@@ -11,8 +11,16 @@ export CFLAGS CXXFLAGS
 case `uname` in
 Linux)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
-	CFLAGS="${CFLAGS} -I/usr/local/include/unicap"
-	CXXFLAGS="${CXXFLAGS} -I/usr/local/include/unicap"
+	if [ -d /usr/include/unicap ]
+	then
+		CFLAGS="${CFLAGS} -I/usr/include/unicap"
+		CXXFLAGS="${CXXFLAGS} -I/usr/include/unicap"
+	else if [ -d /usr/local/include/unicap ]
+		then
+			CFLAGS="${CFLAGS} -I/usr/local/include/unicap"
+			CXXFLAGS="${CXXFLAGS} -I/usr/local/include/unicap"
+		fi
+	fi
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root --enable-unicap
