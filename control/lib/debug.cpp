@@ -26,7 +26,7 @@
 #endif
 #include <time.h>
 
-extern "C" int	debuglevel = LOG_ERR;
+int	debuglevel = LOG_ERR;
 
 extern "C" void	debug(int loglevel, const char *file, int line,
 	int flags, const char *format, ...) {
