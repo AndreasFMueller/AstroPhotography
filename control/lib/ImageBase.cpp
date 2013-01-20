@@ -29,7 +29,7 @@ int     ImageBase::pixeloffset(int x, int y) const {
  * \brief Compute the pixel offset into an Image based on an ImagePoint
  */
 int     ImageBase::pixeloffset(const ImagePoint& p) const {
-	this->pixeloffset(p.x, p.y);
+	return this->pixeloffset(p.x, p.y);
 }
 
 } // namespace image
