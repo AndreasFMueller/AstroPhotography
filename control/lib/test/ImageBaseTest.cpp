@@ -64,7 +64,6 @@ void	ImageBaseTest::testEquality() {
 
 void	ImageBaseTest::testPixeloffset() {
 	CPPUNIT_ASSERT(i1->pixeloffset(4, 11) == (4 + 11 * 640));
-std::cerr << "i1->pixeloffset() = " << i1->pixeloffset(ImagePoint(4, 11)) << std::endl;
 	CPPUNIT_ASSERT(i1->pixeloffset(ImagePoint(4, 11)) == (4 + 11 * 640));
 	CPPUNIT_ASSERT(i4->pixeloffset(4, 11) == (4 + 1024 * (11)));
 }
