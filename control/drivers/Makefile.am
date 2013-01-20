@@ -1,0 +1,7 @@
+#
+# Makefile.am
+#
+# (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
+# $Id$
+#
+SUBDIRS = mock1 mock2

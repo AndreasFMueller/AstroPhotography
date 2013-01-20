@@ -1,0 +1,7 @@
+#
+# configuration used for development purposes on Linux
+#
+
+CXXFLAGS=-fuse-cxa-atexit
+export CXXFLAGS
+./configure --prefix=`pwd`/root

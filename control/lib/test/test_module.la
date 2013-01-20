@@ -1,0 +1,4 @@
+#
+# this is a test file for ModuleTest.cpp, don't remove it
+#
+dlname='test_module.so'

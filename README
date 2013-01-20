@@ -1,0 +1,26 @@
+This repository contains a set of projects used to build astrophotography
+tools for Unix. There are some open source tools available, but they usually
+have at least one of the following problems:
+
+- They are too complex for a casual user. IRAF is an example for this.
+
+- They only support a very limited class of cameras. There are hardly
+  any tools that can, with suitable drivers of course, work with any
+  camera.
+
+This repository contains the following components:
+
+1. Control: A library written that provides access to cameras and accessories.
+   The library allows to dynamically load a driver module. The driver module
+   provides some factory functions to retrieve objects representing cameras,
+   ccds, filterwheels or other acessories. This allows to write generic
+   applications that work with all supported cameras. The library includes
+   support for USB cameras from The Imaging Source, ans Starlight Express
+   and Cameras supported by the universal driver library from SBIG. Other
+   modules can easily be added.
+
+2. Focus: This directory contains applications for focus control, based on
+   the Control library.
+
+3. Guiding: Some applications useful for guiding
+
