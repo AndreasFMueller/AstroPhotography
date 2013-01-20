@@ -474,49 +474,49 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 /* definitions of the iterator construction methods */
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::row::begin() {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, firstoffset, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::row::end() {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, -1, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::row::begin() const {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, firstoffset, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::row::end() const {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, -1, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::column::begin() {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, firstoffset, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::column::end() {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, -1, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::column::begin() const {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, firstoffset, stride);
 }
 
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::column::end() const {
-	return Image<Pixel>::iterator(image,
+	return typename Image<Pixel>::iterator(image,
 		firstoffset, lastoffset, -1, stride);
 }
 

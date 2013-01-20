@@ -8,7 +8,7 @@ LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
 AC_CANONICAL_TARGET([])
 AM_INIT_AUTOMAKE(astro, 1.0)
-AM_CONFIG_HEADER(include/config.h)
+AC_CONFIG_HEADERS(include/config.h)
 
 # some configuration directives
 
