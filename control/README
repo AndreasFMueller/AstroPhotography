@@ -1,5 +1,32 @@
 This Project allows to control astrophotographic cameras and accessories
 and delivers a framework to build astrophotography tools.
 
+This is an autotools and libtool based package. To build it, make sure
+you have installed have installed autotools and libtool. Then create
+the build files using
+
+	$ libtoolize -f
+	$ aclocal
+	$ autoheader
+	$ automake -a -c
+	$ autoconf
+
+Then configure the package using the included configureit script. This
+script sets some configure options useful for debugging and development,
+e.g. it configures it to install in the directory root. Some tests
+expect it to be installed there.
+
+The project depends on the following external packages to compile.
+
+Mandatory packages:
+
+ - CPPUnit: Unit testing framework for C++, available on SourceFoge:
+   http://sourceforge.net/projects/cppunit/
+
+ - Cfitsio: C-Library to manipulate FITS files, available from the
+   NASA web site: http://heasarc.gsfc.nasa.gov/fitsio/
+   The website also has links to online documentation here:
+   http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+
 --
 $Id$

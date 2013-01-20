@@ -2,6 +2,9 @@
 # configuration used for development purposes on Linux
 #
 
+# the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
+# C++ modules, but I'm not convinced. The tests still crash when
+# unloading the modules
 CXXFLAGS=-fuse-cxa-atexit
 export CXXFLAGS
 ./configure --prefix=`pwd`/root
