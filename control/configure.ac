@@ -19,7 +19,26 @@ AC_PROG_LIBTOOL
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h dirent.h fnctl.h dlfcn.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h dirent.h fnctl.h dlfcn.h libusb-1.0/libusb.h])
+
+# Check for libraries
+AC_CHECK_LIB([m], [sqrt])
+AC_CHECK_LIB([cfitsio], [ftffrw_])
+AC_CHECK_LIB([dl], [dlopen])
+AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
+
+# check for SBIG library
+AC_ARG_ENABLE(sbig,
+[AS_HELP_STRING([--enable-sbig], [build the proprietary SBIG driver])],
+[
+AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
+AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig, [AC_MSG_ERROR([SBIG library not found])])
+enable_sbig=yes
+],[
+enable_sbig=no
+]
+)
+AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 
 # Checks for typedefs
 AC_C_CONST
