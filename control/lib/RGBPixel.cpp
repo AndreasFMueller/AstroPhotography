@@ -47,6 +47,25 @@ static unsigned char    blue(int c, int d, int e) {
 }
 
 /**
+ * \brief Functions to convert from a pair of YUYV Pixels to a
+ *        pair of RGB pixels
+ */
+void    YUYV2RGB(const YUYVPixel yuyv[2], RGBPixel rgb[2]) {
+	int	c, d, e;
+	c = yuyv[0].y - 16;
+	d = yuyv[0].uv - 128;
+	e = yuyv[1].uv - 128;
+	rgb[0].R = red(c, d, e);
+	rgb[0].G = green(c, d, e);
+	rgb[0].B = blue(c, d, e);
+	c = yuyv[1].y - 16;
+	rgb[1].R = red(c, d, e);
+	rgb[1].G = green(c, d, e);
+	rgb[1].B = blue(c, d, e);
+}
+
+
+/**
  * \brief Conversion of YUYV images to RGB
  *
  * In YUYV images, pairs of pixels containing two luminance values
@@ -61,21 +80,8 @@ void	imageConvert(Image<RGBPixel>& dest, const Image<YUYVPixel>& src) {
 	if (dest.size != src.size) {
 		throw std::length_error("image size mismatch");
 	}
-	int	offset = 0;
-	while (offset < src.size.pixels) {
-		int	c, d, e;
-		c = src.pixels[offset].y - 16;
-		d = src.pixels[offset].uv - 128;
-		e = src.pixels[offset + 1].uv - 128;
-		dest.pixels[offset].R = red(c, d, e);
-		dest.pixels[offset].G = green(c, d, e);
-		dest.pixels[offset].B = blue(c, d, e);
-		offset++;
-		c = src.pixels[offset].y - 16;
-		dest.pixels[offset].R = red(c, d, e);
-		dest.pixels[offset].G = green(c, d, e);
-		dest.pixels[offset].B = blue(c, d, e);
-		offset++;
+	for (int offset = 0; offset < src.size.pixels; offset += 2) {
+		YUYV2RGB(&src.pixels[offset], &dest.pixels[offset]);
 	}
 }
 
@@ -87,6 +93,17 @@ static unsigned char	U(int R, int G, int B) {
 }
 static unsigned char	V(int R, int G, int B) {
 	return limit((( 112 * R -  94 * G -  18 * B + 128) >> 8) + 128);
+}
+
+/**
+ * \brief Function to convert from a pair of RGB Pixels to a
+ *        pair of YUYV pixels
+ */
+void    RGB2YUYV(const RGBPixel rgb[2], YUYVPixel yuyv[2]) {
+	yuyv[0].y = Y(rgb[0].R, rgb[0].G, rgb[0].B);
+	yuyv[0].uv = U(rgb[0].R, rgb[0].G, rgb[0].B);
+	yuyv[1].y = Y(rgb[1].R, rgb[1].G, rgb[1].B);
+	yuyv[1].uv = V(rgb[1].R, rgb[1].G, rgb[1].B);
 }
 
 /**
@@ -104,20 +121,8 @@ void	imageConvert(Image<YUYVPixel>& dest, const Image<RGBPixel>& src) {
 	if (dest.size != src.size) {
 		throw std::length_error("image size mismatch");
 	}
-	int	offset = 0;
-	while (offset < src.size.pixels) {
-#define	R	src.pixels[offset].R
-#define	G	src.pixels[offset].G
-#define	B	src.pixels[offset].B
-		dest.pixels[offset].y = Y(R, G, B);
-		dest.pixels[offset].uv = U(R, G, B);
-		offset++;
-		dest.pixels[offset].y = Y(R, G, B);
-		dest.pixels[offset].uv = V(R, G, B);
-		offset++;
-#undef R
-#undef G
-#undef B
+	for (int offset = 0; offset < src.size.pixels; offset += 2) {
+		RGB2YUYV(&src.pixels[offset], &dest.pixels[offset]);
 	}
 }
 

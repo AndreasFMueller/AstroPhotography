@@ -62,6 +62,7 @@ FITSinfile::FITSinfile(const std::string& filename) throw (FITSexception)
  */
 ImageBase	FITSinfile::read() throw (FITSexception) {
 	// first find the type 
+	throw FITSexception("not implemented yet");
 }
 
 /**
@@ -76,25 +77,6 @@ FITSoutfileBase::FITSoutfileBase(const std::string &filename)
 }
 
 /**
- * \brief Pixel type code to write
- *
- * When preparing to write an image, we  need to know the type of the
- * pixels we want to write. This method should be overwritten by
- * specializations in derived template classes so that we get the
- * correct CFITSIO pixel type code.
- */
-int	FITSoutfileBase::pixeltype() const {
-	return TBYTE;
-}
-
-/**
- * \brief Number of planes to write
- */
-int	FITSoutfileBase::planes() const {
-	return 1;
-}
-
-/**
  * \brief write the image format information to the header
  */
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
@@ -104,6 +86,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	long	naxis = 3;
 	long	naxes[3] = { image.size.width, image.size.height,
 				this->planes() };
+std::cerr << "number of planes: " << this->planes() << std::endl;
 	int	status = 0;
 	if (fits_create_img(fptr, type, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));
@@ -165,10 +148,70 @@ int     FITSoutfile<float>::pixeltype() const { return TFLOAT; }
 template<>
 int     FITSoutfile<double>::pixeltype() const { return TDOUBLE; }
 
-/*
- * next we declare the specializations for for the number of planes
+/**
+ * \brief fitsio workfunction to write YUYV Pixels as color images to a
+ *        FITS file
  */
+template<>
+int	IteratorData<YUYVPixel>::workfunc(const long totaln, long offset, 
+        long firstn, long nvalues, int narray, 
+        iteratorCol *data, void *userPointer) {
+	unsigned char	*array = (unsigned char *)fits_iter_get_array(data);
+std::cerr << "offset = " << offset << std::endl;
+	IteratorData<YUYVPixel>	*user = (IteratorData<YUYVPixel>*)userPointer;
+std::cerr << "plane " << user->plane << ", nvalues = " << nvalues << std::endl;
+	for (int i = 0; i < nvalues; i += 2) {
+		RGBPixel	rgb[2];
+		YUYV2RGB(&user->image.pixels[i], rgb);
+		switch (user->plane) {
+		case 0:
+			array[i    ] = rgb[0].R;
+			array[i + 1] = rgb[1].R;
+			break;
+		case 1:
+			array[i    ] = rgb[0].G;
+			array[i + 1] = rgb[1].G;
+			break;
+		case 2:
+			array[i    ] = rgb[0].B;
+			array[i + 1] = rgb[1].B;
+			break;
+		}
+	}
+	user->plane++;
+	return 0;
+}
 
+/**
+ * \brief fitsio iterator work function to write RGB pixels as a color
+ *        image to a FITS file
+ */
+template<>
+int	IteratorData<RGBPixel>::workfunc(const long totaln, long offset,
+        long firstn, long nvalues, int narray,
+        iteratorCol *data, void *userPointer) {
+	unsigned char	*array = (unsigned char *)fits_iter_get_array(data);
+	IteratorData<RGBPixel>	*user = (IteratorData<RGBPixel>*)userPointer;
+	switch (user->plane) {
+	case 0:
+		for (int i = 0; i < nvalues; i++) {
+			array[i] = user->image.pixels[i].R;
+		}
+		break;
+	case 1:
+		for (int i = 0; i < nvalues; i++) {
+			array[i] = user->image.pixels[i].G;
+		}
+		break;
+	case 2:
+		for (int i = 0; i < nvalues; i++) {
+			array[i] = user->image.pixels[i].B;
+		}
+		break;
+	}
+	user->plane++;
+	return 0;
+}
 
 } // namespace io
 } // namespace astro

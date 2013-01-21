@@ -13,5 +13,6 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp RGBPixel.cpp \
 	Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
-	Ccd.cpp
+	Ccd.cpp \
+	Fits.cpp
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"

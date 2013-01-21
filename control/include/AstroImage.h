@@ -555,6 +555,18 @@ public:
 } RGBPixel;
 
 /**
+ * \brief Functions to convert from a pair of YUYV Pixels to a
+ *        pair of RGB pixels
+ */
+void	YUYV2RGB(const YUYVPixel yuyv[2], RGBPixel rgb[2]);
+
+/**
+ * \brief Functions to convert from a pair of YUYV Pixels to a
+ *        pair of RGB pixels
+ */
+void	RGB2YUYV(const RGBPixel rgb[2], YUYVPixel yuyv[2]);
+
+/**
  * \brief Convert an image pixel from one pixel type to another.
  *
  * Sometimes the image pixel type returned by a camera is not
