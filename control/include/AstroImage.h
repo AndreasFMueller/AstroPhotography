@@ -11,6 +11,7 @@
 #include <tr1/memory>
 #include <algorithm>
 #include <iostream>
+#include <AstroPixel.h>
 
 namespace astro {
 namespace image {
@@ -263,6 +264,17 @@ public:
 	}
 
 	/**
+	 * \brief	Copy an image from a different pixel type
+	 *
+	 * \param
+ 	 */
+	template<typename srcPixel>
+	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size) {
+		pixels = new Pixel[size.pixels];
+		convertPixelArray(pixels, other.pixels, size.pixels);
+	}
+
+	/**
 	 * \brief	Extract a subimage from an image
 	 */
 	Image<Pixel>(const Image<Pixel>& other, const ImageRectangle& frame);
@@ -299,6 +311,11 @@ public:
 	virtual	~Image() {
 		delete pixels;
 	}
+
+	/**
+	 * \brief A shorthand for the type of the individual pixels
+	 */
+	typedef	Pixel	pixel_type;
 
 	/**
 	 * \brief Read only access to pixel values specified by offset.
@@ -471,6 +488,15 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 	}
 }
 
+typedef std::tr1::shared_ptr<Image<unsigned char> >	ByteImagePtr;
+typedef std::tr1::shared_ptr<Image<unsigned short> >	ShortImagePtr;
+typedef std::tr1::shared_ptr<Image<unsigned int> >	IntImagePtr;
+typedef std::tr1::shared_ptr<Image<unsigned long> >	LongImagePtr;
+typedef std::tr1::shared_ptr<Image<float> >	FloatImagePtr;
+typedef std::tr1::shared_ptr<Image<double> >	DoubleImagePtr;
+typedef std::tr1::shared_ptr<Image<RGB<unsigned char> > >	RGBImagePtr;
+typedef std::tr1::shared_ptr<Image<YUYV<unsigned char> > >	YUYVImagePtr;
+
 /* definitions of the iterator construction methods */
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::row::begin() {
@@ -520,129 +546,20 @@ typename Image<Pixel>::const_iterator	Image<Pixel>::column::end() const {
 		firstoffset, lastoffset, -1, stride);
 }
 
-/**
- * \brief Pixel type for certain color camera types
+/** 
+ * \brief Convert images from one type to another
  *
- * Cameras like the astronomy cameras from "The Imaging Source" return
- * an YUYV encoded color image in certain modes. Pixels of this type are
- * represented by instances of this class.
- */
-class YUYVPixel {
-public:
-	/** \brief luminance value */
-	unsigned char	y;
-	/** \brief chrominance value */
-	unsigned char	uv;
-	YUYVPixel(unsigned char _y = 0, unsigned char _uv = 0);
-	YUYVPixel(unsigned short _y, unsigned char _uv = 0);
-	YUYVPixel(unsigned long _y, unsigned char _uv = 0);
-	bool	operator==(const YUYVPixel& other) const;
-};
-
-/**
- * \brief Pixel type for 8bit color cameras
- *
- * This is formulated somewhat complicatedly because we are not allowed
- * to return an array from a function
- */
-typedef struct rgbpixel {
-public:
-	unsigned char	R;
-	unsigned char	G;
-	unsigned char	B;
-	bool	operator==(const struct rgbpixel& other) const;
-	bool	operator!=(const struct rgbpixel& other) const;
-} RGBPixel;
-
-/**
- * \brief Functions to convert from a pair of YUYV Pixels to a
- *        pair of RGB pixels
- */
-void	YUYV2RGB(const YUYVPixel yuyv[2], RGBPixel rgb[2]);
-
-/**
- * \brief Functions to convert from a pair of YUYV Pixels to a
- *        pair of RGB pixels
- */
-void	RGB2YUYV(const RGBPixel rgb[2], YUYVPixel yuyv[2]);
-
-/**
- * \brief Convert an image pixel from one pixel type to another.
- *
- * Sometimes the image pixel type returned by a camera is not
- * suitable for the application. E.g. when focusing, one needs
- * an image representation that can be easily displayed on a computer
- * screen, which usually means that an 8bit type is needed. Many
- * Astronomy cameras return 16bit pixel values, so the image has
- * to be converted to a suitable type.
- *
- * There are many speicializations for this template function, 
- * because we don't simply want to convert pixel values to a
- * different type. The speicializations change the scale, so
- * that 16bit images can be converted 8bit images without loosing
- * the high order bits.
+ * Since we already have functions to convert pixel types to another, we
+ * just have to apply the convertPixelArray to the pixel arrays of
+ * both images
  */
 template<typename destPixel, typename srcPixel>
-destPixel	convert(const srcPixel& p) { return destPixel(p); };
-
-template<> unsigned char	convert(const unsigned short& p);
-template<> unsigned char	convert(const unsigned long& p);
-template<> unsigned short	convert(const unsigned char& p);
-template<> unsigned short	convert(const unsigned long& p);
-template<> unsigned long	convert(const unsigned char& p);
-template<> unsigned long	convert(const unsigned short& p);
-template<> unsigned char	convert(const YUYVPixel& p);
-template<> unsigned char	convert(const RGBPixel& p);
-
-/**
- * \brief Convert an image from one pixel type to another
- *
- * The imageConvert function converts pixels from one existing image
- * to a different image with the same size.
- */
-template<typename destPixel, typename srcPixel>
-void	imageConvert(Image<destPixel>& dest, const Image<srcPixel>& src) {
-	if (!(dest.size == src.size)) {
-		throw std::length_error("image size mismatch");
+void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
+	if (dest.size != src.size) {
+		throw std::runtime_error("convertImage: image sizes don't match");
 	}
-	std::transform(src.pixels, src.pixels + src.size.pixels, dest.pixels,
-		convert<destPixel, srcPixel>);
+	convertPixelArray(dest.pixels, src.pixels, dest.size.pixels);
 }
-
-template<>
-void	imageConvert(Image<RGBPixel>& dest, const Image<YUYVPixel>& src);
-template<>
-void	imageConvert(Image<YUYVPixel>& dest, const Image<RGBPixel>& src);
-
-/**
- * \brief Create a new image with a different pixel type
- */
-template<typename destPixel, typename srcPixel>
-std::tr1::shared_ptr<Image<destPixel> >	imageConvert(std::tr1::shared_ptr<Image<srcPixel> > src) {
-	Image<destPixel>	*dest = new Image<destPixel>(src->size);
-	imageConvert(*dest, *src);
-	return std::tr1::shared_ptr<Image<destPixel> >(dest);
-};
-
-/**
- * \brief typedef for 8bit images
- */
-typedef std::tr1::shared_ptr<Image<unsigned char> >	ByteImage;
-
-/**
- * \brief typedef for 16bit images
- */
-typedef std::tr1::shared_ptr<Image<unsigned short> >	ShortImage;
-
-/**
- * \brief typedef for YUYV images
- */
-typedef	std::tr1::shared_ptr<Image<YUYVPixel> >		YuyvImage;
-
-/**
- * \brief typedef for 8bit RGB images
- */
-typedef std::tr1::shared_ptr<Image<RGBPixel> >	RgbImage;
 
 } // namespace image
 } // namespace astro

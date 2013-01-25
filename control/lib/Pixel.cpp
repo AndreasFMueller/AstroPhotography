@@ -18,13 +18,13 @@ static unsigned char    limit(int x) {
 	return result;
 }
 
-static unsigned char    red(int c, int d, int e) {
+static unsigned char    R(int c, int d, int e) {
 	return limit((298 * c           + 409 * e + 128) >> 8);
 }
-static unsigned char    green(int c, int d, int e) {
+static unsigned char    G(int c, int d, int e) {
 	return limit((298 * c - 100 * d - 208 * e + 128) >> 8);
 }
-static unsigned char    blue(int c, int d, int e) {
+static unsigned char    B(int c, int d, int e) {
 	return limit((298 * c + 516 * d           + 128) >> 8);
 }
 
@@ -39,13 +39,13 @@ void convertPixelPairTyped(RGB<unsigned char> *rgb,
 	c = yuyv[0].y - 16;
 	d = yuyv[0].uv - 128;
 	e = yuyv[1].uv - 128;
-	rgb[0].R = red(c, d, e);
-	rgb[0].G = green(c, d, e);
-	rgb[0].B = blue(c, d, e);
+	rgb[0].R = R(c, d, e);
+	rgb[0].G = G(c, d, e);
+	rgb[0].B = B(c, d, e);
 	c = yuyv[1].y - 16;
-	rgb[1].R = red(c, d, e);
-	rgb[1].G = green(c, d, e);
-	rgb[1].B = blue(c, d, e);
+	rgb[1].R = R(c, d, e);
+	rgb[1].G = G(c, d, e);
+	rgb[1].B = B(c, d, e);
 }
 
 /**
@@ -68,9 +68,9 @@ template<>
 void convertPixelPairTyped(YUYV<unsigned char> *yuyv,
 	const RGB<unsigned char> *rgb,
 	const yuyv_color_tag& dt, const rgb_color_tag& ds) {
-	yuyv[0].y = Y(rgb[0].R, rgb[0].G, rgb[0].B);
+	yuyv[0].y  = Y(rgb[0].R, rgb[0].G, rgb[0].B);
 	yuyv[0].uv = U(rgb[0].R, rgb[0].G, rgb[0].B);
-	yuyv[1].y = Y(rgb[1].R, rgb[1].G, rgb[1].B);
+	yuyv[1].y  = Y(rgb[1].R, rgb[1].G, rgb[1].B);
 	yuyv[1].uv = V(rgb[1].R, rgb[1].G, rgb[1].B);
 }
 

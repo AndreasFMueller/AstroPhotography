@@ -72,18 +72,19 @@ void	ImageTest::testCopyByteImage() {
 
 void	ImageTest::testYUYVImage() {
 	// test the conversion of an individual pixel
-	YUYVPixel	p((unsigned char)47, 11);
-	unsigned char	v = convert<unsigned char, YUYVPixel>(p);
+	YUYV<unsigned char>	p((unsigned char)47, 11);
+	unsigned char	v;
+	convertPixel(v, p);
 	CPPUNIT_ASSERT(47 == v);
 
 	// convert a complete image
-	Image<YUYVPixel>	image2(640, 480);
-	imageConvert(image2, *image);
+	Image<YUYV<unsigned char> >	image2(640, 480);
+	convertImage(image2, *image);
 	CPPUNIT_ASSERT(image2.pixel(13, 15).y == (13 + 15 * 640) % 160);
 
 	// convert to an unsigned short image
 	Image<unsigned char>	image3(640, 480);
-	imageConvert(image3, image2);
+	convertImage(image3, image2);
 	CPPUNIT_ASSERT(image3 == *image);
 	image3.pixel(14,15) = 1;
 	CPPUNIT_ASSERT(!(image3 == *image));
@@ -91,10 +92,10 @@ void	ImageTest::testYUYVImage() {
 
 void	ImageTest::testShortImage() {
 	Image<unsigned short>	image2(640, 480);
-	imageConvert(image2, *image);
+	convertImage(image2, *image);
 	CPPUNIT_ASSERT(image2.pixel(13, 15) == ((13 + 15 * 640) % 160) * 256);
 	Image<unsigned char>	image3(640,480);
-	imageConvert(image3, image2);
+	convertImage(image3, image2);
 	CPPUNIT_ASSERT(image3 == *image);
 	image3.pixel(14, 15) = 1;
 	CPPUNIT_ASSERT(!(image3 == *image));

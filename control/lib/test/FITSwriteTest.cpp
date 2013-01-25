@@ -23,23 +23,21 @@ public:
 	void	setUp() { }
 	void	tearDown() { }
 	void	testWriteUChar();
-	void	testWriteChar();
 	void	testWriteUShort();
-	void	testWriteShort();
 	void	testWriteYUYV();
 	void	testWriteRGB();
+	void	testWriteRGBUShort();
 
 	CPPUNIT_TEST_SUITE(FITSwriteTest);
 	CPPUNIT_TEST(testWriteUChar);
-	CPPUNIT_TEST(testWriteChar);
 	CPPUNIT_TEST(testWriteUShort);
-	CPPUNIT_TEST(testWriteShort);
 	CPPUNIT_TEST(testWriteYUYV);
 	CPPUNIT_TEST(testWriteRGB);
+	CPPUNIT_TEST(testWriteRGBUShort);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-const char	*uchar_filename = "uchar_test.fits";
+static const char	*uchar_filename = "uchar_test.fits";
 
 void	FITSwriteTest::testWriteUChar() {
 	// find out whether the file already exists, and destroy it
@@ -58,26 +56,7 @@ void	FITSwriteTest::testWriteUChar() {
 	delete outfile;
 }
 
-const char	*char_filename = "char_test.fits";
-
-void	FITSwriteTest::testWriteChar() {
-	// find out whether the file already exists, and destroy it
-	remove(char_filename);
-
-	// create an image
-	Image<char>	*image = new Image<char>(256, 256);
-	for (int x = 0; x < image->size.width; x++) {
-		for (int y = 0; y < image->size.height; y++) {
-			image->pixel(x, y) = (x - y) % 256;
-		}
-	}
-	FITSoutfile<char>	*outfile
-		= new FITSoutfile<char>(char_filename);
-	outfile->write(*image);
-	delete outfile;
-}
-
-const char	*ushort_filename = "ushort_test.fits";
+static const char	*ushort_filename = "ushort_test.fits";
 
 void	FITSwriteTest::testWriteUShort() {
 	// find out whether the file already exists, and destroy it
@@ -96,57 +75,49 @@ void	FITSwriteTest::testWriteUShort() {
 	delete outfile;
 }
 
-const char	*short_filename = "short_test.fits";
-
-void	FITSwriteTest::testWriteShort() {
-	// find out whether the file already exists, and destroy it
-	remove(short_filename);
-
-	// create an image
-	Image<short>	*image = new Image<short>(256, 256);
-	for (int x = 0; x < image->size.width; x++) {
-		for (int y = 0; y < image->size.height; y++) {
-			image->pixel(x, y) = (x * y) % 65536;
-		}
-	}
-	FITSoutfile<short>	*outfile
-		= new FITSoutfile<short>(short_filename);
-	outfile->write(*image);
-	delete outfile;
-}
-
-const char	*yuyv_filename = "yuyv_test.fits";
+static const char	*yuyv_filename = "yuyv_test.fits";
 
 void	FITSwriteTest::testWriteYUYV() {
 	// find out whether the file already exists, and destroy it
 	remove(yuyv_filename);
 
 	// create an image
-	Image<YUYVPixel>	*image = new Image<YUYVPixel>(256, 256);
+	Image<YUYV<unsigned char> >	*image
+		= new Image<YUYV<unsigned char> >(256, 256);
 	for (int x = 0; x < image->size.width; x++) {
 		for (int y = 0; y < image->size.height; y++) {
-			image->pixel(x, y).y = 22;
-			if (y % 2) {
-				image->pixel(x, y).uv = x;
+			RGB<unsigned char>	colors[2];
+			colors[0].R = x;
+			colors[0].G = ((x + y) % 256);
+			colors[0].B = y;
+			colors[1].R = colors[0].R;
+			colors[1].G = colors[0].G;
+			colors[1].B = colors[0].B;
+			YUYV<unsigned char>	target[2];
+			convertPixelPair(target, colors);
+			image->pixel(x, y).y = target[0].y;
+			if (x % 2) {
+				image->pixel(x, y).uv = target[0].uv;
 			} else {
-				image->pixel(x, y).uv = y;
+				image->pixel(x, y).uv = target[1].uv;
 			}
 		}
 	}
-	FITSoutfile<YUYVPixel>	*outfile
-		= new FITSoutfile<YUYVPixel>(yuyv_filename);
+	FITSoutfile<YUYV<unsigned char> >	*outfile
+		= new FITSoutfile<YUYV<unsigned char> >(yuyv_filename);
 	outfile->write(*image);
 	delete outfile;
 }
 
-const char	*rgb_filename = "rgb_test.fits";
+static const char	*rgb_filename = "rgb_test.fits";
 
 void	FITSwriteTest::testWriteRGB() {
 	// find out whether the file already exists, and destroy it
 	remove(rgb_filename);
 
 	// create an image
-	Image<RGBPixel>	*image = new Image<RGBPixel>(256, 256);
+	Image<RGB<unsigned char> >	*image
+		= new Image<RGB<unsigned char> >(256, 256);
 	for (int x = 0; x < image->size.width; x++) {
 		for (int y = 0; y < image->size.height; y++) {
 			image->pixel(x, y).R = x;
@@ -154,8 +125,30 @@ void	FITSwriteTest::testWriteRGB() {
 			image->pixel(x, y).B = y;
 		}
 	}
-	FITSoutfile<RGBPixel>	*outfile
-		= new FITSoutfile<RGBPixel>(rgb_filename);
+	FITSoutfile<RGB<unsigned char> >	*outfile
+		= new FITSoutfile<RGB<unsigned char> >(rgb_filename);
+	outfile->write(*image);
+	delete outfile;
+}
+
+static const char	*rgbushort_filename = "rgbushort_test.fits";
+
+void	FITSwriteTest::testWriteRGBUShort() {
+	// find out whether the file already exists, and destroy it
+	remove(rgbushort_filename);
+
+	// create an image
+	Image<RGB<unsigned short> >	*image
+		= new Image<RGB<unsigned short> >(256, 256);
+	for (int x = 0; x < image->size.width; x++) {
+		for (int y = 0; y < image->size.height; y++) {
+			image->pixel(x, y).R = x << 8;
+			image->pixel(x, y).G = ((x + y) % 256) << 8;
+			image->pixel(x, y).B = y << 8;
+		}
+	}
+	FITSoutfile<RGB<unsigned short> >	*outfile
+		= new FITSoutfile<RGB<unsigned short> >(rgbushort_filename);
 	outfile->write(*image);
 	delete outfile;
 }

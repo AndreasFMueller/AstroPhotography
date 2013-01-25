@@ -46,28 +46,42 @@ void    Ccd::cancelExposure() throw (not_implemented) {
 /**
  * \brief Retrieve a 8bit raw image from the camera
  */
-astro::image::ByteImage       Ccd::byteImage() throw (not_implemented) {
+astro::image::ByteImagePtr	Ccd::byteImage() throw (not_implemented) {
 	throw not_implemented("byteImage not implemented");
 }
 
 /**
  * \brief Retrieve a 16bit raw image from the camera
  */
-astro::image::ShortImage      Ccd::shortImage() throw (not_implemented) {
+astro::image::ShortImagePtr	Ccd::shortImage() throw (not_implemented) {
 	throw not_implemented("shortImage not implemented");
+}
+
+/**
+ * \brief Retrieve a 32bit raw image from the camera
+ */
+astro::image::IntImagePtr	Ccd::intImage() throw (not_implemented) {
+	throw not_implemented("intImage not implemented");
+}
+
+/**
+ * \brief Retrieve a 16bit raw image from the camera
+ */
+astro::image::LongImagePtr	Ccd::longImage() throw (not_implemented) {
+	throw not_implemented("longImage not implemented");
 }
 
 /**
  * \brief Retrieve an YUYV image from the camera
  */
-astro::image::YuyvImage       Ccd::yuyvImage() throw (not_implemented) {
+astro::image::YUYVImagePtr	Ccd::yuyvImage() throw (not_implemented) {
 	throw not_implemented("yuyvImage not implemented");
 }
 
 /**
  * \brief Retrieve an YUYV image from the camera
  */
-astro::image::RgbImage        Ccd::rgbImage() throw (not_implemented) {
+astro::image::RGBImagePtr	Ccd::rgbImage() throw (not_implemented) {
 	throw not_implemented("rgbImage not implemented");
 }
 

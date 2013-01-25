@@ -26,8 +26,10 @@ std::string	FITSfile::errormsg(int status) const {
  *
  * This does not open a file, which is reserved to the derived classes.
  */
-FITSfile::FITSfile(const std::string& _filename)
-	: filename(_filename), fptr(NULL) {
+FITSfile::FITSfile(const std::string& _filename,
+	int _pixeltype, int _planes, int _imgtype)
+	: filename(_filename), fptr(NULL), pixeltype(_pixeltype),
+	  planes(_planes), imgtype(_imgtype) {
 }
 
 /**
@@ -49,27 +51,102 @@ FITSfile::~FITSfile() throw (FITSexception) {
 /**
  * \brief Open a FITS file for reading
  */
-FITSinfile::FITSinfile(const std::string& filename) throw (FITSexception)
-	: FITSfile(filename) {
+FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception)
+	: FITSfile(filename, 0, 0, 0) {
 	int	status = 0;
 	if (fits_open_file(&fptr, filename.c_str(), READONLY, &status)) {
 		throw FITSexception(errormsg(status));
 	}
+
+	/* read the dimensions of the image from the file */
+	int	naxis;
+	long	naxes[3];
+	int	igt;
+	if (fits_get_img_param(fptr, 3, &igt, &naxis, naxes, &status)) {
+		throw FITSexception(errormsg(status));
+	}
+	imgtype = igt;
+std::cerr << "parameters read: imgtype = " << imgtype << ", naxis = " << naxis << ", naxes = " << naxes[0] << "," << naxes[1] << "," << naxes[2] << std::endl;
+	switch (naxis) {
+	case 2:
+		planes = 1;
+		break;
+	case 3:
+		planes = naxes[2];
+		break;
+	default:
+		throw FITSexception("don't know what to do with image of dimension != 2 or 3");
+	}
+	size = ImageSize(naxes[0], naxes[1]);
+	
+	switch (planes) {
+	case 1:
+	case 3:
+		break;
+	default:
+		throw std::runtime_error("not 1 or 3 planes");
+	}
 }
 
 /**
- * \brief Read an image 
+ * \brief Read the raw data
  */
-ImageBase	FITSinfile::read() throw (FITSexception) {
-	// first find the type 
-	throw FITSexception("not implemented yet");
+void	*FITSinfileBase::readdata() throw (FITSexception) {
+	int	typesize = 0;
+std::cerr << "reading an image with image type " << imgtype << std::endl;
+	switch (imgtype) {
+	case BYTE_IMG:
+	case SBYTE_IMG:
+			typesize = sizeof(char);
+			pixeltype = TBYTE;
+			break;
+	case USHORT_IMG:
+	case SHORT_IMG:
+			typesize = sizeof(short);
+			pixeltype = TUSHORT;
+			break;
+	case ULONG_IMG:
+	case LONG_IMG:
+			typesize = sizeof(long);
+			pixeltype = TULONG;
+			break;
+	case FLOAT_IMG:
+			typesize = sizeof(float);
+			pixeltype = TFLOAT;
+			break;
+	case DOUBLE_IMG:
+			typesize = sizeof(double);
+			pixeltype = TDOUBLE;
+			break;
+	default:
+		std::cerr << "unknown pixel type " << imgtype << std::endl;
+		throw FITSexception("cannot read this pixel type");
+		break;
+	}
+	void	*v = calloc(planes * size.pixels, typesize);
+	std::cerr << "fits data size: " << (size.pixels * planes)
+		<< " items of size " << typesize
+		<< " pixel type " << pixeltype
+		<< " planes " << planes << std::endl;
+	
+	/* now read the data */
+	int	status = 0;
+	long	firstpixel[3] = { 1, 1, 1 };
+	if (fits_read_pix(fptr, pixeltype, firstpixel, size.pixels * planes,
+		NULL, v, NULL, &status)) {
+		free(v);
+		throw FITSexception(errormsg(status));
+	}
+	std::cerr << "fits data read" << std::endl;
+	return v;
 }
 
 /**
  * \brief Create a FITS file for writing
  */
-FITSoutfileBase::FITSoutfileBase(const std::string &filename)
-	throw (FITSexception) : FITSfile(filename) {
+FITSoutfileBase::FITSoutfileBase(const std::string &filename,
+	int pixeltype, int planes, int imgtype) throw (FITSexception)
+	: FITSfile(filename, pixeltype, planes, imgtype)  {
 	int	status = 0;
 	if (fits_create_file(&fptr, filename.c_str(), &status)) {
 		throw FITSexception(errormsg(status));
@@ -80,138 +157,49 @@ FITSoutfileBase::FITSoutfileBase(const std::string &filename)
  * \brief write the image format information to the header
  */
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
-	/* find the type to write */
-	int	type = this->imgtype();
-
+	// find the dimensions
 	long	naxis = 3;
-	long	naxes[3] = { image.size.width, image.size.height,
-				this->planes() };
-std::cerr << "number of planes: " << this->planes() << std::endl;
+	long	naxes[3] = { image.size.width, image.size.height, planes };
 	int	status = 0;
-	if (fits_create_img(fptr, type, naxis, naxes, &status)) {
+	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));
 	}
 }
 
-/*
- * we don't want to have the CFITSIO codes in the header files, so we
- * implement the spezializations here.
- */
-template<>
-int     FITSoutfile<unsigned char>::imgtype() const { return BYTE_IMG; }
-template<>
-int     FITSoutfile<char>::imgtype() const { return SBYTE_IMG; }
-
-template<>
-int     FITSoutfile<unsigned short>::imgtype() const { return USHORT_IMG; }
-template<>
-int     FITSoutfile<short>::imgtype() const { return SHORT_IMG; }
-
-template<>
-int     FITSoutfile<unsigned int>::imgtype() const { return ULONG_IMG; }
-template<>
-int     FITSoutfile<int>::imgtype() const { return LONG_IMG; }
-
-template<>
-int     FITSoutfile<unsigned long>::imgtype() const { return ULONG_IMG; }
-template<>
-int     FITSoutfile<long>::imgtype() const { return LONG_IMG; }
-
-template<>
-int     FITSoutfile<float>::imgtype() const { return FLOAT_IMG; }
-template<>
-int     FITSoutfile<double>::imgtype() const { return DOUBLE_IMG; }
-
-/* now the pixel type specializations */
-template<>
-int     FITSoutfile<unsigned char>::pixeltype() const { return TBYTE; }
-template<>
-int     FITSoutfile<char>::pixeltype() const { return TSBYTE; }
-
-template<>
-int     FITSoutfile<unsigned short>::pixeltype() const { return TUSHORT; }
-template<>
-int     FITSoutfile<short>::pixeltype() const { return TSHORT; }
-
-template<>
-int     FITSoutfile<unsigned int>::pixeltype() const { return TUINT; }
-template<>
-int     FITSoutfile<int>::pixeltype() const { return TINT; }
-
-template<>
-int     FITSoutfile<unsigned long>::pixeltype() const { return TULONG; }
-template<>
-int     FITSoutfile<long>::pixeltype() const { return TLONG; }
-
-template<>
-int     FITSoutfile<float>::pixeltype() const { return TFLOAT; }
-template<>
-int     FITSoutfile<double>::pixeltype() const { return TDOUBLE; }
-
 /**
- * \brief fitsio workfunction to write YUYV Pixels as color images to a
- *        FITS file
+ * \brief constructor specializations of FITSoutfile for all types
  */
-template<>
-int	IteratorData<YUYVPixel>::workfunc(const long totaln, long offset, 
-        long firstn, long nvalues, int narray, 
-        iteratorCol *data, void *userPointer) {
-	unsigned char	*array = (unsigned char *)fits_iter_get_array(data);
-std::cerr << "offset = " << offset << std::endl;
-	IteratorData<YUYVPixel>	*user = (IteratorData<YUYVPixel>*)userPointer;
-std::cerr << "plane " << user->plane << ", nvalues = " << nvalues << std::endl;
-	for (int i = 0; i < nvalues; i += 2) {
-		RGBPixel	rgb[2];
-		YUYV2RGB(&user->image.pixels[i], rgb);
-		switch (user->plane) {
-		case 0:
-			array[i    ] = rgb[0].R;
-			array[i + 1] = rgb[1].R;
-			break;
-		case 1:
-			array[i    ] = rgb[0].G;
-			array[i + 1] = rgb[1].G;
-			break;
-		case 2:
-			array[i    ] = rgb[0].B;
-			array[i + 1] = rgb[1].B;
-			break;
-		}
-	}
-	user->plane++;
-	return 0;
+#define FITS_OUT_CONSTRUCTOR(T, pix, planes, img)			\
+template<>								\
+FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
+	throw (FITSexception)						\
+	: FITSoutfileBase(filename, pix, planes, img) {			\
 }
 
-/**
- * \brief fitsio iterator work function to write RGB pixels as a color
- *        image to a FITS file
- */
-template<>
-int	IteratorData<RGBPixel>::workfunc(const long totaln, long offset,
-        long firstn, long nvalues, int narray,
-        iteratorCol *data, void *userPointer) {
-	unsigned char	*array = (unsigned char *)fits_iter_get_array(data);
-	IteratorData<RGBPixel>	*user = (IteratorData<RGBPixel>*)userPointer;
-	switch (user->plane) {
-	case 0:
-		for (int i = 0; i < nvalues; i++) {
-			array[i] = user->image.pixels[i].R;
-		}
-		break;
-	case 1:
-		for (int i = 0; i < nvalues; i++) {
-			array[i] = user->image.pixels[i].G;
-		}
-		break;
-	case 2:
-		for (int i = 0; i < nvalues; i++) {
-			array[i] = user->image.pixels[i].B;
-		}
-		break;
-	}
-	user->plane++;
-	return 0;
-}
+// basic type monochrome pixels
+FITS_OUT_CONSTRUCTOR(unsigned char, TBYTE, 1, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR(unsigned short, TUSHORT, 1, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR(unsigned int, TULONG, 1, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(unsigned long, TULONG, 1, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(float, TFLOAT, 1, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR(double, TDOUBLE, 1, DOUBLE_IMG)
+
+// RGB Pixels
+FITS_OUT_CONSTRUCTOR(RGB<unsigned char> , TBYTE, 3, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR(RGB<unsigned short> , TUSHORT, 3, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR(RGB<unsigned int> , TUINT, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(RGB<unsigned long> , TULONG, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(RGB<float> , TFLOAT, 3, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR(RGB<double> , TDOUBLE, 3, DOUBLE_IMG)
+
+// YUYV Pixels
+FITS_OUT_CONSTRUCTOR(YUYV<unsigned char>, TBYTE, 3, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR(YUYV<unsigned short>, TUSHORT, 3, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR(YUYV<unsigned int>, TULONG, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(YUYV<unsigned long>, TULONG, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR(YUYV<float>, TFLOAT, 3, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR(YUYV<double>, TDOUBLE, 3, DOUBLE_IMG)
 
 } // namespace io
 } // namespace astro
+

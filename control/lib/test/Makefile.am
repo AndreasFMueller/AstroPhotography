@@ -10,12 +10,15 @@ noinst_HEADERS =
 noinst_PROGRAMS = tests
 
 tests_SOURCES = tests.cpp \
+	PixelTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp \
+	FITSwriteTest.cpp FITSreadTest.cpp
 	BinningTest.cpp \
-	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	FITSwriteTest.cpp
+	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp 
+
+
 
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la

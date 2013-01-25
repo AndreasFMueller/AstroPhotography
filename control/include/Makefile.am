@@ -5,4 +5,4 @@
 # $Id$
 #
 noinst_HEADERS = debug.h Format.h AstroImage.h AstroCamera.h AstroLoader.h \
-	AstroIO.h
+	AstroIO.h AstroPixel.h

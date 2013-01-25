@@ -113,11 +113,20 @@ public:
 		throw (not_implemented);
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
 	virtual void	cancelExposure() throw (not_implemented);
-	virtual astro::image::ByteImage	byteImage() throw (not_implemented);
-	virtual astro::image::ShortImage	shortImage()
+
+	// image retrievel functions
+	virtual astro::image::ByteImagePtr	byteImage()
 		throw (not_implemented);
-	virtual astro::image::YuyvImage	yuyvImage() throw (not_implemented);
-	virtual astro::image::RgbImage	rgbImage() throw (not_implemented);
+	virtual astro::image::ShortImagePtr	shortImage()
+		throw (not_implemented);
+	virtual astro::image::IntImagePtr	intImage()
+		throw (not_implemented);
+	virtual astro::image::LongImagePtr	longImage()
+		throw (not_implemented);
+	virtual astro::image::YUYVImagePtr	yuyvImage()
+		throw (not_implemented);
+	virtual astro::image::RGBImagePtr	rgbImage()
+		throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
 

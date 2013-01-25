@@ -12,9 +12,42 @@
 #include <tr1/type_traits>
 #include <algorithm>
 #include <iostream>
+#include <math.h>
 
 namespace astro {
 namespace image {
+
+/**
+ * \brief Template class to get the value type of pixels
+ */
+template<typename Pixel>
+struct pixel_value_type {
+	typedef typename Pixel::value_type	value_type;
+};
+template<>
+struct pixel_value_type<unsigned char> {
+	typedef unsigned char	value_type;
+};
+template<>
+struct pixel_value_type<unsigned short> {
+	typedef unsigned short	value_type;
+};
+template<>
+struct pixel_value_type<unsigned int> {
+	typedef unsigned int	value_type;
+};
+template<>
+struct pixel_value_type<unsigned long> {
+	typedef unsigned long	value_type;
+};
+template<>
+struct pixel_value_type<float> {
+	typedef float	value_type;
+};
+template<>
+struct pixel_value_type<double> {
+	typedef double	value_type;
+};
 
 /**
  * \brief Wrapper to convert integers to typedefs for TMP
@@ -174,9 +207,9 @@ void	convertPixelInteger(destValue& dest, const srcValue& src,
  * integer types. 
  */
 template<typename destValue, typename srcValue,
-	typename isintegraldest, typename isintraldest>
+	typename isintegraldest, typename isintegralsrc>
 void	convertPixelValueX(destValue& dest, const srcValue& src,
-		isintegralsrc, isintegraldeset) {
+		isintegraldest, isintegralsrc) {
 	dest = destValue(src);
 }
 
@@ -231,6 +264,20 @@ struct color_traits {
 	typedef typename P::color_category color_category;
 };
 
+template<typename P>
+class Color {
+public:
+	typedef	P	value_type;
+	static const value_type	pedestal;
+	static const value_type	zero;
+	static const value_type	limit;
+	static P	clip(const double& value) {
+		if (value < 0) { return 0; }
+		if (value > limit) { return limit; }
+		return value;
+	}
+};
+
 /**
  * \brief YUYV Pixels
  *
@@ -247,10 +294,12 @@ struct color_traits {
  * back, as only pairs of pixels contain enough information.
  */
 template<typename P>
-class YUYV {
+class YUYV : public Color<P> {
 public:
 	P	y;
 	P	uv;
+	YUYV() { }
+	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
 	bool	operator==(const YUYV<P>& other) const {
 		return (y == other.y) && (uv == other.uv);
 	}
@@ -258,7 +307,6 @@ public:
 		return (y != other.y) || (uv != other.uv);
 	}
 	typedef yuyv_color_tag color_category;
-	typedef	P	value_type;
 };
 
 /**
@@ -267,11 +315,13 @@ public:
  * RGB pixels encode color with three independent color channels.
  */
 template<typename P>
-class RGB {
+class RGB : public Color<P> {
 public:
 	P	R;
 	P	G;
 	P	B;
+	RGB() { }
+	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
 	bool	operator==(const RGB<P>& other) const {
 		return (R == other.R) && (G == other.G) && (B == other.B);
 	}
@@ -279,7 +329,6 @@ public:
 		return !(*this == other);
 	}
 	typedef rgb_color_tag color_category;
-	typedef	P	value_type;
 };
 
 /**
@@ -291,15 +340,7 @@ struct  color_traits<unsigned char> {
 	typedef monochrome_color_tag color_category;
 };
 template<>
-struct  color_traits<char> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
 struct  color_traits<unsigned short> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<short> {
 	typedef monochrome_color_tag color_category;
 };
 template<>
@@ -307,15 +348,7 @@ struct  color_traits<unsigned int> {
 	typedef monochrome_color_tag color_category;
 };
 template<>
-struct  color_traits<int> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
 struct  color_traits<unsigned long> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<long> {
 	typedef monochrome_color_tag color_category;
 };
 template<>
@@ -350,13 +383,12 @@ template<typename destPixel, typename srcPixel,
 	typename desttraits, typename srctraits>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const desttraits& dt, const srctraits& ds) {
-	dest = destPixel(src);
+	convertPixelValue(dest, src);
 }
 
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const rgb_color_tag& dt, const monochrome_color_tag& ds) {
-std::cerr << "rgb <- mono" << std::endl;
 	convertPixelValue(dest.R, src);
 	convertPixelValue(dest.G, src);
 	convertPixelValue(dest.B, src);
@@ -380,8 +412,7 @@ template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const yuyv_color_tag& dt, const monochrome_color_tag& ds) {
 	convertPixelValue(dest.y, src);
-	unsigned char	x = 128;
-	convertPixelValue(dest.uv, x);
+	dest.uv = destPixel::zero;
 }
 
 template<typename destPixel, typename srcPixel>
@@ -399,26 +430,85 @@ void	convertPixel(destPixel& dest, const srcPixel& src) {
  * conversions, two specializations that do "the right thing" are
  * provided. For efficience reasons, there are further specializations
  * just for the important case of unsigned char integral type values.
+ *
+ * The color space conversion formulae used below are documented here:
+ * http://msdn.microsoft.com/en-us/library/windows/desktop/dd206750(v=vs.85).aspx
  */
 template<typename destPixel, typename srcPixel,
 	typename desttraits, typename srctraits>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 		const desttraits& dt, const srctraits& ds) {
-	*dest++ = destPixel(src++);
-	*dest = destPixel(src);
+	convertPixel(*dest, *src);
+	dest++; src++;
+	convertPixel(*dest, *src);
 }
 
+/* conversion RGB --> YUYV */
 template<typename destPixel, typename srcPixel>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 		const yuyv_color_tag& dt, const rgb_color_tag& ds) {
-	std::cerr << "rgb -> yuyv conversion" << std::endl;
+	typename srcPixel::value_type	Y, U, V;
+	Y = round( 0.256788 * src[0].R
+		 + 0.504129 * src[0].G
+		 + 0.097906 * src[0].B) +  srcPixel::pedestal;
+	convertPixelValue(dest[0].y, Y);
+	U = round(-0.148223 * src[0].R
+		 - 0.290993 * src[0].G
+		 + 0.439216 * src[0].B) + srcPixel::zero;
+	convertPixelValue(dest[0].uv, U);
+	Y = round( 0.256788 * src[1].R
+		 + 0.504129 * src[1].G
+		 + 0.097906 * src[1].B) +  srcPixel::pedestal;
+	convertPixelValue(dest[1].y, Y);
+	V = round( 0.439216 * src[1].R
+		 - 0.367788 * src[1].G
+		 - 0.071427 * src[1].B) + srcPixel::zero;
+	convertPixelValue(dest[1].uv, V);
 }
 
+template<>
+void	convertPixelPairTyped(YUYV<unsigned char> *dest,
+		const RGB<unsigned char> *src,
+		const yuyv_color_tag& dt, const rgb_color_tag& ds);
+
+/* conversion YUYV --> RGB */
 template<typename destPixel, typename srcPixel>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 		const rgb_color_tag& dt, const yuyv_color_tag& ds) {
-	std::cerr << "yuyv -> rgb conversion" << std::endl;
+	double	C, D, E;
+	typename srcPixel::value_type	R, G, B;
+	typename srcPixel::value_type	lower;
+	convertPixelValue(lower, (unsigned char)16);
+	typename srcPixel::value_type	middle;
+	convertPixelValue(middle, (unsigned char)128);
+	C = src[0].y - lower;
+	D = src[0].uv - middle;
+	E = src[1].uv - middle;
+	R = srcPixel::clip(
+		round( 1.164383 * C                   + 1.596027 * E  ) );
+	G = srcPixel::clip(
+		round( 1.164383 * C - (0.391762 * D) - (0.812968 * E) ) );
+	B = srcPixel::clip(
+		round( 1.164383 * C +  2.017232 * D                   ) );
+	convertPixelValue(dest[0].R, R);
+	convertPixelValue(dest[0].G, G);
+	convertPixelValue(dest[0].B, B);
+	C = src[1].y - lower;
+	R = srcPixel::clip(
+		round( 1.164383 * C                   + 1.596027 * E  ) );
+	G = srcPixel::clip(
+		round( 1.164383 * C - (0.391762 * D) - (0.812968 * E) ) );
+	B = srcPixel::clip(
+		round( 1.164383 * C +  2.017232 * D                   ) );
+	convertPixelValue(dest[1].R, R);
+	convertPixelValue(dest[1].G, G);
+	convertPixelValue(dest[1].B, B);
 }
+
+template<>
+void	convertPixelPairTyped(RGB<unsigned char> *dest,
+		const YUYV<unsigned char> *src,
+		const rgb_color_tag& dt, const yuyv_color_tag& ds);
 
 template<typename destPixel, typename srcPixel>
 void	convertPixelPair(destPixel *dest, const srcPixel *src) {

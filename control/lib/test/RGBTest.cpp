@@ -38,7 +38,7 @@ void	RGBTest::tearDown() {
 }
 
 void	RGBTest::testCopy() {
-	Image<RGBPixel>	src(16, 9);
+	Image<RGB<unsigned char> >	src(16, 9);
 	for (int x = 0; x < src.size.width; x++) {
 		for (int y = 0; y < src.size.height; y++) {
 			src.pixel(x, y).R = x << 4;
@@ -46,7 +46,7 @@ void	RGBTest::testCopy() {
 			src.pixel(x, y).B = x + y;
 		}
 	}
-	Image<RGBPixel>	dst(src);
+	Image<RGB<unsigned char> >	dst(src);
 	for (int x = 0; x < src.size.width; x++) {
 		for (int y = 0; y < src.size.height; y++) {
 			CPPUNIT_ASSERT(dst.pixel(x, y).R == x << 4);
@@ -80,24 +80,31 @@ static unsigned char    blue(int c, int d, int e) {
 
 
 void	RGBTest::testRgb() {
-	Image<YUYVPixel>	*src = new Image<YUYVPixel>(16, 9);
+	Image<YUYV<unsigned char> >	*src = new Image<YUYV<unsigned char> >(16, 9);
 	for (int x = 0; x < src->size.width; x++) {
 		for (int y = 0; y < src->size.height; y++) {
 			src->pixel(x, y).y = x << 4;
 			src->pixel(x, y).uv = y << 4;
 		}
 	}
-	YuyvImage	image(src);
-	RgbImage	rgb = imageConvert<RGBPixel, YUYVPixel>(image);
+	RGBImagePtr	rgb(new Image<RGB<unsigned char> >(*src));
 	for (int x = 0; x < src->size.width; x += 2) {
 		for (int y = 0; y < src->size.height; y++) {
-			RGBPixel	man;
+			RGB<unsigned char>	man;
 			int	d = src->pixel(x, y).uv - 128;
 			int	e = src->pixel(x + 1, y).uv - 128;
 			int	c = src->pixel(x, y).y - 16;
 			man.R = red(c, d, e);
 			man.G = green(c, d, e);
 			man.B = blue(c, d, e);
+#if 0
+std::cerr << "R = " << (int)rgb->pixel(x, y).R
+	<< ", G = " << (int)rgb->pixel(x, y).G
+	<< ", B = " << (int)rgb->pixel(x, y).B << std::endl;
+std::cerr << "man.R = " << (int)man.R
+	<< ", man.G = " << (int)man.G
+	<< ", man.B = " << (int)man.B << std::endl;
+#endif
 			CPPUNIT_ASSERT(rgb->pixel(x, y) == man);
 			c = src->pixel(x + 1, y).y - 16;
 			man.R = red(c, d, e);
