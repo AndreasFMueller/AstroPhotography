@@ -28,6 +28,7 @@ public:
 	void	testRGB2YUYVfloat();
 	void	testYUYV2RGBfloat();
 	void	testConversionParameters();
+	void	testCharAndShort();
 
 	CPPUNIT_TEST_SUITE(PixelTest);
 	CPPUNIT_TEST(testMonochrome);
@@ -38,6 +39,7 @@ public:
 	CPPUNIT_TEST(testRGB2YUYVfloat);
 	CPPUNIT_TEST(testYUYV2RGBfloat);
 	CPPUNIT_TEST(testConversionParameters);
+	CPPUNIT_TEST(testCharAndShort);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -133,24 +135,27 @@ void	PixelTest::testRGB2YUYVfloat() {
 	convertPixelArray(r, y, 2);
 }
 
+void	PixelTest::testCharAndShort() {
+	unsigned char	c1 = 16;
+	unsigned short	s1;
+	convertPixel(s1, c1);
+	CPPUNIT_ASSERT(s1 == (16 * 256));
+	convertPixel(c1, s1);
+	CPPUNIT_ASSERT(c1 == 16);
+	RGB<unsigned char>	c((unsigned char)5, (unsigned char)10, (unsigned char)15);
+	RGB<unsigned short>	s;
+	convertPixel(s, c);
+	unsigned char	c2;
+	convertPixel(c2, c);
+	unsigned char	s2;
+	convertPixel(s2, s);
+	unsigned char	c3;
+	convertPixel(c3, s2);
+	CPPUNIT_ASSERT(c3 == c2);
+	//std::cerr << "c2 = " << (int)c2 << ", c3 = " << (int)c3 << std::endl;
+}
+
 void	PixelTest::testConversionParameters() {
-#if 0
-#define	SHOW_CONSTANTS(T)					\
-	std::cerr << "size " << sizeof(T) 			\
-		<< ": pedestal = "				\
-		<< (unsigned long)Color<T>::pedestal		\
-		<< ", zero = "					\
-		<< (unsigned long)Color<T>::zero		\
-		<< ", limit = " 				\
-		<< (double)Color<T>::limit		\
-		<< std::endl;
-	SHOW_CONSTANTS(unsigned char)
-	SHOW_CONSTANTS(unsigned short)
-	SHOW_CONSTANTS(unsigned int)
-	SHOW_CONSTANTS(unsigned long)
-	SHOW_CONSTANTS(float)
-	SHOW_CONSTANTS(double)
-#endif
 
 #define	COLOR_ASSERTS(T, P)						\
 	CPPUNIT_ASSERT(Color<T>::pedestal == (((P)16) << ((sizeof(P) - 1) << 3))); \

@@ -86,6 +86,9 @@ std::cerr << "parameters read: imgtype = " << imgtype << ", naxis = " << naxis <
 	default:
 		throw std::runtime_error("not 1 or 3 planes");
 	}
+
+	// now read the keys
+	readkeys();
 }
 
 /**
@@ -139,6 +142,57 @@ std::cerr << "reading an image with image type " << imgtype << std::endl;
 	}
 	std::cerr << "fits data read" << std::endl;
 	return v;
+}
+
+#define	IGNORED_KEYWORDS_N	8
+const char	*ignored_keywords[IGNORED_KEYWORDS_N] = {
+	"SIMPLE", "BITPIX", "PCOUNT", "GCOUNT",
+	"XTENSION", "END", "BSCALE", "BZERO"
+};
+
+static bool	ignored(const std::string& keyname) {
+	if (keyname.substr(0, 5) == "NAXIS") {
+		return true;
+	}
+	for (int i = 0; i < IGNORED_KEYWORDS_N; i++) {
+		if (keyname == ignored_keywords[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * \brief Read the headers from a FITS file
+ *
+ * In the headers we only record the headers that are not managed by
+ * the type stuff. I.e. the keywords SIMPLE, BITPIX, NAXIS, NAXISn, END,
+ * PCOUNT, GCOUNT, XTENSION are ignored
+ */
+void	FITSinfileBase::readkeys() throw (FITSexception) {
+	int	status = 0;
+	int	keynum = 1;
+	char	keyname[100];
+	char	value[100];
+	char	comment[100];
+	while (1) {
+		if (fits_read_keyn(fptr, keynum, keyname, value, comment,
+			&status)) {
+			// we are at the end of the headers, so we return
+			std::cerr << "headers read: " << keynum << std::endl;
+			return;
+		}
+		FITShdu	hdu;		
+		hdu.name = keyname;
+		if (!ignored(hdu.name)) {
+			hdu.value = value;
+			hdu.comment = comment;
+			headers.insert(make_pair(hdu.name, hdu));
+			std::cerr << hdu.name << "=" << hdu.value
+				<< "/" << hdu.comment << std::endl;
+		}
+		keynum++;
+	}
 }
 
 /**

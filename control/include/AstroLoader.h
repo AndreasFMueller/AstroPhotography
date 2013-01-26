@@ -123,7 +123,8 @@ public:
 	Repository(const std::string& path) throw (repository_error);
 	std::vector<ModulePtr>	modules() const;
 	bool	contains(const std::string& modulename) const;
-	ModulePtr	getModule(const std::string& modulename) const throw (repository_error);
+	ModulePtr	getModule(const std::string& modulename) const
+		throw (repository_error);
 	const std::string&	path() const;
 };
 

@@ -112,91 +112,35 @@ void	convertPixelInteger(destValue& dest, const srcValue& src,
 /**
  * \brief Specializations for various size differences
  */
+#define CONVERT_PIXEL_INTEGER_SHIFT_LEFT(p)				\
+template<typename destValue, typename srcValue>				\
+void	convertPixelInteger(destValue& dest, const srcValue& src,	\
+		Int2Type<p> x) {					\
+	dest = destValue(src) << (p << 3);				\
+}
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(7)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(6)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(5)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(4)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(3)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(2)
+CONVERT_PIXEL_INTEGER_SHIFT_LEFT(1)
+
+#define	CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(p)				\
+template<typename destValue, typename srcValue>				\
+void	convertPixelInteger(destValue& dest, const srcValue& src,	\
+		Int2Type<-p> x) {					\
+	dest = destValue(src >> (p << 3));				\
+}
+
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(1)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(2)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(3)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(4)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(5)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(6)
+CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(7)
  
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<7> x) {
-	dest = destValue(src) << 56;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<6> x) {
-	dest = destValue(src) << 48;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<5> x) {
-	dest = destValue(src) << 40;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<4> x) {
-	dest = destValue(src) << 32;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<3> x) {
-	dest = destValue(src) << 24;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<2> x) {
-	dest = destValue(src) << 16;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<1> x) {
-	dest = destValue(src) << 8;
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-1> x) {
-	dest = destValue(src >> 8);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-2> x) {
-	dest = destValue(src >> 16);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-3> x) {
-	dest = destValue(src >> 24);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-4> x) {
-	dest = destValue(src >> 32);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-5> x) {
-	dest = destValue(src >> 40);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-6> x) {
-	dest = destValue(src >> 48);
-}
-
-template<typename destValue, typename srcValue>
-void	convertPixelInteger(destValue& dest, const srcValue& src,
-		Int2Type<-7> x) {
-	dest = destValue(src >> 56);
-}
-
 /**
  * \brief Convert Pixel values template.
  *
@@ -300,6 +244,27 @@ public:
 	P	uv;
 	YUYV() { }
 	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
+
+	template<typename Q>
+	YUYV(const Q& _y, const Q& _uv) {
+		convertPixelValue(y, _y);
+		convertPixelValue(uv, _uv);
+	}
+
+	/**
+	 * \brief Copy constructor for YUYV pixels.
+	 *
+	 * Since the Y,U,V pixel values can be any integer type, which
+	 * necessitates shifting them when converting from one type to
+	 * another, we have to use the convertPixel functions when copying
+	 * an YUYV pixel.
+	 */
+	template<typename Q>
+	YUYV(const YUYV<Q>& q) {
+		convertPixelValue(y, q.y);
+		convertPixelValue(uv, q.uv);
+	}
+
 	bool	operator==(const YUYV<P>& other) const {
 		return (y == other.y) && (uv == other.uv);
 	}
@@ -322,6 +287,29 @@ public:
 	P	B;
 	RGB() { }
 	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
+
+	template<typename Q>
+	RGB(Q r, Q g, Q b) {
+		convertPixel(R, r);
+		convertPixel(G, g);
+		convertPixel(B, b);
+	}
+
+	/**
+	 * \brief Copy constructor for RGB pixels.
+	 *
+	 * Since the R,G,B pixel values can be any integer type, which
+	 * necessitates shifting them when converting from one type to
+	 * another, we have to use the convertPixel functions when copying
+	 * an RGB pixel.
+	 */
+	template<typename Q>
+	RGB(const RGB<Q>& q) {
+		convertPixelValue(R, q.R);
+		convertPixelValue(G, q.G);
+		convertPixelValue(B, q.B);
+	}
+
 	bool	operator==(const RGB<P>& other) const {
 		return (R == other.R) && (G == other.G) && (B == other.B);
 	}
@@ -386,14 +374,16 @@ void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 	convertPixelValue(dest, src);
 }
 
+/* monochrome -> RGB */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const rgb_color_tag& dt, const monochrome_color_tag& ds) {
 	convertPixelValue(dest.R, src);
-	convertPixelValue(dest.G, src);
-	convertPixelValue(dest.B, src);
+	dest.G = dest.R;
+	dest.B = dest.R;
 }
 
+/* RGB -> monochrome */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const monochrome_color_tag& dt, const rgb_color_tag& ds) {
@@ -402,12 +392,14 @@ void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 	convertPixelValue(dest, y);
 }
 
+/* YUYV -> monochrome */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const monochrome_color_tag& dt, const yuyv_color_tag& ds) {
 	convertPixelValue(dest, src.y);
 }
 
+/*  monochrome -> YUYV */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const yuyv_color_tag& dt, const monochrome_color_tag& ds) {

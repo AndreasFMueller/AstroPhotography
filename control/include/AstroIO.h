@@ -10,6 +10,7 @@
 
 #include <fitsio.h>
 #include <AstroImage.h>
+#include <map>
 
 using namespace astro::image;
 
@@ -28,6 +29,16 @@ public:
 };
 
 /**
+ * \brief structure to abstract 
+ */
+struct FITShdu {
+	std::string	name;
+	std::string	value;
+	std::string	comment;
+	int	type;
+};
+
+/**
  * \brief FITS file base class
  *
  * The base class contains the shared data and some shared functions,
@@ -37,6 +48,7 @@ public:
  */
 class FITSfile {
 protected:
+	std::map<std::string, FITShdu>	headers;
 	std::string	errormsg(int status) const;
 	std::string	filename;
 	fitsfile	*fptr;
@@ -55,9 +67,18 @@ public:
 
 /**
  * \brief Base class for reading files
+ *
+ * This class adds an attribute for the size of the image. Note that while
+ * FITS files can contain several Images, we only use a single image in
+ * every file, so in our context, there is a unique size associated with
+ * each FITS file we are reading.
  */
 class FITSinfileBase : public FITSfile {
 protected:
+	/**
+	 * \brief Size of the image we are about to read
+	 */
+	void	readkeys() throw (FITSexception);
 	ImageSize	size;
 	void	*readdata() throw (FITSexception);
 public:
@@ -70,19 +91,22 @@ public:
  */
 template<typename Pixel>
 class FITSinfile : public FITSinfileBase {
-protected:
 public:
 	FITSinfile(const std::string& filename) : FITSinfileBase(filename) { }
-	std::tr1::shared_ptr<Image<Pixel> >	read() throw (FITSexception);
+	typedef std::tr1::shared_ptr<Image<Pixel> >	ImagePtr;
+	ImagePtr	read() throw(FITSexception);
 };
 
 /**
  * \brief Convert the pixels read from the FITS file into 
+ *
+ * This template function doConvertFITSpixels is used to select
+ * different algorithms dependending on whether we have RGB, YUYV
+ * or monochrome pixels as the target.
  */
 template<typename Pixel, typename srctype, typename colortype>
 void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 		int pixelcount, const colortype&) {
-	std::cerr << "RGB pixel conversion: pixelcount = " << pixelcount << std::endl;
 	int	size1 = pixelcount;
 	int	size2 = pixelcount << 1;
 	for (int offset = 0; offset < pixelcount; offset++) {
@@ -93,11 +117,15 @@ void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 	}
 }
 
+/**
+ * \brief Convert to RGB data read from the FITS file to YUYV pixels.
+ *
+ * This specialization reads RGB data from the FITS file and converts
+ * to appropriate YUYV pixels.
+ */
 template<typename Pixel, typename srctype>
 void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels, 
 		int pixelcount, const yuyv_color_tag) {
-	std::cerr << "RGB pixel conversion: pixelcount = "
-		<< pixelcount << std::endl;
 	int	size1 = pixelcount;
 	int	size2 = pixelcount << 1;
 	RGB<srctype>	rgb[2];
@@ -112,47 +140,46 @@ void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 	}
 }
 
+/**
+ * \brief Convert monochrome image data from the FITS file to the target image
+ *        pixel type.
+ */
 template<typename Pixel, typename srctype>
 void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels, 
 		int pixelcount, const monochrome_color_tag&) {
-	std::cerr << "convert monochrome pixels" << std::endl;
 	convertPixelArray(pixels, srcpixels, pixelcount);
 }
 
+/**
+ * \brief Convert Pixel arrays from a privitive type to any other valid
+ *        pixel type.
+ *
+ * This template function is called by the read method in the
+ * FITSinfile<Pixel> template class. Get more information about the
+ * rationale for these classes in the description of FITSinfile<Pixel>::read
+ */
 template<typename Pixel, typename srctype>
 void	convertFITSpixels(Pixel *pixels, srctype *srcpixels,
 		int pixelcount) {
-std::cerr << "converting pixels" << std::endl;
 	doConvertFITSpixels(pixels, srcpixels, pixelcount,
 		typename color_traits<Pixel>::color_category());
 }
 
 /**
- * \brief Copy void data, but in a type safe way, and in a way that
- *        conversions are only instantiated if the pixel type is
- *        matches the image pixel type.
- */
-template<typename Pixel, typename pixel_value_type, typename src_value_type>
-void	convertPixelsFromVoid(Pixel *pixels, src_value_type *data,
-	int pixelcount, const pixel_value_type&) {
-	
-}
-#define	CONVERT_FROM_VOID(P, S)					\
-template<typename P>						\
-void	convertPixelsFromVoid(P *pixels, S *data,		\
-	int pixelcount,						\
-	const S&) {						\
-	convertFITSpixels(pixels, data, pixelcount);		\
-}
-CONVERT_FROM_VOID(Pixel, unsigned char)
-CONVERT_FROM_VOID(Pixel, unsigned short)
-CONVERT_FROM_VOID(Pixel, unsigned int)
-CONVERT_FROM_VOID(Pixel, unsigned long)
-CONVERT_FROM_VOID(Pixel, float)
-CONVERT_FROM_VOID(Pixel, double)
-
-/**
  * \brief Read the data from a FITS file into an Image
+ *
+ * This method reads the data from the FITS file and converts it
+ * into the array of pixels in the image. But the pixel type of the
+ * image can be different from the pixel type read from the FITS file.
+ * In order to be consistent, we want to apply the same pixel conversions
+ * when reading pixels from a file with different type. However, there
+ * is a problem: the type returned from the FITS library is not typed,
+ * it's a void pointer. So we have to cast it to the appropriate type
+ * based on the Image type we got from the FITS file. So we call the
+ * convertFITSpixels template function, giving it the value type
+ * (from the pixel_value_type traits class. The template selection
+ * mechanism then instantiates the right converFITSpixels template
+ * function.
  */
 template<typename Pixel>
 std::tr1::shared_ptr<Image<Pixel> >	FITSinfile<Pixel>::read()
@@ -165,31 +192,26 @@ std::tr1::shared_ptr<Image<Pixel> >	FITSinfile<Pixel>::read()
 	switch (imgtype) {
 	case BYTE_IMG:
 	case SBYTE_IMG:
-		convertPixelsFromVoid(image->pixels, (unsigned char *)data,
-			image->size.pixels,
-			typename pixel_value_type<Pixel>::value_type());
+		convertFITSpixels(image->pixels, (unsigned char *)data,
+			image->size.pixels);
 		break;
 	case USHORT_IMG:
 	case SHORT_IMG:
-		convertPixelsFromVoid(image->pixels, (unsigned short *)data,
-			image->size.pixels,
-			typename pixel_value_type<Pixel>::value_type());
+		convertFITSpixels(image->pixels, (unsigned short *)data,
+			image->size.pixels);
 		break;
 	case ULONG_IMG:
 	case LONG_IMG:
-		convertPixelsFromVoid(image->pixels, (unsigned long *)data,
-			image->size.pixels,
-			typename pixel_value_type<Pixel>::value_type());
+		convertFITSpixels(image->pixels, (unsigned int *)data,
+			image->size.pixels);
 		break;
 	case FLOAT_IMG:
-		convertPixelsFromVoid(image->pixels, (float *)data,
-			image->size.pixels,
-			typename pixel_value_type<Pixel>::value_type());
+		convertFITSpixels(image->pixels, (float *)data,
+			image->size.pixels);
 		break;
 	case DOUBLE_IMG:
-		convertPixelsFromVoid(image->pixels, (double *)data,
-			image->size.pixels,
-			typename pixel_value_type<Pixel>::value_type());
+		convertFITSpixels(image->pixels, (double *)data,
+			image->size.pixels);
 		break;
 	}
 
@@ -232,7 +254,9 @@ FITSoutfile<Pixel>::FITSoutfile(const std::string& filename)
 	throw (FITSexception) : FITSoutfileBase(filename, TBYTE, 1, BYTE_IMG) {
 }
 
-// specializations for just about any type
+// Specializations for just about any type. They are all needed, because
+// this is where we map the pixel type and image type codes from the
+// CFITSIO library to C++ types
 #define	FITS_OUTFILE_SPECIALIZATION(T)					\
 template<>								\
 FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
@@ -314,6 +338,12 @@ int	FITSWriteDoWork(const long totaln, long offset,
 	return 0;
 }
 
+/**
+ * \brief Work function to write RGB pixels to the FITS file
+ *
+ * This algorithm just has to redestribute the color channels from pixels
+ * each pixel to the three planes of the FITS file.
+ */
 template<typename Pixel>
 int	FITSWriteDoWork(const long totaln, long offset,
 		long firstn, long nvalues, int narray,
@@ -339,6 +369,9 @@ int	FITSWriteDoWork(const long totaln, long offset,
 	return 0;
 }
 
+/**
+ * \brief Work function to write YUYV Pixels to the FITS file
+ */
 template<typename Pixel>
 int	FITSWriteDoWork(const long totaln, long offset,
 		long firstn, long nvalues, int narray,
@@ -358,7 +391,9 @@ int	FITSWriteDoWork(const long totaln, long offset,
 	const int	size = user->image.size.pixels;
 	const	int	size2 = user->image.size.pixels << 1;
 	for (int offset = 0; offset < size; offset += 2) {
+		// convert the YUYV pixel pair to an RGB pixel pair
 		convertPixelPair(dest, user->image.pixels + offset);
+		// distribute the rgb pixel values to the three planes
 		array[offset            ] = dest[0].R;
 		array[offset +     size ] = dest[0].G;
 		array[offset +     size2] = dest[0].B;
