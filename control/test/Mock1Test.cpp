@@ -60,8 +60,10 @@ void	Mock1Test::testMock1() {
 			sleep(1);
 		}
 		if (ccd->exposureStatus() == Exposure::exposed) {
-			ByteImage	image = ccd->byteImage();
-			std::cerr << "result image size: " << image->size.width << " x " << image->size.height << std::endl;
+			ByteImagePtr	image = ccd->byteImage();
+			std::cerr << "result image size: "
+				<< image->size.width << " x "
+				<< image->size.height << std::endl;
 		}
 	}
 }
