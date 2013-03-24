@@ -26,10 +26,10 @@ public:
 	virtual void    startExposure(const Exposure& exposure) throw (not_implemented);
 	virtual Exposure::State exposureStatus() throw (not_implemented);
 	virtual void    cancelExposure() throw (not_implemented);
-	virtual ByteImage       byteImage() throw (not_implemented);
-	virtual ShortImage      shortImage() throw (not_implemented);
-	virtual YuyvImage       yuyvImage() throw (not_implemented);
-	virtual RgbImage	rgbImage() throw (not_implemented);
+	virtual ByteImagePtr    byteImage() throw (not_implemented);
+	virtual ShortImagePtr   shortImage() throw (not_implemented);
+	virtual YUYVImagePtr    yuyvImage() throw (not_implemented);
+	virtual RGBImagePtr	rgbImage() throw (not_implemented);
 }; 
 
 } // namespace mock1

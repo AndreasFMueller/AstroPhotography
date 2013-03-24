@@ -39,7 +39,7 @@ void    Mock1Ccd::cancelExposure() throw (not_implemented) {
 	state = Exposure::idle;
 }
 
-ByteImage       Mock1Ccd::byteImage() throw (not_implemented) {
+ByteImagePtr    Mock1Ccd::byteImage() throw (not_implemented) {
 	Image<unsigned char>	image(size);
 	image.fill(128);
 	ImageSize	blocksize(5, 5);
@@ -52,18 +52,18 @@ ByteImage       Mock1Ccd::byteImage() throw (not_implemented) {
 		image.fill(rect, 255 - i);
 	}
 	Image<unsigned char>	*result = new Image<unsigned char>(image, frame);
-	return ByteImage(result);
+	return ByteImagePtr(result);
 }
 
-ShortImage      Mock1Ccd::shortImage() throw (not_implemented) {
+ShortImagePtr   Mock1Ccd::shortImage() throw (not_implemented) {
 	throw not_implemented("short image not implemented");
 }
 
-YuyvImage       Mock1Ccd::yuyvImage() throw (not_implemented) {
+YUYVImagePtr    Mock1Ccd::yuyvImage() throw (not_implemented) {
 	throw not_implemented("yuyv image not implemented");
 }
 
-RgbImage       Mock1Ccd::rgbImage() throw (not_implemented) {
+RGBImagePtr    Mock1Ccd::rgbImage() throw (not_implemented) {
 	throw not_implemented("yuyv image not implemented");
 }
 
