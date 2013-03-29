@@ -1,0 +1,44 @@
+Command line interface for camera control, some ideas what we might
+want to implement
+
+1. data types
+
+- numbers
+- strings
+- images
+- image sets
+- exposure definitions
+
+2. operations
+
+- arithmetic operations for numbers
+- standard functions
+- string concatenation and formatting
+- arithmetic operations with images and constants
+- average, median, maximum, minimum of a set of images
+- debayering operations on imges
+- composition of images
+- conversion RGB -> luminance
+- subimage
+- artificially binned image
+
+3. control structures
+
+- for-loop for a sequence of values
+- for-loop for an image set
+- conditional execution (if-then-else-endif)
+
+4. functions (optional)
+
+- function definitions
+
+5. various
+
+- reading extern files (source command)
+- error handling (do not execute anything in a statement that is 
+  syntactically incorrect)
+
+
+
+
+
