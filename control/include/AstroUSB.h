@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <list>
 #include <iostream>
+#include <tr1/memory>
 
 namespace astro {
 namespace usb {
@@ -136,16 +137,18 @@ std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc);
  * \brief common Descriptor base class
  */
 class Descriptor {
+protected:
 	Device	dev;
 	std::string	extra_descriptors;
 public:
-	Descriptor(const Device& device, const unsigned char *extra,
-			int extra_length);
+	Descriptor(const Device& device, const void *extra, int extra_length);
 	Descriptor(Device& device, const std::string& extra);
 	Device&	device();
 	const Device&	device() const;
 	const std::string&	extra() const;
 };
+
+typedef std::tr1::shared_ptr<Descriptor>	DescriptorPtr;
 
 /**
  * \brief USB Endpoint Descriptor
@@ -180,6 +183,7 @@ class InterfaceDescriptor : public Descriptor {
 	void	copy(const struct libusb_interface_descriptor *ifpd);
 	std::list<EndpointDescriptor>	endpoints;
 	void	getEndpoints();
+	std::string	interface;
 public:
 	InterfaceDescriptor(const Device& device,
 		const struct libusb_interface_descriptor *ifdp);
@@ -191,6 +195,7 @@ public:
 	uint8_t	bInterfaceClass() const;
 	uint8_t	bInterfaceSubClass() const;
 	uint8_t	bInterfaceProtocol() const;
+	const std::string&	iInterface() const;
 	const std::list<EndpointDescriptor>&	endpoint() const;
 };
 
@@ -212,7 +217,7 @@ std::ostream&	operator<<(std::ostream& out, const Interface& interface);
 /**
  * \brief USB Configuration Descriptor class
  */
-class	ConfigDescriptor : Descriptor {
+class	ConfigDescriptor : public Descriptor {
 	libusb_config_descriptor	*config;
 	std::string	configuration;
 	void	copy(const libusb_config_descriptor *config);
@@ -226,10 +231,92 @@ public:
 	~ConfigDescriptor();
 	uint8_t	bConfigurationValue() const;
 	uint8_t	bNumInterfaces() const;
+	uint8_t	bmAttributes() const;
+	uint8_t	MaxPower() const;
 	const std::list<Interface>&	interface() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config);
+
+/**
+ * \brief Generic USB descriptor
+ *
+ * Not all descriptors have associated structures in libusb, so we need
+ * some method to extend the descriptor mechanism. All descriptors to
+ * have a length field, and 
+ */
+class USBDescriptor {
+	uint8_t	blength;
+	uint8_t	bdescriptortype;
+protected:
+	Device	device;
+	uint8_t	*data;
+public:
+	USBDescriptor(const Device& device, const void *data, int length);
+	USBDescriptor(const USBDescriptor& other);
+	USBDescriptor&	operator=(const USBDescriptor& other);
+	virtual	~USBDescriptor();
+	virtual	std::string	toString() const;
+	uint8_t	bLength() const;
+	uint8_t	bDescriptorType() const;
+};
+
+std::ostream&	operator<<(std::ostream& out, const USBDescriptor& descriptor);
+
+/**
+ * \brief UnknownDescriptorError
+ *
+ * For descriptors that don't have a libusb equivalent, this error is thrown
+ * by the respective factories when construction of a descriptor class
+ * is attempted.
+ */
+class UnknownDescriptorError : public std::runtime_error {
+public:
+	UnknownDescriptorError(const char *cause) : std::runtime_error(cause) {}
+	UnknownDescriptorError(uint8_t length, uint8_t descriptortype);
+};
+
+/**
+ * \brief USB Descriptor factory for descriptors that do not have a structure
+ *
+ */
+typedef	std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
+
+std::ostream&	operator<<(std::ostream& out,
+	const USBDescriptorPtr& descriptorptr);
+
+class DescriptorFactory {
+protected:
+	Device	device;
+public:
+	DescriptorFactory(const Device& device);
+	virtual USBDescriptorPtr	descriptor(const void *data, int length)
+		throw(std::length_error, UnknownDescriptorError);
+	virtual std::list<USBDescriptorPtr>	descriptors(const void *data,
+		int length) throw(std::length_error, UnknownDescriptorError);
+};
+
+std::ostream&	operator<<(std::ostream& out,
+			const std::list<USBDescriptorPtr>& list);
+
+/**
+ * \brief Inteface association descriptor
+ */
+class InterfaceAssociationDescriptor : public USBDescriptor {
+	std::string	function;
+public:
+	InterfaceAssociationDescriptor(const Device& device,
+		const void *data, int length);
+	InterfaceAssociationDescriptor(const InterfaceAssociationDescriptor& other);
+	InterfaceAssociationDescriptor&	operator=(const InterfaceAssociationDescriptor& other);
+	uint8_t	bFirstInterface() const;
+	uint8_t	bInterfaceCount() const;
+	uint8_t	bFunctionClass() const;
+	uint8_t	bFunctionSubClass() const;
+	uint8_t	bFunctionProtocol() const;
+	const std::string&	iFunction() const;
+	virtual std::string	toString() const;
+};
 
 } // namespace usb
 } // namespace astro

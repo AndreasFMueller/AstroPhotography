@@ -18,7 +18,7 @@ Descriptor::Descriptor(Device& device, const std::string& extra)
 	: dev(device), extra_descriptors(extra) {
 }
 
-Descriptor::Descriptor(const Device& device, const unsigned char *extra,
+Descriptor::Descriptor(const Device& device, const void *extra,
 	int extra_length)
 	: dev(device), extra_descriptors((const char *)extra, extra_length) {
 }
@@ -87,9 +87,9 @@ uint8_t	EndpointDescriptor::bSynchAddress() const {
 }
 
 std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd) {
-	out << "          bEndpointAddress:  ";
+	out << " >E       bEndpointAddress:  ";
 	out << std::hex << (int)epd.bEndpointAddress() << std::endl;
-	out << "          bmAttributes:     ";
+	out << "  E       bmAttributes:     ";
 
 	std::string	attributes;
 
@@ -108,43 +108,47 @@ std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd) {
 		break;
 	}
 
-	switch ((epd.bmAttributes() >> 2) & 0x3) {
-	case LIBUSB_ISO_SYNC_TYPE_NONE:
-		attributes += " iso_sync_none";
-		break;
-	case LIBUSB_ISO_SYNC_TYPE_ASYNC:
-		attributes += " iso_sync_async";
-		break;
-	case LIBUSB_ISO_SYNC_TYPE_ADAPTIVE:
-		attributes += " iso_sync_adaptive";
-		break;
-	case LIBUSB_ISO_SYNC_TYPE_SYNC:
-		attributes += " iso_sync_sync";
-		break;
-	}
+	if ((epd.bmAttributes() & 0x03) == LIBUSB_TRANSFER_TYPE_ISOCHRONOUS) {
+		switch ((epd.bmAttributes() >> 2) & 0x3) {
+		case LIBUSB_ISO_SYNC_TYPE_NONE:
+			attributes += " iso_sync_none";
+			break;
+		case LIBUSB_ISO_SYNC_TYPE_ASYNC:
+			attributes += " iso_sync_async";
+			break;
+		case LIBUSB_ISO_SYNC_TYPE_ADAPTIVE:
+			attributes += " iso_sync_adaptive";
+			break;
+		case LIBUSB_ISO_SYNC_TYPE_SYNC:
+			attributes += " iso_sync_sync";
+			break;
+		}
 
-	switch ((epd.bmAttributes() >> 4) & 0x3) {
-	case LIBUSB_ISO_USAGE_TYPE_DATA:
-		attributes += " iso_usage_data";
-		break;
-	case LIBUSB_ISO_USAGE_TYPE_FEEDBACK:
-		attributes += " iso_usage_feedback";
-		break;
-	case LIBUSB_ISO_USAGE_TYPE_IMPLICIT:
-		attributes += " iso_usage_implicit";
-		break;
+		switch ((epd.bmAttributes() >> 4) & 0x3) {
+		case LIBUSB_ISO_USAGE_TYPE_DATA:
+			attributes += " iso_usage_data";
+			break;
+		case LIBUSB_ISO_USAGE_TYPE_FEEDBACK:
+			attributes += " iso_usage_feedback";
+			break;
+		case LIBUSB_ISO_USAGE_TYPE_IMPLICIT:
+			attributes += " iso_usage_implicit";
+			break;
+		}
 	}
 
 	out << attributes << " (";
 	out << std::hex << (int)epd.bmAttributes() << ")" << std::endl;
-	out << "          wMaxPacketSize:    ";
+	out << "  E       wMaxPacketSize:    ";
 	out << std::dec << epd.wMaxPacketSize() << std::endl;
-	out << "          bInterval:         ";
+	out << "  E       bInterval:         ";
 	out << std::dec << (int)epd.bInterval() << std::endl;
-	out << "          bRefresh:          ";
+	out << "  E       bRefresh:          ";
 	out << std::dec << (int)epd.bRefresh() << std::endl;
-	out << "          bSynchAddress:     ";
+	out << "  E       bSynchAddress:     ";
 	out << std::hex << (int)epd.bSynchAddress() << std::endl;
+	out << " <E       extra ep data:     ";
+	out << std::dec << (int)epd.extra().size() << " bytes" << std::endl;
 	return out;
 }
 
@@ -164,6 +168,9 @@ InterfaceDescriptor::InterfaceDescriptor(const Device& device,
 		: Descriptor(device, _ifdp->extra, _ifdp->extra_length) {
 	copy(_ifdp);
 	getEndpoints();
+	DeviceHandle	*handle = dev.open();
+	interface = handle->getStringDescriptor(ifdp->iInterface);
+	delete handle;
 }
 
 InterfaceDescriptor::InterfaceDescriptor(const InterfaceDescriptor& other) :
@@ -198,6 +205,10 @@ uint8_t	InterfaceDescriptor::bInterfaceProtocol() const {
 	return ifdp->bInterfaceProtocol;
 }
 
+const std::string& 	InterfaceDescriptor::iInterface() const {
+	return interface;
+}
+
 const std::list<EndpointDescriptor>&	InterfaceDescriptor::endpoint() const {
 	return endpoints;
 }
@@ -210,24 +221,27 @@ void	InterfaceDescriptor::getEndpoints() {
 }
 
 std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd) {
-	out << "      bInterfaceNumber:      ";
+	out << ">I    bInterfaceNumber:      ";
 	out << (int)ifd.bInterfaceNumber() << std::endl;
-	out << "      bAlternateSetting:     ";
+	out << " I    bAlternateSetting:     ";
 	out << (int)ifd.bAlternateSetting() << std::endl;
-	out << "      bInterfaceClass:       ";
+	out << " I    bInterfaceClass:       ";
 	out << (int)ifd.bInterfaceClass() << std::endl;
-	out << "      bInterfaceSubClass:    ";
+	out << " I    bInterfaceSubClass:    ";
 	out << (int)ifd.bInterfaceSubClass() << std::endl;
-	out << "      bInterfaceProtocol:    ";
+	out << " I    bInterfaceProtocol:    ";
 	out << (int)ifd.bInterfaceProtocol() << std::endl;
+	out << " I    iInterface:            " << ifd.iInterface() << std::endl;
 	const std::list<EndpointDescriptor>&	eplist = ifd.endpoint();
-	out << "        " << eplist.size() << " Endpoints:" << std::endl;
+	out << " I      " << eplist.size() << " Endpoints:" << std::endl;
 	std::list<EndpointDescriptor>::const_iterator	i;
 	int	endpointno = 0;
 	for (i = eplist.begin(); i != eplist.end(); i++, endpointno++) {
-		out << "        Endpoint " << endpointno << ":" << std::endl;
+		out << " I      Endpoint " << endpointno << ":" << std::endl;
 		out << *i;
 	}
+	out << "<I    extra interface data:  ";
+	out << std::dec << (int)ifd.extra().size() << " bytes" << std::endl;
 	return out;
 }
 
@@ -287,12 +301,24 @@ ConfigDescriptor&	ConfigDescriptor::operator=(const ConfigDescriptor& other) {
 	interfaces = other.interfaces;
 }
 
+ConfigDescriptor::~ConfigDescriptor() {
+	delete config;
+}
+
 uint8_t ConfigDescriptor::bConfigurationValue() const {
 	return config->bConfigurationValue;
 }
 
 uint8_t ConfigDescriptor::bNumInterfaces() const {
 	return config->bNumInterfaces;
+}
+
+uint8_t	ConfigDescriptor::bmAttributes() const {
+	return config->bmAttributes;
+}
+
+uint8_t	ConfigDescriptor::MaxPower() const {
+	return config->MaxPower;
 }
 
 const std::list<Interface>&	ConfigDescriptor::interface() const {
@@ -307,15 +333,24 @@ void	ConfigDescriptor::getInterfaces() {
 }
 
 std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config) {
-	out << "    bConfigurationValue:    ";
+	out << "C   bConfigurationValue:    ";
 	out << (int)config.bConfigurationValue() << std::endl;
-	out << "    bNumInterfaces:         ";
+	out << "C   bNumInterfaces:         ";
 	const std::list<Interface>&	l = config.interface();
-	out << (int)config.bNumInterfaces() << "(" << l.size() << ")" << std::endl;
+	out << (int)config.bNumInterfaces() << "(" << l.size() << ")"
+		<< std::endl;
+	out << "C   bConfigurationValue:    ";
+	out << (int)config.bConfigurationValue() << std::endl;
+	out << "C   bmAttributes:           ";
+	out << std::hex << (int)config.bmAttributes() << std::endl;
+	out << "C   MaxPower:               ";
+	out << std::dec << 2 * (int)config.MaxPower() << "mA" << std::endl;
 	std::list<Interface>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
 		out << *i;
 	}
+	out << "C   extra config data:      ";
+	out << std::dec << (int)config.extra().size() << " bytes" << std::endl;
 	return out;
 }
 

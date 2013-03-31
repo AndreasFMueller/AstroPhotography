@@ -14,11 +14,10 @@ tests_SOURCES = tests.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp \
-	FITSwriteTest.cpp FITSreadTest.cpp
+	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
-	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp 
-
-
+	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la

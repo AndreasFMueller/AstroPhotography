@@ -15,5 +15,9 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
 	Ccd.cpp \
-	Fits.cpp
+	Fits.cpp \
+	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
+	USBDeviceHandle.cpp USBDescriptors.cpp USBRawDescriptors.cpp \
+	UVCDescriptors.cpp
+
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"
