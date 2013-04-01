@@ -28,39 +28,47 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-static void	showInterfaceDescriptorList(const std::list<InterfaceDescriptor>&ifdlist) {
-	std::list<InterfaceDescriptor>::const_iterator i;
-	for (i = ifdlist.begin(); i != ifdlist.end(); i++) {
-		std::string	extra = i->extra();
-		if (extra.size() > 0) {
-			std::cout << "extra size: " << extra.size() << std::endl;
-			UVCDescriptorFactory	f(i->device());
-			std::cout << f.descriptors(extra.c_str(), extra.size());
+static void	showInterfaceDescriptor(const InterfaceDescriptor& ifdesc) {
+	std::string	extra = ifdesc.extra();
+	if (extra.size() > 0) {
+		std::cout << "extra size: " << extra.size() << std::endl;
+		UVCDescriptorFactory	f(ifdesc.device());
+		std::cout << f.descriptors(extra.c_str(), extra.size());
+	}
+}
+
+static void	showInterfaceList(const std::vector<Interface>& iflist) {
+	std::vector<Interface>::const_iterator	i;
+	for (i = iflist.begin(); i != iflist.end(); i++) {
+		for (int j = 0; j < i->numAltsettings(); j++) {
+			showInterfaceDescriptor((*i)[j]);
 		}
 	}
 }
 
-static void	showInterfaceList(const std::list<Interface>& iflist) {
-	std::list<Interface>::const_iterator	i;
-	for (i = iflist.begin(); i != iflist.end(); i++) {
-		const std::list<InterfaceDescriptor>&	ifdlist
-			= i->altsettings();
-		showInterfaceDescriptorList(ifdlist);
+static void	showConfigDescriptorExtra(const ConfigDescriptor& config) {
+	DescriptorFactory	f(config.device());
+	std::vector<USBDescriptorPtr>	l = f.descriptors(config.extra().c_str(), config.extra().size());
+	std::vector<USBDescriptorPtr>::const_iterator	i;
+	for (i = l.begin(); i != l.end(); i++) {
+		std::cout << *i;
 	}
 }
 
 void	UVCDescriptorTest::testList() {
 	Context	context;
 	context.setDebugLevel(0);
-	std::list<Device>	devicelist = context.list();
-	std::list<Device>::const_iterator	i;
+	std::vector<Device>	devicelist = context.devices();
+	std::vector<Device>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
 		std::cout << "Device on " << *i << std::endl;
 		DeviceDescriptor	*dd = i->descriptor();
 		for (int config = 0; config < dd->bNumConfigurations();
 			config++) {
 			ConfigDescriptor	*c = i->config(config);
-			const std::list<Interface>&	iflist = c->interface();
+			showConfigDescriptorExtra(*c);
+
+			const std::vector<Interface>&	iflist = c->interface();
 			showInterfaceList(iflist);
 
 			delete c;

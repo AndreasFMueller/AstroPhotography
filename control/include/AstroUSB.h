@@ -9,6 +9,7 @@
 #include <libusb-1.0/libusb.h>
 #include <stdexcept>
 #include <list>
+#include <vector>
 #include <iostream>
 #include <tr1/memory>
 
@@ -38,7 +39,7 @@ public:
 	Context() throw(USBError);
 	~Context();
 	void	setDebugLevel(int level) throw(std::range_error);
-	std::list<Device>	list() throw (USBError);
+	std::vector<Device>	devices() throw (USBError);
 	DeviceHandle	*open(uint16_t vendor_id, uint16_t product_id)
 		throw(USBError);
 };
@@ -181,7 +182,7 @@ std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd);
 class InterfaceDescriptor : public Descriptor {
 	struct libusb_interface_descriptor	*ifdp;
 	void	copy(const struct libusb_interface_descriptor *ifpd);
-	std::list<EndpointDescriptor>	endpoints;
+	std::vector<EndpointDescriptor>	endpoints;
 	void	getEndpoints();
 	std::string	interface;
 public:
@@ -196,7 +197,7 @@ public:
 	uint8_t	bInterfaceSubClass() const;
 	uint8_t	bInterfaceProtocol() const;
 	const std::string&	iInterface() const;
-	const std::list<EndpointDescriptor>&	endpoint() const;
+	const std::vector<EndpointDescriptor>&	endpoint() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
@@ -206,10 +207,13 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
  */
 class Interface {
 	Device	dev;
-	std::list<InterfaceDescriptor>	altsetting;
+	std::vector<InterfaceDescriptor>	altsettingvector;
+	int	interface;
 public:
-	Interface(const Device& device, const libusb_interface *li);
-	const std::list<InterfaceDescriptor>&	altsettings() const;
+	Interface(const Device& device, const libusb_interface *li, int interface);
+	int	numAltsettings() const;
+	int	interfaceNumber() const;
+	const InterfaceDescriptor&	operator[](int index) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const Interface& interface);
@@ -221,7 +225,7 @@ class	ConfigDescriptor : public Descriptor {
 	libusb_config_descriptor	*config;
 	std::string	configuration;
 	void	copy(const libusb_config_descriptor *config);
-	std::list<Interface>	interfaces;
+	std::vector<Interface>	interfaces;
 	void	getInterfaces();
 public:
 	ConfigDescriptor(const Device& device,
@@ -233,7 +237,8 @@ public:
 	uint8_t	bNumInterfaces() const;
 	uint8_t	bmAttributes() const;
 	uint8_t	MaxPower() const;
-	const std::list<Interface>&	interface() const;
+	const std::vector<Interface>&	interface() const;
+	const Interface&	interface(int index) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config);
@@ -251,6 +256,13 @@ class USBDescriptor {
 protected:
 	Device	device;
 	uint8_t	*data;
+	uint8_t	uint8At(int offset) const;
+	int8_t	int8At(int offset) const;
+	uint16_t	uint16At(int offset) const;
+	int16_t	int16At(int offset) const;
+	uint32_t	uint32At(int offset) const;
+	int32_t	int32At(int offset) const;
+	uint32_t	bitmapAt(int offset, int size) const;
 public:
 	USBDescriptor(const Device& device, const void *data, int length);
 	USBDescriptor(const USBDescriptor& other);
@@ -259,6 +271,7 @@ public:
 	virtual	std::string	toString() const;
 	uint8_t	bLength() const;
 	uint8_t	bDescriptorType() const;
+	virtual int	descriptorLength() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const USBDescriptor& descriptor);
@@ -274,6 +287,8 @@ class UnknownDescriptorError : public std::runtime_error {
 public:
 	UnknownDescriptorError(const char *cause) : std::runtime_error(cause) {}
 	UnknownDescriptorError(uint8_t length, uint8_t descriptortype);
+	UnknownDescriptorError(uint8_t length, uint8_t descriptortype,
+		uint8_t descriptorsubtype);
 };
 
 /**
@@ -288,16 +303,27 @@ std::ostream&	operator<<(std::ostream& out,
 class DescriptorFactory {
 protected:
 	Device	device;
+	uint8_t	blength(const void *data) throw(std::length_error);
+	uint8_t	bdescriptortype(const void *data);
 public:
 	DescriptorFactory(const Device& device);
+
 	virtual USBDescriptorPtr	descriptor(const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError);
-	virtual std::list<USBDescriptorPtr>	descriptors(const void *data,
-		int length) throw(std::length_error, UnknownDescriptorError);
+
+	USBDescriptorPtr	descriptor(const std::string& data)
+		throw(std::length_error, UnknownDescriptorError);
+
+	virtual std::vector<USBDescriptorPtr>	descriptors(const void *data,
+		int length)
+		throw(std::length_error, UnknownDescriptorError);
+
+	std::vector<USBDescriptorPtr>	descriptors(const std::string& data)
+		throw(std::length_error, UnknownDescriptorError);
 };
 
 std::ostream&	operator<<(std::ostream& out,
-			const std::list<USBDescriptorPtr>& list);
+			const std::vector<USBDescriptorPtr>& list);
 
 /**
  * \brief Inteface association descriptor
@@ -316,7 +342,13 @@ public:
 	uint8_t	bFunctionProtocol() const;
 	const std::string&	iFunction() const;
 	virtual std::string	toString() const;
+	bool	isVideoInterfaceCollection() const;
 };
+
+bool	isInterfaceAssociationDescriptor(const USBDescriptorPtr& ptr);
+InterfaceAssociationDescriptor	*interfaceAssociationDescriptor(
+	const USBDescriptorPtr& ptr);
+
 
 } // namespace usb
 } // namespace astro

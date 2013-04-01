@@ -209,7 +209,7 @@ const std::string& 	InterfaceDescriptor::iInterface() const {
 	return interface;
 }
 
-const std::list<EndpointDescriptor>&	InterfaceDescriptor::endpoint() const {
+const std::vector<EndpointDescriptor>&	InterfaceDescriptor::endpoint() const {
 	return endpoints;
 }
 
@@ -232,9 +232,9 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd) {
 	out << " I    bInterfaceProtocol:    ";
 	out << (int)ifd.bInterfaceProtocol() << std::endl;
 	out << " I    iInterface:            " << ifd.iInterface() << std::endl;
-	const std::list<EndpointDescriptor>&	eplist = ifd.endpoint();
+	const std::vector<EndpointDescriptor>&	eplist = ifd.endpoint();
 	out << " I      " << eplist.size() << " Endpoints:" << std::endl;
-	std::list<EndpointDescriptor>::const_iterator	i;
+	std::vector<EndpointDescriptor>::const_iterator	i;
 	int	endpointno = 0;
 	for (i = eplist.begin(); i != eplist.end(); i++, endpointno++) {
 		out << " I      Endpoint " << endpointno << ":" << std::endl;
@@ -249,25 +249,35 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd) {
 // Interface implementation
 /////////////////////////////////////////////////////////////////////
 
-Interface::Interface(const Device& device, const libusb_interface *li)
-	: dev(device) {
+Interface::Interface(const Device& device, const libusb_interface *li,
+	int _interface) : dev(device), interface(_interface) {
 	for (int i = 0; i < li->num_altsetting; i++) {
 		InterfaceDescriptor	id(device, &li->altsetting[i]);
-		altsetting.push_back(id);
+		altsettingvector.push_back(id);
 	}
 }
 
-const std::list<InterfaceDescriptor>&	Interface::altsettings() const {
-	return altsetting;
+int	Interface::interfaceNumber() const {
+	return interface;
+}
+
+int	Interface::numAltsettings() const {
+	return altsettingvector.size();
+}
+
+const InterfaceDescriptor&	Interface::operator[](int index) const {
+	if ((index < 0) || (index >= numAltsettings())) {
+		throw std::range_error("out of alt setting range");
+	}
+std::cerr << "altsetting 0" << std::endl;
+	return altsettingvector[index];
 }
 
 std::ostream&	operator<<(std::ostream& out, const Interface& interface) {
-	out << "      Interface with " << interface.altsettings().size();
+	out << "      Interface with " << interface.numAltsettings();
 	out << " alternate settings:" << std::endl;;
-	const std::list<InterfaceDescriptor>&	idref = interface.altsettings();
-	std::list<InterfaceDescriptor>::const_iterator	i;
-	for (i = idref.begin(); i != idref.end(); i++) {
-		out << *i;
+	for (int j = 0; j < interface.numAltsettings(); j++) {
+		out << interface[j];
 	}
 	return out;
 }
@@ -321,13 +331,20 @@ uint8_t	ConfigDescriptor::MaxPower() const {
 	return config->MaxPower;
 }
 
-const std::list<Interface>&	ConfigDescriptor::interface() const {
+const std::vector<Interface>&	ConfigDescriptor::interface() const {
 	return interfaces;
+}
+
+const Interface&	ConfigDescriptor::interface(int index) const {
+	if ((index < 0) || (index >= interfaces.size())) {
+		throw std::range_error("outside interface range");
+	}
+	return interfaces[index];
 }
 
 void	ConfigDescriptor::getInterfaces() {
 	for (int i = 0; i < config->bNumInterfaces; i++) {
-		Interface	ifd(device(), &config->interface[i]);
+		Interface	ifd(device(), &config->interface[i], i);
 		interfaces.push_back(ifd);
 	}
 }
@@ -336,7 +353,7 @@ std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config) {
 	out << "C   bConfigurationValue:    ";
 	out << (int)config.bConfigurationValue() << std::endl;
 	out << "C   bNumInterfaces:         ";
-	const std::list<Interface>&	l = config.interface();
+	const std::vector<Interface>&	l = config.interface();
 	out << (int)config.bNumInterfaces() << "(" << l.size() << ")"
 		<< std::endl;
 	out << "C   bConfigurationValue:    ";
@@ -345,7 +362,7 @@ std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config) {
 	out << std::hex << (int)config.bmAttributes() << std::endl;
 	out << "C   MaxPower:               ";
 	out << std::dec << 2 * (int)config.MaxPower() << "mA" << std::endl;
-	std::list<Interface>::const_iterator	i;
+	std::vector<Interface>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
 		out << *i;
 	}

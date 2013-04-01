@@ -17,7 +17,8 @@ tests_SOURCES = tests.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
 	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp
+	USBContextTest.cpp USBDescriptorTest.cpp \
+	UVCDescriptorTest.cpp UVCCameraTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la

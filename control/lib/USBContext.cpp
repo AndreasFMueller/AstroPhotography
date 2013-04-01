@@ -42,8 +42,8 @@ void	Context::setDebugLevel(int level) throw (std::range_error) {
 /**
  * \brief Retrieve a list of devices available within this context
  */
-std::list<Device>	Context::list() throw (USBError) {
-	std::list<Device>	result;
+std::vector<Device>	Context::devices() throw (USBError) {
+	std::vector<Device>	result;
 	libusb_device	**devlist;
 	size_t	length = libusb_get_device_list(context, &devlist);
 	if (length < 0) {
