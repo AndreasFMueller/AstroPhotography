@@ -596,6 +596,7 @@ public:
 class UVCCamera {
 	// the device
 	Device	device;
+	DeviceHandle	*devicehandle;
 
 	// interface association descriptor
 	USBDescriptorPtr	iadptr;
@@ -619,9 +620,9 @@ public:
 	uint32_t	controlProcessingUnitControls() const;
 
 	// selecting format and frame
-	USBDescriptorPtr	getFormat() const;
+	USBDescriptorPtr	getFormat(uint8_t interface);
 	void	setFormat(int formatindex);
-	USBDescriptorPtr	getFrame() const;
+	USBDescriptorPtr	getFrame(uint8_t interface);
 	void	setFrame(int frameindex);
 
 	// modifying parameter of the various interfaces
@@ -630,12 +631,36 @@ public:
 	std::string	toString() const;
 
 	// access to frames
+#if 0
 	Frame	getFrame();
 	std::vector<Frame>	getFrames(int nframes);
+#endif
 };
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);
 
+/**
+ * \brief data structure for video streaming interface control requests
+ */
+typedef struct  vs_control_request_s {
+	usb_request_header_t	header;
+	uint16_t	bmHint;
+	uint8_t		bFormatIndex;
+	uint8_t		bFrameIndex;
+	uint32_t	dwFrameInterval;
+	uint16_t	wKeyFrameRate;
+	uint16_t	wPFrameRate;
+	uint16_t	wCompQuality;
+	uint16_t	wCompWindowSize;
+	uint16_t	wDelay;
+	uint32_t	dwMaxVideoFrameSize;
+	uint32_t	dwMaxPayloadTransferSize;
+	uint32_t	dwClockFrequency;
+	uint8_t		bmFrameingInfo;
+	uint8_t		bPreferedVersion;
+	uint8_t		bMinVersion;
+	uint8_t		bMaxVersion;
+} __attribute__((packed)) vs_control_request_t;
 
 } // namespace uvc
 } // namespace usb

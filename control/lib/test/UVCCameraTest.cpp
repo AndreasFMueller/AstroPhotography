@@ -60,6 +60,7 @@ void	UVCCameraTest::testCamera() {
 	try {
 		UVCCamera	camera(device, true);
 		std::cout << camera;
+		std::cout << camera.getFormat(1);
 	} catch (std::exception& x) {
 		std::cerr << "exception: " << x.what() << std::endl;
 	}

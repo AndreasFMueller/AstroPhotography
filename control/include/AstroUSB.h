@@ -82,6 +82,35 @@ public:
 
 std::ostream&	operator<<(std::ostream& out, const Device& device);
 
+/*
+ * request structures
+ */ 
+typedef struct  usb_request_header_s {
+	uint8_t		bmRequestType;
+	uint8_t		bRequest;
+	uint16_t	wValue;
+	uint16_t	wIndex;
+	uint16_t	wLength;
+} __attribute__((packed)) usb_request_header_t;
+
+#define	REQUEST_TYPE_GET	0xa1
+#define REQUEST_TYPE_SET	0x21
+
+/**
+ * \brief A simple Request wrapper
+ */
+class Request {
+	usb_request_header_t	*header;
+public:
+	Request(const usb_request_header_t *header);
+	~Request();
+	uint8_t	*payload() const;
+	uint16_t	wLength() const;
+	void	copyTo(void *data);
+	std::string	toString() const;
+	friend class DeviceHandle;
+};
+
 /**
  * \brief USB Device Handle
  */
@@ -101,6 +130,7 @@ public:
 	std::string	getStringDescriptor(uint8_t index) const;
 	friend class Context;
 	friend class Device;
+	int	controlRequest(Request& request);
 };
 
 /**
@@ -353,7 +383,6 @@ public:
 bool	isInterfaceAssociationDescriptor(const USBDescriptorPtr& ptr);
 InterfaceAssociationDescriptor	*interfaceAssociationDescriptor(
 	const USBDescriptorPtr& ptr);
-
 
 } // namespace usb
 } // namespace astro
