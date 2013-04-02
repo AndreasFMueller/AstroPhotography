@@ -578,6 +578,19 @@ public:
 };
 
 /**
+ * \brief Frame holder class
+ */
+class Frame : public std::string {
+	int	width;
+	int	height;
+public:
+	Frame(const void *data, int length);
+	int	getWidth() const;
+	int	getHeight() const;
+	friend class UVCCamera;
+};
+
+/**
  * \brief UVC Camera
  */
 class UVCCamera {
@@ -605,8 +618,20 @@ public:
 	uint8_t	controlProcessingUnitID() const;
 	uint32_t	controlProcessingUnitControls() const;
 
+	// selecting format and frame
+	USBDescriptorPtr	getFormat() const;
+	void	setFormat(int formatindex);
+	USBDescriptorPtr	getFrame() const;
+	void	setFrame(int frameindex);
+
+	// modifying parameter of the various interfaces
+
 	// display stuff
 	std::string	toString() const;
+
+	// access to frames
+	Frame	getFrame();
+	std::vector<Frame>	getFrames(int nframes);
 };
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);

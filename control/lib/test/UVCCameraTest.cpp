@@ -50,7 +50,9 @@ void	UVCCameraTest::testList() {
 
 void	UVCCameraTest::testCamera() {
 	Context	context;
-	DeviceHandle	*handle = context.open(0x199e, 0x8101);
+	//DeviceHandle	*handle = context.open(0x199e, 0x8101); // TIS
+	//DeviceHandle	*handle = context.open(0x046d, 0x082b); // Logitech
+	DeviceHandle	*handle = context.open(0x0c45, 0x6340); // Sonix
 	Device	device = handle->device();
 	std::cout << device;
 

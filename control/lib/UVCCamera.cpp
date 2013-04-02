@@ -52,9 +52,7 @@ UVCCamera::UVCCamera(const Device& _device, bool force) : device(_device) {
 	// get the control interface, and the list of interface descriptors
 	// for the control interface
 	uint8_t	ci = controlInterface();
-	std::cerr << "control interface: " << (int)ci << std::endl;
 	Interface	interface = config->interface(ci);
-	std::cout << interface;
 	InterfaceDescriptor	controlinterface = interface[0];
 
 	// convert the additional descriptors into the control interface
@@ -129,6 +127,30 @@ std::string	UVCCamera::toString() const {
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
 	return out << camera.toString();
+}
+
+USBDescriptorPtr	UVCCamera::getFormat() const {
+	// XXX not implemented yet
+}
+
+void	UVCCamera::setFormat(int formatindex) {
+	// XXX not implemented yet
+}
+
+USBDescriptorPtr	UVCCamera::getFrame() const {
+	// XXX not implemented yet
+}
+
+void	UVCCamera::setFrame(int frameindex) {
+	// XXX not implemented yet
+}
+
+Frame	UVCCamera::getFrame() {
+	// XXX not implemented yet
+}
+
+std::vector<Frame>	getFrames(int nframes) {
+	// XXX not implemented yet
 }
 
 } // namespace uvc

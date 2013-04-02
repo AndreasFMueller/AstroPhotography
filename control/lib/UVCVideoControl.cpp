@@ -525,7 +525,7 @@ std::string	ProcessingUnitDescriptor::toString() const {
 		out << " white_balance_component";
 	}
 	if (bmcontrols & (1 << 8)) {
-		out << " bcklight_compensation";
+		out << " backlight_compensation";
 	}
 	if (bmcontrols & (1 << 9)) {
 		out << " gain";
@@ -595,20 +595,28 @@ ProcessingUnitDescriptor *processingUnitDescriptor(USBDescriptorPtr& ptr) {
 ExtensionUnitDescriptor::ExtensionUnitDescriptor(const Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
 	int	p = bNrInPins();
 	int	n = bControlSize();
-	extension = handle->getStringDescriptor(((uint8_t *)data)[23 + p + n]);
+
+	DeviceHandle	*handle = device.open();
+	try {
+		extension = handle->getStringDescriptor(uint8At(23 + p + n));
+	} catch (std::exception& x) {
+		std::cerr << "extension naem not found: " << x.what()
+			<< std::endl;
+	}
 	delete handle;
-	guid = std::string(((char *)data)[4], 16);
+	guid = std::string(&((char *)data)[4], 16);
 }
 
-ExtensionUnitDescriptor::ExtensionUnitDescriptor(const ExtensionUnitDescriptor& other) : UVCDescriptor(other) {
+ExtensionUnitDescriptor::ExtensionUnitDescriptor(
+	const ExtensionUnitDescriptor& other) : UVCDescriptor(other) {
 	extension = other.extension;
 	guid = other.guid;
 }
 
-ExtensionUnitDescriptor&	ExtensionUnitDescriptor::operator=(const ExtensionUnitDescriptor& other) {
+ExtensionUnitDescriptor&	ExtensionUnitDescriptor::operator=(
+	const ExtensionUnitDescriptor& other) {
 	UVCDescriptor::operator=(other);
 	extension = other.extension;
 	guid = other.guid;

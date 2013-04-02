@@ -59,12 +59,15 @@ USBDescriptorPtr	VideoControlDescriptorFactory::header(
 	// create the header
 	InterfaceHeaderDescriptor	*ifhd = new InterfaceHeaderDescriptor(
 		device, data, length);
+std::cerr << "header parsed" << std::endl;
 
 	// add the units
 	int	offset = ifhd->bLength();
+std::cerr << "offset: " << offset << ", length = " << length << std::endl;
 	while (offset < length) {
 		USBDescriptorPtr	unit
 			= descriptor(offset + (uint8_t *)data, length - offset);
+std::cerr << "new unit" << std::endl << unit;
 		ifhd->units.push_back(unit);
 		offset += unit->bLength();
 	}
@@ -167,6 +170,27 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 
 		// find out how long that format is
 		offset += fd->wTotalLength();
+
+		// it is possible that there are still image frame descriptors
+		// or color matching descriptors following the frames, so
+		// we should skip them and add to the total length of the
+		// format descriptor
+		do {
+			// get the next descriptor
+			newformat = descriptor(offset + (uint8_t *)data,
+				length - offset);
+
+			// if it is a format descriptor, then we have seen 
+			// all descriptors, and should leave the loop
+			fd = dynamic_cast<FormatDescriptor *>(&*newformat);
+
+			// if it is not a format descriptor, then we should
+			// add it to the total length, and go to the next
+			// descriptor
+			if (fd == NULL) {
+				offset += newformat->bLength();
+			}
+		} while ((fd == NULL) && ((length - offset) > 0));
 	}
 
 	// return the header with all the formats attached
@@ -252,6 +276,11 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 		result = USBDescriptorPtr(
 			new FrameFrameBasedDescriptor(device,
 				data, length));
+		break;
+	case VS_STILL_IMAGE_FRAME:
+	case VS_COLORFORMAT:
+		// XXX should add real implementation of these two descriptors
+		result = USBDescriptorPtr(new USBDescriptor(device, data, length));
 		break;
 	default:
 		throw UnknownDescriptorError(type, subtype);
