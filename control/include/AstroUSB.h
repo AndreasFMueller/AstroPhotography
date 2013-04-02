@@ -13,6 +13,9 @@
 #include <iostream>
 #include <tr1/memory>
 
+#define	BROKEN_NONE			0
+#define BROKEN_THE_IMAGING_SOURCE	1
+
 namespace astro {
 namespace usb {
 
@@ -58,6 +61,7 @@ class 	Device {
 	Device(struct libusb_device *dev);
 	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
 	struct libusb_device	*getDevice();
+	int	broken;
 public:
 	Device(const Device& other);
 	~Device();
@@ -65,6 +69,7 @@ public:
 	uint8_t	getBusNumber() const;
 	uint8_t	getDeviceAddress() const;
 	int	getDeviceSpeed() const;
+	int	getBroken() const;
 	DeviceDescriptor	*descriptor() const throw(USBError);
 	ConfigDescriptor	*config(uint8_t index) const throw(USBError);
 	ConfigDescriptor	*activeConfig() const throw(USBError);

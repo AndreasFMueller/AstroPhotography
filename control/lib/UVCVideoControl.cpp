@@ -71,7 +71,7 @@ std::string	InterfaceHeaderDescriptor::toString() const {
 		out << " " << std::hex << (int)baInterface(i);
 	}
 	out << std::endl;
-	out << " units:" << std::endl;
+	out << "  units:" << std::endl;
 	for (int i = 0; i < numUnits(); i++) {
 		out << operator[](i)->toString();
 	}

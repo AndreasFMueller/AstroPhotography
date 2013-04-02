@@ -62,6 +62,13 @@ ConfigDescriptor	*Device::configValue(uint8_t value) const throw(USBError) {
 
 Device::Device(struct libusb_device *_dev) : dev(_dev) {
 	libusb_ref_device(dev);
+	// find out whether this is a broken device
+	DeviceDescriptor	*d = descriptor();
+	if (d->idVendor() == 0x199e) {
+std::cout << "This is a broken camera from the imaging source" << std::endl;
+		broken = BROKEN_THE_IMAGING_SOURCE;
+	}
+	delete d;
 }
 
 Device::~Device() {
@@ -70,6 +77,7 @@ Device::~Device() {
 
 Device::Device(const Device& other) {
 	dev = other.dev;
+	broken = other.broken;
 	libusb_ref_device(dev);
 }
 
@@ -77,6 +85,7 @@ Device&	Device::operator=(const Device& other) {
 	libusb_ref_device(other.dev);
 	libusb_unref_device(dev);
 	dev = other.dev;
+	broken = other.broken;
 	return *this;
 }
 
@@ -90,6 +99,10 @@ uint8_t	Device::getDeviceAddress() const {
 
 int	Device::getDeviceSpeed() const {
 	return libusb_get_device_speed(dev);
+}
+
+int	Device::getBroken() const {
+	return broken;
 }
 
 std::ostream&	operator<<(std::ostream& out, const Device& device) {

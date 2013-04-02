@@ -47,7 +47,8 @@ EndpointDescriptor::EndpointDescriptor(const Device &device,
 	copy(_epd);
 }
 
-EndpointDescriptor&	EndpointDescriptor::operator=(const EndpointDescriptor& other) {
+EndpointDescriptor&	EndpointDescriptor::operator=(
+	const EndpointDescriptor& other) {
 	memcpy(epd, other.epd, sizeof(struct libusb_endpoint_descriptor));
 	return *this;
 }
@@ -269,7 +270,6 @@ const InterfaceDescriptor&	Interface::operator[](int index) const {
 	if ((index < 0) || (index >= numAltsettings())) {
 		throw std::range_error("out of alt setting range");
 	}
-std::cerr << "altsetting 0" << std::endl;
 	return altsettingvector[index];
 }
 

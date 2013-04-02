@@ -77,6 +77,7 @@ std::string	FormatFrameBasedDescriptor::toString() const {
 	out << std::hex << (int)bmInterlaceFlags() << std::endl;
 	out << "  bCopyProtect:         ";
 	out << (int)bCopyProtect() << std::endl;
+	out << framesToString();
 	return out.str();
 }
 

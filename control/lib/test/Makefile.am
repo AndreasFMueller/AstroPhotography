@@ -7,7 +7,7 @@
 noinst_HEADERS = 
 
 # stuff related to testing
-noinst_PROGRAMS = tests
+noinst_PROGRAMS = tests usbtests
 
 tests_SOURCES = tests.cpp \
 	PixelTest.cpp \
@@ -16,14 +16,20 @@ tests_SOURCES = tests.cpp \
 	ImageTest.cpp RGBTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
-	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	USBContextTest.cpp USBDescriptorTest.cpp \
-	UVCDescriptorTest.cpp UVCCameraTest.cpp
-
+	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 
+usbtests_SOURCES = usbtests.cpp \
+	UVCCameraTest.cpp
+usbtests_LDADD = -lcppunit -L.. -lastro
+usbtests_DEPENDENCIES = ../libastro.la
+
+#	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp
+
+
 EXTRA_DIST = test_module.la test_module.so
 
-all-am:	tests
+all-am:	tests usbtests
 	./tests
+	./usbtests

@@ -37,8 +37,6 @@ USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
 	}
 	uint8_t	type = bdescriptortype(data);
 	uint8_t	subtype = bdescriptorsubtype(data);
-	std::cerr << "type = " << (int)type << ", subtype = "
-		<< (int)subtype << std::endl;
 
 	return DescriptorFactory::descriptor(data, length);
 }
@@ -58,7 +56,6 @@ uint16_t	VideoControlDescriptorFactory::wterminaltype(const void *data)
 
 USBDescriptorPtr	VideoControlDescriptorFactory::header(
 				const void *data, int length) {
-	std::cerr << "parsing video control interface descriptors" << std::endl;
 	// create the header
 	InterfaceHeaderDescriptor	*ifhd = new InterfaceHeaderDescriptor(
 		device, data, length);
@@ -89,14 +86,20 @@ USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	if (length < 2) {
 		throw std::length_error("not engouth data for descriptor");
 	}
+
 	// check that there is enough data to process
 	if (blength(data) > length) {
 		throw std::length_error("not enough data for descriptor");
 	}
+
+	// make sure we are in an interface descriptor
 	uint8_t	type = bdescriptortype(data);
+	if (type != CS_INTERFACE) {
+		throw std::runtime_error("not in an interface descriptor");
+	}
+
+	// get the subtype
 	uint8_t	subtype = bdescriptorsubtype(data);
-	std::cerr << "type = " << (int)type << ", subtype = "
-		<< (int)subtype << std::endl;
 
 	// we now have all the information to start building the descriptors
 	USBDescriptorPtr	result;
@@ -145,6 +148,50 @@ VideoStreamingDescriptorFactory::VideoStreamingDescriptorFactory(
 	: UVCDescriptorFactory(_device) {
 }
 
+USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
+				const void *data, int length,
+				HeaderDescriptor *hd) {
+	// add the formats
+	int	offset = hd->bLength();
+	int	nformats = hd->bNumFormats();
+	for (int formatindex = 0; formatindex < nformats; formatindex++) {
+		USBDescriptorPtr	newformat
+			= descriptor(offset + (uint8_t *)data, length - offset);
+		hd->formats.push_back(newformat);
+
+		FormatDescriptor	*fd
+			= dynamic_cast<FormatDescriptor *>(&*newformat);
+		if (NULL == fd) {
+			throw std::runtime_error("expected a FormatDescriptor");
+		}
+
+		// find out how long that format is
+		offset += fd->wTotalLength();
+	}
+
+	// return the header with all the formats attached
+	return USBDescriptorPtr(hd);
+}
+
+USBDescriptorPtr	VideoStreamingDescriptorFactory::formats(
+				const void *data, int length,
+				FormatDescriptor *fd) {
+	int	offset = fd->bLength();
+	int	nframes = fd->bNumFrameDescriptors();
+
+	// get all the frame descriptors
+	for (int frameindex = 0; frameindex < nframes; frameindex++) {
+		USBDescriptorPtr	newframe
+			= descriptor(offset + (uint8_t *)data, length - offset);
+		fd->frames.push_back(newframe);
+		offset += newframe->bLength();
+	}
+	std::cout << "total length of format: " << offset << std::endl;
+
+	// return the format with all the frames attached
+	return USBDescriptorPtr(fd);
+}
+
 USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 	const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError) {
@@ -154,27 +201,34 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 	if (length < 2) {
 		throw std::length_error("not engouth data for descriptor");
 	}
+
 	// check that there is enough data to process
 	if (blength(data) > length) {
 		throw std::length_error("not enough data for descriptor");
 	}
+
+	// ensure that we are parseing an interface descriptor
 	uint8_t	type = bdescriptortype(data);
+	if (type != CS_INTERFACE) {
+		throw std::runtime_error("not in an class interface descriptor");
+	}
+
+	// check the subtype
 	uint8_t	subtype = bdescriptorsubtype(data);
 
 	USBDescriptorPtr	result;
 	switch (subtype) {
 	case VS_INPUT_HEADER:
-		result = USBDescriptorPtr(new InputHeaderDescriptor(
-			device, data, length));
+		result = header(data, length,
+			new InputHeaderDescriptor(device, data, length));
 		break;
 	case VS_OUTPUT_HEADER:
-		result = USBDescriptorPtr(new OutputHeaderDescriptor(
-			device, data, length));
+		result = header(data, length,
+			new OutputHeaderDescriptor(device, data, length));
 		break;
 	case VS_FORMAT_UNCOMPRESSED:
-		result = USBDescriptorPtr(
-			new FormatUncompressedDescriptor(device,
-				data, length));
+		result = formats(data, length,
+			new FormatUncompressedDescriptor(device, data, length));
 		break;
 	case VS_FRAME_UNCOMPRESSED:
 		result = USBDescriptorPtr(
@@ -182,9 +236,8 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 				data, length));
 		break;
 	case VS_FORMAT_MJPEG:
-		result = USBDescriptorPtr(
-			new FormatMJPEGDescriptor(device,
-				data, length));
+		result = formats(data, length,
+			new FormatMJPEGDescriptor(device, data, length));
 		break;
 	case VS_FRAME_MJPEG:
 		result = USBDescriptorPtr(
@@ -192,9 +245,8 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 				data, length));
 		break;
 	case VS_FORMAT_FRAME_BASED:
-		result = USBDescriptorPtr(
-			new FormatFrameBasedDescriptor(device,
-				data, length));
+		result = formats(data, length,
+			new FormatFrameBasedDescriptor(device, data, length));
 		break;
 	case VS_FRAME_FRAME_BASED:
 		result = USBDescriptorPtr(
@@ -204,6 +256,8 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::descriptor(
 	default:
 		throw UnknownDescriptorError(type, subtype);
 	}
+
+	return result;
 }
 
 } // namespace uvc

@@ -12,7 +12,7 @@ namespace astro {
 namespace usb {
 namespace uvc {
 
-UVCCamera::UVCCamera(const Device& _device) : device(_device) {
+UVCCamera::UVCCamera(const Device& _device, bool force) : device(_device) {
 	std::cout << "trying to build a UVCCamera object from a USB Device" << std::endl;
 	// scan the active configuration for one that has an Interface
 	// association descriptor
@@ -37,9 +37,11 @@ UVCCamera::UVCCamera(const Device& _device) : device(_device) {
 		USBDescriptorPtr	dp = *i;
 		InterfaceAssociationDescriptor	*iad
 			= interfaceAssociationDescriptor(dp);
-		if ((NULL != iad) && (iad->isVideoInterfaceCollection())) {
-			iadptr = dp;
-			iadfound = true;
+		if (NULL != iad) {
+			if (force || (iad->isVideoInterfaceCollection())) {
+				iadptr = dp;
+				iadfound = true;
+			}
 		}
 	}
 	if (!iadfound) {
@@ -65,6 +67,15 @@ UVCCamera::UVCCamera(const Device& _device) : device(_device) {
 	}
 
 	// now parse the video streaming interfaces
+	VideoStreamingDescriptorFactory	vsf(device);
+	for (int vsindex = 1; vsindex < iad().bInterfaceCount(); vsindex++) {
+		Interface	interface = config->interface(vsindex);
+		// only alternate setting 0 contains the formats
+		InterfaceDescriptor	id = interface[0];
+		std::string	extra = id.extra();
+		USBDescriptorPtr	vsd = vsf.descriptor(extra);
+		videostreaming.push_back(vsd);
+	}
 }
 
 UVCCamera::~UVCCamera() {
@@ -72,27 +83,6 @@ UVCCamera::~UVCCamera() {
 
 const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
 	return dynamic_cast<const InterfaceAssociationDescriptor &>(*iadptr);
-}
-
-std::string	UVCCamera::cameraInfo() const {
-	std::ostringstream	out;
-	out << *device.config(0);
-	out << iad();
-	out << "Control interface:        ";
-	out  << (int)controlInterface() << std::endl;
-	out << "Camera Terminal ID:       ";
-	out  << (int)controlCameraTerminalID() << std::endl;
-	out << "Camera Controls:          ";
-	out  << std::hex << controlCameraControls() << std::endl;
-	out << "Processing Unit ID:       ";
-	out  << std::dec << (int)controlProcessingUnitID() << std::endl;
-	out << "Processing Unit Controls: ";
-	out  << std::hex << controlProcessingUnitControls() << std::endl;
-	return out.str();
-}
-
-std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
-	return out << camera.cameraInfo();
 }
 
 uint8_t	UVCCamera::controlInterface() const {
@@ -113,6 +103,32 @@ uint8_t	UVCCamera::controlProcessingUnitID() const {
 
 uint32_t	UVCCamera::controlProcessingUnitControls() const {
 	return interfaceHeaderDescriptor(videocontrol)->processingUnitControls();
+}
+
+std::string	UVCCamera::toString() const {
+	std::ostringstream	out;
+	out << *device.config(0);
+	out << iad();
+	out << "Control interface:        ";
+	out  << (int)controlInterface() << std::endl;
+	out << "Camera Terminal ID:       ";
+	out  << (int)controlCameraTerminalID() << std::endl;
+	out << "Camera Controls:          ";
+	out  << std::hex << controlCameraControls() << std::endl;
+	out << "Processing Unit ID:       ";
+	out  << std::dec << (int)controlProcessingUnitID() << std::endl;
+	out << "Processing Unit Controls: ";
+	out  << std::hex << controlProcessingUnitControls() << std::endl;
+	out << videocontrol;
+	std::vector<USBDescriptorPtr>::const_iterator	i;
+	for (i = videostreaming.begin(); i != videostreaming.end(); i++) {
+		out << *i;
+	}
+	return out.str();
+}
+
+std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
+	return out << camera.toString();
 }
 
 } // namespace uvc

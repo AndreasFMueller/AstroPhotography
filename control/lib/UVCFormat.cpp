@@ -14,43 +14,6 @@ namespace usb {
 namespace uvc {
 
 //////////////////////////////////////////////////////////////////////
-// Video Streaming Interface
-//////////////////////////////////////////////////////////////////////
-
-VideoStreamingInterface::VideoStreamingInterface(const Interface& _interface) {
-	interface = _interface.interfaceNumber();
-}
-
-//////////////////////////////////////////////////////////////////////
-// Video Streaming Interface Descriptor
-//////////////////////////////////////////////////////////////////////
-
-VideoStreamingInterfaceDescriptor::VideoStreamingInterfaceDescriptor(
-	const InterfaceDescriptor& interfacedescriptor) {
-	altsetting = interfacedescriptor.bAlternateSetting();
-}
-
-//////////////////////////////////////////////////////////////////////
-// Format factory
-//////////////////////////////////////////////////////////////////////
-
-bool	isFormatDescriptor(USBDescriptorPtr dp) {
-	FormatDescriptor	*fdp = dynamic_cast<FormatDescriptor *>(&*dp);
-	return (fdp != NULL) ? true : false;
-}
-
-FormatDescriptorFactory::FormatDescriptorFactory(const Device& _device)
-	: UVCDescriptorFactory(_device) {
-}
-
-FormatDescriptorPtr	FormatDescriptorFactory::formatdescriptor(
-	const void *data, int length)
-	throw(std::length_error, UnknownDescriptorError) {
-	FormatDescriptorPtr	fdp;
-	return fdp;
-}
-
-//////////////////////////////////////////////////////////////////////
 // FormatDescriptor
 //////////////////////////////////////////////////////////////////////
 FormatDescriptor::FormatDescriptor(const Device& _device,
@@ -91,7 +54,43 @@ std::string	FormatDescriptor::toString() const {
 	out << std::hex << (int)this->bmInterlaceFlags() << std::endl;
 	out << "  bCopyProtect:         ";
 	out << (int)this->bCopyProtect() << std::endl;
+	out << framesToString();
 	return out.str();
+}
+
+std::string	FormatDescriptor::framesToString() const {
+	std::ostringstream	out;
+	out << "Frames (" << numFrames() << "):" << std::endl;
+	std::vector<USBDescriptorPtr>::const_iterator	i;
+	for (i = frames.begin(); i != frames.end(); i++) {
+		out << *i;
+	}
+	return out.str();
+}
+
+int	FormatDescriptor::numFrames() const {
+	return frames.size();
+}
+
+const USBDescriptorPtr&	FormatDescriptor::operator[](int frameindex) const {
+	if ((frameindex < 0) || (frameindex >= numFrames())) {
+		throw std::length_error("frameindex outside frame range");
+	}
+	return frames[frameindex];
+}
+
+int	FormatDescriptor::wTotalLength() const {
+	std::vector<USBDescriptorPtr>::const_iterator	i;
+	int	result = bLength();
+	for (i = frames.begin(); i != frames.end(); i++) {
+		result += (*i)->bLength();
+	}
+	return result;
+}
+
+bool	isFormatDescriptor(USBDescriptorPtr dp) {
+	FormatDescriptor	*fdp = dynamic_cast<FormatDescriptor *>(&*dp);
+	return (fdp != NULL) ? true : false;
 }
 
 //////////////////////////////////////////////////////////////////////

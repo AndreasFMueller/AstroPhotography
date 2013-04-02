@@ -10,6 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <stdexcept>
 
 using namespace astro::usb;
 using namespace astro::usb::uvc;
@@ -22,9 +23,11 @@ public:
 	void	setUp() { }
 	void	tearDown() { }
 	void	testList();
+	void	testCamera();
 
 	CPPUNIT_TEST_SUITE(UVCCameraTest);
-	CPPUNIT_TEST(testList);
+	//CPPUNIT_TEST(testList);
+	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -37,14 +40,27 @@ void	UVCCameraTest::testList() {
 		std::cout << "Device on " << *i << std::endl;
 		try {
 			UVCCamera	camera(*i);
-#if 0
 			std::cout << camera;
-#endif
 		} catch (std::exception& x) {
 			std::cout << "not a camera: " << x.what() << std::endl;
 		}
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
+}
+
+void	UVCCameraTest::testCamera() {
+	Context	context;
+	DeviceHandle	*handle = context.open(0x199e, 0x8101);
+	Device	device = handle->device();
+	std::cout << device;
+
+	// open the device as a 
+	try {
+		UVCCamera	camera(device, true);
+		std::cout << camera;
+	} catch (std::exception& x) {
+		std::cerr << "exception: " << x.what() << std::endl;
+	}
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UVCCameraTest);
