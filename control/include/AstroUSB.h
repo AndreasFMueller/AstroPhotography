@@ -93,22 +93,49 @@ typedef struct  usb_request_header_s {
 	uint16_t	wLength;
 } __attribute__((packed)) usb_request_header_t;
 
-#define	REQUEST_TYPE_GET	0xa1
-#define REQUEST_TYPE_SET	0x21
+#define	REQUEST_CLASS_INTERFACE_GET	0xa1
+#define REQUEST_CLASS_INTERFACE_SET	0x21
+
+class RequestBase {
+public:
+	virtual uint8_t	bmRequestType() const = 0;
+	virtual uint8_t	bRequest() const = 0;
+	virtual uint16_t	wValue() const = 0;
+	virtual uint16_t	wIndex() const = 0;
+	virtual uint16_t	wLength() const = 0;
+	virtual uint8_t	*payload() const = 0;
+	virtual std::string	toString() const;
+};
 
 /**
- * \brief A simple Request wrapper
+ * \brief A simple Request wrapper template
  */
-class Request {
-	usb_request_header_t	*header;
+template<typename T>
+class Request : public RequestBase {
 public:
-	Request(const usb_request_header_t *header);
-	~Request();
-	uint8_t	*payload() const;
-	uint16_t	wLength() const;
-	void	copyTo(void *data);
-	std::string	toString() const;
-	friend class DeviceHandle;
+	typedef struct request_packet_s {
+		usb_request_header_t	header;
+		T			payload;
+	} __attribute__((packed)) request_packet_t;
+private:
+	request_packet_t	packet;
+public:	
+	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
+		uint16_t wIndex) {
+		packet.header.bmRequestType = bmRequestType;
+		packet.header.bRequest = bRequest;
+		packet.header.wValue = wValue;
+		packet.header.wIndex = wIndex;
+		packet.header.wLength = sizeof(T);
+	}
+	// accessors to the public data
+	virtual uint8_t	*payload() const { return (uint8_t *)&packet.payload; }
+	virtual T	*data() { return &packet.payload; }
+	virtual uint8_t	bmRequestType() const { return packet.header.bmRequestType; }
+	virtual uint8_t bRequest() const { return packet.header.bRequest; }
+	virtual uint16_t	wValue() const { return packet.header.wValue; }
+	virtual uint16_t	wIndex() const { return packet.header.wIndex; }
+	virtual uint16_t	wLength() const { return sizeof(T); }
 };
 
 /**
@@ -130,7 +157,7 @@ public:
 	std::string	getStringDescriptor(uint8_t index) const;
 	friend class Context;
 	friend class Device;
-	int	controlRequest(Request& request);
+	int	controlRequest(RequestBase *request) throw(USBError);
 };
 
 /**

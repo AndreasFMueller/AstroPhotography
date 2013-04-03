@@ -643,7 +643,6 @@ std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);
  * \brief data structure for video streaming interface control requests
  */
 typedef struct  vs_control_request_s {
-	usb_request_header_t	header;
 	uint16_t	bmHint;
 	uint8_t		bFormatIndex;
 	uint8_t		bFrameIndex;

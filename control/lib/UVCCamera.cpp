@@ -149,21 +149,14 @@ std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
 }
 
 USBDescriptorPtr	UVCCamera::getFormat(uint8_t interface) {
-	vs_control_request_t	r;
+	Request<vs_control_request_t>	r(REQUEST_CLASS_INTERFACE_GET,
+		GET_CUR, VS_PROBE_CONTROL << 8, interface);
 
-	r.header.bmRequestType = REQUEST_TYPE_GET;
-	r.header.bRequest = GET_CUR;
-	r.header.wValue = VS_PROBE_CONTROL << 8;
-	r.header.wIndex = interface;
-	r.header.wLength = 34;
-
-	Request	request((usb_request_header_t *)&r); // creates a copy
 	int	rc;
-	if ((rc = devicehandle->controlRequest(request)) < 0) {
+	if ((rc = devicehandle->controlRequest(&r)) < 0) {
 		throw USBError(libusb_error_name(rc));
 	} else {
-		request.copyTo((usb_request_header_t *)&r);
-		int	formatindex = r.bFormatIndex;
+		int	formatindex = r.data()->bFormatIndex;
 		// find the descriptor for this format
 		int	vsindex = interface - 1 - iad().bFirstInterface();
 		USBDescriptorPtr	dptr = videostreaming[vsindex];

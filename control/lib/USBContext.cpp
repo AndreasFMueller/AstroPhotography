@@ -62,7 +62,8 @@ std::vector<Device>	Context::devices() throw (USBError) {
 /**
  * \brief Open device based on vendor_id and product_id
  */
-DeviceHandle	*Context::open(uint16_t vendor_id, uint16_t product_id) throw(USBError) {
+DeviceHandle	*Context::open(uint16_t vendor_id, uint16_t product_id)
+	throw(USBError) {
 	// open the device handle
 	libusb_device_handle	*dev_handle = libusb_open_device_with_vid_pid(
 						context, vendor_id, product_id);
@@ -75,7 +76,6 @@ DeviceHandle	*Context::open(uint16_t vendor_id, uint16_t product_id) throw(USBEr
 	DeviceHandle	*result = new DeviceHandle(device, dev_handle);
 	return result;
 }
-
 
 } // namespace usb
 } // namespace astro
