@@ -620,20 +620,31 @@ public:
 	uint32_t	controlProcessingUnitControls() const;
 
 	// selecting format and frame
-	USBDescriptorPtr	getFormat(uint8_t interface);
-	void	setFormat(int formatindex);
-	USBDescriptorPtr	getFrame(uint8_t interface);
-	void	setFrame(int frameindex);
+	void	selectFormatAndFrame(uint8_t interface,
+			uint8_t format, uint8_t frame) throw(USBError);
+	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interface)
+		throw(USBError);
 
+	// alternate setting selection for transfer
+private:
+	int	preferredAltSetting(uint8_t interface);
+	
+public:
 	// modifying parameter of the various interfaces
+	template<typename T>
+	void	setCurrent(const T& p) {
+		Request<T>	r(REQUEST_CLASS_INTERFACE_SET, SET_CUR,
+			T::CS, 0, (uint8_t *)&p);
+		devicehandle->controlRequest(&r);
+	}
 
 	// display stuff
 	std::string	toString() const;
 
 	// access to frames
-#if 0
-	Frame	getFrame();
-	std::vector<Frame>	getFrames(int nframes);
+#if 1
+	Frame	getFrame(uint8_t interface);
+	std::vector<Frame>	getFrames(uint8_t interface, int nframes);
 #endif
 };
 
@@ -660,6 +671,15 @@ typedef struct  vs_control_request_s {
 	uint8_t		bMinVersion;
 	uint8_t		bMaxVersion;
 } __attribute__((packed)) vs_control_request_t;
+
+/**
+ * \brief structures for UVC get/set requests
+ */
+typedef struct scanning_mode_control_s {
+	typedef enum CS_enum { CS = CT_SCANNING_MODE_CONTROL } CS_type;
+	uint8_t bScanningMode;
+} scanning_mode_control_t;
+
 
 } // namespace uvc
 } // namespace usb

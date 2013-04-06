@@ -105,6 +105,10 @@ int	Device::getBroken() const {
 	return broken;
 }
 
+enum Device::usb_speed	Device::speed() const {
+	return (Device::usb_speed)libusb_get_device_speed(dev);
+}
+
 std::ostream&	operator<<(std::ostream& out, const Device& device) {
 	out	<< "bus " << (int)device.getBusNumber()
 		<< " address " << (int)device.getDeviceAddress()

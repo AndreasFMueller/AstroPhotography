@@ -67,7 +67,7 @@ std::string	DeviceHandle::getStringDescriptor(uint8_t index) const {
 }
 
 int	DeviceHandle::controlRequest(RequestBase *request) throw(USBError) {
-	std::cout << request->toString();
+	//std::cout << request->toString();
 	int	rc = libusb_control_transfer(dev_handle, 
 			request->bmRequestType(),
 			request->bRequest(),
@@ -76,14 +76,14 @@ int	DeviceHandle::controlRequest(RequestBase *request) throw(USBError) {
 			request->payload(),
 			request->wLength(),
 			100);
-	std::cout << "rc = " << (int)rc << std::endl;
+	//std::cout << "rc = " << (int)rc << std::endl;
 	if (rc != request->wLength()) {
 		throw USBError("request did not return what we expected");
 	}
 	if (rc < 0) {
 		return rc;
 	}
-	std::cout << request->toString();
+	//std::cout << request->toString();
 	return rc;
 }
 

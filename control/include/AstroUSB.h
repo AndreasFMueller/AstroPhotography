@@ -70,6 +70,9 @@ public:
 	uint8_t	getDeviceAddress() const;
 	int	getDeviceSpeed() const;
 	int	getBroken() const;
+	enum usb_speed { SPEED_UNKNOWN = 0, SPEED_LOW = 1, SPEED_FULL = 2,
+		SPEED_HIGH = 3, SPEED_SUPER = 4 };
+	enum usb_speed	speed() const;
 	DeviceDescriptor	*descriptor() const throw(USBError);
 	ConfigDescriptor	*config(uint8_t index) const throw(USBError);
 	ConfigDescriptor	*activeConfig() const throw(USBError);
@@ -93,8 +96,12 @@ typedef struct  usb_request_header_s {
 	uint16_t	wLength;
 } __attribute__((packed)) usb_request_header_t;
 
-#define	REQUEST_CLASS_INTERFACE_GET	0xa1
-#define REQUEST_CLASS_INTERFACE_SET	0x21
+#define	REQUEST_CLASS_INTERFACE_GET	( \
+	LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | \
+	LIBUSB_RECIPIENT_INTERFACE )
+#define REQUEST_CLASS_INTERFACE_SET	( \
+	LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | \
+	LIBUSB_RECIPIENT_INTERFACE )
 
 class RequestBase {
 public:
@@ -119,14 +126,23 @@ public:
 	} __attribute__((packed)) request_packet_t;
 private:
 	request_packet_t	packet;
-public:	
-	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
+	void init_header(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
 		uint16_t wIndex) {
 		packet.header.bmRequestType = bmRequestType;
 		packet.header.bRequest = bRequest;
 		packet.header.wValue = wValue;
 		packet.header.wIndex = wIndex;
 		packet.header.wLength = sizeof(T);
+	}
+public:	
+	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
+		uint16_t wIndex) {
+		init_header(bmRequestType, bRequest, wValue, wIndex);
+	}
+	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
+		uint16_t wIndex, T *payload_data) {
+		init_header(bmRequestType, bRequest, wValue, wIndex);
+		memcpy(&packet.payload, payload_data, sizeof(T));
 	}
 	// accessors to the public data
 	virtual uint8_t	*payload() const { return (uint8_t *)&packet.payload; }
@@ -143,7 +159,9 @@ public:
  */
 
 class	DeviceHandle {
+public:
 	libusb_device_handle	*dev_handle;
+private:
 	Device	dev;
 	DeviceHandle(const Device& _device, libusb_device_handle *handle);
 public:
@@ -157,7 +175,39 @@ public:
 	std::string	getStringDescriptor(uint8_t index) const;
 	friend class Context;
 	friend class Device;
+	friend class Transfer;
 	int	controlRequest(RequestBase *request) throw(USBError);
+};
+
+/**
+ * Transfer
+ */
+class Transfer {
+	DeviceHandle	devicehandle;
+protected:
+	libusb_device_handle	*handle();
+	libusb_transfer	*transfer;
+	unsigned char	*data;
+	int	length;
+public:
+	Transfer(DeviceHandle& handle, int length);
+	~Transfer();
+	virtual void	submit() throw(USBError);
+	virtual void	callback() = 0;
+};
+
+class BulkTransfer : public Transfer {
+public:
+	BulkTransfer(DeviceHandle& handle, uint8_t endpoint, int length);
+	~BulkTransfer();
+	virtual void	callback();
+};
+
+class IsoTransfer : public Transfer {
+public:
+	IsoTransfer(DeviceHandle& handle, int length);
+	~IsoTransfer();
+	virtual void	callback();
 };
 
 /**
