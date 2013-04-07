@@ -21,16 +21,6 @@ FormatUncompressedDescriptor::FormatUncompressedDescriptor(
 	: FormatFrameBasedDescriptor(_device, data, length) {
 }
 
-FormatUncompressedDescriptor::FormatUncompressedDescriptor(
-	const FormatUncompressedDescriptor& other)
-	: FormatFrameBasedDescriptor(other) {
-}
-
-FormatUncompressedDescriptor&	FormatUncompressedDescriptor::operator=(
-	const FormatUncompressedDescriptor& other) {
-	FormatFrameBasedDescriptor::operator=(other);
-}
-
 std::string	FormatUncompressedDescriptor::toString() const {
 	std::ostringstream	out;
 	out << "Format Uncompressed Descriptor:" << std::endl;
@@ -44,16 +34,6 @@ std::string	FormatUncompressedDescriptor::toString() const {
 FrameUncompressedDescriptor::FrameUncompressedDescriptor(const Device& _device,
 	const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
-}
-
-FrameUncompressedDescriptor::FrameUncompressedDescriptor(
-	const FrameUncompressedDescriptor& other)
-	: FrameDescriptor(other) {
-}
-
-FrameUncompressedDescriptor&	FrameUncompressedDescriptor::operator=(
-	const FrameUncompressedDescriptor& other) {
-	FrameDescriptor::operator=(other);
 }
 
 uint32_t	FrameUncompressedDescriptor::dwMaxVideoFrameBufferSize() const {

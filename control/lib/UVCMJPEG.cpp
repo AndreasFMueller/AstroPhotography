@@ -21,15 +21,6 @@ FormatMJPEGDescriptor::FormatMJPEGDescriptor(
 	: FormatDescriptor(_device, data, length) {
 }
 
-FormatMJPEGDescriptor::FormatMJPEGDescriptor(
-	const FormatMJPEGDescriptor& other)
-	: FormatDescriptor(other) {
-}
-
-FormatMJPEGDescriptor&	FormatMJPEGDescriptor::operator=(const FormatMJPEGDescriptor& other) {
-	FormatDescriptor::operator=(other);
-}
-
 uint8_t	FormatMJPEGDescriptor::bDefaultFrameIndex() const {
 	return uint8At(6);
 }
@@ -63,14 +54,6 @@ std::string	FormatMJPEGDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 FrameMJPEGDescriptor::FrameMJPEGDescriptor(const Device& _device, const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
-}
-
-FrameMJPEGDescriptor::FrameMJPEGDescriptor(const FrameMJPEGDescriptor& other)
-	: FrameDescriptor(other) {
-}
-
-FrameMJPEGDescriptor&	FrameMJPEGDescriptor::operator=(const FrameMJPEGDescriptor& other) {
-	FrameDescriptor::operator=(other);
 }
 
 uint32_t	FrameMJPEGDescriptor::dwMaxVideoFrameBufferSize() const {

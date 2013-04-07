@@ -19,13 +19,139 @@
 namespace astro {
 namespace usb {
 
+/**
+ * \brief Generic USB error
+ * 
+ * whenever an USB operation encounters an error, this exception is thrown.
+ */
 class	USBError : public std::runtime_error {
 public:
 	USBError(const char *error) : std::runtime_error(error) { }
 };
 
-class	Device;
-class	DeviceHandle;
+class Context; // forward declaration for the friend class
+
+// forward declarations for return types of descriptor query functions
+class DeviceDescriptor;
+typedef std::tr1::shared_ptr<DeviceDescriptor>	DeviceDescriptorPtr;
+
+// The Configuration contains a whole hierarchy of descriptors:
+//
+// Configuration
+//   |
+//   +- Interface 0
+//   |    +- InterfaceDescriptor alt setting 0
+//   |    |     +- Endpoint
+//   |    |     +- Endpoint
+//   |    | 
+//   |    +- InterfaceDescriptor alt setting 1
+//   |          +- Endpoint
+//   |          +- Endpoint
+//   |
+//   +- Interface 1
+//   |    +- InterfaceDescriptor alt setting 0
+//   |    |     +- Endpoint
+//   |    |     +- Endpoint
+//   |    | 
+//   |    +- InterfaceDescriptor alt setting 1
+//   |          +- Endpoint
+//   |          +- Endpoint
+//   |
+//   +- Interface 2
+//        +- InterfaceDescriptor alt setting 0
+//        |     +- Endpoint
+//        |     +- Endpoint
+//        | 
+//        +- InterfaceDescriptor alt setting 1
+//              +- Endpoint
+//              +- Endpoint
+//
+// To ensure that we can always navigate back to the top of the tree,
+// each object contains a reference to the parent object.
+
+class Configuration;
+typedef std::tr1::shared_ptr<Configuration>	ConfigurationPtr;
+
+class Interface;
+typedef std::tr1::shared_ptr<Interface>		InterfacePtr;
+
+class InterfaceDescriptor;
+typedef std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
+
+class EndpointDescriptor;
+typedef std::tr1::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
+
+class RequestBase;
+typedef std::tr1::shared_ptr<RequestBase>	RequestPtr;
+
+class Transfer;
+typedef std::tr1::shared_ptr<Transfer>	TransferPtr;
+
+/**
+ * \brief Device abstraction
+ *
+ * The libusb device structure is a reference counted handle to devices.
+ * The Device class is just a wrapper around it.
+ */
+class 	Device {
+	libusb_device	*dev;
+	libusb_device_handle	*dev_handle;
+
+	// Device objects can only be created from a Context
+	Device(struct libusb_device *dev, libusb_device_handle *dev_handle = NULL);
+
+	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
+	struct libusb_device	*getDevice();
+	int	broken;
+public:
+	~Device();
+
+	// information about the device
+	uint8_t	getBusNumber() const;
+	uint8_t	getDeviceAddress() const;
+	int	getBroken() const;
+	enum usb_speed { SPEED_UNKNOWN = 0, SPEED_LOW = 1, SPEED_FULL = 2,
+		SPEED_HIGH = 3, SPEED_SUPER = 4 };
+	enum usb_speed	getDeviceSpeed() const;
+
+	// descriptor access
+	DeviceDescriptorPtr	descriptor() const throw(USBError);
+	ConfigurationPtr	config(uint8_t index) const throw(USBError);
+	ConfigurationPtr	activeConfig() const throw(USBError);
+	ConfigurationPtr	configValue(uint8_t value) const throw(USBError);
+	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
+
+	// make sure the device is open
+	void	open() throw(USBError);
+	void	close();
+
+	// set a configuration
+	void	setConfiguration(uint8_t configuration) throw(USBError);
+	int	getConfiguration() throw(USBError);
+
+	// claim and release an interface
+	void	claimInterface(uint8_t interface) throw(USBError);
+	void	releaseInterface(uint8_t interface) throw(USBError);
+
+	// request the alternate setting of an interface
+	void	setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
+		throw(USBError);
+
+	// having requests processed by the device
+	void	controlRequest(RequestPtr request) throw(USBError);
+	void	submit(TransferPtr request) throw(USBError);
+
+	//  some more accessors
+	int	maxIsoPacketSize(uint8_t endpoint) const;
+
+	// Context is a friend class, it acts as a factory for Devices
+	friend class Context;
+	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
+};
+
+typedef std::tr1::shared_ptr<Device>	DevicePtr;
+
+std::ostream&	operator<<(std::ostream& out, const Device& device);
 
 /**
  * \brief Class to encapsulate libusb_context
@@ -42,48 +168,12 @@ public:
 	Context() throw(USBError);
 	~Context();
 	void	setDebugLevel(int level) throw(std::range_error);
-	std::vector<Device>	devices() throw (USBError);
-	DeviceHandle	*open(uint16_t vendor_id, uint16_t product_id)
+
+	// factory functions to create Devices
+	std::vector<DevicePtr>	devices() throw (USBError);
+	DevicePtr	find(uint16_t vendor_id, uint16_t product_id)
 		throw(USBError);
 };
-
-class DeviceDescriptor;
-class ConfigDescriptor;
-
-/**
- * \brief Device abstraction
- *
- * The libusb device structure is a reference counted handle to devices.
- * The Device class is just a wrapper around it.
- */
-class 	Device {
-	struct libusb_device	*dev;
-	Device(struct libusb_device *dev);
-	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
-	struct libusb_device	*getDevice();
-	int	broken;
-public:
-	Device(const Device& other);
-	~Device();
-	Device&	operator=(const Device& other);
-	uint8_t	getBusNumber() const;
-	uint8_t	getDeviceAddress() const;
-	int	getDeviceSpeed() const;
-	int	getBroken() const;
-	enum usb_speed { SPEED_UNKNOWN = 0, SPEED_LOW = 1, SPEED_FULL = 2,
-		SPEED_HIGH = 3, SPEED_SUPER = 4 };
-	enum usb_speed	speed() const;
-	DeviceDescriptor	*descriptor() const throw(USBError);
-	ConfigDescriptor	*config(uint8_t index) const throw(USBError);
-	ConfigDescriptor	*activeConfig() const throw(USBError);
-	ConfigDescriptor	*configValue(uint8_t value) const throw(USBError);
-	DeviceHandle	*open() throw(USBError);
-	friend class Context;
-	friend class DeviceDescriptor;
-	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
-};
-
-std::ostream&	operator<<(std::ostream& out, const Device& device);
 
 /*
  * request structures
@@ -96,26 +186,64 @@ typedef struct  usb_request_header_s {
 	uint16_t	wLength;
 } __attribute__((packed)) usb_request_header_t;
 
-#define	REQUEST_CLASS_INTERFACE_GET	( \
-	LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | \
-	LIBUSB_RECIPIENT_INTERFACE )
-#define REQUEST_CLASS_INTERFACE_SET	( \
-	LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | \
-	LIBUSB_RECIPIENT_INTERFACE )
-
+/**
+ * \brief Request base class
+ *
+ * This class builds the infrastructure for sending requests on the control
+ * pipe. The direction is inferred from the pointer handed in as an argument.
+ * If the pointer is NULL, transfer from the host the device to the host
+ * is assumed. If the pointer is not NULL, transfer from the host to the device
+ * is inferred.
+ *
+ * The wIndex field is set to the endpoint or the interface depending on
+ * whether the request was constructed for an endpoint or an interface.
+ */
 class RequestBase {
+	// remember the direction of the request
 public:
-	virtual uint8_t	bmRequestType() const = 0;
+	typedef enum { host_to_device = 0, device_to_host = 0x80 }
+		request_direction;
+private:
+	request_direction	direction;
+
+	// remember the type of the request
+public:
+	typedef enum { standard_type = 0, class_specific_type = 1 << 5,
+		vendor_specific_type = 2 << 5}	request_type;
+private:
+	request_type	type;
+
+	// remember the recipient of the control request
+public:
+	typedef enum { device_recipient = 0, interface_recipient = 1,
+		endpoint_recipient = 2 }	request_recipient;
+private:
+	request_recipient	recipient;
+
+	uint8_t	bEndpointAddress;
+	uint8_t	bInterface;
+
+public:
+	RequestBase(request_type _type, const EndpointDescriptorPtr endpoint,
+		void *data = NULL);
+	RequestBase(request_type type, const InterfacePtr interface,
+		void *data = NULL);
+	RequestBase(request_type type, void *data = NULL);
+	
+	virtual uint8_t	bmRequestType() const;
 	virtual uint8_t	bRequest() const = 0;
 	virtual uint16_t	wValue() const = 0;
-	virtual uint16_t	wIndex() const = 0;
+	virtual uint16_t	wIndex() const;
 	virtual uint16_t	wLength() const = 0;
 	virtual uint8_t	*payload() const = 0;
 	virtual std::string	toString() const;
 };
 
 /**
- * \brief A simple Request wrapper template
+ * \brief A Request wrapper template
+ *
+ * Requests on the control pipe are built with this template. 
+ * 
  */
 template<typename T>
 class Request : public RequestBase {
@@ -126,88 +254,135 @@ public:
 	} __attribute__((packed)) request_packet_t;
 private:
 	request_packet_t	packet;
-	void init_header(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
-		uint16_t wIndex) {
-		packet.header.bmRequestType = bmRequestType;
+	void init(uint8_t bRequest, uint16_t wValue, T *payload_data) {
+		packet.header.bmRequestType = RequestBase::bmRequestType();
 		packet.header.bRequest = bRequest;
 		packet.header.wValue = wValue;
-		packet.header.wIndex = wIndex;
 		packet.header.wLength = sizeof(T);
+		if (NULL != payload_data) {
+			memcpy(&packet.payload, payload_data, sizeof(T));
+		}
 	}
 public:	
-	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
-		uint16_t wIndex) {
-		init_header(bmRequestType, bRequest, wValue, wIndex);
+	Request(request_type type, const EndpointDescriptorPtr endpoint,
+		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		: RequestBase(type, endpoint, payload_data) {
+		init(bRequest, wValue, payload_data);
+		packet.header.wIndex = RequestBase::wIndex();
 	}
-	Request(uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue,
-		uint16_t wIndex, T *payload_data) {
-		init_header(bmRequestType, bRequest, wValue, wIndex);
-		memcpy(&packet.payload, payload_data, sizeof(T));
+
+	Request(request_type type, const InterfacePtr& interface,
+		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		: RequestBase(type, interface, payload_data) {
+		init(bRequest, wValue, payload_data);
+		packet.header.wIndex = RequestBase::wIndex();
 	}
+
+	Request(request_type type, uint16_t wIndex,
+		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		: RequestBase(type, payload_data) {
+		init(bRequest, wValue, payload_data);
+		packet.header.wIndex = wIndex;
+	}
+
 	// accessors to the public data
-	virtual uint8_t	*payload() const { return (uint8_t *)&packet.payload; }
-	virtual T	*data() { return &packet.payload; }
-	virtual uint8_t	bmRequestType() const { return packet.header.bmRequestType; }
-	virtual uint8_t bRequest() const { return packet.header.bRequest; }
-	virtual uint16_t	wValue() const { return packet.header.wValue; }
-	virtual uint16_t	wIndex() const { return packet.header.wIndex; }
-	virtual uint16_t	wLength() const { return sizeof(T); }
+	virtual uint8_t	*payload() const {
+		return (uint8_t *)&packet.payload;
+	}
+
+	virtual T	*data() {
+		return &packet.payload;
+	}
+
+	virtual uint8_t	bmRequestType() const {
+		return packet.header.bmRequestType;
+	}
+
+	virtual uint8_t bRequest() const {
+		return packet.header.bRequest;
+	}
+
+	virtual uint16_t	wValue() const {
+		return packet.header.wValue;
+	}
+
+	virtual uint16_t	wIndex() const {
+		return packet.header.wIndex;
+	}
+
+	virtual uint16_t	wLength() const {
+		return sizeof(T);
+	}
 };
 
 /**
- * \brief USB Device Handle
+ * \brief empty requests
+ *
+ * C does not allow empty structures, so the Request Template does not work
+ * for empty 
  */
+class EmptyRequest : public RequestBase {
+	usb_request_header_t	header;
+	void	init(uint8_t bRequest, uint16_t wValue);
+public:
+	EmptyRequest(request_type type, const EndpointDescriptorPtr endpoint,
+		uint8_t bRequest, uint16_t wValue);
+	EmptyRequest(request_type type, const InterfacePtr interface,
+		uint8_t bRequest, uint16_t wValue);
+	EmptyRequest(request_type type, uint16_t wIndex,
+		uint8_t bRequest, uint16_t wValue);
 
-class	DeviceHandle {
-public:
-	libusb_device_handle	*dev_handle;
-private:
-	Device	dev;
-	DeviceHandle(const Device& _device, libusb_device_handle *handle);
-public:
-	~DeviceHandle();
-	Device	device();
-	int	getConfiguration() throw (USBError);
-	void	setConfiguration(int configuration) throw (USBError);
-	void	claimInterface(int interface) throw (USBError);
-	void	releaseInterface(int interface) throw (USBError);
-	void	reset() throw (USBError);
-	std::string	getStringDescriptor(uint8_t index) const;
-	friend class Context;
-	friend class Device;
-	friend class Transfer;
-	int	controlRequest(RequestBase *request) throw(USBError);
+	virtual uint8_t bRequest() const;
+	virtual uint16_t	wValue() const;
+	virtual uint16_t	wIndex() const;
+	virtual uint16_t	wLength() const;
+	virtual uint8_t	*payload() const;
 };
 
 /**
- * Transfer
+ * \brief Transfer base class
+ *
+ * This class holds the common stuff, derivced classes implement the
+ * transfer specific stuff like bulk or isochronous transfers.
  */
 class Transfer {
-	DeviceHandle	devicehandle;
 protected:
-	libusb_device_handle	*handle();
-	libusb_transfer	*transfer;
-	unsigned char	*data;
+	uint8_t	endpoint;
 	int	length;
+	unsigned char	*data;
+	libusb_transfer	*transfer;
+	bool	freedata;
+	int	timeout;
+private:
+	virtual void	submit(libusb_device_handle *devhandle) throw(USBError) = 0;
 public:
-	Transfer(DeviceHandle& handle, int length);
-	~Transfer();
-	virtual void	submit() throw(USBError);
 	virtual void	callback() = 0;
+	Transfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	virtual ~Transfer();
+	int	getTimeout() const;
+	void	setTimeout(int timeout);
+
+	friend class Device;
 };
 
 class BulkTransfer : public Transfer {
 public:
-	BulkTransfer(DeviceHandle& handle, uint8_t endpoint, int length);
-	~BulkTransfer();
 	virtual void	callback();
+private:
+	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
+public:
+	BulkTransfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	virtual ~BulkTransfer();
 };
 
 class IsoTransfer : public Transfer {
 public:
-	IsoTransfer(DeviceHandle& handle, int length);
-	~IsoTransfer();
 	virtual void	callback();
+private:
+	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
+public:
+	IsoTransfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	virtual ~IsoTransfer();
 };
 
 /**
@@ -217,17 +392,16 @@ public:
  * it expands the strings referenced in the descriptor
  */
 class	DeviceDescriptor {
-	Device	dev;
-	struct libusb_device_descriptor	*d;
+	const Device&	dev;
+	struct libusb_device_descriptor	d;
 	std::string	manufacturer;
 	std::string	product;
 	std::string	serialnumber;
-	DeviceDescriptor(const Device& device);
+	DeviceDescriptor(const Device& device,
+		libusb_device_descriptor *dev_descriptor);
 public:
 	// constructors
 	~DeviceDescriptor();
-	DeviceDescriptor(const DeviceDescriptor& other);
-	DeviceDescriptor&	operator=(const DeviceDescriptor& other);
 
 	uint16_t	bcdUSB() const;
 	uint8_t		bDeviceClass() const;
@@ -265,17 +439,18 @@ typedef std::tr1::shared_ptr<Descriptor>	DescriptorPtr;
 
 /**
  * \brief USB Endpoint Descriptor
+ *
+ * Each alternate setting for an interface contains some endpoint descriptors.
  */
 class EndpointDescriptor : public Descriptor {
 	struct libusb_endpoint_descriptor	*epd;
 	void	copy(const struct libusb_endpoint_descriptor	*epd);
+	InterfaceDescriptor&	interfacedescriptor;
 public:
 	// constructors
-	EndpointDescriptor(const Device& device,
+	EndpointDescriptor(const Device& device, InterfaceDescriptor& interface,
 		const libusb_endpoint_descriptor *epd);
 	~EndpointDescriptor();
-	EndpointDescriptor(const EndpointDescriptor& other);
-	EndpointDescriptor&	operator=(const EndpointDescriptor& other);
 
 	// accessors
 	uint8_t		bEndpointAddress() const;
@@ -284,7 +459,15 @@ public:
 	uint8_t		bInterval() const;
 	uint8_t		bRefresh() const;
 	uint8_t		bSynchAddress() const;
+
+	// accessor to the interface
+	InterfaceDescriptor&	interface();
+
+	// text output
+	std::string	toString() const;
 };
+
+typedef std::tr1::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd);
 
@@ -294,14 +477,15 @@ std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd);
 class InterfaceDescriptor : public Descriptor {
 	struct libusb_interface_descriptor	*ifdp;
 	void	copy(const struct libusb_interface_descriptor *ifpd);
-	std::vector<EndpointDescriptor>	endpoints;
+	std::string	interfacename;
+	Interface&	interface;
+	// an interface descriptor has exactly one endpoint descriptor,
+	// which is used for bandwith negotiation
+	std::vector<EndpointDescriptorPtr>	endpointlist;
 	void	getEndpoints();
-	std::string	interface;
 public:
-	InterfaceDescriptor(const Device& device,
+	InterfaceDescriptor(const Device& device, Interface& interface,
 		const struct libusb_interface_descriptor *ifdp);
-	InterfaceDescriptor(const InterfaceDescriptor& other);
-	InterfaceDescriptor&	operator=(const InterfaceDescriptor& other);
 
 	uint8_t	bInterfaceNumber() const;
 	uint8_t	bAlternateSetting() const;
@@ -309,8 +493,20 @@ public:
 	uint8_t	bInterfaceSubClass() const;
 	uint8_t	bInterfaceProtocol() const;
 	const std::string&	iInterface() const;
-	const std::vector<EndpointDescriptor>&	endpoint() const;
+
+	// use this interface descriptors alt setting
+	void	altSetting() throw(USBError);
+
+	// access the various endpoint descriptors (int the cases we are
+	// interested in, there is only a single endpoint descriptor)
+	int	numEndpoints() const;
+	EndpointDescriptorPtr	operator[](int index) const;
+
+	// display
+	std::string	toString() const;
 };
+
+typedef	std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
 
@@ -319,41 +515,53 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
  */
 class Interface {
 	Device	dev;
-	std::vector<InterfaceDescriptor>	altsettingvector;
+	std::vector<InterfaceDescriptorPtr>	altsettingvector;
 	int	interface;
+	Configuration&	configuration;
 public:
-	Interface(const Device& device, const libusb_interface *li, int interface);
+	Interface(const Device& device, Configuration& configuration,
+		const libusb_interface *li, int interface);
 	int	numAltsettings() const;
 	int	interfaceNumber() const;
-	const InterfaceDescriptor&	operator[](int index) const;
+	const InterfaceDescriptorPtr&	operator[](int index) const;
+	InterfaceDescriptorPtr&	operator[](int index);
+	void	claim() throw(USBError);
+	void	release() throw(USBError);
+	std::string	toString() const;
 };
+
+typedef std::tr1::shared_ptr<Interface>	InterfacePtr;
 
 std::ostream&	operator<<(std::ostream& out, const Interface& interface);
 
 /**
  * \brief USB Configuration Descriptor class
  */
-class	ConfigDescriptor : public Descriptor {
+class	Configuration : public Descriptor {
 	libusb_config_descriptor	*config;
 	std::string	configuration;
 	void	copy(const libusb_config_descriptor *config);
-	std::vector<Interface>	interfaces;
+	std::vector<InterfacePtr>	interfacelist;
 	void	getInterfaces();
 public:
-	ConfigDescriptor(const Device& device,
+	Configuration(const Device& device,
 		const struct libusb_config_descriptor *config);
-	ConfigDescriptor(const ConfigDescriptor& other);
-	ConfigDescriptor&	operator=(const ConfigDescriptor& other);
-	~ConfigDescriptor();
+	~Configuration();
 	uint8_t	bConfigurationValue() const;
 	uint8_t	bNumInterfaces() const;
 	uint8_t	bmAttributes() const;
 	uint8_t	MaxPower() const;
-	const std::vector<Interface>&	interface() const;
-	const Interface&	interface(int index) const;
+
+	// configure this configuration
+	void	configure() throw(USBError);
+
+	// access to the interfaces of this configuration
+	const std::vector<InterfacePtr>&	interfaces() const;
+	const InterfacePtr&	operator[](int index) const;
+	InterfacePtr&	operator[](int index);
 };
 
-std::ostream&	operator<<(std::ostream& out, const ConfigDescriptor& config);
+std::ostream&	operator<<(std::ostream& out, const Configuration& config);
 
 /**
  * \brief Generic USB descriptor
@@ -366,7 +574,7 @@ class USBDescriptor {
 	uint8_t	blength;
 	uint8_t	bdescriptortype;
 protected:
-	Device	device;
+	const Device&	device;
 	uint8_t	*data;
 	uint8_t	uint8At(int offset) const;
 	int8_t	int8At(int offset) const;
@@ -377,14 +585,14 @@ protected:
 	uint32_t	bitmapAt(int offset, int size) const;
 public:
 	USBDescriptor(const Device& device, const void *data, int length);
-	USBDescriptor(const USBDescriptor& other);
-	USBDescriptor&	operator=(const USBDescriptor& other);
 	virtual	~USBDescriptor();
 	virtual	std::string	toString() const;
 	uint8_t	bLength() const;
 	uint8_t	bDescriptorType() const;
 	virtual int	descriptorLength() const;
 };
+
+typedef std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const USBDescriptor& descriptor);
 
@@ -407,7 +615,6 @@ public:
  * \brief USB Descriptor factory for descriptors that do not have a structure
  *
  */
-typedef	std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out,
 	const USBDescriptorPtr& descriptorptr);
@@ -445,8 +652,6 @@ class InterfaceAssociationDescriptor : public USBDescriptor {
 public:
 	InterfaceAssociationDescriptor(const Device& device,
 		const void *data, int length);
-	InterfaceAssociationDescriptor(const InterfaceAssociationDescriptor& other);
-	InterfaceAssociationDescriptor&	operator=(const InterfaceAssociationDescriptor& other);
 	uint8_t	bFirstInterface() const;
 	uint8_t	bInterfaceCount() const;
 	uint8_t	bFunctionClass() const;
@@ -458,6 +663,7 @@ public:
 };
 
 bool	isInterfaceAssociationDescriptor(const USBDescriptorPtr& ptr);
+
 InterfaceAssociationDescriptor	*interfaceAssociationDescriptor(
 	const USBDescriptorPtr& ptr);
 

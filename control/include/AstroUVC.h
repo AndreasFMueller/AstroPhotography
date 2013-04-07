@@ -147,13 +147,13 @@ namespace uvc {
 
 /**
  * \brief Base class for all UVC descriptors
+ *
+ * UVC descriptors have a subtype field at offset 2
  */
 class UVCDescriptor : public astro::usb::USBDescriptor {
 	uint8_t	bdescriptorsubtype;
 public:
 	UVCDescriptor(const astro::usb::Device& device, const void *data, int length);
-	UVCDescriptor(const UVCDescriptor& other);
-	UVCDescriptor&	operator=(const UVCDescriptor& other);
 	uint8_t	bDescriptorSubtype() const;
 };
 
@@ -216,8 +216,6 @@ class InterfaceHeaderDescriptor : public UVCDescriptor {
 public:
 	InterfaceHeaderDescriptor(const Device& device,
 		const void *data, int length);
-	InterfaceHeaderDescriptor(const InterfaceHeaderDescriptor& other);
-	InterfaceHeaderDescriptor&	operator=(const InterfaceHeaderDescriptor& other);
 	~InterfaceHeaderDescriptor();
 
 	uint16_t	bcdUVC() const;
@@ -239,7 +237,9 @@ public:
 };
 
 bool	isInterfaceHeaderDescriptor(const USBDescriptorPtr& ptr);
+
 InterfaceHeaderDescriptor	*interfaceHeaderDescriptor(USBDescriptorPtr& ptr);
+
 const InterfaceHeaderDescriptor	*interfaceHeaderDescriptor(
 	const USBDescriptorPtr& ptr);
 
@@ -250,8 +250,6 @@ class TerminalDescriptor : public UVCDescriptor {
 public:
 	TerminalDescriptor(const Device& device,
 		const void *data, int length);
-	TerminalDescriptor(const TerminalDescriptor& other);
-	TerminalDescriptor&	operator=(const TerminalDescriptor& other);
 
 	uint8_t		bTerminalID() const;
 	uint16_t	wTerminalType() const;
@@ -268,8 +266,6 @@ class InputTerminalDescriptor : public TerminalDescriptor {
 public:
 	InputTerminalDescriptor(const Device& device,
 		const void *data, int length);
-	InputTerminalDescriptor(const InputTerminalDescriptor& other);
-	InputTerminalDescriptor&	operator=(const InputTerminalDescriptor& other);
 
 	const std::string&	iTerminal() const;
 	virtual std::string	toString() const;
@@ -283,8 +279,6 @@ class OutputTerminalDescriptor : public TerminalDescriptor {
 public:
 	OutputTerminalDescriptor(const Device& device,
 		const void *data, int length);
-	OutputTerminalDescriptor(const OutputTerminalDescriptor& other);
-	OutputTerminalDescriptor&	operator=(const OutputTerminalDescriptor& other);
 
 	uint8_t		bSourceID() const;
 	const std::string&	iTerminal() const;
@@ -299,8 +293,6 @@ class CameraTerminalDescriptor : public TerminalDescriptor {
 public:
 	CameraTerminalDescriptor(const Device& device,
 		const void *data, int length);
-	CameraTerminalDescriptor(const CameraTerminalDescriptor& other);
-	CameraTerminalDescriptor&	operator=(const CameraTerminalDescriptor& other);
 
 	const std::string&	iTerminal() const;
 	uint16_t	wObjectiveFocalLengthMin() const;
@@ -322,8 +314,6 @@ class SelectorUnitDescriptor : public UVCDescriptor {
 public:
 	SelectorUnitDescriptor(const Device& device,
 		const void *data, int length);
-	SelectorUnitDescriptor(const SelectorUnitDescriptor& other);
-	SelectorUnitDescriptor&	operator=(const SelectorUnitDescriptor& other);
 	uint8_t	bUnitID() const;
 	uint8_t	bNrInPins() const;
 	uint8_t	baSourceID(int index) const;
@@ -338,8 +328,6 @@ class ProcessingUnitDescriptor : public UVCDescriptor {
 	std::string	processing;
 public:
 	ProcessingUnitDescriptor(const Device& device, const void *data, int length);
-	ProcessingUnitDescriptor(const ProcessingUnitDescriptor& other);
-	ProcessingUnitDescriptor&	operator=(const ProcessingUnitDescriptor& other);
 	uint8_t	bUnitID() const;
 	uint8_t	bSourceID() const;
 	uint16_t	wMaxMultiplier() const;
@@ -361,8 +349,6 @@ class ExtensionUnitDescriptor : public UVCDescriptor {
 	std::string	guid;
 public:
 	ExtensionUnitDescriptor(const Device& device, const void *data, int length);
-	ExtensionUnitDescriptor(const ExtensionUnitDescriptor& other);
-	ExtensionUnitDescriptor&	operator=(const ExtensionUnitDescriptor& other);
 	uint8_t	bUnitID() const;
 	const std::string&	guidExtensionCode() const;
 	uint8_t	bNumControls() const;
@@ -381,8 +367,6 @@ class HeaderDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	formats;
 public:
 	HeaderDescriptor(const Device& device, const void *data, int length);
-	HeaderDescriptor(const HeaderDescriptor& other);
-	HeaderDescriptor&	operator=(const HeaderDescriptor &other);
 	uint8_t		bNumFormats() const;
 	uint16_t	wTotalLength() const;
 	uint8_t		bEndpointAddress() const;
@@ -397,8 +381,6 @@ public:
 class InputHeaderDescriptor : public HeaderDescriptor {
 public:
 	InputHeaderDescriptor(const Device& device, const void *data, int length);
-	InputHeaderDescriptor(const InputHeaderDescriptor& other);
-	InputHeaderDescriptor&	operator=(const InputHeaderDescriptor& other);
 	uint8_t		bmInfo() const;
 	uint8_t		bTerminalLink() const;
 	uint8_t		bStillCaptureMethod() const;
@@ -416,8 +398,6 @@ class OutputHeaderDescriptor : public HeaderDescriptor {
 public:
 	OutputHeaderDescriptor(const Device& device,
 		const void *data, int length);
-	OutputHeaderDescriptor(const OutputHeaderDescriptor& other);
-	OutputHeaderDescriptor&	operator=(const OutputHeaderDescriptor& other);
 	uint8_t		bTerminalLink() const;
 	uint8_t		bControlSize() const;
 	uint32_t	bmaControls(int index) const;
@@ -433,8 +413,6 @@ protected:
 	std::string	framesToString() const;
 public:
 	FormatDescriptor(const Device& device, const void *data, int length);
-	FormatDescriptor(const FormatDescriptor& other);
-	FormatDescriptor&	operator=(const FormatDescriptor& other);
 	uint8_t	bFormatIndex() const;
 	uint8_t	bNumFrameDescriptors() const;
 
@@ -460,8 +438,6 @@ typedef std::tr1::shared_ptr<FormatDescriptor *>	FormatDescriptorPtr;
 class FormatMJPEGDescriptor : public FormatDescriptor {
 public:
 	FormatMJPEGDescriptor(const Device& device, const void *data, int length);
-	FormatMJPEGDescriptor(const FormatMJPEGDescriptor& other);
-	FormatMJPEGDescriptor&	operator=(const FormatMJPEGDescriptor& other);
 	virtual uint8_t	bDefaultFrameIndex() const;
 	virtual uint8_t	bAspectRatioX() const;
 	virtual uint8_t	bAspectRatioY() const;
@@ -477,9 +453,7 @@ class FormatFrameBasedDescriptor : public FormatDescriptor {
 public:
 	FormatFrameBasedDescriptor(const Device& device,
 		const void *data, int length);
-	FormatFrameBasedDescriptor(const FormatFrameBasedDescriptor& other);
-	FormatFrameBasedDescriptor&	operator=(
-		const FormatFrameBasedDescriptor& other);
+
 	uint8_t	bBitsPerPixel() const;
 	virtual uint8_t	bDefaultFrameIndex() const;
 	virtual uint8_t	bAspectRatioX() const;
@@ -497,9 +471,6 @@ class FormatUncompressedDescriptor : public FormatFrameBasedDescriptor {
 public:
 	FormatUncompressedDescriptor(const Device& device,
 		const void *data, int length);
-	FormatUncompressedDescriptor(const FormatUncompressedDescriptor& other);
-	FormatUncompressedDescriptor&	operator=(
-		const FormatUncompressedDescriptor& other);
 	virtual std::string	toString() const;
 };
 
@@ -509,8 +480,6 @@ public:
 class FrameDescriptor : public UVCDescriptor {
 public:
 	FrameDescriptor(const Device& device, const void *data, int length);
-	FrameDescriptor(const FrameDescriptor& other);
-	FrameDescriptor&	operator=(const FrameDescriptor& other);
 
 	// common attributes for all Frame descriptors
 	uint8_t		bFrameIndex() const;
@@ -539,9 +508,6 @@ class FrameUncompressedDescriptor : public FrameDescriptor {
 public:
 	FrameUncompressedDescriptor(const Device& device,
 		const void *data, int length);
-	FrameUncompressedDescriptor(const FrameUncompressedDescriptor& other);
-	FrameUncompressedDescriptor&	operator=(
-		const FrameUncompressedDescriptor& other);
 
 	uint32_t	dwMaxVideoFrameBufferSize() const;
 	virtual std::string	toString() const;
@@ -553,8 +519,6 @@ public:
 class FrameMJPEGDescriptor : public FrameDescriptor {
 public:
 	FrameMJPEGDescriptor(const Device& other, const void *data, int length);
-	FrameMJPEGDescriptor(const FrameMJPEGDescriptor& other);
-	FrameMJPEGDescriptor&	operator=(const FrameMJPEGDescriptor& other);
 
 	uint32_t	dwMaxVideoFrameBufferSize() const;
 	virtual std::string	toString() const;
@@ -567,9 +531,6 @@ class FrameFrameBasedDescriptor : public FrameDescriptor {
 public:
 	FrameFrameBasedDescriptor(const Device& device,
 		const void *data, int length);
-	FrameFrameBasedDescriptor(const FrameFrameBasedDescriptor& other);
-	FrameFrameBasedDescriptor&	operator=(
-		const FrameFrameBasedDescriptor& other);
 
 	virtual	uint8_t		bFrameIntervalType() const;
 	virtual uint32_t	dwDefaultFrameInterval() const;
@@ -595,29 +556,35 @@ public:
  */
 class UVCCamera {
 	// the device
-	Device	device;
-	DeviceHandle	*devicehandle;
+	Device&	device;
 
-	// interface association descriptor
+	// interface association descriptor, which indicates which interface
+	// number points to the video control interface and which interfaces
+	// are video streaming interfaces
 	USBDescriptorPtr	iadptr;
 	const InterfaceAssociationDescriptor&	iad() const;
 
 	// stuff related to the video control interface
-	USBDescriptorPtr	videocontrol;
+	InterfacePtr	videocontrol;
+	std::vector<USBDescriptorPtr>	videocontroldescriptors;
 
 	// a list of Video Streaming Interface descriptors, one for each video
 	// streaming interface
-	std::vector<USBDescriptorPtr>	videostreaming;
+	std::vector<InterfacePtr>	videostreaming;
 public:
-	UVCCamera(const Device& device, bool force = false);
+	UVCCamera(Device& device, bool force = false);
 	~UVCCamera();
 
 	// accessors for the control interface parameters
-	uint8_t	controlInterface() const;
+	uint8_t	controlInterfaceNumber() const;
 	uint8_t	controlCameraTerminalID() const;
 	uint32_t	controlCameraControls() const;
 	uint8_t	controlProcessingUnitID() const;
 	uint32_t	controlProcessingUnitControls() const;
+
+	// accessors to the video streaming interfaces
+	const InterfacePtr&	operator[](int interfacenumber) const;
+	InterfacePtr&	operator[](int interfacenumber);
 
 	// selecting format and frame
 	void	selectFormatAndFrame(uint8_t interface,
@@ -633,9 +600,9 @@ public:
 	// modifying parameter of the various interfaces
 	template<typename T>
 	void	setCurrent(const T& p) {
-		Request<T>	r(REQUEST_CLASS_INTERFACE_SET, SET_CUR,
-			T::CS, 0, (uint8_t *)&p);
-		devicehandle->controlRequest(&r);
+		Request<T>	r(RequestBase::host_to_device, videocontrol,
+			SET_CUR, T::CS << 8, &p);
+		device.controlRequest(&r);
 	}
 
 	// display stuff

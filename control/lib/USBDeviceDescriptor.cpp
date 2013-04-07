@@ -1,5 +1,5 @@
 /*
- * USBDeviceDescriptor.cpp
+ * USBDeviceDescriptor.cpp -- abstraction for the device descriptor
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -10,47 +10,18 @@
 namespace astro {
 namespace usb {
 
-DeviceDescriptor::DeviceDescriptor(const Device& device) : dev(device) {
-	int	rc;
-	// allocate the device descriptor
-	d = new struct libusb_device_descriptor;
-
-	// retrieve the device descriptor
-	device.getDescriptor(d);
-
-	// resolve the strings
-	DeviceHandle	*handle = dev.open();
+DeviceDescriptor::DeviceDescriptor(const Device& device,
+	libusb_device_descriptor *device_descriptor) : dev(device) {
+	// copy the descriptor data
+	memcpy(&d, device_descriptor, sizeof(libusb_device_descriptor));
 
 	// manufacturer
-	manufacturer = handle->getStringDescriptor(d->iManufacturer);
-	product = handle->getStringDescriptor(d->iProduct);
-	serialnumber = handle->getStringDescriptor(d->iSerialNumber);
-
-	delete handle;
-}
-
-DeviceDescriptor::DeviceDescriptor(const DeviceDescriptor& other) : dev(other.dev) {
-	int	l = sizeof(struct libusb_device_descriptor);
-	d = new struct libusb_device_descriptor;
-	memcpy(d, other.d, l);
-	manufacturer = other.manufacturer;
-	product = other.product;
-	serialnumber = other.serialnumber;
+	manufacturer = device.getStringDescriptor(d.iManufacturer);
+	product = device.getStringDescriptor(d.iProduct);
+	serialnumber = device.getStringDescriptor(d.iSerialNumber);
 }
 
 DeviceDescriptor::~DeviceDescriptor() {
-	if (NULL != d) {
-		delete d;
-	}
-	d = NULL;
-}
-
-DeviceDescriptor&	DeviceDescriptor::operator=(const DeviceDescriptor& other) {
-	dev = other.dev;
-	memcpy(d, other.d, sizeof(struct libusb_device_descriptor));
-	manufacturer = other.manufacturer;
-	product = other.product;
-	serialnumber = other.serialnumber;
 }
 
 std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc) {
@@ -81,35 +52,35 @@ std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc) {
 
 
 uint16_t        DeviceDescriptor::bcdUSB() const {
-	return d->bcdUSB;
+	return d.bcdUSB;
 }
 
 uint8_t         DeviceDescriptor::bDeviceClass() const {
-	return d->bDeviceClass;
+	return d.bDeviceClass;
 }
 
 uint8_t         DeviceDescriptor::bDeviceSubClass() const {
-	return d->bDeviceSubClass;
+	return d.bDeviceSubClass;
 }
 
 uint8_t         DeviceDescriptor::bDeviceProtocol() const {
-	return d->bDeviceProtocol;
+	return d.bDeviceProtocol;
 }
 
 uint8_t         DeviceDescriptor::bMaxPacketSize0() const {
-	return d->bMaxPacketSize0;
+	return d.bMaxPacketSize0;
 }
 
 uint16_t        DeviceDescriptor::idVendor() const {
-	return d->idVendor;
+	return d.idVendor;
 }
 
 uint16_t        DeviceDescriptor::idProduct() const {
-	return d->idProduct;
+	return d.idProduct;
 }
 
 uint16_t        DeviceDescriptor::bcdDevice() const {
-	return d->bcdDevice;
+	return d.bcdDevice;
 }
 
 const std::string&     DeviceDescriptor::iManufacturer() const {
@@ -125,7 +96,7 @@ const std::string&     DeviceDescriptor::iSerialNumber() const {
 }
 
 uint8_t DeviceDescriptor::bNumConfigurations() const {
-	return d->bNumConfigurations;
+	return d.bNumConfigurations;
 }
 
 } // namespace usb

@@ -19,16 +19,7 @@ InterfaceHeaderDescriptor::InterfaceHeaderDescriptor(const Device& _device,
 	const void *data, int length) : UVCDescriptor(_device, data, length) {
 }
 
-InterfaceHeaderDescriptor::InterfaceHeaderDescriptor(
-	const InterfaceHeaderDescriptor& other)
-	: UVCDescriptor(other) {
-}
-
 InterfaceHeaderDescriptor::~InterfaceHeaderDescriptor() {
-}
-
-InterfaceHeaderDescriptor&	InterfaceHeaderDescriptor::operator=(
-	const InterfaceHeaderDescriptor& other) {
 }
 
 uint16_t	InterfaceHeaderDescriptor::bcdUVC() const {
@@ -144,16 +135,6 @@ TerminalDescriptor::TerminalDescriptor(const Device& _device,
 	: UVCDescriptor(_device, data, length) {
 }
 
-TerminalDescriptor::TerminalDescriptor(
-	const TerminalDescriptor &other) 
-	: UVCDescriptor(other) {
-}
-
-TerminalDescriptor&	TerminalDescriptor::operator=(
-	const TerminalDescriptor& other) {
-	UVCDescriptor::operator=(other);
-}
-
 uint8_t	TerminalDescriptor::bTerminalID() const {
 	return uint8At(3);
 }
@@ -183,20 +164,7 @@ std::string	TerminalDescriptor::toString() const {
 InputTerminalDescriptor::InputTerminalDescriptor(const Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
-	terminal = handle->getStringDescriptor(((uint8_t *)data)[7]);
-	delete handle;
-}
-
-InputTerminalDescriptor::InputTerminalDescriptor(
-	const InputTerminalDescriptor& other) : TerminalDescriptor(other) {
-	terminal = other.terminal;
-}
-
-InputTerminalDescriptor&	InputTerminalDescriptor::operator=(
-	const InputTerminalDescriptor& other) {
-	TerminalDescriptor::operator=(other);
-	terminal = other.terminal;
+	terminal = device.getStringDescriptor(((uint8_t *)data)[7]);
 }
 
 const std::string&	InputTerminalDescriptor::iTerminal() const {
@@ -218,20 +186,7 @@ std::string	InputTerminalDescriptor::toString() const {
 OutputTerminalDescriptor::OutputTerminalDescriptor(const Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
-	terminal = handle->getStringDescriptor(((uint8_t *)data)[8]);
-	delete handle;
-}
-
-OutputTerminalDescriptor::OutputTerminalDescriptor(
-	const OutputTerminalDescriptor& other) : TerminalDescriptor(other) {
-	terminal = other.terminal;
-}
-
-OutputTerminalDescriptor&	OutputTerminalDescriptor::operator=(
-	const OutputTerminalDescriptor& other) {
-	TerminalDescriptor::operator=(other);
-	terminal = other.terminal;
+	terminal = device.getStringDescriptor(((uint8_t *)data)[8]);
 }
 
 const std::string&	OutputTerminalDescriptor::iTerminal() const {
@@ -259,20 +214,7 @@ uint8_t	OutputTerminalDescriptor::bSourceID() const {
 CameraTerminalDescriptor::CameraTerminalDescriptor(const Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
-	terminal = handle->getStringDescriptor(((uint8_t *)data)[8]);
-	delete handle;
-}
-
-CameraTerminalDescriptor::CameraTerminalDescriptor(
-	const CameraTerminalDescriptor& other) : TerminalDescriptor(other) {
-	terminal = other.terminal;
-}
-
-CameraTerminalDescriptor&	CameraTerminalDescriptor::operator=(
-	const CameraTerminalDescriptor& other) {
-	TerminalDescriptor::operator=(other);
-	terminal = other.terminal;
+	terminal = device.getStringDescriptor(((uint8_t *)data)[8]);
 }
 
 const std::string&	CameraTerminalDescriptor::iTerminal() const {
@@ -393,20 +335,8 @@ CameraTerminalDescriptor *cameraTerminalDescriptor(USBDescriptorPtr& ptr) {
 SelectorUnitDescriptor::SelectorUnitDescriptor(const Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
 	int	p = bNrInPins();
-	selector = handle->getStringDescriptor(((uint8_t *)data)[5 + p]);
-	delete handle;
-}
-
-SelectorUnitDescriptor::SelectorUnitDescriptor(const SelectorUnitDescriptor& other) 
-	: UVCDescriptor(other) {
-	selector = other.selector;
-}
-
-SelectorUnitDescriptor&	SelectorUnitDescriptor::operator=(const SelectorUnitDescriptor& other) {
-	UVCDescriptor::operator=(other);
-	selector = other.selector;
+	selector = device.getStringDescriptor(((uint8_t *)data)[5 + p]);
 }
 
 uint8_t	SelectorUnitDescriptor::bUnitID() const {
@@ -446,19 +376,8 @@ std::string	SelectorUnitDescriptor::toString() const {
 ProcessingUnitDescriptor::ProcessingUnitDescriptor(const Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
-	DeviceHandle	*handle = device.open();
 	int	n = bControlSize();
-	processing = handle->getStringDescriptor(((uint8_t *)data)[8 + n]);
-	delete handle;
-}
-
-ProcessingUnitDescriptor::ProcessingUnitDescriptor(const ProcessingUnitDescriptor& other) : UVCDescriptor(other) {
-	processing = other.processing;
-}
-
-ProcessingUnitDescriptor&	ProcessingUnitDescriptor::operator=(const ProcessingUnitDescriptor& other) {
-	UVCDescriptor::operator=(other);
-	processing = other.processing;
+	processing = device.getStringDescriptor(((uint8_t *)data)[8 + n]);
 }
 
 uint8_t	ProcessingUnitDescriptor::bUnitID() const {
@@ -598,28 +517,13 @@ ExtensionUnitDescriptor::ExtensionUnitDescriptor(const Device& _device,
 	int	p = bNrInPins();
 	int	n = bControlSize();
 
-	DeviceHandle	*handle = device.open();
 	try {
-		extension = handle->getStringDescriptor(uint8At(23 + p + n));
+		extension = device.getStringDescriptor(uint8At(23 + p + n));
 	} catch (std::exception& x) {
 		std::cerr << "extension naem not found: " << x.what()
 			<< std::endl;
 	}
-	delete handle;
 	guid = std::string(&((char *)data)[4], 16);
-}
-
-ExtensionUnitDescriptor::ExtensionUnitDescriptor(
-	const ExtensionUnitDescriptor& other) : UVCDescriptor(other) {
-	extension = other.extension;
-	guid = other.guid;
-}
-
-ExtensionUnitDescriptor&	ExtensionUnitDescriptor::operator=(
-	const ExtensionUnitDescriptor& other) {
-	UVCDescriptor::operator=(other);
-	extension = other.extension;
-	guid = other.guid;
 }
 
 uint8_t	ExtensionUnitDescriptor::bUnitID() const {

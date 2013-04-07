@@ -26,15 +26,6 @@ std::cout << "fixing the imaging source:" << std::endl;
 	}
 }
 
-HeaderDescriptor::HeaderDescriptor(const HeaderDescriptor& other) 
-	: UVCDescriptor(other) {
-}
-
-HeaderDescriptor&       HeaderDescriptor::operator=(
-	const HeaderDescriptor &other) {
-	UVCDescriptor::operator=(other);
-}
-
 std::string	HeaderDescriptor::toString() const {
 	std::ostringstream	out;
 	out << "  bNumFormats:      " << (int)bNumFormats() << std::endl;
@@ -73,15 +64,6 @@ const USBDescriptorPtr	HeaderDescriptor::operator[](int formatindex) const {
 InputHeaderDescriptor::InputHeaderDescriptor(const Device& _device,
 	const void *data, int length)
 	: HeaderDescriptor(_device, data, length) {
-}
-
-InputHeaderDescriptor::InputHeaderDescriptor(const InputHeaderDescriptor& other)
-	: HeaderDescriptor(other) {
-}
-
-InputHeaderDescriptor&       InputHeaderDescriptor::operator=(
-	const InputHeaderDescriptor &other) {
-	HeaderDescriptor::operator=(other);
 }
 
 uint8_t	InputHeaderDescriptor::bmInfo() const {
@@ -151,15 +133,6 @@ std::string	InputHeaderDescriptor::toString() const {
 OutputHeaderDescriptor::OutputHeaderDescriptor(const Device& _device,
 	const void *data, int length)
 	: HeaderDescriptor(_device, data, length) {
-}
-
-OutputHeaderDescriptor::OutputHeaderDescriptor(const OutputHeaderDescriptor& other) 
-	: HeaderDescriptor(other) {
-}
-
-OutputHeaderDescriptor&       OutputHeaderDescriptor::operator=(
-	const OutputHeaderDescriptor &other) {
-	HeaderDescriptor::operator=(other);
 }
 
 uint8_t	OutputHeaderDescriptor::bTerminalLink() const {

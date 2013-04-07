@@ -21,15 +21,6 @@ FormatFrameBasedDescriptor::FormatFrameBasedDescriptor(
 	: FormatDescriptor(_device, data, length) {
 }
 
-FormatFrameBasedDescriptor::FormatFrameBasedDescriptor(
-	const FormatFrameBasedDescriptor& other)
-	: FormatDescriptor(other) {
-}
-
-FormatFrameBasedDescriptor&	FormatFrameBasedDescriptor::operator=(const FormatFrameBasedDescriptor& other) {
-	FormatDescriptor::operator=(other);
-}
-
 uint8_t	FormatFrameBasedDescriptor::bBitsPerPixel() const {
 	return uint8At(21);
 }
@@ -87,16 +78,6 @@ std::string	FormatFrameBasedDescriptor::toString() const {
 FrameFrameBasedDescriptor::FrameFrameBasedDescriptor(
 	const Device& _device, const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
-}
-
-FrameFrameBasedDescriptor::FrameFrameBasedDescriptor(
-	const FrameFrameBasedDescriptor& other)
-	: FrameDescriptor(other) {
-}
-
-FrameFrameBasedDescriptor&	FrameFrameBasedDescriptor::operator=(
-	const FrameFrameBasedDescriptor& other) {
-	FrameDescriptor::operator=(other);
 }
 
 uint32_t	FrameFrameBasedDescriptor::dwDefaultFrameInterval() const {

@@ -17,11 +17,13 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	Ccd.cpp \
 	Fits.cpp \
 	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
-	USBDeviceHandle.cpp USBDescriptors.cpp USBRawDescriptors.cpp \
+	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
+	USBInterface.cpp USBRawDescriptors.cpp \
 	USBRequests.cpp USBTransfer.cpp \
 	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
 	UVCFactory.cpp \
 	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
-	UVCFrame.cpp UVCCamera.cpp
+	UVCFrame.cpp UVCCamera.cpp \
+	MicroTouch.cpp
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"

@@ -29,26 +29,6 @@ USBDescriptor::USBDescriptor(const Device& _device,
 	memcpy(data, _data, blength);
 }
 
-USBDescriptor::USBDescriptor(const USBDescriptor& other)
-	: device(other.device) {
-	blength = other.blength;
-	bdescriptortype = other.bdescriptortype;
-	data = new uint8_t[blength];
-	memcpy(data, other.data, blength);
-}
-
-USBDescriptor&	USBDescriptor::operator=(const USBDescriptor& other) {
-	device = other.device;
-	// copy simple files
-	bdescriptortype = other.bdescriptortype;
-	blength = other.blength;
-	// create a copy of the data
-	uint8_t	*newdata = new uint8_t[blength];
-	memcpy(newdata, other.data, blength);
-	delete[] data;
-	data = newdata;
-}
-
 USBDescriptor::~USBDescriptor() {
 	delete[] data;
 }
@@ -234,18 +214,7 @@ std::ostream&	operator<<(std::ostream& out, const std::vector<USBDescriptorPtr>&
 //////////////////////////////////////////////////////////////////////
 
 InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(const Device& _device, const void *_data, int length) : USBDescriptor(_device, _data, length) {
-	DeviceHandle	*handle = device.open();
-	function = handle->getStringDescriptor(data[7]);
-	delete handle;
-}
-
-InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(const InterfaceAssociationDescriptor& other) : USBDescriptor(other) {
-	function = other.function;
-}
-
-InterfaceAssociationDescriptor&	InterfaceAssociationDescriptor::operator=(const InterfaceAssociationDescriptor& other) {
-	function = other.function;
-	return *this;
+	function = device.getStringDescriptor(data[7]);
 }
 
 uint8_t	InterfaceAssociationDescriptor::bFirstInterface() const {

@@ -14,79 +14,103 @@ void	Device::getDescriptor(struct libusb_device_descriptor *devdesc) const {
 	libusb_get_device_descriptor(dev, devdesc);
 }
 
-DeviceHandle	*Device::open() throw(USBError) {
-	libusb_device_handle	*handle;
-	int	rc = libusb_open(dev, &handle);
+void	Device::open() throw(USBError) {
+	// handle the case where the device has already been opened
+	if (NULL != dev_handle) {
+		return;
+	}
+
+	// the device is not open yet, so open it
+	int	rc = libusb_open(dev, &dev_handle);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
-	return new DeviceHandle(*this, handle);
 }
 
-DeviceDescriptor	*Device::descriptor() const throw(USBError) {
-	return new DeviceDescriptor(*this);
+void	Device::close() {
+	if (NULL == dev_handle) {
+		return;
+	}
+	libusb_close(dev_handle);
+	dev_handle = NULL;
 }
 
-ConfigDescriptor	*Device::config(uint8_t index) const throw(USBError) {
+std::string	Device::getStringDescriptor(uint8_t index) const throw(USBError) {
+	if (NULL == dev_handle) {
+		throw USBError("device not open");
+	}
+	// read the string descriptor
+	unsigned char	buffer[128];
+	int	rc = libusb_get_string_descriptor_ascii(dev_handle, index,
+			buffer, sizeof(buffer));
+	if (rc > 0) {
+		return std::string((const char *)buffer, rc);
+	}
+	return std::string();
+}
+
+DeviceDescriptorPtr	Device::descriptor() const throw(USBError) {
+	// get the device descriptor
+	libusb_device_descriptor	d;
+	int	rc = libusb_get_device_descriptor(dev, &d);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+
+	// create a DeviceDescriptor object
+	DeviceDescriptor	*devdesc = new DeviceDescriptor(*this, &d);
+	return DeviceDescriptorPtr(devdesc);
+}
+
+ConfigurationPtr	Device::config(uint8_t index) const throw(USBError) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_config_descriptor(dev, index, &config);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
-	ConfigDescriptor	*result = new ConfigDescriptor(*this, config);
+	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
-	return result;
+	return ConfigurationPtr(result);
 }
 
-ConfigDescriptor	*Device::activeConfig() const throw(USBError) {
+ConfigurationPtr	Device::activeConfig() const throw(USBError) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_active_config_descriptor(dev, &config);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
-	ConfigDescriptor	*result = new ConfigDescriptor(*this, config);
+	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
-	return result;
+	return ConfigurationPtr(result);
 }
 
-ConfigDescriptor	*Device::configValue(uint8_t value) const throw(USBError) {
+ConfigurationPtr	Device::configValue(uint8_t value) const throw(USBError) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_config_descriptor_by_value(dev, value, &config);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
-	ConfigDescriptor	*result = new ConfigDescriptor(*this, config);
+	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
-	return result;
+	return ConfigurationPtr(result);
 }
 
-Device::Device(struct libusb_device *_dev) : dev(_dev) {
+Device::Device(libusb_device *_dev, libusb_device_handle *_dev_handle)
+	: dev(_dev), dev_handle(_dev_handle) {
+	// increment the reference counter
 	libusb_ref_device(dev);
+
 	// find out whether this is a broken device
-	DeviceDescriptor	*d = descriptor();
+	DeviceDescriptorPtr	d = descriptor();
 	if (d->idVendor() == 0x199e) {
 std::cout << "This is a broken camera from the imaging source" << std::endl;
 		broken = BROKEN_THE_IMAGING_SOURCE;
 	}
-	delete d;
 }
 
 Device::~Device() {
+	close();
 	libusb_unref_device(dev);
-}
-
-Device::Device(const Device& other) {
-	dev = other.dev;
-	broken = other.broken;
-	libusb_ref_device(dev);
-}
-
-Device&	Device::operator=(const Device& other) {
-	libusb_ref_device(other.dev);
-	libusb_unref_device(dev);
-	dev = other.dev;
-	broken = other.broken;
-	return *this;
 }
 
 uint8_t	Device::getBusNumber() const {
@@ -97,24 +121,176 @@ uint8_t	Device::getDeviceAddress() const {
 	return libusb_get_device_address(dev);
 }
 
-int	Device::getDeviceSpeed() const {
-	return libusb_get_device_speed(dev);
-}
-
 int	Device::getBroken() const {
 	return broken;
 }
 
-enum Device::usb_speed	Device::speed() const {
+void	Device::claimInterface(uint8_t interface) throw(USBError) {
+	int	rc = libusb_claim_interface(dev_handle, interface);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+void	Device::releaseInterface(uint8_t interface) throw(USBError) {
+	int	rc = libusb_release_interface(dev_handle, interface);
+	rc = libusb_release_interface(dev_handle, interface);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+int	Device::getConfiguration() throw(USBError) {
+	int	result;
+	int	rc = libusb_get_configuration(dev_handle, &result);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+	return result;
+}
+
+void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
+	int	rc = libusb_set_configuration(dev_handle, configuration);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
+		throw(USBError) {
+	int	rc = libusb_set_interface_alt_setting(dev_handle,
+			interface, altsetting);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+void	Device::controlRequest(RequestPtr request) throw(USBError) {
+	std::cout << request->toString();
+	int	rc = libusb_control_transfer(dev_handle, 
+			request->bmRequestType(),
+			request->bRequest(),
+			request->wValue(),
+			request->wIndex(),
+			request->payload(),
+			request->wLength(),
+			100);
+	std::cout << "rc = " << (int)rc << std::endl;
+	if (rc < 0) {
+		throw USBError(libusb_error_name(rc));
+	}
+	if (rc != request->wLength()) {
+		throw USBError("request did not return what we expected");
+	}
+	//std::cout << request->toString();
+}
+
+
+enum Device::usb_speed	Device::getDeviceSpeed() const {
 	return (Device::usb_speed)libusb_get_device_speed(dev);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Device& device) {
 	out	<< "bus " << (int)device.getBusNumber()
 		<< " address " << (int)device.getDeviceAddress()
-		<< " speed " << (int)device.getDeviceSpeed();
+		<< " speed " << (int)device.getDeviceSpeed() << std::endl;
 	return out;
+}
+
+int	Device::maxIsoPacketSize(uint8_t endpoint) const {
+	return libusb_get_max_iso_packet_size(dev, endpoint);
 }
 
 } // namespace usb
 } // namespace astro
+
+
+#if 0
+/*
+ * USBDeviceHandle.cpp
+ *
+ * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#include <AstroUSB.h>
+#include <ios>
+#include <iomanip>
+
+namespace astro {
+namespace usb {
+
+DeviceHandle::DeviceHandle(const Device& _device, libusb_device_handle *handle)
+	: dev(_device), dev_handle(handle) {
+}
+
+DeviceHandle::~DeviceHandle() {
+	if (dev_handle) {
+		libusb_close(dev_handle);
+		dev_handle = NULL;
+	}
+}
+
+Device	DeviceHandle::device() {
+	return dev;
+}
+
+void	DeviceHandle::claimInterface(int interface) throw(USBError) {
+	int	rc = libusb_claim_interface(dev_handle, interface);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+void	DeviceHandle::releaseInterface(int interface) throw(USBError) {
+	int	rc = libusb_release_interface(dev_handle, interface);
+	rc = libusb_release_interface(dev_handle, interface);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+int	DeviceHandle::getConfiguration() throw(USBError) {
+	int	result;
+	int	rc = libusb_get_configuration(dev_handle, &result);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+	return result;
+}
+
+void	DeviceHandle::setConfiguration(int configuration) throw (USBError) {
+	int	rc = libusb_set_configuration(dev_handle, configuration);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+int	DeviceHandle::controlRequest(RequestBase *request) throw(USBError) {
+	std::cout << request->toString();
+	int	rc = libusb_control_transfer(dev_handle, 
+			request->bmRequestType(),
+			request->bRequest(),
+			request->wValue(),
+			request->wIndex(),
+			request->payload(),
+			request->wLength(),
+			100);
+	std::cout << "rc = " << (int)rc << std::endl;
+	if (rc < 0) {
+		throw USBError(libusb_error_name(rc));
+	}
+	if (rc != request->wLength()) {
+		throw USBError("request did not return what we expected");
+	}
+	//std::cout << request->toString();
+	return rc;
+}
+
+int	DeviceHandle::submit(Transfer *transfer) throw(USBError) {
+	transfer->submit(dev_handle);
+	std::cout << "transfer submitted" << std::endl;
+	return 0;
+}
+
+} // namespace usb
+} // namespace astro
+#endif

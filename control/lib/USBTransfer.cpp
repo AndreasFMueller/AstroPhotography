@@ -11,10 +11,17 @@ namespace usb {
 //////////////////////////////////////////////////////////////////////
 // Transfer implementation
 //////////////////////////////////////////////////////////////////////
-Transfer::Transfer(DeviceHandle& handle, int _length)
-	: devicehandle(handle), length(_length) {
+Transfer::Transfer(uint8_t _endpoint, int _length, unsigned char *_data)
+	: endpoint(_endpoint), length(_length) {
 	transfer = NULL;
-	data = new unsigned char[length];
+	if (_data == NULL) {
+		data = new unsigned char[length];
+		freedata = true;
+	} else {
+		data = _data;
+		freedata = false;
+	}
+	timeout = 1000;
 }
 
 Transfer::~Transfer() {
@@ -22,20 +29,18 @@ Transfer::~Transfer() {
 		libusb_free_transfer(transfer);
 		transfer = NULL;
 	}
-	if (NULL != data) {
+	if ((NULL != data) && (freedata)) {
 		delete[] data;
 	}
+	data = NULL;
 }
 
-libusb_device_handle	*Transfer::handle() {
-	return devicehandle.dev_handle;
+int	Transfer::getTimeout() const {
+	return timeout;
 }
 
-void	Transfer::submit() throw(USBError) {
-	int	rc = libusb_submit_transfer(transfer);
-	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
-	}
+void	Transfer::setTimeout(int _timeout) {
+	timeout = _timeout;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -45,34 +50,64 @@ static void bulktransfer_callback(libusb_transfer *transfer) {
 	((BulkTransfer *)transfer->user_data)->callback();
 }
 
-BulkTransfer::BulkTransfer(DeviceHandle &_handle, uint8_t endpoint,
-	int _length)
-	: Transfer(_handle, _length) {
+BulkTransfer::BulkTransfer(uint8_t _endpoint, int _length, unsigned char *_data)
+	: Transfer(_endpoint, _length, _data) {
+}
+
+void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
+	// allocate the transfer structure
 	transfer = libusb_alloc_transfer(0);
-	libusb_fill_bulk_transfer(transfer, handle(),
-		endpoint, data, length,
-		bulktransfer_callback, this, 1000);
+
+	// fill the transfer
+	libusb_fill_bulk_transfer(transfer, dev_handle, endpoint, data,
+		length, bulktransfer_callback, this, timeout);
+
+	// submit the transfer
+	int	rc = libusb_submit_transfer(transfer);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
 }
 
 BulkTransfer::~BulkTransfer() {
 }
 
 void	BulkTransfer::callback() {
+	std::cout << "bulk transfer callback" << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////
 // IsoTransfer implementation
 //////////////////////////////////////////////////////////////////////
-IsoTransfer::IsoTransfer(DeviceHandle &_handle, int _length)
-	: Transfer(_handle, _length) {
-	// find out how many packets we will need
-	transfer = libusb_alloc_transfer(0);
+static void isotransfer_callback(libusb_transfer *transfer) {
+	((IsoTransfer *)transfer->user_data)->callback();
+}
+
+IsoTransfer::IsoTransfer(uint8_t _endpoint, int _length, unsigned char *_data)
+	: Transfer(_endpoint, _length, _data) {
+}
+
+void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
+	// allocate the transfer structure
+	int	packets = 0;
+	transfer = libusb_alloc_transfer(packets);
+
+	// fill the transfer
+	libusb_fill_iso_transfer(transfer, dev_handle, endpoint, data,
+		length, packets, isotransfer_callback, this, timeout);
+
+	// submit the transfer
+	int	rc = libusb_submit_transfer(transfer);
+	if (rc != LIBUSB_SUCCESS) {
+		throw USBError(libusb_error_name(rc));
+	}
 }
 
 IsoTransfer::~IsoTransfer() {
 }
 
 void	IsoTransfer::callback() {
+	std::cout << "iso transfer callback" << std::endl;
 }
 
 

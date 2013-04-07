@@ -21,15 +21,6 @@ FormatDescriptor::FormatDescriptor(const Device& _device,
 	: UVCDescriptor(_device, data, length) {
 }
 
-FormatDescriptor::FormatDescriptor(const FormatDescriptor& other)
-	: UVCDescriptor(other) {
-}
-
-FormatDescriptor&	FormatDescriptor::operator=(
-	const FormatDescriptor& other) {
-	UVCDescriptor::operator=(other);
-}
-
 uint8_t	FormatDescriptor::bFormatIndex() const {
 	return uint8At(3);
 }
@@ -99,15 +90,6 @@ bool	isFormatDescriptor(USBDescriptorPtr dp) {
 FrameDescriptor::FrameDescriptor(const Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
-}
-
-FrameDescriptor::FrameDescriptor(const FrameDescriptor& other)
-	: UVCDescriptor(other) {
-}
-
-FrameDescriptor&	FrameDescriptor::operator=(
-	const FrameDescriptor& other) {
-	UVCDescriptor::operator=(other);
 }
 
 uint8_t	FrameDescriptor::bFrameIndex() const {

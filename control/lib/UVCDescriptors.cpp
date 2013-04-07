@@ -22,15 +22,6 @@ UVCDescriptor::UVCDescriptor(const Device& device, const void *data, int length)
 	bdescriptorsubtype = uint8At(2);
 }
 
-UVCDescriptor::UVCDescriptor(const UVCDescriptor& other) : USBDescriptor(other) {
-	bdescriptorsubtype = other.bdescriptorsubtype;
-}
-
-UVCDescriptor&	UVCDescriptor::operator=(const UVCDescriptor& other) {
-	bdescriptorsubtype = other.bdescriptorsubtype;
-	return *this;
-}
-
 uint8_t	UVCDescriptor::bDescriptorSubtype() const {
 	return bdescriptorsubtype;
 }
