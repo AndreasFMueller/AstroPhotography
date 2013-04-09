@@ -202,5 +202,8 @@ int	Device::maxIsoPacketSize(uint8_t endpoint) const {
 	return libusb_get_max_iso_packet_size(dev, endpoint);
 }
 
+void	Device::submit(TransferPtr request) throw(USBError) {
+}
+
 } // namespace usb
 } // namespace astro
