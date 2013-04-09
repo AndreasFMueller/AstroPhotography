@@ -419,7 +419,7 @@ std::string	ProcessingUnitDescriptor::toString() const {
 	out << "  bControlSize:    ";
 	out << (int)bControlSize() << std::endl;
 	out << "  bmControls:     ";
-	uint32_t	bmcontrols;
+	uint32_t	bmcontrols = bmControls();
 	if (bmcontrols & (1 << 0)) {
 		out << " brightness";
 	}

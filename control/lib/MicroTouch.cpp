@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <MicroTouch.h>
+#include <string.h>
 
 using namespace astro::usb;
 
@@ -59,6 +60,14 @@ uint16_t	MicroTouch::position() {
 	unsigned char	position_response[3];
 	TransferPtr	presp(new BulkTransfer(0x81, 1, position_response));
 	device.submit(presp);
+
+	// when the transport is complete, we should have the code
+	// 0x8d in the first byte
+	if (position_response[0] != position_request) {
+		throw std::runtime_error("bad command response");
+	}
+
+	return *(uint16_t *)&position_response[3];
 }
 
 bool	MicroTouch::isMoving() {

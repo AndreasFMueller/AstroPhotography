@@ -8,6 +8,7 @@
 #include <ios>
 #include <iomanip>
 #include <cassert>
+#include <string.h>
 
 namespace astro {
 namespace usb {

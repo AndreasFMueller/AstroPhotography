@@ -104,7 +104,9 @@ class 	Device {
 	Device(const Device& other);
 
 	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
+/*
 	struct libusb_device	*getDevice();
+*/
 	int	broken;
 public:
 	~Device();

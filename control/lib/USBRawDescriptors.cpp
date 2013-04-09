@@ -6,6 +6,8 @@
 #include <AstroUSB.h>
 #include <AstroUVC.h>
 #include <sstream>
+#include <string.h>
+#include <stdio.h>
 
 namespace astro {
 namespace usb {
