@@ -93,7 +93,7 @@ std::string	RequestBase::toString() const {
 //////////////////////////////////////////////////////////////////////
 
 void	EmptyRequest::init(uint8_t bRequest, uint16_t wValue) {
-	header.bmRequestType = RequestBase::bmRequestType();
+	header.bmRequestType = this->bmRequestType();
 	header.bRequest = bRequest;
 	header.wValue = wValue;
 	header.wLength = 0;
@@ -118,6 +118,12 @@ EmptyRequest::EmptyRequest(request_type type, uint16_t wIndex,
 	: RequestBase(type, NULL) {
 	init(bRequest, wValue);
 	header.wIndex = wIndex;
+}
+
+uint8_t	EmptyRequest::bmRequestType() const {
+	// make sure empty requests are always considered as
+	// host-to-device requests
+	return 0x7f & RequestBase::bmRequestType();
 }
 
 uint8_t EmptyRequest::bRequest() const {

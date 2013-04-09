@@ -16,7 +16,7 @@ namespace uvc {
 //////////////////////////////////////////////////////////////////////
 // FormatDescriptor
 //////////////////////////////////////////////////////////////////////
-FormatDescriptor::FormatDescriptor(const Device& _device,
+FormatDescriptor::FormatDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 }
@@ -87,7 +87,7 @@ bool	isFormatDescriptor(USBDescriptorPtr dp) {
 //////////////////////////////////////////////////////////////////////
 // FrameDescriptor
 //////////////////////////////////////////////////////////////////////
-FrameDescriptor::FrameDescriptor(const Device& _device,
+FrameDescriptor::FrameDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 }

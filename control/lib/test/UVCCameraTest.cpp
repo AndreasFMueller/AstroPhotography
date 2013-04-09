@@ -34,12 +34,12 @@ public:
 void	UVCCameraTest::testList() {
 	Context	context;
 	context.setDebugLevel(0);
-	std::vector<Device>	devicelist = context.devices();
-	std::vector<Device>::const_iterator	i;
+	std::vector<DevicePtr>	devicelist = context.devices();
+	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
 		std::cout << "Device on " << *i << std::endl;
 		try {
-			UVCCamera	camera(*i);
+			UVCCamera	camera(**i);
 			std::cout << camera;
 		} catch (std::exception& x) {
 			std::cout << "not a camera: " << x.what() << std::endl;
@@ -50,16 +50,17 @@ void	UVCCameraTest::testList() {
 
 void	UVCCameraTest::testCamera() {
 	Context	context;
-	//DeviceHandle	*handle = context.open(0x199e, 0x8101); // TIS
-	//DeviceHandle	*handle = context.open(0x046d, 0x082b); // Logitech
-	DeviceHandle	*handle = context.open(0x0c45, 0x6340); // Sonix
-	Device	device = handle->device();
-	std::cout << device;
+	//DevicePtr	*deviceptr = context.find(0x199e, 0x8101); // TIS
+	//DevicePtr	*deviceptr = context.find(0x046d, 0x082b); // Logitech
+	DevicePtr	deviceptr = context.find(0x0c45, 0x6340); // Sonix
+	std::cout << *deviceptr;
 
 	// open the device as a 
 	try {
-		UVCCamera	camera(device, true);
+		UVCCamera	camera(*deviceptr, true);
+std::cout << "constructor complete" << std::endl;
 		std::cout << camera;
+		std::cout << "select FormatAndFrame" << std::endl;
 		camera.selectFormatAndFrame(1, 1, 3);
 		std::pair<uint8_t, uint8_t>	ff
 			= camera.getFormatAndFrame(1);

@@ -22,8 +22,7 @@ void	InterfaceDescriptor::copy(const struct libusb_interface_descriptor *_ifdp) 
 	ifdp->extra_length = 0;
 }
 
-InterfaceDescriptor::InterfaceDescriptor(const Device& device,
-	Interface& _interface,
+InterfaceDescriptor::InterfaceDescriptor(Device& device, Interface& _interface,
 	const struct libusb_interface_descriptor *_ifdp)
 		: Descriptor(device, _ifdp->extra, _ifdp->extra_length),
 		  interface(_interface) {
@@ -65,6 +64,17 @@ void	InterfaceDescriptor::getEndpoints() {
 	}
 }
 
+int	InterfaceDescriptor::numEndpoints() const {
+	return endpointlist.size();
+}
+
+EndpointDescriptorPtr	InterfaceDescriptor::operator[](int index) const {
+	if ((index < 0) || (index >= endpointlist.size())) {
+		throw std::range_error("outside endpoint range");
+	}
+	return endpointlist[index];
+}
+
 void	InterfaceDescriptor::altSetting() throw(USBError) {
 	dev.setInterfaceAltSetting(bInterfaceNumber(), bAlternateSetting());
 }
@@ -85,7 +95,7 @@ std::string	InterfaceDescriptor::toString() const {
 	out << (int)bInterfaceProtocol() << std::endl;
 	out << indent << "iInterface:            ";
 	out << iInterface() << std::endl;
-	out << "Endpoints:" << std::endl;
+	out << indent << "Endpoints:" << std::endl;
 	std::vector<EndpointDescriptor>::const_iterator	i;
 	for (int endpointno = 0; endpointno < numEndpoints(); endpointno++) {
 		out << indent << "Endpoint " << endpointno << ":" << std::endl;
@@ -104,7 +114,7 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd) {
 // Interface implementation
 /////////////////////////////////////////////////////////////////////
 
-Interface::Interface(const Device& device, Configuration& _configuration,
+Interface::Interface(Device& device, Configuration& _configuration,
 	const libusb_interface *li, int _interface)
 	: dev(device), interface(_interface), configuration(_configuration) {
 	for (int i = 0; i < li->num_altsetting; i++) {
@@ -145,15 +155,17 @@ void	Interface::release() throw(USBError) {
 	dev.releaseInterface(interface);
 }
 
-static std::string	ifindent("        I   ");
+static std::string	ifindent("    I   ");
 
 std::string	Interface::toString() const {
 	std::ostringstream	out;
-	out << ifindent << "Interface with " << numAltsettings();
+	out << ifindent << "Interface " << (int)(*this)[0]->bInterfaceNumber()
+		<< " with " << numAltsettings();
 	out << " alternate settings:" << std::endl;;
 	for (int j = 0; j < numAltsettings(); j++) {
 		out << *(*this)[j];
 	}
+	out << ifindent << "end interface" << std::endl;
 	return out.str();
 }
 

@@ -17,7 +17,7 @@ namespace uvc {
 // FormatMJPEGDescriptor
 //////////////////////////////////////////////////////////////////////
 FormatMJPEGDescriptor::FormatMJPEGDescriptor(
-	const Device& _device, const void *data, int length)
+	Device& _device, const void *data, int length)
 	: FormatDescriptor(_device, data, length) {
 }
 
@@ -52,7 +52,7 @@ std::string	FormatMJPEGDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 // FrameMJPEGDescriptor
 //////////////////////////////////////////////////////////////////////
-FrameMJPEGDescriptor::FrameMJPEGDescriptor(const Device& _device, const void *data, int length)
+FrameMJPEGDescriptor::FrameMJPEGDescriptor(Device& _device, const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
 }
 

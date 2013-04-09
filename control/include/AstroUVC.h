@@ -152,8 +152,9 @@ namespace uvc {
  */
 class UVCDescriptor : public astro::usb::USBDescriptor {
 	uint8_t	bdescriptorsubtype;
+	UVCDescriptor(const UVCDescriptor& other);
 public:
-	UVCDescriptor(const astro::usb::Device& device, const void *data, int length);
+	UVCDescriptor(astro::usb::Device& device, const void *data, int length);
 	uint8_t	bDescriptorSubtype() const;
 };
 
@@ -163,10 +164,11 @@ typedef	std::tr1::shared_ptr<UVCDescriptor>	UVCDescriptorPtr;
  * \brief Factory class to produce UVC Descriptors from raw data
  */
 class UVCDescriptorFactory : public DescriptorFactory {
+	UVCDescriptorFactory(const UVCDescriptorFactory& other);
 protected:
 	uint8_t	bdescriptorsubtype(const void *data) const;
 public:
-	UVCDescriptorFactory(const Device& device);
+	UVCDescriptorFactory(Device& device);
 	virtual USBDescriptorPtr	descriptor(const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError);
 	using DescriptorFactory::descriptor; // unhide
@@ -178,11 +180,12 @@ public:
 class	HeaderDescriptor;
 class	FormatDescriptor;
 class VideoControlDescriptorFactory : public UVCDescriptorFactory {
+	VideoControlDescriptorFactory(const VideoControlDescriptorFactory& other);
 protected:
 	uint16_t	wterminaltype(const void *data) const;
 	USBDescriptorPtr	header(const void *data, int length);
 public:
-	VideoControlDescriptorFactory(const Device& device);
+	VideoControlDescriptorFactory(Device& device);
 	virtual USBDescriptorPtr	descriptor(const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError);
 	using DescriptorFactory::descriptor; // unhide
@@ -196,8 +199,9 @@ class VideoStreamingDescriptorFactory : public UVCDescriptorFactory {
 					HeaderDescriptor *headerdescriptor);
 	USBDescriptorPtr	formats(const void *data, int length,
 					FormatDescriptor *formatdescriptor);
+	VideoStreamingDescriptorFactory(const VideoStreamingDescriptorFactory& other);
 public:
-	VideoStreamingDescriptorFactory(const Device& device);
+	VideoStreamingDescriptorFactory(Device& device);
 	virtual USBDescriptorPtr	descriptor(const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError);
 	using DescriptorFactory::descriptor; // unhide
@@ -213,8 +217,9 @@ class InterfaceHeaderDescriptor : public UVCDescriptor {
 	uint8_t	processing_unit_id;
 	uint32_t	processing_unit_controls;
 	void	getIds();
+	InterfaceHeaderDescriptor(const InterfaceHeaderDescriptor& other);
 public:
-	InterfaceHeaderDescriptor(const Device& device,
+	InterfaceHeaderDescriptor(Device& device,
 		const void *data, int length);
 	~InterfaceHeaderDescriptor();
 
@@ -247,8 +252,9 @@ const InterfaceHeaderDescriptor	*interfaceHeaderDescriptor(
  * \brief Terminal Descriptor
  */
 class TerminalDescriptor : public UVCDescriptor {
+	TerminalDescriptor(const TerminalDescriptor& other);
 public:
-	TerminalDescriptor(const Device& device,
+	TerminalDescriptor(Device& device,
 		const void *data, int length);
 
 	uint8_t		bTerminalID() const;
@@ -263,8 +269,9 @@ public:
  */
 class InputTerminalDescriptor : public TerminalDescriptor {
 	std::string	terminal;
+	InputTerminalDescriptor(const InputTerminalDescriptor& other);
 public:
-	InputTerminalDescriptor(const Device& device,
+	InputTerminalDescriptor(Device& device,
 		const void *data, int length);
 
 	const std::string&	iTerminal() const;
@@ -276,8 +283,9 @@ public:
  */
 class OutputTerminalDescriptor : public TerminalDescriptor {
 	std::string	terminal;
+	OutputTerminalDescriptor(const OutputTerminalDescriptor& other);
 public:
-	OutputTerminalDescriptor(const Device& device,
+	OutputTerminalDescriptor(Device& device,
 		const void *data, int length);
 
 	uint8_t		bSourceID() const;
@@ -290,8 +298,9 @@ public:
  */
 class CameraTerminalDescriptor : public TerminalDescriptor {
 	std::string	terminal;
+	CameraTerminalDescriptor(const CameraTerminalDescriptor& other);
 public:
-	CameraTerminalDescriptor(const Device& device,
+	CameraTerminalDescriptor(Device& device,
 		const void *data, int length);
 
 	const std::string&	iTerminal() const;
@@ -311,8 +320,9 @@ CameraTerminalDescriptor	*cameraTerminalDescriptor(USBDescriptorPtr& ptr);
  */
 class SelectorUnitDescriptor : public UVCDescriptor {
 	std::string	selector;
+	SelectorUnitDescriptor(const SelectorUnitDescriptor& other);
 public:
-	SelectorUnitDescriptor(const Device& device,
+	SelectorUnitDescriptor(Device& device,
 		const void *data, int length);
 	uint8_t	bUnitID() const;
 	uint8_t	bNrInPins() const;
@@ -326,8 +336,9 @@ public:
  */
 class ProcessingUnitDescriptor : public UVCDescriptor {
 	std::string	processing;
+	ProcessingUnitDescriptor(const ProcessingUnitDescriptor& other);
 public:
-	ProcessingUnitDescriptor(const Device& device, const void *data, int length);
+	ProcessingUnitDescriptor(Device& device, const void *data, int length);
 	uint8_t	bUnitID() const;
 	uint8_t	bSourceID() const;
 	uint16_t	wMaxMultiplier() const;
@@ -347,8 +358,9 @@ ProcessingUnitDescriptor	*processingUnitDescriptor(USBDescriptorPtr& ptr);
 class ExtensionUnitDescriptor : public UVCDescriptor {
 	std::string	extension;
 	std::string	guid;
+	ExtensionUnitDescriptor(const ExtensionUnitDescriptor& other);
 public:
-	ExtensionUnitDescriptor(const Device& device, const void *data, int length);
+	ExtensionUnitDescriptor(Device& device, const void *data, int length);
 	uint8_t	bUnitID() const;
 	const std::string&	guidExtensionCode() const;
 	uint8_t	bNumControls() const;
@@ -365,8 +377,9 @@ public:
  */
 class HeaderDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	formats;
+	HeaderDescriptor(const HeaderDescriptor& other);
 public:
-	HeaderDescriptor(const Device& device, const void *data, int length);
+	HeaderDescriptor(Device& device, const void *data, int length);
 	uint8_t		bNumFormats() const;
 	uint16_t	wTotalLength() const;
 	uint8_t		bEndpointAddress() const;
@@ -379,8 +392,9 @@ public:
  * \brief Input Header Descriptor
  */
 class InputHeaderDescriptor : public HeaderDescriptor {
+	InputHeaderDescriptor(const InputHeaderDescriptor& other);
 public:
-	InputHeaderDescriptor(const Device& device, const void *data, int length);
+	InputHeaderDescriptor(Device& device, const void *data, int length);
 	uint8_t		bmInfo() const;
 	uint8_t		bTerminalLink() const;
 	uint8_t		bStillCaptureMethod() const;
@@ -395,8 +409,9 @@ public:
  * \brief Output Header Descriptor
  */
 class OutputHeaderDescriptor : public HeaderDescriptor {
+	OutputHeaderDescriptor(const OutputHeaderDescriptor& other);
 public:
-	OutputHeaderDescriptor(const Device& device,
+	OutputHeaderDescriptor(Device& device,
 		const void *data, int length);
 	uint8_t		bTerminalLink() const;
 	uint8_t		bControlSize() const;
@@ -409,10 +424,11 @@ public:
  */
 class FormatDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	frames;
+	FormatDescriptor(const FormatDescriptor& other);
 protected:
 	std::string	framesToString() const;
 public:
-	FormatDescriptor(const Device& device, const void *data, int length);
+	FormatDescriptor(Device& device, const void *data, int length);
 	uint8_t	bFormatIndex() const;
 	uint8_t	bNumFrameDescriptors() const;
 
@@ -436,8 +452,9 @@ typedef std::tr1::shared_ptr<FormatDescriptor *>	FormatDescriptorPtr;
  * \brief MJPEG Format Descriptor
  */
 class FormatMJPEGDescriptor : public FormatDescriptor {
+	FormatMJPEGDescriptor(const FormatMJPEGDescriptor& other);
 public:
-	FormatMJPEGDescriptor(const Device& device, const void *data, int length);
+	FormatMJPEGDescriptor(Device& device, const void *data, int length);
 	virtual uint8_t	bDefaultFrameIndex() const;
 	virtual uint8_t	bAspectRatioX() const;
 	virtual uint8_t	bAspectRatioY() const;
@@ -450,8 +467,9 @@ public:
  * \brief Frame Based Format Descriptor
  */
 class FormatFrameBasedDescriptor : public FormatDescriptor {
+	FormatFrameBasedDescriptor(const FormatFrameBasedDescriptor& other);
 public:
-	FormatFrameBasedDescriptor(const Device& device,
+	FormatFrameBasedDescriptor(Device& device,
 		const void *data, int length);
 
 	uint8_t	bBitsPerPixel() const;
@@ -468,8 +486,9 @@ public:
  * \brief Uncompressed Format Descriptor
  */
 class FormatUncompressedDescriptor : public FormatFrameBasedDescriptor {
+	FormatUncompressedDescriptor(const FormatUncompressedDescriptor& other);
 public:
-	FormatUncompressedDescriptor(const Device& device,
+	FormatUncompressedDescriptor(Device& device,
 		const void *data, int length);
 	virtual std::string	toString() const;
 };
@@ -478,8 +497,9 @@ public:
  * \brief Frame Descriptor base class
  */
 class FrameDescriptor : public UVCDescriptor {
+	FrameDescriptor(const FrameDescriptor& other);
 public:
-	FrameDescriptor(const Device& device, const void *data, int length);
+	FrameDescriptor(Device& device, const void *data, int length);
 
 	// common attributes for all Frame descriptors
 	uint8_t		bFrameIndex() const;
@@ -505,8 +525,9 @@ public:
  * \brief FrameUncompressedDescriptor
  */
 class FrameUncompressedDescriptor : public FrameDescriptor {
+	FrameUncompressedDescriptor(const FrameUncompressedDescriptor& other);
 public:
-	FrameUncompressedDescriptor(const Device& device,
+	FrameUncompressedDescriptor(Device& device,
 		const void *data, int length);
 
 	uint32_t	dwMaxVideoFrameBufferSize() const;
@@ -517,8 +538,9 @@ public:
  * \brief FrameMJPEGDescriptor
  */
 class FrameMJPEGDescriptor : public FrameDescriptor {
+	FrameMJPEGDescriptor(const FrameMJPEGDescriptor& other);
 public:
-	FrameMJPEGDescriptor(const Device& other, const void *data, int length);
+	FrameMJPEGDescriptor(Device& other, const void *data, int length);
 
 	uint32_t	dwMaxVideoFrameBufferSize() const;
 	virtual std::string	toString() const;
@@ -528,8 +550,9 @@ public:
  * \brief FrameFrameBasedDescriptor
  */
 class FrameFrameBasedDescriptor : public FrameDescriptor {
+	FrameFrameBasedDescriptor(const FrameFrameBasedDescriptor& other);
 public:
-	FrameFrameBasedDescriptor(const Device& device,
+	FrameFrameBasedDescriptor(Device& device,
 		const void *data, int length);
 
 	virtual	uint8_t		bFrameIntervalType() const;

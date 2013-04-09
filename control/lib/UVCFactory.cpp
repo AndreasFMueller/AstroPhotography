@@ -15,7 +15,7 @@ namespace uvc {
 //////////////////////////////////////////////////////////////////////
 // UVCDescriptorFactory
 //////////////////////////////////////////////////////////////////////
-UVCDescriptorFactory::UVCDescriptorFactory(const Device& _device)
+UVCDescriptorFactory::UVCDescriptorFactory(Device& _device)
 	: DescriptorFactory(_device) {
 }
 
@@ -45,7 +45,7 @@ USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
 // VideoControlDescriptorFactory
 //////////////////////////////////////////////////////////////////////
 VideoControlDescriptorFactory::VideoControlDescriptorFactory(
-	const Device& _device)
+	Device& _device)
 	: UVCDescriptorFactory(_device) {
 }
 
@@ -54,6 +54,15 @@ uint16_t	VideoControlDescriptorFactory::wterminaltype(const void *data)
 	return *(uint16_t *)&(((uint8_t *)data)[4]);
 }
 
+/**
+ * \brief Parse a header descriptor and all the attached video control unit
+ *        descriptors.
+ *
+ * A InterfaceHeaderDescriptor never comes alone, it is always accompanied
+ * by a sequence fo video control unit descriptors. For camera control, we
+ * only need two headers: the camera terminal descriptor and the processing
+ * unit descriptor. However, we still parse all the headers.
+ */
 USBDescriptorPtr	VideoControlDescriptorFactory::header(
 				const void *data, int length) {
 	// create the header
@@ -74,12 +83,21 @@ std::cerr << "new unit" << std::endl << unit;
 
 	// make sure we know about the camera and the processing unit
 	// controls
+std::cerr << "getting ids" << std::endl;
 	ifhd->getIds();
 
+std::cerr << "complete" << std::endl;
 	// return the InterfaceHeader
 	return USBDescriptorPtr(ifhd);
 }
 
+/**
+ * \brief Main vide control descriptor parser function
+ *
+ * On ertain descriptors, most notably the video control header descriptor,
+ * this method calls other methods that will parse other headers attached
+ * to the first.
+ */
 USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	const void *data, int length)
 	throw(std::length_error, UnknownDescriptorError) {
@@ -109,6 +127,7 @@ USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	switch (subtype) {
 	case VC_HEADER:
 		result = header(data, length);
+std::cerr << "got a header" << std::endl;
 		break;
 	case VC_OUTPUT_TERMINAL:
 		result = USBDescriptorPtr(new OutputTerminalDescriptor(
@@ -140,6 +159,7 @@ USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	default:
 		throw UnknownDescriptorError(type, subtype);
 	}
+std::cerr << "parse complete" << std::endl;
 	return result;
 }
 
@@ -147,7 +167,7 @@ USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 // VideoStreamingDescriptorFactory
 //////////////////////////////////////////////////////////////////////
 VideoStreamingDescriptorFactory::VideoStreamingDescriptorFactory(
-	const Device& _device)
+	Device& _device)
 	: UVCDescriptorFactory(_device) {
 }
 

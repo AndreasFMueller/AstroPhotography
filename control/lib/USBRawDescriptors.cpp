@@ -14,8 +14,7 @@ namespace usb {
 // USBDescriptor base class
 //////////////////////////////////////////////////////////////////////
 
-USBDescriptor::USBDescriptor(const Device& _device,
-	const void *_data, int length)
+USBDescriptor::USBDescriptor(Device& _device, const void *_data, int length)
 	: device(_device) {
 	if (length < 2) {
 		throw std::length_error("data block too short for descriptor");
@@ -128,7 +127,7 @@ UnknownDescriptorError::UnknownDescriptorError(uint8_t length, uint8_t type,
 //////////////////////////////////////////////////////////////////////
 // Descriptor factory for "raw" descriptor
 //////////////////////////////////////////////////////////////////////
-DescriptorFactory::DescriptorFactory(const Device& _device) : device(_device) {
+DescriptorFactory::DescriptorFactory(Device& _device) : device(_device) {
 }
 
 uint8_t	DescriptorFactory::blength(const void *data) throw(std::length_error) {
@@ -213,7 +212,7 @@ std::ostream&	operator<<(std::ostream& out, const std::vector<USBDescriptorPtr>&
 // InterfaceAssociationDescriptor
 //////////////////////////////////////////////////////////////////////
 
-InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(const Device& _device, const void *_data, int length) : USBDescriptor(_device, _data, length) {
+InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(Device& _device, const void *_data, int length) : USBDescriptor(_device, _data, length) {
 	function = device.getStringDescriptor(data[7]);
 }
 
@@ -241,20 +240,22 @@ const std::string&	InterfaceAssociationDescriptor::iFunction() const {
 	return function;
 }
 
+static std::string	indent("    IAD ");
+
 std::string	InterfaceAssociationDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Interface Association Descriptor:" << std::endl;
-	out << "  bFirstInterface:   ";
+	out << indent<< "Interface Association Descriptor:" << std::endl;
+	out << indent<< "bFirstInterface:   ";
 	out << (int)bFirstInterface() << std::endl;
-	out << "  bInterfaceCount:   ";
+	out << indent<< "bInterfaceCount:   ";
 	out << (int)bInterfaceCount() << std::endl;
-	out << "  bFunctionClass:    ";
+	out << indent<< "bFunctionClass:    ";
 	out << (int)bFunctionClass() << std::endl;
-	out << "  bFunctionSubClass: ";
+	out << indent<< "bFunctionSubClass: ";
 	out << (int)bFunctionSubClass() << std::endl;
-	out << "  bFunctionProtocol: ";
+	out << indent<< "bFunctionProtocol: ";
 	out << (int)bFunctionProtocol() << std::endl;
-	out << "  iFunction:         ";
+	out << indent<< "iFunction:         ";
 	out << iFunction() << std::endl;
 	return out.str();
 }

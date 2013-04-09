@@ -27,22 +27,24 @@ public:
 };
 
 void	USBDescriptorTest::testList() {
+	
 	Context	context;
 	context.setDebugLevel(0);
-	std::vector<Device>	devicelist = context.devices();
-	std::vector<Device>::const_iterator	i;
+	std::vector<DevicePtr>	devicelist = context.devices();
+	int	ndevices = devicelist.size();
+	CPPUNIT_ASSERT(ndevices > 0);
+
+	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
-		std::cout << "Device on " << *i << std::endl;
-		DeviceDescriptor	*dd = i->descriptor();
+		std::cout << "Device on " << **i << std::endl;
+		DeviceDescriptorPtr	dd = (*i)->descriptor();
 		std::cout << *dd << std::endl;
 		for (int config = 0; config < dd->bNumConfigurations();
 			config++) {
-			ConfigDescriptor	*c = i->config(config);
+			ConfigurationPtr	c = (*i)->config(config);
 			std::cout << *c;
 		}
-		delete dd;
 	}
-	CPPUNIT_ASSERT(devicelist.size() > 0);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(USBDescriptorTest);

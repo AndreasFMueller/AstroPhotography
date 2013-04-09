@@ -15,7 +15,7 @@ namespace uvc {
 //////////////////////////////////////////////////////////////////////
 // HeaderDescriptor
 //////////////////////////////////////////////////////////////////////
-HeaderDescriptor::HeaderDescriptor(const Device& _device,
+HeaderDescriptor::HeaderDescriptor(Device& _device,
 	const void *_data, int length)
 	: UVCDescriptor(_device, _data, length) {
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
@@ -61,7 +61,7 @@ const USBDescriptorPtr	HeaderDescriptor::operator[](int formatindex) const {
 //////////////////////////////////////////////////////////////////////
 // InputHeaderDescriptor
 //////////////////////////////////////////////////////////////////////
-InputHeaderDescriptor::InputHeaderDescriptor(const Device& _device,
+InputHeaderDescriptor::InputHeaderDescriptor(Device& _device,
 	const void *data, int length)
 	: HeaderDescriptor(_device, data, length) {
 }
@@ -130,7 +130,7 @@ std::string	InputHeaderDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 // OutputHeaderDescriptor
 //////////////////////////////////////////////////////////////////////
-OutputHeaderDescriptor::OutputHeaderDescriptor(const Device& _device,
+OutputHeaderDescriptor::OutputHeaderDescriptor(Device& _device,
 	const void *data, int length)
 	: HeaderDescriptor(_device, data, length) {
 }

@@ -17,7 +17,7 @@ namespace uvc {
 // UVCDescriptor
 //////////////////////////////////////////////////////////////////////
 
-UVCDescriptor::UVCDescriptor(const Device& device, const void *data, int length)
+UVCDescriptor::UVCDescriptor(Device& device, const void *data, int length)
 	: USBDescriptor(device, data, length) {
 	bdescriptorsubtype = uint8At(2);
 }

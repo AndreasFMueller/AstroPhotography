@@ -15,7 +15,7 @@ namespace uvc {
 //////////////////////////////////////////////////////////////////////
 // InterfaceHeaderDescriptor
 //////////////////////////////////////////////////////////////////////
-InterfaceHeaderDescriptor::InterfaceHeaderDescriptor(const Device& _device,
+InterfaceHeaderDescriptor::InterfaceHeaderDescriptor(Device& _device,
 	const void *data, int length) : UVCDescriptor(_device, data, length) {
 }
 
@@ -130,7 +130,7 @@ const USBDescriptorPtr&	InterfaceHeaderDescriptor::operator[](int index) const {
 // TerminalDescriptor
 //////////////////////////////////////////////////////////////////////
 
-TerminalDescriptor::TerminalDescriptor(const Device& _device,
+TerminalDescriptor::TerminalDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 }
@@ -161,7 +161,7 @@ std::string	TerminalDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 // InputTerminalDescriptor
 //////////////////////////////////////////////////////////////////////
-InputTerminalDescriptor::InputTerminalDescriptor(const Device& _device,
+InputTerminalDescriptor::InputTerminalDescriptor(Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
 	terminal = device.getStringDescriptor(((uint8_t *)data)[7]);
@@ -183,7 +183,7 @@ std::string	InputTerminalDescriptor::toString() const {
 // OutputTerminalDescriptor
 //////////////////////////////////////////////////////////////////////
 
-OutputTerminalDescriptor::OutputTerminalDescriptor(const Device& _device,
+OutputTerminalDescriptor::OutputTerminalDescriptor(Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
 	terminal = device.getStringDescriptor(((uint8_t *)data)[8]);
@@ -211,7 +211,7 @@ uint8_t	OutputTerminalDescriptor::bSourceID() const {
 // CameraTerminalDescriptor
 //////////////////////////////////////////////////////////////////////
 
-CameraTerminalDescriptor::CameraTerminalDescriptor(const Device& _device,
+CameraTerminalDescriptor::CameraTerminalDescriptor(Device& _device,
 	const void *data, int length)
 	: TerminalDescriptor(_device, data, length) {
 	terminal = device.getStringDescriptor(((uint8_t *)data)[8]);
@@ -332,7 +332,7 @@ CameraTerminalDescriptor *cameraTerminalDescriptor(USBDescriptorPtr& ptr) {
 // SelectorUnitDescriptor
 //////////////////////////////////////////////////////////////////////
 
-SelectorUnitDescriptor::SelectorUnitDescriptor(const Device& _device,
+SelectorUnitDescriptor::SelectorUnitDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 	int	p = bNrInPins();
@@ -373,7 +373,7 @@ std::string	SelectorUnitDescriptor::toString() const {
 // ProcessingUnitDescriptor
 //////////////////////////////////////////////////////////////////////
 
-ProcessingUnitDescriptor::ProcessingUnitDescriptor(const Device& _device,
+ProcessingUnitDescriptor::ProcessingUnitDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 	int	n = bControlSize();
@@ -402,7 +402,7 @@ uint32_t	ProcessingUnitDescriptor::bmControls() const {
 
 uint32_t	ProcessingUnitDescriptor::bmVideoStandards() const {
 	int	n = bControlSize();
-	return bitmapAt(9 + n, 1);
+	return bitmapAt(8 + n, 1);
 }
 
 const std::string&	ProcessingUnitDescriptor::iProcessing() const {
@@ -417,6 +417,7 @@ std::string	ProcessingUnitDescriptor::toString() const {
 	out << "  bSourceID:       ";
 	out << (int)bSourceID() << std::endl;
 	out << "  bControlSize:    ";
+	out << (int)bControlSize() << std::endl;
 	out << "  bmControls:     ";
 	uint32_t	bmcontrols;
 	if (bmcontrols & (1 << 0)) {
@@ -494,6 +495,7 @@ std::string	ProcessingUnitDescriptor::toString() const {
 	if (videostandards & (1 << 5)) {
 		out << " PAL-525/60";
 	}
+	out << " (" << std::hex << (int)videostandards << ")";
 	out << std::endl;
 	return out.str();
 }
@@ -511,7 +513,7 @@ ProcessingUnitDescriptor *processingUnitDescriptor(USBDescriptorPtr& ptr) {
 // ExtensionUnitDescriptor
 //////////////////////////////////////////////////////////////////////
 
-ExtensionUnitDescriptor::ExtensionUnitDescriptor(const Device& _device,
+ExtensionUnitDescriptor::ExtensionUnitDescriptor(Device& _device,
 	const void *data, int length)
 	: UVCDescriptor(_device, data, length) {
 	int	p = bNrInPins();

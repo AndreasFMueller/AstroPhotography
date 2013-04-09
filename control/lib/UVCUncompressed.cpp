@@ -17,7 +17,7 @@ namespace uvc {
 // FormatUncompressedDescriptor
 //////////////////////////////////////////////////////////////////////
 FormatUncompressedDescriptor::FormatUncompressedDescriptor(
-	const Device& _device, const void *data, int length)
+	Device& _device, const void *data, int length)
 	: FormatFrameBasedDescriptor(_device, data, length) {
 }
 
@@ -31,7 +31,7 @@ std::string	FormatUncompressedDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 // FrameUncompressedDescriptor
 //////////////////////////////////////////////////////////////////////
-FrameUncompressedDescriptor::FrameUncompressedDescriptor(const Device& _device,
+FrameUncompressedDescriptor::FrameUncompressedDescriptor(Device& _device,
 	const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
 }

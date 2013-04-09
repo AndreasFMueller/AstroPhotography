@@ -18,7 +18,7 @@ Descriptor::Descriptor(Device& device, const std::string& extra)
 	: dev(device), extra_descriptors(extra) {
 }
 
-Descriptor::Descriptor(const Device& device, const void *extra,
+Descriptor::Descriptor(Device& device, const void *extra,
 	int extra_length)
 	: dev(device), extra_descriptors((const char *)extra, extra_length) {
 }

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <ios>
 #include <iomanip>
+#include <cassert>
 
 namespace astro {
 namespace usb {
@@ -17,12 +18,13 @@ namespace usb {
 
 void	EndpointDescriptor::copy(const struct libusb_endpoint_descriptor *_epd) {
 	epd = new struct libusb_endpoint_descriptor;
+	assert(NULL != epd);
 	memcpy(epd, _epd, sizeof(struct libusb_endpoint_descriptor));
 	epd->extra = NULL;
 	epd->extra_length = 0;
 }
 
-EndpointDescriptor::EndpointDescriptor(const Device &device,
+EndpointDescriptor::EndpointDescriptor(Device &device,
 	InterfaceDescriptor& _interfacedescriptor,
 	const struct libusb_endpoint_descriptor *_epd) :
 		Descriptor(device, _epd->extra, _epd->extra_length),
@@ -62,13 +64,13 @@ InterfaceDescriptor&	EndpointDescriptor::interface() {
 	return interfacedescriptor;
 }
 
-static std::string	indent("            ");
+static std::string	indent("            E   ");
 
 std::string	EndpointDescriptor::toString() const {
 	std::ostringstream	out;
-	out << indent << " E   bEndpointAddress:  ";
+	out << indent << "bEndpointAddress:  ";
 	out << std::hex << (int)bEndpointAddress() << std::endl;
-	out << indent << " E   bmAttributes:     ";
+	out << indent << "bmAttributes:     ";
 
 	std::string	attributes;
 
@@ -118,15 +120,15 @@ std::string	EndpointDescriptor::toString() const {
 
 	out << attributes << " (";
 	out << std::hex << (int)bmAttributes() << ")" << std::endl;
-	out << indent << " E   wMaxPacketSize:    ";
+	out << indent << "wMaxPacketSize:    ";
 	out << std::dec << wMaxPacketSize() << std::endl;
-	out << indent << " E   bInterval:         ";
+	out << indent << "bInterval:         ";
 	out << std::dec << (int)bInterval() << std::endl;
-	out << indent << " E   bRefresh:          ";
+	out << indent << "bRefresh:          ";
 	out << std::dec << (int)bRefresh() << std::endl;
-	out << indent << " E   bSynchAddress:     ";
+	out << indent << "bSynchAddress:     ";
 	out << std::hex << (int)bSynchAddress() << std::endl;
-	out << indent << "<E   extra ep data:     ";
+	out << indent << "extra EP data:     ";
 	out << std::dec << (int)extra().size() << " bytes" << std::endl;
 	return out.str();
 }

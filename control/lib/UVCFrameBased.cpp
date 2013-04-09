@@ -17,7 +17,7 @@ namespace uvc {
 // FormatFrameBasedDescriptor
 //////////////////////////////////////////////////////////////////////
 FormatFrameBasedDescriptor::FormatFrameBasedDescriptor(
-	const Device& _device, const void *data, int length)
+	Device& _device, const void *data, int length)
 	: FormatDescriptor(_device, data, length) {
 }
 
@@ -76,7 +76,7 @@ std::string	FormatFrameBasedDescriptor::toString() const {
 // FrameFrameBasedDescriptor
 //////////////////////////////////////////////////////////////////////
 FrameFrameBasedDescriptor::FrameFrameBasedDescriptor(
-	const Device& _device, const void *data, int length)
+	Device& _device, const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
 }
 

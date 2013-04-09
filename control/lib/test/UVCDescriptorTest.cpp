@@ -28,26 +28,23 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-static void	showInterfaceDescriptor(const InterfaceDescriptor& ifdesc) {
-	std::string	extra = ifdesc.extra();
+static void	showInterfaceDescriptor(Device& device, InterfaceDescriptorPtr ifdesc) {
+	std::string	extra = ifdesc->extra();
 	if (extra.size() > 0) {
 		std::cout << "extra size: " << extra.size() << std::endl;
-		UVCDescriptorFactory	f(ifdesc.device());
+		UVCDescriptorFactory	f(device);
 		std::cout << f.descriptors(extra.c_str(), extra.size());
 	}
 }
 
-static void	showInterfaceList(const std::vector<Interface>& iflist) {
-	std::vector<Interface>::const_iterator	i;
-	for (i = iflist.begin(); i != iflist.end(); i++) {
-		for (int j = 0; j < i->numAltsettings(); j++) {
-			showInterfaceDescriptor((*i)[j]);
-		}
+static void	showInterface(Device& device, const InterfacePtr& interface) {
+	for (int j = 0; j < interface->numAltsettings(); j++) {
+		showInterfaceDescriptor(device, (*interface)[j]);
 	}
 }
 
-static void	showConfigDescriptorExtra(const ConfigDescriptor& config) {
-	DescriptorFactory	f(config.device());
+static void	showConfigurationExtra(Device& device, const Configuration& config) {
+	DescriptorFactory	f(device);
 	std::vector<USBDescriptorPtr>	l = f.descriptors(config.extra().c_str(), config.extra().size());
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
@@ -58,22 +55,20 @@ static void	showConfigDescriptorExtra(const ConfigDescriptor& config) {
 void	UVCDescriptorTest::testList() {
 	Context	context;
 	context.setDebugLevel(0);
-	std::vector<Device>	devicelist = context.devices();
-	std::vector<Device>::const_iterator	i;
+	std::vector<DevicePtr>	devicelist = context.devices();
+	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
-		std::cout << "Device on " << *i << std::endl;
-		DeviceDescriptor	*dd = i->descriptor();
+		std::cout << "Device on " << **i << std::endl;
+		DeviceDescriptorPtr	dd = (*i)->descriptor();
 		for (int config = 0; config < dd->bNumConfigurations();
 			config++) {
-			ConfigDescriptor	*c = i->config(config);
-			showConfigDescriptorExtra(*c);
+			ConfigurationPtr	c = (*i)->config(config);
+			showConfigurationExtra(**i, *c);
 
-			const std::vector<Interface>&	iflist = c->interface();
-			showInterfaceList(iflist);
-
-			delete c;
+			for (int ifno = 0; ifno < c->bNumInterfaces(); ifno++) {
+				showInterface(**i, (*c)[ifno]);
+			}
 		}
-		delete dd;
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
 }

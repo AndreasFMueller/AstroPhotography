@@ -100,6 +100,9 @@ class 	Device {
 	// Device objects can only be created from a Context
 	Device(struct libusb_device *dev, libusb_device_handle *dev_handle = NULL);
 
+	// Device objects cannot be copied
+	Device(const Device& other);
+
 	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
 	struct libusb_device	*getDevice();
 	int	broken;
@@ -115,10 +118,10 @@ public:
 	enum usb_speed	getDeviceSpeed() const;
 
 	// descriptor access
-	DeviceDescriptorPtr	descriptor() const throw(USBError);
-	ConfigurationPtr	config(uint8_t index) const throw(USBError);
-	ConfigurationPtr	activeConfig() const throw(USBError);
-	ConfigurationPtr	configValue(uint8_t value) const throw(USBError);
+	DeviceDescriptorPtr	descriptor() throw(USBError);
+	ConfigurationPtr	config(uint8_t index) throw(USBError);
+	ConfigurationPtr	activeConfig() throw(USBError);
+	ConfigurationPtr	configValue(uint8_t value) throw(USBError);
 	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
 
 	// make sure the device is open
@@ -332,6 +335,7 @@ public:
 	EmptyRequest(request_type type, uint16_t wIndex,
 		uint8_t bRequest, uint16_t wValue);
 
+	virtual uint8_t	bmRequestType() const;
 	virtual uint8_t bRequest() const;
 	virtual uint16_t	wValue() const;
 	virtual uint16_t	wIndex() const;
@@ -392,13 +396,14 @@ public:
  * it expands the strings referenced in the descriptor
  */
 class	DeviceDescriptor {
-	const Device&	dev;
+	Device&	dev;
 	struct libusb_device_descriptor	d;
 	std::string	manufacturer;
 	std::string	product;
 	std::string	serialnumber;
-	DeviceDescriptor(const Device& device,
+	DeviceDescriptor(Device& device,
 		libusb_device_descriptor *dev_descriptor);
+	DeviceDescriptor(const DeviceDescriptor& other);
 public:
 	// constructors
 	~DeviceDescriptor();
@@ -425,10 +430,11 @@ std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc);
  */
 class Descriptor {
 protected:
-	Device	dev;
+	Device&	dev;
 	std::string	extra_descriptors;
+	Descriptor(const Descriptor& other);
 public:
-	Descriptor(const Device& device, const void *extra, int extra_length);
+	Descriptor(Device& device, const void *extra, int extra_length);
 	Descriptor(Device& device, const std::string& extra);
 	Device&	device();
 	const Device&	device() const;
@@ -446,9 +452,10 @@ class EndpointDescriptor : public Descriptor {
 	struct libusb_endpoint_descriptor	*epd;
 	void	copy(const struct libusb_endpoint_descriptor	*epd);
 	InterfaceDescriptor&	interfacedescriptor;
+	EndpointDescriptor(const EndpointDescriptor& other);
 public:
 	// constructors
-	EndpointDescriptor(const Device& device, InterfaceDescriptor& interface,
+	EndpointDescriptor(Device& device, InterfaceDescriptor& interface,
 		const libusb_endpoint_descriptor *epd);
 	~EndpointDescriptor();
 
@@ -483,8 +490,9 @@ class InterfaceDescriptor : public Descriptor {
 	// which is used for bandwith negotiation
 	std::vector<EndpointDescriptorPtr>	endpointlist;
 	void	getEndpoints();
+	InterfaceDescriptor(const InterfaceDescriptor& other);
 public:
-	InterfaceDescriptor(const Device& device, Interface& interface,
+	InterfaceDescriptor(Device& device, Interface& interface,
 		const struct libusb_interface_descriptor *ifdp);
 
 	uint8_t	bInterfaceNumber() const;
@@ -514,12 +522,13 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
  * \brief Interface abstraction, contains all the alternate settings
  */
 class Interface {
-	Device	dev;
+	Device&	dev;
 	std::vector<InterfaceDescriptorPtr>	altsettingvector;
 	int	interface;
 	Configuration&	configuration;
+	Interface(const Interface& other);
 public:
-	Interface(const Device& device, Configuration& configuration,
+	Interface(Device& device, Configuration& configuration,
 		const libusb_interface *li, int interface);
 	int	numAltsettings() const;
 	int	interfaceNumber() const;
@@ -543,8 +552,9 @@ class	Configuration : public Descriptor {
 	void	copy(const libusb_config_descriptor *config);
 	std::vector<InterfacePtr>	interfacelist;
 	void	getInterfaces();
+	Configuration(const Configuration& other);
 public:
-	Configuration(const Device& device,
+	Configuration(Device& device,
 		const struct libusb_config_descriptor *config);
 	~Configuration();
 	uint8_t	bConfigurationValue() const;
@@ -573,8 +583,9 @@ std::ostream&	operator<<(std::ostream& out, const Configuration& config);
 class USBDescriptor {
 	uint8_t	blength;
 	uint8_t	bdescriptortype;
+	USBDescriptor(const USBDescriptor& other);
 protected:
-	const Device&	device;
+	Device&	device;
 	uint8_t	*data;
 	uint8_t	uint8At(int offset) const;
 	int8_t	int8At(int offset) const;
@@ -584,7 +595,7 @@ protected:
 	int32_t	int32At(int offset) const;
 	uint32_t	bitmapAt(int offset, int size) const;
 public:
-	USBDescriptor(const Device& device, const void *data, int length);
+	USBDescriptor(Device& device, const void *data, int length);
 	virtual	~USBDescriptor();
 	virtual	std::string	toString() const;
 	uint8_t	bLength() const;
@@ -621,11 +632,12 @@ std::ostream&	operator<<(std::ostream& out,
 
 class DescriptorFactory {
 protected:
-	Device	device;
+	Device&	device;
 	uint8_t	blength(const void *data) throw(std::length_error);
 	uint8_t	bdescriptortype(const void *data);
+	DescriptorFactory(const DescriptorFactory& other);
 public:
-	DescriptorFactory(const Device& device);
+	DescriptorFactory(Device& device);
 
 	virtual USBDescriptorPtr	descriptor(const void *data, int length)
 		throw(std::length_error, UnknownDescriptorError);
@@ -646,11 +658,18 @@ std::ostream&	operator<<(std::ostream& out,
 
 /**
  * \brief Inteface association descriptor
+ *
+ * An interface association descriptor is a standard USB descriptor describing
+ * a collection of interfaces that are used for a single function. In the case
+ * of a USB video class function, the interface association descriptor 
+ * describes the one video control interface and the one or more video
+ * streaming interfaces of the video function.
  */
 class InterfaceAssociationDescriptor : public USBDescriptor {
 	std::string	function;
+	InterfaceAssociationDescriptor(const InterfaceAssociationDescriptor& iad);
 public:
-	InterfaceAssociationDescriptor(const Device& device,
+	InterfaceAssociationDescriptor(Device& device,
 		const void *data, int length);
 	uint8_t	bFirstInterface() const;
 	uint8_t	bInterfaceCount() const;

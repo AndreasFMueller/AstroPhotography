@@ -10,7 +10,7 @@
 namespace astro {
 namespace usb {
 
-DeviceDescriptor::DeviceDescriptor(const Device& device,
+DeviceDescriptor::DeviceDescriptor(Device& device,
 	libusb_device_descriptor *device_descriptor) : dev(device) {
 	// copy the descriptor data
 	memcpy(&d, device_descriptor, sizeof(libusb_device_descriptor));
@@ -24,28 +24,34 @@ DeviceDescriptor::DeviceDescriptor(const Device& device,
 DeviceDescriptor::~DeviceDescriptor() {
 }
 
+static std::string	indent("D   ");
+
 std::ostream&	operator<<(std::ostream& out, const DeviceDescriptor& devdesc) {
-	out << "  bcdUSB:             ";
+	out << indent << "bcdUSB:                        ";
 	out << std::hex << devdesc.bcdUSB() << std::endl;
-	out << "  bDeviceClass:       ";
+	out << indent << "bDeviceClass:                  ";
 	out << std::dec << (int)devdesc.bDeviceClass() << std::endl;
-	out << "  bDeviceSubClass:    ";
+	out << indent << "bDeviceSubClass:               ";
 	out << (int)devdesc.bDeviceSubClass() << std::endl;
-	out << "  bDeviceProtocol:    ";
+	out << indent << "bDeviceProtocol:               ";
 	out << (int)devdesc.bDeviceProtocol() << std::endl;
-	out << "  bMaxPacketSize0:    ";
+	out << indent << "bMaxPacketSize0:               ";
 	out << (int)devdesc.bMaxPacketSize0() << std::endl;
-	out << "  idVendor:           ";
+	out << indent << "idVendor:                      ";
 	out << std::hex << std::setfill('0') << std::right << std::setw(4);
 	out << devdesc.idVendor() << std::endl;
-	out << "  idProduct:          ";
+	out << indent << "idProduct:                     ";
 	out << std::hex << std::setfill('0') << std::right << std::setw(4);
 	out << devdesc.idProduct() << std::endl;
-	out << "  bcdDevice:          " << devdesc.bcdDevice() << std::endl;
-	out << "  iManufacturer:      " << devdesc.iManufacturer() << std::endl;
-	out << "  iProduct:           " << devdesc.iProduct() << std::endl;
-	out << "  iSerialNumber:      " << devdesc.iSerialNumber() << std::endl;
-	out << "  bNumConfigurations: ";
+	out << indent << "bcdDevice:                     ";
+	out << devdesc.bcdDevice() << std::endl;
+	out << indent << "iManufacturer:                 ";
+	out << devdesc.iManufacturer() << std::endl;
+	out << indent << "iProduct:                      ";
+	out << devdesc.iProduct() << std::endl;
+	out << indent << "iSerialNumber:                 ";
+	out << devdesc.iSerialNumber() << std::endl;
+	out << indent << "bNumConfigurations:            ";
 	out << std::dec << (int)devdesc.bNumConfigurations() << std::endl;
 	return out;
 }

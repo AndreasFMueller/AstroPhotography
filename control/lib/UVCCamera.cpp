@@ -77,9 +77,11 @@ UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
 	int	interfacecount = iad().bInterfaceCount();
 	int	counter = 1;
 	while (counter < interfacecount) {
+std::cout << "claiming interface " << (int)(ci + counter) << std::endl;
 		device.claimInterface(ci + counter);
 		counter++;
 	}
+std::cout << "done" << std::endl;
 
 #if 0
 	// convert the additional descriptors into the control interface
@@ -105,6 +107,7 @@ UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
 }
 
 UVCCamera::~UVCCamera() {
+std::cout << "camera cleanup" << std::endl;
 	uint8_t	ci = controlInterfaceNumber();
 	device.releaseInterface(ci);
 	int	interfacecount = iad().bInterfaceCount();

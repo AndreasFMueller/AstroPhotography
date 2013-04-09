@@ -50,10 +50,10 @@ void	USBContextTest::testBasic() {
 void	USBContextTest::testList() {
 	Context	context;
 	context.setDebugLevel(0);
-	std::vector<Device>	devicelist = context.devices();
-	std::vector<Device>::const_iterator	i;
+	std::vector<DevicePtr>	devicelist = context.devices();
+	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
-		std::cout << "Device on " << *i << std::endl;
+		std::cout << "Device on " << **i << std::endl;
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
 }
