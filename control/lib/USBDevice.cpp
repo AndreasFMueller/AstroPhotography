@@ -14,9 +14,13 @@ void	Device::getDescriptor(struct libusb_device_descriptor *devdesc) const {
 	libusb_get_device_descriptor(dev, devdesc);
 }
 
+bool	Device::isOpen() const {
+	return (NULL == dev_handle) ? false : true;
+}
+
 void	Device::open() throw(USBError) {
 	// handle the case where the device has already been opened
-	if (NULL != dev_handle) {
+	if (isOpen()) {
 		return;
 	}
 
@@ -92,7 +96,22 @@ ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
 	return ConfigurationPtr(result);
 }
 
+/**
+ * \brief Get active configuaration descriptor.
+ *
+ * This method returns the active device descriptor. The device has to
+ * be open for this to work. This is a restriction imposed by a bug in
+ * libusb-1.0: on Mac OS X, the library causes a segmentation fault when
+ * trying to retrieve the active configuration descriptor of a device that
+ * was not opened. Although it works on other platforms (e.g. Linux),
+ * by enforcing this restriction on all platforms we ensure that code
+ * in Linux cannot inadvertently trigger this bug and cause segementation
+ * faults on Mac OS X.
+ */
 ConfigurationPtr	Device::activeConfig() throw(USBError) {
+	if (!isOpen()) {
+		throw USBError("device not open");
+	}
 	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_active_config_descriptor(dev, &config);
 	if (rc != LIBUSB_SUCCESS) {
@@ -103,6 +122,11 @@ ConfigurationPtr	Device::activeConfig() throw(USBError) {
 	return ConfigurationPtr(result);
 }
 
+/**
+ * \brief Get configuration by value.
+ *
+ * \param value	configuration value to search for.
+ */
 ConfigurationPtr	Device::configValue(uint8_t value) throw(USBError) {
 	struct libusb_config_descriptor	*config;
 	int	rc = libusb_get_config_descriptor_by_value(dev, value, &config);

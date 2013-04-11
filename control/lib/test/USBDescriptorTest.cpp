@@ -38,10 +38,10 @@ void	USBDescriptorTest::testList() {
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
 		std::cout << "Device on " << **i << std::endl;
-//		DeviceDescriptorPtr	dd = (*i)->descriptor();
-//		std::cout << *dd << std::endl;
-//		ConfigurationPtr	c = (*i)->activeConfig();
-//		std::cout << *c;
+		DeviceDescriptorPtr	dd = (*i)->descriptor();
+		std::cout << *dd << std::endl;
+		ConfigurationPtr	c = (*i)->activeConfig();
+		std::cout << *c;
 	}
 }
 

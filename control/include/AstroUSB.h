@@ -131,6 +131,7 @@ public:
 	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
 
 	// make sure the device is open
+	bool	isOpen() const;
 	void	open() throw(USBError);
 	void	close();
 
