@@ -72,6 +72,9 @@ typedef std::tr1::shared_ptr<DeviceDescriptor>	DeviceDescriptorPtr;
 class Configuration;
 typedef std::tr1::shared_ptr<Configuration>	ConfigurationPtr;
 
+class Device;
+typedef std::tr1::shared_ptr<Device>	DevicePtr;
+
 class Interface;
 typedef std::tr1::shared_ptr<Interface>		InterfacePtr;
 
@@ -153,8 +156,6 @@ public:
 	friend class Context;
 	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
 };
-
-typedef std::tr1::shared_ptr<Device>	DevicePtr;
 
 std::ostream&	operator<<(std::ostream& out, const Device& device);
 

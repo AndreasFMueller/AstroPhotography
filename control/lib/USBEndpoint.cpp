@@ -25,7 +25,7 @@ void	EndpointDescriptor::copy(const struct libusb_endpoint_descriptor *_epd) {
 	epd->extra_length = 0;
 }
 
-EndpointDescriptor::EndpointDescriptor(Device &device,
+EndpointDescriptor::EndpointDescriptor(Device& device,
 	InterfaceDescriptor& _interfacedescriptor,
 	const struct libusb_endpoint_descriptor *_epd) :
 		Descriptor(device, _epd->extra, _epd->extra_length),

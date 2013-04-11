@@ -52,7 +52,8 @@ std::string	FormatMJPEGDescriptor::toString() const {
 //////////////////////////////////////////////////////////////////////
 // FrameMJPEGDescriptor
 //////////////////////////////////////////////////////////////////////
-FrameMJPEGDescriptor::FrameMJPEGDescriptor(Device& _device, const void *data, int length)
+FrameMJPEGDescriptor::FrameMJPEGDescriptor(Device& _device,
+	const void *data, int length)
 	: FrameDescriptor(_device, data, length) {
 }
 

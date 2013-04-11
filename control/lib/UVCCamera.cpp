@@ -144,7 +144,7 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
 
 std::string	UVCCamera::toString() const {
 	std::ostringstream	out;
-	out << *device.config(0);
+	out << device.config(0);
 	out << iad();
 	out << "Control interface:        ";
 	out  << (int)controlInterfaceNumber() << std::endl;

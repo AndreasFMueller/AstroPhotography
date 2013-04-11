@@ -23,13 +23,13 @@ void	InterfaceDescriptor::copy(const struct libusb_interface_descriptor *_ifdp) 
 	ifdp->extra_length = 0;
 }
 
-InterfaceDescriptor::InterfaceDescriptor(Device& device, Interface& _interface,
-	const struct libusb_interface_descriptor *_ifdp)
+InterfaceDescriptor::InterfaceDescriptor(Device& device,
+	Interface& _interface, const struct libusb_interface_descriptor *_ifdp)
 		: Descriptor(device, _ifdp->extra, _ifdp->extra_length),
 		  interface(_interface) {
 	copy(_ifdp);
 	getEndpoints();
-	interfacename = device.getStringDescriptor(ifdp->iInterface);
+	interfacename = dev.getStringDescriptor(ifdp->iInterface);
 }
 
 uint8_t	InterfaceDescriptor::bInterfaceNumber() const {

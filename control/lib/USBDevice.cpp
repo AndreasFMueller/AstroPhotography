@@ -35,6 +35,24 @@ void	Device::close() {
 	dev_handle = NULL;
 }
 
+Device::Device(libusb_device *_dev, libusb_device_handle *_dev_handle)
+	: dev(_dev), dev_handle(_dev_handle) {
+	// increment the reference counter
+	libusb_ref_device(dev);
+
+	// find out whether this is a broken device
+	DeviceDescriptorPtr	d = descriptor();
+	if (d->idVendor() == 0x199e) {
+std::cout << "This is a broken camera from the imaging source" << std::endl;
+		broken = BROKEN_THE_IMAGING_SOURCE;
+	}
+}
+
+Device::~Device() {
+	close();
+	libusb_unref_device(dev);
+}
+
 std::string	Device::getStringDescriptor(uint8_t index)
 	const throw(USBError) {
 	if (NULL == dev_handle) {
@@ -64,7 +82,7 @@ DeviceDescriptorPtr	Device::descriptor() throw(USBError) {
 }
 
 ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
-	struct libusb_config_descriptor	*config;
+	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_config_descriptor(dev, index, &config);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
@@ -75,7 +93,7 @@ ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
 }
 
 ConfigurationPtr	Device::activeConfig() throw(USBError) {
-	struct libusb_config_descriptor	*config;
+	struct libusb_config_descriptor	*config = NULL;
 	int	rc = libusb_get_active_config_descriptor(dev, &config);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
@@ -94,24 +112,6 @@ ConfigurationPtr	Device::configValue(uint8_t value) throw(USBError) {
 	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
 	return ConfigurationPtr(result);
-}
-
-Device::Device(libusb_device *_dev, libusb_device_handle *_dev_handle)
-	: dev(_dev), dev_handle(_dev_handle) {
-	// increment the reference counter
-	libusb_ref_device(dev);
-
-	// find out whether this is a broken device
-	DeviceDescriptorPtr	d = descriptor();
-	if (d->idVendor() == 0x199e) {
-std::cout << "This is a broken camera from the imaging source" << std::endl;
-		broken = BROKEN_THE_IMAGING_SOURCE;
-	}
-}
-
-Device::~Device() {
-	close();
-	libusb_unref_device(dev);
 }
 
 uint8_t	Device::getBusNumber() const {

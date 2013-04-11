@@ -20,14 +20,33 @@ public:
 	void	setUp() { }
 	void	tearDown() { }
 	void	testList();
+	void	testAllconfigs();
 
 	CPPUNIT_TEST_SUITE(USBDescriptorTest);
 	CPPUNIT_TEST(testList);
+	CPPUNIT_TEST(testAllconfigs);
 	CPPUNIT_TEST_SUITE_END();
 };
 
 void	USBDescriptorTest::testList() {
-	
+	Context	context;
+	context.setDebugLevel(3);
+	std::vector<DevicePtr>	devicelist = context.devices();
+	int	ndevices = devicelist.size();
+	CPPUNIT_ASSERT(ndevices > 0);
+
+	std::vector<DevicePtr>::const_iterator	i;
+	for (i = devicelist.begin(); i != devicelist.end(); i++) {
+		std::cout << "Device on " << **i << std::endl;
+//		DeviceDescriptorPtr	dd = (*i)->descriptor();
+//		std::cout << *dd << std::endl;
+//		ConfigurationPtr	c = (*i)->activeConfig();
+//		std::cout << *c;
+	}
+}
+
+void	USBDescriptorTest::testAllconfigs() {
+return;
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -39,7 +58,7 @@ void	USBDescriptorTest::testList() {
 		std::cout << "Device on " << **i << std::endl;
 		DeviceDescriptorPtr	dd = (*i)->descriptor();
 		std::cout << *dd << std::endl;
-		for (int config = 0; config < dd->bNumConfigurations();
+		for (int config = 1; config <= dd->bNumConfigurations();
 			config++) {
 			ConfigurationPtr	c = (*i)->config(config);
 			std::cout << *c;
