@@ -122,7 +122,7 @@ int	InterfaceHeaderDescriptor::numUnits() const {
 	return units.size();
 }
 
-const USBDescriptorPtr&	InterfaceHeaderDescriptor::operator[](int index) const {
+const USBDescriptorPtr&	InterfaceHeaderDescriptor::operator[](size_t index) const {
 	return units[index];
 }
 

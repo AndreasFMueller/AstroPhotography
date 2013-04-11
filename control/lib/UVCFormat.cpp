@@ -59,12 +59,12 @@ std::string	FormatDescriptor::framesToString() const {
 	return out.str();
 }
 
-int	FormatDescriptor::numFrames() const {
+size_t	FormatDescriptor::numFrames() const {
 	return frames.size();
 }
 
-const USBDescriptorPtr&	FormatDescriptor::operator[](int frameindex) const {
-	if ((frameindex < 0) || (frameindex >= numFrames())) {
+const USBDescriptorPtr&	FormatDescriptor::operator[](size_t frameindex) const {
+	if (frameindex >= numFrames()) {
 		throw std::length_error("frameindex outside frame range");
 	}
 	return frames[frameindex];

@@ -46,7 +46,7 @@ void	Context::setDebugLevel(int level) throw (std::range_error) {
 std::vector<DevicePtr>	Context::devices() throw (USBError) {
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
-	size_t	length = libusb_get_device_list(context, &devlist);
+	ssize_t	length = libusb_get_device_list(context, &devlist);
 	if (length < 0) {
 		throw USBError(libusb_error_name(length));
 	}
@@ -54,11 +54,11 @@ std::vector<DevicePtr>	Context::devices() throw (USBError) {
 		for (int i = 0; i < length; i++) {
 			DevicePtr	dev(new Device(devlist[i]));
 			result.push_back(dev);
-			// creating Device objects increases the reference
-			// count, so we have to unreference them all here
-			libusb_unref_device(devlist[i]);
 		}
 	}
+	// creating Device objects increases the reference count, 
+	// so it is save to unref all devices, we don't need them
+	// any more
 	libusb_free_device_list(devlist, 1);
 	return result;
 }

@@ -12,6 +12,7 @@
 #include <vector>
 #include <iostream>
 #include <tr1/memory>
+#include <string.h>
 
 #define	BROKEN_NONE			0
 #define BROKEN_THE_IMAGING_SOURCE	1
@@ -511,7 +512,7 @@ public:
 	// access the various endpoint descriptors (int the cases we are
 	// interested in, there is only a single endpoint descriptor)
 	int	numEndpoints() const;
-	EndpointDescriptorPtr	operator[](int index) const;
+	EndpointDescriptorPtr	operator[](size_t index) const;
 
 	// display
 	std::string	toString() const;
@@ -533,10 +534,10 @@ class Interface {
 public:
 	Interface(Device& device, Configuration& configuration,
 		const libusb_interface *li, int interface);
-	int	numAltsettings() const;
+	size_t	numAltsettings() const;
 	int	interfaceNumber() const;
-	const InterfaceDescriptorPtr&	operator[](int index) const;
-	InterfaceDescriptorPtr&	operator[](int index);
+	const InterfaceDescriptorPtr&	operator[](size_t index) const;
+	InterfaceDescriptorPtr&	operator[](size_t index);
 	void	claim() throw(USBError);
 	void	release() throw(USBError);
 	std::string	toString() const;
@@ -570,8 +571,8 @@ public:
 
 	// access to the interfaces of this configuration
 	const std::vector<InterfacePtr>&	interfaces() const;
-	const InterfacePtr&	operator[](int index) const;
-	InterfacePtr&	operator[](int index);
+	const InterfacePtr&	operator[](size_t index) const;
+	InterfacePtr&	operator[](size_t index);
 };
 
 std::ostream&	operator<<(std::ostream& out, const Configuration& config);

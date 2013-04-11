@@ -76,7 +76,7 @@ std::vector<ModulePtr>	Repository::modules() const {
 		return result;
 	}
 	struct dirent	*dirent;
-	while (dirent = readdir(dir)) {
+	while (NULL != (dirent = readdir(dir))) {
 		int	namelen = strlen(dirent->d_name);
 		if (0 == strcmp(".la", dirent->d_name + namelen - 3)) {
 			std::string	modulename

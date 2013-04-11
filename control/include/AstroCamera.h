@@ -57,10 +57,10 @@ public:
  */
 class	Exposure {
 public:
-	float	exposuretime;
 	astro::image::ImageRectangle	frame;
-	Binning	mode;
+	float	exposuretime;
 	float	gain;
+	Binning	mode;
 
 	Exposure() : exposuretime(1.), gain(1.) { }
 	Exposure(const astro::image::ImageRectangle& _frame, float _exposuretime)

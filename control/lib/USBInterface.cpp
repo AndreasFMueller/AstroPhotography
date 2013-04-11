@@ -69,7 +69,7 @@ int	InterfaceDescriptor::numEndpoints() const {
 	return endpointlist.size();
 }
 
-EndpointDescriptorPtr	InterfaceDescriptor::operator[](int index) const {
+EndpointDescriptorPtr	InterfaceDescriptor::operator[](size_t index) const {
 	if ((index < 0) || (index >= endpointlist.size())) {
 		throw std::range_error("outside endpoint range");
 	}
@@ -130,18 +130,18 @@ int	Interface::interfaceNumber() const {
 	return interface;
 }
 
-int	Interface::numAltsettings() const {
+size_t	Interface::numAltsettings() const {
 	return altsettingvector.size();
 }
 
-const InterfaceDescriptorPtr&	Interface::operator[](int index) const {
-	if ((index < 0) || (index >= numAltsettings())) {
+const InterfaceDescriptorPtr&	Interface::operator[](size_t index) const {
+	if (index >= numAltsettings()) {
 		throw std::range_error("out of alt setting range");
 	}
 	return altsettingvector[index];
 }
 
-InterfaceDescriptorPtr&	Interface::operator[](int index) {
+InterfaceDescriptorPtr&	Interface::operator[](size_t index) {
 	if ((index < 0) || (index >= numAltsettings())) {
 		throw std::range_error("out of alt setting range");
 	}
@@ -163,7 +163,7 @@ std::string	Interface::toString() const {
 	out << ifindent << "Interface " << (int)(*this)[0]->bInterfaceNumber()
 		<< " with " << numAltsettings();
 	out << " alternate settings:" << std::endl;;
-	for (int j = 0; j < numAltsettings(); j++) {
+	for (size_t j = 0; j < numAltsettings(); j++) {
 		out << *(*this)[j];
 	}
 	out << ifindent << "end interface" << std::endl;

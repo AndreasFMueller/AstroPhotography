@@ -232,7 +232,7 @@ public:
 
 	// access to the units
 	int	numUnits() const;
-	const USBDescriptorPtr&	operator[](int index) const;
+	const USBDescriptorPtr&	operator[](size_t index) const;
 	friend class VideoControlDescriptorFactory;
 
 	uint8_t	cameraTerminalID() const;
@@ -384,7 +384,7 @@ public:
 	uint16_t	wTotalLength() const;
 	uint8_t		bEndpointAddress() const;
 	virtual std::string	toString() const;
-	const USBDescriptorPtr	operator[](int formatindex) const;
+	const USBDescriptorPtr	operator[](size_t formatindex) const;
 	friend class VideoStreamingDescriptorFactory;
 };
 
@@ -440,9 +440,9 @@ public:
 	virtual std::string	toString() const;
 
 	// frame descriptors
-	int	numFrames() const;
+	size_t	numFrames() const;
 	int	wTotalLength() const;	// not in the header, but needed
-	const USBDescriptorPtr&	operator[](int frameindex) const;
+	const USBDescriptorPtr&	operator[](size_t frameindex) const;
 	friend class VideoStreamingDescriptorFactory;
 };
 
@@ -606,8 +606,8 @@ public:
 	uint32_t	controlProcessingUnitControls() const;
 
 	// accessors to the video streaming interfaces
-	const InterfacePtr&	operator[](int interfacenumber) const;
-	InterfacePtr&	operator[](int interfacenumber);
+	const InterfacePtr&	operator[](size_t interfacenumber) const;
+	InterfacePtr&	operator[](size_t interfacenumber);
 
 	// selecting format and frame
 	void	selectFormatAndFrame(uint8_t interface,

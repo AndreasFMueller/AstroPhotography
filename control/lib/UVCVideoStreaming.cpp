@@ -51,7 +51,7 @@ uint16_t	HeaderDescriptor::wTotalLength() const {
 	return uint16At(4);
 }
 
-const USBDescriptorPtr	HeaderDescriptor::operator[](int formatindex) const {
+const USBDescriptorPtr	HeaderDescriptor::operator[](size_t formatindex) const {
 	if ((formatindex < 0) || (formatindex >= bNumFormats())) {
 		throw std::length_error("outside format range");
 	}

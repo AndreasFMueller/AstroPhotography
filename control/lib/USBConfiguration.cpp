@@ -55,14 +55,14 @@ const std::vector<InterfacePtr>&	Configuration::interfaces() const {
 	return interfacelist;
 }
 
-const InterfacePtr&	Configuration::operator[](int index) const {
+const InterfacePtr&	Configuration::operator[](size_t index) const {
 	if ((index < 0) || (index >= interfacelist.size())) {
 		throw std::range_error("outside interface range");
 	}
 	return interfacelist[index];
 }
 
-InterfacePtr&	Configuration::operator[](int index) {
+InterfacePtr&	Configuration::operator[](size_t index) {
 	if ((index < 0) || (index >= interfacelist.size())) {
 		throw std::range_error("outside interface range");
 	}

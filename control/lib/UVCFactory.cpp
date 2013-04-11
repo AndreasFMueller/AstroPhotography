@@ -35,8 +35,11 @@ USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
 	if (blength(data) > length) {
 		throw std::length_error("not enough data for descriptor");
 	}
+#if 0
+	// currently not used
 	uint8_t	type = bdescriptortype(data);
 	uint8_t	subtype = bdescriptorsubtype(data);
+#endif
 
 	return DescriptorFactory::descriptor(data, length);
 }
