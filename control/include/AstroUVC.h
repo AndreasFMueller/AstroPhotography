@@ -593,21 +593,21 @@ class UVCCamera {
 
 	// a list of Video Streaming Interface descriptors, one for each video
 	// streaming interface
-	std::vector<InterfacePtr>	videostreaming;
+	std::vector<USBDescriptorPtr>	videostreaming;
 public:
-	UVCCamera(Device& device, bool force = false);
+	UVCCamera(Device& device, bool force = false) throw(USBError);
 	~UVCCamera();
 
 	// accessors for the control interface parameters
-	uint8_t	controlInterfaceNumber() const;
-	uint8_t	controlCameraTerminalID() const;
+	uint8_t		controlInterfaceNumber() const;
+	uint8_t		controlCameraTerminalID() const;
 	uint32_t	controlCameraControls() const;
-	uint8_t	controlProcessingUnitID() const;
+	uint8_t		controlProcessingUnitID() const;
 	uint32_t	controlProcessingUnitControls() const;
 
 	// accessors to the video streaming interfaces
-	const InterfacePtr&	operator[](size_t interfacenumber) const;
-	InterfacePtr&	operator[](size_t interfacenumber);
+	const USBDescriptorPtr&	operator[](size_t interfacenumber) const;
+	USBDescriptorPtr&	operator[](size_t interfacenumber);
 
 	// selecting format and frame
 	void	selectFormatAndFrame(uint8_t interface,

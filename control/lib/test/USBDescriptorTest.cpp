@@ -38,10 +38,17 @@ void	USBDescriptorTest::testList() {
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
 		std::cout << "Device on " << **i << std::endl;
-		DeviceDescriptorPtr	dd = (*i)->descriptor();
-		std::cout << *dd << std::endl;
-		ConfigurationPtr	c = (*i)->activeConfig();
-		std::cout << *c;
+		try {
+			(*i)->open();
+			DeviceDescriptorPtr	dd = (*i)->descriptor();
+			std::cout << *dd << std::endl;
+			ConfigurationPtr	c = (*i)->activeConfig();
+			std::cout << *c;
+			(*i)->close();
+		} catch (std::exception& x) {
+			std::cout << "cannot display device: " << x.what()
+				<< std::endl;
+		}
 	}
 }
 
@@ -56,12 +63,18 @@ return;
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = devicelist.begin(); i != devicelist.end(); i++) {
 		std::cout << "Device on " << **i << std::endl;
-		DeviceDescriptorPtr	dd = (*i)->descriptor();
-		std::cout << *dd << std::endl;
-		for (int config = 1; config <= dd->bNumConfigurations();
-			config++) {
-			ConfigurationPtr	c = (*i)->config(config);
-			std::cout << *c;
+		try {
+			DeviceDescriptorPtr	dd = (*i)->descriptor();
+			(*i)->open();
+			std::cout << *dd << std::endl;
+			for (int config = 1; config <= dd->bNumConfigurations();
+				config++) {
+				ConfigurationPtr	c = (*i)->config(config);
+				std::cout << *c;
+			}
+			(*i)->close();
+		} catch (std::exception& x) {
+			std::cout << "cannot show all configs: " << x.what() << std::endl;
 		}
 	}
 }

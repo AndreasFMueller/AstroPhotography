@@ -55,7 +55,7 @@ std::string	RequestBase::toString() const {
 	std::ostringstream      out;
 
 	// display the request header
-	out << "bmRequesetType: "; 
+	out << "bmRequestType:  "; 
 	out << std::hex << std::setw(2) << std::setfill('0'); 
 	out << (int)this->bmRequestType() << std::endl;
 

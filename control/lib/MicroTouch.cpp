@@ -19,34 +19,29 @@ MicroTouch::MicroTouch(Device& _device) : device(_device) {
 	device.open();
 
 	/* 40 00 FF FF 00 00 00 00 */
-	RequestPtr	setup1(
-		new EmptyRequest(RequestBase::vendor_specific_type,
-		(uint16_t)0xffff, (uint8_t)0x00, (uint16_t)0x0000));
-	device.controlRequest(setup1);
+	EmptyRequest	setup1(RequestBase::vendor_specific_type,
+		(uint16_t)0xffff, (uint8_t)0x00, (uint16_t)0x0000);
+	device.controlRequest(&setup1);
 
 	/* 40 01 00 20 00 00 00 00 */
-	RequestPtr	setup2(
-		new EmptyRequest(RequestBase::vendor_specific_type,
-		0x0000, 0x01, 0x0020));
-	device.controlRequest(setup2);
+	EmptyRequest	setup2(RequestBase::vendor_specific_type,
+		0x0000, 0x01, 0x0020);
+	device.controlRequest(&setup2);
 
 	/* C0 FF 0B 37 00 00 01 00 */
-	RequestPtr	setup3(
-		new Request<onebyte_t>(RequestBase::vendor_specific_type,
-		0x0000, 0xff, 0x370b));
-	device.controlRequest(setup3);
+	Request<onebyte_t>	setup3(RequestBase::vendor_specific_type,
+		0x0000, 0xff, 0x370b);
+	device.controlRequest(&setup3);
 
 	/* 40 12 0C 00 00 00 00 00 */
-	RequestPtr	setup4(
-		new EmptyRequest(RequestBase::vendor_specific_type,
-		0x0000, 0x12, 0x000c));
-	device.controlRequest(setup4);
+	EmptyRequest	setup4(RequestBase::vendor_specific_type,
+		0x0000, 0x12, 0x000c);
+	device.controlRequest(&setup4);
 
 	/* 40 01 C0 00 00 00 00 00 */
-	RequestPtr	setup5(
-		new EmptyRequest(RequestBase::vendor_specific_type,
-		0x0000, 0x01, 0x00c0));
-	device.controlRequest(setup5);
+	EmptyRequest	setup5(RequestBase::vendor_specific_type,
+		0x0000, 0x01, 0x00c0);
+	device.controlRequest(&setup5);
 }
 
 

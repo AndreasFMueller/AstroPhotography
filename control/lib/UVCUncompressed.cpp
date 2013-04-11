@@ -23,7 +23,7 @@ FormatUncompressedDescriptor::FormatUncompressedDescriptor(
 
 std::string	FormatUncompressedDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Format Uncompressed Descriptor:" << std::endl;
+	out << "        Format Uncompressed Descriptor:" << std::endl;
 	out << this->FormatFrameBasedDescriptor::toString();
 	return out.str();
 }
@@ -42,9 +42,9 @@ uint32_t	FrameUncompressedDescriptor::dwMaxVideoFrameBufferSize() const {
 
 std::string	FrameUncompressedDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Frame Uncompressed Descriptor:" << std::endl;
+	out << "            Frame Uncompressed Descriptor:" << std::endl;
 	out << this->FrameDescriptor::toString();
-	out << "  dwMaxVideoFrameBufferSize: ";
+	out << "                FRM dwMaxVideoFrameBufferSize: ";
 	out << dwMaxVideoFrameBufferSize() << std::endl;
 	return out.str();
 }

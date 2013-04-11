@@ -148,7 +148,7 @@ public:
 		throw(USBError);
 
 	// having requests processed by the device
-	void	controlRequest(RequestPtr request) throw(USBError);
+	void	controlRequest(RequestBase *request) throw(USBError);
 	void	submit(TransferPtr request) throw(USBError);
 
 	//  some more accessors
@@ -248,10 +248,10 @@ public:
 };
 
 /**
- * \brief A Request wrapper template
+ * \brief Request template.
  *
  * Requests on the control pipe are built with this template. 
- * 
+ *
  */
 template<typename T>
 class Request : public RequestBase {
@@ -262,6 +262,9 @@ public:
 	} __attribute__((packed)) request_packet_t;
 private:
 	request_packet_t	packet;
+	/**
+	 * \brief Initialize the request.
+	 */
 	void init(uint8_t bRequest, uint16_t wValue, T *payload_data) {
 		packet.header.bmRequestType = RequestBase::bmRequestType();
 		packet.header.bRequest = bRequest;
@@ -272,6 +275,9 @@ private:
 		}
 	}
 public:	
+	/**
+	 * \brief Construct a request to an endpoint.
+	 */
 	Request(request_type type, const EndpointDescriptorPtr endpoint,
 		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
 		: RequestBase(type, endpoint, payload_data) {
@@ -279,6 +285,19 @@ public:
 		packet.header.wIndex = RequestBase::wIndex();
 	}
 
+	/**
+	 * \brief Construct a request to an interface.
+	 *
+	 * Fill the structure of a request that is addressed to an
+	 * interface. In most cases, this is a video streaming interface.
+	 * \param type		request type
+	 * \param interface	
+	 * \param bRequest
+	 * \param wValue
+	 * \param payload_data	pointer to the payload data.
+	 *			If the payload_data is NULL, then this is a
+	 *			request that retrieves data from the device.
+	 */
 	Request(request_type type, const InterfacePtr& interface,
 		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
 		: RequestBase(type, interface, payload_data) {
@@ -286,6 +305,17 @@ public:
 		packet.header.wIndex = RequestBase::wIndex();
 	}
 
+	/**
+	 * \brief Construct a raw request.
+	 *
+	 * Fill the request structure directly.
+	 * \param type		request type
+	 * \param wIndex	
+	 * \param bRequest	request number
+	 * \param wValue	
+	 * \param payload_data	pointer to the data structure to send or
+	 * 			retrieve
+	 */
 	Request(request_type type, uint16_t wIndex,
 		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
 		: RequestBase(type, payload_data) {

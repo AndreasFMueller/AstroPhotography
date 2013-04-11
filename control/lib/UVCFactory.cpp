@@ -71,25 +71,20 @@ USBDescriptorPtr	VideoControlDescriptorFactory::header(
 	// create the header
 	InterfaceHeaderDescriptor	*ifhd = new InterfaceHeaderDescriptor(
 		device, data, length);
-std::cerr << "header parsed" << std::endl;
 
 	// add the units
 	int	offset = ifhd->bLength();
-std::cerr << "offset: " << offset << ", length = " << length << std::endl;
 	while (offset < length) {
 		USBDescriptorPtr	unit
 			= descriptor(offset + (uint8_t *)data, length - offset);
-std::cerr << "new unit" << std::endl << unit;
 		ifhd->units.push_back(unit);
 		offset += unit->bLength();
 	}
 
 	// make sure we know about the camera and the processing unit
 	// controls
-std::cerr << "getting ids" << std::endl;
 	ifhd->getIds();
 
-std::cerr << "complete" << std::endl;
 	// return the InterfaceHeader
 	return USBDescriptorPtr(ifhd);
 }
@@ -130,7 +125,6 @@ USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	switch (subtype) {
 	case VC_HEADER:
 		result = header(data, length);
-std::cerr << "got a header" << std::endl;
 		break;
 	case VC_OUTPUT_TERMINAL:
 		result = USBDescriptorPtr(new OutputTerminalDescriptor(
@@ -162,7 +156,6 @@ std::cerr << "got a header" << std::endl;
 	default:
 		throw UnknownDescriptorError(type, subtype);
 	}
-std::cerr << "parse complete" << std::endl;
 	return result;
 }
 

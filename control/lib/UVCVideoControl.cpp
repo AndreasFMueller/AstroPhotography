@@ -46,23 +46,26 @@ uint8_t	InterfaceHeaderDescriptor::baInterface(int index) const
 	return uint8At(12 + index);
 }
 
+static std::string	indent("       ");
+static std::string	headerindent = indent + ("    IH  ");
+
 std::string	InterfaceHeaderDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Interface Header:" << std::endl;
-	out << "  bcdUVC:           ";
+	out << indent << "Interface Header:" << std::endl;
+	out << headerindent << "bcdUVC:                   ";
 	out << std::hex << bcdUVC() << std::endl;
-	out << "  wTotalLength:     ";
+	out << headerindent << "wTotalLength:             ";
 	out << std::dec << wTotalLength() << std::endl;
-	out << "  dwClockFrequency: ";
+	out << headerindent << "dwClockFrequency:         ";
 	out << std::dec << dwClockFrequency() << std::endl;
-	out << "  bInCollection:    ";
+	out << headerindent << "bInCollection:            ";
 	out << std::dec << (int)bInCollection() << std::endl;
-	out << "  baInterface:     ";
+	out << headerindent << "baInterface:             ";
 	for (int i = 0; i < bInCollection(); i++) {
 		out << " " << std::hex << (int)baInterface(i);
 	}
 	out << std::endl;
-	out << "  units:" << std::endl;
+	out << headerindent << "units:" << std::endl;
 	for (int i = 0; i < numUnits(); i++) {
 		out << operator[](i)->toString();
 	}
@@ -147,13 +150,15 @@ uint8_t	TerminalDescriptor::bAssocTerminal() const {
 	return uint8At(6);
 }
 
+static std::string	terminalindent = indent + std::string("     T  ");
+
 std::string	TerminalDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "  bTerminalID:     ";
+	out << terminalindent << "bTerminalID:              ";
 	out << (int)bTerminalID() << std::endl;
-	out << "  wTerminalType:   ";
+	out << terminalindent << "wTerminalType:            ";
 	out << std::hex << wTerminalType() << std::endl;
-	out << "  bAssocTerminal:  ";
+	out << terminalindent << "bAssocTerminal:           ";
 	out << std::dec << (int)bAssocTerminal() << std::endl;
 	return out.str();
 }
@@ -171,11 +176,13 @@ const std::string&	InputTerminalDescriptor::iTerminal() const {
 	return terminal;
 }
 
+static std::string	inputindent = indent + std::string("    IT  ");
+
 std::string	InputTerminalDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Input Terminal Descriptor:" << std::endl;
+	out << indent << "Input Terminal Descriptor:" << std::endl;
 	out << this->TerminalDescriptor::toString();
-	out << "  iTerminal:      " << terminal << std::endl;
+	out << terminalindent << "iTerminal:      " << terminal << std::endl;
 	return out.str();
 }
 
@@ -193,13 +200,16 @@ const std::string&	OutputTerminalDescriptor::iTerminal() const {
 	return terminal;
 }
 
+static std::string	outputindent = indent + std::string("    OT  ");
+
 std::string	OutputTerminalDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Output Terminal Descriptor:" << std::endl;
+	out << indent << "Output Terminal Descriptor:" << std::endl;
 	out << this->TerminalDescriptor::toString();
-	out << "  bSourceID:      ";
+	out << outputindent << "bSourceID:                ";
 	out << std::dec << (int)bSourceID() << std::endl;
-	out << "  iTerminal:      " << terminal << std::endl;
+	out << outputindent << "iTerminal:                ";
+	out << terminal << std::endl;
 	return out.str();
 }
 
@@ -242,21 +252,23 @@ uint32_t	CameraTerminalDescriptor::bmControls() const {
 	return result & 0x0007ffff;
 }
 
+static std::string	cameraindent = indent + std::string("    CT  ");
+
 std::string	CameraTerminalDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Camera Terminal Descriptor:" << std::endl;
+	out << indent << "Camera Terminal Descriptor:" << std::endl;
 	out << this->TerminalDescriptor::toString();
-	out << "  iTerminal:                ";
+	out << cameraindent << "iTerminal:                ";
 	out << iTerminal() << std::endl;
-	out << "  wObjectiveFocalLengthMin: ";
+	out << cameraindent << "wObjectiveFocalLengthMin: ";
 	out << wObjectiveFocalLengthMin() << std::endl;
-	out << "  wObjectiveFocalLengthMax: ";
+	out << cameraindent << "wObjectiveFocalLengthMax: ";
 	out << wObjectiveFocalLengthMax() << std::endl;
-	out << "  wOcularFocalLength:       ";
+	out << cameraindent << "wOcularFocalLength:       ";
 	out << wOcularFocalLength() << std::endl;
-	out << "  bControlSize:             ";
+	out << cameraindent << "bControlSize:             ";
 	out << (int)bControlSize() << std::endl;
-	out << "  bmControls:              ";
+	out << cameraindent << "bmControls:              ";
 	uint16_t	controls = bmControls();
 	if (controls & (1 << 0)) {
 		out << " scanning_mode";
@@ -354,14 +366,16 @@ uint8_t	SelectorUnitDescriptor::baSourceID(int index) const {
 	return uint8At(5 + index);
 }
 
+static std::string	selectorindent = indent + std::string("    SU  ");
+
 std::string	SelectorUnitDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Selector Unit Descriptor:" << std::endl;
-	out << "  bUnitID:      ";
+	out << indent << "Selector Unit Descriptor:" << std::endl;
+	out << selectorindent << "bUnitID:      ";
 	out << (int)bUnitID() << std::endl;
-	out << "  bNrInPins:    ";
+	out << selectorindent << "bNrInPins:    ";
 	out << (int)bNrInPins() << std::endl;
-	out << "  baSourceID:  ";
+	out << selectorindent << "baSourceID:  ";
 	for (int i = 0; i < bNrInPins(); i++) {
 		out << " " << (int)baSourceID(i);
 	}
@@ -409,16 +423,18 @@ const std::string&	ProcessingUnitDescriptor::iProcessing() const {
 	return processing;
 }
 
+static std::string	processingindent = indent + std::string("    PU  ");
+
 std::string	ProcessingUnitDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Processing Unit Descriptor:" << std::endl;
-	out << "  bUnitID:         ";
+	out << indent << "Processing Unit Descriptor:" << std::endl;
+	out << processingindent << "bUnitID:                  ";
 	out << (int)bUnitID() << std::endl;
-	out << "  bSourceID:       ";
+	out << processingindent << "bSourceID:                ";
 	out << (int)bSourceID() << std::endl;
-	out << "  bControlSize:    ";
+	out << processingindent << "bControlSize:             ";
 	out << (int)bControlSize() << std::endl;
-	out << "  bmControls:     ";
+	out << processingindent << "bmControls:              ";
 	uint32_t	bmcontrols = bmControls();
 	if (bmcontrols & (1 << 0)) {
 		out << " brightness";
@@ -475,7 +491,7 @@ std::string	ProcessingUnitDescriptor::toString() const {
 		out << " analog_video_lock_status";
 	}
 	out << std::endl;
-	out << "  bmVideoStandards:";
+	out << processingindent << "bmVideoStandards:        ";
 	uint32_t	videostandards = bmVideoStandards();
 	if (videostandards & (1 << 0)) {
 		out << "none";
@@ -564,27 +580,30 @@ uint32_t	ExtensionUnitDescriptor::bmControls() const {
 	return result & mask;
 }
 
+static std::string	extensionindent = indent + std::string("    EU  ");
+
 std::string	ExtensionUnitDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Extension Unit Descriptor:" << std::endl;
-	out << "  bUnitID:           ";
+	out << indent << "Extension Unit Descriptor:" << std::endl;
+	out << extensionindent << "bUnitID:                  ";
 	out << (int)bUnitID() << std::endl;
-	out << "  guidExtensionCode: ";
+	out << extensionindent << "guidExtensionCode:        ";
 	out << guid << std::endl;
-	out << "  bNumControls:      ";
+	out << extensionindent << "bNumControls:             ";
 	out << (int)bNumControls() << std::endl;
-	out << "  bNrInPins:         ";
+	out << extensionindent << "bNrInPins:                ";
 	out << (int)bNrInPins() << std::endl;
-	out << "  baSourceID:       ";
+	out << extensionindent << "baSourceID:              ";
 	for (int i = 0; i < bNrInPins(); i++) {
 		out << " " << (int)baSourceID(i);
 	}
 	out << std::endl;
-	out << "  bControlSize:      ";
+	out << extensionindent << "bControlSize:             ";
 	out << (int)bControlSize() << std::endl;
-	out << "  bmControls:        ";
+	out << extensionindent << "bmControls:               ";
 	out << std::hex << bmControls() << std::endl;
-	out << "  iExtension:        " << extension << std::endl;
+	out << extensionindent << "iExtension:               ";
+	out << extension << std::endl;
 	return out.str();
 }
 

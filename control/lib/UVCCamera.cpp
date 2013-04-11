@@ -16,7 +16,8 @@ namespace uvc {
 /**
  * \brief Construct a camera from a USB Device
  */
-UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
+UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
+	: device(_device) {
 	std::cout << "trying to build a UVCCamera object from a USB Device"
 		<< std::endl;
 	// make sure the camera is open, this most probably will not have
@@ -25,9 +26,7 @@ UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
 
 	// scan the active configuration for one that has an Interface
 	// association descriptor
-	// XXX getting the active configuration leads to a segmentation fault
-	//     so we do with configuration for the time being
-	ConfigurationPtr config = device.config(0);
+	ConfigurationPtr config = device.activeConfig();
 	if (config->extra().size() == 0) {
 		throw USBError("no InterfaceAssociationDescriptor");
 	}
@@ -61,9 +60,11 @@ UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
 	// for the control interface, and claim it
 	uint8_t	ci = controlInterfaceNumber();
 	videocontrol = (*config)[ci];
+#if 0
 	videocontrol->claim();	// XXX this is probably wrong. we should
 				// only claim the interface if we really want
 				// to use it
+#endif
 
 	// we also need to know all the video control descriptors appended
 	// to this InterfaceDescriptor. The VideoControlDescriptorFactory
@@ -71,55 +72,64 @@ UVCCamera::UVCCamera(Device& _device, bool force) : device(_device) {
 	InterfaceDescriptorPtr	controlinterface = (*videocontrol)[0];
 	VideoControlDescriptorFactory	vcdf(device);
 	videocontroldescriptors = vcdf.descriptors(controlinterface->extra());
+	//std::cout << videocontroldescriptors[0];
 	
 	// now claim get the various interface descriptors, i.e. the
 	// alternate settings for an interface
 	int	interfacecount = iad().bInterfaceCount();
 	int	counter = 1;
 	while (counter < interfacecount) {
+#if 0
 std::cout << "claiming interface " << (int)(ci + counter) << std::endl;
 		device.claimInterface(ci + counter);
+#endif
 		counter++;
-	}
-std::cout << "done" << std::endl;
-
-#if 0
-	// convert the additional descriptors into the control interface
-	// descriptors
-	VideoControlDescriptorFactory	vcf(device);
-	std::string	extra = controlinterface->extra();
-	videocontrol = vcf.descriptor(extra);
-	if (!isInterfaceHeaderDescriptor(videocontrol)) {
-		std::runtime_error("not a video control interface");
 	}
 
 	// now parse the video streaming interfaces
 	VideoStreamingDescriptorFactory	vsf(device);
-	for (int vsindex = 1; vsindex < iad().bInterfaceCount(); vsindex++) {
-		InterfacePtr	interface = config->interface(vsindex);
+	for (int vsindex = controlInterfaceNumber() + 1;
+		vsindex < iad().bInterfaceCount(); vsindex++) {
+		InterfacePtr	interface = (*config)[vsindex];
 		// only alternate setting 0 contains the formats
-		InterfaceDescriptor	id = interface[0];
-		std::string	extra = id.extra();
+		InterfaceDescriptorPtr	id = (*interface)[0];
+		std::string	extra = id->extra();
 		USBDescriptorPtr	vsd = vsf.descriptor(extra);
 		videostreaming.push_back(vsd);
 	}
-#endif
 }
 
 UVCCamera::~UVCCamera() {
 std::cout << "camera cleanup" << std::endl;
-	uint8_t	ci = controlInterfaceNumber();
-	device.releaseInterface(ci);
-	int	interfacecount = iad().bInterfaceCount();
-	int	counter = 1;
-	while (counter < interfacecount) {
-		device.releaseInterface(ci + counter);
-		counter++;
+	try {
+#if 0
+		uint8_t	ci = controlInterfaceNumber();
+		device.releaseInterface(ci);
+		int	interfacecount = iad().bInterfaceCount();
+		int	counter = 1;
+		while (counter < interfacecount) {
+			device.releaseInterface(ci + counter);
+			counter++;
+		}
+#endif
+		device.close();
+	} catch (std::exception& x) {
+		std::cout << "error during cleanup: " << x.what() << std::endl;
+		throw;
 	}
+std::cout << "camera cleanup complete" << std::endl;
 }
 
 const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
 	return dynamic_cast<const InterfaceAssociationDescriptor &>(*iadptr);
+}
+
+const USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) const {
+	return videostreaming[interfacenumber - controlInterfaceNumber() - 1];
+}
+
+USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) {
+	return videostreaming[interfacenumber - controlInterfaceNumber() - 1];
 }
 
 uint8_t	UVCCamera::controlInterfaceNumber() const {
@@ -144,7 +154,7 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
 
 std::string	UVCCamera::toString() const {
 	std::ostringstream	out;
-	out << device.config(0);
+	out << *device.activeConfig();
 	out << iad();
 	out << "Control interface:        ";
 	out  << (int)controlInterfaceNumber() << std::endl;
@@ -156,10 +166,10 @@ std::string	UVCCamera::toString() const {
 	out  << std::dec << (int)controlProcessingUnitID() << std::endl;
 	out << "Processing Unit Controls: ";
 	out  << std::hex << controlProcessingUnitControls() << std::endl;
-	out << videocontrol;
-	std::vector<InterfacePtr>::const_iterator	i;
+	out << *videocontrol;
+	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = videostreaming.begin(); i != videostreaming.end(); i++) {
-		out << *i;
+		out << **i;
 	}
 	return out.str();
 }
@@ -170,45 +180,42 @@ std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera) {
 
 void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 		uint8_t format, uint8_t frame) throw(USBError) {
-#if 0
 	// We want to negotiate use of the a given format and frame.
 	// To do this, we send a SET probe
 	vs_control_request_t	control_request;
 	memset(&control_request, 0, sizeof(control_request));
 	control_request.bFormatIndex = format;
 	control_request.bFrameIndex = frame;
-	Request<vs_control_request_t>	rset(REQUEST_CLASS_INTERFACE_SET,
-		SET_CUR, VS_PROBE_CONTROL << 8, interface, &control_request);
-	int	rc;
-	if ((rc = device.controlRequest(&rset)) < 0) {
-		throw USBError(libusb_error_name(rc));
-	}
+
+	// do we have to claim the interface?
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
+#if 0
+	interfaceptr->claim();
+#endif
+
+	Request<vs_control_request_t>	rset(RequestBase::class_specific_type,
+		interfaceptr, SET_CUR, VS_PROBE_CONTROL << 8, &control_request);
+	device.controlRequest(&rset);
 
 	// now probe the same thing, this should return a recommended
 	// setting 
-	Request<vs_control_request_t>	rget(REQUEST_CLASS_INTERFACE_GET,
-		GET_CUR, VS_PROBE_CONTROL << 8, interface);
-	if ((rc = device.controlRequest(&rget)) < 0) {
-		throw USBError(libusb_error_name(rc));
-	} else {
-		if (rget.data()->bFormatIndex != format) {
-			throw USBError("cannot negotiate format index");
-		}
-		if (rget.data()->bFrameIndex != frame) {
-			throw USBError("cannot negotiate frame index");
-		}
+	Request<vs_control_request_t>	rget(RequestBase::class_specific_type,
+		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	device.controlRequest(&rget);
+	if (rget.data()->bFormatIndex != format) {
+		throw USBError("cannot negotiate format index");
+	}
+	if (rget.data()->bFrameIndex != frame) {
+		throw USBError("cannot negotiate frame index");
 	}
 
 	// if we get to this point, then negotiating the format and frame
 	// was successful, and we can commit the negotiated paramters
-	Request<vs_control_request_t>	rcommit(REQUEST_CLASS_INTERFACE_SET,
-		SET_CUR, VS_COMMIT_CONTROL << 8, interface, rget.data());
-	if ((rc = device.controlRequest(&rcommit)) < 0) {
-		throw USBError(libusb_error_name(rc));
-	}
-#endif
+	Request<vs_control_request_t> rcommit(RequestBase::class_specific_type,
+		interfaceptr, SET_CUR, VS_COMMIT_CONTROL << 8, rget.data());
+	device.controlRequest(&rcommit);
 
-#if 0
+#if 1
 	std::cout << "Format:              ";
 	std::cout << (int)rcommit.data()->bFormatIndex << std::endl;
 	std::cout << "Frame:               ";
@@ -222,16 +229,11 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 
 std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
 	throw(USBError) {
-#if 0
-	Request<vs_control_request_t>	r(REQUEST_CLASS_INTERFACE_GET,
-		GET_CUR, VS_PROBE_CONTROL << 8, interface);
-	int	rc;
-	if ((rc = device.controlRequest(&r)) < 0) {
-		throw USBError(libusb_error_name(rc));
-	}
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
+	Request<vs_control_request_t>	r(RequestBase::class_specific_type,
+		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	device.controlRequest(&r);
 	return std::make_pair(r.data()->bFormatIndex, r.data()->bFrameIndex);
-#endif
-	return std::make_pair((uint8_t)0, (uint8_t)1);
 }
 
 int	UVCCamera::preferredAltSetting(uint8_t interface) {

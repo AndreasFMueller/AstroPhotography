@@ -21,8 +21,9 @@ tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 
 usbtests_SOURCES = usbtests.cpp \
-	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp \
 	UVCCameraTest.cpp
+
+#	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp 
 usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
 
@@ -38,7 +39,5 @@ test2_DEPENDENCIES = ../libastro.la
 EXTRA_DIST = test_module.la test_module.so
 
 all-am:	tests usbtests microtouchtests
-	./tests
 	./usbtests
-	./microtouchtests
 

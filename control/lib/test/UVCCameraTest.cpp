@@ -22,16 +22,16 @@ class UVCCameraTest : public CppUnit::TestFixture {
 public:
 	void	setUp() { }
 	void	tearDown() { }
-	void	testList();
+	void	testCameraList();
 	void	testCamera();
 
 	CPPUNIT_TEST_SUITE(UVCCameraTest);
-	//CPPUNIT_TEST(testList);
+	//CPPUNIT_TEST(testCameraList);
 	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-void	UVCCameraTest::testList() {
+void	UVCCameraTest::testCameraList() {
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -68,7 +68,7 @@ std::cout << "constructor complete" << std::endl;
 			<< ", frame = " << (int)ff.second << std::endl;
 		camera.getFrame(1);
 	} catch (std::exception& x) {
-		std::cerr << "exception: " << x.what() << std::endl;
+		std::cerr << "cannot build camera: " << x.what() << std::endl;
 	}
 }
 

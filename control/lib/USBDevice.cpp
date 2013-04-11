@@ -190,7 +190,7 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
 	}
 }
 
-void	Device::controlRequest(RequestPtr request) throw(USBError) {
+void	Device::controlRequest(RequestBase *request) throw(USBError) {
 	std::cout << request->toString();
 	int	rc = libusb_control_transfer(dev_handle, 
 			request->bmRequestType(),
@@ -200,8 +200,8 @@ void	Device::controlRequest(RequestPtr request) throw(USBError) {
 			request->payload(),
 			request->wLength(),
 			100);
-	std::cout << "rc = " << (int)rc << std::endl;
 	if (rc < 0) {
+	std::cout << "rc = " << libusb_error_name(rc) << std::endl;
 		throw USBError(libusb_error_name(rc));
 	}
 	if (rc != request->wLength()) {

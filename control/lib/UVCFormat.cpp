@@ -29,21 +29,25 @@ uint8_t	FormatDescriptor::bNumFrameDescriptors() const {
 	return uint8At(4);
 }
 
+static std::string	indent("            ");
+static std::string	formatindent = indent + std::string("FO  ");
+static std::string	frameindent = indent + std::string("    FRM ");
+
 std::string	FormatDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "  bFormatIndex:         ";
+	out << formatindent << "bFormatIndex:         ";
 	out << (int)this->bFormatIndex() << std::endl;
-	out << "  bNumFrameDescriptors: ";
+	out << formatindent << "bNumFrameDescriptors: ";
 	out << (int)this->bNumFrameDescriptors() << std::endl;
-	out << "  bDefaultFrameIndex:   ";
+	out << formatindent << "bDefaultFrameIndex:   ";
 	out << (int)this->bDefaultFrameIndex() << std::endl;
-	out << "  bAspectRatioX:        ";
+	out << formatindent << "bAspectRatioX:        ";
 	out << (int)this->bAspectRatioX() << std::endl;
-	out << "  bAspectRatioY:        ";
+	out << formatindent << "bAspectRatioY:        ";
 	out << (int)this->bAspectRatioY() << std::endl;
-	out << "  bmInterlaceFlags:     ";
+	out << formatindent << "bmInterlaceFlags:     ";
 	out << std::hex << (int)this->bmInterlaceFlags() << std::endl;
-	out << "  bCopyProtect:         ";
+	out << formatindent << "bCopyProtect:         ";
 	out << (int)this->bCopyProtect() << std::endl;
 	out << framesToString();
 	return out.str();
@@ -51,7 +55,7 @@ std::string	FormatDescriptor::toString() const {
 
 std::string	FormatDescriptor::framesToString() const {
 	std::ostringstream	out;
-	out << "Frames (" << numFrames() << "):" << std::endl;
+	out << formatindent << "Frames (" << numFrames() << "):" << std::endl;
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = frames.begin(); i != frames.end(); i++) {
 		out << *i;
@@ -154,33 +158,33 @@ uint32_t	FrameDescriptor::dwFrameInterval(int index) const {
 
 std::string	FrameDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "  bFrameIndex:               ";
+	out << frameindent << "bFrameIndex:               ";
 	out << (int)this->bFrameIndex() << std::endl;
-	out << "  bmCapabilities:            ";
+	out << frameindent << "bmCapabilities:            ";
 	out << std::hex << this->bmCapabilities() << std::endl;
-	out << "  wWidth:                    ";
+	out << frameindent << "wWidth:                    ";
 	out << std::dec << this->wWidth() << std::endl;
-	out << "  wHeight:                   ";
+	out << frameindent << "wHeight:                   ";
 	out << std::dec << this->wHeight() << std::endl;
-	out << "  dwMinBitRate:              ";
+	out << frameindent << "dwMinBitRate:              ";
 	out << this->dwMinBitRate() << std::endl;
-	out << "  dwMaxBitRate:              ";
+	out << frameindent << "dwMaxBitRate:              ";
 	out << this->dwMaxBitRate() << std::endl;
-	out << "  dwDefaultFrameInterval:    ";
+	out << frameindent << "dwDefaultFrameInterval:    ";
 	out << this->dwDefaultFrameInterval() << std::endl;
-	out << "  bFrameIntervalType:        ";
+	out << frameindent << "bFrameIntervalType:        ";
 	out << ((this->bFrameIntervalType()) ? "discrete" : "continuous")
 		<< std::endl;
 	if (0 == bFrameIntervalType()) {
-		out << "  dwMinFrameInterval:        ";
+		out << frameindent << "    dwMinFrameInterval:    ";
 		out << this->dwMinFrameInterval() << std::endl;
-		out << "  dwMaxFrameInterval:        ";
+		out << frameindent << "    dwMaxFrameInterval:    ";
 		out << this->dwMaxFrameInterval() << std::endl;
-		out << "  dwFrameIntervalStep:       ";
+		out << frameindent << "    dwFrameIntervalStep:   ";
 		out << this->dwFrameIntervalStep() << std::endl;
 	} else {
 		for (int index = 0; index < this->bFrameIntervalType(); index++) {
-			out << "  dWFrameInterval(" << index << ") = ";	
+			out << frameindent << "    dwFrameInterval(" << index << ") = ";	
 			out << this->dwFrameInterval(index) << std::endl;
 		}
 	}

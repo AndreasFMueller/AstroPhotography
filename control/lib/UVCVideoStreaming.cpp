@@ -26,12 +26,17 @@ std::cout << "fixing the imaging source:" << std::endl;
 	}
 }
 
+static std::string	indent = std::string("        ");
+static std::string	headerindent = indent + std::string("H    ");
+
 std::string	HeaderDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "  bNumFormats:      " << (int)bNumFormats() << std::endl;
-	out << "  wTotalLength:     " << wTotalLength() << std::endl;
-	out << "  bEndpointAddress: "
-		<< std::hex << (int)bEndpointAddress() << std::endl;
+	out << headerindent << "bNumFormats:      ";
+	out << (int)bNumFormats() << std::endl;
+	out << headerindent << "wTotalLength:     ";
+	out << wTotalLength() << std::endl;
+	out << headerindent << "bEndpointAddress: ";
+	out << std::hex << (int)bEndpointAddress() << std::endl;
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = formats.begin(); i != formats.end(); i++) {
 		out << *i;
@@ -105,24 +110,24 @@ uint32_t	InputHeaderDescriptor::bmaControls(int index) const {
 
 std::string	InputHeaderDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Input Header Descriptor:" << std::endl;
-	out << this->HeaderDescriptor::toString();
-	out << "  bmInfo:              ";
+	out << indent << "Input Header Descriptor:" << std::endl;
+	out << headerindent << "bmInfo:              ";
 	out << std::hex << (int)bmInfo() << std::endl;
-	out << "  bTerminalLink:       ";
+	out << headerindent << "bTerminalLink:       ";
 	out << std::dec << (int)bTerminalLink() << std::endl;
-	out << "  bStillCaptureMethod: ";
+	out << headerindent << "bStillCaptureMethod: ";
 	out << (int)bStillCaptureMethod() << std::endl;
-	out << "  bTriggerSupport:     ";
+	out << headerindent << "bTriggerSupport:     ";
 	out << (int)bTriggerSupport() << std::endl;
-	out << "  bTriggerUsage:       ";
+	out << headerindent << "bTriggerUsage:       ";
 	out << (int)bTriggerUsage() << std::endl;
-	out << "  bControlSize:        ";
+	out << headerindent << "bControlSize:        ";
 	out << (int)bControlSize() << std::endl;
-	out << "  bmaControls:        ";
+	out << headerindent << "bmaControls:        ";
 	for (int index = 0; index < bNumFormats(); index++) {
 		out << " " << std::hex << bmaControls(index);
 	}
+	out << this->HeaderDescriptor::toString();
 	out << std::endl;
 	return out.str();
 }
@@ -150,16 +155,16 @@ uint32_t	OutputHeaderDescriptor::bmaControls(int index) const {
 
 std::string	OutputHeaderDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Output Header Descriptor:" << std::endl;
-	out << this->HeaderDescriptor::toString();
-	out << "  bTerminalLink:       ";
+	out << indent << "Output Header Descriptor:" << std::endl;
+	out << headerindent << "bTerminalLink:       ";
 	out << std::dec << (int)bTerminalLink() << std::endl;
-	out << "  bControlSize:        ";
+	out << headerindent << "bControlSize:        ";
 	out << (int)bControlSize() << std::endl;
-	out << "  bmaControls:        ";
+	out << headerindent << "bmaControls:        ";
 	for (int index = 0; index < bNumFormats(); index++) {
 		out << " " << std::hex << bmaControls(index);
 	}
+	out << this->HeaderDescriptor::toString();
 	out << std::endl;
 	return out.str();
 }

@@ -214,7 +214,8 @@ std::ostream&	operator<<(std::ostream& out, const std::vector<USBDescriptorPtr>&
 // InterfaceAssociationDescriptor
 //////////////////////////////////////////////////////////////////////
 
-InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(Device& _device, const void *_data, int length) : USBDescriptor(_device, _data, length) {
+InterfaceAssociationDescriptor::InterfaceAssociationDescriptor(Device& _device,
+	const void *_data, int length) : USBDescriptor(_device, _data, length) {
 	function = device.getStringDescriptor(data[7]);
 }
 
@@ -246,18 +247,18 @@ static std::string	indent("    IAD ");
 
 std::string	InterfaceAssociationDescriptor::toString() const {
 	std::ostringstream	out;
-	out << indent<< "Interface Association Descriptor:" << std::endl;
-	out << indent<< "bFirstInterface:   ";
+	out << indent << "Interface Association Descriptor:" << std::endl;
+	out << indent << "bFirstInterface:   ";
 	out << (int)bFirstInterface() << std::endl;
-	out << indent<< "bInterfaceCount:   ";
+	out << indent << "bInterfaceCount:   ";
 	out << (int)bInterfaceCount() << std::endl;
-	out << indent<< "bFunctionClass:    ";
+	out << indent << "bFunctionClass:    ";
 	out << (int)bFunctionClass() << std::endl;
-	out << indent<< "bFunctionSubClass: ";
+	out << indent << "bFunctionSubClass: ";
 	out << (int)bFunctionSubClass() << std::endl;
-	out << indent<< "bFunctionProtocol: ";
+	out << indent << "bFunctionProtocol: ";
 	out << (int)bFunctionProtocol() << std::endl;
-	out << indent<< "iFunction:         ";
+	out << indent << "iFunction:         ";
 	out << iFunction() << std::endl;
 	return out.str();
 }

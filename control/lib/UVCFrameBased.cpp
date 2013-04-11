@@ -49,24 +49,27 @@ std::string	FormatFrameBasedDescriptor::guidFormat() const {
 	return std::string(5 + (char *)data);
 }
 
+static std::string	indent("        ");
+static std::string	formatindent = indent + std::string("    FO  ");
+
 std::string	FormatFrameBasedDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Format FrameBased Descriptor:" << std::endl;
-	out << "  bNumFrameDescriptors: ";
+	out << indent << "Format FrameBased Descriptor:" << std::endl;
+	out << formatindent << "bNumFrameDescriptors: ";
 	out << (int)bNumFrameDescriptors() << std::endl;
-	out << "  guidFormat:           ";
+	out << formatindent << "guidFormat:           ";
 	out << guidFormat() << std::endl;
-	out << "  bBitsPerPixel:        ";
+	out << formatindent << "bBitsPerPixel:        ";
 	out << (int)bBitsPerPixel() << std::endl;
-	out << "  bDefaultFrameIndex:   ";
+	out << formatindent << "bDefaultFrameIndex:   ";
 	out << (int)bDefaultFrameIndex() << std::endl;
-	out << "  bAspectRatioX:        ";
+	out << formatindent << "bAspectRatioX:        ";
 	out << (int)bAspectRatioX() << std::endl;
-	out << "  bAspectRatioY:        ";
+	out << formatindent << "bAspectRatioY:        ";
 	out << (int)bAspectRatioY() << std::endl;
-	out << "  bmInterlaceFlags:     ";
+	out << formatindent << "bmInterlaceFlags:     ";
 	out << std::hex << (int)bmInterlaceFlags() << std::endl;
-	out << "  bCopyProtect:         ";
+	out << formatindent << "bCopyProtect:         ";
 	out << (int)bCopyProtect() << std::endl;
 	out << framesToString();
 	return out.str();
@@ -92,11 +95,13 @@ uint32_t	FrameFrameBasedDescriptor::dwBytesPerLine() const {
 	return uint32At(22);
 }
 
+static std::string	frameindent = indent + std::string("    FRM ");
+
 std::string	FrameFrameBasedDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Frame FrameBased Descriptor:" << std::endl;
+	out << indent << "    " << "Frame FrameBased Descriptor:" << std::endl;
 	out << this->FrameDescriptor::toString();
-	out << "  dwBytesPerLine:            ";
+	out << frameindent << "  dwBytesPerLine:            ";
 	out << dwBytesPerLine() << std::endl;
 	return out.str();
 }
