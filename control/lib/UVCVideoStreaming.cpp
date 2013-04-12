@@ -127,8 +127,8 @@ std::string	InputHeaderDescriptor::toString() const {
 	for (int index = 0; index < bNumFormats(); index++) {
 		out << " " << std::hex << bmaControls(index);
 	}
-	out << this->HeaderDescriptor::toString();
 	out << std::endl;
+	out << this->HeaderDescriptor::toString();
 	return out.str();
 }
 
@@ -164,8 +164,8 @@ std::string	OutputHeaderDescriptor::toString() const {
 	for (int index = 0; index < bNumFormats(); index++) {
 		out << " " << std::hex << bmaControls(index);
 	}
-	out << this->HeaderDescriptor::toString();
 	out << std::endl;
+	out << this->HeaderDescriptor::toString();
 	return out.str();
 }
 
