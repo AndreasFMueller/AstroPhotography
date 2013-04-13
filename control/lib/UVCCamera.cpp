@@ -215,15 +215,24 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 		interfaceptr, SET_CUR, VS_COMMIT_CONTROL << 8, rget.data());
 	device.controlRequest(&rcommit);
 
+	// just to be on the safe side, we should ask again what the
+	// current settings are
+	Request<vs_control_request_t>	rcur(RequestBase::class_specific_type,
+		interfaceptr, GET_CUR, VS_COMMIT_CONTROL << 8);
+	device.controlRequest(&rcur);
+	if ((rcur.data()->bFormatIndex != format)
+		|| (rcur.data()->bFrameIndex != frame)) {
+		throw USBError("failed to set format an frame");
+	}
 #if 1
 	std::cout << "Format:              ";
-	std::cout << (int)rcommit.data()->bFormatIndex << std::endl;
+	std::cout << (int)rcur.data()->bFormatIndex << std::endl;
 	std::cout << "Frame:               ";
-	std::cout << (int)rcommit.data()->bFrameIndex << std::endl;
+	std::cout << (int)rcur.data()->bFrameIndex << std::endl;
 	std::cout << "dwFrameInterval:     ";
-	std::cout << (int)rcommit.data()->dwFrameInterval << std::endl;
+	std::cout << (int)rcur.data()->dwFrameInterval << std::endl;
 	std::cout << "dwMaxVideoFrameSize: ";
-	std::cout << (int)rcommit.data()->dwMaxVideoFrameSize << std::endl;
+	std::cout << (int)rcur.data()->dwMaxVideoFrameSize << std::endl;
 #endif
 }
 
@@ -238,13 +247,10 @@ std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
 
 int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	// get the currently negotiated settings
-#if 0
-	Request<vs_control_request_t>	rget(REQUEST_CLASS_INTERFACE_GET,
-		GET_CUR, VS_PROBE_CONTROL << 8, interface);
-	int	rc;
-	if ((rc = device.controlRequest(&rget)) < 0) {
-		throw USBError(libusb_error_name(rc));
-	}
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
+	Request<vs_control_request_t>	rget(RequestBase::class_specific_type,
+		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	device.controlRequest(&rget);
 
 	// if the frame interval is 0, we have to ask the format for
 	// the default frame interval
@@ -260,7 +266,6 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	std::cout << datapms << std::endl;
 	std::cout << "speed:               ";
 	std::cout << device.getDeviceSpeed() << std::endl;
-#endif
 
 	// XXX missing implementation
 	return 5;
@@ -268,41 +273,38 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 
 Frame	UVCCamera::getFrame(uint8_t ifno) {
 	Frame	frame(NULL, 0);
-#if 0
-	// get the interface 
-	ConfigurationPtr	config = device.config(0);
-	InterfacePtr interface = (*config)[ifno];
-	std::cout << *interface;
-	int	altsetting = preferredAltSetting(ifno);
-	for (int alt = 1; alt < interface->numAltsettings(); alt++) {
-		InterfaceDescriptorPtr interfacedescriptor = (*interface)[alt];
+
+	// get the currently negotiated settings
+	InterfacePtr	interfaceptr = (*device.activeConfig())[ifno];
+	Request<vs_control_request_t>	rget(RequestBase::class_specific_type,
+		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	device.controlRequest(&rget);
+
+	// show the alt settings of the interface
+	std::cout << *interfaceptr;
+	for (int alt = 1; alt < interfaceptr->numAltsettings(); alt++) {
+		InterfaceDescriptorPtr interfacedescriptor = (*interfaceptr)[alt];
 		std::cout << "alt setting " << (int)alt;
 		std::cout << ", wMaxPacketSize = ";
-		std::cout << interfacedescriptor->endpoint()->wMaxPacketSize();
+		std::cout << (*interfacedescriptor)[0]->wMaxPacketSize();
 		std::cout << std::endl;
 	}
 
 	// now switch to the alternate setting for that interface (this
 	// succeeds if the bandwidth can be negotiated
-	int	rc = libusb_set_interface_alt_setting(device.dev_handle,
-			ifno, altsetting);
-	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
-	}
+	int	altsetting = preferredAltSetting(ifno);
+	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[altsetting];
+	ifdescptr->altSetting();
 	std::cout << "bandwidth negotiated" << std::endl;
 
-	// now do the transfer with the interface
-	preferredAltSetting(ifno);
+	// now do the transfer with this alt setting
 
 	// revert to alt setting 0, i.e. no data
-	rc = libusb_set_interface_alt_setting(device.dev_handle,
-			ifno, 0);
-	if (rc != LIBUSB_SUCCESS) {
-		throw USBError(libusb_error_name(rc));
-	}
+	ifdescptr = (*interfaceptr)[0];
+	ifdescptr->altSetting();
 	std::cout << "bandwidth reset to 0" << std::endl;
-#endif
 
+	// convert the retrieved data to an image
 	// XXX not implemented yet
 	return	frame;
 }
