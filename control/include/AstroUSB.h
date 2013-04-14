@@ -167,6 +167,11 @@ public:
 	//  some more accessors
 	int	maxIsoPacketSize(uint8_t endpoint) const;
 
+	// kernel drivers
+	bool	kernelDriverActive(uint8_t interface) const throw(USBError);
+	void	detachKernelDriver(uint8_t interface) const throw(USBError);
+	void	attachKernelDriver(uint8_t interface) const throw(USBError);
+
 	// Context is a friend class, it acts as a factory for Devices
 	friend class Context;
 	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
@@ -417,6 +422,7 @@ protected:
 	libusb_transfer	*transfer;
 	bool	freedata;
 	int	timeout;
+	bool	complete;
 private:
 	virtual void	submit(libusb_device_handle *devhandle)
 		throw(USBError) = 0;
@@ -428,8 +434,7 @@ public:
 	int	getTimeout() const;
 	void	setTimeout(int timeout);
 
-
-	
+	bool	isComplete() const;
 
 	friend class Device;
 };
@@ -446,6 +451,8 @@ public:
 };
 
 class IsoTransfer : public Transfer {
+	int	packets;
+	int	packetcounter;
 public:
 	virtual void	callback();
 private:
@@ -615,9 +622,11 @@ class Interface {
 	int	interface;
 	Configuration&	configuration;
 	Interface(const Interface& other);
+	bool	reattach;
 public:
 	Interface(Device& device, Configuration& configuration,
 		const libusb_interface *li, int interface);
+	~Interface();
 	size_t	numAltsettings() const;
 	int	interfaceNumber() const;
 	const InterfaceDescriptorPtr&	operator[](size_t index) const;
@@ -625,6 +634,12 @@ public:
 	void	claim() throw(USBError);
 	void	release() throw(USBError);
 	std::string	toString() const;
+
+	// checking whether there is a kernel driver attached to the
+	// interface
+	bool	kernelDriverActive() const;
+	void	detachKernelDriver() throw(USBError);
+	void	attachKernelDriver() const throw(USBError);
 };
 
 typedef std::tr1::shared_ptr<Interface>	InterfacePtr;

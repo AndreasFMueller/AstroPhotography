@@ -5,6 +5,7 @@
  */
 #include <AstroUSB.h>
 #include <debug.h>
+#include <AstroUVC.h>
 
 namespace astro {
 namespace usb {
@@ -24,6 +25,7 @@ Transfer::Transfer(EndpointDescriptorPtr _endpoint,
 		freedata = false;
 	}
 	timeout = 1000;
+	complete = false;
 }
 
 Transfer::~Transfer() {
@@ -43,6 +45,10 @@ int	Transfer::getTimeout() const {
 
 void	Transfer::setTimeout(int _timeout) {
 	timeout = _timeout;
+}
+
+bool	Transfer::isComplete() const {
+	return complete;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -104,11 +110,10 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	// find the packet size that the endpoint can handle
 	int	packetsize = endpoint->maxPacketSize()
 			* endpoint->transactionOpportunities();
-	packetsize = 5120;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found packet size: %d", packetsize);
 
 	// compute the number of packets we are expecting
-	int	packets = (2 * length) / packetsize;
+	packets = (2 * length) / packetsize;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting about %d packets", packets);
 
 	// allocate the transfer structure
@@ -117,6 +122,8 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot allocate transfer");
 		throw std::runtime_error("cannot allocate transfer");
 	}
+	transfer->type = LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
+	transfer->num_iso_packets = packets;
 
 	// fill the transfer request structure
 	libusb_fill_iso_transfer(transfer, dev_handle,
@@ -124,15 +131,15 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 		length, packets, isotransfer_callback, this, timeout);
 
 	// initialize the iso packet lengths
-#if 1
 	libusb_set_iso_packet_lengths(transfer, packetsize);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "packet length set to %d", packetsize);
-#endif
+	packetcounter = 0;
 
+#if 0
 	// claim the interface (again)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "reclaim interface");
 	endpoint->interface().getInterface().claim();
-
+#endif
 	// submit the transfer
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "libusb_submit_transfer(%p)", transfer);
 	int	rc = libusb_submit_transfer(transfer);
@@ -140,15 +147,70 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 		throw USBError(libusb_error_name(rc));
 	}
 
+	// display the packet headers
+#if 0
+	for (int packetno = 0; packetno < packets; packetno++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"packet[%d]: length = %d, actual_length = %d, "
+				"status = %d",
+			packetno,
+			transfer->iso_packet_desc[packetno].length,
+			transfer->iso_packet_desc[packetno].actual_length,
+			transfer->iso_packet_desc[packetno].status);
+	}
+#endif
+
 	// waiting for the transfer to complete
-	//libusb_handle_events(device.getContext().getLibusbContext());
+	libusb_context	*ctx
+		= endpoint->device().getContext()->getLibusbContext();
+	while (!this->isComplete()) {
+		int	rc = libusb_handle_events(ctx);
+		if (rc < 0) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "event handling error: %s",
+				libusb_error_name(rc));
+			throw USBError(libusb_error_name(rc));
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for event handling");
+	sleep(10);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
 }
 
 IsoTransfer::~IsoTransfer() {
 }
 
 void	IsoTransfer::callback() {
-	std::cout << "iso transfer callback" << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iso callback");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "status = %d",
+		transfer->flags);
+	int	headercounter = 0;
+	int	datacounter = 0;
+	for (int packetno = packetcounter; packetno < packets; packetno++) {
+		if (transfer->iso_packet_desc[packetno].actual_length) {
+#if 0
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"packet[%d]: length = %d, actual_length = %d, "
+				"status = %d",
+				packetno,
+				transfer->iso_packet_desc[packetno].length,
+				transfer->iso_packet_desc[packetno].actual_length,
+				transfer->iso_packet_desc[packetno].status);
+#endif
+		}
+		if (12 == transfer->iso_packet_desc[packetno].actual_length) {
+			astro::usb::uvc::stream_header_t	*h = (astro::usb::uvc::stream_header_t *)libusb_get_iso_packet_buffer(transfer, packetno);
+			headercounter++;
+			//std::cout << astro::usb::uvc::stream_header2string(*h);
+		}
+		if (transfer->iso_packet_desc[packetno].actual_length > 12) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "data packet: status %d",
+				transfer->iso_packet_desc[packetno].status);
+			datacounter++;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "headers: %d, data: %d",
+		headercounter, datacounter);
+	packetcounter++;
 }
 
 

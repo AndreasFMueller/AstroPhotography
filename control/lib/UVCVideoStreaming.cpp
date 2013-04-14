@@ -180,6 +180,7 @@ VideoStreamingProbeControlRequest::VideoStreamingProbeControlRequest(
 	vs_control_request_t *_data)
 	: Request<vs_control_request_t>(RequestBase::class_specific_type,
                 interfaceptr, bRequest, VS_PROBE_CONTROL << 8, _data) {
+	accept_short_response = true;
 if (_data) {
 std::cout << "bFormatIndex:  " << (int)(_data->bFormatIndex) << std::endl;
 std::cout << "bFrameIndex:   " << (int)(_data->bFrameIndex) << std::endl;
@@ -192,6 +193,7 @@ VideoStreamingCommitControlRequest::VideoStreamingCommitControlRequest(
 	vs_control_request_t *_data)
 	: Request<vs_control_request_t>(RequestBase::class_specific_type,
                 interfaceptr, bRequest, VS_COMMIT_CONTROL << 8, _data) {
+	accept_short_response = true;
 }
 
 } // namespace uvc

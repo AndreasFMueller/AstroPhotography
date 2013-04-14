@@ -704,6 +704,15 @@ public:
 		int length, unsigned char *data);
 };
 
+typedef struct stream_header_s {
+	uint8_t		hle;
+	uint8_t		bfh;
+	uint32_t	pts;
+	uint8_t		scr[6];
+} __attribute__((packed)) stream_header_t;
+
+std::string	stream_header2string(const stream_header_t& header);
+
 } // namespace uvc
 } // namespace usb
 } // namespace astro

@@ -137,6 +137,20 @@ Interface::Interface(Device& device, Configuration& _configuration,
 				&li->altsetting[i]);
 		altsettingvector.push_back(InterfaceDescriptorPtr(id));
 	}
+	reattach = false;
+}
+
+Interface::~Interface() {
+	try {
+		if (reattach) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"reattach kernel driver");
+			attachKernelDriver();
+		}
+	} catch (USBError& error) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error during kernel driver "
+			"reattach: %s", error.what());
+	}
 }
 
 int	Interface::interfaceNumber() const {
@@ -185,6 +199,29 @@ std::string	Interface::toString() const {
 
 std::ostream&	operator<<(std::ostream& out, const Interface& interface) {
 	return out << interface.toString();
+}
+
+bool	Interface::kernelDriverActive() const {
+	return dev.kernelDriverActive(interface);
+}
+
+/**
+ * \brief Detach a kernel driver.
+ *
+ * If a kernel driver is active, then this method detaches it. When the
+ * Interface is deallocated, then the kernel driver is reattached.
+ */
+void	Interface::detachKernelDriver() throw(USBError) {
+	if (kernelDriverActive()) {
+		reattach = true;
+	} else {
+		return;
+	}
+	dev.detachKernelDriver(interface);
+}
+
+void	Interface::attachKernelDriver() const throw(USBError) {
+	dev.attachKernelDriver(interface);
 }
 
 } // namespace usb

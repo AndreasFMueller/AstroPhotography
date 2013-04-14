@@ -346,5 +346,31 @@ void	Device::submit(Transfer *transfer) throw(USBError) {
 	transfer->submit(dev_handle);
 }
 
+bool	Device::kernelDriverActive(uint8_t interface) const throw(USBError) {
+	int	rc = libusb_kernel_driver_active(dev_handle, interface);
+	if (rc < 0) {
+		throw USBError(libusb_error_name(rc));
+	}
+	return (rc) ? true : false;
+}
+
+void	Device::detachKernelDriver(uint8_t interface) const throw(USBError) {
+	int	rc = libusb_detach_kernel_driver(dev_handle, interface);
+	if (rc < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot detach kernel driver: %s",
+			libusb_error_name(rc));
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
+void	Device::attachKernelDriver(uint8_t interface) const throw(USBError) {
+	int	rc = libusb_attach_kernel_driver(dev_handle, interface);
+	if (rc < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot attach kernel driver: %s",
+			libusb_error_name(rc));
+		throw USBError(libusb_error_name(rc));
+	}
+}
+
 } // namespace usb
 } // namespace astro

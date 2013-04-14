@@ -63,6 +63,7 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 	uint8_t	ci = controlInterfaceNumber();
 	videocontrol = (*config)[ci];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Control interface number: %d", ci);
+	videocontrol->detachKernelDriver();
 #if 0
 	videocontrol->claim();	// XXX this is probably wrong. we should
 				// only claim the interface if we really want
@@ -290,7 +291,7 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d with %d alt settings",
 		interfaceptr->interfaceNumber(),
 		interfaceptr->numAltsettings());
-#if 0
+#if 1
 	interfaceptr->claim();
 #endif
 	VideoStreamingProbeControlRequest	rset(interfaceptr, SET_CUR,
@@ -300,7 +301,6 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 	// now probe the same thing, this should return a recommended
 	// setting 
 	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
-	rget.accept_short_response = true;
 	device.controlRequest(&rget);
 	if (rget.data()->bFormatIndex != format) {
 		throw USBError("cannot negotiate format index");
@@ -313,10 +313,6 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 	// was successful, and we can commit the negotiated paramters
 	VideoStreamingCommitControlRequest	rcommit(interfaceptr, SET_CUR,
 							rget.data());
-/*
-	Request<vs_control_request_t> rcommit(RequestBase::class_specific_type,
-		interfaceptr, SET_CUR, VS_COMMIT_CONTROL << 8, rget.data());
-*/
 	device.controlRequest(&rcommit);
 
 	// just to be on the safe side, we should ask again what the
@@ -328,14 +324,16 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 		throw USBError("failed to set format an frame");
 	}
 #if 1
-	std::cout << "Format:              ";
+	std::cout << "Format:                   ";
 	std::cout << (int)rcur.data()->bFormatIndex << std::endl;
-	std::cout << "Frame:               ";
+	std::cout << "Frame:                    ";
 	std::cout << (int)rcur.data()->bFrameIndex << std::endl;
-	std::cout << "dwFrameInterval:     ";
+	std::cout << "dwFrameInterval:          ";
 	std::cout << (int)rcur.data()->dwFrameInterval << std::endl;
-	std::cout << "dwMaxVideoFrameSize: ";
+	std::cout << "dwMaxVideoFrameSize:      ";
 	std::cout << (int)rcur.data()->dwMaxVideoFrameSize << std::endl;
+	std::cout << "dwMaxPayloadTransferSize: ";
+	std::cout << (int)rcur.data()->dwMaxPayloadTransferSize << std::endl;
 #endif
 }
 
@@ -347,8 +345,7 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
 	throw(USBError) {
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
-	Request<vs_control_request_t>	r(RequestBase::class_specific_type,
-		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	VideoStreamingProbeControlRequest	r(interfaceptr, GET_CUR);
 	device.controlRequest(&r);
 	return std::make_pair(r.data()->bFormatIndex, r.data()->bFrameIndex);
 }
@@ -361,8 +358,7 @@ std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
 int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	// get the currently negotiated settings
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
-	Request<vs_control_request_t>	rget(RequestBase::class_specific_type,
-		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
 	device.controlRequest(&rget);
 
 	// if the frame interval is 0, we have to ask the format for
@@ -422,8 +418,7 @@ Frame	UVCCamera::getFrame(uint8_t ifno) {
 
 	// get the currently negotiated settings
 	InterfacePtr	interfaceptr = (*device.activeConfig())[ifno];
-	Request<vs_control_request_t>	rget(RequestBase::class_specific_type,
-		interfaceptr, GET_CUR, VS_PROBE_CONTROL << 8);
+	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
 	device.controlRequest(&rget);
 
 #if 0
