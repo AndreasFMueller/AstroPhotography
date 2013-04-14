@@ -14,6 +14,16 @@
 #include <tr1/memory>
 #include <string.h>
 
+#define	CC_VIDEO			0x0e
+
+#define SC_UNDEFINED			0x00
+#define SC_VIDECONTROL			0x01
+#define SC_VIDEOSTREAMING		0x02
+#define SC_VIDEO_INTERFACE_COLLECTION	0x03
+
+#define	PC_PROTOCOL_UNDEFINED		0x00
+
+/* constants identifying broken cameras */
 #define	BROKEN_NONE			0
 #define BROKEN_THE_IMAGING_SOURCE	1
 
@@ -98,11 +108,13 @@ typedef std::tr1::shared_ptr<Transfer>	TransferPtr;
  * The Device class is just a wrapper around it.
  */
 class 	Device {
+	Context	*context;
 	libusb_device	*dev;
 	libusb_device_handle	*dev_handle;
 
 	// Device objects can only be created from a Context
-	Device(struct libusb_device *dev, libusb_device_handle *dev_handle = NULL);
+	Device(Context *context, libusb_device *dev,
+		libusb_device_handle *dev_handle = NULL);
 
 	// Device objects cannot be copied
 	Device(const Device& other);
@@ -129,6 +141,7 @@ public:
 	ConfigurationPtr	activeConfig() throw(USBError);
 	ConfigurationPtr	configValue(uint8_t value) throw(USBError);
 	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
+	Context	*getContext() const;
 
 	// make sure the device is open
 	bool	isOpen() const;
@@ -149,7 +162,7 @@ public:
 
 	// having requests processed by the device
 	void	controlRequest(RequestBase *request) throw(USBError);
-	void	submit(TransferPtr request) throw(USBError);
+	void	submit(Transfer *request) throw(USBError);
 
 	//  some more accessors
 	int	maxIsoPacketSize(uint8_t endpoint) const;
@@ -181,6 +194,7 @@ public:
 	std::vector<DevicePtr>	devices() throw (USBError);
 	DevicePtr	find(uint16_t vendor_id, uint16_t product_id)
 		throw(USBError);
+	libusb_context	*getLibusbContext() const;
 };
 
 /*
@@ -230,8 +244,10 @@ private:
 
 	uint8_t	bEndpointAddress;
 	uint8_t	bInterface;
-
+protected:
+	void	init_data(void *data);
 public:
+	bool	accept_short_response;
 	RequestBase(request_type _type, const EndpointDescriptorPtr endpoint,
 		void *data = NULL);
 	RequestBase(request_type type, const InterfacePtr interface,
@@ -243,8 +259,12 @@ public:
 	virtual uint16_t	wValue() const = 0;
 	virtual uint16_t	wIndex() const;
 	virtual uint16_t	wLength() const = 0;
+private:
+	virtual void	setwLength(int length) = 0;
+public:
 	virtual uint8_t	*payload() const = 0;
 	virtual std::string	toString() const;
+	virtual std::string	payloadHex() const;
 };
 
 /**
@@ -270,9 +290,7 @@ private:
 		packet.header.bRequest = bRequest;
 		packet.header.wValue = wValue;
 		packet.header.wLength = sizeof(T);
-		if (NULL != payload_data) {
-			memcpy(&packet.payload, payload_data, sizeof(T));
-		}
+		init_data(payload_data);
 	}
 public:	
 	/**
@@ -351,6 +369,10 @@ public:
 	virtual uint16_t	wLength() const {
 		return sizeof(T);
 	}
+private:
+	virtual void	setwLength(int length) {
+		packet.header.wLength = length;
+	}
 };
 
 /**
@@ -375,6 +397,9 @@ public:
 	virtual uint16_t	wValue() const;
 	virtual uint16_t	wIndex() const;
 	virtual uint16_t	wLength() const;
+private:
+	virtual void	setwLength(int length);
+public:
 	virtual uint8_t	*payload() const;
 };
 
@@ -386,20 +411,25 @@ public:
  */
 class Transfer {
 protected:
-	uint8_t	endpoint;
+	EndpointDescriptorPtr	endpoint;
 	int	length;
 	unsigned char	*data;
 	libusb_transfer	*transfer;
 	bool	freedata;
 	int	timeout;
 private:
-	virtual void	submit(libusb_device_handle *devhandle) throw(USBError) = 0;
+	virtual void	submit(libusb_device_handle *devhandle)
+		throw(USBError) = 0;
 public:
 	virtual void	callback() = 0;
-	Transfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	Transfer(EndpointDescriptorPtr endpoint,
+		int length, unsigned char *data = NULL);
 	virtual ~Transfer();
 	int	getTimeout() const;
 	void	setTimeout(int timeout);
+
+
+	
 
 	friend class Device;
 };
@@ -410,7 +440,8 @@ public:
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
 public:
-	BulkTransfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	BulkTransfer(EndpointDescriptorPtr endpoint,
+		int length, unsigned char *data = NULL);
 	virtual ~BulkTransfer();
 };
 
@@ -420,7 +451,8 @@ public:
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
 public:
-	IsoTransfer(uint8_t endpoint, int length, unsigned char *data = NULL);
+	IsoTransfer(EndpointDescriptorPtr endpoint,
+		int length, unsigned char *data = NULL);
 	virtual ~IsoTransfer();
 };
 
@@ -502,6 +534,26 @@ public:
 	uint8_t		bRefresh() const;
 	uint8_t		bSynchAddress() const;
 
+	// more detailed information about the endpoint
+	typedef enum { control_transfer = 0x0, isochronous_transfer = 0x1,
+		bulk_transfer = 0x2, interrupt_transfer = 0x3 } transfer_type;
+	transfer_type	transferType() const;
+	bool	isControl() const;
+	bool	isIsochronous() const;
+	bool	isBulk() const;
+	bool	isInterrupt() const;
+
+	// special information for isochronous endpoints
+	typedef enum { no_sync = 0x0, async_sync = 0x4, adaptive_sync = 0x8,
+		synchronous_sync = 0xc } sync_type;
+	sync_type	synchronizationType() const;
+	typedef enum { data_usage = 0x0, feedback_usage = 0x10,
+		implicit_usage = 0x20, reserved_usage = 0x30 } usage_type;
+	usage_type	usageType() const;
+	size_t	maxPacketSize() const;
+	size_t	transactionOpportunities() const;
+	size_t	maxBandwidth() const;
+
 	// accessor to the interface
 	InterfaceDescriptor&	interface();
 
@@ -547,6 +599,7 @@ public:
 
 	// display
 	std::string	toString() const;
+	Interface&	getInterface();
 };
 
 typedef	std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;

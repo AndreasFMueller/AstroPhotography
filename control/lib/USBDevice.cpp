@@ -6,6 +6,10 @@
 #include <AstroUSB.h>
 #include <ios>
 #include <iomanip>
+#include <Format.h>
+#include <debug.h>
+
+using namespace astro;
 
 namespace astro {
 namespace usb {
@@ -18,7 +22,16 @@ bool	Device::isOpen() const {
 	return (NULL == dev_handle) ? false : true;
 }
 
+/**
+ * \brief Open the device.
+ *
+ * Most operations need that a USB device that is open. During a bus
+ * scan, we may want to look at a device that is not open, so the default
+ * is to just get a device, but not to open it. This method also opens
+ * the device.
+ */
 void	Device::open() throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open the device");
 	// handle the case where the device has already been opened
 	if (isOpen()) {
 		return;
@@ -31,6 +44,12 @@ void	Device::open() throw(USBError) {
 	}
 }
 
+/**
+ * \brief Close a device.
+ *
+ * This method closes the device. This does not precluded it may
+ * later be reopened.
+ */
 void	Device::close() {
 	if (NULL == dev_handle) {
 		return;
@@ -39,15 +58,30 @@ void	Device::close() {
 	dev_handle = NULL;
 }
 
-Device::Device(libusb_device *_dev, libusb_device_handle *_dev_handle)
-	: dev(_dev), dev_handle(_dev_handle) {
+/**
+ * \brief Create the device.
+ *
+ * This private constructor is used to build a Device object from 
+ * the libusb data structure.
+ *
+ * \param _dev		The libusb_device structure to use for the
+ *			Device.
+ * \param _dev_handle	The libusb_device_handle structure to use if
+ *			the device is already open.
+ */
+Device::Device(Context *_context, libusb_device *_dev,
+	libusb_device_handle *_dev_handle)
+	: context(_context), dev(_dev), dev_handle(_dev_handle) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"create a device from the libusb structure");
 	// increment the reference counter
 	libusb_ref_device(dev);
 
 	// find out whether this is a broken device
 	DeviceDescriptorPtr	d = descriptor();
 	if (d->idVendor() == 0x199e) {
-std::cout << "This is a broken camera from the imaging source" << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"broken camera: The Imaging Source");
 		broken = BROKEN_THE_IMAGING_SOURCE;
 	}
 }
@@ -94,6 +128,18 @@ ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
 	Configuration	*result = new Configuration(*this, config);
 	libusb_free_config_descriptor(config);
 	return ConfigurationPtr(result);
+}
+
+/**
+ * \brief Get the context from which this device was created.
+ *
+ * The context is needed for event handling. Unfortunately, libusb
+ * does not give any methods to retrieve the context from the libusb_device
+ * or the libusb_handle, although it apparently keeps references to the
+ * context internally.
+ */
+Context	*Device::getContext() const {
+	return context;
 }
 
 /**
@@ -146,6 +192,15 @@ uint8_t	Device::getDeviceAddress() const {
 	return libusb_get_device_address(dev);
 }
 
+/**
+ * \brief Get code indicating in what respect the device is broken.
+ *
+ * Some devices have broken USB descriptors or handle the protocol
+ * in a broken way. To simplify working around such problems, there
+ * is code in the constructor that detects such cases. This method
+ * then allows an application program to get this code an provide
+ * workarounds for the deficiencies of the device.
+ */
 int	Device::getBroken() const {
 	return broken;
 }
@@ -165,6 +220,11 @@ void	Device::releaseInterface(uint8_t interface) throw(USBError) {
 	}
 }
 
+/**
+ * \brief Get the number of the current configuration.
+ *
+ * \return configuration number
+ */
 int	Device::getConfiguration() throw(USBError) {
 	int	result;
 	int	rc = libusb_get_configuration(dev_handle, &result);
@@ -174,6 +234,11 @@ int	Device::getConfiguration() throw(USBError) {
 	return result;
 }
 
+/**
+ * \brief Select a configuration by number
+ *
+ * \param configuration	number of the configuration to select.
+ */
 void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
 	int	rc = libusb_set_configuration(dev_handle, configuration);
 	if (rc != LIBUSB_SUCCESS) {
@@ -181,6 +246,13 @@ void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
 	}
 }
 
+/**
+ * \brief Select an alternate setting on an interface.
+ *
+ * 
+ * \param interface	interface number
+ * \param altsetting	number of alternate setting
+ */
 void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
 		throw(USBError) {
 	int	rc = libusb_set_interface_alt_setting(dev_handle,
@@ -190,8 +262,30 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
 	}
 }
 
+/**
+ * \brief Execute a control request.
+ *
+ * All information necessary to execute a control request to the device
+ * is contained in the request argument. This method just sends the
+ * contents of the request to the device. If the request includes
+ * a data phase, then the direction of the data phase was encoded in
+ * the request when the request was constructed.
+ *
+ * \param request	pointer to the control request
+ */
 void	Device::controlRequest(RequestBase *request) throw(USBError) {
-	std::cout << request->toString();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bmRequest = %02x, bRequest = %02x, "
+		"wValue = %04x, wIndex = %04x, wLength = %d",
+		request->bmRequestType(), request->bRequest(),
+		request->wValue(), request->wIndex(), request->wLength());
+
+	// for debugging, display the request content if it is going to
+	// the host
+	if ((request->bmRequestType() & 0x80) == RequestBase::host_to_device) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "payload to send:\n%s",
+			request->payloadHex().c_str());
+	}
+
 	int	rc = libusb_control_transfer(dev_handle, 
 			request->bmRequestType(),
 			request->bRequest(),
@@ -200,16 +294,28 @@ void	Device::controlRequest(RequestBase *request) throw(USBError) {
 			request->payload(),
 			request->wLength(),
 			100);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request result: %d", rc);
 	if (rc < 0) {
-	std::cout << "rc = " << libusb_error_name(rc) << std::endl;
 		throw USBError(libusb_error_name(rc));
 	}
-	if (rc != request->wLength()) {
-		throw USBError("request did not return what we expected");
-	}
-	//std::cout << request->toString();
-}
 
+	// for debuggung: if the data phase goes from device to host, display
+	// the response
+	if ((request->bmRequestType() & 0x80) == RequestBase::device_to_host) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "payload received:\n%s",
+			request->payloadHex().c_str());
+	}
+
+	// only accept the response if it has the right length, otherwise
+	// throw an exception
+	if ((rc != request->wLength()) && (!request->accept_short_response)) {
+		std::string	message
+			= stringprintf("expecting %d bytes, %d received",
+				request->wLength(), rc);
+		std::cerr << request->payloadHex();
+		throw USBError(message.c_str());
+	}
+}
 
 enum Device::usb_speed	Device::getDeviceSpeed() const {
 	return (Device::usb_speed)libusb_get_device_speed(dev);
@@ -226,7 +332,18 @@ int	Device::maxIsoPacketSize(uint8_t endpoint) const {
 	return libusb_get_max_iso_packet_size(dev, endpoint);
 }
 
-void	Device::submit(TransferPtr request) throw(USBError) {
+/**
+ * \brief Submit a transfer to a device.
+ *
+ * The transfers are really handled by the Transfer classes themselves,
+ * but the Device class has to supply the device handle to the transfer
+ * class.
+ * \param transfer	A Transfer instance.
+ */
+void	Device::submit(Transfer *transfer) throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer of size %d",
+		transfer->length);
+	transfer->submit(dev_handle);
 }
 
 } // namespace usb

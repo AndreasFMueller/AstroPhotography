@@ -10,15 +10,6 @@
 #include <tr1/memory>
 #include <stdexcept>
 
-#define	CC_VIDEO			0x0e
-
-#define SC_UNDEFINED			0x00
-#define SC_VIDECONTROL			0x01
-#define SC_VIDEOSTREAMING		0x02
-#define SC_VIDEO_INTERFACE_COLLECTION	0x03
-
-#define	PC_PROTOCOL_UNDEFINED		0x00
-
 #define CS_UNDEFINED			0x20
 #define CS_DEVICE			0x21
 #define CS_CONFIGURATION		0x22
@@ -518,6 +509,9 @@ public:
 	// accessors for discrete frame intervals
 	virtual uint32_t	dwFrameInterval(int interval) const;
 
+	// combined accessor for minimum frame interal
+	virtual uint32_t	minFrameInterval() const;
+
 	virtual	std::string	toString() const;
 };
 
@@ -606,10 +600,16 @@ public:
 	uint32_t	controlProcessingUnitControls() const;
 
 	// accessors to the video streaming interfaces
-	const USBDescriptorPtr&	operator[](size_t interfacenumber) const;
-	USBDescriptorPtr&	operator[](size_t interfacenumber);
+	size_t		streamingInterfaceNumber(size_t interfacenumber) const
+		throw(std::range_error);
+	const USBDescriptorPtr&	operator[](size_t interfacenumber) const
+		throw(std::range_error);
+	USBDescriptorPtr&	operator[](size_t interfacenumber)
+		throw(std::range_error);
 
 	// selecting format and frame
+	uint32_t	minFrameInterval(uint8_t interface,
+		uint8_t format, uint8_t frame) throw(std::range_error,USBError);
 	void	selectFormatAndFrame(uint8_t interface,
 			uint8_t format, uint8_t frame) throw(USBError);
 	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interface)
@@ -632,10 +632,12 @@ public:
 	std::string	toString() const;
 
 	// access to frames
-#if 1
+private:
+	std::vector<Frame>	getIsoFrames(uint8_t interface, int nframes);
+	std::vector<Frame>	getBulkFrames(uint8_t interface, int nframes);
+public:
 	Frame	getFrame(uint8_t interface);
 	std::vector<Frame>	getFrames(uint8_t interface, int nframes);
-#endif
 };
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);
@@ -663,6 +665,21 @@ typedef struct  vs_control_request_s {
 } __attribute__((packed)) vs_control_request_t;
 
 /**
+ * \brief
+ */
+class VideoStreamingProbeControlRequest : public Request<vs_control_request_t> {
+public:
+	VideoStreamingProbeControlRequest(InterfacePtr interptr,
+		uint8_t bRequest, vs_control_request_t *data = NULL);
+};
+
+class VideoStreamingCommitControlRequest : public Request<vs_control_request_t>{
+public:
+	VideoStreamingCommitControlRequest(InterfacePtr interptr,
+		uint8_t bRequest, vs_control_request_t *data = NULL);
+};
+
+/**
  * \brief structures for UVC get/set requests
  */
 typedef struct scanning_mode_control_s {
@@ -670,6 +687,22 @@ typedef struct scanning_mode_control_s {
 	uint8_t bScanningMode;
 } scanning_mode_control_t;
 
+/**
+ * \brief 
+ */
+class UVCIsoTransfer : public IsoTransfer {
+	virtual void	callback();
+public:
+	UVCIsoTransfer(EndpointDescriptorPtr endpoint,
+		int length, unsigned char *data);
+};
+
+class UVCBulkTransfer : public BulkTransfer {
+	virtual void	callback();
+public:
+	UVCBulkTransfer(EndpointDescriptorPtr endpoint,
+		int length, unsigned char *data);
+};
 
 } // namespace uvc
 } // namespace usb

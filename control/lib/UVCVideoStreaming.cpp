@@ -5,6 +5,7 @@
  */
 #include <AstroUVC.h>
 #include <sstream>
+#include <debug.h>
 
 using namespace astro::usb;
 
@@ -58,6 +59,8 @@ uint16_t	HeaderDescriptor::wTotalLength() const {
 
 const USBDescriptorPtr	HeaderDescriptor::operator[](size_t formatindex) const {
 	if ((formatindex < 0) || (formatindex >= bNumFormats())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "%d outside format range %d",
+			formatindex, bNumFormats());
 		throw std::length_error("outside format range");
 	}
 	return formats[formatindex];
@@ -167,6 +170,28 @@ std::string	OutputHeaderDescriptor::toString() const {
 	out << std::endl;
 	out << this->HeaderDescriptor::toString();
 	return out.str();
+}
+
+//////////////////////////////////////////////////////////////////////
+// VideoStreamingProbeControlRequest
+//////////////////////////////////////////////////////////////////////
+VideoStreamingProbeControlRequest::VideoStreamingProbeControlRequest(
+	InterfacePtr interfaceptr, uint8_t bRequest,
+	vs_control_request_t *_data)
+	: Request<vs_control_request_t>(RequestBase::class_specific_type,
+                interfaceptr, bRequest, VS_PROBE_CONTROL << 8, _data) {
+if (_data) {
+std::cout << "bFormatIndex:  " << (int)(_data->bFormatIndex) << std::endl;
+std::cout << "bFrameIndex:   " << (int)(_data->bFrameIndex) << std::endl;
+}
+std::cout << this->payloadHex();
+}
+
+VideoStreamingCommitControlRequest::VideoStreamingCommitControlRequest(
+	InterfacePtr interfaceptr, uint8_t bRequest,
+	vs_control_request_t *_data)
+	: Request<vs_control_request_t>(RequestBase::class_specific_type,
+                interfaceptr, bRequest, VS_COMMIT_CONTROL << 8, _data) {
 }
 
 } // namespace uvc

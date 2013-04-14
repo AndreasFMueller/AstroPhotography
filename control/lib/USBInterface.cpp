@@ -8,6 +8,7 @@
 #include <ios>
 #include <iomanip>
 #include <string.h>
+#include <debug.h>
 
 namespace astro {
 namespace usb {
@@ -77,6 +78,8 @@ EndpointDescriptorPtr	InterfaceDescriptor::operator[](size_t index) const {
 }
 
 void	InterfaceDescriptor::altSetting() throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "select alt setting %d on interface %d",
+		bAlternateSetting(), bInterfaceNumber());
 	dev.setInterfaceAltSetting(bInterfaceNumber(), bAlternateSetting());
 }
 
@@ -96,7 +99,13 @@ std::string	InterfaceDescriptor::toString() const {
 	out << (int)bInterfaceProtocol() << std::endl;
 	out << indent << "iInterface:            ";
 	out << iInterface() << std::endl;
-	out << indent << "Endpoints:" << std::endl;
+	out << indent << "Endpoints:             ";
+	if (0 == numEndpoints()) {
+		out << "none";
+	} else {
+		out << (int)numEndpoints();
+	}
+	out << std::endl;
 	std::vector<EndpointDescriptor>::const_iterator	i;
 	for (int endpointno = 0; endpointno < numEndpoints(); endpointno++) {
 		out << indent << "Endpoint " << endpointno << ":" << std::endl;
@@ -109,6 +118,10 @@ std::string	InterfaceDescriptor::toString() const {
 
 std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd) {
 	return out << ifd.toString();
+}
+
+Interface&	InterfaceDescriptor::getInterface() {
+	return interface;
 }
 
 /////////////////////////////////////////////////////////////////////

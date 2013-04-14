@@ -44,7 +44,7 @@ uint8_t	FormatMJPEGDescriptor::bCopyProtect() const {
 
 std::string	FormatMJPEGDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Format MJPEG Descriptor:" << std::endl;
+	out << "            Format MJPEG Descriptor:" << std::endl;
 	out << this->FormatDescriptor::toString();
 	return out.str();
 }
@@ -61,11 +61,13 @@ uint32_t	FrameMJPEGDescriptor::dwMaxVideoFrameBufferSize() const {
 	return uint32At(17);
 }
 
+static std::string	indent("                ");
+
 std::string	FrameMJPEGDescriptor::toString() const {
 	std::ostringstream	out;
-	out << "Frame MJPEG Descriptor:" << std::endl;
+	out << indent << "Frame MJPEG Descriptor:" << std::endl;
 	out << this->FrameDescriptor::toString();
-	out << "  dwMaxVideoFrameBufferSize: ";
+	out << indent << "FRM dwMaxVideoFrameBufferSize: ";
 	out << dwMaxVideoFrameBufferSize() << std::endl;
 	return out.str();
 }

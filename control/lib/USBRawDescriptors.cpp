@@ -4,10 +4,10 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUSB.h>
-#include <AstroUVC.h>
 #include <sstream>
 #include <string.h>
 #include <stdio.h>
+#include <debug.h>
 
 namespace astro {
 namespace usb {
@@ -153,12 +153,15 @@ USBDescriptorPtr	DescriptorFactory::descriptor(const void *data,
 	USBDescriptorPtr	dp;
 	switch (bdescriptortype(data)) {
 	case 11:
-		std::cerr << "creating an InterfaceAssociationDescriptor" << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"create an InterfaceAssociationDescriptor");
 		dp = USBDescriptorPtr(
 			new InterfaceAssociationDescriptor(device,
 				data, blength(data)));
 		break;
 	default:
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"trying to build unknown descriptor");
 		throw UnknownDescriptorError(blength(data),
 			bdescriptortype(data));
 	}
@@ -170,6 +173,17 @@ USBDescriptorPtr	DescriptorFactory::descriptor(const std::string& data)
 	return this->descriptor(data.c_str(), data.size());
 }
 
+/**
+ * \brief Get a set of descriptors from a block of data.
+ *
+ * The USB video class uses many class specific descriptors, which
+ * libusb returns just as a block of raw data. This method
+ * returns a vector of all descriptors that can be found within
+ * the data block.
+ * \param data		raw data block
+ * \param length	length of the data block
+ * \return A vector of descriptors parsed from the data block
+ */
 std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
 	const void *data, int length)
 	throw(std::length_error, UnknownDescriptorError) {
@@ -183,9 +197,9 @@ std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
 				result.push_back(this->descriptor(a,
 					length - offset));
 			} catch (UnknownDescriptorError& x) {
-				std::cerr << "unknown descriptor: " << x.what()
-					<< std::endl;
-
+				debug(LOG_ERR, DEBUG_LOG, 0,
+					"unknown descriptor: %s",x.what());
+				throw x;
 			}
 		}
 		offset += l;
@@ -193,6 +207,13 @@ std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
 	return result;
 }
 
+/**
+ * \brief Get a set of descriptors a string.
+ *
+ * The data to build the descriptors can also been given in the form of
+ * a string.
+ * \param data	extra data to parse.
+ */
 std::vector<USBDescriptorPtr>	DescriptorFactory::descriptors(
 		const std::string& data)
 		throw(std::length_error, UnknownDescriptorError) {

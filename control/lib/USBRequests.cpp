@@ -15,11 +15,37 @@ namespace usb {
 //////////////////////////////////////////////////////////////////////
 // RequestBase implementation
 //////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief Initialize the request.
+ *
+ * This copies the data provided to the payload structure, if there is
+ * anything to copy. If the request is from device to host, then it also
+ * clears the payload data.
+ */
+void	RequestBase::init_data(void *data) {
+	if ((this->bmRequestType() & 0x80) == host_to_device) {
+		// for requests with data phase to the device, copy the
+		// data
+		if (NULL == data) {
+			return;
+		}
+		memcpy(this->payload(), data, this->wLength());
+	} else {
+		// for requests in the reverse direction, initialize the
+		// data buffer to zero
+		if (this->wLength()) {
+			memset(this->payload(), 0, this->wLength());
+		}
+	}
+}
+
 RequestBase::RequestBase(request_type _type, EndpointDescriptorPtr endpoint,
 	void *data) : type(_type) {
 	recipient = endpoint_recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bEndpointAddress = 0x1f & endpoint->bEndpointAddress();
+	accept_short_response = false;
 }
 
 RequestBase::RequestBase(request_type _type, InterfacePtr interface,
@@ -27,11 +53,13 @@ RequestBase::RequestBase(request_type _type, InterfacePtr interface,
 	recipient = interface_recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bInterface = interface->interfaceNumber();
+	accept_short_response = false;
 }
 
 RequestBase::RequestBase(request_type _type, void *data) : type(_type) {
 	recipient = device_recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
+	accept_short_response = false;
 }
 
 uint16_t	RequestBase::wIndex() const {
@@ -75,17 +103,38 @@ std::string	RequestBase::toString() const {
 	out << this->wLength() << std::endl;
 
 	// display the contents as hex
+	out << payloadHex();
+	return out.str();
+}
+
+std::string	RequestBase::payloadHex() const {
+	std::ostringstream	out;
+	// display the contents as hex
 	uint8_t	*data = this->payload();
 	for (int i = 0; i < this->wLength(); i++) {
-		if (0 == (i % 16)) {
-			out << std::endl;
+		int	col = i % 16;
+		switch (col) {
+		case 0:
+			if (i > 0) {
+				out << std::endl;
+			}
+			out << std::hex << std::setw(4) << std::setfill('0');
+			out << i << "   ";
+			break;
+		case 8:
+			out << " ";
+		default:
+			out << " ";
 		}
-		out << " ";
 		out << std::hex << std::setw(2) << std::setfill('0');
 		out << (int)data[i];
 	}
 	out << std::endl;
 	return out.str();
+}
+
+void	EmptyRequest::setwLength(int length) {
+	header.wLength = length;
 }
 
 //////////////////////////////////////////////////////////////////////

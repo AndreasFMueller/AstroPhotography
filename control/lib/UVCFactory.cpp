@@ -5,6 +5,7 @@
  */
 #include <AstroUVC.h>
 #include <sstream>
+#include <debug.h>
 
 using namespace astro::usb;
 
@@ -226,7 +227,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::formats(
 		fd->frames.push_back(newframe);
 		offset += newframe->bLength();
 	}
-	std::cout << "total length of format: " << offset << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "total format length: %d", offset);
 
 	// return the format with all the frames attached
 	return USBDescriptorPtr(fd);

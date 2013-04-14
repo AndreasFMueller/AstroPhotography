@@ -67,10 +67,10 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 	// get prefix
 	if (flags & DEBUG_NOFILELINE) {
 		snprintf(prefix, sizeof(prefix), "%s %s[%d]:",
-			tstp, "rocket", getpid());
+			tstp, "astro", getpid());
 	} else {
 		snprintf(prefix, sizeof(prefix), "%s %s[%d] %s:%03d:",
-			tstp, "rocket", getpid(), file, line);
+			tstp, "astro", getpid(), file, line);
 	}
 
 	// format log message

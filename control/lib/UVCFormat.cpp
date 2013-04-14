@@ -156,6 +156,14 @@ uint32_t	FrameDescriptor::dwFrameInterval(int index) const {
 	return uint32At(26 + 4 * index);
 }
 
+uint32_t	FrameDescriptor::minFrameInterval() const {
+	if (0 == bFrameIntervalType()) {
+		return dwMinFrameInterval();
+	} else {
+		return dwFrameInterval(0);
+	}
+}
+
 std::string	FrameDescriptor::toString() const {
 	std::ostringstream	out;
 	out << frameindent << "bFrameIndex:               ";

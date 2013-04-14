@@ -65,6 +65,60 @@ InterfaceDescriptor&	EndpointDescriptor::interface() {
 	return interfacedescriptor;
 }
 
+EndpointDescriptor::transfer_type	EndpointDescriptor::transferType() const {
+	return (transfer_type)(bmAttributes() & 0x3);
+}
+
+size_t	EndpointDescriptor::maxPacketSize() const {
+	return (wMaxPacketSize() & 0x7ff);
+}
+
+size_t	EndpointDescriptor::transactionOpportunities() const {
+	return 1 + (0x3 & (wMaxPacketSize() >> 11));
+}
+
+bool	EndpointDescriptor::isControl() const {
+	return (transferType() == control_transfer) ? true : false;
+}
+
+bool	EndpointDescriptor::isIsochronous() const {
+	return (transferType() == isochronous_transfer) ? true : false;
+}
+
+bool	EndpointDescriptor::isBulk() const {
+	return (transferType() == bulk_transfer) ? true : false;
+}
+
+bool	EndpointDescriptor::isInterrupt() const {
+	return (transferType() == interrupt_transfer) ? true : false;
+}
+
+EndpointDescriptor::sync_type	EndpointDescriptor::synchronizationType() const {
+	return (sync_type)((0x3 << 2) & bmAttributes());
+}
+
+EndpointDescriptor::usage_type	EndpointDescriptor::usageType() const {
+	return (usage_type)((0x3 << 4) & bmAttributes());
+}
+
+/**
+ * \brief Maximum number of databytes that can be transferred per second.
+ *
+ * This method uses the information in the interface descriptor to compute
+ * the maximum number of bytes that can be transferred per second on this
+ * endpoint during an isochronous transfer.
+ * The method returns 0 for other types of endpoints.
+ */
+size_t	EndpointDescriptor::maxBandwidth() const {
+	size_t	bandwidth = 1000 * transactionOpportunities() * maxPacketSize();
+	switch (dev.getDeviceSpeed()) {
+	case Device::SPEED_HIGH:
+	case Device::SPEED_SUPER:
+		bandwidth *= 8;
+	}
+	return bandwidth;
+}
+
 static std::string	indent("            E   ");
 
 std::string	EndpointDescriptor::toString() const {
@@ -121,8 +175,12 @@ std::string	EndpointDescriptor::toString() const {
 
 	out << attributes << " (";
 	out << std::hex << (int)bmAttributes() << ")" << std::endl;
+
 	out << indent << "wMaxPacketSize:    ";
-	out << std::dec << wMaxPacketSize() << std::endl;
+	out << std::dec << transactionOpportunities();
+	out << " x ";
+	out << std::dec << maxPacketSize() << std::endl;
+
 	out << indent << "bInterval:         ";
 	out << std::dec << (int)bInterval() << std::endl;
 	out << indent << "bRefresh:          ";

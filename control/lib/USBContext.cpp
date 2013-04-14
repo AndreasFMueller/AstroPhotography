@@ -32,6 +32,8 @@ Context::~Context() {
 
 /**
  * \brief set the debug level
+ *
+ * \param level	The debug level is identical to the libusb debug level.
  */
 void	Context::setDebugLevel(int level) throw (std::range_error) {
 	if ((level < 0) || (level > 3)) {
@@ -52,7 +54,7 @@ std::vector<DevicePtr>	Context::devices() throw (USBError) {
 	}
 	if (length > 0) {
 		for (int i = 0; i < length; i++) {
-			DevicePtr	dev(new Device(devlist[i]));
+			DevicePtr	dev(new Device(this, devlist[i]));
 			result.push_back(dev);
 		}
 	}
@@ -76,9 +78,16 @@ DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id)
 	}
 
 	// get the device structure for thie device handle
-	Device	*devptr = new Device(libusb_get_device(dev_handle),
+	Device	*devptr = new Device(this, libusb_get_device(dev_handle),
 		dev_handle);
 	return DevicePtr(devptr);
+}
+
+/**
+ * \brief get the Libusb context
+ */
+libusb_context	*Context::getLibusbContext() const {
+	return context;
 }
 
 } // namespace usb
