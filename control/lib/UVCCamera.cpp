@@ -413,6 +413,9 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	throw USBError("no alternate setting with enough bandwidth found");
 }
 
+/**
+ * \brief Get a single frame.
+ */
 Frame	UVCCamera::getFrame(uint8_t ifno) {
 	Frame	frame(NULL, 0);
 
@@ -456,7 +459,8 @@ Frame	UVCCamera::getFrame(uint8_t ifno) {
 	int	altsetting = preferredAltSetting(ifno);
 	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[altsetting];
 	ifdescptr->altSetting();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "bandwidth negotiation complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bandwidth negotiation complete, "
+		"alt setting: %d", altsetting);
 
 	// get the Endpoint for this alternate setting
 	EndpointDescriptorPtr	endpoint = (*ifdescptr)[0];
@@ -465,6 +469,7 @@ Frame	UVCCamera::getFrame(uint8_t ifno) {
 	size_t	buffersize = 2 * rget.data()->dwMaxVideoFrameSize;
 	unsigned char	*buffer = new unsigned char[2 * buffersize];
 	IsoTransfer	transfer(endpoint, buffersize, buffer);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "buffersize = %d", buffersize);
 
 	// submit this transfer to the device
 	try {

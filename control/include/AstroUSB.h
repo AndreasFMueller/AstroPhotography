@@ -452,7 +452,9 @@ public:
 
 class IsoTransfer : public Transfer {
 	int	packets;
+	int	dataread;
 	int	packetcounter;
+	unsigned char	*buffer;
 public:
 	virtual void	callback();
 private:

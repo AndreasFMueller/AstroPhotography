@@ -52,8 +52,8 @@ void	UVCCameraTest::testCamera() {
 	Context	context;
 	context.setDebugLevel(3);
 	//DevicePtr	deviceptr = context.find(0x199e, 0x8101); // TIS
-	//DevicePtr	deviceptr = context.find(0x046d, 0x082b); // Logitech
-	DevicePtr	deviceptr = context.find(0x0c45, 0x6340); // Sonix
+	DevicePtr	deviceptr = context.find(0x046d, 0x082b); // Logitech
+	//DevicePtr	deviceptr = context.find(0x0c45, 0x6340); // Sonix
 	//DevicePtr	deviceptr = context.find(0x04fc, 0x2001); // Sunplus
 	std::cout << *deviceptr;
 
