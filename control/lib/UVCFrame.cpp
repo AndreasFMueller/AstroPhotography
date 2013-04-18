@@ -13,7 +13,7 @@ namespace astro {
 namespace usb {
 namespace uvc {
 
-Frame::Frame(const void *data, int length) : std::string((char *)data, length) {
+Frame::Frame(int _width, int _height) : width(_width), height(_height) {
 }
 
 int	Frame::getWidth() const {

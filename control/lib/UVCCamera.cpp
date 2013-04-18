@@ -467,7 +467,53 @@ Frame	UVCCamera::getFrame(uint8_t ifno) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "release failed: %s", x.what());
 	}
 
+	// find the dimensions of the images
+	int	width = 640;
+	int	height = 480;
+
 	// convert the retrieved data to an image
+	std::list<IsoPacketPtr>::const_iterator	i;
+	Frame	*currentframe = new Frame(640, 480);
+	std::list<FramePtr>	frames;
+	int	packetcounter = 0;
+	int	processed = 0;
+	int	framecounter = 0;
+	bool	fid = false;
+	for (i = transfer.packets.begin(); i != transfer.packets.end(); i++) {
+		try {
+			UVCIsoPacket	uvciso(**i);
+			if (uvciso.fid() == fid) {
+				if (NULL == currentframe) {
+					currentframe = new Frame(width, height);
+				}
+				currentframe->append(uvciso.payload());
+			} else {
+				frames.push_back(FramePtr(currentframe));
+				framecounter++;
+				currentframe = NULL;
+				fid = uvciso.fid();
+			}
+			processed++;
+		} catch (std::exception& x) {
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "packet %d ignored: %s",
+			//	packetcounter, x.what());
+		}
+		packetcounter++;
+	}
+	if (currentframe) {
+		delete currentframe;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processed packets: %d, frames: %d",
+		processed, framecounter);
+
+	// show how large the frames are:
+	std::list<FramePtr>::const_iterator	j;
+	framecounter = 0;
+	for (j = frames.begin(); j != frames.end(); j++, framecounter++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "frame %d: %d bytes",
+			framecounter, (*j)->size());
+	}
+
 	// XXX not implemented yet
 	return	frame;
 }
@@ -477,13 +523,6 @@ std::vector<Frame>	UVCCamera::getFrames(uint8_t interface, int nframes) {
 	// XXX not implemented yet
 	return result;
 }
-
-#if 0
-typedef struct scanning_mode_control_s {
-	typedef enum { CS = CT_SCANNINGMODE_CONTROL; } CS_type;
-	uint8_t	bScanningMode;
-} scanning_mode_control_t;
-#endif
 
 } // namespace uvc
 } // namespace usb

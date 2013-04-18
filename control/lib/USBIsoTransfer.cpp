@@ -5,9 +5,6 @@
  */
 #include <AstroUSB.h>
 #include <debug.h>
-#include <AstroUVC.h>
-
-using namespace astro::usb::uvc;
 
 namespace astro {
 namespace usb {
@@ -211,19 +208,6 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 		outgoing.pop();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "have now %d packets", packets.size());
-
-	std::list<IsoPacketPtr>::const_iterator	i;
-	int	counter = 0;
-	for (i = packets.begin(); i != packets.end(); i++, counter++) {
-		stream_header_t	*h = (stream_header_t *)(*i)->c_str();
-		std::cout << counter << ": " << (*i)->size() << ", "
-			<< (*i)->status;
-		if ((*i)->size() >= 12) {
-			std::cout << stream_header2string(*h);
-		} else {
-			std::cout << std::endl;
-		}
-	}
 }
 
 IsoTransfer::~IsoTransfer() {

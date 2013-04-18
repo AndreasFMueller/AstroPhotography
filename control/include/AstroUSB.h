@@ -508,7 +508,9 @@ class IsoTransfer : public Transfer {
 	int	totalpackets;
 	std::queue<IsoSegmentPtr>	incoming;
 	std::queue<IsoSegmentPtr>	outgoing;
+public:
 	std::list<IsoPacketPtr>	packets;
+private:
 	pthread_t	eventthread;
 	pthread_mutex_t	mutex;
 	pthread_cond_t	condition;

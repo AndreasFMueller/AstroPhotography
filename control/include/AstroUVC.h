@@ -562,11 +562,12 @@ class Frame : public std::string {
 	int	width;
 	int	height;
 public:
-	Frame(const void *data, int length);
+	Frame(int width, int height);
 	int	getWidth() const;
 	int	getHeight() const;
 	friend class UVCCamera;
 };
+typedef std::tr1::shared_ptr<Frame>	FramePtr;
 
 /**
  * \brief Traits class for Camera Unit and processing unit requets
@@ -1240,11 +1241,22 @@ public:
 /**
  * \brief 
  */
-class UVCIsoTransfer : public IsoTransfer {
-	virtual void	callback();
+class UVCIsoPacket : public IsoPacket {
 public:
-	UVCIsoTransfer(EndpointDescriptorPtr endpoint,
-		int length, unsigned char *data);
+	UVCIsoPacket(const IsoPacket& isopacket);
+	uint8_t	hle() const;
+	uint8_t	bfh() const;
+	bool	eoh() const;
+	bool	err() const;
+	bool	sti() const;
+	bool	res() const;
+	bool	scr() const;
+	bool	pts() const;
+	bool	eof() const;
+	bool	fid() const;
+	uint32_t	ptsValue() const;
+	uint64_t	scrValue() const;
+	std::string	payload() const;
 };
 
 class UVCBulkTransfer : public BulkTransfer {

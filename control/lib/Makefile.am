@@ -23,7 +23,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
 	UVCFactory.cpp \
 	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
-	UVCFrame.cpp UVCCamera.cpp UVCTransfer.cpp
+	UVCFrame.cpp UVCCamera.cpp UVCTransfer.cpp UVCIso.cpp
 #	MicroTouch.cpp
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"
