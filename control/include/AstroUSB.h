@@ -258,7 +258,8 @@ public:
 		void *data = NULL);
 	RequestBase(request_type type, const InterfacePtr interface,
 		void *data = NULL);
-	RequestBase(request_type type, void *data = NULL);
+	RequestBase(request_type type, request_recipient recipient,
+		void *data = NULL);
 	
 	virtual uint8_t	bmRequestType() const;
 	virtual uint8_t	bRequest() const = 0;
@@ -334,15 +335,16 @@ public:
 	 *
 	 * Fill the request structure directly.
 	 * \param type		request type
+	 * \param recipient	request recipient
 	 * \param wIndex	
 	 * \param bRequest	request number
 	 * \param wValue	
 	 * \param payload_data	pointer to the data structure to send or
 	 * 			retrieve
 	 */
-	Request(request_type type, uint16_t wIndex,
+	Request(request_type type, request_recipient recipient, uint16_t wIndex,
 		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
-		: RequestBase(type, payload_data) {
+		: RequestBase(type, recipient, payload_data) {
 		init(bRequest, wValue, payload_data);
 		packet.header.wIndex = wIndex;
 	}
@@ -395,7 +397,8 @@ public:
 		uint8_t bRequest, uint16_t wValue);
 	EmptyRequest(request_type type, const InterfacePtr interface,
 		uint8_t bRequest, uint16_t wValue);
-	EmptyRequest(request_type type, uint16_t wIndex,
+	EmptyRequest(request_type type, request_recipient recipient,
+		uint16_t wIndex,
 		uint8_t bRequest, uint16_t wValue);
 
 	virtual uint8_t	bmRequestType() const;

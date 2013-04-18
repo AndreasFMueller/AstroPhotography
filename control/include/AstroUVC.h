@@ -67,9 +67,9 @@
 #define CT_CONTROL_UNDEFINED			0x00
 #define CT_SCANNING_MODE_CONTROL		0x01
 #define CT_AE_MODE_CONTROL			0x02
-#define CT_AE_PRIOERITY_CONTROL			0x03
+#define CT_AE_PRIORITY_CONTROL			0x03
 #define CT_EXPOSURE_TIME_ABSOLUTE_CONTROL	0x04
-#define CT_EXPOSURE_TIME_REALTIVE_CONTROL	0x05
+#define CT_EXPOSURE_TIME_RELATIVE_CONTROL	0x05
 #define CT_FOCUS_ABSOLUTE_CONTROL		0x06
 #define CT_FOCUS_RELATIVE_CONTROL		0x07
 #define CT_FOCUS_AUTO_CONTROL			0x08
@@ -93,8 +93,8 @@
 #define PU_SATURATION_CONTROL				0x07
 #define PU_SHARPNESS_CONTROL				0x08
 #define PU_GAMMA_CONTROL				0x09
-#define PU_WHITE_BALANCE_TEMPERATUR_CONTROL		0x0a
-#define PU_WHITE_BALANCE_TEMPERATUR_AUTO_CONTROL	0x0b
+#define PU_WHITE_BALANCE_TEMPERATURE_CONTROL		0x0a
+#define PU_WHITE_BALANCE_TEMPERATURE_AUTO_CONTROL	0x0b
 #define PU_WHITE_BALANCE_COMPONENT_CONTROL		0x0c
 #define PU_WHITE_BALANCE_COMPONENT_AUTO_CONTROL		0x0d
 #define PU_DIGITAL_MULTIPLIER_CONTROL			0x0e
@@ -569,6 +569,451 @@ public:
 };
 
 /**
+ * \brief Traits class for Camera Unit and processing unit requets
+ */
+struct video_control_tag { };
+	struct device_power_mode_control_tag
+		: public video_control_tag {
+		typedef enum CS_enum {
+			CS = VC_VIDEO_POWER_MODE_CONTROL
+		} CS_type;
+	};
+	struct request_error_code_control_tag
+		: public video_control_tag {
+		typedef enum CS_enum {
+			CS = VC_REQUEST_ERROR_CODE_CONTROL
+		} CS_type;
+	};
+
+struct camera_terminal_control_tag {
+};
+	struct scanning_mode_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_SCANNING_MODE_CONTROL
+		} CS_type;
+	};
+	struct auto_exposure_mode_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_AE_MODE_CONTROL
+		} CS_type;
+	};
+	struct auto_exposure_priority_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_AE_PRIORITY_CONTROL
+		} CS_type;
+	};
+	struct exposure_time_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_EXPOSURE_TIME_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct exposure_time_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_EXPOSURE_TIME_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct focus_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_FOCUS_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct focus_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_FOCUS_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct focus_auto_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_FOCUS_AUTO_CONTROL
+		} CS_type;
+	};
+	struct iris_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_IRIS_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct iris_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_IRIS_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct zoom_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_ZOOM_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct zoom_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_ZOOM_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct pantilt_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_PANTILT_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct pantilt_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_PANTILT_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct roll_absolute_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_ROLL_ABSOLUTE_CONTROL
+		} CS_type;
+	};
+	struct roll_relative_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_ROLL_RELATIVE_CONTROL
+		} CS_type;
+	};
+	struct privacy_shutter_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_PRIVACY_CONTROL
+		} CS_type;
+	};
+
+struct selection_unit_control_tag {
+};
+	struct input_selector_control_tag
+		: public selection_unit_control_tag {
+		typedef enum CS_enum {
+			CS = SU_INPUT_SELECT_CONTROL
+		} CS_type;
+	};
+
+struct processing_unit_control_tag {
+};
+	struct backlight_compensation_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_BACKLIGHT_COMPENSATION_CONTROL
+		} CS_type;
+	};
+	struct brightness_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_BRIGHTNESS_CONTROL
+		} CS_type;
+	};
+	struct contrast_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_CONTRAST_CONTROL
+		} CS_type;
+	};
+	struct gain_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_GAIN_CONTROL
+		} CS_type;
+	};
+	struct power_line_frequency_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_POWER_LINE_FREQUENCY_CONTROL
+		} CS_type;
+	};
+	struct hue_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_HUE_CONTROL
+		} CS_type;
+	};
+	struct hue_auto_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_HUE_AUTO_CONTROL
+		} CS_type;
+	};
+	struct saturation_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_SATURATION_CONTROL
+		} CS_type;
+	};
+	struct sharpness_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_SHARPNESS_CONTROL
+		} CS_type;
+	};
+	struct gamma_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_GAMMA_CONTROL
+		} CS_type;
+	};
+	struct white_balance_temperature_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_WHITE_BALANCE_TEMPERATURE_CONTROL
+		} CS_type;
+	};
+	struct white_balance_temperature_auto_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_WHITE_BALANCE_TEMPERATURE_AUTO_CONTROL
+		} CS_type;
+	};
+	struct white_balance_component_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_WHITE_BALANCE_COMPONENT_CONTROL
+		} CS_type;
+	};
+	struct white_balance_component_auto_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_WHITE_BALANCE_COMPONENT_AUTO_CONTROL
+		} CS_type;
+	};
+	struct digital_multiplier_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_DIGITAL_MULTIPLIER_CONTROL
+		} CS_type;
+	};
+	struct digital_multiplier_limit_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_DIGITAL_MULTIPLIER_LIMIT_CONTROL
+		} CS_type;
+	};
+	struct analog_video_standard_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_ANALOG_VIDEO_STANDARD_CONTROL
+		} CS_type;
+	};
+	struct analog_lock_status_control_tag
+		: public processing_unit_control_tag  {
+		typedef enum CS_enum {
+			CS = PU_ANALOG_LOCK_STATUS_CONTROL
+		} CS_type;
+	};
+
+/**
+ * \brief structures for UVC get/set requests
+ */
+typedef struct device_power_mode_control_s {
+	typedef device_power_mode_control_tag	control_type;
+	uint8_t	bDevicePowerMode;
+} __attribute__((packed)) device_power_mode_control_t;
+
+typedef struct request_error_code_control_s {
+	typedef request_error_code_control_tag	control_type;
+	uint8_t	bRequestErrorCode;
+} __attribute__((packed)) request_error_control_t;
+
+typedef struct scanning_mode_control_s {
+	typedef scanning_mode_control_tag	control_type;
+	uint8_t bScanningMode;
+} __attribute__((packed)) scanning_mode_control_t;
+
+typedef struct auto_exposure_mode_control_s {
+	typedef auto_exposure_mode_control_tag	control_type;
+	uint8_t bAutoExposureMode;
+} __attribute__((packed)) auto_exposure_mode_control_t;
+
+typedef struct auto_exposure_priority_control_s {
+	typedef auto_exposure_priority_control_tag	control_type;
+	uint8_t bAutoExposurePriority;
+} __attribute__((packed)) auto_exposure_priority_control_t;
+
+typedef struct exposure_time_absolute_control_s {
+	typedef exposure_time_absolute_control_tag	control_type;
+	uint32_t dwExposureTimeAbsolute;
+} __attribute__((packed)) exposure_time_absolute_control_t;
+
+typedef struct exposure_time_relative_control_s {
+	typedef exposure_time_relative_control_tag	control_type;
+	uint32_t dwExposureTimeRelative;
+} __attribute__((packed)) exposure_time_relative_control_t;
+
+typedef struct focus_absolute_control_s {
+	typedef focus_absolute_control_tag	control_type;
+	uint16_t wFocusAbsolute;
+} __attribute__((packed)) focus_absolute_control_t;
+
+typedef struct focus_relative_control_s {
+	typedef focus_relative_control_tag	control_type;
+	uint8_t bFocusRelative;
+	uint8_t	bSpeed;
+} __attribute__((packed)) focus_relative_control_t;
+
+typedef struct focus_auto_control_s {
+	typedef focus_auto_control_tag	control_type;
+	uint8_t	bFocusAuto;
+} __attribute__((packed)) focus_auto_control_t;
+
+typedef struct iris_absolute_control_s {
+	typedef iris_absolute_control_tag	control_type;
+	uint16_t	wIrisAbsolute;
+} __attribute__((packed)) iris_absolute_control_t;
+
+typedef struct iris_relative_control_s {
+	typedef iris_relative_control_tag	control_type;
+	uint16_t	wIrisRelative;
+} __attribute__((packed)) iris_relative_control_t;
+
+typedef struct zoom_absolute_control_s {
+	typedef zoom_absolute_control_tag	control_type;
+	uint16_t	wObjectFocalLength;
+} __attribute__((packed)) zoom_absolute_control_t;
+
+typedef struct zoom_relative_control_s {
+	typedef zoom_relative_control_tag	control_type;
+	uint8_t	bZoom;
+	uint8_t	bDigitalZoom;
+	uint8_t	bSpeed;
+} __attribute__((packed)) zoom_relative_control_t;
+
+typedef struct pantilt_absolute_control_s {
+	typedef pantilt_absolute_control_tag	control_type;
+	uint32_t	dwPanAbsolute;
+	uint32_t	dwTiltAbsolute;
+} __attribute__((packed)) pantilt_absolute_control_t;
+
+typedef struct pantilt_relative_control_s {
+	typedef pantilt_relative_control_tag	control_type;
+	uint8_t	bPanRelative;
+	uint8_t	bPanSpeed;
+	uint8_t	bTiltRelative;
+	uint8_t	bTiltSpeed;
+} __attribute__((packed)) pantilt_relative_control_t;
+
+typedef struct roll_absolute_control_s {
+	typedef roll_absolute_control_tag	control_type;
+	uint16_t	wRoolAbsolute;
+} __attribute__((packed)) roll_absolute_control_t;
+
+typedef struct roll_relative_control_s {
+	typedef roll_relative_control_tag	control_type;
+	uint8_t	bRollRelative;
+	uint8_t	bSpeed;
+} __attribute__((packed)) roll_relative_control_t;
+
+typedef struct privacy_shutter_control_s {
+	typedef privacy_shutter_control_tag	control_type;
+	uint8_t	bPrivacy;
+} __attribute__((packed)) privacy_shutter_control_t;
+
+typedef struct input_selector_control_s {
+	typedef input_selector_control_tag	control_type;
+	uint8_t	bSelector;
+} __attribute__((packed)) input_selector_control_t;
+
+typedef struct backlight_compensation_control_s {
+	typedef backlight_compensation_control_tag	control_type;
+	uint16_t	wBacklightCompensation;
+} __attribute__((packed)) backlight_compensation_control_t;
+
+typedef struct brightness_control_s {
+	typedef brightness_control_tag control_type;
+	uint16_t	wBrightness;
+} __attribute__((packed)) brightness_control_t;
+
+typedef struct contrast_control_s {
+	typedef contrast_control_tag control_type;
+	uint16_t	wContrast;
+} __attribute__((packed)) contrast_control_t;
+
+typedef struct gain_control_s {
+	typedef gain_control_tag control_type;
+	uint16_t	wGain;
+} __attribute__((packed)) gain_control_t;
+
+typedef struct power_line_frequency_control_s {
+	typedef power_line_frequency_control_tag control_type;
+	uint8_t	bPowerLineFrequency;
+} __attribute__((packed)) power_line_frequency_control_t;
+
+typedef struct hue_control_s {
+	typedef hue_control_tag control_type;
+	uint16_t	wHue;
+} __attribute__((packed)) hue_control_t;
+
+typedef struct hue_auto_control_s {
+	typedef hue_auto_control_tag control_type;
+	uint8_t	bHueAuto;
+} __attribute__((packed)) hue_auto_control_t;
+
+typedef struct saturation_control_s {
+	typedef saturation_control_tag control_type;
+	uint16_t	wSaturation;
+} __attribute__((packed)) saturation_control_t;
+
+typedef struct sharpness_control_s {
+	typedef sharpness_control_tag control_type;
+	uint16_t	wSharpness;
+} __attribute__((packed)) sharpness_control_t;
+
+typedef struct gamma_control_s {
+	typedef gamma_control_tag control_type;
+	uint16_t	wGamma;
+} __attribute__((packed)) gamma_control_t;
+
+typedef struct white_balance_temperature_control_s {
+	typedef white_balance_temperature_control_tag control_type;
+	uint16_t	wWhiteBalacneTemperature;
+} __attribute__((packed)) white_balance_temperature_control_t;
+
+typedef struct white_balance_temperature_auto_control_s {
+	typedef white_balance_temperature_auto_control_tag control_type;
+	uint8_t	bWhiteBalanceTemperatureAuto;
+} __attribute__((packed)) white_balance_temperature_auto_control_t;
+
+typedef struct white_balance_component_control_s {
+	typedef white_balance_component_control_tag control_type;
+	uint16_t	wWhiteBalanceBlue;
+	uint16_t	wWhiteBalanceRed;
+} __attribute__((packed)) white_balance_component_control_t;
+
+typedef struct white_balance_component_auto_control_s {
+	typedef white_balance_component_auto_control_tag control_type;
+	uint8_t	bWhiteBalanceComponentAuto;
+} __attribute__((packed)) white_balance_component_auto_control_t;
+
+typedef struct digital_multiplier_control_s {
+	typedef digital_multiplier_control_tag control_type;
+	uint16_t	wMultiplierStep;
+} __attribute__((packed)) digital_multiplier_control_t;
+
+typedef struct digital_multiplier_limit_control_s {
+	typedef digital_multiplier_limit_control_tag control_type;
+	uint16_t	wMultiplierLimit;
+} __attribute__((packed)) digital_multiplier_limit_control_t;
+
+typedef struct analog_video_standard_control_s {
+	typedef analog_video_standard_control_tag control_type;
+	uint16_t	bVideoStandard;
+} __attribute__((packed)) analog_video_standard_control_t;
+
+typedef struct analog_lock_status_control_s {
+	typedef analog_lock_status_control_tag control_type;
+	uint16_t	wBrightness;
+} __attribute__((packed)) analog_lock_status_control_t;
+
+
+/**
  * \brief UVC Camera
  */
 class UVCCamera {
@@ -618,15 +1063,128 @@ public:
 	// alternate setting selection for transfer
 private:
 	int	preferredAltSetting(uint8_t interface);
-	
+
+private:
+	// private templates for the various types of requests
+	// SET_CUR requests
+	template<typename T>
+	void	doSetCurrent(const T& p, video_control_tag) {
+		uint16_t	wIndex = controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type, wIndex,
+			SET_CUR, T::control_type::CS << 8);
+		device.controlRequest(&r);
+	}
+
+	template<typename T>
+	void	doSetCurrent(const T& p, camera_terminal_control_tag) {
+		uint16_t	wIndex = (controlCameraTerminalID() << 8)
+						| controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type, wIndex,
+			SET_CUR, T::control_type::CS << 8, &p);
+		device.controlRequest(&r);
+	}
+
+	template<typename T>
+	void	doSetCurrent(const T& p, processing_unit_control_tag) {
+		uint16_t	wIndex = (controlProcessingUnitID() << 8)
+						| controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type, wIndex,
+			SET_CUR, T::control_type::CS << 8, &p);
+		device.controlRequest(&r);
+	}
+
 public:
 	// modifying parameter of the various interfaces
 	template<typename T>
 	void	setCurrent(const T& p) {
-		Request<T>	r(RequestBase::host_to_device, videocontrol,
-			SET_CUR, T::CS << 8, &p);
-		device.controlRequest(&r);
+		doSetCurrent(p, typename T::control_type());
 	}
+
+	// GET_INFO request
+	typedef struct control_info_s {
+		uint8_t	info;
+	} __attribute__((packed)) control_info_t;
+
+	template<typename T>
+	uint8_t	getInfo(T, video_control_tag) {
+		uint16_t	wIndex = (controlCameraTerminalID() << 8)
+						| controlInterfaceNumber();
+		Request<control_info_t>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			(uint8_t)GET_INFO, (uint16_t)(T::control_type::CS << 8));
+		device.controlRequest(&r);
+		return r.data()->info;
+	}
+
+	template<typename T>
+	uint8_t	getInfo(T, camera_terminal_control_tag) {
+		uint16_t	wIndex = (controlCameraTerminalID() << 8)
+						| controlInterfaceNumber();
+		Request<control_info_t>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			(uint8_t)GET_INFO, (uint16_t)(T::control_type::CS << 8));
+		device.controlRequest(&r);
+		return r.data()->info;
+	}
+
+	template<typename T>
+	uint8_t	getInfo(T, processing_unit_control_tag) {
+		uint16_t	wIndex = (controlProcessingUnitID() << 8)
+						| controlInterfaceNumber();
+		Request<control_info_t>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			(uint8_t)GET_INFO, (uint16_t)(T::control_type::CS << 8));
+		device.controlRequest(&r);
+		return r.data()->info;
+	}
+public:
+	template<typename T>
+	uint8_t	getInfo(T) {
+		return getInfo(T(), typename T::control_type());
+	}
+
+private:
+
+	// GET_* requests
+	template<typename T>
+	T	doGetControl(int request, T, camera_terminal_control_tag) {
+		uint16_t	wIndex = (controlCameraTerminalID() << 8)
+						| controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			request, T::control_type::CS << 8);
+		device.controlRequest(&r);
+		return *r.data();
+	}
+
+	template<typename T>
+	T	doGetControl(int request, T, processing_unit_control_tag) {
+		uint16_t	wIndex = (controlProcessingUnitID() << 8)
+						| controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			request, T::control_type::CS << 8);
+		device.controlRequest(&r);
+		return *r.data();
+	}
+
+	template<typename T>
+	T	doGetControl(int request, T, video_control_tag) {
+		uint16_t	wIndex = controlInterfaceNumber();
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
+			request, T::control_type::CS << 8);
+		device.controlRequest(&r);
+		return *r.data();
+	}
+	
+public:
+	template<typename T>
+	T	get(int request, T) {
+		return doGetControl(request, T(), typename T::control_type());
+	}
+
+public:
 
 	// display stuff
 	std::string	toString() const;
@@ -678,14 +1236,6 @@ public:
 	VideoStreamingCommitControlRequest(InterfacePtr interptr,
 		uint8_t bRequest, vs_control_request_t *data = NULL);
 };
-
-/**
- * \brief structures for UVC get/set requests
- */
-typedef struct scanning_mode_control_s {
-	typedef enum CS_enum { CS = CT_SCANNING_MODE_CONTROL } CS_type;
-	uint8_t bScanningMode;
-} scanning_mode_control_t;
 
 /**
  * \brief 

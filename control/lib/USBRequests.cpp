@@ -56,8 +56,9 @@ RequestBase::RequestBase(request_type _type, InterfacePtr interface,
 	accept_short_response = false;
 }
 
-RequestBase::RequestBase(request_type _type, void *data) : type(_type) {
-	recipient = device_recipient;
+RequestBase::RequestBase(request_type _type, request_recipient _recipient,
+	void *data) : type(_type) {
+	recipient = _recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	accept_short_response = false;
 }
@@ -162,9 +163,9 @@ EmptyRequest::EmptyRequest(request_type type,
 	init(bRequest, wValue);
 }
 
-EmptyRequest::EmptyRequest(request_type type, uint16_t wIndex,
-                uint8_t bRequest, uint16_t wValue)
-	: RequestBase(type, NULL) {
+EmptyRequest::EmptyRequest(request_type type, request_recipient recipient,
+		 uint16_t wIndex, uint8_t bRequest, uint16_t wValue)
+	: RequestBase(type, recipient, NULL) {
 	init(bRequest, wValue);
 	header.wIndex = wIndex;
 }

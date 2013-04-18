@@ -61,6 +61,18 @@ void	UVCCameraTest::testCamera() {
 	try {
 		UVCCamera	camera(*deviceptr, true);
 		std::cout << camera;
+		uint8_t	rc = camera.getInfo(exposure_time_absolute_control_t());
+		exposure_time_absolute_control_t	cur, min, max, def, res;
+		cur = camera.get(GET_CUR, exposure_time_absolute_control_t());
+		min = camera.get(GET_MIN, exposure_time_absolute_control_t());
+		max = camera.get(GET_MAX, exposure_time_absolute_control_t());
+		def = camera.get(GET_DEF, exposure_time_absolute_control_t());
+		res = camera.get(GET_RES, exposure_time_absolute_control_t());
+		std::cout << "CUR = " << cur.dwExposureTimeAbsolute << ", ";
+		std::cout << "MIN = " << min.dwExposureTimeAbsolute << ", ";
+		std::cout << "MAX = " << max.dwExposureTimeAbsolute << ", ";
+		std::cout << "RES = " << res.dwExposureTimeAbsolute << ", ";
+		std::cout << "DEF = " << def.dwExposureTimeAbsolute << std::endl;
 		std::cout << "select FormatAndFrame" << std::endl;
 		camera.selectFormatAndFrame(1, 1, 1);
 		std::pair<uint8_t, uint8_t>	ff
