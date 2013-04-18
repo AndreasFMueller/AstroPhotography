@@ -5,6 +5,7 @@
  */
 #include <AstroUSB.h>
 #include <debug.h>
+#include <stdlib.h>
 
 namespace astro {
 namespace usb {
