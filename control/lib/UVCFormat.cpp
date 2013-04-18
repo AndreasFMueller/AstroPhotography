@@ -29,6 +29,10 @@ uint8_t	FormatDescriptor::bNumFrameDescriptors() const {
 	return uint8At(4);
 }
 
+void	FormatDescriptor::setBNumFrameDescriptors(uint8_t b) {
+	((uint8_t *)data)[4] = b;
+}
+
 static std::string	indent("            ");
 static std::string	formatindent = indent + std::string("FO  ");
 static std::string	frameindent = indent + std::string("    FRM ");

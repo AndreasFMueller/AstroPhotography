@@ -421,18 +421,15 @@ public:
 class Transfer {
 protected:
 	EndpointDescriptorPtr	endpoint;
-	int	length;
-	unsigned char	*data;
-	bool	freedata;
 	int	timeout;
 	bool	complete;
+	libusb_context	*getContext();
 private:
 	virtual void	submit(libusb_device_handle *devhandle)
 		throw(USBError) = 0;
 public:
 	virtual void	callback() = 0;
-	Transfer(EndpointDescriptorPtr endpoint,
-		int length, unsigned char *data = NULL);
+	Transfer(EndpointDescriptorPtr endpoint);
 	virtual ~Transfer();
 	int	getTimeout() const;
 	void	setTimeout(int timeout);
@@ -442,7 +439,13 @@ public:
 	friend class Device;
 };
 
+/**
+ * \brief Transfer class for bulk transfers.
+ */
 class BulkTransfer : public Transfer {
+	int	length;
+	unsigned char	*data;
+	bool	freedata;
 	libusb_transfer	*transfer;
 public:
 	virtual void	callback();

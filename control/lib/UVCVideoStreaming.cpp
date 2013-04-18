@@ -20,7 +20,7 @@ HeaderDescriptor::HeaderDescriptor(Device& _device,
 	const void *_data, int length)
 	: UVCDescriptor(_device, _data, length) {
 	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
-std::cout << "fixing the imaging source:" << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "fixing TIS headers");
 		((uint8_t *)data)[3] = (uint8_t)3;
 		((uint8_t *)data)[4] = (uint8_t)231;
 		((uint8_t *)data)[5] = (uint8_t)0;
@@ -49,12 +49,20 @@ uint8_t	HeaderDescriptor::bNumFormats() const {
 	return uint8At(3);
 }
 
+void	HeaderDescriptor::setBNumFormats(uint8_t b) {
+	((uint8_t *)data)[3] = b;
+}
+
 uint8_t	HeaderDescriptor::bEndpointAddress() const {
 	return uint8At(6);
 }
 
 uint16_t	HeaderDescriptor::wTotalLength() const {
 	return uint16At(4);
+}
+
+void	HeaderDescriptor::setWTotalLength(uint16_t w) {
+	memcpy(&data[4], &w, 2);
 }
 
 const USBDescriptorPtr	HeaderDescriptor::operator[](size_t formatindex) const {

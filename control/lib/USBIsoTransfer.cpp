@@ -100,7 +100,7 @@ int	IsoSegment::extract(std::list<IsoPacketPtr>& packets) {
 // IsoTransfer implementation
 //////////////////////////////////////////////////////////////////////
 IsoTransfer::IsoTransfer(EndpointDescriptorPtr _endpoint, int _totalpackets)
-	: Transfer(_endpoint, 0), totalpackets(_totalpackets) {
+	: Transfer(_endpoint), totalpackets(_totalpackets) {
 }
 
 static void	*isotransfer_event_thread(void *arguments) {
@@ -113,8 +113,7 @@ static void	*isotransfer_event_thread(void *arguments) {
  * \brief Handle events in a separate thread
  */
 void	IsoTransfer::handlevents() {
-	libusb_context	*ctx
-		= endpoint->device().getContext()->getLibusbContext();
+	libusb_context	*ctx = getContext();
 
 	// wait for the mutex to unlock
 	if (pthread_mutex_lock(&mutex)) {

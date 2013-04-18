@@ -341,8 +341,7 @@ int	Device::maxIsoPacketSize(uint8_t endpoint) const {
  * \param transfer	A Transfer instance.
  */
 void	Device::submit(Transfer *transfer) throw(USBError) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer of size %d",
-		transfer->length);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit transfer");
 	transfer->submit(dev_handle);
 }
 

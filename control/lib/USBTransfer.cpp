@@ -15,25 +15,13 @@ namespace usb {
 //////////////////////////////////////////////////////////////////////
 // Transfer implementation
 //////////////////////////////////////////////////////////////////////
-Transfer::Transfer(EndpointDescriptorPtr _endpoint,
-	int _length, unsigned char *_data)
-	: endpoint(_endpoint), length(_length) {
-	if (_data == NULL) {
-		data = new unsigned char[length];
-		freedata = true;
-	} else {
-		data = _data;
-		freedata = false;
-	}
+Transfer::Transfer(EndpointDescriptorPtr _endpoint)
+	: endpoint(_endpoint) {
 	timeout = 1000;
 	complete = false;
 }
 
 Transfer::~Transfer() {
-	if ((NULL != data) && (freedata)) {
-		delete[] data;
-	}
-	data = NULL;
 }
 
 int	Transfer::getTimeout() const {
@@ -48,6 +36,12 @@ bool	Transfer::isComplete() const {
 	return complete;
 }
 
+libusb_context	*Transfer::getContext() {
+	libusb_context  *ctx
+                = endpoint->device().getContext()->getLibusbContext();
+	return ctx;
+}
+
 //////////////////////////////////////////////////////////////////////
 // BulkTransfer implementation
 //////////////////////////////////////////////////////////////////////
@@ -57,8 +51,16 @@ static void bulktransfer_callback(libusb_transfer *transfer) {
 
 BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
 	int _length, unsigned char *_data)
-	: Transfer(_endpoint, _length, _data) {
+	: Transfer(_endpoint) {
 	transfer = NULL;
+	length = _length;
+	if (NULL != _data) {
+		data = _data;
+		freedata = false;
+	} else {
+		data = new unsigned char[_length];
+		freedata = true;
+	}
 }
 
 void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
@@ -75,6 +77,12 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
 	}
+
+	// handle events until the complete flag is set
+	libusb_context  *ctx = getContext();
+	while (!complete) {
+		libusb_handle_events(ctx);
+	}
 }
 
 BulkTransfer::~BulkTransfer() {
@@ -82,10 +90,16 @@ BulkTransfer::~BulkTransfer() {
 		libusb_free_transfer(transfer);
 		transfer = NULL;
 	}
+	if (freedata) {
+		delete [] data;
+		data = NULL;
+	}
 }
 
 void	BulkTransfer::callback() {
-	std::cout << "bulk transfer callback" << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete: %d",
+		transfer->actual_length);
+	complete = true;
 }
 
 

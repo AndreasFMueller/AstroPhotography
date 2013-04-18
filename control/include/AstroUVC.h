@@ -188,7 +188,7 @@ public:
 class VideoStreamingDescriptorFactory : public UVCDescriptorFactory {
 	USBDescriptorPtr	header(const void *data, int length,
 					HeaderDescriptor *headerdescriptor);
-	USBDescriptorPtr	formats(const void *data, int length,
+	USBDescriptorPtr	format(const void *data, int length,
 					FormatDescriptor *formatdescriptor);
 	VideoStreamingDescriptorFactory(const VideoStreamingDescriptorFactory& other);
 public:
@@ -369,6 +369,8 @@ public:
 class HeaderDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	formats;
 	HeaderDescriptor(const HeaderDescriptor& other);
+	void	setBNumFormats(uint8_t b);
+	void	setWTotalLength(uint16_t w);
 public:
 	HeaderDescriptor(Device& device, const void *data, int length);
 	uint8_t		bNumFormats() const;
@@ -416,6 +418,7 @@ public:
 class FormatDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	frames;
 	FormatDescriptor(const FormatDescriptor& other);
+	void	setBNumFrameDescriptors(uint8_t b);
 protected:
 	std::string	framesToString() const;
 public:
@@ -1192,11 +1195,11 @@ public:
 
 	// access to frames
 private:
-	std::vector<Frame>	getIsoFrames(uint8_t interface, int nframes);
-	std::vector<Frame>	getBulkFrames(uint8_t interface, int nframes);
+	std::vector<FramePtr>	getIsoFrames(uint8_t interface, int nframes);
+	std::vector<FramePtr>	getBulkFrames(uint8_t interface, int nframes);
 public:
-	Frame	getFrame(uint8_t interface);
-	std::vector<Frame>	getFrames(uint8_t interface, int nframes);
+	FramePtr	getFrame(uint8_t interface);
+	std::vector<FramePtr>	getFrames(uint8_t interface, int nframes);
 };
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);
