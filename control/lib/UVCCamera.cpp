@@ -417,38 +417,13 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
  * \brief Get a single frame.
  */
 Frame	UVCCamera::getFrame(uint8_t ifno) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d", ifno);
 	Frame	frame(NULL, 0);
 
 	// get the currently negotiated settings
 	InterfacePtr	interfaceptr = (*device.activeConfig())[ifno];
 	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
 	device.controlRequest(&rget);
-
-#if 0
-	// compute the bandwidth requirements for these settings
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "max video frame size: %d",
-		rget.data()->dwMaxVideoFrameSize);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame interval: %d",
-		rget.data()->dwFrameInterval);
-	double	required_bandwidth = rget.data()->dwMaxVideoFrameSize
-		* (10000000. / rget.data()->dwFrameInterval);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "required bandwidth: %f",
-		required_bandwidth);
-
-	// show the alt settings of the interface
-	std::cout << *interfaceptr;
-	for (int alt = 1; alt < interfaceptr->numAltsettings(); alt++) {
-		InterfaceDescriptorPtr interfacedescriptor = (*interfaceptr)[alt];
-		std::cout << "alt setting " << (int)alt;
-		std::cout << ", maxPacketSize = ";
-		std::cout << (*interfacedescriptor)[0]->maxPacketSize();
-		std::cout << ", transactionOpportunities = ";
-		std::cout << (*interfacedescriptor)[0]->transactionOpportunities();
-		std::cout << ", maxBandwidth = ";
-		std::cout << (*interfacedescriptor)[0]->maxBandwidth();
-		std::cout << std::endl;
-	}
-#endif
 
 	// We have to claim the interface bevor we can actually use an
 	// alternate setting
@@ -465,11 +440,12 @@ Frame	UVCCamera::getFrame(uint8_t ifno) {
 	// get the Endpoint for this alternate setting
 	EndpointDescriptorPtr	endpoint = (*ifdescptr)[0];
 
-	// now do the transfer with this alt setting
-	size_t	buffersize = 2 * rget.data()->dwMaxVideoFrameSize;
-	unsigned char	*buffer = new unsigned char[2 * buffersize];
-	IsoTransfer	transfer(endpoint, buffersize, buffer);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "buffersize = %d", buffersize);
+	// now do the transfer with this alt setting, for this we first have
+	// to decide for how many microframes we want to transfer anything
+	
+	IsoTransfer	transfer(endpoint, 8000);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"create an IsoTransfer with 2000 packets");
 
 	// submit this transfer to the device
 	try {

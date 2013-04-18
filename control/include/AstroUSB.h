@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <list>
 #include <vector>
+#include <queue>
 #include <iostream>
 #include <tr1/memory>
 #include <string.h>
@@ -419,7 +420,6 @@ protected:
 	EndpointDescriptorPtr	endpoint;
 	int	length;
 	unsigned char	*data;
-	libusb_transfer	*transfer;
 	bool	freedata;
 	int	timeout;
 	bool	complete;
@@ -440,6 +440,7 @@ public:
 };
 
 class BulkTransfer : public Transfer {
+	libusb_transfer	*transfer;
 public:
 	virtual void	callback();
 private:
@@ -450,18 +451,71 @@ public:
 	virtual ~BulkTransfer();
 };
 
+/**
+ * Isochronous transfers are much more complicated. In an isochronous transfer,
+ * the device sends one or more packets in each microframe, as specified
+ * in the EndpointDescriptor. Since a controller can only handle a relatively
+ * small number of packets, the transfer has to be put together from several
+ * smaller transfers, implemented by the IsoSegment class. When a transfer
+ * is complete, a list of IsoPacket objects can be retrieved from the
+ * segment.
+ */
+class	IsoTransfer;
+
+/**
+ * \brief IsoPacket
+ */
+class IsoPacket : public std::string {
+public:
+	int status;
+	IsoPacket(unsigned char *data, size_t length, int status);
+};
+typedef std::tr1::shared_ptr<IsoPacket>	IsoPacketPtr;
+
+/**
+ * \brief Isochronous transfer
+ *
+ * A segment of an isochronous transfer is a sequence of packets received
+ * from an isochronous endpoint. Since a USB controller can only handle
+ * a relatively small number of packets, a larger transfer has to be 
+ * split up in a sequence of smaller transfers, called IsoSegments.
+ */
+class IsoSegment {
+	EndpointDescriptorPtr	endpoint;
+	libusb_transfer	*transfer;
+	IsoTransfer	*isotransfer;
+public:
+	IsoSegment(EndpointDescriptorPtr endpoint, int packets,
+		IsoTransfer *isotransfer, libusb_device_handle *dev_handle,
+		int timeout) throw(USBError);
+	~IsoSegment();
+	void	submit() throw(USBError);
+	int	extract(std::list<IsoPacketPtr>& packets);
+};
+
+typedef std::tr1::shared_ptr<IsoSegment>	IsoSegmentPtr;
+
+/**
+ * \brief IsoTransfer
+ *
+ * The IsoTransfer object has two queues for incoming and outgoing IsoSegments
+ * all segments that come out from the queue 
+ */
 class IsoTransfer : public Transfer {
-	int	packets;
-	int	dataread;
-	int	packetcounter;
-	unsigned char	*buffer;
+	int	totalpackets;
+	std::queue<IsoSegmentPtr>	incoming;
+	std::queue<IsoSegmentPtr>	outgoing;
+	std::list<IsoPacketPtr>	packets;
+	pthread_t	eventthread;
+	pthread_mutex_t	mutex;
+	pthread_cond_t	condition;
 public:
 	virtual void	callback();
+	virtual void	handlevents();
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
 public:
-	IsoTransfer(EndpointDescriptorPtr endpoint,
-		int length, unsigned char *data = NULL);
+	IsoTransfer(EndpointDescriptorPtr endpoint, int totalpackets);
 	virtual ~IsoTransfer();
 };
 

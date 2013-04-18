@@ -19,7 +19,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
 	USBInterface.cpp USBRawDescriptors.cpp \
-	USBRequests.cpp USBTransfer.cpp \
+	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
 	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
 	UVCFactory.cpp \
 	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
