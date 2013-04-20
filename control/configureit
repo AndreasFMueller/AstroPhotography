@@ -7,6 +7,6 @@
 # unloading the modules
 LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
 CXXFLAGS="-fuse-cxa-atexit -Wall -g -O2"
-CFLAGS="-Wall -g -O2"
+CFLAGS="-Wall -g"
 export CXXFLAGS CFLAGS LDFLAGS
 ./configure --prefix=`pwd`/root

@@ -134,6 +134,151 @@ void	UVCBulkTransfer::callback(libusb_transfer *transfer) {
 }
  
 //////////////////////////////////////////////////////////////////////
+// UVCIsochronousTransfer implementation
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief Callback for UVC isochronous transfers.
+ *
+ * This function simple redirects the callback to the callback method
+ * to the UVCIsochronousTransfer instance.
+ */
+static void uvcisochronous_callback(struct libusb_transfer *transfer) {
+	UVCIsochronousTransfer	*uvcisochronoustransfer
+		= (UVCIsochronousTransfer *)transfer->user_data;
+	uvcisochronoustransfer->callback(transfer);
+}
+
+/**
+ * \brief Callback for UVC isochronous transfers
+ *
+ * The callback just packs the packets into the packet list.
+ * \param transfer	the currently processed transfer
+ */
+void	UVCIsochronousTransfer::callback(libusb_transfer *transfer) {
+#if 0
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"UVCIsochronousTransfer callback, %d packets",
+		transfer->num_iso_packets);
+#endif
+
+	// go through all the iso packets
+	for (int i = 0; i < transfer->num_iso_packets; i++) {
+		int	length = transfer->iso_packet_desc[i].actual_length;
+		int	status = transfer->iso_packet_desc[i].status;
+		if ((0 == status) && (length >= 12)) {
+			char	*data = (char *)libusb_get_iso_packet_buffer_simple(transfer, i);
+			// create a new payload packet from the transferred data
+			packets.push_back(std::string(data, length));
+		}
+	}
+
+	// resubmit the transfer if necessary
+	if (submitted < ntransfers) {
+		libusb_submit_transfer(transfer);
+		submitted++;
+	}
+}
+ 
+/**
+ * \brief Create a UVCIsochronousTransfer.
+ *
+ * 
+ * \param endpoint
+ * \param _payloadtransfersize
+ * \param _maxframesize
+ */
+static int	isochunk = 400;
+UVCIsochronousTransfer::UVCIsochronousTransfer(EndpointDescriptorPtr endpoint,
+	int _nframes, int _frameinterval)
+	: Transfer(endpoint), nframes(_nframes),
+	  frameinterval(_frameinterval) {
+	submitted = 0;
+
+	// the frame interval and the number of frames tells us how many
+	// transfer microframes we need
+	double	microframesperframe = frameinterval / 1250.;
+	int	isoframes = microframesperframe * (1 + nframes);
+	isoframes = isochunk * (1 + (isoframes / isochunk));
+
+	// compute the packet size
+	packetsize = endpoint->maxPacketSize()
+			* endpoint->transactionOpportunities();
+	int	buffersize = packetsize * isochunk;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iso packetsize = %d, buffersize = %d",
+		packetsize, buffersize);
+
+	// find out how many isochronous transfers we need
+	ntransfers = isoframes / isochunk;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
+		ntransfers, nframes);
+	queuesize = 4; // depends on architecture
+
+	// create transfers for all those packets
+	transfers = (struct libusb_transfer **)calloc(ntransfers,
+		sizeof(struct libusb_transfer *));
+	buffers = (unsigned char **)calloc(ntransfers, sizeof(unsigned char *));
+	for (int i = 0; i < queuesize; i++) {
+		transfers[i] = libusb_alloc_transfer(isochunk);
+		transfers[i]->type = LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
+		transfers[i]->num_iso_packets = isochunk;
+		buffers[i] = (unsigned char *)malloc(buffersize);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d transfers/buffers allocated",
+		ntransfers);
+}
+
+/**
+ * \brief Destructor cleans up all allocations
+ */
+UVCIsochronousTransfer::~UVCIsochronousTransfer() {
+	for (int i = 0; i < ntransfers; i++) {
+		libusb_free_transfer(transfers[i]);
+		free(buffers[i]);
+	}
+	free(buffers);
+	free(transfers);
+}
+
+/**
+ * \brief 
+ *
+ * \param devhandle
+ */
+void	UVCIsochronousTransfer::submit(libusb_device_handle *dev_handle)
+	throw(USBError) {
+	// fill all the transfers
+	int	buffersize = packetsize * isochunk;
+	for (int i = 0; i < queuesize; i++) {
+		libusb_fill_iso_transfer(transfers[i], dev_handle,
+			endpoint->bEndpointAddress(), buffers[i], buffersize,
+			isochunk, uvcisochronous_callback, this, timeout);
+		libusb_set_iso_packet_lengths(transfers[i], packetsize);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers filled: %d", queuesize);
+
+	// now submit them all
+	for (int i = 0; i < queuesize; i++) {
+		libusb_submit_transfer(transfers[i]);
+		submitted++;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted: %p", transfers[i]);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
+
+	// now handle events until all transfers are done
+	libusb_context	*context = getContext();
+	int	outstanding = ntransfers;
+	while (outstanding) {
+		libusb_handle_events(context);
+		outstanding--;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers outstanding: %d",
+			outstanding);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
+}
+
+ 
+//////////////////////////////////////////////////////////////////////
 // UVCPayloadPacket implementation
 //////////////////////////////////////////////////////////////////////
 /**

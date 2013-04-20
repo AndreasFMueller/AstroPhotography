@@ -45,18 +45,22 @@ void	UVCCamera::getCur(uint8_t interface) {
 	maxvideoframesize = rcur.data()->dwMaxVideoFrameSize;
 	maxpayloadtransfersize = rcur.data()->dwMaxPayloadTransferSize;
 
-#if 1
-	std::cout << "Format:                   ";
-	std::cout << (int)rcur.data()->bFormatIndex << std::endl;
-	std::cout << "Frame:                    ";
-	std::cout << (int)rcur.data()->bFrameIndex << std::endl;
-	std::cout << "dwFrameInterval:          ";
-	std::cout << (int)frameinterval << std::endl;
-	std::cout << "dwMaxVideoFrameSize:      ";
-	std::cout << (int)maxvideoframesize << std::endl;
-	std::cout << "dwMaxPayloadTransferSize: ";
-	std::cout << maxpayloadtransfersize << std::endl;
-#endif
+	if (debuglevel >= LOG_DEBUG) {
+		std::cout << "Format:                   ";
+		std::cout << (int)rcur.data()->bFormatIndex << std::endl;
+		std::cout << "Frame:                    ";
+		std::cout << (int)rcur.data()->bFrameIndex << std::endl;
+		std::cout << "wWidth:                   ";
+		std::cout << (int)framedescriptor->wWidth() << std::endl;
+		std::cout << "wHeight:                  ";
+		std::cout << (int)framedescriptor->wHeight() << std::endl;
+		std::cout << "dwFrameInterval:          ";
+		std::cout << (int)frameinterval << std::endl;
+		std::cout << "dwMaxVideoFrameSize:      ";
+		std::cout << (int)maxvideoframesize << std::endl;
+		std::cout << "dwMaxPayloadTransferSize: ";
+		std::cout << maxpayloadtransfersize << std::endl;
+	}
 }
 
 /**
@@ -166,16 +170,6 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 UVCCamera::~UVCCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup");
 	try {
-#if 0
-		uint8_t	ci = controlInterfaceNumber();
-		device.releaseInterface(ci);
-		int	interfacecount = iad().bInterfaceCount();
-		int	counter = 1;
-		while (counter < interfacecount) {
-			device.releaseInterface(ci + counter);
-			counter++;
-		}
-#endif
 		device.close();
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "error during cleanup: %s",
@@ -578,16 +572,6 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d",
 		interface);
 
-	// compute the number of iso packets that we will need to
-	// transfer for the requested number of frames
-	double	ftime = (nframes * frameinterval) / 10000000.;
-	int	nisopackets = 8000 * ftime + 2000;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "isopackets for %d frames: %d",
-		nframes, nisopackets);
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame dimensions: %d x %d",
-		width, height);
-
 	// We have to claim the interface bevor we can actually use an
 	// alternate setting
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
@@ -606,10 +590,7 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 
 	// now do the transfer with this alt setting, for this we first have
 	// to decide for how many microframes we want to transfer anything
-	
-	IsoTransfer	transfer(endpoint, nisopackets);
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"create an IsoTransfer with %d packets", nisopackets);
+	UVCIsochronousTransfer	transfer(endpoint, nframes, frameinterval);
 
 	// submit this transfer to the device
 	try {
@@ -634,56 +615,6 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 	// convert the retrieved data to an image
 	FrameFactory	ff(width, height);
 	return ff(transfer.packets);
-
-#if 0
-	std::list<IsoPacket>::const_iterator	i;
-	Frame	*currentframe = new Frame(width, height);
-	std::vector<FramePtr>	frames;
-	int	packetcounter = 0;
-	int	processed = 0;
-	int	framecounter = 0;
-	bool	fid = false;
-	for (i = transfer.packets.begin(); i != transfer.packets.end(); i++) {
-		try {
-			UVCPayloadPacket	uvcpayload(*i);
-			if (uvcpayload.fid() == fid) {
-				if (NULL == currentframe) {
-					currentframe = new Frame(width, height);
-				}
-				currentframe->append(uvcpayload.payload());
-			} else {
-				frames.push_back(FramePtr(currentframe));
-				framecounter++;
-				currentframe = NULL;
-				fid = uvcpayload.fid();
-			}
-			processed++;
-		} catch (std::exception& x) {
-			//debug(LOG_DEBUG, DEBUG_LOG, 0, "packet %d ignored: %s",
-			//	packetcounter, x.what());
-		}
-		packetcounter++;
-	}
-	if (currentframe) {
-		delete currentframe;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "processed packets: %d, frames: %d",
-		processed, framecounter);
-
-	// show how large the frames are:
-	std::vector<FramePtr>::const_iterator	j;
-	framecounter = 0;
-	for (j = frames.begin(); j != frames.end(); j++, framecounter++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "frame %d: %d bytes",
-			framecounter, (*j)->size());
-	}
-	if (framecounter == 0) {
-		throw std::length_error("no frames received");
-	}
-
-	// get the first image
-	return	frames;
-#endif
 }
 
 /**

@@ -1389,6 +1389,31 @@ public:
 };
 
 /**
+ * \brief Iso transfer for UVC
+ *
+ * Isochronous transfer for UVC also uses interleaved transfers
+ */
+class UVCIsochronousTransfer : public Transfer {
+	int	nframes;
+	int	ntransfers;
+	int	queuesize;
+	int	submitted;
+	int	frameinterval;
+	int	packetsize;
+	libusb_transfer	**transfers;
+	unsigned char	**buffers;
+private:
+        virtual void    submit(libusb_device_handle *devhandle) throw(USBError);
+public:
+	std::vector<FramePtr>	frames;
+	std::list<std::string>	packets;
+	UVCIsochronousTransfer(EndpointDescriptorPtr endpoint, int nframes,
+		int frameinterval);
+	virtual	~UVCIsochronousTransfer();
+	virtual void	callback(libusb_transfer *transfer);
+};
+
+/**
  * \brief Frame factory
  *
  * The transfer functions return a queue 
