@@ -156,12 +156,6 @@ static void uvcisochronous_callback(struct libusb_transfer *transfer) {
  * \param transfer	the currently processed transfer
  */
 void	UVCIsochronousTransfer::callback(libusb_transfer *transfer) {
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"UVCIsochronousTransfer callback, %d packets",
-		transfer->num_iso_packets);
-#endif
-
 	// go through all the iso packets
 	for (int i = 0; i < transfer->num_iso_packets; i++) {
 		int	length = transfer->iso_packet_desc[i].actual_length;
@@ -241,9 +235,9 @@ UVCIsochronousTransfer::~UVCIsochronousTransfer() {
 }
 
 /**
- * \brief 
+ * \brief Submit an isochronous transfer.
  *
- * \param devhandle
+ * \param devhandle	libusb device handle to use during transfer.
  */
 void	UVCIsochronousTransfer::submit(libusb_device_handle *dev_handle)
 	throw(USBError) {
