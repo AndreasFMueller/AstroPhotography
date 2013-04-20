@@ -46,13 +46,14 @@ libusb_context	*Transfer::getContext() {
 // BulkTransfer implementation
 //////////////////////////////////////////////////////////////////////
 static void bulktransfer_callback(libusb_transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d bytes", transfer->actual_length);
 	((BulkTransfer *)transfer->user_data)->callback(transfer);
 }
 
 BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
 	int _length, unsigned char *_data)
 	: Transfer(_endpoint) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer",
+		(endpoint->bEndpointAddress() & 0x80) ? "IN" : "OUT");
 	transfer = NULL;
 	length = _length;
 	if (NULL != _data) {
@@ -62,6 +63,10 @@ BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
 		data = new unsigned char[_length];
 		freedata = true;
 	}
+}
+
+unsigned char	*BulkTransfer::getData() const {
+	return data;
 }
 
 /**
@@ -119,7 +124,8 @@ BulkTransfer::~BulkTransfer() {
  * method overridden.
  */
 void	BulkTransfer::callback(libusb_transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete: %d",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete: %s %d bytes",
+		(endpoint->bEndpointAddress() & 0x80) ? "got" : "sent",
 		transfer->actual_length);
 	complete = true;
 }

@@ -457,6 +457,7 @@ public:
 	BulkTransfer(EndpointDescriptorPtr endpoint,
 		int length, unsigned char *data = NULL);
 	virtual ~BulkTransfer();
+	unsigned char	*getData() const;
 };
 
 /**

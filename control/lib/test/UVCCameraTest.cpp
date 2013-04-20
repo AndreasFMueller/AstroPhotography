@@ -51,8 +51,8 @@ void	UVCCameraTest::testCameraList() {
 void	UVCCameraTest::testCamera() {
 	Context	context;
 	//context.setDebugLevel(3);
-	//DevicePtr	deviceptr = context.find(0x199e, 0x8101); // TIS
-	DevicePtr	deviceptr = context.find(0x046d, 0x082b); // Logitech
+	DevicePtr	deviceptr = context.find(0x199e, 0x8101); // TIS
+	//DevicePtr	deviceptr = context.find(0x046d, 0x082b); // Logitech
 	//DevicePtr	deviceptr = context.find(0x0c45, 0x6340); // Sonix
 	//DevicePtr	deviceptr = context.find(0x04fc, 0x2001); // Sunplus
 	std::cout << *deviceptr;
@@ -61,7 +61,7 @@ void	UVCCameraTest::testCamera() {
 	try {
 		UVCCamera	camera(*deviceptr, true);
 		std::cout << camera;
-#if 0
+#if 1
 		uint8_t	rc = camera.getInfo(exposure_time_absolute_control_t());
 		exposure_time_absolute_control_t	cur, min, max, def, res;
 		cur = camera.get(GET_CUR, exposure_time_absolute_control_t());
