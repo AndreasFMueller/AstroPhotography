@@ -76,7 +76,7 @@ void	UVCCameraTest::testCamera() {
 		std::cout << "DEF = " << def.dwExposureTimeAbsolute << std::endl;
 #endif
 		std::cout << "select FormatAndFrame" << std::endl;
-		camera.selectFormatAndFrame(1, 3, 1);
+		camera.selectFormatAndFrame(1, 1, 1);
 		std::cout << "selection complete" << std::endl;
 		std::pair<uint8_t, uint8_t>	ff
 			= camera.getFormatAndFrame(1);

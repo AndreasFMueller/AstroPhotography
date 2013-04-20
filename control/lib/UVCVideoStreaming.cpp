@@ -26,11 +26,11 @@ static std::string	headerindent = indent + std::string("H    ");
 
 std::string	HeaderDescriptor::toString() const {
 	std::ostringstream	out;
-	out << headerindent << "bNumFormats:      ";
+	out << headerindent << "bNumFormats:         ";
 	out << (int)bNumFormats() << std::endl;
-	out << headerindent << "wTotalLength:     ";
+	out << headerindent << "wTotalLength:        ";
 	out << wTotalLength() << std::endl;
-	out << headerindent << "bEndpointAddress: ";
+	out << headerindent << "bEndpointAddress:    ";
 	out << std::hex << (int)bEndpointAddress() << std::endl;
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = formats.begin(); i != formats.end(); i++) {

@@ -49,7 +49,7 @@ UVCBulkTransfer::UVCBulkTransfer(EndpointDescriptorPtr endpoint, int _nframes,
 	ntransfers = ptspfrm * (nframes + 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "need %d transfers to get %d frames",
 		ntransfers, nframes);
-	queuesize = 10;
+	queuesize = 2; // depends on architecture
 
 	// create transfers for all those packets
 	transfers = (struct libusb_transfer **)calloc(ntransfers,
@@ -96,7 +96,7 @@ void	UVCBulkTransfer::submit(libusb_device_handle *devhandle)
 		libusb_submit_transfer(transfers[i]);
 		submitted++;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", ntransfers);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfers submitted: %d", submitted);
 
 	// now handle events until all transfers are done
 	libusb_context	*context = getContext();
