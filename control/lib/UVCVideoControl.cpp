@@ -76,17 +76,17 @@ void	InterfaceHeaderDescriptor::getIds() {
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = units.begin(); i != units.end(); i++) {
 		USBDescriptorPtr	dp = *i;
-		if (isCameraTerminalDescriptor(dp)) {
-			camera_terminal_id
-				= cameraTerminalDescriptor(dp)->bTerminalID();
-			camera_controls
-				= cameraTerminalDescriptor(dp)->bmControls();
+		if (isPtr<CameraTerminalDescriptor>(dp)) {
+			CameraTerminalDescriptor	*ctdp
+				= getPtr<CameraTerminalDescriptor>(dp);
+			camera_terminal_id = ctdp->bTerminalID();
+			camera_controls = ctdp->bmControls();
 		}
-                if (isProcessingUnitDescriptor(dp)) {
-                        processing_unit_id
-				= processingUnitDescriptor(dp)->bUnitID();
-                        processing_unit_controls
-				= processingUnitDescriptor(dp)->bmControls();
+                if (isPtr<ProcessingUnitDescriptor>(dp)) {
+			ProcessingUnitDescriptor	*pudp
+				= getPtr<ProcessingUnitDescriptor>(dp);
+                        processing_unit_id = pudp->bUnitID();
+                        processing_unit_controls = pudp->bmControls();
                 }
         }
 }
@@ -105,20 +105,6 @@ uint8_t	InterfaceHeaderDescriptor::processingUnitID() const {
 
 uint32_t	InterfaceHeaderDescriptor::processingUnitControls() const {
 	return processing_unit_controls;
-}
-
-bool	isInterfaceHeaderDescriptor(const USBDescriptorPtr& ptr) {
-	return (NULL == dynamic_cast<InterfaceHeaderDescriptor *>(&*ptr))
-		? false : true;
-}
-
-InterfaceHeaderDescriptor *interfaceHeaderDescriptor(USBDescriptorPtr& ptr) {
-	return dynamic_cast<InterfaceHeaderDescriptor *>(&*ptr);
-}
-
-const InterfaceHeaderDescriptor *interfaceHeaderDescriptor(
-	const USBDescriptorPtr& ptr) {
-	return dynamic_cast<const InterfaceHeaderDescriptor *>(&*ptr);
 }
 
 int	InterfaceHeaderDescriptor::numUnits() const {
@@ -331,15 +317,6 @@ std::string	CameraTerminalDescriptor::toString() const {
 	return out.str();
 }
 
-bool	isCameraTerminalDescriptor(const USBDescriptorPtr& ptr) {
-	return (NULL == dynamic_cast<CameraTerminalDescriptor *>(&*ptr))
-		? false : true;
-}
-
-CameraTerminalDescriptor *cameraTerminalDescriptor(USBDescriptorPtr& ptr) {
-	return dynamic_cast<CameraTerminalDescriptor *>(&*ptr);
-}
-
 //////////////////////////////////////////////////////////////////////
 // SelectorUnitDescriptor
 //////////////////////////////////////////////////////////////////////
@@ -514,15 +491,6 @@ std::string	ProcessingUnitDescriptor::toString() const {
 	out << " (" << std::hex << (int)videostandards << ")";
 	out << std::endl;
 	return out.str();
-}
-
-bool	isProcessingUnitDescriptor(const USBDescriptorPtr& ptr) {
-	return (NULL == dynamic_cast<ProcessingUnitDescriptor *>(&*ptr))
-		? false : true;
-}
-
-ProcessingUnitDescriptor *processingUnitDescriptor(USBDescriptorPtr& ptr) {
-	return dynamic_cast<ProcessingUnitDescriptor *>(&*ptr);
 }
 
 //////////////////////////////////////////////////////////////////////

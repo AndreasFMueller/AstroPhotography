@@ -19,12 +19,6 @@ namespace uvc {
 HeaderDescriptor::HeaderDescriptor(Device& _device,
 	const void *_data, int length)
 	: UVCDescriptor(_device, _data, length) {
-	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "fixing TIS headers");
-		((uint8_t *)data)[3] = (uint8_t)3;
-		((uint8_t *)data)[4] = (uint8_t)231;
-		((uint8_t *)data)[5] = (uint8_t)0;
-	}
 }
 
 static std::string	indent = std::string("        ");
@@ -65,7 +59,15 @@ void	HeaderDescriptor::setWTotalLength(uint16_t w) {
 	memcpy(&data[4], &w, 2);
 }
 
+/**
+ * \brief get a format descriptor.
+ *
+ * Format descriptors are contained in an array, the first format having
+ * index 0.
+ * \param formatindex	number of the format descriptors, starting from 0
+ */
 const USBDescriptorPtr	HeaderDescriptor::operator[](size_t formatindex) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request format %d", formatindex);
 	if ((formatindex < 0) || (formatindex >= bNumFormats())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%d outside format range %d",
 			formatindex, bNumFormats());
@@ -189,11 +191,6 @@ VideoStreamingProbeControlRequest::VideoStreamingProbeControlRequest(
 	: Request<vs_control_request_t>(RequestBase::class_specific_type,
                 interfaceptr, bRequest, VS_PROBE_CONTROL << 8, _data) {
 	accept_short_response = true;
-if (_data) {
-std::cout << "bFormatIndex:  " << (int)(_data->bFormatIndex) << std::endl;
-std::cout << "bFrameIndex:   " << (int)(_data->bFrameIndex) << std::endl;
-}
-std::cout << this->payloadHex();
 }
 
 VideoStreamingCommitControlRequest::VideoStreamingCommitControlRequest(

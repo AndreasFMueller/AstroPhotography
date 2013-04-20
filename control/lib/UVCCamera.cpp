@@ -15,8 +15,58 @@ namespace usb {
 namespace uvc {
 
 /**
+ * \brief Get current settings of a interface.
+ *
+ * This method determines some often used variables. Since we use this
+ * same code from multiple places, we do it in this method.
+ * \param interface	streaming interface number from which we want to
+ *			get the default settings
+ */
+void	UVCCamera::getCur(uint8_t interface) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get current settings of interface %d",
+		interface);
+
+	// get the interface descriptor
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
+
+	// get the current streaming settings of that interface
+	VideoStreamingCommitControlRequest	rcur(interfaceptr, GET_CUR);
+	device.controlRequest(&rcur);
+
+	// also set frame dimensions from the currently active frame descriptor
+	FrameDescriptor	*framedescriptor
+		= getPtr<FrameDescriptor>(getFrameDescriptor(interface,
+			rcur.data()->bFormatIndex, rcur.data()->bFrameIndex));
+	width = framedescriptor->wWidth();
+	height = framedescriptor->wHeight();
+
+	// get the frame interval
+	frameinterval = rcur.data()->dwFrameInterval;
+	maxvideoframesize = rcur.data()->dwMaxVideoFrameSize;
+	maxpayloadtransfersize = rcur.data()->dwMaxPayloadTransferSize;
+
+#if 1
+	std::cout << "Format:                   ";
+	std::cout << (int)rcur.data()->bFormatIndex << std::endl;
+	std::cout << "Frame:                    ";
+	std::cout << (int)rcur.data()->bFrameIndex << std::endl;
+	std::cout << "dwFrameInterval:          ";
+	std::cout << (int)frameinterval << std::endl;
+	std::cout << "dwMaxVideoFrameSize:      ";
+	std::cout << (int)maxvideoframesize << std::endl;
+	std::cout << "dwMaxPayloadTransferSize: ";
+	std::cout << maxpayloadtransfersize << std::endl;
+#endif
+}
+
+/**
  * \brief Construct a camera from a USB Device
  *
+ * The constructor undertakes an extensive analysis of the descriptors
+ * to find the video control and video streaming interfaces of the video
+ * function of the device. It also makes sure no kernel driver is attached
+ * to the device. It does not, however, claim any of the interfaces, this
+ * is done when the device is really used.
  * \param _device	an USB device to open as a UVC camera
  * \param force		force opening as camera even if the
  *			interface associaten descriptor does not
@@ -50,9 +100,9 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 	// descriptor
 	for (i = list.begin(); i != list.end(); i++) {
 		USBDescriptorPtr	dp = *i;
-		InterfaceAssociationDescriptor	*iad
-			= interfaceAssociationDescriptor(dp);
-		if (NULL != iad) {
+		if (isPtr<InterfaceAssociationDescriptor>(dp)) {
+			InterfaceAssociationDescriptor	*iad
+				= getPtr<InterfaceAssociationDescriptor>(dp);
 			if (force || (iad->isVideoInterfaceCollection())) {
 				iadptr = dp;
 				iadfound = true;
@@ -70,11 +120,6 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 	videocontrol = (*config)[ci];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Control interface number: %d", ci);
 	videocontrol->detachKernelDriver();
-#if 0
-	videocontrol->claim();	// XXX this is probably wrong. we should
-				// only claim the interface if we really want
-				// to use it
-#endif
 
 	// we also need to know all the video control descriptors appended
 	// to this InterfaceDescriptor. The VideoControlDescriptorFactory
@@ -90,14 +135,6 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 	int	interfacecount = iad().bInterfaceCount();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interfaces in association: %d",
 		interfacecount);
-	int	counter = 1;
-	while (counter < interfacecount) {
-#if 0
-std::cout << "claiming interface " << (int)(ci + counter) << std::endl;
-		device.claimInterface(ci + counter);
-#endif
-		counter++;
-	}
 
 	// now parse the video streaming interfaces
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse streaming interface descriptors");
@@ -120,6 +157,12 @@ std::cout << "claiming interface " << (int)(ci + counter) << std::endl;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "UVCCamera constructed");
 }
 
+/**
+ * \brief Destroy the camera.
+ *
+ * This essentially closes the video interface. Note that it does not
+ * reinstall a kernel driver if one was attached.
+ */
 UVCCamera::~UVCCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup");
 	try {
@@ -142,11 +185,99 @@ UVCCamera::~UVCCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera cleanup complete");
 }
 
-const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
-	return dynamic_cast<const InterfaceAssociationDescriptor &>(*iadptr);
+/**
+ * \brief Get the header descriptor for this streaming interface.
+ *
+ * This function verifies that the interface is really a streaming interface
+ * and returns the interface descriptor for it.
+ * \param interface interface number for the streaming interface
+ */
+USBDescriptorPtr	UVCCamera::getHeaderDescriptor(uint8_t interface) {
+	USBDescriptorPtr	headerptr = (*this)[interface];
+	if (!isPtr<HeaderDescriptor>(headerptr)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "not a header descriptor");
+		throw std::runtime_error("not a header descriptor");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found a header descriptor");
+	return headerptr;
 }
 
-size_t	UVCCamera::streamingInterfaceNumber(size_t interfacenumber) const
+/**
+ * \brief Get the format descriptor with this format index
+ *
+ * \param interface      USB interface number of the streaming interfae
+ * \param formatindex    format index (first format has index 1)
+ */ 
+USBDescriptorPtr	UVCCamera::getFormatDescriptor(uint8_t interface,
+	uint8_t formatindex) {
+	// logging
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get format for interface = %d, "
+		"format = %d", interface, formatindex);
+
+	// get the header descriptor
+	USBDescriptorPtr	header = getHeaderDescriptor(interface);
+	HeaderDescriptor	*headerptr = getPtr<HeaderDescriptor>(header);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "headerptr = %p", headerptr);
+
+	// we don't need to do any range checking on the formatindex
+	// because the operator[] of the header descriptor class will do it
+	USBDescriptorPtr	formatptr = (*headerptr)[formatindex - 1];
+	if (!isPtr<FormatDescriptor>(formatptr)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "not a format descriptor");
+		throw std::runtime_error("not a format descriptor");
+	}
+
+	// if we get to this point, then we have found the format
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found format");
+	return formatptr;
+}
+
+/**
+ * \brief Get the frame descriptor of the currently selected frame
+ *
+ * \param interface      USB interface number of the streaming interfae
+ * \param formatindex    format index (first format has index 0)
+ * \param frameindex	 frame index (first frame has index 0)
+ */
+USBDescriptorPtr	UVCCamera::getFrameDescriptor(uint8_t interface,
+	uint8_t formatindex, uint8_t frameindex) {
+	// logging
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get frame descriptor interface = %d, "
+		"format = %d, frame = %d", interface, formatindex, frameindex);
+
+	// get a format pointer
+	USBDescriptorPtr	format = getFormatDescriptor(interface,
+		formatindex);
+	FormatDescriptor	*formatptr = getPtr<FormatDescriptor>(format);
+
+	// get the frame pointer from the format
+	USBDescriptorPtr	frameptr = (*formatptr)[frameindex - 1];
+	if (!isPtr<FrameDescriptor>(frameptr)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "not a frame descriptor");
+		throw std::runtime_error("not a frame descriptor");
+	}
+
+	// if we get here, we have found the frame
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found frame");
+	return frameptr;
+}
+
+/**
+ * \brief Get the interface association descriptor for the video function
+ *
+ */
+const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
+	return *getPtr<InterfaceAssociationDescriptor>(iadptr);
+}
+
+/**
+ * \brief Get the index of the streaming interface in the videostreaming
+ *        vector.
+ *
+ * Internally we need the index into the video streaming. 
+ * \param interfacenumber    USB interface number for this streaming interface
+ */
+size_t	UVCCamera::streamingInterfaceIndex(size_t interfacenumber) const
 	throw(std::range_error) {
 	int	result = interfacenumber - controlInterfaceNumber() - 1;
 	if ((result < 0) || (result >= videostreaming.size())) {
@@ -157,32 +288,46 @@ size_t	UVCCamera::streamingInterfaceNumber(size_t interfacenumber) const
 
 const USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) const 
 	throw(std::range_error) {
-	return videostreaming[streamingInterfaceNumber(interfacenumber)];
+	return videostreaming[streamingInterfaceIndex(interfacenumber)];
 }
 
 USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) 
 	throw(std::range_error) {
-	return videostreaming[streamingInterfaceNumber(interfacenumber)];
+	return videostreaming[streamingInterfaceIndex(interfacenumber)];
 }
 
 uint8_t	UVCCamera::controlInterfaceNumber() const {
 	return iad().bFirstInterface();
 }
 
+InterfaceHeaderDescriptor	*UVCCamera::interfaceHeaderDescriptor() const {
+	return getPtr<InterfaceHeaderDescriptor>(videocontroldescriptors[0]);
+}
+
 uint8_t	UVCCamera::controlCameraTerminalID() const {
-	return interfaceHeaderDescriptor(videocontroldescriptors[0])->cameraTerminalID();
+	return interfaceHeaderDescriptor()->cameraTerminalID();
 }
 
 uint32_t	UVCCamera::controlCameraControls() const {
-	return interfaceHeaderDescriptor(videocontroldescriptors[0])->cameraControls();
+	return interfaceHeaderDescriptor()->cameraControls();
 }
 
 uint8_t	UVCCamera::controlProcessingUnitID() const {
-	return interfaceHeaderDescriptor(videocontroldescriptors[0])->processingUnitID();
+	return interfaceHeaderDescriptor()->processingUnitID();
 }
 
 uint32_t	UVCCamera::controlProcessingUnitControls() const {
-	return interfaceHeaderDescriptor(videocontroldescriptors[0])->processingUnitControls();
+	return interfaceHeaderDescriptor()->processingUnitControls();
+}
+
+CameraTerminalDescriptor	*UVCCamera::cameraTerminalDescriptor() const {
+	InterfaceHeaderDescriptor	*ifhd = interfaceHeaderDescriptor();
+	getPtr<CameraTerminalDescriptor>((*ifhd)[ifhd->cameraTerminalID()]);
+}
+
+ProcessingUnitDescriptor	*UVCCamera::processingUnitDescriptor() const {
+	InterfaceHeaderDescriptor	*ifhd = interfaceHeaderDescriptor();
+	getPtr<ProcessingUnitDescriptor>((*ifhd)[ifhd->processingUnitID()]);
 }
 
 std::string	UVCCamera::toString() const {
@@ -229,38 +374,13 @@ uint32_t	UVCCamera::minFrameInterval(uint8_t interface, uint8_t format,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve minFrameInterval for "
 		"interface = %d, format = %d, frame = %d",
 		interface, format, frame);
-	// we must indicate a frame interval during negotiation (for bandwith
-	// computation purposes, so we need the descriptors
-	USBDescriptorPtr	vsinterface = (*this)[interface];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got interface %d", interface);
 
-	// this should be a header descriptor
-	HeaderDescriptor	*header
-		= dynamic_cast<HeaderDescriptor *>(&*vsinterface);
-	if (NULL == header) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "VS header not found");
-		throw USBError("not an VS header descriptor");
-	}
+	// retrieve the frame descriptor
+	USBDescriptorPtr	frameptr
+		= getFrameDescriptor(interface, format, frame);
 
-	// now get the format descriptor
-	USBDescriptorPtr	formatptr = (*header)[format - 1];
-	FormatDescriptor	*formatdesc
-		= dynamic_cast<FormatDescriptor *>(&*formatptr);
-	if (NULL == formatdesc) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "format descriptor %d not found",
-			format);
-		throw USBError("not a format descriptor");
-	}
-
-	// finally get the frame descriptor
-	USBDescriptorPtr	frameptr = (*formatdesc)[frame - 1];
-	FrameDescriptor	*framedesc
-		= dynamic_cast<FrameDescriptor *>(&*frameptr);
-	if (NULL == framedesc) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "frame descriptor %d not found",
-			frame);
-		throw USBError("frame descriptor not found");
-	}
+	// convert to a real pointer
+	FrameDescriptor	*framedesc = getPtr<FrameDescriptor>(frameptr);
 
 	// we have found the minimum frame interval
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "minimum frame interval: %d",
@@ -329,24 +449,7 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 
 	// just to be on the safe side, we should ask again what the
 	// current settings are
-	VideoStreamingCommitControlRequest	rcur(interfaceptr, GET_CUR);
-	device.controlRequest(&rcur);
-	if ((rcur.data()->bFormatIndex != format)
-		|| (rcur.data()->bFrameIndex != frame)) {
-		throw USBError("failed to set format an frame");
-	}
-#if 1
-	std::cout << "Format:                   ";
-	std::cout << (int)rcur.data()->bFormatIndex << std::endl;
-	std::cout << "Frame:                    ";
-	std::cout << (int)rcur.data()->bFrameIndex << std::endl;
-	std::cout << "dwFrameInterval:          ";
-	std::cout << (int)rcur.data()->dwFrameInterval << std::endl;
-	std::cout << "dwMaxVideoFrameSize:      ";
-	std::cout << (int)rcur.data()->dwMaxVideoFrameSize << std::endl;
-	std::cout << "dwMaxPayloadTransferSize: ";
-	std::cout << (int)rcur.data()->dwMaxPayloadTransferSize << std::endl;
-#endif
+	getCur(interface);
 }
 
 /**
@@ -369,28 +472,25 @@ std::pair<uint8_t, uint8_t>	UVCCamera::getFormatAndFrame(uint8_t interface)
  */
 int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	// get the currently negotiated settings
-	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
-	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
-	device.controlRequest(&rget);
+	getCur(interface);
 
 	// if the frame interval is 0, we have to ask the format for
 	// the default frame interval
-	uint32_t	dwFrameInterval = rget.data()->dwFrameInterval;
-	if (0 == dwFrameInterval) {
+	if (0 == frameinterval) {
 		debug(LOG_WARNING, DEBUG_LOG, 0,
 			"warning: no negotiated frame interval");
-		dwFrameInterval = 333333;
+		frameinterval = 333333;
 	}
 
 	// compute the data rate
-	double	datarate = rget.data()->dwMaxVideoFrameSize
-			* (10000000. / dwFrameInterval);
+	double	datarate = maxvideoframesize * (10000000. / frameinterval);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "required data rate: %.1fMBps",
 		datarate / 1000000.);
 
 	// for this software, bulk transfers are preferable, if the
 	// device supports them, so we check whether alt setting 0 has a
 	// bulk endpoint, and return 0 in that case
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
 	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[0];
 	if (ifdescptr->numEndpoints() > 0) {
 		EndpointDescriptorPtr	endpointptr = (*ifdescptr)[0];
@@ -431,21 +531,66 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
  * \param interface	interface to use for transfers
  * \param nframes	number of frames to read from the camera
  */
-std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface, int nframes) {
-	//
+std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
+	int nframes) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %d frames using bulk transfer",
+		nframes);
+	// find the interface on which we want to do the transfer
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
+	interfaceptr->claim();
+
+	// make sure we are use alt setting 0, because that's where the
+	// bulk endpoint resides
+	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[0];
+	ifdescptr->altSetting();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using alt setting 0");
+
+	// get the Endpoint for this alternate setting
+	EndpointDescriptorPtr	endpoint = (*ifdescptr)[0];
+	UVCBulkTransfer	transfer(endpoint, nframes, maxpayloadtransfersize,
+		maxvideoframesize);
+
+	// submit the transfer, submit will return when all the data has
+	// been transferred
+	device.submit(&transfer);
+
+	// release the interface again
+	try {
+		interfaceptr->release();
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "interface release failed: %s",
+			x.what());
+	}
+
+	// convert the retrieved data to an image
+	FrameFactory	ff(width, height);
+	return ff(transfer.packets);
 }
 
-std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d", interface);
-	Frame	frame(NULL, 0);
+/**
+ * \brief Get video frames using isochronous transfer
+ *
+ * \param interface	interface to use
+ * \param nframes	number of video frames to retrieve
+ */
+std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
+	int nframes) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d",
+		interface);
 
-	// get the currently negotiated settings
-	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
-	VideoStreamingProbeControlRequest	rget(interfaceptr, GET_CUR);
-	device.controlRequest(&rget);
+	// compute the number of iso packets that we will need to
+	// transfer for the requested number of frames
+	double	ftime = (nframes * frameinterval) / 10000000.;
+	int	nisopackets = 8000 * ftime + 2000;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "isopackets for %d frames: %d",
+		nframes, nisopackets);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame dimensions: %d x %d",
+		width, height);
 
 	// We have to claim the interface bevor we can actually use an
 	// alternate setting
+	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
 	interfaceptr->claim();
 
 	// now switch to the alternate setting for that interface (this
@@ -462,9 +607,9 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
 	// now do the transfer with this alt setting, for this we first have
 	// to decide for how many microframes we want to transfer anything
 	
-	IsoTransfer	transfer(endpoint, 8000);
+	IsoTransfer	transfer(endpoint, nisopackets);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"create an IsoTransfer with 2000 packets");
+		"create an IsoTransfer with %d packets", nisopackets);
 
 	// submit this transfer to the device
 	try {
@@ -486,12 +631,12 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "release failed: %s", x.what());
 	}
 
-	// find the dimensions of the images
-	int	width = 640;
-	int	height = 480;
-
 	// convert the retrieved data to an image
-	std::list<IsoPacketPtr>::const_iterator	i;
+	FrameFactory	ff(width, height);
+	return ff(transfer.packets);
+
+#if 0
+	std::list<IsoPacket>::const_iterator	i;
 	Frame	*currentframe = new Frame(width, height);
 	std::vector<FramePtr>	frames;
 	int	packetcounter = 0;
@@ -500,17 +645,17 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
 	bool	fid = false;
 	for (i = transfer.packets.begin(); i != transfer.packets.end(); i++) {
 		try {
-			UVCIsoPacket	uvciso(**i);
-			if (uvciso.fid() == fid) {
+			UVCPayloadPacket	uvcpayload(*i);
+			if (uvcpayload.fid() == fid) {
 				if (NULL == currentframe) {
 					currentframe = new Frame(width, height);
 				}
-				currentframe->append(uvciso.payload());
+				currentframe->append(uvcpayload.payload());
 			} else {
 				frames.push_back(FramePtr(currentframe));
 				framecounter++;
 				currentframe = NULL;
-				fid = uvciso.fid();
+				fid = uvcpayload.fid();
 			}
 			processed++;
 		} catch (std::exception& x) {
@@ -532,9 +677,13 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "frame %d: %d bytes",
 			framecounter, (*j)->size());
 	}
+	if (framecounter == 0) {
+		throw std::length_error("no frames received");
+	}
 
 	// get the first image
 	return	frames;
+#endif
 }
 
 /**
@@ -543,6 +692,10 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface, int nframes) {
  * \param interface	interface number of the video streaming interface
  */
 std::vector<FramePtr>	UVCCamera::getFrames(uint8_t interface, int nframes) {
+	// all frame retrieval goes through this method, so we use the
+	// occasion to set some important variables
+	getCur(interface);
+
 	// find out what type of endpoint this interface has
 	InterfacePtr	ifptr = (*device.activeConfig())[interface];
 	InterfaceDescriptorPtr	ifdptr = (*ifptr)[0];
@@ -559,9 +712,14 @@ std::vector<FramePtr>	UVCCamera::getFrames(uint8_t interface, int nframes) {
 
 /**
  * \brief Get a single frame.
+ *
+ * \param ifno interface number
  */
 FramePtr	UVCCamera::getFrame(uint8_t ifno) {
 	std::vector<FramePtr>	frames = getFrames(ifno, 1);
+	if (frames.size() == 0) {
+		throw std::length_error("no frames returned by getFrames");
+	}
 	return *frames.begin();
 }
 

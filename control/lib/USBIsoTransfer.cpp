@@ -10,6 +10,7 @@
 namespace astro {
 namespace usb {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // IsoPacket implementation
 //////////////////////////////////////////////////////////////////////
@@ -20,6 +21,7 @@ namespace usb {
 IsoPacket::IsoPacket(unsigned char *data, size_t length, int _status)
 	: std::string((char *)data, length), status(_status) {
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // IsoSegment implementation
@@ -27,12 +29,17 @@ IsoPacket::IsoPacket(unsigned char *data, size_t length, int _status)
 
 static void isotransfer_callback(libusb_transfer *transfer) {
 	IsoTransfer	*isotransferptr = (IsoTransfer *)transfer->user_data;
-	isotransferptr->callback();
+	isotransferptr->callback(transfer);
 }
 
 /**
  * \brief Create an isochronous segment.
  *
+ * \param _endpoint
+ * \param packets
+ * \param _isotransfer
+ * \param dev_handle
+ * \param timeout
  */
 IsoSegment::IsoSegment(EndpointDescriptorPtr _endpoint, int packets,
 	IsoTransfer *_isotransfer, libusb_device_handle *dev_handle,
@@ -83,15 +90,18 @@ void	IsoSegment::submit() throw(USBError) {
 	libusb_submit_transfer(transfer);
 }
 
-int	IsoSegment::extract(std::list<IsoPacketPtr>& packets) {
+int	IsoSegment::extract(std::list<std::string>& packets) {
 	int	packetcounter = 0;
 	for (unsigned int i = 0; i < transfer->num_iso_packets; i++) {
-		IsoPacketPtr	packetptr(new IsoPacket(
-			libusb_get_iso_packet_buffer(transfer, i),
-			transfer->iso_packet_desc[i].actual_length,
-			transfer->iso_packet_desc[i].status));
-		packets.push_back(packetptr);
-		packetcounter++;
+		if (0 == transfer->iso_packet_desc[i].status) {
+			std::string	packet((char *)
+				libusb_get_iso_packet_buffer(transfer, i),
+				transfer->iso_packet_desc[i].actual_length);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "packet size %d",
+				transfer->iso_packet_desc[i].actual_length);
+			packets.push_back(packet);
+			packetcounter++;
+		}
 	}
 	return packetcounter;
 }	
@@ -204,6 +214,8 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 
 	// copy all the packets
 	while (outgoing.size() > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"extracting packets from segment");
 		outgoing.front()->extract(packets);
 		outgoing.pop();
 	}
@@ -214,7 +226,7 @@ IsoTransfer::~IsoTransfer() {
 }
 
 
-void	IsoTransfer::callback() {
+void	IsoTransfer::callback(libusb_transfer *transfer) {
 	// the front element of the incoming queue is the one we were
 	// working on before the callback completed. So we have to
 	// take it from the incoming queue and add it to the outgoing

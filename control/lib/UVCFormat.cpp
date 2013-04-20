@@ -87,11 +87,6 @@ int	FormatDescriptor::wTotalLength() const {
 	return result;
 }
 
-bool	isFormatDescriptor(USBDescriptorPtr dp) {
-	FormatDescriptor	*fdp = dynamic_cast<FormatDescriptor *>(&*dp);
-	return (fdp != NULL) ? true : false;
-}
-
 //////////////////////////////////////////////////////////////////////
 // FrameDescriptor
 //////////////////////////////////////////////////////////////////////

@@ -95,13 +95,13 @@ uint32_t	FrameFrameBasedDescriptor::dwBytesPerLine() const {
 	return uint32At(22);
 }
 
-static std::string	frameindent = indent + std::string("    FRM ");
+static std::string	frameindent = indent + std::string("        FRM ");
 
 std::string	FrameFrameBasedDescriptor::toString() const {
 	std::ostringstream	out;
 	out << indent << "    " << "Frame FrameBased Descriptor:" << std::endl;
 	out << this->FrameDescriptor::toString();
-	out << frameindent << "  dwBytesPerLine:            ";
+	out << frameindent << "dwBytesPerLine:            ";
 	out << dwBytesPerLine() << std::endl;
 	return out.str();
 }

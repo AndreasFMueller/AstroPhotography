@@ -46,7 +46,8 @@ libusb_context	*Transfer::getContext() {
 // BulkTransfer implementation
 //////////////////////////////////////////////////////////////////////
 static void bulktransfer_callback(libusb_transfer *transfer) {
-	((BulkTransfer *)transfer->user_data)->callback();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d bytes", transfer->actual_length);
+	((BulkTransfer *)transfer->user_data)->callback(transfer);
 }
 
 BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
@@ -63,6 +64,14 @@ BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
 	}
 }
 
+/**
+ * \brief Submit a bulk transfer to the device.
+ *
+ * This method allocates and fills the bulk transfer, and submits it to
+ * the libusb_submit_transfer function. It then starts to handle events,
+ * and only returns when the complete flag is set.
+ * \param dev_handle    the libusb device handle
+ */
 void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	// allocate the transfer structure
 	transfer = libusb_alloc_transfer(0);
@@ -85,6 +94,11 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	}
 }
 
+/**
+ * \brief Destroy the Bulk transfer
+ *
+ * The object may not go out of scope when a transfer is still active.
+ */
 BulkTransfer::~BulkTransfer() {
 	if (transfer) {
 		libusb_free_transfer(transfer);
@@ -96,7 +110,15 @@ BulkTransfer::~BulkTransfer() {
 	}
 }
 
-void	BulkTransfer::callback() {
+/**
+ * \brief Default callback.
+ *
+ * This callback just accepts the transfer so far that everything has
+ * been transferred and sets the complete flag. If this is not the
+ * intended behaviour, this class should be subclassed and this
+ * method overridden.
+ */
+void	BulkTransfer::callback(libusb_transfer *transfer) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete: %d",
 		transfer->actual_length);
 	complete = true;

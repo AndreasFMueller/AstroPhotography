@@ -428,7 +428,7 @@ private:
 	virtual void	submit(libusb_device_handle *devhandle)
 		throw(USBError) = 0;
 public:
-	virtual void	callback() = 0;
+	virtual void	callback(libusb_transfer *transfer) = 0;
 	Transfer(EndpointDescriptorPtr endpoint);
 	virtual ~Transfer();
 	int	getTimeout() const;
@@ -443,12 +443,14 @@ public:
  * \brief Transfer class for bulk transfers.
  */
 class BulkTransfer : public Transfer {
+protected:
 	int	length;
 	unsigned char	*data;
-	bool	freedata;
 	libusb_transfer	*transfer;
+private:
+	bool	freedata;
 public:
-	virtual void	callback();
+	virtual void	callback(libusb_transfer *transfer);
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
 public:
@@ -469,16 +471,6 @@ public:
 class	IsoTransfer;
 
 /**
- * \brief IsoPacket
- */
-class IsoPacket : public std::string {
-public:
-	int status;
-	IsoPacket(unsigned char *data, size_t length, int status);
-};
-typedef std::tr1::shared_ptr<IsoPacket>	IsoPacketPtr;
-
-/**
  * \brief Isochronous transfer
  *
  * A segment of an isochronous transfer is a sequence of packets received
@@ -496,7 +488,7 @@ public:
 		int timeout) throw(USBError);
 	~IsoSegment();
 	void	submit() throw(USBError);
-	int	extract(std::list<IsoPacketPtr>& packets);
+	int	extract(std::list<std::string>& packets);
 };
 
 typedef std::tr1::shared_ptr<IsoSegment>	IsoSegmentPtr;
@@ -512,13 +504,13 @@ class IsoTransfer : public Transfer {
 	std::queue<IsoSegmentPtr>	incoming;
 	std::queue<IsoSegmentPtr>	outgoing;
 public:
-	std::list<IsoPacketPtr>	packets;
+	std::list<std::string>	packets;
 private:
 	pthread_t	eventthread;
 	pthread_mutex_t	mutex;
 	pthread_cond_t	condition;
 public:
-	virtual void	callback();
+	virtual void	callback(libusb_transfer *transfer);
 	virtual void	handlevents();
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
@@ -775,6 +767,32 @@ typedef std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
 std::ostream&	operator<<(std::ostream& out, const USBDescriptor& descriptor);
 
 /**
+ * \brief Template function to check whether a USBDescriptorPtr is of a given
+ *        type.
+ *
+ * \param u	USBDescriptorPtr to test for type.
+ */
+template<typename T>
+bool	isPtr(const USBDescriptorPtr& u) {
+	T	*up = dynamic_cast<T *>(&*u);
+	return (NULL != up) ? true : false;
+}
+
+/**
+ * \brief Template function to get a pointer to the real descriptor type
+ *
+ * \param u	USBDescriptorPtr to test for type.
+ */
+template<typename T>
+T	*getPtr(const USBDescriptorPtr& u) {
+	T	*up = dynamic_cast<T *>(&*u);
+	if (NULL == up) {
+		throw std::runtime_error("ptr of wrong type");
+	}
+	return up;
+}
+
+/**
  * \brief UnknownDescriptorError
  *
  * For descriptors that don't have a libusb equivalent, this error is thrown
@@ -847,11 +865,6 @@ public:
 	virtual std::string	toString() const;
 	bool	isVideoInterfaceCollection() const;
 };
-
-bool	isInterfaceAssociationDescriptor(const USBDescriptorPtr& ptr);
-
-InterfaceAssociationDescriptor	*interfaceAssociationDescriptor(
-	const USBDescriptorPtr& ptr);
 
 } // namespace usb
 } // namespace astro

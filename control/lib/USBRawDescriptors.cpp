@@ -290,17 +290,5 @@ bool	InterfaceAssociationDescriptor::isVideoInterfaceCollection() const {
 		(bFunctionProtocol() == PC_PROTOCOL_UNDEFINED)) ? true : false;
 }
 
-bool	isInterfaceAssociationDescriptor(const USBDescriptorPtr& ptr) {
-	return (NULL != dynamic_cast<InterfaceAssociationDescriptor *>(&*ptr))
-		? true : false;
-}
-
-InterfaceAssociationDescriptor	*interfaceAssociationDescriptor(
-	const USBDescriptorPtr& ptr) {
-	InterfaceAssociationDescriptor	*iad
-		= dynamic_cast<InterfaceAssociationDescriptor *>(&*ptr);
-	return iad;
-}
-
 } // namespace usb
 } // namespace astro

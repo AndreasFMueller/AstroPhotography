@@ -9,6 +9,7 @@
 #include <AstroUSB.h>
 #include <tr1/memory>
 #include <stdexcept>
+#include <vector>
 
 #define CS_UNDEFINED			0x20
 #define CS_DEVICE			0x21
@@ -153,6 +154,12 @@ typedef	std::tr1::shared_ptr<UVCDescriptor>	UVCDescriptorPtr;
 
 /**
  * \brief Factory class to produce UVC Descriptors from raw data
+ *
+ * This factory just redirects to the USBDescriptorFactory because there are 
+ * no UVC descriptors common to video streaming and video control interface.
+ * To parse video control descriptors, use the VideoControlDescriptorFactory,
+ * and likewise for video streaming descriptors, use the
+ * VideoStreamingDescriptorFactory.
  */
 class UVCDescriptorFactory : public DescriptorFactory {
 	UVCDescriptorFactory(const UVCDescriptorFactory& other);
@@ -167,6 +174,11 @@ public:
 
 /**
  * \brief Video Control Descriptor Factory
+ *
+ * Video control descriptors are mainly the header descriptors and the
+ * terminal and the unit descriptors. When the factory parses a header,
+ * it also includes all the terminals and the units int he header, so
+ * that the can be easily accessed without reparsing descriptors.
  */
 class	HeaderDescriptor;
 class	FormatDescriptor;
@@ -184,6 +196,14 @@ public:
 
 /**
  * \brief Video Streaming Descriptor Factory
+ *
+ * The Video streaming descriptors are primarily the format and frame
+ * descriptors. When the factory parses a header or a format, it also
+ * includes the dependent descriptors, i.e. formats and frames in the case
+ * of the header, or frames in the case of a format descriptor.
+ * The factory also includes some workarounds for broken cameras like
+ * the "The Imaging Source" cameras which pretend to be vendor specific
+ * devices but in reality are UVC video class cameras.
  */
 class VideoStreamingDescriptorFactory : public UVCDescriptorFactory {
 	USBDescriptorPtr	header(const void *data, int length,
@@ -203,6 +223,8 @@ public:
  */
 class InterfaceHeaderDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	units;
+	// camera terminal and processing unit id and controls, this is
+	// all we need to formulate control requests.
 	uint8_t	camera_terminal_id;
 	uint32_t	camera_controls;
 	uint8_t	processing_unit_id;
@@ -226,18 +248,12 @@ public:
 	const USBDescriptorPtr&	operator[](size_t index) const;
 	friend class VideoControlDescriptorFactory;
 
+	// accessors for camera terminal and processing unit
 	uint8_t	cameraTerminalID() const;
 	uint32_t	cameraControls() const;
 	uint8_t	processingUnitID() const;
 	uint32_t	processingUnitControls() const;
 };
-
-bool	isInterfaceHeaderDescriptor(const USBDescriptorPtr& ptr);
-
-InterfaceHeaderDescriptor	*interfaceHeaderDescriptor(USBDescriptorPtr& ptr);
-
-const InterfaceHeaderDescriptor	*interfaceHeaderDescriptor(
-	const USBDescriptorPtr& ptr);
 
 /**
  * \brief Terminal Descriptor
@@ -340,9 +356,6 @@ public:
 	virtual std::string	toString() const;
 };
 
-bool	isProcessingUnitDescriptor(const USBDescriptorPtr& ptr);
-ProcessingUnitDescriptor	*processingUnitDescriptor(USBDescriptorPtr& ptr);
-
 /**
  * \brief Extension Unit Descriptor
  */
@@ -365,10 +378,18 @@ public:
 
 /**
  * \brief Header Descriptor , base class for Input/Output Header Desriptor
+ * 
+ * This is the base class for headers. Depending on whether an interface
+ * is used for video input (the only case we are interested in) or output
+ * (not used in our case), the first video streaming header descriptor
+ * is either an InputHeaderDescriptor or an OutputHeaderDescriptor, both
+ * derived from this class.
  */
 class HeaderDescriptor : public UVCDescriptor {
 	std::vector<USBDescriptorPtr>	formats;
 	HeaderDescriptor(const HeaderDescriptor& other);
+	// methods to modify total length and number of formats, needed
+	// to work around bugs in certain cameras
 	void	setBNumFormats(uint8_t b);
 	void	setWTotalLength(uint16_t w);
 public:
@@ -1019,28 +1040,49 @@ typedef struct analog_lock_status_control_s {
 
 /**
  * \brief UVC Camera
+ *
+ * The USB Video Class Camera is a rather complicated object. An interface
+ * association descriptor describes which interfaces belong to the video
+ * function. The first interface of the association is the video control
+ * interface. A pointer to this interface descriptor is kept in the 
+ * videocontrol member variable.
  */
 class UVCCamera {
 	// the device
 	Device&	device;
 
-	// interface association descriptor, which indicates which interface
-	// number points to the video control interface and which interfaces
-	// are video streaming interfaces
+	/**
+	 * interface association descriptor, which indicates which interface
+	 * number points to the video control interface and which interfaces
+	 * are video streaming interfaces
+	 */
 	USBDescriptorPtr	iadptr;
+public:
 	const InterfaceAssociationDescriptor&	iad() const;
 
+private:
+	/**
+ 	 * interface descriptor for the video control interface of the
+	 * video function.
+	 */
 	// stuff related to the video control interface
 	InterfacePtr	videocontrol;
+
+	/**
+ 	 * \brief video control descriptors
+	 *
+ 	 * This vector stores all video control descriptors. Many of them
+	 * are not used, but the camera terminal and the process unit are
+	 * needed to control the settings of the camera. They are made
+	 * accessible separately in public methods below.
+ 	 */
 	std::vector<USBDescriptorPtr>	videocontroldescriptors;
 
-	// a list of Video Streaming Interface descriptors, one for each video
-	// streaming interface
-	std::vector<USBDescriptorPtr>	videostreaming;
+private:
+	InterfaceHeaderDescriptor	*interfaceHeaderDescriptor() const;
+	CameraTerminalDescriptor	*cameraTerminalDescriptor() const;
+	ProcessingUnitDescriptor	*processingUnitDescriptor() const;
 public:
-	UVCCamera(Device& device, bool force = false) throw(USBError);
-	~UVCCamera();
-
 	// accessors for the control interface parameters
 	uint8_t		controlInterfaceNumber() const;
 	uint8_t		controlCameraTerminalID() const;
@@ -1048,20 +1090,65 @@ public:
 	uint8_t		controlProcessingUnitID() const;
 	uint32_t	controlProcessingUnitControls() const;
 
+	/**
+	 * a list of Video Streaming Interface descriptors, one for each video
+	 * streaming interface
+	 */
+	std::vector<USBDescriptorPtr>	videostreaming;
+
+	/**
+	 * \brief Currently selected frame width
+ 	 */
+	int	width;
+
+	/**
+	 * \brief Currently selected frame height
+ 	 */
+	int	height;
+
+	/**
+	 * \brief Currently set frame interval
+ 	 */
+	uint32_t	frameinterval;
+
+	/**
+	 * \brief 
+	 */
+	uint32_t	maxvideoframesize;
+
+	/**
+	 * \brief maximum payload transfer size
+	 */
+	uint32_t	maxpayloadtransfersize;
+public:
+	// constructors
+	UVCCamera(Device& device, bool force = false) throw(USBError);
+	~UVCCamera();
+
 	// accessors to the video streaming interfaces
-	size_t		streamingInterfaceNumber(size_t interfacenumber) const
+private:
+	size_t		streamingInterfaceIndex(size_t interfacenumber) const
 		throw(std::range_error);
+	void	getCur(uint8_t interface);
+public:
 	const USBDescriptorPtr&	operator[](size_t interfacenumber) const
 		throw(std::range_error);
 	USBDescriptorPtr&	operator[](size_t interfacenumber)
 		throw(std::range_error);
 
+	// access to format and frame descriptors
+	USBDescriptorPtr	getHeaderDescriptor(uint8_t interfacenumber);
+	USBDescriptorPtr	getFormatDescriptor(uint8_t interfacenumber,
+		uint8_t formatindex);
+	USBDescriptorPtr	getFrameDescriptor(uint8_t interfacenumber,
+		uint8_t formatindex, uint8_t frameindex);
+
 	// selecting format and frame
-	uint32_t	minFrameInterval(uint8_t interface,
+	uint32_t	minFrameInterval(uint8_t interfacenumber,
 		uint8_t format, uint8_t frame) throw(std::range_error,USBError);
-	void	selectFormatAndFrame(uint8_t interface,
+	void	selectFormatAndFrame(uint8_t interfacenumber,
 			uint8_t format, uint8_t frame) throw(USBError);
-	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interface)
+	std::pair<uint8_t, uint8_t>	getFormatAndFrame(uint8_t interfacenumber)
 		throw(USBError);
 
 	// alternate setting selection for transfer
@@ -1189,8 +1276,7 @@ public:
 	}
 
 public:
-
-	// display stuff
+	// display the camera
 	std::string	toString() const;
 
 	// access to frames
@@ -1227,7 +1313,10 @@ typedef struct  vs_control_request_s {
 } __attribute__((packed)) vs_control_request_t;
 
 /**
- * \brief
+ * \brief Video Streaming Probe request.
+ *
+ * This request is used for the probe and commit protocol to negotiate the
+ * video parameters.
  */
 class VideoStreamingProbeControlRequest : public Request<vs_control_request_t> {
 public:
@@ -1235,6 +1324,12 @@ public:
 		uint8_t bRequest, vs_control_request_t *data = NULL);
 };
 
+/**
+ * \brief Video Streaming commit request.
+ *
+ * This request is used for the probe and commit protocol to negotiate the
+ * video parameters.
+ */
 class VideoStreamingCommitControlRequest : public Request<vs_control_request_t>{
 public:
 	VideoStreamingCommitControlRequest(InterfacePtr interptr,
@@ -1242,11 +1337,16 @@ public:
 };
 
 /**
- * \brief 
+ * \brief Payload packets for UVC transfers.
+ *
+ * UVC payload packets have a header containing information about which
+ * packets belong together to form a frame. This class just implements
+ * easy access to the header information.
  */
-class UVCIsoPacket : public IsoPacket {
+class UVCPayloadPacket {
+	const std::string&	data;
 public:
-	UVCIsoPacket(const IsoPacket& isopacket);
+	UVCPayloadPacket(const std::string& data);
 	uint8_t	hle() const;
 	uint8_t	bfh() const;
 	bool	eoh() const;
@@ -1262,21 +1362,44 @@ public:
 	std::string	payload() const;
 };
 
-class UVCBulkTransfer : public BulkTransfer {
-	virtual void	callback();
+/**
+ * \brief Bulk transfer for UVC
+ *
+ * Bulk transfers for UVC need multiple interleaved transfers to capture
+ * complete frames.
+ */
+class UVCBulkTransfer : public Transfer {
+	size_t	payloadtransfersize;
+	size_t	maxframesize;	
+	int	nframes;
+	int	ntransfers;
+	int	queuesize;
+	int	submitted;
+	libusb_transfer	**transfers;
+	unsigned char	**buffers;
+private:
+        virtual void    submit(libusb_device_handle *devhandle) throw(USBError);
 public:
-	UVCBulkTransfer(EndpointDescriptorPtr endpoint,
-		int length, unsigned char *data);
+	std::vector<FramePtr>	frames;
+	std::list<std::string>	packets;
+	UVCBulkTransfer(EndpointDescriptorPtr endpoint, int nframes,
+		size_t payloadtransfersize, size_t framesize);
+	virtual	~UVCBulkTransfer();
+	virtual void	callback(libusb_transfer *transfer);
 };
 
-typedef struct stream_header_s {
-	uint8_t		hle;
-	uint8_t		bfh;
-	uint32_t	pts;
-	uint8_t		scr[6];
-} __attribute__((packed)) stream_header_t;
-
-std::string	stream_header2string(const stream_header_t& header);
+/**
+ * \brief Frame factory
+ *
+ * The transfer functions return a queue 
+ */
+class FrameFactory {
+	int	width;
+	int	height;
+public:
+	FrameFactory(int width, int height);
+	std::vector<FramePtr>	operator()(const std::list<std::string>& packets) const;
+};
 
 } // namespace uvc
 } // namespace usb

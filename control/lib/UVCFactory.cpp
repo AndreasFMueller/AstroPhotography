@@ -20,10 +20,27 @@ UVCDescriptorFactory::UVCDescriptorFactory(Device& _device)
 	: DescriptorFactory(_device) {
 }
 
+/**
+ * \brief Find the descriptor subtype.
+ *
+ * This method is needed in the descriptor method to find the descriptor
+ * subtype that the data represents. The factory method then uses this
+ * to select the correct constructor.
+ * \param data	data block for the descriptor
+ */
 uint8_t	UVCDescriptorFactory::bdescriptorsubtype(const void *data) const {
 	return ((uint8_t *)data)[2];
 }
 
+/**
+ * \brief Construct UVC descriptors from the data.
+ *
+ * This factory redirects all requests directly to the USBDescriptorFactory,
+ * there are no common descriptors that are used in VideoControl and
+ * in the VideoStreaming interfaces.
+ * \param data		data to parse
+ * \param length	length of the data block
+ */
 USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
 	int length)
 	throw(std::length_error, UnknownDescriptorError) {
@@ -48,11 +65,24 @@ USBDescriptorPtr	UVCDescriptorFactory::descriptor(const void *data,
 //////////////////////////////////////////////////////////////////////
 // VideoControlDescriptorFactory
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief construct a VideoControlDescriptorFactory.
+ *
+ * \param _device	Device to use for the factory.
+ */
 VideoControlDescriptorFactory::VideoControlDescriptorFactory(
 	Device& _device)
 	: UVCDescriptorFactory(_device) {
 }
 
+/**
+ * \brief Get the terminal type from a video control descriptor
+ *
+ * This method is needed for parsing: it finds the terminal type so that
+ * the constructor for the right VideoControlDescriptor constructor can
+ * be called.
+ * \param data		data block from which to construct the descriptor
+ */
 uint16_t	VideoControlDescriptorFactory::wterminaltype(const void *data)
 			const {
 	return *(uint16_t *)&(((uint8_t *)data)[4]);
@@ -96,6 +126,8 @@ USBDescriptorPtr	VideoControlDescriptorFactory::header(
  * On ertain descriptors, most notably the video control header descriptor,
  * this method calls other methods that will parse other headers attached
  * to the first.
+ * \param data		raw data to interpret as descriptor
+ * \param length	maximum length of the data block to parse
  */
 USBDescriptorPtr	VideoControlDescriptorFactory::descriptor(
 	const void *data, int length)
@@ -196,11 +228,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::header(
 
 		// check that it really is a format descriptor
 		FormatDescriptor	*fd
-			= dynamic_cast<FormatDescriptor *>(&*newformat);
-		if (NULL == fd) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "not a format");
-			throw std::runtime_error("expected a FormatDescriptor");
-		}
+			= getPtr<FormatDescriptor>(newformat);
 		hd->formats.push_back(newformat);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "FO new format found");
 
@@ -295,9 +323,7 @@ USBDescriptorPtr	VideoStreamingDescriptorFactory::format(
 			= descriptor(offset + (uint8_t *)data, length - offset);
 
 		// verify that it is a Frame descriptor
-		FrameDescriptor	*framed
-			= dynamic_cast<FrameDescriptor *>(&*newframe);
-		if (NULL == framed) {
+		if (!isPtr<FrameDescriptor>(newframe)) {
 			// it is not a frame descriptor, so we go to the
 			// cleanup portion
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "FR not a frame descriptor");
