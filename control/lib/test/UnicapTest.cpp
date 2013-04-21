@@ -26,12 +26,14 @@ public:
 	void	testGet();
 	void	testDeviceInfo();
 	void	testFormats();
+	void	testCapture();
 
 	CPPUNIT_TEST_SUITE(UnicapTest);
 	CPPUNIT_TEST(testEnumeration);
 	CPPUNIT_TEST(testGet);
 	CPPUNIT_TEST(testDeviceInfo);
 	CPPUNIT_TEST(testFormats);
+	CPPUNIT_TEST(testCapture);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -81,6 +83,18 @@ void	UnicapTest::testFormats() {
 			}
 		}
 	}
+}
+
+void	UnicapTest::testCapture() {
+	debuglevel = LOG_DEBUG;
+	Unicap	unicap;
+	UnicapDevice	device = unicap.get(0);
+	std::cout << "Device: " << device.identifier() << std::endl;
+	device.numFormats();
+	UnicapFormat	format = device.getFormat(0);
+	std::cout << "Format: " << format.identifier() << std::endl;
+	device.setFormat(0);
+	device.getFrames(10);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UnicapTest);

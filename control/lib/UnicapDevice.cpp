@@ -6,6 +6,7 @@
 #include <AstroUnicap.h>
 #include <stdlib.h>
 #include <string.h>
+#include <debug.h>
 
 namespace astro {
 namespace unicap {
@@ -58,6 +59,8 @@ UnicapDevice::UnicapDevice(unicap_device_t *device) {
 	if (rc != STATUS_SUCCESS) {
 		throw UnicapError(rc, "cannot open the device");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "device opened: %s",
+		identifier().c_str());
 }
 
 UnicapDevice::UnicapDevice(const UnicapDevice& other) {
@@ -134,6 +137,110 @@ UnicapFormat	UnicapDevice::getFormat(int index) {
 	return UnicapFormat(&format);
 }
 
+void	UnicapDevice::setFormat(int index) {
+	unicap_format_t	format;
+	unicap_status_t	rc = unicap_get_format(handle, &format);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot get format");
+	}
+	rc = unicap_set_format(handle, &format);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot set format");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set format %s", format.identifier);
+}
+
+/**
+ * \brief Get Frames from a Unicap camera
+ *
+ * \param count		number of frames to retrieve
+ * \return		a vector of Frame objects
+ */
+std::vector<FramePtr>	UnicapDevice::getFrames(int count) {
+	unicap_status_t	rc;
+
+	// find the format
+	unicap_format_t	format;
+	rc = unicap_get_format(handle, &format);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot get the format");
+	}
+	int	width = format.size.width;
+	int	height = format.size.height;
+	int	bpp = format.bpp;
+	int	buffer_size = format.buffer_size;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"request %d frames (%d x %d) of size %d",
+		count, width, height, buffer_size);
+
+	// find the buffer size that we should be using
+	std::vector<FramePtr>	frames;
+	int	queued = 0;
+	int	queuesize = 3;
+
+	// create a few buffers and queue them
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating buffers");
+	unicap_data_buffer_t	*buffers[queuesize];
+	for (int i = 0; i < queuesize; i++) {
+		unicap_data_buffer_t	*buffer;
+		buffer = (unicap_data_buffer_t *)calloc(1,
+			sizeof(unicap_data_buffer_t));
+		buffers[i] = buffer;
+		buffer->buffer_size = buffer_size;
+		buffer->data = (unsigned char *)malloc(buffer_size);
+	}
+
+	// start capturing
+	rc = unicap_start_capture(handle);
+	if (rc != STATUS_SUCCESS) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start captures");
+		throw UnicapError(rc, "cannot start capture");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "capture started");
+
+	// queue the buffers
+	for (int i = 0; i < queuesize; i++) {
+		rc = unicap_queue_buffer(handle, buffers[i]);
+		if (rc != STATUS_SUCCESS) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot queue %d", i);
+			goto cleanup;
+		}
+		queued++;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d buffers queued", queued);
+
+	// wait for frames to arrive
+	while (frames.size() < count) {
+		unicap_data_buffer_t	*returned;
+		rc = unicap_wait_buffer(handle, &returned);
+		if (rc != STATUS_SUCCESS) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot receive a buffer");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got buffer %d", frames.size());
+		Frame	*f = new Frame(width, height, returned->data,
+			returned->buffer_size);
+		frames.push_back(FramePtr(f));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new frame added");
+		if (queued < count) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "requeue the buffer");
+			rc = unicap_queue_buffer(handle, returned);
+			queued++;
+		}
+	}
+	rc = unicap_stop_capture(handle);
+
+cleanup:
+	for (int i = 0; i < queuesize; i++) {
+		free(buffers[i]->data);
+		buffers[i]->data = NULL;
+		free(buffers[i]);
+		buffers[i] = NULL;
+	}
+	free(buffers);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "capture stopped");
+	return frames;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Unicap format implementation
 //////////////////////////////////////////////////////////////////////
@@ -192,6 +299,10 @@ int	UnicapRectangle::width() {
 int	UnicapRectangle::height() {
 	return rect.height;
 }
+
+//////////////////////////////////////////////////////////////////////
+// Unicap Properties
+//////////////////////////////////////////////////////////////////////
 
 } // namespace unicap
 } // namespace astro

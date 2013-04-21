@@ -16,6 +16,10 @@ namespace uvc {
 Frame::Frame(int _width, int _height) : width(_width), height(_height) {
 }
 
+Frame::Frame(int _width, int _height, void *data, size_t length)
+	: std::string((char *)data, length), width(_width), height(_height) {
+}
+
 int	Frame::getWidth() const {
 	return width;
 }

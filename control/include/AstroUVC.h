@@ -587,6 +587,7 @@ class Frame : public std::string {
 	int	height;
 public:
 	Frame(int width, int height);
+	Frame(int width, int height, void *data, size_t length);
 	int	getWidth() const;
 	int	getHeight() const;
 	friend class UVCCamera;

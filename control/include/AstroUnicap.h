@@ -7,6 +7,8 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <AstroUVC.h>
+
 #include <stdexcept>
 
 #ifdef HAVE_UNICAP_H
@@ -14,6 +16,8 @@
 extern "C" {
 #include <unicap.h>
 }
+
+using namespace astro::usb::uvc;
 
 namespace astro {
 namespace unicap {
@@ -83,6 +87,8 @@ public:
 
 	int	numFormats();
 	UnicapFormat	getFormat(int index);
+	void	setFormat(int index);
+	std::vector<FramePtr>	getFrames(int count);
 };
 
 /**
