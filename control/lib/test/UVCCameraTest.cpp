@@ -63,6 +63,8 @@ void	UVCCameraTest::testCamera() {
 		std::cout << camera;
 #if 1
 		uint8_t	rc = camera.getInfo(exposure_time_absolute_control_t());
+		std::cout << "info return code: " << std::hex << (int)rc
+			<< std::endl;
 		exposure_time_absolute_control_t	cur, min, max, def, res;
 		cur = camera.get(GET_CUR, exposure_time_absolute_control_t());
 		min = camera.get(GET_MIN, exposure_time_absolute_control_t());

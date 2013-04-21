@@ -38,7 +38,7 @@ static void	showInterfaceDescriptor(Device& device, InterfaceDescriptorPtr ifdes
 }
 
 static void	showInterface(Device& device, const InterfacePtr& interface) {
-	for (int j = 0; j < interface->numAltsettings(); j++) {
+	for (size_t j = 0; j < interface->numAltsettings(); j++) {
 		showInterfaceDescriptor(device, (*interface)[j]);
 	}
 }
