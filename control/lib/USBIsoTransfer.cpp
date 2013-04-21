@@ -92,7 +92,7 @@ void	IsoSegment::submit() throw(USBError) {
 
 int	IsoSegment::extract(std::list<std::string>& packets) {
 	int	packetcounter = 0;
-	for (unsigned int i = 0; i < transfer->num_iso_packets; i++) {
+	for (int i = 0; i < transfer->num_iso_packets; i++) {
 		if (0 == transfer->iso_packet_desc[i].status) {
 			std::string	packet((char *)
 				libusb_get_iso_packet_buffer(transfer, i),
@@ -138,6 +138,9 @@ void	IsoTransfer::handlevents() {
 	// wait for completion of all segments
 	while (!complete) {
 		int	rc = libusb_handle_events(ctx);
+		if (rc != LIBUSB_SUCCESS) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "request handling failed");
+		}
 		// XXX if failed, we should cancel all pending requests.
 	}
 }
@@ -200,7 +203,7 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	}
 
 	// wait for completion of the request, using the condition variable
-	if (rc = pthread_cond_wait(&condition, &mutex)) {
+	if ((rc = pthread_cond_wait(&condition, &mutex))) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cond wait: %s",
 			strerror(rc));
 		throw USBError("cannot release event handling thread");

@@ -580,21 +580,6 @@ public:
 };
 
 /**
- * \brief Frame holder class
- */
-class Frame : public std::string {
-	int	width;
-	int	height;
-public:
-	Frame(int width, int height);
-	Frame(int width, int height, void *data, size_t length);
-	int	getWidth() const;
-	int	getHeight() const;
-	friend class UVCCamera;
-};
-typedef std::tr1::shared_ptr<Frame>	FramePtr;
-
-/**
  * \brief Traits class for Camera Unit and processing unit requets
  */
 struct video_control_tag { };

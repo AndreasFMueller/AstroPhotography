@@ -273,9 +273,13 @@ const InterfaceAssociationDescriptor&	UVCCamera::iad() const {
  */
 size_t	UVCCamera::streamingInterfaceIndex(size_t interfacenumber) const
 	throw(std::range_error) {
-	int	result = interfacenumber - controlInterfaceNumber() - 1;
-	if ((result < 0) || (result >= videostreaming.size())) {
-		throw std::range_error("outside video streaming interface range");
+	uint8_t	cifn = controlInterfaceNumber();
+	if (interfacenumber <= cifn) {
+		throw std::range_error("interface number too small");
+	}
+	unsigned int	result = interfacenumber - cifn - 1;
+	if (result >= videostreaming.size()) {
+		throw std::range_error("outside VS interface range");
 	}
 	return result;
 }
@@ -316,12 +320,12 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
 
 CameraTerminalDescriptor	*UVCCamera::cameraTerminalDescriptor() const {
 	InterfaceHeaderDescriptor	*ifhd = interfaceHeaderDescriptor();
-	getPtr<CameraTerminalDescriptor>((*ifhd)[ifhd->cameraTerminalID()]);
+	return getPtr<CameraTerminalDescriptor>((*ifhd)[ifhd->cameraTerminalID()]);
 }
 
 ProcessingUnitDescriptor	*UVCCamera::processingUnitDescriptor() const {
 	InterfaceHeaderDescriptor	*ifhd = interfaceHeaderDescriptor();
-	getPtr<ProcessingUnitDescriptor>((*ifhd)[ifhd->processingUnitID()]);
+	return getPtr<ProcessingUnitDescriptor>((*ifhd)[ifhd->processingUnitID()]);
 }
 
 std::string	UVCCamera::toString() const {
@@ -500,7 +504,7 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
 	// we return that. Apparently cameras usually order alt settings
 	// with increasing bandwidth, so this algorithm should be good
 	// enough.
-	for (int alt = 1; alt <= interfaceptr->numAltsettings(); alt++) {
+	for (size_t alt = 1; alt <= interfaceptr->numAltsettings(); alt++) {
 		ifdescptr = (*interfaceptr)[alt];
 		EndpointDescriptorPtr	endpointptr = (*ifdescptr)[0];
 		size_t	maxbandwidth = endpointptr->maxBandwidth();

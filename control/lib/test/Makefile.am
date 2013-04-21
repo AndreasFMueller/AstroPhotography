@@ -6,9 +6,37 @@
 #
 noinst_HEADERS = 
 
-# stuff related to testing
-noinst_PROGRAMS = tests usbtests microtouchtests unicaptests
+# files needed for the Unicap driver tests
+if ENABLE_UNICAP
+unicap_tests = unicaptests.cpp UnicapTest.cpp
+unicap_cmds = unicaptests
+else
+unicap_tests =
+unicap_cmds =
+endif
 
+# files needed for the MicroTouch driver tests
+if ENABLE_MICROTOUCH
+microtouch_tests = microtouchtests.cpp MicroTouchTests.cpp
+microtouch_cmds = microtouchtests
+else
+microtouch_tests =
+microtouch_cmds =
+endif
+
+# files needed for the UVC driver tests
+if ENABLE_UVC
+uvc_tests = uvctests.cpp UVCCameraTest.cpp
+uvc_cmds = uvctests
+else
+uvc_tests =
+uvc_cmds =
+endif
+
+# stuff related to testing
+noinst_PROGRAMS = tests usbtests $(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
+
+# general tests
 tests_SOURCES = tests.cpp \
 	PixelTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
@@ -16,28 +44,36 @@ tests_SOURCES = tests.cpp \
 	ImageTest.cpp RGBTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
-	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	UnicapTest.cpp
-
+	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 
+# tests for USB library
 usbtests_SOURCES = usbtests.cpp \
-	UVCCameraTest.cpp
-
-#	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp 
+	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp 
 usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
 
-microtouchtests_SOURCES = microtouchtests.cpp \
-	MicroTouchTest.cpp
+# tests for UVC cameras
+if ENABLE_UVC
+uvctests_SOURCES = $(uvc_tests)
+uvctests_LDADD = -lcppunit -L.. -lastro
+uvctests_DEPENDENCIES = ../libastro.la
+endif
+
+# tests for the MicroTouch driver
+if ENABLE_MICROTOUCH
+microtouchtests_SOURCES = $(microtouch_tests)
 microtouchtests_LDADD = -lcppunit -L.. -lastro
 microtouchtests_DEPENDENCIES = ../libastro.la
+endif
 
-unicaptests_SOURCES = unicaptests.cpp \
-	UnicapTest.cpp
+# tests for Unicap driver
+if ENABLE_UNICAP
+unicaptests_SOURCES = $(unicap_tests)
 unicaptests_LDADD = -lcppunit -L.. -lastro
 unicaptests_DEPENDENCIES = ../libastro.la
+endif
 
 test2_SOURCES = test2.cpp
 test2_LDADD = -L.. -lastro

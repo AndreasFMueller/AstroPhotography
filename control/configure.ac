@@ -27,31 +27,61 @@ AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 
+######################################################################
+# decide whether to build the UVC driver, by default we only build
+# it on Mac OS X
+AC_ARG_ENABLE(uvc,
+[AS_HELP_STRING([--enable-uvc], [build the UVC driver])],
+[
+],[
+	case `uname` in
+	Darwin)	enable_uvc=yes
+		;;
+	*)	enable_uvc=no
+		;;
+	esac
+])
+AM_CONDITIONAL(ENABLE_UVC, test x$enable_uvc = xyes)
+
+######################################################################
 # check for SBIG library
 AC_ARG_ENABLE(sbig,
 [AS_HELP_STRING([--enable-sbig], [build the proprietary SBIG driver])],
 [
-AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
-AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig, [AC_MSG_ERROR([SBIG library not found])])
-enable_sbig=yes
+	AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
+	AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
+	[AC_MSG_ERROR([SBIG library not found])])
 ],[
 enable_sbig=no
 ]
 )
 AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 
+######################################################################
 # check for the Unicap library
 AC_ARG_ENABLE(unicap,
 [AS_HELP_STRING([--enable-unicap], [build the unicap driver])],
 [
-AC_CHECK_HEADERS(unicap.h, , [AC_MSG_ERROR([unicap header not found])])
-AC_CHECK_LIB([unicap], [unicap_open], LIBS="${LIBS} -lunicap", [AC_MSG_ERROR([unicap library not found])])
-enable_unicap=yes
+	if test x${enable_unicap} = xyes
+	then
+		AC_CHECK_HEADERS(unicap.h, ,
+			[AC_MSG_ERROR([unicap header not found])])
+		AC_CHECK_LIB([unicap], [unicap_open], LIBS="${LIBS} -lunicap",
+			[AC_MSG_ERROR([unicap library not found])])
+	fi
 ],[
-enable_unicap=no
 ]
 )
-AM_CONDITIONAL(ENABLE_UNICAP, test x$enable_unicap = xyes)
+AM_CONDITIONAL(ENABLE_UNICAP, test x${enable_unicap} = xyes)
+
+######################################################################
+# turn on the microtouch stuff
+AC_ARG_ENABLE(microtouch,
+[AS_HELP_STRING([--enable-microtouch], [build the microtouch driver])], ,
+	enable_microtouch=no)
+AM_CONDITIONAL(ENABLE_MICROTOUCH, test x${enable_microtouch} = xyes)
+
+######################################################################
 
 # Checks for typedefs
 AC_C_CONST

@@ -115,6 +115,11 @@ size_t	EndpointDescriptor::maxBandwidth() const {
 	case Device::SPEED_HIGH:
 	case Device::SPEED_SUPER:
 		bandwidth *= 8;
+		break;
+	case Device::SPEED_UNKNOWN:
+	case Device::SPEED_LOW:
+	case Device::SPEED_FULL:
+		break;
 	}
 	return bandwidth;
 }

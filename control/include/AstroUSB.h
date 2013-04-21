@@ -867,6 +867,25 @@ public:
 	bool	isVideoInterfaceCollection() const;
 };
 
+/**
+ * \brief Frame holder class
+ *
+ * A helper class as intermediate step between the raw data blocks from the
+ * drivers (UVC or Unicap) and the more complex FITS based image classes.
+ */
+class Frame : public std::string {
+	int	width;
+	int	height;
+public:
+	Frame(int width, int height);
+	Frame(int width, int height, void *data, size_t length);
+	int	getWidth() const;
+	int	getHeight() const;
+	friend class UVCCamera;
+};
+typedef std::tr1::shared_ptr<Frame>	FramePtr;
+
+
 } // namespace usb
 } // namespace astro
 

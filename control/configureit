@@ -18,7 +18,7 @@ Linux)
 	./configure --prefix=`pwd`/root --enable-unicap
 	;;
 Darwin)
-	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
+	LDFLAGS="-L/usr/local/lib -lusb-1.0"
 	export LDFLAGS
 	./configure --prefix=`pwd`/root
 	;;

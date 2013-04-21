@@ -39,9 +39,9 @@ static void uvcbulk_callback(struct libusb_transfer *transfer) {
  */
 UVCBulkTransfer::UVCBulkTransfer(EndpointDescriptorPtr endpoint, int _nframes,
 	size_t _payloadtransfersize, size_t _maxframesize)
-	: Transfer(endpoint), nframes(_nframes),
+	: Transfer(endpoint),
 	  payloadtransfersize(_payloadtransfersize),
-	  maxframesize(_maxframesize) {
+	  maxframesize(_maxframesize), nframes(_nframes) {
 	submitted = 0;
 
 	// compute the number of transfers required for all the frames

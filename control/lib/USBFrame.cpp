@@ -1,17 +1,15 @@
 /*
- * UVCFrame.cpp
+ * USBFrame.cpp
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AstroUVC.h>
+#include <AstroUSB.h>
 #include <string>
 
 using namespace astro::usb;
-using namespace astro::usb::uvc;
 
 namespace astro {
 namespace usb {
-namespace uvc {
 
 Frame::Frame(int _width, int _height) : width(_width), height(_height) {
 }
@@ -28,6 +26,5 @@ int	Frame::getHeight() const {
 	return height;
 }
 
-} // namespace uvc
 } // namespace usb
 } // namespace astro

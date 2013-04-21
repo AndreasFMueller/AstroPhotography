@@ -8,9 +8,26 @@ SUBDIRS = . test
 
 lib_LTLIBRARIES = libastro.la
 
-UNICAP_FILES =
 if ENABLE_UNICAP
-UNICAP_FILES = UnicapDevice.cpp
+unicap_flies = UnicapDevice.cpp
+else
+unicap_flies =
+endif
+
+if ENABLE_MICROTOUCH
+microtouch_files = MicroTouch.cpp
+else
+microtouch_files =
+endif
+
+if ENABLE_UVC
+uvc_files = \
+	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
+	UVCFactory.cpp \
+	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
+	UVCCamera.cpp UVCTransfer.cpp UVCFrameFactory.cpp 
+else
+uvc_files =
 endif
 
 libastro_la_SOURCES = debug.cpp Format.cpp \
@@ -23,13 +40,9 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	Fits.cpp \
 	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
-	USBInterface.cpp USBRawDescriptors.cpp \
+	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
-	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
-	UVCFactory.cpp \
-	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
-	UVCFrame.cpp UVCCamera.cpp UVCTransfer.cpp UVCFrameFactory.cpp \
-	MicroTouch.cpp \
-	$(UNICAP_FILES)
+	$(uvc_files) \
+	$(unicap_flies) $(microtouch_files)
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"

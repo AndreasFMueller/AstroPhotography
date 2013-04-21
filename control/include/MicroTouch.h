@@ -11,6 +11,9 @@
 namespace astro {
 namespace microtouch {
 
+/**
+ * \brief 
+ */
 class MicroTouch {
 	astro::usb::Device&	device;
 	astro::usb::EndpointDescriptorPtr	outendpoint;
