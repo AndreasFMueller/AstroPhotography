@@ -122,6 +122,8 @@ uint8_t	MicroTouch::getByte(uint8_t code) {
 
 /**
  * \brief Query the position from the MicroTouch.
+ *
+ * \return The current stepper motor position.
  */
 uint16_t	MicroTouch::position() {
 	return getWord(0x8d);
@@ -129,21 +131,33 @@ uint16_t	MicroTouch::position() {
 
 /**
  * \brief Find out whether Microtouch is moving
+ * 
+ * \return true if the motor is currently moving, false if not.
  */
 bool	MicroTouch::isMoving() {
 	return getByte(0x82) ? true : false;
 }
 
+/**
+ * \brief  Find out whether temperature compensation is turned on.
+ *
+ * \return true if temperature consation is turned on, false if not.
+ */
 bool	MicroTouch::isTemperatureCompensating() {
 	return getByte(0x89) ? true : false;
 }
 
+/**
+ * \brief Drive the stepper motor to a given position.
+ * \param position	the position to drive to.
+ */
 void	MicroTouch::setPosition(uint16_t position) {
 	// send a command to the MicroTouch
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "send position request");
 	uint8_t	request_data[5] = { 0x8c, 0x00, 0x00, 0x00, 0x00 };
 	int	r, p;
 	p = position;
+	// last three decimal digits are the first three command bytes
 	r = p % 10;
 	p = (p - r) / 10;
 	request_data[1] = r;
@@ -153,6 +167,7 @@ void	MicroTouch::setPosition(uint16_t position) {
 	r = p % 10;
 	p = (p - r) / 10;
 	request_data[3] = r;
+	// the quotient by 1000 gives the last byte of the command
 	std::cout << "p = " << p << std::endl;
 	request_data[4] = p;
 	BulkTransfer	request(outendpoint, 5, request_data);
@@ -162,6 +177,7 @@ void	MicroTouch::setPosition(uint16_t position) {
 
 /**
  * \brief Get the current temperature
+ * \return give the temperature of the hand controller in degrees Fahrenheit.
  */
 float	MicroTouch::getTemperature() {
 	// send a command to the MicroTouch

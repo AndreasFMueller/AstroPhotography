@@ -42,14 +42,13 @@ void	MicroTouchTest::testPosition() {
 		MicroTouch	microtouch(*deviceptr);
 		std::cout << "microtouch initialized " << std::endl;
 
-		microtouch.setPosition(36321);
+		microtouch.setPosition(1);
 
 		// find the current position
 		while (1) {
 		std::cout << "position: ";
 		std::cout << (int)microtouch.position() << std::endl;
 		sleep(1);
-		}
 
 		//std::cout << "getWord(0x94):  ";
 		//std::cout << (int)microtouch.getWord(0x94) << std::endl;
@@ -80,6 +79,8 @@ void	MicroTouchTest::testPosition() {
 
 		std::cout << "moving:         ";
 		std::cout << ((microtouch.isMoving()) ? "moving" : "not moving") << std::endl;
+		std::cout << std::endl;
+		}
 	
 		// step up
 		//microtouch.stepUp();
