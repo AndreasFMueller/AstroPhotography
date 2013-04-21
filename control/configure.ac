@@ -78,7 +78,7 @@ AM_CONDITIONAL(ENABLE_UNICAP, test x${enable_unicap} = xyes)
 # turn on the microtouch stuff
 AC_ARG_ENABLE(microtouch,
 [AS_HELP_STRING([--enable-microtouch], [build the microtouch driver])], ,
-	enable_microtouch=no)
+	enable_microtouch=yes)
 AM_CONDITIONAL(ENABLE_MICROTOUCH, test x${enable_microtouch} = xyes)
 
 ######################################################################

@@ -8,6 +8,8 @@
 #include <string.h>
 #include <debug.h>
 
+using namespace astro::usb;
+
 namespace astro {
 namespace unicap {
 
@@ -156,7 +158,7 @@ void	UnicapDevice::setFormat(int index) {
  * \param count		number of frames to retrieve
  * \return		a vector of Frame objects
  */
-std::vector<FramePtr>	UnicapDevice::getFrames(int count) {
+std::vector<FramePtr>	UnicapDevice::getFrames(size_t count) {
 	unicap_status_t	rc;
 
 	// find the format
@@ -167,7 +169,6 @@ std::vector<FramePtr>	UnicapDevice::getFrames(int count) {
 	}
 	int	width = format.size.width;
 	int	height = format.size.height;
-	int	bpp = format.bpp;
 	int	buffer_size = format.buffer_size;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"request %d frames (%d x %d) of size %d",
@@ -175,7 +176,7 @@ std::vector<FramePtr>	UnicapDevice::getFrames(int count) {
 
 	// find the buffer size that we should be using
 	std::vector<FramePtr>	frames;
-	int	queued = 0;
+	size_t	queued = 0;
 	int	queuesize = 3;
 
 	// create a few buffers and queue them

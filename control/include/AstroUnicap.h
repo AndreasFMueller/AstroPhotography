@@ -17,8 +17,6 @@ extern "C" {
 #include <unicap.h>
 }
 
-using namespace astro::usb::uvc;
-
 namespace astro {
 namespace unicap {
 
@@ -88,7 +86,7 @@ public:
 	int	numFormats();
 	UnicapFormat	getFormat(int index);
 	void	setFormat(int index);
-	std::vector<FramePtr>	getFrames(int count);
+	std::vector<astro::usb::FramePtr>	getFrames(size_t count);
 };
 
 /**

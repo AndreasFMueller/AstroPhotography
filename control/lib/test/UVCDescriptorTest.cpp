@@ -28,7 +28,8 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-static void	showInterfaceDescriptor(Device& device, InterfaceDescriptorPtr ifdesc) {
+static void	showInterfaceDescriptor(Device& device,
+			InterfaceDescriptorPtr ifdesc) {
 	std::string	extra = ifdesc->extra();
 	if (extra.size() > 0) {
 		std::cout << "extra size: " << extra.size() << std::endl;
@@ -43,9 +44,11 @@ static void	showInterface(Device& device, const InterfacePtr& interface) {
 	}
 }
 
-static void	showConfigurationExtra(Device& device, const Configuration& config) {
+static void	showConfigurationExtra(Device& device,
+			const Configuration& config) {
 	DescriptorFactory	f(device);
-	std::vector<USBDescriptorPtr>	l = f.descriptors(config.extra().c_str(), config.extra().size());
+	std::vector<USBDescriptorPtr>	l = f.descriptors(
+		config.extra().c_str(), config.extra().size());
 	std::vector<USBDescriptorPtr>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
 		std::cout << *i;

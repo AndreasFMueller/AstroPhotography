@@ -17,7 +17,7 @@ endif
 
 # files needed for the MicroTouch driver tests
 if ENABLE_MICROTOUCH
-microtouch_tests = microtouchtests.cpp MicroTouchTests.cpp
+microtouch_tests = microtouchtests.cpp MicroTouchTest.cpp
 microtouch_cmds = microtouchtests
 else
 microtouch_tests =
@@ -26,7 +26,7 @@ endif
 
 # files needed for the UVC driver tests
 if ENABLE_UVC
-uvc_tests = uvctests.cpp UVCCameraTest.cpp
+uvc_tests = uvctests.cpp UVCDescriptorTest.cpp UVCCameraTest.cpp
 uvc_cmds = uvctests
 else
 uvc_tests =
@@ -50,7 +50,7 @@ tests_DEPENDENCIES = ../libastro.la
 
 # tests for USB library
 usbtests_SOURCES = usbtests.cpp \
-	USBContextTest.cpp USBDescriptorTest.cpp UVCDescriptorTest.cpp 
+	USBContextTest.cpp USBDescriptorTest.cpp
 usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
 
