@@ -68,6 +68,10 @@ UnicapDevice::UnicapDevice(unicap_device_t *device) {
 	if (rc != STATUS_SUCCESS) {
 		throw UnicapError(rc, "cannot reenumerate formats");
 	}
+	rc = unicap_reenumerate_properties(handle, &nproperties);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot reenumerate properties");
+	}
 }
 
 UnicapDevice::UnicapDevice(const UnicapDevice& other) {
@@ -81,7 +85,7 @@ UnicapDevice::~UnicapDevice() {
 	}
 }
 
-std::string	UnicapDevice::identifier() {
+std::string	UnicapDevice::identifier() const {
 	unicap_device_t	device;
 	unicap_status_t	rc = unicap_get_device(handle, &device);
 	if (rc != STATUS_SUCCESS) {
@@ -90,7 +94,7 @@ std::string	UnicapDevice::identifier() {
 	return std::string(device.identifier);
 }
 
-std::string	UnicapDevice::model_name() {
+std::string	UnicapDevice::model_name() const {
 	unicap_device_t	device;
 	unicap_status_t	rc = unicap_get_device(handle, &device);
 	if (rc != STATUS_SUCCESS) {
@@ -99,7 +103,7 @@ std::string	UnicapDevice::model_name() {
 	return std::string(device.model_name);
 }
 
-std::string	UnicapDevice::vendor_name() {
+std::string	UnicapDevice::vendor_name() const {
 	unicap_device_t	device;
 	unicap_status_t	rc = unicap_get_device(handle, &device);
 	if (rc != STATUS_SUCCESS) {
@@ -108,7 +112,7 @@ std::string	UnicapDevice::vendor_name() {
 	return std::string(device.vendor_name);
 }
 
-unsigned long long	UnicapDevice::model_id() {
+unsigned long long	UnicapDevice::model_id() const {
 	unicap_device_t	device;
 	unicap_status_t	rc = unicap_get_device(handle, &device);
 	if (rc != STATUS_SUCCESS) {
@@ -117,7 +121,7 @@ unsigned long long	UnicapDevice::model_id() {
 	return device.model_id;
 }
 
-unsigned int	UnicapDevice::vendor_id() {
+unsigned int	UnicapDevice::vendor_id() const {
 	unicap_device_t	device;
 	unicap_status_t	rc = unicap_get_device(handle, &device);
 	if (rc != STATUS_SUCCESS) {
@@ -126,7 +130,7 @@ unsigned int	UnicapDevice::vendor_id() {
 	return device.vendor_id;
 }
 
-int	UnicapDevice::numFormats() {
+int	UnicapDevice::numFormats() const {
 	return nformats;
 }
 
@@ -150,6 +154,51 @@ void	UnicapDevice::setFormat(int index) {
 		throw UnicapError(rc, "cannot set format");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set format %s", format.identifier);
+}
+
+int	UnicapDevice::numProperties() const {
+	return nproperties;
+}
+
+UnicapPropertyPtr	UnicapDevice::getProperty(int index) {
+	unicap_property_t	property;
+	unicap_status_t	rc;
+	rc = unicap_enumerate_properties(handle, NULL, &property, index);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot get property");
+	}
+	UnicapProperty	*prop;
+	switch (property.type) {
+	case UNICAP_PROPERTY_TYPE_VALUE_LIST:
+		prop = new UnicapPropertyValuelist(&property);
+		break;
+	case UNICAP_PROPERTY_TYPE_MENU:
+		prop = new UnicapPropertyMenu(&property);
+		break;
+	case UNICAP_PROPERTY_TYPE_RANGE:
+		prop = new UnicapPropertyRange(&property);
+		break;
+	case UNICAP_PROPERTY_TYPE_FLAGS:
+		prop = new UnicapPropertyFlags(&property);
+		break;
+	case UNICAP_PROPERTY_TYPE_DATA:
+		prop = new UnicapPropertyData(&property);
+		break;
+	case UNICAP_PROPERTY_TYPE_UNKNOWN:
+		throw UnicapError("unknown property type");
+		break;
+	}
+	return UnicapPropertyPtr(prop);
+}
+
+std::string	UnicapDevice::toString() const {
+	std::ostringstream	out;
+	out << identifier();
+	return out.str();
+}
+
+std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device) {
+	return out << device.toString();
 }
 
 /**
@@ -266,11 +315,11 @@ UnicapFormat::~UnicapFormat() {
 	free(format.sizes);
 }
 
-std::string	UnicapFormat::identifier() {
+std::string	UnicapFormat::identifier() const {
 	return std::string(format.identifier);
 }
 
-int	UnicapFormat::numSizes() {
+int	UnicapFormat::numSizes() const {
 	return format.size_count;
 }
 
@@ -285,19 +334,19 @@ UnicapRectangle::UnicapRectangle(unicap_rect_t *_rect) {
 	memcpy(&rect, _rect, sizeof(rect));
 }
 
-int	UnicapRectangle::x() {
+int	UnicapRectangle::x() const {
 	return rect.x;
 }
 
-int	UnicapRectangle::y() {
+int	UnicapRectangle::y() const {
 	return rect.y;
 }
 
-int	UnicapRectangle::width() {
+int	UnicapRectangle::width() const {
 	return rect.width;
 }
 
-int	UnicapRectangle::height() {
+int	UnicapRectangle::height() const {
 	return rect.height;
 }
 

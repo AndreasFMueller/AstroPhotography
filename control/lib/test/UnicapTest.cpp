@@ -26,6 +26,7 @@ public:
 	void	testGet();
 	void	testDeviceInfo();
 	void	testFormats();
+	void	testProperties();
 	void	testCapture();
 
 	CPPUNIT_TEST_SUITE(UnicapTest);
@@ -33,6 +34,7 @@ public:
 	CPPUNIT_TEST(testGet);
 	CPPUNIT_TEST(testDeviceInfo);
 	CPPUNIT_TEST(testFormats);
+	CPPUNIT_TEST(testProperties);
 	CPPUNIT_TEST(testCapture);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -81,6 +83,22 @@ void	UnicapTest::testFormats() {
 				std::cout << "   [" << j << "]: " << r.width()
 					<< " x " << r.height() << std::endl;
 			}
+		}
+	}
+}
+
+void	UnicapTest::testProperties() {
+	Unicap	unicap;
+	int	ndevices = unicap.numDevices();
+	for (int d = 0; d < ndevices; d++) {
+		UnicapDevice	device = unicap.get(d);
+		std::cout << device << std::endl;
+		int	n = device.numProperties();
+		std::cout << "    number of properties: " << n << std::endl;
+		for (int i = 0; i < n; i++) {
+			UnicapPropertyPtr	property
+				= device.getProperty(i);
+			std::cout << "        " << *property << std::endl;
 		}
 	}
 }

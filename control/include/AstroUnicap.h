@@ -49,6 +49,8 @@ public:
 	virtual std::string	toString() const;
 };
 
+typedef std::tr1::shared_ptr<UnicapProperty>	UnicapPropertyPtr;
+
 std::ostream&	operator<<(std::ostream& out, const UnicapProperty& prop);
 
 /**
@@ -142,10 +144,10 @@ class UnicapRectangle {
 	UnicapRectangle(unicap_rect_t *rect);
 public:
 	UnicapRectangle();
-	int	x();
-	int	y();
-	int	width();
-	int	height();
+	int	x() const;
+	int	y() const;
+	int	width() const;
+	int	height() const;
 	friend class UnicapFormat;
 };
 
@@ -160,8 +162,8 @@ class UnicapFormat {
 public:
 	UnicapFormat(const UnicapFormat& other);
 	~UnicapFormat();
-	std::string	identifier();
-	int	numSizes();
+	std::string	identifier() const;
+	int	numSizes() const;
 	friend class UnicapDevice;
 	UnicapRectangle	get(int i);
 };
@@ -173,6 +175,7 @@ public:
 class Unicap;
 class UnicapDevice {
 	int	nformats;
+	int	nproperties;
 	unicap_handle_t	handle;
 	bool	isopen;
 	UnicapDevice(unicap_device_t *device);
@@ -181,17 +184,22 @@ public:
 	~UnicapDevice();
 	friend class Unicap;
 
-	std::string	identifier();
-	std::string	model_name();
-	std::string	vendor_name();
-	unsigned long long	model_id();
-	unsigned int	vendor_id();
+	std::string	identifier() const;
+	std::string	model_name() const;
+	std::string	vendor_name() const;
+	unsigned long long	model_id() const;
+	unsigned int	vendor_id() const;
 
-	int	numFormats();
+	int	numFormats() const;
 	UnicapFormat	getFormat(int index);
 	void	setFormat(int index);
+	int	numProperties() const;
+	UnicapPropertyPtr	getProperty(int index);
 	std::vector<astro::usb::FramePtr>	getFrames(size_t count);
+	std::string	toString() const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device);
 
 /**
  * \brief Factory class toget Unicap devices
