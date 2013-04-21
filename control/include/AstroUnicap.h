@@ -32,9 +32,111 @@ public:
 };
 
 /**
+ * \brief Base class for all properties
+ *
+ * The base class of the properties just gives access to the common
+ * attributes identifying the property.
+ */
+class UnicapProperty {
+protected:
+	unicap_property_t	property;
+	UnicapProperty(unicap_property_t *property);
+public:
+	~UnicapProperty();
+	std::string	identifier() const;
+	std::string	category() const;
+	std::string	unit() const;
+	virtual std::string	toString() const;
+};
+
+std::ostream&	operator<<(std::ostream& out, const UnicapProperty& prop);
+
+/**
+ * \brief Base class for number valued properties.
+ *
+ * The range and valuelist properties have double values, this common
+ * class gives access to the value.
+ */
+class UnicapPropertyDouble : public UnicapProperty {
+protected:
+	UnicapPropertyDouble(unicap_property_t *property);
+public:
+	virtual	~UnicapPropertyDouble();
+	double	value() const;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Range property.
+ *
+ * Range properties can take any value in a range.
+ */
+class UnicapPropertyRange : public UnicapPropertyDouble {
+public:
+	UnicapPropertyRange(unicap_property_t *property);
+	virtual	~UnicapPropertyRange();
+	double	getMin() const;
+	double	getMax() const;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Value list property.
+ *
+ * Valuelist properties take values from a list of valid values.
+ */
+class UnicapPropertyValuelist : public UnicapPropertyDouble {
+public:
+	UnicapPropertyValuelist(unicap_property_t *property);
+	virtual	~UnicapPropertyValuelist();
+	std::vector<double>	values() const;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Menu property.
+ *
+ * Menu properties take discrete values from a list, the values
+ * are identified by strings.
+ */
+class UnicapPropertyMenu : public UnicapProperty {
+public:
+	UnicapPropertyMenu(unicap_property_t *property);
+	virtual	~UnicapPropertyMenu();
+	std::vector<std::string>	items() const;
+	std::string	item() const;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Data property.
+ *
+ * Data properties have just a datablock as data.
+ */
+class UnicapPropertyData : public UnicapProperty {
+public:
+	UnicapPropertyData(unicap_property_t *property);
+	virtual	~UnicapPropertyData();
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Flag properties.
+ *
+ * Flags properties take flag values.
+ */
+class UnicapPropertyFlags : public UnicapProperty {
+public:
+	UnicapPropertyFlags(unicap_property_t *property);
+	virtual	~UnicapPropertyFlags();
+	virtual std::string	toString() const;
+}; 
+
+/**
  * \brief Class representing a Unicap rectangle size
  */
 class UnicapFormat;
+
 class UnicapRectangle {
 	unicap_rect_t	rect;
 	UnicapRectangle(unicap_rect_t *rect);
@@ -51,6 +153,7 @@ public:
  * \brief Class representing a Unicap format.
  */
 class UnicapDevice;
+
 class UnicapFormat {
 	unicap_format_t	format;
 	UnicapFormat(unicap_format_t *format);
@@ -69,6 +172,7 @@ public:
  */
 class Unicap;
 class UnicapDevice {
+	int	nformats;
 	unicap_handle_t	handle;
 	bool	isopen;
 	UnicapDevice(unicap_device_t *device);

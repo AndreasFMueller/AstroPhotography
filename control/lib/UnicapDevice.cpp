@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <debug.h>
+#include <sstream>
 
 using namespace astro::usb;
 
@@ -63,6 +64,10 @@ UnicapDevice::UnicapDevice(unicap_device_t *device) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device opened: %s",
 		identifier().c_str());
+	rc = unicap_reenumerate_formats(handle, &nformats);
+	if (rc != STATUS_SUCCESS) {
+		throw UnicapError(rc, "cannot reenumerate formats");
+	}
 }
 
 UnicapDevice::UnicapDevice(const UnicapDevice& other) {
@@ -122,12 +127,7 @@ unsigned int	UnicapDevice::vendor_id() {
 }
 
 int	UnicapDevice::numFormats() {
-	int	count;
-	unicap_status_t	rc = unicap_reenumerate_formats(handle, &count);
-	if (rc != STATUS_SUCCESS) {
-		throw UnicapError(rc, "cannot reenumerate formats");
-	}
-	return count;
+	return nformats;
 }
 
 UnicapFormat	UnicapDevice::getFormat(int index) {
@@ -302,8 +302,205 @@ int	UnicapRectangle::height() {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Unicap Properties
+// UnicapProperty
 //////////////////////////////////////////////////////////////////////
+
+UnicapProperty::UnicapProperty(unicap_property_t *_property) {
+	memcpy(&property, _property, sizeof(unicap_property_t));
+}
+
+UnicapProperty::~UnicapProperty() {
+}
+
+std::string	UnicapProperty::toString() const {
+	std::ostringstream	out;
+	out << identifier() << ": ";
+	return out.str();
+}
+
+std::ostream&	operator<<(std::ostream& out, const UnicapProperty& prop) {
+	out << prop.toString();
+	return out;
+}
+
+std::string	UnicapProperty::identifier() const {
+	return std::string(property.identifier);
+}
+
+std::string	UnicapProperty::category() const {
+	return std::string(property.category);
+}
+
+std::string	UnicapProperty::unit() const {
+	return std::string(property.unit);
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyDouble
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyDouble::UnicapPropertyDouble(unicap_property_t *property)
+	: UnicapProperty(property) {
+}
+
+UnicapPropertyDouble::~UnicapPropertyDouble() {
+}
+
+std::string	UnicapPropertyDouble::toString() const {
+	std::ostringstream	out;
+	out << UnicapProperty::toString() << value();
+	return out.str();
+}
+
+double	UnicapPropertyDouble::value() const {
+	return property.value;
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyRange
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyRange::UnicapPropertyRange(unicap_property_t *property)
+	: UnicapPropertyDouble(property) {
+	if (property->type != UNICAP_PROPERTY_TYPE_RANGE) {
+		throw UnicapError("not a range property");
+	}
+}
+
+UnicapPropertyRange::~UnicapPropertyRange() {
+}
+
+std::string	UnicapPropertyRange::toString() const {
+	std::ostringstream	out;
+	out << UnicapPropertyDouble::toString();
+	out << " [" << getMin() << ", " << getMax() << "]";
+	return out.str();
+}
+
+double	UnicapPropertyRange::getMin() const {
+	return property.range.min;
+}
+
+double	UnicapPropertyRange::getMax() const {
+	return property.range.max;
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyValuelist
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyValuelist::UnicapPropertyValuelist(unicap_property_t *property)
+	: UnicapPropertyDouble(property) {
+	if (property->type != UNICAP_PROPERTY_TYPE_VALUE_LIST) {
+		throw UnicapError("not a list property");
+	}
+}
+
+UnicapPropertyValuelist::~UnicapPropertyValuelist() {
+}
+
+std::string	UnicapPropertyValuelist::toString() const {
+	std::ostringstream	out;
+	out << UnicapPropertyDouble::toString();
+	out << " (" ;
+	std::vector<double>	v = values();
+	std::vector<double>::const_iterator	i;
+	for (i = v.begin(); i != v.end(); i++) {
+		if (i != v.begin()) { out << ", "; }
+		out << *i;
+	}
+	out << ")";
+	return out.str();
+}
+
+std::vector<double>	UnicapPropertyValuelist::values() const {
+	std::vector<double>	v;
+	for (int i = 0; i < property.value_list.value_count; i++) {
+		v.push_back(property.value_list.values[i]);
+	}
+	return v;
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyMenu
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyMenu::UnicapPropertyMenu(unicap_property_t *property)
+	: UnicapProperty(property) {
+	if (property->type != UNICAP_PROPERTY_TYPE_MENU) {
+		throw UnicapError("not a menu property");
+	}
+}
+
+UnicapPropertyMenu::~UnicapPropertyMenu() {
+}
+
+std::string	UnicapPropertyMenu::toString() const {
+	std::ostringstream	out;
+	out << identifier() << ": ";
+	out << item();
+	out << " (";
+	std::vector<std::string>	m = items();
+	std::vector<std::string>::const_iterator	i;
+	for (i = m.begin(); i != m.end(); i++) {
+		if (i != m.begin()) { out << ", "; }
+		out << *i;
+	}
+	out << ")";
+	return out.str();
+}
+
+std::vector<std::string>	UnicapPropertyMenu::items() const {
+	std::vector<std::string>	m;
+	for (int i = 0; i < property.menu.menu_item_count; i++) {
+		m.push_back(std::string(property.menu.menu_items[i]));
+	}
+	return m;
+}
+
+std::string	UnicapPropertyMenu::item() const {
+	return std::string(property.menu_item);
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyData
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyData::UnicapPropertyData(unicap_property_t *property)
+	: UnicapProperty(property) {
+	if (property->type != UNICAP_PROPERTY_TYPE_DATA) {
+		throw UnicapError("not a data property");
+	}
+}
+
+UnicapPropertyData::~UnicapPropertyData() {
+}
+
+std::string	UnicapPropertyData::toString() const {
+	std::ostringstream	out;
+	out << UnicapProperty::toString();
+	return out.str();
+}
+
+//////////////////////////////////////////////////////////////////////
+// UnicapPropertyData
+//////////////////////////////////////////////////////////////////////
+
+UnicapPropertyFlags::UnicapPropertyFlags(unicap_property_t *property)
+	: UnicapProperty(property) {
+	if (property->type != UNICAP_PROPERTY_TYPE_FLAGS) {
+		throw UnicapError("not a flags property");
+	}
+}
+
+UnicapPropertyFlags::~UnicapPropertyFlags() {
+}
+
+std::string	UnicapPropertyFlags::toString() const {
+	std::ostringstream	out;
+	out << UnicapProperty::toString();
+	return out.str();
+}
 
 } // namespace unicap
 } // namespace astro
