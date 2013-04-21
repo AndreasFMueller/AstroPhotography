@@ -7,7 +7,7 @@
 noinst_HEADERS = 
 
 # stuff related to testing
-noinst_PROGRAMS = tests usbtests  microtouchtests
+noinst_PROGRAMS = tests usbtests microtouchtests unicaptests
 
 tests_SOURCES = tests.cpp \
 	PixelTest.cpp \
@@ -16,7 +16,9 @@ tests_SOURCES = tests.cpp \
 	ImageTest.cpp RGBTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
-	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
+	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+	UnicapTest.cpp
+
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 
@@ -31,6 +33,11 @@ microtouchtests_SOURCES = microtouchtests.cpp \
 	MicroTouchTest.cpp
 microtouchtests_LDADD = -lcppunit -L.. -lastro
 microtouchtests_DEPENDENCIES = ../libastro.la
+
+unicaptests_SOURCES = unicaptests.cpp \
+	UnicapTest.cpp
+unicaptests_LDADD = -lcppunit -L.. -lastro
+unicaptests_DEPENDENCIES = ../libastro.la
 
 test2_SOURCES = test2.cpp
 test2_LDADD = -L.. -lastro

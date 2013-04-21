@@ -40,6 +40,19 @@ enable_sbig=no
 )
 AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 
+# check for the Unicap library
+AC_ARG_ENABLE(unicap,
+[AS_HELP_STRING([--enable-unicap], [build the unicap driver])],
+[
+AC_CHECK_HEADERS(unicap.h, , [AC_MSG_ERROR([unicap header not found])])
+AC_CHECK_LIB([unicap], [unicap_open], LIBS="${LIBS} -lunicap", [AC_MSG_ERROR([unicap library not found])])
+enable_unicap=yes
+],[
+enable_unicap=no
+]
+)
+AM_CONDITIONAL(ENABLE_UNICAP, test x$enable_unicap = xyes)
+
 # Checks for typedefs
 AC_C_CONST
 

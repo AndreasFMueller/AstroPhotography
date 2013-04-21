@@ -12,6 +12,7 @@
 #include <config.h>
 #include <stdexcept>
 #include <debug.h>
+#include <iomanip>
 
 using namespace astro::usb;
 using namespace astro::microtouch;
@@ -47,6 +48,7 @@ void	MicroTouchTest::testPosition() {
 		// find the current position
 		while (1) {
 		std::cout << "position: ";
+		std::cout << std::dec;
 		std::cout << (int)microtouch.position() << std::endl;
 		sleep(1);
 
@@ -54,24 +56,30 @@ void	MicroTouchTest::testPosition() {
 		//std::cout << (int)microtouch.getWord(0x94) << std::endl;
 
 		std::cout << "getWord(0x9a):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getWord(0x9a) << std::endl;
 
 		std::cout << "getWord(0x9c):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getWord(0x9c) << std::endl;
 
 		std::cout << "getWord(0xa0):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getWord(0xa0) << std::endl;
 
 		std::cout << "getWord(0x9e):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getWord(0x9e) << std::endl;
 
 		std::cout << "getWord(0x92):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getWord(0x92) << std::endl;
 
 		std::cout << "temperature compensation:  ";
 		std::cout << (microtouch.isTemperatureCompensating() ? "ON" : "OFF") << std::endl;
 
 		std::cout << "getByte(0x92):  ";
+		std::cout << std::hex << std::setw(2) << std::setfill('0');
 		std::cout << (int)microtouch.getByte(0x92) << std::endl;
 
 		std::cout << "temperature:    ";

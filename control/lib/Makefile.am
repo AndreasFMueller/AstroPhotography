@@ -8,6 +8,11 @@ SUBDIRS = . test
 
 lib_LTLIBRARIES = libastro.la
 
+UNICAP_FILES =
+if ENABLE_UNICAP
+UNICAP_FILES = UnicapDevice.cpp
+endif
+
 libastro_la_SOURCES = debug.cpp Format.cpp \
 	Pixel.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
@@ -24,6 +29,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	UVCFactory.cpp \
 	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
 	UVCFrame.cpp UVCCamera.cpp UVCTransfer.cpp UVCFrameFactory.cpp \
-	MicroTouch.cpp
+	MicroTouch.cpp \
+	$(UNICAP_FILES)
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"
