@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <debug.h>
 #include <iomanip>
+#include <unistd.h>
 
 using namespace astro::usb;
 using namespace astro::microtouch;
