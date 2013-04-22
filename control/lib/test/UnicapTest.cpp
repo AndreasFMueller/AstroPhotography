@@ -136,9 +136,7 @@ void	UnicapTest::testCapture() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "out file: %s", buffer);
 		std::string	filename(buffer);
 		FITSoutfile<YUYV<unsigned char> >	file(filename);
-#if 1
 		file.write(*image);
-#endif
 	}
 }
 
