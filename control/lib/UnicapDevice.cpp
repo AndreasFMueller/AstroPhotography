@@ -143,17 +143,12 @@ UnicapFormat	UnicapDevice::getFormat(int index) {
 	return UnicapFormat(&format);
 }
 
-void	UnicapDevice::setFormat(int index) {
-	unicap_format_t	format;
-	unicap_status_t	rc = unicap_get_format(handle, &format);
-	if (rc != STATUS_SUCCESS) {
-		throw UnicapError(rc, "cannot get format");
-	}
-	rc = unicap_set_format(handle, &format);
+void	UnicapDevice::setFormat(UnicapFormat& format) {
+	unicap_status_t	rc = unicap_set_format(handle, &(format.format));
 	if (rc != STATUS_SUCCESS) {
 		throw UnicapError(rc, "cannot set format");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set format %s", format.identifier);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set format %s", format.identifier().c_str());
 }
 
 int	UnicapDevice::numProperties() const {
@@ -202,6 +197,22 @@ std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device) {
 }
 
 /**
+ * \brief Callback method.
+ */
+void	UnicapDevice::callback(unicap_event_t event,
+	unicap_data_buffer_t *buffer) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame received");
+	frames.push_back(FramePtr(new Frame(width, height, buffer->data,
+		buffer->buffer_size)));
+}
+
+static void	new_frame_callback(unicap_event_t event, unicap_handle_t handle,
+	unicap_data_buffer_t *buffer, void *user_data) {
+	UnicapDevice	*unicapdevice = (UnicapDevice *)user_data;
+	unicapdevice->callback(event, buffer);
+}
+
+/**
  * \brief Get Frames from a Unicap camera
  *
  * \param count		number of frames to retrieve
@@ -209,6 +220,7 @@ std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device) {
  */
 std::vector<FramePtr>	UnicapDevice::getFrames(size_t count) {
 	unicap_status_t	rc;
+	frames.clear();
 
 	// find the format
 	unicap_format_t	format;
@@ -216,78 +228,49 @@ std::vector<FramePtr>	UnicapDevice::getFrames(size_t count) {
 	if (rc != STATUS_SUCCESS) {
 		throw UnicapError(rc, "cannot get the format");
 	}
-	int	width = format.size.width;
-	int	height = format.size.height;
+	width = format.size.width;
+	height = format.size.height;
 	int	buffer_size = format.buffer_size;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"request %d frames (%d x %d) of size %d",
 		count, width, height, buffer_size);
 
-	// find the buffer size that we should be using
-	std::vector<FramePtr>	frames;
-	size_t	queued = 0;
-	int	queuesize = 3;
-
-	// create a few buffers and queue them
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating buffers");
-	unicap_data_buffer_t	*buffers[queuesize];
-	for (int i = 0; i < queuesize; i++) {
-		unicap_data_buffer_t	*buffer;
-		buffer = (unicap_data_buffer_t *)calloc(1,
-			sizeof(unicap_data_buffer_t));
-		buffers[i] = buffer;
-		buffer->buffer_size = buffer_size;
-		buffer->data = (unsigned char *)malloc(buffer_size);
+	// set user buffer type
+	format.buffer_type = UNICAP_BUFFER_TYPE_SYSTEM;
+	rc = unicap_set_format(handle, &format);
+	if (rc != STATUS_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set fornat");
+		throw UnicapError(rc, "cannot set format");
 	}
 
-	// start capturing
+	// register the callback
+	rc = unicap_register_callback(handle, UNICAP_EVENT_NEW_FRAME,
+		(unicap_callback_t)new_frame_callback, this);
+	if (rc != STATUS_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback");
+		throw UnicapError(rc, "cannot register callback");
+	}
+
+	// start capture
 	rc = unicap_start_capture(handle);
 	if (rc != STATUS_SUCCESS) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start captures");
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start captures");
 		throw UnicapError(rc, "cannot start capture");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "capture started");
 
-	// queue the buffers
-	for (int i = 0; i < queuesize; i++) {
-		rc = unicap_queue_buffer(handle, buffers[i]);
-		if (rc != STATUS_SUCCESS) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot queue %d", i);
-			goto cleanup;
-		}
-		queued++;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d buffers queued", queued);
+	// waiting for enough frames to be received
+	do {
+		usleep(100);
+	} while (frames.size() < count);
 
-	// wait for frames to arrive
-	while (frames.size() < count) {
-		unicap_data_buffer_t	*returned;
-		rc = unicap_wait_buffer(handle, &returned);
-		if (rc != STATUS_SUCCESS) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot receive a buffer");
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "got buffer %d", frames.size());
-		Frame	*f = new Frame(width, height, returned->data,
-			returned->buffer_size);
-		frames.push_back(FramePtr(f));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new frame added");
-		if (queued < count) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "requeue the buffer");
-			rc = unicap_queue_buffer(handle, returned);
-			queued++;
-		}
-	}
+	// stop capture
 	rc = unicap_stop_capture(handle);
-
-cleanup:
-	for (int i = 0; i < queuesize; i++) {
-		free(buffers[i]->data);
-		buffers[i]->data = NULL;
-		free(buffers[i]);
-		buffers[i] = NULL;
+	if (rc != STATUS_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop captures");
+		throw UnicapError(rc, "cannot stop capture");
 	}
-	free(buffers);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "capture stopped");
+
+	// return the frames
 	return frames;
 }
 
@@ -325,6 +308,21 @@ int	UnicapFormat::numSizes() const {
 
 UnicapRectangle	UnicapFormat::get(int i) {
 	return UnicapRectangle(&(format.sizes[i]));
+}
+
+void	UnicapFormat::setBufferType(unicap_buffer_type_t type) {
+	format.buffer_type = type;
+}
+
+std::string	UnicapFormat::toString() const {
+	std::ostringstream	out;
+	out << identifier() << ", size = " << format.size.width
+		<< " x " << format.size.height << std::endl;
+	return out.str();
+}
+
+std::ostream&	operator<<(std::ostream& out, const UnicapFormat& format) {
+	return out << format.toString();
 }
 
 //////////////////////////////////////////////////////////////////////

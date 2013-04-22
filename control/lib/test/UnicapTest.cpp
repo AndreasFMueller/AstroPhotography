@@ -5,6 +5,8 @@
  * $Id$
  */
 #include <AstroUnicap.h>
+#include <AstroImage.h>
+#include <AstroIO.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -14,6 +16,9 @@
 #include <iomanip>
 
 using namespace astro::unicap;
+using namespace astro::image;
+using namespace astro::usb;
+using namespace astro::io;
 
 namespace astro {
 namespace test {
@@ -110,9 +115,31 @@ void	UnicapTest::testCapture() {
 	std::cout << "Device: " << device.identifier() << std::endl;
 	device.numFormats();
 	UnicapFormat	format = device.getFormat(0);
-	std::cout << "Format: " << format.identifier() << std::endl;
-	device.setFormat(0);
-	device.getFrames(10);
+	std::cout << "Format: " << format << std::endl;
+	device.setFormat(format);
+	std::vector<FramePtr>	frames = device.getFrames(10);
+	std::vector<FramePtr>::const_iterator	i;
+	int	count = 0;
+	for (i = frames.begin(); i != frames.end(); i++) {
+		int	width = (*i)->getWidth();
+		int	height = (*i)->getHeight();
+		Image<YUYV<unsigned char> >     *image =
+			new Image<YUYV<unsigned char> >(width, height);
+		const char	*data = (*i)->data();
+		int	size = (*i)->size();
+		for (int j = 0; 2 * j < size; j++) {
+			(*image)[j] = YUYV<unsigned char>(data[2 * j],
+				data[2 * j + 1]);
+		}
+		char	buffer[128];
+		snprintf(buffer, sizeof(buffer), "out%d.fits", count++);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "out file: %s", buffer);
+		std::string	filename(buffer);
+		FITSoutfile<YUYV<unsigned char> >	file(filename);
+#if 1
+		file.write(*image);
+#endif
+	}
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UnicapTest);

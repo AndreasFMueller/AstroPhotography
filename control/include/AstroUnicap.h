@@ -166,8 +166,11 @@ public:
 	int	numSizes() const;
 	friend class UnicapDevice;
 	UnicapRectangle	get(int i);
+	void	setBufferType(unicap_buffer_type_t type);
+	std::string	toString() const;
 };
 
+std::ostream&	operator<<(std::ostream& out, const UnicapFormat& format);
 
 /**
  * \brief Class representing a Unicap device.
@@ -179,6 +182,9 @@ class UnicapDevice {
 	unicap_handle_t	handle;
 	bool	isopen;
 	UnicapDevice(unicap_device_t *device);
+	int	width;
+	int	height;
+	std::vector<astro::usb::FramePtr>	frames;
 public:
 	UnicapDevice(const UnicapDevice& other);
 	~UnicapDevice();
@@ -192,11 +198,12 @@ public:
 
 	int	numFormats() const;
 	UnicapFormat	getFormat(int index);
-	void	setFormat(int index);
+	void	setFormat(UnicapFormat& format);
 	int	numProperties() const;
 	UnicapPropertyPtr	getProperty(int index);
 	std::vector<astro::usb::FramePtr>	getFrames(size_t count);
 	std::string	toString() const;
+	void	callback(unicap_event_t event, unicap_data_buffer_t *buffer);
 };
 
 std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device);

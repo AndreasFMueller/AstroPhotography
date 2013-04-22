@@ -389,7 +389,7 @@ int	FITSWriteDoWork(const long totaln, long offset,
 	// now iteratate through the pixels and convert them pair by pair
 	RGB<value_type>	dest[2];
 	const int	size = user->image.size.pixels;
-	const	int	size2 = user->image.size.pixels << 1;
+	const int	size2 = user->image.size.pixels << 1;
 	for (int offset = 0; offset < size; offset += 2) {
 		// convert the YUYV pixel pair to an RGB pixel pair
 		convertPixelPair(dest, user->image.pixels + offset);
