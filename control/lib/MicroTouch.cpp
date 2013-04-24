@@ -13,6 +13,13 @@ using namespace astro::usb;
 namespace astro {
 namespace microtouch {
 
+/**
+ * \brief construct a microtouche exception instance
+ */
+MicroTouchError::MicroTouchError(const char *cause)
+	: std::runtime_error(cause) {
+}
+
 typedef struct onebyte_s {
 	uint8_t	result;
 } __attribute__((packed)) onebyte_t;
@@ -22,7 +29,7 @@ typedef struct onebyte_s {
  *
  * \param device USB device representing the MicroTouch
  */
-MicroTouch::MicroTouch(Device& _device) : device(_device) {
+MicroTouch::MicroTouch(Device& _device) throw(USBError) : device(_device) {
 	device.open();
 
 	ConfigurationPtr	config = device.activeConfig();
@@ -67,56 +74,28 @@ MicroTouch::MicroTouch(Device& _device) : device(_device) {
 	device.controlRequest(&setup5);
 }
 
+template<size_t n>
+struct mtdata {
+	uint8_t	cmd;
+	uint8_t	data[n];
+	mtdata(uint8_t _cmd) { cmd = _cmd; }
+	mtdata() { }
+} __attribute__((packed));
+
 /**
  * \brief get a word from the remote device
  */
-uint16_t	MicroTouch::getWord(uint8_t code) {
-	// send a command to the MicroTouch
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send %02x request", code);
-	uint8_t	request_data = code;
-	BulkTransfer	request(outendpoint, 1, &request_data);
-	device.submit(&request);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transmit complete");
-
-	// read the result back
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "receive  request");
-	uint8_t	response_data[3];
-	BulkTransfer	response(inendpoint, 3, response_data);
-	device.submit(&response);
-
-	// when the transport is complete, we should have the code
-	// 0x8d in the first byte
-	if (response_data[0] != request_data) {
-		throw std::runtime_error("bad command response");
-	}
-
-	return *(uint16_t *)&response_data[1];
+uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
+	mtdata<2>	result = get<2>(code);
+	return *(uint16_t *)result.data;
 }
 
 /**
  * \brief get a byte from the remote device
  */
-uint8_t	MicroTouch::getByte(uint8_t code) {
-	// send a command to the MicroTouch
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send %02x request", code);
-	uint8_t	request_data = code;
-	BulkTransfer	request(outendpoint, 1, &request_data);
-	device.submit(&request);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transmit complete");
-
-	// read the result back
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "receive  request");
-	uint8_t	response_data[2];
-	BulkTransfer	response(inendpoint, 2, response_data);
-	device.submit(&response);
-
-	// when the transport is complete, we should have the code
-	// 0x8d in the first byte
-	if (response_data[0] != request_data) {
-		throw std::runtime_error("bad command response");
-	}
-
-	return response_data[1];
+uint8_t	MicroTouch::getByte(uint8_t code) throw(MicroTouchError) {
+	mtdata<1>	result = get<1>(code);
+	return result.data[0];
 }
 
 
@@ -125,8 +104,8 @@ uint8_t	MicroTouch::getByte(uint8_t code) {
  *
  * \return The current stepper motor position.
  */
-uint16_t	MicroTouch::position() {
-	return getWord(0x8d);
+uint16_t	MicroTouch::position() throw(MicroTouchError) {
+	return getWord(MICROTOUCH_GETPOSITION);
 }
 
 /**
@@ -134,8 +113,8 @@ uint16_t	MicroTouch::position() {
  * 
  * \return true if the motor is currently moving, false if not.
  */
-bool	MicroTouch::isMoving() {
-	return getByte(0x82) ? true : false;
+bool	MicroTouch::isMoving() throw(MicroTouchError) {
+	return getByte(MICROTOUCH_ISMOVING) ? true : false;
 }
 
 /**
@@ -143,80 +122,67 @@ bool	MicroTouch::isMoving() {
  *
  * \return true if temperature consation is turned on, false if not.
  */
-bool	MicroTouch::isTemperatureCompensating() {
-	return getByte(0x89) ? true : false;
+bool	MicroTouch::isTemperatureCompensating() throw(MicroTouchError) {
+	return getByte(MICROTOUCH_ISTEMPCOMPENSATING) ? true : false;
 }
 
 /**
  * \brief Drive the stepper motor to a given position.
  * \param position	the position to drive to.
  */
-void	MicroTouch::setPosition(uint16_t position) {
+void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
 	// send a command to the MicroTouch
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "send position request");
-	uint8_t	request_data[5] = { 0x8c, 0x00, 0x00, 0x00, 0x00 };
+	mtdata<4>	request_data(MICROTOUCH_SETPOSITION);
 	int	r, p;
 	p = position;
 	// last three decimal digits are the first three command bytes
 	r = p % 10;
 	p = (p - r) / 10;
-	request_data[1] = r;
+	request_data.data[0] = r;
 	r = p % 10;
 	p = (p - r) / 10;
-	request_data[2] = r;
+	request_data.data[1] = r;
 	r = p % 10;
 	p = (p - r) / 10;
-	request_data[3] = r;
+	request_data.data[2] = r;
 	// the quotient by 1000 gives the last byte of the command
 	std::cout << "p = " << p << std::endl;
-	request_data[4] = p;
-	BulkTransfer	request(outendpoint, 5, request_data);
+	request_data.data[3] = p;
+	BulkTransfer	request(outendpoint, &request_data);
 	device.submit(&request);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transmit complete");
 }
 
 /**
  * \brief Get the current temperature
- * \return give the temperature of the hand controller in degrees Fahrenheit.
+ * \return give the temperature of the hand controller in degrees Celsius.
  */
-float	MicroTouch::getTemperature() {
+float	MicroTouch::getTemperature() throw(MicroTouchError) {
 	// send a command to the MicroTouch
-	uint8_t	code = 0x84;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send %02x request", code);
-	uint8_t	request_data = code;
-	BulkTransfer	request(outendpoint, 1, &request_data);
-	device.submit(&request);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transmit complete");
+	mtdata<5>	result = get<5>(MICROTOUCH_GETTEMPERATURE);
 
-	// read the result back
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "receive  request");
-	uint8_t	response_data[6];
-	BulkTransfer	response(inendpoint, 6, response_data);
-	device.submit(&response);
-
-	// when the transport is complete, we should have the code
-	// 0x8d in the first byte
-	if (response_data[0] != request_data) {
-		throw std::runtime_error("bad command response");
+	// a 0 in byte 2 indicates a problem
+	if (result.data[2] == 0) {
+		throw MicroTouchError("no temperature info");
 	}
-	for (int i = 0; i < 6; i++) {
-		std::cout << " " << std::hex << std::setw(2);
-		std::cout << std::setfill('0') << (int)response_data[i];
-	}
-	std::cout << std::endl;
 
-	uint16_t	temp = response_data[1];
-	temp = (temp << 8) | response_data[2];
-	return 0.1 * (temp + 368);
+	// convert the response to number
+	int16_t	temp = result.data[0];
+	temp = (temp << 8) | result.data[1];
+	int16_t	offset = result.data[4];
+	offset = (offset << 8) | result.data[3];
+	double temperature = (temp + offset) / 16.;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got temperature %.1f", temperature);
+	return temperature;
 }
 
 /**
  * \brief Start moving up
  */
-void	MicroTouch::stepUp() {
-std::cout << "step up" << std::endl;
-	unsigned char	stepup_request = 0x8e;
-	BulkTransfer	request(outendpoint, 1, &stepup_request);
+void	MicroTouch::stepUp() throw(MicroTouchError) {
+	mtdata<0>	stepup_request(MICROTOUCH_STARTUP);
+	BulkTransfer	request(outendpoint, &stepup_request);
 	device.submit(&request);
 }
 

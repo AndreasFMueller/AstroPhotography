@@ -49,9 +49,7 @@ static void bulktransfer_callback(libusb_transfer *transfer) {
 	((BulkTransfer *)transfer->user_data)->callback(transfer);
 }
 
-BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
-	int _length, unsigned char *_data)
-	: Transfer(_endpoint) {
+void	BulkTransfer::init(int _length, unsigned char *_data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer",
 		(endpoint->bEndpointAddress() & 0x80) ? "IN" : "OUT");
 	transfer = NULL;
@@ -63,6 +61,12 @@ BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
 		data = new unsigned char[_length];
 		freedata = true;
 	}
+}
+
+BulkTransfer::BulkTransfer(EndpointDescriptorPtr _endpoint,
+	int _length, unsigned char *_data)
+	: Transfer(_endpoint) {
+	init(_length, _data);
 }
 
 unsigned char	*BulkTransfer::getData() const {

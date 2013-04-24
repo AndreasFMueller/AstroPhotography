@@ -453,9 +453,15 @@ public:
 	virtual void	callback(libusb_transfer *transfer);
 private:
 	virtual void	submit(libusb_device_handle *devhandle) throw(USBError);
+	void	init(int length, unsigned char *data);
 public:
 	BulkTransfer(EndpointDescriptorPtr endpoint,
 		int length, unsigned char *data = NULL);
+	template<typename T>
+	BulkTransfer(EndpointDescriptorPtr endpoint, const T *data) 
+		: Transfer(endpoint) {
+		init(sizeof(T), (unsigned char *)data);
+	}
 	virtual ~BulkTransfer();
 	unsigned char	*getData() const;
 };

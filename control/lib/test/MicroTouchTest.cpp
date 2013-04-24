@@ -84,7 +84,7 @@ void	MicroTouchTest::testPosition() {
 		std::cout << (int)microtouch.getByte(0x92) << std::endl;
 
 		std::cout << "temperature:    ";
-		std::cout << microtouch.getTemperature() << std::endl;
+		std::cout << std::setw(4) << microtouch.getTemperature() << std::endl;
 
 		std::cout << "moving:         ";
 		std::cout << ((microtouch.isMoving()) ? "moving" : "not moving") << std::endl;
