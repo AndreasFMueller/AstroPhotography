@@ -5,6 +5,7 @@
  * $Id$
  */
 #include <Mock1Ccd.h>
+#include <unistd.h>
 
 using namespace astro::image;
 using namespace astro::camera;
