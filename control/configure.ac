@@ -104,6 +104,7 @@ AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
+	drivers/sx/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT

@@ -1,0 +1,438 @@
+       Starlight Xpress USB Programmers Reference Manual
+			  Version 1.0
+			    10/12/02
+			 David Schmenk
+
+
+1.0 Introduction
+################
+
+This document describes the second generation USB interface for Starlight 
+Xpress Astronomy Cameras.  The programming interface is a simple 
+USB BULK I/O interface.  Commands are written to the device, 
+command results and data are read back from the device - although only a few 
+commands actually return data.
+
+
+2.0 Command Format
+##################
+
+The command format reflects the USB control packet format.  This is due to 
+the dual nature of the command stream.  Commands can be submitted as both 
+control requests to endpoint 0 or through the standard BULK OUT endpoint 
+of the device.  The command block is defined as such:
+
+Byte offset	Name
+-----------	------------
+  0		CMD_TYPE
+  1		CMD
+  2		CMD_VALUE_L
+  3		CMD_VALUE_H
+  4		CMD_INDEX_L
+  5	    	CMD_INDEX_H
+  6		CMD_LENGTH_L
+  7		CMD_LENGTH_H
+  
+This is an 8 byte command block that is present for all commands.  Some 
+commands include parameters.  These will follow directly after the command 
+block.  The length of the parameters (in bytes) will be filled in the 
+CMD_LENGTH_H:L fields.  If no parameters are passed in, the CMD_LENGTH_H:L 
+fields must be set to zero.  Command parameters are limited to a 
+maximum of 56 bytes in length.  CMD_TYPE must be 0x40 when additional data 
+is being supplied with the command block.  CMD_TYPE can be 0xC0 for  
+certain commands that read data back from the interface.  Refer to each 
+command for additional information.
+
+It should be noted that all 16 bit values are little-endian.  This is in 
+keeping with the USB standard.  If you are using a little-endian computer, 
+the 16 bit fields can be written as such, no need to write them as 
+individual 8 bit values.
+
+
+2.1 Commands
+============
+
+The commands defined currently are:
+
+Name               	Value
+-------------------	-----
+GET_FIRMWARE_VERSION 	255
+ECHO              	0 
+CLEAR_PIXELS       	1
+READ_PIXELS_DELAYED   	2
+READ_PIXELS        	3
+SET_TIMER             	4
+GET_TIMER             	5
+RESET        	  	6
+SET_CCD_PARMS  	  	7
+GET_CCD_PARMS  	  	8
+SET_STAR2K         	9
+WRITE_SERIAL_PORT     	10
+READ_SERIAL_PORT      	11
+SET_SERIAL            	12
+GET_SERIAL            	13
+CAMERA_MODEL	 	14
+LOAD_EEPROM           	15
+
+The command value is written into the CMD field of the command block.
+
+Many commands use flags to modify the operation of the command.  Currently 
+the flags defined are:
+
+Name			Value	Function
+---------------------	-----   -----------------------------------
+CCD_FLAGS_FIELD_ODD       1     Specify odd field for MX cameras
+CCD_FLAGS_FIELD_EVEN      2	Specify even field for MX cameras
+CCD_FLAGS_NOBIN_ACCUM     4	Don't accumulate charge if binning
+CCD_FLAGS_NOWIPE_FRAME    8	Don't apply WIPE when clearing frame
+CCD_FLAGS_TDI             32	Implement TDI (drift scan) operation
+CCD_FLAGS_NOCLEAR_FRAME   64	Don't clear frame, even when asked
+
+Flags are passed in the CMD_VALUEH:L fields.  The flags are logically ORed 
+together.
+
+
+2.1.1 GET_FIRMWARE_VERSION
+==========================
+
+Byte offset	Name
+-----------	------
+  0		MINOR_VERSION_L
+  1		MINOR_VERSION_H
+  2		MAJOR_VERSION_L
+  3		MAJOR_VERSION_H
+
+
+2.1.2 ECHO
+==========
+
+This command is used to test the interface for proper functionality.  The 
+data following the command will be echoed back to the host.
+
+
+
+2.1.3 CLEAR_PIXELS
+==================
+
+This command is issued in order to wipe or clear the pixel charge 
+currently stored in the CCD.  Implemented flags are NOWIPE_FRAME, TDI and 
+NOCLEAR_FRAME.
+
+
+2.1.4 READ_PIXELS_DELAYED
+=========================
+
+This command downloads pixels after they have been exposed.  There is a 
+parameter block associated with this command:
+
+Byte offset	Name
+-----------	------
+  0		X_OFFSET_L
+  1		X_OFFSET_H
+  2		Y_OFFSET_L
+  3		Y_OFFSET_H
+  4		WIDTH_L
+  5		WIDTH_H
+  6		HEIGHT_L
+  7		HEIGHT_H
+  8		X_BIN
+  9		Y_BIN
+  10		DELAY_0
+  11		DELAY_1
+  12		DELAY_2
+  13		DELAY_3
+
+All parameters are expressed in terms of pixels.  The offsets are 
+unbinned pixel coordinates from the upper left.  Width and height are 
+specified in unbinned pixels.  The binning is in pixels.  Because these 
+parameters are specified in unbinned pixels, the calculation to determine 
+the actual # pixels to download given the binning factors are:
+
+# of pixels per row = INT(WIDTH_H:L / X_BIN)
+# of rows per image = INT(HEIGHT_H:L / Y_BIN)
+
+The delay is expressed in milliseconds as a 32 bit value.  Note that any 
+other load pixels command received during the delay will cancel the 
+current load pixels command.  This value is useful for any environment 
+that doesn't have accurate timing at the OS level.
+
+An implied CLEAR_PIXELS is done at the beginning of the exposure.  All of
+the CLEAR_PIXELS flags are in effect.
+
+
+Some cameras have multiple CCD chips controllable from the same interface.
+CMD_INDEX_H:L indexes into the available CCDs.  Currently, the main
+imaging CCD is at index 0.  An optional guiding CCD is at index 1.  The
+guiding CCD will only return valid data if the INTEGRATED_GUIDER_CCD bit
+is set in the CAPS field of the GET_CCD_PARAMS returned parameters.  See 
+section 2.1.10 for further details.
+
+When the host reads the pixel data after submitting this command, it does 
+so as one contiguous block.  Previous versions sent one scanline at a 
+time.  The host is responsible for reading the image data in chunks and 
+providing user feedback of the download operation.
+
+Flags valid for READ_PIXELS_DELAYED are FIELD_EVEN, FIELD_ODD, NOBIN_ACCUM,
+NOWIPE_FRAME, NOCLEAR_FRAME, and TDI.
+
+
+2.1.5 READ_PIXELS
+=================
+
+This command downloads pixels after they have been exposed.  There is a 
+parameter block associated with this command:
+
+Byte offset	Name
+-----------	------
+  0		X_OFFSET_L
+  1		X_OFFSET_H
+  2		Y_OFFSET_L
+  3		Y_OFFSET_H
+  4		WIDTH_L
+  5		WIDTH_H
+  6		HEIGHT_L
+  7		HEIGHT_H
+  8		X_BIN
+  9		Y_BIN
+
+READ_PIXELS is exactly the same as READ_PIXELS_DELAYED except there is no 
+delay parameter or implied CLEAR_PIXELS operation before reading the pixels.
+The pixels are returned immediately.
+
+Flags valid for READ_PIXELS are FIELD_EVEN, FIELD_ODD, NOBIN_ACCUM, and 
+TDI.
+
+
+2.1.6 SET_TIMER
+===============
+
+A 32 bit millisecond timer value is passed in as a parameter.  The timer 
+is the same timer set in the LOAD_PIXELS command.  Thus, the delay in the 
+exposure can be modified on-the-fly with this command.  This command is 
+also useful for general timing purposes.  Whenever the timer is set, it 
+will start counting down to zero every millisecond unless another 
+SET_TIMER command is issued or a LOAD_PIXELS_DELAYED command is issued. A 
+LOAD_PIXELS will not reset the timer.
+
+
+2.1.7 GET_TIMER
+===============
+
+The 32 bit millisecond timer is returned.  This is the same timer set with 
+LOAD_PIXELS_DELAYED or SET_TIMER.
+
+
+2.1.8 RESET
+===========
+
+RESET will cancel any outstanding operations and put the camera into a 
+know state.  Useful when first starting operation with the camera.
+
+
+2.1.9 SET_CCD_PARAMS
+===================
+
+This command sets the type of CCD device installed in the camera.  The 
+dimensions of the CCD and some features like interleaved functionality are 
+set with this.  If a camera's CCD device is known by way of the USB 
+VID/PID then this command isn't required.  It is still useful to be able 
+to set CCD parameters regardless.  The parameters to this command are:
+
+Byte offset	Name
+-----------	------
+  0	        HFRONT_PORCH
+  1	        HBACK_PORCH							 	
+  2	        WIDTH_L
+  3	        WIDTH_H
+  4	        VFRONT_PORCH
+  5	        VBACK_PORCH
+  6	        HEIGHT_L
+  7	        HEIGHT_H
+  8	        PIXEL_uWIDTH_L
+  9	        PIXEL_uWIDTH_H
+  10        	PIXEL_uHEIGHT_L
+  11        	PIXEL_uHEIGHT_H
+  12        	COLOR_MATRIX_L
+  13        	COLOR_MATRIX_H
+  
+The front and back porches specify the black pixels of the CCD.  The width 
+and height are the active size of the device.
+
+Note that the pixel width and height are 8.8 fixed point values in 
+microns. To convert microns to 8.8 fixed, multiply by 256.0 and cast 
+the result to a 16 bit integer.
+
+The color matrix format is described in the next section, GET_CCD_PARAMS.
+
+
+2.1.10 GET_CCD_PARAMS
+====================
+
+Returns the parameters of the camera.  Fields as follows:
+
+Byte offset	Name
+-----------	------
+  0		HFRONT_PORCH
+  1		HBACK_PORCH							 	
+  2		WIDTH_L
+  3		WIDTH_H
+  4		VFRONT_PORCH
+  5		VBACK_PORCH
+  6		HEIGHT_L
+  7		HEIGHT_H
+  8		PIXEL_uWIDTH_L
+  9		PIXEL_uWIDTH_H
+  10		PIXEL_uHEIGHT_L
+  11		PIXEL_uHEIGHT_H
+  12        	COLOR_MATRIX_L
+  13        	COLOR_MATRIX_H
+  14        	BITS_PER_PIXEL
+  15		NUM_SERIAL_PORTS
+  16		EXTRA_CAPABILITIES
+  
+Note that the pixel width and height are 8.8 fixed point values in 
+microns. To convert the returned value into microns, type cast to 
+floating point and divide by 256.0  The bits per pixel will normally 
+be 16 or 8.  The EXTRA_CAPS returns flags of additional implemented 
+functionality.  The current list is:
+
+Bit offset	Name
+----------	------
+  0		STAR2000_PORT
+  1		COMPRESSED_PIXEL_FORMAT - !!! DEPRECATED !!!
+  2		EEPROM
+  3     	INTEGRATED_GUIDER_CCD
+
+!!! DEPRECATED
+!The compressed pixel format is a 4.4 unsigned floating point value.  
+!Whenever a READ_PIXELS command is sent with DAC_BITS set to 8 bits or 
+!less, the compressed pixel format will be returned.  See section 2.1.4 for 
+!more details.
+!!! DEPRECATED
+
+The CMD_INDEX_H:L value should be zero to get the parameters for the main
+imaging CCD.  If the INTEGRATED_GUIDER_CCD  EXTRA_CAPS bit is set, a
+GET_CCD_PARAMS command using a CMD_INDEX_H:L of 1 will return the parameters
+of the guiding CCD.
+
+CCD matrix color representation.
+Packed colors allow individual sizes up to 16 bits.
+2X2 matrix bits are represented as:
+  0 1
+  2 3
+Many color matrices alternate the order of the color filters every other
+matrix row in order to reduce the effects of aliasing.  The ALT_EVEN and
+ALT_ODD flags indicate which rows of the matrix will be inverted.
+
+Mask    Name
+-----   ---------------------
+0x8000  COLOR_MATRIX_PACKED_RGB        
+0x4000  COLOR_MATRIX_PACKED_BGR        
+0x0F00  COLOR_MATRIX_PACKED_RED_SIZE   
+0x00F0  COLOR_MATRIX_PACKED_GREEN_SIZE 
+0x000F  COLOR_MATRIX_PACKED_BLUE_SIZE  
+0x2000  COLOR_MATRIX_MATRIX_ALT_EVEN   
+0x1000  COLOR_MATRIX_MATRIX_ALT_ODD    
+0x0000  COLOR_MATRIX_MATRIX_2X2        
+0x0F00  COLOR_MATRIX_MATRIX_RED_MASK   
+0x00F0  COLOR_MATRIX_MATRIX_GREEN_MASK 
+0x000F  COLOR_MATRIX_MATRIX_BLUE_MASK  
+0x0FFF  COLOR_MATRIX_MONOCHROME        
+
+2.1.11 SET_STAR2K
+=================
+
+For cameras implementing the integrated Star2000 autoguider port, this 
+will set the outputs for it.  The 4 bit value to be sent to the port is in 
+the CMD_VALUE_L byte of the command packet.  Check the EXTRA_CAPS field in 
+GET_CCD if this functionality is supported.
+
+
+2.1.12 WRITE_SERIAL_PORT
+========================
+
+Output the data to a serial port.  The data following the command will 
+be written out the serial port.  It is best to check for appropriate 
+buffer space before sending data (see GET_SERIAL for details).  The number 
+of characters to write is passed in LENGTH_H:L and should be less than 64 
+bytes. CMD_INDEX_H:L contains the port number. For CMD_VALUE_H:L equal to 1,
+flush the data before accepting new commands. For CMD_VALUE_H:L equal to 0,
+data will be queued to the serial port.
+
+
+2.1.13 READ_SERIAL_PORT
+=======================
+
+Read the available data read from a serial port.  It is best to check 
+for the amount of available data before reading (see GET_SERIAL 
+for details).  The number of characters to read is passed in LENGTH_H:L 
+and should be less than 64 bytes.  CMD_INDEX_H:L contains the port number.
+
+
+2.1.14 SET_SERIAL
+=================
+
+Nothing implemented here.  Perhaps setting serial port properties like 
+baud rate can go here.
+
+
+2.1.15 GET_SERIAL
+=================
+
+For CMD_VALUE_H:L equal to 0, return the available output buffer space.  
+Do not write more than this amount of data to avoid buffer overruns.
+
+For CMD_VALUE_H:L equal to 1, return the amount of available data read 
+from the serial port.
+
+CMD_INDEX_H:L contains the port number, starting with 0.
+ 
+The size of the return value is 2 bytes - a 16 bit integer.
+
+
+2.1.16 CAMERA_MODEL
+=======================
+
+When CMD_TYPE is 0xC0, return a two byte model number.  Model numbers 
+encoded so far include:
+
+Model #		Camera
+-------		------
+ 0x09		 HX9
+ 0x45   	 MX5
+ 0xC5   	 MX5C
+ 0x47		 MX7
+ 0xC7		 MX7C
+ 0x49   	 MX9
+0xFFFF		 Undefined camera model
+
+The original USB interface had no way of knowing what camera was attached
+to it.  Thus, 0xFFFF is returned and it is up to the application software
+to provide the camera information through the SET_CCD command.
+
+When CMD_TYPE is 0x40, the camera model will be over-written with the 
+values in CMD_VALUE_H:L.  This is useful for camera without EEPROMs to 
+remember what model they are.  A utility script/application can set the 
+camera model up before starting imaging applications that will query for 
+the camera model.
+
+
+2.1.17 LOAD_EEPROM
+===================
+
+When CMD_TYPE is 0x40, data will be written to the EEPROM.  This can cause  
+your camera to stop working properly, so be careful!  The data to write to 
+the EEPROM follows the command packet. The CMD_LENGTH_L:H can be less than 
+16 but cannot be greater. The EEPROM address to write the data to is 
+passed in CMD_VALUE_L:H.  EXTENDED_CAPS field must have the EEPROM present 
+for this command to work.
+
+When CMD_TYPE is 0xC0, data will be read from EEPROM.  CMD_LENGTH_L:H 
+bytes from the EEPROM will be returned.  CMD_LENGTH_L:H can be less than 
+16 but cannot be greater.  The EEPROM address to read from is passed in 
+CMD_VALUE_L:H.  The EXTENDED_CAPS field must have the EEPROM present for 
+this command to work.
+
+The format of this command mimics that of the EZUSB firmware load 
+operation.
+
