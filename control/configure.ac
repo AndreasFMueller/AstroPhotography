@@ -27,6 +27,16 @@ AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 
+
+######################################################################
+# decide whether or not to build the test programs
+AC_ARG_ENABLE(unittests,
+[AS_HELP_STRING([--enable-unittests], [also build the unit tests if CPPUNIT is present])],
+[
+],[
+])
+AM_CONDITIONAL(ENABLE_UNITESTS, test x$enable_unittests = xyes)
+
 ######################################################################
 # decide whether to build the UVC driver, by default we only build
 # it on Mac OS X
@@ -104,7 +114,7 @@ AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
-	drivers/sx/Makefile
+	drivers/sx/Makefile drivers/sbig/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT
