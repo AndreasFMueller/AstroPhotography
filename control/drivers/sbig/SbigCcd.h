@@ -20,7 +20,6 @@ namespace sbig {
 class SbigCcd : public Ccd {
 	int	id;
 	SbigCamera&	camera;
-	Exposure	exposure;
 public:
 	SbigCcd(const ImageSize& size, int id, SbigCamera& camera);
 	virtual ~SbigCcd();

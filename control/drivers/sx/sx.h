@@ -1,5 +1,5 @@
 /*
- * sxhw.h -- common definitions for the SX driver
+ * sx.h -- common definitions for the SX driver
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -11,6 +11,7 @@
 using namespace astro::usb;
 
 namespace astro {
+namespace camera {
 namespace sx {
 
 #define SX_CMD_GET_FIRMWARE_VERSION	255
@@ -42,8 +43,8 @@ typedef struct sx_read_pixels_s {
 	uint16_t	y_offset;
 	uint16_t	width;
 	uint16_t	height;
-	uint8_t		x;
-	uint8_t		y;
+	uint8_t		x_bin;
+	uint8_t		y_bin;
 } __attribute__((packed)) sx_read_pixels_t;
 
 typedef struct sx_read_pixels_delayed_s : public sx_read_pixels_t {
@@ -73,26 +74,8 @@ typedef struct sx_camera_model_s {
 	uint16_t	model;
 } __attribute__((packed)) sx_camera_model_t;
 
-class SxCamera {
-	Device&	device;
-	InterfacePtr	datainterface;
-public:
-	SxCamera(Device &device);
-	sx_firmware_version_t	getVersion();
-	std::string	getEcho(const std::string& data);
-	void	clear(uint16_t ccdindex);
-	FramePtr	getImage(uint16_t ccdindex,
-		const sx_read_pixels_t& read);
-	void	reset();
-	sx_ccd_params_t	getCcdParams(uint16_t ccdindex);
-	void	writeSerial(uint16_t serialport, const std::string& data);
-	std::string	readSerial(uint16_t serialport);
-	uint16_t	getModel();
-	uint32_t	getTimer();
-	void	setTimer(uint32_t timer);
-};
-
 } // namespace sx
+} // namespace camera
 } // namespace astro
 
 #endif /* _sx_h */

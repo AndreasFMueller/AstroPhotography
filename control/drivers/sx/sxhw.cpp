@@ -9,6 +9,7 @@
 using namespace astro::usb;
 
 namespace astro {
+namespace camera {
 namespace sx {
 
 SxCamera::SxCamera(Device& _device) : device(_device) {
@@ -17,6 +18,7 @@ SxCamera::SxCamera(Device& _device) : device(_device) {
 }
 
 sx_firmware_version_t	SxCamera::getVersion() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing version request");
 	Request<sx_firmware_version_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, (uint16_t)0,
@@ -98,4 +100,5 @@ void	SxCamera::setTimer(uint32_t timer) {
 }
 
 } // namespace sx
+} // namespace camera
 } // namespace astro

@@ -31,6 +31,8 @@ public:
 	bool	iswildcard() const;
 	bool	operator==(const Binning& other) const;
 	bool	compatible(const Binning& other) const;
+	int	getX() const { return x; }
+	int	getY() const { return y; }
 };
 
 /**
@@ -104,6 +106,7 @@ protected:
 	BinningSet	binningmodes;
 	Exposure::State	state;
 	float		setTemperature;
+	Exposure	exposure;
 public:
 	Ccd(const astro::image::ImageSize& _size)
 		: size(_size), state(Exposure::idle) { }
