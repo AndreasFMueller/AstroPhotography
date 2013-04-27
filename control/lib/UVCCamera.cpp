@@ -14,6 +14,21 @@ namespace astro {
 namespace usb {
 namespace uvc {
 
+
+
+bool	isUVCDevice(Device& device) {
+	// handle the special case of TIS camera
+	DeviceDescriptorPtr	devicedescriptor = device.descriptor();
+	if (VENDOR_THE_IMAGING_SOURCE == devicedescriptor->idVendor()) {
+		return true;
+	}
+
+	// for all other devices, look for a interface association descriptor
+	// for a video interface
+	
+	return true;
+}
+
 /**
  * \brief Get current settings of a interface.
  *
@@ -93,29 +108,13 @@ UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
 		throw USBError("no InterfaceAssociationDescriptor");
 	}
 
-	// creating a descriptor factory
-	UVCDescriptorFactory	f(device);
-	std::vector<USBDescriptorPtr>	list
-		= f.descriptors(config->extra());
-	std::vector<USBDescriptorPtr>::const_iterator	i;
-	bool	iadfound = false;
-
-	// now scan all the descriptors for an interface association
-	// descriptor
-	for (i = list.begin(); i != list.end(); i++) {
-		USBDescriptorPtr	dp = *i;
-		if (isPtr<InterfaceAssociationDescriptor>(dp)) {
-			InterfaceAssociationDescriptor	*iad
-				= getPtr<InterfaceAssociationDescriptor>(dp);
-			if (force || (iad->isVideoInterfaceCollection())) {
-				iadptr = dp;
-				iadfound = true;
-			}
-		}
-	}
-	if (!iadfound) {
+	// get the list of interface association descriptors
+	std::list<USBDescriptorPtr>	iadlist
+		= device.interfaceAssociationDescriptors(true);
+	if (0 == iadlist.size()) {
 		throw USBError("no Video Interface Association found");
 	}
+	iadptr = *iadlist.begin();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Video Interface Association found");
 
 	// get the control interface, and the list of interface descriptors
@@ -282,6 +281,10 @@ size_t	UVCCamera::streamingInterfaceIndex(size_t interfacenumber) const
 		throw std::range_error("outside VS interface range");
 	}
 	return result;
+}
+
+size_t	UVCCamera::numberVideoStreamingInterfaces() const {
+	return iad().bInterfaceCount() - 1;
 }
 
 const USBDescriptorPtr&	UVCCamera::operator[](size_t interfacenumber) const 

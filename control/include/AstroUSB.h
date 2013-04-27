@@ -28,6 +28,8 @@
 #define	BROKEN_NONE			0
 #define BROKEN_THE_IMAGING_SOURCE	1
 
+#define	VENDOR_THE_IMAGING_SOURCE	0x199e
+
 namespace astro {
 namespace usb {
 
@@ -96,6 +98,9 @@ typedef std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
 class EndpointDescriptor;
 typedef std::tr1::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
 
+class USBDescriptor;
+typedef std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
+
 class RequestBase;
 typedef std::tr1::shared_ptr<RequestBase>	RequestPtr;
 
@@ -121,9 +126,6 @@ class 	Device {
 	Device(const Device& other);
 
 	void	getDescriptor(struct libusb_device_descriptor *devdesc) const;
-/*
-	struct libusb_device	*getDevice();
-*/
 	int	broken;
 public:
 	~Device();
@@ -143,6 +145,11 @@ public:
 	ConfigurationPtr	configValue(uint8_t value) throw(USBError);
 	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
 	Context	*getContext() const;
+
+	// find all the interface association descriptors
+	std::list<USBDescriptorPtr>	interfaceAssociationDescriptors(bool videoonly)
+		throw (USBError);
+	bool	isVideoDevice();
 
 	// make sure the device is open
 	bool	isOpen() const;
@@ -768,8 +775,6 @@ public:
 	uint8_t	bDescriptorType() const;
 	virtual int	descriptorLength() const;
 };
-
-typedef std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const USBDescriptor& descriptor);
 

@@ -138,6 +138,15 @@ namespace usb {
 namespace uvc {
 
 /**
+ * \brief find out whether a USB device is a UVC camera device.
+ *
+ * This method returns true if the device is a UVC device or can be 
+ * opened as a UVC device like the "The Imaging Source" cameras.
+ * \param device	USB device to test
+ */
+bool	isUVCDevice(Device& device);
+
+/**
  * \brief Base class for all UVC descriptors
  *
  * UVC descriptors have a subtype field at offset 2
@@ -1117,6 +1126,7 @@ private:
 		throw(std::range_error);
 	void	getCur(uint8_t interface);
 public:
+	size_t	numberVideoStreamingInterfaces() const;
 	const USBDescriptorPtr&	operator[](size_t interfacenumber) const
 		throw(std::range_error);
 	USBDescriptorPtr&	operator[](size_t interfacenumber)

@@ -79,7 +79,7 @@ Device::Device(Context *_context, libusb_device *_dev,
 
 	// find out whether this is a broken device
 	DeviceDescriptorPtr	d = descriptor();
-	if (d->idVendor() == 0x199e) {
+	if (d->idVendor() == VENDOR_THE_IMAGING_SOURCE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"broken camera: The Imaging Source");
 		broken = BROKEN_THE_IMAGING_SOURCE;
@@ -368,6 +368,60 @@ void	Device::attachKernelDriver(uint8_t interface) const throw(USBError) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot attach kernel driver: %s",
 			libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
+	}
+}
+
+/**
+ * \brief Get a list of interface association Descriptors from the device
+ */
+std::list<USBDescriptorPtr>	Device::interfaceAssociationDescriptors(
+					bool videoonly) throw(USBError) {
+	std::list<USBDescriptorPtr>	iadescriptors;
+
+	// see whether there is any additional data that could contain
+	// an interface association descriptor
+	ConfigurationPtr	config = activeConfig();
+	if (config->extra().size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no data for descriptors");
+		return iadescriptors;
+	}
+
+	// try to parse additional descriptors
+	DescriptorFactory	f(*this);
+	std::vector<USBDescriptorPtr>	list = f.descriptors(config->extra());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d additional descriptors",
+		list.size());
+
+	// no check whether they are InterfaceAssociationDescriptors
+	std::vector<USBDescriptorPtr>::const_iterator	i;
+	for (i = list.begin(); i != list.end(); i++) {
+		USBDescriptorPtr	dp = *i;
+		if (isPtr<InterfaceAssociationDescriptor>(dp)) {
+			InterfaceAssociationDescriptor	*iad
+				= getPtr<InterfaceAssociationDescriptor>(dp);
+			bool	isvideo = iad->isVideoInterfaceCollection();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "isvideo = %s",
+				(isvideo) ? "YES" : "NO");
+			if ((!videoonly) || (isvideo)) {
+				iadescriptors.push_back(dp);
+			}
+		}
+	}
+
+	// return all the interface association descriptors we have found
+	return iadescriptors;
+}
+
+/**
+ * \brief Find out whether this is a video device
+ */
+bool	Device::isVideoDevice() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find out whether this is video device");
+	try {
+		return (interfaceAssociationDescriptors(true).size() > 0)
+			? true : false;
+	} catch (std::exception& x) {
+		return false;
 	}
 }
 
