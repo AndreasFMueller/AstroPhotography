@@ -28,20 +28,57 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	product = deviceptr->descriptor()->idProduct();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product = %04x", product);
 
-	// XXX find out how many ccds this device has
-	numberCcds = 1;
-
 	// learn the model number
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
-	Request<sx_camera_model_t>      request(
+	Request<sx_camera_model_t>      modelrequest(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_CAMERA_MODEL, (uint16_t)0);
-	deviceptr->controlRequest(&request);
-	model = request.data()->model;
+	deviceptr->controlRequest(&modelrequest);
+	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
-	// 
+	// get information about this CCD from the camera
+        Request<sx_ccd_params_t>        ccd0request(
+                RequestBase::vendor_specific_type,
+                RequestBase::device_recipient, (uint16_t)0,
+                (uint8_t)SX_CMD_GET_CCD_PARAMS, (uint16_t)0);
+        deviceptr->controlRequest(&ccd0request);
+	sx_ccd_params_t	params = *ccd0request.data();
+
+	// now create a CcdInfo structure for this device
+	CcdInfo	ccd0;
+	ccd0.size = ImageSize(params.width, params.height);
+	ccd0.name = "Imaging";
+	ccd0.binningmodes.push_back(Binning(1,1));
+	ccd0.binningmodes.push_back(Binning(2,2));
+	if (model != SX_MODEL_M26C) {
+		ccd0.size.height *= 2;
+		ccd0.binningmodes.push_back(Binning(3,3));
+		ccd0.binningmodes.push_back(Binning(4,4));
+	}
+	ccdinfo.push_back(ccd0);
+
+	// try to get the same information from the second CCD, if there
+	// is one
+	try {
+		// get information about this CCD from the camera
+		Request<sx_ccd_params_t>        ccd1request(
+			RequestBase::vendor_specific_type,
+			RequestBase::device_recipient, (uint16_t)1,
+			(uint8_t)SX_CMD_GET_CCD_PARAMS, (uint16_t)0);
+		deviceptr->controlRequest(&ccd1request);
+		params = *ccd1request.data();
+
+		CcdInfo	ccd1;
+		ccd1.size = ImageSize(params.width, params.height);
+		ccd1.name = "Tracking";
+		ccd1.binningmodes.push_back(Binning(1,1));
+		ccd1.binningmodes.push_back(Binning(2,2));
+		ccdinfo.push_back(ccd1);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
+	}
 }
 
 SxCamera::~SxCamera() {
@@ -54,28 +91,13 @@ SxCamera::~SxCamera() {
  * \return A smart pointer to a CCD
  */
 CcdPtr	SxCamera::getCcd(int ccdindex) {
-	if (ccdindex >= numberCcds) {
+	if (ccdindex >= nCcds()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd id %d out of range",
 			ccdindex);
 		throw std::range_error("ccd id out of range");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd with index %d", ccdindex);
-
-	// get information about this CCD from the camera
-        Request<sx_ccd_params_t>        request(
-                RequestBase::vendor_specific_type,
-                RequestBase::device_recipient, ccdindex,
-                (uint8_t)SX_CMD_GET_CCD_PARAMS, (uint16_t)0);
-        deviceptr->controlRequest(&request);
-	sx_ccd_params_t	params = *request.data();
-
-	// now use this data to construct the CCD
-	ImageSize	size(params.width, params.height);
-	if (model == SX_MODEL_M26C) {
-		size.height *= 2;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %dx%d", size.width, size.height);
-	return CcdPtr(new SxCcd(size, *this, ccdindex));
+	return CcdPtr(new SxCcd(ccdinfo[ccdindex], *this, ccdindex));
 }
 
 /**

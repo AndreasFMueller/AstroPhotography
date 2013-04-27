@@ -14,8 +14,8 @@ namespace astro {
 namespace camera {
 namespace sx {
 
-SxCcd::SxCcd(const ImageSize& size, SxCamera& _camera, int _ccdindex)
-	: Ccd(size), camera(_camera), ccdindex(_ccdindex) {
+SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
+	: Ccd(info), camera(_camera), ccdindex(_ccdindex) {
 }
 
 SxCcd::~SxCcd() {
@@ -81,8 +81,8 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	return ShortImagePtr(image);
 }
 
-SxCcdM26C::SxCcdM26C(const ImageSize& size, SxCamera& camera, int id)
-	: SxCcd(size, camera, id) {
+SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
+	: SxCcd(info, camera, id) {
 }
 
 void	SxCcdM26C::startExposure(const Exposure& exposure)

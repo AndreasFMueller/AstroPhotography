@@ -28,7 +28,7 @@ protected:
 	SxCamera&	camera;
 	int	ccdindex;
 public:
-	SxCcd(const ImageSize& size, SxCamera& camera, int ccdindex);
+	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
 	virtual void	startExposure(const Exposure& exposure)
@@ -44,7 +44,7 @@ public:
  */
 class SxCcdM26C : public SxCcd {
 public:
-	SxCcdM26C(const ImageSize& size, SxCamera& camera, int ccdindex);
+	SxCcdM26C(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcdM26C();
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);

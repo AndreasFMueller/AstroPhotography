@@ -9,6 +9,33 @@
 namespace astro {
 namespace camera {
 
+//////////////////////////////////////////////////////////////////////
+// CcdInfo implementation
+//////////////////////////////////////////////////////////////////////
+
+CcdInfo::CcdInfo() {
+}
+
+const astro::image::ImageSize&	CcdInfo::getSize() const {
+	return size;
+}
+
+const BinningSet&	CcdInfo::modes() const {
+	return binningmodes;
+}
+
+const std::string&	CcdInfo::getName() const {
+	return name;
+}
+
+int	CcdInfo::getId() const {
+	return ccdid;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Ccd implementation
+//////////////////////////////////////////////////////////////////////
+
 /**
  * \brief Start an exposure
  *

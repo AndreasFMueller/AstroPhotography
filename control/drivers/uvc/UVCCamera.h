@@ -25,11 +25,7 @@ class UVCCamera : public Camera {
 		int	interface;
 		int	format;
 		int	frame;
-		int	width;
-		int	height;
-		std::string	name;
 	} uvcccd_t;
-
 	std::vector<uvcccd_t>	ccds;
 
 private:
@@ -40,7 +36,6 @@ private:
 			FormatDescriptor *formatdescriptor);
 	void    addHeader(int interface,
 			HeaderDescriptor *headerdescriptor);
-
 public:
 	UVCCamera(DevicePtr& deviceptr);
 	virtual ~UVCCamera();

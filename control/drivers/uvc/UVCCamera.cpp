@@ -17,16 +17,26 @@ void	UVCCamera::addFrame(int interface, int format, int frame,
 	FrameDescriptor *framedescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d, format %d, frame %d",
 		interface, format, frame);
-	uvcccd_t	ccd;
-	ccd.interface = interface;
-	ccd.format = format;
-	ccd.frame = frame;
-	ccd.width = framedescriptor->wWidth();
-	ccd.height = framedescriptor->wHeight();
-	ccd.name = stringprintf("%dx%d/%d/%d/%d", ccd.width, ccd.height,
-		ccd.interface, ccd.format, ccd.frame);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.name.c_str());
-	ccds.push_back(ccd);
+
+	// UVC interface/format/frame information
+	uvcccd_t	uvcccd;
+	uvcccd.interface = interface;
+	uvcccd.format = format;
+	uvcccd.frame = frame;
+	ccds.push_back(uvcccd);
+
+	// standard CcdInfo
+	CcdInfo	ccd;
+	ccd.size = astro::image::ImageSize(framedescriptor->wWidth(),
+		framedescriptor->wHeight());
+	ccd.name = stringprintf("%dx%d/%d/%d/%d",
+		ccd.size.width, ccd.size.height,
+		uvcccd.interface, uvcccd.format, uvcccd.frame);
+	ccd.binningmodes.push_back(Binning(1,1));
+	ccdinfo.push_back(ccd);
+
+	// add ccdinfo
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.getName().c_str());
 }
 
 void	UVCCamera::addFormat(int interface, int format,
@@ -83,8 +93,6 @@ UVCCamera::UVCCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "streaming interfaces: %d",
 		interfacecount - 1);
 	int	lastinterface = firstinterface + interfacecount;
-
-	int	n = camera.numberVideoStreamingInterfaces();
 	for (int ifno = firstinterface + 1; ifno < lastinterface; ifno++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d", ifno);
 		USBDescriptorPtr	header
@@ -93,10 +101,6 @@ UVCCamera::UVCCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 		HeaderDescriptor	*hd = getPtr<HeaderDescriptor>(header);
 		addHeader(ifno, hd);
 	}
-
-	// now we know all the format/frame combinations, they are contained
-	// in the array
-	numberCcds = ccds.size();
 }
 
 UVCCamera::~UVCCamera() {

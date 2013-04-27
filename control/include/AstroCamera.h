@@ -88,6 +88,31 @@ public:
 };
 
 /**
+ * \brief Class containing information about a CCD chip. 
+ *
+ * This class tracks commonly used information about a CCD chip inside
+ * a camera. The camera class has methods to return information about
+ * the CCDs without a need to open the CCD. Instances of this class can
+ * easily be copied, not as the Ccd instances.
+ */
+class Camera;
+class Ccd;
+class CcdInfo {
+public:
+	astro::image::ImageSize	size;
+	BinningSet	binningmodes;
+	std::string	name;
+	int	ccdid;
+	CcdInfo();
+	const astro::image::ImageSize&	getSize() const;
+	const BinningSet&	modes() const;
+	const std::string&	getName() const;
+	int	getId() const;
+	friend class Camera;
+	friend class Ccd;
+};
+
+/**
  * \brief Abstraction for a CCD chip
  *
  * This class is necessary because a camera can have several imaging
@@ -102,16 +127,16 @@ public:
  */
 class	Ccd {
 protected:
-	astro::image::ImageSize	size;
-	BinningSet	binningmodes;
+	CcdInfo	info;
 	Exposure::State	state;
 	float		setTemperature;
 	Exposure	exposure;
+	void	addBinning(const Binning& binning);
 public:
-	Ccd(const astro::image::ImageSize& _size)
-		: size(_size), state(Exposure::idle) { }
+	Ccd(const CcdInfo& _info) : info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
-	const astro::image::ImageSize&	getSize() const { return size; }
+	const CcdInfo&	getInfo() const { return info; }
+	const astro::image::ImageSize&	getSize() const { return info.size; }
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
@@ -141,11 +166,12 @@ typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
  */
 class	Camera {
 protected:
-	int	numberCcds;
+	std::vector<CcdInfo>	ccdinfo;
 public:
-	Camera() : numberCcds(0) { }
+	Camera() { }
 	~Camera() { }
-	int	nCcds() const { return numberCcds; }
+	int	nCcds() const { return ccdinfo.size(); }
+	const CcdInfo&	getCcdInfo(size_t ccdid) { return ccdinfo[ccdid]; }
 	virtual CcdPtr	getCcd(int id) = 0;
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;

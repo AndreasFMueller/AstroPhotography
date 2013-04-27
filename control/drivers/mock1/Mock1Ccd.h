@@ -20,8 +20,8 @@ class Mock1Ccd : public Ccd {
 	int	ccd;
 	ImageRectangle	frame;
 public:
-	Mock1Ccd(const ImageSize& size, int _cameraid, int _ccd)
-		: Ccd(size), cameraid(_cameraid), ccd(_ccd) { }
+	Mock1Ccd(const CcdInfo& info, int _cameraid, int _ccd)
+		: Ccd(info), cameraid(_cameraid), ccd(_ccd) { }
 	virtual ~Mock1Ccd() { }
 	virtual void    startExposure(const Exposure& exposure) throw (not_implemented);
 	virtual Exposure::State exposureStatus() throw (not_implemented);
