@@ -6,6 +6,8 @@
 #
 noinst_HEADERS = 
 
+if ENABLE_UNITTESTS
+
 # files needed for the Unicap driver tests
 if ENABLE_UNICAP
 unicap_tests = unicaptests.cpp UnicapTest.cpp
@@ -84,3 +86,4 @@ EXTRA_DIST = test_module.la test_module.so
 #all-am:	tests usbtests 
 #	./usbtests
 
+endif

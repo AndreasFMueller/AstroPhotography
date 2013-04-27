@@ -10,6 +10,8 @@
 #include <ostream>
 #include <debug.h>
 
+using namespace astro::image;
+
 namespace astro {
 namespace camera {
 namespace sx {
@@ -65,6 +67,11 @@ void	sxtest::testCamera() {
 	CameraPtr	camera = locator->getCamera(*cameras.begin());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has %d ccds", camera->nCcds());
 	CcdPtr	ccd = camera->getCcd(0);
+	
+	Exposure	exposure(ImageRectangle(ImagePoint(100, 100),
+		ImageSize(200, 100)), 1);
+	ccd->startExposure(exposure);
+	ShortImagePtr	image = ccd->shortImage();
 }
 
 } // namespace test

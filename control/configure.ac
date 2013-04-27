@@ -35,7 +35,7 @@ AC_ARG_ENABLE(unittests,
 [
 ],[
 ])
-AM_CONDITIONAL(ENABLE_UNITESTS, test x$enable_unittests = xyes)
+AM_CONDITIONAL(ENABLE_UNITTESTS, test x$enable_unittests = xyes)
 
 ######################################################################
 # decide whether to build the UVC driver, by default we only build

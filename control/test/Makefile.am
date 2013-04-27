@@ -2,6 +2,8 @@
 # global tests, some of which can even only be execute after the whole thing
 # has been installed locally
 #
+if ENABLE_UNITTESTS
+
 noinst_HEADERS =
 
 noinst_PROGRAMS = tests postinstall_tests loadtest
@@ -18,3 +20,5 @@ all-am: tests
 
 test:	postinstall_tests
 	./postinstall_tests
+
+endif
