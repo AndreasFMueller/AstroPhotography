@@ -6,6 +6,7 @@
 #include <UVCCamera.h>
 #include <debug.h>
 #include <Format.h>
+#include <UVCCcd.h>
 
 namespace astro {
 namespace camera {
@@ -106,8 +107,16 @@ UVCCamera::UVCCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 UVCCamera::~UVCCamera() {
 }
 
-CcdPtr	UVCCamera::getCcd(int ccdindex) {
+CcdPtr	UVCCamera::getCcd(const std::string& name) {
+	// locate the camera using the name
 	return CcdPtr();
+}
+
+CcdPtr	UVCCamera::getCcd(int ccdindex) {
+	uvcccd_t	uc = ccds[ccdindex];
+	CcdInfo	info = ccdinfo[ccdindex];
+	return CcdPtr(new UVCCcd(info, uc.interface, uc.format, uc.frame,
+		*this));
 }
 
 } // namespace uvc

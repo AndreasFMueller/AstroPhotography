@@ -5,14 +5,14 @@
 #
 if ENABLE_UVC
 
-noinst_HEADERS =  UVCLocator.h UVCUtils.h UVCCamera.h
+noinst_HEADERS =  UVCLocator.h UVCUtils.h UVCCamera.h UVCCcd.h
 pkglib_LTLIBRARIES = uvc.la 
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libuvc.la
 
-libuvc_la_SOURCES = UVCLocator.cpp UVCUtils.cpp UVCCamera.cpp
+libuvc_la_SOURCES = UVCLocator.cpp UVCUtils.cpp UVCCamera.cpp UVCCcd.cpp
 libuvc_la_DEPENDENCIES = ../../lib/libastro.la
 libuvc_la_LIBADD = ../../lib/libastro.la
 
@@ -23,7 +23,7 @@ uvctests_DEPENDENCIES = ../../lib/libastro.la libuvc.la
 
 endif
 
-uvc_la_SOURCES = UVCLocator.cpp UVCUtils.cpp UVCCamera.cpp
+uvc_la_SOURCES = UVCLocator.cpp UVCUtils.cpp UVCCamera.cpp UVCCcd.cpp
 uvc_la_LDFLAGS = -module
 uvc_la_DEPENDENCIES = ../../lib/libastro.la
 uvc_la_LIBADD = ../../lib/libastro.la

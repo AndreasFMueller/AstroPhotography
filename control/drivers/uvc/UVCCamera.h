@@ -40,6 +40,7 @@ public:
 	UVCCamera(DevicePtr& deviceptr);
 	virtual ~UVCCamera();
 	CcdPtr	getCcd(int ccdindex);
+	CcdPtr	getCcd(const std::string& name);
 };
 
 } // namespace uvc
