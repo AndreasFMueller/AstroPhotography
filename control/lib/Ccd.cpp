@@ -5,6 +5,7 @@
  * $Id$
  */
 #include <AstroCamera.h>
+#include <Format.h>
 
 namespace astro {
 namespace camera {
@@ -30,6 +31,16 @@ const std::string&	CcdInfo::getName() const {
 
 int	CcdInfo::getId() const {
 	return ccdid;
+}
+
+std::string	CcdInfo::toString() const {
+	return stringprintf("%s: %dx%d,%s", name.c_str(),
+		size.width, size.height,
+		binningmodes.toString().c_str());
+}
+
+std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo) {
+	return out << ccdinfo.toString();
 }
 
 //////////////////////////////////////////////////////////////////////

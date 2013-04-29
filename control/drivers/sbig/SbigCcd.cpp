@@ -130,20 +130,6 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 		throw SbigError(e);
 	}
 
-	// dump initial lines of the image
-	DumpLinesParams	dumplines;
-	dumplines.ccd = id;
-	dumplines.readoutMode = readparams.readoutMode;
-	dumplines.lineLength = exposure.frame.origin.y;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d lines",
-		dumplines.lineLength);
-	e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "error during dump: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
-
 	// read the data lines we really are interested in
 	ReadoutLineParams	readlineparams;
 	readlineparams.ccd = id;
@@ -170,9 +156,12 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
 
 	// dump the remaining lines
+	DumpLinesParams	dumplines;
+	dumplines.ccd = id;
+	dumplines.readoutMode = readparams.readoutMode;
 	dumplines.lineLength = info.size.height - exposure.frame.size.height
 		- exposure.frame.origin.y;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d lines",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
 		dumplines.lineLength);
 	e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
 	if (e != CE_NO_ERROR) {

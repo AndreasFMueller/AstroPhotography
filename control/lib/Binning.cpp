@@ -96,5 +96,21 @@ bool	BinningSet::permits(const Binning& binning) const throw (std::range_error) 
 	return false;
 }
 
+std::string	BinningSet::toString() const {
+	std::string	result;
+	std::vector<Binning>::const_iterator	i;
+	for (i = begin(); i != end(); i++) {
+		if (i != begin()) {
+			result.append(",");
+		}
+		result.append(i->toString());
+	}
+	return result;
+}
+
+std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset) {
+	return out << binningset.toString();
+}
+
 } // namespace camera
 } // namespace astro

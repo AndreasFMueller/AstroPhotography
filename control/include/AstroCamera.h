@@ -50,7 +50,9 @@ class	BinningSet : public std::vector<Binning> {
 public:
 	BinningSet();
 	bool	permits(const Binning& binning) const throw (std::range_error);
+	std::string	toString() const;
 };
+std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
 
 /**
  * \brief Specification of an exposure request
@@ -114,7 +116,9 @@ public:
 	int	getId() const;
 	friend class Camera;
 	friend class Ccd;
+	std::string	toString() const;
 };
+std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 
 /**
  * \brief Abstraction for a CCD chip

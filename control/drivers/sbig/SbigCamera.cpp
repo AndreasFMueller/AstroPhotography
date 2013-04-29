@@ -92,7 +92,6 @@ SbigCamera::SbigCamera() {
 		ccd.name = std::string("Imaging");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(1,1));
 		ccd.binningmodes.push_back(Binning(2,2));
 		switch (cameraType) {
 		case STF8300_CAMERA:
@@ -127,7 +126,6 @@ SbigCamera::SbigCamera() {
 		ccd.name = std::string("Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(1,1));
 		ccd.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd);
 	}
@@ -143,7 +141,6 @@ SbigCamera::SbigCamera() {
 		ccd.name = std::string("external Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(1,1));
 		ccd.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd);
 	}
