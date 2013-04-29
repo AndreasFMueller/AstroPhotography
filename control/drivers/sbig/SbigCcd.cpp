@@ -16,34 +16,8 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
-SbigCcd::SbigCcd(const ImageSize& size, int _id, SbigCamera& _camera)
-	: Ccd(size), id(_id), camera(_camera) {
-	// determine all the binning modes that we support
-	binningmodes.push_back(Binning(1,1));
-	binningmodes.push_back(Binning(2,2));
-	if (id > 0) {
-		return;
-	}
-
-	// binning modes supported by particular cameras
-	switch (camera.cameraType) {
-	case STF8300_CAMERA:
-		binningmodes.push_back(Binning(-1,-1));
-	case STT_CAMERA:
-	case STX_CAMERA:
-	// case STXL_CAMERA: /* no definition yet */
-		binningmodes.push_back(Binning(3,3));
-		binningmodes.push_back(Binning(9,9));
-		binningmodes.push_back(Binning(1,-1));
-		break;
-	case STI_CAMERA:
-		binningmodes.push_back(Binning(1,-1));
-		binningmodes.push_back(Binning(2,-1));
-		break;
-	case ST402_CAMERA:
-		binningmodes.push_back(Binning(3,3));
-		break;
-	}
+SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
+	: Ccd(info), id(_id), camera(_camera) {
 }
 
 SbigCcd::~SbigCcd() {
@@ -196,7 +170,7 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
 
 	// dump the remaining lines
-	dumplines.lineLength = size.height - exposure.frame.size.height
+	dumplines.lineLength = info.size.height - exposure.frame.size.height
 		- exposure.frame.origin.y;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d lines",
 		dumplines.lineLength);

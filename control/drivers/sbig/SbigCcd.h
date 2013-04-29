@@ -21,7 +21,7 @@ class SbigCcd : public Ccd {
 	int	id;
 	SbigCamera&	camera;
 public:
-	SbigCcd(const ImageSize& size, int id, SbigCamera& camera);
+	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
 	virtual ~SbigCcd();
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
 	virtual void	startExposure(const Exposure& exposure) throw (not_implemented);

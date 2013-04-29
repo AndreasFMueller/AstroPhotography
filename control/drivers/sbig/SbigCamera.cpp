@@ -47,20 +47,6 @@ SbigCamera::SbigCamera() {
 	cameraType = results.cameraType;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera type: %hu", cameraType);
 
-	// we also get the camera type from the establish link command,
-	// so we can now decide whether this is a camera with remote guide
-	// head capability
-	numberCcds = 0;
-	switch (cameraType) {
-	case STX_CAMERA:
-	case STL_CAMERA:
-		numberCcds = 3;
-		break;
-	default:
-		numberCcds = 1;
-		break;
-	}
-
 	// get the handle
 	GetDriverHandleResults	driverhandle;
 	e = SBIGUnivDrvCommand(CC_GET_DRIVER_HANDLE, NULL, &driverhandle);
@@ -82,25 +68,84 @@ SbigCamera::SbigCamera() {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get driver info: %s",
 				sbig_error(e).c_str());
 		} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "driverinfo[%d]: %s ver %hu, "
-			"maxrequest = %hu", driverinfoparams.request,
-			driverinfo.name, driverinfo.version,
-			driverinfo.maxRequest);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "driverinfo[%d]: %s "
+				"ver %hu, maxrequest = %hu",
+				driverinfoparams.request,
+				driverinfo.name, driverinfo.version,
+				driverinfo.maxRequest);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver info retrieved");
 
-	// query the number of ccds this device has. All cameras always have
-	// at least one CCD, the imaging CCD. Some cameras have a tracking
-	// CCD, which we hope to detect using CC_GET_CCD_INFO. And there
-	// are some cameras (STX and ST-L) which can have a remote guide
-	// head, we detect this by testing for the camera type.
+	// we now get the ccd info for all ccds of this camera
 	GetCCDInfoParams	ccdinfoparams;
-	GetCCDInfoResults0	ccdinfo;
+	GetCCDInfoResults0	ccdinforesult;
+
+	// imaging ccd
+	ccdinfoparams.request = CCD_INFO_IMAGING;
+	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imaging ccd");
+	} else {
+		CcdInfo	ccd;
+		ccd.ccdid = 0;
+		ccd.name = std::string("Imaging");
+		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+			ccdinforesult.readoutInfo[0].height);
+		ccd.binningmodes.push_back(Binning(1,1));
+		ccd.binningmodes.push_back(Binning(2,2));
+		switch (cameraType) {
+		case STF8300_CAMERA:
+			ccd.binningmodes.push_back(Binning(-1,-1));
+		case STT_CAMERA:
+		case STX_CAMERA:
+		// case STXL_CAMERA: /* no definition yet */
+			ccd.binningmodes.push_back(Binning(3,3));
+			ccd.binningmodes.push_back(Binning(9,9));
+			ccd.binningmodes.push_back(Binning(1,-1));
+			break;
+		case STI_CAMERA:
+			ccd.binningmodes.push_back(Binning(1,-1));
+			ccd.binningmodes.push_back(Binning(2,-1));
+			break;
+		case ST402_CAMERA:
+			ccd.binningmodes.push_back(Binning(3,3));
+			break;
+		}
+
+		ccdinfo.push_back(ccd);
+	}
+
+	// tracking ccd if present
 	ccdinfoparams.request = CCD_INFO_TRACKING;
 	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinfo);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
-		numberCcds = 1;
+	} else {
+		CcdInfo	ccd;
+		ccd.ccdid = 0;
+		ccd.name = std::string("Tracking");
+		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+			ccdinforesult.readoutInfo[0].height);
+		ccd.binningmodes.push_back(Binning(1,1));
+		ccd.binningmodes.push_back(Binning(2,2));
+		ccdinfo.push_back(ccd);
+	}
+
+	// external tracking ccd, if present
+	ccdinfoparams.request = CCD_INFO_TRACKING;
+	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinfo);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no external tracking ccd");
+	} else {
+		CcdInfo	ccd;
+		ccd.ccdid = 0;
+		ccd.name = std::string("external Tracking");
+		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+			ccdinforesult.readoutInfo[0].height);
+		ccd.binningmodes.push_back(Binning(1,1));
+		ccd.binningmodes.push_back(Binning(2,2));
+		ccdinfo.push_back(ccd);
 	}
 }
 
@@ -130,37 +175,14 @@ SbigCamera::~SbigCamera() {
 }
 
 CcdPtr	SbigCamera::getCcd(int id) {
-	if ((id < 0) || (id >= numberCcds)) {
+	if ((id < 0) || (id >= ccdinfo.size())) {
 		throw std::range_error("ccd id not in range");
 	}
-	// get information about the size of this ccd
-	GetCCDInfoParams	ccdinfoparams;
-	GetCCDInfoResults0	ccdinfo;
-	ccdinfoparams.request = id;
-	short	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams,
-		&ccdinfo);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get CCD info: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
 
-	// debugging: display all readout modes
-	if (debuglevel >= LOG_DEBUG) {
-		for (int i = 0; i < ccdinfo.readoutModes; i++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d] %hu x %hu", i,
-				ccdinfo.readoutInfo[i].width,
-				ccdinfo.readoutInfo[i].height);
-		}
-	}
+	CcdInfo	ccd = ccdinfo[id];
 
 	// now that we have he CCD info, we can create a ccd structure
-	ImageSize	size(ccdinfo.readoutInfo[0].width,
-				ccdinfo.readoutInfo[0].height);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating %d x %d ccd",
-		size.width, size.height);
-
-	return CcdPtr(new SbigCcd(size, id, *this));
+	return CcdPtr(new SbigCcd(ccd, id, *this));
 }
 
 } // namespace sbig

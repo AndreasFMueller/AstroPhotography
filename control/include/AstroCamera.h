@@ -33,7 +33,9 @@ public:
 	bool	compatible(const Binning& other) const;
 	int	getX() const { return x; }
 	int	getY() const { return y; }
+	std::string	toString() const;
 };
+std::ostream&	operator<<(std::ostream& out, const Binning& binning);
 
 /**
  * \brief Set of Binning objects
@@ -70,7 +72,9 @@ public:
 	typedef enum state_e {
 		idle, exposing, exposed, cancelling
 	} State;
+	std::string	toString() const;
 };
+std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
 /**
  * \brief Exception for unimplementd stuff

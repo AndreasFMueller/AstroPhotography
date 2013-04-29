@@ -34,7 +34,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp \
 	Pixel.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp \
-	Binning.cpp \
+	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
 	Ccd.cpp \
 	Fits.cpp \

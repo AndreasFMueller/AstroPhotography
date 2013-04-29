@@ -5,7 +5,7 @@
  * $Id$
  */
 #include <AstroCamera.h>
-
+#include <Format.h>
 #include <stdexcept>
 
 namespace astro {
@@ -30,6 +30,17 @@ bool	Binning::operator==(const Binning& other) const {
 bool	Binning::compatible(const Binning& other) const {
 	return	((x == other.x) || (x == -1) || (other.x == -1)) &&
 		((y == other.y) || (y == -1) || (other.y == -1));
+}
+
+/**
+ * \brief Convert a Binning object into something printable
+ */
+std::string	Binning::toString() const {
+	return stringprintf("(%dx%d)", x, y);
+}
+
+std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
+	return out << binning.toString();
 }
 
 /**

@@ -7,6 +7,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 #include <debug.h>
+#include <getopt.h>
 
 int	main(int argc, char *argv[]) {
 	int	c;
