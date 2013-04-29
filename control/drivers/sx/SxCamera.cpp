@@ -47,6 +47,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	sx_ccd_params_t	params = *ccd0request.data();
 
 	// now create a CcdInfo structure for this device
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Imaging CCD info");
 	CcdInfo	ccd0;
 	ccd0.size = ImageSize(params.width, params.height);
 	ccd0.name = "Imaging";
@@ -62,6 +63,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	// try to get the same information from the second CCD, if there
 	// is one
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "create Tracking CCD info");
 		// get information about this CCD from the camera
 		Request<sx_ccd_params_t>        ccd1request(
 			RequestBase::vendor_specific_type,

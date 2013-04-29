@@ -50,4 +50,8 @@
 #include <dlfcn.h>
 #endif /* HAVE_DLFCN_H */
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif /* HAVE_SYS_TIME_H */
+
 #endif /* _includes_h */

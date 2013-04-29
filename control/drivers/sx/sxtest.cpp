@@ -67,6 +67,7 @@ void	sxtest::testCamera() {
 	CameraPtr	camera = locator->getCamera(*cameras.begin());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has %d ccds", camera->nCcds());
 	CcdPtr	ccd = camera->getCcd(0);
+	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(100, 100),
 		ImageSize(200, 100)), 1);

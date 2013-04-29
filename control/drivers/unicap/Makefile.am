@@ -15,7 +15,7 @@ if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libunicap.la
 
-libunicap_la_SOURCES = 
+libunicap_la_SOURCES = UnicapLocator.cpp
 libunicap_la_DEPENDENCIES = ../../lib/libastro.la
 libunicap_la_LIBADD = ../../lib/libastro.la
 
@@ -26,7 +26,7 @@ unicaptests_DEPENDENCIES = ../../lib/libastro.la libunicap.la
 
 endif
 
-unicap_la_SOURCES = 
+unicap_la_SOURCES = UnicapLocator.cpp
 unicap_la_LDFLAGS = -module
 unicap_la_DEPENDENCIES = ../../lib/libastro.la
 unicap_la_LIBADD = ../../lib/libastro.la

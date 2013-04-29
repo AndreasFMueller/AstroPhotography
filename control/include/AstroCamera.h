@@ -33,7 +33,7 @@ public:
 	bool	compatible(const Binning& other) const;
 	int	getX() const { return x; }
 	int	getY() const { return y; }
-	std::string	toString() const;
+	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);
 
@@ -50,7 +50,7 @@ class	BinningSet : public std::vector<Binning> {
 public:
 	BinningSet();
 	bool	permits(const Binning& binning) const throw (std::range_error);
-	std::string	toString() const;
+	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
 
@@ -74,7 +74,7 @@ public:
 	typedef enum state_e {
 		idle, exposing, exposed, cancelling
 	} State;
-	std::string	toString() const;
+	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
@@ -116,7 +116,7 @@ public:
 	int	getId() const;
 	friend class Camera;
 	friend class Ccd;
-	std::string	toString() const;
+	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 
@@ -149,6 +149,7 @@ public:
 		throw (not_implemented);
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
 	virtual void	cancelExposure() throw (not_implemented);
+	const Exposure&	getExposure() const { return exposure; }
 
 	// image retrievel functions
 	virtual astro::image::ByteImagePtr	byteImage()
@@ -186,11 +187,16 @@ typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 
 /**
  * \brief Camera locator
+ *
+ * The camera locator class acts as a factory for camera instances.
+ * A module contains a single instance of the locator class. 
  */
 class	CameraLocator {
 public:
 	CameraLocator() { }
 	virtual	~CameraLocator() { }
+	virtual std::string	getName() const = 0;
+	virtual std::string	getVersion() const = 0;
 	virtual std::vector<std::string>	getCameralist() = 0;
 	virtual CameraPtr	getCamera(const std::string& name) = 0;
 };

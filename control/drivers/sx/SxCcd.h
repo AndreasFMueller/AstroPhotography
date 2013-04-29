@@ -43,6 +43,8 @@ public:
  * implementation is indicated.
  */
 class SxCcdM26C : public SxCcd {
+	Exposure	m26cExposure();
+	Exposure	symmetrize(const Exposure& exp) const;
 public:
 	SxCcdM26C(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcdM26C();

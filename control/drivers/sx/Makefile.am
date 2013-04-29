@@ -10,7 +10,8 @@ if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
 
-libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp
+libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
+	SxCcdM26C.cpp
 libsx_la_DEPENDENCIES = ../../lib/libastro.la
 libsx_la_LIBADD = ../../lib/libastro.la
 
@@ -21,7 +22,7 @@ sxtests_DEPENDENCIES = ../../lib/libastro.la libsx.la
 
 endif
 
-sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp
+sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp SxCcdM26C.cpp
 sx_la_LDFLAGS = -module
 sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la

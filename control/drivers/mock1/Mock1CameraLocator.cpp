@@ -26,6 +26,8 @@ class Mock1CameraLocator : public CameraLocator {
 public:
 	Mock1CameraLocator() { }
 	virtual ~Mock1CameraLocator() { }
+	virtual std::string	getName() const { return "mock1"; }
+	virtual std::string	getVersion() const { return VERSION; }
 	virtual std::vector<std::string>	getCameralist();
 	virtual CameraPtr	getCamera(const std::string& name);
 };

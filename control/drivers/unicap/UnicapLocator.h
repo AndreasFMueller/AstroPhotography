@@ -21,6 +21,8 @@ class UnicapCameraLocator : public CameraLocator {
 public:
 	UnicapCameraLocator();
 	virtual ~UnicapCameraLocator();
+	virtual std::string	getName() const;
+	virtual std::string	getModule() const;
 	virtual std::vector<std::string>	getCameralist();
 	virtual CameraPtr	getCamera(const std::string& name);
 	virtual CameraPtr	getCamera(size_t index);

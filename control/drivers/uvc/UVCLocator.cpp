@@ -19,6 +19,14 @@ UVCCameraLocator::UVCCameraLocator() {
 UVCCameraLocator::~UVCCameraLocator() {
 }
 
+std::string	UVCCameraLocator::getName() const {
+	return "uvc";
+}
+
+std::string	UVCCameraLocator::getVersion() const {
+	return VERSION;
+}
+
 std::vector<std::string>	UVCCameraLocator::getCameralist() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a camera list");
 	std::vector<std::string>	cameras;

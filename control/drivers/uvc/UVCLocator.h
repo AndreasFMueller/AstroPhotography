@@ -26,6 +26,8 @@ class UVCCameraLocator : public CameraLocator {
 public:
 	UVCCameraLocator();
 	virtual ~UVCCameraLocator();
+	virtual std::string	getName() const;
+	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getCameralist();
 	virtual CameraPtr	getCamera(const std::string& name);
 	virtual CameraPtr	getCamera(size_t index);

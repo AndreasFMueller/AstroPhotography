@@ -30,7 +30,7 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp Format.cpp \
+libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Pixel.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp \

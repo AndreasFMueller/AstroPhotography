@@ -8,6 +8,7 @@
 #include <SxUtils.h>
 #include <Format.h>
 #include <debug.h>
+#include <includes.h>
 
 using namespace astro::usb;
 
@@ -21,6 +22,20 @@ SxCameraLocator::SxCameraLocator() {
 }
 
 SxCameraLocator::~SxCameraLocator() {
+}
+
+/**
+ * \brief Get module name.
+ */
+std::string	SxCameraLocator::getName() const {
+	return std::string("sx");
+}
+
+/**
+ * \brief Get module version.
+ */
+std::string	SxCameraLocator::getVersion() const {
+	return VERSION;
 }
 
 /**

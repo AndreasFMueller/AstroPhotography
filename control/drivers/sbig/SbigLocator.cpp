@@ -9,12 +9,21 @@
 #include <utils.h>
 #include <Format.h>
 #include <SbigCamera.h>
+#include <includes.h>
 
 using namespace astro::camera;
 
 namespace astro {
 namespace camera {
 namespace sbig {
+
+std::string	SbigCameraLocator::getName() const {
+	return std::string("sbig");
+}
+
+std::string	SbigCameraLocator::getVersion() const {
+	return VERSION;
+}
 
 SbigCameraLocator::SbigCameraLocator() {
 	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);

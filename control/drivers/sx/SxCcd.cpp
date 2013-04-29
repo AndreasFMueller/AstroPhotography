@@ -81,37 +81,6 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	return ShortImagePtr(image);
 }
 
-SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
-	: SxCcd(info, camera, id) {
-}
-
-void	SxCcdM26C::startExposure(const Exposure& exposure)
-		throw (not_implemented) {
-	// remember the exposre, we need it for the second field for the
-	// case where we do two fields one after the other
-	this->exposure = exposure;
-
-	// compute a better request for the M26C camera
-	sx_read_pixels_delayed_t	rpd;
-
-	// send the request to the camera
-	Request<sx_read_pixels_delayed_t>	request(
-		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, ccdindex,
-		(uint8_t)SX_CMD_READ_PIXELS_DELAYED, (uint16_t)0, &rpd);
-	camera.getDevicePtr()->controlRequest(&request);
-
-	// we are now in exposing state
-	state = Exposure::exposing;
-}
-
-ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
-	return ShortImagePtr();
-}
-
-SxCcdM26C::~SxCcdM26C() {
-}
-
 } // namespace sx
 } // namespace camera
 } // namespace astro
