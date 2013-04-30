@@ -27,9 +27,13 @@ void	UVCCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 		throw UVCError("UVC driver cannot have offsets");
 	}
 
-	// XXX select interface, format and frame
+	// select interface, format and frame
+	camera.selectFormatAndFrame(interface, format, frame);
 
-	// XXX set exposure time
+	// set exposure time
+	camera.setExposureTime(exposure.exposuretime);
+
+	// XXX should also disable automatic white balance
 }
 
 } // namespace uvc

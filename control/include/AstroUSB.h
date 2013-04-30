@@ -258,15 +258,15 @@ private:
 	uint8_t	bEndpointAddress;
 	uint8_t	bInterface;
 protected:
-	void	init_data(void *data);
+	void	init_data(const void *data);
 public:
 	bool	accept_short_response;
 	RequestBase(request_type _type, const EndpointDescriptorPtr endpoint,
-		void *data = NULL);
+		const void *data = NULL);
 	RequestBase(request_type type, const InterfacePtr interface,
-		void *data = NULL);
+		const void *data = NULL);
 	RequestBase(request_type type, request_recipient recipient,
-		void *data = NULL);
+		const void *data = NULL);
 	
 	virtual uint8_t	bmRequestType() const;
 	virtual uint8_t	bRequest() const = 0;
@@ -299,7 +299,7 @@ private:
 	/**
 	 * \brief Initialize the request.
 	 */
-	void init(uint8_t bRequest, uint16_t wValue, T *payload_data) {
+	void init(uint8_t bRequest, uint16_t wValue, const T *payload_data) {
 		packet.header.bmRequestType = RequestBase::bmRequestType();
 		packet.header.bRequest = bRequest;
 		packet.header.wValue = wValue;
@@ -311,7 +311,7 @@ public:
 	 * \brief Construct a request to an endpoint.
 	 */
 	Request(request_type type, const EndpointDescriptorPtr endpoint,
-		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		uint8_t bRequest, uint16_t wValue, const T *payload_data = NULL)
 		: RequestBase(type, endpoint, payload_data) {
 		init(bRequest, wValue, payload_data);
 		packet.header.wIndex = RequestBase::wIndex();
@@ -331,7 +331,7 @@ public:
 	 *			request that retrieves data from the device.
 	 */
 	Request(request_type type, const InterfacePtr& interface,
-		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		uint8_t bRequest, uint16_t wValue, const T *payload_data = NULL)
 		: RequestBase(type, interface, payload_data) {
 		init(bRequest, wValue, payload_data);
 		packet.header.wIndex = RequestBase::wIndex();
@@ -350,7 +350,7 @@ public:
 	 * 			retrieve
 	 */
 	Request(request_type type, request_recipient recipient, uint16_t wIndex,
-		uint8_t bRequest, uint16_t wValue, T *payload_data = NULL)
+		uint8_t bRequest, uint16_t wValue, const T *payload_data = NULL)
 		: RequestBase(type, recipient, payload_data) {
 		init(bRequest, wValue, payload_data);
 		packet.header.wIndex = wIndex;

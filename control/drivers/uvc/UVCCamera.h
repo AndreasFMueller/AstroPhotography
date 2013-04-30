@@ -41,6 +41,10 @@ public:
 	virtual ~UVCCamera();
 	CcdPtr	getCcd(int ccdindex);
 	CcdPtr	getCcd(const std::string& name);
+
+	void	selectFormatAndFrame(int interface, int format, int frame);
+	void	setExposureTime(double exposuretime);
+	void	setGain(double gain);
 };
 
 } // namespace uvc

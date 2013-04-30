@@ -321,6 +321,46 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
 	return interfaceHeaderDescriptor()->processingUnitControls();
 }
 
+void	UVCCamera::setExposureTime(double exposuretime) {
+	// make sure time has priority
+	astro::usb::uvc::auto_exposure_priority_control_t       aeprio;
+	// bAutoExposurePriority == 1 means that frame rate may be
+	// altered dynamically
+	aeprio.bAutoExposurePriority = 1;
+	setCurrent(aeprio);
+
+	// set the auto exposure mode
+	astro::usb::uvc::auto_exposure_mode_control_t   aemode;
+	// bAutoExposureMode == 1 means manual mode, manual iris
+	aemode.bAutoExposureMode = 1;
+	setCurrent(aemode);
+
+	// XXX check allowed min/max values of the exposure time
+
+	// set exposure time
+	astro::usb::uvc::exposure_time_absolute_control_t       exptime;
+	exptime.dwExposureTimeAbsolute = 10000 * exposuretime;
+	setCurrent(exptime);
+}
+
+void	UVCCamera::setGain(double gain) {
+	// get the default, min and max value of the gain
+	astro::usb::uvc::gain_control_t	def
+		= get(GET_DEF, astro::usb::uvc::gain_control_t());
+	astro::usb::uvc::gain_control_t	min
+		= get(GET_MIN, astro::usb::uvc::gain_control_t());
+	astro::usb::uvc::gain_control_t	max
+		= get(GET_MAX, astro::usb::uvc::gain_control_t());
+
+	astro::usb::uvc::gain_control_t gaincontrol;
+	// what are the gain units?
+	gaincontrol.wGain = gain * def.wGain;
+	if ((gaincontrol.wGain > max.wGain) || (gaincontrol.wGain < min.wGain)) {
+		throw std::range_error("gain outside range");
+	}
+	setCurrent(gaincontrol);
+}
+
 CameraTerminalDescriptor	*UVCCamera::cameraTerminalDescriptor() const {
 	InterfaceHeaderDescriptor	*ifhd = interfaceHeaderDescriptor();
 	return getPtr<CameraTerminalDescriptor>((*ifhd)[ifhd->cameraTerminalID()]);

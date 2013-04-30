@@ -10,6 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
+#include <debug.h>
 
 using namespace astro::camera::uvc;
 using namespace astro::image;
@@ -65,25 +66,23 @@ void	uvctest::testCamera() {
 }
 
 void	uvctest::testCcd() {
-#if 0
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCcd");
 	CameraPtr	camera = locator->getCamera(0);
 	CcdPtr	ccd = camera->getCcd(0);
-#endif
+	std::cout << ccd->getInfo() << std::endl; 
 }
 
 void	uvctest::testExposure() {
-#if 0
 	CameraPtr	camera = locator->getCamera(0);
 	CcdPtr	ccd = camera->getCcd(0);
-	Exposure	exposure(ImageRectangle(ImagePoint(80, 50),
-		ImageSize(500, 400)), 0.02);
+	Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
+		ImageSize(160, 120)), 0.02);
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
 	ShortImagePtr	image = ccd->shortImage();
 	// write the image to a file
 	FITSoutfile<unsigned short>	file("test.fits");
 	file.write(*image);
-#endif
 }
 
 } // namespace test

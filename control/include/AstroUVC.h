@@ -1157,7 +1157,8 @@ private:
 	template<typename T>
 	void	doSetCurrent(const T& p, video_control_tag) {
 		uint16_t	wIndex = controlInterfaceNumber();
-		Request<T>	r(RequestBase::class_specific_type, wIndex,
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
 			SET_CUR, T::control_type::CS << 8);
 		device.controlRequest(&r);
 	}
@@ -1166,7 +1167,8 @@ private:
 	void	doSetCurrent(const T& p, camera_terminal_control_tag) {
 		uint16_t	wIndex = (controlCameraTerminalID() << 8)
 						| controlInterfaceNumber();
-		Request<T>	r(RequestBase::class_specific_type, wIndex,
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
 			SET_CUR, T::control_type::CS << 8, &p);
 		device.controlRequest(&r);
 	}
@@ -1175,7 +1177,8 @@ private:
 	void	doSetCurrent(const T& p, processing_unit_control_tag) {
 		uint16_t	wIndex = (controlProcessingUnitID() << 8)
 						| controlInterfaceNumber();
-		Request<T>	r(RequestBase::class_specific_type, wIndex,
+		Request<T>	r(RequestBase::class_specific_type,
+			RequestBase::interface_recipient, wIndex,
 			SET_CUR, T::control_type::CS << 8, &p);
 		device.controlRequest(&r);
 	}
@@ -1270,6 +1273,10 @@ public:
 	T	get(int request, T) {
 		return doGetControl(request, T(), typename T::control_type());
 	}
+
+	// some convenience set requests
+	void	setExposureTime(double exposuretime);
+	void	setGain(double gain);
 
 public:
 	// display the camera

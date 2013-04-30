@@ -7,6 +7,8 @@
 #include <AstroCamera.h>
 #include <AstroImage.h>
 #include <sx.h>
+#include <debug.h>
+#include <SxUtils.h>
 
 using namespace astro::camera;
 
@@ -25,9 +27,22 @@ Exposure::State	SxCcd::exposureStatus() throw (not_implemented) {
 	return state;
 }
 
+/**
+ * \brief Start an Exposure on a "normal" Starlight Express camera
+ *
+ * \param exposure	specification of the exposure to take
+ */
 void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 	// remember the exposure
 	this->exposure = exposure;
+
+	// we should check that the selected binning mode is in fact 
+	// available
+	if (!info.modes().permits(exposure.mode)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "binning mode %s not supported",
+			exposure.mode.toString().c_str());
+		throw SxError("binning mode not supported");
+	}
 
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
@@ -50,6 +65,12 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 	state = Exposure::exposing;
 }
 
+/**
+ * \brief Retrieve an image with short pixel values.
+ *
+ * Starlight Express cameras always use 16 bit pixels, it is natural to
+ * always produce 16 bit deep images.
+ */
 ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	// compute the size of the buffer, and create a buffer for the
 	// data
@@ -73,6 +94,9 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 
 	// release the interface again
 	interface->release();
+
+	// now the camera is no longer busy, i.e. we have to reset the state
+	state = Exposure::idle;
 
 	// when the transfer completes, one can use the data for the
 	// image

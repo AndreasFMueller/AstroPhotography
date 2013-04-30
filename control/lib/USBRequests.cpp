@@ -23,7 +23,7 @@ namespace usb {
  * anything to copy. If the request is from device to host, then it also
  * clears the payload data.
  */
-void	RequestBase::init_data(void *data) {
+void	RequestBase::init_data(const void *data) {
 	if ((this->bmRequestType() & 0x80) == host_to_device) {
 		// for requests with data phase to the device, copy the
 		// data
@@ -41,7 +41,7 @@ void	RequestBase::init_data(void *data) {
 }
 
 RequestBase::RequestBase(request_type _type, EndpointDescriptorPtr endpoint,
-	void *data) : type(_type) {
+	const void *data) : type(_type) {
 	recipient = endpoint_recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bEndpointAddress = 0x1f & endpoint->bEndpointAddress();
@@ -49,7 +49,7 @@ RequestBase::RequestBase(request_type _type, EndpointDescriptorPtr endpoint,
 }
 
 RequestBase::RequestBase(request_type _type, InterfacePtr interface,
-	void *data) : type(_type) {
+	const void *data) : type(_type) {
 	recipient = interface_recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bInterface = interface->interfaceNumber();
@@ -57,7 +57,7 @@ RequestBase::RequestBase(request_type _type, InterfacePtr interface,
 }
 
 RequestBase::RequestBase(request_type _type, request_recipient _recipient,
-	void *data) : type(_type) {
+	const void *data) : type(_type) {
 	recipient = _recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	accept_short_response = false;

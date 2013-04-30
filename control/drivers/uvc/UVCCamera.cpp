@@ -7,6 +7,7 @@
 #include <debug.h>
 #include <Format.h>
 #include <UVCCcd.h>
+#include <UVCUtils.h>
 
 namespace astro {
 namespace camera {
@@ -117,6 +118,37 @@ CcdPtr	UVCCamera::getCcd(int ccdindex) {
 	CcdInfo	info = ccdinfo[ccdindex];
 	return CcdPtr(new UVCCcd(info, uc.interface, uc.format, uc.frame,
 		*this));
+}
+
+void	UVCCamera::selectFormatAndFrame(int interface, int format, int frame) {
+	try {
+		camera.selectFormatAndFrame(interface, format, frame);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot select interface %d, "
+			"format %d, frame %d: %s",
+			interface, format, frame, x.what());
+		throw UVCError("cannot set format/frame");
+	}
+}
+
+void	UVCCamera::setExposureTime(double exposuretime) {
+	try {
+		camera.setExposureTime(exposuretime);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set exposure time: %s",
+			x.what());
+		throw UVCError("cannot set exposure time");
+	}
+}
+
+void	UVCCamera::setGain(double gain) {
+	try {
+		camera.setGain(gain);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set gain: %s",
+			x.what());
+		throw UVCError("cannot set exposure time");
+	}
 }
 
 } // namespace uvc
