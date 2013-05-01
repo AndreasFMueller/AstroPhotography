@@ -58,9 +58,31 @@ AM_CONDITIONAL(ENABLE_UVC, test x$enable_uvc = xyes)
 AC_ARG_ENABLE(sbig,
 [AS_HELP_STRING([--enable-sbig], [build the proprietary SBIG driver])],
 [
+	case `uname` in
+	Darwin)	SBIGTARGET=ENV_MACOSX
+		SBIGINCLUDE=-I/Library/Frameworks/SBIGUDrv.framework/Headers
+		;;
+	Linux)	SBIGTARGET=ENV_LINUX
+		;;
+	esac
+	AC_SUBST(SBIGTARGET)
+	OLDCFLAGS="${CFLAGS}"
+	CFLAGS="${CFLAGS} -DTARGET=${SBIGTARGET} ${SBIGINCLUDE}"
 	AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
-	AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
-	[AC_MSG_ERROR([SBIG library not found])])
+	case `uname` in
+	Linux)	OLDLIBS="${LIBS}"
+		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
+			[AC_MSG_ERROR([SBIG library not found])])
+		SBIGLIBRARY=-lsbigudrv
+		LIBS="${OLDLIBS}"
+		;;
+	*)	echo "Mac OS X: just believe library will work"
+		SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
+		;;
+	esac
+	AC_SUBST(SBIGLIBRARY)
+	AC_SUBST(SBIGINCLUDE)
+	CFLAGS="${OLDCFLAGS}"
 ],[
 enable_sbig=no
 ]
