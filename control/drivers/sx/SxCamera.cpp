@@ -51,14 +51,16 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	CcdInfo	ccd0;
 	ccd0.size = ImageSize(params.width, params.height);
 	ccd0.name = "Imaging";
-	ccd0.binningmodes.push_back(Binning(1,1));
 	ccd0.binningmodes.push_back(Binning(2,2));
 	if (model != SX_MODEL_M26C) {
-		ccd0.size.height *= 2;
 		ccd0.binningmodes.push_back(Binning(3,3));
 		ccd0.binningmodes.push_back(Binning(4,4));
+	} else {
+		ccd0.size.height *= 2;
 	}
 	ccdinfo.push_back(ccd0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
+		ccd0.toString().c_str());
 
 	// try to get the same information from the second CCD, if there
 	// is one
@@ -75,12 +77,19 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		CcdInfo	ccd1;
 		ccd1.size = ImageSize(params.width, params.height);
 		ccd1.name = "Tracking";
-		ccd1.binningmodes.push_back(Binning(1,1));
 		ccd1.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd1);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	}
+
+	// now get the data interface and endpoint
+	ConfigurationPtr	conf = deviceptr->activeConfig();
+	std::cout << *conf;
+	interface = (*conf)[0];
+	InterfaceDescriptorPtr	ifdesc = (*interface)[0];
+	dataendpoint = (*ifdesc)[0];
+	std::cout << *dataendpoint;
 }
 
 SxCamera::~SxCamera() {
@@ -99,6 +108,14 @@ CcdPtr	SxCamera::getCcd(int ccdindex) {
 		throw std::range_error("ccd id out of range");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd with index %d", ccdindex);
+	if ((model == SX_MODEL_M26C) && (ccdindex == 0)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "create SxCcdM26C for the M26C "
+			"imaging CCD");
+		return CcdPtr(new SxCcdM26C(ccdinfo[ccdindex], *this,
+			ccdindex));
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd");
 	return CcdPtr(new SxCcd(ccdinfo[ccdindex], *this, ccdindex));
 }
 
@@ -107,6 +124,17 @@ CcdPtr	SxCamera::getCcd(int ccdindex) {
  */
 DevicePtr	SxCamera::getDevicePtr() {
 	return deviceptr;
+}
+
+/**
+ * \brief Get the data endpoint
+ */
+EndpointDescriptorPtr	SxCamera::getEndpoint() {
+	return dataendpoint;
+}
+
+InterfacePtr	SxCamera::getInterface() {
+	return interface;
 }
 
 } // namespace sx

@@ -20,11 +20,15 @@ class SxCamera : public Camera {
 	DevicePtr	deviceptr;
 	uint16_t	model;
 	uint16_t	product;
+	InterfacePtr	interface;
+	EndpointDescriptorPtr	dataendpoint;
 public:
 	DevicePtr	getDevicePtr();
 	SxCamera(DevicePtr& devptr);
 	virtual ~SxCamera();
 	virtual CcdPtr	getCcd(int id);
+	EndpointDescriptorPtr	getEndpoint();
+	InterfacePtr	getInterface();
 };
 
 

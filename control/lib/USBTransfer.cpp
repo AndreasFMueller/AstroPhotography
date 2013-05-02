@@ -50,8 +50,9 @@ static void bulktransfer_callback(libusb_transfer *transfer) {
 }
 
 void	BulkTransfer::init(int _length, unsigned char *_data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer",
-		(endpoint->bEndpointAddress() & 0x80) ? "IN" : "OUT");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s transfer on %02x",
+		(endpoint->bEndpointAddress() & 0x80) ? "IN" : "OUT",
+		(endpoint->bEndpointAddress()));
 	transfer = NULL;
 	length = _length;
 	if (NULL != _data) {

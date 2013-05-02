@@ -8,6 +8,7 @@
 
 #include <SxCamera.h>
 #include <AstroImage.h>
+#include <AstroUtils.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -45,6 +46,19 @@ public:
 class SxCcdM26C : public SxCcd {
 	Exposure	m26cExposure();
 	Exposure	symmetrize(const Exposure& exp) const;
+	Exposure	m26c;
+	Timer	timer;
+	void	exposeField(int field);
+	void	requestField(int field);
+	class	Field {
+	public:
+		size_t	length;
+		unsigned short	*data;
+		Field(size_t l);
+		~Field();
+		void	rescale(double scale);
+	};
+	Field 	*readField();
 public:
 	SxCcdM26C(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcdM26C();

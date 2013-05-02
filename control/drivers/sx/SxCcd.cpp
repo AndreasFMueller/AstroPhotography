@@ -77,23 +77,17 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	int	size = 2 * exposure.frame.size.pixels;
 	unsigned short	*data = new unsigned short[size];
 
-	// find the interface
-	ConfigurationPtr	config = camera.getDevicePtr()->activeConfig();
-	InterfacePtr	interface = (*config)[0];
-	interface->claim();
-
-	// get the endpoint
-	InterfaceDescriptorPtr	idptr = (*interface)[0];
-	EndpointDescriptorPtr	endpoint = (*idptr)[2];
+	// claim the interface
+	camera.getInterface()->claim();
 
 	// read the data from the data endpoint
-	BulkTransfer	transfer(endpoint, size, (unsigned char *)data);
+	BulkTransfer	transfer(camera.getEndpoint(), size, (unsigned char *)data);
 
 	// submit the transfer
 	camera.getDevicePtr()->submit(&transfer);
 
 	// release the interface again
-	interface->release();
+	camera.getInterface()->release();
 
 	// now the camera is no longer busy, i.e. we have to reset the state
 	state = Exposure::idle;
