@@ -131,6 +131,7 @@ Interface&	InterfaceDescriptor::getInterface() {
 Interface::Interface(Device& device, Configuration& _configuration,
 	const libusb_interface *li, int _interface)
 	: dev(device), interface(_interface), configuration(_configuration) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating interface %d", interface);
 	for (int i = 0; i < li->num_altsetting; i++) {
 		InterfaceDescriptor	*id
 			= new InterfaceDescriptor(device, *this,

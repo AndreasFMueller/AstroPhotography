@@ -7,6 +7,7 @@
 #define _SxCcd_h
 
 #include <SxCamera.h>
+#include <SxDemux.h>
 #include <AstroImage.h>
 #include <AstroUtils.h>
 
@@ -50,14 +51,6 @@ class SxCcdM26C : public SxCcd {
 	Timer	timer;
 	void	exposeField(int field);
 	void	requestField(int field);
-	class	Field {
-	public:
-		size_t	length;
-		unsigned short	*data;
-		Field(size_t l);
-		~Field();
-		void	rescale(double scale);
-	};
 	Field 	*readField();
 public:
 	SxCcdM26C(const CcdInfo& info, SxCamera& camera, int ccdindex);

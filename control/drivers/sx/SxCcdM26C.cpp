@@ -4,48 +4,56 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SxCcd.h>
+#include <SxDemux.h>
 #include <AstroCamera.h>
 #include <AstroImage.h>
 #include <sx.h>
 #include <debug.h>
+#include <SxDemux.h>
 
-#define	FIELD_CUTOVER	10
+#define	EXPOSURE_FIELD_CUTOVER		10
+#define EXPOSURE_ADCONVERSION_TIME	30000
+
+#define CCD_FLAGS_FIELD_ODD       1   /* Specify odd field for MX cameras */
+#define CCD_FLAGS_FIELD_EVEN      2   /* Specify even field for MX cameras */
+#define CCD_FLAGS_NOBIN_ACCUM     4   /* Don't accumulate charge if binning */
+#define CCD_FLAGS_NOWIPE_FRAME    8   /* Don't apply WIPE when clearing frame */
+#define CCD_FLAGS_TDI             32  /* Implement TDI (drift scan) operation */
+#define CCD_FLAGS_NOCLEAR_FRAME   64  /* Don't clear frame, even when asked */
 
 namespace astro {
 namespace camera {
 namespace sx {
 
-SxCcdM26C::Field::Field(size_t l) : length(l) {
-	data = new unsigned short[length];
-}
-
-SxCcdM26C::Field::~Field() {
-	delete [] data;
-	data = NULL;
-}
-
+/**
+ * \brief Compute the exposure parameters for an M26C camera.
+ *
+ * The M26C camera has a very strange CCD that is actually read column by
+ * column, not row by row. Thus we have to recompute the parameters for this
+ * CCD.
+ */
 Exposure	SxCcdM26C::m26cExposure() {
-	Exposure	m26c;
+	Exposure	m26c = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute the exposure parameters for "
 		"the M26C's CCD chip");
 
 	// adapt the size suitable for 
-	m26c.frame.size.width = exposure.frame.size.width / 4;
-	m26c.frame.size.height = exposure.frame.size.height * 2;
-	if (m26c.mode.getY() > 1) {
+	m26c.frame.size.height = exposure.frame.size.width / 4;
+	m26c.frame.size.width = exposure.frame.size.height * 2;
+	if (m26c.mode.getX() > 1) {
 		m26c.frame.size.height -= m26c.frame.size.height % 2;
 	}
-	exposure.frame.size.width = m26c.frame.size.width * 4;
-	exposure.frame.size.height = m26c.frame.size.height / 2;
+	exposure.frame.size.height = m26c.frame.size.width / 2;
+	exposure.frame.size.width = m26c.frame.size.height * 4;
 
 	// adapt the top left corner
-	m26c.frame.origin.x = exposure.frame.origin.x / 4;
-	m26c.frame.origin.y = exposure.frame.origin.y * 2;
+	m26c.frame.origin.x = exposure.frame.origin.y * 2;
+	m26c.frame.origin.y = exposure.frame.origin.x / 4;
 	if (m26c.mode.getY() > 1) {
 		m26c.frame.origin.y -= m26c.frame.origin.y % 2;
 	}
-	exposure.frame.origin.x = m26c.frame.origin.x * 4;
-	exposure.frame.origin.y = m26c.frame.origin.y / 2;
+	exposure.frame.origin.x = m26c.frame.origin.y / 2;
+	exposure.frame.origin.y = m26c.frame.origin.x * 4;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", m26c.toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", exposure.toString().c_str());
@@ -59,6 +67,9 @@ Exposure	SxCcdM26C::m26cExposure() {
 	return m26c;
 }
 
+/**
+ * \brief Create an SxCcdM26C object.
+ */
 SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
 	: SxCcd(info, camera, id) {
 }
@@ -66,7 +77,7 @@ SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
 /**
  * \brief Read the field requested previously
  */
-SxCcdM26C::Field	*SxCcdM26C::readField() {
+Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
 	size_t	l = (m26c.frame.size.width / m26c.mode.getX())
 		* (m26c.frame.size.height / m26c.mode.getY());
@@ -74,33 +85,20 @@ SxCcdM26C::Field	*SxCcdM26C::readField() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u",
 		field->length);
 
-	// claim the interface
-	try {
-		camera.getInterface()->claim();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d claimed",
-			camera.getInterface()->interfaceNumber());
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface: %s",
-			x.what());
-		throw x;
-	}
-
 	// perform the data transfer
 	try {
 		BulkTransfer	transfer(camera.getEndpoint(), (int)l * 2,
 			(unsigned char *)field->data);
-		transfer.setTimeout(exposure.exposuretime * 1.1 + 30);
+		int	timeout = exposure.exposuretime * 1100
+				+ EXPOSURE_ADCONVERSION_TIME;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting timeout: %d", timeout);
+		transfer.setTimeout(timeout);
 		camera.getDevicePtr()->submit(&transfer);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer complete");
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "transfer failed: %s", x.what());
 		throw x;
 	}
-
-	// release the interface again
-	camera.getInterface()->release();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d released",
-		camera.getInterface()->interfaceNumber());
 
 	// return the field
 	return field;
@@ -156,7 +154,34 @@ void	SxCcdM26C::exposeField(int field) {
 void	SxCcdM26C::requestField(int field) {
 	// prepare a request for the pixels, without delay, this just
 	// downloads the already exposed field
-	sx_read_pixels_t	rpd;
+#if 0
+	sx_read_pixels_t	rp;
+	rp.width = m26c.frame.size.width;
+	rp.height = m26c.frame.size.height;
+	rp.x_offset = m26c.frame.origin.x;
+	rp.y_offset = m26c.frame.origin.y;
+	rp.x_bin = m26c.mode.getX();
+	rp.y_bin = m26c.mode.getY();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
+		rp.width, rp.height, rp.x_offset, rp.y_offset,
+		rp.x_bin, rp.y_bin);
+
+	// send the request to the camera, this is a request for field 0 
+	// field 1 has to be retrieved separately
+	try {
+		Request<sx_read_pixels_t>	request(
+			RequestBase::vendor_specific_type,
+			RequestBase::device_recipient, ccdindex,
+			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)(1 << field),
+			&rp);
+		camera.getDevicePtr()->controlRequest(&request);
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
+			x.what());
+		throw x;
+	}
+#else
+	sx_read_pixels_delayed_t	rpd;
 	rpd.width = m26c.frame.size.width;
 	rpd.height = m26c.frame.size.height;
 	rpd.x_offset = m26c.frame.origin.x;
@@ -166,14 +191,16 @@ void	SxCcdM26C::requestField(int field) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
 		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
 		rpd.x_bin, rpd.y_bin);
+	rpd.delay = 1;
 
 	// send the request to the camera, this is a request for field 0 
 	// field 1 has to be retrieved separately
 	try {
-		Request<sx_read_pixels_t>	request(
+		Request<sx_read_pixels_delayed_t>	request(
 			RequestBase::vendor_specific_type,
 			RequestBase::device_recipient, ccdindex,
-			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)(1 << field),
+			(uint8_t)SX_CMD_READ_PIXELS_DELAYED,
+			CCD_FLAGS_NOCLEAR_FRAME | (uint16_t)(1 << field),
 			&rpd);
 		camera.getDevicePtr()->controlRequest(&request);
 	} catch (std::exception& x) {
@@ -181,6 +208,7 @@ void	SxCcdM26C::requestField(int field) {
 			x.what());
 		throw x;
 	}
+#endif
 }
 
 #define M26C_WIDTH	3906
@@ -250,7 +278,7 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
  */
 void	SxCcdM26C::startExposure(const Exposure& exposure)
 		throw (not_implemented) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "expousre %s requested",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s requested",
 		exposure.toString().c_str());
 	// remember the exposre, we need it for the second field for the
 	// case where we do two fields one after the other
@@ -266,55 +294,90 @@ void	SxCcdM26C::startExposure(const Exposure& exposure)
 }
 
 /**
- * \brief Rescale a field
+ * \brief Retrieve an image from the caemra
  *
- * This method scales the pixels of the field with the factor. The factor
- * must be >1 because otherwise saturated pixels become unsaturated by
- * the scaling operation, leading to wrong colors.
- * \param field		field object to rescale
- * \param scale
+ * This method completes the exposure on the main ccd and reads the field.
+ * Depending on the exposure time, it then either starts a new exposure
+ * (for short exposures, because the second field would otherwise be too
+ * different), or reads out the already exposed second field (for long
+ * exposures). In the latter case, the first field is rescaled to account
+ * for the different exposure time.
  */
-void	SxCcdM26C::Field::rescale(double scale) {
-	for (size_t i = 0; i < length; i++) {
-		unsigned long	rescaled = data[i] * scale;
-		if (rescaled > 0xffff) {
-			data[i] = 0xffff;
-		} else {
-			data[i] = rescaled;
-		}
-	}
-}
-
 ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
+
+	// claim the interface, we need this for the transfers
+	try {
+		camera.getInterface()->claim();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d claimed",
+			camera.getInterface()->interfaceNumber());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface: %s",
+			x.what());
+		throw x;
+	}
 
 	// read the right number of pixels from the IN endpoint
 	Field	*field0 = readField();
-	Field	*field1 = NULL;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "field 0 transferred");
 
 	// for long exposures, we just read the second field.
-	if (exposure.exposuretime > FIELD_CUTOVER) {
+	Field	*field1 = NULL;
+	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "request second field 1");
 		requestField(1);
 		timer.end();
-		field1 = readField();
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "expose second field 1");
+		exposeField(1);
+	}
 
+	// read the second field
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "read field 1");
+	field1 = readField();
+
+	// release the interface again, we no longer need it
+	try {
+		camera.getInterface()->release();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d released",
+			camera.getInterface()->interfaceNumber());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release interface. %s",
+			x.what());
+	}
+
+	// rescale the first field, if we did only one exposure
+	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
 		// rescale the field. We have to multiply the first field
 		// with the scaling factor, because of overflows
 		field0->rescale(timer.elapsed() / exposure.exposuretime);
-	} else {
-		exposeField(1);
-		field1 = readField();
 	}
 
+	// prepare a new image 
+	Image<unsigned short>	*image = new Image<unsigned short>(
+		exposure.frame.size.width, exposure.frame.size.height);
+
 	// now we have to demultiplex the two fields
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX demultiplex the fields");
+	if (1 == exposure.mode.getX()) {
+		DemuxerUnbinned	demuxer;
+		demuxer(*image, *field0, *field1);
+	} else {
+		DemuxerBinned	demuxer;
+		demuxer(*image, *field0, *field1);
+	}
 
 	// remove the data
 	delete field0;
 	delete field1;
 
 	// return the demultiplexed image
-	return ShortImagePtr();
+	return ShortImagePtr(image);
 }
 
+/**
+ * \brief Destroy the CCD object.
+ */
 SxCcdM26C::~SxCcdM26C() {
 }
 

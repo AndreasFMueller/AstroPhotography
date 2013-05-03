@@ -45,6 +45,7 @@ void	sxtest::tearDown() {
 }
 
 void	sxtest::testList() {
+#if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
 	std::vector<std::string>	cameras = locator->getCameralist();
 	int	counter = 0;
@@ -53,6 +54,7 @@ void	sxtest::testList() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera[%d]: %s", ++counter,
 			i->c_str());
 	}
+#endif
 }
 
 void	sxtest::testCamera() {
@@ -70,7 +72,7 @@ void	sxtest::testCamera() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(100, 100),
-		ImageSize(200, 100)), 1);
+		ImageSize(200, 100)), 11);
 	ccd->startExposure(exposure);
 	ShortImagePtr	image = ccd->shortImage();
 }

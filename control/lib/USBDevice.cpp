@@ -206,16 +206,22 @@ int	Device::getBroken() const {
 }
 
 void	Device::claimInterface(uint8_t interface) throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "claiming interface %d", interface);
 	int	rc = libusb_claim_interface(dev_handle, interface);
 	if (rc != LIBUSB_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface %d: %s",
+			interface, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 }
 
 void	Device::releaseInterface(uint8_t interface) throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "releasing interface %d", interface);
 	int	rc = libusb_release_interface(dev_handle, interface);
 	rc = libusb_release_interface(dev_handle, interface);
 	if (rc != LIBUSB_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release interface %d: %s",
+			interface, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 }
@@ -229,6 +235,8 @@ int	Device::getConfiguration() throw(USBError) {
 	int	result;
 	int	rc = libusb_get_configuration(dev_handle, &result);
 	if (rc != LIBUSB_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get configuration: %s",
+			libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 	return result;
@@ -242,6 +250,8 @@ int	Device::getConfiguration() throw(USBError) {
 void	Device::setConfiguration(uint8_t configuration) throw (USBError) {
 	int	rc = libusb_set_configuration(dev_handle, configuration);
 	if (rc != LIBUSB_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set configuration %d: %s",
+			configuration, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 }
@@ -258,6 +268,8 @@ void	Device::setInterfaceAltSetting(uint8_t interface, uint8_t altsetting)
 	int	rc = libusb_set_interface_alt_setting(dev_handle,
 			interface, altsetting);
 	if (rc != LIBUSB_SUCCESS) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set altsetting %d: %s",
+			altsetting, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
 }
@@ -293,7 +305,7 @@ void	Device::controlRequest(RequestBase *request) throw(USBError) {
 			request->wIndex(),
 			request->payload(),
 			request->wLength(),
-			100);
+			request->getTimeout());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request result: %d", rc);
 	if (rc < 0) {
 		throw USBError(libusb_error_name(rc));

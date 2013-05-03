@@ -69,10 +69,22 @@ InterfacePtr&	Configuration::operator[](size_t index) {
 	return interfacelist[index];
 }
 
+/**
+ * \brief Create a list of interface objects for this configuration.
+ *
+ * This method scans the array of struct libusb_interface in the config
+ * descriptor structure and constructs an Interface object for every
+ * structure found.
+ */
 void	Configuration::getInterfaces() {
 	for (int i = 0; i < config->bNumInterfaces; i++) {
+		// when we construct an interface, we should keep in mind
+		// that the interface number has origin 1, while the index
+		// in the array of interfaces has origin 0. The interface
+		// number thus is the index + 1
 		Interface	*ifd
-			= new Interface(device(), *this, &config->interface[i], i);
+			= new Interface(device(), *this, &config->interface[i],
+				i + 1);
 		interfacelist.push_back(InterfacePtr(ifd));
 	}
 }

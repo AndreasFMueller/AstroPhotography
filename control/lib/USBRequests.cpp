@@ -46,6 +46,7 @@ RequestBase::RequestBase(request_type _type, EndpointDescriptorPtr endpoint,
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bEndpointAddress = 0x1f & endpoint->bEndpointAddress();
 	accept_short_response = false;
+	timeout = 0;
 }
 
 RequestBase::RequestBase(request_type _type, InterfacePtr interface,
@@ -54,6 +55,7 @@ RequestBase::RequestBase(request_type _type, InterfacePtr interface,
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	bInterface = interface->interfaceNumber();
 	accept_short_response = false;
+	timeout = 0;
 }
 
 RequestBase::RequestBase(request_type _type, request_recipient _recipient,
@@ -61,6 +63,7 @@ RequestBase::RequestBase(request_type _type, request_recipient _recipient,
 	recipient = _recipient;
 	direction = (NULL != data) ? host_to_device : device_to_host;
 	accept_short_response = false;
+	timeout = 0;
 }
 
 uint16_t	RequestBase::wIndex() const {

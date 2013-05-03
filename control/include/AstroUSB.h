@@ -234,6 +234,10 @@ typedef struct  usb_request_header_s {
  * whether the request was constructed for an endpoint or an interface.
  */
 class RequestBase {
+	int	timeout;
+public:
+	int	getTimeout() const { return timeout; }
+	void	setTimeout(int _timeout) { timeout = _timeout; }
 	// remember the direction of the request
 public:
 	typedef enum { host_to_device = 0, device_to_host = 0x80 }

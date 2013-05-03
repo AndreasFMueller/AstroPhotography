@@ -4,14 +4,14 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 pkglib_LTLIBRARIES = sx.la 
-noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h 
+noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
 
 libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCcdM26C.cpp
+	SxCcdM26C.cpp SxDemux.cpp
 libsx_la_DEPENDENCIES = ../../lib/libastro.la
 libsx_la_LIBADD = ../../lib/libastro.la
 
@@ -22,7 +22,8 @@ sxtests_DEPENDENCIES = ../../lib/libastro.la libsx.la
 
 endif
 
-sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp SxCcdM26C.cpp
+sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
+	SxCcdM26C.cpp SxDemux.cpp
 sx_la_LDFLAGS = -module
 sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la
