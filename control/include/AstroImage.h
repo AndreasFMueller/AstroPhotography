@@ -149,6 +149,13 @@ public:
 	virtual bool	operator==(const ImageBase& other) const;
 	virtual int	pixeloffset(int x, int y) const;
 	virtual int	pixeloffset(const ImagePoint& p) const;
+
+	// methods related to the mosaic stuff
+	bool	isR(int x, int y) const;
+	bool	isG(int x, int y) const;
+	bool	isB(int x, int y) const;
+	bool	isGr(int x, int y) const;
+	bool	isGb(int x, int y) const;
 };
 
 /**

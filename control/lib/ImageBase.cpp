@@ -51,5 +51,42 @@ int     ImageBase::pixeloffset(const ImagePoint& p) const {
 	return this->pixeloffset(p.x, p.y);
 }
 
+bool	ImageBase::isR(int x, int y) const {
+	if (mosaic == NONE) {
+		return false;
+	}
+	return (((y & 0x1) << 1) | (x & 0x1)) == (mosaic & 0x3);
+}
+
+bool	ImageBase::isB(int x, int y) const {
+	if (mosaic == NONE) {
+		return false;
+	}
+	// this means that the mod 2 remainder of both x and y have to
+	// be different from the ones in the mosaic constant. The XOR
+	// with 0x3 inverts the coordinates so that we can nevertheless
+	// do an equality comparison
+	return (0x3 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
+}
+
+bool	ImageBase::isG(int x, int y) const {
+	return (isGr(x, y) | isGb(x, y));
+	
+}
+
+bool	ImageBase::isGr(int x, int y) const {
+	if (mosaic == NONE) {
+		return false;
+	}
+	return (0x1 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
+}
+
+bool	ImageBase::isGb(int x, int y) const {
+	if (mosaic == NONE) {
+		return false;
+	}
+	return (0x2 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
+}
+
 } // namespace image
 } // namespace astro
