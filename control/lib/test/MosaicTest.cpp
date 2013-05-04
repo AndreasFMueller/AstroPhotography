@@ -5,12 +5,17 @@
  * $Id$
  */
 #include <AstroImage.h>
+#include <AstroMosaic.h>
+#include <AstroDemosaic.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
+#include <AstroIO.h>
+#include <Format.h>
 
 using namespace astro::image;
+using namespace astro::io;
 
 namespace astro {
 namespace test {
@@ -26,6 +31,16 @@ public:
 	void	testGRBG();
 	void	testGBRG();
 	void	testBGGR();
+	void	testMosaic(ImageBase::mosaic_type mosaic);
+	void	testMosaicRGGB();
+	void	testMosaicGRBG();
+	void	testMosaicGBRG();
+	void	testMosaicBGGR();
+	void	testSeparate(ImageBase::mosaic_type mosaic);
+	void	testSeparateRGGB();
+	void	testSeparateGRBG();
+	void	testSeparateGBRG();
+	void	testSeparateBGGR();
 
 	CPPUNIT_TEST_SUITE(MosaicTest);
 	CPPUNIT_TEST(testNone);
@@ -33,6 +48,14 @@ public:
 	CPPUNIT_TEST(testGRBG);
 	CPPUNIT_TEST(testGBRG);
 	CPPUNIT_TEST(testBGGR);
+	CPPUNIT_TEST(testMosaicRGGB);
+	CPPUNIT_TEST(testMosaicGRBG);
+	CPPUNIT_TEST(testMosaicGBRG);
+	CPPUNIT_TEST(testMosaicBGGR);
+	CPPUNIT_TEST(testSeparateRGGB);
+	CPPUNIT_TEST(testSeparateGRBG);
+	CPPUNIT_TEST(testSeparateGBRG);
+	CPPUNIT_TEST(testSeparateBGGR);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -184,6 +207,117 @@ void	MosaicTest::testBGGR() {
 			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
 		}
 	}
+}
+
+void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
+	Image<RGB<unsigned char> >	image(44, 62);
+	for (int x = 0; x < image.size.width; x++) {
+		for (int y = 0; y < image.size.height; y++) {
+			image.pixel(x, y).R = 'R';
+			image.pixel(x, y).G = 'G';
+			image.pixel(x, y).B = 'B';
+		}
+	}
+
+	Mosaic<unsigned char>	mosaicer(mosaic);
+	Image<unsigned char>	*mosaiced = mosaicer(image);
+	std::string	filename = stringprintf("mosaic%d.fits", mosaic);
+	unlink(filename.c_str());
+	FITSoutfile<unsigned char>	*outfile
+		= new FITSoutfile<unsigned char>(filename.c_str());
+	outfile->write(*mosaiced);
+        delete outfile;
+
+	for (int x = 0; x < image.size.width; x++) {
+		for (int y = 0; y < image.size.height; y++) {
+			if (mosaiced->isR(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'R');
+			}
+			if (mosaiced->isG(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'G');
+			}
+			if (mosaiced->isB(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'B');
+			}
+		}
+	}
+	delete mosaiced;
+}
+
+void	MosaicTest::testMosaicRGGB() {
+	testMosaic(ImageBase::BAYER_RGGB);
+}
+
+void	MosaicTest::testMosaicGRBG() {
+	testMosaic(ImageBase::BAYER_GRBG);
+}
+
+void	MosaicTest::testMosaicGBRG() {
+	testMosaic(ImageBase::BAYER_GBRG);
+}
+
+void	MosaicTest::testMosaicBGGR() {
+	testMosaic(ImageBase::BAYER_BGGR);
+}
+
+void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
+	Image<RGB<unsigned char> >	image(44, 62);
+	for (int x = 0; x < image.size.width; x++) {
+		for (int y = 0; y < image.size.height; y++) {
+			image.pixel(x, y).R = 'R';
+			image.pixel(x, y).G = 'G';
+			image.pixel(x, y).B = 'B';
+		}
+	}
+
+	Mosaic<unsigned char>	mosaicer(mosaic);
+	Image<unsigned char>	*mosaiced = mosaicer(image);
+
+	for (int x = 0; x < image.size.width; x++) {
+		for (int y = 0; y < image.size.height; y++) {
+			if (mosaiced->isR(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'R');
+			}
+			if (mosaiced->isG(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'G');
+			}
+			if (mosaiced->isB(x, y)) {
+				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'B');
+			}
+		}
+	}
+
+	Demosaic<unsigned char>	demosaic;
+
+	Image<RGB<unsigned char> >	*demosaiced = demosaic(*mosaiced);
+	CPPUNIT_ASSERT((demosaiced->size.width == 44)
+		&& (demosaiced->size.height == 62));
+	delete mosaiced;
+	
+	std::string	filename = stringprintf("demosaiced%d.fits", mosaic);
+	unlink(filename.c_str());
+	FITSoutfile<RGB<unsigned char> >	*outfile
+		= new FITSoutfile<RGB<unsigned char> >(filename.c_str());
+	outfile->write(*demosaiced);
+	delete outfile;
+
+	delete demosaiced;
+}
+
+void	MosaicTest::testSeparateRGGB() {
+	testSeparate(ImageBase::BAYER_RGGB);
+}
+
+void	MosaicTest::testSeparateGRBG() {
+	testSeparate(ImageBase::BAYER_GRBG);
+}
+
+void	MosaicTest::testSeparateGBRG() {
+	testSeparate(ImageBase::BAYER_GBRG);
+}
+
+void	MosaicTest::testSeparateBGGR() {
+	testSeparate(ImageBase::BAYER_BGGR);
 }
 
 } // namespace test
