@@ -133,6 +133,9 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
  * the camera can return natively. For all other pixel formats, the
  * application should use the provided conversion functions.
  */
+class Cooler;
+typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
+
 class	Ccd {
 protected:
 	CcdInfo	info;
@@ -145,6 +148,8 @@ public:
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
 	const astro::image::ImageSize&	getSize() const { return info.size; }
+
+	// methods to start/stop exposures
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
@@ -164,6 +169,9 @@ public:
 		throw (not_implemented);
 	virtual astro::image::RGBImagePtr	rgbImage()
 		throw (not_implemented);
+
+	// handling the cooler
+	virtual CoolerPtr	getCooler() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
 
@@ -184,6 +192,25 @@ public:
 	virtual CcdPtr	getCcd(int id) = 0;
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
+
+/**
+ * \brief Coole abstraction
+ *
+ * Some CCDs of some cameras have a thermoelectric cooler that helps reduce
+ * chip temperature and noise. This class abstracts what such coolers can do
+ * to the bare minimum: query and set the temperature. The temperatures
+ * are always in K. This may look awkward, but the philosophy everywhere in
+ * this projects is to use SI units. It is better to have a general rule
+ * regarding units than to have to document units for every value.
+ */
+class Cooler {
+	float	temperature;
+public:
+	Cooler();
+	virtual ~Cooler();
+	virtual float	getTemperature();
+	virtual void	setTemperature(const float temperature);
+};
 
 /**
  * \brief Camera locator

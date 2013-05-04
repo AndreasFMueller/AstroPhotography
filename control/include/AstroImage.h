@@ -54,7 +54,7 @@ public:
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(int x, int y) const;
-	float	chi(int x, int y) const;
+	int	chi(int x, int y) const;
 };
 
 /**

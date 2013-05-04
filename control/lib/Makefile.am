@@ -36,7 +36,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp \
 	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
-	Ccd.cpp \
+	Ccd.cpp Cooler.cpp \
 	Fits.cpp \
 	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \

@@ -123,5 +123,12 @@ astro::image::RGBImagePtr	Ccd::rgbImage() throw (not_implemented) {
 	throw not_implemented("rgbImage not implemented");
 }
 
+/**
+ * \brief Retrieve a cooler
+ */
+CoolerPtr	Ccd::getCooler() throw (not_implemented) {
+	throw not_implemented("thermoelectric cooler not implemented");
+}
+
 } // namespace camera
 } // namespace astro

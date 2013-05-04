@@ -92,8 +92,8 @@ bool	ImageSize::contains(int x, int y) const {
  * \param x
  * \param y
  */
-float	ImageSize::chi(int x, int y) const {
-	return contains(x, y) ? 1. : 0.;
+int	ImageSize::chi(int x, int y) const {
+	return contains(x, y) ? 1 : 0;
 }
 
 } // namespace image
