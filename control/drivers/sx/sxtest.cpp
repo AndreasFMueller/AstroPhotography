@@ -26,10 +26,12 @@ public:
 	void	setUp();
 	void	tearDown();
 	void	testList();
+	void	testCooler();
 	void	testCamera();
 
 	CPPUNIT_TEST_SUITE(sxtest);
 	CPPUNIT_TEST(testList);
+	CPPUNIT_TEST(testCooler);
 	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -58,6 +60,30 @@ void	sxtest::testList() {
 			i->c_str());
 	}
 #endif
+}
+
+void	sxtest::testCooler() {
+	std::vector<std::string>	cameras = locator->getCameralist();
+	CameraPtr	camera = locator->getCamera(*cameras.begin());
+	CcdPtr	ccd = camera->getCcd(0);
+	CoolerPtr	cooler = ccd->getCooler();
+	CPPUNIT_ASSERT(cooler->getActualTemperature() > 250);
+	float	temp = cooler->getActualTemperature();
+	float	newtemp = cooler->getActualTemperature();
+	float	targettemperature = 283.1;
+	cooler->setTemperature(targettemperature);
+	cooler->setOn(true);
+	CPPUNIT_ASSERT(cooler->getSetTemperature() == targettemperature);
+	for (int time = 0; time < 60; time++) {
+		sleep(1);
+		float	newtemp = cooler->getActualTemperature();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "target: %.1f, actual: %.1f",
+			targettemperature, newtemp);
+		if ((fabs(newtemp - targettemperature)) < 0.3) {
+			return;
+		}
+	}
+	CPPUNIT_ASSERT(newtemp < temp - 9);
 }
 
 void	sxtest::testCamera() {

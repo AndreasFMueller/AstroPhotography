@@ -23,6 +23,26 @@ SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 SxCcd::~SxCcd() {
 }
 
+/**
+ * \brief Get the thermoelectric cooler
+ *
+ * This method builds a SxCooler objects and wraps in a CoolerPtr smart
+ * pointer.
+ */
+CoolerPtr	SxCcd::getCooler() throw (not_implemented) {
+	if (0 != ccdindex) {
+		throw std::runtime_error("only imaging CCD has cooler");
+	}
+	return CoolerPtr(new SxCooler(camera));
+}
+
+/**
+ * \brief get the exposure status.
+ *
+ * This method does not query the actual camera status, but only the current
+ * flag. So it may return a busy state although the exposure has long been
+ * completed.
+ */
 Exposure::State	SxCcd::exposureStatus() throw (not_implemented) {
 	return state;
 }

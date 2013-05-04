@@ -42,7 +42,7 @@ namespace sx {
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	// the default is to use the 
-	useControlRequests = false;
+	useControlRequests = true;
 
 	// make sure the device is open
 	deviceptr->open();

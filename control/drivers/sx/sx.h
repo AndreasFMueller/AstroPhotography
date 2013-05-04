@@ -74,6 +74,11 @@ typedef struct sx_camera_model_s {
 	uint16_t	model;
 } __attribute__((packed)) sx_camera_model_t;
 
+typedef struct sx_cooler_temperature_s {
+	uint16_t	temperature;
+	uint8_t		status;
+} __attribute__((packed)) sx_cooler_temperature_t;
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

@@ -208,8 +208,11 @@ class Cooler {
 public:
 	Cooler();
 	virtual ~Cooler();
-	virtual float	getTemperature();
+	virtual float	getSetTemperature();
+	virtual float	getActualTemperature();
 	virtual void	setTemperature(const float temperature);
+	virtual bool	isOn();
+	virtual void	setOn(bool onoff);
 };
 
 /**

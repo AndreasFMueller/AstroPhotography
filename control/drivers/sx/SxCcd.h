@@ -19,6 +19,28 @@ namespace camera {
 namespace sx {
 
 /**
+ * \brief Starlight Express Cooler abstraction
+ *
+ * The Starlight Express cameras do have a cooler and a proprietary API,
+ * this class encapsulates that.
+ */
+class SxCooler : public Cooler {
+	SxCamera&	camera;
+	bool	cooler_on;
+	float	settemperature;
+	float	actualtemperature;
+	void	cmd();
+public:
+	SxCooler(SxCamera& camera);
+	virtual	~SxCooler();
+	//virtual float	getSetTemperature();
+	virtual float	getActualTemperature();
+	virtual void	setTemperature(float temperature);
+	virtual bool	isOn();
+	virtual	void	setOn(bool onoff);
+};
+
+/**
  * \brief Basic Starlight Express class
  *
  * Most Starlight Express cameras have a progressive CCD and are relatively
@@ -36,6 +58,7 @@ public:
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
 	virtual ShortImagePtr	shortImage() throw (not_implemented);
+	virtual CoolerPtr	getCooler() throw (not_implemented);
 };
 
 /**
