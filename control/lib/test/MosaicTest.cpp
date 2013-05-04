@@ -273,20 +273,6 @@ void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
 	Mosaic<unsigned char>	mosaicer(mosaic);
 	Image<unsigned char>	*mosaiced = mosaicer(image);
 
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
-			if (mosaiced->isR(x, y)) {
-				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'R');
-			}
-			if (mosaiced->isG(x, y)) {
-				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'G');
-			}
-			if (mosaiced->isB(x, y)) {
-				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'B');
-			}
-		}
-	}
-
 	Demosaic<unsigned char>	demosaic;
 
 	Image<RGB<unsigned char> >	*demosaiced = demosaic(*mosaiced);
@@ -294,12 +280,16 @@ void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
 		&& (demosaiced->size.height == 62));
 	delete mosaiced;
 	
-	std::string	filename = stringprintf("demosaiced%d.fits", mosaic);
-	unlink(filename.c_str());
-	FITSoutfile<RGB<unsigned char> >	*outfile
-		= new FITSoutfile<RGB<unsigned char> >(filename.c_str());
-	outfile->write(*demosaiced);
-	delete outfile;
+	for (int x = 0; x < image.size.width; x++) {
+		for (int y = 0; y < image.size.height; y++) {
+			CPPUNIT_ASSERT((demosaiced->pixel(x, y).R == 0)
+				|| (demosaiced->pixel(x, y).R == 'R'));
+			CPPUNIT_ASSERT((demosaiced->pixel(x, y).G == 0)
+				|| (demosaiced->pixel(x, y).G == 'G'));
+			CPPUNIT_ASSERT((demosaiced->pixel(x, y).B == 0)
+				|| (demosaiced->pixel(x, y).B == 'B'));
+		}
+	}
 
 	delete demosaiced;
 }
