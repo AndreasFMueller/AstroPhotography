@@ -101,6 +101,14 @@ EndpointDescriptor::usage_type	EndpointDescriptor::usageType() const {
 	return (usage_type)((0x3 << 4) & bmAttributes());
 }
 
+bool	EndpointDescriptor::isIN() const {
+	return (bEndpointAddress() & 0x80) ? true : false;
+}
+
+bool	EndpointDescriptor::isOUT() const {
+	return !isIN();
+}
+
 /**
  * \brief Maximum number of databytes that can be transferred per second.
  *

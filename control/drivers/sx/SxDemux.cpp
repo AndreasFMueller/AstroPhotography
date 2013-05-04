@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperwil
  */
 #include <SxDemux.h>
+#include <debug.h>
 
 namespace astro {
 namespace camera {
@@ -15,8 +16,17 @@ namespace sx {
 
 /**
  * \brief Create a field object.
+ *
+ * \param _size	size of the image object of which this field is a part
+ * \param l	length of the data block (should be size.with * size.height / 2)
  */
-Field::Field(size_t l) : length(l) {
+Field::Field(ImageSize _size, size_t l) : size(_size), length(l) {
+	if (size.width * size.height != 2 * l) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "%dx%d image expects length %d, "
+			"%d found", size.width, size.height,
+			size.width * size.height / 2, length);
+		throw std::logic_error("image size and field size mismatch");
+	}
 	data = new unsigned short[length];
 }
 
@@ -38,6 +48,7 @@ Field::~Field() {
  * \param scale
  */
 void	Field::rescale(double scale) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescale field by factor %f", scale);
 	for (size_t i = 0; i < length; i++) {
 		unsigned long	rescaled = data[i] * scale;
 		if (rescaled > 0xffff) {
@@ -48,6 +59,35 @@ void	Field::rescale(double scale) {
 	}
 }
 
+/**
+ * \brief Output of fields (mainly for testing)
+ *
+ * 
+ */
+std::ostream&	operator<<(std::ostream& out, const Field& field) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing length %d field from "
+		"%d x %d image", field.length,
+		field.size.width, field.size.height);
+	out.write((const char *)&field.size.width, sizeof(field.size.width));
+	out.write((const char *)&field.size.height, sizeof(field.size.height));
+	out.write((const char *)&field.length, sizeof(field.length));
+	out.write((const char *)field.data, 2 * field.length);
+	return out;
+}
+
+/**
+ * \brief Input of fields (mainly for testing)
+ */
+std::istream&	operator>>(std::istream& in, Field& field) {
+	in.read((char *)&field.size.width, sizeof(field.size.width));
+	in.read((char *)&field.size.height, sizeof(field.size.height));
+	in.read((char *)&field.length, sizeof(field.length));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading length %d field", field.length);
+	delete [] field.data;
+	field.data = new unsigned short[field.length];
+	in.read((char *)field.data, 2 * field.length);
+	return in;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Demuxer base class implementation
@@ -92,15 +132,37 @@ void	Demuxer::LEXIP(Image<unsigned short>& image, int x, int y,
 	set_pixel(image, width - x, y, v);
 }
 
+void	Demuxer::set_quad(Image<unsigned short>& image, int x, int y,
+		const Field& field, int off) {
+	int     p;
+	p = perm[0] << 1; PIXEL(image, x + 0, y + 0, field.data[off + p]);
+	p = perm[1] << 1; PIXEL(image, x + 2, y + 0, field.data[off + p]);
+	p = perm[2] << 1; PIXEL(image, x + 0, y + 2, field.data[off + p]);
+	p = perm[3] << 1; PIXEL(image, x + 2, y + 2, field.data[off + p]);
+}
+
+void	Demuxer::set_quad_back(Image<unsigned short>& image,
+		int x, int y, const Field& field, int off) {
+	int     p;
+	p = permb[0] << 1; LEXIP(image, x + 0, y + 0, field.data[off + p]);
+	p = permb[1] << 1; LEXIP(image, x + 2, y + 0, field.data[off + p]);
+	p = permb[2] << 1; LEXIP(image, x + 0, y + 2, field.data[off + p]);
+	p = permb[3] << 1; LEXIP(image, x + 2, y + 2, field.data[off + p]);
+}
+
 //////////////////////////////////////////////////////////////////////
 // DemuxerBinned base class implementation
 //////////////////////////////////////////////////////////////////////
 DemuxerBinned::DemuxerBinned() {
 	offset = 0;
 	perm[0] = 1;
-	perm[1] = 3;
-	perm[2] = 0;
+	perm[1] = 0;
+	perm[2] = 3;
 	perm[3] = 2;
+	permb[0] = 0;
+	permb[1] = 1;
+	permb[2] = 2;
+	permb[3] = 3;
 	greenx = 0; greeny = 0;
 	redx = 0; redy = 0;
 	bluex = 0; bluey = 0;
@@ -109,27 +171,10 @@ DemuxerBinned::DemuxerBinned() {
 DemuxerBinned::~DemuxerBinned() {
 }
 
-void	DemuxerBinned::set_quad(Image<unsigned short>& image, int x, int y,
-		const Field& field, int off) {
-	int     p;
-	p = perm[0] << 1; PIXEL(image, x + 0, y + 0, field.data[off + p]);
-	p = perm[1] << 1; PIXEL(image, x + 0, y + 2, field.data[off + p]);
-	p = perm[2] << 1; PIXEL(image, x + 2, y + 0, field.data[off + p]);
-	p = perm[3] << 1; PIXEL(image, x + 2, y + 2, field.data[off + p]);
-}
-
-void	DemuxerBinned::set_quad_back(Image<unsigned short>& image,
-		int x, int y, const Field& field, int off) {
-	int     p;
-	p = perm[2] << 1; LEXIP(image, x + 0, y + 0, field.data[off + p]);
-	p = perm[3] << 1; LEXIP(image, x + 0, y + 2, field.data[off + p]);
-	p = perm[1] << 1; LEXIP(image, x + 2, y + 2, field.data[off + p]);
-	p = perm[0] << 1; LEXIP(image, x + 2, y + 0, field.data[off + p]);
-}
-
 void	DemuxerBinned::operator()(Image<unsigned short>& image,
 		const Field& field1, const Field& field2) {
 	Demuxer::operator()(image, field1, field2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "binned demultiplexer");
 
 	int	off = 2 * offset + 1;
 	for (int x = 0; x < width; x += 4) {
@@ -175,10 +220,10 @@ void	DemuxerBinned::operator()(Image<unsigned short>& image,
 
 DemuxerUnbinned::DemuxerUnbinned() {
 	offset = 0;
-	perm[0] = 0;
-	perm[1] = 1;
-	perm[2] = 2;
-	perm[3] = 3;
+	perm[0] = permb[0] = 0;
+	perm[1] = permb[1] = 1;
+	perm[2] = permb[2] = 2;
+	perm[3] = permb[3] = 3;
 	greenx = 0; greeny = 0;
 	redx = 0; redy = 0;
 	bluex = 0; bluey = 0;
@@ -198,27 +243,10 @@ DemuxerUnbinned::~DemuxerUnbinned() {
 #define GRSHIFTX        0
 #define GRSHIFTY        0
 
-void	DemuxerUnbinned::set_quad(Image<unsigned short>& image, int x, int y,
-		const Field& field, int off) {
-	int     p;
-	p = perm[0] << 1; PIXEL(image, x + 0, y + 0, field.data[off + p]);
-	p = perm[1] << 1; PIXEL(image, x + 2, y + 0, field.data[off + p]);
-	p = perm[2] << 1; PIXEL(image, x + 0, y + 2, field.data[off + p]);
-	p = perm[3] << 1; PIXEL(image, x + 2, y + 2, field.data[off + p]);
-}
-
-void	DemuxerUnbinned::set_quad_back(Image<unsigned short>& image,
-		int x, int y, const Field& field, int off) {
-	int     p;
-	p = perm[0] << 1; LEXIP(image, x + 0, y + 0, field.data[off + p]);
-	p = perm[1] << 1; LEXIP(image, x + 2, y + 0, field.data[off + p]);
-	p = perm[2] << 1; LEXIP(image, x + 0, y + 2, field.data[off + p]);
-	p = perm[3] << 1; LEXIP(image, x + 2, y + 2, field.data[off + p]);
-}
-
 void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 		const Field& field1, const Field& field2) {
 	Demuxer::operator()(image, field1, field2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unbinned demultiplexer");
 
 	int	off = 2 * offset + 1;
 	for (int x = 0; x < width; x += 4) {

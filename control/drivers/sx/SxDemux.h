@@ -18,13 +18,19 @@ namespace sx {
  * \brief A field to be demultiplexed later
  */
 class	Field {
-public:
+	ImageSize	size;
 	size_t	length;
+public:
 	unsigned short	*data;
-	Field(size_t l);
+	Field(ImageSize size, size_t l);
 	~Field();
+	size_t	getLength() const { return length; }
 	void	rescale(double scale);
+	friend std::ostream&	operator<<(std::ostream&, const Field& field);
+	friend std::istream&	operator>>(std::istream&, Field& field);
 };
+std::ostream&	operator<<(std::ostream&, const Field& field);
+std::istream&	operator>>(std::istream&, Field& field);
 
 /**
  * \brief The demultiplexer base class
@@ -34,6 +40,7 @@ class Demuxer {
 protected:
 	int	offset;
 	int	perm[4];
+	int	permb[4];
 	int	greenx;
 	int	greeny;
 	int	redx;
@@ -49,6 +56,10 @@ protected:
 			unsigned short v);
 	void	LEXIP(Image<unsigned short>& image, int x, int y,
 			unsigned short v);
+	void	set_quad(Image<unsigned short>& image, int x, int y,
+		const Field& field, int offset);
+	void	set_quad_back(Image<unsigned short>& image, int x, int y,
+		const Field& field, int offset);
 public:
 	Demuxer();
 	virtual	~Demuxer();
@@ -57,10 +68,6 @@ public:
 };
 
 class DemuxerBinned : public Demuxer {
-	void	set_quad(Image<unsigned short>& image, int x, int y,
-		const Field& field, int offset);
-	void	set_quad_back(Image<unsigned short>& image, int x, int y,
-		const Field& field, int offset);
 public:
 	DemuxerBinned();
 	virtual ~DemuxerBinned();
@@ -69,10 +76,6 @@ public:
 };
 
 class DemuxerUnbinned : public Demuxer {
-	void	set_quad(Image<unsigned short>& image, int x, int y,
-		const Field& field, int offset);
-	void	set_quad_back(Image<unsigned short>& image, int x, int y,
-		const Field& field, int offset);
 public:
 	DemuxerUnbinned();
 	virtual ~DemuxerUnbinned();

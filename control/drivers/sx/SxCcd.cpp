@@ -59,7 +59,7 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, ccdindex,
 		(uint8_t)SX_CMD_READ_PIXELS_DELAYED, (uint16_t)0, &rpd);
-	camera.getDevicePtr()->controlRequest(&request);
+	camera.controlRequest(&request);
 
 	// we are now in exposing state
 	state = Exposure::exposing;
@@ -77,17 +77,11 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	int	size = 2 * exposure.frame.size.pixels;
 	unsigned short	*data = new unsigned short[size];
 
-	// claim the interface
-	camera.getInterface()->claim();
-
 	// read the data from the data endpoint
 	BulkTransfer	transfer(camera.getEndpoint(), size, (unsigned char *)data);
 
 	// submit the transfer
 	camera.getDevicePtr()->submit(&transfer);
-
-	// release the interface again
-	camera.getInterface()->release();
 
 	// now the camera is no longer busy, i.e. we have to reset the state
 	state = Exposure::idle;

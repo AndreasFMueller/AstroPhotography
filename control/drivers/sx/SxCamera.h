@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
+#include <sx.h>
 
 using namespace astro::camera;
 using namespace astro::usb;
@@ -21,14 +22,25 @@ class SxCamera : public Camera {
 	uint16_t	model;
 	uint16_t	product;
 	InterfacePtr	interface;
-	EndpointDescriptorPtr	dataendpoint;
+	EndpointDescriptorPtr	outendpoint;
+	EndpointDescriptorPtr	inendpoint;
+	bool	useControlRequests;
+	sx_firmware_version_t	firmware_version;
 public:
+	// USB related methods
 	DevicePtr	getDevicePtr();
-	SxCamera(DevicePtr& devptr);
-	virtual ~SxCamera();
-	virtual CcdPtr	getCcd(int id);
 	EndpointDescriptorPtr	getEndpoint();
 	InterfacePtr	getInterface();
+
+	// constructors
+	SxCamera(DevicePtr& devptr);
+	virtual ~SxCamera();
+
+	// ccd access
+	virtual CcdPtr	getCcd(int id);
+
+	// request handling
+	void	controlRequest(RequestBase *request);
 };
 
 

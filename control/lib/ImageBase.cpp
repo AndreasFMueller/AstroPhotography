@@ -10,6 +10,25 @@ namespace astro {
 namespace image {
 
 /**
+ * \brief Construct an image base from size parameters
+ */
+ImageBase::ImageBase(int w, int h) : size(w, h) {
+	mosaic = NONE;
+}
+
+ImageBase::ImageBase(const ImageSize& _size) : size(_size) {
+	mosaic = NONE;
+}
+
+ImageBase::ImageBase(const ImageRectangle& frame) : size(frame.size) {
+	mosaic = NONE;
+}
+
+ImageBase::ImageBase(const ImageBase& other) : size(other.size) {
+	mosaic = other.mosaic;
+}
+
+/**
  * \brief Compare two images
  *
  * Two images are considered equal if the have identical size.

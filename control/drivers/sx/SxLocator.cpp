@@ -19,7 +19,7 @@ namespace sx {
 #define	SX_VENDOR_ID	0x1278
 
 SxCameraLocator::SxCameraLocator() {
-	context.setDebugLevel(0);
+	context.setDebugLevel(3);
 }
 
 SxCameraLocator::~SxCameraLocator() {

@@ -277,6 +277,8 @@ public:
 	virtual uint16_t	wValue() const = 0;
 	virtual uint16_t	wIndex() const;
 	virtual uint16_t	wLength() const = 0;
+	virtual const usb_request_header_t&	getHeader() const = 0;
+	virtual const void	*getPacket() const = 0;
 private:
 	virtual void	setwLength(int length) = 0;
 public:
@@ -388,6 +390,14 @@ public:
 	virtual uint16_t	wLength() const {
 		return sizeof(T);
 	}
+
+	virtual const usb_request_header_t&	getHeader() const {
+		return packet.header;
+	}
+
+	virtual const void	*getPacket() const {
+		return &packet;
+	}
 private:
 	virtual void	setwLength(int length) {
 		packet.header.wLength = length;
@@ -417,10 +427,12 @@ public:
 	virtual uint16_t	wValue() const;
 	virtual uint16_t	wIndex() const;
 	virtual uint16_t	wLength() const;
+	virtual const usb_request_header_t&	getHeader() const;
 private:
 	virtual void	setwLength(int length);
 public:
 	virtual uint8_t	*payload() const;
+	virtual const void	*getPacket() const;
 };
 
 /**
@@ -623,6 +635,8 @@ public:
 	bool	isIsochronous() const;
 	bool	isBulk() const;
 	bool	isInterrupt() const;
+	bool	isIN() const;
+	bool	isOUT() const;
 
 	// special information for isochronous endpoints
 	typedef enum { no_sync = 0x0, async_sync = 0x4, adaptive_sync = 0x8,

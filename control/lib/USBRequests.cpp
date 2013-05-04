@@ -195,8 +195,16 @@ uint16_t        EmptyRequest::wLength() const {
 	return 0;
 }
 
+const usb_request_header_t&	EmptyRequest::getHeader() const {
+	return header;
+}
+
 uint8_t *EmptyRequest::payload() const {
 	return NULL;
+}
+
+const void	*EmptyRequest::getPacket() const {
+	return &header;
 }
 
 } // namespace usb

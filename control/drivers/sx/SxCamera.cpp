@@ -17,16 +17,66 @@ namespace sx {
 #define	SX_MODEL_M26C	0x005a
 #define SX_PRODUCT_M26C	0x0326
 
+#define	STAR2000_PORT		(1 << 0)
+#define COMPRESSED_PIXEL_FORMAT	(1 << 1)
+#define EEPROM			(1 << 2)
+#define	INTEGRATED_GUIDER	(1 << 3)
+
 /**
  * \brief Create a new Camera from a USB device pointer
  *
  * \param _deviceptr	USB device pointer
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
+	// the default is to use the 
+	useControlRequests = false;
+
 	// make sure the device is open
 	deviceptr->open();
 	product = deviceptr->descriptor()->idProduct();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product = %04x", product);
+
+	// now get the data interface ...
+	ConfigurationPtr	conf = deviceptr->activeConfig();
+	std::cout << *conf;
+	interface = (*conf)[0];
+
+	// and also claim it, we will need it all the time
+	try {
+		interface->claim();
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot claim the data interface: %s", x.what());
+		throw x;
+	}
+
+	// ... and endpoint
+	InterfaceDescriptorPtr	ifdesc = (*interface)[0];
+	EndpointDescriptorPtr	endpoint0 = (*ifdesc)[0];
+	EndpointDescriptorPtr	endpoint1 = (*ifdesc)[1];
+	if (endpoint0->isIN()) {
+		inendpoint = endpoint0;
+		outendpoint = endpoint1;
+	} else {
+		inendpoint = endpoint1;
+		outendpoint = endpoint0;
+	}
+	if (debuglevel >= LOG_DEBUG) {
+		std::cout << "IN endpoint:" << std::endl;
+		std::cout << *inendpoint;
+		std::cout << "OUT endpoint:" << std::endl;
+		std::cout << *outendpoint;
+	}
+
+	// learn the firmware version
+	Request<sx_firmware_version_t>	versionrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_GET_FIRMWARE_VERSION, (uint16_t)0);
+	controlRequest(&versionrequest);
+	firmware_version = *versionrequest.data();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "firmware version: %d.%d",
+		firmware_version.major_version, firmware_version.minor_version);
 
 	// learn the model number
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get model number");
@@ -34,7 +84,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, (uint16_t)0,
 		(uint8_t)SX_CMD_CAMERA_MODEL, (uint16_t)0);
-	deviceptr->controlRequest(&modelrequest);
+	controlRequest(&modelrequest);
 	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
@@ -43,7 +93,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
                 RequestBase::vendor_specific_type,
                 RequestBase::device_recipient, (uint16_t)0,
                 (uint8_t)SX_CMD_GET_CCD_PARAMS, (uint16_t)0);
-        deviceptr->controlRequest(&ccd0request);
+        controlRequest(&ccd0request);
 	sx_ccd_params_t	params = *ccd0request.data();
 
 	// now create a CcdInfo structure for this device
@@ -64,14 +114,14 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// try to get the same information from the second CCD, if there
 	// is one
-	try {
+	if (ccd0request.data()->extra_capabilities & INTEGRATED_GUIDER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "create Tracking CCD info");
 		// get information about this CCD from the camera
 		Request<sx_ccd_params_t>        ccd1request(
 			RequestBase::vendor_specific_type,
 			RequestBase::device_recipient, (uint16_t)1,
 			(uint8_t)SX_CMD_GET_CCD_PARAMS, (uint16_t)0);
-		deviceptr->controlRequest(&ccd1request);
+		controlRequest(&ccd1request);
 		params = *ccd1request.data();
 
 		CcdInfo	ccd1;
@@ -79,20 +129,17 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		ccd1.name = "Tracking";
 		ccd1.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd1);
-	} catch (std::exception& x) {
+	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	}
-
-	// now get the data interface and endpoint
-	ConfigurationPtr	conf = deviceptr->activeConfig();
-	std::cout << *conf;
-	interface = (*conf)[0];
-	InterfaceDescriptorPtr	ifdesc = (*interface)[0];
-	dataendpoint = (*ifdesc)[0];
-	std::cout << *dataendpoint;
 }
 
 SxCamera::~SxCamera() {
+	try {
+		interface->release();
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release: %s", x.what());
+	}
 }
 
 /**
@@ -130,11 +177,64 @@ DevicePtr	SxCamera::getDevicePtr() {
  * \brief Get the data endpoint
  */
 EndpointDescriptorPtr	SxCamera::getEndpoint() {
-	return dataendpoint;
+	return inendpoint;
 }
 
 InterfacePtr	SxCamera::getInterface() {
 	return interface;
+}
+
+/**
+ * \brief Control requests.
+ *
+ * The Starlight Express documentation says that all commands can be sent
+ * to the control interface or the out endpoint. But at least for the
+ * M26C camera, this seems not to be true, the READ_PIXELS command seems
+ * to hang the camera, and other commands seem not to work correctly. So 
+ * We cannot use the controlRequest method of the USBDevice, but must
+ * rather reimplement control request handling via the bulk endpoints.
+ */
+void	SxCamera::controlRequest(RequestBase *request) {
+	if (useControlRequests) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface");
+		deviceptr->controlRequest(request);
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request %p on data interface",
+		request);
+
+	// we first analyse whether this is a control request with a
+	// in data phase, because then the packet size to send is just
+	// the request header, end there will an additional transfer from
+	// the IN endpoint
+	size_t	receivelength = (request->bmRequestType() & RequestBase::device_to_host) ? request->wLength() : 0;
+	size_t	sendlength = (receivelength) ? sizeof(usb_request_header_t) : request->wLength();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request size send: %d, receive %d",
+		sendlength, receivelength);
+
+	// send phase
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing OUT transfer: %p",
+		request->getPacket());
+	BulkTransfer	out(outendpoint, sendlength,
+		(unsigned char *)request->getPacket());
+	if (0 == receivelength) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
+			request->payloadHex().c_str());
+	}
+	deviceptr->submit(&out);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "OUT transfer complete");
+
+	// if there is no IN data phase, we are done
+	if (0 == receivelength) {
+		return;
+	}
+
+	// optional receive phase of the control request
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing IN transfer");
+	BulkTransfer	in(inendpoint, receivelength, request->payload());
+	deviceptr->submit(&in);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "IN transfer complete:\n%s",
+		request->payloadHex().c_str());
 }
 
 } // namespace sx

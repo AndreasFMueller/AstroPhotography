@@ -10,6 +10,7 @@
 #include <sx.h>
 #include <debug.h>
 #include <SxDemux.h>
+#include <fstream.h>
 
 #define	EXPOSURE_FIELD_CUTOVER		10
 #define EXPOSURE_ADCONVERSION_TIME	30000
@@ -81,9 +82,8 @@ Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
 	size_t	l = (m26c.frame.size.width / m26c.mode.getX())
 		* (m26c.frame.size.height / m26c.mode.getY());
-	Field	*field = new Field(l);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u",
-		field->length);
+	Field	*field = new Field(exposure.frame.size, l);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u", l);
 
 	// perform the data transfer
 	try {
@@ -135,7 +135,7 @@ void	SxCcdM26C::exposeField(int field) {
 			RequestBase::device_recipient, ccdindex,
 			(uint8_t)SX_CMD_READ_PIXELS_DELAYED,
 			(uint16_t)(1 << field), &rpd);
-		camera.getDevicePtr()->controlRequest(&request);
+		camera.controlRequest(&request);
 	} catch (std::exception &x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
 			x.what());
@@ -174,7 +174,7 @@ void	SxCcdM26C::requestField(int field) {
 			RequestBase::device_recipient, ccdindex,
 			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)(1 << field),
 			&rp);
-		camera.getDevicePtr()->controlRequest(&request);
+		camera.controlRequest(&request);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
 			x.what());
@@ -202,7 +202,7 @@ void	SxCcdM26C::requestField(int field) {
 			(uint8_t)SX_CMD_READ_PIXELS_DELAYED,
 			CCD_FLAGS_NOCLEAR_FRAME | (uint16_t)(1 << field),
 			&rpd);
-		camera.getDevicePtr()->controlRequest(&request);
+		camera.controlRequest(&request);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
 			x.what());
@@ -306,20 +306,16 @@ void	SxCcdM26C::startExposure(const Exposure& exposure)
 ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
 
-	// claim the interface, we need this for the transfers
-	try {
-		camera.getInterface()->claim();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d claimed",
-			camera.getInterface()->interfaceNumber());
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot claim interface: %s",
-			x.what());
-		throw x;
-	}
-
 	// read the right number of pixels from the IN endpoint
 	Field	*field0 = readField();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "field 0 transferred");
+	if (debuglevel == LOG_DEBUG) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing field 0");
+		ofstream	out("field0.raw", std::ofstream::binary);
+		out << *field0;
+		out.close();
+	}
+
 
 	// for long exposures, we just read the second field.
 	Field	*field1 = NULL;
@@ -335,15 +331,11 @@ ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 	// read the second field
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read field 1");
 	field1 = readField();
-
-	// release the interface again, we no longer need it
-	try {
-		camera.getInterface()->release();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d released",
-			camera.getInterface()->interfaceNumber());
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release interface. %s",
-			x.what());
+	if (debuglevel == LOG_DEBUG) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing field 1");
+		ofstream	out("field1.raw", std::ofstream::binary);
+		out << *field1;
+		out.close();
 	}
 
 	// rescale the first field, if we did only one exposure
@@ -353,12 +345,13 @@ ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 		field0->rescale(timer.elapsed() / exposure.exposuretime);
 	}
 
-	// prepare a new image 
+	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*image = new Image<unsigned short>(
-		exposure.frame.size.width, exposure.frame.size.height);
+		exposure.frame.size.width / exposure.mode.getX(),
+		exposure.frame.size.height /exposure.mode.getY());
 
 	// now we have to demultiplex the two fields
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "XXX demultiplex the fields");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "demultiplex the fields");
 	if (1 == exposure.mode.getX()) {
 		DemuxerUnbinned	demuxer;
 		demuxer(*image, *field0, *field1);

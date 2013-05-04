@@ -60,5 +60,41 @@ bool	ImageSize::bounds(const ImageRectangle& rect) const {
 		rect.origin.y + rect.size.height));
 }
 
+/**
+ * \brief Test whether a point is in the rectangle.
+ *
+ * \param point
+ */
+bool	ImageSize::contains(const ImagePoint& point) const {
+	return contains(point.x, point.y);
+}
+
+/**
+ * \brief Test whether a coordinate pair is in the rectangle.
+ *
+ * \param x
+ * \param y
+ */
+bool	ImageSize::contains(int x, int y) const {
+	if ((x < 0) || (x >= width)) {
+		return false;
+	}
+	if ((y < 0) || (y >= height)) {
+		return false;
+	}
+	return true;
+}
+
+/**
+ * \brief Characteristic function for the image rectangle.
+ *
+ * This method is useful for debayering algorithms.
+ * \param x
+ * \param y
+ */
+float	ImageSize::chi(int x, int y) const {
+	return contains(x, y) ? 1. : 0.;
+}
+
 } // namespace image
 } // namespace astro

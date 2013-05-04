@@ -10,7 +10,7 @@ namespace astro {
 namespace camera {
 
 std::string	Exposure::toString() const {
-	return stringprintf("%dx%d@(%d,%d)/%s for %.1fms",
+	return stringprintf("%dx%d@(%d,%d)/%s for %.3fms",
 		frame.size.width, frame.size.height,
 		frame.origin.x, frame.origin.y,
 		mode.toString().c_str(), exposuretime);

@@ -52,6 +52,9 @@ public:
 	bool	operator!=(const ImageSize& other) const;
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;
+	bool	contains(const ImagePoint& point) const;
+	bool	contains(int x, int y) const;
+	float	chi(int x, int y) const;
 };
 
 /**
@@ -100,20 +103,49 @@ public:
  * offset width-1. The pixel with pixeloffset width has image coordinates
  * (0,1).
  *
+ * An image can also have a mosaic type. Mosaic types are mainly useful
+ * for Bayer Matrix images, and the library provides some methods
+ * to convert images with nontrivial Bayer matrix into images with RGB
+ * pixels.
+ *
  * Images have immutable size and cannot be assigned, which makes them
- * quite awkward use. But because of the large data sets involved,
+ * quite awkward to use. But because of the large data sets involved,
  * a smart pointer has to be used anyway. Such smart pointers are
  * defined for the Image template class that inherits from ImageBase.
  */
 class ImageBase {
 public:
+	/**
+	 * \brief Constants describing pixel layout in bayer matrix.
+	 *
+	 * The four BAYER_ constants indicate the position of the red
+	 * pixel. The last two bits can be interpreted as the coordinates
+	 * of the red pixel in a 2x2 square of the Bayer matrix. The last
+	 * bit is the x-coordinate, the last but one bit is the y-coordinate.
+	 * so the constant 2 has last bit 0 and last but one bit 1, translating
+	 * into a bayer matrix that has the red pixel in the second row and
+	 * the first column, i.e. in the lower left corner
+	 */
+	typedef enum mosaic_e {
+		NONE = 0,
+		BAYER_RGGB = 4,
+		BAYER_GRBG = 5,
+		BAYER_GBRG = 6,
+		BAYER_BGGR = 7
+	} mosaic_type;
+	mosaic_type	mosaic;
+
 	// the size is publicly accessible, but cannot be changed
-	const ImageSize	size;
-	ImageBase(int w = 0, int h = 0) : size(w, h) { }
-	ImageBase(const ImageSize& _size) : size(_size) { }
-	ImageBase(const ImageRectangle& _frame) : size(_frame.size) { }
-	ImageBase(const ImageBase& other) : size(other.size) { }
+	ImageSize	size;
+
+	// constructors and destructor
+	ImageBase(int w = 0, int h = 0);
+	ImageBase(const ImageSize& _size);
+	ImageBase(const ImageRectangle& _frame);
+	ImageBase(const ImageBase& other);
 	virtual	~ImageBase() { }
+
+	// comparison and pixel offset computation
 	virtual bool	operator==(const ImageBase& other) const;
 	virtual int	pixeloffset(int x, int y) const;
 	virtual int	pixeloffset(const ImagePoint& p) const;

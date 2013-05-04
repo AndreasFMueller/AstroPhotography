@@ -4,13 +4,16 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SxLocator.h>
+#include <AstroIO.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
 #include <debug.h>
+#include <includes.h>
 
 using namespace astro::image;
+using namespace astro::io;
 
 namespace astro {
 namespace camera {
@@ -71,10 +74,14 @@ void	sxtest::testCamera() {
 	CcdPtr	ccd = camera->getCcd(0);
 	std::cout << ccd->getInfo() << std::endl;
 	
-	Exposure	exposure(ImageRectangle(ImagePoint(100, 100),
-		ImageSize(200, 100)), 11);
+	Exposure	exposure(ImageRectangle(ImagePoint(1800, 1200),
+		ImageSize(100, 100)), 0.1);
 	ccd->startExposure(exposure);
 	ShortImagePtr	image = ccd->shortImage();
+
+	unlink("test.fits");
+	FITSoutfile<unsigned short>	file("test.fits");
+	file.write(*image);
 }
 
 } // namespace test
