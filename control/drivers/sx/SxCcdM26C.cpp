@@ -10,7 +10,7 @@
 #include <sx.h>
 #include <debug.h>
 #include <SxDemux.h>
-#include <fstream.h>
+#include <fstream>
 
 #define	EXPOSURE_FIELD_CUTOVER		10
 #define EXPOSURE_ADCONVERSION_TIME	30000
@@ -311,7 +311,7 @@ ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "field 0 transferred");
 	if (debuglevel == LOG_DEBUG) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing field 0");
-		ofstream	out("field0.raw", std::ofstream::binary);
+		std::ofstream	out("field0.raw", std::ofstream::binary);
 		out << *field0;
 		out.close();
 	}
@@ -333,7 +333,7 @@ ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 	field1 = readField();
 	if (debuglevel == LOG_DEBUG) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing field 1");
-		ofstream	out("field1.raw", std::ofstream::binary);
+		std::ofstream	out("field1.raw", std::ofstream::binary);
 		out << *field1;
 		out.close();
 	}
