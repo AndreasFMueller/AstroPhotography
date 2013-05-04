@@ -21,10 +21,23 @@ namespace sx {
 #define COMPRESSED_PIXEL_FORMAT	(1 << 1)
 #define EEPROM			(1 << 2)
 #define	INTEGRATED_GUIDER	(1 << 3)
+#define REGULATED_COOLER	(1 << 4)
+/*
+ * the last constant is not contained in the official documentation,
+ * it is a meaning of that by conjectured in an email from Terry Platt, 
+ * <tplatt@starlight.win-uk.net>, may 4, 2013
+ */
 
 /**
  * \brief Create a new Camera from a USB device pointer
  *
+ * The constructor has the side effect of claiming the data interface of
+ * the camera. As we are doing multiple Bulk-Transfers during the lifetime
+ * of the Camera object, it does not make sense to only claim and
+ * release the interface when we need it. However this means that no other
+ * instance of the camera object can access the camera (one can also consider
+ * this a feature, not a bug). And the destructor absolutely must release
+ * interface.
  * \param _deviceptr	USB device pointer
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
@@ -134,6 +147,11 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	}
 }
 
+/**
+ * \brief Destructor for the camera class.
+ *
+ * This method releases the data interface of the camera.
+ */
 SxCamera::~SxCamera() {
 	try {
 		interface->release();
@@ -174,12 +192,20 @@ DevicePtr	SxCamera::getDevicePtr() {
 }
 
 /**
- * \brief Get the data endpoint
+ * \brief Get the data IN endpoint
+ *
+ * Note that we don't need the OUT endpoint, because that is only needed
+ * to send commands. For commands we have the controlRequest method of
+ * the camera object, which does everything for us, and does have direct
+ * access to the endpoints.
  */
 EndpointDescriptorPtr	SxCamera::getEndpoint() {
 	return inendpoint;
 }
 
+/**
+ * \brief Get the data interface of the camera
+ */
 InterfacePtr	SxCamera::getInterface() {
 	return interface;
 }
