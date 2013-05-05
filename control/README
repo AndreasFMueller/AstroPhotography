@@ -20,6 +20,10 @@ The project depends on the following external packages to compile.
 
 Mandatory packages:
 
+ - libusb: this is a common package on all Linux systems, but Mac OS X
+   users will have to download from http://www.libusb.org and compile
+   themselves.
+
  - CPPUnit: Unit testing framework for C++, available on SourceFoge:
    http://sourceforge.net/projects/cppunit/
 
@@ -27,6 +31,16 @@ Mandatory packages:
    NASA web site: http://heasarc.gsfc.nasa.gov/fitsio/
    The website also has links to online documentation here:
    http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+
+Optional packages:
+
+ - Unicap: on Linux, accessing USB Video class cameras is simplified
+   by using the Video4Linux and the Unicap library. See
+   http://unicap-imaging.org
+
+ - SBIG driver library. Astrophotography cameras by SBIG are supported
+   via the SBIG driver library, which can be obtained from the SBIG
+   website.
 
 --
 $Id$
