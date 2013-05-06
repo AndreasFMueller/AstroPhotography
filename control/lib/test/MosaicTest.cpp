@@ -13,6 +13,7 @@
 #include <iostream>
 #include <AstroIO.h>
 #include <Format.h>
+#include <includes.h>
 
 using namespace astro::image;
 using namespace astro::io;
