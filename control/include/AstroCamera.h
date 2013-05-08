@@ -66,11 +66,13 @@ public:
 	astro::image::ImageRectangle	frame;
 	float	exposuretime;
 	float	gain;
+	float	limit;
 	Binning	mode;
 
-	Exposure() : exposuretime(1.), gain(1.) { }
-	Exposure(const astro::image::ImageRectangle& _frame, float _exposuretime)
-		: frame(_frame), exposuretime(_exposuretime), gain(1.) { }
+	Exposure();
+	Exposure(const astro::image::ImageRectangle& _frame,
+		float _exposuretime);
+		
 	typedef enum state_e {
 		idle, exposing, exposed, cancelling
 	} State;

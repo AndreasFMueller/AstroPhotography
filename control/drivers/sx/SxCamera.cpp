@@ -125,6 +125,15 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
 		ccd0.toString().c_str());
 
+	// find out whether this camera has a cooler
+	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
+		hasCooler = true;
+	} else {
+		hasCooler = false;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has cooler: %s",
+		(hasCooler) ? "yes" : "no");
+
 	// try to get the same information from the second CCD, if there
 	// is one
 	if (ccd0request.data()->extra_capabilities & INTEGRATED_GUIDER) {
@@ -261,6 +270,21 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	deviceptr->submit(&in);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "IN transfer complete:\n%s",
 		request->payloadHex().c_str());
+}
+
+/**
+ * \brief Get the cooler for this camera, if it exists.
+ */
+CoolerPtr	SxCamera::getCooler(int ccdindex) {
+	if (ccdindex > 0) {
+		throw std::runtime_error("only imaging CCD has cooler");
+	}
+	if (!hasCooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no cooler");
+		throw std::runtime_error("this camera has no cooler");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating cooler object");
+	return CoolerPtr(new SxCooler(*this));
 }
 
 } // namespace sx

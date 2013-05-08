@@ -65,25 +65,32 @@ void	sxtest::testList() {
 void	sxtest::testCooler() {
 	std::vector<std::string>	cameras = locator->getCameralist();
 	CameraPtr	camera = locator->getCamera(*cameras.begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd");
 	CcdPtr	ccd = camera->getCcd(0);
-	CoolerPtr	cooler = ccd->getCooler();
-	CPPUNIT_ASSERT(cooler->getActualTemperature() > 250);
-	float	temp = cooler->getActualTemperature();
-	float	newtemp = cooler->getActualTemperature();
-	float	targettemperature = 283.1;
-	cooler->setTemperature(targettemperature);
-	cooler->setOn(true);
-	CPPUNIT_ASSERT(cooler->getSetTemperature() == targettemperature);
-	for (int time = 0; time < 60; time++) {
-		sleep(1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got CCD");
+	try {
+		CoolerPtr	cooler = ccd->getCooler();
+		CPPUNIT_ASSERT(cooler->getActualTemperature() > 250);
+		float	temp = cooler->getActualTemperature();
 		float	newtemp = cooler->getActualTemperature();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "target: %.1f, actual: %.1f",
-			targettemperature, newtemp);
-		if ((fabs(newtemp - targettemperature)) < 0.3) {
-			return;
+		float	targettemperature = 283.1;
+		cooler->setTemperature(targettemperature);
+		cooler->setOn(true);
+		CPPUNIT_ASSERT(cooler->getSetTemperature() == targettemperature);
+		for (int time = 0; time < 60; time++) {
+			sleep(1);
+			float	newtemp = cooler->getActualTemperature();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "target: %.1f, actual: %.1f",
+				targettemperature, newtemp);
+			if ((fabs(newtemp - targettemperature)) < 0.3) {
+				return;
+			}
 		}
+		CPPUNIT_ASSERT(newtemp < temp - 9);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no cooler? cause: %s", x.what());
 	}
-	CPPUNIT_ASSERT(newtemp < temp - 9);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler test complete");
 }
 
 void	sxtest::testCamera() {
@@ -100,8 +107,10 @@ void	sxtest::testCamera() {
 	CcdPtr	ccd = camera->getCcd(0);
 	std::cout << ccd->getInfo() << std::endl;
 	
-	Exposure	exposure(ImageRectangle(ImagePoint(1800, 1200),
-		ImageSize(100, 100)), 0.1);
+	Exposure	exposure(ImageRectangle(ImagePoint(176, 0),
+		ImageSize(1040, 1040)), 1200);
+	//exposure.limit = 62000;
+	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
 	ShortImagePtr	image = ccd->shortImage();
 

@@ -18,6 +18,7 @@ namespace sx {
 
 SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 	: Ccd(info), camera(_camera), ccdindex(_ccdindex) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating CCD %d", ccdindex);
 }
 
 SxCcd::~SxCcd() {
@@ -30,10 +31,13 @@ SxCcd::~SxCcd() {
  * pointer.
  */
 CoolerPtr	SxCcd::getCooler() throw (not_implemented) {
-	if (0 != ccdindex) {
-		throw std::runtime_error("only imaging CCD has cooler");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for cooler");
+	try {
+		return camera.getCooler(ccdindex);
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cooler problem: %s", x.what());
+		throw not_implemented("no cooler");
 	}
-	return CoolerPtr(new SxCooler(camera));
 }
 
 /**
@@ -71,7 +75,7 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 	rpd.width = exposure.frame.size.width;
 	rpd.height = exposure.frame.size.height;
 	rpd.x_bin = exposure.mode.getX();
-	rpd.x_bin = exposure.mode.getY();
+	rpd.y_bin = exposure.mode.getY();
 	rpd.delay = 1000 * exposure.exposuretime;
 
 	// build a control request
@@ -92,13 +96,22 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
  * always produce 16 bit deep images.
  */
 ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
-	// compute the size of the buffer, and create a buffer for the
-	// data
-	int	size = 2 * exposure.frame.size.pixels;
+	// compute the target image size, using the binning mode
+	ImageSize	targetsize(
+		exposure.frame.size.width / exposure.mode.getX(),
+		exposure.frame.size.height / exposure.mode.getY());
+
+	// compute the size of the buffer, and create a buffer for the data
+	int	size = targetsize.pixels;
 	unsigned short	*data = new unsigned short[size];
 
 	// read the data from the data endpoint
-	BulkTransfer	transfer(camera.getEndpoint(), size, (unsigned char *)data);
+	BulkTransfer	transfer(camera.getEndpoint(),
+		sizeof(unsigned short) * size, (unsigned char *)data);
+
+	// timeout depends on the actual data size we want to transfer
+	int	timeout = 1100 * exposure.exposuretime + 30000;
+	transfer.setTimeout(timeout);
 
 	// submit the transfer
 	camera.getDevicePtr()->submit(&transfer);
@@ -109,7 +122,18 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	// when the transfer completes, one can use the data for the
 	// image
 	Image<unsigned short>	*image
-		= new Image<unsigned short>(exposure.frame.size, data);
+		= new Image<unsigned short>(targetsize, data);
+
+	if (exposure.limit < INFINITY) {
+		for (int offset = 0; offset < image->size.pixels; offset++) {
+			unsigned short	pv = image->pixels[offset];
+			if (pv > exposure.limit) {
+				pv = exposure.limit;
+			}
+			image->pixels[offset] = pv;
+		}
+	}
+
 	return ShortImagePtr(image);
 }
 

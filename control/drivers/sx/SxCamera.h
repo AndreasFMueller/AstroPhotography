@@ -26,6 +26,7 @@ class SxCamera : public Camera {
 	EndpointDescriptorPtr	inendpoint;
 	bool	useControlRequests;
 	sx_firmware_version_t	firmware_version;
+	bool	hasCooler;
 public:
 	// USB related methods
 	DevicePtr	getDevicePtr();
@@ -38,6 +39,7 @@ public:
 
 	// ccd access
 	virtual CcdPtr	getCcd(int id);
+	virtual CoolerPtr	getCooler(int ccdindex);
 
 	// request handling
 	void	controlRequest(RequestBase *request);
