@@ -5,6 +5,7 @@
  */
 #include <SxLocator.h>
 #include <AstroIO.h>
+#include <AstroFilter.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -13,6 +14,7 @@
 #include <includes.h>
 
 using namespace astro::image;
+using namespace astro::image::filter;
 using namespace astro::io;
 
 namespace astro {
@@ -108,11 +110,14 @@ void	sxtest::testCamera() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(176, 0),
-		ImageSize(1040, 1040)), 1200);
+		ImageSize(1040, 1040)), 10);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
 	ShortImagePtr	image = ccd->shortImage();
+	Median<unsigned short>	median;
+	unsigned short	m = median(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "median: %hu", m);
 
 	unlink("test.fits");
 	FITSoutfile<unsigned short>	file("test.fits");

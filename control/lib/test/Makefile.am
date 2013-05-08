@@ -44,6 +44,7 @@ tests_SOURCES = tests.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
+	OperatorTest.cpp FilterTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
 	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp

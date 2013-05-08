@@ -120,5 +120,15 @@ COLOR_CONSTANTS(unsigned long, unsigned long)
 COLOR_CONSTANTS(float, unsigned int)
 COLOR_CONSTANTS(double, unsigned long)
 
+/*
+ * constants for the maximum values
+ */
+unsigned char	pixel_value_type<unsigned char>::max_value = 0xff;
+unsigned short	pixel_value_type<unsigned short>::max_value = 0xffff;
+unsigned int	pixel_value_type<unsigned int>::max_value = 0xffffffff;
+unsigned long	pixel_value_type<unsigned long>::max_value = 0xffffffff;
+float	pixel_value_type<float>::max_value = 1.0;
+double	pixel_value_type<double>::max_value = 1.0;
+
 } // image
 } // astro

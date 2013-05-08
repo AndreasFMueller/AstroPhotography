@@ -6,11 +6,13 @@
 #include <SxCcd.h>
 #include <AstroCamera.h>
 #include <AstroImage.h>
+#include <AstroFilter.h>
 #include <sx.h>
 #include <debug.h>
 #include <SxUtils.h>
 
 using namespace astro::camera;
+using namespace astro::image::filter;
 
 namespace astro {
 namespace camera {
@@ -119,11 +121,16 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 	// now the camera is no longer busy, i.e. we have to reset the state
 	state = Exposure::idle;
 
-	// when the transfer completes, one can use the data for the
-	// image
+	// when the transfer completes, one can use the data for the image
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(targetsize, data);
 
+	// images are upside down, since our origin is always the lower
+	// left corner
+	FlipOperator<unsigned short>	f;
+	f(*image);
+
+	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
 		for (int offset = 0; offset < image->size.pixels; offset++) {
 			unsigned short	pv = image->pixels[offset];
