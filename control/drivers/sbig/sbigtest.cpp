@@ -71,10 +71,10 @@ void	sbigtest::testCcd() {
 void	sbigtest::testExposure() {
 	CameraPtr	camera = locator->getCamera(0);
 	CcdPtr	ccd = camera->getCcd(0);
-	Exposure	exposure(ImageRectangle(ImagePoint(80, 50),
-		ImageSize(500, 400)), 0.02);
-	//Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
-	//	ImageSize(648, 486)), 0.02);
+	//Exposure	exposure(ImageRectangle(ImagePoint(80, 50),
+	//	ImageSize(500, 400)), 0.02);
+	Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
+		ImageSize(648, 486)), 0.02);
 	//Exposure	exposure(ImageRectangle(ImagePoint(80, 200),
 	//	ImageSize(500, 286)), 0.02);
 	std::cout << exposure << std::endl;

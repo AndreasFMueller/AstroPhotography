@@ -54,4 +54,8 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+
 #endif /* _includes_h */
