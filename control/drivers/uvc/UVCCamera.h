@@ -39,7 +39,7 @@ private:
 public:
 	UVCCamera(DevicePtr& deviceptr);
 	virtual ~UVCCamera();
-	CcdPtr	getCcd(int ccdindex);
+	CcdPtr	getCcd(size_t ccdindex);
 	CcdPtr	getCcd(const std::string& name);
 
 	void	selectFormatAndFrame(int interface, int format, int frame);

@@ -113,7 +113,7 @@ CcdPtr	UVCCamera::getCcd(const std::string& name) {
 	return CcdPtr();
 }
 
-CcdPtr	UVCCamera::getCcd(int ccdindex) {
+CcdPtr	UVCCamera::getCcd(size_t ccdindex) {
 	uvcccd_t	uc = ccds[ccdindex];
 	CcdInfo	info = ccdinfo[ccdindex];
 	return CcdPtr(new UVCCcd(info, uc.interface, uc.format, uc.frame,
