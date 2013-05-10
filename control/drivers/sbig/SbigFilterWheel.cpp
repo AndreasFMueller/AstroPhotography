@@ -152,13 +152,6 @@ unsigned int	SbigFilterWheel::currentPosition() {
 	camera.sethandle();
 	wait();
 	return currentindex;
-	try {
-		wait();
-	} catch (SbigFilterWheelTimeout& timeout) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "filter wheel timeout, init");
-		init();
-		wait();
-	}
 }
 
 /**
