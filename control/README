@@ -22,7 +22,9 @@ Mandatory packages:
 
  - libusb: this is a common package on all Linux systems, but Mac OS X
    users will have to download from http://www.libusb.org and compile
-   themselves.
+   themselves. For Mac OS X, libusb 1.0.16 or newer must be used, as
+   previous versions have bugs that cause the software to fail on that
+   plattform.
 
  - CPPUnit: Unit testing framework for C++, available on SourceFoge:
    http://sourceforge.net/projects/cppunit/
