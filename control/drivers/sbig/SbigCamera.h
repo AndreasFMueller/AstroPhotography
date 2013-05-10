@@ -15,6 +15,7 @@ namespace camera {
 namespace sbig {
 
 class SbigCcd;
+class SbigFilterWheel;
 
 class SbigCamera : public Camera {
 	unsigned short	cameraType;
@@ -23,8 +24,10 @@ class SbigCamera : public Camera {
 public:
 	SbigCamera();
 	virtual ~SbigCamera();
-	virtual CcdPtr	getCcd(int id);
+	virtual CcdPtr	getCcd(size_t id);
+	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 	friend class SbigCcd;
+	friend class SbigFilterWheel;
 };
 
 } // namespace sbig

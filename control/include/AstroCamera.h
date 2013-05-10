@@ -183,20 +183,24 @@ typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
  * A camera can have several CCDs, which are numbered sequentially starting
  * at 0. 
  */
+class FilterWheel;
+typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
+
 class	Camera {
 protected:
 	std::vector<CcdInfo>	ccdinfo;
 public:
-	Camera() { }
-	~Camera() { }
-	int	nCcds() const { return ccdinfo.size(); }
-	const CcdInfo&	getCcdInfo(size_t ccdid) { return ccdinfo[ccdid]; }
-	virtual CcdPtr	getCcd(int id) = 0;
+	Camera();
+	~Camera();
+	unsigned int	nCcds() const;
+	const CcdInfo&	getCcdInfo(size_t ccdid) const;
+	virtual CcdPtr	getCcd(size_t ccdid) = 0;
+	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 
 /**
- * \brief Coole abstraction
+ * \brief Cooler abstraction
  *
  * Some CCDs of some cameras have a thermoelectric cooler that helps reduce
  * chip temperature and noise. This class abstracts what such coolers can do
@@ -215,6 +219,22 @@ public:
 	virtual void	setTemperature(const float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+};
+
+/**
+ * \brief FilterWheel abstraction
+ *
+ * Some Cameras have an included filter wheel, while in other cases
+ * the filter wheel is controlled by a different driver
+ */
+class FilterWheel {
+public:
+	FilterWheel();
+	virtual ~FilterWheel();
+	virtual unsigned int	nFilters() = 0;
+	virtual unsigned int	currentPosition() = 0;
+	virtual void	select(size_t filterindex) = 0;
+	virtual std::string	filterName(size_t filterindex) = 0;
 };
 
 /**

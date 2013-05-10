@@ -9,6 +9,7 @@
 #include <sbigudrv.h>
 #include <utils.h>
 #include <debug.h>
+#include <SbigFilterWheel.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -56,6 +57,7 @@ SbigCamera::SbigCamera() {
 		throw SbigError(e);
 	}
 	handle = driverhandle.handle;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver handle");
 
 	// query the driver info
 	GetDriverInfoParams	driverinfoparams;
@@ -65,7 +67,9 @@ SbigCamera::SbigCamera() {
 		e = SBIGUnivDrvCommand(CC_GET_DRIVER_INFO, &driverinfoparams,
 			&driverinfo);
 		if (e != CE_NO_ERROR) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot get driver info: %s",
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot get driver info for %d: %s",
+				driverinfoparams.request,
 				sbig_error(e).c_str());
 		} else {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "driverinfo[%d]: %s "
@@ -82,6 +86,7 @@ SbigCamera::SbigCamera() {
 	GetCCDInfoResults0	ccdinforesult;
 
 	// imaging ccd
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query imaging CCD info");
 	ccdinfoparams.request = CCD_INFO_IMAGING;
 	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
 	if (e != CE_NO_ERROR) {
@@ -94,7 +99,14 @@ SbigCamera::SbigCamera() {
 			ccdinforesult.readoutInfo[0].height);
 		ccd.binningmodes.push_back(Binning(2,2));
 		switch (cameraType) {
+// this hack is needed because the header files in SBIG development kits
+// are out of sync
+#ifdef STF8300_CAMERA
 		case STF8300_CAMERA:
+#endif
+#ifdef STF_CAMERA
+		case STF_CAMERA:
+#endif
 			ccd.binningmodes.push_back(Binning(-1,-1));
 		case STT_CAMERA:
 		case STX_CAMERA:
@@ -116,8 +128,9 @@ SbigCamera::SbigCamera() {
 	}
 
 	// tracking ccd if present
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying tracking CCD info");
 	ccdinfoparams.request = CCD_INFO_TRACKING;
-	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinfo);
+	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	} else {
@@ -131,8 +144,9 @@ SbigCamera::SbigCamera() {
 	}
 
 	// external tracking ccd, if present
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "querying external tracking CCD info");
 	ccdinfoparams.request = CCD_INFO_TRACKING;
-	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinfo);
+	e = SBIGUnivDrvCommand(CC_GET_CCD_INFO, &ccdinfoparams, &ccdinforesult);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no external tracking ccd");
 	} else {
@@ -144,6 +158,8 @@ SbigCamera::SbigCamera() {
 		ccd.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd);
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
 }
 
 void	SbigCamera::sethandle() {
@@ -171,7 +187,7 @@ SbigCamera::~SbigCamera() {
 	}
 }
 
-CcdPtr	SbigCamera::getCcd(int id) {
+CcdPtr	SbigCamera::getCcd(size_t id) {
 	if ((id < 0) || (id >= ccdinfo.size())) {
 		throw std::range_error("ccd id not in range");
 	}
@@ -180,6 +196,10 @@ CcdPtr	SbigCamera::getCcd(int id) {
 
 	// now that we have he CCD info, we can create a ccd structure
 	return CcdPtr(new SbigCcd(ccd, id, *this));
+}
+
+FilterWheelPtr	SbigCamera::getFilterWheel() throw (not_implemented) {
+	return FilterWheelPtr(new SbigFilterWheel(*this));
 }
 
 } // namespace sbig

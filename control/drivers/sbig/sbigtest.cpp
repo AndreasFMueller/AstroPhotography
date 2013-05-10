@@ -10,6 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
+#include <debug.h>
 
 using namespace astro::camera::sbig;
 using namespace astro::image;
@@ -29,12 +30,14 @@ public:
 	void	testCamera();
 	void	testCcd();
 	void	testExposure();
+	void	testFilterwheel();
 
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
 	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST(testCcd);
-	CPPUNIT_TEST(testExposure);
+	//CPPUNIT_TEST(testExposure);
+	CPPUNIT_TEST(testFilterwheel);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -73,17 +76,45 @@ void	sbigtest::testExposure() {
 	CcdPtr	ccd = camera->getCcd(0);
 	//Exposure	exposure(ImageRectangle(ImagePoint(80, 50),
 	//	ImageSize(500, 400)), 0.02);
-	Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
-		ImageSize(648, 486)), 0.02);
+	//Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
+	//	ImageSize(648, 486)), 0.02);
 	//Exposure	exposure(ImageRectangle(ImagePoint(80, 200),
 	//	ImageSize(500, 286)), 0.02);
+	Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
+		ImageSize(4096, 4096)), 0.12);
 	std::cout << exposure << std::endl;
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
 	ShortImagePtr	image = ccd->shortImage();
 	// write the image to a file
+	unlink("test.fits");
 	FITSoutfile<unsigned short>	file("test.fits");
 	file.write(*image);
+}
+
+void	sbigtest::testFilterwheel() {
+	CameraPtr	camera = locator->getCamera(0);
+	CcdPtr	ccd = camera->getCcd(0);
+	FilterWheelPtr	filterwheel = camera->getFilterWheel();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filter wheel has %hu positions",
+		filterwheel->nFilters());
+	unsigned int	currentindex = filterwheel->currentPosition();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current: %u", currentindex);
+	filterwheel->select(currentindex);
+	for (unsigned int filterindex = 0;
+		filterindex < 4 /* filterwheel->nFilters() */; filterindex++) {
+		filterwheel->select(filterindex);
+		Exposure	exposure(ImageRectangle(ImagePoint(1500,1500),
+			ImageSize(1000,1000)), 0.1);
+		ccd->startExposure(exposure);
+		ccd->exposureStatus();
+		ShortImagePtr	image = ccd->shortImage();
+		char	name[128];
+		snprintf(name, sizeof(name), "test-pos%02d.fits", filterindex);
+		unlink(name);
+		FITSoutfile<unsigned short>	file(name);
+		file.write(*image);
+	}
 }
 
 } // namespace test

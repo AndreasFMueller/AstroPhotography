@@ -18,6 +18,8 @@ namespace sbig {
 
 SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
 	: Ccd(info), id(_id), camera(_camera) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d: %s", id,
+		info.toString().c_str());
 }
 
 SbigCcd::~SbigCcd() {
@@ -141,7 +143,7 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
 	unsigned short	*data = new unsigned short[arraysize];
 	unsigned short	*p = data;
-	int	linecounter = 0;
+	unsigned int	linecounter = 0;
 	while (linecounter < exposure.frame.size.height) {
 		e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
 		if (e != CE_NO_ERROR) {

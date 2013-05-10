@@ -20,7 +20,7 @@ class Mock1Camera : public Camera {
 public:
 	Mock1Camera(int _id);
 	virtual	~Mock1Camera() { }
-	virtual CcdPtr	getCcd(int id);
+	virtual CcdPtr	getCcd(size_t id);
 };
 
 } // namespace mock1
