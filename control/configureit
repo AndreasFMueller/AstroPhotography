@@ -27,12 +27,7 @@ Linux)
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap --enable-sbig
 	;;
 Darwin)
-	SBIGINCLUDE=/Library/Frameworks/SBIGUDrv.framework/Headers
-	SBIGLIB=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
-
-	CFLAGS="${CFLAGS} -I${SBIGINCLUDE}"
-	CXXFLAGS="${CXXFLAGS} -I${SBIGINCLUDE}"
-	LDFLAGS="-L/usr/local/lib -lusb-1.0 ${SBIGLIB}"
+	LDFLAGS="-L/usr/local/lib -lusb-1.0"
 	export CFLAGS CXXFLAGS LDFLAGS
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc --enable-sbig
 	;;
