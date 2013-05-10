@@ -6,6 +6,7 @@
 #include <AstroUSB.h>
 #include <ios>
 #include <iomanip>
+#include <debug.h>
 
 namespace astro {
 namespace usb {
@@ -21,6 +22,9 @@ Context::Context() throw(USBError) {
 	if (rc != 0) {
 		throw USBError(libusb_error_name(rc));
 	}
+	const libusb_version	*version = libusb_get_version();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "libusb version: %hu.%hu.%hu",
+		version->major, version->minor, version->micro);
 }
 
 /**
