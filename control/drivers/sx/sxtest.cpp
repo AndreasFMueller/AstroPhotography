@@ -52,7 +52,7 @@ void	sxtest::tearDown() {
 }
 
 void	sxtest::testList() {
-#if 0
+#if 1
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
 	std::vector<std::string>	cameras = locator->getCameralist();
 	int	counter = 0;

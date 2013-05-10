@@ -49,20 +49,30 @@ std::vector<std::string>	SxCameraLocator::getCameralist() {
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
-		(*i)->open();
-		DeviceDescriptorPtr	descriptor = (*i)->descriptor();
-		if (SX_VENDOR_ID == descriptor->idVendor()) {
-			std::string	name
-				= stringprintf("sx:%03d:%03d:%s:%04x:%04x:%s",
+		// try to open the device. On Mac OS X, opening doesn't fail
+		// ever, but on Linux, we may not have permission to open
+		// all devices
+		try {
+			(*i)->open();
+			DeviceDescriptorPtr	descriptor = (*i)->descriptor();
+			if (SX_VENDOR_ID == descriptor->idVendor()) {
+				std::string	name = stringprintf(
+					"sx:%03d:%03d:%s:%04x:%04x:%s",
 					(*i)->getBusNumber(),
 					(*i)->getDeviceAddress(),
 					descriptor->iProduct().c_str(),
 					descriptor->idVendor(),
 					descriptor->idProduct(),
 					descriptor->iSerialNumber().c_str());
-			names.push_back(name);
+				names.push_back(name);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"SX device %s found", name.c_str());
+			}
+			(*i)->close();
+		} catch (std::exception& x) {
+			// log the error, but don't do anything about it
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device");
 		}
-		(*i)->close();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d SX cameras", names.size());
 	return names;
@@ -106,6 +116,7 @@ CameraPtr	SxCameraLocator::getCamera(const std::string& name) {
  * \return Camera with that index
  */
 CameraPtr	SxCameraLocator::getCamera(size_t index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open device %d as SX camera", index);
 	size_t	counter = 0;
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;

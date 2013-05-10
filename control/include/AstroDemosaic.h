@@ -127,7 +127,7 @@ void	DemosaicBilinear<T>::red(Image<RGB<T> > *result, const Image<T>& image) {
 				= pairv(x + redx, y + bluey, image);
 			result->pixel(x + bluex, y + redy).R
 				= pairh(x + bluex, y + redy, image);
-#endif 0
+#endif
 		}
 	}
 }

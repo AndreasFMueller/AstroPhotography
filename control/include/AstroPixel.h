@@ -62,7 +62,7 @@ struct pixel_value_type<double> {
  * dealing with function parameter specialization, not whole classes,
  * we cannot easily specialize integer arguments.
  */
-template<int v>
+template<long v>
 struct Int2Type {
 	enum { value = v };
 };
