@@ -63,7 +63,6 @@ CameraPtr	UVCCameraLocator::getCamera(const std::string& name) {
 	// now scan the device lift 
 	std::vector<DevicePtr>	devices = context.devices();
 	std::vector<DevicePtr>::iterator	i;
-	int	counter = 0;
 	for (i = devices.begin(); i != devices.end(); i++) {
 		DevicePtr	deviceptr = *i;
 		DeviceDescriptorPtr	descriptor = (*i)->descriptor();
@@ -79,7 +78,7 @@ CameraPtr	UVCCameraLocator::getCamera(size_t index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
 	std::vector<DevicePtr>	devices = context.devices();
 	std::vector<DevicePtr>::iterator	i;
-	int	counter = 0;
+	unsigned int	counter = 0;
 	for (i = devices.begin(); i != devices.end(); i++) {
 		DevicePtr	deviceptr = *i;
 		deviceptr->open();

@@ -132,7 +132,8 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
-		for (int offset = 0; offset < image->size.pixels; offset++) {
+		for (unsigned int offset = 0; offset < image->size.pixels;
+			offset++) {
 			unsigned short	pv = image->pixels[offset];
 			if (pv > exposure.limit) {
 				pv = exposure.limit;

@@ -83,7 +83,7 @@ void	ImageIteratorBaseTest::testPixeloffset() {
 	ImageIteratorBase	b(7 * 640, 8 * 640 - 1, 7 * 640, 1);
 	ImageIteratorBase	e(0, 0, -1, 0);
 	ImageIteratorBase	i;
-	int	counter = 0;
+	unsigned int	counter = 0;
 	for (i = b; i != e; i++) {
 		CPPUNIT_ASSERT(i.pixeloffset() == (7 * 640 + counter));
 		counter++;

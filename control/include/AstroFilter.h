@@ -28,7 +28,7 @@ public:
 	Max() { }
 	virtual T	operator()(const Image<T>& image) {
 		T	result = 0;
-		for (int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			if (image.pixels[i] > result) {
 				result = image.pixels[i];
 			}
@@ -45,8 +45,8 @@ class Min : public PixelTypeFilter<T> {
 public:
 	Min() { }
 	virtual T	operator()(const Image<T>& image) {
-		T	result = pixel_value_type<T>::max_value;
-		for (int i = 0; i < image.size.pixels; i++) {
+		T	result = std::numeric_limits<T>::max();
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			if (image.pixels[i] < result) {
 				result = image.pixels[i];
 			}
@@ -64,7 +64,7 @@ public:
 	Mean() { }
 	virtual T	operator()(const Image<T>& image) {
 		double	sum = 0;
-		for (int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			sum += image.pixels[i];
 		}
 		return (T)(sum / image.size.pixels);
@@ -78,6 +78,8 @@ public:
 template<typename T>
 class Median : public PixelTypeFilter<T> {
 	enum { N = 4 };
+	T	upper_limit;
+	T	lower_limit;
 
 	T	median(const Image<T>& image, const T& left, const T& right) {
 #if 0
@@ -88,7 +90,7 @@ class Median : public PixelTypeFilter<T> {
 		T	limits[N + 1];
 		int	delta = 0;
 		// reset all the limit values 
-		for (int i = 0; i < N + 1; i++) {
+		for (unsigned int i = 0; i < N + 1; i++) {
 			count[i] = 0;
 			limits[i] = left + (i * (right - left)) / N;
 			if (i > 0) {
@@ -100,9 +102,9 @@ class Median : public PixelTypeFilter<T> {
 		}
 
 		// count the number of values 
-		for (int p = 0; p < image.size.pixels; p++) {
+		for (unsigned int p = 0; p < image.size.pixels; p++) {
 			T	v = image.pixels[p];
-			for (int i = 0; i < N + 1; i++) {
+			for (unsigned int i = 0; i < N + 1; i++) {
 				if (v <= limits[i]) {
 					count[i]++;
 				}
@@ -115,7 +117,7 @@ class Median : public PixelTypeFilter<T> {
 			return limits[0];
 		}
 		if (delta <= 1) {
-			for (int i = 1; i < N + 1; i++) {
+			for (unsigned int i = 1; i < N + 1; i++) {
 				if (((2 * count[i - 1]) < image.size.pixels)
 					&& (image.size.pixels <= (2 * count[i]))) {
 					return (limits[i - 1] + limits[i]) / 2;
@@ -130,18 +132,16 @@ class Median : public PixelTypeFilter<T> {
 				<< ", count: " << count[i] << std::endl;
 		}
 #endif
-
 		// now find out in which interval we have to expect the
 		// median
 		
 		if ((2 * count[N]) < image.size.pixels) {
-			return median(image, limits[N],
-				pixel_value_type<T>::max_value);
+			return median(image, limits[N], upper_limit);
 		}
 		if (image.size.pixels <= (2 * count[0])) {
 			return median(image, 0, limits[0]);
 		}
-		for (int i = 1; i < N + 1; i++) {
+		for (unsigned int i = 1; i < N + 1; i++) {
 			if (((2 * count[i - 1]) < image.size.pixels)
 				&& (image.size.pixels <= (2 * count[i]))) {
 				return median(image, limits[i - 1], limits[i]);
@@ -152,8 +152,24 @@ class Median : public PixelTypeFilter<T> {
 public:
 	Median() { }
 	virtual T	operator()(const Image<T>& image) {
-		T	result = median(image, (T)0,
-				pixel_value_type<T>::max_value);
+		// compute the maximum value that we have to consider.
+		// this depends on whether we have a floating point type,
+		// in which case we have to compute the maximum and minimum,
+		// or whether we have an integer type, in which case we
+		// can use std::numeric_limits
+		T	lower_limit;
+		T	upper_limit;
+		// 
+		if (std::numeric_limits<T>::is_integer) {
+			lower_limit = 0;
+			upper_limit = std::numeric_limits<T>::max();
+		} else {
+			Min<T>	minfilter;
+			lower_limit = minfilter(image);
+			Max<T>	maxfilter;
+			upper_limit = maxfilter(image);
+		}
+		T	result = median(image, lower_limit, upper_limit);
 		return result;
 	}
 };
@@ -172,11 +188,12 @@ class FlipOperator : public ImageOperator<T> {
 public:
 	FlipOperator() { }
 	virtual void	operator()(Image<T>& image) {
-		for (int line = 0; (line << 1) < image.size.height; line++) {
+		for (unsigned int line = 0; (line << 1) < image.size.height;
+			line++) {
 			T	*p = &image.pixels[line * image.size.width];
 			int	lastline = image.size.height - line - 1;
 			T	*q = &image.pixels[lastline * image.size.width];
-			for (int i = 0; i < image.size.width; i++) {
+			for (unsigned int i = 0; i < image.size.width; i++) {
 				T	v = p[i];
 				p[i] = q[i];
 				q[i] = v;
@@ -194,7 +211,7 @@ public:
 		: lower(_lower), upper(_upper) {
 	}
 	virtual void	operator()(Image<T>& image) {
-		for (int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
 			if (v < lower) {
 				image.pixels[i] = lower;
@@ -212,14 +229,14 @@ class ScaleOperator : public ImageOperator<T> {
 	T	delta;
 public:
 	ScaleOperator(const T& _lower = 0,
-		const T& _upper = pixel_value_type<T>::max_value)
+		const T& _upper = std::numeric_limits<T>::max())
 			: lower(_lower), delta(_upper - _lower) {
 	}
 
 	virtual void	operator()(Image<T>& image) {
 		T	min = image.pixels[0];
 		T	max = image.pixels[0];
-		for (int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
 			if (v < min) {
 				min = v;
@@ -229,7 +246,7 @@ public:
 			}
 		}
 		T	span = max - min;
-		for (int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
 			v = lower + (v - min) * delta / span;
 			image.pixels[i] = v;

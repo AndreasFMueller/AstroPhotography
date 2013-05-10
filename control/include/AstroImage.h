@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iostream>
 #include <AstroPixel.h>
+#include <limits>
 
 namespace astro {
 namespace image {
@@ -28,8 +29,8 @@ namespace image {
  */
 class ImagePoint {
 public:
-	int	x, y;
-	ImagePoint(int _x = 0, int _y = 0) : x(_x), y(_y) { }
+	unsigned int	x, y;
+	ImagePoint(unsigned int _x = 0, unsigned int _y = 0) : x(_x), y(_y) { }
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
@@ -45,16 +46,16 @@ class ImageRectangle;
  */
 class ImageSize {
 public:
-	int	width, height;
-	int	pixels;
-	ImageSize(int _width = 0, int _height = 0);
+	unsigned int	width, height;
+	unsigned int	pixels;
+	ImageSize(unsigned int _width = 0, unsigned int _height = 0);
 	bool	operator==(const ImageSize& other) const;
 	bool	operator!=(const ImageSize& other) const;
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
-	bool	contains(int x, int y) const;
-	int	chi(int x, int y) const;
+	bool	contains(unsigned int x, unsigned int y) const;
+	int	chi(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -71,7 +72,7 @@ public:
 	ImageSize		size;
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
-	ImageRectangle(int w = 0, int h = 0) : size(w, h) { }
+	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : size(w, h) { }
 	ImageRectangle(const ImageSize& _size) : origin(0, 0), size(_size) { }
 	ImageRectangle(const ImagePoint& _origin, const ImageSize& _size)
 		: origin(_origin), size(_size) { }
@@ -139,7 +140,7 @@ public:
 	ImageSize	size;
 
 	// constructors and destructor
-	ImageBase(int w = 0, int h = 0);
+	ImageBase(unsigned int w = 0, unsigned int h = 0);
 	ImageBase(const ImageSize& _size);
 	ImageBase(const ImageRectangle& _frame);
 	ImageBase(const ImageBase& other);
@@ -147,15 +148,15 @@ public:
 
 	// comparison and pixel offset computation
 	virtual bool	operator==(const ImageBase& other) const;
-	virtual int	pixeloffset(int x, int y) const;
-	virtual int	pixeloffset(const ImagePoint& p) const;
+	virtual unsigned int	pixeloffset(unsigned int x, unsigned int y) const;
+	virtual unsigned int	pixeloffset(const ImagePoint& p) const;
 
 	// methods related to the mosaic stuff
-	bool	isR(int x, int y) const;
-	bool	isG(int x, int y) const;
-	bool	isB(int x, int y) const;
-	bool	isGr(int x, int y) const;
-	bool	isGb(int x, int y) const;
+	bool	isR(unsigned int x, unsigned int y) const;
+	bool	isG(unsigned int x, unsigned int y) const;
+	bool	isB(unsigned int x, unsigned int y) const;
+	bool	isGr(unsigned int x, unsigned int y) const;
+	bool	isGb(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -174,17 +175,21 @@ public:
 // base iterator classes
 class ImageIteratorBase {
 protected:
-	int	first;	// first index, always >= 0, -1 indicates that the
-			// iterator now points nowhere (NULL pointer)
-	int	last;	// last inde
-	int	offset; // 
-	int	stride;
+	unsigned int	first;	// first index, always >= 0, the end is
+			// indicated by setting it to
+			// std::numeric_limits<unsigned int>::max(),
+			// the iterator then points nowhere (NULL pointer)
+	unsigned int	last;	// last index
+	unsigned int	offset; // 
+	unsigned int	stride;
 public:
-	ImageIteratorBase(int _first, int _last, int _offset, int _stride) :
+	ImageIteratorBase(unsigned int _first, unsigned int _last,
+		unsigned int _offset, unsigned int _stride) :
 		first(_first), last(_last), offset(_offset), stride(_stride) { }
-	ImageIteratorBase(int _first, int _last, int _stride = 1)
+	ImageIteratorBase(unsigned int _first, unsigned int _last,
+		unsigned int _stride = std::numeric_limits<unsigned int>::max())
 		: first(_first), last(_last), offset(_first), stride(_stride) { }
-	ImageIteratorBase() : first(0), last(0), offset(-1), stride(1) { }
+	ImageIteratorBase() : first(0), last(0), offset(std::numeric_limits<unsigned int>::max()), stride(1) { }
 	ImageIteratorBase&	operator++();
 	ImageIteratorBase&	operator--();
 	ImageIteratorBase	operator++(int);
@@ -196,9 +201,9 @@ public:
 	// image iterators are equal, if they point to the same pixel
 	bool	operator==(const ImageIteratorBase& other) const;
 	bool	operator!=(const ImageIteratorBase& other) const;
-	int	pixeloffset() const throw(std::range_error);
-	int	f() const { return first; }
-	int	l() const { return last; }
+	unsigned int	pixeloffset() const throw(std::range_error);
+	unsigned int	f() const { return first; }
+	unsigned int	l() const { return last; }
 };
 
 /**
@@ -212,10 +217,10 @@ public:
  */
 class	ImageLine {
 public:
-	const	int firstoffset, lastoffset;
-	const	int stride;
+	const	unsigned int firstoffset, lastoffset;
+	const	unsigned int stride;
 protected:
-	ImageLine(int _firstoffset, int _lastoffset, int _stride)
+	ImageLine(unsigned int _firstoffset, unsigned int _lastoffset, unsigned int _stride)
 		: firstoffset(_firstoffset), lastoffset(_lastoffset),
 		  stride(_stride) { }
 public:
@@ -228,8 +233,8 @@ public:
  */
 class	ImageRow : public ImageLine {
 public:
-	const int	y;
-	ImageRow(const ImageSize size, int _y)
+	const unsigned int	y;
+	ImageRow(const ImageSize size, unsigned int _y)
 		: ImageLine(size.width * _y, size.width * (_y + 1) - 1, 1),
 		  y(_y) { }
 };
@@ -239,8 +244,8 @@ public:
  */
 class	ImageColumn : public ImageLine {
 public:
-	const int	x;
-	ImageColumn(const ImageSize& size, int _x)
+	const unsigned int	x;
+	ImageColumn(const ImageSize& size, unsigned int _x)
 		: ImageLine(_x, _x + size.pixels - size.width, size.width),
 		  x(_x) { }
 };
@@ -273,7 +278,8 @@ public:
 	 *		supplied Pixel array and will free it when the
 	 *		Image is deallocated.
 	 */
-	Image<Pixel>(int _w, int _h, Pixel *p = NULL) : ImageBase(_w, _h) {
+	Image<Pixel>(unsigned int _w, unsigned int _h, Pixel *p = NULL)
+		: ImageBase(_w, _h) {
 		if (p) {
 			pixels = p;
 		} else {
@@ -359,7 +365,7 @@ public:
 	/**
 	 * \brief Read only access to pixel values specified by offset.
 	 */
-	const Pixel&	operator[](int offset) const {
+	const Pixel&	operator[](unsigned int offset) const {
 		if ((offset < 0) || (offset > size.pixels)) {
 			throw std::range_error("offset outside image");
 		}
@@ -369,7 +375,7 @@ public:
 	/**
 	 * \brief Read/write access to pixels specified by offset
 	 */
-	Pixel&	operator[](int offset) {
+	Pixel&	operator[](unsigned int offset) {
 		if ((offset < 0) || (offset > size.pixels)) {
 			throw std::range_error("offset outside image");
 		}
@@ -380,14 +386,14 @@ public:
 	 * \brief Read only access to pixel values specified by image
 	 *        coordinates
 	 */
-	const Pixel&	pixel(int x, int y) const {
+	const Pixel&	pixel(unsigned int x, unsigned int y) const {
 		return pixels[pixeloffset(x, y)];
 	}
 
 	/**
 	 * \brief Read/write access to pixels specified by image coordinates
  	 */
-	Pixel&	pixel(int x, int y) {
+	Pixel&	pixel(unsigned int x, unsigned int y) {
 		return pixels[pixeloffset(x, y)];
 	}
 
@@ -404,7 +410,7 @@ public:
 		/**
 		 * \param _y y coordinate of the row to be constructed
 		 */
-		row(Image<Pixel> &_image, int _y)
+		row(Image<Pixel> &_image, unsigned int _y)
 			: ImageRow(_image.size, _y), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
@@ -421,7 +427,7 @@ public:
 		/**
 		 * \param _x x coordinate of the column to be constructed
  		 */
-		column(Image<Pixel> &_image, int _x)
+		column(Image<Pixel> &_image, unsigned int _x)
 			: ImageColumn(_image.size, _x), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
@@ -440,8 +446,8 @@ public:
 		Image<Pixel>	*image;
 	public:
 		// pixel iterator constructors
-		iterator(Image<Pixel>& _image, int _first, int _last,
-			int _offset, int _stride)
+		iterator(Image<Pixel>& _image, unsigned int _first, unsigned int _last,
+			unsigned int _offset, unsigned int _stride)
 			: ImageIteratorBase(_first, _last, _offset, _stride),
 			  image(&_image) { }
 		iterator() : image(NULL) { }
@@ -460,7 +466,8 @@ public:
 		const Image<Pixel>	&image;
 	public:
 		const_iterator(const Image<Pixel>& _image,
-			int _first, int _last, int _offset, int _stride)
+			unsigned int _first, unsigned int _last,
+			unsigned int _offset, unsigned int _stride)
 			: ImageIteratorBase(_first, _last, _offset, _stride),
 			  image(_image) { }
 		const Pixel&	operator*() const {
@@ -492,7 +499,7 @@ public:
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
 	void	fill(const ImageRectangle& frame, const Pixel& value) {
-		for (int y = 0; y < frame.size.height; y++) {
+		for (unsigned int y = 0; y < frame.size.height; y++) {
 			ImageRow	r(size, frame.origin.y + y);
 			std::fill(pixels + r.firstoffset + frame.origin.x,
 				pixels + r.firstoffset + frame.origin.x
@@ -517,7 +524,7 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 		throw std::range_error("subimage frame too large");
 	}
 	pixels = new Pixel[size.pixels];
-	for (int y = 0; y < frame.size.height; y++) {
+	for (unsigned int y = 0; y < frame.size.height; y++) {
 		ImageRow	srcrow(src.size, frame.origin.y + y);
 		ImageRow	destrow(size, y);
 		std::copy(src.pixels + srcrow.firstoffset + frame.origin.x,
@@ -546,7 +553,8 @@ typename Image<Pixel>::iterator	Image<Pixel>::row::begin() {
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::row::end() {
 	return typename Image<Pixel>::iterator(image,
-		firstoffset, lastoffset, -1, stride);
+		firstoffset, lastoffset,
+		std::numeric_limits<unsigned int>::max(), stride);
 }
 
 template<class Pixel>
@@ -558,7 +566,8 @@ typename Image<Pixel>::const_iterator	Image<Pixel>::row::begin() const {
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::row::end() const {
 	return typename Image<Pixel>::iterator(image,
-		firstoffset, lastoffset, -1, stride);
+		firstoffset, lastoffset,
+		std::numeric_limits<unsigned int>::max(), stride);
 }
 
 template<class Pixel>
@@ -570,7 +579,8 @@ typename Image<Pixel>::iterator	Image<Pixel>::column::begin() {
 template<class Pixel>
 typename Image<Pixel>::iterator	Image<Pixel>::column::end() {
 	return typename Image<Pixel>::iterator(image,
-		firstoffset, lastoffset, -1, stride);
+		firstoffset, lastoffset,
+		std::numeric_limits<unsigned int>::max(), stride);
 }
 
 template<class Pixel>
@@ -582,7 +592,8 @@ typename Image<Pixel>::const_iterator	Image<Pixel>::column::begin() const {
 template<class Pixel>
 typename Image<Pixel>::const_iterator	Image<Pixel>::column::end() const {
 	return typename Image<Pixel>::iterator(image,
-		firstoffset, lastoffset, -1, stride);
+		firstoffset, lastoffset,
+		std::numeric_limits<unsigned int>::max(), stride);
 }
 
 /** 

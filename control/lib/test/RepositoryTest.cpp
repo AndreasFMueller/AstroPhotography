@@ -71,13 +71,13 @@ void	RepositoryTest::setUp() {
 
 		// if the filename ends in .la, we write something to it
 		if (i == 2) {
-			char	*contents =	"# test file\n"
+			const char	*contents =	"# test file\n"
 						"dlname='libmock1.so.0\n";
 			write(fd, contents, strlen(contents));
 		}
 
 		if (i == 7) {
-			char	*contents =	"# test file\n"
+			const char	*contents =	"# test file\n"
 						"# with illegal dlname\n"
 						"dlname='libmock2.so.0'\n";
 			write(fd, contents, strlen(contents));
@@ -91,7 +91,7 @@ void	RepositoryTest::tearDown() {
 	// remove everything below the path
 	DIR	*dir = opendir(path.c_str());
 	struct dirent	*dirent;
-	while (dirent = readdir(dir)) {
+	while (NULL != (dirent = readdir(dir))) {
 		char	filename[1024];
 		snprintf(filename, sizeof(filename), "%s/%s", path.c_str(),
 			dirent->d_name);

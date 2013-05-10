@@ -46,8 +46,8 @@ Image<T>	*Mosaic<T>::operator()(const Image<RGB<T> >& image) const {
 	int	redy = (mosaic >> 1) & 0x1;
 	int	bluex = 0x1 ^ redx;
 	int	bluey = 0x1 ^ redy;
-	for (int x = 0; x < image.size.width; x += 2) {
-		for (int y = 0; y < image.size.height; y += 2) {
+	for (unsigned int x = 0; x < image.size.width; x += 2) {
+		for (unsigned int y = 0; y < image.size.height; y += 2) {
 			// red pixels
 			result->pixel(x + redx, y + redy)
 				= image.pixel(x + redx, y + redy).R;

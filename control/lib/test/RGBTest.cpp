@@ -39,16 +39,16 @@ void	RGBTest::tearDown() {
 
 void	RGBTest::testCopy() {
 	Image<RGB<unsigned char> >	src(16, 9);
-	for (int x = 0; x < src.size.width; x++) {
-		for (int y = 0; y < src.size.height; y++) {
+	for (unsigned int x = 0; x < src.size.width; x++) {
+		for (unsigned int y = 0; y < src.size.height; y++) {
 			src.pixel(x, y).R = x << 4;
 			src.pixel(x, y).G = y << 4;
 			src.pixel(x, y).B = x + y;
 		}
 	}
 	Image<RGB<unsigned char> >	dst(src);
-	for (int x = 0; x < src.size.width; x++) {
-		for (int y = 0; y < src.size.height; y++) {
+	for (unsigned int x = 0; x < src.size.width; x++) {
+		for (unsigned int y = 0; y < src.size.height; y++) {
 			CPPUNIT_ASSERT(dst.pixel(x, y).R == x << 4);
 			CPPUNIT_ASSERT(dst.pixel(x, y).G == y << 4);
 			CPPUNIT_ASSERT(dst.pixel(x, y).B == x + y);
@@ -81,15 +81,15 @@ static unsigned char    blue(int c, int d, int e) {
 
 void	RGBTest::testRgb() {
 	Image<YUYV<unsigned char> >	*src = new Image<YUYV<unsigned char> >(16, 9);
-	for (int x = 0; x < src->size.width; x++) {
-		for (int y = 0; y < src->size.height; y++) {
+	for (unsigned int x = 0; x < src->size.width; x++) {
+		for (unsigned int y = 0; y < src->size.height; y++) {
 			src->pixel(x, y).y = x << 4;
 			src->pixel(x, y).uv = y << 4;
 		}
 	}
 	RGBImagePtr	rgb(new Image<RGB<unsigned char> >(*src));
-	for (int x = 0; x < src->size.width; x += 2) {
-		for (int y = 0; y < src->size.height; y++) {
+	for (unsigned int x = 0; x < src->size.width; x += 2) {
+		for (unsigned int y = 0; y < src->size.height; y++) {
 			RGB<unsigned char>	man;
 			int	d = src->pixel(x, y).uv - 128;
 			int	e = src->pixel(x + 1, y).uv - 128;

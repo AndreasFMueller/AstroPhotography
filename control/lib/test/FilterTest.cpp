@@ -50,8 +50,8 @@ void	FilterTest::tearDown() {
 
 void	FilterTest::testMin() {
 	Image<unsigned char>	image(10, 10);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -61,8 +61,8 @@ void	FilterTest::testMin() {
 
 void	FilterTest::testMax() {
 	Image<unsigned char>	image(10, 10);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -72,8 +72,8 @@ void	FilterTest::testMax() {
 
 void	FilterTest::testMean() {
 	Image<unsigned char>	image(10, 10);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -83,8 +83,8 @@ void	FilterTest::testMean() {
 
 void	FilterTest::testMedian() {
 	Image<unsigned short>	image(100, 100);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = 7 * x * y;
 		}
 	}
@@ -94,8 +94,8 @@ void	FilterTest::testMedian() {
 
 void	FilterTest::testMedian0() {
 	Image<unsigned short>	image(100, 100);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = 0;
 		}
 	}
@@ -106,8 +106,8 @@ void	FilterTest::testMedian0() {
 
 void	FilterTest::testMedianLarge() {
 	Image<unsigned int>	image(8000, 8000);
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (unsigned int x = 0; x < image.size.width; x++) {
+		for (unsigned int y = 0; y < image.size.height; y++) {
 			image.pixel(x, y) = x * y;
 		}
 	}

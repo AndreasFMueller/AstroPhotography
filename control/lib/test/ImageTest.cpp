@@ -42,7 +42,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ImageTest);
 
 void	ImageTest::setUp() {
 	image = new Image<unsigned char>(640, 480);
-	for (int i = 0; i < image->size.pixels; i++) {
+	for (unsigned int i = 0; i < image->size.pixels; i++) {
 		(*image)[i] = i % 160;
 	}
 }
@@ -52,8 +52,8 @@ void	ImageTest::tearDown() {
 }
 
 void	ImageTest::testByteImage() {
-	for (int x = 47; x < 100; x += 11) {
-		for (int y = 18; y < 88; y += 13) {
+	for (unsigned int x = 47; x < 100; x += 11) {
+		for (unsigned int y = 18; y < 88; y += 13) {
 			unsigned char	value = (x + y * 640) % 160;
 			CPPUNIT_ASSERT(value == image->pixel(x, y));
 		}
@@ -62,8 +62,8 @@ void	ImageTest::testByteImage() {
 
 void	ImageTest::testCopyByteImage() {
 	Image<unsigned char>	image2 = *image;
-	for (int x = 47; x < 100; x += 11) {
-		for (int y = 18; y < 88; y += 13) {
+	for (unsigned int x = 47; x < 100; x += 11) {
+		for (unsigned int y = 18; y < 88; y += 13) {
 			unsigned char	value = (x + y * 640) % 160;
 			CPPUNIT_ASSERT(value == image2.pixel(x, y));
 		}
@@ -106,8 +106,8 @@ void	ImageTest::testSubimage() {
 	ImagePoint	origin(5, 9);
 	ImageRectangle	frame(origin, size);
 	Image<unsigned char>	image2(*image, frame);
-	for (int x = 0; x < size.width; x++) {
-		for (int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
 			unsigned char	v1 = image2.pixel(x, y);
 			unsigned char	v2 = image->pixel(x + 5, y + 9);
 			unsigned char	v3 = (5 + x + 640 * (9 + y)) % 160;

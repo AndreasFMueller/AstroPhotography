@@ -12,7 +12,7 @@ namespace image {
 /**
  * \brief Construct an image base from size parameters
  */
-ImageBase::ImageBase(int w, int h) : size(w, h) {
+ImageBase::ImageBase(unsigned int w, unsigned int h) : size(w, h) {
 	mosaic = NONE;
 }
 
@@ -40,25 +40,25 @@ bool	ImageBase::operator==(const ImageBase& other) const {
 /**
  * \brief Compute the pixel offset into an Image based on coordinates
  */
-int     ImageBase::pixeloffset(int x, int y) const {
+unsigned int     ImageBase::pixeloffset(unsigned int x, unsigned int y) const {
 	return x + size.width * y;
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on an ImagePoint
  */
-int     ImageBase::pixeloffset(const ImagePoint& p) const {
+unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
 	return this->pixeloffset(p.x, p.y);
 }
 
-bool	ImageBase::isR(int x, int y) const {
+bool	ImageBase::isR(unsigned int x, unsigned int y) const {
 	if (mosaic == NONE) {
 		return false;
 	}
 	return (((y & 0x1) << 1) | (x & 0x1)) == (mosaic & 0x3);
 }
 
-bool	ImageBase::isB(int x, int y) const {
+bool	ImageBase::isB(unsigned int x, unsigned int y) const {
 	if (mosaic == NONE) {
 		return false;
 	}
@@ -69,19 +69,19 @@ bool	ImageBase::isB(int x, int y) const {
 	return (0x3 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
 }
 
-bool	ImageBase::isG(int x, int y) const {
+bool	ImageBase::isG(unsigned int x, unsigned int y) const {
 	return (isGr(x, y) | isGb(x, y));
 	
 }
 
-bool	ImageBase::isGr(int x, int y) const {
+bool	ImageBase::isGr(unsigned int x, unsigned int y) const {
 	if (mosaic == NONE) {
 		return false;
 	}
 	return (0x1 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
 }
 
-bool	ImageBase::isGb(int x, int y) const {
+bool	ImageBase::isGb(unsigned int x, unsigned int y) const {
 	if (mosaic == NONE) {
 		return false;
 	}

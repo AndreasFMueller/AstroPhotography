@@ -1,11 +1,12 @@
 /*
- * ImageBaseIterator.cpp -- ImageBaseIterator implementation
+ * ImageIteratorBase.cpp -- ImageIteratorBase implementation
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
  */
 #include <AstroImage.h>
 #include <iostream>
+#include <limits>
 
 namespace astro {
 namespace image {
@@ -17,13 +18,13 @@ namespace image {
  */
 ImageIteratorBase	ImageIteratorBase::operator++(int) {
 	// return the current state, we are at the end already
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	}
 	int	oldoffset = offset;
 	offset += stride;
 	if (offset > last) {
-		offset = -1;
+		offset = std::numeric_limits<unsigned int>::max();
 	}
 	return ImageIteratorBase(first, last, oldoffset, stride);
 }
@@ -34,7 +35,7 @@ ImageIteratorBase	ImageIteratorBase::operator++(int) {
  * decrements the iterator and returns the value before increment
  */
 ImageIteratorBase	ImageIteratorBase::operator--(int) {
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	}
 	int	oldoffset = offset;
@@ -48,12 +49,12 @@ ImageIteratorBase	ImageIteratorBase::operator--(int) {
  * increments the iterator and returns the incremented value
  */
 ImageIteratorBase&	ImageIteratorBase::operator++() {
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	} 
 	offset += stride;
 	if (offset > last) {
-		offset = -1;
+		offset = std::numeric_limits<unsigned int>::max();
 	}
 	return *this;
 }
@@ -64,12 +65,12 @@ ImageIteratorBase&	ImageIteratorBase::operator++() {
  * decrement the iterator and return the decremented value
  */
 ImageIteratorBase&	ImageIteratorBase::operator--() {
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	}
 	offset -= stride;
 	if (offset < first) {
-		offset = -1;
+		offset = std::numeric_limits<unsigned int>::max();
 	}
 	return *this;
 }
@@ -81,12 +82,12 @@ ImageIteratorBase&	ImageIteratorBase::operator--() {
  * decrementing the iterator -steps times if steps is negative.
  */
 ImageIteratorBase	ImageIteratorBase::operator+(const int steps) const {
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	}
-	int	newoffset = offset + steps * stride;
+	unsigned int	newoffset = offset + steps * stride;
 	if ((newoffset > last) || (newoffset < first)) {
-		newoffset = -1;
+		newoffset = std::numeric_limits<unsigned int>::max();
 	}
 	return ImageIteratorBase(first, last, newoffset, stride);
 }
@@ -98,12 +99,13 @@ ImageIteratorBase	ImageIteratorBase::operator+(const int steps) const {
  * incrementing the iterator -steps times if steps is negative.
  */
 ImageIteratorBase	ImageIteratorBase::operator-(const int steps) const {
-	if (offset == -1) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		return *this;
 	}
-	int	newoffset = offset - steps * stride;
+	// XXX check for negative difference
+	unsigned int	newoffset = offset - steps * stride;
 	if ((newoffset < 0) || (newoffset > last)) {
-		newoffset = -1;
+		newoffset = std::numeric_limits<unsigned int>::max();
 	}
 	return ImageIteratorBase(first, last, offset - steps * stride, stride);
 }
@@ -148,8 +150,8 @@ bool    ImageIteratorBase::invalid() const {
  * \throws Throws a std::range_error if the iterator no longer points to
  *         a point inside the row or column.
  */
-int	ImageIteratorBase::pixeloffset() const throw(std::range_error) {
-	if (offset == -1) {
+unsigned int	ImageIteratorBase::pixeloffset() const throw(std::range_error) {
+	if (offset == std::numeric_limits<unsigned int>::max()) {
 		throw std::range_error("image iterator out of range");
 	}
 	return offset;

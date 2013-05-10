@@ -26,37 +26,30 @@ namespace image {
 template<typename Pixel>
 struct pixel_value_type {
 	typedef typename Pixel::value_type	value_type;
-	static Pixel	max_value;
 };
 template<>
 struct pixel_value_type<unsigned char> {
 	typedef unsigned char	value_type;
-	static unsigned char	max_value;
 };
 template<>
 struct pixel_value_type<unsigned short> {
 	typedef unsigned short	value_type;
-	static unsigned short	max_value;
 };
 template<>
 struct pixel_value_type<unsigned int> {
 	typedef unsigned int	value_type;
-	static unsigned int	max_value;
 };
 template<>
 struct pixel_value_type<unsigned long> {
 	typedef unsigned long	value_type;
-	static unsigned long	max_value;
 };
 template<>
 struct pixel_value_type<float> {
 	typedef float	value_type;
-	static float	max_value;
 };
 template<>
 struct pixel_value_type<double> {
 	typedef double	value_type;
-	static double	max_value;
 };
 
 /**

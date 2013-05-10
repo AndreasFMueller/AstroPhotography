@@ -17,7 +17,7 @@ namespace image {
  * often, keeping a it redundantly in memory saves a large
  * number of multiplications
  */
-ImageSize::ImageSize(int _width, int _height)
+ImageSize::ImageSize(unsigned int _width, unsigned int _height)
 	: width(_width), height(_height), pixels(width * height) {
 }
 
@@ -75,11 +75,11 @@ bool	ImageSize::contains(const ImagePoint& point) const {
  * \param x
  * \param y
  */
-bool	ImageSize::contains(int x, int y) const {
-	if ((x < 0) || (x >= width)) {
+bool	ImageSize::contains(unsigned int x, unsigned int y) const {
+	if (x >= width) {
 		return false;
 	}
-	if ((y < 0) || (y >= height)) {
+	if (y >= height) {
 		return false;
 	}
 	return true;
@@ -92,7 +92,7 @@ bool	ImageSize::contains(int x, int y) const {
  * \param x
  * \param y
  */
-int	ImageSize::chi(int x, int y) const {
+int	ImageSize::chi(unsigned int x, unsigned int y) const {
 	return contains(x, y) ? 1 : 0;
 }
 
