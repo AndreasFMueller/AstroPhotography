@@ -31,13 +31,15 @@ public:
 	void	testCcd();
 	void	testExposure();
 	void	testFilterwheel();
+	void	testCooler();
 
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
 	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST(testCcd);
 	//CPPUNIT_TEST(testExposure);
-	CPPUNIT_TEST(testFilterwheel);
+	//CPPUNIT_TEST(testFilterwheel);
+	CPPUNIT_TEST(testCooler);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -114,6 +116,31 @@ void	sbigtest::testFilterwheel() {
 		unlink(name);
 		FITSoutfile<unsigned short>	file(name);
 		file.write(*image);
+	}
+}
+
+void	sbigtest::testCooler() {
+	CameraPtr	camera = locator->getCamera(0);
+	CcdPtr	ccd = camera->getCcd(0);
+	CoolerPtr	cooler = ccd->getCooler();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
+		cooler->getActualTemperature() - 273.1);
+	cooler->setTemperature(273.1);
+	cooler->setOn(true);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %f, "
+		"enabled: %s", cooler->getSetTemperature(),
+		(cooler->isOn()) ? "YES" : "NO");
+	for (int t = 0; t < 60; t++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
+			cooler->getActualTemperature() - 273.1);
+	}
+	cooler->setOn(false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current set temperature: %f, "
+		"enabled: %s", cooler->getSetTemperature(),
+		(cooler->isOn()) ? "YES" : "NO");
+	for (int t = 0; t < 60; t++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
+			cooler->getActualTemperature() - 273.1);
 	}
 }
 

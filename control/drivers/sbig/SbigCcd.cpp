@@ -8,6 +8,7 @@
 #include <debug.h>
 #include <utils.h>
 #include <includes.h>
+#include <SbigCooler.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -187,6 +188,10 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 
 	// convert the data read to a short image
 	return ShortImagePtr(image);
+}
+
+CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
+	return CoolerPtr(new SbigCooler(camera));
 }
 
 } // namespace sbig

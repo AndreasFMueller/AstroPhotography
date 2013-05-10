@@ -16,6 +16,7 @@ namespace sbig {
 
 class SbigCcd;
 class SbigFilterWheel;
+class SbigCooler;
 
 class SbigCamera : public Camera {
 	unsigned short	cameraType;
@@ -28,6 +29,7 @@ public:
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 	friend class SbigCcd;
 	friend class SbigFilterWheel;
+	friend class SbigCooler;
 };
 
 } // namespace sbig

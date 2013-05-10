@@ -210,6 +210,7 @@ typedef std::tr1::shared_ptr<Camera>	CameraPtr;
  * regarding units than to have to document units for every value.
  */
 class Cooler {
+protected:
 	float	temperature;
 public:
 	Cooler();
