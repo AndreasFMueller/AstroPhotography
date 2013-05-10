@@ -110,7 +110,7 @@ void	sxtest::testCamera() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(176, 0),
-		ImageSize(1040, 1040)), 10);
+		ImageSize(1040, 1040)), 0.019);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
