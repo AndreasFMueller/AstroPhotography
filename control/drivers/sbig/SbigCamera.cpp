@@ -10,6 +10,7 @@
 #include <utils.h>
 #include <debug.h>
 #include <SbigFilterWheel.h>
+#include <SbigGuiderPort.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -200,6 +201,10 @@ CcdPtr	SbigCamera::getCcd(size_t id) {
 
 FilterWheelPtr	SbigCamera::getFilterWheel() throw (not_implemented) {
 	return FilterWheelPtr(new SbigFilterWheel(*this));
+}
+
+GuiderPortPtr	SbigCamera::getGuiderPort() throw (not_implemented) {
+	return GuiderPortPtr(new SbigGuiderPort(*this));
 }
 
 } // namespace sbig

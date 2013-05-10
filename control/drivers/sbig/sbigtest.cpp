@@ -32,6 +32,7 @@ public:
 	void	testExposure();
 	void	testFilterwheel();
 	void	testCooler();
+	void	testGuiderport();
 
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
@@ -39,7 +40,8 @@ public:
 	CPPUNIT_TEST(testCcd);
 	//CPPUNIT_TEST(testExposure);
 	//CPPUNIT_TEST(testFilterwheel);
-	CPPUNIT_TEST(testCooler);
+	//CPPUNIT_TEST(testCooler);
+	CPPUNIT_TEST(testGuiderport);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -141,6 +143,35 @@ void	sbigtest::testCooler() {
 	for (int t = 0; t < 60; t++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "current temperature: %f",
 			cooler->getActualTemperature() - 273.1);
+	}
+}
+
+void	sbigtest::testGuiderport() {
+	CameraPtr	camera = locator->getCamera(0);
+	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	guiderport->activate(3, 0, 0, 0);
+	for (int t = 0; t < 5; t++) {
+		uint8_t	port = guiderport->active();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
+		sleep(1);
+	}
+	guiderport->activate(0, 3, 0, 0);
+	for (int t = 0; t < 5; t++) {
+		uint8_t	port = guiderport->active();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
+		sleep(1);
+	}
+	guiderport->activate(0, 0, 3, 0);
+	for (int t = 0; t < 5; t++) {
+		uint8_t	port = guiderport->active();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
+		sleep(1);
+	}
+	guiderport->activate(0, 0, 0, 3);
+	for (int t = 0; t < 5; t++) {
+		uint8_t	port = guiderport->active();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
+		sleep(1);
 	}
 }
 

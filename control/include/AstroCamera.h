@@ -186,6 +186,9 @@ typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
 class FilterWheel;
 typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
 
+class GuiderPort;
+typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
+
 class	Camera {
 protected:
 	std::vector<CcdInfo>	ccdinfo;
@@ -195,7 +198,12 @@ public:
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
 	virtual CcdPtr	getCcd(size_t ccdid) = 0;
+
+	// handling the filter wheel
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
+
+	// handling the guider port
+	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 
@@ -236,6 +244,38 @@ public:
 	virtual unsigned int	currentPosition() = 0;
 	virtual void	select(size_t filterindex) = 0;
 	virtual std::string	filterName(size_t filterindex) = 0;
+};
+
+/**
+ * \brief Abstraction for the Guider port
+ */
+class GuiderPort {
+public:
+	GuiderPort();
+	virtual ~GuiderPort();
+
+	typedef enum {
+		DECMINUS = 1, DECPLUS = 2, RAMINUS = 4, RAPLUS = 8
+	} relay_bits;
+
+	/**
+ 	 * \brief Find out which guider port relays are active
+	 * 
+	 * The return value of this method is a bit map composed from the
+	 * constants in the relay_bits enum.
+	 */
+	virtual uint8_t	active() = 0;
+
+	/**
+	 * \brief Activate guider port relays.
+	 *
+	 * \param raplus	activation time for RA+ relay
+	 * \param raminus	activation time for RA- relay
+	 * \param decplus	activation time for DEC+ relay
+	 * \param decminus	activation time for DEC- relay
+	 */
+	virtual void	activate(float raplus, float raminus,
+		float decplus, float decminus) = 0;
 };
 
 /**

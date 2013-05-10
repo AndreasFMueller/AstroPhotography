@@ -7,6 +7,7 @@
 #include <SxCcd.h>
 #include <sx.h>
 #include <debug.h>
+#include <SxGuiderPort.h>
 
 using namespace astro::image;
 
@@ -133,6 +134,15 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has cooler: %s",
 		(hasCooler) ? "yes" : "no");
+
+	// find out whether this camera has a guider port
+	if (ccd0request.data()->extra_capabilities & STAR2000_PORT) {
+		hasGuiderPort = true;
+	} else {
+		hasGuiderPort = false;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has guider port: %s",
+		(hasGuiderPort) ? "yes" : "no");
 
 	// try to get the same information from the second CCD, if there
 	// is one
@@ -285,6 +295,18 @@ CoolerPtr	SxCamera::getCooler(int ccdindex) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating cooler object");
 	return CoolerPtr(new SxCooler(*this));
+}
+
+/**
+ * \brief Get the guider port
+ */
+GuiderPortPtr	SxCamera::getGuiderPort() throw (not_implemented) {
+	if (!hasGuiderPort) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no guide port");
+		throw std::runtime_error("this camera has no guider port");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating guider port object");
+	return GuiderPortPtr(new SxGuiderPort(*this));
 }
 
 } // namespace sx

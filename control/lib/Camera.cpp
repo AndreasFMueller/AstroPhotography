@@ -26,5 +26,9 @@ FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
 	throw not_implemented("filter wheel not implemented");
 }
 
+GuiderPortPtr	Camera::getGuiderPort() throw (not_implemented) {
+	throw not_implemented("guider port not implemented");
+}
+
 } // namespace camera
 } // namespace astro

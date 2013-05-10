@@ -4,14 +4,15 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 pkglib_LTLIBRARIES = sx.la 
-noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h
+noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
+	SxGuiderPort.h
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
 
 libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp
+	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuiderPort.cpp
 libsx_la_DEPENDENCIES = ../../lib/libastro.la
 libsx_la_LIBADD = ../../lib/libastro.la
 
