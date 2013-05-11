@@ -9,6 +9,7 @@
 
 #include <AstroImage.h>
 #include <vector>
+#include <stdint.h>
 
 namespace astro {
 namespace camera {
