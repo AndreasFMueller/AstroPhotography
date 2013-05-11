@@ -30,11 +30,13 @@ public:
 	void	testList();
 	void	testCooler();
 	void	testCamera();
+	void	testGuiderport();
 
 	CPPUNIT_TEST_SUITE(sxtest);
-	CPPUNIT_TEST(testList);
-	CPPUNIT_TEST(testCooler);
-	CPPUNIT_TEST(testCamera);
+	//CPPUNIT_TEST(testList);
+	//CPPUNIT_TEST(testCooler);
+	//CPPUNIT_TEST(testCamera);
+	CPPUNIT_TEST(testGuiderport);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -52,7 +54,6 @@ void	sxtest::tearDown() {
 }
 
 void	sxtest::testList() {
-#if 1
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
 	std::vector<std::string>	cameras = locator->getCameralist();
 	int	counter = 0;
@@ -61,7 +62,6 @@ void	sxtest::testList() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera[%d]: %s", ++counter,
 			i->c_str());
 	}
-#endif
 }
 
 void	sxtest::testCooler() {
@@ -122,6 +122,19 @@ void	sxtest::testCamera() {
 	unlink("test.fits");
 	FITSoutfile<unsigned short>	file("test.fits");
 	file.write(*image);
+}
+
+void	sxtest::testGuiderport() {
+	CameraPtr	camera = locator->getCamera(0);
+	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	guiderport->activate(3,0,0,0);
+	sleep(4);
+	guiderport->activate(0,3,0,0);
+	sleep(4);
+	guiderport->activate(0,0,3,0);
+	sleep(4);
+	guiderport->activate(0,0,0,3);
+	sleep(10);
 }
 
 } // namespace test
