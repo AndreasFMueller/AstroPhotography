@@ -1,6 +1,5 @@
 /*
- * AstroIO.h -- classes and functions to perform image IO to/from IO
- *                files
+ * AstroIO.h -- classes and functions to perform image IO to/from IO files
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
@@ -462,6 +461,19 @@ class FITSout {
 public:
 	FITSout(const std::string& filename);
 	void	write(const ImagePtr& image) throw (FITSexception);
+};
+
+/**
+ * \brief Read a generic image as a FITS file
+ *
+ * Read the image file and create an appropriate Image<P> object, then
+ * wrap it in an ImagePtr.
+ */
+class FITSin {
+	std::string	filename;
+public:
+	FITSin(const std::string& filename);
+	ImagePtr	read() throw (FITSexception);
 };
 
 } // namespace io

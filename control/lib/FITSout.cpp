@@ -13,8 +13,14 @@ namespace io {
 FITSout::FITSout(const std::string& _filename) : filename(_filename) {
 }
 
+/**
+ * \brief Write a file with a given pixel type.
+ *
+ * \param filename	Name of the FITS file to write
+ * \param image		Image to write
+ */
 template<typename P>
-bool	do_write(const std::string& filename, const ImagePtr& image)
+static bool	do_write(const std::string& filename, const ImagePtr& image)
 		throw (FITSexception) {
 	Image<P>	*im = dynamic_cast<Image<P> *>(&*image);
 	if (NULL == im) {
