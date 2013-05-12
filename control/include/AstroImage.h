@@ -534,6 +534,7 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 	}
 }
 
+typedef std::tr1::shared_ptr<ImageBase>	ImagePtr;
 typedef std::tr1::shared_ptr<Image<unsigned char> >	ByteImagePtr;
 typedef std::tr1::shared_ptr<Image<unsigned short> >	ShortImagePtr;
 typedef std::tr1::shared_ptr<Image<unsigned int> >	IntImagePtr;
@@ -542,6 +543,29 @@ typedef std::tr1::shared_ptr<Image<float> >	FloatImagePtr;
 typedef std::tr1::shared_ptr<Image<double> >	DoubleImagePtr;
 typedef std::tr1::shared_ptr<Image<RGB<unsigned char> > >	RGBImagePtr;
 typedef std::tr1::shared_ptr<Image<YUYV<unsigned char> > >	YUYVImagePtr;
+
+/**
+ * \brief Convert a typed image ptr to an untyped image ptr
+ *
+ * This functions modifies the original pointer so that it no longer
+ * points to an image. The actual image is now owned by the new pointer
+ */
+template<typename P>
+ImagePtr	baseimage(std::tr1::shared_ptr<Image<P> >& image) {
+	ImagePtr	result(&*image);
+	image.reset();
+	return result;
+}
+
+/**
+ * \brief Find out whether an image has a certain type
+ *
+ * \param image	Image to query the pixel type
+ */
+template<typename P>
+bool	hasType(const ImagePtr& image) {
+	return (NULL != dynamic_cast<Image<P> *>(&*image)) ? true : false;
+}
 
 /* definitions of the iterator construction methods */
 template<class Pixel>

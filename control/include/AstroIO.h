@@ -450,6 +450,20 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 	}
 }
 
+/**
+ * \brief Write a generic image as a FITS file.
+ *
+ * The ImagePtr is independent of the pixel type. This class can determine
+ * the pixel type and use an appropriate FITSoutfile<Pixel> instance to
+ * write the image.
+ */
+class FITSout {
+	std::string	filename;
+public:
+	FITSout(const std::string& filename);
+	void	write(const ImagePtr& image) throw (FITSexception);
+};
+
 } // namespace io
 } // namespace astro
 

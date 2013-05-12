@@ -320,6 +320,29 @@ public:
 		return !(*this == other);
 	}
 	typedef rgb_color_tag color_category;
+
+	// numeric operators on RGB pixels
+	RGB<P>	operator+(const RGB<P>& other) {
+		RGB<P>	result;
+		result.R = R + other.R;
+		result.G = G + other.G;
+		result.B = B + other.B;
+		return result;
+	}
+	RGB<P>	operator-(const RGB<P>& other) {
+		RGB<P>	result;
+		result.R = R - other.R;
+		result.G = G - other.G;
+		result.B = B - other.B;
+		return result;
+	}
+	RGB<P>	operator*(const P value) {
+		RGB<P>	result;
+		result.R = R * value;
+		result.G = G * value;
+		result.B = B * value;
+		return result;
+	}
 };
 
 /**
