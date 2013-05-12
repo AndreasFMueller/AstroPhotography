@@ -77,7 +77,7 @@ void	FilterTest::testMean() {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
-	Mean<unsigned char>	m;
+	Mean<unsigned char, double>	m;
 	CPPUNIT_ASSERT(16 == m(image));
 }
 

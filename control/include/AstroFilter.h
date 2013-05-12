@@ -12,6 +12,11 @@ namespace filter {
 
 /**
  * \brief Filters that return a single value of the same type as the image.
+ *
+ * This type of filter cannot be used to compute values from the image
+ * that don't fit in the pixel type. An example of such a value would be
+ * the mean value. There is a Mean filter derived from this type but in its
+ * basic form it computes the integer rounded version.
  */
 template<typename T>
 class PixelTypeFilter {
@@ -58,16 +63,19 @@ public:
 /**
  * \brief Filter that finds the mean of an image
  */
-template<typename T>
+template<typename T, typename S>
 class Mean : public PixelTypeFilter<T> {
 public:
 	Mean() { }
-	virtual T	operator()(const Image<T>& image) {
-		double	sum = 0;
+	S	mean(const Image<T>& image) {
+		S	sum = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			sum += image.pixels[i];
 		}
-		return (T)(sum / image.size.pixels);
+		return sum / image.size.pixels;
+	}
+	virtual T	operator()(const Image<T>& image) {
+		return (T)mean(image);
 	}
 };
 
@@ -176,6 +184,8 @@ public:
 
 /**
  * \brief Image operators
+ * 
+ * These operators operate an an image change the image in place.
  */
 template<typename T>
 class ImageOperator {
