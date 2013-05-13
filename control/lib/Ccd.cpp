@@ -8,6 +8,8 @@
 #include <Format.h>
 #include <debug.h>
 
+using namespace astro::image;
+
 namespace astro {
 namespace camera {
 
@@ -18,22 +20,51 @@ namespace camera {
 CcdInfo::CcdInfo() {
 }
 
+/**
+ * \brief Get the CCD size.
+ */
 const astro::image::ImageSize&	CcdInfo::getSize() const {
 	return size;
 }
 
+/**
+ * \brief Get a frame filling the CCD
+ *
+ * This method returns an image rectangle that fills the CCD. This can
+ * be used to initialize the exposure object for the getExposure
+ * method. Some cameras, like the UVC cameras, can only display full
+ * frames, not subframes.
+ */
+const ImageRectangle	CcdInfo::getFrame() const {
+	return ImageRectangle(ImagePoint(0, 0), size);
+}
+
+/**
+ * \brief Get the binning modes available for this CCD.
+ */
 const BinningSet&	CcdInfo::modes() const {
 	return binningmodes;
 }
 
+/**
+ * \brief Get the name of this CCD.
+ */
 const std::string&	CcdInfo::getName() const {
 	return name;
 }
 
+/**
+ * \brief Get the CCD id for this CCD.
+ *
+ * This is the index into the array of CCDs this camera has.
+ */
 int	CcdInfo::getId() const {
 	return ccdid;
 }
 
+/**
+ * \brief Return a string representation.
+ */
 std::string	CcdInfo::toString() const {
 	return stringprintf("%s: %dx%d,%s", name.c_str(),
 		size.width, size.height,
@@ -94,11 +125,12 @@ astro::image::ImagePtr	Ccd::getImage() throw (not_implemented) {
  *
  * The default implementation just performs multiple startExposure/getImage
  * calls. We reuse the same exposure structure for all calls.
+ * \param imagecount	number of images to retrieve
  */
-astro::image::ImageSequence	Ccd::getImageSequence(int imagecount)
+astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount)
 	throw (not_implemented) {
 	astro::image::ImageSequence	result;
-	int	k = 0;
+	unsigned int	k = 0;
 	while (k < imagecount) {
 		if (k > 0) {
 			startExposure(exposure);

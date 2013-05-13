@@ -1284,11 +1284,14 @@ public:
 
 	// access to frames
 private:
-	std::vector<FramePtr>	getIsoFrames(uint8_t interface, int nframes);
-	std::vector<FramePtr>	getBulkFrames(uint8_t interface, int nframes);
+	std::vector<FramePtr>	getIsoFrames(uint8_t interface,
+					unsigned int nframes);
+	std::vector<FramePtr>	getBulkFrames(uint8_t interface,
+					unsigned int nframes);
 public:
 	FramePtr	getFrame(uint8_t interface);
-	std::vector<FramePtr>	getFrames(uint8_t interface, int nframes);
+	std::vector<FramePtr>	getFrames(uint8_t interface,
+		unsigned int nframes);
 };
 
 std::ostream&	operator<<(std::ostream& out, const UVCCamera& camera);

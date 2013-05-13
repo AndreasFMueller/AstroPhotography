@@ -1,13 +1,13 @@
 /*
- * UVCCamera.cpp -- UVC Camera implementation
+ * UvcCamera.cpp -- UVC Camera implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <UVCCamera.h>
+#include <UvcCamera.h>
 #include <debug.h>
 #include <Format.h>
-#include <UVCCcd.h>
-#include <UVCUtils.h>
+#include <UvcCcd.h>
+#include <UvcUtils.h>
 
 namespace astro {
 namespace camera {
@@ -15,7 +15,7 @@ namespace uvc {
 
 using astro::usb::uvc::HeaderDescriptor;
 
-void	UVCCamera::addFrame(int interface, int format, int frame,
+void	UvcCamera::addFrame(int interface, int format, int frame,
 	FrameDescriptor *framedescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d, format %d, frame %d",
 		interface, format, frame);
@@ -41,7 +41,7 @@ void	UVCCamera::addFrame(int interface, int format, int frame,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.getName().c_str());
 }
 
-void	UVCCamera::addFormat(int interface, int format,
+void	UvcCamera::addFormat(int interface, int format,
 		FormatDescriptor *formatdescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d, format %d",
 		interface, format);
@@ -69,7 +69,7 @@ void	UVCCamera::addFormat(int interface, int format,
 	}
 }
 
-void	UVCCamera::addHeader(int interface, HeaderDescriptor *headerdescriptor) {
+void	UvcCamera::addHeader(int interface, HeaderDescriptor *headerdescriptor) {
 	int	formatcount = headerdescriptor->bNumFormats();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d formats", formatcount);
 
@@ -82,7 +82,7 @@ void	UVCCamera::addHeader(int interface, HeaderDescriptor *headerdescriptor) {
 	}
 }
 
-UVCCamera::UVCCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
+UvcCamera::UvcCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 	camera(*deviceptr, true) {
 	// show what we have in this camera
 	std::cout << camera;
@@ -105,50 +105,55 @@ UVCCamera::UVCCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 	}
 }
 
-UVCCamera::~UVCCamera() {
+UvcCamera::~UvcCamera() {
 }
 
-CcdPtr	UVCCamera::getCcd(const std::string& name) {
+CcdPtr	UvcCamera::getCcd(const std::string& name) {
 	// locate the camera using the name
 	return CcdPtr();
 }
 
-CcdPtr	UVCCamera::getCcd(size_t ccdindex) {
+CcdPtr	UvcCamera::getCcd(size_t ccdindex) {
 	uvcccd_t	uc = ccds[ccdindex];
 	CcdInfo	info = ccdinfo[ccdindex];
-	return CcdPtr(new UVCCcd(info, uc.interface, uc.format, uc.frame,
+	return CcdPtr(new UvcCcd(info, uc.interface, uc.format, uc.frame,
 		*this));
 }
 
-void	UVCCamera::selectFormatAndFrame(int interface, int format, int frame) {
+void	UvcCamera::selectFormatAndFrame(int interface, int format, int frame) {
 	try {
 		camera.selectFormatAndFrame(interface, format, frame);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot select interface %d, "
 			"format %d, frame %d: %s",
 			interface, format, frame, x.what());
-		throw UVCError("cannot set format/frame");
+		throw UvcError("cannot set format/frame");
 	}
 }
 
-void	UVCCamera::setExposureTime(double exposuretime) {
+void	UvcCamera::setExposureTime(double exposuretime) {
 	try {
 		camera.setExposureTime(exposuretime);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set exposure time: %s",
 			x.what());
-		throw UVCError("cannot set exposure time");
+		throw UvcError("cannot set exposure time");
 	}
 }
 
-void	UVCCamera::setGain(double gain) {
+void	UvcCamera::setGain(double gain) {
 	try {
 		camera.setGain(gain);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set gain: %s",
 			x.what());
-		throw UVCError("cannot set exposure time");
+		throw UvcError("cannot set exposure time");
 	}
+}
+
+std::vector<FramePtr>	UvcCamera::getFrames(int interface,
+	unsigned int nframes) {
+	return camera.getFrames(interface, nframes);
 }
 
 } // namespace uvc

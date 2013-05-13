@@ -249,14 +249,25 @@ uint8_t	InterfaceAssociationDescriptor::bInterfaceCount() const {
 }
 
 uint8_t	InterfaceAssociationDescriptor::bFunctionClass() const {
+	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
+		return CC_VIDEO;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionClass = %02x", uint8At(4));
 	return uint8At(4);
 }
 
 uint8_t	InterfaceAssociationDescriptor::bFunctionSubClass() const {
+	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
+		return SC_VIDEO_INTERFACE_COLLECTION;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bFunctionSubClass = %02x", uint8At(5));
 	return uint8At(5);
 }
 
 uint8_t	InterfaceAssociationDescriptor::bFunctionProtocol() const {
+	if (device.getBroken() == BROKEN_THE_IMAGING_SOURCE) {
+		return PC_PROTOCOL_UNDEFINED;
+	}
 	return uint8At(6);
 }
 

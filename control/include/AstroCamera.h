@@ -1,5 +1,5 @@
 /*
- * AstroCamera.h
+ * AstroCamera.h -- Astro camera declarations
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
@@ -114,6 +114,7 @@ public:
 	int	ccdid;
 	CcdInfo();
 	const astro::image::ImageSize&	getSize() const;
+	const astro::image::ImageRectangle	getFrame() const;
 	const BinningSet&	modes() const;
 	const std::string&	getName() const;
 	int	getId() const;
@@ -161,7 +162,7 @@ public:
 
 	// image retrievel functions
 	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
-	virtual astro::image::ImageSequence	getImageSequence(int imagecount)
+	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount)
 		throw (not_implemented);
 
 	// handling the cooler

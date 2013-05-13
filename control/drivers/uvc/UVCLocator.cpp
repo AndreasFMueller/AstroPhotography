@@ -1,11 +1,11 @@
 /*
- * UVCLocator.cpp -- implementation of UVC camera locator
+ * UvcLocator.cpp -- implementation of UVC camera locator
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <UVCLocator.h>
-#include <UVCCamera.h>
-#include <UVCUtils.h>
+#include <UvcLocator.h>
+#include <UvcCamera.h>
+#include <UvcUtils.h>
 #include <debug.h>
 #include <Format.h>
 
@@ -13,21 +13,23 @@ namespace astro {
 namespace camera {
 namespace uvc {
 
-UVCCameraLocator::UVCCameraLocator() {
+UvcCameraLocator::UvcCameraLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the UVC locator");
 }
 
-UVCCameraLocator::~UVCCameraLocator() {
+UvcCameraLocator::~UvcCameraLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the UVC locator");
 }
 
-std::string	UVCCameraLocator::getName() const {
+std::string	UvcCameraLocator::getName() const {
 	return "uvc";
 }
 
-std::string	UVCCameraLocator::getVersion() const {
+std::string	UvcCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-std::vector<std::string>	UVCCameraLocator::getCameralist() {
+std::vector<std::string>	UvcCameraLocator::getCameralist() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a camera list");
 	std::vector<std::string>	cameras;
 	// get a list of all device, then check whether they are UVC
@@ -46,13 +48,15 @@ std::vector<std::string>	UVCCameraLocator::getCameralist() {
 				descriptor->idVendor(), descriptor->idProduct(),
 				descriptor->iProduct().c_str());
 			cameras.push_back(name);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "not a video device");
 		}
 		deviceptr->close();
 	}
 	return cameras;
 }
 
-CameraPtr	UVCCameraLocator::getCamera(const std::string& name) {
+CameraPtr	UvcCameraLocator::getCamera(const std::string& name) {
 	// extract the vendor id and the product id from the name and
 	// open the device for it
 	unsigned int	vendor, product;
@@ -68,13 +72,13 @@ CameraPtr	UVCCameraLocator::getCamera(const std::string& name) {
 		DeviceDescriptorPtr	descriptor = (*i)->descriptor();
 		if ((vendor == descriptor->idVendor())
 			&& (product == descriptor->idProduct())) {
-			return CameraPtr(new UVCCamera(deviceptr));
+			return CameraPtr(new UvcCamera(deviceptr));
 		}
 	}
-	throw UVCError("device not found");
+	throw UvcError("device not found");
 }
 
-CameraPtr	UVCCameraLocator::getCamera(size_t index) {
+CameraPtr	UvcCameraLocator::getCamera(size_t index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
 	std::vector<DevicePtr>	devices = context.devices();
 	std::vector<DevicePtr>::iterator	i;
@@ -85,13 +89,13 @@ CameraPtr	UVCCameraLocator::getCamera(size_t index) {
 		if (deviceptr->isVideoDevice()) {
 			if (index == counter) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "camera found");
-				return CameraPtr(new UVCCamera(deviceptr));
+				return CameraPtr(new UvcCamera(deviceptr));
 			}
 			counter++;
 		}
 		deviceptr->close();
 	}
-	throw UVCError("device not found");
+	throw UvcError("device not found");
 }
 
 } // namespace uvc
@@ -100,6 +104,6 @@ CameraPtr	UVCCameraLocator::getCamera(size_t index) {
 
 extern "C"
 astro::camera::CameraLocator	*getCameraLocator() {
-	return new astro::camera::uvc::UVCCameraLocator();
+	return new astro::camera::uvc::UvcCameraLocator();
 }
 

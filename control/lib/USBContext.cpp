@@ -18,6 +18,7 @@ namespace usb {
  *
  */
 Context::Context() throw(USBError) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating USB context");
 	int	rc = libusb_init(&context);
 	if (rc != 0) {
 		throw USBError(libusb_error_name(rc));
@@ -31,7 +32,9 @@ Context::Context() throw(USBError) {
  * \brief Destroy the USB context
  */
 Context::~Context() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying USB context");
 	libusb_exit(context);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "USB context destroyed");
 }
 
 /**

@@ -1,10 +1,10 @@
 /*
- * UVCLocator.h -- declarations of the camera 
+ * UvcLocator.h -- declarations of the camera 
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _UVCLocator_h
-#define _UVCLocator_h
+#ifndef _UvcLocator_h
+#define _UvcLocator_h
 
 #include <AstroUSB.h>
 #include <AstroCamera.h>
@@ -21,11 +21,11 @@ namespace uvc {
  *
  * Each UVC camera is also a camera from the point of view of this 
  */
-class UVCCameraLocator : public CameraLocator {
+class UvcCameraLocator : public CameraLocator {
 	Context	context;
 public:
-	UVCCameraLocator();
-	virtual ~UVCCameraLocator();
+	UvcCameraLocator();
+	virtual ~UvcCameraLocator();
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getCameralist();
@@ -37,4 +37,4 @@ public:
 } // namespace camera
 } // namespace uvc
 
-#endif /* _UVCLocator_h */
+#endif /* _UvcLocator_h */

@@ -573,7 +573,7 @@ int	UVCCamera::preferredAltSetting(uint8_t interface) {
  * \param nframes	number of frames to read from the camera
  */
 std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
-	int nframes) {
+	unsigned int nframes) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %d frames using bulk transfer",
 		nframes);
 	// find the interface on which we want to do the transfer
@@ -615,7 +615,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
  * \param nframes	number of video frames to retrieve
  */
 std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
-	int nframes) {
+	unsigned int nframes) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a frame from if %d",
 		interface);
 
@@ -669,7 +669,8 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
  *
  * \param interface	interface number of the video streaming interface
  */
-std::vector<FramePtr>	UVCCamera::getFrames(uint8_t interface, int nframes) {
+std::vector<FramePtr>	UVCCamera::getFrames(uint8_t interface,
+	unsigned int nframes) {
 	// all frame retrieval goes through this method, so we use the
 	// occasion to set some important variables
 	getCur(interface);

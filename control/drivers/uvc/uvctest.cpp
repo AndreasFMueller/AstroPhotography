@@ -5,7 +5,7 @@
  */
 
 #include <AstroIO.h>
-#include <UVCLocator.h>
+#include <UvcLocator.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -22,7 +22,7 @@ namespace uvc {
 namespace test {
 
 class uvctest : public CppUnit::TestFixture {
-	UVCCameraLocator	*locator;
+	UvcCameraLocator	*locator;
 public:
 	void	setUp();
 	void	tearDown();
@@ -42,7 +42,7 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION(uvctest);
 
 void	uvctest::setUp() {
-	locator = new UVCCameraLocator();
+	locator = new UvcCameraLocator();
 }
 
 void	uvctest::tearDown() {
@@ -51,6 +51,7 @@ void	uvctest::tearDown() {
 }
 
 void	uvctest::testList() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a list of cameras");
 	std::vector<std::string>	cameras = locator->getCameralist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
@@ -58,9 +59,11 @@ void	uvctest::testList() {
 		std::cout << "camera[" << ++counter << "]: '" << *i << "'"
 			<< std::endl;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cameras listed");
 }
 
 void	uvctest::testCamera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera");
 	CameraPtr	camera = locator->getCamera(0);
 	std::cout << "number of ccds: " << camera->nCcds() << std::endl;
 }
@@ -73,13 +76,17 @@ void	uvctest::testCcd() {
 }
 
 void	uvctest::testExposure() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera device");
 	CameraPtr	camera = locator->getCamera(0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first CCD");
 	CcdPtr	ccd = camera->getCcd(0);
-	Exposure	exposure(ImageRectangle(ImagePoint(0, 0),
-		ImageSize(160, 120)), 0.02);
+	Exposure	exposure(ccd->getInfo().getFrame(), 0.02);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure");
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve an image");
 	ImagePtr	image = ccd->getImage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
 	// write the image to a file
 	FITSout	file("test.fits");
 	file.write(image);

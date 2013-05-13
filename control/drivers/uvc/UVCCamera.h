@@ -1,10 +1,10 @@
 /*
- * UVCCamera.h -- USB Video Class camera
+ * UvcCamera.h -- USB Video Class camera
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _UVCCamera_h
-#define _UVCCamera_h
+#ifndef _UvcCamera_h
+#define _UvcCamera_h
 
 #include <AstroUVC.h>
 #include <AstroCamera.h>
@@ -18,7 +18,7 @@ namespace astro {
 namespace camera {
 namespace uvc {
 
-class UVCCamera : public Camera {
+class UvcCamera : public Camera {
 	DevicePtr	deviceptr;
 	astro::usb::uvc::UVCCamera	camera;
 	typedef struct uvcccd_s {
@@ -37,18 +37,19 @@ private:
 	void    addHeader(int interface,
 			HeaderDescriptor *headerdescriptor);
 public:
-	UVCCamera(DevicePtr& deviceptr);
-	virtual ~UVCCamera();
+	UvcCamera(DevicePtr& deviceptr);
+	virtual ~UvcCamera();
 	CcdPtr	getCcd(size_t ccdindex);
 	CcdPtr	getCcd(const std::string& name);
 
 	void	selectFormatAndFrame(int interface, int format, int frame);
 	void	setExposureTime(double exposuretime);
 	void	setGain(double gain);
+	std::vector<FramePtr>	getFrames(int interface, unsigned int nframes);
 };
 
 } // namespace uvc
 } // namespace camera
 } // namespace astro
 
-#endif /* _UVCCamera_h */
+#endif /* _UvcCamera_h */
