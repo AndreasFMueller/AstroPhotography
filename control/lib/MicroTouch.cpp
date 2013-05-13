@@ -87,7 +87,10 @@ struct mtdata {
  */
 uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
 	mtdata<2>	result = get<2>(code);
-	return *(uint16_t *)result.data;
+	uint16_t	word = result.data[1];
+	word <<= 8;
+	word += result.data[0];
+	return word;
 }
 
 /**
