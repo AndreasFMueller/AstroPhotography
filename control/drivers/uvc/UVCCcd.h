@@ -6,6 +6,8 @@
 #include <AstroCamera.h>
 #include <UVCCamera.h>
 
+using namespace astro::image;
+
 namespace astro {
 namespace camera {
 namespace uvc {

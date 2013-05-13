@@ -79,10 +79,10 @@ void	uvctest::testExposure() {
 		ImageSize(160, 120)), 0.02);
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
-	ShortImagePtr	image = ccd->shortImage();
+	ImagePtr	image = ccd->getImage();
 	// write the image to a file
-	FITSoutfile<unsigned short>	file("test.fits");
-	file.write(*image);
+	FITSout	file("test.fits");
+	file.write(image);
 }
 
 } // namespace test

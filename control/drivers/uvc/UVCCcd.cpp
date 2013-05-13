@@ -7,6 +7,8 @@
 #include <debug.h>
 #include <UVCUtils.h>
 
+using namespace astro::image;
+
 namespace astro {
 namespace camera {
 namespace uvc {
