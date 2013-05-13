@@ -114,14 +114,16 @@ void	sxtest::testCamera() {
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
-	ShortImagePtr	image = ccd->shortImage();
+	ImagePtr	image = ccd->getImage();
+	Image<unsigned short>	*shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	CPPUNIT_ASSERT(NULL != shortimage);
 	Median<unsigned short>	median;
-	unsigned short	m = median(*image);
+	unsigned short	m = median(*shortimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "median: %hu", m);
 
 	unlink("test.fits");
-	FITSoutfile<unsigned short>	file("test.fits");
-	file.write(*image);
+	FITSout	file("test.fits");
+	file.write(image);
 }
 
 void	sxtest::testGuiderport() {

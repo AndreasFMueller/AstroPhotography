@@ -36,6 +36,10 @@ void	UVCCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	// XXX should also disable automatic white balance
 }
 
+ImagePtr	UVCCcd::getImage() throw(not_implemented) {
+	throw not_implemented("get image not yet implemented");
+}
+
 } // namespace uvc
 } // namespace camera
 } // namespace astro

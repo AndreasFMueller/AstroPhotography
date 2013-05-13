@@ -97,7 +97,7 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
  * Starlight Express cameras always use 16 bit pixels, it is natural to
  * always produce 16 bit deep images.
  */
-ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
+ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize(
 		exposure.frame.size.width / exposure.mode.getX(),
@@ -142,7 +142,7 @@ ShortImagePtr	SxCcd::shortImage() throw (not_implemented) {
 		}
 	}
 
-	return ShortImagePtr(image);
+	return ImagePtr(image);
 }
 
 } // namespace sx

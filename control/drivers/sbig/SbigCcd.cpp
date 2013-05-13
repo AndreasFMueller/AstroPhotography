@@ -90,7 +90,7 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	state = Exposure::exposing;
 }
 
-ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
+ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
 	if (state == Exposure::idle) {
@@ -187,7 +187,7 @@ ShortImagePtr	SbigCcd::shortImage() throw(not_implemented) {
 		= new Image<unsigned short>(exposure.frame.size, data);
 
 	// convert the data read to a short image
-	return ShortImagePtr(image);
+	return ImagePtr(image);
 }
 
 CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {

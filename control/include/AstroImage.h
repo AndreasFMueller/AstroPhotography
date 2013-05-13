@@ -13,6 +13,7 @@
 #include <iostream>
 #include <AstroPixel.h>
 #include <limits>
+#include <vector>
 
 namespace astro {
 namespace image {
@@ -543,6 +544,8 @@ typedef std::tr1::shared_ptr<Image<float> >	FloatImagePtr;
 typedef std::tr1::shared_ptr<Image<double> >	DoubleImagePtr;
 typedef std::tr1::shared_ptr<Image<RGB<unsigned char> > >	RGBImagePtr;
 typedef std::tr1::shared_ptr<Image<YUYV<unsigned char> > >	YUYVImagePtr;
+
+typedef std::vector<ImagePtr>	ImageSequence;
 
 /**
  * \brief Convert a typed image ptr to an untyped image ptr

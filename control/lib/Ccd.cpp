@@ -82,45 +82,17 @@ void    Ccd::cancelExposure() throw (not_implemented) {
 }
 
 /**
- * \brief Retrieve a 8bit raw image from the camera
+ * \brief Retrieve an image from the camera
  */
-astro::image::ByteImagePtr	Ccd::byteImage() throw (not_implemented) {
-	throw not_implemented("byteImage not implemented");
+astro::image::ImagePtr	Ccd::getImage() throw (not_implemented) {
+	throw not_implemented("getImage not implemented");
 }
 
 /**
- * \brief Retrieve a 16bit raw image from the camera
+ * \brief Retrieve a sequence of images from the camera
  */
-astro::image::ShortImagePtr	Ccd::shortImage() throw (not_implemented) {
-	throw not_implemented("shortImage not implemented");
-}
-
-/**
- * \brief Retrieve a 32bit raw image from the camera
- */
-astro::image::IntImagePtr	Ccd::intImage() throw (not_implemented) {
-	throw not_implemented("intImage not implemented");
-}
-
-/**
- * \brief Retrieve a 16bit raw image from the camera
- */
-astro::image::LongImagePtr	Ccd::longImage() throw (not_implemented) {
-	throw not_implemented("longImage not implemented");
-}
-
-/**
- * \brief Retrieve an YUYV image from the camera
- */
-astro::image::YUYVImagePtr	Ccd::yuyvImage() throw (not_implemented) {
-	throw not_implemented("yuyvImage not implemented");
-}
-
-/**
- * \brief Retrieve an YUYV image from the camera
- */
-astro::image::RGBImagePtr	Ccd::rgbImage() throw (not_implemented) {
-	throw not_implemented("rgbImage not implemented");
+astro::image::ImageSequence	Ccd::getImageSequence() throw (not_implemented) {
+	throw not_implemented("getImageSequence not implemented");
 }
 
 /**

@@ -89,11 +89,11 @@ void	sbigtest::testExposure() {
 	std::cout << exposure << std::endl;
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
-	ShortImagePtr	image = ccd->shortImage();
+	ImagePtr	image = ccd->getImage();
 	// write the image to a file
 	unlink("test.fits");
-	FITSoutfile<unsigned short>	file("test.fits");
-	file.write(*image);
+	FITSout	file("test.fits");
+	file.write(image);
 }
 
 void	sbigtest::testFilterwheel() {
@@ -112,12 +112,12 @@ void	sbigtest::testFilterwheel() {
 			ImageSize(1000,1000)), 0.1);
 		ccd->startExposure(exposure);
 		ccd->exposureStatus();
-		ShortImagePtr	image = ccd->shortImage();
+		ImagePtr	image = ccd->getImage();
 		char	name[128];
 		snprintf(name, sizeof(name), "test-pos%02d.fits", filterindex);
 		unlink(name);
-		FITSoutfile<unsigned short>	file(name);
-		file.write(*image);
+		FITSout	file(name);
+		file.write(image);
 	}
 }
 

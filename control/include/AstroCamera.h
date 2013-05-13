@@ -160,17 +160,8 @@ public:
 	const Exposure&	getExposure() const { return exposure; }
 
 	// image retrievel functions
-	virtual astro::image::ByteImagePtr	byteImage()
-		throw (not_implemented);
-	virtual astro::image::ShortImagePtr	shortImage()
-		throw (not_implemented);
-	virtual astro::image::IntImagePtr	intImage()
-		throw (not_implemented);
-	virtual astro::image::LongImagePtr	longImage()
-		throw (not_implemented);
-	virtual astro::image::YUYVImagePtr	yuyvImage()
-		throw (not_implemented);
-	virtual astro::image::RGBImagePtr	rgbImage()
+	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
+	virtual astro::image::ImageSequence	getImageSequence()
 		throw (not_implemented);
 
 	// handling the cooler

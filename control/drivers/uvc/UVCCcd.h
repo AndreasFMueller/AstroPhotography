@@ -20,6 +20,7 @@ public:
 		UVCCamera& camera);
 	virtual void    startExposure(const Exposure& exposure)
 		throw (not_implemented);
+	virtual ImagePtr	getImage() throw(not_implemented);
 };
 
 } // namespace uvc

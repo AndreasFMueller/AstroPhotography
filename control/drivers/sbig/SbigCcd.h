@@ -25,7 +25,7 @@ public:
 	virtual ~SbigCcd();
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
 	virtual void	startExposure(const Exposure& exposure) throw (not_implemented);
-	virtual	ShortImagePtr	shortImage() throw(not_implemented);
+	virtual	ImagePtr	getImage() throw(not_implemented);
 	virtual CoolerPtr	getCooler() throw(not_implemented);
 };
 

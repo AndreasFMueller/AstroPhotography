@@ -49,7 +49,7 @@ void	Mock1Test::testMock1() {
 	CPPUNIT_ASSERT(cameras.size() == 10);
 	CameraPtr	camera = cl->getCamera("mock1-5");
 	// for every CCD, take an image
-	for (int i = 0; i < camera->nCcds(); i++) {
+	for (unsigned int i = 0; i < camera->nCcds(); i++) {
 		CcdPtr	ccd = camera->getCcd(i);
 		Exposure	exposure;
 		ImageRectangle	frame(ImagePoint(1,1),
@@ -61,7 +61,7 @@ void	Mock1Test::testMock1() {
 			sleep(1);
 		}
 		if (ccd->exposureStatus() == Exposure::exposed) {
-			ByteImagePtr	image = ccd->byteImage();
+			ImagePtr	image = ccd->getImage();
 			std::cerr << "result image size: "
 				<< image->size.width << " x "
 				<< image->size.height << std::endl;
