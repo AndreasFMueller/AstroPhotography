@@ -6,6 +6,7 @@
  */
 #include <AstroCamera.h>
 #include <Format.h>
+#include <debug.h>
 
 namespace astro {
 namespace camera {
@@ -90,9 +91,23 @@ astro::image::ImagePtr	Ccd::getImage() throw (not_implemented) {
 
 /**
  * \brief Retrieve a sequence of images from the camera
+ *
+ * The default implementation just performs multiple startExposure/getImage
+ * calls. We reuse the same exposure structure for all calls.
  */
-astro::image::ImageSequence	Ccd::getImageSequence() throw (not_implemented) {
-	throw not_implemented("getImageSequence not implemented");
+astro::image::ImageSequence	Ccd::getImageSequence(int imagecount)
+	throw (not_implemented) {
+	astro::image::ImageSequence	result;
+	int	k = 0;
+	while (k < imagecount) {
+		if (k > 0) {
+			startExposure(exposure);
+		}
+		result.push_back(getImage());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %d retrieved", k);
+		k++;
+	}
+	return result;
 }
 
 /**

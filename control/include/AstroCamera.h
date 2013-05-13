@@ -161,7 +161,7 @@ public:
 
 	// image retrievel functions
 	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
-	virtual astro::image::ImageSequence	getImageSequence()
+	virtual astro::image::ImageSequence	getImageSequence(int imagecount)
 		throw (not_implemented);
 
 	// handling the cooler
