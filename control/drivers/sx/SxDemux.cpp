@@ -113,7 +113,6 @@ void	Demuxer::set_pixel(Image<unsigned short>& image, int x, int y,
 	if (y >= height) {
 		return;
 	}
-debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel[%d,%d] = %hu", x, y, value);
 	image.pixel(x, y) = value;
 }
 
