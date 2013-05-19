@@ -12,6 +12,7 @@
 #include <ostream>
 #include <debug.h>
 #include <includes.h>
+#include <AstroDemosaic.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -143,10 +144,19 @@ void	sxtest::testFullimage() {
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
+	Image<unsigned short>	*shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 
 	unlink("test.fits");
 	FITSout	file("test.fits");
 	file.write(image);
+
+	// demosaic the image
+	DemosaicBilinear<unsigned short>	demosaicer;
+	Image<RGB<unsigned short> >	*demosaiced = demosaicer(*shortimage);
+	ImagePtr	demosaicedptr(demosaiced);
+	unlink("test-demosaiced.fits");
+	FITSout	demosaicedfile("test-demosaiced.fits");
+	demosaicedfile.write(demosaicedptr);
 }
 
 void	sxtest::testSubimage() {
