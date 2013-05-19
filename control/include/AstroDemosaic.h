@@ -7,6 +7,7 @@
 #define _AstroDemosaic_h
 
 #include <AstroImage.h>
+#include <debug.h>
 
 namespace astro {
 namespace image {
@@ -93,57 +94,128 @@ class DemosaicBilinear : public Demosaic<T> {
 	void	red(Image<RGB<T> > *result, const Image<T>& image);
 	void	blue(Image<RGB<T> > *result, const Image<T>& image);
 
-	T	quadt(int x, int y, const Image<T>& image);
-	T	quadx(int x, int y, const Image<T>& image);
-	T	pairh(int x, int y, const Image<T>& image);
-	T	pairv(int x, int y, const Image<T>& image);
+	T	quadt(unsigned int x, unsigned int y, const Image<T>& image);
+	T	quadx(unsigned int x, unsigned int y, const Image<T>& image);
+	T	pairh(unsigned int x, unsigned int y, const Image<T>& image);
+	T	pairv(unsigned int x, unsigned int y, const Image<T>& image);
 public:
 	DemosaicBilinear() { }
 	Image<RGB<T> >	*operator()(const Image<T>& image);
 };
 
 template<typename T>
-void	DemosaicBilinear<T>::green(Image<RGB<T> > *result, const Image<T>& image) {
+T	DemosaicBilinear<T>::quadt(unsigned int x, unsigned int y,
+		const Image<T>& image) {
+	double	result = 0;
+	int	n = 0;
+	if (x > 0) {
+		result += image.pixel(x - 1, y); n++;
+	}
+	if (x < image.size.width - 1) {
+		result += image.pixel(x + 1, y); n++;
+	}
+	if (y > 0) {
+		result += image.pixel(x, y - 1); n++;
+	}
+	if (y < image.size.height - 1) {
+		result += image.pixel(x, y + 1); n++;
+	}
+	result /= n;
+	return (T)result;
+}
+
+template<typename T>
+T	DemosaicBilinear<T>::quadx(unsigned int x, unsigned int y,
+		const Image<T>& image) {
+	double	result = 0;
+	int	n = 0;
+	if ((x > 0) && (y > 0)) {
+		result += image.pixel(x - 1, y - 1); n++;
+	}
+	if ((x > 0) && (y < image.size.height - 1)) {
+		result += image.pixel(x - 1, y + 1); n++;
+	}
+	if ((x < image.size.width - 1) && (y > 0)) {
+		result += image.pixel(x + 1, y - 1); n++;
+	} 
+	if ((x < image.size.width - 1) && (y < image.size.height - 1)) {
+		result += image.pixel(x + 1, y + 1); n++;
+	}
+debug(LOG_DEBUG, DEBUG_LOG, 0, "sum = %f", result);
+	result /= n;
+debug(LOG_DEBUG, DEBUG_LOG, 0, "value = %d", (T)result);
+	return (T)result;
+}
+
+template<typename T>
+T	DemosaicBilinear<T>::pairh(unsigned int x, unsigned int y,
+		const Image<T>& image) {
+	double	result = 0;
+	int	n = 0;
+	if (x > 0) {
+		result += image.pixel(x - 1, y); n++;
+	}
+	if (x < image.size.width - 1) {
+		result += image.pixel(x + 1, y); n++;
+	}
+	result /= n;
+	return (T)result;
+}
+
+template<typename T>
+T	DemosaicBilinear<T>::pairv(unsigned int x, unsigned int y,
+		const Image<T>& image) {
+	double	result = 0;
+	int	n = 0;
+	if (y > 0) {
+		result += image.pixel(x, y - 1); n++;
+	}
+	if (y < image.size.height - 1) {
+		result += image.pixel(x, y + 1); n++;
+	}
+	result /= n;
+	return (T)result;
+}
+
+template<typename T>
+void	DemosaicBilinear<T>::green(Image<RGB<T> > *result,
+		const Image<T>& image) {
 	for (unsigned int x = 0; x < image.size.width; x += 2) {
 		for (unsigned int y = 0; y < image.size.height; y += 2) {
-#if 0
 			result->pixel(x + redx, y + redy).G
 				= quadt(x + redx, y + redy, image);
 			result->pixel(x + bluex, y + bluey).G
 				= quadt(x + bluex, y + bluey, image);
-#endif
 		}
 	}
 }
 
 template<typename T>
-void	DemosaicBilinear<T>::red(Image<RGB<T> > *result, const Image<T>& image) {
+void	DemosaicBilinear<T>::red(Image<RGB<T> > *result,
+		const Image<T>& image) {
 	for (unsigned int x = 0; x < image.size.width; x += 2) {
 		for (unsigned int y = 0; y < image.size.height; y += 2) {
-#if 0
 			result->pixel(x + bluex, y + bluey).R
 				= quadx(x + bluex, y + bluey, image);
 			result->pixel(x + redx, y + bluey).R
 				= pairv(x + redx, y + bluey, image);
 			result->pixel(x + bluex, y + redy).R
 				= pairh(x + bluex, y + redy, image);
-#endif
 		}
 	}
 }
 
 template<typename T>
-void	DemosaicBilinear<T>::blue(Image<RGB<T> > *result, const Image<T>& image) {
+void	DemosaicBilinear<T>::blue(Image<RGB<T> > *result,
+		const Image<T>& image) {
 	for (unsigned int x = 0; x < image.size.width; x += 2) {
 		for (unsigned int y = 0; y < image.size.height; y += 2) {
-#if 0
 			result->pixel(x + redx, y + redy).B
 				= quadx(x + redx, y + redy, image);
-			result->pixel(x + redx, y + blue).B
-				= pairh(x + redx, y + blue, image);
+			result->pixel(x + redx, y + bluey).B
+				= pairh(x + redx, y + bluey, image);
 			result->pixel(x + bluex, y + redy).B
 				= pairv(x + bluex, y +redy, image);
-#endif
 		}
 	}
 }
@@ -157,6 +229,8 @@ Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
 	redy = (image.mosaic >> 1) & 0x1;
 	bluex = 0x1 ^ redx;
 	bluey = 0x1 ^ redy;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "redx = %d, redy = %d, "
+		"bluex = %d, bluey = %d", redx, redy, bluex, bluey);
 	
 	// fill in the green pixels
 	green(result, image);

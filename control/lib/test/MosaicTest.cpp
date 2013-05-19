@@ -42,6 +42,7 @@ public:
 	void	testSeparateGRBG();
 	void	testSeparateGBRG();
 	void	testSeparateBGGR();
+	void	testDemosaicBilinear();
 
 	CPPUNIT_TEST_SUITE(MosaicTest);
 	CPPUNIT_TEST(testNone);
@@ -57,6 +58,7 @@ public:
 	CPPUNIT_TEST(testSeparateGRBG);
 	CPPUNIT_TEST(testSeparateGBRG);
 	CPPUNIT_TEST(testSeparateBGGR);
+	CPPUNIT_TEST(testDemosaicBilinear);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -309,6 +311,36 @@ void	MosaicTest::testSeparateGBRG() {
 
 void	MosaicTest::testSeparateBGGR() {
 	testSeparate(ImageBase::BAYER_BGGR);
+}
+
+void	MosaicTest::testDemosaicBilinear() {
+	Image<RGB<unsigned char> >	*image
+		= new Image<RGB<unsigned char> >(80, 80);
+	ImagePtr	imageptr(image);
+	for (unsigned int x = 0; x < image->size.width; x++) {
+		for (unsigned int y = 0; y < image->size.height; y++) {
+			int	v = ((x / 10) + (y / 10)) % 8;
+			image->pixel(x, y).R = (v & 0x4) ? 0xff : 0;
+			image->pixel(x, y).G = (v & 0x2) ? 0xff : 0;
+			image->pixel(x, y).B = (v & 0x1) ? 0xff : 0;
+		}
+	}
+
+	/* separate into bayer pattern */
+	Mosaic<unsigned char>	mosaicer(ImageBase::BAYER_RGGB);
+	Image<unsigned char>	*mosaiced = mosaicer(*image);
+	ImagePtr	mosaicimage(mosaiced);
+	unlink("rgbmosaic.fits");
+	FITSout	mosaicfile("rgbmosaic.fits");
+	mosaicfile.write(mosaicimage);
+
+	/* demosaic */
+	DemosaicBilinear<unsigned char>	demosaicer;
+	Image<RGB<unsigned char> >	*rgb = demosaicer(*mosaiced);
+	ImagePtr	rgbptr(rgb);
+	unlink("rgb.fits");
+	FITSout	file("rgb.fits");
+	file.write(rgbptr);
 }
 
 } // namespace test
