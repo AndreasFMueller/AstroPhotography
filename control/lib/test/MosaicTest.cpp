@@ -327,7 +327,7 @@ void	MosaicTest::testDemosaicBilinear() {
 	}
 
 	/* separate into bayer pattern */
-	Mosaic<unsigned char>	mosaicer(ImageBase::BAYER_RGGB);
+	Mosaic<unsigned char>	mosaicer(ImageBase::BAYER_GRBG);
 	Image<unsigned char>	*mosaiced = mosaicer(*image);
 	ImagePtr	mosaicimage(mosaiced);
 	unlink("rgbmosaic.fits");

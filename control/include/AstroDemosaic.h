@@ -141,9 +141,7 @@ T	DemosaicBilinear<T>::quadx(unsigned int x, unsigned int y,
 	if ((x < image.size.width - 1) && (y < image.size.height - 1)) {
 		result += image.pixel(x + 1, y + 1); n++;
 	}
-debug(LOG_DEBUG, DEBUG_LOG, 0, "sum = %f", result);
 	result /= n;
-debug(LOG_DEBUG, DEBUG_LOG, 0, "value = %d", (T)result);
 	return (T)result;
 }
 
@@ -229,8 +227,6 @@ Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
 	redy = (image.mosaic >> 1) & 0x1;
 	bluex = 0x1 ^ redx;
 	bluey = 0x1 ^ redy;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "redx = %d, redy = %d, "
-		"bluex = %d, bluey = %d", redx, redy, bluex, bluey);
 	
 	// fill in the green pixels
 	green(result, image);
