@@ -31,12 +31,14 @@ public:
 	void	testCooler();
 	void	testCamera();
 	void	testGuiderport();
+	void	testGuiderport2();
 
 	CPPUNIT_TEST_SUITE(sxtest);
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
-	CPPUNIT_TEST(testGuiderport);
+	//CPPUNIT_TEST(testGuiderport);
+	CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -138,6 +140,28 @@ void	sxtest::testGuiderport() {
 	guiderport->activate(0,0,0,3);
 	sleep(10);
 }
+
+void	sxtest::testGuiderport2() {
+	CameraPtr	camera = locator->getCamera(0);
+	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	int	counter = 100;
+	int	flags = 0;
+	float	delta = 0.2;
+	while (counter--) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%01x", flags);
+		flags = (flags << 1) % 16;
+		if (0 == flags) {
+			flags = 1;
+		}
+		float	raplus = delta * ((0x1 & flags) ? 1 : 0);
+		float	decplus = delta * ((0x2 & flags) ? 1 : 0);
+		float	decminus = delta * ((0x4 & flags) ? 1 : 0);
+		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
+		guiderport->activate(raplus, raminus, decplus, decminus);
+		usleep(2 * delta * 1000000);
+	}
+}
+
 
 } // namespace test
 } // namespace sx
