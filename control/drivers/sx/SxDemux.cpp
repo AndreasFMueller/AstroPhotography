@@ -113,6 +113,7 @@ void	Demuxer::set_pixel(Image<unsigned short>& image, int x, int y,
 	if (y >= height) {
 		return;
 	}
+debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel[%d,%d] = %hu", x, y, value);
 	image.pixel(x, y) = value;
 }
 
@@ -174,7 +175,8 @@ DemuxerBinned::~DemuxerBinned() {
 void	DemuxerBinned::operator()(Image<unsigned short>& image,
 		const Field& field1, const Field& field2) {
 	Demuxer::operator()(image, field1, field2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "binned demultiplexer");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "binned demultiplexer, offset = %d",
+		offset);
 
 	int	off = 2 * offset + 1;
 	for (int x = 0; x < width; x += 4) {
@@ -182,6 +184,7 @@ void	DemuxerBinned::operator()(Image<unsigned short>& image,
 			set_quad_back(image,
 				x + 1 + bluex - 2, y + 1 + bluey,
 				field1, off);
+			off += 8;
 		}
 	}
 
@@ -191,6 +194,7 @@ void	DemuxerBinned::operator()(Image<unsigned short>& image,
 			set_quad(image,
 				x + 1, y + 0,
 				field1, off);
+			off += 8;
 		}
 	}
 
@@ -200,6 +204,7 @@ void	DemuxerBinned::operator()(Image<unsigned short>& image,
 			set_quad_back(image,
 				x + redx - 2, y + redy,
 				field2, off);
+			off += 8;
 		}
 	}
 
@@ -210,6 +215,7 @@ void	DemuxerBinned::operator()(Image<unsigned short>& image,
 				x + 0 + greenx + 2,
 				y + 1 + greeny,
 				field2, off);
+			off += 8;
 		}
 	}
 }
@@ -246,14 +252,17 @@ DemuxerUnbinned::~DemuxerUnbinned() {
 void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 		const Field& field1, const Field& field2) {
 	Demuxer::operator()(image, field1, field2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "unbinned demultiplexer");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unbinned demultiplexer, offset = %d",
+		offset);
 
+#if 1
 	int	off = 2 * offset + 1;
 	for (int x = 0; x < width; x += 4) {
 		for (int y = 0; y < height; y += 4) {
 			set_quad_back(image,
 				x + 1 + BLUESHIFTX, y + 1 + BLUESHIFTY,
 				field1, off);
+			off += 8;
 		}
 	}
 
@@ -264,6 +273,7 @@ void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 				x + 1 + GBSHIFTX + GREENSHIFTX,
 				y + 0 + GBSHIFTY + GREENSHIFTY,
 				field1, off);
+			off += 8;
 		}
 	}
 
@@ -273,6 +283,7 @@ void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 			set_quad_back(image,
 				x + REDSHIFTX, y + REDSHIFTY,
 				field2, off);
+			off += 8;
 		}
 	}
 
@@ -283,8 +294,16 @@ void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 				x + 0 + GRSHIFTX + GREENSHIFTX,
 				y + 1 + GRSHIFTY + GREENSHIFTY,
 				field2, off);
+			off += 8;
 		}
 	}
+#else
+	/* copy without demultiplexing, just for debugging */
+	unsigned int	length = field1.getLength() * sizeof(unsigned short);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "length: %u", length);
+	memcpy(image.pixels, field1.data, length);
+	memcpy(length + (unsigned char *)image.pixels, field2.data, length);
+#endif
 }
 
 } // namespace sx
