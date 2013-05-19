@@ -80,7 +80,7 @@ public:
 	virtual ~SxCcdM26C();
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
-	virtual ShortImagePtr	shortImage() throw (not_implemented);
+	virtual ImagePtr	getImage() throw (not_implemented);
 };
 
 } // namespace sx

@@ -30,6 +30,7 @@ public:
 	void	testList();
 	void	testCooler();
 	void	testCamera();
+	void	testSubimage();
 	void	testGuiderport();
 	void	testGuiderport2();
 
@@ -37,8 +38,9 @@ public:
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
+	CPPUNIT_TEST(testSubimage);
 	//CPPUNIT_TEST(testGuiderport);
-	CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -127,6 +129,25 @@ void	sxtest::testCamera() {
 	FITSout	file("test.fits");
 	file.write(image);
 }
+
+void	sxtest::testSubimage() {
+	CameraPtr	camera = locator->getCamera(0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has %d ccds", camera->nCcds());
+	CcdPtr	ccd = camera->getCcd(0);
+	std::cout << ccd->getInfo() << std::endl;
+	
+	Exposure	exposure(ImageRectangle(ImagePoint(1450, 808),
+		ImageSize(1000, 1000)), 0.04);
+	//exposure.limit = 62000;
+	exposure.mode = Binning(1,1);
+	ccd->startExposure(exposure);
+	ImagePtr	image = ccd->getImage();
+
+	unlink("test.fits");
+	FITSout	file("test.fits");
+	file.write(image);
+}
+
 
 void	sxtest::testGuiderport() {
 	CameraPtr	camera = locator->getCamera(0);

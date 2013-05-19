@@ -303,7 +303,7 @@ void	SxCcdM26C::startExposure(const Exposure& exposure)
  * exposures). In the latter case, the first field is rescaled to account
  * for the different exposure time.
  */
-ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
+ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
 
 	// read the right number of pixels from the IN endpoint
@@ -365,7 +365,7 @@ ShortImagePtr	SxCcdM26C::shortImage() throw (not_implemented) {
 	delete field1;
 
 	// return the demultiplexed image
-	return ShortImagePtr(image);
+	return ImagePtr(image);
 }
 
 /**

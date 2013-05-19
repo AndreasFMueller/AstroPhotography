@@ -43,7 +43,7 @@ namespace sx {
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	// the default is to use the 
-	useControlRequests = true;
+	useControlRequests = false;
 
 	// make sure the device is open
 	deviceptr->open();
@@ -253,7 +253,10 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	// the request header, end there will an additional transfer from
 	// the IN endpoint
 	size_t	receivelength = (request->bmRequestType() & RequestBase::device_to_host) ? request->wLength() : 0;
-	size_t	sendlength = (receivelength) ? sizeof(usb_request_header_t) : request->wLength();
+	size_t	sendlength = sizeof(usb_request_header_t);
+	if (0 == receivelength) {
+		sendlength += request->wLength();
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request size send: %d, receive %d",
 		sendlength, receivelength);
 
