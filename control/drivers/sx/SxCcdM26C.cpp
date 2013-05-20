@@ -113,7 +113,7 @@ Field	*SxCcdM26C::readField() {
  * \param field	number of the field to expose.
  */
 void	SxCcdM26C::exposeField(int field) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request exposure of a field");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request exposure of a field %d", field);
 	// compute a better request for the M26C camera
 	sx_read_pixels_delayed_t	rpd;
 	rpd.delay = 1000 * m26c.exposuretime;
@@ -123,9 +123,10 @@ void	SxCcdM26C::exposeField(int field) {
 	rpd.y_offset = m26c.frame.origin.y;
 	rpd.x_bin = m26c.mode.getX();
 	rpd.y_bin = m26c.mode.getY();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"request: %hux%hu@(%hu,%hu)/(%d,%d), t=%ums",
 		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
-		rpd.x_bin, rpd.y_bin);
+		rpd.x_bin, rpd.y_bin, rpd.delay);
 
 	// send the request to the camera, this is a request for field 0 
 	// field 1 has to be retrieved separately
@@ -152,9 +153,10 @@ void	SxCcdM26C::exposeField(int field) {
  * \param field		field number of the field to download
  */
 void	SxCcdM26C::requestField(int field) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting field %d", field);
 	// prepare a request for the pixels, without delay, this just
 	// downloads the already exposed field
-#if 0
+#if 1
 	sx_read_pixels_t	rp;
 	rp.width = m26c.frame.size.width;
 	rp.height = m26c.frame.size.height;
@@ -188,10 +190,11 @@ void	SxCcdM26C::requestField(int field) {
 	rpd.y_offset = m26c.frame.origin.y;
 	rpd.x_bin = m26c.mode.getX();
 	rpd.y_bin = m26c.mode.getY();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
-		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
-		rpd.x_bin, rpd.y_bin);
 	rpd.delay = 1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"request: %hux%hu@(%hu,%hu)/(%d,%d), delay = %ul",
+		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
+		rpd.x_bin, rpd.y_bin, rpd.delay);
 
 	// send the request to the camera, this is a request for field 0 
 	// field 1 has to be retrieved separately
@@ -315,7 +318,6 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 		out << *field0;
 		out.close();
 	}
-
 
 	// for long exposures, we just read the second field.
 	Field	*field1 = NULL;

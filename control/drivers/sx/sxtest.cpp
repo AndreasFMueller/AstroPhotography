@@ -122,7 +122,8 @@ void	sxtest::testCamera() {
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
-	Image<unsigned short>	*shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	Image<unsigned short>	*shortimage
+		= dynamic_cast<Image<unsigned short> *>(&*image);
 	CPPUNIT_ASSERT(NULL != shortimage);
 	Median<unsigned short>	median;
 	unsigned short	m = median(*shortimage);
@@ -139,12 +140,13 @@ void	sxtest::testFullimage() {
 	CcdPtr	ccd = camera->getCcd(0);
 	std::cout << ccd->getInfo() << std::endl;
 	
-	Exposure	exposure(ccd->getInfo().getFrame(), 0.08);
+	Exposure	exposure(ccd->getInfo().getFrame(), 11);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
-	Image<unsigned short>	*shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	Image<unsigned short>	*shortimage
+		= dynamic_cast<Image<unsigned short> *>(&*image);
 
 	unlink("test.fits");
 	FITSout	file("test.fits");
