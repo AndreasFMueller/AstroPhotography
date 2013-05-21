@@ -140,7 +140,7 @@ void	sxtest::testFullimage() {
 	CcdPtr	ccd = camera->getCcd(0);
 	std::cout << ccd->getInfo() << std::endl;
 	
-	Exposure	exposure(ccd->getInfo().getFrame(), 11);
+	Exposure	exposure(ccd->getInfo().getFrame(), 3600);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
@@ -151,6 +151,16 @@ void	sxtest::testFullimage() {
 	unlink("test.fits");
 	FITSout	file("test.fits");
 	file.write(image);
+
+	// find average value of all pixel planes
+	MeanR<unsigned short, double>	R;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "R = %f", R.mean(*shortimage));
+	MeanGr<unsigned short, double>	Gr;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gr = %f", Gr.mean(*shortimage));
+	MeanB<unsigned short, double>	B;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "B = %f", B.mean(*shortimage));
+	MeanGb<unsigned short, double>	Gb;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gb = %f", Gb.mean(*shortimage));
 
 	// demosaic the image
 	DemosaicBilinear<unsigned short>	demosaicer;
