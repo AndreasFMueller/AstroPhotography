@@ -321,26 +321,49 @@ uint32_t	UVCCamera::controlProcessingUnitControls() const {
 	return interfaceHeaderDescriptor()->processingUnitControls();
 }
 
+/**
+ * \brief Set exposure time
+ *
+ * This sets the exposure priority as well
+ */
 void	UVCCamera::setExposureTime(double exposuretime) {
-	// make sure time has priority
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure priority");
+
+	// we have to find out whether the auto_exposure_priority_control
+	// is available on this camera
 	astro::usb::uvc::auto_exposure_priority_control_t       aeprio;
+	// make sure time has priority
 	// bAutoExposurePriority == 1 means that frame rate may be
 	// altered dynamically
 	aeprio.bAutoExposurePriority = 1;
-	setCurrent(aeprio);
+	if (controlSupported(aeprio)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"auto exposure priority control supported");
+		setCurrent(aeprio);
+	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting auto exposure mode");
 	// set the auto exposure mode
 	astro::usb::uvc::auto_exposure_mode_control_t   aemode;
 	// bAutoExposureMode == 1 means manual mode, manual iris
 	aemode.bAutoExposureMode = 1;
-	setCurrent(aemode);
+	if (controlSupported(aemode)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"auto exposure mode control supported");
+		setCurrent(aemode);
+	}
 
 	// XXX check allowed min/max values of the exposure time
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time to %f", exposuretime);
 	// set exposure time
 	astro::usb::uvc::exposure_time_absolute_control_t       exptime;
 	exptime.dwExposureTimeAbsolute = 10000 * exposuretime;
-	setCurrent(exptime);
+	if (controlSupported(exptime)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"exposure time absolute control supported");
+		setCurrent(exptime);
+	}
 }
 
 void	UVCCamera::setGain(double gain) {

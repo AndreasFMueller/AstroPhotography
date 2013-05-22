@@ -14,9 +14,10 @@ namespace camera {
 namespace uvc {
 
 using astro::usb::uvc::HeaderDescriptor;
+using astro::usb::uvc::FormatFrameBasedDescriptor;
 
 void	UvcCamera::addFrame(int interface, int format, int frame,
-	FrameDescriptor *framedescriptor) {
+	const std::string& guid, FrameDescriptor *framedescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d, format %d, frame %d",
 		interface, format, frame);
 
@@ -25,16 +26,17 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 	uvcccd.interface = interface;
 	uvcccd.format = format;
 	uvcccd.frame = frame;
+	uvcccd.guid = guid;
 	ccds.push_back(uvcccd);
 
 	// standard CcdInfo
 	CcdInfo	ccd;
 	ccd.size = astro::image::ImageSize(framedescriptor->wWidth(),
 		framedescriptor->wHeight());
-	ccd.name = stringprintf("%dx%d/%d/%d/%d",
+	ccd.name = stringprintf("%dx%d/%d/%d/%d/%s",
 		ccd.size.width, ccd.size.height,
-		uvcccd.interface, uvcccd.format, uvcccd.frame);
-	ccd.binningmodes.push_back(Binning(1,1));
+		uvcccd.interface, uvcccd.format, uvcccd.frame,
+		uvcccd.guid.c_str());
 	ccdinfo.push_back(ccd);
 
 	// add ccdinfo
@@ -50,22 +52,30 @@ void	UvcCamera::addFormat(int interface, int format,
 	if (type != CS_INTERFACE) {
 		return;
 	}
+
 	// subtype must be uncompressed or frame based
 	int	subtype = formatdescriptor->bDescriptorSubtype();
+	std::string	guid("(unknown)");
 	switch (subtype) {
 	case VS_FORMAT_UNCOMPRESSED:
 	case VS_FORMAT_FRAME_BASED:
+		guid = dynamic_cast<FormatFrameBasedDescriptor *>(
+			formatdescriptor)->guidFormat();
 		break;
 	default:
 		return;
 	}
-	// if we get to this point, then we can add all the frames
+
+	// if we get to this point, we know that we are working on a format
+	// descriptor that we understand
+
+	// we can add all the frames
 	int	framecount = formatdescriptor->numFrames();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "frames: %d", framecount);
 	for (int frameindex = 1; frameindex <= framecount; frameindex++) {
 		FrameDescriptor	*framedescriptor
 			= getPtr<FrameDescriptor>((*formatdescriptor)[frameindex - 1]);
-		addFrame(interface, format, frameindex, framedescriptor);
+		addFrame(interface, format, frameindex, guid, framedescriptor);
 	}
 }
 

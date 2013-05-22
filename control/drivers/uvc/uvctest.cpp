@@ -66,6 +66,9 @@ void	uvctest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera");
 	CameraPtr	camera = locator->getCamera(0);
 	std::cout << "number of ccds: " << camera->nCcds() << std::endl;
+	for (int i = 0; i < camera->nCcds(); i++) {
+		std::cout << camera->getCcdInfo(i) << std::endl;
+	}
 }
 
 void	uvctest::testCcd() {

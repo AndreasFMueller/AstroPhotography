@@ -612,102 +612,153 @@ struct camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_SCANNING_MODE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 0
+		} bit_type;
 	};
 	struct auto_exposure_mode_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_AE_MODE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 1
+		} bit_type;
 	};
 	struct auto_exposure_priority_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_AE_PRIORITY_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 2
+		} bit_type;
 	};
 	struct exposure_time_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_EXPOSURE_TIME_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 3
+		} bit_type;
 	};
 	struct exposure_time_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_EXPOSURE_TIME_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 4
+		} bit_type;
 	};
 	struct focus_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_FOCUS_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 5
+		} bit_type;
 	};
 	struct focus_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_FOCUS_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 6
+		} bit_type;
 	};
 	struct focus_auto_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_FOCUS_AUTO_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 17
+		} bit_type;
 	};
 	struct iris_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_IRIS_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 7
+		} bit_type;
 	};
 	struct iris_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_IRIS_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 8
+		} bit_type;
 	};
 	struct zoom_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_ZOOM_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 9
+		} bit_type;
 	};
 	struct zoom_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_ZOOM_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 10
+		} bit_type;
 	};
 	struct pantilt_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_PANTILT_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 11
+		} bit_type;
 	};
 	struct pantilt_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_PANTILT_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 12
+		} bit_type;
 	};
 	struct roll_absolute_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_ROLL_ABSOLUTE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 13
+		} bit_type;
 	};
 	struct roll_relative_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_ROLL_RELATIVE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 14
+		} bit_type;
 	};
 	struct privacy_shutter_control_tag
 		: public camera_terminal_control_tag {
 		typedef enum CS_enum {
 			CS = CT_PRIVACY_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 18
+		} bit_type;
 	};
 
 struct selection_unit_control_tag {
@@ -726,108 +777,162 @@ struct processing_unit_control_tag {
 		typedef enum CS_enum {
 			CS = PU_BACKLIGHT_COMPENSATION_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 8
+		} bit_type;
 	};
 	struct brightness_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_BRIGHTNESS_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 0
+		} bit_type;
 	};
 	struct contrast_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_CONTRAST_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 1
+		} bit_type;
 	};
 	struct gain_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_GAIN_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 9
+		} bit_type;
 	};
 	struct power_line_frequency_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_POWER_LINE_FREQUENCY_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 10
+		} bit_type;
 	};
 	struct hue_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_HUE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 2
+		} bit_type;
 	};
 	struct hue_auto_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_HUE_AUTO_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 11
+		} bit_type;
 	};
 	struct saturation_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_SATURATION_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 3
+		} bit_type;
 	};
 	struct sharpness_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_SHARPNESS_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 4
+		} bit_type;
 	};
 	struct gamma_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_GAMMA_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 5
+		} bit_type;
 	};
 	struct white_balance_temperature_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_WHITE_BALANCE_TEMPERATURE_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 6
+		} bit_type;
 	};
 	struct white_balance_temperature_auto_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_WHITE_BALANCE_TEMPERATURE_AUTO_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 12
+		} bit_type;
 	};
 	struct white_balance_component_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_WHITE_BALANCE_COMPONENT_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 7
+		} bit_type;
 	};
 	struct white_balance_component_auto_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_WHITE_BALANCE_COMPONENT_AUTO_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 13
+		} bit_type;
 	};
 	struct digital_multiplier_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_DIGITAL_MULTIPLIER_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 14
+		} bit_type;
 	};
 	struct digital_multiplier_limit_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_DIGITAL_MULTIPLIER_LIMIT_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 15
+		} bit_type;
 	};
 	struct analog_video_standard_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_ANALOG_VIDEO_STANDARD_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 16
+		} bit_type;
 	};
 	struct analog_lock_status_control_tag
 		: public processing_unit_control_tag  {
 		typedef enum CS_enum {
 			CS = PU_ANALOG_LOCK_STATUS_CONTROL
 		} CS_type;
+		typedef enum bit_enum {
+			bit = 17
+		} bit_type;
 	};
 
 /**
@@ -1084,6 +1189,28 @@ public:
 	uint32_t	controlCameraControls() const;
 	uint8_t		controlProcessingUnitID() const;
 	uint32_t	controlProcessingUnitControls() const;
+
+private:
+	// find out whether a camera terminal supports a given control
+	template<typename T>
+	bool	controlSupported(const T& p, camera_terminal_control_tag) {
+		uint32_t	bm = controlCameraControls();
+		return (bm & (1 << T::control_type::bit)) ? true : false;
+	}
+
+	// find out whether a processing unit supports a given control
+	template<typename T>
+	bool	controlSupported(const T& p, processing_unit_control_tag) {
+		uint32_t	bm = controlProcessingUnitControls();
+		return (bm & (1 << T::control_type::bit)) ? true : false;
+	}
+
+public:
+	// find out whether a give control is supported
+	template<typename T>
+	bool	controlSupported(const T& p) {
+		return controlSupported(p, typename T::control_type());
+	}
 
 	/**
 	 * a list of Video Streaming Interface descriptors, one for each video

@@ -78,13 +78,9 @@ InterfacePtr&	Configuration::operator[](size_t index) {
  */
 void	Configuration::getInterfaces() {
 	for (int i = 0; i < config->bNumInterfaces; i++) {
-		// when we construct an interface, we should keep in mind
-		// that the interface number has origin 1, while the index
-		// in the array of interfaces has origin 0. The interface
-		// number thus is the index + 1
 		Interface	*ifd
 			= new Interface(device(), *this, &config->interface[i],
-				i + 1);
+				i);
 		interfacelist.push_back(InterfacePtr(ifd));
 	}
 }

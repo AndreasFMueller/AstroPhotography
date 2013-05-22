@@ -25,12 +25,14 @@ class UvcCamera : public Camera {
 		int	interface;
 		int	format;
 		int	frame;
+		std::string	guid;
 	} uvcccd_t;
 	std::vector<uvcccd_t>	ccds;
 
 private:
 	// auxiliary functions needed to build the CCD list
-	void    addFrame(int interface, int format, int frame, 
+	void    addFrame(int interface, int format, int frame,
+			const std::string& guid,
 			FrameDescriptor *framedescriptor);
 	void    addFormat(int interface, int format, 
 			FormatDescriptor *formatdescriptor);
