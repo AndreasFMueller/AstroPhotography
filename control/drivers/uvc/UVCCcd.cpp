@@ -52,6 +52,9 @@ void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	camera.setExposureTime(exposure.exposuretime);
 
 	// XXX should also disable automatic white balance
+
+	// status
+	state = Exposure::exposed;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -92,8 +95,15 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 		FramePtr	frameptr = *i;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image has size %d x %d",
 			frameptr->getWidth(), frameptr->getHeight());
+
+		// XXX convert the frame, this depends on the frame type
 	}
 
+	// set state back to not done
+	state = Exposure::idle;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning sequence with %d images",
+		result.size());
 	return result;
 }
 

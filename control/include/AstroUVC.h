@@ -1206,7 +1206,16 @@ private:
 	}
 
 public:
-	// find out whether a give control is supported
+	/**
+	 * \brief Find out whether a give control is supported
+	 *
+	 * This template function tests whether a given control is supported
+	 * by the camera. Depending on the type of the control, according
+	 * to the control_type structure, one of the private controlSupported
+	 * methods is called. This implements compile time polymorphism for
+	 * the controlSupported method.
+ 	 * \param p	structure of the control type to 
+	 */
 	template<typename T>
 	bool	controlSupported(const T& p) {
 		return controlSupported(p, typename T::control_type());

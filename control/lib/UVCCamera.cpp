@@ -364,24 +364,33 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 			"exposure time absolute control supported");
 		setCurrent(exptime);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %f", exposuretime);
 }
 
+/**
+ * \brief Set the camera gain.
+ *
+ * \param gain	gain value to set, default is 1
+ */
 void	UVCCamera::setGain(double gain) {
-	// get the default, min and max value of the gain
-	astro::usb::uvc::gain_control_t	def
-		= get(GET_DEF, astro::usb::uvc::gain_control_t());
-	astro::usb::uvc::gain_control_t	min
-		= get(GET_MIN, astro::usb::uvc::gain_control_t());
-	astro::usb::uvc::gain_control_t	max
-		= get(GET_MAX, astro::usb::uvc::gain_control_t());
+	astro::usb::uvc::gain_control_t	def, min, max, gaincontrol;
 
-	astro::usb::uvc::gain_control_t gaincontrol;
-	// what are the gain units?
-	gaincontrol.wGain = gain * def.wGain;
-	if ((gaincontrol.wGain > max.wGain) || (gaincontrol.wGain < min.wGain)) {
-		throw std::range_error("gain outside range");
+	if (controlSupported(gaincontrol)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
+		// get the default, min and max value of the gain
+		def = get(GET_DEF, astro::usb::uvc::gain_control_t());
+		min = get(GET_MIN, astro::usb::uvc::gain_control_t());
+		max = get(GET_MAX, astro::usb::uvc::gain_control_t());
+
+		// what are the gain units?
+		gaincontrol.wGain = gain * def.wGain;
+		if ((gaincontrol.wGain > max.wGain)
+			|| (gaincontrol.wGain < min.wGain)) {
+			throw std::range_error("gain outside range");
+		}
+		setCurrent(gaincontrol);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f", gain);
 	}
-	setCurrent(gaincontrol);
 }
 
 CameraTerminalDescriptor	*UVCCamera::cameraTerminalDescriptor() const {

@@ -96,7 +96,7 @@ void    Ccd::startExposure(const Exposure& exposure) throw (not_implemented) {
  * Find out whether an exposure is in progress. Optional method.
  */
 Exposure::State Ccd::exposureStatus() throw (not_implemented) {
-	throw not_implemented("exposureStatus not implemented");
+	return state;
 }
 
 /**
