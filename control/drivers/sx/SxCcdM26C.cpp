@@ -323,8 +323,8 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 	Field	*field1 = NULL;
 	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "request second field 1");
-		requestField(1);
 		timer.end();
+		requestField(1);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "expose second field 1");
 		exposeField(1);
@@ -342,9 +342,20 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 
 	// rescale the first field, if we did only one exposure
 	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
+		//double	deadtime = 3.37; // exposuretime = 11
+		//double	deadtime = 3.99; // exposuretime = 20
+		double	deadtime = 1.2;
+		double	scalefactor
+			= (timer.elapsed() - deadtime) / exposure.exposuretime;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "scalefactor = %f", scalefactor);
 		// rescale the field. We have to multiply the first field
 		// with the scaling factor, because of overflows
-		field0->rescale(timer.elapsed() / exposure.exposuretime);
+		if (scalefactor > 0) {
+			field0->rescale(scalefactor);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no rescaling");
+		}
+		//field0->rescale(1.1283);
 	}
 
 	// prepare a new image, this now needs binned pixels

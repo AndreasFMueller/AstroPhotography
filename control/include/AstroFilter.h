@@ -67,7 +67,7 @@ template<typename T, typename S>
 class Mean : public PixelTypeFilter<T> {
 public:
 	Mean() { }
-	S	mean(const Image<T>& image) {
+	virtual S	mean(const Image<T>& image) {
 		S	sum = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			sum += image.pixels[i];
@@ -77,6 +77,74 @@ public:
 	virtual T	operator()(const Image<T>& image) {
 		return (T)mean(image);
 	}
+};
+
+/**
+ * \brief Filters that finds the mean of the various color channels
+ */
+template<typename T, typename S>
+class MatrixMean : public Mean<T, S> {
+protected:
+	typedef enum color_e {
+		R = 0, Gr = 1, B = 2, Gb = 3
+	} color_type;
+	color_type	color;
+public:
+	MatrixMean(color_type _color) : color(_color) { }
+	virtual S	mean(const Image<T>& image) {
+		if (image.mosaic & 0x8) {
+			throw std::logic_error("not a mosaic image");
+		}
+		unsigned int	dx =  image.mosaic       & 0x1;
+		unsigned int	dy = (image.mosaic >> 1) & 0x1;
+		switch (color) {
+		case R:
+			break;
+		case Gr:
+			dx ^= 0x1;
+			break;
+		case B:
+			dx ^= 0x1;
+			dy ^= 0x1;
+			break;
+		case Gb:
+			dy ^= 0x1;
+			break;
+		}
+		S	sum = 0;
+		unsigned long	counter = 0;
+		for (unsigned int x = dx; x < image.size.width; x += 2) {
+			for (unsigned int y = dy; y < image.size.height; y += 2) {
+				sum += image.pixel(x, y);
+				counter++;
+			}
+		}
+		return sum / counter;
+	}
+};
+
+template<typename T, typename S>
+class MeanR : public MatrixMean<T, S> {
+public:
+	MeanR() : MatrixMean<T, S>(MatrixMean<T, S>::R) { };
+};
+
+template<typename T, typename S>
+class MeanGr : public MatrixMean<T, S> {
+public:
+	MeanGr() : MatrixMean<T, S>(MatrixMean<T, S>::Gr) { };
+};
+
+template<typename T, typename S>
+class MeanB : public MatrixMean<T, S> {
+public:
+	MeanB() : MatrixMean<T, S>(MatrixMean<T, S>::B) { };
+};
+
+template<typename T, typename S>
+class MeanGb : public MatrixMean<T, S> {
+public:
+	MeanGb() : MatrixMean<T, S>(MatrixMean<T, S>::Gb) { };
 };
 
 /**
