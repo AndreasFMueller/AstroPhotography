@@ -38,7 +38,15 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 	for (i = packets.begin(); i != packets.end(); i++) {
 		try {
 			UVCPayloadPacket	uvcpayload(*i);
-std::cout << (int)uvcpayload.hle() << ": " << uvcpayload.ptsValue() << ", " << uvcpayload.fid() << ", " << uvcpayload.pts() << std::endl;
+			if (i->length() > 12) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: %u, %u, %u, %d",
+					(int)uvcpayload.hle(), 
+					uvcpayload.ptsValue(), 
+					uvcpayload.fid(), 
+					uvcpayload.pts(),
+					i->length() - 12);
+					
+			}
 			if (uvcpayload.fid() == fid) {
 				if (NULL == currentframe) {
 					currentframe = new Frame(width, height);

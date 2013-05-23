@@ -179,6 +179,15 @@ void	UvcCamera::setGain(double gain) {
 	}
 }
 
+void	UvcCamera::disableAutoWhiteBalance() {
+	try {
+		camera.disableAutoWhiteBalance();
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot disable WB: %s",
+			x.what());
+	}
+}
+
 std::vector<FramePtr>	UvcCamera::getFrames(int interface,
 	unsigned int nframes) {
 	return camera.getFrames(interface, nframes);

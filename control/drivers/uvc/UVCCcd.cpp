@@ -68,10 +68,11 @@ void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	// select interface, format and frame
 	camera.selectFormatAndFrame(interface, format, frame);
 
+	// should also disable automatic white balance
+	//camera.disableAutoWhiteBalance();
+
 	// set exposure time
 	camera.setExposureTime(exposure.exposuretime);
-
-	// XXX should also disable automatic white balance
 
 	// status
 	state = Exposure::exposed;

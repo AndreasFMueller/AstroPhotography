@@ -82,15 +82,16 @@ void	uvctest::testCcd() {
 void	uvctest::testExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera device");
 	CameraPtr	camera = locator->getCamera(0);
-	int	ccdindex = 2;
+	int	ccdindex = 0;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the CCD no %d", ccdindex);
 	CcdPtr	ccd = camera->getCcd(ccdindex);
-	Exposure	exposure(ccd->getInfo().getFrame(), 0.333);
+	Exposure	exposure(ccd->getInfo().getFrame(), 2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure");
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve an image");
-	ImagePtr	image = ccd->getImage();
+	ImageSequence	imgseq = ccd->getImageSequence(2);
+	ImagePtr	image = imgseq[imgseq.size() - 1];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
 	// write the image to a file
 	unlink("test.fits");

@@ -354,17 +354,96 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 	}
 
 	// XXX check allowed min/max values of the exposure time
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time to %f", exposuretime);
-	// set exposure time
 	astro::usb::uvc::exposure_time_absolute_control_t       exptime;
-	exptime.dwExposureTimeAbsolute = 10000 * exposuretime;
 	if (controlSupported(exptime)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"exposure time absolute control supported");
-		setCurrent(exptime);
+		// get min and max time
+		exptime = get(GET_MIN, exptime);
+		uint32_t	minexp = exptime.dwExposureTimeAbsolute;
+		exptime = get(GET_MAX, exptime);
+		uint32_t	maxexp = exptime.dwExposureTimeAbsolute;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"exposure time min = %u, max = %u", minexp, maxexp);
+
+		// set exposure time
+		exptime.dwExposureTimeAbsolute = 10000 * exposuretime;
+		if ((exptime.dwExposureTimeAbsolute < minexp) ||
+			(maxexp < exptime.dwExposureTimeAbsolute)) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "time %u out of range",
+				exptime.dwExposureTimeAbsolute);
+			throw std::range_error("exposure time not supported");
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "setting time %u",
+				exptime.dwExposureTimeAbsolute);
+			setCurrent(exptime);
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %f", exposuretime);
+}
+
+/**
+ * \brief disable automatic white balance
+ */
+void	UVCCamera::disableAutoWhiteBalance() {
+	// turn of the white balance temperature control
+	white_balance_temperature_auto_control_t	wbtempauto;
+	wbtempauto.bWhiteBalanceTemperatureAuto = 0;
+	if (controlSupported(wbtempauto)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"turn off auto white balance temperature");
+		setCurrent(wbtempauto);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance temperature auto control not supported");
+	}
+
+	// turn of automatic white balance component adjustmen
+	white_balance_component_auto_control_t	wbcompauto;
+	wbcompauto.bWhiteBalanceComponentAuto = 0;
+	if (controlSupported(wbcompauto)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"turn off auto white balance components");
+		setCurrent(wbcompauto);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance component auto control not supported");
+	}
+
+	// set the white balance temperature
+	white_balance_temperature_control_t	wbtemp;
+	if (controlSupported(wbtemp)) {
+		wbtemp = get(GET_DEF, wbtemp);
+		setCurrent(wbtemp);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance temperature set to %hu", 
+			wbtemp.wWhiteBalanceTemperature);
+		return;
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance temperature control not supported");
+	}
+
+	// if white balance temperature setting is not supported, try
+	// setting components
+	white_balance_component_control_t	wbcomp;
+	if (controlSupported(wbcomp)) {
+		wbcomp = get(GET_CUR, wbcomp);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"current White Balance components B = %hu, R = %hu", 
+			wbcomp.wWhiteBalanceBlue,
+			wbcomp.wWhiteBalanceRed);
+		wbcomp = get(GET_DEF, wbcomp);
+		wbcomp.wWhiteBalanceBlue += 10;
+		setCurrent(wbcomp);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance components set to B = %hu, R = %hu", 
+			wbcomp.wWhiteBalanceBlue,
+			wbcomp.wWhiteBalanceRed);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"white balance component control not supported");
+	}
 }
 
 /**

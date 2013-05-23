@@ -47,6 +47,7 @@ public:
 	void	selectFormatAndFrame(int interface, int format, int frame);
 	void	setExposureTime(double exposuretime);
 	void	setGain(double gain);
+	void	disableAutoWhiteBalance();
 	std::vector<FramePtr>	getFrames(int interface, unsigned int nframes);
 };
 

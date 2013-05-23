@@ -1098,7 +1098,7 @@ typedef struct gamma_control_s {
 
 typedef struct white_balance_temperature_control_s {
 	typedef white_balance_temperature_control_tag control_type;
-	uint16_t	wWhiteBalacneTemperature;
+	uint16_t	wWhiteBalanceTemperature;
 } __attribute__((packed)) white_balance_temperature_control_t;
 
 typedef struct white_balance_temperature_auto_control_s {
@@ -1418,6 +1418,7 @@ public:
 	// some convenience set requests
 	void	setExposureTime(double exposuretime);
 	void	setGain(double gain);
+	void	disableAutoWhiteBalance();
 
 public:
 	// display the camera
@@ -1541,12 +1542,15 @@ public:
  * Isochronous transfer for UVC also uses interleaved transfers
  */
 class UVCIsochronousTransfer : public Transfer {
-	int	nframes;
-	int	ntransfers;
-	int	queuesize;
-	int	submitted;
+	int	nframes;	// number of frames to read
+	int	ntransfers;	// number of transfers in transfers array
+	int	queuesize;	// number of transfers in queue
+	int	submitted;	// number of transfers submitted
+	int	completed;	// number of transfers that actually did 
+				// bring in some data
 	int	frameinterval;
 	int	packetsize;
+	unsigned long	bytestransferred;
 	libusb_transfer	**transfers;
 	unsigned char	**buffers;
 private:
