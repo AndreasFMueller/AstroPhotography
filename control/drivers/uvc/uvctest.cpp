@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
 #include <debug.h>
+#include <AstroDemosaic.h>
 
 using namespace astro::camera::uvc;
 using namespace astro::image;
@@ -66,7 +67,7 @@ void	uvctest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera");
 	CameraPtr	camera = locator->getCamera(0);
 	std::cout << "number of ccds: " << camera->nCcds() << std::endl;
-	for (int i = 0; i < camera->nCcds(); i++) {
+	for (unsigned int i = 0; i < camera->nCcds(); i++) {
 		std::cout << camera->getCcdInfo(i) << std::endl;
 	}
 }
@@ -81,9 +82,10 @@ void	uvctest::testCcd() {
 void	uvctest::testExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera device");
 	CameraPtr	camera = locator->getCamera(0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first CCD");
-	CcdPtr	ccd = camera->getCcd(0);
-	Exposure	exposure(ccd->getInfo().getFrame(), 0.02);
+	int	ccdindex = 2;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the CCD no %d", ccdindex);
+	CcdPtr	ccd = camera->getCcd(ccdindex);
+	Exposure	exposure(ccd->getInfo().getFrame(), 0.333);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure");
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
@@ -91,8 +93,25 @@ void	uvctest::testExposure() {
 	ImagePtr	image = ccd->getImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
 	// write the image to a file
+	unlink("test.fits");
 	FITSout	file("test.fits");
 	file.write(image);
+
+	if (ccdindex == 2) {
+		DemosaicBilinear<unsigned char>        demosaicer;
+		Image<unsigned char>	*mosaicimg
+			= dynamic_cast<Image<unsigned char> *>(&*image);
+		if (NULL != mosaicimg) {
+			Image<RGB<unsigned char> >     *demosaiced
+				= demosaicer(*mosaicimg);
+			ImagePtr        demosaicedptr(demosaiced);
+			unlink("test-demosaiced.fits");
+			FITSout demosaicedfile("test-demosaiced.fits");
+			demosaicedfile.write(demosaicedptr);
+		} else {
+			debug(LOG_ERR, DEBUG_LOG, 0, "not a mosaic image");
+		}
+	}
 }
 
 } // namespace test

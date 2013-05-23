@@ -6,8 +6,10 @@
 #include <UvcCcd.h>
 #include <debug.h>
 #include <UvcUtils.h>
+#include <AstroFilter.h>
 
 using namespace astro::image;
+using namespace astro::image::filter;
 
 namespace astro {
 namespace camera {
@@ -26,6 +28,24 @@ UvcCcd::UvcCcd(const CcdInfo& info, int _interface, int _format, int _frame,
 	UvcCamera& _camera)
 	: Ccd(info), interface(_interface), format(_format), frame(_frame),
 	  camera(_camera) {
+}
+
+UvcCcdYUY2::UvcCcdYUY2(const CcdInfo& info, int interface, int format,
+	int frame, UvcCamera& camera)
+		: UvcCcd(info, interface, format, frame, camera) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating YUY2 CCD");
+}
+
+UvcCcdY800::UvcCcdY800(const CcdInfo& info, int interface, int format,
+	int frame, UvcCamera& camera)
+		: UvcCcd(info, interface, format, frame, camera) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating Y800 CCD");
+}
+
+UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
+	int frame, UvcCamera& camera)
+		: UvcCcd(info, interface, format, frame, camera) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating BY8 CCD");
 }
 
 /**
@@ -96,7 +116,9 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image has size %d x %d",
 			frameptr->getWidth(), frameptr->getHeight());
 
-		// XXX convert the frame, this depends on the frame type
+		// convert the frame, this depends on the frame type
+		ImagePtr	imageptr = frameToImage(*frameptr);
+		result.push_back(imageptr);
 	}
 
 	// set state back to not done
@@ -105,6 +127,64 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning sequence with %d images",
 		result.size());
 	return result;
+}
+
+/**
+ * \brief Convert an YUYV frame to an image with YUYV pixels
+ *
+ * \param frame	frame from USB transfer
+ */
+ImagePtr	UvcCcdYUY2::frameToImage(const Frame& frame) const {
+	ImageSize	size(frame.getWidth(), frame.getHeight());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building YUY2 image %u x %u",
+		size.width, size.height);
+	Image<YUYV<unsigned char> >	*image
+		= new Image<YUYV<unsigned char> >(size);
+	for (unsigned int i = 0; i < size.pixels; i++) {
+		image->pixels[i].y = frame[2 * i];
+		image->pixels[i].uv = frame[2 * i + 1];
+	}
+	FlipOperator<YUYV<unsigned char> >	flip;
+	flip(*image);
+	return ImagePtr(image);
+}
+
+/**
+ * \brief Convert luminance only image
+ *
+ * Images built from formats with guid Y800 are luminance only images,
+ * the produce an image with only a single plane
+ */
+ImagePtr	UvcCcdY800::frameToImage(const Frame& frame) const {
+	ImageSize	size(frame.getWidth(), frame.getHeight());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building Y800 image %u x %u",
+		size.width, size.height);
+	Image<unsigned char>	*image = new Image<unsigned char>(size);
+	for (unsigned int i = 0; i < size.pixels; i++) {
+		image->pixels[i] = frame[i];
+	}
+	FlipOperator<unsigned char>	flip;
+	flip(*image);
+	return ImagePtr(image);
+}
+
+/**
+ * \brief Convert a Bayer mosaic image to an Image object
+ *
+ * \param frame	
+ */
+ImagePtr	UvcCcdBY8::frameToImage(const Frame& frame) const {
+	ImageSize	size(frame.getWidth(), frame.getHeight());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building BY8 image %u x %u",
+		size.width, size.height);
+	Image<unsigned char>	*image = new Image<unsigned char>(size);
+	image->mosaic = ImageBase::BAYER_RGGB;
+	for (unsigned int i = 0; i < size.pixels; i++) {
+		image->pixels[i] = frame[i];
+	}
+	FlipOperator<unsigned char>	flip;
+	flip(*image);
+	return ImagePtr(image);
 }
 
 } // namespace uvc

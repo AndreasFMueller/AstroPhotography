@@ -1238,6 +1238,11 @@ public:
 	int	height;
 
 	/**
+	 * \brief Currently selected bits per pixel
+	 */
+	int	bitsPerPixel;
+
+	/**
 	 * \brief Currently set frame interval
  	 */
 	uint32_t	frameinterval;
@@ -1563,8 +1568,9 @@ public:
 class FrameFactory {
 	int	width;
 	int	height;
+	int	bytesperpixel;
 public:
-	FrameFactory(int width, int height);
+	FrameFactory(int width, int height, int bytesperpixel);
 	std::vector<FramePtr>	operator()(const std::list<std::string>& packets) const;
 };
 

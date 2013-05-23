@@ -520,6 +520,21 @@ void	UVCCamera::selectFormatAndFrame(uint8_t interface,
 							rget.data());
 	device.controlRequest(&rcommit);
 
+	// we now also have to find out how many bits per pixel we can
+	// expect
+	USBDescriptorPtr	formatptr
+		= getFormatDescriptor(interface, format);
+	FormatFrameBasedDescriptor	*fd
+		= dynamic_cast<FormatFrameBasedDescriptor *>(&*formatptr);
+	if (NULL == fd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown pixel size");
+		bitsPerPixel = 1;
+	} else {
+		bitsPerPixel = fd->bBitsPerPixel();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bits per pixel: %d",
+			bitsPerPixel);
+	}
+
 	// just to be on the safe side, we should ask again what the
 	// current settings are
 	getCur(interface);
@@ -636,7 +651,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
 	}
 
 	// convert the retrieved data to an image
-	FrameFactory	ff(width, height);
+	FrameFactory	ff(width, height, bitsPerPixel / 8);
 	return ff(transfer.packets);
 }
 
@@ -692,7 +707,7 @@ std::vector<FramePtr>	UVCCamera::getIsoFrames(uint8_t interface,
 	}
 
 	// convert the retrieved data to an image
-	FrameFactory	ff(width, height);
+	FrameFactory	ff(width, height, bitsPerPixel / 8);
 	return ff(transfer.packets);
 }
 

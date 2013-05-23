@@ -11,8 +11,8 @@ namespace astro {
 namespace usb {
 namespace uvc {
 
-FrameFactory::FrameFactory(int _width, int _height)
-	: width(_width), height(_height) {
+FrameFactory::FrameFactory(int _width, int _height, int _bytesperpixel)
+	: width(_width), height(_height), bytesperpixel(_bytesperpixel) {
 }
 
 /**
@@ -29,6 +29,9 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 	int	processed = 0;
 	int	framecounter = 0;
 
+	// compute the size of frames that we expect
+	int	minsize = width * height * bytesperpixel;
+
 	// go through the packet list and put together all the data
 	bool	fid = false;
 	std::list<std::string>::const_iterator	i;
@@ -42,8 +45,10 @@ std::cout << (int)uvcpayload.hle() << ": " << uvcpayload.ptsValue() << ", " << u
 				}
 				currentframe->append(uvcpayload.payload());
 			} else {
-				if (currentframe) {
-					debug(LOG_DEBUG, DEBUG_LOG, 0, "adding frame of size %d", currentframe->size());
+				if ((currentframe) && (currentframe->size() >= minsize)) {
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"adding frame of size %d",
+						currentframe->size());
 					frames.push_back(FramePtr(currentframe));
 					framecounter++;
 				}

@@ -126,8 +126,26 @@ CcdPtr	UvcCamera::getCcd(const std::string& name) {
 CcdPtr	UvcCamera::getCcd(size_t ccdindex) {
 	uvcccd_t	uc = ccds[ccdindex];
 	CcdInfo	info = ccdinfo[ccdindex];
-	return CcdPtr(new UvcCcd(info, uc.interface, uc.format, uc.frame,
-		*this));
+	UvcCcd	*uvcccd = NULL;
+	if (uc.guid == std::string("YUY2")) {
+		uvcccd = new UvcCcdYUY2(info, uc.interface, uc.format, uc.frame,
+				*this);
+	}
+	if (uc.guid == std::string("Y800")) {
+		uvcccd = new UvcCcdY800(info, uc.interface, uc.format, uc.frame,
+				*this);
+	}
+	if (uc.guid == std::string("BY8 ")) {
+		uvcccd = new UvcCcdBY8(info, uc.interface, uc.format, uc.frame,
+				*this);
+	}
+	if (NULL == uvcccd) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no known frame format: %s",
+			uc.guid.c_str());
+		throw std::runtime_error("unknown frame format");
+	}
+
+	return CcdPtr(uvcccd);
 }
 
 void	UvcCamera::selectFormatAndFrame(int interface, int format, int frame) {
