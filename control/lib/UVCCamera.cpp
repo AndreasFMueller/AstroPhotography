@@ -353,7 +353,7 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 		setCurrent(aemode);
 	}
 
-	// XXX check allowed min/max values of the exposure time
+	// check allowed min/max values of the exposure time
 	astro::usb::uvc::exposure_time_absolute_control_t       exptime;
 	if (controlSupported(exptime)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -706,7 +706,7 @@ std::vector<FramePtr>	UVCCamera::getBulkFrames(uint8_t interface,
 	InterfacePtr	interfaceptr = (*device.activeConfig())[interface];
 	interfaceptr->claim();
 
-	// make sure we are use alt setting 0, because that's where the
+	// make sure we use alt setting 0, because that's where the
 	// bulk endpoint resides
 	InterfaceDescriptorPtr	ifdescptr = (*interfaceptr)[0];
 	ifdescptr->altSetting();

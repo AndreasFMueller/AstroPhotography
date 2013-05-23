@@ -82,10 +82,10 @@ void	uvctest::testCcd() {
 void	uvctest::testExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera device");
 	CameraPtr	camera = locator->getCamera(0);
-	int	ccdindex = 0;
+	int	ccdindex = 2;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the CCD no %d", ccdindex);
 	CcdPtr	ccd = camera->getCcd(ccdindex);
-	Exposure	exposure(ccd->getInfo().getFrame(), 2);
+	Exposure	exposure(ccd->getInfo().getFrame(), 60);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure");
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
