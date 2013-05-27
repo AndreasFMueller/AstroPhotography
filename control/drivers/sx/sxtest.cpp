@@ -40,10 +40,10 @@ public:
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
-	CPPUNIT_TEST(testFullimage);
+	//CPPUNIT_TEST(testFullimage);
 	//CPPUNIT_TEST(testSubimage);
 	//CPPUNIT_TEST(testGuiderport);
-	//CPPUNIT_TEST(testGuiderport2);
+	CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -193,14 +193,26 @@ void	sxtest::testSubimage() {
 void	sxtest::testGuiderport() {
 	CameraPtr	camera = locator->getCamera(0);
 	GuiderPortPtr	guiderport = camera->getGuiderPort();
-	guiderport->activate(3,0,0,0);
-	sleep(4);
-	guiderport->activate(0,3,0,0);
-	sleep(4);
-	guiderport->activate(0,0,3,0);
-	sleep(4);
-	guiderport->activate(0,0,0,3);
-	sleep(10);
+	guiderport->activate(1,0,0,0);
+	sleep(2);
+	guiderport->activate(1,0,0,0);
+	sleep(2);
+	guiderport->activate(1,0,0,0);
+	sleep(2);
+	guiderport->activate(1,0,0,0);
+	sleep(2);
+	guiderport->activate(0,1,0,0);
+	sleep(2);
+	guiderport->activate(0,1,0,0);
+	sleep(2);
+	guiderport->activate(0,1,0,0);
+	sleep(2);
+	guiderport->activate(0,0,1,0);
+	sleep(2);
+	guiderport->activate(0,0,1,0);
+	sleep(2);
+	guiderport->activate(0,0,0,1);
+	sleep(3);
 }
 
 void	sxtest::testGuiderport2() {

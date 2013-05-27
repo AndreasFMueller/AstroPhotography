@@ -129,15 +129,19 @@ Interface&	InterfaceDescriptor::getInterface() {
 /////////////////////////////////////////////////////////////////////
 
 Interface::Interface(Device& device, Configuration& _configuration,
-	const libusb_interface *li, int _interface)
-	: dev(device), interface(_interface), configuration(_configuration) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating interface %d", interface);
+	const libusb_interface *li, int _interfaceindex)
+	: dev(device), interfaceindex(_interfaceindex),
+	  configuration(_configuration) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating interface index=%d",
+		interfaceindex);
 	for (int i = 0; i < li->num_altsetting; i++) {
 		InterfaceDescriptor	*id
 			= new InterfaceDescriptor(device, *this,
 				&li->altsetting[i]);
 		altsettingvector.push_back(InterfaceDescriptorPtr(id));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface with index %d has number %d",
+			interfaceindex, interfaceNumber());
 	reattach = false;
 }
 
@@ -154,8 +158,8 @@ Interface::~Interface() {
 	}
 }
 
-int	Interface::interfaceNumber() const {
-	return interface;
+uint8_t	Interface::interfaceNumber() const {
+	return altsettingvector[0]->bInterfaceNumber();
 }
 
 size_t	Interface::numAltsettings() const {
@@ -177,11 +181,11 @@ InterfaceDescriptorPtr&	Interface::operator[](size_t index) {
 }
 
 void	Interface::claim() throw(USBError) {
-	dev.claimInterface(interface);
+	dev.claimInterface(interfaceNumber());
 }
 
 void	Interface::release() throw(USBError) {
-	dev.releaseInterface(interface);
+	dev.releaseInterface(interfaceNumber());
 }
 
 static std::string	ifindent("    I   ");
@@ -203,7 +207,7 @@ std::ostream&	operator<<(std::ostream& out, const Interface& interface) {
 }
 
 bool	Interface::kernelDriverActive() const {
-	return dev.kernelDriverActive(interface);
+	return dev.kernelDriverActive(interfaceNumber());
 }
 
 /**
@@ -218,11 +222,11 @@ void	Interface::detachKernelDriver() throw(USBError) {
 	} else {
 		return;
 	}
-	dev.detachKernelDriver(interface);
+	dev.detachKernelDriver(interfaceNumber());
 }
 
 void	Interface::attachKernelDriver() const throw(USBError) {
-	dev.attachKernelDriver(interface);
+	dev.attachKernelDriver(interfaceNumber());
 }
 
 } // namespace usb

@@ -245,8 +245,12 @@ void	SxCamera::controlRequest(RequestBase *request) {
 		deviceptr->controlRequest(request);
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request %p on data interface",
-		request);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request %p on data interface, "
+		"request = %02x, requesttype = %02x,  wValue = %04x, "
+		"wIndex = %04x, wLength = %04x",
+		request,
+		request->bRequest(), request->bmRequestType(),
+		request->wValue(), request->wIndex(), request->wLength());
 
 	// we first analyse whether this is a control request with a
 	// in data phase, because then the packet size to send is just

@@ -38,7 +38,7 @@ public:
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
 	CPPUNIT_TEST(testCamera);
-	CPPUNIT_TEST(testCcd);
+	//CPPUNIT_TEST(testCcd);
 	//CPPUNIT_TEST(testExposure);
 	//CPPUNIT_TEST(testFilterwheel);
 	//CPPUNIT_TEST(testCooler);
@@ -73,7 +73,7 @@ void	sbigtest::testCamera() {
 
 void	sbigtest::testCcd() {
 	CameraPtr	camera = locator->getCamera(0);
-	CcdPtr	ccd = camera->getCcd(0);
+	CcdPtr	ccd = camera->getCcd(1);
 	std::cout << ccd->getInfo() << std::endl;
 }
 

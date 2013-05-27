@@ -220,7 +220,7 @@ void	DemosaicBilinear<T>::blue(Image<RGB<T> > *result,
 
 template<typename T>
 Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
-	Image<RGB<T> >	*result = separate(image);
+	Image<RGB<T> >	*result = this->separate(image);
 
 	// we don't want to call the isR functions all the time
 	redx =  image.mosaic       & 0x1;

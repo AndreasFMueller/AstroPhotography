@@ -85,9 +85,9 @@ std::string	timespec::toString() const {
 }
 
 #define	SX_RAPLUS_BIT	1
-#define	SX_RAMINUS_BIT	2
-#define SX_DECPLUS_BIT	4
-#define SX_DECMINUS_BIT	8
+#define SX_DECPLUS_BIT	2
+#define SX_DECMINUS_BIT	4
+#define	SX_RAMINUS_BIT	8
 
 static void	*sxguidermain(void *private_data) {
 	SxGuiderPort	*guiderport = (SxGuiderPort *)private_data;
@@ -148,12 +148,13 @@ void	*SxGuiderPort::main() {
 	// we lock the mutex, thus blocking the thread until we want to
 	// release it.
 	pthread_mutex_lock(&mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] guider port thread released", pthread_self());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] guider port thread released",
+		pthread_self());
 
 	while (true) {
 		// find the current time
 		timespec	now;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p]current time: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] current time: %s",
 			pthread_self(), now.toString().c_str());
 
 		// forward 0.01 seconds
@@ -173,6 +174,8 @@ void	*SxGuiderPort::main() {
 		if (now < turnoff[3]) {
 			newstate |= SX_DECMINUS_BIT;
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] new port state: %02x",
+			pthread_self(), newstate);
 
 		// find the time for the next event
 		timespec	next = now + 1000000;
@@ -235,6 +238,7 @@ void	SxGuiderPort::activate(float raplus, float raminus,
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot lock mutex");
 		throw SxError("cannot lock mutex");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mutex locked");
 
 	// now we can write the new turnoff times
 	turnoff[0] = timespec() + raplus;
@@ -244,6 +248,7 @@ void	SxGuiderPort::activate(float raplus, float raminus,
 
 	// release the mutex
 	pthread_mutex_unlock(&mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mutex unlocked, signaling condition");
 
 	// signal that some things have changed
 	pthread_cond_signal(&condition);
