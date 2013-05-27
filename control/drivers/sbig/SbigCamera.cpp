@@ -86,6 +86,9 @@ SbigCamera::SbigCamera() {
 	GetCCDInfoParams	ccdinfoparams;
 	GetCCDInfoResults0	ccdinforesult;
 
+	// we want to assign CCD ids sequentially
+	unsigned int	ccdidcounter = 0;
+
 	// imaging ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query imaging CCD info");
 	ccdinfoparams.request = CCD_INFO_IMAGING;
@@ -94,7 +97,7 @@ SbigCamera::SbigCamera() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imaging ccd");
 	} else {
 		CcdInfo	ccd;
-		ccd.ccdid = 0;
+		ccd.ccdid = ccdidcounter++;
 		ccd.name = std::string("Imaging");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
@@ -136,7 +139,7 @@ SbigCamera::SbigCamera() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	} else {
 		CcdInfo	ccd;
-		ccd.ccdid = 0;
+		ccd.ccdid = ccdidcounter++;
 		ccd.name = std::string("Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
@@ -152,7 +155,7 @@ SbigCamera::SbigCamera() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no external tracking ccd");
 	} else {
 		CcdInfo	ccd;
-		ccd.ccdid = 0;
+		ccd.ccdid = ccdidcounter++;
 		ccd.name = std::string("external Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
