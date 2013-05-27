@@ -707,7 +707,7 @@ std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
 class Interface {
 	Device&	dev;
 	std::vector<InterfaceDescriptorPtr>	altsettingvector;
-	int	interface;
+	int	interfaceindex;
 	Configuration&	configuration;
 	Interface(const Interface& other);
 	bool	reattach;
@@ -716,7 +716,7 @@ public:
 		const libusb_interface *li, int interface);
 	~Interface();
 	size_t	numAltsettings() const;
-	int	interfaceNumber() const;
+	uint8_t	interfaceNumber() const;
 	const InterfaceDescriptorPtr&	operator[](size_t index) const;
 	InterfaceDescriptorPtr&	operator[](size_t index);
 	void	claim() throw(USBError);

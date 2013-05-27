@@ -40,9 +40,9 @@ public:
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
-	CPPUNIT_TEST(testFullimage);
+	//CPPUNIT_TEST(testFullimage);
 	//CPPUNIT_TEST(testSubimage);
-	//CPPUNIT_TEST(testGuiderport);
+	CPPUNIT_TEST(testGuiderport);
 	//CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
