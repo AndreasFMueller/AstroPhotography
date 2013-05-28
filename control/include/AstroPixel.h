@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <iostream>
 #include <math.h>
+#include <limits>
 
 namespace astro {
 namespace image {
@@ -223,6 +224,9 @@ public:
 		if (value > limit) { return limit; }
 		return value;
 	}
+	virtual unsigned int	bitsPerPixel() const {
+		return std::numeric_limits<P>::digits;
+	}
 };
 
 /**
@@ -275,6 +279,10 @@ public:
 		return (y != other.y) || (uv != other.uv);
 	}
 	typedef yuyv_color_tag color_category;
+
+	virtual unsigned int	bitsPerPixel() const {
+		return 2 * std::numeric_limits<P>::digits;
+	}
 };
 
 /**
@@ -342,6 +350,10 @@ public:
 		result.G = G * value;
 		result.B = B * value;
 		return result;
+	}
+
+	virtual unsigned int	bitsPerPixel() const {
+		return 2 * std::numeric_limits<P>::digits;
 	}
 };
 
@@ -547,6 +559,23 @@ void	convertPixelArray(destPixel *dest, const srcPixel *src, int length) {
 	for (int i = 0; i < length; i += 2) {
 		convertPixelPair(&dest[i], &src[i]);
 	}
+}
+
+/**
+ * \brief template with specializations for the bitsPerPixel function
+ */
+template<typename P>
+unsigned int	bitsPerPixel(P) {
+	return std::numeric_limits<P>::digits;
+}
+template<typename P>
+unsigned int	bitsPerPixel(YUYV<P>) {
+	return 2 * std::numeric_limits<P>::digits;
+}
+
+template<typename P>
+unsigned int	bitsPerPixel(RGB<P>) {
+	return 3 * std::numeric_limits<P>::digits;
 }
 
 } // namespace image
