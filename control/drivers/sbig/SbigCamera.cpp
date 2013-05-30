@@ -129,6 +129,16 @@ SbigCamera::SbigCamera() {
 		}
 
 		ccdinfo.push_back(ccd);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
+			ccd.toString().c_str());
+		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"mode[%d]: %d x %d (%04x)",
+				i, 
+				ccdinforesult.readoutInfo[i].width,
+				ccdinforesult.readoutInfo[i].height,
+				ccdinforesult.readoutInfo[i].mode);
+		}
 	}
 
 	// tracking ccd if present
@@ -145,6 +155,16 @@ SbigCamera::SbigCamera() {
 			ccdinforesult.readoutInfo[0].height);
 		ccd.binningmodes.push_back(Binning(2,2));
 		ccdinfo.push_back(ccd);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
+			ccd.toString().c_str());
+
+		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d]: %d x %d",
+				i, 
+				ccdinforesult.readoutInfo[i].width,
+				ccdinforesult.readoutInfo[i].height,
+				ccdinforesult.readoutInfo[i].mode);
+		}
 	}
 
 	// external tracking ccd, if present

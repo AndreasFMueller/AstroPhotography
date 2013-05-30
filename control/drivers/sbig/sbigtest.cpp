@@ -38,12 +38,12 @@ public:
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
 	CPPUNIT_TEST(testCamera);
-	//CPPUNIT_TEST(testCcd);
+	CPPUNIT_TEST(testCcd);
 	//CPPUNIT_TEST(testExposure);
 	//CPPUNIT_TEST(testFilterwheel);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testGuiderport);
-	CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
