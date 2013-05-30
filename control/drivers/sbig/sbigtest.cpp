@@ -43,7 +43,7 @@ public:
 	//CPPUNIT_TEST(testFilterwheel);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testGuiderport);
-	//CPPUNIT_TEST(testGuiderport2);
+	CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
