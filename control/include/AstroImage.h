@@ -158,6 +158,9 @@ public:
 	bool	isB(unsigned int x, unsigned int y) const;
 	bool	isGr(unsigned int x, unsigned int y) const;
 	bool	isGb(unsigned int x, unsigned int y) const;
+
+	virtual unsigned int bitsPerPixel() const { return 0; }
+	unsigned int bytesPerPixel() const;
 };
 
 /**
@@ -507,6 +510,22 @@ public:
 					+ size.width, value);
 		}
 	}
+
+	/**
+	 * \brief Access to pixel values
+	 * 
+ 	 */
+	template<typename T>
+	T	pixelvalue(unsigned int x, unsigned int y) const {
+		return (T)pixels[pixeloffset(x, y)];
+	}
+
+	/**
+	 * \brief Determine number of bits of a pixel
+ 	 */
+	virtual unsigned int	bitsPerPixel() const {
+		return astro::image::bitsPerPixel(Pixel());
+	}
 };
 
 /**
@@ -637,6 +656,16 @@ void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
 	}
 	convertPixelArray(dest.pixels, src.pixels, dest.size.pixels);
 }
+
+/**
+ * \brief Find out whether an image is a color
+ */
+bool	isColorImage(const ImagePtr& image);
+
+/**
+ * \brief Find out whether an image is a monochrome
+ */
+bool	isMonochromeImage(const ImagePtr& image);
 
 } // namespace image
 } // namespace astro

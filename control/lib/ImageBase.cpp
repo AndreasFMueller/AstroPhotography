@@ -88,5 +88,9 @@ bool	ImageBase::isGb(unsigned int x, unsigned int y) const {
 	return (0x2 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
 }
 
+unsigned int	ImageBase::bytesPerPixel() const {
+	return this->bitsPerPixel() / 8;
+}
+
 } // namespace image
 } // namespace astro
