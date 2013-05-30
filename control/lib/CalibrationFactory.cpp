@@ -59,35 +59,41 @@ class ConstPixelValue {
 	const Image<float>	*floatimage;
 	const Image<double>	*doubleimage;
 public:
-	ConstPixelValue(const ImagePtr& image) {
-		byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
-		shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
-		intimage = dynamic_cast<Image<unsigned int> *>(&*image);
-		longimage = dynamic_cast<Image<unsigned long> *>(&*image);
-		floatimage = dynamic_cast<Image<float> *>(&*image);
-		doubleimage = dynamic_cast<Image<double> *>(&*image);
-		if ((NULL == byteimage) &&
-		    (NULL == shortimage) &&
-		    (NULL == intimage) &&
-		    (NULL == longimage) &&
-		    (NULL == floatimage) &&
-		    (NULL == doubleimage)) {
-			throw std::runtime_error("pixel type not primitive");
-		}
-	}
-	T	pixelvalue(unsigned int x, unsigned int y) const {
-		if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
-		if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
-		if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
-		if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
-		if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
-		if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
-		if (std::numeric_limits<T>::has_quiet_NaN) {
-			return std::numeric_limits<T>::quiet_NaN();
-		}
-		throw std::runtime_error("NaN not available");
-	}
+	ConstPixelValue(const ImagePtr& image);
+	T	pixelvalue(unsigned int x, unsigned int y) const;
 };
+
+template<typename T>
+ConstPixelValue<T>::ConstPixelValue(const ImagePtr& image) {
+	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
+	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
+	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
+	floatimage = dynamic_cast<Image<float> *>(&*image);
+	doubleimage = dynamic_cast<Image<double> *>(&*image);
+	if ((NULL == byteimage) &&
+	    (NULL == shortimage) &&
+	    (NULL == intimage) &&
+	    (NULL == longimage) &&
+	    (NULL == floatimage) &&
+	    (NULL == doubleimage)) {
+		throw std::runtime_error("pixel type not primitive");
+	}
+}
+
+template<typename T>
+T	ConstPixelValue<T>::pixelvalue(unsigned int x, unsigned int y) const {
+	if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
+	if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
+	if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
+	if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
+	if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
+	if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
+	if (std::numeric_limits<T>::has_quiet_NaN) {
+		return std::numeric_limits<T>::quiet_NaN();
+	}
+	throw std::runtime_error("NaN not available");
+}
 
 template<typename T>
 class PixelValue {
@@ -98,35 +104,41 @@ class PixelValue {
 	Image<float>	*floatimage;
 	Image<double>	*doubleimage;
 public:
-	PixelValue(ImagePtr& image) {
-		byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
-		shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
-		intimage = dynamic_cast<Image<unsigned int> *>(&*image);
-		longimage = dynamic_cast<Image<unsigned long> *>(&*image);
-		floatimage = dynamic_cast<Image<float> *>(&*image);
-		doubleimage = dynamic_cast<Image<double> *>(&*image);
-		if ((NULL == byteimage) &&
-		    (NULL == shortimage) &&
-		    (NULL == intimage) &&
-		    (NULL == longimage) &&
-		    (NULL == floatimage) &&
-		    (NULL == doubleimage)) {
-			throw std::runtime_error("pixel type not primitive");
-		}
-	}
-	T	pixelvalue(unsigned int x, unsigned int y) {
-		if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
-		if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
-		if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
-		if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
-		if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
-		if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
-		if (std::numeric_limits<T>::has_quiet_NaN) {
-			return std::numeric_limits<T>::quiet_NaN();
-		}
-		throw std::runtime_error("NaN not available");
-	}
+	PixelValue(ImagePtr& image);
+	T	pixelvalue(unsigned int x, unsigned int y);
 };
+
+template<typename T>
+PixelValue<T>::PixelValue(ImagePtr& image) {
+	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
+	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
+	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
+	floatimage = dynamic_cast<Image<float> *>(&*image);
+	doubleimage = dynamic_cast<Image<double> *>(&*image);
+	if ((NULL == byteimage) &&
+	    (NULL == shortimage) &&
+	    (NULL == intimage) &&
+	    (NULL == longimage) &&
+	    (NULL == floatimage) &&
+	    (NULL == doubleimage)) {
+		throw std::runtime_error("pixel type not primitive");
+	}
+}
+
+template<typename T>
+T	PixelValue<T>::pixelvalue(unsigned int x, unsigned int y) {
+	if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
+	if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
+	if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
+	if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
+	if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
+	if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
+	if (std::numeric_limits<T>::has_quiet_NaN) {
+		return std::numeric_limits<T>::quiet_NaN();
+	}
+	throw std::runtime_error("NaN not available");
+}
 
 /**
  * \brief Compute statistical characteristics of an image sequence
@@ -308,6 +320,24 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 template<typename T>
 ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 	ImageMean<T>	im(images, dark, false); // variance not needed
+	ImagePtr	result = im.getImagePtr();
+	Image<T>	*image = dynamic_cast<Image<T>*>(&*result);
+	if (NULL == image) {
+		throw std::runtime_error("dark image type mismatch");
+	}
+
+	// find the maximum value of the image
+	Max<T>	maxfilter;
+	T	maxvalue = maxfilter(*image);
+
+	// device the image by that value, so that the new maximum value
+	// is 1
+	for (unsigned int x = 0; x < image->size.width; x++) {
+		for (unsigned int y = 0; y < image->size.height; y++) {
+			image->pixel(x, y) /= maxvalue;
+		}
+	}
+
 	return im.getImagePtr();
 }
 
@@ -325,6 +355,45 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 }
 
 //////////////////////////////////////////////////////////////////////
+// TypedCalibrator implementation (used for Calibrator)
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class TypedCalibrator {
+	ConstPixelValue<T>	dark;
+	ConstPixelValue<T>	flat;
+	T	nan;
+public:
+	TypedCalibrator(const ImagePtr& _dark, const ImagePtr& _flat);
+	ImagePtr	operator()(const ImagePtr& image) const;
+};
+
+template<typename T>
+TypedCalibrator<T>::TypedCalibrator(const ImagePtr& _dark,
+	const ImagePtr& _flat) : dark(_dark), flat(_flat) {
+	nan = std::numeric_limits<T>::quiet_NaN();
+}
+
+template<typename T>
+ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
+	ConstPixelValue<T>	im(image);
+	Image<T>	*result = new Image<T>(image->size);
+	for (unsigned int x = 0; x < image->size.width; x++) {
+		for (unsigned int y = 0; y < image->size.height; y++) {
+			T	darkvalue = dark.pixelvalue(x, y);
+			// if the pixel is bad give 
+			if (darkvalue == nan) {
+				result->pixel(x, y) = nan;;
+				continue;
+			}
+			result->pixel(x, y) = (im.pixelvalue(x, y) - darkvalue)
+				/ flat.pixelvalue(x, y);
+		}
+	}
+	return ImagePtr(result);
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
 Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
@@ -332,9 +401,56 @@ Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
 }
 
 ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
-	ImagePtr	result;
-	// XXX calibration missing
-	return result;
+	if (image->bitsPerPixel() <= std::numeric_limits<float>::digits) {
+		TypedCalibrator<float>	calibrator(dark, flat);
+		return calibrator(image);
+	}
+	TypedCalibrator<double>	calibrator(dark, flat);
+	return calibrator(image);
+}
+
+//////////////////////////////////////////////////////////////////////
+// TypedInterpolator implementation
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class TypedInterpolator {
+	const Image<T>&	dark;
+protected:
+	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+				ImagePtr& image);
+	PixelValue<T>	*pv;
+	T	nan;
+public:
+	TypedInterpolator(const Image<T>& _dark);
+	void	interpolate(ImagePtr& image);
+};
+
+template<typename T>
+void	TypedInterpolator<T>::interpolatePixel(unsigned int x, unsigned int y,
+		ImagePtr& image) {
+	// XXX interpolation missing
+}
+
+template<typename T>
+TypedInterpolator<T>::TypedInterpolator(const Image<T>& _dark) : dark(_dark) {
+	nan = std::numeric_limits<T>::quiet_NaN();
+}
+
+template<typename T>
+void	TypedInterpolator<T>::interpolate(ImagePtr& image) {
+	// make sure the image sizes match
+	if (image->size != dark.size) {
+		throw std::range_error("image sizes don't match");
+	}
+	pv = new PixelValue<T>(image);
+	for (unsigned int x = 0; x < dark.size.width; x++) {
+		for (unsigned int y = 0; y < dark.size.height; y++) {
+			if (dark.pixel(x, y) == nan) {
+				interpolatePixel(x, y, image);
+			}
+		}
+	}
+	delete pv;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -347,35 +463,6 @@ Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
 		throw std::runtime_error("only float or double images are suitable as darks");
 	}
 }
-
-template<typename T>
-class TypedInterpolator {
-	const Image<T>&	dark;
-	void	interpolatePixel(unsigned int x, unsigned int y,
-			ImagePtr& image) {
-		// XXX interpolation missing
-	}
-	PixelValue<T>	*pv;
-public:
-	TypedInterpolator(const Image<T>& _dark) : dark(_dark) {
-	}
-
-	void	interpolate(ImagePtr& image) {
-		// make sure the image sizes match
-		if (image->size != dark.size) {
-			throw std::range_error("image sizes don't match");
-		}
-		pv = new PixelValue<T>(image);
-		for (unsigned int x = 0; x < dark.size.width; x++) {
-			for (unsigned int y = 0; y < dark.size.height; y++) {
-				if (dark.pixel(x, y) == std::numeric_limits<T>::quiet_NaN()) {
-					interpolatePixel(x, y, image);
-				}
-			}
-		}
-		delete pv;
-	}
-};
 
 void	Interpolator::interpolate(ImagePtr& image) {
 	if (floatdark) {
