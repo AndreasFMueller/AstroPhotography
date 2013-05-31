@@ -7,6 +7,7 @@
 #define _utils_h
 
 #include <stdexcept>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace camera {
@@ -19,6 +20,9 @@ public:
 	SbigError(short errocode);
 	SbigError(const char *cause);
 };
+
+Binning	SbigMode2Binning(unsigned short mode);
+unsigned short	SbigBinning2Mode(const Binning& mode);
 
 } // namespace sbig
 } // namespace camera
