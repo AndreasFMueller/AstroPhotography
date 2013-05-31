@@ -160,6 +160,12 @@ public:
 	virtual void	cancelExposure() throw (not_implemented);
 	const Exposure&	getExposure() const { return exposure; }
 
+	// methods to control a shutter
+	typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+	virtual shutter_state	getShutterState() throw(not_implemented);
+	virtual void	setShutterState(const shutter_state& state)
+		throw(not_implemented);
+
 	// image retrievel functions
 	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
 	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount)

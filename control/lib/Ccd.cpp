@@ -149,5 +149,20 @@ CoolerPtr	Ccd::getCooler() throw (not_implemented) {
 	throw not_implemented("thermoelectric cooler not implemented");
 }
 
+/**
+ * \brief Retrieve the state of the shutter
+ */
+Ccd::shutter_state	Ccd::getShutterState() throw (not_implemented) {
+	throw not_implemented("camera has no shutter");
+}
+
+/**
+ * \brief Set the state of the shutter
+ */
+void	Ccd::setShutterState(const Ccd::shutter_state& state)
+	throw(not_implemented) {
+	throw not_implemented("camera has no shutter");
+}
+
 } // namespace camera
 } // namespace astro

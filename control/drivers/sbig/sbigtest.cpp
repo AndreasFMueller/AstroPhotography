@@ -34,6 +34,7 @@ public:
 	void	testCooler();
 	void	testGuiderport();
 	void	testGuiderport2();
+	void	testShutter();
 
 	CPPUNIT_TEST_SUITE(sbigtest);
 	CPPUNIT_TEST(testList);
@@ -43,7 +44,8 @@ public:
 	//CPPUNIT_TEST(testFilterwheel);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testGuiderport);
-	CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuiderport2);
+	CPPUNIT_TEST(testShutter);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -195,6 +197,18 @@ void	sbigtest::testGuiderport2() {
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
 		guiderport->activate(raplus, raminus, decplus, decminus);
 		usleep(2 * delta * 1000000);
+	}
+}
+
+void	sbigtest::testShutter() {
+	CameraPtr	camera = locator->getCamera(0);
+	CcdPtr	ccd = camera->getCcd(0);
+	unsigned int	delay = 500000;
+	for (int i = 0; i < 20; i++) {
+		ccd->setShutterState(Ccd::SHUTTER_CLOSED);
+		usleep(delay);
+		ccd->setShutterState(Ccd::SHUTTER_OPEN);
+		usleep(delay);
 	}
 }
 

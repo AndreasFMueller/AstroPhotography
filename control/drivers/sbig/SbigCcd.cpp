@@ -194,6 +194,82 @@ CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
 	return CoolerPtr(new SbigCooler(camera));
 }
 
+Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+	camera.sethandle();
+
+	// get the shutter state from query command status command
+	QueryCommandStatusParams	params;
+	QueryCommandStatusResults	results;
+	params.command = CC_MISCELLANEOUS_CONTROL;
+	unsigned short	e;
+	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &params, &results);
+	if (e != CE_NO_ERROR) {
+		throw not_implemented("cannot query command status");
+	}
+
+	shutter_state	state;
+	switch ((results.status >> 10) & 0x3) {
+	case SS_OPEN:
+	case SS_OPENING:
+		state = SHUTTER_OPEN;
+		break;
+	case SS_CLOSED:
+	case SS_CLOSING:
+		state = SHUTTER_CLOSED;
+		break;
+	}
+
+	return state;
+}
+
+void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented) {
+	camera.sethandle();
+
+	// first query the the state of fan and LED so that we can use the
+	// right constant in the misc control params
+	QueryCommandStatusParams	params;
+	params.command = CC_MISCELLANEOUS_CONTROL;
+	QueryCommandStatusResults	results;
+	unsigned short	e;
+	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &params, &results);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot get status, assuming no shutter");
+		throw not_implemented("apparently there is no shutter");
+	}
+
+	// now copy the data
+	MiscellaneousControlParams	misc;
+	misc.fanEnable = ((results.status >> 8) & 0x1)
+		? FS_AUTOCONTROL : FS_OFF;
+	switch ((results.status >> 11) & 0x2) {
+	case 0:
+		misc.ledState = LED_OFF;
+		break;
+	case 1:
+		misc.ledState = LED_ON;
+		break;
+	case 2:
+		misc.ledState = LED_BLINK_LOW;
+		break;
+	case 3:
+		misc.ledState = LED_BLINK_HIGH;
+		break;
+	}
+	switch (state) {
+	case SHUTTER_CLOSED:
+		misc.shutterCommand = SC_CLOSE_SHUTTER;
+		break;
+	case SHUTTER_OPEN:
+		misc.shutterCommand = SC_OPEN_SHUTTER;
+		break;
+	}
+	e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);
+	if (e != CE_NO_ERROR) {
+		throw not_implemented("shutter command not implemented");
+	}
+}
+
 } // namespace sbig
 } // namespace camera
 } // namespace astro

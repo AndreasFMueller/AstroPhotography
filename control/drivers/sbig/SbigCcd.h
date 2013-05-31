@@ -24,7 +24,13 @@ public:
 	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
 	virtual ~SbigCcd();
 	virtual Exposure::State	exposureStatus() throw (not_implemented);
-	virtual void	startExposure(const Exposure& exposure) throw (not_implemented);
+	virtual void	startExposure(const Exposure& exposure)
+		throw (not_implemented);
+
+	virtual shutter_state	getShutterState() throw(not_implemented);
+	virtual void	setShutterState(const shutter_state& state)
+		throw(not_implemented);
+
 	virtual	ImagePtr	getImage() throw(not_implemented);
 	virtual CoolerPtr	getCooler() throw(not_implemented);
 };
