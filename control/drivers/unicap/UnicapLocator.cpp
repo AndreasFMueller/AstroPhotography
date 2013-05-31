@@ -1,30 +1,32 @@
 /*
- * UnicapLocator.cpp --
+ * UnicapCameraLocator.cpp --
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <UnicapLocator.h>
 #include <includes.h>
 
-UnicapLocator::UnicapLocator() {
+using namespace astro::camera::unicap;
+
+UnicapCameraLocator::UnicapCameraLocator() {
 }
 
-UnicapLocator::~UnicapLocator() {
+UnicapCameraLocator::~UnicapCameraLocator() {
 }
 
-std::string	UnicapLocator::getName() const {
+std::string	UnicapCameraLocator::getName() const {
 	return std::string("unicap");
 }
 
-std::string	UnicapLocator::getVersion() const {
+std::string	UnicapCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-std::vector<std::string>	UnicapLocator::getCameralist() {
+std::vector<std::string>	UnicapCameraLocator::getCameralist() {
 	std::vector<std::string>	cameras;
 	return cameras;
 }
 
-CameraPtr	UncaipLocator::getCamera(const std::string& name) {
+CameraPtr	UnicapCameraLocator::getCamera(const std::string& name) {
 	return CameraPtr();
 }

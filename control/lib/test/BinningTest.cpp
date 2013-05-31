@@ -40,13 +40,13 @@ void	BinningTest::testEquality() {
 
 void	BinningTest::testPermits() {
 	BinningSet	bs;
-	bs.push_back(Binning(1,1));
-	bs.push_back(Binning(2,2));
-	bs.push_back(Binning(3,3));
-	bs.push_back(Binning(-1,1));
-	bs.push_back(Binning(-1,2));
-	bs.push_back(Binning(1,-1));
-	bs.push_back(Binning(2,-1));
+	bs.insert(Binning(1,1));
+	bs.insert(Binning(2,2));
+	bs.insert(Binning(3,3));
+	bs.insert(Binning(-1,1));
+	bs.insert(Binning(-1,2));
+	bs.insert(Binning(1,-1));
+	bs.insert(Binning(2,-1));
 	CPPUNIT_ASSERT(bs.permits(Binning(1,1)));
 	CPPUNIT_ASSERT(bs.permits(Binning(2,2)));
 	CPPUNIT_ASSERT(bs.permits(Binning(3,3)));

@@ -115,10 +115,10 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	CcdInfo	ccd0;
 	ccd0.size = ImageSize(params.width, params.height);
 	ccd0.name = "Imaging";
-	ccd0.binningmodes.push_back(Binning(2,2));
+	ccd0.binningmodes.insert(Binning(2,2));
 	if (model != SX_MODEL_M26C) {
-		ccd0.binningmodes.push_back(Binning(3,3));
-		ccd0.binningmodes.push_back(Binning(4,4));
+		ccd0.binningmodes.insert(Binning(3,3));
+		ccd0.binningmodes.insert(Binning(4,4));
 	} else {
 		ccd0.size.height *= 2;
 	}
@@ -159,7 +159,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		CcdInfo	ccd1;
 		ccd1.size = ImageSize(params.width, params.height);
 		ccd1.name = "Tracking";
-		ccd1.binningmodes.push_back(Binning(2,2));
+		ccd1.binningmodes.insert(Binning(2,2));
 		ccdinfo.push_back(ccd1);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");

@@ -9,6 +9,7 @@
 
 #include <AstroImage.h>
 #include <vector>
+#include <set>
 #include <stdint.h>
 
 namespace astro {
@@ -24,16 +25,20 @@ namespace camera {
  * Binning objects.
  */
 class	Binning {
-	int	x;
-	int	y;
+	unsigned int	x;
+	unsigned int	y;
 public:
-	Binning(int _x = 1, int _y = 1) : x(_x), y(_y) { }
+	static const unsigned int	wildcard;
+	Binning(unsigned int _x = 1, unsigned int _y = 1) : x(_x), y(_y) { }
 	Binning(const Binning& other) : x(other.x), y(other.y) { }
 	bool	iswildcard() const;
+	bool	isXwildcard() const;
+	bool	isYwildcard() const;
 	bool	operator==(const Binning& other) const;
+	int	operator<(const Binning& other) const;
 	bool	compatible(const Binning& other) const;
-	int	getX() const { return x; }
-	int	getY() const { return y; }
+	unsigned int	getX() const { return x; }
+	unsigned int	getY() const { return y; }
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);
@@ -47,7 +52,7 @@ std::ostream&	operator<<(std::ostream& out, const Binning& binning);
  * mode is supported by the chip. This cannot be a set membership test
  * because wildcard binning modes.
  */
-class	BinningSet : public std::vector<Binning> {
+class	BinningSet : public std::set<Binning> {
 public:
 	BinningSet();
 	bool	permits(const Binning& binning) const throw (std::range_error);

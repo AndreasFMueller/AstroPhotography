@@ -18,13 +18,13 @@ Mock1Camera::Mock1Camera(int _id) : id(_id) {
 	CcdInfo	ccd0;
 	ccd0.size = ImageSize(1024, 768);
 	ccd0.name = "primary ccd";
-	ccd0.binningmodes.push_back(Binning(1,1));
+	ccd0.binningmodes.insert(Binning(1,1));
 	ccdinfo.push_back(ccd0);
 
 	CcdInfo	ccd1;
 	ccd1.size = ImageSize(640, 480);
 	ccd1.name = "secondary ccd";
-	ccd1.binningmodes.push_back(Binning(1,1));
+	ccd1.binningmodes.insert(Binning(1,1));
 	ccdinfo.push_back(ccd1);
 }
 

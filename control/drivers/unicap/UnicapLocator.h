@@ -6,6 +6,8 @@
 #ifndef _UnicapLocator_h
 #define _UnicapLocator_h
 
+#include <AstroCamera.h>
+
 using namespace astro::camera;
 
 namespace astro {
@@ -22,10 +24,10 @@ public:
 	UnicapCameraLocator();
 	virtual ~UnicapCameraLocator();
 	virtual std::string	getName() const;
-	virtual std::string	getModule() const;
 	virtual std::vector<std::string>	getCameralist();
 	virtual CameraPtr	getCamera(const std::string& name);
 	virtual CameraPtr	getCamera(size_t index);
+	virtual std::string	getVersion() const;
 };
 
 } // namespace unicap

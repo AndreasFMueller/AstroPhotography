@@ -99,39 +99,16 @@ SbigCamera::SbigCamera() {
 		CcdInfo	ccd;
 		ccd.ccdid = ccdidcounter++;
 		ccd.name = std::string("Imaging");
+		// here we assume that the largest readout mode is
+		// delivered first, otherwise we would have to scan
+		// the readout modes for one with mode == 0 (RM_1X1)
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(2,2));
-		switch (cameraType) {
-// this hack is needed because the header files in SBIG development kits
-// are out of sync
-#ifdef STF8300_CAMERA
-		case STF8300_CAMERA:
-#endif
-#ifdef STF_CAMERA
-		case STF_CAMERA:
-#endif
-			ccd.binningmodes.push_back(Binning(-1,-1));
-		case STT_CAMERA:
-		case STX_CAMERA:
-		// case STXL_CAMERA: /* no definition yet */
-			ccd.binningmodes.push_back(Binning(3,3));
-			ccd.binningmodes.push_back(Binning(9,9));
-			ccd.binningmodes.push_back(Binning(1,-1));
-			break;
-		case STI_CAMERA:
-			ccd.binningmodes.push_back(Binning(1,-1));
-			ccd.binningmodes.push_back(Binning(2,-1));
-			break;
-		case ST402_CAMERA:
-			ccd.binningmodes.push_back(Binning(3,3));
-			break;
-		}
-
-		ccdinfo.push_back(ccd);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+			ccd.binningmodes.insert(SbigMode2Binning(
+				ccdinforesult.readoutInfo[i].mode));
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"mode[%d]: %d x %d (%04x)",
 				i, 
@@ -139,6 +116,8 @@ SbigCamera::SbigCamera() {
 				ccdinforesult.readoutInfo[i].height,
 				ccdinforesult.readoutInfo[i].mode);
 		}
+
+		ccdinfo.push_back(ccd);
 	}
 
 	// tracking ccd if present
@@ -153,18 +132,19 @@ SbigCamera::SbigCamera() {
 		ccd.name = std::string("Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(2,2));
-		ccdinfo.push_back(ccd);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
 			ccd.toString().c_str());
 
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+			ccd.binningmodes.insert(SbigMode2Binning(
+				ccdinforesult.readoutInfo[i].mode));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d]: %d x %d",
 				i, 
 				ccdinforesult.readoutInfo[i].width,
 				ccdinforesult.readoutInfo[i].height,
 				ccdinforesult.readoutInfo[i].mode);
 		}
+		ccdinfo.push_back(ccd);
 	}
 
 	// external tracking ccd, if present
@@ -179,7 +159,10 @@ SbigCamera::SbigCamera() {
 		ccd.name = std::string("external Tracking");
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		ccd.binningmodes.push_back(Binning(2,2));
+		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
+			ccd.binningmodes.insert(SbigMode2Binning(
+				ccdinforesult.readoutInfo[i].mode));
+		}
 		ccdinfo.push_back(ccd);
 	}
 

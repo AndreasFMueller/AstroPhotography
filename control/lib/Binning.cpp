@@ -7,9 +7,12 @@
 #include <AstroCamera.h>
 #include <Format.h>
 #include <stdexcept>
+#include <limits>
 
 namespace astro {
 namespace camera {
+
+const unsigned int	Binning::wildcard = std::numeric_limits<unsigned int>::max();
 
 /**
  * \brief Compare binning modes: equality
@@ -23,20 +26,45 @@ bool	Binning::operator==(const Binning& other) const {
 }
 
 /**
+ * \brief Compare binning modes: order
+ *
+ * This comparison should order the exact binning modes before the
+ * wild card binning modes.
+ */
+int	Binning::operator<(const Binning& other) const {
+	if (x < other.x) { return 1; }
+	if (x > other.x) { return -1; }
+	// x == other.x
+	if (y < other.y) { return -1; }
+	if (y > other.y) { return 1; }
+	// y == other.y
+	return 0;
+}
+
+/**
  * \brief compare binning modes: compatibility
  *
  * This comparisaon takes wildcards into account.
  */
 bool	Binning::compatible(const Binning& other) const {
-	return	((x == other.x) || (x == -1) || (other.x == -1)) &&
-		((y == other.y) || (y == -1) || (other.y == -1));
+	return	((x == other.x) || (x == wildcard) || (other.x == wildcard)) &&
+		((y == other.y) || (y == wildcard) || (other.y == wildcard));
 }
 
 /**
  * \brief Convert a Binning object into something printable
  */
 std::string	Binning::toString() const {
-	return stringprintf("(%dx%d)", x, y);
+	if (isXwildcard() && isYwildcard()) {
+		return std::string("(*x*)");
+	}
+	if (isXwildcard()) {
+		return stringprintf("(*x%u)", y);
+	}
+	if (isYwildcard()) {
+		return stringprintf("(%ux*)", x);
+	}
+	return stringprintf("(%ux%u)", x, y);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
@@ -47,7 +75,21 @@ std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
  * \brief Test whether the binning mode has any wildcards.
  */
 bool	Binning::iswildcard() const {
-	return (x == -1) || (y == -1);
+	return (x == wildcard) || (y == wildcard);
+}
+
+/**
+ * \brief Test whether the binning mode has any wildcards.
+ */
+bool	Binning::isXwildcard() const {
+	return (x == wildcard);
+}
+
+/**
+ * \brief Test whether the binning mode has any wildcards.
+ */
+bool	Binning::isYwildcard() const {
+	return (y == wildcard);
 }
 
 // The binningtester class is used as a functor 
@@ -73,7 +115,7 @@ public:
  * contain at least the 1x1 binning mode.
  */
 BinningSet::BinningSet() {
-	push_back(Binning());
+	insert(Binning());
 }
 
 /**
@@ -88,7 +130,7 @@ bool	BinningSet::permits(const Binning& binning) const throw (std::range_error) 
 	if (binning.iswildcard()) {
 		throw std::range_error("invalid binning type");
 	}
-	for (std::vector<Binning>::const_iterator i = begin(); i != end(); i++) {
+	for (std::set<Binning>::const_iterator i = begin(); i != end(); i++) {
 		if (i->compatible(binning)) {
 			return true;
 		}
@@ -98,7 +140,7 @@ bool	BinningSet::permits(const Binning& binning) const throw (std::range_error) 
 
 std::string	BinningSet::toString() const {
 	std::string	result;
-	std::vector<Binning>::const_iterator	i;
+	std::set<Binning>::const_iterator	i;
 	for (i = begin(); i != end(); i++) {
 		if (i != begin()) {
 			result.append(",");
