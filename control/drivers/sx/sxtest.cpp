@@ -13,6 +13,7 @@
 #include <debug.h>
 #include <includes.h>
 #include <AstroDemosaic.h>
+#include <Format.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -24,6 +25,7 @@ namespace sx {
 namespace test {
 
 extern "C" double default_exposure;
+extern "C" int default_imagecount;
 
 class sxtest : public CppUnit::TestFixture {
 	static SxCameraLocator	*locator;
@@ -35,6 +37,7 @@ public:
 	void	testCamera();
 	void	testFullimage();
 	void	testSubimage();
+	void	testImageSequence();
 	void	testGuiderport();
 	void	testGuiderport2();
 
@@ -42,7 +45,8 @@ public:
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
-	CPPUNIT_TEST(testFullimage);
+	//CPPUNIT_TEST(testFullimage);
+	CPPUNIT_TEST(testImageSequence);
 	//CPPUNIT_TEST(testSubimage);
 	//CPPUNIT_TEST(testGuiderport);
 	//CPPUNIT_TEST(testGuiderport2);
@@ -235,6 +239,38 @@ void	sxtest::testGuiderport2() {
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
 		guiderport->activate(raplus, raminus, decplus, decminus);
 		usleep(2 * delta * 1000000);
+	}
+}
+
+void	sxtest::testImageSequence() {
+	CameraPtr	camera = locator->getCamera(0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has %d ccds", camera->nCcds());
+	CcdPtr	ccd = camera->getCcd(0);
+	std::cout << ccd->getInfo() << std::endl;
+	
+	Exposure	exposure(ccd->getInfo().getFrame(), default_exposure);
+	//exposure.limit = 62000;
+	exposure.mode = Binning(1,1);
+	ccd->startExposure(exposure);
+
+	// now retrieve a sequence of images
+	ImageSequence	images = ccd->getImageSequence(default_imagecount);
+	ImageSequence::const_iterator	i;
+	int	counter = 0;
+	for (i = images.begin(); i != images.end(); i++, counter++) {
+		ImagePtr	image = *i;
+		Image<unsigned short>	*shortimage
+			= dynamic_cast<Image<unsigned short> *>(&*image);
+		if (NULL == shortimage) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "not a short image");
+			throw std::runtime_error("not a short image");
+		}
+		std::string	filename = stringprintf("test%03d.fits");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %s",
+			filename.c_str());
+		unlink(filename.c_str());
+		FITSout	file(filename);
+		file.write(image);
 	}
 }
 
