@@ -23,6 +23,8 @@ namespace camera {
 namespace sx {
 namespace test {
 
+extern "C" double default_exposure;
+
 class sxtest : public CppUnit::TestFixture {
 	static SxCameraLocator	*locator;
 public:
@@ -40,10 +42,10 @@ public:
 	//CPPUNIT_TEST(testList);
 	//CPPUNIT_TEST(testCooler);
 	//CPPUNIT_TEST(testCamera);
-	//CPPUNIT_TEST(testFullimage);
+	CPPUNIT_TEST(testFullimage);
 	//CPPUNIT_TEST(testSubimage);
 	//CPPUNIT_TEST(testGuiderport);
-	CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuiderport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -117,7 +119,7 @@ void	sxtest::testCamera() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(176, 0),
-		ImageSize(1040, 1040)), 0.019);
+		ImageSize(1040, 1040)), default_exposure);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
@@ -140,7 +142,7 @@ void	sxtest::testFullimage() {
 	CcdPtr	ccd = camera->getCcd(0);
 	std::cout << ccd->getInfo() << std::endl;
 	
-	Exposure	exposure(ccd->getInfo().getFrame(), 3600);
+	Exposure	exposure(ccd->getInfo().getFrame(), default_exposure);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);
@@ -178,7 +180,7 @@ void	sxtest::testSubimage() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(1450, 808),
-		ImageSize(1000, 1000)), 0.04);
+		ImageSize(1000, 1000)), default_exposure);
 	//exposure.limit = 62000;
 	exposure.mode = Binning(1,1);
 	ccd->startExposure(exposure);

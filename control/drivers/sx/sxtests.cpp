@@ -8,13 +8,19 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <debug.h>
 #include <getopt.h>
+#include <stdlib.h>
+
+double default_exposure = 0.01;
 
 int	main(int argc, char *argv[]) {
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "d")))
+	while (EOF != (c = getopt(argc, argv, "de:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'e':
+			default_exposure = atof(optarg);
 			break;
 		}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sx tests");
