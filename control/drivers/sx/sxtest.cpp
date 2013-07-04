@@ -27,6 +27,7 @@ namespace test {
 extern "C" double default_exposure;
 extern "C" int default_imagecount;
 extern "C" const char	*default_targetdirectory;
+extern "C" const char	*default_prefix;
 
 class sxtest : public CppUnit::TestFixture {
 	static SxCameraLocator	*locator;
@@ -266,8 +267,8 @@ void	sxtest::testImageSequence() {
 			debug(LOG_ERR, DEBUG_LOG, 0, "not a short image");
 			throw std::runtime_error("not a short image");
 		}
-		std::string filename = stringprintf("%s/test%03d.fits",
-			default_targetdirectory, counter);
+		std::string filename = stringprintf("%s/%s%03d.fits",
+			default_targetdirectory, default_prefix, counter);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "working on %s",
 			filename.c_str());
 		unlink(filename.c_str());

@@ -16,6 +16,7 @@ using namespace astro;
 double	default_exposure = 0.01;
 int	default_imagecount = 5;
 const char	*default_targetdirectory = "../../tmp";
+const char	*default_prefix = "test";
 
 /**
  * \brief Make sure target directory exists
@@ -46,7 +47,7 @@ void	check_directory(const char *directory) {
 
 int	main(int argc, char *argv[]) {
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "de:n:t:")))
+	while (EOF != (c = getopt(argc, argv, "de:n:t:p:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -59,6 +60,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 't':
 			default_targetdirectory = optarg;
+			break;
+		case 'p':
+			default_prefix = optarg;
 			break;
 		}
 

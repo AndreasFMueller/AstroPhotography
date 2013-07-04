@@ -43,12 +43,26 @@ bool	consistent(const ImageSequence& images) {
 	return true;
 }
 
+/**
+ * \brief Factory method
+ *
+ * This is the factory method, it takes an image sequence and produces
+ * a calibration image. The base class of course has no data on which
+ * to base the creation of a calibration image, so it just returns an
+ * empty image pointer.
+ */
 ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence& images) const {
+	debug(LOG_ERR, DEBUG_LOG, 0, "base class factory method called, "
+		"probably an error");
 	return ImagePtr();
 }
 
 /**
  * \brief Adapter class for picture values of an ImagePtr
+ *
+ * This class allows access to the pixels of an image with primitive
+ * pixel types, and performs an implicit type conversion to the type
+ * we want to use in the calibration image computation.
  */
 template<typename T>
 class ConstPixelValue {
@@ -63,6 +77,9 @@ public:
 	T	pixelvalue(unsigned int x, unsigned int y) const;
 };
 
+/**
+ * \brief Constructor
+ */
 template<typename T>
 ConstPixelValue<T>::ConstPixelValue(const ImagePtr& image) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
@@ -81,6 +98,17 @@ ConstPixelValue<T>::ConstPixelValue(const ImagePtr& image) {
 	}
 }
 
+/**
+ * \brief Accessor to pixel value with implicit type conversion
+ *
+ * This method retrieves the pixel at point (x,y) and converts its
+ * value to type T. If the conversion is not possible, a NaN is returned,
+ * if available, or an exception thrown otherwise. Usually, calibration
+ * images will be created with float or double types, so the exception
+ * is not an issue.
+ * \param x	x-coordinate of pixel
+ * \param y	y-coordinate of pixel
+ */
 template<typename T>
 T	ConstPixelValue<T>::pixelvalue(unsigned int x, unsigned int y) const {
 	if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
@@ -95,6 +123,11 @@ T	ConstPixelValue<T>::pixelvalue(unsigned int x, unsigned int y) const {
 	throw std::runtime_error("NaN not available");
 }
 
+/**
+ * \brief Access to pixel values
+ *
+ * This
+ */
 template<typename T>
 class PixelValue {
 	Image<unsigned char>	*byteimage;
@@ -143,8 +176,10 @@ T	PixelValue<T>::pixelvalue(unsigned int x, unsigned int y) {
 /**
  * \brief Compute statistical characteristics of an image sequence
  *
- * This class is needed by several methods that compute means, variations
- * and medians to decide whether or not to consider an image pixel as valid
+ * This class is needed by several methods that compute means, variance
+ * and medians to decide whether or not to consider an image pixel as valid.
+ * It usually operates on a sequence of images, which must all have the same
+ * pixel type.
  */
 template<typename T>
 class ImageMean {
@@ -155,6 +190,11 @@ public:
 
 private:
 	PVSequence	pvs;
+	/**
+	 * \brief Prepare internal data
+	 *
+ 	 * This method is called to set up the PixelValue vectors
+	 */
 	void	setup_pv(const ImageSequence& images) {
 		// the image sequence must be consistent, or we cannot do 
 		// anything about it
@@ -175,25 +215,49 @@ private:
 public:
 
 	ImageSize	size;
+	/**
+	 * \brief Calibration image being computed
+	 *
+	 * This image contains the mean values for pixels at the same position
+	 */
 	Image<T>	*image;
+
+	/**
+	 * \brief Variance per pixel
+	 *
+	 * This image contains the variance of pixel values at the same position
+ 	 */
 	Image<T>	*var;
 
 private:
+	/**
+	 * \brief Prepare internal data for dark image compuation
+	 */
 	void	setup_images(const ImageSequence& images) {
 		// create an image of appropriate size
 		size = (*images.begin())->size;
 		image = new Image<T>(size);
 		if (enableVariance) {
+			// prepare the variance image
 			var = new Image<T>(size);
 		} else {
 			var = NULL;
 		}
 	}
 
+	/**
+	 * \brief Perform dark image computation per pixel
+	 *
+	 * Computes mean and variance (if enabled) of the pixels
+	 * at point (x,y) from all images in the image sequence.
+	 * The PixelValue objects are used for this purpose.
+	 * \param x	x-coordinate of pixel
+	 * \param y	y-coordinate of pixel
+	 */
 	void	compute(unsigned int x, unsigned int y, T darkvalue) {
 		// if the dark value is invalid, then the computed value
 		// is also invalid
-		if (std::numeric_limits<T>::quiet_NaN() == darkvalue) {
+		if (darkvalue != darkvalue) {
 			image->pixel(x, y) = darkvalue;
 			var->pixel(x, y) = darkvalue;
 			return;
@@ -201,24 +265,85 @@ private:
 
 		// perform mean (and possibly variance) computation in the
 		// case where 
+		T	m;
 		T	X = 0, X2 = 0;
 		typename std::vector<PV>::const_iterator j;
+		int	counter = 0;
 		for (j = pvs.begin(); j != pvs.end(); j++) {
 			T	v = j->pixelvalue(x, y);
+			// skip this value if it is a NaN
+			if (v != v)
+				continue;
 			X += v;
 			if (enableVariance) {
 				X2 += v * v;
 			}
+			counter++;
 		}
-		T	EX = X / pvs.size();
-		image->pixel(x, y) = EX;
+		if (counter != pvs.size()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixel values at (%d, %d): %d", x, y, counter);
+		}
+		T	EX = X / counter;
+		T	EX2 = 0;
 		if (enableVariance) {
-			T	EX2 = X2 / pvs.size();
-			var->pixel(x, y) = EX2 - EX * EX;
+			EX2 = X2 / counter;
 		}
+
+		// if we don't have the variance, we leave it at that
+		if (!enableVariance) {
+			image->pixel(x, y) = EX;
+			return;
+		}
+
+		// if the variance is enabled, then we can do the computation
+		// again, and ignore not only the bad values, but also the
+		// ones that are more then 3 standard deviations away from 
+		// the mean
+		X = 0, X2 = 0;
+		counter = 0;
+		T	stddev3 = 3 * sqrt(EX2 - EX * EX);
+		if (stddev3 < 1) {
+			stddev3 = std::numeric_limits<T>::infinity();
+		}
+if (stddev3 < 1) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "EX = %f, EX2 = %f", EX, EX2);
+}
+		for (j = pvs.begin(); j != pvs.end(); j++) {
+			T	v = j->pixelvalue(x, y);
+			// skip NaNs
+			if (v != v)
+				continue;
+			// skip values that are too far off
+			if (fabs(v - EX) > stddev3) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d): skipping %f, EX = %f, stddev3 = %f", x, y, v, EX, stddev3);
+				continue;
+			}
+			X += v;
+			X2 += v * v;
+			counter++;
+		}
+
+		if (0 == counter) {
+			image->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
+			var->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
+			return;
+		}
+		EX = X / counter;
+		EX2 = X2 / counter;
+		image->pixel(x, y) = EX;
+		var->pixel(x, y) = EX2 - EX * EX;
 	}
 
 public:
+	/**
+	 * \brief Constructor for ImageMean object
+	 *
+	 * The constructor remembers all images, sets up PixelValue objects
+	 * for them, and computes mean and variance for each point
+	 * \param images	a sequence of images
+	 * \param _enableVariance	whether or not the variance should be
+	 *				computed
+ 	 */
 	ImageMean(const ImageSequence& images, bool _enableVariance = false)
 		: enableVariance(_enableVariance) {
 		// compute the PixelValue objects
@@ -235,6 +360,14 @@ public:
 		}
 	}
 
+	/**
+	 * \brief Construtor for ImageMean object with dark value correction
+	 * 
+	 * Constructs an ImageMean object, but ignores pixels where the
+	 * dark image has NaN values. This allows to first construct a
+	 * map of dark pixels, which should be ignored, and then perform
+	 * the computation of the dark images ignoring the bad pixels.
+ 	 */
 	ImageMean(const ImageSequence& images, const Image<T>& dark,
 		bool _enableVariance = false)
 		: enableVariance(_enableVariance) {
@@ -264,16 +397,29 @@ public:
 		}
 	}
 	
+	/**
+	 * \brief compute the mean of the result image
+	 */
 	T	mean() const {
 		Mean<T, T>	meanoperator;
 		return meanoperator(*image);
 	}
 
+	/**
+	 * \brief compute variance of the result image
+	 */
 	T	variance() const {
-		Mean<T, T>	meanoperator;
-		return meanoperator(*var);
+		Variance<T, T>	varianceoperator;
+		return varianceoperator(*image);
 	}
 
+	/**
+	 * \brief retrieve the result image from the ImageMean object
+	 *
+ 	 * Makes the private image pointer accessible in the form of a
+	 * smart pointer. This method can only be called once, as image
+	 * is invalidate after the call.
+	 */
 	ImagePtr	getImagePtr() {
 		ImagePtr	result(image);
 		image = NULL;
@@ -281,23 +427,35 @@ public:
 	}
 };
 
+/**
+ * \brief Function to compute a dark image from a sequence of images
+ *
+ * This function first computes pixelwise mean and variance of the
+ * image sequence. Then mean and variance over the image are computed.
+ * This allows 
+ * \param images	sequence of images to use to compute the 
+ *			dark image
+ */
 template<typename T>
 ImagePtr	dark(const ImageSequence& images) {
 	ImageMean<T>	im(images, true);
 	
 	// we also need the mean of the image to decide which pixels are
 	// too far off to consider them "sane" pixels
-	T	mvar = im.mean();
-	T	m = im.variance();
+	T	mean = im.mean();
+	T	var = im.variance();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f",
+		mean, var);
 
 	// now find out which pixels are bad, and mark them using NaNs.
 	// we consider pixels bad if the deviate from the mean by more
 	// than three standard deviations
-	T	stddev3 = 3 * sqrt(mvar);
+	T	stddev3 = 3 * sqrt(var);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
 	unsigned int	badpixelcount = 0;
 	for (unsigned int x = 0; x < im.size.width; x++) {
 		for (unsigned int y = 0; y < im.size.height; y++) {
-			if (fabs(im.image->pixel(x, y) - m) > stddev3) {
+			if (fabs(im.image->pixel(x, y) - mean) > stddev3) {
 				im.image->pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
 				badpixelcount++;
@@ -310,6 +468,9 @@ ImagePtr	dark(const ImageSequence& images) {
 	return im.getImagePtr();
 }
 
+/**
+ * \brief Dark image construction function for arbitrary image sequences
+ */
 ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	if ((*images.begin())->bitsPerPixel() <= std::numeric_limits<float>::digits) {
 		return dark<float>(images);
@@ -317,18 +478,25 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	return dark<double>(images);
 }
 
+/**
+ * \brief Flat image construction function for arbitrary image sequences
+ */
 template<typename T>
 ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
-	ImageMean<T>	im(images, dark, false); // variance not needed
+	// we first compute the pixelwise mean, but we have to eliminate
+	// possible cosmic ray artefacts, so we let the thing compute
+	// the variance nevertheless
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute mean of images");
+	ImageMean<T>	im(images, dark, true);
+
+	// extract the image
 	ImagePtr	result = im.getImagePtr();
-	Image<T>	*image = dynamic_cast<Image<T>*>(&*result);
-	if (NULL == image) {
-		throw std::runtime_error("dark image type mismatch");
-	}
+	Image<T>	*image = dynamic_cast<Image<T> *>(&*result);
 
 	// find the maximum value of the image
 	Max<T>	maxfilter;
 	T	maxvalue = maxfilter(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
 
 	// device the image by that value, so that the new maximum value
 	// is 1
@@ -337,8 +505,9 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 			image->pixel(x, y) /= maxvalue;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image normalized");
 
-	return im.getImagePtr();
+	return result;
 }
 
 ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
@@ -346,9 +515,17 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 	Image<double>	*doubledark = dynamic_cast<Image<double>*>(&*darkimage);
 	Image<float>	*floatdark = dynamic_cast<Image<float>*>(&*darkimage);
 	if (doubledark) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark is Image<double>");
+		CountNaNs<double>	countnans;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark has %f nans",
+			countnans(*doubledark));
 		return flat(images, *doubledark);
 	}
 	if (floatdark) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark is Image<float>");
+		CountNaNs<float>	countnans;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark has %f nans",
+			countnans(*floatdark));
 		return flat(images, *floatdark);
 	}
 	throw std::runtime_error("unknown dark image type");
@@ -381,7 +558,7 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 		for (unsigned int y = 0; y < image->size.height; y++) {
 			T	darkvalue = dark.pixelvalue(x, y);
 			// if the pixel is bad give 
-			if (darkvalue == nan) {
+			if (darkvalue != darkvalue) {
 				result->pixel(x, y) = nan;;
 				continue;
 			}
@@ -445,7 +622,7 @@ void	TypedInterpolator<T>::interpolate(ImagePtr& image) {
 	pv = new PixelValue<T>(image);
 	for (unsigned int x = 0; x < dark.size.width; x++) {
 		for (unsigned int y = 0; y < dark.size.height; y++) {
-			if (dark.pixel(x, y) == nan) {
+			if (dark.pixel(x, y) != dark.pixel(x, y)) {
 				interpolatePixel(x, y, image);
 			}
 		}

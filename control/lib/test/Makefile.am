@@ -78,9 +78,9 @@ unicaptests_LDADD = -lcppunit -L.. -lastro
 unicaptests_DEPENDENCIES = ../libastro.la
 endif
 
-test2_SOURCES = test2.cpp
-test2_LDADD = -L.. -lastro
-test2_DEPENDENCIES = ../libastro.la
+# test2_SOURCES = test2.cpp
+# test2_LDADD = -L.. -lastro
+# test2_DEPENDENCIES = ../libastro.la
 
 EXTRA_DIST = test_module.la test_module.so
 

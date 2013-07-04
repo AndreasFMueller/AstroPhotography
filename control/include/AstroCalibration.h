@@ -37,7 +37,8 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) con
  */
 class FlatFrameFactory : public CalibrationFrameFactory {
 public:
-astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images, const astro::image::ImagePtr& darkimage) const;
+astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images,
+	const astro::image::ImagePtr& darkimage) const;
 };
 
 /**

@@ -6,6 +6,9 @@
 #ifndef _AstroFilter_h
 #define _AstroFilter_h
 
+#include <limits>
+#include <debug.h>
+
 namespace astro {
 namespace image {
 namespace filter {
@@ -25,6 +28,25 @@ public:
 };
 
 /**
+ * \brief Filter to count NaNs
+ */
+template<typename T>
+class CountNaNs : public PixelTypeFilter<T> {
+public:
+	CountNaNs() { }
+	virtual T	operator()(const Image<T>& image) {
+		T	result = 0;
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
+			T	v = image.pixels[i];
+			if (v != v) {
+				result += 1;
+			}
+		}
+		return result;
+	}
+};
+
+/**
  * \brief Filter that finds the largest value of all pixels
  */
 template<typename T>
@@ -34,7 +56,9 @@ public:
 	virtual T	operator()(const Image<T>& image) {
 		T	result = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
-			if (image.pixels[i] > result) {
+			T	v = image.pixels[i];
+			if (v != v) continue; // skip NaNs
+			if (v > result) {
 				result = image.pixels[i];
 			}
 		}
@@ -52,7 +76,9 @@ public:
 	virtual T	operator()(const Image<T>& image) {
 		T	result = std::numeric_limits<T>::max();
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
-			if (image.pixels[i] < result) {
+			T	v = image.pixels[i];
+			if (v != v) continue; // skip NaNs
+			if (v < result) {
 				result = image.pixels[i];
 			}
 		}
@@ -69,13 +95,53 @@ public:
 	Mean() { }
 	virtual S	mean(const Image<T>& image) {
 		S	sum = 0;
+		size_t	counter = 0;
+		bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
-			sum += image.pixels[i];
+			T	v = image.pixels[i];
+			if ((check_nan) && (v != v))
+				continue;
+			sum += v;
+			counter++;
 		}
-		return sum / image.size.pixels;
+		return sum / counter;
 	}
 	virtual T	operator()(const Image<T>& image) {
 		return (T)mean(image);
+	}
+};
+
+/**
+ * \brief Filter that finds the variance of an image
+ */
+template<typename T, typename S>
+class Variance : public Mean<T, S> {
+
+public:
+	Variance() { }
+	virtual S	variance(const Image<T>& image) {
+		S	m = Mean<T, S>::mean(image);
+		// the rest of the code is concerned with computing the
+		// quadratic mean
+
+		S	sum = 0;
+		size_t	counter = 0;
+		bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
+		for (unsigned int i = 0; i < image.size.pixels; i++) {
+			T	v = image.pixels[i];
+			// skip NaNs
+			if ((check_nan) && (v != v))
+				continue;
+			
+			sum += (v - m) * (v - m);
+			counter++;
+		}
+		S	var = sum / counter;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "var = %f", var);
+		return var;
+	}
+	virtual T	operator()(const Image<T>& image) {
+		return (T)variance(image);
 	}
 };
 
