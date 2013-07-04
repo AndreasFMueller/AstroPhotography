@@ -298,6 +298,7 @@ public:
 	P	B;
 	RGB() { }
 	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
+	virtual ~RGB() { }
 
 	template<typename Q>
 	RGB(Q r, Q g, Q b) {
