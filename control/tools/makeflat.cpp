@@ -50,7 +50,8 @@ int	main(int argc, char *argv[]) {
 	ImageSequence	images;
 	for (; optind < argc; optind++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "reading file %s", argv[optind]);
-		FITSin	infile(std::string(argv[optind]));
+		std::string	name(argv[optind]);
+		FITSin	infile(name);
 		ImagePtr	image = infile.read();
 		images.push_back(image);
 	}
