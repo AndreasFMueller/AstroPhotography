@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroIO.h>
+#include <debug.h>
 
 namespace astro {
 namespace io {
@@ -20,15 +21,16 @@ FITSin::FITSin(const std::string& _filename) : filename(_filename) {
  * \brief Do the dirty work of the read
  *
  * We already have classes to read images of a certain type, so this
- * function uses such a class, read the image pointer from it, wrap it
+ * function uses such a class, reads the image pointer from it, wrap it
  * in a new ImagePtr and reset the old type specific pointer.
  */
 template<typename P>
 static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
 	FITSinfile<P>	reader(filename);
-	std::tr1::shared_ptr<Image<P> >	image = reader.read();
-	ImagePtr	result(&*image);
-	image.reset();
+	Image<P>	*image = reader.read();
+	ImagePtr	result(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "result is an %d x %d image",
+		result->size.width, result->size.height);
 	return result;
 }
 

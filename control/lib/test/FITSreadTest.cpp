@@ -41,16 +41,18 @@ const char	*uchar_filename = "uchar_test.fits";
 
 void	FITSreadTest::testReadUChar() {
 	FITSinfile<unsigned char>	infile(uchar_filename);
-	std::tr1::shared_ptr<Image<unsigned char> >	i = infile.read();
+	Image<unsigned char>	*i = infile.read();
 	std::cerr << "image type: " << infile.getImgtype() << std::endl;
 	std::cerr << "size: " << i->size.width << " x " << i->size.height << std::endl;
 	std::cerr << "planes: " << infile.getPlanes() << std::endl;
-	std::tr1::shared_ptr<Image<unsigned char> >	image = infile.read();
+	delete	i;
+	Image<unsigned char>	*image = infile.read();
 	std::string	newfilename = std::string("copy-") + uchar_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<unsigned char>	*outfile
 		= new FITSoutfile<unsigned char>(newfilename);
 	outfile->write(*image);
+	delete image;
 	delete outfile;
 }
 
@@ -63,7 +65,7 @@ void	FITSreadTest::testReadUShort() {
 		<< infile.getSize().height << std::endl;
 	std::cerr << "planes: " << infile.getPlanes() << std::endl;
 	std::cerr << "read pixels" << std::endl;
-	std::tr1::shared_ptr<Image<unsigned short> >	image = infile.read();
+	Image<unsigned short>	*image = infile.read();
 	std::cerr << "image read" << std::endl;
 
 	std::string	newfilename = std::string("copy-") + ushort_filename;
@@ -71,6 +73,7 @@ void	FITSreadTest::testReadUShort() {
 	FITSoutfile<unsigned short>	*outfile
 		= new FITSoutfile<unsigned short>(newfilename);
 	outfile->write(*image);
+	delete image;
 	delete outfile;
 }
 
@@ -82,14 +85,14 @@ void	FITSreadTest::testReadYUYV() {
 	std::cerr << "size: " << infile.getSize().width << " x "
 		<< infile.getSize().height << std::endl;
 	std::cerr << "planes: " << infile.getPlanes() << std::endl;
-	std::tr1::shared_ptr<Image<YUYV<unsigned char> > >	image
-		= infile.read();
+	Image<YUYV<unsigned char> >	*image = infile.read();
 
 	std::string	newfilename = std::string("copy-") + yuyv_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<YUYV<unsigned char> >	*outfile
 		= new FITSoutfile<YUYV<unsigned char> >(newfilename);
 	outfile->write(*image);
+	delete image;
 	delete outfile;
 }
 
@@ -100,13 +103,13 @@ void	FITSreadTest::testReadRGB() {
 	std::cerr << "image type: " << infile.getImgtype() << std::endl;
 	std::cerr << "size: " << infile.getSize().width << " x " << infile.getSize().height << std::endl;
 	std::cerr << "planes: " << infile.getPlanes() << std::endl;
-	std::tr1::shared_ptr<Image<RGB<unsigned char> > >	image
-		= infile.read();
+	Image<RGB<unsigned char> >	*image = infile.read();
 	std::string	newfilename = std::string("copy-") + rgb_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<RGB<unsigned char> >	*outfile
 		= new FITSoutfile<RGB<unsigned char> >(newfilename);
 	outfile->write(*image);
+	delete image;
 	delete outfile;
 }
 
@@ -117,13 +120,13 @@ void	FITSreadTest::testReadRGBUShort() {
 	std::cerr << "image type: " << infile.getImgtype() << std::endl;
 	std::cerr << "size: " << infile.getSize().width << " x " << infile.getSize().height << std::endl;
 	std::cerr << "planes: " << infile.getPlanes() << std::endl;
-	std::tr1::shared_ptr<Image<RGB<unsigned short> > >	image
-		= infile.read();
+	Image<RGB<unsigned short> >	*image = infile.read();
 	std::string	newfilename = std::string("copy-") + rgbushort_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<RGB<unsigned short> >	*outfile
 		= new FITSoutfile<RGB<unsigned short> >(newfilename);
 	outfile->write(*image);
+	delete image;
 	delete outfile;
 }
 

@@ -92,8 +92,7 @@ template<typename Pixel>
 class FITSinfile : public FITSinfileBase {
 public:
 	FITSinfile(const std::string& filename) : FITSinfileBase(filename) { }
-	typedef std::tr1::shared_ptr<Image<Pixel> >	ImagePtr;
-	ImagePtr	read() throw(FITSexception);
+	Image<Pixel>	*read() throw(FITSexception);
 };
 
 /**
@@ -181,7 +180,7 @@ void	convertFITSpixels(Pixel *pixels, srctype *srcpixels,
  * function.
  */
 template<typename Pixel>
-std::tr1::shared_ptr<Image<Pixel> >	FITSinfile<Pixel>::read()
+Image<Pixel>	*FITSinfile<Pixel>::read()
 	throw (FITSexception) {
 	Image<Pixel>	*image = new Image<Pixel>(size);
 	// read the data
@@ -214,7 +213,7 @@ std::tr1::shared_ptr<Image<Pixel> >	FITSinfile<Pixel>::read()
 		break;
 	}
 
-	return std::tr1::shared_ptr<Image<Pixel> >(image);
+	return image;
 }
 
 
