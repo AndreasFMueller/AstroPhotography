@@ -10,17 +10,21 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-double default_exposure = 0.01;
+double	default_exposure = 0.01;
+int	default_imagecount = 5;
 
 int	main(int argc, char *argv[]) {
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "de:")))
+	while (EOF != (c = getopt(argc, argv, "de:n:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
 			default_exposure = atof(optarg);
+			break;
+		case 'n':
+			default_imagecount = atoi(optarg);
 			break;
 		}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sx tests");
