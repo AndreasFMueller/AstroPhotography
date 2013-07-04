@@ -257,6 +257,7 @@ public:
 		convertPixelValue(y, _y);
 		convertPixelValue(uv, _uv);
 	}
+	virtual	~YUYV() { }
 
 	/**
 	 * \brief Copy constructor for YUYV pixels.
