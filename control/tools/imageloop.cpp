@@ -60,7 +60,7 @@ int	main(int argc, char *argv[]) {
 	unsigned int	nImages = 1;
 	double	exposuretime = 0.1;
 	const char	*modulename = "uvc";
-	double		targetmean = 16000;
+	double		targetmean = 0;
 	unsigned int	period = 1;
 	while (EOF != (c = getopt(argc, argv, "dw:x:y:w:h:o:C:c:n:e:E:m:p:?")))
 		switch (c) {
