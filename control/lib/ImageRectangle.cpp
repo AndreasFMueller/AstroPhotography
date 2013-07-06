@@ -5,6 +5,7 @@
  * $id$
  */
 #include <AstroImage.h>
+#include <Format.h>
 
 namespace astro {
 namespace image {
@@ -93,6 +94,14 @@ ImagePoint	ImageRectangle::upperLeftCorner() const {
  */
 ImagePoint	ImageRectangle::upperRightCorner() const {
 	return ImagePoint(origin.x + size.width - 1, origin.y + size.height - 1);
+}
+
+/**
+ * \brief string representation of the rectangle
+ */
+std::string	ImageRectangle::toString() const {
+	return stringprintf("%dx%d@(%d,%d)", size.width, size.height,
+		origin.x, origin.y);
 }
 
 } // namespace image

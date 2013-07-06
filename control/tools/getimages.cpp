@@ -20,11 +20,32 @@ using namespace astro::io;
 
 namespace astro {
 
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ -d ]" << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " -n nImages     number of images to capture" << std::endl;
+	std::cout << " -e exptime     exposure time" << std::endl;
+	std::cout << " -p prefix      prefix of captured image files" << std::endl;
+	std::cout << " -t target      target directory" << std::endl;
+	std::cout << " -T cameratype  type of the camera" << std::endl;
+	std::cout << " -C camerano    camera number (default 0)" << std::endl;
+	std::cout << " -c ccdid       id of the CCD to use (default 0)" << std::endl;
+	std::cout << " -w width       width of image rectangle" << std::endl;
+	std::cout << " -h height      height of image rectangle" << std::endl;
+	std::cout << " -x xoffset     horizontal offset of image rectangle" << std::endl;
+	std::cout << " -y yoffset     vertical offset of image rectangle" << std::endl;
+	std::cout << " -l             list only, lists the devices" << std::endl;
+}
+
 int	main(int argc, char *argv[]) {
 	int	c;
 	unsigned int	nImages = 1;
 	unsigned int	cameranumber = 0;
 	unsigned int	ccdid = 0;
+	unsigned int	xoffset = 0;
+	unsigned int	yoffset = 0;
+	unsigned int	width = 0;
+	unsigned int	height = 0;
 	float	exposuretime = 0.01;
 	const char	*target = ".";
 	const char	*prefix = "test";
@@ -32,7 +53,7 @@ int	main(int argc, char *argv[]) {
 	bool	listonly = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:t:T:")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:t:T:h:w:x:y:?")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -61,10 +82,26 @@ int	main(int argc, char *argv[]) {
 		case 'l':
 			listonly = true;
 			break;
+		case 'w':
+			width = atoi(optarg);
+			break;
+		case 'h':
+			height = atoi(optarg);
+			break;
+		case 'x':
+			xoffset = atoi(optarg);
+			break;
+		case 'y':
+			yoffset = atoi(optarg);
+			break;
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// load the camera driver library
 	Repository	repository;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "recovering module '%s'", cameratype);
 	ModulePtr	module = repository.getModule(cameratype);
 	module->open();
 
@@ -101,8 +138,19 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd: %s",
 		ccd->getInfo().toString().c_str());
 
+	// create the image rectangle
+	if (width == 0) {
+		width = ccd->getInfo().size.width;
+	}
+	if (height == 0) {
+		height = ccd->getInfo().size.height;
+	}
+	ImageRectangle	imagerectangle = ccd->getInfo().clipRectangle(
+		ImageRectangle(ImagePoint(xoffset, yoffset),
+			ImageSize(width, height)));
+
 	// prepare an exposure object
-	Exposure	exposure(ccd->getInfo().size, exposuretime);
+	Exposure	exposure(imagerectangle, exposuretime);
 
 	// start the exposure
 	ccd->startExposure(exposure);

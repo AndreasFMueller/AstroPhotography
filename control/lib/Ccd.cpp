@@ -75,6 +75,44 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo) {
 	return out << ccdinfo.toString();
 }
 
+/**
+ * \brief Fit a rectangle inside a ccd
+ */
+ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
+	if (size.width < rectangle.origin.x) {
+		throw std::runtime_error("image rectangle outside ccd");
+	}
+	if (size.height < rectangle.origin.y) {
+		throw std::runtime_error("image rectangle outside ccd");
+	}
+	unsigned int	w = rectangle.size.width;
+	if ((rectangle.size.width + rectangle.origin.x) > size.width) {
+		w = size.width - rectangle.origin.x;
+	}
+	unsigned int	h = rectangle.size.height;
+	if ((rectangle.size.height + rectangle.origin.y) > size.height) {
+		h = size.height - rectangle.origin.y;
+	}
+	return ImageRectangle(rectangle.origin, ImageSize(w, h));
+}
+
+/**
+ * \brief Get a centered rectangle of a given size
+ */
+ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
+	unsigned int	w = s.width;
+	unsigned int	h = s.height;
+	if (w > size.width) {
+		w = size.width;
+	}
+	if (h > size.height) {
+		h = size.height;
+	}
+	unsigned int	xoffset = (size.width - w) / 2;
+	unsigned int	yoffset = (size.height - h) / 2;
+	return ImageRectangle(ImagePoint(xoffset, yoffset), ImageSize(w, h));
+}
+
 //////////////////////////////////////////////////////////////////////
 // Ccd implementation
 //////////////////////////////////////////////////////////////////////

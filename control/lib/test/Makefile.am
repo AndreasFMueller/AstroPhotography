@@ -36,7 +36,8 @@ uvc_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests usbtests $(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
+noinst_PROGRAMS = tests usbtests calimggen caltests \
+	$(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
 
 # general tests
 tests_SOURCES = tests.cpp \
@@ -56,6 +57,14 @@ usbtests_SOURCES = usbtests.cpp \
 	USBContextTest.cpp USBDescriptorTest.cpp
 usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
+
+calimggen_SOURCES = calimggen.cpp
+calimggens_LDADD = -L.. -lastro
+calimggen_DEPENDENCIES = ../libastro.la
+
+caltests_SOURCES = caltests.cpp
+caltests_LDADD = -lcppunit -L.. -lastro
+caltests_DEPENDENCIES = ../libastro.la
 
 # tests for UVC cameras
 if ENABLE_UVC

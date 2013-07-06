@@ -18,7 +18,11 @@ else
 microtouch_files =
 endif
 
-bin_PROGRAMS = getimages imageinfo makedark makeflat
+bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat
+
+imageloop_SOURCES = imageloop.cpp
+imageloop_DEPENDENCIES = ../lib/libastro.la
+imageloop_LDADD = -L../lib -lastro
 
 getimages_SOURCES = getimages.cpp
 getimages_DEPENDENCIES = ../lib/libastro.la
@@ -35,3 +39,4 @@ makedark_LDADD = -L../lib -lastro
 makeflat_SOURCES = makeflat.cpp
 makeflat_DEPENDENCIES = ../lib/libastro.la
 makeflat_LDADD = -L../lib -lastro
+

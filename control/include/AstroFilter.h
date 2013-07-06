@@ -6,6 +6,7 @@
 #ifndef _AstroFilter_h
 #define _AstroFilter_h
 
+#include <AstroImage.h>
 #include <limits>
 #include <debug.h>
 
@@ -24,7 +25,7 @@ namespace filter {
 template<typename T>
 class PixelTypeFilter {
 public:
-	virtual T	operator()(const Image<T>& image) = 0;
+	virtual T	operator()(const astro::image::Image<T>& image) = 0;
 };
 
 /**
@@ -34,7 +35,7 @@ template<typename T>
 class CountNaNs : public PixelTypeFilter<T> {
 public:
 	CountNaNs() { }
-	virtual T	operator()(const Image<T>& image) {
+	virtual T	operator()(const astro::image::Image<T>& image) {
 		T	result = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
@@ -53,7 +54,7 @@ template<typename T>
 class Max : public PixelTypeFilter<T> {
 public:
 	Max() { }
-	virtual T	operator()(const Image<T>& image) {
+	virtual T	operator()(const astro::image::Image<T>& image) {
 		T	result = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
@@ -73,7 +74,7 @@ template<typename T>
 class Min : public PixelTypeFilter<T> {
 public:
 	Min() { }
-	virtual T	operator()(const Image<T>& image) {
+	virtual T	operator()(const astro::image::Image<T>& image) {
 		T	result = std::numeric_limits<T>::max();
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
@@ -93,7 +94,7 @@ template<typename T, typename S>
 class Mean : public PixelTypeFilter<T> {
 public:
 	Mean() { }
-	virtual S	mean(const Image<T>& image) {
+	virtual S	mean(const astro::image::Image<T>& image) {
 		S	sum = 0;
 		size_t	counter = 0;
 		bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
@@ -111,6 +112,8 @@ public:
 	}
 };
 
+double	mean(const astro::image::ImagePtr& image);
+
 /**
  * \brief Filter that finds the variance of an image
  */
@@ -119,7 +122,7 @@ class Variance : public Mean<T, S> {
 
 public:
 	Variance() { }
-	virtual S	variance(const Image<T>& image) {
+	virtual S	variance(const astro::image::Image<T>& image) {
 		S	m = Mean<T, S>::mean(image);
 		// the rest of the code is concerned with computing the
 		// quadratic mean
@@ -157,7 +160,7 @@ protected:
 	color_type	color;
 public:
 	MatrixMean(color_type _color) : color(_color) { }
-	virtual S	mean(const Image<T>& image) {
+	virtual S	mean(const astro::image::Image<T>& image) {
 		if (image.mosaic & 0x8) {
 			throw std::logic_error("not a mosaic image");
 		}
@@ -223,7 +226,7 @@ class Median : public PixelTypeFilter<T> {
 	T	upper_limit;
 	T	lower_limit;
 
-	T	median(const Image<T>& image, const T& left, const T& right) {
+	T	median(const astro::image::Image<T>& image, const T& left, const T& right) {
 #if 0
 	std::cout << "left: " << (unsigned int)left << ", right: "
 		<< (unsigned int)right << std::endl;
@@ -316,6 +319,8 @@ public:
 	}
 };
 
+double	median(const ImagePtr& image);
+
 /**
  * \brief Image operators
  * 
@@ -331,7 +336,7 @@ template<typename T>
 class FlipOperator : public ImageOperator<T> {
 public:
 	FlipOperator() { }
-	virtual void	operator()(Image<T>& image) {
+	virtual void	operator()(astro::image::Image<T>& image) {
 		for (unsigned int line = 0; (line << 1) < image.size.height;
 			line++) {
 			T	*p = &image.pixels[line * image.size.width];
@@ -354,7 +359,7 @@ public:
 	LimitOperator(const T& _lower, const T& _upper)
 		: lower(_lower), upper(_upper) {
 	}
-	virtual void	operator()(Image<T>& image) {
+	virtual void	operator()(astro::image::Image<T>& image) {
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
 			if (v < lower) {
@@ -377,7 +382,7 @@ public:
 			: lower(_lower), delta(_upper - _lower) {
 	}
 
-	virtual void	operator()(Image<T>& image) {
+	virtual void	operator()(astro::image::Image<T>& image) {
 		T	min = image.pixels[0];
 		T	max = image.pixels[0];
 		for (unsigned int i = 0; i < image.size.pixels; i++) {

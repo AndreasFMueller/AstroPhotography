@@ -37,8 +37,8 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
-	Fits.cpp FITSout.cpp FITSin.cpp \
-	CalibrationFactory.cpp \
+	Fits.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
+	Filters.cpp CalibrationFactory.cpp \
 	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
 	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \

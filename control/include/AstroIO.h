@@ -475,6 +475,19 @@ public:
 	ImagePtr	read() throw (FITSexception);
 };
 
+/**
+ * \brief Image directory
+ */
+class FITSdirectory {
+	std::string	path;
+	std::string	indexfile;
+	void	setup();
+public:
+	FITSdirectory();
+	FITSdirectory(const std::string& path);
+	void	add(const ImagePtr& image);
+};
+
 } // namespace io
 } // namespace astro
 

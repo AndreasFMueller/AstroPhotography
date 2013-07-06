@@ -126,6 +126,8 @@ public:
 	friend class Camera;
 	friend class Ccd;
 	virtual std::string	toString() const;
+	astro::image::ImageRectangle	clipRectangle(const astro::image::ImageRectangle& rectangle) const;
+	astro::image::ImageRectangle	centeredRectangle(const astro::image::ImageSize& size) const;
 };
 std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 

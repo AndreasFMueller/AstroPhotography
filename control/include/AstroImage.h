@@ -86,6 +86,7 @@ public:
 	ImagePoint	lowerRightCorner() const;
 	ImagePoint	upperRightCorner() const;
 	ImagePoint	upperLeftCorner() const;
+	std::string	toString() const;
 };
 
 /**
