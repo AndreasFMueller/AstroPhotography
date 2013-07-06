@@ -31,12 +31,21 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -y yoffset   vertical offset of image rectangle"
 		<< std::endl;
-	std::cout << "  -n images    number of images" << std::endl;
+	std::cout << "  -n images    number of images, 0 means never stop" << std::endl;
 	std::cout << "  -o outdir    directory where files should be placed"
 		<< std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the mean pixel value stays close to mean" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
+}
+
+static const double	a = 0.5;
+
+double	scalefactor(double x) {
+	double	y = x - 1;
+	double	result =  y * (1 - a * exp(-y * y)) + 1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, scalefactor = %f", x, result);
+	return result;
 }
 
 int	main(int argc, char *argv[]) {
@@ -52,7 +61,8 @@ int	main(int argc, char *argv[]) {
 	double	exposuretime = 0.1;
 	const char	*modulename = "uvc";
 	double		targetmean = 16000;
-	while (EOF != (c = getopt(argc, argv, "dw:x:y:w:h:o:C:c:n:e:E:m:?")))
+	unsigned int	period = 1;
+	while (EOF != (c = getopt(argc, argv, "dw:x:y:w:h:o:C:c:n:e:E:m:p:?")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -93,7 +103,19 @@ int	main(int argc, char *argv[]) {
 		case 'E':
 			targetmean = atof(optarg);
 			break;
+		case 'p':
+			period = atoi(optarg);
+			break;
 		}
+
+	// if E is set, and the initial exposure time is zero, then
+	// we should change it to something more reasonable
+	if ((0 != targetmean) && (exposuretime == 0)) {
+		std::string	msg("cannot change exposure time dynamically "
+			"starting from 0");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// make sure the target directory exists
 	FITSdirectory	directory(outpath);
@@ -135,9 +157,23 @@ int	main(int argc, char *argv[]) {
                 ImageRectangle(ImagePoint(xoffset, yoffset),
                         ImageSize(width, height)));
 
+	// find the first image time
+	time_t	start = time(NULL);
+	time_t	next = start;
+
 	// now initialize exposure computation loop
 	unsigned int	counter = 0;
-	while (counter++ < nImages) {
+	while ((counter++ < nImages) || (nImages == 0)) {
+		// make sure the exposure time is not too long
+		time_t	now = time(NULL);
+		while (next <= now) {
+			next += period;
+		}
+		if (exposuretime > (next - now)) {
+			exposuretime = next - now;
+		}
+
+		// get an exposure
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s, time %fs",
 			imagerectangle.toString().c_str(), exposuretime);
 		// get an image with the current parameters
@@ -150,11 +186,21 @@ int	main(int argc, char *argv[]) {
 		// mean of the pixel values
 		if (targetmean != 0) {
 			double	mnew = median(image);
-			double	newexp = exposuretime * sqrt(targetmean / mnew);
+			double	newexp = exposuretime * scalefactor(targetmean / mnew);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
 				"actual mean = %f, current exposure time = %f, "
-				"new = %f", targetmean, mnew, exposuretime, newexp);
+				"new = %f", targetmean, mnew, exposuretime,
+				newexp);
 			exposuretime = newexp;
+		}
+
+		// now wait to the next
+		now = time(NULL);
+		time_t	delta = next - now;
+		if (delta > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %d seconds",
+				delta);
+			sleep(delta);
 		}
 	}
 
