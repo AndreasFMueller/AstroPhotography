@@ -148,12 +148,14 @@ int	main(int argc, char *argv[]) {
 
 		// compute the next exposure time, for this we need the
 		// mean of the pixel values
-		double	mnew = median(image);
-		double	newexp = exposuretime * sqrt(targetmean / mnew);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
-			"actual mean = %f, current exposure time = %f, "
-			"new = %f", targetmean, mnew, exposuretime, newexp);
-		exposuretime = newexp;
+		if (targetmean != 0) {
+			double	mnew = median(image);
+			double	newexp = exposuretime * sqrt(targetmean / mnew);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
+				"actual mean = %f, current exposure time = %f, "
+				"new = %f", targetmean, mnew, exposuretime, newexp);
+			exposuretime = newexp;
+		}
 	}
 
 	return EXIT_SUCCESS;

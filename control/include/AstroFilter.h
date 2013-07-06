@@ -22,21 +22,22 @@ namespace filter {
  * the mean value. There is a Mean filter derived from this type but in its
  * basic form it computes the integer rounded version.
  */
-template<typename T>
+template<typename T, typename S>
 class PixelTypeFilter {
 public:
+	virtual S	filter(const astro::image::Image<T>& image) = 0;
 	virtual T	operator()(const astro::image::Image<T>& image) = 0;
 };
 
 /**
  * \brief Filter to count NaNs
  */
-template<typename T>
-class CountNaNs : public PixelTypeFilter<T> {
+template<typename T, typename S>
+class CountNaNs : public PixelTypeFilter<T, S> {
 public:
 	CountNaNs() { }
-	virtual T	operator()(const astro::image::Image<T>& image) {
-		T	result = 0;
+	virtual S	filter(const astro::image::Image<T>& image) {
+		S	result = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
 			T	v = image.pixels[i];
 			if (v != v) {
@@ -45,15 +46,24 @@ public:
 		}
 		return result;
 	}
+	virtual T	operator()(const astro::image::Image<T>& image) {
+		return (T)filter(image);
+	}
 };
+
+double	countnans(const ImagePtr& image);
+double	countnansrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the largest value of all pixels
  */
-template<typename T>
-class Max : public PixelTypeFilter<T> {
+template<typename T, typename S>
+class Max : public PixelTypeFilter<T, S> {
 public:
 	Max() { }
+	virtual	S	filter(const astro::image::Image<T>& image) {
+		return (S)this->operator()(image);
+	}
 	virtual T	operator()(const astro::image::Image<T>& image) {
 		T	result = 0;
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
@@ -67,13 +77,19 @@ public:
 	}
 };
 
+double	max(const ImagePtr& image);
+double	maxrel(const ImagePtr& image);
+
 /**
  * \brief Filter that fines the smalles value of all pixels
  */
-template<typename T>
-class Min : public PixelTypeFilter<T> {
+template<typename T, typename S>
+class Min : public PixelTypeFilter<T, S> {
 public:
 	Min() { }
+	virtual	S	filter(const astro::image::Image<T>& image) {
+		return (S) this->operator()(image);
+	}
 	virtual T	operator()(const astro::image::Image<T>& image) {
 		T	result = std::numeric_limits<T>::max();
 		for (unsigned int i = 0; i < image.size.pixels; i++) {
@@ -87,14 +103,19 @@ public:
 	}
 };
 
+double	min(const ImagePtr& image);
+double	minrel(const ImagePtr& image);
+
 /**
  * \brief Filter that finds the mean of an image
  */
 template<typename T, typename S>
-class Mean : public PixelTypeFilter<T> {
+class Mean : public PixelTypeFilter<T, S> {
+	bool	relative;
 public:
-	Mean() { }
-	virtual S	mean(const astro::image::Image<T>& image) {
+	Mean(bool _relative = false) : relative(_relative) {
+	}
+	virtual S	filter(const astro::image::Image<T>& image) {
 		S	sum = 0;
 		size_t	counter = 0;
 		bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
@@ -105,25 +126,26 @@ public:
 			sum += v;
 			counter++;
 		}
-		return sum / counter;
+		S	result = sum / counter;
+		return result;
 	}
 	virtual T	operator()(const Image<T>& image) {
-		return (T)mean(image);
+		return (T)filter(image);
 	}
 };
 
 double	mean(const astro::image::ImagePtr& image);
+double	meanrel(const astro::image::ImagePtr& image);
 
 /**
  * \brief Filter that finds the variance of an image
  */
 template<typename T, typename S>
 class Variance : public Mean<T, S> {
-
 public:
 	Variance() { }
-	virtual S	variance(const astro::image::Image<T>& image) {
-		S	m = Mean<T, S>::mean(image);
+	virtual S	filter(const astro::image::Image<T>& image) {
+		S	m = Mean<T, S>::filter(image);
 		// the rest of the code is concerned with computing the
 		// quadratic mean
 
@@ -144,7 +166,7 @@ public:
 		return var;
 	}
 	virtual T	operator()(const Image<T>& image) {
-		return (T)variance(image);
+		return (T)filter(image);
 	}
 };
 
@@ -220,8 +242,8 @@ public:
  * \brief Filter that finds the median of an image
  */
 
-template<typename T>
-class Median : public PixelTypeFilter<T> {
+template<typename T, typename S>
+class Median : public PixelTypeFilter<T, S> {
 	enum { N = 4 };
 	T	upper_limit;
 	T	lower_limit;
@@ -309,13 +331,16 @@ public:
 			lower_limit = 0;
 			upper_limit = std::numeric_limits<T>::max();
 		} else {
-			Min<T>	minfilter;
+			Min<T, S>	minfilter;
 			lower_limit = minfilter(image);
-			Max<T>	maxfilter;
+			Max<T, S>	maxfilter;
 			upper_limit = maxfilter(image);
 		}
 		T	result = median(image, lower_limit, upper_limit);
 		return result;
+	}
+	virtual S	filter(const Image<T>& image) {
+		return (S)this->operator()(image);
 	}
 };
 

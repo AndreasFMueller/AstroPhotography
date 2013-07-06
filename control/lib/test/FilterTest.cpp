@@ -55,7 +55,7 @@ void	FilterTest::testMin() {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
-	Min<unsigned char>	m;
+	Min<unsigned char, unsigned char>	m;
 	CPPUNIT_ASSERT(7 == m(image));
 }
 
@@ -66,7 +66,7 @@ void	FilterTest::testMax() {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
-	Max<unsigned char>	m;
+	Max<unsigned char, unsigned char>	m;
 	CPPUNIT_ASSERT(25 == m(image));
 }
 
@@ -88,7 +88,7 @@ void	FilterTest::testMedian() {
 			image.pixel(x, y) = 7 * x * y;
 		}
 	}
-	Median<unsigned short>	m;
+	Median<unsigned short, unsigned short>	m;
 	CPPUNIT_ASSERT(12641 == m(image));
 }
 
@@ -99,7 +99,7 @@ void	FilterTest::testMedian0() {
 			image.pixel(x, y) = 0;
 		}
 	}
-	Median<unsigned short>	m;
+	Median<unsigned short, unsigned short>	m;
 	unsigned short	median = m(image);
 	CPPUNIT_ASSERT(0 == median);
 }
@@ -111,7 +111,7 @@ void	FilterTest::testMedianLarge() {
 			image.pixel(x, y) = x * y;
 		}
 	}
-	Median<unsigned int>	m;
+	Median<unsigned int, unsigned int>	m;
 	unsigned int	median = m(image);
 	CPPUNIT_ASSERT(11943792 == median);
 }

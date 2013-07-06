@@ -494,7 +494,7 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 	Image<T>	*image = dynamic_cast<Image<T> *>(&*result);
 
 	// find the maximum value of the image
-	Max<T>	maxfilter;
+	Max<T, double>	maxfilter;
 	T	maxvalue = maxfilter(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value: %f", maxvalue);
 
@@ -516,14 +516,14 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 	Image<float>	*floatdark = dynamic_cast<Image<float>*>(&*darkimage);
 	if (doubledark) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark is Image<double>");
-		CountNaNs<double>	countnans;
+		CountNaNs<double, double>	countnans;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark has %f nans",
 			countnans(*doubledark));
 		return flat(images, *doubledark);
 	}
 	if (floatdark) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark is Image<float>");
-		CountNaNs<float>	countnans;
+		CountNaNs<float, double>	countnans;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark has %f nans",
 			countnans(*floatdark));
 		return flat(images, *floatdark);
