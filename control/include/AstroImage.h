@@ -35,6 +35,7 @@ public:
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
+	std::string	toString() const;
 };
 
 class ImageRectangle;
@@ -57,6 +58,7 @@ public:
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(unsigned int x, unsigned int y) const;
 	int	chi(unsigned int x, unsigned int y) const;
+	std::string	toString() const;
 };
 
 /**

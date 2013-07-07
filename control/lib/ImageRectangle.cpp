@@ -100,8 +100,8 @@ ImagePoint	ImageRectangle::upperRightCorner() const {
  * \brief string representation of the rectangle
  */
 std::string	ImageRectangle::toString() const {
-	return stringprintf("%dx%d@(%d,%d)", size.width, size.height,
-		origin.x, origin.y);
+	return stringprintf("%s@%s", size.toString().c_str(),
+		origin.toString().c_str());
 }
 
 } // namespace image

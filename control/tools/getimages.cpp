@@ -21,20 +21,34 @@ using namespace astro::io;
 namespace astro {
 
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -d ]" << std::endl;
+	std::cout << "usage: " << progname << " [ options ]" << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -n nImages     number of images to capture" << std::endl;
-	std::cout << " -e exptime     exposure time" << std::endl;
-	std::cout << " -p prefix      prefix of captured image files" << std::endl;
-	std::cout << " -t target      target directory" << std::endl;
-	std::cout << " -T cameratype  type of the camera" << std::endl;
-	std::cout << " -C camerano    camera number (default 0)" << std::endl;
-	std::cout << " -c ccdid       id of the CCD to use (default 0)" << std::endl;
-	std::cout << " -w width       width of image rectangle" << std::endl;
-	std::cout << " -h height      height of image rectangle" << std::endl;
-	std::cout << " -x xoffset     horizontal offset of image rectangle" << std::endl;
-	std::cout << " -y yoffset     vertical offset of image rectangle" << std::endl;
-	std::cout << " -l             list only, lists the devices" << std::endl;
+	std::cout << " -d             increase debug level" << std::endl;
+	std::cout << " -?             display this help message and exit"
+		<< std::endl;
+	std::cout << " -n nImages     number of images to capture"
+		<< std::endl;
+	std::cout << " -e exptime     exposure time"
+		<< std::endl;
+	std::cout << " -p prefix      prefix of captured image files"
+		<< std::endl;
+	std::cout << " -t outputdir      outputdir directory" << std::endl;
+	std::cout << " -m modulename  driver modue name, type of the camera"
+		<< std::endl;
+	std::cout << " -C cameraid    camera number (default 0)"
+		<< std::endl;
+	std::cout << " -c ccdid       id of the CCD to use (default 0)"
+		<< std::endl;
+	std::cout << " -w width       width of image rectangle"
+		<< std::endl;
+	std::cout << " -h height      height of image rectangle"
+		<< std::endl;
+	std::cout << " -x xoffset     horizontal offset of image rectangle"
+		<< std::endl;
+	std::cout << " -y yoffset     vertical offset of image rectangle"
+		<< std::endl;
+	std::cout << " -l             list only, lists the devices"
+		<< std::endl;
 }
 
 int	main(int argc, char *argv[]) {
@@ -47,13 +61,13 @@ int	main(int argc, char *argv[]) {
 	unsigned int	width = 0;
 	unsigned int	height = 0;
 	float	exposuretime = 0.01;
-	const char	*target = ".";
+	const char	*outputdir = ".";
 	const char	*prefix = "test";
 	const char	*cameratype = "uvc";
 	bool	listonly = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:t:T:h:w:x:y:?")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -67,10 +81,10 @@ int	main(int argc, char *argv[]) {
 		case 'p':
 			prefix = optarg;
 			break;
-		case 't':
-			target = optarg;
+		case 'o':
+			outputdir = optarg;
 			break;
-		case 'T':
+		case 'm':
 			cameratype = optarg;
 			break;
 		case 'C':
@@ -163,7 +177,7 @@ int	main(int argc, char *argv[]) {
 	int	counter = 0;
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
 		std::string	filename = stringprintf("%s/%s%03d.fits",
-			target, prefix, counter++);
+			outputdir, prefix, counter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
 			filename.c_str());
 		unlink(filename.c_str());

@@ -42,6 +42,36 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images,
 };
 
 /**
+ * \brief Clamp an image
+ */
+class Clamper {
+	double minvalue;
+	double maxvalue;
+public:
+	Clamper(double minvalue, double maxvalue);
+	void	operator()(astro::image::ImagePtr& image) const;
+};
+
+/**
+ * \brief Strech an image
+ */
+class Stretcher {
+public:
+	Stretcher();
+	void	operator()(astro::image::ImagePtr& image) const;
+};
+
+/**
+ * \brief Correct dark correction
+ */
+class DarkCorrector  {
+	const astro::image::ImagePtr&	dark;
+public:
+	DarkCorrector(const astro::image::ImagePtr& dark);
+	void	operator()(astro::image::ImagePtr& image) const;
+};
+
+/**
  * \brief Calibrate using a dark frame and a flat frame
  */
 class Calibrator {

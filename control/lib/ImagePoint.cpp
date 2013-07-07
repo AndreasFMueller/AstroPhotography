@@ -5,6 +5,7 @@
  * $Id$
  */
 #include <AstroImage.h>
+#include <Format.h>
 
 namespace astro {
 namespace image {
@@ -34,6 +35,13 @@ ImagePoint	ImagePoint::operator+(const ImagePoint& other) const {
  */
 ImagePoint	ImagePoint::operator-(const ImagePoint& other) const {
 	return ImagePoint(x - other.x, y - other.y);
+}
+
+/**
+ * \brief String representation
+ */
+std::string	ImagePoint::toString() const {
+	return stringprintf("(%d,%d)", x, y);
 }
 
 } // namespace image

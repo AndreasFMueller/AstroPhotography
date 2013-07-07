@@ -5,6 +5,7 @@
  * $Id$
  */
 #include <AstroImage.h>
+#include <Format.h>
 
 namespace astro {
 namespace image {
@@ -94,6 +95,13 @@ bool	ImageSize::contains(unsigned int x, unsigned int y) const {
  */
 int	ImageSize::chi(unsigned int x, unsigned int y) const {
 	return contains(x, y) ? 1 : 0;
+}
+
+/**
+ * \brief String representation
+ */
+std::string	ImageSize::toString() const {
+	return stringprintf("%dx%d", width, height);
 }
 
 } // namespace image

@@ -15,6 +15,17 @@ using namespace astro::image;
 
 namespace astro {
 
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ options ] darkimages"
+		<< std::endl;
+	std::cout <<"Computes a consolidated dark image from a set of images"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "  -d             increase debug level" << std::endl;
+	std::cout << "  -o outfile     filename of the output dark image"
+		<< std::endl;
+}
+
 /**
  * \brief Main function for makedark tool 
  *
@@ -35,8 +46,10 @@ int	main(int argc, char *argv[]) {
 		}
 
 	if (argc <= optind) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no images specified");
+		std::string	msg("no images specified");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		std::cerr << "no image file arguments specified" << std::endl;
+		throw std::runtime_error(msg);
 	}
 
 	ImageSequence	images;

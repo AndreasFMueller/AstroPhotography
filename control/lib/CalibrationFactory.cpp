@@ -9,6 +9,7 @@
 #include <debug.h>
 #include <stdexcept>
 #include <vector>
+#include <Format.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -569,12 +570,163 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 	return ImagePtr(result);
 }
 
+//////////////////////////////////////////////////////////////////////
+// Clamp images to a given range
+//////////////////////////////////////////////////////////////////////
+Clamper::Clamper(double _minvalue, double _maxvalue)
+	: minvalue(_minvalue), maxvalue(_maxvalue) {
+}
+
+template<typename P>
+void	do_clamp(Image<P>& image, double minvalue, double maxvalue) {
+	for (size_t offset = 0; offset < image.size.pixels; offset++) {
+		P	value = image.pixels[offset];
+		// skip indefined pixels
+		if (value != value) {
+			continue;
+		}
+		if (value < minvalue) {
+			value = minvalue;
+		}
+		if (value > maxvalue) {
+			value = maxvalue;
+		}
+		image.pixels[offset] = value;
+	}
+}
+
+#define	do_clamp_typed(P)						\
+{									\
+	Image<P>	*timage = dynamic_cast<Image<P> *>(&*image);	\
+	if (NULL != timage) {						\
+		do_clamp(*timage, minvalue, maxvalue);			\
+		return;							\
+	}								\
+}
+
+void	Clamper::operator()(ImagePtr& image) const {
+	do_clamp_typed(unsigned char);
+	do_clamp_typed(unsigned short);
+	do_clamp_typed(unsigned int);
+	do_clamp_typed(unsigned long);
+	do_clamp_typed(float);
+	do_clamp_typed(double);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Type dark correctors
+//
+// Dark correction can be applied to any type of image, with varying
+// primitive pixel types. These templates perform dark correction
+// based on the various possible pixel types
+//////////////////////////////////////////////////////////////////////
+template<typename ImagePixelType, typename DarkPixelType>
+void	dark_correct(Image<ImagePixelType>& image,
+		const Image<DarkPixelType>& dark) {
+	// first check that image sizes match
+	if (image.size != dark.size) {
+		std::string	msg = stringprintf("size: image %s != dark %s",
+			image.size.toString().c_str(),
+			dark.size.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// correct all pixels
+	for (size_t offset = 0; offset < image.size.pixels; offset++) {
+		ImagePixelType	ip = image.pixels[offset];
+		// skip NaN pixels
+		if (ip != ip) {
+			continue;
+		}
+		DarkPixelType	dp = dark.pixels[offset];
+		// turn off (make nan) pixels that are marked nan in the dark
+		if (dp != dp) {
+			ip = 0;
+		} else {
+			if (ip > dp) {
+				ip = ip - dp;
+			} else {
+				ip = 0;
+			}
+		}
+		image.pixels[offset] = ip;
+	}
+}
+
+#define	dark_correct_for(T)						\
+{									\
+	Image<T>	*timage	= dynamic_cast<Image<T> *>(&*image);	\
+	if (NULL != timage) {						\
+		dark_correct(*timage, dark);				\
+		return;							\
+	}								\
+}
+
+template<typename DarkPixelType>
+void	dark_correct_typed(ImagePtr& image,
+		const Image<DarkPixelType>& dark) {
+	dark_correct_for(unsigned char);
+	dark_correct_for(unsigned short);
+	dark_correct_for(unsigned int);
+	dark_correct_for(unsigned long);
+	dark_correct_for(double);
+	dark_correct_for(float);
+}
+
+//////////////////////////////////////////////////////////////////////
+// DarkCorrector implementation
+//////////////////////////////////////////////////////////////////////
+DarkCorrector::DarkCorrector(const ImagePtr& _dark) : dark(_dark) {
+	// We want dark images to be of float or double type
+	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
+	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
+	if ((NULL != fp) || (NULL != dp)) {
+		return;
+	}
+	std::string	msg("dark image must be of floating point type");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
+ * \brief perform dark correction
+ *
+ * Subtract the dark image from the argument image. This is done in place,
+ * as most quite, the uncorrected image is no longer needed. If a new image
+ * is required, first create the new image, then apply the dark corrector in
+ * place.
+ * \param image     image to dark correct
+ */
+void	DarkCorrector::operator()(ImagePtr& image) const {
+	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
+	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
+	if (NULL != fp) {
+		dark_correct_typed<float>(image, *fp);
+		return;
+	}
+	if (NULL != dp) {
+		dark_correct_typed<double>(image, *dp);
+		return;
+	}
+	std::string	msg("dark image must be of floating point type");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
 
 //////////////////////////////////////////////////////////////////////
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
 Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
 	: dark(_dark), flat(_flat) {
+	// We want dark and flat images to be of float or double type
+	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
+	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
+	if ((fp == NULL) && (dp == NULL)) {
+		std::string	msg("dark image must be of floating point type");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 }
 
 ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
