@@ -191,28 +191,7 @@ public:
 
 private:
 	PVSequence	pvs;
-	/**
-	 * \brief Prepare internal data
-	 *
- 	 * This method is called to set up the PixelValue vectors
-	 */
-	void	setup_pv(const ImageSequence& images) {
-		// the image sequence must be consistent, or we cannot do 
-		// anything about it
-		if (!consistent(images)) {
-			throw std::runtime_error("images not consistent");
-		}
-
-		// we need access to the pixels, but we want to avoid all the
-		// time consuming dynamic casts, so we create a vector of
-		// PixelValue objects, which already do the dynamic casts
-		// in the constructor
-		ImageSequence::const_iterator i;
-		for (i = images.begin(); i != images.end(); i++) {
-			pvs.push_back(PV(*i));
-		}
-
-	}
+	void	setup_pv(const ImageSequence& images);
 public:
 
 	ImageSize	size;
@@ -231,202 +210,278 @@ public:
 	Image<T>	*var;
 
 private:
-	/**
-	 * \brief Prepare internal data for dark image compuation
-	 */
-	void	setup_images(const ImageSequence& images) {
-		// create an image of appropriate size
-		size = (*images.begin())->size;
-		image = new Image<T>(size);
-		if (enableVariance) {
-			// prepare the variance image
-			var = new Image<T>(size);
-		} else {
-			var = NULL;
-		}
-	}
-
-	/**
-	 * \brief Perform dark image computation per pixel
-	 *
-	 * Computes mean and variance (if enabled) of the pixels
-	 * at point (x,y) from all images in the image sequence.
-	 * The PixelValue objects are used for this purpose.
-	 * \param x	x-coordinate of pixel
-	 * \param y	y-coordinate of pixel
-	 */
-	void	compute(unsigned int x, unsigned int y, T darkvalue) {
-		// if the dark value is invalid, then the computed value
-		// is also invalid
-		if (darkvalue != darkvalue) {
-			image->pixel(x, y) = darkvalue;
-			var->pixel(x, y) = darkvalue;
-			return;
-		}
-
-		// perform mean (and possibly variance) computation in the
-		// case where 
-		T	m;
-		T	X = 0, X2 = 0;
-		typename std::vector<PV>::const_iterator j;
-		int	counter = 0;
-		for (j = pvs.begin(); j != pvs.end(); j++) {
-			T	v = j->pixelvalue(x, y);
-			// skip this value if it is a NaN
-			if (v != v)
-				continue;
-			X += v;
-			if (enableVariance) {
-				X2 += v * v;
-			}
-			counter++;
-		}
-		if (counter != pvs.size()) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixel values at (%d, %d): %d", x, y, counter);
-		}
-		T	EX = X / counter;
-		T	EX2 = 0;
-		if (enableVariance) {
-			EX2 = X2 / counter;
-		}
-
-		// if we don't have the variance, we leave it at that
-		if (!enableVariance) {
-			image->pixel(x, y) = EX;
-			return;
-		}
-
-		// if the variance is enabled, then we can do the computation
-		// again, and ignore not only the bad values, but also the
-		// ones that are more then 3 standard deviations away from 
-		// the mean
-		X = 0, X2 = 0;
-		counter = 0;
-		T	stddev3 = 3 * sqrt(EX2 - EX * EX);
-		if (stddev3 < 1) {
-			stddev3 = std::numeric_limits<T>::infinity();
-		}
-if (stddev3 < 1) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "EX = %f, EX2 = %f", EX, EX2);
-}
-		for (j = pvs.begin(); j != pvs.end(); j++) {
-			T	v = j->pixelvalue(x, y);
-			// skip NaNs
-			if (v != v)
-				continue;
-			// skip values that are too far off
-			if (fabs(v - EX) > stddev3) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d): skipping %f, EX = %f, stddev3 = %f", x, y, v, EX, stddev3);
-				continue;
-			}
-			X += v;
-			X2 += v * v;
-			counter++;
-		}
-
-		if (0 == counter) {
-			image->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
-			var->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
-			return;
-		}
-		EX = X / counter;
-		EX2 = X2 / counter;
-		image->pixel(x, y) = EX;
-		var->pixel(x, y) = EX2 - EX * EX;
-	}
+	void	setup_images(const ImageSequence& images);
+	void	compute(unsigned int x, unsigned int y, T darkvalue);
 
 public:
-	/**
-	 * \brief Constructor for ImageMean object
-	 *
-	 * The constructor remembers all images, sets up PixelValue objects
-	 * for them, and computes mean and variance for each point
-	 * \param images	a sequence of images
-	 * \param _enableVariance	whether or not the variance should be
-	 *				computed
- 	 */
-	ImageMean(const ImageSequence& images, bool _enableVariance = false)
-		: enableVariance(_enableVariance) {
-		// compute the PixelValue objects
-		setup_pv(images);
-
-		// allocate the images
-		setup_images(images);
-
-		// now compute mean and variance for every pixel
-		for (unsigned int x = 0; x < size.width; x++) {
-			for (unsigned int y = 0; y < size.height; y++) {
-				compute(x, y, 0);
-			}
-		}
-	}
-
-	/**
-	 * \brief Construtor for ImageMean object with dark value correction
-	 * 
-	 * Constructs an ImageMean object, but ignores pixels where the
-	 * dark image has NaN values. This allows to first construct a
-	 * map of dark pixels, which should be ignored, and then perform
-	 * the computation of the dark images ignoring the bad pixels.
- 	 */
+	ImageMean(const ImageSequence& images, bool _enableVariance = false);
 	ImageMean(const ImageSequence& images, const Image<T>& dark,
-		bool _enableVariance = false)
+		bool _enableVariance = false);
+
+	~ImageMean();
+	T	mean(const Subgrid grid = Subgrid()) const;
+	T	variance(const Subgrid grid = Subgrid()) const;
+	ImagePtr	getImagePtr();
+};
+
+/**
+ * \brief Prepare internal data for dark image compuation
+ */
+template<typename T>
+void	ImageMean<T>::setup_images(const ImageSequence& images) {
+	// create an image of appropriate size
+	size = (*images.begin())->size;
+	image = new Image<T>(size);
+	if (enableVariance) {
+		// prepare the variance image
+		var = new Image<T>(size);
+	} else {
+		var = NULL;
+	}
+}
+
+/**
+ * \brief Prepare internal data
+ *
+ * This method is called to set up the PixelValue vectors
+ */
+template<typename T>
+void	ImageMean<T>::setup_pv(const ImageSequence& images) {
+	// the image sequence must be consistent, or we cannot do 
+	// anything about it
+	if (!consistent(images)) {
+		throw std::runtime_error("images not consistent");
+	}
+
+	// we need access to the pixels, but we want to avoid all the
+	// time consuming dynamic casts, so we create a vector of
+	// PixelValue objects, which already do the dynamic casts
+	// in the constructor
+	ImageSequence::const_iterator i;
+	for (i = images.begin(); i != images.end(); i++) {
+		pvs.push_back(PV(*i));
+	}
+}
+
+/**
+ * \brief Perform dark image computation per pixel
+ *
+ * Computes mean and variance (if enabled) of the pixels
+ * at point (x,y) from all images in the image sequence.
+ * The PixelValue objects are used for this purpose.
+ * \param x	x-coordinate of pixel
+ * \param y	y-coordinate of pixel
+ */
+template<typename T>
+void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
+	// if the dark value is invalid, then the computed value
+	// is also invalid
+	if (darkvalue != darkvalue) {
+		image->pixel(x, y) = darkvalue;
+		var->pixel(x, y) = darkvalue;
+		return;
+	}
+
+	// perform mean (and possibly variance) computation in the
+	// case where 
+	T	m;
+	T	X = 0, X2 = 0;
+	typename std::vector<PV>::const_iterator j;
+	int	counter = 0;
+	for (j = pvs.begin(); j != pvs.end(); j++) {
+		T	v = j->pixelvalue(x, y);
+		// skip this value if it is a NaN
+		if (v != v)
+			continue;
+		X += v;
+		if (enableVariance) {
+			X2 += v * v;
+		}
+		counter++;
+	}
+	if (counter != pvs.size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad pixel values at (%d, %d): %d", x, y, counter);
+	}
+	T	EX = X / counter;
+	T	EX2 = 0;
+	if (enableVariance) {
+		EX2 = X2 / counter;
+	}
+
+	// if we don't have the variance, we leave it at that
+	if (!enableVariance) {
+		image->pixel(x, y) = EX;
+		return;
+	}
+
+	// if the variance is enabled, then we can do the computation
+	// again, and ignore not only the bad values, but also the
+	// ones that are more then 3 standard deviations away from 
+	// the mean
+	X = 0, X2 = 0;
+	counter = 0;
+	T	stddev3 = 3 * sqrt(EX2 - EX * EX);
+	if (stddev3 < 1) {
+		stddev3 = std::numeric_limits<T>::infinity();
+	}
+if (stddev3 < 1) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "EX = %f, EX2 = %f", EX, EX2);
+}
+	for (j = pvs.begin(); j != pvs.end(); j++) {
+		T	v = j->pixelvalue(x, y);
+		// skip NaNs
+		if (v != v)
+			continue;
+		// skip values that are too far off
+		if (fabs(v - EX) > stddev3) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d): skipping %f, EX = %f, stddev3 = %f", x, y, v, EX, stddev3);
+			continue;
+		}
+		X += v;
+		X2 += v * v;
+		counter++;
+	}
+
+	if (0 == counter) {
+		image->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
+		var->pixel(x, y) = std::numeric_limits<T>::quiet_NaN();
+		return;
+	}
+	EX = X / counter;
+	EX2 = X2 / counter;
+	image->pixel(x, y) = EX;
+	var->pixel(x, y) = EX2 - EX * EX;
+}
+
+/**
+ * \brief Constructor for ImageMean object
+ *
+ * The constructor remembers all images, sets up PixelValue objects
+ * for them, and computes mean and variance for each point
+ * \param images	a sequence of images
+ * \param _enableVariance	whether or not the variance should be
+ *				computed
+ */
+template<typename T>
+ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 		: enableVariance(_enableVariance) {
-		// compute the PixelValue objects
-		setup_pv(images);
+	// compute the PixelValue objects
+	setup_pv(images);
 
-		// allocate the images
-		setup_images(images);
+	// allocate the images
+	setup_images(images);
 
-		// now compute mean and variance for every pixel
-		for (unsigned int x = 0; x < size.width; x++) {
-			for (unsigned int y = 0; y < size.height; y++) {
-				T	darkvalue = dark.pixel(x, y);
-				compute(x, y, darkvalue);
+	// now compute mean and variance for every pixel
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			compute(x, y, 0);
+		}
+	}
+}
+
+/**
+ * \brief Construtor for ImageMean object with dark value correction
+ * 
+ * Constructs an ImageMean object, but ignores pixels where the
+ * dark image has NaN values. This allows to first construct a
+ * map of dark pixels, which should be ignored, and then perform
+ * the computation of the dark images ignoring the bad pixels.
+ */
+template<typename T>
+ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
+	bool _enableVariance) : enableVariance(_enableVariance) {
+	// compute the PixelValue objects
+	setup_pv(images);
+
+	// allocate the images
+	setup_images(images);
+
+	// now compute mean and variance for every pixel
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	darkvalue = dark.pixel(x, y);
+			compute(x, y, darkvalue);
+		}
+	}
+}
+
+template<typename T>
+ImageMean<T>::~ImageMean() {
+	if (image) {
+		delete image;
+		image = NULL;
+	}
+	if (var) {
+		delete var;
+		image = NULL;
+	}
+}
+
+/**
+ * \brief compute the mean of the result image
+ */
+template<typename T>
+T	ImageMean<T>::mean(const Subgrid grid) const {
+	Mean<T, T>	meanoperator;
+	return meanoperator(*image, grid);
+}
+
+/**
+ * \brief compute variance of the result image
+ */
+template<typename T>
+T	ImageMean<T>::variance(const Subgrid grid) const {
+	Variance<T, T>	varianceoperator;
+	return varianceoperator(*image, grid);
+}
+
+/**
+ * \brief retrieve the result image from the ImageMean object
+ *
+ * Makes the private image pointer accessible in the form of a
+ * smart pointer. This method can only be called once, as image
+ * is invalidate after the call.
+ */
+template<typename T>
+ImagePtr	ImageMean<T>::getImagePtr() {
+	ImagePtr	result(image);
+	image = NULL;
+	return result;
+}
+
+/**
+ * \brief Perform dark computation for a subgrid
+ */
+template<typename T>
+size_t	subdark(const ImageSequence&, ImageMean<T>& im,
+	const Subgrid grid) {
+	// we also need the mean of the image to decide which pixels are
+	// too far off to consider them "sane" pixels
+	T	mean = im.mean(grid);
+	T	var = im.variance(grid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f",
+		mean, var);
+
+	// now find out which pixels are bad, and mark them using NaNs.
+	// we consider pixels bad if the deviate from the mean by more
+	// than three standard deviations
+	T	stddev3 = 3 * sqrt(var);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
+	size_t	badpixelcount = 0;
+	for (unsigned int x = grid.origin.x; x < im.size.width;
+		x += grid.size.width) {
+		for (unsigned int y = grid.origin.y; y < im.size.height;
+			y += grid.size.height) {
+			if (fabs(im.image->pixel(x, y) - mean) > stddev3) {
+				im.image->pixel(x, y)
+					= std::numeric_limits<T>::quiet_NaN();
+				badpixelcount++;
 			}
 		}
 	}
-
-	~ImageMean() {
-		if (image) {
-			delete image;
-			image = NULL;
-		}
-		if (var) {
-			delete var;
-			image = NULL;
-		}
-	}
-	
-	/**
-	 * \brief compute the mean of the result image
-	 */
-	T	mean() const {
-		Mean<T, T>	meanoperator;
-		return meanoperator(*image);
-	}
-
-	/**
-	 * \brief compute variance of the result image
-	 */
-	T	variance() const {
-		Variance<T, T>	varianceoperator;
-		return varianceoperator(*image);
-	}
-
-	/**
-	 * \brief retrieve the result image from the ImageMean object
-	 *
- 	 * Makes the private image pointer accessible in the form of a
-	 * smart pointer. This method can only be called once, as image
-	 * is invalidate after the call.
-	 */
-	ImagePtr	getImagePtr() {
-		ImagePtr	result(image);
-		image = NULL;
-		return result;
-	}
-};
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u bad pixels", badpixelcount);
+	return badpixelcount;
+}
 
 /**
  * \brief Function to compute a dark image from a sequence of images
@@ -438,34 +493,29 @@ public:
  *			dark image
  */
 template<typename T>
-ImagePtr	dark(const ImageSequence& images) {
+ImagePtr	dark_plain(const ImageSequence& images) {
 	ImageMean<T>	im(images, true);
+	subdark<T>(images, im, Subgrid());
 	
-	// we also need the mean of the image to decide which pixels are
-	// too far off to consider them "sane" pixels
-	T	mean = im.mean();
-	T	var = im.variance();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f",
-		mean, var);
-
-	// now find out which pixels are bad, and mark them using NaNs.
-	// we consider pixels bad if the deviate from the mean by more
-	// than three standard deviations
-	T	stddev3 = 3 * sqrt(var);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
-	unsigned int	badpixelcount = 0;
-	for (unsigned int x = 0; x < im.size.width; x++) {
-		for (unsigned int y = 0; y < im.size.height; y++) {
-			if (fabs(im.image->pixel(x, y) - mean) > stddev3) {
-				im.image->pixel(x, y)
-					= std::numeric_limits<T>::quiet_NaN();
-				badpixelcount++;
-			}
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u bad pixels", badpixelcount);
-
 	// that's it, we now have a dark image
+	return im.getImagePtr();
+}
+
+template<typename T>
+ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
+	if (!gridded) {
+		return dark_plain<T>(images);
+	}
+
+	ImageMean<T>	im(images, true);
+	// perform the dark computation for each individual subgrid
+	size_t	badpixels = 0;
+	ImageSize	size(2, 2);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), size));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), size));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), size));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), size));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	return im.getImagePtr();
 }
 
@@ -473,10 +523,12 @@ ImagePtr	dark(const ImageSequence& images) {
  * \brief Dark image construction function for arbitrary image sequences
  */
 ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
+	// XXX find out whether this is a Bayer image
+	bool	gridded = true;
 	if ((*images.begin())->bitsPerPixel() <= std::numeric_limits<float>::digits) {
-		return dark<float>(images);
+		return dark<float>(images, gridded);
 	}
-	return dark<double>(images);
+	return dark<double>(images, gridded);
 }
 
 /**

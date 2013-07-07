@@ -36,6 +36,7 @@ void	usage(const char *progname) {
 int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
+	bool	gridded = false;
 	while (EOF != (c = getopt(argc, argv, "do:")))
 		switch (c) {
 		case 'd':

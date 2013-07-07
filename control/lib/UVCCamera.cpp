@@ -379,7 +379,8 @@ void	UVCCamera::setExposureTime(double exposuretime) {
 			setCurrent(exptime);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %f", exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time set to %fs",
+		exposuretime);
 }
 
 /**

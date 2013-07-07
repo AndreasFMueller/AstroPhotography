@@ -13,6 +13,9 @@
 #include <debug.h>
 #include <AstroDemosaic.h>
 
+extern double	default_exposuretime;
+extern int	default_ccdid;
+
 using namespace astro::camera::uvc;
 using namespace astro::image;
 using namespace astro::io;
@@ -75,18 +78,20 @@ void	uvctest::testCamera() {
 void	uvctest::testCcd() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCcd");
 	CameraPtr	camera = locator->getCamera(0);
-	CcdPtr	ccd = camera->getCcd(0);
+	CcdPtr	ccd = camera->getCcd(default_ccdid);
 	std::cout << ccd->getInfo() << std::endl; 
 }
 
 void	uvctest::testExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the first camera device");
 	CameraPtr	camera = locator->getCamera(0);
-	int	ccdindex = 2;
+	int	ccdindex = default_ccdid;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the CCD no %d", ccdindex);
 	CcdPtr	ccd = camera->getCcd(ccdindex);
-	Exposure	exposure(ccd->getInfo().getFrame(), 60);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure");
+	Exposure	exposure(ccd->getInfo().getFrame(),
+		default_exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start an exposure: %s",
+		exposure.toString().c_str());
 	ccd->startExposure(exposure);
 	ccd->exposureStatus();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve an image");

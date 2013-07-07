@@ -32,7 +32,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -p prefix      prefix of captured image files"
 		<< std::endl;
-	std::cout << " -t outputdir      outputdir directory" << std::endl;
+	std::cout << " -o outputdir      outputdir directory" << std::endl;
 	std::cout << " -m modulename  driver modue name, type of the camera"
 		<< std::endl;
 	std::cout << " -C cameraid    camera number (default 0)"

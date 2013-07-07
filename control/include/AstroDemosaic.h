@@ -37,6 +37,8 @@ public:
 template<typename T>
 Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 	Image<RGB<T> >	*result = new Image<RGB<T> >(image.size);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "result RGB image %s created",
+		result->size.toString().c_str());
 	unsigned int	redx =  image.mosaic       & 0x1;
 	unsigned int	redy = (image.mosaic >> 1) & 0x1;
 	unsigned int	bluex = 0x1 ^ redx;
@@ -50,6 +52,7 @@ Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 			result->pixel(x, y).B = 0;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image initialized to black");
 
 	// now set the pixels from the mosaic
 	for (unsigned int x = 0; x < image.size.width; x += 2) {
@@ -64,6 +67,8 @@ Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 				= image.pixel(x + bluex, y + redy);
 		}
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "color planes separated");
 	return result;
 }
 
@@ -229,14 +234,18 @@ Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
 	bluey = 0x1 ^ redy;
 	
 	// fill in the green pixels
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate green pixels");
 	green(result, image);
 
 	// fill in the red pixels
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate red pixels");
 	red(result, image);
 
 	// fill in the blue pixels
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate blue pixels");
 	blue(result, image);
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolation complete");
 	return result;
 }
 
