@@ -6,6 +6,7 @@
  */
 #include <AstroIO.h>
 #include <fitsio.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -66,7 +67,10 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 		throw FITSexception(errormsg(status));
 	}
 	imgtype = igt;
-std::cerr << "parameters read: imgtype = " << imgtype << ", naxis = " << naxis << ", naxes = " << naxes[0] << "," << naxes[1] << "," << naxes[2] << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "params read: imgtype = %d", imgtype);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "             naxis = %d", naxis);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "             naxes[] = [%d,%d,%d]",
+		naxes[0], naxes[1], naxes[2]);
 	switch (naxis) {
 	case 2:
 		planes = 1;
@@ -96,7 +100,8 @@ std::cerr << "parameters read: imgtype = " << imgtype << ", naxis = " << naxis <
  */
 void	*FITSinfileBase::readdata() throw (FITSexception) {
 	int	typesize = 0;
-std::cerr << "reading an image with image type " << imgtype << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading an image with image type %d",
+		imgtype);
 	switch (imgtype) {
 	case BYTE_IMG:
 	case SBYTE_IMG:
@@ -122,15 +127,14 @@ std::cerr << "reading an image with image type " << imgtype << std::endl;
 			pixeltype = TDOUBLE;
 			break;
 	default:
-		std::cerr << "unknown pixel type " << imgtype << std::endl;
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown pixel type %d", imgtype);
 		throw FITSexception("cannot read this pixel type");
 		break;
 	}
 	void	*v = calloc(planes * size.pixels, typesize);
-	std::cerr << "fits data size: " << (size.pixels * planes)
-		<< " items of size " << typesize
-		<< " pixel type " << pixeltype
-		<< " planes " << planes << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size: %d items of size %d, "
+		"pixel type %d, %d planes", (size.pixels * planes), typesize,
+		pixeltype, planes);
 	
 	/* now read the data */
 	int	status = 0;
@@ -140,7 +144,7 @@ std::cerr << "reading an image with image type " << imgtype << std::endl;
 		free(v);
 		throw FITSexception(errormsg(status));
 	}
-	std::cerr << "fits data read" << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fits data read");
 	return v;
 }
 
@@ -179,7 +183,8 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 		if (fits_read_keyn(fptr, keynum, keyname, value, comment,
 			&status)) {
 			// we are at the end of the headers, so we return
-			std::cerr << "headers read: " << keynum << std::endl;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d headers read",
+				keynum);
 			return;
 		}
 		FITShdu	hdu;		
@@ -188,8 +193,9 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 			hdu.value = value;
 			hdu.comment = comment;
 			headers.insert(make_pair(hdu.name, hdu));
-			std::cerr << hdu.name << "=" << hdu.value
-				<< "/" << hdu.comment << std::endl;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
+				hdu.name.c_str(), hdu.value.c_str(),
+				hdu.comment.c_str());
 		}
 		keynum++;
 	}
