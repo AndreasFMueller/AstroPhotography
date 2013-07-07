@@ -5,6 +5,7 @@
  */
 #include <AstroCalibration.h>
 #include <AstroFilter.h>
+#include <PixelValue.h>
 #include <limits>
 #include <debug.h>
 #include <stdexcept>
@@ -56,122 +57,6 @@ ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence& images) const 
 	debug(LOG_ERR, DEBUG_LOG, 0, "base class factory method called, "
 		"probably an error");
 	return ImagePtr();
-}
-
-/**
- * \brief Adapter class for picture values of an ImagePtr
- *
- * This class allows access to the pixels of an image with primitive
- * pixel types, and performs an implicit type conversion to the type
- * we want to use in the calibration image computation.
- */
-template<typename T>
-class ConstPixelValue {
-	const Image<unsigned char>	*byteimage;
-	const Image<unsigned short>	*shortimage;
-	const Image<unsigned int>	*intimage;
-	const Image<unsigned long>	*longimage;
-	const Image<float>	*floatimage;
-	const Image<double>	*doubleimage;
-public:
-	ConstPixelValue(const ImagePtr& image);
-	T	pixelvalue(unsigned int x, unsigned int y) const;
-};
-
-/**
- * \brief Constructor
- */
-template<typename T>
-ConstPixelValue<T>::ConstPixelValue(const ImagePtr& image) {
-	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
-	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
-	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
-	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
-	floatimage = dynamic_cast<Image<float> *>(&*image);
-	doubleimage = dynamic_cast<Image<double> *>(&*image);
-	if ((NULL == byteimage) &&
-	    (NULL == shortimage) &&
-	    (NULL == intimage) &&
-	    (NULL == longimage) &&
-	    (NULL == floatimage) &&
-	    (NULL == doubleimage)) {
-		throw std::runtime_error("pixel type not primitive");
-	}
-}
-
-/**
- * \brief Accessor to pixel value with implicit type conversion
- *
- * This method retrieves the pixel at point (x,y) and converts its
- * value to type T. If the conversion is not possible, a NaN is returned,
- * if available, or an exception thrown otherwise. Usually, calibration
- * images will be created with float or double types, so the exception
- * is not an issue.
- * \param x	x-coordinate of pixel
- * \param y	y-coordinate of pixel
- */
-template<typename T>
-T	ConstPixelValue<T>::pixelvalue(unsigned int x, unsigned int y) const {
-	if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
-	if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
-	if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
-	if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
-	if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
-	if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
-	if (std::numeric_limits<T>::has_quiet_NaN) {
-		return std::numeric_limits<T>::quiet_NaN();
-	}
-	throw std::runtime_error("NaN not available");
-}
-
-/**
- * \brief Access to pixel values
- *
- * This
- */
-template<typename T>
-class PixelValue {
-	Image<unsigned char>	*byteimage;
-	Image<unsigned short>	*shortimage;
-	Image<unsigned int>	*intimage;
-	Image<unsigned long>	*longimage;
-	Image<float>	*floatimage;
-	Image<double>	*doubleimage;
-public:
-	PixelValue(ImagePtr& image);
-	T	pixelvalue(unsigned int x, unsigned int y);
-};
-
-template<typename T>
-PixelValue<T>::PixelValue(ImagePtr& image) {
-	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
-	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
-	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
-	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
-	floatimage = dynamic_cast<Image<float> *>(&*image);
-	doubleimage = dynamic_cast<Image<double> *>(&*image);
-	if ((NULL == byteimage) &&
-	    (NULL == shortimage) &&
-	    (NULL == intimage) &&
-	    (NULL == longimage) &&
-	    (NULL == floatimage) &&
-	    (NULL == doubleimage)) {
-		throw std::runtime_error("pixel type not primitive");
-	}
-}
-
-template<typename T>
-T	PixelValue<T>::pixelvalue(unsigned int x, unsigned int y) {
-	if (byteimage) {   return byteimage->pixelvalue<T>(x, y);   }
-	if (shortimage) {  return shortimage->pixelvalue<T>(x, y);  }
-	if (intimage) {    return intimage->pixelvalue<T>(x, y);    }
-	if (longimage) {   return longimage->pixelvalue<T>(x, y);   }
-	if (floatimage) {  return floatimage->pixelvalue<T>(x, y);  }
-	if (doubleimage) { return doubleimage->pixelvalue<T>(x, y); }
-	if (std::numeric_limits<T>::has_quiet_NaN) {
-		return std::numeric_limits<T>::quiet_NaN();
-	}
-	throw std::runtime_error("NaN not available");
 }
 
 /**
@@ -623,49 +508,6 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Clamp images to a given range
-//////////////////////////////////////////////////////////////////////
-Clamper::Clamper(double _minvalue, double _maxvalue)
-	: minvalue(_minvalue), maxvalue(_maxvalue) {
-}
-
-template<typename P>
-void	do_clamp(Image<P>& image, double minvalue, double maxvalue) {
-	for (size_t offset = 0; offset < image.size.pixels; offset++) {
-		P	value = image.pixels[offset];
-		// skip indefined pixels
-		if (value != value) {
-			continue;
-		}
-		if (value < minvalue) {
-			value = minvalue;
-		}
-		if (value > maxvalue) {
-			value = maxvalue;
-		}
-		image.pixels[offset] = value;
-	}
-}
-
-#define	do_clamp_typed(P)						\
-{									\
-	Image<P>	*timage = dynamic_cast<Image<P> *>(&*image);	\
-	if (NULL != timage) {						\
-		do_clamp(*timage, minvalue, maxvalue);			\
-		return;							\
-	}								\
-}
-
-void	Clamper::operator()(ImagePtr& image) const {
-	do_clamp_typed(unsigned char);
-	do_clamp_typed(unsigned short);
-	do_clamp_typed(unsigned int);
-	do_clamp_typed(unsigned long);
-	do_clamp_typed(float);
-	do_clamp_typed(double);
-}
-
-//////////////////////////////////////////////////////////////////////
 // Type dark correctors
 //
 // Dark correction can be applied to any type of image, with varying
@@ -724,6 +566,9 @@ void	dark_correct_typed(ImagePtr& image,
 	dark_correct_for(unsigned long);
 	dark_correct_for(double);
 	dark_correct_for(float);
+	std::string	msg("dark correction only for primitive types");
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -788,80 +633,6 @@ ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
 	}
 	TypedCalibrator<double>	calibrator(dark, flat);
 	return calibrator(image);
-}
-
-//////////////////////////////////////////////////////////////////////
-// TypedInterpolator implementation
-//////////////////////////////////////////////////////////////////////
-template<typename T>
-class TypedInterpolator {
-	const Image<T>&	dark;
-protected:
-	virtual void	interpolatePixel(unsigned int x, unsigned int y,
-				ImagePtr& image);
-	PixelValue<T>	*pv;
-	T	nan;
-public:
-	TypedInterpolator(const Image<T>& _dark);
-	void	interpolate(ImagePtr& image);
-};
-
-template<typename T>
-void	TypedInterpolator<T>::interpolatePixel(unsigned int x, unsigned int y,
-		ImagePtr& image) {
-	// XXX interpolation missing
-}
-
-template<typename T>
-TypedInterpolator<T>::TypedInterpolator(const Image<T>& _dark) : dark(_dark) {
-	nan = std::numeric_limits<T>::quiet_NaN();
-}
-
-template<typename T>
-void	TypedInterpolator<T>::interpolate(ImagePtr& image) {
-	// make sure the image sizes match
-	if (image->size != dark.size) {
-		throw std::range_error("image sizes don't match");
-	}
-	pv = new PixelValue<T>(image);
-	for (unsigned int x = 0; x < dark.size.width; x++) {
-		for (unsigned int y = 0; y < dark.size.height; y++) {
-			if (dark.pixel(x, y) != dark.pixel(x, y)) {
-				interpolatePixel(x, y, image);
-			}
-		}
-	}
-	delete pv;
-}
-
-//////////////////////////////////////////////////////////////////////
-// Interpolator implementation
-//////////////////////////////////////////////////////////////////////
-Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
-	floatdark = dynamic_cast<Image<float> *>(&*dark);
-	doubledark = dynamic_cast<Image<double> *>(&*dark);
-	if ((NULL == floatdark) && (NULL == doubledark)) {
-		throw std::runtime_error("only float or double images are suitable as darks");
-	}
-}
-
-void	Interpolator::interpolate(ImagePtr& image) {
-	if (floatdark) {
-		TypedInterpolator<float>	tint(*floatdark);
-		tint.interpolate(image);
-		return;
-	}
-	if (doubledark) {
-		TypedInterpolator<double>	tint(*doubledark);
-		tint.interpolate(image);
-		return;
-	}
-}
-
-ImagePtr	Interpolator::operator()(const ImagePtr& image) {
-	ImagePtr	imagecopy;
-	interpolate(imagecopy);
-	return imagecopy;
 }
 
 } // calibration

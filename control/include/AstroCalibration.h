@@ -83,19 +83,6 @@ public:
 	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image) const;
 };
 
-/**
- * \brief Using a dark image, interpolate bad pixelsin an image
- */
-class Interpolator {
-	const astro::image::ImagePtr& dark;
-	astro::image::Image<float>	*floatdark;
-	astro::image::Image<double>	*doubledark;
-public:
-	Interpolator(const astro::image::ImagePtr& dark);
-	void	interpolate(astro::image::ImagePtr& image);
-	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image);
-};
-
 } // namespace calibration
 } // namespace astro
 

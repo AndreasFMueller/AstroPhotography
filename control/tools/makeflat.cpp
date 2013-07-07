@@ -1,4 +1,3 @@
-
 /*
  * makeflat.cpp -- create a flat frame from a set of FITS images
  *

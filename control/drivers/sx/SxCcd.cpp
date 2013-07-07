@@ -7,12 +7,14 @@
 #include <AstroCamera.h>
 #include <AstroImage.h>
 #include <AstroFilter.h>
+#include <AstroOperators.h>
 #include <sx.h>
 #include <debug.h>
 #include <SxUtils.h>
 
 using namespace astro::camera;
 using namespace astro::image::filter;
+using namespace astro::image::operators;
 
 namespace astro {
 namespace camera {

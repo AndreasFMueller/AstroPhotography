@@ -7,9 +7,11 @@
 #include <debug.h>
 #include <UvcUtils.h>
 #include <AstroFilter.h>
+#include <AstroOperators.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
+using namespace astro::image::operators;
 
 namespace astro {
 namespace camera {

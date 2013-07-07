@@ -6,6 +6,7 @@
  */
 #include <AstroImage.h>
 #include <AstroFilter.h>
+#include <AstroOperators.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -13,6 +14,7 @@
 
 using namespace astro::image;
 using namespace astro::image::filter;
+using namespace astro::image::operators;
 
 namespace astro {
 namespace test {
