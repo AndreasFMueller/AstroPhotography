@@ -22,6 +22,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d             increase debug level" << std::endl;
+	std::cout << "  -h, -?         show this help message" << std::endl;
 	std::cout << "  -o outfile     filename of the output dark image"
 		<< std::endl;
 }
@@ -42,6 +43,11 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'o':
 			outfilename = optarg;
+			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 			break;
 		}
 
