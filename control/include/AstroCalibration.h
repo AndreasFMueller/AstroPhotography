@@ -72,6 +72,16 @@ public:
 };
 
 /**
+ * \brief Perform flat correction
+ */
+class FlatCorrector {
+	const astro::image::ImagePtr&	flat;
+public:
+	FlatCorrector(const astro::image::ImagePtr& flat);
+	void	operator()(astro::image::ImagePtr& image) const;
+};
+
+/**
  * \brief Calibrate using a dark frame and a flat frame
  */
 class Calibrator {

@@ -249,6 +249,8 @@ Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
 	return result;
 }
 
+ImagePtr	demosaic_bilinear(const ImagePtr& image);
+
 } // namespace image
 } // namespace astro
 

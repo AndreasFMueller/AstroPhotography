@@ -10,6 +10,7 @@
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
+#include <AstroDemosaic.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -45,9 +46,10 @@ int	main(int argc, char *argv[]) {
 	const char	*flatfilename = NULL;
 	double	minvalue = -1;
 	double	maxvalue = -1;
+	bool	demosaic = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:")))
+	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:b")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -63,6 +65,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'M':
 			maxvalue = atof(optarg);
+			break;
+		case 'b':
+			demosaic = true;
 			break;
 		case '?':
 		case 'h':
@@ -95,6 +100,16 @@ int	main(int argc, char *argv[]) {
 		corrector(image);
 	}
 
+	// if we have a flat file, we perform flat correction
+	if (NULL != flatfilename) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flat correction: %s",
+			flatfilename);
+		FITSin	flatin(flatfilename);
+		ImagePtr	flat = flatin.read();
+		FlatCorrector	corrector(flat);
+		corrector(image);
+	}
+
 	// if minvalue or maxvalue are set, clamp the image values
 	if ((minvalue >= 0) || (maxvalue >= 0)) {
 		if (minvalue < 0) {
@@ -110,7 +125,14 @@ int	main(int argc, char *argv[]) {
 	// after all the calibrations have been performed, write the output
 	// file
 	FITSout	outfile(outfilename);
-	outfile.write(image);
+
+	// if demosaic is requested we do that now
+	if (demosaic) {
+		ImagePtr	demosaiced = demosaic_bilinear(image);
+		outfile.write(demosaiced);
+	} else {
+		outfile.write(image);
+	}
 
 	// that's it
 	return EXIT_SUCCESS;

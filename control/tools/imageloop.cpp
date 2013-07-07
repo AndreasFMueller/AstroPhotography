@@ -185,7 +185,7 @@ int	main(int argc, char *argv[]) {
 		// compute the next exposure time, for this we need the
 		// mean of the pixel values
 		if (targetmean != 0) {
-			double	mnew = median(image);
+			double	mnew = mean(image);
 			double	newexp = exposuretime * scalefactor(targetmean / mnew);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
 				"actual mean = %f, current exposure time = %f, "
