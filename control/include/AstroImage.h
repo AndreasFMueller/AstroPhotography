@@ -14,6 +14,7 @@
 #include <AstroPixel.h>
 #include <limits>
 #include <vector>
+#include <debug.h>
 
 namespace astro {
 namespace image {
@@ -291,6 +292,8 @@ public:
 			pixels = p;
 		} else {
 			pixels = new Pixel[size.pixels];
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
+				size.pixels, pixels);
 		}
 	}
 
@@ -312,6 +315,8 @@ public:
 			pixels = p;
 		} else {
 			pixels = new Pixel[size.pixels];
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
+				size.pixels, pixels);
 		}
 	}
 
@@ -323,6 +328,8 @@ public:
 	template<typename srcPixel>
 	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size) {
 		pixels = new Pixel[size.pixels];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
+			size.pixels, pixels);
 		convertPixelArray(pixels, other.pixels, size.pixels);
 	}
 
@@ -341,6 +348,8 @@ public:
 	 */
 	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p) {
 		pixels = new Pixel[size.pixels];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
+			size.pixels, pixels);
 		std::copy(p.pixels, p.pixels + size.pixels, pixels);
 	}
 
@@ -354,6 +363,8 @@ public:
 		if (!(other.size == size)) {
 			throw std::length_error("image frame mismatch");
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
+			other.pixels, pixels);
 		std::copy(other.pixels, other.pixels + other.size.pixels, pixels);
 	}
 
@@ -361,7 +372,8 @@ public:
 	 * \brief Destroy the image, deallocating the pixel array
 	 */
 	virtual	~Image() {
-		delete pixels;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delete pixels at %p", pixels);
+		delete[] pixels;
 	}
 
 	/**
