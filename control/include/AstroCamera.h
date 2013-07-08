@@ -83,6 +83,8 @@ public:
 		idle, exposing, exposed, cancelling
 	} State;
 	virtual std::string	toString() const;
+
+	void	addToImage(astro::image::ImageBase& image) const;
 };
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
@@ -180,6 +182,11 @@ public:
 
 	// handling the cooler
 	virtual CoolerPtr	getCooler() throw (not_implemented);
+
+	// methods related to metadata
+	virtual void	addExposureMetadata(astro::image::ImageBase& image) const;
+	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
+	virtual void	addMetadata(astro::image::ImageBase& image);
 };
 typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
 
@@ -234,6 +241,7 @@ public:
 	virtual void	setTemperature(const float temperature);
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
+	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
 };
 
 /**

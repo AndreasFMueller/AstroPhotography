@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -52,15 +53,18 @@ void	ImageTest::tearDown() {
 }
 
 void	ImageTest::testByteImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testByteImage() begin");
 	for (unsigned int x = 47; x < 100; x += 11) {
 		for (unsigned int y = 18; y < 88; y += 13) {
 			unsigned char	value = (x + y * 640) % 160;
 			CPPUNIT_ASSERT(value == image->pixel(x, y));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testByteImage() end");
 }
 
 void	ImageTest::testCopyByteImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCopyByteImage() begin");
 	Image<unsigned char>	image2 = *image;
 	for (unsigned int x = 47; x < 100; x += 11) {
 		for (unsigned int y = 18; y < 88; y += 13) {
@@ -68,9 +72,11 @@ void	ImageTest::testCopyByteImage() {
 			CPPUNIT_ASSERT(value == image2.pixel(x, y));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCopyByteImage() end");
 }
 
 void	ImageTest::testYUYVImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYVImage() begin");
 	// test the conversion of an individual pixel
 	YUYV<unsigned char>	p((unsigned char)47, 11);
 	unsigned char	v;
@@ -88,9 +94,11 @@ void	ImageTest::testYUYVImage() {
 	CPPUNIT_ASSERT(image3 == *image);
 	image3.pixel(14,15) = 1;
 	CPPUNIT_ASSERT(!(image3 == *image));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYVImage() end");
 }
 
 void	ImageTest::testShortImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShortImage() begin");
 	Image<unsigned short>	image2(640, 480);
 	convertImage(image2, *image);
 	CPPUNIT_ASSERT(image2.pixel(13, 15) == ((13 + 15 * 640) % 160) * 256);
@@ -99,9 +107,11 @@ void	ImageTest::testShortImage() {
 	CPPUNIT_ASSERT(image3 == *image);
 	image3.pixel(14, 15) = 1;
 	CPPUNIT_ASSERT(!(image3 == *image));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShortImage() end");
 }
 
 void	ImageTest::testSubimage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubimage() begin");
 	ImageSize	size(10, 12);
 	ImagePoint	origin(5, 9);
 	ImageRectangle	frame(origin, size);
@@ -115,9 +125,11 @@ void	ImageTest::testSubimage() {
 			CPPUNIT_ASSERT(v2 == v3);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubimage() end");
 }
 
 void	ImageTest::testIterator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
 	Image<unsigned char>::row	row(*image, 7);
 	Image<unsigned char>::iterator	i = row.begin();
 	int	counter = 0;
@@ -128,6 +140,7 @@ void	ImageTest::testIterator() {
 		counter++;
 	}
 	CPPUNIT_ASSERT(counter == 640);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }
 
 } // namespace test

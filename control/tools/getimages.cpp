@@ -180,6 +180,10 @@ int	main(int argc, char *argv[]) {
 			outputdir, prefix, counter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
 			filename.c_str());
+		if (debuglevel >= LOG_DEBUG) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info:");
+			std::cout << *imageptr;
+		}
 		unlink(filename.c_str());
 		FITSout	out(filename);
 		out.write(*imageptr);

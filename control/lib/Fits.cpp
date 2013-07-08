@@ -154,6 +154,16 @@ const char	*ignored_keywords[IGNORED_KEYWORDS_N] = {
 	"XTENSION", "END", "BSCALE", "BZERO"
 };
 
+/**
+ * \brief Find out whether a key should be ignored
+ *
+ * The read/write functions for the key value pairs in the FITS headers
+ * only process headers that are not explicitely handled by the FITS library.
+ * Otherwise it would be impossible to keep the headers consistent.
+ * This function tells whether a header is ignored, based on the name.
+ * It uses the list of ignored_keywords defined above.
+ * \param keyname	header key name 
+ */
 static bool	ignored(const std::string& keyname) {
 	if (keyname.substr(0, 5) == "NAXIS") {
 		return true;
@@ -171,7 +181,8 @@ static bool	ignored(const std::string& keyname) {
  *
  * In the headers we only record the headers that are not managed by
  * the type stuff. I.e. the keywords SIMPLE, BITPIX, NAXIS, NAXISn, END,
- * PCOUNT, GCOUNT, XTENSION are ignored
+ * PCOUNT, GCOUNT, XTENSION are ignored, as defined in the ignored
+ * function.
  */
 void	FITSinfileBase::readkeys() throw (FITSexception) {
 	int	status = 0;
@@ -190,8 +201,9 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 		FITShdu	hdu;		
 		hdu.name = keyname;
 		if (!ignored(hdu.name)) {
-			hdu.value = value;
 			hdu.comment = comment;
+			hdu.value = value;
+			hdu.type = TSTRING;
 			headers.insert(make_pair(hdu.name, hdu));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
 				hdu.name.c_str(), hdu.value.c_str(),
@@ -202,11 +214,25 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 }
 
 /**
+ * \brief Copy the headers read from the FITS file into the Image metadata
+ */
+void	FITSinfileBase::addHeaders(ImageBase *image) const {
+	std::map<std::string, FITShdu>::const_iterator	hi;
+	for (hi = headers.begin(); hi != headers.end(); hi++) {
+		std::string	key = hi->second.name;
+		std::string	value = hi->second.value;
+		std::string	comment = hi->second.comment;
+		Metavalue	mv(hi->second.type, value, comment);
+		image->setMetadata(key, mv);
+	}
+}
+
+/**
  * \brief Create a FITS file for writing
  */
 FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 	int pixeltype, int planes, int imgtype) throw (FITSexception)
-	: FITSfile(filename, pixeltype, planes, imgtype)  {
+	: FITSfile(filename, pixeltype, planes, imgtype) {
 	int	status = 0;
 	if (fits_create_file(&fptr, filename.c_str(), &status)) {
 		throw FITSexception(errormsg(status));
@@ -223,6 +249,90 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	int	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));
+	}
+
+	// write all the additional headers we would like to have in
+	// an image
+	ImageMetadata::const_iterator	i;
+	for (i = image.begin(); i != image.end(); i++) {
+		const char	*key = i->first.c_str();
+		const char	*comment = i->second.getComment().c_str();
+		int	type = i->second.getType();
+		int	status = 0;
+		int	rc = 0;
+		std::string	value = i->second.getValue();
+		// next few variables are used as buffers for the fits_write_key
+		// function
+		int		logicalvalue;
+		char		charvalue;
+		short		shortvalue;
+		unsigned short	ushortvalue;
+		int		intvalue;
+		unsigned int	uintvalue;
+		long		longvalue;
+		unsigned long	ulongvalue;
+		float		floatvalue;
+		double		doublevalue;
+		switch (type) {
+		case TLOGICAL:
+			logicalvalue = (value[0] == 'T') ? 1 : 0;
+			rc = fits_write_key(fptr, type, key, &logicalvalue,
+				comment, &status);
+			break;
+		case TSTRING:
+			rc = fits_write_key(fptr, type, key,
+				(void *)value.c_str(),
+				comment, &status);
+			break;
+		case TBYTE:
+			charvalue = atoi(value.c_str());
+			rc = fits_write_key(fptr, type, key, &charvalue,
+				comment, &status);
+			break;
+		case TSHORT:
+			shortvalue = atoi(value.c_str());
+			rc = fits_write_key(fptr, type, key, &shortvalue,
+				comment, &status);
+			break;
+		case TUSHORT:
+			ushortvalue = atoi(value.c_str());
+			rc = fits_write_key(fptr, type, key, &ushortvalue,
+				comment, &status);
+			break;
+		case TINT:
+			intvalue = atoi(value.c_str());
+			rc = fits_write_key(fptr, type, key, &intvalue,
+				comment, &status);
+			break;
+		case TUINT:
+			uintvalue = atoi(value.c_str());
+			rc = fits_write_key(fptr, type, key, &uintvalue,
+				comment, &status);
+			break;
+		case TLONG:
+			longvalue = atol(value.c_str());
+			rc = fits_write_key(fptr, type, key, &longvalue,
+				comment, &status);
+			break;
+		case TULONG:
+			ulongvalue = atol(value.c_str());
+			rc = fits_write_key(fptr, type, key, &ulongvalue,
+				comment, &status);
+			break;
+		case TFLOAT:
+			floatvalue = strtof(value.c_str(), NULL);
+			rc = fits_write_key(fptr, type, key, &floatvalue,
+				comment, &status);
+			break;
+		case TDOUBLE:
+			doublevalue = strtod(value.c_str(), NULL);
+			rc = fits_write_key(fptr, type, key, &doublevalue,
+				comment, &status);
+			break;
+		}
+		if (rc) {
+			throw FITSexception(errormsg(status));
+		}
 	}
 }
 

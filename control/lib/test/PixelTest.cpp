@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -52,6 +53,7 @@ void	PixelTest::tearDown() {
 }
 
 void	PixelTest::testMonochrome() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMonochrome() begin");
 	unsigned short	us = 65535;
 	unsigned char	uc;
 	convertPixelValue(uc, us);
@@ -83,9 +85,11 @@ void	PixelTest::testMonochrome() {
 	convertPixelValue(ui, ll);
 	convertPixelValue(ll, ui);
 	CPPUNIT_ASSERT(0x1122334400000000 == ll);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMonochrome() end");
 }
 
 void	PixelTest::testMono2RGB() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMono2RGB() begin");
 	RGB<unsigned short>	r;
 	unsigned int	ui = 0x12345678;
 	unsigned int	ui2;
@@ -95,9 +99,11 @@ void	PixelTest::testMono2RGB() {
 	CPPUNIT_ASSERT(r.R == 0x1234);
 	CPPUNIT_ASSERT(r.G == 0x1234);
 	CPPUNIT_ASSERT(r.B == 0x1234);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMono2RGB() end");
 }
 
 void	PixelTest::testRGB2Mono() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2Mono() begin");
 	RGB<unsigned short>	r;
 	r.R = 4711;
 	r.G = 4711;
@@ -105,37 +111,47 @@ void	PixelTest::testRGB2Mono() {
 	unsigned short	v;
 	convertPixel(v, r);
 	CPPUNIT_ASSERT(v == 4711);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2Mono() end");
 }
 
 void	PixelTest::testYUYV2RGB() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYV2RGB() begin");
 	RGB<unsigned short>	r[2];
 	YUYV<unsigned short>	y[2];
 	convertPixelPair(y, r);
 	convertPixelArray(y, r, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYV2RGB() end");
 }
 
 void	PixelTest::testRGB2YUYV() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2YUYV() begin");
 	YUYV<unsigned short>	y[2];
 	RGB<unsigned short>	r[2];
 	convertPixelPair(r, y);
 	convertPixelArray(r, y, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2YUYV() end");
 }
 
 void	PixelTest::testYUYV2RGBfloat() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYV2RGBfloat() begin");
 	RGB<float>	r[2];
 	YUYV<float>	y[2];
 	convertPixelPair(y, r);
 	convertPixelArray(y, r, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testYUYV2RGBfloat() end");
 }
 
 void	PixelTest::testRGB2YUYVfloat() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2YUYVfloat() begin");
 	YUYV<float>	y[2];
 	RGB<float>	r[2];
 	convertPixelPair(r, y);
 	convertPixelArray(r, y, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGB2YUYVfloat() end");
 }
 
 void	PixelTest::testCharAndShort() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCharAndShort() begin");
 	unsigned char	c1 = 16;
 	unsigned short	s1;
 	convertPixel(s1, c1);
@@ -153,9 +169,11 @@ void	PixelTest::testCharAndShort() {
 	convertPixel(c3, s2);
 	CPPUNIT_ASSERT(c3 == c2);
 	//std::cerr << "c2 = " << (int)c2 << ", c3 = " << (int)c3 << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCharAndShort() end");
 }
 
 void	PixelTest::testConversionParameters() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConversionParameters() begin");
 
 #define	COLOR_ASSERTS(T, P)						\
 	CPPUNIT_ASSERT(Color<T>::pedestal == (((P)16) << ((sizeof(P) - 1) << 3))); \
@@ -168,6 +186,7 @@ void	PixelTest::testConversionParameters() {
 	COLOR_ASSERTS(unsigned long, unsigned long);
 	COLOR_ASSERTS(float, unsigned int);
 	COLOR_ASSERTS(double, unsigned long);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConversionParameters() end");
 }
 
 } // namespace test

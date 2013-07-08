@@ -56,6 +56,7 @@ UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
  * \param exposure 	Exposure parameters
  */
 void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
+	this->exposure = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	if (exposure.frame.size != info.size) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot take subimages");
@@ -121,6 +122,11 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 
 		// convert the frame, this depends on the frame type
 		ImagePtr	imageptr = frameToImage(*frameptr);
+
+		// add the metadata
+		addMetadata(*imageptr);
+
+		// add image to result set
 		result.push_back(imageptr);
 	}
 
@@ -181,7 +187,7 @@ ImagePtr	UvcCcdBY8::frameToImage(const Frame& frame) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building BY8 image %u x %u",
 		size.width, size.height);
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
-	image->mosaic = ImageBase::BAYER_RGGB;
+	image->setMosaicType(ImageBase::BAYER_RGGB);
 	for (unsigned int i = 0; i < size.pixels; i++) {
 		image->pixels[i] = frame[i];
 	}

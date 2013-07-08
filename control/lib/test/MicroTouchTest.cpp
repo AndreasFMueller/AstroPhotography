@@ -33,6 +33,7 @@ public:
 };
 
 void	MicroTouchTest::testPosition() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPosition() begin");
 	//debuglevel = LOG_DEBUG;
 	Context	context;
 	context.setDebugLevel(1);
@@ -98,6 +99,7 @@ void	MicroTouchTest::testPosition() {
 	} catch (std::exception& x) {
 		std::cerr << "exception: " << x.what() << std::endl;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPosition() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(MicroTouchTest);

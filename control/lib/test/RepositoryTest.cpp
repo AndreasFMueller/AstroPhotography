@@ -11,6 +11,7 @@
 #include <config.h>
 #include <iostream>
 #include <includes.h>
+#include <debug.h>
 
 using namespace astro::module;
 
@@ -104,17 +105,22 @@ void	RepositoryTest::tearDown() {
 }
 
 void	RepositoryTest::testPathexists() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathexists() begin");
 	Repository	repository(".");
 	repository.modules();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathexists() end");
 }
 
 void	RepositoryTest::testPathdoesnotexist() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathdoesnotexist() begin");
 	Repository	repository("./this/path/quite/certainly/does/not/exit");
 	repository.modules();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPathdoesnotexist() end");
 }
 
 
 void	RepositoryTest::testModules() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testModules() begin");
 	// query the list of modules, and verify it's contents
 	Repository	repository(path);
 	std::vector<ModulePtr>	m = repository.modules();
@@ -123,6 +129,7 @@ void	RepositoryTest::testModules() {
 	CPPUNIT_ASSERT(!repository.contains("libmock1"));
 	CPPUNIT_ASSERT(repository.contains("libmock2"));
 	CPPUNIT_ASSERT(!repository.contains("blubb"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testModules() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RepositoryTest);

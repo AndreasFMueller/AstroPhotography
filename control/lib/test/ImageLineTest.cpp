@@ -8,6 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -40,17 +41,21 @@ void	ImageLineTest::tearDown() {
 }
 
 void	ImageLineTest::testColumn() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testColumn() begin");
 	ImageLine	*l = new ImageColumn(*i, 47);
 	ImageIteratorBase	it = l->begin();
 	CPPUNIT_ASSERT(it.pixeloffset() == 47);
 	delete l;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testColumn() end");
 }
 
 void	ImageLineTest::testRow() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRow() begin");
 	ImageLine	*l = new ImageRow(*i, 47);
 	ImageIteratorBase	it = l->begin();
 	CPPUNIT_ASSERT(it.pixeloffset() == (47 * 640));
 	delete l;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRow() end");
 }
 
 } // namespace test

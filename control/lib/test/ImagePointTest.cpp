@@ -8,6 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -44,13 +45,17 @@ void	ImagePointTest::tearDown() {
 }
 
 void	ImagePointTest::testEquality() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() begin");
 	CPPUNIT_ASSERT(*p1 == *p2);
 	CPPUNIT_ASSERT(!(*p2 == *p3));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() end");
 }
 
 void	ImagePointTest::testArithmetic() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testArithmetic() begin");
 	CPPUNIT_ASSERT((*p1 + *p3) == ImagePoint(8, 9));
 	CPPUNIT_ASSERT((*p1 - *p3) == ImagePoint(-2, 1));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testArithmetic() end");
 }
 
 } // namespace test

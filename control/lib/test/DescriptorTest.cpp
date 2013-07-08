@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <debug.h>
 
 using namespace astro::module;
 
@@ -27,9 +28,11 @@ public:
 };
 
 void	DescriptorTest::testBasic() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() begin");
 	Descriptor	d;
 	CPPUNIT_ASSERT(d.name() == std::string(""));
 	CPPUNIT_ASSERT(d.version() == std::string(VERSION));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(DescriptorTest);

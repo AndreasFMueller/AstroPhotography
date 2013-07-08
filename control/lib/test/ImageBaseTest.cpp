@@ -8,6 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -51,21 +52,27 @@ void	ImageBaseTest::tearDown() {
 }
 
 void	ImageBaseTest::testAccessors() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() begin");
 	CPPUNIT_ASSERT(i1->size == ImageSize(640,480));
 	CPPUNIT_ASSERT(i2->size == ImageSize(640,480));
 	CPPUNIT_ASSERT(i3->size == ImageSize(1024,768));
 	CPPUNIT_ASSERT(i4->size == ImageSize(1024,768));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() end");
 }
 
 void	ImageBaseTest::testEquality() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() begin");
 	CPPUNIT_ASSERT(*i1 == *i2);
 	CPPUNIT_ASSERT(!(*i1 == *i3));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() end");
 }
 
 void	ImageBaseTest::testPixeloffset() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixelOffset() begin");
 	CPPUNIT_ASSERT(i1->pixeloffset(4, 11) == (4 + 11 * 640));
 	CPPUNIT_ASSERT(i1->pixeloffset(ImagePoint(4, 11)) == (4 + 11 * 640));
 	CPPUNIT_ASSERT(i4->pixeloffset(4, 11) == (4 + 1024 * (11)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixelOffset() end");
 }
 
 } // namespace test

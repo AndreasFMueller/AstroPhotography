@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <unistd.h>
+#include <debug.h>
 
 using namespace astro::camera;
 using namespace astro::module;
@@ -62,9 +63,9 @@ void	Mock1Test::testMock1() {
 		}
 		if (ccd->exposureStatus() == Exposure::exposed) {
 			ImagePtr	image = ccd->getImage();
-			std::cerr << "result image size: "
-				<< image->size.width << " x "
-				<< image->size.height << std::endl;
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"result image size: %d x %d",
+				image->size.width, image->size.height);
 		}
 	}
 }

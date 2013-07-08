@@ -10,6 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <debug.h>
 
 using namespace astro::usb;
 using namespace astro::usb::uvc;
@@ -56,6 +57,7 @@ static void	showConfigurationExtra(Device& device,
 }
 
 void	UVCDescriptorTest::testList() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() begin");
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -74,6 +76,7 @@ void	UVCDescriptorTest::testList() {
 		}
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UVCDescriptorTest);

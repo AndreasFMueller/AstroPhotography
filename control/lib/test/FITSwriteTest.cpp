@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <iostream>
+#include <debug.h>
 
 using namespace astro::io;
 using namespace astro::image;
@@ -40,6 +41,7 @@ public:
 static const char	*uchar_filename = "uchar_test.fits";
 
 void	FITSwriteTest::testWriteUChar() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUChar() begin");
 	// find out whether the file already exists, and destroy it
 	remove(uchar_filename);
 
@@ -54,11 +56,13 @@ void	FITSwriteTest::testWriteUChar() {
 		= new FITSoutfile<unsigned char>(uchar_filename);
 	outfile->write(*image);
 	delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUChar() end");
 }
 
 static const char	*ushort_filename = "ushort_test.fits";
 
 void	FITSwriteTest::testWriteUShort() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUShort() begin");
 	// find out whether the file already exists, and destroy it
 	remove(ushort_filename);
 
@@ -73,11 +77,13 @@ void	FITSwriteTest::testWriteUShort() {
 		= new FITSoutfile<unsigned short>(ushort_filename);
 	outfile->write(*image);
 	delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUShort() end");
 }
 
 static const char	*yuyv_filename = "yuyv_test.fits";
 
 void	FITSwriteTest::testWriteYUYV() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteYUYV() begin");
 	// find out whether the file already exists, and destroy it
 	remove(yuyv_filename);
 
@@ -107,11 +113,13 @@ void	FITSwriteTest::testWriteYUYV() {
 		= new FITSoutfile<YUYV<unsigned char> >(yuyv_filename);
 	outfile->write(*image);
 	delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteYUYV() end");
 }
 
 static const char	*rgb_filename = "rgb_test.fits";
 
 void	FITSwriteTest::testWriteRGB() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGB() begin");
 	// find out whether the file already exists, and destroy it
 	remove(rgb_filename);
 
@@ -129,11 +137,13 @@ void	FITSwriteTest::testWriteRGB() {
 		= new FITSoutfile<RGB<unsigned char> >(rgb_filename);
 	outfile->write(*image);
 	delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGB() end");
 }
 
 static const char	*rgbushort_filename = "rgbushort_test.fits";
 
 void	FITSwriteTest::testWriteRGBUShort() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGBUShort() begin");
 	// find out whether the file already exists, and destroy it
 	remove(rgbushort_filename);
 
@@ -151,6 +161,7 @@ void	FITSwriteTest::testWriteRGBUShort() {
 		= new FITSoutfile<RGB<unsigned short> >(rgbushort_filename);
 	outfile->write(*image);
 	delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGBUShort() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FITSwriteTest);

@@ -186,6 +186,9 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(exposure.frame.size, data);
 
+	// add the metadata to the image
+	addMetadata(*image);
+
 	// convert the data read to a short image
 	return ImagePtr(image);
 }

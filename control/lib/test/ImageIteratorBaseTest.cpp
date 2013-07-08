@@ -8,6 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -50,12 +51,15 @@ void	ImageIteratorBaseTest::tearDown() {
 }
 
 void	ImageIteratorBaseTest::testValid() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testValid() begin");
 	CPPUNIT_ASSERT(!i1->valid());
 	CPPUNIT_ASSERT(i2->valid());
 	CPPUNIT_ASSERT(i3->valid());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testValid() end");
 }
 
 void	ImageIteratorBaseTest::testIncrement() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIncrement() begin");
 	for (int i = 0; i < 6; i++) {
 		(*i3)++;
 	}
@@ -70,16 +74,20 @@ void	ImageIteratorBaseTest::testIncrement() {
 	ImageIteratorBase	i(*i2);
 	CPPUNIT_ASSERT(i-- == *i2);
 	CPPUNIT_ASSERT(++i == *i2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIncrement() end");
 }
 
 void	ImageIteratorBaseTest::testArithmetic() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testArithmetic() begin");
 	CPPUNIT_ASSERT((*i3 + 6) == (*i2));
 	CPPUNIT_ASSERT((*i2 - 6) == (*i3));
 	(*i1) = *i1 + 7;
 	CPPUNIT_ASSERT(!(i1->valid()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testArithmetic() end");
 }
 
 void	ImageIteratorBaseTest::testPixeloffset() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixeloffset() begin");
 	ImageIteratorBase	b(7 * 640, 8 * 640 - 1, 7 * 640, 1);
 	ImageIteratorBase	e(0, 0, -1, 0);
 	ImageIteratorBase	i;
@@ -89,6 +97,7 @@ void	ImageIteratorBaseTest::testPixeloffset() {
 		counter++;
 	}
 	CPPUNIT_ASSERT(counter == 640);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixeloffset() end");
 }
 
 } // namespace test

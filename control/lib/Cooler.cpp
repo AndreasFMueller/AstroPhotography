@@ -5,6 +5,9 @@
  */
 #include <AstroCamera.h>
 #include <stdexcept>
+#include <Format.h>
+
+using namespace astro::image;
 
 namespace astro {
 namespace camera {
@@ -39,6 +42,33 @@ void	Cooler::setOn(bool onoff) {
 
 bool	Cooler::isOn() {
 	return true;
+}
+
+/**
+ * \brief Add temperature metadata to an image
+ */
+void	Cooler::addTemperatureMetadata(ImageBase& image) {
+	if (!isOn()) {
+		return;
+	}
+
+	// set temperature
+	Metavalue	mvsettemp(
+		getSetTemperature() - 273.1,
+		std::string("CCD temperature setpoint in "
+			"degrees C"));
+	image.setMetadata(std::string("SET-TEMP"), mvsettemp);
+	
+	// actual temperature
+	try {
+		Metavalue	mvtemp(getActualTemperature() - 273.1,
+			std::string("actual measured sensor temperature "
+				"at the start of exposure in degrees C"));
+		image.setMetadata(std::string("CCD-TEMP"), mvtemp);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature unknown: %s",
+			x.what());
+	}
 }
 
 } // namespace camera

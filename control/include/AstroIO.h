@@ -10,6 +10,7 @@
 #include <fitsio.h>
 #include <AstroImage.h>
 #include <map>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -80,6 +81,8 @@ protected:
 	void	readkeys() throw (FITSexception);
 	ImageSize	size;
 	void	*readdata() throw (FITSexception);
+protected:
+	void	addHeaders(ImageBase *image) const;
 public:
 	FITSinfileBase(const std::string& filename) throw (FITSexception);
 	ImageSize	getSize() const { return size; }
@@ -182,7 +185,13 @@ void	convertFITSpixels(Pixel *pixels, srctype *srcpixels,
 template<typename Pixel>
 Image<Pixel>	*FITSinfile<Pixel>::read()
 	throw (FITSexception) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS file");
 	Image<Pixel>	*image = new Image<Pixel>(size);
+
+	// the FITSinfile constructor has already read the header data
+	// so we con copy the headers into the metadata now
+	addHeaders(image);
+
 	// read the data
 	void	*data = readdata();
 
@@ -213,6 +222,7 @@ Image<Pixel>	*FITSinfile<Pixel>::read()
 		break;
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS file completed");
 	return image;
 }
 

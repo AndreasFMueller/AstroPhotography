@@ -14,6 +14,7 @@
 #include <AstroIO.h>
 #include <Format.h>
 #include <includes.h>
+#include <debug.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -73,6 +74,7 @@ void	MosaicTest::tearDown() {
 }
 
 void	MosaicTest::testNone() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testNone() begin");
 	for (unsigned int x = 0; x < image->size.width; x++) {
 		for (unsigned int y = 0; y < image->size.height; y++) {
 			CPPUNIT_ASSERT(!image->isR(x, y));
@@ -82,10 +84,12 @@ void	MosaicTest::testNone() {
 			CPPUNIT_ASSERT(!image->isGb(x, y));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testNone() end");
 }
 
 void	MosaicTest::testRGGB() {
-	image->mosaic = ImageBase::BAYER_RGGB;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGGB() begin");
+	image->setMosaicType(ImageBase::BAYER_RGGB);
 	for (unsigned int x = 0; x < image->size.width; x += 2) {
 		for (unsigned int y = 0; y < image->size.height; y += 2) {
 			// point (0,0)
@@ -114,10 +118,12 @@ void	MosaicTest::testRGGB() {
 			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGGB() end");
 }
 
 void	MosaicTest::testGRBG() {
-	image->mosaic = ImageBase::BAYER_GRBG;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGRBG() begin");
+	image->setMosaicType(ImageBase::BAYER_GRBG);
 	for (unsigned int x = 0; x < image->size.width; x += 2) {
 		for (unsigned int y = 0; y < image->size.height; y += 2) {
 			// point (0,0): G, Gr
@@ -146,10 +152,12 @@ void	MosaicTest::testGRBG() {
 			CPPUNIT_ASSERT( image->isGb(x + 1, y + 1));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGRBG() end");
 }
 
 void	MosaicTest::testGBRG() {
-	image->mosaic = ImageBase::BAYER_GBRG;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGBRG() begin");
+	image->setMosaicType(ImageBase::BAYER_GBRG);
 	for (unsigned int x = 0; x < image->size.width; x += 2) {
 		for (unsigned int y = 0; y < image->size.height; y += 2) {
 			// point (0,0): G, Gb
@@ -178,10 +186,12 @@ void	MosaicTest::testGBRG() {
 			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGBRG() end");
 }
 
 void	MosaicTest::testBGGR() {
-	image->mosaic = ImageBase::BAYER_BGGR;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBGGR() begin");
+	image->setMosaicType(ImageBase::BAYER_BGGR);
 	for (unsigned int x = 0; x < image->size.width; x += 2) {
 		for (unsigned int y = 0; y < image->size.height; y += 2) {
 			// point (0,0): B
@@ -210,9 +220,11 @@ void	MosaicTest::testBGGR() {
 			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBGGR() end");
 }
 
 void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaic() begin");
 	Image<RGB<unsigned char> >	image(44, 62);
 	for (unsigned int x = 0; x < image.size.width; x++) {
 		for (unsigned int y = 0; y < image.size.height; y++) {
@@ -245,25 +257,35 @@ void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
 		}
 	}
 	delete mosaiced;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaic() end");
 }
 
 void	MosaicTest::testMosaicRGGB() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicRGGB() begin");
 	testMosaic(ImageBase::BAYER_RGGB);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicRGGB() end");
 }
 
 void	MosaicTest::testMosaicGRBG() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGRBG() begin");
 	testMosaic(ImageBase::BAYER_GRBG);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGRBG() end");
 }
 
 void	MosaicTest::testMosaicGBRG() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGBRG() begin");
 	testMosaic(ImageBase::BAYER_GBRG);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGBRG() end");
 }
 
 void	MosaicTest::testMosaicBGGR() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicBGGR() begin");
 	testMosaic(ImageBase::BAYER_BGGR);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicBGGR() end");
 }
 
 void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparate() begin");
 	Image<RGB<unsigned char> >	image(44, 62);
 	for (unsigned int x = 0; x < image.size.width; x++) {
 		for (unsigned int y = 0; y < image.size.height; y++) {
@@ -295,25 +317,35 @@ void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
 	}
 
 	delete demosaiced;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparate() end");
 }
 
 void	MosaicTest::testSeparateRGGB() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateRGGB() begin");
 	testSeparate(ImageBase::BAYER_RGGB);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateRGGB() end");
 }
 
 void	MosaicTest::testSeparateGRBG() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGRBG() begin");
 	testSeparate(ImageBase::BAYER_GRBG);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGRBG() end");
 }
 
 void	MosaicTest::testSeparateGBRG() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGBRG() begin");
 	testSeparate(ImageBase::BAYER_GBRG);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGBRG() end");
 }
 
 void	MosaicTest::testSeparateBGGR() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateBGGR() begin");
 	testSeparate(ImageBase::BAYER_BGGR);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateBGGR() end");
 }
 
 void	MosaicTest::testDemosaicBilinear() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDemosaicBilinear() begin");
 	Image<RGB<unsigned char> >	*image
 		= new Image<RGB<unsigned char> >(80, 80);
 	ImagePtr	imageptr(image);
@@ -341,6 +373,7 @@ void	MosaicTest::testDemosaicBilinear() {
 	unlink("rgb.fits");
 	FITSout	file("rgb.fits");
 	file.write(rgbptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDemosaicBilinear() end");
 }
 
 } // namespace test

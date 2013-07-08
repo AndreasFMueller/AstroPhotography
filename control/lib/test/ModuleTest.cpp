@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <debug.h>
 
 using namespace astro::module;
 
@@ -27,8 +28,10 @@ public:
 };
 
 void	ModuleTest::testBasic() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() begin");
 	Module	module(".", "test_module");
 	CPPUNIT_ASSERT(module.filename() == "./test_module.so");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ModuleTest);

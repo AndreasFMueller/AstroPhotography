@@ -14,6 +14,7 @@
 #include <AstroPixel.h>
 #include <limits>
 #include <vector>
+#include <map>
 #include <debug.h>
 
 namespace astro {
@@ -93,6 +94,34 @@ public:
 };
 
 /**
+ * \brief Image metadata is stored in a map
+ */
+class Metavalue {
+	int	datatype;
+	std::string	value;
+	std::string	comment;
+public:
+	std::string	getValue() const;
+	std::string	getComment() const;
+	int	getType() const;
+	Metavalue(const std::string& _value, const std::string& _comment);
+	Metavalue(const bool b, const std::string& _comment);
+	Metavalue(const char c, const std::string& _comment);
+	Metavalue(const unsigned char uc, const std::string& _comment);
+	Metavalue(const short s, const std::string& _comment);
+	Metavalue(const unsigned short us, const std::string& _comment);
+	Metavalue(const int i, const std::string& _comment);
+	Metavalue(const unsigned int ui, const std::string& _comment);
+	Metavalue(const long l, const std::string& _comment);
+	Metavalue(const unsigned long ul, const std::string& _comment);
+	Metavalue(const float f, const std::string& _comment);
+	Metavalue(const double f, const std::string& _comment);
+	Metavalue(int _datatype, const std::string& _value,
+		const std::string& _comment);
+};
+typedef std::multimap<std::string, Metavalue>	ImageMetadata;
+
+/**
  * \brief Image base class
  *
  * Images in Astrophotographe can have wildly varying pixel types,
@@ -120,6 +149,19 @@ public:
  * defined for the Image template class that inherits from ImageBase.
  */
 class ImageBase {
+	/**
+	 * \brief Metadata for the image
+	 *
+	 * Some of the Metadata is not accessible 
+ 	 */
+	ImageMetadata	metadata;
+public:
+	// access to metadata
+	bool	hasMetadata(const std::string& name) const;
+	Metavalue	getMetadata(const std::string& name) const;
+	void	setMetadata(const std::string& name, const Metavalue& mv);
+	ImageMetadata::const_iterator	begin() const;
+	ImageMetadata::const_iterator	end() const;
 public:
 	/**
 	 * \brief Constants describing pixel layout in bayer matrix.
@@ -139,9 +181,15 @@ public:
 		BAYER_GBRG = 6,
 		BAYER_BGGR = 7
 	} mosaic_type;
+protected:
 	mosaic_type	mosaic;
+public:
+	// accessors for metadata
+	mosaic_type	getMosaicType() const;
+	void	setMosaicType(mosaic_type mosaic);
+	void	setMosaicType(const std::string& mosaic_name);
 
-	// the size is publicly accessible, but cannot be changed
+	// the size is publicly accessible, but users should not change it
 	ImageSize	size;
 
 	// constructors and destructor
@@ -165,7 +213,11 @@ public:
 
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	unsigned int bytesPerPixel() const;
+	friend std::ostream&	operator<<(std::ostream& out,
+		const ImageBase& image);
 };
+
+std::ostream&	operator<<(std::ostream& out, const ImageBase& image);
 
 /**
  * \brief Iterators for Images

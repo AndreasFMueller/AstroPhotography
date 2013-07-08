@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <debug.h>
 
 using namespace astro::usb;
 
@@ -29,6 +30,7 @@ public:
 };
 
 void	USBDescriptorTest::testList() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() begin");
 	Context	context;
 	context.setDebugLevel(3);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -50,10 +52,12 @@ void	USBDescriptorTest::testList() {
 				<< std::endl;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() end");
 }
 
 void	USBDescriptorTest::testAllconfigs() {
 return;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAllconfigs() begin");
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -77,6 +81,7 @@ return;
 			std::cout << "cannot show all configs: " << x.what() << std::endl;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAllconfigs() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(USBDescriptorTest);

@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <stdexcept>
+#include <debug.h>
 
 using namespace astro::usb;
 using namespace astro::usb::uvc;
@@ -32,6 +33,7 @@ public:
 };
 
 void	UVCCameraTest::testCameraList() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCameraList() begin");
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -46,9 +48,11 @@ void	UVCCameraTest::testCameraList() {
 		}
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCameraList() end");
 }
 
 void	UVCCameraTest::testCamera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCamera() begin");
 	Context	context;
 	//context.setDebugLevel(3);
 	DevicePtr	deviceptr = context.find(0x199e, 0x8101); // TIS
@@ -88,6 +92,7 @@ void	UVCCameraTest::testCamera() {
 	} catch (std::exception& x) {
 		std::cerr << "exception during camera test: " << x.what() << std::endl;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCamera() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UVCCameraTest);

@@ -8,6 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <debug.h>
 
 using namespace astro::image;
 
@@ -71,6 +72,7 @@ void	ImageRectangleTest::tearDown() {
 }
 
 void	ImageRectangleTest::testEquality() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() begin");
 	CPPUNIT_ASSERT(*r1 == *r1);
 	CPPUNIT_ASSERT(*r2 == *r2);
 	CPPUNIT_ASSERT(*r3 == *r3);
@@ -81,13 +83,17 @@ void	ImageRectangleTest::testEquality() {
 	CPPUNIT_ASSERT(!(*r2 == *r3));
 	CPPUNIT_ASSERT(!(*r2 == *r4));
 	CPPUNIT_ASSERT(!(*r3 == *r4));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() end");
 }
 
 void	ImageRectangleTest::testConstructor() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() begin");
 	CPPUNIT_ASSERT(*r3 == ImageRectangle(ImageSize(640, 480)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEquality() end");
 }
 
 void	ImageRectangleTest::testAccessors() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() begin");
 	CPPUNIT_ASSERT(r1->size == *s1);
 	CPPUNIT_ASSERT(r2->size == *s2);
 	CPPUNIT_ASSERT(r3->size == *s1);
@@ -96,16 +102,20 @@ void	ImageRectangleTest::testAccessors() {
 	CPPUNIT_ASSERT(r2->origin == *p1);
 	CPPUNIT_ASSERT(r3->origin == *p2);
 	CPPUNIT_ASSERT(r4->origin == *p2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() end");
 }
 
 void	ImageRectangleTest::testCorners() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCorners() begin");
 	CPPUNIT_ASSERT(ImagePoint(3, 5) == r1->lowerLeftCorner());
 	CPPUNIT_ASSERT(ImagePoint(642, 5) == r1->lowerRightCorner());
 	CPPUNIT_ASSERT(ImagePoint(3, 484) == r1->upperLeftCorner());
 	CPPUNIT_ASSERT(ImagePoint(642, 484) == r1->upperRightCorner());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCorners() end");
 }
 
 void	ImageRectangleTest::testContainsPoint() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testContainsPoint() begin");
 	CPPUNIT_ASSERT(r1->contains(r1->lowerLeftCorner()));
 	CPPUNIT_ASSERT(r1->contains(r1->lowerRightCorner()));
 	CPPUNIT_ASSERT(r1->contains(r1->upperLeftCorner()));
@@ -118,28 +128,37 @@ void	ImageRectangleTest::testContainsPoint() {
 	CPPUNIT_ASSERT(!r1->contains(ImagePoint(3, 485)));
 	CPPUNIT_ASSERT(!r1->contains(ImagePoint(643, 484)));
 	CPPUNIT_ASSERT(!r1->contains(ImagePoint(642, 485)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testContainsPoint() end");
 }
 
 void	ImageRectangleTest::testContainsRectangle() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testContainsRectangle() begin");
 	CPPUNIT_ASSERT(r1->contains(*r1));
 	CPPUNIT_ASSERT(r2->contains(*r1));
 	CPPUNIT_ASSERT(!r1->contains(*r2));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testContainsRectangle() end");
 }
 
 void	ImageRectangleTest::testTranslation() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTranslation() begin");
 	ImageRectangle	r(*r1, ImagePoint(17, 4));
 	CPPUNIT_ASSERT(r.size == r1->size);
 	CPPUNIT_ASSERT(r.origin == ImagePoint(20, 9));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTranslation() end");
 }
 
 void	ImageRectangleTest::testSubrectangle() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangle() begin");
 	ImageRectangle	r(*r2, *r1);
 	CPPUNIT_ASSERT(r.size == r1->size);
 	CPPUNIT_ASSERT(r.origin == ImagePoint(6, 10));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangle() end");
 }
 
 void	ImageRectangleTest::testSubrectangleDoesNotFit() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() begin");
 	ImageRectangle	r(*r3, *r2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() end");
 }
 
 } // namespace test

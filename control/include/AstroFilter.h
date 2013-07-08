@@ -270,11 +270,11 @@ protected:
 public:
 	MatrixMean(color_type _color) : color(_color) { }
 	virtual S	mean(const astro::image::Image<T>& image) {
-		if (image.mosaic & 0x8) {
+		if (image.getMosaicType() & 0x8) {
 			throw std::logic_error("not a mosaic image");
 		}
-		unsigned int	dx =  image.mosaic       & 0x1;
-		unsigned int	dy = (image.mosaic >> 1) & 0x1;
+		unsigned int	dx =  image.getMosaicType()       & 0x1;
+		unsigned int	dy = (image.getMosaicType() >> 1) & 0x1;
 		switch (color) {
 		case R:
 			break;

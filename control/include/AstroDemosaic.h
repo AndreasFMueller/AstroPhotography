@@ -39,8 +39,8 @@ Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 	Image<RGB<T> >	*result = new Image<RGB<T> >(image.size);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "result RGB image %s created",
 		result->size.toString().c_str());
-	unsigned int	redx =  image.mosaic       & 0x1;
-	unsigned int	redy = (image.mosaic >> 1) & 0x1;
+	unsigned int	redx =  image.getMosaicType()       & 0x1;
+	unsigned int	redy = (image.getMosaicType() >> 1) & 0x1;
 	unsigned int	bluex = 0x1 ^ redx;
 	unsigned int	bluey = 0x1 ^ redy;
 
@@ -228,8 +228,8 @@ Image<RGB<T> >	*DemosaicBilinear<T>::operator()(const Image<T>& image) {
 	Image<RGB<T> >	*result = this->separate(image);
 
 	// we don't want to call the isR functions all the time
-	redx =  image.mosaic       & 0x1;
-	redy = (image.mosaic >> 1) & 0x1;
+	redx =  image.getMosaicType()       & 0x1;
+	redy = (image.getMosaicType() >> 1) & 0x1;
 	bluex = 0x1 ^ redx;
 	bluey = 0x1 ^ redy;
 	

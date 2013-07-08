@@ -25,8 +25,7 @@ void	show_imageinfo(const std::string& filename) {
 		std::cout << "name: " << filename << std::endl;
 		FITSin	infile(filename);
 		ImagePtr	image = infile.read();
-		std::cout << "size: " << image->size.width << " x "
-			<< image->size.height <<std::endl;
+		std::cout << *image;
 
 		// find maximum, minimum, average and median values
 		double	maximum = astro::image::filter::max(image);

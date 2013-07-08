@@ -144,6 +144,9 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 		}
 	}
 
+	// add the metadata
+	addMetadata(*image);
+
 	return ImagePtr(image);
 }
 

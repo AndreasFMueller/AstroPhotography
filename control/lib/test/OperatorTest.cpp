@@ -11,6 +11,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
+#include <debug.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -40,6 +41,7 @@ void	OperatorTest::tearDown() {
 }
 
 void	OperatorTest::testFlip() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFlip() begin");
 	Image<unsigned char>	image(10, 10);
 	for (unsigned int x = 0; x < image.size.width; x++) {
 		for (unsigned int y = 0; y < image.size.height; y++) {
@@ -54,6 +56,7 @@ void	OperatorTest::testFlip() {
 				== 7 + x + y);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFlip() end");
 }
 
 } // namespace test

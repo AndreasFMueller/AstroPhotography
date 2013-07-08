@@ -45,20 +45,25 @@ public:
 };
 
 void	UnicapTest::testEnumeration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEnumeration() begin");
 	try {
 		Unicap	unicap;
 		std::cout << "devices: " << unicap.numDevices() << std::endl;
 	} catch (std::exception& x) {
 		std::cerr << "exception: " << x.what() << std::endl;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testEnumeration() end");
 }
 
 void	UnicapTest::testGet() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGet() begin");
 	Unicap	unicap;
 	UnicapDevice	device = unicap.get(0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGet() end");
 }
 
 void	UnicapTest::testDeviceInfo() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDeviceInfo() begin");
 	Unicap	unicap;
 	for (int i = 0; i < unicap.numDevices(); i++) {
 		std::cout << "Device " << i << std::endl;
@@ -70,9 +75,11 @@ void	UnicapTest::testDeviceInfo() {
 		std::cout << "Vendor name:    ";
 		std::cout << device.vendor_name() << std::endl;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDeviceInfo() end");
 }
 
 void	UnicapTest::testFormats() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFormats() begin");
 	Unicap	unicap;
 	int	ndevices = unicap.numDevices();
 	for (int d = 0; d < ndevices; d++) {
@@ -90,9 +97,11 @@ void	UnicapTest::testFormats() {
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFormats() end");
 }
 
 void	UnicapTest::testProperties() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testProperties() begin");
 	Unicap	unicap;
 	int	ndevices = unicap.numDevices();
 	for (int d = 0; d < ndevices; d++) {
@@ -106,9 +115,11 @@ void	UnicapTest::testProperties() {
 			std::cout << "        " << *property << std::endl;
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testProperties() end");
 }
 
 void	UnicapTest::testCapture() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCapture() begin");
 	debuglevel = LOG_DEBUG;
 	Unicap	unicap;
 	UnicapDevice	device = unicap.get(0);
@@ -138,6 +149,7 @@ void	UnicapTest::testCapture() {
 		FITSoutfile<YUYV<unsigned char> >	file(filename);
 		file.write(*image);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCapture() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(UnicapTest);

@@ -202,5 +202,36 @@ void	Ccd::setShutterState(const Ccd::shutter_state& state)
 	throw not_implemented("camera has no shutter");
 }
 
+/**
+ * \brief add exposure metadata
+ */
+void	Ccd::addExposureMetadata(ImageBase& image) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding exposure metadata");
+	exposure.addToImage(image);
+	std::cout << image;
+}
+
+/**
+ * \brief add temperature metadata
+ */
+void	Ccd::addTemperatureMetadata(ImageBase& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding temperature metadata");
+	try {
+		// only if a cooler is available for this CCD
+		CoolerPtr	cooler = getCooler();
+		cooler->addTemperatureMetadata(image);
+	} catch (not_implemented& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "this CCD has no cooler");
+	}
+}
+
+/**
+ * \brief add metadata
+ */
+void	Ccd::addMetadata(ImageBase& image) {
+	this->addExposureMetadata(image);
+	this->addTemperatureMetadata(image);
+}
+
 } // namespace camera
 } // namespace astro

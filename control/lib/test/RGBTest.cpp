@@ -38,6 +38,7 @@ void	RGBTest::tearDown() {
 }
 
 void	RGBTest::testCopy() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCopy() begin");
 	Image<RGB<unsigned char> >	src(16, 9);
 	for (unsigned int x = 0; x < src.size.width; x++) {
 		for (unsigned int y = 0; y < src.size.height; y++) {
@@ -54,6 +55,7 @@ void	RGBTest::testCopy() {
 			CPPUNIT_ASSERT(dst.pixel(x, y).B == x + y);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCopy() end");
 }
 
 static unsigned char    limit(int x) {
@@ -80,6 +82,7 @@ static unsigned char    blue(int c, int d, int e) {
 
 
 void	RGBTest::testRgb() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRgb() begin");
 	Image<YUYV<unsigned char> >	*src = new Image<YUYV<unsigned char> >(16, 9);
 	for (unsigned int x = 0; x < src->size.width; x++) {
 		for (unsigned int y = 0; y < src->size.height; y++) {
@@ -114,7 +117,7 @@ std::cerr << "man.R = " << (int)man.R
 			
 		}
 	}
-	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRgb() end");
 }
 
 } // namespace test

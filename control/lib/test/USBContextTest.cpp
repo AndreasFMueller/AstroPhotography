@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <debug.h>
 
 using namespace astro::usb;
 
@@ -33,21 +34,28 @@ public:
 };
 
 void	USBContextTest::testLowDebugLevel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLowDebugLevel() begin");
 	Context	context;
 	context.setDebugLevel(-1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLowDebugLevel() end");
 }
 
 void	USBContextTest::testHighDebugLevel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHighDebugLevel() begin");
 	Context	context;
 	context.setDebugLevel(4);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHighDebugLevel() end");
 }
 
 void	USBContextTest::testBasic() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() begin");
 	Context	context;
 	context.setDebugLevel(3);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBasic() end");
 }
 
 void	USBContextTest::testList() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() begin");
 	Context	context;
 	context.setDebugLevel(0);
 	std::vector<DevicePtr>	devicelist = context.devices();
@@ -56,6 +64,7 @@ void	USBContextTest::testList() {
 		std::cout << "Device on " << **i << std::endl;
 	}
 	CPPUNIT_ASSERT(devicelist.size() > 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testList() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(USBContextTest);
