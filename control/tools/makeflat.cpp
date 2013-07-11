@@ -37,6 +37,9 @@ int	main(int argc, char *argv[]) {
 		case 'o':
 			outfilename = optarg;
 			break;
+		default:
+			throw std::runtime_error("bad option");
+			break;
 		}
 
 	// make sure we do have some files to process

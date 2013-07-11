@@ -362,6 +362,7 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 	Image<unsigned short>	*image = new Image<unsigned short>(
 		exposure.frame.size.width / exposure.mode.getX(),
 		exposure.frame.size.height /exposure.mode.getY());
+	image->setMosaicType(ImageBase::BAYER_RGGB);
 
 	// now we have to demultiplex the two fields
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "demultiplex the fields");
