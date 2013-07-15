@@ -4,7 +4,7 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 CPPFLAGS = -I/usr/local/include/opencv2
-LDFLAGS = -lopencv_core -lopencv_highgui -lopencv_imgproc -llapack
+LDFLAGS = -lopencv_core -lopencv_highgui -lopencv_imgproc -llapack -lfftw3 -lm
 
 all:	setup rotate radontransform motion
 
@@ -37,8 +37,8 @@ radontransform:	radontransform.o radon.o
 RADONRESOLUTION=512
 
 test-radon:	radontransform
-	./radontransform -w $(RADONRESOLUTION) -h $(RADONRESOLUTION) before.jpg before-radon.jpg
-	./radontransform -w $(RADONRESOLUTION) -h $(RADONRESOLUTION) after.jpg after-radon.jpg
+	./radontransform -m 0 -w $(RADONRESOLUTION) -h $(RADONRESOLUTION) before.jpg before-radon.jpg
+	./radontransform -m 0 -w $(RADONRESOLUTION) -h $(RADONRESOLUTION) after.jpg after-radon.jpg
 
 motion.o:	motion.cpp
 	g++ $(CPPFLAGS) -c -o motion.o motion.cpp

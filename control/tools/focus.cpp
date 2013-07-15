@@ -87,6 +87,8 @@ int	main(int argc, char *argv[]) {
 	ImageSize	framesize(length, length);
 	ImageRectangle	frame = ccd->getInfo().centeredRectangle(framesize);
 	Exposure	exposure(frame, exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure prepared: %s",
+		exposure.toString().c_str());
 
 	// retrieve an image
 	ccd->startExposure(exposure);
@@ -98,11 +100,11 @@ int	main(int argc, char *argv[]) {
 	out.write(image);
 
 	// apply a mask to keep the border out
-	CircleFunction	circle(ImagePoint(length/2, length/2), length/2, 0.8);
-	mask(circle, image);
-	unlink("masked.fits");
-	FITSout	maskout("masked.fits");
-	maskout.write(image);
+	//CircleFunction	circle(ImagePoint(length/2, length/2), length/2, 0.8);
+	//mask(circle, image);
+	//unlink("masked.fits");
+	//FITSout	maskout("masked.fits");
+	//maskout.write(image);
 
 	// compute the FOM
 	double	fom = focusFOM(image, true,

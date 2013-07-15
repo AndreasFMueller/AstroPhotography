@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <opencv.hpp>
+#include <unistd.h>
+#include <iostream>
 
 double	angle = 0;
 cv::Point2d	translation(0, 0);
@@ -50,7 +52,8 @@ int	main(int argc, char *argv[]) {
 	cv::Size	size(inimg.cols, inimg.rows);
 	cv::Point2d	center(size.width / 2, size.height / 2);
 
-	cv::Rect	rect(center.x - width / 2, center.y - height / 2, width, height);
+	cv::Rect	rect(center.x - width / 2, center.y - height / 2,
+				width, height);
 
 	// the the transform
 	cv::Mat	rotmat = cv::getRotationMatrix2D(center, angle, 1);

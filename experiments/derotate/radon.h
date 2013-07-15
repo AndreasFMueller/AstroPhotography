@@ -8,6 +8,8 @@
 
 #include <opencv.hpp>
 
-cv::Mat	radon(const char *filename, int width, int height);
+extern double	margin;
+
+extern cv::Mat	radon(const char *filename, int width, int height);
 
 #endif /* _radon_h */

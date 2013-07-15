@@ -16,7 +16,7 @@ static inline double	min(double a, double b) {
 	return (a < b) ? a : b;
 }
 
-double	margin = 0.4;
+double	margin = 0.1;
 
 /**
  * \brief Grid abstraction used to iterate over a grid
@@ -515,6 +515,24 @@ GridIterator	GridRay::end() {
 	return result;
 }
 
+static double	window(const double x) {
+	if (x < (1 - margin)) {
+		return 1;
+	}
+	double	f = 0;
+	if (x < 1) {
+		f = (1 + cos(M_PI * (x - 1 + margin) / margin)) / 2;
+	}
+	return f;
+}
+
+static double	window2(const double x) {
+	if (x < (1 - margin)) {
+		return 1;
+	}
+	return 0;
+}
+
 /**
  * \brief Radon Transform
  */
@@ -533,13 +551,7 @@ cv::Mat	radon(const char *filename, int width, int height) {
 	for (int x = 0; x < inimg.cols; x++) {
 		for (int y = 0; y < inimg.rows; y++) {
 			double	l = hypot(x - center.x, y - center.y) / r;
-			if (l < (1 - margin)) {
-				continue;
-			}
-			double	f = 0;
-			if (l < 1) {
-				f = (1 + cos(M_PI * (l - 1 + margin) / margin)) / 2;
-			}
+			double	f = window2(l);
 			unsigned char	v = ingray.at<unsigned char>(y, x);
 			v = v * f;
 			ingray.at<unsigned char>(y, x) = f * v;
@@ -556,7 +568,7 @@ cv::Mat	radon(const char *filename, int width, int height) {
 	double	srange = 2 * grid.maxS();
 	double	sstep = srange / width;
 	int	y = 0, x = 0;
-	double	norm = hypot(width, height) / 2;
+	double	norm = hypot(width, height) / 1.5;
 	for (double angle = 0; y < height; angle += anglestep, y++) {
 		//std::cout << "y = " << y << std::endl;
 		x = 0;

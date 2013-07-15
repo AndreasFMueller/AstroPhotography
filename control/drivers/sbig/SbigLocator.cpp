@@ -70,10 +70,12 @@ std::vector<std::string>	SbigCameraLocator::getCameralist() {
 }
 
 CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
-	return CameraPtr();
+	debug(LOG_ERR, DEBUG_LOG, 0, "WARNING: name resolution not implemented");
+	return CameraPtr(new SbigCamera());
 }
 
 CameraPtr	SbigCameraLocator::getCamera(size_t index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "WARNING: index resolution not implemented");
 	return CameraPtr(new SbigCamera());
 }
 

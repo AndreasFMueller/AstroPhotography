@@ -46,5 +46,5 @@ calibrate_LDADD = -L../lib -lastro
 
 focus_SOURCES = focus.cpp
 focus_DEPENDENCIES = ../lib/libastro.la
-focus_LDADD = -L../lib -lastro
+focus_LDADD = -L../lib -lastro @SBIGLIBRARY@
 

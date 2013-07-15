@@ -20,6 +20,7 @@ namespace camera {
 namespace sbig {
 
 SbigCamera::SbigCamera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object");
 	// XXX find out which USB number this is, we currently cannot really
 	//     do this because the strings returned by the library are junk
 	int	usbno = 0;
@@ -195,6 +196,7 @@ SbigCamera::~SbigCamera() {
 }
 
 CcdPtr	SbigCamera::getCcd(size_t id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u", id);
 	if ((id < 0) || (id >= ccdinfo.size())) {
 		throw std::range_error("ccd id not in range");
 	}

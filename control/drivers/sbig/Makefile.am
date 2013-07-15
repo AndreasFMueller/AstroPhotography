@@ -36,7 +36,7 @@ sbig_la_SOURCES = SbigLocator.cpp utils.cpp SbigCamera.cpp SbigCcd.cpp \
 	SbigFilterWheel.cpp SbigCooler.cpp SbigGuiderPort.cpp
 sbig_la_LDFLAGS = -module
 sbig_la_DEPENDENCIES = ../../lib/libastro.la
-sbig_la_LIBADD = ../../lib/libastro.la
+sbig_la_LIBADD = ../../lib/libastro.la @SBIGLIBRARY@
 sbig_la_CPPFLAGS = -DTARGET=@SBIGTARGET@
 
 endif

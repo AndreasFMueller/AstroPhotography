@@ -14,13 +14,16 @@ int	main(int argc, char *argv[]) {
 	int	width = 512;
 	int	height = 512;
 
-	while (EOF != (c = getopt(argc, argv, "w:h:")))
+	while (EOF != (c = getopt(argc, argv, "w:h:m:")))
 		switch (c) {
 		case 'w':
 			width = atoi(optarg);
 			break;
 		case 'h':
 			height = atoi(optarg);
+			break;
+		case 'm':
+			margin = atof(optarg);
 			break;
 		}	
 
