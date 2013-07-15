@@ -15,6 +15,14 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief Time specification class
+ *
+ * The SX cameras cannot time the guider port outputs themselves, so we need
+ * to do this explicitely. Our interface accepts times, so we have to launch
+ * threads that will turn on/off the guider port pins at the right time.
+ * timespec objects are used to fix the time when such events happen.
+ */
 class timespec {
 	void	normalize();
 public:
@@ -30,6 +38,12 @@ public:
 	std::string	toString() const;
 };
 
+/**
+ * \brief Starlight Express Guider Port interface
+ *
+ * This class encapsulates a thread that handles the timing of the guider
+ * port output signals.
+ */
 class SxGuiderPort : public GuiderPort {
 	SxCamera&	camera;
 	std::vector<timespec>	turnoff;
