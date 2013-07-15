@@ -29,6 +29,7 @@ Linux)
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
 	export CFLAGS CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc --enable-sbig
+	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
+		--enable-sbig
 	;;
 esac

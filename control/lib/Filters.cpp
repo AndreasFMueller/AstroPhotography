@@ -71,6 +71,27 @@ double	min(const ImagePtr& image, const Subgrid grid) {
 	return 0;
 }
 
+#define	filter_focusfom(image, pixel, diagonal, grid)		\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			astro::image::filter::FocusFOM<pixel, double>	\
+				m(diagonal);				\
+			return m.filter(*imagep, grid);			\
+		}							\
+	}
+
+double	focusFOM(const ImagePtr& image, const bool diagonal, const Subgrid grid) {
+	filter_focusfom(image, unsigned char, diagonal, grid);
+	filter_focusfom(image, unsigned short, diagonal, grid);
+	filter_focusfom(image, unsigned int, diagonal, grid);
+	filter_focusfom(image, unsigned long, diagonal, grid);
+	filter_focusfom(image, float, diagonal, grid);
+	filter_focusfom(image, double, diagonal, grid);
+	return 0;
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro

@@ -353,12 +353,11 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	T	stddev3 = 3 * sqrt(var);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
 	size_t	badpixelcount = 0;
-	for (unsigned int x = grid.origin.x; x < im.size.width;
-		x += grid.size.width) {
-		for (unsigned int y = grid.origin.y; y < im.size.height;
-			y += grid.size.height) {
-			if (fabs(im.image->pixel(x, y) - mean) > stddev3) {
-				im.image->pixel(x, y)
+	SubgridAdapter<T>	sga(grid, *im.image);
+	for (unsigned int x = 0; x < sga.size.width; x++) {
+		for (unsigned int y = 0; y < sga.size.height; y++) {
+			if (fabs(sga.pixel(x, y) - mean) > stddev3) {
+				sga.pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
 				badpixelcount++;
 			}

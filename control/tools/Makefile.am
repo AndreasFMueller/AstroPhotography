@@ -18,7 +18,7 @@ else
 microtouch_files =
 endif
 
-bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate
+bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate focus
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -43,4 +43,8 @@ makeflat_LDADD = -L../lib -lastro
 calibrate_SOURCES = calibrate.cpp
 calibrate_DEPENDENCIES = ../lib/libastro.la
 calibrate_LDADD = -L../lib -lastro
+
+focus_SOURCES = focus.cpp
+focus_DEPENDENCIES = ../lib/libastro.la
+focus_LDADD = -L../lib -lastro
 
