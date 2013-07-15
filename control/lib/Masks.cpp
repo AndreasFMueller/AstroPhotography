@@ -92,10 +92,6 @@ CircleFunction::CircleFunction(const ImagePoint& _center, double _radius,
  * \brief Masking function for a circular Hanning window
  */
 double	CircleFunction::operator()(size_t x, size_t y) const {
-	int	xx = x;
-	int	cx = center.x;
-	int	yy = y;
-	int	cy = center.y;
 	double	l = hypot((int)x - (int)center.x, (int)y - (int)center.y) / radius;
 	if (l >= 1) {
 		return 0;

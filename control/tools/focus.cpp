@@ -61,13 +61,17 @@ int	main(int argc, char *argv[]) {
 	ModulePtr	module = repository.getModule(cameratype);
 	module->open();
 
+
 	// get the camera
 	CameraLocatorPtr	locator = module->getCameraLocator();
+std::cout << "locator" << std::endl;
 	std::vector<std::string>	cameras = locator->getCameralist();
+std::cout << "cameras" << std::endl;
 	if (0 == cameras.size()) {
 		std::cerr << "no cameras found" << std::endl;
 		return EXIT_FAILURE;
 	}
+std::cout << "cameraid" << std::endl;
 	if (cameraid >= cameras.size()) {
 		std::string	msg = stringprintf("camera %d out of range",
 			cameraid);
@@ -77,6 +81,7 @@ int	main(int argc, char *argv[]) {
 	std::string	cameraname = cameras[cameraid];
 	CameraPtr	camera = locator->getCamera(cameraname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera loaded: %s", cameraname.c_str());
+std::cout << "works" << std::endl;
 
 	// get the ccd
 	CcdPtr	ccd = camera->getCcd(ccdid);
@@ -100,11 +105,11 @@ int	main(int argc, char *argv[]) {
 	out.write(image);
 
 	// apply a mask to keep the border out
-	//CircleFunction	circle(ImagePoint(length/2, length/2), length/2, 0.8);
-	//mask(circle, image);
-	//unlink("masked.fits");
-	//FITSout	maskout("masked.fits");
-	//maskout.write(image);
+	CircleFunction	circle(ImagePoint(length/2, length/2), length/2, 0.8);
+	mask(circle, image);
+	unlink("masked.fits");
+	FITSout	maskout("masked.fits");
+	maskout.write(image);
 
 	// compute the FOM
 	double	fom = focusFOM(image, true,
