@@ -47,6 +47,13 @@ SbigCameraLocator::~SbigCameraLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
 }
 
+/**
+ * \brief Get a list of SBIG cameras
+ *
+ * The cameras on the USB bus are number, that's the order in which the
+ * locator returns the identifying string of the camera. A camera is
+ * identified by its serial number an name.
+ */
 std::vector<std::string>	SbigCameraLocator::getCameralist() {
 	std::vector<std::string>	names;
 	QueryUSBResults	results;
@@ -69,6 +76,13 @@ std::vector<std::string>	SbigCameraLocator::getCameralist() {
 	return names;
 }
 
+/**
+ * \brief Get a camera by name
+ *
+ * This works by retrieving a list of cameras and the checking which number
+ * has the right name. This index is then used to retreive the camera object
+ * by number.
+ */
 CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
 	std::vector<std::string>	cameras = getCameralist();
 	std::vector<std::string>::const_iterator	i;
@@ -83,6 +97,9 @@ CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
 	throw std::runtime_error(msg);
 }
 
+/**
+ * \brief Get a camera by number
+ */
 CameraPtr	SbigCameraLocator::getCamera(size_t index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
 	return CameraPtr(new SbigCamera(index));
