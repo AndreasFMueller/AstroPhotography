@@ -317,6 +317,13 @@ GuiderPortPtr	SxCamera::getGuiderPort() throw (not_implemented) {
 	return GuiderPortPtr(new SxGuiderPort(*this));
 }
 
+/**
+ * \brief Find out whether this is a color camera
+ */
+bool	SxCamera::isColor() const {
+	return ((product & 0xf00) == 0x300) ? true : false;
+}
+
 } // namespace sx
 } // namespace camera
 } // namespace astro

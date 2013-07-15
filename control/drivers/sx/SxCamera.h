@@ -49,6 +49,9 @@ public:
 
 	// request handling
 	void	controlRequest(RequestBase *request);
+
+	// find out whether this is a color camera
+	bool	isColor() const;
 };
 
 

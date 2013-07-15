@@ -127,6 +127,20 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(targetsize, data);
 
+	// if this is a color camera (which we can find out from the model
+	// of the camera), then we should add RGB information to the image
+	// but only in 1x1 binning mode
+	if ((camera.isColor()) && (exposure.mode == Binning())) {
+
+		// add bayer info, this depends on the subframe we are
+		// requesting
+		image->setMosaicType(
+			(ImageBase::mosaic_type)(
+			ImageBase::BAYER_RGGB \
+				| ((exposure.frame.origin.x % 2) << 1) \
+				| (exposure.frame.origin.y % 2)));
+	}
+
 	// images are upside down, since our origin is always the lower
 	// left corner
 	FlipOperator<unsigned short>	f;
