@@ -64,14 +64,11 @@ int	main(int argc, char *argv[]) {
 
 	// get the camera
 	CameraLocatorPtr	locator = module->getCameraLocator();
-std::cout << "locator" << std::endl;
 	std::vector<std::string>	cameras = locator->getCameralist();
-std::cout << "cameras" << std::endl;
 	if (0 == cameras.size()) {
 		std::cerr << "no cameras found" << std::endl;
 		return EXIT_FAILURE;
 	}
-std::cout << "cameraid" << std::endl;
 	if (cameraid >= cameras.size()) {
 		std::string	msg = stringprintf("camera %d out of range",
 			cameraid);
@@ -81,7 +78,6 @@ std::cout << "cameraid" << std::endl;
 	std::string	cameraname = cameras[cameraid];
 	CameraPtr	camera = locator->getCamera(cameraname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera loaded: %s", cameraname.c_str());
-std::cout << "works" << std::endl;
 
 	// get the ccd
 	CcdPtr	ccd = camera->getCcd(ccdid);

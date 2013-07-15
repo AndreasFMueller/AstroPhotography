@@ -19,11 +19,13 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
-SbigCamera::SbigCamera() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object");
-	// XXX find out which USB number this is, we currently cannot really
-	//     do this because the strings returned by the library are junk
-	int	usbno = 0;
+/**
+ * \brief Open the SBIG UDRV library
+ *
+ * \param usbno   USB number of the camera.
+ */
+SbigCamera::SbigCamera(int usbno) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object %d", usbno);
 
 	// open the device
 	OpenDeviceParams	openparams;
@@ -170,6 +172,19 @@ SbigCamera::SbigCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
 }
 
+/**
+ * \brief Set the handle of the current camera
+ *
+ * The  SBIG universal driver library keeps track of the camera to talk to
+ * via a handle. However, handling this handle is really awkward. This method
+ * helps ensuring that whenever a camera operation is attempted, the 
+ * handle is set correctly.
+ *
+ * XXX There are some concurrency issues here: we should really make sure 
+ * that now function is attempted on a camera while an uninterruptible
+ * operation on some other camera is in progress. But then it should
+ * really be the driver libraries task to ensure such basic stuff.
+ */
 void	SbigCamera::sethandle() {
 	SetDriverHandleParams	driverhandle;
 	driverhandle.handle = handle;
@@ -182,6 +197,11 @@ void	SbigCamera::sethandle() {
 	}
 }
 
+/**
+ * \brief Destroy the SBIG camera.
+ *
+ * This cleans up the handle of the camera and closes the device.
+ */
 SbigCamera::~SbigCamera() {
 	// set the handle first
 	sethandle();
@@ -195,6 +215,11 @@ SbigCamera::~SbigCamera() {
 	}
 }
 
+/**
+ * \brief Get a CCD from an SBIG camera.
+ *
+ * \param id     ID of the CCD
+ */
 CcdPtr	SbigCamera::getCcd(size_t id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u", id);
 	if ((id < 0) || (id >= ccdinfo.size())) {
@@ -207,10 +232,22 @@ CcdPtr	SbigCamera::getCcd(size_t id) {
 	return CcdPtr(new SbigCcd(ccd, id, *this));
 }
 
+/**
+ * \brief Get the FilterWheel object
+ *
+ * If the camera has a filter wheel, this method returns a filter wheel
+ * object which allows to control the filter wheel position.
+ */
 FilterWheelPtr	SbigCamera::getFilterWheel() throw (not_implemented) {
 	return FilterWheelPtr(new SbigFilterWheel(*this));
 }
 
+/**
+ * \brief Get the Guider Port object
+ *
+ * If the camera has a guider port, thie object allows to retrieve a
+ * GuiderPort object to control the guider port.
+ */
 GuiderPortPtr	SbigCamera::getGuiderPort() throw (not_implemented) {
 	return GuiderPortPtr(new SbigGuiderPort(*this));
 }

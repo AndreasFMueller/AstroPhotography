@@ -70,13 +70,22 @@ std::vector<std::string>	SbigCameraLocator::getCameralist() {
 }
 
 CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
-	debug(LOG_ERR, DEBUG_LOG, 0, "WARNING: name resolution not implemented");
-	return CameraPtr(new SbigCamera());
+	std::vector<std::string>	cameras = getCameralist();
+	std::vector<std::string>::const_iterator	i;
+	size_t	index = 0;
+	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
+		if (name == *i) {
+			return getCamera(index);
+		}
+	}
+	std::string	msg = stringprintf("camera %s not found", name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 CameraPtr	SbigCameraLocator::getCamera(size_t index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "WARNING: index resolution not implemented");
-	return CameraPtr(new SbigCamera());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
+	return CameraPtr(new SbigCamera(index));
 }
 
 } // namespace sbig

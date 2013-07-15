@@ -17,6 +17,12 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
+/**
+ * \brief Create an SBIG CCD object.
+ *
+ * SBIG Ccd's are essentially holder objects for the CCD info and a reference
+ * to the camera.
+ */
 SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
 	: Ccd(info), id(_id), camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d: %s", id,
@@ -26,6 +32,12 @@ SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
 SbigCcd::~SbigCcd() {
 }
 
+/**
+ * \brief Query the exposure status.
+ *
+ * Since the camera interface is closely modelled on the SBIG driver library,
+ * this is essentially a call to the corresponding dirver library function.
+ */
 Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
@@ -56,6 +68,11 @@ Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
 	return state;
 }
 
+/**
+ * \brief Start an exposure
+ *
+ *
+ */
 void	SbigCcd::startExposure(const Exposure& exposure)
 		throw (not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startExposure on ccd %d", id);
@@ -90,6 +107,12 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	state = Exposure::exposing;
 }
 
+/**
+ * \brief Get an Image from the camera.
+ *
+ * This method waits until the exposure is completed and then downloads the
+ * image from the camera.
+ */
 ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
@@ -193,10 +216,16 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	return ImagePtr(image);
 }
 
+/**
+ * \brief Get a Cooler object, if the CCD has a TEC cooler
+ */
 CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
 	return CoolerPtr(new SbigCooler(camera));
 }
 
+/**
+ * \brief Query the shutter state
+ */
 Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 	camera.sethandle();
 
@@ -225,6 +254,9 @@ Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 	return state;
 }
 
+/**
+ * \brief Set the shutter state.
+ */
 void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented) {
 	camera.sethandle();
 

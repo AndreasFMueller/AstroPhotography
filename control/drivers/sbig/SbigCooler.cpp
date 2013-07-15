@@ -12,6 +12,13 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
+/**
+ * \brief Create an SBIG cooler
+ *
+ * This is essentiall a holder for cooler specific state and a reference
+ * to the camera. The camera contains all the information needed to perform
+ * a call to the SBIG universal driver library.
+ */
 SbigCooler::SbigCooler(SbigCamera& _camera) : camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing cooler");
 	enabled = isOn();
@@ -21,6 +28,9 @@ SbigCooler::SbigCooler(SbigCamera& _camera) : camera(_camera) {
 SbigCooler::~SbigCooler() {
 }
 
+/**
+ * \brief Query the set temperature
+ */
 float	SbigCooler::getSetTemperature() {
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature");
@@ -37,6 +47,9 @@ float	SbigCooler::getSetTemperature() {
 	return temperature = results.ccdSetpoint + 273.1;
 }
 
+/**
+ * \brief Query the actual temperature
+ */
 float	SbigCooler::getActualTemperature() {
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get actual temperature");
@@ -53,6 +66,9 @@ float	SbigCooler::getActualTemperature() {
 	return results.imagingCCDTemperature + 273.1;
 }
 
+/**
+ * \brief Set the set temperature
+ */
 void	SbigCooler::setTemperature(const float temperature) {
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the set temperature");
@@ -63,6 +79,9 @@ void	SbigCooler::setTemperature(const float temperature) {
 	set();
 }
 
+/**
+ * \brief Common (private) set function
+ */
 void	SbigCooler::set() {
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
@@ -78,6 +97,9 @@ void	SbigCooler::set() {
 	}
 }
 
+/**
+ * \brief Query whether cooler is on
+ */
 bool	SbigCooler::isOn() {
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query regulation status");
@@ -94,6 +116,9 @@ bool	SbigCooler::isOn() {
 	return (results.enabled) ? true : false;
 }
 
+/**
+ * \brief Turn cooler on.
+ */
 void	SbigCooler::setOn(bool onoff) {
 	enabled = onoff;
 	set();
