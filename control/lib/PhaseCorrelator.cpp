@@ -16,6 +16,12 @@ static inline double	sqr(double x) {
 	return x * x;
 }
 
+/**
+ * \brief Auxiliary function to retrieve array values
+ *
+ * When computing the centroid, we often work near the boundary of the domain,
+ * this accessor wraps the indices around according to the array size.
+ */
 double	PhaseCorrelator::value(const double *a, const ImageSize& size,
 		unsigned int x, unsigned int y) const {
 	while (x > size.width) {
@@ -27,21 +33,24 @@ double	PhaseCorrelator::value(const double *a, const ImageSize& size,
 	return a[size.offset(x, y)];
 }
 
+/**
+ * \brief Compute 2k+1 x 2k+1 centroid around the center point
+ */
 Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
-		const ImagePoint& center) const {
+		const ImagePoint& center, int k) const {
 	unsigned int	cx = center.x;
-	if (cx < 2) {
+	if (cx < k) {
 		cx += size.width;
 	}
 	unsigned int	cy = center.y;
-	if (cy < 2) {
+	if (cy < k) {
 		cy += size.height;
 	}
 	double	s = 0;
 	double	xs = 0;
 	double	ys = 0;
-	for (unsigned int x = center.x - 2; x <= center.x + 2; x++) {
-		for (unsigned int y = center.y - 2; y <= center.y + 2; y++) {
+	for (unsigned int x = center.x - k; x <= center.x + k; x++) {
+		for (unsigned int y = center.y - k; y <= center.y + k; y++) {
 			double	v = value(a, size, x, y);
 			s += v;
 			xs += v * x;
@@ -59,6 +68,15 @@ Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
 	return Point(xs, ys);
 }
 
+/**
+ * \brief Find displacement between two images using phase correlation.
+ *
+ * This method applies a Hanning window to the two images, computes the
+ * Fourier transforms, takes the product (with the first fourier transform
+ * complex conjugated) and computes the reverse transform. Then the maximum
+ * is found and a 5x5 centroid around the maximum computed. This gives
+ * subpixel accuracy for image translations.
+ */
 Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 		const ConstImageAdapter<double>& toimage) {
 	// ensure that both images are of the same size
