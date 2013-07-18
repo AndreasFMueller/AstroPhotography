@@ -78,6 +78,19 @@ public:
 		const Transform& transform);
 };
 
+/**
+ * \brief Find a transformation between two images
+ */
+class PhaseCorrelator {
+	double	value(const double *a, const astro::image::ImageSize& size,
+			unsigned int x, unsigned int y) const;
+	Point	centroid(const double *a, const astro::image::ImageSize& size,
+			const astro::image::ImagePoint& center) const;
+public:
+	Point	operator()(const ConstImageAdapter<double>& fromimage,
+			const ConstImageAdapter<double>& toimage);
+};
+
 } // namespace transform
 } // namespace image
 } // namespace astro

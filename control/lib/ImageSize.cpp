@@ -98,6 +98,20 @@ int	ImageSize::chi(unsigned int x, unsigned int y) const {
 }
 
 /**
+ * \brief Find the offset into an array with this size
+ */
+unsigned int	ImageSize::offset(unsigned int x, unsigned int y) const {
+	return x + width * y;
+}
+
+/**
+ * \brief Find the offset into an array with this size
+ */
+unsigned int	ImageSize::offset(const ImagePoint& point) const {
+	return offset(point.x, point.y);
+}
+
+/**
  * \brief String representation
  */
 std::string	ImageSize::toString() const {

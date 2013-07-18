@@ -62,6 +62,8 @@ public:
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(unsigned int x, unsigned int y) const;
 	int	chi(unsigned int x, unsigned int y) const;
+	unsigned int	offset(unsigned int x, unsigned int y) const;
+	unsigned int	offset(const ImagePoint& point) const;
 	std::string	toString() const;
 };
 

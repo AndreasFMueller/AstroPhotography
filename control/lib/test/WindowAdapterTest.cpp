@@ -39,7 +39,7 @@ void	WindowAdapterTest::tearDown() {
 
 void	WindowAdapterTest::testWindowAdapter() {
 	// create an image
-	Image<unsigned char>	image(16, 116);
+	Image<unsigned char>	image(16, 16);
 	for (unsigned int x = 0; x < 16; x++) {
 		for (unsigned int y = 0; y < 16; y++) {
 			image.pixel(x, y) = x * y;

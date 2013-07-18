@@ -43,14 +43,14 @@ bool	ImageBase::operator==(const ImageBase& other) const {
  * \brief Compute the pixel offset into an Image based on coordinates
  */
 unsigned int     ImageBase::pixeloffset(unsigned int x, unsigned int y) const {
-	return x + size.width * y;
+	return size.offset(x, y);
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on an ImagePoint
  */
 unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
-	return this->pixeloffset(p.x, p.y);
+	return size.offset(p);
 }
 
 bool	ImageBase::isR(unsigned int x, unsigned int y) const {
