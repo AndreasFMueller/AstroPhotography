@@ -40,6 +40,8 @@ public:
 	std::string	toString() const;
 };
 
+std::ostream&	operator<<(std::ostream& out, const ImagePoint& point);
+
 class ImageRectangle;
 /**
  * \brief Size of an image or rectangle

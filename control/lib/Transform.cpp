@@ -5,17 +5,61 @@
  */
 #include <AstroTransform.h>
 #include <Accelerate/Accelerate.h>
+#include <Format.h>
 
 namespace astro {
 namespace image {
 namespace transform {
+
+static const double	epsilon = 1e-10;
+
+//////////////////////////////////////////////////////////////////////
+// Point implementation
+//////////////////////////////////////////////////////////////////////
+Point	Point::operator+(const Point& other) const {
+	return Point(x + other.x, y + other.y);
+}
+
+Point	Point::operator-(const Point& other) const {
+	return Point(x - other.x, y - other.y);
+}
+
+Point	Point::operator*(double l) const {
+	return Point(l * x, l * y);
+}
+
+Point	operator*(double l, const Point& other) {
+	return other * l;
+}
+
+std::string	Point::toString() const {
+	return stringprintf("(%f,%f)", x, y);
+}
+
+std::ostream&	operator<<(std::ostream& out, const Point& point) {
+	return out << point.toString();
+}
+
+bool	Point::operator==(const Point& other) const {
+	if (fabs(x - other.x) > epsilon) { return false; }
+	if (fabs(y - other.y) > epsilon) { return false; }
+	return true;
+}
+
+bool	Point::operator!=(const Point& other) const {
+	return !operator==(other);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Transform implementation
+//////////////////////////////////////////////////////////////////////
 
 /**
  * \brief Default transform is the identity
  */
 Transform::Transform() {
 	a[0] = 1; a[1] = 0; a[2] = 0;
-	a[0] = 0; a[1] = 1; a[2] = 0;
+	a[3] = 0; a[4] = 1; a[5] = 0;
 }
 
 /**
@@ -30,9 +74,9 @@ Transform::Transform(const Transform& other) {
 /**
  * \brief Create an affine transform from angle translation and scale factor
  */
-Transform::Transform(double angle, const ImagePoint& translation, double scale) {
-	a[0] =  scale * cos(angle); a[1] = scale * sin(angle);
-	a[3] = -scale * sin(angle); a[4] = scale * cos(angle);
+Transform::Transform(double angle, const Point& translation, double scale) {
+	a[0] = scale * cos(angle); a[1] = -scale * sin(angle);
+	a[3] = scale * sin(angle); a[4] =  scale * cos(angle);
 	a[2] = translation.x;
 	a[5] = translation.y;
 }
@@ -40,8 +84,8 @@ Transform::Transform(double angle, const ImagePoint& translation, double scale) 
 /**
  * \brief Find the optimal transform from one set of points to the other
  */
-Transform::Transform(const std::vector<ImagePoint>& frompoints,
-	const std::vector<ImagePoint>& topoints) {
+Transform::Transform(const std::vector<Point>& frompoints,
+	const std::vector<Point>& topoints) {
 	// make sure point sets are of the same size
 	if (frompoints.size() != topoints.size()) {
 		std::string	msg = stringprintf("point vectors must be of "
@@ -58,34 +102,41 @@ Transform::Transform(const std::vector<ImagePoint>& frompoints,
 		throw std::runtime_error(msg);
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "determine best transformation between two sets of %d points", frompoints.size());
+
 	// allocate space for the linear system
-	int	m = frompoints.size();
-	double	A[12 * frompoints.size()];
-	double	b[2 * frompoints.size()];
+	int	m = 2 * frompoints.size();
+	double	A[6 * m];
+	double	b[m];
 
 	// set up linear system of equations
-	std::vector<ImagePoint>::const_iterator	fromi, toi;;
+	std::vector<Point>::const_iterator	fromi, toi;;
 	int	i = 0;
 	for (fromi = frompoints.begin(), toi = topoints.begin();
-		fromi != frompoints.end(); fromi++, toi++, i++) {
+		fromi != frompoints.end();
+		fromi++, toi++) {
 		// add coefficients to A array
-		A[2 * i            ] = fromi->x;
-		A[2 * i     +     m] = fromi->y;
-		A[2 * i     + 2 * m] = 1;
-		A[2 * i     + 3 * m] = 0;
-		A[2 * i     + 4 * m] = 0;
-		A[2 * i     + 5 * m] = 0;
+		A[i        ] = fromi->x;
+		A[i +     m] = fromi->y;
+		A[i + 2 * m] = 1;
+		A[i + 3 * m] = 0;
+		A[i + 4 * m] = 0;
+		A[i + 5 * m] = 0;
 
-		A[2 * i + 1        ] = 0;
-		A[2 * i + 1 +     m] = 0;
-		A[2 * i + 1 + 2 * m] = 0;
-		A[2 * i + 1 + 3 * m] = fromi->x;
-		A[2 * i + 1 + 4 * m] = fromi->y;
-		A[2 * i + 1 + 5 * m] = 1;
+                b[i] = toi->x;
 
-                // add positions to B array
-                b[2 * i    ] = toi->x + toi->x;
-                b[2 * i + 1] = toi->y + toi->y;
+		i++;
+
+		A[i        ] = 0;
+		A[i +     m] = 0;
+		A[i + 2 * m] = 0;
+		A[i + 3 * m] = fromi->x;
+		A[i + 4 * m] = fromi->y;
+		A[i + 5 * m] = 1;
+
+                b[i] = toi->y;
+
+		i++;
 	}
 
 	// solve the linear system
@@ -128,10 +179,97 @@ Transform::Transform(const std::vector<ImagePoint>& frompoints,
 }
 
 /**
+ * \brief Compute the inverse transformation
+ */
+Transform	Transform::inverse() const {
+	Transform	result;
+	// inverse of the matrix
+	double	det = a[0] * a[4] - a[1] * a[3];
+	result.a[0] =  a[0] / det;
+	result.a[1] = -a[3] / det;
+	result.a[3] = -a[1] / det;
+	result.a[4] =  a[4] / det;
+	// offset
+	result.a[2] = -(result.a[0] * a[2] + result.a[1] * a[5]);
+	result.a[5] = -(result.a[3] * a[2] + result.a[4] * a[5]);
+	return result;
+}
+
+
+/**
+ * \brief Test whether this is a translation
+ */
+bool	Transform::isTranslation() const {
+	if (fabs(a[0] - 1) > epsilon) { return false; }
+	if (fabs(a[1] - 0) > epsilon) { return false; }
+	if (fabs(a[3] - 0) > epsilon) { return false; }
+	if (fabs(a[4] - 1) > epsilon) { return false; }
+	return true;
+}
+
+bool	Transform::isIdentity() const {
+	return isTranslation() && fixesOrigin();
+}
+
+bool	Transform::fixesOrigin() const {
+	if (fabs(a[2]) > epsilon) { return false; }
+	if (fabs(a[5]) > epsilon) { return false; }
+	return true;
+}
+
+bool	Transform::isRotation() const {
+	return fixesOrigin() && isIsometry();
+}
+
+bool	Transform::isHomothety() const {
+	if (!fixesOrigin()) { return false; }
+	if (fabs(a[0] - a[4]) > epsilon) { return false; }
+	if (fabs(a[1]) > epsilon) { return false; }
+	if (fabs(a[3]) > epsilon) { return false; }
+	return true;
+}
+
+bool	Transform::isIsometry() const {
+	// compute the product a*a', if this gives the identity,
+	// the matrix of the transform is orthogonal, so it's an
+	// isometry
+	if (fabs((a[0] * a[0] + a[1] * a[1]) - 1) > epsilon) { return false; }
+	if (fabs((a[0] * a[3] + a[1] * a[4]) - 0) > epsilon) { return false; }
+	if (fabs((a[3] * a[3] + a[3] * a[4]) - 1) > epsilon) { return false; }
+	return true;
+}
+
+bool	Transform::isAreaPreserving() const {
+	double	det = a[0] * a[4] - a[1] * a[3];
+	if (fabs(fabs(det) - 1) > epsilon) {
+		return false;
+	}
+	return true;
+}
+
+bool	Transform::isAnglePreserving() const {
+	if (fabs(a[0] * a[3] + a[1] * a[4]) > epsilon) { return false; }
+	if (fabs((a[0] * a[0] + a[1] * a[1]) - (a[3] * a[3] + a[4] * a[4]))
+		> epsilon) { return false; }
+	return true;
+}
+
+bool	Transform::operator==(const Transform& other) const {
+	for (size_t i = 0; i < 6; i++) {
+		if (fabs(a[i] - other.a[i]) > epsilon) { return false; }
+	}
+	return true;
+}
+
+bool	Transform::operator!=(const Transform& other) const {
+	return !operator==(other);
+}
+
+/**
  * \brief Extract the translation component
  */
-ImagePoint	Transform::getTranslation() const {
-	return ImagePoint(a[2], a[5]);
+Point	Transform::getTranslation() const {
+	return Point(a[2], a[5]);
 }
 
 /*
@@ -142,30 +280,47 @@ Transform	Transform::operator*(const Transform& other) const {
 	// matrix product
 	result.a[0] = a[0] * other.a[0] + a[1] * other.a[3];
 	result.a[1] = a[0] * other.a[1] + a[1] * other.a[4];
-	result.a[2] = a[3] * other.a[0] + a[4] * other.a[3];
-	result.a[3] = a[3] * other.a[1] + a[4] * other.a[4];
+	result.a[3] = a[3] * other.a[0] + a[4] * other.a[3];
+	result.a[4] = a[3] * other.a[1] + a[4] * other.a[4];
 	// operation 
-	ImagePoint	composed = this->operator()(getTranslation());
+	Point	composed = this->operator()(getTranslation());
 	result.a[2] = composed.x;
 	result.a[5] = composed.y;
 	return result;
 }
 
-Transform	Transform::operator+(const ImagePoint& translation) const {
+Transform	Transform::operator+(const Point& translation) const {
 	Transform	result;
 	for (int i = 0; i < 6; i++) {
-		result.a[i] + a[i];
+		result.a[i] = a[i];
 	}
 	result.a[2] += translation.x;
 	result.a[5] += translation.y;
 	return result;
 }
 
-ImagePoint	Transform::operator()(const ImagePoint& point) const {
-	ImagePoint	result;
-	result.x = a[0] * point.x + a[1] * point.y + a[2];
-	result.y = a[3] * point.x + a[4] * point.y + a[5];
-	return result;
+Transform	Transform::operator+(const ImagePoint& translation) const {
+	return operator+(Point(translation));
+}
+
+Point	Transform::operator()(const Point& point) const {
+	return Point(
+		a[0] * point.x + a[1] * point.y + a[2],
+		a[3] * point.x + a[4] * point.y + a[5]
+	);
+}
+
+/**
+ * \brief Display version of string transform
+ */
+std::ostream&	operator<<(std::ostream& out, const Transform& transform) {
+	out << "[ " << transform.a[0];
+	out << ", " << transform.a[1];
+	out << ", " << transform.a[2] << ";" << std::endl;
+	out << "  " << transform.a[3];
+	out << ", " << transform.a[4];
+	out << ", " << transform.a[5] << " ]" << std::endl;
+	return out;
 }
 
 } // namespace transform

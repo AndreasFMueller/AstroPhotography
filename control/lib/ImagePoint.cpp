@@ -44,5 +44,12 @@ std::string	ImagePoint::toString() const {
 	return stringprintf("(%d,%d)", x, y);
 }
 
+/**
+ * \brief Point output
+ */
+std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
+	return out << point.toString();
+}
+
 } // namespace image
 } // namespace astro

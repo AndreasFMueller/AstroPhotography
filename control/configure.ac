@@ -26,7 +26,7 @@ AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
-
+AC_CHECK_LIB([lapack], [dgels_])
 
 ######################################################################
 # decide whether or not to build the test programs
