@@ -19,7 +19,7 @@ AC_PROG_LIBTOOL
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h dlfcn.h libusb-1.0/libusb.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h dlfcn.h libusb-1.0/libusb.h fftw3.h])
 
 # Check for libraries
 AC_CHECK_LIB([m], [sqrt])
@@ -27,6 +27,7 @@ AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 AC_CHECK_LIB([lapack], [dgels_])
+AC_CHECK_LIB([fftw3], [fftw_malloc])
 
 ######################################################################
 # decide whether or not to build the test programs

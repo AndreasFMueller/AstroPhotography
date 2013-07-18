@@ -13,17 +13,17 @@ namespace image {
  */
 template<typename Pixel>
 class WindowAdapter : public ConstImageAdapter<Pixel> {
-	const Image<Pixel>&	image;
+	const ConstImageAdapter<Pixel>&	image;
 	ImageRectangle	frame;
 public:
-	WindowAdapter(const Image<Pixel>& image, const ImageRectangle& frame);
+	WindowAdapter(const ConstImageAdapter<Pixel>& image, const ImageRectangle& frame);
 	virtual ImageSize	getSize() const;
 	
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
-WindowAdapter<Pixel>::WindowAdapter(const Image<Pixel>& _image,
+WindowAdapter<Pixel>::WindowAdapter(const ConstImageAdapter<Pixel>& _image,
 	const ImageRectangle& _frame) : image(_image), frame(_frame) {
 }
 
@@ -42,10 +42,10 @@ const Pixel	WindowAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
  */
 template<typename Pixel, typename T>
 class ConvertingWindowAdapter : public ConstImageAdapter<Pixel> {
-	const Image<T>&	 image;
+	const ConstImageAdapter<T>&	 image;
 	ImageRectangle	frame;
 public:
-	ConvertingWindowAdapter(const Image<T>& image,
+	ConvertingWindowAdapter(const ConstImageAdapter<T>& image,
 		const ImageRectangle& frame);
 	virtual ImageSize	getSize() const;
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
@@ -53,7 +53,7 @@ public:
 
 template<typename Pixel, typename T>
 ConvertingWindowAdapter<Pixel, T>::ConvertingWindowAdapter(
-	const Image<T>& _image, const ImageRectangle& _frame)
+	const ConstImageAdapter<T>& _image, const ImageRectangle& _frame)
 	: image(_image), frame(_frame) {
 }
 

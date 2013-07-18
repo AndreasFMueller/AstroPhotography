@@ -351,7 +351,7 @@ public:
  * as specified by the template argument. Images have an immutable size
  */
 template<typename Pixel>
-class Image : public ImageBase, ImageAdapter<Pixel> {
+class Image : public ImageBase, public ImageAdapter<Pixel> {
 public:
 	/**
 	 * \brief Access to the image size
