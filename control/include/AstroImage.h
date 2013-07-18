@@ -313,14 +313,53 @@ public:
 };
 
 /**
+ * \brief Read-only Access to the pixels of an image
+ *
+ * The Image class gives some basic access to the pixels of an image.
+ * more sophisticated access, like selecting planes, merging planes,
+ * converting pixel type, taking subimages etc. is handled through 
+ * adapter classes. This is the base class for these adapter classes,
+ * it defines the pixel accessors. 
+ */
+template<typename Pixel>
+class ConstImageAdapter {
+public:
+	/**
+	 * \brief A shorthand for the type of the individual pixels
+	 */
+	typedef	Pixel	pixel_type;
+
+	virtual	ImageSize	getSize() const = 0;
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const = 0;
+};
+
+/**
+ * \brief Read-write Access to the pixels of an image
+ *
+ */
+template<typename Pixel>
+class ImageAdapter : public ConstImageAdapter<Pixel> {
+public:
+	virtual Pixel&	pixel(unsigned int x, unsigned int y) = 0;
+};
+
+
+/**
  * \brief Image class
  *
  * The Image template class implements images with different pixel types
  * as specified by the template argument. Images have an immutable size
  */
 template<typename Pixel>
-class Image : public ImageBase {
+class Image : public ImageBase, ImageAdapter<Pixel> {
 public:
+	/**
+	 * \brief Access to the image size
+	 */
+	virtual	ImageSize	getSize() const {
+		return size;
+	}
+
 	/**
 	 * \brief	Array containing the pixel values
 	 */
@@ -431,11 +470,6 @@ public:
 	}
 
 	/**
-	 * \brief A shorthand for the type of the individual pixels
-	 */
-	typedef	Pixel	pixel_type;
-
-	/**
 	 * \brief Read only access to pixel values specified by offset.
 	 */
 	const Pixel&	operator[](unsigned int offset) const {
@@ -459,7 +493,7 @@ public:
 	 * \brief Read only access to pixel values specified by image
 	 *        coordinates
 	 */
-	const Pixel&	pixel(unsigned int x, unsigned int y) const {
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
 		return pixels[pixeloffset(x, y)];
 	}
 
