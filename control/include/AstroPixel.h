@@ -298,6 +298,7 @@ public:
 	P	G;
 	P	B;
 	RGB() { }
+	RGB(P w) : R(w), G(w), B(w) { }
 	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
 	virtual ~RGB() { }
 
@@ -332,21 +333,21 @@ public:
 	typedef rgb_color_tag color_category;
 
 	// numeric operators on RGB pixels
-	RGB<P>	operator+(const RGB<P>& other) {
+	RGB<P>	operator+(const RGB<P>& other) const {
 		RGB<P>	result;
 		result.R = R + other.R;
 		result.G = G + other.G;
 		result.B = B + other.B;
 		return result;
 	}
-	RGB<P>	operator-(const RGB<P>& other) {
+	RGB<P>	operator-(const RGB<P>& other) const {
 		RGB<P>	result;
 		result.R = R - other.R;
 		result.G = G - other.G;
 		result.B = B - other.B;
 		return result;
 	}
-	RGB<P>	operator*(const P value) {
+	RGB<P>	operator*(const P value) const {
 		RGB<P>	result;
 		result.R = R * value;
 		result.G = G * value;
@@ -578,6 +579,50 @@ unsigned int	bitsPerPixel(YUYV<P>) {
 template<typename P>
 unsigned int	bitsPerPixel(RGB<P>) {
 	return 3 * std::numeric_limits<P>::digits;
+}
+
+/**
+ * \bits Weighted sum of Pixels
+ *
+ * The most important function when performing Image transformations is
+ * the ability to compute a weighted sum of pixels. The problem is that
+ * information is lost when this is done in the pixel type arithemtic,
+ * especially for the very small types like unsigned char. Therefore 
+ * we create this template function with suitable specialisations so
+ * that Weighted averags can be computed for every type of pixel
+ */
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms, const double *weights,
+		const Pixel *pixels, const monochrome_color_tag& tag) {
+	double	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		result = result + pixels[i] * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+}
+
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms,
+			const double *weights, const Pixel *pixels,
+			const rgb_color_tag& tag) {
+	RGB<double>	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		RGB<double>	summand(pixels[i].R, pixels[i].G, pixels[i].B);
+		result = result + summand * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+	return Pixel(result.R, result.G, result.B);
+}
+
+template<typename Pixel>
+Pixel	weighted_sum(unsigned int number_of_terms,
+		const double *weights, const Pixel *pixels) {
+	return weighted_sum_typed(number_of_terms, weights, pixels,
+		typename color_traits<Pixel>::color_category());
 }
 
 } // namespace image

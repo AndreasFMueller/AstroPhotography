@@ -412,5 +412,86 @@ const Pixel	CachingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	return values[offset];
 }
 
-} // namepsace image
+//////////////////////////////////////////////////////////////////////
+// Up/Downsampling adapters
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class DownSamplingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	image;
+	ImageSize	sampling;
+	double	*weights;
+	unsigned int	volume;
+public:
+	DownSamplingAdapter(const ConstImageAdapter<Pixel>& image,
+		const ImageSize& sampling);
+	virtual	~DownSamplingAdapter();
+	const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+DownSamplingAdapter<Pixel>::DownSamplingAdapter(
+	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
+	: ConstImageAdapter<Pixel>(
+		ImageSize(_image.getSize().width / _sampling.width,
+			_image.getSize().height / _sampling.height)),
+	  image(_image), sampling(_sampling) {
+	volume = sampling.width * sampling.height;
+	weights = new double[volume];
+	weights[0] = 1./volume;
+	for (unsigned int index = 0; index < volume; index++) {
+		weights[index] = 1./volume;
+	}
+}
+
+template<typename Pixel>
+DownSamplingAdapter<Pixel>::~DownSamplingAdapter() {
+	delete[] weights;
+}
+
+template<typename Pixel>
+const Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
+	unsigned int y) const {
+	unsigned int	originx = x * sampling.width;
+	unsigned int	originy = y * sampling.height;
+	Pixel	pixels[volume];
+	unsigned int	index = 0;
+	for (unsigned int dx = 0; dx < sampling.width; dx++) {
+		for (unsigned int dy = 0; dy < sampling.height; dy++) {
+			pixels[index++]
+				= image.pixel(originx + dx, originy + dy);
+		}
+	}
+	return weighted_sum(index, weights, pixels);
+}
+
+ImagePtr	downsample(ImagePtr image, const ImageSize& sampling);
+
+template<typename Pixel>
+class UpSamplingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	image;
+	ImageSize	sampling;
+public:
+	UpSamplingAdapter(const ConstImageAdapter<Pixel>& image,
+		const ImageSize& sampling);
+	const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+UpSamplingAdapter<Pixel>::UpSamplingAdapter(
+	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
+	: ConstImageAdapter<Pixel>(
+		ImageSize(_image.getSize().width * _sampling.width,
+			_image.getSize().height * _sampling.height)),
+	  image(_image), sampling(_sampling) {
+}
+
+template<typename Pixel>
+const Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
+	unsigned int y) const {
+	return image.pixel(x / sampling.width, y / sampling.width);
+}
+
+ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
+
+} // namespace image
 } // namespace astro

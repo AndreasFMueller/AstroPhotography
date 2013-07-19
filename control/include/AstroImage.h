@@ -60,7 +60,7 @@ public:
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
-	bool	contains(unsigned int x, unsigned int y) const;
+	bool	contains(int x, int y) const;
 	int	chi(unsigned int x, unsigned int y) const;
 	unsigned int	offset(unsigned int x, unsigned int y) const;
 	unsigned int	offset(const ImagePoint& point) const;
@@ -419,6 +419,25 @@ public:
 			pixels = new Pixel[size.pixels];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
 				size.pixels, pixels);
+		}
+	}
+
+	/**
+	 * \brief Create an image from an adapter
+	 *
+	 * Usually, adapters are only "virtual" images, the pixels are
+	 * computed only when needed. In some cases, like when an image is
+	 * to be stored in a file, a concrete image has to be instantiated
+	 * from the adapter
+ 	 */ 
+	Image<Pixel>(const ConstImageAdapter<Pixel>& adapter)
+		: ImageBase(adapter.getSize()),
+		  ImageAdapter<Pixel>(adapter.getSize()) {
+		pixels = new Pixel[size.pixels];
+		for (unsigned int x = 0; x < size.width; x++) {
+			for (unsigned int y = 0; y < size.height; y++) {
+				pixel(x, y) = adapter.pixel(x, y);
+			}
 		}
 	}
 

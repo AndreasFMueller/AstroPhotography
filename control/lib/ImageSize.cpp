@@ -76,11 +76,17 @@ bool	ImageSize::contains(const ImagePoint& point) const {
  * \param x
  * \param y
  */
-bool	ImageSize::contains(unsigned int x, unsigned int y) const {
-	if (x >= width) {
+bool	ImageSize::contains(int x, int y) const {
+	if (x < 0) {
 		return false;
 	}
-	if (y >= height) {
+	if (y < 0) {
+		return false;
+	}
+	if (x >= (int)width) {
+		return false;
+	}
+	if (y >= (int)height) {
 		return false;
 	}
 	return true;

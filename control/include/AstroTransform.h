@@ -13,6 +13,12 @@ namespace astro {
 namespace image {
 namespace transform {
 
+/**
+ * \brief Point with noninteger coordinates
+ *
+ * Such points are needed when registering images.
+ */
+
 class Point {
 public:
 	double	x;
@@ -30,6 +36,75 @@ public:
 };
 Point	operator*(double l, const Point& other);
 std::ostream&	operator<<(std::ostream& out, const Point& other);
+
+/**
+ * \brief
+ */
+template<typename Pixel>
+class TranslationAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>& image;
+	Point	translation;
+	int	tx, ty;
+	double	weights[4];
+public:
+	TranslationAdapter(const ConstImageAdapter<Pixel>& image,
+		const Point& translation);
+	const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+TranslationAdapter<Pixel>::TranslationAdapter(
+	const ConstImageAdapter<Pixel>& _image, const Point& _translation) 
+	: ConstImageAdapter<Pixel>(_image.getSize()),
+	  image(_image), translation(_translation) {
+	tx = floor(translation.x);
+	ty = floor(translation.y);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %d, ty = %d", tx, ty);
+	double	wx = translation.x - tx;
+	double	wy = translation.y - ty;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wx = %f, wy = %f", wx, wy);
+	// compute the weights
+	weights[0] = wx * wy;
+	weights[1] = (1 - wx) * wy;
+	weights[2] = wx * (1 - wy);
+	weights[3] = (1 - wx) * (1 - wy);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"w[0] = %f, w[1] = %f, w[2] = %f, w[3] = %f",
+		weights[0], weights[1], weights[2], weights[3]);
+}
+
+template<typename Pixel>
+const Pixel	TranslationAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	Pixel	a[4];
+	ImageSize	size = ConstImageAdapter<Pixel>::getSize();
+	// lower left corner
+	if (size.contains(-tx + x - 1, -ty + y - 1)) {
+		a[0] = image.pixel(-tx + x - 1, -ty + y - 1);
+	} else {
+		a[0] = Pixel(0);
+	}
+	// lower right corner
+	if (size.contains(-tx + x    , -ty + y - 1)) {
+		a[1] = image.pixel(-tx + x    , -ty + y - 1);
+	} else {
+		a[1] = Pixel(0);
+	}
+	// upper left corner
+	if (size.contains(-tx + x - 1, -ty + y    )) {
+		a[2] = image.pixel(-tx + x - 1, -ty + y    );
+	} else {
+		a[2] = Pixel(0);
+	}
+	// upper right corner
+	if (size.contains(-tx + x    , -ty + y    )) {
+		a[3] = image.pixel(-tx + x    , -ty + y    );
+	} else {
+		a[3] = Pixel(0);
+	}
+	return weighted_sum(4, weights, a);
+}
+
+ImagePtr	translate(ImagePtr source, const Point& translation);
 
 /**
  * \brief Abstraction of an affine transform

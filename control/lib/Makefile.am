@@ -35,7 +35,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
 	Metavalue.cpp \
-	Subgrid.cpp Transform.cpp PhaseCorrelator.cpp \
+	Subgrid.cpp Transform.cpp Adapters.cpp PhaseCorrelator.cpp \
 	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \

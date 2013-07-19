@@ -51,6 +51,35 @@ bool	Point::operator!=(const Point& other) const {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Translation operation
+//////////////////////////////////////////////////////////////////////
+#define	translate_typed(Pixel) 						\
+{									\
+	Image<Pixel>	*imageptr					\
+		= dynamic_cast<Image<Pixel > *>(&*source);		\
+	if (NULL != imageptr) {						\
+		TranslationAdapter<Pixel >				\
+			ta(*imageptr, translation);			\
+		return ImagePtr(new Image<Pixel >(ta));			\
+	}								\
+}
+ImagePtr	translate(ImagePtr source, const Point& translation) {
+	translate_typed(unsigned char);
+	translate_typed(unsigned short);
+	translate_typed(unsigned int);
+	translate_typed(unsigned long);
+	translate_typed(float);
+	translate_typed(double);
+	translate_typed(RGB<unsigned char>);
+	translate_typed(RGB<unsigned short>);
+	translate_typed(RGB<unsigned int>);
+	translate_typed(RGB<unsigned long>);
+	translate_typed(RGB<float>);
+	translate_typed(RGB<double>);
+	throw std::runtime_error("cannot translate this image type");
+}
+
+//////////////////////////////////////////////////////////////////////
 // Transform implementation
 //////////////////////////////////////////////////////////////////////
 
