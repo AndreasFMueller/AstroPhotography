@@ -49,7 +49,7 @@ class TranslationAdapter : public ConstImageAdapter<Pixel> {
 public:
 	TranslationAdapter(const ConstImageAdapter<Pixel>& image,
 		const Point& translation);
-	const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -145,7 +145,7 @@ public:
 	Transform	operator+(const astro::image::ImagePoint& translation)
 				const;
 
-	// operating on points and images
+	// operating on points 
 	Point	operator()(const Point& point) const;
 
 	// for debugging
@@ -153,6 +153,32 @@ public:
 	friend std::ostream&	operator<<(std::ostream& out,
 		const Transform& transform);
 };
+
+/**
+ * \brief
+ */
+template<typename Pixel>
+class TransformAdapter {
+	const ConstImageAdapter<Pixel>& image;
+	Transform	transform;
+public:
+	TransformAdapter(const ConstImageAdapter<Pixel>& image,
+		const Transform& transform);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+TransformAdapter<Pixel>::TransformAdapter(
+	const ConstImageAdapter<Pixel>& _image, const Transform& _transform)
+	: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
+	  transform(_transform) {
+}
+
+template<typename Pixel>
+const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	return Pixel(0);
+}
+
 
 /**
  * \brief Find a transformation between two images

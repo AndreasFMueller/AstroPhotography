@@ -63,6 +63,7 @@ bool	Point::operator!=(const Point& other) const {
 		return ImagePtr(new Image<Pixel >(ta));			\
 	}								\
 }
+
 ImagePtr	translate(ImagePtr source, const Point& translation) {
 	translate_typed(unsigned char);
 	translate_typed(unsigned short);
