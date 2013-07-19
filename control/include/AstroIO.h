@@ -200,25 +200,25 @@ Image<Pixel>	*FITSinfile<Pixel>::read()
 	case BYTE_IMG:
 	case SBYTE_IMG:
 		convertFITSpixels(image->pixels, (unsigned char *)data,
-			image->size.pixels);
+			image->getSize().pixels);
 		break;
 	case USHORT_IMG:
 	case SHORT_IMG:
 		convertFITSpixels(image->pixels, (unsigned short *)data,
-			image->size.pixels);
+			image->getSize().pixels);
 		break;
 	case ULONG_IMG:
 	case LONG_IMG:
 		convertFITSpixels(image->pixels, (unsigned int *)data,
-			image->size.pixels);
+			image->getSize().pixels);
 		break;
 	case FLOAT_IMG:
 		convertFITSpixels(image->pixels, (float *)data,
-			image->size.pixels);
+			image->getSize().pixels);
 		break;
 	case DOUBLE_IMG:
 		convertFITSpixels(image->pixels, (double *)data,
-			image->size.pixels);
+			image->getSize().pixels);
 		break;
 	}
 
@@ -367,8 +367,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
 		= (IteratorData<Pixel, rgb_color_tag>*)userPointer;
 
 	// iterate through the pixels and convert them to RGB on the fly
-	const int	size = user->image.size.pixels;
-	const int	size2 = user->image.size.pixels << 1;
+	const int	size = user->image.getSize().pixels;
+	const int	size2 = user->image.getSize().pixels << 1;
 	for (int offset = 0; offset < size; offset++) {
 		array[offset        ] = user->image[offset].R;
 		array[offset + size ] = user->image[offset].G;
@@ -396,8 +396,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
 
 	// now iteratate through the pixels and convert them pair by pair
 	RGB<value_type>	dest[2];
-	const int	size = user->image.size.pixels;
-	const int	size2 = user->image.size.pixels << 1;
+	const int	size = user->image.getSize().pixels;
+	const int	size2 = user->image.getSize().pixels << 1;
 	for (int offset = 0; offset < size; offset += 2) {
 		// convert the YUYV pixel pair to an RGB pixel pair
 		convertPixelPair(dest, user->image.pixels + offset);
@@ -452,7 +452,7 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 	IteratorData<Pixel, typename color_traits<Pixel>::color_category >	
 		user(image);
 	int	status = 0;
-	if (fits_iterate_data(1, &ic, 0, image.size.pixels * planes,
+	if (fits_iterate_data(1, &ic, 0, image.getSize().pixels * planes,
 		user.workfunc, &user, &status)) {
 		throw FITSexception(errormsg(status));
 	}

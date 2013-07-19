@@ -108,6 +108,7 @@ Transform::Transform(const std::vector<Point>& frompoints,
 	int	m = 2 * frompoints.size();
 	double	A[6 * m];
 	double	b[m];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "A size: %d, b size: %d", 6 * m, m);
 
 	// set up linear system of equations
 	std::vector<Point>::const_iterator	fromi, toi;;
@@ -138,6 +139,7 @@ Transform::Transform(const std::vector<Point>& frompoints,
 
 		i++;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of equations: %d", i);
 
 	// solve the linear system
 	char	trans = 'N';
@@ -176,6 +178,8 @@ Transform::Transform(const std::vector<Point>& frompoints,
 	for (int i = 0; i < 6; i++) {
 		a[i] = b[i];
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transformation found: %s",
+		this->toString().c_str());
 }
 
 /**
@@ -314,13 +318,13 @@ Point	Transform::operator()(const Point& point) const {
  * \brief Display version of string transform
  */
 std::ostream&	operator<<(std::ostream& out, const Transform& transform) {
-	out << "[ " << transform.a[0];
-	out << ", " << transform.a[1];
-	out << ", " << transform.a[2] << ";" << std::endl;
-	out << "  " << transform.a[3];
-	out << ", " << transform.a[4];
-	out << ", " << transform.a[5] << " ]" << std::endl;
+	out << transform.toString() << std::endl;
 	return out;
+}
+
+std::string	Transform::toString() const {
+	return stringprintf("[ %f, %f, %f; %f, %f, %f ]",
+		a[0], a[1], a[2], a[3], a[4], a[5]);
 }
 
 } // namespace transform

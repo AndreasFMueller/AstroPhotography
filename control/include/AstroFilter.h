@@ -7,97 +7,13 @@
 #define _AstroFilter_h
 
 #include <AstroImage.h>
+#include <AstroAdapter.h>
 #include <limits>
 #include <debug.h>
 
 namespace astro {
 namespace image {
 namespace filter {
-
-/**
- * \brief Subgrid specification
- *
- * Some filter operations only happen on a subgrid, specified by this 
- * class
- */
-class	Subgrid {
-public:
-	ImagePoint	gridorigin;
-	ImageSize	gridsize;
-	Subgrid() : gridorigin(ImagePoint(0, 0)), gridsize(ImageSize(1, 1)) { }
-	Subgrid(const ImagePoint& origin, const ImageSize& size)
-		: gridorigin(origin), gridsize(size) { }
-	Subgrid(const Subgrid& other) : gridorigin(other.gridorigin),
-		gridsize(other.gridsize) {
-	}
-	size_t	volume() const { return gridsize.width * gridsize.height; }
-};
-
-/**
- * \brief Subgrid Adapter
- *
- * The subgrid adapter mediates access to the images pixel taking the
- * subgrid into account. This allows to formulate the filters for a
- * subgrid as if they were just the image
- */
-template <typename Pixel>
-class SubgridAdapter : public Subgrid {
-	Image<Pixel>&	image;
-public:
-	ImageSize	size;
-private:
-	void	computesize() {
-		// compute the resulting image size
-		size = ImageSize(
-			(image.size.width - gridorigin.x) / gridsize.width,
-			(image.size.height - gridorigin.y) / gridsize.height
-		);
-	}
-public:
-	SubgridAdapter(const ImagePoint& gridorigin, const ImageSize& gridsize,
-		Image<Pixel>& _image)
-		: Subgrid(gridorigin, gridsize), image(_image) {
-		computesize();
-	}
-	SubgridAdapter(const Subgrid& subgrid, Image<Pixel>& _image)
-		: Subgrid(subgrid), image(_image) {
-		computesize();
-	}
-	Pixel&	pixel(size_t x, size_t y) {
-		return image.pixel(gridorigin.x + x * gridsize.width,
-			gridorigin.y + y * gridsize.height);
-	}
-};
-
-template <typename Pixel>
-class ConstSubgridAdapter : public Subgrid {
-	const Image<Pixel>&	image;
-public:
-	ImageSize	size;
-private:
-	void	computesize() {
-		// compute the resulting image size
-		size = ImageSize(
-			(image.size.width - gridorigin.x) / gridsize.width,
-			(image.size.height - gridorigin.y) / gridsize.height
-		);
-	}
-public:
-	ConstSubgridAdapter(const ImagePoint& gridorigin,
-		const ImageSize& gridsize,
-		const Image<Pixel>& _image)
-		: Subgrid(gridorigin, gridsize), image(_image) {
-		computesize();
-	}
-	ConstSubgridAdapter(const Subgrid& subgrid, const Image<Pixel>& _image)
-		: Subgrid(subgrid), image(_image) {
-		computesize();
-	}
-	Pixel	pixel(size_t x, size_t y) const {
-		return image.pixel(gridorigin.x + x * gridsize.width,
-			gridorigin.y + y * gridsize.height);
-	}
-};
 
 /**
  * \brief Filters that return a single value of the same type as the image.
@@ -110,10 +26,8 @@ public:
 template<typename T, typename S>
 class PixelTypeFilter {
 public:
-	virtual S	filter(const astro::image::Image<T>& image,
-				Subgrid subgrid = Subgrid()) = 0;
-	virtual T	operator()(const astro::image::Image<T>& image,
-				Subgrid subgrid = Subgrid()) = 0;
+	virtual S	filter(const ConstImageAdapter<T>& image) = 0;
+	virtual T	operator()(const ConstImageAdapter<T>& image) = 0;
 };
 
 /**
@@ -123,20 +37,17 @@ template<typename T, typename S>
 class CountNaNs : public PixelTypeFilter<T, S> {
 public:
 	CountNaNs() { }
-	virtual S	filter(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual T	operator()(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-S	CountNaNs<T, S>::filter(const astro::image::Image<T>& image,
-			const Subgrid grid) {
+S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	result = 0;
-	ConstSubgridAdapter<T>	sga(grid, image);
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	ImageSize	size = image.getSize();
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			if (v != v) {
 				result += 1;
 			}
@@ -146,13 +57,12 @@ S	CountNaNs<T, S>::filter(const astro::image::Image<T>& image,
 }
 
 template<typename T, typename S>
-T	CountNaNs<T, S>::operator()(const astro::image::Image<T>& image,
-			const Subgrid grid) {
+T	CountNaNs<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	return (T)filter(image);
 }
 
-double	countnans(const ImagePtr& image, const Subgrid grid = Subgrid());
-double	countnansrel(const ImagePtr& image, const Subgrid grid = Subgrid());
+double	countnans(const ImagePtr& image);
+double	countnansrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the largest value of all pixels
@@ -161,26 +71,22 @@ template<typename T, typename S>
 class Max : public PixelTypeFilter<T, S> {
 public:
 	Max() { }
-	virtual	S	filter(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual T	operator()(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual	S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-S	Max<T, S>::filter(const astro::image::Image<T>& image,
-			const Subgrid grid) {
-	return (S)this->operator()(image, grid);
+S	Max<T, S>::filter(const ConstImageAdapter<T>& image) {
+	return (S)this->operator()(image);
 }
 
 template<typename T, typename S>
-T	Max<T, S>::operator()(const astro::image::Image<T>& image,
-			const Subgrid grid) {
+T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = 0;
-	ConstSubgridAdapter<T>	sga(grid, image);
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	ImageSize	size = image.getSize();
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v > result) {
 				result = image.pixel(x, y);
@@ -190,8 +96,8 @@ T	Max<T, S>::operator()(const astro::image::Image<T>& image,
 	return result;
 }
 
-double	max(const ImagePtr& image, const Subgrid grid = Subgrid());
-double	maxrel(const ImagePtr& image, const Subgrid grid = Subgrid());
+double	max(const ImagePtr& image);
+double	maxrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the smalles value of all pixels
@@ -200,26 +106,22 @@ template<typename T, typename S>
 class Min : public PixelTypeFilter<T, S> {
 public:
 	Min() { }
-	virtual	S	filter(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual T	operator()(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual	S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-S	Min<T, S>::filter(const astro::image::Image<T>& image,
-			const Subgrid grid) {
-	return (S) this->operator()(image, grid);
+S	Min<T, S>::filter(const ConstImageAdapter<T>& image) {
+	return (S) this->operator()(image);
 }
 
 template<typename T, typename S>
-T	Min<T, S>::operator()(const astro::image::Image<T>& image,
-			const Subgrid grid) {
+T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = std::numeric_limits<T>::max();
-	const ConstSubgridAdapter<T>	sga(grid, image);
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	ImageSize	size = image.getSize();
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v < result) {
 				result = v;
@@ -229,8 +131,8 @@ T	Min<T, S>::operator()(const astro::image::Image<T>& image,
 	return result;
 }
 
-double	min(const ImagePtr& image, const Subgrid grid = Subgrid());
-double	minrel(const ImagePtr& image, const Subgrid grid = Subgrid());
+double	min(const ImagePtr& image);
+double	minrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the mean of an image
@@ -241,22 +143,19 @@ class Mean : public PixelTypeFilter<T, S> {
 public:
 	Mean(bool _relative = false) : relative(_relative) {
 	}
-	virtual S	filter(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual T	operator()(const Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-S	Mean<T, S>::filter(const astro::image::Image<T>& image,
-			const Subgrid grid) {
-	const ConstSubgridAdapter<T>	sga(grid, image);
+S	Mean<T, S>::filter(const ConstImageAdapter<T>& image) {
+	ImageSize	size = image.getSize();
 	S	sum = 0;
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			if ((check_nan) && (v != v))
 				continue;
 			sum += v;
@@ -268,13 +167,12 @@ S	Mean<T, S>::filter(const astro::image::Image<T>& image,
 }
 
 template<typename T, typename S>
-T	Mean<T, S>::operator()(const Image<T>& image,
-			const Subgrid grid) {
-	return (T)filter(image, grid);
+T	Mean<T, S>::operator()(const ConstImageAdapter<T>& image) {
+	return (T)filter(image);
 }
 
-double	mean(const astro::image::ImagePtr& image, const Subgrid grid = Subgrid());
-double	meanrel(const astro::image::ImagePtr& image, const Subgrid grid = Subgrid());
+double	mean(const ImagePtr& image);
+double	meanrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the variance of an image
@@ -283,26 +181,23 @@ template<typename T, typename S>
 class Variance : public Mean<T, S> {
 public:
 	Variance() { }
-	virtual S	filter(const astro::image::Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual T	operator()(const Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual S	filter(const ConstImageAdapter<T>& image);
+	virtual T	operator()(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-S	Variance<T, S>::filter(const astro::image::Image<T>& image,
-			const Subgrid grid) {
-	S	m = Mean<T, S>::filter(image, grid);
+S	Variance<T, S>::filter(const ConstImageAdapter<T>& image) {
+	S	m = Mean<T, S>::filter(image);
 	// the rest of the code is concerned with computing the
 	// quadratic mean
 
 	S	sum = 0;
 	size_t	counter = 0;
-	const ConstSubgridAdapter<T>	sga(grid, image);
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	ImageSize	size = image.getSize();
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			// skip NaNs
 			if ((check_nan) && (v != v))
 				continue;
@@ -317,71 +212,76 @@ S	Variance<T, S>::filter(const astro::image::Image<T>& image,
 }
 
 template<typename T, typename S>
-T	Variance<T, S>::operator()(const Image<T>& image, const Subgrid grid) {
-	return (T)filter(image, grid);
+T	Variance<T, S>::operator()(const ConstImageAdapter<T>& image) {
+	return (T)filter(image);
 }
 
 /**
  * \brief Filters that finds the mean of the various color channels
  */
 template<typename T, typename S>
-class MatrixMean : public Mean<T, S> {
+class MosaicMean : public Mean<T, S> {
 protected:
 	typedef enum color_e {
 		R = 0, Gr = 1, B = 2, Gb = 3
 	} color_type;
 	color_type	color;
-public:
-	MatrixMean(color_type _color) : color(_color) { }
-	virtual S	mean(const astro::image::Image<T>& image) {
-		if (image.getMosaicType() & 0x8) {
-			throw std::logic_error("not a mosaic image");
-		}
-		unsigned int	dx =  image.getMosaicType()       & 0x1;
-		unsigned int	dy = (image.getMosaicType() >> 1) & 0x1;
-		ImagePoint	origin(dx, dy);
+	ImagePoint	origin(const ImageBase::mosaic_type& mosaic) {
+		unsigned int	dx =  mosaic       & 0x1;
+		unsigned int	dy = (mosaic >> 1) & 0x1;
+		ImagePoint	o(dx, dy);
 		switch (color) {
 		case R:
 			break;
 		case Gr:
-			origin.x ^= 0x1;
+			o.x ^= 0x1;
 			break;
 		case B:
-			origin.x ^= 0x1;
-			origin.y ^= 0x1;
+			o.x ^= 0x1;
+			o.y ^= 0x1;
 			break;
 		case Gb:
-			origin.y ^= 0x1;
+			o.y ^= 0x1;
 			break;
 		}
-		Subgrid	grid(origin, ImageSize(2, 2));
+		return o;
+	}
+public:
+	MosaicMean(color_type _color) : color(_color) { }
+	virtual S	mean(const ConstImageAdapter<T>& image,
+				const ImageBase::mosaic_type& mosaic) {
+		if (mosaic & 0x8) {
+			throw std::logic_error("not a mosaic image");
+		}
+		Subgrid	grid(origin(mosaic), ImageSize(2, 2));
+		ConstSubgridAdapter<T>	subimage(image, grid);
 		Mean<T, S>	m;
-		return m.filter(image, grid);
+		return m.filter(image);
 	}
 };
 
 template<typename T, typename S>
-class MeanR : public MatrixMean<T, S> {
+class MeanR : public MosaicMean<T, S> {
 public:
-	MeanR() : MatrixMean<T, S>(MatrixMean<T, S>::R) { };
+	MeanR() : MosaicMean<T, S>(MosaicMean<T, S>::R) { }
 };
 
 template<typename T, typename S>
-class MeanGr : public MatrixMean<T, S> {
+class MeanGr : public MosaicMean<T, S> {
 public:
-	MeanGr() : MatrixMean<T, S>(MatrixMean<T, S>::Gr) { };
+	MeanGr() : MosaicMean<T, S>(MosaicMean<T, S>::Gr) { };
 };
 
 template<typename T, typename S>
-class MeanB : public MatrixMean<T, S> {
+class MeanB : public MosaicMean<T, S> {
 public:
-	MeanB() : MatrixMean<T, S>(MatrixMean<T, S>::B) { };
+	MeanB() : MosaicMean<T, S>(MosaicMean<T, S>::B) { };
 };
 
 template<typename T, typename S>
-class MeanGb : public MatrixMean<T, S> {
+class MeanGb : public MosaicMean<T, S> {
 public:
-	MeanGb() : MatrixMean<T, S>(MatrixMean<T, S>::Gb) { };
+	MeanGb() : MosaicMean<T, S>(MosaicMean<T, S>::Gb) { };
 };
 
 /**
@@ -394,19 +294,17 @@ class Median : public PixelTypeFilter<T, S> {
 	T	upper_limit;
 	T	lower_limit;
 
-	T	median(const astro::image::Image<T>& image,
-			const T& left, const T& right, const Subgrid grid);
+	T	median(const ConstImageAdapter<T>& image,
+			const T& left, const T& right);
 public:
 	Median() { }
 
-	virtual T	operator()(const Image<T>& image,
-				const Subgrid grid = Subgrid());
-	virtual S	filter(const Image<T>& image,
-				const Subgrid grid = Subgrid());
+	virtual T	operator()(const ConstImageAdapter<T>& image);
+	virtual S	filter(const ConstImageAdapter<T>& image);
 };
 
 template<typename T, typename S>
-T	Median<T, S>::operator()(const Image<T>& image, const Subgrid grid) {
+T	Median<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	// compute the maximum value that we have to consider.
 	// this depends on whether we have a floating point type,
 	// in which case we have to compute the maximum and minimum,
@@ -420,23 +318,24 @@ T	Median<T, S>::operator()(const Image<T>& image, const Subgrid grid) {
 		upper_limit = std::numeric_limits<T>::max();
 	} else {
 		Min<T, S>	minfilter;
-		lower_limit = minfilter(image, grid);
+		lower_limit = minfilter(image);
 		Max<T, S>	maxfilter;
-		upper_limit = maxfilter(image, grid);
+		upper_limit = maxfilter(image);
 	}
-	T	result = median(image, lower_limit, upper_limit, grid);
+	T	result = median(image, lower_limit, upper_limit);
 	return result;
 }
 
 template<typename T, typename S>
-S	Median<T, S>::filter(const Image<T>& image, const Subgrid grid) {
-	return (S)this->operator()(image, grid);
+S	Median<T, S>::filter(const ConstImageAdapter<T>& image) {
+	return (S)this->operator()(image);
 }
 
 template<typename T, typename S>
-T	Median<T, S>::median(const astro::image::Image<T>& image,
-		const T& left, const T& right, const Subgrid grid) {
-	size_t	pixels = image.size.pixels / grid.volume();
+T	Median<T, S>::median(const ConstImageAdapter<T>& image,
+		const T& left, const T& right) {
+	ImageSize	size = image.getSize();
+	size_t	pixels = size.pixels;
 #if 0
 std::cout << "left: " << (unsigned int)left << ", right: "
 	<< (unsigned int)right << std::endl;
@@ -457,10 +356,9 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	}
 
 	// count the number of values 
-	const ConstSubgridAdapter<T>	sga(grid, image);
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
-			T	v = sga.pixel(x, y);
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			T	v = image.pixel(x, y);
 			for (unsigned int i = 0; i < N + 1; i++) {
 				if (v <= limits[i]) {
 					count[i]++;
@@ -494,21 +392,21 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	// median
 	
 	if ((2 * count[N]) < pixels) {
-		return median(image, limits[N], upper_limit, grid);
+		return median(image, limits[N], upper_limit);
 	}
 	if (pixels <= (2 * count[0])) {
-		return median(image, 0, limits[0], grid);
+		return median(image, 0, limits[0]);
 	}
 	for (unsigned int i = 1; i < N + 1; i++) {
 		if (((2 * count[i - 1]) < pixels)
 			&& (pixels <= (2 * count[i]))) {
-			return median(image, limits[i - 1], limits[i], grid);
+			return median(image, limits[i - 1], limits[i]);
 		}
 	}
 	throw std::logic_error("error in median computation");
 }
 
-double	median(const ImagePtr& image, const Subgrid grid = Subgrid());
+double	median(const ImagePtr& image);
 
 /**
  * \brief Figure of Merit for autofocus
@@ -517,106 +415,38 @@ double	median(const ImagePtr& image, const Subgrid grid = Subgrid());
  * of the image function. This is the L^2-norm of the first derivative.
  * The larger in absolute value, the better the focus. 
  */
-template<typename Pixel, typename S>
-class FocusFOM : public PixelTypeFilter<Pixel, S> {
-	/**
-	 * \brief Direction for computation of the laplacian
-	 *
-	 * For Bayer RGB images, it is preferable to compute the laplacian
-	 * diagonally.
-	 */
+template<typename Pixel>
+class FocusFOM : public PixelTypeFilter<Pixel, double> {
 	bool	diagonal;
 	double	scale;
-	S	laplacian(const ConstSubgridAdapter<Pixel>& image,
-			size_t x, size_t y) const {
-		S	result = -4 * image.pixel(x, y);
-		if (diagonal) {
-			result += image.pixel(x - 1, y);
-			result += image.pixel(x + 1, y);
-			result += image.pixel(x, y - 1);
-			result += image.pixel(x, y + 1);
-		} else {
-			result += image.pixel(x - 1, y - 1);
-			result += image.pixel(x + 1, y - 1);
-			result += image.pixel(x - 1, y + 1);
-			result += image.pixel(x + 1, y + 1);
-		}
-		return result / 4;
-	}
 public:
 	FocusFOM(bool _diagonal = false, double _scale = 1)
 		: diagonal(_diagonal), scale(_scale) {
-		if (diagonal) {
-			scale /= sqrt(2.);
-		}
 	}
 
-	virtual S	filter(const astro::image::Image<Pixel>& image,
-				Subgrid subgrid = Subgrid()) {
-		S	result = 0;
-		ConstSubgridAdapter<Pixel>	sga(subgrid, image);
-		for (size_t x = 1; x < sga.size.width - 1; x++) {
-			for (size_t y = 1; y < sga.size.height - 1; y++) {
-				S	l = laplacian(sga, x, y)
-						* sga.pixel(x, y);
+	virtual double	filter(const ConstImageAdapter<Pixel>& image) {
+		FocusFOMAdapter<Pixel>	foa(image, diagonal);
+		ImageSize	size = foa.getSize();
+		double	result = 0;
+		for (size_t x = 0; x < size.width; x++) {
+			for (size_t y = 0; y < size.height; y++) {
+				double	l = foa.pixel(x, y);
 				// skip NaNs
 				if (l == l) {
-					result -= l;
+					result += l;
 				}
 			}
 		}
 		return scale * result;
 	}
 
-	virtual Pixel	operator()(const astro::image::Image<Pixel>& image,
-				Subgrid subgrid = Subgrid()) {
-		Pixel	result = this->filter(image, subgrid);
+	virtual Pixel	operator()(const ConstImageAdapter<Pixel>& image) {
+		Pixel	result = this->filter(image);
 		return result;
 	}
 };
 
-double	focusFOM(const ImagePtr& image, const bool diagonal = false,
-		const Subgrid grid = Subgrid());
-
-/**
- * \brief Masking functions
- *
- * The mask class needs a method to find out whether a given pixel
- *
- */
-class MaskingFunction {
-public:
-	virtual double	operator()(size_t x, size_t y) const = 0;
-};
-
-class HanningMaskingFunction : public MaskingFunction {
-protected:
-	double	hanningradius;
-	double	hanningfunction(double x) const;
-public:
-	HanningMaskingFunction(double hanningradius);
-};
-
-class RectangleFunction : public HanningMaskingFunction {
-	ImageRectangle	rectangle;
-	ImageRectangle	innerrectangle;
-	double	xmargin;
-	double	ymargin;
-public:
-	RectangleFunction(const ImageRectangle& rectangle,
-		double hanningradius = 0);
-	virtual double	operator()(size_t x, size_t y) const;
-}; 
-
-class CircleFunction : public HanningMaskingFunction {
-protected:
-	ImagePoint	center;
-	double	radius;
-public:
-	CircleFunction(const ImagePoint& center, double radius,
-		double hanningradius = 0);
-	virtual double	operator()(size_t x, size_t y) const;
-};
+double	focusFOM(const ImagePtr& image, const bool diagonal = false);
 
 /**
  * \brief Image masking operations

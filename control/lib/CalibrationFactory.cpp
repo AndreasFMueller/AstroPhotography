@@ -169,10 +169,10 @@ void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
 
 	// perform mean (and possibly variance) computation in the
 	// case where 
-	T	m;
+	//T	m;
 	T	X = 0, X2 = 0;
 	typename std::vector<PV>::const_iterator j;
-	int	counter = 0;
+	unsigned int	counter = 0;
 	for (j = pvs.begin(); j != pvs.end(); j++) {
 		T	v = j->pixelvalue(x, y);
 		// skip this value if it is a NaN
@@ -308,7 +308,8 @@ ImageMean<T>::~ImageMean() {
 template<typename T>
 T	ImageMean<T>::mean(const Subgrid grid) const {
 	Mean<T, T>	meanoperator;
-	return meanoperator(*image, grid);
+	ConstSubgridAdapter<T>	sga(*image, grid);
+	return meanoperator(sga);
 }
 
 /**
@@ -317,7 +318,8 @@ T	ImageMean<T>::mean(const Subgrid grid) const {
 template<typename T>
 T	ImageMean<T>::variance(const Subgrid grid) const {
 	Variance<T, T>	varianceoperator;
-	return varianceoperator(*image, grid);
+	ConstSubgridAdapter<T>	sga(*image, grid);
+	return varianceoperator(sga);
 }
 
 /**
@@ -353,9 +355,10 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	T	stddev3 = 3 * sqrt(var);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
 	size_t	badpixelcount = 0;
-	SubgridAdapter<T>	sga(grid, *im.image);
-	for (unsigned int x = 0; x < sga.size.width; x++) {
-		for (unsigned int y = 0; y < sga.size.height; y++) {
+	SubgridAdapter<T>	sga(*im.image, grid);
+	ImageSize	size = sga.getSize();
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
 			if (fabs(sga.pixel(x, y) - mean) > stddev3) {
 				sga.pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
@@ -394,11 +397,11 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
 	ImageMean<T>	im(images, true);
 	// perform the dark computation for each individual subgrid
 	size_t	badpixels = 0;
-	ImageSize	size(2, 2);
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), size));
+	ImageSize	step(2, 2);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	return im.getImagePtr();
 }
@@ -407,9 +410,21 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
  * \brief Dark image construction function for arbitrary image sequences
  */
 ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
-	// XXX find out whether this is a Bayer image
-	bool	gridded = true;
-	if ((*images.begin())->bitsPerPixel() <= std::numeric_limits<float>::digits) {
+	// make sure we have at least one image
+	if (images.size() == 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create dark from no images");
+		throw std::runtime_error("no images in sequence");
+	}
+
+	// find out whether these are Bayer images, by looking at the first
+	// image
+	ImagePtr	firstimage = *images.begin();
+	bool	gridded = firstimage->isMosaic();
+	
+	// based on the bit size of the first image, decide whether to work
+	// with floats or with doubles
+	unsigned int	floatlimit = std::numeric_limits<float>::digits;
+	if (firstimage->bitsPerPixel() <= floatlimit) {
 		return dark<float>(images, gridded);
 	}
 	return dark<double>(images, gridded);
@@ -522,7 +537,8 @@ Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
 }
 
 ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
-	if (image->bitsPerPixel() <= std::numeric_limits<float>::digits) {
+	unsigned int	floatlimit = std::numeric_limits<float>::digits;
+	if (image->bitsPerPixel() <= floatlimit) {
 		TypedCalibrator<float>	calibrator(dark, flat);
 		return calibrator(image);
 	}

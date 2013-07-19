@@ -51,11 +51,14 @@ void	TransformTest::tearDown() {
 }
 
 void	TransformTest::testIdentity() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin identity test");
 	Transform	t;
 	CPPUNIT_ASSERT(t.isIdentity());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "identity test complete");
 }
 
 void	TransformTest::testPoints() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point test");
 	Point	P1(0, 0);
 	Point	P2(1, 0);
 	Point	P3(1, 1);
@@ -75,33 +78,43 @@ void	TransformTest::testPoints() {
 	Transform	t1(frompoints, topoints);
 	Transform	t2(M_PI/2, Point(2, 3));
 	CPPUNIT_ASSERT(t1 == t2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point test complete");
 }
 
 void	TransformTest::testTranslation() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation test");
 	Transform	t1(0, Point(4, 5));
 	CPPUNIT_ASSERT(t1.isTranslation());
 	Transform	t2(0, Point(4, 5), 2);
 	CPPUNIT_ASSERT(!t2.isTranslation());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation test complete");
 }
 
 void	TransformTest::testProduct() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "product test");
 	Transform	t1(10, Point(0, 0), 2);
 	Transform	t2(-10, Point(0, 0), 0.5);
 	Transform	t3 = t1 * t2;
 	CPPUNIT_ASSERT(t3.isIdentity());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "product test complete");
 }
 
 void	TransformTest::testHomothety() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "homothety test");
 	Transform	t1(0, Point(0, 0), 3);
 	CPPUNIT_ASSERT(t1.isHomothety());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "homothety test complete");
 }
 
 void	TransformTest::testAnglePreserving() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "angle preserving test");
 	Transform	t1(5, Point(1,2), 2);
 	CPPUNIT_ASSERT(t1.isAnglePreserving());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "angle preserving test complete");
 }
 
 void	TransformTest::testAreaPreserving() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "area preserving test");
 	Point	P1(0, 0);
 	Point	P2(1, 0);
 	Point	P3(1, 1);
@@ -120,9 +133,11 @@ void	TransformTest::testAreaPreserving() {
 	
 	Transform	t1(frompoints, topoints);
 	CPPUNIT_ASSERT(t1.isAreaPreserving());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "area preserving test complete");
 }
 
 void	TransformTest::testOperator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "operator test");
 	Transform	t(M_PI/4, Point(1,2));
 	Point	p1(1, 0);
 	Point	q1 = t(p1);
@@ -132,6 +147,7 @@ void	TransformTest::testOperator() {
 	Point	q2 = t(p2);
 	CPPUNIT_ASSERT(fabs(q2.x - (1 - sqrt(0.5))) < 0.000001);
 	CPPUNIT_ASSERT(fabs(q2.y - (2 + sqrt(0.5))) < 0.000001);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "operator test complete");
 }
 
 } // namespace test

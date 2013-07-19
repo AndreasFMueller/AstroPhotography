@@ -107,10 +107,12 @@ int	main(int argc, char *argv[]) {
 	FITSout	maskout("masked.fits");
 	maskout.write(image);
 
+#if 0
 	// compute the FOM
 	double	fom = focusFOM(image, true,
 		Subgrid(ImagePoint(1, 0), ImageSize(1, 1)));
 	std::cout << "FOM: " << fom << std::endl;
+#endif
 
 
 	return EXIT_SUCCESS;

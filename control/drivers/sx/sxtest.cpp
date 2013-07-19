@@ -161,14 +161,15 @@ void	sxtest::testFullimage() {
 	file.write(image);
 
 	// find average value of all pixel planes
+	ImageBase::mosaic_type	mosaic = shortimage->getMosaicType();
 	MeanR<unsigned short, double>	R;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "R = %f", R.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "R = %f", R.mean(*shortimage, mosaic));
 	MeanGr<unsigned short, double>	Gr;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gr = %f", Gr.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gr = %f", Gr.mean(*shortimage, mosaic));
 	MeanB<unsigned short, double>	B;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "B = %f", B.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "B = %f", B.mean(*shortimage, mosaic));
 	MeanGb<unsigned short, double>	Gb;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gb = %f", Gb.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gb = %f", Gb.mean(*shortimage, mosaic));
 
 	// demosaic the image
 	DemosaicBilinear<unsigned short>	demosaicer;

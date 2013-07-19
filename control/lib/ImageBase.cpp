@@ -178,6 +178,13 @@ void	ImageBase::setMosaicType(const std::string& mosaic_name) {
 }
 
 /**
+ * \brief
+ */
+bool	ImageBase::isMosaic() const {
+	return mosaic != NONE;
+}
+
+/**
  * \brief Find out whether a given Metadata value is set
  *
  * \param name	 name of the metadata element

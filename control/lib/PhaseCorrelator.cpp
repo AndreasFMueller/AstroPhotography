@@ -37,7 +37,7 @@ double	PhaseCorrelator::value(const double *a, const ImageSize& size,
  * \brief Compute 2k+1 x 2k+1 centroid around the center point
  */
 Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
-		const ImagePoint& center, int k) const {
+		const ImagePoint& center, unsigned int k) const {
 	unsigned int	cx = center.x;
 	if (cx < k) {
 		cx += size.width;

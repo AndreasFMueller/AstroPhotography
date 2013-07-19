@@ -10,7 +10,6 @@ using namespace astro::image;
 
 namespace astro {
 namespace image {
-namespace filter {
 
 HanningMaskingFunction::HanningMaskingFunction(double _hanningradius)
 	: hanningradius(_hanningradius) {
@@ -105,26 +104,5 @@ double	CircleFunction::operator()(size_t x, size_t y) const {
 	return 0;
 }
 
-#define mask_typed(mf, image, Pixel)         				\
-        {                                                               \
-                Image<Pixel>    *imagep                                 \
-                        = dynamic_cast<Image<Pixel> *>(&*image);        \
-                if (NULL != imagep) {                                   \
-			Mask<Pixel>	m(mf);				\
-			m(*imagep);					\
-			return;						\
-		}							\
-	}
-
-void	mask(MaskingFunction& maskingfunction, ImagePtr image) {
-	mask_typed(maskingfunction, image, unsigned char);
-	mask_typed(maskingfunction, image, unsigned short);
-	mask_typed(maskingfunction, image, unsigned int);
-	mask_typed(maskingfunction, image, unsigned long);
-	mask_typed(maskingfunction, image, float);
-	mask_typed(maskingfunction, image, double);
-}
-
-} // namespace filter
 } // namespace image
 } // namespace astro

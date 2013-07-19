@@ -74,6 +74,7 @@ public:
 	Point	operator()(const Point& point) const;
 
 	// for debugging
+	std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out,
 		const Transform& transform);
 };
@@ -85,7 +86,8 @@ class PhaseCorrelator {
 	double	value(const double *a, const astro::image::ImageSize& size,
 			unsigned int x, unsigned int y) const;
 	Point	centroid(const double *a, const astro::image::ImageSize& size,
-			const astro::image::ImagePoint& center, int k = 2) const;
+			const astro::image::ImagePoint& center,
+			unsigned int k = 2) const;
 public:
 	Point	operator()(const ConstImageAdapter<double>& fromimage,
 			const ConstImageAdapter<double>& toimage);

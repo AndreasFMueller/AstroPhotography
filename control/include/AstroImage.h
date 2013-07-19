@@ -192,6 +192,7 @@ public:
 	mosaic_type	getMosaicType() const;
 	void	setMosaicType(mosaic_type mosaic);
 	void	setMosaicType(const std::string& mosaic_name);
+	bool	isMosaic() const;
 
 	// the size is publicly accessible, but users should not change it
 	ImageSize	size;
@@ -325,13 +326,17 @@ public:
  */
 template<typename Pixel>
 class ConstImageAdapter {
+protected:
+	ImageSize	adaptersize;
 public:
 	/**
 	 * \brief A shorthand for the type of the individual pixels
 	 */
 	typedef	Pixel	pixel_type;
 
-	virtual	ImageSize	getSize() const = 0;
+	ConstImageAdapter(const ImageSize& _size) : adaptersize(_size) { }
+
+	ImageSize	getSize() const { return adaptersize; }
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const = 0;
 };
 
@@ -342,6 +347,7 @@ public:
 template<typename Pixel>
 class ImageAdapter : public ConstImageAdapter<Pixel> {
 public:
+	ImageAdapter(const ImageSize& size) : ConstImageAdapter<Pixel>(size) {}
 	virtual Pixel&	pixel(unsigned int x, unsigned int y) = 0;
 };
 
@@ -382,7 +388,7 @@ public:
 	 *		Image is deallocated.
 	 */
 	Image<Pixel>(unsigned int _w, unsigned int _h, Pixel *p = NULL)
-		: ImageBase(_w, _h) {
+		: ImageBase(_w, _h), ImageAdapter<Pixel>(ImageSize(_w, _h)) {
 		if (p) {
 			pixels = p;
 		} else {
@@ -405,7 +411,8 @@ public:
 	 *		supplied Pixel array and will free it when the
 	 *		Image is deallocated.
 	 */
-	Image<Pixel>(const ImageSize& size, Pixel *p = NULL) : ImageBase(size) {
+	Image<Pixel>(const ImageSize& size, Pixel *p = NULL)
+		: ImageBase(size), ImageAdapter<Pixel>(size) {
 		if (p) {
 			pixels = p;
 		} else {
@@ -421,7 +428,8 @@ public:
 	 * \param
  	 */
 	template<typename srcPixel>
-	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size) {
+	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size),
+		ImageAdapter<Pixel>(other.size) {
 		pixels = new Pixel[size.pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
 			size.pixels, pixels);
@@ -441,7 +449,8 @@ public:
 	 * because the whole pixel array and not only some rows of  it
 	 * need to be copied.
 	 */
-	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p) {
+	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
+		ImageAdapter<Pixel>(p.size) {
 		pixels = new Pixel[size.pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
 			size.pixels, pixels);
@@ -644,7 +653,8 @@ public:
  */
 template<class Pixel>
 Image<Pixel>::Image(const Image<Pixel>& src,
-		const ImageRectangle& frame) : ImageBase(frame.size) {
+		const ImageRectangle& frame)
+	: ImageBase(frame.size), ImageAdapter<Pixel>(frame.size) {
 	if (!src.size.bounds(frame)) {
 		throw std::range_error("subimage frame too large");
 	}
@@ -771,6 +781,21 @@ bool	isColorImage(const ImagePtr& image);
  * \brief Find out whether an image is a monochrome
  */
 bool	isMonochromeImage(const ImagePtr& image);
+
+/**
+ * \brief Abstraction for subgrids of an image
+ */
+class Subgrid {
+public:
+	ImagePoint	origin;
+	ImageSize	stepsize;
+	Subgrid();
+	Subgrid(const ImagePoint& origin, const ImageSize& stepsize);
+	Subgrid(const Subgrid& other);
+	unsigned int	x(unsigned int _x) const;
+	unsigned int	y(unsigned int _y) const;
+	unsigned int	volume() const;
+};
 
 } // namespace image
 } // namespace astro
