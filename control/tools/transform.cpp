@@ -22,10 +22,14 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	Point	translation;
 	int	sample = 0;
-	while (EOF != (c = getopt(argc, argv, "dx:y:s:")))
+	double	angle = 0;
+	while (EOF != (c = getopt(argc, argv, "dx:y:s:a:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'a':
+			angle = atof(optarg);
 			break;
 		case 'x':
 			translation.x = atof(optarg);
@@ -51,18 +55,25 @@ int	main(int argc, char *argv[]) {
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
 
-	// apply a sampling adapter and a translation adapter
+	// prepare result
 	ImagePtr	result;
-	if (sample > 0) {
-		ImageSize	sampling(1 + sample, 1 + sample);
-		result = translate(upsample(image, sampling), translation);
-	}
-	if (sample < 0) {
-		ImageSize	sampling(1 - sample, 1 - sample);
-		result = translate(downsample(image, sampling), translation);
-	}
-	if (sample == 0) {
-		result = translate(image, translation);
+	if (0 != angle) {
+		// perform rotation
+		Transform	rotation(angle, translation);
+		result = astro::image::transform::transform(image, rotation);
+	} else {
+		// apply a sampling adapter and a translation adapter
+		if (sample > 0) {
+			ImageSize	sampling(1 + sample, 1 + sample);
+			result = translate(upsample(image, sampling), translation);
+		}
+		if (sample < 0) {
+			ImageSize	sampling(1 - sample, 1 - sample);
+			result = translate(downsample(image, sampling), translation);
+		}
+		if (sample == 0) {
+			result = translate(image, translation);
+		}
 	}
 	
 	// write the result image

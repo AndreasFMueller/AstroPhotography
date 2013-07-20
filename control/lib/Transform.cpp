@@ -357,6 +357,35 @@ std::string	Transform::toString() const {
 		a[0], a[1], a[2], a[3], a[4], a[5]);
 }
 
+//////////////////////////////////////////////////////////////////////
+// Transform implementation
+//////////////////////////////////////////////////////////////////////
+#define	transform_typed(Pixel)						\
+{									\
+	Image<Pixel >	*imageptr					\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imageptr) {						\
+		TransformAdapter<Pixel > ta(*imageptr, transform);	\
+		return ImagePtr(new Image<Pixel >(ta));			\
+	}								\
+}
+
+ImagePtr	transform(ImagePtr image, const Transform& transform) {
+	transform_typed(unsigned char);
+	transform_typed(unsigned short);
+	transform_typed(unsigned int);
+	transform_typed(unsigned long);
+	transform_typed(float);
+	transform_typed(double);
+	transform_typed(RGB<unsigned char>);
+	transform_typed(RGB<unsigned short>);
+	transform_typed(RGB<unsigned int>);
+	transform_typed(RGB<unsigned long>);
+	transform_typed(float);
+	transform_typed(double);
+	throw std::runtime_error("cannot transform image of this pixel type");
+}
+
 } // namespace transform
 } // namespace image
 } // namespace astro
