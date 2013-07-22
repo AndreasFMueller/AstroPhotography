@@ -284,6 +284,9 @@ public:
 	virtual unsigned int	bitsPerPixel() const {
 		return 2 * std::numeric_limits<P>::digits;
 	}
+	P	luminance() const {
+		return y;
+	}
 };
 
 /**
@@ -357,6 +360,10 @@ public:
 
 	virtual unsigned int	bitsPerPixel() const {
 		return 2 * std::numeric_limits<P>::digits;
+	}
+
+	P	luminance() const {
+		return G;
 	}
 };
 
@@ -622,6 +629,32 @@ template<typename Pixel>
 Pixel	weighted_sum(unsigned int number_of_terms,
 		const double *weights, const Pixel *pixels) {
 	return weighted_sum_typed(number_of_terms, weights, pixels,
+		typename color_traits<Pixel>::color_category());
+}
+
+/**
+ * \brief Luminance function
+ *
+ * Retrieve luminance information from a pixel, independent of time.
+ */
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+	return pixel;
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
+double	luminance(const Pixel& pixel) {
+	return luminance_typed(pixel,
 		typename color_traits<Pixel>::color_category());
 }
 

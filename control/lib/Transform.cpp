@@ -381,8 +381,8 @@ ImagePtr	transform(ImagePtr image, const Transform& transform) {
 	transform_typed(RGB<unsigned short>);
 	transform_typed(RGB<unsigned int>);
 	transform_typed(RGB<unsigned long>);
-	transform_typed(float);
-	transform_typed(double);
+	transform_typed(RGB<float>);
+	transform_typed(RGB<double>);
 	throw std::runtime_error("cannot transform image of this pixel type");
 }
 

@@ -493,5 +493,28 @@ const Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
 
 ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
 
+//////////////////////////////////////////////////////////////////////
+// Luminance Adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class LuminanceAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	LuminanceAdapter(const ConstImageAdapter<Pixel>& image);
+	const double	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+LuminanceAdapter<Pixel>::LuminanceAdapter(
+	const ConstImageAdapter<Pixel>& _image)
+	: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+}
+
+template<typename Pixel>
+const double	LuminanceAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+			const {
+	return luminance(image.pixel(x, y));
+}
+
 } // namespace image
 } // namespace astro

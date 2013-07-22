@@ -48,7 +48,7 @@ tests_SOURCES = tests.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
 	TranslationTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
-	PhaseCorrelatorTest.cpp \
+	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \
 	BinningTest.cpp \
 	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
@@ -62,7 +62,7 @@ usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
 
 calimggen_SOURCES = calimggen.cpp
-calimggens_LDADD = -L.. -lastro
+calimggen_LDADD = -L.. -lastro
 calimggen_DEPENDENCIES = ../libastro.la
 
 caltests_SOURCES = caltests.cpp
