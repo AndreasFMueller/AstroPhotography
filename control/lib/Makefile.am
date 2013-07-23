@@ -36,7 +36,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
 	Metavalue.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp PhaseCorrelator.cpp \
-	Guiding.cpp \
+	Guiding.cpp Simulator.cpp \
 	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp Repository.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \

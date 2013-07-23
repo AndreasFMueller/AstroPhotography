@@ -86,6 +86,7 @@ PhaseTracker::PhaseTracker(ImagePtr _image) {
 	phasetracker_construct(YUYV<unsigned long>);
 	phasetracker_construct(YUYV<float>);
 	phasetracker_construct(YUYV<double>);
+	throw std::runtime_error("cannot track this image type");
 }
 
 #define	phasetracker_typed(Pixel)					\
@@ -121,6 +122,7 @@ astro::image::transform::Point	PhaseTracker::operator()(ImagePtr newimage)
 	phasetracker_typed(YUYV<unsigned long>);
 	phasetracker_typed(YUYV<float>);
 	phasetracker_typed(YUYV<double>);
+	throw std::runtime_error("cannot track this image type");
 }
 
 } // namespace guiding

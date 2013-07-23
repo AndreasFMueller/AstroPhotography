@@ -9,6 +9,7 @@
 #include <AstroImage.h>
 #include <AstroAdapter.h>
 #include <AstroTransform.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace guiding {
@@ -133,10 +134,11 @@ public:
  * \brief Guider class
  */
 class Guider {
-	GuiderPortPtr	guiderport;
-	CameraPtr	camera;
+	astro::camera::GuiderPortPtr	guiderport;
+	astro::camera::CameraPtr	camera;
 public:
-	Guider(GuiderPortPtr guiderport, CameraPtr camera);
+	Guider(astro::camera::GuiderPortPtr guiderport, astro::camera::CameraPtr camera);
+	bool	calibrate();
 };
 
 } // namespace guiding

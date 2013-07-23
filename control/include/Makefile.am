@@ -10,4 +10,4 @@ include_HEADERS = debug.h Format.h AstroImage.h AstroCamera.h AstroLoader.h \
 	AstroFilter.h AstroCalibration.h AstroOperations.h AstroTransform.h \
 	AstroMask.h AstroGuiding.h
 
-noinst_HEADERS = PixelValue.h
+noinst_HEADERS = PixelValue.h Simulator.h
