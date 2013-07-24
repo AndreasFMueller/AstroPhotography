@@ -31,19 +31,22 @@ SimCamera::SimCamera() {
 	ccd0.name = "primary ccd";
 	ccd0.binningmodes.insert(Binning(1, 1));
 	ccdinfo.push_back(ccd0);
-	// position
+	// initial star position
 	x = 320;
 	y = 240;
 
+	// movement definition
 	vx = 0.1;
 	vy = 0.2;
-	delta = 1;
-	alpha = 1;
+	delta = 10;
+	ra.clear();
+	dec.clear();
+	ra.alpha = 1;
+	dec.alpha = ra.alpha + M_PI / 2;
 
 	// neither movement nor exposures are active
-	movestart = -1;
 	exposurestart = -1;
-	lastmovetime = now();
+	lastexposure = now();
 }
 
 CcdPtr	SimCamera::getCcd(size_t id) {
@@ -54,78 +57,93 @@ uint8_t	SimCamera::active() {
 	return 0;
 }
 
-void	SimCamera::complete_movement() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "completing movement");
-	// if we are still moving, figure out by how much we have moved
-	if (movestart > 0) {
-		double	interval = movetime;
+/**
+ * \brief complete the RA movement
+ */
+void	SimCamera::complete(movement& mov) {
+	// find out whether some movement is in progress
+	if (mov.starttime > 0) {
+		double	interval = mov.duration;
 		double	nowtime = now();
-		if (nowtime < (movestart + movetime)) {
-			interval = (movestart + movetime - nowtime);
+		if (nowtime < (mov.starttime + mov.duration)) {
+			interval = (mov.starttime + mov.duration - nowtime);
 		}
-		// figure out in which direction the movement actually
-		// goes
-		double	movementangle = 0;
-		switch (direction) {
-		case GuiderPort::DECMINUS:
-			movementangle = 3 * M_PI / 2;
-			break;
-		case GuiderPort::RAMINUS:
-			movementangle = M_PI;
-			break;
-		case GuiderPort::DECPLUS:
-			movementangle = M_PI / 2;
-			break;
-		case GuiderPort::RAPLUS:
-			break;
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "direction: %.0f right angles",
-			round(2 * movementangle / M_PI));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "moving for %.3f seconds",
+			interval);
 
 		// add the movement to the coordinates
-		x += interval * delta * cos(alpha + movementangle);
-		y += interval * delta * sin(alpha + movementangle);
+		x += mov.direction * interval * delta * cos(mov.alpha);
+		y += mov.direction * interval * delta * sin(mov.alpha);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new coordinates: (%f, %f)",
 			x, y);
 
 		// leave the remaining movement active
-		movetime -= interval;
-		if (movetime > 0) {
-			movestart = nowtime;
+		mov.duration -= interval;
+		if (mov.duration > 0) {
+			mov.starttime = nowtime;
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"remaining move time: %f", movetime);
+				"remaining move time: %f", mov.duration);
 		} else {
-			movestart = -1;
+			mov.starttime = -1;
 		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no movement in progress");
 	}
+}
+
+void	SimCamera::complete_movement() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "completing RA movement");
+	complete(ra);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "completing DEC movement");
+	complete(dec);
 }
 
 void	SimCamera::activate(float raplus, float raminus, float decplus,
 		float decminus) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving ra+ = %.3f, ra- = %.3f, "
+		"dec+ = %.3f, dec- = %.3f", raplus, raminus, decplus, decminus);
 	// complete any pending movement
 	complete_movement();
 
 	// set the new movement state
-	movestart = now();
+	double	movestart = now();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "movement start time: %.3f", movestart);
+
+	// right ascension
+	ra.clear();
 	if (raplus > 0) {
-		direction = GuiderPort::RAPLUS;
-		movetime = raplus;
-		return;
+		ra.starttime = movestart;
+		ra.direction = 1;
+		ra.duration = raplus;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA+ for %.3f seconds",
+			ra.duration);
+	} else {
+		if (raminus > 0) {
+			ra.starttime = movestart;
+			ra.direction = -1;
+			ra.duration = raminus;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "RA- for %.3f seconds",
+				ra.duration);
+		}
 	}
-	if (raminus > 0) {
-		direction = GuiderPort::RAMINUS;
-		movetime = raminus;
-		return;
-	}
+
+	// declination
+	dec.clear();
 	if (decplus > 0) {
-		direction = GuiderPort::DECPLUS;
-		movetime = decplus;
-		return;
-	}
-	if (decminus > 0) {
-		direction = GuiderPort::DECMINUS;
-		movetime = decminus;
-		return;
+		dec.starttime = movestart;
+		dec.direction = 1;
+		dec.duration = decplus;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC+ for %.3f seconds",
+			dec.duration);
+	} else {
+		if (decminus > 0) {
+			dec.starttime = movestart;
+			dec.direction = -1;
+			dec.duration = decminus;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC- for %.3f seconds",
+				dec.duration);
+			return;
+		}
 	}
 }
 
@@ -181,9 +199,9 @@ ImagePtr	SimCamera::getImage() {
 
 	// add base motion
 	double	nowtime = now();
-	x += vx * (nowtime - lastmovetime);
-	y += vy * (nowtime - lastmovetime);
-	lastmovetime = nowtime;
+	x += vx * (nowtime - lastexposure);
+	y += vy * (nowtime - lastexposure);
+	lastexposure = nowtime;
 
 	// create the image based on the current position parameters
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating 640x480 image");

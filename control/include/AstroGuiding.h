@@ -7,6 +7,7 @@
 #define _AstroStar_h
 
 #include <AstroImage.h>
+#include <AstroTypes.h>
 #include <AstroAdapter.h>
 #include <AstroTransform.h>
 #include <AstroCamera.h>
@@ -25,7 +26,7 @@ class StarDetector {
 	const astro::image::ConstImageAdapter<Pixel>&	image;
 public:
 	StarDetector(const astro::image::ConstImageAdapter<Pixel>& _image);
-	astro::image::transform::Point	operator()(
+	Point	operator()(
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k) const;
 }; 
@@ -46,7 +47,7 @@ StarDetector<Pixel>::StarDetector(
  * response. This is the best estimate for the star coordinates.
  */
 template<typename Pixel>
-astro::image::transform::Point	StarDetector<Pixel>::operator()(
+Point	StarDetector<Pixel>::operator()(
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k) const {
 	// work only in the rectangle
@@ -80,11 +81,11 @@ astro::image::transform::Point	StarDetector<Pixel>::operator()(
 	ysum /= weightsum;
 
 	// add the offset of the rectangle to get real coordinates
-	return astro::image::transform::Point(rectangle.origin.x + xsum,
+	return Point(rectangle.origin.x + xsum,
 		rectangle.origin.y + ysum);
 }
 
-astro::image::transform::Point	findstar(astro::image::ImagePtr image,
+Point	findstar(astro::image::ImagePtr image,
 	const astro::image::ImageRectangle& rectangle);
 
 /**
@@ -95,9 +96,10 @@ astro::image::transform::Point	findstar(astro::image::ImagePtr image,
  */
 class Tracker {
 public:
-	virtual astro::image::transform::Point	operator()(
-			astro::image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(astro::image::ImagePtr newimage) const = 0;
 };
+
+typedef std::tr1::shared_ptr<Tracker>	TrackerPtr;
 
 /**
  * \brief StarDetector based Tracker
@@ -105,15 +107,16 @@ public:
  * This Tracker uses the StarTracker 
  */
 class StarTracker : public Tracker {
-	astro::image::transform::Point	point;
+	Point	point;
 	astro::image::ImageRectangle rectangle;
 	unsigned int	k;
 public:
-	StarTracker(const astro::image::transform::Point & point,
+	StarTracker(const Point& point,
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k);
-	virtual astro::image::transform::Point	operator()(
-			astro::image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(
+			astro::image::ImagePtr newimage) const;
+	const astro::image::ImageRectangle&	getRectangle() const;
 };
 
 /**
@@ -126,19 +129,72 @@ class PhaseTracker : public Tracker {
 	astro::image::ImagePtr	image;
 public:
 	PhaseTracker(astro::image::ImagePtr image);
-	virtual astro::image::transform::Point	operator()(
-			astro::image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(
+			astro::image::ImagePtr newimage) const;
 };
+
+/**
+ * \brief GuiderCalibration
+ */
+class GuiderCalibration {
+public:
+	double	a[6];
+	std::string	toString() const;
+	Point	defaultcorrection() const;
+	Point	operator()(const Point& offset) const;
+};
+
+/**
+ * \brief GuiderCalibrator
+ */
+class GuiderCalibrator {
+public:
+	class calibration_point {
+	public:
+		double	t;
+		Point	offset;
+		Point	point;
+		calibration_point(double _t, const Point& _offset,
+			const Point& _point) 
+			: t(_t), offset(_offset), point(_point) {
+		}
+	};
+private:
+	std::vector<calibration_point>	calibration_data;
+public:
+	GuiderCalibrator();
+	void	add(double t, const Point& movement,
+			const Point& point);
+	GuiderCalibration	calibrate();
+};
+
+// we will need the GuiderProcess class, but as we want to keep the 
+// implementation (using low level threads and other nasty things) hidden,
+// we only define it in the implementation
+class GuiderProcess;
+typedef std::tr1::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 
 /**
  * \brief Guider class
  */
 class Guider {
 	astro::camera::GuiderPortPtr	guiderport;
-	astro::camera::CameraPtr	camera;
+	astro::camera::CcdPtr	ccd;
+	GuiderCalibration	calibration;
+	bool	calibrated;
+	void	sleep(double t);
+	void	moveto(int ra, int dec);
+	GuiderProcessPtr	guiderprocess;
 public:
-	Guider(astro::camera::GuiderPortPtr guiderport, astro::camera::CameraPtr camera);
-	bool	calibrate();
+	Guider(astro::camera::GuiderPortPtr guiderport,
+		astro::camera::CcdPtr ccd);
+	bool	calibrate(TrackerPtr tracker);
+	const GuiderCalibration&	getCalibration() const;
+	astro::camera::CcdPtr	getCcd();
+	astro::camera::GuiderPortPtr	getGuiderPort();
+	bool	start(TrackerPtr tracker);
+	bool	stop();
+	friend class GuiderProcess;
 };
 
 } // namespace guiding

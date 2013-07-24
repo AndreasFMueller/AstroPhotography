@@ -8,6 +8,6 @@ include_HEADERS = debug.h Format.h AstroImage.h AstroCamera.h AstroLoader.h \
 	AstroIO.h AstroPixel.h AstroUSB.h AstroUVC.h AstroUnicap.h \
 	AstroUtils.h AstroMosaic.h AstroDemosaic.h AstroAdapter.h \
 	AstroFilter.h AstroCalibration.h AstroOperations.h AstroTransform.h \
-	AstroMask.h AstroGuiding.h
+	AstroMask.h AstroGuiding.h AstroTypes.h
 
-noinst_HEADERS = PixelValue.h Simulator.h
+noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h

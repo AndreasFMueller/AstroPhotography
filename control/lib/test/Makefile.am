@@ -36,7 +36,7 @@ uvc_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests usbtests calimggen caltests simtest \
+noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 	$(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
 
 # general tests
@@ -72,6 +72,10 @@ caltests_DEPENDENCIES = ../libastro.la
 simtest_SOURCES = simtest.cpp
 simtest_LDADD = -L.. -lastro
 simtest_DEPENDENCIES = ../libastro.la
+
+guidetest_SOURCES = guidetest.cpp
+guidetest_LDADD = -L.. -lastro
+guidetest_DEPENDENCIES = ../libastro.la
 
 # tests for UVC cameras
 if ENABLE_UVC

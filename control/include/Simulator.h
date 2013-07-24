@@ -19,27 +19,50 @@ namespace sim {
 class SimCcd;
 class SimGuiderPort;
 
+/**
+ * \brief Simulator camera for guiding code tests
+ *
+ * This camera simulates a guiding camera on a slightly misaligned telescope.
+ * Whenever an image is taken, it places it at the current (x,y) coordinates.
+ * These coordinates are initialized to the center of the image, but they
+ * change over time according to the variables vx and vy. The speed can 
+ * further be modified by activating the guider port available with the
+ * camera. Activating the guider port in right ascencsion for a given time
+ * changes the coordinates based on the velocity set in the member variable
+ * delta and the direction set in the ra.alpha. Similarly for declination.
+ */
 class SimCamera : public Camera {
 	// position
 	double	x, y;
 
+public:
 	// motion status
+	double	delta;
+	
+	// common movement
 	double	vx;
 	double	vy;
-	double	delta;
-	double	alpha;
-	double	lastmovetime;
 
 	// guiderport control
-	double	movestart;
-	double	movetime;
-	GuiderPort::relay_bits	direction;
+	typedef struct movement {
+		double	starttime;	// time when movement started
+		double	duration;	// duration of movement
+		int	direction;	// +- 1
+		double	alpha;
+		void clear() { starttime = -1; }
+	} movement;
+
+	movement	ra;
+	movement	dec;
 
 	// exposure control
 	Exposure	exposure;
+private:
 	double	exposurestart;
+	double	lastexposure;
 
 	// complete the current movement
+	void	complete(movement& mov);
 	void	complete_movement();
 	void	await_exposure();
 public:
@@ -57,6 +80,9 @@ public:
 	ImagePtr	getImage();
 };
 
+/**
+ * \brief Simulator camera CCD
+ */
 class SimCcd : public Ccd {
 	SimCamera&	camera;
 public:
@@ -68,6 +94,9 @@ public:
 	virtual ImagePtr	getImage() throw (not_implemented);
 };
 
+/**
+ * \brief Simulator camera guider port
+ */
 class SimGuiderPort : public GuiderPort {
 	SimCamera&	camera;
 public:
