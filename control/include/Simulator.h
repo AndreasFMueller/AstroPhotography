@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <includes.h>
+#include <pthread.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -62,12 +63,13 @@ private:
 	double	lastexposure;
 
 	// complete the current movement
+	pthread_mutex_t	mutex;
 	void	complete(movement& mov);
 	void	complete_movement();
 	void	await_exposure();
 public:
 	SimCamera();
-	virtual ~SimCamera() { }
+	virtual ~SimCamera();
 	virtual CcdPtr	getCcd(size_t id);
 	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
 	// guider port functions

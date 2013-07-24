@@ -55,6 +55,8 @@ public:
 	~GuiderProcess();
 	bool	start(TrackerPtr tracker);
 	bool	stop();
+	double	getGain() const;
+	void	setGain(double gain);
 };
 
 } // namespace guiding

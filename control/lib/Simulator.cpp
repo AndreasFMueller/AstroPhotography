@@ -47,6 +47,13 @@ SimCamera::SimCamera() {
 	// neither movement nor exposures are active
 	exposurestart = -1;
 	lastexposure = now();
+
+	// create a mutex to protect the movement structures
+	pthread_mutex_init(&mutex, NULL);
+}
+
+SimCamera::~SimCamera() {
+	pthread_mutex_destroy(&mutex);
 }
 
 CcdPtr	SimCamera::getCcd(size_t id) {
@@ -96,12 +103,23 @@ void	SimCamera::complete_movement() {
 	complete(ra);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "completing DEC movement");
 	complete(dec);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "position now: (%.3f,%.3f)", x, y);
 }
 
-void	SimCamera::activate(float raplus, float raminus, float decplus,
-		float decminus) {
+/**
+ * \brief Activate the Guiderport of the simulator camera
+ *
+ * This method completes the movement that was already in progress, as
+ * far as time has already progressed.
+ */
+void	SimCamera::activate(float raplus, float raminus,
+		float decplus, float decminus) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving ra+ = %.3f, ra- = %.3f, "
 		"dec+ = %.3f, dec- = %.3f", raplus, raminus, decplus, decminus);
+
+	// ensure noboy else can change the structures
+	pthread_mutex_lock(&mutex);
+
 	// complete any pending movement
 	complete_movement();
 
@@ -142,9 +160,9 @@ void	SimCamera::activate(float raplus, float raminus, float decplus,
 			dec.duration = decminus;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC- for %.3f seconds",
 				dec.duration);
-			return;
 		}
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 void	SimCamera::startExposure(const Exposure& _exposure) {
@@ -169,10 +187,11 @@ void	SimCamera::await_exposure() {
 	double	exposed = nowtime - exposurestart;
 	if (exposure.exposuretime > exposed) {
 		double	remaining = exposure.exposuretime - exposed;
-		struct timeval	tv;
-		tv.tv_sec = trunc(remaining);
-		tv.tv_usec = trunc(1000000 * remaining - tv.tv_sec);
-		select(0, NULL, NULL, NULL, &tv);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"remaining time to exposure: %.3f", remaining);
+		int	useconds = 1000000 * remaining;
+		usleep(useconds);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure copmlete now");
 	}
 }
 
@@ -195,7 +214,10 @@ ImagePtr	SimCamera::getImage() {
 	exposurestart = -1;
 
 	// complete any pending motions
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "complete movement up to now");
+	pthread_mutex_lock(&mutex);
 	complete_movement();
+	pthread_mutex_unlock(&mutex);
 
 	// add base motion
 	double	nowtime = now();

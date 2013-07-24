@@ -52,7 +52,10 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error(msg);
 	}
 
-	// XXX now simulate tracking
+	// now simulate tracking
+	guider.start(tracker);
+	sleep(60);
+	guider.stop();
 
 	return EXIT_SUCCESS;
 }

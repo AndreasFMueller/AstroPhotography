@@ -21,6 +21,10 @@ namespace guiding {
  * compensate the drift to first order.
  */
 GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
+	// exposure
+	exposure = guider.getExposure();
+
+	// there is currently no way to modify the gain
 	gain = 1;
 
 	// compute the ra/dec duty cycle to compensate the drift
@@ -28,8 +32,8 @@ GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
 	// using the 
 	const GuiderCalibration&	calibration = guider.getCalibration();
 	Point	correction = calibration.defaultcorrection();
-	tx = zx = correction.x;
-	ty = zy = correction.y;
+	tx = zx = -correction.x;
+	ty = zy = -correction.y;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %.3fs, ty = %.3fs", tx, ty);
 	if ((fabs(tx) > 1) || (fabs(ty) > 1)) {
 		std::string	msg = stringprintf("default activation times "
@@ -81,17 +85,29 @@ void	*GuiderProcess::guide_main() {
 			decminus = -ty;
 		}
 		pthread_mutex_unlock(&mutex);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"GUIDE: activate(%.3f, %.3f, %.3f, %.3f)",
+			raplus, raminus, decplus, decminus);
 
 		guider.getGuiderPort()->activate(raplus, raminus,
 			decplus, decminus);
 
-		struct timespec	ts;
 		struct timeval	tv;
 		gettimeofday(&tv, NULL);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GUIDE: now: %d.%06u",
+			tv.tv_sec, tv.tv_usec);
+
+		struct timespec	ts;
 		ts.tv_sec = tv.tv_sec + 1;
 		ts.tv_nsec = 1000 * tv.tv_usec;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"GUIDE: next activity at %d.%09u",
+			ts.tv_sec, ts.tv_nsec);
 		rc = pthread_cond_timedwait(&guide.cond, &guide.mutex, &ts);
-	} while (rc == 0);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GUIDE: wait complete (%s)",
+			strerror(rc));
+	} while (rc == ETIMEDOUT);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GUIDE: Termination signal received");
 	pthread_exit(NULL);
 }
 
@@ -107,26 +123,29 @@ static void	*guiderprocess_main(void *private_data) {
  * \brief Main tracker method
  */
 void	*GuiderProcess::track_main() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker main function started");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: tracker main function started");
 	while (tracking) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: start new exposure");
 		// initiate an exposure
 		guider.getCcd()->startExposure(exposure);
 
 		// until the image is exposed
 		usleep(1000000 * exposure.exposuretime);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retreive the image
 		ImagePtr	image = guider.getCcd()->getImage();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: new image received");
 
 		// use the tracker to find the tracking offset
 		Point	offset = tracker->operator()(image);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "current tracker offset: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK: current tracker offset: %s",
 			offset.toString().c_str());
 
 		// compute the correction to tx and ty
 		Point	correction = guider.getCalibration()(offset);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "correction: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: correction: %s",
 			correction.toString().c_str());
 
 		// compute the correction, but this must be done with tx, ty
@@ -186,6 +205,9 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 	return true;
 }
 
+/**
+ * \brief Stop the tracker process
+ */
 bool	GuiderProcess::stop() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping guiding threads");
 	// stop the tracker process
@@ -209,6 +231,14 @@ bool	GuiderProcess::stop() {
 	// clean up all resources needed by the thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiding threads stopped");
 	return true;
+}
+
+double	GuiderProcess::getGain() const {
+	return gain;
+}
+
+void	GuiderProcess::setGain(double _gain) {
+	gain = _gain;
 }
 
 } // namespace guiding

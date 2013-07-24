@@ -11,6 +11,7 @@
 #include <AstroAdapter.h>
 #include <AstroTransform.h>
 #include <AstroCamera.h>
+#include <debug.h>
 
 namespace astro {
 namespace guiding {
@@ -65,6 +66,8 @@ Point	StarDetector<Pixel>::operator()(
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum at (%d,%d), value = %f",
+		maxx, maxy, maxvalue);
 
 	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
 	// square around the maximum pixel.
@@ -180,6 +183,7 @@ typedef std::tr1::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 class Guider {
 	astro::camera::GuiderPortPtr	guiderport;
 	astro::camera::CcdPtr	ccd;
+	astro::camera::Exposure	exposure;
 	GuiderCalibration	calibration;
 	bool	calibrated;
 	void	sleep(double t);
@@ -188,10 +192,18 @@ class Guider {
 public:
 	Guider(astro::camera::GuiderPortPtr guiderport,
 		astro::camera::CcdPtr ccd);
+	// controlling the exposure parameters
+	const astro::camera::Exposure&	getExposure() const;
+	void	setExposure(const astro::camera::Exposure& exposure);
+
+	// calibration
 	bool	calibrate(TrackerPtr tracker);
 	const GuiderCalibration&	getCalibration() const;
+
 	astro::camera::CcdPtr	getCcd();
 	astro::camera::GuiderPortPtr	getGuiderPort();
+
+	// tracking
 	bool	start(TrackerPtr tracker);
 	bool	stop();
 	friend class GuiderProcess;

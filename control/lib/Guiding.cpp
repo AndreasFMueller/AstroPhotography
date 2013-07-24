@@ -58,6 +58,8 @@ Point	StarTracker::operator()(ImagePtr newimage)
 	const {
 	// find the star on the new image
 	Point	newpoint = findstar(newimage, rectangle, k);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s",
+		newpoint.toString().c_str());
 	return newpoint - point;
 }
 
@@ -147,9 +149,9 @@ Point	GuiderCalibration::defaultcorrection() const {
 }
 
 Point	GuiderCalibration::operator()(const Point& offset) const {
-        double determinant = a[0] * a[4] - a[1] * a[3];
-        double	x = (offset.x * a[4] - offset.y * a[3]) / determinant;
-        double	y = (a[0] * offset.x - a[1] * offset.y) / determinant;
+        double determinant = a[0] * a[4] - a[3] * a[1];
+        double	x = (offset.x * a[4] - offset.y * a[1]) / determinant;
+        double	y = (a[0] * offset.y - a[3] * offset.x) / determinant;
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s",
 		offset.toString().c_str(), result.toString().c_str());
@@ -259,6 +261,17 @@ static double	now() {
 Guider::Guider(GuiderPortPtr _guiderport, CcdPtr _ccd)
 	: guiderport(_guiderport), ccd(_ccd) {
 	calibrated = false;
+	// default exposure settings
+	exposure.frame = ccd->getInfo().getFrame();
+	exposure.exposuretime = 1.;
+}
+
+const Exposure&	Guider::getExposure() const {
+	return exposure;
+}
+
+void	Guider::setExposure(const Exposure& _exposure) {
+	exposure = _exposure;
 }
 
 /**
@@ -279,10 +292,6 @@ Guider::Guider(GuiderPortPtr _guiderport, CcdPtr _ccd)
  */
 bool	Guider::calibrate(TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
-
-	// prepare Exposure structure (XXX we should be able to define the
-	// image rectangle an the exposure time)
-	Exposure	exposure(ccd->getInfo().getFrame(), 1.);
 
 	// grid range we want to scan
 	int range = 1;
@@ -361,18 +370,12 @@ void	Guider::moveto(int ra, int dec) {
 /**
  * \brief Utility function: pause for a number of seconds
  *
- * \param t	time in seconds. Actual precision depends on the resolution
- *		of the systems select call.
+ * \param t	time in seconds. 
  */
 void	Guider::sleep(double t) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %.3f seconds", t);
-	struct timeval	tv;
-	tv.tv_sec = trunc(t);
-	tv.tv_usec = trunc(1000000 * (t - tv.tv_sec));
-	if (tv.tv_usec < 0) {
-		tv.tv_usec = 0;
-	}
-	select(0, NULL, NULL, NULL, &tv);
+	unsigned int	tt = 1000000 * t;
+	usleep(tt);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
 }
 
