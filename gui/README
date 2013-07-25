@@ -1,0 +1,6 @@
+This directory contains a library of Qt based GUI components and auxiliary
+applications. These could then be used in more complete GUI applications
+for astrophotography.
+
+--
+$Id$

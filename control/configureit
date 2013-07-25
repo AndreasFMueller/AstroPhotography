@@ -1,5 +1,5 @@
 #
-# configuration used for development purposes on Linux
+# configuration used for development purposes on Linux and Mac OS X
 #
 CFLAGS="-Wall -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
