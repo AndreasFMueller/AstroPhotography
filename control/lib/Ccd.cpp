@@ -5,8 +5,8 @@
  * $Id$
  */
 #include <AstroCamera.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 

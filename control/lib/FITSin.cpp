@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroIO.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace io {

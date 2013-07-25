@@ -11,7 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <stdexcept>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::usb;
 using namespace astro::usb::uvc;

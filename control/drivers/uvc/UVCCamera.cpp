@@ -4,8 +4,8 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <UvcCamera.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <UvcCcd.h>
 #include <UvcUtils.h>
 

@@ -10,7 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroDemosaic.h>
 
 extern double	default_exposuretime;

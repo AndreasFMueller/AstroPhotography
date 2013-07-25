@@ -6,8 +6,8 @@
 #include <UvcLocator.h>
 #include <UvcCamera.h>
 #include <UvcUtils.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 
 using namespace astro::device;
 

@@ -10,7 +10,7 @@
 #include <fitsio.h>
 #include <AstroImage.h>
 #include <map>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 

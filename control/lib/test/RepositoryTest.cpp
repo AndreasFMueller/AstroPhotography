@@ -11,7 +11,7 @@
 #include <config.h>
 #include <iostream>
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::module;
 

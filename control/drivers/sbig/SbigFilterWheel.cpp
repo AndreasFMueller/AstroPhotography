@@ -6,8 +6,8 @@
 #include <SbigLocator.h>
 #include <includes.h>
 #include <SbigFilterWheel.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 #include <sbigudrv.h>
 #include <utils.h>
 #include <limits>

@@ -5,11 +5,11 @@
  */
 #include <includes.h>
 #include <stdexcept>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <AstroFilter.h>
 #include <AstroDevice.h>
 

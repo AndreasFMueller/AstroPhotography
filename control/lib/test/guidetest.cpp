@@ -6,7 +6,7 @@
  */
 #include <AstroGuiding.h>
 #include <Simulator.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 using namespace astro::guiding;

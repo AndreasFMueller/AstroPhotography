@@ -8,7 +8,7 @@
 #include <AstroCamera.h>
 #include <AstroImage.h>
 #include <sx.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SxDemux.h>
 #include <fstream>
 

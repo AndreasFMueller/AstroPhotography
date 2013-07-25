@@ -8,6 +8,7 @@
 #include <GuiderProcess.h>
 #include <Accelerate/Accelerate.h>
 #include <includes.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;

@@ -11,7 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <iostream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::io;
 using namespace astro::image;

@@ -1,8 +1,8 @@
 //
-// Format.h -- format numbers as std::string
+// AstroFormat.h -- format numbers as std::string
 //
-#ifndef _Format_h
-#define _Format_h
+#ifndef _AstroFormat_h
+#define _AstroFormat_h
 
 #include <string>
 #include <stdarg.h>
@@ -14,4 +14,4 @@ extern std::string vstringprintf(const char *format, va_list args);
 
 } // namespace rocket
 
-#endif	/* _Format_h */
+#endif	/* _AstroFormat_h */

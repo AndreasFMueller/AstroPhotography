@@ -6,7 +6,7 @@
 #include <SxCamera.h>
 #include <SxCcd.h>
 #include <sx.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SxGuiderPort.h>
 
 using namespace astro::image;

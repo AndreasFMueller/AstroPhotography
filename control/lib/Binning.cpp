@@ -5,7 +5,7 @@
  * $Id$
  */
 #include <AstroCamera.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <stdexcept>
 #include <limits>
 

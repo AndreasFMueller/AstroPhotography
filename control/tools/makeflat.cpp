@@ -4,11 +4,11 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 using namespace astro::calibration;
 using namespace astro::io;

@@ -8,8 +8,8 @@
 #include <AstroIO.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;

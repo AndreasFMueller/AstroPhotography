@@ -6,7 +6,7 @@
  */
 #include <AstroIO.h>
 #include <fitsio.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 

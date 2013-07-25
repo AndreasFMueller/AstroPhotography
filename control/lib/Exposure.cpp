@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroCamera.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <math.h>
 
 using namespace astro::image;

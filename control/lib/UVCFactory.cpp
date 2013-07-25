@@ -5,7 +5,7 @@
  */
 #include <AstroUVC.h>
 #include <sstream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::usb;
 

@@ -204,13 +204,18 @@ typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
 
 class	Camera {
 protected:
+	std::string	name;
 	std::vector<CcdInfo>	ccdinfo;
 public:
+	Camera(const std::string& name);
 	Camera();
 	~Camera();
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
 	virtual CcdPtr	getCcd(size_t ccdid) = 0;
+
+	// access to name
+	const std::string&	getName() const;
 
 	// handling the filter wheel
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);

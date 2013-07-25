@@ -4,9 +4,9 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <iostream>
 #include <AstroLoader.h>
 #include <AstroCamera.h>

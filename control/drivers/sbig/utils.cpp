@@ -6,7 +6,7 @@
 #include <sbigudrv.h>
 #include <string>
 #include <utils.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::camera;
 

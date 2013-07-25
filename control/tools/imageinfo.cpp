@@ -7,7 +7,7 @@
 #include <AstroImage.h>
 #include <AstroIO.h>
 #include <AstroFilter.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 
 using namespace astro::image;

@@ -12,9 +12,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 using namespace astro::io;

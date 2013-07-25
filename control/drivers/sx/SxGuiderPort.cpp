@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SxGuiderPort.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <algorithm>
 #include <SxUtils.h>
 

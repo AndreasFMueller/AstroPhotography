@@ -12,7 +12,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <unistd.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::device;
 using namespace astro::camera;

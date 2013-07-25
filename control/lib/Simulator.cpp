@@ -5,7 +5,7 @@
  */
 #include <Simulator.h>
 #include <AstroAdapter.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <unistd.h>
 
 using namespace astro::image;
@@ -25,7 +25,7 @@ static double	now() {
 // Simulator camera implementation
 //////////////////////////////////////////////////////////////////////
 
-SimCamera::SimCamera() {
+SimCamera::SimCamera() : Camera("guidesim") {
 	CcdInfo	ccd0;
 	ccd0.size = ImageSize(640, 480);
 	ccd0.name = "primary ccd";

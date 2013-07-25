@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <UvcCcd.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <UvcUtils.h>
 #include <AstroFilter.h>
 #include <AstroOperators.h>

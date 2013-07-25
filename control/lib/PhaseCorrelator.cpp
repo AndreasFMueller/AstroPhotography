@@ -4,8 +4,8 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswli
  */
 #include <AstroTransform.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <fftw3.h>
 
 namespace astro {

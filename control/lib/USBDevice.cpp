@@ -6,8 +6,8 @@
 #include <AstroUSB.h>
 #include <ios>
 #include <iomanip>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 using namespace astro;
 

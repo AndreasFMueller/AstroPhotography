@@ -5,7 +5,7 @@
  */
 #include <AstroTransform.h>
 #include <Accelerate/Accelerate.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {

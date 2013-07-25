@@ -6,7 +6,7 @@
 #include <AstroUVC.h>
 #include <sstream>
 #include <iomanip>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdlib.h>
 
 namespace astro {

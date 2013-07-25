@@ -6,7 +6,7 @@
 #include <AstroUnicap.h>
 #include <stdlib.h>
 #include <string.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <sstream>
 
 using namespace astro::usb;

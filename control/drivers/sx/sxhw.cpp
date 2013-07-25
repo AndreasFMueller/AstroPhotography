@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, 
  */
 #include <sxhw.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::usb;
 

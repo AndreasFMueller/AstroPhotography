@@ -11,7 +11,7 @@
 #include <AstroAdapter.h>
 #include <AstroTransform.h>
 #include <AstroCamera.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace guiding {

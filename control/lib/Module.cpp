@@ -8,7 +8,7 @@
 #include <includes.h>
 #include <iostream>
 #include <fstream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::device;
 

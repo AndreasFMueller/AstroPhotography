@@ -10,7 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::camera::sbig;
 using namespace astro::device;

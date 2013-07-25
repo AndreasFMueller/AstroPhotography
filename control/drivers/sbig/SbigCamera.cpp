@@ -9,9 +9,10 @@
 #include <iostream>
 #include <sbigudrv.h>
 #include <utils.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SbigFilterWheel.h>
 #include <SbigGuiderPort.h>
+#include <AstroFormat.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -25,15 +26,34 @@ namespace sbig {
  *
  * \param usbno   USB number of the camera.
  */
-SbigCamera::SbigCamera(int usbno) {
+SbigCamera::SbigCamera(int usbno) : Camera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object %d", usbno);
 
 	SbigLock	sbiglock;
 
+	// make sure we can really find this camera, and construct the name
+	// of the camera
+	QueryUSBResults results;
+	short   e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
+        if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get camera list: %s",
+			sbig_error(e).c_str());
+		throw SbigError(e);
+        }
+	if ((usbno >= results.camerasFound) ||
+		(!results.usbInfo[usbno].cameraFound)) {
+		std::string	msg = stringprintf("camera %d not found",
+			usbno);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	name = stringprintf("sbig:%s/%s", results.usbInfo[usbno].serialNumber,
+		results.usbInfo[usbno].name);
+
 	// open the device
 	OpenDeviceParams	openparams;
 	openparams.deviceType = 0x7f02 + usbno;
-	short	e = SBIGUnivDrvCommand(CC_OPEN_DEVICE, &openparams, NULL);
+	e = SBIGUnivDrvCommand(CC_OPEN_DEVICE, &openparams, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open device: %s",
 			sbig_error(e).c_str());
@@ -45,14 +65,14 @@ SbigCamera::SbigCamera(int usbno) {
 	// separate step from opening the device)
 	EstablishLinkParams	establishparams;
 	establishparams.sbigUseOnly = 0;
-	EstablishLinkResults	results;
-	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams, &results);
+	EstablishLinkResults	establishresults;
+	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams, &establishresults);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot establish link: %s",
 			sbig_error(e).c_str());
 		throw SbigError(e);
 	}
-	cameraType = results.cameraType;
+	cameraType = establishresults.cameraType;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera type: %hu", cameraType);
 
 	// get the handle

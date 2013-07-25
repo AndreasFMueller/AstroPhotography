@@ -4,14 +4,15 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SbigLocator.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <sbigudrv.h>
 #include <utils.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <SbigCamera.h>
 #include <includes.h>
 #include <pthread.h>
 
+using namespace astro;
 using namespace astro::camera;
 
 namespace astro {
@@ -68,22 +69,6 @@ SbigCameraLocator::~SbigCameraLocator() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
 }
-
-#if 0
-void	SbigCameraLocator::lock() {
-	int	err = pthread_mutex_lock(&mutex);
-	if (0 != err) {
-		throw std::runtime_error("could not lock Sbig mutex");
-	}
-}
-
-void	SbigCameraLocator::unlock() {
-	int	err = pthread_mutex_unlock(&mutex);
-	if (0 != err) {
-		throw std::runtime_error("could not unlock Sbig mutex");
-	}
-}
-#endif
 
 /**
  * \brief Get a list of SBIG cameras

@@ -6,10 +6,10 @@
 #include <includes.h>
 #include <AstroImage.h>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <istream>
 #include <fstream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 

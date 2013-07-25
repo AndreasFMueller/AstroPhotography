@@ -6,7 +6,7 @@
 #include <AstroInterpolation.h>
 #include <PixelValue.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 
 using namespace astro::image;

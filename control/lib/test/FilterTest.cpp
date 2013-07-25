@@ -10,7 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;

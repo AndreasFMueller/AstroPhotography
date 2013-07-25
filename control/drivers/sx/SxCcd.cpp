@@ -9,7 +9,7 @@
 #include <AstroFilter.h>
 #include <AstroOperators.h>
 #include <sx.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SxUtils.h>
 
 using namespace astro::camera;

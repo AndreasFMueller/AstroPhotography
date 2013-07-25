@@ -6,7 +6,7 @@
 #include <SbigLocator.h>
 #include <SbigCcd.h>
 #include <sbigudrv.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <utils.h>
 #include <includes.h>
 #include <SbigCooler.h>

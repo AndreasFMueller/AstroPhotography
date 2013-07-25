@@ -15,7 +15,7 @@
 #include <limits>
 #include <vector>
 #include <map>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {

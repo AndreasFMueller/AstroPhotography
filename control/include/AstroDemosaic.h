@@ -7,7 +7,7 @@
 #define _AstroDemosaic_h
 
 #include <AstroImage.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {

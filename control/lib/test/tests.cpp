@@ -7,7 +7,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 int	main(int argc, char *argv[]) {
 	CppUnit::TextUi::TestRunner	runner;

@@ -6,7 +6,7 @@
 #include <AstroUSB.h>
 #include <ios>
 #include <iomanip>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace usb {

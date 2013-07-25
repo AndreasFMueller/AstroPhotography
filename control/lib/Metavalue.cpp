@@ -5,7 +5,7 @@
  */
 #include <AstroImage.h>
 #include <fitsio.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {

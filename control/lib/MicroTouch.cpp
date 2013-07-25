@@ -5,7 +5,7 @@
  */
 #include <MicroTouch.h>
 #include <string.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <iomanip>
 
 using namespace astro::usb;

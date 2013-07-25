@@ -9,7 +9,7 @@
 #include <AstroImage.h>
 #include <AstroAdapter.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {

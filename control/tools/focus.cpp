@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 #include <iostream>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <AstroDevice.h>

@@ -6,8 +6,8 @@
 #include <SxLocator.h>
 #include <SxCamera.h>
 #include <SxUtils.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 #include <includes.h>
 
 using namespace astro::usb;

@@ -6,7 +6,7 @@
 #include <SbigLocator.h>
 #include <SbigGuiderPort.h>
 #include <utils.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <sbigudrv.h>
 
 namespace astro {

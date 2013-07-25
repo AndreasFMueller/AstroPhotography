@@ -7,7 +7,7 @@
 #include <SbigCooler.h>
 #include <sbigudrv.h>
 #include <utils.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {

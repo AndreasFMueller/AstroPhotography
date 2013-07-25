@@ -5,7 +5,7 @@
  */
 #include <SxCcd.h>
 #include <AstroUSB.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {

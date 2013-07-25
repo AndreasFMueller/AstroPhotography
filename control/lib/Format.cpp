@@ -3,7 +3,7 @@
 //
 // (c) 2005 Dr. Andreas Mueller, Beratung und Entwicklung
 //
-#include <Format.h>
+#include <AstroFormat.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

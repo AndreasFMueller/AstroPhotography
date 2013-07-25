@@ -5,7 +5,7 @@
  * $id$
  */
 #include <AstroImage.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {

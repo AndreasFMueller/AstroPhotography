@@ -7,8 +7,8 @@
 #include <AstroLoader.h>
 #include <AstroIO.h>
 #include <Simulator.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 using namespace astro::camera::sim;
 using namespace astro::io;
