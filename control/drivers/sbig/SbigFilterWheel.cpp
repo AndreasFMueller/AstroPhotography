@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <SbigLocator.h>
 #include <includes.h>
 #include <SbigFilterWheel.h>
 #include <Format.h>
@@ -78,6 +79,7 @@ void	SbigFilterWheel::wait() {
  *			Filter wheel
  */
 SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera) : camera(_camera) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// find out what type of filter wheel we have
@@ -128,6 +130,8 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera) : camera(_camera) {
 }
 
 SbigFilterWheel::~SbigFilterWheel() {
+	SbigLock	lock;
+	camera.sethandle();
 	// find out what type of filter wheel we have
 	CFWParams	params;
 	CFWResults	results;
@@ -149,6 +153,7 @@ unsigned int	SbigFilterWheel::nFilters() {
  * \brief Determine current filter wheel position.
  */
 unsigned int	SbigFilterWheel::currentPosition() {
+	SbigLock	lock;
 	camera.sethandle();
 	wait();
 	return currentindex;
@@ -168,6 +173,7 @@ void	SbigFilterWheel::select(size_t filterindex) {
 		return;
 	}
 #endif
+	SbigLock	lock;
 	camera.sethandle();
 	CFWParams	params;
 	CFWResults	results;

@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroGuiding.h>
+#include <AstroIO.h>
 #include <GuiderProcess.h>
 #include <Accelerate/Accelerate.h>
 #include <includes.h>
@@ -12,6 +13,7 @@ using namespace astro::image;
 using namespace astro::image::transform;
 using namespace astro::camera;
 using namespace astro::guiding;
+using namespace astro::io;
 
 namespace astro {
 namespace guiding {
@@ -303,13 +305,20 @@ bool	Guider::calibrate(TrackerPtr tracker) {
 	for (int ra = -range; ra <= range; ra++) {
 		for (int dec = -range; dec <= range; dec++) {
 			// move the telescope to the grid position
-			moveto(ra, dec);
+			moveto(5 * ra, 5 * dec);
 			ccd->startExposure(exposure);
-			Point	point = (*tracker)(ccd->getImage());
+			ImagePtr	image = ccd->getImage();
+
+std::string	filename = stringprintf("guider.%d.%d.fits", ra, dec);
+FITSout	out(filename);
+unlink(filename.c_str());
+out.write(image);
+			
+			Point	point = (*tracker)(image);
 			double	t = now();
 			calibrator.add(t, Point(ra, dec), point);
 			// move the telescope back
-			moveto(-ra, -dec);
+			moveto(-5 * ra, -5 * dec);
 			ccd->startExposure(exposure);
 			point = (*tracker)(ccd->getImage());
 			t = now();

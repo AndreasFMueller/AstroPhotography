@@ -89,7 +89,7 @@ Point	StarDetector<Pixel>::operator()(
 }
 
 Point	findstar(astro::image::ImagePtr image,
-	const astro::image::ImageRectangle& rectangle);
+	const astro::image::ImageRectangle& rectangle, unsigned int k);
 
 /**
  * \brief Tracker class

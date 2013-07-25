@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <SbigLocator.h>
 #include <SbigCamera.h>
 #include <SbigCcd.h>
 #include <iostream>
@@ -26,6 +27,8 @@ namespace sbig {
  */
 SbigCamera::SbigCamera(int usbno) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object %d", usbno);
+
+	SbigLock	sbiglock;
 
 	// open the device
 	OpenDeviceParams	openparams;
@@ -203,6 +206,7 @@ void	SbigCamera::sethandle() {
  * This cleans up the handle of the camera and closes the device.
  */
 SbigCamera::~SbigCamera() {
+	SbigLock	lock;
 	// set the handle first
 	sethandle();
 

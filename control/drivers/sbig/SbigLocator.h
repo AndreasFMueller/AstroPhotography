@@ -7,6 +7,7 @@
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <includes.h>
+#include <pthread.h>
 
 using namespace astro::camera;
 
@@ -29,6 +30,15 @@ public:
 	virtual	std::vector<std::string>	getCameralist();
 	virtual CameraPtr	getCamera(const std::string& name);
 	virtual CameraPtr	getCamera(size_t index);
+};
+
+/**
+ * \brief Locking class for SBIG camera driver
+ */
+class SbigLock {
+public:
+	SbigLock();
+	~SbigLock();
 };
 
 } // namespace sbig

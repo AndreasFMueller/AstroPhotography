@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <SbigLocator.h>
 #include <SbigCcd.h>
 #include <sbigudrv.h>
 #include <debug.h>
@@ -39,6 +40,7 @@ SbigCcd::~SbigCcd() {
  * this is essentially a call to the corresponding dirver library function.
  */
 Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
+	SbigLock	lock;
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
 	QueryCommandStatusResults	results;
@@ -75,6 +77,7 @@ Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
  */
 void	SbigCcd::startExposure(const Exposure& exposure)
 		throw (not_implemented) {
+	SbigLock	lock;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startExposure on ccd %d", id);
 	// check whether we are already exposing
 	if (state == Exposure::exposing) {
@@ -130,79 +133,86 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		usleep(100000);
 	}
 
-	// end the exposure
-	camera.sethandle();
-	EndExposureParams	endexpparams;
-	endexpparams.ccd = id;
-	short	e = SBIGUnivDrvCommand(CC_END_EXPOSURE, &endexpparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot end exposure: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	// this is where we will find the data, we have to declare it
+	// here because everything after this point will be protected
+	unsigned short	*data = NULL;
 
-	// start the readout
-	StartReadoutParams	readparams;
-	readparams.ccd = id;
-	readparams.readoutMode = RM_1X1; // XXX should be set from exposure.mode
-	readparams.top = exposure.frame.origin.y;
-	readparams.left = exposure.frame.origin.x;
-	readparams.width = exposure.frame.size.width;
-	readparams.height = exposure.frame.size.height;
-	e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
-
-	// read the data lines we really are interested in
-	ReadoutLineParams	readlineparams;
-	readlineparams.ccd = id;
-	readlineparams.pixelStart = exposure.frame.origin.x;
-	readlineparams.pixelLength = exposure.frame.size.width;
-	readlineparams.readoutMode = readparams.readoutMode;
-	size_t	arraysize = exposure.frame.size.width
-				* exposure.frame.size.height;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
-	unsigned short	*data = new unsigned short[arraysize];
-	unsigned short	*p = data;
-	unsigned int	linecounter = 0;
-	while (linecounter < exposure.frame.size.height) {
-		e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
+	{
+		SbigLock	lock;
+		// end the exposure
+		camera.sethandle();
+		EndExposureParams	endexpparams;
+		endexpparams.ccd = id;
+		short	e = SBIGUnivDrvCommand(CC_END_EXPOSURE, &endexpparams, NULL);
 		if (e != CE_NO_ERROR) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot end exposure: %s",
 				sbig_error(e).c_str());
-			delete[] data;
 			throw SbigError(e);
 		}
-		p += exposure.frame.size.width;
-		linecounter++;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
 
-	// dump the remaining lines
-	DumpLinesParams	dumplines;
-	dumplines.ccd = id;
-	dumplines.readoutMode = readparams.readoutMode;
-	dumplines.lineLength = info.size.height - exposure.frame.size.height
-		- exposure.frame.origin.y;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
-		dumplines.lineLength);
-	e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot dump remaining lines: %s"
-			" (ignored)", sbig_error(e).c_str());
-	}
+		// start the readout
+		StartReadoutParams	readparams;
+		readparams.ccd = id;
+		readparams.readoutMode = RM_1X1; // XXX should be set from exposure.mode
+		readparams.top = exposure.frame.origin.y;
+		readparams.left = exposure.frame.origin.x;
+		readparams.width = exposure.frame.size.width;
+		readparams.height = exposure.frame.size.height;
+		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
+				sbig_error(e).c_str());
+			throw SbigError(e);
+		}
 
-	// end the readout
-	EndReadoutParams	endreadparams;
-	endreadparams.ccd = id;
-	e = SBIGUnivDrvCommand(CC_END_READOUT, &endreadparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot end readout: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
+		// read the data lines we really are interested in
+		ReadoutLineParams	readlineparams;
+		readlineparams.ccd = id;
+		readlineparams.pixelStart = exposure.frame.origin.x;
+		readlineparams.pixelLength = exposure.frame.size.width;
+		readlineparams.readoutMode = readparams.readoutMode;
+		size_t	arraysize = exposure.frame.size.width
+					* exposure.frame.size.height;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
+		data = new unsigned short[arraysize];
+		unsigned short	*p = data;
+		unsigned int	linecounter = 0;
+		while (linecounter < exposure.frame.size.height) {
+			e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
+			if (e != CE_NO_ERROR) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
+					sbig_error(e).c_str());
+				delete[] data;
+				throw SbigError(e);
+			}
+			p += exposure.frame.size.width;
+			linecounter++;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
+
+		// dump the remaining lines
+		DumpLinesParams	dumplines;
+		dumplines.ccd = id;
+		dumplines.readoutMode = readparams.readoutMode;
+		dumplines.lineLength = info.size.height - exposure.frame.size.height
+			- exposure.frame.origin.y;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
+			dumplines.lineLength);
+		e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot dump remaining lines: %s"
+				" (ignored)", sbig_error(e).c_str());
+		}
+
+		// end the readout
+		EndReadoutParams	endreadparams;
+		endreadparams.ccd = id;
+		e = SBIGUnivDrvCommand(CC_END_READOUT, &endreadparams, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot end readout: %s",
+				sbig_error(e).c_str());
+			throw SbigError(e);
+		}
 	}
 
 	// convert the image data into an image
@@ -227,6 +237,7 @@ CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
  * \brief Query the shutter state
  */
 Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// get the shutter state from query command status command
@@ -258,6 +269,7 @@ Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
  * \brief Set the shutter state.
  */
 void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// first query the the state of fan and LED so that we can use the

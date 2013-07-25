@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <SbigLocator.h>
 #include <SbigCooler.h>
 #include <sbigudrv.h>
 #include <utils.h>
@@ -32,6 +33,7 @@ SbigCooler::~SbigCooler() {
  * \brief Query the set temperature
  */
 float	SbigCooler::getSetTemperature() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature");
 	QueryTemperatureStatusParams	params;
@@ -51,6 +53,7 @@ float	SbigCooler::getSetTemperature() {
  * \brief Query the actual temperature
  */
 float	SbigCooler::getActualTemperature() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get actual temperature");
 	QueryTemperatureStatusParams	params;
@@ -70,6 +73,7 @@ float	SbigCooler::getActualTemperature() {
  * \brief Set the set temperature
  */
 void	SbigCooler::setTemperature(const float temperature) {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the set temperature");
 	this->temperature = temperature;
@@ -83,6 +87,7 @@ void	SbigCooler::setTemperature(const float temperature) {
  * \brief Common (private) set function
  */
 void	SbigCooler::set() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
 	SetTemperatureRegulationParams2	params;
@@ -101,6 +106,7 @@ void	SbigCooler::set() {
  * \brief Query whether cooler is on
  */
 bool	SbigCooler::isOn() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query regulation status");
 	QueryTemperatureStatusParams	params;

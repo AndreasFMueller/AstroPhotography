@@ -27,7 +27,7 @@ imageloop_LDADD = -L../lib -lastro
 
 getimages_SOURCES = getimages.cpp
 getimages_DEPENDENCIES = ../lib/libastro.la
-getimages_LDADD = -L../lib -lastro
+getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = ../lib/libastro.la

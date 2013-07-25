@@ -10,12 +10,33 @@
 #include <Format.h>
 #include <SbigCamera.h>
 #include <includes.h>
+#include <pthread.h>
 
 using namespace astro::camera;
 
 namespace astro {
 namespace camera {
 namespace sbig {
+
+//////////////////////////////////////////////////////////////////////
+// SbigLock implementation
+//////////////////////////////////////////////////////////////////////
+
+static pthread_mutex_t sbigmutex;
+
+SbigLock::SbigLock() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking sbig mutex");
+	pthread_mutex_lock(&sbigmutex);
+}
+
+SbigLock::~SbigLock() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unlocking sbig mutex");
+	pthread_mutex_unlock(&sbigmutex);
+}
+
+//////////////////////////////////////////////////////////////////////
+// SbigLocator implementation
+//////////////////////////////////////////////////////////////////////
 
 std::string	SbigCameraLocator::getName() const {
 	return std::string("sbig");
@@ -26,6 +47,7 @@ std::string	SbigCameraLocator::getVersion() const {
 }
 
 SbigCameraLocator::SbigCameraLocator() {
+	pthread_mutex_init(&sbigmutex, NULL);
 	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
 	if (e != CE_NO_ERROR) {
 		std::string	errmsg = sbig_error(e);
@@ -47,6 +69,22 @@ SbigCameraLocator::~SbigCameraLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
 }
 
+#if 0
+void	SbigCameraLocator::lock() {
+	int	err = pthread_mutex_lock(&mutex);
+	if (0 != err) {
+		throw std::runtime_error("could not lock Sbig mutex");
+	}
+}
+
+void	SbigCameraLocator::unlock() {
+	int	err = pthread_mutex_unlock(&mutex);
+	if (0 != err) {
+		throw std::runtime_error("could not unlock Sbig mutex");
+	}
+}
+#endif
+
 /**
  * \brief Get a list of SBIG cameras
  *
@@ -57,6 +95,7 @@ SbigCameraLocator::~SbigCameraLocator() {
 std::vector<std::string>	SbigCameraLocator::getCameralist() {
 	std::vector<std::string>	names;
 	QueryUSBResults	results;
+	SbigLock	lock;
 	short	e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get camera list: %s",
@@ -104,6 +143,7 @@ CameraPtr	SbigCameraLocator::getCamera(size_t index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
 	return CameraPtr(new SbigCamera(index));
 }
+
 
 } // namespace sbig
 } // namespace camera

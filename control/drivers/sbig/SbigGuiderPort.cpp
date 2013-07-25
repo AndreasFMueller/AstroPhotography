@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <SbigLocator.h>
 #include <SbigGuiderPort.h>
 #include <utils.h>
 #include <debug.h>
@@ -30,6 +31,7 @@ SbigGuiderPort::~SbigGuiderPort() {
  * output relays.
  */
 uint8_t	SbigGuiderPort::active() {
+	SbigLock	lock;
 	camera.sethandle();
 	QueryCommandStatusParams	params;
 	QueryCommandStatusResults	results;
@@ -69,6 +71,7 @@ uint8_t	SbigGuiderPort::active() {
  */
 void	SbigGuiderPort::activate(float raplus, float raminus,
 	float decplus, float decminus) {
+	SbigLock	lock;
 	camera.sethandle();
 	ActivateRelayParams	params;
 	params.tXPlus = raplus * 100;
