@@ -92,8 +92,11 @@ void	SbigCameraLocator::unlock() {
  * locator returns the identifying string of the camera. A camera is
  * identified by its serial number an name.
  */
-std::vector<std::string>	SbigCameraLocator::getCameralist() {
+std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	names;
+	if (device != CAMERA) {
+		return names;
+	}
 	QueryUSBResults	results;
 	SbigLock	lock;
 	short	e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
@@ -123,7 +126,7 @@ std::vector<std::string>	SbigCameraLocator::getCameralist() {
  * by number.
  */
 CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
-	std::vector<std::string>	cameras = getCameralist();
+	std::vector<std::string>	cameras = getDevicelist();
 	std::vector<std::string>::const_iterator	i;
 	size_t	index = 0;
 	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
@@ -144,12 +147,11 @@ CameraPtr	SbigCameraLocator::getCamera(size_t index) {
 	return CameraPtr(new SbigCamera(index));
 }
 
-
 } // namespace sbig
 } // namespace camera
 } // namespace astro
 
 extern "C"
-astro::camera::CameraLocator	*getCameraLocator() {
+astro::device::DeviceLocator	*getDeviceLocator() {
 	return new astro::camera::sbig::SbigCameraLocator();
 }

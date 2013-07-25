@@ -11,11 +11,13 @@
 #include <AstroIO.h>
 #include <Format.h>
 #include <AstroFilter.h>
+#include <AstroDevice.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::module;
 using namespace astro::camera;
+using namespace astro::device;
 using namespace astro::image::filter;
 
 namespace astro {
@@ -127,8 +129,8 @@ int	main(int argc, char *argv[]) {
 	module->open();
 
         // get the camera
-	CameraLocatorPtr        locator = module->getCameraLocator();
-	std::vector<std::string>        cameras = locator->getCameralist();
+	DeviceLocatorPtr        locator = module->getDeviceLocator();
+	std::vector<std::string>        cameras = locator->getDevicelist();
 	if (cameraid >= cameras.size()) {
 		std::string	msg = stringprintf("camera id %d out of range",
 			cameraid);

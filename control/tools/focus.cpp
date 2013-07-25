@@ -12,12 +12,14 @@
 #include <Format.h>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 #include <AstroFilter.h>
 #include <AstroIO.h>
 
 using namespace astro;
 using namespace astro::module;
 using namespace astro::camera;
+using namespace astro::device;
 using namespace astro::image;
 using namespace astro::image::filter;
 using namespace astro::io;
@@ -63,8 +65,8 @@ int	main(int argc, char *argv[]) {
 
 
 	// get the camera
-	CameraLocatorPtr	locator = module->getCameraLocator();
-	std::vector<std::string>	cameras = locator->getCameralist();
+	DeviceLocatorPtr	locator = module->getDeviceLocator();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	if (0 == cameras.size()) {
 		std::cerr << "no cameras found" << std::endl;
 		return EXIT_FAILURE;

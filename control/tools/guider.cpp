@@ -6,10 +6,12 @@
 #include <stdexcept>
 #include <iostream>
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 #include <AstroLoader.h>
 #include <AstroGuiding.h>
 
 using namespace astro::camera;
+using namespace astro::device;
 using namespace astro::module;
 using namespace astro::guiding;
 
@@ -68,8 +70,8 @@ int	main(int argc, char *argv[]) {
 	module->open();
 
 	// get the camera
-	CameraLocatorPtr	locator = module->getCameraLocator();
-	std::vector<std::string>	cameras = locator->getCameralist();
+	DeviceLocatorPtr	locator = module->getDeviceLocator();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	if (cameraid >= cameras.size()) {
 		std::cerr << "cameraid exceeds number of cameras" << std::endl;
 		throw std::runtime_error("bad cameraid");

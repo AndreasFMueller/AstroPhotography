@@ -6,6 +6,7 @@
  */
 
 #include <AstroLoader.h>
+#include <AstroDevice.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -13,6 +14,7 @@
 #include <unistd.h>
 #include <debug.h>
 
+using namespace astro::device;
 using namespace astro::camera;
 using namespace astro::module;
 using namespace astro::image;
@@ -45,8 +47,8 @@ void	Mock1Test::tearDown() {
 void	Mock1Test::testMock1() {
 	ModulePtr	module = repository->getModule("mock1");
 	module->open();
-	CameraLocatorPtr	cl = module->getCameraLocator();
-	std::vector<std::string>	cameras = cl->getCameralist();
+	DeviceLocatorPtr	cl = module->getDeviceLocator();
+	std::vector<std::string>	cameras = cl->getDevicelist();
 	CPPUNIT_ASSERT(cameras.size() == 10);
 	CameraPtr	camera = cl->getCamera("mock1-5");
 	// for every CCD, take an image

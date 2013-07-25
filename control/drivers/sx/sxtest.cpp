@@ -70,7 +70,7 @@ void	sxtest::tearDown() {
 
 void	sxtest::testList() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {
@@ -80,7 +80,7 @@ void	sxtest::testList() {
 }
 
 void	sxtest::testCooler() {
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	CameraPtr	camera = locator->getCamera(*cameras.begin());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd");
 	CcdPtr	ccd = camera->getCcd(0);
@@ -112,7 +112,7 @@ void	sxtest::testCooler() {
 
 void	sxtest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {

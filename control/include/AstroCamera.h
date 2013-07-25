@@ -292,23 +292,6 @@ public:
 		float decplus, float decminus) = 0;
 };
 
-/**
- * \brief Camera locator
- *
- * The camera locator class acts as a factory for camera instances.
- * A module contains a single instance of the locator class. 
- */
-class	CameraLocator {
-public:
-	CameraLocator() { }
-	virtual	~CameraLocator() { }
-	virtual std::string	getName() const = 0;
-	virtual std::string	getVersion() const = 0;
-	virtual std::vector<std::string>	getCameralist() = 0;
-	virtual CameraPtr	getCamera(const std::string& name) = 0;
-};
-typedef std::tr1::shared_ptr<CameraLocator>	CameraLocatorPtr;
-
 } // namepsace camera
 } // namespace astro
 

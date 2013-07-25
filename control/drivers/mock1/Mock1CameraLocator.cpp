@@ -6,11 +6,13 @@
  */
 #include <AstroLoader.h>
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 #include <includes.h>
 #include <Mock1Camera.h>
 #include <iostream>
 
 using namespace astro::camera;
+using namespace astro::device;
 
 namespace astro {
 namespace camera {
@@ -22,13 +24,13 @@ namespace mock1 {
  * The mock1 module offers a set of ten mock cameras each with two
  * CCDs with different image sizes.
  */
-class Mock1CameraLocator : public CameraLocator {
+class Mock1CameraLocator : public DeviceLocator {
 public:
 	Mock1CameraLocator() { }
 	virtual ~Mock1CameraLocator() { }
 	virtual std::string	getName() const { return "mock1"; }
 	virtual std::string	getVersion() const { return VERSION; }
-	virtual std::vector<std::string>	getCameralist();
+	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
 	virtual CameraPtr	getCamera(const std::string& name);
 };
 
@@ -41,8 +43,11 @@ static std::string	cameraname(int id) {
 /**
  * \brief Get a list of cameras
  */
-std::vector<std::string>	Mock1CameraLocator::getCameralist() {
+std::vector<std::string>	Mock1CameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	result;
+	if (device != DeviceLocator::CAMERA) {
+		return result;
+	}
 	for (int i = 0; i < 10; i++) {
 		result.push_back(cameraname(i));
 	}
@@ -70,6 +75,6 @@ CameraPtr	Mock1CameraLocator::getCamera(const std::string& name) {
 } // namespace astro
 
 extern "C"
-astro::camera::CameraLocator	*getCameraLocator() {
+astro::device::DeviceLocator	*getDeviceLocator() {
 	return new astro::camera::mock1::Mock1CameraLocator();
 }

@@ -13,6 +13,7 @@
 #include <debug.h>
 
 using namespace astro::camera::sbig;
+using namespace astro::device;
 using namespace astro::image;
 using namespace astro::io;
 
@@ -61,7 +62,7 @@ void	sbigtest::tearDown() {
 }
 
 void	sbigtest::testList() {
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {

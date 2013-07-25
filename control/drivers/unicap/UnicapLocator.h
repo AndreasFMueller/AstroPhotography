@@ -7,8 +7,10 @@
 #define _UnicapLocator_h
 
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 
 using namespace astro::camera;
+using namespace astro::device;
 
 namespace astro {
 namespace camera {
@@ -19,12 +21,12 @@ namespace unicap {
  *
  * Each Unicap camera is also a camera from the point of view of this 
  */
-class UnicapCameraLocator : public CameraLocator {
+class UnicapCameraLocator : public DeviceLocator {
 public:
 	UnicapCameraLocator();
 	virtual ~UnicapCameraLocator();
 	virtual std::string	getName() const;
-	virtual std::vector<std::string>	getCameralist();
+	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
 	virtual CameraPtr	getCamera(const std::string& name);
 	virtual CameraPtr	getCamera(size_t index);
 	virtual std::string	getVersion() const;

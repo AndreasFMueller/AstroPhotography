@@ -9,6 +9,7 @@
 #define _AstroLoader_h
 
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 
 #include <string>
 #include <vector>
@@ -77,7 +78,7 @@ public:
 	void	close();
 	static bool	dlclose_on_close;
 	DescriptorPtr	getDescriptor() const;
-	astro::camera::CameraLocatorPtr	getCameraLocator() const;
+	astro::device::DeviceLocatorPtr	getDeviceLocator() const;
 	friend class Repository;
 	friend class ::astro::test::ModuleTest;
 };

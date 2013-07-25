@@ -9,6 +9,8 @@
 #include <debug.h>
 #include <Format.h>
 
+using namespace astro::device;
+
 namespace astro {
 namespace camera {
 namespace uvc {
@@ -29,9 +31,12 @@ std::string	UvcCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-std::vector<std::string>	UvcCameraLocator::getCameralist() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a camera list");
+std::vector<std::string>	UvcCameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	cameras;
+	if (device != DeviceLocator::CAMERA) {
+		return cameras;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a camera list");
 	// get a list of all device, then check whether they are UVC
 	// devices
 	std::vector<DevicePtr>	devices = context.devices();
@@ -103,7 +108,7 @@ CameraPtr	UvcCameraLocator::getCamera(size_t index) {
 } // namespace astro
 
 extern "C"
-astro::camera::CameraLocator	*getCameraLocator() {
+astro::device::DeviceLocator	*getDeviceLocator() {
 	return new astro::camera::uvc::UvcCameraLocator();
 }
 
