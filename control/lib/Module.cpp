@@ -8,6 +8,7 @@
 #include <includes.h>
 #include <iostream>
 #include <fstream>
+#include <debug.h>
 
 using namespace astro::device;
 
@@ -39,6 +40,7 @@ bool	Module::dlclose_on_close = true;
  */
 std::string	Module::getDlname(const std::string& lafile) const {
 	// open the file
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading .la-file %s", lafile.c_str());
 	std::ifstream	in(lafile.c_str(), std::ifstream::in);
 
 	// scan the file
@@ -134,6 +136,7 @@ void	Module::open() {
 		return;
 	}
 	dlerror(); // clear error conditions
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
 	handle = dlopen(dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {
 		std::string	error(dlerror());

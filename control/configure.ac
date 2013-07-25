@@ -61,7 +61,7 @@ AC_ARG_ENABLE(sbig,
 [
 	case `uname` in
 	Darwin)	SBIGTARGET=ENV_MACOSX
-		SBIGINCLUDE=-I/Library/Frameworks/SBIGUDrv.framework/Headers
+		SBIGINCLUDE="-framework SBIGUDrv"
 		;;
 	Linux)	SBIGTARGET=ENV_LINUX
 		;;
@@ -77,8 +77,9 @@ AC_ARG_ENABLE(sbig,
 		SBIGLIBRARY=-lsbigudrv
 		LIBS="${OLDLIBS}"
 		;;
-	*)	echo "Mac OS X: just believe library will work"
-		SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
+	Darwin)	echo "Mac OS X: just believe library will work"
+		SBIGLIBRARY="-framework SBIGUDrv"
+		#SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
 		;;
 	esac
 	AC_SUBST(SBIGLIBRARY)
