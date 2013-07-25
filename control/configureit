@@ -24,7 +24,8 @@ Linux)
 	fi
 	export LDFLAGS CFLAGS CXXFLAGS
 
-	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap --enable-sbig
+	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
+		--enable-sbig
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"

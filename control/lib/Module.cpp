@@ -58,7 +58,10 @@ std::string	Module::getDlname(const std::string& lafile) const {
 			}
 			*end = '\0';
 			in.close();
-			return dirname + "/" + std::string(p);
+			std::string	shared = dirname + "/" + std::string(p);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "shared: %s",
+				shared.c_str());
+			return shared;
 		}
 	}
 end:
@@ -102,6 +105,9 @@ bool	Module::dlfileexists() const {
  */
 Module::Module(const std::string& _dirname, const std::string& _modulename)
 	: dirname(_dirname), modulename(_modulename) {
+	// NULL handle means module has not been loaded yet
+	handle = NULL;
+
 	// get the path to the la file
 	dlname = getDlname(dirname + "/" + modulename + ".la");
 
