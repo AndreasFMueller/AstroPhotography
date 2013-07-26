@@ -96,10 +96,10 @@ template<typename Pixel>
 ConstSubgridAdapter<Pixel>::ConstSubgridAdapter(
 	const ConstImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ConstImageAdapter<Pixel>(ImageSize(
-		(image.getSize().width - subgrid.origin.x)
-			/ subgrid.stepsize.width,
-		(image.getSize().height - subgrid.origin.y)
-			/ subgrid.stepsize.height)
+		(image.getSize().getWidth() - subgrid.origin.x)
+			/ subgrid.stepsize.getWidth(),
+		(image.getSize().getHeight() - subgrid.origin.y)
+			/ subgrid.stepsize.getHeight())
 	), image(_image), subgrid(_subgrid) {
 }
 	
@@ -127,10 +127,10 @@ template<typename Pixel>
 SubgridAdapter<Pixel>::SubgridAdapter(
 	ImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ImageAdapter<Pixel>(ImageSize(
-		(image.getSize().width - subgrid.origin.x)
-			/ subgrid.stepsize.width,
-		(image.getSize().height - subgrid.origin.y)
-			/ subgrid.stepsize.height)
+		(image.getSize().getWidth() - subgrid.origin.x)
+			/ subgrid.stepsize.getWidth(),
+		(image.getSize().getHeight() - subgrid.origin.y)
+			/ subgrid.stepsize.getHeight())
 	), image(_image), subgrid(_subgrid) {
 }
 	
@@ -284,8 +284,8 @@ const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	double	result = 0;
 	int	counter;
 	if (diagonal) {
-		if ((x > 0) && (x < adaptersize.width - 1) &&
-			(y > 0) && (y < adaptersize.height - 1)) {
+		if ((x > 0) && (x < adaptersize.getWidth() - 1) &&
+			(y > 0) && (y < adaptersize.getHeight() - 1)) {
 			result += image.pixel(x - 1, y - 1);
 			result += image.pixel(x + 1, y - 1);
 			result += image.pixel(x - 1, y + 1);
@@ -293,12 +293,12 @@ const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 			counter += 4;
 		}
 	} else {
-		if ((x > 0) && (x < adaptersize.width - 1)) {
+		if ((x > 0) && (x < adaptersize.getWidth() - 1)) {
 			result += image.pixel(x - 1, y);
 			result += image.pixel(x + 1, y);
 			counter += 2;
 		}
-		if ((y > 0) && (y < adaptersize.height - 1)) {
+		if ((y > 0) && (y < adaptersize.getHeight() - 1)) {
 			result += image.pixel(x, y - 1);
 			result += image.pixel(x, y + 1);
 			counter += 2;
@@ -329,8 +329,8 @@ public:
 template<typename Pixel>
 FocusFOMAdapter<Pixel>::FocusFOMAdapter(const ConstImageAdapter<Pixel>& _image,
 	bool diagonal)
-	: ConstImageAdapter<double>(ImageSize(_image.getSize().width - 2,
-		_image.getSize().height - 2)),
+	: ConstImageAdapter<double>(ImageSize(_image.getSize().getWidth() - 2,
+		_image.getSize().getHeight() - 2)),
 	  laplacian(_image, diagonal),
 	  converting(_image),
 	  multiply(laplacian, converting) {
@@ -432,10 +432,10 @@ template<typename Pixel>
 DownSamplingAdapter<Pixel>::DownSamplingAdapter(
 	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
 	: ConstImageAdapter<Pixel>(
-		ImageSize(_image.getSize().width / _sampling.width,
-			_image.getSize().height / _sampling.height)),
+		ImageSize(_image.getSize().getWidth() / _sampling.getWidth(),
+			_image.getSize().getHeight() / _sampling.getHeight())),
 	  image(_image), sampling(_sampling) {
-	volume = sampling.width * sampling.height;
+	volume = sampling.getWidth() * sampling.getHeight();
 	weights = new double[volume];
 	weights[0] = 1./volume;
 	for (unsigned int index = 0; index < volume; index++) {
@@ -451,12 +451,12 @@ DownSamplingAdapter<Pixel>::~DownSamplingAdapter() {
 template<typename Pixel>
 const Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
-	unsigned int	originx = x * sampling.width;
-	unsigned int	originy = y * sampling.height;
+	unsigned int	originx = x * sampling.getWidth();
+	unsigned int	originy = y * sampling.getHeight();
 	Pixel	pixels[volume];
 	unsigned int	index = 0;
-	for (unsigned int dx = 0; dx < sampling.width; dx++) {
-		for (unsigned int dy = 0; dy < sampling.height; dy++) {
+	for (unsigned int dx = 0; dx < sampling.getWidth(); dx++) {
+		for (unsigned int dy = 0; dy < sampling.getHeight(); dy++) {
 			pixels[index++]
 				= image.pixel(originx + dx, originy + dy);
 		}
@@ -480,15 +480,15 @@ template<typename Pixel>
 UpSamplingAdapter<Pixel>::UpSamplingAdapter(
 	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
 	: ConstImageAdapter<Pixel>(
-		ImageSize(_image.getSize().width * _sampling.width,
-			_image.getSize().height * _sampling.height)),
+		ImageSize(_image.getSize().getWidth() * _sampling.getWidth(),
+			_image.getSize().getHeight() * _sampling.getHeight())),
 	  image(_image), sampling(_sampling) {
 }
 
 template<typename Pixel>
 const Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
-	return image.pixel(x / sampling.width, y / sampling.width);
+	return image.pixel(x / sampling.getWidth(), y / sampling.getWidth());
 }
 
 ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
@@ -514,6 +514,34 @@ template<typename Pixel>
 const double	LuminanceAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 			const {
 	return luminance(image.pixel(x, y));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Rescaling adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class RescalingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	image;
+	double	minpixel;
+	double	scale;
+	Pixel	zero;
+public:
+	RescalingAdapter(const ConstImageAdapter<Pixel>& image,
+		double _minpixel, double scale);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+RescalingAdapter<Pixel>::RescalingAdapter(const ConstImageAdapter<Pixel>& _image,
+		double _minpixel, double _scale)
+		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
+		  minpixel(_minpixel), scale(_scale), zero(minpixel) {
+}
+
+template<typename Pixel>
+const Pixel	RescalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+	const {
+	return (image.pixel(x, y) - zero) * scale;
 }
 
 } // namespace image

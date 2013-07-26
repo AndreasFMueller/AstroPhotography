@@ -56,8 +56,8 @@ void	Mock1Test::testMock1() {
 		CcdPtr	ccd = camera->getCcd(i);
 		Exposure	exposure;
 		ImageRectangle	frame(ImagePoint(1,1),
-			ImageSize(ccd->getSize().width - 2,
-			ccd->getSize().height - 2));
+			ImageSize(ccd->getSize().getWidth() - 2,
+			ccd->getSize().getHeight() - 2));
 		exposure.frame = frame;
 		ccd->startExposure(exposure);
 		while (ccd->exposureStatus() == Exposure::exposing) {
@@ -67,7 +67,7 @@ void	Mock1Test::testMock1() {
 			ImagePtr	image = ccd->getImage();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"result image size: %d x %d",
-				image->size.width, image->size.height);
+				image->size.getWidth(), image->size.getHeight());
 		}
 	}
 }

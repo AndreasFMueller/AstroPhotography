@@ -45,8 +45,8 @@ template<typename T, typename S>
 S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	result = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) {
 				result += 1;
@@ -84,8 +84,8 @@ template<typename T, typename S>
 T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v > result) {
@@ -95,9 +95,6 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	}
 	return result;
 }
-
-double	max(const ImagePtr& image);
-double	maxrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the smalles value of all pixels
@@ -119,8 +116,8 @@ template<typename T, typename S>
 T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = std::numeric_limits<T>::max();
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v < result) {
@@ -130,9 +127,6 @@ T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	}
 	return result;
 }
-
-double	min(const ImagePtr& image);
-double	minrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the mean of an image
@@ -153,8 +147,8 @@ S	Mean<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	sum = 0;
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			if ((check_nan) && (v != v))
 				continue;
@@ -170,9 +164,6 @@ template<typename T, typename S>
 T	Mean<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	return (T)filter(image);
 }
-
-double	mean(const ImagePtr& image);
-double	meanrel(const ImagePtr& image);
 
 /**
  * \brief Filter that finds the variance of an image
@@ -195,8 +186,8 @@ S	Variance<T, S>::filter(const ConstImageAdapter<T>& image) {
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			// skip NaNs
 			if ((check_nan) && (v != v))
@@ -335,7 +326,7 @@ template<typename T, typename S>
 T	Median<T, S>::median(const ConstImageAdapter<T>& image,
 		const T& left, const T& right) {
 	ImageSize	size = image.getSize();
-	size_t	pixels = size.pixels;
+	size_t	pixels = size.getPixels();
 #if 0
 std::cout << "left: " << (unsigned int)left << ", right: "
 	<< (unsigned int)right << std::endl;
@@ -356,8 +347,8 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	}
 
 	// count the number of values 
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	v = image.pixel(x, y);
 			for (unsigned int i = 0; i < N + 1; i++) {
 				if (v <= limits[i]) {
@@ -406,8 +397,6 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	throw std::logic_error("error in median computation");
 }
 
-double	median(const ImagePtr& image);
-
 /**
  * \brief Figure of Merit for autofocus
  *
@@ -428,8 +417,8 @@ public:
 		FocusFOMAdapter<Pixel>	foa(image, diagonal);
 		ImageSize	size = foa.getSize();
 		double	result = 0;
-		for (size_t x = 0; x < size.width; x++) {
-			for (size_t y = 0; y < size.height; y++) {
+		for (size_t x = 0; x < size.getWidth(); x++) {
+			for (size_t y = 0; y < size.getHeight(); y++) {
 				double	l = foa.pixel(x, y);
 				// skip NaNs
 				if (l == l) {
@@ -445,8 +434,6 @@ public:
 		return result;
 	}
 };
-
-double	focusFOM(const ImagePtr& image, const bool diagonal = false);
 
 /**
  * \brief Image masking operations
@@ -467,16 +454,14 @@ public:
 
 template<typename Pixel>
 void    Mask<Pixel>::operator()(Image<Pixel>& image) {
-	for (size_t x = 0; x < image.size.width; x++) {
-		for (size_t y = 0; y < image.size.height; y++) {
+	for (size_t x = 0; x < image.size.getWidth(); x++) {
+		for (size_t y = 0; y < image.size.getHeight(); y++) {
 			Pixel   v = image.pixel(x, y);
 			v = maskingfunction(x, y) * v;
 			image.pixel(x, y) = v;
 		}
 	}
 }
-
-void	mask(MaskingFunction& maskingfunction, ImagePtr image);
 
 } // namespace filter
 } // namespace image

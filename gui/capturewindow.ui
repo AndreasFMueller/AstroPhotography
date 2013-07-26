@@ -6,135 +6,620 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>944</width>
-    <height>726</height>
+    <width>960</width>
+    <height>842</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="exposureBox">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>10</y>
-      <width>261</width>
-      <height>211</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Exposure</string>
-    </property>
-    <widget class="QComboBox" name="binningComboBox">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>70</y>
-       <width>111</width>
-       <height>26</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="binningLabel">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>80</y>
-       <width>62</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Binning:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="timeLabel">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>62</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Time:</string>
-     </property>
-    </widget>
-    <widget class="QPlainTextEdit" name="timeText">
-     <property name="geometry">
-      <rect>
-       <x>140</x>
-       <y>30</y>
-       <width>104</width>
-       <height>25</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="coolerBox">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>230</y>
-      <width>261</width>
-      <height>141</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Cooler</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="captureButton">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>590</y>
-      <width>114</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Capture</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>380</y>
-      <width>261</width>
-      <height>191</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Correction</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="imageLabel">
-    <property name="geometry">
-     <rect>
-      <x>21</x>
-      <y>15</y>
-      <width>631</width>
-      <height>671</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>624</width>
+         <height>773</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="bottomMargin">
+         <number>33</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="imageLabel">
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetFixedSize</enum>
+       </property>
+       <property name="topMargin">
+        <number>12</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="imageinfoBox">
+         <property name="title">
+          <string>Image info:</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="sizeinfoLabel">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="sizeinfoField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="maximumLabel">
+            <property name="text">
+             <string>Maximum value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="maximumvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="minimumvalueLabel">
+            <property name="text">
+             <string>Minimum value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="minimumvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="meanvalueLabel">
+            <property name="text">
+             <string>Mean value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="meanvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="valueatLabel">
+            <property name="text">
+             <string>Value at:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="valueatField">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="exposureBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>250</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Exposure</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="timeLabel">
+            <property name="text">
+             <string>Time:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="binningLabel">
+            <property name="text">
+             <string>Binning:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="binningComboBox"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="subframeLabel">
+            <property name="text">
+             <string>Frame:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="subframeCheckbox">
+            <property name="text">
+             <string>full frame</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="originLabel">
+            <property name="text">
+             <string>Origin:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QWidget" name="originWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="originxField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="originseparaterLabel">
+               <property name="text">
+                <string>,</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="originyField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="sizeLabel">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QWidget" name="sizeWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="sizexField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="sizeseparatorLabel">
+               <property name="text">
+                <string>,</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="sizeyField">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="timeSpinBox">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>3600.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="coolerBox">
+         <property name="title">
+          <string>Cooler</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="actualLabel">
+            <property name="text">
+             <string>Actual temperature:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="temperaturLabel">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Set temperature:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="settemperatureField">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="enabledField">
+            <property name="text">
+             <string>Cooler enabled:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="enabledCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="processingBox">
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Image processing</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_2">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+          </property>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="darkField"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="darkLabel">
+            <property name="text">
+             <string>Dark image:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="darksubtracctLabel">
+            <property name="text">
+             <string>Dark subtract:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="darksubtractCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Demosaic:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="demosaicCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="valueintervalLabel">
+            <property name="text">
+             <string>Value interval:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QWidget" name="valueintervalWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="valueintervalminField">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="valueintervalSeparator">
+               <property name="text">
+                <string>,</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="valueintervalmaxField">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="scaleLabel">
+            <property name="text">
+             <string>Scale:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="scaleCombobox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="darkLabel_2">
+            <property name="text">
+             <string>Flatt image:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lightField"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="flatdivideLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="flatdivideCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="captureButton">
+         <property name="text">
+          <string>Capture</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>944</width>
+     <width>960</width>
      <height>22</height>
     </rect>
    </property>
@@ -150,8 +635,8 @@
    <slot>startCapture()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>790</x>
-     <y>638</y>
+     <x>704</x>
+     <y>799</y>
     </hint>
     <hint type="destinationlabel">
      <x>693</x>
@@ -159,8 +644,59 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>scaleCombobox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>scaleChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>837</x>
+     <y>740</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>950</x>
+     <y>641</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframeCheckbox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>subframeToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>823</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>951</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>timeSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>timeChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>810</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>953</x>
+     <y>204</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>startCapture()</slot>
+  <slot>scaleChanged(int)</slot>
+  <slot>subframeToggled(bool)</slot>
+  <slot>timeChanged(double)</slot>
  </slots>
 </ui>

@@ -345,16 +345,28 @@ public:
 	}
 	RGB<P>	operator-(const RGB<P>& other) const {
 		RGB<P>	result;
-		result.R = R - other.R;
-		result.G = G - other.G;
-		result.B = B - other.B;
+		result.R = (R < other.R) ? 0 : (R - other.R);
+		result.G = (G < other.G) ? 0 : (G - other.G);
+		result.B = (B < other.B) ? 0 : (B - other.B);
 		return result;
 	}
 	RGB<P>	operator*(const P value) const {
 		RGB<P>	result;
-		result.R = R * value;
-		result.G = G * value;
-		result.B = B * value;
+		if ((R * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.R = R * value;
+		}
+		if ((G * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.G = G * value;
+		}
+		if ((B * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.B = B * value;
+		}
 		return result;
 	}
 

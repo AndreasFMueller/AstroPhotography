@@ -23,6 +23,22 @@ ImageSize::ImageSize(unsigned int _width, unsigned int _height)
 }
 
 /**
+ * \brief Width accessor
+ */
+void	ImageSize::setWidth(unsigned int _width) {
+	width = _width;
+	pixels = width * height;
+}
+
+/**
+ * \brief Height accessor
+ */
+void	ImageSize::setHeight(unsigned int _height) {
+	height = _height;
+	pixels = width * height;
+}
+
+/**
  * \brief Compare two size objects: equality
  *
  * Two size objects are equal if width and height are identical

@@ -11,6 +11,7 @@
 #include <AstroIO.h>
 #include <AstroFormat.h>
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
 #include <AstroDevice.h>
 
 using namespace astro;
@@ -150,10 +151,10 @@ int	main(int argc, char *argv[]) {
 
 	// find a fitting image rectangle
         if (width == 0) {
-                width = ccd->getInfo().size.width;
+                width = ccd->getInfo().size.getWidth();
         }
         if (height == 0) {
-                height = ccd->getInfo().size.height;
+                height = ccd->getInfo().size.getHeight();
         }
         ImageRectangle  imagerectangle = ccd->getInfo().clipRectangle(
                 ImageRectangle(ImagePoint(xoffset, yoffset),

@@ -20,15 +20,15 @@ Subgrid::Subgrid(const Subgrid& other) : origin(other.origin),
 }
 
 unsigned int	Subgrid::x(unsigned int _x) const {
-	return origin.x + _x * stepsize.width;
+	return origin.x + _x * stepsize.getWidth();
 }
 
 unsigned int	Subgrid::y(unsigned int _y) const {
-	return origin.y + _y * stepsize.height;
+	return origin.y + _y * stepsize.getHeight();
 }
 
 unsigned int	Subgrid::volume() const {
-	return stepsize.width * stepsize.height;
+	return stepsize.getPixels();
 }
 
 } // namespace image

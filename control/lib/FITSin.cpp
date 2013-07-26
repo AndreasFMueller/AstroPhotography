@@ -30,7 +30,7 @@ static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
 	Image<P>	*image = reader.read();
 	ImagePtr	result(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "result is an %d x %d image",
-		result->size.width, result->size.height);
+		result->size.getWidth(), result->size.getHeight());
 	return result;
 }
 

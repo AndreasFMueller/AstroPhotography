@@ -48,8 +48,8 @@ void	TypedInterpolator<T>::interpolate(ImagePtr& image) {
 		throw std::range_error("image sizes don't match");
 	}
 	pv = new PixelValue<T>(image);
-	for (unsigned int x = 0; x < dark.size.width; x++) {
-		for (unsigned int y = 0; y < dark.size.height; y++) {
+	for (unsigned int x = 0; x < dark.size.getWidth(); x++) {
+		for (unsigned int y = 0; y < dark.size.getHeight(); y++) {
 			if (dark.pixel(x, y) != dark.pixel(x, y)) {
 				interpolatePixel(x, y, image);
 			}

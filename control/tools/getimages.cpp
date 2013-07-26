@@ -156,10 +156,10 @@ int	main(int argc, char *argv[]) {
 
 	// create the image rectangle
 	if (width == 0) {
-		width = ccd->getInfo().size.width;
+		width = ccd->getInfo().size.getWidth();
 	}
 	if (height == 0) {
-		height = ccd->getInfo().size.height;
+		height = ccd->getInfo().size.getHeight();
 	}
 	ImageRectangle	imagerectangle = ccd->getInfo().clipRectangle(
 		ImageRectangle(ImagePoint(xoffset, yoffset),

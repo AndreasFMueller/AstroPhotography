@@ -51,9 +51,16 @@ class ImageRectangle;
  * number of pixels and width/height.
  */
 class ImageSize {
-public:
 	unsigned int	width, height;
 	unsigned int	pixels;
+public:
+	// the accessors are defined inline so that a clever compiler can
+	// still make them just asf ast as directly accessible members
+	unsigned int	getWidth() const { return width; }
+	void	setWidth(unsigned int _width);
+	unsigned int	getHeight() const { return height; }
+	void	setHeight(unsigned int _height);
+	unsigned int	getPixels() const { return pixels; }
 	ImageSize(unsigned int _width = 0, unsigned int _height = 0);
 	bool	operator==(const ImageSize& other) const;
 	bool	operator!=(const ImageSize& other) const;
@@ -300,7 +307,7 @@ class	ImageRow : public ImageLine {
 public:
 	const unsigned int	y;
 	ImageRow(const ImageSize size, unsigned int _y)
-		: ImageLine(size.width * _y, size.width * (_y + 1) - 1, 1),
+		: ImageLine(size.getWidth() * _y, size.getWidth() * (_y + 1) - 1, 1),
 		  y(_y) { }
 };
 
@@ -311,8 +318,8 @@ class	ImageColumn : public ImageLine {
 public:
 	const unsigned int	x;
 	ImageColumn(const ImageSize& size, unsigned int _x)
-		: ImageLine(_x, _x + size.pixels - size.width, size.width),
-		  x(_x) { }
+		: ImageLine(_x, _x + size.getPixels() - size.getWidth(),
+			size.getWidth()), x(_x) { }
 };
 
 /**
@@ -392,9 +399,9 @@ public:
 		if (p) {
 			pixels = p;
 		} else {
-			pixels = new Pixel[size.pixels];
+			pixels = new Pixel[size.getPixels()];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.pixels, pixels);
+				size.getPixels(), pixels);
 		}
 	}
 
@@ -416,9 +423,9 @@ public:
 		if (p) {
 			pixels = p;
 		} else {
-			pixels = new Pixel[size.pixels];
+			pixels = new Pixel[size.getPixels()];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.pixels, pixels);
+				size.getPixels(), pixels);
 		}
 	}
 
@@ -433,9 +440,9 @@ public:
 	Image<Pixel>(const ConstImageAdapter<Pixel>& adapter)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
-		pixels = new Pixel[size.pixels];
-		for (unsigned int x = 0; x < size.width; x++) {
-			for (unsigned int y = 0; y < size.height; y++) {
+		pixels = new Pixel[size.getPixels()];
+		for (unsigned int x = 0; x < size.getWidth(); x++) {
+			for (unsigned int y = 0; y < size.getHeight(); y++) {
 				pixel(x, y) = adapter.pixel(x, y);
 			}
 		}
@@ -449,10 +456,10 @@ public:
 	template<typename srcPixel>
 	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size),
 		ImageAdapter<Pixel>(other.size) {
-		pixels = new Pixel[size.pixels];
+		pixels = new Pixel[size.getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.pixels, pixels);
-		convertPixelArray(pixels, other.pixels, size.pixels);
+			size.getPixels(), pixels);
+		convertPixelArray(pixels, other.pixels, size.getPixels());
 	}
 
 	/**
@@ -470,10 +477,10 @@ public:
 	 */
 	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
 		ImageAdapter<Pixel>(p.size) {
-		pixels = new Pixel[size.pixels];
+		pixels = new Pixel[size.getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.pixels, pixels);
-		std::copy(p.pixels, p.pixels + size.pixels, pixels);
+			size.getPixels(), pixels);
+		std::copy(p.pixels, p.pixels + size.getPixels(), pixels);
 	}
 
 	/**
@@ -488,7 +495,7 @@ public:
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
 			other.pixels, pixels);
-		std::copy(other.pixels, other.pixels + other.size.pixels, pixels);
+		std::copy(other.pixels, other.pixels + other.size.getPixels(), pixels);
 	}
 
 	/**
@@ -503,7 +510,7 @@ public:
 	 * \brief Read only access to pixel values specified by offset.
 	 */
 	const Pixel&	operator[](unsigned int offset) const {
-		if ((offset < 0) || (offset > size.pixels)) {
+		if ((offset < 0) || (offset > size.getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -513,7 +520,7 @@ public:
 	 * \brief Read/write access to pixels specified by offset
 	 */
 	Pixel&	operator[](unsigned int offset) {
-		if ((offset < 0) || (offset > size.pixels)) {
+		if ((offset < 0) || (offset > size.getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -622,25 +629,25 @@ public:
 		if (!this->ImageBase::operator==(other)) {
 			return false;
 		}
-		return std::equal(pixels, pixels + size.pixels, other.pixels);
+		return std::equal(pixels, pixels + size.getPixels(), other.pixels);
 	}
 
 	/**
 	 * \brief Fill an image with a given value
 	 */
 	void	fill(const Pixel& value) {
-		std::fill(pixels, pixels + size.pixels, value);
+		std::fill(pixels, pixels + size.getPixels(), value);
 	}
 
 	/**
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
 	void	fill(const ImageRectangle& frame, const Pixel& value) {
-		for (unsigned int y = 0; y < frame.size.height; y++) {
+		for (unsigned int y = 0; y < frame.size.getHeight(); y++) {
 			ImageRow	r(size, frame.origin.y + y);
 			std::fill(pixels + r.firstoffset + frame.origin.x,
 				pixels + r.firstoffset + frame.origin.x
-					+ size.width, value);
+					+ size.getWidth(), value);
 		}
 	}
 
@@ -677,13 +684,13 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 	if (!src.size.bounds(frame)) {
 		throw std::range_error("subimage frame too large");
 	}
-	pixels = new Pixel[size.pixels];
-	for (unsigned int y = 0; y < frame.size.height; y++) {
+	pixels = new Pixel[size.getPixels()];
+	for (unsigned int y = 0; y < frame.size.getHeight(); y++) {
 		ImageRow	srcrow(src.size, frame.origin.y + y);
 		ImageRow	destrow(size, y);
 		std::copy(src.pixels + srcrow.firstoffset + frame.origin.x,
 			src.pixels + srcrow.firstoffset + frame.origin.x
-				+ size.width,
+				+ size.getWidth(),
 			pixels + destrow.firstoffset);
 	}
 }
@@ -788,7 +795,7 @@ void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
 	if (dest.size != src.size) {
 		throw std::runtime_error("convertImage: image sizes don't match");
 	}
-	convertPixelArray(dest.pixels, src.pixels, dest.size.pixels);
+	convertPixelArray(dest.pixels, src.pixels, dest.size.getPixels());
 }
 
 /**

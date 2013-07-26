@@ -46,7 +46,7 @@ void	FITSreadTest::testReadUChar() {
 	Image<unsigned char>	*i = infile.read();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size. %d x %d",
-		i->size.width, i->size.height);
+		i->size.getWidth(), i->size.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	delete	i;
 	Image<unsigned char>	*image = infile.read();
@@ -66,8 +66,8 @@ void	FITSreadTest::testReadUShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadUShort() begin");
 	FITSinfile<unsigned short>	infile(ushort_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width,
-		infile.getSize().height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().getWidth(),
+		infile.getSize().getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "read pixels");
 	Image<unsigned short>	*image = infile.read();
@@ -89,8 +89,8 @@ void	FITSreadTest::testReadYUYV() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadYUYV() begin");
 	FITSinfile<YUYV<unsigned char> >	infile(yuyv_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width,
-		infile.getSize().height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().getWidth(),
+		infile.getSize().getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<YUYV<unsigned char> >	*image = infile.read();
 
@@ -110,8 +110,8 @@ void	FITSreadTest::testReadRGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadRGB() begin");
 	FITSinfile<RGB<unsigned char> >	infile(rgb_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width,
-		infile.getSize().height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().getWidth(),
+		infile.getSize().getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<RGB<unsigned char> >	*image = infile.read();
 	std::string	newfilename = std::string("copy-") + rgb_filename;
@@ -130,8 +130,8 @@ void	FITSreadTest::testReadRGBUShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadRGBUShort() begin");
 	FITSinfile<RGB<unsigned short> >	infile(rgbushort_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: ", infile.getImgtype());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width,
-		infile.getSize().height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().getWidth(),
+		infile.getSize().getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<RGB<unsigned short> >	*image = infile.read();
 	std::string	newfilename = std::string("copy-") + rgbushort_filename;

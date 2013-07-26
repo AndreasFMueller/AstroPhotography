@@ -30,12 +30,12 @@ class FlipOperator : public ImageOperator<T> {
 public:
 	FlipOperator() { }
 	virtual void	operator()(astro::image::Image<T>& image) {
-		for (unsigned int line = 0; (line << 1) < image.size.height;
+		for (unsigned int line = 0; (line << 1) < image.size.getHeight();
 			line++) {
-			T	*p = &image.pixels[line * image.size.width];
-			int	lastline = image.size.height - line - 1;
-			T	*q = &image.pixels[lastline * image.size.width];
-			for (unsigned int i = 0; i < image.size.width; i++) {
+			T	*p = &image.pixels[line * image.size.getWidth()];
+			int	lastline = image.size.getHeight() - line - 1;
+			T	*q = &image.pixels[lastline * image.size.getWidth()];
+			for (unsigned int i = 0; i < image.size.getWidth(); i++) {
 				T	v = p[i];
 				p[i] = q[i];
 				q[i] = v;

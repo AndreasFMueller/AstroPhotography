@@ -223,8 +223,7 @@ void	ImageBase::setMetadata(const std::string& name, const Metavalue& mv) {
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {
-	out << "size: " << image.size.width << " x "
-                        << image.size.height <<std::endl;
+	out << "size: " << image.size.toString() << std::endl;
 	ImageMetadata::const_iterator	i;
 	for (i = image.metadata.begin(); i != image.metadata.end(); i++) {
 		out << i->first << ": ";

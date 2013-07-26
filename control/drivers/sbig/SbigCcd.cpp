@@ -96,8 +96,8 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	params.readoutMode = RM_1X1; // XXX should be set from exposure.mode
 	params.top = exposure.frame.origin.y;
 	params.left = exposure.frame.origin.x;
-	params.width = exposure.frame.size.width;
-	params.height = exposure.frame.size.height;
+	params.width = exposure.frame.size.getWidth();
+	params.height = exposure.frame.size.getHeight();
 	short	e = SBIGUnivDrvCommand(CC_START_EXPOSURE2, &params, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start exposure: %s",
@@ -156,8 +156,8 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		readparams.readoutMode = RM_1X1; // XXX should be set from exposure.mode
 		readparams.top = exposure.frame.origin.y;
 		readparams.left = exposure.frame.origin.x;
-		readparams.width = exposure.frame.size.width;
-		readparams.height = exposure.frame.size.height;
+		readparams.width = exposure.frame.size.getWidth();
+		readparams.height = exposure.frame.size.getHeight();
 		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
 		if (e != CE_NO_ERROR) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
@@ -169,15 +169,15 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		ReadoutLineParams	readlineparams;
 		readlineparams.ccd = id;
 		readlineparams.pixelStart = exposure.frame.origin.x;
-		readlineparams.pixelLength = exposure.frame.size.width;
+		readlineparams.pixelLength = exposure.frame.size.getWidth();
 		readlineparams.readoutMode = readparams.readoutMode;
-		size_t	arraysize = exposure.frame.size.width
-					* exposure.frame.size.height;
+		size_t	arraysize = exposure.frame.size.getWidth()
+					* exposure.frame.size.getHeight();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
 		data = new unsigned short[arraysize];
 		unsigned short	*p = data;
 		unsigned int	linecounter = 0;
-		while (linecounter < exposure.frame.size.height) {
+		while (linecounter < exposure.frame.size.getHeight()) {
 			e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
 			if (e != CE_NO_ERROR) {
 				debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
@@ -185,7 +185,7 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 				delete[] data;
 				throw SbigError(e);
 			}
-			p += exposure.frame.size.width;
+			p += exposure.frame.size.getWidth();
 			linecounter++;
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
@@ -194,7 +194,7 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		DumpLinesParams	dumplines;
 		dumplines.ccd = id;
 		dumplines.readoutMode = readparams.readoutMode;
-		dumplines.lineLength = info.size.height - exposure.frame.size.height
+		dumplines.lineLength = info.size.getHeight() - exposure.frame.size.getHeight()
 			- exposure.frame.origin.y;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
 			dumplines.lineLength);

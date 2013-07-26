@@ -14,6 +14,7 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
 #include <AstroIO.h>
 
 using namespace astro;

@@ -40,7 +40,7 @@ void	flat_correct(Image<ImagePixelType>& image,
 	}
 
 	// correct all pixels
-	for (size_t offset = 0; offset < image.size.pixels; offset++) {
+	for (size_t offset = 0; offset < image.size.getPixels(); offset++) {
 		ImagePixelType	ip = image.pixels[offset];
 		// skip NaN pixels
 		if (ip != ip) {

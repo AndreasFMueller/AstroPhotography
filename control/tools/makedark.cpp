@@ -72,7 +72,7 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	dark = dff(images);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image %d x %d generated",
-		dark->size.width, dark->size.height);
+		dark->size.getWidth(), dark->size.getHeight());
 
 	if (outfilename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "outfile: %s", outfilename);

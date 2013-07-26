@@ -19,7 +19,7 @@ Clamper::Clamper(double _minvalue, double _maxvalue)
 
 template<typename P>
 void	do_clamp(Image<P>& image, double minvalue, double maxvalue) {
-	for (size_t offset = 0; offset < image.size.pixels; offset++) {
+	for (size_t offset = 0; offset < image.size.getPixels(); offset++) {
 		P	value = image.pixels[offset];
 		// skip indefined pixels
 		if (value != value) {

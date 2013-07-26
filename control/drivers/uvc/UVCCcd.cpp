@@ -146,10 +146,10 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 ImagePtr	UvcCcdYUY2::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building YUY2 image %u x %u",
-		size.width, size.height);
+		size.getWidth(), size.getHeight());
 	Image<YUYV<unsigned char> >	*image
 		= new Image<YUYV<unsigned char> >(size);
-	for (unsigned int i = 0; i < size.pixels; i++) {
+	for (unsigned int i = 0; i < size.getPixels(); i++) {
 		image->pixels[i].y = frame[2 * i];
 		image->pixels[i].uv = frame[2 * i + 1];
 	}
@@ -167,9 +167,9 @@ ImagePtr	UvcCcdYUY2::frameToImage(const Frame& frame) const {
 ImagePtr	UvcCcdY800::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building Y800 image %u x %u",
-		size.width, size.height);
+		size.getWidth(), size.getHeight());
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
-	for (unsigned int i = 0; i < size.pixels; i++) {
+	for (unsigned int i = 0; i < size.getPixels(); i++) {
 		image->pixels[i] = frame[i];
 	}
 	FlipOperator<unsigned char>	flip;
@@ -185,10 +185,10 @@ ImagePtr	UvcCcdY800::frameToImage(const Frame& frame) const {
 ImagePtr	UvcCcdBY8::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building BY8 image %u x %u",
-		size.width, size.height);
+		size.getWidth(), size.getHeight());
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
 	image->setMosaicType(ImageBase::BAYER_RGGB);
-	for (unsigned int i = 0; i < size.pixels; i++) {
+	for (unsigned int i = 0; i < size.getPixels(); i++) {
 		image->pixels[i] = frame[i];
 	}
 	FlipOperator<unsigned char>	flip;

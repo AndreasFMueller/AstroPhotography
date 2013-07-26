@@ -76,8 +76,8 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 	sx_read_pixels_delayed_t	rpd;
 	rpd.x_offset = exposure.frame.origin.x;
 	rpd.y_offset = exposure.frame.origin.y;
-	rpd.width = exposure.frame.size.width;
-	rpd.height = exposure.frame.size.height;
+	rpd.width = exposure.frame.size.getWidth();
+	rpd.height = exposure.frame.size.getHeight();
 	rpd.x_bin = exposure.mode.getX();
 	rpd.y_bin = exposure.mode.getY();
 	rpd.delay = 1000 * exposure.exposuretime;
@@ -102,11 +102,11 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize(
-		exposure.frame.size.width / exposure.mode.getX(),
-		exposure.frame.size.height / exposure.mode.getY());
+		exposure.frame.size.getWidth() / exposure.mode.getX(),
+		exposure.frame.size.getHeight() / exposure.mode.getY());
 
 	// compute the size of the buffer, and create a buffer for the data
-	int	size = targetsize.pixels;
+	int	size = targetsize.getPixels();
 	unsigned short	*data = new unsigned short[size];
 
 	// read the data from the data endpoint
@@ -148,7 +148,7 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
-		for (unsigned int offset = 0; offset < image->size.pixels;
+		for (unsigned int offset = 0; offset < image->size.getPixels();
 			offset++) {
 			unsigned short	pv = image->pixels[offset];
 			if (pv > exposure.limit) {

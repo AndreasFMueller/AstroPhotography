@@ -7,6 +7,7 @@
 #include <AstroImage.h>
 #include <AstroIO.h>
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
 #include <AstroDebug.h>
 #include <stdexcept>
 

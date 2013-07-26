@@ -131,15 +131,15 @@ void	*FITSinfileBase::readdata() throw (FITSexception) {
 		throw FITSexception("cannot read this pixel type");
 		break;
 	}
-	void	*v = calloc(planes * size.pixels, typesize);
+	void	*v = calloc(planes * size.getPixels(), typesize);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size: %d items of size %d, "
-		"pixel type %d, %d planes", (size.pixels * planes), typesize,
+		"pixel type %d, %d planes", (size.getPixels() * planes), typesize,
 		pixeltype, planes);
 	
 	/* now read the data */
 	int	status = 0;
 	long	firstpixel[3] = { 1, 1, 1 };
-	if (fits_read_pix(fptr, pixeltype, firstpixel, size.pixels * planes,
+	if (fits_read_pix(fptr, pixeltype, firstpixel, size.getPixels() * planes,
 		NULL, v, NULL, &status)) {
 		free(v);
 		throw FITSexception(errormsg(status));
@@ -245,7 +245,7 @@ FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	// find the dimensions
 	long	naxis = 3;
-	long	naxes[3] = { image.size.width, image.size.height, planes };
+	long	naxes[3] = { image.size.getWidth(), image.size.getWidth(), planes };
 	int	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));

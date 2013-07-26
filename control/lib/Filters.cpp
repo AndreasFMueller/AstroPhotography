@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
 
 using namespace astro::image;
 
@@ -109,6 +110,37 @@ void	mask(MaskingFunction& maskingfunction, ImagePtr image) {
 	filter_mask(image, unsigned long, maskingfunction);
 	filter_mask(image, float, maskingfunction);
 	filter_mask(image, double, maskingfunction);
+}
+
+#define rawvalue_typed(image, Pixel, point)				\
+{									\
+	Image<Pixel >	*imagep						\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		return luminance(imagep->pixel(point.x, point.y));	\
+	}								\
+}
+
+double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
+	rawvalue_typed(image, unsigned char, point);
+	rawvalue_typed(image, unsigned short, point);
+	rawvalue_typed(image, unsigned int, point);
+	rawvalue_typed(image, unsigned long, point);
+	rawvalue_typed(image, float, point);
+	rawvalue_typed(image, double, point);
+	rawvalue_typed(image, RGB<unsigned char>, point);
+	rawvalue_typed(image, RGB<unsigned short>, point);
+	rawvalue_typed(image, RGB<unsigned int>, point);
+	rawvalue_typed(image, RGB<unsigned long>, point);
+	rawvalue_typed(image, RGB<float>, point);
+	rawvalue_typed(image, RGB<double>, point);
+	rawvalue_typed(image, YUYV<unsigned char>, point);
+	rawvalue_typed(image, YUYV<unsigned short>, point);
+	rawvalue_typed(image, YUYV<unsigned int>, point);
+	rawvalue_typed(image, YUYV<unsigned long>, point);
+	rawvalue_typed(image, YUYV<float>, point);
+	rawvalue_typed(image, YUYV<double>, point);
+	return 0;
 }
 
 } // namespace filter

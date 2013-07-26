@@ -257,8 +257,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			compute(x, y, 0);
 		}
 	}
@@ -282,8 +282,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			T	darkvalue = dark.pixel(x, y);
 			compute(x, y, darkvalue);
 		}
@@ -357,8 +357,8 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	size_t	badpixelcount = 0;
 	SubgridAdapter<T>	sga(*im.image, grid);
 	ImageSize	size = sga.getSize();
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.getWidth(); x++) {
+		for (unsigned int y = 0; y < size.getHeight(); y++) {
 			if (fabs(sga.pixel(x, y) - mean) > stddev3) {
 				sga.pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
@@ -452,8 +452,8 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 
 	// device the image by that value, so that the new maximum value
 	// is 1
-	for (unsigned int x = 0; x < image->size.width; x++) {
-		for (unsigned int y = 0; y < image->size.height; y++) {
+	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
+		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
 			image->pixel(x, y) /= maxvalue;
 		}
 	}
@@ -506,8 +506,8 @@ template<typename T>
 ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 	ConstPixelValue<T>	im(image);
 	Image<T>	*result = new Image<T>(image->size);
-	for (unsigned int x = 0; x < image->size.width; x++) {
-		for (unsigned int y = 0; y < image->size.height; y++) {
+	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
+		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
 			T	darkvalue = dark.pixelvalue(x, y);
 			// if the pixel is bad give 
 			if (darkvalue != darkvalue) {

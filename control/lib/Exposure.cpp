@@ -23,7 +23,7 @@ Exposure::Exposure(const ImageRectangle& _frame,
 
 std::string	Exposure::toString() const {
 	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs",
-		frame.size.width, frame.size.height,
+		frame.size.getWidth(), frame.size.getHeight(),
 		frame.origin.x, frame.origin.y,
 		mode.toString().c_str(), exposuretime);
 }

@@ -39,13 +39,14 @@ Exposure	SxCcdM26C::m26cExposure() {
 		"the M26C's CCD chip");
 
 	// adapt the size suitable for 
-	m26c.frame.size.height = exposure.frame.size.width / 4;
-	m26c.frame.size.width = exposure.frame.size.height * 2;
+	m26c.frame.size.setHeight(exposure.frame.size.getWidth() / 4);
+	m26c.frame.size.setWidth(exposure.frame.size.getHeight() * 2);
 	if (m26c.mode.getX() > 1) {
-		m26c.frame.size.height -= m26c.frame.size.height % 2;
+		m26c.frame.size.setHeight(m26c.frame.size.getHeight()
+			- m26c.frame.size.getHeight() % 2);
 	}
-	exposure.frame.size.height = m26c.frame.size.width / 2;
-	exposure.frame.size.width = m26c.frame.size.height * 4;
+	exposure.frame.size.setHeight(m26c.frame.size.getWidth() / 2);
+	exposure.frame.size.setWidth(m26c.frame.size.getHeight() * 4);
 
 	// adapt the top left corner
 	m26c.frame.origin.x = exposure.frame.origin.y * 2;
@@ -80,8 +81,8 @@ SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
  */
 Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
-	size_t	l = (m26c.frame.size.width / m26c.mode.getX())
-		* (m26c.frame.size.height / m26c.mode.getY());
+	size_t	l = (m26c.frame.size.getWidth() / m26c.mode.getX())
+		* (m26c.frame.size.getHeight() / m26c.mode.getY());
 	Field	*field = new Field(exposure.frame.size, l);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u", l);
 
@@ -117,8 +118,8 @@ void	SxCcdM26C::exposeField(int field) {
 	// compute a better request for the M26C camera
 	sx_read_pixels_delayed_t	rpd;
 	rpd.delay = 1000 * m26c.exposuretime;
-	rpd.width = m26c.frame.size.width;
-	rpd.height = m26c.frame.size.height;
+	rpd.width = m26c.frame.size.getWidth();
+	rpd.height = m26c.frame.size.getHeight();
 	rpd.x_offset = m26c.frame.origin.x;
 	rpd.y_offset = m26c.frame.origin.y;
 	rpd.x_bin = m26c.mode.getX();
@@ -158,8 +159,8 @@ void	SxCcdM26C::requestField(int field) {
 	// downloads the already exposed field
 #if 1
 	sx_read_pixels_t	rp;
-	rp.width = m26c.frame.size.width;
-	rp.height = m26c.frame.size.height;
+	rp.width = m26c.frame.size.getWidth();
+	rp.height = m26c.frame.size.getHeight();
 	rp.x_offset = m26c.frame.origin.x;
 	rp.y_offset = m26c.frame.origin.y;
 	rp.x_bin = m26c.mode.getX();
@@ -184,8 +185,8 @@ void	SxCcdM26C::requestField(int field) {
 	}
 #else
 	sx_read_pixels_delayed_t	rpd;
-	rpd.width = m26c.frame.size.width;
-	rpd.height = m26c.frame.size.height;
+	rpd.width = m26c.frame.size.getWidth();
+	rpd.height = m26c.frame.size.getHeight();
 	rpd.x_offset = m26c.frame.origin.x;
 	rpd.y_offset = m26c.frame.origin.y;
 	rpd.x_bin = m26c.mode.getX();
@@ -254,8 +255,8 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 	y[0] = exp.frame.origin.y;
 	x[1] = M26C_WIDTH - x[0];
 	y[1] = M26C_HEIGHT - y[0];
-	x[2] = exp.frame.origin.x + exp.frame.size.width;
-	y[2] = exp.frame.origin.y + exp.frame.size.height;
+	x[2] = exp.frame.origin.x + exp.frame.size.getWidth();
+	y[2] = exp.frame.origin.y + exp.frame.size.getHeight();
 	x[3] = M26C_WIDTH - x[2];
 	y[3] = M26C_HEIGHT - y[2];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x[] = %d %d %d %d",
@@ -264,11 +265,11 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 		y[0], y[1], y[2], y[3]);
 	symexp.frame.origin.x = min(x, 4);
 	symexp.frame.origin.y = min(y, 4);
-	symexp.frame.size.width = max(x, 4) - symexp.frame.origin.x;
-	if (symexp.frame.size.width > 3900) {
-		symexp.frame.size.width = 3900;
+	symexp.frame.size.setWidth(max(x, 4) - symexp.frame.origin.x);
+	if (symexp.frame.size.getWidth() > 3900) {
+		symexp.frame.size.setWidth(3900);
 	}
-	symexp.frame.size.height = max(y, 4) - symexp.frame.origin.y;
+	symexp.frame.size.setHeight(max(y, 4) - symexp.frame.origin.y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetrized exposure: %s",
 		symexp.toString().c_str());
 	return symexp;
@@ -360,8 +361,8 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 
 	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*image = new Image<unsigned short>(
-		exposure.frame.size.width / exposure.mode.getX(),
-		exposure.frame.size.height /exposure.mode.getY());
+		exposure.frame.size.getWidth() / exposure.mode.getX(),
+		exposure.frame.size.getHeight() /exposure.mode.getY());
 	image->setMosaicType(ImageBase::BAYER_RGGB);
 
 	// now we have to demultiplex the two fields

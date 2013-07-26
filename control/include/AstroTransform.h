@@ -140,10 +140,21 @@ class TransformAdapter : public ConstImageAdapter<Pixel> {
 	Transform	transform;
 	Transform	inverse;
 public:
+	TransformAdapter(const ImageSize& targetsize,
+		const ConstImageAdapter<Pixel>& image,
+		const Transform& transform);
 	TransformAdapter(const ConstImageAdapter<Pixel>& image,
 		const Transform& transform);
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
 };
+
+template<typename Pixel>
+TransformAdapter<Pixel>::TransformAdapter(const ImageSize& targetsize,
+	const ConstImageAdapter<Pixel>& _image, const Transform& _transform)
+	: ConstImageAdapter<Pixel>(targetsize), image(_image),
+	  transform(_transform) {
+	inverse = transform.inverse();
+}
 
 template<typename Pixel>
 TransformAdapter<Pixel>::TransformAdapter(
@@ -176,7 +187,7 @@ const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 
 	// now compute the weighted sum of the pixels
 	Pixel	a[4];
-	ImageSize	size = ConstImageAdapter<Pixel>::getSize();
+	ImageSize	size = image.getSize();
 
 	// lower left corner
 	if (size.contains(tx    , ty    )) {

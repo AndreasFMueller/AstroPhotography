@@ -54,8 +54,8 @@ bool	ImageRectangle::operator==(const ImageRectangle& other) const {
  * \brief Test whether a point is contained within a rectangle
  */
 bool	ImageRectangle::contains(const ImagePoint& point) const {
-	return	(origin.x <= point.x) && (point.x < origin.x + size.width) &&
-		(origin.y <= point.y) && (point.y < origin.y + size.height);
+	return	(origin.x <= point.x) && (point.x < origin.x + size.getWidth()) &&
+		(origin.y <= point.y) && (point.y < origin.y + size.getHeight());
 }
 
 /**
@@ -63,9 +63,9 @@ bool	ImageRectangle::contains(const ImagePoint& point) const {
  */
 bool	ImageRectangle::contains(const ImageRectangle& other) const {
 	return	(origin.x <= other.origin.x) &&
-		(origin.x + size.width >= other.origin.x + other.size.width) &&
+		(origin.x + size.getWidth() >= other.origin.x + other.size.getWidth()) &&
 		(origin.y <= other.origin.y) &&
-		(origin.y + size.height >= other.origin.y + other.size.height);
+		(origin.y + size.getHeight() >= other.origin.y + other.size.getHeight());
 }
 
 /**
@@ -79,21 +79,21 @@ const ImagePoint&	ImageRectangle::lowerLeftCorner() const {
  * \brief Extract the lower right corner of a rectangle
  */
 ImagePoint	ImageRectangle::lowerRightCorner() const {
-	return ImagePoint(origin.x + size.width - 1, origin.y);
+	return ImagePoint(origin.x + size.getWidth() - 1, origin.y);
 }
 
 /**
  * \brief Extract the upper left corner of a rectangle
  */
 ImagePoint	ImageRectangle::upperLeftCorner() const {
-	return ImagePoint(origin.x, origin.y + size.height - 1);
+	return ImagePoint(origin.x, origin.y + size.getHeight() - 1);
 }
 
 /**
  * \brief Extract the upper right corner of a rectangle
  */
 ImagePoint	ImageRectangle::upperRightCorner() const {
-	return ImagePoint(origin.x + size.width - 1, origin.y + size.height - 1);
+	return ImagePoint(origin.x + size.getWidth() - 1, origin.y + size.getHeight() - 1);
 }
 
 /**

@@ -120,7 +120,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		ccd0.binningmodes.insert(Binning(3,3));
 		ccd0.binningmodes.insert(Binning(4,4));
 	} else {
-		ccd0.size.height *= 2;
+		ccd0.size.setHeight(2 * ccd0.size.getHeight());
 	}
 	ccdinfo.push_back(ccd0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",

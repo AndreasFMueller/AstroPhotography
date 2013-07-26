@@ -67,7 +67,7 @@ int	CcdInfo::getId() const {
  */
 std::string	CcdInfo::toString() const {
 	return stringprintf("%s: %dx%d,%s", name.c_str(),
-		size.width, size.height,
+		size.getWidth(), size.getHeight(),
 		binningmodes.toString().c_str());
 }
 
@@ -79,19 +79,19 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo) {
  * \brief Fit a rectangle inside a ccd
  */
 ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
-	if (size.width < rectangle.origin.x) {
+	if (size.getWidth() < rectangle.origin.x) {
 		throw std::runtime_error("image rectangle outside ccd");
 	}
-	if (size.height < rectangle.origin.y) {
+	if (size.getHeight() < rectangle.origin.y) {
 		throw std::runtime_error("image rectangle outside ccd");
 	}
-	unsigned int	w = rectangle.size.width;
-	if ((rectangle.size.width + rectangle.origin.x) > size.width) {
-		w = size.width - rectangle.origin.x;
+	unsigned int	w = rectangle.size.getWidth();
+	if ((rectangle.size.getWidth() + rectangle.origin.x) > size.getWidth()) {
+		w = size.getWidth() - rectangle.origin.x;
 	}
-	unsigned int	h = rectangle.size.height;
-	if ((rectangle.size.height + rectangle.origin.y) > size.height) {
-		h = size.height - rectangle.origin.y;
+	unsigned int	h = rectangle.size.getHeight();
+	if ((rectangle.size.getHeight() + rectangle.origin.y) > size.getHeight()) {
+		h = size.getHeight() - rectangle.origin.y;
 	}
 	return ImageRectangle(rectangle.origin, ImageSize(w, h));
 }
@@ -100,16 +100,16 @@ ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
  * \brief Get a centered rectangle of a given size
  */
 ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
-	unsigned int	w = s.width;
-	unsigned int	h = s.height;
-	if (w > size.width) {
-		w = size.width;
+	unsigned int	w = s.getWidth();
+	unsigned int	h = s.getHeight();
+	if (w > size.getWidth()) {
+		w = size.getWidth();
 	}
-	if (h > size.height) {
-		h = size.height;
+	if (h > size.getHeight()) {
+		h = size.getHeight();
 	}
-	unsigned int	xoffset = (size.width - w) / 2;
-	unsigned int	yoffset = (size.height - h) / 2;
+	unsigned int	xoffset = (size.getWidth() - w) / 2;
+	unsigned int	yoffset = (size.getHeight() - h) / 2;
 	return ImageRectangle(ImagePoint(xoffset, yoffset), ImageSize(w, h));
 }
 

@@ -33,12 +33,12 @@ double	HanningMaskingFunction::hanningfunction(double x) const {
 RectangleFunction::RectangleFunction(const ImageRectangle& _rectangle,
 	double hanningradius)
 	: HanningMaskingFunction(hanningradius), rectangle(_rectangle) {
-	xmargin = hanningradius * rectangle.size.width / 2;
-	ymargin = hanningradius * rectangle.size.height / 2;
+	xmargin = hanningradius * rectangle.size.getWidth() / 2;
+	ymargin = hanningradius * rectangle.size.getHeight() / 2;
 	innerrectangle.origin = ImagePoint(rectangle.origin
 					+ ImagePoint(xmargin, ymargin));
-	innerrectangle.size = ImageSize(rectangle.size.width - 2 * xmargin,
-		rectangle.size.height - 2 * ymargin);
+	innerrectangle.size = ImageSize(rectangle.size.getWidth() - 2 * xmargin,
+		rectangle.size.getHeight() - 2 * ymargin);
 }
 
 /**
@@ -59,17 +59,17 @@ double	RectangleFunction::operator()(size_t x, size_t y) const {
 	if ((rectangle.origin.x <= x) && (x <= innerrectangle.origin.x)) {
 		hx = (innerrectangle.origin.x - x)/xmargin;
 	}
-	if (((innerrectangle.origin.x + innerrectangle.size.width) <= x) &&
-		(x <= (rectangle.origin.x + rectangle.size.width))) {
-		hx = (x - innerrectangle.origin.x - innerrectangle.size.width)/xmargin;
+	if (((innerrectangle.origin.x + innerrectangle.size.getWidth()) <= x) &&
+		(x <= (rectangle.origin.x + rectangle.size.getWidth()))) {
+		hx = (x - innerrectangle.origin.x - innerrectangle.size.getWidth())/xmargin;
 	}
 	double	hy = 0;
 	if ((rectangle.origin.y <= y) && (y <= innerrectangle.origin.y)) {
 		hy = (y - innerrectangle.origin.y)/ymargin;
 	}
-	if (((innerrectangle.origin.y + innerrectangle.size.height) <= y) &&
-		(y <= (rectangle.origin.y + rectangle.size.height))) {
-		hx = (x - innerrectangle.origin.y - innerrectangle.size.height)/ymargin;
+	if (((innerrectangle.origin.y + innerrectangle.size.getHeight()) <= y) &&
+		(y <= (rectangle.origin.y + rectangle.size.getHeight()))) {
+		hx = (x - innerrectangle.origin.y - innerrectangle.size.getHeight())/ymargin;
 	}
 	return hanningfunction(hx) * hanningfunction(y);
 }

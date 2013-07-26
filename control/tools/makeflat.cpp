@@ -68,7 +68,7 @@ int	main(int argc, char *argv[]) {
 		FITSin	infile(f);
 		dark = infile.read();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got dark %d x %d",
-			dark->size.width, dark->size.height);
+			dark->size.getWidth(), dark->size.getHeight());
 	} else {
 		dark = ImagePtr(new Image<float>(images[0]->size));
 	}
@@ -81,7 +81,7 @@ int	main(int argc, char *argv[]) {
 
 	// display some info about the flat image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image %d x %d generated",
-		flat->size.width, flat->size.height);
+		flat->size.getWidth(), flat->size.getHeight());
 
 	// write the flat image to a file
 	if (outfilename) {
