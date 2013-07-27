@@ -8,6 +8,7 @@
 #include <sx.h>
 #include <AstroDebug.h>
 #include <SxGuiderPort.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 
@@ -28,6 +29,46 @@ namespace sx {
  * it is a meaning of that by conjectured in an email from Terry Platt, 
  * <tplatt@starlight.win-uk.net>, may 4, 2013
  */
+typedef struct sx_model_s {
+	unsigned short	product;
+	unsigned short	model;
+	std::string	name;
+} sx_model_t;
+
+#define	NUMBER_SX_MODELS	31
+sx_model_t	models[NUMBER_SX_MODELS] = {
+	{ 0x0105, 0x0045, std::string("SXVF-M5") },
+	{ 0x0305, 0x00c5, std::string("SXVF-M5C") },
+	{ 0x0107, 0x0047, std::string("SXVF-M7") },
+	{ 0x0307, 0x00c7, std::string("SXVF-M7C") },
+	{ 0x0308, 0x0000, std::string("SXVF-M8C") },
+	{ 0x0109, 0x0000, std::string("SXVF-M9") },
+	{ 0x0109, 0x0049, std::string("MX9") },
+	{ 0x0109, 0x00c9, std::string("MX9C") },
+	{ 0x0509, 0x0009, std::string("Oculus") },
+	{ 0x0325, 0x0000, std::string("SXVR-M25C") },
+	{ 0x0326, 0x005a, std::string("SXVR-M26C") },
+	{ 0x0128, 0x0000, std::string("SXVR-H18") },
+	{ 0x0126, 0x0000, std::string("SXVR-H16") },
+	{ 0x0135, 0x0000, std::string("SXVR-H35") },
+	{ 0x0136, 0x0000, std::string("SXVR-H36") },
+	{ 0x0100, 0x0000, std::string("SXVR-H9") },
+	{ 0x0119, 0x0000, std::string("SXVR-H9") },
+	{ 0x0319, 0x0000, std::string("SXVR-H9C") },
+	{ 0x0100, 0x0000, std::string("SXVR-H9C") },
+	{ 0x0200, 0x0000, std::string("SXV interface") },
+	{ 0x0507, 0x0000, std::string("Lodestar") },
+	{ 0x0507, 0x0000, std::string("Lodestar-C") },
+	{ 0x0517, 0x0000, std::string("CoStar") },
+	{ 0x0000, 0x0009, std::string("HX9") },
+	{ 0x0000, 0x0000, std::string("SXVR-H16") },
+	{ 0x0000, 0x0000, std::string("SXVR-H18") },
+	{ 0x0000, 0x0000, std::string("SXVR-H674") },
+	{ 0x0000, 0x0000, std::string("SXVR-H674C") },
+	{ 0x0000, 0x0000, std::string("SXVR-H694") },
+	{ 0x0000, 0x0000, std::string("SXVR-H694C") },
+	{ 0x0000, 0x0000, std::string("SXVR-H814") }
+};
 
 /**
  * \brief Create a new Camera from a USB device pointer
@@ -101,6 +142,17 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	controlRequest(&modelrequest);
 	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
+
+	// from product id and model number, try to infer the product name
+	for (unsigned int m = 0; m < NUMBER_SX_MODELS; m++) {
+		if (
+		((models[m].product == 0) || (models[m].product == product)) &&
+		((models[m].model == 0) || (models[m].model == model))
+		) {
+			name = models[m].name;
+			break;
+		}
+	}
 
 	// get information about this CCD from the camera
         Request<sx_ccd_params_t>        ccd0request(
