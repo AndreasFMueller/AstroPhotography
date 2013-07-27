@@ -6,8 +6,11 @@ INCLUDEPATH += . -I ../control/include
 LIBS += -L../control/lib -lastro
 
 HEADERS += \ 
-    capturewindow.h
+    capturewindow.h \
+    exposurewidget.h
 FORMS += \ 
-    capturewindow.ui
+    capturewindow.ui \
+    exposurewidget.ui
 SOURCES = capture.cpp \ 
-    capturewindow.cpp
+    capturewindow.cpp \
+    exposurewidget.cpp

@@ -37,9 +37,6 @@ CaptureWindow::CaptureWindow(QWidget *parent) :
 	ui->scaleCombobox->addItem(QString("200%"));
 	ui->scaleCombobox->addItem(QString("400%"));
 	ui->scaleCombobox->setCurrentIndex(2);
-
-	// 
-	timechange = false;
 }
 
 /**
@@ -88,19 +85,14 @@ void	CaptureWindow::setCamera(CameraPtr _camera) {
 void	CaptureWindow::setCcd(CcdPtr _ccd) {
 	ccd = _ccd;
 
+	ui->exposureWidget->setCcd(ccd);
+
 	// update the window title
 	setWindowTitle(getCameraTitle());
 
-	// read the binning modes and add the options to the combo box
-	const BinningSet&	set = ccd->getInfo().binningmodes;
-	std::set<Binning>::const_iterator	bi;
-	for (bi = set.begin(); bi != set.end(); bi++) {
-		ui->binningComboBox->addItem(QString(bi->toString().c_str()));
-	}
-
 	// set the frame size 
 	exposure.frame = ccd->getInfo().getFrame();
-	setExposure(exposure);
+	ui->exposureWidget->setExposure(exposure);
 
 	// find out whether this CCD has a cooler, disable the cooler box
 	// if it hasn't
@@ -125,65 +117,10 @@ void	CaptureWindow::startCapture() {
 	//     be change so that a separate thread is performing the
 	//     capture
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCapture called");
-	exposure = getExposure();
+	exposure = ui->exposureWidget->getExposure();
 	ccd->startExposure(exposure);
 	setImage(ccd->getImage());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image");
-}
-
-/**
- * \brief Read the exposure parameters from the fields
- */
-Exposure	CaptureWindow::getExposure() {
-	Exposure	result;
-	// read information from the GUI 
-
-	// subframe
-	bool	ok;
-	if (ui->subframeCheckbox->isChecked()) {
-		result.frame.origin.x = ui->originxField->text().toInt(&ok);
-		result.frame.origin.y = ui->originyField->text().toInt(&ok);
-		result.frame.size.setWidth(ui->sizexField->text().toInt(&ok));
-		result.frame.size.setHeight(ui->sizeyField->text().toInt(&ok));
-	} else {
-		result.frame = ccd->getInfo().getFrame();
-	}
-
-	// exposure time
-	result.exposuretime = ui->timeSpinBox->value();
-
-	// binning mode
-	BinningSet::const_iterator	i = ccd->getInfo().binningmodes.begin();
-	int	binning_entry = ui->binningComboBox->currentIndex();
-	while (binning_entry-- > 0) { i++; }
-	result.mode = *i;
-
-	// return the exposure
-	return result;
-}
-
-/**
- * \brief display current exposure values are displayed
- */
-void	CaptureWindow::setExposure(const Exposure& exposure) {
-	// display exposure window parameters
-	ui->originxField->setText(QString().setNum(exposure.frame.origin.x));
-	ui->originyField->setText(QString().setNum(exposure.frame.origin.y));
-	ui->sizexField->setText(QString().setNum(exposure.frame.size.getWidth()));
-	ui->sizeyField->setText(QString().setNum(exposure.frame.size.getHeight()));
-	ui->timeSpinBox->setValue(exposure.exposuretime);
-	// find the right binning mode to display in the binning mode
-	// combo box
-	BinningSet::const_iterator	i;
-	int	binning_entry = 0;
-	for (i = ccd->getInfo().binningmodes.begin();
-		i != ccd->getInfo().binningmodes.end(); i++) {
-		if (exposure.mode == *i) {
-			break;
-		}
-		binning_entry++;
-	}
-	ui->binningComboBox->setCurrentIndex(binning_entry);
 }
 
 /**
@@ -337,54 +274,3 @@ void	CaptureWindow::scaleChanged(int item) {
 	}
 }
 
-/**
- * \brief Slot called when the subframe checkbox is toggled
- */
-void	CaptureWindow::subframeToggled(bool state) {
-	ui->originxField->setEnabled(state);
-	ui->originyField->setEnabled(state);
-	ui->sizexField->setEnabled(state);
-	ui->sizeyField->setEnabled(state);
-	if (state) {
-		ui->subframeCheckbox->setText(QString("partial frame"));
-	} else {
-		ui->subframeCheckbox->setText(QString("full frame"));
-	}
-}
-
-void	CaptureWindow::timeChanged(double value) {
-	if (timechange) {
-		return;
-	}
-	timechange = true;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "value = %f, timeprevious = %f", value, timeprevious);
-	double	stepvalue = ui->timeSpinBox->singleStep();
-	if (value < timeprevious) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping down");
-		if (timeprevious >= 120) {
-			stepvalue = 60;
-		} else {
-			stepvalue /= 2;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new stepvalue: %f", stepvalue);
-			if (stepvalue < 0.001) {
-				stepvalue = 0.001;
-			}
-			stepvalue = trunc(1000 * stepvalue) / 1000.;
-			ui->timeSpinBox->setValue(stepvalue);
-		}
-		ui->timeSpinBox->setSingleStep(stepvalue);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping up");
-		if (value > 1) {
-			value = trunc(value);
-			ui->timeSpinBox->setValue(value);
-		}
-		if (value >= 60) {
-			ui->timeSpinBox->setSingleStep(60);
-		} else {
-			ui->timeSpinBox->setSingleStep(value);
-		}
-	}
-	timeprevious = ui->timeSpinBox->value();
-	timechange = false;
-}

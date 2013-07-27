@@ -236,7 +236,7 @@ CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
 /**
  * \brief Query the shutter state
  */
-Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 	SbigLock	lock;
 	camera.sethandle();
 

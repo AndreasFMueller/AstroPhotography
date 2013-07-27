@@ -15,6 +15,8 @@
 namespace astro {
 namespace camera {
 
+typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+
 /**
  * \brief Binning mode specification
  *
@@ -74,6 +76,7 @@ public:
 	float	gain;
 	float	limit;
 	Binning	mode;
+	shutter_state	shutter;
 
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
@@ -170,7 +173,7 @@ public:
 	const Exposure&	getExposure() const { return exposure; }
 
 	// methods to control a shutter
-	typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+	virtual bool	hasShutter() const { return false; }
 	virtual shutter_state	getShutterState() throw(not_implemented);
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);
@@ -181,6 +184,7 @@ public:
 		throw (not_implemented);
 
 	// handling the cooler
+	virtual bool	hasCooler() const { return true; }
 	virtual CoolerPtr	getCooler() throw (not_implemented);
 
 	// methods related to metadata
@@ -218,9 +222,11 @@ public:
 	const std::string&	getName() const;
 
 	// handling the filter wheel
+	bool	hasFilterWheel() const { return false; }
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 
 	// handling the guider port
+	bool	hasGuiderPort() const { return false; }
 	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;

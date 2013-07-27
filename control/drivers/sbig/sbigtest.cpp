@@ -206,9 +206,9 @@ void	sbigtest::testShutter() {
 	CcdPtr	ccd = camera->getCcd(0);
 	unsigned int	delay = 500000;
 	for (int i = 0; i < 20; i++) {
-		ccd->setShutterState(Ccd::SHUTTER_CLOSED);
+		ccd->setShutterState(SHUTTER_CLOSED);
 		usleep(delay);
-		ccd->setShutterState(Ccd::SHUTTER_OPEN);
+		ccd->setShutterState(SHUTTER_OPEN);
 		usleep(delay);
 	}
 }

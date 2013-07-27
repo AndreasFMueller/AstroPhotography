@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <AstroCamera.h>
+#include <exposurewidget.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -22,8 +23,6 @@ class CaptureWindow : public QMainWindow
 	ImagePtr	image; // most recent image
 	ImagePtr	demosaicedimage;
 	double	imagescale;
-	double	timeprevious;
-	bool	timechange;
     
 public:
     explicit CaptureWindow(QWidget *parent = 0);
@@ -32,9 +31,6 @@ public:
 	QString	getCameraTitle();
 	void	setCamera(CameraPtr camera);
 	void	setCcd(CcdPtr ccd);
-
-	Exposure	getExposure();
-	void	setExposure(const Exposure& exposure);
 
 	void	setImage(ImagePtr newimage);
 	void	redisplayImage();
@@ -47,8 +43,6 @@ private:
 private slots:
 	void	scaleChanged(int item);
 	void	startCapture();
-	void	subframeToggled(bool state);
-	void	timeChanged(double value);
 };
 
 #endif // CAPTUREWINDOW_H
