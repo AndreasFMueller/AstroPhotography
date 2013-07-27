@@ -227,6 +227,18 @@ void	FITSinfileBase::addHeaders(ImageBase *image) const {
 	}
 }
 
+bool	FITSinfileBase::hasHeader(const std::string& key) const {
+	return (headers.find(key) != headers.end());
+}
+
+std::string	FITSinfileBase::getHeader(const std::string& key) const {
+	std::map<std::string, FITShdu>::const_iterator hi = headers.find(key);
+	if (hi == headers.end()) {
+		throw std::runtime_error("header not found");
+	}
+	return hi->second.value;
+}
+
 /**
  * \brief Create a FITS file for writing
  */

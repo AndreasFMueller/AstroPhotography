@@ -342,6 +342,8 @@ ImagePtr	ImageMean<T>::getImagePtr() {
 template<typename T>
 size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	const Subgrid grid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing subgrid %s",
+		grid.toString().c_str());
 	// we also need the mean of the image to decide which pixels are
 	// too far off to consider them "sane" pixels
 	T	mean = im.mean(grid);
@@ -381,6 +383,7 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
  */
 template<typename T>
 ImagePtr	dark_plain(const ImageSequence& images) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "plain dark processing");
 	ImageMean<T>	im(images, true);
 	subdark<T>(images, im, Subgrid());
 	
@@ -390,10 +393,12 @@ ImagePtr	dark_plain(const ImageSequence& images) {
 
 template<typename T>
 ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded: %s", (gridded) ? "YES" : "NO");
 	if (!gridded) {
 		return dark_plain<T>(images);
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded dark processing");
 	ImageMean<T>	im(images, true);
 	// perform the dark computation for each individual subgrid
 	size_t	badpixels = 0;
@@ -410,6 +415,8 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
  * \brief Dark image construction function for arbitrary image sequences
  */
 ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %d images into dark frame",
+		images.size());
 	// make sure we have at least one image
 	if (images.size() == 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create dark from no images");
@@ -420,6 +427,8 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	// image
 	ImagePtr	firstimage = *images.begin();
 	bool	gridded = firstimage->isMosaic();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "first image is %sgridded",
+		(gridded) ? "" : "not ");
 	
 	// based on the bit size of the first image, decide whether to work
 	// with floats or with doubles

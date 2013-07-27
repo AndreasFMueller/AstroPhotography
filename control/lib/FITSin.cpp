@@ -39,23 +39,29 @@ static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
  */
 ImagePtr	FITSin::read() throw (FITSexception) {
 	FITSinfileBase	infile(filename);
+	ImagePtr	result;
 
 	/* images with 1 plane have primitive data types */
 	if (infile.getPlanes() == 1) {
 		switch (infile.getImgtype()) {
 		case BYTE_IMG:
 		case SBYTE_IMG:
-			return do_read<unsigned char>(filename);
+			result = do_read<unsigned char>(filename);
+			break;
 		case USHORT_IMG:
 		case SHORT_IMG:
-			return do_read<unsigned short>(filename);
+			result = do_read<unsigned short>(filename);
+			break;
 		case ULONG_IMG:
 		case LONG_IMG:
-			return do_read<unsigned int>(filename);
+			result = do_read<unsigned int>(filename);
+			break;
 		case FLOAT_IMG:
-			return do_read<float>(filename);
+			result = do_read<float>(filename);
+			break;
 		case DOUBLE_IMG:
-			return do_read<double>(filename);
+			result = do_read<double>(filename);
+			break;
 		}
 	}
 
@@ -64,21 +70,47 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 		switch (infile.getImgtype()) {
 		case BYTE_IMG:
 		case SBYTE_IMG:
-			return do_read<RGB<unsigned char> >(filename);
+			result = do_read<RGB<unsigned char> >(filename);
+			break;
 		case USHORT_IMG:
 		case SHORT_IMG:
-			return do_read<RGB<unsigned short> >(filename);
+			result = do_read<RGB<unsigned short> >(filename);
+			break;
 		case ULONG_IMG:
 		case LONG_IMG:
-			return do_read<RGB<unsigned int> >(filename);
+			result = do_read<RGB<unsigned int> >(filename);
+			break;
 		case FLOAT_IMG:
-			return do_read<RGB<float> >(filename);
+			result = do_read<RGB<float> >(filename);
+			break;
 		case DOUBLE_IMG:
-			return do_read<RGB<double> >(filename);
+			result = do_read<RGB<double> >(filename);
+			break;
 		}
 	}
 
-	return ImagePtr();
+	// resolve mosaic information, check for the BAYER key:
+	if (infile.hasHeader(std::string("BAYER"))) {
+		std::string	bayervalue
+			= infile.getHeader(std::string("BAYER"));
+		bayervalue = bayervalue.substr(1, 4);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayervalue: '%s'",
+			bayervalue.c_str());
+                if (bayervalue == std::string("RGGB")) {
+			result->setMosaicType(ImageBase::BAYER_RGGB);
+                }
+                if (bayervalue == std::string("GRBG")) {
+			result->setMosaicType(ImageBase::BAYER_GRBG);
+                }
+                if (bayervalue == std::string("GBRG")) {
+			result->setMosaicType(ImageBase::BAYER_GBRG);
+                }
+                if (bayervalue == std::string("BGGR")) {
+			result->setMosaicType(ImageBase::BAYER_BGGR);
+                }
+        }
+
+	return result;
 }
 
 

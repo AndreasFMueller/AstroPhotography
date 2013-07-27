@@ -821,6 +821,7 @@ public:
 	unsigned int	x(unsigned int _x) const;
 	unsigned int	y(unsigned int _y) const;
 	unsigned int	volume() const;
+	std::string	toString() const;
 };
 
 } // namespace image

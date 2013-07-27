@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroImage.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -29,6 +30,12 @@ unsigned int	Subgrid::y(unsigned int _y) const {
 
 unsigned int	Subgrid::volume() const {
 	return stepsize.getPixels();
+}
+
+std::string	Subgrid::toString() const {
+	return stringprintf("%ux%u@(%u,%u)",
+		stepsize.getWidth(), stepsize.getHeight(),
+		origin.x, origin.y);
 }
 
 } // namespace image

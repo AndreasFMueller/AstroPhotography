@@ -86,6 +86,9 @@ protected:
 public:
 	FITSinfileBase(const std::string& filename) throw (FITSexception);
 	ImageSize	getSize() const { return size; }
+	// header access
+	bool	hasHeader(const std::string& key) const;
+	std::string	getHeader(const std::string& key) const;
 };
 
 /**
