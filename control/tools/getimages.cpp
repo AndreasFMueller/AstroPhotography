@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <AstroFormat.h>
 #include <iostream>
+#include <sstream>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <AstroDevice.h>
@@ -180,11 +181,13 @@ int	main(int argc, char *argv[]) {
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
 		std::string	filename = stringprintf("%s/%s%03d.fits",
 			outputdir, prefix, counter++);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
-			filename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s of size %s",
+			filename.c_str(), (*imageptr)->size.toString().c_str());
 		if (debuglevel >= LOG_DEBUG) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info:");
-			std::cout << *imageptr;
+			std::ostringstream	out;
+			out << **imageptr;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info: %s",
+				out.str().c_str());
 		}
 		unlink(filename.c_str());
 		FITSout	out(filename);
