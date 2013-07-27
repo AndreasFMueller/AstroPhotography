@@ -162,6 +162,10 @@ void	CaptureWindow::redisplayImage() {
 		displayconverter.setMaxpixel(maxvalue);
 	}
 
+	// just for debugging
+	displayconverter.setMinpixel(0);
+	displayconverter.setMaxpixel(65535);
+
 	// compute the image scale
 	int	scaleitem = ui->scaleCombobox->currentIndex();
 	imagescale = 0.25;
@@ -170,9 +174,30 @@ void	CaptureWindow::redisplayImage() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scale: %f", imagescale);
 
+	// find out whether color display is expected: if the image is
+	// color, we obviously display the color image. If we have a
+	// monochrome image, we have demosaicing requested, then the
+	// demosaiced image should be displayed
+	bool	colordisplay = false;
+	if (isColorImage(image)) {
+		colordisplay = true;
+	}
+	if ((image->isMosaic()) && (ui->demosaicCheckbox->isChecked())) {
+		colordisplay = true;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "color display: %s",
+		(colordisplay) ? "YES" : "NO");
+	displayconverter.setColor(colordisplay);
+
 	// apply the display conversion to the image
-	Image<RGB<unsigned char> >	*imptr
-		= displayconverter(image);
+	Image<RGB<unsigned char> >	*imptr = NULL;
+	if (image->isMosaic()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display demosaiced image");
+		imptr = displayconverter(demosaicedimage);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display raw image");
+		imptr = displayconverter(image);
+	}
 	ImagePtr	displayimage(imptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converted image size: %s",
 		displayimage->size.toString().c_str());
