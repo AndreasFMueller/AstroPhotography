@@ -9,6 +9,7 @@
 #include <AstroDisplay.h>
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
+#include <AstroDemosaic.h>
 
 using namespace astro;
 using namespace astro::image;
@@ -205,6 +206,10 @@ void	CaptureWindow::redisplayImage() {
 void	CaptureWindow::setImage(ImagePtr newimage) {
 	ui->statusbar->showMessage(QString("new image captured"));
 	image = newimage;
+	ui->demosaicCheckbox->setEnabled(image->isMosaic());
+	if (image->isMosaic()) {
+		demosaicedimage = demosaic_bilinear(image);
+	}
 	redisplayImage();
 }
 
