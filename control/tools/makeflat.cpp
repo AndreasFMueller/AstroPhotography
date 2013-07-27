@@ -16,6 +16,16 @@ using namespace astro::image;
 
 namespace astro {
 
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ -d?h ] [ -o outfile ] [ -D dark ] [ -o outfile ] files ..." << std::endl;
+	std::cout << "compute flat frame from <files>..." << std::endl;
+	std::cout << "options: " << std::endl;
+	std::cout << " -d           increase debug level" << std::endl;
+	std::cout << " -o outfile   write the computed flat file to <outfile>" << std::endl;
+	std::cout << " -h, -?        show this help message" << std::endl;
+	std::cout << " -D dark       use <dark> as the bias for flat computation" << std::endl;
+}
+
 /**
  * \brief Main function for makeflat tool 
  *
@@ -26,7 +36,7 @@ int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	const char	*darkfilename = NULL;
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "do:D:")))
+	while (EOF != (c = getopt(argc, argv, "do:D:?h")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -37,6 +47,10 @@ int	main(int argc, char *argv[]) {
 		case 'o':
 			outfilename = optarg;
 			break;
+		case '?':
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		default:
 			throw std::runtime_error("bad option");
 			break;

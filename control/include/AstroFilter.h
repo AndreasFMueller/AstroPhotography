@@ -69,10 +69,12 @@ double	countnansrel(const ImagePtr& image);
  */
 template<typename T, typename S>
 class Max : public PixelTypeFilter<T, S> {
+	int	maxx, maxy;
 public:
-	Max() { }
+	Max() { maxx = 0; maxy = 0; }
 	virtual	S	filter(const ConstImageAdapter<T>& image);
 	virtual T	operator()(const ConstImageAdapter<T>& image);
+	ImagePoint	getPoint() const { return ImagePoint(maxx, maxy); }
 };
 
 template<typename T, typename S>
@@ -83,6 +85,8 @@ S	Max<T, S>::filter(const ConstImageAdapter<T>& image) {
 template<typename T, typename S>
 T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = 0;
+	maxx = 0;
+	maxy = 0;
 	ImageSize	size = image.getSize();
 	for (unsigned int x = 0; x < size.getWidth(); x++) {
 		for (unsigned int y = 0; y < size.getHeight(); y++) {
@@ -90,6 +94,8 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 			if (v != v) continue; // skip NaNs
 			if (v > result) {
 				result = image.pixel(x, y);
+				maxx = x;
+				maxy = y;
 			}
 		}
 	}
@@ -101,10 +107,12 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
  */
 template<typename T, typename S>
 class Min : public PixelTypeFilter<T, S> {
+	unsigned int	minx, miny;
 public:
 	Min() { }
 	virtual	S	filter(const ConstImageAdapter<T>& image);
 	virtual T	operator()(const ConstImageAdapter<T>& image);
+	ImagePoint	getPoint() const { return ImagePoint(minx, miny); }
 };
 
 template<typename T, typename S>
@@ -115,6 +123,8 @@ S	Min<T, S>::filter(const ConstImageAdapter<T>& image) {
 template<typename T, typename S>
 T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	T	result = std::numeric_limits<T>::max();
+	minx = 0;
+	miny = 0;
 	ImageSize	size = image.getSize();
 	for (unsigned int x = 0; x < size.getWidth(); x++) {
 		for (unsigned int y = 0; y < size.getHeight(); y++) {
@@ -122,6 +132,8 @@ T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 			if (v != v) continue; // skip NaNs
 			if (v < result) {
 				result = v;
+				minx = x;
+				miny = y;
 			}
 		}
 	}

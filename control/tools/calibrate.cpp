@@ -33,6 +33,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -M max    clamp the image values to at most <max>"
 		<< std::endl;
+	std::cout << "  -b        demosaic bayer images" << std::endl;
 	std::cout << "  -d        increase debug level" << std::endl;
 	std::cout << "  -n, -?    show this help message" << std::endl;
 }

@@ -41,7 +41,7 @@ ImagePoint	ImagePoint::operator-(const ImagePoint& other) const {
  * \brief String representation
  */
 std::string	ImagePoint::toString() const {
-	return stringprintf("(%d,%d)", x, y);
+	return stringprintf("(%u,%u)", x, y);
 }
 
 /**

@@ -52,23 +52,36 @@ double	median(const ImagePtr& image) {
 	return 0;
 }
 
+#define	filter_typed2(image, f, pixel)					\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			f<pixel, double>	m;			\
+			double	v = m.filter(*imagep);			\
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "extremum @ %s",	\
+				m.getPoint().toString().c_str());	\
+			return v;					\
+		}							\
+	}
+
 double	max(const ImagePtr& image) {
-	filter_typed1(image, Max, unsigned char);
-	filter_typed1(image, Max, unsigned short);
-	filter_typed1(image, Max, unsigned int);
-	filter_typed1(image, Max, unsigned long);
-	filter_typed1(image, Max, float);
-	filter_typed1(image, Max, double);
+	filter_typed2(image, Max, unsigned char);
+	filter_typed2(image, Max, unsigned short);
+	filter_typed2(image, Max, unsigned int);
+	filter_typed2(image, Max, unsigned long);
+	filter_typed2(image, Max, float);
+	filter_typed2(image, Max, double);
 	return 0;
 }
 
 double	min(const ImagePtr& image) {
-	filter_typed1(image, Min, unsigned char);
-	filter_typed1(image, Min, unsigned short);
-	filter_typed1(image, Min, unsigned int);
-	filter_typed1(image, Min, unsigned long);
-	filter_typed1(image, Min, float);
-	filter_typed1(image, Min, double);
+	filter_typed2(image, Min, unsigned char);
+	filter_typed2(image, Min, unsigned short);
+	filter_typed2(image, Min, unsigned int);
+	filter_typed2(image, Min, unsigned long);
+	filter_typed2(image, Min, float);
+	filter_typed2(image, Min, double);
 	return 0;
 }
 

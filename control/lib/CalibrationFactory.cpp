@@ -70,7 +70,9 @@ ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence& images) const 
 template<typename T>
 class ImageMean {
 	bool	enableVariance;
+	unsigned int	k;
 public:
+	void	setK(unsigned int _k) { k = _k; }
 	typedef ConstPixelValue<T>	PV;
 	typedef std::vector<PV>	PVSequence;
 
@@ -178,6 +180,11 @@ void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
 		// skip this value if it is a NaN
 		if (v != v)
 			continue;
+		if (v < darkvalue) {
+			v = 0;
+		} else {
+			v = v - darkvalue;
+		}
 		X += v;
 		if (enableVariance) {
 			X2 += v * v;
@@ -205,21 +212,22 @@ void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
 	// the mean
 	X = 0, X2 = 0;
 	counter = 0;
-	T	stddev3 = 3 * sqrt(EX2 - EX * EX);
-	if (stddev3 < 1) {
-		stddev3 = std::numeric_limits<T>::infinity();
+	T	stddevk = k * sqrt(EX2 - EX * EX);
+	if (stddevk < 1) {
+		stddevk = std::numeric_limits<T>::infinity();
 	}
-if (stddev3 < 1) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "EX = %f, EX2 = %f", EX, EX2);
-}
 	for (j = pvs.begin(); j != pvs.end(); j++) {
 		T	v = j->pixelvalue(x, y);
 		// skip NaNs
 		if (v != v)
 			continue;
+		if (v < darkvalue) {
+			v = 0;
+		} else {
+			v = v - darkvalue;
+		}
 		// skip values that are too far off
-		if (fabs(v - EX) > stddev3) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d): skipping %f, EX = %f, stddev3 = %f", x, y, v, EX, stddev3);
+		if (fabs(v - EX) > stddevk) {
 			continue;
 		}
 		X += v;
@@ -262,6 +270,9 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 			compute(x, y, 0);
 		}
 	}
+
+	// number of standard deviations for bad pixels
+	k = 3;
 }
 
 /**
@@ -288,6 +299,9 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 			compute(x, y, darkvalue);
 		}
 	}
+
+	// number of standard deviations for bad pixels
+	k = 3;
 }
 
 template<typename T>
@@ -341,33 +355,38 @@ ImagePtr	ImageMean<T>::getImagePtr() {
  */
 template<typename T>
 size_t	subdark(const ImageSequence&, ImageMean<T>& im,
-	const Subgrid grid) {
+	const Subgrid grid, unsigned int k = 3) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing subgrid %s",
 		grid.toString().c_str());
 	// we also need the mean of the image to decide which pixels are
 	// too far off to consider them "sane" pixels
 	T	mean = im.mean(grid);
 	T	var = im.variance(grid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f",
-		mean, var);
 
 	// now find out which pixels are bad, and mark them using NaNs.
 	// we consider pixels bad if the deviate from the mean by more
 	// than three standard deviations
-	T	stddev3 = 3 * sqrt(var);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
+	T	stddevk = k * sqrt(var);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f, "
+		"stddev%u = %f", mean, var, k, stddevk);
 	size_t	badpixelcount = 0;
 	SubgridAdapter<T>	sga(*im.image, grid);
 	ImageSize	size = sga.getSize();
 	for (unsigned int x = 0; x < size.getWidth(); x++) {
 		for (unsigned int y = 0; y < size.getHeight(); y++) {
-			if (fabs(sga.pixel(x, y) - mean) > stddev3) {
+			T	v = sga.pixel(x, y);
+			// skip NaNs
+			if (v != v) {
+				break;
+			}
+			if (fabs(v - mean) > stddevk) {
 				sga.pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
 				badpixelcount++;
 			}
 		}
 	}
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u bad pixels", badpixelcount);
 	return badpixelcount;
 }
@@ -523,8 +542,11 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 				result->pixel(x, y) = nan;;
 				continue;
 			}
-			result->pixel(x, y) = (im.pixelvalue(x, y) - darkvalue)
-				/ flat.pixelvalue(x, y);
+			T	v = im.pixelvalue(x, y) - darkvalue;
+			if (v < 0) {
+				v = 0;
+			}
+			result->pixel(x, y) = v / flat.pixelvalue(x, y);
 		}
 	}
 	return ImagePtr(result);

@@ -5,6 +5,7 @@
  */
 #include <AstroImage.h>
 #include <AstroMask.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -96,10 +97,10 @@ template<typename Pixel>
 ConstSubgridAdapter<Pixel>::ConstSubgridAdapter(
 	const ConstImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ConstImageAdapter<Pixel>(ImageSize(
-		(image.getSize().getWidth() - subgrid.origin.x)
-			/ subgrid.stepsize.getWidth(),
-		(image.getSize().getHeight() - subgrid.origin.y)
-			/ subgrid.stepsize.getHeight())
+		(_image.getSize().getWidth() - _subgrid.origin.x)
+			/ _subgrid.stepsize.getWidth(),
+		(_image.getSize().getHeight() - _subgrid.origin.y)
+			/ _subgrid.stepsize.getHeight())
 	), image(_image), subgrid(_subgrid) {
 }
 	
@@ -127,10 +128,10 @@ template<typename Pixel>
 SubgridAdapter<Pixel>::SubgridAdapter(
 	ImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ImageAdapter<Pixel>(ImageSize(
-		(image.getSize().getWidth() - subgrid.origin.x)
-			/ subgrid.stepsize.getWidth(),
-		(image.getSize().getHeight() - subgrid.origin.y)
-			/ subgrid.stepsize.getHeight())
+		(_image.getSize().getWidth() - _subgrid.origin.x)
+			/ _subgrid.stepsize.getWidth(),
+		(_image.getSize().getHeight() - _subgrid.origin.y)
+			/ _subgrid.stepsize.getHeight())
 	), image(_image), subgrid(_subgrid) {
 }
 	
