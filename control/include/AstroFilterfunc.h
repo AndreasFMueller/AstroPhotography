@@ -28,6 +28,8 @@ extern double	meanrel(const ImagePtr& image);
 extern double	median(const ImagePtr& image);
 
 extern double	focusFOM(const ImagePtr& image, const bool diagonal = false);
+extern double	focusFWHM(const ImagePtr& image, const ImagePoint& where,
+			unsigned int r);
 
 extern void	mask(MaskingFunction& maskingfunction, ImagePtr image);
 

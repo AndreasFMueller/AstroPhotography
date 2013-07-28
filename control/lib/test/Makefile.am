@@ -46,7 +46,7 @@ tests_SOURCES = tests.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
-	TranslationTest.cpp \
+	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp \

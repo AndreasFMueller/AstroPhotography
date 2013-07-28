@@ -475,6 +475,98 @@ void    Mask<Pixel>::operator()(Image<Pixel>& image) {
 	}
 }
 
+/**
+ * \brief Full Width at Half Maximum computation classes
+ */
+template<typename Pixel>
+class FWHM : PixelTypeFilter<Pixel, double> {
+	ImagePoint	point;
+	unsigned int	r;
+public:
+	FWHM(const ImagePoint& _point, unsigned int _r) : point(_point), r(_r) {
+	}
+	virtual Pixel	operator()(const ConstImageAdapter<Pixel>& image) {
+		return this->filter(image);
+	}
+	virtual double	filter(const ConstImageAdapter<Pixel>& image);
+};
+
+template<typename Pixel>
+double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
+	// first define the area where we should see the maximum
+	ImagePoint	center(point.x - r, point.y - r);
+	ImageRectangle	rectangle(center, ImageSize(2 * r + 1, 2 * r + 1));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
+		rectangle.toString().c_str());
+	WindowAdapter<Pixel>	wa(image, rectangle);
+
+	// locate the maximum in a rectangle around the point
+	Max<Pixel, double>	m;
+	double	maxvalue = m.filter(wa);
+	ImagePoint	target = m.getPoint();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum %f at %s",
+		(double)maxvalue, target.toString().c_str());
+	
+	// find pixels that are above half maximum
+	double	halfmax = maxvalue / 2;
+	unsigned int	maxradius = trunc((r + 1) * 1.43);
+	unsigned int	rhist[maxradius];
+	for (unsigned int k = 0; k < maxradius; k++) {
+		rhist[k] = 0;
+	}
+	for (unsigned int x = 0; x < wa.getSize().getWidth(); x++) {
+		for (unsigned int y = 0; y < wa.getSize().getHeight(); y++) {
+			if (wa.pixel(x, y) > halfmax) {
+				unsigned int	k
+					= trunc(hypot(x - target.x, y - target.y));
+				if (k < maxradius) {
+					rhist[k]++;
+				}
+			}
+		}
+	}
+	
+	// display the radius histogram
+	for (unsigned int k = 0; k < maxradius; k++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rhist[%03u] = %u",
+			k, rhist[k]);
+	}
+
+	// find the maximum in the histogram
+	unsigned int	maxr = 0;
+	unsigned int	maxrh = 0;
+	for (unsigned int k = 0; k < maxradius; k++) {
+		if (rhist[k] > maxrh) {
+			maxr = k;
+			maxrh = rhist[k];
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum %u at %u", maxrh, maxr);
+
+	// fint the point where it first drops below half the maximum
+	double	maxrh2 = maxrh / 2;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "half maximum: %f", maxrh2);
+	unsigned int	hm;
+	for (hm = maxr; hm < maxradius; hm++) {
+		if (rhist[hm] == maxrh2) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "half max at %u", hm);
+			return hm;
+		}
+		if (rhist[hm] < maxrh2) {
+			break;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "drop off to half maximum: %u", hm);
+
+	// interpolate the radius between hm and the previous point
+	double	dx = (maxrh2 - rhist[hm - 1]) / (rhist[hm - 1] - rhist[hm]);
+	double	fwhm = hm - dx;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dx = %f, fwhm = %f", dx, fwhm);
+
+	// return value
+	return fwhm;
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro

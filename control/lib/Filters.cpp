@@ -106,6 +106,27 @@ double	focusFOM(const ImagePtr& image, const bool diagonal) {
 	return 0;
 }
 
+#define	filter_focusfwhm(image, Pixel, center, r)			\
+{									\
+	Image<Pixel >	*imagep						\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		FWHM<Pixel>	fwhm(center, r);			\
+		return fwhm.filter(*imagep);				\
+	}								\
+}
+
+double	focusFWHM(const ImagePtr& image, const ImagePoint& center,
+	unsigned int r) {
+	filter_focusfwhm(image, unsigned char, center, r);
+	filter_focusfwhm(image, unsigned short, center, r);
+	filter_focusfwhm(image, unsigned int, center, r);
+	filter_focusfwhm(image, unsigned long, center, r);
+	filter_focusfwhm(image, float, center, r);
+	filter_focusfwhm(image, double, center, r);
+	return 0;
+}
+
 #define	filter_mask(image, pixel, mf)					\
 	{								\
 		Image<pixel>	*imagep					\
