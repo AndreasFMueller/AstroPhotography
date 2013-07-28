@@ -350,7 +350,7 @@
            <widget class="QComboBox" name="scaleCombobox"/>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="darkLabel_2">
+           <widget class="QLabel" name="flatLabel">
             <property name="text">
              <string>Flat image:</string>
             </property>
@@ -386,6 +386,16 @@
         <widget class="QPushButton" name="captureButton">
          <property name="text">
           <string>Capture</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="captureProgressBar">
+         <property name="value">
+          <number>24</number>
+         </property>
+         <property name="textVisible">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

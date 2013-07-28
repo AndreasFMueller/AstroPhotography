@@ -12,9 +12,16 @@
 #include <AstroDemosaic.h>
 #include <QThread>
 #include "ExposureWorker.h"
+#include <sys/time.h>
 
 using namespace astro;
 using namespace astro::image;
+
+static double	nowtime() {
+	struct timeval	now;
+	gettimeofday(&now, NULL);
+	return now.tv_sec + 0.000001 * now.tv_usec;
+}
 
 /**
  * \brief construct a CaptureWindow
@@ -40,6 +47,15 @@ CaptureWindow::CaptureWindow(QWidget *parent) :
 	ui->scaleCombobox->addItem(QString("200%"));
 	ui->scaleCombobox->addItem(QString("400%"));
 	ui->scaleCombobox->setCurrentIndex(2);
+
+	// make progress bar invisible
+	ui->captureProgressBar->hide();
+	ui->captureProgressBar->setMinimum(0);
+
+	// create the timer, but don't start i
+	timer = new QTimer();
+	timer->setInterval(100);
+	connect(timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
 }
 
 /**
@@ -48,6 +64,7 @@ CaptureWindow::CaptureWindow(QWidget *parent) :
 CaptureWindow::~CaptureWindow()
 {
     delete ui;
+    delete timer;
 }
 
 /**
@@ -116,6 +133,9 @@ void	CaptureWindow::setCcd(CcdPtr _ccd) {
 void	CaptureWindow::startCapture() {
 	ui->statusbar->showMessage(QString("capturing new image"));
 	exposure = ui->exposureWidget->getExposure();
+	int	maxprogress = 100 * exposure.exposuretime;
+	ui->captureProgressBar->setMaximum(maxprogress);
+	exposurestart = nowtime();
 #if 0
 	// XXX This implementation is current synchronous, which means
 	//     that long exposures completely block the UI. This should
@@ -138,6 +158,13 @@ void	CaptureWindow::startCapture() {
 	// when the thread signals finished, mark it for deleteion
 	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 	thread->start();
+	ui->captureButton->hide();
+	ui->captureProgressBar->show();
+
+	// start a timer
+	if (exposure.exposuretime > 1) {
+		timer->start();
+	}
 #endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image");
 }
@@ -323,9 +350,18 @@ void	CaptureWindow::scaleChanged(int item) {
 }
 
 void	CaptureWindow::finished() {
+	ui->captureProgressBar->hide();
+	ui->captureButton->show();
 	setImage(newimage);
+	timer->stop();
 }
 
 void	CaptureWindow::newImage(ImagePtr _newimage) {
 	newimage = _newimage;
+}
+
+void	CaptureWindow::timer_timeout() {
+	// compute time passed since start
+	int	progress = 100 * (nowtime() - exposurestart);
+	ui->captureProgressBar->setValue(progress);
 }

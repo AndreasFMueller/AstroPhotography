@@ -132,7 +132,7 @@ Exposure	ExposureWidget::getExposure() {
 		result.frame.origin.x = ui->originxField->text().toInt(&ok);
 		result.frame.origin.y = ui->originyField->text().toInt(&ok);
 		result.frame.size.setWidth(ui->widthField->text().toInt(&ok));
-		result.frame.size.setHeight(ui->widthField->text().toInt(&ok));
+		result.frame.size.setHeight(ui->heightField->text().toInt(&ok));
 	} else {
 		result.frame = ccd->getInfo().getFrame();
 	}

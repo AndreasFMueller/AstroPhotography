@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMouseEvent>
+#include <QTimer>
 #include <AstroCamera.h>
 #include <exposurewidget.h>
 
@@ -24,6 +25,10 @@ class CaptureWindow : public QMainWindow
 	ImagePtr	image; // most recent image
 	ImagePtr	demosaicedimage;
 	double	imagescale;
+
+	// timing and progress
+	QTimer	*timer;
+	double	exposurestart;
     
 public:
     explicit CaptureWindow(QWidget *parent = 0);
@@ -46,6 +51,7 @@ private slots:
 	void	scaleChanged(int item);
 	void	startCapture();
 	void	finished();
+	void	timer_timeout();
 };
 
 #endif // CAPTUREWINDOW_H
