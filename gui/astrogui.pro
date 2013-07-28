@@ -7,10 +7,12 @@ LIBS += -L../control/lib -lastro
 
 HEADERS += \ 
     capturewindow.h \
-    exposurewidget.h
+    exposurewidget.h \
+    ExposureWorker.h
 FORMS += \ 
     capturewindow.ui \
     exposurewidget.ui
 SOURCES = capture.cpp \ 
     capturewindow.cpp \
-    exposurewidget.cpp
+    exposurewidget.cpp \
+    ExposureWorker.cpp

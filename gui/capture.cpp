@@ -52,7 +52,7 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d devices", cameras.size());
 	if (cameraid >= cameras.size()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "not enough devices");
-		std::runtime_error("camera id too large");
+		throw std::runtime_error("camera id too large");
 	}
 	CameraPtr	camera = locator->getCamera(cameras[cameraid]);
 	CcdPtr	ccd = camera->getCcd(ccdid);

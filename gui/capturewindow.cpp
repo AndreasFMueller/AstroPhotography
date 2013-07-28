@@ -10,6 +10,8 @@
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
 #include <AstroDemosaic.h>
+#include <QThread>
+#include "ExposureWorker.h"
 
 using namespace astro;
 using namespace astro::image;
@@ -113,14 +115,30 @@ void	CaptureWindow::setCcd(CcdPtr _ccd) {
  */
 void	CaptureWindow::startCapture() {
 	ui->statusbar->showMessage(QString("capturing new image"));
+	exposure = ui->exposureWidget->getExposure();
+#if 0
 	// XXX This implementation is current synchronous, which means
 	//     that long exposures completely block the UI. This should
 	//     be change so that a separate thread is performing the
 	//     capture
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCapture called");
-	exposure = ui->exposureWidget->getExposure();
 	ccd->startExposure(exposure);
 	setImage(ccd->getImage());
+#else
+	QThread	*thread = new QThread();
+	ExposureWorker	*worker = new ExposureWorker(ccd, exposure, this);
+	worker->moveToThread(thread);
+	// when the thread is read, start the process method in the worker
+	connect(thread, SIGNAL(started()), worker, SLOT(process()));
+	// when the worker is done, hand over image to this class
+	connect(worker, SIGNAL(finished()), this, SLOT(finished()));
+	// when the worker signals finish, quit the thread
+	connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
+	// when the worker signals finish, mark it for deletetion
+	connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+	// when the thread signals finished, mark it for deleteion
+	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+	thread->start();
+#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image");
 }
 
@@ -304,3 +322,10 @@ void	CaptureWindow::scaleChanged(int item) {
 	}
 }
 
+void	CaptureWindow::finished() {
+	setImage(newimage);
+}
+
+void	CaptureWindow::newImage(ImagePtr _newimage) {
+	newimage = _newimage;
+}

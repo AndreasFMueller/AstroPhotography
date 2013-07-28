@@ -20,6 +20,7 @@ class CaptureWindow : public QMainWindow
 	CameraPtr	camera;
 	CcdPtr	ccd;
 	Exposure	exposure;
+	ImagePtr	newimage;
 	ImagePtr	image; // most recent image
 	ImagePtr	demosaicedimage;
 	double	imagescale;
@@ -36,6 +37,7 @@ public:
 	void	redisplayImage();
 
 	virtual void mouseMoveEvent(QMouseEvent* event);
+	void	newImage(ImagePtr newimage);
     
 private:
     Ui::CaptureWindow *ui;
@@ -43,6 +45,7 @@ private:
 private slots:
 	void	scaleChanged(int item);
 	void	startCapture();
+	void	finished();
 };
 
 #endif // CAPTUREWINDOW_H

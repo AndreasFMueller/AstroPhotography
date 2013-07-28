@@ -26,12 +26,12 @@ class ExposureWidget : public QGroupBox
     
 public:
     explicit ExposureWidget(QWidget *parent = 0);
-    ~ExposureWidget();
+    virtual ~ExposureWidget();
 
 	void	setCcd(CcdPtr ccd);
 	Exposure	getExposure();
 	void	setExposure(const Exposure& exposure);
-    
+
 private:
     Ui::ExposureWidget *ui;
 
