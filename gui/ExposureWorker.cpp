@@ -1,6 +1,8 @@
 /*
  * ExposureWorker.cpp -- ExposureWorker implementation
  *
+ * Info for how to use this class: http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
+ *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <ExposureWorker.h>

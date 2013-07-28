@@ -10,12 +10,18 @@
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
 #include <AstroDemosaic.h>
+#include <AstroIO.h>
 #include <QThread>
+#include <QFileDialog>
+#include <QMessageBox>
 #include "ExposureWorker.h"
 #include <sys/time.h>
+#include <AstroCalibration.h>
 
 using namespace astro;
 using namespace astro::image;
+using namespace astro::io;
+using namespace astro::calibration;
 
 static double	nowtime() {
 	struct timeval	now;
@@ -56,6 +62,12 @@ CaptureWindow::CaptureWindow(QWidget *parent) :
 	timer = new QTimer();
 	timer->setInterval(100);
 	connect(timer, SIGNAL(timeout()), this, SLOT(timer_timeout()));
+
+	// add menus
+	fileMenu = menuBar()->addMenu("&File");
+	QAction	*saveAction = fileMenu->addAction("&Save ...", this,
+		SLOT(fileSaveAs()));
+	saveAction->setShortcut(QKeySequence::Save);
 }
 
 /**
@@ -136,14 +148,6 @@ void	CaptureWindow::startCapture() {
 	int	maxprogress = 100 * exposure.exposuretime;
 	ui->captureProgressBar->setMaximum(maxprogress);
 	exposurestart = nowtime();
-#if 0
-	// XXX This implementation is current synchronous, which means
-	//     that long exposures completely block the UI. This should
-	//     be change so that a separate thread is performing the
-	//     capture
-	ccd->startExposure(exposure);
-	setImage(ccd->getImage());
-#else
 	QThread	*thread = new QThread();
 	ExposureWorker	*worker = new ExposureWorker(ccd, exposure, this);
 	worker->moveToThread(thread);
@@ -158,14 +162,12 @@ void	CaptureWindow::startCapture() {
 	// when the thread signals finished, mark it for deleteion
 	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 	thread->start();
-	ui->captureButton->hide();
-	ui->captureProgressBar->show();
-
-	// start a timer
 	if (exposure.exposuretime > 1) {
+		ui->captureButton->hide();
+		ui->captureProgressBar->show();
+		// start a timer
 		timer->start();
 	}
-#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image");
 }
 
@@ -276,6 +278,23 @@ void	CaptureWindow::redisplayImage() {
 void	CaptureWindow::setImage(ImagePtr newimage) {
 	ui->statusbar->showMessage(QString("new image captured"));
 	image = newimage;
+
+	// perform calibration
+	if (ui->darksubtractCheckbox->isChecked()) {
+		if (dark) {
+			DarkCorrector	corrector(dark);
+			corrector(image);
+		}
+	}
+
+	if (ui->flatdivideCheckbox->isChecked()) {
+		if (!flat) {
+			FlatCorrector	corrector(flat);
+			corrector(image);
+		}
+	}
+
+	// demosaic the image
 	ui->demosaicCheckbox->setEnabled(image->isMosaic());
 	if (image->isMosaic()) {
 		demosaicedimage = demosaic_bilinear(image);
@@ -349,6 +368,9 @@ void	CaptureWindow::scaleChanged(int item) {
 	}
 }
 
+/**
+ * \brief
+ */ 
 void	CaptureWindow::finished() {
 	ui->captureProgressBar->hide();
 	ui->captureButton->show();
@@ -356,12 +378,95 @@ void	CaptureWindow::finished() {
 	timer->stop();
 }
 
+/**
+ * \brief method used
+ */
 void	CaptureWindow::newImage(ImagePtr _newimage) {
 	newimage = _newimage;
 }
 
+/**
+ * \brief
+ */
 void	CaptureWindow::timer_timeout() {
 	// compute time passed since start
 	int	progress = 100 * (nowtime() - exposurestart);
 	ui->captureProgressBar->setValue(progress);
 }
+
+/**
+ * \brief Slot that saves the current image as a file
+ */
+bool	CaptureWindow::fileSaveAs() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "save file");
+	QString	filename = QFileDialog::getSaveFileName();
+	std::string	filenamestring
+		= filename.toUtf8().constData();
+	ui->statusbar->showMessage(QString("Save to '%1'").arg(filename));
+	if (filename.isEmpty()) {
+		return false;
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing file '%s'",
+		filenamestring.c_str());
+	unlink(filenamestring.c_str());
+	FITSout	out(filenamestring);
+	out.write(image);
+	ui->statusbar->showMessage(QString("Save to '%1'").arg(filename));
+	return true;
+}
+
+/**
+ * \brief Slot for opening a dark file
+ */
+void	CaptureWindow::openDarkfile() {
+	darkfilename = QFileDialog::getOpenFileName();
+	if (darkfilename.isEmpty()) {
+		return;
+	}
+	std::string	darkfilenamestring(darkfilename.toUtf8().constData());
+	try {
+		FITSin	in(darkfilenamestring);
+		ImagePtr	newdark = in.read();
+		if (newdark->size != ccd->getInfo().getSize()) {
+			QMessageBox::warning(this,
+				QString("Cannot use dark image"),
+				QString("The dark file '%1' cannot be used, because it does not match the CCD size").arg(darkfilename));
+			return;
+		}
+		dark = newdark;
+	} catch (std::exception& x) {
+		std::string	msg = 
+			stringprintf("cannot open file: '%s'", x.what());
+		ui->statusbar->showMessage(QString(msg.c_str()));
+	}
+	ui->darkField->setText(darkfilename);
+}
+
+/**
+ * \brief Slot for opening a flat file
+ */
+void	CaptureWindow::openFlatfile() {
+	flatfilename = QFileDialog::getOpenFileName();
+	if (flatfilename.isEmpty()) {
+		return;
+	}
+	std::string	flatfilenamestring(flatfilename.toUtf8().constData());
+	try {
+		FITSin	in(flatfilenamestring);
+		ImagePtr	newflat = in.read();
+		if (newflat->size != ccd->getInfo().getSize()) {
+			QMessageBox::warning(this,
+				QString("Cannot use flat image"),
+				QString("The flat file '%1' cannot be used, because it does not match the CCD size").arg(flatfilename));
+			return;
+		}
+		flat = newflat;
+	} catch (std::exception& x) {
+		std::string	msg = 
+			stringprintf("cannot open file: '%s'", x.what());
+		ui->statusbar->showMessage(QString(msg.c_str()));
+	}
+	ui->flatField->setText(flatfilename);
+}
+

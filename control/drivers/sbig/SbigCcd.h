@@ -27,6 +27,7 @@ public:
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
 
+	virtual bool	hasShutter() const { return true; }
 	virtual shutter_state	getShutterState() throw(not_implemented);
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);

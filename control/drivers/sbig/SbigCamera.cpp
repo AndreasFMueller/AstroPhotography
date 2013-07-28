@@ -133,8 +133,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			ccd.binningmodes.insert(SbigMode2Binning(
-				ccdinforesult.readoutInfo[i].mode));
+			SbigBinningAdd(ccd.binningmodes,
+				ccdinforesult.readoutInfo[i].mode);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"mode[%d]: %d x %d (%04x)",
 				i, 
@@ -162,8 +162,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 			ccd.toString().c_str());
 
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			ccd.binningmodes.insert(SbigMode2Binning(
-				ccdinforesult.readoutInfo[i].mode));
+			SbigBinningAdd(ccd.binningmodes,
+				ccdinforesult.readoutInfo[i].mode);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d]: %d x %d",
 				i, 
 				ccdinforesult.readoutInfo[i].width,
@@ -186,8 +186,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			ccd.binningmodes.insert(SbigMode2Binning(
-				ccdinforesult.readoutInfo[i].mode));
+			SbigBinningAdd(ccd.binningmodes,
+				ccdinforesult.readoutInfo[i].mode);
 		}
 		ccdinfo.push_back(ccd);
 	}

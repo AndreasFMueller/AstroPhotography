@@ -45,20 +45,28 @@ void	ExposureWidget::timeChanged(double value) {
 		value, timeprevious);
 	double	stepvalue = ui->timeSpinBox->singleStep();
 	if (value < timeprevious) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping down");
-		if (timeprevious >= 120) {
-			stepvalue = 60;
-		} else {
-			stepvalue /= 2;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new stepvalue: %f",
-				stepvalue);
-			if (stepvalue < 0.001) {
-				stepvalue = 0.001;
+		if (value == 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping down");
+			if (timeprevious >= 120) {
+				stepvalue = 60;
+			} else {
+				stepvalue /= 2;
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "new stepvalue: %f",
+					stepvalue);
+				if (stepvalue < 0.001) {
+					stepvalue = 0.001;
+				}
+				stepvalue = trunc(1000 * stepvalue) / 1000.;
+				ui->timeSpinBox->setValue(stepvalue);
 			}
-			stepvalue = trunc(1000 * stepvalue) / 1000.;
-			ui->timeSpinBox->setValue(stepvalue);
+			ui->timeSpinBox->setSingleStep(stepvalue);
+		} else {
+			if (value < 0.001) {
+				value = 0.001;
+				ui->timeSpinBox->setValue(value);
+			}
+			ui->timeSpinBox->setSingleStep(value);
 		}
-		ui->timeSpinBox->setSingleStep(stepvalue);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping up");
 		if (value > 1) {

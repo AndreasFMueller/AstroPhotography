@@ -29,6 +29,15 @@ class CaptureWindow : public QMainWindow
 	// timing and progress
 	QTimer	*timer;
 	double	exposurestart;
+
+	// Menus
+	QMenu	*fileMenu;
+
+	// dark and flat files
+	QString	darkfilename;
+	ImagePtr	dark;
+	QString	flatfilename;
+	ImagePtr	flat;
     
 public:
     explicit CaptureWindow(QWidget *parent = 0);
@@ -52,6 +61,9 @@ private slots:
 	void	startCapture();
 	void	finished();
 	void	timer_timeout();
+	bool	fileSaveAs();
+	void	openDarkfile();
+	void	openFlatfile();
 };
 
 #endif // CAPTUREWINDOW_H

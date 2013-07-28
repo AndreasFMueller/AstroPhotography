@@ -83,6 +83,10 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	if (state == Exposure::exposing) {
 		throw SbigError("exposure already in progress");
 	}
+
+	// XXX make sure that the subframe parameters are compatible with the
+	//     binning mode
+
 	camera.sethandle();
 	this->exposure = exposure;
 
@@ -92,8 +96,22 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	params.ccd = id;
 	params.exposureTime = 100 * exposure.exposuretime;
 	params.abgState = ABG_LOW7; // XXX should be able to set via property
-	params.openShutter = SC_OPEN_SHUTTER; // XXX need way to set this e.g. for darks
-	params.readoutMode = RM_1X1; // XXX should be set from exposure.mode
+
+	// use the shutter info 
+	params.openShutter = (exposure.shutter == SHUTTER_OPEN)
+				? ((id == 2)
+					? SC_OPEN_EXT_SHUTTER
+					: SC_OPEN_SHUTTER)
+				: ((id == 2)
+					? SC_CLOSE_EXT_SHUTTER
+					: SC_CLOSE_SHUTTER);
+
+	// set the appropriate binning mode
+	params.readoutMode = SbigBinning2Mode(exposure.mode);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s binning -> readout mode: %04hx",
+		exposure.mode.toString().c_str(), params.readoutMode);
+
+	// get the subframe
 	params.top = exposure.frame.origin.y;
 	params.left = exposure.frame.origin.x;
 	params.width = exposure.frame.size.getWidth();
@@ -133,6 +151,13 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		usleep(100000);
 	}
 
+	// compute the size of the resulting image, if we get one
+	ImageSize	resultsize(
+		exposure.frame.size.getWidth() / exposure.mode.getX(),
+		exposure.frame.size.getHeight() / exposure.mode.getY());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting an %s image",
+		resultsize.toString().c_str());
+
 	// this is where we will find the data, we have to declare it
 	// here because everything after this point will be protected
 	unsigned short	*data = NULL;
@@ -153,11 +178,13 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		// start the readout
 		StartReadoutParams	readparams;
 		readparams.ccd = id;
-		readparams.readoutMode = RM_1X1; // XXX should be set from exposure.mode
+		readparams.readoutMode = SbigBinning2Mode(exposure.mode);
+
 		readparams.top = exposure.frame.origin.y;
 		readparams.left = exposure.frame.origin.x;
 		readparams.width = exposure.frame.size.getWidth();
 		readparams.height = exposure.frame.size.getHeight();
+
 		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
 		if (e != CE_NO_ERROR) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
@@ -168,16 +195,21 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		// read the data lines we really are interested in
 		ReadoutLineParams	readlineparams;
 		readlineparams.ccd = id;
-		readlineparams.pixelStart = exposure.frame.origin.x;
-		readlineparams.pixelLength = exposure.frame.size.getWidth();
+		readlineparams.pixelStart = exposure.frame.origin.x
+						/ exposure.mode.getX();
+		readlineparams.pixelLength = exposure.frame.size.getWidth()
+						/ exposure.mode.getX();
 		readlineparams.readoutMode = readparams.readoutMode;
-		size_t	arraysize = exposure.frame.size.getWidth()
-					* exposure.frame.size.getHeight();
+debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d", 
+	readlineparams.pixelStart,
+	readlineparams.pixelLength);
+		size_t	arraysize = resultsize.getPixels();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
 		data = new unsigned short[arraysize];
+		memset(data, 0xff, 2 * arraysize);
 		unsigned short	*p = data;
 		unsigned int	linecounter = 0;
-		while (linecounter < exposure.frame.size.getHeight()) {
+		while (linecounter < resultsize.getHeight()) {
 			e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
 			if (e != CE_NO_ERROR) {
 				debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
@@ -185,7 +217,7 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 				delete[] data;
 				throw SbigError(e);
 			}
-			p += exposure.frame.size.getWidth();
+			p += resultsize.getWidth();
 			linecounter++;
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
@@ -194,7 +226,8 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		DumpLinesParams	dumplines;
 		dumplines.ccd = id;
 		dumplines.readoutMode = readparams.readoutMode;
-		dumplines.lineLength = info.size.getHeight() - exposure.frame.size.getHeight()
+		dumplines.lineLength = info.size.getHeight()
+			- exposure.frame.size.getHeight()
 			- exposure.frame.origin.y;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
 			dumplines.lineLength);
@@ -217,7 +250,7 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 
 	// convert the image data into an image
 	Image<unsigned short>	*image
-		= new Image<unsigned short>(exposure.frame.size, data);
+		= new Image<unsigned short>(resultsize, data);
 
 	// add the metadata to the image
 	addMetadata(*image);
@@ -305,10 +338,14 @@ void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented)
 	}
 	switch (state) {
 	case SHUTTER_CLOSED:
-		misc.shutterCommand = SC_CLOSE_SHUTTER;
+		misc.shutterCommand = (id == 2)
+					? SC_CLOSE_EXT_SHUTTER
+					: SC_CLOSE_SHUTTER;
 		break;
 	case SHUTTER_OPEN:
-		misc.shutterCommand = SC_OPEN_SHUTTER;
+		misc.shutterCommand = (id == 2) 
+					? SC_OPEN_EXT_SHUTTER
+					: SC_OPEN_SHUTTER;
 		break;
 	}
 	e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);

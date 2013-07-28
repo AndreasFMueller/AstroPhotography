@@ -237,9 +237,6 @@
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::FieldsStayAtSizeHint</enum>
           </property>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="darkField"/>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="darkLabel">
             <property name="text">
@@ -275,14 +272,145 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
+          <item row="7" column="0">
+           <widget class="QLabel" name="scaleLabel">
+            <property name="text">
+             <string>Scale:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QComboBox" name="scaleCombobox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="flatLabel">
+            <property name="text">
+             <string>Flat image:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="flatdivideLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Flat divide:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="flatdivideCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="darkWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="darkField">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="darkButton">
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QWidget" name="flatWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="flatField">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="flatButton">
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="6" column="0">
            <widget class="QLabel" name="valueintervalLabel">
             <property name="text">
              <string>Value interval:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="6" column="1">
            <widget class="QWidget" name="valueintervalWidget" native="true">
             <property name="minimumSize">
              <size>
@@ -339,46 +467,6 @@
             </layout>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="scaleLabel">
-            <property name="text">
-             <string>Scale:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QComboBox" name="scaleCombobox"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="flatLabel">
-            <property name="text">
-             <string>Flat image:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lightField"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="flatdivideLabel">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Flat divide:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QCheckBox" name="flatdivideCheckbox">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -433,8 +521,8 @@
    <slot>startCapture()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>704</x>
-     <y>799</y>
+     <x>941</x>
+     <y>774</y>
     </hint>
     <hint type="destinationlabel">
      <x>693</x>
@@ -449,12 +537,44 @@
    <slot>scaleChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>837</x>
-     <y>740</y>
+     <x>880</x>
+     <y>721</y>
     </hint>
     <hint type="destinationlabel">
      <x>950</x>
      <y>641</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>darkButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>openDarkfile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>909</x>
+     <y>562</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>956</x>
+     <y>566</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>flatButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>openFlatfile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>918</x>
+     <y>616</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>953</x>
+     <y>618</y>
     </hint>
    </hints>
   </connection>
@@ -464,5 +584,7 @@
   <slot>scaleChanged(int)</slot>
   <slot>subframeToggled(bool)</slot>
   <slot>timeChanged(double)</slot>
+  <slot>openDarkfile()</slot>
+  <slot>openFlatfile()</slot>
  </slots>
 </ui>
