@@ -18,6 +18,8 @@ class Interpolator {
 	const astro::image::ImagePtr& dark;
 	astro::image::Image<float>	*floatdark;
 	astro::image::Image<double>	*doubledark;
+	void	interpolateMonochrome(astro::image::ImagePtr& image);
+	void	interpolateMosaic(astro::image::ImagePtr& image);
 public:
 	Interpolator(const astro::image::ImagePtr& dark);
 	void	interpolate(astro::image::ImagePtr& image);

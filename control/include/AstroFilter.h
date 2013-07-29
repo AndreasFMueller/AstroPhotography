@@ -229,30 +229,19 @@ protected:
 		R = 0, Gr = 1, B = 2, Gb = 3
 	} color_type;
 	color_type	color;
-	ImagePoint	origin(const ImageBase::mosaic_type& mosaic) {
-		unsigned int	dx =  mosaic       & 0x1;
-		unsigned int	dy = (mosaic >> 1) & 0x1;
-		ImagePoint	o(dx, dy);
+	ImagePoint	origin(const MosaicType::mosaic_type& mosaic) {
+		MosaicType	m(mosaic);
 		switch (color) {
-		case R:
-			break;
-		case Gr:
-			o.setX(o.x() ^ 0x1);
-			break;
-		case B:
-			o.setX(o.x() ^ 0x1);
-			o.setY(o.y() ^ 0x1);
-			break;
-		case Gb:
-			o.setY(o.y() ^ 0x1);
-			break;
+		case R:		return m.red();
+		case Gr:	return m.greenr();
+		case B:		return m.blue();
+		case Gb:	return m.greenb();
 		}
-		return o;
 	}
 public:
 	MosaicMean(color_type _color) : color(_color) { }
 	virtual S	mean(const ConstImageAdapter<T>& image,
-				const ImageBase::mosaic_type& mosaic) {
+				const MosaicType::mosaic_type& mosaic) {
 		if (mosaic & 0x8) {
 			throw std::logic_error("not a mosaic image");
 		}

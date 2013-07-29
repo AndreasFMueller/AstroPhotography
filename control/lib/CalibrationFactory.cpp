@@ -445,7 +445,7 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	// find out whether these are Bayer images, by looking at the first
 	// image
 	ImagePtr	firstimage = *images.begin();
-	bool	gridded = firstimage->isMosaic();
+	bool	gridded = firstimage->getMosaicType().isMosaic();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "first image is %sgridded",
 		(gridded) ? "" : "not ");
 	

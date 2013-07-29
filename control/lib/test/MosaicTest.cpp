@@ -33,12 +33,12 @@ public:
 	void	testGRBG();
 	void	testGBRG();
 	void	testBGGR();
-	void	testMosaic(ImageBase::mosaic_type mosaic);
+	void	testMosaic(MosaicType::mosaic_type mosaic);
 	void	testMosaicRGGB();
 	void	testMosaicGRBG();
 	void	testMosaicGBRG();
 	void	testMosaicBGGR();
-	void	testSeparate(ImageBase::mosaic_type mosaic);
+	void	testSeparate(MosaicType::mosaic_type mosaic);
 	void	testSeparateRGGB();
 	void	testSeparateGRBG();
 	void	testSeparateGBRG();
@@ -77,11 +77,11 @@ void	MosaicTest::testNone() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testNone() begin");
 	for (unsigned int x = 0; x < image->size().width(); x++) {
 		for (unsigned int y = 0; y < image->size().height(); y++) {
-			CPPUNIT_ASSERT(!image->isR(x, y));
-			CPPUNIT_ASSERT(!image->isG(x, y));
-			CPPUNIT_ASSERT(!image->isB(x, y));
-			CPPUNIT_ASSERT(!image->isGr(x, y));
-			CPPUNIT_ASSERT(!image->isGb(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y));
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testNone() end");
@@ -89,33 +89,33 @@ void	MosaicTest::testNone() {
 
 void	MosaicTest::testRGGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGGB() begin");
-	image->setMosaicType(ImageBase::BAYER_RGGB);
+	image->setMosaicType(MosaicType::BAYER_RGGB);
 	for (unsigned int x = 0; x < image->size().width(); x += 2) {
 		for (unsigned int y = 0; y < image->size().height(); y += 2) {
 			// point (0,0)
-			CPPUNIT_ASSERT( image->isR(x, y));
-			CPPUNIT_ASSERT(!image->isG(x, y));
-			CPPUNIT_ASSERT(!image->isB(x, y));
-			CPPUNIT_ASSERT(!image->isGr(x, y));
-			CPPUNIT_ASSERT(!image->isGb(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isR(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y));
 			// point (1,0)
-			CPPUNIT_ASSERT(!image->isR(x + 1, y));
-			CPPUNIT_ASSERT( image->isG(x + 1, y));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y));
-			CPPUNIT_ASSERT( image->isGr(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isGr(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y));
 			// point (0,1)
-			CPPUNIT_ASSERT(!image->isR(x, y + 1));
-			CPPUNIT_ASSERT( image->isG(x, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x, y + 1));
-			CPPUNIT_ASSERT( image->isGb(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isGb(x, y + 1));
 			// point (1,1)
-			CPPUNIT_ASSERT(!image->isR(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isG(x + 1, y + 1));
-			CPPUNIT_ASSERT( image->isB(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isB(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y + 1));
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRGGB() end");
@@ -123,33 +123,33 @@ void	MosaicTest::testRGGB() {
 
 void	MosaicTest::testGRBG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGRBG() begin");
-	image->setMosaicType(ImageBase::BAYER_GRBG);
+	image->setMosaicType(MosaicType::BAYER_GRBG);
 	for (unsigned int x = 0; x < image->size().width(); x += 2) {
 		for (unsigned int y = 0; y < image->size().height(); y += 2) {
 			// point (0,0): G, Gr
-			CPPUNIT_ASSERT(!image->isR(x, y));
-			CPPUNIT_ASSERT( image->isG(x, y));
-			CPPUNIT_ASSERT(!image->isB(x, y));
-			CPPUNIT_ASSERT( image->isGr(x, y));
-			CPPUNIT_ASSERT(!image->isGb(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isGr(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y));
 			// point (1,0): R
-			CPPUNIT_ASSERT( image->isR(x + 1, y));
-			CPPUNIT_ASSERT(!image->isG(x + 1, y));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isR(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y));
 			// point (0,1): B
-			CPPUNIT_ASSERT(!image->isR(x, y + 1));
-			CPPUNIT_ASSERT(!image->isG(x, y + 1));
-			CPPUNIT_ASSERT( image->isB(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isB(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y + 1));
 			// point (1,1): G, Gb
-			CPPUNIT_ASSERT(!image->isR(x + 1, y + 1));
-			CPPUNIT_ASSERT( image->isG(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y + 1));
-			CPPUNIT_ASSERT( image->isGb(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isGb(x + 1, y + 1));
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGRBG() end");
@@ -157,33 +157,33 @@ void	MosaicTest::testGRBG() {
 
 void	MosaicTest::testGBRG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGBRG() begin");
-	image->setMosaicType(ImageBase::BAYER_GBRG);
+	image->setMosaicType(MosaicType::BAYER_GBRG);
 	for (unsigned int x = 0; x < image->size().width(); x += 2) {
 		for (unsigned int y = 0; y < image->size().height(); y += 2) {
 			// point (0,0): G, Gb
-			CPPUNIT_ASSERT(!image->isR(x, y));
-			CPPUNIT_ASSERT( image->isG(x, y));
-			CPPUNIT_ASSERT(!image->isB(x, y));
-			CPPUNIT_ASSERT(!image->isGr(x, y));
-			CPPUNIT_ASSERT( image->isGb(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isGb(x, y));
 			// point (1,0): B
-			CPPUNIT_ASSERT(!image->isR(x + 1, y));
-			CPPUNIT_ASSERT(!image->isG(x + 1, y));
-			CPPUNIT_ASSERT( image->isB(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isB(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y));
 			// point (0,1): R
-			CPPUNIT_ASSERT( image->isR(x, y + 1));
-			CPPUNIT_ASSERT(!image->isG(x, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isR(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y + 1));
 			// point (1,1): G, Gr
-			CPPUNIT_ASSERT(!image->isR(x + 1, y + 1));
-			CPPUNIT_ASSERT( image->isG(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y + 1));
-			CPPUNIT_ASSERT( image->isGr(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isGr(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y + 1));
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGBRG() end");
@@ -191,39 +191,39 @@ void	MosaicTest::testGBRG() {
 
 void	MosaicTest::testBGGR() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBGGR() begin");
-	image->setMosaicType(ImageBase::BAYER_BGGR);
+	image->setMosaicType(MosaicType::BAYER_BGGR);
 	for (unsigned int x = 0; x < image->size().width(); x += 2) {
 		for (unsigned int y = 0; y < image->size().height(); y += 2) {
 			// point (0,0): B
-			CPPUNIT_ASSERT(!image->isR(x, y));
-			CPPUNIT_ASSERT(!image->isG(x, y));
-			CPPUNIT_ASSERT( image->isB(x, y));
-			CPPUNIT_ASSERT(!image->isGr(x, y));
-			CPPUNIT_ASSERT(!image->isGb(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isB(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y));
 			// point (1,0): G, Gb
-			CPPUNIT_ASSERT(!image->isR(x + 1, y));
-			CPPUNIT_ASSERT( image->isG(x + 1, y));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y));
-			CPPUNIT_ASSERT( image->isGb(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y));
+			CPPUNIT_ASSERT( image->getMosaicType().isGb(x + 1, y));
 			// point (0,1): G, Gr
-			CPPUNIT_ASSERT(!image->isR(x, y + 1));
-			CPPUNIT_ASSERT( image->isG(x, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x, y + 1));
-			CPPUNIT_ASSERT( image->isGr(x, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isR(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isG(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isGr(x, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x, y + 1));
 			// point (1,1): R
-			CPPUNIT_ASSERT( image->isR(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isG(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isB(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGr(x + 1, y + 1));
-			CPPUNIT_ASSERT(!image->isGb(x + 1, y + 1));
+			CPPUNIT_ASSERT( image->getMosaicType().isR(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isG(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isB(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGr(x + 1, y + 1));
+			CPPUNIT_ASSERT(!image->getMosaicType().isGb(x + 1, y + 1));
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBGGR() end");
 }
 
-void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
+void	MosaicTest::testMosaic(MosaicType::mosaic_type mosaic) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaic() begin");
 	Image<RGB<unsigned char> >	image(44, 62);
 	for (unsigned int x = 0; x < image.size().width(); x++) {
@@ -245,13 +245,13 @@ void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
 
 	for (unsigned int x = 0; x < image.size().width(); x++) {
 		for (unsigned int y = 0; y < image.size().height(); y++) {
-			if (mosaiced->isR(x, y)) {
+			if (mosaiced->getMosaicType().isR(x, y)) {
 				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'R');
 			}
-			if (mosaiced->isG(x, y)) {
+			if (mosaiced->getMosaicType().isG(x, y)) {
 				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'G');
 			}
-			if (mosaiced->isB(x, y)) {
+			if (mosaiced->getMosaicType().isB(x, y)) {
 				CPPUNIT_ASSERT(mosaiced->pixel(x, y) == 'B');
 			}
 		}
@@ -262,29 +262,29 @@ void	MosaicTest::testMosaic(ImageBase::mosaic_type mosaic) {
 
 void	MosaicTest::testMosaicRGGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicRGGB() begin");
-	testMosaic(ImageBase::BAYER_RGGB);
+	testMosaic(MosaicType::BAYER_RGGB);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicRGGB() end");
 }
 
 void	MosaicTest::testMosaicGRBG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGRBG() begin");
-	testMosaic(ImageBase::BAYER_GRBG);
+	testMosaic(MosaicType::BAYER_GRBG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGRBG() end");
 }
 
 void	MosaicTest::testMosaicGBRG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGBRG() begin");
-	testMosaic(ImageBase::BAYER_GBRG);
+	testMosaic(MosaicType::BAYER_GBRG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicGBRG() end");
 }
 
 void	MosaicTest::testMosaicBGGR() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicBGGR() begin");
-	testMosaic(ImageBase::BAYER_BGGR);
+	testMosaic(MosaicType::BAYER_BGGR);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMosaicBGGR() end");
 }
 
-void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
+void	MosaicTest::testSeparate(MosaicType::mosaic_type mosaic) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparate() begin");
 	Image<RGB<unsigned char> >	image(44, 62);
 	for (unsigned int x = 0; x < image.size().width(); x++) {
@@ -322,25 +322,25 @@ void	MosaicTest::testSeparate(ImageBase::mosaic_type mosaic) {
 
 void	MosaicTest::testSeparateRGGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateRGGB() begin");
-	testSeparate(ImageBase::BAYER_RGGB);
+	testSeparate(MosaicType::BAYER_RGGB);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateRGGB() end");
 }
 
 void	MosaicTest::testSeparateGRBG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGRBG() begin");
-	testSeparate(ImageBase::BAYER_GRBG);
+	testSeparate(MosaicType::BAYER_GRBG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGRBG() end");
 }
 
 void	MosaicTest::testSeparateGBRG() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGBRG() begin");
-	testSeparate(ImageBase::BAYER_GBRG);
+	testSeparate(MosaicType::BAYER_GBRG);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateGBRG() end");
 }
 
 void	MosaicTest::testSeparateBGGR() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateBGGR() begin");
-	testSeparate(ImageBase::BAYER_BGGR);
+	testSeparate(MosaicType::BAYER_BGGR);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSeparateBGGR() end");
 }
 
@@ -359,7 +359,7 @@ void	MosaicTest::testDemosaicBilinear() {
 	}
 
 	/* separate into bayer pattern */
-	Mosaic<unsigned char>	mosaicer(ImageBase::BAYER_GRBG);
+	Mosaic<unsigned char>	mosaicer(MosaicType::BAYER_GRBG);
 	Image<unsigned char>	*mosaiced = mosaicer(*image);
 	ImagePtr	mosaicimage(mosaiced);
 	unlink("rgbmosaic.fits");

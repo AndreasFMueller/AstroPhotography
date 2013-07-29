@@ -136,8 +136,8 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 		// add bayer info, this depends on the subframe we are
 		// requesting
 		image->setMosaicType(
-			(ImageBase::mosaic_type)(
-			ImageBase::BAYER_RGGB \
+			(MosaicType::mosaic_type)(
+			MosaicType::BAYER_RGGB \
 				| ((exposure.frame.origin().x() % 2) << 1) \
 				| (exposure.frame.origin().y() % 2)));
 	}

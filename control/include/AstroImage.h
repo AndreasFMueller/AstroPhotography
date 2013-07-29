@@ -151,6 +151,53 @@ public:
 typedef std::multimap<std::string, Metavalue>	ImageMetadata;
 
 /**
+ * \brief MosaicType
+ *
+ *
+ */
+class MosaicType {
+public:
+	/**
+	 * \brief Constants describing pixel layout in bayer matrix.
+	 *
+	 * The four BAYER_ constants indicate the position of the red
+	 * pixel. The last two bits can be interpreted as the coordinates
+	 * of the red pixel in a 2x2 square of the Bayer matrix. The last
+	 * bit is the x-coordinate, the last but one bit is the y-coordinate.
+	 * so the constant 2 has last bit 0 and last but one bit 1, translating
+	 * into a bayer matrix that has the red pixel in the second row and
+	 * the first column, i.e. in the lower left corner
+	 */
+	typedef enum mosaic_e {
+		NONE = 0,
+		BAYER_RGGB = 4,
+		BAYER_GRBG = 5,
+		BAYER_GBRG = 6,
+		BAYER_BGGR = 7
+	} mosaic_type;
+private:
+	mosaic_type	mosaic;
+public:
+	MosaicType(mosaic_type _mosaic = NONE) : mosaic(_mosaic) { }
+	mosaic_type	getMosaicType() const { return mosaic; }
+	void	setMosaicType(mosaic_type mosaic);
+	void	setMosaicType(const std::string& mosaic_name);
+	bool	isMosaic() const;
+	// methods used for demosaicing: x/y coordinates of colored
+	// pixels
+	ImagePoint	red() const;
+	ImagePoint	blue() const;
+	ImagePoint	greenb() const;
+	ImagePoint	greenr() const;
+	// methods related to the mosaic stuff
+	bool	isR(unsigned int x, unsigned int y) const;
+	bool	isG(unsigned int x, unsigned int y) const;
+	bool	isB(unsigned int x, unsigned int y) const;
+	bool	isGr(unsigned int x, unsigned int y) const;
+	bool	isGb(unsigned int x, unsigned int y) const;
+};
+
+/**
  * \brief Image base class
  *
  * Images in Astrophotographe can have wildly varying pixel types,
@@ -191,33 +238,13 @@ public:
 	void	setMetadata(const std::string& name, const Metavalue& mv);
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
-public:
-	/**
-	 * \brief Constants describing pixel layout in bayer matrix.
-	 *
-	 * The four BAYER_ constants indicate the position of the red
-	 * pixel. The last two bits can be interpreted as the coordinates
-	 * of the red pixel in a 2x2 square of the Bayer matrix. The last
-	 * bit is the x-coordinate, the last but one bit is the y-coordinate.
-	 * so the constant 2 has last bit 0 and last but one bit 1, translating
-	 * into a bayer matrix that has the red pixel in the second row and
-	 * the first column, i.e. in the lower left corner
-	 */
-	typedef enum mosaic_e {
-		NONE = 0,
-		BAYER_RGGB = 4,
-		BAYER_GRBG = 5,
-		BAYER_GBRG = 6,
-		BAYER_BGGR = 7
-	} mosaic_type;
 protected:
-	mosaic_type	mosaic;
+	MosaicType	mosaic;
 public:
 	// accessors for metadata
-	mosaic_type	getMosaicType() const;
-	void	setMosaicType(mosaic_type mosaic);
+	MosaicType	getMosaicType() const { return mosaic; }
+	void	setMosaicType(MosaicType::mosaic_type mosaic);
 	void	setMosaicType(const std::string& mosaic_name);
-	bool	isMosaic() const;
 
 	// the size is publicly accessible, but users should not change it
 protected:
@@ -239,13 +266,6 @@ public:
 	virtual bool	operator==(const ImageBase& other) const;
 	virtual unsigned int	pixeloffset(unsigned int x, unsigned int y) const;
 	virtual unsigned int	pixeloffset(const ImagePoint& p) const;
-
-	// methods related to the mosaic stuff
-	bool	isR(unsigned int x, unsigned int y) const;
-	bool	isG(unsigned int x, unsigned int y) const;
-	bool	isB(unsigned int x, unsigned int y) const;
-	bool	isGr(unsigned int x, unsigned int y) const;
-	bool	isGb(unsigned int x, unsigned int y) const;
 
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	unsigned int bytesPerPixel() const;

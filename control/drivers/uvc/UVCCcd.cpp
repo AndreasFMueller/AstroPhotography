@@ -187,7 +187,7 @@ ImagePtr	UvcCcdBY8::frameToImage(const Frame& frame) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building BY8 image %u x %u",
 		size.width(), size.height());
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
-	image->setMosaicType(ImageBase::BAYER_RGGB);
+	image->setMosaicType(MosaicType::BAYER_RGGB);
 	for (unsigned int i = 0; i < size.getPixels(); i++) {
 		image->pixels[i] = frame[i];
 	}

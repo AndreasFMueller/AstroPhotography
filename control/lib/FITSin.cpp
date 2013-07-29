@@ -97,16 +97,16 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayervalue: '%s'",
 			bayervalue.c_str());
                 if (bayervalue == std::string("RGGB")) {
-			result->setMosaicType(ImageBase::BAYER_RGGB);
+			result->setMosaicType(MosaicType::BAYER_RGGB);
                 }
                 if (bayervalue == std::string("GRBG")) {
-			result->setMosaicType(ImageBase::BAYER_GRBG);
+			result->setMosaicType(MosaicType::BAYER_GRBG);
                 }
                 if (bayervalue == std::string("GBRG")) {
-			result->setMosaicType(ImageBase::BAYER_GBRG);
+			result->setMosaicType(MosaicType::BAYER_GBRG);
                 }
                 if (bayervalue == std::string("BGGR")) {
-			result->setMosaicType(ImageBase::BAYER_BGGR);
+			result->setMosaicType(MosaicType::BAYER_BGGR);
                 }
         }
 
