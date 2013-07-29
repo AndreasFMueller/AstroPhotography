@@ -153,8 +153,8 @@ Point	GuiderCalibration::defaultcorrection() const {
 
 Point	GuiderCalibration::operator()(const Point& offset) const {
         double determinant = a[0] * a[4] - a[3] * a[1];
-        double	x = (offset.x * a[4] - offset.y * a[1]) / determinant;
-        double	y = (a[0] * offset.y - a[3] * offset.x) / determinant;
+        double	x = (offset.x() * a[4] - offset.y() * a[1]) / determinant;
+        double	y = (a[0] * offset.y() - a[3] * offset.x()) / determinant;
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s",
 		offset.toString().c_str(), result.toString().c_str());
@@ -183,8 +183,8 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	std::vector<calibration_point>::const_iterator	ci;
 	int	i = 0;
 	for (ci = calibration_data.begin(); ci != calibration_data.end(); ci++){
-		A[i        ] = ci->offset.x;
-		A[i +     m] = ci->offset.y;
+		A[i        ] = ci->offset.x();
+		A[i +     m] = ci->offset.y();
 		A[i + 2 * m] = ci->t;
 		A[i + 3 * m] = 0;
 		A[i + 4 * m] = 0;
@@ -192,20 +192,20 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 		A[i + 6 * m] = 1;
 		A[i + 7 * m] = 0;
 
-		b[i] = ci->point.x;
+		b[i] = ci->point.x();
 
 		i++;
 
 		A[i        ] = 0;
 		A[i +     m] = 0;
 		A[i + 2 * m] = 0;
-		A[i + 3 * m] = ci->offset.x;
-		A[i + 4 * m] = ci->offset.y;
+		A[i + 3 * m] = ci->offset.x();
+		A[i + 4 * m] = ci->offset.y();
 		A[i + 5 * m] = ci->t;
 		A[i + 6 * m] = 0;
 		A[i + 7 * m] = 1;
 
-		b[i] = ci->point.y;
+		b[i] = ci->point.y();
 
 		i++;
 	}

@@ -40,14 +40,14 @@ Mosaic<T>::Mosaic(ImageBase::mosaic_type _mosaic) : mosaic(_mosaic) {
  */
 template<typename T>
 Image<T>	*Mosaic<T>::operator()(const Image<RGB<T> >& image) const {
-	Image<T>	*result = new Image<T>(image.size);
+	Image<T>	*result = new Image<T>(image.getFrame().size());
 	result->setMosaicType(mosaic);
 	int	redx = mosaic & 0x1;
 	int	redy = (mosaic >> 1) & 0x1;
 	int	bluex = 0x1 ^ redx;
 	int	bluey = 0x1 ^ redy;
-	for (unsigned int x = 0; x < image.size.getWidth(); x += 2) {
-		for (unsigned int y = 0; y < image.size.getHeight(); y += 2) {
+	for (unsigned int x = 0; x < image.getFrame().size().width(); x += 2) {
+		for (unsigned int y = 0; y < image.getFrame().size().height(); y += 2) {
 			// red pixels
 			result->pixel(x + redx, y + redy)
 				= image.pixel(x + redx, y + redy).R;

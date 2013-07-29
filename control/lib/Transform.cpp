@@ -70,8 +70,8 @@ Transform::Transform(const Transform& other) {
 Transform::Transform(double angle, const Point& translation, double scale) {
 	a[0] = scale * cos(angle); a[1] = -scale * sin(angle);
 	a[3] = scale * sin(angle); a[4] =  scale * cos(angle);
-	a[2] = translation.x;
-	a[5] = translation.y;
+	a[2] = translation.x();
+	a[5] = translation.y();
 }
 
 /**
@@ -110,25 +110,25 @@ Transform::Transform(const std::vector<Point>& frompoints,
 		fromi != frompoints.end();
 		fromi++, toi++) {
 		// add coefficients to A array
-		A[i        ] = fromi->x;
-		A[i +     m] = fromi->y;
+		A[i        ] = fromi->x();
+		A[i +     m] = fromi->y();
 		A[i + 2 * m] = 1;
 		A[i + 3 * m] = 0;
 		A[i + 4 * m] = 0;
 		A[i + 5 * m] = 0;
 
-                b[i] = toi->x;
+                b[i] = toi->x();
 
 		i++;
 
 		A[i        ] = 0;
 		A[i +     m] = 0;
 		A[i + 2 * m] = 0;
-		A[i + 3 * m] = fromi->x;
-		A[i + 4 * m] = fromi->y;
+		A[i + 3 * m] = fromi->x();
+		A[i + 4 * m] = fromi->y();
 		A[i + 5 * m] = 1;
 
-                b[i] = toi->y;
+                b[i] = toi->y();
 
 		i++;
 	}
@@ -281,8 +281,8 @@ Transform	Transform::operator*(const Transform& other) const {
 	result.a[4] = a[3] * other.a[1] + a[4] * other.a[4];
 	// operation 
 	Point	composed = this->operator()(getTranslation());
-	result.a[2] = composed.x;
-	result.a[5] = composed.y;
+	result.a[2] = composed.x();
+	result.a[5] = composed.y();
 	return result;
 }
 
@@ -291,8 +291,8 @@ Transform	Transform::operator+(const Point& translation) const {
 	for (int i = 0; i < 6; i++) {
 		result.a[i] = a[i];
 	}
-	result.a[2] += translation.x;
-	result.a[5] += translation.y;
+	result.a[2] += translation.x();
+	result.a[5] += translation.y();
 	return result;
 }
 
@@ -302,8 +302,8 @@ Transform	Transform::operator+(const ImagePoint& translation) const {
 
 Point	Transform::operator()(const Point& point) const {
 	return Point(
-		a[0] * point.x + a[1] * point.y + a[2],
-		a[3] * point.x + a[4] * point.y + a[5]
+		a[0] * point.x() + a[1] * point.y() + a[2],
+		a[3] * point.x() + a[4] * point.y() + a[5]
 	);
 }
 

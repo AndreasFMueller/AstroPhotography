@@ -32,10 +32,10 @@ int	main(int argc, char *argv[]) {
 			angle = atof(optarg);
 			break;
 		case 'x':
-			translation.x = atof(optarg);
+			translation.setX(atof(optarg));
 			break;
 		case 'y':
-			translation.y = atof(optarg);
+			translation.setY(atof(optarg));
 			break;
 		case 's':
 			sample = atoi(optarg);

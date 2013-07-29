@@ -184,7 +184,7 @@ void	CaptureWindow::redisplayImage() {
 	ui->minimumvalueField->setText(QString().setNum(minvalue, 'f', 0));
 	double	meanvalue = astro::image::filter::mean(image);
 	ui->meanvalueField->setText(QString().setNum(meanvalue, 'f', 1));
-	ui->sizeinfoField->setText(QString(image->size.toString().c_str()));
+	ui->sizeinfoField->setText(QString(image->size().toString().c_str()));
 
 	// convert image into a Pixmap
 	DisplayConverter	displayconverter;
@@ -247,25 +247,25 @@ void	CaptureWindow::redisplayImage() {
 	}
 	ImagePtr	displayimage(imptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converted image size: %s",
-		displayimage->size.toString().c_str());
+		displayimage->size().toString().c_str());
 
 	// convert the image to 
-	int32_t	*data = (int32_t *)calloc(imptr->size.getPixels(), sizeof(int32_t));
+	int32_t	*data = (int32_t *)calloc(imptr->size().getPixels(), sizeof(int32_t));
 
-	for (unsigned int x = 0; x < imptr->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < imptr->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < imptr->size().width(); x++) {
+		for (unsigned int y = 0; y < imptr->size().height(); y++) {
 			RGB<unsigned char>	v = imptr->pixel(x, y);
-			data[x + (imptr->size.getHeight() - 1 - y) * imptr->size.getWidth()]
+			data[x + (imptr->size().height() - 1 - y) * imptr->size().width()]
 				= (v.R << 16) | (v.G << 8) | v.B;
 		}
 	}
-	QImage	qimage((unsigned char *)data, imptr->size.getWidth(),
-		imptr->size.getHeight(), QImage::Format_RGB32);
+	QImage	qimage((unsigned char *)data, imptr->size().width(),
+		imptr->size().height(), QImage::Format_RGB32);
 	QPixmap	pixmap = QPixmap::fromImage(qimage);
 
 	// display in the image area
-	QSize	displaysize(imagescale * image->size.getWidth(),
-			imagescale * image->size.getHeight());
+	QSize	displaysize(imagescale * image->size().width(),
+			imagescale * image->size().height());
 	ui->imageLabel->setPixmap(pixmap.scaled(displaysize,
 		Qt::KeepAspectRatio));
 
@@ -279,17 +279,23 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 	ui->statusbar->showMessage(QString("new image captured"));
 	image = newimage;
 
+	// get the rectangle for the correctors
+	ImageRectangle	frame = image->getFrame();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image has frame: %s",
+		frame.toString().c_str());
+
 	// perform calibration
 	if (ui->darksubtractCheckbox->isChecked()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct with dark of size %s", dark->size().toString().c_str());
 		if (dark) {
-			DarkCorrector	corrector(dark);
+			DarkCorrector	corrector(dark, frame);
 			corrector(image);
 		}
 	}
 
 	if (ui->flatdivideCheckbox->isChecked()) {
 		if (!flat) {
-			FlatCorrector	corrector(flat);
+			FlatCorrector	corrector(flat, frame);
 			corrector(image);
 		}
 	}
@@ -317,38 +323,38 @@ void CaptureWindow::mouseMoveEvent(QMouseEvent* event) {
 
 	// compute imageLabel size
 	QSize	size = ui->imageLabel->size();
-	int	xoffset = (size.width() - imagescale * image->size.getWidth()) / 2;
+	int	xoffset = (size.width() - imagescale * image->size().width()) / 2;
 	if (xoffset < 0) {
 		xoffset = 0;
 	}
-	int	yoffset = (size.height() - imagescale * image->size.getHeight()) / 2;
+	int	yoffset = (size.height() - imagescale * image->size().height()) / 2;
 	if (yoffset < 0) {
 		yoffset = 0;
 	}
 
 	int	x = (mousepos.x() - xoffset) / imagescale;
-	int	y = image->size.getHeight()
+	int	y = image->size().height()
 			- (mousepos.y() - yoffset) / imagescale;
 	
 	// normalize into the image rectangle
 	if (x < 0) {
 		x = 0;
 	}
-	if (x >= image->size.getWidth()) {
-		x = image->size.getWidth() - 1;
+	if (x >= image->size().width()) {
+		x = image->size().width() - 1;
 	}
 	if (y < 0) {
 		y = 0;
 	}
-	if (y >= image->size.getHeight()) {
-		y = image->size.getHeight() - 1;
+	if (y >= image->size().height()) {
+		y = image->size().height() - 1;
 	}
 
 	// access the value
 	ImagePoint	p(x, y);
 	double	v = astro::image::filter::rawvalue(image, p);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "raw value: %f", v);
-	QString	al(stringprintf("Value at (%d,%d):", p.x, p.y).c_str());
+	QString	al(stringprintf("Value at (%d,%d):", p.x(), p.y()).c_str());
 	ui->valueatLabel->setText(al);
 	ui->valueatField->setText(QString().setNum(v, 'f', 0));
 }
@@ -428,13 +434,15 @@ void	CaptureWindow::openDarkfile() {
 	try {
 		FITSin	in(darkfilenamestring);
 		ImagePtr	newdark = in.read();
-		if (newdark->size != ccd->getInfo().getSize()) {
+		if (newdark->size() != ccd->getInfo().getSize()) {
 			QMessageBox::warning(this,
 				QString("Cannot use dark image"),
 				QString("The dark file '%1' cannot be used, because it does not match the CCD size").arg(darkfilename));
 			return;
 		}
 		dark = newdark;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark of size %s read",
+			dark->size().toString().c_str());
 	} catch (std::exception& x) {
 		std::string	msg = 
 			stringprintf("cannot open file: '%s'", x.what());
@@ -455,7 +463,7 @@ void	CaptureWindow::openFlatfile() {
 	try {
 		FITSin	in(flatfilenamestring);
 		ImagePtr	newflat = in.read();
-		if (newflat->size != ccd->getInfo().getSize()) {
+		if (newflat->size() != ccd->getInfo().getSize()) {
 			QMessageBox::warning(this,
 				QString("Cannot use flat image"),
 				QString("The flat file '%1' cannot be used, because it does not match the CCD size").arg(flatfilename));

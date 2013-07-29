@@ -29,7 +29,7 @@ bool	consistent(const ImageSequence& images) {
 	// make sure all images in the sequence are of the same size
 	ImageSequence::const_iterator	i = images.begin();
 	for (i++; i != images.end(); i++) {
-		if ((*images.begin())->size != (*i)->size) {
+		if ((*images.begin())->size() != (*i)->size()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "image size mismatch");
 			return false;
 		}
@@ -117,7 +117,7 @@ public:
 template<typename T>
 void	ImageMean<T>::setup_images(const ImageSequence& images) {
 	// create an image of appropriate size
-	size = (*images.begin())->size;
+	size = (*images.begin())->size();
 	image = new Image<T>(size);
 	if (enableVariance) {
 		// prepare the variance image
@@ -265,8 +265,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			compute(x, y, 0);
 		}
 	}
@@ -293,8 +293,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	darkvalue = dark.pixel(x, y);
 			compute(x, y, darkvalue);
 		}
@@ -372,8 +372,8 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	size_t	badpixelcount = 0;
 	SubgridAdapter<T>	sga(*im.image, grid);
 	ImageSize	size = sga.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = sga.pixel(x, y);
 			// skip NaNs
 			if (v != v) {
@@ -480,8 +480,8 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 
 	// device the image by that value, so that the new maximum value
 	// is 1
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y) /= maxvalue;
 		}
 	}
@@ -516,37 +516,39 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 //////////////////////////////////////////////////////////////////////
 template<typename T>
 class TypedCalibrator {
-	ConstPixelValue<T>	dark;
-	ConstPixelValue<T>	flat;
+	const ConstImageAdapter<T>&	dark;
+	const ConstImageAdapter<T>&	flat;
 	T	nan;
 public:
-	TypedCalibrator(const ImagePtr& _dark, const ImagePtr& _flat);
+	TypedCalibrator(const ConstImageAdapter<T>& _dark,
+		const ConstImageAdapter<T>& _flat);
 	ImagePtr	operator()(const ImagePtr& image) const;
 };
 
 template<typename T>
-TypedCalibrator<T>::TypedCalibrator(const ImagePtr& _dark,
-	const ImagePtr& _flat) : dark(_dark), flat(_flat) {
+TypedCalibrator<T>::TypedCalibrator(const ConstImageAdapter<T>& _dark,
+	const ConstImageAdapter<T>& _flat) 
+	: dark(_dark), flat(_flat) {
 	nan = std::numeric_limits<T>::quiet_NaN();
 }
 
 template<typename T>
 ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
-	ConstPixelValue<T>	im(image);
-	Image<T>	*result = new Image<T>(image->size);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
-			T	darkvalue = dark.pixelvalue(x, y);
+	ConstPixelValueAdapter<T>	im(image);
+	Image<T>	*result = new Image<T>(image->size());
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
+			T	darkvalue = dark.pixel(x, y);
 			// if the pixel is bad give 
 			if (darkvalue != darkvalue) {
 				result->pixel(x, y) = nan;;
 				continue;
 			}
-			T	v = im.pixelvalue(x, y) - darkvalue;
+			T	v = im.pixel(x, y) - darkvalue;
 			if (v < 0) {
 				v = 0;
 			}
-			result->pixel(x, y) = v / flat.pixelvalue(x, y);
+			result->pixel(x, y) = v / flat.pixel(x, y);
 		}
 	}
 	return ImagePtr(result);
@@ -555,8 +557,9 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 //////////////////////////////////////////////////////////////////////
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
-Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
-	: dark(_dark), flat(_flat) {
+Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat,
+		const ImageRectangle& _rectangle)
+	: dark(_dark), flat(_flat), rectangle(_rectangle) {
 	// We want dark and flat images to be of float or double type
 	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
 	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
@@ -569,11 +572,27 @@ Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
 
 ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
 	unsigned int	floatlimit = std::numeric_limits<float>::digits;
+	// find the appropriate frame to use for the correction images
+	ImageRectangle	frame;
+	if (rectangle == ImageRectangle()) {
+		frame = ImageRectangle(ImagePoint(), image->size());
+	}
+
+	// use pixel size to decide which type to use for the result image
 	if (image->bitsPerPixel() <= floatlimit) {
-		TypedCalibrator<float>	calibrator(dark, flat);
+		// create adapters for darks and flats with float values
+		ConstPixelValueAdapter<float>	pvdark(dark);
+		WindowAdapter<float>		wdark(pvdark, frame);
+		ConstPixelValueAdapter<float>	pvflat(flat);
+		WindowAdapter<float>		wflat(pvflat, frame);
+		TypedCalibrator<float>	calibrator(wdark, wflat);
 		return calibrator(image);
 	}
-	TypedCalibrator<double>	calibrator(dark, flat);
+	ConstPixelValueAdapter<double>	pvdark(dark);
+	WindowAdapter<double>		wdark(pvdark, frame);
+	ConstPixelValueAdapter<double>	pvflat(flat);
+	WindowAdapter<double>		wflat(pvflat, frame);
+	TypedCalibrator<double>	calibrator(wdark, wflat);
 	return calibrator(image);
 }
 

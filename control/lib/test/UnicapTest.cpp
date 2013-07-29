@@ -132,8 +132,8 @@ void	UnicapTest::testCapture() {
 	std::vector<FramePtr>::const_iterator	i;
 	int	count = 0;
 	for (i = frames.begin(); i != frames.end(); i++) {
-		int	width = (*i)->getWidth();
-		int	height = (*i)->getHeight();
+		int	width = (*i)->width();
+		int	height = (*i)->height();
 		Image<YUYV<unsigned char> >     *image =
 			new Image<YUYV<unsigned char> >(width, height);
 		const char	*data = (*i)->data();

@@ -141,12 +141,12 @@ void	TransformTest::testOperator() {
 	Transform	t(M_PI/4, Point(1,2));
 	Point	p1(1, 0);
 	Point	q1 = t(p1);
-	CPPUNIT_ASSERT(fabs(q1.x - (1 + sqrt(0.5))) < 0.000001);
-	CPPUNIT_ASSERT(fabs(q1.y - (2 + sqrt(0.5))) < 0.000001);
+	CPPUNIT_ASSERT(fabs(q1.x() - (1 + sqrt(0.5))) < 0.000001);
+	CPPUNIT_ASSERT(fabs(q1.y() - (2 + sqrt(0.5))) < 0.000001);
 	Point	p2(0, 1);
 	Point	q2 = t(p2);
-	CPPUNIT_ASSERT(fabs(q2.x - (1 - sqrt(0.5))) < 0.000001);
-	CPPUNIT_ASSERT(fabs(q2.y - (2 + sqrt(0.5))) < 0.000001);
+	CPPUNIT_ASSERT(fabs(q2.x() - (1 - sqrt(0.5))) < 0.000001);
+	CPPUNIT_ASSERT(fabs(q2.y() - (2 + sqrt(0.5))) < 0.000001);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "operator test complete");
 }
 

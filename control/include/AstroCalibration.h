@@ -62,23 +62,39 @@ public:
 };
 
 /**
+ * \brief Corrector class
+ */
+class Corrector {
+protected:
+	const astro::image::ImagePtr&	calibrationimage;
+	astro::image::ImageRectangle	rectangle;
+public:
+	Corrector(const astro::image::ImagePtr& calibrationimage,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const = 0;
+};
+
+/**
  * \brief Correct dark correction
  */
-class DarkCorrector  {
-	const astro::image::ImagePtr&	dark;
+class DarkCorrector : public Corrector {
 public:
-	DarkCorrector(const astro::image::ImagePtr& dark);
-	void	operator()(astro::image::ImagePtr& image) const;
+	DarkCorrector(const astro::image::ImagePtr& dark,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const;
 };
 
 /**
  * \brief Perform flat correction
  */
-class FlatCorrector {
-	const astro::image::ImagePtr&	flat;
+class FlatCorrector : public Corrector {
 public:
-	FlatCorrector(const astro::image::ImagePtr& flat);
-	void	operator()(astro::image::ImagePtr& image) const;
+	FlatCorrector(const astro::image::ImagePtr& flat,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const;
 };
 
 /**
@@ -87,9 +103,12 @@ public:
 class Calibrator {
 	const astro::image::ImagePtr&	dark;
 	const astro::image::ImagePtr&	flat;
+	astro::image::ImageRectangle	rectangle;
 public:
 	Calibrator(const astro::image::ImagePtr& dark,
-		const astro::image::ImagePtr& flat);
+		const astro::image::ImagePtr& flat,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
 	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image) const;
 };
 

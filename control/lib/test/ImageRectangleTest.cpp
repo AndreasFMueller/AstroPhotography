@@ -94,14 +94,14 @@ void	ImageRectangleTest::testConstructor() {
 
 void	ImageRectangleTest::testAccessors() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() begin");
-	CPPUNIT_ASSERT(r1->size == *s1);
-	CPPUNIT_ASSERT(r2->size == *s2);
-	CPPUNIT_ASSERT(r3->size == *s1);
-	CPPUNIT_ASSERT(r4->size == *s2);
-	CPPUNIT_ASSERT(r1->origin == *p1);
-	CPPUNIT_ASSERT(r2->origin == *p1);
-	CPPUNIT_ASSERT(r3->origin == *p2);
-	CPPUNIT_ASSERT(r4->origin == *p2);
+	CPPUNIT_ASSERT(r1->size() == *s1);
+	CPPUNIT_ASSERT(r2->size() == *s2);
+	CPPUNIT_ASSERT(r3->size() == *s1);
+	CPPUNIT_ASSERT(r4->size() == *s2);
+	CPPUNIT_ASSERT(r1->origin() == *p1);
+	CPPUNIT_ASSERT(r2->origin() == *p1);
+	CPPUNIT_ASSERT(r3->origin() == *p2);
+	CPPUNIT_ASSERT(r4->origin() == *p2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccessors() end");
 }
 
@@ -142,16 +142,16 @@ void	ImageRectangleTest::testContainsRectangle() {
 void	ImageRectangleTest::testTranslation() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTranslation() begin");
 	ImageRectangle	r(*r1, ImagePoint(17, 4));
-	CPPUNIT_ASSERT(r.size == r1->size);
-	CPPUNIT_ASSERT(r.origin == ImagePoint(20, 9));
+	CPPUNIT_ASSERT(r.size() == r1->size());
+	CPPUNIT_ASSERT(r.origin() == ImagePoint(20, 9));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTranslation() end");
 }
 
 void	ImageRectangleTest::testSubrectangle() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangle() begin");
 	ImageRectangle	r(*r2, *r1);
-	CPPUNIT_ASSERT(r.size == r1->size);
-	CPPUNIT_ASSERT(r.origin == ImagePoint(6, 10));
+	CPPUNIT_ASSERT(r.size() == r1->size());
+	CPPUNIT_ASSERT(r.origin() == ImagePoint(6, 10));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangle() end");
 }
 

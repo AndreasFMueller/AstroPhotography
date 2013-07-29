@@ -58,12 +58,12 @@ UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
 void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	this->exposure = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
-	if (exposure.frame.size != info.size) {
+	if (exposure.frame.size() != info.size) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot take subimages");
 		throw UvcError("UVC driver cannot take subimages");
 	}
 
-	if ((exposure.frame.origin.x != 0) || (exposure.frame.origin.y != 0)) {
+	if ((exposure.frame.origin().x() != 0) || (exposure.frame.origin().y() != 0)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "UVC images cannot have offset");
 		throw UvcError("UVC driver cannot have offsets");
 	}
@@ -146,7 +146,7 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
 ImagePtr	UvcCcdYUY2::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building YUY2 image %u x %u",
-		size.getWidth(), size.getHeight());
+		size.width(), size.height());
 	Image<YUYV<unsigned char> >	*image
 		= new Image<YUYV<unsigned char> >(size);
 	for (unsigned int i = 0; i < size.getPixels(); i++) {
@@ -167,7 +167,7 @@ ImagePtr	UvcCcdYUY2::frameToImage(const Frame& frame) const {
 ImagePtr	UvcCcdY800::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building Y800 image %u x %u",
-		size.getWidth(), size.getHeight());
+		size.width(), size.height());
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
 	for (unsigned int i = 0; i < size.getPixels(); i++) {
 		image->pixels[i] = frame[i];
@@ -185,7 +185,7 @@ ImagePtr	UvcCcdY800::frameToImage(const Frame& frame) const {
 ImagePtr	UvcCcdBY8::frameToImage(const Frame& frame) const {
 	ImageSize	size(frame.getWidth(), frame.getHeight());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building BY8 image %u x %u",
-		size.getWidth(), size.getHeight());
+		size.width(), size.height());
 	Image<unsigned char>	*image = new Image<unsigned char>(size);
 	image->setMosaicType(ImageBase::BAYER_RGGB);
 	for (unsigned int i = 0; i < size.getPixels(); i++) {

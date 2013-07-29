@@ -35,7 +35,7 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 	ccd.size = astro::image::ImageSize(framedescriptor->wWidth(),
 		framedescriptor->wHeight());
 	ccd.name = stringprintf("%dx%d/%d/%d/%d/%s",
-		ccd.size.getWidth(), ccd.size.getHeight(),
+		ccd.size.width(), ccd.size.height(),
 		uvcccd.interface, uvcccd.format, uvcccd.frame,
 		uvcccd.guid.c_str());
 	ccdinfo.push_back(ccd);

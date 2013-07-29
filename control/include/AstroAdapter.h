@@ -36,7 +36,7 @@ public:
 template<typename Pixel>
 WindowAdapter<Pixel>::WindowAdapter(const ConstImageAdapter<Pixel>& _image,
 	const ImageRectangle& _frame)
-	: ConstImageAdapter<Pixel>(_frame.size),
+	: ConstImageAdapter<Pixel>(_frame.size()),
 	  image(_image), frame(_frame) {
 }
 
@@ -45,7 +45,7 @@ WindowAdapter<Pixel>::WindowAdapter(const ConstImageAdapter<Pixel>& _image,
  */
 template<typename Pixel>
 const Pixel	WindowAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
-	return	image.pixel(frame.origin.x + x, frame.origin.y + y);
+	return	image.pixel(frame.origin().x() + x, frame.origin().y() + y);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -97,10 +97,10 @@ template<typename Pixel>
 ConstSubgridAdapter<Pixel>::ConstSubgridAdapter(
 	const ConstImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ConstImageAdapter<Pixel>(ImageSize(
-		(_image.getSize().getWidth() - _subgrid.origin.x)
-			/ _subgrid.stepsize.getWidth(),
-		(_image.getSize().getHeight() - _subgrid.origin.y)
-			/ _subgrid.stepsize.getHeight())
+		(_image.getSize().width() - _subgrid.origin.x())
+			/ _subgrid.stepsize.width(),
+		(_image.getSize().height() - _subgrid.origin.y())
+			/ _subgrid.stepsize.height())
 	), image(_image), subgrid(_subgrid) {
 }
 	
@@ -128,10 +128,10 @@ template<typename Pixel>
 SubgridAdapter<Pixel>::SubgridAdapter(
 	ImageAdapter<Pixel>& _image, const Subgrid& _subgrid)
 	: ImageAdapter<Pixel>(ImageSize(
-		(_image.getSize().getWidth() - _subgrid.origin.x)
-			/ _subgrid.stepsize.getWidth(),
-		(_image.getSize().getHeight() - _subgrid.origin.y)
-			/ _subgrid.stepsize.getHeight())
+		(_image.getSize().width() - _subgrid.origin.x())
+			/ _subgrid.stepsize.width(),
+		(_image.getSize().height() - _subgrid.origin.y())
+			/ _subgrid.stepsize.height())
 	), image(_image), subgrid(_subgrid) {
 }
 	
@@ -285,8 +285,8 @@ const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	double	result = 0;
 	int	counter;
 	if (diagonal) {
-		if ((x > 0) && (x < adaptersize.getWidth() - 1) &&
-			(y > 0) && (y < adaptersize.getHeight() - 1)) {
+		if ((x > 0) && (x < adaptersize.width() - 1) &&
+			(y > 0) && (y < adaptersize.height() - 1)) {
 			result += image.pixel(x - 1, y - 1);
 			result += image.pixel(x + 1, y - 1);
 			result += image.pixel(x - 1, y + 1);
@@ -294,12 +294,12 @@ const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 			counter += 4;
 		}
 	} else {
-		if ((x > 0) && (x < adaptersize.getWidth() - 1)) {
+		if ((x > 0) && (x < adaptersize.width() - 1)) {
 			result += image.pixel(x - 1, y);
 			result += image.pixel(x + 1, y);
 			counter += 2;
 		}
-		if ((y > 0) && (y < adaptersize.getHeight() - 1)) {
+		if ((y > 0) && (y < adaptersize.height() - 1)) {
 			result += image.pixel(x, y - 1);
 			result += image.pixel(x, y + 1);
 			counter += 2;
@@ -330,8 +330,8 @@ public:
 template<typename Pixel>
 FocusFOMAdapter<Pixel>::FocusFOMAdapter(const ConstImageAdapter<Pixel>& _image,
 	bool diagonal)
-	: ConstImageAdapter<double>(ImageSize(_image.getSize().getWidth() - 2,
-		_image.getSize().getHeight() - 2)),
+	: ConstImageAdapter<double>(ImageSize(_image.getSize().width() - 2,
+		_image.getSize().height() - 2)),
 	  laplacian(_image, diagonal),
 	  converting(_image),
 	  multiply(laplacian, converting) {
@@ -433,10 +433,10 @@ template<typename Pixel>
 DownSamplingAdapter<Pixel>::DownSamplingAdapter(
 	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
 	: ConstImageAdapter<Pixel>(
-		ImageSize(_image.getSize().getWidth() / _sampling.getWidth(),
-			_image.getSize().getHeight() / _sampling.getHeight())),
+		ImageSize(_image.getSize().width() / _sampling.width(),
+			_image.getSize().height() / _sampling.height())),
 	  image(_image), sampling(_sampling) {
-	volume = sampling.getWidth() * sampling.getHeight();
+	volume = sampling.width() * sampling.height();
 	weights = new double[volume];
 	weights[0] = 1./volume;
 	for (unsigned int index = 0; index < volume; index++) {
@@ -452,12 +452,12 @@ DownSamplingAdapter<Pixel>::~DownSamplingAdapter() {
 template<typename Pixel>
 const Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
-	unsigned int	originx = x * sampling.getWidth();
-	unsigned int	originy = y * sampling.getHeight();
+	unsigned int	originx = x * sampling.width();
+	unsigned int	originy = y * sampling.height();
 	Pixel	pixels[volume];
 	unsigned int	index = 0;
-	for (unsigned int dx = 0; dx < sampling.getWidth(); dx++) {
-		for (unsigned int dy = 0; dy < sampling.getHeight(); dy++) {
+	for (unsigned int dx = 0; dx < sampling.width(); dx++) {
+		for (unsigned int dy = 0; dy < sampling.height(); dy++) {
 			pixels[index++]
 				= image.pixel(originx + dx, originy + dy);
 		}
@@ -481,15 +481,15 @@ template<typename Pixel>
 UpSamplingAdapter<Pixel>::UpSamplingAdapter(
 	const ConstImageAdapter<Pixel>& _image, const ImageSize& _sampling)
 	: ConstImageAdapter<Pixel>(
-		ImageSize(_image.getSize().getWidth() * _sampling.getWidth(),
-			_image.getSize().getHeight() * _sampling.getHeight())),
+		ImageSize(_image.getSize().width() * _sampling.width(),
+			_image.getSize().height() * _sampling.height())),
 	  image(_image), sampling(_sampling) {
 }
 
 template<typename Pixel>
 const Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
-	return image.pixel(x / sampling.getWidth(), y / sampling.getWidth());
+	return image.pixel(x / sampling.width(), y / sampling.height());
 }
 
 ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
@@ -543,6 +543,102 @@ template<typename Pixel>
 const Pixel	RescalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	const {
 	return (image.pixel(x, y) - zero) * scale;
+}
+
+//////////////////////////////////////////////////////////////////////
+// PixelValue adapter, works for any image and returns float or double
+// result types
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ConstPixelValueAdapter : public ConstImageAdapter<Pixel> {
+	const Image<unsigned char>	*byteimage;
+	const Image<unsigned short>	*shortimage;
+	const Image<unsigned int>	*intimage;
+	const Image<unsigned long>	*longimage;
+	const Image<float>		*floatimage;
+	const Image<double>		*doubleimage;
+public:
+	ConstPixelValueAdapter(const ImagePtr& image);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+ConstPixelValueAdapter<Pixel>::ConstPixelValueAdapter(const ImagePtr& image)
+	: ConstImageAdapter<Pixel>(image->size()) {
+	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
+	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
+	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
+	floatimage = dynamic_cast<Image<float> *>(&*image);
+	doubleimage = dynamic_cast<Image<double> *>(&*image);
+	if ((NULL == byteimage) &&
+	    (NULL == shortimage) &&
+	    (NULL == intimage) &&
+	    (NULL == longimage) &&
+	    (NULL == floatimage) &&
+	    (NULL == doubleimage)) {
+		throw std::runtime_error("pixel type not primitive");
+	}
+}
+
+template <typename Pixel>
+const Pixel	ConstPixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
+	if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
+	if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
+	if (longimage) {   return longimage->pixelvalue<Pixel>(x, y);   }
+	if (floatimage) {  return floatimage->pixelvalue<Pixel>(x, y);  }
+	if (doubleimage) { return doubleimage->pixelvalue<Pixel>(x, y); }
+	if (std::numeric_limits<Pixel>::has_quiet_NaN) {
+		return std::numeric_limits<Pixel>::quiet_NaN();
+	}
+	throw std::runtime_error("NaN not available");
+}
+
+template <typename Pixel>
+class PixelValueAdapter : public ImageAdapter<Pixel> {
+	const Image<unsigned char>	*byteimage;
+	const Image<unsigned short>	*shortimage;
+	const Image<unsigned int>	*intimage;
+	const Image<unsigned long>	*longimage;
+	const Image<float>		*floatimage;
+	const Image<double>		*doubleimage;
+public:
+	PixelValueAdapter(ImagePtr& image);
+	virtual Pixel	pixel(unsigned int x, unsigned int y);
+};
+
+template<typename Pixel>
+PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr& image) :
+	ImageAdapter<Pixel>(image->size()) {
+	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
+	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
+	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
+	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
+	floatimage = dynamic_cast<Image<float> *>(&*image);
+	doubleimage = dynamic_cast<Image<double> *>(&*image);
+	if ((NULL == byteimage) &&
+	    (NULL == shortimage) &&
+	    (NULL == intimage) &&
+	    (NULL == longimage) &&
+	    (NULL == floatimage) &&
+	    (NULL == doubleimage)) {
+		throw std::runtime_error("pixel type not primitive");
+	}
+}
+
+template<typename Pixel>
+Pixel	PixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) {
+        if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
+        if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
+        if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
+        if (longimage) {   return longimage->pixelvalue<Pixel>(x, y);   }
+        if (floatimage) {  return floatimage->pixelvalue<Pixel>(x, y);  }
+        if (doubleimage) { return doubleimage->pixelvalue<Pixel>(x, y); }
+        if (std::numeric_limits<Pixel>::has_quiet_NaN) {
+                return std::numeric_limits<Pixel>::quiet_NaN();
+        }
+        throw std::runtime_error("NaN not available");
 }
 
 } // namespace image

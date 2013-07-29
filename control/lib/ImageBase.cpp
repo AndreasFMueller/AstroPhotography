@@ -14,19 +14,19 @@ namespace image {
 /**
  * \brief Construct an image base from size parameters
  */
-ImageBase::ImageBase(unsigned int w, unsigned int h) : size(w, h) {
+ImageBase::ImageBase(unsigned int w, unsigned int h) : frame(w, h) {
 	mosaic = NONE;
 }
 
-ImageBase::ImageBase(const ImageSize& _size) : size(_size) {
+ImageBase::ImageBase(const ImageSize& _size) : frame(_size) {
 	mosaic = NONE;
 }
 
-ImageBase::ImageBase(const ImageRectangle& frame) : size(frame.size) {
+ImageBase::ImageBase(const ImageRectangle& _frame) : frame(_frame) {
 	mosaic = NONE;
 }
 
-ImageBase::ImageBase(const ImageBase& other) : size(other.size) {
+ImageBase::ImageBase(const ImageBase& other) : frame(other.frame) {
 	mosaic = other.mosaic;
 }
 
@@ -36,21 +36,21 @@ ImageBase::ImageBase(const ImageBase& other) : size(other.size) {
  * Two images are considered equal if the have identical size.
  */
 bool	ImageBase::operator==(const ImageBase& other) const {
-	return (size == other.size);
+	return (frame == other.frame);
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on coordinates
  */
 unsigned int     ImageBase::pixeloffset(unsigned int x, unsigned int y) const {
-	return size.offset(x, y);
+	return frame.size().offset(x, y);
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on an ImagePoint
  */
 unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
-	return size.offset(p);
+	return frame.size().offset(p);
 }
 
 bool	ImageBase::isR(unsigned int x, unsigned int y) const {
@@ -223,7 +223,7 @@ void	ImageBase::setMetadata(const std::string& name, const Metavalue& mv) {
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {
-	out << "size: " << image.size.toString() << std::endl;
+	out << "size: " << image.frame.size().toString() << std::endl;
 	ImageMetadata::const_iterator	i;
 	for (i = image.metadata.begin(); i != image.metadata.end(); i++) {
 		out << i->first << ": ";

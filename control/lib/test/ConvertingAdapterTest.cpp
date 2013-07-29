@@ -50,8 +50,8 @@ void	ConvertingAdapterTest::testConvertingAdapter() {
 
 	// access the subframe
 	ImageSize	size = adapter.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			float	value = adapter.pixel(x, y);
 			float	v = x * y;
 			CPPUNIT_ASSERT(value == v);

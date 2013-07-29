@@ -23,8 +23,8 @@ Exposure::Exposure(const ImageRectangle& _frame,
 
 std::string	Exposure::toString() const {
 	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs",
-		frame.size.getWidth(), frame.size.getHeight(),
-		frame.origin.x, frame.origin.y,
+		frame.size().width(), frame.size().height(),
+		frame.origin().x(), frame.origin().y(),
 		mode.toString().c_str(), exposuretime);
 }
 
@@ -60,11 +60,11 @@ void	Exposure::addToImage(ImageBase& image) const {
 	image.setMetadata(std::string("YBINNING"), mvbiny);
 
 	// subframe information
-	Metavalue	mvorigx(frame.origin.x,
+	Metavalue	mvorigx(frame.origin().x(),
 		std::string("subframe origin on X axis"));
 	image.setMetadata(std::string("XORGSUBF"), mvorigx);
 
-	Metavalue	mvorigy(frame.origin.y,
+	Metavalue	mvorigy(frame.origin().y(),
 		std::string("subframe origin on Y axis"));
 	image.setMetadata(std::string("YORGSUBF"), mvorigy);
 

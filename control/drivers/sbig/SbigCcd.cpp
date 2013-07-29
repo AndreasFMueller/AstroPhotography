@@ -112,10 +112,10 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 		exposure.mode.toString().c_str(), params.readoutMode);
 
 	// get the subframe
-	params.top = exposure.frame.origin.y;
-	params.left = exposure.frame.origin.x;
-	params.width = exposure.frame.size.getWidth();
-	params.height = exposure.frame.size.getHeight();
+	params.top = exposure.frame.origin().y();
+	params.left = exposure.frame.origin().x();
+	params.width = exposure.frame.size().width();
+	params.height = exposure.frame.size().height();
 	short	e = SBIGUnivDrvCommand(CC_START_EXPOSURE2, &params, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start exposure: %s",
@@ -153,8 +153,8 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 
 	// compute the size of the resulting image, if we get one
 	ImageSize	resultsize(
-		exposure.frame.size.getWidth() / exposure.mode.getX(),
-		exposure.frame.size.getHeight() / exposure.mode.getY());
+		exposure.frame.size().width() / exposure.mode.getX(),
+		exposure.frame.size().height() / exposure.mode.getY());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting an %s image",
 		resultsize.toString().c_str());
 
@@ -180,10 +180,10 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		readparams.ccd = id;
 		readparams.readoutMode = SbigBinning2Mode(exposure.mode);
 
-		readparams.top = exposure.frame.origin.y;
-		readparams.left = exposure.frame.origin.x;
-		readparams.width = exposure.frame.size.getWidth();
-		readparams.height = exposure.frame.size.getHeight();
+		readparams.top = exposure.frame.origin().y();
+		readparams.left = exposure.frame.origin().x();
+		readparams.width = exposure.frame.size().width();
+		readparams.height = exposure.frame.size().height();
 
 		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
 		if (e != CE_NO_ERROR) {
@@ -195,9 +195,9 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		// read the data lines we really are interested in
 		ReadoutLineParams	readlineparams;
 		readlineparams.ccd = id;
-		readlineparams.pixelStart = exposure.frame.origin.x
+		readlineparams.pixelStart = exposure.frame.origin().x()
 						/ exposure.mode.getX();
-		readlineparams.pixelLength = exposure.frame.size.getWidth()
+		readlineparams.pixelLength = exposure.frame.size().width()
 						/ exposure.mode.getX();
 		readlineparams.readoutMode = readparams.readoutMode;
 debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d", 
@@ -209,7 +209,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 		memset(data, 0xff, 2 * arraysize);
 		unsigned short	*p = data;
 		unsigned int	linecounter = 0;
-		while (linecounter < resultsize.getHeight()) {
+		while (linecounter < resultsize.height()) {
 			e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
 			if (e != CE_NO_ERROR) {
 				debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
@@ -217,7 +217,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 				delete[] data;
 				throw SbigError(e);
 			}
-			p += resultsize.getWidth();
+			p += resultsize.width();
 			linecounter++;
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
@@ -226,9 +226,9 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 		DumpLinesParams	dumplines;
 		dumplines.ccd = id;
 		dumplines.readoutMode = readparams.readoutMode;
-		dumplines.lineLength = info.size.getHeight()
-			- exposure.frame.size.getHeight()
-			- exposure.frame.origin.y;
+		dumplines.lineLength = info.size.height()
+			- exposure.frame.size().height()
+			- exposure.frame.origin().y();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
 			dumplines.lineLength);
 		e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
@@ -251,6 +251,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 	// convert the image data into an image
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(resultsize, data);
+	image->setOrigin(exposure.frame.origin());
 
 	// add the metadata to the image
 	addMetadata(*image);

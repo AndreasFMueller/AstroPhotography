@@ -24,11 +24,11 @@ static inline double	sqr(double x) {
  */
 double	PhaseCorrelator::value(const double *a, const ImageSize& size,
 		unsigned int x, unsigned int y) const {
-	while (x > size.getWidth()) {
-		x -= size.getWidth();
+	while (x > size.width()) {
+		x -= size.width();
 	}
-	while (y > size.getHeight()) {
-		y -= size.getHeight();
+	while (y > size.height()) {
+		y -= size.height();
 	}
 	return a[size.offset(x, y)];
 }
@@ -38,19 +38,19 @@ double	PhaseCorrelator::value(const double *a, const ImageSize& size,
  */
 Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
 		const ImagePoint& center, unsigned int k) const {
-	unsigned int	cx = center.x;
+	unsigned int	cx = center.x();
 	if (cx < k) {
-		cx += size.getWidth();
+		cx += size.width();
 	}
-	unsigned int	cy = center.y;
+	unsigned int	cy = center.y();
 	if (cy < k) {
-		cy += size.getHeight();
+		cy += size.height();
 	}
 	double	s = 0;
 	double	xs = 0;
 	double	ys = 0;
-	for (unsigned int x = center.x - k; x <= center.x + k; x++) {
-		for (unsigned int y = center.y - k; y <= center.y + k; y++) {
+	for (unsigned int x = center.x() - k; x <= center.x() + k; x++) {
+		for (unsigned int y = center.y() - k; y <= center.y() + k; y++) {
 			double	v = value(a, size, x, y);
 			s += v;
 			xs += v * x;
@@ -59,11 +59,11 @@ Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
 	}
 	xs /= s;
 	ys /= s;
-	if (xs > size.getWidth() / 2) {
-		xs -= size.getWidth();
+	if (xs > size.width() / 2) {
+		xs -= size.width();
 	}
-	if (ys > size.getWidth() / 2) {
-		ys -= size.getWidth();
+	if (ys > size.width() / 2) {
+		ys -= size.width();
 	}
 	return Point(xs, ys);
 }
@@ -95,38 +95,38 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	double	b[n];
 
 	// allocate memeory for the fourier transforms
-	size_t	nc = size.getWidth() * (1 + size.getHeight() / 2);
+	size_t	nc = size.width() * (1 + size.height() / 2);
 	fftw_complex	*af = (fftw_complex *)fftw_malloc(
 					sizeof(fftw_complex) * nc);
 	fftw_complex	*bf = (fftw_complex *)fftw_malloc(
 					sizeof(fftw_complex) * nc);
 
 	// create a plan for the fourier transform
-	fftw_plan	p = fftw_plan_dft_r2c_2d(size.getWidth(), size.getHeight(),
+	fftw_plan	p = fftw_plan_dft_r2c_2d(size.width(), size.height(),
 				a, af, 0);
-	fftw_plan	q = fftw_plan_dft_r2c_2d(size.getWidth(), size.getHeight(),
+	fftw_plan	q = fftw_plan_dft_r2c_2d(size.width(), size.height(),
 				b, bf, 0);
 
 	// we also already need a back transform
-	fftw_plan	r = fftw_plan_dft_c2r_2d(size.getWidth(), size.getHeight(),
+	fftw_plan	r = fftw_plan_dft_c2r_2d(size.width(), size.height(),
 				af, a, 0);
 
 	// compute the values for the hanning windows
-	double	hh[size.getWidth()];
-	double	h = M_PI / size.getWidth();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
+	double	hh[size.width()];
+	double	h = M_PI / size.width();
+	for (unsigned int x = 0; x < size.width(); x++) {
 		hh[x] = sqr(sin(x * h));
 	}
-	double	hv[size.getHeight()];
-	h = M_PI / size.getHeight();
-	for (unsigned int y = 0; y < size.getWidth(); y++) {
+	double	hv[size.height()];
+	h = M_PI / size.height();
+	for (unsigned int y = 0; y < size.width(); y++) {
 		hv[y] = sqr(sin(y * h));
 	}
 
 	// now copy the data into the arrays, applying the hanning window
 	// at the same time
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getWidth(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.width(); y++) {
 			double	hanning = hh[x] * hv[y];
 			a[size.offset(x, y)] = hanning * fromimage.pixel(x, y);
 			b[size.offset(x, y)] = hanning * toimage.pixel(x, y);
@@ -153,8 +153,8 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	double	max = 0;
 	unsigned int maxx = 0;
 	unsigned int maxy = 0;
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			double	v = a[size.offset(x, y)];
 //std::cout << "v(" << x << "," << y << ") = " << v << std::endl;
 			if (v > max) {

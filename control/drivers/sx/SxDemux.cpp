@@ -21,10 +21,10 @@ namespace sx {
  * \param l	length of the data block (should be size.with * size.height / 2)
  */
 Field::Field(ImageSize _size, size_t l) : size(_size), length(l) {
-	if (size.getWidth() * size.getHeight() != 2 * l) {
+	if (size.width() * size.height() != 2 * l) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%dx%d image expects length %d, "
-			"%d found", size.getWidth(), size.getHeight(),
-			size.getWidth() * size.getHeight() / 2, length);
+			"%d found", size.width(), size.height(),
+			size.width() * size.height() / 2, length);
 		throw std::logic_error("image size and field size mismatch");
 	}
 	data = new unsigned short[length];
@@ -67,10 +67,10 @@ void	Field::rescale(double scale) {
 std::ostream&	operator<<(std::ostream& out, const Field& field) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing length %d field from "
 		"%d x %d image", field.length,
-		field.size.getWidth(), field.size.getHeight());
-	unsigned int	width = field.size.getWidth();
+		field.size.width(), field.size.height());
+	unsigned int	width = field.size.width();
 	out.write((const char *)&width, sizeof(width));
-	unsigned int	height = field.size.getHeight();
+	unsigned int	height = field.size.height();
 	out.write((const char *)&height, sizeof(height));
 	out.write((const char *)&field.length, sizeof(field.length));
 	out.write((const char *)field.data, 2 * field.length);
@@ -124,8 +124,8 @@ void	Demuxer::set_pixel(Image<unsigned short>& image, int x, int y,
 
 void	Demuxer::operator()(Image<unsigned short>& image,
 			const Field& field1, const Field& field2) {
-	width = image.size.getWidth();
-	height = image.size.getHeight();
+	width = image.size().width();
+	height = image.size().height();
 }
 
 void	Demuxer::PIXEL(Image<unsigned short>& image, int x, int y,

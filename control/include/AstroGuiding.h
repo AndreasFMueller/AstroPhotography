@@ -58,8 +58,8 @@ Point	StarDetector<Pixel>::operator()(
 	astro::image::ImageSize	size = adapter.getSize();
 	unsigned	maxx = -1, maxy = -1;
 	double	maxvalue = 0;
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			double	value = luminance(adapter.pixel(x, y));
 			if (value > maxvalue) {
 				maxx = x; maxy = y; maxvalue = value;
@@ -84,8 +84,8 @@ Point	StarDetector<Pixel>::operator()(
 	ysum /= weightsum;
 
 	// add the offset of the rectangle to get real coordinates
-	return Point(rectangle.origin.x + xsum,
-		rectangle.origin.y + ysum);
+	return Point(rectangle.origin().x() + xsum,
+		rectangle.origin().y() + ysum);
 }
 
 Point	findstar(astro::image::ImagePtr image,

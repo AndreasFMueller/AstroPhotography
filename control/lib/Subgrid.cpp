@@ -21,11 +21,11 @@ Subgrid::Subgrid(const Subgrid& other) : origin(other.origin),
 }
 
 unsigned int	Subgrid::x(unsigned int _x) const {
-	return origin.x + _x * stepsize.getWidth();
+	return origin.x() + _x * stepsize.width();
 }
 
 unsigned int	Subgrid::y(unsigned int _y) const {
-	return origin.y + _y * stepsize.getHeight();
+	return origin.y() + _y * stepsize.height();
 }
 
 unsigned int	Subgrid::volume() const {
@@ -34,8 +34,8 @@ unsigned int	Subgrid::volume() const {
 
 std::string	Subgrid::toString() const {
 	return stringprintf("%ux%u@(%u,%u)",
-		stepsize.getWidth(), stepsize.getHeight(),
-		origin.x, origin.y);
+		stepsize.width(), stepsize.height(),
+		origin.x(), origin.y());
 }
 
 } // namespace image

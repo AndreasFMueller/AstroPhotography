@@ -34,31 +34,39 @@ namespace sx {
  * CCD.
  */
 Exposure	SxCcdM26C::m26cExposure() {
-	Exposure	m26c = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute the exposure parameters for "
 		"the M26C's CCD chip");
+	Exposure	m26c = exposure;
 
-	// adapt the size suitable for 
-	m26c.frame.size.setHeight(exposure.frame.size.getWidth() / 4);
-	m26c.frame.size.setWidth(exposure.frame.size.getHeight() * 2);
+	// adapt the size suitable for the M26C chip
+	unsigned int	height = exposure.frame.size().width() / 4;
+	unsigned int	width = exposure.frame.size().height() * 2;
 	if (m26c.mode.getX() > 1) {
-		m26c.frame.size.setHeight(m26c.frame.size.getHeight()
-			- m26c.frame.size.getHeight() % 2);
+		height -=  height % 2;
 	}
-	exposure.frame.size.setHeight(m26c.frame.size.getWidth() / 2);
-	exposure.frame.size.setWidth(m26c.frame.size.getHeight() * 4);
+	m26c.frame.setSize(ImageSize(width, height));
+
+	// the integer arithmetic may have changed some parameters in the
+	// m26c object, so we have to recompute the size the client will see
+	exposure.frame.setSize(ImageSize(m26c.frame.size().height() * 4,
+					m26c.frame.size().width() / 2));
 
 	// adapt the top left corner
-	m26c.frame.origin.x = exposure.frame.origin.y * 2;
-	m26c.frame.origin.y = exposure.frame.origin.x / 4;
+	unsigned int	originy = exposure.frame.origin().x() / 4;
+	unsigned int	originx = exposure.frame.origin().y() * 2;
 	if (m26c.mode.getY() > 1) {
-		m26c.frame.origin.y -= m26c.frame.origin.y % 2;
+		originy -= originy % 2;
 	}
-	exposure.frame.origin.x = m26c.frame.origin.y / 2;
-	exposure.frame.origin.y = m26c.frame.origin.x * 4;
+	m26c.frame.setOrigin(ImagePoint(originx, originy));
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", m26c.toString().c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", exposure.toString().c_str());
+	// fix the origin too
+	exposure.frame.setOrigin(ImagePoint(m26c.frame.origin().y() * 4,
+					m26c.frame.origin().x() / 2));
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "m26c specific exposure: %s",
+		m26c.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "public exposure: %s",
+		exposure.toString().c_str());
 
 	// copy stuff that is not affected
 	m26c.mode = exposure.mode;
@@ -81,9 +89,9 @@ SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
  */
 Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
-	size_t	l = (m26c.frame.size.getWidth() / m26c.mode.getX())
-		* (m26c.frame.size.getHeight() / m26c.mode.getY());
-	Field	*field = new Field(exposure.frame.size, l);
+	size_t	l = (m26c.frame.size().width() / m26c.mode.getX())
+		* (m26c.frame.size().height() / m26c.mode.getY());
+	Field	*field = new Field(exposure.frame.size(), l);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u", l);
 
 	// perform the data transfer
@@ -118,10 +126,10 @@ void	SxCcdM26C::exposeField(int field) {
 	// compute a better request for the M26C camera
 	sx_read_pixels_delayed_t	rpd;
 	rpd.delay = 1000 * m26c.exposuretime;
-	rpd.width = m26c.frame.size.getWidth();
-	rpd.height = m26c.frame.size.getHeight();
-	rpd.x_offset = m26c.frame.origin.x;
-	rpd.y_offset = m26c.frame.origin.y;
+	rpd.width = m26c.frame.size().width();
+	rpd.height = m26c.frame.size().height();
+	rpd.x_offset = m26c.frame.origin().x();
+	rpd.y_offset = m26c.frame.origin().y();
 	rpd.x_bin = m26c.mode.getX();
 	rpd.y_bin = m26c.mode.getY();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -159,10 +167,10 @@ void	SxCcdM26C::requestField(int field) {
 	// downloads the already exposed field
 #if 1
 	sx_read_pixels_t	rp;
-	rp.width = m26c.frame.size.getWidth();
-	rp.height = m26c.frame.size.getHeight();
-	rp.x_offset = m26c.frame.origin.x;
-	rp.y_offset = m26c.frame.origin.y;
+	rp.width = m26c.frame.size().width();
+	rp.height = m26c.frame.size().height();
+	rp.x_offset = m26c.frame.origin().x();
+	rp.y_offset = m26c.frame.origin().y();
 	rp.x_bin = m26c.mode.getX();
 	rp.y_bin = m26c.mode.getY();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
@@ -185,10 +193,10 @@ void	SxCcdM26C::requestField(int field) {
 	}
 #else
 	sx_read_pixels_delayed_t	rpd;
-	rpd.width = m26c.frame.size.getWidth();
-	rpd.height = m26c.frame.size.getHeight();
-	rpd.x_offset = m26c.frame.origin.x;
-	rpd.y_offset = m26c.frame.origin.y;
+	rpd.width = m26c.frame.size.width();
+	rpd.height = m26c.frame.size.height();
+	rpd.x_offset = m26c.frame.origin.x();
+	rpd.y_offset = m26c.frame.origin.y();
 	rpd.x_bin = m26c.mode.getX();
 	rpd.y_bin = m26c.mode.getY();
 	rpd.delay = 1;
@@ -251,25 +259,30 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 		exp.toString().c_str());
 	Exposure	symexp = exp;
 	int	x[4], y[4];
-	x[0] = exp.frame.origin.x;
-	y[0] = exp.frame.origin.y;
+	x[0] = exp.frame.origin().x();
+	y[0] = exp.frame.origin().y();
 	x[1] = M26C_WIDTH - x[0];
 	y[1] = M26C_HEIGHT - y[0];
-	x[2] = exp.frame.origin.x + exp.frame.size.getWidth();
-	y[2] = exp.frame.origin.y + exp.frame.size.getHeight();
+	x[2] = exp.frame.origin().x() + exp.frame.size().width();
+	y[2] = exp.frame.origin().y() + exp.frame.size().height();
 	x[3] = M26C_WIDTH - x[2];
 	y[3] = M26C_HEIGHT - y[2];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x[] = %d %d %d %d",
 		x[0], x[1], x[2], x[3]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "y[] = %d %d %d %d",
 		y[0], y[1], y[2], y[3]);
-	symexp.frame.origin.x = min(x, 4);
-	symexp.frame.origin.y = min(y, 4);
-	symexp.frame.size.setWidth(max(x, 4) - symexp.frame.origin.x);
-	if (symexp.frame.size.getWidth() > 3900) {
-		symexp.frame.size.setWidth(3900);
+
+	// symmetrized origin
+	symexp.frame.setOrigin(ImagePoint(min(x, 4), min(y, 4)));
+	
+	// symmetrize size
+	unsigned int	sizex = max(x, 4) - symexp.frame.origin().x();
+	if (sizex > 3900) {
+		sizex = 3900;
 	}
-	symexp.frame.size.setHeight(max(y, 4) - symexp.frame.origin.y);
+	unsigned int	sizey = max(y, 4) - symexp.frame.origin().y();
+	symexp.frame.setSize(ImageSize(sizex, sizey));
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetrized exposure: %s",
 		symexp.toString().c_str());
 	return symexp;
@@ -361,8 +374,9 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 
 	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*image = new Image<unsigned short>(
-		exposure.frame.size.getWidth() / exposure.mode.getX(),
-		exposure.frame.size.getHeight() /exposure.mode.getY());
+		exposure.frame.size().width() / exposure.mode.getX(),
+		exposure.frame.size().height() /exposure.mode.getY());
+	image->setOrigin(exposure.frame.origin());
 	image->setMosaicType(ImageBase::BAYER_RGGB);
 
 	// now we have to demultiplex the two fields

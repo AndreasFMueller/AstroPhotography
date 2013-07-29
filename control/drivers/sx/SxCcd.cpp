@@ -74,10 +74,10 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
-	rpd.x_offset = exposure.frame.origin.x;
-	rpd.y_offset = exposure.frame.origin.y;
-	rpd.width = exposure.frame.size.getWidth();
-	rpd.height = exposure.frame.size.getHeight();
+	rpd.x_offset = exposure.frame.origin().x();
+	rpd.y_offset = exposure.frame.origin().y();
+	rpd.width = exposure.frame.size().width();
+	rpd.height = exposure.frame.size().height();
 	rpd.x_bin = exposure.mode.getX();
 	rpd.y_bin = exposure.mode.getY();
 	rpd.delay = 1000 * exposure.exposuretime;
@@ -102,8 +102,8 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize(
-		exposure.frame.size.getWidth() / exposure.mode.getX(),
-		exposure.frame.size.getHeight() / exposure.mode.getY());
+		exposure.frame.size().width() / exposure.mode.getX(),
+		exposure.frame.size().height() / exposure.mode.getY());
 
 	// compute the size of the buffer, and create a buffer for the data
 	int	size = targetsize.getPixels();
@@ -126,6 +126,7 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// when the transfer completes, one can use the data for the image
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(targetsize, data);
+	image->setOrigin(exposure.frame.origin());
 
 	// if this is a color camera (which we can find out from the model
 	// of the camera), then we should add RGB information to the image
@@ -137,8 +138,8 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 		image->setMosaicType(
 			(ImageBase::mosaic_type)(
 			ImageBase::BAYER_RGGB \
-				| ((exposure.frame.origin.x % 2) << 1) \
-				| (exposure.frame.origin.y % 2)));
+				| ((exposure.frame.origin().x() % 2) << 1) \
+				| (exposure.frame.origin().y() % 2)));
 	}
 
 	// images are upside down, since our origin is always the lower
@@ -148,7 +149,7 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
-		for (unsigned int offset = 0; offset < image->size.getPixels();
+		for (unsigned int offset = 0; offset < image->size().getPixels();
 			offset++) {
 			unsigned short	pv = image->pixels[offset];
 			if (pv > exposure.limit) {

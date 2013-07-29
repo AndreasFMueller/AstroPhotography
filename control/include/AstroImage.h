@@ -31,9 +31,13 @@ namespace image {
  * convention.
  */
 class ImagePoint {
+	unsigned int	_x, _y;
 public:
-	unsigned int	x, y;
-	ImagePoint(unsigned int _x = 0, unsigned int _y = 0) : x(_x), y(_y) { }
+	unsigned int	x() const { return _x; }
+	unsigned int	y() const { return _y; }
+	void	setX(unsigned int x) { _x = x; }
+	void	setY(unsigned int y) { _y = y; }
+	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
@@ -51,26 +55,32 @@ class ImageRectangle;
  * number of pixels and width/height.
  */
 class ImageSize {
-	unsigned int	width, height;
+	unsigned int	_width, _height;
 	unsigned int	pixels;
 public:
 	// the accessors are defined inline so that a clever compiler can
 	// still make them just asf ast as directly accessible members
-	unsigned int	getWidth() const { return width; }
-	void	setWidth(unsigned int _width);
-	unsigned int	getHeight() const { return height; }
-	void	setHeight(unsigned int _height);
+	unsigned int	width() const { return _width; }
+	void	setWidth(unsigned int width);
+	unsigned int	height() const { return _height; }
+	void	setHeight(unsigned int height);
 	unsigned int	getPixels() const { return pixels; }
-	ImageSize(unsigned int _width = 0, unsigned int _height = 0);
+	// constructors
+	ImageSize(unsigned int width = 0, unsigned int height = 0);
+	// comparision
 	bool	operator==(const ImageSize& other) const;
 	bool	operator!=(const ImageSize& other) const;
+	// relationships
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(int x, int y) const;
+	// characteristic function
 	int	chi(unsigned int x, unsigned int y) const;
+	// offset into pixel array
 	unsigned int	offset(unsigned int x, unsigned int y) const;
 	unsigned int	offset(const ImagePoint& point) const;
+	// text representation
 	std::string	toString() const;
 };
 
@@ -83,24 +93,32 @@ public:
  * specifies width and height of the rectangle,
  */
 class ImageRectangle {
+	ImagePoint	_origin;
+	ImageSize	_size;
 public:
-	ImagePoint	origin;
-	ImageSize		size;
-	bool	contains(const ImagePoint& point) const;
-	bool	contains(const ImageRectangle& rectangle) const;
-	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : size(w, h) { }
-	ImageRectangle(const ImageSize& _size) : origin(0, 0), size(_size) { }
-	ImageRectangle(const ImagePoint& _origin, const ImageSize& _size)
-		: origin(_origin), size(_size) { }
+	// accessors
+	const ImagePoint&	origin() const { return _origin; }
+	const ImageSize&	size() const { return _size; }
+	void	setOrigin(const ImagePoint& origin) { _origin = origin; }
+	void	setSize(const ImageSize& size) { _size = size; }
+	// constructors
+	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : _size(w, h) { }
+	ImageRectangle(const ImageSize& size) : _size(size) { }
+	ImageRectangle(const ImagePoint& origin, const ImageSize& size)
+		: _origin(origin), _size(size) { }
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImagePoint& translatedby);
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
+	// oeprators
+	bool	contains(const ImagePoint& point) const;
+	bool	contains(const ImageRectangle& rectangle) const;
 	bool	operator==(const ImageRectangle& other) const;
 	const ImagePoint&	lowerLeftCorner() const;
 	ImagePoint	lowerRightCorner() const;
 	ImagePoint	upperRightCorner() const;
 	ImagePoint	upperLeftCorner() const;
+	// text represenation
 	std::string	toString() const;
 };
 
@@ -202,7 +220,13 @@ public:
 	bool	isMosaic() const;
 
 	// the size is publicly accessible, but users should not change it
-	ImageSize	size;
+protected:
+	ImageRectangle	frame;
+public:
+	const ImageRectangle&	getFrame() const { return frame; }
+	void	setOrigin(const ImagePoint& origin) { frame.setOrigin(origin); }
+	const ImageSize&	size() const { return frame.size(); }
+	const ImagePoint&	origin() const { return frame.origin(); }
 
 	// constructors and destructor
 	ImageBase(unsigned int w = 0, unsigned int h = 0);
@@ -307,7 +331,7 @@ class	ImageRow : public ImageLine {
 public:
 	const unsigned int	y;
 	ImageRow(const ImageSize size, unsigned int _y)
-		: ImageLine(size.getWidth() * _y, size.getWidth() * (_y + 1) - 1, 1),
+		: ImageLine(size.width() * _y, size.width() * (_y + 1) - 1, 1),
 		  y(_y) { }
 };
 
@@ -318,8 +342,8 @@ class	ImageColumn : public ImageLine {
 public:
 	const unsigned int	x;
 	ImageColumn(const ImageSize& size, unsigned int _x)
-		: ImageLine(_x, _x + size.getPixels() - size.getWidth(),
-			size.getWidth()), x(_x) { }
+		: ImageLine(_x, _x + size.getPixels() - size.width(),
+			size.width()), x(_x) { }
 };
 
 /**
@@ -372,7 +396,7 @@ public:
 	 * \brief Access to the image size
 	 */
 	virtual	ImageSize	getSize() const {
-		return size;
+		return frame.size();
 	}
 
 	/**
@@ -399,9 +423,9 @@ public:
 		if (p) {
 			pixels = p;
 		} else {
-			pixels = new Pixel[size.getPixels()];
+			pixels = new Pixel[frame.size().getPixels()];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.getPixels(), pixels);
+				frame.size().getPixels(), pixels);
 		}
 	}
 
@@ -440,9 +464,9 @@ public:
 	Image<Pixel>(const ConstImageAdapter<Pixel>& adapter)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
-		pixels = new Pixel[size.getPixels()];
-		for (unsigned int x = 0; x < size.getWidth(); x++) {
-			for (unsigned int y = 0; y < size.getHeight(); y++) {
+		pixels = new Pixel[frame.size().getPixels()];
+		for (unsigned int x = 0; x < frame.size().width(); x++) {
+			for (unsigned int y = 0; y < frame.size().height(); y++) {
 				pixel(x, y) = adapter.pixel(x, y);
 			}
 		}
@@ -454,12 +478,13 @@ public:
 	 * \param
  	 */
 	template<typename srcPixel>
-	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size),
-		ImageAdapter<Pixel>(other.size) {
-		pixels = new Pixel[size.getPixels()];
+	Image<Pixel>(const Image<srcPixel>& other)
+		: ImageBase(other.size()),
+		  ImageAdapter<Pixel>(other.size()) {
+		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.getPixels(), pixels);
-		convertPixelArray(pixels, other.pixels, size.getPixels());
+			frame.size().getPixels(), pixels);
+		convertPixelArray(pixels, other.pixels, frame.size().getPixels());
 	}
 
 	/**
@@ -476,11 +501,11 @@ public:
 	 * need to be copied.
 	 */
 	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
-		ImageAdapter<Pixel>(p.size) {
-		pixels = new Pixel[size.getPixels()];
+		ImageAdapter<Pixel>(p.frame.size()) {
+		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.getPixels(), pixels);
-		std::copy(p.pixels, p.pixels + size.getPixels(), pixels);
+			frame.size().getPixels(), pixels);
+		std::copy(p.pixels, p.pixels + frame.size().getPixels(), pixels);
 	}
 
 	/**
@@ -490,12 +515,12 @@ public:
 	 * same size.
 	 */
 	Image<Pixel>&	operator=(Image<Pixel>& other) {
-		if (!(other.size == size)) {
+		if (!(other.frame.size() == frame.size())) {
 			throw std::length_error("image frame mismatch");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
 			other.pixels, pixels);
-		std::copy(other.pixels, other.pixels + other.size.getPixels(), pixels);
+		std::copy(other.pixels, other.pixels + other.frame.size().getPixels(), pixels);
 	}
 
 	/**
@@ -510,7 +535,7 @@ public:
 	 * \brief Read only access to pixel values specified by offset.
 	 */
 	const Pixel&	operator[](unsigned int offset) const {
-		if ((offset < 0) || (offset > size.getPixels())) {
+		if ((offset < 0) || (offset > frame.size().getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -520,7 +545,7 @@ public:
 	 * \brief Read/write access to pixels specified by offset
 	 */
 	Pixel&	operator[](unsigned int offset) {
-		if ((offset < 0) || (offset > size.getPixels())) {
+		if ((offset < 0) || (offset > frame.size().getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -555,7 +580,7 @@ public:
 		 * \param _y y coordinate of the row to be constructed
 		 */
 		row(Image<Pixel> &_image, unsigned int _y)
-			: ImageRow(_image.size, _y), image(_image) { }
+			: ImageRow(_image.frame.size(), _y), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
 		iterator	end();
@@ -572,7 +597,7 @@ public:
 		 * \param _x x coordinate of the column to be constructed
  		 */
 		column(Image<Pixel> &_image, unsigned int _x)
-			: ImageColumn(_image.size, _x), image(_image) { }
+			: ImageColumn(_image.size(), _x), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
 		iterator	end();
@@ -629,25 +654,25 @@ public:
 		if (!this->ImageBase::operator==(other)) {
 			return false;
 		}
-		return std::equal(pixels, pixels + size.getPixels(), other.pixels);
+		return std::equal(pixels, pixels + frame.size().getPixels(), other.pixels);
 	}
 
 	/**
 	 * \brief Fill an image with a given value
 	 */
 	void	fill(const Pixel& value) {
-		std::fill(pixels, pixels + size.getPixels(), value);
+		std::fill(pixels, pixels + frame.size().getPixels(), value);
 	}
 
 	/**
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
-	void	fill(const ImageRectangle& frame, const Pixel& value) {
-		for (unsigned int y = 0; y < frame.size.getHeight(); y++) {
-			ImageRow	r(size, frame.origin.y + y);
-			std::fill(pixels + r.firstoffset + frame.origin.x,
-				pixels + r.firstoffset + frame.origin.x
-					+ size.getWidth(), value);
+	void	fill(const ImageRectangle& subframe, const Pixel& value) {
+		for (unsigned int y = 0; y < subframe.size().height(); y++) {
+			ImageRow	r(frame.size(), subframe.origin().y() + y);
+			std::fill(pixels + r.firstoffset + subframe.origin().x(),
+				pixels + r.firstoffset + subframe.origin().x()
+					+ frame.size().width(), value);
 		}
 	}
 
@@ -679,18 +704,18 @@ public:
  */
 template<class Pixel>
 Image<Pixel>::Image(const Image<Pixel>& src,
-		const ImageRectangle& frame)
-	: ImageBase(frame.size), ImageAdapter<Pixel>(frame.size) {
-	if (!src.size.bounds(frame)) {
+		const ImageRectangle& subframe)
+	: ImageBase(subframe.size()), ImageAdapter<Pixel>(subframe.size()) {
+	if (!src.frame.size().bounds(subframe)) {
 		throw std::range_error("subimage frame too large");
 	}
-	pixels = new Pixel[size.getPixels()];
-	for (unsigned int y = 0; y < frame.size.getHeight(); y++) {
-		ImageRow	srcrow(src.size, frame.origin.y + y);
-		ImageRow	destrow(size, y);
-		std::copy(src.pixels + srcrow.firstoffset + frame.origin.x,
-			src.pixels + srcrow.firstoffset + frame.origin.x
-				+ size.getWidth(),
+	pixels = new Pixel[subframe.size().getPixels()];
+	for (unsigned int y = 0; y < subframe.size().height(); y++) {
+		ImageRow	srcrow(src.frame.size(), subframe.origin().y() + y);
+		ImageRow	destrow(frame.size(), y);
+		std::copy(src.pixels + srcrow.firstoffset + subframe.origin().x(),
+			src.pixels + srcrow.firstoffset + subframe.origin().x()
+				+ frame.size().width(),
 			pixels + destrow.firstoffset);
 	}
 }
@@ -792,10 +817,10 @@ typename Image<Pixel>::const_iterator	Image<Pixel>::column::end() const {
  */
 template<typename destPixel, typename srcPixel>
 void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
-	if (dest.size != src.size) {
+	if (dest.size() != src.size()) {
 		throw std::runtime_error("convertImage: image sizes don't match");
 	}
-	convertPixelArray(dest.pixels, src.pixels, dest.size.getPixels());
+	convertPixelArray(dest.pixels, src.pixels, dest.size().getPixels());
 }
 
 /**

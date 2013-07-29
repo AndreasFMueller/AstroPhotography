@@ -56,11 +56,11 @@ void	WindowAdapterTest::testWindowAdapter() {
 	ImageSize	size = adapter.getSize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adapter size: %s",
 		size.toString().c_str());
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			unsigned char	value = adapter.pixel(x, y);
 			unsigned char	v
-				= (frame.origin.x + x) * (frame.origin.y + y);
+				= (frame.origin().x() + x) * (frame.origin().y() + y);
 			if (v != value) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "expected %d != %d found",
 					(int)v, (int)value);

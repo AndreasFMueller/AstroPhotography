@@ -47,8 +47,8 @@ void	FITSwriteTest::testWriteUChar() {
 
 	// create an image
 	Image<unsigned char>	*image = new Image<unsigned char>(256, 256);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y) = (x + y) % 256;
 		}
 	}
@@ -68,8 +68,8 @@ void	FITSwriteTest::testWriteUShort() {
 
 	// create an image
 	Image<unsigned short>	*image = new Image<unsigned short>(256, 256);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y) = (x * y) % 65536;
 		}
 	}
@@ -90,8 +90,8 @@ void	FITSwriteTest::testWriteYUYV() {
 	// create an image
 	Image<YUYV<unsigned char> >	*image
 		= new Image<YUYV<unsigned char> >(256, 256);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			RGB<unsigned char>	colors[2];
 			colors[0].R = x;
 			colors[0].G = ((x + y) % 256);
@@ -126,8 +126,8 @@ void	FITSwriteTest::testWriteRGB() {
 	// create an image
 	Image<RGB<unsigned char> >	*image
 		= new Image<RGB<unsigned char> >(256, 256);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y).R = x;
 			image->pixel(x, y).G = (x + y) % 256;
 			image->pixel(x, y).B = y;
@@ -150,8 +150,8 @@ void	FITSwriteTest::testWriteRGBUShort() {
 	// create an image
 	Image<RGB<unsigned short> >	*image
 		= new Image<RGB<unsigned short> >(256, 256);
-	for (unsigned int x = 0; x < image->size.getWidth(); x++) {
-		for (unsigned int y = 0; y < image->size.getHeight(); y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y).R = x << 8;
 			image->pixel(x, y).G = ((x + y) % 256) << 8;
 			image->pixel(x, y).B = y << 8;

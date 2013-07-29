@@ -34,11 +34,11 @@ TranslationAdapter<Pixel>::TranslationAdapter(
 	const ConstImageAdapter<Pixel>& _image, const Point& _translation) 
 	: ConstImageAdapter<Pixel>(_image.getSize()),
 	  image(_image), translation(_translation) {
-	tx = floor(translation.x);
-	ty = floor(translation.y);
+	tx = floor(translation.x());
+	ty = floor(translation.y());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %d, ty = %d", tx, ty);
-	double	wx = translation.x - tx;
-	double	wy = translation.y - ty;
+	double	wx = translation.x() - tx;
+	double	wy = translation.y() - ty;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wx = %f, wy = %f", wx, wy);
 	// compute the weights
 	weights[0] = wx * wy;
@@ -171,12 +171,12 @@ const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	Point	t = inverse(Point(x, y));
 
 	// find out in which pixel this is located
-	int	tx = floor(t.x);
-	int	ty = floor(t.y);
+	int	tx = floor(t.x());
+	int	ty = floor(t.y());
 
 	// compute the weights
-	double	wx = t.x - tx;
-	double	wy = t.y - ty;
+	double	wx = t.x() - tx;
+	double	wy = t.y() - ty;
 
 	// compute the weights
 	double	weights[4];

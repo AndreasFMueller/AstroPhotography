@@ -15,15 +15,15 @@ static const double	epsilon = 1e-10;
 // Point implementation
 //////////////////////////////////////////////////////////////////////
 Point	Point::operator+(const Point& other) const {
-	return Point(x + other.x, y + other.y);
+	return Point(_x + other._x, _y + other._y);
 }
 
 Point	Point::operator-(const Point& other) const {
-	return Point(x - other.x, y - other.y);
+	return Point(_x - other._x, _y - other._y);
 }
 
 Point	Point::operator*(double l) const {
-	return Point(l * x, l * y);
+	return Point(l * _x, l * _y);
 }
 
 Point	operator*(double l, const Point& other) {
@@ -31,7 +31,7 @@ Point	operator*(double l, const Point& other) {
 }
 
 std::string	Point::toString() const {
-	return stringprintf("(%f,%f)", x, y);
+	return stringprintf("(%f,%f)", _x, _y);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Point& point) {
@@ -39,8 +39,8 @@ std::ostream&	operator<<(std::ostream& out, const Point& point) {
 }
 
 bool	Point::operator==(const Point& other) const {
-	if (fabs(x - other.x) > epsilon) { return false; }
-	if (fabs(y - other.y) > epsilon) { return false; }
+	if (fabs(_x - other._x) > epsilon) { return false; }
+	if (fabs(_y - other._y) > epsilon) { return false; }
 	return true;
 }
 

@@ -32,8 +32,8 @@ GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
 	// using the 
 	const GuiderCalibration&	calibration = guider.getCalibration();
 	Point	correction = calibration.defaultcorrection();
-	tx = zx = -correction.x;
-	ty = zy = -correction.y;
+	tx = zx = -correction.x();
+	ty = zy = -correction.y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %.3fs, ty = %.3fs", tx, ty);
 	if ((fabs(tx) > 1) || (fabs(ty) > 1)) {
 		std::string	msg = stringprintf("default activation times "
@@ -152,10 +152,10 @@ void	*GuiderProcess::track_main() {
 		// protected from concurrent access, because it may be in an
 		// illegal state temporarily
 		pthread_mutex_lock(&mutex);
-		tx = zx - gain * correction.x;
+		tx = zx - gain * correction.x();
 		if (tx > 1) { tx = 1; }
 		if (tx < -1) { tx = -1; }
-		ty = zy - gain * correction.y;
+		ty = zy - gain * correction.y();
 		if (ty > 1) { ty = 1; }
 		if (ty < -1) { ty = -1; }
 		pthread_mutex_unlock(&mutex);

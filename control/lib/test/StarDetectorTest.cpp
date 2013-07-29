@@ -47,9 +47,9 @@ std::cerr << "StarDetector" << std::endl;
 	Image<unsigned short>	*imagep = new Image<unsigned short>(640, 480);
 	ImagePtr	imageptr(imagep);
 	ImageSize	size = imagep->getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
-			double	r = hypot(x - p.x, y - p.y);
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
+			double	r = hypot(x - p.x(), y - p.y());
 			unsigned short	v = 1000 * exp(-(r * r) / 8);
 			imagep->pixel(x, y) = v;
 		}

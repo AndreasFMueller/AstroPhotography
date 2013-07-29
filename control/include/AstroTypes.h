@@ -19,12 +19,17 @@ namespace astro {
  */
 
 class Point {
+	double	_x;
+	double	_y;
 public:
-	double	x;
-	double	y;
-	Point() : x(0), y(0) { }
-	Point(double _x, double _y) : x(_x), y(_y) { }
-	Point(const astro::image::ImagePoint& point) : x(point.x), y(point.y) {}
+	Point() : _x(0), _y(0) { }
+	Point(double x, double y) : _x(x), _y(y) { }
+	Point(const astro::image::ImagePoint& point)
+		: _x(point.x()), _y(point.y()) {}
+	double	x() const { return _x; }
+	double	y() const { return _y; }
+	void	setX(double x) { _x = x; }
+	void	setY(double y) { _y = y; }
 	Point	operator+(const Point& other) const;
 	Point	operator-(const Point& other) const;
 	Point	operator*(double l) const;

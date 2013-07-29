@@ -31,16 +31,16 @@ void	flat_correct(Image<ImagePixelType>& image,
 	ImagePixelType	max = std::numeric_limits<ImagePixelType>::max();
 
 	// first check that image sizes match
-	if (image.size != flat.size) {
+	if (image.size() != flat.size()) {
 		std::string	msg = stringprintf("size: image %s != flat %s",
-			image.size.toString().c_str(),
-			flat.size.toString().c_str());
+			image.size().toString().c_str(),
+			flat.size().toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
 	// correct all pixels
-	for (size_t offset = 0; offset < image.size.getPixels(); offset++) {
+	for (size_t offset = 0; offset < image.size().getPixels(); offset++) {
 		ImagePixelType	ip = image.pixels[offset];
 		// skip NaN pixels
 		if (ip != ip) {
@@ -88,16 +88,9 @@ void	flat_correct_typed(ImagePtr& image,
 //////////////////////////////////////////////////////////////////////
 // FlatCorrector implementation
 //////////////////////////////////////////////////////////////////////
-FlatCorrector::FlatCorrector(const ImagePtr& _flat) : flat(_flat) {
-	// We want flat images to be of float or double type
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*flat);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*flat);
-	if ((NULL != fp) || (NULL != dp)) {
-		return;
-	}
-	std::string	msg("flat image must be of floating point type");
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+FlatCorrector::FlatCorrector(const ImagePtr& _flat,
+	const ImageRectangle& _rectangle)
+	: Corrector(_flat, _rectangle) {
 }
 
 /**
@@ -110,8 +103,8 @@ FlatCorrector::FlatCorrector(const ImagePtr& _flat) : flat(_flat) {
  * \param image     image to flat correct
  */
 void	FlatCorrector::operator()(ImagePtr& image) const {
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*flat);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*flat);
+	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
+	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
 	if (NULL != fp) {
 		flat_correct_typed<float>(image, *fp);
 		return;

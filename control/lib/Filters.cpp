@@ -151,7 +151,7 @@ void	mask(MaskingFunction& maskingfunction, ImagePtr image) {
 	Image<Pixel >	*imagep						\
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		return luminance(imagep->pixel(point.x, point.y));	\
+		return luminance(imagep->pixel(point.x(), point.y()));	\
 	}								\
 }
 

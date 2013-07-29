@@ -151,10 +151,10 @@ int	main(int argc, char *argv[]) {
 
 	// find a fitting image rectangle
         if (width == 0) {
-                width = ccd->getInfo().size.getWidth();
+                width = ccd->getInfo().size.width();
         }
         if (height == 0) {
-                height = ccd->getInfo().size.getHeight();
+                height = ccd->getInfo().size.height();
         }
         ImageRectangle  imagerectangle = ccd->getInfo().clipRectangle(
                 ImageRectangle(ImagePoint(xoffset, yoffset),

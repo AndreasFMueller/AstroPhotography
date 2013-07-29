@@ -115,10 +115,10 @@ void	ExposureWidget::setCcd(CcdPtr _ccd) {
 
 	// set the frame size 
 	ImageRectangle	frame = ccd->getInfo().getFrame();
-	ui->originxField->setText(QString().setNum(frame.origin.x));
-	ui->originyField->setText(QString().setNum(frame.origin.y));
-	ui->widthField->setText(QString().setNum(frame.size.getWidth()));
-	ui->heightField->setText(QString().setNum(frame.size.getHeight()));
+	ui->originxField->setText(QString().setNum(frame.origin().x()));
+	ui->originyField->setText(QString().setNum(frame.origin().y()));
+	ui->widthField->setText(QString().setNum(frame.size().width()));
+	ui->heightField->setText(QString().setNum(frame.size().height()));
 
 	// if the ccd has no shutter, disable it
 	ui->shutterLabel->setEnabled(ccd->hasShutter());
@@ -137,10 +137,13 @@ Exposure	ExposureWidget::getExposure() {
 	// subframe info
 	bool	ok;
 	if (ui->subframeCheckBox->isChecked()) {
-		result.frame.origin.x = ui->originxField->text().toInt(&ok);
-		result.frame.origin.y = ui->originyField->text().toInt(&ok);
-		result.frame.size.setWidth(ui->widthField->text().toInt(&ok));
-		result.frame.size.setHeight(ui->heightField->text().toInt(&ok));
+		int	originx = ui->originxField->text().toInt(&ok);
+		int	originy = ui->originyField->text().toInt(&ok);
+		result.frame.setOrigin(ImagePoint(originx, originy));
+
+		int	sizex = ui->widthField->text().toInt(&ok);
+		int	sizey = ui->heightField->text().toInt(&ok);
+		result.frame.setSize(ImageSize(sizex, sizey));
 	} else {
 		result.frame = ccd->getInfo().getFrame();
 	}
@@ -177,10 +180,10 @@ Exposure	ExposureWidget::getExposure() {
  */
 void	ExposureWidget::setExposure(const Exposure& exposure) {
 	// display exposure window parameters
-	ui->originxField->setText(QString().setNum(exposure.frame.origin.x));
-	ui->originyField->setText(QString().setNum(exposure.frame.origin.y));
-	ui->widthField->setText(QString().setNum(exposure.frame.size.getWidth()));
-	ui->heightField->setText(QString().setNum(exposure.frame.size.getHeight()));
+	ui->originxField->setText(QString().setNum(exposure.frame.origin().x()));
+	ui->originyField->setText(QString().setNum(exposure.frame.origin().y()));
+	ui->widthField->setText(QString().setNum(exposure.frame.size().width()));
+	ui->heightField->setText(QString().setNum(exposure.frame.size().height()));
 
 	// normalize the exposure to so that it fits into the constraints of
 	// the exposure time spinner

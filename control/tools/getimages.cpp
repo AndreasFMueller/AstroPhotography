@@ -157,10 +157,10 @@ int	main(int argc, char *argv[]) {
 
 	// create the image rectangle
 	if (width == 0) {
-		width = ccd->getInfo().size.getWidth();
+		width = ccd->getInfo().size.width();
 	}
 	if (height == 0) {
-		height = ccd->getInfo().size.getHeight();
+		height = ccd->getInfo().size.height();
 	}
 	ImageRectangle	imagerectangle = ccd->getInfo().clipRectangle(
 		ImageRectangle(ImagePoint(xoffset, yoffset),
@@ -182,7 +182,7 @@ int	main(int argc, char *argv[]) {
 		std::string	filename = stringprintf("%s/%s%03d.fits",
 			outputdir, prefix, counter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s of size %s",
-			filename.c_str(), (*imageptr)->size.toString().c_str());
+			filename.c_str(), (*imageptr)->size().toString().c_str());
 		if (debuglevel >= LOG_DEBUG) {
 			std::ostringstream	out;
 			out << **imageptr;

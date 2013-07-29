@@ -43,7 +43,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ImageTest);
 
 void	ImageTest::setUp() {
 	image = new Image<unsigned char>(640, 480);
-	for (unsigned int i = 0; i < image->size.getPixels(); i++) {
+	for (unsigned int i = 0; i < image->size().getPixels(); i++) {
 		(*image)[i] = i % 160;
 	}
 }
@@ -116,8 +116,8 @@ void	ImageTest::testSubimage() {
 	ImagePoint	origin(5, 9);
 	ImageRectangle	frame(origin, size);
 	Image<unsigned char>	image2(*image, frame);
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			unsigned char	v1 = image2.pixel(x, y);
 			unsigned char	v2 = image->pixel(x + 5, y + 9);
 			unsigned char	v3 = (5 + x + 640 * (9 + y)) % 160;

@@ -257,7 +257,7 @@ FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	// find the dimensions
 	long	naxis = 3;
-	long	naxes[3] = { image.size.getWidth(), image.size.getHeight(), planes };
+	long	naxes[3] = { image.size().width(), image.size().height(), planes };
 	int	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));

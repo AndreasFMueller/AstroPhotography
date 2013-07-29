@@ -45,8 +45,8 @@ template<typename T, typename S>
 S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	result = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) {
 				result += 1;
@@ -88,8 +88,8 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	maxx = 0;
 	maxy = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v > result) {
@@ -126,8 +126,8 @@ T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	minx = 0;
 	miny = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v < result) {
@@ -159,8 +159,8 @@ S	Mean<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	sum = 0;
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if ((check_nan) && (v != v))
 				continue;
@@ -198,8 +198,8 @@ S	Variance<T, S>::filter(const ConstImageAdapter<T>& image) {
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			// skip NaNs
 			if ((check_nan) && (v != v))
@@ -237,14 +237,14 @@ protected:
 		case R:
 			break;
 		case Gr:
-			o.x ^= 0x1;
+			o.setX(o.x() ^ 0x1);
 			break;
 		case B:
-			o.x ^= 0x1;
-			o.y ^= 0x1;
+			o.setX(o.x() ^ 0x1);
+			o.setY(o.y() ^ 0x1);
 			break;
 		case Gb:
-			o.y ^= 0x1;
+			o.setY(o.y() ^ 0x1);
 			break;
 		}
 		return o;
@@ -359,8 +359,8 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	}
 
 	// count the number of values 
-	for (unsigned int x = 0; x < size.getWidth(); x++) {
-		for (unsigned int y = 0; y < size.getHeight(); y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			for (unsigned int i = 0; i < N + 1; i++) {
 				if (v <= limits[i]) {
@@ -429,8 +429,8 @@ public:
 		FocusFOMAdapter<Pixel>	foa(image, diagonal);
 		ImageSize	size = foa.getSize();
 		double	result = 0;
-		for (size_t x = 0; x < size.getWidth(); x++) {
-			for (size_t y = 0; y < size.getHeight(); y++) {
+		for (size_t x = 0; x < size.width(); x++) {
+			for (size_t y = 0; y < size.height(); y++) {
 				double	l = foa.pixel(x, y);
 				// skip NaNs
 				if (l == l) {
@@ -466,8 +466,8 @@ public:
 
 template<typename Pixel>
 void    Mask<Pixel>::operator()(Image<Pixel>& image) {
-	for (size_t x = 0; x < image.size.getWidth(); x++) {
-		for (size_t y = 0; y < image.size.getHeight(); y++) {
+	for (size_t x = 0; x < image.size().width(); x++) {
+		for (size_t y = 0; y < image.size().height(); y++) {
 			Pixel   v = image.pixel(x, y);
 			v = maskingfunction(x, y) * v;
 			image.pixel(x, y) = v;
@@ -494,7 +494,7 @@ public:
 template<typename Pixel>
 double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	// first define the area where we should see the maximum
-	ImagePoint	center(point.x - r, point.y - r);
+	ImagePoint	center(point.x() - r, point.y() - r);
 	ImageRectangle	rectangle(center, ImageSize(2 * r + 1, 2 * r + 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
 		rectangle.toString().c_str());
@@ -514,11 +514,11 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	for (unsigned int k = 0; k < maxradius; k++) {
 		rhist[k] = 0;
 	}
-	for (unsigned int x = 0; x < wa.getSize().getWidth(); x++) {
-		for (unsigned int y = 0; y < wa.getSize().getHeight(); y++) {
+	for (unsigned int x = 0; x < wa.getSize().width(); x++) {
+		for (unsigned int y = 0; y < wa.getSize().height(); y++) {
 			if (wa.pixel(x, y) > halfmax) {
 				unsigned int	k
-					= trunc(hypot(x - target.x, y - target.y));
+					= trunc(hypot(x - target.x(), y - target.y()));
 				if (k < maxradius) {
 					rhist[k]++;
 				}
