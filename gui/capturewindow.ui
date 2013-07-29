@@ -258,28 +258,28 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="6" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Demosaic:</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="6" column="1">
            <widget class="QCheckBox" name="demosaicCheckbox">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="7" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="scaleLabel">
             <property name="text">
              <string>Scale:</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <widget class="QComboBox" name="scaleCombobox"/>
           </item>
           <item row="3" column="0">
@@ -403,14 +403,14 @@
             </layout>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="valueintervalLabel">
             <property name="text">
              <string>Value interval:</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <widget class="QWidget" name="valueintervalWidget" native="true">
             <property name="minimumSize">
              <size>
@@ -465,6 +465,20 @@
               </widget>
              </item>
             </layout>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="badpixelsLabel">
+            <property name="text">
+             <string>Bad Pixels:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="badpixelsCheckBox">
+            <property name="text">
+             <string>disabled: set to 0</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -538,7 +552,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>880</x>
-     <y>721</y>
+     <y>711</y>
     </hint>
     <hint type="destinationlabel">
      <x>950</x>
@@ -554,7 +568,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>909</x>
-     <y>562</y>
+     <y>502</y>
     </hint>
     <hint type="destinationlabel">
      <x>956</x>
@@ -570,11 +584,27 @@
    <hints>
     <hint type="sourcelabel">
      <x>918</x>
-     <y>616</y>
+     <y>553</y>
     </hint>
     <hint type="destinationlabel">
      <x>953</x>
      <y>618</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>badpixelsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>badpixelsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>798</x>
+     <y>614</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>952</x>
+     <y>532</y>
     </hint>
    </hints>
   </connection>
@@ -586,5 +616,6 @@
   <slot>timeChanged(double)</slot>
   <slot>openDarkfile()</slot>
   <slot>openFlatfile()</slot>
+  <slot>badpixelsToggled(bool)</slot>
  </slots>
 </ui>

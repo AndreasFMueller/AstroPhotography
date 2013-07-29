@@ -22,8 +22,7 @@ class Interpolator {
 	void	interpolateMosaic(astro::image::ImagePtr& image);
 public:
 	Interpolator(const astro::image::ImagePtr& dark);
-	void	interpolate(astro::image::ImagePtr& image);
-	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image);
+	void	operator()(astro::image::ImagePtr& image);
 };
 
 } // namespace interpolation

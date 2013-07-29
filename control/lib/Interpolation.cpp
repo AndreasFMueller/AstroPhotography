@@ -53,6 +53,8 @@ void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
 		for (unsigned int y = 0; y < dark.size().height(); y++) {
 			DarkPixelType	darkpixel = dark.pixel(x, y);
 			if (darkpixel != darkpixel) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"interpolating pixel (%u,%u)", x, y);
 				this->interpolatePixel(x, y, image);
 			}
 		}
@@ -281,9 +283,11 @@ Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
 {									\
 	Image<pixel>	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
-	MonochromeInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
-	tint.interpolate(*imagep);					\
-	return;								\
+	if (NULL != imagep) {						\
+		MonochromeInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
+		tint.interpolate(*imagep);				\
+		return;							\
+	}								\
 }
 
 void	Interpolator::interpolateMonochrome(ImagePtr& image) {
@@ -310,22 +314,33 @@ void	Interpolator::interpolateMonochrome(ImagePtr& image) {
 {									\
 	Image<pixel>	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
-	MosaicInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
-	tint.setMosaic(image->getMosaic());				\
-	tint.interpolate(*imagep);					\
-	return;								\
+	if (NULL != imagep) {						\
+		MosaicInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
+		tint.setMosaic(image->getMosaicType());			\
+		tint.interpolate(*imagep);				\
+		return;							\
+	}								\
 }
 
-void	Interpolator::interpolateMosaic(ImagePtr& image) {
+void	Interpolator::operator()(ImagePtr& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mosaic interpolation");
+	if (floatdark) {
+		interpolate_mosaic(float, unsigned char, floatdark, image);
+		interpolate_mosaic(float, unsigned short, floatdark, image);
+		interpolate_mosaic(float, unsigned int, floatdark, image);
+		interpolate_mosaic(float, unsigned long, floatdark, image);
+		interpolate_mosaic(float, float, floatdark, image);
+		interpolate_mosaic(float, double, floatdark, image);
+	}
+	if (doubledark) {
+		interpolate_mosaic(double, unsigned char, floatdark, image);
+		interpolate_mosaic(double, unsigned short, floatdark, image);
+		interpolate_mosaic(double, unsigned int, floatdark, image);
+		interpolate_mosaic(double, unsigned long, floatdark, image);
+		interpolate_mosaic(double, float, floatdark, image);
+		interpolate_mosaic(double, double, floatdark, image);
+	}
 	return;
-}
-
-ImagePtr	Interpolator::operator()(const ImagePtr& image) {
-	// XXX create a copy of an image
-	ImagePtr	imagecopy;
-	interpolate(imagecopy);
-	return imagecopy;
 }
 
 } // interpolation

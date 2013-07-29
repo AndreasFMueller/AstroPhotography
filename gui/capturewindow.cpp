@@ -17,11 +17,13 @@
 #include "ExposureWorker.h"
 #include <sys/time.h>
 #include <AstroCalibration.h>
+#include <AstroInterpolation.h>
 
 using namespace astro;
 using namespace astro::image;
 using namespace astro::io;
 using namespace astro::calibration;
+using namespace astro::interpolation;
 
 static double	nowtime() {
 	struct timeval	now;
@@ -229,7 +231,7 @@ void	CaptureWindow::redisplayImage() {
 	if (isColorImage(image)) {
 		colordisplay = true;
 	}
-	if ((image->isMosaic()) && (ui->demosaicCheckbox->isChecked())) {
+	if ((image->getMosaicType().isMosaic()) && (ui->demosaicCheckbox->isChecked())) {
 		colordisplay = true;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "color display: %s",
@@ -238,7 +240,7 @@ void	CaptureWindow::redisplayImage() {
 
 	// apply the display conversion to the image
 	Image<RGB<unsigned char> >	*imptr = NULL;
-	if (image->isMosaic()) {
+	if (image->getMosaicType().isMosaic()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "display demosaiced image");
 		imptr = displayconverter(demosaicedimage);
 	} else {
@@ -294,15 +296,22 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 	}
 
 	if (ui->flatdivideCheckbox->isChecked()) {
-		if (!flat) {
+		if (flat) {
 			FlatCorrector	corrector(flat, frame);
 			corrector(image);
 		}
 	}
 
+	if (ui->badpixelsCheckBox->isChecked()) {
+		if (dark) {
+			Interpolator	interpolator(dark);
+			interpolator(image);
+		}
+	}
+
 	// demosaic the image
-	ui->demosaicCheckbox->setEnabled(image->isMosaic());
-	if (image->isMosaic()) {
+	ui->demosaicCheckbox->setEnabled(image->getMosaicType().isMosaic());
+	if (image->getMosaicType().isMosaic()) {
 		demosaicedimage = demosaic_bilinear(image);
 	}
 	redisplayImage();
@@ -478,3 +487,13 @@ void	CaptureWindow::openFlatfile() {
 	ui->flatField->setText(flatfilename);
 }
 
+/**
+ * \brief Slot when bad pixels are toggled
+ */
+void	CaptureWindow::badpixelsToggled(bool state) {
+	if (state) {
+		ui->badpixelsCheckBox->setText(QString("enabled: interpolate"));
+	} else {
+		ui->badpixelsCheckBox->setText(QString("disabled: set to 0"));
+	}
+}

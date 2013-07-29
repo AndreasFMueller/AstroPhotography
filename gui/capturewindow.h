@@ -64,6 +64,7 @@ private slots:
 	bool	fileSaveAs();
 	void	openDarkfile();
 	void	openFlatfile();
+	void	badpixelsToggled(bool state);
 };
 
 #endif // CAPTUREWINDOW_H
