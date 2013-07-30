@@ -178,6 +178,12 @@ public:
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);
 
+	// gain related methods
+	virtual bool	hasGain() { return false; }
+	virtual std::pair<float, float>	gainInterval() {
+		return std::make_pair((float)0, (float)0);
+	}
+
 	// image retrievel functions
 	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
 	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount)

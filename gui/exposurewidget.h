@@ -24,6 +24,10 @@ class ExposureWidget : public QGroupBox
 	bool	timechange;
 	double	timeprevious;
     
+	// variables to handle gain
+	float	mingain;
+	float	maxgain;
+	float	gainunit;
 public:
     explicit ExposureWidget(QWidget *parent = 0);
     virtual ~ExposureWidget();

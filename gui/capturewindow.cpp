@@ -212,8 +212,8 @@ void	CaptureWindow::redisplayImage() {
 	}
 
 	// just for debugging
-	displayconverter.setMinpixel(0);
-	displayconverter.setMaxpixel(65535);
+	displayconverter.setMinpixel(image->minimum());
+	displayconverter.setMaxpixel(image->maximum());
 
 	// compute the image scale
 	int	scaleitem = ui->scaleCombobox->currentIndex();
@@ -450,6 +450,8 @@ void	CaptureWindow::openDarkfile() {
 			return;
 		}
 		dark = newdark;
+		ui->darksubtractCheckbox->setEnabled(true);
+		ui->badpixelsCheckBox->setEnabled(true);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark of size %s read",
 			dark->size().toString().c_str());
 	} catch (std::exception& x) {
@@ -479,6 +481,7 @@ void	CaptureWindow::openFlatfile() {
 			return;
 		}
 		flat = newflat;
+		ui->flatdivideCheckbox->setEnabled(true);
 	} catch (std::exception& x) {
 		std::string	msg = 
 			stringprintf("cannot open file: '%s'", x.what());

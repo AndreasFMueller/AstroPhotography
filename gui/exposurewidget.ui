@@ -36,7 +36,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <property name="decimals">
-      <number>3</number>
+      <number>4</number>
      </property>
      <property name="minimum">
       <double>0.000000000000000</double>
@@ -45,52 +45,52 @@
       <double>3600.000000000000000</double>
      </property>
      <property name="singleStep">
-      <double>0.001000000000000</double>
+      <double>0.000100000000000</double>
      </property>
      <property name="value">
       <double>1.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="binningLabel">
      <property name="text">
       <string>Binning:</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="2" column="1">
     <widget class="QComboBox" name="binningComboBox"/>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="subframeLabel">
      <property name="text">
       <string>Subframe:</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QCheckBox" name="subframeCheckBox">
      <property name="text">
       <string>disabled: full frame</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QLabel" name="originLabel">
      <property name="text">
       <string>Origin:</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="5" column="0">
     <widget class="QLabel" name="sizeLabel">
      <property name="text">
       <string>Size:</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QWidget" name="originWidget" native="true">
      <property name="minimumSize">
       <size>
@@ -153,7 +153,7 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QWidget" name="sizeWidget" native="true">
      <property name="minimumSize">
       <size>
@@ -210,15 +210,41 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="shutterLabel">
      <property name="text">
       <string>Shutter:</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QComboBox" name="shutterComboBox"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="gainLabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Gain:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSlider" name="gainSlider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

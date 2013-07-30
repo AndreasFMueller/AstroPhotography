@@ -269,6 +269,12 @@ public:
 
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	unsigned int bytesPerPixel() const;
+
+	// pixel range stuff
+	virtual double	minimum() const { return 0; }
+	virtual double	maximum() const { return 255; }
+
+	// text representation (for debugging)
 	friend std::ostream&	operator<<(std::ostream& out,
 		const ImageBase& image);
 };
@@ -710,6 +716,13 @@ public:
  	 */
 	virtual unsigned int	bitsPerPixel() const {
 		return astro::image::bitsPerPixel(Pixel());
+	}
+
+	/**
+	 * \brief get maximum pixel value
+ 	 */
+	virtual double	maximum() const {
+		return pixel_maximum<Pixel>();
 	}
 };
 

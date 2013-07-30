@@ -641,5 +641,45 @@ Pixel	PixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) {
         throw std::runtime_error("NaN not available");
 }
 
+//////////////////////////////////////////////////////////////////////
+// YUYV-Adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class YUYVAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<YUYV<T> >&	image;
+public:
+	YUYVAdapter(const ConstImageAdapter<YUYV<T> >& image);
+	virtual const RGB<T>	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename T>
+YUYVAdapter<T>::YUYVAdapter(const ConstImageAdapter<YUYV<T> >& _image)
+	: ConstImageAdapter<RGB<T> >(_image.getSize()), image(_image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "YUYVAdapter of size %s constructed",
+		this->getSize().toString().c_str());
+}
+
+template<typename T>
+const	RGB<T>	YUYVAdapter<T>::pixel(unsigned int x, unsigned int y) const {
+	// get the pixel pair
+	unsigned int	pairx = x - (x % 2);
+	YUYV<T>	yuyvpixels[2];
+	yuyvpixels[0] = image.pixel(pairx    , y);
+	yuyvpixels[1] = image.pixel(pairx + 1, y);
+
+	// convert the pair to RGB
+	RGB<T>	rgbpixels[2];
+	convertPixelPair(rgbpixels, yuyvpixels);
+
+#if 0
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%4u,%4 = %3u,%3u -> %3u,%3u,%3u", x, y,
+		yuyvpixels[x % 2].y, yuyvpixels[x % 2].uv,
+		rgbpixels[x % 2].R, rgbpixels[x % 2].G, rgbpixels[x % 2].B);
+#endif
+
+	// extract the "right" RGB pixel
+	return rgbpixels[x % 2];
+}
+
 } // namespace image
 } // namespace astro

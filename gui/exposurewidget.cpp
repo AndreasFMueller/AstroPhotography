@@ -31,6 +31,8 @@ ExposureWidget::~ExposureWidget()
     delete ui;
 }
 
+#define EXPOSURE_MIN	0.0001
+
 /**
  * \brief Slot called when the time spinner changes
  *
@@ -53,16 +55,16 @@ void	ExposureWidget::timeChanged(double value) {
 				stepvalue /= 2;
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "new stepvalue: %f",
 					stepvalue);
-				if (stepvalue < 0.001) {
-					stepvalue = 0.001;
+				if (stepvalue < EXPOSURE_MIN) {
+					stepvalue = EXPOSURE_MIN;
 				}
-				stepvalue = trunc(1000 * stepvalue) / 1000.;
+				stepvalue = trunc(10000 * stepvalue) / 10000.;
 				ui->timeSpinBox->setValue(stepvalue);
 			}
 			ui->timeSpinBox->setSingleStep(stepvalue);
 		} else {
-			if (value < 0.001) {
-				value = 0.001;
+			if (value < EXPOSURE_MIN) {
+				value = EXPOSURE_MIN;
 				ui->timeSpinBox->setValue(value);
 			}
 			ui->timeSpinBox->setSingleStep(value);
@@ -102,6 +104,7 @@ void	ExposureWidget::subframeToggled(bool state) {
  * \brief Set the CCD
  */
 void	ExposureWidget::setCcd(CcdPtr _ccd) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing CCD properties");
 	// remember the CCD (there might be some information we want to read
 	// from it later)
 	ccd = _ccd;
@@ -123,6 +126,21 @@ void	ExposureWidget::setCcd(CcdPtr _ccd) {
 	// if the ccd has no shutter, disable it
 	ui->shutterLabel->setEnabled(ccd->hasShutter());
 	ui->shutterComboBox->setEnabled(ccd->hasShutter());
+
+	// if the ccd has a gain setting, configureit
+	if (ccd->hasGain()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has gain control");
+		ui->gainLabel->setEnabled(true);
+		ui->gainSlider->setEnabled(true);
+		std::pair<float, float>	gaininterval = ccd->gainInterval();
+		mingain = gaininterval.first;
+		maxgain = gaininterval.second;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain interval: [%f,%f]",
+			mingain, maxgain);
+		gainunit = (maxgain - mingain) / 100.;
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has no gain control");
+	}
 }
 
 /**
@@ -150,6 +168,9 @@ Exposure	ExposureWidget::getExposure() {
 
 	// exposure time
 	result.exposuretime = ui->timeSpinBox->value();
+	if (result.exposuretime < 0.0001) {
+		result.exposuretime = 0.0001;
+	}
 
 	// binning mode
 	BinningSet::const_iterator	i = ccd->getInfo().binningmodes.begin();
@@ -169,6 +190,13 @@ Exposure	ExposureWidget::getExposure() {
 		}
 	} else {
 		result.shutter = SHUTTER_OPEN;
+	}
+
+	// read the gain value
+	if (ccd->hasGain()) {
+		result.gain = mingain
+			+ ui->gainSlider->sliderPosition() * gainunit;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain is %.3f", result.gain);
 	}
 
 	// return the exposure
@@ -192,8 +220,8 @@ void	ExposureWidget::setExposure(const Exposure& exposure) {
 	if (exposuretime > 3600) {
 		exposuretime = 3600;
 	}
-	if (exposuretime < 0.001) {
-		exposuretime = 0.001;
+	if (exposuretime < EXPOSURE_MIN) {
+		exposuretime = EXPOSURE_MIN;
 	}
 	ui->timeSpinBox->setValue(exposure.exposuretime);
 

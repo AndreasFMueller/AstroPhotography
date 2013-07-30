@@ -170,13 +170,28 @@ void	UvcCamera::setExposureTime(double exposuretime) {
 	}
 }
 
+bool	UvcCamera::hasGain() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking whether camera has gain");
+	return camera.hasGain();
+}
+
 void	UvcCamera::setGain(double gain) {
 	try {
 		camera.setGain(gain);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set gain: %s",
 			x.what());
-		throw UvcError("cannot set exposure time");
+		throw UvcError("cannot set gain");
+	}
+}
+
+std::pair<float, float>	UvcCamera::getGainInterval() {
+	try {
+		return camera.getGainInterval();
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get gain interval: %s",
+			x.what());
+		throw UvcError("cannot get gain interval");
 	}
 }
 

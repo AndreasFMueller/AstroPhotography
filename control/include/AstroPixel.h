@@ -670,6 +670,29 @@ double	luminance(const Pixel& pixel) {
 		typename color_traits<Pixel>::color_category());
 }
 
+/**
+ * \brief Find the maximum possible value for a pixel type
+ */
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+	return std::numeric_limits<Pixel>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double pixel_maximum() {
+	return maximum_typed(Pixel(), typename color_traits<Pixel>::color_category());
+}
+
 } // namespace image
 } // namespace astro
 

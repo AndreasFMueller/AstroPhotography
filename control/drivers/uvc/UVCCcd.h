@@ -26,6 +26,11 @@ public:
 	virtual ImagePtr	getImage() throw(not_implemented);
 	virtual ImageSequence	getImageSequence(unsigned int imagecount)
 		throw(not_implemented);
+
+	// gain control
+	virtual bool	hasGain();
+	virtual void	setGain(double gain);
+	virtual std::pair<float, float>	gainInterval();
 };
 
 class UvcCcdYUY2 : public UvcCcd {

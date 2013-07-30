@@ -448,6 +448,14 @@ void	UVCCamera::disableAutoWhiteBalance() {
 }
 
 /**
+ * \brief find out whether gain setting is supported
+ */
+bool	UVCCamera::hasGain() {
+	astro::usb::uvc::gain_control_t	gaincontrol;
+	return controlSupported(gaincontrol);
+}
+
+/**
  * \brief Set the camera gain.
  *
  * \param gain	gain value to set, default is 1
@@ -471,6 +479,24 @@ void	UVCCamera::setGain(double gain) {
 		setCurrent(gaincontrol);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "gain set to %f", gain);
 	}
+}
+
+/**
+ * \brief Get the gain interval from the camera
+ */
+std::pair<float, float>	UVCCamera::getGainInterval() {
+	astro::usb::uvc::gain_control_t	def, min, max, gaincontrol;
+
+	if (!controlSupported(gaincontrol)) {
+		throw std::runtime_error("gain control not supported");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain control is supported");
+		// get the default, min and max value of the gain
+	def = get(GET_DEF, astro::usb::uvc::gain_control_t());
+	min = get(GET_MIN, astro::usb::uvc::gain_control_t());
+	max = get(GET_MAX, astro::usb::uvc::gain_control_t());
+	return std::make_pair((float)min.wGain/def.wGain,
+		(float)max.wGain/def.wGain);
 }
 
 CameraTerminalDescriptor	*UVCCamera::cameraTerminalDescriptor() const {

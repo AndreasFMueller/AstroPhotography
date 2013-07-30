@@ -74,12 +74,38 @@ void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	// should also disable automatic white balance
 	//camera.disableAutoWhiteBalance();
 
+	// set the gain
+	camera.setGain(exposure.gain);
+
 	// set exposure time
 	camera.setExposureTime(exposure.exposuretime);
 
 	// status
 	state = Exposure::exposed;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
+}
+
+/**
+ * \brief has gain
+ */
+bool	UvcCcd::hasGain() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking whether ccd has gain");
+	return camera.hasGain();
+}
+
+/**
+ * \brief Set gain for an UVC camera
+ */
+void	UvcCcd::setGain(double gain) {
+	camera.setGain(gain);
+}
+
+/**
+ * \brief UVC cameras have a gain setting, the valid interval for which
+ *        we can query using this function
+ */
+std::pair<float, float>	UvcCcd::gainInterval() {
+	return camera.getGainInterval();
 }
 
 /**
@@ -93,7 +119,7 @@ ImagePtr	UvcCcd::getImage() throw(not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image");
 	// retrieve an image
 	ImageSequence	sequence = getImageSequence(1);
-	return *sequence.begin();
+	return *sequence.rbegin();
 }
 
 /**

@@ -253,6 +253,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="darksubtractCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -267,6 +270,9 @@
           </item>
           <item row="6" column="1">
            <widget class="QCheckBox" name="demosaicCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -304,6 +310,9 @@
           </item>
           <item row="4" column="1">
            <widget class="QCheckBox" name="flatdivideCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -476,6 +485,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QCheckBox" name="badpixelsCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>disabled: set to 0</string>
             </property>

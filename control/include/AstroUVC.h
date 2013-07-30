@@ -1417,7 +1417,13 @@ public:
 
 	// some convenience set requests
 	void	setExposureTime(double exposuretime);
+
+	// gain control
+	bool	hasGain();
 	void	setGain(double gain);
+	std::pair<float, float>	getGainInterval();
+
+	// white balance control
 	void	disableAutoWhiteBalance();
 
 public:
