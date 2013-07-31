@@ -6,6 +6,7 @@
 #include <SbigLocator.h>
 #include <SbigCcd.h>
 #include <sbigudrv.h>
+#include <AstroOperators.h>
 #include <AstroDebug.h>
 #include <utils.h>
 #include <includes.h>
@@ -13,6 +14,7 @@
 
 using namespace astro::camera;
 using namespace astro::image;
+using namespace astro::image::operators;
 
 namespace astro {
 namespace camera {
@@ -28,6 +30,7 @@ SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
 	: Ccd(info), id(_id), camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d: %s", id,
 		info.toString().c_str());
+	cooler = true;
 }
 
 SbigCcd::~SbigCcd() {
@@ -89,6 +92,9 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 
 	camera.sethandle();
 	this->exposure = exposure;
+	if (this->exposure.frame.size() == ImageSize()) {
+		this->exposure.frame = getInfo().getFrame();
+	}
 
 	// prepare the start exposure2 command for the SBIG library
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure on ccd %d", id);
@@ -252,6 +258,10 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(resultsize, data);
 	image->setOrigin(exposure.frame.origin());
+
+	// flip image vertically
+	FlipOperator<unsigned short>    f;
+	f(*image);
 
 	// add the metadata to the image
 	addMetadata(*image);
