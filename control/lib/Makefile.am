@@ -41,7 +41,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Exposure.cpp Binning.cpp \
 	Descriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
-	FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
+	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp \

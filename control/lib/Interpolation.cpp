@@ -7,6 +7,7 @@
 #include <limits>
 #include <AstroDebug.h>
 #include <stdexcept>
+#include <AstroAdapter.h>
 
 using namespace astro::image;
 
@@ -19,13 +20,13 @@ namespace interpolation {
 template<typename DarkPixelType, typename Pixel>
 class TypedInterpolator {
 protected:
-	const Image<DarkPixelType>&	dark;
+	const ConstImageAdapter<DarkPixelType>&	dark;
 	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
 	virtual void	interpolatePixel(unsigned int x, unsigned int y,
 				ImageAdapter<Pixel>& image) = 0;
 	DarkPixelType	nan;
 public:
-	TypedInterpolator(const Image<DarkPixelType>& _dark);
+	TypedInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
 	void	interpolate(ImageAdapter<Pixel>& image);
 };
 
@@ -38,7 +39,7 @@ DarkPixelType TypedInterpolator<DarkPixelType, Pixel>::darkpixel(
 
 template<typename DarkPixelType, typename Pixel>
 TypedInterpolator<DarkPixelType, Pixel>::TypedInterpolator(
-	const Image<DarkPixelType>& _dark) : dark(_dark) {
+	const ConstImageAdapter<DarkPixelType>& _dark) : dark(_dark) {
 	nan = std::numeric_limits<DarkPixelType>::quiet_NaN();
 }
 
@@ -46,11 +47,11 @@ template<typename DarkPixelType, typename Pixel>
 void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
 		ImageAdapter<Pixel>& image) {
 	// make sure the image sizes match
-	if (image.getSize() != dark.size()) {
+	if (image.getSize() != dark.getSize()) {
 		throw std::range_error("image sizes don't match");
 	}
-	for (unsigned int x = 0; x < dark.size().width(); x++) {
-		for (unsigned int y = 0; y < dark.size().height(); y++) {
+	for (unsigned int x = 0; x < dark.getSize().width(); x++) {
+		for (unsigned int y = 0; y < dark.getSize().height(); y++) {
 			DarkPixelType	darkpixel = dark.pixel(x, y);
 			if (darkpixel != darkpixel) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -71,7 +72,7 @@ protected:
 	virtual void	interpolatePixel(unsigned int x, unsigned int y,
 				ImageAdapter<Pixel>& image);
 public:
-	MonochromeInterpolator(const Image<DarkPixelType>& _dark);
+	MonochromeInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
 };
 
 template<typename DarkPixelType, typename Pixel>
@@ -82,7 +83,7 @@ DarkPixelType	MonochromeInterpolator<DarkPixelType, Pixel>::darkpixel(
 
 template<typename DarkPixelType, typename Pixel>
 MonochromeInterpolator<DarkPixelType, Pixel>::MonochromeInterpolator(
-	const Image<DarkPixelType>& _dark)
+	const ConstImageAdapter<DarkPixelType>& _dark)
 	: TypedInterpolator<DarkPixelType, Pixel>(_dark) {
 }
 
@@ -270,7 +271,8 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolatePixel(
 //////////////////////////////////////////////////////////////////////
 // Interpolator implementation
 //////////////////////////////////////////////////////////////////////
-Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
+Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle& _frame)
+	: dark(_dark), frame(_frame) {
 	floatdark = dynamic_cast<Image<float> *>(&*dark);
 	doubledark = dynamic_cast<Image<double> *>(&*dark);
 	if ((NULL == floatdark) && (NULL == doubledark)) {
@@ -279,12 +281,12 @@ Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
 	}
 }
 
-#define interpolate_mono(darkpixeltype, pixel, darkp, image)		\
+#define interpolate_mono(darkpixeltype, pixel, dark, image)		\
 {									\
 	Image<pixel>	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		MonochromeInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
+		MonochromeInterpolator<darkpixeltype, pixel>	tint(dark);	\
 		tint.interpolate(*imagep);				\
 		return;							\
 	}								\
@@ -292,30 +294,32 @@ Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
 
 void	Interpolator::interpolateMonochrome(ImagePtr& image) {
 	if (floatdark) {
-		interpolate_mono(float, unsigned char, floatdark, image);
-		interpolate_mono(float, unsigned short, floatdark, image);
-		interpolate_mono(float, unsigned int, floatdark, image);
-		interpolate_mono(float, unsigned long, floatdark, image);
-		interpolate_mono(float, float, floatdark, image);
-		interpolate_mono(float, double, floatdark, image);
+		WindowAdapter<float>	windowdark(*floatdark, frame);
+		interpolate_mono(float, unsigned char, windowdark, image);
+		interpolate_mono(float, unsigned short, windowdark, image);
+		interpolate_mono(float, unsigned int, windowdark, image);
+		interpolate_mono(float, unsigned long, windowdark, image);
+		interpolate_mono(float, float, windowdark, image);
+		interpolate_mono(float, double, windowdark, image);
 	}
 	if (doubledark) {
-		interpolate_mono(double, unsigned char, floatdark, image);
-		interpolate_mono(double, unsigned short, floatdark, image);
-		interpolate_mono(double, unsigned int, floatdark, image);
-		interpolate_mono(double, unsigned long, floatdark, image);
-		interpolate_mono(double, float, floatdark, image);
-		interpolate_mono(double, double, floatdark, image);
+		WindowAdapter<double>	windowdark(*doubledark, frame);
+		interpolate_mono(double, unsigned char, windowdark, image);
+		interpolate_mono(double, unsigned short, windowdark, image);
+		interpolate_mono(double, unsigned int, windowdark, image);
+		interpolate_mono(double, unsigned long, windowdark, image);
+		interpolate_mono(double, float, windowdark, image);
+		interpolate_mono(double, double, windowdark, image);
 	}
 	throw std::runtime_error("cannot interpolate this image type");
 }
 
-#define interpolate_mosaic(darkpixeltype, pixel, darkp, image)		\
+#define interpolate_mosaic(darkpixeltype, pixel, dark, image)		\
 {									\
 	Image<pixel>	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		MosaicInterpolator<darkpixeltype, pixel>	tint(*darkp);	\
+		MosaicInterpolator<darkpixeltype, pixel>	tint(dark);	\
 		tint.setMosaic(image->getMosaicType());			\
 		tint.interpolate(*imagep);				\
 		return;							\
@@ -325,20 +329,22 @@ void	Interpolator::interpolateMonochrome(ImagePtr& image) {
 void	Interpolator::operator()(ImagePtr& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mosaic interpolation");
 	if (floatdark) {
-		interpolate_mosaic(float, unsigned char, floatdark, image);
-		interpolate_mosaic(float, unsigned short, floatdark, image);
-		interpolate_mosaic(float, unsigned int, floatdark, image);
-		interpolate_mosaic(float, unsigned long, floatdark, image);
-		interpolate_mosaic(float, float, floatdark, image);
-		interpolate_mosaic(float, double, floatdark, image);
+		WindowAdapter<float>	windowdark(*floatdark, frame);
+		interpolate_mosaic(float, unsigned char, windowdark, image);
+		interpolate_mosaic(float, unsigned short, windowdark, image);
+		interpolate_mosaic(float, unsigned int, windowdark, image);
+		interpolate_mosaic(float, unsigned long, windowdark, image);
+		interpolate_mosaic(float, float, windowdark, image);
+		interpolate_mosaic(float, double, windowdark, image);
 	}
 	if (doubledark) {
-		interpolate_mosaic(double, unsigned char, floatdark, image);
-		interpolate_mosaic(double, unsigned short, floatdark, image);
-		interpolate_mosaic(double, unsigned int, floatdark, image);
-		interpolate_mosaic(double, unsigned long, floatdark, image);
-		interpolate_mosaic(double, float, floatdark, image);
-		interpolate_mosaic(double, double, floatdark, image);
+		WindowAdapter<double>	windowdark(*doubledark, frame);
+		interpolate_mosaic(double, unsigned char, windowdark, image);
+		interpolate_mosaic(double, unsigned short, windowdark, image);
+		interpolate_mosaic(double, unsigned int, windowdark, image);
+		interpolate_mosaic(double, unsigned long, windowdark, image);
+		interpolate_mosaic(double, float, windowdark, image);
+		interpolate_mosaic(double, double, windowdark, image);
 	}
 	return;
 }

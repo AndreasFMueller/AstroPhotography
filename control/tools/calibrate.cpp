@@ -12,11 +12,13 @@
 #include <AstroInterpolation.h>
 #include <AstroIO.h>
 #include <AstroDemosaic.h>
+#include <AstroImager.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::calibration;
 using namespace astro::interpolation;
+using namespace astro::camera;
 
 namespace astro {
 
@@ -98,14 +100,18 @@ int	main(int argc, char *argv[]) {
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
 
+	// build the Imager
+	Imager	imager;
+
 	// if we have a dark correction, apply it
 	ImagePtr	dark;
 	if (NULL != darkfilename) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct: %s", darkfilename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct: %s",
+			darkfilename);
 		FITSin	darkin(darkfilename);
 		dark = darkin.read();
-		DarkCorrector	corrector(dark);
-		corrector(image);
+		imager.setDark(dark);
+		imager.setDarksubtract(true);
 	}
 
 	// if we have a flat file, we perform flat correction
@@ -114,18 +120,17 @@ int	main(int argc, char *argv[]) {
 			flatfilename);
 		FITSin	flatin(flatfilename);
 		ImagePtr	flat = flatin.read();
-		FlatCorrector	corrector(flat);
-		corrector(image);
+		imager.setFlat(flat);
+		imager.setFlatdivide(true);
 	}
 
 	// perform bad pixel interpolation
 	if (interpolate) {
-		if (!dark) {
-			throw std::runtime_error("need dark for interpolation");
-		}
-		Interpolator	interpolator(dark);
-		interpolator(dark);
+		imager.setInterpolate(true);
 	}
+
+	// apply imager corrections
+	imager(image);
 
 	// if minvalue or maxvalue are set, clamp the image values
 	if ((minvalue >= 0) || (maxvalue >= 0)) {

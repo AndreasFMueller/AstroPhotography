@@ -34,7 +34,8 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -y yoffset   vertical offset of image rectangle"
 		<< std::endl;
-	std::cout << "  -n images    number of images, 0 means never stop" << std::endl;
+	std::cout << "  -n images    number of images, 0 means never stop"
+		<< std::endl;
 	std::cout << "  -o outdir    directory where files should be placed"
 		<< std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
@@ -151,10 +152,10 @@ int	main(int argc, char *argv[]) {
 
 	// find a fitting image rectangle
         if (width == 0) {
-                width = ccd->getInfo().size.width();
+                width = ccd->getInfo().size().width();
         }
         if (height == 0) {
-                height = ccd->getInfo().size.height();
+                height = ccd->getInfo().size().height();
         }
         ImageRectangle  imagerectangle = ccd->getInfo().clipRectangle(
                 ImageRectangle(ImagePoint(xoffset, yoffset),

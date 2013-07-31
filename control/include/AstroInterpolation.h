@@ -20,8 +20,10 @@ class Interpolator {
 	astro::image::Image<double>	*doubledark;
 	void	interpolateMonochrome(astro::image::ImagePtr& image);
 	void	interpolateMosaic(astro::image::ImagePtr& image);
+	astro::image::ImageRectangle	frame;
 public:
-	Interpolator(const astro::image::ImagePtr& dark);
+	Interpolator(const astro::image::ImagePtr& dark,
+		const astro::image::ImageRectangle& frame);
 	void	operator()(astro::image::ImagePtr& image);
 };
 

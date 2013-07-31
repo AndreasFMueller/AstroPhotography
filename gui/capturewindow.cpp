@@ -283,6 +283,11 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 	ui->statusbar->showMessage(QString("new image captured"));
 	image = newimage;
 
+	// create the Imager
+	Imager	imager;
+	imager.setDark(dark);
+	imager.setFlat(flat);
+
 	// get the rectangle for the correctors
 	ImageRectangle	frame = image->getFrame();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image has frame: %s",
@@ -290,26 +295,21 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 
 	// perform calibration
 	if (ui->darksubtractCheckbox->isChecked()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct with dark of size %s", dark->size().toString().c_str());
-		if (dark) {
-			DarkCorrector	corrector(dark, frame);
-			corrector(image);
-		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"dark correct with dark of size %s",
+			dark->size().toString().c_str());
+		imager.setDarksubtract(true);
 	}
 
 	if (ui->flatdivideCheckbox->isChecked()) {
-		if (flat) {
-			FlatCorrector	corrector(flat, frame);
-			corrector(image);
-		}
+		imager.setFlatsubtract(true);
 	}
 
 	if (ui->badpixelsCheckBox->isChecked()) {
-		if (dark) {
-			Interpolator	interpolator(dark);
-			interpolator(image);
-		}
+		imager.setInterpolate(true);
 	}
+
+	imager(image);
 
 	// demosaic the image
 	ui->demosaicCheckbox->setEnabled(image->getMosaicType().isMosaic());
