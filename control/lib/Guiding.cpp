@@ -261,11 +261,10 @@ static double	now() {
 	return tv.tv_sec + 0.000001 * tv.tv_usec;
 }
 
-Guider::Guider(GuiderPortPtr _guiderport, CcdPtr _ccd)
-	: guiderport(_guiderport), ccd(_ccd) {
+Guider::Guider(GuiderPortPtr _guiderport, Imager _imager)
+	: guiderport(_guiderport), imager(_imager) {
 	calibrated = false;
 	// default exposure settings
-	exposure.frame = ccd->getInfo().getFrame();
 	exposure.exposuretime = 1.;
 }
 
@@ -307,8 +306,8 @@ bool	Guider::calibrate(TrackerPtr tracker) {
 		for (int dec = -range; dec <= range; dec++) {
 			// move the telescope to the grid position
 			moveto(5 * ra, 5 * dec);
-			ccd->startExposure(exposure);
-			ImagePtr	image = ccd->getImage();
+			imager.startExposure(exposure);
+			ImagePtr	image = imager.getImage();
 
 std::string	filename = stringprintf("guider.%d.%d.fits", ra, dec);
 FITSout	out(filename);
@@ -320,8 +319,8 @@ out.write(image);
 			calibrator.add(t, Point(ra, dec), point);
 			// move the telescope back
 			moveto(-5 * ra, -5 * dec);
-			ccd->startExposure(exposure);
-			point = (*tracker)(ccd->getImage());
+			imager.startExposure(exposure);
+			point = (*tracker)(imager.getImage());
 			t = now();
 			calibrator.add(t, Point(0, 0), point);
 		}
@@ -378,6 +377,20 @@ void	Guider::moveto(int ra, int dec) {
 }
 
 /**
+ * \brief start an exposure
+ */
+void	Guider::startExposure() {
+	imager.startExposure(exposure);
+}
+
+/**
+ * \brief get the image
+ */
+ImagePtr	Guider::getImage() {
+	return imager.getImage();
+}
+
+/**
  * \brief Utility function: pause for a number of seconds
  *
  * \param t	time in seconds. 
@@ -408,8 +421,8 @@ GuiderPortPtr	Guider::getGuiderPort() {
 	return guiderport;
 }
 
-CcdPtr	Guider::getCcd() {
-	return ccd;
+Imager	Guider::getImager() {
+	return imager;
 }
 
 /**

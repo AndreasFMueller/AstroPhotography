@@ -42,7 +42,6 @@ class GuiderProcess {
 	double	gain;
 
 	// common members
-	Exposure	exposure;
 	Guider&	guider;
 	TrackerPtr	tracker;
 

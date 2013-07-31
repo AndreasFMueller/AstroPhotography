@@ -21,10 +21,7 @@ namespace guiding {
  * compensate the drift to first order.
  */
 GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
-	// exposure
-	exposure = guider.getExposure();
-
-	// there is currently no way to modify the gain
+	// XXX there is currently no way to modify the gain
 	gain = 1;
 
 	// compute the ra/dec duty cycle to compensate the drift
@@ -127,14 +124,14 @@ void	*GuiderProcess::track_main() {
 	while (tracking) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: start new exposure");
 		// initiate an exposure
-		guider.getCcd()->startExposure(exposure);
+		guider.startExposure();
 
 		// until the image is exposed
-		usleep(1000000 * exposure.exposuretime);
+		usleep(1000000 * guider.getExposure().exposuretime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retreive the image
-		ImagePtr	image = guider.getCcd()->getImage();
+		ImagePtr	image = guider.getImage();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: new image received");
 
 		// use the tracker to find the tracking offset

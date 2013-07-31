@@ -12,6 +12,7 @@
 #include <AstroTransform.h>
 #include <AstroCamera.h>
 #include <AstroDebug.h>
+#include <AstroImager.h>
 
 namespace astro {
 namespace guiding {
@@ -182,7 +183,7 @@ typedef std::tr1::shared_ptr<GuiderProcess>	GuiderProcessPtr;
  */
 class Guider {
 	astro::camera::GuiderPortPtr	guiderport;
-	astro::camera::CcdPtr	ccd;
+	astro::camera::Imager	imager;
 	astro::camera::Exposure	exposure;
 	GuiderCalibration	calibration;
 	bool	calibrated;
@@ -191,16 +192,20 @@ class Guider {
 	GuiderProcessPtr	guiderprocess;
 public:
 	Guider(astro::camera::GuiderPortPtr guiderport,
-		astro::camera::CcdPtr ccd);
+		astro::camera::Imager imager);
 	// controlling the exposure parameters
 	const astro::camera::Exposure&	getExposure() const;
 	void	setExposure(const astro::camera::Exposure& exposure);
+
+	// getting images
+	void	startExposure();
+	ImagePtr	getImage();
 
 	// calibration
 	bool	calibrate(TrackerPtr tracker);
 	const GuiderCalibration&	getCalibration() const;
 
-	astro::camera::CcdPtr	getCcd();
+	astro::camera::Imager	getImager();
 	astro::camera::GuiderPortPtr	getGuiderPort();
 
 	// tracking
