@@ -117,20 +117,31 @@ public:
 class Camera;
 class Ccd;
 class CcdInfo {
-public:
-	astro::image::ImageSize	size;
-	BinningSet	binningmodes;
-	std::string	name;
+	std::string	_name;
+	astro::image::ImageSize	_size;
 	int	ccdid;
-	CcdInfo();
-	const astro::image::ImageSize&	getSize() const;
+	BinningSet	binningmodes;
+	bool	_shutter;
+public:
+	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
+		int ccdid = 0);
+
+	// modifying accessors
+	void	addMode(const Binning& mode);
+	void	setShutter(bool shutter) { _shutter = shutter; }
+	bool	shutter() const { return _shutter; }
+
+	// accessors
+	const astro::image::ImageSize&	size() const;
 	const astro::image::ImageRectangle	getFrame() const;
 	const BinningSet&	modes() const;
-	const std::string&	getName() const;
+	const std::string&	name() const;
 	int	getId() const;
-	friend class Camera;
-	friend class Ccd;
+
+	// text representation
 	virtual std::string	toString() const;
+
+	// utility functions
 	astro::image::ImageRectangle	clipRectangle(const astro::image::ImageRectangle& rectangle) const;
 	astro::image::ImageRectangle	centeredRectangle(const astro::image::ImageSize& size) const;
 };
@@ -163,7 +174,7 @@ public:
 	Ccd(const CcdInfo& _info) : info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
-	const astro::image::ImageSize&	getSize() const { return info.size; }
+	const astro::image::ImageSize&	getSize() const { return info.size(); }
 
 	// methods to start/stop exposures
 	virtual void	startExposure(const Exposure& exposure)
@@ -173,7 +184,7 @@ public:
 	const Exposure&	getExposure() const { return exposure; }
 
 	// methods to control a shutter
-	virtual bool	hasShutter() const { return false; }
+	bool	hasShutter() const { return info.shutter(); }
 	virtual shutter_state	getShutterState() throw(not_implemented);
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);

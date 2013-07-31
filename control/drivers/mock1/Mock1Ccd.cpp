@@ -18,7 +18,7 @@ void    Mock1Ccd::startExposure(const Exposure& exposure) throw (not_implemented
 	if (state != Exposure::idle) {
 		throw std::runtime_error("ccd not idle");
 	}
-	if (!info.getSize().bounds(exposure.frame)) {
+	if (!info.size().bounds(exposure.frame)) {
 		throw std::runtime_error("exposure does not fit ccd");
 	}
 	frame = exposure.frame;
@@ -41,7 +41,7 @@ void    Mock1Ccd::cancelExposure() throw (not_implemented) {
 }
 
 ImagePtr    Mock1Ccd::getImage() throw (not_implemented) {
-	Image<unsigned char>	image(info.getSize());
+	Image<unsigned char>	image(info.size());
 	image.fill(128);
 	ImageSize	blocksize(5, 5);
 	for (int i = 0; i <= cameraid; i++) {

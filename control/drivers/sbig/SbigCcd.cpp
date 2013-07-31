@@ -226,7 +226,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 		DumpLinesParams	dumplines;
 		dumplines.ccd = id;
 		dumplines.readoutMode = readparams.readoutMode;
-		dumplines.lineLength = info.size.height()
+		dumplines.lineLength = info.size().height()
 			- exposure.frame.size().height()
 			- exposure.frame.origin().y();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",

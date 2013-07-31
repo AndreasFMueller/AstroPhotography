@@ -30,18 +30,19 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 	ccds.push_back(uvcccd);
 
 	// standard CcdInfo
-	CcdInfo	ccd;
-	ccd.binningmodes.insert(Binning(1,1));
-	ccd.size = astro::image::ImageSize(framedescriptor->wWidth(),
-		framedescriptor->wHeight());
-	ccd.name = stringprintf("%dx%d/%d/%d/%d/%s",
-		ccd.size.width(), ccd.size.height(),
+	astro::image::ImageSize	ccdsize
+		= astro::image::ImageSize(framedescriptor->wWidth(),
+			framedescriptor->wHeight());
+	std::string	ccdname = stringprintf("%dx%d/%d/%d/%d/%s",
+		ccdsize.width(), ccdsize.height(),
 		uvcccd.interface, uvcccd.format, uvcccd.frame,
 		uvcccd.guid.c_str());
+	CcdInfo	ccd(ccdname, ccdsize, ccds.size() - 1);
+	ccd.addMode(Binning(1,1));
 	ccdinfo.push_back(ccd);
 
 	// add ccdinfo
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.getName().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.name().c_str());
 }
 
 void	UvcCamera::addFormat(int interface, int format,

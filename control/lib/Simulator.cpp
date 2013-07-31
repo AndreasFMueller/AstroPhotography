@@ -26,11 +26,10 @@ static double	now() {
 //////////////////////////////////////////////////////////////////////
 
 SimCamera::SimCamera() : Camera("guidesim") {
-	CcdInfo	ccd0;
-	ccd0.size = ImageSize(640, 480);
-	ccd0.name = "primary ccd";
-	ccd0.binningmodes.insert(Binning(1, 1));
+	CcdInfo	ccd0("primary ccd", ImageSize(640, 480));
+	ccd0.addMode(Binning(1, 1));
 	ccdinfo.push_back(ccd0);
+
 	// initial star position
 	x = 320;
 	y = 240;

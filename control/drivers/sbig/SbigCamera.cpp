@@ -122,19 +122,18 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no imaging ccd");
 	} else {
-		CcdInfo	ccd;
-		ccd.ccdid = ccdidcounter++;
-		ccd.name = std::string("Imaging");
 		// here we assume that the largest readout mode is
 		// delivered first, otherwise we would have to scan
 		// the readout modes for one with mode == 0 (RM_1X1)
-		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
+		CcdInfo	ccd("Imaging", ccdsize, ccdidcounter++);
+		ccd.setShutter(true);
+
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd.binningmodes,
-				ccdinforesult.readoutInfo[i].mode);
+			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"mode[%d]: %d x %d (%04x)",
 				i, 
@@ -142,7 +141,7 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 				ccdinforesult.readoutInfo[i].height,
 				ccdinforesult.readoutInfo[i].mode);
 		}
-
+		ccd.setShutter(true);
 		ccdinfo.push_back(ccd);
 	}
 
@@ -153,17 +152,14 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
 	} else {
-		CcdInfo	ccd;
-		ccd.ccdid = ccdidcounter++;
-		ccd.name = std::string("Tracking");
-		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
+		CcdInfo	ccd("Tracking", ccdsize, ccdidcounter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
 			ccd.toString().c_str());
 
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd.binningmodes,
-				ccdinforesult.readoutInfo[i].mode);
+			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "mode[%d]: %d x %d",
 				i, 
 				ccdinforesult.readoutInfo[i].width,
@@ -180,15 +176,13 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	if (e != CE_NO_ERROR) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no external tracking ccd");
 	} else {
-		CcdInfo	ccd;
-		ccd.ccdid = ccdidcounter++;
-		ccd.name = std::string("external Tracking");
-		ccd.size = ImageSize(ccdinforesult.readoutInfo[0].width,
+		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
+		CcdInfo	ccd("external Tracking", ccdsize, ccdidcounter++);
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
-			SbigBinningAdd(ccd.binningmodes,
-				ccdinforesult.readoutInfo[i].mode);
+			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 		}
+		ccd.setShutter(true);
 		ccdinfo.push_back(ccd);
 	}
 

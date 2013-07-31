@@ -68,10 +68,14 @@ int	main(int argc, char *argv[]) {
 	const char	*prefix = "test";
 	const char	*cameratype = "uvc";
 	bool	listonly = false;
+	bool	dark = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?D")))
 		switch (c) {
+		case 'D':
+			dark = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
@@ -168,6 +172,7 @@ int	main(int argc, char *argv[]) {
 
 	// prepare an exposure object
 	Exposure	exposure(imagerectangle, exposuretime);
+	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
 
 	// start the exposure
 	ccd->startExposure(exposure);

@@ -31,6 +31,8 @@ static double	nowtime() {
 	return now.tv_sec + 0.000001 * now.tv_usec;
 }
 
+#define	EXPOSURE_MIN	0.001
+
 /**
  * \brief construct a CaptureWindow
  */

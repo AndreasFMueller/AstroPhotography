@@ -9,12 +9,14 @@
 #include <iostream>
 #include <AstroImage.h>
 #include <AstroCalibration.h>
+#include <AstroInterpolation.h>
 #include <AstroIO.h>
 #include <AstroDemosaic.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::calibration;
+using namespace astro::interpolation;
 
 namespace astro {
 
@@ -48,9 +50,10 @@ int	main(int argc, char *argv[]) {
 	double	minvalue = -1;
 	double	maxvalue = -1;
 	bool	demosaic = false;
+	bool	interpolate = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:b")))
+	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:bi")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -69,6 +72,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'b':
 			demosaic = true;
+			break;
+		case 'i':
+			interpolate = true;
 			break;
 		case '?':
 		case 'h':
@@ -93,10 +99,11 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	image = infile.read();
 
 	// if we have a dark correction, apply it
+	ImagePtr	dark;
 	if (NULL != darkfilename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct: %s", darkfilename);
 		FITSin	darkin(darkfilename);
-		ImagePtr	dark = darkin.read();
+		dark = darkin.read();
 		DarkCorrector	corrector(dark);
 		corrector(image);
 	}
@@ -109,6 +116,15 @@ int	main(int argc, char *argv[]) {
 		ImagePtr	flat = flatin.read();
 		FlatCorrector	corrector(flat);
 		corrector(image);
+	}
+
+	// perform bad pixel interpolation
+	if (interpolate) {
+		if (!dark) {
+			throw std::runtime_error("need dark for interpolation");
+		}
+		Interpolator	interpolator(dark);
+		interpolator(dark);
 	}
 
 	// if minvalue or maxvalue are set, clamp the image values

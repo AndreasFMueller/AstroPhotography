@@ -58,7 +58,7 @@ UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
 void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
 	this->exposure = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
-	if (exposure.frame.size() != info.size) {
+	if (exposure.frame.size() != info.size()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot take subimages");
 		throw UvcError("UVC driver cannot take subimages");
 	}

@@ -15,16 +15,12 @@ namespace camera {
 namespace mock1 {
 
 Mock1Camera::Mock1Camera(int _id) : id(_id) {
-	CcdInfo	ccd0;
-	ccd0.size = ImageSize(1024, 768);
-	ccd0.name = "primary ccd";
-	ccd0.binningmodes.insert(Binning(1,1));
+	CcdInfo	ccd0("primary ccd", ImageSize(1024, 768), 0);
+	ccd0.addMode(Binning(1,1));
 	ccdinfo.push_back(ccd0);
 
-	CcdInfo	ccd1;
-	ccd1.size = ImageSize(640, 480);
-	ccd1.name = "secondary ccd";
-	ccd1.binningmodes.insert(Binning(1,1));
+	CcdInfo	ccd1("secondary ccd", ImageSize(640, 480), 1);
+	ccd1.addMode(Binning(1,1));
 	ccdinfo.push_back(ccd1);
 }
 

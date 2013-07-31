@@ -171,15 +171,16 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// now create a CcdInfo structure for this device
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Imaging CCD info");
-	CcdInfo	ccd0;
-	ccd0.size = ImageSize(params.width, params.height);
-	ccd0.name = "Imaging";
-	ccd0.binningmodes.insert(Binning(2,2));
+	unsigned int	width = params.width;
+	unsigned int	height = params.height;
 	if (model != SX_MODEL_M26C) {
-		ccd0.binningmodes.insert(Binning(3,3));
-		ccd0.binningmodes.insert(Binning(4,4));
-	} else {
-		ccd0.size.setHeight(2 * ccd0.size.height());
+		height *= 2;
+	}
+	CcdInfo	ccd0("Imaging", ImageSize(width, height), 0);
+	ccd0.addMode(Binning(2,2));
+	if (model != SX_MODEL_M26C) {
+		ccd0.addMode(Binning(3,3));
+		ccd0.addMode(Binning(4,4));
 	}
 	ccdinfo.push_back(ccd0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
@@ -215,10 +216,9 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		controlRequest(&ccd1request);
 		params = *ccd1request.data();
 
-		CcdInfo	ccd1;
-		ccd1.size = ImageSize(params.width, params.height);
-		ccd1.name = "Tracking";
-		ccd1.binningmodes.insert(Binning(2,2));
+		CcdInfo	ccd1("Tracking",
+			ImageSize(params.width, params.height), 1);
+		ccd1.addMode(Binning(2,2));
 		ccdinfo.push_back(ccd1);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");

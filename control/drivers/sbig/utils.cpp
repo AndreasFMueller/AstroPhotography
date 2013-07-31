@@ -122,32 +122,32 @@ unsigned short	SbigBinning2Mode(const Binning& mode) {
  * This method resolves the wildcard binning modes into actually available
  * binning modes.
  */
-void    SbigBinningAdd(BinningSet& modes, unsigned short mode) {
+void    SbigBinningAdd(CcdInfo& ccd, unsigned short mode) {
 	switch (mode & 0xff) {
 	case RM_1X1:
 	case RM_1X1_VOFFCHIP:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 1x1", mode);
-		modes.insert(Binning(1, 1));
+		ccd.addMode(Binning(1, 1));
 		return;
 	case RM_2X2:
 	case RM_2X2_VOFFCHIP:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 2x2", mode);
-		modes.insert(Binning(2, 2));
+		ccd.addMode(Binning(2, 2));
 		return;
 	case RM_3X3:
 	case RM_3X3_VOFFCHIP:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 3x3", mode);
-		modes.insert(Binning(3, 3));
+		ccd.addMode(Binning(3, 3));
 		return;
 	case RM_9X9:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 9x9", mode);
-		modes.insert(Binning(9, 9));
+		ccd.addMode(Binning(9, 9));
 		return;
 	case RM_NX1:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 1x*", mode);
 		for (unsigned int n = 1; n < 256; n++) {
 			if (n != 1) {
-				modes.insert(Binning(1, n));
+				ccd.addMode(Binning(1, n));
 			}
 		}
 		return;
@@ -155,7 +155,7 @@ void    SbigBinningAdd(BinningSet& modes, unsigned short mode) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 2x*", mode);
 		for (unsigned int n = 1; n < 256; n++) {
 			if (n != 2) {
-				modes.insert(Binning(2, n));
+				ccd.addMode(Binning(2, n));
 			}
 		}
 		return;
@@ -163,7 +163,7 @@ void    SbigBinningAdd(BinningSet& modes, unsigned short mode) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "mode %04x = 3x*", mode);
 		for (unsigned int n = 1; n < 256; n++) {
 			if (n != 3) {
-				modes.insert(Binning(3, n));
+				ccd.addMode(Binning(3, n));
 			}
 		}
 		return;
