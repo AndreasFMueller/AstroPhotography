@@ -14,6 +14,7 @@
 
 using namespace astro::image;
 using namespace astro::image::filter;
+using namespace astro::camera;
 
 namespace astro {
 namespace calibration {
@@ -594,6 +595,48 @@ ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
 	WindowAdapter<double>		wflat(pvflat, frame);
 	TypedCalibrator<double>	calibrator(wdark, wflat);
 	return calibrator(image);
+}
+
+//////////////////////////////////////////////////////////////////////
+// CalibrationFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+// DarkFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+ImagePtr	DarkFrameProcess::get() {
+	// enable cooler, set temperature, if cooler available
+	if (ccd->hasCooler()) {
+		CoolerPtr	cooler = ccd->getCooler();
+		cooler->setTemperature(_temperature);
+		cooler->setOn(true);
+
+		// wait until temperature is close to set point
+		while (fabs(cooler->getActualTemperature() - _temperature) > 1) {
+			sleep(1);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature reached");
+	}
+
+	// start exposure
+	exposure.shutter = SHUTTER_CLOSED;
+	ccd->startExposure(exposure);
+
+	// get a sequence of images
+	ImageSequence	images = ccd->getImageSequence(_nimages);
+
+	// convert the images into a dark frame
+	DarkFrameFactory	df;
+	ImagePtr	dark = df(images);
+
+	// turn of cooler
+	if (ccd->hasCooler()) {
+		CoolerPtr	cooler = ccd->getCooler();
+		cooler->setOn(false);
+	}
+
+	// return the dark image
+	return dark;
 }
 
 } // calibration

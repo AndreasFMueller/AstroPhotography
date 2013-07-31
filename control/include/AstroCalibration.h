@@ -7,6 +7,7 @@
 #define _AstroCalibration_h
 
 #include <AstroImage.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace calibration {
@@ -111,6 +112,39 @@ public:
 			= astro::image::ImageRectangle());
 	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image) const;
 };
+
+/**
+ * \brief Class to record and average calibration images
+ */
+class CalibrationFrameProcess {
+protected:
+	astro::camera::CcdPtr	ccd;
+	astro::camera::Exposure	exposure;
+public:
+	CalibrationFrameProcess(astro::camera::CcdPtr _ccd) : ccd(_ccd) { }
+	double	exposuretime() const {
+		return exposure.exposuretime;
+	}
+	void	setExposuretime(const float exposuretime) {
+		exposure.exposuretime = exposuretime;
+	}
+	virtual astro::image::ImagePtr	get() = 0;
+};
+
+class DarkFrameProcess : public CalibrationFrameProcess {
+	float	_temperature;
+	unsigned int	_nimages;
+public:
+	DarkFrameProcess(astro::camera::CcdPtr _ccd)
+		: CalibrationFrameProcess(_ccd) { }
+	float	temperature() const { return _temperature; }
+	void	setTemperature(float temperatur) { _temperature = temperatur; }
+	unsigned int	nimages() const { return _nimages; }
+	void	setNimages(unsigned int nimages) { _nimages = nimages; }
+	virtual astro::image::ImagePtr	get();
+};
+
+
 
 } // namespace calibration
 } // namespace astro
