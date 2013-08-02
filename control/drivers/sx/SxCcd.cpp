@@ -29,6 +29,17 @@ SxCcd::~SxCcd() {
 }
 
 /**
+ * \brief Find out whether the Ccd has a cooler
+ */
+bool	SxCcd::hasCooler() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for cooler");
+	if (getInfo().getId() == 0) {
+		return camera.hasCooler();
+	}
+	return false;
+}
+
+/**
  * \brief Get the thermoelectric cooler
  *
  * This method builds a SxCooler objects and wraps in a CoolerPtr smart

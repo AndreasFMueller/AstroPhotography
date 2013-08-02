@@ -174,8 +174,8 @@ Point	GuiderCalibration::defaultcorrection() const {
  * however, has to be calculated by the caller.
  */
 Point	GuiderCalibration::operator()(const Point& offset, double Deltat) const {
-	double	Deltax = offset.x() + Deltat * a[2];
-	double	Deltay = offset.y() + Deltat * a[5];
+	double	Deltax = offset.x() - Deltat * a[2];
+	double	Deltay = offset.y() - Deltat * a[5];
         double	determinant = a[0] * a[4] - a[3] * a[1];
         double	x = (Deltax * a[4] - Deltay * a[1]) / determinant;
         double	y = (a[0] * Deltay - a[3] * Deltax) / determinant;

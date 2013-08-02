@@ -178,6 +178,8 @@ int	main(int argc, char *argv[]) {
 
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s, temperature = %f",
+		ccd->hasCooler() ? "YES" : "NO", temperature);
 	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
 	CoolerPtr	cooler;
 	if (usecooler) {
@@ -190,7 +192,7 @@ int	main(int argc, char *argv[]) {
 		do {
 			sleep(1);
 			double	actual = cooler->getActualTemperature();
-			delta = (temperature - actual);
+			delta = fabs(temperature - actual);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"set: %.1f, actual: %1.f, delta: %.1f",
 				temperature, actual, delta);

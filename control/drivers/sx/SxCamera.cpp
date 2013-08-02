@@ -188,12 +188,13 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// find out whether this camera has a cooler
 	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
-		hasCooler = true;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "has cooler");
+		_hasCooler = true;
 	} else {
-		hasCooler = false;
+		_hasCooler = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has cooler: %s",
-		(hasCooler) ? "yes" : "no");
+		(_hasCooler) ? "yes" : "no");
 
 	// find out whether this camera has a guider port
 	if (ccd0request.data()->extra_capabilities & STAR2000_PORT) {
@@ -350,13 +351,20 @@ void	SxCamera::controlRequest(RequestBase *request) {
 }
 
 /**
+ * \brief Ask whether this camera has a cooler
+ */
+bool	SxCamera::hasCooler() {
+	return _hasCooler;
+}
+
+/**
  * \brief Get the cooler for this camera, if it exists.
  */
 CoolerPtr	SxCamera::getCooler(int ccdindex) {
 	if (ccdindex > 0) {
 		throw std::runtime_error("only imaging CCD has cooler");
 	}
-	if (!hasCooler) {
+	if (!_hasCooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no cooler");
 		throw std::runtime_error("this camera has no cooler");
 	}
