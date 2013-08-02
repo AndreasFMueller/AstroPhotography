@@ -9,13 +9,41 @@
 #include <AstroDevice.h>
 #include <AstroLoader.h>
 #include <AstroGuiding.h>
+#include <AstroCallback.h>
+#include <AstroIO.h>
 
 using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::module;
 using namespace astro::guiding;
+using namespace astro::callback;
+using namespace astro::io;
 
 namespace astro {
+
+class NewImageCallback : public Callback {
+	int	counter;
+	FITSdirectory	directory;
+public:
+	NewImageCallback(const std::string& path) : directory(path) { }
+	virtual CallbackDataPtr	operator()(CallbackDataPtr data);
+};
+
+CallbackDataPtr	NewImageCallback::operator()(CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback received");
+	GuiderNewImageCallbackData	*datap
+		= dynamic_cast<GuiderNewImageCallbackData *>(&*data);
+	if (datap == NULL) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "argument not of correct type");
+	}
+	// retrieve image 
+	ImagePtr	image = datap->image();
+	// add it to the directory
+	directory.add(image);
+
+	// return the same data
+	return data;
+}
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ -d ] [ -m drivermodule ] [ -C cameraid ] cmd time { cmd time ... }" << std::endl;
@@ -29,6 +57,17 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -C <cameraid>  select camera number <cameraid>"
 		<< std::endl;
+	std::cout << " -e <time>      exposure time" << std::endl;
+	std::cout << " -k <k>         half side length of square of pixels to include in" << std::endl;
+	std::cout << "                centroid computation" << std::endl;
+	std::cout << " -x <x>         approx. x coordinate of guide star"
+		<< std::endl;
+	std::cout << " -y <y>         approx. y coordinate of guide star"
+		<< std::endl;
+	std::cout << " -r <radius>    search radius for guide star"
+		<< std::endl;
+	std::cout << " -p <path>      path where images should be written"
+		<< std::endl;
 }
 
 int	main(int argc, char *argv[]) {
@@ -39,7 +78,11 @@ int	main(int argc, char *argv[]) {
 	const char	*modulename = "uvc";
 	double	exposuretime = 1;
 	unsigned int	k = 5;
-	while (EOF != (c = getopt(argc, argv, "dm:C:c:e:k:")))
+	int	x = -1;
+	int	y = -1;
+	int	r = 32;
+	const char	*path = NULL;
+	while (EOF != (c = getopt(argc, argv, "dm:C:c:e:k:x:y:r:p:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -58,6 +101,18 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'k':
 			k = atoi(optarg);
+			break;
+		case 'x':
+			x = atoi(optarg);
+			break;
+		case 'y':
+			y = atoi(optarg);
+			break;
+		case 'r':
+			r = atoi(optarg);
+			break;
+		case 'p':
+			path = optarg;
 			break;
 		default:
 			usage(argv[0]);
@@ -78,6 +133,17 @@ int	main(int argc, char *argv[]) {
 	}
 	CameraPtr	camera = locator->getCamera(cameras[cameraid]);
 	CcdPtr	ccd = camera->getCcd(ccdid);
+
+	// compute the point where we should look for the guide star
+	if (x < 0) {
+		x = ccd->getInfo().size().width() / 2;
+	}
+	if (y < 0) {
+		y = ccd->getInfo().size().height() / 2;
+	}
+
+	ImageRectangle	starwindow(ImagePoint(x - r, x - r),
+		ImageSize(2 * r, 2 * r));
 
 	// get the Guider for the camera
 	GuiderPortPtr	guiderport = camera->getGuiderPort();
@@ -112,12 +178,21 @@ int	main(int argc, char *argv[]) {
 	// create a guider
 	Guider	guider(guiderport, ccd);
 
+	// if the path is set, we also install a callback
+	if (path) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callback to write "
+			"images to directory %s", path);
+		NewImageCallback	*callback = new NewImageCallback(path);
+		guider.newimagecallback = CallbackPtr(callback);
+	}
+
 	// get a first image from the ccd, which we use to find the brightest
 	// star
 	Exposure	exposure(ccd->getInfo().getFrame(), exposuretime);
+	exposure.shutter = SHUTTER_OPEN;
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
-	Point	guidestar = findstar(image, ccd->getInfo().getFrame(), k);
+	Point	guidestar = findstar(image, starwindow, k);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found guide star at %s",
 		guidestar.toString().c_str());
 
@@ -137,7 +212,7 @@ int	main(int argc, char *argv[]) {
 
 	// now track for 10 minutes
 	guider.start(tracker);
-	sleep(600);
+	sleep(1800);
 	guider.stop();
 
 	return EXIT_SUCCESS;

@@ -247,7 +247,23 @@ CcdPtr	SbigCamera::getCcd(size_t id) {
 	CcdInfo	ccd = ccdinfo[id];
 
 	// now that we have he CCD info, we can create a ccd structure
-	return CcdPtr(new SbigCcd(ccd, id, *this));
+	SbigCcd	*sbigccd = new SbigCcd(ccd, id, *this);
+	CcdPtr	result(sbigccd);
+
+	// ST-i is the only camera without a cooler, and only the imager
+	// ccd can have a cooler
+	if (id == 0) {
+		switch (cameraType) {
+		case STI_CAMERA:
+			sbigccd->setCooler(false);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// that's it
+	return result;
 }
 
 /**

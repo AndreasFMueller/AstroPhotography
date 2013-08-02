@@ -61,9 +61,6 @@ T	CountNaNs<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	return (T)filter(image);
 }
 
-double	countnans(const ImagePtr& image);
-double	countnansrel(const ImagePtr& image);
-
 /**
  * \brief Filter that finds the largest value of all pixels
  */

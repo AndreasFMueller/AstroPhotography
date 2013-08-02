@@ -35,7 +35,7 @@ void	do_clamp(Image<P>& image, double minvalue, double maxvalue) {
 	}
 }
 
-#define	do_clamp_typed(P)						\
+#define	do_clamp_monochrome(P)						\
 {									\
 	Image<P>	*timage = dynamic_cast<Image<P> *>(&*image);	\
 	if (NULL != timage) {						\
@@ -44,13 +44,51 @@ void	do_clamp(Image<P>& image, double minvalue, double maxvalue) {
 	}								\
 }
 
+template<typename P>
+void	do_clamp(Image<RGB<P> >& image, double minvalue, double maxvalue) {
+	for (size_t offset = 0; offset < image.size().getPixels(); offset++) {
+		RGB<P>	value = image.pixels[offset];
+		// leave NaNs alone
+		if ((value.R != value.R) || (value.G != value.G)
+			|| (value.B != value.B)) {
+			continue;
+		}
+		if ((value.R < minvalue) || (value.G < minvalue)
+			|| (value.B < minvalue)) {
+			value = RGB<P>(minvalue, minvalue, minvalue);
+		}
+		if ((value.R > maxvalue) || (value.G > maxvalue)
+			|| (value.B > maxvalue)) {
+			value = RGB<P>(maxvalue, maxvalue, maxvalue);
+		}
+		image.pixels[offset] = value;
+	}
+}
+
+#define do_clamp_rgb(P)							\
+{									\
+	Image<RGB<P> >	*timage						\
+		= dynamic_cast<Image<RGB<P> > *>(&*image);		\
+	if (NULL != timage) {						\
+		do_clamp(*timage, minvalue, maxvalue);			\
+		return;							\
+	}								\
+}
+
 void	Clamper::operator()(ImagePtr& image) const {
-	do_clamp_typed(unsigned char);
-	do_clamp_typed(unsigned short);
-	do_clamp_typed(unsigned int);
-	do_clamp_typed(unsigned long);
-	do_clamp_typed(float);
-	do_clamp_typed(double);
+	do_clamp_monochrome(unsigned char);
+	do_clamp_monochrome(unsigned short);
+	do_clamp_monochrome(unsigned int);
+	do_clamp_monochrome(unsigned long);
+	do_clamp_monochrome(float);
+	do_clamp_monochrome(double);
+
+	do_clamp_rgb(unsigned char);
+	do_clamp_rgb(unsigned short);
+	do_clamp_rgb(unsigned int);
+	do_clamp_rgb(unsigned long);
+	do_clamp_rgb(float);
+	do_clamp_rgb(double);
 }
 
 } // calibration

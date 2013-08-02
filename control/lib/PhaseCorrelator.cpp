@@ -23,9 +23,15 @@ static inline double	sqr(double x) {
  * this accessor wraps the indices around according to the array size.
  */
 double	PhaseCorrelator::value(const double *a, const ImageSize& size,
-		unsigned int x, unsigned int y) const {
+		int x, int y) const {
+	while (x < 0) {
+		x += size.width();
+	}
 	while (x > size.width()) {
 		x -= size.width();
+	}
+	while (y < 0) {
+		y += size.height();
 	}
 	while (y > size.height()) {
 		y -= size.height();
@@ -38,20 +44,21 @@ double	PhaseCorrelator::value(const double *a, const ImageSize& size,
  */
 Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
 		const ImagePoint& center, unsigned int k) const {
-	unsigned int	cx = center.x();
-	if (cx < k) {
-		cx += size.width();
-	}
-	unsigned int	cy = center.y();
-	if (cy < k) {
-		cy += size.height();
-	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing %d-centroid at %s",
+		2 * k + 1, center.toString().c_str());
+
+	// compute the centroid
 	double	s = 0;
 	double	xs = 0;
 	double	ys = 0;
-	for (unsigned int x = center.x() - k; x <= center.x() + k; x++) {
-		for (unsigned int y = center.y() - k; y <= center.y() + k; y++) {
+	int	xmin = center.x() - k;
+	int	xmax = xmin + 2 * k;
+	int	ymin = center.y() - k;
+	int	ymax = ymin + 2 * k;
+	for (int x = xmin; x <= xmax; x++) {
+		for (int y = ymin; y <= ymax; y++) {
 			double	v = value(a, size, x, y);
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "v(%d, %d) = %f", x, y, v);
 			s += v;
 			xs += v * x;
 			ys += v * y;
@@ -79,6 +86,10 @@ Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
  */
 Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 		const ConstImageAdapter<double>& toimage) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "correlating images %s ~ %s",
+		fromimage.getSize().toString().c_str(),
+		toimage.getSize().toString().c_str());
+
 	// ensure that both images are of the same size
 	ImageSize	size = fromimage.getSize();
 	if (size != toimage.getSize()) {
@@ -132,6 +143,7 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 			b[size.offset(x, y)] = hanning * toimage.pixel(x, y);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "applied Hanning window to both images");
 
 	// now compute the fourier transforms
 	fftw_execute(p);
@@ -156,7 +168,6 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	for (unsigned int x = 0; x < size.width(); x++) {
 		for (unsigned int y = 0; y < size.height(); y++) {
 			double	v = a[size.offset(x, y)];
-//std::cout << "v(" << x << "," << y << ") = " << v << std::endl;
 			if (v > max) {
 				max = v;
 				maxx = x;
@@ -164,7 +175,7 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 			}
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum at %u,%u", maxx, maxy);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum at Pixel %u,%u", maxx, maxy);
 
 	// build the 5x5 centroid to get the best possible Point value
 	Point	result = centroid(a, size, ImagePoint(maxx, maxy));
@@ -178,6 +189,8 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	fftw_cleanup();
 
 	// result
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation: %s",
+		result.toString().c_str());
 	return result;
 }
 

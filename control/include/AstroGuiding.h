@@ -13,6 +13,7 @@
 #include <AstroCamera.h>
 #include <AstroDebug.h>
 #include <AstroImager.h>
+#include <AstroCallback.h>
 
 namespace astro {
 namespace guiding {
@@ -138,6 +139,17 @@ public:
 };
 
 /**
+ * \brief Callback class for Guider debugging/monitoring
+ */
+class GuiderNewImageCallbackData : public astro::callback::CallbackData {
+	astro::image::ImagePtr	_image;
+public:
+	GuiderNewImageCallbackData(astro::image::ImagePtr image)
+		: _image(image) { }
+	astro::image::ImagePtr	image() { return _image; }
+};
+
+/**
  * \brief GuiderCalibration
  */
 class GuiderCalibration {
@@ -145,7 +157,7 @@ public:
 	double	a[6];
 	std::string	toString() const;
 	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset) const;
+	Point	operator()(const Point& offset, double Deltat) const;
 };
 
 /**
@@ -186,13 +198,17 @@ class Guider {
 	astro::camera::Imager	imager;
 	astro::camera::Exposure	exposure;
 	GuiderCalibration	calibration;
+	double	gridconstant;
 	bool	calibrated;
 	void	sleep(double t);
-	void	moveto(int ra, int dec);
+	void	moveto(double ra, double dec);
 	GuiderProcessPtr	guiderprocess;
 public:
 	Guider(astro::camera::GuiderPortPtr guiderport,
 		astro::camera::Imager imager);
+	// XXX we also need a constructor that recovers previously recorded
+	//     calibration data
+
 	// controlling the exposure parameters
 	const astro::camera::Exposure&	getExposure() const;
 	void	setExposure(const astro::camera::Exposure& exposure);
@@ -202,7 +218,8 @@ public:
 	ImagePtr	getImage();
 
 	// calibration
-	bool	calibrate(TrackerPtr tracker);
+	bool	calibrate(TrackerPtr tracker,
+		double focallength = 0, double pixelsize = 0);
 	const GuiderCalibration&	getCalibration() const;
 
 	astro::camera::Imager	getImager();
@@ -212,6 +229,10 @@ public:
 	bool	start(TrackerPtr tracker);
 	bool	stop();
 	friend class GuiderProcess;
+
+	// callbacks
+	astro::callback::CallbackPtr	newimagecallback;
+	
 };
 
 } // namespace guiding

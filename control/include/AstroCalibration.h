@@ -120,27 +120,43 @@ class CalibrationFrameProcess {
 protected:
 	astro::camera::CcdPtr	ccd;
 	astro::camera::Exposure	exposure;
+	float	_temperature;
+	unsigned int	_nimages;
+	void	prepare();
+	void	cleanup();
 public:
-	CalibrationFrameProcess(astro::camera::CcdPtr _ccd) : ccd(_ccd) { }
+	CalibrationFrameProcess(astro::camera::CcdPtr _ccd) : ccd(_ccd) {
+		_temperature = -1;
+		_nimages = 3;
+	}
 	double	exposuretime() const {
 		return exposure.exposuretime;
 	}
 	void	setExposuretime(const float exposuretime) {
 		exposure.exposuretime = exposuretime;
 	}
-	virtual astro::image::ImagePtr	get() = 0;
-};
 
-class DarkFrameProcess : public CalibrationFrameProcess {
-	float	_temperature;
-	unsigned int	_nimages;
-public:
-	DarkFrameProcess(astro::camera::CcdPtr _ccd)
-		: CalibrationFrameProcess(_ccd) { }
 	float	temperature() const { return _temperature; }
 	void	setTemperature(float temperatur) { _temperature = temperatur; }
 	unsigned int	nimages() const { return _nimages; }
 	void	setNimages(unsigned int nimages) { _nimages = nimages; }
+
+	virtual astro::image::ImagePtr	get() = 0;
+};
+
+class DarkFrameProcess : public CalibrationFrameProcess {
+public:
+	DarkFrameProcess(astro::camera::CcdPtr _ccd)
+		: CalibrationFrameProcess(_ccd) { }
+	virtual astro::image::ImagePtr	get();
+};
+
+class FlatFrameProcess : public CalibrationFrameProcess {
+	const astro::image::ImagePtr&	dark;
+public:
+	FlatFrameProcess(astro::camera::CcdPtr _ccd,
+		const astro::image::ImagePtr& _dark)
+		: CalibrationFrameProcess(_ccd), dark(_dark) { }
 	virtual astro::image::ImagePtr	get();
 };
 

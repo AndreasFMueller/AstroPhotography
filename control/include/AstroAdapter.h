@@ -642,6 +642,28 @@ Pixel	PixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// RGB Adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class RGBAdapter : public ConstImageAdapter<RGB<double> > {
+	const ConstImageAdapter<RGB<T> >&	image;
+public:
+	RGBAdapter(const ConstImageAdapter<RGB<T> >& image);
+	const RGB<double>	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename T>
+RGBAdapter<T>::RGBAdapter(const ConstImageAdapter<RGB<T> >& _image)
+	: ConstImageAdapter<RGB<double> >(_image.getSize()), image(_image) {
+}
+
+template<typename T>
+const RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
+	return RGB<double>(image.pixel(x, y));
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // YUYV-Adapter
 //////////////////////////////////////////////////////////////////////
 template<typename T>
@@ -680,6 +702,22 @@ const	RGB<T>	YUYVAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 	// extract the "right" RGB pixel
 	return rgbpixels[x % 2];
 }
+
+//////////////////////////////////////////////////////////////////////
+// Function adapter
+//////////////////////////////////////////////////////////////////////
+class FunctionAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	image;
+	double	(*f)(double);
+public:
+	FunctionAdapter(const ConstImageAdapter<double>& _image,
+		double (*_f)(double))
+		: ConstImageAdapter<double>(_image.getSize()),
+		  image(_image), f(_f) { }
+	const double	pixel(unsigned int x, unsigned int y) const {
+		return f(image.pixel(x,y));
+	}
+};
 
 } // namespace image
 } // namespace astro

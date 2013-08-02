@@ -9,12 +9,14 @@
 #include <Accelerate/Accelerate.h>
 #include <includes.h>
 #include <AstroFormat.h>
+#include <AstroCallback.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;
 using namespace astro::camera;
 using namespace astro::guiding;
 using namespace astro::io;
+using namespace astro::callback;
 
 namespace astro {
 namespace guiding {
@@ -140,6 +142,10 @@ Point	PhaseTracker::operator()(ImagePtr newimage)
 }
 
 //////////////////////////////////////////////////////////////////////
+// Callback for images retrieved (to help analysis of guider problems)
+//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
 // Guider Calibration data
 //////////////////////////////////////////////////////////////////////
 std::string	GuiderCalibration::toString() const {
@@ -147,14 +153,32 @@ std::string	GuiderCalibration::toString() const {
 		a[0], a[1], a[2], a[3], a[4], a[5]);
 }
 
+/**
+ * \brief compute correction for drift
+ * 
+ * While a correction for some offset depends on the time within which
+ * the correction should be done, 
+ */
 Point	GuiderCalibration::defaultcorrection() const {
-	return this->operator()(Point(a[2], a[5]));
+	return this->operator()(Point(0, 0), 1);
 }
 
-Point	GuiderCalibration::operator()(const Point& offset) const {
-        double determinant = a[0] * a[4] - a[3] * a[1];
-        double	x = (offset.x() * a[4] - offset.y() * a[1]) / determinant;
-        double	y = (a[0] * offset.y() - a[3] * offset.x()) / determinant;
+/**
+ * \brief Compute correction for an offset
+ *
+ * The correction to be applied to right ascension and declination depends
+ * on the time allotted to the correction. The result is a pair of total
+ * corrections. They can either be applied in one second, without any
+ * corrections in the remaining seconds of the Deltat-interval, or they can
+ * be distributed over the seconds of the Deltat-interval.  This distribution,
+ * however, has to be calculated by the caller.
+ */
+Point	GuiderCalibration::operator()(const Point& offset, double Deltat) const {
+	double	Deltax = offset.x() + Deltat * a[2];
+	double	Deltay = offset.y() + Deltat * a[5];
+        double	determinant = a[0] * a[4] - a[3] * a[1];
+        double	x = (Deltax * a[4] - Deltay * a[1]) / determinant;
+        double	y = (a[0] * Deltay - a[3] * Deltax) / determinant;
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s",
 		offset.toString().c_str(), result.toString().c_str());
@@ -266,6 +290,7 @@ Guider::Guider(GuiderPortPtr _guiderport, Imager _imager)
 	calibrated = false;
 	// default exposure settings
 	exposure.exposuretime = 1.;
+	gridconstant = 10;
 }
 
 const Exposure&	Guider::getExposure() const {
@@ -291,12 +316,29 @@ void	Guider::setExposure(const Exposure& _exposure) {
  * central position.
  *
  * This method may require additional parameters to be completely useful.
+ * \param focallength    focallength of guide scope in mm
+ * \param pixelsize      size of pixels in um
  */
-bool	Guider::calibrate(TrackerPtr tracker) {
+bool	Guider::calibrate(TrackerPtr tracker,
+		double focallength, double pixelsize) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
 
 	// grid range we want to scan
 	int range = 1;
+
+	// the grid constant normally depends on the focallength and the
+	// pixels size. Smaller pixels are larger focallength allow to
+	// use a smaller grid constant. The default value of 10 is a good
+	// choice for a 100mm guide scope and 7u pixels as for the SBIG
+	// ST-i guider kit
+	if ((focallength > 0) && (pixelsize > 0)) {
+		gridconstant = 10 * (pixelsize / 7.4) / (focallength / 100);
+		if (gridconstant < 2) {
+			gridconstant = 2;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %f",
+			gridconstant);
+	}
 
 	// prepare a GuiderCalibrator class that does the actual computation
 	GuiderCalibrator	calibrator;
@@ -305,22 +347,17 @@ bool	Guider::calibrate(TrackerPtr tracker) {
 	for (int ra = -range; ra <= range; ra++) {
 		for (int dec = -range; dec <= range; dec++) {
 			// move the telescope to the grid position
-			moveto(5 * ra, 5 * dec);
+			moveto(gridconstant * ra, gridconstant * dec);
 			imager.startExposure(exposure);
-			ImagePtr	image = imager.getImage();
-
-std::string	filename = stringprintf("guider.%d.%d.fits", ra, dec);
-FITSout	out(filename);
-unlink(filename.c_str());
-out.write(image);
-			
+			ImagePtr	image = getImage();
 			Point	point = (*tracker)(image);
 			double	t = now();
 			calibrator.add(t, Point(ra, dec), point);
 			// move the telescope back
-			moveto(-5 * ra, -5 * dec);
+			moveto(-gridconstant * ra, -gridconstant * dec);
 			imager.startExposure(exposure);
-			point = (*tracker)(imager.getImage());
+			image = getImage();
+			point = (*tracker)(image);
 			t = now();
 			calibrator.add(t, Point(0, 0), point);
 		}
@@ -331,6 +368,12 @@ out.write(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
 		calibration.toString().c_str());
 	calibrated = true;
+
+	// fix time constant
+	calibration.a[0] /= gridconstant;
+	calibration.a[1] /= gridconstant;
+	calibration.a[3] /= gridconstant;
+	calibration.a[4] /= gridconstant;
 
 	// are we now calibrated?
 	return calibrated;
@@ -343,22 +386,18 @@ out.write(image);
  * by actuating right ascension and declination guider ports for the 
  * corresponding number of seconds.
  */
-void	Guider::moveto(int ra, int dec) {
+void	Guider::moveto(double ra, double dec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto (%d, %d)", ra, dec);
 	double	t = 0;
 	double	raplus = 0;
 	double	raminus = 0;
 	double	decplus = 0;
 	double	decminus = 0;
+
 	if (ra > 0) {
 		raplus = ra;
 	} else {
 		raminus = -ra;
-	}
-	if (dec > 0) {
-		decplus = dec;
-	} else {
-		decminus = -dec;
 	}
 	if (raplus > t) {
 		t = raplus;
@@ -366,14 +405,28 @@ void	Guider::moveto(int ra, int dec) {
 	if (raminus > t) {
 		t = raminus;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f",
+		raplus, raminus);
+	guiderport->activate(raplus, raminus, 0, 0);
+	sleep(t);
+
+	t = 0;
+	if (dec > 0) {
+		decplus = dec;
+	} else {
+		decminus = -dec;
+	}
 	if (decminus > t) {
 		t = decminus;
 	}
 	if (decplus > t) {
 		t = decplus;
 	}
-	guiderport->activate(raplus, raminus, decplus, decminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f",
+		decplus, decminus);
+	guiderport->activate(0, 0, decplus, decminus);
 	sleep(t);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
 }
 
 /**
@@ -387,7 +440,17 @@ void	Guider::startExposure() {
  * \brief get the image
  */
 ImagePtr	Guider::getImage() {
-	return imager.getImage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
+	ImagePtr	image = imager.getImage();
+	if (newimagecallback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
+		GuiderNewImageCallbackData	*argp = 
+			new GuiderNewImageCallbackData(image);
+		CallbackDataPtr	arg(argp);
+		newimagecallback->operator()(arg);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
+	}
+	return image;
 }
 
 /**

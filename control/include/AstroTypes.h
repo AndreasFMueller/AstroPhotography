@@ -32,6 +32,7 @@ public:
 	void	setY(double y) { _y = y; }
 	Point	operator+(const Point& other) const;
 	Point	operator-(const Point& other) const;
+	Point	operator-() const;
 	Point	operator*(double l) const;
 	friend Point	operator*(double l, const Point& other);
 	std::string	toString() const;

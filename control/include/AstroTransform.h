@@ -219,17 +219,36 @@ const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 ImagePtr	transform(ImagePtr image, const Transform& transform);
 
 /**
- * \brief Find a transformation between two images
+ * \brief Find a translation between two images
+ *
+ * This method uses Fourier transform and phase correlation to find the
+ * (necessarily small) translation with subpixel accuracy.
  */
 class PhaseCorrelator {
 	double	value(const double *a, const astro::image::ImageSize& size,
-			unsigned int x, unsigned int y) const;
+			int x, int y) const;
 	Point	centroid(const double *a, const astro::image::ImageSize& size,
 			const astro::image::ImagePoint& center,
 			unsigned int k = 2) const;
 public:
 	Point	operator()(const ConstImageAdapter<double>& fromimage,
 			const ConstImageAdapter<double>& toimage);
+};
+
+/**
+ * \brief Find a general transformation between
+ */
+class TransformAnalyzer {
+	const ConstImageAdapter<double>& baseimage;
+	unsigned int	spacing;
+	unsigned int	patchsize;
+public:
+	TransformAnalyzer(const ConstImageAdapter<double>& _baseimage,
+		unsigned int _spacing = 128, unsigned int _patchsize = 128)
+		: baseimage(_baseimage),
+		  spacing(_spacing), patchsize(_patchsize)  {
+	}
+	Transform	operator()(const ConstImageAdapter<double>& image) const;
 };
 
 } // namespace transform

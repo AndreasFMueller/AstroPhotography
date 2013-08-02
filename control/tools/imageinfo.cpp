@@ -33,6 +33,8 @@ void	show_imageinfo(const std::string& filename) {
 		double	minimum = astro::image::filter::min(image);
 		double	mean = astro::image::filter::mean(image);
 		double	median = astro::image::filter::median(image);
+		double	nans = astro::image::filter::countnans(image);
+		
 		std::cout << "min = " << minimum;
 		if (median < mean) {
 			std::cout << ", median = " << median;
@@ -42,6 +44,7 @@ void	show_imageinfo(const std::string& filename) {
 			std::cout << ", median = " << median;
 		}
 		std::cout << ", max = " << maximum;
+		std::cout << ", nans = " << nans;
 		std::cout << std::endl;
 	} catch (std::exception& x) {
 		std::cerr << "could not process " << filename << ": "

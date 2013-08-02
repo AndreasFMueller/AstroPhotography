@@ -110,7 +110,7 @@ void	ExposureWidget::setCcd(CcdPtr _ccd) {
 	ccd = _ccd;
 
 	// read the binning modes and add the options to the combo box
-	const BinningSet&	set = ccd->getInfo().binningmodes;
+	const BinningSet&	set = ccd->getInfo().modes();
 	std::set<Binning>::const_iterator	bi;
 	for (bi = set.begin(); bi != set.end(); bi++) {
 		ui->binningComboBox->addItem(QString(bi->toString().c_str()));
@@ -173,7 +173,7 @@ Exposure	ExposureWidget::getExposure() {
 	}
 
 	// binning mode
-	BinningSet::const_iterator	i = ccd->getInfo().binningmodes.begin();
+	BinningSet::const_iterator	i = ccd->getInfo().modes().begin();
 	int	binning_entry = ui->binningComboBox->currentIndex();
 	while (binning_entry-- > 0) { i++; }
 	result.mode = *i;
@@ -227,10 +227,10 @@ void	ExposureWidget::setExposure(const Exposure& exposure) {
 
 	// find the right binning mode to display in the binning mode
 	// combo box
+	BinningSet	modes = ccd->getInfo().modes();
 	BinningSet::const_iterator	i;
 	int	binning_entry = 0;
-	for (i = ccd->getInfo().binningmodes.begin();
-		i != ccd->getInfo().binningmodes.end(); i++) {
+	for (i = modes.begin(); i != modes.end(); i++) {
 		if (exposure.mode == *i) {
 			break;
 		}

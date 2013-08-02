@@ -12,6 +12,31 @@ namespace astro {
 namespace image {
 namespace filter {
 
+#define	countnans_typed(image, pixel)					\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			if (std::numeric_limits<pixel>::has_quiet_NaN) {\
+				CountNaNs<pixel, double>	cn;	\
+				return cn.filter(*imagep);		\
+			} else {					\
+				return 0;				\
+			}						\
+		}							\
+	}
+
+double	countnans(const ImagePtr& image) {
+	countnans_typed(image, unsigned char);
+	countnans_typed(image, unsigned short);
+	countnans_typed(image, unsigned int);
+	countnans_typed(image, unsigned long);
+	countnans_typed(image, float);
+	countnans_typed(image, double);
+	throw std::runtime_error("cannot count nans in this image type");
+	return 0;
+}
+
 #define	filter_typed(image, f, pixel)					\
 	{								\
 		Image<pixel>	*imagep					\

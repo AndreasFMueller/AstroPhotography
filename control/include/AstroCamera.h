@@ -201,7 +201,7 @@ public:
 		throw (not_implemented);
 
 	// handling the cooler
-	virtual bool	hasCooler() const { return true; }
+	virtual bool	hasCooler() const { return false; }
 	virtual CoolerPtr	getCooler() throw (not_implemented);
 
 	// methods related to metadata

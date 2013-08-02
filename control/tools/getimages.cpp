@@ -50,6 +50,8 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -y yoffset     vertical offset of image rectangle"
 		<< std::endl;
+	std::cout << " -t temp        cool the CCD to temperature <temp> in decrees Celsius"
+		<< std::endl;
 	std::cout << " -l             list only, lists the devices"
 		<< std::endl;
 }
@@ -69,9 +71,10 @@ int	main(int argc, char *argv[]) {
 	const char	*cameratype = "uvc";
 	bool	listonly = false;
 	bool	dark = false;
+	double	temperature = -1;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?D")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:")))
 		switch (c) {
 		case 'D':
 			dark = true;
@@ -114,6 +117,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'y':
 			yoffset = atoi(optarg);
+			break;
+		case 't':
+			temperature = atof(optarg) + 273.1;
 			break;
 		case '?':
 			usage(argv[0]);
@@ -170,6 +176,27 @@ int	main(int argc, char *argv[]) {
 		ImageRectangle(ImagePoint(xoffset, yoffset),
 			ImageSize(width, height)));
 
+	// if the temperature is set, and the ccd has a cooler, lets
+	// start the cooler
+	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
+	CoolerPtr	cooler;
+	if (usecooler) {
+		cooler = ccd->getCooler();
+		cooler->setTemperature(temperature);
+		cooler->setOn(true);
+		// wait until the temperature is within 1 degree of the
+		// set temperature
+		double	delta;
+		do {
+			sleep(1);
+			double	actual = cooler->getActualTemperature();
+			delta = (temperature - actual);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"set: %.1f, actual: %1.f, delta: %.1f",
+				temperature, actual, delta);
+		} while (delta > 1);
+	}
+
 	// prepare an exposure object
 	Exposure	exposure(imagerectangle, exposuretime);
 	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
@@ -179,6 +206,11 @@ int	main(int argc, char *argv[]) {
 
 	// read all images
 	ImageSequence	images = ccd->getImageSequence(nImages);
+
+	// turn of the cooler to save energy
+	if (usecooler) {
+		cooler->setOn(false);
+	}
 
 	// write the images to a file
 	ImageSequence::const_iterator	imageptr;

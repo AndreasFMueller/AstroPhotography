@@ -104,13 +104,22 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	params.abgState = ABG_LOW7; // XXX should be able to set via property
 
 	// use the shutter info 
-	params.openShutter = (exposure.shutter == SHUTTER_OPEN)
-				? ((id == 2)
+	switch (exposure.shutter) {
+	case SHUTTER_OPEN:
+		params.openShutter = ((id == 2)
 					? SC_OPEN_EXT_SHUTTER
-					: SC_OPEN_SHUTTER)
-				: ((id == 2)
+					: SC_OPEN_SHUTTER);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter open command: %hd",
+			params.openShutter);
+		break;
+	case SHUTTER_CLOSED:
+		params.openShutter = ((id == 2)
 					? SC_CLOSE_EXT_SHUTTER
 					: SC_CLOSE_SHUTTER);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter close command: %hd",
+			params.openShutter);
+		break;
+	}
 
 	// set the appropriate binning mode
 	params.readoutMode = SbigBinning2Mode(exposure.mode);

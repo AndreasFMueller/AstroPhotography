@@ -18,6 +18,7 @@
 #include <sys/time.h>
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
+#include <AstroImager.h>
 
 using namespace astro;
 using namespace astro::image;
@@ -94,9 +95,9 @@ QString	CaptureWindow::getCameraTitle() {
 	std::string	cameraname
 		= (camera) ? camera->getName() : std::string("(unknown)");
 	std::string	ccdname
-		= (ccd) ?  (ccd->getInfo().name
+		= (ccd) ?  (ccd->getInfo().name()
 				+ std::string(" (")
-				+ ccd->getInfo().size.toString()
+				+ ccd->getInfo().size().toString()
 				+ std::string(")"))
 			: std::string("(unknown)");
 
@@ -302,7 +303,7 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 	}
 
 	if (ui->flatdivideCheckbox->isChecked()) {
-		imager.setFlatsubtract(true);
+		imager.setFlatdivide(true);
 	}
 
 	if (ui->badpixelsCheckBox->isChecked()) {
@@ -445,7 +446,7 @@ void	CaptureWindow::openDarkfile() {
 	try {
 		FITSin	in(darkfilenamestring);
 		ImagePtr	newdark = in.read();
-		if (newdark->size() != ccd->getInfo().getSize()) {
+		if (newdark->size() != ccd->getInfo().size()) {
 			QMessageBox::warning(this,
 				QString("Cannot use dark image"),
 				QString("The dark file '%1' cannot be used, because it does not match the CCD size").arg(darkfilename));
@@ -476,7 +477,7 @@ void	CaptureWindow::openFlatfile() {
 	try {
 		FITSin	in(flatfilenamestring);
 		ImagePtr	newflat = in.read();
-		if (newflat->size() != ccd->getInfo().getSize()) {
+		if (newflat->size() != ccd->getInfo().size()) {
 			QMessageBox::warning(this,
 				QString("Cannot use flat image"),
 				QString("The flat file '%1' cannot be used, because it does not match the CCD size").arg(flatfilename));

@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <vector>
 #include <AstroFormat.h>
+#include <AstroIO.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -601,12 +602,10 @@ ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
 // CalibrationFrameProcess implementation
 //////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////
-// DarkFrameProcess implementation
-//////////////////////////////////////////////////////////////////////
-ImagePtr	DarkFrameProcess::get() {
+void	CalibrationFrameProcess::prepare() {
 	// enable cooler, set temperature, if cooler available
-	if (ccd->hasCooler()) {
+	bool	usecooler = (ccd->hasCooler() && (_temperature > 0));
+	if (usecooler) {
 		CoolerPtr	cooler = ccd->getCooler();
 		cooler->setTemperature(_temperature);
 		cooler->setOn(true);
@@ -617,6 +616,21 @@ ImagePtr	DarkFrameProcess::get() {
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature reached");
 	}
+}
+
+void	CalibrationFrameProcess::cleanup() {
+	bool	usecooler = (ccd->hasCooler() && (_temperature > 0));
+	if (usecooler) {
+		CoolerPtr	cooler = ccd->getCooler();
+		cooler->setOn(false);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// DarkFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+ImagePtr	DarkFrameProcess::get() {
+	prepare();
 
 	// start exposure
 	exposure.shutter = SHUTTER_CLOSED;
@@ -629,15 +643,37 @@ ImagePtr	DarkFrameProcess::get() {
 	DarkFrameFactory	df;
 	ImagePtr	dark = df(images);
 
-	// turn of cooler
-	if (ccd->hasCooler()) {
-		CoolerPtr	cooler = ccd->getCooler();
-		cooler->setOn(false);
-	}
+	cleanup();
 
 	// return the dark image
 	return dark;
 }
+
+//////////////////////////////////////////////////////////////////////
+// FlatFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+ImagePtr	FlatFrameProcess::get() {
+	prepare();
+
+	// start exposure
+	exposure.shutter = SHUTTER_OPEN;
+	ccd->startExposure(exposure);
+
+	// get a sequence of images
+	ImageSequence	images = ccd->getImageSequence(_nimages);
+
+	// convert the images into a flat frame
+	FlatFrameFactory	ff;
+	ImagePtr	flat = ff(images, dark);
+
+	// turn of cooler
+	cleanup();
+
+	// return the dark image
+	return flat;
+}
+
+
 
 } // calibration
 } // astro

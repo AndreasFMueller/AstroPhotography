@@ -23,6 +23,7 @@ template<typename P>
 static bool	do_write(const std::string& filename, const ImagePtr& image)
 		throw (FITSexception) {
 	Image<P>	*im = dynamic_cast<Image<P> *>(&*image);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "%p", im);
 	if (NULL == im) {
 		return false;
 	}

@@ -19,7 +19,7 @@ microtouch_files =
 endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
-	focus transform guider
+	focus transform guider dark flat clamp logscale stack
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -36,6 +36,14 @@ imageinfo_LDADD = -L../lib -lastro
 makedark_SOURCES = makedark.cpp
 makedark_DEPENDENCIES = ../lib/libastro.la
 makedark_LDADD = -L../lib -lastro
+
+dark_SOURCES = dark.cpp
+dark_DEPENDENCIES = ../lib/libastro.la
+dark_LDADD = -L../lib -lastro
+
+flat_SOURCES = flat.cpp
+flat_DEPENDENCIES = ../lib/libastro.la
+flat_LDADD = -L../lib -lastro
 
 makeflat_SOURCES = makeflat.cpp
 makeflat_DEPENDENCIES = ../lib/libastro.la
@@ -56,4 +64,16 @@ focus_LDADD = -L../lib -lastro @SBIGLIBRARY@
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la
 guider_LDADD = -L../lib -lastro @SBIGLIBRARY@
+
+stack_SOURCES = stack.cpp
+stack_DEPENDENCIES = ../lib/libastro.la
+stack_LDADD = -L../lib -lastro
+
+clamp_SOURCES = clamp.cpp
+clamp_DEPENDENCIES = ../lib/libastro.la
+clamp_LDADD = -L../lib -lastro
+
+logscale_SOURCES = logscale.cpp
+logscale_DEPENDENCIES = ../lib/libastro.la
+logscale_LDADD = -L../lib -lastro
 

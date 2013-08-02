@@ -48,7 +48,10 @@ std::string	SbigCameraLocator::getVersion() const {
 }
 
 SbigCameraLocator::SbigCameraLocator() {
-	pthread_mutex_init(&sbigmutex, NULL);
+	pthread_mutexattr_t	mta;
+	pthread_mutexattr_init(&mta);
+	pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&sbigmutex, &mta);
 	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
 	if (e != CE_NO_ERROR) {
 		std::string	errmsg = sbig_error(e);

@@ -22,6 +22,10 @@ Point	Point::operator-(const Point& other) const {
 	return Point(_x - other._x, _y - other._y);
 }
 
+Point	Point::operator-() const {
+	return Point(-_x, -_y);
+}
+
 Point	Point::operator*(double l) const {
 	return Point(l * _x, l * _y);
 }

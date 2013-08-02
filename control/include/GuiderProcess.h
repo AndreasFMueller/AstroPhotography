@@ -37,13 +37,15 @@ class GuiderProcess {
 	
 	// 
 	pthread_mutex_t	mutex; // protects tx, ty variables
-	double	zx, zy;
 	double	tx, ty;
 	double	gain;
 
 	// common members
 	Guider&	guider;
 	TrackerPtr	tracker;
+
+	// Interval between images
+	double	interval;
 
 public:
 	// main functions
@@ -52,7 +54,7 @@ public:
 public:
 	GuiderProcess(Guider& guider);
 	~GuiderProcess();
-	bool	start(TrackerPtr tracker);
+	bool	start(TrackerPtr tracker, double interval = 1);
 	bool	stop();
 	double	getGain() const;
 	void	setGain(double gain);
