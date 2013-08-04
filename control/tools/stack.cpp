@@ -13,6 +13,15 @@ using namespace astro::io;
 
 namespace astro {
 
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ -dh? ] [ -o outfile ] files..." << std::endl;
+	std::cout << "stack a set of images to produce a target image" << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " -d               increase debug level" << std::endl;
+	std::cout << " -o outfile       filename of output file" << std::endl;
+	std::cout << " -h,-?            display this help" << std::endl;
+}
+
 int	main(int argc, char *argv[]) {
 	int	c;
 	const char	*outfilename = NULL;
@@ -24,6 +33,10 @@ int	main(int argc, char *argv[]) {
 		case 'o':
 			outfilename = optarg;
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// read all the images

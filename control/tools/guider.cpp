@@ -142,7 +142,7 @@ int	main(int argc, char *argv[]) {
 		y = ccd->getInfo().size().height() / 2;
 	}
 
-	ImageRectangle	starwindow(ImagePoint(x - r, x - r),
+	ImageRectangle	starwindow(ImagePoint(x - r, y - r),
 		ImageSize(2 * r, 2 * r));
 
 	// get the Guider for the camera
@@ -192,6 +192,7 @@ int	main(int argc, char *argv[]) {
 	exposure.shutter = SHUTTER_OPEN;
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starwindow: %s", starwindow.toString().c_str());
 	Point	guidestar = findstar(image, starwindow, k);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found guide star at %s",
 		guidestar.toString().c_str());
@@ -212,7 +213,7 @@ int	main(int argc, char *argv[]) {
 
 	// now track for 10 minutes
 	guider.start(tracker);
-	sleep(1800);
+	sleep(7200);
 	guider.stop();
 
 	return EXIT_SUCCESS;

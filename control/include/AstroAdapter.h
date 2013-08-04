@@ -713,7 +713,9 @@ public:
 	FunctionAdapter(const ConstImageAdapter<double>& _image,
 		double (*_f)(double))
 		: ConstImageAdapter<double>(_image.getSize()),
-		  image(_image), f(_f) { }
+		  image(_image), f(_f) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
+	}
 	const double	pixel(unsigned int x, unsigned int y) const {
 		return f(image.pixel(x,y));
 	}

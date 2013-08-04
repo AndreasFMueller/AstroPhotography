@@ -119,6 +119,7 @@ ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
 	std::vector<Transform>	transforms;
 	ImageSequence::const_iterator	imgp = images.begin();
 	for (imgp++; imgp != images.end(); imgp++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add image");
 		ImagePtr	imageptr = *imgp;
 		Image<RGB<Pixel > >	*imagep
 			= dynamic_cast<Image<RGB<Pixel> > *>(&*imageptr);
