@@ -77,13 +77,16 @@ Point	StarDetector<Pixel>::operator()(
 	for (unsigned int x = maxx - k; x <= maxx + k; x++) {
 		for (unsigned int y = maxy - k; y <= maxy + k; y++) {
 			double	value = luminance(adapter.pixel(x, y));
-			weightsum += value;
-			xsum += x * value;
-			ysum += y * value;
+			if (value == value) {
+				weightsum += value;
+				xsum += x * value;
+				ysum += y * value;
+			}
 		}
 	}
 	xsum /= weightsum;
 	ysum /= weightsum;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "centroid offsets: %f,%f", xsum, ysum);
 
 	// add the offset of the rectangle to get real coordinates
 	return Point(rectangle.origin().x() + xsum,

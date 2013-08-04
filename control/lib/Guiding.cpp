@@ -387,7 +387,7 @@ bool	Guider::calibrate(TrackerPtr tracker,
  * corresponding number of seconds.
  */
 void	Guider::moveto(double ra, double dec) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto (%d, %d)", ra, dec);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto (%f, %f)", ra, dec);
 	double	t = 0;
 	double	raplus = 0;
 	double	raminus = 0;

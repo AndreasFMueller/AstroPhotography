@@ -447,6 +447,8 @@ void	CaptureWindow::openDarkfile() {
 		FITSin	in(darkfilenamestring);
 		ImagePtr	newdark = in.read();
 		if (newdark->size() != ccd->getInfo().size()) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "dark size: %s, ccd size: %s",
+newdark->size().toString().c_str(), ccd->getInfo().size().toString().c_str());
 			QMessageBox::warning(this,
 				QString("Cannot use dark image"),
 				QString("The dark file '%1' cannot be used, because it does not match the CCD size").arg(darkfilename));

@@ -28,8 +28,7 @@ static double   now() {
  */
 GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
 	// set a default gain
-	//gain = 1;
-	gain = 0.25;
+	gain = 1;
 
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
@@ -176,7 +175,7 @@ void	*GuiderProcess::track_main() {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = guider.getCalibration()(-offset,
+		Point	correction = guider.getCalibration()(offset,
 			correctiontime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: correction: %s",
 			correction.toString().c_str());
@@ -201,7 +200,8 @@ void	*GuiderProcess::track_main() {
 			unsigned int	useconds
 				= (interval - elapsed) * 1000000;
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"sleep %udusec for 10s cycles", useconds);
+				"sleep %udusec for %f sec cycles",
+				useconds, interval);
 			usleep(useconds);
 		}
 	}

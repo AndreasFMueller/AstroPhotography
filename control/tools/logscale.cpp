@@ -66,12 +66,18 @@ int	main(int argc, char *argv[]) {
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
 
-	// if minvalue or maxvalue are set, clamp the image values
+	// convert pixels according to luminance
+#if 0
 	Image<RGB<double> >	*imageptr
 		= dynamic_cast<Image<RGB<double> > *>(&*image);
 	LuminanceAdapter<RGB<double> >	la(*imageptr);
-	FunctionAdapter	fa(la, log2);
+#endif
+	Image<double >	*imageptr
+		= dynamic_cast<Image<double > *>(&*image);
+	LuminanceAdapter<double>	la(*imageptr);
 
+	// create image from log adapter
+	FunctionAdapter	fa(la, log2);
 	Image<double>	*logimage = new Image<double>(fa);
 	ImagePtr	outimage(logimage);
 

@@ -239,12 +239,16 @@ SbigCamera::~SbigCamera() {
  * \param id     ID of the CCD
  */
 CcdPtr	SbigCamera::getCcd(size_t id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u", id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u (of %d)", id, ccdinfo.size());
 	if ((id < 0) || (id >= ccdinfo.size())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "ccd %d not in range", id);
 		throw std::range_error("ccd id not in range");
 	}
 
+debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
 	CcdInfo	ccd = ccdinfo[id];
+debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s", ccd.toString().c_str());
 
 	// now that we have he CCD info, we can create a ccd structure
 	SbigCcd	*sbigccd = new SbigCcd(ccd, id, *this);
@@ -263,6 +267,7 @@ CcdPtr	SbigCamera::getCcd(size_t id) {
 	}
 
 	// that's it
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning CCD");
 	return result;
 }
 
