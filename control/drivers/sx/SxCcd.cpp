@@ -154,7 +154,7 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	}
 
 	// images are upside down, since our origin is always the lower
-	// left corner
+	// left corner. Note that Hyperstar images are reversed!
 	FlipOperator<unsigned short>	f;
 	f(*image);
 
