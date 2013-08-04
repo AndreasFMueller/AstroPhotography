@@ -3,11 +3,22 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
+#include <sbigudrv.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
 #include <SbigLocator.h>
 #include <SbigGuiderPort.h>
 #include <utils.h>
 #include <AstroDebug.h>
-#include <sbigudrv.h>
 
 namespace astro {
 namespace camera {
