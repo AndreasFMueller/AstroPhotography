@@ -484,6 +484,7 @@ public:
  */
 template<typename P, int n>
 class Multiplane {
+public:
 	enum { planes = n};
 	P	p[n];
 	typedef	P	value_type;
