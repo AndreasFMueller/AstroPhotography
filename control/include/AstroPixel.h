@@ -212,6 +212,102 @@ struct color_traits {
 	typedef typename P::color_category color_category;
 };
 
+/**
+ * \brief Specializations of the color_traits traits class to indicate
+ *        that basic types correspond to monochrome pixels
+ */
+template<>
+struct  color_traits<unsigned char> {
+	typedef monochrome_color_tag color_category;
+};
+template<>
+struct  color_traits<unsigned short> {
+	typedef monochrome_color_tag color_category;
+};
+template<>
+struct  color_traits<unsigned int> {
+	typedef monochrome_color_tag color_category;
+};
+template<>
+struct  color_traits<unsigned long> {
+	typedef monochrome_color_tag color_category;
+};
+template<>
+struct  color_traits<float> {
+	typedef monochrome_color_tag color_category;
+};
+template<>
+struct  color_traits<double> {
+	typedef monochrome_color_tag color_category;
+};
+
+/**
+ * \brief Converting pixels between pixel types, taking color into account.
+ *
+ * We have three different pixel color traits classes, so there are 
+ * essentially 9 different algorithms to convert pixel values. Conversions
+ * to and from monochrome are always possible, and amount to just converting
+ * pixel value types. Conversions between different instantiations  of RGB
+ * or of YUYV likewise. Only conversions between the two color types 
+ * have to handled differently, they only work on pairs.
+ *
+ * This is reflected by the hierarchy of types below. The convertPixelTyped
+ * template by default uses the pixel type copy constructor, which works
+ * for the conversions within a type (3 cases). The template detects the
+ * color type from two additional template parameters containing the type
+ * traits.  For the conversions to and from monochrome, two specializations
+ * are provided that just copy luminance information. This gives us and
+ * additional 4 conversion functions. The only functions missing are the
+ * two conversions between RGB and YUYV.
+ */
+template<typename destPixel, typename srcPixel,
+	typename desttraits, typename srctraits>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const desttraits& dt, const srctraits& ds) {
+	convertPixelValue(dest, src);
+}
+
+/* monochrome -> RGB */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const rgb_color_tag& dt, const monochrome_color_tag& ds) {
+	convertPixelValue(dest.R, src);
+	dest.G = dest.R;
+	dest.B = dest.R;
+}
+
+/* RGB -> monochrome */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const monochrome_color_tag& dt, const rgb_color_tag& ds) {
+	typename srcPixel::value_type	y;
+	y = 0.299 * src.R + 0.587 * src.G + 0.114 * src.B;
+	convertPixelValue(dest, y);
+}
+
+/* YUYV -> monochrome */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const monochrome_color_tag& dt, const yuyv_color_tag& ds) {
+	convertPixelValue(dest, src.y);
+}
+
+/*  monochrome -> YUYV */
+template<typename destPixel, typename srcPixel>
+void	convertPixelTyped(destPixel& dest, const srcPixel& src,
+		const yuyv_color_tag& dt, const monochrome_color_tag& ds) {
+	convertPixelValue(dest.y, src);
+	dest.uv = destPixel::zero;
+}
+
+template<typename destPixel, typename srcPixel>
+void	convertPixel(destPixel& dest, const srcPixel& src) {
+	convertPixelTyped(dest, src,
+		typename color_traits<destPixel>::color_category(),
+		typename color_traits<srcPixel>::color_category());
+}
+
+
 template<typename P>
 class Color {
 public:
@@ -379,100 +475,21 @@ public:
 	}
 };
 
-/**
- * \brief Specializations of the color_traits traits class to indicate
- *        that basic types correspond to monochrome pixels
- */
-template<>
-struct  color_traits<unsigned char> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<unsigned short> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<unsigned int> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<unsigned long> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<float> {
-	typedef monochrome_color_tag color_category;
-};
-template<>
-struct  color_traits<double> {
-	typedef monochrome_color_tag color_category;
-};
-
-/**
- * \brief Converting pixels between pixel types, taking color into account.
- *
- * We have three different pixel color traits classes, so there are 
- * essentially 9 different algorithms to convert pixel values. Conversions
- * to and from monochrome are always possible, and amount to just converting
- * pixel value types. Conversions between different instantiations  of RGB
- * or of YUYV likewise. Only conversions between the two color types 
- * have to handled differently, they only work on pairs.
- *
- * This is reflected by the hierarchy of types below. The convertPixelTyped
- * template by default uses the pixel type copy constructor, which works
- * for the conversions within a type (3 cases). The template detects the
- * color type from two additional template parameters containing the type
- * traits.  For the conversions to and from monochrome, two specializations
- * are provided that just copy luminance information. This gives us and
- * additional 4 conversion functions. The only functions missing are the
- * two conversions between RGB and YUYV.
- */
-template<typename destPixel, typename srcPixel,
-	typename desttraits, typename srctraits>
-void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const desttraits& dt, const srctraits& ds) {
-	convertPixelValue(dest, src);
+#if 0
+template<typename P, typename Q>
+RGB<P>::RGB(Q r, Q g, Q b) {
+	convertPixel(R, r);
+	convertPixel(G, g);
+	convertPixel(B, b);
 }
 
-/* monochrome -> RGB */
-template<typename destPixel, typename srcPixel>
-void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const rgb_color_tag& dt, const monochrome_color_tag& ds) {
-	convertPixelValue(dest.R, src);
-	dest.G = dest.R;
-	dest.B = dest.R;
+template<typename P, typename Q>
+RGB<P>::RGB(const RGB<Q>& q) {
+	convertPixelValue(R, q.R);
+	convertPixelValue(G, q.G);
+	convertPixelValue(B, q.B);
 }
-
-/* RGB -> monochrome */
-template<typename destPixel, typename srcPixel>
-void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const monochrome_color_tag& dt, const rgb_color_tag& ds) {
-	typename srcPixel::value_type	y;
-	y = 0.299 * src.R + 0.587 * src.G + 0.114 * src.B;
-	convertPixelValue(dest, y);
-}
-
-/* YUYV -> monochrome */
-template<typename destPixel, typename srcPixel>
-void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const monochrome_color_tag& dt, const yuyv_color_tag& ds) {
-	convertPixelValue(dest, src.y);
-}
-
-/*  monochrome -> YUYV */
-template<typename destPixel, typename srcPixel>
-void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const yuyv_color_tag& dt, const monochrome_color_tag& ds) {
-	convertPixelValue(dest.y, src);
-	dest.uv = destPixel::zero;
-}
-
-template<typename destPixel, typename srcPixel>
-void	convertPixel(destPixel& dest, const srcPixel& src) {
-	convertPixelTyped(dest, src,
-		typename color_traits<destPixel>::color_category(),
-		typename color_traits<srcPixel>::color_category());
-}
+#endif
 
 /**
  * \brief Convert a pair of pixels
@@ -504,9 +521,9 @@ void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 		 + 0.504129 * src[0].G
 		 + 0.097906 * src[0].B) +  srcPixel::pedestal;
 	convertPixelValue(dest[0].y, Y);
-	U = round(-0.148223 * src[0].R
-		 - 0.290993 * src[0].G
-		 + 0.439216 * src[0].B) + srcPixel::zero;
+	U = round(- 0.148223 * src[0].R
+		  - 0.290993 * src[0].G
+		  + 0.439216 * src[0].B) + srcPixel::zero;
 	convertPixelValue(dest[0].uv, U);
 	Y = round( 0.256788 * src[1].R
 		 + 0.504129 * src[1].G
