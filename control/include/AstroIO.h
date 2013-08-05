@@ -272,6 +272,7 @@ FITSoutfile<Pixel>::FITSoutfile(const std::string& filename)
 template<>								\
 FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
 	throw (FITSexception);
+
 FITS_OUTFILE_SPECIALIZATION(unsigned char)
 FITS_OUTFILE_SPECIALIZATION(unsigned short)
 FITS_OUTFILE_SPECIALIZATION(unsigned int)
@@ -292,6 +293,54 @@ FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned int>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned long>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<float>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<double>)
+
+#define	FITS_OUTFILE_SPECIALIZATION_MULTI(T, N)				\
+template<>								\
+FITSoutfile<Multiplane<T, N> >::FITSoutfile(const std::string& filename)\
+	throw (FITSexception);
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 1)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 2)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 3)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 5)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 6)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 7)
+
 
 /**
  * \brief Holder class for application specific information during FITS
@@ -411,6 +460,33 @@ int	FITSWriteDoWork(const long totaln, long offset,
 		array[offset + 1        ] = dest[1].R;
 		array[offset + 1 + size ] = dest[1].G;
 		array[offset + 1 + size2] = dest[1].B;
+	}
+	return 0;
+}
+
+/**
+ * \brief Work function to write Multiplane pixels to the FITS file
+ */
+template<typename Pixel>
+int	FITSWriteDoWork(const long totaln, long offset,
+		long firstn, long nvalues, int narray,
+		iteratorCol *data, void *userPointer,
+		multiplane_color_tag) {
+	// get the data array, and write a zero into it
+	typedef	typename pixel_value_type<Pixel>::value_type	value_type;
+	value_type   *array = (value_type *)fits_iter_get_array(data);
+	*array++ = 0;
+
+	// get the user data pointer
+        IteratorData<Pixel, multiplane_color_tag>     *user
+		= (IteratorData<Pixel, multiplane_color_tag>*)userPointer;
+
+	// iterate through the pixels and copy them to the data array
+	const int	size = user->image.getSize().getPixels();
+	for (int offset = 0; offset < size; offset++) {
+		for (int i = 0; i < Pixel::planes; i++) {
+			array[offset + i * size] = user->image[offset].p[i];
+		}
 	}
 	return 0;
 }

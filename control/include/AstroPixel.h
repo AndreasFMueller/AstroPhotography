@@ -484,7 +484,7 @@ public:
  */
 template<typename P, int n>
 class Multiplane {
-	static int	planes;
+	enum { planes = n};
 	P	p[n];
 	typedef	P	value_type;
 
@@ -555,7 +555,7 @@ class Multiplane {
 		return !(*this == other);
 	}
 
-	typedef rgb_color_tag color_category;
+	typedef multiplane_color_tag color_category;
 
 	// numeric operators on RGB pixels
 	Multiplane<P, n>	operator+(const Multiplane<P, n>& other) const {
@@ -592,9 +592,6 @@ class Multiplane {
 		return p[0];
 	}
 };
-
-template<typename P, int n>
-int	Multiplane<P,n>::planes = n;
 
 /**
  * \brief Convert a pair of pixels
