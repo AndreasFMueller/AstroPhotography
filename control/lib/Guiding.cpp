@@ -3,13 +3,19 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <includes.h>
+
 #include <AstroGuiding.h>
 #include <AstroIO.h>
 #include <GuiderProcess.h>
-#include <Accelerate/Accelerate.h>
-#include <includes.h>
 #include <AstroFormat.h>
 #include <AstroCallback.h>
+
+#ifdef HAVE_ACCELERATE_ACCELERATE_H
+#include <Accelerate/Accelerate.h>
+#else
+#include <lapack.h>
+#endif /* HAVE_ACCELERATE_ACCELERATE_H */
 
 using namespace astro::image;
 using namespace astro::image::transform;

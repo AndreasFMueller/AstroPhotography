@@ -11,6 +11,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <iostream>
+#include <includes.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;

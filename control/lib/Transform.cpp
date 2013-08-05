@@ -3,9 +3,18 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <AstroTransform.h>
-#include <Accelerate/Accelerate.h>
 #include <AstroFormat.h>
+
+#ifdef HAVE_ACCELERATE_ACCELERATE_H
+#include <Accelerate/Accelerate.h>
+#else
+#include <lapack.h>
+#endif /* HAVE_ACCELERATE_ACCELERATE_H */
 
 namespace astro {
 namespace image {

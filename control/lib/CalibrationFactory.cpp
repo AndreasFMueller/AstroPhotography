@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <includes.h>
 #include <AstroCalibration.h>
 #include <AstroFilter.h>
 #include <PixelValue.h>
