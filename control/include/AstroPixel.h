@@ -205,6 +205,7 @@ void	convertPixelValue(destValue& dest, const srcValue& src) {
  */
 struct yuyv_color_tag { };
 struct rgb_color_tag { };
+struct multiplane_color_tag { };
 struct monochrome_color_tag { };
 
 template<typename P>
@@ -475,21 +476,125 @@ public:
 	}
 };
 
-#if 0
-template<typename P, typename Q>
-RGB<P>::RGB(Q r, Q g, Q b) {
-	convertPixel(R, r);
-	convertPixel(G, g);
-	convertPixel(B, b);
-}
+/*
+ * \brief Pixel classes with an arbitrary number of planes 
+ *
+ * Possible applications for this pixel class is stacking of images for
+ * with the LRGB technique.
+ */
+template<typename P, int n>
+class Multiplane {
+	static int	planes;
+	P	p[n];
+	typedef	P	value_type;
 
-template<typename P, typename Q>
-RGB<P>::RGB(const RGB<Q>& q) {
-	convertPixelValue(R, q.R);
-	convertPixelValue(G, q.G);
-	convertPixelValue(B, q.B);
-}
-#endif
+	Multiplane(const P& v) {
+		for (int i = 0; i < n; i++) {
+			p[i] = v;
+		}
+	}
+
+	template<typename Q>
+	Multiplane(const Q& v) {
+		for (int i = 0; i < n; i++) {
+			p[i] = v;
+		}
+	}
+
+	Multiplane(const RGB<P>& rgb) {
+		int	i = 0;
+		p[i++] = rgb.R;
+		if (i >= n) return;
+		p[i++] = rgb.G;
+		if (i >= n) return;
+		p[i++] = rgb.B;
+		while (i < n) {
+			p[i++] = 0;
+		}
+	}
+
+	template<typename Q>
+	Multiplane(const RGB<Q>& rgb) {
+		int	i = 0;
+		p[i++] = rgb.R;
+		if (i >= n) return;
+		p[i++] = rgb.G;
+		if (i >= n) return;
+		p[i++] = rgb.B;
+		while (i < n) {
+			p[i++] = 0;
+		}
+	}
+	
+	Multiplane(const Multiplane<P, n>& other) {
+		for (int i = 0; i < n; i++) {
+			p[i] = other.p[i];
+		}
+	}
+
+	Multiplane<P,n>&	operator=(const Multiplane<P,n>& other) {
+		for (int i = 0; i < n; i++) {
+			p[i] = other.p[i];
+		}
+	}
+
+	virtual unsigned int	bitsPerPixel() const {
+		return n * std::numeric_limits<P>::digits;
+	}
+
+	bool	operator==(const Multiplane<P, n>& other) const {
+		for (int i = 0; i < n; i++) {
+			if (p[i] == other.p[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool	operator!=(const Multiplane<P, n>& other) const {
+		return !(*this == other);
+	}
+
+	typedef rgb_color_tag color_category;
+
+	// numeric operators on RGB pixels
+	Multiplane<P, n>	operator+(const Multiplane<P, n>& other) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			result.p[i] = p[i] + other.p[i];
+		}
+		return result;
+	}
+
+	Multiplane<P, n>	operator-(const Multiplane<P, n>& other) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			result.p[i] = (p[i] < other.p[i])
+					? 0
+					: (p[i] - other.p[i]);
+		}
+		return result;
+	}
+
+	Multiplane<P, n>	operator*(const P value) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			if ((p[i] * (double)value) > std::numeric_limits<P>::max()) {
+				result.p[i] = std::numeric_limits<P>::max();
+			} else {
+				result.p[i] = p[i] * value;
+			}
+		}
+		return result;
+	}
+
+	P	luminance() const {
+		return p[0];
+	}
+};
+
+template<typename P, int n>
+int	Multiplane<P,n>::planes = n;
 
 /**
  * \brief Convert a pair of pixels
@@ -654,6 +759,31 @@ Pixel	weighted_sum_typed(unsigned int number_of_terms,
 	return Pixel(result.R, result.G, result.B);
 }
 
+template<typename Pixel, int n>
+Multiplane<Pixel, n>	weighted_sum_typed_n(unsigned int number_of_terms,
+				const double *weights,
+				const Multiplane<Pixel, n> *pixels,
+				const multiplane_color_tag& tag) {
+	Multiplane<double, n>	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		Multiplane<double, n>	summand(pixels[i]);
+		result = result + summand * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+	return Pixel(result);
+}
+
+
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms,
+			const double *weights, const Pixel *pixels,
+			const multiplane_color_tag& tag) {
+	return weighted_sum_typed_n<Pixel::value_type, Pixel::planes>(
+		number_of_terms, weights, pixels, multiplane_color_tag());
+}
+
 template<typename Pixel>
 Pixel	weighted_sum(unsigned int number_of_terms,
 		const double *weights, const Pixel *pixels) {
@@ -669,6 +799,11 @@ Pixel	weighted_sum(unsigned int number_of_terms,
 template<typename Pixel>
 double	luminance_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
 	return pixel;
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+	return pixel.luminance();
 }
 
 template<typename Pixel>
@@ -696,6 +831,11 @@ double	maximum_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
 }
 
 template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
 double	maximum_typed(const Pixel& pixel, const rgb_color_tag& tag) {
 	return std::numeric_limits<typename Pixel::value_type>::max();
 }
@@ -709,6 +849,7 @@ template<typename Pixel>
 double pixel_maximum() {
 	return maximum_typed(Pixel(), typename color_traits<Pixel>::color_category());
 }
+
 
 } // namespace image
 } // namespace astro
