@@ -87,8 +87,8 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 	case 1:
 	case 3:
 		break;
-	default:
-		throw std::runtime_error("not 1 or 3 planes");
+//	default:
+//		throw std::runtime_error("not 1 or 3 planes");
 	}
 
 	// now read the keys

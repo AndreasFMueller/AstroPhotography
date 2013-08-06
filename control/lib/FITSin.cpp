@@ -41,30 +41,6 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 	FITSinfileBase	infile(filename);
 	ImagePtr	result;
 
-	/* images with 1 plane have primitive data types */
-	if (infile.getPlanes() == 1) {
-		switch (infile.getImgtype()) {
-		case BYTE_IMG:
-		case SBYTE_IMG:
-			result = do_read<unsigned char>(filename);
-			break;
-		case USHORT_IMG:
-		case SHORT_IMG:
-			result = do_read<unsigned short>(filename);
-			break;
-		case ULONG_IMG:
-		case LONG_IMG:
-			result = do_read<unsigned int>(filename);
-			break;
-		case FLOAT_IMG:
-			result = do_read<float>(filename);
-			break;
-		case DOUBLE_IMG:
-			result = do_read<double>(filename);
-			break;
-		}
-	}
-
 	/* images with 3 planes have RGB pixels */
 	if (infile.getPlanes() == 3) {
 		switch (infile.getImgtype()) {
@@ -85,6 +61,63 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 			break;
 		case DOUBLE_IMG:
 			result = do_read<RGB<double> >(filename);
+			break;
+		}
+		return result;
+	}
+
+	/* multiplane pixel images */
+#define	multiplane_read(n)						\
+	if (infile.getPlanes() == n) {					\
+		switch (infile.getImgtype()) {				\
+		case BYTE_IMG:						\
+		case SBYTE_IMG:						\
+			result = do_read<Multiplane<unsigned char, n> >(filename);\
+			break;						\
+		case USHORT_IMG:					\
+		case SHORT_IMG:						\
+			result = do_read<Multiplane<unsigned short, n> >(filename);\
+			break;						\
+		case ULONG_IMG:						\
+		case LONG_IMG:						\
+			result = do_read<Multiplane<unsigned int, n> >(filename);\
+			break;						\
+		case FLOAT_IMG:						\
+			result = do_read<Multiplane<float, n> >(filename);\
+			break;						\
+		case DOUBLE_IMG:					\
+			result = do_read<Multiplane<double, n> >(filename);\
+			break;						\
+		}							\
+		return result;						\
+	}
+
+	multiplane_read(2);
+	multiplane_read(4);
+	multiplane_read(5);
+	multiplane_read(6);
+	multiplane_read(7);
+
+	/* images with 1 plane have primitive data types */
+	if (infile.getPlanes() == 1) {
+		switch (infile.getImgtype()) {
+		case BYTE_IMG:
+		case SBYTE_IMG:
+			result = do_read<unsigned char>(filename);
+			break;
+		case USHORT_IMG:
+		case SHORT_IMG:
+			result = do_read<unsigned short>(filename);
+			break;
+		case ULONG_IMG:
+		case LONG_IMG:
+			result = do_read<unsigned int>(filename);
+			break;
+		case FLOAT_IMG:
+			result = do_read<float>(filename);
+			break;
+		case DOUBLE_IMG:
+			result = do_read<double>(filename);
 			break;
 		}
 	}

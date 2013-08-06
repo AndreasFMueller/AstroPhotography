@@ -155,6 +155,20 @@ void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 }
 
 /**
+ * \brief Convert Multiplane image data from FITS file to the target image
+ *        pixel type
+ */
+template<typename Pixel, typename srctype>
+void	doConvertFITSPixels(Pixel *pixels, const srctype *srcpixels,
+		int pixelcount, const multiplane_color_tag&) {
+	for (int offset = 0; offset < pixelcount; offset++) {
+		for (unsigned int i = 0; i < Pixel::planes; i++) {
+			pixels[offset].p[i] = srcpixels[offset + i * pixelcount];
+		}
+	}
+}
+
+/**
  * \brief Convert Pixel arrays from a privitive type to any other valid
  *        pixel type.
  *

@@ -548,7 +548,7 @@ public:
 
 	bool	operator==(const Multiplane<P, n>& other) const {
 		for (int i = 0; i < n; i++) {
-			if (p[i] == other.p[i]) {
+			if (p[i] != other.p[i]) {
 				return false;
 			}
 		}
