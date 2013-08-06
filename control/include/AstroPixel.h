@@ -489,6 +489,8 @@ public:
 	P	p[n];
 	typedef	P	value_type;
 
+	Multiplane() { }
+
 	Multiplane(const P& v) {
 		for (int i = 0; i < n; i++) {
 			p[i] = v;
@@ -537,6 +539,7 @@ public:
 		for (int i = 0; i < n; i++) {
 			p[i] = other.p[i];
 		}
+		return *this;
 	}
 
 	virtual unsigned int	bitsPerPixel() const {

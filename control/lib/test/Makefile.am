@@ -49,7 +49,7 @@ tests_SOURCES = tests.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
-	FITSwriteTest.cpp FITSreadTest.cpp \
+	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
 	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
