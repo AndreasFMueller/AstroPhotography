@@ -180,6 +180,15 @@ void	mask(MaskingFunction& maskingfunction, ImagePtr image) {
 	}								\
 }
 
+#define rawvalue_multi(image, Pixel, point, n)				\
+{									\
+	Image<Multiplane<Pixel, n> >	*imagep				\
+		= dynamic_cast<Image<Multiplane<Pixel, n> > *>(&*image);\
+	if (NULL != imagep) {						\
+		return luminance(imagep->pixel(point.x(), point.y()));	\
+	}								\
+}
+
 double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
 	rawvalue_typed(image, unsigned char, point);
 	rawvalue_typed(image, unsigned short, point);
@@ -187,19 +196,75 @@ double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
 	rawvalue_typed(image, unsigned long, point);
 	rawvalue_typed(image, float, point);
 	rawvalue_typed(image, double, point);
+
 	rawvalue_typed(image, RGB<unsigned char>, point);
 	rawvalue_typed(image, RGB<unsigned short>, point);
 	rawvalue_typed(image, RGB<unsigned int>, point);
 	rawvalue_typed(image, RGB<unsigned long>, point);
 	rawvalue_typed(image, RGB<float>, point);
 	rawvalue_typed(image, RGB<double>, point);
+
 	rawvalue_typed(image, YUYV<unsigned char>, point);
 	rawvalue_typed(image, YUYV<unsigned short>, point);
 	rawvalue_typed(image, YUYV<unsigned int>, point);
 	rawvalue_typed(image, YUYV<unsigned long>, point);
 	rawvalue_typed(image, YUYV<float>, point);
 	rawvalue_typed(image, YUYV<double>, point);
+
+	rawvalue_multi(image, unsigned char, point, 1);
+	rawvalue_multi(image, unsigned short, point, 1);
+	rawvalue_multi(image, unsigned int, point, 1);
+	rawvalue_multi(image, unsigned long, point, 1);
+	rawvalue_multi(image, float, point, 1);
+	rawvalue_multi(image, double, point, 1);
+
+	rawvalue_multi(image, unsigned char, point, 2);
+	rawvalue_multi(image, unsigned short, point, 2);
+	rawvalue_multi(image, unsigned int, point, 2);
+	rawvalue_multi(image, unsigned long, point, 2);
+	rawvalue_multi(image, float, point, 2);
+	rawvalue_multi(image, double, point, 2);
+
+	rawvalue_multi(image, unsigned char, point, 3);
+	rawvalue_multi(image, unsigned short, point, 3);
+	rawvalue_multi(image, unsigned int, point, 3);
+	rawvalue_multi(image, unsigned long, point, 3);
+	rawvalue_multi(image, float, point, 3);
+	rawvalue_multi(image, double, point, 3);
+
+	rawvalue_multi(image, unsigned char, point, 4);
+	rawvalue_multi(image, unsigned short, point, 4);
+	rawvalue_multi(image, unsigned int, point, 4);
+	rawvalue_multi(image, unsigned long, point, 4);
+	rawvalue_multi(image, float, point, 4);
+	rawvalue_multi(image, double, point, 4);
+
+	rawvalue_multi(image, unsigned char, point, 5);
+	rawvalue_multi(image, unsigned short, point, 5);
+	rawvalue_multi(image, unsigned int, point, 5);
+	rawvalue_multi(image, unsigned long, point, 5);
+	rawvalue_multi(image, float, point, 5);
+	rawvalue_multi(image, double, point, 5);
+
+	rawvalue_multi(image, unsigned char, point, 6);
+	rawvalue_multi(image, unsigned short, point, 6);
+	rawvalue_multi(image, unsigned int, point, 6);
+	rawvalue_multi(image, unsigned long, point, 6);
+	rawvalue_multi(image, float, point, 6);
+	rawvalue_multi(image, double, point, 6);
+
+	rawvalue_multi(image, unsigned char, point, 7);
+	rawvalue_multi(image, unsigned short, point, 7);
+	rawvalue_multi(image, unsigned int, point, 7);
+	rawvalue_multi(image, unsigned long, point, 7);
+	rawvalue_multi(image, float, point, 7);
+	rawvalue_multi(image, double, point, 7);
+
 	return 0;
+}
+
+bool	saturated(const ImagePtr& image, const ImageRectangle& rect) {
+	return true;
 }
 
 } // namespace filter
