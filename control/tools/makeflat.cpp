@@ -102,6 +102,7 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "outfile: %s", outfilename);
 		unlink(outfilename);
 		FITSout	outfile(outfilename);
+		outfile.setPrecious(false);
 		outfile.write(flat);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image written to %s",
 			outfilename);

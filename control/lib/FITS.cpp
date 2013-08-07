@@ -7,6 +7,8 @@
 #include <AstroIO.h>
 #include <fitsio.h>
 #include <AstroDebug.h>
+#include <includes.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 
@@ -245,20 +247,61 @@ std::string	FITSinfileBase::getHeader(const std::string& key) const {
 FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 	int pixeltype, int planes, int imgtype) throw (FITSexception)
 	: FITSfile(filename, pixeltype, planes, imgtype) {
-	int	status = 0;
-	if (fits_create_file(&fptr, filename.c_str(), &status)) {
-		throw FITSexception(errormsg(status));
-	}
+	_precious = true;
 }
 
 /**
  * \brief write the image format information to the header
  */
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
+	// if the file exists but is not precious, and writable, unlink it
+	struct stat	sb;
+	int	rc = stat(filename.c_str(), &sb);
+	if (rc == 0) {
+		// file exists, check that it is a file
+		if (!S_ISREG(sb.st_mode)) {
+			std::string	msg = stringprintf("%s is not a file",
+				filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+
+		// check whether the file is precious
+		if (precious()) {
+			std::string	msg = stringprintf("%s is precious, cannot overwrite", filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+
+		// check whether the file writable
+		if (access(filename.c_str(), W_OK) < 0) {
+			std::string	msg = stringprintf("%s is not writable",
+				filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+
+		// unlink the file
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unklink(%s)", filename.c_str());
+		if (unlink(filename.c_str())) {
+			std::string	msg = stringprintf("cannot unlink "
+				"%s: %s", filename.c_str(), strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+
+	// create the file
+	int	status = 0;
+	if (fits_create_file(&fptr, filename.c_str(), &status)) {
+		throw FITSexception(errormsg(status));
+	}
+
 	// find the dimensions
 	long	naxis = 3;
 	long	naxes[3] = { image.size().width(), image.size().height(), planes };
-	int	status = 0;
+
+	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));
 	}

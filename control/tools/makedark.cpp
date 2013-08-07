@@ -78,6 +78,7 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "outfile: %s", outfilename);
 		unlink(outfilename);
 		FITSout	outfile(outfilename);
+		outfile.setPrecious(false); // allow overwriting
 		outfile.write(dark);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image written to %s",
 			outfilename);

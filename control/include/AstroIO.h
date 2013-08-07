@@ -252,12 +252,15 @@ Image<Pixel>	*FITSinfile<Pixel>::read()
  * to write the image contents.
  */
 class FITSoutfileBase : public FITSfile {
+	bool	_precious;
 public:
 	FITSoutfileBase(const std::string & filename,
 		int _pixeltype, int _planes, int _imgtype)
 		throw (FITSexception);
 	void	write(const ImageBase& image)
 			throw (FITSexception);
+	bool	precious() const { return _precious; }
+	void	setPrecious(bool precious) { _precious = precious; }	
 };
 
 /**
@@ -560,8 +563,11 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
  */
 class FITSout {
 	std::string	filename;
+	bool	_precious;
 public:
 	FITSout(const std::string& filename);
+	bool	precious() const { return _precious; }
+	void	setPrecious(bool precious) { _precious = precious; }
 	void	write(const ImagePtr& image) throw (FITSexception);
 };
 
