@@ -259,6 +259,7 @@ public:
 		throw (FITSexception);
 	void	write(const ImageBase& image)
 			throw (FITSexception);
+	void	postwrite() throw (FITSexception);
 	bool	precious() const { return _precious; }
 	void	setPrecious(bool precious) { _precious = precious; }	
 };
@@ -552,6 +553,9 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 		user.workfunc, &user, &status)) {
 		throw FITSexception(errormsg(status));
 	}
+
+	// call postwrite to protect precious files
+	postwrite();
 }
 
 /**

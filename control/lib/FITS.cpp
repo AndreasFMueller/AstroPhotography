@@ -263,14 +263,14 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 			std::string	msg = stringprintf("%s is not a file",
 				filename.c_str());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
+			throw FITSexception(msg);
 		}
 
 		// check whether the file is precious
 		if (precious()) {
 			std::string	msg = stringprintf("%s is precious, cannot overwrite", filename.c_str());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
+			throw FITSexception(msg);
 		}
 
 		// check whether the file writable
@@ -388,6 +388,33 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 		if (rc) {
 			throw FITSexception(errormsg(status));
 		}
+	}
+}
+
+/**
+ * \brief Fix permissions on precious files
+ */
+void	FITSoutfileBase::postwrite() throw (FITSexception) {
+	// not precious, do nothing
+	if (!precious()) {
+		return;
+	}
+
+	// find current permissions
+	struct stat	sb;
+	if (stat(filename.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat %s: %s",
+			filename.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw FITSexception(msg);
+	}
+
+	// compute and set new permissions
+	if (chmod(filename.c_str(), sb.st_mode & (~(S_IWUSR | S_IWGRP | S_IWOTH))) < 0) {
+		std::string	msg = stringprintf("cannot chmod %s: %s",
+			filename.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw FITSexception(msg);
 	}
 }
 
