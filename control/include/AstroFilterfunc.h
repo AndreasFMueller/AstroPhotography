@@ -33,7 +33,9 @@ extern double	focusFWHM(const ImagePtr& image, const ImagePoint& where,
 
 extern void	mask(MaskingFunction& maskingfunction, ImagePtr image);
 
-extern double	rawvalue(const ImagePtr&image, const ImagePoint& point);
+extern double	rawvalue(const ImagePtr& image, const ImagePoint& point);
+
+extern bool	saturated(const ImagePtr& image, const ImageRectangle& rect);
 
 } // namespace filter
 } // namespace image
