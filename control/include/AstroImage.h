@@ -15,7 +15,7 @@
 #include <limits>
 #include <vector>
 #include <map>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -31,14 +31,20 @@ namespace image {
  * convention.
  */
 class ImagePoint {
+	unsigned int	_x, _y;
 public:
-	unsigned int	x, y;
-	ImagePoint(unsigned int _x = 0, unsigned int _y = 0) : x(_x), y(_y) { }
+	unsigned int	x() const { return _x; }
+	unsigned int	y() const { return _y; }
+	void	setX(unsigned int x) { _x = x; }
+	void	setY(unsigned int y) { _y = y; }
+	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
 	std::string	toString() const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const ImagePoint& point);
 
 class ImageRectangle;
 /**
@@ -49,17 +55,32 @@ class ImageRectangle;
  * number of pixels and width/height.
  */
 class ImageSize {
-public:
-	unsigned int	width, height;
+	unsigned int	_width, _height;
 	unsigned int	pixels;
-	ImageSize(unsigned int _width = 0, unsigned int _height = 0);
+public:
+	// the accessors are defined inline so that a clever compiler can
+	// still make them just asf ast as directly accessible members
+	unsigned int	width() const { return _width; }
+	void	setWidth(unsigned int width);
+	unsigned int	height() const { return _height; }
+	void	setHeight(unsigned int height);
+	unsigned int	getPixels() const { return pixels; }
+	// constructors
+	ImageSize(unsigned int width = 0, unsigned int height = 0);
+	// comparision
 	bool	operator==(const ImageSize& other) const;
 	bool	operator!=(const ImageSize& other) const;
+	// relationships
 	bool	bounds(const ImagePoint& point) const;
 	bool	bounds(const ImageRectangle& rectangle) const;
 	bool	contains(const ImagePoint& point) const;
-	bool	contains(unsigned int x, unsigned int y) const;
+	bool	contains(int x, int y) const;
+	// characteristic function
 	int	chi(unsigned int x, unsigned int y) const;
+	// offset into pixel array
+	unsigned int	offset(unsigned int x, unsigned int y) const;
+	unsigned int	offset(const ImagePoint& point) const;
+	// text representation
 	std::string	toString() const;
 };
 
@@ -72,24 +93,32 @@ public:
  * specifies width and height of the rectangle,
  */
 class ImageRectangle {
+	ImagePoint	_origin;
+	ImageSize	_size;
 public:
-	ImagePoint	origin;
-	ImageSize		size;
-	bool	contains(const ImagePoint& point) const;
-	bool	contains(const ImageRectangle& rectangle) const;
-	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : size(w, h) { }
-	ImageRectangle(const ImageSize& _size) : origin(0, 0), size(_size) { }
-	ImageRectangle(const ImagePoint& _origin, const ImageSize& _size)
-		: origin(_origin), size(_size) { }
+	// accessors
+	const ImagePoint&	origin() const { return _origin; }
+	const ImageSize&	size() const { return _size; }
+	void	setOrigin(const ImagePoint& origin) { _origin = origin; }
+	void	setSize(const ImageSize& size) { _size = size; }
+	// constructors
+	ImageRectangle(unsigned int w = 0, unsigned int h = 0) : _size(w, h) { }
+	ImageRectangle(const ImageSize& size) : _size(size) { }
+	ImageRectangle(const ImagePoint& origin, const ImageSize& size)
+		: _origin(origin), _size(size) { }
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImagePoint& translatedby);
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
+	// oeprators
+	bool	contains(const ImagePoint& point) const;
+	bool	contains(const ImageRectangle& rectangle) const;
 	bool	operator==(const ImageRectangle& other) const;
 	const ImagePoint&	lowerLeftCorner() const;
 	ImagePoint	lowerRightCorner() const;
 	ImagePoint	upperRightCorner() const;
 	ImagePoint	upperLeftCorner() const;
+	// text represenation
 	std::string	toString() const;
 };
 
@@ -120,6 +149,53 @@ public:
 		const std::string& _comment);
 };
 typedef std::multimap<std::string, Metavalue>	ImageMetadata;
+
+/**
+ * \brief MosaicType
+ *
+ *
+ */
+class MosaicType {
+public:
+	/**
+	 * \brief Constants describing pixel layout in bayer matrix.
+	 *
+	 * The four BAYER_ constants indicate the position of the red
+	 * pixel. The last two bits can be interpreted as the coordinates
+	 * of the red pixel in a 2x2 square of the Bayer matrix. The last
+	 * bit is the x-coordinate, the last but one bit is the y-coordinate.
+	 * so the constant 2 has last bit 0 and last but one bit 1, translating
+	 * into a bayer matrix that has the red pixel in the second row and
+	 * the first column, i.e. in the lower left corner
+	 */
+	typedef enum mosaic_e {
+		NONE = 0,
+		BAYER_RGGB = 4,
+		BAYER_GRBG = 5,
+		BAYER_GBRG = 6,
+		BAYER_BGGR = 7
+	} mosaic_type;
+private:
+	mosaic_type	mosaic;
+public:
+	MosaicType(mosaic_type _mosaic = NONE) : mosaic(_mosaic) { }
+	mosaic_type	getMosaicType() const { return mosaic; }
+	void	setMosaicType(mosaic_type mosaic);
+	void	setMosaicType(const std::string& mosaic_name);
+	bool	isMosaic() const;
+	// methods used for demosaicing: x/y coordinates of colored
+	// pixels
+	ImagePoint	red() const;
+	ImagePoint	blue() const;
+	ImagePoint	greenb() const;
+	ImagePoint	greenr() const;
+	// methods related to the mosaic stuff
+	bool	isR(unsigned int x, unsigned int y) const;
+	bool	isG(unsigned int x, unsigned int y) const;
+	bool	isB(unsigned int x, unsigned int y) const;
+	bool	isGr(unsigned int x, unsigned int y) const;
+	bool	isGb(unsigned int x, unsigned int y) const;
+};
 
 /**
  * \brief Image base class
@@ -162,35 +238,22 @@ public:
 	void	setMetadata(const std::string& name, const Metavalue& mv);
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
-public:
-	/**
-	 * \brief Constants describing pixel layout in bayer matrix.
-	 *
-	 * The four BAYER_ constants indicate the position of the red
-	 * pixel. The last two bits can be interpreted as the coordinates
-	 * of the red pixel in a 2x2 square of the Bayer matrix. The last
-	 * bit is the x-coordinate, the last but one bit is the y-coordinate.
-	 * so the constant 2 has last bit 0 and last but one bit 1, translating
-	 * into a bayer matrix that has the red pixel in the second row and
-	 * the first column, i.e. in the lower left corner
-	 */
-	typedef enum mosaic_e {
-		NONE = 0,
-		BAYER_RGGB = 4,
-		BAYER_GRBG = 5,
-		BAYER_GBRG = 6,
-		BAYER_BGGR = 7
-	} mosaic_type;
 protected:
-	mosaic_type	mosaic;
+	MosaicType	mosaic;
 public:
 	// accessors for metadata
-	mosaic_type	getMosaicType() const;
-	void	setMosaicType(mosaic_type mosaic);
+	MosaicType	getMosaicType() const { return mosaic; }
+	void	setMosaicType(MosaicType::mosaic_type mosaic);
 	void	setMosaicType(const std::string& mosaic_name);
 
 	// the size is publicly accessible, but users should not change it
-	ImageSize	size;
+protected:
+	ImageRectangle	frame;
+public:
+	const ImageRectangle&	getFrame() const { return frame; }
+	void	setOrigin(const ImagePoint& origin) { frame.setOrigin(origin); }
+	const ImageSize&	size() const { return frame.size(); }
+	const ImagePoint&	origin() const { return frame.origin(); }
 
 	// constructors and destructor
 	ImageBase(unsigned int w = 0, unsigned int h = 0);
@@ -204,15 +267,14 @@ public:
 	virtual unsigned int	pixeloffset(unsigned int x, unsigned int y) const;
 	virtual unsigned int	pixeloffset(const ImagePoint& p) const;
 
-	// methods related to the mosaic stuff
-	bool	isR(unsigned int x, unsigned int y) const;
-	bool	isG(unsigned int x, unsigned int y) const;
-	bool	isB(unsigned int x, unsigned int y) const;
-	bool	isGr(unsigned int x, unsigned int y) const;
-	bool	isGb(unsigned int x, unsigned int y) const;
-
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	unsigned int bytesPerPixel() const;
+
+	// pixel range stuff
+	virtual double	minimum() const { return 0; }
+	virtual double	maximum() const { return 255; }
+
+	// text representation (for debugging)
 	friend std::ostream&	operator<<(std::ostream& out,
 		const ImageBase& image);
 };
@@ -295,7 +357,7 @@ class	ImageRow : public ImageLine {
 public:
 	const unsigned int	y;
 	ImageRow(const ImageSize size, unsigned int _y)
-		: ImageLine(size.width * _y, size.width * (_y + 1) - 1, 1),
+		: ImageLine(size.width() * _y, size.width() * (_y + 1) - 1, 1),
 		  y(_y) { }
 };
 
@@ -306,9 +368,46 @@ class	ImageColumn : public ImageLine {
 public:
 	const unsigned int	x;
 	ImageColumn(const ImageSize& size, unsigned int _x)
-		: ImageLine(_x, _x + size.pixels - size.width, size.width),
-		  x(_x) { }
+		: ImageLine(_x, _x + size.getPixels() - size.width(),
+			size.width()), x(_x) { }
 };
+
+/**
+ * \brief Read-only Access to the pixels of an image
+ *
+ * The Image class gives some basic access to the pixels of an image.
+ * more sophisticated access, like selecting planes, merging planes,
+ * converting pixel type, taking subimages etc. is handled through 
+ * adapter classes. This is the base class for these adapter classes,
+ * it defines the pixel accessors. 
+ */
+template<typename Pixel>
+class ConstImageAdapter {
+protected:
+	ImageSize	adaptersize;
+public:
+	/**
+	 * \brief A shorthand for the type of the individual pixels
+	 */
+	typedef	Pixel	pixel_type;
+
+	ConstImageAdapter(const ImageSize& _size) : adaptersize(_size) { }
+
+	ImageSize	getSize() const { return adaptersize; }
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const = 0;
+};
+
+/**
+ * \brief Read-write Access to the pixels of an image
+ *
+ */
+template<typename Pixel>
+class ImageAdapter : public ConstImageAdapter<Pixel> {
+public:
+	ImageAdapter(const ImageSize& size) : ConstImageAdapter<Pixel>(size) {}
+	virtual Pixel&	pixel(unsigned int x, unsigned int y) = 0;
+};
+
 
 /**
  * \brief Image class
@@ -317,8 +416,15 @@ public:
  * as specified by the template argument. Images have an immutable size
  */
 template<typename Pixel>
-class Image : public ImageBase {
+class Image : public ImageBase, public ImageAdapter<Pixel> {
 public:
+	/**
+	 * \brief Access to the image size
+	 */
+	virtual	ImageSize	getSize() const {
+		return frame.size();
+	}
+
 	/**
 	 * \brief	Array containing the pixel values
 	 */
@@ -339,13 +445,13 @@ public:
 	 *		Image is deallocated.
 	 */
 	Image<Pixel>(unsigned int _w, unsigned int _h, Pixel *p = NULL)
-		: ImageBase(_w, _h) {
+		: ImageBase(_w, _h), ImageAdapter<Pixel>(ImageSize(_w, _h)) {
 		if (p) {
 			pixels = p;
 		} else {
-			pixels = new Pixel[size.pixels];
+			pixels = new Pixel[frame.size().getPixels()];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.pixels, pixels);
+				frame.size().getPixels(), pixels);
 		}
 	}
 
@@ -362,13 +468,33 @@ public:
 	 *		supplied Pixel array and will free it when the
 	 *		Image is deallocated.
 	 */
-	Image<Pixel>(const ImageSize& size, Pixel *p = NULL) : ImageBase(size) {
+	Image<Pixel>(const ImageSize& size, Pixel *p = NULL)
+		: ImageBase(size), ImageAdapter<Pixel>(size) {
 		if (p) {
 			pixels = p;
 		} else {
-			pixels = new Pixel[size.pixels];
+			pixels = new Pixel[size.getPixels()];
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.pixels, pixels);
+				size.getPixels(), pixels);
+		}
+	}
+
+	/**
+	 * \brief Create an image from an adapter
+	 *
+	 * Usually, adapters are only "virtual" images, the pixels are
+	 * computed only when needed. In some cases, like when an image is
+	 * to be stored in a file, a concrete image has to be instantiated
+	 * from the adapter
+ 	 */ 
+	Image<Pixel>(const ConstImageAdapter<Pixel>& adapter)
+		: ImageBase(adapter.getSize()),
+		  ImageAdapter<Pixel>(adapter.getSize()) {
+		pixels = new Pixel[frame.size().getPixels()];
+		for (unsigned int x = 0; x < frame.size().width(); x++) {
+			for (unsigned int y = 0; y < frame.size().height(); y++) {
+				pixel(x, y) = adapter.pixel(x, y);
+			}
 		}
 	}
 
@@ -378,11 +504,13 @@ public:
 	 * \param
  	 */
 	template<typename srcPixel>
-	Image<Pixel>(const Image<srcPixel>& other) : ImageBase(other.size) {
-		pixels = new Pixel[size.pixels];
+	Image<Pixel>(const Image<srcPixel>& other)
+		: ImageBase(other.size()),
+		  ImageAdapter<Pixel>(other.size()) {
+		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.pixels, pixels);
-		convertPixelArray(pixels, other.pixels, size.pixels);
+			frame.size().getPixels(), pixels);
+		convertPixelArray(pixels, other.pixels, frame.size().getPixels());
 	}
 
 	/**
@@ -398,11 +526,12 @@ public:
 	 * because the whole pixel array and not only some rows of  it
 	 * need to be copied.
 	 */
-	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p) {
-		pixels = new Pixel[size.pixels];
+	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
+		ImageAdapter<Pixel>(p.frame.size()) {
+		pixels = new Pixel[frame.size().getPixels()];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
-			size.pixels, pixels);
-		std::copy(p.pixels, p.pixels + size.pixels, pixels);
+			frame.size().getPixels(), pixels);
+		std::copy(p.pixels, p.pixels + frame.size().getPixels(), pixels);
 	}
 
 	/**
@@ -412,12 +541,12 @@ public:
 	 * same size.
 	 */
 	Image<Pixel>&	operator=(Image<Pixel>& other) {
-		if (!(other.size == size)) {
+		if (!(other.frame.size() == frame.size())) {
 			throw std::length_error("image frame mismatch");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
 			other.pixels, pixels);
-		std::copy(other.pixels, other.pixels + other.size.pixels, pixels);
+		std::copy(other.pixels, other.pixels + other.frame.size().getPixels(), pixels);
 	}
 
 	/**
@@ -429,15 +558,10 @@ public:
 	}
 
 	/**
-	 * \brief A shorthand for the type of the individual pixels
-	 */
-	typedef	Pixel	pixel_type;
-
-	/**
 	 * \brief Read only access to pixel values specified by offset.
 	 */
 	const Pixel&	operator[](unsigned int offset) const {
-		if ((offset < 0) || (offset > size.pixels)) {
+		if ((offset < 0) || (offset > frame.size().getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -447,7 +571,7 @@ public:
 	 * \brief Read/write access to pixels specified by offset
 	 */
 	Pixel&	operator[](unsigned int offset) {
-		if ((offset < 0) || (offset > size.pixels)) {
+		if ((offset < 0) || (offset > frame.size().getPixels())) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -457,7 +581,7 @@ public:
 	 * \brief Read only access to pixel values specified by image
 	 *        coordinates
 	 */
-	const Pixel&	pixel(unsigned int x, unsigned int y) const {
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
 		return pixels[pixeloffset(x, y)];
 	}
 
@@ -482,7 +606,7 @@ public:
 		 * \param _y y coordinate of the row to be constructed
 		 */
 		row(Image<Pixel> &_image, unsigned int _y)
-			: ImageRow(_image.size, _y), image(_image) { }
+			: ImageRow(_image.frame.size(), _y), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
 		iterator	end();
@@ -499,7 +623,7 @@ public:
 		 * \param _x x coordinate of the column to be constructed
  		 */
 		column(Image<Pixel> &_image, unsigned int _x)
-			: ImageColumn(_image.size, _x), image(_image) { }
+			: ImageColumn(_image.size(), _x), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
 		iterator	end();
@@ -556,25 +680,25 @@ public:
 		if (!this->ImageBase::operator==(other)) {
 			return false;
 		}
-		return std::equal(pixels, pixels + size.pixels, other.pixels);
+		return std::equal(pixels, pixels + frame.size().getPixels(), other.pixels);
 	}
 
 	/**
 	 * \brief Fill an image with a given value
 	 */
 	void	fill(const Pixel& value) {
-		std::fill(pixels, pixels + size.pixels, value);
+		std::fill(pixels, pixels + frame.size().getPixels(), value);
 	}
 
 	/**
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
-	void	fill(const ImageRectangle& frame, const Pixel& value) {
-		for (unsigned int y = 0; y < frame.size.height; y++) {
-			ImageRow	r(size, frame.origin.y + y);
-			std::fill(pixels + r.firstoffset + frame.origin.x,
-				pixels + r.firstoffset + frame.origin.x
-					+ size.width, value);
+	void	fill(const ImageRectangle& subframe, const Pixel& value) {
+		for (unsigned int y = 0; y < subframe.size().height(); y++) {
+			ImageRow	r(frame.size(), subframe.origin().y() + y);
+			std::fill(pixels + r.firstoffset + subframe.origin().x(),
+				pixels + r.firstoffset + subframe.origin().x()
+					+ frame.size().width(), value);
 		}
 	}
 
@@ -593,6 +717,13 @@ public:
 	virtual unsigned int	bitsPerPixel() const {
 		return astro::image::bitsPerPixel(Pixel());
 	}
+
+	/**
+	 * \brief get maximum pixel value
+ 	 */
+	virtual double	maximum() const {
+		return pixel_maximum<Pixel>();
+	}
 };
 
 /**
@@ -606,17 +737,18 @@ public:
  */
 template<class Pixel>
 Image<Pixel>::Image(const Image<Pixel>& src,
-		const ImageRectangle& frame) : ImageBase(frame.size) {
-	if (!src.size.bounds(frame)) {
+		const ImageRectangle& subframe)
+	: ImageBase(subframe.size()), ImageAdapter<Pixel>(subframe.size()) {
+	if (!src.frame.size().bounds(subframe)) {
 		throw std::range_error("subimage frame too large");
 	}
-	pixels = new Pixel[size.pixels];
-	for (unsigned int y = 0; y < frame.size.height; y++) {
-		ImageRow	srcrow(src.size, frame.origin.y + y);
-		ImageRow	destrow(size, y);
-		std::copy(src.pixels + srcrow.firstoffset + frame.origin.x,
-			src.pixels + srcrow.firstoffset + frame.origin.x
-				+ size.width,
+	pixels = new Pixel[subframe.size().getPixels()];
+	for (unsigned int y = 0; y < subframe.size().height(); y++) {
+		ImageRow	srcrow(src.frame.size(), subframe.origin().y() + y);
+		ImageRow	destrow(frame.size(), y);
+		std::copy(src.pixels + srcrow.firstoffset + subframe.origin().x(),
+			src.pixels + srcrow.firstoffset + subframe.origin().x()
+				+ frame.size().width(),
 			pixels + destrow.firstoffset);
 	}
 }
@@ -718,10 +850,10 @@ typename Image<Pixel>::const_iterator	Image<Pixel>::column::end() const {
  */
 template<typename destPixel, typename srcPixel>
 void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
-	if (dest.size != src.size) {
+	if (dest.size() != src.size()) {
 		throw std::runtime_error("convertImage: image sizes don't match");
 	}
-	convertPixelArray(dest.pixels, src.pixels, dest.size.pixels);
+	convertPixelArray(dest.pixels, src.pixels, dest.size().getPixels());
 }
 
 /**
@@ -733,6 +865,22 @@ bool	isColorImage(const ImagePtr& image);
  * \brief Find out whether an image is a monochrome
  */
 bool	isMonochromeImage(const ImagePtr& image);
+
+/**
+ * \brief Abstraction for subgrids of an image
+ */
+class Subgrid {
+public:
+	ImagePoint	origin;
+	ImageSize	stepsize;
+	Subgrid();
+	Subgrid(const ImagePoint& origin, const ImageSize& stepsize);
+	Subgrid(const Subgrid& other);
+	unsigned int	x(unsigned int _x) const;
+	unsigned int	y(unsigned int _y) const;
+	unsigned int	volume() const;
+	std::string	toString() const;
+};
 
 } // namespace image
 } // namespace astro

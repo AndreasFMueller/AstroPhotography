@@ -3,19 +3,52 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SbigLocator.h>
-#include <debug.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
 #include <sbigudrv.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
+#include <SbigLocator.h>
+#include <AstroDebug.h>
 #include <utils.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <SbigCamera.h>
 #include <includes.h>
+#include <pthread.h>
 
+using namespace astro;
 using namespace astro::camera;
 
 namespace astro {
 namespace camera {
 namespace sbig {
+
+//////////////////////////////////////////////////////////////////////
+// SbigLock implementation
+//////////////////////////////////////////////////////////////////////
+
+static pthread_mutex_t sbigmutex;
+
+SbigLock::SbigLock() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking sbig mutex");
+	pthread_mutex_lock(&sbigmutex);
+}
+
+SbigLock::~SbigLock() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unlocking sbig mutex");
+	pthread_mutex_unlock(&sbigmutex);
+}
+
+//////////////////////////////////////////////////////////////////////
+// SbigLocator implementation
+//////////////////////////////////////////////////////////////////////
 
 std::string	SbigCameraLocator::getName() const {
 	return std::string("sbig");
@@ -26,6 +59,10 @@ std::string	SbigCameraLocator::getVersion() const {
 }
 
 SbigCameraLocator::SbigCameraLocator() {
+	pthread_mutexattr_t	mta;
+	pthread_mutexattr_init(&mta);
+	pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&sbigmutex, &mta);
 	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
 	if (e != CE_NO_ERROR) {
 		std::string	errmsg = sbig_error(e);
@@ -47,9 +84,20 @@ SbigCameraLocator::~SbigCameraLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
 }
 
-std::vector<std::string>	SbigCameraLocator::getCameralist() {
+/**
+ * \brief Get a list of SBIG cameras
+ *
+ * The cameras on the USB bus are number, that's the order in which the
+ * locator returns the identifying string of the camera. A camera is
+ * identified by its serial number an name.
+ */
+std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	names;
+	if (device != CAMERA) {
+		return names;
+	}
 	QueryUSBResults	results;
+	SbigLock	lock;
 	short	e = SBIGUnivDrvCommand(CC_QUERY_USB, NULL, &results);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get camera list: %s",
@@ -69,12 +117,33 @@ std::vector<std::string>	SbigCameraLocator::getCameralist() {
 	return names;
 }
 
+/**
+ * \brief Get a camera by name
+ *
+ * This works by retrieving a list of cameras and the checking which number
+ * has the right name. This index is then used to retreive the camera object
+ * by number.
+ */
 CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
-	return CameraPtr();
+	std::vector<std::string>	cameras = getDevicelist();
+	std::vector<std::string>::const_iterator	i;
+	size_t	index = 0;
+	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
+		if (name == *i) {
+			return getCamera(index);
+		}
+	}
+	std::string	msg = stringprintf("camera %s not found", name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
+/**
+ * \brief Get a camera by number
+ */
 CameraPtr	SbigCameraLocator::getCamera(size_t index) {
-	return CameraPtr(new SbigCamera());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
+	return CameraPtr(new SbigCamera(index));
 }
 
 } // namespace sbig
@@ -82,6 +151,6 @@ CameraPtr	SbigCameraLocator::getCamera(size_t index) {
 } // namespace astro
 
 extern "C"
-astro::camera::CameraLocator	*getCameraLocator() {
+astro::device::DeviceLocator	*getDeviceLocator() {
 	return new astro::camera::sbig::SbigCameraLocator();
 }

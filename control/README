@@ -35,6 +35,10 @@ Mandatory packages:
    The website also has links to online documentation here:
    http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
 
+ - LAPACK: in several places, linear systems of equations and least squares
+   problems for relatively large numbers of equations or unknowns need to
+   be solved. For these operations, LAPACK is used.
+
 Optional packages:
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified

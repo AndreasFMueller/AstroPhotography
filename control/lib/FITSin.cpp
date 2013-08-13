@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroIO.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace io {
@@ -30,7 +30,7 @@ static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
 	Image<P>	*image = reader.read();
 	ImagePtr	result(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "result is an %d x %d image",
-		result->size.width, result->size.height);
+		result->size().width(), result->size().height());
 	return result;
 }
 
@@ -39,46 +39,111 @@ static ImagePtr	do_read(const std::string& filename) throw (FITSexception) {
  */
 ImagePtr	FITSin::read() throw (FITSexception) {
 	FITSinfileBase	infile(filename);
-
-	/* images with 1 plane have primitive data types */
-	if (infile.getPlanes() == 1) {
-		switch (infile.getImgtype()) {
-		case BYTE_IMG:
-		case SBYTE_IMG:
-			return do_read<unsigned char>(filename);
-		case USHORT_IMG:
-		case SHORT_IMG:
-			return do_read<unsigned short>(filename);
-		case ULONG_IMG:
-		case LONG_IMG:
-			return do_read<unsigned int>(filename);
-		case FLOAT_IMG:
-			return do_read<float>(filename);
-		case DOUBLE_IMG:
-			return do_read<double>(filename);
-		}
-	}
+	ImagePtr	result;
 
 	/* images with 3 planes have RGB pixels */
 	if (infile.getPlanes() == 3) {
 		switch (infile.getImgtype()) {
 		case BYTE_IMG:
 		case SBYTE_IMG:
-			return do_read<RGB<unsigned char> >(filename);
+			result = do_read<RGB<unsigned char> >(filename);
+			break;
 		case USHORT_IMG:
 		case SHORT_IMG:
-			return do_read<RGB<unsigned short> >(filename);
+			result = do_read<RGB<unsigned short> >(filename);
+			break;
 		case ULONG_IMG:
 		case LONG_IMG:
-			return do_read<RGB<unsigned int> >(filename);
+			result = do_read<RGB<unsigned int> >(filename);
+			break;
 		case FLOAT_IMG:
-			return do_read<RGB<float> >(filename);
+			result = do_read<RGB<float> >(filename);
+			break;
 		case DOUBLE_IMG:
-			return do_read<RGB<double> >(filename);
+			result = do_read<RGB<double> >(filename);
+			break;
+		}
+		return result;
+	}
+
+	/* multiplane pixel images */
+#define	multiplane_read(n)						\
+	if (infile.getPlanes() == n) {					\
+		switch (infile.getImgtype()) {				\
+		case BYTE_IMG:						\
+		case SBYTE_IMG:						\
+			result = do_read<Multiplane<unsigned char, n> >(filename);\
+			break;						\
+		case USHORT_IMG:					\
+		case SHORT_IMG:						\
+			result = do_read<Multiplane<unsigned short, n> >(filename);\
+			break;						\
+		case ULONG_IMG:						\
+		case LONG_IMG:						\
+			result = do_read<Multiplane<unsigned int, n> >(filename);\
+			break;						\
+		case FLOAT_IMG:						\
+			result = do_read<Multiplane<float, n> >(filename);\
+			break;						\
+		case DOUBLE_IMG:					\
+			result = do_read<Multiplane<double, n> >(filename);\
+			break;						\
+		}							\
+		return result;						\
+	}
+
+	multiplane_read(2);
+	multiplane_read(4);
+	multiplane_read(5);
+	multiplane_read(6);
+	multiplane_read(7);
+
+	/* images with 1 plane have primitive data types */
+	if (infile.getPlanes() == 1) {
+		switch (infile.getImgtype()) {
+		case BYTE_IMG:
+		case SBYTE_IMG:
+			result = do_read<unsigned char>(filename);
+			break;
+		case USHORT_IMG:
+		case SHORT_IMG:
+			result = do_read<unsigned short>(filename);
+			break;
+		case ULONG_IMG:
+		case LONG_IMG:
+			result = do_read<unsigned int>(filename);
+			break;
+		case FLOAT_IMG:
+			result = do_read<float>(filename);
+			break;
+		case DOUBLE_IMG:
+			result = do_read<double>(filename);
+			break;
 		}
 	}
 
-	return ImagePtr();
+	// resolve mosaic information, check for the BAYER key:
+	if (infile.hasHeader(std::string("BAYER"))) {
+		std::string	bayervalue
+			= infile.getHeader(std::string("BAYER"));
+		bayervalue = bayervalue.substr(1, 4);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayervalue: '%s'",
+			bayervalue.c_str());
+                if (bayervalue == std::string("RGGB")) {
+			result->setMosaicType(MosaicType::BAYER_RGGB);
+                }
+                if (bayervalue == std::string("GRBG")) {
+			result->setMosaicType(MosaicType::BAYER_GRBG);
+                }
+                if (bayervalue == std::string("GBRG")) {
+			result->setMosaicType(MosaicType::BAYER_GBRG);
+                }
+                if (bayervalue == std::string("BGGR")) {
+			result->setMosaicType(MosaicType::BAYER_BGGR);
+                }
+        }
+
+	return result;
 }
 
 

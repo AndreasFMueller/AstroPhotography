@@ -7,8 +7,8 @@
 #include <includes.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <stdexcept>
 
 using namespace astro;

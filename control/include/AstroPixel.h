@@ -205,158 +205,12 @@ void	convertPixelValue(destValue& dest, const srcValue& src) {
  */
 struct yuyv_color_tag { };
 struct rgb_color_tag { };
+struct multiplane_color_tag { };
 struct monochrome_color_tag { };
 
 template<typename P>
 struct color_traits {
 	typedef typename P::color_category color_category;
-};
-
-template<typename P>
-class Color {
-public:
-	typedef	P	value_type;
-	static const value_type	pedestal;
-	static const value_type	zero;
-	static const value_type	limit;
-	static P	clip(const double& value) {
-		if (value < 0) { return 0; }
-		if (value > limit) { return limit; }
-		return value;
-	}
-	virtual unsigned int	bitsPerPixel() const {
-		return std::numeric_limits<P>::digits;
-	}
-};
-
-/**
- * \brief YUYV Pixels
- *
- * YUYV Colorspace encodes colors by providing a luminance (Y) value
- * in every pixel, and color (U, V) values in every other pixel.
- * So luminance can be reconstructed with full resolution, while 
- * color will be reconstructed with reduced fidelity. This usually
- * is not a problem, as the eye does not resolve color with the
- * same accuracy as luminance.
- *
- * Our images can use any primitive numeric type for the pixel values,
- * so YUYV, so we use a template class to create YUYV pixels. Note, however,
- * that there is no way to convert individual YUYV pixels to RGB or
- * back, as only pairs of pixels contain enough information.
- */
-template<typename P>
-class YUYV : public Color<P> {
-public:
-	P	y;
-	P	uv;
-	YUYV() { }
-	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
-
-	template<typename Q>
-	YUYV(const Q& _y, const Q& _uv) {
-		convertPixelValue(y, _y);
-		convertPixelValue(uv, _uv);
-	}
-	virtual	~YUYV() { }
-
-	/**
-	 * \brief Copy constructor for YUYV pixels.
-	 *
-	 * Since the Y,U,V pixel values can be any integer type, which
-	 * necessitates shifting them when converting from one type to
-	 * another, we have to use the convertPixel functions when copying
-	 * an YUYV pixel.
-	 */
-	template<typename Q>
-	YUYV(const YUYV<Q>& q) {
-		convertPixelValue(y, q.y);
-		convertPixelValue(uv, q.uv);
-	}
-
-	bool	operator==(const YUYV<P>& other) const {
-		return (y == other.y) && (uv == other.uv);
-	}
-	bool	operator!=(const YUYV<P>& other) const {
-		return (y != other.y) || (uv != other.uv);
-	}
-	typedef yuyv_color_tag color_category;
-
-	virtual unsigned int	bitsPerPixel() const {
-		return 2 * std::numeric_limits<P>::digits;
-	}
-};
-
-/**
- * \brief RGB pixels of any type
- *
- * RGB pixels encode color with three independent color channels.
- */
-template<typename P>
-class RGB : public Color<P> {
-public:
-	P	R;
-	P	G;
-	P	B;
-	RGB() { }
-	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
-	virtual ~RGB() { }
-
-	template<typename Q>
-	RGB(Q r, Q g, Q b) {
-		convertPixel(R, r);
-		convertPixel(G, g);
-		convertPixel(B, b);
-	}
-
-	/**
-	 * \brief Copy constructor for RGB pixels.
-	 *
-	 * Since the R,G,B pixel values can be any integer type, which
-	 * necessitates shifting them when converting from one type to
-	 * another, we have to use the convertPixel functions when copying
-	 * an RGB pixel.
-	 */
-	template<typename Q>
-	RGB(const RGB<Q>& q) {
-		convertPixelValue(R, q.R);
-		convertPixelValue(G, q.G);
-		convertPixelValue(B, q.B);
-	}
-
-	bool	operator==(const RGB<P>& other) const {
-		return (R == other.R) && (G == other.G) && (B == other.B);
-	}
-	bool	operator!=(const RGB<P>& other) const {
-		return !(*this == other);
-	}
-	typedef rgb_color_tag color_category;
-
-	// numeric operators on RGB pixels
-	RGB<P>	operator+(const RGB<P>& other) {
-		RGB<P>	result;
-		result.R = R + other.R;
-		result.G = G + other.G;
-		result.B = B + other.B;
-		return result;
-	}
-	RGB<P>	operator-(const RGB<P>& other) {
-		RGB<P>	result;
-		result.R = R - other.R;
-		result.G = G - other.G;
-		result.B = B - other.B;
-		return result;
-	}
-	RGB<P>	operator*(const P value) {
-		RGB<P>	result;
-		result.R = R * value;
-		result.G = G * value;
-		result.B = B * value;
-		return result;
-	}
-
-	virtual unsigned int	bitsPerPixel() const {
-		return 2 * std::numeric_limits<P>::digits;
-	}
 };
 
 /**
@@ -454,6 +308,295 @@ void	convertPixel(destPixel& dest, const srcPixel& src) {
 		typename color_traits<srcPixel>::color_category());
 }
 
+
+template<typename P>
+class Color {
+public:
+	typedef	P	value_type;
+	static const value_type	pedestal;
+	static const value_type	zero;
+	static const value_type	limit;
+	static P	clip(const double& value) {
+		if (value < 0) { return 0; }
+		if (value > limit) { return limit; }
+		return value;
+	}
+	virtual unsigned int	bitsPerPixel() const {
+		return std::numeric_limits<P>::digits;
+	}
+};
+
+/**
+ * \brief YUYV Pixels
+ *
+ * YUYV Colorspace encodes colors by providing a luminance (Y) value
+ * in every pixel, and color (U, V) values in every other pixel.
+ * So luminance can be reconstructed with full resolution, while 
+ * color will be reconstructed with reduced fidelity. This usually
+ * is not a problem, as the eye does not resolve color with the
+ * same accuracy as luminance.
+ *
+ * Our images can use any primitive numeric type for the pixel values,
+ * so YUYV, so we use a template class to create YUYV pixels. Note, however,
+ * that there is no way to convert individual YUYV pixels to RGB or
+ * back, as only pairs of pixels contain enough information.
+ */
+template<typename P>
+class YUYV : public Color<P> {
+public:
+	P	y;
+	P	uv;
+	YUYV() { }
+	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
+
+	template<typename Q>
+	YUYV(const Q& _y, const Q& _uv) {
+		convertPixelValue(y, _y);
+		convertPixelValue(uv, _uv);
+	}
+	virtual	~YUYV() { }
+
+	/**
+	 * \brief Copy constructor for YUYV pixels.
+	 *
+	 * Since the Y,U,V pixel values can be any integer type, which
+	 * necessitates shifting them when converting from one type to
+	 * another, we have to use the convertPixel functions when copying
+	 * an YUYV pixel.
+	 */
+	template<typename Q>
+	YUYV(const YUYV<Q>& q) {
+		convertPixelValue(y, q.y);
+		convertPixelValue(uv, q.uv);
+	}
+
+	bool	operator==(const YUYV<P>& other) const {
+		return (y == other.y) && (uv == other.uv);
+	}
+	bool	operator!=(const YUYV<P>& other) const {
+		return (y != other.y) || (uv != other.uv);
+	}
+	typedef yuyv_color_tag color_category;
+
+	virtual unsigned int	bitsPerPixel() const {
+		return 2 * std::numeric_limits<P>::digits;
+	}
+	P	luminance() const {
+		return y;
+	}
+};
+
+/**
+ * \brief RGB pixels of any type
+ *
+ * RGB pixels encode color with three independent color channels.
+ */
+template<typename P>
+class RGB : public Color<P> {
+public:
+	P	R;
+	P	G;
+	P	B;
+	RGB() { }
+	RGB(P w) : R(w), G(w), B(w) { }
+	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
+	virtual ~RGB() { }
+
+	template<typename Q>
+	RGB(Q r, Q g, Q b) {
+		convertPixel(R, r);
+		convertPixel(G, g);
+		convertPixel(B, b);
+	}
+
+	/**
+	 * \brief Copy constructor for RGB pixels.
+	 *
+	 * Since the R,G,B pixel values can be any integer type, which
+	 * necessitates shifting them when converting from one type to
+	 * another, we have to use the convertPixel functions when copying
+	 * an RGB pixel.
+	 */
+	template<typename Q>
+	RGB(const RGB<Q>& q) {
+		convertPixelValue(R, q.R);
+		convertPixelValue(G, q.G);
+		convertPixelValue(B, q.B);
+	}
+
+	bool	operator==(const RGB<P>& other) const {
+		return (R == other.R) && (G == other.G) && (B == other.B);
+	}
+	bool	operator!=(const RGB<P>& other) const {
+		return !(*this == other);
+	}
+	typedef rgb_color_tag color_category;
+
+	// numeric operators on RGB pixels
+	RGB<P>	operator+(const RGB<P>& other) const {
+		RGB<P>	result;
+		result.R = R + other.R;
+		result.G = G + other.G;
+		result.B = B + other.B;
+		return result;
+	}
+	RGB<P>	operator-(const RGB<P>& other) const {
+		RGB<P>	result;
+		result.R = (R < other.R) ? 0 : (R - other.R);
+		result.G = (G < other.G) ? 0 : (G - other.G);
+		result.B = (B < other.B) ? 0 : (B - other.B);
+		return result;
+	}
+	RGB<P>	operator*(const P value) const {
+		RGB<P>	result;
+		if ((R * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.R = R * value;
+		}
+		if ((G * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.G = G * value;
+		}
+		if ((B * (double)value) > std::numeric_limits<P>::max()) {
+			result.R = std::numeric_limits<P>::max();
+		} else {
+			result.B = B * value;
+		}
+		return result;
+	}
+
+	virtual unsigned int	bitsPerPixel() const {
+		return 2 * std::numeric_limits<P>::digits;
+	}
+
+	P	luminance() const {
+		return G;
+	}
+};
+
+/*
+ * \brief Pixel classes with an arbitrary number of planes 
+ *
+ * Possible applications for this pixel class is stacking of images for
+ * with the LRGB technique.
+ */
+template<typename P, int n>
+class Multiplane {
+public:
+	enum { planes = n};
+	P	p[n];
+	typedef	P	value_type;
+
+	Multiplane() { }
+
+	Multiplane(const P& v) {
+		for (int i = 0; i < n; i++) {
+			p[i] = v;
+		}
+	}
+
+	template<typename Q>
+	Multiplane(const Q& v) {
+		for (int i = 0; i < n; i++) {
+			p[i] = v;
+		}
+	}
+
+	Multiplane(const RGB<P>& rgb) {
+		int	i = 0;
+		p[i++] = rgb.R;
+		if (i >= n) return;
+		p[i++] = rgb.G;
+		if (i >= n) return;
+		p[i++] = rgb.B;
+		while (i < n) {
+			p[i++] = 0;
+		}
+	}
+
+	template<typename Q>
+	Multiplane(const RGB<Q>& rgb) {
+		int	i = 0;
+		p[i++] = rgb.R;
+		if (i >= n) return;
+		p[i++] = rgb.G;
+		if (i >= n) return;
+		p[i++] = rgb.B;
+		while (i < n) {
+			p[i++] = 0;
+		}
+	}
+	
+	Multiplane(const Multiplane<P, n>& other) {
+		for (int i = 0; i < n; i++) {
+			p[i] = other.p[i];
+		}
+	}
+
+	Multiplane<P,n>&	operator=(const Multiplane<P,n>& other) {
+		for (int i = 0; i < n; i++) {
+			p[i] = other.p[i];
+		}
+		return *this;
+	}
+
+	virtual unsigned int	bitsPerPixel() const {
+		return n * std::numeric_limits<P>::digits;
+	}
+
+	bool	operator==(const Multiplane<P, n>& other) const {
+		for (int i = 0; i < n; i++) {
+			if (p[i] != other.p[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool	operator!=(const Multiplane<P, n>& other) const {
+		return !(*this == other);
+	}
+
+	typedef multiplane_color_tag color_category;
+
+	// numeric operators on RGB pixels
+	Multiplane<P, n>	operator+(const Multiplane<P, n>& other) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			result.p[i] = p[i] + other.p[i];
+		}
+		return result;
+	}
+
+	Multiplane<P, n>	operator-(const Multiplane<P, n>& other) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			result.p[i] = (p[i] < other.p[i])
+					? 0
+					: (p[i] - other.p[i]);
+		}
+		return result;
+	}
+
+	Multiplane<P, n>	operator*(const P value) const {
+		Multiplane<P, n>	result;
+		for (int i = 0; i < n; i++) {
+			if ((p[i] * (double)value) > std::numeric_limits<P>::max()) {
+				result.p[i] = std::numeric_limits<P>::max();
+			} else {
+				result.p[i] = p[i] * value;
+			}
+		}
+		return result;
+	}
+
+	P	luminance() const {
+		return p[0];
+	}
+};
+
 /**
  * \brief Convert a pair of pixels
  *
@@ -484,9 +627,9 @@ void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 		 + 0.504129 * src[0].G
 		 + 0.097906 * src[0].B) +  srcPixel::pedestal;
 	convertPixelValue(dest[0].y, Y);
-	U = round(-0.148223 * src[0].R
-		 - 0.290993 * src[0].G
-		 + 0.439216 * src[0].B) + srcPixel::zero;
+	U = round(- 0.148223 * src[0].R
+		  - 0.290993 * src[0].G
+		  + 0.439216 * src[0].B) + srcPixel::zero;
 	convertPixelValue(dest[0].uv, U);
 	Y = round( 0.256788 * src[1].R
 		 + 0.504129 * src[1].G
@@ -579,6 +722,135 @@ template<typename P>
 unsigned int	bitsPerPixel(RGB<P>) {
 	return 3 * std::numeric_limits<P>::digits;
 }
+
+/**
+ * \bits Weighted sum of Pixels
+ *
+ * The most important function when performing Image transformations is
+ * the ability to compute a weighted sum of pixels. The problem is that
+ * information is lost when this is done in the pixel type arithemtic,
+ * especially for the very small types like unsigned char. Therefore 
+ * we create this template function with suitable specialisations so
+ * that Weighted averags can be computed for every type of pixel
+ */
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms, const double *weights,
+		const Pixel *pixels, const monochrome_color_tag& tag) {
+	double	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		result = result + pixels[i] * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+}
+
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms,
+			const double *weights, const Pixel *pixels,
+			const rgb_color_tag& tag) {
+	RGB<double>	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		RGB<double>	summand(pixels[i].R, pixels[i].G, pixels[i].B);
+		result = result + summand * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+	return Pixel(result.R, result.G, result.B);
+}
+
+template<typename Pixel, int n>
+Multiplane<Pixel, n>	weighted_sum_typed_n(unsigned int number_of_terms,
+				const double *weights,
+				const Multiplane<Pixel, n> *pixels,
+				const multiplane_color_tag& tag) {
+	Multiplane<double, n>	result = 0;
+	double	weightsum = 0;
+	for (unsigned int i = 0; i < number_of_terms; i++) {
+		Multiplane<double, n>	summand(pixels[i]);
+		result = result + summand * weights[i];
+		weightsum += weights[i];
+	}
+	return result * (1./weightsum);
+	return Pixel(result);
+}
+
+
+template<typename Pixel>
+Pixel	weighted_sum_typed(unsigned int number_of_terms,
+			const double *weights, const Pixel *pixels,
+			const multiplane_color_tag& tag) {
+	return weighted_sum_typed_n<Pixel::value_type, Pixel::planes>(
+		number_of_terms, weights, pixels, multiplane_color_tag());
+}
+
+template<typename Pixel>
+Pixel	weighted_sum(unsigned int number_of_terms,
+		const double *weights, const Pixel *pixels) {
+	return weighted_sum_typed(number_of_terms, weights, pixels,
+		typename color_traits<Pixel>::color_category());
+}
+
+/**
+ * \brief Luminance function
+ *
+ * Retrieve luminance information from a pixel, independent of time.
+ */
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+	return pixel;
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
+double	luminance_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+	return pixel.luminance();
+}
+
+template<typename Pixel>
+double	luminance(const Pixel& pixel) {
+	return luminance_typed(pixel,
+		typename color_traits<Pixel>::color_category());
+}
+
+/**
+ * \brief Find the maximum possible value for a pixel type
+ */
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+	return std::numeric_limits<Pixel>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double	maximum_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+	return std::numeric_limits<typename Pixel::value_type>::max();
+}
+
+template<typename Pixel>
+double pixel_maximum() {
+	return maximum_typed(Pixel(), typename color_traits<Pixel>::color_category());
+}
+
 
 } // namespace image
 } // namespace astro

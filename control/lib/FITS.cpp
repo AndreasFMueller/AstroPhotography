@@ -6,7 +6,9 @@
  */
 #include <AstroIO.h>
 #include <fitsio.h>
-#include <debug.h>
+#include <AstroDebug.h>
+#include <includes.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 
@@ -87,8 +89,8 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 	case 1:
 	case 3:
 		break;
-	default:
-		throw std::runtime_error("not 1 or 3 planes");
+//	default:
+//		throw std::runtime_error("not 1 or 3 planes");
 	}
 
 	// now read the keys
@@ -131,15 +133,15 @@ void	*FITSinfileBase::readdata() throw (FITSexception) {
 		throw FITSexception("cannot read this pixel type");
 		break;
 	}
-	void	*v = calloc(planes * size.pixels, typesize);
+	void	*v = calloc(planes * size.getPixels(), typesize);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size: %d items of size %d, "
-		"pixel type %d, %d planes", (size.pixels * planes), typesize,
+		"pixel type %d, %d planes", (size.getPixels() * planes), typesize,
 		pixeltype, planes);
 	
 	/* now read the data */
 	int	status = 0;
 	long	firstpixel[3] = { 1, 1, 1 };
-	if (fits_read_pix(fptr, pixeltype, firstpixel, size.pixels * planes,
+	if (fits_read_pix(fptr, pixeltype, firstpixel, size.getPixels() * planes,
 		NULL, v, NULL, &status)) {
 		free(v);
 		throw FITSexception(errormsg(status));
@@ -227,26 +229,79 @@ void	FITSinfileBase::addHeaders(ImageBase *image) const {
 	}
 }
 
+bool	FITSinfileBase::hasHeader(const std::string& key) const {
+	return (headers.find(key) != headers.end());
+}
+
+std::string	FITSinfileBase::getHeader(const std::string& key) const {
+	std::map<std::string, FITShdu>::const_iterator hi = headers.find(key);
+	if (hi == headers.end()) {
+		throw std::runtime_error("header not found");
+	}
+	return hi->second.value;
+}
+
 /**
  * \brief Create a FITS file for writing
  */
 FITSoutfileBase::FITSoutfileBase(const std::string &filename,
 	int pixeltype, int planes, int imgtype) throw (FITSexception)
 	: FITSfile(filename, pixeltype, planes, imgtype) {
-	int	status = 0;
-	if (fits_create_file(&fptr, filename.c_str(), &status)) {
-		throw FITSexception(errormsg(status));
-	}
+	_precious = true;
 }
 
 /**
  * \brief write the image format information to the header
  */
 void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
+	// if the file exists but is not precious, and writable, unlink it
+	struct stat	sb;
+	int	rc = stat(filename.c_str(), &sb);
+	if (rc == 0) {
+		// file exists, check that it is a file
+		if (!S_ISREG(sb.st_mode)) {
+			std::string	msg = stringprintf("%s is not a file",
+				filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw FITSexception(msg);
+		}
+
+		// check whether the file is precious
+		if (precious()) {
+			std::string	msg = stringprintf("%s is precious, cannot overwrite", filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw FITSexception(msg);
+		}
+
+		// check whether the file writable
+		if (access(filename.c_str(), W_OK) < 0) {
+			std::string	msg = stringprintf("%s is not writable",
+				filename.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+
+		// unlink the file
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unklink(%s)", filename.c_str());
+		if (unlink(filename.c_str())) {
+			std::string	msg = stringprintf("cannot unlink "
+				"%s: %s", filename.c_str(), strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+
+	// create the file
+	int	status = 0;
+	if (fits_create_file(&fptr, filename.c_str(), &status)) {
+		throw FITSexception(errormsg(status));
+	}
+
 	// find the dimensions
 	long	naxis = 3;
-	long	naxes[3] = { image.size.width, image.size.height, planes };
-	int	status = 0;
+	long	naxes[3] = { image.size().width(), image.size().height(), planes };
+
+	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
 		throw FITSexception(errormsg(status));
 	}
@@ -337,6 +392,33 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 }
 
 /**
+ * \brief Fix permissions on precious files
+ */
+void	FITSoutfileBase::postwrite() throw (FITSexception) {
+	// not precious, do nothing
+	if (!precious()) {
+		return;
+	}
+
+	// find current permissions
+	struct stat	sb;
+	if (stat(filename.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat %s: %s",
+			filename.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw FITSexception(msg);
+	}
+
+	// compute and set new permissions
+	if (chmod(filename.c_str(), sb.st_mode & (~(S_IWUSR | S_IWGRP | S_IWOTH))) < 0) {
+		std::string	msg = stringprintf("cannot chmod %s: %s",
+			filename.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw FITSexception(msg);
+	}
+}
+
+/**
  * \brief constructor specializations of FITSoutfile for all types
  */
 #define FITS_OUT_CONSTRUCTOR(T, pix, planes, img)			\
@@ -369,6 +451,61 @@ FITS_OUT_CONSTRUCTOR(YUYV<unsigned int>, TULONG, 3, ULONG_IMG)
 FITS_OUT_CONSTRUCTOR(YUYV<unsigned long>, TULONG, 3, ULONG_IMG)
 FITS_OUT_CONSTRUCTOR(YUYV<float>, TFLOAT, 3, FLOAT_IMG)
 FITS_OUT_CONSTRUCTOR(YUYV<double>, TDOUBLE, 3, DOUBLE_IMG)
+
+#define FITS_OUT_CONSTRUCTOR_MULTI(T, pix, planes, img)			\
+template<>								\
+FITSoutfile<Multiplane<T, planes> >::FITSoutfile(const std::string& filename)		\
+	throw (FITSexception)						\
+	: FITSoutfileBase(filename, pix, planes, img) {			\
+}
+
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 1, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 2, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 3, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 4, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 5, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 6, BYTE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned char, TBYTE, 7, BYTE_IMG)
+
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 1, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 2, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 3, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 4, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 5, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 6, USHORT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned short, TUSHORT, 7, USHORT_IMG)
+
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 1, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 2, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 4, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 5, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 6, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned int, TULONG, 7, ULONG_IMG)
+
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 1, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 2, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 3, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 4, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 5, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 6, ULONG_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(unsigned long, TULONG, 7, ULONG_IMG)
+
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 1, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 2, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 3, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 4, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 5, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 6, FLOAT_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(float, TFLOAT, 7, FLOAT_IMG)
+
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 1, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 2, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 3, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 4, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 5, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 6, DOUBLE_IMG)
+FITS_OUT_CONSTRUCTOR_MULTI(double, TDOUBLE, 7, DOUBLE_IMG)
 
 } // namespace io
 } // namespace astro

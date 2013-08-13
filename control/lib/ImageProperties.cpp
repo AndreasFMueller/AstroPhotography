@@ -16,6 +16,9 @@ bool	isColorImage(const ImagePtr& image) {
 	if (dynamic_cast<Image<unsigned short> *>(&*image)) {
 		return false;
 	}
+	if (dynamic_cast<Image<unsigned int> *>(&*image)) {
+		return false;
+	}
 	if (dynamic_cast<Image<unsigned long> *>(&*image)) {
 		return false;
 	}
@@ -25,7 +28,7 @@ bool	isColorImage(const ImagePtr& image) {
 	if (dynamic_cast<Image<double> *>(&*image)) {
 		return false;
 	}
-	return false;
+	return true;
 }
 
 bool	isMonochromeImage(const ImagePtr& image) {

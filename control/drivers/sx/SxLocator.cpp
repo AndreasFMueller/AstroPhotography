@@ -6,8 +6,8 @@
 #include <SxLocator.h>
 #include <SxCamera.h>
 #include <SxUtils.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 #include <includes.h>
 
 using namespace astro::usb;
@@ -44,8 +44,11 @@ std::string	SxCameraLocator::getVersion() const {
  *
  * \return a vector of strings that uniquely descript devices
  */
-std::vector<std::string>	SxCameraLocator::getCameralist() {
+std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	names;
+	if (device != DeviceLocator::CAMERA) {
+		return names;
+	}
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
@@ -138,7 +141,7 @@ CameraPtr	SxCameraLocator::getCamera(size_t index) {
 } // namespace astro
 
 extern "C"
-astro::camera::CameraLocator    *getCameraLocator() {
+astro::device::DeviceLocator    *getDeviceLocator() {
 	return new astro::camera::sx::SxCameraLocator();
 }
 

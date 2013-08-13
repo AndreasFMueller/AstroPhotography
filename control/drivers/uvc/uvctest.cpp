@@ -10,7 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroDemosaic.h>
 
 extern double	default_exposuretime;
@@ -56,7 +56,7 @@ void	uvctest::tearDown() {
 
 void	uvctest::testList() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a list of cameras");
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {

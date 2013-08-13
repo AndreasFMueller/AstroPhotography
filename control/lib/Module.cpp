@@ -8,6 +8,9 @@
 #include <includes.h>
 #include <iostream>
 #include <fstream>
+#include <AstroDebug.h>
+
+using namespace astro::device;
 
 namespace astro {
 namespace module {
@@ -37,6 +40,7 @@ bool	Module::dlclose_on_close = true;
  */
 std::string	Module::getDlname(const std::string& lafile) const {
 	// open the file
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading .la-file %s", lafile.c_str());
 	std::ifstream	in(lafile.c_str(), std::ifstream::in);
 
 	// scan the file
@@ -54,7 +58,10 @@ std::string	Module::getDlname(const std::string& lafile) const {
 			}
 			*end = '\0';
 			in.close();
-			return dirname + "/" + std::string(p);
+			std::string	shared = dirname + "/" + std::string(p);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "shared: %s",
+				shared.c_str());
+			return shared;
 		}
 	}
 end:
@@ -98,6 +105,9 @@ bool	Module::dlfileexists() const {
  */
 Module::Module(const std::string& _dirname, const std::string& _modulename)
 	: dirname(_dirname), modulename(_modulename) {
+	// NULL handle means module has not been loaded yet
+	handle = NULL;
+
 	// get the path to the la file
 	dlname = getDlname(dirname + "/" + modulename + ".la");
 
@@ -132,6 +142,7 @@ void	Module::open() {
 		return;
 	}
 	dlerror(); // clear error conditions
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
 	handle = dlopen(dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {
 		std::string	error(dlerror());
@@ -184,24 +195,24 @@ DescriptorPtr	Module::getDescriptor() const {
  *
  * The camerae locator retrieved via this method can tell the list of
  * available cameras. The shared library has to implement a method
- * named getCameraLocator with C linkage which returns a pointer to
- * a CameraLocator object for this to work.
+ * named getDeviceLocator with C linkage which returns a pointer to
+ * a DeviceLocator object for this to work.
  */
-astro::camera::CameraLocatorPtr	Module::getCameraLocator() const {
+DeviceLocatorPtr	Module::getDeviceLocator() const {
 	if (!isloaded()) {
 		throw std::runtime_error("module is not open");
 	}
 	// find the symbol for the getDescriptor function
-	void	*s = dlsym(handle, "getCameraLocator");
+	void	*s = dlsym(handle, "getDeviceLocator");
 	if (NULL == s) {
-		throw std::invalid_argument("getCameraLocator not found");
+		throw std::invalid_argument("getDeviceLocator not found");
 	}
 
 	// now cast the symbol to a function that returns a descriptor
 	// pointer
-	typedef astro::camera::CameraLocator	*(*getter)();
-	astro::camera::CameraLocator	*c = ((getter)s)();
-	return astro::camera::CameraLocatorPtr(c);
+	typedef DeviceLocator	*(*getter)();
+	DeviceLocator	*c = ((getter)s)();
+	return DeviceLocatorPtr(c);
 }
 
 } // namespace module

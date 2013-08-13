@@ -8,7 +8,7 @@
 
 #include <AstroImage.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -30,12 +30,12 @@ class FlipOperator : public ImageOperator<T> {
 public:
 	FlipOperator() { }
 	virtual void	operator()(astro::image::Image<T>& image) {
-		for (unsigned int line = 0; (line << 1) < image.size.height;
+		for (unsigned int line = 0; (line << 1) < image.size().height();
 			line++) {
-			T	*p = &image.pixels[line * image.size.width];
-			int	lastline = image.size.height - line - 1;
-			T	*q = &image.pixels[lastline * image.size.width];
-			for (unsigned int i = 0; i < image.size.width; i++) {
+			T	*p = &image.pixels[line * image.size().width()];
+			int	lastline = image.size().height() - line - 1;
+			T	*q = &image.pixels[lastline * image.size().width()];
+			for (unsigned int i = 0; i < image.size().width(); i++) {
 				T	v = p[i];
 				p[i] = q[i];
 				q[i] = v;
@@ -53,7 +53,7 @@ public:
 		: lower(_lower), upper(_upper) {
 	}
 	virtual void	operator()(astro::image::Image<T>& image) {
-		for (unsigned int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size().pixels; i++) {
 			T	v = image.pixels[i];
 			if (v != v) {
 				continue;
@@ -81,7 +81,7 @@ public:
 	virtual void	operator()(astro::image::Image<T>& image) {
 		T	min = image.pixels[0];
 		T	max = image.pixels[0];
-		for (unsigned int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size().pixels; i++) {
 			T	v = image.pixels[i];
 			if (v != v) {
 				continue;
@@ -94,7 +94,7 @@ public:
 			}
 		}
 		T	span = max - min;
-		for (unsigned int i = 0; i < image.size.pixels; i++) {
+		for (unsigned int i = 0; i < image.size().pixels; i++) {
 			T	v = image.pixels[i];
 			v = lower + (v - min) * delta / span;
 			image.pixels[i] = v;

@@ -7,10 +7,10 @@
 #include <AstroFilter.h>
 #include <PixelValue.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 #include <vector>
-#include <Format.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -27,35 +27,39 @@ namespace calibration {
 //////////////////////////////////////////////////////////////////////
 template<typename ImagePixelType, typename DarkPixelType>
 void	dark_correct(Image<ImagePixelType>& image,
-		const Image<DarkPixelType>& dark) {
+		const ConstImageAdapter<DarkPixelType>& dark) {
 	// first check that image sizes match
-	if (image.size != dark.size) {
+	if (image.size() != dark.getSize()) {
 		std::string	msg = stringprintf("size: image %s != dark %s",
-			image.size.toString().c_str(),
-			dark.size.toString().c_str());
+			image.size().toString().c_str(),
+			dark.getSize().toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
 	// correct all pixels
-	for (size_t offset = 0; offset < image.size.pixels; offset++) {
-		ImagePixelType	ip = image.pixels[offset];
-		// skip NaN pixels
-		if (ip != ip) {
-			continue;
-		}
-		DarkPixelType	dp = dark.pixels[offset];
-		// turn off (make nan) pixels that are marked nan in the dark
-		if (dp != dp) {
-			ip = 0;
-		} else {
-			if (ip > dp) {
-				ip = ip - dp;
-			} else {
-				ip = 0;
+	for (unsigned int x = 0; x < image.size().width(); x++) {
+		for (unsigned int y = 0; y < image.size().height(); y++) {
+
+			ImagePixelType	ip = image.pixel(x, y);
+			// skip NaN pixels
+			if (ip != ip) {
+				continue;
 			}
+			DarkPixelType	dp = dark.pixel(x, y);
+			// turn off (make nan) pixels that are marked nan
+			// in the dark
+			if (dp != dp) {
+				ip = 0;
+			} else {
+				if (ip > dp) {
+					ip = ip - dp;
+				} else {
+					ip = 0;
+				}
+			}
+			image.pixel(x, y) = ip;
 		}
-		image.pixels[offset] = ip;
 	}
 }
 
@@ -70,7 +74,7 @@ void	dark_correct(Image<ImagePixelType>& image,
 
 template<typename DarkPixelType>
 void	dark_correct_typed(ImagePtr& image,
-		const Image<DarkPixelType>& dark) {
+		const ConstImageAdapter<DarkPixelType>& dark) {
 	dark_correct_for(unsigned char);
 	dark_correct_for(unsigned short);
 	dark_correct_for(unsigned int);
@@ -85,16 +89,9 @@ void	dark_correct_typed(ImagePtr& image,
 //////////////////////////////////////////////////////////////////////
 // DarkCorrector implementation
 //////////////////////////////////////////////////////////////////////
-DarkCorrector::DarkCorrector(const ImagePtr& _dark) : dark(_dark) {
-	// We want dark images to be of float or double type
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
-	if ((NULL != fp) || (NULL != dp)) {
-		return;
-	}
-	std::string	msg("dark image must be of floating point type");
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+DarkCorrector::DarkCorrector(const ImagePtr& _dark,
+	const ImageRectangle& _rectangle)
+	: Corrector(_dark, _rectangle) {
 }
 
 /**
@@ -107,14 +104,16 @@ DarkCorrector::DarkCorrector(const ImagePtr& _dark) : dark(_dark) {
  * \param image     image to dark correct
  */
 void	DarkCorrector::operator()(ImagePtr& image) const {
-	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
-	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
+	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
+	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
 	if (NULL != fp) {
-		dark_correct_typed<float>(image, *fp);
+		WindowAdapter<float>	wa(*fp, rectangle);
+		dark_correct_typed<float>(image, wa);
 		return;
 	}
 	if (NULL != dp) {
-		dark_correct_typed<double>(image, *dp);
+		WindowAdapter<double>	wa(*dp, rectangle);
+		dark_correct_typed<double>(image, wa);
 		return;
 	}
 	std::string	msg("dark image must be of floating point type");

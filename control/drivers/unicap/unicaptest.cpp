@@ -50,7 +50,7 @@ void	unicaptest::tearDown() {
 }
 
 void	unicaptest::testList() {
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {

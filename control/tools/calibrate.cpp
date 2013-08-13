@@ -4,17 +4,21 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
-#include <Format.h>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <iostream>
 #include <AstroImage.h>
 #include <AstroCalibration.h>
+#include <AstroInterpolation.h>
 #include <AstroIO.h>
 #include <AstroDemosaic.h>
+#include <AstroImager.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::calibration;
+using namespace astro::interpolation;
+using namespace astro::camera;
 
 namespace astro {
 
@@ -33,6 +37,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -M max    clamp the image values to at most <max>"
 		<< std::endl;
+	std::cout << "  -b        demosaic bayer images" << std::endl;
 	std::cout << "  -d        increase debug level" << std::endl;
 	std::cout << "  -n, -?    show this help message" << std::endl;
 }
@@ -47,9 +52,10 @@ int	main(int argc, char *argv[]) {
 	double	minvalue = -1;
 	double	maxvalue = -1;
 	bool	demosaic = false;
+	bool	interpolate = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:b")))
+	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:bi")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -68,6 +74,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'b':
 			demosaic = true;
+			break;
+		case 'i':
+			interpolate = true;
 			break;
 		case '?':
 		case 'h':
@@ -91,13 +100,18 @@ int	main(int argc, char *argv[]) {
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
 
+	// build the Imager
+	Imager	imager;
+
 	// if we have a dark correction, apply it
+	ImagePtr	dark;
 	if (NULL != darkfilename) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct: %s", darkfilename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark correct: %s",
+			darkfilename);
 		FITSin	darkin(darkfilename);
-		ImagePtr	dark = darkin.read();
-		DarkCorrector	corrector(dark);
-		corrector(image);
+		dark = darkin.read();
+		imager.setDark(dark);
+		imager.setDarksubtract(true);
 	}
 
 	// if we have a flat file, we perform flat correction
@@ -106,9 +120,17 @@ int	main(int argc, char *argv[]) {
 			flatfilename);
 		FITSin	flatin(flatfilename);
 		ImagePtr	flat = flatin.read();
-		FlatCorrector	corrector(flat);
-		corrector(image);
+		imager.setFlat(flat);
+		imager.setFlatdivide(true);
 	}
+
+	// perform bad pixel interpolation
+	if (interpolate) {
+		imager.setInterpolate(true);
+	}
+
+	// apply imager corrections
+	imager(image);
 
 	// if minvalue or maxvalue are set, clamp the image values
 	if ((minvalue >= 0) || (maxvalue >= 0)) {

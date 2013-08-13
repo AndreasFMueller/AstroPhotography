@@ -3,22 +3,46 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
+#include <sbigudrv.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
+#include <SbigLocator.h>
 #include <SbigGuiderPort.h>
 #include <utils.h>
-#include <debug.h>
-#include <sbigudrv.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {
 namespace sbig {
 
+/**
+ * \brief Create a Guiderport object
+ *
+ * This method assumes that every SBIG camera has a guider port.
+ */
 SbigGuiderPort::SbigGuiderPort(SbigCamera& _camera) : camera(_camera) {
 }
 
 SbigGuiderPort::~SbigGuiderPort() {
 }
 
+/**
+ * \brief Query the state of the guider port.
+ *
+ * \returns a bit mask indicating the logical state of the four guider port
+ * output relays.
+ */
 uint8_t	SbigGuiderPort::active() {
+	SbigLock	lock;
 	camera.sethandle();
 	QueryCommandStatusParams	params;
 	QueryCommandStatusResults	results;
@@ -46,8 +70,19 @@ uint8_t	SbigGuiderPort::active() {
 	return result;
 }
 
+/**
+ * \brief Control guider port relays.
+ *
+ * The parameters indicate which ports have to be enabled for how long
+ * (in seconds). 
+ * \param raplus	how long to turn on the RA+ output
+ * \param raminus	how long to turn on the RA- output
+ * \param decplus	how long to turn on the DEC+ output
+ * \param decminus	how long to turn on the DEC- output
+ */
 void	SbigGuiderPort::activate(float raplus, float raminus,
 	float decplus, float decminus) {
+	SbigLock	lock;
 	camera.sethandle();
 	ActivateRelayParams	params;
 	params.tXPlus = raplus * 100;

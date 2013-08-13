@@ -10,10 +10,10 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <includes.h>
 #include <AstroDemosaic.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
@@ -70,7 +70,7 @@ void	sxtest::tearDown() {
 
 void	sxtest::testList() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {
@@ -80,7 +80,7 @@ void	sxtest::testList() {
 }
 
 void	sxtest::testCooler() {
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	CameraPtr	camera = locator->getCamera(*cameras.begin());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd");
 	CcdPtr	ccd = camera->getCcd(0);
@@ -112,7 +112,7 @@ void	sxtest::testCooler() {
 
 void	sxtest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices");
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {
@@ -161,14 +161,15 @@ void	sxtest::testFullimage() {
 	file.write(image);
 
 	// find average value of all pixel planes
+	MosaicType	mosaic = shortimage->getMosaicType();
 	MeanR<unsigned short, double>	R;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "R = %f", R.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "R = %f", R.mean(*shortimage, mosaic.getMosaicType()));
 	MeanGr<unsigned short, double>	Gr;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gr = %f", Gr.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gr = %f", Gr.mean(*shortimage, mosaic.getMosaicType()));
 	MeanB<unsigned short, double>	B;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "B = %f", B.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "B = %f", B.mean(*shortimage, mosaic.getMosaicType()));
 	MeanGb<unsigned short, double>	Gb;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gb = %f", Gb.mean(*shortimage));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Gb = %f", Gb.mean(*shortimage, mosaic.getMosaicType()));
 
 	// demosaic the image
 	DemosaicBilinear<unsigned short>	demosaicer;

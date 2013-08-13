@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
@@ -72,12 +72,13 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	dark = dff(images);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image %d x %d generated",
-		dark->size.width, dark->size.height);
+		dark->size().width(), dark->size().height());
 
 	if (outfilename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "outfile: %s", outfilename);
 		unlink(outfilename);
 		FITSout	outfile(outfilename);
+		outfile.setPrecious(false); // allow overwriting
 		outfile.write(dark);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dark image written to %s",
 			outfilename);

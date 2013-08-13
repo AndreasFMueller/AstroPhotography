@@ -10,9 +10,10 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <ostream>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::camera::sbig;
+using namespace astro::device;
 using namespace astro::image;
 using namespace astro::io;
 
@@ -61,7 +62,7 @@ void	sbigtest::tearDown() {
 }
 
 void	sbigtest::testList() {
-	std::vector<std::string>	cameras = locator->getCameralist();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	int	counter = 0;
 	std::vector<std::string>::const_iterator	i;
 	for (i = cameras.begin(); i != cameras.end(); i++) {
@@ -205,9 +206,9 @@ void	sbigtest::testShutter() {
 	CcdPtr	ccd = camera->getCcd(0);
 	unsigned int	delay = 500000;
 	for (int i = 0; i < 20; i++) {
-		ccd->setShutterState(Ccd::SHUTTER_CLOSED);
+		ccd->setShutterState(SHUTTER_CLOSED);
 		usleep(delay);
-		ccd->setShutterState(Ccd::SHUTTER_OPEN);
+		ccd->setShutterState(SHUTTER_OPEN);
 		usleep(delay);
 	}
 }

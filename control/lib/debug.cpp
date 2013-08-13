@@ -4,7 +4,7 @@
 // (c) 2007 Prof Dr Andreas Mueller, Hochschule Rapperswil
 // $Id: debug.cpp,v 1.3 2008/12/05 18:08:25 afm Exp $
 //
-#include <debug.h>
+#include <AstroDebug.h>
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

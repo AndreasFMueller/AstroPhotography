@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string.h>
 #include <stdio.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace usb {

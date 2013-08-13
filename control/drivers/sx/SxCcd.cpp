@@ -9,7 +9,7 @@
 #include <AstroFilter.h>
 #include <AstroOperators.h>
 #include <sx.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SxUtils.h>
 
 using namespace astro::camera;
@@ -26,6 +26,17 @@ SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 }
 
 SxCcd::~SxCcd() {
+}
+
+/**
+ * \brief Find out whether the Ccd has a cooler
+ */
+bool	SxCcd::hasCooler() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for cooler");
+	if (getInfo().getId() == 0) {
+		return camera.hasCooler();
+	}
+	return false;
 }
 
 /**
@@ -74,10 +85,10 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
-	rpd.x_offset = exposure.frame.origin.x;
-	rpd.y_offset = exposure.frame.origin.y;
-	rpd.width = exposure.frame.size.width;
-	rpd.height = exposure.frame.size.height;
+	rpd.x_offset = exposure.frame.origin().x();
+	rpd.y_offset = exposure.frame.origin().y();
+	rpd.width = exposure.frame.size().width();
+	rpd.height = exposure.frame.size().height();
 	rpd.x_bin = exposure.mode.getX();
 	rpd.y_bin = exposure.mode.getY();
 	rpd.delay = 1000 * exposure.exposuretime;
@@ -102,11 +113,11 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
 ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize(
-		exposure.frame.size.width / exposure.mode.getX(),
-		exposure.frame.size.height / exposure.mode.getY());
+		exposure.frame.size().width() / exposure.mode.getX(),
+		exposure.frame.size().height() / exposure.mode.getY());
 
 	// compute the size of the buffer, and create a buffer for the data
-	int	size = targetsize.pixels;
+	int	size = targetsize.getPixels();
 	unsigned short	*data = new unsigned short[size];
 
 	// read the data from the data endpoint
@@ -126,15 +137,30 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// when the transfer completes, one can use the data for the image
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(targetsize, data);
+	image->setOrigin(exposure.frame.origin());
+
+	// if this is a color camera (which we can find out from the model
+	// of the camera), then we should add RGB information to the image
+	// but only in 1x1 binning mode
+	if ((camera.isColor()) && (exposure.mode == Binning())) {
+
+		// add bayer info, this depends on the subframe we are
+		// requesting
+		image->setMosaicType(
+			(MosaicType::mosaic_type)(
+			MosaicType::BAYER_RGGB \
+				| ((exposure.frame.origin().x() % 2) << 1) \
+				| (exposure.frame.origin().y() % 2)));
+	}
 
 	// images are upside down, since our origin is always the lower
-	// left corner
+	// left corner. Note that Hyperstar images are reversed!
 	FlipOperator<unsigned short>	f;
 	f(*image);
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
-		for (unsigned int offset = 0; offset < image->size.pixels;
+		for (unsigned int offset = 0; offset < image->size().getPixels();
 			offset++) {
 			unsigned short	pv = image->pixels[offset];
 			if (pv > exposure.limit) {

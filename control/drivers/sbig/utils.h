@@ -22,7 +22,9 @@ public:
 };
 
 Binning	SbigMode2Binning(unsigned short mode);
-unsigned short	SbigBinning2Mode(const Binning& mode);
+unsigned short SbigBinning2Mode(const Binning& mode);
+
+void	SbigBinningAdd(CcdInfo& modes, unsigned short mode);
 
 } // namespace sbig
 } // namespace camera

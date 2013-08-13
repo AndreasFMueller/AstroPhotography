@@ -5,8 +5,8 @@
  * $Id$
  */
 #include <AstroImage.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -14,19 +14,16 @@ namespace image {
 /**
  * \brief Construct an image base from size parameters
  */
-ImageBase::ImageBase(unsigned int w, unsigned int h) : size(w, h) {
-	mosaic = NONE;
+ImageBase::ImageBase(unsigned int w, unsigned int h) : frame(w, h) {
 }
 
-ImageBase::ImageBase(const ImageSize& _size) : size(_size) {
-	mosaic = NONE;
+ImageBase::ImageBase(const ImageSize& _size) : frame(_size) {
 }
 
-ImageBase::ImageBase(const ImageRectangle& frame) : size(frame.size) {
-	mosaic = NONE;
+ImageBase::ImageBase(const ImageRectangle& _frame) : frame(_frame) {
 }
 
-ImageBase::ImageBase(const ImageBase& other) : size(other.size) {
+ImageBase::ImageBase(const ImageBase& other) : frame(other.frame) {
 	mosaic = other.mosaic;
 }
 
@@ -36,66 +33,25 @@ ImageBase::ImageBase(const ImageBase& other) : size(other.size) {
  * Two images are considered equal if the have identical size.
  */
 bool	ImageBase::operator==(const ImageBase& other) const {
-	return (size == other.size);
+	return (frame == other.frame);
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on coordinates
  */
 unsigned int     ImageBase::pixeloffset(unsigned int x, unsigned int y) const {
-	return x + size.width * y;
+	return frame.size().offset(x, y);
 }
 
 /**
  * \brief Compute the pixel offset into an Image based on an ImagePoint
  */
 unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
-	return this->pixeloffset(p.x, p.y);
-}
-
-bool	ImageBase::isR(unsigned int x, unsigned int y) const {
-	if (mosaic == NONE) {
-		return false;
-	}
-	return (((y & 0x1) << 1) | (x & 0x1)) == (mosaic & 0x3);
-}
-
-bool	ImageBase::isB(unsigned int x, unsigned int y) const {
-	if (mosaic == NONE) {
-		return false;
-	}
-	// this means that the mod 2 remainder of both x and y have to
-	// be different from the ones in the mosaic constant. The XOR
-	// with 0x3 inverts the coordinates so that we can nevertheless
-	// do an equality comparison
-	return (0x3 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
-}
-
-bool	ImageBase::isG(unsigned int x, unsigned int y) const {
-	return (isGr(x, y) | isGb(x, y));
-	
-}
-
-bool	ImageBase::isGr(unsigned int x, unsigned int y) const {
-	if (mosaic == NONE) {
-		return false;
-	}
-	return (0x1 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
-}
-
-bool	ImageBase::isGb(unsigned int x, unsigned int y) const {
-	if (mosaic == NONE) {
-		return false;
-	}
-	return (0x2 ^ (((y & 0x1) << 1) | (x & 0x1))) == (mosaic & 0x3);
+	return frame.size().offset(p);
 }
 
 unsigned int	ImageBase::bytesPerPixel() const {
 	return this->bitsPerPixel() / 8;
-}
-
-ImageBase::mosaic_type	ImageBase::getMosaicType() const {
-	return mosaic;
 }
 
 static std::string	mosaic_key("BAYER");
@@ -106,8 +62,8 @@ static std::string	mosaic_key("BAYER");
  * This method ensures that the metadata map and the mosaic type
  * are consistent.
  */
-void	ImageBase::setMosaicType(ImageBase::mosaic_type _mosaic) {
-	mosaic = _mosaic;
+void	ImageBase::setMosaicType(MosaicType::mosaic_type _mosaic) {
+	mosaic.setMosaicType(_mosaic);
 
 	// remove the key
 	ImageMetadata::iterator	i = metadata.find(mosaic_key);
@@ -117,17 +73,17 @@ void	ImageBase::setMosaicType(ImageBase::mosaic_type _mosaic) {
 
 	// compute the new key value
 	std::string	value;
-	switch (mosaic) {
-	case ImageBase::BAYER_RGGB:
+	switch (_mosaic) {
+	case MosaicType::BAYER_RGGB:
 		value = "RGGB";
 		break;
-	case ImageBase::BAYER_GRBG:
+	case MosaicType::BAYER_GRBG:
 		value = "GRBG";
 		break;
-	case ImageBase::BAYER_GBRG:
+	case MosaicType::BAYER_GBRG:
 		value = "GBRG";
 		break;
-	case ImageBase::BAYER_BGGR:
+	case MosaicType::BAYER_BGGR:
 		value = "BGGR";
 		break;
 	default:
@@ -152,23 +108,23 @@ void	ImageBase::setMosaicType(ImageBase::mosaic_type _mosaic) {
  */
 void	ImageBase::setMosaicType(const std::string& mosaic_name) {
 	if (mosaic_name == "NONE") {
-		setMosaicType(ImageBase::NONE);
+		setMosaicType(MosaicType::NONE);
 		return;
 	}
 	if (mosaic_name == "RGGB") {
-		setMosaicType(ImageBase::BAYER_RGGB);
+		setMosaicType(MosaicType::BAYER_RGGB);
 		return;
 	}
 	if (mosaic_name == "GRBG") {
-		setMosaicType(ImageBase::BAYER_GRBG);
+		setMosaicType(MosaicType::BAYER_GRBG);
 		return;
 	}
 	if (mosaic_name == "GBRG") {
-		setMosaicType(ImageBase::BAYER_GBRG);
+		setMosaicType(MosaicType::BAYER_GBRG);
 		return;
 	}
 	if (mosaic_name == "BGGR") {
-		setMosaicType(ImageBase::BAYER_BGGR);
+		setMosaicType(MosaicType::BAYER_BGGR);
 		return;
 	}
 	std::string	msg = stringprintf("unknown mosaic name: %s",
@@ -216,8 +172,7 @@ void	ImageBase::setMetadata(const std::string& name, const Metavalue& mv) {
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {
-	out << "size: " << image.size.width << " x "
-                        << image.size.height <<std::endl;
+	out << "size: " << image.frame.size().toString() << std::endl;
 	ImageMetadata::const_iterator	i;
 	for (i = image.metadata.begin(); i != image.metadata.end(); i++) {
 		out << i->first << ": ";

@@ -15,6 +15,8 @@
 namespace astro {
 namespace camera {
 
+typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+
 /**
  * \brief Binning mode specification
  *
@@ -74,6 +76,7 @@ public:
 	float	gain;
 	float	limit;
 	Binning	mode;
+	shutter_state	shutter;
 
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
@@ -114,20 +117,31 @@ public:
 class Camera;
 class Ccd;
 class CcdInfo {
-public:
-	astro::image::ImageSize	size;
-	BinningSet	binningmodes;
-	std::string	name;
+	std::string	_name;
+	astro::image::ImageSize	_size;
 	int	ccdid;
-	CcdInfo();
-	const astro::image::ImageSize&	getSize() const;
+	BinningSet	binningmodes;
+	bool	_shutter;
+public:
+	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
+		int ccdid = 0);
+
+	// modifying accessors
+	void	addMode(const Binning& mode);
+	void	setShutter(bool shutter) { _shutter = shutter; }
+	bool	shutter() const { return _shutter; }
+
+	// accessors
+	const astro::image::ImageSize&	size() const;
 	const astro::image::ImageRectangle	getFrame() const;
 	const BinningSet&	modes() const;
-	const std::string&	getName() const;
+	const std::string&	name() const;
 	int	getId() const;
-	friend class Camera;
-	friend class Ccd;
+
+	// text representation
 	virtual std::string	toString() const;
+
+	// utility functions
 	astro::image::ImageRectangle	clipRectangle(const astro::image::ImageRectangle& rectangle) const;
 	astro::image::ImageRectangle	centeredRectangle(const astro::image::ImageSize& size) const;
 };
@@ -160,7 +174,7 @@ public:
 	Ccd(const CcdInfo& _info) : info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
-	const astro::image::ImageSize&	getSize() const { return info.size; }
+	const astro::image::ImageSize&	getSize() const { return info.size(); }
 
 	// methods to start/stop exposures
 	virtual void	startExposure(const Exposure& exposure)
@@ -170,10 +184,16 @@ public:
 	const Exposure&	getExposure() const { return exposure; }
 
 	// methods to control a shutter
-	typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+	bool	hasShutter() const { return info.shutter(); }
 	virtual shutter_state	getShutterState() throw(not_implemented);
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);
+
+	// gain related methods
+	virtual bool	hasGain() { return false; }
+	virtual std::pair<float, float>	gainInterval() {
+		return std::make_pair((float)0, (float)0);
+	}
 
 	// image retrievel functions
 	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
@@ -181,6 +201,7 @@ public:
 		throw (not_implemented);
 
 	// handling the cooler
+	virtual bool	hasCooler() const { return false; }
 	virtual CoolerPtr	getCooler() throw (not_implemented);
 
 	// methods related to metadata
@@ -204,18 +225,25 @@ typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
 
 class	Camera {
 protected:
+	std::string	name;
 	std::vector<CcdInfo>	ccdinfo;
 public:
+	Camera(const std::string& name);
 	Camera();
 	~Camera();
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
 	virtual CcdPtr	getCcd(size_t ccdid) = 0;
 
+	// access to name
+	const std::string&	getName() const;
+
 	// handling the filter wheel
+	bool	hasFilterWheel() const { return false; }
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 
 	// handling the guider port
+	bool	hasGuiderPort() const { return false; }
 	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
@@ -291,23 +319,6 @@ public:
 	virtual void	activate(float raplus, float raminus,
 		float decplus, float decminus) = 0;
 };
-
-/**
- * \brief Camera locator
- *
- * The camera locator class acts as a factory for camera instances.
- * A module contains a single instance of the locator class. 
- */
-class	CameraLocator {
-public:
-	CameraLocator() { }
-	virtual	~CameraLocator() { }
-	virtual std::string	getName() const = 0;
-	virtual std::string	getVersion() const = 0;
-	virtual std::vector<std::string>	getCameralist() = 0;
-	virtual CameraPtr	getCamera(const std::string& name) = 0;
-};
-typedef std::tr1::shared_ptr<CameraLocator>	CameraLocatorPtr;
 
 } // namepsace camera
 } // namespace astro

@@ -11,6 +11,9 @@ namespace camera {
 Camera::Camera() {
 }
 
+Camera::Camera(const std::string& _name) : name(_name) {
+}
+
 Camera::~Camera() {
 }
 
@@ -28,6 +31,10 @@ FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
 
 GuiderPortPtr	Camera::getGuiderPort() throw (not_implemented) {
 	throw not_implemented("guider port not implemented");
+}
+
+const std::string& 	Camera::getName() const {
+	return name;
 }
 
 } // namespace camera

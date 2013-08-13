@@ -1,5 +1,5 @@
 #
-# configuration used for development purposes on Linux
+# configuration used for development purposes on Linux and Mac OS X
 #
 CFLAGS="-Wall -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
@@ -51,11 +51,13 @@ SuSE)
 	fi
 	export LDFLAGS CFLAGS CXXFLAGS
 
-	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap 
+	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
+		--enable-sbig
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
 	export CFLAGS CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc --enable-sbig
+	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
+		--enable-sbig
 	;;
 esac

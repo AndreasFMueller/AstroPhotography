@@ -8,7 +8,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 
@@ -55,8 +55,8 @@ void	ImageSizeTest::testEquality() {
 
 void	ImageSizeTest::testPixels() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixels() begin");
-	CPPUNIT_ASSERT(i1->pixels == 77);
-	CPPUNIT_ASSERT(i2->pixels == 15);
+	CPPUNIT_ASSERT(i1->getPixels() == 77);
+	CPPUNIT_ASSERT(i2->getPixels() == 15);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPixels() end");
 }
 

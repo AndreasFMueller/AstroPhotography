@@ -19,12 +19,15 @@ class SbigFilterWheel;
 class SbigCooler;
 class SbigGuiderPort;
 
+/**
+ * \brief SBIG camera object
+ */
 class SbigCamera : public Camera {
 	unsigned short	cameraType;
 	short	handle;
 	void	sethandle();
 public:
-	SbigCamera();
+	SbigCamera(int usbno);
 	virtual ~SbigCamera();
 	virtual CcdPtr	getCcd(size_t id);
 	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);

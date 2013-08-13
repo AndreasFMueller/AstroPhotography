@@ -3,11 +3,23 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
+#include <sbigudrv.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
+#include <SbigLocator.h>
 #include <includes.h>
 #include <SbigFilterWheel.h>
-#include <Format.h>
-#include <debug.h>
-#include <sbigudrv.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 #include <utils.h>
 #include <limits>
 
@@ -78,6 +90,7 @@ void	SbigFilterWheel::wait() {
  *			Filter wheel
  */
 SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera) : camera(_camera) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// find out what type of filter wheel we have
@@ -128,6 +141,8 @@ SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera) : camera(_camera) {
 }
 
 SbigFilterWheel::~SbigFilterWheel() {
+	SbigLock	lock;
+	camera.sethandle();
 	// find out what type of filter wheel we have
 	CFWParams	params;
 	CFWResults	results;
@@ -149,6 +164,7 @@ unsigned int	SbigFilterWheel::nFilters() {
  * \brief Determine current filter wheel position.
  */
 unsigned int	SbigFilterWheel::currentPosition() {
+	SbigLock	lock;
 	camera.sethandle();
 	wait();
 	return currentindex;
@@ -168,6 +184,7 @@ void	SbigFilterWheel::select(size_t filterindex) {
 		return;
 	}
 #endif
+	SbigLock	lock;
 	camera.sethandle();
 	CFWParams	params;
 	CFWResults	results;

@@ -4,9 +4,9 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUSB.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroUVC.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <stdlib.h>
 
 namespace astro {

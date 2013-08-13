@@ -19,9 +19,9 @@ namespace image {
  */
 template<typename T>
 class Mosaic {
-	ImageBase::mosaic_type	mosaic;
+	MosaicType	mosaic;
 public:
-	Mosaic(ImageBase::mosaic_type _mosaic);
+	Mosaic(MosaicType::mosaic_type _mosaic);
 
 	Image<T>	*operator()(const Image<RGB<T> >& image) const;
 };
@@ -30,7 +30,7 @@ public:
  * \brief Constructor for the mosaicer.
  */
 template<typename T>
-Mosaic<T>::Mosaic(ImageBase::mosaic_type _mosaic) : mosaic(_mosaic) {
+Mosaic<T>::Mosaic(MosaicType::mosaic_type _mosaic) : mosaic(_mosaic) {
 }
 
 /**
@@ -40,25 +40,23 @@ Mosaic<T>::Mosaic(ImageBase::mosaic_type _mosaic) : mosaic(_mosaic) {
  */
 template<typename T>
 Image<T>	*Mosaic<T>::operator()(const Image<RGB<T> >& image) const {
-	Image<T>	*result = new Image<T>(image.size);
-	result->setMosaicType(mosaic);
-	int	redx = mosaic & 0x1;
-	int	redy = (mosaic >> 1) & 0x1;
-	int	bluex = 0x1 ^ redx;
-	int	bluey = 0x1 ^ redy;
-	for (unsigned int x = 0; x < image.size.width; x += 2) {
-		for (unsigned int y = 0; y < image.size.height; y += 2) {
+	Image<T>	*result = new Image<T>(image.getFrame().size());
+	result->setMosaicType(mosaic.getMosaicType());
+	ImagePoint	r = mosaic.red();
+	ImagePoint	b = mosaic.blue();
+	for (unsigned int x = 0; x < image.getFrame().size().width(); x += 2) {
+		for (unsigned int y = 0; y < image.getFrame().size().height(); y += 2) {
 			// red pixels
-			result->pixel(x + redx, y + redy)
-				= image.pixel(x + redx, y + redy).R;
+			result->pixel(x + r.x(), y + r.y())
+				= image.pixel(x + r.x(), y + r.y()).R;
 			// blue pixels
-			result->pixel(x + bluex, y + bluey)
-				= image.pixel(x + redx, y + bluey).B;
+			result->pixel(x + b.x(), y + b.y())
+				= image.pixel(x + r.x(), y + b.y()).B;
 			// green pixels
-			result->pixel(x + redx, y + bluey)
-				= image.pixel(x + redx, y + bluey).G;
-			result->pixel(x + bluex, y + redy)
-				= image.pixel(x + bluex, y + redy).G;
+			result->pixel(x + r.x(), y + b.y())
+				= image.pixel(x + r.x(), y + b.y()).G;
+			result->pixel(x + b.x(), y + r.y())
+				= image.pixel(x + b.x(), y + r.y()).G;
 		}
 	}
 	return result;

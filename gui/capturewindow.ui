@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CaptureWindow</class>
+ <widget class="QMainWindow" name="CaptureWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>960</width>
+    <height>842</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>624</width>
+         <height>773</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="bottomMargin">
+         <number>33</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="imageLabel">
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetFixedSize</enum>
+       </property>
+       <property name="topMargin">
+        <number>12</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="imageinfoBox">
+         <property name="title">
+          <string>Image info:</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="sizeinfoLabel">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="sizeinfoField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="maximumLabel">
+            <property name="text">
+             <string>Maximum value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="maximumvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="minimumvalueLabel">
+            <property name="text">
+             <string>Minimum value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="minimumvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="meanvalueLabel">
+            <property name="text">
+             <string>Mean value:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="meanvalueField">
+            <property name="text">
+             <string>unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="valueatLabel">
+            <property name="text">
+             <string>Value at:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="valueatField">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="ExposureWidget" name="exposureWidget" native="true"/>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="coolerBox">
+         <property name="title">
+          <string>Cooler</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="actualLabel">
+            <property name="text">
+             <string>Actual temperature:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="temperaturLabel">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Set temperature:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="settemperatureField">
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="enabledField">
+            <property name="text">
+             <string>Cooler enabled:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="enabledCheckbox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="processingBox">
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Image processing</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_2">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="darkLabel">
+            <property name="text">
+             <string>Dark image:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="darksubtracctLabel">
+            <property name="text">
+             <string>Dark subtract:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="darksubtractCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Demosaic:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="demosaicCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="scaleLabel">
+            <property name="text">
+             <string>Scale:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QComboBox" name="scaleCombobox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="flatLabel">
+            <property name="text">
+             <string>Flat image:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="flatdivideLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Flat divide:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="flatdivideCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="darkWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="darkField">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="darkButton">
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QWidget" name="flatWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="flatField">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="flatButton">
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="valueintervalLabel">
+            <property name="text">
+             <string>Value interval:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QWidget" name="valueintervalWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLineEdit" name="valueintervalminField">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="valueintervalSeparator">
+               <property name="text">
+                <string>,</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="valueintervalmaxField">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="badpixelsLabel">
+            <property name="text">
+             <string>Bad Pixels:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="badpixelsCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>disabled: set to 0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="captureButton">
+         <property name="text">
+          <string>Capture</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="captureProgressBar">
+         <property name="value">
+          <number>24</number>
+         </property>
+         <property name="textVisible">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>960</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExposureWidget</class>
+   <extends>QWidget</extends>
+   <header>exposurewidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>captureButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>startCapture()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>941</x>
+     <y>774</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>693</x>
+     <y>672</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scaleCombobox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>scaleChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>880</x>
+     <y>711</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>950</x>
+     <y>641</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>darkButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>openDarkfile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>909</x>
+     <y>502</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>956</x>
+     <y>566</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>flatButton</sender>
+   <signal>clicked()</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>openFlatfile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>918</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>953</x>
+     <y>618</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>badpixelsCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CaptureWindow</receiver>
+   <slot>badpixelsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>798</x>
+     <y>614</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>952</x>
+     <y>532</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>startCapture()</slot>
+  <slot>scaleChanged(int)</slot>
+  <slot>subframeToggled(bool)</slot>
+  <slot>timeChanged(double)</slot>
+  <slot>openDarkfile()</slot>
+  <slot>openFlatfile()</slot>
+  <slot>badpixelsToggled(bool)</slot>
+ </slots>
+</ui>

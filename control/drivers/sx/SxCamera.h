@@ -26,7 +26,7 @@ class SxCamera : public Camera {
 	EndpointDescriptorPtr	inendpoint;
 	bool	useControlRequests;
 	sx_firmware_version_t	firmware_version;
-	bool	hasCooler;
+	bool	_hasCooler;
 	bool	hasGuiderPort;
 public:
 	// USB related methods
@@ -42,6 +42,7 @@ public:
 	virtual CcdPtr	getCcd(size_t id);
 
 	// cooler access
+	bool	hasCooler();
 	virtual CoolerPtr	getCooler(int ccdindex);
 
 	// guider port access
@@ -49,6 +50,9 @@ public:
 
 	// request handling
 	void	controlRequest(RequestBase *request);
+
+	// find out whether this is a color camera
+	bool	isColor() const;
 };
 
 

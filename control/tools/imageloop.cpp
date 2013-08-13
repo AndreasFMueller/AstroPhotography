@@ -5,17 +5,20 @@
  */
 #include <includes.h>
 #include <stdexcept>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <AstroFilter.h>
+#include <AstroFilterfunc.h>
+#include <AstroDevice.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::module;
 using namespace astro::camera;
+using namespace astro::device;
 using namespace astro::image::filter;
 
 namespace astro {
@@ -31,7 +34,8 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -y yoffset   vertical offset of image rectangle"
 		<< std::endl;
-	std::cout << "  -n images    number of images, 0 means never stop" << std::endl;
+	std::cout << "  -n images    number of images, 0 means never stop"
+		<< std::endl;
 	std::cout << "  -o outdir    directory where files should be placed"
 		<< std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
@@ -127,8 +131,8 @@ int	main(int argc, char *argv[]) {
 	module->open();
 
         // get the camera
-	CameraLocatorPtr        locator = module->getCameraLocator();
-	std::vector<std::string>        cameras = locator->getCameralist();
+	DeviceLocatorPtr        locator = module->getDeviceLocator();
+	std::vector<std::string>        cameras = locator->getDevicelist();
 	if (cameraid >= cameras.size()) {
 		std::string	msg = stringprintf("camera id %d out of range",
 			cameraid);
@@ -148,10 +152,10 @@ int	main(int argc, char *argv[]) {
 
 	// find a fitting image rectangle
         if (width == 0) {
-                width = ccd->getInfo().size.width;
+                width = ccd->getInfo().size().width();
         }
         if (height == 0) {
-                height = ccd->getInfo().size.height;
+                height = ccd->getInfo().size().height();
         }
         ImageRectangle  imagerectangle = ccd->getInfo().clipRectangle(
                 ImageRectangle(ImagePoint(xoffset, yoffset),

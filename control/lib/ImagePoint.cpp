@@ -5,7 +5,7 @@
  * $Id$
  */
 #include <AstroImage.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -16,7 +16,7 @@ namespace image {
  * points are equal if both coordinates are equal
  */
 bool	ImagePoint::operator==(const ImagePoint& other) const {
-	return (x == other.x) && (y == other.y);
+	return (_x == other._x) && (_y == other._y);
 }
 
 /**
@@ -25,7 +25,7 @@ bool	ImagePoint::operator==(const ImagePoint& other) const {
  * addition is just addition of components
  */
 ImagePoint	ImagePoint::operator+(const ImagePoint& other) const {
-	return ImagePoint(x + other.x, y + other.y);
+	return ImagePoint(_x + other._x, _y + other._y);
 }
 
 /**
@@ -34,14 +34,21 @@ ImagePoint	ImagePoint::operator+(const ImagePoint& other) const {
  * addition is just subtraction of components
  */
 ImagePoint	ImagePoint::operator-(const ImagePoint& other) const {
-	return ImagePoint(x - other.x, y - other.y);
+	return ImagePoint(_x - other._x, _y - other._y);
 }
 
 /**
  * \brief String representation
  */
 std::string	ImagePoint::toString() const {
-	return stringprintf("(%d,%d)", x, y);
+	return stringprintf("(%u,%u)", _x, _y);
+}
+
+/**
+ * \brief Point output
+ */
+std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
+	return out << point.toString();
 }
 
 } // namespace image

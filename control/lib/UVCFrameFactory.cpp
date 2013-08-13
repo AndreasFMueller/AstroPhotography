@@ -5,7 +5,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUVC.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace usb {

@@ -4,17 +4,20 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
-#include <Format.h>
+#include <AstroFormat.h>
 #include <iostream>
+#include <sstream>
 #include <AstroLoader.h>
 #include <AstroCamera.h>
+#include <AstroDevice.h>
 #include <AstroIO.h>
 
 using namespace astro;
 using namespace astro::module;
 using namespace astro::camera;
+using namespace astro::device;
 using namespace astro::image;
 using namespace astro::io;
 
@@ -47,6 +50,8 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -y yoffset     vertical offset of image rectangle"
 		<< std::endl;
+	std::cout << " -t temp        cool the CCD to temperature <temp> in decrees Celsius"
+		<< std::endl;
 	std::cout << " -l             list only, lists the devices"
 		<< std::endl;
 }
@@ -65,10 +70,15 @@ int	main(int argc, char *argv[]) {
 	const char	*prefix = "test";
 	const char	*cameratype = "uvc";
 	bool	listonly = false;
+	bool	dark = false;
+	double	temperature = -1;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:")))
 		switch (c) {
+		case 'D':
+			dark = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
@@ -108,6 +118,9 @@ int	main(int argc, char *argv[]) {
 		case 'y':
 			yoffset = atoi(optarg);
 			break;
+		case 't':
+			temperature = atof(optarg) + 273.1;
+			break;
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
@@ -120,8 +133,8 @@ int	main(int argc, char *argv[]) {
 	module->open();
 
 	// get the camera
-	CameraLocatorPtr	locator = module->getCameraLocator();
-	std::vector<std::string>	cameras = locator->getCameralist();
+	DeviceLocatorPtr	locator = module->getDeviceLocator();
+	std::vector<std::string>	cameras = locator->getDevicelist();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "have found %d cameras", cameras.size());
 	if (0 == cameras.size()) {
 		std::cerr << "no cameras found" << std::endl;
@@ -154,17 +167,41 @@ int	main(int argc, char *argv[]) {
 
 	// create the image rectangle
 	if (width == 0) {
-		width = ccd->getInfo().size.width;
+		width = ccd->getInfo().size().width();
 	}
 	if (height == 0) {
-		height = ccd->getInfo().size.height;
+		height = ccd->getInfo().size().height();
 	}
 	ImageRectangle	imagerectangle = ccd->getInfo().clipRectangle(
 		ImageRectangle(ImagePoint(xoffset, yoffset),
 			ImageSize(width, height)));
 
+	// if the temperature is set, and the ccd has a cooler, lets
+	// start the cooler
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s, temperature = %f",
+		ccd->hasCooler() ? "YES" : "NO", temperature);
+	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
+	CoolerPtr	cooler;
+	if (usecooler) {
+		cooler = ccd->getCooler();
+		cooler->setTemperature(temperature);
+		cooler->setOn(true);
+		// wait until the temperature is within 1 degree of the
+		// set temperature
+		double	delta;
+		do {
+			sleep(1);
+			double	actual = cooler->getActualTemperature();
+			delta = fabs(temperature - actual);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"set: %.1f, actual: %1.f, delta: %.1f",
+				temperature, actual, delta);
+		} while (delta > 1);
+	}
+
 	// prepare an exposure object
 	Exposure	exposure(imagerectangle, exposuretime);
+	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
 
 	// start the exposure
 	ccd->startExposure(exposure);
@@ -172,17 +209,24 @@ int	main(int argc, char *argv[]) {
 	// read all images
 	ImageSequence	images = ccd->getImageSequence(nImages);
 
+	// turn of the cooler to save energy
+	if (usecooler) {
+		cooler->setOn(false);
+	}
+
 	// write the images to a file
 	ImageSequence::const_iterator	imageptr;
 	int	counter = 0;
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
 		std::string	filename = stringprintf("%s/%s%03d.fits",
 			outputdir, prefix, counter++);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
-			filename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s of size %s",
+			filename.c_str(), (*imageptr)->size().toString().c_str());
 		if (debuglevel >= LOG_DEBUG) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info:");
-			std::cout << *imageptr;
+			std::ostringstream	out;
+			out << **imageptr;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info: %s",
+				out.str().c_str());
 		}
 		unlink(filename.c_str());
 		FITSout	out(filename);

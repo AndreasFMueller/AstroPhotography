@@ -18,10 +18,13 @@ class Interpolator {
 	const astro::image::ImagePtr& dark;
 	astro::image::Image<float>	*floatdark;
 	astro::image::Image<double>	*doubledark;
+	void	interpolateMonochrome(astro::image::ImagePtr& image);
+	void	interpolateMosaic(astro::image::ImagePtr& image);
+	astro::image::ImageRectangle	frame;
 public:
-	Interpolator(const astro::image::ImagePtr& dark);
-	void	interpolate(astro::image::ImagePtr& image);
-	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image);
+	Interpolator(const astro::image::ImagePtr& dark,
+		const astro::image::ImageRectangle& frame);
+	void	operator()(astro::image::ImagePtr& image);
 };
 
 } // namespace interpolation

@@ -19,14 +19,15 @@ AC_PROG_LIBTOOL
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h dlfcn.h libusb-1.0/libusb.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h])
 
 # Check for libraries
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
-
+AC_CHECK_LIB([lapack], [dgels_])
+AC_CHECK_LIB([fftw3], [fftw_malloc])
 
 ######################################################################
 # decide whether or not to build the test programs
@@ -60,7 +61,7 @@ AC_ARG_ENABLE(sbig,
 [
 	case `uname` in
 	Darwin)	SBIGTARGET=ENV_MACOSX
-		SBIGINCLUDE=-I/Library/Frameworks/SBIGUDrv.framework/Headers
+		SBIGINCLUDE="-framework SBIGUDrv"
 		;;
 	Linux)	SBIGTARGET=ENV_LINUX
 		;;
@@ -68,16 +69,20 @@ AC_ARG_ENABLE(sbig,
 	AC_SUBST(SBIGTARGET)
 	OLDCFLAGS="${CFLAGS}"
 	CFLAGS="${CFLAGS} -DTARGET=${SBIGTARGET} ${SBIGINCLUDE}"
-	AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
 	case `uname` in
 	Linux)	OLDLIBS="${LIBS}"
+		AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
 		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
 			[AC_MSG_ERROR([SBIG library not found])])
 		SBIGLIBRARY=-lsbigudrv
 		LIBS="${OLDLIBS}"
 		;;
-	*)	echo "Mac OS X: just believe library will work"
-		SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
+	Darwin)	
+		AC_CHECK_HEADERS(SBIGUDrv/sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
+		echo "Mac OS X: header was found, so library will work"
+		SBIGLIBRARY="-framework SBIGUDrv"
+		CFLAGS="${CPPFLAGS} ${SBIGLIBRARY}"
+		#SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
 		;;
 	esac
 	AC_SUBST(SBIGLIBRARY)
@@ -138,7 +143,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
-	drivers/uvc/Makefile drivers/unicap/Makefile
+	drivers/uvc/Makefile drivers/unicap/Makefile 
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT

@@ -6,8 +6,9 @@
 #include <SxCamera.h>
 #include <SxCcd.h>
 #include <sx.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <SxGuiderPort.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 
@@ -28,6 +29,53 @@ namespace sx {
  * it is a meaning of that by conjectured in an email from Terry Platt, 
  * <tplatt@starlight.win-uk.net>, may 4, 2013
  */
+typedef struct sx_model_s {
+	unsigned short	product;
+	unsigned short	model;
+	std::string	name;
+} sx_model_t;
+
+#define	NUMBER_SX_MODELS	38
+sx_model_t	models[NUMBER_SX_MODELS] = {
+	{ 0x0105, 0x0045, std::string("SXVF-M5") },
+	{ 0x0305, 0x00c5, std::string("SXVF-M5C") },
+	{ 0x0107, 0x0047, std::string("SXVF-M7") },
+	{ 0x0307, 0x00c7, std::string("SXVF-M7C") },
+	{ 0x0000, 0x0048, std::string("SXVF-M8") },
+	{ 0x0308, 0x00c8, std::string("SXVF-M8C") },
+	{ 0x0109, 0x0049, std::string("MX9") },
+	{ 0x0109, 0x0000, std::string("SXVF-M9") },
+	{ 0x0309, 0x00c9, std::string("MX9C") },
+	{ 0x0509, 0x0009, std::string("Oculus") },
+	{ 0x0325, 0x0059, std::string("SXVR-M25C") },
+	{ 0x0326, 0x005a, std::string("SXVR-M26C") },
+	{ 0x0128, 0x0000, std::string("SXVR-H18") },
+	{ 0x0126, 0x0000, std::string("SXVR-H16") },
+	{ 0x0135, 0x0023, std::string("SXVR-H35") },
+	{ 0x0135, 0x00b3, std::string("SXVR-H35C") },
+	{ 0x0136, 0x0024, std::string("SXVR-H36") },
+	{ 0x0136, 0x00b4, std::string("SXVR-H36C") },
+	{ 0x0100, 0x0009, std::string("SXVR-H9") },
+	{ 0x0119, 0x0009, std::string("SXVR-H9") },
+	{ 0x0319, 0x0089, std::string("SXVR-H9C") },
+	{ 0x0100, 0x0089, std::string("SXVR-H9C") },
+	{ 0x0200, 0x0000, std::string("SXV interface") },
+	{ 0x0507, 0x0000, std::string("Lodestar") },
+	{ 0x0507, 0x0000, std::string("Lodestar-C") },
+	{ 0x0517, 0x0000, std::string("CoStar") },
+	{ 0x0000, 0x0009, std::string("HX9") },
+	{ 0x0000, 0x0010, std::string("SXVR-H16") },
+	{ 0x0000, 0x0090, std::string("SXVR-H16C") },
+	{ 0x0000, 0x0012, std::string("SXVR-H18") },
+	{ 0x0000, 0x0092, std::string("SXVR-H18C") },
+	{ 0x0000, 0x0056, std::string("SXVR-H674") },
+	{ 0x0000, 0x00b6, std::string("SXVR-H674C") },
+	{ 0x0000, 0x0057, std::string("SXVR-H694") },
+	{ 0x0000, 0x00b7, std::string("SXVR-H694C") },
+	{ 0x0000, 0x0028, std::string("SXVR-H814") },
+	{ 0x0000, 0x00a8, std::string("SXVR-H814C") },
+	{ 0x0000, 0x0058, std::string("SXVR-H290") },
+};
 
 /**
  * \brief Create a new Camera from a USB device pointer
@@ -102,6 +150,17 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
+	// from product id and model number, try to infer the product name
+	for (unsigned int m = 0; m < NUMBER_SX_MODELS; m++) {
+		if (
+		((models[m].product == 0) || (models[m].product == product)) &&
+		((models[m].model == 0) || (models[m].model == model))
+		) {
+			name = models[m].name;
+			break;
+		}
+	}
+
 	// get information about this CCD from the camera
         Request<sx_ccd_params_t>        ccd0request(
                 RequestBase::vendor_specific_type,
@@ -112,15 +171,16 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// now create a CcdInfo structure for this device
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Imaging CCD info");
-	CcdInfo	ccd0;
-	ccd0.size = ImageSize(params.width, params.height);
-	ccd0.name = "Imaging";
-	ccd0.binningmodes.insert(Binning(2,2));
+	unsigned int	width = params.width;
+	unsigned int	height = params.height;
 	if (model != SX_MODEL_M26C) {
-		ccd0.binningmodes.insert(Binning(3,3));
-		ccd0.binningmodes.insert(Binning(4,4));
-	} else {
-		ccd0.size.height *= 2;
+		height *= 2;
+	}
+	CcdInfo	ccd0("Imaging", ImageSize(width, height), 0);
+	ccd0.addMode(Binning(2,2));
+	if (model != SX_MODEL_M26C) {
+		ccd0.addMode(Binning(3,3));
+		ccd0.addMode(Binning(4,4));
 	}
 	ccdinfo.push_back(ccd0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
@@ -128,12 +188,13 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// find out whether this camera has a cooler
 	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
-		hasCooler = true;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "has cooler");
+		_hasCooler = true;
 	} else {
-		hasCooler = false;
+		_hasCooler = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has cooler: %s",
-		(hasCooler) ? "yes" : "no");
+		(_hasCooler) ? "yes" : "no");
 
 	// find out whether this camera has a guider port
 	if (ccd0request.data()->extra_capabilities & STAR2000_PORT) {
@@ -156,10 +217,9 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		controlRequest(&ccd1request);
 		params = *ccd1request.data();
 
-		CcdInfo	ccd1;
-		ccd1.size = ImageSize(params.width, params.height);
-		ccd1.name = "Tracking";
-		ccd1.binningmodes.insert(Binning(2,2));
+		CcdInfo	ccd1("Tracking",
+			ImageSize(params.width, params.height), 1);
+		ccd1.addMode(Binning(2,2));
 		ccdinfo.push_back(ccd1);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no tracking ccd");
@@ -291,13 +351,20 @@ void	SxCamera::controlRequest(RequestBase *request) {
 }
 
 /**
+ * \brief Ask whether this camera has a cooler
+ */
+bool	SxCamera::hasCooler() {
+	return _hasCooler;
+}
+
+/**
  * \brief Get the cooler for this camera, if it exists.
  */
 CoolerPtr	SxCamera::getCooler(int ccdindex) {
 	if (ccdindex > 0) {
 		throw std::runtime_error("only imaging CCD has cooler");
 	}
-	if (!hasCooler) {
+	if (!_hasCooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no cooler");
 		throw std::runtime_error("this camera has no cooler");
 	}
@@ -315,6 +382,13 @@ GuiderPortPtr	SxCamera::getGuiderPort() throw (not_implemented) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating guider port object");
 	return GuiderPortPtr(new SxGuiderPort(*this));
+}
+
+/**
+ * \brief Find out whether this is a color camera
+ */
+bool	SxCamera::isColor() const {
+	return ((product & 0xf00) == 0x300) ? true : false;
 }
 
 } // namespace sx

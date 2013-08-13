@@ -7,6 +7,7 @@
 #define _AstroCalibration_h
 
 #include <AstroImage.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace calibration {
@@ -62,23 +63,39 @@ public:
 };
 
 /**
+ * \brief Corrector class
+ */
+class Corrector {
+protected:
+	const astro::image::ImagePtr&	calibrationimage;
+	astro::image::ImageRectangle	rectangle;
+public:
+	Corrector(const astro::image::ImagePtr& calibrationimage,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const = 0;
+};
+
+/**
  * \brief Correct dark correction
  */
-class DarkCorrector  {
-	const astro::image::ImagePtr&	dark;
+class DarkCorrector : public Corrector {
 public:
-	DarkCorrector(const astro::image::ImagePtr& dark);
-	void	operator()(astro::image::ImagePtr& image) const;
+	DarkCorrector(const astro::image::ImagePtr& dark,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const;
 };
 
 /**
  * \brief Perform flat correction
  */
-class FlatCorrector {
-	const astro::image::ImagePtr&	flat;
+class FlatCorrector : public Corrector {
 public:
-	FlatCorrector(const astro::image::ImagePtr& flat);
-	void	operator()(astro::image::ImagePtr& image) const;
+	FlatCorrector(const astro::image::ImagePtr& flat,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
+	virtual void	operator()(astro::image::ImagePtr& image) const;
 };
 
 /**
@@ -87,11 +104,63 @@ public:
 class Calibrator {
 	const astro::image::ImagePtr&	dark;
 	const astro::image::ImagePtr&	flat;
+	astro::image::ImageRectangle	rectangle;
 public:
 	Calibrator(const astro::image::ImagePtr& dark,
-		const astro::image::ImagePtr& flat);
+		const astro::image::ImagePtr& flat,
+		const astro::image::ImageRectangle& rectangle
+			= astro::image::ImageRectangle());
 	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image) const;
 };
+
+/**
+ * \brief Class to record and average calibration images
+ */
+class CalibrationFrameProcess {
+protected:
+	astro::camera::CcdPtr	ccd;
+	astro::camera::Exposure	exposure;
+	float	_temperature;
+	unsigned int	_nimages;
+	void	prepare();
+	void	cleanup();
+public:
+	CalibrationFrameProcess(astro::camera::CcdPtr _ccd) : ccd(_ccd) {
+		_temperature = -1;
+		_nimages = 3;
+	}
+	double	exposuretime() const {
+		return exposure.exposuretime;
+	}
+	void	setExposuretime(const float exposuretime) {
+		exposure.exposuretime = exposuretime;
+	}
+
+	float	temperature() const { return _temperature; }
+	void	setTemperature(float temperatur) { _temperature = temperatur; }
+	unsigned int	nimages() const { return _nimages; }
+	void	setNimages(unsigned int nimages) { _nimages = nimages; }
+
+	virtual astro::image::ImagePtr	get() = 0;
+};
+
+class DarkFrameProcess : public CalibrationFrameProcess {
+public:
+	DarkFrameProcess(astro::camera::CcdPtr _ccd)
+		: CalibrationFrameProcess(_ccd) { }
+	virtual astro::image::ImagePtr	get();
+};
+
+class FlatFrameProcess : public CalibrationFrameProcess {
+	const astro::image::ImagePtr&	dark;
+public:
+	FlatFrameProcess(astro::camera::CcdPtr _ccd,
+		const astro::image::ImagePtr& _dark)
+		: CalibrationFrameProcess(_ccd), dark(_dark) { }
+	virtual astro::image::ImagePtr	get();
+};
+
+
 
 } // namespace calibration
 } // namespace astro

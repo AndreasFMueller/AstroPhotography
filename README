@@ -19,8 +19,10 @@ This repository contains the following components:
    and Cameras supported by the universal driver library from SBIG. Other
    modules can easily be added.
 
-2. Focus: This directory contains applications for focus control, based on
+2. gui: Some gui components usefull to build complete GUI applications
+
+3. Focus: This directory contains applications for focus control, based on
    the Control library.
 
-3. Guiding: Some applications useful for guiding
+4. Guiding: Some applications useful for guiding
 

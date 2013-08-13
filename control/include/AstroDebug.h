@@ -1,23 +1,14 @@
 /*
- * debug.h
+ * AstroDebug.h
  *
  * (c) 2007 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _debug_h
-#define _debug_h
+#ifndef _AstroDebug_h
+#define _AstroDebug_h
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
-
-#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
-#endif
-
-#ifdef HAVE_STDIO_H
 #include <stdio.h>
-#endif
-
 #include <stdarg.h>
 
 #define	DEBUG_NOFILELINE	1
@@ -38,4 +29,4 @@ extern void	vdebug(int loglevel, const char *filename, int line,
 }
 #endif
 
-#endif /* _debug_h */
+#endif /* _AstroDebug_h */

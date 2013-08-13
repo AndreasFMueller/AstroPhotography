@@ -4,17 +4,27 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 using namespace astro::calibration;
 using namespace astro::io;
 using namespace astro::image;
 
 namespace astro {
+
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ -d?h ] [ -o outfile ] [ -D dark ] [ -o outfile ] files ..." << std::endl;
+	std::cout << "compute flat frame from <files>..." << std::endl;
+	std::cout << "options: " << std::endl;
+	std::cout << " -d           increase debug level" << std::endl;
+	std::cout << " -o outfile   write the computed flat file to <outfile>" << std::endl;
+	std::cout << " -h, -?        show this help message" << std::endl;
+	std::cout << " -D dark       use <dark> as the bias for flat computation" << std::endl;
+}
 
 /**
  * \brief Main function for makeflat tool 
@@ -26,7 +36,7 @@ int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	const char	*darkfilename = NULL;
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "do:D:")))
+	while (EOF != (c = getopt(argc, argv, "do:D:?h")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -36,6 +46,13 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'o':
 			outfilename = optarg;
+			break;
+		case '?':
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
+		default:
+			throw std::runtime_error("bad option");
 			break;
 		}
 
@@ -65,9 +82,9 @@ int	main(int argc, char *argv[]) {
 		FITSin	infile(f);
 		dark = infile.read();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got dark %d x %d",
-			dark->size.width, dark->size.height);
+			dark->size().width(), dark->size().height());
 	} else {
-		dark = ImagePtr(new Image<float>(images[0]->size));
+		dark = ImagePtr(new Image<float>(images[0]->size()));
 	}
 
 	// now produce the flat image
@@ -78,13 +95,14 @@ int	main(int argc, char *argv[]) {
 
 	// display some info about the flat image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image %d x %d generated",
-		flat->size.width, flat->size.height);
+		flat->size().width(), flat->size().height());
 
 	// write the flat image to a file
 	if (outfilename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "outfile: %s", outfilename);
 		unlink(outfilename);
 		FITSout	outfile(outfilename);
+		outfile.setPrecious(false);
 		outfile.write(flat);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "flat image written to %s",
 			outfilename);

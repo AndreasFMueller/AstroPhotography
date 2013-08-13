@@ -12,7 +12,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <stdexcept>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <iomanip>
 
 using namespace astro::unicap;

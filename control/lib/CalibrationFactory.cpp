@@ -3,17 +3,20 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <includes.h>
 #include <AstroCalibration.h>
 #include <AstroFilter.h>
 #include <PixelValue.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 #include <vector>
-#include <Format.h>
+#include <AstroFormat.h>
+#include <AstroIO.h>
 
 using namespace astro::image;
 using namespace astro::image::filter;
+using namespace astro::camera;
 
 namespace astro {
 namespace calibration {
@@ -29,7 +32,7 @@ bool	consistent(const ImageSequence& images) {
 	// make sure all images in the sequence are of the same size
 	ImageSequence::const_iterator	i = images.begin();
 	for (i++; i != images.end(); i++) {
-		if ((*images.begin())->size != (*i)->size) {
+		if ((*images.begin())->size() != (*i)->size()) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "image size mismatch");
 			return false;
 		}
@@ -70,7 +73,9 @@ ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence& images) const 
 template<typename T>
 class ImageMean {
 	bool	enableVariance;
+	unsigned int	k;
 public:
+	void	setK(unsigned int _k) { k = _k; }
 	typedef ConstPixelValue<T>	PV;
 	typedef std::vector<PV>	PVSequence;
 
@@ -115,7 +120,7 @@ public:
 template<typename T>
 void	ImageMean<T>::setup_images(const ImageSequence& images) {
 	// create an image of appropriate size
-	size = (*images.begin())->size;
+	size = (*images.begin())->size();
 	image = new Image<T>(size);
 	if (enableVariance) {
 		// prepare the variance image
@@ -169,15 +174,20 @@ void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
 
 	// perform mean (and possibly variance) computation in the
 	// case where 
-	T	m;
+	//T	m;
 	T	X = 0, X2 = 0;
 	typename std::vector<PV>::const_iterator j;
-	int	counter = 0;
+	unsigned int	counter = 0;
 	for (j = pvs.begin(); j != pvs.end(); j++) {
 		T	v = j->pixelvalue(x, y);
 		// skip this value if it is a NaN
 		if (v != v)
 			continue;
+		if (v < darkvalue) {
+			v = 0;
+		} else {
+			v = v - darkvalue;
+		}
 		X += v;
 		if (enableVariance) {
 			X2 += v * v;
@@ -205,21 +215,22 @@ void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
 	// the mean
 	X = 0, X2 = 0;
 	counter = 0;
-	T	stddev3 = 3 * sqrt(EX2 - EX * EX);
-	if (stddev3 < 1) {
-		stddev3 = std::numeric_limits<T>::infinity();
+	T	stddevk = k * sqrt(EX2 - EX * EX);
+	if (stddevk < 1) {
+		stddevk = std::numeric_limits<T>::infinity();
 	}
-if (stddev3 < 1) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "EX = %f, EX2 = %f", EX, EX2);
-}
 	for (j = pvs.begin(); j != pvs.end(); j++) {
 		T	v = j->pixelvalue(x, y);
 		// skip NaNs
 		if (v != v)
 			continue;
+		if (v < darkvalue) {
+			v = 0;
+		} else {
+			v = v - darkvalue;
+		}
 		// skip values that are too far off
-		if (fabs(v - EX) > stddev3) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "(%d,%d): skipping %f, EX = %f, stddev3 = %f", x, y, v, EX, stddev3);
+		if (fabs(v - EX) > stddevk) {
 			continue;
 		}
 		X += v;
@@ -257,11 +268,14 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			compute(x, y, 0);
 		}
 	}
+
+	// number of standard deviations for bad pixels
+	k = 3;
 }
 
 /**
@@ -282,12 +296,15 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width; x++) {
-		for (unsigned int y = 0; y < size.height; y++) {
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			T	darkvalue = dark.pixel(x, y);
 			compute(x, y, darkvalue);
 		}
 	}
+
+	// number of standard deviations for bad pixels
+	k = 3;
 }
 
 template<typename T>
@@ -308,7 +325,8 @@ ImageMean<T>::~ImageMean() {
 template<typename T>
 T	ImageMean<T>::mean(const Subgrid grid) const {
 	Mean<T, T>	meanoperator;
-	return meanoperator(*image, grid);
+	ConstSubgridAdapter<T>	sga(*image, grid);
+	return meanoperator(sga);
 }
 
 /**
@@ -317,7 +335,8 @@ T	ImageMean<T>::mean(const Subgrid grid) const {
 template<typename T>
 T	ImageMean<T>::variance(const Subgrid grid) const {
 	Variance<T, T>	varianceoperator;
-	return varianceoperator(*image, grid);
+	ConstSubgridAdapter<T>	sga(*image, grid);
+	return varianceoperator(sga);
 }
 
 /**
@@ -339,31 +358,38 @@ ImagePtr	ImageMean<T>::getImagePtr() {
  */
 template<typename T>
 size_t	subdark(const ImageSequence&, ImageMean<T>& im,
-	const Subgrid grid) {
+	const Subgrid grid, unsigned int k = 3) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing subgrid %s",
+		grid.toString().c_str());
 	// we also need the mean of the image to decide which pixels are
 	// too far off to consider them "sane" pixels
 	T	mean = im.mean(grid);
 	T	var = im.variance(grid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f",
-		mean, var);
 
 	// now find out which pixels are bad, and mark them using NaNs.
 	// we consider pixels bad if the deviate from the mean by more
 	// than three standard deviations
-	T	stddev3 = 3 * sqrt(var);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stddev3 = %f", stddev3);
+	T	stddevk = k * sqrt(var);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found mean: %f, variance: %f, "
+		"stddev%u = %f", mean, var, k, stddevk);
 	size_t	badpixelcount = 0;
-	for (unsigned int x = grid.origin.x; x < im.size.width;
-		x += grid.size.width) {
-		for (unsigned int y = grid.origin.y; y < im.size.height;
-			y += grid.size.height) {
-			if (fabs(im.image->pixel(x, y) - mean) > stddev3) {
-				im.image->pixel(x, y)
+	SubgridAdapter<T>	sga(*im.image, grid);
+	ImageSize	size = sga.getSize();
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
+			T	v = sga.pixel(x, y);
+			// skip NaNs
+			if (v != v) {
+				break;
+			}
+			if (fabs(v - mean) > stddevk) {
+				sga.pixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
 				badpixelcount++;
 			}
 		}
 	}
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u bad pixels", badpixelcount);
 	return badpixelcount;
 }
@@ -379,6 +405,7 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
  */
 template<typename T>
 ImagePtr	dark_plain(const ImageSequence& images) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "plain dark processing");
 	ImageMean<T>	im(images, true);
 	subdark<T>(images, im, Subgrid());
 	
@@ -388,18 +415,20 @@ ImagePtr	dark_plain(const ImageSequence& images) {
 
 template<typename T>
 ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded: %s", (gridded) ? "YES" : "NO");
 	if (!gridded) {
 		return dark_plain<T>(images);
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "gridded dark processing");
 	ImageMean<T>	im(images, true);
 	// perform the dark computation for each individual subgrid
 	size_t	badpixels = 0;
-	ImageSize	size(2, 2);
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), size));
-	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), size));
+	ImageSize	step(2, 2);
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 0), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 0), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step));
+	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	return im.getImagePtr();
 }
@@ -408,9 +437,25 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
  * \brief Dark image construction function for arbitrary image sequences
  */
 ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
-	// XXX find out whether this is a Bayer image
-	bool	gridded = true;
-	if ((*images.begin())->bitsPerPixel() <= std::numeric_limits<float>::digits) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing %d images into dark frame",
+		images.size());
+	// make sure we have at least one image
+	if (images.size() == 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create dark from no images");
+		throw std::runtime_error("no images in sequence");
+	}
+
+	// find out whether these are Bayer images, by looking at the first
+	// image
+	ImagePtr	firstimage = *images.begin();
+	bool	gridded = firstimage->getMosaicType().isMosaic();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "first image is %sgridded",
+		(gridded) ? "" : "not ");
+	
+	// based on the bit size of the first image, decide whether to work
+	// with floats or with doubles
+	unsigned int	floatlimit = std::numeric_limits<float>::digits;
+	if (firstimage->bitsPerPixel() <= floatlimit) {
 		return dark<float>(images, gridded);
 	}
 	return dark<double>(images, gridded);
@@ -438,8 +483,8 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 
 	// device the image by that value, so that the new maximum value
 	// is 1
-	for (unsigned int x = 0; x < image->size.width; x++) {
-		for (unsigned int y = 0; y < image->size.height; y++) {
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y) /= maxvalue;
 		}
 	}
@@ -474,34 +519,39 @@ ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
 //////////////////////////////////////////////////////////////////////
 template<typename T>
 class TypedCalibrator {
-	ConstPixelValue<T>	dark;
-	ConstPixelValue<T>	flat;
+	const ConstImageAdapter<T>&	dark;
+	const ConstImageAdapter<T>&	flat;
 	T	nan;
 public:
-	TypedCalibrator(const ImagePtr& _dark, const ImagePtr& _flat);
+	TypedCalibrator(const ConstImageAdapter<T>& _dark,
+		const ConstImageAdapter<T>& _flat);
 	ImagePtr	operator()(const ImagePtr& image) const;
 };
 
 template<typename T>
-TypedCalibrator<T>::TypedCalibrator(const ImagePtr& _dark,
-	const ImagePtr& _flat) : dark(_dark), flat(_flat) {
+TypedCalibrator<T>::TypedCalibrator(const ConstImageAdapter<T>& _dark,
+	const ConstImageAdapter<T>& _flat) 
+	: dark(_dark), flat(_flat) {
 	nan = std::numeric_limits<T>::quiet_NaN();
 }
 
 template<typename T>
 ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
-	ConstPixelValue<T>	im(image);
-	Image<T>	*result = new Image<T>(image->size);
-	for (unsigned int x = 0; x < image->size.width; x++) {
-		for (unsigned int y = 0; y < image->size.height; y++) {
-			T	darkvalue = dark.pixelvalue(x, y);
+	ConstPixelValueAdapter<T>	im(image);
+	Image<T>	*result = new Image<T>(image->size());
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
+			T	darkvalue = dark.pixel(x, y);
 			// if the pixel is bad give 
 			if (darkvalue != darkvalue) {
 				result->pixel(x, y) = nan;;
 				continue;
 			}
-			result->pixel(x, y) = (im.pixelvalue(x, y) - darkvalue)
-				/ flat.pixelvalue(x, y);
+			T	v = im.pixel(x, y) - darkvalue;
+			if (v < 0) {
+				v = 0;
+			}
+			result->pixel(x, y) = v / flat.pixel(x, y);
 		}
 	}
 	return ImagePtr(result);
@@ -510,8 +560,9 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 //////////////////////////////////////////////////////////////////////
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
-Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
-	: dark(_dark), flat(_flat) {
+Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat,
+		const ImageRectangle& _rectangle)
+	: dark(_dark), flat(_flat), rectangle(_rectangle) {
 	// We want dark and flat images to be of float or double type
 	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);
 	Image<double>	*dp = dynamic_cast<Image<double> *>(&*dark);
@@ -523,13 +574,107 @@ Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat)
 }
 
 ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
-	if (image->bitsPerPixel() <= std::numeric_limits<float>::digits) {
-		TypedCalibrator<float>	calibrator(dark, flat);
+	unsigned int	floatlimit = std::numeric_limits<float>::digits;
+	// find the appropriate frame to use for the correction images
+	ImageRectangle	frame;
+	if (rectangle == ImageRectangle()) {
+		frame = ImageRectangle(ImagePoint(), image->size());
+	}
+
+	// use pixel size to decide which type to use for the result image
+	if (image->bitsPerPixel() <= floatlimit) {
+		// create adapters for darks and flats with float values
+		ConstPixelValueAdapter<float>	pvdark(dark);
+		WindowAdapter<float>		wdark(pvdark, frame);
+		ConstPixelValueAdapter<float>	pvflat(flat);
+		WindowAdapter<float>		wflat(pvflat, frame);
+		TypedCalibrator<float>	calibrator(wdark, wflat);
 		return calibrator(image);
 	}
-	TypedCalibrator<double>	calibrator(dark, flat);
+	ConstPixelValueAdapter<double>	pvdark(dark);
+	WindowAdapter<double>		wdark(pvdark, frame);
+	ConstPixelValueAdapter<double>	pvflat(flat);
+	WindowAdapter<double>		wflat(pvflat, frame);
+	TypedCalibrator<double>	calibrator(wdark, wflat);
 	return calibrator(image);
 }
+
+//////////////////////////////////////////////////////////////////////
+// CalibrationFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+
+void	CalibrationFrameProcess::prepare() {
+	// enable cooler, set temperature, if cooler available
+	bool	usecooler = (ccd->hasCooler() && (_temperature > 0));
+	if (usecooler) {
+		CoolerPtr	cooler = ccd->getCooler();
+		cooler->setTemperature(_temperature);
+		cooler->setOn(true);
+
+		// wait until temperature is close to set point
+		while (fabs(cooler->getActualTemperature() - _temperature) > 1) {
+			sleep(1);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature reached");
+	}
+}
+
+void	CalibrationFrameProcess::cleanup() {
+	bool	usecooler = (ccd->hasCooler() && (_temperature > 0));
+	if (usecooler) {
+		CoolerPtr	cooler = ccd->getCooler();
+		cooler->setOn(false);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// DarkFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+ImagePtr	DarkFrameProcess::get() {
+	prepare();
+
+	// start exposure
+	exposure.shutter = SHUTTER_CLOSED;
+	ccd->startExposure(exposure);
+
+	// get a sequence of images
+	ImageSequence	images = ccd->getImageSequence(_nimages);
+
+	// convert the images into a dark frame
+	DarkFrameFactory	df;
+	ImagePtr	dark = df(images);
+
+	cleanup();
+
+	// return the dark image
+	return dark;
+}
+
+//////////////////////////////////////////////////////////////////////
+// FlatFrameProcess implementation
+//////////////////////////////////////////////////////////////////////
+ImagePtr	FlatFrameProcess::get() {
+	prepare();
+
+	// start exposure
+	exposure.shutter = SHUTTER_OPEN;
+	ccd->startExposure(exposure);
+
+	// get a sequence of images
+	ImageSequence	images = ccd->getImageSequence(_nimages);
+
+	// convert the images into a flat frame
+	FlatFrameFactory	ff;
+	ImagePtr	flat = ff(images, dark);
+
+	// turn of cooler
+	cleanup();
+
+	// return the dark image
+	return flat;
+}
+
+
 
 } // calibration
 } // astro

@@ -6,13 +6,15 @@
  */
 
 #include <AstroLoader.h>
+#include <AstroDevice.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <unistd.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
+using namespace astro::device;
 using namespace astro::camera;
 using namespace astro::module;
 using namespace astro::image;
@@ -45,8 +47,8 @@ void	Mock1Test::tearDown() {
 void	Mock1Test::testMock1() {
 	ModulePtr	module = repository->getModule("mock1");
 	module->open();
-	CameraLocatorPtr	cl = module->getCameraLocator();
-	std::vector<std::string>	cameras = cl->getCameralist();
+	DeviceLocatorPtr	cl = module->getDeviceLocator();
+	std::vector<std::string>	cameras = cl->getDevicelist();
 	CPPUNIT_ASSERT(cameras.size() == 10);
 	CameraPtr	camera = cl->getCamera("mock1-5");
 	// for every CCD, take an image
@@ -54,8 +56,8 @@ void	Mock1Test::testMock1() {
 		CcdPtr	ccd = camera->getCcd(i);
 		Exposure	exposure;
 		ImageRectangle	frame(ImagePoint(1,1),
-			ImageSize(ccd->getSize().width - 2,
-			ccd->getSize().height - 2));
+			ImageSize(ccd->getSize().width() - 2,
+			ccd->getSize().height() - 2));
 		exposure.frame = frame;
 		ccd->startExposure(exposure);
 		while (ccd->exposureStatus() == Exposure::exposing) {
@@ -65,7 +67,7 @@ void	Mock1Test::testMock1() {
 			ImagePtr	image = ccd->getImage();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"result image size: %d x %d",
-				image->size.width, image->size.height);
+				image->size().width(), image->size().height());
 		}
 	}
 }

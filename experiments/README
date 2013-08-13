@@ -1,0 +1,16 @@
+This directory contains small prototype developments that will never
+make it into the main branch, so that it doesn't make sense to plan
+for a merge.
+
+An example would be the development of a new derotation algorithm
+based on the Radon transform. This experiment uses OpenCV and many
+other libraries in a rather unsystematic way. It might be better
+to reimplement some of OpenCVs functionality in a more robust way,
+or use more lightweight libraries.  For prototyping, however, it
+is usefull to have a more comprehensive library.
+
+(e.g. in OpenCV, accessing array elements via typed accessor functions
+only works if the programmer chooses the right type. This is not
+what I expect from a well designed Library. Probably OpenCV should
+implement adapter classes that allow one to access and modify pixels
+of an 8bit image just as if they were floats).

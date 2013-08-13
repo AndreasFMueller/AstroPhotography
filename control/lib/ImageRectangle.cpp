@@ -5,7 +5,7 @@
  * $id$
  */
 #include <AstroImage.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -20,8 +20,8 @@ namespace image {
  */
 ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
 	const ImagePoint& translatedby)
-	: origin(rectangle.origin + translatedby),
-	  size(rectangle.size) { }
+	: _origin(rectangle.origin() + translatedby),
+	  _size(rectangle.size()) { }
 
 /**
  * \brief Construct a subrectangle relative to the source rectangles 
@@ -33,8 +33,8 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
  */
 ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
 	const ImageRectangle& subrectangle)
-	: origin(rectangle.origin + subrectangle.origin),
-	  size(subrectangle.size) {
+	: _origin(rectangle.origin() + subrectangle.origin()),
+	  _size(subrectangle.size()) {
 	if (!rectangle.contains(subrectangle)) {
 		throw std::range_error("subrectangle not contained in rectangle");
 	}
@@ -47,61 +47,64 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
  * size.
  */
 bool	ImageRectangle::operator==(const ImageRectangle& other) const {
-	return (origin == other.origin) && (size == other.size);
+	return (_origin == other.origin()) && (_size == other.size());
 }
 
 /**
  * \brief Test whether a point is contained within a rectangle
  */
 bool	ImageRectangle::contains(const ImagePoint& point) const {
-	return	(origin.x <= point.x) && (point.x < origin.x + size.width) &&
-		(origin.y <= point.y) && (point.y < origin.y + size.height);
+	return	(_origin.x() <= point.x()) &&
+		(point.x() < _origin.x() + _size.width()) &&
+		(_origin.y() <= point.y()) &&
+		(point.y() < _origin.y() + _size.height());
 }
 
 /**
  * \brief Test whether a rectangle is contained within a rectangle
  */
 bool	ImageRectangle::contains(const ImageRectangle& other) const {
-	return	(origin.x <= other.origin.x) &&
-		(origin.x + size.width >= other.origin.x + other.size.width) &&
-		(origin.y <= other.origin.y) &&
-		(origin.y + size.height >= other.origin.y + other.size.height);
+	return	(_origin.x() <= other.origin().x()) &&
+		(_origin.x() + _size.width() >= other.origin().x() + other.size().width()) &&
+		(_origin.y() <= other.origin().y()) &&
+		(_origin.y() + _size.height() >= other.origin().y() + other.size().height());
 }
 
 /**
  * \brief Extract the lower left corner (the origin) of a rectangle
  */
 const ImagePoint&	ImageRectangle::lowerLeftCorner() const {
-	return origin;
+	return _origin;
 }
 
 /**
  * \brief Extract the lower right corner of a rectangle
  */
 ImagePoint	ImageRectangle::lowerRightCorner() const {
-	return ImagePoint(origin.x + size.width - 1, origin.y);
+	return ImagePoint(_origin.x() + _size.width() - 1, _origin.y());
 }
 
 /**
  * \brief Extract the upper left corner of a rectangle
  */
 ImagePoint	ImageRectangle::upperLeftCorner() const {
-	return ImagePoint(origin.x, origin.y + size.height - 1);
+	return ImagePoint(_origin.x(), _origin.y() + _size.height() - 1);
 }
 
 /**
  * \brief Extract the upper right corner of a rectangle
  */
 ImagePoint	ImageRectangle::upperRightCorner() const {
-	return ImagePoint(origin.x + size.width - 1, origin.y + size.height - 1);
+	return ImagePoint(_origin.x() + _size.width() - 1,
+			_origin.y() + _size.height() - 1);
 }
 
 /**
  * \brief string representation of the rectangle
  */
 std::string	ImageRectangle::toString() const {
-	return stringprintf("%s@%s", size.toString().c_str(),
-		origin.toString().c_str());
+	return stringprintf("%s@%s", _size.toString().c_str(),
+		_origin.toString().c_str());
 }
 
 } // namespace image

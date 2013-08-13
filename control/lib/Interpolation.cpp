@@ -4,10 +4,10 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroInterpolation.h>
-#include <PixelValue.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
+#include <AstroAdapter.h>
 
 using namespace astro::image;
 
@@ -17,51 +17,262 @@ namespace interpolation {
 //////////////////////////////////////////////////////////////////////
 // TypedInterpolator implementation
 //////////////////////////////////////////////////////////////////////
-template<typename T>
+template<typename DarkPixelType, typename Pixel>
 class TypedInterpolator {
-	const Image<T>&	dark;
 protected:
+	const ConstImageAdapter<DarkPixelType>&	dark;
+	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
 	virtual void	interpolatePixel(unsigned int x, unsigned int y,
-				ImagePtr& image);
-	PixelValue<T>	*pv;
-	T	nan;
+				ImageAdapter<Pixel>& image) = 0;
+	DarkPixelType	nan;
 public:
-	TypedInterpolator(const Image<T>& _dark);
-	void	interpolate(ImagePtr& image);
+	TypedInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
+	void	interpolate(ImageAdapter<Pixel>& image);
 };
 
-template<typename T>
-void	TypedInterpolator<T>::interpolatePixel(unsigned int x, unsigned int y,
-		ImagePtr& image) {
-	// XXX interpolation missing
+
+template<typename DarkPixelType, typename Pixel>
+DarkPixelType TypedInterpolator<DarkPixelType, Pixel>::darkpixel(
+	unsigned int x, unsigned int y) const {
+	return dark.pixel(x, y);
 }
 
-template<typename T>
-TypedInterpolator<T>::TypedInterpolator(const Image<T>& _dark) : dark(_dark) {
-	nan = std::numeric_limits<T>::quiet_NaN();
+template<typename DarkPixelType, typename Pixel>
+TypedInterpolator<DarkPixelType, Pixel>::TypedInterpolator(
+	const ConstImageAdapter<DarkPixelType>& _dark) : dark(_dark) {
+	nan = std::numeric_limits<DarkPixelType>::quiet_NaN();
 }
 
-template<typename T>
-void	TypedInterpolator<T>::interpolate(ImagePtr& image) {
+template<typename DarkPixelType, typename Pixel>
+void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
+		ImageAdapter<Pixel>& image) {
 	// make sure the image sizes match
-	if (image->size != dark.size) {
+	if (image.getSize() != dark.getSize()) {
 		throw std::range_error("image sizes don't match");
 	}
-	pv = new PixelValue<T>(image);
-	for (unsigned int x = 0; x < dark.size.width; x++) {
-		for (unsigned int y = 0; y < dark.size.height; y++) {
-			if (dark.pixel(x, y) != dark.pixel(x, y)) {
-				interpolatePixel(x, y, image);
+	for (unsigned int x = 0; x < dark.getSize().width(); x++) {
+		for (unsigned int y = 0; y < dark.getSize().height(); y++) {
+			DarkPixelType	darkpixel = dark.pixel(x, y);
+			if (darkpixel != darkpixel) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"interpolating pixel (%u,%u)", x, y);
+				this->interpolatePixel(x, y, image);
 			}
 		}
 	}
-	delete pv;
 }
+
+//////////////////////////////////////////////////////////////////////
+// Monochrome interpolator
+//////////////////////////////////////////////////////////////////////
+template<typename DarkPixelType, typename Pixel>
+class MonochromeInterpolator : public TypedInterpolator<DarkPixelType, Pixel> {
+protected:
+	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
+	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+				ImageAdapter<Pixel>& image);
+public:
+	MonochromeInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
+};
+
+template<typename DarkPixelType, typename Pixel>
+DarkPixelType	MonochromeInterpolator<DarkPixelType, Pixel>::darkpixel(
+	unsigned int x, unsigned int y) const {
+	return TypedInterpolator<DarkPixelType, Pixel>::darkpixel(x, y);
+}
+
+template<typename DarkPixelType, typename Pixel>
+MonochromeInterpolator<DarkPixelType, Pixel>::MonochromeInterpolator(
+	const ConstImageAdapter<DarkPixelType>& _dark)
+	: TypedInterpolator<DarkPixelType, Pixel>(_dark) {
+}
+
+/**
+ * \brief Interpolation function
+ *
+ * Interpolation is actually two quite different cases: monochrome and
+ * Bayer matrix. Monochrome interpolation interpolates the four nearest
+ * neighbor points. Bayer Matrix interpolation depends on the color.
+ * For green pixel, the four diagonal neighbors are interpolated. For
+ * red and blue, the for nearest neighbours of the same color are interpolated.
+ *
+ */
+template<typename DarkPixelType, typename Pixel>
+void	MonochromeInterpolator<DarkPixelType, Pixel>::interpolatePixel(
+	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	unsigned int	counter = 0;
+	double	sum = 0;
+	// for each image, we have to make sure the pixels are inside the
+	// image
+	if (x > 0) {
+		DarkPixelType	darkneighbor = darkpixel(x - 1, y);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x - 1, y);
+			counter++;
+		}
+	}
+	if (x < image.getSize().width() - 1) {
+		DarkPixelType	darkneighbor = darkpixel(x + 1, y);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x + 1, y);
+			counter++;
+		}
+	}
+	if (y > 0) {
+		DarkPixelType	darkneighbor = darkpixel(x, y - 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x, y - 1);
+			counter++;
+		}
+	}
+	if (y < image.getSize().height() - 1) {
+		DarkPixelType	darkneighbor = darkpixel(x, y + 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x, y + 1);
+			counter++;
+		}
+	}
+	Pixel	result = sum / counter;
+	image.pixel(x, y) = result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Mosaic interpolator
+//////////////////////////////////////////////////////////////////////
+template<typename DarkPixelType, typename Pixel>
+class MosaicInterpolator : public TypedInterpolator<DarkPixelType, Pixel> {
+protected:
+	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
+	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+				ImageAdapter<Pixel>& image);
+	virtual void	interpolateGreen(unsigned int x, unsigned int y,
+				ImageAdapter<Pixel>& image);
+	virtual void	interpolateRedBlue(unsigned int x, unsigned int y,
+				ImageAdapter<Pixel>& image);
+	MosaicType	mosaic;
+public:
+	MosaicInterpolator(const Image<DarkPixelType>& _dark);
+	void	setMosaic(const MosaicType& _mosaic) { mosaic = _mosaic; }
+};
+
+template<typename DarkPixelType, typename Pixel>
+DarkPixelType	MosaicInterpolator<DarkPixelType, Pixel>::darkpixel(
+	unsigned int x, unsigned int y) const {
+	return TypedInterpolator<DarkPixelType, Pixel>::darkpixel(x, y);
+}
+
+template<typename DarkPixelType, typename Pixel>
+MosaicInterpolator<DarkPixelType, Pixel>::MosaicInterpolator(
+	const Image<DarkPixelType>& _dark)
+	: TypedInterpolator<DarkPixelType, Pixel>(_dark) {
+}
+
+/**
+ * \brief Interpolation function
+ *
+ * Interpolation is actually two quite different cases: monochrome and
+ * Bayer matrix. Mosaic interpolation interpolates the four nearest
+ * neighbor points. Bayer Matrix interpolation depends on the color.
+ * For green pixel, the four diagonal neighbors are interpolated. For
+ * red and blue, the for nearest neighbours of the same color are interpolated.
+ *
+ */
+template<typename DarkPixelType, typename Pixel>
+void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateGreen(
+	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	unsigned int	counter = 0;
+	double	sum = 0;
+
+	// for each image, we have to make sure the pixels are inside the
+	// image
+	if ((x > 0) && (y > 0)) {
+		DarkPixelType	darkneighbor = darkpixel(x - 1, y - 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x - 1, y - 1);
+			counter++;
+		}
+	}
+	if ((x > 0) && (y < image.getSize().height() - 1)) {
+		DarkPixelType	darkneighbor = darkpixel(x - 1, y + 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x - 1, y + 1);
+			counter++;
+		}
+	}
+	if ((x < image.getSize().width() - 1) && (y > 0)) {
+		DarkPixelType	darkneighbor = darkpixel(x + 1, y - 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x + 1, y - 1);
+			counter++;
+		}
+	}
+	if ((x < image.getSize().width() - 1)
+		&& (y < image.getSize().height() - 1)) {
+		DarkPixelType	darkneighbor = darkpixel(x + 1, y + 1);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x + 1, y + 1);
+			counter++;
+		}
+	}
+	Pixel	result = sum / counter;
+	image.pixel(x, y) = result;
+}
+
+template<typename DarkPixelType, typename Pixel>
+void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateRedBlue(
+	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	unsigned int	counter = 0;
+	double	sum = 0;
+	// for each image, we have to make sure the pixels are inside the
+	// image
+	if (x > 1) {
+		DarkPixelType	darkneighbor = darkpixel(x - 2, y);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x - 2, y);
+			counter++;
+		}
+	}
+	if (x < image.getSize().width() - 2) {
+		DarkPixelType	darkneighbor = darkpixel(x + 2, y);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x + 2, y);
+			counter++;
+		}
+	}
+	if (y > 1) {
+		DarkPixelType	darkneighbor = darkpixel(x, y - 2);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x, y - 2);
+			counter++;
+		}
+	}
+	if (y < image.getSize().height() - 2) {
+		DarkPixelType	darkneighbor = darkpixel(x, y + 2);
+		if (darkneighbor == darkneighbor) {
+			sum += image.pixel(x, y + 2);
+			counter++;
+		}
+	}
+	Pixel	result = sum / counter;
+	image.pixel(x, y) = result;
+}
+
+template<typename DarkPixelType, typename Pixel>
+void	MosaicInterpolator<DarkPixelType, Pixel>::interpolatePixel(
+	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	if (mosaic.isG(x, y)) {
+		interpolateGreen(x, y, image);
+	} else {
+		interpolateRedBlue(x, y, image);
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Interpolator implementation
 //////////////////////////////////////////////////////////////////////
-Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
+Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle& _frame)
+	: dark(_dark), frame(_frame) {
 	floatdark = dynamic_cast<Image<float> *>(&*dark);
 	doubledark = dynamic_cast<Image<double> *>(&*dark);
 	if ((NULL == floatdark) && (NULL == doubledark)) {
@@ -70,23 +281,72 @@ Interpolator::Interpolator(const ImagePtr& _dark) : dark(_dark) {
 	}
 }
 
-void	Interpolator::interpolate(ImagePtr& image) {
-	if (floatdark) {
-		TypedInterpolator<float>	tint(*floatdark);
-		tint.interpolate(image);
-		return;
-	}
-	if (doubledark) {
-		TypedInterpolator<double>	tint(*doubledark);
-		tint.interpolate(image);
-		return;
-	}
+#define interpolate_mono(darkpixeltype, pixel, dark, image)		\
+{									\
+	Image<pixel>	*imagep						\
+		= dynamic_cast<Image<pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		MonochromeInterpolator<darkpixeltype, pixel>	tint(dark);	\
+		tint.interpolate(*imagep);				\
+		return;							\
+	}								\
 }
 
-ImagePtr	Interpolator::operator()(const ImagePtr& image) {
-	ImagePtr	imagecopy;
-	interpolate(imagecopy);
-	return imagecopy;
+void	Interpolator::interpolateMonochrome(ImagePtr& image) {
+	if (floatdark) {
+		WindowAdapter<float>	windowdark(*floatdark, frame);
+		interpolate_mono(float, unsigned char, windowdark, image);
+		interpolate_mono(float, unsigned short, windowdark, image);
+		interpolate_mono(float, unsigned int, windowdark, image);
+		interpolate_mono(float, unsigned long, windowdark, image);
+		interpolate_mono(float, float, windowdark, image);
+		interpolate_mono(float, double, windowdark, image);
+	}
+	if (doubledark) {
+		WindowAdapter<double>	windowdark(*doubledark, frame);
+		interpolate_mono(double, unsigned char, windowdark, image);
+		interpolate_mono(double, unsigned short, windowdark, image);
+		interpolate_mono(double, unsigned int, windowdark, image);
+		interpolate_mono(double, unsigned long, windowdark, image);
+		interpolate_mono(double, float, windowdark, image);
+		interpolate_mono(double, double, windowdark, image);
+	}
+	throw std::runtime_error("cannot interpolate this image type");
+}
+
+#define interpolate_mosaic(darkpixeltype, pixel, dark, image)		\
+{									\
+	Image<pixel>	*imagep						\
+		= dynamic_cast<Image<pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		MosaicInterpolator<darkpixeltype, pixel>	tint(dark);	\
+		tint.setMosaic(image->getMosaicType());			\
+		tint.interpolate(*imagep);				\
+		return;							\
+	}								\
+}
+
+void	Interpolator::operator()(ImagePtr& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mosaic interpolation");
+	if (floatdark) {
+		WindowAdapter<float>	windowdark(*floatdark, frame);
+		interpolate_mosaic(float, unsigned char, windowdark, image);
+		interpolate_mosaic(float, unsigned short, windowdark, image);
+		interpolate_mosaic(float, unsigned int, windowdark, image);
+		interpolate_mosaic(float, unsigned long, windowdark, image);
+		interpolate_mosaic(float, float, windowdark, image);
+		interpolate_mosaic(float, double, windowdark, image);
+	}
+	if (doubledark) {
+		WindowAdapter<double>	windowdark(*doubledark, frame);
+		interpolate_mosaic(double, unsigned char, windowdark, image);
+		interpolate_mosaic(double, unsigned short, windowdark, image);
+		interpolate_mosaic(double, unsigned int, windowdark, image);
+		interpolate_mosaic(double, unsigned long, windowdark, image);
+		interpolate_mosaic(double, float, windowdark, image);
+		interpolate_mosaic(double, double, windowdark, image);
+	}
+	return;
 }
 
 } // interpolation

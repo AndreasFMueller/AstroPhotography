@@ -6,7 +6,7 @@
  */
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 int	main(int argc, char *argv[]) {
 	debuglevel = LOG_DEBUG;

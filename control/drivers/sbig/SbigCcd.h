@@ -20,6 +20,7 @@ namespace sbig {
 class SbigCcd : public Ccd {
 	int	id;
 	SbigCamera&	camera;
+	bool	cooler;
 public:
 	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
 	virtual ~SbigCcd();
@@ -32,6 +33,9 @@ public:
 		throw(not_implemented);
 
 	virtual	ImagePtr	getImage() throw(not_implemented);
+
+	virtual bool	hasCooler() { return cooler; }
+	void	setCooler(bool _cooler) { cooler = _cooler; }
 	virtual CoolerPtr	getCooler() throw(not_implemented);
 };
 

@@ -7,6 +7,7 @@
 #include <includes.h>
 
 using namespace astro::camera::unicap;
+using namespace astro::device;
 
 UnicapCameraLocator::UnicapCameraLocator() {
 }
@@ -22,8 +23,11 @@ std::string	UnicapCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-std::vector<std::string>	UnicapCameraLocator::getCameralist() {
+std::vector<std::string>	UnicapCameraLocator::getDevicelist(DeviceLocator::device_type device) {
 	std::vector<std::string>	cameras;
+	if (DeviceLacator::CAMERA != device) {
+		return cameras;
+	}
 	return cameras;
 }
 

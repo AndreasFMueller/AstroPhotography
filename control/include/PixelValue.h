@@ -8,7 +8,7 @@
 
 #include <AstroImage.h>
 #include <limits>
-#include <debug.h>
+#include <AstroDebug.h>
 #include <stdexcept>
 
 using namespace astro::image;

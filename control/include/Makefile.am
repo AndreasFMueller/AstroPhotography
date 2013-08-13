@@ -4,9 +4,13 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-include_HEADERS = debug.h Format.h AstroImage.h AstroCamera.h AstroLoader.h \
+include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
+	AstroLoader.h AstroDisplay.h AstroImager.h \
 	AstroIO.h AstroPixel.h AstroUSB.h AstroUVC.h AstroUnicap.h \
-	AstroUnicap.h AstroUtils.h AstroMosaic.h AstroDemosaic.h \
-	AstroFilter.h AstroCalibration.h AstroCalibration.h AstroOperations.h
+	AstroUtils.h AstroMosaic.h AstroDemosaic.h AstroAdapter.h \
+	AstroFilter.h AstroFilterfunc.h AstroCalibration.h \
+	AstroOperations.h AstroTransform.h \
+	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
+	AstroCoordinates.h
 
-noinst_HEADERS = PixelValue.h
+noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h

@@ -36,7 +36,7 @@ uvc_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests usbtests calimggen caltests \
+noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 	$(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
 
 # general tests
@@ -45,8 +45,11 @@ tests_SOURCES = tests.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
-	OperatorTest.cpp FilterTest.cpp \
-	FITSwriteTest.cpp FITSreadTest.cpp \
+	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
+	TranslationTest.cpp FWHMTest.cpp \
+	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
+	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
+	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
 	DescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
@@ -59,12 +62,20 @@ usbtests_LDADD = -lcppunit -L.. -lastro
 usbtests_DEPENDENCIES = ../libastro.la
 
 calimggen_SOURCES = calimggen.cpp
-calimggens_LDADD = -L.. -lastro
+calimggen_LDADD = -L.. -lastro
 calimggen_DEPENDENCIES = ../libastro.la
 
 caltests_SOURCES = caltests.cpp
 caltests_LDADD = -lcppunit -L.. -lastro
 caltests_DEPENDENCIES = ../libastro.la
+
+simtest_SOURCES = simtest.cpp
+simtest_LDADD = -L.. -lastro
+simtest_DEPENDENCIES = ../libastro.la
+
+guidetest_SOURCES = guidetest.cpp
+guidetest_LDADD = -L.. -lastro
+guidetest_DEPENDENCIES = ../libastro.la
 
 # tests for UVC cameras
 if ENABLE_UVC

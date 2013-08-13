@@ -3,30 +3,58 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SbigCcd.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
 #include <sbigudrv.h>
-#include <debug.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
+#include <SbigLocator.h>
+#include <SbigCcd.h>
+#include <AstroOperators.h>
+#include <AstroDebug.h>
 #include <utils.h>
 #include <includes.h>
 #include <SbigCooler.h>
 
 using namespace astro::camera;
 using namespace astro::image;
+using namespace astro::image::operators;
 
 namespace astro {
 namespace camera {
 namespace sbig {
 
+/**
+ * \brief Create an SBIG CCD object.
+ *
+ * SBIG Ccd's are essentially holder objects for the CCD info and a reference
+ * to the camera.
+ */
 SbigCcd::SbigCcd(const CcdInfo& info, int _id, SbigCamera& _camera)
 	: Ccd(info), id(_id), camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d: %s", id,
 		info.toString().c_str());
+	cooler = true;
 }
 
 SbigCcd::~SbigCcd() {
 }
 
+/**
+ * \brief Query the exposure status.
+ *
+ * Since the camera interface is closely modelled on the SBIG driver library,
+ * this is essentially a call to the corresponding dirver library function.
+ */
 Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
+	SbigLock	lock;
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
 	QueryCommandStatusResults	results;
@@ -56,15 +84,28 @@ Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
 	return state;
 }
 
+/**
+ * \brief Start an exposure
+ *
+ *
+ */
 void	SbigCcd::startExposure(const Exposure& exposure)
 		throw (not_implemented) {
+	SbigLock	lock;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startExposure on ccd %d", id);
 	// check whether we are already exposing
 	if (state == Exposure::exposing) {
 		throw SbigError("exposure already in progress");
 	}
+
+	// XXX make sure that the subframe parameters are compatible with the
+	//     binning mode
+
 	camera.sethandle();
 	this->exposure = exposure;
+	if (this->exposure.frame.size() == ImageSize()) {
+		this->exposure.frame = getInfo().getFrame();
+	}
 
 	// prepare the start exposure2 command for the SBIG library
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure on ccd %d", id);
@@ -72,12 +113,35 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	params.ccd = id;
 	params.exposureTime = 100 * exposure.exposuretime;
 	params.abgState = ABG_LOW7; // XXX should be able to set via property
-	params.openShutter = SC_OPEN_SHUTTER; // XXX need way to set this e.g. for darks
-	params.readoutMode = RM_1X1; // XXX should be set from exposure.mode
-	params.top = exposure.frame.origin.y;
-	params.left = exposure.frame.origin.x;
-	params.width = exposure.frame.size.width;
-	params.height = exposure.frame.size.height;
+
+	// use the shutter info 
+	switch (exposure.shutter) {
+	case SHUTTER_OPEN:
+		params.openShutter = ((id == 2)
+					? SC_OPEN_EXT_SHUTTER
+					: SC_OPEN_SHUTTER);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter open command: %hd",
+			params.openShutter);
+		break;
+	case SHUTTER_CLOSED:
+		params.openShutter = ((id == 2)
+					? SC_CLOSE_EXT_SHUTTER
+					: SC_CLOSE_SHUTTER);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter close command: %hd",
+			params.openShutter);
+		break;
+	}
+
+	// set the appropriate binning mode
+	params.readoutMode = SbigBinning2Mode(exposure.mode);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s binning -> readout mode: %04hx",
+		exposure.mode.toString().c_str(), params.readoutMode);
+
+	// get the subframe
+	params.top = exposure.frame.origin().y();
+	params.left = exposure.frame.origin().x();
+	params.width = exposure.frame.size().width();
+	params.height = exposure.frame.size().height();
 	short	e = SBIGUnivDrvCommand(CC_START_EXPOSURE2, &params, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start exposure: %s",
@@ -90,6 +154,12 @@ void	SbigCcd::startExposure(const Exposure& exposure)
 	state = Exposure::exposing;
 }
 
+/**
+ * \brief Get an Image from the camera.
+ *
+ * This method waits until the exposure is completed and then downloads the
+ * image from the camera.
+ */
 ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
@@ -107,84 +177,111 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 		usleep(100000);
 	}
 
-	// end the exposure
-	camera.sethandle();
-	EndExposureParams	endexpparams;
-	endexpparams.ccd = id;
-	short	e = SBIGUnivDrvCommand(CC_END_EXPOSURE, &endexpparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot end exposure: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	// compute the size of the resulting image, if we get one
+	ImageSize	resultsize(
+		exposure.frame.size().width() / exposure.mode.getX(),
+		exposure.frame.size().height() / exposure.mode.getY());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting an %s image",
+		resultsize.toString().c_str());
 
-	// start the readout
-	StartReadoutParams	readparams;
-	readparams.ccd = id;
-	readparams.readoutMode = RM_1X1; // XXX should be set from exposure.mode
-	readparams.top = exposure.frame.origin.y;
-	readparams.left = exposure.frame.origin.x;
-	readparams.width = exposure.frame.size.width;
-	readparams.height = exposure.frame.size.height;
-	e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
-	}
+	// this is where we will find the data, we have to declare it
+	// here because everything after this point will be protected
+	unsigned short	*data = NULL;
 
-	// read the data lines we really are interested in
-	ReadoutLineParams	readlineparams;
-	readlineparams.ccd = id;
-	readlineparams.pixelStart = exposure.frame.origin.x;
-	readlineparams.pixelLength = exposure.frame.size.width;
-	readlineparams.readoutMode = readparams.readoutMode;
-	size_t	arraysize = exposure.frame.size.width
-				* exposure.frame.size.height;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
-	unsigned short	*data = new unsigned short[arraysize];
-	unsigned short	*p = data;
-	unsigned int	linecounter = 0;
-	while (linecounter < exposure.frame.size.height) {
-		e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
+	{
+		SbigLock	lock;
+		// end the exposure
+		camera.sethandle();
+		EndExposureParams	endexpparams;
+		endexpparams.ccd = id;
+		short	e = SBIGUnivDrvCommand(CC_END_EXPOSURE, &endexpparams, NULL);
 		if (e != CE_NO_ERROR) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot end exposure: %s",
 				sbig_error(e).c_str());
-			delete[] data;
 			throw SbigError(e);
 		}
-		p += exposure.frame.size.width;
-		linecounter++;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
 
-	// dump the remaining lines
-	DumpLinesParams	dumplines;
-	dumplines.ccd = id;
-	dumplines.readoutMode = readparams.readoutMode;
-	dumplines.lineLength = info.size.height - exposure.frame.size.height
-		- exposure.frame.origin.y;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
-		dumplines.lineLength);
-	e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot dump remaining lines: %s"
-			" (ignored)", sbig_error(e).c_str());
-	}
+		// start the readout
+		StartReadoutParams	readparams;
+		readparams.ccd = id;
+		readparams.readoutMode = SbigBinning2Mode(exposure.mode);
 
-	// end the readout
-	EndReadoutParams	endreadparams;
-	endreadparams.ccd = id;
-	e = SBIGUnivDrvCommand(CC_END_READOUT, &endreadparams, NULL);
-	if (e != CE_NO_ERROR) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot end readout: %s",
-			sbig_error(e).c_str());
-		throw SbigError(e);
+		readparams.top = exposure.frame.origin().y();
+		readparams.left = exposure.frame.origin().x();
+		readparams.width = exposure.frame.size().width();
+		readparams.height = exposure.frame.size().height();
+
+		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot start readout: %s",
+				sbig_error(e).c_str());
+			throw SbigError(e);
+		}
+
+		// read the data lines we really are interested in
+		ReadoutLineParams	readlineparams;
+		readlineparams.ccd = id;
+		readlineparams.pixelStart = exposure.frame.origin().x()
+						/ exposure.mode.getX();
+		readlineparams.pixelLength = exposure.frame.size().width()
+						/ exposure.mode.getX();
+		readlineparams.readoutMode = readparams.readoutMode;
+debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d", 
+	readlineparams.pixelStart,
+	readlineparams.pixelLength);
+		size_t	arraysize = resultsize.getPixels();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
+		data = new unsigned short[arraysize];
+		memset(data, 0xff, 2 * arraysize);
+		unsigned short	*p = data;
+		unsigned int	linecounter = 0;
+		while (linecounter < resultsize.height()) {
+			e = SBIGUnivDrvCommand(CC_READOUT_LINE, &readlineparams, p);
+			if (e != CE_NO_ERROR) {
+				debug(LOG_ERR, DEBUG_LOG, 0, "error during readout: %s",
+					sbig_error(e).c_str());
+				delete[] data;
+				throw SbigError(e);
+			}
+			p += resultsize.width();
+			linecounter++;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "read %d lines", linecounter);
+
+		// dump the remaining lines
+		DumpLinesParams	dumplines;
+		dumplines.ccd = id;
+		dumplines.readoutMode = readparams.readoutMode;
+		dumplines.lineLength = info.size().height()
+			- exposure.frame.size().height()
+			- exposure.frame.origin().y();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
+			dumplines.lineLength);
+		e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot dump remaining lines: %s"
+				" (ignored)", sbig_error(e).c_str());
+		}
+
+		// end the readout
+		EndReadoutParams	endreadparams;
+		endreadparams.ccd = id;
+		e = SBIGUnivDrvCommand(CC_END_READOUT, &endreadparams, NULL);
+		if (e != CE_NO_ERROR) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot end readout: %s",
+				sbig_error(e).c_str());
+			throw SbigError(e);
+		}
 	}
 
 	// convert the image data into an image
 	Image<unsigned short>	*image
-		= new Image<unsigned short>(exposure.frame.size, data);
+		= new Image<unsigned short>(resultsize, data);
+	image->setOrigin(exposure.frame.origin());
+
+	// flip image vertically
+	FlipOperator<unsigned short>    f;
+	f(*image);
 
 	// add the metadata to the image
 	addMetadata(*image);
@@ -193,11 +290,18 @@ ImagePtr	SbigCcd::getImage() throw(not_implemented) {
 	return ImagePtr(image);
 }
 
+/**
+ * \brief Get a Cooler object, if the CCD has a TEC cooler
+ */
 CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
 	return CoolerPtr(new SbigCooler(camera));
 }
 
-Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+/**
+ * \brief Query the shutter state
+ */
+shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// get the shutter state from query command status command
@@ -225,7 +329,11 @@ Ccd::shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 	return state;
 }
 
+/**
+ * \brief Set the shutter state.
+ */
 void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented) {
+	SbigLock	lock;
 	camera.sethandle();
 
 	// first query the the state of fan and LED so that we can use the
@@ -261,10 +369,14 @@ void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented)
 	}
 	switch (state) {
 	case SHUTTER_CLOSED:
-		misc.shutterCommand = SC_CLOSE_SHUTTER;
+		misc.shutterCommand = (id == 2)
+					? SC_CLOSE_EXT_SHUTTER
+					: SC_CLOSE_SHUTTER;
 		break;
 	case SHUTTER_OPEN:
-		misc.shutterCommand = SC_OPEN_SHUTTER;
+		misc.shutterCommand = (id == 2) 
+					? SC_OPEN_EXT_SHUTTER
+					: SC_OPEN_SHUTTER;
 		break;
 	}
 	e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);

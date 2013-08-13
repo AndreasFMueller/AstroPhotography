@@ -10,7 +10,7 @@
 #include <fitsio.h>
 #include <AstroImage.h>
 #include <map>
-#include <debug.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 
@@ -86,6 +86,9 @@ protected:
 public:
 	FITSinfileBase(const std::string& filename) throw (FITSexception);
 	ImageSize	getSize() const { return size; }
+	// header access
+	bool	hasHeader(const std::string& key) const;
+	std::string	getHeader(const std::string& key) const;
 };
 
 /**
@@ -152,6 +155,20 @@ void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 }
 
 /**
+ * \brief Convert Multiplane image data from FITS file to the target image
+ *        pixel type
+ */
+template<typename Pixel, typename srctype>
+void	doConvertFITSPixels(Pixel *pixels, const srctype *srcpixels,
+		int pixelcount, const multiplane_color_tag&) {
+	for (int offset = 0; offset < pixelcount; offset++) {
+		for (unsigned int i = 0; i < Pixel::planes; i++) {
+			pixels[offset].p[i] = srcpixels[offset + i * pixelcount];
+		}
+	}
+}
+
+/**
  * \brief Convert Pixel arrays from a privitive type to any other valid
  *        pixel type.
  *
@@ -200,25 +217,25 @@ Image<Pixel>	*FITSinfile<Pixel>::read()
 	case BYTE_IMG:
 	case SBYTE_IMG:
 		convertFITSpixels(image->pixels, (unsigned char *)data,
-			image->size.pixels);
+			image->getSize().getPixels());
 		break;
 	case USHORT_IMG:
 	case SHORT_IMG:
 		convertFITSpixels(image->pixels, (unsigned short *)data,
-			image->size.pixels);
+			image->getSize().getPixels());
 		break;
 	case ULONG_IMG:
 	case LONG_IMG:
 		convertFITSpixels(image->pixels, (unsigned int *)data,
-			image->size.pixels);
+			image->getSize().getPixels());
 		break;
 	case FLOAT_IMG:
 		convertFITSpixels(image->pixels, (float *)data,
-			image->size.pixels);
+			image->getSize().getPixels());
 		break;
 	case DOUBLE_IMG:
 		convertFITSpixels(image->pixels, (double *)data,
-			image->size.pixels);
+			image->getSize().getPixels());
 		break;
 	}
 
@@ -235,12 +252,16 @@ Image<Pixel>	*FITSinfile<Pixel>::read()
  * to write the image contents.
  */
 class FITSoutfileBase : public FITSfile {
+	bool	_precious;
 public:
 	FITSoutfileBase(const std::string & filename,
 		int _pixeltype, int _planes, int _imgtype)
 		throw (FITSexception);
 	void	write(const ImageBase& image)
 			throw (FITSexception);
+	void	postwrite() throw (FITSexception);
+	bool	precious() const { return _precious; }
+	void	setPrecious(bool precious) { _precious = precious; }	
 };
 
 /**
@@ -269,6 +290,7 @@ FITSoutfile<Pixel>::FITSoutfile(const std::string& filename)
 template<>								\
 FITSoutfile<T >::FITSoutfile(const std::string& filename)		\
 	throw (FITSexception);
+
 FITS_OUTFILE_SPECIALIZATION(unsigned char)
 FITS_OUTFILE_SPECIALIZATION(unsigned short)
 FITS_OUTFILE_SPECIALIZATION(unsigned int)
@@ -289,6 +311,54 @@ FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned int>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<unsigned long>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<float>)
 FITS_OUTFILE_SPECIALIZATION(YUYV<double>)
+
+#define	FITS_OUTFILE_SPECIALIZATION_MULTI(T, N)				\
+template<>								\
+FITSoutfile<Multiplane<T, N> >::FITSoutfile(const std::string& filename)\
+	throw (FITSexception);
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 1)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 1)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 2)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 2)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 3)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 3)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 5)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 5)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 6)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 6)
+
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned char, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned short, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned int, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(unsigned long, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(float, 7)
+FITS_OUTFILE_SPECIALIZATION_MULTI(double, 7)
+
 
 /**
  * \brief Holder class for application specific information during FITS
@@ -367,8 +437,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
 		= (IteratorData<Pixel, rgb_color_tag>*)userPointer;
 
 	// iterate through the pixels and convert them to RGB on the fly
-	const int	size = user->image.size.pixels;
-	const int	size2 = user->image.size.pixels << 1;
+	const int	size = user->image.getSize().getPixels();
+	const int	size2 = user->image.getSize().getPixels() << 1;
 	for (int offset = 0; offset < size; offset++) {
 		array[offset        ] = user->image[offset].R;
 		array[offset + size ] = user->image[offset].G;
@@ -396,8 +466,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
 
 	// now iteratate through the pixels and convert them pair by pair
 	RGB<value_type>	dest[2];
-	const int	size = user->image.size.pixels;
-	const int	size2 = user->image.size.pixels << 1;
+	const int	size = user->image.getSize().getPixels();
+	const int	size2 = user->image.getSize().getPixels() << 1;
 	for (int offset = 0; offset < size; offset += 2) {
 		// convert the YUYV pixel pair to an RGB pixel pair
 		convertPixelPair(dest, user->image.pixels + offset);
@@ -408,6 +478,33 @@ int	FITSWriteDoWork(const long totaln, long offset,
 		array[offset + 1        ] = dest[1].R;
 		array[offset + 1 + size ] = dest[1].G;
 		array[offset + 1 + size2] = dest[1].B;
+	}
+	return 0;
+}
+
+/**
+ * \brief Work function to write Multiplane pixels to the FITS file
+ */
+template<typename Pixel>
+int	FITSWriteDoWork(const long totaln, long offset,
+		long firstn, long nvalues, int narray,
+		iteratorCol *data, void *userPointer,
+		multiplane_color_tag) {
+	// get the data array, and write a zero into it
+	typedef	typename pixel_value_type<Pixel>::value_type	value_type;
+	value_type   *array = (value_type *)fits_iter_get_array(data);
+	*array++ = 0;
+
+	// get the user data pointer
+        IteratorData<Pixel, multiplane_color_tag>     *user
+		= (IteratorData<Pixel, multiplane_color_tag>*)userPointer;
+
+	// iterate through the pixels and copy them to the data array
+	const int	size = user->image.getSize().getPixels();
+	for (int offset = 0; offset < size; offset++) {
+		for (int i = 0; i < Pixel::planes; i++) {
+			array[offset + i * size] = user->image[offset].p[i];
+		}
 	}
 	return 0;
 }
@@ -452,10 +549,13 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 	IteratorData<Pixel, typename color_traits<Pixel>::color_category >	
 		user(image);
 	int	status = 0;
-	if (fits_iterate_data(1, &ic, 0, image.size.pixels * planes,
+	if (fits_iterate_data(1, &ic, 0, image.getSize().getPixels() * planes,
 		user.workfunc, &user, &status)) {
 		throw FITSexception(errormsg(status));
 	}
+
+	// call postwrite to protect precious files
+	postwrite();
 }
 
 /**
@@ -467,8 +567,11 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
  */
 class FITSout {
 	std::string	filename;
+	bool	_precious;
 public:
 	FITSout(const std::string& filename);
+	bool	precious() const { return _precious; }
+	void	setPrecious(bool precious) { _precious = precious; }
 	void	write(const ImagePtr& image) throw (FITSexception);
 };
 

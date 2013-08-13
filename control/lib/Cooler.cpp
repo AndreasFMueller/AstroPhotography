@@ -5,7 +5,7 @@
  */
 #include <AstroCamera.h>
 #include <stdexcept>
-#include <Format.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 

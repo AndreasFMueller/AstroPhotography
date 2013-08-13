@@ -5,8 +5,8 @@
  * $Id$
  */
 #include <AstroCamera.h>
-#include <Format.h>
-#include <debug.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 
@@ -17,14 +17,16 @@ namespace camera {
 // CcdInfo implementation
 //////////////////////////////////////////////////////////////////////
 
-CcdInfo::CcdInfo() {
+CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
+	: _name(name), _size(size), ccdid(_ccdid) {
+	_shutter = false;
 }
 
 /**
  * \brief Get the CCD size.
  */
-const astro::image::ImageSize&	CcdInfo::getSize() const {
-	return size;
+const astro::image::ImageSize&	CcdInfo::size() const {
+	return _size;
 }
 
 /**
@@ -36,7 +38,14 @@ const astro::image::ImageSize&	CcdInfo::getSize() const {
  * frames, not subframes.
  */
 const ImageRectangle	CcdInfo::getFrame() const {
-	return ImageRectangle(ImagePoint(0, 0), size);
+	return ImageRectangle(ImagePoint(0, 0), _size);
+}
+
+/**
+ * \brief add a binning mode
+ */
+void	CcdInfo::addMode(const Binning& mode) {
+	binningmodes.insert(mode);
 }
 
 /**
@@ -49,8 +58,8 @@ const BinningSet&	CcdInfo::modes() const {
 /**
  * \brief Get the name of this CCD.
  */
-const std::string&	CcdInfo::getName() const {
-	return name;
+const std::string&	CcdInfo::name() const {
+	return _name;
 }
 
 /**
@@ -66,8 +75,8 @@ int	CcdInfo::getId() const {
  * \brief Return a string representation.
  */
 std::string	CcdInfo::toString() const {
-	return stringprintf("%s: %dx%d,%s", name.c_str(),
-		size.width, size.height,
+	return stringprintf("%s: %dx%d,%s", _name.c_str(),
+		_size.width(), _size.height(),
 		binningmodes.toString().c_str());
 }
 
@@ -79,37 +88,37 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo) {
  * \brief Fit a rectangle inside a ccd
  */
 ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
-	if (size.width < rectangle.origin.x) {
+	if (_size.width() < rectangle.origin().x()) {
 		throw std::runtime_error("image rectangle outside ccd");
 	}
-	if (size.height < rectangle.origin.y) {
+	if (_size.height() < rectangle.origin().y()) {
 		throw std::runtime_error("image rectangle outside ccd");
 	}
-	unsigned int	w = rectangle.size.width;
-	if ((rectangle.size.width + rectangle.origin.x) > size.width) {
-		w = size.width - rectangle.origin.x;
+	unsigned int	w = rectangle.size().width();
+	if ((rectangle.size().width() + rectangle.origin().x()) > _size.width()) {
+		w = _size.width() - rectangle.origin().x();
 	}
-	unsigned int	h = rectangle.size.height;
-	if ((rectangle.size.height + rectangle.origin.y) > size.height) {
-		h = size.height - rectangle.origin.y;
+	unsigned int	h = rectangle.size().height();
+	if ((rectangle.size().height() + rectangle.origin().y()) > _size.height()) {
+		h = _size.height() - rectangle.origin().y();
 	}
-	return ImageRectangle(rectangle.origin, ImageSize(w, h));
+	return ImageRectangle(rectangle.origin(), ImageSize(w, h));
 }
 
 /**
  * \brief Get a centered rectangle of a given size
  */
 ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
-	unsigned int	w = s.width;
-	unsigned int	h = s.height;
-	if (w > size.width) {
-		w = size.width;
+	unsigned int	w = s.width();
+	unsigned int	h = s.height();
+	if (w > _size.width()) {
+		w = _size.width();
 	}
-	if (h > size.height) {
-		h = size.height;
+	if (h > _size.height()) {
+		h = _size.height();
 	}
-	unsigned int	xoffset = (size.width - w) / 2;
-	unsigned int	yoffset = (size.height - h) / 2;
+	unsigned int	xoffset = (_size.width() - w) / 2;
+	unsigned int	yoffset = (_size.height() - h) / 2;
 	return ImageRectangle(ImagePoint(xoffset, yoffset), ImageSize(w, h));
 }
 
@@ -190,14 +199,14 @@ CoolerPtr	Ccd::getCooler() throw (not_implemented) {
 /**
  * \brief Retrieve the state of the shutter
  */
-Ccd::shutter_state	Ccd::getShutterState() throw (not_implemented) {
+shutter_state	Ccd::getShutterState() throw (not_implemented) {
 	throw not_implemented("camera has no shutter");
 }
 
 /**
  * \brief Set the state of the shutter
  */
-void	Ccd::setShutterState(const Ccd::shutter_state& state)
+void	Ccd::setShutterState(const shutter_state& state)
 	throw(not_implemented) {
 	throw not_implemented("camera has no shutter");
 }

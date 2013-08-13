@@ -5,7 +5,7 @@
  * $Id$
  */
 #include <AstroImage.h>
-#include <Format.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -18,8 +18,24 @@ namespace image {
  * often, keeping a it redundantly in memory saves a large
  * number of multiplications
  */
-ImageSize::ImageSize(unsigned int _width, unsigned int _height)
-	: width(_width), height(_height), pixels(width * height) {
+ImageSize::ImageSize(unsigned int width, unsigned int height)
+	: _width(width), _height(height), pixels(width * height) {
+}
+
+/**
+ * \brief Width accessor
+ */
+void	ImageSize::setWidth(unsigned int width) {
+	_width = width;
+	pixels = _width * _height;
+}
+
+/**
+ * \brief Height accessor
+ */
+void	ImageSize::setHeight(unsigned int height) {
+	_height = height;
+	pixels = _width * _height;
 }
 
 /**
@@ -28,7 +44,7 @@ ImageSize::ImageSize(unsigned int _width, unsigned int _height)
  * Two size objects are equal if width and height are identical
  */
 bool	ImageSize::operator==(const ImageSize& other) const {
-	return (width == other.width) && (height == other.height);
+	return (_width == other.width()) && (_height == other.height());
 }
 
 /**
@@ -37,7 +53,7 @@ bool	ImageSize::operator==(const ImageSize& other) const {
  * Two size objects are unequal if width or height are unequal
  */
 bool	ImageSize::operator!=(const ImageSize& other) const {
-	return (width != other.width) || (height != other.height);
+	return (_width != other.width()) || (_height != other.height());
 }
 
 /**
@@ -45,8 +61,8 @@ bool	ImageSize::operator!=(const ImageSize& other) const {
  *        defined by a size object
  */
 bool	ImageSize::bounds(const ImagePoint& p) const {
-	return	(0 <= p.x) && (p.x < width) &&
-		(0 <= p.y) && (p.y < height);
+	return	(0 <= p.x()) && (p.x() < _width) &&
+		(0 <= p.y()) && (p.y() < _height);
 }
 
 /**
@@ -54,11 +70,11 @@ bool	ImageSize::bounds(const ImagePoint& p) const {
  *        defined by a size ojbect.
  */
 bool	ImageSize::bounds(const ImageRectangle& rect) const {
-	if (!bounds(rect.origin)) {
+	if (!bounds(rect.origin())) {
 		return false;
 	}
-	return bounds(ImagePoint(rect.origin.x + rect.size.width,
-		rect.origin.y + rect.size.height));
+	return bounds(ImagePoint(rect.origin().x() + rect.size().width(),
+		rect.origin().y() + rect.size().height()));
 }
 
 /**
@@ -67,7 +83,7 @@ bool	ImageSize::bounds(const ImageRectangle& rect) const {
  * \param point
  */
 bool	ImageSize::contains(const ImagePoint& point) const {
-	return contains(point.x, point.y);
+	return contains(point.x(), point.y());
 }
 
 /**
@@ -76,11 +92,17 @@ bool	ImageSize::contains(const ImagePoint& point) const {
  * \param x
  * \param y
  */
-bool	ImageSize::contains(unsigned int x, unsigned int y) const {
-	if (x >= width) {
+bool	ImageSize::contains(int x, int y) const {
+	if (x < 0) {
 		return false;
 	}
-	if (y >= height) {
+	if (y < 0) {
+		return false;
+	}
+	if (x >= (int)_width) {
+		return false;
+	}
+	if (y >= (int)_height) {
 		return false;
 	}
 	return true;
@@ -98,10 +120,24 @@ int	ImageSize::chi(unsigned int x, unsigned int y) const {
 }
 
 /**
+ * \brief Find the offset into an array with this size
+ */
+unsigned int	ImageSize::offset(unsigned int x, unsigned int y) const {
+	return x + _width * y;
+}
+
+/**
+ * \brief Find the offset into an array with this size
+ */
+unsigned int	ImageSize::offset(const ImagePoint& point) const {
+	return offset(point.x(), point.y());
+}
+
+/**
  * \brief String representation
  */
 std::string	ImageSize::toString() const {
-	return stringprintf("%dx%d", width, height);
+	return stringprintf("%dx%d", _width, _height);
 }
 
 } // namespace image

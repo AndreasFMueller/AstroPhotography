@@ -3,15 +3,34 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SbigCooler.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SBIGUDRV_H
 #include <sbigudrv.h>
+#else
+#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
+#include <SBIGUDrv/sbigudrv.h>
+#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#endif
+
+#include <SbigLocator.h>
+#include <SbigCooler.h>
 #include <utils.h>
-#include <debug.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {
 namespace sbig {
 
+/**
+ * \brief Create an SBIG cooler
+ *
+ * This is essentiall a holder for cooler specific state and a reference
+ * to the camera. The camera contains all the information needed to perform
+ * a call to the SBIG universal driver library.
+ */
 SbigCooler::SbigCooler(SbigCamera& _camera) : camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing cooler");
 	enabled = isOn();
@@ -21,7 +40,11 @@ SbigCooler::SbigCooler(SbigCamera& _camera) : camera(_camera) {
 SbigCooler::~SbigCooler() {
 }
 
+/**
+ * \brief Query the set temperature
+ */
 float	SbigCooler::getSetTemperature() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve set temperature");
 	QueryTemperatureStatusParams	params;
@@ -37,7 +60,11 @@ float	SbigCooler::getSetTemperature() {
 	return temperature = results.ccdSetpoint + 273.1;
 }
 
+/**
+ * \brief Query the actual temperature
+ */
 float	SbigCooler::getActualTemperature() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get actual temperature");
 	QueryTemperatureStatusParams	params;
@@ -53,7 +80,11 @@ float	SbigCooler::getActualTemperature() {
 	return results.imagingCCDTemperature + 273.1;
 }
 
+/**
+ * \brief Set the set temperature
+ */
 void	SbigCooler::setTemperature(const float temperature) {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the set temperature");
 	this->temperature = temperature;
@@ -63,7 +94,11 @@ void	SbigCooler::setTemperature(const float temperature) {
 	set();
 }
 
+/**
+ * \brief Common (private) set function
+ */
 void	SbigCooler::set() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set parameters");
 	SetTemperatureRegulationParams2	params;
@@ -78,7 +113,11 @@ void	SbigCooler::set() {
 	}
 }
 
+/**
+ * \brief Query whether cooler is on
+ */
 bool	SbigCooler::isOn() {
+	SbigLock	lock;
 	camera.sethandle();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query regulation status");
 	QueryTemperatureStatusParams	params;
@@ -94,6 +133,9 @@ bool	SbigCooler::isOn() {
 	return (results.enabled) ? true : false;
 }
 
+/**
+ * \brief Turn cooler on.
+ */
 void	SbigCooler::setOn(bool onoff) {
 	enabled = onoff;
 	set();
