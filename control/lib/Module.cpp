@@ -103,13 +103,13 @@ bool	Module::dlfileexists() const {
  * The file name of the .la file is constructed by concatenating the
  * directory name, the module name and the suffix .la.
  */
-Module::Module(const std::string& _dirname, const std::string& _modulename)
-	: dirname(_dirname), modulename(_modulename) {
+Module::Module(const std::string& _dirname, const std::string& modulename)
+	: dirname(_dirname), _modulename(modulename) {
 	// NULL handle means module has not been loaded yet
 	handle = NULL;
 
 	// get the path to the la file
-	dlname = getDlname(dirname + "/" + modulename + ".la");
+	dlname = getDlname(dirname + "/" + _modulename + ".la");
 
 	if (!dlfileexists()) {
 		throw std::domain_error("dl file not accessible");
@@ -127,7 +127,7 @@ const std::string&	Module::filename() const {
  * \brief Compare modules.
  */
 bool	Module::operator==(const Module& other) const {
-	return (other.dirname == dirname) && (other.modulename == modulename);
+	return (other.dirname == dirname) && (other.modulename() == modulename());
 }
 
 /**

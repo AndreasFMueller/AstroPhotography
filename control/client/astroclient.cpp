@@ -55,6 +55,13 @@ int	main(int argc, char *argv[]) {
 		std::cout << "module " << i << ": " << namelist[i] << std::endl;
 	}
 
+	// get the sx module
+#if 0
+	Astro::DriverModule_var	drivermodule = modules->getModule("sx");
+	std::cout << "module loaded: " << std::string(drivermodule->getName())
+		<< std::endl;
+#endif
+
 	// that's it, we are done
 	exit(EXIT_SUCCESS);
 }

@@ -1,13 +1,18 @@
 
 module Astro {
-	interface Modules {
-		long	numberOfModules();
-		typedef sequence<string> ModuleNameSequence;
-		ModuleNameSequence	getModuleNames();
+
+	interface DeviceLocator {
 	};
 
 	interface DriverModule {
 		string	getName();
+	};
+
+	interface Modules {
+		long	numberOfModules();
+		typedef sequence<string> ModuleNameSequence;
+		ModuleNameSequence	getModuleNames();
+		DriverModule	getModule(in string name);
 	};
 
 };

@@ -64,7 +64,7 @@ class Repository;
  */
 class	Module {
 	std::string	dirname;
-	std::string	modulename;
+	std::string	_modulename;
 	std::string	dlname;
 	void	*handle;	
 	std::string	getDlname(const std::string& lafilename) const;
@@ -73,6 +73,7 @@ class	Module {
 public:
 	bool	operator==(const Module& other) const;
 	const std::string&	filename() const;
+	const std::string&	modulename() const { return _modulename; }
 	bool	isloaded() const { return NULL != handle; }
 	void	open();
 	void	close();

@@ -5,7 +5,9 @@
  */
 #include <../idl/device.hh>
 #include "Modules.h"
+#include "DriverModule.h"
 #include <AstroLoader.h>
+#include <AstroDebug.h>
 
 namespace Astro {
 
@@ -30,7 +32,38 @@ Astro::Modules::ModuleNameSequence*	Modules_impl::getModuleNames() {
 	for (i = modules.begin(); i != modules.end(); i++) {
 		(*result)[j++] = ::CORBA::string_dup(i->c_str());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created list with %d names",
+		result->length());
 	return result;
+}
+
+/**
+ * \brief load a certain module and return a reference to it
+ */
+Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
+	std::string	name(_name);
+	astro::module::ModulePtr	result;
+	// find out whether this module was already loaded
+	modulemap_t::const_iterator	i = modulemap.find(name);
+	if (modulemap.find(name) == modulemap.end()) {
+		result = i->second;
+	} else {
+		// load the module and put the module pointer into the map
+		result = repository.getModule(name);
+		modulemap.insert(make_pair(name, result));
+	}
+
+	// check whether we now have a module
+	if (!result) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no module loaded");
+	}
+
+	// turn the ModulePtr into an object reference
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s loaded", name.c_str());
+	Astro::DriverModule_impl	*drivermodule
+		= new Astro::DriverModule_impl(result);
+	
+	return drivermodule->_this();
 }
 
 } // namespace Astro
