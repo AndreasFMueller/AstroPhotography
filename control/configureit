@@ -6,11 +6,38 @@ CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests"
 
+# first find out what type of system we are
+systemtype=`uname`
+case ${systemtype} in
+Darwin)	echo "configuring for Mac OS X"
+	;;
+Linux)	if [ -r /etc/debian_version ]
+	then
+		echo "configuring for Debian"
+		systemtype=Debian
+	else
+		if [ -r /etc/SuSE-release ]
+		then
+			echo "configuring for SuSE"
+			systemtype=SuSE
+		else
+			echo "configuring for unspecified Linux (cross your fingers)"
+		fi
+	fi
+	;;
+esac
+
 # the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
 # C++ modules, but I'm not convinced. The tests still crash when
 # unloading the modules
 case `uname` in
 Linux)
+	./configure --prefix=`pwd`/root ${commonflags}
+	;;
+Debian)
+	./configure --prefix=`pwd`/root ${commonflags}
+	;;
+SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
 	if [ -d /usr/include/unicap ]
 	then
