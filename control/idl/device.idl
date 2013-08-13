@@ -1,0 +1,14 @@
+
+module Astro {
+	interface Modules {
+		long	numberOfModules();
+		typedef sequence<string> ModuleNameSequence;
+		ModuleNameSequence	getModuleNames();
+	};
+
+	interface DriverModule {
+		string	getName();
+	};
+
+};
+
