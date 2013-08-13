@@ -27,13 +27,13 @@ double	PhaseCorrelator::value(const double *a, const ImageSize& size,
 	while (x < 0) {
 		x += size.width();
 	}
-	while (x > size.width()) {
+	while (x > (int)size.width()) { // cast to make compiler happy
 		x -= size.width();
 	}
 	while (y < 0) {
 		y += size.height();
 	}
-	while (y > size.height()) {
+	while (y > (int)size.height()) { // cast to make compiler happy
 		y -= size.height();
 	}
 	return a[size.offset(x, y)];

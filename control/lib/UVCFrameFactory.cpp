@@ -53,7 +53,8 @@ std::vector<FramePtr>	FrameFactory::operator()(const std::list<std::string>& pac
 				}
 				currentframe->append(uvcpayload.payload());
 			} else {
-				if ((currentframe) && (currentframe->size() >= minsize)) {
+				// cast below to make compiler happy
+				if ((currentframe) && ((int)currentframe->size() >= minsize)) {
 					debug(LOG_DEBUG, DEBUG_LOG, 0,
 						"adding frame of size %d",
 						currentframe->size());
