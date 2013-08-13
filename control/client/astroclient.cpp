@@ -8,6 +8,7 @@
 #include <iostream>
 #include <AstroDebug.h>
 #include <stdexcept>
+#include "../idl/NameService.h"
 
 namespace astro {
 
@@ -27,39 +28,14 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// get a reference to the naming service
-	CORBA::Object_var	initServ;
-	try {
-		initServ = orb->resolve_initial_references("NameService");
-	} catch (CORBA::ORB::InvalidName& x) {
-		std::cerr << "no naming service" << std::endl;
-		throw std::runtime_error("no naming service");
-	}
+	Astro::Naming::NameService	nameservice(orb);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
 
-	CosNaming::NamingContext_var	rootContext;
-	rootContext = CosNaming::NamingContext::_narrow(initServ);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service root context");
-
 	// Next we want to get a reference to the Modules object
-	CORBA::Object_var	obj;
-
-	// prepare the path for object lookup in the root context
-	CosNaming::Name	name;
-	name.length(2);
-	name[0].id = (const char *)"Astro";
-	name[0].kind = (const char *)"context";
-	name[1].id = (const char *)"Modules";
-	name[1].kind = (const char *)"object";
-	try {
-		obj = rootContext->resolve(name);
-	} catch (CosNaming::NamingContext::NotFound& ex) {
-		std::cerr << "context not found" << std::endl;
-		return EXIT_FAILURE;
-	} catch (CORBA::TRANSIENT& ex) {
-		return EXIT_FAILURE;
-	} catch (CORBA::SystemException& ex) {
-		return EXIT_FAILURE;
-	}
+	Astro::Naming::Names	names;
+	names.push_back(Astro::Naming::Name("Astro", "context"));
+	names.push_back(Astro::Naming::Name("Modules", "object"));
+	CORBA::Object_var	obj = nameservice.lookup(names);
 
 	// get a reference to the modules interface
 	Astro::Modules_var	modules = Astro::Modules::_narrow(obj);
@@ -73,10 +49,10 @@ int	main(int argc, char *argv[]) {
 		<< std::endl;
 
 	// get the list of all modules, and display it
-	Astro::Modules::ModuleNameSequence_var	names
+	Astro::Modules::ModuleNameSequence_var	namelist
 		= modules->getModuleNames();
-	for (int i = 0; i < names->length(); i++) {
-		std::cout << "module " << i << ": " << names[i] << std::endl;
+	for (int i = 0; i < (int)namelist->length(); i++) {
+		std::cout << "module " << i << ": " << namelist[i] << std::endl;
 	}
 
 	// that's it, we are done
