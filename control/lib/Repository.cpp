@@ -62,6 +62,40 @@ Repository::Repository() throw (repository_error) : _path(PKGLIBDIR) {
 }
 
 /**
+ * \brief Retrieve the number of modules available from the repository
+ */
+long	Repository::numberOfModules() const {
+	return moduleNames().size();
+}
+
+/**
+ * \brief Retrieve the module names
+ *
+ * This method just counts the module files that are installed, but it
+ * may also count files that are ultimately not loadable
+ */
+std::vector<std::string>	Repository::moduleNames() const {
+	std::vector<std::string>	result;
+	// search the directory for files ending in la
+	DIR	*dir = opendir(_path.c_str());
+	if (NULL == dir) {
+		return result;
+	}
+	struct dirent	*dirent;
+	while (NULL != (dirent = readdir(dir))) {
+		int	namelen = strlen(dirent->d_name);
+		if (0 == strcmp(".la", dirent->d_name + namelen - 3)) {
+			std::string	modulename
+				= std::string(dirent->d_name).substr(0, namelen - 3);
+			result.push_back(modulename);
+		}
+	}
+	closedir(dir);
+	return result;
+	
+}
+
+/**
  * \brief Retrieve a list of all available modules in the Repository.
  *
  * The std::vector of ModulePtr objects returned is not just a list

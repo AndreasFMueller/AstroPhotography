@@ -141,7 +141,7 @@ esac
 AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
-	idl/Makefile server/Makefile tools/Makefile
+	idl/Makefile server/Makefile client/Makefile tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 

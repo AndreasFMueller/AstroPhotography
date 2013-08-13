@@ -122,6 +122,8 @@ class	Repository {
 public:
 	Repository() throw (repository_error);
 	Repository(const std::string& path) throw (repository_error);
+	long	numberOfModules() const;
+	std::vector<std::string>	moduleNames() const;
 	std::vector<ModulePtr>	modules() const;
 	bool	contains(const std::string& modulename) const;
 	ModulePtr	getModule(const std::string& modulename) const

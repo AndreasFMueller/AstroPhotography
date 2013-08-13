@@ -4,3 +4,15 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
+
+EXTRA_DIST = device.idl
+
+BUILT_SOURCES = deviceSK.cc device.hh
+
+deviceSK.cc device.h:	device.idl
+	omniidl -bcxx device.idl
+
+lib_LTLIBRARIES = libastrocom.la
+
+libastrocom_la_SOURCES = deviceSK.cc
+
