@@ -2,8 +2,8 @@ QT += widgets
 TEMPLATE = app
 TARGET = capture
 DEPENDPATH += .
-INCLUDEPATH += . -I ../control/include
-LIBS += -L../control/lib -lastro
+INCLUDEPATH += . -I /usr/local/include -I ../control/include
+LIBS += -L/usr/local/lib -L../control/lib -lastro
 
 HEADERS += \ 
     capturewindow.h \
