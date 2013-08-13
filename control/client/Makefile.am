@@ -11,9 +11,11 @@ ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 \
 
 astroclient_SOURCES = astroclient.cpp
 astroclient_DEPENDENCIES = ../lib/libastro.la
-astroclient_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@ $(ORBLDFLAGS)
+astroclient_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@ \
+	$(ORBLDFLAGS)
 
-
+test:	astroclient
+	./astroclient -d -ORBInitRef NameService=corbaname::localhost
 
 
 
