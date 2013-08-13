@@ -10,6 +10,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
+#include <unistd.h>
 #include <iostream>
 #include <AstroDebug.h>
 

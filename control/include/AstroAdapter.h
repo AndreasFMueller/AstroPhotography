@@ -283,7 +283,7 @@ template<typename Pixel>
 const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 			const {
 	double	result = 0;
-	int	counter;
+	int	counter = 0;
 	if (diagonal) {
 		if ((x > 0) && (x < adaptersize.width() - 1) &&
 			(y > 0) && (y < adaptersize.height() - 1)) {

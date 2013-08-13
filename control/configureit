@@ -24,13 +24,21 @@ Linux)	if [ -r /etc/debian_version ]
 			echo "configuring for unspecified Linux (cross your fingers)"
 		fi
 	fi
+	# find out whether we should try to build the sbig driver
+	if [ -r /usr/include/sbigudrv.h -a -r /usr/local/include/sbigudrv.h ]
+	then
+		sbigoption=--enable-sbig
+	else
+		sbigoption=
+	fi
 	;;
 esac
+
 
 # the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
 # C++ modules, but I'm not convinced. The tests still crash when
 # unloading the modules
-case `uname` in
+case ${systemtype} in
 Linux)
 	./configure --prefix=`pwd`/root ${commonflags}
 	;;
@@ -52,7 +60,7 @@ SuSE)
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
-		--enable-sbig
+		${sbigoption}
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"

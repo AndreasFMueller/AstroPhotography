@@ -31,7 +31,7 @@ class RaDec {
 public:
 	Angle	ra() const;
 	Angle	dec() const;
-}
+};
 
 
 

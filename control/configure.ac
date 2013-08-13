@@ -26,7 +26,8 @@ AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
-AC_CHECK_LIB([lapack], [dgels_])
+AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
+	AC_MSG_ERROR([required library LAPACK not found]))
 AC_CHECK_LIB([fftw3], [fftw_malloc])
 
 ######################################################################
@@ -71,7 +72,8 @@ AC_ARG_ENABLE(sbig,
 	CFLAGS="${CFLAGS} -DTARGET=${SBIGTARGET} ${SBIGINCLUDE}"
 	case `uname` in
 	Linux)	OLDLIBS="${LIBS}"
-		AC_CHECK_HEADERS(sbigudrv.h, , [AC_MSG_ERROR([SBIG header not found])])
+		AC_CHECK_HEADERS(sbigudrv.h, ,
+			[AC_MSG_ERROR([SBIG header not found])])
 		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
 			[AC_MSG_ERROR([SBIG library not found])])
 		SBIGLIBRARY=-lsbigudrv
@@ -82,7 +84,6 @@ AC_ARG_ENABLE(sbig,
 		echo "Mac OS X: header was found, so library will work"
 		SBIGLIBRARY="-framework SBIGUDrv"
 		CFLAGS="${CPPFLAGS} ${SBIGLIBRARY}"
-		#SBIGLIBRARY=/Library/Frameworks/SBIGUDrv.framework/SBIGUDrv
 		;;
 	esac
 	AC_SUBST(SBIGLIBRARY)
