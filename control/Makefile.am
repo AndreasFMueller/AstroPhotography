@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = include lib idl tools server drivers test doc
+SUBDIRS = include lib idl tools server client drivers test doc
 
 documentation:
 	cd doc; make doc
