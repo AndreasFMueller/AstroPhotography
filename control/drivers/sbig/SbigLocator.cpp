@@ -23,6 +23,44 @@
 #include <includes.h>
 #include <pthread.h>
 
+//////////////////////////////////////////////////////////////////////
+// Implementation of the SBIG Express Module Descriptor
+//////////////////////////////////////////////////////////////////////
+
+namespace astro {
+namespace module {
+namespace sbig {
+
+static std::string      sbig_name("sbig");
+static std::string      sbig_version(VERSION);
+
+/**
+ * \brief Module descriptor for the Starlight express module
+ */
+class SbigDescriptor : public ModuleDescriptor {
+public:
+	SbigDescriptor() { }
+	~SbigDescriptor() { }
+        virtual std::string     name() const {
+                return sbig_name;
+        }
+        virtual std::string     version() const {
+                return sbig_version;
+        }
+	virtual bool	hasDeviceLocator() const {
+		return true;
+	}
+};
+
+} // namespace sbig
+} // namespace module
+} // namespace astro
+
+extern "C"
+astro::module::ModuleDescriptor	*getDescriptor() {
+	return new astro::module::sbig::SbigDescriptor();
+}
+
 using namespace astro;
 using namespace astro::camera;
 

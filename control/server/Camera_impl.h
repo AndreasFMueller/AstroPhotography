@@ -27,6 +27,7 @@ public:
 
 	// access to CCDs of a camera (there may be more than one)
 	virtual CORBA::Long	nCcds();
+	virtual CcdInfo	*getCcdinfo(::CORBA::Long ccdid);
 	virtual Ccd_ptr	getCcd(::CORBA::Long ccdid);
 
 	// access to the filter wheel

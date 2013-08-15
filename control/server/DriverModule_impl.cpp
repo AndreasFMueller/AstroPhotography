@@ -19,12 +19,12 @@ Descriptor	*DriverModule_impl::getDescriptor() {
 	Descriptor	*result = new Descriptor();
 	result->name = strdup(_module->getDescriptor()->name().c_str());
 	result->version = strdup(_module->getDescriptor()->version().c_str());
+	result->hasDeviceLocator = _module->getDescriptor()->hasDeviceLocator();
 	return result;
 }
 
 DeviceLocator_ptr	DriverModule_impl::getDeviceLocator() {
 	if (!_devicelocator) {
-		_module->open();
 		_devicelocator = _module->getDeviceLocator();
 	}
 

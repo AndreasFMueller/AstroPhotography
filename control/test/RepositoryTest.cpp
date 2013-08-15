@@ -60,7 +60,7 @@ void	RepositoryTest::testOpen() {
 }
 
 void	RepositoryTest::moduleTest(ModulePtr module) {
-	DescriptorPtr	descriptor = module->getDescriptor();
+	ModuleDescriptorPtr	descriptor = module->getDescriptor();
 	bool	result1 = descriptor->name() == "mock1";
 	CPPUNIT_ASSERT(result1);
 	bool	result2 = descriptor->version() == VERSION;

@@ -16,7 +16,7 @@ namespace mock2 {
 static std::string	mock2_name("mock2");
 static std::string	mock2_version(VERSION);
 
-class	Mock2Descriptor : public Descriptor {
+class	Mock2Descriptor : public ModuleDescriptor {
 public:
 	Mock2Descriptor() { }
 	~Mock2Descriptor() { }
@@ -33,6 +33,6 @@ public:
 } // namespace astro
 
 extern "C"
-Descriptor	*getDescriptor() {
+ModuleDescriptor	*getDescriptor() {
 	return new astro::module::mock2::Mock2Descriptor();
 }

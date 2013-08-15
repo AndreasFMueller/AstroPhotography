@@ -1,5 +1,5 @@
 /*
- * Descriptor.cpp -- descriptor implementation
+ * ModuleDescriptor.cpp -- descriptor implementation
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
@@ -24,18 +24,25 @@ static const std::string	module_version(VERSION);
  * code for several functions, like cameras and filterwheels (which are
  * often controlled through a camera).
  */
-std::string	Descriptor::name() const {
+std::string	ModuleDescriptor::name() const {
 	return module_name;
 }
 
 /**
- * \brief Get the veresion of the module
+ * \brief Get the version of the module
  *
  * The version string should also include version strings for
  * libraries the module depends on.
  */
-std::string	Descriptor::version() const {
+std::string	ModuleDescriptor::version() const {
 	return module_version;
+}
+
+/**
+ * \brief  Find out whether the module has a DeviceLocator
+ */
+bool	ModuleDescriptor::hasDeviceLocator() const {
+	return false;
 }
 
 } // namespace module

@@ -10,7 +10,7 @@
 using namespace astro::module;
 
 void	moduletest(ModulePtr module) {
-	DescriptorPtr	descriptor = module->getDescriptor();
+	ModuleDescriptorPtr	descriptor = module->getDescriptor();
 	std::cout << descriptor->name() << ", " << descriptor->version()
 		<< std::endl;
 }
@@ -23,7 +23,7 @@ void	test() {
 	moduletest(module1);
 #else
 	{
-		DescriptorPtr	descriptor1 = module1->getDescriptor();
+		ModuleDescriptorPtr	descriptor1 = module1->getDescriptor();
 		std::cout << descriptor1->name() << ", "
 			<< descriptor1->version() << std::endl;
 	}
@@ -36,7 +36,7 @@ void	test() {
 	moduletest(module2);
 #else
 	{
-		DescriptorPtr	descriptor2 = module2->getDescriptor();
+		ModuleDescriptorPtr	descriptor2 = module2->getDescriptor();
 		std::cout << descriptor2->name() << ", "
 			<< descriptor2->version() << std::endl;
 	}

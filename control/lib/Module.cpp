@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 
 using namespace astro::device;
 
@@ -20,9 +21,9 @@ namespace module {
  *
  * Under certain conditions, most notably when running CPPUNIT unit
  * tests, closing the dynamic library causes the program to crash.
- * The crash is caused by the DescriptorPtr returned by getDescriptor
+ * The crash is caused by the ModuleDescriptorPtr returned by getDescriptor
  * being deallocated after the library has been closed. This can be
- * prevented if the either the returned DescriptorPtr goes out of
+ * prevented if the either the returned ModuleDescriptorPtr goes out of
  * scope before the library is unloaded, or by turning of unloading
  * of the library completely. This is what dlclose_on_close does.
  * When set to false, the library is not dlclose()d.
@@ -114,7 +115,11 @@ Module::Module(const std::string& _dirname, const std::string& modulename)
 	dlname = getDlname(dirname + "/" + _modulename + ".la");
 
 	if (!dlfileexists()) {
-		throw std::domain_error("dl file not accessible");
+		std::string	msg = stringprintf(
+			"dl file '%s' not accessible", dlname.c_str());
+	
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::domain_error(msg);
 	}
 }
 
@@ -147,9 +152,10 @@ void	Module::open() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
 	handle = dlopen(dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {
-		std::string	error(dlerror());
-		throw std::runtime_error("cannot load " + dlname + ": "
-			+ error);
+		std::string	msg = stringprintf("cannot load %s: %s",
+			dlname.c_str(), dlerror());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
@@ -169,27 +175,44 @@ void	Module::close() {
 }
 
 /**
+ * \brief Get a pointer to given symbol
+ */
+void	*Module::getSymbol(const std::string& symbolname) const {
+	// make sure the module is already loaded
+	if (!isloaded()) {
+		std::string	msg = stringprintf("module %s not open",
+			_modulename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// find the symbol for the getDescriptor function
+	void	*s = dlsym(handle, symbolname.c_str());
+	if (NULL == s) {
+		std::string	msg = stringprintf("module %s lacks symbol %s",
+			_modulename.c_str(), symbolname.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::invalid_argument(msg);
+	}
+
+	return s;
+}
+
+/**
  * \brief Retrieve the descriptor
  *
  * Get a Descriptor for the Module. The shared library has to implement
  * a method named getDescriptor with C linkage which returns a pointer
  * to a Descriptor object for this method to work.
  */
-DescriptorPtr	Module::getDescriptor() const {
-	if (!isloaded()) {
-		throw std::runtime_error("module is not open");
-	}
-	// find the symbol for the getDescriptor function
-	void	*s = dlsym(handle, "getDescriptor");
-	if (NULL == s) {
-		throw std::invalid_argument("getDescriptor not found");
-	}
+ModuleDescriptorPtr	Module::getDescriptor() const {
+	void	*s = getSymbol(std::string("getDescriptor"));
 
 	// now cast the symbol to a function that returns a descriptor
 	// pointer
-	typedef Descriptor	*(*getter)();
-	Descriptor	*d = ((getter)s)();
-	return DescriptorPtr(d);
+	typedef ModuleDescriptor	*(*getter)();
+	ModuleDescriptor	*d = ((getter)s)();
+	return ModuleDescriptorPtr(d);
 }
 
 /**
@@ -201,14 +224,7 @@ DescriptorPtr	Module::getDescriptor() const {
  * a DeviceLocator object for this to work.
  */
 DeviceLocatorPtr	Module::getDeviceLocator() const {
-	if (!isloaded()) {
-		throw std::runtime_error("module is not open");
-	}
-	// find the symbol for the getDescriptor function
-	void	*s = dlsym(handle, "getDeviceLocator");
-	if (NULL == s) {
-		throw std::invalid_argument("getDeviceLocator not found");
-	}
+	void	*s = getSymbol(std::string("getDeviceLocator"));
 
 	// now cast the symbol to a function that returns a descriptor
 	// pointer

@@ -51,7 +51,13 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	} else {
 		// load the module and put the module pointer into the map
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new module %s", _name);
-		result = repository.getModule(name);
+		try {
+			result = repository.getModule(name);
+			result->open();
+		} catch (std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "exception: %s", x.what());
+			throw x;
+		}
 		modulemap.insert(make_pair(name, result));
 	}
 

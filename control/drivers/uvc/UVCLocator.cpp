@@ -8,8 +8,52 @@
 #include <UvcUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroLoader.h>
 
 using namespace astro::device;
+
+//////////////////////////////////////////////////////////////////////
+// SBIG Module Descriptor
+//////////////////////////////////////////////////////////////////////
+
+namespace astro {
+namespace module {
+namespace uvc {
+
+static std::string      uvc_name("uvc");
+static std::string      uvc_version(VERSION);
+
+/**
+ * \brief Module descriptor for the Starlight express module
+ */
+class UvcDescriptor : public ModuleDescriptor {
+public:
+	UvcDescriptor() { }
+	~UvcDescriptor() { }
+	virtual std::string     name() const {
+		return uvc_name;
+	}
+	virtual std::string     version() const {
+		return uvc_version;
+	}
+	virtual bool    hasDeviceLocator() const {
+		return true;
+	}
+};
+
+
+} // namespace uvc
+} // namespace module
+} // namespace astro
+
+extern "C"
+astro::module::ModuleDescriptor *getDescriptor() {
+	return new astro::module::uvc::UvcDescriptor();
+}
+
+//////////////////////////////////////////////////////////////////////
+// UvcCameraLocator implementation
+//////////////////////////////////////////////////////////////////////
 
 namespace astro {
 namespace camera {

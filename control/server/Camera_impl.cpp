@@ -18,6 +18,37 @@ CORBA::Long	Camera_impl::nCcds() {
 	return _camera->nCcds();
 }
 
+CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
+	// get the CCD info
+	const astro::camera::CcdInfo&	info = _camera->getCcdInfo(ccdid);
+
+	// create a result structure,
+	Astro::CcdInfo	*result = new Astro::CcdInfo();
+
+	// copy simple members first
+	result->name = ::CORBA::string_dup(info.name().c_str());
+	result->id = info.getId();
+	result->size.width = info.size().width();
+	result->size.height = info.size().height();
+	result->shutter = info.shutter();
+
+	// copy binning modes
+	const astro::camera::BinningSet&	binningset = info.modes();
+	result->binningmodes.length(binningset.size());
+	astro::camera::BinningSet::const_iterator	i;
+	int	j;
+	for (i = binningset.begin(), j = 0; i != binningset.end(); i++, j++) {
+		Astro::BinningMode	*bm = new BinningMode();
+		bm->x = ::CORBA::Long(i->getX());
+		bm->y = ::CORBA::Long(i->getY());
+		Astro::BinningMode_var	bmv = bm;
+		result->binningmodes[j++] = bmv;
+	}
+
+	// done
+	return result;
+}
+
 Ccd_ptr	Camera_impl::getCcd(::CORBA::Long ccdid) {
 	if ((ccdid < 0) || (ccdid >= (int)ccds.size())) {
 		// XXX bad thing happens

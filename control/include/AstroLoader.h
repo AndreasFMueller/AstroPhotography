@@ -34,14 +34,15 @@ namespace module {
  * In particular, it can find out what types of devices (cameras,
  * filter wheels, telescopes) are supported by the the module.
  */
-class	Descriptor {
+class	ModuleDescriptor {
 public:
-	Descriptor() { }
-	virtual	~Descriptor() { }
+	ModuleDescriptor() { }
+	virtual	~ModuleDescriptor() { }
 	virtual std::string	name() const;
 	virtual std::string	version() const;
+	virtual	bool	hasDeviceLocator() const;
 };
-typedef std::tr1::shared_ptr<Descriptor>	DescriptorPtr;
+typedef std::tr1::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
 
 class Repository;
 /**
@@ -57,7 +58,7 @@ class Repository;
  * E. g. every module must implement a function getDescriptor with C
  * linkage that returns a pointer to a Descriptor object. The getDescriptor
  * method of the Module class calls this function and wraps the pointer
- * into an DescriptorPtr smart pointer object. Other getter functions
+ * into an ModuleDescriptorPtr smart pointer object. Other getter functions
  * are implemented similarly. See the member function documentation
  * for more information about methods that need to be implemented
  * by the library.
@@ -70,6 +71,7 @@ class	Module {
 	std::string	getDlname(const std::string& lafilename) const;
 	bool	dlfileexists() const;
 	Module(const std::string& dirname, const std::string& modulename);
+	void	*getSymbol(const std::string& symbolname) const;
 public:
 	bool	operator==(const Module& other) const;
 	const std::string&	filename() const;
@@ -78,7 +80,7 @@ public:
 	void	open();
 	void	close();
 	static bool	dlclose_on_close;
-	DescriptorPtr	getDescriptor() const;
+	ModuleDescriptorPtr	getDescriptor() const;
 	astro::device::DeviceLocatorPtr	getDeviceLocator() const;
 	friend class Repository;
 	friend class ::astro::test::ModuleTest;

@@ -20,7 +20,7 @@ static std::string	mock1_version(VERSION);
 /**
  * \brief Descriptor of the mock1 module
  */
-class Mock1Descriptor : public Descriptor {
+class Mock1Descriptor : public ModuleDescriptor {
 public:
 	Mock1Descriptor() { }
 	virtual std::string	name() const {
@@ -29,6 +29,9 @@ public:
 	virtual std::string	version() const {
 		return mock1_version;
 	}
+	virtual bool	hasDeviceLocator() const {
+		return true;
+	}
 };
 
 } // namespace mock1
@@ -36,6 +39,6 @@ public:
 } // namespace astro
 
 extern "C"
-Descriptor	*getDescriptor() {
+ModuleDescriptor	*getDescriptor() {
 	return new astro::module::mock1::Mock1Descriptor();
 }

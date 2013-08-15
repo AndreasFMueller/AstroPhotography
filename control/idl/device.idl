@@ -20,6 +20,7 @@ module Astro {
 	struct CcdInfo {
 		string	name;
 		long	id;
+		ImageSize	size;
 		BinningSet	binningmodes;
 		boolean	shutter;
 	};
@@ -56,9 +57,10 @@ module Astro {
 		string	getName();
 		//CcdInfo info;
 		long	nCcds();
+		CcdInfo	getCcdinfo(in long ccdid);
 		Ccd	getCcd(in long ccdid);
 		// FilterWheel
-		boolean	hasFilerWheel();
+		boolean	hasFilterWheel();
 		FilterWheel	getFilterWheel();
 		// Guider Port
 		boolean	hasGuiderPort();
@@ -69,13 +71,17 @@ module Astro {
 		string	getName();
 		string	getVersion();
 		typedef sequence<string>	DeviceNameList;
-		enum device_type { CAMERA, FOCUSER, GUIDERPORT };
+		enum device_type { DEVICE_CAMERA, DEVICE_FOCUSER,
+					DEVICE_GUIDERPORT };
 		DeviceNameList	getDevicelist(in device_type devicetype);
+		Camera	getCamera(in string name);
+		GuiderPort	getGuiderPort(in string name);
 	};
 
 	struct Descriptor {
 		string name;
 		string version;
+		boolean hasDeviceLocator;
 	};
 
 	interface DriverModule {
