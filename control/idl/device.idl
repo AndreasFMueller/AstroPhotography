@@ -53,11 +53,16 @@ module Astro {
 	};
 
 	interface Camera {
+		string	getName();
 		//CcdInfo info;
 		long	nCcds();
-		string	getName();
+		Ccd	getCcd(in long ccdid);
+		// FilterWheel
 		boolean	hasFilerWheel();
+		FilterWheel	getFilterWheel();
+		// Guider Port
 		boolean	hasGuiderPort();
+		GuiderPort	getGuiderPort();
 	};
 
 	interface DeviceLocator {

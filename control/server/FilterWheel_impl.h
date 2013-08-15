@@ -11,10 +11,10 @@
 
 namespace Astro {
 
-class FilterWheel_impl : POA_Astro::FilterWheel {
+class FilterWheel_impl : public POA_Astro::FilterWheel {
 	astro::camera::FilterWheelPtr	_filterwheel;
 public:
-	inlinde	FilterWheel_impl(astro::camera::FilterWheelPtr filterwheel)
+	inline	FilterWheel_impl(astro::camera::FilterWheelPtr filterwheel)
 		: _filterwheel(filterwheel) { }
 	virtual ::CORBA::Long	nFilters();
 	virtual ::CORBA::Long	currentPosition();
