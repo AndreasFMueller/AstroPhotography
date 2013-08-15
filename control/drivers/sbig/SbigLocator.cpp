@@ -88,6 +88,8 @@ SbigLock::~SbigLock() {
 // SbigLocator implementation
 //////////////////////////////////////////////////////////////////////
 
+int	SbigCameraLocator::driveropen = 0;
+
 std::string	SbigCameraLocator::getName() const {
 	return std::string("sbig");
 }
@@ -101,25 +103,36 @@ SbigCameraLocator::SbigCameraLocator() {
 	pthread_mutexattr_init(&mta);
 	pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&sbigmutex, &mta);
-	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
-	if (e != CE_NO_ERROR) {
-		std::string	errmsg = sbig_error(e);
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open driver: %s",
-			errmsg.c_str());
-		throw SbigError(errmsg.c_str());
+
+	if (0 == driveropen) {
+		short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
+		if (e != CE_NO_ERROR) {
+			std::string	errmsg = sbig_error(e);
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot open driver: %s",
+				errmsg.c_str());
+			throw SbigError(errmsg.c_str());
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "driver opened: %hd", e);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "driver already open");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver opened: %hd", e);
+	driveropen++;
 }
 
 SbigCameraLocator::~SbigCameraLocator() {
-	short	e = SBIGUnivDrvCommand(CC_CLOSE_DRIVER, NULL, NULL);
-	if (e != CE_NO_ERROR) {
-		std::string	errmsg = sbig_error(e);
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot close driver: %s",
-			errmsg.c_str());
-		throw SbigError(errmsg.c_str());
+	if (0 == --driveropen) {
+		short	e = SBIGUnivDrvCommand(CC_CLOSE_DRIVER, NULL, NULL);
+		if (e != CE_NO_ERROR) {
+			std::string	errmsg = sbig_error(e);
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot close driver: %s",
+				errmsg.c_str());
+			throw SbigError(errmsg.c_str());
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d remaining driver references",
+			driveropen);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "driver closed: %hd", e);
 }
 
 /**

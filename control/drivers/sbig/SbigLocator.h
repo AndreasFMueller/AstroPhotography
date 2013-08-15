@@ -24,6 +24,7 @@ namespace sbig {
  * an adapter class to the CameraLocator class.
  */
 class SbigCameraLocator : public DeviceLocator {
+	static int	driveropen;
 public:
 	SbigCameraLocator();
 	virtual ~SbigCameraLocator();
