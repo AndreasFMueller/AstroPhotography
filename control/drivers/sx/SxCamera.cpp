@@ -173,7 +173,7 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Imaging CCD info");
 	unsigned int	width = params.width;
 	unsigned int	height = params.height;
-	if (model != SX_MODEL_M26C) {
+	if (model == SX_MODEL_M26C) {
 		height *= 2;
 	}
 	CcdInfo	ccd0("Imaging", ImageSize(width, height), 0);
