@@ -1,10 +1,10 @@
 /*
- * DriverModule.cpp -- Driver module implementation
+ * DriverModule_impl.cpp -- Driver module implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "DriverModule.h"
-#include "DeviceLocator.h"
+#include "DriverModule_impl.h"
+#include "DeviceLocator_impl.h"
 #include <AstroDebug.h>
 
 namespace Astro {

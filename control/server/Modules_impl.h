@@ -1,10 +1,10 @@
 /*
- * Modules.h -- Modules servant implementation
+ * Modules_impl.h -- Modules servant implementation
  *
  * (c) Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _Modules_h
-#define _Modules_h
+#ifndef _Modules_impl_h
+#define _Modules_impl_h
 
 #include <../idl/device.hh>
 #include <AstroLoader.h>
@@ -25,4 +25,4 @@ public:
 
 } // namespace Astro
 
-#endif /* _Modules_h */
+#endif /* _Modules_impl_h */

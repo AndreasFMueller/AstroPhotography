@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <omniORB4/CORBA.h>
-#include "Modules.h"
+#include "Modules_impl.h"
 #include "../idl/NameService.h"
 
 namespace astro {

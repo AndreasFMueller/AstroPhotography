@@ -6,13 +6,19 @@
 #
 bin_PROGRAMS = astrod
 
-EXTRA_DIST = Modules.h DriverModule.h DeviceLocator.h
+EXTRA_DIST = Modules_impl.h DriverModule_impl.h DeviceLocator_impl.h \
+	Camera_impl.h Ccd_impl.h GuiderPort_impl.h
 
 ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
 
-astrod_SOURCES = Modules.cpp DriverModule.cpp DeviceLocator.cpp astrod.cpp
-astrod_DEPENDENCIES = ../lib/libastro.la
-astrod_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@  $(ORBLDFLAGS)
+noinst_LTLIBRARIES = libserver.la
+libserver_la_SOURCES = Modules_impl.cpp DriverModule_impl.cpp \
+	DeviceLocator_impl.cpp Camera_impl.cpp Ccd_impl.cpp \
+	GuiderPort_impl.cpp
+
+astrod_SOURCES = astrod.cpp
+astrod_DEPENDENCIES = ../lib/libastro.la libserver.la
+astrod_LDADD = libserver.la -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@  $(ORBLDFLAGS)
 
 test:	astrod
 	./astrod -d -ORBInitRef NameService=corbaname::localhost

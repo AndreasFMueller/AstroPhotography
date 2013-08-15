@@ -1,11 +1,11 @@
 /*
- * Modules.cpp -- Modules servant implementation
+ * Modules_impl.cpp -- Modules servant implementation
  *
  * (c) Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <../idl/device.hh>
-#include "Modules.h"
-#include "DriverModule.h"
+#include "Modules_impl.h"
+#include "DriverModule_impl.h"
 #include <AstroLoader.h>
 #include <AstroDebug.h>
 

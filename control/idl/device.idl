@@ -1,5 +1,58 @@
 
 module Astro {
+	struct ImagePoint {
+		long	x;
+		long	y;
+	};
+	struct ImageSize {
+		long	width;
+		long	height;
+	};
+	struct ImageRectangle {
+		ImagePoint	origin;
+		ImageSize	size;
+	};
+	struct BinningMode {
+		long	x;
+		long	y;
+	};
+	typedef sequence<BinningMode>	BinningSet;
+	struct CcdInfo {
+		string	name;
+		long	id;
+		BinningSet	binningmodes;
+		boolean	shutter;
+	};
+
+	struct Exposure {
+		ImageRectangle	frame;
+		float	exposuretime;
+		float	gain;
+		float	limit;
+/*
+		enum Shutter { CLOSED, OPEN };
+		Shutter	shutter_state;
+		enum State { idle, exposing, exposed, cancelling };
+		BinningMode	mode;
+*/
+	};
+
+	interface GuiderPort {
+		void	activate(in float ra, in float dec);
+	};
+
+	interface Ccd {
+		boolean	hasGain();
+		boolean	hasCooler();
+	};
+
+	interface Camera {
+		//CcdInfo info;
+		long	nCcds();
+		string	getName();
+		boolean	hasFilerWheel();
+		boolean	hasGuiderPort();
+	};
 
 	interface DeviceLocator {
 		string	getName();

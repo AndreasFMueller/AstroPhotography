@@ -1,10 +1,10 @@
 /*
- * DriverModule.h -- Driver Module C++ interface
+ * DriverModule_impl.h -- Driver Module C++ interface
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _DriverModule_h
-#define _DriverModule_h
+#ifndef _DriverModule_impl_h
+#define _DriverModule_impl_h
 
 #include <../idl/device.hh>
 #include <AstroLoader.h>
@@ -25,4 +25,4 @@ public:
 
 } // namespace Astro
 
-#endif /* _DriverModule_h */
+#endif /* _DriverModule_impl_h */
