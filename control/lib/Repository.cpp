@@ -160,6 +160,7 @@ ModulePtr	Repository::getModule(const std::string& modulename) throw(repository_
 		if (modulecache.find(modulename) == modulecache.end()) {
 			ModulePtr	module(new Module(_path, modulename));
 			modulecache.insert(std::make_pair(modulename, module));
+			return module;
 		} else {
 			return modulecache.find(modulename)->second;
 		}

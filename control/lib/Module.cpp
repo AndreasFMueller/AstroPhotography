@@ -153,7 +153,9 @@ void	Module::open() {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "really loading now");
-	//dlerror(); // clear error conditions
+
+	dlerror(); // clear error conditions
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
 	handle = dlopen(dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {

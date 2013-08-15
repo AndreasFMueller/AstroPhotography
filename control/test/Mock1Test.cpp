@@ -49,6 +49,7 @@ void	Mock1Test::testMock1() {
 	ModulePtr	module = repository->getModule("mock1");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got module");
 	module->open();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "module open");
 	DeviceLocatorPtr	cl = module->getDeviceLocator();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get DeviceLocator");
 	std::vector<std::string>	cameras = cl->getDevicelist();
