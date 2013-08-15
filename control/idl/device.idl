@@ -41,6 +41,12 @@ module Astro {
 		void	activate(in float ra, in float dec);
 	};
 
+	interface FilterWheel {
+		long	nFilters();
+		long	currentPosition();
+		void	select(in long position);
+	};
+
 	interface Ccd {
 		boolean	hasGain();
 		boolean	hasCooler();
