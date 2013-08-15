@@ -6,8 +6,15 @@
  */
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <AstroDebug.h>
 
 int	main(int argc, char *argv[]) {
+	int	c;
+	while (EOF != (c = getopt(argc, argv, "d")))
+		switch (c) {
+		case 'd':
+			debuglevel = LOG_DEBUG;
+		}
 	CppUnit::TextUi::TestRunner	runner;
 	CppUnit::TestFactoryRegistry	&registry = CppUnit::TestFactoryRegistry::getRegistry();
 	runner.addTest(registry.makeTest());

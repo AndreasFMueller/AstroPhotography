@@ -18,6 +18,7 @@
 using namespace astro::image;
 using namespace astro::image::filter;
 using namespace astro::io;
+using namespace astro::camera;
 
 namespace astro {
 namespace camera {
@@ -81,7 +82,8 @@ void	sxtest::testList() {
 
 void	sxtest::testCooler() {
 	std::vector<std::string>	cameras = locator->getDevicelist();
-	CameraPtr	camera = locator->getCamera(*cameras.begin());
+	std::string	cameraname = *cameras.begin();
+	CameraPtr	camera = locator->getCamera(cameraname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd");
 	CcdPtr	ccd = camera->getCcd(0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got CCD");

@@ -8,6 +8,7 @@
 #define _AstroCamera_h
 
 #include <AstroImage.h>
+#include <AstroDevice.h>
 #include <vector>
 #include <set>
 #include <stdint.h>
@@ -223,9 +224,8 @@ typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
 class GuiderPort;
 typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
 
-class	Camera {
+class	Camera : public astro::device::Device {
 protected:
-	std::string	name;
 	std::vector<CcdInfo>	ccdinfo;
 public:
 	Camera(const std::string& name);
@@ -234,9 +234,6 @@ public:
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
 	virtual CcdPtr	getCcd(size_t ccdid) = 0;
-
-	// access to name
-	const std::string&	getName() const;
 
 	// handling the filter wheel
 	bool	hasFilterWheel() const { return false; }
@@ -278,7 +275,7 @@ public:
  * Some Cameras have an included filter wheel, while in other cases
  * the filter wheel is controlled by a different driver
  */
-class FilterWheel {
+class FilterWheel : public astro::device::Device {
 public:
 	FilterWheel();
 	virtual ~FilterWheel();
@@ -291,7 +288,7 @@ public:
 /**
  * \brief Abstraction for the Guider port
  */
-class GuiderPort {
+class GuiderPort : public astro::device::Device {
 public:
 	GuiderPort();
 	virtual ~GuiderPort();

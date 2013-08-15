@@ -58,7 +58,7 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	name = stringprintf("sbig:%s/%s", results.usbInfo[usbno].serialNumber,
+	_name = stringprintf("sbig:%s/%s", results.usbInfo[usbno].serialNumber,
 		results.usbInfo[usbno].name);
 
 	// open the device

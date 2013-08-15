@@ -27,8 +27,9 @@ public:
 	virtual ~UnicapCameraLocator();
 	virtual std::string	getName() const;
 	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
-	virtual CameraPtr	getCamera(const std::string& name);
-	virtual CameraPtr	getCamera(size_t index);
+protected:
+	virtual CameraPtr	getCamera0(const std::string& name);
+public:
 	virtual std::string	getVersion() const;
 };
 

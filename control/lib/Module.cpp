@@ -121,6 +121,8 @@ Module::Module(const std::string& _dirname, const std::string& modulename)
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::domain_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s created from file %s",
+		modulename.c_str(), dlname.c_str());
 }
 
 /**
@@ -145,10 +147,13 @@ bool	Module::operator==(const Module& other) const {
  * use. This method must be called before any module functions can be called.
  */
 void	Module::open() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening module");
 	if (isloaded()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "already open");
 		return;
 	}
-	dlerror(); // clear error conditions
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "really loading now");
+	//dlerror(); // clear error conditions
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "loading library %s", dlname.c_str());
 	handle = dlopen(dlname.c_str(), RTLD_NOW);
 	if (NULL == handle) {
@@ -178,6 +183,8 @@ void	Module::close() {
  * \brief Get a pointer to given symbol
  */
 void	*Module::getSymbol(const std::string& symbolname) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lookin up symbol %s",
+		symbolname.c_str());
 	// make sure the module is already loaded
 	if (!isloaded()) {
 		std::string	msg = stringprintf("module %s not open",
@@ -223,14 +230,21 @@ ModuleDescriptorPtr	Module::getDescriptor() const {
  * named getDeviceLocator with C linkage which returns a pointer to
  * a DeviceLocator object for this to work.
  */
-DeviceLocatorPtr	Module::getDeviceLocator() const {
+DeviceLocatorPtr	Module::getDeviceLocator() {
+	// if we have retrieved the device locator before, we can just
+	// return it
+	if (devicelocator) {
+		return devicelocator;
+	}
+
+	// get the the device locator symbol
 	void	*s = getSymbol(std::string("getDeviceLocator"));
 
-	// now cast the symbol to a function that returns a descriptor
-	// pointer
+	// now cast the symbol to a function that returns a descriptor pointer
 	typedef DeviceLocator	*(*getter)();
 	DeviceLocator	*c = ((getter)s)();
-	return DeviceLocatorPtr(c);
+	devicelocator = DeviceLocatorPtr(c);
+	return devicelocator;
 }
 
 } // namespace module

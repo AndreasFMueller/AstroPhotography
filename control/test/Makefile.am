@@ -16,7 +16,7 @@ LDADD = -lcppunit -L../lib -lastro
 DEPENDENCIES = ../lib/libastro.a
 
 all-am: tests
-	./tests
+	./tests -d
 
 test:	postinstall_tests
 	./postinstall_tests

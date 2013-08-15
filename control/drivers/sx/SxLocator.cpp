@@ -130,7 +130,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceLocator::device_ty
  * \param name		Name of the camera
  * \return Camera with that name
  */
-CameraPtr	SxCameraLocator::getCamera(const std::string& name) {
+CameraPtr	SxCameraLocator::getCamera0(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing '%s'", name.c_str());
 	// parse the name string
 	int	busnumber, deviceaddress;
@@ -149,34 +149,6 @@ CameraPtr	SxCameraLocator::getCamera(const std::string& name) {
 		}
 	}
 	throw SxError("cannot create a camera from a name");
-}
-
-/**
- * \brief Get a camera pointer.
- *
- * This method assumes that the context always returns the connected
- * starlight express devices in the same order, so that the index
- * into the list of starlight express devices uniquely specifies a
- * camera.
- * \param index		index of the camera:
- * \return Camera with that index
- */
-CameraPtr	SxCameraLocator::getCamera(size_t index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "open device %d as SX camera", index);
-	size_t	counter = 0;
-	std::vector<DevicePtr>	d = context.devices();
-	std::vector<DevicePtr>::const_iterator	i;
-	for (i = d.begin(); i != d.end(); i++) {
-		DeviceDescriptorPtr	descriptor = (*i)->descriptor();
-		if (SX_VENDOR_ID == descriptor->idVendor()) {
-			if (index == counter) {
-				DevicePtr	dptr = (*i);
-				return CameraPtr(new SxCamera(dptr));
-			}
-			counter++;
-		}
-	}
-	throw SxError("cannot create a camera from an index");
 }
 
 } // namespace sx

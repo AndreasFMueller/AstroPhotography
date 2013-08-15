@@ -105,7 +105,7 @@ std::vector<std::string>	UvcCameraLocator::getDevicelist(DeviceLocator::device_t
 	return cameras;
 }
 
-CameraPtr	UvcCameraLocator::getCamera(const std::string& name) {
+CameraPtr	UvcCameraLocator::getCamera0(const std::string& name) {
 	// extract the vendor id and the product id from the name and
 	// open the device for it
 	unsigned int	vendor, product;
@@ -123,26 +123,6 @@ CameraPtr	UvcCameraLocator::getCamera(const std::string& name) {
 			&& (product == descriptor->idProduct())) {
 			return CameraPtr(new UvcCamera(deviceptr));
 		}
-	}
-	throw UvcError("device not found");
-}
-
-CameraPtr	UvcCameraLocator::getCamera(size_t index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
-	std::vector<DevicePtr>	devices = context.devices();
-	std::vector<DevicePtr>::iterator	i;
-	unsigned int	counter = 0;
-	for (i = devices.begin(); i != devices.end(); i++) {
-		DevicePtr	deviceptr = *i;
-		deviceptr->open();
-		if (deviceptr->isVideoDevice()) {
-			if (index == counter) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "camera found");
-				return CameraPtr(new UvcCamera(deviceptr));
-			}
-			counter++;
-		}
-		deviceptr->close();
 	}
 	throw UvcError("device not found");
 }

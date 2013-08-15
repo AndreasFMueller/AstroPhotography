@@ -6,24 +6,18 @@
 #ifndef _AstroDevice_h
 #define _AstroDevice_h
 
-#include <AstroCamera.h>
+#include <string>
 
 namespace astro {
 namespace device {
 
-class   DeviceLocator {
+class Device {
+protected:
+	std::string	_name;
 public:
-	DeviceLocator();
-	virtual ~DeviceLocator();
-	virtual std::string	getName() const;
-	virtual std::string	getVersion() const;
-	typedef enum device_type { CAMERA, FOCUSER, GUIDERPORT } device_type;
-	virtual std::vector<std::string>	getDevicelist(
-		device_type device = CAMERA);
-	virtual astro::camera::CameraPtr	getCamera(const std::string& name);
-	virtual astro::camera::GuiderPortPtr	getGuiderPort(const std::string& name);
+	Device(const std::string& name = "") : _name(name) { }
+	const std::string&	getName() const { return _name; }
 };
-typedef std::tr1::shared_ptr<DeviceLocator>	DeviceLocatorPtr;
 
 } // namespace device
 } // namespace astro

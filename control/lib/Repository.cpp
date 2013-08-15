@@ -155,9 +155,14 @@ bool	Repository::contains(const std::string& modulename) const {
  *				has a corrupt .la file or the code file
  *				is missing.
  */
-ModulePtr	Repository::getModule(const std::string& modulename) const throw(repository_error) {
+ModulePtr	Repository::getModule(const std::string& modulename) throw(repository_error) {
 	try {
-		return ModulePtr(new Module(_path, modulename));
+		if (modulecache.find(modulename) == modulecache.end()) {
+			ModulePtr	module(new Module(_path, modulename));
+			modulecache.insert(std::make_pair(modulename, module));
+		} else {
+			return modulecache.find(modulename)->second;
+		}
 	} catch (std::exception& x) {
 		throw repository_error(x.what());
 	}

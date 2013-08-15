@@ -31,8 +31,8 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual	std::vector<std::string>	getDevicelist(device_type device = CAMERA);
-	virtual CameraPtr	getCamera(const std::string& name);
-	virtual CameraPtr	getCamera(size_t index);
+protected:
+	virtual CameraPtr	getCamera0(const std::string& name);
 };
 
 /**

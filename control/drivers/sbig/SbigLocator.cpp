@@ -175,7 +175,7 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_
  * has the right name. This index is then used to retreive the camera object
  * by number.
  */
-CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
+CameraPtr	SbigCameraLocator::getCamera0(const std::string& name) {
 	std::vector<std::string>	cameras = getDevicelist();
 	std::vector<std::string>::const_iterator	i;
 	size_t	index = 0;
@@ -187,14 +187,6 @@ CameraPtr	SbigCameraLocator::getCamera(const std::string& name) {
 	std::string	msg = stringprintf("camera %s not found", name.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
-}
-
-/**
- * \brief Get a camera by number
- */
-CameraPtr	SbigCameraLocator::getCamera(size_t index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening camera %d", index);
-	return CameraPtr(new SbigCamera(index));
 }
 
 } // namespace sbig

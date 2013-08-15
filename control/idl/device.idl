@@ -1,22 +1,28 @@
 
 module Astro {
+
 	struct ImagePoint {
 		long	x;
 		long	y;
 	};
+
 	struct ImageSize {
 		long	width;
 		long	height;
 	};
+
 	struct ImageRectangle {
 		ImagePoint	origin;
 		ImageSize	size;
 	};
+
 	struct BinningMode {
 		long	x;
 		long	y;
 	};
+
 	typedef sequence<BinningMode>	BinningSet;
+
 	struct CcdInfo {
 		string	name;
 		long	id;

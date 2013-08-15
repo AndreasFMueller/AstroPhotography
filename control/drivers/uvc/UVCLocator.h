@@ -7,7 +7,7 @@
 #define _UvcLocator_h
 
 #include <AstroUSB.h>
-#include <AstroDevice.h>
+#include <AstroLocator.h>
 #include <AstroCamera.h>
 
 using namespace astro::usb;
@@ -31,8 +31,8 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
-	virtual CameraPtr	getCamera(const std::string& name);
-	virtual CameraPtr	getCamera(size_t index);
+protected:
+	CameraPtr	getCamera0(const std::string& name);
 };
 
 } // namespace uvc

@@ -3,7 +3,10 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller,
  */
-#include <AstroDevice.h>
+#include <AstroLocator.h>
+#include <AstroCamera.h>
+
+using namespace astro::camera;
 
 namespace astro {
 namespace device {
@@ -27,12 +30,42 @@ std::vector<std::string>	DeviceLocator::getDevicelist(device_type device) {
 	return devices;
 }
 
+astro::camera::CameraPtr	DeviceLocator::getCamera0(const std::string& name) {
+	throw std::runtime_error("cameras not implemented");
+}
+
+astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort0(const std::string& name) {
+	throw std::runtime_error("guiderport not implemented");
+}
+
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
-	throw std::runtime_error("base class does not implement cameras");
+	CameraPtr	camera;
+	if (cameracache.find(name) == cameracache.end()) {
+		camera = this->getCamera0(name);
+		cameracache.insert(std::make_pair(name, camera));
+	} else {
+		camera = cameracache.find(name)->second;
+	}
+	return camera;
+}
+
+astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
+	std::vector<std::string>	cameras = this->getDevicelist();
+	if (index >= cameras.size()) {
+		throw std::runtime_error("cannot create a camera from an index");
+	}
+	return getCamera(cameras[index]);
 }
 
 astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& name) {
-	throw std::runtime_error("base class does not implement guider ports");
+	GuiderPortPtr	guiderport;
+	if (guiderportcache.find(name) == guiderportcache.end()) {
+		guiderport = this->getGuiderPort0(name);
+		guiderportcache.insert(std::make_pair(name, guiderport));
+	} else {
+		guiderport = guiderportcache.find(name)->second;
+	}
+	return guiderport;
 }
 
 } // namespace device

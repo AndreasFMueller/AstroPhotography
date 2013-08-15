@@ -45,10 +45,14 @@ void	Mock1Test::tearDown() {
 }
 
 void	Mock1Test::testMock1() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mock1Test begin");
 	ModulePtr	module = repository->getModule("mock1");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got module");
 	module->open();
 	DeviceLocatorPtr	cl = module->getDeviceLocator();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get DeviceLocator");
 	std::vector<std::string>	cameras = cl->getDevicelist();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %d devices", cameras.size());
 	CPPUNIT_ASSERT(cameras.size() == 10);
 	CameraPtr	camera = cl->getCamera("mock1-5");
 	// for every CCD, take an image
@@ -70,6 +74,7 @@ void	Mock1Test::testMock1() {
 				image->size().width(), image->size().height());
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mock1Test end");
 }
 
 } // namespace test

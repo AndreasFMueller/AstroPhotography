@@ -31,6 +31,6 @@ std::vector<std::string>	UnicapCameraLocator::getDevicelist(DeviceLocator::devic
 	return cameras;
 }
 
-CameraPtr	UnicapCameraLocator::getCamera(const std::string& name) {
+CameraPtr	UnicapCameraLocator::getCamera0(const std::string& name) {
 	return CameraPtr();
 }

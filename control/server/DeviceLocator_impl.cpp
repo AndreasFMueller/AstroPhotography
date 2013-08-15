@@ -59,17 +59,24 @@ GuiderPort_ptr	DeviceLocator_impl::getGuiderPort(const char *name) {
 	return gp->_this();
 }
 
+/**
+ * \brief
+ */
 Camera_ptr	DeviceLocator_impl::getCamera(const char *name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera %s", name);
 	// find out whether this guider port has already been retrieved
 	std::string	cameraname(name);
 	astro::camera::CameraPtr	camera;
-	if (cameramap.find(cameraname) != cameramap.end()) {
+	if (cameramap.find(cameraname) == cameramap.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new camera: %s", name);
 		camera = _locator->getCamera(cameraname);
 		cameramap.insert(std::make_pair(cameraname, camera));
 	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %s already open", name);
 		camera = cameramap.find(cameraname)->second;
 	}
 	Camera_impl	*c = new Camera_impl(camera);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created camera at %p", c);
 	return c->_this();
 }
 

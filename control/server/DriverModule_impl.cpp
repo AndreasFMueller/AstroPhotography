@@ -9,12 +9,18 @@
 
 namespace Astro {
 
+/**
+ * \brief Get the name of the module
+ */
 char	*DriverModule_impl::getName() {
 	char	*result = strdup(_module->modulename().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning module name %s", result);
 	return result;
 }
 
+/**
+ * \brief Get the module descriptor
+ */
 Descriptor	*DriverModule_impl::getDescriptor() {
 	Descriptor	*result = new Descriptor();
 	result->name = strdup(_module->getDescriptor()->name().c_str());
@@ -23,12 +29,12 @@ Descriptor	*DriverModule_impl::getDescriptor() {
 	return result;
 }
 
+/**
+ * \brief Get the DeviceLocator
+ */
 DeviceLocator_ptr	DriverModule_impl::getDeviceLocator() {
-	if (!_devicelocator) {
-		_devicelocator = _module->getDeviceLocator();
-	}
-
-	DeviceLocator_impl	*dl = new DeviceLocator_impl(_devicelocator);
+	DeviceLocator_impl	*dl
+		= new DeviceLocator_impl(_module->getDeviceLocator());
 	
 	return dl->_this();
 }

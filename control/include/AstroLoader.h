@@ -9,7 +9,7 @@
 #define _AstroLoader_h
 
 #include <AstroCamera.h>
-#include <AstroDevice.h>
+#include <AstroLocator.h>
 
 #include <string>
 #include <vector>
@@ -72,6 +72,7 @@ class	Module {
 	bool	dlfileexists() const;
 	Module(const std::string& dirname, const std::string& modulename);
 	void	*getSymbol(const std::string& symbolname) const;
+	astro::device::DeviceLocatorPtr	devicelocator;
 public:
 	bool	operator==(const Module& other) const;
 	const std::string&	filename() const;
@@ -81,7 +82,7 @@ public:
 	void	close();
 	static bool	dlclose_on_close;
 	ModuleDescriptorPtr	getDescriptor() const;
-	astro::device::DeviceLocatorPtr	getDeviceLocator() const;
+	astro::device::DeviceLocatorPtr	getDeviceLocator();
 	friend class Repository;
 	friend class ::astro::test::ModuleTest;
 };
@@ -122,6 +123,7 @@ public:
 class	Repository {
 	std::string	_path;
 	void	checkpath(const std::string& path) const throw(repository_error);
+	std::map<std::string, ModulePtr>	modulecache;
 public:
 	Repository() throw (repository_error);
 	Repository(const std::string& path) throw (repository_error);
@@ -129,7 +131,7 @@ public:
 	std::vector<std::string>	moduleNames() const;
 	std::vector<ModulePtr>	modules() const;
 	bool	contains(const std::string& modulename) const;
-	ModulePtr	getModule(const std::string& modulename) const
+	ModulePtr	getModule(const std::string& modulename) 
 		throw (repository_error);
 	const std::string&	path() const;
 };

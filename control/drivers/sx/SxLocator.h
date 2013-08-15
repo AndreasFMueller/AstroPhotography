@@ -6,7 +6,7 @@
 #ifndef _SxLocator_h
 #define _SxLocator_h
 
-#include <AstroDevice.h>
+#include <AstroLocator.h>
 #include <AstroCamera.h>
 #include <AstroUSB.h>
 
@@ -25,8 +25,8 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
-	virtual CameraPtr	getCamera(const std::string& name);
-	virtual CameraPtr	getCamera(size_t index);
+protected:
+	virtual CameraPtr	getCamera0(const std::string& name);
 };
 
 } // namespace sx
