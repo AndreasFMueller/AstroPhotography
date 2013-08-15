@@ -2,10 +2,22 @@
 module Astro {
 
 	interface DeviceLocator {
+		string	getName();
+		string	getVersion();
+		typedef sequence<string>	DeviceNameList;
+		enum device_type { CAMERA, FOCUSER, GUIDERPORT };
+		DeviceNameList	getDevicelist(in device_type devicetype);
+	};
+
+	struct Descriptor {
+		string name;
+		string version;
 	};
 
 	interface DriverModule {
+		Descriptor	getDescriptor();
 		string	getName();
+		DeviceLocator	getDeviceLocator();
 	};
 
 	interface Modules {

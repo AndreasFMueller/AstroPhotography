@@ -105,6 +105,8 @@ bool	Module::dlfileexists() const {
  */
 Module::Module(const std::string& _dirname, const std::string& modulename)
 	: dirname(_dirname), _modulename(modulename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating module %s",
+		_modulename.c_str());
 	// NULL handle means module has not been loaded yet
 	handle = NULL;
 

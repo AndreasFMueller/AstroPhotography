@@ -45,17 +45,14 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	astro::module::ModulePtr	result;
 	// find out whether this module was already loaded
 	modulemap_t::const_iterator	i = modulemap.find(name);
-	if (modulemap.find(name) == modulemap.end()) {
+	if (modulemap.find(name) != modulemap.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s in cache", _name);
 		result = i->second;
 	} else {
 		// load the module and put the module pointer into the map
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new module %s", _name);
 		result = repository.getModule(name);
 		modulemap.insert(make_pair(name, result));
-	}
-
-	// check whether we now have a module
-	if (!result) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no module loaded");
 	}
 
 	// turn the ModulePtr into an object reference

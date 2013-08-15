@@ -56,11 +56,15 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// get the sx module
-#if 0
 	Astro::DriverModule_var	drivermodule = modules->getModule("sx");
 	std::cout << "module loaded: " << std::string(drivermodule->getName())
 		<< std::endl;
-#endif
+
+	// get the device locator
+	Astro::DeviceLocator_var	devicelocator
+		= drivermodule->getDeviceLocator();
+	std::cout << "module: " << devicelocator->getName() << ", version: "
+		<< devicelocator->getVersion() << std::endl;
 
 	// that's it, we are done
 	exit(EXIT_SUCCESS);

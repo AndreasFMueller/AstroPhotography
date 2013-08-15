@@ -6,11 +6,11 @@
 #
 bin_PROGRAMS = astrod
 
-EXTRA_DIST = Modules.h
+EXTRA_DIST = Modules.h DriverModule.h DeviceLocator.h
 
 ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
 
-astrod_SOURCES = Modules.cpp DriverModule.cpp astrod.cpp
+astrod_SOURCES = Modules.cpp DriverModule.cpp DeviceLocator.cpp astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la
 astrod_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@  $(ORBLDFLAGS)
 
