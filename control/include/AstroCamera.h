@@ -31,15 +31,10 @@ class	Binning {
 	unsigned int	x;
 	unsigned int	y;
 public:
-	static const unsigned int	wildcard;
 	Binning(unsigned int _x = 1, unsigned int _y = 1) : x(_x), y(_y) { }
 	Binning(const Binning& other) : x(other.x), y(other.y) { }
-	bool	iswildcard() const;
-	bool	isXwildcard() const;
-	bool	isYwildcard() const;
 	bool	operator==(const Binning& other) const;
-	int	operator<(const Binning& other) const;
-	bool	compatible(const Binning& other) const;
+	bool	operator<(const Binning& other) const;
 	unsigned int	getX() const { return x; }
 	unsigned int	getY() const { return y; }
 	virtual std::string	toString() const;
