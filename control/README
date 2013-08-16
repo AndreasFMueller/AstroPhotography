@@ -39,6 +39,9 @@ Mandatory packages:
    problems for relatively large numbers of equations or unknowns need to
    be solved. For these operations, LAPACK is used.
 
+ - omniORB: The client-server-communication uses Corba, and the build system
+   assumes that omniORB is preinstalled for the purpose.
+
 Optional packages:
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
