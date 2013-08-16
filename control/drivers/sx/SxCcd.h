@@ -59,7 +59,8 @@ public:
 		throw (not_implemented);
 	virtual ImagePtr	getImage() throw (not_implemented);
 	virtual bool	hasCooler() const;
-	virtual CoolerPtr	getCooler() throw (not_implemented);
+protected:
+	virtual CoolerPtr	getCooler0() throw (not_implemented);
 };
 
 /**

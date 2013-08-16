@@ -293,7 +293,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 /**
  * \brief Get a Cooler object, if the CCD has a TEC cooler
  */
-CoolerPtr	SbigCcd::getCooler() throw (not_implemented) {
+CoolerPtr	SbigCcd::getCooler0() throw (not_implemented) {
 	return CoolerPtr(new SbigCooler(camera));
 }
 

@@ -28,15 +28,18 @@ public:
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
 
+	// shutter interface
 	virtual shutter_state	getShutterState() throw(not_implemented);
 	virtual void	setShutterState(const shutter_state& state)
 		throw(not_implemented);
 
 	virtual	ImagePtr	getImage() throw(not_implemented);
 
+	// cooler interface
 	virtual bool	hasCooler() { return cooler; }
 	void	setCooler(bool _cooler) { cooler = _cooler; }
-	virtual CoolerPtr	getCooler() throw(not_implemented);
+protected:
+	virtual CoolerPtr	getCooler0() throw(not_implemented);
 };
 
 } // namespace sbig

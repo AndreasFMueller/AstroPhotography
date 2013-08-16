@@ -190,9 +190,19 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount)
 }
 
 /**
- * \brief Retrieve a cooler
+ * \brief Retrieve Cooler, using the cache if retrieved befor
  */
 CoolerPtr	Ccd::getCooler() throw (not_implemented) {
+	if (!cooler) {
+		cooler = this->getCooler0();
+	}
+	return cooler;
+}
+
+/**
+ * \brief Retrieve a cooler
+ */
+CoolerPtr	Ccd::getCooler0() throw (not_implemented) {
 	throw not_implemented("thermoelectric cooler not implemented");
 }
 

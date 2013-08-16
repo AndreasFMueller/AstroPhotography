@@ -45,7 +45,7 @@ bool	SxCcd::hasCooler() const {
  * This method builds a SxCooler objects and wraps in a CoolerPtr smart
  * pointer.
  */
-CoolerPtr	SxCcd::getCooler() throw (not_implemented) {
+CoolerPtr	SxCcd::getCooler0() throw (not_implemented) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for cooler");
 	try {
 		return camera.getCooler(ccdindex);

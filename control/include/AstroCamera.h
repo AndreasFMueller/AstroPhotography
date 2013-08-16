@@ -197,8 +197,13 @@ public:
 		throw (not_implemented);
 
 	// handling the cooler
+private:
+	CoolerPtr	cooler;
+protected:
+	virtual CoolerPtr	getCooler0() throw (not_implemented);
+public:
 	virtual bool	hasCooler() const { return false; }
-	virtual CoolerPtr	getCooler() throw (not_implemented);
+	CoolerPtr	getCooler() throw (not_implemented);
 
 	// methods related to metadata
 	virtual void	addExposureMetadata(astro::image::ImageBase& image) const;
