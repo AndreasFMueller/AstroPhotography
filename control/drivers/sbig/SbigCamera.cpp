@@ -283,6 +283,14 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
 }
 
 /**
+ * \brief find out whether the camera has a filter wheel
+ */
+bool	SbigCamera::hasFilterWheel() const {
+	// XXX that's not quite correct ;-)
+	return true;
+}
+
+/**
  * \brief Get the FilterWheel object
  *
  * If the camera has a filter wheel, this method returns a filter wheel
@@ -290,6 +298,14 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
  */
 FilterWheelPtr	SbigCamera::getFilterWheel0() throw (not_implemented) {
 	return FilterWheelPtr(new SbigFilterWheel(*this));
+}
+
+/**
+ * \brief find out whether the camera has a guider port
+ */
+bool	SbigCamera::hasGuiderPort() const {
+	// XXX that's not quite correct ;-)
+	return true;
 }
 
 /**

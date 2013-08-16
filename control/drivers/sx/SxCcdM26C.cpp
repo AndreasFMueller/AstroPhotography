@@ -293,8 +293,7 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
  *
  * \param exposure	exposure structure for the exposure to perform
  */
-void	SxCcdM26C::startExposure(const Exposure& exposure)
-		throw (not_implemented) {
+void	SxCcdM26C::startExposure0(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s requested",
 		exposure.toString().c_str());
 	// remember the exposre, we need it for the second field for the
@@ -320,7 +319,7 @@ void	SxCcdM26C::startExposure(const Exposure& exposure)
  * exposures). In the latter case, the first field is rescaled to account
  * for the different exposure time.
  */
-ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
+void	SxCcdM26C::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
 
 	// read the right number of pixels from the IN endpoint
@@ -373,20 +372,20 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 	}
 
 	// prepare a new image, this now needs binned pixels
-	Image<unsigned short>	*image = new Image<unsigned short>(
+	Image<unsigned short>	*_image = new Image<unsigned short>(
 		exposure.frame.size().width() / exposure.mode.getX(),
 		exposure.frame.size().height() /exposure.mode.getY());
-	image->setOrigin(exposure.frame.origin());
-	image->setMosaicType(MosaicType::BAYER_RGGB);
+	_image->setOrigin(exposure.frame.origin());
+	_image->setMosaicType(MosaicType::BAYER_RGGB);
 
 	// now we have to demultiplex the two fields
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "demultiplex the fields");
 	if (1 == exposure.mode.getX()) {
 		DemuxerUnbinned	demuxer;
-		demuxer(*image, *field0, *field1);
+		demuxer(*_image, *field0, *field1);
 	} else {
 		DemuxerBinned	demuxer;
-		demuxer(*image, *field0, *field1);
+		demuxer(*_image, *field0, *field1);
 	}
 
 	// remove the data
@@ -394,7 +393,8 @@ ImagePtr	SxCcdM26C::getImage() throw (not_implemented) {
 	delete field1;
 
 	// return the demultiplexed image
-	return ImagePtr(image);
+	image = ImagePtr(_image);
+	state = Exposure::exposed;
 }
 
 /**

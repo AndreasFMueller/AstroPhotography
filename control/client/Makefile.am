@@ -30,5 +30,5 @@ test:	astroinfo
 
 image:	getimage
 	./getimage -d -ORBInitRef NameService=corbaname::localhost \
-		-e 0.01  -m sx
+		-e 1  -m sx test.fits
 

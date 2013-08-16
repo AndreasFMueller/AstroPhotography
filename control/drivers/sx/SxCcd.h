@@ -10,6 +10,7 @@
 #include <SxDemux.h>
 #include <AstroImage.h>
 #include <AstroUtils.h>
+#include <pthread.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -48,16 +49,25 @@ public:
  * to handle these differences
  */
 class SxCcd : public Ccd {
+	// we need a separate thread that retrieves the image
+	pthread_t	thread;
 protected:
+	ImagePtr	image;
 	SxCamera&	camera;
 	int	ccdindex;
 public:
 	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();
-	virtual Exposure::State	exposureStatus() throw (not_implemented);
+protected:
+	virtual void	startExposure0(const Exposure& exposure);
+public:
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);
+	virtual void	getImage0();
+public:
 	virtual ImagePtr	getImage() throw (not_implemented);
+
+	// cooler stuff
 	virtual bool	hasCooler() const;
 protected:
 	virtual CoolerPtr	getCooler0() throw (not_implemented);
@@ -80,9 +90,8 @@ class SxCcdM26C : public SxCcd {
 public:
 	SxCcdM26C(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcdM26C();
-	virtual void	startExposure(const Exposure& exposure)
-		throw (not_implemented);
-	virtual ImagePtr	getImage() throw (not_implemented);
+	virtual void	startExposure0(const Exposure& exposure);
+	virtual void	getImage0();
 };
 
 } // namespace sx

@@ -29,6 +29,57 @@ SxCcd::~SxCcd() {
 }
 
 /**
+ * \brief Start Routine of the exposure thread
+ */
+void	*start_routine(void *arg) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
+	SxCcd	*ccd = (SxCcd *)arg;
+	ccd->getImage0();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");
+	return NULL;
+}
+
+/**
+ * \brief Start the exposure
+ *
+ * This method calls the "real" startExposure0 method and launches a thread
+ * that performs the getImage0 method which will retrieve the image. 
+ */
+void	SxCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
+	// if we are already exposing, we should not start a new exposure
+	if ((state != Exposure::idle) && (state != Exposure::exposed)) {
+		return;
+	}
+
+	// start the exposure
+	this->startExposure0(exposure);
+	state = Exposure::exposing;
+
+	// create a new thread
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
+	pthread_attr_t	attr;
+	pthread_attr_init(&attr);
+	pthread_create(&thread, &attr, start_routine, this);
+}
+
+/**
+ * \brief Get the exposed image
+ *
+ * This method is very simple as it only has to check whether the image has
+ * already been exposed.
+ */
+ImagePtr	SxCcd::getImage() throw(not_implemented) {
+	if (state != Exposure::exposed) {
+		// XXX bad things should happen
+		return ImagePtr();
+	}
+	void	*result = NULL;
+	pthread_join(thread, &result);
+	state = Exposure::idle;
+	return image;
+}
+
+/**
  * \brief Find out whether the Ccd has a cooler
  */
 bool	SxCcd::hasCooler() const {
@@ -56,22 +107,11 @@ CoolerPtr	SxCcd::getCooler0() throw (not_implemented) {
 }
 
 /**
- * \brief get the exposure status.
- *
- * This method does not query the actual camera status, but only the current
- * flag. So it may return a busy state although the exposure has long been
- * completed.
- */
-Exposure::State	SxCcd::exposureStatus() throw (not_implemented) {
-	return state;
-}
-
-/**
  * \brief Start an Exposure on a "normal" Starlight Express camera
  *
  * \param exposure	specification of the exposure to take
  */
-void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
+void	SxCcd::startExposure0(const Exposure& exposure) {
 	// remember the exposure
 	this->exposure = exposure;
 
@@ -110,7 +150,7 @@ void	SxCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
  * Starlight Express cameras always use 16 bit pixels, it is natural to
  * always produce 16 bit deep images.
  */
-ImagePtr	SxCcd::getImage() throw (not_implemented) {
+void	SxCcd::getImage0() {
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize(
 		exposure.frame.size().width() / exposure.mode.getX(),
@@ -130,23 +170,26 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 
 	// submit the transfer
 	camera.getDevicePtr()->submit(&transfer);
-
-	// now the camera is no longer busy, i.e. we have to reset the state
-	state = Exposure::idle;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received %d pixels", size);
 
 	// when the transfer completes, one can use the data for the image
-	Image<unsigned short>	*image
+	Image<unsigned short>	*_image
 		= new Image<unsigned short>(targetsize, data);
-	image->setOrigin(exposure.frame.origin());
+	_image->setOrigin(exposure.frame.origin());
 
+for (unsigned int x = 500; x < 510; x++) {
+	for (unsigned int y = 500; y < 510; y++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel[%u,%u] = %d",
+			x, y, _image->pixel(x, y));
+	}
+}
 	// if this is a color camera (which we can find out from the model
 	// of the camera), then we should add RGB information to the image
 	// but only in 1x1 binning mode
 	if ((camera.isColor()) && (exposure.mode == Binning())) {
-
 		// add bayer info, this depends on the subframe we are
 		// requesting
-		image->setMosaicType(
+		_image->setMosaicType(
 			(MosaicType::mosaic_type)(
 			MosaicType::BAYER_RGGB \
 				| ((exposure.frame.origin().x() % 2) << 1) \
@@ -156,24 +199,26 @@ ImagePtr	SxCcd::getImage() throw (not_implemented) {
 	// images are upside down, since our origin is always the lower
 	// left corner. Note that Hyperstar images are reversed!
 	FlipOperator<unsigned short>	f;
-	f(*image);
+	f(*_image);
 
 	// if the exposure requests a limiting function, we apply it now
 	if (exposure.limit < INFINITY) {
-		for (unsigned int offset = 0; offset < image->size().getPixels();
+		for (unsigned int offset = 0; offset < _image->size().getPixels();
 			offset++) {
-			unsigned short	pv = image->pixels[offset];
+			unsigned short	pv = _image->pixels[offset];
 			if (pv > exposure.limit) {
 				pv = exposure.limit;
 			}
-			image->pixels[offset] = pv;
+			_image->pixels[offset] = pv;
 		}
 	}
 
 	// add the metadata
-	addMetadata(*image);
+	addMetadata(*_image);
 
-	return ImagePtr(image);
+	image = ImagePtr(_image);
+	state = Exposure::exposed;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "status set to exposed");
 }
 
 } // namespace sx

@@ -21,7 +21,9 @@ void	Ccd_impl::startExposure(const Exposure& exp) {
 		exp.exposuretime
 	);
 	exposure.gain = exp.gain;
-	exposure.limit = exp.limit;
+	if (exp.limit > 0) {
+		exposure.limit = exp.limit;
+	}
 	exposure.mode = Binning(exp.mode.x, exp.mode.y);
 	switch (exp.shutter) {
 	case Astro::SHUTTER_CLOSED:

@@ -18,6 +18,15 @@ Camera::~Camera() {
 }
 
 /**
+ * \brief Default implementation of reset does nothing
+ *
+ * Most camera drivers cannot reset a camera, because camera vendors most
+ * often forgot this function.
+ */
+void	Camera::reset() {
+}
+
+/**
  * \brief Get the number of CCDs this camera has
  */
 unsigned int	Camera::nCcds() const {
@@ -67,6 +76,9 @@ FilterWheelPtr	Camera::getFilterWheel0() throw (not_implemented) {
  * \brief Get FilterWheel, using the cached object if available
  */
 FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
+	if (!this->hasFilterWheel()) {
+		throw not_implemented("cannot request filter wheel");
+	}
 	if (!filterwheel) {
 		filterwheel = this->getFilterWheel0();
 	}
@@ -84,6 +96,9 @@ GuiderPortPtr	Camera::getGuiderPort0() throw (not_implemented) {
  * \brief Get GuiderPort, using the cached object if available
  */
 GuiderPortPtr	Camera::getGuiderPort() throw (not_implemented) {
+	if (!this->hasGuiderPort()) {
+		throw not_implemented("cannot request guider port");
+	}
 	if (!guiderport) {
 		guiderport = this->getGuiderPort0();
 	}

@@ -17,6 +17,7 @@ public:
 	inline	Image_impl(astro::image::ImagePtr image) : _image(image) { }
 	virtual Astro::ImagePoint	origin();
 	virtual Astro::ImageSize	size();
+	virtual void	write(const char *filename, ::CORBA::Boolean overwrite);
 };
 
 } // namespace Astro

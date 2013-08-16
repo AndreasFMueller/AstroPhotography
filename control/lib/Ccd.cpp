@@ -237,8 +237,10 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding temperature metadata");
 	try {
 		// only if a cooler is available for this CCD
-		CoolerPtr	cooler = getCooler();
-		cooler->addTemperatureMetadata(image);
+		if (hasCooler()) {
+			CoolerPtr	cooler = getCooler();
+			cooler->addTemperatureMetadata(image);
+		}
 	} catch (not_implemented& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this CCD has no cooler");
 	}

@@ -198,12 +198,12 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 
 	// find out whether this camera has a guider port
 	if (ccd0request.data()->extra_capabilities & STAR2000_PORT) {
-		hasGuiderPort = true;
+		_hasGuiderPort = true;
 	} else {
-		hasGuiderPort = false;
+		_hasGuiderPort = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has guider port: %s",
-		(hasGuiderPort) ? "yes" : "no");
+		(_hasGuiderPort) ? "yes" : "no");
 
 	// try to get the same information from the second CCD, if there
 	// is one
@@ -237,6 +237,17 @@ SxCamera::~SxCamera() {
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot release: %s", x.what());
 	}
+}
+
+/**
+ * \brief Reset the SxCamera
+ */
+void	SxCamera::reset() {
+	EmptyRequest	resetrequest(
+		RequestBase::vendor_specific_type,
+		RequestBase::device_recipient, (uint16_t)0,
+		(uint8_t)SX_CMD_RESET, (uint16_t)0);
+	controlRequest(&resetrequest);
 }
 
 /**
@@ -376,7 +387,7 @@ CoolerPtr	SxCamera::getCooler(int ccdindex) {
  * \brief Get the guider port
  */
 GuiderPortPtr	SxCamera::getGuiderPort0() throw (not_implemented) {
-	if (!hasGuiderPort) {
+	if (!_hasGuiderPort) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no guide port");
 		throw std::runtime_error("this camera has no guider port");
 	}

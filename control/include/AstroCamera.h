@@ -162,7 +162,7 @@ typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
 class	Ccd {
 protected:
 	CcdInfo	info;
-	Exposure::State	state;
+	volatile Exposure::State	state;
 	float		setTemperature;
 	Exposure	exposure;
 	void	addBinning(const Binning& binning);
@@ -231,6 +231,7 @@ public:
 	Camera(const std::string& name);
 	Camera();
 	~Camera();
+	virtual void	reset();
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
 private:
@@ -246,8 +247,8 @@ private:
 protected:
 	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
 public:
+	virtual bool	hasFilterWheel() const { return false; }
 	FilterWheelPtr	getFilterWheel() throw (not_implemented);
-	bool	hasFilterWheel() const { return false; }
 
 	// handling the guider port
 private:
@@ -255,7 +256,7 @@ private:
 protected:
 	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
 public:
-	bool	hasGuiderPort() const { return false; }
+	virtual bool	hasGuiderPort() const { return false; }
 	GuiderPortPtr	getGuiderPort() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;

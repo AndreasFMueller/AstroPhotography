@@ -31,7 +31,9 @@ public:
 	virtual ~SbigCamera();
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
+	virtual bool	hasFilterWheel() const;
 	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
+	virtual bool	hasGuiderPort() const;
 	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
 	friend class SbigCcd;
 	friend class SbigFilterWheel;

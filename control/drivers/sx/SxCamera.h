@@ -27,7 +27,7 @@ class SxCamera : public Camera {
 	bool	useControlRequests;
 	sx_firmware_version_t	firmware_version;
 	bool	_hasCooler;
-	bool	hasGuiderPort;
+	bool	_hasGuiderPort;
 public:
 	// USB related methods
 	DevicePtr	getDevicePtr();
@@ -37,6 +37,9 @@ public:
 	// constructors
 	SxCamera(DevicePtr& devptr);
 	virtual ~SxCamera();
+
+	// reset
+	void	reset();
 
 	// ccd access
 protected:
@@ -48,6 +51,8 @@ public:
 	virtual CoolerPtr	getCooler(int ccdindex);
 
 	// guider port access
+public:
+	virtual bool	hasGuiderPort() const { return _hasGuiderPort; }
 protected:
 	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
 

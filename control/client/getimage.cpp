@@ -16,7 +16,8 @@
 namespace Astro {
 
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ]" << std::endl;
+	std::cout << "usage: " << progname << " [ options ] filename" << std::endl;
+	std::cout << "retrieve an image from the camera and save it under <filename>." << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -d             increase debug level" << std::endl;
 	std::cout << " -?             display this help message and exit"
@@ -117,6 +118,15 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		}
 
+	// there should be a remaining argument which we want to use as
+	// a file name
+	if (optind >= argc) {
+		std::cerr << "missing file name argument" << std::endl;
+		usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+	std::string	outfilename(argv[optind]);
+
         // get a reference to the naming service
         Astro::Naming::NameService      nameservice(orb);
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
@@ -194,7 +204,13 @@ int	main(int argc, char *argv[]) {
 	// start the exposure
 	ccd->startExposure(exposure);
 
-	// XXX wait until the state changes to exposed
+	// wait until the state changes to exposed
+	ExposureState	state = ccd->exposureStatus();
+	while (state == EXPOSURE_EXPOSING) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting");
+		usleep(100000);
+		state = ccd->exposureStatus();
+	}
 
 	// retrieve the image
 	Astro::Image_ptr	image = ccd->getImage();
@@ -207,6 +223,9 @@ int	main(int argc, char *argv[]) {
 	// process the image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %dx%d",
 		image->size().width, image->size().height);
+
+	// write the image
+	image->write(outfilename.c_str(), true);
 
 	return EXIT_SUCCESS;
 }

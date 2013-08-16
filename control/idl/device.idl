@@ -1,4 +1,6 @@
-
+//
+// device.idl 
+//
 module Astro {
 
 	struct ImagePoint {
@@ -66,6 +68,7 @@ module Astro {
 	interface Image {
 		ImageSize	size();
 		ImagePoint	origin();
+		void	write(in string filename, in boolean overwrite);
 	};
 
 	interface Ccd {
@@ -88,7 +91,7 @@ module Astro {
 
 	interface Camera {
 		string	getName();
-		//CcdInfo info;
+		// CcdInfo info;
 		long	nCcds();
 		CcdInfo	getCcdinfo(in long ccdid);
 		Ccd	getCcd(in long ccdid);
