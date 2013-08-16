@@ -31,17 +31,15 @@ module Astro {
 		boolean	shutter;
 	};
 
+	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
+
 	struct Exposure {
 		ImageRectangle	frame;
 		float	exposuretime;
 		float	gain;
 		float	limit;
-/*
-		enum Shutter { CLOSED, OPEN };
-		Shutter	shutter_state;
-		enum State { idle, exposing, exposed, cancelling };
+		ShutterState	shutter;
 		BinningMode	mode;
-*/
 	};
 
 	interface GuiderPort {
@@ -62,9 +60,22 @@ module Astro {
 		void	setOn(in boolean onoff);
 	};
 
-	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
+	enum ExposureState { EXPOSURE_IDLE, EXPOSURE_EXPOSING,
+		EXPOSURE_EXPOSED, EXPOSURE_CANCELLING };
+
+	interface Image {
+		ImageSize	size();
+		ImagePoint	origin();
+	};
 
 	interface Ccd {
+		void	startExposure(in Exposure exp);
+		ExposureState	exposureStatus();
+		void	cancelExposure();
+		Exposure	getExposure();
+
+		Image	getImage();
+
 		boolean	hasGain();
 
 		boolean	hasShutter();
