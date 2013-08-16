@@ -40,21 +40,13 @@ void	Exposure::addToImage(ImageBase& image) const {
 
 	// X binning
 	unsigned int	binning;
-	if (mode.isXwildcard()) {
-		binning = 0;
-	} else {
-		binning = mode.getX();
-	}
+	binning = mode.getX();
 	Metavalue	mvbinx(binning,
 		std::string("binning factor used on X axis"));
 	image.setMetadata(std::string("XBINNING"), mvbinx);
 
 	// Y binning
-	if (mode.isYwildcard()) {
-		binning = 0;
-	} else {
-		binning = mode.getY();
-	}
+	binning = mode.getY();
 	Metavalue	mvbiny(binning,
 		std::string("binning factor used on Y axis"));
 	image.setMetadata(std::string("YBINNING"), mvbiny);
