@@ -62,8 +62,14 @@ module Astro {
 		void	setOn(in boolean onoff);
 	};
 
+	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
+
 	interface Ccd {
 		boolean	hasGain();
+
+		boolean	hasShutter();
+		ShutterState	getShutterState();
+		void	setShutterState(in ShutterState state);
 
 		boolean	hasCooler();
 		Cooler	getCooler();
