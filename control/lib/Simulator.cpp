@@ -55,7 +55,7 @@ SimCamera::~SimCamera() {
 	pthread_mutex_destroy(&mutex);
 }
 
-CcdPtr	SimCamera::getCcd(size_t id) {
+CcdPtr	SimCamera::getCcd0(size_t id) {
 	return CcdPtr(new SimCcd(ccdinfo[0], *this));
 }
 
@@ -277,7 +277,7 @@ void	SimGuiderPort::activate(float raplus, float raminus, float decplus,
 	camera.activate(raplus, raminus, decplus, decminus);
 }
 
-GuiderPortPtr	SimCamera::getGuiderPort() throw (not_implemented) {
+GuiderPortPtr	SimCamera::getGuiderPort0() throw (not_implemented) {
 	return GuiderPortPtr(new SimGuiderPort(*this));
 }
 

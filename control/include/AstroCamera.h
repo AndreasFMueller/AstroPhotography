@@ -228,7 +228,12 @@ public:
 	~Camera();
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
-	virtual CcdPtr	getCcd(size_t ccdid) = 0;
+private:
+	std::vector<CcdPtr>	ccds;
+protected:
+	virtual CcdPtr	getCcd0(size_t ccdid) = 0;
+public:
+	CcdPtr	getCcd(size_t ccdid);
 
 	// handling the filter wheel
 private:

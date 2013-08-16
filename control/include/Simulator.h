@@ -70,8 +70,12 @@ private:
 public:
 	SimCamera();
 	virtual ~SimCamera();
-	virtual CcdPtr	getCcd(size_t id);
-	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
+
+protected:
+	virtual CcdPtr	getCcd0(size_t id);
+	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+
+public:
 	// guider port functions
 	uint8_t	active();
 	void	activate(float raplus, float raminus,
@@ -88,7 +92,8 @@ public:
 class SimCcd : public Ccd {
 	SimCamera&	camera;
 public:
-	SimCcd(const CcdInfo& info, SimCamera& _camera) : Ccd(info), camera(_camera) { }
+	SimCcd(const CcdInfo& info, SimCamera& _camera)
+		: Ccd(info), camera(_camera) { }
 	virtual ~SimCcd() { }
 	virtual void	startExposure(const Exposure& exposure)
 		throw (not_implemented);

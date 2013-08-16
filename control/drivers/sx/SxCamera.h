@@ -39,8 +39,10 @@ public:
 	virtual ~SxCamera();
 
 	// ccd access
-	virtual CcdPtr	getCcd(size_t id);
+protected:
+	virtual CcdPtr	getCcd0(size_t id);
 
+public:
 	// cooler access
 	bool	hasCooler();
 	virtual CoolerPtr	getCooler(int ccdindex);

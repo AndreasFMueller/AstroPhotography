@@ -41,9 +41,10 @@ private:
 public:
 	UvcCamera(DevicePtr& deviceptr);
 	virtual ~UvcCamera();
-	CcdPtr	getCcd(size_t ccdindex);
-	CcdPtr	getCcd(const std::string& name);
+protected:
+	virtual CcdPtr	getCcd0(size_t ccdindex);
 
+public:
 	void	selectFormatAndFrame(int interface, int format, int frame);
 	void	setExposureTime(double exposuretime);
 

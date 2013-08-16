@@ -29,7 +29,7 @@ Mock1Camera::Mock1Camera(int _id) : id(_id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mock1 has %d ccds", this->nCcds());
 }
 
-CcdPtr	Mock1Camera::getCcd(size_t id) {
+CcdPtr	Mock1Camera::getCcd0(size_t id) {
 	if ((id < 0) || (id > 1)) {
 		throw std::runtime_error("bad ccd id");
 	}

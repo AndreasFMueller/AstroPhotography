@@ -120,12 +120,7 @@ UvcCamera::UvcCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
 UvcCamera::~UvcCamera() {
 }
 
-CcdPtr	UvcCamera::getCcd(const std::string& name) {
-	// locate the camera using the name
-	return CcdPtr();
-}
-
-CcdPtr	UvcCamera::getCcd(size_t ccdindex) {
+CcdPtr	UvcCamera::getCcd0(size_t ccdindex) {
 	uvcccd_t	uc = ccds[ccdindex];
 	CcdInfo	info = ccdinfo[ccdindex];
 	UvcCcd	*uvcccd = NULL;

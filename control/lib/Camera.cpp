@@ -17,14 +17,48 @@ Camera::Camera(const std::string& name) : Device(name) {
 Camera::~Camera() {
 }
 
+/**
+ * \brief Get the number of CCDs this camera has
+ */
 unsigned int	Camera::nCcds() const {
 	return ccdinfo.size();
 }
 
+/**
+ * \brief Get the info object for a CCD
+ */
 const CcdInfo&	Camera::getCcdInfo(size_t ccdid) const {
 	return ccdinfo[ccdid];
 }
 
+/**
+ * \brief Get A Ccd from the cache, if available
+ */
+CcdPtr	Camera::getCcd(size_t ccdid) {
+	// ensure empty pointers are present
+	if (ccds.size() < nCcds()) {
+		for (int i = 0; i < nCcds(); i++) {
+			ccds.push_back(CcdPtr());
+		}
+	}
+
+	// make sure the index is reasonable
+	if (ccdid >= nCcds()) {
+		throw std::range_error("ccd id too large");
+	}
+
+	// get the ccd from the cache
+	CcdPtr	ccd = ccds[ccdid];
+	if (!ccd) {
+		ccd = this->getCcd0(ccdid);
+		ccds[ccdid] = ccd;
+	}
+	return ccd;
+}
+
+/**
+ * \brief Default FilterWheel implementation just throws an exception
+ */
 FilterWheelPtr	Camera::getFilterWheel0() throw (not_implemented) {
 	throw not_implemented("filter wheel not implemented");
 }
@@ -39,6 +73,9 @@ FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
 	return filterwheel;
 }
 
+/**
+ * \brief Default GuiderPort implementation just throws an exception
+ */
 GuiderPortPtr	Camera::getGuiderPort0() throw (not_implemented) {
 	throw not_implemented("guider port not implemented");
 }

@@ -245,7 +245,7 @@ SxCamera::~SxCamera() {
  * \param ccdindex	Index of the CCD to open.
  * \return A smart pointer to a CCD
  */
-CcdPtr	SxCamera::getCcd(size_t ccdindex) {
+CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 	if (ccdindex >= nCcds()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd id %d out of range",
 			ccdindex);
