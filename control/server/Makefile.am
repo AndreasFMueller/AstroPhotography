@@ -14,7 +14,7 @@ ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lo
 noinst_LTLIBRARIES = libserver.la
 libserver_la_SOURCES = Modules_impl.cpp DriverModule_impl.cpp \
 	DeviceLocator_impl.cpp Camera_impl.cpp Ccd_impl.cpp \
-	GuiderPort_impl.cpp FilterWheel_impl.cpp
+	GuiderPort_impl.cpp FilterWheel_impl.cpp Cooler_impl.cpp
 
 astrod_SOURCES = astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la libserver.la

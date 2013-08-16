@@ -54,9 +54,19 @@ module Astro {
 		void	select(in long position);
 	};
 
+	interface Cooler {
+		float	getSetTemperature();
+		float	getActualTemperature();
+		void	setTemperature(in float temperature);
+		boolean	isOn();
+		void	setOn(in boolean onoff);
+	};
+
 	interface Ccd {
 		boolean	hasGain();
+
 		boolean	hasCooler();
+		Cooler	getCooler();
 	};
 
 	interface Camera {
