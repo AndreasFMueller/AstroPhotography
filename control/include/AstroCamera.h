@@ -231,12 +231,22 @@ public:
 	virtual CcdPtr	getCcd(size_t ccdid) = 0;
 
 	// handling the filter wheel
+private:
+	FilterWheelPtr	filterwheel;
+protected:
+	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
+public:
+	FilterWheelPtr	getFilterWheel() throw (not_implemented);
 	bool	hasFilterWheel() const { return false; }
-	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
 
 	// handling the guider port
+private:
+	GuiderPortPtr	guiderport;
+protected:
+	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+public:
 	bool	hasGuiderPort() const { return false; }
-	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
+	GuiderPortPtr	getGuiderPort() throw (not_implemented);
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 

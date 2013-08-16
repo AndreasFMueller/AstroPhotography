@@ -30,8 +30,9 @@ public:
 	SbigCamera(int usbno);
 	virtual ~SbigCamera();
 	virtual CcdPtr	getCcd(size_t id);
-	virtual FilterWheelPtr	getFilterWheel() throw (not_implemented);
-	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
+protected:
+	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
+	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
 	friend class SbigCcd;
 	friend class SbigFilterWheel;
 	friend class SbigCooler;

@@ -288,7 +288,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
  * If the camera has a filter wheel, this method returns a filter wheel
  * object which allows to control the filter wheel position.
  */
-FilterWheelPtr	SbigCamera::getFilterWheel() throw (not_implemented) {
+FilterWheelPtr	SbigCamera::getFilterWheel0() throw (not_implemented) {
 	return FilterWheelPtr(new SbigFilterWheel(*this));
 }
 
@@ -298,7 +298,7 @@ FilterWheelPtr	SbigCamera::getFilterWheel() throw (not_implemented) {
  * If the camera has a guider port, thie object allows to retrieve a
  * GuiderPort object to control the guider port.
  */
-GuiderPortPtr	SbigCamera::getGuiderPort() throw (not_implemented) {
+GuiderPortPtr	SbigCamera::getGuiderPort0() throw (not_implemented) {
 	return GuiderPortPtr(new SbigGuiderPort(*this));
 }
 

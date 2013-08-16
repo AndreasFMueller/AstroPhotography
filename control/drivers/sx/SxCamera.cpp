@@ -375,7 +375,7 @@ CoolerPtr	SxCamera::getCooler(int ccdindex) {
 /**
  * \brief Get the guider port
  */
-GuiderPortPtr	SxCamera::getGuiderPort() throw (not_implemented) {
+GuiderPortPtr	SxCamera::getGuiderPort0() throw (not_implemented) {
 	if (!hasGuiderPort) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no guide port");
 		throw std::runtime_error("this camera has no guider port");

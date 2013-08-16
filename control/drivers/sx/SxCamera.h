@@ -46,9 +46,11 @@ public:
 	virtual CoolerPtr	getCooler(int ccdindex);
 
 	// guider port access
-	virtual GuiderPortPtr	getGuiderPort() throw (not_implemented);
+protected:
+	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
 
 	// request handling
+public:
 	void	controlRequest(RequestBase *request);
 
 	// find out whether this is a color camera
