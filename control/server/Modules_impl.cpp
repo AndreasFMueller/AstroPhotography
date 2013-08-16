@@ -41,6 +41,7 @@ Astro::Modules::ModuleNameSequence*	Modules_impl::getModuleNames() {
  * \brief load a certain module and return a reference to it
  */
 Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for module %s", _name);
 	std::string	name(_name);
 	astro::module::ModulePtr	result;
 	// find out whether this module was already loaded

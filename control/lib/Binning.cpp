@@ -13,6 +13,14 @@ namespace astro {
 namespace camera {
 
 /**
+ * \brief Construct a binning object
+ */
+Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
+	if (x == 0) { x = 1; }
+	if (y == 0) { y = 1; }
+}
+
+/**
  * \brief Compare binning modes: equality
  *
  * This comparison does not take wildcards into account, i.e. if one

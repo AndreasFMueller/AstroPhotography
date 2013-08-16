@@ -31,7 +31,7 @@ class	Binning {
 	unsigned int	x;
 	unsigned int	y;
 public:
-	Binning(unsigned int _x = 1, unsigned int _y = 1) : x(_x), y(_y) { }
+	Binning(unsigned int _x = 1, unsigned int _y = 1);
 	Binning(const Binning& other) : x(other.x), y(other.y) { }
 	bool	operator==(const Binning& other) const;
 	bool	operator<(const Binning& other) const;

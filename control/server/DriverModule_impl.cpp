@@ -33,6 +33,7 @@ Descriptor	*DriverModule_impl::getDescriptor() {
  * \brief Get the DeviceLocator
  */
 DeviceLocator_ptr	DriverModule_impl::getDeviceLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning device locator");
 	DeviceLocator_impl	*dl
 		= new DeviceLocator_impl(_module->getDeviceLocator());
 	
