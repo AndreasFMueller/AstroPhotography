@@ -1,0 +1,18 @@
+This directory contains IDL and supporting definitions for CORBA services
+
+Why CORBA is used:
+
+- with omniORB we have a very efficient ORB implementation that can easily
+  transport complicated binary data structures. This means that there
+  is no serious penalty in using CORBA instead of the native classes.
+
+- The IDL we use is very close to the native classes.  The servant classes
+  are really just rather simple wrappers around the native classes.
+  On the client side, the application logic hardly changes when converting
+  an application to CORBA
+
+- Using SSL certificates, it is also quite simple to implement strong
+  security if needed
+
+
+
