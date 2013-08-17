@@ -73,7 +73,7 @@ public:
 
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
-	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+	virtual GuiderPortPtr	getGuiderPort0();
 
 public:
 	// guider port functions
@@ -95,10 +95,9 @@ public:
 	SimCcd(const CcdInfo& info, SimCamera& _camera)
 		: Ccd(info), camera(_camera) { }
 	virtual ~SimCcd() { }
-	virtual void	startExposure(const Exposure& exposure)
-		throw (not_implemented);
-	virtual Exposure::State	exposureStatus() throw (not_implemented);
-	virtual ImagePtr	getImage() throw (not_implemented);
+	virtual void	startExposure(const Exposure& exposure);
+	virtual Exposure::State	exposureStatus();
+	virtual ImagePtr	getImage();
 };
 
 /**

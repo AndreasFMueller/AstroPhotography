@@ -7,6 +7,7 @@
 #include <AstroCamera.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <AstroExceptions.h>
 
 using namespace astro::image;
 
@@ -133,8 +134,11 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
  * should return immediately. The caller can then use the exposureStatus
  * method to monitor the progress of the exposure.
  */
-void    Ccd::startExposure(const Exposure& exposure) throw (not_implemented) {
-	throw not_implemented("startExposureStatus not implemented");
+void    Ccd::startExposure(const Exposure& exposure) {
+	if (Exposure::idle != state) {
+		throw BadState("start exposure only in idle state");
+	}
+	throw NotImplemented("startExposureStatus not implemented");
 }
 
 /**
@@ -142,7 +146,7 @@ void    Ccd::startExposure(const Exposure& exposure) throw (not_implemented) {
  *
  * Find out whether an exposure is in progress. Optional method.
  */
-Exposure::State Ccd::exposureStatus() throw (not_implemented) {
+Exposure::State Ccd::exposureStatus() {
 	return state;
 }
 
@@ -156,15 +160,18 @@ Exposure::State Ccd::exposureStatus() throw (not_implemented) {
  * make sure that you would usually read from the camera is also
  * stored locally so that it can be restored after the reset.
  */
-void    Ccd::cancelExposure() throw (not_implemented) {
-	throw not_implemented("cancelExposure not implemented");
+void    Ccd::cancelExposure() {
+	throw NotImplemented("cancelExposure not implemented");
 }
 
 /**
  * \brief Retrieve an image from the camera
  */
-astro::image::ImagePtr	Ccd::getImage() throw (not_implemented) {
-	throw not_implemented("getImage not implemented");
+astro::image::ImagePtr	Ccd::getImage() {
+	if (Exposure::exposed != state) {
+		throw BadState("no exposed image to retrieve");
+	}
+	throw NotImplemented("getImage not implemented");
 }
 
 /**
@@ -174,8 +181,7 @@ astro::image::ImagePtr	Ccd::getImage() throw (not_implemented) {
  * calls. We reuse the same exposure structure for all calls.
  * \param imagecount	number of images to retrieve
  */
-astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount)
-	throw (not_implemented) {
+astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 	astro::image::ImageSequence	result;
 	unsigned int	k = 0;
 	while (k < imagecount) {
@@ -192,7 +198,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount)
 /**
  * \brief Retrieve Cooler, using the cache if retrieved befor
  */
-CoolerPtr	Ccd::getCooler() throw (not_implemented) {
+CoolerPtr	Ccd::getCooler() {
 	if (!cooler) {
 		cooler = this->getCooler0();
 	}
@@ -202,23 +208,26 @@ CoolerPtr	Ccd::getCooler() throw (not_implemented) {
 /**
  * \brief Retrieve a cooler
  */
-CoolerPtr	Ccd::getCooler0() throw (not_implemented) {
-	throw not_implemented("thermoelectric cooler not implemented");
+CoolerPtr	Ccd::getCooler0() {
+	throw NotImplemented("thermoelectric cooler not implemented");
 }
 
 /**
  * \brief Retrieve the state of the shutter
  */
-shutter_state	Ccd::getShutterState() throw (not_implemented) {
-	throw not_implemented("camera has no shutter");
+shutter_state	Ccd::getShutterState() {
+	throw NotImplemented("camera has no shutter");
 }
 
 /**
  * \brief Set the state of the shutter
  */
-void	Ccd::setShutterState(const shutter_state& state)
-	throw(not_implemented) {
-	throw not_implemented("camera has no shutter");
+void	Ccd::setShutterState(const shutter_state& state) {
+	// always accept shutter open
+	if (SHUTTER_OPEN == state) {
+		return;
+	}
+	throw NotImplemented("camera has no shutter");
 }
 
 /**
@@ -235,14 +244,10 @@ void	Ccd::addExposureMetadata(ImageBase& image) const {
  */
 void	Ccd::addTemperatureMetadata(ImageBase& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding temperature metadata");
-	try {
-		// only if a cooler is available for this CCD
-		if (hasCooler()) {
-			CoolerPtr	cooler = getCooler();
-			cooler->addTemperatureMetadata(image);
-		}
-	} catch (not_implemented& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "this CCD has no cooler");
+	// only if a cooler is available for this CCD
+	if (hasCooler()) {
+		CoolerPtr	cooler = getCooler();
+		cooler->addTemperatureMetadata(image);
 	}
 }
 

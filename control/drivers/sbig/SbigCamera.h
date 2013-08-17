@@ -32,9 +32,9 @@ public:
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
 	virtual bool	hasFilterWheel() const;
-	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
+	virtual FilterWheelPtr	getFilterWheel0();
 	virtual bool	hasGuiderPort() const;
-	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+	virtual GuiderPortPtr	getGuiderPort0();
 	friend class SbigCcd;
 	friend class SbigFilterWheel;
 	friend class SbigCooler;

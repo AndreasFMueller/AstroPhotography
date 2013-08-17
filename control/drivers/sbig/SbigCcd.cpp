@@ -19,6 +19,7 @@
 #include <SbigCcd.h>
 #include <AstroOperators.h>
 #include <AstroDebug.h>
+#include <AstroExceptions.h>
 #include <utils.h>
 #include <includes.h>
 #include <SbigCooler.h>
@@ -53,7 +54,7 @@ SbigCcd::~SbigCcd() {
  * Since the camera interface is closely modelled on the SBIG driver library,
  * this is essentially a call to the corresponding dirver library function.
  */
-Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
+Exposure::State	SbigCcd::exposureStatus() {
 	SbigLock	lock;
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
@@ -87,15 +88,14 @@ Exposure::State	SbigCcd::exposureStatus() throw (not_implemented) {
 /**
  * \brief Start an exposure
  *
- *
+ * This is only possible if the camera is in the idle or exposed state.
  */
-void	SbigCcd::startExposure(const Exposure& exposure)
-		throw (not_implemented) {
+void	SbigCcd::startExposure(const Exposure& exposure) {
 	SbigLock	lock;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startExposure on ccd %d", id);
 	// check whether we are already exposing
-	if (state == Exposure::exposing) {
-		throw SbigError("exposure already in progress");
+	if ((state == Exposure::exposing) || (state == Exposure::cancelling)) {
+		throw BadState("exposure already in progress");
 	}
 
 	// XXX make sure that the subframe parameters are compatible with the
@@ -160,21 +160,18 @@ void	SbigCcd::startExposure(const Exposure& exposure)
  * This method waits until the exposure is completed and then downloads the
  * image from the camera.
  */
-ImagePtr	SbigCcd::getImage() throw(not_implemented) {
+ImagePtr	SbigCcd::getImage() {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
-	if (state == Exposure::idle) {
-		throw SbigError("camera is idle");
+	if (state != Exposure::idle) {
+		throw BadState("camera is idle");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image ccd %d", id);
 
 	// wait until the exposure is complete
 	exposureStatus();
-	while (Exposure::exposed != exposureStatus()) {
-		if (state == Exposure::idle) {
-			throw SbigError("suddenly became idle");
-		}
-		usleep(100000);
+	if (Exposure::exposed != state) {
+		throw BadState("no exposed image available");
 	}
 
 	// compute the size of the resulting image, if we get one
@@ -293,14 +290,16 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 /**
  * \brief Get a Cooler object, if the CCD has a TEC cooler
  */
-CoolerPtr	SbigCcd::getCooler0() throw (not_implemented) {
+CoolerPtr	SbigCcd::getCooler0() {
+	// XXX we assume that every SBIG camera has a cooler, which is
+	//     obviously incorrect
 	return CoolerPtr(new SbigCooler(camera));
 }
 
 /**
  * \brief Query the shutter state
  */
-shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
+shutter_state	SbigCcd::getShutterState() {
 	SbigLock	lock;
 	camera.sethandle();
 
@@ -311,7 +310,7 @@ shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 	unsigned short	e;
 	e = SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &params, &results);
 	if (e != CE_NO_ERROR) {
-		throw not_implemented("cannot query command status");
+		throw NotImplemented("cannot query command status");
 	}
 
 	shutter_state	state;
@@ -332,7 +331,7 @@ shutter_state	SbigCcd::getShutterState() throw(not_implemented) {
 /**
  * \brief Set the shutter state.
  */
-void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented) {
+void	SbigCcd::setShutterState(const shutter_state& state) {
 	SbigLock	lock;
 	camera.sethandle();
 
@@ -346,7 +345,7 @@ void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented)
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot get status, assuming no shutter");
-		throw not_implemented("apparently there is no shutter");
+		throw NotImplemented("apparently there is no shutter");
 	}
 
 	// now copy the data
@@ -381,7 +380,7 @@ void	SbigCcd::setShutterState(const shutter_state& state) throw(not_implemented)
 	}
 	e = SBIGUnivDrvCommand(CC_MISCELLANEOUS_CONTROL, &misc, NULL);
 	if (e != CE_NO_ERROR) {
-		throw not_implemented("shutter command not implemented");
+		throw NotImplemented("shutter command not implemented");
 	}
 }
 

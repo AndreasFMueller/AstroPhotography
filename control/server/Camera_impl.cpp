@@ -28,6 +28,13 @@ CORBA::Long	Camera_impl::nCcds() {
  * \brief Retrieve CcdInfo from a camera
  */
 CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
+	// make sure the ccdid exists
+	if ((ccdid < 0) || (ccdid >= _camera->nCcds())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "CCD id %d out of range", ccdid);
+		NotFound	notfound;
+		notfound.cause = (const char *)"CCD id out of range";
+		throw notfound;
+	}
 	// get the CCD info
 	astro::camera::CcdInfo	info = _camera->getCcdInfo(ccdid);
 
@@ -63,7 +70,11 @@ CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
  */
 Ccd_ptr	Camera_impl::getCcd(::CORBA::Long ccdid) {
 	if ((ccdid < 0) || (ccdid >= (int)ccds.size())) {
-		// XXX bad thing happens
+		debug(LOG_ERR, DEBUG_LOG, 0, "request for nonexistant CCD %d",
+			ccdid);
+		NotFound	notfound;
+		notfound.cause = (const char *)"CCD Id does not exist";
+		throw notfound;
 	}
 	Ccd_impl	*ccd = new Ccd_impl(ccds[ccdid]);
 	return ccd->_this();
@@ -80,6 +91,14 @@ bool	Camera_impl::hasFilterWheel() {
  * \brief Get the Filter wheel
  */
 FilterWheel_ptr	Camera_impl::getFilterWheel() {
+	if (!_camera->hasFilterWheel()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "request filter wheel on "
+			"camera that does not have one");
+		NotImplemented	notimplemented;
+		notimplemented.cause
+			= (const char *)"camera does not have a filter wheel";
+		throw notimplemented;
+	}
 	if (!filterwheel) {
 		filterwheel = _camera->getFilterWheel();
 	}
@@ -98,6 +117,14 @@ bool	Camera_impl::hasGuiderPort() {
  * \brief Get the GuiderPort
  */
 GuiderPort_ptr	Camera_impl::getGuiderPort() {
+	if (!_camera->hasGuiderPort()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "request guider port on "
+			"camera that does not have one");
+		NotImplemented	notimplemented;
+		notimplemented.cause
+			= (const char *)"camera does not have a guider port";
+		throw notimplemented;
+	}
 	if (!guiderport) {
 		guiderport = _camera->getGuiderPort();
 	}

@@ -296,7 +296,7 @@ bool	SbigCamera::hasFilterWheel() const {
  * If the camera has a filter wheel, this method returns a filter wheel
  * object which allows to control the filter wheel position.
  */
-FilterWheelPtr	SbigCamera::getFilterWheel0() throw (not_implemented) {
+FilterWheelPtr	SbigCamera::getFilterWheel0() {
 	return FilterWheelPtr(new SbigFilterWheel(*this));
 }
 
@@ -314,7 +314,7 @@ bool	SbigCamera::hasGuiderPort() const {
  * If the camera has a guider port, thie object allows to retrieve a
  * GuiderPort object to control the guider port.
  */
-GuiderPortPtr	SbigCamera::getGuiderPort0() throw (not_implemented) {
+GuiderPortPtr	SbigCamera::getGuiderPort0() {
 	return GuiderPortPtr(new SbigGuiderPort(*this));
 }
 

@@ -33,6 +33,12 @@ Descriptor	*DriverModule_impl::getDescriptor() {
  * \brief Get the DeviceLocator
  */
 DeviceLocator_ptr	DriverModule_impl::getDeviceLocator() {
+	if (!_module->getDescriptor()->hasDeviceLocator()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "module has no device locator");
+		NotFound	notfound;
+		notfound.cause = (const char *)"module has no device locator";
+		throw notfound;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning device locator");
 	DeviceLocator_impl	*dl
 		= new DeviceLocator_impl(_module->getDeviceLocator());

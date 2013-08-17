@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <SxGuiderPort.h>
 #include <AstroFormat.h>
+#include <AstroExceptions.h>
 
 using namespace astro::image;
 
@@ -260,7 +261,7 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 	if (ccdindex >= nCcds()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd id %d out of range",
 			ccdindex);
-		throw std::range_error("ccd id out of range");
+		throw NotFound("ccd id out of range");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd with index %d", ccdindex);
 	if ((model == SX_MODEL_M26C) && (ccdindex == 0)) {
@@ -373,11 +374,11 @@ bool	SxCamera::hasCooler() {
  */
 CoolerPtr	SxCamera::getCooler(int ccdindex) {
 	if (ccdindex > 0) {
-		throw std::runtime_error("only imaging CCD has cooler");
+		throw NotImplemented("only imaging CCD has cooler");
 	}
 	if (!_hasCooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no cooler");
-		throw std::runtime_error("this camera has no cooler");
+		throw NotImplemented("this camera has no cooler");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating cooler object");
 	return CoolerPtr(new SxCooler(*this));
@@ -386,10 +387,10 @@ CoolerPtr	SxCamera::getCooler(int ccdindex) {
 /**
  * \brief Get the guider port
  */
-GuiderPortPtr	SxCamera::getGuiderPort0() throw (not_implemented) {
+GuiderPortPtr	SxCamera::getGuiderPort0() {
 	if (!_hasGuiderPort) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no guide port");
-		throw std::runtime_error("this camera has no guider port");
+		throw NotImplemented("this camera has no guider port");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating guider port object");
 	return GuiderPortPtr(new SxGuiderPort(*this));

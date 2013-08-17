@@ -267,6 +267,96 @@ bool	saturated(const ImagePtr& image, const ImageRectangle& rect) {
 	return true;
 }
 
+#define	bytespervalue_typed(image, pixel)				\
+{									\
+	Image<pixel >	*imagep = dynamic_cast<Image<pixel > *>(&*image);\
+	if (NULL != imagep) {						\
+		return sizeof(pixel);				\
+	}								\
+}
+#define	bytespervalue_yuyv(image, Pixel)				\
+{									\
+	Image<YUYV<Pixel > >	*imagep = dynamic_cast<Image<YUYV<Pixel > > *>(&*image);\
+	if (NULL != imagep) {						\
+		return sizeof(Pixel);				\
+	}								\
+}
+#define	bytespervalue_rgb(image, Pixel)				\
+{									\
+	Image<RGB<Pixel > >	*imagep = dynamic_cast<Image<RGB<Pixel > > *>(&*image);\
+	if (NULL != imagep) {						\
+		return sizeof(Pixel);				\
+	}								\
+}
+
+int	bytespervalue(const ImagePtr& image) {
+	bytespervalue_typed(image, unsigned char);
+	bytespervalue_typed(image, unsigned short);
+	bytespervalue_typed(image, unsigned int);
+	bytespervalue_typed(image, unsigned long);
+	bytespervalue_typed(image, float);
+	bytespervalue_typed(image, double);
+	bytespervalue_yuyv(image, unsigned char);
+	bytespervalue_yuyv(image, unsigned short);
+	bytespervalue_yuyv(image, unsigned int);
+	bytespervalue_yuyv(image, unsigned long);
+	bytespervalue_yuyv(image, float);
+	bytespervalue_yuyv(image, double);
+	bytespervalue_rgb(image, unsigned char);
+	bytespervalue_rgb(image, unsigned short);
+	bytespervalue_rgb(image, unsigned int);
+	bytespervalue_rgb(image, unsigned long);
+	bytespervalue_rgb(image, float);
+	bytespervalue_rgb(image, double);
+}
+
+#define	planes_typed(image, pixel)					\
+{									\
+	Image<pixel >	*imagep = dynamic_cast<Image<pixel > *>(&*image);\
+	if (NULL != imagep) {						\
+		return 1;						\
+	}								\
+}
+#define	planes_yuyv(image, pixel)					\
+{									\
+	Image<YUYV<pixel > >	*imagep = dynamic_cast<Image<YUYV<pixel > > *>(&*image);\
+	if (NULL != imagep) {						\
+		return 2;						\
+	}								\
+}
+#define	planes_rgb(image, pixel)					\
+{									\
+	Image<RGB<pixel > >	*imagep = dynamic_cast<Image<RGB<pixel > > *>(&*image);\
+	if (NULL != imagep) {						\
+		return 2;						\
+	}								\
+}
+
+int	planes(const ImagePtr& image) {
+	planes_typed(image, unsigned char);
+	planes_typed(image, unsigned short);
+	planes_typed(image, unsigned int);
+	planes_typed(image, unsigned long);
+	planes_typed(image, float);
+	planes_typed(image, double);
+	planes_yuyv(image, unsigned char);
+	planes_yuyv(image, unsigned short);
+	planes_yuyv(image, unsigned int);
+	planes_yuyv(image, unsigned long);
+	planes_yuyv(image, float);
+	planes_yuyv(image, double);
+	planes_rgb(image, unsigned char);
+	planes_rgb(image, unsigned short);
+	planes_rgb(image, unsigned int);
+	planes_rgb(image, unsigned long);
+	planes_rgb(image, float);
+	planes_rgb(image, double);
+}
+
+int	bytesperpixel(const ImagePtr& image) {
+	return planes(image) * bytespervalue(image);
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro

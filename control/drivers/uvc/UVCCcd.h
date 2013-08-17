@@ -21,11 +21,9 @@ class UvcCcd : public Ccd {
 public:
 	UvcCcd(const CcdInfo& info, int interface, int format, int frame,
 		UvcCamera& camera);
-	virtual void    startExposure(const Exposure& exposure)
-		throw (not_implemented);
-	virtual ImagePtr	getImage() throw(not_implemented);
-	virtual ImageSequence	getImageSequence(unsigned int imagecount)
-		throw(not_implemented);
+	virtual void    startExposure(const Exposure& exposure);
+	virtual ImagePtr	getImage();
+	virtual ImageSequence	getImageSequence(unsigned int imagecount);
 
 	// gain control
 	virtual bool	hasGain();

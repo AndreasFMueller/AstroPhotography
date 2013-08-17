@@ -1,23 +1,159 @@
 //
-// device.idl 
+// device.idl -- Interface definition for device access
 //
-module Astro {
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+//
 
+/**
+ * \brief Astro module captures all interfaces
+ */
+module Astro {
+	// Exceptions
+	/**
+	 * \brief Exception for requests during wrong state
+	 *
+	 * The CCD interface implements a state machine, certain requests
+	 * are only possible in some states. E.g. it is not possible to
+	 * start a new exposure if one is already in progress. Trying to
+	 * do so raises the BadState exception.
+	 */
+	exception BadState {
+		string cause;
+	};
+
+	/**
+	 * \brief Exception for bad parameters
+	 */
+	exception BadParameter {
+		string cause;
+	};
+
+	/**
+	 * \brief An object was not found
+	 */
+	exception NotFound {
+		string cause;
+	};
+
+	/**
+	 * \brief The device in question does not implement this function
+	 */
+	exception NotImplemented {
+		string cause;
+	};
+
+	/**
+	 * \brief Exception thrown when the servant encouters an I/O problem
+	 */
+	exception IOException {
+		string cause;
+	};
+
+	// Image related data structures
+	/**
+	 * \brief Pixel coordinates of a pixel in an image
+	 *
+	 * To be consistent with FITS, the origin of the coordinate system
+	 * is in the lower left corner of the image.
+ 	 */
 	struct ImagePoint {
 		long	x;
 		long	y;
 	};
 
+	/**
+	 * \brief Size of an image in pixels
+	 */
 	struct ImageSize {
 		long	width;
 		long	height;
 	};
 
+	/**
+	 * \brief Rectangle inside an image
+	 */
 	struct ImageRectangle {
 		ImagePoint	origin;
 		ImageSize	size;
 	};
 
+	/**
+ 	 * \brief Image base interface
+	 *
+	 * This interface allows access to properties of an image that are
+	 * independent of the value of an individual pixel. It is not intended
+	 * to give access to all the information contained in a FITS file,
+	 * if that is desired, the FITS file should be used directly.
+	 */
+	interface Image {
+		/**
+		 * \brief Size of the image
+		 */
+		ImageSize	size();
+		/**
+		 * \brief Origin of the image
+		 *
+		 * If this image was taken by selecting a subrectangle of a
+		 * larger CCD chip, then this method returns the origin of
+		 * the subrectangle. For full size images, this is always
+		 * (0,0).
+		 */
+		ImagePoint	origin();
+		/**
+		 * \brief Write the image to a FITS file
+		 *
+		 * This method writes the image to a FITS file. The location
+		 * of the file is determined by the server, the URL method
+		 * returns an URL where the client can fetch the FITS file.
+		 * \param filename	Name of the fits file
+		 * \param overwrite	If the file already exists, the file
+		 *			is usually not written, unless this
+		 *			parameter is set to true
+		 */
+		void	write(in string filename, in boolean overwrite);
+		/**
+		 * \brief Number of bytes per pixel
+		 *
+		 * This returns the number of bytes needed to store an
+		 * individual pixel. RGB color pixels need three primitive data
+		 * element per pixel for the three color channels. YUYV images
+		 * (as returned by some web cams) need two primitive elements
+		 * per pixel. Any unsigned integral type or floating point
+		 * type can be used as primitive pixel type, but cameras usuall
+		 * return either bytes or unsigned shorts.
+		 * 
+		 */
+		long	bytesPerPixel();
+		/**
+		 * \brief Number of planes.
+		 * 
+		 * This is usually 1, but for cameras that return color images
+		 * it can be 2 (YUYV pixels) or 3 (RGB pixels).
+		 */
+		long	planes();
+		/**
+		 * \brief Pixel value type size
+		 */
+		long	bytesPerValue();
+	};
+
+	/**
+	 * \brief An image with byte sized pixels
+	 */
+	interface ByteImage : Image {
+		typedef sequence<octet>	ByteSequence;
+		ByteSequence	getBytes();
+	};
+
+	/**
+	 * \brief An image with short sized pixels
+	 */
+	interface ShortImage : Image {
+		typedef sequence<unsigned short> ShortSequence;
+		ShortSequence	getShorts();
+	};
+
+	// exposure related data structures
 	struct BinningMode {
 		long	x;
 		long	y;
@@ -25,6 +161,62 @@ module Astro {
 
 	typedef sequence<BinningMode>	BinningSet;
 
+	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
+
+	/**
+	 * \brief Exposure request structure
+	 */
+	struct Exposure {
+		/**
+		 * \brief CCD subrectangle to retrieve.
+		 *
+		 * If the size field of the frame is set to (0,0), it is assumed
+		 * that the complete CCD is returned.
+		 */
+		ImageRectangle	frame;
+		/**
+		 * \brief Exposure time in seconds.
+		 */
+		float	exposuretime;
+		/**
+		 * \brief Gain.
+		 *
+		 * Many cameras do not support the gain setting, so by default,
+		 * the gain should be set to 1.
+		 */
+		float	gain;
+		/**
+		 * \brief Limit for pixel values.
+		 *
+		 * Some cameras may produce confusingly large pixel values in
+		 * some cases. To simplify image interpretation, the exposure
+		 * methods can use the limit member to limit the pixel values.
+		 */
+		float	limit;
+		/**
+		 * \brief Shutter state during exposure.
+		 *
+		 * For cameras that have a shutter, this setting indicates
+		 * whether the shutter should be open or closed during exposure.
+		 * For dark images, the shutter needs to be closed.
+		 */
+		ShutterState	shutter;
+		/**
+		 * \brief Binning mode to use during readout
+		 *
+		 * Default binning mode should always be 1x1. If the binning
+		 * mode is 0x0, 1x1 is assumed.
+		 */
+		BinningMode	mode;
+	};
+
+	// Device objects
+	/**
+	 * \brief Info about a CCD
+	 *
+	 * This contains information that can typically be retrieved without
+	 * accessing the CCD.
+	 */
 	struct CcdInfo {
 		string	name;
 		long	id;
@@ -33,85 +225,232 @@ module Astro {
 		boolean	shutter;
 	};
 
-	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
-
-	struct Exposure {
-		ImageRectangle	frame;
-		float	exposuretime;
-		float	gain;
-		float	limit;
-		ShutterState	shutter;
-		BinningMode	mode;
-	};
-
-	interface GuiderPort {
-		void	activate(in float ra, in float dec);
-	};
-
-	interface FilterWheel {
-		long	nFilters();
-		long	currentPosition();
-		void	select(in long position);
-	};
-
-	interface Cooler {
-		float	getSetTemperature();
-		float	getActualTemperature();
-		void	setTemperature(in float temperature);
-		boolean	isOn();
-		void	setOn(in boolean onoff);
-	};
+	interface Cooler;
 
 	enum ExposureState { EXPOSURE_IDLE, EXPOSURE_EXPOSING,
 		EXPOSURE_EXPOSED, EXPOSURE_CANCELLING };
 
-	interface Image {
-		ImageSize	size();
-		ImagePoint	origin();
-		void	write(in string filename, in boolean overwrite);
-	};
-
+	/**
+	 * \brief Interface to a CCD chip of a camera.
+	 *
+	 * A camera can have multiple CCD chips (up to three, e.g. in the
+	 * case of the SBIG STX-16803). Each CCD can have a cooler.
+	 * It is also assumed, that each CCD can have a shutter, although
+	 * for some cameras, a shutter may actually affect more than one
+	 * CCD (e.g. with self guiding cameras, if the guiging CCD is
+	 * behind the shutter.
+	 */
 	interface Ccd {
-		void	startExposure(in Exposure exp);
+		/**
+		 * \brief Start an exposure
+		 */
+		void	startExposure(in Exposure exp) raises(BadState,BadParameter);
+		/**
+		 * \brief Find the state of the exposure
+		 */
 		ExposureState	exposureStatus();
-		void	cancelExposure();
-		Exposure	getExposure();
+		/**
+		 * \brief Cancel an exposure
+		 */
+		void	cancelExposure() raises(BadState,NotImplemented);
+		/**
+		 * \brief Get information about the exposure
+		 *
+		 * This only makes sense if an exposure is in progres or
+		 * has completed. In all other cases, a BadState exception
+		 * is raised.
+		 */
+		Exposure	getExposure() raises(BadState);
+		/**
+		 * \brief Retrieve the image
+		 *
+		 * For this method to work the Ccd must be in state exposed.
+		 * Retreiving the image will update the state to idle.
+		 */
+		Image	getImage() raises(BadState);
 
-		Image	getImage();
-
+		/**
+		 * \brief Find out whether this CCD has a gain setting.
+		 */
 		boolean	hasGain();
-
+		/**
+		 * \brief Find out whether this CCD has a shutter
+		 */
 		boolean	hasShutter();
-		ShutterState	getShutterState();
-		void	setShutterState(in ShutterState state);
-
+		/**
+		 * \brief Get the current shutter state
+		 */
+		ShutterState	getShutterState() raises(NotImplemented);
+		/**
+		 * \brief Set the current shutter state
+		 */
+		void	setShutterState(in ShutterState state) raises(NotImplemented);
+		/**
+		 * \brief Find out whether the CCD has a cooler
+		 */
 		boolean	hasCooler();
-		Cooler	getCooler();
+		/**
+		 * \brief Get the Cooler
+		 */
+		Cooler	getCooler() raises(NotImplemented);
 	};
 
+	/**
+	 * \brief Thermoelectric coolers
+	 *
+	 * Some CCDs have thermoelectric coolers. This interface allows
+	 * to control their temperature.
+	 */
+	interface Cooler {
+		/**
+		 * \brief Get temperature at which the cooler is set
+		 */
+		float	getSetTemperature();
+		/**
+		 * \brief Get the actual temperature of the CCD
+		 */
+		float	getActualTemperature();
+		/**
+		 * \brief Set the temperature.
+		 *
+		 * This does not automatically mean that the temperature
+		 * has been reached. For this one should query the actual
+		 * temperature using getActualTemperature() repeatedly 
+		 * until the temperature has been reached to a sufficiently
+		 * accurate degree.
+	 	 */
+		void	setTemperature(in float temperature);
+		/**
+		 * \brief Find out whether cooler is on.
+		 */
+		boolean	isOn();
+		/**
+		 * \brief Turn cooler on.
+		 *
+		 * Note that setting the temperature on does not automatically
+		 * turn the cooler on, at least on some devices. To get cooling,
+		 * set the temperature AND set the it on.
+		 */
+		void	setOn(in boolean onoff);
+	};
+
+	/**
+	 * \brief Interface for Guider Ports
+	 *
+	 * The guider port has four outputs, two for right ascension
+	 * (RA+ and RA- for west and east) and two for declination (DEC+
+	 * DEC- for north and south). Activating the outputs changes the
+	 * telescope movement in the corresponding direction.
+	 * This interface allows to control activation of these ports.
+	 */
+	interface GuiderPort {
+		/**
+		 * \brief Activate Guider Port outputs.
+		 *
+		 * This method activates the guider port outputs for the
+		 * time specified in the arguments. A positive argument
+		 * activates the + output, a negative argument the - output.
+		 * \param ra	Time in seconds to activate the RA outputs
+		 * \param dec	Time in seconds to activate the DEC outputs
+	 	 */
+		void	activate(in float ra, in float dec);
+	};
+
+	/**
+ 	 * \brief FilterWheel interface
+	 *
+	 * A Filterwheel is a device that can position a certain number
+	 * of filters into the light path of the camera.
+	 */
+	interface FilterWheel {
+		/**
+		 * \brief Number of available filter positions.
+		 *
+		 * This method also counts empty filter positions in the wheel.
+		 */
+		long	nFilters();
+		/**
+		 * \brief Query the current filter position.
+		 */
+		long	currentPosition();
+		/**
+		 * \brief Move the filter wheel to a given position
+		 */
+		void	select(in long position) raises(NotFound);
+	};
+
+	/**
+	 * \brief Camera abstraction
+	 *
+	 * A camera consists of a number of CCDs that can be controlled
+	 * individually. It can also have Filterwheels attached, and many
+	 * cameras have a guider port.
+	 */
 	interface Camera {
+		/**
+		 * \brief Get the camera name.
+		 */
 		string	getName();
 		// CcdInfo info;
+		/**
+		 * \brief Find out how many CCDs the camera has
+	 	 */
 		long	nCcds();
-		CcdInfo	getCcdinfo(in long ccdid);
-		Ccd	getCcd(in long ccdid);
+		/**
+		 * \brief Get Information about the CCD.
+		 *
+		 * This method does not return all available information, but
+		 * typically only information available without accessing
+		 * the CCD. It should be sufficient to plan an exposure.
+		 */
+		CcdInfo	getCcdinfo(in long ccdid) raises(NotFound);
+		/**
+		 * \brief Retrieve a CCD.
+		 */
+		Ccd	getCcd(in long ccdid) raises(NotFound);
 		// FilterWheel
+		/**
+		 * \brief Find out whether the camera has FilterWheel
+		 */
 		boolean	hasFilterWheel();
-		FilterWheel	getFilterWheel();
+		/**
+		 * \brief Get the FilterWheel
+		 */
+		FilterWheel	getFilterWheel() raises(NotImplemented);
 		// Guider Port
+		/**
+		 * \brief Find out whether the camera has a guider port.
+	 	 */
 		boolean	hasGuiderPort();
-		GuiderPort	getGuiderPort();
+		/**
+		 * \brief Get the Guider Port
+		 */
+		GuiderPort	getGuiderPort() raises(NotImplemented);
 	};
 
+	// Module related stuff
+	/**
+	 * \brief Device Locator interface within a module
+	 */
 	interface DeviceLocator {
 		string	getName();
 		string	getVersion();
 		typedef sequence<string>	DeviceNameList;
 		enum device_type { DEVICE_CAMERA, DEVICE_FOCUSER,
-					DEVICE_GUIDERPORT };
+					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL };
+		/**
+		 * \brief Retrieve a list of device names for a device type
+		 *
+		 * Most camera drivers just give access to camera devices.
+		 * But some devices may be accessed independently of a camera,
+		 * e.g. the USB filterwheel from QHYCCD, which has it's own
+		 * interface independent of a camera.
+		 * \param devicetype	Type of device to construct the list
+		 */
 		DeviceNameList	getDevicelist(in device_type devicetype);
-		Camera	getCamera(in string name);
-		GuiderPort	getGuiderPort(in string name);
+		Camera	getCamera(in string name) raises(NotFound);
+		GuiderPort	getGuiderPort(in string name) raises(NotFound);
+		FilterWheel	getFilterWheel(in string name) raises(NotFound);
 	};
 
 	struct Descriptor {
@@ -120,17 +459,35 @@ module Astro {
 		boolean hasDeviceLocator;
 	};
 
+	/**
+	 * \brief 
+	 *
+	 * A module may implement many other things but device access.
+	 * To find out whether the module gives access to any devices,
+	 * one should query the Descriptor and check whether the module
+	 * implements a DeviceLocator. The DeviceLocator obtained from
+	 * the getDeviceLocator() method can then be used to get the
+	 * devices themselves.
+	 */
 	interface DriverModule {
 		Descriptor	getDescriptor();
 		string	getName();
-		DeviceLocator	getDeviceLocator();
+		/**
+		 * \brief Get the device locator of a module
+		 */
+		DeviceLocator	getDeviceLocator() raises(NotImplemented);
 	};
 
+	/**
+	 * \brief Repository of all device driver modules
+	 *
+ 	 * All device driver modules are accessible through this interface.
+	 */
 	interface Modules {
 		long	numberOfModules();
 		typedef sequence<string> ModuleNameSequence;
 		ModuleNameSequence	getModuleNames();
-		DriverModule	getModule(in string name);
+		DriverModule	getModule(in string name) raises(NotFound);
 	};
 
 };

@@ -16,6 +16,12 @@ CORBA::Long	FilterWheel_impl::currentPosition() {
 }
 
 void	FilterWheel_impl::select(CORBA::Long position) {
+	if ((position < 0) || (position >= _filterwheel->nFilters())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "filter wheel position %d out of range", position);
+		NotFound	notfound;
+		notfound.cause = (const char *)"filter wheel position out of range";
+		throw notfound;
+	}
 	return _filterwheel->select(position);
 }
 

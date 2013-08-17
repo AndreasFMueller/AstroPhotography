@@ -246,15 +246,15 @@ ImagePtr	SimCamera::getImage() {
 //////////////////////////////////////////////////////////////////////
 // Simulator CCD implementation
 //////////////////////////////////////////////////////////////////////
-void	SimCcd::startExposure(const Exposure& exposure) throw (not_implemented) {
+void	SimCcd::startExposure(const Exposure& exposure) {
 	camera.startExposure(exposure);
 }
 
-Exposure::State	SimCcd::exposureStatus() throw (not_implemented) {
+Exposure::State	SimCcd::exposureStatus() {
 	return camera.exposureStatus();
 }
 
-ImagePtr	SimCcd::getImage() throw (not_implemented) {
+ImagePtr	SimCcd::getImage() {
 	return camera.getImage();
 }
 
@@ -277,7 +277,7 @@ void	SimGuiderPort::activate(float raplus, float raminus, float decplus,
 	camera.activate(raplus, raminus, decplus, decminus);
 }
 
-GuiderPortPtr	SimCamera::getGuiderPort0() throw (not_implemented) {
+GuiderPortPtr	SimCamera::getGuiderPort0() {
 	return GuiderPortPtr(new SimGuiderPort(*this));
 }
 

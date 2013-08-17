@@ -205,6 +205,7 @@ int	main(int argc, char *argv[]) {
 	ccd->startExposure(exposure);
 
 	// wait until the state changes to exposed
+	usleep(1000000 * exposure.exposuretime);
 	ExposureState	state = ccd->exposureStatus();
 	while (state == EXPOSURE_EXPOSING) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting");

@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroCamera.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 namespace camera {
@@ -37,6 +38,9 @@ unsigned int	Camera::nCcds() const {
  * \brief Get the info object for a CCD
  */
 const CcdInfo&	Camera::getCcdInfo(size_t ccdid) const {
+	if (ccdid > ccds.size()) {
+		throw NotFound("ccd id too large");
+	}
 	return ccdinfo[ccdid];
 }
 
@@ -53,7 +57,7 @@ CcdPtr	Camera::getCcd(size_t ccdid) {
 
 	// make sure the index is reasonable
 	if (ccdid >= nCcds()) {
-		throw std::range_error("ccd id too large");
+		throw NotFound("ccd id too large");
 	}
 
 	// get the ccd from the cache
@@ -68,16 +72,16 @@ CcdPtr	Camera::getCcd(size_t ccdid) {
 /**
  * \brief Default FilterWheel implementation just throws an exception
  */
-FilterWheelPtr	Camera::getFilterWheel0() throw (not_implemented) {
-	throw not_implemented("filter wheel not implemented");
+FilterWheelPtr	Camera::getFilterWheel0() {
+	throw NotImplemented("filter wheel not implemented");
 }
 
 /**
  * \brief Get FilterWheel, using the cached object if available
  */
-FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
+FilterWheelPtr	Camera::getFilterWheel() {
 	if (!this->hasFilterWheel()) {
-		throw not_implemented("cannot request filter wheel");
+		throw NotImplemented("cannot request filter wheel");
 	}
 	if (!filterwheel) {
 		filterwheel = this->getFilterWheel0();
@@ -88,16 +92,16 @@ FilterWheelPtr	Camera::getFilterWheel() throw (not_implemented) {
 /**
  * \brief Default GuiderPort implementation just throws an exception
  */
-GuiderPortPtr	Camera::getGuiderPort0() throw (not_implemented) {
-	throw not_implemented("guider port not implemented");
+GuiderPortPtr	Camera::getGuiderPort0() {
+	throw NotImplemented("guider port not implemented");
 }
 
 /**
  * \brief Get GuiderPort, using the cached object if available
  */
-GuiderPortPtr	Camera::getGuiderPort() throw (not_implemented) {
+GuiderPortPtr	Camera::getGuiderPort() {
 	if (!this->hasGuiderPort()) {
-		throw not_implemented("cannot request guider port");
+		throw NotImplemented("cannot request guider port");
 	}
 	if (!guiderport) {
 		guiderport = this->getGuiderPort0();

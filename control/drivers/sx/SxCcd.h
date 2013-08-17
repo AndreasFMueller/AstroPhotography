@@ -61,16 +61,15 @@ public:
 protected:
 	virtual void	startExposure0(const Exposure& exposure);
 public:
-	virtual void	startExposure(const Exposure& exposure)
-		throw (not_implemented);
+	virtual void	startExposure(const Exposure& exposure);
 	virtual void	getImage0();
 public:
-	virtual ImagePtr	getImage() throw (not_implemented);
+	virtual ImagePtr	getImage();
 
 	// cooler stuff
 	virtual bool	hasCooler() const;
 protected:
-	virtual CoolerPtr	getCooler0() throw (not_implemented);
+	virtual CoolerPtr	getCooler0();
 };
 
 /**

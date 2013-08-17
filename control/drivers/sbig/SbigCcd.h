@@ -24,22 +24,20 @@ class SbigCcd : public Ccd {
 public:
 	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
 	virtual ~SbigCcd();
-	virtual Exposure::State	exposureStatus() throw (not_implemented);
-	virtual void	startExposure(const Exposure& exposure)
-		throw (not_implemented);
+	virtual Exposure::State	exposureStatus();
+	virtual void	startExposure(const Exposure& exposure);
 
 	// shutter interface
-	virtual shutter_state	getShutterState() throw(not_implemented);
-	virtual void	setShutterState(const shutter_state& state)
-		throw(not_implemented);
+	virtual shutter_state	getShutterState();
+	virtual void	setShutterState(const shutter_state& state);
 
-	virtual	ImagePtr	getImage() throw(not_implemented);
+	virtual	ImagePtr	getImage();
 
 	// cooler interface
 	virtual bool	hasCooler() { return cooler; }
 	void	setCooler(bool _cooler) { cooler = _cooler; }
 protected:
-	virtual CoolerPtr	getCooler0() throw(not_implemented);
+	virtual CoolerPtr	getCooler0();
 };
 
 } // namespace sbig

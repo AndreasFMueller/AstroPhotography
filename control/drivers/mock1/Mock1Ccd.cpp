@@ -6,6 +6,7 @@
  */
 #include <Mock1Ccd.h>
 #include <unistd.h>
+#include <AstroExceptions.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -14,12 +15,15 @@ namespace astro {
 namespace camera {
 namespace mock1 {
 
-void    Mock1Ccd::startExposure(const Exposure& exposure) throw (not_implemented) {
+/**
+ * \brief Start an exposure
+ */
+void    Mock1Ccd::startExposure(const Exposure& exposure) {
 	if (state != Exposure::idle) {
-		throw std::runtime_error("ccd not idle");
+		throw BadState("CCD not idle");
 	}
 	if (!info.size().bounds(exposure.frame)) {
-		throw std::runtime_error("exposure does not fit ccd");
+		throw BadParameter("exposure does not fit ccd");
 	}
 	frame = exposure.frame;
 	state = Exposure::exposing;
@@ -27,20 +31,32 @@ void    Mock1Ccd::startExposure(const Exposure& exposure) throw (not_implemented
 	state = Exposure::exposed;
 }
 
-Exposure::State Mock1Ccd::exposureStatus() throw (not_implemented) {
+/**
+ * \brief Query exposure status
+ */
+Exposure::State Mock1Ccd::exposureStatus() {
 	return state;
 }
 
-void    Mock1Ccd::cancelExposure() throw (not_implemented) {
-	if (state != Exposure::idle) {
-		throw std::runtime_error("ccd not idle");
+/**
+ * \brief Cancel the exposure
+ */
+void    Mock1Ccd::cancelExposure() {
+	if (state != Exposure::exposing) {
+		throw BadState("CCD not exposing");
 	}
 	state = Exposure::cancelling;
 	sleep(1);
 	state = Exposure::idle;
 }
 
-ImagePtr    Mock1Ccd::getImage() throw (not_implemented) {
+/**
+ * \brief Retrieve the image
+ */
+ImagePtr    Mock1Ccd::getImage() {
+	if (Exposure::exposed != state) {
+		throw BadState("no exposed image available");
+	}
 	Image<unsigned char>	image(info.size());
 	image.fill(128);
 	ImageSize	blocksize(5, 5);

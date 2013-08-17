@@ -5,6 +5,7 @@
  */
 #include "DeviceLocator_impl.h"
 #include "GuiderPort_impl.h"
+#include "FilterWheel_impl.h"
 #include "Camera_impl.h"
 #include <AstroDebug.h>
 
@@ -30,6 +31,9 @@ char	*DeviceLocator_impl::getVersion() {
 	case ::Astro::DeviceLocator::DEVICE_GUIDERPORT:
 		type = astro::device::DeviceLocator::GUIDERPORT;
 		break;
+	case ::Astro::DeviceLocator::DEVICE_FILTERWHEEL:
+		type = astro::device::DeviceLocator::FILTERWHEEL;
+		break;
 	}
 	std::vector<std::string>	devices
 		= _locator->getDevicelist(type);
@@ -49,13 +53,27 @@ GuiderPort_ptr	DeviceLocator_impl::getGuiderPort(const char *name) {
 	// find out whether this guider port has already been retrieved
 	std::string	guidername(name);
 	astro::camera::GuiderPortPtr	guiderport;
-	if (guiderportmap.find(guidername) != guiderportmap.end()) {
+	if (guiderportmap.find(guidername) == guiderportmap.end()) {
 		guiderport = _locator->getGuiderPort(guidername);
 		guiderportmap.insert(std::make_pair(guidername, guiderport));
 	} else {
 		guiderport = guiderportmap.find(guidername)->second;
 	}
 	GuiderPort_impl	*gp = new GuiderPort_impl(guiderport);
+	return gp->_this();
+}
+
+FilterWheel_ptr	DeviceLocator_impl::getFilterWheel(const char *name) {
+	// find out whether this guider port has already been retrieved
+	std::string	filtername(name);
+	astro::camera::FilterWheelPtr	filterwheel;
+	if (filterwheelmap.find(filtername) == filterwheelmap.end()) {
+		filterwheel = _locator->getFilterWheel(filtername);
+		filterwheelmap.insert(std::make_pair(filtername, filterwheel));
+	} else {
+		filterwheel = filterwheelmap.find(filtername)->second;
+	}
+	FilterWheel_impl	*gp = new FilterWheel_impl(filterwheel);
 	return gp->_this();
 }
 

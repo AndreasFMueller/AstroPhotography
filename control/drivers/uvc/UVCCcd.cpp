@@ -55,7 +55,7 @@ UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
  *
  * \param exposure 	Exposure parameters
  */
-void	UvcCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
+void	UvcCcd::startExposure(const Exposure& exposure) {
 	this->exposure = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	if (exposure.frame.size() != info.size()) {
@@ -115,7 +115,7 @@ std::pair<float, float>	UvcCcd::gainInterval() {
  * individual image. So we just retrieve an image of one image, and
  * extract the image from the sequence.
  */
-ImagePtr	UvcCcd::getImage() throw(not_implemented) {
+ImagePtr	UvcCcd::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image");
 	// retrieve an image
 	ImageSequence	sequence = getImageSequence(1);
@@ -128,8 +128,7 @@ ImagePtr	UvcCcd::getImage() throw(not_implemented) {
  * Get an image sequence
  * \param imagecount	length of the image sequence
  */
-ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount)
-	throw(not_implemented) {
+ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image sequence of %d images",
 		imagecount);
 	ImageSequence	result;

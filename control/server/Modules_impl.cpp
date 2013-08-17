@@ -57,7 +57,9 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 			result->open();
 		} catch (std::exception& x) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "exception: %s", x.what());
-			throw x;
+			NotFound	notfound;
+			notfound.cause = CORBA::string_dup(x.what());
+			throw notfound;
 		}
 		modulemap.insert(make_pair(name, result));
 	}

@@ -8,6 +8,7 @@
 #include <AstroImage.h>
 #include <AstroFilter.h>
 #include <AstroOperators.h>
+#include <AstroExceptions.h>
 #include <sx.h>
 #include <AstroDebug.h>
 #include <SxUtils.h>
@@ -20,11 +21,17 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief Construct an SxCcd
+ */
 SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 	: Ccd(info), camera(_camera), ccdindex(_ccdindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating CCD %d", ccdindex);
 }
 
+/**
+ * \brief Destroy an SxCcd
+ */
 SxCcd::~SxCcd() {
 }
 
@@ -45,10 +52,10 @@ void	*start_routine(void *arg) {
  * This method calls the "real" startExposure0 method and launches a thread
  * that performs the getImage0 method which will retrieve the image. 
  */
-void	SxCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
+void	SxCcd::startExposure(const Exposure& exposure) {
 	// if we are already exposing, we should not start a new exposure
 	if ((state != Exposure::idle) && (state != Exposure::exposed)) {
-		return;
+		throw BadState("exposure already in progress");
 	}
 
 	// start the exposure
@@ -68,10 +75,9 @@ void	SxCcd::startExposure(const Exposure& exposure) throw(not_implemented) {
  * This method is very simple as it only has to check whether the image has
  * already been exposed.
  */
-ImagePtr	SxCcd::getImage() throw(not_implemented) {
+ImagePtr	SxCcd::getImage() {
 	if (state != Exposure::exposed) {
-		// XXX bad things should happen
-		return ImagePtr();
+		throw BadState("no exposure available");
 	}
 	void	*result = NULL;
 	pthread_join(thread, &result);
@@ -96,13 +102,13 @@ bool	SxCcd::hasCooler() const {
  * This method builds a SxCooler objects and wraps in a CoolerPtr smart
  * pointer.
  */
-CoolerPtr	SxCcd::getCooler0() throw (not_implemented) {
+CoolerPtr	SxCcd::getCooler0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for cooler");
 	try {
 		return camera.getCooler(ccdindex);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cooler problem: %s", x.what());
-		throw not_implemented("no cooler");
+		throw NotImplemented("no cooler");
 	}
 }
 

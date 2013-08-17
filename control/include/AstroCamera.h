@@ -88,21 +88,6 @@ public:
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
 /**
- * \brief Exception for unimplementd stuff
- *
- * Rather than not implementing some of the functions, and thus creating
- * interface classes with many pure virtual functions which the user
- * must implement before it can at all be instantiated, we prefer 
- * the more dynamical approach of implementing all with a function that
- * throws a special exception designed to indicate that the function is
- * not implemented.
- */
-class not_implemented : public std::runtime_error {
-public:
-	not_implemented(const std::string& cause) : std::runtime_error(cause) {}
-};
-
-/**
  * \brief Class containing information about a CCD chip. 
  *
  * This class tracks commonly used information about a CCD chip inside
@@ -173,17 +158,15 @@ public:
 	const astro::image::ImageSize&	getSize() const { return info.size(); }
 
 	// methods to start/stop exposures
-	virtual void	startExposure(const Exposure& exposure)
-		throw (not_implemented);
-	virtual Exposure::State	exposureStatus() throw (not_implemented);
-	virtual void	cancelExposure() throw (not_implemented);
+	virtual void	startExposure(const Exposure& exposure);
+	virtual Exposure::State	exposureStatus();
+	virtual void	cancelExposure();
 	const Exposure&	getExposure() const { return exposure; }
 
 	// methods to control a shutter
 	bool	hasShutter() const { return info.shutter(); }
-	virtual shutter_state	getShutterState() throw(not_implemented);
-	virtual void	setShutterState(const shutter_state& state)
-		throw(not_implemented);
+	virtual shutter_state	getShutterState();
+	virtual void	setShutterState(const shutter_state& state);
 
 	// gain related methods
 	virtual bool	hasGain() { return false; }
@@ -192,18 +175,17 @@ public:
 	}
 
 	// image retrievel functions
-	virtual astro::image::ImagePtr	getImage() throw (not_implemented);
-	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount)
-		throw (not_implemented);
+	virtual astro::image::ImagePtr	getImage();
+	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount);
 
 	// handling the cooler
 private:
 	CoolerPtr	cooler;
 protected:
-	virtual CoolerPtr	getCooler0() throw (not_implemented);
+	virtual CoolerPtr	getCooler0();
 public:
 	virtual bool	hasCooler() const { return false; }
-	CoolerPtr	getCooler() throw (not_implemented);
+	CoolerPtr	getCooler();
 
 	// methods related to metadata
 	virtual void	addExposureMetadata(astro::image::ImageBase& image) const;
@@ -245,19 +227,19 @@ public:
 private:
 	FilterWheelPtr	filterwheel;
 protected:
-	virtual FilterWheelPtr	getFilterWheel0() throw (not_implemented);
+	virtual FilterWheelPtr	getFilterWheel0();
 public:
 	virtual bool	hasFilterWheel() const { return false; }
-	FilterWheelPtr	getFilterWheel() throw (not_implemented);
+	FilterWheelPtr	getFilterWheel();
 
 	// handling the guider port
 private:
 	GuiderPortPtr	guiderport;
 protected:
-	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+	virtual GuiderPortPtr	getGuiderPort0();
 public:
 	virtual bool	hasGuiderPort() const { return false; }
-	GuiderPortPtr	getGuiderPort() throw (not_implemented);
+	GuiderPortPtr	getGuiderPort();
 };
 typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 

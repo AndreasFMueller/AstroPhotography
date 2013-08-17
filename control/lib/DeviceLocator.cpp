@@ -38,6 +38,10 @@ astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort0(const std::string& na
 	throw std::runtime_error("guiderport not implemented");
 }
 
+astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const std::string& name) {
+	throw std::runtime_error("filterwheel not implemented");
+}
+
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
 	CameraPtr	camera;
 	if (cameracache.find(name) == cameracache.end()) {
@@ -66,6 +70,17 @@ astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& nam
 		guiderport = guiderportcache.find(name)->second;
 	}
 	return guiderport;
+}
+
+astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& name) {
+	FilterWheelPtr	filterwheel;
+	if (filterwheelcache.find(name) == filterwheelcache.end()) {
+		filterwheel = this->getFilterWheel0(name);
+		filterwheelcache.insert(std::make_pair(name, filterwheel));
+	} else {
+		filterwheel = filterwheelcache.find(name)->second;
+	}
+	return filterwheel;
 }
 
 } // namespace device

@@ -27,6 +27,10 @@ extern double	meanrel(const ImagePtr& image);
 
 extern double	median(const ImagePtr& image);
 
+extern int	bytespervalue(const ImagePtr& image);
+extern int	bytesperpixel(const ImagePtr& image);
+extern int	planes(const ImagePtr& image);
+
 extern double	focusFOM(const ImagePtr& image, const bool diagonal = false);
 extern double	focusFWHM(const ImagePtr& image, const ImagePoint& where,
 			unsigned int r);
@@ -36,6 +40,7 @@ extern void	mask(MaskingFunction& maskingfunction, ImagePtr image);
 extern double	rawvalue(const ImagePtr& image, const ImagePoint& point);
 
 extern bool	saturated(const ImagePtr& image, const ImageRectangle& rect);
+
 
 } // namespace filter
 } // namespace image

@@ -54,7 +54,7 @@ public:
 public:
 	virtual bool	hasGuiderPort() const { return _hasGuiderPort; }
 protected:
-	virtual GuiderPortPtr	getGuiderPort0() throw (not_implemented);
+	virtual GuiderPortPtr	getGuiderPort0();
 
 	// request handling
 public:
