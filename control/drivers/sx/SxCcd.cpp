@@ -177,12 +177,6 @@ void	SxCcd::getImage0() {
 		= new Image<unsigned short>(targetsize, data);
 	_image->setOrigin(exposure.frame.origin());
 
-for (unsigned int x = 500; x < 510; x++) {
-	for (unsigned int y = 500; y < 510; y++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel[%u,%u] = %d",
-			x, y, _image->pixel(x, y));
-	}
-}
 	// if this is a color camera (which we can find out from the model
 	// of the camera), then we should add RGB information to the image
 	// but only in 1x1 binning mode
