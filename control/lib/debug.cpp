@@ -8,25 +8,37 @@
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
+#endif /* HAVE_CONFIG_H */
+
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
+#endif /* HAVE_ERRNO_H */
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif /* HAVE_UNISTD_H */
+
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
-#endif
+#endif /* HAVE_SYSLOG_H */
+
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
+#endif /* HAVE_STDARG_H */
+
 #ifdef HAVE_STRING_H
 #include <string.h>
-#endif
+#endif /* HAVE_STRING_H */
+
 #include <time.h>
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif /* HAVE_SYS_TIME_H */
+
 int	debuglevel = LOG_ERR;
+
+int	debugtimeprecision = 0;
 
 extern "C" void	debug(int loglevel, const char *file, int line,
 	int flags, const char *format, ...) {
@@ -60,9 +72,22 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 	}
 
 	// get time
-	t = time(NULL);
-	tmp = localtime(&t);
-	strftime(tstp, sizeof(tstp), "%b %e %H:%M:%S", tmp);
+	struct timeval	tv;
+	gettimeofday(&tv, NULL);
+	tmp = localtime(&tv.tv_sec);
+	size_t	bytes = strftime(tstp, sizeof(tstp), "%b %e %H:%M:%S", tmp);
+
+	// high resolution time
+	if (debugtimeprecision > 0) {
+		if (debugtimeprecision > 6) {
+			debugtimeprecision = 6;
+		}
+		unsigned int	u = tv.tv_usec;
+		int	p = 6 - debugtimeprecision;
+		while (p--) { u /= 10; }
+		snprintf(tstp + bytes, sizeof(tstp) - bytes, ".%0*u",
+			debugtimeprecision, u);
+	}
 
 	// get prefix
 	if (flags & DEBUG_NOFILELINE) {
