@@ -110,7 +110,7 @@ module Astro {
 		 *			is usually not written, unless this
 		 *			parameter is set to true
 		 */
-		void	write(in string filename, in boolean overwrite);
+		string	write(in string filename, in boolean overwrite);
 		/**
 		 * \brief Number of bytes per pixel
 		 *

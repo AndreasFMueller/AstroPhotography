@@ -26,17 +26,28 @@ ImageSize	Image_impl::size() {
 	return result;
 }
 
-void	Image_impl::write(const char *filename, bool overwrite) {
+char	*Image_impl::write(const char *filename, bool overwrite) {
 	std::string	f(filename);
 	try {
 		astro::io::FITSout	out(f);
 		out.setPrecious(!overwrite);
 		out.write(_image);
 	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write image file: %s",
+			x.what());
 		IOException	ioexception;
 		ioexception.cause = x.what();
 		throw ioexception;
 	}
+	char	cwd[1024];
+	if (NULL == getcwd(cwd, sizeof(cwd))) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "CWD not found");
+		NotFound	notfound;
+		notfound.cause = (const char *)"current working directory not found";
+		throw notfound;
+	}
+	std::string	url = astro::stringprintf("file://%s/%s", cwd, filename);
+	return CORBA::string_dup(url.c_str());
 }
 
 CORBA::Long	Image_impl::bytesPerPixel() {
@@ -87,8 +98,9 @@ CORBA::Long	Image_impl::bytesPerValue() {
 	}								\
 }
 
-ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
-	ByteImage::ByteSequence	*result = new ByteImage::ByteSequence();
+Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
+	Astro::ByteImage::ByteSequence	*result
+		= new Astro::ByteImage::ByteSequence();
 	unsigned int	size = _image->size().getPixels();
 	size_t	bytes = astro::image::filter::planes(_image) * size;
 	result->length(bytes);
@@ -98,9 +110,9 @@ ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	return result;
 }
 
-ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
-	ShortImage::ShortSequence	*result
-		= new ShortImage::ShortSequence();
+Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
+	Astro::ShortImage::ShortSequence	*result
+		= new Astro::ShortImage::ShortSequence();
 	unsigned int	size = _image->size().getPixels();
 	size_t	shorts = astro::image::filter::planes(_image) * size;
 	result->length(shorts);

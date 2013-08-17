@@ -7,6 +7,7 @@
 #include "Cooler_impl.h"
 #include "Image_impl.h"
 #include <AstroExceptions.h>
+#include <AstroFilterfunc.h>
 
 using namespace astro::camera;
 
@@ -119,8 +120,26 @@ Image_ptr	Ccd_impl::getImage() {
 			throw badstate;
 		}
 	}
-	Image_impl	*imageptr = new Image_impl(image);
-	return imageptr->_this();
+	ByteImage_impl	*byteimage = NULL;
+	ShortImage_impl	*shortimage = NULL;
+	switch (astro::image::filter::bytespervalue(image)) {
+	case 1:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "byte pixels");
+		byteimage = new ByteImage_impl(image);
+		return byteimage->_this();
+	case 2:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "short pixels");
+		shortimage = new ShortImage_impl(image);
+		return shortimage->_this();
+	default:
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"don't know to handle this pixel type");
+		break;
+	}
+	NotImplemented	notimplemented;
+	notimplemented.cause
+		= (const char *)"image pixel type not implemented";
+	throw notimplemented;
 }
 
 /**

@@ -226,7 +226,25 @@ int	main(int argc, char *argv[]) {
 		image->size().width, image->size().height);
 
 	// write the image
-	image->write(outfilename.c_str(), true);
+	::CORBA::String_var	url = image->write(outfilename.c_str(), true);
+	std::cout << "url: " << url << std::endl;
+
+	// find out how large the values are
+	std::cout << "bytes per value: " << image->bytesPerValue() << std::endl;
+
+	// get the image data, but that depends on the type of pixels
+	ByteImage_ptr	byteimage = ByteImage::_narrow(image);
+	if (::CORBA::is_nil(byteimage)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "nil byte image");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a byte image");
+	}
+	ShortImage_ptr	shortimage = ShortImage::_narrow(image);
+	if (::CORBA::is_nil(shortimage)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "nil short image");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a short image");
+	}
 
 	return EXIT_SUCCESS;
 }
