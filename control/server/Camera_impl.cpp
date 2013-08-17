@@ -35,7 +35,7 @@ CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
 	Astro::CcdInfo	*result = new Astro::CcdInfo();
 
 	// copy simple members first
-	result->name = CORBA::String_member(info.name().c_str());
+	result->name = CORBA::string_dup(info.name().c_str());
 	result->id = info.getId();
 	result->size.width = info.size().width();
 	result->size.height = info.size().height();
