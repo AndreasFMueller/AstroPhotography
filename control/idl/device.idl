@@ -135,6 +135,22 @@ module Astro {
 		 * \brief Pixel value type size
 		 */
 		long	bytesPerValue();
+		/**
+		 * \brief Maximum pixel value
+		 */
+		double	max();
+		/**
+		 * \brief Minimum pixel value
+		 */
+		double	min();
+		/**
+		 * \brief Mean pixel value
+		 */
+		double	mean();
+		/**
+		 * \brief Median pixel value
+		 */
+		double	median();
 	};
 
 	/**

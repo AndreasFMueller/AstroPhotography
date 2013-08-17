@@ -15,8 +15,11 @@
 namespace astro {
 
 int	main(int argc, char *argv[]) {
+	debugtimeprecision = 3;
+
 	// initialize CORBA
-	CORBA::ORB_var	orb = CORBA::ORB_init(argc, argv);
+	const char* options[][2] = { { "giopMaxMsgSize", "40000000" }, { 0, 0 } }; 
+	CORBA::ORB_var	orb = CORBA::ORB_init(argc, argv, "omniORB4", options);
 
 	// now parse the command line
 	int	c;

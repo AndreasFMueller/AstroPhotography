@@ -10,6 +10,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Retrieve origin of the image
+ */
 ImagePoint	Image_impl::origin() {
 	astro::image::ImagePoint	o = _image->origin();
 	ImagePoint	result;
@@ -18,6 +21,9 @@ ImagePoint	Image_impl::origin() {
 	return result;
 }
 
+/**
+ * \brief Retrive size of the image
+ */
 ImageSize	Image_impl::size() {
 	astro::image::ImageSize	s = _image->size();
 	ImageSize	result;
@@ -26,6 +32,9 @@ ImageSize	Image_impl::size() {
 	return result;
 }
 
+/**
+ * \brief Write image to a file an return URL to the client
+ */
 char	*Image_impl::write(const char *filename, bool overwrite) {
 	std::string	f(filename);
 	try {
@@ -48,6 +57,22 @@ char	*Image_impl::write(const char *filename, bool overwrite) {
 	}
 	std::string	url = astro::stringprintf("file://%s/%s", cwd, filename);
 	return CORBA::string_dup(url.c_str());
+}
+
+CORBA::Double	Image_impl::max() {
+	return astro::image::filter::max(_image);
+}
+
+CORBA::Double	Image_impl::min() {
+	return astro::image::filter::min(_image);
+}
+
+CORBA::Double	Image_impl::mean() {
+	return astro::image::filter::mean(_image);
+}
+
+CORBA::Double	Image_impl::median() {
+	return astro::image::filter::median(_image);
 }
 
 CORBA::Long	Image_impl::bytesPerPixel() {

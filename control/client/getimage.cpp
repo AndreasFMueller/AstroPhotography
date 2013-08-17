@@ -48,6 +48,7 @@ void	usage(const char *progname) {
 }
 
 int	main(int argc, char *argv[]) {
+	debugtimeprecision = 3;
 	// parameters
 	unsigned int	cameranumber = 0;
 	unsigned int	ccdid = 0;
@@ -64,7 +65,9 @@ int	main(int argc, char *argv[]) {
 	double	temperature = -1;
 
 	// initialize the ORB
-	CORBA::ORB_ptr  orb = CORBA::ORB_init(argc, argv, "omniORB4");
+        const char* options[][2] = { { "giopMaxMsgSize", "40000000" }, { 0, 0 } };
+
+	CORBA::ORB_ptr  orb = CORBA::ORB_init(argc, argv, "omniORB4", options);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got ORB");
 
 	// parse command line
@@ -229,6 +232,12 @@ int	main(int argc, char *argv[]) {
 	::CORBA::String_var	url = image->write(outfilename.c_str(), true);
 	std::cout << "url: " << url << std::endl;
 
+	// basic image info:
+	std::cout << "Min:      " << image->min() << std::endl;
+	std::cout << "Max:      " << image->max() << std::endl;
+	std::cout << "Mean:     " << image->mean() << std::endl;
+	std::cout << "Median:   " << image->median() << std::endl;
+
 	// find out how large the values are
 	std::cout << "bytes per value: " << image->bytesPerValue() << std::endl;
 
@@ -238,12 +247,16 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "nil byte image");
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a byte image");
+		ByteImage::ByteSequence_var	bytes = byteimage->getBytes();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d bytes", bytes->length());
 	}
 	ShortImage_ptr	shortimage = ShortImage::_narrow(image);
 	if (::CORBA::is_nil(shortimage)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "nil short image");
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a short image");
+		ShortImage::ShortSequence_var	shorts = shortimage->getShorts();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d shorts", shorts->length());
 	}
 
 	return EXIT_SUCCESS;

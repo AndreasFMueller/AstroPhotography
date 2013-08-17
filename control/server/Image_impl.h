@@ -23,6 +23,10 @@ public:
 	virtual CORBA::Long	bytesPerPixel();
 	virtual CORBA::Long	bytesPerValue();
 	virtual CORBA::Long	planes();
+	virtual CORBA::Double	max();
+	virtual CORBA::Double	min();
+	virtual CORBA::Double	mean();
+	virtual CORBA::Double	median();
 };
 
 /*
