@@ -15,33 +15,39 @@ using namespace astro::image::filter;
 namespace astro {
 namespace task {
 
+/**
+ * \brief Initialize the Loop task
+ */
 Loop::Loop(CcdPtr ccd, const Exposure& exposure, FITSdirectory& directory)
 	: _ccd(ccd), _exposure(exposure), _directory(directory) {
-	_targetmean = -1;
-	_targetmedian = -1;
 	_nImages = 0;
 	_period = 1;
 	_align = false;
 }
 
-static const double	a = 0.5;
-
-static double	scalefactor(double x) {
-	double	y = x - 1;
-	double	result =  y * (1 - a * exp(-y * y)) + 1;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, scalefactor = %f", x, result);
-	return result;
-}
-
+/**
+ * \brief Execute the loop task
+ */
 void	Loop::execute() {
 	// find the first image time
 	time_t	start = time(NULL);
-	if (_align) {
-		start %= _period;
-		start += _period;
-	}
 	time_t	next = start;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "time for next image: %d", start);
+	if (_align) {
+		next = next - (next % _period);
+		next += _period;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "time for next image: %d (now %d)",
+		next, start);
+	if (next > start) {
+		int	waittime = next - start;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"waiting %d seconds for start time", waittime);
+		sleep(waittime);
+	}
+
+	// make sure that the timer does not increase the exposure time beyond
+	// the period
+	_timer.limit(_period);
 
 	// now initialize exposure computation loop
 	double	exposuretime = _exposure.exposuretime;
@@ -73,27 +79,10 @@ void	Loop::execute() {
 
 		// compute the next exposure time, for this we need the
 		// mean of the pixel values
-		if (_targetmean > 0) {
-			double	mnew = mean(image);
-			double	newexp = exposuretime * scalefactor(_targetmean / mnew);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
-				"actual mean = %f, current exposure time = %f, "
-				"new = %f", _targetmean, mnew, exposuretime,
-				newexp);
-			exposuretime = newexp;
-		}
-		if ((_targetmean < 0) && (_targetmedian > 0)) {
-			double	mnew = median(image);
-			double	newexp = exposuretime * scalefactor(_targetmedian / mnew);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "target median = %f, "
-				"actual median = %f, current exposure time = %f, "
-				"new = %f", _targetmedian, mnew, exposuretime,
-				newexp);
-			exposuretime = newexp;
-		}
-		if (exposuretime > _period) {
-			exposuretime = _period;
-		}
+		_timer.update(image);
+
+		// ensure that we don't exceed the period
+		exposuretime = _timer;
 
 		// now wait to the next time we start an image, if there is
 		// any time to sleep at all

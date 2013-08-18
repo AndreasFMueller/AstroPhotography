@@ -57,18 +57,11 @@ void	usage(const char *progname) {
 	std::cout << "  -t           use timestamps as filenames" << std::endl;
 	std::cout << "  -e time      (initial) exposure time, modified later if target mean set" << std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
-	std::cout << "               that the mean pixel value stays close to mean" << std::endl;
+	std::cout << "               that the mean pixel value stays close to <mean>" << std::endl;
+	std::cout << "  -M meadian   attemtp to vary the exposure time in such a way that" << std::endl;
+	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
 	std::cout << "  -F           stay in the foreground" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
-}
-
-static const double	a = 0.5;
-
-double	scalefactor(double x) {
-	double	y = x - 1;
-	double	result =  y * (1 - a * exp(-y * y)) + 1;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, scalefactor = %f", x, result);
-	return result;
 }
 
 static unsigned int	nImages = 1;
@@ -79,6 +72,7 @@ static bool	align = false;	// indicates whether exposures should be
 				// synchronized with the clock
 static bool	timestamped = false;
 static double		targetmean = 0;
+static double		targetmedian = 0;
 static FITSdirectory::filenameformat	format;
 static const char	*outpath = ".";
 
@@ -88,7 +82,7 @@ static const char	*outpath = ".";
  * In this mode, we create a new directory every night, and only take images
  * during the night.
  */
-void	nightloop(CcdPtr ccd, Exposure& exposure) {
+void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "night only");
 
 	// we need a sun object for our location to compute sunrise and
@@ -173,9 +167,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure) {
 			loop.period(period);
 			loop.nImages(nImages);
 			loop.align(align);
-			if (targetmean > 0) {
-				loop.targetmean(targetmean);
-			}
+			loop.timer(timer);
 
 			// run the loop
 			loop.execute();
@@ -184,7 +176,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure) {
 	}
 }
 
-void	loop(CcdPtr ccd, Exposure& exposure) {
+void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 	// make sure the target directory exists
 	FITSdirectory	directory(outpath, format);
 	if (timestamped) {
@@ -200,9 +192,7 @@ void	loop(CcdPtr ccd, Exposure& exposure) {
 	loop.period(period);
 	loop.nImages(nImages);
 	loop.align(align);
-	if (targetmean > 0) {
-		loop.targetmean(targetmean);
-	}
+	loop.timer(timer);
 
 	// run the loop
 	loop.execute();
@@ -224,7 +214,7 @@ int	main(int argc, char *argv[]) {
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NF"))) {
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:"))) {
 		switch (c) {
 		case 'a':
 			align = true;
@@ -268,6 +258,9 @@ int	main(int argc, char *argv[]) {
 		case 'E':
 			targetmean = atof(optarg);
 			break;
+		case 'M':
+			targetmedian = atof(optarg);
+			break;
 		case 'p':
 			period = atoi(optarg);
 			break;
@@ -291,7 +284,7 @@ int	main(int argc, char *argv[]) {
 
 	// if E is set, and the initial exposure time is zero, then
 	// we should change it to something more reasonable
-	if ((0 != targetmean) && (exposuretime == 0)) {
+	if (((0 != targetmean) || (0 != targetmedian)) && (exposuretime == 0)) {
 		std::string	msg("cannot change exposure time dynamically "
 			"starting from 0");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -359,12 +352,22 @@ int	main(int argc, char *argv[]) {
                         ImageSize(width, height)));
 	Exposure	exposure(imagerectangle, exposuretime);
 
+	// depending on the target values, construct a timer
+	ExposureTimer	timer;
+	if (targetmean > 0) {
+		timer = ExposureTimer(exposure.exposuretime,
+			targetmean, ExposureTimer::MEAN);
+	} else if (targetmedian > 0) {
+		timer = ExposureTimer(exposure.exposuretime,
+			targetmedian, ExposureTimer::MEDIAN);
+	}
+
 	// if night only was requested, then we need a Sun object, and
 	// we have to find out 
 	if (night) {
-		nightloop(ccd, exposure);
+		nightloop(ccd, exposure, timer);
 	} else {
-		loop(ccd, exposure);
+		loop(ccd, exposure, timer);
 	}
 
 	return EXIT_SUCCESS;

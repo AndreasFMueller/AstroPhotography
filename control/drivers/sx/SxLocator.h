@@ -17,6 +17,13 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief The Locator class for Starlight Express devices
+ *
+ * All Starlight Express devices are USB devices, so this locator is 
+ * essentially a wrapper around a USB context which serves as a factory
+ * for the Starlight Express USB devices.
+ */
 class SxCameraLocator : public DeviceLocator {
 	Context	context;
 public:

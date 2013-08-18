@@ -38,7 +38,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
 	Guiding.cpp GuiderProcess.cpp Simulator.cpp \
-	Exposure.cpp Binning.cpp Loop.cpp \
+	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
