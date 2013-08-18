@@ -45,8 +45,8 @@ void	Loop::execute() {
 
 	// now initialize exposure computation loop
 	double	exposuretime = _exposure.exposuretime;
-	unsigned int	counter = 0;
-	while ((counter++ < _nImages) || (_nImages == 0)) {
+	_counter = 0;
+	while ((_counter++ < _nImages) || (_nImages == 0)) {
 		// make sure the exposure time is not too long
 		time_t	now = time(NULL);
 		while (next <= now) {
@@ -97,7 +97,7 @@ void	Loop::execute() {
 
 		// now wait to the next time we start an image, if there is
 		// any time to sleep at all
-		if ((counter < _nImages) || (_nImages == 0)) {
+		if ((_counter < _nImages) || (_nImages == 0)) {
 			now = time(NULL);
 			time_t	delta = next - now;
 			if (delta > 0) {

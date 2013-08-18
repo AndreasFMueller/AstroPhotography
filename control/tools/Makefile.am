@@ -78,4 +78,4 @@ logscale_DEPENDENCIES = ../lib/libastro.la
 logscale_LDADD = -L../lib -lastro
 
 looptest:	imageloop
-	./imageloop -d -p 15 -t -m sx -n 3 -e 0.01 -E 10000 -o cat -a 
+	./imageloop -d -p 15 -t -m sx -n 5 -e 0.01 -E 10000 -o cat -a -L 77.5 -l 47.2 -N -F

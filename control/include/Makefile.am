@@ -13,4 +13,4 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
 	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h
 
-noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h
+noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h Sun.h

@@ -72,6 +72,65 @@ FITSdirectory::FITSdirectory(const std::string& _path, filenameformat format)
 }
 
 /**
+ * \brief Construct a new FITSdirectory based on a date
+ *
+ * This method creates a directory from the time using the prefix/YYYY/mm/dd
+ * format.
+ */
+FITSdirectory::FITSdirectory(const std::string& prefix, const time_t when,
+	filenameformat format) : _format(format) {
+	// some auxiliary variables we need for initialization
+	struct stat	sb;
+	char	p[1024];
+
+	// get local time of timestamp
+	struct tm	*lt = localtime(&when);
+
+	// year directory
+	snprintf(p, sizeof(p), "%s/%04d", prefix.c_str(), lt->tm_year + 1900);
+	if ((stat(p, &sb) < 0) && (errno == ENOENT)) {
+		if (mkdir(p, 0777) < 0) {
+			std::string	msg = stringprintf(
+				"cannot create year directory %s: %s",
+				p, strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+
+	// month directory
+	snprintf(p, sizeof(p), "%s/%04d/%02d", prefix.c_str(),
+		lt->tm_year + 1900, lt->tm_mon + 1);
+	if ((stat(p, &sb) < 0) && (errno == ENOENT)) {
+		if (mkdir(p, 0777) < 0) {
+			std::string	msg = stringprintf(
+				"cannot create month directory %s: %s",
+				p, strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+
+	// day directory
+	snprintf(p, sizeof(p), "%s/%04d/%02d/%02d", prefix.c_str(),
+		lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday);
+	if ((stat(p, &sb) < 0) && (errno == ENOENT)) {
+		if (mkdir(p, 0777) < 0) {
+			std::string	msg = stringprintf(
+				"cannot create day directory %s: %s",
+				p, strerror(errno));
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+	}
+	path = std::string(p);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "path set to: %s", path.c_str());
+
+	// now do the normal setup
+	setup();
+}
+
+/**
  * \brief Add an image file to the directory
  *
  * This method locks the index file, reads the contents from it, creates 

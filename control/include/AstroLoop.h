@@ -19,6 +19,7 @@ class Loop {
 	double	_targetmean;
 	double	_targetmedian;
 	unsigned int	_nImages;
+	unsigned int	_counter;
 	unsigned int	_period;
 	bool	_align;
 public:
@@ -37,6 +38,7 @@ public:
 	void	align(bool align) { _align = align; }
 	// do the work
 	void	execute();
+	unsigned int	counter() const { return _counter; }
 };
 
 } // namespace task

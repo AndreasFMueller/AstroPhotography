@@ -14,6 +14,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroDevice.h>
 #include <AstroLoop.h>
+#include <Sun.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -25,8 +26,11 @@ using namespace astro::task;
 
 namespace astro {
 
+/**
+ * \brief Usage of the imageloop program
+ */
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -ad? ] [ -m module ] [ -C cameraid ] [ -c ccdid ] [ -n nimages ] [ -p period ] [ -E targetmean ] [ -e exposuretime ] [ -w width ] [ -h height ] [ -x xoffset ] [ -y yoffset ] [ -o directory ]" << std::endl;
+	std::cout << "usage: " << progname << " [ -adNF? ] [ -m module ] [ -C cameraid ] [ -c ccdid ] [ -n nimages ] [ -p period ] [ -E targetmean ] [ -e exposuretime ] [ -w width ] [ -h height ] [ -x xoffset ] [ -y yoffset ] [ -L longitude ] [ -l latitude ] [ -o directory ]" << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d           increase deug level" << std::endl;
 	std::cout << "  -m module    load camera module" << std::endl;
@@ -40,6 +44,12 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -y yoffset   vertical offset of image rectangle"
 		<< std::endl;
+	std::cout << "  -L longitude logitude of the camera location"
+		<< std::endl;
+	std::cout << "  -l latitude  latitude of the camera location"
+		<< std::endl;
+	std::cout << "  -N           take images during the night only"
+		<< std::endl;
 	std::cout << "  -n images    number of images, 0 means never stop"
 		<< std::endl;
 	std::cout << "  -o outdir    directory where files should be placed"
@@ -48,6 +58,7 @@ void	usage(const char *progname) {
 	std::cout << "  -e time      (initial) exposure time, modified later if target mean set" << std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the mean pixel value stays close to mean" << std::endl;
+	std::cout << "  -F           stay in the foreground" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
 }
 
@@ -60,8 +71,145 @@ double	scalefactor(double x) {
 	return result;
 }
 
+static unsigned int	nImages = 1;
+static double		longitude = 0;
+static double		latitude = 0;
+static unsigned int	period = 1; // one second
+static bool	align = false;	// indicates whether exposures should be
+				// synchronized with the clock
+static bool	timestamped = false;
+static double		targetmean = 0;
+static FITSdirectory::filenameformat	format;
+static const char	*outpath = ".";
+
+/**
+ * \brief Loop for night only mode
+ *
+ * In this mode, we create a new directory every night, and only take images
+ * during the night.
+ */
+void	nightloop(CcdPtr ccd, Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "night only");
+
+	// we need a sun object for our location to compute sunrise and
+	// sunset times
+	Sun	sun(longitude, latitude);
+	unsigned int	counter = 0;
+
+	// take images until we have enough (which might be without end)
+	while ((counter < nImages) || (nImages == 0)) {
+		// first compute sunrise and sunset times
+		time_t	now;
+		time(&now);
+		time_t	sunrise = sun.sunrise(now);
+		time_t	sunset = sun.sunset(now);
+
+		if (debuglevel == LOG_DEBUG) {
+			char	sunrise_s[26];	ctime_r(&sunrise, sunrise_s);
+			char	sunset_s[26];	ctime_r(&sunset, sunset_s);
+			char	now_s[26];	ctime_r(&now, now_s);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"sunrise: %24.24s, now: %24.24s, sunset: %24.24s",
+				sunrise_s, now_s, sunset_s);
+		}
+
+		// there are three situations: 
+		// 1. daylight
+		// 2. night before midnight
+		// 3. night after midnight
+		int	nightimages = 0;
+		time_t	dirtimestamp;
+		if ((sunrise <= now) && (now < sunset)) {
+			int	sleeptime = sunset - now;
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"daylight, waiting %d seconds for sunset",
+				sleeptime);
+			sleep(sleeptime);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "night");
+			if (now < sunrise) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "after midnight");
+				// compute the directory name from t - 86400
+				dirtimestamp = now - 86400;
+				// number of images to take till sunrise
+				nightimages = (sunrise - now) / period;
+			}
+			if (sunset < now) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "before midnight");
+				// use now to ocmpute directory name
+				dirtimestamp = now;
+				// compute sunrise for next day
+				sunrise = sun.sunrise(now + 86400);
+				nightimages = (sunrise - now) / period;
+			}
+			FITSdirectory	directory(outpath, dirtimestamp,
+				format);
+			if (timestamped) {
+				if (period >= 60) {
+					directory.timestampformat("%H%M");
+				} else {
+					directory.timestampformat("%H%M%S");
+				}
+			}
+			if (nightimages <= 0) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"no work: %d images", nightimages);
+				continue;
+			}
+
+			// find out whether we have to take all those images
+			// or whether the nImages parameter limits them
+			if (nImages) {
+				int	maximages = nImages - counter;
+				if (maximages < nightimages) {
+					nightimages = maximages;
+				}
+			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "need to take %d images",
+				nightimages);
+
+			// now create the Loop object
+			Loop	loop(ccd, exposure, directory);
+			loop.period(period);
+			loop.nImages(nImages);
+			loop.align(align);
+			if (targetmean > 0) {
+				loop.targetmean(targetmean);
+			}
+
+			// run the loop
+			loop.execute();
+			counter += loop.counter();
+		}
+	}
+}
+
+void	loop(CcdPtr ccd, Exposure& exposure) {
+	// make sure the target directory exists
+	FITSdirectory	directory(outpath, format);
+	if (timestamped) {
+		if (period >= 60) {
+			directory.timestampformat("%H%M");
+		} else {
+			directory.timestampformat("%H%M%S");
+		}
+	}
+
+	// now create the Loop object
+	Loop	loop(ccd, exposure, directory);
+	loop.period(period);
+	loop.nImages(nImages);
+	loop.align(align);
+	if (targetmean > 0) {
+		loop.targetmean(targetmean);
+	}
+
+	// run the loop
+	loop.execute();
+}
+
+
 int	main(int argc, char *argv[]) {
-std::cout << "number of arguments: " << argc << std::endl;
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	int	c;
@@ -69,19 +217,14 @@ std::cout << "number of arguments: " << argc << std::endl;
 	unsigned int	height = 0;
 	unsigned int	xoffset = 0;
 	unsigned int	yoffset = 0;
-	const char	*outpath = ".";
 	unsigned int	cameraid = 0;
 	unsigned int	ccdid = 0;
-	unsigned int	nImages = 1;
 	double	exposuretime = 0.1;
 	const char	*modulename = "uvc";
-	double		targetmean = 0;
-	unsigned int	period = 1; // one second
-	bool	align = false;	// indicates whether exposures should be
-				// synchronized with the clock
-	bool	timestamped = false;
+	bool	night = false;
+	bool	daemonize = true;
 	while (EOF != (c = getopt(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?"))) {
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NF"))) {
 		switch (c) {
 		case 'a':
 			align = true;
@@ -131,6 +274,18 @@ std::cout << "number of arguments: " << argc << std::endl;
 		case 't':
 			timestamped = true;
 			break;
+		case 'l':
+			latitude = atof(optarg);
+			break;
+		case 'L':
+			longitude = atof(optarg);
+			break;
+		case 'N':
+			night = true;
+			break;
+		case 'F':
+			daemonize = false;
+			break;
 		}
 	}
 
@@ -143,19 +298,28 @@ std::cout << "number of arguments: " << argc << std::endl;
 		throw std::runtime_error(msg);
 	}
 
-	// make sure the target directory exists
-	FITSdirectory::filenameformat	format
-		= (timestamped)	? FITSdirectory::TIMESTAMP
+	// daemonize
+	if (daemonize) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "daemonizing");
+		pid_t	pid = fork();
+		if (pid < 0) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot fork: %s",
+				strerror(errno));
+			return EXIT_FAILURE;
+		}
+		if (pid > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "parent exit");
+			return EXIT_SUCCESS;
+		}
+		setsid();
+		umask(022);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "child process started");
+	}
+
+	// what format for the file names is expected?
+	format = (timestamped)	? FITSdirectory::TIMESTAMP
 				: FITSdirectory::COUNTER;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %d", format);
-	FITSdirectory	directory(outpath, format);
-	if (timestamped) {
-		if (period >= 60) {
-			directory.timestampformat("%H%M");
-		} else {
-			directory.timestampformat("%H%M%S");
-		}
-	}
 
 	// load the module
 	Repository      repository;
@@ -163,7 +327,7 @@ std::cout << "number of arguments: " << argc << std::endl;
 	ModulePtr       module = repository.getModule(modulename);
 	module->open();
 
-        // get the camera
+        // get the camera list
 	DeviceLocatorPtr        locator = module->getDeviceLocator();
 	std::vector<std::string>        cameras = locator->getDevicelist();
 	if (cameraid >= cameras.size()) {
@@ -183,7 +347,7 @@ std::cout << "number of arguments: " << argc << std::endl;
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd: %s",
                 ccd->getInfo().toString().c_str());
 
-	// find a fitting image rectangle
+	// find a fitting image rectangle, initialize the exposure structure
         if (width == 0) {
                 width = ccd->getInfo().size().width();
         }
@@ -195,17 +359,13 @@ std::cout << "number of arguments: " << argc << std::endl;
                         ImageSize(width, height)));
 	Exposure	exposure(imagerectangle, exposuretime);
 
-	// now create the Loop object
-	Loop	loop(ccd, exposure, directory);
-	loop.period(period);
-	loop.nImages(nImages);
-	loop.align(align);
-	if (targetmean > 0) {
-		loop.targetmean(targetmean);
+	// if night only was requested, then we need a Sun object, and
+	// we have to find out 
+	if (night) {
+		nightloop(ccd, exposure);
+	} else {
+		loop(ccd, exposure);
 	}
-
-	// run the loop
-	loop.execute();
 
 	return EXIT_SUCCESS;
 }

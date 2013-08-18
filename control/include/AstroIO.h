@@ -604,6 +604,8 @@ private:
 public:
 	FITSdirectory(filenameformat format = COUNTER);
 	FITSdirectory(const std::string& path, filenameformat format = COUNTER);
+	FITSdirectory(const std::string& prefix, const time_t when,
+		filenameformat format = COUNTER);
 	// accessors
 	const std::string&	prefix() const { return _prefix; }
 	void	prefix(const std::string& prefix) { _prefix = prefix; }
