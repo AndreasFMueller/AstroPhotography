@@ -69,7 +69,7 @@ void	Device::close() {
  * \param _dev_handle	The libusb_device_handle structure to use if
  *			the device is already open.
  */
-Device::Device(Context *_context, libusb_device *_dev,
+Device::Device(ContextHolderPtr _context, libusb_device *_dev,
 	libusb_device_handle *_dev_handle)
 	: context(_context), dev(_dev), dev_handle(_dev_handle) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -138,7 +138,7 @@ ConfigurationPtr	Device::config(uint8_t index) throw(USBError) {
  * or the libusb_handle, although it apparently keeps references to the
  * context internally.
  */
-Context	*Device::getContext() const {
+ContextHolderPtr	Device::getContext() const {
 	return context;
 }
 

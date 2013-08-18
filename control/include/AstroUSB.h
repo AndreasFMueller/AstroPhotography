@@ -43,7 +43,20 @@ public:
 	USBError(const char *error) : std::runtime_error(error) { }
 };
 
-class Context; // forward declaration for the friend class
+/**
+ * \brief Holder class for USB context
+ */
+class ContextHolder {
+	libusb_context	*_context;
+public:
+	ContextHolder();
+	~ContextHolder();
+	libusb_context	*context() { return _context; }
+};
+typedef std::tr1::shared_ptr<ContextHolder>	ContextHolderPtr;
+
+class Context; // forward declaration for the context class
+typedef std::tr1::shared_ptr<Context>	ContextPtr;
 
 // forward declarations for return types of descriptor query functions
 class DeviceDescriptor;
@@ -114,12 +127,12 @@ typedef std::tr1::shared_ptr<Transfer>	TransferPtr;
  * The Device class is just a wrapper around it.
  */
 class 	Device {
-	Context	*context;
+	ContextHolderPtr	context;
 	libusb_device	*dev;
 	libusb_device_handle	*dev_handle;
 
 	// Device objects can only be created from a Context
-	Device(Context *context, libusb_device *dev,
+	Device(ContextHolderPtr context, libusb_device *dev,
 		libusb_device_handle *dev_handle = NULL);
 
 	// Device objects cannot be copied
@@ -144,7 +157,7 @@ public:
 	ConfigurationPtr	activeConfig() throw(USBError);
 	ConfigurationPtr	configValue(uint8_t value) throw(USBError);
 	std::string	getStringDescriptor(uint8_t index) const throw(USBError);
-	Context	*getContext() const;
+	ContextHolderPtr	getContext() const;
 
 	// find all the interface association descriptors
 	std::list<USBDescriptorPtr>	interfaceAssociationDescriptors(bool videoonly)
@@ -196,7 +209,7 @@ std::ostream&	operator<<(std::ostream& out, const Device& device);
  * has gone out of scope.
  */
 class	Context {
-	libusb_context	*context;
+	ContextHolderPtr	context;
 	Context(const Context& other);
 public:
 	Context() throw(USBError);

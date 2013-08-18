@@ -45,7 +45,8 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp \
-	USBContext.cpp USBDevice.cpp USBDeviceDescriptor.cpp \
+	USBContextHolder.cpp USBContext.cpp \
+	USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
 	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \

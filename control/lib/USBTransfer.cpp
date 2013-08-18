@@ -39,7 +39,7 @@ bool	Transfer::isComplete() const {
 
 libusb_context	*Transfer::getContext() {
 	libusb_context  *ctx
-                = endpoint->device().getContext()->getLibusbContext();
+                = endpoint->device().getContext()->context();
 	return ctx;
 }
 

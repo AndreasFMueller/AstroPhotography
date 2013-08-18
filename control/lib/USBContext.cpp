@@ -16,25 +16,17 @@ namespace usb {
 /**
  * \brief Create an USB context
  *
+ * We keep a reference to the context so that we can be sure that the context
+ * is closed only when all other USB structures have been deallocated.
  */
 Context::Context() throw(USBError) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating USB context");
-	int	rc = libusb_init(&context);
-	if (rc != 0) {
-		throw USBError(libusb_error_name(rc));
-	}
-	const libusb_version	*version = libusb_get_version();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "libusb version: %hu.%hu.%hu",
-		version->major, version->minor, version->micro);
+	context = ContextHolderPtr(new ContextHolder());
 }
 
 /**
  * \brief Destroy the USB context
  */
 Context::~Context() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying USB context");
-	libusb_exit(context);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "USB context destroyed");
 }
 
 /**
@@ -46,7 +38,7 @@ void	Context::setDebugLevel(int level) throw (std::range_error) {
 	if ((level < 0) || (level > 3)) {
 		throw std::range_error("invalid USB debug level");
 	}
-	libusb_set_debug(context, level);
+	libusb_set_debug(context->context(), level);
 }
 
 /**
@@ -55,13 +47,13 @@ void	Context::setDebugLevel(int level) throw (std::range_error) {
 std::vector<DevicePtr>	Context::devices() throw (USBError) {
 	std::vector<DevicePtr>	result;
 	libusb_device	**devlist;
-	ssize_t	length = libusb_get_device_list(context, &devlist);
+	ssize_t	length = libusb_get_device_list(context->context(), &devlist);
 	if (length < 0) {
 		throw USBError(libusb_error_name(length));
 	}
 	if (length > 0) {
 		for (int i = 0; i < length; i++) {
-			DevicePtr	dev(new Device(this, devlist[i]));
+			DevicePtr	dev(new Device(context, devlist[i]));
 			result.push_back(dev);
 		}
 	}
@@ -79,13 +71,13 @@ DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id)
 	throw(USBError) {
 	// open the device handle
 	libusb_device_handle	*dev_handle = libusb_open_device_with_vid_pid(
-						context, vendor_id, product_id);
+		context->context(), vendor_id, product_id);
 	if (NULL == dev_handle) {
 		throw USBError("cannot open device");
 	}
 
 	// get the device structure for thie device handle
-	Device	*devptr = new Device(this, libusb_get_device(dev_handle),
+	Device	*devptr = new Device(context, libusb_get_device(dev_handle),
 		dev_handle);
 	return DevicePtr(devptr);
 }
@@ -94,7 +86,7 @@ DevicePtr	Context::find(uint16_t vendor_id, uint16_t product_id)
  * \brief get the Libusb context
  */
 libusb_context	*Context::getLibusbContext() const {
-	return context;
+	return context->context();
 }
 
 } // namespace usb
