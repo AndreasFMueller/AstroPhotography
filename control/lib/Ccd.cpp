@@ -137,11 +137,13 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
  * call this method as the first step in their implementation, because
  * this method also sets up the infrastructure for the wait method.
  */
-void    Ccd::startExposure(const Exposure& exposure) {
+void    Ccd::startExposure(const Exposure& _exposure) {
+	exposure = _exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %s",
 		exposure.toString().c_str());
 	if (Exposure::idle != state) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "start exposure only in idle state");
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"start exposure only in idle state");
 		throw BadState("start exposure only in idle state");
 	}
         if (!info.size().bounds(exposure.frame)) {
@@ -189,12 +191,20 @@ bool	Ccd::wait() {
 	if (Exposure::exposing == state) {
 		// has the exposure time already expired? If so, we wait at
 		// least as the exposure time indicates
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"lastexposurestart: %d, exposuretime: %f",
+			lastexposurestart, exposure.exposuretime);
+		double	endtime = lastexposurestart;
+		endtime += exposure.exposuretime;
 		time_t	now = time(NULL);
-		double	delta = now - lastexposurestart;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
+		unsigned int	delta = endtime - now;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %u", delta);
 		if (delta > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
-				"to expire: %.3f", delta);
-			usleep(1000000 * delta);
+				"to expire: %u", delta);
+			sleep(delta);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
 		}
 		// now wait in 0.1 second intervals until either the exposure
 		// completes or we have waited for 30 seconds
