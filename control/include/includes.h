@@ -42,6 +42,10 @@
 #include <fcntl.h>
 #endif /* HAVE_FCNTL_H */
 
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif /* HAVE_SYS_FILE_H */
+
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif /* HAVE_DIRENT_H */
