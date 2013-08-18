@@ -6,6 +6,7 @@
  */
 #include <AstroImage.h>
 #include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -71,10 +72,11 @@ bool	ImageSize::bounds(const ImagePoint& p) const {
  */
 bool	ImageSize::bounds(const ImageRectangle& rect) const {
 	if (!bounds(rect.origin())) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "origin outside");
 		return false;
 	}
-	return bounds(ImagePoint(rect.origin().x() + rect.size().width(),
-		rect.origin().y() + rect.size().height()));
+	return bounds(ImagePoint(rect.origin().x() + rect.size().width() - 1,
+		rect.origin().y() + rect.size().height() - 1));
 }
 
 /**
