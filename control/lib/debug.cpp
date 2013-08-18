@@ -36,9 +36,13 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
 
+#include <pthread.h>
+
 int	debuglevel = LOG_ERR;
 
 int	debugtimeprecision = 0;
+
+int	debugthreads = 0;
 
 extern "C" void	debug(int loglevel, const char *file, int line,
 	int flags, const char *format, ...) {
@@ -56,7 +60,8 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 	time_t		t;
 	struct tm	*tmp;
 	char	msgbuffer[MSGSIZE], prefix[MSGSIZE],
-		msgbuffer2[MSGSIZE], tstp[MSGSIZE];
+		msgbuffer2[MSGSIZE], tstp[MSGSIZE],
+		threadid[20];
 	int	localerrno;
 
 	if (loglevel > debuglevel) { return; }
@@ -89,13 +94,21 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 			debugtimeprecision, u);
 	}
 
+	// find the current thread id if necessary
+	if (debugthreads) {
+		snprintf(threadid, sizeof(threadid), "/%04x",
+			((unsigned long)pthread_self()) % 0x10000);
+	} else {
+		threadid[0] = '\0';
+	}
+
 	// get prefix
 	if (flags & DEBUG_NOFILELINE) {
-		snprintf(prefix, sizeof(prefix), "%s %s[%d]:",
-			tstp, "astro", getpid());
+		snprintf(prefix, sizeof(prefix), "%s %s[%d%s]:",
+			tstp, "astro", getpid(), threadid);
 	} else {
-		snprintf(prefix, sizeof(prefix), "%s %s[%d] %s:%03d:",
-			tstp, "astro", getpid(), file, line);
+		snprintf(prefix, sizeof(prefix), "%s %s[%d%s] %s:%03d:",
+			tstp, "astro", getpid(), threadid, file, line);
 	}
 
 	// format log message

@@ -21,6 +21,7 @@ extern "C" {
 
 extern int	debuglevel;
 extern int	debugtimeprecision;
+extern int	debugthreads;
 extern void	debug(int loglevel, const char *filename, int line,
 			int flags, const char *format, ...);
 extern void	vdebug(int loglevel, const char *filename, int line,
