@@ -19,14 +19,10 @@ namespace mock1 {
  * \brief Start an exposure
  */
 void    Mock1Ccd::startExposure(const Exposure& exposure) {
-	if (state != Exposure::idle) {
-		throw BadState("CCD not idle");
-	}
-	if (!info.size().bounds(exposure.frame)) {
-		throw BadParameter("exposure does not fit ccd");
-	}
+	Ccd::startExposure(exposure);
 	frame = exposure.frame;
 	state = Exposure::exposing;
+	// XXX should start a thread that does nothing for exposuretime seconds
 	sleep(1);
 	state = Exposure::exposed;
 }

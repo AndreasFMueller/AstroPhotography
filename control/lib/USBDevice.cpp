@@ -224,6 +224,7 @@ void	Device::releaseInterface(uint8_t interface) throw(USBError) {
 			interface, libusb_error_name(rc));
 		throw USBError(libusb_error_name(rc));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface released");
 }
 
 /**

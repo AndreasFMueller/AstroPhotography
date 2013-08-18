@@ -151,6 +151,7 @@ protected:
 	float		setTemperature;
 	Exposure	exposure;
 	void	addBinning(const Binning& binning);
+	time_t	lastexposurestart;
 public:
 	Ccd(const CcdInfo& _info) : info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
@@ -162,6 +163,7 @@ public:
 	virtual Exposure::State	exposureStatus();
 	virtual void	cancelExposure();
 	const Exposure&	getExposure() const { return exposure; }
+	virtual bool	wait();
 
 	// methods to control a shutter
 	bool	hasShutter() const { return info.shutter(); }

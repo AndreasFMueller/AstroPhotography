@@ -53,14 +53,11 @@ void	*start_routine(void *arg) {
  * that performs the getImage0 method which will retrieve the image. 
  */
 void	SxCcd::startExposure(const Exposure& exposure) {
-	// if we are already exposing, we should not start a new exposure
-	if ((state != Exposure::idle) && (state != Exposure::exposed)) {
-		throw BadState("exposure already in progress");
-	}
+	Ccd::startExposure(exposure);
 
 	// start the exposure
-	this->startExposure0(exposure);
 	state = Exposure::exposing;
+	this->startExposure0(exposure);
 
 	// create a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");

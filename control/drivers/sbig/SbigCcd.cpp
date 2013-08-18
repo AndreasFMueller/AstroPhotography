@@ -93,13 +93,9 @@ Exposure::State	SbigCcd::exposureStatus() {
 void	SbigCcd::startExposure(const Exposure& exposure) {
 	SbigLock	lock;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startExposure on ccd %d", id);
-	// check whether we are already exposing
-	if ((state == Exposure::exposing) || (state == Exposure::cancelling)) {
-		throw BadState("exposure already in progress");
-	}
 
-	// XXX make sure that the subframe parameters are compatible with the
-	//     binning mode
+	// do common start exposure stuff
+	Ccd::startExposure(exposure);
 
 	camera.sethandle();
 	this->exposure = exposure;

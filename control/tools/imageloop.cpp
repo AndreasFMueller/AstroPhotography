@@ -13,6 +13,7 @@
 #include <AstroFilter.h>
 #include <AstroFilterfunc.h>
 #include <AstroDevice.h>
+#include <AstroLoop.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -20,14 +21,19 @@ using namespace astro::module;
 using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::image::filter;
+using namespace astro::task;
 
 namespace astro {
 
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -d? ] [ -m module ] [ -w width ] [ -h height ] [ -x xoffset ] [ -y yoffset ] [ -o directory ]" << std::endl;
+	std::cout << "usage: " << progname << " [ -ad? ] [ -m module ] [ -C cameraid ] [ -c ccdid ] [ -n nimages ] [ -p period ] [ -E targetmean ] [ -e exposuretime ] [ -w width ] [ -h height ] [ -x xoffset ] [ -y yoffset ] [ -o directory ]" << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d           increase deug level" << std::endl;
 	std::cout << "  -m module    load camera module" << std::endl;
+	std::cout << "  -C cameraid  which camera to use, default 0" << std::endl;
+	std::cout << "  -c ccdid     which ccd to use, default 0" << std::endl;
+	std::cout << "  -n nimages   number of images to retrieve" << std::endl;
+	std::cout << "  -p period    image period" << std::endl;
 	std::cout << "  -w width     width of image rectangle" << std::endl;
 	std::cout << "  -h height    height of image rectangle" << std::endl;
 	std::cout << "  -x xoffset   horizontal offset of image rectangle"
@@ -38,6 +44,8 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << "  -o outdir    directory where files should be placed"
 		<< std::endl;
+	std::cout << "  -t           use timestamps as filenames" << std::endl;
+	std::cout << "  -e time      (initial) exposure time, modified later if target mean set" << std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the mean pixel value stays close to mean" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
@@ -53,6 +61,9 @@ double	scalefactor(double x) {
 }
 
 int	main(int argc, char *argv[]) {
+std::cout << "number of arguments: " << argc << std::endl;
+	debugtimeprecision = 3;
+	debugthreads = 1;
 	int	c;
 	unsigned int	width = 0;
 	unsigned int	height = 0;
@@ -65,9 +76,16 @@ int	main(int argc, char *argv[]) {
 	double	exposuretime = 0.1;
 	const char	*modulename = "uvc";
 	double		targetmean = 0;
-	unsigned int	period = 1;
-	while (EOF != (c = getopt(argc, argv, "dw:x:y:w:h:o:C:c:n:e:E:m:p:?")))
+	unsigned int	period = 1; // one second
+	bool	align = false;	// indicates whether exposures should be
+				// synchronized with the clock
+	bool	timestamped = false;
+	while (EOF != (c = getopt(argc, argv,
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?"))) {
 		switch (c) {
+		case 'a':
+			align = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
@@ -110,7 +128,11 @@ int	main(int argc, char *argv[]) {
 		case 'p':
 			period = atoi(optarg);
 			break;
+		case 't':
+			timestamped = true;
+			break;
 		}
+	}
 
 	// if E is set, and the initial exposure time is zero, then
 	// we should change it to something more reasonable
@@ -122,7 +144,18 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// make sure the target directory exists
-	FITSdirectory	directory(outpath);
+	FITSdirectory::filenameformat	format
+		= (timestamped)	? FITSdirectory::TIMESTAMP
+				: FITSdirectory::COUNTER;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %d", format);
+	FITSdirectory	directory(outpath, format);
+	if (timestamped) {
+		if (period >= 60) {
+			directory.timestampformat("%H%M");
+		} else {
+			directory.timestampformat("%H%M%S");
+		}
+	}
 
 	// load the module
 	Repository      repository;
@@ -160,53 +193,19 @@ int	main(int argc, char *argv[]) {
         ImageRectangle  imagerectangle = ccd->getInfo().clipRectangle(
                 ImageRectangle(ImagePoint(xoffset, yoffset),
                         ImageSize(width, height)));
+	Exposure	exposure(imagerectangle, exposuretime);
 
-	// find the first image time
-	time_t	start = time(NULL);
-	time_t	next = start;
-
-	// now initialize exposure computation loop
-	unsigned int	counter = 0;
-	while ((counter++ < nImages) || (nImages == 0)) {
-		// make sure the exposure time is not too long
-		time_t	now = time(NULL);
-		while (next <= now) {
-			next += period;
-		}
-		if (exposuretime > (next - now)) {
-			exposuretime = next - now;
-		}
-
-		// get an exposure
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s, time %fs",
-			imagerectangle.toString().c_str(), exposuretime);
-		// get an image with the current parameters
-		Exposure	exposure(imagerectangle, exposuretime);
-		ccd->startExposure(exposure);
-		ImagePtr	image = ccd->getImage();
-		directory.add(image);
-
-		// compute the next exposure time, for this we need the
-		// mean of the pixel values
-		if (targetmean != 0) {
-			double	mnew = mean(image);
-			double	newexp = exposuretime * scalefactor(targetmean / mnew);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "target mean = %f, "
-				"actual mean = %f, current exposure time = %f, "
-				"new = %f", targetmean, mnew, exposuretime,
-				newexp);
-			exposuretime = newexp;
-		}
-
-		// now wait to the next
-		now = time(NULL);
-		time_t	delta = next - now;
-		if (delta > 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %d seconds",
-				delta);
-			sleep(delta);
-		}
+	// now create the Loop object
+	Loop	loop(ccd, exposure, directory);
+	loop.period(period);
+	loop.nImages(nImages);
+	loop.align(align);
+	if (targetmean > 0) {
+		loop.targetmean(targetmean);
 	}
+
+	// run the loop
+	loop.execute();
 
 	return EXIT_SUCCESS;
 }

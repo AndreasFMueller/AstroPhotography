@@ -178,11 +178,12 @@ int	main(int argc, char *argv[]) {
 
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s, temperature = %f",
-		ccd->hasCooler() ? "YES" : "NO", temperature);
 	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s, temperature = %f",
+		usecooler ? "YES" : "NO", temperature);
 	CoolerPtr	cooler;
 	if (usecooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
 		cooler = ccd->getCooler();
 		cooler->setTemperature(temperature);
 		cooler->setOn(true);
@@ -202,12 +203,16 @@ int	main(int argc, char *argv[]) {
 	// prepare an exposure object
 	Exposure	exposure(imagerectangle, exposuretime);
 	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
+		exposure.toString().c_str());
 
 	// start the exposure
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	ccd->startExposure(exposure);
 
 	// read all images
 	ImageSequence	images = ccd->getImageSequence(nImages);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieved %d images", images.size());
 
 	// turn of the cooler to save energy
 	if (usecooler) {
@@ -232,6 +237,7 @@ int	main(int argc, char *argv[]) {
 		FITSout	out(filename);
 		out.write(*imageptr);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
 
 	return EXIT_SUCCESS;
 }

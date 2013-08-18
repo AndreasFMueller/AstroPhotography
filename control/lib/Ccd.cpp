@@ -130,15 +130,27 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
 /**
  * \brief Start an exposure
  *
- * Override this function to initiate an exposure. This function
- * should return immediately. The caller can then use the exposureStatus
- * method to monitor the progress of the exposure.
+ * Initiate an exposure. The base class method performs some common
+ * sanity checks (e.g. it will not accept subframes that don't fit within
+ * the CCD area), and it will reject requests if an exposure is already in
+ * progress. Derived classes should override this methode, but they should
+ * call this method as the first step in their implementation, because
+ * this method also sets up the infrastructure for the wait method.
  */
 void    Ccd::startExposure(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %s",
+		exposure.toString().c_str());
 	if (Exposure::idle != state) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "start exposure only in idle state");
 		throw BadState("start exposure only in idle state");
 	}
-	throw NotImplemented("startExposureStatus not implemented");
+        if (!info.size().bounds(exposure.frame)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "exposure does not fit in ccd");
+                throw BadParameter("exposure does not fit ccd");
+        }
+	time(&lastexposurestart);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
+		lastexposurestart);
 }
 
 /**
@@ -165,6 +177,43 @@ void    Ccd::cancelExposure() {
 }
 
 /**
+ * \brief Waiting for completion is generic (except possibly for UVC cameras)
+ */
+bool	Ccd::wait() {
+	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot wait: no exposure in progress");
+		throw BadState("cannot wait: no exposure requested");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for exposure to complete");
+	if (Exposure::exposing == state) {
+		// has the exposure time already expired? If so, we wait at
+		// least as the exposure time indicates
+		time_t	now = time(NULL);
+		double	delta = now - lastexposurestart;
+		if (delta > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
+				"to expire: %.3f", delta);
+			usleep(1000000 * delta);
+		}
+		// now wait in 0.1 second intervals until either the exposure
+		// completes or we have waited for 30 seconds
+		double	step = 0.1;
+		int	counter = 300;
+		while ((counter-- > 0) && (Exposure::exposing == state)) {
+			usleep(step * 1000000);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %d", counter);
+		}
+		if (counter == 0) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"timeout waiting for exposure");
+			// XXX bad things should happen
+		}
+	}
+	return (Exposure::exposed == state);
+}
+
+/**
  * \brief Retrieve an image from the camera
  */
 astro::image::ImagePtr	Ccd::getImage() {
@@ -188,6 +237,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 		if (k > 0) {
 			startExposure(exposure);
 		}
+		wait();
 		result.push_back(getImage());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %d retrieved", k);
 		k++;
