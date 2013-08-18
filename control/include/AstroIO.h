@@ -592,12 +592,28 @@ public:
  * \brief Image directory
  */
 class FITSdirectory {
+public:
+	typedef enum { COUNTER, TIMESTAMP } filenameformat;
+private:
 	std::string	path;
 	std::string	indexfile;
+	std::string	_prefix;
+	filenameformat	_format;
+	std::string	_timestampformat;
 	void	setup();
 public:
-	FITSdirectory();
-	FITSdirectory(const std::string& path);
+	FITSdirectory(filenameformat format = COUNTER);
+	FITSdirectory(const std::string& path, filenameformat format = COUNTER);
+	// accessors
+	const std::string&	prefix() const { return _prefix; }
+	void	prefix(const std::string& prefix) { _prefix = prefix; }
+	const std::string&	timestampformat() const {
+		return _timestampformat;
+	}
+	void	timestampformat(const std::string& timestampformat) {
+		_timestampformat = timestampformat;
+	}
+	// add an image
 	void	add(const ImagePtr& image);
 };
 

@@ -35,6 +35,11 @@ void	FITSdirectory::setup() {
 		}
 	}
 
+	// set default timestamp format
+	if (_format == TIMESTAMP) {
+		timestampformat = "%Y%m%d-%H%M%S";
+	}
+
 	// ensure the index file exists
 	indexfile = stringprintf("%s/index", path.c_str());
 	if (stat(indexfile.c_str(), &sb) < 0) {
@@ -44,15 +49,32 @@ void	FITSdirectory::setup() {
 	}
 }
 
-FITSdirectory::FITSdirectory() : path(".") {
+FITSdirectory::FITSdirectory(filenameformat format)
+	: path("."), _format(format) {
 	setup();
 }
 
-FITSdirectory::FITSdirectory(const std::string& _path) : path(_path) {
+FITSdirectory::FITSdirectory(const std::string& _path, filenameformat format)
+	: path(_path), _format(format) {
 	setup();
 }
 
+/**
+ * \brief Add an image file to the directory
+ *
+ * This method locks the index file, reads the contents from it, creates 
+ * a suiteable file name, writes the image to the new file name, and 
+ * unlocks the index file. This ensures that even concurrently accessing
+ * writers will get different file names.
+ */
 void	FITSdirectory::add(const ImagePtr& image) {
+	// lock the index file
+	int	fd = open(indexfile.c_str(), O_RDONLY);
+	if (flock(fd, LOCK_EX) < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot lock index file, proceed at your own peril");
+	}
+
 	// read the number from the index file
 	std::ifstream	in(indexfile.c_str());
 	unsigned int	index;
@@ -66,12 +88,43 @@ void	FITSdirectory::add(const ImagePtr& image) {
 	out << index << std::endl;
 	out.close();
 
+	// construct the filename
+	std::string	filename;
+	if (_format == COUNTER) {
+		filename = stringprintf("%s/%05d.fits", path.c_str(), index);
+	} else {
+		// build a timestamp as the filename, without the extension
+		char	buffer[1024];
+		time_t	now = time(NULL);
+		struct tm	*lt = localtime(&now);
+		strftime(buffer, sizeof(buffer), timestampformat.c_str(), lt);
+		filename = stringprintf("%s/%s", path.c_str(), buffer);
+
+		// it could happen that the file name already exists, so
+		// we add counter suffixes until we find a name that does not
+		// exist yet
+		struct stat	sb;
+		int	suffix = 0;
+		std::string	suffixedfilename = filename + ".fits";
+		while (stat(suffixedfilename.c_str(), &sb)) {
+			suffix++;
+			suffixedfilename = stringprintf("%s-%d.fits",
+				filename.c_str(), suffix);
+		}
+
+		// the last suffixed filename is ok for writing
+		filename = suffixedfilename;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename: %s", filename.c_str());
+
 	// create a new file
-	std::string	filename
-		= stringprintf("%s/%05d.fits", path.c_str(), index);
 	unlink(filename.c_str());
 	FITSout	fitsout(filename);
 	fitsout.write(image);
+
+	// unlock the index file
+	flock(fd, LOCK_UN);
+	close(fd);
 }
 
 
