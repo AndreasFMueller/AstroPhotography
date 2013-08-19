@@ -29,6 +29,7 @@ AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 	AC_MSG_ERROR([required library LAPACK not found]))
 AC_CHECK_LIB([fftw3], [fftw_malloc])
+AC_CHECK_LIB([pthread], [pthread_create])
 
 ######################################################################
 # decide whether or not to build the test programs
