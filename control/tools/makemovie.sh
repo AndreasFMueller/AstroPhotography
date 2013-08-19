@@ -15,11 +15,18 @@ year=`basename ${dir}`
 
 mpegname=${year}${month}${day}.mpg
 
-sleep 2
-
 cd ${directory}
 files=`echo *.jpeg | wc -w`
 
 echo producing ${mpegname} from ${files} JPEG images
+
+if [ -x /usr/local/bin/makemovie ]
+then
+	/usr/local/bin/makemovie ${directory} ${mpegname}
+else
+	echo "simulating movie creation"
+	sleep 2
+	echo "movie created"
+fi
 
 exit 0

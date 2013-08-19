@@ -290,7 +290,7 @@ public:
  */
 class GuiderPort : public astro::device::Device {
 public:
-	GuiderPort();
+	GuiderPort(const std::string name = std::string(""));
 	virtual ~GuiderPort();
 
 	typedef enum {
