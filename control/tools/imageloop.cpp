@@ -310,7 +310,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// what format for the file names is expected?
-	format = (timestamped)	? FITSdirectory::TIMESTAMP
+	format = (timestamped)	? FITSdirectory::BOTH
 				: FITSdirectory::COUNTER;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %d", format);
 
