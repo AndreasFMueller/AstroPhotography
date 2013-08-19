@@ -172,7 +172,12 @@ void	FITSdirectory::add(const ImagePtr& image) {
 		time_t	now = time(NULL);
 		struct tm	*lt = localtime(&now);
 		strftime(buffer, sizeof(buffer), _timestampformat.c_str(), lt);
-		filename = stringprintf("%s/%s", path.c_str(), buffer);
+		if (_format == BOTH) {
+			filename = stringprintf("%s/%05d-%s", path.c_str(),
+				index, buffer);
+		} else {
+			filename = stringprintf("%s/%s", path.c_str(), buffer);
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file base: %s",
 			filename.c_str());
 

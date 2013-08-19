@@ -593,7 +593,7 @@ public:
  */
 class FITSdirectory {
 public:
-	typedef enum { COUNTER, TIMESTAMP } filenameformat;
+	typedef enum { COUNTER, TIMESTAMP, BOTH } filenameformat;
 private:
 	std::string	path;
 	std::string	indexfile;
