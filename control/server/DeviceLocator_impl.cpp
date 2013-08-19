@@ -20,7 +20,9 @@ char	*DeviceLocator_impl::getVersion() {
 }
 
 ::Astro::DeviceLocator::DeviceNameList	*DeviceLocator_impl::getDevicelist(::Astro::DeviceLocator::device_type devicetype) {
-	astro::device::DeviceLocator::device_type	type;
+	astro::device::DeviceLocator::device_type	type
+		= astro::device::DeviceLocator::CAMERA;
+		// initialize to silence compiler
 	switch (devicetype) {
 	case ::Astro::DeviceLocator::DEVICE_CAMERA:
 		type = astro::device::DeviceLocator::CAMERA;
