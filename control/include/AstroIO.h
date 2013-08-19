@@ -595,7 +595,7 @@ class FITSdirectory {
 public:
 	typedef enum { COUNTER, TIMESTAMP, BOTH } filenameformat;
 private:
-	std::string	path;
+	std::string	_path;
 	std::string	indexfile;
 	std::string	_prefix;
 	filenameformat	_format;
@@ -615,6 +615,7 @@ public:
 	void	timestampformat(const std::string& timestampformat) {
 		_timestampformat = timestampformat;
 	}
+	const std::string&	path() const { return _path; }
 	// add an image
 	std::string	add(const ImagePtr& image);
 };

@@ -14,6 +14,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroDevice.h>
 #include <AstroLoop.h>
+#include <AstroCallback.h>
 #include <Sun.h>
 
 using namespace astro;
@@ -63,6 +64,7 @@ void	usage(const char *progname) {
 	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
 	std::cout << "  -F           stay in the foreground" << std::endl;
 	std::cout << "  -P prog      processing script for individual images" << std::endl;
+	std::cout << "  -Q prog      processing script called at the end of a loop" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
 }
 
@@ -78,6 +80,7 @@ static double		targetmedian = 0;
 static FITSdirectory::filenameformat	format;
 static const char	*outpath = ".";
 static CallbackPtr	imagecallback;
+static CallbackPtr	loopcallback;
 
 /**
  * \brief Loop for night only mode
@@ -175,7 +178,26 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 
 			// run the loop
 			loop.execute();
+
+			// count the images we have built so far
 			counter += loop.counter();
+
+			// execute the end loop programming
+			if (loopcallback) {
+				// ensure we are waiting for termination of
+				// the callback
+				ImageProgramCallback	*ipcb
+					= dynamic_cast<ImageProgramCallback *>(&*loopcallback);
+				if (ipcb) {
+					ipcb->wait(true);
+				}
+				// prepare the argument data
+				CallbackDataPtr	cbd(
+					new ImageCallbackData(directory.path(),
+						ImagePtr()));
+				// now call the callback
+				(*loopcallback)(cbd);
+			}
 		}
 	}
 }
@@ -201,6 +223,14 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 
 	// run the loop
 	loop.execute();
+
+	// execute the end loop programming
+	if (loopcallback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "loop callback");
+		CallbackDataPtr	cbd(
+			new ImageCallbackData(directory.path(), ImagePtr()));
+		(*loopcallback)(cbd);
+	}
 }
 
 
@@ -219,7 +249,7 @@ int	main(int argc, char *argv[]) {
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:"))) {
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:Q:"))) {
 		switch (c) {
 		case 'a':
 			align = true;
@@ -286,6 +316,10 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'P':
 			imagecallback = CallbackPtr(
+				new ImageProgramCallback(std::string(optarg)));
+			break;
+		case 'Q':
+			loopcallback = CallbackPtr(
 				new ImageProgramCallback(std::string(optarg)));
 			break;
 		}

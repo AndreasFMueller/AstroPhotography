@@ -62,6 +62,8 @@ public:
 	ImageProgramCallback(const std::string& progname, bool wait = false)
 		: _progname(progname), _wait(wait) { }
 	std::string	progname() const { return _progname; }
+	bool	wait() const { return _wait; }
+	void	wait(bool wait) { _wait = wait; }
 	CallbackDataPtr	operator()(CallbackDataPtr data);
 };
 

@@ -21,21 +21,22 @@ namespace io {
  */
 void	FITSdirectory::setup() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "format: %s, path: %s",
-		(_format == TIMESTAMP) ? "timestamp" : "counter", path.c_str());
+		(_format == TIMESTAMP) ? "timestamp" : "counter",
+		_path.c_str());
 
 	// check that directory exists, and create it if necessary
 	struct stat	sb;
-	if (stat(path.c_str(), &sb) < 0) {
-		if (mkdir(path.c_str(), 0777) < 0) {
+	if (stat(_path.c_str(), &sb) < 0) {
+		if (mkdir(_path.c_str(), 0777) < 0) {
 			std::string	msg = stringprintf("cannot create "
-				"%s: %s", path.c_str(), strerror(errno));
+				"%s: %s", _path.c_str(), strerror(errno));
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}
 	} else {
 		if (!S_ISDIR(sb.st_mode)) {
 			std::string	msg = stringprintf("%s exists but is "
-				"not a directory", path.c_str());
+				"not a directory", _path.c_str());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}
@@ -47,7 +48,7 @@ void	FITSdirectory::setup() {
 	}
 
 	// ensure the index file exists
-	indexfile = stringprintf("%s/index", path.c_str());
+	indexfile = stringprintf("%s/index", _path.c_str());
 	if (stat(indexfile.c_str(), &sb) < 0) {
 		std::ofstream	out(indexfile.c_str());
 		out << 0 << std::endl;;
@@ -59,15 +60,15 @@ void	FITSdirectory::setup() {
  * \brief Construct a new FITSdirectory in the current working directory
  */
 FITSdirectory::FITSdirectory(filenameformat format)
-	: path("."), _format(format) {
+	: _path("."), _format(format) {
 	setup();
 }
 
 /**
  * \brief Construct a new FITSdirectory in a given path
  */
-FITSdirectory::FITSdirectory(const std::string& _path, filenameformat format)
-	: path(_path), _format(format) {
+FITSdirectory::FITSdirectory(const std::string& path, filenameformat format)
+	: _path(path), _format(format) {
 	setup();
 }
 
@@ -123,8 +124,8 @@ FITSdirectory::FITSdirectory(const std::string& prefix, const time_t when,
 			throw std::runtime_error(msg);
 		}
 	}
-	path = std::string(p);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "path set to: %s", path.c_str());
+	_path = std::string(p);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "path set to: %s", _path.c_str());
 
 	// now do the normal setup
 	setup();
@@ -165,7 +166,7 @@ std::string	FITSdirectory::add(const ImagePtr& image) {
 	// construct the filename
 	std::string	filename;
 	if (_format == COUNTER) {
-		filename = stringprintf("%s/%05d.fits", path.c_str(), index);
+		filename = stringprintf("%s/%05d.fits", _path.c_str(), index);
 	} else {
 		// build a timestamp as the filename, without the extension
 		char	buffer[1024];
@@ -173,10 +174,10 @@ std::string	FITSdirectory::add(const ImagePtr& image) {
 		struct tm	*lt = localtime(&now);
 		strftime(buffer, sizeof(buffer), _timestampformat.c_str(), lt);
 		if (_format == BOTH) {
-			filename = stringprintf("%s/%05d-%s", path.c_str(),
+			filename = stringprintf("%s/%05d-%s", _path.c_str(),
 				index, buffer);
 		} else {
-			filename = stringprintf("%s/%s", path.c_str(), buffer);
+			filename = stringprintf("%s/%s", _path.c_str(), buffer);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file base: %s",
 			filename.c_str());
