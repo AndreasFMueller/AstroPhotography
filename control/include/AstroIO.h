@@ -616,7 +616,7 @@ public:
 		_timestampformat = timestampformat;
 	}
 	// add an image
-	void	add(const ImagePtr& image);
+	std::string	add(const ImagePtr& image);
 };
 
 } // namespace io

@@ -138,7 +138,7 @@ FITSdirectory::FITSdirectory(const std::string& prefix, const time_t when,
  * unlocks the index file. This ensures that even concurrently accessing
  * writers will get different file names.
  */
-void	FITSdirectory::add(const ImagePtr& image) {
+std::string	FITSdirectory::add(const ImagePtr& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image");
 	// lock the index file
 	int	fd = open(indexfile.c_str(), O_RDONLY);
@@ -210,6 +210,9 @@ void	FITSdirectory::add(const ImagePtr& image) {
 	flock(fd, LOCK_UN);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock released");
 	close(fd);
+
+	// return the file name
+	return filename;
 }
 
 

@@ -23,6 +23,7 @@ using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::image::filter;
 using namespace astro::task;
+using namespace astro::callback;
 
 namespace astro {
 
@@ -61,6 +62,7 @@ void	usage(const char *progname) {
 	std::cout << "  -M meadian   attemtp to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
 	std::cout << "  -F           stay in the foreground" << std::endl;
+	std::cout << "  -P prog      processing script for individual images" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
 }
 
@@ -75,6 +77,7 @@ static double		targetmean = 0;
 static double		targetmedian = 0;
 static FITSdirectory::filenameformat	format;
 static const char	*outpath = ".";
+static CallbackPtr	imagecallback;
 
 /**
  * \brief Loop for night only mode
@@ -168,6 +171,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 			loop.nImages(nightimages);
 			loop.align(align);
 			loop.timer(timer);
+			loop.newImageCallback(imagecallback);
 
 			// run the loop
 			loop.execute();
@@ -193,6 +197,7 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 	loop.nImages(nImages);
 	loop.align(align);
 	loop.timer(timer);
+	loop.newImageCallback(imagecallback);
 
 	// run the loop
 	loop.execute();
@@ -214,7 +219,7 @@ int	main(int argc, char *argv[]) {
 	bool	night = false;
 	bool	daemonize = true;
 	while (EOF != (c = getopt(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:"))) {
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:"))) {
 		switch (c) {
 		case 'a':
 			align = true;
@@ -278,6 +283,10 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'F':
 			daemonize = false;
+			break;
+		case 'P':
+			imagecallback = CallbackPtr(
+				new ImageProgramCallback(std::string(optarg)));
 			break;
 		}
 	}

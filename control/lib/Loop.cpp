@@ -11,6 +11,7 @@
 using namespace astro::camera;
 using namespace astro::io;
 using namespace astro::image::filter;
+using namespace astro::callback;
 
 namespace astro {
 namespace task {
@@ -75,11 +76,19 @@ void	Loop::execute() {
 			// XXX bad things should happen
 		}
 		ImagePtr	image = _ccd->getImage();
-		_directory.add(image);
+		std::string	imagefilename = _directory.add(image);
 
 		// compute the next exposure time, for this we need the
 		// mean of the pixel values
 		_timer.update(image);
+
+		// if the call back is set, then we should also run the
+		// callback on the image
+		if (_newImageCallback) {
+			CallbackDataPtr	cbd = CallbackDataPtr(
+				new ImageCallbackData(imagefilename, image));
+			(*_newImageCallback)(cbd);
+		}
 
 		// ensure that we don't exceed the period
 		exposuretime = _timer;

@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroIO.h>
+#include <AstroCallback.h>
 
 namespace astro {
 namespace task {
@@ -53,6 +54,7 @@ class Loop {
 	unsigned int	_counter;
 	unsigned int	_period;
 	bool	_align;
+	astro::callback::CallbackPtr	_newImageCallback;
 public:
 	Loop(astro::camera::CcdPtr ccd, const astro::camera::Exposure& exposure, astro::io::FITSdirectory& directory);
 	// accessors
@@ -65,6 +67,7 @@ public:
 	void	period(unsigned int period) { _period = period; }
 	bool	align() const { return _align; }
 	void	align(bool align) { _align = align; }
+	void	newImageCallback(astro::callback::CallbackPtr callback) { _newImageCallback = callback; }
 	// do the work
 	void	execute();
 	unsigned int	counter() const { return _counter; }
