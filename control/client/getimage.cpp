@@ -66,7 +66,7 @@ int	main(int argc, char *argv[]) {
 
 	// parse command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:lm:h:w:x:y:?Dt:")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:m:h:w:x:y:?Dt:")))
 		switch (c) {
 		case 'D':
 			dark = true;
