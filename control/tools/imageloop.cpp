@@ -139,7 +139,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 			FITSdirectory	directory(outpath, dirtimestamp,
 				format);
 			if (timestamped) {
-				if (period >= 60) {
+				if (period >= 120) {
 					directory.timestampformat("%H%M");
 				} else {
 					directory.timestampformat("%H%M%S");
@@ -165,7 +165,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 			// now create the Loop object
 			Loop	loop(ccd, exposure, directory);
 			loop.period(period);
-			loop.nImages(nImages);
+			loop.nImages(nightimages);
 			loop.align(align);
 			loop.timer(timer);
 
