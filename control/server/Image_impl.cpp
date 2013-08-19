@@ -7,6 +7,7 @@
 
 #include <AstroIO.h>
 #include <AstroFilterfunc.h>
+#include <includes.h>
 
 namespace Astro {
 
