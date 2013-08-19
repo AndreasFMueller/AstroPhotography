@@ -24,9 +24,6 @@ void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -e exptime     exposure time"
 		<< std::endl;
-	std::cout << " -p prefix      prefix of captured image files"
-		<< std::endl;
-	std::cout << " -o outputdir      outputdir directory" << std::endl;
 	std::cout << " -m modulename  driver modue name, type of the camera"
 		<< std::endl;
 	std::cout << " -C cameraid    camera number (default 0)"
@@ -57,10 +54,7 @@ int	main(int argc, char *argv[]) {
 	unsigned int	width = 0;
 	unsigned int	height = 0;
 	float	exposuretime = 0.01;
-	const char	*outputdir = ".";
-	const char	*prefix = "test";
 	const char	*cameratype = "uvc";
-	bool	listonly = false;
 	bool	dark = false;
 	double	temperature = -1;
 
@@ -72,7 +66,7 @@ int	main(int argc, char *argv[]) {
 
 	// parse command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:lp:o:m:h:w:x:y:?Dt:")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:lm:h:w:x:y:?Dt:")))
 		switch (c) {
 		case 'D':
 			dark = true;
@@ -83,12 +77,6 @@ int	main(int argc, char *argv[]) {
 		case 'e':
 			exposuretime = atof(optarg);
 			break;
-		case 'p':
-			prefix = optarg;
-			break;
-		case 'o':
-			outputdir = optarg;
-			break;
 		case 'm':
 			cameratype = optarg;
 			break;
@@ -97,9 +85,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'c':
 			ccdid = atoi(optarg);
-			break;
-		case 'l':
-			listonly = true;
 			break;
 		case 'w':
 			width = atoi(optarg);
