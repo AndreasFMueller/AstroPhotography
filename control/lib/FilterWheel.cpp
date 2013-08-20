@@ -5,10 +5,12 @@
  */
 #include <AstroCamera.h>
 
+using namespace astro::device;
+
 namespace astro {
 namespace camera {
 
-FilterWheel::FilterWheel() {
+FilterWheel::FilterWheel(const std::string name) : Device(name) {
 }
 
 FilterWheel::~FilterWheel() {

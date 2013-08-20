@@ -42,6 +42,10 @@ astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const std::string& 
 	throw std::runtime_error("filterwheel not implemented");
 }
 
+astro::camera::CoolerPtr	DeviceLocator::getCooler0(const std::string& name) {
+	throw std::runtime_error("cooler not implemented");
+}
+
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
 	CameraPtr	camera;
 	if (cameracache.find(name) == cameracache.end()) {
@@ -81,6 +85,17 @@ astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& n
 		filterwheel = filterwheelcache.find(name)->second;
 	}
 	return filterwheel;
+}
+
+astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
+	CoolerPtr	cooler;
+	if (coolercache.find(name) == coolercache.end()) {
+		cooler = this->getCooler0(name);
+		coolercache.insert(std::make_pair(name, cooler));
+	} else {
+		cooler = coolercache.find(name)->second;
+	}
+	return cooler;
 }
 
 } // namespace device

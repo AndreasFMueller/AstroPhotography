@@ -8,7 +8,7 @@
 namespace astro {
 namespace camera {
 
-GuiderPort::GuiderPort(const std::string& name) : Device(name) {
+GuiderPort::GuiderPort(const std::string name) : Device(name) {
 }
 
 GuiderPort::~GuiderPort() {

@@ -11,6 +11,7 @@ namespace camera {
 namespace simulator {
 
 double	simtime();
+void	simtime_advance(double delta);
 
 } // namespace simulator
 } // namespace camera

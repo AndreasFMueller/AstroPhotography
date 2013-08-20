@@ -75,7 +75,7 @@ SimLocator::~SimLocator() {
  * \brief Get module name.
  */
 std::string	SimLocator::getName() const {
-	return std::string("sim");
+	return std::string("simulator");
 }
 
 /**
@@ -109,6 +109,9 @@ std::vector<std::string>	SimLocator::getDevicelist(
 		break;
 	case DeviceLocator::FOCUSER:
 		names.push_back(std::string("sim-focuser"));
+		break;
+	case DeviceLocator::COOLER:
+		names.push_back(std::string("sim-cooler"));
 		break;
 	}
 	return names;
@@ -145,6 +148,31 @@ FilterWheelPtr	SimLocator::getFilterWheel0(const std::string& name) {
 		throw NotFound("no such camera");
 	}
 	return _filterwheel;
+}
+
+CoolerPtr	SimLocator::getCooler0(const std::string& name) {
+	if (name != "sim-cooler") {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cooler %s does not exist",
+			name.c_str());
+		throw NotFound("no such cooler");
+	}
+	return _cooler;
+}
+
+SimCamera	*SimLocator::simcamera() {
+	return dynamic_cast<SimCamera *>(&*_camera);
+}
+
+SimFilterWheel	*SimLocator::simfilterwheel() {
+	return dynamic_cast<SimFilterWheel *>(&*_filterwheel);
+}
+
+SimGuiderPort	*SimLocator::simguiderport() {
+	return dynamic_cast<SimGuiderPort *>(&*_guiderport);
+}
+
+SimCooler	*SimLocator::simcooler() {
+	return dynamic_cast<SimCooler *>(&*_cooler);
 }
 
 } // namespace simulator

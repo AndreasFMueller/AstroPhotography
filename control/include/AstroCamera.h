@@ -255,11 +255,11 @@ typedef std::tr1::shared_ptr<Camera>	CameraPtr;
  * this projects is to use SI units. It is better to have a general rule
  * regarding units than to have to document units for every value.
  */
-class Cooler {
+class Cooler : public astro::device::Device {
 protected:
 	float	temperature;
 public:
-	Cooler();
+	Cooler(const std::string name = std::string(""));
 	virtual ~Cooler();
 	virtual float	getSetTemperature();
 	virtual float	getActualTemperature();
@@ -277,7 +277,7 @@ public:
  */
 class FilterWheel : public astro::device::Device {
 public:
-	FilterWheel();
+	FilterWheel(const std::string name = std::string(""));
 	virtual ~FilterWheel();
 	virtual unsigned int	nFilters() = 0;
 	virtual unsigned int	currentPosition() = 0;

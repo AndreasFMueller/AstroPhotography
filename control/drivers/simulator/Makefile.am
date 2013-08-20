@@ -19,9 +19,14 @@ libsimulator_la_DEPENDENCIES = ../../lib/libastro.la
 libsimulator_la_LIBADD = ../../lib/libastro.la
 
 noinst_PROGRAMS = simulatortests
-simulatortests_SOURCES = simulatortests.cpp 
+simulatortests_SOURCES = simulatortests.cpp \
+	SimLocatorTest.cpp SimUtilTest.cpp SimCoolerTest.cpp \
+	SimCameraTest.cpp
 simulatortests_LDADD = -lcppunit ../../lib/libastro.la -L. -lsimulator
 simulatortests_DEPENDENCIES = ../../lib/libastro.la libsimulator.la
+
+test:	simulatortests
+	./simulatortests -d
 
 endif
 

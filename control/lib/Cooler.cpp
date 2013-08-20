@@ -8,11 +8,12 @@
 #include <AstroFormat.h>
 
 using namespace astro::image;
+using namespace astro::device;
 
 namespace astro {
 namespace camera {
 
-Cooler::Cooler() {
+Cooler::Cooler(const std::string name) : Device(name) {
 	temperature = 25 + 273.1;
 }
 

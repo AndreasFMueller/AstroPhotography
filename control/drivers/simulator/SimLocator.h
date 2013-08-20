@@ -13,6 +13,11 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
+class SimCamera;
+class SimFilterWheel;
+class SimGuiderPort;
+class SimCooler;
+
 /**
  * \brief The Locator class for Simulator devices
  *
@@ -34,6 +39,11 @@ public:
 	FilterWheelPtr	filterwheel() { return _filterwheel; }
 	CoolerPtr	cooler() { return _cooler; }
 
+	SimCamera	*simcamera();
+	SimGuiderPort	*simguiderport();
+	SimFilterWheel	*simfilterwheel();
+	SimCooler	*simcooler();
+
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(
@@ -42,6 +52,7 @@ protected:
 	virtual CameraPtr	getCamera0(const std::string& name);
 	virtual FilterWheelPtr	getFilterWheel0(const std::string& name);
 	virtual GuiderPortPtr	getGuiderPort0(const std::string& name);
+	virtual CoolerPtr	getCooler0(const std::string& name);
 };
 
 } // namespace simulator
