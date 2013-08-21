@@ -52,4 +52,8 @@ bool	Point::operator!=(const Point& other) const {
 	return !operator==(other);
 }
 
+Point::operator double() const {
+	return hypot(_x, _y);
+}
+
 } // namespace astro

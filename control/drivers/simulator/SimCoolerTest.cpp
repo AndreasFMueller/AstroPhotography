@@ -55,19 +55,36 @@ void	SimCoolerTest::testCooler() {
 	CPPUNIT_ASSERT(cooler->getSetTemperature() == 260);
 	cooler->setOn(true);
 	CPPUNIT_ASSERT(cooler->isOn());
-	simtime_advance(10);
+	for (int i = 0; i < 10; i++) {
+		simtime_advance(1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "T(%.1f) = %.3f", simtime(),
+			cooler->getActualTemperature());
+	}
 	double	delta = fabs(cooler->getActualTemperature()
 		- cooler->getSetTemperature());
 	CPPUNIT_ASSERT(delta < 0.2);
-	simtime_advance(10);
+	for (int i = 0; i < 10; i++) {
+		simtime_advance(1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "T(%.1f) = %.3f", simtime(),
+			cooler->getActualTemperature());
+	}
 	delta = fabs(cooler->getActualTemperature()
 		- cooler->getSetTemperature());
 	CPPUNIT_ASSERT(delta < 0.1);
 	cooler->setOn(false);
-	simtime_advance(10);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler off");
+	for (int i = 0; i < 10; i++) {
+		simtime_advance(1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "T(%.1f) = %.3f", simtime(),
+			cooler->getActualTemperature());
+	}
 	delta = fabs(cooler->getActualTemperature() - ambient);
 	CPPUNIT_ASSERT(delta < 0.2);
-	simtime_advance(10);
+	for (int i = 0; i < 10; i++) {
+		simtime_advance(1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "T(%.1f) = %.3f", simtime(),
+			cooler->getActualTemperature());
+	}
 	delta = fabs(cooler->getActualTemperature() - ambient);
 	CPPUNIT_ASSERT(delta < 0.1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "End cooler test");

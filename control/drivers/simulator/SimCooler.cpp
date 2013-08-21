@@ -22,21 +22,16 @@ SimCooler::SimCooler(SimLocator& locator)
 	lasttemperature = AMBIENT_TEMPERATURE;
 	laststatechange = simtime();
 	on = false;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state initialization at: %f",
-		laststatechange);
 }
 
 float	SimCooler::getActualTemperature() {
 	double	timepast = simtime() - laststatechange;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "time past: %f", timepast);
 	float	targettemperature = (on) ? temperature : AMBIENT_TEMPERATURE;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "target temperature: %f",
-		targettemperature);
 	float	delta = targettemperature - lasttemperature;
 	if (timepast < 5) {
 		return (timepast / 6) * delta + lasttemperature;
 	}
-	return -exp(5 - timepast) * delta + targettemperature;
+	return targettemperature - exp(5 - timepast) * delta / 6;
 }
 
 void	SimCooler::setTemperature(float _temperature) {

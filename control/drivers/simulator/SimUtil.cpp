@@ -19,7 +19,6 @@ double	simtime() {
         double  result = tv.tv_sec;
         result += 0.0000001 * tv.tv_usec;
 	result += advance;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "simtime() = %f", result);
         return result;
 }
 

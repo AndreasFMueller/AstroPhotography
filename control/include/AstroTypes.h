@@ -38,6 +38,7 @@ public:
 	std::string	toString() const;
 	bool	operator==(const Point& other) const;
 	bool	operator!=(const Point& other) const;
+	operator double() const;
 };
 Point	operator*(double l, const Point& other);
 std::ostream&	operator<<(std::ostream& out, const Point& other);
