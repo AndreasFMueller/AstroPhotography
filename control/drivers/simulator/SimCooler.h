@@ -23,6 +23,7 @@ public:
 	virtual void	setTemperature(float _temperature);
 	virtual void	setOn(bool onoff);
 	virtual bool	isOn() { return on; }
+	int	belowambient();
 };
 
 } // namespace simulator

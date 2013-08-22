@@ -14,8 +14,7 @@ namespace simulator {
 SimGuiderPort::SimGuiderPort(SimLocator& locator)
 	: GuiderPort("sim-guiderport"), _locator(locator) {
 	starttime = simtime();
-	_driftx = 0;
-	_drifty = 0;
+	_omega = 0;
 }
 
 uint8_t	SimGuiderPort::active() {
@@ -29,23 +28,22 @@ void	SimGuiderPort::activate(float raplus, float raminus,
 		raplus, raminus, decplus, decminus);
 }
 
-std::pair<double, double>	SimGuiderPort::offset() {
+Point	SimGuiderPort::offset() {
 	double	x = 0, y = 0;
 	double	timepast = simtime() - starttime;
 
 	// drift computation
-	x += _driftx * timepast;
-	y += _drifty * timepast;
-
-	// rotation
-	double	alpha = _omega * timepast;
-	double	xx = x * cos(alpha) - y * sin(alpha);
-	y = x * sin(alpha) + y * cos(alpha);
-	x = xx;
+	x += _drift.x() * timepast;
+	y += _drift.y() * timepast;
 
 	// XXX Fourier components
 
-	return std::make_pair(x, y);
+	// return the point
+	return Point(x, y);
+}
+
+double	SimGuiderPort::alpha() {
+	return (simtime() - starttime) * _omega;
 }
 
 } // namespace simulator

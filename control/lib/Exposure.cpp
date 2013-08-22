@@ -12,13 +12,14 @@ using namespace astro::image;
 namespace astro {
 namespace camera {
 
-Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY) {
+Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
+	shutter(SHUTTER_OPEN) {
 }
 
 Exposure::Exposure(const ImageRectangle& _frame,
 	float _exposuretime)
                 : frame(_frame), exposuretime(_exposuretime), gain(1.),
-		  limit(INFINITY) {
+		  limit(INFINITY), shutter(SHUTTER_OPEN) {
 }
 
 std::string	Exposure::toString() const {

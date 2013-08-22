@@ -7,6 +7,7 @@
 #define _SimGuiderPort_h
 
 #include "SimLocator.h"
+#include <AstroTypes.h>
 
 namespace astro {
 namespace camera {
@@ -15,8 +16,7 @@ namespace simulator {
 class SimGuiderPort : public GuiderPort {
 	SimLocator&	_locator;
 	double	starttime;
-	double	_driftx;
-	double	_drifty;
+	Point	_drift;
 	double	_omega;
 public:
 	SimGuiderPort(SimLocator& locator);
@@ -25,13 +25,14 @@ public:
 		float decplus, float decminus);
 
 	// parameters for the simulation
-	double	driftx() const { return _driftx; }
-	void	driftx(double driftx) { _driftx = driftx; }
-	double	drifty() const { return _drifty; }
-	void	drifty(double drifty) { _drifty = drifty; }
+	const Point&	drift() const { return _drift; }
+	void	drift(const Point& drift) { _drift = drift; }
 	double	omega() const { return _omega; }
 	void	omega(double omega) { _omega = omega; }
-	std::pair<double, double>	offset();
+
+	// retrive offset and rotation
+	Point	offset();
+	double	alpha();
 };
 
 } // namespace simulator

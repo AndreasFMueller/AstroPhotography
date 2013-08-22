@@ -8,6 +8,7 @@
 
 #include <SimLocator.h>
 #include <SimCamera.h>
+#include <Stars.h>
 
 namespace astro {
 namespace camera {
@@ -17,6 +18,8 @@ class SimCcd : public Ccd {
 	SimLocator&	_locator;
 	double	starttime;
 	shutter_state	shutter;
+	StarField	starfield;
+	StarCamera<unsigned short>	starcamera;
 public:
 	SimCcd(const CcdInfo& _info, SimLocator& locator);
 

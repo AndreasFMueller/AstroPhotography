@@ -49,6 +49,11 @@ void	SimCooler::setOn(bool onoff) {
 	on = onoff;
 }
 
+int	SimCooler::belowambient() {
+	int	result = (AMBIENT_TEMPERATURE - getActualTemperature()) / 7.;
+	return result;
+}
+
 } // namespace simulator
 } // namespace camera
 } // namespace atro

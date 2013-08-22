@@ -35,7 +35,7 @@ Point	operator*(double l, const Point& other) {
 }
 
 std::string	Point::toString() const {
-	return stringprintf("(%f,%f)", _x, _y);
+	return stringprintf("(%.2f,%.2f)", _x, _y);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Point& point) {

@@ -139,18 +139,36 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
  * this method also sets up the infrastructure for the wait method.
  */
 void    Ccd::startExposure(const Exposure& _exposure) {
-	exposure = _exposure;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %s",
-		exposure.toString().c_str());
+	// make sure we are in the right state, and only accept new exposures
+	// in that state. This is important because if we change the
+	// exposure member while an exposure is in progress, we may run into
+	// trouble while doing the readout
 	if (Exposure::idle != state) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"start exposure only in idle state");
 		throw BadState("start exposure only in idle state");
 	}
+
+	// copy the exposure info
+	exposure = _exposure;
+
+	// if the size was not specified in the exposure, take the full
+	// CCD size
+        if (exposure.frame.size() == ImageSize(0, 0)) {
+                exposure.frame = getInfo().getFrame();
+        }
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %s -> %s",
+		_exposure.toString().c_str(),
+		exposure.toString().c_str());
+
+	// check that the frame to be exposed fits into the CCD
         if (!info.size().bounds(exposure.frame)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure does not fit in ccd");
                 throw BadParameter("exposure does not fit ccd");
         }
+
+	// remember the start time of the exposure, this will be useful
+	// if we later want to wait for the exposure to complete.
 	time(&lastexposurestart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);

@@ -51,5 +51,18 @@ std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
 	return out << point.toString();
 }
 
+/**
+ * \brief Ordering of points, needed so that points can be stored in sets
+ */
+bool	ImagePoint::operator<(const ImagePoint& other) const {
+	if (_x < other._x) {
+		return true;
+	}
+	if (_x > other._x) {
+		return false;
+	}
+	return _y < other._y;
+}
+
 } // namespace image
 } // namespace astro

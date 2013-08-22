@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SimCamera.h>
+#include <SimCcd.h>
 #include <AstroExceptions.h>
 
 using namespace astro::image;
@@ -30,7 +31,8 @@ CcdPtr	SimCamera::getCcd0(size_t ccdid) {
 	if (0 != ccdid) {
 		throw NotFound("only ccd 0 exists");
 	}
-	return CcdPtr();
+	CcdInfo	info = getCcdInfo(0);
+	return CcdPtr(new SimCcd(info, _locator));
 }
 
 FilterWheelPtr	SimCamera::getFilterWheel0() {

@@ -1,11 +1,13 @@
 /*
- * SimCcd.cpp --
+ * SimCcd.cpp -- simulate a CCD
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <SimCcd.h>
 #include <SimUtil.h>
 #include <AstroExceptions.h>
+#include <SimGuiderPort.h>
+#include <SimCooler.h>
 
 using namespace astro::image;
 
@@ -13,9 +15,22 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
-SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator) : Ccd(_info), _locator(locator) {
+#define STARFIELD_OVERSHOOT	100
+#define	NUMBER_OF_STARS		200
+
+/**
+ * \brief Create a simulated CCD
+ */
+SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
+	: Ccd(_info), _locator(locator),
+	  starfield(_info.size(), STARFIELD_OVERSHOOT, NUMBER_OF_STARS),
+	  starcamera(ImageRectangle(_info.size())) {
+	starcamera.addHotPixels(6);
 }
 
+/**
+ * \brief Start simulated exposure
+ */
 void    SimCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	starttime = simtime();
@@ -23,6 +38,11 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	shutter = exposure.shutter;
 }
 
+/**
+ * \brief query the exposure state
+ *
+ * This also changes the value of the state member
+ */
 Exposure::State	SimCcd::exposureStatus() {
 	double	now = simtime();
 	double	timepast = now - starttime;
@@ -37,8 +57,14 @@ Exposure::State	SimCcd::exposureStatus() {
 		}
 		return state;
 	}
+	// this exception is mainly thrown to silence the compiler, it should
+	// never happen
+	throw std::runtime_error("illegal state");
 }
 
+/**
+ * \brief cancel the exposure
+ */
 void    SimCcd::cancelExposure() {
 	if ((Exposure::exposing == state) || (Exposure::exposed == state)) {
 		throw BadState("no exposure in progress");
@@ -46,6 +72,15 @@ void    SimCcd::cancelExposure() {
 	state = Exposure::idle;
 }
 
+/**
+ * \brief Wait for completion of the exopsure
+ *
+ * This is a reimplementation of the wait method because during tests we don't
+ * really want to wait for the exposure time to really elapse. So we fake it.
+ * Note that this doesn't affect the exposureStatus method. If one only looks
+ * at the exposureStatus, one can still wait (the Ccd::wait method would do
+ * that).
+ */
 bool    SimCcd::wait() {
 	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
 		throw BadState("no exposure in progress");
@@ -53,22 +88,44 @@ bool    SimCcd::wait() {
 	if (Exposure::exposed == state) {
 		return true;
 	}
-	double	now = simtime();
-	double	remaining = exposure.exposuretime - (now - starttime);
-	if (remaining > 0) {
-		int	w = 1000000 * remaining;
-		usleep(w);
-	}
+	// we don't want to wait, so we just throw up a debug message, 
+	// set the state to exposed and are happy with it.
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "faking exposure time %.3f",
+		exposure.exposuretime);
 	state = Exposure::exposed;
 	return true;
 }
 
+/**
+ * \brief Remember the shutter state
+ */
 void    SimCcd::setShuterState(const shutter_state& state) {
 	shutter = state;
 }
 
+/**
+ * \brief Retrieve an image
+ */
 ImagePtr  SimCcd::getImage() {
-	return ImagePtr();
+	// we need a camera to convert the starfield into an image
+	starcamera.rectangle(exposure.frame);
+
+	// exposure influence
+	starcamera.stretch(exposure.exposuretime);
+	starcamera.light(exposure.shutter == SHUTTER_OPEN);
+
+	// geometric distortion (guiderport)
+	starcamera.translation(_locator.simguiderport()->offset());
+	starcamera.alpha(_locator.simguiderport()->alpha());
+
+	// temperature influence on noise
+	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
+
+	ImagePtr	image = starcamera(starfield);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
+		image->getFrame().toString().c_str());
+	state = Exposure::idle;
+	return image;
 }
 
 } // namespace simulator

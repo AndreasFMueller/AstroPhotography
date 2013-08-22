@@ -15,7 +15,7 @@ namespace image {
 namespace transform {
 
 /**
- * \brief
+ * \brief A translation adapter applies a trnslation to an image
  */
 template<typename Pixel>
 class TranslationAdapter : public ConstImageAdapter<Pixel> {

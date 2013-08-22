@@ -97,11 +97,8 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 	// do common start exposure stuff
 	Ccd::startExposure(exposure);
 
+	// we need to get the camera handle for the SBIG Library
 	camera.sethandle();
-	this->exposure = exposure;
-	if (this->exposure.frame.size() == ImageSize()) {
-		this->exposure.frame = getInfo().getFrame();
-	}
 
 	// prepare the start exposure2 command for the SBIG library
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure on ccd %d", id);

@@ -41,6 +41,7 @@ public:
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
+	bool	operator<(const ImagePoint& point) const;
 	std::string	toString() const;
 };
 
