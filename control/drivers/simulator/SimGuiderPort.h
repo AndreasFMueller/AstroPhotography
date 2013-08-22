@@ -13,11 +13,19 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
+/**
+ * \brief Simulated guider port
+ */
 class SimGuiderPort : public GuiderPort {
 	SimLocator&	_locator;
 	double	starttime;
 	Point	_drift;
+	Point	_offset;
 	double	_omega;
+	double	lastactivation;
+	double	ra, dec;
+	Point	_ravector, _decvector;
+	void	update();
 public:
 	SimGuiderPort(SimLocator& locator);
 	virtual uint8_t	active();
@@ -27,8 +35,15 @@ public:
 	// parameters for the simulation
 	const Point&	drift() const { return _drift; }
 	void	drift(const Point& drift) { _drift = drift; }
+
 	double	omega() const { return _omega; }
 	void	omega(double omega) { _omega = omega; }
+
+	const Point&	ravector() const { return _ravector; }
+	void	ravector(const Point& ravector) { _ravector = ravector; }
+
+	const Point&	decvector() const { return _decvector; }
+	void	decvector(const Point& decvector) { _decvector = decvector; }
 
 	// retrive offset and rotation
 	Point	offset();
