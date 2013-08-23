@@ -157,6 +157,8 @@ int	main(int argc, char *argv[]) {
 		throw std::range_error(msg);
 	}
 	std::string	cameraname = cameras[cameranumber];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting camera %s",
+		cameraname.c_str());
 	CameraPtr	camera = locator->getCamera(cameraname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera loaded: %s", cameraname.c_str());
 

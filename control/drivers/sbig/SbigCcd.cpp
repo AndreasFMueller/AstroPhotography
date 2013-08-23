@@ -7,12 +7,12 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_SBIGUDRV_H
-#include <sbigudrv.h>
+#ifdef HAVE_LPARDRV_H
+#include <lpardrv.h>
 #else
-#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
-#include <SBIGUDrv/sbigudrv.h>
-#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#ifdef HAVE_SBIGUDRV_LPARDRV_H
+#include <SBIGUDrv/lpardrv.h>
+#endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
 #include <SbigLocator.h>
@@ -55,6 +55,7 @@ SbigCcd::~SbigCcd() {
  * this is essentially a call to the corresponding dirver library function.
  */
 Exposure::State	SbigCcd::exposureStatus() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exposure status");
 	SbigLock	lock;
 	QueryCommandStatusParams	params;
 	params.command = CC_START_EXPOSURE2;
@@ -156,7 +157,7 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 ImagePtr	SbigCcd::getImage() {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
-	if (state != Exposure::idle) {
+	if (state == Exposure::idle) {
 		throw BadState("camera is idle");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image ccd %d", id);

@@ -7,12 +7,12 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_SBIGUDRV_H
-#include <sbigudrv.h>
+#ifdef HAVE_LPARDRV_H
+#include <lpardrv.h>
 #else
-#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
-#include <SBIGUDrv/sbigudrv.h>
-#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#ifdef HAVE_SBIGUDRV_LPARDRV_H
+#include <SBIGUDrv/lpardrv.h>
+#endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
 #include <SbigLocator.h>
@@ -33,6 +33,7 @@ namespace sbig {
 
 static std::string      sbig_name("sbig");
 static std::string      sbig_version(VERSION);
+static astro::camera::sbig::SbigCameraLocator	*sbig_locator = NULL;
 
 /**
  * \brief Module descriptor for the Starlight express module
@@ -68,6 +69,7 @@ namespace astro {
 namespace camera {
 namespace sbig {
 
+
 //////////////////////////////////////////////////////////////////////
 // SbigLock implementation
 //////////////////////////////////////////////////////////////////////
@@ -87,6 +89,7 @@ SbigLock::~SbigLock() {
 //////////////////////////////////////////////////////////////////////
 // SbigLocator implementation
 //////////////////////////////////////////////////////////////////////
+
 
 int	SbigCameraLocator::driveropen = 0;
 
@@ -143,6 +146,7 @@ SbigCameraLocator::~SbigCameraLocator() {
  * identified by its serial number an name.
  */
 std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_type device) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list");
 	std::vector<std::string>	names;
 	if (device != CAMERA) {
 		return names;
@@ -162,9 +166,13 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_
 			std::string	name = stringprintf("sbig:%s/%s",
 				results.usbInfo[i].serialNumber,
 				results.usbInfo[i].name);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "device found: %s",
+				name.c_str());
 			names.push_back(name);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning list with %d members",
+		names.size());
 	return names;
 }
 
@@ -176,12 +184,13 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_
  * by number.
  */
 CameraPtr	SbigCameraLocator::getCamera0(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", name.c_str());
 	std::vector<std::string>	cameras = getDevicelist();
 	std::vector<std::string>::const_iterator	i;
 	size_t	index = 0;
 	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
 		if (name == *i) {
-			return getCamera(index);
+			return CameraPtr(new SbigCamera(index));
 		}
 	}
 	std::string	msg = stringprintf("camera %s not found", name.c_str());
@@ -195,5 +204,9 @@ CameraPtr	SbigCameraLocator::getCamera0(const std::string& name) {
 
 extern "C"
 astro::device::DeviceLocator	*getDeviceLocator() {
-	return new astro::camera::sbig::SbigCameraLocator();
+	if (NULL == astro::module::sbig::sbig_locator) {
+		astro::module::sbig::sbig_locator
+			= new astro::camera::sbig::SbigCameraLocator();
+	}
+	return astro::module::sbig::sbig_locator;
 }

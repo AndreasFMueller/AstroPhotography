@@ -229,7 +229,7 @@ bool	Ccd::wait() {
 		// completes or we have waited for 30 seconds
 		double	step = 0.1;
 		int	counter = 300;
-		while ((counter-- > 0) && (Exposure::exposing == state)) {
+		while ((counter-- > 0) && (Exposure::exposing == this->exposureStatus())) {
 			usleep(step * 1000000);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %d", counter);
 		}
@@ -239,6 +239,7 @@ bool	Ccd::wait() {
 			// XXX bad things should happen
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
 	return (Exposure::exposed == state);
 }
 

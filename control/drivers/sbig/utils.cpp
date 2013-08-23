@@ -7,12 +7,12 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_SBIGUDRV_H
-#include <sbigudrv.h>
+#ifdef HAVE_LPARDRV_H
+#include <lpardrv.h>
 #else
-#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
-#include <SBIGUDrv/sbigudrv.h>
-#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#ifdef HAVE_SBIGUDRV_LPARDRV_H
+#include <SBIGUDrv/lpardrv.h>
+#endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
 #include <string>

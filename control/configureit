@@ -25,7 +25,7 @@ Linux)	if [ -r /etc/debian_version ]
 		fi
 	fi
 	# find out whether we should try to build the sbig driver
-	if [ -r /usr/include/sbigudrv.h -a -r /usr/local/include/sbigudrv.h ]
+	if [ -r /usr/local/lib64/libsbigudrv.so -a -r /usr/local/include/sbigudrv.h ]
 	then
 		sbigoption=--enable-sbig
 	else

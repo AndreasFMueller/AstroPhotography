@@ -7,12 +7,12 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_SBIGUDRV_H
-#include <sbigudrv.h>
+#ifdef HAVE_LPARDRV_H
+#include <lpardrv.h>
 #else
-#ifdef HAVE_SBIGUDRV_SBIGUDRV_H
-#include <SBIGUDrv/sbigudrv.h>
-#endif /* HAVE_SBIGUDRV_SBIGUDRV_H */
+#ifdef HAVE_SBIGUDRV_LPARDRV_H
+#include <SBIGUDrv/lpardrv.h>
+#endif /* HAVE_SBIGUDRV_LPARDRV_H */
 #endif
 
 #include <SbigLocator.h>
@@ -286,6 +286,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
  * \brief find out whether the camera has a filter wheel
  */
 bool	SbigCamera::hasFilterWheel() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "does this camera have a filter wheel?");
 	// XXX that's not quite correct ;-)
 	return true;
 }
@@ -297,6 +298,7 @@ bool	SbigCamera::hasFilterWheel() const {
  * object which allows to control the filter wheel position.
  */
 FilterWheelPtr	SbigCamera::getFilterWheel0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filter wheel");
 	return FilterWheelPtr(new SbigFilterWheel(*this));
 }
 
@@ -304,6 +306,7 @@ FilterWheelPtr	SbigCamera::getFilterWheel0() {
  * \brief find out whether the camera has a guider port
  */
 bool	SbigCamera::hasGuiderPort() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "does this camera have a guider port?");
 	// XXX that's not quite correct ;-)
 	return true;
 }
@@ -315,6 +318,7 @@ bool	SbigCamera::hasGuiderPort() const {
  * GuiderPort object to control the guider port.
  */
 GuiderPortPtr	SbigCamera::getGuiderPort0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the guider port");
 	return GuiderPortPtr(new SbigGuiderPort(*this));
 }
 
