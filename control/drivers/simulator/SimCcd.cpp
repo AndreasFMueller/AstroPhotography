@@ -118,6 +118,9 @@ ImagePtr  SimCcd::getImage() {
 	starcamera.translation(_locator.simguiderport()->offset());
 	starcamera.alpha(_locator.simguiderport()->alpha());
 
+	// color (filterwheel)
+	starcamera.colorfactor(_locator.filterwheel()->currentPosition());
+
 	// temperature influence on noise
 	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
 

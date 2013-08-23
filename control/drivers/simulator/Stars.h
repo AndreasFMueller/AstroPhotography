@@ -20,13 +20,21 @@ namespace astro {
  */
 class StellarObject {
 	Point	_position;
+	astro::image::RGB<double>	_color;
 protected:
 	double	distance(const Point& point) const { return point - _position; }
 public:
-	StellarObject(const Point& position) : _position(position) { }
+	StellarObject(const Point& position);
 	const Point&	position() const { return _position; }
 	void	position(const Point& position) { _position = position; }
+	const astro::image::RGB<double>&	color() const { return _color; }
+	void	color(const astro::image::RGB<double>& color) {
+		_color = color;
+	}
 	virtual double	intensity(const Point& where) const = 0;
+	double	intensityR(const Point& where) const;
+	double	intensityG(const Point& where) const;
+	double	intensityB(const Point& where) const;
 	virtual std::string	toString() const { return _position.toString(); }
 };
 
@@ -82,6 +90,9 @@ public:
 		unsigned int nobjects = 100);
 	void	addObject(StellarObjectPtr object);
 	virtual double	intensity(const Point& where) const;
+	virtual double	intensityR(const Point& where) const;
+	virtual double	intensityG(const Point& where) const;
+	virtual double	intensityB(const Point& where) const;
 	const StellarObjectPtr&	operator[](size_t index) const {
 		return objects[index];
 	}
@@ -102,6 +113,7 @@ class StarCameraBase {
 	double	_dark;
 	double	_noise;
 	bool	_light;
+	int	_color;
 	void	addHotPixel();
 protected:
 	double	noisevalue() const;
@@ -109,7 +121,7 @@ protected:
 public:
 	StarCameraBase(const ImageRectangle& rectangle)
 		: _rectangle(rectangle), _alpha(0), _stretch(1),
-		  _dark(0), _noise(0), _light(true) { }
+		  _dark(0), _noise(0), _light(true), _color(0) { }
 
 	void	addHotPixels(unsigned int npixels);
 
@@ -137,6 +149,9 @@ public:
 
 	const bool&	light() const { return _light; }
 	void	light(const bool& light) { _light = light; }
+
+	const int&	color() const { return _color; }
+	void	colorfactor(const int& color) { _color = color; }
 };
 
 /**
@@ -173,6 +188,9 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s image",
 			(light()) ? "light" : "dark");
 
+		// compute the common multiplier
+		double	multiplier = stretch();
+
 		// now compute all the pixel values
 		double	scale = std::numeric_limits<P>::max();
 		for (unsigned int x = 0; x < size.width(); x++) {
@@ -182,8 +200,26 @@ public:
 				Point	p = transform(where);
 
 				// compute the intensity
-				double	value = (light())
-					? stretch() * field.intensity(p) : 0;
+				double	value = 0;
+				if (light()) {
+					switch (color()) {
+					case 0:
+						value = field.intensity(p);
+						break;
+					case 1:
+						value = field.intensityR(p);
+						break;
+					case 2:
+						value = field.intensityG(p);
+						break;
+					case 3:
+						value = field.intensityB(p);
+						break;
+					default:
+						break;
+					}
+					value *= multiplier;
+				}
 				if (do_noise) {
 					value += noisevalue();
 				}

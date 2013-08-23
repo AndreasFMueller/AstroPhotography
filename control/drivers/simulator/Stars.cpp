@@ -5,10 +5,40 @@
  */
 #include <Stars.h>
 
+using namespace astro::image;
+
 namespace astro {
 
 inline double	sqr(const double x) {
 	return x * x;
+}
+
+/**
+ * \brief Construct a new stellar object
+ */
+StellarObject::StellarObject(const Point& position) : _position(position) {
+	_color = RGB<double>(1., 1., 1.);
+}
+
+/**
+ * \brief Extract red color value
+ */
+double	StellarObject::intensityR(const Point& where) const {
+	return _color.R * this->intensity(where);
+}
+
+/**
+ * \brief Extract blue color value
+ */
+double	StellarObject::intensityB(const Point& where) const {
+	return _color.B * this->intensity(where);
+}
+
+/**
+ * \brief Extract green color value
+ */
+double	StellarObject::intensityG(const Point& where) const {
+	return _color.G * this->intensity(where);
 }
 
 /**
@@ -96,8 +126,21 @@ void	StarField::createStar(const ImageSize& size, int overshoot) {
 	int	y = (random() % (size.height() + 2 * overshoot)) - overshoot;
 	// create magnitudes with a power distribution
 	double	magnitude = log2(8 + (random() % 56)) - 3;
+
+	StellarObject	*newstar = new Star(Point(x, y), magnitude);
+
+	// create color
+	int	colorcode = random() % 8;
+	double	red = (colorcode & 4) ? 1.0 : 0.8;
+	double	green = (colorcode & 2) ? 1.0 : 0.8;
+	double	blue = (colorcode & 1) ? 1.0 : 0.8;
+	RGB<double>	color(red, green, blue);
+	newstar->color(color);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "color: %.2f/%.2f/%.2f",
+	//	red, green, blue);
 	
-	addObject(StellarObjectPtr(new Star(Point(x, y), magnitude)));
+	// the new star
+	addObject(StellarObjectPtr(newstar));
 }
 
 /**
@@ -117,6 +160,42 @@ double	StarField::intensity(const Point& where) const {
 	double	result = 0;
 	for (i = objects.begin(); i != objects.end(); i++) {
 		result += (*i)->intensity(where);
+	}
+	return result;
+}
+
+/**
+ * \brief Compute cumulated intensity for all objects in the star field
+ */
+double	StarField::intensityR(const Point& where) const {
+	std::vector<StellarObjectPtr>::const_iterator	i;
+	double	result = 0;
+	for (i = objects.begin(); i != objects.end(); i++) {
+		result += (*i)->intensityR(where);
+	}
+	return result;
+}
+
+/**
+ * \brief Compute cumulated intensity for all objects in the star field
+ */
+double	StarField::intensityG(const Point& where) const {
+	std::vector<StellarObjectPtr>::const_iterator	i;
+	double	result = 0;
+	for (i = objects.begin(); i != objects.end(); i++) {
+		result += (*i)->intensityG(where);
+	}
+	return result;
+}
+
+/**
+ * \brief Compute cumulated intensity for all objects in the star field
+ */
+double	StarField::intensityB(const Point& where) const {
+	std::vector<StellarObjectPtr>::const_iterator	i;
+	double	result = 0;
+	for (i = objects.begin(); i != objects.end(); i++) {
+		result += (*i)->intensityB(where);
 	}
 	return result;
 }
