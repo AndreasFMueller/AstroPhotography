@@ -5,6 +5,7 @@
  */
 #include <SimFilterWheel.h>
 #include <AstroExceptions.h>
+#include <includes.h>
 
 namespace astro {
 namespace camera {
