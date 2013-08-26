@@ -6,7 +6,7 @@
 #ifndef _GuiderPort_impl_h
 #define _GuiderPort_impl_h
 
-#include "../idl/device.hh"
+#include <device.hh>
 #include <AstroCamera.h>
 
 namespace Astro {
@@ -16,6 +16,7 @@ class GuiderPort_impl : public POA_Astro::GuiderPort {
 public:
 	inline GuiderPort_impl(astro::camera::GuiderPortPtr guiderport)
 		: _guiderport(guiderport) { }
+	virtual CORBA::Char	active();
 	virtual void	activate(::CORBA::Float ra, ::CORBA::Float dec);
 };
 

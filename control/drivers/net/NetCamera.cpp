@@ -25,7 +25,7 @@ FilterWheelPtr	NetCamera::getFilterWheel0() {
 }
 
 GuiderPortPtr	NetCamera::getGuiderPort0() {
-	return GuiderPort();
+	return GuiderPortPtr();
 }
 
 } // namespace net

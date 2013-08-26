@@ -4,15 +4,20 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <NetLocator.h>
+#include <AstroLoader.h>
+#include <device.hh>
+#include <Conversions.h>
+
+using namespace astro::device;
 
 namespace astro {
 namespace module {
 namespace net {
 
-static std::tring	net_name("net");
+static std::string	net_name("net");
 static std::string	net_version(VERSION);
 
-class NetDescriptor : public NetDescriptor {
+class NetDescriptor : public ModuleDescriptor {
 public:
 	NetDescriptor() { }
 	~NetDescriptor() { }
@@ -58,42 +63,59 @@ std::string	NetLocator::getVersion() const {
 
 std::string	NetLocator::modulename(const std::string& netname) const {
 	// locate the /, and return the part before the /
+	size_t	offset = netname.find('/');
+	if (offset == std::string::npos) {
+		throw std::runtime_error("no / in name");
+	}
+	return netname.substr(0, offset);
 }
 
 std::string	NetLocator::devicename(const std::string& netname) const {
 	// locate the /, and return the part after the /
+	size_t	offset = netname.find('/');
+	if (offset == std::string::npos) {
+		throw std::runtime_error("no / in name");
+	}
+	return netname.substr(offset + 1);
 }
 
+/**
+ * \brief Retrieve a list of names of all objects of a given type
+ */
 std::vector<std::string>	NetLocator::getDevicelist(
-	DeviceLocator::device_type devie) {
+	DeviceLocator::device_type device) {
 	std::vector<std::string>	result;
 
+	// convert the device_type to the corresponding CORBA type
+	Astro::DeviceLocator::device_type	type = convert(device);
+
 	// get a list of module names
-	ModuleNameSequence	*modnames = modules->getModuleNames();
-	ModuleNameSequence_var	modulenames = modnames;
+	Astro::Modules::ModuleNameSequence	*modnames
+		= modules->getModuleNames();
+	Astro::Modules::ModuleNameSequence_var	modulenames = modnames;
 
 	// get module references for all modules in the module list
-	for (int i = 0; i < modulenames->length(); i++) {
-		std::string	modulename((*modulenames)[i]);
+	for (unsigned int i = 0; i < modulenames->length(); i++) {
+		std::string	modulename((*modnames)[i]);
 		// query each module for the names of objects of the
 		// requested type
-		DriverModule_ptr	*drivermodule
-			= modules->getDriverModule(modulename.c_str());
-		DriverModule_var	drivermodulevar = drivermodule;
+		Astro::DriverModule_ptr	drivermodule
+			= modules->getModule(modulename.c_str());
+		Astro::DriverModule_var	drivermodulevar = drivermodule;
 
 		// get the device locator for this module
-		DeviceLocator_ptr	devicelocator
+		Astro::DeviceLocator_ptr	devicelocator
 			= drivermodulevar->getDeviceLocator();
-		DeviceLocator_var	devcelocatorvar = devicelocator;
+		Astro::DeviceLocator_var	devcelocatorvar = devicelocator;
 
 		// get a list of device names for this type
-		DeviceNameList_ptr	list
+		Astro::DeviceLocator::DeviceNameList	*list
 			= devicelocator->getDevicelist(type);
-		DeviceNameList_var	listvar = list;
+		Astro::DeviceLocator::DeviceNameList_var	listvar = list;
 
 		// build new names from the name list received
-		for (j = 0; j < listvar->length(); j++) {
-			std::string	devicename((*listvar)[j]);
+		for (unsigned int j = 0; j < listvar->length(); j++) {
+			std::string	devicename((*list)[j]);
 			result.push_back(modulename + "/" + devicename);
 		}
 	}
@@ -128,7 +150,7 @@ CoolerPtr	NetLocator::getCooler0(const std::string& name) {
 	return CoolerPtr();
 }
 
-} // namespace net
+} // namespace net
 } // namespace module
 } // namespace net
 

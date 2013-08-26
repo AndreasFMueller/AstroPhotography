@@ -6,7 +6,7 @@
 #ifndef _Camera_impl_h
 #define _Camera_impl_h
 
-#include "../idl/device.hh"
+#include <device.hh>
 #include <AstroCamera.h>
 
 namespace Astro {

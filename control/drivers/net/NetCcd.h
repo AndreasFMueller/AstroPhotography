@@ -7,24 +7,25 @@
 #define _NetCcd_h
 
 #include <NetCamera.h>
-#include "../../idl/device.hh"
+#include <device.hh>
 
 namespace astro {
-namespace caemra {
+namespace camera {
 namespace net {
 
 class NetCcd : public Ccd {
-	Astro::Ccd_var	_ccd;
+	Astro::Ccd_ptr	_ccd;
 public:
-	NetCcd(CcdInfo& _info, Astro::Ccd_var ccd);
+	NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd);
+	~NetCcd();
 
-	virtual void    startExposure(const Exposure& exposure);
-	virtual Exposure::State exposureStatus();
+	virtual void    startExposure(const astro::camera::Exposure& exposure);
+	virtual astro::camera::Exposure::State exposureStatus();
 	virtual void    cancelExposure();
 	virtual bool    wait();
 
 	virtual shutter_state   getShutterState();
-	virtual void    setShuterState(const shutter_state& state);
+	virtual void    setShutterState(const shutter_state& state);
 
 	virtual astro::image::ImagePtr  getImage();
 

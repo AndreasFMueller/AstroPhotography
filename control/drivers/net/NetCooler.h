@@ -7,7 +7,7 @@
 #define _NetCooler_h
 
 #include <AstroCamera.h>
-#include "../../idl/device.hh"
+#include <device.hh>
 
 namespace astro {
 namespace camera {
@@ -16,7 +16,8 @@ namespace net {
 class NetCooler : public Cooler {
 	Astro::Cooler_var	_cooler;
 public:
-	NetCooler(Cooler_var Astro::cooler);
+	NetCooler(Astro::Cooler_var cooler);
+	~NetCooler();
 	virtual float	getActualTemperature();
 	virtual void	setTemperature(float _temperature);
 	virtual void	setOn(bool onoff);
@@ -26,3 +27,5 @@ public:
 } // namespace net
 } // namespace camera
 } // namespace astro
+
+#endif /* _NetCooler_h */

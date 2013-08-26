@@ -8,6 +8,7 @@
 #include "Image_impl.h"
 #include <AstroExceptions.h>
 #include <AstroFilterfunc.h>
+#include <Conversions.h>
 
 using namespace astro::camera;
 
@@ -21,17 +22,7 @@ namespace Astro {
  * exception.
  */
 ExposureState	Ccd_impl::exposureStatus() {
-	astro::camera::Exposure::State	state = _ccd->exposureStatus();
-	switch (state) {
-	case astro::camera::Exposure::idle:
-		return EXPOSURE_IDLE;
-	case astro::camera::Exposure::exposing:
-		return EXPOSURE_EXPOSING;
-	case astro::camera::Exposure::exposed:
-		return EXPOSURE_EXPOSED;
-	case astro::camera::Exposure::cancelling:
-		return EXPOSURE_CANCELLING;
-	}
+	return convert(_ccd->exposureStatus());
 }
 
 /**
@@ -43,26 +34,7 @@ ExposureState	Ccd_impl::exposureStatus() {
  */
 void	Ccd_impl::startExposure(const Exposure& exp) {
 	image.reset();
-	astro::camera::Exposure	exposure(
-		astro::image::ImageRectangle(
-			astro::image::ImagePoint(exp.frame.origin.x, exp.frame.origin.y),
-			astro::image::ImageSize(exp.frame.size.width, exp.frame.size.height)
-		),
-		exp.exposuretime
-	);
-	exposure.gain = exp.gain;
-	if (exp.limit > 0) {
-		exposure.limit = exp.limit;
-	}
-	exposure.mode = Binning(exp.mode.x, exp.mode.y);
-	switch (exp.shutter) {
-	case Astro::SHUTTER_CLOSED:
-		exposure.shutter = astro::camera::SHUTTER_CLOSED;
-		break;
-	case Astro::SHUTTER_OPEN:
-		exposure.shutter = astro::camera::SHUTTER_OPEN;
-		break;
-	}
+	astro::camera::Exposure	exposure = convert(exp);
 	try {
 		_ccd->startExposure(exposure);
 	} catch (astro::BadParameter& bpx) {
@@ -150,23 +122,7 @@ Image_ptr	Ccd_impl::getImage() {
  */
 Astro::Exposure	Ccd_impl::getExposure() {
 	try {
-		astro::camera::Exposure	exposure = _ccd->getExposure();
-		Astro::Exposure	exp;
-		exp.frame.size.width = exposure.frame.size().width();
-		exp.frame.size.height = exposure.frame.size().height();
-		exp.frame.origin.x = exposure.frame.origin().x();
-		exp.frame.origin.y = exposure.frame.origin().y();
-		exp.exposuretime = exposure.exposuretime;
-		exp.gain = exposure.gain;
-		exp.limit = exposure.limit;
-		switch (exposure.shutter) {
-		case astro::camera::SHUTTER_OPEN:
-			exp.shutter = Astro::SHUTTER_OPEN;
-		case astro::camera::SHUTTER_CLOSED:
-			exp.shutter = Astro::SHUTTER_CLOSED;
-		}
-		exp.mode.x = exposure.mode.getX();
-		exp.mode.y = exposure.mode.getY();
+		Astro::Exposure	exp = convert(_ccd->getExposure());
 		return exp;
 	} catch (astro::camera::BadState& bsx) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure: %s", bsx.what());
@@ -194,16 +150,7 @@ Astro::Exposure	Ccd_impl::getExposure() {
  * \brief Query the shutter state
  */
 ShutterState	Ccd_impl::getShutterState() {
-	astro::camera::shutter_state	shutterstate = _ccd->getShutterState();
-	switch (shutterstate) {
-	case astro::camera::SHUTTER_OPEN:
-		return Astro::SHUTTER_OPEN;
-		break;
-	case astro::camera::SHUTTER_CLOSED:
-		return Astro::SHUTTER_CLOSED;
-		break;
-	}
-	// XXX should not happen
+	return convert(_ccd->getShutterState());
 }
 
 /**
@@ -214,15 +161,7 @@ ShutterState	Ccd_impl::getShutterState() {
  * structure.
  */
 void	Ccd_impl::setShutterState(ShutterState state) {
-	astro::camera::shutter_state	shutterstate;
-	switch (state) {
-	case Astro::SHUTTER_OPEN:
-		shutterstate = astro::camera::SHUTTER_OPEN;
-		break;
-	case Astro::SHUTTER_CLOSED:
-		shutterstate = astro::camera::SHUTTER_CLOSED;
-		break;
-	}
+	astro::camera::shutter_state	shutterstate = convert(state);
 	try {
 		_ccd->setShutterState(shutterstate);
 	} catch (astro::NotImplemented& nix) {

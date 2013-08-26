@@ -360,6 +360,16 @@ module Astro {
 	 * This interface allows to control activation of these ports.
 	 */
 	interface GuiderPort {
+		const octet	DECMINUS = 1;
+		const octet	DECPLUS = 2;
+		const octet	RAMINUS = 4;
+		const octet	RAPLUS = 8;
+		/**
+		 * \brief Retrieve active ports
+		 *
+		 * Which ports are currently active
+		 */
+		octet	active();
 		/**
 		 * \brief Activate Guider Port outputs.
 		 *
@@ -453,7 +463,8 @@ module Astro {
 		string	getVersion();
 		typedef sequence<string>	DeviceNameList;
 		enum device_type { DEVICE_CAMERA, DEVICE_FOCUSER,
-					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL };
+					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL,
+					DEVICE_COOLER };
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *

@@ -6,7 +6,7 @@
 #ifndef _DriverModule_impl_h
 #define _DriverModule_impl_h
 
-#include <../idl/device.hh>
+#include <device.hh>
 #include <AstroLoader.h>
 
 namespace Astro {

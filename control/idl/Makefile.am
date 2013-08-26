@@ -5,14 +5,16 @@
 # $Id$
 #
 
-EXTRA_DIST = device.idl NameService.h
+EXTRA_DIST = device.idl NameService.h 
 
-BUILT_SOURCES = deviceSK.cc device.hh
+BUILT_SOURCES = deviceSK.cc ../include/device.hh
 
-deviceSK.cc device.h:	device.idl
+deviceSK.cc ../include/device.hh:	device.idl
 	omniidl -bcxx device.idl
+	mv device.hh ../include
 
 lib_LTLIBRARIES = libastrocom.la
 
-libastrocom_la_SOURCES = deviceSK.cc NameService.cpp
+libastrocom_la_SOURCES = deviceSK.cc NameService.cpp Conversions.cpp \
+	OrbSingleton.cpp
 

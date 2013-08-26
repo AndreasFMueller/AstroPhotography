@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "../idl/device.hh"
+#include <device.hh>
 #include "../idl/NameService.h"
 #include <includes.h>
 #include <AstroDebug.h>

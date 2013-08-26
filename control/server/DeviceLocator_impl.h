@@ -6,7 +6,7 @@
 #ifndef _DeviceLocator_impl_h
 #define _DeviceLocator_impl_h
 
-#include <../idl/device.hh>
+#include <device.hh>
 #include <AstroLoader.h>
 #include <AstroDevice.h>
 

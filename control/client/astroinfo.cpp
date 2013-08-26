@@ -4,7 +4,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "../idl/device.hh"
+#include <device.hh>
 #include <includes.h>
 #include <iostream>
 #include <AstroDebug.h>

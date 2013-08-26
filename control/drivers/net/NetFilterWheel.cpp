@@ -1,5 +1,5 @@
 /*
- * NetFilterWheel.cpp
+ * NetFilterWheel.cpp -- network based filter wheel implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswi
  */
@@ -9,20 +9,25 @@ namespace astro {
 namespace camera {
 namespace net {
 
-NetFilterWheel::NetFilterWhell(Astro::FilterWheel_var filterwheel)
+NetFilterWheel::NetFilterWheel(Astro::FilterWheel_var filterwheel)
 	: _filterwheel(filterwheel) {
+	Astro::FilterWheel_Helper::duplicate(_filterwheel);
 }
 
-int	NetFilterWheel::nFilters() {
-	return filterwheel->nFilters();
+NetFilterWheel::~NetFilterWheel() {
+	Astro::FilterWheel_Helper::release(_filterwheel);
 }
 
-int	NetFilterWheel::currentPosition() {
-	return filterwheel->currentPosition();
+unsigned int	NetFilterWheel::nFilters() {
+	return _filterwheel->nFilters();
+}
+
+unsigned int	NetFilterWheel::currentPosition() {
+	return _filterwheel->currentPosition();
 }
 
 void	NetFilterWheel::select(size_t filterindex) {
-	filterwheel->select(filterindex);
+	_filterwheel->select(filterindex);
 }
 
 } // namespace net

@@ -11,6 +11,11 @@ namespace net {
 
 NetCooler::NetCooler(Astro::Cooler_var cooler) : _cooler(cooler) {
 	// query the current cooler state from the remote cooler
+	Astro::Cooler_Helper::duplicate(_cooler);
+}
+
+NetCooler::~NetCooler() {
+	Astro::Cooler_Helper::release(_cooler);
 }
 
 float	NetCooler::getActualTemperature() {

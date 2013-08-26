@@ -7,16 +7,17 @@
 #define _NetFilterWheel_h
 
 #include <AstroCamera.h>
-#include "../../idl/device.hh"
+#include <device.hh>
 
 namespace astro {
 namespace camera {
 namespace net {
 
 class NetFilterWheel : public FilterWheel {
-	FilterWheel_var	_filterwheel;
+	Astro::FilterWheel_var	_filterwheel;
 public:
-	NetFilterWheel(FilterWheel_var filterwheel);
+	NetFilterWheel(Astro::FilterWheel_var filterwheel);
+	~NetFilterWheel();
 	virtual unsigned int	nFilters();
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
@@ -25,6 +26,6 @@ public:
 
 } // namespace net
 } // namespace camera
-} // namespace astro
+} // namespace astro
 
 #endif /* _NetFilterWheel_h */
