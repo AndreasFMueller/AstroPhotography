@@ -217,7 +217,7 @@ bool	Ccd::wait() {
 		endtime += exposure.exposuretime;
 		time_t	now = time(NULL);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
-		unsigned int	delta = endtime - now;
+		int	delta = endtime - now;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %u", delta);
 		if (delta > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
