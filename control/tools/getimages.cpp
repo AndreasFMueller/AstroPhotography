@@ -261,6 +261,9 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	time_t	t;
+	time(&t);
+	srandom(t);
 	try {
 		return astro::main(argc, argv);
 	} catch (std::exception& x) {

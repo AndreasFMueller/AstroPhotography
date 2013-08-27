@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Filterwheel servant definition
+ */
 class FilterWheel_impl : public POA_Astro::FilterWheel {
 	astro::camera::FilterWheelPtr	_filterwheel;
 public:

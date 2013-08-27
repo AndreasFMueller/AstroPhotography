@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Cooler servant definition
+ */
 class Cooler_impl : public POA_Astro::Cooler {
 	astro::camera::CoolerPtr	_cooler;
 public:

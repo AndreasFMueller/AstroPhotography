@@ -46,6 +46,10 @@ astro::camera::CoolerPtr	DeviceLocator::getCooler0(const std::string& name) {
 	throw std::runtime_error("cooler not implemented");
 }
 
+astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const std::string& name) {
+	throw std::runtime_error("focuser not implemented");
+}
+
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
 	CameraPtr	camera;
 	if (cameracache.find(name) == cameracache.end()) {
@@ -96,6 +100,17 @@ astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
 		cooler = coolercache.find(name)->second;
 	}
 	return cooler;
+}
+
+astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
+	FocuserPtr	focuser;
+	if (focusercache.find(name) == focusercache.end()) {
+		focuser = this->getFocuser0(name);
+		focusercache.insert(std::make_pair(name, focuser));
+	} else {
+		focuser = focusercache.find(name)->second;
+	}
+	return focuser;
 }
 
 } // namespace device

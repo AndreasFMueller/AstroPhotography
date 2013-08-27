@@ -12,6 +12,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Image servant definition
+ */
 class Image_impl : public virtual POA_Astro::Image {
 protected:
 	astro::image::ImagePtr	_image;
@@ -38,6 +41,9 @@ public:
  * derived class.
  */
 
+/**
+ * \brief ByteImage servant definition
+ */
 class ByteImage_impl : public Image_impl, public POA_Astro::ByteImage {
 public:
 	inline ByteImage_impl(astro::image::ImagePtr image)
@@ -45,6 +51,9 @@ public:
 	Astro::ByteImage::ByteSequence	*getBytes();
 };
 
+/**
+ * \brief ShortImage servant definition
+ */
 class ShortImage_impl : public Image_impl, public POA_Astro::ShortImage {
 public:
 	inline ShortImage_impl(astro::image::ImagePtr image)

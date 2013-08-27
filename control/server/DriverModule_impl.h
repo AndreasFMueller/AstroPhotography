@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Driver servant definition
+ */
 class DriverModule_impl : public POA_Astro::DriverModule {
 	astro::module::ModulePtr	_module;
 public:

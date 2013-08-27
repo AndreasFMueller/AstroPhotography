@@ -8,6 +8,7 @@
 #include <AstroExceptions.h>
 #include <SimGuiderPort.h>
 #include <SimCooler.h>
+#include <SimFocuser.h>
 
 using namespace astro::image;
 
@@ -123,6 +124,11 @@ ImagePtr  SimCcd::getImage() {
 
 	// temperature influence on noise
 	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
+
+	// focuser effect
+	double	radius = _locator.simfocuser()->radius();
+	starcamera.radius(radius);
+	starcamera.innerradius(0.4 * radius);
 
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",

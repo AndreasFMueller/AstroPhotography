@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Modules servant definition
+ */
 class Modules_impl : public POA_Astro::Modules {
 	astro::module::Repository	repository;
 	typedef	std::map<std::string, astro::module::ModulePtr>	modulemap_t;

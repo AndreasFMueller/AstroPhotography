@@ -12,7 +12,7 @@
 namespace Astro {
 
 /**
- * \brief Camera server implementation
+ * \brief Camera servant definition
  */
 class Camera_impl : public POA_Astro::Camera {
 	astro::camera::CameraPtr	_camera;

@@ -12,6 +12,9 @@
 
 namespace Astro {
 
+/**
+ * \brief DeviceLocator servant definition
+ */
 class DeviceLocator_impl : public POA_Astro::DeviceLocator {
 	astro::device::DeviceLocatorPtr	_locator;
 	std::map<std::string, astro::camera::CameraPtr>	cameramap;

@@ -419,6 +419,16 @@ module Astro {
 	};
 
 	/**
+	 * \brief Focuser abstraction
+	 */
+	interface Focuser {
+		unsigned short	min();
+		unsigned short	max();
+		unsigned short	current();
+		void	set(in unsigned short value);
+	};
+
+	/**
 	 * \brief Camera abstraction
 	 *
 	 * A camera consists of a number of CCDs that can be controlled

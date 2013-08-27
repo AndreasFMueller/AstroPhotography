@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Ccd servant definition
+ */
 class Ccd_impl : public POA_Astro::Ccd {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImagePtr	image;

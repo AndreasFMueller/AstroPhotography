@@ -13,15 +13,17 @@ namespace astro {
 namespace device {
 
 class   DeviceLocator {
-	std::map<std::string, astro::camera::CameraPtr>	cameracache;
+	std::map<std::string, astro::camera::CameraPtr>		cameracache;
 	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportcache;
 	std::map<std::string, astro::camera::FilterWheelPtr>	filterwheelcache;
-	std::map<std::string, astro::camera::CoolerPtr>	coolercache;
+	std::map<std::string, astro::camera::CoolerPtr>		coolercache;
+	std::map<std::string, astro::camera::FocuserPtr>	focusercache;
 protected:
 	virtual	astro::camera::CameraPtr	getCamera0(const std::string& name);
 	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const std::string& name);
 	virtual	astro::camera::FilterWheelPtr	getFilterWheel0(const std::string& name);
 	virtual	astro::camera::CoolerPtr	getCooler0(const std::string& name);
+	virtual	astro::camera::FocuserPtr	getFocuser0(const std::string& name);
 public:
 	DeviceLocator();
 	virtual ~DeviceLocator();
@@ -35,6 +37,7 @@ public:
 	astro::camera::GuiderPortPtr	getGuiderPort(const std::string& name);
 	astro::camera::FilterWheelPtr	getFilterWheel(const std::string& name);
 	astro::camera::CoolerPtr	getCooler(const std::string& name);
+	astro::camera::FocuserPtr	getFocuser(const std::string& name);
 };
 
 typedef std::tr1::shared_ptr<DeviceLocator>	DeviceLocatorPtr;

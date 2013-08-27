@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief GuiderPort servant definition
+ */
 class GuiderPort_impl : public POA_Astro::GuiderPort {
 	astro::camera::GuiderPortPtr	_guiderport;
 public:
