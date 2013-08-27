@@ -7,6 +7,7 @@
 #include "DriverModule_impl.h"
 #include <AstroLoader.h>
 #include <AstroDebug.h>
+#include <algorithm>
 
 namespace Astro {
 
@@ -18,14 +19,10 @@ std::vector<std::string>	Modules_impl::modulenames() {
 	std::vector<std::string>	modules = repository.moduleNames();
 
 	// remove the net module, we don't want to have that in the server
-	std::vector<std::string>::iterator	k;
-	for (k = modules.begin(); k != modules.end(); k++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %s", k->c_str());
-		if ((*k) == std::string("net")) {
-			modules.erase(k);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "removed 'net' module");
-			continue;
-		}
+	std::vector<std::string>::iterator	k
+		= find(modules.begin(), modules.end(), std::string("net"));
+	if (k != modules.end()) {
+		modules.erase(k);
 	}
 
 	// return the remaining modules
