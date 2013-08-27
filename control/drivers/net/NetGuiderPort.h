@@ -13,6 +13,9 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for Guider ports
+ */
 class NetGuiderPort : public astro::camera::GuiderPort {
 	Astro::GuiderPort_var	_guiderport;
 public:

@@ -13,6 +13,9 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for CCDs
+ */
 class NetCcd : public Ccd {
 	Astro::Ccd_ptr	_ccd;
 public:

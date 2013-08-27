@@ -14,6 +14,9 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for cameras
+ */
 class NetCamera : public Camera {
 	Astro::Camera_var	_camera;
 	bool	_hasfilterwheel;

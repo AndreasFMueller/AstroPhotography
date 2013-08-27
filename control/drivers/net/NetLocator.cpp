@@ -10,6 +10,9 @@
 #include <OrbSingleton.h>
 #include <AstroExceptions.h>
 #include <NetCamera.h>
+#include <NetGuiderPort.h>
+#include <NetFilterWheel.h>
+#include <NetCooler.h>
 
 using namespace astro::device;
 
@@ -93,6 +96,9 @@ std::string	NetLocator::devicename(const std::string& netname) const {
 
 /**
  * \brief Retrieve a list of names of all objects of a given type
+ *
+ * This method collects devices from all remote modules, and encodes
+ * module and device name in the single net device name
  */
 std::vector<std::string>	NetLocator::getDevicelist(
 	DeviceLocator::device_type device) {
@@ -146,10 +152,12 @@ std::vector<std::string>	NetLocator::getDevicelist(
 	return result;
 }
 
-CameraPtr	NetLocator::getCamera0(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for camera %s", name.c_str());
-	std::string	modname = modulename(name);
-	std::string	devname = devicename(name);
+/**
+ * \brief Get the device locator
+ */
+Astro::DeviceLocator_var	NetLocator::devicelocator(
+	const std::string& netname) {
+	std::string	modname = modulename(netname);
 
 	// get the driver module
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module %s", modname.c_str());
@@ -161,29 +169,81 @@ CameraPtr	NetLocator::getCamera0(const std::string& name) {
 	Astro::DeviceLocator_ptr	devicelocator
 		= drivermodulevar->getDeviceLocator();
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator;
+	return devicelocatorvar;
+}
+
+/**
+ * \brief Get a camera by name
+ */
+CameraPtr	NetLocator::getCamera0(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for camera %s", name.c_str());
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
+	std::string	devname = devicename(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera %s", devname.c_str());
-	Astro::Camera_ptr	camera
+	Astro::Camera_var	devicevar
 		= devicelocatorvar->getCamera(devname.c_str());
-	Astro::Camera_var	cameravar = camera;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a remote camera with %d ccds",
-		cameravar->nCcds());
+		devicevar->nCcds());
 
 	// wrap it in a CameraPtr object
-	return CameraPtr(new NetCamera(cameravar));
+	return CameraPtr(new NetCamera(devicevar));
 }
 
+/**
+ * \brief Get a guiderport by name
+ */
 GuiderPortPtr	NetLocator::getGuiderPort0(const std::string& name) {
-	return GuiderPortPtr();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guider port %s",
+		name.c_str());
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
+
+	// get the device reference
+	std::string	devname = devicename(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera %s", devname.c_str());
+	Astro::GuiderPort_var	devicevar
+		= devicelocatorvar->getGuiderPort(devname.c_str());
+
+	// wrap it in a GuiderPortPtr object
+	return GuiderPortPtr(new NetGuiderPort(devicevar));
 }
 
+/**
+ * \brief Get a filterwheel by name
+ */
 FilterWheelPtr	NetLocator::getFilterWheel0(const std::string& name) {
-	return FilterWheelPtr();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for filter wheel %s",
+		name.c_str());
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
+
+	// get the device reference
+	std::string	devname = devicename(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve filter wheel %s",
+		devname.c_str());
+	Astro::FilterWheel_var	devicevar
+		= devicelocatorvar->getFilterWheel(devname.c_str());
+
+	// wrap it in a FilterWheelPtr object
+	return FilterWheelPtr(new NetFilterWheel(devicevar));
 }
 
+/**
+ * \brief Get a cooler by name
+ */
 CoolerPtr	NetLocator::getCooler0(const std::string& name) {
-	return CoolerPtr();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for cooler %s",
+		name.c_str());
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
+
+	// get the device reference
+	std::string	devname = devicename(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cooler %s", devname.c_str());
+	Astro::Cooler_var	devicevar
+		= devicelocatorvar->getCooler(devname.c_str());
+
+	// wrap it in a CoolerPtr object
+	return CoolerPtr(new NetCooler(devicevar));
 }
 
 } // namespace net

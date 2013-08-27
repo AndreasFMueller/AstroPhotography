@@ -9,11 +9,17 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroIO.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Create a new network connected CCD
+ *
+ * Duplicate the reference to the remove ccd reference
+ */
 NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
 	: Ccd(_info), _ccd(ccd) {
 	Astro::Ccd_Helper::duplicate(_ccd);
@@ -27,10 +33,19 @@ NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
 		exposure.toString().c_str());
 }
 
+/**
+ * \brief Destroy the NetCcd
+ *
+ * This simply releases the reference to the remote object reference
+ * we hold for this ccd.
+ */
 NetCcd::~NetCcd() {
 	Astro::Ccd_Helper::release(_ccd);
 }
 
+/**
+ * \brief Start a new exposure
+ */
 void	NetCcd::startExposure(const Exposure& _exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new exposure");
 	Ccd::startExposure(_exposure);
@@ -43,10 +58,16 @@ void	NetCcd::startExposure(const Exposure& _exposure) {
 		convert2string(state).c_str());
 }
 
+/**
+ * \brief Get the exposure status
+ */
 Exposure::State	NetCcd::exposureStatus() {
 	return convert(_ccd->exposureStatus());
 }
 
+/**
+ * \brief Cancel an exposure that is already in progress
+ */
 void	NetCcd::cancelExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelling exposure");
 	_ccd->cancelExposure();
@@ -102,19 +123,38 @@ ImagePtr	NetCcd::getImage() {
 	return _image;
 }
 
+/**
+ * \brief Check whether the the CCD has a cooler
+ */
 bool	NetCcd::hasCooler() const {
 	return _ccd->hasCooler();
 }
 
+/**
+ * \brief Retrieve a cooler, if there is one
+ */
 CoolerPtr	NetCcd::getCooler0() {
+	if (!hasCooler()) {
+		throw NotFound("CCD has no cooler");
+	}
 	Astro::Cooler_var	cooler = _ccd->getCooler();
 	return CoolerPtr(new NetCooler(cooler));
 }
 
+/**
+ * \brief Get the Shutter state of this CCD
+ */
 shutter_state	NetCcd::getShutterState() {
 	return convert(_ccd->getShutterState());
 }
 
+/**
+ * \brief Set the shutter state
+ *
+ * This actually moves the shutter. This should probably not be used except
+ * in special cases. It is usually preferred to use the shutter member
+ * of the Exposure object when starting a new exposure.
+ */
 void	NetCcd::setShutterState(const shutter_state& state) {
 	_ccd->setShutterState(convert(state));
 }

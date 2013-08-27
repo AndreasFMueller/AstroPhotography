@@ -412,6 +412,10 @@ module Astro {
 		 * \brief Move the filter wheel to a given position
 		 */
 		void	select(in long position) raises(NotFound);
+		/**
+		 * \brief Get the name of the filter
+		 */
+		string	filterName(in long position) raises(NotFound);
 	};
 
 	/**
@@ -487,6 +491,7 @@ module Astro {
 		Camera		getCamera(in string name) raises(NotFound);
 		GuiderPort	getGuiderPort(in string name) raises(NotFound);
 		FilterWheel	getFilterWheel(in string name) raises(NotFound);
+		Cooler		getCooler(in string name) raises(NotFound);
 	};
 
 	struct Descriptor {

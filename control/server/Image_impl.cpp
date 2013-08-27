@@ -88,42 +88,6 @@ CORBA::Long	Image_impl::bytesPerValue() {
 	return astro::image::filter::bytespervalue(_image);
 }
 
-#define	sequence_mono(pixel, size, _image, result)			\
-{									\
-	astro::image::Image<pixel>	*imagep				\
-		= dynamic_cast<astro::image::Image<pixel> *>(&*_image);	\
-	if (NULL != imagep) {						\
-		for (unsigned int off = 0; off < size; off++) {		\
-			(*result)[off] = (*imagep)[off];		\
-		}							\
-	}								\
-}
-
-#define sequence_yuyv(pixel, size, _image, result)			\
-{									\
-	astro::image::Image<YUYV<pixel> >	*imagep			\
-		= dynamic_cast<astro::image::Image<YUYV<pixel> > *>(&*_image);\
-	if (NULL != imagep) {						\
-		for (unsigned int off = 0; off < size; off++) {		\
-			(*result)[2 * off    ] = (*imagep)[off].y;	\
-			(*result)[2 * off + 1] = (*imagep)[off].uv;	\
-		}							\
-	}								\
-}
-
-#define sequence_rgb(pixel, size, _image, result)			\
-{									\
-	astro::image::Image<RGB<pixel> >	*imagep			\
-		= dynamic_cast<astro::image::Image<RGB<pixel> > *>(&*_image);\
-	if (NULL != imagep) {						\
-		for (unsigned int off = 0; off < size; off++) {		\
-			(*result)[3 * off    ] = (*imagep)[off].R;	\
-			(*result)[3 * off + 1] = (*imagep)[off].G;	\
-			(*result)[3 * off + 2] = (*imagep)[off].B;	\
-		}							\
-	}								\
-}
-
 /**
  * \brief Convert image into FITS data
  *
@@ -178,6 +142,45 @@ Astro::Image::ImageFile	*Image_impl::file() {
 	return imagefile;
 }
 
+#define	sequence_mono(pixel, size, _image, result)			\
+{									\
+	astro::image::Image<pixel>	*imagep				\
+		= dynamic_cast<astro::image::Image<pixel> *>(&*_image);	\
+	if (NULL != imagep) {						\
+		for (unsigned int off = 0; off < size; off++) {		\
+			(*result)[off] = (*imagep)[off];		\
+		}							\
+	}								\
+}
+
+#define sequence_yuyv(pixel, size, _image, result)			\
+{									\
+	astro::image::Image<YUYV<pixel> >	*imagep			\
+		= dynamic_cast<astro::image::Image<YUYV<pixel> > *>(&*_image);\
+	if (NULL != imagep) {						\
+		for (unsigned int off = 0; off < size; off++) {		\
+			(*result)[2 * off    ] = (*imagep)[off].y;	\
+			(*result)[2 * off + 1] = (*imagep)[off].uv;	\
+		}							\
+	}								\
+}
+
+#define sequence_rgb(pixel, size, _image, result)			\
+{									\
+	astro::image::Image<RGB<pixel> >	*imagep			\
+		= dynamic_cast<astro::image::Image<RGB<pixel> > *>(&*_image);\
+	if (NULL != imagep) {						\
+		for (unsigned int off = 0; off < size; off++) {		\
+			(*result)[3 * off    ] = (*imagep)[off].R;	\
+			(*result)[3 * off + 1] = (*imagep)[off].G;	\
+			(*result)[3 * off + 2] = (*imagep)[off].B;	\
+		}							\
+	}								\
+}
+
+/**
+ * \brief Retrieve the raw image data for a byte image
+ */
 Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	Astro::ByteImage::ByteSequence	*result
 		= new Astro::ByteImage::ByteSequence();
@@ -190,6 +193,9 @@ Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	return result;
 }
 
+/**
+ * \brief Retrieve the raw image data for a short iamge
+ */
 Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
 	Astro::ShortImage::ShortSequence	*result
 		= new Astro::ShortImage::ShortSequence();

@@ -16,6 +16,14 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Create a network camera client
+ *
+ * A network camera client keeps a reference to a remote camera reference.
+ * In addition, its parent class keeps information about the CCDs available,
+ * so the constructor retrieves this information from the remote object
+ * and caches it locally.
+ */
 NetCamera::NetCamera(Astro::Camera_var camera) : _camera(camera) {
 	// retrieve Ccds from the camera reference and fill the CCDinfo
 	int	nccds = _camera->nCcds();
@@ -33,6 +41,9 @@ NetCamera::NetCamera(Astro::Camera_var camera) : _camera(camera) {
 	_hasguiderport = _camera->hasGuiderPort();
 }
 
+/**
+ * \brief Get the CCD 
+ */
 CcdPtr	NetCamera::getCcd0(size_t ccdid) {
 	if (ccdid >= ccdinfo.size()) {
 		throw NotFound("ccd id too large");
@@ -42,10 +53,16 @@ CcdPtr	NetCamera::getCcd0(size_t ccdid) {
 	return CcdPtr(new NetCcd(ccdinfo[ccdid], ccdvar));
 }
 
+/**
+ * \brief Check whether the camera has a filter wheel
+ */
 bool	NetCamera::hasFilterWheel() const {
 	return _hasfilterwheel;
 }
 
+/**
+ * \brief Get the FilterWheel
+ */
 FilterWheelPtr	NetCamera::getFilterWheel0() {
 	if (!_hasfilterwheel) {
 		throw NotFound("camera does not have a filter wheel");
@@ -53,10 +70,16 @@ FilterWheelPtr	NetCamera::getFilterWheel0() {
 	return FilterWheelPtr(new NetFilterWheel(_camera->getFilterWheel()));
 }
 
+/**
+ * \brief Check whether the camera has guider port
+ */
 bool	NetCamera::hasGuiderPort() const {
 	return _hasguiderport;
 }
 
+/**
+ * \brief Get the GuiderPort
+ */
 GuiderPortPtr	NetCamera::getGuiderPort0() {
 	if (!_hasguiderport) {
 		throw NotFound("camera does not have guider port");

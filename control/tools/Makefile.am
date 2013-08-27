@@ -84,4 +84,4 @@ looptest:	imageloop
 
 test:	getimages
 	./getimages -d -ORBInitRef NameService=corbaname::localhost \
-		-m net -C 10 -e 1 -o net -p net
+		-m net -C 10 -e 1 -o net -p net -t -10

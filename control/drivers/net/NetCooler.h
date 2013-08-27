@@ -13,6 +13,9 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for a Cooler
+ */
 class NetCooler : public Cooler {
 	Astro::Cooler_var	_cooler;
 public:

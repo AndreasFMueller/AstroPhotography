@@ -13,6 +13,9 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for a filterwheel
+ */
 class NetFilterWheel : public FilterWheel {
 	Astro::FilterWheel_var	_filterwheel;
 public:

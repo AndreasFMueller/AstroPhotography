@@ -13,10 +13,14 @@ namespace astro {
 namespace camera {
 namespace net {
 
+/**
+ * \brief Network client for locators
+ */
 class NetLocator : public astro::device::DeviceLocator {
 	Astro::Modules_var	modules;
 	std::string	modulename(const std::string& netname) const;
 	std::string	devicename(const std::string& netname) const;
+	Astro::DeviceLocator_var	devicelocator(const std::string& netname);
 public:
 	NetLocator();
 	virtual ~NetLocator();

@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+/**
+ * \brief Camera server implementation
+ */
 class Camera_impl : public POA_Astro::Camera {
 	astro::camera::CameraPtr	_camera;
 	std::vector<astro::camera::CcdPtr>	ccds;

@@ -7,23 +7,35 @@
 #include "GuiderPort_impl.h"
 #include "FilterWheel_impl.h"
 #include "Camera_impl.h"
+#include "Cooler_impl.h"
 #include <AstroDebug.h>
 #include <Conversions.h>
 
 namespace Astro {
 
+/**
+ * \brief Get the name of the DeviceLocator
+ */
 char	*DeviceLocator_impl::getName() {
 	return ::CORBA::string_dup(_locator->getName().c_str());
 }
 
+/**
+ * \brief Get the version of the DeviceLocator
+ */
 char	*DeviceLocator_impl::getVersion() {
 	return ::CORBA::string_dup(_locator->getVersion().c_str());
 }
 
-::Astro::DeviceLocator::DeviceNameList	*DeviceLocator_impl::getDevicelist(::Astro::DeviceLocator::device_type devicetype) {
+/**
+ * \brief Get the list of device names for a given type
+ */
+::Astro::DeviceLocator::DeviceNameList	*DeviceLocator_impl::getDevicelist(
+	::Astro::DeviceLocator::device_type devicetype) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for device type %d",
 		devicetype);
-	astro::device::DeviceLocator::device_type	type = astro::convert(devicetype);
+	astro::device::DeviceLocator::device_type	type
+		= astro::convert(devicetype);
 	std::vector<std::string>	devices
 		= _locator->getDevicelist(type);
 
@@ -38,6 +50,9 @@ char	*DeviceLocator_impl::getVersion() {
 	return result;
 }
 
+/**
+ * \brief Get a GuiderPort with a given name
+ */
 GuiderPort_ptr	DeviceLocator_impl::getGuiderPort(const char *name) {
 	// find out whether this guider port has already been retrieved
 	std::string	guidername(name);
@@ -52,6 +67,9 @@ GuiderPort_ptr	DeviceLocator_impl::getGuiderPort(const char *name) {
 	return gp->_this();
 }
 
+/**
+ * \brief Get a FilterWheel of a given name
+ */
 FilterWheel_ptr	DeviceLocator_impl::getFilterWheel(const char *name) {
 	// find out whether this guider port has already been retrieved
 	std::string	filtername(name);
@@ -67,7 +85,24 @@ FilterWheel_ptr	DeviceLocator_impl::getFilterWheel(const char *name) {
 }
 
 /**
- * \brief
+ * \brief Get a Cooler of a given name
+ */
+Cooler_ptr	DeviceLocator_impl::getCooler(const char *name) {
+	// find out whether this guider port has already been retrieved
+	std::string	coolername(name);
+	astro::camera::CoolerPtr	cooler;
+	if (coolermap.find(coolername) == coolermap.end()) {
+		cooler = _locator->getCooler(coolername);
+		coolermap.insert(std::make_pair(coolername, cooler));
+	} else {
+		cooler = coolermap.find(coolername)->second;
+	}
+	Cooler_impl	*gp = new Cooler_impl(cooler);
+	return gp->_this();
+}
+
+/**
+ * \brief Get A Camera of a given name
  */
 Camera_ptr	DeviceLocator_impl::getCamera(const char *name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera %s", name);
