@@ -35,6 +35,7 @@ protected:
 	virtual FilterWheelPtr	getFilterWheel0(const std::string& name);
 	virtual GuiderPortPtr	getGuiderPort0(const std::string& name);
 	virtual CoolerPtr	getCooler0(const std::string& name);
+	virtual FocuserPtr	getFocuser0(const std::string& name);
 };
 
 } // namespace net

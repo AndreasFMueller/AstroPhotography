@@ -13,6 +13,7 @@
 #include <NetGuiderPort.h>
 #include <NetFilterWheel.h>
 #include <NetCooler.h>
+#include <NetFocuser.h>
 
 using namespace astro::device;
 
@@ -244,6 +245,24 @@ CoolerPtr	NetLocator::getCooler0(const std::string& name) {
 
 	// wrap it in a CoolerPtr object
 	return CoolerPtr(new NetCooler(devicevar));
+}
+
+/**
+ * \brief Get a focuser by name
+ */
+FocuserPtr	NetLocator::getFocuser0(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for focuser %s",
+		name.c_str());
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
+
+	// get the device reference
+	std::string	devname = devicename(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve focuser %s", devname.c_str());
+	Astro::Focuser_var	devicevar
+		= devicelocatorvar->getFocuser(devname.c_str());
+
+	// wrap it in a FocuserPtr object
+	return FocuserPtr(new NetFocuser(devicevar));
 }
 
 } // namespace net

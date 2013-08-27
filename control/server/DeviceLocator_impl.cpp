@@ -8,6 +8,7 @@
 #include "FilterWheel_impl.h"
 #include "Camera_impl.h"
 #include "Cooler_impl.h"
+#include "Focuser_impl.h"
 #include <AstroDebug.h>
 #include <Conversions.h>
 
@@ -98,6 +99,23 @@ Cooler_ptr	DeviceLocator_impl::getCooler(const char *name) {
 		cooler = coolermap.find(coolername)->second;
 	}
 	Cooler_impl	*gp = new Cooler_impl(cooler);
+	return gp->_this();
+}
+
+/**
+ * \brief Get a Focuser of a given name
+ */
+Focuser_ptr	DeviceLocator_impl::getFocuser(const char *name) {
+	// find out whether this guider port has already been retrieved
+	std::string	focusername(name);
+	astro::camera::FocuserPtr	focuser;
+	if (focusermap.find(focusername) == focusermap.end()) {
+		focuser = _locator->getFocuser(focusername);
+		focusermap.insert(std::make_pair(focusername, focuser));
+	} else {
+		focuser = focusermap.find(focusername)->second;
+	}
+	Focuser_impl	*gp = new Focuser_impl(focuser);
 	return gp->_this();
 }
 

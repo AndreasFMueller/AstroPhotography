@@ -162,7 +162,7 @@ CoolerPtr	SimLocator::getCooler0(const std::string& name) {
 }
 
 FocuserPtr	SimLocator::getFocuser0(const std::string& name) {
-	if (name != "sim-cooler") {
+	if (name != "sim-focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
 			name.c_str());
 		throw NotFound("no such focuser");

@@ -21,7 +21,7 @@ unsigned short	SimFocuser::variance() {
 	return std::numeric_limits<unsigned short>::max() / 4;
 }
 
-SimFocuser::SimFocuser(SimLocator& locator) : _locator(locator) {
+SimFocuser::SimFocuser(SimLocator& locator) : Focuser("sim-locator"), _locator(locator) {
 	_value = reference() + (random() % variance());
 	target = _value;
 	lastset = 0;
@@ -41,12 +41,13 @@ unsigned short	SimFocuser::current() {
 	}
 	double	now = simtime();
 	double	timepast = now - lastset;
-	if (fabs((_value - target) / 1000.) > timepast) {
-		_value -= timepast * (_value - target) / 1000.;
+	double	delta = (double)_value - (double)target;
+	if (fabs(delta / 1000.) > timepast) {
+		_value -= timepast * delta;
 		lastset = now;
 	} else {
 		lastset = 0;
-		target = _value;
+		_value = target;
 	}
 	return _value;
 }

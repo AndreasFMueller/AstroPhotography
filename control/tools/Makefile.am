@@ -84,4 +84,4 @@ looptest:	imageloop
 
 test:	getimages
 	./getimages -d -ORBInitRef NameService=corbaname::localhost \
-		-m simulator -e 1 -o net -p net
+		-m net -C 10 -e 1 -o net -p net -F net:simulator/sim-focuser -f 25000

@@ -5,10 +5,12 @@
 #
 pkglib_LTLIBRARIES = net.la
 noinst_HEADERS = NetLocator.h NetCamera.h NetCcd.h \
-	NetGuiderPort.h NetFilterWheel.h NetCooler.h
+	NetGuiderPort.h NetFilterWheel.h NetCooler.h \
+	NetFocuser.h
 
 SRCFILES = NetLocator.cpp NetCamera.cpp NetCcd.cpp \
-	NetGuiderPort.cpp NetFilterWheel.cpp NetCooler.cpp
+	NetGuiderPort.cpp NetFilterWheel.cpp NetCooler.cpp \
+	NetFocuser.cpp
 
 if ENABLE_UNITTESTS
 

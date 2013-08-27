@@ -502,6 +502,7 @@ module Astro {
 		GuiderPort	getGuiderPort(in string name) raises(NotFound);
 		FilterWheel	getFilterWheel(in string name) raises(NotFound);
 		Cooler		getCooler(in string name) raises(NotFound);
+		Focuser		getFocuser(in string name) raises(NotFound);
 	};
 
 	struct Descriptor {
