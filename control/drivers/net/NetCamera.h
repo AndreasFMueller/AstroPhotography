@@ -8,6 +8,7 @@
 
 #include <NetLocator.h>
 #include <device.hh>
+#include <Conversions.h>
 
 namespace astro {
 namespace camera {
@@ -15,6 +16,8 @@ namespace net {
 
 class NetCamera : public Camera {
 	Astro::Camera_var	_camera;
+	bool	_hasfilterwheel;
+	bool	_hasguiderport;
 public:
 	NetCamera(Astro::Camera_var camera);
 	virtual CcdPtr	getCcd0(size_t ccdid);

@@ -10,16 +10,17 @@
 #include <iostream>
 #include <omniORB4/CORBA.h>
 #include "Modules_impl.h"
-#include "../idl/NameService.h"
+#include <NameService.h>
+#include <OrbSingleton.h>
 
 namespace astro {
 
 int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
+	debuglevel = LOG_DEBUG;
 
 	// initialize CORBA
-	const char* options[][2] = { { "giopMaxMsgSize", "40000000" }, { 0, 0 } }; 
-	CORBA::ORB_var	orb = CORBA::ORB_init(argc, argv, "omniORB4", options);
+	Astro::OrbSingleton	orb(argc, argv);
 
 	// now parse the command line
 	int	c;
@@ -35,7 +36,7 @@ int	main(int argc, char *argv[]) {
 
 	// get the POA
 	CORBA::Object_var	obj
-		= orb->resolve_initial_references("RootPOA");
+		= orb.orbvar()->resolve_initial_references("RootPOA");
 	PortableServer::POA_var	poa = PortableServer::POA::_narrow(obj);
 
 	// get the naming service
@@ -62,8 +63,8 @@ int	main(int argc, char *argv[]) {
 	pman->activate();
 
 	// run the orb
-	orb->run();
-	orb->destroy();
+	orb.orbvar()->run();
+	orb.orbvar()->destroy();
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "astrod exiting");
 	return EXIT_SUCCESS;

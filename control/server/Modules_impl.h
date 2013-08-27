@@ -15,6 +15,7 @@ class Modules_impl : public POA_Astro::Modules {
 	astro::module::Repository	repository;
 	typedef	std::map<std::string, astro::module::ModulePtr>	modulemap_t;
 	modulemap_t	modulemap;
+	std::vector<std::string>	modulenames();
 public:
 	inline Modules_impl() { }
 	virtual ~Modules_impl() { }

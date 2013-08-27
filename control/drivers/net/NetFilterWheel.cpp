@@ -30,6 +30,10 @@ void	NetFilterWheel::select(size_t filterindex) {
 	_filterwheel->select(filterindex);
 }
 
+std::string	NetFilterWheel::filterName(size_t filterindex) {
+	return std::string();
+}
+
 } // namespace net
 } // namespace camera
 } // namespace astro

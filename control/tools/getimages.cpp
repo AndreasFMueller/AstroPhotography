@@ -13,6 +13,7 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <AstroIO.h>
+#include <OrbSingleton.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -72,6 +73,10 @@ int	main(int argc, char *argv[]) {
 	bool	listonly = false;
 	bool	dark = false;
 	double	temperature = -1;
+
+	// initialize the orb in case we want to use the net module
+	Astro::OrbSingleton	orb(argc, argv);
+	debugtimeprecision = 3;
 
 	// parse the command line
 	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:")))
@@ -207,6 +212,15 @@ int	main(int argc, char *argv[]) {
 	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
+
+	// check whether the remote camera already has an exposed image,
+	// in which case we want to cancel it
+	if (Exposure::exposed == ccd->exposureStatus()) {
+		ccd->cancelExposure();
+		while (Exposure::idle != ccd->exposureStatus()) {
+			usleep(100000);
+		}
+	}
 
 	// start the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");

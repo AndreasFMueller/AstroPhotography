@@ -8,6 +8,7 @@
 #include "FilterWheel_impl.h"
 #include "Camera_impl.h"
 #include <AstroDebug.h>
+#include <Conversions.h>
 
 namespace Astro {
 
@@ -20,23 +21,9 @@ char	*DeviceLocator_impl::getVersion() {
 }
 
 ::Astro::DeviceLocator::DeviceNameList	*DeviceLocator_impl::getDevicelist(::Astro::DeviceLocator::device_type devicetype) {
-	astro::device::DeviceLocator::device_type	type
-		= astro::device::DeviceLocator::CAMERA;
-		// initialize to silence compiler
-	switch (devicetype) {
-	case ::Astro::DeviceLocator::DEVICE_CAMERA:
-		type = astro::device::DeviceLocator::CAMERA;
-		break;
-	case ::Astro::DeviceLocator::DEVICE_FOCUSER:
-		type = astro::device::DeviceLocator::FOCUSER;
-		break;
-	case ::Astro::DeviceLocator::DEVICE_GUIDERPORT:
-		type = astro::device::DeviceLocator::GUIDERPORT;
-		break;
-	case ::Astro::DeviceLocator::DEVICE_FILTERWHEEL:
-		type = astro::device::DeviceLocator::FILTERWHEEL;
-		break;
-	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for device type %d",
+		devicetype);
+	astro::device::DeviceLocator::device_type	type = astro::convert(devicetype);
 	std::vector<std::string>	devices
 		= _locator->getDevicelist(type);
 

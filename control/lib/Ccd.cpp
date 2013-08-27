@@ -51,6 +51,16 @@ void	CcdInfo::addMode(const Binning& mode) {
 }
 
 /**
+ * \brief add a set of binning modes
+ */
+void	CcdInfo::addModes(const BinningSet& modes) {
+	BinningSet::const_iterator	i;
+	for (i = modes.begin(); i != modes.end(); i++) {
+		addMode(*i);
+	}
+}
+
+/**
  * \brief Get the binning modes available for this CCD.
  */
 const BinningSet&	CcdInfo::modes() const {
@@ -142,7 +152,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	// make sure we are in the right state, and only accept new exposures
 	// in that state. This is important because if we change the
 	// exposure member while an exposure is in progress, we may run into
-	// trouble while doing the readout
+	// trouble while doing the readout. 
 	if (Exposure::idle != state) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"start exposure only in idle state");

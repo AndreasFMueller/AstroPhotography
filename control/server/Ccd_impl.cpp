@@ -22,7 +22,7 @@ namespace Astro {
  * exception.
  */
 ExposureState	Ccd_impl::exposureStatus() {
-	return convert(_ccd->exposureStatus());
+	return astro::convert(_ccd->exposureStatus());
 }
 
 /**
@@ -34,7 +34,7 @@ ExposureState	Ccd_impl::exposureStatus() {
  */
 void	Ccd_impl::startExposure(const Exposure& exp) {
 	image.reset();
-	astro::camera::Exposure	exposure = convert(exp);
+	astro::camera::Exposure	exposure = astro::convert(exp);
 	try {
 		_ccd->startExposure(exposure);
 	} catch (astro::BadParameter& bpx) {
@@ -68,7 +68,7 @@ void	Ccd_impl::cancelExposure() {
 		throw notimplemented;
 	} catch (astro::camera::BadState &bsx) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
-			"cancel only state EXPOSING: %s", bsx.what());
+			"cancel only in state EXPOSING or EXPOSED: %s", bsx.what());
 		BadState	badstate;
 		badstate.cause = bsx.what();
 		throw badstate;
@@ -122,7 +122,7 @@ Image_ptr	Ccd_impl::getImage() {
  */
 Astro::Exposure	Ccd_impl::getExposure() {
 	try {
-		Astro::Exposure	exp = convert(_ccd->getExposure());
+		Astro::Exposure	exp = astro::convert(_ccd->getExposure());
 		return exp;
 	} catch (astro::camera::BadState& bsx) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure: %s", bsx.what());
@@ -150,7 +150,7 @@ Astro::Exposure	Ccd_impl::getExposure() {
  * \brief Query the shutter state
  */
 ShutterState	Ccd_impl::getShutterState() {
-	return convert(_ccd->getShutterState());
+	return astro::convert(_ccd->getShutterState());
 }
 
 /**
@@ -161,7 +161,7 @@ ShutterState	Ccd_impl::getShutterState() {
  * structure.
  */
 void	Ccd_impl::setShutterState(ShutterState state) {
-	astro::camera::shutter_state	shutterstate = convert(state);
+	astro::camera::shutter_state	shutterstate = astro::convert(state);
 	try {
 		_ccd->setShutterState(shutterstate);
 	} catch (astro::NotImplemented& nix) {

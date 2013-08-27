@@ -185,7 +185,7 @@ void	Module::close() {
  * \brief Get a pointer to given symbol
  */
 void	*Module::getSymbol(const std::string& symbolname) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "lookin up symbol %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking up symbol %s",
 		symbolname.c_str());
 	// make sure the module is already loaded
 	if (!isloaded()) {

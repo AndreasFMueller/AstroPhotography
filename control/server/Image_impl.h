@@ -27,6 +27,7 @@ public:
 	virtual CORBA::Double	min();
 	virtual CORBA::Double	mean();
 	virtual CORBA::Double	median();
+	virtual Astro::Image::ImageFile	*file();
 };
 
 /*

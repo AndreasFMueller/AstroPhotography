@@ -10,8 +10,6 @@ EXTRA_DIST = Modules_impl.h DriverModule_impl.h DeviceLocator_impl.h \
 	Camera_impl.h Ccd_impl.h GuiderPort_impl.h FilterWheel_impl.h \
 	Cooler_impl.h Image_impl.h
 
-ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
-
 noinst_LTLIBRARIES = libserver.la
 libserver_la_SOURCES = Modules_impl.cpp DriverModule_impl.cpp \
 	DeviceLocator_impl.cpp Camera_impl.cpp Ccd_impl.cpp \
@@ -20,7 +18,7 @@ libserver_la_SOURCES = Modules_impl.cpp DriverModule_impl.cpp \
 
 astrod_SOURCES = astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la libserver.la
-astrod_LDADD = libserver.la -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@  $(ORBLDFLAGS)
+astrod_LDADD = libserver.la -L../lib -lastro @SBIGLIBRARY@
 
 test:	astrod
 	./astrod -d -ORBInitRef NameService=corbaname::localhost

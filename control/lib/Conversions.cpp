@@ -46,6 +46,40 @@ astro::device::DeviceLocator::device_type	convert(
 	throw std::runtime_error("illegal type");
 }
 
+std::string	convert2string(astro::device::DeviceLocator::device_type fromtype) {
+	switch (fromtype) {
+	case astro::device::DeviceLocator::CAMERA:
+		return std::string("CAMERA");
+	case astro::device::DeviceLocator::FOCUSER:
+		return std::string("FOCUSER");
+	case astro::device::DeviceLocator::GUIDERPORT:
+		return std::string("GUIDERPORT");
+	case astro::device::DeviceLocator::FILTERWHEEL:
+		return std::string("FILTERWHEEL");
+	case astro::device::DeviceLocator::COOLER:
+		return std::string("COOLER");
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
+	throw std::runtime_error("illegal type");
+}
+
+std::string	convert2string(Astro::DeviceLocator::device_type fromtype) {
+	switch (fromtype) {
+	case Astro::DeviceLocator::DEVICE_CAMERA:
+		return std::string("CAMERA");
+	case Astro::DeviceLocator::DEVICE_FOCUSER:
+		return std::string("FOCUSER");
+	case Astro::DeviceLocator::DEVICE_GUIDERPORT:
+		return std::string("GUIDERPORT");
+	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
+		return std::string("FILTERWHEEL");
+	case Astro::DeviceLocator::DEVICE_COOLER:
+		return std::string("COOLER");
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
+	throw std::runtime_error("illegal type");
+}
+
 // Exposure state
 
 Astro::ExposureState	convert(astro::camera::Exposure::State fromstate) {
@@ -77,6 +111,37 @@ astro::camera::Exposure::State	convert(Astro::ExposureState fromstate) {
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromstate);
 	throw std::runtime_error("illegal type");
 }
+
+std::string	convert2string(astro::camera::Exposure::State fromstate) {
+        switch (fromstate) {
+        case astro::camera::Exposure::idle:
+                return std::string("IDLE");
+        case astro::camera::Exposure::exposing:
+                return std::string("EXPOSING");
+        case astro::camera::Exposure::exposed:
+                return std::string("EXPOSED");
+        case astro::camera::Exposure::cancelling:
+                return std::string("CANCELLING");
+        }
+        debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromstate);
+        throw std::runtime_error("illegal type");
+}
+
+std::string	convert2string(Astro::ExposureState fromstate) {
+	switch (fromstate) {
+	case Astro::EXPOSURE_IDLE:
+		return std::string("idle");
+	case Astro::EXPOSURE_EXPOSING:
+		return std::string("exposing");
+	case Astro::EXPOSURE_EXPOSED:
+		return std::string("exposed");
+	case Astro::EXPOSURE_CANCELLING:
+		return std::string("cancelling");
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromstate);
+	throw std::runtime_error("illegal type");
+}
+
 
 // Image point
 
@@ -164,6 +229,14 @@ astro::camera::BinningSet	convert(Astro::BinningSet_var set) {
 	return result;
 }
 
+astro::camera::BinningSet	convert(Astro::BinningSet set) {
+	astro::camera::BinningSet	result;
+	for (unsigned int i = 0; i < set.length(); i++) {
+		result.insert(convert(set[i]));
+	}
+	return result;
+}
+
 Astro::BinningSet_var	convert(const astro::camera::BinningSet& set) {
 	Astro::BinningSet	*resultset = new Astro::BinningSet();
 	Astro::BinningSet_var	result = resultset;
@@ -232,6 +305,33 @@ CORBA::Octet	convert_relaybits2octet(uint8_t bits) {
 	if (bits & astro::camera::GuiderPort::RAPLUS) {
 		result |= Astro::GuiderPort::RAPLUS;
 	}
+	return result;
+}
+
+// CcdInfo
+Astro::CcdInfo	convert(const astro::camera::CcdInfo& info) {
+	Astro::CcdInfo	result;
+	result.name = CORBA::string_dup(info.name().c_str());
+	result.id = info.getId();
+	result.size = convert(info.size());
+	result.binningmodes = convert(info.modes());
+	result.shutter = info.shutter();
+	return result;
+}
+
+astro::camera::CcdInfo	convert(const Astro::CcdInfo& info) {
+	astro::camera::CcdInfo	result(std::string(info.name),
+					convert(info.size), info.id);
+	result.addModes(convert(info.binningmodes));
+	result.setShutter(info.shutter);
+	return result;
+}
+
+astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info) {
+	astro::camera::CcdInfo	result(std::string(info->name),
+					convert(info->size), info->id);
+	result.addModes(convert(info->binningmodes));
+	result.setShutter(info->shutter);
 	return result;
 }
 

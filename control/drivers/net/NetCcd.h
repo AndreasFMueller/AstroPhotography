@@ -22,7 +22,6 @@ public:
 	virtual void    startExposure(const astro::camera::Exposure& exposure);
 	virtual astro::camera::Exposure::State exposureStatus();
 	virtual void    cancelExposure();
-	virtual bool    wait();
 
 	virtual shutter_state   getShutterState();
 	virtual void    setShutterState(const shutter_state& state);

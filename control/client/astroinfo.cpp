@@ -9,7 +9,8 @@
 #include <iostream>
 #include <AstroDebug.h>
 #include <stdexcept>
-#include "../idl/NameService.h"
+#include <NameService.h>
+#include <OrbSingleton.h>
 #include <stdio.h>
 
 namespace astro {
@@ -77,8 +78,7 @@ void	display_module(Astro::DriverModule_var drivermodule) {
 int	main(int argc, char *argv[]) {
 	// get an orb reference, also removes the ORB arguments from
 	// the command line
-	CORBA::ORB_ptr	orb = CORBA::ORB_init(argc, argv, "omniORB4");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got ORB");
+	Astro::OrbSingleton	orb(argc, argv);
 
 	// parse the command line
 	int	c;

@@ -11,17 +11,40 @@
 namespace Astro {
 
 /**
+ * \brief retrieve a list of modules that are available via CORBA
+ */
+std::vector<std::string>	Modules_impl::modulenames() {
+	// get a list of all modules
+	std::vector<std::string>	modules = repository.moduleNames();
+
+	// remove the net module, we don't want to have that in the server
+	std::vector<std::string>::iterator	k;
+	for (k = modules.begin(); k != modules.end(); k++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %s", k->c_str());
+		if ((*k) == std::string("net")) {
+			modules.erase(k);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "removed 'net' module");
+			continue;
+		}
+	}
+
+	// return the remaining modules
+	return modules;
+}
+
+/**
  * \brief Get the number of available modules.
  */
 ::CORBA::Long	Modules_impl::numberOfModules() {
-	return repository.numberOfModules();
+	return modulenames().size();
 }
 
 /**
  * \brief Get the list of module names.
  */
 Astro::Modules::ModuleNameSequence*	Modules_impl::getModuleNames() {
-	std::vector<std::string>	modules = repository.moduleNames();
+	std::vector<std::string>	modules = modulenames();
+
 	// convert the vector into a ModuleSequence
 	Astro::Modules::ModuleNameSequence	*result
 		= new Astro::Modules::ModuleNameSequence();
@@ -38,14 +61,30 @@ Astro::Modules::ModuleNameSequence*	Modules_impl::getModuleNames() {
 
 /**
  * \brief load a certain module and return a reference to it
+ *
+ * \param _name	name of the module
  */
 Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for module %s", _name);
 	std::string	name(_name);
+
+	// make sure the net module is not requested
+	if (name == "net") {
+		NotFound	notfound;
+		notfound.cause = CORBA::string_dup("net module not available "
+			"via CORBA");
+		throw notfound;
+	}
+
+	// prepare the result pointer. We have to do this here, because
+	// there are two ways to fill it: from the cache or by creating
+	// a new module. 
 	astro::module::ModulePtr	result;
+
 	// find out whether this module was already loaded
 	modulemap_t::const_iterator	i = modulemap.find(name);
 	if (modulemap.find(name) != modulemap.end()) {
+		// retrieve the module from the cache
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s in cache", _name);
 		result = i->second;
 	} else {
@@ -68,6 +107,7 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	Astro::DriverModule_impl	*drivermodule
 		= new Astro::DriverModule_impl(result);
 	
+	// return the driver module
 	return drivermodule->_this();
 }
 

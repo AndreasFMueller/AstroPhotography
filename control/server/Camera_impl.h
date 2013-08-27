@@ -19,7 +19,7 @@ class Camera_impl : public POA_Astro::Camera {
 public:
 	inline Camera_impl(astro::camera::CameraPtr camera)
 		: _camera(camera) {
-		for (int id = 0; id < _camera->nCcds(); id++) {
+		for (unsigned int id = 0; id < _camera->nCcds(); id++) {
 			ccds.push_back(_camera->getCcd(id));
 		}
 	}

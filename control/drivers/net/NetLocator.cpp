@@ -7,6 +7,9 @@
 #include <AstroLoader.h>
 #include <device.hh>
 #include <Conversions.h>
+#include <OrbSingleton.h>
+#include <AstroExceptions.h>
+#include <NetCamera.h>
 
 using namespace astro::device;
 
@@ -46,7 +49,9 @@ namespace camera {
 namespace net {
 
 NetLocator::NetLocator() {
-	// XXX get a reference to the CORBA server
+	// get a reference to the CORBA server
+	Astro::OrbSingleton	orbsingleton;
+	modules = orbsingleton.getModules();
 }
 
 NetLocator::~NetLocator() {
@@ -54,7 +59,7 @@ NetLocator::~NetLocator() {
 }
 
 std::string	NetLocator::getName() const {
-	return std::string("network");
+	return std::string("net");
 }
 
 std::string	NetLocator::getVersion() const {
@@ -62,15 +67,22 @@ std::string	NetLocator::getVersion() const {
 }
 
 std::string	NetLocator::modulename(const std::string& netname) const {
+	if (netname.substr(0, 4) != "net:") {
+		throw NotFound("not a net camera name");
+	}
+	std::string	purename = netname.substr(4);
 	// locate the /, and return the part before the /
-	size_t	offset = netname.find('/');
+	size_t	offset = purename.find('/');
 	if (offset == std::string::npos) {
 		throw std::runtime_error("no / in name");
 	}
-	return netname.substr(0, offset);
+	return purename.substr(0, offset);
 }
 
 std::string	NetLocator::devicename(const std::string& netname) const {
+	if (netname.substr(0, 4) != "net:") {
+		throw NotFound("not a net camera name");
+	}
 	// locate the /, and return the part after the /
 	size_t	offset = netname.find('/');
 	if (offset == std::string::npos) {
@@ -103,20 +115,31 @@ std::vector<std::string>	NetLocator::getDevicelist(
 			= modules->getModule(modulename.c_str());
 		Astro::DriverModule_var	drivermodulevar = drivermodule;
 
-		// get the device locator for this module
-		Astro::DeviceLocator_ptr	devicelocator
-			= drivermodulevar->getDeviceLocator();
-		Astro::DeviceLocator_var	devcelocatorvar = devicelocator;
+		// query the descriptor
+		Astro::Descriptor	*descriptor
+			= drivermodule->getDescriptor();
+		Astro::Descriptor_var	descriptorvar = descriptor;
 
-		// get a list of device names for this type
-		Astro::DeviceLocator::DeviceNameList	*list
-			= devicelocator->getDevicelist(type);
-		Astro::DeviceLocator::DeviceNameList_var	listvar = list;
+		// if the driver module does not have we don't even try
+		if (descriptor->hasDeviceLocator) {
 
-		// build new names from the name list received
-		for (unsigned int j = 0; j < listvar->length(); j++) {
-			std::string	devicename((*list)[j]);
-			result.push_back(modulename + "/" + devicename);
+			// get the device locator for this module
+			Astro::DeviceLocator_ptr	devicelocator
+				= drivermodulevar->getDeviceLocator();
+			Astro::DeviceLocator_var	devcelocatorvar
+				= devicelocator;
+
+			// get a list of device names for this type
+			Astro::DeviceLocator::DeviceNameList	*list
+				= devicelocator->getDevicelist(type);
+			Astro::DeviceLocator::DeviceNameList_var	listvar
+				= list;
+
+			// build new names from the name list received
+			for (unsigned int j = 0; j < listvar->length(); j++) {
+				std::string	devicename((*list)[j]);
+				result.push_back("net:" + modulename + "/" + devicename);
+			}
 		}
 	}
 
@@ -124,18 +147,31 @@ std::vector<std::string>	NetLocator::getDevicelist(
 }
 
 CameraPtr	NetLocator::getCamera0(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for camera %s", name.c_str());
 	std::string	modname = modulename(name);
 	std::string	devname = devicename(name);
 
 	// get the driver module
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module %s", modname.c_str());
+	Astro::DriverModule_ptr	drivermodule
+		= modules->getModule(modname.c_str());
+	Astro::DriverModule_var	drivermodulevar = drivermodule;
 
 	// get the device locator
+	Astro::DeviceLocator_ptr	devicelocator
+		= drivermodulevar->getDeviceLocator();
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator;
 
 	// get the device reference
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera %s", devname.c_str());
+	Astro::Camera_ptr	camera
+		= devicelocatorvar->getCamera(devname.c_str());
+	Astro::Camera_var	cameravar = camera;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a remote camera with %d ccds",
+		cameravar->nCcds());
 
 	// wrap it in a CameraPtr object
-
-	return CameraPtr();
+	return CameraPtr(new NetCamera(cameravar));
 }
 
 GuiderPortPtr	NetLocator::getGuiderPort0(const std::string& name) {

@@ -66,7 +66,7 @@ Exposure::State	SimCcd::exposureStatus() {
  * \brief cancel the exposure
  */
 void    SimCcd::cancelExposure() {
-	if ((Exposure::exposing == state) || (Exposure::exposed == state)) {
+	if (Exposure::idle == state) {
 		throw BadState("no exposure in progress");
 	}
 	state = Exposure::idle;

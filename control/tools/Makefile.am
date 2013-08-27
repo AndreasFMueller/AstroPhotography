@@ -23,61 +23,65 @@ bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
-imageloop_LDADD = -L../lib -lastro
+imageloop_LDADD = -L../lib -lastro 
 
 getimages_SOURCES = getimages.cpp
 getimages_DEPENDENCIES = ../lib/libastro.la
-getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@
+getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = ../lib/libastro.la
-imageinfo_LDADD = -L../lib -lastro
+imageinfo_LDADD = -L../lib -lastro 
 
 makedark_SOURCES = makedark.cpp
 makedark_DEPENDENCIES = ../lib/libastro.la
-makedark_LDADD = -L../lib -lastro
+makedark_LDADD = -L../lib -lastro 
 
 dark_SOURCES = dark.cpp
 dark_DEPENDENCIES = ../lib/libastro.la
-dark_LDADD = -L../lib -lastro
+dark_LDADD = -L../lib -lastro 
 
 flat_SOURCES = flat.cpp
 flat_DEPENDENCIES = ../lib/libastro.la
-flat_LDADD = -L../lib -lastro
+flat_LDADD = -L../lib -lastro 
 
 makeflat_SOURCES = makeflat.cpp
 makeflat_DEPENDENCIES = ../lib/libastro.la
-makeflat_LDADD = -L../lib -lastro
+makeflat_LDADD = -L../lib -lastro 
 
 calibrate_SOURCES = calibrate.cpp
 calibrate_DEPENDENCIES = ../lib/libastro.la
-calibrate_LDADD = -L../lib -lastro
+calibrate_LDADD = -L../lib -lastro 
 
 transform_SOURCES = transform.cpp
 transform_DEPENDENCIES = ../lib/libastro.la
-transform_LDADD = -L../lib -lastro
+transform_LDADD = -L../lib -lastro 
 
 focus_SOURCES = focus.cpp
 focus_DEPENDENCIES = ../lib/libastro.la
-focus_LDADD = -L../lib -lastro @SBIGLIBRARY@
+focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la
-guider_LDADD = -L../lib -lastro @SBIGLIBRARY@
+guider_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 stack_SOURCES = stack.cpp
 stack_DEPENDENCIES = ../lib/libastro.la
-stack_LDADD = -L../lib -lastro
+stack_LDADD = -L../lib -lastro 
 
 clamp_SOURCES = clamp.cpp
 clamp_DEPENDENCIES = ../lib/libastro.la
-clamp_LDADD = -L../lib -lastro
+clamp_LDADD = -L../lib -lastro 
 
 logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
-logscale_LDADD = -L../lib -lastro
+logscale_LDADD = -L../lib -lastro 
 
 looptest:	imageloop
 	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
 		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \
 		-P ./convertimage.sh -Q ./makemovie.sh
+
+test:	getimages
+	./getimages -d -ORBInitRef NameService=corbaname::localhost \
+		-m net -C 10 -e 1 -o net -p net

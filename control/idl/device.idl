@@ -151,6 +151,15 @@ module Astro {
 		 * \brief Median pixel value
 		 */
 		double	median();
+
+		/**
+		 * \brief Retrieve the imagedata
+		 *
+		 * This method returns the contents of the FITS file the server
+		 * collected.
+		 */
+		typedef sequence<octet>	ImageFile;
+		ImageFile	file();
 	};
 
 	/**
@@ -475,7 +484,7 @@ module Astro {
 		 * \param devicetype	Type of device to construct the list
 		 */
 		DeviceNameList	getDevicelist(in device_type devicetype);
-		Camera	getCamera(in string name) raises(NotFound);
+		Camera		getCamera(in string name) raises(NotFound);
 		GuiderPort	getGuiderPort(in string name) raises(NotFound);
 		FilterWheel	getFilterWheel(in string name) raises(NotFound);
 	};

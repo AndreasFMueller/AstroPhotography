@@ -109,6 +109,7 @@ public:
 
 	// modifying accessors
 	void	addMode(const Binning& mode);
+	void	addModes(const BinningSet& modes);
 	void	setShutter(bool shutter) { _shutter = shutter; }
 	bool	shutter() const { return _shutter; }
 

@@ -24,7 +24,7 @@ void	GuiderPort_impl::activate(::CORBA::Float ra, ::CORBA::Float dec) {
 }
 
 CORBA::Octet	GuiderPort_impl::active() {
-	return convert_relaybits2octet(_guiderport->active());
+	return astro::convert_relaybits2octet(_guiderport->active());
 }
 
 } // namespace Astro

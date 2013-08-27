@@ -8,8 +8,10 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <OrbSingleton.h>
 
 int	main(int argc, char *argv[]) {
+	Astro::OrbSingleton	orb(argc, argv);
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {
