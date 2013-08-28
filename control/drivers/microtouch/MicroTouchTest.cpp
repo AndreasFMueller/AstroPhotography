@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 using namespace astro::usb;
-using namespace astro::microtouch;
+using namespace astro::device::microtouch;
 
 namespace astro {
 namespace test {
@@ -42,7 +42,7 @@ void	MicroTouchTest::testPosition() {
 		std::cout << *deviceptr->activeConfig();
 
 		// open the device as a MicroTouch
-		MicroTouch	microtouch(*deviceptr);
+		MicroTouch	microtouch(deviceptr);
 		std::cout << "microtouch initialized " << std::endl;
 
 		microtouch.setPosition(1);
