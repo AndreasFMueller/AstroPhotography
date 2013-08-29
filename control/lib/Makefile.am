@@ -14,12 +14,6 @@ else
 unicap_flies =
 endif
 
-if ENABLE_MICROTOUCH
-microtouch_files = MicroTouch.cpp
-else
-microtouch_files =
-endif
-
 if ENABLE_UVC
 uvc_files = \
 	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
@@ -45,7 +39,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
-	CalibrationFactory.cpp Focuser.cpp \
+	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	USBContextHolder.cpp USBContext.cpp \
 	USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
@@ -53,6 +47,6 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
 	Conversions.cpp NameService.cpp OrbSingleton.cpp deviceSK.cc \
 	$(uvc_files) \
-	$(unicap_flies) $(microtouch_files)
+	$(unicap_flies)
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"

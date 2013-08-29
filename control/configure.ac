@@ -157,6 +157,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
+	drivers/microtouch/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT
