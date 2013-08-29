@@ -28,6 +28,7 @@ public:
 	virtual unsigned short  current();
 	virtual void	set(unsigned short value);
 	double	radius();
+	void	randomposition();	
 };
 
 } // namespace simulator

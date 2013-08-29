@@ -23,6 +23,12 @@ unsigned short	SimFocuser::variance() {
 
 SimFocuser::SimFocuser(SimLocator& locator)
 	: Focuser("sim-focuser"), _locator(locator) {
+	_value = 10000 + (max() + min()) / 2;
+	target = _value;
+	lastset = 0;
+}
+
+void	SimFocuser::randomposition() {
 	_value = reference() + (random() % variance());
 	target = _value;
 	lastset = 0;

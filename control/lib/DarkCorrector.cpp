@@ -90,7 +90,7 @@ void	dark_correct_typed(ImagePtr& image,
 // DarkCorrector implementation
 //////////////////////////////////////////////////////////////////////
 DarkCorrector::DarkCorrector(const ImagePtr& _dark,
-	const ImageRectangle& _rectangle)
+	const ImageRectangle _rectangle)
 	: Corrector(_dark, _rectangle) {
 }
 

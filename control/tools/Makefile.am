@@ -19,7 +19,7 @@ microtouch_files =
 endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
-	focus transform guider dark flat clamp logscale stack
+	focus focustest transform guider dark flat clamp logscale stack
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -61,6 +61,10 @@ focus_SOURCES = focus.cpp
 focus_DEPENDENCIES = ../lib/libastro.la
 focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
+focustest_SOURCES = focustest.cpp
+focustest_DEPENDENCIES = ../lib/libastro.la
+focustest_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la
 guider_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
@@ -86,3 +90,18 @@ test:	getimages
 	./getimages -d -ORBInitRef NameService=corbaname::localhost \
 		-m net -C 10 -e 1 -o net -p net \
 		-F net:simulator/sim-focuser -f 25000
+
+testfocus:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
+		-b 16000 -e 48000 -s 100 | tee focus.csv
+
+testfocus2:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
+		-b 26000 -e 40000 -s 20 | tee focus2.csv
+
+testfocus3:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 4 -F simulator -f sim-focuser \
+		-p 32768 -b 28000 -e 38001 -s 4 | tee focus3.csv

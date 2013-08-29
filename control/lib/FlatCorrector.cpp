@@ -89,7 +89,7 @@ void	flat_correct_typed(ImagePtr& image,
 // FlatCorrector implementation
 //////////////////////////////////////////////////////////////////////
 FlatCorrector::FlatCorrector(const ImagePtr& _flat,
-	const ImageRectangle& _rectangle)
+	const ImageRectangle _rectangle)
 	: Corrector(_flat, _rectangle) {
 }
 

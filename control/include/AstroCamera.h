@@ -334,6 +334,7 @@ public:
 	virtual unsigned short	max();
 	virtual unsigned short	current();
 	virtual void	set(unsigned short value);
+	bool	moveto(unsigned short value, unsigned long timeout = 60);
 };
 
 } // namepsace camera

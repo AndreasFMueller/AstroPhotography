@@ -89,10 +89,16 @@ bool    SimCcd::wait() {
 	if (Exposure::exposed == state) {
 		return true;
 	}
-	// we don't want to wait, so we just throw up a debug message, 
-	// set the state to exposed and are happy with it.
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "faking exposure time %.3f",
-		exposure.exposuretime);
+	// compute the remaining exposure time
+	double	remaining = exposure.exposuretime
+			- (simtime() - starttime);
+	if (remaining > 0) {
+		unsigned int	remainingus = 1000000 * remaining;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sleeping for %.3f", remaining);
+		usleep(remainingus);
+	}
+
+	// exposure is now complete
 	state = Exposure::exposed;
 	return true;
 }

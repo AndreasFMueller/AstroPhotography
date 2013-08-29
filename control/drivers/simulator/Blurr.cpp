@@ -13,8 +13,63 @@ namespace image {
 
 static double	sqr(double x) { return x * x; }
 
+void    Blurr::radius(const double& radius) {
+	_radius = radius;
+	update();
+}
+
+void    Blurr::innerradius(const double& innerradius) {
+	_innerradius = innerradius;
+	update();
+}
+
+void	Blurr::update() {
+	epsilon = _innerradius / _radius;
+	normalize = 1 / (M_PI * (sqr(_radius) - sqr(_innerradius)));
+}
+
+double	Blurr::ring(double r) const {
+	double x = r / _radius;
+	double	v = 0;
+	if (x > 0) {
+		v = fabs(j1(x) - epsilon * j1(epsilon * x)) / x;
+	}
+	return v / normalize;
+}
+
+double	Blurr::airy(double r) const {
+	double x = r / _radius;
+	double	v = 0.5;
+	if (x > 0) {
+		v = j1(x) / x;
+	}
+	return v / normalize;
+}
+
+double	Blurr::pattern(double r) const {
+	if (r > 2 * _radius) {
+		return 0;
+	}
+	if (0 == _innerradius) {
+		return airy(r);
+	} else {
+		return ring(r);
+	}
+}
+
+double	Blurr::aperture(double r) const {
+	if (0 == _innerradius) {
+		return (r <= _radius) ? normalize : 0;
+	} else {
+		return ((_innerradius <= r) && (r <= _radius)) ? normalize : 0;
+	}
+}
+
 /**
  * \brief Compute the blurr
+ *
+ * This method takes as point spread function of the telescope the
+ * diffraction pattern of the 
  */
 void	Blurr::operator()(const Image<double>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing the convolution for blurr");
@@ -45,21 +100,17 @@ void	Blurr::operator()(const Image<double>& image) {
 				af, image.pixels, FFTW_ESTIMATE);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transforms planned");
 
-	// compute the values
-	double	value = 1 / (M_PI * (sqr(_radius) - sqr(_innerradius)) * n0 * n1);
+	// compute the values of the blurring function
+	double	value = 1. / (n0 * n1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"radius = %.1f, innerradius = %.1f, value = %f",
 		_radius, _innerradius, value);
-	for (unsigned int x = 0; x < n1; x++) {
-		for (unsigned int y = 0; y < n0; y++) {
+	for (int x = 0; x < n1; x++) {
+		for (int y = 0; y < n0; y++) {
 			int	xx = (x > (n0 / 2)) ? (n1 - x) : x;
 			int	yy = (y > (n1 / 2)) ? (n0 - y) : y;
 			double	r = hypot(xx, yy);
-			if ((_innerradius <= r) && (r <= _radius)) {
-				blurr.pixel(x, y) = value;
-			} else {
-				blurr.pixel(x, y) = 0;
-			}
+			blurr.pixel(x, y) = value * aperture(r);
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "blurr kernel computed");
