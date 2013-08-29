@@ -21,7 +21,8 @@ unsigned short	SimFocuser::variance() {
 	return std::numeric_limits<unsigned short>::max() / 4;
 }
 
-SimFocuser::SimFocuser(SimLocator& locator) : Focuser("sim-locator"), _locator(locator) {
+SimFocuser::SimFocuser(SimLocator& locator)
+	: Focuser("sim-focuser"), _locator(locator) {
 	_value = reference() + (random() % variance());
 	target = _value;
 	lastset = 0;
