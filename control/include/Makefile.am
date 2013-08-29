@@ -11,7 +11,8 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroFilter.h AstroFilterfunc.h AstroCalibration.h \
 	AstroOperations.h AstroTransform.h \
 	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
-	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h
+	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h \
+	AstroFocus.h
 
 noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h Sun.h \
 	NameService.h OrbSingleton.h Conversions.h

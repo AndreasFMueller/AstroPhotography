@@ -39,7 +39,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
-	CalibrationFactory.cpp Focuser.cpp \
+	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	USBContextHolder.cpp USBContext.cpp \
 	USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
