@@ -6,6 +6,8 @@
 #ifndef _AstroFocus_h
 #define _AstroFocus_h
 
+#include <AstroCamera.h>
+
 namespace astro {
 namespace focusing {
 
@@ -14,14 +16,15 @@ public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED } focus_status;
 private:
-	CameraPtr	_camera;
-	FocuserPtr	_focuser;
+	astro::camera::CameraPtr	_camera;
+	astro::camera::FocuserPtr	_focuser;
 	focus_mode	_mode;
 	volatile focus_status	_status;
 public:
-	Focusing(CameraPtr camera, FocuserPtr focuser);
+	Focusing(astro::camera::CameraPtr camera,
+		astro::camera::FocuserPtr focuser);
 	void	start();
-	focus_status	status() const { return status; }
+	focus_status	status() const { return _status; }
 	void	cancel();
 	focus_mode	mode() const { return _mode; }
 	void	mode(focus_mode mode) { _mode = mode; }

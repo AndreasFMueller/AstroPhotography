@@ -5,6 +5,8 @@
  */
 #include <AstroFocus.h>
 
+using namespace astro::camera;
+
 namespace astro {
 namespace focusing {
 
