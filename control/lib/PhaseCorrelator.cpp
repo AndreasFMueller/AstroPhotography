@@ -105,7 +105,7 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	double	a[n];
 	double	b[n];
 
-	// allocate memeory for the fourier transforms
+	// allocate memory for the fourier transforms
 	size_t	nc = size.width() * (1 + size.height() / 2);
 	fftw_complex	*af = (fftw_complex *)fftw_malloc(
 					sizeof(fftw_complex) * nc);
@@ -113,13 +113,13 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 					sizeof(fftw_complex) * nc);
 
 	// create a plan for the fourier transform
-	fftw_plan	p = fftw_plan_dft_r2c_2d(size.width(), size.height(),
+	fftw_plan	p = fftw_plan_dft_r2c_2d(size.height(), size.width(),
 				a, af, 0);
-	fftw_plan	q = fftw_plan_dft_r2c_2d(size.width(), size.height(),
+	fftw_plan	q = fftw_plan_dft_r2c_2d(size.height(), size.width(),
 				b, bf, 0);
 
 	// we also already need a back transform
-	fftw_plan	r = fftw_plan_dft_c2r_2d(size.width(), size.height(),
+	fftw_plan	r = fftw_plan_dft_c2r_2d(size.height(), size.width(),
 				af, a, 0);
 
 	// compute the values for the hanning windows
@@ -137,7 +137,7 @@ Point	PhaseCorrelator::operator()(const ConstImageAdapter<double>& fromimage,
 	// now copy the data into the arrays, applying the hanning window
 	// at the same time
 	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.width(); y++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
 			double	hanning = hh[x] * hv[y];
 			a[size.offset(x, y)] = hanning * fromimage.pixel(x, y);
 			b[size.offset(x, y)] = hanning * toimage.pixel(x, y);

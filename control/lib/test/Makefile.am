@@ -17,15 +17,6 @@ unicap_tests =
 unicap_cmds =
 endif
 
-# files needed for the MicroTouch driver tests
-if ENABLE_MICROTOUCH
-microtouch_tests = microtouchtests.cpp MicroTouchTest.cpp
-microtouch_cmds = microtouchtests
-else
-microtouch_tests =
-microtouch_cmds =
-endif
-
 # files needed for the UVC driver tests
 if ENABLE_UVC
 uvc_tests = uvctests.cpp UVCDescriptorTest.cpp UVCCameraTest.cpp
@@ -37,7 +28,7 @@ endif
 
 # stuff related to testing
 noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
-	$(uvc_cmds) $(microtouch_cmds) $(unicap_cmds)
+	$(uvc_cmds) $(unicap_cmds)
 
 # general tests
 tests_SOURCES = tests.cpp \
@@ -82,13 +73,6 @@ if ENABLE_UVC
 uvctests_SOURCES = $(uvc_tests)
 uvctests_LDADD = -lcppunit -L.. -lastro
 uvctests_DEPENDENCIES = ../libastro.la
-endif
-
-# tests for the MicroTouch driver
-if ENABLE_MICROTOUCH
-microtouchtests_SOURCES = $(microtouch_tests)
-microtouchtests_LDADD = -lcppunit -L.. -lastro
-microtouchtests_DEPENDENCIES = ../libastro.la
 endif
 
 # tests for Unicap driver

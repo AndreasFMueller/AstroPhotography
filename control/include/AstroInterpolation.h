@@ -23,7 +23,8 @@ class Interpolator {
 	astro::image::ImageRectangle	frame;
 public:
 	Interpolator(const astro::image::ImagePtr& dark,
-		const astro::image::ImageRectangle& frame);
+		const astro::image::ImageRectangle frame
+			= astro::image::ImageRectangle());
 	void	operator()(astro::image::ImagePtr& image);
 };
 

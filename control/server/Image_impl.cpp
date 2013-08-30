@@ -88,6 +88,60 @@ CORBA::Long	Image_impl::bytesPerValue() {
 	return astro::image::filter::bytespervalue(_image);
 }
 
+/**
+ * \brief Convert image into FITS data
+ *
+ * Convert the image into a FITS file and then return the contents of the
+ * FITS file.
+ */
+Astro::Image::ImageFile	*Image_impl::file() {
+	// create a temporary file name 
+	char	filename[1024];
+	char	*tempdir = getenv("TMPDIR");
+	if (NULL == tempdir) {
+		tempdir = "/tmp";
+	}
+	snprintf(filename, sizeof(filename), "%s/astrodXXXXXX.fits", tempdir);
+	mkstemps(filename, 5);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "temporary filename: %s", filename);
+
+	// write the image to that file
+	astro::io::FITSout	out(filename);
+	out.setPrecious(false);
+	out.write(_image);
+
+	// stat and open the temporary file, we will need it's size and
+	// and contents for the following
+	int	fd = open(filename, O_RDONLY);
+	if (fd < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open %s: %s",
+			filename, strerror(errno));
+		throw Astro::IOException("cannot open temporary file");
+	}
+	struct stat	sb;
+	int	rc = fstat(fd, &sb);
+	if (rc < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot stat %s: %s",
+			filename, strerror(errno));
+		throw Astro::IOException("cannot stat temporary file");
+	} 
+
+	// read the data
+	CORBA::Octet	*buf = new CORBA::Octet[sb.st_size];
+	read(fd, buf, sb.st_size);
+	close(fd);
+
+	// create an ImageData object
+	Astro::Image::ImageFile	*imagefile
+		= new Astro::Image::ImageFile(sb.st_size, sb.st_size, buf, 0);
+
+	// unlink the temporary file, it is no longer needed
+	unlink(filename);
+
+	// return the image data
+	return imagefile;
+}
+
 #define	sequence_mono(pixel, size, _image, result)			\
 {									\
 	astro::image::Image<pixel>	*imagep				\
@@ -124,6 +178,9 @@ CORBA::Long	Image_impl::bytesPerValue() {
 	}								\
 }
 
+/**
+ * \brief Retrieve the raw image data for a byte image
+ */
 Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	Astro::ByteImage::ByteSequence	*result
 		= new Astro::ByteImage::ByteSequence();
@@ -136,6 +193,9 @@ Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	return result;
 }
 
+/**
+ * \brief Retrieve the raw image data for a short iamge
+ */
 Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
 	Astro::ShortImage::ShortSequence	*result
 		= new Astro::ShortImage::ShortSequence();

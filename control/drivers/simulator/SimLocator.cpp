@@ -9,6 +9,7 @@
 #include <SimGuiderPort.h>
 #include <SimFilterWheel.h>
 #include <SimCooler.h>
+#include <SimFocuser.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
@@ -66,6 +67,7 @@ SimLocator::SimLocator() {
 	_guiderport = GuiderPortPtr(new SimGuiderPort(*this));
 	_filterwheel = FilterWheelPtr(new SimFilterWheel(*this));
 	_cooler = CoolerPtr(new SimCooler(*this));
+	_focuser = FocuserPtr(new SimFocuser(*this));
 }
 
 SimLocator::~SimLocator() {
@@ -159,6 +161,15 @@ CoolerPtr	SimLocator::getCooler0(const std::string& name) {
 	return _cooler;
 }
 
+FocuserPtr	SimLocator::getFocuser0(const std::string& name) {
+	if (name != "sim-focuser") {
+		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
+			name.c_str());
+		throw NotFound("no such focuser");
+	}
+	return _focuser;
+}
+
 SimCamera	*SimLocator::simcamera() {
 	return dynamic_cast<SimCamera *>(&*_camera);
 }
@@ -173,6 +184,10 @@ SimGuiderPort	*SimLocator::simguiderport() {
 
 SimCooler	*SimLocator::simcooler() {
 	return dynamic_cast<SimCooler *>(&*_cooler);
+}
+
+SimFocuser	*SimLocator::simfocuser() {
+	return dynamic_cast<SimFocuser *>(&*_focuser);
 }
 
 } // namespace simulator

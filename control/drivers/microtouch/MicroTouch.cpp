@@ -11,6 +11,7 @@
 using namespace astro::usb;
 
 namespace astro {
+namespace device {
 namespace microtouch {
 
 /**
@@ -29,10 +30,10 @@ typedef struct onebyte_s {
  *
  * \param device USB device representing the MicroTouch
  */
-MicroTouch::MicroTouch(Device& _device) throw(USBError) : device(_device) {
-	device.open();
+MicroTouch::MicroTouch(DevicePtr _device) throw(USBError) : device(_device) {
+	device->open();
 
-	ConfigurationPtr	config = device.activeConfig();
+	ConfigurationPtr	config = device->activeConfig();
 	InterfacePtr	interfaceptr = (*config)[0];
 	interfaceptr->claim();
 	InterfaceDescriptorPtr	interfacedescriptorptr = (*interfaceptr)[0];
@@ -47,31 +48,31 @@ MicroTouch::MicroTouch(Device& _device) throw(USBError) : device(_device) {
 	EmptyRequest	setup1(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		(uint16_t)0x0000, (uint8_t)0x00, (uint16_t)0xffff);
-	device.controlRequest(&setup1);
+	device->controlRequest(&setup1);
 
 	/* 40 01 00 20 00 00 00 00 */
 	EmptyRequest	setup2(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x01, 0x2000);
-	device.controlRequest(&setup2);
+	device->controlRequest(&setup2);
 
 	/* C0 FF 0B 37 00 00 01 00 */
 	Request<onebyte_t>	setup3(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0xff, 0x370b);
-	device.controlRequest(&setup3);
+	device->controlRequest(&setup3);
 
 	/* 40 12 0C 00 00 00 00 00 */
 	EmptyRequest	setup4(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x12, 0x000c);
-	device.controlRequest(&setup4);
+	device->controlRequest(&setup4);
 
 	/* 40 01 C0 00 00 00 00 00 */
 	EmptyRequest	setup5(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x01, 0x00c0);
-	device.controlRequest(&setup5);
+	device->controlRequest(&setup5);
 }
 
 template<size_t n>
@@ -153,7 +154,7 @@ void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
 	std::cout << "p = " << p << std::endl;
 	request_data.data[3] = p;
 	BulkTransfer	request(outendpoint, &request_data);
-	device.submit(&request);
+	device->submit(&request);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transmit complete");
 }
 
@@ -186,10 +187,11 @@ float	MicroTouch::getTemperature() throw(MicroTouchError) {
 void	MicroTouch::stepUp() throw(MicroTouchError) {
 	mtdata<0>	stepup_request(MICROTOUCH_STARTUP);
 	BulkTransfer	request(outendpoint, &stepup_request);
-	device.submit(&request);
+	device->submit(&request);
 }
 
 
 
 } // namespace microtouch
+} // namepsace device
 } // namepsace astro

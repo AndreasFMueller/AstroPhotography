@@ -561,7 +561,7 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
 Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat,
-		const ImageRectangle& _rectangle)
+		const ImageRectangle _rectangle)
 	: dark(_dark), flat(_flat), rectangle(_rectangle) {
 	// We want dark and flat images to be of float or double type
 	Image<float>	*fp = dynamic_cast<Image<float> *>(&*dark);

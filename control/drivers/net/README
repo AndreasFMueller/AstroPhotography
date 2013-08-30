@@ -1,0 +1,5 @@
+This driver uses CORBA to talk to a device server, but it implements the
+common driver classes. This means that applications that can talk to
+the local classes can transparently access remote devices.
+
+

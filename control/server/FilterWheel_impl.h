@@ -6,11 +6,14 @@
 #ifndef _FilterWheel_impl_h
 #define _FilterWheel_impl_h
 
-#include "../idl/device.hh"
+#include <device.hh>
 #include <AstroCamera.h>
 
 namespace Astro {
 
+/**
+ * \brief Filterwheel servant definition
+ */
 class FilterWheel_impl : public POA_Astro::FilterWheel {
 	astro::camera::FilterWheelPtr	_filterwheel;
 public:
@@ -19,6 +22,7 @@ public:
 	virtual ::CORBA::Long	nFilters();
 	virtual ::CORBA::Long	currentPosition();
 	virtual void	select(::CORBA::Long position);
+	virtual char	*filterName(::CORBA::Long position);
 };
 
 } // namespace Astro

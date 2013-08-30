@@ -271,13 +271,16 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolatePixel(
 //////////////////////////////////////////////////////////////////////
 // Interpolator implementation
 //////////////////////////////////////////////////////////////////////
-Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle& _frame)
+Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle _frame)
 	: dark(_dark), frame(_frame) {
 	floatdark = dynamic_cast<Image<float> *>(&*dark);
 	doubledark = dynamic_cast<Image<double> *>(&*dark);
 	if ((NULL == floatdark) && (NULL == doubledark)) {
 		throw std::runtime_error("only float or double images are "
 			"suitable as darks");
+	}
+	if (_frame == ImageRectangle()) {
+		frame = _dark->getFrame();
 	}
 }
 
@@ -293,6 +296,7 @@ Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle& _frame)
 }
 
 void	Interpolator::interpolateMonochrome(ImagePtr& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "doing monochrome interpolation");
 	if (floatdark) {
 		WindowAdapter<float>	windowdark(*floatdark, frame);
 		interpolate_mono(float, unsigned char, windowdark, image);
@@ -326,7 +330,7 @@ void	Interpolator::interpolateMonochrome(ImagePtr& image) {
 	}								\
 }
 
-void	Interpolator::operator()(ImagePtr& image) {
+void	Interpolator::interpolateMosaic(ImagePtr& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mosaic interpolation");
 	if (floatdark) {
 		WindowAdapter<float>	windowdark(*floatdark, frame);
@@ -347,6 +351,14 @@ void	Interpolator::operator()(ImagePtr& image) {
 		interpolate_mosaic(double, double, windowdark, image);
 	}
 	return;
+}
+
+void	Interpolator::operator()(ImagePtr& image) {
+	if (image->getMosaicType().isMosaic()) {
+		interpolateMosaic(image);
+	} else {
+		interpolateMonochrome(image);
+	}
 }
 
 } // interpolation

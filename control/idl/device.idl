@@ -151,6 +151,15 @@ module Astro {
 		 * \brief Median pixel value
 		 */
 		double	median();
+
+		/**
+		 * \brief Retrieve the imagedata
+		 *
+		 * This method returns the contents of the FITS file the server
+		 * collected.
+		 */
+		typedef sequence<octet>	ImageFile;
+		ImageFile	file();
 	};
 
 	/**
@@ -360,6 +369,16 @@ module Astro {
 	 * This interface allows to control activation of these ports.
 	 */
 	interface GuiderPort {
+		const octet	DECMINUS = 1;
+		const octet	DECPLUS = 2;
+		const octet	RAMINUS = 4;
+		const octet	RAPLUS = 8;
+		/**
+		 * \brief Retrieve active ports
+		 *
+		 * Which ports are currently active
+		 */
+		octet	active();
 		/**
 		 * \brief Activate Guider Port outputs.
 		 *
@@ -393,6 +412,20 @@ module Astro {
 		 * \brief Move the filter wheel to a given position
 		 */
 		void	select(in long position) raises(NotFound);
+		/**
+		 * \brief Get the name of the filter
+		 */
+		string	filterName(in long position) raises(NotFound);
+	};
+
+	/**
+	 * \brief Focuser abstraction
+	 */
+	interface Focuser {
+		unsigned short	min();
+		unsigned short	max();
+		unsigned short	current();
+		void	set(in unsigned short value);
 	};
 
 	/**
@@ -453,7 +486,8 @@ module Astro {
 		string	getVersion();
 		typedef sequence<string>	DeviceNameList;
 		enum device_type { DEVICE_CAMERA, DEVICE_FOCUSER,
-					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL };
+					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL,
+					DEVICE_COOLER };
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *
@@ -464,9 +498,11 @@ module Astro {
 		 * \param devicetype	Type of device to construct the list
 		 */
 		DeviceNameList	getDevicelist(in device_type devicetype);
-		Camera	getCamera(in string name) raises(NotFound);
+		Camera		getCamera(in string name) raises(NotFound);
 		GuiderPort	getGuiderPort(in string name) raises(NotFound);
 		FilterWheel	getFilterWheel(in string name) raises(NotFound);
+		Cooler		getCooler(in string name) raises(NotFound);
+		Focuser		getFocuser(in string name) raises(NotFound);
 	};
 
 	struct Descriptor {

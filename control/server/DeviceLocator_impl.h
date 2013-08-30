@@ -6,17 +6,22 @@
 #ifndef _DeviceLocator_impl_h
 #define _DeviceLocator_impl_h
 
-#include <../idl/device.hh>
+#include <device.hh>
 #include <AstroLoader.h>
 #include <AstroDevice.h>
 
 namespace Astro {
 
+/**
+ * \brief DeviceLocator servant definition
+ */
 class DeviceLocator_impl : public POA_Astro::DeviceLocator {
 	astro::device::DeviceLocatorPtr	_locator;
-	std::map<std::string, astro::camera::CameraPtr>	cameramap;
+	std::map<std::string, astro::camera::CameraPtr>		cameramap;
 	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportmap;
 	std::map<std::string, astro::camera::FilterWheelPtr>	filterwheelmap;
+	std::map<std::string, astro::camera::CoolerPtr>		coolermap;
+	std::map<std::string, astro::camera::FocuserPtr>	focusermap;
 public:
 	inline DeviceLocator_impl(astro::device::DeviceLocatorPtr locator)
 		: _locator(locator) { }
@@ -28,6 +33,8 @@ public:
 	virtual Camera_ptr	getCamera(const char *name);
 	virtual GuiderPort_ptr	getGuiderPort(const char *name);
 	virtual FilterWheel_ptr	getFilterWheel(const char *name);
+	virtual	Cooler_ptr	getCooler(const char *name);
+	virtual	Focuser_ptr	getFocuser(const char *name);
 };
 
 } // namespace Astro

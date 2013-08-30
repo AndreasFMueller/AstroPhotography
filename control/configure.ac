@@ -31,6 +31,15 @@ AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 
+# use pkg-config to find out about the flags to use for omniorb
+if type pkg-config >/dev/null
+then
+	ORBLIBS="`pkg-config omniORB4 --libs`"
+else
+	ORBLIBS="-lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread"
+fi
+LIBS="${ORBLIBS} ${LIBS}"
+
 ######################################################################
 # decide whether or not to build the test programs
 AC_ARG_ENABLE(unittests,
@@ -145,9 +154,10 @@ AC_SUBST(SHLIB_EXT)
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	idl/Makefile server/Makefile client/Makefile tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
-	drivers/simulator/Makefile
+	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
+	drivers/microtouch/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT

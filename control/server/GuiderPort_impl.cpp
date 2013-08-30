@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include "GuiderPort_impl.h"
+#include <Conversions.h>
 
 namespace Astro {
 
@@ -20,6 +21,10 @@ void	GuiderPort_impl::activate(::CORBA::Float ra, ::CORBA::Float dec) {
 		decminus = -dec;
 	}
 	_guiderport->activate(raplus, raminus, decplus, decminus);
+}
+
+CORBA::Octet	GuiderPort_impl::active() {
+	return astro::convert_relaybits2octet(_guiderport->active());
 }
 
 } // namespace Astro

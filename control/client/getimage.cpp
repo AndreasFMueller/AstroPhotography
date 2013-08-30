@@ -3,8 +3,8 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "../idl/device.hh"
-#include "../idl/NameService.h"
+#include <device.hh>
+#include <NameService.h>
 #include <includes.h>
 #include <AstroDebug.h>
 #include <iostream>
@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <math.h>
 #include <AstroFormat.h>
+#include <OrbSingleton.h>
 
 namespace Astro {
 
@@ -59,10 +60,7 @@ int	main(int argc, char *argv[]) {
 	double	temperature = -1;
 
 	// initialize the ORB
-        const char* options[][2] = { { "giopMaxMsgSize", "40000000" }, { 0, 0 } };
-
-	CORBA::ORB_ptr  orb = CORBA::ORB_init(argc, argv, "omniORB4", options);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got ORB");
+	OrbSingleton	orb(argc, argv);
 
 	// parse command line
 	int	c;
@@ -115,29 +113,9 @@ int	main(int argc, char *argv[]) {
 	}
 	std::string	outfilename(argv[optind]);
 
-        // get a reference to the naming service
-        Astro::Naming::NameService      nameservice(orb);
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
-
-        // Next we want to get a reference to the Modules object
-        Astro::Naming::Names    names;
-        names.push_back(Astro::Naming::Name("Astro", "context"));
-        names.push_back(Astro::Naming::Name("Modules", "object"));
-        CORBA::Object_var       obj = nameservice.lookup(names);
-
-        // get a reference to the modules interface
-        Astro::Modules_var      modules = Astro::Modules::_narrow(obj);
-        if (CORBA::is_nil(modules)) {
-                throw std::runtime_error("nil object reference");
-        }
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
-
-	// get the Module with the right name
-	Astro::DriverModule_var	drivermodule = modules->getModule(cameratype);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a DriverModule reference");
-
 	// get the device locator from the module
-	Astro::DeviceLocator_ptr locator = drivermodule->getDeviceLocator();
+	Astro::DeviceLocator_var locator
+		= orb.getDeviceLocator(std::string(cameratype));
 	Astro::DeviceLocator::DeviceNameList	*namelist
 		= locator->getDevicelist(Astro::DeviceLocator::DEVICE_CAMERA);
 	Astro::DeviceLocator::DeviceNameList_var	namelistvar = namelist;
@@ -145,7 +123,8 @@ int	main(int argc, char *argv[]) {
 		namelist->length());
 
 	// get the camera
-	Astro::Camera_ptr	camera = locator->getCamera((*namelist)[cameranumber]);
+	Astro::Camera_ptr	camera
+		= locator->getCamera((*namelist)[cameranumber]);
 	Astro::CcdInfo	*ccdinfo = camera->getCcdinfo(ccdid);
 	Astro::CcdInfo_var	ccdinfovar = ccdinfo;
 

@@ -6,15 +6,19 @@
 #ifndef _Modules_impl_h
 #define _Modules_impl_h
 
-#include <../idl/device.hh>
+#include <device.hh>
 #include <AstroLoader.h>
 
 namespace Astro {
 
+/**
+ * \brief Modules servant definition
+ */
 class Modules_impl : public POA_Astro::Modules {
 	astro::module::Repository	repository;
 	typedef	std::map<std::string, astro::module::ModulePtr>	modulemap_t;
 	modulemap_t	modulemap;
+	std::vector<std::string>	modulenames();
 public:
 	inline Modules_impl() { }
 	virtual ~Modules_impl() { }

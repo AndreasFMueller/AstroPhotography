@@ -6,11 +6,14 @@
 #ifndef _DriverModule_impl_h
 #define _DriverModule_impl_h
 
-#include <../idl/device.hh>
+#include <device.hh>
 #include <AstroLoader.h>
 
 namespace Astro {
 
+/**
+ * \brief Driver servant definition
+ */
 class DriverModule_impl : public POA_Astro::DriverModule {
 	astro::module::ModulePtr	_module;
 public:

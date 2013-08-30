@@ -13,6 +13,7 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <AstroIO.h>
+#include <OrbSingleton.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -72,9 +73,15 @@ int	main(int argc, char *argv[]) {
 	bool	listonly = false;
 	bool	dark = false;
 	double	temperature = -1;
+	unsigned short	focus = 32768;
+	const char	*focuser = NULL;
+
+	// initialize the orb in case we want to use the net module
+	Astro::OrbSingleton	orb(argc, argv);
+	debugtimeprecision = 3;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:")))
+	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:f:F:")))
 		switch (c) {
 		case 'D':
 			dark = true;
@@ -120,6 +127,12 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 't':
 			temperature = atof(optarg) + 273.1;
+			break;
+		case 'f':
+			focus = atoi(optarg);
+			break;
+		case 'F':
+			focuser = optarg;
 			break;
 		case '?':
 			usage(argv[0]);
@@ -178,6 +191,20 @@ int	main(int argc, char *argv[]) {
 		ImageRectangle(ImagePoint(xoffset, yoffset),
 			ImageSize(width, height)));
 
+	// if the focuser is specified, we try to get it and then set
+	// the focus value
+	if (focuser) {
+		std::string	name(focuser);
+		FocuserPtr	f = locator->getFocuser(std::string(focuser));
+		f->set(focus);
+		while (f->current() != focus) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"current = %hu, focus = %hu",
+				f->current(), focus);
+			usleep(100000);
+		}
+	}
+
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
 	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
@@ -207,6 +234,15 @@ int	main(int argc, char *argv[]) {
 	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
+
+	// check whether the remote camera already has an exposed image,
+	// in which case we want to cancel it
+	if (Exposure::exposed == ccd->exposureStatus()) {
+		ccd->cancelExposure();
+		while (Exposure::idle != ccd->exposureStatus()) {
+			usleep(100000);
+		}
+	}
 
 	// start the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");

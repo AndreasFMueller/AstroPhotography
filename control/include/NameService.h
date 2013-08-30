@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <omniORB4/CORBA.h>
+#include <OrbSingleton.h>
 
 namespace Astro {
 namespace Naming {

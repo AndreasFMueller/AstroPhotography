@@ -115,13 +115,16 @@ class StarCameraBase {
 	bool	_light;
 	int	_color;
 	void	addHotPixel();
+	double	_radius;
+	double	_innerradius;
 protected:
 	double	noisevalue() const;
 	std::set<ImagePoint>	hotpixels;
 public:
 	StarCameraBase(const ImageRectangle& rectangle)
 		: _rectangle(rectangle), _alpha(0), _stretch(1),
-		  _dark(0), _noise(0), _light(true), _color(0) { }
+		  _dark(0), _noise(0), _light(true), _color(0), _radius(0),
+		  _innerradius(0) { }
 
 	void	addHotPixels(unsigned int npixels);
 
@@ -152,6 +155,16 @@ public:
 
 	const int&	color() const { return _color; }
 	void	colorfactor(const int& color) { _color = color; }
+
+	const double&	radius() const { return _radius; }
+	void	radius(const double& radius) { _radius = radius; }
+
+	const double&	innerradius() const { return _innerradius; }
+	void	innerradius(const double& innerradius) {
+		_innerradius = innerradius;
+	}
+
+	Image<double>	*operator()(const StarField& field) const;
 };
 
 /**
@@ -173,7 +186,6 @@ public:
 			
 		// create the image
 		ImageSize	size = rectangle().size();
-		ImagePoint	origin = rectangle().origin();
 		Image<P>	*image = new Image<P>(size);
 
 		// compute a transform based on translation and rotation
@@ -188,41 +200,23 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s image",
 			(light()) ? "light" : "dark");
 
-		// compute the common multiplier
-		double	multiplier = stretch();
+		// compute the image
+		Image<double>	*rawimage = StarCameraBase::operator()(field);
 
-		// now compute all the pixel values
+		// now add all the local stuff, which depends on the camera,
+		// not the star field
 		double	scale = std::numeric_limits<P>::max();
 		for (unsigned int x = 0; x < size.width(); x++) {
 			for (unsigned int y = 0; y < size.height(); y++) {
-				// apply the transform to the current point
-				Point	where(origin.x() + x, origin.y() + y);
-				Point	p = transform(where);
-
 				// compute the intensity
-				double	value = 0;
-				if (light()) {
-					switch (color()) {
-					case 0:
-						value = field.intensity(p);
-						break;
-					case 1:
-						value = field.intensityR(p);
-						break;
-					case 2:
-						value = field.intensityG(p);
-						break;
-					case 3:
-						value = field.intensityB(p);
-						break;
-					default:
-						break;
-					}
-					value *= multiplier;
-				}
+				double	value = rawimage->pixel(x, y);
+
+				// add the noise
 				if (do_noise) {
 					value += noisevalue();
 				}
+
+				// scale to the pixel size
 				value *= scale;
 
 				// clamp the the range of the pixel type
@@ -233,7 +227,11 @@ public:
 			}
 		}
 
+		// remove the raw image, we no longer need it
+		delete rawimage;
+
 		// turn pixels hot
+		ImagePoint	origin = rectangle().origin();
 		std::set<ImagePoint>::const_iterator	i;
 		for (i = hotpixels.begin(); i != hotpixels.end(); i++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "add hot pixel %s",

@@ -6,11 +6,14 @@
 #ifndef _Camera_impl_h
 #define _Camera_impl_h
 
-#include "../idl/device.hh"
+#include <device.hh>
 #include <AstroCamera.h>
 
 namespace Astro {
 
+/**
+ * \brief Camera servant definition
+ */
 class Camera_impl : public POA_Astro::Camera {
 	astro::camera::CameraPtr	_camera;
 	std::vector<astro::camera::CcdPtr>	ccds;
@@ -19,7 +22,7 @@ class Camera_impl : public POA_Astro::Camera {
 public:
 	inline Camera_impl(astro::camera::CameraPtr camera)
 		: _camera(camera) {
-		for (int id = 0; id < _camera->nCcds(); id++) {
+		for (unsigned int id = 0; id < _camera->nCcds(); id++) {
 			ccds.push_back(_camera->getCcd(id));
 		}
 	}

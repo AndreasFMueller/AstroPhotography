@@ -8,6 +8,7 @@
 #include <AstroExceptions.h>
 #include <SimGuiderPort.h>
 #include <SimCooler.h>
+#include <SimFocuser.h>
 
 using namespace astro::image;
 
@@ -66,7 +67,7 @@ Exposure::State	SimCcd::exposureStatus() {
  * \brief cancel the exposure
  */
 void    SimCcd::cancelExposure() {
-	if ((Exposure::exposing == state) || (Exposure::exposed == state)) {
+	if (Exposure::idle == state) {
 		throw BadState("no exposure in progress");
 	}
 	state = Exposure::idle;
@@ -88,10 +89,16 @@ bool    SimCcd::wait() {
 	if (Exposure::exposed == state) {
 		return true;
 	}
-	// we don't want to wait, so we just throw up a debug message, 
-	// set the state to exposed and are happy with it.
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "faking exposure time %.3f",
-		exposure.exposuretime);
+	// compute the remaining exposure time
+	double	remaining = exposure.exposuretime
+			- (simtime() - starttime);
+	if (remaining > 0) {
+		unsigned int	remainingus = 1000000 * remaining;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "sleeping for %.3f", remaining);
+		usleep(remainingus);
+	}
+
+	// exposure is now complete
 	state = Exposure::exposed;
 	return true;
 }
@@ -123,6 +130,11 @@ ImagePtr  SimCcd::getImage() {
 
 	// temperature influence on noise
 	starcamera.noise(0.2 * exp2(-_locator.simcooler()->belowambient()));
+
+	// focuser effect
+	double	radius = _locator.simfocuser()->radius();
+	starcamera.radius(radius);
+	starcamera.innerradius(0.4 * radius);
 
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",

@@ -87,6 +87,20 @@ public:
 };
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
+// We will need a number of shared_ptr classes for different types of devices
+
+class FilterWheel;
+typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
+
+class GuiderPort;
+typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
+
+class Cooler;
+typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
+
+class Focuser;
+typedef std::tr1::shared_ptr<Focuser>	FocuserPtr;
+
 /**
  * \brief Class containing information about a CCD chip. 
  *
@@ -109,6 +123,7 @@ public:
 
 	// modifying accessors
 	void	addMode(const Binning& mode);
+	void	addModes(const BinningSet& modes);
 	void	setShutter(bool shutter) { _shutter = shutter; }
 	bool	shutter() const { return _shutter; }
 
@@ -141,9 +156,6 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
  * the camera can return natively. For all other pixel formats, the
  * application should use the provided conversion functions.
  */
-class Cooler;
-typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
-
 class	Ccd {
 protected:
 	CcdInfo	info;
@@ -202,12 +214,6 @@ typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
  * A camera can have several CCDs, which are numbered sequentially starting
  * at 0. 
  */
-class FilterWheel;
-typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
-
-class GuiderPort;
-typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
-
 class	Camera : public astro::device::Device {
 protected:
 	std::vector<CcdInfo>	ccdinfo;
@@ -315,6 +321,20 @@ public:
 	 */
 	virtual void	activate(float raplus, float raminus,
 		float decplus, float decminus) = 0;
+};
+
+/**
+ * \brief Abstraction for a Focuser
+ */
+class Focuser : public astro::device::Device {
+public:
+	Focuser(const std::string name = std::string(""));
+	virtual ~Focuser();
+	virtual unsigned short	min();
+	virtual unsigned short	max();
+	virtual unsigned short	current();
+	virtual void	set(unsigned short value);
+	bool	moveto(unsigned short value, unsigned long timeout = 60);
 };
 
 } // namepsace camera

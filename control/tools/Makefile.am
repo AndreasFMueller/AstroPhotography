@@ -19,65 +19,89 @@ microtouch_files =
 endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
-	focus transform guider dark flat clamp logscale stack
+	focus focustest transform guider dark flat clamp logscale stack
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
-imageloop_LDADD = -L../lib -lastro
+imageloop_LDADD = -L../lib -lastro 
 
 getimages_SOURCES = getimages.cpp
 getimages_DEPENDENCIES = ../lib/libastro.la
-getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@
+getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = ../lib/libastro.la
-imageinfo_LDADD = -L../lib -lastro
+imageinfo_LDADD = -L../lib -lastro 
 
 makedark_SOURCES = makedark.cpp
 makedark_DEPENDENCIES = ../lib/libastro.la
-makedark_LDADD = -L../lib -lastro
+makedark_LDADD = -L../lib -lastro 
 
 dark_SOURCES = dark.cpp
 dark_DEPENDENCIES = ../lib/libastro.la
-dark_LDADD = -L../lib -lastro
+dark_LDADD = -L../lib -lastro 
 
 flat_SOURCES = flat.cpp
 flat_DEPENDENCIES = ../lib/libastro.la
-flat_LDADD = -L../lib -lastro
+flat_LDADD = -L../lib -lastro 
 
 makeflat_SOURCES = makeflat.cpp
 makeflat_DEPENDENCIES = ../lib/libastro.la
-makeflat_LDADD = -L../lib -lastro
+makeflat_LDADD = -L../lib -lastro 
 
 calibrate_SOURCES = calibrate.cpp
 calibrate_DEPENDENCIES = ../lib/libastro.la
-calibrate_LDADD = -L../lib -lastro
+calibrate_LDADD = -L../lib -lastro 
 
 transform_SOURCES = transform.cpp
 transform_DEPENDENCIES = ../lib/libastro.la
-transform_LDADD = -L../lib -lastro
+transform_LDADD = -L../lib -lastro 
 
 focus_SOURCES = focus.cpp
 focus_DEPENDENCIES = ../lib/libastro.la
-focus_LDADD = -L../lib -lastro @SBIGLIBRARY@
+focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+
+focustest_SOURCES = focustest.cpp
+focustest_DEPENDENCIES = ../lib/libastro.la
+focustest_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la
-guider_LDADD = -L../lib -lastro @SBIGLIBRARY@
+guider_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 stack_SOURCES = stack.cpp
 stack_DEPENDENCIES = ../lib/libastro.la
-stack_LDADD = -L../lib -lastro
+stack_LDADD = -L../lib -lastro 
 
 clamp_SOURCES = clamp.cpp
 clamp_DEPENDENCIES = ../lib/libastro.la
-clamp_LDADD = -L../lib -lastro
+clamp_LDADD = -L../lib -lastro 
 
 logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
-logscale_LDADD = -L../lib -lastro
+logscale_LDADD = -L../lib -lastro 
 
 looptest:	imageloop
 	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
 		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \
 		-P ./convertimage.sh -Q ./makemovie.sh
+
+test:	getimages
+	./getimages -d -ORBInitRef NameService=corbaname::localhost \
+		-m net -C 10 -e 1 -o net -p net \
+		-F net:simulator/sim-focuser -f 25000
+
+testfocus:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
+		-b 16000 -e 48000 -s 100 | tee focus.csv
+
+testfocus2:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
+		-b 26000 -e 40000 -s 20 | tee focus2.csv
+
+testfocus3:	focustest
+	./focustest -d -ORBInitRef NameService=corbaname::localhost \
+		-m simulator -C 0 -c 0 -E 4 -F simulator -f sim-focuser \
+		-p 32768 -b 28000 -e 38001 -s 4 | tee focus3.csv

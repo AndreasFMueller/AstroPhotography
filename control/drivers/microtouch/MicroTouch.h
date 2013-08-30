@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 namespace astro {
+namespace device {
 namespace microtouch {
 
 #define MICROTOUCH_ISMOVING		0x82
@@ -31,7 +32,7 @@ public:
  * \brief 
  */
 class MicroTouch {
-	astro::usb::Device&	device;
+	astro::usb::DevicePtr	device;
 	astro::usb::EndpointDescriptorPtr	outendpoint;
 	astro::usb::EndpointDescriptorPtr	inendpoint;
 
@@ -47,10 +48,10 @@ class MicroTouch {
 	mtdata<n>	get(uint8_t code) throw(MicroTouchError) {
 		mtdata<0>	request_data(code);
 		astro::usb::BulkTransfer	request(outendpoint, &request_data);
-		device.submit(&request);
+		device->submit(&request);
 		mtdata<n>	response_data;
 		astro::usb::BulkTransfer	response(inendpoint, &response_data);
-		device.submit(&response);
+		device->submit(&response);
 		if (request_data.cmd != response_data.cmd) {
 			throw MicroTouchError("response command code mismatch");
 		}
@@ -58,7 +59,7 @@ class MicroTouch {
 	}
 
 public:
-	MicroTouch(astro::usb::Device& device) throw(astro::usb::USBError);
+	MicroTouch(astro::usb::DevicePtr device) throw(astro::usb::USBError);
 	uint16_t	getWord(uint8_t code) throw(MicroTouchError);
 	uint16_t	position() throw(MicroTouchError);
 	void		setPosition(uint16_t position) throw(MicroTouchError);
@@ -73,6 +74,7 @@ public:
 };
 
 } // namespace microtouch
+} // namespace device
 } // namespace astro
 
 #endif /* _MicroTouch_h */

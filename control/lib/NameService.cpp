@@ -58,7 +58,7 @@ NameService::NameService(CORBA::ORB_var orb) {
 		}
 	} catch (CORBA::NO_RESOURCES&) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "omniORB is not configured");
-		throw std::runtime_error("omniORB not correctly corrected");
+		throw std::runtime_error("omniORB not correctly configured");
 	} catch (CORBA::ORB::InvalidName&) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "Service required is invalid");
 		throw std::runtime_error("service required is invalid");

@@ -7,23 +7,17 @@
 bin_PROGRAMS = astroinfo getimage
 noinst_PROGRAMS = astroclient
 
-ORBLDFLAGS = -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 \
-	-lomniORB4 -lomnithread
-
 getimage_SOURCES = getimage.cpp
 getimage_DEPENDENCIES = ../lib/libastro.la
-getimage_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@ \
-	$(ORBLDFLAGS)
+getimage_LDADD = -L../lib -lastro @SBIGLIBRARY@
 
 astroinfo_SOURCES = astroinfo.cpp
 astroinfo_DEPENDENCIES = ../lib/libastro.la
-astroinfo_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@ \
-	$(ORBLDFLAGS)
+astroinfo_LDADD = -L../lib -lastro @SBIGLIBRARY@
 
 astroclient_SOURCES = astroclient.cpp
 astroclient_DEPENDENCIES = ../lib/libastro.la
-astroclient_LDADD = -L../lib -lastro -L../idl -lastrocom @SBIGLIBRARY@ \
-	$(ORBLDFLAGS)
+astroclient_LDADD = -L../lib -lastro @SBIGLIBRARY@
 
 test:	astroinfo
 	./astroinfo -d -ORBInitRef NameService=corbaname::localhost
