@@ -11,7 +11,7 @@ noinst_HEADERS = SimUtil.cpp SimLocator.h SimCamera.h SimCcd.h \
 SRCFILES = SimUtil.cpp SimLocator.cpp SimCamera.cpp SimCcd.cpp \
 	SimGuiderPort.cpp SimFilterWheel.cpp SimCooler.cpp \
 	SimFocuser.cpp \
-	Stars.cpp Starfield.cpp Starcamera.cpp Blurr.cpp
+	Stars.cpp Starfield.cpp StarCamera.cpp Blurr.cpp
 
 if ENABLE_UNITTESTS
 

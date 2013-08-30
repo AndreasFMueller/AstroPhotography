@@ -12,6 +12,7 @@
 #include <AstroIO.h>
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
+#include <includes.h>
 
 using namespace astro::camera;
 using namespace astro::image;

@@ -7,6 +7,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <stdlib.h>
 #include <AstroTransform.h>
 #include <AstroFormat.h>
 

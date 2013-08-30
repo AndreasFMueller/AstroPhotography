@@ -9,6 +9,7 @@
 #include <SimGuiderPort.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
+#include <includes.h>
 
 using namespace astro::image;
 

@@ -6,6 +6,7 @@
 #include <AstroCamera.h>
 #include <AstroExceptions.h>
 #include <AstroDebug.h>
+#include <includes.h>
 
 using namespace astro::device;
 

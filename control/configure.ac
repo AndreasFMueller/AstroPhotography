@@ -137,8 +137,6 @@ AC_C_CONST
 
 # Checks for library functions
 AC_CHECK_FUNCS([memset strdup strerror trunc])
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
 
 # definitions for the extension for shared libraries
 case `uname` in
