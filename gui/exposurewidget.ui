@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>285</width>
-    <height>222</height>
+    <height>257</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QDoubleSpinBox" name="timeSpinBox">
+    <widget class="LogSpinBox" name="timeSpinBox">
      <property name="minimumSize">
       <size>
        <width>90</width>
@@ -39,7 +39,7 @@
       <number>4</number>
      </property>
      <property name="minimum">
-      <double>0.000000000000000</double>
+      <double>0.000100000000000</double>
      </property>
      <property name="maximum">
       <double>3600.000000000000000</double>
@@ -251,24 +251,15 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LogSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>LogSpinBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
-  <connection>
-   <sender>timeSpinBox</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>ExposureWidget</receiver>
-   <slot>timeChanged(double)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>178</x>
-     <y>38</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>270</x>
-     <y>42</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>subframeCheckBox</sender>
    <signal>toggled(bool)</signal>
@@ -276,8 +267,8 @@
    <slot>subframeToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>134</x>
-     <y>105</y>
+     <x>246</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel">
      <x>266</x>

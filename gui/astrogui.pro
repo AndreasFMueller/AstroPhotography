@@ -8,11 +8,13 @@ LIBS += -L/usr/local/lib -L../control/lib -lastro
 HEADERS += \ 
     capturewindow.h \
     exposurewidget.h \
-    ExposureWorker.h
+    ExposureWorker.h \
+    LogSpinBox.h
 FORMS += \ 
     capturewindow.ui \
     exposurewidget.ui
 SOURCES = capture.cpp \ 
     capturewindow.cpp \
     exposurewidget.cpp \
-    ExposureWorker.cpp
+    ExposureWorker.cpp \
+    LogSpinBox.cpp

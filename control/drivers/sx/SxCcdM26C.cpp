@@ -89,8 +89,7 @@ SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
  */
 Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
-	size_t	l = (m26c.frame.size().width() / m26c.mode.getX())
-		* (m26c.frame.size().height() / m26c.mode.getY());
+	size_t	l = (m26c.frame.size() / m26c.mode).getPixels();
 	Field	*field = new Field(exposure.frame.size(), l);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u", l);
 
@@ -373,8 +372,7 @@ void	SxCcdM26C::getImage0() {
 
 	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*_image = new Image<unsigned short>(
-		exposure.frame.size().width() / exposure.mode.getX(),
-		exposure.frame.size().height() /exposure.mode.getY());
+		exposure.frame.size() / exposure.mode);
 	_image->setOrigin(exposure.frame.origin());
 	_image->setMosaicType(MosaicType::BAYER_RGGB);
 

@@ -34,12 +34,22 @@ public:
 	Binning(unsigned int _x = 1, unsigned int _y = 1);
 	Binning(const Binning& other) : x(other.x), y(other.y) { }
 	bool	operator==(const Binning& other) const;
+	bool	operator!=(const Binning& other) const;
 	bool	operator<(const Binning& other) const;
 	unsigned int	getX() const { return x; }
 	unsigned int	getY() const { return y; }
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);
+
+astro::image::ImagePoint	operator*(const astro::image::ImagePoint& point,
+					const Binning& mode);
+astro::image::ImagePoint	operator/(const astro::image::ImagePoint& point,
+					const Binning& mode);
+astro::image::ImageSize	operator*(const astro::image::ImageSize& size,
+				const Binning& mode);
+astro::image::ImageSize	operator/(const astro::image::ImageSize& size,
+				const Binning& mode);
 
 /**
  * \brief Set of Binning objects

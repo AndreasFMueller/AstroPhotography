@@ -40,7 +40,6 @@ private:
     Ui::ExposureWidget *ui;
 
 private slots:
-	void	timeChanged(double value);
 	void	subframeToggled(bool state);
 };
 

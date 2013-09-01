@@ -8,6 +8,7 @@
 #include <Blurr.h>
 
 using namespace astro::image;
+using namespace astro::camera;
 
 namespace astro {
 
@@ -68,7 +69,12 @@ double	StarCameraBase::noisevalue() const {
 	return _noise * inverf(x);
 }
 
-
+/**
+ * \brief Compute the image of a star field
+ *
+ * This method computes the distribution of the stars, with appropriate
+ * transformations, and the effect of the focuser.
+ */
 
 Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// find out how large we should make the field which we will later
@@ -94,7 +100,7 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// - B is the rectangle we need to image if we want to capture
 	//   focus blurr without artifacts. The point offset computed above
 	//   is the offset of the rectangle A withing B.
-	// y
+	// y-axis
 	// +------------------------------------------------+
 	// |                                                |
 	// |                                                |
@@ -110,7 +116,7 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// |               |                     |          |
 	// |               +---------------------+          |
 	// |                                                |
-	// +------------------------------------------------+ x
+	// +------------------------------------------------+ x-axis
 	// (0,0)
 	// To compute pixels withing the rectangle B. A point (x_B, y_B)
 	// has absolute coordinates 
@@ -174,7 +180,121 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	WindowAdapter<double>	wa(image, r);
 	Image<double>	*result = new Image<double>(wa);
 
+	// add noise to the image rectangle
+	if (noise()) {
+		addnoise(*result);
+	}
+
 	return result;
+}
+
+/**
+ * \brief Add noise to the image
+ */
+void	StarCameraBase::addnoise(Image<double>& image) const {
+	unsigned int	width = image.size().width();
+	unsigned int	height = image.size().height();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			image.pixel(x, y) += noisevalue();
+		}
+	}
+}
+
+/**
+ * \brief Rescale the image
+ *
+ * Rescale the image so that all pixel values lie between 0 and the
+ * scale argument
+ */
+void	StarCameraBase::rescale(Image<double>& image, double scale) const {
+	unsigned int	width = image.size().width();
+	unsigned int	height = image.size().height();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling %dx%d image", width, height);
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			double	value = scale * image.pixel(x, y);
+			if (value > scale) {
+				value = scale;
+			}
+			image.pixel(x, y) = value;
+		}
+	}
+}
+
+/**
+ * \brief Add hot pixels to the image
+ */
+void	StarCameraBase::addhot(Image<double>& image, double hotvalue) const {
+	ImagePoint	origin = rectangle().origin();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add hot pixels to %s image",
+		image.getFrame().toString().c_str());
+	std::set<ImagePoint>::const_iterator	i;
+	for (i = hotpixels.begin(); i != hotpixels.end(); i++) {
+		if (rectangle().contains(*i)) {
+			fill0(image, (*i) - origin, hotvalue);
+/*
+			image.pixel(i->x() - origin.x(), i->y() - origin.y())
+				= hotvalue;
+*/
+		}
+	}
+}
+
+/**
+ * \brief Computed binned pixel values
+ */
+double	StarCameraBase::bin0(Image<double>& image,
+		unsigned int x, unsigned int y) const {
+	// find out whether we are at the edge of the image, where we may not
+	// be able to bin a full image
+	unsigned int	maxx = image.getFrame().size().width() - x;
+	if (maxx > binning().getX()) {
+		maxx = binning().getX();
+	}
+	unsigned int	maxy = image.getFrame().size().height() - y;
+	if (maxy > binning().getY()) {
+		maxy = binning().getY();
+	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "maxx = %d, maxy = %d", maxx, maxy);
+	double	value = 0;
+	for (unsigned int xoffset = 0; xoffset < maxx; xoffset++) {
+		for (unsigned int yoffset = 0; yoffset < maxy; yoffset++) {
+			value += image.pixel(x + xoffset, y + yoffset);
+		}
+	}
+	return value;
+}
+
+/**
+ * \brief Perform binning
+ */
+void	StarCameraBase::bin(Image<double>& image) const {
+	unsigned int	width = image.size().width();
+	unsigned int	height = image.size().height();
+	unsigned int	deltax = binning().getX();
+	unsigned int	deltay = binning().getY();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%dx%d-binning of %dx%d image",
+		deltax, deltay, width, height);
+	for (unsigned int x = 0; x < width; x += deltax) {
+		for (unsigned int y = 0; y < height; y += deltay) {
+			image.pixel(x, y) = bin0(image, x, y);
+		}
+	}
+}
+
+/**
+ * \brief Fill a binned pixel with a given value
+ */
+void	StarCameraBase::fill0(Image<double>& image, const ImagePoint& point,
+		double fillvalue) const {
+	ImagePoint	corner = (point / binning()) * binning();
+	for (unsigned int x = 0; x < binning().getX(); x++) {
+		for (unsigned int y = 0; y < binning().getY(); y++) {
+			image.pixel(corner.x() + x, corner.y() + y)
+				= fillvalue;
+		}
+	}
 }
 
 } // namespace astro

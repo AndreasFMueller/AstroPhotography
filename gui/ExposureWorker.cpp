@@ -19,6 +19,7 @@ ExposureWorker::~ExposureWorker() {
 
 void	ExposureWorker::process() {
 	ccd->startExposure(exposure);
+	ccd->wait();
 	ImagePtr	image = ccd->getImage();
 	capturewindow->newImage(image);
 	emit finished();

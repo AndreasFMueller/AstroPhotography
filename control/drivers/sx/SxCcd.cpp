@@ -155,9 +155,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
  */
 void	SxCcd::getImage0() {
 	// compute the target image size, using the binning mode
-	ImageSize	targetsize(
-		exposure.frame.size().width() / exposure.mode.getX(),
-		exposure.frame.size().height() / exposure.mode.getY());
+	ImageSize	targetsize = exposure.frame.size() / exposure.mode;
 
 	// compute the size of the buffer, and create a buffer for the data
 	int	size = targetsize.getPixels();

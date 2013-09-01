@@ -34,58 +34,6 @@ ExposureWidget::~ExposureWidget()
 #define EXPOSURE_MIN	0.0001
 
 /**
- * \brief Slot called when the time spinner changes
- *
- * This is used to ensure that time steps are essentially exponential
- */
-void	ExposureWidget::timeChanged(double value) {
-	if (timechange) {
-		return;
-	}
-	timechange = true;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "value = %f, timeprevious = %f",
-		value, timeprevious);
-	double	stepvalue = ui->timeSpinBox->singleStep();
-	if (value < timeprevious) {
-		if (value == 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping down");
-			if (timeprevious >= 120) {
-				stepvalue = 60;
-			} else {
-				stepvalue /= 2;
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "new stepvalue: %f",
-					stepvalue);
-				if (stepvalue < EXPOSURE_MIN) {
-					stepvalue = EXPOSURE_MIN;
-				}
-				stepvalue = trunc(10000 * stepvalue) / 10000.;
-				ui->timeSpinBox->setValue(stepvalue);
-			}
-			ui->timeSpinBox->setSingleStep(stepvalue);
-		} else {
-			if (value < EXPOSURE_MIN) {
-				value = EXPOSURE_MIN;
-				ui->timeSpinBox->setValue(value);
-			}
-			ui->timeSpinBox->setSingleStep(value);
-		}
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stepping up");
-		if (value > 1) {
-			value = trunc(value);
-			ui->timeSpinBox->setValue(value);
-		}
-		if (value >= 60) {
-			ui->timeSpinBox->setSingleStep(60);
-		} else {
-			ui->timeSpinBox->setSingleStep(value);
-		}
-	}
-	timeprevious = ui->timeSpinBox->value();
-	timechange = false;
-}
-
-/**
  * \brief Slot called when the subframe checkbox is toggled
  */
 void	ExposureWidget::subframeToggled(bool state) {

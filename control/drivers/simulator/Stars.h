@@ -8,6 +8,7 @@
 
 #include <AstroTypes.h>
 #include <AstroTransform.h>
+#include <AstroCamera.h>
 #include <set>
 
 namespace astro {
@@ -117,7 +118,15 @@ class StarCameraBase {
 	void	addHotPixel();
 	double	_radius;
 	double	_innerradius;
+	astro::camera::Binning	_binning;
+	double	bin0(Image<double>& image, unsigned int x, unsigned int y) const;
+	void	fill0(Image<double>& image, const ImagePoint& point,
+			double fillvalue) const;
 protected:
+	void	addnoise(Image<double>& image) const;
+	void	addhot(Image<double>& image, double hotvalue) const;
+	void	rescale(Image<double>& image, double scale) const;
+	void	bin(Image<double>& image) const;
 	double	noisevalue() const;
 	std::set<ImagePoint>	hotpixels;
 public:
@@ -164,6 +173,9 @@ public:
 		_innerradius = innerradius;
 	}
 
+	const astro::camera::Binning&	binning() const { return _binning; }
+	void	binning(const astro::camera::Binning& binning) { _binning = binning; }
+
 	Image<double>	*operator()(const StarField& field) const;
 };
 
@@ -184,63 +196,41 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "imaging star field %s",
 			field[0]->toString().c_str());
 			
-		// create the image
-		ImageSize	size = rectangle().size();
-		Image<P>	*image = new Image<P>(size);
-
-		// compute a transform based on translation and rotation
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s, alpha = %f",
-			translation().toString().c_str(), alpha());
-		astro::image::transform::Transform	transform(alpha(),
-							-translation());
-
-		// whether or not we should do the somewhat onerous noise
-		// computation
-		bool	do_noise = (noise() > 0);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s image",
-			(light()) ? "light" : "dark");
-
 		// compute the image
 		Image<double>	*rawimage = StarCameraBase::operator()(field);
+
+		// bin the image,
+		if (binning() != astro::camera::Binning()) {
+			bin(*rawimage);
+		}
 
 		// now add all the local stuff, which depends on the camera,
 		// not the star field
 		double	scale = std::numeric_limits<P>::max();
-		for (unsigned int x = 0; x < size.width(); x++) {
-			for (unsigned int y = 0; y < size.height(); y++) {
-				// compute the intensity
-				double	value = rawimage->pixel(x, y);
+		rescale(*rawimage, scale);
 
-				// add the noise
-				if (do_noise) {
-					value += noisevalue();
-				}
+		// turn pixels hot, this must respsect the binning
+		addhot(*rawimage, scale);
 
-				// scale to the pixel size
-				value *= scale;
+		// now convert the image into an image of the right pixel type
+		// create the image
+		ImageSize	size = rectangle().size() / binning();
+		Image<P>	*image = new Image<P>(size);
 
-				// clamp the the range of the pixel type
-				if (value > scale) {
-					value = scale;
-				}
-				image->pixel(x, y) = value;
+		// fill in the data
+		unsigned int	width = size.width();
+		unsigned int	height = size.height();
+		unsigned int	deltax = binning().getX();
+		unsigned int	deltay = binning().getY();
+		for (unsigned int x = 0; x < width; x++) {
+			for (unsigned int y = 0; y < height; y++) {
+				image->pixel(x, y)
+					= rawimage->pixel(x * deltax, y * deltay);
 			}
 		}
 
 		// remove the raw image, we no longer need it
 		delete rawimage;
-
-		// turn pixels hot
-		ImagePoint	origin = rectangle().origin();
-		std::set<ImagePoint>::const_iterator	i;
-		for (i = hotpixels.begin(); i != hotpixels.end(); i++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "add hot pixel %s",
-				i->toString().c_str());
-			if (rectangle().contains(*i)) {
-				image->pixel(i->x() - origin.x(),
-						i->y() - origin.y()) = scale;
-			}
-		}
 
 		// that's the image
 		return ImagePtr(image);

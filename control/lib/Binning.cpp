@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <limits>
 
+using namespace astro::image;
+
 namespace astro {
 namespace camera {
 
@@ -29,6 +31,10 @@ Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
  */
 bool	Binning::operator==(const Binning& other) const {
 	return (x == other.x) && (y == other.y);
+}
+
+bool	Binning::operator!=(const Binning& other) const {
+	return !operator==(other);
 }
 
 /**
@@ -112,6 +118,27 @@ std::string	BinningSet::toString() const {
 std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset) {
 	return out << binningset.toString();
 }
+
+ImageSize       operator*(const ImageSize& size, const Binning& binning) {
+	return ImageSize(size.width() * binning.getX(),
+			size.height() * binning.getY());
+}
+
+ImageSize       operator/(const ImageSize& size, const Binning& binning) {
+	return ImageSize(size.width() / binning.getX(),
+			size.height() / binning.getY());
+}
+
+ImagePoint	operator*(const ImagePoint& point, const Binning& binning) {
+	return ImagePoint(point.x() * binning.getX(),
+			point.y() * binning.getY());
+}
+
+ImagePoint	operator/(const ImagePoint& point, const Binning& binning) {
+	return ImagePoint(point.x() / binning.getX(),
+			point.y() / binning.getY());
+}
+
 
 } // namespace camera
 } // namespace astro
