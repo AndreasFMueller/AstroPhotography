@@ -84,6 +84,7 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 		throw FITSexception("don't know what to do with image of dimension != 2 or 3");
 	}
 	size = ImageSize(naxes[0], naxes[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", planes);
 	
 	switch (planes) {
 	case 1:
