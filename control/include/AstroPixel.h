@@ -282,7 +282,7 @@ template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 		const monochrome_color_tag& dt, const rgb_color_tag& ds) {
 	typename srcPixel::value_type	y;
-	y = 0.299 * src.R + 0.587 * src.G + 0.114 * src.B;
+	y = src.luminance();
 	convertPixelValue(dest, y);
 }
 
@@ -472,7 +472,7 @@ public:
 	}
 
 	P	luminance() const {
-		return G;
+		return 0.2126 * R + 0.7152 * G + 0.0722 * B;
 	}
 };
 
@@ -791,6 +791,48 @@ Pixel	weighted_sum(unsigned int number_of_terms,
 	return weighted_sum_typed(number_of_terms, weights, pixels,
 		typename color_traits<Pixel>::color_category());
 }
+
+/**
+ * \brief Luminance operators
+ */
+template<typename Pixel>
+class Luminance {
+public:
+	double	operator()(const RGB<Pixel>&) = 0;
+};
+
+template<typename Pixel>
+class StandardLuminance : public Luminance<Pixel> {
+public:
+	double	operator()(const RGB<Pixel>& p) {
+		return 0.2126 * p.R + 0.7152 * p.G + 0.0722 * p.B;
+	}
+};
+
+template<typename Pixel>
+class GreenLuminance : public Luminance<Pixel> {
+public:
+	double	operator()(const RGB<Pixel>& p) {
+		return p.G;
+	}
+};
+
+template<typename Pixel>
+class CCIRLuminance : public Luminance<Pixel> {
+public:
+	double	operator()(const RGB<Pixel>& p) {
+		return 0.299 * p.R + 0.587 * p.G + 0.114 * p.B;
+	}
+};
+
+template<typename Pixel>
+class SqrtLuminance : public Luminance<Pixel> {
+public:
+	double	operator()(const RGB<Pixel>& p) {
+		return sqrt(0.241 * p.R * p.R + 0.691 * p.G * p.G
+				+ 0.068 * p.B * p.B);
+	}
+};
 
 /**
  * \brief Luminance function
