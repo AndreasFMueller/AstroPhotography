@@ -145,7 +145,8 @@ public:
 template<typename Pixel>
 ColorCorrectionAdapter<Pixel>::ColorCorrectionAdapter(
 	const ConstImageAdapter<RGB<Pixel> >& _image, const RGB<float>& _rgb)
-	: ConstImageAdapter<RGB<Pixel> >(_image.getSize()), image(_image), rgb(_rgb) {
+	: ConstImageAdapter<RGB<Pixel> >(_image.getSize()), image(_image) {
+	rgb = _rgb / _rgb.luminance();
 }
 
 template<typename Pixel>

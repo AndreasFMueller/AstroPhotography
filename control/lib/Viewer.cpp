@@ -134,15 +134,15 @@ void	Viewer::update() {
 
 	// compose the processing pipeline
 	LuminanceScalingAdapter<float>	lsa(*luminanceimagep, 1/65535.);
-	ColorCorrectionAdapter<float>	cca(*colorimagep, RGB<float>(0.7,1.,1.));
-	BackgroundSubtractionAdapter<float>	bsa(cca, RGB<float>(.2, .2, .2));
+	ColorCorrectionAdapter<float>	cca(*colorimagep, RGB<float>(0.65,1.,.93));
 	GammaAdapter<float>	ga(lsa, 0.5);
 	LuminanceScalingAdapter<float>	upscale(ga, 256);
-	LuminanceColorAdapter<float>	lca(upscale, bsa);
+	LuminanceColorAdapter<float>	lca(upscale, cca);
+	BackgroundSubtractionAdapter<float>	bsa(lca, RGB<float>(50., 50., 50.));
 
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
-			RGB<float>	colorpixel = lca.pixel(x, y);
+			RGB<float>	colorpixel = bsa.pixel(x, y);
 			uint32_t	value = reduce(colorpixel);
 			unsigned int	offset = size.offset(x, y);
 			p[offset] = value;
