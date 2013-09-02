@@ -7,43 +7,50 @@
 #include <AstroImage.h>
 #include <AstroIO.h>
 #include <AstroDebug.h>
+#include <AstroTonemapping.h>
 
 using namespace astro::image;
+using namespace astro::adapter;
 using namespace astro::io;
 
 namespace astro {
 namespace image {
 
 template<typename P>
-void	convert_mono(Image<RGB<float> >& image, const ImagePtr& rawimage) {
+void	convert_mono(Image<float>& luminanceimage,
+		Image<RGB<float> >& colorimage, const ImagePtr& rawimage) {
 	Image<P>	*imagep = dynamic_cast<Image<P> *>(&*rawimage);
 	if (NULL == imagep) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel size: %d", sizeof(P));
-	unsigned int	width = image.size().width();
-	unsigned int	height = image.size().height();
+	unsigned int	width = luminanceimage.size().width();
+	unsigned int	height = luminanceimage.size().height();
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
 			P	v = imagep->pixel(x, y);
-			image.pixel(x, y) = RGB<float>(v, v, v);
+			luminanceimage.pixel(x, y) = v; 
+			colorimage.pixel(x, y) = RGB<float>(1., 1., 1.);
 		}
 	}
 }
 
 template<typename P>
-void	convert_rgb(Image<RGB<float> >& image, const ImagePtr rawimage) {
+void	convert_rgb(Image<float>& luminanceimage,
+		Image<RGB<float> >& colorimage, const ImagePtr rawimage) {
 	Image<RGB<P> >	*imagep = dynamic_cast<Image<RGB<P> > *>(&*rawimage);
 	if (NULL == imagep) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RGB pixel size: %d", sizeof(RGB<P>));
-	unsigned int	width = image.size().width();
-	unsigned int	height = image.size().height();
+	unsigned int	width = luminanceimage.size().width();
+	unsigned int	height = luminanceimage.size().height();
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
 			RGB<P>	v = imagep->pixel(x, y);
-			image.pixel(x, y) = RGB<float>(v.R, v.G, v.B);
+			float	l = v.luminance();
+			luminanceimage.pixel(x, y) = l;
+			colorimage.pixel(x, y) = RGB<float>(v.R, v.G, v.B) / l;
 		}
 	}
 }
@@ -59,28 +66,30 @@ Viewer::Viewer(const std::string& filename) {
 	ImageSize	size = rawimage->size();
 
 	// allocate an image with float pixels
-	Image<RGB<float> >	*imagep = new Image<RGB<float> >(size);
-	image = ImagePtr(imagep);
+	Image<RGB<float> >	*colorimagep = new Image<RGB<float> >(size);
+	colorimage = ImagePtr(colorimagep);
+	Image<float>	*luminanceimagep = new Image<float>(size);
+	luminanceimage = ImagePtr(luminanceimagep);
 
 	// create an array 
 	uint32_t	*p = new uint32_t[size.getPixels()];
 	_imagedata = imagedataptr(p);
 	
 	// copy the data from the image to the imagep
-	convert_mono<unsigned char>(*imagep, rawimage);
-	convert_mono<unsigned short>(*imagep, rawimage);
-	convert_mono<unsigned int>(*imagep, rawimage);
-	convert_mono<unsigned long>(*imagep, rawimage);
-	convert_mono<float>(*imagep, rawimage);
-	convert_mono<double>(*imagep, rawimage);
+	convert_mono<unsigned char>(*luminanceimagep, *colorimagep, rawimage);
+	convert_mono<unsigned short>(*luminanceimagep, *colorimagep, rawimage);
+	convert_mono<unsigned int>(*luminanceimagep, *colorimagep, rawimage);
+	convert_mono<unsigned long>(*luminanceimagep, *colorimagep, rawimage);
+	convert_mono<float>(*luminanceimagep, *colorimagep, rawimage);
+	convert_mono<double>(*luminanceimagep, *colorimagep, rawimage);
 
-	// copy the data from the image to the imagep
-	convert_rgb<unsigned char>(*imagep, rawimage);
-	convert_rgb<unsigned short>(*imagep, rawimage);
-	convert_rgb<unsigned int>(*imagep, rawimage);
-	convert_rgb<unsigned long>(*imagep, rawimage);
-	convert_rgb<float>(*imagep, rawimage);
-	convert_rgb<double>(*imagep, rawimage);
+	// copy the data from the image to the luminanceimagep, *colorimagep
+	convert_rgb<unsigned char>(*luminanceimagep, *colorimagep, rawimage);
+	convert_rgb<unsigned short>(*luminanceimagep, *colorimagep, rawimage);
+	convert_rgb<unsigned int>(*luminanceimagep, *colorimagep, rawimage);
+	convert_rgb<unsigned long>(*luminanceimagep, *colorimagep, rawimage);
+	convert_rgb<float>(*luminanceimagep, *colorimagep, rawimage);
+	convert_rgb<double>(*luminanceimagep, *colorimagep, rawimage);
 
 	// copy the data to the 
 	update();
@@ -100,26 +109,42 @@ unsigned char	reduce(float value) {
 	return result;
 }
 
+uint32_t	reduce(const RGB<float> pixel) {
+	uint32_t	result;
+	result = reduce(pixel.R);
+	result <<= 8;
+	result |= reduce(pixel.G);
+	result <<= 8;
+	result |= reduce(pixel.B);
+	return result;
+}
+
 void	Viewer::update() {
 	uint32_t	*p = imagedata();
 	if (NULL == p) {
 		return;
 	}
-	ImageSize	size = image->size();
+	ImageSize	size = luminanceimage->size();
 	unsigned int	width = size.width();
 	unsigned int	height = size.height();
-	Image<RGB<float> >	*imagep = dynamic_cast<Image<RGB<float> >*>(&*image);
+	Image<float>	*luminanceimagep
+		= dynamic_cast<Image<float> *>(&*luminanceimage);
+	Image<RGB<float> >	*colorimagep
+		= dynamic_cast<Image<RGB<float> >*>(&*colorimage);
+
+	// compose the processing pipeline
+	LuminanceScalingAdapter<float>	lsa(*luminanceimagep, 1/65535.);
+	ColorCorrectionAdapter<float>	cca(*colorimagep, RGB<float>(0.7,1.,1.));
+	BackgroundSubtractionAdapter<float>	bsa(cca, RGB<float>(.2, .2, .2));
+	GammaAdapter<float>	ga(lsa, 0.5);
+	LuminanceScalingAdapter<float>	upscale(ga, 256);
+	LuminanceColorAdapter<float>	lca(upscale, bsa);
+
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
+			RGB<float>	colorpixel = lca.pixel(x, y);
+			uint32_t	value = reduce(colorpixel);
 			unsigned int	offset = size.offset(x, y);
-			unsigned char	v = reduce(imagep->pixel(x, y).R / 256.);
-			uint32_t	value = v;
-			value <<= 8;
-			v = reduce(imagep->pixel(x, y).G / 256.);
-			value |= v;
-			value <<= 8;
-			v = reduce(imagep->pixel(x, y).B / 256.);
-			value |= v;
 			p[offset] = value;
 		}
 	}
@@ -130,7 +155,7 @@ uint32_t	*Viewer::imagedata() const {
 }
 
 ImageSize	Viewer::size() const {
-	return image->size();
+	return luminanceimage->size();
 }
 
 } // namespace image

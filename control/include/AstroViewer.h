@@ -15,7 +15,8 @@ namespace astro {
 namespace image {
 
 class Viewer {
-	ImagePtr	image;
+	ImagePtr	luminanceimage;
+	ImagePtr	colorimage;
 	typedef	std::tr1::shared_ptr<uint32_t>	imagedataptr;
 	imagedataptr	_imagedata;
 	void	update();

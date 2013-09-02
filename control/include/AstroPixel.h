@@ -474,6 +474,10 @@ public:
 	P	luminance() const {
 		return 0.2126 * R + 0.7152 * G + 0.0722 * B;
 	}
+
+	RGB<P>	operator/(const P value) const {
+		return RGB<P>(R / value, G / value, B / value);
+	}
 };
 
 /*
