@@ -10,6 +10,7 @@
 #include <string.h>
 #include <AstroDebug.h>
 #include <capturewindow.h>
+#include <unistd.h>
 
 using namespace astro::module;
 using namespace astro::camera;

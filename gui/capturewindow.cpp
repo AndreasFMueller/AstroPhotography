@@ -19,6 +19,7 @@
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
 #include <AstroImager.h>
+#include <unistd.h>
 
 using namespace astro;
 using namespace astro::image;

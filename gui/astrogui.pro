@@ -3,7 +3,7 @@ TEMPLATE = app
 TARGET = capture
 DEPENDPATH += .
 INCLUDEPATH += . -I /usr/local/include -I ../control/include
-LIBS += -L/usr/local/lib -L../control/lib -lastro
+LIBS += -L../control/root/lib64 -L/usr/local/lib -L../control/lib -lastro
 
 HEADERS += \ 
     capturewindow.h \
