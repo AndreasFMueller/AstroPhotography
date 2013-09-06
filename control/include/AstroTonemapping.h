@@ -30,8 +30,14 @@ GammaAdapter<Pixel>::GammaAdapter(const ConstImageAdapter<Pixel>& _image,
 }
 
 template<typename Pixel>
-const Pixel	GammaAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
-	return pow(image.pixel(x, y), _gamma);
+const Pixel	GammaAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+			const {
+	Pixel	v = image.pixel(x, y);
+	if (v < 0) {
+		return 0;
+	}
+	return pow(v, _gamma);
+
 }
 
 /**
@@ -104,6 +110,57 @@ const Pixel	LuminanceScalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y
 }
 
 /**
+ * \brief Luminance extraction
+ */
+template<typename Pixel>
+class LuminanceExtractionAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<RGB<Pixel> >&	_image;
+public:
+	LuminanceExtractionAdapter(const ConstImageAdapter<RGB<Pixel> >& image);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+LuminanceExtractionAdapter<Pixel>::LuminanceExtractionAdapter(
+	const ConstImageAdapter<RGB<Pixel> >& image)
+	: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+}
+
+template<typename Pixel>
+const Pixel	LuminanceExtractionAdapter<Pixel>::pixel(unsigned int x,
+			unsigned int y) const {
+	return _image.pixel(x, y).luminance();
+}
+
+/**
+ * \brief Color extraction
+ */
+template<typename Pixel>
+class ColorExtractionAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	const ConstImageAdapter<RGB<Pixel> >&	_image;
+public:
+	ColorExtractionAdapter(const ConstImageAdapter<RGB<Pixel> >& image);
+	virtual const RGB<Pixel> pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+ColorExtractionAdapter<Pixel>::ColorExtractionAdapter(
+	const ConstImageAdapter<RGB<Pixel> >& image)
+	: ConstImageAdapter<RGB<Pixel> >(image.getSize()), _image(image) {
+}
+
+template<typename Pixel>
+const RGB<Pixel>	ColorExtractionAdapter<Pixel>::pixel(
+				unsigned int x, unsigned int y) const {
+	RGB<Pixel>	v = _image.pixel(x, y);
+	float	l = 1. / v.luminance();
+	Pixel	R = v.R * l;
+	Pixel	G = v.G * l;
+	Pixel	B = v.B * l;
+	return RGB<Pixel>(R, G, B);
+}
+
+/**
  * \brief Luminance-Color-Combination Adapter
  */
 template<typename Pixel>
@@ -111,7 +168,8 @@ class LuminanceColorAdapter : public ConstImageAdapter<RGB<Pixel> > {
 	const ConstImageAdapter<Pixel>&		luminanceimage;
 	const ConstImageAdapter<RGB<Pixel> >&	colorimage;
 public:
-	LuminanceColorAdapter(const ConstImageAdapter<Pixel>& luminanceimage,
+	LuminanceColorAdapter(
+		const ConstImageAdapter<Pixel>& luminanceimage,
 		const ConstImageAdapter<RGB<Pixel> >& colorimage);
 	virtual const RGB<Pixel>	pixel(unsigned int x, unsigned int y) const;
 };
@@ -184,6 +242,73 @@ const RGB<Pixel>	BackgroundSubtractionAdapter<Pixel>::pixel(
 	RGB<Pixel>	v = image.pixel(x, y);
 	return RGB<Pixel>(v.R - background.R, v.G - background.G,
 		v.B - background.B);
+}
+
+/**
+ * \brief Range adapter
+ */
+template<typename Pixel>
+class RangeAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	float	m;
+	float	b;
+public:
+	RangeAdapter(const ConstImageAdapter<Pixel>& image,
+		float min, float max);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+RangeAdapter<Pixel>::RangeAdapter(const ConstImageAdapter<Pixel>& image,
+	float min, float max)
+	: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	b = -min;
+	m = 1. / (max - min);
+}
+
+template<typename Pixel>
+const Pixel RangeAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	return m * (_image.pixel(x, y) + b);
+}
+
+/**
+ * \brief RGB32 extraction
+ */
+template<typename Pixel>
+class RGB32Adapter : public ConstImageAdapter<unsigned int> {
+	const ConstImageAdapter<RGB<Pixel> >&	_image;
+	unsigned char	reduce(Pixel v) const {
+		if (v > 255) {
+			v = 255;
+		}
+		if (v < 0) {
+			v = 0;
+		}
+		unsigned char	result = v;
+		return result;
+	}
+	unsigned int	reduce(const RGB<Pixel>& v) const {
+		unsigned int	result = reduce(v.R);
+		result <<= 8;
+		result |= reduce(v.G);
+		result <<= 8;
+		result |= reduce(v.B);
+		return result;
+	}
+public:
+	RGB32Adapter(const ConstImageAdapter<RGB<Pixel> >& image);
+	virtual const unsigned int	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+RGB32Adapter<Pixel>::RGB32Adapter(const ConstImageAdapter<RGB<Pixel> >& image)
+	: ConstImageAdapter<unsigned int>(image.getSize()), _image(image) {
+}
+
+template<typename Pixel>
+const unsigned int	RGB32Adapter<Pixel>::pixel(unsigned int x,
+	unsigned int y) const {
+	return reduce(_image.pixel(x, y));
 }
 
 } // namespace adapter

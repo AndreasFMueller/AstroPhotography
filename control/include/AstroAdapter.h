@@ -662,6 +662,47 @@ const RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 	return RGB<double>(image.pixel(x, y));
 }
 
+//////////////////////////////////////////////////////////////////////
+// Color adaapters
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class ColorAdapter : public ConstImageAdapter<T> {
+protected:
+	const ConstImageAdapter<RGB<T> >&	_image;
+public:
+	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) { }
+};
+
+template<typename T>
+class ColorRedAdapter : public ColorAdapter<T> {
+public:
+	ColorRedAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).R;
+	}
+};
+
+template<typename T>
+class ColorGreenAdapter : public ColorAdapter<T> {
+public:
+	ColorGreenAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).G;
+	}
+};
+
+template<typename T>
+class ColorBlueAdapter : public ColorAdapter<T> {
+public:
+	ColorBlueAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).B;
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // YUYV-Adapter
@@ -715,6 +756,25 @@ public:
 		: ConstImageAdapter<double>(_image.getSize()),
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
+	}
+	const double	pixel(unsigned int x, unsigned int y) const {
+		return f(image.pixel(x,y));
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Functor adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Functor>
+class FunctorAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	image;
+	Functor	f;
+public:
+	FunctorAdapter(const ConstImageAdapter<double>& _image,
+		const Functor& _f)
+		: ConstImageAdapter<double>(_image.getSize()),
+		  image(_image), f(_f) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating functor adapter");
 	}
 	const double	pixel(unsigned int x, unsigned int y) const {
 		return f(image.pixel(x,y));

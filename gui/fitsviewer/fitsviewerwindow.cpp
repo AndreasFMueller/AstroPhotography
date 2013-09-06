@@ -1,6 +1,7 @@
 #include "fitsviewerwindow.h"
 #include "ui_fitsviewerwindow.h"
 #include <AstroViewer.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 
@@ -9,8 +10,11 @@ FITSViewerWindow::FITSViewerWindow(QWidget *parent, const std::string& filename)
     ui(new Ui::FITSViewerWindow),
     viewer(filename)
 {
+    debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up FITSViewerWindow");
     ui->setupUi(this);
+    debug(LOG_DEBUG, DEBUG_LOG, 0, "ui for FITSViewerWindow created");
     update();
+    debug(LOG_DEBUG, DEBUG_LOG, 0, "FITSViewerWindow constructor complete");
 }
 
 FITSViewerWindow::~FITSViewerWindow()

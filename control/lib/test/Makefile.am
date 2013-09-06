@@ -42,7 +42,8 @@ tests_SOURCES = tests.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
-	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
+	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+	LinearFunctionTest.cpp BackgroundTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 

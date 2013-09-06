@@ -13,8 +13,11 @@
 int	main(int argc, char *argv[]) {
 	Astro::OrbSingleton	orb(argc, argv);
 	CppUnit::TextUi::TestRunner	runner;
-	CppUnit::TestFactoryRegistry	&registry = CppUnit::TestFactoryRegistry::getRegistry();
+	CppUnit::TestFactoryRegistry	&registry
+		= CppUnit::TestFactoryRegistry::getRegistry();
 	int	c;
+	debugtimeprecision = 3;
+	debugthreads = 1;
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {
 		case 'd':

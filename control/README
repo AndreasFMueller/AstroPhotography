@@ -42,6 +42,9 @@ Mandatory packages:
  - omniORB: The client-server-communication uses Corba, and the build system
    assumes that omniORB is preinstalled for the purpose.
 
+ - GLPK, the GNU Linear Programming toolKit. This package is used for the
+   algorithm that finds a background to subtract.
+
 Optional packages:
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
