@@ -8,6 +8,7 @@
 #include <AstroIO.h>
 #include <AstroDebug.h>
 #include <AstroTonemapping.h>
+#include <AstroHistogram.h>
 
 using namespace astro::image;
 using namespace astro::adapter;
@@ -86,15 +87,26 @@ Viewer::Viewer(const std::string& filename) {
 	convert_rgb<float>(*imagep, rawimage);
 	convert_rgb<double>(*imagep, rawimage);
 
+	// background stuff
+	_backgroundsubtract = true;
+	_background = BackgroundExtractor(100)(*imagep);
+
 	// color correction and background
 	_colorcorrection = RGB<float>(0.7, 1., 1.1);
-	_backgroundcolor = RGB<float>(1., 1., 1.);
-	_backgroundluminance = 0;
-	_gamma = 0.9;
+	_gamma = 1.;
 	_min = 0;
-	_min = 2000;
 	_max = 65535;
-	_max = 40000;
+	_max *= 10;
+	_max = 10000;
+
+	// Histogram
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing histogram");
+	HistogramLinearScale	scale(0, 128000, 256);
+	HistogramFactory	factory(scale);
+
+	HistogramPtr	histogram = factory(image, HistogramFactory::HISTOGRAM_LUMINANCE);
+	std::string	hs = histogram->toString();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "histogram: %s", hs.c_str());
 
 	// copy the data to the 
 	update();
@@ -124,6 +136,28 @@ uint32_t	reduce(const RGB<float> pixel) {
 	return result;
 }
 
+void	Viewer::writeimage(const std::string& filename) {
+	ImageSize	size = image->size();
+	Image<RGB<unsigned char> >	*outimage
+		= new Image<RGB<unsigned char> >(size);
+	unsigned int	width = size.width();
+	unsigned int	height = size.height();
+	uint32_t	*i = imagedata();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			uint32_t	v = i[size.offset(x, y)];
+			unsigned char	R = (v & 0xff0000) >> 16;
+			unsigned char	G = (v & 0x00ff00) >> 8;
+			unsigned char	B = (v & 0x0000ff);
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d,%d", R, G, B);
+			outimage->pixel(x, y) = RGB<unsigned char>(R, G, B);
+		}
+	}
+	FITSout	out(filename);
+	out.setPrecious(false);
+	out.write(ImagePtr(outimage));
+}
+
 void	Viewer::update() {
 	uint32_t	*p = imagedata();
 	if (NULL == p) {
@@ -139,11 +173,17 @@ void	Viewer::update() {
 
 	// compose the processing pipeline
 	// step 1: background subtraction
-	RGB<float>	background = _backgroundcolor * _backgroundluminance;
-	BackgroundSubtractionAdapter<float>	bsa(*imagep, background);
+	BackgroundSubtractionAdapter	bsa(*imagep, _background);
+	IdentityAdapter<RGB<float> >	identity(*imagep);
+	ConstImageAdapter<RGB<float> >	*w = NULL;
+	if (_backgroundsubtract) {
+		w = &bsa;
+	} else {
+		w = &identity;
+	}
 
 	// step 2: color correction
-	ColorCorrectionAdapter<float>	cca(bsa, _colorcorrection);
+	ColorCorrectionAdapter<float>	cca(*w, _colorcorrection);
 
 	// for the following steps, we need luminance and color separately
 	LuminanceExtractionAdapter<float>	luminanceimage(cca);
@@ -171,6 +211,9 @@ void	Viewer::update() {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update complete");
+
+	// write the file
+	writeimage("out.fits");
 }
 
 uint32_t	*Viewer::imagedata() const {

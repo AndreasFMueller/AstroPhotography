@@ -3,12 +3,30 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _AstroAdapter_h
+#define _AstroAdapter_h
+
 #include <AstroImage.h>
 #include <AstroMask.h>
 #include <AstroDebug.h>
 
 namespace astro {
 namespace image {
+
+//////////////////////////////////////////////////////////////////////
+// Identity adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class IdentityAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	IdentityAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y);
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // Accessing Subrectangles of an Image
@@ -497,24 +515,25 @@ ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
 //////////////////////////////////////////////////////////////////////
 // Luminance Adapter
 //////////////////////////////////////////////////////////////////////
-template<typename Pixel>
-class LuminanceAdapter : public ConstImageAdapter<double> {
+template<typename Pixel, typename T>
+class LuminanceAdapter : public ConstImageAdapter<T> {
 	const ConstImageAdapter<Pixel>&	image;
 public:
 	LuminanceAdapter(const ConstImageAdapter<Pixel>& image);
-	const double	pixel(unsigned int x, unsigned int y) const;
+	const T	pixel(unsigned int x, unsigned int y) const;
 };
 
-template<typename Pixel>
-LuminanceAdapter<Pixel>::LuminanceAdapter(
+template<typename Pixel, typename T>
+LuminanceAdapter<Pixel, T>::LuminanceAdapter(
 	const ConstImageAdapter<Pixel>& _image)
-	: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	: ConstImageAdapter<T>(_image.getSize()), image(_image) {
 }
 
-template<typename Pixel>
-const double	LuminanceAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
-			const {
-	return luminance(image.pixel(x, y));
+template<typename Pixel, typename T>
+const T	LuminanceAdapter<Pixel, T>::pixel(unsigned int x,
+			unsigned int y) const {
+	T	v = luminance(image.pixel(x, y));
+	return v;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -672,14 +691,19 @@ protected:
 public:
 	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ConstImageAdapter<T>(image.getSize()), _image(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) {
+		T	v = _image.pixel(x, y).luminance();
+		return v;
+	}
 };
 
 template<typename T>
 class ColorRedAdapter : public ColorAdapter<T> {
 public:
+	using ColorAdapter<T>::_image;
 	ColorRedAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	const T	pixel(unsigned int x, unsigned int y) const {
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).R;
 	}
 };
@@ -687,9 +711,10 @@ public:
 template<typename T>
 class ColorGreenAdapter : public ColorAdapter<T> {
 public:
+	using ColorAdapter<T>::_image;
 	ColorGreenAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	const T	pixel(unsigned int x, unsigned int y) const {
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).G;
 	}
 };
@@ -697,9 +722,10 @@ public:
 template<typename T>
 class ColorBlueAdapter : public ColorAdapter<T> {
 public:
+	using ColorAdapter<T>::_image;
 	ColorBlueAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	const T	pixel(unsigned int x, unsigned int y) const {
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).B;
 	}
 };
@@ -783,3 +809,5 @@ public:
 
 } // namespace image
 } // namespace astro
+
+#endif /* _AstroAdapter_h */

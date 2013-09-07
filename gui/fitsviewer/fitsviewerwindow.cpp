@@ -5,7 +5,8 @@
 
 using namespace astro::image;
 
-FITSViewerWindow::FITSViewerWindow(QWidget *parent, const std::string& filename) :
+FITSViewerWindow::FITSViewerWindow(QWidget *parent,
+	const std::string& filename) :
     QMainWindow(parent),
     ui(new Ui::FITSViewerWindow),
     viewer(filename)

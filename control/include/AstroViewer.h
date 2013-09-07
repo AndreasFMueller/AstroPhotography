@@ -8,6 +8,7 @@
 
 #include <AstroImage.h>
 #include <AstroPixel.h>
+#include <AstroBackground.h>
 #include <stdint.h>
 
 using namespace astro::image;
@@ -22,8 +23,10 @@ class Viewer {
 	void	update();
 
 	RGB<float>	_colorcorrection;
-	float	_backgroundluminance;
-	RGB<float>	_backgroundcolor;
+
+	Background<float>	_background;
+	bool	_backgroundsubtract;
+
 	float	_gamma;
 	float	_min;
 	float	_max;
@@ -36,14 +39,12 @@ public:
 		_colorcorrection = colorcorrection;
 	}
 
-	float	backgroundluminance() const { return _backgroundluminance; }
-	void	backgroundluminance(float backgroundluminance) {
-		_backgroundluminance = backgroundluminance;
+	const Background<float>&	background() const {
+		return _background;
 	}
-
-	RGB<float>	backgroundcolor() const { return _backgroundcolor; }
-	void	backgroundcolor(const RGB<float>& backgroundcolor) {
-		_backgroundcolor = backgroundcolor;
+	bool	backgroundsubtract() const { return _backgroundsubtract; }
+	void	backgroundsubtract(bool backgroundsubtract) {
+		_backgroundsubtract = backgroundsubtract;
 	}
 
 	float	gamma() const { return _gamma; }
@@ -54,6 +55,8 @@ public:
 
 	float	max() const { return _max; }
 	void	max(float max) { _max = max; }
+
+	void	writeimage(const std::string& filename);
 
 	uint32_t	*imagedata() const;
 	ImageSize	size() const;

@@ -418,15 +418,26 @@ LinearFunction<float>	MinimumEstimator::operator()(
 /**
  * \brief Compute the background of an image
  */
-Background<float> BackgroundExtractor::operator()(const Image<float>& image)
-	const {
+Background<float> BackgroundExtractor::operator()(
+			const Image<RGB<float> >& image) const {
 	// compute the lower bound for each color 
 	MinimumEstimator	me(alpha);
-	LinearFunction<float>	R = me(ColorRAdapter<float>(image));
-	LinearFunction<float>	G = me(ColorGAdapter<float>(image));
-	LinearFunction<float>	B = me(ColorGAdapter<float>(image));
-
+	ColorRedAdapter<float>		redimage(image);
+	ColorGreenAdapter<float>	greenimage(image);
+	ColorBlueAdapter<float>		blueimage(image);
+	
+	LinearFunction<float>	R = me(redimage);
+	LinearFunction<float>	G = me(greenimage);
+	LinearFunction<float>	B = me(blueimage);
 	Background<float>	result(R, G, B);
+	return result;
+}
+
+Background<float>	BackgroundExtractor::operator()(
+				const Image<float>& image) const {
+	MinimumEstimator	me(alpha);
+	LinearFunction<float>	l = me(image);
+	Background<float>	result(l, l, l);
 	return result;
 }
 

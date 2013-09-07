@@ -20,7 +20,7 @@ class LinearFunctionBase {
 	double	a[3];
 public:
 	typedef std::pair<Point, double>	doublevaluepair;
-private:
+protected:
 	void	reduce(const std::vector<doublevaluepair>& values);
 public:
 	// standard constructors
@@ -105,11 +105,14 @@ public:
 	Background(const LinearFunction<Pixel>& _R,
 		   const LinearFunction<Pixel>& _G,
 		   const LinearFunction<Pixel>& _B) : R(_R), G(_G), B(_B) { }
-	RGB<Pixel>	operator()(const ImagePoint& point) const {
-		return RGB<Pixel>(R(point), G(point), B(point));
-	}
 	RGB<Pixel>	operator()(const Point& point) const {
 		return RGB<Pixel>(R(point), G(point), B(point));
+	}
+	RGB<Pixel>	operator()(const ImagePoint& point) const {
+		return operator()(Point(point));
+	}
+	RGB<Pixel>	operator()(unsigned int x, unsigned int y) const {
+		return operator()(Point(x, y));
 	}
 };
 
@@ -135,7 +138,28 @@ class BackgroundExtractor {
 	unsigned int	alpha;
 public:
 	BackgroundExtractor(unsigned int _alpha) : alpha(_alpha) { }
+	Background<float>	operator()(const Image<RGB<float> >& image) const;
 	Background<float>	operator()(const Image<float>& image) const;
+};
+
+/**
+ * \brief Backgroud Subtraction
+ *
+ * We implement this as an adapter
+ */
+class BackgroundSubtractionAdapter : public ConstImageAdapter<RGB<float> > {
+	const ConstImageAdapter<RGB<float> >&	_image;
+	Background<float>	_background;
+public:
+	BackgroundSubtractionAdapter(
+		const ConstImageAdapter<RGB<float> >& image,
+		const Background<float>& background)
+		: ConstImageAdapter<RGB<float> >(image.getSize()),
+		  _image(image), _background(background) {
+	}
+	virtual const RGB<float>	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y) - _background(x, y);
+	}
 };
 
 } // namespace image

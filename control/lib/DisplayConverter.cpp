@@ -154,7 +154,7 @@ Image<RGB<unsigned char> >	*DisplayConverter::convertColor(const ImagePtr image)
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tryping type: %p", imageptr);	\
 	if (NULL != imageptr) {						\
-		LuminanceAdapter<Pixel>	la(*imageptr);			\
+		LuminanceAdapter<Pixel, double>	la(*imageptr);		\
 		luminanceimage = new Image<double>(la);			\
 	}								\
 }

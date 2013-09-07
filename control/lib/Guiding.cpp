@@ -83,7 +83,7 @@ const ImageRectangle&	StarTracker::getRectangle() const {
 	Image<Pixel>	*imagep						\
 		= dynamic_cast<Image<Pixel > *>(&*_image);		\
 	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel >	la(*imagep);		\
+		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		image = ImagePtr(new Image<double>(la));		\
 		return;							\
 	}								\
@@ -116,7 +116,7 @@ PhaseTracker::PhaseTracker(ImagePtr _image) {
 	Image<Pixel>	*newimagep					\
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != newimagep) {					\
-		LuminanceAdapter<Pixel >	newla(*newimagep);	\
+		LuminanceAdapter<Pixel, double>	newla(*newimagep);	\
 		Image<double>	*imagep					\
 			= dynamic_cast<Image<double> *>(&*image);	\
 		PhaseCorrelator	pc;					\
