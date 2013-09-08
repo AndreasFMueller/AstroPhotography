@@ -142,5 +142,21 @@ std::string	ImageSize::toString() const {
 	return stringprintf("%dx%d", _width, _height);
 }
 
+ImagePoint      ImageSize::upperright() const {
+	return ImagePoint(_width, _height);
+}
+
+ImagePoint      ImageSize::upperleft() const {
+	return ImagePoint(0, _height);
+}
+
+ImagePoint      ImageSize::lowerleft() const {
+	return ImagePoint(0, 0);
+}
+
+ImagePoint      ImageSize::lowerright() const {
+	return ImagePoint(_width, 0);
+}
+
 } // namespace image
 } // namespace astro

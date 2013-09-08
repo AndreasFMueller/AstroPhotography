@@ -9,16 +9,21 @@
 #include <AstroTypes.h>
 #include <AstroImage.h>
 #include <vector>
+#include <algorithm>
 
 namespace astro {
-namespace image {
+namespace adapter {
 
 /**
  * \brief Gradients are described by linear functions on the image coordinates
  */
 class LinearFunctionBase {
 	double	a[3];
+	bool	_gradient;
+	double	_scalefactor;
 public:
+	bool	gradient() const { return _gradient; }
+	void	gradient(bool gradient) { _gradient = gradient; }
 	typedef std::pair<Point, double>	doublevaluepair;
 protected:
 	void	reduce(const std::vector<doublevaluepair>& values);
@@ -37,6 +42,10 @@ public:
 	// coefficient access
 	double	operator[](int i) const;
 	double&	operator[](int i);
+
+	// scale factor accessor
+	double	scalefactor() const { return _scalefactor; }
+	void	scalefactor(double scalefactor) { _scalefactor = scalefactor; }
 
 	// linear operators
 	LinearFunctionBase	operator+(const LinearFunctionBase& other);
@@ -105,6 +114,12 @@ public:
 	Background(const LinearFunction<Pixel>& _R,
 		   const LinearFunction<Pixel>& _G,
 		   const LinearFunction<Pixel>& _B) : R(_R), G(_G), B(_B) { }
+	bool	gradient() const { return R.gradient(); }
+	void	gradient(bool gradient) {
+		R.gradient(gradient);
+		G.gradient(gradient);
+		B.gradient(gradient);
+	}
 	RGB<Pixel>	operator()(const Point& point) const {
 		return RGB<Pixel>(R(point), G(point), B(point));
 	}
@@ -113,6 +128,12 @@ public:
 	}
 	RGB<Pixel>	operator()(unsigned int x, unsigned int y) const {
 		return operator()(Point(x, y));
+	}
+	double	scalefactor() const { return R.scalefactor(); }
+	void	scalefactor(double scalefactor) { 
+		R.scalefactor(scalefactor);
+		G.scalefactor(scalefactor);
+		B.scalefactor(scalefactor);
 	}
 };
 
@@ -157,8 +178,62 @@ public:
 		: ConstImageAdapter<RGB<float> >(image.getSize()),
 		  _image(image), _background(background) {
 	}
+	BackgroundSubtractionAdapter(
+		const ConstImageAdapter<RGB<float> >& image)
+		: ConstImageAdapter<RGB<float> >(image.getSize()),
+		  _image(image) {
+	}
 	virtual const RGB<float>	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y) - _background(x, y);
+	}
+	const Background<float>&	background() const { return _background; }
+	void	background(const Background<float>& background) {
+		_background = background;
+	}
+	bool	gradient() const { return _background.gradient(); }
+	void	gradient(bool gradient) { _background.gradient(gradient); }
+	double	scalefactor() const { return _background.scalefactor(); }
+	void	scalefactor(double scalefactor) {
+		_background.scalefactor(scalefactor);
+	}
+};
+
+/**
+ * \brief Create an image for the background
+ */
+template<typename BgPixel, typename Pixel>
+class BackgroundImageAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	Background<BgPixel>	_background;
+	RGB<Pixel>	min;
+	double	scale;
+public:
+	BackgroundImageAdapter(const ImageSize& size,
+		const Background<BgPixel>& background)
+		: ConstImageAdapter<RGB<Pixel> >(size),
+		  _background(background) {
+		std::vector<BgPixel>	values;
+		values.push_back(_background(size.lowerleft()).max());
+		values.push_back(_background(size.upperleft()).max());
+		values.push_back(_background(size.lowerright()).max());
+		values.push_back(_background(size.upperright()).max());
+		BgPixel	maxvalue = *max_element(values.begin(), values.end());
+		values.clear();
+		values.push_back(_background(size.lowerleft()).min());
+		values.push_back(_background(size.upperleft()).min());
+		values.push_back(_background(size.lowerright()).min());
+		values.push_back(_background(size.upperright()).min());
+		BgPixel	minvalue = *min_element(values.begin(), values.end());
+		BgPixel	delta = maxvalue - minvalue;
+		if (delta == 0) {
+			scale = 0;
+		} else {
+			scale = RGB<Pixel>::limit / delta;
+		}
+		min = RGB<Pixel>(minvalue);
+	}
+	virtual const RGB<Pixel>	pixel(unsigned int x, unsigned int y)
+		const {
+		return (_background(ImagePoint(x, y)) - min) * scale;
 	}
 };
 

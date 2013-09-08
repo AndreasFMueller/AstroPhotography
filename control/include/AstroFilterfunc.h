@@ -17,9 +17,13 @@ extern double	countnans(const ImagePtr& image);
 extern double	countnansrel(const ImagePtr& image);
 
 extern double	max(const ImagePtr& image);
+extern double	max_luminance(const ImagePtr& image);
+extern double	max_RGB(const ImagePtr& image);
 extern double	maxrel(const ImagePtr& image);
 
 extern double	min(const ImagePtr& image);
+extern double	min_luminance(const ImagePtr& image);
+extern double	min_RGB(const ImagePtr& image);
 extern double	minrel(const ImagePtr& image);
 
 extern double	mean(const ImagePtr& image);

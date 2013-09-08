@@ -8,8 +8,8 @@
 #include <AstroTransform.h>
 #include <AstroDebug.h>
 
-using namespace astro::image;
 using namespace astro::image::transform;
+using namespace astro::adapter;
 
 namespace astro {
 namespace image {

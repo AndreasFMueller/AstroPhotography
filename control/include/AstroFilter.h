@@ -243,7 +243,7 @@ public:
 			throw std::logic_error("not a mosaic image");
 		}
 		Subgrid	grid(origin(mosaic), ImageSize(2, 2));
-		ConstSubgridAdapter<T>	subimage(image, grid);
+		astro::adapter::ConstSubgridAdapter<T>	subimage(image, grid);
 		Mean<T, S>	m;
 		return m.filter(image);
 	}
@@ -412,7 +412,7 @@ public:
 	}
 
 	virtual double	filter(const ConstImageAdapter<Pixel>& image) {
-		FocusFOMAdapter<Pixel>	foa(image, diagonal);
+		astro::adapter::FocusFOMAdapter<Pixel>	foa(image, diagonal);
 		ImageSize	size = foa.getSize();
 		double	result = 0;
 		for (size_t x = 0; x < size.width(); x++) {
@@ -484,7 +484,7 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	ImageRectangle	rectangle(center, ImageSize(2 * r + 1, 2 * r + 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
 		rectangle.toString().c_str());
-	WindowAdapter<Pixel>	wa(image, rectangle);
+	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
 
 	// locate the maximum in a rectangle around the point
 	Max<Pixel, double>	m;

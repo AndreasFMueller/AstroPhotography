@@ -54,7 +54,7 @@ Point	StarDetector<Pixel>::operator()(
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k) const {
 	// work only in the rectangle
-	astro::image::WindowAdapter<Pixel>	adapter(image, rectangle);
+	astro::adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
 	// determine the brightest pixel within the rectangle
 	astro::image::ImageSize	size = adapter.getSize();

@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroTonemapping.h>
 #include <AstroHistogram.h>
+#include <ViewerPipeline.h>
 
 using namespace astro::image;
 using namespace astro::adapter;
@@ -87,53 +88,40 @@ Viewer::Viewer(const std::string& filename) {
 	convert_rgb<float>(*imagep, rawimage);
 	convert_rgb<double>(*imagep, rawimage);
 
-	// background stuff
-	_backgroundsubtract = true;
-	_background = BackgroundExtractor(100)(*imagep);
+	// create the viewer pipeline
+	pipeline = new ViewerPipeline(imagep);
+	pipelineptr = std::tr1::shared_ptr<ViewerPipeline>(pipeline);
 
-	// color correction and background
-	_colorcorrection = RGB<float>(0.7, 1., 1.1);
-	_gamma = 1.;
-	_min = 0;
-	_max = 65535;
-	_max *= 10;
-	_max = 10000;
+	// background stuff
+	Background<float>	bg = BackgroundExtractor(100)(*imagep);
+	background(bg);
+	backgroundEnabled(true);
+	gradientEnabled(true);
+
+	// set parameters
+	pipeline->colorcorrection(RGB<float>(1.0, 1.0, 1.0));
+	pipeline->setRange(0, 10000);
 
 	// Histogram
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing histogram");
-	HistogramLinearScale	scale(0, 128000, 256);
-	HistogramFactory	factory(scale);
+	_histograms = HistogramSet(image, 350);
 
-	HistogramPtr	histogram = factory(image, HistogramFactory::HISTOGRAM_LUMINANCE);
-	std::string	hs = histogram->toString();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "histogram: %s", hs.c_str());
+	// set up the preview size
+	previewwidth(300);
+
+	// set up the background preview
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing background size");
+	unsigned int	width = 100;
+	unsigned int	height = (size.height() * width) / size.width();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "background %u x %u", width, height);
+	backgroundsize(ImageSize(width, height));
 
 	// copy the data to the 
 	update();
+	previewupdate();
 }
 
 Viewer::~Viewer() {
-}
-
-unsigned char	reduce(float value) {
-	if (value > 255) {
-		value = 255;
-	}
-	if (value < 0) {
-		value = 255;
-	}
-	unsigned char	result = round(value);
-	return result;
-}
-
-uint32_t	reduce(const RGB<float> pixel) {
-	uint32_t	result;
-	result = reduce(pixel.R);
-	result <<= 8;
-	result |= reduce(pixel.G);
-	result <<= 8;
-	result |= reduce(pixel.B);
-	return result;
 }
 
 void	Viewer::writeimage(const std::string& filename) {
@@ -158,69 +146,167 @@ void	Viewer::writeimage(const std::string& filename) {
 	out.write(ImagePtr(outimage));
 }
 
-void	Viewer::update() {
+RGB<float>	Viewer::colorcorrection() const {
+	return pipeline->colorcorrection();
+}
+
+void	Viewer::colorcorrection(const RGB<float>& colorcorrection) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "color correction: [%.2f, %.2f, %.2f]",
+		colorcorrection.R, colorcorrection.G, colorcorrection.B);
+	pipeline->colorcorrection(colorcorrection);
+}
+
+float	Viewer::min() const {
+	return pipeline->min();
+}
+
+float	Viewer::max() const {
+	return pipeline->max();
+}
+
+void	Viewer::setRange(float min, float max) {
+	pipeline->setRange(min, max);
+}
+
+float	Viewer::gamma() const {
+	return pipeline->gamma();
+}
+
+void	Viewer::gamma(float _gamma) {
+	pipeline->gamma(_gamma);
+}
+
+float	Viewer::saturation() const {
+	return pipeline->saturation();
+}
+
+void	Viewer::saturation(float _saturation) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saturation set to %.3f", _saturation);
+	pipeline->saturation(_saturation);
+}
+
+const Background<float>&	Viewer::background() const {
+	return pipeline->background();
+}
+
+void	Viewer::background(const Background<float>& _background) {
+	return pipeline->background(_background);
+}
+
+bool	Viewer::backgroundEnabled() const {
+	return pipeline->backgroundEnabled();
+}
+
+void	Viewer::backgroundEnabled(bool _backgroundenabled) {
+	pipeline->backgroundEnabled(_backgroundenabled);
+}
+
+bool	Viewer::gradientEnabled() const {
+	return pipeline->gradientEnabled();
+}
+
+void	Viewer::gradientEnabled(bool _gradientenabled) {
+	return pipeline->gradientEnabled(_gradientenabled);
+}
+
+void	Viewer::previewsize(const ImageSize& previewsize) {
+	_previewsize = previewsize;
+	uint32_t	*p = new uint32_t[_previewsize.getPixels()];
+	_previewdata = imagedataptr(p);
+}
+
+void	Viewer::previewwidth(unsigned int width) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set width to %u", width);
+	ImageSize	size = image->size();
+	unsigned int	height = (size.height() * width) / size.width();
+	previewsize(ImageSize(width, height));
+}
+
+void	Viewer::backgroundsize(const ImageSize& backgroundsize) {
+	_backgroundsize = backgroundsize;
+	uint32_t	*p = new uint32_t[_previewsize.getPixels()];
+	_backgrounddata = imagedataptr(p);
+}
+
+void	Viewer::previewupdate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview update");
+	uint32_t	*p = previewdata();
+	if (NULL == p) {
+		return;
+	}
+	unsigned int	width = _previewsize.width();
+	unsigned int	height = _previewsize.height();
+
+	// create a subgrid adaptero
+	ImageRectangle	rectangle(size());
+	WindowScalingAdapter<unsigned int>	wsa(*pipeline,
+		rectangle, _previewsize);
+
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			uint32_t	value = wsa.pixel(x, y);
+			p[_previewsize.offset(x, y)] = value;
+		}
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview update complete");
+}
+
+void	Viewer::backgroundupdate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backgroundupdate");
 	uint32_t	*p = imagedata();
 	if (NULL == p) {
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating image data at %p", p);
-	ImageSize	size = image->size();
-	unsigned int	width = size.width();
-	unsigned int	height = size.height();
-	Image<RGB<float> >	*imagep
-		= dynamic_cast<Image<RGB<float> >*>(&*image);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagep = %p", imagep);
+	unsigned int	width = backgroundsize().width();
+	unsigned int	height = backgroundsize().height();
 
-	// compose the processing pipeline
-	// step 1: background subtraction
-	BackgroundSubtractionAdapter	bsa(*imagep, _background);
-	IdentityAdapter<RGB<float> >	identity(*imagep);
-	ConstImageAdapter<RGB<float> >	*w = NULL;
-	if (_backgroundsubtract) {
-		w = &bsa;
-	} else {
-		w = &identity;
-	}
-
-	// step 2: color correction
-	ColorCorrectionAdapter<float>	cca(*w, _colorcorrection);
-
-	// for the following steps, we need luminance and color separately
-	LuminanceExtractionAdapter<float>	luminanceimage(cca);
-	ColorExtractionAdapter<float>	colorimage(cca);
-
-	// step 3: range reduction
-	RangeAdapter<float>	range(luminanceimage, _min, _max);
-
-	// step 4: gamma correction
-	GammaAdapter<float>	ga(range, _gamma);
-
-	// rescale to the range 0-256
-	LuminanceScalingAdapter<float>	upscale(ga, 256);
-	LuminanceColorAdapter<float>	lca(upscale, colorimage);
-
-	// RGB32 extractor
-	RGB32Adapter<float>	rgb32(lca);
-
-	// extract the data
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "extracting RGB32 image");
+	BackgroundImageAdapter<float, unsigned char>	bia(backgroundsize(),
+								background());
+	RGB32Adapter<unsigned char>	rgb32(bia);
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
-			uint32_t	value = rgb32.pixel(x, y);
-			p[size.offset(x, y)] = value;
+			p[backgroundsize().offset(x, y)] = rgb32.pixel(x, y);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "backgroundupdate complete");
+}
 
-	// write the file
-	writeimage("out.fits");
+void	Viewer::update() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main update");
+	uint32_t	*p = imagedata();
+	if ((NULL == p) || (NULL == pipeline)) {
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating image data at %p", p);
+	unsigned int	width = size().width();
+	unsigned int	height = size().height();
+
+	// extract the data
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "extracting %u x %u RGB32 image",
+		width, height);
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			uint32_t	value = pipeline->pixel(x, y);
+			p[size().offset(x, y)] = value;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main update complete");
 }
 
 uint32_t	*Viewer::imagedata() const {
 	return &*_imagedata;
 }
 
-ImageSize	Viewer::size() const {
+uint32_t	*Viewer::previewdata() const {
+	return &*_previewdata;
+}
+
+uint32_t	*Viewer::backgrounddata() const {
+	return &*_backgrounddata;
+}
+
+const ImageSize&	Viewer::size() const {
 	return image->size();
 }
 

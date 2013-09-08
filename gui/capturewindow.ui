@@ -595,8 +595,8 @@
    <slot>openFlatfile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>918</x>
-     <y>553</y>
+     <x>922</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
      <x>953</x>

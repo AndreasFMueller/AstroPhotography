@@ -23,6 +23,7 @@ using namespace astro::camera;
 using namespace astro::guiding;
 using namespace astro::io;
 using namespace astro::callback;
+using namespace astro::adapter;
 
 namespace astro {
 namespace guiding {

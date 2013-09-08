@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace astro::image;
+using namespace astro::adapter;
 
 namespace astro {
 namespace test {

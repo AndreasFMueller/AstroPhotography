@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>665</height>
+    <width>811</width>
+    <height>1160</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,8 +25,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>554</width>
-         <height>596</height>
+         <width>425</width>
+         <height>1091</height>
         </rect>
        </property>
        <property name="layoutDirection">
@@ -51,19 +51,19 @@
      <widget class="QWidget" name="widget" native="true">
       <property name="minimumSize">
        <size>
-        <width>200</width>
+        <width>350</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>210</width>
+        <width>350</width>
         <height>16777215</height>
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="backgroundGroupBox">
+        <widget class="QGroupBox" name="groupBox">
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -71,137 +71,101 @@
           </size>
          </property>
          <property name="title">
-          <string>Background</string>
+          <string>Histogram</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="1" column="1">
-           <widget class="QSlider" name="backgroundRedSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="HistogramWidget" name="histogramWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="backgroundRedLabel">
-            <property name="text">
-             <string>Red:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QSlider" name="backgroundGreenSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QSlider" name="backgroundBlueSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="backgroundGreenLabel">
-            <property name="text">
-             <string>Green:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="backgroundBlueLabel">
-            <property name="text">
-             <string>Blue:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="backgroundLuminanceLabel">
-            <property name="text">
-             <string>Luminance:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSlider" name="backgroundLuminanceSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
+            <zorder>currectionGroupBox</zorder>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="currectionGroupBox">
+        <widget class="QGroupBox" name="backgroundGroupBox">
          <property name="maximumSize">
           <size>
-           <width>200</width>
+           <width>16777215</width>
            <height>140</height>
           </size>
          </property>
          <property name="title">
-          <string>Color correction</string>
+          <string>Background</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="2" column="0">
-           <widget class="QLabel" name="correctionBlueLabel">
-            <property name="text">
-             <string>Blue:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QSlider" name="correctionGreenSlider">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>12</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="backgroundButtonBox" native="true">
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>16777215</height>
+              <height>70</height>
              </size>
             </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <property name="leftMargin">
+              <number>12</number>
+             </property>
+             <property name="topMargin">
+              <number>12</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="gradientCheckbox">
+               <property name="text">
+                <string>Gradient enabled</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="backgroundCheckbox">
+               <property name="text">
+                <string>Background Subtract</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QSlider" name="correctionRedSlider">
+          <item>
+           <widget class="QLabel" name="backgroundLabel">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>100</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
-              <height>16777215</height>
+              <width>100</width>
+              <height>100</height>
              </size>
             </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QSlider" name="correctionBlueSlider">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="correctionGreenLabel">
             <property name="text">
-             <string>Green:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="correctionRedLabel">
-            <property name="text">
-             <string>Red:</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -220,32 +184,169 @@
           <string>Luminance Range</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
+          <item row="0" column="1">
            <widget class="QLabel" name="minLabel">
             <property name="text">
-             <string>Min:</string>
+             <string>Min</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QSlider" name="minSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+          <item row="0" column="2">
            <widget class="QLabel" name="maxLabel">
             <property name="text">
-             <string>Max:</string>
+             <string>Max</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSlider" name="maxSlider">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+           <widget class="QSpinBox" name="minSpinner">
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="maxSpinner">
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Color correction</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QWidget" name="widget_2" native="true">
+            <layout class="QGridLayout" name="gridLayout_3">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="1">
+              <widget class="QLabel" name="greenCorrectionLabel">
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="blueCorrectionLabel">
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="redCorrectionLabel">
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QDoubleSpinBox" name="redSpinBox">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.900000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="greenSpinBox">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.900000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QDoubleSpinBox" name="blueSpinBox">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>1.900000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="saturationBox" native="true">
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="0">
+              <widget class="QLabel" name="saturationLabel">
+               <property name="text">
+                <string>Saturation:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSlider" name="saturationSlider">
+               <property name="minimumSize">
+                <size>
+                 <width>210</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>200</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -274,9 +375,21 @@
            <widget class="QSlider" name="gammaSlider">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>16777215</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="minimum">
+             <number>75</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+            <property name="tracking">
+             <bool>true</bool>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -289,6 +402,53 @@
          <zorder>gammaSlider</zorder>
         </widget>
        </item>
+       <item>
+        <widget class="QGroupBox" name="previewBox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>186</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>300</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Preview</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="previewLabel">
+            <property name="minimumSize">
+             <size>
+              <width>296</width>
+              <height>296</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>296</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="updateButton">
+         <property name="text">
+          <string>Update</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -299,13 +459,191 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>811</width>
      <height>22</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HistogramWidget</class>
+   <extends>QWidget</extends>
+   <header>histogramwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>gammaSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>gammaChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>567</x>
+     <y>744</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>795</x>
+     <y>599</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>backgroundCheckbox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>backgroundChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>562</x>
+     <y>307</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>796</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gradientCheckbox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>gradientChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>581</x>
+     <y>280</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>795</x>
+     <y>165</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>updateButton</sender>
+   <signal>released()</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>doUpdate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>767</x>
+     <y>1110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>808</x>
+     <y>819</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>minSpinner</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>rangeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>581</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>810</x>
+     <y>295</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxSpinner</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>rangeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>710</x>
+     <y>420</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>808</x>
+     <y>267</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saturationSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>saturationChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>749</x>
+     <y>642</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>810</x>
+     <y>647</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>redSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>colorcorrectionChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>499</x>
+     <y>564</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>804</x>
+     <y>554</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>greenSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>colorcorrectionChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>611</x>
+     <y>568</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>808</x>
+     <y>533</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>blueSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>colorcorrectionChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>807</x>
+     <y>507</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>gammaChanged(int)</slot>
+  <slot>gradientChanged(int)</slot>
+  <slot>backgroundChanged(int)</slot>
+  <slot>doUpdate()</slot>
+  <slot>rangeChanged(int)</slot>
+  <slot>colorcorrectionChanged(double)</slot>
+  <slot>saturationChanged(int)</slot>
+ </slots>
 </ui>

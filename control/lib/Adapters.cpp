@@ -6,7 +6,7 @@
 #include <AstroAdapter.h>
 
 namespace astro {
-namespace image {
+namespace adapter {
 
 #define	sample_type(Adapter, Pixel)					\
 {									\

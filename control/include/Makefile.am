@@ -15,4 +15,4 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h
 
 noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h Sun.h \
-	NameService.h OrbSingleton.h Conversions.h
+	NameService.h OrbSingleton.h Conversions.h ViewerPipeline.h

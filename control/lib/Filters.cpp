@@ -5,8 +5,10 @@
  */
 #include <AstroFilter.h>
 #include <AstroFilterfunc.h>
+#include <AstroAdapter.h>
 
 using namespace astro::image;
+using namespace astro::adapter;
 
 namespace astro {
 namespace image {
@@ -107,6 +109,80 @@ double	min(const ImagePtr& image) {
 	filter_typed2(image, Min, unsigned long);
 	filter_typed2(image, Min, float);
 	filter_typed2(image, Min, double);
+	return 0;
+}
+
+
+#define	filter_luminance_rgb(image, f, pixel)				\
+{									\
+	Image<RGB<pixel> >	*imagep					\
+		= dynamic_cast<Image<RGB<pixel> > *>(&*image);		\
+	if (NULL != imagep) {						\
+		LuminanceAdapter<RGB<pixel>, double>	la(*imagep);	\
+		f<double, double>	m;				\
+		return m.filter(la);					\
+	}								\
+}
+
+double	max_luminance(const ImagePtr& image) {
+	filter_luminance_rgb(image, Max, unsigned char);
+	filter_luminance_rgb(image, Max, unsigned short);
+	filter_luminance_rgb(image, Max, unsigned int);
+	filter_luminance_rgb(image, Max, unsigned long);
+	filter_luminance_rgb(image, Max, float);
+	filter_luminance_rgb(image, Max, double);
+	return max(image);
+}
+
+double	min_luminance(const ImagePtr& image) {
+	filter_luminance_rgb(image, Min, unsigned char);
+	filter_luminance_rgb(image, Min, unsigned short);
+	filter_luminance_rgb(image, Min, unsigned int);
+	filter_luminance_rgb(image, Min, unsigned long);
+	filter_luminance_rgb(image, Min, float);
+	filter_luminance_rgb(image, Min, double);
+	return min(image);
+}
+
+#define	filter_MaxRGB_rgb(image, pixel) 				\
+{									\
+	Image<RGB<pixel> >	*imagep					\
+		= dynamic_cast<Image<RGB<pixel > >*>(&*image);		\
+	if (NULL != imagep) {						\
+		ColorMaxAdapter<pixel>	cma(*imagep);			\
+		Max<pixel, double>	m;				\
+		return m.filter(cma);					\
+	}								\
+}
+
+double	max_RGB(const ImagePtr& image) {
+	filter_MaxRGB_rgb(image, unsigned char);
+	filter_MaxRGB_rgb(image, unsigned short);
+	filter_MaxRGB_rgb(image, unsigned int);
+	filter_MaxRGB_rgb(image, unsigned long);
+	filter_MaxRGB_rgb(image, float);
+	filter_MaxRGB_rgb(image, double);
+	return 0;
+}
+
+#define	filter_MinRGB_rgb(image, pixel) 				\
+{									\
+	Image<RGB<pixel> >	*imagep					\
+		= dynamic_cast<Image<RGB<pixel > >*>(&*image);		\
+	if (NULL != imagep) {						\
+		ColorMinAdapter<pixel>	cma(*imagep);			\
+		Min<pixel, double>	m;				\
+		return m.filter(cma);					\
+	}								\
+}
+
+double	min_RGB(const ImagePtr& image) {
+	filter_MinRGB_rgb(image, unsigned char);
+	filter_MinRGB_rgb(image, unsigned short);
+	filter_MinRGB_rgb(image, unsigned int);
+	filter_MinRGB_rgb(image, unsigned long);
+	filter_MinRGB_rgb(image, float);
+	filter_MinRGB_rgb(image, double);
 	return 0;
 }
 
@@ -308,6 +384,7 @@ int	bytespervalue(const ImagePtr& image) {
 	bytespervalue_rgb(image, unsigned long);
 	bytespervalue_rgb(image, float);
 	bytespervalue_rgb(image, double);
+	return 0;
 }
 
 #define	planes_typed(image, pixel)					\
@@ -351,6 +428,7 @@ int	planes(const ImagePtr& image) {
 	planes_rgb(image, unsigned long);
 	planes_rgb(image, float);
 	planes_rgb(image, double);
+	return 1;
 }
 
 int	bytesperpixel(const ImagePtr& image) {

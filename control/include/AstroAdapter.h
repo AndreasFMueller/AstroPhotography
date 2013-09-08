@@ -10,8 +10,10 @@
 #include <AstroMask.h>
 #include <AstroDebug.h>
 
+using namespace astro::image;
+
 namespace astro {
-namespace image {
+namespace adapter {
 
 //////////////////////////////////////////////////////////////////////
 // Identity adapter
@@ -730,6 +732,28 @@ public:
 	}
 };
 
+template<typename T>
+class ColorMaxAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorMaxAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).max();
+	}
+};
+
+template<typename T>
+class ColorMinAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorMinAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).min();
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // YUYV-Adapter
 //////////////////////////////////////////////////////////////////////
@@ -802,12 +826,44 @@ public:
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating functor adapter");
 	}
-	const double	pixel(unsigned int x, unsigned int y) const {
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
 		return f(image.pixel(x,y));
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Window scaling adapter
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Quick and dirty adapter to extract a subrectangle and change scale
+ *
+ * This adapter does not attempt to interpolate pixels, it just computs
+ * the coordinates and rounds them down
+ */
+template<typename Pixel>
+class WindowScalingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	ImageRectangle	_source;
+	double	xscaling;
+	double	yscaling;
+public:
+	WindowScalingAdapter(const ConstImageAdapter<Pixel>& image,
+		const ImageRectangle& source, const ImageSize& target)
+		: ConstImageAdapter<Pixel>(target), _image(image),
+		  _source(source) {
+		xscaling = _source.size().width() / (double)target.width();
+		yscaling = _source.size().height() / (double)target.height();
+debug(LOG_DEBUG, DEBUG_LOG, 0, "xscaling = %f, yscaling = %f", xscaling, yscaling);
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		unsigned int	xx = trunc(_source.origin().x() + xscaling * x);
+		unsigned int	yy = trunc(_source.origin().y() + yscaling * y);
+		return _image.pixel(xx, yy);
 	}
 };
 
 } // namespace image
 } // namespace astro
+
 
 #endif /* _AstroAdapter_h */

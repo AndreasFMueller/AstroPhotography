@@ -21,22 +21,30 @@
 #include <lapack.h>
 #endif /* HAVE_ACCELERATE_ACCELERATE_H */
 
+using namespace astro::image;
 using namespace astro::image::filter;
 
 namespace astro {
-namespace image {
+namespace adapter {
 
 LinearFunctionBase::LinearFunctionBase(double alpha, double beta, double gamma) {
 	a[0] = alpha; a[1] = beta; a[2] = gamma;
+	_gradient = true;
+	_scalefactor = 1.;
 }
 
 
 LinearFunctionBase::LinearFunctionBase(const LinearFunctionBase& other) {
 	for (int i = 0; i < 3; i++) { a[i] = other.a[i]; }
+	_gradient = other.gradient();
 }
 
 double  LinearFunctionBase::evaluate(const Point& point) const {
-	return point.x() * a[0] + point.y() * a[1] + a[2];
+	if (_gradient) {
+		return _scalefactor * (point.x() * a[0] + point.y() * a[1] + a[2]);
+	} else {
+		return _scalefactor * a[2];
+	}
 }
 
 inline static double	sqr(const double& x) {

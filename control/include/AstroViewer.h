@@ -9,57 +9,89 @@
 #include <AstroImage.h>
 #include <AstroPixel.h>
 #include <AstroBackground.h>
+#include <AstroHistogram.h>
 #include <stdint.h>
 
 using namespace astro::image;
+using namespace astro::adapter;
 
 namespace astro {
 namespace image {
 
+class ViewerPipeline;
+
 class Viewer {
 	ImagePtr	image;
+	// pointer for the full image
 	typedef	std::tr1::shared_ptr<uint32_t>	imagedataptr;
 	imagedataptr	_imagedata;
-	void	update();
+public:
+	uint32_t	*imagedata() const;
+	const ImageSize&	size() const;
 
-	RGB<float>	_colorcorrection;
+private:
+	// pointer to the previous version of the image
+	imagedataptr	_previewdata;
+	ImageSize	_previewsize;
+public:
+	uint32_t	*previewdata() const;
+public:
+	const ImageSize&	previewsize() const { return _previewsize; }
+	void	previewsize(const ImageSize& previewsize);
+	void	previewwidth(unsigned int width);
 
-	Background<float>	_background;
-	bool	_backgroundsubtract;
+private:
+	imagedataptr	_backgrounddata;
+	ImageSize	_backgroundsize;
+public:
+	const ImageSize&	backgroundsize() const { return _backgroundsize; }
+	void	backgroundsize(const ImageSize& backgroundsize);
+	uint32_t	*backgrounddata() const;
 
-	float	_gamma;
-	float	_min;
-	float	_max;
+private:
+	HistogramSet	_histograms;
+public:
+	const HistogramSet&	histograms() const { return _histograms; }
+
+private:
+	// adapters of the processing pipeline
+	ViewerPipeline	*pipeline;
+	std::tr1::shared_ptr<ViewerPipeline>	pipelineptr;
 public:
 	Viewer(const std::string& filename);
 	~Viewer();
 
-	RGB<float>	colorcorrection() const { return _colorcorrection; }
-	void	colorcorrection(const RGB<float>& colorcorrection) {
-		_colorcorrection = colorcorrection;
-	}
+	void	update();
+	void	previewupdate();
+	void	backgroundupdate();
 
-	const Background<float>&	background() const {
-		return _background;
-	}
-	bool	backgroundsubtract() const { return _backgroundsubtract; }
-	void	backgroundsubtract(bool backgroundsubtract) {
-		_backgroundsubtract = backgroundsubtract;
-	}
+	// color correction
+	RGB<float>	colorcorrection() const;
+	void	colorcorrection(const RGB<float>& colorcorrection);
 
-	float	gamma() const { return _gamma; }
-	void	gamma(float gamma) { _gamma = gamma; }
+	// background subtraction
+	const Background<float>&	background() const;
+	void	background(const Background<float>& background);
+	bool	backgroundEnabled() const;
+	void	backgroundEnabled(bool backgroundsubtract);
+	bool	gradientEnabled() const;
+	void	gradientEnabled(bool gradientenabled);
 
-	float	min() const { return _min; }
-	void	min(float min) { _min = min; }
+	// Gamma correction
+	float	gamma() const;
+	void	gamma(float gamma);
 
-	float	max() const { return _max; }
-	void	max(float max) { _max = max; }
+	// Range extraction
+	float	min() const;
+	float	max() const;
+	void	setRange(float min, float max);
+
+	// change the saturation
+	float	saturation() const;
+	void	saturation(float saturation);
 
 	void	writeimage(const std::string& filename);
 
-	uint32_t	*imagedata() const;
-	ImageSize	size() const;
 };
 
 } // namespace image

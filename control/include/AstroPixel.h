@@ -447,19 +447,19 @@ public:
 		result.B = (B < other.B) ? 0 : (B - other.B);
 		return result;
 	}
-	RGB<P>	operator*(const P value) const {
+	RGB<P>	operator*(const double value) const {
 		RGB<P>	result;
-		if ((R * (double)value) > std::numeric_limits<P>::max()) {
+		if ((R * value) > std::numeric_limits<P>::max()) {
 			result.R = std::numeric_limits<P>::max();
 		} else {
 			result.R = R * value;
 		}
-		if ((G * (double)value) > std::numeric_limits<P>::max()) {
+		if ((G * value) > std::numeric_limits<P>::max()) {
 			result.R = std::numeric_limits<P>::max();
 		} else {
 			result.G = G * value;
 		}
-		if ((B * (double)value) > std::numeric_limits<P>::max()) {
+		if ((B * value) > std::numeric_limits<P>::max()) {
 			result.R = std::numeric_limits<P>::max();
 		} else {
 			result.B = B * value;
@@ -477,6 +477,20 @@ public:
 
 	RGB<P>	operator/(const P value) const {
 		return RGB<P>(R / value, G / value, B / value);
+	}
+
+	P	max() const {
+		P	result = R;
+		if (G > result) { result = G; }
+		if (B > result) { result = B; }
+		return result;
+	}
+
+	P	min() const {
+		P	result = R;
+		if (G < result) { result = G; }
+		if (B < result) { result = B; }
+		return result;
 	}
 };
 
