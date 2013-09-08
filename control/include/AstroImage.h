@@ -88,6 +88,8 @@ public:
 	ImagePoint	upperleft() const;
 	ImagePoint	lowerleft() const;
 	ImagePoint	lowerright() const;
+	// scaling
+	ImageSize	operator*(const double l) const;
 };
 
 /**

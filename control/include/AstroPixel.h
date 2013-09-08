@@ -492,6 +492,19 @@ public:
 		if (B < result) { result = B; }
 		return result;
 	}
+
+	P	sum() const {
+		return R + G + B;
+	}
+
+	RGB<P>	inverse() const {
+		return RGB<P>((P)(1. / R), (P)(1. / G), (P)(1. / B));
+	}
+
+	RGB<P>	normalize() const {
+		double	l = ((double)R + (double)G + (double)B) / 3.;
+		return (*this) * l;
+	}
 };
 
 /*

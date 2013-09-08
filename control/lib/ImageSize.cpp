@@ -158,5 +158,11 @@ ImagePoint      ImageSize::lowerright() const {
 	return ImagePoint(_width, 0);
 }
 
+ImageSize	ImageSize::operator*(const double l) const {
+	unsigned int	x = _width * l;
+	unsigned int	y = _height * l;
+	return ImageSize(x, y);
+}
+
 } // namespace image
 } // namespace astro

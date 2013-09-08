@@ -19,6 +19,7 @@ class FITSViewerWindow : public QMainWindow
 public:
     explicit FITSViewerWindow(QWidget *parent, const std::string& filename);
     ~FITSViewerWindow();
+    bool	smallEnough();
     
 private:
     Ui::FITSViewerWindow *ui;
@@ -32,6 +33,10 @@ private slots:
 	void	rangeChanged(int value);
 	void	colorcorrectionChanged(double value);
 	void	saturationChanged(int value);
+	void	scale100(bool);
+	void	scale50(bool);
+	void	scale25(bool);
+	void	scaleFit(bool);
 };
 
 #endif // FITSVIEWERWINDOW_H

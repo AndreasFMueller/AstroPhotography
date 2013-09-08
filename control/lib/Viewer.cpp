@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroTonemapping.h>
 #include <AstroHistogram.h>
+#include <AstroFilter.h>
 #include <ViewerPipeline.h>
 
 using namespace astro::image;
@@ -63,6 +64,7 @@ Viewer::Viewer(const std::string& filename) {
 
 	// image size
 	ImageSize	size = rawimage->size();
+	_displaysize = size;
 
 	// allocate an image with float pixels
 	Image<RGB<float> >	*imagep = new Image<RGB<float> >(size);
@@ -92,6 +94,11 @@ Viewer::Viewer(const std::string& filename) {
 	pipeline = new ViewerPipeline(imagep);
 	pipelineptr = std::tr1::shared_ptr<ViewerPipeline>(pipeline);
 
+	// compute the white balance vector
+	filter::WhiteBalance<float>	wb;
+	RGB<double>	rgb = wb.filter(*imagep);
+	rgb = rgb.inverse().normalize();
+
 	// background stuff
 	Background<float>	bg = BackgroundExtractor(100)(*imagep);
 	background(bg);
@@ -99,7 +106,7 @@ Viewer::Viewer(const std::string& filename) {
 	gradientEnabled(true);
 
 	// set parameters
-	pipeline->colorcorrection(RGB<float>(1.0, 1.0, 1.0));
+	pipeline->colorcorrection(RGB<float>(rgb.R, rgb.G, rgb.B));
 	pipeline->setRange(0, 10000);
 
 	// Histogram
@@ -183,6 +190,28 @@ float	Viewer::saturation() const {
 void	Viewer::saturation(float _saturation) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saturation set to %.3f", _saturation);
 	pipeline->saturation(_saturation);
+}
+
+const ImageSize&	Viewer::displaysize() const {
+	return _displaysize;
+}
+
+void	Viewer::displaysize(const ImageSize& displaysize) {
+	_displaysize = displaysize;
+}
+
+void	Viewer::displayScale(float scale) {
+	if (scale > 1.0) {
+		throw std::range_error("cannot scale up");
+	}
+	if (scale < 0) {
+		throw std::range_error("negative scale not allowed");
+	}
+	_displaysize = size() * scale;
+}
+
+double	Viewer::displayScale() const {
+	return _displaysize.width() / (double)size().width();
 }
 
 const Background<float>&	Viewer::background() const {
@@ -279,16 +308,20 @@ void	Viewer::update() {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating image data at %p", p);
-	unsigned int	width = size().width();
-	unsigned int	height = size().height();
+	unsigned int	width = _displaysize.width();
+	unsigned int	height = _displaysize.height();
+
+	// extract the image
+	ImageRectangle	rectangle(size());
+	WindowScalingAdapter<unsigned int>	wsa(*pipeline, rectangle,
+							_displaysize);
 
 	// extract the data
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "extracting %u x %u RGB32 image",
 		width, height);
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
-			uint32_t	value = pipeline->pixel(x, y);
-			p[size().offset(x, y)] = value;
+			p[_displaysize.offset(x, y)] = wsa.pixel(x, y);
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main update complete");

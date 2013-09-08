@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QScrollArea" name="scrollArea">
+     <widget class="QScrollArea" name="imageScrollArea">
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
@@ -63,7 +63,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="histogramBox">
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -177,13 +177,19 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>100</height>
+           <height>90</height>
           </size>
          </property>
          <property name="title">
           <string>Luminance Range</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
+          <property name="topMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
           <item row="0" column="1">
            <widget class="QLabel" name="minLabel">
             <property name="text">
@@ -222,11 +228,23 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="colorcorrectionBox">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>140</height>
+          </size>
+         </property>
          <property name="title">
           <string>Color correction</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="spacing">
+           <number>-1</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QWidget" name="widget_2" native="true">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -357,13 +375,19 @@
          <property name="maximumSize">
           <size>
            <width>1677215</width>
-           <height>80</height>
+           <height>60</height>
           </size>
          </property>
          <property name="title">
           <string>Curves</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="gammaLabel">
             <property name="text">
@@ -443,6 +467,58 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="displayscaleBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>30</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Display scale</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="2">
+           <widget class="QRadioButton" name="scale50">
+            <property name="text">
+             <string>50%</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QRadioButton" name="scale25">
+            <property name="text">
+             <string>25%</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="scale100">
+            <property name="text">
+             <string>100%</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QRadioButton" name="scaleFit">
+            <property name="text">
+             <string>fit window</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="updateButton">
          <property name="text">
           <string>Update</string>
@@ -484,7 +560,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>567</x>
-     <y>744</y>
+     <y>631</y>
     </hint>
     <hint type="destinationlabel">
      <x>795</x>
@@ -500,7 +576,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>562</x>
-     <y>307</y>
+     <y>297</y>
     </hint>
     <hint type="destinationlabel">
      <x>796</x>
@@ -516,7 +592,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>581</x>
-     <y>280</y>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
      <x>795</x>
@@ -532,7 +608,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>767</x>
-     <y>1110</y>
+     <y>1092</y>
     </hint>
     <hint type="destinationlabel">
      <x>808</x>
@@ -548,7 +624,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>581</x>
-     <y>427</y>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>810</x>
@@ -580,7 +656,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>749</x>
-     <y>642</y>
+     <y>567</y>
     </hint>
     <hint type="destinationlabel">
      <x>810</x>
@@ -596,7 +672,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>499</x>
-     <y>564</y>
+     <y>514</y>
     </hint>
     <hint type="destinationlabel">
      <x>804</x>
@@ -612,7 +688,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>611</x>
-     <y>568</y>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>808</x>
@@ -628,11 +704,75 @@
    <hints>
     <hint type="sourcelabel">
      <x>738</x>
-     <y>571</y>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>807</x>
      <y>507</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scaleFit</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>scaleFit(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>754</x>
+     <y>1022</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>804</x>
+     <y>1022</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scale25</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>scale25(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>639</x>
+     <y>1021</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>803</x>
+     <y>980</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scale50</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>scale50(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>1026</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>802</x>
+     <y>944</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scale100</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FITSViewerWindow</receiver>
+   <slot>scale100(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>518</x>
+     <y>1017</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>804</x>
+     <y>911</y>
     </hint>
    </hints>
   </connection>
@@ -645,5 +785,9 @@
   <slot>rangeChanged(int)</slot>
   <slot>colorcorrectionChanged(double)</slot>
   <slot>saturationChanged(int)</slot>
+  <slot>scaleFit(bool)</slot>
+  <slot>scale25(bool)</slot>
+  <slot>scale50(bool)</slot>
+  <slot>scale100(bool)</slot>
  </slots>
 </ui>

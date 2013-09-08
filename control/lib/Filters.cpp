@@ -435,6 +435,10 @@ int	bytesperpixel(const ImagePtr& image) {
 	return planes(image) * bytespervalue(image);
 }
 
+RGB<double>	whitebalance(const ImagePtr& image) {
+	return RGB<double>(1., 1., 1.);
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro

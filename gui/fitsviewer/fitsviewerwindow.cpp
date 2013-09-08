@@ -42,8 +42,8 @@ FITSViewerWindow::~FITSViewerWindow()
 void	FITSViewerWindow::update() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main update()");
 	// copy the image data to a pixmap
-	unsigned int	width = viewer.size().width();
-	unsigned int	height = viewer.size().height();
+	unsigned int	width = viewer.displaysize().width();
+	unsigned int	height = viewer.displaysize().height();
 	QImage	qimage((unsigned char *)viewer.imagedata(), width, height,
 		QImage::Format_RGB32);
 	QPixmap	pixmap = QPixmap::fromImage(qimage);
@@ -66,6 +66,11 @@ void	FITSViewerWindow::previewupdate() {
 	ui->previewLabel->setPixmap(pixmap);
 	ui->histogramWidget->setMinmark(viewer.min());
 	ui->histogramWidget->setMaxmark(viewer.max());
+	if (smallEnough()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "small enough for update");
+		viewer.update();
+		update();
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "previewupdate() ends");
 }
 
@@ -137,4 +142,46 @@ void	FITSViewerWindow::colorcorrectionChanged(double value) {
 	viewer.colorcorrection(RGB<float>(R, G, B));
 	viewer.previewupdate();
 	previewupdate();
+}
+
+void	FITSViewerWindow::scale100(bool state) {
+	if (state) {
+		viewer.displaysize(viewer.size());
+		previewupdate();
+	}
+}
+
+void	FITSViewerWindow::scale50(bool state) {
+	if (state) {
+		viewer.displaysize(viewer.size() * 0.5);
+		previewupdate();
+	}
+}
+
+void	FITSViewerWindow::scale25(bool state) {
+	if (state) {
+		viewer.displaysize(viewer.size() * 0.25);
+		previewupdate();
+	}
+}
+
+void	FITSViewerWindow::scaleFit(bool state) {
+	if (!state) {
+		return;
+	}
+	double	width = ui->imageScrollArea->width();
+	double	height = ui->imageScrollArea->height();
+	double	xscale = width / viewer.size().width();
+	double	yscale = height / viewer.size().height();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "xscale = %f, yscale = %f");
+	double	scale = std::min(xscale, yscale);
+	if (scale > 1.0) {
+		scale100(true);
+	}
+	viewer.displayScale(scale);
+	previewupdate();
+}
+
+bool	FITSViewerWindow::smallEnough() {
+	return viewer.displaysize().getPixels() < 1000000;
 }

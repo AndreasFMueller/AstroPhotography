@@ -25,9 +25,14 @@ class Viewer {
 	// pointer for the full image
 	typedef	std::tr1::shared_ptr<uint32_t>	imagedataptr;
 	imagedataptr	_imagedata;
+	ImageSize	_displaysize;
 public:
 	uint32_t	*imagedata() const;
 	const ImageSize&	size() const;
+	const ImageSize&	displaysize() const;
+	void	displaysize(const ImageSize& displaysize);
+	void	displayScale(float scale);
+	double	displayScale() const;
 
 private:
 	// pointer to the previous version of the image

@@ -45,6 +45,8 @@ extern double	rawvalue(const ImagePtr& image, const ImagePoint& point);
 
 extern bool	saturated(const ImagePtr& image, const ImageRectangle& rect);
 
+extern RGB<double>	whitebalance(const ImagePtr& image);
+
 
 } // namespace filter
 } // namespace image

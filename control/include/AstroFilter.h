@@ -553,6 +553,37 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	return fwhm;
 }
 
+/**
+ * \brief
+ */
+template<typename Pixel>
+class WhiteBalance {
+public:
+	WhiteBalance() { }
+	RGB<double>	filter(const ConstImageAdapter<RGB<Pixel> >& image)
+				const;
+};
+
+template<typename Pixel>
+RGB<double>	WhiteBalance<Pixel>::filter(
+	const ConstImageAdapter<RGB<Pixel> >& image) const {
+	double	R = 0;
+	double	G = 0;
+	double	B = 0;
+	unsigned int	width = image.getSize().width();
+	unsigned int	height = image.getSize().height();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			RGB<Pixel>	v = image.pixel(x, y);
+			R += v.R;
+			G += v.G;
+			B += v.B;
+		}
+	}
+	double	m = (R + G + B) / 3;
+	return RGB<double>(R / m, G / m, B / m);
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro
