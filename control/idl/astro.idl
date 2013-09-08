@@ -1,0 +1,11 @@
+//
+// astro.idl -- Interface definition for device access
+//
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+//
+#include "exceptions.idl"
+#include "types.idl"
+#include "image.idl"
+#include "camera.idl"
+#include "module.idl"
+

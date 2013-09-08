@@ -82,5 +82,9 @@ void	ViewerPipeline::background(const Background<float>& background) {
 	backgroundsubtract.background(background);
 }
 
+const	ConstImageAdapter<RGB<float> >&	ViewerPipeline::processedimage() const {
+	return compose;
+}
+
 } // namespace image
 } // namespace astro

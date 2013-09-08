@@ -55,6 +55,8 @@ public:
 
 	const Background<float>&	background() const;
 	void	background(const Background<float>& _background);
+
+	const ConstImageAdapter<RGB<float> >&	processedimage() const;
 };
 
 } // namespace image

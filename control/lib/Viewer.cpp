@@ -19,6 +19,9 @@ using namespace astro::io;
 namespace astro {
 namespace image {
 
+/**
+ * \brief Convert an monochrome image to RGB float pixels
+ */
 template<typename P>
 void	convert_mono(Image<RGB<float> >& image, const ImagePtr& rawimage) {
 	Image<P>	*imagep = dynamic_cast<Image<P> *>(&*rawimage);
@@ -37,6 +40,9 @@ void	convert_mono(Image<RGB<float> >& image, const ImagePtr& rawimage) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 }
 
+/**
+ * \brief Convert an RGB image to RGB float pixels
+ */
 template<typename P>
 void	convert_rgb(Image<RGB<float> >& image, const ImagePtr rawimage) {
 	Image<RGB<P> >	*imagep = dynamic_cast<Image<RGB<P> > *>(&*rawimage);
@@ -55,6 +61,14 @@ void	convert_rgb(Image<RGB<float> >& image, const ImagePtr rawimage) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 }
 
+/**
+ * \brief Create a new Viewer
+ *
+ * This constructor converts the image to an RGB<float> image, and
+ * then sets up the image processing pipeline on this image.
+ * For the pipeline, some objects have to computed, like the white
+ * balance, the background gradients.
+ */
 Viewer::Viewer(const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create viewer for file %s",
 		filename.c_str());
@@ -131,6 +145,9 @@ Viewer::Viewer(const std::string& filename) {
 Viewer::~Viewer() {
 }
 
+/**
+ * \brief Write a processed image to a file
+ */
 void	Viewer::writeimage(const std::string& filename) {
 	ImageSize	size = image->size();
 	Image<RGB<unsigned char> >	*outimage
@@ -257,6 +274,9 @@ void	Viewer::backgroundsize(const ImageSize& backgroundsize) {
 	_backgrounddata = imagedataptr(p);
 }
 
+/**
+ * \brief Update the preview pixel array
+ */
 void	Viewer::previewupdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview update");
 	uint32_t	*p = previewdata();
@@ -281,6 +301,9 @@ void	Viewer::previewupdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview update complete");
 }
 
+/**
+ * \brief Update the background pixel array
+ */
 void	Viewer::backgroundupdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backgroundupdate");
 	uint32_t	*p = imagedata();
@@ -301,6 +324,9 @@ void	Viewer::backgroundupdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "backgroundupdate complete");
 }
 
+/**
+ * \brief Update the current pixel arrays
+ */
 void	Viewer::update() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main update");
 	uint32_t	*p = imagedata();

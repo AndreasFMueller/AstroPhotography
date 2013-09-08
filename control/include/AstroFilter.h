@@ -554,7 +554,10 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 }
 
 /**
- * \brief
+ * \brief WhiteBalance computation class
+ *
+ * The WhiteBalance class computes average pixel densities and can be used
+ * as a start for color correction.
  */
 template<typename Pixel>
 class WhiteBalance {

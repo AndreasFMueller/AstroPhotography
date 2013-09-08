@@ -46,7 +46,8 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
 	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
-	Conversions.cpp NameService.cpp OrbSingleton.cpp deviceSK.cc \
+	Conversions.cpp NameService.cpp OrbSingleton.cpp \
+	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
 	$(uvc_files) \
 	$(unicap_flies)
 

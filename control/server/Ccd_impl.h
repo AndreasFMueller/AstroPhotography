@@ -6,7 +6,7 @@
 #ifndef _Ccd_impl_h
 #define _Ccd_impl_h
 
-#include <device.hh>
+#include <camera.hh>
 #include <AstroCamera.h>
 
 namespace Astro {

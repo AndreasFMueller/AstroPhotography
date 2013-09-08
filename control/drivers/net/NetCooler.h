@@ -7,7 +7,7 @@
 #define _NetCooler_h
 
 #include <AstroCamera.h>
-#include <device.hh>
+#include <camera.hh>
 
 namespace astro {
 namespace camera {

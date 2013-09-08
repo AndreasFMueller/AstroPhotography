@@ -6,7 +6,7 @@
 #ifndef _OrbSingleton_h
 #define _OrbSingleton_h
 
-#include <device.hh>
+#include <astro.hh>
 #include <string>
 
 namespace Astro {

@@ -6,7 +6,7 @@
 #ifndef _Image_impl_h
 #define _Image_impl_h
 
-#include <device.hh>
+#include <image.hh>
 #include <AstroImage.h>
 #include <AstroFormat.h>
 

@@ -7,7 +7,7 @@
 #define _NetCcd_h
 
 #include <NetCamera.h>
-#include <device.hh>
+#include <camera.hh>
 
 namespace astro {
 namespace camera {

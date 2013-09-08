@@ -5,7 +5,6 @@
  */
 #include <NetLocator.h>
 #include <AstroLoader.h>
-#include <device.hh>
 #include <Conversions.h>
 #include <OrbSingleton.h>
 #include <AstroExceptions.h>

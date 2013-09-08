@@ -18,6 +18,7 @@
 using namespace astro;
 using namespace astro::io;
 using namespace astro::calibration;
+using namespace astro::adapter;
 
 namespace astro {
 
@@ -74,7 +75,7 @@ int	main(int argc, char *argv[]) {
 #endif
 	Image<double >	*imageptr
 		= dynamic_cast<Image<double > *>(&*image);
-	LuminanceAdapter<double>	la(*imageptr);
+	LuminanceAdapter<double, double>	la(*imageptr);
 
 	// create image from log adapter
 	FunctionAdapter	fa(la, log2);
