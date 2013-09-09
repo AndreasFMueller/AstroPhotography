@@ -6,7 +6,7 @@
 #ifndef _Conversions_h
 #define _Conversions_h
 
-#include <astro.hh>
+#include <module.hh>
 #include <AstroTypes.h>
 #include <AstroLocator.h>
 #include <AstroCamera.h>
