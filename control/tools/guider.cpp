@@ -177,7 +177,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// create a guider
-	Guider	guider(guiderport, ccd);
+	Guider	guider(camera, ccd, guiderport);
 
 	// if the path is set, we also install a callback
 	if (path) {
@@ -205,7 +205,7 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker created");
 
 	// now perform the calibration
-	guider.setExposure(exposure);
+	guider.exposure(exposure);
 	if (!guider.calibrate(tracker)) {
 		std::string	msg = stringprintf("tracker failed to calibrate");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

@@ -79,6 +79,8 @@ module Astro {
 		ImageSize	size;
 		BinningSet	binningmodes;
 		boolean	shutter;
+		float	pixelwidth;
+		float	pixelheight;
 	};
 
 	interface Cooler;

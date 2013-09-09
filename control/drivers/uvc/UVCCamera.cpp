@@ -30,6 +30,15 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 	ccds.push_back(uvcccd);
 
 	// standard CcdInfo
+	// note that it is apparently impossible to determine the pixel
+	// size of a UVC camera. However, for a guide camera it is essential
+	// to know the CCD size. Lacking any better method, we set the
+	// pixel size to 5 microns which is probably the right order of
+	// magnitude for any camera useful for astronomy purposes (smaller
+	// chips will not be sensitive enough for guiding), but a littel too
+	// small in most cases. That isn't too serious, because it just
+	// means that calibration algorithm will be a bit more careful
+	// not to move to telescope during calibration.
 	astro::image::ImageSize	ccdsize
 		= astro::image::ImageSize(framedescriptor->wWidth(),
 			framedescriptor->wHeight());
@@ -38,6 +47,8 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 		uvcccd.interface, uvcccd.format, uvcccd.frame,
 		uvcccd.guid.c_str());
 	CcdInfo	ccd(ccdname, ccdsize, ccds.size() - 1);
+	ccd.pixelwidth(0.000005); // fake pixel size, as it is not available
+	ccd.pixelheight(0.000005); // for a UVC camera
 	ccd.addMode(Binning(1,1));
 	ccdinfo.push_back(ccd);
 

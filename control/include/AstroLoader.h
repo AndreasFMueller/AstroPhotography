@@ -45,6 +45,7 @@ public:
 typedef std::tr1::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
 
 class Repository;
+class RepositoryBackend;
 /**
  * \brief Dynamically loadable module to control various types of
  *        devices used for astrophotography.
@@ -83,7 +84,7 @@ public:
 	static bool	dlclose_on_close;
 	ModuleDescriptorPtr	getDescriptor() const;
 	astro::device::DeviceLocatorPtr	getDeviceLocator();
-	friend class Repository;
+	friend class RepositoryBackend;
 	friend class ::astro::test::ModuleTest;
 };
 
@@ -122,8 +123,8 @@ public:
  */
 class	Repository {
 	std::string	_path;
-	void	checkpath(const std::string& path) const throw(repository_error);
-	std::map<std::string, ModulePtr>	modulecache;
+public:
+	const std::string&	path() const { return _path; }
 public:
 	Repository() throw (repository_error);
 	Repository(const std::string& path) throw (repository_error);
@@ -133,7 +134,6 @@ public:
 	bool	contains(const std::string& modulename) const;
 	ModulePtr	getModule(const std::string& modulename) 
 		throw (repository_error);
-	const std::string&	path() const;
 };
 
 } // namespace module

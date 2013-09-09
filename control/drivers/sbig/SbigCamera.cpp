@@ -33,6 +33,25 @@ namespace camera {
 namespace sbig {
 
 /**
+ * \brief Pixel size conversion
+ *
+ * SBIG cameras specify the pixel size in BCD format, which somewhat
+ * annoying to convert to. This method performs the conversion from
+ * XXXXXX.XX fixed point BCD format in micrometers to a float in milimeters.
+ */
+static float	pixelsize(unsigned long sbigsize) {
+	double	result = 0;
+	double	multiplier = 0.00000001;
+	while (sbigsize) {
+		int	n = sbigsize & 0xf;
+		result = result + multiplier * n;
+		sbigsize >>= 4;
+		multiplier *= 10;
+	}
+	return result;
+}
+
+/**
  * \brief Open the SBIG UDRV library
  *
  * \param usbno   USB number of the camera.
@@ -77,7 +96,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	EstablishLinkParams	establishparams;
 	establishparams.sbigUseOnly = 0;
 	EstablishLinkResults	establishresults;
-	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams, &establishresults);
+	e = SBIGUnivDrvCommand(CC_ESTABLISH_LINK, &establishparams,
+		&establishresults);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot establish link: %s",
 			sbig_error(e).c_str());
@@ -139,6 +159,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
 		CcdInfo	ccd("Imaging", ccdsize, ccdidcounter++);
+		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
+		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		ccd.setShutter(true);
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
@@ -166,6 +188,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
 		CcdInfo	ccd("Tracking", ccdsize, ccdidcounter++);
+		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
+		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
 			ccd.toString().c_str());
 
@@ -190,6 +214,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
 		CcdInfo	ccd("external Tracking", ccdsize, ccdidcounter++);
+		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
+		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
 			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 		}

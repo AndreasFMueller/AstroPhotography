@@ -111,6 +111,12 @@ typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
 class Focuser;
 typedef std::tr1::shared_ptr<Focuser>	FocuserPtr;
 
+class Camera;
+typedef std::tr1::shared_ptr<Camera>	CameraPtr;
+
+class Ccd;
+typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
+
 /**
  * \brief Class containing information about a CCD chip. 
  *
@@ -119,30 +125,46 @@ typedef std::tr1::shared_ptr<Focuser>	FocuserPtr;
  * the CCDs without a need to open the CCD. Instances of this class can
  * easily be copied, not as the Ccd instances.
  */
-class Camera;
-class Ccd;
 class CcdInfo {
+	// CCD name
 	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	// CCD size
+private:
 	astro::image::ImageSize	_size;
+public:
+	const astro::image::ImageSize&	size() const { return _size; }
+	const astro::image::ImageRectangle	getFrame() const;
+	// CCD id
+private:
 	int	ccdid;
+public:
+	int	getId() const { return ccdid; }
+	// binning modes
+private:
 	BinningSet	binningmodes;
+public:
+	const BinningSet&	modes() const { return binningmodes; }
+	void	addMode(const Binning& mode);
+	void	addModes(const BinningSet& modes);
+	// shutter related methods
+private:
 	bool	_shutter;
+public:
+	void	setShutter(bool shutter) { _shutter = shutter; }
+	bool	shutter() const { return _shutter; }
+private:
+	float	_pixelwidth;	// pixel width in meters
+	float	_pixelheight;	// pixel height in meters
+public:
+	float	pixelwidth() const { return _pixelwidth; }
+	float	pixelheight() const { return _pixelheight; }
+	void	pixelwidth(float pixelwidth) { _pixelwidth = pixelwidth; }
+	void	pixelheight(float pixelheight) { _pixelheight = pixelheight; }
 public:
 	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
 		int ccdid = 0);
-
-	// modifying accessors
-	void	addMode(const Binning& mode);
-	void	addModes(const BinningSet& modes);
-	void	setShutter(bool shutter) { _shutter = shutter; }
-	bool	shutter() const { return _shutter; }
-
-	// accessors
-	const astro::image::ImageSize&	size() const;
-	const astro::image::ImageRectangle	getFrame() const;
-	const BinningSet&	modes() const;
-	const std::string&	name() const;
-	int	getId() const;
 
 	// text representation
 	virtual std::string	toString() const;
@@ -216,7 +238,6 @@ public:
 	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
 	virtual void	addMetadata(astro::image::ImageBase& image);
 };
-typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
 
 /**
  * \brief Abstraction for a astrophotographic CCD camera.
@@ -259,7 +280,6 @@ public:
 	virtual bool	hasGuiderPort() const { return false; }
 	GuiderPortPtr	getGuiderPort();
 };
-typedef std::tr1::shared_ptr<Camera>	CameraPtr;
 
 /**
  * \brief Cooler abstraction

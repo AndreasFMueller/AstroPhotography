@@ -570,21 +570,35 @@ public:
 template<typename Pixel>
 RGB<double>	WhiteBalance<Pixel>::filter(
 	const ConstImageAdapter<RGB<Pixel> >& image) const {
+	double	L = 0;
 	double	R = 0;
 	double	G = 0;
 	double	B = 0;
+	unsigned int	m = 0;
 	unsigned int	width = image.getSize().width();
 	unsigned int	height = image.getSize().height();
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
 			RGB<Pixel>	v = image.pixel(x, y);
-			R += v.R;
-			G += v.G;
-			B += v.B;
+			double	l = v.luminance();
+			L += l * l;
+			v = v.colorcomponents();
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f", v.R, v.G, v.B);
+			R += v.R * l;
+			G += v.G * l;
+			B += v.B * l;
+			m++;
 		}
 	}
-	double	m = (R + G + B) / 3;
-	return RGB<double>(R / m, G / m, B / m);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "L = %.3f, R = %.3f, G = %.3f, B = %.3f",
+		L, R, G, B);
+	RGB<double>	result((L - R) / m, (L - G) / m, (L - B) / m);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f",
+		result.R, result.G, result.B);
+	result = result / result.luminance();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f",
+		result.R, result.G, result.B);
+	return result;
 }
 
 } // namespace filter

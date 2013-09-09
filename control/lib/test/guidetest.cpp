@@ -38,7 +38,7 @@ int	main(int argc, char *argv[]) {
 	GuiderPortPtr	guiderport = cameraptr->getGuiderPort();
 
 	// create a Guider object
-	Guider	guider(guiderport, ccd);
+	Guider	guider(cameraptr, ccd, guiderport);
 
 	// create a suitable tracker
 	StarTracker	*startracker = new StarTracker(Point(320, 240),

@@ -20,10 +20,14 @@ Mock1Camera::Mock1Camera(int _id) : id(_id) {
 
 	CcdInfo	ccd0("primary ccd", ImageSize(1024, 768), 0);
 	ccd0.addMode(Binning(1,1));
+	ccd0.pixelwidth(0.00001);
+	ccd0.pixelheight(0.00001);
 	ccdinfo.push_back(ccd0);
 
 	CcdInfo	ccd1("secondary ccd", ImageSize(640, 480), 1);
 	ccd1.addMode(Binning(1,1));
+	ccd1.pixelwidth(0.00001);
+	ccd1.pixelheight(0.00001);
 	ccdinfo.push_back(ccd1);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mock1 has %d ccds", this->nCcds());

@@ -12,6 +12,12 @@
 namespace astro {
 namespace device {
 
+/**
+ * \brief The device locator can locate device within a module
+ *
+ * The device locator keeps a cache of all devices ever retrieved from this
+ * locator, which ensures that 
+ */
 class   DeviceLocator {
 	std::map<std::string, astro::camera::CameraPtr>		cameracache;
 	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportcache;
@@ -29,7 +35,9 @@ public:
 	virtual ~DeviceLocator();
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
-	typedef enum device_type { CAMERA, FOCUSER, GUIDERPORT, FILTERWHEEL, COOLER } device_type;
+	typedef enum device_type {
+		CAMERA, FOCUSER, GUIDERPORT, FILTERWHEEL, COOLER
+	} device_type;
 	virtual std::vector<std::string>	getDevicelist(
 		device_type device = CAMERA);
 	astro::camera::CameraPtr	getCamera(const std::string& name);

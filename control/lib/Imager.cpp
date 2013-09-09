@@ -17,7 +17,7 @@ namespace camera {
 /**
  * \brief Create an Imager
  */
-Imager::Imager(CcdPtr _ccd) : ccd(_ccd) {
+Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
 	_darksubtract = false;
 	_flatdivide = false;
 	_interpolate = false;
@@ -49,14 +49,14 @@ void	Imager::operator()(ImagePtr image) {
  * \brief Start an exposure
  */
 void	Imager::startExposure(const Exposure& exposure) {
-	ccd->startExposure(exposure);
+	ccd()->startExposure(exposure);
 }
 
 /**
  * \brief Get a corrected image
  */
 ImagePtr	Imager::getImage() {
-	ImagePtr	image = ccd->getImage();
+	ImagePtr	image = ccd()->getImage();
 	this->operator()(image);
 	return image;
 }

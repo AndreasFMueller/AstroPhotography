@@ -505,6 +505,11 @@ public:
 		double	l = ((double)R + (double)G + (double)B) / 3.;
 		return (*this) * l;
 	}
+
+	RGB<P>	colorcomponents() const {
+		double	l = luminance();
+		return RGB<P>(R - l, G - l, B - l);
+	}
 };
 
 /*

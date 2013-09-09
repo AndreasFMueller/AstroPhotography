@@ -111,8 +111,8 @@ int	main(int argc, char *argv[]) {
 			darkfilename);
 		FITSin	darkin(darkfilename);
 		dark = darkin.read();
-		imager.setDark(dark);
-		imager.setDarksubtract(true);
+		imager.dark(dark);
+		imager.darksubtract(true);
 	}
 
 	// if we have a flat file, we perform flat correction
@@ -121,13 +121,13 @@ int	main(int argc, char *argv[]) {
 			flatfilename);
 		FITSin	flatin(flatfilename);
 		ImagePtr	flat = flatin.read();
-		imager.setFlat(flat);
-		imager.setFlatdivide(true);
+		imager.flat(flat);
+		imager.flatdivide(true);
 	}
 
 	// perform bad pixel interpolation
 	if (interpolate) {
-		imager.setInterpolate(true);
+		imager.interpolate(true);
 	}
 
 	// apply imager corrections

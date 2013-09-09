@@ -111,7 +111,6 @@ Viewer::Viewer(const std::string& filename) {
 	// compute the white balance vector
 	filter::WhiteBalance<float>	wb;
 	RGB<double>	rgb = wb.filter(*imagep);
-	rgb = rgb.inverse().normalize();
 
 	// background stuff
 	Background<float>	bg = BackgroundExtractor(100)(*imagep);

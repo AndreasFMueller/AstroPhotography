@@ -24,7 +24,7 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
+libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp DeviceName.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
@@ -32,10 +32,11 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
-	Guiding.cpp GuiderProcess.cpp Simulator.cpp \
+	Guiding.cpp GuiderProcess.cpp GuiderFactory.cpp Simulator.cpp \
 	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
 	ImageProgramCallback.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
+	DeviceAccessor.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
@@ -48,6 +49,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
 	Conversions.cpp NameService.cpp OrbSingleton.cpp \
 	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
+	guiderSK.cc \
 	$(uvc_files) \
 	$(unicap_flies)
 

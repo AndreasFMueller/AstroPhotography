@@ -22,13 +22,10 @@ namespace camera {
 CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
 	: _name(name), _size(size), ccdid(_ccdid) {
 	_shutter = false;
-}
-
-/**
- * \brief Get the CCD size.
- */
-const astro::image::ImageSize&	CcdInfo::size() const {
-	return _size;
+	// the default pixel width and height is set to 0 to indicate that
+	// it is not known yet
+	_pixelwidth = 0;
+	_pixelheight = 0;
 }
 
 /**
@@ -61,34 +58,12 @@ void	CcdInfo::addModes(const BinningSet& modes) {
 }
 
 /**
- * \brief Get the binning modes available for this CCD.
- */
-const BinningSet&	CcdInfo::modes() const {
-	return binningmodes;
-}
-
-/**
- * \brief Get the name of this CCD.
- */
-const std::string&	CcdInfo::name() const {
-	return _name;
-}
-
-/**
- * \brief Get the CCD id for this CCD.
- *
- * This is the index into the array of CCDs this camera has.
- */
-int	CcdInfo::getId() const {
-	return ccdid;
-}
-
-/**
  * \brief Return a string representation.
  */
 std::string	CcdInfo::toString() const {
-	return stringprintf("%s: %dx%d,%s", _name.c_str(),
+	return stringprintf("%s: %dx%d (%.1fu x %.1fu),%s", _name.c_str(),
 		_size.width(), _size.height(),
+		_pixelwidth * 1000000, _pixelheight * 1000000,
 		binningmodes.toString().c_str());
 }
 
