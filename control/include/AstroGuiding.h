@@ -316,19 +316,22 @@ public:
 	std::string	cameraname() const { return _cameraname; }
 	unsigned int	ccdid() const { return _ccdid; }
 	std::string	guiderportname() const { return _guiderportname; }
+	std::string	toString() const;
 };
 
 /**
  * \brief GuiderFactory class
  */
 class GuiderFactory {
-	astro::module::Repository	repository;
+	astro::module::Repository&	_repository;
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
 	astro::camera::CameraPtr	cameraFromName(const std::string& name);
-	astro::camera::GuiderPortPtr	guiderportFromName(const std::string& name);
+	astro::camera::GuiderPortPtr	guiderportFromName(
+						const std::string& name);
 public:
-	GuiderFactory();
+	GuiderFactory(astro::module::Repository& repository)
+		: _repository(repository) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
 };

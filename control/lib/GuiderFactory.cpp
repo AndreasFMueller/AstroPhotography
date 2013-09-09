@@ -45,6 +45,11 @@ bool	GuiderDescriptor::operator<(const GuiderDescriptor& other) const {
 	return guiderportname() < other.guiderportname();
 }
 
+std::string	GuiderDescriptor::toString() const {
+	return stringprintf("%s|%d|%s", cameraname().c_str(), ccdid(),
+		guiderportname().c_str());
+}
+
 //////////////////////////////////////////////////////////////////////
 // GuiderFactory implementation
 //////////////////////////////////////////////////////////////////////

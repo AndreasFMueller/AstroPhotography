@@ -60,8 +60,8 @@ int	main(int argc, char *argv[]) {
 	nameservice.bind(names, modules->_this());
 
 	// create a servant for the guider factory
-	Astro::GuiderFactor_impl	*guiderfactory
-		= new Astro::GuiderFactory_imlp();
+	Astro::GuiderFactory_impl	*guiderfactory
+		= new Astro::GuiderFactory_impl();
 	PortableServer::ObjectId_var	guiderfactorysid
 		= poa->activate_object(guiderfactory);
 

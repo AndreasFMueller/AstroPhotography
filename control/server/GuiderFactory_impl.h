@@ -9,6 +9,8 @@
 #include <guider.hh>
 #include <AstroGuiding.h>
 
+namespace Astro {
+
 /**
  * \brief GuiderFactory servant definition
  */
@@ -17,7 +19,9 @@ public:
 	inline GuiderFactory_impl() { }
 	virtual ~GuiderFactory_impl() { }
 	virtual Astro::GuiderFactory::GuiderList	*list();
-	virtual Astro::_objref_Guider	get(const Astro::GuiderFactory::GuiderDescriptor& descriptor);
+	virtual Astro::_objref_Guider	*get(const Astro::GuiderFactory::GuiderDescriptor& descriptor);
 };
+
+} // namespace astro
 
 #endif /* _GuiderFactory_impl_h */

@@ -6,29 +6,31 @@
 #ifndef _Guider_impl_h
 #define _Guider_impl_h
 
+#include <guider.hh>
+
 namespace Astro {
 
 class Guider_impl : public POA_Astro::Guider {
 public:
 	inline Guider_impl() { }
 	virtual ~Guider_impl() { }
-	virtual Guider::GuiderState	getState();
-	virtual _obj_ref_Camera	*getCamera();
-	virtual _obj_ref_Ccd	*getCcd();
-	virtual _obj_ref_GuiderPort	*getGuiderPort();
-	virtual void	setupGuider(const ::Astro::Guider::ImageRectangle& rectangle, const ::Astro::Guider::Point& star, ::CORBA::Float exposuretime);
-	virtual Astro::Guider::ImageRectangle selectedArea();
-	virtual Astro::Guider::Point	selectedPoint();
+	virtual ::Astro::Guider::GuiderState	getState();
+	virtual Camera_ptr	getCamera();
+	virtual Ccd_ptr	getCcd();
+	virtual GuiderPort_ptr	getGuiderPort();
+	virtual void	setupGuider(const ::Astro::ImageRectangle& rectangle, const ::Astro::Guider::Point& star, ::CORBA::Float exposuretime);
+	virtual ImageRectangle selectedArea();
+	virtual ::Astro::Guider::Point	selectedPoint();
 	virtual ::CORBA::Float	exposuretime();
-	virtual Astro::Guider::Calibration	*getCalibration();
+	virtual ::Astro::Guider::Calibration	*getCalibration();
 	virtual void	useCalibration(Astro::Guider::Calibration& cal);
 	virtual void	startCalibration(::CORBA::Float sensitivity);
 	virtual void	startGuding(::CORBA::Float guidinginterval);
 	virtual void	stopGuiding();
-	virtual _obj_ref_ShortImage	mostRecentImage();
-	virtual Astro::Guider::Point	mostRecentOffset();
+	virtual ShortImage_ptr	mostRecentImage();
+	virtual ::Astro::Guider::Point	mostRecentOffset();
 	virtual ::CORBA::Float	mostRecentDelay();
-	virtual Astro::Guider::GuiderAction	mostRecentAction();
+	virtual ::Astro::Guider::GuiderAction	mostRecentAction();
 };
 
 } // namespace Astro
