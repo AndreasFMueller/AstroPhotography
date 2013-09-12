@@ -341,4 +341,27 @@ astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info) {
 	return result;
 }
 
+// GuiderDescriptor
+
+astro::guiding::GuiderDescriptor	convert(
+	const Astro::GuiderFactory::GuiderDescriptor& guiderdescriptor) {
+	astro::guiding::GuiderDescriptor	result(
+		std::string(guiderdescriptor.cameraname),
+		guiderdescriptor.ccdid,
+		std::string(guiderdescriptor.guiderportname)
+	);
+	return result;
+}
+
+Astro::GuiderFactory::GuiderDescriptor	convert(
+	const astro::guiding::GuiderDescriptor& guiderdescriptor) {
+	Astro::GuiderFactory::GuiderDescriptor	result;
+	result.cameraname = CORBA::string_dup(
+		guiderdescriptor.cameraname().c_str());
+	result.ccdid = guiderdescriptor.ccdid();
+	result.guiderportname = CORBA::string_dup(
+		guiderdescriptor.guiderportname().c_str());
+	return result;
+}
+
 } // namespace astro

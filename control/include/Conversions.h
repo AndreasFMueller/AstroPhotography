@@ -10,6 +10,8 @@
 #include <AstroTypes.h>
 #include <AstroLocator.h>
 #include <AstroCamera.h>
+#include <guider.hh>
+#include <AstroGuiding.h>
 
 namespace astro {
 
@@ -65,6 +67,12 @@ CORBA::Octet	convert_relaybits2octet(uint8_t bits);
 astro::camera::CcdInfo	convert(const Astro::CcdInfo& info);
 astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info);
 Astro::CcdInfo	convert(const astro::camera::CcdInfo& info);
+
+// GuiderDescriptor
+astro::guiding::GuiderDescriptor        convert(
+        const Astro::GuiderFactory::GuiderDescriptor& guiderdescriptor);
+Astro::GuiderFactory::GuiderDescriptor  convert(
+        const astro::guiding::GuiderDescriptor& guiderdescriptor);
 
 } // namespace astro
 

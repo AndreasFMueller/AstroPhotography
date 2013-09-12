@@ -12,6 +12,7 @@
 #include "Modules_impl.h"
 #include "GuiderFactory_impl.h"
 #include <NameService.h>
+#include <AstroLoader.h>
 #include <OrbSingleton.h>
 
 namespace astro {
@@ -60,8 +61,9 @@ int	main(int argc, char *argv[]) {
 	nameservice.bind(names, modules->_this());
 
 	// create a servant for the guider factory
+	astro::module::Repository	repository;
 	Astro::GuiderFactory_impl	*guiderfactory
-		= new Astro::GuiderFactory_impl();
+		= new Astro::GuiderFactory_impl(repository);
 	PortableServer::ObjectId_var	guiderfactorysid
 		= poa->activate_object(guiderfactory);
 

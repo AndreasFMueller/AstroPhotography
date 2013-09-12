@@ -76,7 +76,7 @@ module Astro {
 		 */
 		void	startGuiding(in float guidinginterval) raises(BadState);
 		float	getGuidingInterval() raises(BadState);
-		void	stopGuding() raises(BadState);
+		void	stopGuiding() raises(BadState);
 
 		/**
 		 * \brief 

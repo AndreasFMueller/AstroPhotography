@@ -323,15 +323,15 @@ public:
  * \brief GuiderFactory class
  */
 class GuiderFactory {
-	astro::module::Repository&	_repository;
+	astro::module::Repository&	repository;
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
+	// auxiliary functions to simplify the 
 	astro::camera::CameraPtr	cameraFromName(const std::string& name);
 	astro::camera::GuiderPortPtr	guiderportFromName(
 						const std::string& name);
 public:
-	GuiderFactory(astro::module::Repository& repository)
-		: _repository(repository) { }
+	GuiderFactory() { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
 };
