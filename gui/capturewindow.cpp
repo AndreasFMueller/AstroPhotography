@@ -287,8 +287,8 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 
 	// create the Imager
 	Imager	imager;
-	imager.setDark(dark);
-	imager.setFlat(flat);
+	imager.dark(dark);
+	imager.flat(flat);
 
 	// get the rectangle for the correctors
 	ImageRectangle	frame = image->getFrame();
@@ -300,15 +300,15 @@ void	CaptureWindow::setImage(ImagePtr newimage) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"dark correct with dark of size %s",
 			dark->size().toString().c_str());
-		imager.setDarksubtract(true);
+		imager.darksubtract(true);
 	}
 
 	if (ui->flatdivideCheckbox->isChecked()) {
-		imager.setFlatdivide(true);
+		imager.flatdivide(true);
 	}
 
 	if (ui->badpixelsCheckBox->isChecked()) {
-		imager.setInterpolate(true);
+		imager.interpolate(true);
 	}
 
 	imager(image);

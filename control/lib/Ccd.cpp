@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
 #include <includes.h>
+#include <sstream>
 
 using namespace astro::image;
 
@@ -26,6 +27,31 @@ CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
 	// it is not known yet
 	_pixelwidth = 0;
 	_pixelheight = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructor: %s",
+		this->toString().c_str());
+}
+
+CcdInfo::CcdInfo(const CcdInfo& other)
+	: _name(other.name()), _size(other.size()), ccdid(other.getId()),
+	  binningmodes(other.modes()), _shutter(other.shutter()),
+	  _pixelwidth(other.pixelwidth()), _pixelheight(other.pixelheight()) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"copy constructor: %s <- %s",
+		this->toString().c_str(), other.toString().c_str(),
+		binningmodes.size());
+}
+
+CcdInfo&	CcdInfo::operator=(const CcdInfo& other) {
+	_name = other.name();
+	_size = other.size();
+	ccdid = other.getId();
+	binningmodes = other.modes();
+	_shutter = other.shutter();
+	_pixelwidth = other.pixelwidth();
+	_pixelheight = other.pixelheight();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "assignment operator: %s <- %s",
+		this->toString().c_str(), other.toString().c_str());
+	return *this;
 }
 
 /**
@@ -60,11 +86,17 @@ void	CcdInfo::addModes(const BinningSet& modes) {
 /**
  * \brief Return a string representation.
  */
-std::string	CcdInfo::toString() const {
-	return stringprintf("%s: %dx%d (%.1fu x %.1fu),%s", _name.c_str(),
+std::string	CcdInfo::toString(bool withbinningmodes) const {
+	std::ostringstream	out;
+	out << stringprintf("%s: %ux%u (%.1fu x %.1fu),", _name.c_str(),
 		_size.width(), _size.height(),
-		_pixelwidth * 1000000, _pixelheight * 1000000,
-		binningmodes.toString().c_str());
+		_pixelwidth * 1000000, _pixelheight * 1000000);
+	if (withbinningmodes) {
+		out << binningmodes.toString();
+	} else {
+		out << stringprintf("%d binning modes", binningmodes.size());
+	}
+	return out.str();
 }
 
 std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo) {

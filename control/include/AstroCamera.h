@@ -165,9 +165,11 @@ public:
 public:
 	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
 		int ccdid = 0);
+	CcdInfo(const CcdInfo& other);
+	CcdInfo&	operator=(const CcdInfo& other);
 
 	// text representation
-	virtual std::string	toString() const;
+	virtual std::string	toString(bool withbinningmodes = false) const;
 
 	// utility functions
 	astro::image::ImageRectangle	clipRectangle(const astro::image::ImageRectangle& rectangle) const;

@@ -224,6 +224,13 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
+#if 0
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d", ccdinfo.size());
+	CcdInfo	c = ccdinfo[0];
+	c.toString();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "c");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s", c.toString().c_str());
+#endif
 }
 
 /**
@@ -276,7 +283,8 @@ SbigCamera::~SbigCamera() {
  * \param id     ID of the CCD
  */
 CcdPtr	SbigCamera::getCcd0(size_t id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u (of %d)", id, ccdinfo.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u (of %d)", id,
+		ccdinfo.size());
 	if ((id < 0) || (id >= ccdinfo.size())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd %d not in range", id);
 		throw std::range_error("ccd id not in range");

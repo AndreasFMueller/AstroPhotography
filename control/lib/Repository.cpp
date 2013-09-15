@@ -95,6 +95,12 @@ public:
  * \brief Retrieve a repository backend associated with a path
  */
 RepositoryBackendPtr	Repositories::get(const std::string& path) {
+	std::string	key = path;
+	if (key.size() == 0) {
+		key = std::string(PKGLIBDIR);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "key for empty path is %s",
+			key.c_str());
+	}
 	//PthreadLocker(&mutex);
 	std::map<std::string, RepositoryBackendPtr>::iterator	r
 		= _repositories.find(path);
@@ -118,11 +124,12 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
  * \throws repository_error	is thrown when there is any problem with the
  *				directory specified
  */
-void	RepositoryBackend::checkpath(const std::string& path) const throw(repository_error) {
+void	RepositoryBackend::checkpath(const std::string& path) const
+	throw(repository_error) {
 	// verify that the path exists and is a directory
 	struct stat	sb;
 	if (stat(path.c_str(), &sb) < 0) {
-		std::string	message("cannot stat " + path + ": "
+		std::string	message("cannot stat '" + path + "': "
 			+ strerror(errno));
 		throw repository_error(message);
 	}
@@ -141,7 +148,11 @@ void	RepositoryBackend::checkpath(const std::string& path) const throw(repositor
  *
  * \param path		path to the directory containing the modules
  */
-RepositoryBackend::RepositoryBackend(const std::string& path) throw (repository_error) : _path(path) {
+RepositoryBackend::RepositoryBackend(const std::string& path)
+	throw (repository_error) : _path(path) {
+	if (_path.size() == 0) {
+		_path = std::string(PKGLIBDIR);
+	}
 	checkpath(_path);
 }
 
@@ -153,7 +164,8 @@ RepositoryBackend::RepositoryBackend(const std::string& path) throw (repository_
  * modules and thus rely on the modules being installed in the pkgdir
  * directory.
  */
-RepositoryBackend::RepositoryBackend() throw (repository_error) : _path(PKGLIBDIR) {
+RepositoryBackend::RepositoryBackend() throw (repository_error)
+	: _path(PKGLIBDIR) {
 	checkpath(_path);
 }
 

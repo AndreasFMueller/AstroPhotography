@@ -160,7 +160,7 @@ ImagePtr	SbigCcd::getImage() {
 	if (state == Exposure::idle) {
 		throw BadState("camera is idle");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image ccd %d", id);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image from ccd %d", id);
 
 	// wait until the exposure is complete
 	exposureStatus();
@@ -217,9 +217,10 @@ ImagePtr	SbigCcd::getImage() {
 		readlineparams.pixelLength = exposure.frame.size().width()
 						/ exposure.mode.getX();
 		readlineparams.readoutMode = readparams.readoutMode;
-debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d", 
-	readlineparams.pixelStart,
-	readlineparams.pixelLength);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"pixelStart = %d, pixelLength = %d", 
+			readlineparams.pixelStart,
+			readlineparams.pixelLength);
 		size_t	arraysize = resultsize.getPixels();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "data allocated: %d", arraysize);
 		data = new unsigned short[arraysize];
@@ -278,6 +279,9 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelStart = %d, pixelLength = %d",
 	addMetadata(*image);
 
 	// convert the data read to a short image
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve image complete");
+        state = Exposure::idle;
+
 	return ImagePtr(image);
 }
 

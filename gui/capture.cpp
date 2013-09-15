@@ -23,6 +23,8 @@ int	main(int argc, char *argv[]) {
 	int	cameraid = 0;
 	int	ccdid = 0;
 	int	c;
+	debugtimeprecision = 3;
+	debugthreads = true;
 	
 	while (EOF != (c = getopt(argc, argv, "dC:c:m:")))
 		switch (c) {
@@ -39,6 +41,7 @@ int	main(int argc, char *argv[]) {
 			modulename = strdup(optarg);
 			break;
 		}
+std::cout << "main" << std::endl;
 
 	// open repository
 	Repository	repository;
