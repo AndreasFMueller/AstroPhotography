@@ -332,6 +332,8 @@ class GuiderFactory {
 						const std::string& name);
 public:
 	GuiderFactory() { }
+	GuiderFactory(astro::module::Repository _repository)
+		: repository(_repository) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
 };

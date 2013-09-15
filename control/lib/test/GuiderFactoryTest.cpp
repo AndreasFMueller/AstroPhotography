@@ -37,8 +37,7 @@ void	GuiderFactoryTest::tearDown() {
 
 void	GuiderFactoryTest::test() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test() begin");
-	Repository	repository;
-	GuiderFactory	guiderfactory(repository);
+	GuiderFactory	guiderfactory;
 	GuiderDescriptor	guiderdescriptor("simulator:sim-camera", 0, "");
 	GuiderPtr	guider = guiderfactory.get(guiderdescriptor);
 	std::vector<GuiderDescriptor>	guiders = guiderfactory.list();
