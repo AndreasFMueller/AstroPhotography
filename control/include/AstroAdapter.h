@@ -716,10 +716,75 @@ public:
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
 	}
-	const double	pixel(unsigned int x, unsigned int y) const {
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
 		return f(image.pixel(x,y));
 	}
 };
+
+template<typename Pixel>
+class MirrorAdapter : public ConstImageAdapter<Pixel> {
+public:
+	typedef enum { NONE, HORIZONTAL, VERTICAL, CENTRAL } symmetry;
+private:
+	const ConstImageAdapter<Pixel>&	image;
+	symmetry	direction;
+public:
+	MirrorAdapter(const ConstImageAdapter<Pixel>& _image,
+		const symmetry& _direction)
+		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
+		  direction(_direction) {
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		
+		switch (direction) {
+		NONE:
+			break;
+		HORIZONTAL:
+			x = image.getSize().width() - x;
+			break;
+		CENTRAL:
+			x = image.getSize().width() - x;
+		VERTICAL:
+			y = image.getSize().height() - y;
+			break;
+		}
+		return image.pixel(x, y);
+	}
+};
+
+/**
+ * \brief Adapter to create a Bayer mosaic image from an RGB image
+ */
+template<typename Pixel>
+class MosaicAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<RGB<Pixel> >&	image;
+	MosaicType	mosaic;
+public:
+	MosaicAdapter(const ConstImageAdapter<RGB<Pixel> >& _image,
+		const MosaicType& _mosaic);
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel>
+MosaicAdapter<Pixel>::MosaicAdapter(
+	const ConstImageAdapter<RGB<Pixel> >& _image, const MosaicType& _mosaic)
+	: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
+	  mosaic(_mosaic) {
+}
+
+template<typename Pixel>
+const Pixel	MosaicAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	if (mosaic.isR(x, y)) {
+		return image.pixel(x, y).R;
+	}
+	if (mosaic.isG(x, y)) {
+		return image.pixel(x, y).G;
+	}
+	if (mosaic.isB(x, y)) {
+		return image.pixel(x, y).B;
+	}
+}
+
 
 } // namespace image
 } // namespace astro
