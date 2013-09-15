@@ -33,7 +33,7 @@ GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
 	// using the 
-	const GuiderCalibration&	calibration = guider.getCalibration();
+	const GuiderCalibration&	calibration = guider.calibration();
 
 	// the default correction only neutralizes the drift
 	Point	correction = calibration.defaultcorrection();
@@ -98,7 +98,7 @@ void	*GuiderProcess::guide_main() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"GUIDE: activate(%.3f, %.3f, %.3f, %.3f)",
 			raplus, raminus, decplus, decminus);
-		guider.getGuiderPort()->activate(raplus, raminus,
+		guider.guiderport()->activate(raplus, raminus,
 			decplus, decminus);
 
 		// wait for one second. We do this using a wait on a condition
@@ -150,7 +150,7 @@ void	*GuiderProcess::track_main() {
 		guider.startExposure();
 
 		// until the image is exposed
-		usleep(1000000 * guider.getExposure().exposuretime);
+		usleep(1000000 * guider.exposure().exposuretime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retreive the image
@@ -175,7 +175,7 @@ void	*GuiderProcess::track_main() {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = guider.getCalibration()(offset,
+		Point	correction = guider.calibration()(offset,
 			correctiontime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: correction: %s",
 			correction.toString().c_str());

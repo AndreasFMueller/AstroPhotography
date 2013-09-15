@@ -6,7 +6,7 @@
 #ifndef _FilterWheel_impl_h
 #define _FilterWheel_impl_h
 
-#include <device.hh>
+#include <camera.hh>
 #include <AstroCamera.h>
 
 namespace Astro {

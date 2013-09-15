@@ -3,8 +3,8 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _AstroStar_h
-#define _AstroStar_h
+#ifndef _AstroGuiding_h
+#define _AstroGuiding_h
 
 #include <AstroImage.h>
 #include <AstroTypes.h>
@@ -14,6 +14,7 @@
 #include <AstroDebug.h>
 #include <AstroImager.h>
 #include <AstroCallback.h>
+#include <AstroLoader.h>
 
 namespace astro {
 namespace guiding {
@@ -54,7 +55,7 @@ Point	StarDetector<Pixel>::operator()(
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k) const {
 	// work only in the rectangle
-	astro::image::WindowAdapter<Pixel>	adapter(image, rectangle);
+	astro::adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
 	// determine the brightest pixel within the rectangle
 	astro::image::ImageSize	size = adapter.getSize();
@@ -195,50 +196,148 @@ typedef std::tr1::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 
 /**
  * \brief Guider class
+ * 
+ * The guider class unifies all the operations needed for guiding.
  */
 class Guider {
-	astro::camera::GuiderPortPtr	guiderport;
-	astro::camera::Imager	imager;
-	astro::camera::Exposure	exposure;
-	GuiderCalibration	calibration;
+	// The guider is essentially composed of a camera and a guiderport
+	// we will hardly need access to the camera, but we don't want to
+	// loose the reference to it either, so we keep it handy here
+private:
+	astro::camera::CameraPtr	_camera;
+	astro::camera::GuiderPortPtr	_guiderport;
+public:
+	astro::camera::GuiderPortPtr	guiderport() { return _guiderport; }
+	astro::camera::CameraPtr	camera() { return _camera; }
+private:
+	// Imaging is performed via the imager, but the imager is built from
+	// from the ccd and the some additional data like darks and flats.
+	// The imager is exposed so that the client can change the imager
+	// parameters, e. g. can add a dark image, or enable pixel
+	// interpolation
+	astro::camera::Imager	_imager;
+public:
+	const astro::camera::Imager&	imager() const { return _imager; }
+	astro::camera::Imager&	imager() { return _imager; }
+	astro::camera::CcdPtr		ccd() { return _imager.ccd(); }
+
+	// Controlling the exposure parameters includes changing the rectangle
+	// to use during exposure. Since we don't want to implement methods
+	// for all these details, we just expose the exposure structure
+private:
+	astro::camera::Exposure	_exposure;
+public:
+	const astro::camera::Exposure&	exposure() const { return _exposure; }
+	astro::camera::Exposure&	exposure() { return _exposure; }
+	void	exposure(const astro::camera::Exposure& exposure) {
+		_exposure = exposure;
+	}
+public:
+	/**
+	 * \brief Construct a guider from camera, ccd, and guiderport
+	 */
+	Guider(astro::camera::CameraPtr camera, astro::camera::CcdPtr ccd,
+		astro::camera::GuiderPortPtr guiderport);
+
+	// We should be able to get images through the imager, using the
+	// previously defined exposure structure.
+public:
+	void	startExposure();
+	ImagePtr	getImage();
+
+	// The following members are used for the calibration of the guider.
+	// The guider calibration is encapsulated in a GuiderCalibration
+	// object, the calibration step can be bypassed by setting the
+	// the calibration directly.
+private:
+	GuiderCalibration	_calibration;
+public:
+	const GuiderCalibration&	calibration() const { return _calibration; }
+	GuiderCalibration&	calibration() { return _calibration; }
+	void	calibration(const GuiderCalibration& calibration);
+	/**
+	 * \brief Perform guider calibration
+	 * 
+	 * This method takes a tracker object that is programmed to follow
+	 * a given star, and performs the calibration using that star.
+	 * It needs information about the focal length of the telescope
+	 * to determine the expected effect of the guider port commands
+	 * on the star position detected by the tracker. Without this
+	 * information the tracker might loose the star it is expected
+	 * to track.
+	 */
+	bool	calibrate(TrackerPtr tracker,
+		double focallength = 0, double pixelsize = 0);
+private:
+	// here come a few private variables and methods to help with the
+	// calibration process
 	double	gridconstant;
 	bool	calibrated;
 	void	sleep(double t);
 	void	moveto(double ra, double dec);
+
+	// the following methods 
+private:
 	GuiderProcessPtr	guiderprocess;
+
 public:
-	Guider(astro::camera::GuiderPortPtr guiderport,
-		astro::camera::Imager imager);
-	// XXX we also need a constructor that recovers previously recorded
-	//     calibration data
-
-	// controlling the exposure parameters
-	const astro::camera::Exposure&	getExposure() const;
-	void	setExposure(const astro::camera::Exposure& exposure);
-
-	// getting images
-	void	startExposure();
-	ImagePtr	getImage();
-
-	// calibration
-	bool	calibrate(TrackerPtr tracker,
-		double focallength = 0, double pixelsize = 0);
-	const GuiderCalibration&	getCalibration() const;
-
-	astro::camera::Imager	getImager();
-	astro::camera::GuiderPortPtr	getGuiderPort();
-
 	// tracking
 	bool	start(TrackerPtr tracker);
 	bool	stop();
 	friend class GuiderProcess;
 
-	// callbacks
+	/**
+	 * \brief Callback for new images
+	 *
+	 * When the guider operates, it retrieves a new image from the camera
+	 * every now and then. To get access to these images, e. g. to allow
+	 * a user to monitor the guiding process, this callback can be set
+	 * to a callback of type ImageProgramCallback. Every time the guider
+	 * gets a new image, it calls this callback with an argument of type
+	 * ImageCallbackData.
+	 */
 	astro::callback::CallbackPtr	newimagecallback;
-	
 };
+typedef std::tr1::shared_ptr<Guider>	GuiderPtr;
+
+/**
+ * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
+ */
+class GuiderDescriptor {
+	std::string	_cameraname;
+	unsigned int	_ccdid;
+	std::string	_guiderportname;
+public:
+	GuiderDescriptor(const std::string& cameraname, unsigned int ccdid,
+		const std::string& guiderportname) : _cameraname(cameraname),
+		_ccdid(ccdid), _guiderportname(guiderportname) { }
+	bool	operator==(const GuiderDescriptor& other) const;
+	bool	operator<(const GuiderDescriptor& other) const;
+	std::string	cameraname() const { return _cameraname; }
+	unsigned int	ccdid() const { return _ccdid; }
+	std::string	guiderportname() const { return _guiderportname; }
+	std::string	toString() const;
+};
+
+/**
+ * \brief GuiderFactory class
+ */
+class GuiderFactory {
+	astro::module::Repository	repository;
+	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
+	guidermap_t	guiders;
+	// auxiliary functions to simplify the 
+	astro::camera::CameraPtr	cameraFromName(const std::string& name);
+	astro::camera::GuiderPortPtr	guiderportFromName(
+						const std::string& name);
+public:
+	GuiderFactory() { }
+	std::vector<GuiderDescriptor>	list() const;
+	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
+};
+typedef std::tr1::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 
 } // namespace guiding
 } // namespace astro
 
-#endif /* _AstroStar_h */
+#endif /* _AstroGuiding_h */

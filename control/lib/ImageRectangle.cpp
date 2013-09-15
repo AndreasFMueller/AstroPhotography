@@ -107,5 +107,21 @@ std::string	ImageRectangle::toString() const {
 		_origin.toString().c_str());
 }
 
+ImagePoint      ImageRectangle::upperright() const {
+	return _origin + _size.upperright();
+}
+
+ImagePoint      ImageRectangle::upperleft() const {
+	return _origin + _size.upperleft();
+}
+
+ImagePoint      ImageRectangle::lowerleft() const {
+	return _origin + _size.lowerleft();
+}
+
+ImagePoint      ImageRectangle::lowerright() const {
+	return _origin + _size.lowerright();
+}
+
 } // namespace image
 } // namespace astro

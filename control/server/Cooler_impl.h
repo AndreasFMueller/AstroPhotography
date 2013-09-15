@@ -7,7 +7,7 @@
 #define _Cooler_impl_h
 
 #include <AstroCamera.h>
-#include <device.hh>
+#include <camera.hh>
 
 namespace Astro {
 

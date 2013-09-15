@@ -10,7 +10,9 @@
 #include <iostream>
 #include <omniORB4/CORBA.h>
 #include "Modules_impl.h"
+#include "GuiderFactory_impl.h"
 #include <NameService.h>
+#include <AstroLoader.h>
 #include <OrbSingleton.h>
 
 namespace astro {
@@ -57,6 +59,19 @@ int	main(int argc, char *argv[]) {
 
 	// register the modules object
 	nameservice.bind(names, modules->_this());
+
+	// create a servant for the guider factory
+	astro::module::Repository	repository;
+	Astro::GuiderFactory_impl	*guiderfactory
+		= new Astro::GuiderFactory_impl(repository);
+	PortableServer::ObjectId_var	guiderfactorysid
+		= poa->activate_object(guiderfactory);
+
+	// register the GuiderFactory object
+	names.clear();
+	names.push_back(Astro::Naming::Name("Astro", "context"));
+	names.push_back(Astro::Naming::Name("GuiderFactory", "object"));
+	nameservice.bind(names, guiderfactory->_this());
 
 	// activate the POA manager
 	PortableServer::POAManager_var	pman = poa->the_POAManager();

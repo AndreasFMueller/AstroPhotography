@@ -32,7 +32,7 @@ noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 
 # general tests
 tests_SOURCES = tests.cpp \
-	PixelTest.cpp \
+	PixelTest.cpp DeviceNameTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
@@ -42,7 +42,9 @@ tests_SOURCES = tests.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
-	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp
+	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+	LinearFunctionTest.cpp BackgroundTest.cpp \
+	GuiderFactoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 

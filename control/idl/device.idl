@@ -512,7 +512,7 @@ module Astro {
 	};
 
 	/**
-	 * \brief 
+	 * \brief Interface to driver modules
 	 *
 	 * A module may implement many other things but device access.
 	 * To find out whether the module gives access to any devices,

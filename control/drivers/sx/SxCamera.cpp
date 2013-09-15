@@ -187,6 +187,10 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
 		ccd0.toString().c_str());
 
+	// set pixel width and height
+	ccd0.pixelwidth((float)params.pixel_uwidth / (256. * 1000000));
+	ccd0.pixelheight((float)params.pixel_uheight / (256. * 1000000));
+
 	// find out whether this camera has a cooler
 	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "has cooler");

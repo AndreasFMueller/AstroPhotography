@@ -15,36 +15,43 @@ namespace astro {
 namespace camera {
 
 class Imager {
+private:
 	ImagePtr	_dark;
-	bool	_darksubtract;
-	ImagePtr	_flat;
-	bool	_flatdivide;
-	bool	_interpolate;
-	CcdPtr	ccd;
 public:
-	Imager(CcdPtr _ccd = CcdPtr());
-
-	// accessors
 	ImagePtr	dark() const { return _dark; }
-	void	setDark(ImagePtr dark) { _dark = dark; }
+	void	dark(ImagePtr dark) { _dark = dark; }
 
+private:
+	bool	_darksubtract;
+public:
 	bool	darksubtract() const { return _darksubtract; }
-	void	setDarksubtract(bool darksubtract) {
-		_darksubtract = darksubtract;
-	}
+	void	darksubtract(bool darksubtract) { _darksubtract = darksubtract; }
 
+private:
+	ImagePtr	_flat;
+public:
 	ImagePtr	flat() const { return _flat; }
-	void	setFlat(ImagePtr flat) { _flat = flat; }
+	void	flat(ImagePtr flat) { _flat = flat; }
 
+private:
+	bool	_flatdivide;
+public:
 	bool	flatdivide() const { return _flatdivide; }
-	void	setFlatdivide(bool flatdivide) {
-		_flatdivide = flatdivide;
-	}
+	void	flatdivide(bool flatdivide) { _flatdivide = flatdivide; }
 
+private:
+	bool	_interpolate;
+public:
 	bool	interpolate() const { return _interpolate; }
-	void	setInterpolate(bool interpolate) {
-		_interpolate = interpolate;
-	}
+	void	interpolate(bool interpolate) { _interpolate = interpolate; }
+
+private:
+	CcdPtr	_ccd;
+public:
+	CcdPtr	ccd() { return _ccd; }
+
+public:
+	Imager(CcdPtr ccd = CcdPtr());
 
 	// Image processing
 	void	operator()(ImagePtr image);

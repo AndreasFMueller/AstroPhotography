@@ -16,6 +16,7 @@ namespace astro {
 
 int	main(int argc, char *argv[]) {
 	int	c;
+	debugtimeprecision = 3;
 	
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {

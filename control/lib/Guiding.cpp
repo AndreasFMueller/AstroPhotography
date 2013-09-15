@@ -23,6 +23,7 @@ using namespace astro::camera;
 using namespace astro::guiding;
 using namespace astro::io;
 using namespace astro::callback;
+using namespace astro::adapter;
 
 namespace astro {
 namespace guiding {
@@ -83,7 +84,7 @@ const ImageRectangle&	StarTracker::getRectangle() const {
 	Image<Pixel>	*imagep						\
 		= dynamic_cast<Image<Pixel > *>(&*_image);		\
 	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel >	la(*imagep);		\
+		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		image = ImagePtr(new Image<double>(la));		\
 		return;							\
 	}								\
@@ -116,7 +117,7 @@ PhaseTracker::PhaseTracker(ImagePtr _image) {
 	Image<Pixel>	*newimagep					\
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != newimagep) {					\
-		LuminanceAdapter<Pixel >	newla(*newimagep);	\
+		LuminanceAdapter<Pixel, double>	newla(*newimagep);	\
 		Image<double>	*imagep					\
 			= dynamic_cast<Image<double> *>(&*image);	\
 		PhaseCorrelator	pc;					\
@@ -291,20 +292,15 @@ static double	now() {
 	return tv.tv_sec + 0.000001 * tv.tv_usec;
 }
 
-Guider::Guider(GuiderPortPtr _guiderport, Imager _imager)
-	: guiderport(_guiderport), imager(_imager) {
+/**
+ * \brief Construct a guider from 
+ */
+Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport)
+	: _camera(camera), _guiderport(guiderport), _imager(ccd) {
 	calibrated = false;
 	// default exposure settings
-	exposure.exposuretime = 1.;
+	exposure().exposuretime = 1.;
 	gridconstant = 10;
-}
-
-const Exposure&	Guider::getExposure() const {
-	return exposure;
-}
-
-void	Guider::setExposure(const Exposure& _exposure) {
-	exposure = _exposure;
 }
 
 /**
@@ -354,14 +350,14 @@ bool	Guider::calibrate(TrackerPtr tracker,
 		for (int dec = -range; dec <= range; dec++) {
 			// move the telescope to the grid position
 			moveto(gridconstant * ra, gridconstant * dec);
-			imager.startExposure(exposure);
+			imager().startExposure(exposure());
 			ImagePtr	image = getImage();
 			Point	point = (*tracker)(image);
 			double	t = now();
 			calibrator.add(t, Point(ra, dec), point);
 			// move the telescope back
 			moveto(-gridconstant * ra, -gridconstant * dec);
-			imager.startExposure(exposure);
+			imager().startExposure(exposure());
 			image = getImage();
 			point = (*tracker)(image);
 			t = now();
@@ -370,16 +366,16 @@ bool	Guider::calibrate(TrackerPtr tracker,
 	}
 	
 	// now compute the calibration data
-	calibration = calibrator.calibrate();
+	calibration(calibrator.calibrate());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
-		calibration.toString().c_str());
+		calibration().toString().c_str());
 	calibrated = true;
 
 	// fix time constant
-	calibration.a[0] /= gridconstant;
-	calibration.a[1] /= gridconstant;
-	calibration.a[3] /= gridconstant;
-	calibration.a[4] /= gridconstant;
+	calibration().a[0] /= gridconstant;
+	calibration().a[1] /= gridconstant;
+	calibration().a[3] /= gridconstant;
+	calibration().a[4] /= gridconstant;
 
 	// are we now calibrated?
 	return calibrated;
@@ -413,7 +409,7 @@ void	Guider::moveto(double ra, double dec) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f",
 		raplus, raminus);
-	guiderport->activate(raplus, raminus, 0, 0);
+	guiderport()->activate(raplus, raminus, 0, 0);
 	sleep(t);
 
 	t = 0;
@@ -430,16 +426,24 @@ void	Guider::moveto(double ra, double dec) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f",
 		decplus, decminus);
-	guiderport->activate(0, 0, decplus, decminus);
+	guiderport()->activate(0, 0, decplus, decminus);
 	sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
+}
+
+/**
+ * \brief Set a calibration
+ */
+void	Guider::calibration(const GuiderCalibration& calibration) {
+	_calibration = calibration;
+	calibrated = true;
 }
 
 /**
  * \brief start an exposure
  */
 void	Guider::startExposure() {
-	imager.startExposure(exposure);
+	imager().startExposure(exposure());
 }
 
 /**
@@ -447,7 +451,7 @@ void	Guider::startExposure() {
  */
 ImagePtr	Guider::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
-	ImagePtr	image = imager.getImage();
+	ImagePtr	image = imager().getImage();
 	if (newimagecallback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
 		GuiderNewImageCallbackData	*argp = 
@@ -484,21 +488,6 @@ bool	Guider::start(TrackerPtr tracker) {
 bool	Guider::stop() {
 	guiderprocess->stop();
 	return true;
-}
-
-GuiderPortPtr	Guider::getGuiderPort() {
-	return guiderport;
-}
-
-Imager	Guider::getImager() {
-	return imager;
-}
-
-/**
- * \brief Accessor to calibrationd ata
- */
-const GuiderCalibration&	Guider::getCalibration() const {
-	return calibration;
 }
 
 } // namespace guiding

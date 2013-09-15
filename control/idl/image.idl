@@ -1,0 +1,113 @@
+//
+// image.idl -- Interface definition for images access
+//
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+//
+#include "types.idl"
+#include "exceptions.idl"
+
+/**
+ * \brief Astro module captures all interfaces
+ */
+module Astro {
+	/**
+ 	 * \brief Image base interface
+	 *
+	 * This interface allows access to properties of an image that are
+	 * independent of the value of an individual pixel. It is not intended
+	 * to give access to all the information contained in a FITS file,
+	 * if that is desired, the FITS file should be used directly.
+	 */
+	interface Image {
+		/**
+		 * \brief Size of the image
+		 */
+		ImageSize	size();
+		/**
+		 * \brief Origin of the image
+		 *
+		 * If this image was taken by selecting a subrectangle of a
+		 * larger CCD chip, then this method returns the origin of
+		 * the subrectangle. For full size images, this is always
+		 * (0,0).
+		 */
+		ImagePoint	origin();
+		/**
+		 * \brief Write the image to a FITS file
+		 *
+		 * This method writes the image to a FITS file. The location
+		 * of the file is determined by the server, the URL method
+		 * returns an URL where the client can fetch the FITS file.
+		 * \param filename	Name of the fits file
+		 * \param overwrite	If the file already exists, the file
+		 *			is usually not written, unless this
+		 *			parameter is set to true
+		 */
+		string	write(in string filename, in boolean overwrite);
+		/**
+		 * \brief Number of bytes per pixel
+		 *
+		 * This returns the number of bytes needed to store an
+		 * individual pixel. RGB color pixels need three primitive data
+		 * element per pixel for the three color channels. YUYV images
+		 * (as returned by some web cams) need two primitive elements
+		 * per pixel. Any unsigned integral type or floating point
+		 * type can be used as primitive pixel type, but cameras usuall
+		 * return either bytes or unsigned shorts.
+		 * 
+		 */
+		long	bytesPerPixel();
+		/**
+		 * \brief Number of planes.
+		 * 
+		 * This is usually 1, but for cameras that return color images
+		 * it can be 2 (YUYV pixels) or 3 (RGB pixels).
+		 */
+		long	planes();
+		/**
+		 * \brief Pixel value type size
+		 */
+		long	bytesPerValue();
+		/**
+		 * \brief Maximum pixel value
+		 */
+		double	max();
+		/**
+		 * \brief Minimum pixel value
+		 */
+		double	min();
+		/**
+		 * \brief Mean pixel value
+		 */
+		double	mean();
+		/**
+		 * \brief Median pixel value
+		 */
+		double	median();
+
+		/**
+		 * \brief Retrieve the imagedata
+		 *
+		 * This method returns the contents of the FITS file the server
+		 * collected.
+		 */
+		typedef sequence<octet>	ImageFile;
+		ImageFile	file();
+	};
+
+	/**
+	 * \brief An image with byte sized pixels
+	 */
+	interface ByteImage : Image {
+		typedef sequence<octet>	ByteSequence;
+		ByteSequence	getBytes();
+	};
+
+	/**
+	 * \brief An image with short sized pixels
+	 */
+	interface ShortImage : Image {
+		typedef sequence<unsigned short> ShortSequence;
+		ShortSequence	getShorts();
+	};
+};

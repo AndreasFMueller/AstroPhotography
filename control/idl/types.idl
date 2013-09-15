@@ -1,0 +1,38 @@
+//
+// types.idl -- Interface definition for device access
+//
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+//
+
+/**
+ * \brief Astro module captures all interfaces
+ */
+module Astro {
+	// Image related data structures
+	/**
+	 * \brief Pixel coordinates of a pixel in an image
+	 *
+	 * To be consistent with FITS, the origin of the coordinate system
+	 * is in the lower left corner of the image.
+ 	 */
+	struct ImagePoint {
+		long	x;
+		long	y;
+	};
+
+	/**
+	 * \brief Size of an image in pixels
+	 */
+	struct ImageSize {
+		long	width;
+		long	height;
+	};
+
+	/**
+	 * \brief Rectangle inside an image
+	 */
+	struct ImageRectangle {
+		ImagePoint	origin;
+		ImageSize	size;
+	};
+};

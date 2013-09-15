@@ -38,6 +38,7 @@ void	usage(const char *progname) {
 	std::cout << "  -M max    clamp the image values to at most <max>"
 		<< std::endl;
 	std::cout << "  -b        demosaic bayer images" << std::endl;
+	std::cout << "  -i        interpolate bad pixels" << std::endl;
 	std::cout << "  -d        increase debug level" << std::endl;
 	std::cout << "  -n, -?    show this help message" << std::endl;
 }
@@ -110,8 +111,8 @@ int	main(int argc, char *argv[]) {
 			darkfilename);
 		FITSin	darkin(darkfilename);
 		dark = darkin.read();
-		imager.setDark(dark);
-		imager.setDarksubtract(true);
+		imager.dark(dark);
+		imager.darksubtract(true);
 	}
 
 	// if we have a flat file, we perform flat correction
@@ -120,13 +121,13 @@ int	main(int argc, char *argv[]) {
 			flatfilename);
 		FITSin	flatin(flatfilename);
 		ImagePtr	flat = flatin.read();
-		imager.setFlat(flat);
-		imager.setFlatdivide(true);
+		imager.flat(flat);
+		imager.flatdivide(true);
 	}
 
 	// perform bad pixel interpolation
 	if (interpolate) {
-		imager.setInterpolate(true);
+		imager.interpolate(true);
 	}
 
 	// apply imager corrections

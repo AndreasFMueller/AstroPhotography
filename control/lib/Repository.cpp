@@ -7,9 +7,105 @@
 #include <AstroLoader.h>
 #include <includes.h>
 #include <iostream>
+#include <pthread.h>
 
 namespace astro {
 namespace module {
+
+class RepositoryBackend;
+typedef std::tr1::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
+
+//////////////////////////////////////////////////////////////////////
+// Locker class
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Locker class
+ *
+ * We want to make sure the pthread_mutex is unlocked when an exception
+ * is thrown, so we have to encapsulate the locking operation in a
+ * class that locks when the object is created an unlocks then it is
+ * destroyed.
+ */
+class PthreadLocker {
+	pthread_mutex_t	*_lock;
+public:
+	PthreadLocker(pthread_mutex_t *lock) : _lock(lock) {
+		pthread_mutex_lock(_lock);
+	}
+	~PthreadLocker() {
+		pthread_mutex_unlock(_lock);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Repositories collection
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief A collection of RepositoryBackends
+ *
+ * A static object of this type gives access to all backends that have been
+ * accessed by a program
+ */
+class Repositories {
+	pthread_mutex_t	mutex;
+	std::map<std::string, RepositoryBackendPtr>	_repositories;
+public:
+	Repositories();
+	~Repositories();
+	RepositoryBackendPtr	get(const std::string& path);
+};
+
+static Repositories	repositories;
+
+Repositories::Repositories() {
+	pthread_mutexattr_t	attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutex_init(&mutex, &attr);
+}
+
+Repositories::~Repositories() {
+	pthread_mutex_destroy(&mutex);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Repositories collection
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Repository backend class
+ */
+class RepositoryBackend {
+	std::string	_path;
+public:
+	const std::string&	path() const { return _path; }
+private:
+	std::map<std::string, ModulePtr>	modulecache;
+	void	checkpath(const std::string& path) const throw(repository_error);
+public:
+	RepositoryBackend() throw (repository_error);
+	RepositoryBackend(const std::string& path) throw (repository_error);
+	long	numberOfModules() const;
+	std::vector<std::string>	moduleNames() const;
+	std::vector<ModulePtr>	modules() const;
+	bool	contains(const std::string& modulename) const;
+	ModulePtr	getModule(const std::string& modulename)
+		throw (repository_error);
+};
+
+/**
+ * \brief Retrieve a repository backend associated with a path
+ */
+RepositoryBackendPtr	Repositories::get(const std::string& path) {
+	//PthreadLocker(&mutex);
+	std::map<std::string, RepositoryBackendPtr>::iterator	r
+		= _repositories.find(path);
+	if (r != _repositories.end()) {
+		return r->second;
+	}
+	RepositoryBackend	*rb = new RepositoryBackend(path);
+	RepositoryBackendPtr	rbp(rb);
+	_repositories.insert(std::make_pair(path, rbp));
+	return rbp;
+}
 
 /**
  * \brief Auxiliary function used to check accessibility of a repository
@@ -22,7 +118,7 @@ namespace module {
  * \throws repository_error	is thrown when there is any problem with the
  *				directory specified
  */
-void	Repository::checkpath(const std::string& path) const throw(repository_error) {
+void	RepositoryBackend::checkpath(const std::string& path) const throw(repository_error) {
 	// verify that the path exists and is a directory
 	struct stat	sb;
 	if (stat(path.c_str(), &sb) < 0) {
@@ -45,7 +141,7 @@ void	Repository::checkpath(const std::string& path) const throw(repository_error
  *
  * \param path		path to the directory containing the modules
  */
-Repository::Repository(const std::string& path) throw (repository_error) : _path(path) {
+RepositoryBackend::RepositoryBackend(const std::string& path) throw (repository_error) : _path(path) {
 	checkpath(_path);
 }
 
@@ -57,14 +153,14 @@ Repository::Repository(const std::string& path) throw (repository_error) : _path
  * modules and thus rely on the modules being installed in the pkgdir
  * directory.
  */
-Repository::Repository() throw (repository_error) : _path(PKGLIBDIR) {
+RepositoryBackend::RepositoryBackend() throw (repository_error) : _path(PKGLIBDIR) {
 	checkpath(_path);
 }
 
 /**
  * \brief Retrieve the number of modules available from the repository
  */
-long	Repository::numberOfModules() const {
+long	RepositoryBackend::numberOfModules() const {
 	return moduleNames().size();
 }
 
@@ -74,7 +170,7 @@ long	Repository::numberOfModules() const {
  * This method just counts the module files that are installed, but it
  * may also count files that are ultimately not loadable
  */
-std::vector<std::string>	Repository::moduleNames() const {
+std::vector<std::string>	RepositoryBackend::moduleNames() const {
 	std::vector<std::string>	result;
 	// search the directory for files ending in la
 	DIR	*dir = opendir(_path.c_str());
@@ -102,7 +198,7 @@ std::vector<std::string>	Repository::moduleNames() const {
  * of valid names. Each Module has already been checked whether the
  * file exists and is accessible.
  */
-std::vector<ModulePtr>	Repository::modules() const {
+std::vector<ModulePtr>	RepositoryBackend::modules() const {
 	std::vector<ModulePtr>	result;
 	// search the directory for files ending in la
 	DIR	*dir = opendir(_path.c_str());
@@ -137,7 +233,7 @@ std::vector<ModulePtr>	Repository::modules() const {
  * that file is readable, contains a valid dlname specification and
  * the code file is also available and readable.
  */
-bool	Repository::contains(const std::string& modulename) const {
+bool	RepositoryBackend::contains(const std::string& modulename) const {
 	try {
 		Module(_path, modulename);
 	} catch (std::exception) {
@@ -155,7 +251,7 @@ bool	Repository::contains(const std::string& modulename) const {
  *				has a corrupt .la file or the code file
  *				is missing.
  */
-ModulePtr	Repository::getModule(const std::string& modulename) throw(repository_error) {
+ModulePtr	RepositoryBackend::getModule(const std::string& modulename) throw(repository_error) {
 	try {
 		if (modulecache.find(modulename) == modulecache.end()) {
 			ModulePtr	module(new Module(_path, modulename));
@@ -169,10 +265,33 @@ ModulePtr	Repository::getModule(const std::string& modulename) throw(repository_
 	}
 }
 
-/**
- * \brief Retrieve the path of the repository.
- */
-const std::string&      Repository::path() const { return _path; }
+//////////////////////////////////////////////////////////////////////
+// Repository wrapper class implementation
+//////////////////////////////////////////////////////////////////////
+Repository::Repository() throw (repository_error) : _path() { }
+
+Repository::Repository(const std::string& path) throw (repository_error)
+	: _path(path) { }
+
+long    Repository::numberOfModules() const {
+	return repositories.get(_path)->numberOfModules();
+}
+
+std::vector<std::string>        Repository::moduleNames() const {
+	return repositories.get(_path)->moduleNames();
+}
+
+std::vector<ModulePtr>  Repository::modules() const {
+	return repositories.get(_path)->modules();
+}
+
+bool    Repository::contains(const std::string& modulename) const {
+	return repositories.get(_path)->contains(modulename);
+}
+
+ModulePtr       Repository::getModule(const std::string& modulename) throw (repository_error) {
+	return repositories.get(_path)->getModule(modulename);
+}
 
 } // namespace module
 } // namespace astro

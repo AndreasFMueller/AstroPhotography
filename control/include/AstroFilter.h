@@ -243,7 +243,7 @@ public:
 			throw std::logic_error("not a mosaic image");
 		}
 		Subgrid	grid(origin(mosaic), ImageSize(2, 2));
-		ConstSubgridAdapter<T>	subimage(image, grid);
+		astro::adapter::ConstSubgridAdapter<T>	subimage(image, grid);
 		Mean<T, S>	m;
 		return m.filter(image);
 	}
@@ -412,7 +412,7 @@ public:
 	}
 
 	virtual double	filter(const ConstImageAdapter<Pixel>& image) {
-		FocusFOMAdapter<Pixel>	foa(image, diagonal);
+		astro::adapter::FocusFOMAdapter<Pixel>	foa(image, diagonal);
 		ImageSize	size = foa.getSize();
 		double	result = 0;
 		for (size_t x = 0; x < size.width(); x++) {
@@ -484,7 +484,7 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	ImageRectangle	rectangle(center, ImageSize(2 * r + 1, 2 * r + 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
 		rectangle.toString().c_str());
-	WindowAdapter<Pixel>	wa(image, rectangle);
+	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
 
 	// locate the maximum in a rectangle around the point
 	Max<Pixel, double>	m;
@@ -551,6 +551,54 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 
 	// return value
 	return fwhm;
+}
+
+/**
+ * \brief WhiteBalance computation class
+ *
+ * The WhiteBalance class computes average pixel densities and can be used
+ * as a start for color correction.
+ */
+template<typename Pixel>
+class WhiteBalance {
+public:
+	WhiteBalance() { }
+	RGB<double>	filter(const ConstImageAdapter<RGB<Pixel> >& image)
+				const;
+};
+
+template<typename Pixel>
+RGB<double>	WhiteBalance<Pixel>::filter(
+	const ConstImageAdapter<RGB<Pixel> >& image) const {
+	double	L = 0;
+	double	R = 0;
+	double	G = 0;
+	double	B = 0;
+	unsigned int	m = 0;
+	unsigned int	width = image.getSize().width();
+	unsigned int	height = image.getSize().height();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			RGB<Pixel>	v = image.pixel(x, y);
+			double	l = v.luminance();
+			L += l * l;
+			v = v.colorcomponents();
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f", v.R, v.G, v.B);
+			R += v.R * l;
+			G += v.G * l;
+			B += v.B * l;
+			m++;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "L = %.3f, R = %.3f, G = %.3f, B = %.3f",
+		L, R, G, B);
+	RGB<double>	result((L - R) / m, (L - G) / m, (L - B) / m);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f",
+		result.R, result.G, result.B);
+	result = result / result.luminance();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%.3f, %.3f, %.3f",
+		result.R, result.G, result.B);
+	return result;
 }
 
 } // namespace filter

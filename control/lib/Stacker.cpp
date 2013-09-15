@@ -10,6 +10,7 @@
 
 using namespace astro::image;
 using namespace astro::image::transform;
+using namespace astro::adapter;
 
 namespace astro {
 namespace image {
@@ -111,7 +112,7 @@ ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
 	if (NULL == baseimagep) {
 		throw std::runtime_error("type inconsistency");
 	}
-	LuminanceAdapter<RGB<Pixel> >	base(*baseimagep);
+	LuminanceAdapter<RGB<Pixel>, double>	base(*baseimagep);
 	TransformAnalyzer	ta(base);
 
 	// for each image in the sequence, find the transform relative to the
@@ -126,7 +127,7 @@ ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
 		if (NULL == imagep) {
 			throw std::runtime_error("image type inconsistency");
 		}
-		LuminanceAdapter<RGB<Pixel> >	img(*imagep);
+		LuminanceAdapter<RGB<Pixel>, double>	img(*imagep);
 		Transform	t = ta(img);
 		transforms.push_back(t);
 	}

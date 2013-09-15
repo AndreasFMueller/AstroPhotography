@@ -3,12 +3,32 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _AstroAdapter_h
+#define _AstroAdapter_h
+
 #include <AstroImage.h>
 #include <AstroMask.h>
 #include <AstroDebug.h>
 
+using namespace astro::image;
+
 namespace astro {
-namespace image {
+namespace adapter {
+
+//////////////////////////////////////////////////////////////////////
+// Identity adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class IdentityAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	IdentityAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y);
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // Accessing Subrectangles of an Image
@@ -497,24 +517,25 @@ ImagePtr	upsample(ImagePtr image, const ImageSize& sampling);
 //////////////////////////////////////////////////////////////////////
 // Luminance Adapter
 //////////////////////////////////////////////////////////////////////
-template<typename Pixel>
-class LuminanceAdapter : public ConstImageAdapter<double> {
+template<typename Pixel, typename T>
+class LuminanceAdapter : public ConstImageAdapter<T> {
 	const ConstImageAdapter<Pixel>&	image;
 public:
 	LuminanceAdapter(const ConstImageAdapter<Pixel>& image);
-	const double	pixel(unsigned int x, unsigned int y) const;
+	const T	pixel(unsigned int x, unsigned int y) const;
 };
 
-template<typename Pixel>
-LuminanceAdapter<Pixel>::LuminanceAdapter(
+template<typename Pixel, typename T>
+LuminanceAdapter<Pixel, T>::LuminanceAdapter(
 	const ConstImageAdapter<Pixel>& _image)
-	: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	: ConstImageAdapter<T>(_image.getSize()), image(_image) {
 }
 
-template<typename Pixel>
-const double	LuminanceAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
-			const {
-	return luminance(image.pixel(x, y));
+template<typename Pixel, typename T>
+const T	LuminanceAdapter<Pixel, T>::pixel(unsigned int x,
+			unsigned int y) const {
+	T	v = luminance(image.pixel(x, y));
+	return v;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -662,6 +683,76 @@ const RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 	return RGB<double>(image.pixel(x, y));
 }
 
+//////////////////////////////////////////////////////////////////////
+// Color adaapters
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class ColorAdapter : public ConstImageAdapter<T> {
+protected:
+	const ConstImageAdapter<RGB<T> >&	_image;
+public:
+	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) {
+		T	v = _image.pixel(x, y).luminance();
+		return v;
+	}
+};
+
+template<typename T>
+class ColorRedAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorRedAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).R;
+	}
+};
+
+template<typename T>
+class ColorGreenAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorGreenAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).G;
+	}
+};
+
+template<typename T>
+class ColorBlueAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorBlueAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).B;
+	}
+};
+
+template<typename T>
+class ColorMaxAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorMaxAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).max();
+	}
+};
+
+template<typename T>
+class ColorMinAdapter : public ColorAdapter<T> {
+public:
+	using ColorAdapter<T>::_image;
+	ColorMinAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ColorAdapter<T>(image) { }
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
+		return _image.pixel(x, y).min();
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // YUYV-Adapter
@@ -721,6 +812,9 @@ public:
 	}
 };
 
+/**
+ * \brief Adapter to perform a mirror image
+ */
 template<typename Pixel>
 class MirrorAdapter : public ConstImageAdapter<Pixel> {
 public:
@@ -785,6 +879,58 @@ const Pixel	MosaicAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////
+// Functor adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Functor>
+class FunctorAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	image;
+	Functor	f;
+public:
+	FunctorAdapter(const ConstImageAdapter<double>& _image,
+		const Functor& _f)
+		: ConstImageAdapter<double>(_image.getSize()),
+		  image(_image), f(_f) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating functor adapter");
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		return f(image.pixel(x,y));
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Window scaling adapter
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Quick and dirty adapter to extract a subrectangle and change scale
+ *
+ * This adapter does not attempt to interpolate pixels, it just computs
+ * the coordinates and rounds them down
+ */
+template<typename Pixel>
+class WindowScalingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	ImageRectangle	_source;
+	double	xscaling;
+	double	yscaling;
+public:
+	WindowScalingAdapter(const ConstImageAdapter<Pixel>& image,
+		const ImageRectangle& source, const ImageSize& target)
+		: ConstImageAdapter<Pixel>(target), _image(image),
+		  _source(source) {
+		xscaling = _source.size().width() / (double)target.width();
+		yscaling = _source.size().height() / (double)target.height();
+debug(LOG_DEBUG, DEBUG_LOG, 0, "xscaling = %f, yscaling = %f", xscaling, yscaling);
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		unsigned int	xx = trunc(_source.origin().x() + xscaling * x);
+		unsigned int	yy = trunc(_source.origin().y() + yscaling * y);
+		return _image.pixel(xx, yy);
+	}
+};
 
 } // namespace image
 } // namespace astro
+
+
+#endif /* _AstroAdapter_h */

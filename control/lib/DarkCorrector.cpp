@@ -14,6 +14,7 @@
 
 using namespace astro::image;
 using namespace astro::image::filter;
+using namespace astro::adapter;
 
 namespace astro {
 namespace calibration {

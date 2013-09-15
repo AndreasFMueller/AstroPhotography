@@ -316,6 +316,8 @@ Astro::CcdInfo	convert(const astro::camera::CcdInfo& info) {
 	result.size = convert(info.size());
 	result.binningmodes = convert(info.modes());
 	result.shutter = info.shutter();
+	result.pixelwidth = info.pixelwidth();
+	result.pixelheight = info.pixelheight();
 	return result;
 }
 
@@ -324,6 +326,8 @@ astro::camera::CcdInfo	convert(const Astro::CcdInfo& info) {
 					convert(info.size), info.id);
 	result.addModes(convert(info.binningmodes));
 	result.setShutter(info.shutter);
+	result.pixelwidth(info.pixelwidth);
+	result.pixelheight(info.pixelheight);
 	return result;
 }
 
@@ -332,6 +336,31 @@ astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info) {
 					convert(info->size), info->id);
 	result.addModes(convert(info->binningmodes));
 	result.setShutter(info->shutter);
+	result.pixelwidth(info->pixelwidth);
+	result.pixelheight(info->pixelheight);
+	return result;
+}
+
+// GuiderDescriptor
+
+astro::guiding::GuiderDescriptor	convert(
+	const Astro::GuiderFactory::GuiderDescriptor& guiderdescriptor) {
+	astro::guiding::GuiderDescriptor	result(
+		std::string(guiderdescriptor.cameraname),
+		guiderdescriptor.ccdid,
+		std::string(guiderdescriptor.guiderportname)
+	);
+	return result;
+}
+
+Astro::GuiderFactory::GuiderDescriptor	convert(
+	const astro::guiding::GuiderDescriptor& guiderdescriptor) {
+	Astro::GuiderFactory::GuiderDescriptor	result;
+	result.cameraname = CORBA::string_dup(
+		guiderdescriptor.cameraname().c_str());
+	result.ccdid = guiderdescriptor.ccdid();
+	result.guiderportname = CORBA::string_dup(
+		guiderdescriptor.guiderportname().c_str());
 	return result;
 }
 

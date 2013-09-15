@@ -8,8 +8,8 @@
 #include <AstroTransform.h>
 #include <AstroDebug.h>
 
-using namespace astro::image;
 using namespace astro::image::transform;
+using namespace astro::adapter;
 
 namespace astro {
 namespace image {
@@ -154,7 +154,7 @@ Image<RGB<unsigned char> >	*DisplayConverter::convertColor(const ImagePtr image)
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tryping type: %p", imageptr);	\
 	if (NULL != imageptr) {						\
-		LuminanceAdapter<Pixel>	la(*imageptr);			\
+		LuminanceAdapter<Pixel, double>	la(*imageptr);		\
 		luminanceimage = new Image<double>(la);			\
 	}								\
 }

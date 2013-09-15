@@ -9,6 +9,7 @@
 
 using namespace astro::image;
 using namespace astro::camera;
+using namespace astro::adapter;
 
 namespace astro {
 

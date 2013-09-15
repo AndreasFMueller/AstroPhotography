@@ -7,7 +7,7 @@
 #define _NetLocator_h
 
 #include <AstroLocator.h>
-#include <device.hh>
+#include <module.hh>
 
 namespace astro {
 namespace camera {

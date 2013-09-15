@@ -1,0 +1,112 @@
+//
+// guider.idl -- Interface to an autonomous guider
+//
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil 2013
+//
+#include "camera.idl"
+
+module Astro {
+	interface Guider {
+		/**
+		 * \brief States of the guider
+		 */
+		enum GuiderState {
+			// Without the camera, ccd and guiderport selected,
+			// the guider is not configured
+			GUIDER_UNCONFIGURED,
+			// When the camera, ccd and guider port have been
+			// configured, the 
+			GUIDER_IDLE,
+			// Before the guider can be used for guiding, it must
+			// be calibrated
+			GUIDER_CALIBRATING,
+			// When the guider ist calibrated, it can be used
+			// for guiding
+			GUIDER_CALIBRATED,
+			// The calibrated guider can be used for guiding
+			GUIDER_GUIDING
+		};
+		GuiderState	getState();
+
+		/**
+		 * \brief Choose a camera to for the guider
+		 */
+		Camera	getCamera() raises(BadState);
+		Ccd	getCcd() raises(BadState);
+		
+		/**
+		 * \brief Choose a guider port for the guider
+		 *
+		 * If a string of length 0 is given as the name, then
+		 * it is assumed that the guider port of the chosen
+		 * camera should be used
+		 */
+		GuiderPort	getGuiderPort() raises(BadState);
+
+		/**
+		 * \brief Point structure to indicate which star to use
+		 */
+		struct Point {
+			float	x;
+			float	y;
+		};
+
+		/**
+		 * \brief Define the area of interest to use for guiding
+		 */
+		void	setupGuider(in ImageRectangle rectangle,
+				in Point star, in float exposuretime)
+			raises(BadParameter,BadState);
+		ImageRectangle	selectedArea() raises(BadState);
+		Point	selectedPoint() raises(BadState);
+		float	exposureTime() raises(BadState);
+
+		/**
+		 * \brief Methods related to calibration
+		 */
+		struct Calibration {
+			sequence<float>	coefficients;
+		};
+		Calibration	getCalibration() raises(BadState);
+		void	useCalibration(in Calibration cal);
+		void	startCalibration(in float sensitivity);
+
+		/**
+		 * \brief Control the guiding
+		 */
+		void	startGuiding(in float guidinginterval) raises(BadState);
+		float	getGuidingInterval() raises(BadState);
+		void	stopGuiding() raises(BadState);
+
+		/**
+		 * \brief 
+		 */
+		ShortImage	mostRecentImage() raises(BadState);
+		Point	mostRecentOffset() raises(BadState);
+		float	mostRecentDelay() raises(BadState);
+		struct GuiderAction {
+			float	ra;
+			float	dec;
+		};
+		GuiderAction	mostRecentAction() raises(BadState);
+	};
+
+	/**
+	 * \brief The GuiderFactory builds Guider objects
+	 *
+	 * Guiders are persistent in the server, because the may have to be
+	 * doing their work even when no client is connected. The GuiderFactory
+	 * keeps a repository of guider objects. New guider objects can
+	 * be created by specifying camera, ccd and guider port.
+	 */
+	interface GuiderFactory {
+		struct GuiderDescriptor {
+			string	cameraname;
+			long	ccdid;
+			string	guiderportname;
+		};
+		typedef sequence<GuiderDescriptor> GuiderList;
+		GuiderList	list();
+		Guider	get(in GuiderDescriptor descriptor) raises(NotFound);
+	};
+};
