@@ -39,7 +39,10 @@ void	BackgroundTest::tearDown() {
 void	BackgroundTest::testBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() begin");
 	// create a linear function
-	LinearFunction<float>	lf(0.01, 0.02, 47);
+	LinearFunction<float>	lf(ImagePoint(1000, 500), false);
+	lf[0] = 0.01;
+	lf[1] = 0.02;
+	lf[2] = 47;
 
 	// create an image with random data in it
 	unsigned int	width = 2000;
@@ -56,7 +59,7 @@ void	BackgroundTest::testBase() {
 
 	// compute the lower bound
 	MinimumEstimator	me(100);
-	LinearFunction<float>	l2 = me(image);
+	LinearFunction<float>	l2 = me.linearfunction(ImagePoint(1000, 500), false, image);
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() end");
 }

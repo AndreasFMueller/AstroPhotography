@@ -88,6 +88,7 @@ public:
 	ImagePoint	upperleft() const;
 	ImagePoint	lowerleft() const;
 	ImagePoint	lowerright() const;
+	ImagePoint	center() const;
 	// scaling
 	ImageSize	operator*(const double l) const;
 };
@@ -267,6 +268,7 @@ public:
 	void	setOrigin(const ImagePoint& origin) { frame.setOrigin(origin); }
 	const ImageSize&	size() const { return frame.size(); }
 	const ImagePoint&	origin() const { return frame.origin(); }
+	ImagePoint	center() const { return size().center(); }
 
 	// constructors and destructor
 	ImageBase(unsigned int w = 0, unsigned int h = 0);

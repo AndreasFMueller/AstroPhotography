@@ -15,45 +15,96 @@ namespace astro {
 namespace adapter {
 
 /**
- * \brief Gradients are described by linear functions on the image coordinates
+ * \brief Common base class for all background functions
  */
-class LinearFunctionBase {
-	double	a[3];
+class FunctionBase {
 	bool	_gradient;
-	double	_scalefactor;
 public:
 	bool	gradient() const { return _gradient; }
 	void	gradient(bool gradient) { _gradient = gradient; }
+
+private:
+	bool	_symmetric;
+public:
+	bool	symmetric() const { return _symmetric; }
+	void	symmetric(bool symmetric) { _symmetric = symmetric; }
+
+private:
+	double	_scalefactor;
+public:
+	double	scalefactor() const { return _scalefactor; }
+	void	scalefactor(double scalefactor) { _scalefactor = scalefactor; }
+
+protected:
+	ImagePoint	_center;
+public:
+	ImagePoint	center() const { return _center; }
+
+public:
 	typedef std::pair<Point, double>	doublevaluepair;
+
+	FunctionBase(const ImagePoint& center, bool symmetric)
+		: _symmetric(symmetric), _center(center) {
+		_gradient = true;
+		_scalefactor = 1.;
+	}
+	FunctionBase(const FunctionBase& other);
+	virtual double	evaluate(const Point& point) const = 0;
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Gradients are described by linear functions on the image coordinates
+ */
+class LinearFunctionBase : public FunctionBase {
+	double	a[3];
 protected:
 	void	reduce(const std::vector<doublevaluepair>& values);
 public:
 	// standard constructors
-	LinearFunctionBase(double alpha = 0., double beta = 0., double gamma = 0.);
+	LinearFunctionBase(const ImagePoint& point, bool symmetric);
 	LinearFunctionBase(const LinearFunctionBase& other);
 
 	// constructor from data set
-	LinearFunctionBase(const std::vector<doublevaluepair>& values);
+	LinearFunctionBase(const ImagePoint& center, bool symmetric,
+		const std::vector<doublevaluepair>& values);
 
 	// evaluation
-	double	evaluate(const Point& point) const;
-	double	norm(const ImageSize& size) const;
+	virtual double	evaluate(const Point& point) const;
+	double	norm() const;
 
 	// coefficient access
-	double	operator[](int i) const;
-	double&	operator[](int i);
-
-	// scale factor accessor
-	double	scalefactor() const { return _scalefactor; }
-	void	scalefactor(double scalefactor) { _scalefactor = scalefactor; }
+	virtual double	operator[](int i) const;
+	virtual double&	operator[](int i);
 
 	// linear operators
 	LinearFunctionBase	operator+(const LinearFunctionBase& other);
 	LinearFunctionBase&	operator=(const LinearFunctionBase& other);
 	
 	// text representation
-	std::string	toString() const;
+	virtual std::string	toString() const;
 };
+
+/**
+ * \brief Quadratic background function
+ */
+class QuadraticFunctionBase : public LinearFunctionBase {
+	double	q[3];
+protected:
+	void	reduce(const std::vector<doublevaluepair>& values);
+public:
+	QuadraticFunctionBase(const ImagePoint& center, bool symmetric);
+	QuadraticFunctionBase(const LinearFunctionBase& linear);
+	virtual double	evaluate(const Point& point) const;
+	virtual double	operator[](int i) const;
+	virtual double&	operator[](int i);
+	QuadraticFunctionBase	operator+(const QuadraticFunctionBase& other);
+	QuadraticFunctionBase	operator+(const LinearFunctionBase& other);
+	QuadraticFunctionBase&	operator=(const QuadraticFunctionBase& other);
+	QuadraticFunctionBase&	operator=(const LinearFunctionBase& other);
+	virtual std::string	toString() const;
+};
+
 
 /**
  * \brief Linear functions with complex pixel values
@@ -64,9 +115,11 @@ public:
 	typedef std::pair<Point, Pixel>	valuepair;
 	typedef std::vector<valuepair>	values_type;
 
-	LinearFunction(double alpha = 0, double beta = 0, double gamma = 0)
-		: LinearFunctionBase(alpha, beta, gamma) { }
-	LinearFunction(const LinearFunctionBase& other) : LinearFunctionBase(other) { }
+	LinearFunction() : LinearFunctionBase(ImagePoint(), true) { }
+	LinearFunction(const ImagePoint& center, bool symmetric)
+		: LinearFunctionBase(center, symmetric) { }
+	LinearFunction(const LinearFunctionBase& other)
+		: LinearFunctionBase(other) { }
 
 	LinearFunction(const values_type& values) {
 		std::vector<doublevaluepair>	converted;
@@ -101,11 +154,72 @@ public:
 	}
 };
 
+template<typename Pixel>
+class QuadraticFunction : public QuadraticFunctionBase {
+public:
+	typedef std::pair<Point, Pixel>	valuepair;
+	typedef std::vector<valuepair>	values_type;
+
+	QuadraticFunction(const ImagePoint& center, bool symmetric)
+		: QuadraticFunctionBase(center, symmetric) {
+	}
+
+	QuadraticFunction(const values_type& values) {
+		std::vector<doublevaluepair>	converted;
+		typename std::vector<valuepair>::const_iterator	i;
+		for (i = values.begin(); i != values.end(); i++) {
+			double	v = i->second;
+			converted.push_back(std::make_pair(i->first, v));
+		}
+		reduce(converted);
+	}
+
+	virtual Pixel	operator()(const Point& point) const {
+		Pixel	result = evaluate(point);
+		return result;
+	}
+
+	virtual Pixel	operator()(const ImagePoint& point) const {
+		return operator()(Point(point));
+	}
+
+	virtual Pixel	operator()(unsigned int x, unsigned int y) const {
+		return operator()(Point(x, y));
+	}
+
+	QuadraticFunction<Pixel>	operator+(
+		const QuadraticFunction<Pixel>& other) {
+		return QuadraticFunction<Pixel>(
+			QuadraticFunctionBase::operator+(other));
+	}
+
+	QuadraticFunction<Pixel>&	operator=(
+		const QuadraticFunction<Pixel>& other) {
+		QuadraticFunctionBase::operator=(other);
+		return *this;
+	}
+};
+
+/**
+ * \brief Background base
+ */
+template<typename Pixel>
+class BackgroundBase {
+public:
+	virtual bool	gradient() const = 0;
+	virtual void	gradient(bool gradient) = 0;
+	virtual double	scalefactor() const = 0;
+	virtual void	scalefactor(double scalefactor) = 0;
+	virtual RGB<Pixel>	operator()(const Point& point) const = 0;
+	virtual RGB<Pixel>	operator()(const ImagePoint& point) const = 0;
+	virtual RGB<Pixel>	operator()(unsigned int x, unsigned int y) const = 0;
+};
+
 /**
  * \brief Describing a background with a gradient
  */
 template<typename Pixel>
-class Background {
+class Background : public BackgroundBase<Pixel> {
 	LinearFunction<Pixel>	R;
 	LinearFunction<Pixel>	G;
 	LinearFunction<Pixel>	B;
@@ -144,7 +258,12 @@ class	MinimumEstimator {
 	unsigned int	alpha;
 public:
 	MinimumEstimator(unsigned int _alpha) : alpha(_alpha) { }
-	LinearFunction<float>	operator()(const ConstImageAdapter<float>& values) const;
+	LinearFunction<float>	linearfunction(const ImagePoint& center,
+		bool symmetric,
+		const ConstImageAdapter<float>& values) const;
+	QuadraticFunction<float> quadraticfunction(const ImagePoint& center,
+		bool symmetric,
+		const ConstImageAdapter<float>& values) const;
 };
 
 /**
@@ -159,8 +278,8 @@ class BackgroundExtractor {
 	unsigned int	alpha;
 public:
 	BackgroundExtractor(unsigned int _alpha) : alpha(_alpha) { }
-	Background<float>	operator()(const Image<RGB<float> >& image) const;
-	Background<float>	operator()(const Image<float>& image) const;
+	Background<float>	operator()(const ImagePoint& center, bool symmetric, const Image<RGB<float> >& image) const;
+	Background<float>	operator()(const ImagePoint& center, bool symmetric, const Image<float>& image) const;
 };
 
 /**

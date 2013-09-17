@@ -27,49 +27,71 @@ using namespace astro::image::filter;
 namespace astro {
 namespace adapter {
 
-LinearFunctionBase::LinearFunctionBase(double alpha, double beta, double gamma) {
-	a[0] = alpha; a[1] = beta; a[2] = gamma;
-	_gradient = true;
-	_scalefactor = 1.;
+//////////////////////////////////////////////////////////////////////
+// FunctionBase implementation
+//////////////////////////////////////////////////////////////////////
+
+FunctionBase::FunctionBase(const FunctionBase& other) :
+	_symmetric(other.symmetric()), _center(other.center()) {
+	_gradient = other.gradient();
+	_scalefactor = other.scalefactor();
 }
 
+std::string	FunctionBase::toString() const {
+	return stringprintf("[gradient=%s,symmetric=%s,scalefactor=%.3f]",
+		(gradient()) ? "YES" : "NO", (symmetric()) ? "YES" : "NO",
+		scalefactor());
+}
 
-LinearFunctionBase::LinearFunctionBase(const LinearFunctionBase& other) {
+//////////////////////////////////////////////////////////////////////
+// LinearFunctionBase implementation
+//////////////////////////////////////////////////////////////////////
+
+LinearFunctionBase::LinearFunctionBase(const ImagePoint& point, bool symmetric)
+	: FunctionBase(point, symmetric) {
+	for (int i = 0; i < 3; i++) { a[i] = 0; }
+}
+
+LinearFunctionBase::LinearFunctionBase(const LinearFunctionBase& other) :
+	FunctionBase(other) {
 	for (int i = 0; i < 3; i++) { a[i] = other.a[i]; }
-	_gradient = other.gradient();
 }
 
 double  LinearFunctionBase::evaluate(const Point& point) const {
-	if (_gradient) {
-		return _scalefactor * (point.x() * a[0] + point.y() * a[1] + a[2]);
-	} else {
-		return _scalefactor * a[2];
+	double	value = a[2];
+	if (gradient() && symmetric()) {
+		double	deltax = point.x() - center().x();
+		double	deltay = point.y() - center().y();
+		value += (deltax * a[0] + deltay * a[1]);
 	}
+	return scalefactor() * value;
 }
 
 inline static double	sqr(const double& x) {
 	return x * x;
 }
 
-double	LinearFunctionBase::norm(const ImageSize& size) const {
+double	LinearFunctionBase::norm() const {
 	double	result = 0;
-	result += sqr(size.width() * a[0]);
-	result += sqr(size.height() * a[1]);
+	result += sqr(center().x() * a[0]);
+	result += sqr(center().y() * a[1]);
 	result += sqr(a[2]);
 	return sqrt(result);
 }
 
 LinearFunctionBase      LinearFunctionBase::operator+(const LinearFunctionBase& other) {
 	LinearFunctionBase      result(*this);
-	result.a[0] = a[0] + other.a[0];
-	result.a[1] = a[1] + other.a[1];
-	result.a[2] = a[2] + other.a[2];
+	for (unsigned int i = 0; i < 3; i++) {
+		result.a[i] = a[i] + other.a[i];
+	}
 	return result;
 }
 
 LinearFunctionBase&     LinearFunctionBase::operator=(
 	const LinearFunctionBase& other) {
-	for (int i = 0; i < 3; i++) { a[i] = other.a[i]; }
+	for (int i = 0; i < 3; i++) {
+		a[i] = other.a[i];
+	}
 	return *this;
 }
 
@@ -105,8 +127,8 @@ void	LinearFunctionBase::reduce(const std::vector<doublevaluepair>& values) {
 	int	line = 0;
 	std::vector<doublevaluepair>::const_iterator	vp;
 	for (vp = values.begin(); vp != values.end(); vp++, line++) {
-		A[line + 0 * m] = vp->first.x();
-		A[line + 1 * m] = vp->first.y();
+		A[line + 0 * m] = vp->first.x() - center().x();
+		A[line + 1 * m] = vp->first.y() - center().x();
 		A[line + 2 * m] = 1;
 		b[line] = vp->second;
 	}
@@ -152,8 +174,9 @@ void	LinearFunctionBase::reduce(const std::vector<doublevaluepair>& values) {
 /**
  * \brief Create a linear function from a set of value pairs
  */
-LinearFunctionBase::LinearFunctionBase(
-	const std::vector<LinearFunctionBase::doublevaluepair>& values) {
+LinearFunctionBase::LinearFunctionBase(const ImagePoint& center, bool symmetric,
+	const std::vector<LinearFunctionBase::doublevaluepair>& values)
+	: FunctionBase(center, symmetric) {
 	a[0] = a[1] = a[2] = 0;
 	reduce(values);
 }
@@ -162,7 +185,8 @@ LinearFunctionBase::LinearFunctionBase(
  * \brief Text representation of a linear form
  */
 std::string	LinearFunctionBase::toString() const {
-	return stringprintf("%f * x + %f * y + %f", a[0], a[1], a[2]);
+	return FunctionBase::toString()
+		+ stringprintf("%f * dx + %f * dy + %f", a[0], a[1], a[2]);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -301,17 +325,62 @@ const float	LinearFunctionAdapter::pixel(unsigned int x, unsigned int y)
 }
 
 //////////////////////////////////////////////////////////////////////
-// Optimization problem solution
+// QuadraticFunctionAdapter
 //////////////////////////////////////////////////////////////////////
-typedef	std::pair<Tile, float>	tilevalue;
-typedef std::vector<tilevalue>	tilevaluevector;
-class LowerBound {
+class QuadraticFunctionAdapter : public ConstImageAdapter<float> {
+	const ConstImageAdapter<float>&	_image;
+	const QuadraticFunction<float>&	_qfunc;
+	const ImagePoint	_origin;
 public:
-	LinearFunction<float>	operator()(const tilevaluevector& values) const;
+	QuadraticFunctionAdapter(const ConstImageAdapter<float>& image,
+		const QuadraticFunction<float>& qfunc,
+		const ImagePoint& origin)
+		: ConstImageAdapter<float>(image.getSize()), _image(image),
+		  _qfunc(qfunc), _origin(origin) {
+	}
+	virtual const float	pixel(unsigned int x, unsigned int y) const;
 };
 
-LinearFunction<float>	LowerBound::operator()(const tilevaluevector& values)
+const float	QuadraticFunctionAdapter::pixel(unsigned int x, unsigned int y)
 	const {
+	return _image.pixel(x, y) - _qfunc(_origin.x() + x, _origin.y() + y);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Optimization problem solution: the LowerBound class
+//////////////////////////////////////////////////////////////////////
+class LowerBound {
+public:
+	typedef	std::pair<Tile, float>	tilevalue;
+	typedef std::vector<tilevalue>	tilevaluevector;
+};
+
+class LinearLowerBound : public LowerBound {
+	LinearFunction<float>	symmetricfunction(const ImagePoint& center,
+		const tilevaluevector& values) const;
+	LinearFunction<float>	asymmetricfunction(const ImagePoint& center,
+		const tilevaluevector& values) const;
+public:
+	LinearFunction<float>	operator()(const ImagePoint& center,
+		bool symmetric, const tilevaluevector& values) const;
+};
+
+LinearFunction<float>	LinearLowerBound::symmetricfunction(
+	const ImagePoint& center, const tilevaluevector& values) const {
+	double	minimum = std::numeric_limits<double>::infinity();
+	tilevaluevector::const_iterator	i;
+	for (i = values.begin(); i != values.end(); i++) {
+		if (i->second < minimum) {
+			minimum = i->second;
+		}
+	}
+	LinearFunction<float>	result(center, true);
+	result[2] = minimum;
+	return result;
+}
+
+LinearFunction<float>	LinearLowerBound::asymmetricfunction(
+	const ImagePoint& center, const tilevaluevector& values) const {
 	// create a problem
 	glp_prob	*lp = glp_create_prob();
 	glp_set_obj_dir(lp, GLP_MAX);
@@ -342,14 +411,14 @@ LinearFunction<float>	LowerBound::operator()(const tilevaluevector& values)
 		// row coefficients and bounds
 		glp_set_row_bnds(lp, row, GLP_UP, 0, vp->second);
 		double	val[4];
-		val[1] = vp->first.x();
-		val[2] = vp->first.y();
+		val[1] = vp->first.x() - center.x();
+		val[2] = vp->first.y() - center.y();
 		val[3] = 1;
 		glp_set_mat_row(lp, row, 3, ind, val);
 
 		// objective function
-		obj[0] += vp->first.x();
-		obj[1] += vp->first.y();
+		obj[0] += vp->first.x() - center.x();
+		obj[1] += vp->first.y() - center.y();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rows set up");
 
@@ -367,32 +436,75 @@ LinearFunction<float>	LowerBound::operator()(const tilevaluevector& values)
 	glp_delete_prob(lp);
 
 	// return the result
-	double	alpha = glp_get_col_prim(lp, 1);
-	double	beta = glp_get_col_prim(lp, 2);
-	double	gamma = glp_get_col_prim(lp, 3);
-	LinearFunction<float>	lb(alpha, beta, gamma);
+	LinearFunction<float>	lb(center, false);
+	lb[0] = glp_get_col_prim(lp, 1);
+	lb[1] = glp_get_col_prim(lp, 2);
+	lb[2] = glp_get_col_prim(lp, 3);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "linear function: %s",
 		lb.toString().c_str());
 	return lb;
 }
 
+LinearFunction<float>	LinearLowerBound::operator()(const ImagePoint& center,
+	bool symmetric, const tilevaluevector& values)
+	const {
+	if (symmetric) {
+		return symmetricfunction(center, values);
+	} else {
+		return asymmetricfunction(center, values);
+	}
+}
+
+
+class QuadraticLowerBound : public LowerBound {
+	QuadraticFunction<float>	symmetricfunction(
+		const ImagePoint& center, const tilevaluevector& values) const;
+	QuadraticFunction<float>	asymmetricfunction(
+		const ImagePoint& center, const tilevaluevector& values) const;
+public:
+	QuadraticFunction<float>	operator()(const ImagePoint& center,
+		bool symmetric, const tilevaluevector& values) const;
+};
+
+QuadraticFunction<float>	QuadraticLowerBound::symmetricfunction(
+	const ImagePoint& center, const tilevaluevector& values) const {
+	QuadraticFunction<float>	result(center, true);
+	return result;
+}
+
+QuadraticFunction<float>	QuadraticLowerBound::asymmetricfunction(
+	const ImagePoint& center, const tilevaluevector& values) const {
+	QuadraticFunction<float>	result(center, false);
+	return result;
+}
+
+QuadraticFunction<float>	QuadraticLowerBound::operator()(
+	const ImagePoint& center, bool symmetric, const tilevaluevector& values)
+	const {
+	if (symmetric) {
+		return symmetricfunction(center, values);
+	} else {
+		return asymmetricfunction(center, values);
+	}
+}
 
 /**
  * \brief Minimum Estimator implementation
  */
-LinearFunction<float>	MinimumEstimator::operator()(
+LinearFunction<float>	MinimumEstimator::linearfunction(
+				const ImagePoint& center, bool symmetric,
 				const ConstImageAdapter<float>& image) const {
 	// construct a set of tiles
 	TileFactory	tf(ImageSize(100, 100));
 	TileSet	tileset = tf(image);
 
 	// initialize the loop
-	LinearFunction<float>	h;
+	LinearFunction<float>	h(center, symmetric);
 	float	delta = std::numeric_limits<float>::infinity();
 	float	epsilon = 0.1;
 	unsigned int	count = 0;
 	while ((count < 10) && (delta > epsilon)) {
-		tilevaluevector	tv;
+		LowerBound::tilevaluevector	tv;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start new iteration %d", count);
 
 		// compute the order statistics in a tile
@@ -409,11 +521,12 @@ LinearFunction<float>	MinimumEstimator::operator()(
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "values computed");
 
 		// set up the optimization problem
-		LowerBound	lb;
-		LinearFunction<float>	hhat = lb(tv);
+		LinearLowerBound	lb;
+		LinearFunction<float>	hhat
+			= lb(image.getSize().center(), symmetric, tv);
 
 		// compute the improved lower bound function
-		delta = hhat.norm(image.getSize());
+		delta = hhat.norm();
 		h = h + hhat;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new lower bound: %s, delta = %f",
 			h.toString().c_str(), delta);
@@ -426,7 +539,8 @@ LinearFunction<float>	MinimumEstimator::operator()(
 /**
  * \brief Compute the background of an image
  */
-Background<float> BackgroundExtractor::operator()(
+Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
+			bool symmetric,
 			const Image<RGB<float> >& image) const {
 	// compute the lower bound for each color 
 	MinimumEstimator	me(alpha);
@@ -434,20 +548,104 @@ Background<float> BackgroundExtractor::operator()(
 	ColorGreenAdapter<float>	greenimage(image);
 	ColorBlueAdapter<float>		blueimage(image);
 	
-	LinearFunction<float>	R = me(redimage);
-	LinearFunction<float>	G = me(greenimage);
-	LinearFunction<float>	B = me(blueimage);
+	LinearFunction<float>	R = me.linearfunction(center, symmetric, redimage);
+	LinearFunction<float>	G = me.linearfunction(center, symmetric, greenimage);
+	LinearFunction<float>	B = me.linearfunction(center, symmetric, blueimage);
 	Background<float>	result(R, G, B);
 	return result;
 }
 
 Background<float>	BackgroundExtractor::operator()(
+				const ImagePoint& center, bool symmetric,
 				const Image<float>& image) const {
 	MinimumEstimator	me(alpha);
-	LinearFunction<float>	l = me(image);
+	LinearFunction<float>	l = me.linearfunction(center, symmetric, image);
 	Background<float>	result(l, l, l);
 	return result;
 }
+
+//////////////////////////////////////////////////////////////////////
+// QuadraticFunctionBase implementation
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief 
+ */
+QuadraticFunctionBase::QuadraticFunctionBase(const ImagePoint& center,
+	bool symmetric) : LinearFunctionBase(center, symmetric) {
+	for (unsigned int i = 0; i < 3; i++) {
+		q[i] = 0;
+	}
+}
+
+double	QuadraticFunctionBase::evaluate(const Point& point) const {
+	double	value = LinearFunctionBase::evaluate(point);
+	if (gradient()) {
+		double	deltax = point.x() - center().x();
+		double	deltay = point.y() - center().y();
+		value += q[0] * (sqr(deltax) + sqr(deltay));
+		if (!symmetric()) {
+			value += q[1] * deltax * deltay
+				+ q[2] * (sqr(deltax) - sqr(deltay));
+		}
+	}
+	return value;
+}
+
+double	QuadraticFunctionBase::operator[](int i) const {
+	if (i < 3) {
+		return LinearFunctionBase::operator[](i);
+	}
+	if (i > 5) {
+		std::runtime_error("index out of range");
+	}
+	return q[i - 3];
+}
+
+double&	QuadraticFunctionBase::operator[](int i) {
+	if (i < 3) {
+		return LinearFunctionBase::operator[](i);
+	}
+	if (i > 5) {
+		std::runtime_error("index out of range");
+	}
+	return q[i - 3];
+}
+
+QuadraticFunctionBase	QuadraticFunctionBase::operator+(
+	const QuadraticFunctionBase& other) {
+	LinearFunctionBase::operator+(other);
+	for (unsigned int i = 0; i < 3; i++) {
+		q[i] += other.q[i];
+	}
+	return *this;
+}
+
+QuadraticFunctionBase	QuadraticFunctionBase::operator+(
+	const LinearFunctionBase& other) {
+	LinearFunctionBase::operator+(other);
+	return *this;
+}
+
+QuadraticFunctionBase&	QuadraticFunctionBase::operator=(
+	const QuadraticFunctionBase& other) {
+	LinearFunctionBase::operator=(other);
+	for (unsigned int i = 0; i < 3; i++) {
+		q[i] = other.q[i];
+	}
+	return *this;
+}
+
+QuadraticFunctionBase&	QuadraticFunctionBase::operator=(
+	const LinearFunctionBase& other) {
+	LinearFunctionBase::operator=(other);
+	return *this;
+}
+
+std::string	QuadraticFunctionBase::toString() const {
+	return LinearFunctionBase::toString()
+		+ stringprintf("[%.3f, %.3f, %.3f]", q[0], q[1], q[2]);
+} 
 
 } // namespace image
 } // namespace astro

@@ -158,6 +158,10 @@ ImagePoint      ImageSize::lowerright() const {
 	return ImagePoint(_width, 0);
 }
 
+ImagePoint	ImageSize::center() const {
+	return ImagePoint(_width / 2, _height / 2);
+}
+
 ImageSize	ImageSize::operator*(const double l) const {
 	unsigned int	x = _width * l;
 	unsigned int	y = _height * l;

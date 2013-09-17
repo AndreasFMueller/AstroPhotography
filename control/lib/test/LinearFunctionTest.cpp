@@ -38,7 +38,7 @@ void	LinearFunctionTest::tearDown() {
 
 void	LinearFunctionTest::testBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() begin");
-	LinearFunctionBase	l;
+	LinearFunctionBase	l(ImagePoint(500, 500), false);
 	l[0] = 0.1;
 	l[1] = 0.2;
 	l[2] = 0.3;
@@ -51,7 +51,7 @@ void	LinearFunctionTest::testBase() {
 			values.push_back(std::make_pair(p, value));
 		}
 	}
-	LinearFunctionBase	l2(values);
+	LinearFunctionBase	l2(ImagePoint(500, 500), false, values);
 	for (unsigned int x = 0; x < 1000; x += 50) {
 		for (unsigned int y = 0; y < 1000; y += 50) {
 			ImagePoint	p(x, y);

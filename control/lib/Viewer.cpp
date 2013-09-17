@@ -111,9 +111,10 @@ Viewer::Viewer(const std::string& filename) {
 	// compute the white balance vector
 	filter::WhiteBalance<float>	wb;
 	RGB<double>	rgb = wb.filter(*imagep);
+	ImagePoint	center = rawimage->center();
 
 	// background stuff
-	Background<float>	bg = BackgroundExtractor(100)(*imagep);
+	Background<float>	bg = BackgroundExtractor(100)(center, true, *imagep);
 	background(bg);
 	backgroundEnabled(true);
 	gradientEnabled(true);
