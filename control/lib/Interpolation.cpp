@@ -134,7 +134,7 @@ void	MonochromeInterpolator<DarkPixelType, Pixel>::interpolatePixel(
 		}
 	}
 	Pixel	result = sum / counter;
-	image.pixel(x, y) = result;
+	image.writablepixel(x, y) = result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -216,7 +216,7 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateGreen(
 		}
 	}
 	Pixel	result = sum / counter;
-	image.pixel(x, y) = result;
+	image.writablepixel(x, y) = result;
 }
 
 template<typename DarkPixelType, typename Pixel>
@@ -255,7 +255,7 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateRedBlue(
 		}
 	}
 	Pixel	result = sum / counter;
-	image.pixel(x, y) = result;
+	image.writablepixel(x, y) = result;
 }
 
 template<typename DarkPixelType, typename Pixel>

@@ -10,7 +10,7 @@ namespace image {
 
 ViewerPipeline::ViewerPipeline(const Image<RGB<float> > *_imagep)
                 : ConstImageAdapter<unsigned int>(_imagep->size()),
-		  imagep(_imagep),
+		  //imagep(_imagep),
 		  backgroundsubtract(*_imagep),
                   colorcorrectionadapter(backgroundsubtract),
                   luminanceimage(colorcorrectionadapter),

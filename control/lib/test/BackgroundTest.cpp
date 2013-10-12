@@ -39,7 +39,7 @@ void	BackgroundTest::tearDown() {
 void	BackgroundTest::testBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() begin");
 	// create a linear function
-	LinearFunction<float>	lf(ImagePoint(1000, 500), false);
+	LinearFunction	lf(ImagePoint(1000, 500), false);
 	lf[0] = 0.01;
 	lf[1] = 0.02;
 	lf[2] = 47;
@@ -58,8 +58,8 @@ void	BackgroundTest::testBase() {
 	}
 
 	// compute the lower bound
-	MinimumEstimator	me(100);
-	LinearFunction<float>	l2 = me.linearfunction(ImagePoint(1000, 500), false, image);
+	MinimumEstimator<LinearFunction>	me(image, 100);
+	FunctionPtr	l2 = me(ImagePoint(1000, 500), false);
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBase() end");
 }

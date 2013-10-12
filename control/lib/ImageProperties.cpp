@@ -9,25 +9,18 @@
 namespace astro {
 namespace image {
 
+#define	iscolor(image, pixel)						\
+	if (dynamic_cast<Image<pixel> *>(&*image)) {			\
+		return false;						\
+	}
+
 bool	isColorImage(const ImagePtr& image) {
-	if (dynamic_cast<Image<unsigned char> *>(&*image)) {
-		return false;
-	}
-	if (dynamic_cast<Image<unsigned short> *>(&*image)) {
-		return false;
-	}
-	if (dynamic_cast<Image<unsigned int> *>(&*image)) {
-		return false;
-	}
-	if (dynamic_cast<Image<unsigned long> *>(&*image)) {
-		return false;
-	}
-	if (dynamic_cast<Image<float> *>(&*image)) {
-		return false;
-	}
-	if (dynamic_cast<Image<double> *>(&*image)) {
-		return false;
-	}
+	iscolor(image, unsigned char)
+	iscolor(image, unsigned short)
+	iscolor(image, unsigned int)
+	iscolor(image, unsigned long)
+	iscolor(image, float)
+	iscolor(image, double)
 	return true;
 }
 

@@ -104,7 +104,7 @@ ImageIteratorBase	ImageIteratorBase::operator-(const int steps) const {
 	}
 	// XXX check for negative difference
 	unsigned int	newoffset = offset - steps * stride;
-	if ((newoffset < 0) || (newoffset > last)) {
+	if (newoffset > last) {
 		newoffset = std::numeric_limits<unsigned int>::max();
 	}
 	return ImageIteratorBase(first, last, offset - steps * stride, stride);

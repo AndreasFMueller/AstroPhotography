@@ -420,7 +420,7 @@ template<typename Pixel>
 class ImageAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ImageAdapter(const ImageSize& size) : ConstImageAdapter<Pixel>(size) {}
-	virtual Pixel&	pixel(unsigned int x, unsigned int y) = 0;
+	virtual Pixel&	writablepixel(unsigned int x, unsigned int y) = 0;
 };
 
 
@@ -576,7 +576,7 @@ public:
 	 * \brief Read only access to pixel values specified by offset.
 	 */
 	const Pixel&	operator[](unsigned int offset) const {
-		if ((offset < 0) || (offset > frame.size().getPixels())) {
+		if (offset > frame.size().getPixels()) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -604,6 +604,10 @@ public:
 	 * \brief Read/write access to pixels specified by image coordinates
  	 */
 	Pixel&	pixel(unsigned int x, unsigned int y) {
+		return pixels[pixeloffset(x, y)];
+	}
+
+	Pixel&	writablepixel(unsigned int x, unsigned int y) {
 		return pixels[pixeloffset(x, y)];
 	}
 

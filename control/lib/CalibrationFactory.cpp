@@ -384,7 +384,7 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 				break;
 			}
 			if (fabs(v - mean) > stddevk) {
-				sga.pixel(x, y)
+				sga.writablepixel(x, y)
 					= std::numeric_limits<T>::quiet_NaN();
 				badpixelcount++;
 			}

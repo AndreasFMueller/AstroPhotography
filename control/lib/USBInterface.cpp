@@ -71,7 +71,7 @@ int	InterfaceDescriptor::numEndpoints() const {
 }
 
 EndpointDescriptorPtr	InterfaceDescriptor::operator[](size_t index) const {
-	if ((index < 0) || (index >= endpointlist.size())) {
+	if (index >= endpointlist.size()) {
 		throw std::range_error("outside endpoint range");
 	}
 	return endpointlist[index];
@@ -174,7 +174,7 @@ const InterfaceDescriptorPtr&	Interface::operator[](size_t index) const {
 }
 
 InterfaceDescriptorPtr&	Interface::operator[](size_t index) {
-	if ((index < 0) || (index >= numAltsettings())) {
+	if (index >= numAltsettings()) {
 		throw std::range_error("out of alt setting range");
 	}
 	return altsettingvector[index];

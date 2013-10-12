@@ -277,16 +277,16 @@ class RangeAdapter : public ConstImageAdapter<Pixel> {
 	float	b;
 public:
 	RangeAdapter(const ConstImageAdapter<Pixel>& image,
-		float min, float max);
+		float min = 0, float max = 1);
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
 	double	min() const { return -b; }
 	double	max() const { return 1/m - b; }
-	void	setRange(float min, float max);
+	void	setRange(float min = 0, float max = 1);
 };
 
 template<typename Pixel>
 RangeAdapter<Pixel>::RangeAdapter(const ConstImageAdapter<Pixel>& image,
-	float min = 0, float max = 1)
+	float min, float max)
 	: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
 	setRange(min, max);
 }

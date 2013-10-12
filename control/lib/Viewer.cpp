@@ -114,7 +114,9 @@ Viewer::Viewer(const std::string& filename) {
 	ImagePoint	center = rawimage->center();
 
 	// background stuff
-	Background<float>	bg = BackgroundExtractor(100)(center, true, *imagep);
+	BackgroundExtractor	be(100);
+	Background<float>	bg = be(center, true,
+					BackgroundExtractor::LINEAR, *imagep);
 	background(bg);
 	backgroundEnabled(true);
 	gradientEnabled(true);

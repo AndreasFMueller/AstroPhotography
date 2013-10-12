@@ -141,7 +141,7 @@ public:
 	SubgridAdapter(ImageAdapter<Pixel>& image,
 		const Subgrid& subgrid);
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
-	virtual Pixel&	pixel(unsigned int x, unsigned int y);
+	virtual Pixel&	writablepixel(unsigned int x, unsigned int y);
 };
 
 template<typename Pixel>
@@ -162,8 +162,8 @@ const Pixel	SubgridAdapter<Pixel>::pixel(unsigned int x,
 }
 
 template<typename Pixel>
-Pixel&	SubgridAdapter<Pixel>::pixel(unsigned int x, unsigned int y) {
-	return image.pixel(subgrid.x(x), subgrid.y(y));
+Pixel&	SubgridAdapter<Pixel>::writablepixel(unsigned int x, unsigned int y) {
+	return image.writablepixel(subgrid.x(x), subgrid.y(y));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -396,7 +396,7 @@ const Pixel	MaskingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 template<typename Pixel>
 class CachingAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
-	bool	tags[];
+	bool	*tags;
 	Pixel	values[];
 public:
 	CachingAdapter(const ConstImageAdapter<Pixel>& image);
@@ -442,6 +442,7 @@ class DownSamplingAdapter : public ConstImageAdapter<Pixel> {
 	ImageSize	sampling;
 	double	*weights;
 	unsigned int	volume;
+	Pixel	*pixels;
 public:
 	DownSamplingAdapter(const ConstImageAdapter<Pixel>& image,
 		const ImageSize& sampling);
@@ -462,11 +463,13 @@ DownSamplingAdapter<Pixel>::DownSamplingAdapter(
 	for (unsigned int index = 0; index < volume; index++) {
 		weights[index] = 1./volume;
 	}
+	pixels = new Pixel[volume];
 }
 
 template<typename Pixel>
 DownSamplingAdapter<Pixel>::~DownSamplingAdapter() {
 	delete[] weights;
+	delete[] pixels;
 }
 
 template<typename Pixel>
@@ -474,7 +477,7 @@ const Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
 	unsigned int	originx = x * sampling.width();
 	unsigned int	originy = y * sampling.height();
-	Pixel	pixels[volume];
+	//Pixel	pixels[volume];
 	unsigned int	index = 0;
 	for (unsigned int dx = 0; dx < sampling.width(); dx++) {
 		for (unsigned int dy = 0; dy < sampling.height(); dy++) {
@@ -617,7 +620,7 @@ const Pixel	ConstPixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 }
 
 template <typename Pixel>
-class PixelValueAdapter : public ImageAdapter<Pixel> {
+class PixelValueAdapter : public ConstImageAdapter<Pixel> {
 	const Image<unsigned char>	*byteimage;
 	const Image<unsigned short>	*shortimage;
 	const Image<unsigned int>	*intimage;
@@ -626,12 +629,12 @@ class PixelValueAdapter : public ImageAdapter<Pixel> {
 	const Image<double>		*doubleimage;
 public:
 	PixelValueAdapter(ImagePtr& image);
-	virtual Pixel	pixel(unsigned int x, unsigned int y);
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
 PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr& image) :
-	ImageAdapter<Pixel>(image->size()) {
+	ConstImageAdapter<Pixel>(image->size()) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
 	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
@@ -649,7 +652,7 @@ PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr& image) :
 }
 
 template<typename Pixel>
-Pixel	PixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) {
+Pixel	PixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
         if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
         if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
         if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
@@ -693,7 +696,7 @@ protected:
 public:
 	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ConstImageAdapter<T>(image.getSize()), _image(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) {
+	virtual const T	pixel(unsigned int x, unsigned int y) const {
 		T	v = _image.pixel(x, y).luminance();
 		return v;
 	}
@@ -831,14 +834,14 @@ public:
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
 		
 		switch (direction) {
-		NONE:
+		case NONE:
 			break;
-		HORIZONTAL:
+		case HORIZONTAL:
 			x = image.getSize().width() - x;
 			break;
-		CENTRAL:
+		case CENTRAL:
 			x = image.getSize().width() - x;
-		VERTICAL:
+		case VERTICAL:
 			y = image.getSize().height() - y;
 			break;
 		}

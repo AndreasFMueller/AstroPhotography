@@ -17,7 +17,7 @@ namespace astro {
 namespace image {
 
 class ViewerPipeline : public ConstImageAdapter<unsigned int> {
-	const Image<RGB<float> >		*imagep;
+	//const Image<RGB<float> >		*imagep;
 	BackgroundSubtractionAdapter		backgroundsubtract;
 	ColorCorrectionAdapter<float>		colorcorrectionadapter;
 	LuminanceExtractionAdapter<float>	luminanceimage;

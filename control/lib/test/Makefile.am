@@ -43,7 +43,7 @@ tests_SOURCES = tests.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	LinearFunctionTest.cpp BackgroundTest.cpp \
+	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
