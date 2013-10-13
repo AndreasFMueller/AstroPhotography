@@ -16,7 +16,8 @@ class listcommand : public clicommand {
 public:
 	listcommand() : clicommand("list") { }
 	~listcommand() { }
-	void	operator()(const std::vector<std::string>& arguments);
+	void	operator()(const std::string& command,
+			const std::vector<std::string>& arguments);
 };
 
 } // namespace cli

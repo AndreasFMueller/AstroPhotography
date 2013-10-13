@@ -18,7 +18,8 @@ class clicommand {
 public:
 	clicommand(const std::string& _name) : name(_name) { }
 	~clicommand() { }
-	virtual void	operator()(const std::vector<std::string>& args) { }
+	virtual void	operator()(const std::string& command,
+				const std::vector<std::string>& args) { }
 };
 
 class command_error : public std::runtime_error {

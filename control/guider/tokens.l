@@ -18,6 +18,14 @@ list	{
 		yy_push_state(ARGUMENTS);
 		return LIST;
 	}
+module	{
+		yy_push_state(ARGUMENTS);
+		return MODULE;
+	}
+locator	{
+		yy_push_state(ARGUMENTS);
+		return LOCATOR;
+	}
 
 exit	{
 		return EXIT;

@@ -11,6 +11,8 @@
 #include <AstroDebug.h>
 #include <NameService.h>
 #include <listcommand.h>
+#include <locatorcommand.h>
+#include <modulecommand.h>
 #include <string>
 #include <vector>
 
@@ -29,6 +31,8 @@ sharedcli	shcli;
 %}
 %token EXIT
 %token LIST
+%token LOCATOR
+%token MODULE
 %token <argument>ARGUMENT
 %token END_OF_FILE
 %type <arguments>arguments
@@ -75,7 +79,21 @@ commandline:
    |	LIST arguments '\n' {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "list command");
 		listcommand	c;
-		c(*$2);
+		c(std::string("list"), *$2);
+		delete $2;
+		$2 = NULL;
+	}
+   |	MODULE arguments '\n' {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
+		modulecommand	c;
+		c(std::string("module"), *$2);
+		delete $2;
+		$2 = NULL;
+	}
+   |	LOCATOR arguments '\n' {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "locator command");
+		locatorcommand	c;
+		c(std::string("locator"), *$2);
 		delete $2;
 		$2 = NULL;
 	}

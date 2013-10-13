@@ -4,9 +4,10 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 bin_PROGRAMS = guide
-noinst_HEADER = cli.h guidecli.h clicommand.h
+noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
+	modulecommand.h
 
-COMMANDS = listcommand.cpp
+COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	$(COMMANDS)

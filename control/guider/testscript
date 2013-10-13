@@ -1,2 +1,4 @@
 list modules
+module help
+module simulator version
 exit

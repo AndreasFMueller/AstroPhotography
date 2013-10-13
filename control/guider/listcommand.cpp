@@ -10,7 +10,8 @@
 namespace astro {
 namespace cli {
 
-void	listcommand::operator()(const std::vector<std::string>& arguments) {
+void	listcommand::operator()(const std::string& command,
+		const std::vector<std::string>& arguments) {
 	if (arguments.size() == 0) {
 		throw command_error("list command requires arguments");
 	}
