@@ -19,34 +19,35 @@ void	modulecommand::operator()(const std::string& command,
 		help();
 		return;
 	}
+
 	std::string	modulename = arguments[0];
+	if (arguments.size() < 2) {
+		throw std::runtime_error("not enough arguments");
+	}
 	if (arguments[1] == std::string("version")) {
 		moduleversion(modulename);
 		return;
 	}
-	if (arguments[1] == std::string("camera")) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		listdevices(modulename, Astro::DeviceLocator::DEVICE_CAMERA);
-		return;
-	}
-	if (arguments[1] == std::string("focuser")) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		listdevices(modulename, Astro::DeviceLocator::DEVICE_FOCUSER);
-		return;
-	}
-	if (arguments[1] == std::string("guiderport")) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		listdevices(modulename, Astro::DeviceLocator::DEVICE_GUIDERPORT);
-		return;
-	}
-	if (arguments[1] == std::string("filterwheel")) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		listdevices(modulename, Astro::DeviceLocator::DEVICE_FILTERWHEEL);
-		return;
-	}
-	if (arguments[1] == std::string("cooler")) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		listdevices(modulename, Astro::DeviceLocator::DEVICE_COOLER);
+
+	if (arguments[1] == std::string("list")) {
+		if (arguments.size() < 3) {
+			throw std::runtime_error("not enough arguments");
+		}
+		Astro::DeviceLocator::device_type	type;
+		if (arguments[2] == std::string("camera")) {
+			type = Astro::DeviceLocator::DEVICE_CAMERA;
+		} else if (arguments[2] == std::string("focuser")) {
+			type = Astro::DeviceLocator::DEVICE_FOCUSER;
+		} else if (arguments[2] == std::string("guiderport")) {
+			type = Astro::DeviceLocator::DEVICE_GUIDERPORT;
+		} else if (arguments[2] == std::string("filterwheel")) {
+			type = Astro::DeviceLocator::DEVICE_FILTERWHEEL;
+		} else if (arguments[2] == std::string("cooler")) {
+			type = Astro::DeviceLocator::DEVICE_COOLER;
+		} else {
+			std::runtime_error("unknown device catogory");
+		}
+		listdevices(modulename, type);
 		return;
 	}
 	throw command_error("cannot execute module command");
@@ -60,6 +61,14 @@ void	modulecommand::listdevices(const std::string& modulename,
 		= gcli->modules->getModuleNames();
 	Astro::DriverModule_var drivermodule
 		= gcli->modules->getModule(modulename.c_str());
+	Astro::DeviceLocator_var        devicelocator
+		= drivermodule->getDeviceLocator();
+	Astro::DeviceLocator::DeviceNameList_var	namelist
+		= devicelocator->getDevicelist(devicetype);
+	for (int i = 0; i < (int)namelist->length(); i++) {
+		std::cout << namelist[i] << std::endl;
+	}
+
 }
 
 void	modulecommand::moduleversion(const std::string& modulename) {

@@ -1,4 +1,10 @@
 list modules
 module help
 module simulator version
+module simulator list camera
+module simulator list filterwheel
+module simulator list guiderport
+module simulator list focuser
+module simulator list cooler
+module simulator list camera
 exit
