@@ -27,3 +27,6 @@ grammar.cpp grammar.hpp:        grammar.y
 
 test:	guide
 	./guide -ORBInitRef NameService=corbaname::localhost -d -f testscript 
+
+testcli:	guide
+	./guide -ORBInitRef NameService=corbaname::localhost -d

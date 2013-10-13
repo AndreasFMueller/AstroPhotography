@@ -68,8 +68,8 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing '%s'", filename);
 		cli.parse(filename);
 	} else {
-		std::cerr << "cannot read stdin" << std::endl;
-		return EXIT_FAILURE;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing stdin");
+		cli.parse(&std::cin);
 	}
 
 	return EXIT_SUCCESS;
