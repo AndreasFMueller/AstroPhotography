@@ -40,14 +40,17 @@ int	main(int argc, char *argv[]) {
 	CORBA::Object_var	obj
 		= orb.orbvar()->resolve_initial_references("RootPOA");
 	PortableServer::POA_var	poa = PortableServer::POA::_narrow(obj);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial poa reference");
 
 	// get the naming service
 	Astro::Naming::NameService	nameservice(orb);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a name service object");
 
 	// create the servant and register it with the ORB
 	Astro::Modules_impl	*modules = new Astro::Modules_impl();
 	PortableServer::ObjectId_var	mymodulesid
 		= poa->activate_object(modules);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "modules servant created");
 
 	// create a stringified object reference
 	obj = modules->_this();
@@ -59,6 +62,7 @@ int	main(int argc, char *argv[]) {
 
 	// register the modules object
 	nameservice.bind(names, modules->_this());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "modules bound");
 
 	// create a servant for the guider factory
 	astro::module::Repository	repository;
@@ -73,10 +77,12 @@ int	main(int argc, char *argv[]) {
 	names.push_back(Astro::Naming::Name("Astro", "context"));
 	names.push_back(Astro::Naming::Name("GuiderFactory", "object"));
 	nameservice.bind(names, guiderfactory->_this());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderFactory object bound");
 
 	// activate the POA manager
 	PortableServer::POAManager_var	pman = poa->the_POAManager();
 	pman->activate();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "poa manager activated");
 
 	// run the orb
 	orb.orbvar()->run();

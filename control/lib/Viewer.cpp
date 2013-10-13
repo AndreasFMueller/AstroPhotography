@@ -115,7 +115,7 @@ Viewer::Viewer(const std::string& filename) {
 
 	// background stuff
 	BackgroundExtractor	be(100);
-	Background<float>	bg = be(center, true,
+	Background<float>	bg = be(center, false,
 					BackgroundExtractor::LINEAR, *imagep);
 	background(bg);
 	backgroundEnabled(true);
