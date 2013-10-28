@@ -97,7 +97,7 @@ CORBA::Long	Image_impl::bytesPerValue() {
 Astro::Image::ImageFile	*Image_impl::file() {
 	// create a temporary file name 
 	char	filename[1024];
-	char	*tempdir = getenv("TMPDIR");
+	const char	*tempdir = getenv("TMPDIR");
 	if (NULL == tempdir) {
 		tempdir = "/tmp";
 	}

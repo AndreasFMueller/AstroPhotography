@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroCoordinates.h>
-#include <math.h>
+#include <cmath>
 
 namespace astro {
 

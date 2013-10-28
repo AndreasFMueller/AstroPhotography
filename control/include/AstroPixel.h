@@ -8,13 +8,11 @@
 #define _AstroPixel_h
 
 #include <stdexcept>
-//#include <tr1/memory>
 #include <memory>
-//#include <tr1/type_traits>
 #include <type_traits>
 #include <algorithm>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <limits>
 
 namespace astro {

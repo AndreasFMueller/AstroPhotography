@@ -34,7 +34,7 @@ Mock1Camera::Mock1Camera(int _id) : id(_id) {
 }
 
 CcdPtr	Mock1Camera::getCcd0(size_t id) {
-	if ((id < 0) || (id > 1)) {
+	if (id > 1) {
 		throw std::runtime_error("bad ccd id");
 	}
 	return CcdPtr(new Mock1Ccd(ccdinfo[id], this->id, id));

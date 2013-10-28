@@ -8,7 +8,6 @@
 #define _AstroImage_h
 
 #include <stdexcept>
-//#include <tr1/memory>
 #include <memory>
 #include <algorithm>
 #include <iostream>

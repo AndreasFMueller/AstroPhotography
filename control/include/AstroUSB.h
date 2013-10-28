@@ -12,9 +12,8 @@
 #include <vector>
 #include <queue>
 #include <iostream>
-//#include <tr1/memory>
 #include <memory>
-#include <string.h>
+#include <cstring>
 
 #define	CC_VIDEO			0x0e
 

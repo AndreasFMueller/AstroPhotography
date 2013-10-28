@@ -7,7 +7,6 @@
 #define _AstroUVC_h
 
 #include <AstroUSB.h>
-//#include <tr1/memory>
 #include <memory>
 #include <stdexcept>
 #include <vector>

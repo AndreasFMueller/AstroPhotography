@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller
  */
 #include "NameService.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <stdexcept>

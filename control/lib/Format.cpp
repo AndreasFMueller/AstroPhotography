@@ -4,9 +4,9 @@
 // (c) 2005 Dr. Andreas Mueller, Beratung und Entwicklung
 //
 #include <AstroFormat.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 #include <alloca.h>
 
 namespace astro {

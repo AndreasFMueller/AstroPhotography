@@ -7,7 +7,7 @@
 #include <sstream>
 #include <ios>
 #include <iomanip>
-#include <string.h>
+#include <cstring>
 #include <AstroDebug.h>
 
 namespace astro {

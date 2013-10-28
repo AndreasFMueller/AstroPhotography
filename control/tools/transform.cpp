@@ -7,8 +7,8 @@
 #include <AstroTransform.h>
 #include <AstroAdapter.h>
 #include <AstroIO.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 

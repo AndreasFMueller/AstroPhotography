@@ -10,9 +10,10 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif /* HAVE_ERRNO_H */
+#include <cerrno>
+#include <cstdarg>
+#include <cstring>
+#include <ctime>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -21,16 +22,6 @@
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif /* HAVE_SYSLOG_H */
-
-#ifdef HAVE_STDARG_H
-#include <stdarg.h>
-#endif /* HAVE_STDARG_H */
-
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
-
-#include <time.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

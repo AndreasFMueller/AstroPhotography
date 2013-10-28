@@ -5,7 +5,7 @@
 #define _AstroTonemapping_h
 
 #include <AstroAdapter.h>
-#include <math.h>
+#include <cmath>
 
 namespace astro {
 namespace adapter {

@@ -8,7 +8,7 @@
 #ifndef _Sun_h
 #define _Sun_h
 
-#include <time.h>
+#include <ctime>
 
 namespace astro {
 

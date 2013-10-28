@@ -7,7 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroFilter.h>
 #include <AstroUtils.h>
-#include <math.h>
+#include <cmath>
 #include <set>
 
 #ifdef HAVE_CONFIG_H

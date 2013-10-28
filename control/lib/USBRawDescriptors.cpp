@@ -5,8 +5,8 @@
  */
 #include <AstroUSB.h>
 #include <sstream>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <AstroDebug.h>
 
 namespace astro {

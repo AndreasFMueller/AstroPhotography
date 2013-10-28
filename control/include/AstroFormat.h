@@ -5,7 +5,7 @@
 #define _AstroFormat_h
 
 #include <string>
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace astro {
 

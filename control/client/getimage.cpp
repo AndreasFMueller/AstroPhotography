@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include <math.h>
+#include <cmath>
 #include <AstroFormat.h>
 #include <OrbSingleton.h>
 

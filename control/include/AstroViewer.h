@@ -10,7 +10,7 @@
 #include <AstroPixel.h>
 #include <AstroBackground.h>
 #include <AstroHistogram.h>
-#include <stdint.h>
+#include <cstdint>
 
 using namespace astro::image;
 using namespace astro::adapter;

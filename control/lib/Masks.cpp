@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroFilter.h>
-#include <math.h>
+#include <cmath>
 
 using namespace astro::image;
 

@@ -5,7 +5,7 @@
  */
 #include <AstroCamera.h>
 #include <AstroFormat.h>
-#include <math.h>
+#include <cmath>
 
 using namespace astro::image;
 

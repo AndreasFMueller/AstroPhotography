@@ -4,7 +4,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <stdlib.h>
+#include <cstdlib>
 #include <cli.h>
 #include <guidecli.h>
 #include <FlexLexer.h>

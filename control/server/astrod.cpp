@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <stdlib.h>
+#include <cstdlib>
 #include <includes.h>
 #include <AstroDebug.h>
 #include <stdexcept>

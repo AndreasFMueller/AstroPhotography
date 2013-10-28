@@ -7,16 +7,16 @@
 #include <config.h>
 #endif /* _HAVE_CONFIG_H */
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <AstroDebug.h>
 #include <stdexcept>
 #include <unistd.h>
 #include <iostream>
 #include <OrbSingleton.h>
 #include <NameService.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 #include <guidecli.h>
 #include <module.hh>
 

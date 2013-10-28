@@ -10,8 +10,8 @@
 //
 #include <Sun.h>
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 namespace astro {
 

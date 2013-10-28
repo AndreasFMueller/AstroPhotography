@@ -285,7 +285,7 @@ SbigCamera::~SbigCamera() {
 CcdPtr	SbigCamera::getCcd0(size_t id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %u (of %d)", id,
 		ccdinfo.size());
-	if ((id < 0) || (id >= ccdinfo.size())) {
+	if (id >= ccdinfo.size()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd %d not in range", id);
 		throw std::range_error("ccd id not in range");
 	}

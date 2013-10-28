@@ -13,7 +13,7 @@
 #include <AstroDemosaic.h>
 #include <AstroImager.h>
 #include <AstroAdapter.h>
-#include <math.h>
+#include <cmath>
 
 using namespace astro;
 using namespace astro::io;

@@ -8,7 +8,7 @@
 #include <AstroFilter.h>
 #include <AstroUtils.h>
 #include <glpk.h>
-#include <math.h>
+#include <cmath>
 #include <set>
 
 #ifdef HAVE_CONFIG_H
