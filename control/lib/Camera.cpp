@@ -50,7 +50,7 @@ const CcdInfo&	Camera::getCcdInfo(size_t ccdid) const {
 CcdPtr	Camera::getCcd(size_t ccdid) {
 	// ensure empty pointers are present
 	if (ccds.size() < nCcds()) {
-		for (int i = 0; i < nCcds(); i++) {
+		for (unsigned int i = 0; i < nCcds(); i++) {
 			ccds.push_back(CcdPtr());
 		}
 	}

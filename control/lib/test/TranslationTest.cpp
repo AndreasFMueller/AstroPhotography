@@ -58,7 +58,7 @@ void	TranslationTest::testPositiveTranslation() {
 
 	// create a translation adapter
 	TranslationAdapter<double>	ta(image, translation);
-	ImageSize	size = ta.getSize();
+	//ImageSize	size = ta.getSize();
 	for (unsigned int x = 0; x < 4; x++) {
 		for (unsigned int y = 0; y < 4; y++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ta.pixel(%u, %u) = %f",
@@ -109,7 +109,7 @@ void	TranslationTest::testNegativeTranslation() {
 
 	// create a translation adapter
 	TranslationAdapter<double>	ta(image, translation);
-	ImageSize	size = ta.getSize();
+	//ImageSize	size = ta.getSize();
 	for (unsigned int x = 0; x < 4; x++) {
 		for (unsigned int y = 0; y < 4; y++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ta.pixel(%u, %u) = %f",

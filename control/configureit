@@ -2,7 +2,7 @@
 # configuration used for development purposes on Linux and Mac OS X
 #
 CFLAGS="-Wall -g -O2"
-CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
+CXXFLAGS="-fuse-cxa-atexit ${CFLAGS} -std=c++11"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests --enable-microtouch"
 
@@ -64,8 +64,8 @@ SuSE)
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
-	CXXFLAGS="-std=c++11 -stdlib=libc++"
 	export CFLAGS CXXFLAGS LDFLAGS
+	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
 		--enable-sbig
 	;;

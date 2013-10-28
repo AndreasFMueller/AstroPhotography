@@ -15,7 +15,7 @@ namespace task {
  * \brief Update the exposure time
  */
 void	ExposureTimer::update(ImagePtr image) {
-	double	actualvalue;
+	double	actualvalue = 1.;
 	switch (_method) {
 	case NONE:
 		actualvalue = _targetvalue;

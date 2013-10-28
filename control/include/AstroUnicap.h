@@ -49,7 +49,7 @@ public:
 	virtual std::string	toString() const;
 };
 
-typedef std::tr1::shared_ptr<UnicapProperty>	UnicapPropertyPtr;
+typedef std::shared_ptr<UnicapProperty>	UnicapPropertyPtr;
 
 std::ostream&	operator<<(std::ostream& out, const UnicapProperty& prop);
 
