@@ -23,7 +23,7 @@ class ViewerPipeline;
 class Viewer {
 	ImagePtr	image;
 	// pointer for the full image
-	typedef	std::tr1::shared_ptr<uint32_t>	imagedataptr;
+	typedef	std::shared_ptr<uint32_t>	imagedataptr;
 	imagedataptr	_imagedata;
 	ImageSize	_displaysize;
 public:
@@ -61,7 +61,7 @@ public:
 private:
 	// adapters of the processing pipeline
 	ViewerPipeline	*pipeline;
-	std::tr1::shared_ptr<ViewerPipeline>	pipelineptr;
+	std::shared_ptr<ViewerPipeline>	pipelineptr;
 public:
 	Viewer(const std::string& filename);
 	~Viewer();

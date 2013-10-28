@@ -147,7 +147,7 @@ public:
 	}
 };
 
-typedef std::tr1::shared_ptr<FunctionBase>	FunctionPtr;
+typedef std::shared_ptr<FunctionBase>	FunctionPtr;
 FunctionPtr	operator+(const FunctionPtr& a, const FunctionPtr& b);
 
 /**
@@ -365,7 +365,7 @@ public:
 	virtual RGB<Pixel>	operator()(unsigned int x, unsigned int y) const = 0;
 };
 
-typedef std::tr1::shared_ptr<BackgroundBase<float> >	BackgroundPtr;
+typedef std::shared_ptr<BackgroundBase<float> >	BackgroundPtr;
 
 /**
  * \brief Background template

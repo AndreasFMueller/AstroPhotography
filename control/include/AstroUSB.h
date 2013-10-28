@@ -12,7 +12,8 @@
 #include <vector>
 #include <queue>
 #include <iostream>
-#include <tr1/memory>
+//#include <tr1/memory>
+#include <memory>
 #include <string.h>
 
 #define	CC_VIDEO			0x0e
@@ -53,14 +54,14 @@ public:
 	~ContextHolder();
 	libusb_context	*context() { return _context; }
 };
-typedef std::tr1::shared_ptr<ContextHolder>	ContextHolderPtr;
+typedef std::shared_ptr<ContextHolder>	ContextHolderPtr;
 
 class Context; // forward declaration for the context class
-typedef std::tr1::shared_ptr<Context>	ContextPtr;
+typedef std::shared_ptr<Context>	ContextPtr;
 
 // forward declarations for return types of descriptor query functions
 class DeviceDescriptor;
-typedef std::tr1::shared_ptr<DeviceDescriptor>	DeviceDescriptorPtr;
+typedef std::shared_ptr<DeviceDescriptor>	DeviceDescriptorPtr;
 
 // The Configuration contains a whole hierarchy of descriptors:
 //
@@ -97,28 +98,28 @@ typedef std::tr1::shared_ptr<DeviceDescriptor>	DeviceDescriptorPtr;
 // each object contains a reference to the parent object.
 
 class Configuration;
-typedef std::tr1::shared_ptr<Configuration>	ConfigurationPtr;
+typedef std::shared_ptr<Configuration>	ConfigurationPtr;
 
 class Device;
-typedef std::tr1::shared_ptr<Device>	DevicePtr;
+typedef std::shared_ptr<Device>	DevicePtr;
 
 class Interface;
-typedef std::tr1::shared_ptr<Interface>		InterfacePtr;
+typedef std::shared_ptr<Interface>		InterfacePtr;
 
 class InterfaceDescriptor;
-typedef std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
+typedef std::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
 
 class EndpointDescriptor;
-typedef std::tr1::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
+typedef std::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
 
 class USBDescriptor;
-typedef std::tr1::shared_ptr<USBDescriptor>	USBDescriptorPtr;
+typedef std::shared_ptr<USBDescriptor>	USBDescriptorPtr;
 
 class RequestBase;
-typedef std::tr1::shared_ptr<RequestBase>	RequestPtr;
+typedef std::shared_ptr<RequestBase>	RequestPtr;
 
 class Transfer;
-typedef std::tr1::shared_ptr<Transfer>	TransferPtr;
+typedef std::shared_ptr<Transfer>	TransferPtr;
 
 /**
  * \brief Device abstraction
@@ -534,7 +535,7 @@ public:
 	int	extract(std::list<std::string>& packets);
 };
 
-typedef std::tr1::shared_ptr<IsoSegment>	IsoSegmentPtr;
+typedef std::shared_ptr<IsoSegment>	IsoSegmentPtr;
 
 /**
  * \brief IsoTransfer
@@ -614,7 +615,7 @@ public:
 	const std::string&	extra() const;
 };
 
-typedef std::tr1::shared_ptr<Descriptor>	DescriptorPtr;
+typedef std::shared_ptr<Descriptor>	DescriptorPtr;
 
 /**
  * \brief USB Endpoint Descriptor
@@ -669,7 +670,7 @@ public:
 	std::string	toString() const;
 };
 
-typedef std::tr1::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
+typedef std::shared_ptr<EndpointDescriptor>	EndpointDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const EndpointDescriptor& epd);
 
@@ -710,7 +711,7 @@ public:
 	Interface&	getInterface();
 };
 
-typedef	std::tr1::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
+typedef	std::shared_ptr<InterfaceDescriptor>	InterfaceDescriptorPtr;
 
 std::ostream&	operator<<(std::ostream& out, const InterfaceDescriptor& ifd);
 
@@ -743,7 +744,7 @@ public:
 	void	attachKernelDriver() const throw(USBError);
 };
 
-typedef std::tr1::shared_ptr<Interface>	InterfacePtr;
+typedef std::shared_ptr<Interface>	InterfacePtr;
 
 std::ostream&	operator<<(std::ostream& out, const Interface& interface);
 
@@ -925,7 +926,7 @@ public:
 	int	getHeight() const;
 	friend class UVCCamera;
 };
-typedef std::tr1::shared_ptr<Frame>	FramePtr;
+typedef std::shared_ptr<Frame>	FramePtr;
 
 
 } // namespace usb

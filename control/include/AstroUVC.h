@@ -7,7 +7,8 @@
 #define _AstroUVC_h
 
 #include <AstroUSB.h>
-#include <tr1/memory>
+//#include <tr1/memory>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -159,7 +160,7 @@ public:
 	uint8_t	bDescriptorSubtype() const;
 };
 
-typedef	std::tr1::shared_ptr<UVCDescriptor>	UVCDescriptorPtr;
+typedef	std::shared_ptr<UVCDescriptor>	UVCDescriptorPtr;
 
 /**
  * \brief Factory class to produce UVC Descriptors from raw data
@@ -470,7 +471,7 @@ public:
 	friend class VideoStreamingDescriptorFactory;
 };
 
-typedef std::tr1::shared_ptr<FormatDescriptor *>	FormatDescriptorPtr;
+typedef std::shared_ptr<FormatDescriptor *>	FormatDescriptorPtr;
 
 /**
  * \brief MJPEG Format Descriptor

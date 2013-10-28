@@ -23,7 +23,7 @@ public:
 	CallbackData() { }
 	virtual	~CallbackData() { }
 };
-typedef	std::tr1::shared_ptr<CallbackData>	CallbackDataPtr;
+typedef	std::shared_ptr<CallbackData>	CallbackDataPtr;
 
 /**
  * \brief A Callback is a functor that processes CallbackData
@@ -37,7 +37,7 @@ public:
 	}
 };
 
-typedef	std::tr1::shared_ptr<Callback>	CallbackPtr;
+typedef	std::shared_ptr<Callback>	CallbackPtr;
 
 /**
  * \brief Per image program execution callback argument

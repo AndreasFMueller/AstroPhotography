@@ -12,6 +12,7 @@
 #include <ostream>
 #include <AstroDebug.h>
 #include <AstroDemosaic.h>
+#include <unistd.h>
 
 extern double	default_exposuretime;
 extern int	default_ccdid;

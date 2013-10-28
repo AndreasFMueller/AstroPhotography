@@ -106,7 +106,7 @@ Viewer::Viewer(const std::string& filename) {
 
 	// create the viewer pipeline
 	pipeline = new ViewerPipeline(imagep);
-	pipelineptr = std::tr1::shared_ptr<ViewerPipeline>(pipeline);
+	pipelineptr = std::shared_ptr<ViewerPipeline>(pipeline);
 
 	// compute the white balance vector
 	filter::WhiteBalance<float>	wb;

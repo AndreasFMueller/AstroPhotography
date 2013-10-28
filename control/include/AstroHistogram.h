@@ -37,7 +37,7 @@ public:
 	virtual std::string	toString() const;
 };
 
-typedef std::tr1::shared_ptr<HistogramScale>	HistogramScalePtr;
+typedef std::shared_ptr<HistogramScale>	HistogramScalePtr;
 
 namespace histogram {
 typedef enum {	LUMINANCE, RED, GREEN, BLUE } type;
@@ -53,7 +53,7 @@ public:
 class HistogramBase {
 protected:
 	HistogramScalePtr	scale;
-	std::tr1::shared_ptr<unsigned int>	counts;
+	std::shared_ptr<unsigned int>	counts;
 	unsigned int	*p;
 public:
 	HistogramBase(HistogramScalePtr _scale);
@@ -68,7 +68,7 @@ public:
 	virtual std::string	toString() const;
 };
 
-typedef std::tr1::shared_ptr<HistogramBase>	HistogramPtr;
+typedef std::shared_ptr<HistogramBase>	HistogramPtr;
 
 class HistogramFactory {
 	HistogramScalePtr	scale;

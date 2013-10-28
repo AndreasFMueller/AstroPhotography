@@ -45,10 +45,12 @@ template<typename T, typename S>
 S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	result = 0;
 	ImageSize	size = image.getSize();
+	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
 	for (unsigned int x = 0; x < size.width(); x++) {
 		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
-			if (v != v) {
+		
+			if ((std::numeric_limits<T>::has_quiet_NaN) && (v != v)) {
 				result += 1;
 			}
 		}
@@ -126,7 +128,7 @@ T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	for (unsigned int x = 0; x < size.width(); x++) {
 		for (unsigned int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
-			if (v != v) continue; // skip NaNs
+			if ((std::numeric_limits<T>::has_quiet_NaN) && (v != v)) continue; // skip NaNs
 			if (v < result) {
 				result = v;
 				minx = x;

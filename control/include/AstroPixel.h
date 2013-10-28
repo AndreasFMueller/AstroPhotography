@@ -8,8 +8,10 @@
 #define _AstroPixel_h
 
 #include <stdexcept>
-#include <tr1/memory>
-#include <tr1/type_traits>
+//#include <tr1/memory>
+#include <memory>
+//#include <tr1/type_traits>
+#include <type_traits>
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -85,7 +87,7 @@ struct Int2Type {
  * constructor of the destination type for the conversion. The conversion
  * function convertPixelValue calls the default implementation of the
  * convertPixelX template function for this purpose. It also hands in
- * two instantiations of std::tr1:is_integral to identify to the compiler
+ * two instantiations of std::is_integral to identify to the compiler
  * whether the pixels are of integral type.
  *
  * A specialization of convertPixelValueX for the case where both
@@ -172,9 +174,9 @@ void	convertPixelValueX(destValue& dest, const srcValue& src,
  */
 template<typename destValue, typename srcValue>
 void	convertPixelValueX(destValue& dest, const srcValue& src,
-		std::tr1::true_type, std::tr1::true_type) {
+		std::true_type, std::true_type) {
 	convertPixelInteger(dest, src,
-		Int2Type<sizeof(destValue) - sizeof(srcValue)>());
+		Int2Type<(long)sizeof(destValue) - (long)sizeof(srcValue)>());
 }
 
 /**
@@ -188,8 +190,8 @@ template<typename destValue, typename srcValue>
 void	convertPixelValue(destValue& dest, const srcValue& src) {
 	// otherweise use the default, which does not employ rescaling
 	convertPixelValueX(dest, src,
-		typename std::tr1::is_integral<destValue>::type(),
-		typename std::tr1::is_integral<srcValue>::type());
+		typename std::is_integral<destValue>::type(),
+		typename std::is_integral<srcValue>::type());
 }
 
 /**

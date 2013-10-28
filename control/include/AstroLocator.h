@@ -48,7 +48,7 @@ public:
 	astro::camera::FocuserPtr	getFocuser(const std::string& name);
 };
 
-typedef std::tr1::shared_ptr<DeviceLocator>	DeviceLocatorPtr;
+typedef std::shared_ptr<DeviceLocator>	DeviceLocatorPtr;
 
 } // namespace device
 } // namespace astro

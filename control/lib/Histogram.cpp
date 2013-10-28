@@ -82,7 +82,7 @@ HistogramBase::HistogramBase(HistogramScalePtr _scale) : scale(_scale) {
 	for (unsigned int i = 0; i < scale->buckets(); i++) {
 		p[i] = 0;
 	}
-	counts = std::tr1::shared_ptr<unsigned int>(p);
+	counts = std::shared_ptr<unsigned int>(p);
 debug(LOG_DEBUG, DEBUG_LOG, 0, "buckets: %d", buckets());
 }
 

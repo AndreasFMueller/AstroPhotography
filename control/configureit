@@ -64,6 +64,7 @@ SuSE)
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	CXXFLAGS="-std=c++11 -stdlib=libc++"
 	export CFLAGS CXXFLAGS LDFLAGS
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
 		--enable-sbig

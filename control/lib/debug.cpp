@@ -96,7 +96,7 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 
 	// find the current thread id if necessary
 	if (debugthreads) {
-		snprintf(threadid, sizeof(threadid), "/%04x",
+		snprintf(threadid, sizeof(threadid), "/%04lx",
 			((unsigned long)pthread_self()) % 0x10000);
 	} else {
 		threadid[0] = '\0';

@@ -32,7 +32,7 @@ static void	*imageprogramcallback(void *data) {
 
 	// we create a shared ptr for cba, which will take ownership of the
 	// callback arguments and deallocate them when we exit this function
-	std::tr1::shared_ptr<callbackargs>	ptr(cba);
+	std::shared_ptr<callbackargs>	ptr(cba);
 
 	// get the data
 	ImageCallbackData	*icb

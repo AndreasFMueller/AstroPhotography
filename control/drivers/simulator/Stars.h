@@ -75,7 +75,7 @@ public:
 	virtual std::string	toString() const;
 };
 
-typedef std::tr1::shared_ptr<StellarObject>	StellarObjectPtr;
+typedef std::shared_ptr<StellarObject>	StellarObjectPtr;
 
 /**
  * \brief Star fields

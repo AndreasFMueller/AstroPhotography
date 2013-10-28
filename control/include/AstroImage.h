@@ -8,7 +8,8 @@
 #define _AstroImage_h
 
 #include <stdexcept>
-#include <tr1/memory>
+//#include <tr1/memory>
+#include <memory>
 #include <algorithm>
 #include <iostream>
 #include <AstroPixel.h>
@@ -586,7 +587,7 @@ public:
 	 * \brief Read/write access to pixels specified by offset
 	 */
 	Pixel&	operator[](unsigned int offset) {
-		if ((offset < 0) || (offset > frame.size().getPixels())) {
+		if (offset > frame.size().getPixels()) {
 			throw std::range_error("offset outside image");
 		}
 		return pixels[offset];
@@ -772,15 +773,15 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 	}
 }
 
-typedef std::tr1::shared_ptr<ImageBase>	ImagePtr;
-typedef std::tr1::shared_ptr<Image<unsigned char> >	ByteImagePtr;
-typedef std::tr1::shared_ptr<Image<unsigned short> >	ShortImagePtr;
-typedef std::tr1::shared_ptr<Image<unsigned int> >	IntImagePtr;
-typedef std::tr1::shared_ptr<Image<unsigned long> >	LongImagePtr;
-typedef std::tr1::shared_ptr<Image<float> >	FloatImagePtr;
-typedef std::tr1::shared_ptr<Image<double> >	DoubleImagePtr;
-typedef std::tr1::shared_ptr<Image<RGB<unsigned char> > >	RGBImagePtr;
-typedef std::tr1::shared_ptr<Image<YUYV<unsigned char> > >	YUYVImagePtr;
+typedef std::shared_ptr<ImageBase>	ImagePtr;
+typedef std::shared_ptr<Image<unsigned char> >	ByteImagePtr;
+typedef std::shared_ptr<Image<unsigned short> >	ShortImagePtr;
+typedef std::shared_ptr<Image<unsigned int> >	IntImagePtr;
+typedef std::shared_ptr<Image<unsigned long> >	LongImagePtr;
+typedef std::shared_ptr<Image<float> >	FloatImagePtr;
+typedef std::shared_ptr<Image<double> >	DoubleImagePtr;
+typedef std::shared_ptr<Image<RGB<unsigned char> > >	RGBImagePtr;
+typedef std::shared_ptr<Image<YUYV<unsigned char> > >	YUYVImagePtr;
 
 typedef std::vector<ImagePtr>	ImageSequence;
 
@@ -791,7 +792,7 @@ typedef std::vector<ImagePtr>	ImageSequence;
  * points to an image. The actual image is now owned by the new pointer
  */
 template<typename P>
-ImagePtr	baseimage(std::tr1::shared_ptr<Image<P> >& image) {
+ImagePtr	baseimage(std::shared_ptr<Image<P> >& image) {
 	ImagePtr	result(&*image);
 	image.reset();
 	return result;

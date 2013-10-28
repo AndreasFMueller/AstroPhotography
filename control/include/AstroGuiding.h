@@ -108,7 +108,7 @@ public:
 	virtual Point	operator()(astro::image::ImagePtr newimage) const = 0;
 };
 
-typedef std::tr1::shared_ptr<Tracker>	TrackerPtr;
+typedef std::shared_ptr<Tracker>	TrackerPtr;
 
 /**
  * \brief StarDetector based Tracker
@@ -192,7 +192,7 @@ public:
 // implementation (using low level threads and other nasty things) hidden,
 // we only define it in the implementation
 class GuiderProcess;
-typedef std::tr1::shared_ptr<GuiderProcess>	GuiderProcessPtr;
+typedef std::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 
 /**
  * \brief Guider class
@@ -298,7 +298,7 @@ public:
 	 */
 	astro::callback::CallbackPtr	newimagecallback;
 };
-typedef std::tr1::shared_ptr<Guider>	GuiderPtr;
+typedef std::shared_ptr<Guider>	GuiderPtr;
 
 /**
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
@@ -337,7 +337,7 @@ public:
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
 };
-typedef std::tr1::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
+typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 
 } // namespace guiding
 } // namespace astro

@@ -14,7 +14,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <tr1/memory>
+//#include <tr1/memory>
+#include <memory>
 
 namespace astro {
 // the Module constructor is private, but we would like to test it
@@ -42,7 +43,7 @@ public:
 	virtual std::string	version() const;
 	virtual	bool	hasDeviceLocator() const;
 };
-typedef std::tr1::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
+typedef std::shared_ptr<ModuleDescriptor>	ModuleDescriptorPtr;
 
 class Repository;
 class RepositoryBackend;
@@ -97,7 +98,7 @@ public:
  * clients should only access the Module through a smart pointer
  * of type ModulePtr.
  */
-typedef	std::tr1::shared_ptr<Module>	ModulePtr;
+typedef	std::shared_ptr<Module>	ModulePtr;
 
 /**
  * \brief Exceptions thrown when the Repository class meets a problem.

@@ -100,22 +100,22 @@ std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 // We will need a number of shared_ptr classes for different types of devices
 
 class FilterWheel;
-typedef std::tr1::shared_ptr<FilterWheel>	FilterWheelPtr;
+typedef std::shared_ptr<FilterWheel>	FilterWheelPtr;
 
 class GuiderPort;
-typedef std::tr1::shared_ptr<GuiderPort>	GuiderPortPtr;
+typedef std::shared_ptr<GuiderPort>	GuiderPortPtr;
 
 class Cooler;
-typedef std::tr1::shared_ptr<Cooler>	CoolerPtr;
+typedef std::shared_ptr<Cooler>	CoolerPtr;
 
 class Focuser;
-typedef std::tr1::shared_ptr<Focuser>	FocuserPtr;
+typedef std::shared_ptr<Focuser>	FocuserPtr;
 
 class Camera;
-typedef std::tr1::shared_ptr<Camera>	CameraPtr;
+typedef std::shared_ptr<Camera>	CameraPtr;
 
 class Ccd;
-typedef std::tr1::shared_ptr<Ccd>	CcdPtr;
+typedef std::shared_ptr<Ccd>	CcdPtr;
 
 /**
  * \brief Class containing information about a CCD chip. 

@@ -13,7 +13,7 @@ namespace astro {
 namespace module {
 
 class RepositoryBackend;
-typedef std::tr1::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
+typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
 
 //////////////////////////////////////////////////////////////////////
 // Locker class
