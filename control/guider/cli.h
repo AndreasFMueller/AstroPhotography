@@ -6,6 +6,8 @@
 #ifndef _astrocli_h
 #define _astrocli_h 
 
+#include <clicommand.h>
+
 #include <iostream>
 #include <string>
 
@@ -13,13 +15,15 @@ namespace astro {
 namespace cli {
 
 class cli {
+	commandfactory&	_factory;
 public:
-	cli() { }
+	cli(commandfactory& cf) : _factory(cf) { }
 	virtual ~cli() { }
 	int	parse(const char *filename);
 	int	parse(std::istream *infile);
 	std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out, const cli& c);
+	commandfactory&	factory() { return _factory; }
 };
 
 std::ostream&	operator<<(std::ostream& out, const cli& c);
@@ -35,6 +39,8 @@ public:
 	std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out,
 					const sharedcli& c);
+	cli&	operator*() const { return *c; }
+	cli*	operator->() const { return c; }
 };
 
 std::ostream&	operator<<(std::ostream& out, const sharedcli& c);

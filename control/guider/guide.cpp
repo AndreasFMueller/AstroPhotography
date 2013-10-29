@@ -42,7 +42,8 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guide program started");
 
 	// create the command line interpreter
-	astro::cli::guidecli	cli;
+	astro::cli::commandfactory	factory;
+	astro::cli::guidecli	cli(factory);
 	astro::cli::guidesharedcli	s(&cli);
 
 	// get a reference to the naming service

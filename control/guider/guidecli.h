@@ -14,7 +14,7 @@ namespace cli {
 
 class guidecli : public cli {
 public:
-	guidecli();
+	guidecli(commandfactory& cf);
 	virtual ~guidecli();
 	Astro::Modules_var      modules;
 };

@@ -29,12 +29,13 @@ using namespace astro::cli;
 sharedcli	shcli;
 
 %}
-%token EXIT
-%token LIST
-%token LOCATOR
-%token MODULE
+%token <argument>EXIT
+%token <argument>LIST
+%token <argument>LOCATOR
+%token <argument>MODULE
 %token <argument>ARGUMENT
 %token END_OF_FILE
+%type <argument>command_with_arguments
 %type <arguments>arguments
 %union {
 	std::string	*argument;
@@ -67,6 +68,12 @@ arguments:
 	}
    ;
 
+command_with_arguments:
+   |	LIST	{ $$ = $1; }
+   |	LOCATOR	{ $$ = $1; }
+   |	MODULE	{ $$ = $1; }
+   ;
+
 commandline:
 	error '\n' {
 		yyclearin;
@@ -76,24 +83,10 @@ commandline:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exit command");
 		YYACCEPT;
 	}
-   |	LIST arguments '\n' {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "list command");
-		listcommand	c;
-		c(std::string("list"), *$2);
-		delete $2;
-		$2 = NULL;
-	}
-   |	MODULE arguments '\n' {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module command");
-		modulecommand	c;
-		c(std::string("module"), *$2);
-		delete $2;
-		$2 = NULL;
-	}
-   |	LOCATOR arguments '\n' {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "locator command");
-		locatorcommand	c;
-		c(std::string("locator"), *$2);
+   |	command_with_arguments arguments '\n' {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s command", $1->c_str());
+		clicommandptr	cmd = shcli->factory().get(*$1, *$2);
+		(*cmd)(*$1, *$2);
 		delete $2;
 		$2 = NULL;
 	}

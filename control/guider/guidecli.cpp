@@ -9,7 +9,7 @@
 namespace astro {
 namespace cli {
 
-guidecli::guidecli() {
+guidecli::guidecli(commandfactory& cf) : cli(cf) {
 }
 
 guidecli::~guidecli() {

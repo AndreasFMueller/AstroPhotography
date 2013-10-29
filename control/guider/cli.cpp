@@ -97,14 +97,18 @@ std::ostream&   operator<<(std::ostream& out, const cli& c) {
 }
 
 cli	*sharedcli::c = NULL;
+static commandfactory	*staticfactory = NULL;
 
 sharedcli::sharedcli() {
 	if (NULL == c) {
-		c = new cli();
+		staticfactory = new commandfactory();
+		c = new cli(*staticfactory);
 	}
 }
 
-sharedcli::sharedcli(cli *_c) { c = _c; }
+sharedcli::sharedcli(cli *_c) {
+	c = _c;
+}
 
 int	sharedcli::parse(const char *filename) {
 	return c->parse(filename);

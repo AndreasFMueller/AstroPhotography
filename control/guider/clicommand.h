@@ -9,10 +9,14 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <memory>
 
 namespace astro {
 namespace cli {
 
+/**
+ * \brief base class for all commands
+ */
 class clicommand {
 	std::string	name;
 public:
@@ -22,9 +26,23 @@ public:
 				const std::vector<std::string>& args) { }
 };
 
+/**
+ * \brief exception thrown by commands that fail
+ */
 class command_error : public std::runtime_error {
 public:
 	command_error(const std::string& cause) : std::runtime_error(cause) { }
+};
+
+typedef std::shared_ptr<clicommand>	clicommandptr;
+
+/**
+ * \brief command factory
+ */
+class commandfactory {
+public:
+	clicommandptr	get(const std::string& commandname,
+		const std::vector<std::string>& arguments);
 };
 
 } // namespace cli

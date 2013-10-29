@@ -10,7 +10,7 @@ noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
-	$(COMMANDS)
+	clicommand.cpp $(COMMANDS)
 guide_DEPENDENCIES = ../lib/libastro.la
 guide_LDADD = -L../lib -lastro
 

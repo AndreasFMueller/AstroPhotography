@@ -15,19 +15,23 @@
 %x ARGUMENTS
 %%
 list	{
+		yylval.argument = new std::string(yytext);
 		yy_push_state(ARGUMENTS);
 		return LIST;
 	}
 module	{
+		yylval.argument = new std::string(yytext);
 		yy_push_state(ARGUMENTS);
 		return MODULE;
 	}
 locator	{
+		yylval.argument = new std::string(yytext);
 		yy_push_state(ARGUMENTS);
 		return LOCATOR;
 	}
 
 exit	{
+		yylval.argument = new std::string(yytext);
 		return EXIT;
 	}
 
