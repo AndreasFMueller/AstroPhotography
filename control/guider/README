@@ -1,0 +1,3 @@
+This directory contains a CORBA client that contrails guiding. It supports
+a command line interface in is mainly intended to verify that the IDL
+implements all functions for a guider in a useful way.
