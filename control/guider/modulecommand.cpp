@@ -15,15 +15,12 @@ void	modulecommand::operator()(const std::string& command,
 	if (arguments.size() < 1) {
 		throw command_error("module command requires arguments");
 	}
-	if (arguments[0] == std::string("help")) {
-		help();
-		return;
-	}
 
 	std::string	modulename = arguments[0];
 	if (arguments.size() < 2) {
 		throw std::runtime_error("not enough arguments");
 	}
+
 	if (arguments[1] == std::string("version")) {
 		moduleversion(modulename);
 		return;
@@ -83,13 +80,23 @@ void	modulecommand::moduleversion(const std::string& modulename) {
 		devicelocator->getVersion() << std::endl;
 }
 
-void	modulecommand::help() {
-	std::cout << "module command help" << std::endl;
-	std::cout << "   module <modulename> camera" << std::endl;
-	std::cout << "   module <modulename> focuser" << std::endl;
-	std::cout << "   module <modulename> guiderport" << std::endl;
-	std::cout << "   module <modulename> filterwheel" << std::endl;
-	std::cout << "   module <modulename> cooler" << std::endl;
+std::string	modulecommand::summary() const {
+	return std::string("manipulate driver modules");
+}
+
+std::string	modulecommand::help() const {
+	return std::string(
+	"SYNOPSIS\n"
+	"\n"
+	"\tmodule <modulename> version\n"
+	"\tmodule <modulename> list [ camera | focuser | guiderport | filterwheel | cooler ]\n"
+	"\n"
+	"DESCRIPTION\n"
+	"\n"
+	"The first synopsis displays version information about the module.\n"
+	"The second synopsis List objects of a given type from the module\n"
+	"named <modulename>.\n"
+	);
 }
 
 } // namespace cli

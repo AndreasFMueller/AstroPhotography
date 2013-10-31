@@ -70,6 +70,8 @@ int	main(int argc, char *argv[]) {
 		cli.parse(filename);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing stdin");
+		cli.prompt("> ");
+		std::cout << cli.prompt();
 		cli.parse(&std::cin);
 	}
 

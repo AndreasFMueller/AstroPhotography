@@ -14,10 +14,12 @@ namespace cli {
 class listcommand : public clicommand {
 	void	listmodules();
 public:
-	listcommand() : clicommand("list") { }
+	listcommand(commandfactory& factory) : clicommand(factory, "list") { }
 	~listcommand() { }
-	void	operator()(const std::string& command,
+	virtual void	operator()(const std::string& command,
 			const std::vector<std::string>& arguments);
+	virtual std::string	summary() const;
+	virtual std::string	help() const;
 };
 
 } // namespace cli

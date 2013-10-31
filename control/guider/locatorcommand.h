@@ -13,9 +13,12 @@ namespace cli {
 
 class locatorcommand : public clicommand {
 public:
-	locatorcommand() : clicommand(std::string("locator")) { }
-	void	operator()(const std::string& command,
+	locatorcommand(commandfactory& factory)
+		: clicommand(factory, std::string("locator")) { }
+	virtual void	operator()(const std::string& command,
 			const std::vector<std::string>& arguments);
+	virtual std::string	summary() const;
+	virtual std::string	help() const;
 };
 
 } // namespace cli

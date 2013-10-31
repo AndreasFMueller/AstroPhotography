@@ -16,6 +16,7 @@ namespace cli {
 
 class cli {
 	commandfactory&	_factory;
+	std::string	_prompt;
 public:
 	cli(commandfactory& cf) : _factory(cf) { }
 	virtual ~cli() { }
@@ -24,6 +25,8 @@ public:
 	std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out, const cli& c);
 	commandfactory&	factory() { return _factory; }
+	std::string	prompt() const;
+	void	prompt(const std::string& prompt);
 };
 
 std::ostream&	operator<<(std::ostream& out, const cli& c);

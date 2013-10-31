@@ -30,12 +30,10 @@ sharedcli	shcli;
 
 %}
 %token <argument>EXIT
-%token <argument>LIST
-%token <argument>LOCATOR
-%token <argument>MODULE
 %token <argument>ARGUMENT
+%token <argument>COMMANDNAME
 %token END_OF_FILE
-%type <argument>command_with_arguments
+%type <argument>commandname
 %type <arguments>arguments
 %union {
 	std::string	*argument;
@@ -44,13 +42,14 @@ sharedcli	shcli;
 %%
 commandfile:
 	commandlist END_OF_FILE {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "end of file");
 		YYACCEPT;
 	}
    ;
 
 commandlist:
-	commandline
-   |	commandlist commandline
+	commandline 		{ std::cout << shcli->prompt(); }
+   |	commandlist commandline	{ std::cout << shcli->prompt(); }
    ;
 
 arguments:
@@ -68,14 +67,16 @@ arguments:
 	}
    ;
 
-command_with_arguments:
-   |	LIST	{ $$ = $1; }
-   |	LOCATOR	{ $$ = $1; }
-   |	MODULE	{ $$ = $1; }
+commandname:
+	COMMANDNAME	{ $$ = $1; }
    ;
 
 commandline:
-	error '\n' {
+	'\n'	{
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "empty line is ok");
+	}
+   |	error '\n' {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "parse error: skip to EOL");
 		yyclearin;
 		yyerrok;
 	}
@@ -83,10 +84,36 @@ commandline:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exit command");
 		YYACCEPT;
 	}
-   |	command_with_arguments arguments '\n' {
+   |	commandname '\n' {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s command", $1->c_str());
+		std::vector<std::string>	noarguments;
+		clicommandptr	cmd = shcli->factory().get(*$1, noarguments);
+		if (cmd) {
+			try {
+				(*cmd)(*$1, noarguments);
+			} catch (std::exception& x) {
+				std::cerr << "error in '" << *$1 << "' command: ";
+				std::cerr << x.what() << std::endl;
+			}
+		} else {
+			std::cerr << "command '" << *$1 << "' not known";
+			std::cerr << std::endl;
+		}
+	}
+   |	commandname arguments '\n' {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s command", $1->c_str());
 		clicommandptr	cmd = shcli->factory().get(*$1, *$2);
-		(*cmd)(*$1, *$2);
+		if (cmd) {
+			try {
+				(*cmd)(*$1, *$2);
+			} catch (std::exception& x) {
+				std::cerr << "error in " << *$1 << " command: ";
+				std::cerr << x.what() << std::endl;
+			}
+		} else {
+			std::cerr << "command '" << *$1 << "' not known";
+			std::cerr << std::endl;
+		}
 		delete $2;
 		$2 = NULL;
 	}

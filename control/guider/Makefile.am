@@ -5,9 +5,10 @@
 #
 bin_PROGRAMS = guide
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
-	modulecommand.h
+	modulecommand.h helpcommand.h cameracommand.h VarWrapper.h
 
-COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp
+COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
+	helpcommand.cpp cameracommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(COMMANDS)

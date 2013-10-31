@@ -33,5 +33,22 @@ void	listcommand::listmodules() {
 	}
 }
 
+std::string	listcommand::summary() const {
+	return std::string("list various object types");
+}
+
+std::string	listcommand::help() const {
+	return std::string(
+		"SYNOPSIS\n"
+		"\n"
+		"\tlist <type>\n"
+		"\n"
+		"DESCRIPTION\n"
+		"\n"
+		"Display a list of objects of a given <type>. Valid <type>\n"
+		"values are \"modules\".\n"
+	);
+}
+
 } // namespace cli
 } // namespace astro

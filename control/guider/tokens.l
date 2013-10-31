@@ -9,36 +9,29 @@
 #include <string>
 #include <grammar.hpp>
 #include <AstroFormat.h>
+#include <AstroDebug.h>
 %}
 %option yylineno
 %x QUOTED
 %x ARGUMENTS
 %%
-list	{
-		yylval.argument = new std::string(yytext);
-		yy_push_state(ARGUMENTS);
-		return LIST;
-	}
-module	{
-		yylval.argument = new std::string(yytext);
-		yy_push_state(ARGUMENTS);
-		return MODULE;
-	}
-locator	{
-		yylval.argument = new std::string(yytext);
-		yy_push_state(ARGUMENTS);
-		return LOCATOR;
-	}
-
-exit	{
+exit|quit	{
 		yylval.argument = new std::string(yytext);
 		return EXIT;
 	}
 
+[a-zA-Z0-9]*	{
+		yylval.argument = new std::string(yytext);
+		yy_push_state(ARGUMENTS);
+		return COMMANDNAME;
+	}
+
+<ARGUMENTS>[ \t]
+
 <ARGUMENTS>[^ \t\n"]*	{
 		yylval.argument = new std::string(yytext);
-		std::cerr << astro::stringprintf("argument string: %s",
-			yylval.argument->c_str()) << std::endl;
+		//std::cerr << astro::stringprintf("argument string: %s",
+		//	yylval.argument->c_str()) << std::endl;
 		return ARGUMENT;
 	}
 
@@ -53,8 +46,9 @@ exit	{
 
 <QUOTED>[^"\n]*	{
 		yylval.argument = new std::string(yytext);
-		std::cerr << astro::stringprintf("quoted string: %s",
-			yylval.argument->c_str()) << std::endl;
+		//std::cerr << astro::stringprintf("quoted string: %s",
+		//	yylval.argument->c_str()) << std::endl;
+		yy_pop_state();
 		return ARGUMENT;
 	}
 
@@ -62,5 +56,11 @@ exit	{
 		return '\n';
 	}
 
-<<EOF>>	{ return END_OF_FILE; }
+.	{
+		return *yytext;
+	}
+
+<<EOF>>	{
+		return END_OF_FILE;
+	}
 %%

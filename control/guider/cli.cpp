@@ -88,6 +88,14 @@ int	cli::parse(std::istream *infile) {
 	return result;
 }
 
+std::string	cli::prompt() const {
+	return _prompt;
+}
+
+void	cli::prompt(const std::string& p) {
+	_prompt = p;
+}
+
 std::string	cli::toString() const {
 	return std::string("command line interpreter");
 }

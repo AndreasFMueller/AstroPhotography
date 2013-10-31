@@ -13,5 +13,21 @@ void	locatorcommand::operator()(const std::string& command,
 	
 }
 
+std::string	locatorcommand::summary() const {
+	return std::string("locate devices");
+}
+
+std::string	locatorcommand::help() const {
+	return std::string(
+		"SYNOPSIS\n"
+		"\n"
+		"\tlocate\n"
+		"\n"
+		"DESCRIPTION\n"
+		"\n"
+		"Locate a module and devices associated with it\n"
+	);
+}
+
 } // namespace cli
 } // namespace astro

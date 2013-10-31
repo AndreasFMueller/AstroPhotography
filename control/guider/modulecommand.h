@@ -16,12 +16,13 @@ class modulecommand : public clicommand {
 	void	listdevices(const std::string& modulename,
 			const enum Astro::DeviceLocator::device_type devicetype);
 	void	moduleversion(const std::string& modulename);
-	void	help();
 public:
-	modulecommand() : clicommand("module") { }
+	modulecommand(commandfactory& factory) : clicommand(factory, "module") { }
 	~modulecommand() { }
-	void	operator()(const std::string& command,
+	virtual void	operator()(const std::string& command,
 			const std::vector<std::string>& arguments);
+	virtual std::string	summary() const;
+	virtual std::string	help() const;
 };
 
 } // namespace cli
