@@ -6,6 +6,7 @@
 #include <guidecli.h>
 #include <modulecommand.h>
 #include <AstroDebug.h>
+#include <CorbaExceptionReporter.h>
 
 namespace astro {
 namespace cli {
@@ -30,7 +31,10 @@ void	modulecommand::operator()(const std::string& command,
 		if (arguments.size() < 3) {
 			throw std::runtime_error("not enough arguments");
 		}
-		Astro::DeviceLocator::device_type	type;
+		// initialize the type variable to keep the compiler from
+		// complaining about unitialized variables
+		Astro::DeviceLocator::device_type	type
+			= Astro::DeviceLocator::DEVICE_CAMERA;
 		if (arguments[2] == std::string("camera")) {
 			type = Astro::DeviceLocator::DEVICE_CAMERA;
 		} else if (arguments[2] == std::string("focuser")) {
@@ -54,14 +58,51 @@ void	modulecommand::listdevices(const std::string& modulename,
 		const enum Astro::DeviceLocator::device_type devicetype) {
 	// get the modules object
 	guidesharedcli	gcli;
-	Astro::Modules::ModuleNameSequence_var	namemodule
-		= gcli->modules->getModuleNames();
-	Astro::DriverModule_var drivermodule
-		= gcli->modules->getModule(modulename.c_str());
-	Astro::DeviceLocator_var        devicelocator
-		= drivermodule->getDeviceLocator();
-	Astro::DeviceLocator::DeviceNameList_var	namelist
-		= devicelocator->getDevicelist(devicetype);
+
+	// get the module names available
+	Astro::Modules::ModuleNameSequence_var	namemodule;
+	try {
+		namemodule = gcli->modules->getModuleNames();
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getModuleNames exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
+
+	// get a module of a given name
+	Astro::DriverModule_var drivermodule;
+	try {
+		drivermodule = gcli->modules->getModule(modulename.c_str());
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getModule exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
+
+	// get the device locator from the module
+	Astro::DeviceLocator_var        devicelocator;
+	try {
+		devicelocator = drivermodule->getDeviceLocator();
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getDeivceLocator exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
+
+	// get the list of device names
+	Astro::DeviceLocator::DeviceNameList_var	namelist;
+	try {
+		namelist = devicelocator->getDevicelist(devicetype);
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getDevicelist exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
+
 	for (int i = 0; i < (int)namelist->length(); i++) {
 		std::cout << namelist[i] << std::endl;
 	}

@@ -48,7 +48,7 @@ extern "C" void	debug(int loglevel, const char *file, int line,
 
 extern "C" void vdebug(int loglevel, const char *file, int line,
 	int flags, const char *format, va_list ap) {
-	time_t		t;
+	//time_t		t;
 	struct tm	*tmp;
 	char	msgbuffer[MSGSIZE], prefix[MSGSIZE],
 		msgbuffer2[MSGSIZE], tstp[MSGSIZE],

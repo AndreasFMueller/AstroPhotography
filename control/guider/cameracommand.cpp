@@ -10,6 +10,7 @@
 #include <OrbSingleton.h>
 #include <iostream>
 #include <VarWrapper.h>
+#include <CorbaExceptionReporter.h>
 
 namespace astro {
 namespace cli {
@@ -19,9 +20,7 @@ namespace cli {
 //////////////////////////////////////////////////////////////////////
 typedef	ObjWrapper<Astro::Camera>	CameraWrapper;
 
-class Camera_internals /* : std::map<std::string, Astro::Camera_ptr> */ {
-	typedef	std::map<std::string, Astro::Camera_ptr>	cameramap_t;
-	cameramap_t	m;
+class Camera_internals : std::map<std::string, CameraWrapper> {
 public:
 	Camera_internals() { }
 	CameraWrapper	byname(const std::string& cameraid);
@@ -33,8 +32,8 @@ public:
 static Camera_internals	*commoncameras = NULL;
 
 CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
-	cameramap_t::iterator	i = m.find(cameraid);
-	if (i == m.end()) {
+	Camera_internals::iterator	i = find(cameraid);
+	if (i == end()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera %s not found",
 			cameraid.c_str());
 		throw command_error("camera not found");
@@ -43,17 +42,16 @@ CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
 }
 
 void	Camera_internals::release(const std::string& cameraid) {
-	cameramap_t::iterator	i = m.find(cameraid);
-	if (i != m.end()) {
+	Camera_internals::iterator	i = find(cameraid);
+	if (i != end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing camera %s",
 			cameraid.c_str());
-		m.erase(i);
+		erase(i);
 	}
 }
 
 void	Camera_internals::assign(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
-#if 1
 	if (arguments.size() < 4) {
 		throw command_error("camera assign needs 4 arguments");
 	}
@@ -65,41 +63,69 @@ void	Camera_internals::assign(const std::string& cameraid,
 
 	// geht the modules interface
 	Astro::OrbSingleton	orb;
-	Astro::Modules_var	modules = orb.getModules();
+	Astro::Modules_var	modules;
+	try {
+		modules = orb.getModules();
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x).c_str();
+		debug(LOG_ERR, DEBUG_LOG, 0, "getModules() exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
 
 	// get the driver module
-	Astro::DriverModule_var	drivermodule
-		= modules->getModule(modulename.c_str());
+	Astro::DriverModule_var	drivermodule;
+	try {
+		drivermodule = modules->getModule(modulename.c_str());
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getModule exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
 	if (CORBA::is_nil(drivermodule)) {
 		throw command_error("could not get module");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver module");
 
 	// get the device locator
-	Astro::DeviceLocator_var	devicelocator
-		= drivermodule->getDeviceLocator();
+	Astro::DeviceLocator_var	devicelocator;
+	try {
+		devicelocator = drivermodule->getDeviceLocator();
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getDeviceLocator exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
 	if (CORBA::is_nil(devicelocator)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get device locator");
+		throw std::runtime_error("cannot get device locator");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got device locator for %s",
 		modulename.c_str());
 
 	// now ask the device locator for a camera with that name
-	Astro::Camera_ptr	camera
-		= devicelocator->getCamera(cameraname.c_str());
+	Astro::Camera_ptr	camera;
+	try {
+		camera = devicelocator->getCamera(cameraname.c_str());
+	} catch (const CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		debug(LOG_ERR, DEBUG_LOG, 0, "getCamera exception: %s",
+			s.c_str());
+		throw std::runtime_error(s);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera ptr: %p", camera);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "int ptr: %p", new int);
 	if (CORBA::is_nil(camera)) {
 		throw command_error("could not get camera");
 	}
 
-	//CameraWrapper	cw(camera);
+	CameraWrapper	cw(camera);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got camera '%s'", cameraname.c_str());
 
 	// assign the Camera_var object to this 
-	cameramap_t::value_type	v(cameraid, camera);
-	m.insert(v);
-#endif
+	Camera_internals::value_type	v(cameraid, cw);
+	insert(v);
 
 #if 0
 	std::pair<std::string, std::shared_ptr<int> >	v(cameraid, std::shared_ptr<int>(new int));

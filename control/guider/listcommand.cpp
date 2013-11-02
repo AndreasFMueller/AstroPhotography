@@ -6,6 +6,7 @@
 #include <guidecli.h>
 #include <listcommand.h>
 #include <AstroDebug.h>
+#include <CorbaExceptionReporter.h>
 
 namespace astro {
 namespace cli {
@@ -17,7 +18,13 @@ void	listcommand::operator()(const std::string& command,
 	}
 	if (arguments[0] == std::string("modules")) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "list modules command");
-		listmodules();
+		try {
+			listmodules();
+		} catch (CORBA::Exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"list modules throws exception: %s",
+				Astro::exception2string(x).c_str());
+		}
 		return;
 	}
 	throw command_error("cannot execute list command");
@@ -26,8 +33,15 @@ void	listcommand::operator()(const std::string& command,
 void	listcommand::listmodules() {
 	// get the modules object
 	guidesharedcli	gcli;
-	Astro::Modules::ModuleNameSequence_var	namelist
-		= gcli->modules->getModuleNames();
+	Astro::Modules::ModuleNameSequence_var	namelist;
+	try {
+		namelist = gcli->modules->getModuleNames();
+	} catch (const CORBA::Exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"getModuleNames throws exception: %s",
+			Astro::exception2string(x).c_str());
+		return;
+	}
 	for (int i = 0; i < (int)namelist->length(); i++) {
 		std::cout << namelist[i] << std::endl;
 	}

@@ -19,6 +19,7 @@
 #include <cstring>
 #include <guidecli.h>
 #include <module.hh>
+#include <CorbaExceptionReporter.h>
 
 extern int	yydebug;
 
@@ -83,9 +84,16 @@ int	main(int argc, char *argv[]) {
 int	main(int argc, char *argv[]) {
 	try {
 		return astro::main(argc, argv);
+	} catch (CORBA::Exception& x) {
+		std::string	s = Astro::exception2string(x);
+		std::cerr << "guide program terminated by Corba exception: "
+			<< s << std::endl;
 	} catch (std::exception& x) {
 		std::cerr << "guide program terminated by exception: "
 			<< x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "guide program terminated by unknown exception"
+			<< std::endl;
 	}
 	exit(EXIT_FAILURE);
 }
