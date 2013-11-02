@@ -93,6 +93,8 @@ public:
 	ImageSize	operator*(const double l) const;
 };
 
+std::ostream&	operator<<(std::ostream& out, const ImageSize& size);
+
 /**
  * \brief Rectangle
  *

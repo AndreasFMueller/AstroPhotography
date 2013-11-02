@@ -20,6 +20,9 @@ namespace cli {
 //////////////////////////////////////////////////////////////////////
 typedef	ObjWrapper<Astro::Camera>	CameraWrapper;
 
+/**
+ * \brief internals class for Camera repository
+ */
 class Camera_internals : std::map<std::string, CameraWrapper> {
 public:
 	Camera_internals() { }
@@ -29,6 +32,9 @@ public:
 				const std::vector<std::string>& arguments);
 };
 
+/**
+ * \brief retrieve a camera by name
+ */
 CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
 	Camera_internals::iterator	i = find(cameraid);
 	if (i == end()) {
@@ -39,6 +45,9 @@ CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
 	return i->second;
 }
 
+/**
+ * \brief release a camera from the repository
+ */
 void	Camera_internals::release(const std::string& cameraid) {
 	Camera_internals::iterator	i = find(cameraid);
 	if (i != end()) {
@@ -48,6 +57,9 @@ void	Camera_internals::release(const std::string& cameraid) {
 	}
 }
 
+/**
+ * \brief assign a camera to a name
+ */
 void	Camera_internals::assign(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
 
@@ -134,6 +146,10 @@ void	Camera_internals::assign(const std::string& cameraid,
 //////////////////////////////////////////////////////////////////////
 // Cameras implementation
 //////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief class to mediate access to 
+ */
 class Cameras {
 	static Camera_internals	*internals;
 public:
@@ -146,6 +162,9 @@ public:
 
 Camera_internals	*Cameras::internals = NULL;
 
+/**
+ * \brief create the Cameras object
+ */
 Cameras::Cameras() {
 	if (NULL == internals) {
 		internals = new Camera_internals();
@@ -169,6 +188,9 @@ void	Cameras::assign(const std::string& cameraid,
 // cameracommand implementation
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief release a camera 
+ */
 void	cameracommand::release(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera release subcommand");
@@ -176,6 +198,18 @@ void	cameracommand::release(const std::string& cameraid,
 	cameras.release(cameraid);
 }
 
+std::ostream&	operator<<(std::ostream& out, Astro::CcdInfo *ccdinfo) {
+	out << "name:        " << ccdinfo->name << std::endl;
+	out << "id:          " << ccdinfo->id << std::endl;
+	out << "size:        " << ccdinfo->size.width << " x " << ccdinfo->size.height << std::endl;
+	out << "shutter:     " << ((ccdinfo->shutter) ? "YES" : "NO") << std::endl;
+	out << "pixel size:  " << (1000000 * ccdinfo->pixelwidth) << " x " << (1000000 * ccdinfo->pixelheight) << std::endl;
+	return out;
+}
+
+/**
+ * \brief display information about a camera available in the Cameras object
+ */
 void	cameracommand::info(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera info subcommand");
@@ -183,8 +217,16 @@ void	cameracommand::info(const std::string& cameraid,
 	CameraWrapper	camera = cameras.byname(cameraid);
 	std::cout << "name:           " << (*camera)->getName() << std::endl;
 	std::cout << "number of ccds: " << (*camera)->nCcds() << std::endl;
+	for (long ccdno = 0; ccdno < (*camera)->nCcds(); ccdno++) {
+		Astro::CcdInfo	*info = (*camera)->getCcdinfo(ccdno);
+		Astro::CcdInfo_var	v = info;
+		std::cout << info;
+	}
 }
 
+/**
+ * \brief Assign a camera to a name
+ */
 void	cameracommand::assign(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera assign subcommand");
@@ -192,6 +234,9 @@ void	cameracommand::assign(const std::string& cameraid,
 	cameras.assign(cameraid, arguments);
 }
 
+/**
+ * \brief execute a subcommand
+ */
 void	cameracommand::operator()(const std::string& commandname,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera command");

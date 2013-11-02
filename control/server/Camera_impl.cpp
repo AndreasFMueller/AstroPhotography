@@ -47,6 +47,8 @@ CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
 	result->size.width = info.size().width();
 	result->size.height = info.size().height();
 	result->shutter = info.shutter();
+	result->pixelwidth = info.pixelwidth();
+	result->pixelheight = info.pixelheight();
 
 	// copy binning modes
 	astro::camera::BinningSet	binningset = info.modes();
