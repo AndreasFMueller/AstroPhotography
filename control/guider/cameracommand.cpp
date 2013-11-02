@@ -9,7 +9,7 @@
 #include <camera.hh>
 #include <OrbSingleton.h>
 #include <iostream>
-#include <VarWrapper.h>
+#include <ObjWrapper.h>
 #include <CorbaExceptionReporter.h>
 
 namespace astro {
@@ -28,8 +28,6 @@ public:
 	void	assign(const std::string& cameraid,
 				const std::vector<std::string>& arguments);
 };
-
-static Camera_internals	*commoncameras = NULL;
 
 CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
 	Camera_internals::iterator	i = find(cameraid);
@@ -52,6 +50,7 @@ void	Camera_internals::release(const std::string& cameraid) {
 
 void	Camera_internals::assign(const std::string& cameraid,
 		const std::vector<std::string>& arguments) {
+
 	if (arguments.size() < 4) {
 		throw command_error("camera assign needs 4 arguments");
 	}
@@ -125,18 +124,8 @@ void	Camera_internals::assign(const std::string& cameraid,
 
 	// assign the Camera_var object to this 
 	Camera_internals::value_type	v(cameraid, cw);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "insert pair");
 	insert(v);
-
-#if 0
-	std::pair<std::string, std::shared_ptr<int> >	v(cameraid, std::shared_ptr<int>(new int));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new pair at %p", &v);
-	m.insert(v);
-#endif
-	//m.insert(std::make_pair(cameraid, camera));
-	//m.insert(std::make_pair(cameraid, NULL));
-
-//	std::map<std::string, int *>	m;
-//	m.insert(std::make_pair(std::string("blubb"), (int *)NULL));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera reference stored in map");
 }
@@ -146,7 +135,7 @@ void	Camera_internals::assign(const std::string& cameraid,
 // Cameras implementation
 //////////////////////////////////////////////////////////////////////
 class Cameras {
-	Camera_internals	*internals;
+	static Camera_internals	*internals;
 public:
 	Cameras();
 	CameraWrapper	byname(const std::string& cameraid);
@@ -155,11 +144,11 @@ public:
 			const std::vector<std::string>& arguments);
 };
 
+Camera_internals	*Cameras::internals = NULL;
+
 Cameras::Cameras() {
-	if (commoncameras) {
-		internals = commoncameras;
-	} else {
-		commoncameras = new Camera_internals();
+	if (NULL == internals) {
+		internals = new Camera_internals();
 	}
 }
 
@@ -192,7 +181,8 @@ void	cameracommand::info(const std::string& cameraid,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera info subcommand");
 	Cameras	cameras;
 	CameraWrapper	camera = cameras.byname(cameraid);
-//	std::cout << "name: " << camera->getName() << std::endl;
+	std::cout << "name:           " << (*camera)->getName() << std::endl;
+	std::cout << "number of ccds: " << (*camera)->nCcds() << std::endl;
 }
 
 void	cameracommand::assign(const std::string& cameraid,

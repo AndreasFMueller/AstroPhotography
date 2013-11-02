@@ -1,7 +1,7 @@
 #
 # configuration used for development purposes on Linux and Mac OS X
 #
-CFLAGS="-Wall -g -O2"
+CFLAGS="-Wall -g"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS} -std=c++11"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests --enable-microtouch"
