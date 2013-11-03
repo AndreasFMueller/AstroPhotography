@@ -83,9 +83,7 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	// now we create an object reference in the POA for modules, for
 	// that we first have to get the POA
 	OrbSingleton	orb;
-	std::vector<std::string>	poapath;
-	poapath.push_back("Modules");
-	poapath.push_back("DriverModules");
+	PoaName	poapath("Modules/DriverModules");
 	PortableServer::POA_var	modules_poa = orb.findPOA(poapath);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DriverModules POA found");
 	CORBA::Object_var	obj
