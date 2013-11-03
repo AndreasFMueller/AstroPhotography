@@ -64,7 +64,6 @@ int	main(int argc, char *argv[]) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
 
-
 	/* start parsing the input */
 	if (filename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing '%s'", filename);

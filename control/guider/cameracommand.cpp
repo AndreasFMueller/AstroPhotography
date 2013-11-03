@@ -201,9 +201,12 @@ void	cameracommand::release(const std::string& cameraid,
 std::ostream&	operator<<(std::ostream& out, Astro::CcdInfo *ccdinfo) {
 	out << "name:        " << ccdinfo->name << std::endl;
 	out << "id:          " << ccdinfo->id << std::endl;
-	out << "size:        " << ccdinfo->size.width << " x " << ccdinfo->size.height << std::endl;
-	out << "shutter:     " << ((ccdinfo->shutter) ? "YES" : "NO") << std::endl;
-	out << "pixel size:  " << (1000000 * ccdinfo->pixelwidth) << " x " << (1000000 * ccdinfo->pixelheight) << std::endl;
+	out << "size:        " << ccdinfo->size.width << " x "
+				<< ccdinfo->size.height << std::endl;
+	out << "shutter:     " << ((ccdinfo->shutter) ? "YES" : "NO")
+		<< std::endl;
+	out << "pixel size:  " << (1000000 * ccdinfo->pixelwidth) << " x "
+		<< (1000000 * ccdinfo->pixelheight) << std::endl;
 	return out;
 }
 
