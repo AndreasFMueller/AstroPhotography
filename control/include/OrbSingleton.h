@@ -8,6 +8,7 @@
 
 #include <module.hh>
 #include <string>
+#include <vector>
 
 namespace Astro {
 
@@ -28,6 +29,7 @@ public:
 	operator	CORBA::ORB_var() { return _orbvar; }
 	Modules_var	getModules();
 	DeviceLocator_var       getDeviceLocator(const std::string& modulename);
+	PortableServer::POA_var	findPOA(const std::vector<std::string>& poaname);
 };
 
 } // namespace Astro

@@ -15,9 +15,102 @@
 #include <AstroLoader.h>
 #include <OrbSingleton.h>
 #include <cassert>
+#include "DriverModuleActivator_impl.h"
 
 namespace astro {
 
+//////////////////////////////////////////////////////////////////////
+// POABuilder class: builds standard POAs
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief Auxiliary to build a POA
+ */
+class POABuilder {
+	PortableServer::POA_var	_poa;
+public:
+	POABuilder(PortableServer::POA_ptr poaptr) : _poa(poaptr) { }
+	PortableServer::POA_var	build(const std::string& poaname);
+};
+
+PortableServer::POA_var	POABuilder::build(const std::string& poaname) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build POA named '%s'", poaname.c_str());
+	// build a policy list for the POA
+	CORBA::PolicyList	policy_list;
+	PortableServer::IdAssignmentPolicy_var	assign
+		= _poa->create_id_assignment_policy(PortableServer::USER_ID);
+	PortableServer::LifespanPolicy_var	lifespan
+		= _poa->create_lifespan_policy(PortableServer::TRANSIENT);
+	policy_list.length(2);
+	policy_list[0] = PortableServer::IdAssignmentPolicy::_duplicate(assign);
+	policy_list[1] = PortableServer::LifespanPolicy::_duplicate(lifespan);
+
+	// now create the POA
+	PortableServer::POA_var result = _poa->create_POA(poaname.c_str(),
+		_poa->the_POAManager(), policy_list);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "POA '%s' constructed", poaname.c_str());
+
+	// cleanup
+	assign->destroy();
+	lifespan->destroy();
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// POABuilderActivator template: builds POAs that use an activator
+//////////////////////////////////////////////////////////////////////
+template <typename activator>
+class POABuilderActivator {
+	PortableServer::POA_var	_poa;
+public:
+	POABuilderActivator(PortableServer::POA_ptr poaptr) : _poa(poaptr) { }
+	PortableServer::POA_var	build(const std::string& poaname,
+		activator *theactivator);
+};
+
+template<typename activator>
+PortableServer::POA_var	POABuilderActivator<activator>::build(
+		const std::string& poaname, activator *theactivator) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a POA named '%s' with activator",
+		poaname.c_str());
+	// create the policy
+	PortableServer::IdAssignmentPolicy_var	assign
+		= _poa->create_id_assignment_policy(PortableServer::USER_ID);
+	PortableServer::RequestProcessingPolicy_var	requestprocessing
+		= _poa->create_request_processing_policy(
+			PortableServer::USE_SERVANT_MANAGER);
+	CORBA::PolicyList	policy_list;
+	policy_list.length(2);
+	policy_list[0] = PortableServer::IdAssignmentPolicy::_duplicate(assign);
+	policy_list[1] = PortableServer::RequestProcessingPolicy::_duplicate(
+				requestprocessing);
+
+	// now build the POA
+	PortableServer::POA_var	result_poa
+		= _poa->create_POA(poaname.c_str(),
+			_poa->the_POAManager(), policy_list);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created POA '%s' with activator");
+
+	// cleanup
+	assign->destroy();
+	requestprocessing->destroy();
+
+	// now assign the activator
+	PortableServer::ServantManager_var	activator_ref
+		= theactivator->_this();
+	result_poa->set_servant_manager(activator_ref);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Activator set");
+
+	// return the constructed POA
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"POA construction with activator complete");
+	return result_poa;
+}
+
+
+/**
+ * \brief Main function for the CORBA server
+ */
 int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debuglevel = LOG_DEBUG;
@@ -50,21 +143,36 @@ int	main(int argc, char *argv[]) {
 
 	// we want a separate child POA for the Modules object, because
 	// we want that object reference to be persistent
-	PortableServer::LifespanPolicy_var	lifespan
-		= root_poa->create_lifespan_policy(PortableServer::TRANSIENT);
-	PortableServer::IdAssignmentPolicy_var	assign
-		= root_poa->create_id_assignment_policy(PortableServer::USER_ID);
-	CORBA::PolicyList	policy_list;
-	policy_list.length(2);
-	policy_list[0] = PortableServer::LifespanPolicy::_duplicate(lifespan);
-	policy_list[1] = PortableServer::IdAssignmentPolicy::_duplicate(assign);
-	PortableServer::POA_var	modules_poa
-		= root_poa->create_POA("Modules",
-			PortableServer::POAManager::_nil(), policy_list);
-	lifespan->destroy();
-	assign->destroy();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "created POA for modules servant");
+	POABuilder	pb(root_poa);
+	PortableServer::POA_var	modules_poa = pb.build("Modules");
 
+	// create a POA for driver modules
+	POABuilderActivator<Astro::DriverModuleActivator_impl>	pb1(modules_poa);
+	PortableServer::POA_var	drivermodules_poa = pb1.build("DriverModules",
+		new Astro::DriverModuleActivator_impl());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DriverModuleActivator set");
+
+	// create a POA for Camera objects
+	POABuilder	pbcamera(drivermodules_poa);
+	PortableServer::POA_var	camera_poa = pbcamera.build("Cameras");
+
+	// create a POA for Ccd objects
+	POABuilder	pbccd(camera_poa);
+	PortableServer::POA_var	ccd_poa = pbccd.build("Ccds");
+
+	// create a POA for Cooler objects
+	POABuilder	pbcooler(ccd_poa);
+	PortableServer::POA_var	cooler_poa = pbcooler.build("Coolers");
+
+	// create a POA GuiderPort objects
+	POABuilder	pbguiderport(camera_poa);
+	PortableServer::POA_var	guiderport_poa
+		= pbguiderport.build("GuiderPorts");;
+
+	// create a POA for Focuser objects
+	POABuilder	pbfocuser(modules_poa);
+	PortableServer::POA_var	focuser_poa = pbfocuser.build("Focusers");
+			
 	// create the servant and register it with the ORB
 	Astro::Modules_impl	*modules = new Astro::Modules_impl();
 	PortableServer::ObjectId_var	oid
@@ -100,7 +208,6 @@ int	main(int argc, char *argv[]) {
 	PortableServer::POAManager_var	pman = root_poa->the_POAManager();
 	pman->activate();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "poa manager activated");
-	modules_poa->the_POAManager()->activate();
 
 	// run the orb
 	orb.orbvar()->run();

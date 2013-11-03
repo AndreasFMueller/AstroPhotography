@@ -88,4 +88,19 @@ DeviceLocator_var	OrbSingleton::getDeviceLocator(
 	return locatorvar;
 }
 
+/**
+ * \brief Find a POA of a given name
+ */
+PortableServer::POA_var	OrbSingleton::findPOA(const std::vector<std::string>& poaname) {
+	CORBA::Object_var	obj
+		= _orbvar->resolve_initial_references("RootPOA");
+	PortableServer::POA_ptr	root_poa
+		= PortableServer::POA::_narrow(obj);
+	PortableServer::POA_ptr	poa = root_poa;
+	for (int i = 0; i < poaname.size(); i++) {
+		poa = poa->find_POA(poaname[i].c_str(), 0);
+	}
+	return poa;
+}
+
 } // namespace Astro

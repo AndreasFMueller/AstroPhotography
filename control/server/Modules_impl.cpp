@@ -5,6 +5,7 @@
  */
 #include "Modules_impl.h"
 #include "DriverModule_impl.h"
+#include <OrbSingleton.h>
 #include <AstroLoader.h>
 #include <AstroDebug.h>
 #include <algorithm>
@@ -65,47 +66,32 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for module %s", _name);
 	std::string	name(_name);
 
-	// make sure the net module is not requested
-	if (name == "net") {
+	// get the available modules names
+	std::vector<std::string>	names = modulenames();
+	if (names.end() == std::find(names.begin(), names.end(), name)) {
 		NotFound	notfound;
-		notfound.cause = CORBA::string_dup("net module not available "
-			"via CORBA");
+		notfound.cause = CORBA::string_dup("module not available");
 		throw notfound;
 	}
 
-	// prepare the result pointer. We have to do this here, because
-	// there are two ways to fill it: from the cache or by creating
-	// a new module. 
-	astro::module::ModulePtr	result;
+	// create an objectid for this driver module
+	std::string	oidstr = std::string("module:") + name;
+	PortableServer::ObjectId_var	oid
+		= PortableServer::string_to_ObjectId(oidstr.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "oid: %s", oidstr.c_str());
 
-	// find out whether this module was already loaded
-	modulemap_t::const_iterator	i = modulemap.find(name);
-	if (modulemap.find(name) != modulemap.end()) {
-		// retrieve the module from the cache
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s in cache", _name);
-		result = i->second;
-	} else {
-		// load the module and put the module pointer into the map
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new module %s", _name);
-		try {
-			result = repository.getModule(name);
-			result->open();
-		} catch (std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "exception: %s", x.what());
-			NotFound	notfound;
-			notfound.cause = CORBA::string_dup(x.what());
-			throw notfound;
-		}
-		modulemap.insert(make_pair(name, result));
-	}
-
-	// turn the ModulePtr into an object reference
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "module %s loaded", name.c_str());
-	Astro::DriverModule_impl	*drivermodule
-		= new Astro::DriverModule_impl(result);
-	
-	// return the driver module
-	return drivermodule->_this();
+	// now we create an object reference in the POA for modules, for
+	// that we first have to get the POA
+	OrbSingleton	orb;
+	std::vector<std::string>	poapath;
+	poapath.push_back("Modules");
+	poapath.push_back("DriverModules");
+	PortableServer::POA_var	modules_poa = orb.findPOA(poapath);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DriverModules POA found");
+	CORBA::Object_var	obj
+		= modules_poa->create_reference_with_id(oid,
+			"IDL:/Astro/DriverModule");
+	return DriverModule::_narrow(obj);
 }
 
 } // namespace Astro

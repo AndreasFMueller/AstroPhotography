@@ -41,8 +41,6 @@ public:
 	// cooler methods
 	virtual ::CORBA::Boolean	hasCooler();
 	virtual Cooler_ptr	getCooler();
-
-	// exposure related methods
 };
 
 } // namespace Astro
