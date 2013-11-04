@@ -116,6 +116,9 @@ std::string	ExceptionReporter::operator()(const CORBA::SystemException& x) const
 		}
 
 		// add the minor
+#ifdef minor
+#undef minor
+#endif
 		out << ", minor: " << se->minor();
 	}
 
