@@ -193,7 +193,7 @@ uint8_t	Device::getDeviceAddress() const {
 }
 
 std::string	Device::getDeviceName() const {
-	return stringprintf("%03o:%03o", getBusNumber(), getDeviceAddress());
+	return stringprintf("%03d:%03d", (int)getBusNumber(), (int)getDeviceAddress());
 }
 
 /**
