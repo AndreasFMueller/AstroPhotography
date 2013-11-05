@@ -39,13 +39,13 @@ void	SimCoolerTest::tearDown() {
 }
 
 void	SimCoolerTest::testName() {
-	CoolerPtr	cooler = locator->getCooler("sim-cooler");
-	CPPUNIT_ASSERT(cooler->getName() == "sim-cooler");
+	CoolerPtr	cooler = locator->getCooler("cooler:simulator/cooler");
+	CPPUNIT_ASSERT(cooler->name().unitname() == "cooler");
 }
 
 void	SimCoolerTest::testCooler() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Start cooler test");
-	CoolerPtr	cooler = locator->getCooler("sim-cooler");
+	CoolerPtr	cooler = locator->getCooler("cooler:simulator/cooler");
 	double	ambient = 273 + 13.2;
 	CPPUNIT_ASSERT(fabs(ambient - cooler->getActualTemperature()) < 0.01);
 	CPPUNIT_ASSERT(cooler->getActualTemperature()

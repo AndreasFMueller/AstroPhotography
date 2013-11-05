@@ -8,11 +8,13 @@
 #include <Conversions.h>
 #include <OrbSingleton.h>
 #include <AstroExceptions.h>
+#include <AstroDevice.h>
 #include <NetCamera.h>
 #include <NetGuiderPort.h>
 #include <NetFilterWheel.h>
 #include <NetCooler.h>
 #include <NetFocuser.h>
+#include <NetUtils.h>
 
 using namespace astro::device;
 
@@ -83,15 +85,11 @@ std::string	NetLocator::modulename(const std::string& netname) const {
 }
 
 std::string	NetLocator::devicename(const std::string& netname) const {
-	if (netname.substr(0, 4) != "net:") {
-		throw NotFound("not a net camera name");
+	DeviceName	netdev(netname);
+	if (netdev.modulename() != "net") {
+		throw NotFound("not a net device name");
 	}
-	// locate the /, and return the part after the /
-	size_t	offset = netname.find('/');
-	if (offset == std::string::npos) {
-		throw std::runtime_error("no / in name");
-	}
-	return netname.substr(offset + 1);
+	return URL::decode(netdev.unitname());
 }
 
 /**
@@ -143,8 +141,9 @@ std::vector<std::string>	NetLocator::getDevicelist(
 
 			// build new names from the name list received
 			for (unsigned int j = 0; j < listvar->length(); j++) {
-				std::string	devicename((*list)[j]);
-				result.push_back("net:" + modulename + "/" + devicename);
+				char	*lp = (*list)[j];
+				DeviceName	devname(lp);
+				result.push_back(devname2netname(devname));
 			}
 		}
 	}

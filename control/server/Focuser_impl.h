@@ -23,6 +23,7 @@ public:
 	virtual CORBA::UShort	max();
 	virtual CORBA::UShort	current();
 	virtual void	set(CORBA::UShort value);
+	virtual char	*getName();
 };
 
 } // namespace astro

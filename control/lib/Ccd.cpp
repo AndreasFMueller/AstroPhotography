@@ -20,6 +20,11 @@ namespace camera {
 // CcdInfo implementation
 //////////////////////////////////////////////////////////////////////
 
+DeviceName	CcdInfo::defaultname(const DeviceName& parent,
+			const std::string& unitname) {
+	return DeviceName(parent, DeviceName::Ccd, unitname);
+}
+
 CcdInfo::CcdInfo(const std::string& name, const ImageSize& size, int _ccdid)
 	: _name(name), _size(size), ccdid(_ccdid) {
 	_shutter = false;
@@ -88,9 +93,10 @@ void	CcdInfo::addModes(const BinningSet& modes) {
  */
 std::string	CcdInfo::toString(bool withbinningmodes) const {
 	std::ostringstream	out;
-	out << stringprintf("%s: %ux%u (%.1fu x %.1fu),", _name.c_str(),
-		_size.width(), _size.height(),
-		_pixelwidth * 1000000, _pixelheight * 1000000);
+	out << (std::string)name() <<
+		stringprintf(": %ux%u (%.1fu x %.1fu),",
+			_size.width(), _size.height(),
+			_pixelwidth * 1000000, _pixelheight * 1000000);
 	if (withbinningmodes) {
 		out << binningmodes.toString();
 	} else {

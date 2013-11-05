@@ -13,7 +13,7 @@ namespace astro {
 namespace device {
 namespace microtouch {
 
-MtFocuser::MtFocuser() {
+MtFocuser::MtFocuser() : Focuser(DeviceName("focuser:microtouch/focuser")) {
 	Context	context;
 	DevicePtr	deviceptr = context.find(0x10c4, 0x82f4);
 	mt = new MicroTouch(deviceptr);

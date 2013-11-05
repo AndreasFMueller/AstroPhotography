@@ -13,7 +13,16 @@ using namespace astro::device;
 namespace astro {
 namespace camera {
 
-Cooler::Cooler(const std::string name) : Device(name) {
+DeviceName	Cooler::defaultname(const DeviceName& parent,
+			const std::string& unitname) {
+	return DeviceName(parent, DeviceName::Cooler, unitname);
+}
+
+Cooler::Cooler(const DeviceName& name) : Device(name) {
+	temperature = 25 + 273.1;
+}
+
+Cooler::Cooler(const std::string& name) : Device(name) {
 	temperature = 25 + 273.1;
 }
 

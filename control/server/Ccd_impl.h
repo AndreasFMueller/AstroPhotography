@@ -21,6 +21,8 @@ public:
 	// constructor
 	inline Ccd_impl(astro::camera::CcdPtr ccd) : _ccd(ccd) { }
 
+	virtual char	*getName();
+
 	// exposure related stuff
 	virtual void	startExposure(const ::Astro::Exposure& exp);
 	virtual ExposureState	exposureStatus();

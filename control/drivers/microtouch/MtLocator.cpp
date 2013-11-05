@@ -64,12 +64,12 @@ std::vector<std::string>	MtLocator::getDevicelist(
 	if (DeviceLocator::FOCUSER != device) {
 		return names;
 	}
-	names.push_back(std::string("focuser"));
+	names.push_back(std::string("focuser:microtouch/focuser"));
 	return names;
 }
 
 FocuserPtr	MtLocator::getFocuser0(const std::string& name) {
-	if (name != "focuser") {
+	if (name != "focuser:microtouch/focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
 			name.c_str());
 		throw NotFound("no such focuser");

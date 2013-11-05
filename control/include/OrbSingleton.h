@@ -13,7 +13,6 @@
 namespace Astro {
 
 class PoaName : public std::vector<std::string> {
-	std::vector<std::string>	split(const std::string& name) const;
 public:
 	PoaName(const std::string& basename);
 	PoaName&	add(const std::string& name);

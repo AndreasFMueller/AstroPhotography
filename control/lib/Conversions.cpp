@@ -311,7 +311,8 @@ CORBA::Octet	convert_relaybits2octet(uint8_t bits) {
 // CcdInfo
 Astro::CcdInfo	convert(const astro::camera::CcdInfo& info) {
 	Astro::CcdInfo	result;
-	result.name = CORBA::string_dup(info.name().c_str());
+	std::string	ccdname = info.name();
+	result.name = CORBA::string_dup(ccdname.c_str());
 	result.id = info.getId();
 	result.size = convert(info.size());
 	result.binningmodes = convert(info.modes());

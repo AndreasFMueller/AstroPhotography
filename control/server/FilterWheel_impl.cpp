@@ -7,6 +7,11 @@
 
 namespace Astro {
 
+char	*FilterWheel_impl::getName() {
+	std::string	name = _filterwheel->name();
+        return CORBA::string_dup(name.c_str());
+}
+
 /**
  * \brief Get the number of Filters
  */

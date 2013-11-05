@@ -8,6 +8,7 @@
 #include <NameService.h>
 #include <stdexcept>
 #include <sstream>
+#include <AstroUtils.h>
 
 namespace Astro {
 
@@ -15,45 +16,19 @@ namespace Astro {
 // PoaName implementation
 //////////////////////////////////////////////////////////////////////
 
-std::vector<std::string>	PoaName::split(const std::string& name) const {
-	std::vector<std::string>	result;
-	std::string	n = name;
-	do {
-		std::string::size_type	l = n.find('/');
-		if (l == std::string::npos) {
-			result.push_back(n);
-			n = "";
-		} else {
-			result.push_back(n.substr(0, l));
-			n = n.substr(l + 1);
-		}
-	} while (n.size() > 0);
-	return result;
-}
-
 PoaName::PoaName(const std::string& basename) {
 	add(basename);
 }
 
 PoaName&	PoaName::add(const std::string& name) {
-	std::vector<std::string>	names = split(name);
-	std::vector<std::string>::iterator	i;
-	for (i = names.begin(); i != names.end(); i++) {
-		push_back(*i);
-	}
+	std::vector<std::string>	names;
+	astro::split<std::vector<std::string> >(name, "/", names);
+	std::copy(names.begin(), names.end(), std::back_inserter(*this));
 	return *this;
 }
 
 std::string	PoaName::toString() const {
-	std::ostringstream	out;
-	std::vector<std::string>::const_iterator	i;
-	for (i = begin(); i != end(); i++) {
-		if (i != begin()) {
-			out << "/";
-		}
-		out << *i;
-	}
-	return out.str();
+	return astro::Concatenator::concat(*this, std::string("/"));
 }
 
 std::ostream&	operator<<(std::ostream& out, const PoaName& poaname) {

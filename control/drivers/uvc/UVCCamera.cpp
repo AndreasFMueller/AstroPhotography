@@ -16,6 +16,15 @@ namespace uvc {
 using astro::usb::uvc::HeaderDescriptor;
 using astro::usb::uvc::FormatFrameBasedDescriptor;
 
+/**
+ * \brief Auxiliary function to generate the camera name from the deviceptr
+ */
+static astro::DeviceName        cameraname(DevicePtr& deviceptr) {
+	DeviceName	modulename("module:uvc");
+	return DeviceName(modulename, DeviceName::Camera,
+			deviceptr->getDeviceName());
+}
+
 void	UvcCamera::addFrame(int interface, int format, int frame,
 	const std::string& guid, FrameDescriptor *framedescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interface %d, format %d, frame %d",
@@ -42,18 +51,20 @@ void	UvcCamera::addFrame(int interface, int format, int frame,
 	astro::image::ImageSize	ccdsize
 		= astro::image::ImageSize(framedescriptor->wWidth(),
 			framedescriptor->wHeight());
-	std::string	ccdname = stringprintf("%dx%d/%d/%d/%d/%s",
+	std::string	ccdname = stringprintf("%dx%d:%d:%d:%d:%s",
 		ccdsize.width(), ccdsize.height(),
 		uvcccd.interface, uvcccd.format, uvcccd.frame,
 		uvcccd.guid.c_str());
-	CcdInfo	ccd(ccdname, ccdsize, ccds.size() - 1);
+	DeviceName	devname(name(), DeviceName::Ccd, ccdname);
+	CcdInfo	ccd(devname, ccdsize, ccds.size() - 1);
 	ccd.pixelwidth(0.000005); // fake pixel size, as it is not available
 	ccd.pixelheight(0.000005); // for a UVC camera
 	ccd.addMode(Binning(1,1));
 	ccdinfo.push_back(ccd);
 
 	// add ccdinfo
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", ccd.name().c_str());
+	std::string	n = devname;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding CCD %s", n.c_str());
 }
 
 void	UvcCamera::addFormat(int interface, int format,
@@ -105,8 +116,8 @@ void	UvcCamera::addHeader(int interface, HeaderDescriptor *headerdescriptor) {
 	}
 }
 
-UvcCamera::UvcCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr),
-	camera(*deviceptr, true) {
+UvcCamera::UvcCamera(DevicePtr& _deviceptr) : Camera(cameraname(deviceptr)),
+	deviceptr(_deviceptr), camera(*deviceptr, true) {
 	// show what we have in this camera
 	std::cout << camera;
 

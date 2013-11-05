@@ -23,6 +23,7 @@ public:
 	virtual ::CORBA::Long	currentPosition();
 	virtual void	select(::CORBA::Long position);
 	virtual char	*filterName(::CORBA::Long position);
+	virtual char	*getName();
 };
 
 } // namespace Astro

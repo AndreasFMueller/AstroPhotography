@@ -4,6 +4,8 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <NetFocuser.h>
+#include <AstroUtils.h>
+#include <NetUtils.h>
 
 namespace astro {
 namespace camera {
@@ -14,7 +16,9 @@ namespace net {
  *
  * The constructor keeps a reference to a remote focuser object
  */
-NetFocuser::NetFocuser(Astro::Focuser_var focuser) : _focuser(focuser) {
+NetFocuser::NetFocuser(Astro::Focuser_var focuser)
+	: Focuser(devname2netname(focuser->getName())),
+	  _focuser(focuser) {
 	// query the current focuser state from the remote focuser
 	Astro::Focuser_Helper::duplicate(_focuser);
 }

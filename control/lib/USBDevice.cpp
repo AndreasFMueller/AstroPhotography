@@ -192,6 +192,10 @@ uint8_t	Device::getDeviceAddress() const {
 	return libusb_get_device_address(dev);
 }
 
+std::string	Device::getDeviceName() const {
+	return stringprintf("%03o:%03o", getBusNumber(), getDeviceAddress());
+}
+
 /**
  * \brief Get code indicating in what respect the device is broken.
  *

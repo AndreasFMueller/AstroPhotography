@@ -51,12 +51,16 @@ static float	pixelsize(unsigned long sbigsize) {
 	return result;
 }
 
+static DeviceName	cameraname(int usbno) {
+	return DeviceName(std::string("camera:sbig/") + std::to_string(usbno));
+}
+
 /**
  * \brief Open the SBIG UDRV library
  *
  * \param usbno   USB number of the camera.
  */
-SbigCamera::SbigCamera(int usbno) : Camera() {
+SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating SBIG camera object %d", usbno);
 
 	SbigLock	sbiglock;
@@ -158,7 +162,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 		// the readout modes for one with mode == 0 (RM_1X1)
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		CcdInfo	ccd("Imaging", ccdsize, ccdidcounter++);
+		DeviceName	ccdname(name(), DeviceName::Ccd, "Imaging");
+		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
 		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
 		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		ccd.setShutter(true);
@@ -187,7 +192,8 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	} else {
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		CcdInfo	ccd("Tracking", ccdsize, ccdidcounter++);
+		DeviceName	ccdname(name(), DeviceName::Ccd, "Tracking");
+		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
 		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
 		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found tracking ccd: %s",
@@ -213,7 +219,9 @@ SbigCamera::SbigCamera(int usbno) : Camera() {
 	} else {
 		ImageSize	ccdsize(ccdinforesult.readoutInfo[0].width,
 			ccdinforesult.readoutInfo[0].height);
-		CcdInfo	ccd("external Tracking", ccdsize, ccdidcounter++);
+		DeviceName	ccdname(name(), DeviceName::Ccd,
+					"external Tracking");
+		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
 		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
 		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {

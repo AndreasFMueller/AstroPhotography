@@ -36,7 +36,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimCcdTest);
 
 void	SimCcdTest::setUp() {
 	SimLocator	*locator = new SimLocator();
-	camera = locator->getCamera("sim-camera");
+	camera = locator->getCamera("camera:simulator/camera");
 	ccd = camera->getCcd(0);
 }
 
@@ -47,11 +47,10 @@ void	SimCcdTest::tearDown() {
 void	SimCcdTest::testConfig() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start Ccd config test");
 	CcdInfo	info = ccd->getInfo();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got ccd info: %s", info.name().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got ccd info: %s",
-		info.toString().c_str());
+		((std::string)info.name()).c_str());
 	CPPUNIT_ASSERT(info.size() == ImageSize(640, 480));
-	CPPUNIT_ASSERT(info.name() == "ccd");
+	CPPUNIT_ASSERT(info.name().unitname() == "ccd");
 	CPPUNIT_ASSERT(info.modes().permits(Binning(1,1)));
 	CPPUNIT_ASSERT(info.modes().permits(Binning(2,2)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Ccd config test");

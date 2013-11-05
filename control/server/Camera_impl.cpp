@@ -14,7 +14,8 @@ namespace Astro {
  * \brief Get the name of the camera
  */
 char	*Camera_impl::getName() {
-	return CORBA::string_dup(_camera->getName().c_str());
+	std::string	name = _camera->name();
+	return CORBA::string_dup(name.c_str());
 }
 
 /**
@@ -35,6 +36,7 @@ CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
 		notfound.cause = (const char *)"CCD id out of range";
 		throw notfound;
 	}
+
 	// get the CCD info
 	astro::camera::CcdInfo	info = _camera->getCcdInfo(ccdid);
 
@@ -42,7 +44,8 @@ CcdInfo	*Camera_impl::getCcdinfo(::CORBA::Long ccdid) {
 	Astro::CcdInfo	*result = new Astro::CcdInfo();
 
 	// copy simple members first
-	result->name = CORBA::string_dup(info.name().c_str());
+	std::string	ccdname = info.name();
+	result->name = CORBA::string_dup(ccdname.c_str());
 	result->id = info.getId();
 	result->size.width = info.size().width();
 	result->size.height = info.size().height();

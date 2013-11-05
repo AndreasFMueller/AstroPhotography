@@ -21,6 +21,7 @@ public:
 		: _guiderport(guiderport) { }
 	virtual CORBA::Char	active();
 	virtual void	activate(::CORBA::Float ra, ::CORBA::Float dec);
+	virtual char	*getName();
 };
 
 } // namespace Astro

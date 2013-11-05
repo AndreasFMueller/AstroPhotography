@@ -26,8 +26,13 @@ static double	now() {
 // Simulator camera implementation
 //////////////////////////////////////////////////////////////////////
 
-SimCamera::SimCamera() : Camera("guidesim") {
-	CcdInfo	ccd0("primary ccd", ImageSize(640, 480));
+static std::string	cameraname(const std::string& shortname) {
+	return std::string("camera:sim/") + shortname;
+}
+
+SimCamera::SimCamera() : Camera(cameraname("guidesim")) {
+	DeviceName	ccdname(name(), DeviceName::Ccd, "primary ccd");
+	CcdInfo	ccd0(ccdname, ImageSize(640, 480));
 	ccd0.addMode(Binning(1, 1));
 	ccdinfo.push_back(ccd0);
 
@@ -263,7 +268,12 @@ ImagePtr	SimCcd::getImage() {
 // Simulator Guiderport implementation
 //////////////////////////////////////////////////////////////////////
 
-SimGuiderPort::SimGuiderPort(SimCamera& _camera) : camera(_camera) {
+static DeviceName	guiderportname(const DeviceName& cameraname) {
+	return DeviceName(cameraname, DeviceName::Guiderport, "guiderport");
+}
+
+SimGuiderPort::SimGuiderPort(SimCamera& _camera)
+	: GuiderPort(guiderportname(_camera.name())), camera(_camera) {
 }
 
 SimGuiderPort::~SimGuiderPort() {

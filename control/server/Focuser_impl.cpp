@@ -7,6 +7,11 @@
 
 namespace Astro {
 
+char	*Focuser_impl::getName() {
+	std::string	name = _focuser->name();
+	return CORBA::string_dup(name.c_str());
+}
+
 CORBA::UShort	Focuser_impl::min() {
 	return _focuser->min();
 }

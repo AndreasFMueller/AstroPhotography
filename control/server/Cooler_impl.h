@@ -23,6 +23,7 @@ public:
 	void	setTemperature(CORBA::Float temperature);
 	bool	isOn();
 	void	setOn(bool onoff);
+	virtual char	*getName();
 };
 
 } // namespace astro

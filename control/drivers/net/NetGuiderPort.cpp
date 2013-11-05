@@ -5,6 +5,8 @@
  */
 #include <NetGuiderPort.h>
 #include <Conversions.h>
+#include <AstroUtils.h>
+#include <NetUtils.h>
 
 namespace astro {
 namespace camera {
@@ -17,7 +19,8 @@ namespace net {
  * is kept by the client class until it is destroyed again
  */
 NetGuiderPort::NetGuiderPort(Astro::GuiderPort_var guiderport)
-	: _guiderport(guiderport) {
+	: GuiderPort(devname2netname(guiderport->getName())),
+	  _guiderport(guiderport) {
 	Astro::GuiderPort_Helper::duplicate(_guiderport);
 }
 

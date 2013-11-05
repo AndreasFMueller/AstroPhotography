@@ -9,6 +9,8 @@
 #include <NetGuiderPort.h>
 #include <AstroExceptions.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
+#include <NetUtils.h>
 
 using namespace astro::image;
 
@@ -24,7 +26,9 @@ namespace net {
  * so the constructor retrieves this information from the remote object
  * and caches it locally.
  */
-NetCamera::NetCamera(Astro::Camera_var camera) : _camera(camera) {
+NetCamera::NetCamera(Astro::Camera_var camera)
+	: Camera(devname2netname(camera->getName())),
+	  _camera(camera) {
 	// retrieve Ccds from the camera reference and fill the CCDinfo
 	int	nccds = _camera->nCcds();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has %d CCDs", nccds);

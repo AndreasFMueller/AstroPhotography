@@ -32,7 +32,8 @@ noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 
 # general tests
 tests_SOURCES = tests.cpp \
-	PixelTest.cpp DeviceNameTest.cpp \
+	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
+	DeviceNameTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \

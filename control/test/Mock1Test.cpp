@@ -55,7 +55,7 @@ void	Mock1Test::testMock1() {
 	std::vector<std::string>	cameras = cl->getDevicelist();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get %d devices", cameras.size());
 	CPPUNIT_ASSERT(cameras.size() == 10);
-	CameraPtr	camera = cl->getCamera("mock1-5");
+	CameraPtr	camera = cl->getCamera("camera:mock1/5");
 	// for every CCD, take an image
 	for (unsigned int i = 0; i < camera->nCcds(); i++) {
 		CcdPtr	ccd = camera->getCcd(i);

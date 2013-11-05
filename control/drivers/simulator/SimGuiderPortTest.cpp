@@ -64,7 +64,7 @@ void	SimGuiderPortTest::testTranslation() {
 	simguiderport->drift(Point(1,2));
 
 	// get camera and ccd and retrieve an image
-	CameraPtr	camera = locator->getCamera("sim-camera");
+	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
 	CcdPtr	ccd = camera->getCcd(0);
 	Exposure	exposure;
 	exposure.exposuretime = 1;
@@ -98,7 +98,7 @@ void	SimGuiderPortTest::testRotation() {
 	simguiderport->omega(0.01);
 
 	// get camera and ccd and retrieve an image
-	CameraPtr	camera = locator->getCamera("sim-camera");
+	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
 	CcdPtr	ccd = camera->getCcd(0);
 	Exposure	exposure;
 	exposure.exposuretime = 1;

@@ -17,7 +17,7 @@ namespace simulator {
 #define AMBIENT_TEMPERATURE     (273 + 13.2)
 
 SimCooler::SimCooler(SimLocator& locator)
-	: Cooler(std::string("sim-cooler")), _locator(locator) {
+	: Cooler(DeviceName("cooler:simulator/cooler")), _locator(locator) {
 	temperature = AMBIENT_TEMPERATURE;
 	lasttemperature = AMBIENT_TEMPERATURE;
 	laststatechange = simtime();

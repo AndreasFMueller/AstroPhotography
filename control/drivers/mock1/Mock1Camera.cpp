@@ -8,6 +8,7 @@
 #include "Mock1Ccd.h"
 #include <AstroFormat.h>
 #include <iostream>
+#include "Mock1Utils.h"
 
 using namespace astro::camera;
 
@@ -15,16 +16,17 @@ namespace astro {
 namespace camera {
 namespace mock1 {
 
-Mock1Camera::Mock1Camera(int _id) : id(_id) {
-	_name = stringprintf("mock1:%d", _id);
+Mock1Camera::Mock1Camera(int _id) : astro::camera::Camera(cameraname(id)), id(_id) {
 
-	CcdInfo	ccd0("primary ccd", ImageSize(1024, 768), 0);
+	CcdInfo	ccd0(DeviceName(name(), DeviceName::Ccd, "primary ccd"),
+		ImageSize(1024, 768), 0);
 	ccd0.addMode(Binning(1,1));
 	ccd0.pixelwidth(0.00001);
 	ccd0.pixelheight(0.00001);
 	ccdinfo.push_back(ccd0);
 
-	CcdInfo	ccd1("secondary ccd", ImageSize(640, 480), 1);
+	CcdInfo	ccd1(DeviceName(name(), DeviceName::Ccd, "secondary ccd"),
+		ImageSize(640, 480), 1);
 	ccd1.addMode(Binning(1,1));
 	ccd1.pixelwidth(0.00001);
 	ccd1.pixelheight(0.00001);
