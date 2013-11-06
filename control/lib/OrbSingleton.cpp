@@ -35,6 +35,38 @@ std::ostream&	operator<<(std::ostream& out, const PoaName& poaname) {
 	return out << poaname.toString();
 }
 
+PoaName	PoaName::modules() {
+	return PoaName("Modules");
+}
+
+PoaName	PoaName::drivermodules() {
+	return modules().add("DriverModules");
+}
+
+PoaName	PoaName::cameras() {
+	return drivermodules().add("Cameras");
+}
+
+PoaName	PoaName::guiderports() {
+	return cameras().add("GuiderPorts");
+}
+
+PoaName	PoaName::filterwheels() {
+	return cameras().add("FilterWheels");
+}
+
+PoaName	PoaName::ccds() {
+	return cameras().add("Ccds");
+}
+
+PoaName	PoaName::coolers() {
+	return ccds().add("FilterWheels");
+}
+
+PoaName	PoaName::focusers() {
+	return drivermodules().add("Focusers");
+}
+
 //////////////////////////////////////////////////////////////////////
 // OrbSingleton implementation
 //////////////////////////////////////////////////////////////////////

@@ -113,5 +113,36 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
 	return focuser;
 }
 
+template<>
+astro::camera::CameraPtr       LocatorAdapter<astro::camera::Camera>::get(
+					const std::string& name) {
+        return _locator->getCamera(name);
+}
+
+template<>
+astro::camera::GuiderPortPtr   LocatorAdapter<astro::camera::GuiderPort>::get(
+					const std::string& name) {
+        return _locator->getGuiderPort(name);
+}
+
+template<>
+astro::camera::FilterWheelPtr   LocatorAdapter<astro::camera::FilterWheel>::get(
+					const std::string& name) {
+        return _locator->getFilterWheel(name);
+}
+
+template<>
+astro::camera::CoolerPtr        LocatorAdapter<astro::camera::Cooler>::get(
+					const std::string& name) {
+        return _locator->getCooler(name);
+}
+
+template<>
+astro::camera::FocuserPtr       LocatorAdapter<astro::camera::Focuser>::get(
+					const std::string& name) {
+        return _locator->getFocuser(name);
+}
+
 } // namespace device
 } // namespace astro
+

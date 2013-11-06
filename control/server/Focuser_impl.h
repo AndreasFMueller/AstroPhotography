@@ -17,6 +17,7 @@ namespace Astro {
 class Focuser_impl : public POA_Astro::Focuser {
 	astro::camera::FocuserPtr	_focuser;
 public:
+	typedef astro::camera::Focuser	device_type;
 	inline Focuser_impl(astro::camera::FocuserPtr& focuser)
 		: _focuser(focuser) { }
 	virtual CORBA::UShort	min();
