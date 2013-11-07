@@ -6,6 +6,6 @@ module simulator list guiderport
 module simulator list focuser
 module simulator list cooler
 module simulator list camera
-camera blubb assign simulator sim-camera
+camera blubb assign simulator camera:simulator/camera
 camera blubb info
 exit

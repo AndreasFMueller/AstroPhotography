@@ -11,7 +11,9 @@ namespace astro {
 namespace camera {
 namespace sx {
 
-SxCooler::SxCooler(SxCamera& _camera) : camera(_camera) {
+SxCooler::SxCooler(SxCamera& _camera)
+	: Cooler(Cooler::defaultname(_camera.name(), "cooler")),
+	  camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create an SX cooler");
 	cooler_on = false;
 	// we should find out whether the cooler is on, this is done by

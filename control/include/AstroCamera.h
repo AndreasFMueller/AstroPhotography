@@ -127,9 +127,11 @@ typedef std::shared_ptr<Ccd>	CcdPtr;
  */
 class CcdInfo {
 	// CCD name
-	std::string	_name;
+	DeviceName	_name;
 public:
-	const std::string&	name() const { return _name; }
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	const DeviceName&	name() const { return _name; }
 	// CCD size
 private:
 	astro::image::ImageSize	_size;
@@ -190,7 +192,7 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
  * the camera can return natively. For all other pixel formats, the
  * application should use the provided conversion functions.
  */
-class	Ccd {
+class	Ccd : public astro::device::Device {
 protected:
 	CcdInfo	info;
 	volatile Exposure::State	state;
@@ -199,7 +201,11 @@ protected:
 	void	addBinning(const Binning& binning);
 	time_t	lastexposurestart;
 public:
-	Ccd(const CcdInfo& _info) : info(_info), state(Exposure::idle) { }
+	typedef CcdPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	Ccd(const CcdInfo& _info) : astro::device::Device(_info.name()),
+		info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
 	const astro::image::ImageSize&	getSize() const { return info.size(); }
@@ -251,8 +257,11 @@ class	Camera : public astro::device::Device {
 protected:
 	std::vector<CcdInfo>	ccdinfo;
 public:
+	typedef CameraPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string&unitname);
 	Camera(const std::string& name);
-	Camera();
+	Camera(const DeviceName& name);
 	~Camera();
 	virtual void	reset();
 	unsigned int	nCcds() const;
@@ -297,7 +306,11 @@ class Cooler : public astro::device::Device {
 protected:
 	float	temperature;
 public:
-	Cooler(const std::string name = std::string(""));
+	typedef CoolerPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	Cooler(const DeviceName& name);
+	Cooler(const std::string& name);
 	virtual ~Cooler();
 	virtual float	getSetTemperature();
 	virtual float	getActualTemperature();
@@ -315,7 +328,11 @@ public:
  */
 class FilterWheel : public astro::device::Device {
 public:
-	FilterWheel(const std::string name = std::string(""));
+	typedef FilterWheelPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	FilterWheel(const std::string& name);
+	FilterWheel(const DeviceName& name);
 	virtual ~FilterWheel();
 	virtual unsigned int	nFilters() = 0;
 	virtual unsigned int	currentPosition() = 0;
@@ -328,7 +345,11 @@ public:
  */
 class GuiderPort : public astro::device::Device {
 public:
-	GuiderPort(const std::string name = std::string(""));
+	typedef GuiderPortPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	GuiderPort(const std::string& name);
+	GuiderPort(const DeviceName& name);
 	virtual ~GuiderPort();
 
 	typedef enum {
@@ -360,7 +381,11 @@ public:
  */
 class Focuser : public astro::device::Device {
 public:
-	Focuser(const std::string name = std::string(""));
+	typedef FocuserPtr	sharedptr;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	Focuser(const DeviceName& name);
+	Focuser(const std::string& name);
 	virtual ~Focuser();
 	virtual unsigned short	min();
 	virtual unsigned short	max();

@@ -33,8 +33,8 @@ int	main(int argc, char *argv[]) {
 	int	cameraid = 0;
 	int	ccdid = 0;
 	double	exposuretime = 1.;
-	const char	*focusermodulename = "simulator";
-	const char	*focusername = "sim-focuser";
+	const char	*focusermodulename = "module:simulator";
+	const char	*focusername = "focuser:simulator/focuser";
 	unsigned short	begin = 0;
 	unsigned short	end = std::numeric_limits<unsigned short>::max();
 	unsigned short	step = 1024;

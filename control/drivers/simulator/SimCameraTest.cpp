@@ -41,16 +41,16 @@ void	SimCameraTest::tearDown() {
 }
 
 void	SimCameraTest::testName() {
-	CameraPtr	camera = locator->getCamera("sim-camera");
-	CPPUNIT_ASSERT(camera->getName() == "sim-camera");
+	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
+	CPPUNIT_ASSERT(camera->name().unitname() == "camera");
 }
 
 void	SimCameraTest::testConfig() {
-	CameraPtr	camera = locator->getCamera("sim-camera");
+	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
 	CPPUNIT_ASSERT(camera->nCcds() == 1);
 	CcdInfo	info = camera->getCcdInfo(0);
 	CPPUNIT_ASSERT(info.size() == ImageSize(640, 480));
-	CPPUNIT_ASSERT(info.name() == "ccd");
+	CPPUNIT_ASSERT(info.name().unitname() == "ccd");
 	CPPUNIT_ASSERT(info.modes().permits(Binning(1,1)));
 	CPPUNIT_ASSERT(info.modes().permits(Binning(2,2)));
 }

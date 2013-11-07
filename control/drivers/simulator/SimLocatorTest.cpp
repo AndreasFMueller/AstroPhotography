@@ -71,51 +71,51 @@ void	SimLocatorTest::testCameraName() {
 	std::vector<std::string>	names
 		= locator->getDevicelist(DeviceLocator::CAMERA);
 	CPPUNIT_ASSERT(names.size() == 1);
-	CPPUNIT_ASSERT(std::string("sim-camera") == *names.begin());
+	CPPUNIT_ASSERT(std::string("camera:simulator/camera") == *names.begin());
 }
 
 void	SimLocatorTest::testFilterWheelName() {
 	std::vector<std::string>	names
 		= locator->getDevicelist(DeviceLocator::FILTERWHEEL);
 	CPPUNIT_ASSERT(names.size() == 1);
-	CPPUNIT_ASSERT(std::string("sim-filterwheel") == *names.begin());
+	CPPUNIT_ASSERT(std::string("filterwheel:simulator/filterwheel") == *names.begin());
 }
 
 void	SimLocatorTest::testGuiderPortName() {
 	std::vector<std::string>	names
 		= locator->getDevicelist(DeviceLocator::GUIDERPORT);
 	CPPUNIT_ASSERT(names.size() == 1);
-	CPPUNIT_ASSERT(std::string("sim-guiderport") == *names.begin());
+	CPPUNIT_ASSERT(std::string("guiderport:simulator/guiderport") == *names.begin());
 }
 
 void	SimLocatorTest::testCoolerName() {
 	std::vector<std::string>	names
 		= locator->getDevicelist(DeviceLocator::COOLER);
 	CPPUNIT_ASSERT(names.size() == 1);
-	CPPUNIT_ASSERT(std::string("sim-cooler") == *names.begin());
+	CPPUNIT_ASSERT(std::string("cooler:simulator/cooler") == *names.begin());
 }
 
 void	SimLocatorTest::testCamera() {
 	SimCamera	*camera
-		= dynamic_cast<SimCamera *>(&*(locator->getCamera("sim-camera")));
+		= dynamic_cast<SimCamera *>(&*(locator->getCamera("camera:simulator/camera")));
 	CPPUNIT_ASSERT(NULL != camera);
 }
 
 void	SimLocatorTest::testFilterWheel() {
 	SimFilterWheel	*filterwheel
-		= dynamic_cast<SimFilterWheel*>(&*(locator->getFilterWheel("sim-filterwheel")));
+		= dynamic_cast<SimFilterWheel*>(&*(locator->getFilterWheel("filterwheel:simulator/filterwheel")));
 	CPPUNIT_ASSERT(NULL != filterwheel);
 }
 
 void	SimLocatorTest::testGuiderPort() {
 	SimGuiderPort	*guiderport
-		= dynamic_cast<SimGuiderPort*>(&*(locator->getGuiderPort("sim-guiderport")));
+		= dynamic_cast<SimGuiderPort*>(&*(locator->getGuiderPort("guiderport:simulator/guiderport")));
 	CPPUNIT_ASSERT(NULL != guiderport);
 }
 
 void	SimLocatorTest::testCooler() {
 	SimCooler	*cooler
-		= dynamic_cast<SimCooler *>(&*(locator->getCooler("sim-cooler")));
+		= dynamic_cast<SimCooler *>(&*(locator->getCooler("cooler:simulator/cooler")));
 	CPPUNIT_ASSERT(NULL != cooler);
 }
 

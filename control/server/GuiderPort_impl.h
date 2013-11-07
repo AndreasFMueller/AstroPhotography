@@ -17,10 +17,12 @@ namespace Astro {
 class GuiderPort_impl : public POA_Astro::GuiderPort {
 	astro::camera::GuiderPortPtr	_guiderport;
 public:
+	typedef	astro::camera::GuiderPort	device_type;
 	inline GuiderPort_impl(astro::camera::GuiderPortPtr guiderport)
 		: _guiderport(guiderport) { }
 	virtual CORBA::Char	active();
 	virtual void	activate(::CORBA::Float ra, ::CORBA::Float dec);
+	virtual char	*getName();
 };
 
 } // namespace Astro

@@ -29,7 +29,9 @@ namespace sbig {
  *
  * This method assumes that every SBIG camera has a guider port.
  */
-SbigGuiderPort::SbigGuiderPort(SbigCamera& _camera) : camera(_camera) {
+SbigGuiderPort::SbigGuiderPort(SbigCamera& _camera)
+	: GuiderPort(GuiderPort::defaultname(name(), "guiderport")),
+	  camera(_camera) {
 }
 
 SbigGuiderPort::~SbigGuiderPort() {

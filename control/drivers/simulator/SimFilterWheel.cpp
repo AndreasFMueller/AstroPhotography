@@ -11,7 +11,9 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
-SimFilterWheel::SimFilterWheel(SimLocator& locator) : _locator(locator) {
+SimFilterWheel::SimFilterWheel(SimLocator& locator)
+	: FilterWheel(DeviceName("filterwheel:sx/filterwheel")),
+	  _locator(locator) {
 	_currentPosition = 0;
 }
 

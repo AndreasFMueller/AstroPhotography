@@ -167,7 +167,12 @@ int	main(int argc, char *argv[]) {
 	// create a POA GuiderPort objects
 	POABuilder	pbguiderport(camera_poa);
 	PortableServer::POA_var	guiderport_poa
-		= pbguiderport.build("GuiderPorts");;
+		= pbguiderport.build("GuiderPorts");
+
+	// create a POA for FilterWheel objects
+	POABuilder	pbfilterwheel(camera_poa);
+	PortableServer::POA_var	filterwheel_poa
+		= pbfilterwheel.build("FilterWheels");
 
 	// create a POA for Focuser objects
 	POABuilder	pbfocuser(modules_poa);

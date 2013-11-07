@@ -146,6 +146,7 @@ public:
 	// information about the device
 	uint8_t	getBusNumber() const;
 	uint8_t	getDeviceAddress() const;
+	std::string	getDeviceName() const;
 	int	getBroken() const;
 	enum usb_speed { SPEED_UNKNOWN = 0, SPEED_LOW = 1, SPEED_FULL = 2,
 		SPEED_HIGH = 3, SPEED_SUPER = 4 };

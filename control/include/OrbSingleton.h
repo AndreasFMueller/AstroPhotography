@@ -12,12 +12,22 @@
 
 namespace Astro {
 
+/**
+ * \brief An abstraction for the hierarchical naming of POAs
+ */
 class PoaName : public std::vector<std::string> {
-	std::vector<std::string>	split(const std::string& name) const;
 public:
 	PoaName(const std::string& basename);
 	PoaName&	add(const std::string& name);
 	std::string	toString() const;
+	static PoaName	modules();
+	static PoaName	drivermodules();
+	static PoaName	cameras();
+	static PoaName	guiderports();
+	static PoaName	filterwheels();
+	static PoaName	coolers();
+	static PoaName	ccds();
+	static PoaName	focusers();
 };
 
 std::ostream&	operator<<(std::ostream& out, const PoaName& poaname);

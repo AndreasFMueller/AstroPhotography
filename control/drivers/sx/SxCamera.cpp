@@ -6,6 +6,7 @@
 #include <SxCamera.h>
 #include <SxCcd.h>
 #include <sx.h>
+//#include <AstroDevice.h>
 #include <AstroDebug.h>
 #include <SxGuiderPort.h>
 #include <AstroFormat.h>
@@ -79,6 +80,15 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 };
 
 /**
+ * \brief Auxiliary function to generate the camera name from the deviceptr
+ */
+static astro::DeviceName	cameraname(DevicePtr& deviceptr) {
+	DeviceName	modulename("module:sx");
+	return DeviceName(modulename, DeviceName::Camera,
+			deviceptr->getDeviceName());
+}
+
+/**
  * \brief Create a new Camera from a USB device pointer
  *
  * The constructor has the side effect of claiming the data interface of
@@ -90,7 +100,8 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
  * interface.
  * \param _deviceptr	USB device pointer
  */
-SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
+SxCamera::SxCamera(DevicePtr& _deviceptr)
+	: Camera(cameraname(deviceptr)), deviceptr(_deviceptr) {
 	// the default is to use the 
 	useControlRequests = false;
 
@@ -177,7 +188,8 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 	if (model == SX_MODEL_M26C) {
 		height *= 2;
 	}
-	CcdInfo	ccd0("Imaging", ImageSize(width, height), 0);
+	DeviceName	ccd0name = CcdInfo::defaultname(name(), "Imaging");
+	CcdInfo	ccd0(ccd0name, ImageSize(width, height), 0);
 	ccd0.addMode(Binning(2,2));
 	if (model != SX_MODEL_M26C) {
 		ccd0.addMode(Binning(3,3));
@@ -222,7 +234,9 @@ SxCamera::SxCamera(DevicePtr& _deviceptr) : deviceptr(_deviceptr) {
 		controlRequest(&ccd1request);
 		params = *ccd1request.data();
 
-		CcdInfo	ccd1("Tracking",
+		DeviceName	ccd1name = CcdInfo::defaultname(name(),
+					"Tracking");
+		CcdInfo	ccd1(ccd1name,
 			ImageSize(params.width, params.height), 1);
 		ccd1.addMode(Binning(2,2));
 		ccdinfo.push_back(ccd1);

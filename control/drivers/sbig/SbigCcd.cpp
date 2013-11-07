@@ -291,7 +291,8 @@ ImagePtr	SbigCcd::getImage() {
 CoolerPtr	SbigCcd::getCooler0() {
 	// XXX we assume that every SBIG camera has a cooler, which is
 	//     obviously incorrect
-	return CoolerPtr(new SbigCooler(camera));
+	DeviceName	devname(name(), DeviceName::Cooler, "cooler");
+	return CoolerPtr(new SbigCooler(camera, devname));
 }
 
 /**

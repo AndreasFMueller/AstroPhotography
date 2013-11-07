@@ -24,7 +24,8 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp DeviceName.cpp \
+libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
+	URL.cpp DeviceName.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \

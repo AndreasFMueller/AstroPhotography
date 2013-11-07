@@ -31,7 +31,8 @@ namespace sbig {
  * to the camera. The camera contains all the information needed to perform
  * a call to the SBIG universal driver library.
  */
-SbigCooler::SbigCooler(SbigCamera& _camera) : camera(_camera) {
+SbigCooler::SbigCooler(SbigCamera& _camera, const DeviceName& name)
+	: Cooler(name), camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing cooler");
 	enabled = isOn();
 	getSetTemperature();

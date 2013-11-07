@@ -163,12 +163,14 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_
 		results.camerasFound);
 	for (int i = 0; i < results.camerasFound; i++) {
 		if (results.usbInfo[i].cameraFound) {
-			std::string	name = stringprintf("sbig:%s/%s",
+			std::string	name = stringprintf("%s-%s",
 				results.usbInfo[i].serialNumber,
 				results.usbInfo[i].name);
+			DeviceName	camname("sbig", name);
+			camname.type(DeviceName::Camera);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "device found: %s",
 				name.c_str());
-			names.push_back(name);
+			names.push_back(camname);
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning list with %d members",

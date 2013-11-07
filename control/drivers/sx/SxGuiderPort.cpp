@@ -94,7 +94,9 @@ static void	*sxguidermain(void *private_data) {
 	return guiderport->main();
 }
 
-SxGuiderPort::SxGuiderPort(SxCamera& _camera) : camera(_camera) {
+SxGuiderPort::SxGuiderPort(SxCamera& _camera)
+	: GuiderPort(GuiderPort::defaultname(_camera.name(), "guiderport")),
+	  camera(_camera) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating a guider port");
 	// initialize tze turnoff variables
 	for (int i = 0; i < 4; i++) { turnoff.push_back(timespec(0)); }

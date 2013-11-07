@@ -9,10 +9,15 @@
 namespace astro {
 namespace camera {
 
-Camera::Camera() {
+DeviceName	Camera::defaultname(const DeviceName& parent,
+			const std::string& unitname) {
+	return DeviceName(parent, DeviceName::Camera, unitname);
 }
 
 Camera::Camera(const std::string& name) : Device(name) {
+}
+
+Camera::Camera(const DeviceName& name) : Device(name) {
 }
 
 Camera::~Camera() {

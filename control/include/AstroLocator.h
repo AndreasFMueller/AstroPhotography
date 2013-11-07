@@ -50,6 +50,38 @@ public:
 
 typedef std::shared_ptr<DeviceLocator>	DeviceLocatorPtr;
 
+//////////////////////////////////////////////////////////////////////
+// adapter class for DeviceLocator to extract objects of a given type
+//////////////////////////////////////////////////////////////////////
+template<typename device>
+class LocatorAdapter {
+        astro::device::DeviceLocatorPtr _locator;
+public:
+        LocatorAdapter(astro::device::DeviceLocatorPtr locator)
+                : _locator(locator) { }
+        typename device::sharedptr      get(const std::string& name);
+};
+
+template<>
+astro::camera::CameraPtr       LocatorAdapter<astro::camera::Camera>::get(
+					const std::string& name);
+
+template<>
+astro::camera::GuiderPortPtr   LocatorAdapter<astro::camera::GuiderPort>::get(
+					const std::string& name);
+
+template<>
+astro::camera::FilterWheelPtr   LocatorAdapter<astro::camera::FilterWheel>::get(
+					const std::string& name);
+
+template<>
+astro::camera::CoolerPtr        LocatorAdapter<astro::camera::Cooler>::get(
+					const std::string& name);
+
+template<>
+astro::camera::FocuserPtr       LocatorAdapter<astro::camera::Focuser>::get(
+					const std::string& name);
+
 } // namespace device
 } // namespace astro
 

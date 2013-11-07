@@ -14,6 +14,11 @@ using namespace astro::camera;
 
 namespace Astro {
 
+char	*Ccd_impl::getName() {
+	std::string	name = _ccd->name();
+	return CORBA::string_dup(name.c_str());
+}
+
 /**
  * \brief Query the current exposure status
  *

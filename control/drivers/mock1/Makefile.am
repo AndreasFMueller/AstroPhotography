@@ -6,9 +6,10 @@
 #
 pkglib_LTLIBRARIES = mock1.la
 
-noinst_HEADERS = Mock1Camera.h Mock1Ccd.h
+noinst_HEADERS = Mock1Camera.h Mock1Ccd.h Mock1Utils.h
 
-mock1_la_SOURCES = mock1.cpp Mock1CameraLocator.cpp Mock1Camera.cpp \
+mock1_la_SOURCES = mock1.cpp \
+	Mock1Utils.cpp Mock1CameraLocator.cpp Mock1Camera.cpp \
 	Mock1Ccd.cpp
 mock1_la_LDFLAGS = -module
 mock1_la_DEPENDENCIES = ../../lib/libastro.la

@@ -17,12 +17,14 @@ namespace Astro {
 class Cooler_impl : public POA_Astro::Cooler {
 	astro::camera::CoolerPtr	_cooler;
 public:
+	typedef astro::camera::Cooler	device_type;
 	inline Cooler_impl(astro::camera::CoolerPtr& cooler) : _cooler(cooler) { }
 	CORBA::Float	getSetTemperature();
 	CORBA::Float	getActualTemperature();
 	void	setTemperature(CORBA::Float temperature);
 	bool	isOn();
 	void	setOn(bool onoff);
+	virtual char	*getName();
 };
 
 } // namespace astro

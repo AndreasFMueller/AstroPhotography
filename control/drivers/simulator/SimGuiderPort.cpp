@@ -16,7 +16,7 @@ namespace simulator {
  * \brief Create a simulated GuiderPort
  */
 SimGuiderPort::SimGuiderPort(SimLocator& locator)
-	: GuiderPort("sim-guiderport"), _locator(locator) {
+	: GuiderPort("guiderport:simulator/guiderport"), _locator(locator) {
 	starttime = simtime();
 	_omega = 0;
 	_decvector = Point(0, 1);

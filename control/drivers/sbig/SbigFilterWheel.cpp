@@ -89,7 +89,9 @@ void	SbigFilterWheel::wait() {
  * \param camera	SbigCamera object to use when talking to the
  *			Filter wheel
  */
-SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera) : camera(_camera) {
+SbigFilterWheel::SbigFilterWheel(SbigCamera& _camera)
+	: FilterWheel(FilterWheel::defaultname(name(), "filterwheel")),
+	  camera(_camera) {
 	SbigLock	lock;
 	camera.sethandle();
 

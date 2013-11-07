@@ -27,4 +27,9 @@ CORBA::Octet	GuiderPort_impl::active() {
 	return astro::convert_relaybits2octet(_guiderport->active());
 }
 
+char	*GuiderPort_impl::getName() {
+	std::string	name = _guiderport->name();
+        return CORBA::string_dup(name.c_str());
+}
+
 } // namespace Astro

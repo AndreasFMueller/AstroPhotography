@@ -99,6 +99,10 @@ module Astro {
 	 * behind the shutter.
 	 */
 	interface Ccd {
+		/**	
+		 * \brief get the name of the ccd
+		 */
+		string	getName();
 		/**
 		 * \brief Start an exposure
 		 */
@@ -161,6 +165,10 @@ module Astro {
 	 */
 	interface Cooler {
 		/**
+		 * \brief get the name of the cooler
+		 */
+		string	getName();
+		/**
 		 * \brief Get temperature at which the cooler is set
 		 */
 		float	getSetTemperature();
@@ -202,6 +210,11 @@ module Astro {
 	 * This interface allows to control activation of these ports.
 	 */
 	interface GuiderPort {
+		/**
+		 * \brief get the name of the guiderport
+		 */
+		string	getName();
+
 		const octet	DECMINUS = 1;
 		const octet	DECPLUS = 2;
 		const octet	RAMINUS = 4;
@@ -232,6 +245,10 @@ module Astro {
 	 */
 	interface FilterWheel {
 		/**
+ 		 * \brief get the name of the filter wheel
+		 */
+		string	getName();
+		/**
 		 * \brief Number of available filter positions.
 		 *
 		 * This method also counts empty filter positions in the wheel.
@@ -255,6 +272,7 @@ module Astro {
 	 * \brief Focuser abstraction
 	 */
 	interface Focuser {
+		string	getName();
 		unsigned short	min();
 		unsigned short	max();
 		unsigned short	current();

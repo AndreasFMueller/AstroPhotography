@@ -19,8 +19,9 @@ namespace simulator {
  * The simulator camera supports two binning modes and has a shutter
  */
 SimCamera::SimCamera(SimLocator& locator)
-	: Camera("sim-camera"), _locator(locator) {
-	CcdInfo	ccdi("ccd", ImageSize(640, 480), 0);
+	: Camera("camera:simulator/camera"), _locator(locator) {
+	DeviceName	ccdname = CcdInfo::defaultname(name(), "ccd");
+	CcdInfo	ccdi(ccdname, ImageSize(640, 480), 0);
 	ccdi.addMode(Binning(1,1));
 	ccdi.addMode(Binning(2,2));
 	ccdi.setShutter(true);

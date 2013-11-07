@@ -4,6 +4,8 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswi
  */
 #include <NetFilterWheel.h>
+#include <AstroUtils.h>
+#include <NetUtils.h>
 
 namespace astro {
 namespace camera {
@@ -15,7 +17,8 @@ namespace net {
  * The constructor keeps a reference the filter wheel
  */
 NetFilterWheel::NetFilterWheel(Astro::FilterWheel_var filterwheel)
-	: _filterwheel(filterwheel) {
+	: FilterWheel(devname2netname(_filterwheel->getName())),
+	  _filterwheel(filterwheel) {
 	Astro::FilterWheel_Helper::duplicate(_filterwheel);
 }
 

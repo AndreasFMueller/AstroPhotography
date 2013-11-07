@@ -7,6 +7,7 @@
 #define _AstroTypes_h
 
 #include <AstroImage.h>
+#include <iostream>
 
 using namespace astro::image;
 
@@ -42,31 +43,6 @@ public:
 };
 Point	operator*(double l, const Point& other);
 std::ostream&	operator<<(std::ostream& out, const Point& other);
-
-/**
- * \brief Name of a device
- */
-class DeviceName {
-private:
-	std::string	_modulename;
-public:
-	const std::string&	modulename() const { return _modulename; }
-	
-private:
-	std::string	_unitname;
-public:
-	const std::string&	unitname() const { return _unitname; }
-public:
-	DeviceName(const std::string& name);
-	DeviceName(const std::string& modulename, const std::string& unitname)
-		: _modulename(modulename), _unitname(unitname) { }
-	// comparison operators (for containers)
-	bool	operator==(const DeviceName& other) const;
-	bool	operator!=(const DeviceName& other) const;
-	bool	operator<(const DeviceName& other) const;
-	// cast to a string
-	operator std::string() const;
-};
 
 } // namespace astro
 

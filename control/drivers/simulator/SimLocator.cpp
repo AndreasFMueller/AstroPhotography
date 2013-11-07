@@ -101,19 +101,19 @@ std::vector<std::string>	SimLocator::getDevicelist(
 	std::vector<std::string>	names;
 	switch (device) {
 	case DeviceLocator::CAMERA:
-		names.push_back(std::string("sim-camera"));
+		names.push_back(std::string("camera:simulator/camera"));
 		break;
 	case DeviceLocator::GUIDERPORT:
-		names.push_back(std::string("sim-guiderport"));
+		names.push_back(std::string("guiderport:simulator/guiderport"));
 		break;
 	case DeviceLocator::FILTERWHEEL:
-		names.push_back(std::string("sim-filterwheel"));
+		names.push_back(std::string("filterwheel:simulator/filterwheel"));
 		break;
 	case DeviceLocator::FOCUSER:
-		names.push_back(std::string("sim-focuser"));
+		names.push_back(std::string("focuser:simulator/focuser"));
 		break;
 	case DeviceLocator::COOLER:
-		names.push_back(std::string("sim-cooler"));
+		names.push_back(std::string("cooler:simulator/cooler"));
 		break;
 	}
 	return names;
@@ -126,7 +126,7 @@ std::vector<std::string>	SimLocator::getDevicelist(
  * \return Camera with that name
  */
 CameraPtr	SimLocator::getCamera0(const std::string& name) {
-	if (name != "sim-camera") {
+	if (name != "camera:simulator/camera") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera %s does not exist",
 			name.c_str());
 		throw NotFound("no such camera");
@@ -135,7 +135,7 @@ CameraPtr	SimLocator::getCamera0(const std::string& name) {
 }
 
 GuiderPortPtr	SimLocator::getGuiderPort0(const std::string& name) {
-	if (name != "sim-guiderport") {
+	if (name != "guiderport:simulator/guiderport") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport %s does not exist",
 			name.c_str());
 		throw NotFound("no such camera");
@@ -144,7 +144,7 @@ GuiderPortPtr	SimLocator::getGuiderPort0(const std::string& name) {
 }
 
 FilterWheelPtr	SimLocator::getFilterWheel0(const std::string& name) {
-	if (name != "sim-filterwheel") {
+	if (name != "filterwheel:simulator/filterwheel") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "filterwheel %s does not exist",
 			name.c_str());
 		throw NotFound("no such camera");
@@ -153,7 +153,7 @@ FilterWheelPtr	SimLocator::getFilterWheel0(const std::string& name) {
 }
 
 CoolerPtr	SimLocator::getCooler0(const std::string& name) {
-	if (name != "sim-cooler") {
+	if (name != "cooler:simulator/cooler") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cooler %s does not exist",
 			name.c_str());
 		throw NotFound("no such cooler");
@@ -162,7 +162,7 @@ CoolerPtr	SimLocator::getCooler0(const std::string& name) {
 }
 
 FocuserPtr	SimLocator::getFocuser0(const std::string& name) {
-	if (name != "sim-focuser") {
+	if (name != "focuser:simulator/focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
 			name.c_str());
 		throw NotFound("no such focuser");

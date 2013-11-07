@@ -22,7 +22,8 @@ unsigned short	SimFocuser::variance() {
 }
 
 SimFocuser::SimFocuser(SimLocator& locator)
-	: Focuser("sim-focuser"), _locator(locator) {
+	: Focuser(DeviceName("focuser:simulator/focuser")),
+	  _locator(locator) {
 	_value = 10000 + (max() + min()) / 2;
 	target = _value;
 	lastset = 0;

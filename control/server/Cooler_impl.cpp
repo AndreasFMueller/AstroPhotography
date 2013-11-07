@@ -7,6 +7,11 @@
 
 namespace Astro {
 
+char	*Cooler_impl::getName() {
+	std::string	name = _cooler->name();
+	return CORBA::string_dup(name.c_str());
+}
+
 CORBA::Float	Cooler_impl::getSetTemperature() {
 	return _cooler->getSetTemperature();
 }

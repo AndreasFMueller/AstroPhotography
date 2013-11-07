@@ -19,7 +19,7 @@ class SbigCooler : public Cooler {
 	bool	enabled;
 	void	set();
 public:
-	SbigCooler(SbigCamera& camera);
+	SbigCooler(SbigCamera& camera, const DeviceName& devname);
 	~SbigCooler();
 	virtual float	getSetTemperature();
 	virtual float	getActualTemperature();

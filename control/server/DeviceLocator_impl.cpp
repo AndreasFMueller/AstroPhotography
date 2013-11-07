@@ -11,8 +11,70 @@
 #include "Focuser_impl.h"
 #include <AstroDebug.h>
 #include <Conversions.h>
+#include <OrbSingleton.h>
+#include <AstroLocator.h>
+#include <PoaNameMap.h>
 
 namespace Astro {
+
+//////////////////////////////////////////////////////////////////////
+// template class for building servants
+//////////////////////////////////////////////////////////////////////
+
+template<typename device, typename device_impl>
+class ServantBuilder {
+	astro::device::DeviceLocatorPtr	_locator;
+	OrbSingleton	orb;
+	PortableServer::POA_var	poa;
+public:
+	typedef	typename device_impl::device_type	device_type;
+	typedef typename device_type::sharedptr	sharedptr;
+	typedef typename device::_ptr_type	_ptr_type;
+	ServantBuilder(astro::device::DeviceLocatorPtr locator);
+	_ptr_type	operator()(const std::string& name);
+};
+
+template<typename device, typename device_impl>
+ServantBuilder<device, device_impl>::ServantBuilder(
+	astro::device::DeviceLocatorPtr locator) : _locator(locator) {
+	PoaName	name = poaname<device>();
+	poa = orb.findPOA(name);
+}
+
+template<typename device, typename device_impl>
+typename device::_ptr_type	ServantBuilder<device, device_impl>::operator()(
+		const std::string& name) {
+	// get the object id
+	PortableServer::ObjectId_var	oid
+		= PortableServer::string_to_ObjectId(name.c_str());
+
+	// find out whether the servant already exists
+	try {
+		CORBA::Object_var	obj = poa->id_to_reference(oid);
+		return device::_narrow(obj);
+	} catch (PortableServer::POA::ObjectNotActive&) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has no servant yet",
+			name.c_str());
+	}
+
+	// create a new servant
+	try {
+		astro::device::LocatorAdapter<device_type>	la(_locator);
+		sharedptr	dptr = la.get(name);
+		poa->activate_object_with_id(oid, new device_impl(dptr));
+
+		CORBA::Object_var	obj = poa->id_to_reference(oid);
+		return device::_narrow(obj);
+	} catch (...) {
+		NotFound	notfound;
+                notfound.cause = CORBA::string_dup("device not found");
+		throw notfound;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// DeviceLocator_impl implementation
+//////////////////////////////////////////////////////////////////////
 
 /**
  * \brief Get the name of the DeviceLocator
@@ -52,92 +114,114 @@ char	*DeviceLocator_impl::getVersion() {
 }
 
 /**
+ * \brief Get A Camera of a given name
+ */
+Camera_ptr	DeviceLocator_impl::getCamera(const char *name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera %s", name);
+	std::string	cameraname(name);
+
+	// use the ServantBuilder
+	ServantBuilder<Camera, Camera_impl>
+		servantbuilder(_locator);
+	return servantbuilder(cameraname);
+#if 0
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera %s", name);
+	std::string	cameraname(name);
+
+	// we need the ORB
+	OrbSingleton	orb;
+
+	// first find the POA for cameras
+	PoaName	poaname("Modules");
+	poaname.add("DriverModules").add("Cameras");
+	PortableServer::POA_var	camera_poa = orb.findPOA(poaname);
+
+	// now create the object id
+	PortableServer::ObjectId_var	oid
+		= PortableServer::string_to_ObjectId(cameraname.c_str());
+
+	// find out whether the POA alread knows about this camera. If so
+	// just return the 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving object reference");
+	try {
+		CORBA::Object_var       obj = camera_poa->id_to_reference(oid);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"camera '%s' already has a servant", name);
+		return Camera::_narrow(obj);
+	} catch (PortableServer::POA::ObjectNotActive&) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has no servant yet", name);
+	}
+
+	// create a new servant 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create new servant");
+	try {
+		// create a new servant and activate in the POA
+		astro::camera::CameraPtr	camera
+			= _locator->getCamera(cameraname);
+		camera_poa->activate_object_with_id(oid,
+				new Camera_impl(camera));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new object created");
+
+		// return reference to new object
+		CORBA::Object_var       obj
+			= camera_poa->id_to_reference(oid);
+		return Camera::_narrow(obj);
+	} catch (...) {
+		NotFound	notfound;
+                notfound.cause = CORBA::string_dup("camera not found");
+		throw notfound;
+	}
+#endif
+}
+
+/**
  * \brief Get a GuiderPort with a given name
  */
-GuiderPort_ptr	DeviceLocator_impl::getGuiderPort(const char *name) {
-	// find out whether this guider port has already been retrieved
-	std::string	guidername(name);
-	astro::camera::GuiderPortPtr	guiderport;
-	if (guiderportmap.find(guidername) == guiderportmap.end()) {
-		guiderport = _locator->getGuiderPort(guidername);
-		guiderportmap.insert(std::make_pair(guidername, guiderport));
-	} else {
-		guiderport = guiderportmap.find(guidername)->second;
-	}
-	GuiderPort_impl	*gp = new GuiderPort_impl(guiderport);
-	return gp->_this();
+GuiderPort_ptr DeviceLocator_impl::getGuiderPort(const char *name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get guiderport %s", name);
+	std::string	guiderportname(name);
+
+	// use the ServantBuilder
+	ServantBuilder<GuiderPort, GuiderPort_impl>
+		servantbuilder(_locator);
+	return servantbuilder(guiderportname);
 }
 
 /**
  * \brief Get a FilterWheel of a given name
  */
 FilterWheel_ptr	DeviceLocator_impl::getFilterWheel(const char *name) {
-	// find out whether this guider port has already been retrieved
-	std::string	filtername(name);
-	astro::camera::FilterWheelPtr	filterwheel;
-	if (filterwheelmap.find(filtername) == filterwheelmap.end()) {
-		filterwheel = _locator->getFilterWheel(filtername);
-		filterwheelmap.insert(std::make_pair(filtername, filterwheel));
-	} else {
-		filterwheel = filterwheelmap.find(filtername)->second;
-	}
-	FilterWheel_impl	*gp = new FilterWheel_impl(filterwheel);
-	return gp->_this();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filterwheel %s", name);
+	std::string	filterwheelname(name);
+
+	// use the ServantBuilder
+	ServantBuilder<FilterWheel, FilterWheel_impl>
+		servantbuilder(_locator);
+	return servantbuilder(filterwheelname);
 }
 
 /**
  * \brief Get a Cooler of a given name
  */
 Cooler_ptr	DeviceLocator_impl::getCooler(const char *name) {
-	// find out whether this guider port has already been retrieved
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler %s", name);
 	std::string	coolername(name);
-	astro::camera::CoolerPtr	cooler;
-	if (coolermap.find(coolername) == coolermap.end()) {
-		cooler = _locator->getCooler(coolername);
-		coolermap.insert(std::make_pair(coolername, cooler));
-	} else {
-		cooler = coolermap.find(coolername)->second;
-	}
-	Cooler_impl	*gp = new Cooler_impl(cooler);
-	return gp->_this();
+
+	// use the ServantBuilder
+	ServantBuilder<Cooler, Cooler_impl> servantbuilder(_locator);
+	return servantbuilder(coolername);
 }
 
 /**
  * \brief Get a Focuser of a given name
  */
 Focuser_ptr	DeviceLocator_impl::getFocuser(const char *name) {
-	// find out whether this guider port has already been retrieved
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get focuser %s", name);
 	std::string	focusername(name);
-	astro::camera::FocuserPtr	focuser;
-	if (focusermap.find(focusername) == focusermap.end()) {
-		focuser = _locator->getFocuser(focusername);
-		focusermap.insert(std::make_pair(focusername, focuser));
-	} else {
-		focuser = focusermap.find(focusername)->second;
-	}
-	Focuser_impl	*gp = new Focuser_impl(focuser);
-	return gp->_this();
-}
 
-/**
- * \brief Get A Camera of a given name
- */
-Camera_ptr	DeviceLocator_impl::getCamera(const char *name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera %s", name);
-	// find out whether this guider port has already been retrieved
-	std::string	cameraname(name);
-	astro::camera::CameraPtr	camera;
-	if (cameramap.find(cameraname) == cameramap.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new camera: %s", name);
-		camera = _locator->getCamera(cameraname);
-		cameramap.insert(std::make_pair(cameraname, camera));
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %s already open", name);
-		camera = cameramap.find(cameraname)->second;
-	}
-	Camera_impl	*c = new Camera_impl(camera);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "created camera at %p", c);
-	return c->_this();
+	// use the ServantBuilder
+	ServantBuilder<Focuser, Focuser_impl> servantbuilder(_locator);
+	return servantbuilder(focusername);
 }
 
 } // namespace astro
