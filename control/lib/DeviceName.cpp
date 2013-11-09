@@ -14,7 +14,9 @@ DeviceName::DeviceName(const std::string& name) {
 	// parse the device URL
 	std::string::size_type	pos = name.find(":");
 	_type = string2type(name.substr(0, pos));
-	split<DeviceName>(name.substr(pos + 1), "/", *this);
+	std::string	path = name.substr(pos + 1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "path: %s", path.c_str());
+	split<DeviceName>(path, "/", *this);
 }
 
 DeviceName::DeviceName(const std::string& modulename,
@@ -54,7 +56,20 @@ std::string	DeviceName::name() const {
  */
 #define	Ntypes	6
 static std::string	typenames[Ntypes] = {
-	"camera", "ccd", "cooler", "filterwheel", "guiderport", "focuser"
+	"camera",
+	"ccd",
+	"cooler",
+	"filterwheel",
+	"guiderport",
+	"focuser"
+};
+static DeviceName::device_type	typecode[Ntypes] = {
+	DeviceName::Camera,
+	DeviceName::Ccd,
+	DeviceName::Cooler,
+	DeviceName::Filterwheel,
+	DeviceName::Guiderport,
+	DeviceName::Focuser
 };
 
 DeviceName::device_type	DeviceName::string2type(const std::string& name) {
@@ -62,7 +77,7 @@ DeviceName::device_type	DeviceName::string2type(const std::string& name) {
 		if (typenames[i] == name) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s mapped to %d",
 				name.c_str(), i);
-			return (device_type)i;
+			return typecode[i];
 		}
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "type '%s' not found", name.c_str());
@@ -72,11 +87,17 @@ DeviceName::device_type	DeviceName::string2type(const std::string& name) {
 /**
  * \brief Type field conversion from type code to string
  */
-const std::string&	DeviceName::type2string(const device_type& type) {
-	return typenames[type];
+std::string	DeviceName::type2string(const device_type& type) {
+	for (int i = 0; i < Ntypes; i++) {
+		if (typecode[i] == type) {
+			return std::string(typenames[i]);
+		}
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "typecode '%d' not found", type);
+	throw std::runtime_error("type code not found");
 }
 
-const std::string&	DeviceName::typestring() const {
+std::string	DeviceName::typestring() const {
 	return DeviceName::type2string(type());
 }
 
@@ -84,8 +105,12 @@ void	DeviceName::typestring(const std::string& t) {
 	type(DeviceName::string2type(t));
 }
 
+bool	DeviceName::hasType(const device_type& t) const {
+	return _type == t;
+}
+
 DeviceName::operator std::string() const {
-	return typestring() + ":" + unitname();
+	return typestring() + ":" + Concatenator::concat(*this, "/");
 }
 
 class comparator {

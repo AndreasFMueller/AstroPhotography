@@ -18,10 +18,13 @@ class Ccd_impl : public POA_Astro::Ccd {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImagePtr	image;
 public:
+	typedef astro::camera::Ccd	device_type;
+
 	// constructor
 	inline Ccd_impl(astro::camera::CcdPtr ccd) : _ccd(ccd) { }
 
 	virtual char	*getName();
+	virtual CcdInfo	*getInfo();
 
 	// exposure related stuff
 	virtual void	startExposure(const ::Astro::Exposure& exp);

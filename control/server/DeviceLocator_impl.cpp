@@ -8,6 +8,7 @@
 #include "FilterWheel_impl.h"
 #include "Camera_impl.h"
 #include "Cooler_impl.h"
+#include "Ccd_impl.h"
 #include "Focuser_impl.h"
 #include <AstroDebug.h>
 #include <Conversions.h>
@@ -97,7 +98,7 @@ char	*DeviceLocator_impl::getVersion() {
 	::Astro::DeviceLocator::device_type devicetype) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for device type %d",
 		devicetype);
-	astro::device::DeviceLocator::device_type	type
+	astro::DeviceName::device_type	type
 		= astro::convert(devicetype);
 	std::vector<std::string>	devices
 		= _locator->getDevicelist(type);
@@ -121,57 +122,20 @@ Camera_ptr	DeviceLocator_impl::getCamera(const char *name) {
 	std::string	cameraname(name);
 
 	// use the ServantBuilder
-	ServantBuilder<Camera, Camera_impl>
-		servantbuilder(_locator);
+	ServantBuilder<Camera, Camera_impl>	servantbuilder(_locator);
 	return servantbuilder(cameraname);
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera %s", name);
-	std::string	cameraname(name);
+}
 
-	// we need the ORB
-	OrbSingleton	orb;
+/**
+ * \brief Get A Ccd of a given name
+ */
+Ccd_ptr	DeviceLocator_impl::getCcd(const char *name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd %s", name);
+	std::string	ccdname(name);
 
-	// first find the POA for cameras
-	PoaName	poaname("Modules");
-	poaname.add("DriverModules").add("Cameras");
-	PortableServer::POA_var	camera_poa = orb.findPOA(poaname);
-
-	// now create the object id
-	PortableServer::ObjectId_var	oid
-		= PortableServer::string_to_ObjectId(cameraname.c_str());
-
-	// find out whether the POA alread knows about this camera. If so
-	// just return the 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving object reference");
-	try {
-		CORBA::Object_var       obj = camera_poa->id_to_reference(oid);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"camera '%s' already has a servant", name);
-		return Camera::_narrow(obj);
-	} catch (PortableServer::POA::ObjectNotActive&) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has no servant yet", name);
-	}
-
-	// create a new servant 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create new servant");
-	try {
-		// create a new servant and activate in the POA
-		astro::camera::CameraPtr	camera
-			= _locator->getCamera(cameraname);
-		camera_poa->activate_object_with_id(oid,
-				new Camera_impl(camera));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new object created");
-
-		// return reference to new object
-		CORBA::Object_var       obj
-			= camera_poa->id_to_reference(oid);
-		return Camera::_narrow(obj);
-	} catch (...) {
-		NotFound	notfound;
-                notfound.cause = CORBA::string_dup("camera not found");
-		throw notfound;
-	}
-#endif
+	// use the ServantBuilder
+	ServantBuilder<Ccd, Ccd_impl>	servantbuilder(_locator);
+	return servantbuilder(ccdname);
 }
 
 /**
@@ -182,8 +146,7 @@ GuiderPort_ptr DeviceLocator_impl::getGuiderPort(const char *name) {
 	std::string	guiderportname(name);
 
 	// use the ServantBuilder
-	ServantBuilder<GuiderPort, GuiderPort_impl>
-		servantbuilder(_locator);
+	ServantBuilder<GuiderPort, GuiderPort_impl> servantbuilder(_locator);
 	return servantbuilder(guiderportname);
 }
 
@@ -195,8 +158,7 @@ FilterWheel_ptr	DeviceLocator_impl::getFilterWheel(const char *name) {
 	std::string	filterwheelname(name);
 
 	// use the ServantBuilder
-	ServantBuilder<FilterWheel, FilterWheel_impl>
-		servantbuilder(_locator);
+	ServantBuilder<FilterWheel, FilterWheel_impl> servantbuilder(_locator);
 	return servantbuilder(filterwheelname);
 }
 

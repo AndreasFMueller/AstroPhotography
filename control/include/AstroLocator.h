@@ -20,28 +20,28 @@ namespace device {
  */
 class   DeviceLocator {
 	std::map<std::string, astro::camera::CameraPtr>		cameracache;
+	std::map<std::string, astro::camera::CcdPtr>		ccdcache;
 	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportcache;
 	std::map<std::string, astro::camera::FilterWheelPtr>	filterwheelcache;
 	std::map<std::string, astro::camera::CoolerPtr>		coolercache;
 	std::map<std::string, astro::camera::FocuserPtr>	focusercache;
 protected:
-	virtual	astro::camera::CameraPtr	getCamera0(const std::string& name);
-	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const std::string& name);
-	virtual	astro::camera::FilterWheelPtr	getFilterWheel0(const std::string& name);
-	virtual	astro::camera::CoolerPtr	getCooler0(const std::string& name);
-	virtual	astro::camera::FocuserPtr	getFocuser0(const std::string& name);
+	virtual	astro::camera::CameraPtr	getCamera0(const DeviceName& name);
+	virtual astro::camera::CcdPtr		getCcd0(const DeviceName& name);
+	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual	astro::camera::FilterWheelPtr	getFilterWheel0(const DeviceName& name);
+	virtual	astro::camera::CoolerPtr	getCooler0(const DeviceName& name);
+	virtual	astro::camera::FocuserPtr	getFocuser0(const DeviceName& name);
 public:
 	DeviceLocator();
 	virtual ~DeviceLocator();
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
-	typedef enum device_type {
-		CAMERA, FOCUSER, GUIDERPORT, FILTERWHEEL, COOLER
-	} device_type;
 	virtual std::vector<std::string>	getDevicelist(
-		device_type device = CAMERA);
+		const DeviceName::device_type device = DeviceName::Camera);
 	astro::camera::CameraPtr	getCamera(const std::string& name);
 	astro::camera::CameraPtr	getCamera(size_t index);
+	astro::camera::CcdPtr		getCcd(const std::string& name);
 	astro::camera::GuiderPortPtr	getGuiderPort(const std::string& name);
 	astro::camera::FilterWheelPtr	getFilterWheel(const std::string& name);
 	astro::camera::CoolerPtr	getCooler(const std::string& name);
@@ -63,23 +63,27 @@ public:
 };
 
 template<>
-astro::camera::CameraPtr       LocatorAdapter<astro::camera::Camera>::get(
+astro::camera::CameraPtr	LocatorAdapter<astro::camera::Camera>::get(
 					const std::string& name);
 
 template<>
-astro::camera::GuiderPortPtr   LocatorAdapter<astro::camera::GuiderPort>::get(
+astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get(
 					const std::string& name);
 
 template<>
-astro::camera::FilterWheelPtr   LocatorAdapter<astro::camera::FilterWheel>::get(
+astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get(
 					const std::string& name);
 
 template<>
-astro::camera::CoolerPtr        LocatorAdapter<astro::camera::Cooler>::get(
+astro::camera::FilterWheelPtr	LocatorAdapter<astro::camera::FilterWheel>::get(
 					const std::string& name);
 
 template<>
-astro::camera::FocuserPtr       LocatorAdapter<astro::camera::Focuser>::get(
+astro::camera::CoolerPtr	LocatorAdapter<astro::camera::Cooler>::get(
+					const std::string& name);
+
+template<>
+astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get(
 					const std::string& name);
 
 } // namespace device

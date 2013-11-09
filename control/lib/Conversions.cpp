@@ -11,52 +11,58 @@ namespace astro {
 // Device type
 
 Astro::DeviceLocator::device_type	convert(
-	astro::device::DeviceLocator::device_type fromtype) {
+	astro::DeviceName::device_type fromtype) {
 	switch (fromtype) {
-	case astro::device::DeviceLocator::CAMERA:
+	case astro::DeviceName::Camera:
 		return Astro::DeviceLocator::DEVICE_CAMERA;
-	case astro::device::DeviceLocator::FOCUSER:
+	case astro::DeviceName::Ccd:
+		return Astro::DeviceLocator::DEVICE_CCD;
+	case astro::DeviceName::Focuser:
 		return Astro::DeviceLocator::DEVICE_FOCUSER;
-	case astro::device::DeviceLocator::GUIDERPORT:
+	case astro::DeviceName::Guiderport:
 		return Astro::DeviceLocator::DEVICE_GUIDERPORT;
-	case astro::device::DeviceLocator::FILTERWHEEL:
+	case astro::DeviceName::Filterwheel:
 		return Astro::DeviceLocator::DEVICE_FILTERWHEEL;
-	case astro::device::DeviceLocator::COOLER:
+	case astro::DeviceName::Cooler:
 		return Astro::DeviceLocator::DEVICE_COOLER;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
 }
 
-astro::device::DeviceLocator::device_type	convert(
+astro::DeviceName::device_type	convert(
 		Astro::DeviceLocator::device_type fromtype) {
 	switch (fromtype) {
 	case Astro::DeviceLocator::DEVICE_CAMERA:
-		return astro::device::DeviceLocator::CAMERA;
+		return astro::DeviceName::Camera;
+	case Astro::DeviceLocator::DEVICE_CCD:
+		return astro::DeviceName::Ccd;
 	case Astro::DeviceLocator::DEVICE_FOCUSER:
-		return astro::device::DeviceLocator::FOCUSER;
+		return astro::DeviceName::Focuser;
 	case Astro::DeviceLocator::DEVICE_GUIDERPORT:
-		return astro::device::DeviceLocator::GUIDERPORT;
+		return astro::DeviceName::Guiderport;
 	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
-		return astro::device::DeviceLocator::FILTERWHEEL;
+		return astro::DeviceName::Filterwheel;
 	case Astro::DeviceLocator::DEVICE_COOLER:
-		return astro::device::DeviceLocator::COOLER;
+		return astro::DeviceName::Cooler;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
 }
 
-std::string	convert2string(astro::device::DeviceLocator::device_type fromtype) {
+std::string	convert2string(astro::DeviceName::device_type fromtype) {
 	switch (fromtype) {
-	case astro::device::DeviceLocator::CAMERA:
+	case astro::DeviceName::Camera:
 		return std::string("CAMERA");
-	case astro::device::DeviceLocator::FOCUSER:
+	case astro::DeviceName::Ccd:
+		return std::string("CCD");
+	case astro::DeviceName::Focuser:
 		return std::string("FOCUSER");
-	case astro::device::DeviceLocator::GUIDERPORT:
+	case astro::DeviceName::Guiderport:
 		return std::string("GUIDERPORT");
-	case astro::device::DeviceLocator::FILTERWHEEL:
+	case astro::DeviceName::Filterwheel:
 		return std::string("FILTERWHEEL");
-	case astro::device::DeviceLocator::COOLER:
+	case astro::DeviceName::Cooler:
 		return std::string("COOLER");
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
@@ -67,6 +73,8 @@ std::string	convert2string(Astro::DeviceLocator::device_type fromtype) {
 	switch (fromtype) {
 	case Astro::DeviceLocator::DEVICE_CAMERA:
 		return std::string("CAMERA");
+	case Astro::DeviceLocator::DEVICE_CCD:
+		return std::string("CCD");
 	case Astro::DeviceLocator::DEVICE_FOCUSER:
 		return std::string("FOCUSER");
 	case Astro::DeviceLocator::DEVICE_GUIDERPORT:
@@ -309,16 +317,16 @@ CORBA::Octet	convert_relaybits2octet(uint8_t bits) {
 }
 
 // CcdInfo
-Astro::CcdInfo	convert(const astro::camera::CcdInfo& info) {
-	Astro::CcdInfo	result;
+Astro::CcdInfo	*convert(const astro::camera::CcdInfo& info) {
+	Astro::CcdInfo	*result = new Astro::CcdInfo;
 	std::string	ccdname = info.name();
-	result.name = CORBA::string_dup(ccdname.c_str());
-	result.id = info.getId();
-	result.size = convert(info.size());
-	result.binningmodes = convert(info.modes());
-	result.shutter = info.shutter();
-	result.pixelwidth = info.pixelwidth();
-	result.pixelheight = info.pixelheight();
+	result->name = CORBA::string_dup(ccdname.c_str());
+	result->id = info.getId();
+	result->size = convert(info.size());
+	result->binningmodes = convert(info.modes());
+	result->shutter = info.shutter();
+	result->pixelwidth = info.pixelwidth();
+	result->pixelheight = info.pixelheight();
 	return result;
 }
 

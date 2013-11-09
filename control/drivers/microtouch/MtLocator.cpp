@@ -59,19 +59,20 @@ std::string	MtLocator::getVersion() const {
 }
 
 std::vector<std::string>	MtLocator::getDevicelist(
-	DeviceLocator::device_type device) {
+	DeviceName::device_type device) {
 	std::vector<std::string>	names;
-	if (DeviceLocator::FOCUSER != device) {
+	if (DeviceName::Focuser != device) {
 		return names;
 	}
 	names.push_back(std::string("focuser:microtouch/focuser"));
 	return names;
 }
 
-FocuserPtr	MtLocator::getFocuser0(const std::string& name) {
-	if (name != "focuser:microtouch/focuser") {
+FocuserPtr	MtLocator::getFocuser0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "focuser:microtouch/focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such focuser");
 	}
 	// create the focuser

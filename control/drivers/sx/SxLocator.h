@@ -31,9 +31,9 @@ public:
 	virtual ~SxCameraLocator();
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
-	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
+	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
-	virtual CameraPtr	getCamera0(const std::string& name);
+	virtual CameraPtr	getCamera0(const DeviceName& name);
 };
 
 } // namespace sx

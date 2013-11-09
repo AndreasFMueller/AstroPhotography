@@ -20,6 +20,16 @@ char	*Ccd_impl::getName() {
 }
 
 /**
+ * \brief Ccd
+ *
+ * get the information from the server
+ */
+CcdInfo	*Ccd_impl::getInfo() {
+	CcdInfo	*result = astro::convert(_ccd->getInfo());
+	return result;
+}
+
+/**
  * \brief Query the current exposure status
  *
  * The various operations are only allowed in certain states, if these

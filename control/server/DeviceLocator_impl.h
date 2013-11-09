@@ -26,6 +26,7 @@ public:
 	virtual ::Astro::DeviceLocator::DeviceNameList	*getDevicelist(
 				::Astro::DeviceLocator::device_type devicetype);
 	virtual Camera_ptr	getCamera(const char *name);
+	virtual Ccd_ptr		getCcd(const char *name);
 	virtual GuiderPort_ptr	getGuiderPort(const char *name);
 	virtual FilterWheel_ptr	getFilterWheel(const char *name);
 	virtual	Cooler_ptr	getCooler(const char *name);
