@@ -154,13 +154,13 @@ std::ostream&	operator<<(std::ostream& out, const DeviceName& name) {
 }
 
 DeviceName	DeviceName::parent(const DeviceName::device_type& devicetype) const {
-	DeviceName	result(*this);
+	DeviceName	result;
 	const_iterator	i = begin();
-	int	j = 0;
+	size_type	j = 1;
 	while (j++ < size()) {
+		result.push_back(*i);
 		i++;
 	}
-	result.erase(i);
 	result.type(devicetype);
 	return result;
 }

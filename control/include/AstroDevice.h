@@ -39,6 +39,8 @@ public:
 public:
 	const std::string&	unitname() const;
 	std::string	name() const;
+private:
+	DeviceName() { }
 public:
 	DeviceName(const std::string& name);
 	DeviceName(const std::string& modulename, const std::string& unitname);
