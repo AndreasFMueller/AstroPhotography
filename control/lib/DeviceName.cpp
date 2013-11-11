@@ -39,6 +39,10 @@ DeviceName::DeviceName(const DeviceName& name, const device_type& type,
 	push_back(unitname);
 }
 
+DeviceName::DeviceName(const DeviceName& other)
+	: std::vector<std::string>(other), _type(other.type()) {
+}
+
 const std::string&	DeviceName::modulename() const {
 	return this->front();
 }
@@ -147,6 +151,18 @@ bool	DeviceName::operator<(const DeviceName& other) const {
 
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name) {
 	return out << (std::string)name;
+}
+
+DeviceName	DeviceName::parent(const DeviceName::device_type& devicetype) const {
+	DeviceName	result(*this);
+	const_iterator	i = begin();
+	int	j = 0;
+	while (j++ < size()) {
+		i++;
+	}
+	result.erase(i);
+	result.type(devicetype);
+	return result;
 }
 
 } // namespace astro

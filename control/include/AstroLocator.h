@@ -135,36 +135,78 @@ class LocatorAdapter {
 public:
         LocatorAdapter(astro::device::DeviceLocatorPtr locator)
                 : _locator(locator) { }
-        typename device::sharedptr      get(const std::string& name);
+        typename device::sharedptr      get0(const DeviceName& name);
+        typename device::sharedptr      get(const DeviceName& name);
+	typename device::sharedptr	getCameraChild(const DeviceName& name);
 };
 
-template<>
-astro::camera::CameraPtr	LocatorAdapter<astro::camera::Camera>::get(
-					const std::string& name);
+template<typename device>
+typename device::sharedptr
+LocatorAdapter<device>::getCameraChild(const DeviceName& name) {
+	try {
+		DeviceName      devicename(name);
+		DeviceName      cameraname
+			= devicename.parent(DeviceName::Camera);
+		astro::camera::CameraPtr	camera
+			= _locator->getCamera(cameraname);
+		astro::camera::CameraDeviceAdapter<device>     cda(camera);
+		return cda.get(devicename);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot find camera child: %s",
+			std::string(name).c_str());
+	}
+	return get0(name);
+}
 
 template<>
-astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get(
-					const std::string& name);
+astro::camera::CameraPtr
+LocatorAdapter<astro::camera::Camera>::get0(const DeviceName& name);
 
 template<>
-astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get(
-					const std::string& name);
+astro::camera::CcdPtr
+LocatorAdapter<astro::camera::Ccd>::get0(const DeviceName& name);
 
 template<>
-astro::camera::FilterWheelPtr	LocatorAdapter<astro::camera::FilterWheel>::get(
-					const std::string& name);
+astro::camera::GuiderPortPtr
+LocatorAdapter<astro::camera::GuiderPort>::get0(const DeviceName& name);
 
 template<>
-astro::camera::CoolerPtr	LocatorAdapter<astro::camera::Cooler>::get(
-					const std::string& name);
+astro::camera::FilterWheelPtr
+LocatorAdapter<astro::camera::FilterWheel>::get0(const DeviceName& name);
 
 template<>
-astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get(
-					const std::string& name);
+astro::camera::CoolerPtr
+LocatorAdapter<astro::camera::Cooler>::get0(const DeviceName& name);
+
+template<>
+astro::camera::FocuserPtr
+LocatorAdapter<astro::camera::Focuser>::get0(const DeviceName& name);
+
+template<>
+astro::camera::CameraPtr
+LocatorAdapter<astro::camera::Camera>::get(const DeviceName& name);
+
+template<>
+astro::camera::CcdPtr
+LocatorAdapter<astro::camera::Ccd>::get(const DeviceName& name);
+
+template<>
+astro::camera::GuiderPortPtr
+LocatorAdapter<astro::camera::GuiderPort>::get(const DeviceName& name);
+
+template<>
+astro::camera::FilterWheelPtr
+LocatorAdapter<astro::camera::FilterWheel>::get(const DeviceName& name);
+
+template<>
+astro::camera::CoolerPtr
+LocatorAdapter<astro::camera::Cooler>::get(const DeviceName& name);
+
+template<>
+astro::camera::FocuserPtr
+LocatorAdapter<astro::camera::Focuser>::get(const DeviceName& name);
 
 } // namespace device
 } // namespace astro
 
 #endif /* _AstroLocator_h */
-
-

@@ -274,6 +274,7 @@ protected:
 	virtual CcdPtr	getCcd0(size_t ccdid) = 0;
 public:
 	CcdPtr	getCcd(size_t ccdid);
+	CcdPtr	getCcd(const DeviceName& ccdname);
 
 	// handling the filter wheel
 private:
@@ -399,6 +400,26 @@ public:
 	virtual void	set(unsigned short value);
 	bool	moveto(unsigned short value, unsigned long timeout = 60);
 };
+
+/**
+ * \brief Adapter template to extract an unspecified device from a camera
+ */
+template<typename device>
+class CameraDeviceAdapter {
+	CameraPtr	_camera;
+public:
+	CameraDeviceAdapter(CameraPtr camera) : _camera(camera) { }
+	typename device::sharedptr	get(const DeviceName& name);
+};
+
+template<>
+CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name);
+
+template<>
+GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName& name);
+
+template<>
+FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName& name);
 
 } // namepsace camera
 } // namespace astro

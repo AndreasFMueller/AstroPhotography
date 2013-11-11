@@ -44,9 +44,13 @@ public:
 	DeviceName(const std::string& modulename, const std::string& unitname);
 	DeviceName(const device_type& type,
 		const std::vector<std::string>& components);
-	// conversion to device names of a different type
+	DeviceName(const DeviceName& other);
+	// conversion to child device names of a different type
 	DeviceName(const DeviceName& name, const device_type& type,
 		const std::string& unitname);
+
+	// get the parent of a certain type
+	DeviceName	parent(const device_type& devicetype) const;
 
 	// comparison operators (for containers)
 	bool	operator==(const DeviceName& other) const;

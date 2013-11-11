@@ -131,39 +131,89 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
 // Locator Adapter class
 //////////////////////////////////////////////////////////////////////
 
+// Camera
 template<>
 astro::camera::CameraPtr	LocatorAdapter<astro::camera::Camera>::get(
-					const std::string& name) {
+					const DeviceName& name) {
         return _locator->getCamera(name);
 }
 
 template<>
-astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get(
-					const std::string& name) {
-        return _locator->getCcd(name);
+astro::camera::CameraPtr	LocatorAdapter<astro::camera::Camera>::get0(
+					const DeviceName& name) {
+        return _locator->getCamera(name);
 }
 
+// Ccd
+template<>
+astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get(
+					const DeviceName& ccdname) {
+	return getCameraChild(ccdname);
+}
+
+template<>
+astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get0(
+					const DeviceName& ccdname) {
+	return _locator->getCcd(ccdname);
+}
+
+// GuiderPort
 template<>
 astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get(
-					const std::string& name) {
-        return _locator->getGuiderPort(name);
+					const DeviceName& guiderportname) {
+        return getCameraChild(guiderportname);
 }
 
+template<>
+astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get0(
+					const DeviceName& guiderportname) {
+        return _locator->getGuiderPort0(guiderportname);
+}
+
+// FilterWheel
 template<>
 astro::camera::FilterWheelPtr	LocatorAdapter<astro::camera::FilterWheel>::get(
-					const std::string& name) {
-        return _locator->getFilterWheel(name);
+					const DeviceName& filterwheelname) {
+	return getCameraChild(filterwheelname);
 }
 
 template<>
+astro::camera::FilterWheelPtr	LocatorAdapter<astro::camera::FilterWheel>::get0(
+					const DeviceName& filterwheelname) {
+        return _locator->getFilterWheel(filterwheelname);
+}
+
+// CoolerPtr
+template<>
 astro::camera::CoolerPtr	LocatorAdapter<astro::camera::Cooler>::get(
-					const std::string& name) {
+					const DeviceName& coolername) {
+	try {
+		DeviceName	ccdname = coolername.parent(DeviceName::Cooler);
+		CcdPtr	ccd = _locator->getCcd(ccdname);
+		return ccd->getCooler();
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler '%s' not found",
+			std::string(coolername).c_str());
+	}
+	return _locator->getCooler(coolername);
+}
+
+template<>
+astro::camera::CoolerPtr	LocatorAdapter<astro::camera::Cooler>::get0(
+					const DeviceName& name) {
         return _locator->getCooler(name);
 }
 
+// Focuser
 template<>
 astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get(
-					const std::string& name) {
+					const DeviceName& name) {
+        return _locator->getFocuser(name);
+}
+
+template<>
+astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get0(
+					const DeviceName& name) {
         return _locator->getFocuser(name);
 }
 

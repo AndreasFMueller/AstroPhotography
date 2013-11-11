@@ -10,7 +10,8 @@ namespace camera {
 
 DeviceName::device_type	GuiderPort::devicetype = DeviceName::Guiderport;
 
-DeviceName	GuiderPort::defaultname(const DeviceName& parent, const std::string& unitname) {
+DeviceName	GuiderPort::defaultname(const DeviceName& parent,
+			const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Guiderport, unitname);
 }
 
