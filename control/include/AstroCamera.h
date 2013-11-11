@@ -201,6 +201,8 @@ protected:
 	void	addBinning(const Binning& binning);
 	time_t	lastexposurestart;
 public:
+	typedef CcdPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Ccd(const CcdInfo& _info) : astro::device::Device(_info.name()),
@@ -256,6 +258,8 @@ class	Camera : public astro::device::Device {
 protected:
 	std::vector<CcdInfo>	ccdinfo;
 public:
+	typedef CameraPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string&unitname);
 	Camera(const std::string& name);
@@ -270,6 +274,7 @@ protected:
 	virtual CcdPtr	getCcd0(size_t ccdid) = 0;
 public:
 	CcdPtr	getCcd(size_t ccdid);
+	CcdPtr	getCcd(const DeviceName& ccdname);
 
 	// handling the filter wheel
 private:
@@ -304,6 +309,8 @@ class Cooler : public astro::device::Device {
 protected:
 	float	temperature;
 public:
+	typedef CoolerPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Cooler(const DeviceName& name);
@@ -325,6 +332,8 @@ public:
  */
 class FilterWheel : public astro::device::Device {
 public:
+	typedef FilterWheelPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	FilterWheel(const std::string& name);
@@ -341,6 +350,8 @@ public:
  */
 class GuiderPort : public astro::device::Device {
 public:
+	typedef GuiderPortPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	GuiderPort(const std::string& name);
@@ -376,6 +387,8 @@ public:
  */
 class Focuser : public astro::device::Device {
 public:
+	typedef FocuserPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Focuser(const DeviceName& name);
@@ -387,6 +400,26 @@ public:
 	virtual void	set(unsigned short value);
 	bool	moveto(unsigned short value, unsigned long timeout = 60);
 };
+
+/**
+ * \brief Adapter template to extract an unspecified device from a camera
+ */
+template<typename device>
+class CameraDeviceAdapter {
+	CameraPtr	_camera;
+public:
+	CameraDeviceAdapter(CameraPtr camera) : _camera(camera) { }
+	typename device::sharedptr	get(const DeviceName& name);
+};
+
+template<>
+CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name);
+
+template<>
+GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName& name);
+
+template<>
+FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName& name);
 
 } // namepsace camera
 } // namespace astro

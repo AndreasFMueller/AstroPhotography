@@ -9,6 +9,29 @@
 namespace astro {
 namespace camera {
 
+//////////////////////////////////////////////////////////////////////
+// CameraDeviceAdapter implementation
+//////////////////////////////////////////////////////////////////////
+template<>
+CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name) {
+	return _camera->getCcd(name);
+}
+
+template<>
+GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName& name) {
+	return _camera->getGuiderPort();
+}
+
+template<>
+FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName& name) {
+	return _camera->getFilterWheel();
+}
+
+//////////////////////////////////////////////////////////////////////
+// Camera implementation
+//////////////////////////////////////////////////////////////////////
+DeviceName::device_type	Camera::devicetype = DeviceName::Camera;
+
 DeviceName	Camera::defaultname(const DeviceName& parent,
 			const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Camera, unitname);
@@ -72,6 +95,18 @@ CcdPtr	Camera::getCcd(size_t ccdid) {
 		ccds[ccdid] = ccd;
 	}
 	return ccd;
+}
+
+/**
+ * \brief Get a Ccd by name
+ */
+CcdPtr	Camera::getCcd(const DeviceName& ccdname) {
+	for (int i = 0; i < nCcds(); i++) {
+		if (getCcdInfo(i).name() == ccdname) {
+			return getCcd(i);
+		}
+	}
+	throw std::invalid_argument("no ccd with this name found");
 }
 
 /**

@@ -10,6 +10,8 @@ using namespace astro::device;
 namespace astro {
 namespace camera {
 
+DeviceName::device_type	FilterWheel::devicetype = DeviceName::Filterwheel;
+
 DeviceName	FilterWheel::defaultname(const DeviceName& parent, const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Filterwheel, unitname);
 }

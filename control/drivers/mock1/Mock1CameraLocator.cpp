@@ -30,9 +30,9 @@ public:
 	virtual ~Mock1CameraLocator() { }
 	virtual std::string	getName() const { return "module:mock1"; }
 	virtual std::string	getVersion() const { return VERSION; }
-	virtual std::vector<std::string>	getDevicelist(DeviceLocator::device_type device = DeviceLocator::CAMERA);
+	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
-	virtual CameraPtr	getCamera0(const std::string& name);
+	virtual CameraPtr	getCamera0(const DeviceName& name);
 };
 
 static std::string	cameraname(int id) {
@@ -45,9 +45,9 @@ static std::string	cameraname(int id) {
 /**
  * \brief Get a list of cameras
  */
-std::vector<std::string>	Mock1CameraLocator::getDevicelist(DeviceLocator::device_type device) {
+std::vector<std::string>	Mock1CameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	result;
-	if (device != DeviceLocator::CAMERA) {
+	if (device != DeviceName::Camera) {
 		return result;
 	}
 	for (int i = 0; i < 10; i++) {
@@ -59,11 +59,12 @@ std::vector<std::string>	Mock1CameraLocator::getDevicelist(DeviceLocator::device
 /**
  * \brief Get a camera by name
  */
-CameraPtr	Mock1CameraLocator::getCamera0(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "mock1 camera: %s", name.c_str());
+CameraPtr	Mock1CameraLocator::getCamera0(const DeviceName& name) {
+	std::string	sname = name;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mock1 camera: %s", sname.c_str());
 	DeviceName	devname(name);
 	int	id = stoi(devname.unitname());
-	if (cameraname(id) != name) {
+	if (cameraname(id) != sname) {
 		throw std::range_error("no such camera");
 	}
 	if ((id > 9) || (id < 0)) {

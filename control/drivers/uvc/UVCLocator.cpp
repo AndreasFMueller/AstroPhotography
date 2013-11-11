@@ -75,9 +75,9 @@ std::string	UvcCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-std::vector<std::string>	UvcCameraLocator::getDevicelist(DeviceLocator::device_type device) {
+std::vector<std::string>	UvcCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	cameras;
-	if (device != DeviceLocator::CAMERA) {
+	if (device != DeviceName::Camera) {
 		return cameras;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a camera list");
@@ -105,11 +105,12 @@ std::vector<std::string>	UvcCameraLocator::getDevicelist(DeviceLocator::device_t
 	return cameras;
 }
 
-CameraPtr	UvcCameraLocator::getCamera0(const std::string& name) {
+CameraPtr	UvcCameraLocator::getCamera0(const DeviceName& name) {
+	std::string	sname = name;
 	// extract the vendor id and the product id from the name and
 	// open the device for it
 	unsigned int	vendor, product;
-	sscanf(name.c_str(), "uvc:%x:%x:", &vendor, &product);
+	sscanf(sname.c_str(), "uvc:%x:%x:", &vendor, &product);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening device %04x:%4x",
 		vendor, product);
 

@@ -13,8 +13,10 @@
 #include <NetGuiderPort.h>
 #include <NetFilterWheel.h>
 #include <NetCooler.h>
+#include <NetCcd.h>
 #include <NetFocuser.h>
 #include <NetUtils.h>
+#include <DeviceLocatorAdapter.h>
 
 using namespace astro::device;
 
@@ -84,12 +86,11 @@ std::string	NetLocator::modulename(const std::string& netname) const {
 	return purename.substr(0, offset);
 }
 
-std::string	NetLocator::devicename(const std::string& netname) const {
-	DeviceName	netdev(netname);
-	if (netdev.modulename() != "net") {
+std::string	NetLocator::devicename(const DeviceName& netname) const {
+	if (netname.modulename() != "net") {
 		throw NotFound("not a net device name");
 	}
-	return URL::decode(netdev.unitname());
+	return URL::decode(netname.unitname());
 }
 
 /**
@@ -99,7 +100,7 @@ std::string	NetLocator::devicename(const std::string& netname) const {
  * module and device name in the single net device name
  */
 std::vector<std::string>	NetLocator::getDevicelist(
-	DeviceLocator::device_type device) {
+	DeviceName::device_type device) {
 	std::vector<std::string>	result;
 
 	// convert the device_type to the corresponding CORBA type
@@ -155,8 +156,8 @@ std::vector<std::string>	NetLocator::getDevicelist(
  * \brief Get the device locator
  */
 Astro::DeviceLocator_var	NetLocator::devicelocator(
-	const std::string& netname) {
-	std::string	modname = modulename(netname);
+	const DeviceName& netname) {
+	std::string	modname = netname.modulename();
 
 	// get the driver module
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module %s", modname.c_str());
@@ -171,11 +172,60 @@ Astro::DeviceLocator_var	NetLocator::devicelocator(
 	return devicelocatorvar;
 }
 
+#if 1
+
+template<typename DeviceType, typename Type, typename NetType>
+class NetLocatorHelper {
+	Astro::Modules_var&	_modules;
+public:
+	NetLocatorHelper(Astro::Modules_var& modules) : _modules(modules) { }
+	typename DeviceType::sharedptr	get(const DeviceName& name);
+};
+
+template<typename DeviceType, typename Type, typename NetType>
+typename DeviceType::sharedptr
+NetLocatorHelper<DeviceType, Type, NetType>::get(const DeviceName& name) {
+	std::string	sname = name;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for %s", sname.c_str());
+
+	std::string	modname = name.modulename();
+
+	// get the driver module
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve module %s", modname.c_str());
+	Astro::DriverModule_ptr	drivermodule
+		= _modules->getModule(modname.c_str());
+	Astro::DriverModule_var	drivermodulevar = drivermodule;
+
+	// get the device locator
+	Astro::DeviceLocator_ptr	devicelocator
+		= drivermodulevar->getDeviceLocator();
+	Astro::DeviceLocator_var	devicelocatorvar = devicelocator;
+
+	// now create a device locator adapter from the locator var
+	Astro::DeviceLocatorAdapter<typename Type::_ptr_type>
+		devloc(devicelocatorvar);
+
+	// get the device reference
+	std::string	devname = URL::decode(name.unitname());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve %s", devname.c_str());
+	typename Type::_var_type	devicevar
+		= devloc.get(devname.c_str());
+
+	// wrap it in a CameraPtr object
+	return typename DeviceType::sharedptr(new NetType(devicevar));
+}
+
+#endif
+
 /**
  * \brief Get a camera by name
  */
-CameraPtr	NetLocator::getCamera0(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for camera %s", name.c_str());
+CameraPtr	NetLocator::getCamera0(const DeviceName& name) {
+	NetLocatorHelper<Camera, Astro::Camera, NetCamera> lh(modules);
+	return	lh.get(name);
+#if 0
+	std::string	sname = name;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for camera %s", sname.c_str());
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
@@ -188,14 +238,25 @@ CameraPtr	NetLocator::getCamera0(const std::string& name) {
 
 	// wrap it in a CameraPtr object
 	return CameraPtr(new NetCamera(devicevar));
+#endif
+}
+
+CcdPtr	NetLocator::getCcd0(const DeviceName& name) {
+	NetLocatorHelper<Ccd, Astro::Ccd, NetCcd> lh(modules);
+	return	lh.get(name);
 }
 
 /**
  * \brief Get a guiderport by name
  */
-GuiderPortPtr	NetLocator::getGuiderPort0(const std::string& name) {
+GuiderPortPtr	NetLocator::getGuiderPort0(const DeviceName& name) {
+	NetLocatorHelper<GuiderPort, Astro::GuiderPort, NetGuiderPort>
+		lh(modules);
+	return	lh.get(name);
+#if 0
+	std::string	sname = name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guider port %s",
-		name.c_str());
+		sname.c_str());
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
@@ -206,14 +267,19 @@ GuiderPortPtr	NetLocator::getGuiderPort0(const std::string& name) {
 
 	// wrap it in a GuiderPortPtr object
 	return GuiderPortPtr(new NetGuiderPort(devicevar));
+#endif
 }
 
 /**
  * \brief Get a filterwheel by name
  */
-FilterWheelPtr	NetLocator::getFilterWheel0(const std::string& name) {
+FilterWheelPtr	NetLocator::getFilterWheel0(const DeviceName& name) {
+	NetLocatorHelper<FilterWheel, Astro::FilterWheel, NetFilterWheel> lh(modules);
+	return	lh.get(name);
+#if 0
+	std::string	sname = name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for filter wheel %s",
-		name.c_str());
+		sname.c_str());
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
@@ -225,14 +291,19 @@ FilterWheelPtr	NetLocator::getFilterWheel0(const std::string& name) {
 
 	// wrap it in a FilterWheelPtr object
 	return FilterWheelPtr(new NetFilterWheel(devicevar));
+#endif
 }
 
 /**
  * \brief Get a cooler by name
  */
-CoolerPtr	NetLocator::getCooler0(const std::string& name) {
+CoolerPtr	NetLocator::getCooler0(const DeviceName& name) {
+	NetLocatorHelper<Cooler, Astro::Cooler, NetCooler> lh(modules);
+	return	lh.get(name);
+#if 0
+	std::string	sname = name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for cooler %s",
-		name.c_str());
+		sname.c_str());
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
@@ -243,14 +314,19 @@ CoolerPtr	NetLocator::getCooler0(const std::string& name) {
 
 	// wrap it in a CoolerPtr object
 	return CoolerPtr(new NetCooler(devicevar));
+#endif
 }
 
 /**
  * \brief Get a focuser by name
  */
-FocuserPtr	NetLocator::getFocuser0(const std::string& name) {
+FocuserPtr	NetLocator::getFocuser0(const DeviceName& name) {
+	NetLocatorHelper<Focuser, Astro::Focuser, NetFocuser> lh(modules);
+	return	lh.get(name);
+#if 0
+	std::string	sname = name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for focuser %s",
-		name.c_str());
+		sname.c_str());
 	Astro::DeviceLocator_var	devicelocatorvar = devicelocator(name);
 
 	// get the device reference
@@ -261,6 +337,7 @@ FocuserPtr	NetLocator::getFocuser0(const std::string& name) {
 
 	// wrap it in a FocuserPtr object
 	return FocuserPtr(new NetFocuser(devicevar));
+#endif
 }
 
 } // namespace net

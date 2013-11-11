@@ -97,22 +97,25 @@ std::string	SimLocator::getVersion() const {
  * \return a vector of strings that uniquely describe devices
  */
 std::vector<std::string>	SimLocator::getDevicelist(
-	DeviceLocator::device_type device) {
+	DeviceName::device_type device) {
 	std::vector<std::string>	names;
 	switch (device) {
-	case DeviceLocator::CAMERA:
+	case DeviceName::Camera:
 		names.push_back(std::string("camera:simulator/camera"));
 		break;
-	case DeviceLocator::GUIDERPORT:
+	case DeviceName::Ccd:
+		names.push_back(std::string("ccd:simulator/camera/ccd"));
+		break;
+	case DeviceName::Guiderport:
 		names.push_back(std::string("guiderport:simulator/guiderport"));
 		break;
-	case DeviceLocator::FILTERWHEEL:
+	case DeviceName::Filterwheel:
 		names.push_back(std::string("filterwheel:simulator/filterwheel"));
 		break;
-	case DeviceLocator::FOCUSER:
+	case DeviceName::Focuser:
 		names.push_back(std::string("focuser:simulator/focuser"));
 		break;
-	case DeviceLocator::COOLER:
+	case DeviceName::Cooler:
 		names.push_back(std::string("cooler:simulator/cooler"));
 		break;
 	}
@@ -125,46 +128,61 @@ std::vector<std::string>	SimLocator::getDevicelist(
  * \param name		Name of the camera
  * \return Camera with that name
  */
-CameraPtr	SimLocator::getCamera0(const std::string& name) {
-	if (name != "camera:simulator/camera") {
+CameraPtr	SimLocator::getCamera0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "camera:simulator/camera") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such camera");
 	}
 	return _camera;
 }
 
-GuiderPortPtr	SimLocator::getGuiderPort0(const std::string& name) {
-	if (name != "guiderport:simulator/guiderport") {
+CcdPtr	SimLocator::getCcd0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "ccd:simulator/camera/ccd") {
+		debug(LOG_ERR, DEBUG_LOG, 0, "ccd %s does not exist",
+			sname.c_str());
+		throw NotFound("no such ccd");
+	}
+	return _camera->getCcd(0);
+}
+
+GuiderPortPtr	SimLocator::getGuiderPort0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "guiderport:simulator/guiderport") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such camera");
 	}
 	return _guiderport;
 }
 
-FilterWheelPtr	SimLocator::getFilterWheel0(const std::string& name) {
-	if (name != "filterwheel:simulator/filterwheel") {
+FilterWheelPtr	SimLocator::getFilterWheel0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "filterwheel:simulator/filterwheel") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "filterwheel %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such camera");
 	}
 	return _filterwheel;
 }
 
-CoolerPtr	SimLocator::getCooler0(const std::string& name) {
-	if (name != "cooler:simulator/cooler") {
+CoolerPtr	SimLocator::getCooler0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "cooler:simulator/cooler") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cooler %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such cooler");
 	}
 	return _cooler;
 }
 
-FocuserPtr	SimLocator::getFocuser0(const std::string& name) {
-	if (name != "focuser:simulator/focuser") {
+FocuserPtr	SimLocator::getFocuser0(const DeviceName& name) {
+	std::string	sname = name;
+	if (sname != "focuser:simulator/focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
-			name.c_str());
+			sname.c_str());
 		throw NotFound("no such focuser");
 	}
 	return _focuser;

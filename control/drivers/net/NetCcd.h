@@ -18,8 +18,10 @@ namespace net {
  */
 class NetCcd : public Ccd {
 	Astro::Ccd_ptr	_ccd;
+	void	synchronize();
 public:
 	NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd);
+	NetCcd(Astro::Ccd_ptr ccd);
 	~NetCcd();
 
 	virtual void    startExposure(const astro::camera::Exposure& exposure);

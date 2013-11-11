@@ -17,11 +17,6 @@ namespace Astro {
  */
 class DeviceLocator_impl : public POA_Astro::DeviceLocator {
 	astro::device::DeviceLocatorPtr	_locator;
-	std::map<std::string, astro::camera::CameraPtr>		cameramap;
-	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportmap;
-	std::map<std::string, astro::camera::FilterWheelPtr>	filterwheelmap;
-	std::map<std::string, astro::camera::CoolerPtr>		coolermap;
-	std::map<std::string, astro::camera::FocuserPtr>	focusermap;
 public:
 	inline DeviceLocator_impl(astro::device::DeviceLocatorPtr locator)
 		: _locator(locator) { }
@@ -31,6 +26,7 @@ public:
 	virtual ::Astro::DeviceLocator::DeviceNameList	*getDevicelist(
 				::Astro::DeviceLocator::device_type devicetype);
 	virtual Camera_ptr	getCamera(const char *name);
+	virtual Ccd_ptr		getCcd(const char *name);
 	virtual GuiderPort_ptr	getGuiderPort(const char *name);
 	virtual FilterWheel_ptr	getFilterWheel(const char *name);
 	virtual	Cooler_ptr	getCooler(const char *name);

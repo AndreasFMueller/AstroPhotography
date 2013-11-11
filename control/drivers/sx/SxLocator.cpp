@@ -87,9 +87,9 @@ std::string	SxCameraLocator::getVersion() const {
  *
  * \return a vector of strings that uniquely descript devices
  */
-std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceLocator::device_type device) {
+std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
-	if (device != DeviceLocator::CAMERA) {
+	if (device != DeviceName::Camera) {
 		return names;
 	}
 	std::vector<DevicePtr>	d = context.devices();
@@ -130,12 +130,13 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceLocator::device_ty
  * \param name		Name of the camera
  * \return Camera with that name
  */
-CameraPtr	SxCameraLocator::getCamera0(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing '%s'", name.c_str());
+CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
+	std::string	sname = name;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing '%s'", sname.c_str());
 	// parse the name string
 	int	busnumber, deviceaddress;
-	sscanf(name.c_str(), "sx:%d:%d:", &busnumber, &deviceaddress);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d", name.c_str(),
+	sscanf(sname.c_str(), "sx:%d:%d:", &busnumber, &deviceaddress);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d", sname.c_str(),
 		busnumber, deviceaddress);
 
 	// find the device with this bus number and address

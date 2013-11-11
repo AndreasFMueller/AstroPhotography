@@ -15,14 +15,7 @@ namespace astro {
 namespace camera {
 namespace net {
 
-/**
- * \brief Create a new network connected CCD
- *
- * Duplicate the reference to the remove ccd reference
- */
-NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
-	: Ccd(_info), _ccd(ccd) {
-	Astro::Ccd_Helper::duplicate(_ccd);
+void	NetCcd::synchronize() {
 	// an exposure may already be in progress, so we make sure we 
 	// retrieve the remote state
 	state = convert(_ccd->exposureStatus());
@@ -31,6 +24,23 @@ NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
 	exposure = convert(_ccd->getExposure());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote exposure parameters: %s",
 		exposure.toString().c_str());
+}
+
+/**
+ * \brief Create a new network connected CCD
+ *
+ * Duplicate the reference to the remove ccd reference
+ */
+NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
+	: Ccd(_info), _ccd(ccd) {
+	Astro::Ccd_Helper::duplicate(_ccd);
+	synchronize();
+}
+
+NetCcd::NetCcd(Astro::Ccd_ptr ccd)
+	: Ccd(convert(_ccd->getInfo())), _ccd(ccd) {
+	Astro::Ccd_Helper::duplicate(_ccd);
+	synchronize();
 }
 
 /**

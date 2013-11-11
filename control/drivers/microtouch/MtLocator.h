@@ -20,9 +20,9 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(
-		DeviceLocator::device_type device = DeviceLocator::CAMERA);
+		DeviceName::device_type device = DeviceName::Camera);
 protected:
-	virtual astro::camera::FocuserPtr	getFocuser0(const std::string& name);
+	virtual astro::camera::FocuserPtr	getFocuser0(const DeviceName& name);
 };
 
 } // namespace microtouch

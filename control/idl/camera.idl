@@ -104,6 +104,10 @@ module Astro {
 		 */
 		string	getName();
 		/**
+ 		 * \brief get the CcdInfo from the ccd
+		 */
+		CcdInfo	getInfo();
+		/**
 		 * \brief Start an exposure
 		 */
 		void	startExposure(in Exposure exp) raises(BadState,BadParameter);

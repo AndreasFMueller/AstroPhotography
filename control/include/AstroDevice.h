@@ -24,15 +24,16 @@ class DeviceName : public std::vector<std::string> {
 public:
 	typedef enum { Camera, Ccd, Cooler, Filterwheel, Guiderport, Focuser }
 		device_type;
-	static const std::string&	type2string(const device_type& type);
+	static std::string	type2string(const device_type& type);
 	static device_type	string2type(const std::string& name);
 private:
 	device_type	_type;
 public:
 	const device_type&	type() const { return _type; }
-	const std::string&	typestring() const;
+	std::string	typestring() const;
 	void	type(const device_type& type) { _type = type; }
 	void	typestring(const std::string& t);
+	bool	hasType(const device_type& t) const;
 public:
 	const std::string&	modulename() const;
 public:
@@ -43,9 +44,13 @@ public:
 	DeviceName(const std::string& modulename, const std::string& unitname);
 	DeviceName(const device_type& type,
 		const std::vector<std::string>& components);
-	// conversion to device names of a different type
+	DeviceName(const DeviceName& other);
+	// conversion to child device names of a different type
 	DeviceName(const DeviceName& name, const device_type& type,
 		const std::string& unitname);
+
+	// get the parent of a certain type
+	DeviceName	parent(const device_type& devicetype) const;
 
 	// comparison operators (for containers)
 	bool	operator==(const DeviceName& other) const;

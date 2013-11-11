@@ -69,28 +69,28 @@ void	SimLocatorTest::testVersion() {
 
 void	SimLocatorTest::testCameraName() {
 	std::vector<std::string>	names
-		= locator->getDevicelist(DeviceLocator::CAMERA);
+		= locator->getDevicelist(DeviceName::Camera);
 	CPPUNIT_ASSERT(names.size() == 1);
 	CPPUNIT_ASSERT(std::string("camera:simulator/camera") == *names.begin());
 }
 
 void	SimLocatorTest::testFilterWheelName() {
 	std::vector<std::string>	names
-		= locator->getDevicelist(DeviceLocator::FILTERWHEEL);
+		= locator->getDevicelist(DeviceName::Filterwheel);
 	CPPUNIT_ASSERT(names.size() == 1);
 	CPPUNIT_ASSERT(std::string("filterwheel:simulator/filterwheel") == *names.begin());
 }
 
 void	SimLocatorTest::testGuiderPortName() {
 	std::vector<std::string>	names
-		= locator->getDevicelist(DeviceLocator::GUIDERPORT);
+		= locator->getDevicelist(DeviceName::Guiderport);
 	CPPUNIT_ASSERT(names.size() == 1);
 	CPPUNIT_ASSERT(std::string("guiderport:simulator/guiderport") == *names.begin());
 }
 
 void	SimLocatorTest::testCoolerName() {
 	std::vector<std::string>	names
-		= locator->getDevicelist(DeviceLocator::COOLER);
+		= locator->getDevicelist(DeviceName::Cooler);
 	CPPUNIT_ASSERT(names.size() == 1);
 	CPPUNIT_ASSERT(std::string("cooler:simulator/cooler") == *names.begin());
 }

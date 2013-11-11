@@ -145,10 +145,10 @@ SbigCameraLocator::~SbigCameraLocator() {
  * locator returns the identifying string of the camera. A camera is
  * identified by its serial number an name.
  */
-std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_type device) {
+std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_type device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list");
 	std::vector<std::string>	names;
-	if (device != CAMERA) {
+	if (device != DeviceName::Camera) {
 		return names;
 	}
 	QueryUSBResults	results;
@@ -185,8 +185,9 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceLocator::device_
  * has the right name. This index is then used to retreive the camera object
  * by number.
  */
-CameraPtr	SbigCameraLocator::getCamera0(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", name.c_str());
+CameraPtr	SbigCameraLocator::getCamera0(const DeviceName& name) {
+	std::string	sname = name;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", sname.c_str());
 	std::vector<std::string>	cameras = getDevicelist();
 	std::vector<std::string>::const_iterator	i;
 	size_t	index = 0;
@@ -195,7 +196,7 @@ CameraPtr	SbigCameraLocator::getCamera0(const std::string& name) {
 			return CameraPtr(new SbigCamera(index));
 		}
 	}
-	std::string	msg = stringprintf("camera %s not found", name.c_str());
+	std::string	msg = stringprintf("camera %s not found", sname.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }

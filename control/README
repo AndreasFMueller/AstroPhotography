@@ -55,5 +55,12 @@ Optional packages:
    via the SBIG driver library, which can be obtained from the SBIG
    website.
 
+Some issues:
+
+ - Linux defines a macro minor in /usr/include/sys/sysmacros.h. On the other
+   hand, CORBA defines a member function minor in CORBA::SystemException.
+   This only works if the minor macro is overridden. One way to do this is
+   to include sys/sysmacros in /usr/local/include/omniORB4/CORBA_Exception.h
+
 --
 $Id$

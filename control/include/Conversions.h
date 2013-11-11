@@ -16,13 +16,13 @@
 namespace astro {
 
 // Device type
-astro::device::DeviceLocator::device_type convert(
+astro::DeviceName::device_type convert(
 			Astro::DeviceLocator::device_type fromtype);
 Astro::DeviceLocator::device_type convert(
-			astro::device::DeviceLocator::device_type fromtype);
+			astro::DeviceName::device_type fromtype);
 std::string	convert2string(Astro::DeviceLocator::device_type fromtype);
 std::string	convert2string(
-			astro::device::DeviceLocator::device_type fromtype);
+			astro::DeviceName::device_type fromtype);
 
 // Exposure state
 astro::camera::Exposure::State	convert(Astro::ExposureState fromstate);
@@ -66,7 +66,7 @@ CORBA::Octet	convert_relaybits2octet(uint8_t bits);
 // CcdInfo
 astro::camera::CcdInfo	convert(const Astro::CcdInfo& info);
 astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info);
-Astro::CcdInfo	convert(const astro::camera::CcdInfo& info);
+Astro::CcdInfo	*convert(const astro::camera::CcdInfo& info);
 
 // GuiderDescriptor
 astro::guiding::GuiderDescriptor        convert(

@@ -30,9 +30,9 @@ public:
 	virtual ~SbigCameraLocator();
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
-	virtual	std::vector<std::string>	getDevicelist(device_type device = CAMERA);
+	virtual	std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
-	virtual CameraPtr	getCamera0(const std::string& name);
+	virtual CameraPtr	getCamera0(const DeviceName& name);
 };
 
 /**
