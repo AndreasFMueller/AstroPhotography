@@ -13,6 +13,8 @@ using namespace astro::device;
 namespace astro {
 namespace camera {
 
+DeviceName::device_type	Focuser::devicetype = DeviceName::Focuser;
+
 Focuser::Focuser(const DeviceName& name) : Device(name) {
 }
 

@@ -202,6 +202,7 @@ protected:
 	time_t	lastexposurestart;
 public:
 	typedef CcdPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Ccd(const CcdInfo& _info) : astro::device::Device(_info.name()),
@@ -258,6 +259,7 @@ protected:
 	std::vector<CcdInfo>	ccdinfo;
 public:
 	typedef CameraPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string&unitname);
 	Camera(const std::string& name);
@@ -307,6 +309,7 @@ protected:
 	float	temperature;
 public:
 	typedef CoolerPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Cooler(const DeviceName& name);
@@ -329,6 +332,7 @@ public:
 class FilterWheel : public astro::device::Device {
 public:
 	typedef FilterWheelPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	FilterWheel(const std::string& name);
@@ -346,6 +350,7 @@ public:
 class GuiderPort : public astro::device::Device {
 public:
 	typedef GuiderPortPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	GuiderPort(const std::string& name);
@@ -382,6 +387,7 @@ public:
 class Focuser : public astro::device::Device {
 public:
 	typedef FocuserPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	Focuser(const DeviceName& name);

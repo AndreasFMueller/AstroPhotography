@@ -8,9 +8,85 @@
 
 #include <AstroCamera.h>
 #include <map>
+#include <stdexcept>
 
 namespace astro {
 namespace device {
+
+/**
+ * \brief Device cache adapter serving devices of any type
+ *
+ * 
+ */
+class DeviceLocator;
+
+template<typename Device>
+class DeviceCacheAdapter {
+	DeviceLocator	*_locator;
+public:
+	DeviceCacheAdapter(DeviceLocator *locator) : _locator(locator) { }
+	typename Device::sharedptr	get0(const DeviceName& name);
+};
+
+template<>
+astro::camera::CameraPtr
+DeviceCacheAdapter<astro::camera::Camera>::get0(const DeviceName& name);
+
+template<>
+astro::camera::CcdPtr
+DeviceCacheAdapter<astro::camera::Ccd>::get0(const DeviceName& name);
+
+template<>
+astro::camera::GuiderPortPtr
+DeviceCacheAdapter<astro::camera::GuiderPort>::get0(const DeviceName& name);
+
+template<>
+astro::camera::FilterWheelPtr
+DeviceCacheAdapter<astro::camera::FilterWheel>::get0(const DeviceName& name);
+
+template<>
+astro::camera::CoolerPtr
+DeviceCacheAdapter<astro::camera::Cooler>::get0(const DeviceName& name);
+
+template<>
+astro::camera::FocuserPtr
+DeviceCacheAdapter<astro::camera::Focuser>::get0(const DeviceName& name);
+
+/**
+ * \brief Cache for devices
+ *
+ * Devices are cached by name. This template implements a cache for
+ * each type of object.
+ */
+template<typename Device>
+class DeviceCache {
+	std::map<std::string, typename Device::sharedptr>	_cache;
+	DeviceLocator	*_locator;
+public:
+	DeviceCache(DeviceLocator *locator) : _locator(locator) { }
+	typename Device::sharedptr	get(const std::string& name);
+};
+
+template<typename Device>
+typename Device::sharedptr	DeviceCache<Device>::get(const std::string& name) {
+	DeviceName	devname(name);
+	if (!devname.hasType(Device::devicetype)) {
+		std::string	t = DeviceName::type2string(Device::devicetype);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s is not of type %s",
+			name.c_str(), t.c_str());
+		throw std::invalid_argument("name does not refer the "
+			"right device type");
+	}
+	typename Device::sharedptr	device;
+	if (_cache.find(name) == _cache.end()) {
+		DeviceCacheAdapter<Device>	dca(_locator);
+		device = dca.get0(name);
+		_cache.insert(std::make_pair(name, device));
+	} else {
+		device = _cache.find(name)->second;
+	}
+	return device;
+}
 
 /**
  * \brief The device locator can locate device within a module
@@ -19,13 +95,13 @@ namespace device {
  * locator, which ensures that 
  */
 class   DeviceLocator {
-	std::map<std::string, astro::camera::CameraPtr>		cameracache;
-	std::map<std::string, astro::camera::CcdPtr>		ccdcache;
-	std::map<std::string, astro::camera::GuiderPortPtr>	guiderportcache;
-	std::map<std::string, astro::camera::FilterWheelPtr>	filterwheelcache;
-	std::map<std::string, astro::camera::CoolerPtr>		coolercache;
-	std::map<std::string, astro::camera::FocuserPtr>	focusercache;
-protected:
+	DeviceCache<astro::camera::Camera>	cameracache;
+	DeviceCache<astro::camera::Ccd>		ccdcache;
+	DeviceCache<astro::camera::GuiderPort>	guiderportcache;
+	DeviceCache<astro::camera::FilterWheel>	filterwheelcache;
+	DeviceCache<astro::camera::Cooler>	coolercache;
+	DeviceCache<astro::camera::Focuser>	focusercache;
+public:
 	virtual	astro::camera::CameraPtr	getCamera0(const DeviceName& name);
 	virtual astro::camera::CcdPtr		getCcd0(const DeviceName& name);
 	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const DeviceName& name);
@@ -90,3 +166,5 @@ astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get(
 } // namespace astro
 
 #endif /* _AstroLocator_h */
+
+

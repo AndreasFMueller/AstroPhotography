@@ -11,7 +11,46 @@ using namespace astro::camera;
 namespace astro {
 namespace device {
 
-DeviceLocator::DeviceLocator() {
+//////////////////////////////////////////////////////////////////////
+// DeviceCacheAdapter implementation
+//////////////////////////////////////////////////////////////////////
+
+template<>
+CameraPtr	DeviceCacheAdapter<Camera>::get0(const DeviceName& name) {
+	return _locator->getCamera0(name);
+}
+
+template<>
+CcdPtr	DeviceCacheAdapter<Ccd>::get0(const DeviceName& name) {
+	return _locator->getCcd0(name);
+}
+
+template<>
+GuiderPortPtr	DeviceCacheAdapter<GuiderPort>::get0(const DeviceName& name) {
+	return _locator->getGuiderPort0(name);
+}
+
+template<>
+FilterWheelPtr	DeviceCacheAdapter<FilterWheel>::get0(const DeviceName& name) {
+	return _locator->getFilterWheel0(name);
+}
+
+template<>
+CoolerPtr	DeviceCacheAdapter<Cooler>::get0(const DeviceName& name) {
+	return _locator->getCooler0(name);
+}
+
+template<>
+FocuserPtr	DeviceCacheAdapter<Focuser>::get0(const DeviceName& name) {
+	return _locator->getFocuser0(name);
+}
+
+//////////////////////////////////////////////////////////////////////
+// DeviceLocator implementation
+//////////////////////////////////////////////////////////////////////
+DeviceLocator::DeviceLocator() :
+	cameracache(this), ccdcache(this), guiderportcache(this),
+	filterwheelcache(this), coolercache(this), focusercache(this) {
 }
 
 DeviceLocator::~DeviceLocator() {
@@ -54,41 +93,13 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {
 	throw std::runtime_error("focuser not implemented");
 }
 
+
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getCamera(%s)", name.c_str());
-	// check that the device name really is a camera name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Camera)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s is not a camera name",
-			std::string(devname).c_str());
-		throw std::invalid_argument("not a camera name");
-	}
-	// find the camera
-	CameraPtr	camera;
-	if (cameracache.find(name) == cameracache.end()) {
-		camera = this->getCamera0(DeviceName(name));
-		cameracache.insert(std::make_pair(name, camera));
-	} else {
-		camera = cameracache.find(name)->second;
-	}
-	return camera;
+	return cameracache.get(name);
 }
 
 astro::camera::CcdPtr	DeviceLocator::getCcd(const std::string& name) {
-	// check that the device name really is a ccd name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Ccd)) {
-		throw std::invalid_argument("not a ccd name");
-	}
-	// find the ccd
-	CcdPtr	ccd;
-	if (ccdcache.find(name) == ccdcache.end()) {
-		ccd = this->getCcd0(DeviceName(name));
-		ccdcache.insert(std::make_pair(name, ccd));
-	} else {
-		ccd = ccdcache.find(name)->second;
-	}
-	return ccd;
+	return ccdcache.get(name);
 }
 
 astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
@@ -100,72 +111,25 @@ astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
 }
 
 astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& name) {
-	// check that the device name really is a Guiderport name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Guiderport)) {
-		throw std::invalid_argument("not a guiderport name");
-	}
-	// get the guideport
-	GuiderPortPtr	guiderport;
-	if (guiderportcache.find(name) == guiderportcache.end()) {
-		guiderport = this->getGuiderPort0(DeviceName(name));
-		guiderportcache.insert(std::make_pair(name, guiderport));
-	} else {
-		guiderport = guiderportcache.find(name)->second;
-	}
-	return guiderport;
+	return guiderportcache.get(name);
 }
 
 astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& name) {
-	// check that the device name really is a FilterWheel name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Filterwheel)) {
-		throw std::invalid_argument("not a filterwheel name");
-	}
-	// get the filterwheel
-	FilterWheelPtr	filterwheel;
-	if (filterwheelcache.find(name) == filterwheelcache.end()) {
-		filterwheel = this->getFilterWheel0(name);
-		filterwheelcache.insert(std::make_pair(name, filterwheel));
-	} else {
-		filterwheel = filterwheelcache.find(name)->second;
-	}
-	return filterwheel;
+	return filterwheelcache.get(name);
 }
 
 astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
-	// check that the device name really is a Cooler name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Cooler)) {
-		throw std::invalid_argument("not a cooler name");
-	}
-	// get the cooler
-	CoolerPtr	cooler;
-	if (coolercache.find(name) == coolercache.end()) {
-		cooler = this->getCooler0(DeviceName(name));
-		coolercache.insert(std::make_pair(name, cooler));
-	} else {
-		cooler = coolercache.find(name)->second;
-	}
-	return cooler;
+	return coolercache.get(name);
 }
 
 astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
-	// check that the device name really is a Focuser name
-	DeviceName	devname(name);
-	if (!devname.hasType(DeviceName::Focuser)) {
-		throw std::invalid_argument("not a focuser name");
-	}
-	// get the focuser
-	FocuserPtr	focuser;
-	if (focusercache.find(name) == focusercache.end()) {
-		focuser = this->getFocuser0(DeviceName(name));
-		focusercache.insert(std::make_pair(name, focuser));
-	} else {
-		focuser = focusercache.find(name)->second;
-	}
-	return focuser;
+	return focusercache.get(name);
 }
+
+
+//////////////////////////////////////////////////////////////////////
+// Locator Adapter class
+//////////////////////////////////////////////////////////////////////
 
 template<>
 astro::camera::CameraPtr	LocatorAdapter<astro::camera::Camera>::get(

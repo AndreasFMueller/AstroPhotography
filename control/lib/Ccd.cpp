@@ -151,6 +151,8 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
 // Ccd implementation
 //////////////////////////////////////////////////////////////////////
 
+DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
+
 /**
  * \brief Start an exposure
  *

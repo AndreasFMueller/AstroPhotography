@@ -9,6 +9,8 @@
 namespace astro {
 namespace camera {
 
+DeviceName::device_type	Camera::devicetype = DeviceName::Camera;
+
 DeviceName	Camera::defaultname(const DeviceName& parent,
 			const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Camera, unitname);

@@ -1,5 +1,5 @@
 /* 
- * GuidderPort.pp -- Guider Port implementation
+ * GuiderPort.pp -- Guider Port implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -7,6 +7,8 @@
 
 namespace astro {
 namespace camera {
+
+DeviceName::device_type	GuiderPort::devicetype = DeviceName::Guiderport;
 
 DeviceName	GuiderPort::defaultname(const DeviceName& parent, const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Guiderport, unitname);
