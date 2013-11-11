@@ -7,6 +7,8 @@
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 #include <AstroDebug.h>
+#include <algorithm>
+#include <stdexcept>
 
 namespace astro {
 
