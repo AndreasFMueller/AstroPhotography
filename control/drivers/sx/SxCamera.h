@@ -39,7 +39,7 @@ public:
 	virtual ~SxCamera();
 
 	// reset
-	void	reset();
+	virtual void	reset();
 
 	// ccd access
 protected:

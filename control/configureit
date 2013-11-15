@@ -73,6 +73,6 @@ Darwin)
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
-		--enable-sbig
+		--enable-sbig --enable-qsi
 	;;
 esac

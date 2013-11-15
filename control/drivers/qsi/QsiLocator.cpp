@@ -8,6 +8,9 @@
 #include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <includes.h>
+#include <qsiapi.h>
+#include <QSIError.h>
+#include <QsiCamera.h>
 
 namespace astro {
 namespace module {
@@ -72,7 +75,16 @@ std::string	QsiCameraLocator::getName() const {
  * \brief Get module version.
  */
 std::string	QsiCameraLocator::getVersion() const {
-	return VERSION;
+	QSICamera cam;
+	cam.put_UseStructuredExceptions(true);
+	try {
+		std::string	info;
+		cam.get_DriverInfo(info);
+		return astro::module::qsi::qsi_version + "/" + info;
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get QSI library version");
+		return astro::module::qsi::qsi_version;
+	}
 }
 
 /**
@@ -82,6 +94,30 @@ std::string	QsiCameraLocator::getVersion() const {
  */
 std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
+
+	// return empty list, QSI only has camera devices from the locator
+	if (DeviceName::Camera != device) {
+		return names;
+	}
+
+	// now get all cameras
+	QSICamera cam;
+	cam.put_UseStructuredExceptions(true);
+	try {
+                //Discover the connected cameras
+                std::string camSerial[QSICamera::MAXCAMERAS];
+                std::string camDesc[QSICamera::MAXCAMERAS];
+		int	iNumFound;
+                cam.get_AvailableCameras(camSerial, camDesc, iNumFound);
+		for (int i = 0; i < iNumFound; i++) {
+			std::string	cameraname =
+				std::string("camera:qsi/") + camSerial[i];
+			names.push_back(cameraname);
+		}
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error during camera retrieval");
+	}
+
 	return names;
 }
 
@@ -92,7 +128,7 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
  * \return Camera with that name
  */
 CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
-	return CameraPtr();
+	return CameraPtr(new QsiCamera(name));
 }
 
 } // namespace qsi

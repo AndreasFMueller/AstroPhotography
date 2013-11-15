@@ -6,13 +6,13 @@
 if ENABLE_QSI
 
 pkglib_LTLIBRARIES = qsi.la 
-noinst_HEADERS = QsiLocator.h
+noinst_HEADERS = QsiLocator.h QsiCamera.h
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libqsi.la
 
-libqsi_la_SOURCES = QsiLocator.cpp
+libqsi_la_SOURCES = QsiLocator.cpp QsiCamera.cpp
 libqsi_la_DEPENDENCIES = ../../lib/libastro.la
 libqsi_la_LIBADD = ../../lib/libastro.la
 
@@ -23,7 +23,7 @@ qsitests_DEPENDENCIES = ../../lib/libastro.la libqsi.la
 
 endif
 
-qsi_la_SOURCES = QsiLocator.cpp
+qsi_la_SOURCES = QsiLocator.cpp QsiCamera.cpp
 qsi_la_LDFLAGS = -module
 qsi_la_DEPENDENCIES = ../../lib/libastro.la
 qsi_la_LIBADD = ../../lib/libastro.la
