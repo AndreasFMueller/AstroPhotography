@@ -2,7 +2,7 @@
 # configuration used for development purposes on Linux and Mac OS X
 #
 CFLAGS="-Wall -g"
-CXXFLAGS="-fuse-cxa-atexit ${CFLAGS} -std=c++11"
+CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests --enable-microtouch --enable-qsi"
 
@@ -40,9 +40,13 @@ esac
 # unloading the modules
 case ${systemtype} in
 Linux)
+	CXXFLAGS="${CFLAGS} --std=c++11"
+	export CXXFLAGS
 	./configure --prefix=`pwd`/root ${commonflags}
 	;;
 Debian)
+	CXXFLAGS="${CFLAGS} --std=c++0x"
+	export CXXFLAGS
 	./configure --prefix=`pwd`/root ${commonflags}
 	;;
 SuSE)
@@ -57,6 +61,7 @@ SuSE)
 			CXXFLAGS="${CXXFLAGS} -I/usr/local/include/unicap"
 		fi
 	fi
+	CXXFLAGS="${CFLAGS} --std=c++11"
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
@@ -64,6 +69,7 @@ SuSE)
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
