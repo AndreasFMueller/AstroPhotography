@@ -110,6 +110,22 @@ enable_sbig=no
 AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 
 ######################################################################
+# check for qsi library
+AC_ARG_ENABLE(qsi,
+[AS_HELP_STRING([--enable-qsi], [build the QSI driver])],
+[
+	enable_qsi=yes
+	# check whether the qsiapi library is present
+	AC_CHECK_LIB([qsiapi], [_ZN10CCCDCameraC1Ev])
+
+	# if we fail, disable qsi
+],[
+enable_qsi=no
+]
+)
+AM_CONDITIONAL(ENABLE_QSI, test x$enable_qsi = xyes)
+
+######################################################################
 # check for the Unicap library
 AC_ARG_ENABLE(unicap,
 [AS_HELP_STRING([--enable-unicap], [build the unicap driver])],
@@ -159,7 +175,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
-	drivers/microtouch/Makefile
+	drivers/microtouch/Makefile drivers/qsi/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT

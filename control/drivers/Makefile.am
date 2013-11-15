@@ -4,4 +4,4 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = mock1 mock2 sx sbig uvc simulator net microtouch
+SUBDIRS = mock1 mock2 sx sbig uvc simulator net microtouch qsi

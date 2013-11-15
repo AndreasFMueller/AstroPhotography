@@ -1,0 +1,106 @@
+/*
+ * QsiLocator.cpp -- camera locator class for QSI cameras
+ *
+ * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#include <QsiLocator.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
+#include <AstroLoader.h>
+#include <includes.h>
+
+namespace astro {
+namespace module {
+namespace qsi {
+
+//////////////////////////////////////////////////////////////////////
+// Implementation of the QSI Module Descriptor
+//////////////////////////////////////////////////////////////////////
+
+static std::string      qsi_name("qsi");
+static std::string      qsi_version(VERSION);
+
+/**
+ * \brief Module descriptor for the Starlight express module
+ */
+class QsiDescriptor : public ModuleDescriptor {
+public:
+	QsiDescriptor() { }
+	~QsiDescriptor() { }
+        virtual std::string     name() const {
+                return qsi_name;
+        }
+        virtual std::string     version() const {
+                return qsi_version;
+        }
+	virtual bool	hasDeviceLocator() const {
+		return true;
+	}
+};
+
+} // namespace qsi
+} // namespace module
+} // namespace astro
+
+extern "C"
+astro::module::ModuleDescriptor	*getDescriptor() {
+	return new astro::module::qsi::QsiDescriptor();
+}
+
+namespace astro {
+namespace camera {
+namespace qsi {
+
+//////////////////////////////////////////////////////////////////////
+// Implementation of the Camera Locator for QSI
+//////////////////////////////////////////////////////////////////////
+
+QsiCameraLocator::QsiCameraLocator() {
+}
+
+QsiCameraLocator::~QsiCameraLocator() {
+}
+
+/**
+ * \brief Get module name.
+ */
+std::string	QsiCameraLocator::getName() const {
+	return std::string("qsi");
+}
+
+/**
+ * \brief Get module version.
+ */
+std::string	QsiCameraLocator::getVersion() const {
+	return VERSION;
+}
+
+/**
+ * \brief Get a list of Starlight Express cameras.
+ *
+ * \return a vector of strings that uniquely descript devices
+ */
+std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type device) {
+	std::vector<std::string>	names;
+	return names;
+}
+
+/**
+ * \brief Construct a camera from a camera description
+ *
+ * \param name		Name of the camera
+ * \return Camera with that name
+ */
+CameraPtr	QsiCameraLocator::getCamera0(const DeviceName& name) {
+	return CameraPtr();
+}
+
+} // namespace qsi
+} // namespace camera
+} // namespace astro
+
+
+extern "C"
+astro::device::DeviceLocator    *getDeviceLocator() {
+	return new astro::camera::qsi::QsiCameraLocator();
+}
