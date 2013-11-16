@@ -4,7 +4,7 @@
 CFLAGS="-Wall -g"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
-commonflags="--enable-unittests --enable-microtouch --enable-qsi"
+commonflags="--enable-unittests --enable-microtouch --enable-qsi --enable-qhy"
 
 # first find out what type of system we are
 systemtype=`uname`

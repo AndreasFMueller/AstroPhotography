@@ -1,5 +1,5 @@
 #
-# Makefile.am -- build the starlight express driver
+# Makefile.am -- build the Quantum Scientific Imaging driver
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #

@@ -126,6 +126,17 @@ enable_qsi=no
 AM_CONDITIONAL(ENABLE_QSI, test x$enable_qsi = xyes)
 
 ######################################################################
+# enable the qhy driver
+AC_ARG_ENABLE(qhy,
+[AS_HELP_STRING([--enable-qhy], [build the QHY driver])],
+[
+	enable_qhy=yes
+],[
+	enable_qhy=no
+])
+AM_CONDITIONAL(ENABLE_QHY, test x$enable_qhy = xyes)
+
+######################################################################
 # check for the Unicap library
 AC_ARG_ENABLE(unicap,
 [AS_HELP_STRING([--enable-unicap], [build the unicap driver])],
@@ -175,7 +186,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
-	drivers/microtouch/Makefile drivers/qsi/Makefile
+	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	doc/Makefile
 	test/Makefile])
 AC_OUTPUT
