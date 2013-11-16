@@ -88,7 +88,7 @@ AC_ARG_ENABLE(sbig,
 	Linux)	OLDLIBS="${LIBS}"
 		AC_CHECK_HEADERS(lpardrv.h, ,
 			[AC_MSG_ERROR([SBIG header not found])])
-		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig,
+		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig=yes,
 			[AC_MSG_ERROR([SBIG library not found])])
 		SBIGLIBRARY=-lsbigudrv
 		LIBS="${OLDLIBS}"
