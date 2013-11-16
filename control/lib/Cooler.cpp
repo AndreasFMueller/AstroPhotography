@@ -66,7 +66,7 @@ void	Cooler::addTemperatureMetadata(ImageBase& image) {
 
 	// set temperature
 	Metavalue	mvsettemp(
-		getSetTemperature() - 273.1,
+		this->getSetTemperature() - 273.1,
 		std::string("CCD temperature setpoint in "
 			"degrees C"));
 	image.setMetadata(std::string("SET-TEMP"), mvsettemp);

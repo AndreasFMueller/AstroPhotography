@@ -3,16 +3,20 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+
 if ENABLE_QSI
 
 pkglib_LTLIBRARIES = qsi.la 
-noinst_HEADERS = QsiLocator.h QsiCamera.h
+noinst_HEADERS = QsiLocator.h QsiCamera.h QsiCcd.h QsiCooler.h QsiFilterWheel.h
+
+SRCFILES = QsiLocator.cpp QsiCamera.cpp QsiCcd.cpp QsiCooler.cpp \
+	QsiFilterWheel.cpp
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libqsi.la
 
-libqsi_la_SOURCES = QsiLocator.cpp QsiCamera.cpp
+libqsi_la_SOURCES = $(SRCFILES)
 libqsi_la_DEPENDENCIES = ../../lib/libastro.la
 libqsi_la_LIBADD = ../../lib/libastro.la
 
@@ -23,7 +27,7 @@ qsitests_DEPENDENCIES = ../../lib/libastro.la libqsi.la
 
 endif
 
-qsi_la_SOURCES = QsiLocator.cpp QsiCamera.cpp
+qsi_la_SOURCES = $(SRCFILES)
 qsi_la_LDFLAGS = -module
 qsi_la_DEPENDENCIES = ../../lib/libastro.la
 qsi_la_LIBADD = ../../lib/libastro.la

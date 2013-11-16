@@ -74,6 +74,9 @@ std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
  * The Exposure object specifies an exposure request to a camera.
  * It includes the subframe to expose, the exposure time, the
  * the binning mode and the gain.
+ *
+ * The frame rectangle is specified in unbinned pixels. So a 2x3 binned
+ * subframe with size (200,300) results in a 100x100 image being returned.
  */
 class	Exposure {
 public:
@@ -264,7 +267,7 @@ public:
 					const std::string&unitname);
 	Camera(const std::string& name);
 	Camera(const DeviceName& name);
-	~Camera();
+	virtual	~Camera();
 	virtual void	reset();
 	unsigned int	nCcds() const;
 	const CcdInfo&	getCcdInfo(size_t ccdid) const;
