@@ -10,6 +10,7 @@
 #include <OrbSingleton.h>
 #include <iostream>
 #include <ObjWrapper.h>
+#include <DeviceMap.h>
 #include <CorbaExceptionReporter.h>
 
 namespace astro {
@@ -23,39 +24,12 @@ typedef	ObjWrapper<Astro::Camera>	CameraWrapper;
 /**
  * \brief internals class for Camera repository
  */
-class Camera_internals : std::map<std::string, CameraWrapper> {
+class Camera_internals : public DeviceMap<Astro::Camera> {
 public:
 	Camera_internals() { }
-	CameraWrapper	byname(const std::string& cameraid);
-	void	release(const std::string& cameraid);
-	void	assign(const std::string& cameraid,
+	virtual void	assign(const std::string& cameraid,
 				const std::vector<std::string>& arguments);
 };
-
-/**
- * \brief retrieve a camera by name
- */
-CameraWrapper	Camera_internals::byname(const std::string& cameraid) {
-	Camera_internals::iterator	i = find(cameraid);
-	if (i == end()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "camera %s not found",
-			cameraid.c_str());
-		throw command_error("camera not found");
-	}
-	return i->second;
-}
-
-/**
- * \brief release a camera from the repository
- */
-void	Camera_internals::release(const std::string& cameraid) {
-	Camera_internals::iterator	i = find(cameraid);
-	if (i != end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing camera %s",
-			cameraid.c_str());
-		erase(i);
-	}
-}
 
 /**
  * \brief assign a camera to a name
@@ -126,20 +100,12 @@ void	Camera_internals::assign(const std::string& cameraid,
 			s.c_str());
 		throw std::runtime_error(s);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera ptr: %p", camera);
 	if (CORBA::is_nil(camera)) {
 		throw command_error("could not get camera");
 	}
 
-	CameraWrapper	cw(camera);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got camera '%s'", cameraname.c_str());
-
 	// assign the Camera_var object to this 
-	Camera_internals::value_type	v(cameraid, cw);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "insert pair");
-	insert(v);
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera reference stored in map");
+	DeviceMap<Astro::Camera>::assign(cameraid, camera);
 }
 
 
