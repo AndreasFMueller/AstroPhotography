@@ -15,6 +15,14 @@ namespace astro {
 namespace cli {
 
 /**
+ * \brief Device map exception
+ */
+class devicemap_error : public std::runtime_error {
+public:
+	devicemap_error(const std::string& error) : std::runtime_error(error) { }
+};
+
+/**
  * \brief map class for device references
  *
  * The cli interface can talk to all types of devices, and for each device
@@ -86,7 +94,7 @@ void	DeviceMap<AstroDevice>::assign(const std::string& deviceid,
 	if (deviceid == "default") {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"'default' is not a vaild device name");
-		throw command_error("invalid device name");
+		throw devicemap_error("invalid device name");
 	}
 	value_type	v(deviceid, DeviceWrapper(device));
 	maptype::insert(v);
@@ -95,12 +103,13 @@ void	DeviceMap<AstroDevice>::assign(const std::string& deviceid,
 }
 
 template<typename AstroDevice>
-ObjWrapper<AstroDevice>	DeviceMap<AstroDevice>::byname(const std::string& deviceid) {
+ObjWrapper<AstroDevice>
+DeviceMap<AstroDevice>::byname(const std::string& deviceid) {
 	iterator	i = maptype::find(deviceid);
 	if (i == maptype::end()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "device %s not found",
 			deviceid.c_str());
-		throw command_error("device not found");
+		throw devicemap_error("device not found");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found device reference '%s'",
 		deviceid.c_str());

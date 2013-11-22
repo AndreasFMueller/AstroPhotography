@@ -9,6 +9,7 @@
 #define _ObjWrapper_h
 
 #include <AstroDebug.h>
+#include <memory>
 
 namespace astro {
 
@@ -21,6 +22,7 @@ public:
 
 	ObjWrapper(_ptr_type t) : objptr(new _var_type(t)) {
 	}
+	_ptr_type	operator->() { return **this; }
 };
 
 } // namespace astro

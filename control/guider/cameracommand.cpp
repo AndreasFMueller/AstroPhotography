@@ -12,143 +12,10 @@
 #include <ObjWrapper.h>
 #include <DeviceMap.h>
 #include <CorbaExceptionReporter.h>
+#include <Cameras.h>
 
 namespace astro {
 namespace cli {
-
-//////////////////////////////////////////////////////////////////////
-// Class of internals for the cameras
-//////////////////////////////////////////////////////////////////////
-typedef	ObjWrapper<Astro::Camera>	CameraWrapper;
-
-/**
- * \brief internals class for Camera repository
- */
-class Camera_internals : public DeviceMap<Astro::Camera> {
-public:
-	Camera_internals() { }
-	virtual void	assign(const std::string& cameraid,
-				const std::vector<std::string>& arguments);
-};
-
-/**
- * \brief assign a camera to a name
- */
-void	Camera_internals::assign(const std::string& cameraid,
-		const std::vector<std::string>& arguments) {
-
-	if (arguments.size() < 4) {
-		throw command_error("camera assign needs 4 arguments");
-	}
-	// extract module name
-	std::string	modulename = arguments[2];
-	std::string	cameraname = arguments[3];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' from module '%s'",
-		cameraname.c_str(), modulename.c_str());
-
-	// geht the modules interface
-	Astro::OrbSingleton	orb;
-	Astro::Modules_var	modules;
-	try {
-		modules = orb.getModules();
-	} catch (const CORBA::Exception& x) {
-		std::string	s = Astro::exception2string(x).c_str();
-		debug(LOG_ERR, DEBUG_LOG, 0, "getModules() exception: %s",
-			s.c_str());
-		throw std::runtime_error(s);
-	}
-
-	// get the driver module
-	Astro::DriverModule_var	drivermodule;
-	try {
-		drivermodule = modules->getModule(modulename.c_str());
-	} catch (const CORBA::Exception& x) {
-		std::string	s = Astro::exception2string(x);
-		debug(LOG_ERR, DEBUG_LOG, 0, "getModule exception: %s",
-			s.c_str());
-		throw std::runtime_error(s);
-	}
-	if (CORBA::is_nil(drivermodule)) {
-		throw command_error("could not get module");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver module");
-
-	// get the device locator
-	Astro::DeviceLocator_var	devicelocator;
-	try {
-		devicelocator = drivermodule->getDeviceLocator();
-	} catch (const CORBA::Exception& x) {
-		std::string	s = Astro::exception2string(x);
-		debug(LOG_ERR, DEBUG_LOG, 0, "getDeviceLocator exception: %s",
-			s.c_str());
-		throw std::runtime_error(s);
-	}
-	if (CORBA::is_nil(devicelocator)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get device locator");
-		throw std::runtime_error("cannot get device locator");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got device locator for %s",
-		modulename.c_str());
-
-	// now ask the device locator for a camera with that name
-	Astro::Camera_ptr	camera;
-	try {
-		camera = devicelocator->getCamera(cameraname.c_str());
-	} catch (const CORBA::Exception& x) {
-		std::string	s = Astro::exception2string(x);
-		debug(LOG_ERR, DEBUG_LOG, 0, "getCamera exception: %s",
-			s.c_str());
-		throw std::runtime_error(s);
-	}
-	if (CORBA::is_nil(camera)) {
-		throw command_error("could not get camera");
-	}
-
-	// assign the Camera_var object to this 
-	DeviceMap<Astro::Camera>::assign(cameraid, camera);
-}
-
-
-//////////////////////////////////////////////////////////////////////
-// Cameras implementation
-//////////////////////////////////////////////////////////////////////
-
-/**
- * \brief class to mediate access to 
- */
-class Cameras {
-	static Camera_internals	*internals;
-public:
-	Cameras();
-	CameraWrapper	byname(const std::string& cameraid);
-	void	release(const std::string& cameraid);
-	void	assign(const std::string& cameraid,
-			const std::vector<std::string>& arguments);
-};
-
-Camera_internals	*Cameras::internals = NULL;
-
-/**
- * \brief create the Cameras object
- */
-Cameras::Cameras() {
-	if (NULL == internals) {
-		internals = new Camera_internals();
-	}
-}
-
-CameraWrapper	Cameras::byname(const std::string& cameraid) {
-	return internals->byname(cameraid);
-}
-
-void	Cameras::release(const std::string& cameraid) {
-	internals->release(cameraid);
-}
-
-void	Cameras::assign(const std::string& cameraid,
-			const std::vector<std::string>& arguments) {
-	internals->assign(cameraid, arguments);
-}
 
 //////////////////////////////////////////////////////////////////////
 // cameracommand implementation
@@ -244,7 +111,7 @@ std::string	cameracommand::help() const {
 	return std::string(
 	"SYNOPSIS\n"
 	"\n"
-	"\tcamera <cameraid> assign <modulename> <cameraname>\n"
+	"\tcamera <cameraid> assign <cameraname>\n"
 	"\tcamera <cameraid> info\n"
 	"\tcamera <cameraid> release\n"
 	"\tcamera <cameraid> default\n"

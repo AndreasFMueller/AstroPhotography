@@ -5,13 +5,15 @@
 #
 bin_PROGRAMS = guide
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
-	modulecommand.h helpcommand.h cameracommand.h ObjWrapper.h
+	modulecommand.h helpcommand.h cameracommand.h ccdcommand.h \
+	ObjWrapper.h Cameras.h Ccds.h
 
+CLASSES = Cameras.cpp Ccds.cpp
 COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
-	helpcommand.cpp cameracommand.cpp
+	helpcommand.cpp cameracommand.cpp ccdcommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
-	clicommand.cpp $(COMMANDS)
+	clicommand.cpp $(CLASSES) $(COMMANDS)
 guide_DEPENDENCIES = ../lib/libastro.la
 guide_LDADD = -L../lib -lastro
 

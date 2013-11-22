@@ -10,6 +10,7 @@
 #include <locatorcommand.h>
 #include <helpcommand.h>
 #include <cameracommand.h>
+#include <ccdcommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -99,6 +100,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("camera"),
 		commandcreatorptr(new commandcreator<cameracommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("ccd"),
+		commandcreatorptr(new commandcreator<ccdcommand>())
 	));
 }
 
