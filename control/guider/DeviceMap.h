@@ -31,6 +31,13 @@ public:
 	typedef std::map<std::string, ObjWrapper<AstroDevice> >	maptype;
 	typedef typename std::map<std::string, ObjWrapper<AstroDevice> >::iterator	iterator;
 	typedef typename std::map<std::string, ObjWrapper<AstroDevice> >::value_type	value_type;
+private:
+	std::string	_defaultname;
+public:
+	const std::string&	defaultname() const { return _defaultname; }
+	void	defaultname(const std::string& name);
+	DeviceWrapper	defaultdevice() { return byname(defaultname); }
+public:
 	DeviceWrapper	byname(const std::string& deviceid);
 	void	release(const std::string& deviceid);
 protected:
@@ -42,7 +49,29 @@ public:
 };
 
 template<typename AstroDevice>
+void	DeviceMap<AstroDevice>::defaultname(const std::string& name) {
+	// ensure the device exists
+	try {
+		byname(name);
+		_defaultname = name;
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device %s not found: %s",
+			name.c_str(), x.what());
+		throw x;
+	}
+}
+
+template<typename AstroDevice>
 void	DeviceMap<AstroDevice>::release(const std::string& deviceid) {
+	if (deviceid == "default") {
+		try {
+			release(defaultname());
+			defaultname("");
+		} catch (std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "release failed: %s",
+				x.what());
+		}
+	}
 	iterator	i = maptype::find(deviceid);
 	if (i != maptype::end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing device %s",
@@ -54,6 +83,11 @@ void	DeviceMap<AstroDevice>::release(const std::string& deviceid) {
 template<typename AstroDevice>
 void	DeviceMap<AstroDevice>::assign(const std::string& deviceid,
 		typename AstroDevice::_ptr_type device) {
+	if (deviceid == "default") {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"'default' is not a vaild device name");
+		throw command_error("invalid device name");
+	}
 	value_type	v(deviceid, DeviceWrapper(device));
 	maptype::insert(v);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device %s stored in map",

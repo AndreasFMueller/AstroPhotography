@@ -247,6 +247,7 @@ std::string	cameracommand::help() const {
 	"\tcamera <cameraid> assign <modulename> <cameraname>\n"
 	"\tcamera <cameraid> info\n"
 	"\tcamera <cameraid> release\n"
+	"\tcamera <cameraid> default\n"
 	"\n"
 	"DESCRIPTION\n"
 	"\n"
@@ -258,8 +259,10 @@ std::string	cameracommand::help() const {
 	"including the list of CCDs available on that camera.\n"
 	"The third synopsis makes the camera named <cameraname> from module\n"
 	"<modulename> available as the camera with id <cameraid>.\n"
-	"The second synopsis tells the system that the camera with name\n"
+	"The third synopsis tells the system that the camera with name\n"
 	"<cameraid> is no longer needed.\n"
+	"The fourth synopsis tells the system to use this camera as the\n"
+	"default camera for all operations that need a camera\n"
 	);
 }
 
