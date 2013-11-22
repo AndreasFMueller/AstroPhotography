@@ -22,7 +22,7 @@ DeviceName	devname2netname(const std::string& name) {
 }
 
 DeviceName	netname2devname(const DeviceName& netname) {
-	DeviceName	devname(URL::decode(devname.unitname()));
+	DeviceName	devname(URL::decode(netname.unitname()));
 	return devname;
 }
 
