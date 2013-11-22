@@ -10,6 +10,7 @@
 #include <DeviceMap.h>
 #include <CorbaExceptionReporter.h>
 #include <AstroDevice.h>
+#include <stdexcept>
 
 namespace astro {
 namespace cli {

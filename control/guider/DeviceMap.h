@@ -10,6 +10,7 @@
 #include <AstroDebug.h>
 #include <string>
 #include <map>
+#include <stdexcept>
 
 namespace astro {
 namespace cli {
