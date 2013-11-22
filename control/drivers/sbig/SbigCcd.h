@@ -34,7 +34,7 @@ public:
 	virtual	ImagePtr	getImage();
 
 	// cooler interface
-	virtual bool	hasCooler() { return cooler; }
+	virtual bool	hasCooler() const { return cooler; }
 	void	setCooler(bool _cooler) { cooler = _cooler; }
 protected:
 	virtual CoolerPtr	getCooler0();

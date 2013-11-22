@@ -75,7 +75,7 @@ void	Blurr::operator()(const Image<double>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing the convolution for blurr");
 	// how large is the pixel array that we should use for the
 	// computation
-	size_t	n = image.size().getPixels();
+	//size_t	n = image.size().getPixels();
 	int	n0 = image.size().height();
 	int	n1 = image.size().width();
 	size_t	nc = n0 * (1 + (n1 / 2));
