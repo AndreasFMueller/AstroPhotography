@@ -20,6 +20,7 @@ class SbigFilterWheel : public FilterWheel {
 	unsigned int	currentindex;
 	void	init();
 	void	wait();
+	FilterWheel::State	state();
 public:
 	SbigFilterWheel(SbigCamera& camera);
 	virtual ~SbigFilterWheel();
@@ -27,6 +28,7 @@ public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);
+	virtual FilterWheel::State	getState();
 };
 
 } // namespace sbig

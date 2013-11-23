@@ -23,6 +23,7 @@ public:
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);
+	virtual FilterWheel::State	getState();
 };
 
 } // namespace qsi

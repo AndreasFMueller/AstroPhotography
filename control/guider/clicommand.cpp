@@ -10,6 +10,7 @@
 #include <locatorcommand.h>
 #include <helpcommand.h>
 #include <cameracommand.h>
+#include <filterwheelcommand.h>
 #include <ccdcommand.h>
 #include <coolercommand.h>
 #include <sleepcommand.h>
@@ -102,6 +103,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("camera"),
 		commandcreatorptr(new commandcreator<cameracommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("filterwheel"),
+		commandcreatorptr(new commandcreator<filterwheelcommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("ccd"),

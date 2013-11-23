@@ -10,7 +10,10 @@ camera blubb assign camera:simulator/camera
 camera blubb info
 filterwheel fw assign blubb
 filterwheel fw info
-exit
+filterwheel fw wait
+filterwheel fw position 1
+filterwheel fw wait
+filterwheel fw info
 ccd blubber assign blubb 0
 ccd blubber info
 cooler blubber status

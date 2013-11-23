@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <QsiFilterWheel.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 namespace camera {
@@ -28,6 +29,9 @@ unsigned int	QsiFilterWheel::nFilters() {
 unsigned int	QsiFilterWheel::currentPosition() {
 	short	position = 0;
 	_camera.camera().get_Position(&position);
+	if (position < 0) {
+		throw astro::camera::BadState("filter wheel moving");
+	}
 	return position;
 }
 
@@ -48,6 +52,15 @@ std::string	QsiFilterWheel::filterName(size_t filterindex) {
 	std::string	filtername(names[filterindex]);
 	delete[] names;
 	return filtername;
+}
+
+FilterWheel::State	QsiFilterWheel::getState() {
+	short	position = 0;
+	_camera.camera().get_Position(&position);
+	if (position < 0) {
+		return FilterWheel::moving;
+	}
+	return FilterWheel::idle;
 }
 
 } // namespace qsi

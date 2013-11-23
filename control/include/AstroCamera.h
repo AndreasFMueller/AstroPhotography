@@ -335,6 +335,7 @@ public:
  */
 class FilterWheel : public astro::device::Device {
 public:
+	typedef enum state_e { idle, moving, unknown } State;
 	typedef FilterWheelPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
@@ -346,6 +347,7 @@ public:
 	virtual unsigned int	currentPosition() = 0;
 	virtual void	select(size_t filterindex) = 0;
 	virtual std::string	filterName(size_t filterindex) = 0;
+	virtual State	getState() = 0;
 };
 
 /**

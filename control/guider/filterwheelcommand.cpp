@@ -7,9 +7,22 @@
 #include <filterwheelcommand.h>
 #include <Filterwheels.h>
 #include <iostream>
+#include <unistd.h>
 
 namespace astro {
 namespace cli {
+
+std::ostream&	operator<<(std::ostream& out, const Astro::FilterwheelState& state) {
+	switch (state) {
+	case Astro::FILTERWHEEL_IDLE:
+		out << "idle"; break;
+	case Astro::FILTERWHEEL_MOVING:
+		out << "moving"; break;
+	case Astro::FILTERWHEEL_UNKNOWN:
+		out << "unknown"; break;
+	}
+	return out;
+}
 
 std::ostream&	operator<<(std::ostream& out, FilterwheelWrapper filterwheel) {
 	out << "name:         " << filterwheel->getName() << std::endl;
@@ -21,15 +34,18 @@ std::ostream&	operator<<(std::ostream& out, FilterwheelWrapper filterwheel) {
 		out << filterwheel->filterName(position);
 	}
 	out << std::endl;
+	out << "state:        " << filterwheel->getState() << std::endl;
+	if (filterwheel->getState() == Astro::FILTERWHEEL_IDLE) {
+		out << "current:      "
+			<< filterwheel->currentPosition() << std::endl;
+	}
 	return out;
 }
 
-void	filterwheelcommand::info(const std::string& filterwheelid,
+void	filterwheelcommand::info(FilterwheelWrapper& filterwheel,
 		const std::vector<std::string>& arguments) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s info", filterwheelid.c_str());
-	Filterwheels	filterwheels;
-	FilterwheelWrapper	filterwheel
-		= filterwheels.byname(filterwheelid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s info",
+		filterwheel->getName());
 	std::cout << filterwheel;
 }
 
@@ -50,6 +66,23 @@ void	filterwheelcommand::assign(const std::string& filterwheelid,
 	}
 }
 
+void	filterwheelcommand::position(FilterwheelWrapper& filterwheel,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		
+	}
+	int	position = stoi(arguments[2]);
+	filterwheel->select(position);
+}
+
+void	filterwheelcommand::wait(FilterwheelWrapper& filterwheel,
+		const std::vector<std::string>& arguments) {
+	while (filterwheel->getState() != Astro::FILTERWHEEL_IDLE) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting");
+		usleep(1000000);
+	}
+}
+
 void	filterwheelcommand::operator()(const std::string& commandname,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
@@ -60,16 +93,27 @@ void	filterwheelcommand::operator()(const std::string& commandname,
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"filterwheel command for FW %s, subommand %s",
 		filterwheelid.c_str(), subcommandname.c_str());
-	if (subcommandname == "info") {
-		info(filterwheelid, arguments);
-		return;
-	}
 	if (subcommandname == "release") {
 		release(filterwheelid, arguments);
 		return;
 	}
 	if (subcommandname == "assign") {
 		assign(filterwheelid, arguments);
+		return;
+	}
+	Filterwheels	filterwheels;
+	FilterwheelWrapper	filterwheel
+		= filterwheels.byname(filterwheelid);
+	if (subcommandname == "info") {
+		info(filterwheel, arguments);
+		return;
+	}
+	if (subcommandname == "position") {
+		position(filterwheel, arguments);
+		return;
+	}
+	if (subcommandname == "wait") {
+		wait(filterwheel, arguments);
 		return;
 	}
 	throw command_error("unknown command");
@@ -86,6 +130,8 @@ std::string	filterwheelcommand::help() const {
 	"\tfilterwheel <filterwheelid> assign <cameraid>\n"
 	"\tfilterwheel <filterwheelid> info\n"
 	"\tfilterwheel <filterwheelid> release\n"
+	"\tfilterwheel <filterwheelid> position <n>\n"
+	"\tfilterwheel <filterwheelid> wait\n"
 	"\n"
 	"DESCRIPTION\n"
 	"\n"

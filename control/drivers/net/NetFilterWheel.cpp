@@ -6,6 +6,7 @@
 #include <NetFilterWheel.h>
 #include <AstroUtils.h>
 #include <NetUtils.h>
+#include <Conversions.h>
 
 namespace astro {
 namespace camera {
@@ -57,6 +58,13 @@ void	NetFilterWheel::select(size_t filterindex) {
  */
 std::string	NetFilterWheel::filterName(size_t filterindex) {
 	return std::string(_filterwheel->filterName(filterindex));
+}
+
+/**
+ * \brief get the filter wheel state
+ */
+FilterWheel::State	NetFilterWheel::getState() {
+	return convert(_filterwheel->getState());
 }
 
 } // namespace net

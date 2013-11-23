@@ -74,6 +74,10 @@ astro::guiding::GuiderDescriptor        convert(
 Astro::GuiderFactory::GuiderDescriptor  convert(
         const astro::guiding::GuiderDescriptor& guiderdescriptor);
 
+// FilterWheel state
+astro::camera::FilterWheel::State	convert(const Astro::FilterwheelState& state);
+Astro::FilterwheelState	convert(const astro::camera::FilterWheel::State& state);
+
 } // namespace astro
 
 #endif /* _Conversions_h */

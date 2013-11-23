@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <SimLocator.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace camera {
@@ -15,13 +16,17 @@ namespace simulator {
 
 class SimFilterWheel : public FilterWheel {
 	SimLocator&	_locator;
-	int	_currentPosition;
+	int	_currentposition;
+	State	_currentstate;
+	double	_changetime;
+	void	checkstate();
 public:
 	SimFilterWheel(SimLocator& locator);
 	virtual unsigned int	nFilters() { return 5; }
-	virtual unsigned int	currentPosition() { return _currentPosition; }
+	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
 	virtual std::string	filterName(size_t filterindex);
+	virtual State	getState();
 };
 
 } // namespace simulator

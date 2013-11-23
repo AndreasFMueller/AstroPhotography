@@ -22,8 +22,8 @@ namespace astro {
 class Timer {
 	double	startTime;
 	double	endTime;
-	double	gettime();
 public:
+	static double	gettime();
 	Timer();
 	void	start();
 	void	end();

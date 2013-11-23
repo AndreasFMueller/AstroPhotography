@@ -215,6 +215,44 @@ std::string	SbigFilterWheel::filterName(size_t filterindex) {
 	return stringprintf("filter position %u", filterindex);
 }
 
+/**
+ * \brief find the current filter wheel state
+ */
+FilterWheel::State	SbigFilterWheel::getState() {
+	// make sure we have the handle set
+	camera.sethandle();
+	SbigLock	lock;
+	return state();
+}
+
+FilterWheel::State	SbigFilterWheel::state() {
+	CFWParams	params;
+	CFWResults	results;
+	params.cfwCommand = CFWC_QUERY;
+	params.cfwModel = CFWSEL_AUTO;
+	short	e = SBIGUnivDrvCommand(CC_CFW, &params, &results);
+	if (e != CE_NO_ERROR) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot open filter wheel: %s",
+			sbig_error(e).c_str());
+	}
+	// if the filter wheel is idle, it could still be that we are
+	// in the unknown state, because we don't know the position
+	if (CFWS_IDLE == results.cfwStatus) {
+		if (results.cfwPosition == CFWP_UNKNOWN) {
+			return FilterWheel::unknown;
+		}
+		currentindex = results.cfwPosition - 1;
+		return FilterWheel::idle;
+	}
+	// if the filter wheel is busy, then it is moving
+	if (CFWS_BUSY == results.cfwStatus) {
+		return FilterWheel::moving;
+	}
+	// at this position, we really don't know what to do
+	throw SbigError("don't know the current state");
+}
+
 } // namespace sbig
 } // namespace camera
 } // namespace astro

@@ -241,6 +241,20 @@ module Astro {
 		void	activate(in float ra, in float dec);
 	};
 
+
+	/**
+	 * \brief State of the filterwheel
+	 *
+	 * The idle state means that the filterwheel is now in a known
+	 * position that can be queried via the currentPosition method.
+	 * When a filterwheel initializes, it will be either in the unknown
+	 * or the moving state. New position requests can be issued when
+	 * the filter wheel is in the idle or unknown state. One then should
+	 * wait until it is in the idle state, 
+	 */
+	enum FilterwheelState { FILTERWHEEL_IDLE, FILTERWHEEL_MOVING,
+		FILTERWHEEL_UNKNOWN };
+
 	/**
  	 * \brief FilterWheel interface
 	 *
@@ -270,6 +284,10 @@ module Astro {
 		 * \brief Get the name of the filter
 		 */
 		string	filterName(in long position) raises(NotFound);
+		/**
+		 * \brief Query the filter wheel state
+		 */
+		FilterwheelState	getState();
 	};
 
 	/**

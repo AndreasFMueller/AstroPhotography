@@ -7,6 +7,7 @@
 #define _filterwheelcommand_H
 
 #include <clicommand.h>
+#include <Filterwheels.h>
 
 namespace astro {
 namespace cli {
@@ -14,9 +15,13 @@ namespace cli {
 class filterwheelcommand : public clicommand {
 	void	release(const std::string& filterwheelid,
 			const std::vector<std::string>& arguments);
-	void	info(const std::string& filterwheelid,
+	void	info(FilterwheelWrapper& filterwheel,
 			const std::vector<std::string>& arguments);
 	void	assign(const std::string& filterwheelid,
+			const std::vector<std::string>& arguments);
+	void	position(FilterwheelWrapper& filterwheel,
+			const std::vector<std::string>& arguments);
+	void	wait(FilterwheelWrapper& filterwheel,
 			const std::vector<std::string>& arguments);
 public:
 	filterwheelcommand(commandfactory& factory)

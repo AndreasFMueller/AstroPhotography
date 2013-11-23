@@ -96,6 +96,7 @@ bool	Camera_impl::hasFilterWheel() {
  * \brief Get the Filter wheel
  */
 FilterWheel_ptr	Camera_impl::getFilterWheel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting filter wheel");
 	if (!_camera->hasFilterWheel()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "request filter wheel on "
 			"camera that does not have one");
@@ -105,6 +106,7 @@ FilterWheel_ptr	Camera_impl::getFilterWheel() {
 		throw notimplemented;
 	}
 	if (!filterwheel) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve filter wheel");
 		filterwheel = _camera->getFilterWheel();
 	}
 	FilterWheel_impl	*fw = new FilterWheel_impl(filterwheel);

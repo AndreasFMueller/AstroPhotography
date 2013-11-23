@@ -373,4 +373,28 @@ Astro::GuiderFactory::GuiderDescriptor	convert(
 	return result;
 }
 
+// Filterwheel state
+astro::camera::FilterWheel::State       convert(const Astro::FilterwheelState& state) {
+	switch (state) {
+	case Astro::FILTERWHEEL_IDLE:
+		return astro::camera::FilterWheel::idle;
+	case Astro::FILTERWHEEL_MOVING:
+		return astro::camera::FilterWheel::moving;
+	case Astro::FILTERWHEEL_UNKNOWN:
+		return astro::camera::FilterWheel::unknown;
+	}
+}
+
+Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) {
+	switch (state) {
+	case astro::camera::FilterWheel::idle:
+		return Astro::FILTERWHEEL_IDLE;
+	case astro::camera::FilterWheel::moving:
+		return Astro::FILTERWHEEL_MOVING;
+	case astro::camera::FilterWheel::unknown:
+		return Astro::FILTERWHEEL_UNKNOWN;
+	}
+}
+
+
 } // namespace astro

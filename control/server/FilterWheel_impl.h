@@ -25,6 +25,7 @@ public:
 	virtual void	select(::CORBA::Long position);
 	virtual char	*filterName(::CORBA::Long position);
 	virtual char	*getName();
+	virtual FilterwheelState	getState();
 };
 
 } // namespace Astro
