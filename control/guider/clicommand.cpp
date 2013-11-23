@@ -14,6 +14,7 @@
 #include <ccdcommand.h>
 #include <coolercommand.h>
 #include <sleepcommand.h>
+#include <focusercommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -99,6 +100,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("module"),
 		commandcreatorptr(new commandcreator<modulecommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("focuser"),
+		commandcreatorptr(new commandcreator<focusercommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("camera"),

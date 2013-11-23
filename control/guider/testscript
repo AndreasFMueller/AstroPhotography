@@ -6,6 +6,14 @@ module simulator list guiderport
 module simulator list focuser
 module simulator list cooler
 module simulator list camera
+module simulator list focuser
+focuser f assign focuser:simulator/focuser
+focuser f info
+focuser f set 1000 wait
+focuser f info
+focuser f set 60000 wait
+focuser f info
+exit
 camera blubb assign camera:simulator/camera
 camera blubb info
 filterwheel fw assign blubb

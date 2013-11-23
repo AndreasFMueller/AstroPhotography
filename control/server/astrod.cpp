@@ -154,15 +154,18 @@ int	main(int argc, char *argv[]) {
 
 	// create a POA for Camera objects
 	POABuilder	pbcamera(drivermodules_poa);
-	PortableServer::POA_var	camera_poa = pbcamera.build("Cameras");
+	PortableServer::POA_var	camera_poa
+		= pbcamera.build("Cameras");
 
 	// create a POA for Ccd objects
 	POABuilder	pbccd(camera_poa);
-	PortableServer::POA_var	ccd_poa = pbccd.build("Ccds");
+	PortableServer::POA_var	ccd_poa
+		= pbccd.build("Ccds");
 
 	// create a POA for Cooler objects
 	POABuilder	pbcooler(ccd_poa);
-	PortableServer::POA_var	cooler_poa = pbcooler.build("Coolers");
+	PortableServer::POA_var	cooler_poa
+		= pbcooler.build("Coolers");
 
 	// create a POA GuiderPort objects
 	POABuilder	pbguiderport(camera_poa);
@@ -175,8 +178,9 @@ int	main(int argc, char *argv[]) {
 		= pbfilterwheel.build("FilterWheels");
 
 	// create a POA for Focuser objects
-	POABuilder	pbfocuser(modules_poa);
-	PortableServer::POA_var	focuser_poa = pbfocuser.build("Focusers");
+	POABuilder	pbfocuser(drivermodules_poa);
+	PortableServer::POA_var	focuser_poa
+		= pbfocuser.build("Focusers");
 			
 	// create the servant and register it with the ORB
 	Astro::Modules_impl	*modules = new Astro::Modules_impl();
