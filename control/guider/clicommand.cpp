@@ -11,6 +11,8 @@
 #include <helpcommand.h>
 #include <cameracommand.h>
 #include <ccdcommand.h>
+#include <coolercommand.h>
+#include <sleepcommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -104,6 +106,14 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("ccd"),
 		commandcreatorptr(new commandcreator<ccdcommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("cooler"),
+		commandcreatorptr(new commandcreator<coolercommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("sleep"),
+		commandcreatorptr(new commandcreator<sleepcommand>())
 	));
 }
 

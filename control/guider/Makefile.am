@@ -6,11 +6,13 @@
 bin_PROGRAMS = guide
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 	modulecommand.h helpcommand.h cameracommand.h ccdcommand.h \
+	coolercommand.h sleepcommand.h \
 	ObjWrapper.h Cameras.h Ccds.h
 
 CLASSES = Cameras.cpp Ccds.cpp
 COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
-	helpcommand.cpp cameracommand.cpp ccdcommand.cpp
+	helpcommand.cpp cameracommand.cpp ccdcommand.cpp coolercommand.cpp \
+	sleepcommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)

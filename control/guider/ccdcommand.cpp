@@ -92,11 +92,13 @@ void	ccdcommand::operator()(const std::string& commandname,
 	}
 	if (subcommandname == "release") {
 		release(ccdid, arguments);
+		return;
 	}
 	if (subcommandname == "assign") {
 		assign(ccdid, arguments);
 		return;
 	}
+	throw command_error("unknown command");
 }
 
 std::string	ccdcommand::summary() const {

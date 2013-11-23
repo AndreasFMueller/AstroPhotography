@@ -10,6 +10,19 @@ camera blubb assign camera:simulator/camera
 camera blubb info
 ccd blubber assign blubb 0
 ccd blubber info
-help
-help ccd
+cooler blubber status
+cooler blubber set 270
+cooler blubber enable
+cooler blubber waitfor
+cooler blubber status
+cooler blubber disable
+sleep 3
+cooler blubber status
+sleep 3
+cooler blubber status
+sleep 3
+cooler blubber status
+sleep 3
+cooler blubber status
+help cooler
 exit
