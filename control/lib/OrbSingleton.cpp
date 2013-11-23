@@ -67,6 +67,10 @@ PoaName	PoaName::focusers() {
 	return drivermodules().add("Focusers");
 }
 
+PoaName	PoaName::guiders() {
+	return PoaName("Guiders");
+}
+
 //////////////////////////////////////////////////////////////////////
 // OrbSingleton implementation
 //////////////////////////////////////////////////////////////////////
@@ -128,6 +132,28 @@ Modules_var	OrbSingleton::getModules() {
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
 	return modules;
+}
+
+/**
+ * \brief Get the GuiderFactory reference
+ */
+GuiderFactory_var	OrbSingleton::getGuiderfactory() {
+        Astro::Naming::NameService      nameservice(_orbvar);
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
+
+        // Next we want to get a reference to the Modules object
+        Astro::Naming::Names    names;
+        names.push_back(Astro::Naming::Name("Astro", "context"));
+        names.push_back(Astro::Naming::Name("GuiderFactory", "object"));
+        CORBA::Object_var       obj = nameservice.lookup(names);
+
+        // get a reference to the modules interface
+        Astro::GuiderFactory_var      guiderfactory = Astro::GuiderFactory::_narrow(obj);
+        if (CORBA::is_nil(guiderfactory)) {
+                throw std::runtime_error("nil object reference");
+        }
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a GuiderFactory object");
+	return guiderfactory;
 }
 
 /**

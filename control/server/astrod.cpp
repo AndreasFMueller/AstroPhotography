@@ -200,7 +200,8 @@ int	main(int argc, char *argv[]) {
 
 	// create a servant for the guider factory
 	astro::module::Repository	repository;
-	astro::guiding::GuiderFactoryPtr	gfptr(new astro::guiding::GuiderFactory(repository));
+	astro::guiding::GuiderFactoryPtr
+		gfptr(new astro::guiding::GuiderFactory(repository));
 	Astro::GuiderFactory_impl	*guiderfactory
 		= new Astro::GuiderFactory_impl(gfptr);
 	PortableServer::ObjectId_var	guiderfactorysid
@@ -212,6 +213,11 @@ int	main(int argc, char *argv[]) {
 	names.push_back(Astro::Naming::Name("GuiderFactory", "object"));
 	nameservice.bind(names, guiderfactory->_this());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderFactory object bound");
+
+	// create a POA for guiders
+	POABuilder	pbguider(root_poa);
+	PortableServer::POA_var	guider_poa
+		= pbguider.build("Guiders");
 
 	// activate the POA manager
 	PortableServer::POAManager_var	pman = root_poa->the_POAManager();

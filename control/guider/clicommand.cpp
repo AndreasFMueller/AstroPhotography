@@ -15,6 +15,7 @@
 #include <coolercommand.h>
 #include <sleepcommand.h>
 #include <focusercommand.h>
+#include <guiderfactorycommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -120,6 +121,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("cooler"),
 		commandcreatorptr(new commandcreator<coolercommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("guiderfactory"),
+		commandcreatorptr(new commandcreator<guiderfactorycommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("sleep"),

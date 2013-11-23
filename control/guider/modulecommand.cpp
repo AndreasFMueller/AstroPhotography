@@ -87,7 +87,7 @@ void	modulecommand::listdevices(const std::string& modulename,
 		devicelocator = drivermodule->getDeviceLocator();
 	} catch (const CORBA::Exception& x) {
 		std::string	s = Astro::exception2string(x);
-		debug(LOG_ERR, DEBUG_LOG, 0, "getDeivceLocator exception: %s",
+		debug(LOG_ERR, DEBUG_LOG, 0, "getDeviceLocator exception: %s",
 			s.c_str());
 		throw std::runtime_error(s);
 	}

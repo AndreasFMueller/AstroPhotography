@@ -33,6 +33,9 @@ PoaName	poaname<FilterWheel>();
 template<>
 PoaName	poaname<Focuser>();
 
+template<>
+PoaName	poaname<Guider>();
+
 } // namespace Astro
 
 #endif /* _PoaNameMap_h */

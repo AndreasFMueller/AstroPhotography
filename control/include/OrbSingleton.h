@@ -7,6 +7,7 @@
 #define _OrbSingleton_h
 
 #include <module.hh>
+#include <guider.hh>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,7 @@ public:
 	static PoaName	coolers();
 	static PoaName	ccds();
 	static PoaName	focusers();
+	static PoaName	guiders();
 };
 
 std::ostream&	operator<<(std::ostream& out, const PoaName& poaname);
@@ -48,6 +50,7 @@ public:
 	CORBA::ORB_var	orbvar() { return _orbvar; }
 	operator	CORBA::ORB_var() { return _orbvar; }
 	Modules_var	getModules();
+	GuiderFactory_var	getGuiderfactory();
 	DeviceLocator_var       getDeviceLocator(const std::string& modulename);
 	PortableServer::POA_var	findPOA(const std::vector<std::string>& poaname);
 };

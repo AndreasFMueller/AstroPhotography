@@ -37,4 +37,9 @@ PoaName	poaname<Focuser>() {
 	return PoaName::focusers();
 }
 
+template<>
+PoaName	poaname<Guider>() {
+	return PoaName::guiders();
+}
+
 } // namespace Astro
