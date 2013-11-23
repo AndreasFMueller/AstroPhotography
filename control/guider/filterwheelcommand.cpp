@@ -1,0 +1,98 @@
+
+/*
+ * filterwheelcommand.h -- filterwheel command implementation
+ *
+ * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#include <filterwheelcommand.h>
+#include <Filterwheels.h>
+#include <iostream>
+
+namespace astro {
+namespace cli {
+
+std::ostream&	operator<<(std::ostream& out, FilterwheelWrapper filterwheel) {
+	out << "name:         " << filterwheel->getName() << std::endl;
+	int	npositions = filterwheel->nFilters();
+	out << "filters:      " << npositions << std::endl;
+	out << "filter names: ";
+	for (int position = 0; position < npositions; position++) {
+		if (position > 0) { out << ", "; }
+		out << filterwheel->filterName(position);
+	}
+	out << std::endl;
+	return out;
+}
+
+void	filterwheelcommand::info(const std::string& filterwheelid,
+		const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s info", filterwheelid.c_str());
+	Filterwheels	filterwheels;
+	FilterwheelWrapper	filterwheel
+		= filterwheels.byname(filterwheelid);
+	std::cout << filterwheel;
+}
+
+void	filterwheelcommand::release(const std::string& filterwheelid,
+		const std::vector<std::string>& arguments) {
+	Filterwheels	filterwheels;
+	filterwheels.release(filterwheelid);
+}
+
+void	filterwheelcommand::assign(const std::string& filterwheelid,
+		const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "assign %s", filterwheelid.c_str());
+	try {
+		Filterwheels	filterwheels;
+		filterwheels.assign(filterwheelid, arguments);
+	} catch (std::exception& x) {
+		throw command_error(x.what());
+	}
+}
+
+void	filterwheelcommand::operator()(const std::string& commandname,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 2) {
+		throw command_error("filterwheel command requires 2 arguments");
+	}
+	std::string	filterwheelid = arguments[0];
+	std::string	subcommandname = arguments[1];
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"filterwheel command for FW %s, subommand %s",
+		filterwheelid.c_str(), subcommandname.c_str());
+	if (subcommandname == "info") {
+		info(filterwheelid, arguments);
+		return;
+	}
+	if (subcommandname == "release") {
+		release(filterwheelid, arguments);
+		return;
+	}
+	if (subcommandname == "assign") {
+		assign(filterwheelid, arguments);
+		return;
+	}
+	throw command_error("unknown command");
+}
+
+std::string	filterwheelcommand::summary() const {
+	return std::string("access filterwheels");
+}
+
+std::string	filterwheelcommand::help() const {
+	return std::string(
+	"SYNOPSIS\n"
+	"\n"
+	"\tfilterwheel <filterwheelid> assign <cameraid>\n"
+	"\tfilterwheel <filterwheelid> info\n"
+	"\tfilterwheel <filterwheelid> release\n"
+	"\n"
+	"DESCRIPTION\n"
+	"\n"
+	"The filterwheel command gives access to a filterwheel mounted on a\n"
+	"camera.\n"
+	);
+}
+
+} // namespace cli
+} // namespace astro
