@@ -8,15 +8,16 @@
 
 #include <guider.hh>
 #include <AstroGuiding.h>
+#include <GuiderStateMachine.h>
 
 namespace Astro {
 
 class Guider_impl : public POA_Astro::Guider {
-	Astro::Guider::GuiderState	_state;
+	GuiderStateMachine	_state;
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
 public:
-	inline Guider_impl(astro::guiding::GuiderPtr guider);
+	Guider_impl(astro::guiding::GuiderPtr guider);
 	virtual ~Guider_impl() { }
 
 	// state and basic component information
@@ -33,7 +34,7 @@ public:
 	virtual ::Astro::Point	selectedPoint();
 
 	// calibration related methods
-	virtual ::Astro::Guider::Calibration	*getCalibration();
+	virtual ::Astro::Guider::Calibration	getCalibration();
 	virtual void	useCalibration(const Astro::Guider::Calibration& cal);
 	virtual void	startCalibration(::CORBA::Float sensitivity);
 

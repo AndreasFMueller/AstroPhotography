@@ -26,7 +26,8 @@ static double   now() {
  * This also initializes the values for guider port activation to values that
  * compensate the drift to first order.
  */
-GuiderProcess::GuiderProcess(Guider& _guider) : guider(_guider) {
+GuiderProcess::GuiderProcess(Guider& _guider, double interval)
+	: guider(_guider), _interval(interval) {
 	// set a default gain
 	gain = 1;
 
@@ -168,8 +169,8 @@ void	*GuiderProcess::track_main() {
 		// time between images
 		double	elapsed = endtime - starttime;
 		double	correctiontime = elapsed;
-		if (correctiontime < interval) {
-			correctiontime = interval;
+		if (correctiontime < interval()) {
+			correctiontime = interval();
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using correction interval %f", 
 			correctiontime);
@@ -196,12 +197,12 @@ void	*GuiderProcess::track_main() {
 
 		// now ensure that we don't correct more often than specified
 		// by the interval
-		if (elapsed < interval) {
+		if (elapsed < interval()) {
 			unsigned int	useconds
-				= (interval - elapsed) * 1000000;
+				= (interval() - elapsed) * 1000000;
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"sleep %udusec for %f sec cycles",
-				useconds, interval);
+				useconds, interval());
 			usleep(useconds);
 		}
 	}
@@ -221,14 +222,13 @@ static void	*trackerprocess_main(void *private_data) {
  *
  * \param _tracker	the tracker to use to determine the offset
  */
-bool	GuiderProcess::start(TrackerPtr _tracker, double _interval) {
+bool	GuiderProcess::start(TrackerPtr _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching guiding threads");
 	// remember the tracker
 	tracker = _tracker;
-	interval = _interval;
-	if (interval < 1) {
+	if (interval() < 1) {
 		std::string	msg = stringprintf("cannot guide in %.3f "
-			"second intervals: minimum 1", interval);
+			"second intervals: minimum 1", interval());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}

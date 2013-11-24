@@ -1,4 +1,5 @@
-/* * Guider_impl.cpp -- implementation of the guider servant
+/*
+ * Guider_impl.cpp -- implementation of the guider servant
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -10,14 +11,23 @@
 
 namespace Astro {
 
+/**
+ * \brief create a guider implementation object
+ */
 Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
-	: _state(Astro::Guider::GUIDER_UNCONFIGURED), _guider(guider) {
+	: _guider(guider) {
 }
 
+/**
+ * \brief retrieve the state of the state machine
+ */
 Guider::GuiderState	Guider_impl::getState() {
 	return _state;
 }
 
+/**
+ * \brief Get a servant for the camera
+ */
 Camera_ptr	Guider_impl::getCamera() {
 	astro::camera::CameraPtr	camera = _guider->camera();
 	if (!camera) {
@@ -27,6 +37,9 @@ Camera_ptr	Guider_impl::getCamera() {
 	return servant(camera);
 }
 
+/**
+ * \brief Get a servant for the CCD
+ */
 Ccd_ptr	Guider_impl::getCcd() {
 	astro::camera::CcdPtr	ccd = _guider->ccd();
 	if (!ccd) {
@@ -36,6 +49,9 @@ Ccd_ptr	Guider_impl::getCcd() {
 	return servant(ccd);
 }
 
+/**
+ * \brief Get a servant for the Guiderport
+ */
 GuiderPort_ptr	Guider_impl::getGuiderPort() {
 	astro::camera::GuiderPortPtr	guiderport = _guider->guiderport();
 	if (!guiderport) {
@@ -45,39 +61,71 @@ GuiderPort_ptr	Guider_impl::getGuiderPort() {
 	return servant(guiderport);
 }
 
+/**
+ * \brief Configure the guider
+ */
 void	Guider_impl::setupGuider(const ::Astro::Exposure& exposure,
-		const ::Astro::Point& star) {
-	
+		const Point& star) {
+	_guider->exposure(astro::convert(exposure));
+	_point = astro::convert(star);
 }
 
-Astro::Exposure	Guider_impl::getExposure() {
-	Astro::Exposure	result;
-	return result;
+/**
+ * \brief get the exposure used for the 
+ */
+Exposure	Guider_impl::getExposure() {
+	return astro::convert(_guider->exposure());
 }
 
-Astro::Point	Guider_impl::selectedPoint() {
-	Astro::Point	result;
-	return result;
+/**
+ * \brief Get the point on which the guide star should be locked
+ */
+Point	Guider_impl::selectedPoint() {
+	return astro::convert(_point);
 }
 
-Astro::Guider::Calibration	*Guider_impl::getCalibration() {
-	return NULL;
+/**
+ * \brief Retrieve the calibration from the guider
+ */
+Guider::Calibration	Guider_impl::getCalibration() {
+	return astro::convert(_guider->calibration());
 }
 
+/**
+ * \brief Use the this calibration
+ */
 void	Guider_impl::useCalibration(const Astro::Guider::Calibration& cal) {
+	_state.addCalibration();
+	_guider->calibration(astro::convert(cal));
 }
 
+/**
+ * \brief start calibrating
+ */
 void	Guider_impl::startCalibration(::CORBA::Float sensitivity) {
+	_state.startCalibrating();
 }
 
+/**
+ * \brief start guiding with the given interval
+ */
 void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
+	_state.startGuiding();
 }
 
+/**
+ * \brief get the guiding interval
+ */
 ::CORBA::Float	Guider_impl::getGuidingInterval() {
 	return 0;
 }
 
+/**
+ * \brief stop the guiding process
+ */
 void	Guider_impl::stopGuiding() {
+	_state.stopGuiding();
+	_guider->stop();
 }
 
 ShortImage_ptr	Guider_impl::mostRecentImage() {

@@ -75,7 +75,7 @@ module Astro {
 		 * \brief Methods related to calibration
 		 */
 		struct Calibration {
-			sequence<float>	coefficients;
+			float	coefficients[6];
 		};
 		Calibration	getCalibration() raises(BadState);
 		void	useCalibration(in Calibration cal);

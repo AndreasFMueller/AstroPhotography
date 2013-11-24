@@ -45,16 +45,19 @@ class GuiderProcess {
 	TrackerPtr	tracker;
 
 	// Interval between images
-	double	interval;
+	double	_interval;
+public:
+	const double&	interval() const { return _interval; }
+	void	interval(const double& i) { _interval = i; }
 
 public:
 	// main functions
 	void	*guide_main();
 	void	*track_main();
 public:
-	GuiderProcess(Guider& guider);
+	GuiderProcess(Guider& guider, double interval = 10);
 	~GuiderProcess();
-	bool	start(TrackerPtr tracker, double interval = 1);
+	bool	start(TrackerPtr tracker);
 	bool	stop();
 	double	getGain() const;
 	void	setGain(double gain);

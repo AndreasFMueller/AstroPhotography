@@ -46,12 +46,11 @@ void	Guider_internals::assign(const std::string& guiderid,
 		cameraname.c_str(), ccdno, guiderportname.c_str());
 
 	// create a GuiderDescriptor
-	Astro::GuiderFactory::GuiderDescriptor	*descriptor
-		= new Astro::GuiderFactory::GuiderDescriptor();
+	Astro::GuiderDescriptor	*descriptor = new Astro::GuiderDescriptor();
 	descriptor->cameraname = CORBA::string_dup(cameraname.c_str());
 	descriptor->ccdid = ccdno;
 	descriptor->guiderportname = CORBA::string_dup(guiderportname.c_str());
-	Astro::GuiderFactory::GuiderDescriptor_var	descvar = descriptor;
+	Astro::GuiderDescriptor_var	descvar = descriptor;
 
 	// geht the modules interface
 	Astro::OrbSingleton	orb;

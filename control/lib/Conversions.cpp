@@ -409,5 +409,21 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 	}
 }
 
+// GuiderCalibration
+astro::guiding::GuiderCalibration       convert(const Astro::Guider::Calibration& cal) {
+	astro::guiding::GuiderCalibration	result;
+	for (int i = 0; i < 6; i++) {
+		result.a[i] = cal.coefficients[i];
+	}
+	return result;
+}
+
+Astro::Guider::Calibration        convert(const astro::guiding::GuiderCalibration& cal) {
+	Astro::Guider::Calibration	result;
+	for (int i = 0; i < 6; i++) {
+		result.coefficients[i] = cal.a[i];
+	}
+	return result;
+}
 
 } // namespace astro
