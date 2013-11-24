@@ -35,4 +35,15 @@ module Astro {
 		ImagePoint	origin;
 		ImageSize	size;
 	};
+
+	/**
+	 * \brief generic point
+	 *
+	 * This type is used for guiding, where subpixel resolution is
+	 * required, which leads to using floating coordinates
+	 */
+	struct Point {
+		float	x;
+		float	y;
+	};
 };

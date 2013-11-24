@@ -34,6 +34,10 @@ std::string	convert2string(astro::camera::Exposure::State fromstate);
 astro::image::ImagePoint	convert(const Astro::ImagePoint& point);
 Astro::ImagePoint	convert(const astro::image::ImagePoint& point);
 
+// Point
+astro::Point	convert(const Astro::Point& point);
+Astro::Point	convert(const astro::Point& point);
+
 // ImageSize
 astro::image::ImageSize	convert(const Astro::ImageSize& size);
 Astro::ImageSize	convert(const astro::image::ImageSize& size);
@@ -70,8 +74,8 @@ Astro::CcdInfo	*convert(const astro::camera::CcdInfo& info);
 
 // GuiderDescriptor
 astro::guiding::GuiderDescriptor        convert(
-        const Astro::GuiderFactory::GuiderDescriptor& guiderdescriptor);
-Astro::GuiderFactory::GuiderDescriptor  convert(
+        const Astro::GuiderDescriptor& guiderdescriptor);
+Astro::GuiderDescriptor  convert(
         const astro::guiding::GuiderDescriptor& guiderdescriptor);
 
 // FilterWheel state

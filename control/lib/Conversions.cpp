@@ -164,6 +164,19 @@ Astro::ImagePoint	convert(const astro::image::ImagePoint& point) {
 	return result;
 }
 
+// generic Point
+
+astro::Point	convert(const Astro::Point& point) {
+	return astro::Point(point.x, point.y);
+}
+
+Astro::Point	convert(const astro::Point& point) {
+	Astro::Point	result;
+	result.x = point.x();
+	result.y = point.y();
+	return result;
+}
+
 // Image size
 
 astro::image::ImageSize	convert(const Astro::ImageSize& size) {
@@ -353,7 +366,7 @@ astro::camera::CcdInfo	convert(const Astro::CcdInfo_var& info) {
 // GuiderDescriptor
 
 astro::guiding::GuiderDescriptor	convert(
-	const Astro::GuiderFactory::GuiderDescriptor& guiderdescriptor) {
+	const Astro::GuiderDescriptor& guiderdescriptor) {
 	astro::guiding::GuiderDescriptor	result(
 		std::string(guiderdescriptor.cameraname),
 		guiderdescriptor.ccdid,
@@ -362,9 +375,9 @@ astro::guiding::GuiderDescriptor	convert(
 	return result;
 }
 
-Astro::GuiderFactory::GuiderDescriptor	convert(
+Astro::GuiderDescriptor	convert(
 	const astro::guiding::GuiderDescriptor& guiderdescriptor) {
-	Astro::GuiderFactory::GuiderDescriptor	result;
+	Astro::GuiderDescriptor	result;
 	result.cameraname = CORBA::string_dup(
 		guiderdescriptor.cameraname().c_str());
 	result.ccdid = guiderdescriptor.ccdid();

@@ -6,6 +6,22 @@
 #include "camera.idl"
 
 module Astro {
+	/**
+	 * \brief guiders are described by camera, ccdid and guider port
+	 *
+	 */
+	struct GuiderDescriptor {
+		string	cameraname;
+		long	ccdid;
+		string	guiderportname;
+	};
+	/**
+	 * \brief Interface for guiders
+	 *
+	 * Guiders take information from images shot through a ccd of a
+	 * attached camera, and derive corrective actions that they then
+	 * output to the guiderport.
+	 */
 	interface Guider {
 		/**
 		 * \brief States of the guider
@@ -44,22 +60,16 @@ module Astro {
 		GuiderPort	getGuiderPort() raises(BadState);
 
 		/**
-		 * \brief Point structure to indicate which star to use
+		 * \brief return the descriptor that created the guider
 		 */
-		struct Point {
-			float	x;
-			float	y;
-		};
+		GuiderDescriptor	getDescriptor();
 
-		/**
-		 * \brief Define the area of interest to use for guiding
-		 */
-		void	setupGuider(in ImageRectangle rectangle,
-				in Point star, in float exposuretime)
+		// The guider needs to know how to expose an image, where
+		// to look for the guide star and where to lock it.
+		void	setupGuider(in Exposure expo, in Point star)
 			raises(BadParameter,BadState);
-		ImageRectangle	selectedArea() raises(BadState);
+		Exposure	getExposure();
 		Point	selectedPoint() raises(BadState);
-		float	exposureTime() raises(BadState);
 
 		/**
 		 * \brief Methods related to calibration
@@ -71,13 +81,18 @@ module Astro {
 		void	useCalibration(in Calibration cal);
 		void	startCalibration(in float sensitivity);
 
-		/**
-		 * \brief Control the guiding
-		 */
+		// Start and stop the guding process.
+		// Before this can be done, the exposure parameters must be
+		// specified, as the determine which are of the CCD to read
+		// out and where to look for the star and where to lock it
 		void	startGuiding(in float guidinginterval) raises(BadState);
 		float	getGuidingInterval() raises(BadState);
 		void	stopGuiding() raises(BadState);
 
+		// The following methods are used to monitor the calibration
+		// or the guiding. The guider keeps the most recent image
+		// so that a GUI application can fetch thosei mages and 
+		// display them to the user
 		/**
 		 * \brief 
 		 */
@@ -100,11 +115,6 @@ module Astro {
 	 * be created by specifying camera, ccd and guider port.
 	 */
 	interface GuiderFactory {
-		struct GuiderDescriptor {
-			string	cameraname;
-			long	ccdid;
-			string	guiderportname;
-		};
 		typedef sequence<GuiderDescriptor> GuiderList;
 		GuiderList	list();
 		Guider	get(in GuiderDescriptor descriptor) raises(NotFound);

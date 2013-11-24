@@ -21,7 +21,7 @@ public:
 		: _guiderfactory(guiderfactory) { }
 	virtual ~GuiderFactory_impl() { }
 	virtual Astro::GuiderFactory::GuiderList	*list();
-	virtual Astro::Guider_ptr	get(const Astro::GuiderFactory::GuiderDescriptor& descriptor);
+	virtual Astro::Guider_ptr	get(const Astro::GuiderDescriptor& descriptor);
 };
 
 } // namespace astro

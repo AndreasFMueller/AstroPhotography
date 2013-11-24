@@ -15,9 +15,11 @@
 #include <OrbSingleton.h>
 #include <AstroLocator.h>
 #include <PoaNameMap.h>
+#include <ServantBuilder.h>
 
 namespace Astro {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // template class for building servants
 //////////////////////////////////////////////////////////////////////
@@ -72,6 +74,7 @@ typename device::_ptr_type	ServantBuilder<device, device_impl>::operator()(
 		throw notfound;
 	}
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // DeviceLocator_impl implementation

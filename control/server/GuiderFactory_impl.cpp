@@ -15,14 +15,21 @@ namespace Astro {
 // GuiderFactory implementation
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief create a list of available guiders
+ */
 GuiderFactory::GuiderList	*GuiderFactory_impl::list() {
-	std::vector<astro::guiding::GuiderDescriptor>	l = _guiderfactory->list();
+	std::vector<astro::guiding::GuiderDescriptor>	l
+		= _guiderfactory->list();
 	// create a list to return
 	return NULL;
 }
 
+/**
+ * \brief build a guider from the descriptor
+ */
 Guider_ptr	GuiderFactory_impl::get(
-	const Astro::GuiderFactory::GuiderDescriptor& descriptor) {
+	const Astro::GuiderDescriptor& descriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"get guider from camera %s, ccd %ld, guiderport %s",
 		(const char *)descriptor.cameraname,
