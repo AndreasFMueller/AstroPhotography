@@ -28,10 +28,11 @@ public:
 	virtual ::Astro::GuiderDescriptor	*getDescriptor();
 
 	// setting up the guider
-	virtual void	setupGuider(const ::Astro::Exposure& exposure,
-		const ::Astro::Point& star);
 	virtual Astro::Exposure	getExposure();
-	virtual ::Astro::Point	selectedPoint();
+	virtual void	setExposure(const Astro::Exposure& exposre);
+
+	virtual Astro::Point	getStar();
+	virtual	void	setStar(const Astro::Point& star);
 
 	// calibration related methods
 	virtual ::Astro::Guider::Calibration	getCalibration();

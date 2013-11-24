@@ -13,7 +13,7 @@ namespace astro {
 namespace camera {
 
 Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
-	shutter(SHUTTER_OPEN) {
+	mode(1,1), shutter(SHUTTER_OPEN) {
 }
 
 Exposure::Exposure(const ImageRectangle& _frame,

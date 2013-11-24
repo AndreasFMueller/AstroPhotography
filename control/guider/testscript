@@ -8,8 +8,9 @@ module simulator list cooler
 module simulator list camera
 module simulator list focuser
 guiderfactory g assign camera:simulator/camera 0 guiderport:simulator/guiderport
+guider g info
 guider g exposuretime 1
-guider g binning 2 2
+guider g binning 1 2
 guider g viewport 320 240
 guider g star 240 180
 exit

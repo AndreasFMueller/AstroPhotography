@@ -87,7 +87,8 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	}
 
 	// with all these components we can now build a new guider
-	return GuiderPtr(new Guider(camera, ccd, guiderport));
+	GuiderPtr	guider(new Guider(camera, ccd, guiderport));
+	return guider;
 }
 
 /**

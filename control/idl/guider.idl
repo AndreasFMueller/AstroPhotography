@@ -66,10 +66,13 @@ module Astro {
 
 		// The guider needs to know how to expose an image, where
 		// to look for the guide star and where to lock it.
-		void	setupGuider(in Exposure expo, in Point star)
-			raises(BadParameter,BadState);
+		void	setExposure(in Exposure expo)
+				raises(BadParameter,BadState);
 		Exposure	getExposure();
-		Point	selectedPoint() raises(BadState);
+
+		void	setStar(in Point star)
+				raises(BadParameter,BadState);
+		Point	getStar() raises(BadState);
 
 		/**
 		 * \brief Methods related to calibration

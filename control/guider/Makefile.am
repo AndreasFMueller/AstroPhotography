@@ -7,7 +7,7 @@ bin_PROGRAMS = guide
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 	modulecommand.h helpcommand.h cameracommand.h ccdcommand.h \
 	coolercommand.h sleepcommand.h filterwheelcommand.h focusercommand.h \
-	guiderfactorycommand.h \
+	guiderfactorycommand.h guidercommand.h \
 	ObjWrapper.h Cameras.h Ccds.h Filterwheels.h Focusers.h \
 	Guiders.h
 
@@ -16,7 +16,7 @@ CLASSES = Cameras.cpp Ccds.cpp Filterwheels.cpp Focusers.cpp \
 COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
 	helpcommand.cpp cameracommand.cpp ccdcommand.cpp coolercommand.cpp \
 	sleepcommand.cpp filterwheelcommand.cpp focusercommand.cpp \
-	guiderfactorycommand.cpp
+	guiderfactorycommand.cpp guidercommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)

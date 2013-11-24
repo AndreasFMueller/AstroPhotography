@@ -300,6 +300,7 @@ Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport)
 	calibrated = false;
 	// default exposure settings
 	exposure().exposuretime = 1.;
+	exposure().frame = ccd->getInfo().getFrame();
 	gridconstant = 10;
 }
 

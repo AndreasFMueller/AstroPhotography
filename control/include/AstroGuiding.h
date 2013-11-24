@@ -232,6 +232,7 @@ public:
 	void	exposure(const astro::camera::Exposure& exposure) {
 		_exposure = exposure;
 	}
+
 public:
 	/**
 	 * \brief Construct a guider from camera, ccd, and guiderport

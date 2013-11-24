@@ -16,6 +16,7 @@ namespace Astro {
  */
 Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
 	: _guider(guider) {
+	_point = _guider->ccd()->getInfo().getFrame().size().center();
 }
 
 /**
@@ -64,9 +65,14 @@ GuiderPort_ptr	Guider_impl::getGuiderPort() {
 /**
  * \brief Configure the guider
  */
-void	Guider_impl::setupGuider(const ::Astro::Exposure& exposure,
-		const Point& star) {
+void	Guider_impl::setExposure(const ::Astro::Exposure& exposure) {
 	_guider->exposure(astro::convert(exposure));
+}
+
+/**
+ * \brief set the star
+ */
+void	Guider_impl::setStar(const Astro::Point& star) {
 	_point = astro::convert(star);
 }
 
@@ -80,7 +86,7 @@ Exposure	Guider_impl::getExposure() {
 /**
  * \brief Get the point on which the guide star should be locked
  */
-Point	Guider_impl::selectedPoint() {
+Point	Guider_impl::getStar() {
 	return astro::convert(_point);
 }
 
