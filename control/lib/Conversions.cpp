@@ -5,6 +5,7 @@
  */
 #include <Conversions.h>
 #include <AstroDebug.h>
+#include <stdexcept>
 
 namespace astro {
 
@@ -396,6 +397,7 @@ astro::camera::FilterWheel::State       convert(const Astro::FilterwheelState& s
 	case Astro::FILTERWHEEL_UNKNOWN:
 		return astro::camera::FilterWheel::unknown;
 	}
+	throw std::runtime_error("unknown filter wheel state");
 }
 
 Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) {
@@ -407,6 +409,7 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 	case astro::camera::FilterWheel::unknown:
 		return Astro::FILTERWHEEL_UNKNOWN;
 	}
+	throw std::runtime_error("unknown filter wheel state");
 }
 
 // GuiderCalibration
