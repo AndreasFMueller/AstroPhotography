@@ -6,6 +6,7 @@
 #include <ccdcommand.h>
 #include <Ccds.h>
 #include <iostream>
+#include <unistd.h>
 
 namespace astro {
 namespace cli {
@@ -49,15 +50,51 @@ std::ostream&	operator<<(std::ostream& out, Astro::CcdInfo_var info) {
 	return out;
 }
 
-void	ccdcommand::info(const std::string& ccdid,
+void	ccdcommand::info(CcdWrapper& ccd,
 		const std::vector<std::string>& arguments) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %s info", ccdid.c_str());
-	Ccds	ccds;
-	CcdWrapper	ccd = ccds.byname(ccdid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %s info", ccd->getName());
 	std::cout << "name:       " << ccd->getName() << std::endl;
 	Astro::CcdInfo_var	info = ccd->getInfo();
 	std::cout << info;
 	std::cout << "state:      " << ccd->exposureStatus() << std::endl;
+}
+
+void	ccdcommand::start(CcdWrapper& ccd,
+		const std::vector<std::string>& arguments) {
+	// set up a default exposure structure
+	Astro::Exposure	exposure;
+	exposure.exposuretime = 1;
+	exposure.gain = 1;
+	exposure.limit = std::numeric_limits<float>::max();
+	exposure.shutter = Astro::SHUTTER_OPEN;
+	exposure.mode.x = 1;
+	exposure.mode.y = 1;
+	exposure.frame.size = ccd->getInfo()->size;
+	exposure.frame.origin.x = 0;
+	exposure.frame.origin.y = 0;
+
+	// parse the command line arguments and modify the exposure structure
+	// accordingly
+
+	// start the exposure
+	ccd->startExposure(exposure);
+}
+
+void	ccdcommand::cancel(CcdWrapper& ccd,
+		const std::vector<std::string>& arguments) {
+	if (Astro::EXPOSURE_EXPOSING != ccd->exposureStatus()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not exposing");
+		return;
+	}
+	ccd->cancelExposure();
+}
+
+void	ccdcommand::wait(CcdWrapper& ccd,
+		const std::vector<std::string>& arguments) {
+	// wait for completion of this exposure
+	while (Astro::EXPOSURE_EXPOSING == ccd->exposureStatus()) {
+		usleep(1000000);
+	}
 }
 
 void	ccdcommand::release(const std::string& ccdid,
@@ -86,10 +123,6 @@ void	ccdcommand::operator()(const std::string& commandname,
 	std::string	subcommandname = arguments[1];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd command for CCD %s, subommand %s",
 		ccdid.c_str(), subcommandname.c_str());
-	if (subcommandname == "info") {
-		info(ccdid, arguments);
-		return;
-	}
 	if (subcommandname == "release") {
 		release(ccdid, arguments);
 		return;
@@ -98,6 +131,29 @@ void	ccdcommand::operator()(const std::string& commandname,
 		assign(ccdid, arguments);
 		return;
 	}
+
+	// get the ccd to perform an operation on it
+	Ccds	ccds;
+	CcdWrapper	ccd = ccds.byname(ccdid);
+
+	// commands that need a ccd to operate on
+	if (subcommandname == "info") {
+		info(ccd, arguments);
+		return;
+	}
+	if (subcommandname == "start") {
+		start(ccd, arguments);
+		return;
+	}
+	if (subcommandname == "cancel") {
+		cancel(ccd, arguments);
+		return;
+	}
+	if (subcommandname == "wait") {
+		wait(ccd, arguments);
+		return;
+	}
+
 	throw command_error("unknown command");
 }
 
@@ -111,6 +167,9 @@ std::string	ccdcommand::help() const {
 	"\n"
 	"\tccd <ccdid> assign <cameraid> <ccdnumber>\n"
 	"\tccd <ccdid> info\n"
+	"\tccd <ccdid> start ...\n"
+	"\tccd <ccdid> cancel\n"
+	"\tccd <ccdid> wait\n"
 	"\tccd <ccdid> release\n"
 	"\n"
 	"DESCRIPTION\n"

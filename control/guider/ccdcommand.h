@@ -7,16 +7,25 @@
 #define _ccdcommand_H
 
 #include <clicommand.h>
+#include <Ccds.h>
 
 namespace astro {
 namespace cli {
 
+typedef ObjWrapper<Astro::Ccd>	CcdWrapper;
+
 class ccdcommand : public clicommand {
 	void	release(const std::string& ccdid,
 			const std::vector<std::string>& arguments);
-	void	info(const std::string& ccdid,
-			const std::vector<std::string>& arguments);
 	void	assign(const std::string& ccdid,
+			const std::vector<std::string>& arguments);
+	void	info(CcdWrapper& ccd,
+			const std::vector<std::string>& arguments);
+	void	start(CcdWrapper& ccd,
+			const std::vector<std::string>& arguments);
+	void	cancel(CcdWrapper& ccd,
+			const std::vector<std::string>& arguments);
+	void	wait(CcdWrapper& ccd,
 			const std::vector<std::string>& arguments);
 public:
 	ccdcommand(commandfactory& factory)

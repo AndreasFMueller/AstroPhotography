@@ -7,13 +7,25 @@ module simulator list focuser
 module simulator list cooler
 module simulator list camera
 module simulator list focuser
+focuser f assign focuser:simulator/focuser
+focuser f set 32768 wait
+camera blubb assign camera:simulator/camera
+camera blubb info
+filterwheel fw assign blubb
+filterwheel fw info
+filterwheel fw wait
+filterwheel fw position 1
+ccd blubber assign blubb 0
+ccd blubber info
+ccd blubber start
+ccd blubber wait
+exit
 guiderfactory g assign camera:simulator/camera 0 guiderport:simulator/guiderport
 guider g info
 guider g exposuretime 1
 guider g binning 1 2
 guider g viewport 320 240
 guider g star 240 180
-exit
 focuser f assign focuser:simulator/focuser
 focuser f info
 focuser f set 1000 wait
