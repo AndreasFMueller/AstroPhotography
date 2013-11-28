@@ -192,16 +192,6 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %dx%d",
 		image->size().width, image->size().height);
 
-	// write the image
-	::CORBA::String_var	url = image->write(outfilename.c_str(), true);
-	std::cout << "url: " << url << std::endl;
-
-	// basic image info:
-	std::cout << "Min:      " << image->min() << std::endl;
-	std::cout << "Max:      " << image->max() << std::endl;
-	std::cout << "Mean:     " << image->mean() << std::endl;
-	std::cout << "Median:   " << image->median() << std::endl;
-
 	// find out how large the values are
 	std::cout << "bytes per value: " << image->bytesPerValue() << std::endl;
 

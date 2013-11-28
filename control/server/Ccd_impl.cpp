@@ -9,6 +9,7 @@
 #include <AstroExceptions.h>
 #include <AstroFilterfunc.h>
 #include <Conversions.h>
+#include <ImageDirectory.h>
 
 using namespace astro::camera;
 
@@ -96,6 +97,7 @@ void	Ccd_impl::cancelExposure() {
  * The CCD must be in state EXPOSED for this to be successful.
  */
 Image_ptr	Ccd_impl::getImage() {
+	// first make sure we have an image
 	if (!image) {
 		try {
 			image = _ccd->getImage();
@@ -107,26 +109,13 @@ Image_ptr	Ccd_impl::getImage() {
 			throw badstate;
 		}
 	}
-	ByteImage_impl	*byteimage = NULL;
-	ShortImage_impl	*shortimage = NULL;
-	switch (astro::image::filter::bytespervalue(image)) {
-	case 1:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "byte pixels");
-		byteimage = new ByteImage_impl(image);
-		return byteimage->_this();
-	case 2:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "short pixels");
-		shortimage = new ShortImage_impl(image);
-		return shortimage->_this();
-	default:
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"don't know to handle this pixel type");
-		break;
-	}
-	NotImplemented	notimplemented;
-	notimplemented.cause
-		= (const char *)"image pixel type not implemented";
-	throw notimplemented;
+
+	// save the image
+	ImageDirectory	directory;
+	std::string	filename = directory.save(image);
+
+	// activate this object
+	return directory.getImage(filename);
 }
 
 /**

@@ -23,6 +23,7 @@ module Astro {
 		 * \brief Size of the image
 		 */
 		ImageSize	size();
+
 		/**
 		 * \brief Origin of the image
 		 *
@@ -32,18 +33,7 @@ module Astro {
 		 * (0,0).
 		 */
 		ImagePoint	origin();
-		/**
-		 * \brief Write the image to a FITS file
-		 *
-		 * This method writes the image to a FITS file. The location
-		 * of the file is determined by the server, the URL method
-		 * returns an URL where the client can fetch the FITS file.
-		 * \param filename	Name of the fits file
-		 * \param overwrite	If the file already exists, the file
-		 *			is usually not written, unless this
-		 *			parameter is set to true
-		 */
-		string	write(in string filename, in boolean overwrite);
+
 		/**
 		 * \brief Number of bytes per pixel
 		 *
@@ -57,6 +47,7 @@ module Astro {
 		 * 
 		 */
 		long	bytesPerPixel();
+
 		/**
 		 * \brief Number of planes.
 		 * 
@@ -64,26 +55,11 @@ module Astro {
 		 * it can be 2 (YUYV pixels) or 3 (RGB pixels).
 		 */
 		long	planes();
+
 		/**
 		 * \brief Pixel value type size
 		 */
 		long	bytesPerValue();
-		/**
-		 * \brief Maximum pixel value
-		 */
-		double	max();
-		/**
-		 * \brief Minimum pixel value
-		 */
-		double	min();
-		/**
-		 * \brief Mean pixel value
-		 */
-		double	mean();
-		/**
-		 * \brief Median pixel value
-		 */
-		double	median();
 
 		/**
 		 * \brief Retrieve the imagedata
@@ -93,6 +69,11 @@ module Astro {
 		 */
 		typedef sequence<octet>	ImageFile;
 		ImageFile	file();
+
+		/**
+		 * \brief Destroy a servant
+		 */
+		void	remove();
 	};
 
 	/**
@@ -109,5 +90,19 @@ module Astro {
 	interface ShortImage : Image {
 		typedef sequence<unsigned short> ShortSequence;
 		ShortSequence	getShorts();
+	};
+
+	/**
+	 * \brief Image database interface
+	 *
+	 * The server can keep a set of images on disk, this service gives
+	 * access to these services
+	 */
+	interface Images {
+		typedef sequence<string>	ImageList;
+		ImageList	listImages();
+		long	imageSize(in string name);
+		long	imageAge(in string name);
+		Image	getImage(in string name);
 	};
 };

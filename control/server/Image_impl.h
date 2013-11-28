@@ -16,21 +16,46 @@ namespace Astro {
  * \brief Image servant definition
  */
 class Image_impl : public virtual POA_Astro::Image {
+static std::string	basedir;
+	std::string	_filename;
+	void	setup(astro::image::ImagePtr image);
 protected:
 	astro::image::ImagePtr	_image;
 public:
-	inline	Image_impl(astro::image::ImagePtr image) : _image(image) { }
-	virtual Astro::ImagePoint	origin();
-	virtual Astro::ImageSize	size();
-	virtual char	*write(const char *filename, ::CORBA::Boolean overwrite);
-	virtual CORBA::Long	bytesPerPixel();
-	virtual CORBA::Long	bytesPerValue();
-	virtual CORBA::Long	planes();
-	virtual CORBA::Double	max();
-	virtual CORBA::Double	min();
-	virtual CORBA::Double	mean();
-	virtual CORBA::Double	median();
+	// constructors
+	Image_impl(astro::image::ImagePtr image);
+	Image_impl(const std::string& filename);
+
+	// static fields
+private:
+	Astro::ImagePoint	_origin;
+public:
+	virtual Astro::ImagePoint	origin() { return _origin; }
+
+private:
+	Astro::ImageSize	_size;
+public:
+	virtual Astro::ImageSize	size() { return _size; }
+
+private:
+	int	_bytesperpixel;
+public:
+	virtual CORBA::Long	bytesPerPixel() { return _bytesperpixel; }
+
+private:
+	int	_bytespervalue;
+public:
+	virtual CORBA::Long	bytesPerValue() { return _bytespervalue; }
+
+private:
+	int	_planes;
+public:
+	virtual CORBA::Long	planes() { return _planes; }
+
+	// access to the image file data
 	virtual Astro::Image::ImageFile	*file();
+
+	virtual void	remove();
 };
 
 /*
@@ -46,8 +71,11 @@ public:
  */
 class ByteImage_impl : public Image_impl, public POA_Astro::ByteImage {
 public:
-	inline ByteImage_impl(astro::image::ImagePtr image)
+	ByteImage_impl(astro::image::ImagePtr image)
 		: Image_impl(image) { }
+	ByteImage_impl(const std::string& filename)
+		: Image_impl(filename) { }
+	virtual ~ByteImage_impl();
 	Astro::ByteImage::ByteSequence	*getBytes();
 };
 
@@ -56,8 +84,11 @@ public:
  */
 class ShortImage_impl : public Image_impl, public POA_Astro::ShortImage {
 public:
-	inline ShortImage_impl(astro::image::ImagePtr image)
+	ShortImage_impl(astro::image::ImagePtr image)
 		: Image_impl(image) { }
+	ShortImage_impl(const std::string& filename)
+		: Image_impl(filename) { }
+	virtual ~ShortImage_impl();
 	Astro::ShortImage::ShortSequence	*getShorts();
 };
 

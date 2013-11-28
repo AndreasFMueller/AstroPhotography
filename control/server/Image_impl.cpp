@@ -12,27 +12,41 @@
 namespace Astro {
 
 /**
- * \brief Retrieve origin of the image
+ * \brief Construct an image from an ImagePtr
  */
-ImagePoint	Image_impl::origin() {
-	astro::image::ImagePoint	o = _image->origin();
-	ImagePoint	result;
-	result.x = o.x();
-	result.y = o.y();
-	return result;
+Image_impl::Image_impl(astro::image::ImagePtr image) : _image(image) {
+	setup(image);
 }
 
 /**
- * \brief Retrive size of the image
+ * \brief Construct an Image servant from a file
  */
-ImageSize	Image_impl::size() {
-	astro::image::ImageSize	s = _image->size();
-	ImageSize	result;
-	result.width = s.width();
-	result.height = s.height();
-	return result;
+Image_impl::Image_impl(const std::string& filename) : _filename(filename) {
+	// read the image file 
+	astro::io::FITSin	infile(filename);
+	_image = infile.read();
+	setup(_image);
 }
 
+/**
+ * \brief Initialize static fields in the implementation
+ */
+void	Image_impl::setup(astro::image::ImagePtr image) {
+	// origin
+	_origin.x = _image->origin().x();
+	_origin.y = _image->origin().y();
+	// size
+	_size.width = _image->size().width();
+	_size.height = _image->size().height();
+	// bytes per pixel
+	_bytesperpixel = astro::image::filter::bytesperpixel(_image);
+	// bytes per value
+	_bytespervalue = astro::image::filter::bytespervalue(_image);
+	// planes
+	_planes = astro::image::filter::planes(_image);
+}
+
+#if 0
 /**
  * \brief Write image to a file an return URL to the client
  */
@@ -59,34 +73,7 @@ char	*Image_impl::write(const char *filename, bool overwrite) {
 	std::string	url = astro::stringprintf("file://%s/%s", cwd, filename);
 	return CORBA::string_dup(url.c_str());
 }
-
-CORBA::Double	Image_impl::max() {
-	return astro::image::filter::max(_image);
-}
-
-CORBA::Double	Image_impl::min() {
-	return astro::image::filter::min(_image);
-}
-
-CORBA::Double	Image_impl::mean() {
-	return astro::image::filter::mean(_image);
-}
-
-CORBA::Double	Image_impl::median() {
-	return astro::image::filter::median(_image);
-}
-
-CORBA::Long	Image_impl::bytesPerPixel() {
-	return astro::image::filter::bytesperpixel(_image);
-}
-
-CORBA::Long	Image_impl::planes() {
-	return astro::image::filter::planes(_image);
-}
-
-CORBA::Long	Image_impl::bytesPerValue() {
-	return astro::image::filter::bytespervalue(_image);
-}
+#endif
 
 /**
  * \brief Convert image into FITS data
@@ -142,6 +129,9 @@ Astro::Image::ImageFile	*Image_impl::file() {
 	return imagefile;
 }
 
+void	Image_impl::remove() {
+}
+
 #define	sequence_mono(pixel, size, _image, result)			\
 {									\
 	astro::image::Image<pixel>	*imagep				\
@@ -193,6 +183,9 @@ Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	return result;
 }
 
+ByteImage_impl::~ByteImage_impl() {
+}
+
 /**
  * \brief Retrieve the raw image data for a short iamge
  */
@@ -206,6 +199,9 @@ Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
 	sequence_yuyv(unsigned short, size, _image, result);
 	sequence_rgb(unsigned short, size, _image, result);
 	return result;
+}
+
+ShortImage_impl::~ShortImage_impl() {
 }
 
 } // namespace Astro

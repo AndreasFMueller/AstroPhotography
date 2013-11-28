@@ -11,11 +11,13 @@
 #include <omniORB4/CORBA.h>
 #include "Modules_impl.h"
 #include "GuiderFactory_impl.h"
+#include "Images_impl.h"
 #include <NameService.h>
 #include <AstroLoader.h>
 #include <OrbSingleton.h>
 #include <cassert>
 #include "DriverModuleActivator_impl.h"
+#include "ImageActivator_impl.h"
 
 namespace astro {
 
@@ -120,10 +122,13 @@ int	main(int argc, char *argv[]) {
 
 	// now parse the command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "d")))
+	while (EOF != (c = getopt(argc, argv, "db:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'b':
+			Astro::ImageDirectory::basedir(optarg);
 			break;
 		}
 
@@ -218,6 +223,23 @@ int	main(int argc, char *argv[]) {
 	POABuilder	pbguider(root_poa);
 	PortableServer::POA_var	guider_poa
 		= pbguider.build("Guiders");
+
+	// create a servant for images
+	Astro::Images_impl	*images = new Astro::Images_impl();
+	PortableServer::ObjectId_var	imagessid
+		= root_poa->activate_object(images);
+
+	// register the Images servant
+	names.clear();
+	names.push_back(Astro::Naming::Name("Astro", "context"));
+	names.push_back(Astro::Naming::Name("Images", "object"));
+	nameservice.bind(names, images->_this());
+
+	// a POA for images
+	POABuilderActivator<Astro::ImageActivator_impl>	pb2(root_poa);
+	PortableServer::POA_var	images_poa = pb2.build("Images",
+		new Astro::ImageActivator_impl());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageActivator set");
 
 	// activate the POA manager
 	PortableServer::POAManager_var	pman = root_poa->the_POAManager();
