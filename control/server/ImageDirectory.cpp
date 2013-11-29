@@ -60,7 +60,7 @@ std::list<std::string>	ImageDirectory::fileList() {
 	}
 	struct dirent	*d;
 	while (NULL != (d = readdir(dir))) {
-		std::string	filename(d->d_name, d->d_namlen);
+		std::string	filename(d->d_name, d->d_reclen);
 		if (isFile(filename)) {
 			names.push_back(filename);
 		}
