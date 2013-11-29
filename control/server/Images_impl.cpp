@@ -25,8 +25,11 @@ CORBA::Long	Images_impl::imageAge(const char *name) {
 }
 
 Images::ImageList*	Images_impl::listImages() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "list Images");
 	// read all file names
 	std::list<std::string>	names = fileList();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fileList has length %d",
+		names.size());
 
 	// now convert this into a corba list
 	Astro::Images::ImageList	*list
@@ -35,12 +38,14 @@ Images::ImageList*	Images_impl::listImages() {
 	std::list<std::string>::const_iterator	i;
 	int	j = 0;
 	for (i = names.begin(); i != names.end(); i++, j++) {
-		(*list)[j++] = ::CORBA::string_dup(i->c_str());
+		(*list)[j] = ::CORBA::string_dup(i->c_str());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images found", list->length());
 	return list;
 }
 
 Image_ptr	Images_impl::getImage(const char *_name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for file %s", _name);
 	return ImageDirectory::getImage(std::string(_name));
 }
 

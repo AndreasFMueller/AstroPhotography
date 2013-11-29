@@ -8,6 +8,7 @@
 
 #include <cli.h>
 #include <module.hh>
+#include <image.hh>
 
 namespace astro {
 namespace cli {
@@ -16,7 +17,8 @@ class guidecli : public cli {
 public:
 	guidecli(commandfactory& cf);
 	virtual ~guidecli();
-	Astro::Modules_var      modules;
+	Astro::Modules_var	modules;
+	Astro::Images_var	images;
 };
 
 

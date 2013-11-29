@@ -9,21 +9,18 @@
 #include <image.hh>
 #include <AstroImage.h>
 #include <AstroFormat.h>
+#include <ImageDirectory.h>
 
 namespace Astro {
 
 /**
  * \brief Image servant definition
  */
-class Image_impl : public virtual POA_Astro::Image {
-static std::string	basedir;
+class Image_impl : public virtual POA_Astro::Image, public ImageDirectory {
 	std::string	_filename;
 	void	setup(astro::image::ImagePtr image);
-protected:
-	astro::image::ImagePtr	_image;
 public:
 	// constructors
-	Image_impl(astro::image::ImagePtr image);
 	Image_impl(const std::string& filename);
 
 	// static fields
@@ -56,6 +53,8 @@ public:
 	virtual Astro::Image::ImageFile	*file();
 
 	virtual void	remove();
+protected:
+	astro::image::ImagePtr	getImage();
 };
 
 /*
@@ -71,8 +70,6 @@ public:
  */
 class ByteImage_impl : public Image_impl, public POA_Astro::ByteImage {
 public:
-	ByteImage_impl(astro::image::ImagePtr image)
-		: Image_impl(image) { }
 	ByteImage_impl(const std::string& filename)
 		: Image_impl(filename) { }
 	virtual ~ByteImage_impl();
@@ -84,8 +81,6 @@ public:
  */
 class ShortImage_impl : public Image_impl, public POA_Astro::ShortImage {
 public:
-	ShortImage_impl(astro::image::ImagePtr image)
-		: Image_impl(image) { }
 	ShortImage_impl(const std::string& filename)
 		: Image_impl(filename) { }
 	virtual ~ShortImage_impl();

@@ -86,7 +86,7 @@ Image_ptr	ImageDirectory::getImage(const std::string& filename) {
 	
 	// now create an object reference in the POA for images
 	OrbSingleton	orb;
-	PoaName	poapath("Images/Image");
+	PoaName	poapath("Images");
 	PortableServer::POA_var	images_poa = orb.findPOA(poapath);
 	CORBA::Object_var	obj
 		= images_poa->create_reference_with_id(oid,

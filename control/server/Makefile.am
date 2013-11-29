@@ -30,7 +30,7 @@ astrod_DEPENDENCIES = ../lib/libastro.la libserver.la
 astrod_LDADD = libserver.la -L../lib -lastro @SBIGLIBRARY@
 
 test:	astrod
-	./astrod -d -ORBInitRef NameService=corbaname::localhost -f `pwd`/images
+	./astrod -d -ORBInitRef NameService=corbaname::localhost -b `pwd`/images
 
 
 

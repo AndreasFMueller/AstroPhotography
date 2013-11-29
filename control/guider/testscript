@@ -1,4 +1,9 @@
 list modules
+list images
+image i assign 00381.fits
+image i info
+image i save test.fits
+exit
 module simulator version
 module simulator list camera
 module simulator list filterwheel

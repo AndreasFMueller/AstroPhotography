@@ -47,10 +47,10 @@ PortableServer::Servant	ImageActivator_impl::incarnate(
 	// build a servant of approriate type
 	switch (astro::image::filter::bytespervalue(image)) {
 	case 1:
-		return new Astro::ByteImage_impl(image);
+		return new Astro::ByteImage_impl(filename);
 		break;
 	case 2:
-		return new Astro::ShortImage_impl(image);
+		return new Astro::ShortImage_impl(filename);
 		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create image servant %s",

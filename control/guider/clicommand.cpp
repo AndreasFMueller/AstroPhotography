@@ -17,6 +17,7 @@
 #include <focusercommand.h>
 #include <guiderfactorycommand.h>
 #include <guidercommand.h>
+#include <imagecommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -130,6 +131,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("guider"),
 		commandcreatorptr(new commandcreator<guidercommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("image"),
+		commandcreatorptr(new commandcreator<imagecommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("sleep"),

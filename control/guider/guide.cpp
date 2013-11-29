@@ -64,6 +64,19 @@ int	main(int argc, char *argv[]) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
 
+	// Next we want to get a reference to the Images object
+	names.clear();
+	names.push_back(Astro::Naming::Name("Astro", "context"));
+	names.push_back(Astro::Naming::Name("Images", "object"));
+	obj = nameservice.lookup(names);
+
+	// get a reference to the modules interface
+	cli.images = Astro::Images::_narrow(obj);
+	if (CORBA::is_nil(cli.images)) {
+		throw std::runtime_error("nil object reference");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Images object");
+
 	/* start parsing the input */
 	if (filename) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing '%s'", filename);

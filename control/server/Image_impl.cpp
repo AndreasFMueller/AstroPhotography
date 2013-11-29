@@ -12,26 +12,17 @@
 namespace Astro {
 
 /**
- * \brief Construct an image from an ImagePtr
- */
-Image_impl::Image_impl(astro::image::ImagePtr image) : _image(image) {
-	setup(image);
-}
-
-/**
  * \brief Construct an Image servant from a file
  */
 Image_impl::Image_impl(const std::string& filename) : _filename(filename) {
 	// read the image file 
-	astro::io::FITSin	infile(filename);
-	_image = infile.read();
-	setup(_image);
+	setup(getImage());
 }
 
 /**
  * \brief Initialize static fields in the implementation
  */
-void	Image_impl::setup(astro::image::ImagePtr image) {
+void	Image_impl::setup(astro::image::ImagePtr _image) {
 	// origin
 	_origin.x = _image->origin().x();
 	_origin.y = _image->origin().y();
@@ -46,35 +37,6 @@ void	Image_impl::setup(astro::image::ImagePtr image) {
 	_planes = astro::image::filter::planes(_image);
 }
 
-#if 0
-/**
- * \brief Write image to a file an return URL to the client
- */
-char	*Image_impl::write(const char *filename, bool overwrite) {
-	std::string	f(filename);
-	try {
-		astro::io::FITSout	out(f);
-		out.setPrecious(!overwrite);
-		out.write(_image);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write image file: %s",
-			x.what());
-		IOException	ioexception;
-		ioexception.cause = x.what();
-		throw ioexception;
-	}
-	char	cwd[1024];
-	if (NULL == getcwd(cwd, sizeof(cwd))) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "CWD not found");
-		NotFound	notfound;
-		notfound.cause = (const char *)"current working directory not found";
-		throw notfound;
-	}
-	std::string	url = astro::stringprintf("file://%s/%s", cwd, filename);
-	return CORBA::string_dup(url.c_str());
-}
-#endif
-
 /**
  * \brief Convert image into FITS data
  *
@@ -82,54 +44,48 @@ char	*Image_impl::write(const char *filename, bool overwrite) {
  * FITS file.
  */
 Astro::Image::ImageFile	*Image_impl::file() {
-	// create a temporary file name 
-	char	filename[1024];
-	const char	*tempdir = getenv("TMPDIR");
-	if (NULL == tempdir) {
-		tempdir = "/tmp";
-	}
-	snprintf(filename, sizeof(filename), "%s/astrodXXXXXX.fits", tempdir);
-	mkstemps(filename, 5);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "temporary filename: %s", filename);
-
-	// write the image to that file
-	astro::io::FITSout	out(filename);
-	out.setPrecious(false);
-	out.write(_image);
-
-	// stat and open the temporary file, we will need it's size and
-	// and contents for the following
-	int	fd = open(filename, O_RDONLY);
+	std::string	fn = fullname(_filename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "serving file %s", fn.c_str());
+	int	fd = open(fn.c_str(), O_RDONLY);
 	if (fd < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot open %s: %s",
-			filename, strerror(errno));
-		throw Astro::IOException("cannot open temporary file");
+			fn.c_str(), strerror(errno));
+		throw Astro::IOException("cannot image file");
 	}
 	struct stat	sb;
 	int	rc = fstat(fd, &sb);
 	if (rc < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot stat %s: %s",
-			filename, strerror(errno));
+			fn.c_str(), strerror(errno));
 		throw Astro::IOException("cannot stat temporary file");
 	} 
 
 	// read the data
 	CORBA::Octet	*buf = new CORBA::Octet[sb.st_size];
-	read(fd, buf, sb.st_size);
+	long	bytes = read(fd, buf, sb.st_size);
+	if (bytes != sb.st_size) {
+		throw std::runtime_error("incorrect number of bytes read");
+	}
 	close(fd);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "read %ld bytes", bytes);
 
 	// create an ImageData object
 	Astro::Image::ImageFile	*imagefile
 		= new Astro::Image::ImageFile(sb.st_size, sb.st_size, buf, 0);
-
-	// unlink the temporary file, it is no longer needed
-	unlink(filename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageData object of length %ld",
+		imagefile->length());
 
 	// return the image data
 	return imagefile;
 }
 
 void	Image_impl::remove() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove image %s", _filename.c_str());
+}
+
+astro::image::ImagePtr	Image_impl::getImage() {
+	astro::io::FITSin	infile(fullname(_filename));
+	return infile.read();
 }
 
 #define	sequence_mono(pixel, size, _image, result)			\
@@ -174,6 +130,7 @@ void	Image_impl::remove() {
 Astro::ByteImage::ByteSequence	*ByteImage_impl::getBytes() {
 	Astro::ByteImage::ByteSequence	*result
 		= new Astro::ByteImage::ByteSequence();
+	astro::image::ImagePtr	_image = getImage();
 	unsigned int	size = _image->size().getPixels();
 	size_t	bytes = astro::image::filter::planes(_image) * size;
 	result->length(bytes);
@@ -192,6 +149,7 @@ ByteImage_impl::~ByteImage_impl() {
 Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
 	Astro::ShortImage::ShortSequence	*result
 		= new Astro::ShortImage::ShortSequence();
+	astro::image::ImagePtr	_image = getImage();
 	unsigned int	size = _image->size().getPixels();
 	size_t	shorts = astro::image::filter::planes(_image) * size;
 	result->length(shorts);

@@ -51,7 +51,7 @@ void	Camera_internals::assign(const std::string& cameraid,
 	try {
 		modules = orb.getModules();
 	} catch (const CORBA::Exception& x) {
-		std::string	s = Astro::exception2string(x).c_str();
+		std::string	s = Astro::exception2string(x)/*.c_str()*/;
 		debug(LOG_ERR, DEBUG_LOG, 0, "getModules() exception: %s",
 			s.c_str());
 		throw std::runtime_error(s);

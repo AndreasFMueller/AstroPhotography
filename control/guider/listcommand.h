@@ -13,6 +13,7 @@ namespace cli {
 
 class listcommand : public clicommand {
 	void	listmodules();
+	void	listimages();
 public:
 	listcommand(commandfactory& factory) : clicommand(factory, "list") { }
 	~listcommand() { }
