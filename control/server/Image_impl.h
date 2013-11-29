@@ -51,6 +51,7 @@ public:
 
 	// access to the image file data
 	virtual Astro::Image::ImageFile	*file();
+	virtual CORBA::Long	filesize();
 
 	virtual void	remove();
 protected:

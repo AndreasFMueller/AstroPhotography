@@ -79,6 +79,10 @@ Astro::Image::ImageFile	*Image_impl::file() {
 	return imagefile;
 }
 
+CORBA::Long	Image_impl::filesize() {
+	return fileSize(_filename);
+}
+
 void	Image_impl::remove() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove image %s", _filename.c_str());
 }

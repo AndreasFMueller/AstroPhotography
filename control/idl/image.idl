@@ -71,6 +71,11 @@ module Astro {
 		ImageFile	file();
 
 		/**
+		 * \brief get the file size
+		 */
+		long	filesize();
+
+		/**
 		 * \brief Destroy a servant
 		 */
 		void	remove();

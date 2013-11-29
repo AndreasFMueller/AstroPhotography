@@ -1,6 +1,6 @@
 list modules
 list images
-image i assign 00381.fits
+image i assign bias000.fits
 image i info
 image i save test.fits
 exit

@@ -7,6 +7,8 @@
 #include <imagecommand.h>
 #include <AstroDebug.h>
 #include <Images.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 namespace astro {
 namespace cli {
@@ -39,12 +41,24 @@ void	imagecommand::info(ImageWrapper& image) {
 	std::cout << "bytes/pixel:    " << image->bytesPerPixel() << std::endl;
 	std::cout << "bytes/value:    " << image->bytesPerValue() << std::endl;
 	std::cout << "planes:         " << image->planes() << std::endl;
+	std::cout << "filesize:       " << image->filesize() << std::endl;
 }
 
 void	imagecommand::save(ImageWrapper& image, const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "save image to %s", filename.c_str());
 	Astro::Image::ImageFile_var	imagefile = image->file();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %s bytes", imagefile->length());
+
+	// write the data to the output file
+	int	fd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	if (imagefile->length() != write(fd, imagefile->get_buffer(),
+		imagefile->length())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write file %s: %s",
+			filename.c_str(), strerror(errno));
+		throw std::runtime_error("cannot write file");
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s bytes write to %s",
+		imagefile->length(), filename.c_str());
 }
 
 void	imagecommand::remove(ImageWrapper& image) {
