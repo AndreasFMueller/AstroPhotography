@@ -12,6 +12,14 @@
 
 namespace Astro {
 
+/**
+ * \brief Images implementation
+ *
+ * The Images service gives access to a directory containing FITS images.
+ * The methods allow to retrieve a list of available files and to read
+ * basic information about each file. The getImage method allows then to
+ * get a reference to such an image.
+ */
 class Images_impl : public virtual POA_Astro::Images, public ImageDirectory {
 	std::string	fullname(const std::string& filename);
 public:

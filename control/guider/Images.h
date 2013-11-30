@@ -8,6 +8,7 @@
 
 #include <ObjWrapper.h>
 #include <camera.hh>
+#include <image.hh>
 #include <vector>
 
 namespace astro {
@@ -26,6 +27,7 @@ public:
 	Images();
 	ImageWrapper	byname(const std::string& imageid);
 	void	release(const std::string& imageid);
+	void	assign(const std::string& imageid, Astro::Image_ptr image);
 	void	assign(const std::string& imageid,
 			const std::vector<std::string>& arguments);
 };

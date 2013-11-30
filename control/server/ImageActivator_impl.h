@@ -12,6 +12,13 @@
 
 namespace Astro {
 
+/**
+ * \brief Activator implementation for images
+ *
+ * Images in the image directory are not automatically activated as 
+ * CORBA objects. But when a client requests an image, a new object
+ * reference is created and a servant is activated.
+ */
 class ImageActivator_impl
 	: public virtual POA_PortableServer::ServantActivator,
 	  public ImageDirectory {

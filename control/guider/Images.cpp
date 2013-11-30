@@ -22,7 +22,13 @@ public:
 	Image_internals() { }
 	virtual void	assign(const std::string& imageid,
 				const std::vector<std::string>& arguments);
+	void	assign(const std::string& imageid, Astro::Image_ptr image);
 };
+
+void	Image_internals::assign(const std::string& imageid,
+		Astro::Image_ptr image) {
+	DeviceMap<Astro::Image>::assign(imageid, image);
+}
 
 void	Image_internals::assign(const std::string& imageid,
 		const std::vector<std::string>& arguments) {
@@ -50,18 +56,14 @@ void	Image_internals::assign(const std::string& imageid,
 	}
 
 	// get the image reference
-	Astro::Image_ptr	image;
 	try {
-		image = images->getImage(imagefilename.c_str());
+		assign(imageid, images->getImage(imagefilename.c_str()));
 	} catch (const CORBA::Exception& x) {
 		std::string	s = Astro::exception2string(x);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage exception: %s",
 			s.c_str());
 		throw std::runtime_error(s);
 	}
-
-	// store it in the device map
-	DeviceMap<Astro::Image>::assign(imageid, image);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -78,6 +80,11 @@ Images::Images() {
 
 ImageWrapper	Images::byname(const std::string& imageid) {
 	return internals->byname(imageid);
+}
+
+void	Images::assign(const std::string& imageid,
+		Astro::Image_ptr image) {
+	internals->assign(imageid, image);
 }
 
 void	Images::assign(const std::string& imageid,

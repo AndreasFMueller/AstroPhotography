@@ -72,7 +72,7 @@ void	focusercommand::operator()(const std::string& commandname,
 	std::string	focuserid = arguments[0];
 	std::string	subcommandname = arguments[1];
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"focuser command for focuser %s, subommand %s",
+		"focuser command for focuser %s, subcommand %s",
 		focuserid.c_str(), subcommandname.c_str());
 	if (subcommandname == "release") {
 		release(focuserid, arguments);

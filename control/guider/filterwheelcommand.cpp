@@ -91,7 +91,7 @@ void	filterwheelcommand::operator()(const std::string& commandname,
 	std::string	filterwheelid = arguments[0];
 	std::string	subcommandname = arguments[1];
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"filterwheel command for FW %s, subommand %s",
+		"filterwheel command for FW %s, subcommand %s",
 		filterwheelid.c_str(), subcommandname.c_str());
 	if (subcommandname == "release") {
 		release(filterwheelid, arguments);

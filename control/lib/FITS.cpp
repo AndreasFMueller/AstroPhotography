@@ -269,7 +269,9 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 
 		// check whether the file is precious
 		if (precious()) {
-			std::string	msg = stringprintf("%s is precious, cannot overwrite", filename.c_str());
+			std::string	msg = stringprintf(
+				"%s is precious, cannot overwrite",
+				filename.c_str());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw FITSexception(msg);
 		}
@@ -283,7 +285,8 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 		}
 
 		// unlink the file
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "unklink(%s)", filename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "unklink(%s) existing file",
+			filename.c_str());
 		if (unlink(filename.c_str())) {
 			std::string	msg = stringprintf("cannot unlink "
 				"%s: %s", filename.c_str(), strerror(errno));
@@ -300,7 +303,9 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 
 	// find the dimensions
 	long	naxis = 3;
-	long	naxes[3] = { image.size().width(), image.size().height(), planes };
+	long	naxes[3] = {
+		image.size().width(), image.size().height(), planes
+	};
 
 	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
@@ -396,6 +401,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
  * \brief Fix permissions on precious files
  */
 void	FITSoutfileBase::postwrite() throw (FITSexception) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "postwrite called");
 	// not precious, do nothing
 	if (!precious()) {
 		return;

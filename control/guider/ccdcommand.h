@@ -27,6 +27,8 @@ class ccdcommand : public clicommand {
 			const std::vector<std::string>& arguments);
 	void	wait(CcdWrapper& ccd,
 			const std::vector<std::string>& arguments);
+	void	image(CcdWrapper& ccd,
+			const std::vector<std::string>& argumetns);
 public:
 	ccdcommand(commandfactory& factory)
 		: clicommand(factory, std::string("ccd")) { }

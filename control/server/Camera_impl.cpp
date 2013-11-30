@@ -11,6 +11,15 @@
 namespace Astro {
 
 /**
+ * \brief Construct a camera implementation object
+ */
+Camera_impl::Camera_impl(astro::camera::CameraPtr camera) : _camera(camera) {
+	for (unsigned int id = 0; id < _camera->nCcds(); id++) {
+		ccds.push_back(_camera->getCcd(id));
+	}
+}
+
+/**
  * \brief Get the name of the camera
  */
 char	*Camera_impl::getName() {

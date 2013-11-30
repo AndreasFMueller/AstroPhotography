@@ -21,12 +21,7 @@ class Camera_impl : public POA_Astro::Camera {
 	astro::camera::GuiderPortPtr	guiderport;
 public:
 	typedef astro::camera::Camera	device_type;
-	inline Camera_impl(astro::camera::CameraPtr camera)
-		: _camera(camera) {
-		for (unsigned int id = 0; id < _camera->nCcds(); id++) {
-			ccds.push_back(_camera->getCcd(id));
-		}
-	}
+	Camera_impl(astro::camera::CameraPtr camera);
 	virtual char	*getName();
 
 	// access to CCDs of a camera (there may be more than one)

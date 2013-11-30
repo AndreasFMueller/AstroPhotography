@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <limits>
+#include <Images.h>
 
 namespace astro {
 namespace cli {
@@ -83,8 +84,9 @@ void	ccdcommand::start(CcdWrapper& ccd,
 
 void	ccdcommand::cancel(CcdWrapper& ccd,
 		const std::vector<std::string>& arguments) {
-	if (Astro::EXPOSURE_EXPOSING != ccd->exposureStatus()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "not exposing");
+	if (!((Astro::EXPOSURE_EXPOSING == ccd->exposureStatus()) ||
+		(Astro::EXPOSURE_EXPOSED == ccd->exposureStatus()))) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not exposing/exposed");
 		return;
 	}
 	ccd->cancelExposure();
@@ -94,8 +96,28 @@ void	ccdcommand::wait(CcdWrapper& ccd,
 		const std::vector<std::string>& arguments) {
 	// wait for completion of this exposure
 	while (Astro::EXPOSURE_EXPOSING == ccd->exposureStatus()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"waiting for exposure to complete");
 		usleep(1000000);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure complete");
+}
+
+void	ccdcommand::image(CcdWrapper& ccd,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		throw std::runtime_error("missing imageid argument");
+	}
+	std::string	imageid = arguments[2];
+	if (Astro::EXPOSURE_EXPOSED != ccd->exposureStatus()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "ccd is not in the exposed state");
+		throw std::runtime_error("ccd has no image ready");
+	}
+	Astro::Image_ptr	image = ccd->getImage();
+
+	// assign the image retrieved
+	Images	images;
+	images.assign(imageid, image);
 }
 
 void	ccdcommand::release(const std::string& ccdid,
@@ -122,7 +144,7 @@ void	ccdcommand::operator()(const std::string& commandname,
 	}
 	std::string	ccdid = arguments[0];
 	std::string	subcommandname = arguments[1];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd command for CCD %s, subommand %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd command for CCD %s, subcommand %s",
 		ccdid.c_str(), subcommandname.c_str());
 	if (subcommandname == "release") {
 		release(ccdid, arguments);
@@ -154,6 +176,10 @@ void	ccdcommand::operator()(const std::string& commandname,
 		wait(ccd, arguments);
 		return;
 	}
+	if (subcommandname == "image") {
+		image(ccd, arguments);
+		return;
+	}
 
 	throw command_error("unknown command");
 }
@@ -171,6 +197,7 @@ std::string	ccdcommand::help() const {
 	"\tccd <ccdid> start ...\n"
 	"\tccd <ccdid> cancel\n"
 	"\tccd <ccdid> wait\n"
+	"\tccd <ccdid> image <imageid>\n"
 	"\tccd <ccdid> release\n"
 	"\n"
 	"DESCRIPTION\n"
@@ -182,6 +209,8 @@ std::string	ccdcommand::help() const {
 	"The second synopsis gives info about a CCD.\n"
 	"The third synopsis releases a ccd reference, it should no longer be\n"
 	"used after this command is issued.\n"
+	"The image subcommand retrieves an image from the ccd and makes it\n"
+	"available to the image command under the image id specified.\n"
 	);
 }
 

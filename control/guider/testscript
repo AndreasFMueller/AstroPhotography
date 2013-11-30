@@ -4,7 +4,6 @@ image i assign toremove.fits
 image i info
 image i save test.fits
 image i remove
-exit
 module simulator version
 module simulator list camera
 module simulator list filterwheel
@@ -23,8 +22,12 @@ filterwheel fw wait
 filterwheel fw position 1
 ccd blubber assign blubb 0
 ccd blubber info
+ccd blubber cancel
 ccd blubber start
 ccd blubber wait
+ccd blubber image testimage
+image testimage info
+image testimage save testimage.fits
 exit
 guiderfactory g assign camera:simulator/camera 0 guiderport:simulator/guiderport
 guider g info

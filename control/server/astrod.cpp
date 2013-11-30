@@ -19,7 +19,11 @@
 #include "DriverModuleActivator_impl.h"
 #include "ImageActivator_impl.h"
 
+#include <POABuilder.h>
+
 namespace astro {
+
+#if 0
 
 //////////////////////////////////////////////////////////////////////
 // POABuilder class: builds standard POAs
@@ -109,6 +113,7 @@ PortableServer::POA_var	POABuilderActivator<activator>::build(
 	return result_poa;
 }
 
+#endif
 
 /**
  * \brief Main function for the CORBA server
