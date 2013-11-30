@@ -1,8 +1,9 @@
 list modules
 list images
-image i assign bias000.fits
+image i assign toremove.fits
 image i info
 image i save test.fits
+image i remove
 exit
 module simulator version
 module simulator list camera

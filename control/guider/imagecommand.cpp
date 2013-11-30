@@ -9,6 +9,7 @@
 #include <Images.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace cli {
@@ -46,18 +47,25 @@ void	imagecommand::info(ImageWrapper& image) {
 
 void	imagecommand::save(ImageWrapper& image, const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "save image to %s", filename.c_str());
+	astro::Timer	timer;
+	timer.start();
 	Astro::Image::ImageFile_var	imagefile = image->file();
+	timer.end();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"file download took %.3f seconds, %.1fMBps", timer.elapsed(),
+		imagefile->length() / (1024 * 1024 * timer.elapsed()));
 
 	// write the data to the output file
 	int	fd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s opened for writing (%d)",
+		filename.c_str(), fd);
 	if (imagefile->length() != write(fd, imagefile->get_buffer(),
 		imagefile->length())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write file %s: %s",
 			filename.c_str(), strerror(errno));
 		throw std::runtime_error("cannot write file");
 	}
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s bytes write to %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d bytes written to %s",
 		imagefile->length(), filename.c_str());
 }
 

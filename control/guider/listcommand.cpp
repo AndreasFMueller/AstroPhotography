@@ -68,8 +68,12 @@ public:
 
 std::ostream&	operator<<(std::ostream& out, const imageinfo& info) {
 	char	buffer[81];
-	snprintf(buffer, sizeof(buffer), "%-20.20s  %10ld  %10ld",
-		info.name.c_str(), info.size, info.age);
+	time_t	now = time(NULL) - info.age;;
+	struct tm	*t = localtime(&now);;
+	int	offset = snprintf(buffer, sizeof(buffer),
+			"%-40.40s  %10ld     ", info.name.c_str(), info.size);
+	strftime(buffer + offset, sizeof(buffer) - offset,
+		"%Y-%m-%d  %H:%M:%S", t);
 	out << buffer;
 	return out;
 }
@@ -106,7 +110,7 @@ std::string	listcommand::help() const {
 		"DESCRIPTION\n"
 		"\n"
 		"Display a list of objects of a given <type>. Valid <type>\n"
-		"values are \"modules\".\n"
+		"values are \"modules\" and \"images\".\n"
 	);
 }
 
