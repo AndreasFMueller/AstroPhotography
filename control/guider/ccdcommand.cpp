@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <limits>
 #include <Images.h>
+#include <exposurecommand.h>
+#include <Conversions.h>
 
 namespace astro {
 namespace cli {
@@ -63,20 +65,33 @@ void	ccdcommand::info(CcdWrapper& ccd,
 
 void	ccdcommand::start(CcdWrapper& ccd,
 		const std::vector<std::string>& arguments) {
-	// set up a default exposure structure
-	Astro::Exposure	exposure;
-	exposure.exposuretime = 1;
-	exposure.gain = 1;
-	exposure.limit = std::numeric_limits<float>::max();
-	exposure.shutter = Astro::SHUTTER_OPEN;
-	exposure.mode.x = 1;
-	exposure.mode.y = 1;
-	exposure.frame.size = ccd->getInfo()->size;
-	exposure.frame.origin.x = 0;
-	exposure.frame.origin.y = 0;
+	// get the default CCD size
+	Astro::CcdInfo_var      info = ccd->getInfo();
+	astro::image::ImageSize	size(info->size.width, info->size.height);
+
+	// initialize the parser with defaults from the CCD
+	ExposureParser	parser;
+	parser->frame.setSize(size); // set default size
 
 	// parse the command line arguments and modify the exposure structure
 	// accordingly
+	parser.parse(arguments, 2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure parsed: %s",
+		parser.exposure().toString().c_str());
+
+	// set up a default exposure structure
+	Astro::Exposure	exposure;
+	exposure.exposuretime = parser->exposuretime;
+	exposure.gain = parser->gain;
+	exposure.limit = parser->limit;
+	exposure.shutter = Astro::SHUTTER_OPEN;
+	exposure.mode.x = parser->mode.getX();
+	exposure.mode.y = parser->mode.getY();
+	exposure.frame.size.width = parser->frame.size().width();
+	exposure.frame.size.height = parser->frame.size().height();
+	exposure.frame.origin.x = parser->frame.origin().x();
+	exposure.frame.origin.y = parser->frame.origin().y();
+	exposure.shutter = astro::convert(parser->shutter);
 
 	// start the exposure
 	ccd->startExposure(exposure);

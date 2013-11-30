@@ -67,7 +67,7 @@ std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
 std::istream&	operator>>(std::istream& in, Binning& binning) {
 	char	c;
 	unsigned int	x, y;
-	in >> c >> x >> c >> y;
+	in >> x >> c >> y;
 	binning.setX(x);
 	binning.setY(y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "binning mode parsed: %s",

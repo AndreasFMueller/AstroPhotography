@@ -55,7 +55,7 @@ std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
 std::istream&	operator>>(std::istream& in, ImagePoint& point) {
 	unsigned int	x, y;
 	char	c;
-	in >> x >> c >> y;
+	in >> c >> x >> c >> y;
 	point.setX(x);
 	point.setY(y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image point: %s",
