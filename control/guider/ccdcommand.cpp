@@ -11,6 +11,7 @@
 #include <Images.h>
 #include <exposurecommand.h>
 #include <Conversions.h>
+#include <time.h>
 
 namespace astro {
 namespace cli {
@@ -61,6 +62,11 @@ void	ccdcommand::info(CcdWrapper& ccd,
 	Astro::CcdInfo_var	info = ccd->getInfo();
 	std::cout << info;
 	std::cout << "state:      " << ccd->exposureStatus() << std::endl;
+	time_t	last = time(NULL) - ccd->lastExposureStart();
+	struct tm	*t = localtime(&last);
+	char	buffer[80];
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", t);
+	std::cout << "last image: " << buffer << std::endl;
 }
 
 void	ccdcommand::start(CcdWrapper& ccd,

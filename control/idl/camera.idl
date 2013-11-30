@@ -110,11 +110,18 @@ module Astro {
 		/**
 		 * \brief Start an exposure
 		 */
-		void	startExposure(in Exposure exp) raises(BadState,BadParameter);
+		void	startExposure(in Exposure exp)
+				raises(BadState,BadParameter);
 		/**
 		 * \brief Find the state of the exposure
 		 */
 		ExposureState	exposureStatus();
+
+		/**
+		 * \brief Find out how long ago the last exposure was started
+		 */
+		long	lastExposureStart();
+
 		/**
 		 * \brief Cancel an exposure
 		 */
@@ -150,7 +157,8 @@ module Astro {
 		/**
 		 * \brief Set the current shutter state
 		 */
-		void	setShutterState(in ShutterState state) raises(NotImplemented);
+		void	setShutterState(in ShutterState state)
+				raises(NotImplemented);
 		/**
 		 * \brief Find out whether the CCD has a cooler
 		 */

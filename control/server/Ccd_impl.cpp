@@ -10,14 +10,27 @@
 #include <AstroFilterfunc.h>
 #include <Conversions.h>
 #include <ImageDirectory.h>
+#include <ServantBuilder.h>
 
 using namespace astro::camera;
 
 namespace Astro {
 
+Ccd_impl::Ccd_impl(astro::camera::CcdPtr ccd) : _ccd(ccd) {
+	laststart = 0;
+}
+
 char	*Ccd_impl::getName() {
 	std::string	name = _ccd->name();
 	return CORBA::string_dup(name.c_str());
+}
+
+/**
+ * \brief Retrieve time since last image start
+ */
+CORBA::Long	Ccd_impl::lastExposureStart() {
+	time_t	now = time(NULL);
+	return now - laststart;
 }
 
 /**
@@ -53,6 +66,7 @@ void	Ccd_impl::startExposure(const Exposure& exp) {
 	astro::camera::Exposure	exposure = astro::convert(exp);
 	try {
 		_ccd->startExposure(exposure);
+		laststart = time(NULL);
 	} catch (astro::BadParameter& bpx) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad parameter: %s", bpx.what());
 		BadParameter	badparameter;
@@ -188,16 +202,17 @@ void	Ccd_impl::setShutterState(ShutterState state) {
  */
 Cooler_ptr	Ccd_impl::getCooler() {
 	if (!_ccd->hasCooler()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "request for cooler on CCD that does not have one");
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"request for cooler on CCD that does not have one");
 		NotImplemented	notimplemented;
 		notimplemented.cause = (const char *)"CCD has no cooler";
 		throw notimplemented;
 	}
 	CoolerPtr	cooler = _ccd->getCooler();
 
-	// convert into a CORBA Cooler_ptr
-	Cooler_impl	*coolerptr = new Cooler_impl(cooler);
-	return coolerptr->_this();
+	// Use the ServantBuilder to create a servant
+	ServantBuilder<Cooler, Cooler_impl>	servantbuilder;
+	return servantbuilder(cooler);
 }
 
 } // namespace Astro

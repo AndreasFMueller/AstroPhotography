@@ -17,11 +17,12 @@ namespace Astro {
 class Ccd_impl : public POA_Astro::Ccd {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImagePtr	image;
+	time_t	laststart;
 public:
 	typedef astro::camera::Ccd	device_type;
 
 	// constructor
-	inline Ccd_impl(astro::camera::CcdPtr ccd) : _ccd(ccd) { }
+	Ccd_impl(astro::camera::CcdPtr ccd);
 
 	virtual char	*getName();
 	virtual CcdInfo	*getInfo();
@@ -29,6 +30,7 @@ public:
 	// exposure related stuff
 	virtual void	startExposure(const ::Astro::Exposure& exp);
 	virtual ExposureState	exposureStatus();
+	virtual CORBA::Long	lastExposureStart();
 	virtual Exposure	getExposure();
 	virtual void	cancelExposure();
 

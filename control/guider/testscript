@@ -23,11 +23,12 @@ filterwheel fw position 1
 ccd blubber assign blubb 0
 ccd blubber info
 ccd blubber cancel
-ccd blubber start exposuretime=10 binning=1x1 origin=(20,10) size=200x210 shutter=open
+ccd blubber start exposuretime=0.99 binning=1x1 origin=(10,10) size=620x460 shutter=open
 ccd blubber wait
 ccd blubber image testimage
 image testimage info
 image testimage save testimage.fits
+ccd blubber info
 exit
 guiderfactory g assign camera:simulator/camera 0 guiderport:simulator/guiderport
 guider g info

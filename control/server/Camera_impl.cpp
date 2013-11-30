@@ -7,6 +7,7 @@
 #include "Ccd_impl.h"
 #include "FilterWheel_impl.h"
 #include "GuiderPort_impl.h"
+#include <ServantBuilder.h>
 
 namespace Astro {
 
@@ -90,8 +91,10 @@ Ccd_ptr	Camera_impl::getCcd(::CORBA::Long ccdid) {
 		notfound.cause = (const char *)"CCD Id does not exist";
 		throw notfound;
 	}
-	Ccd_impl	*ccd = new Ccd_impl(ccds[ccdid]);
-	return ccd->_this();
+
+        ServantBuilder<Ccd, Ccd_impl>     servantbuilder;
+	astro::camera::CcdPtr	ccd = _camera->getCcd(ccdid);
+        return servantbuilder(ccd);
 }
 
 /**
@@ -118,8 +121,9 @@ FilterWheel_ptr	Camera_impl::getFilterWheel() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve filter wheel");
 		filterwheel = _camera->getFilterWheel();
 	}
-	FilterWheel_impl	*fw = new FilterWheel_impl(filterwheel);
-	return fw->_this();
+
+	ServantBuilder<FilterWheel, FilterWheel_impl>	servantbuilder;
+	return servantbuilder(filterwheel);
 }
 
 /**
@@ -144,8 +148,8 @@ GuiderPort_ptr	Camera_impl::getGuiderPort() {
 	if (!guiderport) {
 		guiderport = _camera->getGuiderPort();
 	}
-	GuiderPort_impl	*gp = new GuiderPort_impl(guiderport);
-	return gp->_this();
+	ServantBuilder<GuiderPort, GuiderPort_impl>	servantbuilder;
+	return servantbuilder(guiderport);
 }
 
 } // namespace Astro
