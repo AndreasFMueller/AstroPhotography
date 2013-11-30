@@ -68,6 +68,29 @@ void	ImageActivator_impl::etherealize(
 		CORBA::Boolean			cleanup_in_progress,
 		CORBA::Boolean			remaining_activations
 	) throw (CORBA::SystemException) {
+
+	// get the file name
+	std::string	filename;
+        try {
+		filename = PortableServer::ObjectId_to_string(oid);
+        } catch (const CORBA::BAD_PARAM&) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "have not filename");
+        }
+
+	// when there are no remaining activations, remove the image
+	// from the image directory
+	if (remaining_activations) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remaining activations");
+		return;
+	}
+		
+	// remove the servant
+	delete serv;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "servant deleted");
+
+	// remove the image from the ImageDirectory
+	ImageDirectory::remove(filename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
 }
 
 } // namespace Astro

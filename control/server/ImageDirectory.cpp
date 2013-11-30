@@ -157,4 +157,18 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
 	return filename;
 }
 
+/**
+ * \brief Remove an image from the directory
+ */
+void	ImageDirectory::remove(const std::string& filename) {
+	if (!isFile(filename)) {
+		throw std::runtime_error("file not found");
+	}
+	if (unlink(fullname(filename).c_str()) < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove %s: %s",
+			filename.c_str(), strerror(errno));
+		throw std::runtime_error("cannot remove file");
+	}
+}
+
 } // namespace Astro

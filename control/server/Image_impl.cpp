@@ -8,6 +8,7 @@
 #include <AstroIO.h>
 #include <AstroFilterfunc.h>
 #include <includes.h>
+#include <OrbSingleton.h>
 
 namespace Astro {
 
@@ -85,6 +86,14 @@ CORBA::Long	Image_impl::filesize() {
 
 void	Image_impl::remove() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove image %s", _filename.c_str());
+	// we need a poa to clean up
+	OrbSingleton	orb;
+	PortableServer::POA_var	poa = orb.findPOA(PoaName::images());
+
+	// remove the servant 
+	PortableServer::ObjectId_var	oid
+		= PortableServer::string_to_ObjectId(_filename.c_str());
+	poa->deactivate_object(oid);
 }
 
 astro::image::ImagePtr	Image_impl::getImage() {

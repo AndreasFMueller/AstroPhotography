@@ -33,6 +33,7 @@ public:
 	long	fileAge(const std::string& filename) const;
 	std::list<std::string>	fileList() const;
 	std::string	save(astro::image::ImagePtr image);
+	void	remove(const std::string& filename);
 	Image_ptr	getImage(const std::string& filename);
 };
 

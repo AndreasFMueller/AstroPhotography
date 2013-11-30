@@ -31,6 +31,7 @@ public:
 	static PoaName	ccds();
 	static PoaName	focusers();
 	static PoaName	guiders();
+	static PoaName	images();
 };
 
 std::ostream&	operator<<(std::ostream& out, const PoaName& poaname);
