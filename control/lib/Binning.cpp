@@ -64,6 +64,17 @@ std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
 	return out << binning.toString();
 }
 
+std::istream&	operator>>(std::istream& in, Binning& binning) {
+	char	c;
+	unsigned int	x, y;
+	in >> c >> x >> c >> y;
+	binning.setX(x);
+	binning.setY(y);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "binning mode parsed: %s",
+		binning.toString().c_str());
+	return in;
+}
+
 // The binningtester class is used as a functor 
 /**
  * \brief Binning mode compatibility tester

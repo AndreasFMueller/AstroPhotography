@@ -172,5 +172,16 @@ std::ostream&	operator<<(std::ostream& out, const ImageSize& size) {
 	return out;
 }
 
+std::istream&	operator>>(std::istream& in, ImageSize& size) {
+	unsigned int	width, height;
+	char	x;
+	in >> width >> x >> height;
+	size.setWidth(width);
+	size.setHeight(height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image size: %s",
+		size.toString().c_str());
+	return in;
+}
+
 } // namespace image
 } // namespace astro

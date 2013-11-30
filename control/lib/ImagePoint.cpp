@@ -6,6 +6,7 @@
  */
 #include <AstroImage.h>
 #include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -49,6 +50,17 @@ std::string	ImagePoint::toString() const {
  */
 std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
 	return out << point.toString();
+}
+
+std::istream&	operator>>(std::istream& in, ImagePoint& point) {
+	unsigned int	x, y;
+	char	c;
+	in >> x >> c >> y;
+	point.setX(x);
+	point.setY(y);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image point: %s",
+		point.toString().c_str());
+	return in;
 }
 
 /**

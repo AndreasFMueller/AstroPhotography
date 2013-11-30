@@ -46,6 +46,7 @@ public:
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImagePoint& point);
+std::istream&	operator>>(std::istream& in, ImagePoint& point);
 
 class ImageRectangle;
 /**
@@ -94,6 +95,7 @@ public:
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageSize& size);
+std::istream&	operator>>(std::istream& in, ImageSize& point);
 
 /**
  * \brief Rectangle

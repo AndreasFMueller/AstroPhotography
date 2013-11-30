@@ -38,9 +38,12 @@ public:
 	bool	operator<(const Binning& other) const;
 	unsigned int	getX() const { return x; }
 	unsigned int	getY() const { return y; }
+	void	setX(unsigned int _x) { x = _x; }
+	void	setY(unsigned int _y) { y = _y; }
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);
+std::istream&	operator>>(std::istream& out, Binning& binning);
 
 astro::image::ImagePoint	operator*(const astro::image::ImagePoint& point,
 					const Binning& mode);
@@ -90,7 +93,7 @@ public:
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
 		float _exposuretime);
-		
+
 	typedef enum state_e {
 		idle, exposing, exposed, cancelling
 	} State;
