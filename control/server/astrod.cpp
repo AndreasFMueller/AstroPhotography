@@ -40,7 +40,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'b':
-			Astro::ImageDirectory::basedir(optarg);
+			Astro::ImageObjectDirectory::basedir(optarg);
 			break;
 		}
 

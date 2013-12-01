@@ -11,7 +11,8 @@ namespace task {
 Task::Task() {
 }
 
-TaskQueueEntry::TaskQueueEntry(const Task& task) : _state(pending) {
+TaskQueueEntry::TaskQueueEntry(long queueid, const Task& task)
+	: _id(queueid), _state(pending) {
 }
 
 bool	TaskQueueEntry::blocks(const TaskQueueEntry& other) const {

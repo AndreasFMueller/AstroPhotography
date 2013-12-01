@@ -8,7 +8,7 @@
 
 #include <omniORB4/CORBA.h>
 #include <AstroLoader.h>
-#include <ImageDirectory.h>
+#include <ImageObjectDirectory.h>
 
 namespace Astro {
 
@@ -21,7 +21,7 @@ namespace Astro {
  */
 class ImageActivator_impl
 	: public virtual POA_PortableServer::ServantActivator,
-	  public ImageDirectory {
+	  public ImageObjectDirectory {
 public:
 	ImageActivator_impl() { }
 

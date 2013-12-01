@@ -9,7 +9,7 @@
 #include <AstroExceptions.h>
 #include <AstroFilterfunc.h>
 #include <Conversions.h>
-#include <ImageDirectory.h>
+#include <ImageObjectDirectory.h>
 #include <ServantBuilder.h>
 
 using namespace astro::camera;
@@ -125,7 +125,7 @@ Image_ptr	Ccd_impl::getImage() {
 	}
 
 	// save the image
-	ImageDirectory	directory;
+	ImageObjectDirectory	directory;
 	std::string	filename = directory.save(image);
 
 	// activate this object

@@ -7,6 +7,8 @@
 #define _AstroTask_h
 
 #include <AstroCamera.h>
+#include <queue>
+#include <pthread.h>
 
 namespace astro {
 namespace task {
@@ -86,7 +88,7 @@ public:
 	const std::string& filename() const { return _filename; }
 	void	filename(const std::string& filename) { _filename = filename; }
 
-	TaskQueueEntry(const Task& task);
+	TaskQueueEntry(long queueid, const Task& task);
 public:
 
 	// find out whether a this task blocks some other task
@@ -101,9 +103,13 @@ typedef std::shared_ptr<TaskExecutor>	TaskExecutorPtr;
  * \brief Task queue object
  */
 class TaskQueue {
-	typedef std::map<int id, TaskExecutorPtr>	executormap;
+	typedef std::map<int, TaskExecutorPtr>	executormap;
 	executormap	executors;
 	pthread_t	_thread;
+	pthread_mutex_t	_lock;
+	pthread_cond_t	_cond;
+	bool	_running;
+	std::queue<int>	_idqueue;
 private:
 	// prevent copying
 	TaskQueue(const TaskQueue& other);
@@ -111,27 +117,34 @@ private:
 public:
 	TaskQueue();
 	~TaskQueue();
-	void	terminate(int taskid);
-	void	callback(const TaskQueueEntry& entry);
-	void	update(const TaskQueueEntry& entry);
+	void	main();
+	void	launch();
+	void	hasended(int queueid);
+	void	update(TaskQueueEntry& entry);
+	void	cleanup(int queueid);
 };
 
 /**
  * \brief TaskExecutor
  */
 class TaskExecutor {
-	TaskQueue	_queue;
-	TaskQueueEntry	_task;
+	TaskQueue&	_queue;
+	TaskQueueEntry&	_task;
+public:
+	TaskQueueEntry&	task() { return _task; }
+private:
 	pthread_t	_thread;
 private:
 	// ensure that the TaskExecutor cannot be copied
-	operator=(const TaskExecutor& other);
+	TaskExecutor&	operator=(const TaskExecutor& other);
 	TaskExecutor(const TaskExecutor& other);
 public:
-	TaskExecutor(TaskQueueEntry& task);
+	TaskExecutor(TaskQueue& queue, TaskQueueEntry& task);
 	~TaskExecutor();
 
 	void	main();
+
+	friend class TaskQueue;
 };
 
 } // namespace task

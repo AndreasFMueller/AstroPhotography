@@ -17,6 +17,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 
 noinst_HEADERS = PixelValue.h Simulator.h GuiderProcess.h Sun.h \
 	NameService.h OrbSingleton.h Conversions.h ViewerPipeline.h \
-	CorbaExceptionReporter.h DeviceLocatorAdapter.h Testtable.h
+	CorbaExceptionReporter.h DeviceLocatorAdapter.h Testtable.h \
+	ImageDirectory.h TaskTable.h
 
 BUILT_SOURCES = types.hh exceptions.hh image.hh camera.hh module.hh guider.hh

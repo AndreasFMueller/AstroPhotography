@@ -29,6 +29,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
+	ImageDirectory.cpp \
 	Metavalue.cpp Sun.cpp ViewerPipeline.cpp Viewer.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
@@ -52,7 +53,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Conversions.cpp NameService.cpp OrbSingleton.cpp \
 	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
-	Task.cpp TaskQueue.cpp \
+	Task.cpp TaskQueue.cpp TaskTable.cpp \
 	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
 	guiderSK.cc tasksSK.cc \
 	$(uvc_files) \

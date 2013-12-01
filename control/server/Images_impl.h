@@ -8,7 +8,7 @@
 
 #include <image.hh>
 #include <string>
-#include <ImageDirectory.h>
+#include <ImageObjectDirectory.h>
 
 namespace Astro {
 
@@ -20,7 +20,8 @@ namespace Astro {
  * basic information about each file. The getImage method allows then to
  * get a reference to such an image.
  */
-class Images_impl : public virtual POA_Astro::Images, public ImageDirectory {
+class Images_impl : public virtual POA_Astro::Images,
+			public ImageObjectDirectory {
 	std::string	fullname(const std::string& filename);
 public:
 	Images_impl();

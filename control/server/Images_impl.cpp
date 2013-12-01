@@ -46,7 +46,7 @@ Images::ImageList*	Images_impl::listImages() {
 
 Image_ptr	Images_impl::getImage(const char *_name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for file %s", _name);
-	return ImageDirectory::getImage(std::string(_name));
+	return ImageObjectDirectory::getImage(std::string(_name));
 }
 
 } // namespace Astro

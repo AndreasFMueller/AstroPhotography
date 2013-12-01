@@ -8,10 +8,10 @@
 
 #include <string>
 #include <list>
-#include <image.hh>
 #include <AstroImage.h>
 
-namespace Astro {
+namespace astro {
+namespace image {
 
 /**
  * \brief Server diretory containing images
@@ -34,9 +34,10 @@ public:
 	std::list<std::string>	fileList() const;
 	std::string	save(astro::image::ImagePtr image);
 	void	remove(const std::string& filename);
-	Image_ptr	getImage(const std::string& filename);
+	ImagePtr	getImagePtr(const std::string& filename);
 };
 
-} // namespace Astro
+} // namespace image
+} // namespace astro
 
 #endif /* _ImageDirectory_h */

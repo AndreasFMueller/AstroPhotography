@@ -9,14 +9,14 @@
 #include <image.hh>
 #include <AstroImage.h>
 #include <AstroFormat.h>
-#include <ImageDirectory.h>
+#include <ImageObjectDirectory.h>
 
 namespace Astro {
 
 /**
  * \brief Image servant definition
  */
-class Image_impl : public virtual POA_Astro::Image, public ImageDirectory {
+class Image_impl : public virtual POA_Astro::Image, public ImageObjectDirectory {
 	std::string	_filename;
 	void	setup(astro::image::ImagePtr image);
 public:
