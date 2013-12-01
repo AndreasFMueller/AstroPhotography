@@ -1,0 +1,63 @@
+//
+// tasks.idl -- IDL for the task interface
+//
+// (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+//
+#include "camera.idl"
+
+module Astro {
+	/**
+	 * \brief Task Parameters
+	 */
+	struct TaskParameters {
+		// camera
+		string	camera;
+		long	ccdid;
+
+		// cooler stuff
+		float	ccdtemperature;
+
+		// filterwheel parameters
+		string	filterwheel;
+		long	filterposition;
+
+		// exposure stuff
+		Exposure	exp;
+	};
+
+	/**
+	 * \brief States a task can be in
+	 *
+	 * When a task is created, it is in the pending state. As soon as
+	 * all devices are free, e.g. are not used by any other device,
+	 * then it can be started, after which point it is in the executing
+	 * state. If anything happens during execution of the task goes into
+	 * the failed state. A task can also be cancelled, after which it
+	 * is in the cancelled state.
+	 */
+	enum TaskState	{ TASK_PENDING, TASK_EXECUTING, TASK_FAILED,
+			TASK_CANCELLED };
+
+	/**
+ 	 * \brief Task object
+	 *
+	 * Tasks can manipulated using this interface.
+	 */
+	interface Task {
+		TaskState	state();
+		TaskParameters	parameters();
+		Image		getImage();
+	};
+
+	/**
+	 * \brief Task queue
+	 *
+	 * The task queue stores exposure tasks and executes them.
+	 */
+	interface TaskQueue {
+		long	submit(in TaskParameters params) raises(BadParameter);
+		TaskParameters	parameters(in long taskid) raises(NotFound);
+		void	cancel(in long taskid) raises(BadState, NotFound);
+		void	remove(in long taskid) raises(BadState, NotFound);
+	};
+};

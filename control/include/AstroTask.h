@@ -73,7 +73,7 @@ public:
 	const long	id() const { return _id; }
 
 public:
-	typedef enum { pending, executing, failed, cancelled } taskstate;
+	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
 private:
 	taskstate	_state;
 public:
@@ -94,12 +94,44 @@ public:
 	bool	blockedby(const TaskQueueEntry& other) const;
 };
 
+class	TaskExecutor;
+typedef std::shared_ptr<TaskExecutor>	TaskExecutorPtr;
+
 /**
  * \brief Task queue object
  */
 class TaskQueue {
+	typedef std::map<int id, TaskExecutorPtr>	executormap;
+	executormap	executors;
+	pthread_t	_thread;
+private:
+	// prevent copying
+	TaskQueue(const TaskQueue& other);
+	TaskQueue&	operator=(const TaskQueue& other);
 public:
 	TaskQueue();
+	~TaskQueue();
+	void	terminate(int taskid);
+	void	callback(const TaskQueueEntry& entry);
+	void	update(const TaskQueueEntry& entry);
+};
+
+/**
+ * \brief TaskExecutor
+ */
+class TaskExecutor {
+	TaskQueue	_queue;
+	TaskQueueEntry	_task;
+	pthread_t	_thread;
+private:
+	// ensure that the TaskExecutor cannot be copied
+	operator=(const TaskExecutor& other);
+	TaskExecutor(const TaskExecutor& other);
+public:
+	TaskExecutor(TaskQueueEntry& task);
+	~TaskExecutor();
+
+	void	main();
 };
 
 } // namespace task
