@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <algorithm>
+#include <stdexcept>
 
 namespace astro {
 namespace persistence {
