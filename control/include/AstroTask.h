@@ -17,11 +17,6 @@ namespace task {
  */
 class Task {
 private:
-	long	_id;
-public:
-	const long	id() const { return _id; }
-
-private:
 	astro::camera::Exposure	_exposure;
 public:
 	const astro::camera::Exposure&	exposure() const { return _exposure; }
@@ -72,6 +67,11 @@ public:
  * \brief Task Queue entry
  */
 class TaskQueueEntry : public Task {
+private:
+	long	_id;
+public:
+	const long	id() const { return _id; }
+
 public:
 	typedef enum { pending, executing, failed, cancelled } taskstate;
 private:
