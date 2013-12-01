@@ -6,6 +6,7 @@
 #include <AstroPersistence.h>
 #include <sstream>
 #include <AstroDebug.h>
+#include <stdexcept>
 
 namespace astro {
 namespace persistence {
