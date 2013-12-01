@@ -80,10 +80,19 @@ Astro::Image::ImageFile	*Image_impl::file() {
 	return imagefile;
 }
 
+/**
+ * \brief Get the file size
+ */
 CORBA::Long	Image_impl::filesize() {
 	return fileSize(_filename);
 }
 
+/**
+ * \brief deactivate an object
+ *
+ * This will also remove the file when the servant is etherialized by
+ * the ORB
+ */
 void	Image_impl::remove() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove image %s", _filename.c_str());
 	// we need a poa to clean up

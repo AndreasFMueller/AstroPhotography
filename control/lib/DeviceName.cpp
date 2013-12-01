@@ -86,8 +86,9 @@ DeviceName::device_type	DeviceName::string2type(const std::string& name) {
 			return typecode[i];
 		}
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "type '%s' not found", name.c_str());
-	throw std::runtime_error("type not found");
+	std::string	msg = stringprintf("type '%s' not found", name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**

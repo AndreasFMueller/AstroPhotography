@@ -45,7 +45,8 @@ tests_SOURCES = tests.cpp \
 	BinningTest.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
-	GuiderFactoryTest.cpp
+	GuiderFactoryTest.cpp \
+	DatabaseTest.cpp UpdateSpecTest.cpp TableTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro
 tests_DEPENDENCIES = ../libastro.la
 
@@ -89,7 +90,7 @@ endif
 # test2_LDADD = -L.. -lastro
 # test2_DEPENDENCIES = ../libastro.la
 
-EXTRA_DIST = test_module.la test_module.so
+EXTRA_DIST = test_module.la test_module.so testtable.sh
 
 #all-am:	tests usbtests 
 #	./usbtests

@@ -51,8 +51,10 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
 	Conversions.cpp NameService.cpp OrbSingleton.cpp \
 	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
+	Persistence.cpp Backend.cpp Testtable.cpp \
+	Task.cpp TaskQueue.cpp \
 	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
-	guiderSK.cc \
+	guiderSK.cc tasksSK.cc \
 	$(uvc_files) \
 	$(unicap_flies)
 

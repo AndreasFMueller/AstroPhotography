@@ -33,6 +33,7 @@ AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
 AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
+AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 
 # use pkg-config to find out about the flags to use for omniorb
 if type pkg-config >/dev/null

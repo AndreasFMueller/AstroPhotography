@@ -5,14 +5,16 @@
 # $Id$
 #
 
-EXTRA_DIST = exceptions.idl types.idl image.idl camera.idl module.idl guider.idl
+EXTRA_DIST = exceptions.idl types.idl image.idl camera.idl module.idl \
+	guider.idl tasks.idl
 
 all-am:	../lib/typesSK.cc ../include/types.hh \
 	../lib/exceptionsSK.cc ../include/exceptions.hh \
 	../lib/imageSK.cc ../include/image.hh \
 	../lib/cameraSK.cc ../include/camera.hh \
 	../lib/moduleSK.cc ../include/module.hh \
-	../lib/guiderSK.cc ../include/guider.hh
+	../lib/guiderSK.cc ../include/guider.hh \
+	../lib/tasksSK.cc ../include/tasks.hh
 
 ../lib/exceptionsSK.cc ../include/exceptions.hh:	exceptions.idl
 	omniidl -bcxx exceptions.idl
@@ -44,3 +46,7 @@ all-am:	../lib/typesSK.cc ../include/types.hh \
 	mv guider.hh ../include
 	mv guiderSK.cc ../lib
 
+../lib/tasksSK.cc ../include/tasks.hh:	tasks.idl
+	omniidl -bcxx tasks.idl
+	mv tasks.hh ../include
+	mv tasksSK.cc ../lib

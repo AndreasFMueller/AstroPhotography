@@ -45,6 +45,8 @@ Mandatory packages:
  - GLPK, the GNU Linear Programming toolKit. This package is used for the
    algorithm that finds a background to subtract.
 
+ - SQLite3 is used for persistence of various types of objects
+
 Optional packages:
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
