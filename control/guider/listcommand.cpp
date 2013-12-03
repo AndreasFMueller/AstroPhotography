@@ -38,6 +38,17 @@ void	listcommand::operator()(const std::string& command,
 		}
 		return;
 	}
+	if (arguments[0] == std::string("tasks")) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "list tasks command");
+		try {
+			listtasks(arguments);
+		} catch (CORBA::Exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"list tasks throws exception: %s",
+				Astro::exception2string(x).c_str());
+		}
+		return;
+	}
 	throw command_error("cannot execute list command");
 }
 
@@ -97,6 +108,35 @@ void	listcommand::listimages() {
 	}
 }
 
+void	listcommand::listtasks(const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "list tasks");
+	guidesharedcli	gcli;
+	Astro::TaskState	state = Astro::TASK_COMPLETED;
+	if (arguments.size() > 2) {
+		std::string	statestring = arguments[2];
+		if (statestring == "pending") {
+			state = Astro::TASK_PENDING;
+		}
+		if (statestring == "executing") {
+			state = Astro::TASK_EXECUTING;
+		}
+		if (statestring == "failed") {
+			state = Astro::TASK_FAILED;
+		}
+		if (statestring == "cancelled") {
+			state = Astro::TASK_CANCELLED;
+		}
+		if (statestring == "completed") {
+			state = Astro::TASK_COMPLETED;
+		}
+	}
+	Astro::TaskQueue::taskidsequence_var	taskids
+		= gcli->taskqueue->tasklist(state);
+	for (int i = 0; i < taskids->length(); i++) {
+		std::cout << taskids[i] << std::endl;
+	}
+}
+
 std::string	listcommand::summary() const {
 	return std::string("list various object types");
 }
@@ -110,7 +150,7 @@ std::string	listcommand::help() const {
 		"DESCRIPTION\n"
 		"\n"
 		"Display a list of objects of a given <type>. Valid <type>\n"
-		"values are \"modules\" and \"images\".\n"
+		"values are \"modules\", \"images\" and \"tasks\".\n"
 	);
 }
 

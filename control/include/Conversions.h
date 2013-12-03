@@ -12,6 +12,8 @@
 #include <AstroCamera.h>
 #include <guider.hh>
 #include <AstroGuiding.h>
+#include <AstroTask.h>
+#include <tasks.hh>
 
 namespace astro {
 
@@ -85,6 +87,19 @@ Astro::FilterwheelState	convert(const astro::camera::FilterWheel::State& state);
 // GuiderCalibration
 astro::guiding::GuiderCalibration	convert(const Astro::Guider::Calibration& cal);
 Astro::Guider::Calibration	convert(const astro::guiding::GuiderCalibration& cal);
+
+// TaskState
+astro::task::TaskQueueEntry::taskstate	convert(const Astro::TaskState& state);
+Astro::TaskState	convert(const astro::task::TaskQueueEntry::taskstate& state);
+
+// TaskQueueState
+astro::task::TaskQueue::state_type      convert(const Astro::TaskQueue::QueueState state);
+Astro::TaskQueue::QueueState	convert(const astro::task::TaskQueue::state_type     state);
+
+
+// TaskQueueParameters
+astro::task::Task	convert(const Astro::TaskParameters& parameters);
+Astro::TaskParameters	convert(const astro::task::Task& task);
 
 } // namespace astro
 

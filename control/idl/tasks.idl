@@ -36,7 +36,7 @@ module Astro {
 	 * is in the cancelled state.
 	 */
 	enum TaskState	{ TASK_PENDING, TASK_EXECUTING, TASK_FAILED,
-			TASK_CANCELLED };
+			TASK_CANCELLED, TASK_COMPLETED };
 
 	/**
  	 * \brief Task object
@@ -46,6 +46,7 @@ module Astro {
 	interface Task {
 		TaskState	state();
 		TaskParameters	parameters();
+		string		imagename();
 		Image		getImage();
 	};
 
@@ -55,9 +56,43 @@ module Astro {
 	 * The task queue stores exposure tasks and executes them.
 	 */
 	interface TaskQueue {
+		/**
+		 * \brief manipulate the task queue 
+		 */
+		enum QueueState { IDLE, LAUNCHING, STOPPING, STOPPED };
+		QueueState	state();
+
+		/**
+		 * \brief submit a new task
+		 *
+		 * This submits a new task to the queue.
+		 */
 		long	submit(in TaskParameters params) raises(BadParameter);
+
+		/**
+		 * \brief Retreive the parameters of the queue task
+	 	 */
 		TaskParameters	parameters(in long taskid) raises(NotFound);
+
+		/**
+		 * \brief Cancel a task
+		 */
 		void	cancel(in long taskid) raises(BadState, NotFound);
+
+		/**
+		 * \brief Remove a task from the queue
+		 */
 		void	remove(in long taskid) raises(BadState, NotFound);
+
+		/**
+		 * \brief retrieve a list of tasks
+		 */
+		typedef sequence<long> taskidsequence;
+		taskidsequence	tasklist(in TaskState state);
+		
+		/**
+		 * \brief retrieve a task reference
+		 */
+		Task	getTask(in long taskid) raises(NotFound);
 	};
 };

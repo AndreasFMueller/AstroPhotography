@@ -1,3 +1,6 @@
+list tasks
+task 42 info
+exit
 list modules
 list images
 image i assign toremove.fits

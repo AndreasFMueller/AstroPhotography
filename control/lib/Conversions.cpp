@@ -6,6 +6,8 @@
 #include <Conversions.h>
 #include <AstroDebug.h>
 #include <stdexcept>
+#include <AstroImage.h>
+#include <AstroCamera.h>
 
 namespace astro {
 
@@ -429,6 +431,124 @@ Astro::Guider::Calibration        convert(const astro::guiding::GuiderCalibratio
 		result.coefficients[i] = cal.a[i];
 	}
 	return result;
+}
+
+// TaskState
+astro::task::TaskQueueEntry::taskstate  convert(const Astro::TaskState& state) {
+	switch (state) {
+	case Astro::TASK_PENDING:
+		return astro::task::TaskQueueEntry::pending;
+	case Astro::TASK_EXECUTING:
+		return astro::task::TaskQueueEntry::executing;
+	case Astro::TASK_FAILED:
+		return astro::task::TaskQueueEntry::failed;
+	case Astro::TASK_CANCELLED:
+		return astro::task::TaskQueueEntry::cancelled;
+	case Astro::TASK_COMPLETED:
+		return astro::task::TaskQueueEntry::complete;
+	}
+}
+
+Astro::TaskState        convert(const astro::task::TaskQueueEntry::taskstate& state) {
+	switch (state) {
+	case astro::task::TaskQueueEntry::pending:
+		return Astro::TASK_PENDING;
+	case astro::task::TaskQueueEntry::executing:
+		return Astro::TASK_EXECUTING;
+	case astro::task::TaskQueueEntry::failed:
+		return Astro::TASK_FAILED;
+	case astro::task::TaskQueueEntry::cancelled:
+		return Astro::TASK_CANCELLED;
+	case astro::task::TaskQueueEntry::complete:
+		return Astro::TASK_COMPLETED;
+	}
+}
+
+// TaskQueueState
+astro::task::TaskQueue::state_type
+convert(const Astro::TaskQueue::QueueState state) {
+	switch (state) {
+	case Astro::TaskQueue::IDLE:
+		return astro::task::TaskQueue::idle;
+	case Astro::TaskQueue::LAUNCHING:
+		return astro::task::TaskQueue::launching;
+	case Astro::TaskQueue::STOPPING:
+		return astro::task::TaskQueue::stopping;
+	case Astro::TaskQueue::STOPPED:
+		return astro::task::TaskQueue::stopped;
+	}
+}
+
+Astro::TaskQueue::QueueState
+convert(const astro::task::TaskQueue::state_type state) {
+	switch (state) {
+	case astro::task::TaskQueue::idle:
+		return Astro::TaskQueue::IDLE;
+	case astro::task::TaskQueue::launching:
+		return Astro::TaskQueue::LAUNCHING;
+	case astro::task::TaskQueue::stopping:
+		return Astro::TaskQueue::STOPPING;
+	case astro::task::TaskQueue::stopped:
+		return Astro::TaskQueue::STOPPED;
+	}
+}
+
+// Task parameters
+astro::task::Task	convert(const Astro::TaskParameters& parameters) {
+	astro::camera::Exposure	exposure;
+
+	// origin
+	astro::image::ImagePoint	origin(parameters.exp.frame.origin.x,
+				parameters.exp.frame.origin.y);
+	exposure.frame.setOrigin(origin);
+
+	// size
+	astro::image::ImageSize	size(parameters.exp.frame.size.width,
+				parameters.exp.frame.size.height);
+	exposure.frame.setSize(size);
+
+	// binning mode
+	astro::camera::Binning	mode(parameters.exp.mode.x,
+					parameters.exp.mode.y);
+	exposure.mode = mode;
+
+	switch (parameters.exp.shutter) {
+	case Astro::SHUTTER_CLOSED:
+		exposure.shutter = astro::camera::SHUTTER_CLOSED;
+		break;
+	case Astro::SHUTTER_OPEN:
+		exposure.shutter = astro::camera::SHUTTER_OPEN;
+		break;
+	}
+
+	// remaining parameters
+	astro::task::Task	task;
+	task.exposure(exposure);
+	task.camera(std::string(parameters.camera));
+	task.ccdid(parameters.ccdid);
+	task.ccdtemperature(parameters.ccdtemperature);
+	task.filterwheel(std::string(parameters.filterwheel));
+	task.filterposition(parameters.filterposition);
+
+	return task;
+}
+
+Astro::TaskParameters	convert(const astro::task::Task& task) {
+	Astro::TaskParameters	parameters;
+	parameters.camera = CORBA::string_dup(task.camera().c_str());
+	parameters.ccdid = task.ccdid();
+	parameters.ccdtemperature = task.ccdtemperature();
+	parameters.filterwheel = CORBA::string_dup(task.filterwheel().c_str());
+	parameters.filterposition = task.filterposition();
+	astro::camera::Exposure	exposure = task.exposure();
+	parameters.exp.exposuretime = exposure.exposuretime;
+	parameters.exp.gain = exposure.gain;
+	parameters.exp.limit = exposure.limit;
+	parameters.exp.mode.x = exposure.mode.getX();
+	parameters.exp.mode.y = exposure.mode.getY();
+	parameters.exp.shutter = astro::convert(exposure.shutter);
+	parameters.exp.frame = astro::convert(exposure.frame);
+	return parameters;
 }
 
 } // namespace astro

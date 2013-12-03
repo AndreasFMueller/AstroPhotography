@@ -5,6 +5,7 @@
  */
 #include <AstroTask.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <TaskTable.h>
@@ -484,6 +485,25 @@ bool	TaskQueue::running(int queueid) {
 	executormap::iterator	i = executors.find(queueid);
 	return (executors.end() != i);
 	
+}
+
+/**
+ * \brief retrieve a list of tasks with a given state
+ */
+std::list<long>	TaskQueue::tasklist(TaskQueueEntry::taskstate state) {
+	TaskTable	tasktable(_database);
+	std::list<long>	idlist = tasktable.selectids(
+		stringprintf("state = %d order by id", state));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d ids found", idlist.size());
+	return idlist;
+}
+
+/**
+ * \brief  find out whether the queue id exists
+ */
+bool	TaskQueue::exists(int queueid) {
+	TaskTable	tasktable(_database);
+	return tasktable.exists(queueid);
 }
 
 } // namespace task

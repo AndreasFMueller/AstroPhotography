@@ -9,6 +9,7 @@
 #include <module.hh>
 #include <guider.hh>
 #include <image.hh>
+#include <tasks.hh>
 #include <string>
 #include <vector>
 
@@ -53,6 +54,7 @@ public:
 	operator	CORBA::ORB_var() { return _orbvar; }
 	Modules_var	getModules();
 	Images_var	getImages();
+	TaskQueue_var	getTaskQueue();
 	GuiderFactory_var	getGuiderfactory();
 	DeviceLocator_var       getDeviceLocator(const std::string& modulename);
 	PortableServer::POA_var	findPOA(const std::vector<std::string>& poaname);

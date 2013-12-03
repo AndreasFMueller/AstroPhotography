@@ -9,6 +9,7 @@
 #include <cli.h>
 #include <module.hh>
 #include <image.hh>
+#include <tasks.hh>
 
 namespace astro {
 namespace cli {
@@ -19,6 +20,7 @@ public:
 	virtual ~guidecli();
 	Astro::Modules_var	modules;
 	Astro::Images_var	images;
+	Astro::TaskQueue_var	taskqueue;
 };
 
 

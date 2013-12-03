@@ -211,6 +211,10 @@ public:
 	// information about the queue content
 	int	nexecutors() const { return executors.size(); }
 	TaskExecutorPtr	executor(int queueid);
+
+	// retrieve a list of a queue ids for a given state
+	std::list<long>	tasklist(TaskQueueEntry::taskstate state);
+	bool	exists(int queueid);
 };
 
 /**

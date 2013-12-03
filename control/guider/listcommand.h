@@ -14,6 +14,7 @@ namespace cli {
 class listcommand : public clicommand {
 	void	listmodules();
 	void	listimages();
+	void	listtasks(const std::vector<std::string>& arguments);
 public:
 	listcommand(commandfactory& factory) : clicommand(factory, "list") { }
 	~listcommand() { }

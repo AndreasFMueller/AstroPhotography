@@ -160,6 +160,12 @@ void	ExposureTask::run() {
 			// remember the filename
 			_task.filename(filename);
 
+			// update the frame information
+			astro::camera::Exposure	exposure = _task.exposure();
+			exposure.frame.setSize(image->size());
+			exposure.frame.setOrigin(image->origin());
+			_task.exposure(exposure);
+
 			// log info
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"file %s written",

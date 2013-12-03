@@ -52,30 +52,25 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
 
 	// Next we want to get a reference to the Modules object
-	Astro::Naming::Names	names;
-	names.push_back(Astro::Naming::Name("Astro", "context"));
-	names.push_back(Astro::Naming::Name("Modules", "object"));
-	CORBA::Object_var	obj = nameservice.lookup(names);
-
-	// get a reference to the modules interface
-	cli.modules = Astro::Modules::_narrow(obj);
+	cli.modules = orb.getModules();
 	if (CORBA::is_nil(cli.modules)) {
 		throw std::runtime_error("nil object reference");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
 
 	// Next we want to get a reference to the Images object
-	names.clear();
-	names.push_back(Astro::Naming::Name("Astro", "context"));
-	names.push_back(Astro::Naming::Name("Images", "object"));
-	obj = nameservice.lookup(names);
-
-	// get a reference to the modules interface
-	cli.images = Astro::Images::_narrow(obj);
+	cli.images = orb.getImages();
 	if (CORBA::is_nil(cli.images)) {
 		throw std::runtime_error("nil object reference");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Images object");
+
+	// next we want to get a reference to the TaskQueue object
+	cli.taskqueue = orb.getTaskQueue();
+	if (CORBA::is_nil(cli.taskqueue)) {
+		throw std::runtime_error("nil object reference");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a TaskQueue object");
 
 	/* start parsing the input */
 	if (filename) {

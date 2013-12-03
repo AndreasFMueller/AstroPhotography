@@ -18,7 +18,11 @@
 #include <cassert>
 #include "DriverModuleActivator_impl.h"
 #include "ImageActivator_impl.h"
+#include "TaskQueue_impl.h"
+#include "TaskActivator_impl.h"
 #include <POABuilder.h>
+#include <AstroPersistence.h>
+#include <AstroTask.h>
 
 namespace astro {
 
@@ -28,19 +32,26 @@ namespace astro {
 int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debuglevel = LOG_DEBUG;
+	debugthreads = true;
 
 	// initialize CORBA
 	Astro::OrbSingleton	orb(argc, argv);
 
+	// parameters
+	std::string	databasefile("testdb.db");
+
 	// now parse the command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "db:")))
+	while (EOF != (c = getopt(argc, argv, "db:q:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'b':
 			Astro::ImageObjectDirectory::basedir(optarg);
+			break;
+		case 'q':
+			databasefile = std::string(optarg);
 			break;
 		}
 
@@ -152,6 +163,31 @@ int	main(int argc, char *argv[]) {
 	PortableServer::POA_var	images_poa = pb2.build("Images",
 		new Astro::ImageActivator_impl());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageActivator set");
+
+	// create the task queue
+	astro::persistence::DatabaseFactory	factory;
+	astro::persistence::Database	database
+		= factory.get(databasefile);
+	astro::task::TaskQueue	taskqueue(database);
+
+	// create the servant for TaskQueue
+	Astro::TaskQueue_impl	*taskqueueservant
+		= new Astro::TaskQueue_impl(taskqueue);
+	PortableServer::ObjectId_var	taskqueuesid
+		= root_poa->activate_object(taskqueueservant);
+
+	// register the TaskQueue servant
+	names.clear();
+	names.push_back(Astro::Naming::Name("Astro", "context"));
+	names.push_back(Astro::Naming::Name("TaskQueue", "object"));
+	nameservice.bind(names, taskqueueservant->_this());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue servant activated");
+
+	// a POA for Tasks
+	POABuilderActivator<Astro::TaskActivator_impl>	pb3(root_poa);
+	PortableServer::POA_var	tasks_poa = pb3.build("Tasks",
+		new Astro::TaskActivator_impl(database));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskActivator set");
 
 	// activate the POA manager
 	PortableServer::POAManager_var	pman = root_poa->the_POAManager();

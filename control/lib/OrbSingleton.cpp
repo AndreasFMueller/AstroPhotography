@@ -119,7 +119,7 @@ OrbSingleton::~OrbSingleton() {
  * \brief Get the Modules reference from the ORB
  */
 Modules_var	OrbSingleton::getModules() {
-	        // get a reference to the naming service
+        // get a reference to the naming service
         Astro::Naming::NameService      nameservice(_orbvar);
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
 
@@ -142,7 +142,7 @@ Modules_var	OrbSingleton::getModules() {
  * \brief Get the Images reference from the ORB
  */
 Images_var	OrbSingleton::getImages() {
-	        // get a reference to the naming service
+        // get a reference to the naming service
         Astro::Naming::NameService      nameservice(_orbvar);
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
 
@@ -159,6 +159,29 @@ Images_var	OrbSingleton::getImages() {
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a images object");
 	return images;
+}
+
+/**
+ * \brief Get 
+ */
+TaskQueue_var	OrbSingleton::getTaskQueue() {
+        // get a reference to the naming service
+        Astro::Naming::NameService      nameservice(_orbvar);
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "got naming service");
+
+        // Next we want to get a reference to the Images object
+        Astro::Naming::Names    names;
+        names.push_back(Astro::Naming::Name("Astro", "context"));
+        names.push_back(Astro::Naming::Name("TaskQueue", "object"));
+        CORBA::Object_var       obj = nameservice.lookup(names);
+
+        // get a reference to the images interface
+        Astro::TaskQueue_var      taskqueue = Astro::TaskQueue::_narrow(obj);
+        if (CORBA::is_nil(taskqueue)) {
+                throw std::runtime_error("nil object reference");
+        }
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a taskqueue object");
+	return taskqueue;
 }
 
 /**

@@ -7,21 +7,10 @@
 #include <AstroDebug.h>
 //#include <guiders.h>
 #include <iostream>
+#include <Output.h>
 
 namespace astro {
 namespace cli {
-
-std::ostream&	operator<<(std::ostream& out,
-			const Astro::ImageRectangle& rectangle) {
-	out << rectangle.size.width << "x" << rectangle.size.height << "@("
-		<< rectangle.origin.x << "," << rectangle.origin.y << ")";
-	return out;
-}
-
-std::ostream&	operator<<(std::ostream& out, const Astro::BinningMode& mode) {
-	out << mode.x << "x" << mode.y;
-	return out;
-}
 
 std::ostream&	operator<<(std::ostream& out, const Astro::Exposure& exposure) {
 	out << "exposure time:   " << exposure.exposuretime << std::endl;

@@ -12,14 +12,10 @@
 #include <exposurecommand.h>
 #include <Conversions.h>
 #include <time.h>
+#include <Output.h>
 
 namespace astro {
 namespace cli {
-
-std::ostream&	operator<<(std::ostream& out, Astro::BinningMode& mode) {
-	out << mode.x << "x" << mode.y;
-	return out;
-}
 
 std::ostream&	operator<<(std::ostream& out, Astro::BinningSet& binningset) {
 	for (int i = 0; i < binningset.length(); i++) {
