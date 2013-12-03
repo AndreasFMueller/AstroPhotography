@@ -13,6 +13,8 @@
 #include <AstroLoader.h>
 #include <AstroDevaccess.h>
 #include <ImageDirectory.h>
+#include <errno.h>
+#include <string.h>
 
 using namespace astro::persistence;
 
