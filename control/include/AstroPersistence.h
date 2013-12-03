@@ -139,6 +139,7 @@ public:
 	virtual void	commit() = 0;
 	virtual void	rollback() = 0;
 	virtual StatementPtr	statement(const std::string& query) = 0;
+	virtual bool	hastable(const std::string& tablename) = 0;
 };
 typedef std::shared_ptr<DatabaseBackend>	Database;
 
@@ -175,14 +176,18 @@ protected:
 	std::string	_tablename;
 	std::vector<std::string>	_fieldnames;
 	std::string	selectquery() const;
+protected:
+	
 public:
-	TableBase(Database& database, const std::string& tablename);
+	TableBase(Database& database, const std::string& tablename,
+		const std::string& createstatement = std::string());
 	Row	rowbyid(long objectid);
 	long	nextid();
 	long	addrow(const UpdateSpec& updatespec);
 	void	updaterow(long objectid, const UpdateSpec& updatespec);
 	bool	exists(long objectid);
 	void	remove(long objectid);
+	std::list<long>	selectids(const std::string& condition);
 };
 
 // The table template create below from the TableBase class needs a
@@ -190,6 +195,7 @@ public:
 //
 // class table_adapter {
 // static std::string	tablename();
+// static std::string	createstatement();
 // object	row_to_object(int objectid, const Row& row);
 // UpdateSpec	object_to_updatespec(const object& o);
 // };
@@ -203,7 +209,8 @@ template<typename object, typename dbadapter>
 class Table : public TableBase {
 public:
 	Table(Database& database)
-		: TableBase(database, dbadapter::tablename()) { }
+		: TableBase(database, dbadapter::tablename(),
+			dbadapter::createstatement()) { }
 	object	byid(long objectid);
 	long	add(const object&);
 	void	update(long objectid, const object& o);

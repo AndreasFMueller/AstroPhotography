@@ -12,6 +12,9 @@
 namespace astro {
 namespace task {
 
+/**
+ * \brief Task table adapter
+ */
 class TaskTableAdapter {
 public:
 static std::string	tablename();
@@ -21,6 +24,11 @@ static TaskQueueEntry
 static astro::persistence::UpdateSpec
 	object_to_updatespec(const TaskQueueEntry& entry);
 };
+
+/**
+ * \brief A table built with the TaskTableAdapter is a TaskTable
+ */
+typedef astro::persistence::Table<TaskQueueEntry, TaskTableAdapter> TaskTable;
 
 } // namespace task
 } // namespace astro

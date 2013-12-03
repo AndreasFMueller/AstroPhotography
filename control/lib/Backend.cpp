@@ -21,7 +21,8 @@ class Sqlite3Exception : public std::runtime_error {
 				const std::string& info);
 public:
 	Sqlite3Exception(Sqlite3Backend& backend, const std::string& info) 
-		: std::runtime_error(cause(backend, info)) { }
+		: std::runtime_error(cause(backend, info)) {
+	}
 };
 
 /**
@@ -70,6 +71,7 @@ public:
 	virtual void	commit();
 	virtual void	rollback();
 	virtual StatementPtr	statement(const std::string& query);
+	virtual bool	hastable(const std::string& tablename);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -89,10 +91,13 @@ Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 	if (SQLITE_OK == (rc = sqlite3_prepare_v2(_backend.database(),
 		query.c_str(), query.size(), &stmt, &tail))) {
 		if (NULL == stmt) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "no sql query: %s",
+				query.c_str());
 			throw std::runtime_error("no SQL query");
 		}
 		return;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "remaining query: %s", tail);
 	throw Sqlite3Exception(_backend,
 		stringprintf("remaining query: %s", tail));
 }
@@ -253,8 +258,8 @@ public:
 
 int	ResultCollector::operator()(int columns, char **values,
 		char **colnames) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "add another row with %d columns",
-		columns);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "add another row with %d columns",
+	//	columns);
 	Row	row;
 	for (int i = 0; i < columns; i++) {
 		std::string	colname;
@@ -280,6 +285,7 @@ static int	collector_callback(void *coll, int columns, char **values,
  * \brief Perform an arbitrary query
  */
 Result	Sqlite3Backend::query(const std::string& query) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query: %s", query.c_str());
 	ResultCollector	collector;
 	char	*errmsg = NULL;
 	int	rc = sqlite3_exec(_database, query.c_str(),
@@ -287,6 +293,7 @@ Result	Sqlite3Backend::query(const std::string& query) {
 	if (SQLITE_OK == rc) {
 		return collector.result;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "query fails: %s", errmsg);
 	throw Sqlite3Exception(*this, std::string(errmsg));
 }
 
@@ -335,6 +342,25 @@ void	Sqlite3Backend::rollback() {
  */
 StatementPtr	Sqlite3Backend::statement(const std::string& query) {
 	return StatementPtr(new Sqlite3Statement(*this, query));
+}
+
+/**
+ * \brief Find out whether the table exists in the database
+ */
+bool	Sqlite3Backend::hastable(const std::string& tablename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check for table %s", tablename.c_str());
+	try {
+		Result	res = query("PRAGMA table_info('" + tablename + "');");
+		if (res.size() > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "table exists");
+			return true;
+		}
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create table %s",
+			x.what());
+			
+	}
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////

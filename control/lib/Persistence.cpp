@@ -269,15 +269,24 @@ void	UpdateSpec::bind(StatementPtr& stmt) const {
 }
 
 void	UpdateSpec::bindid(StatementPtr& stmt, int id) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "binding id: %d", id);
 	stmt->bind(size(), id);
 }
 
 //////////////////////////////////////////////////////////////////////
 // TableBase implementation
 //////////////////////////////////////////////////////////////////////
-TableBase::TableBase(Database& database, const std::string& tablename)
+TableBase::TableBase(Database& database, const std::string& tablename,
+	const std::string& createstatement)
 	: _database(database), _tablename(tablename) {
-	// get all the rows
+	// test whether the database contains the table
+	if (!database->hastable(tablename)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating table using %s",
+			createstatement.c_str());
+		database->query(createstatement);
+	}
+
+	// get all the column names
 	_fieldnames = _database->fieldnames(_tablename);
 }
 
@@ -311,14 +320,16 @@ std::string	TableBase::selectquery() const {
  */
 long	TableBase::nextid() {
 	std::ostringstream	out;
-	out << "select max(id + 1) as 'nextid' from " << _tablename;
+	out << "select case when count(*) = 0 then 1 else max(id + 1) end as 'nextid' from " << _tablename;
 	Result	result = _database->query(out.str());
 	if (result.size() != 1) {
 		return 0;
 	}
 	Row	row = result.front();
 	const FieldValuePtr&	field = row[0];
-	return field->intValue();
+	long	id = field->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "next id: %ld", id);
+	return id;
 }
 
 /**
@@ -331,6 +342,7 @@ Row	TableBase::rowbyid(long objectid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
 	Result	result = stmt->result();
 	if (result.size() != 1) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "internal error: objectid");
 		throw std::runtime_error("wrong number of rows");
 	}
 	return result.front();
@@ -385,6 +397,23 @@ void	TableBase::remove(long objectid) {
 	StatementPtr	stmt = _database->statement(out.str());
 	stmt->bind(0, (int)objectid);
 	stmt->execute();
+}
+
+/**
+ * \brief retrieve a list of all object ids satisfying a condition
+ */
+std::list<long>	TableBase::selectids(const std::string& condition) {
+	std::ostringstream	out;
+	out << "select id from " << _tablename << " where " << condition;
+	Result	result = _database->query(out.str());
+	std::list<long>	idlist;
+	Result::const_iterator	rowp;
+	for (rowp = result.begin(); rowp != result.end(); rowp++) {
+		idlist.push_back((*rowp)[0]->intValue());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "list of %d ids retrieved",
+		idlist.size());
+	return idlist;
 }
 
 } // namespace persistence

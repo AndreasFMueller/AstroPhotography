@@ -49,6 +49,7 @@ std::ostream&	operator<<(std::ostream& out, const TestEntry& entry);
 class	TesttableAdapter {
 public:
 static std::string	tablename();
+static std::string	createstatement();
 static TestEntry	row_to_object(int objectid, const Row& row);
 static UpdateSpec	object_to_updatespec(const TestEntry& entry);
 };

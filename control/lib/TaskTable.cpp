@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <TaskTable.h>
+#include <AstroDebug.h>
 
 using namespace astro::persistence;
 using namespace astro::image;
@@ -18,28 +19,31 @@ std::string	TaskTableAdapter::tablename() {
 
 std::string	TaskTableAdapter::createstatement() {
 	return std::string(
-	"create table ("
-	"    id integer not null,"
-	"    camera varchar(256) not null, "
-	"    ccdid integer not null default 0, "
-	"    temperature float not null default -1, "
-	"    filterwheel varchar(256) not null default '', "
-	"    position integer not null default 0, "
-	"    originx integer not null default 0, "
-	"    originy integer not null default 0, "
-	"    width integer not null default 0, "
-	"    height integer not null default 0, "
-	"    exposuretime float not null default 1, "
-	"    gain float not null, "
-	"    limit float not null, "
-	"    binx integer not null default 1, "
-	"    biny integer not null default 1, "
-	"    shutteropen integer not null default 1, "
-	"    primary key(id) "
+	"create table taskqueue (\n"
+	"    id integer not null,\n"
+	"    camera varchar(256) not null,\n"
+	"    ccdid integer not null default 0,\n"
+	"    temperature float not null default -1,\n"
+	"    filterwheel varchar(256) not null default '',\n"
+	"    position integer not null default 0,\n"
+	"    originx integer not null default 0,\n"
+	"    originy integer not null default 0,\n"
+	"    width integer not null default 0,\n"
+	"    height integer not null default 0,\n"
+	"    exposuretime float not null default 1,\n"
+	"    gain float not null,\n"
+	"    vlimit float not null,\n"
+	"    binx integer not null default 1,\n"
+	"    biny integer not null default 1,\n"
+	"    shutteropen integer not null default 1,\n"
+	"    filename varchar(256) not null default '',\n"
+	"    state int not null default 0,\n"
+	"    primary key(id)\n"
 	")");
 }
 
 TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert object %d", objectid);
 	Task	task;
 	task.camera(row["camera"]->stringValue());
 	task.ccdid(row["ccdid"]->intValue());
@@ -56,18 +60,23 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	exposure.frame.setSize(size);
 	exposure.exposuretime = row["exposuretime"]->doubleValue();
 	exposure.gain = row["gain"]->doubleValue();
-	exposure.limit = row["limit"]->doubleValue();
+	exposure.limit = row["vlimit"]->doubleValue();
 	exposure.shutter = (row["shutteropen"]->intValue())
 				? camera::SHUTTER_OPEN : camera::SHUTTER_CLOSED;
 
 	Binning	mode(row["binx"]->intValue(), row["biny"]->intValue());
 	exposure.mode = mode;
 	task.exposure(exposure);
+
 	TaskQueueEntry	entry(objectid, task);
+	entry.filename(row["filename"]->stringValue());
+	entry.state((TaskQueueEntry::taskstate)row["state"]->intValue());
+
 	return entry;
 }
 
 UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert entry %d", entry.id());
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
 	spec.insert(Field("camera", factory.get(entry.camera())));
@@ -85,11 +94,13 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("exposuretime",
 		factory.get((double)exposure.exposuretime)));
 	spec.insert(Field("gain", factory.get((double)exposure.gain)));
-	spec.insert(Field("limit", factory.get((double)exposure.limit)));
+	spec.insert(Field("vlimit", factory.get((double)exposure.limit)));
 	spec.insert(Field("binx", factory.get((int)exposure.mode.getX())));
 	spec.insert(Field("biny", factory.get((int)exposure.mode.getY())));
 	spec.insert(Field("shutteropen",
 		factory.get((exposure.shutter == SHUTTER_OPEN) ? 1 : 0)));
+	spec.insert(Field("filename", factory.get(entry.filename())));
+	spec.insert(Field("state", factory.get((int)entry.state())));
 	return spec;
 }
 

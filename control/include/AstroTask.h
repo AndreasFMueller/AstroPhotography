@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <queue>
 #include <pthread.h>
+#include <AstroPersistence.h>
 
 namespace astro {
 namespace task {
@@ -16,6 +17,9 @@ namespace task {
 /**
  * \brief Task object
  *
+ * The Task object contains all information needed to start a task. It tells
+ * what to do. In contrast, the TaskQueueEntry class below contains in
+ * addition information acquired while while performing the task.
  */
 class Task {
 private:
@@ -67,12 +71,18 @@ public:
 
 /**
  * \brief Task Queue entry
+ *
+ * The TaskQueueEntry object is an extension of the Task object. It collects
+ * all information needed during task processing, like identification,
+ * state and the name of the image file created from the completion of
+ * the task.
  */
 class TaskQueueEntry : public Task {
 private:
 	long	_id;
 public:
 	const long	id() const { return _id; }
+	void	id(long i) { _id = i; }
 
 public:
 	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
@@ -95,33 +105,112 @@ public:
 	bool	blocks(const TaskQueueEntry& other) const;
 	bool	blockedby(const TaskQueueEntry& other) const;
 };
+typedef std::shared_ptr<TaskQueueEntry>	TaskQueueEntryPtr;
 
 class	TaskExecutor;
 typedef std::shared_ptr<TaskExecutor>	TaskExecutorPtr;
 
 /**
  * \brief Task queue object
+ *
+ * The TaskQueue object manages a queue of tasks. Each task is launched
+ * with an executor object, and the queue can wait for completion of the
+ * task.
  */
 class TaskQueue {
+	// database containing the task queue table
+	astro::persistence::Database	_database;
+
+	// a map containing all active executors
 	typedef std::map<int, TaskExecutorPtr>	executormap;
 	executormap	executors;
+
+	// thread performing the task queue management work
 	pthread_t	_thread;
-	pthread_mutex_t	_lock;
-	pthread_cond_t	_cond;
-	bool	_running;
+	// lock to protect the data structures
+	pthread_mutex_t	lock;
+	// condition variable to signal to the task queue thread
+	pthread_cond_t	statechange_cond;
+
+	// condition variable and lock used for the wait operation
+	pthread_cond_t	wait_cond;
+
+	// various variables used to exchange information with 
+public:
+	// the task queue implements the following state diagram
+	//
+	//      +------+                              +-----------+
+	// ---> | idle | -----start_work_thread-----> | launching |
+	//      +------+        [ restart() ]         +-----------+
+	//         ^                              ^    |         ^
+	//         |                            /      |         |
+	//         |                          /        |         |
+	//     shutdown()           start()         stop()    start()
+	//         |            /                      |         |
+	//         |          /                        |         |
+	//         |        /                          v         |
+	//    +---------+ /                           +----------+
+	//    | stopped | <---last_executor_stops --- | stopping |
+	//    +---------+         [ wait() ]          +----------+
+	//
+	// In the idle state, there is no work available, so the task
+	// object cannot do any work. In the launching state, the task
+	// queue will start new task executors when another task 
+	// completes. To prevent this, one has to stop the queue using
+	// the stop() method. It will continue monitoring the active
+	// executors, but it will no longer launch new executors. Then
+	// the last executor has stopped, the queue goes into the stopped
+	// state. From there, launching of executors can still be resumed
+	// by calling the start method.
+	typedef enum { idle, launching, stopping, stopped } state_type;
+	static std::string	statestring(const state_type& state);
+private:
+	state_type	_state;
+public:
+	const state_type&	state() const { return _state; }
+private:
 	std::queue<int>	_idqueue;
 private:
 	// prevent copying
 	TaskQueue(const TaskQueue& other);
 	TaskQueue&	operator=(const TaskQueue& other);
 public:
-	TaskQueue();
+	TaskQueue(astro::persistence::Database database);
 	~TaskQueue();
+
+	// main function
 	void	main();
+
+private:
+	// start new executors. Many methods here are private, they are
+	// only used internally
 	void	launch();
-	void	hasended(int queueid);
-	void	update(TaskQueueEntry& entry);
+	void	launch(const TaskQueueEntry& entry);
+	// methods to update the executormap/database
+	void	update(const TaskQueueEntry& entry);
+	void	update(int queueid);
+	void	cancel(int queueid);
 	void	cleanup(int queueid);
+	bool	blocks(const TaskQueueEntry& entry);
+public:
+	void	post(int queueid);	// signal state change for queueid
+	bool	running(int queueid);
+
+	// start and stop queue processing
+	void	start();		// start queue processing
+	void	stop();			// stop launching new executors
+	void	cancel();		// cancel all active executors
+	void	wait(int queueid);	// wait for an executor to terminate
+	void	wait();			// wait for alle executors to terminate
+	void	shutdown();		// shutdown the queue
+	void	restart();		// restart the queue
+
+	// submit a new task entry
+	int	submit(const Task& entry);
+
+	// information about the queue content
+	int	nexecutors() const { return executors.size(); }
+	TaskExecutorPtr	executor(int queueid);
 };
 
 /**
@@ -129,20 +218,30 @@ public:
  */
 class TaskExecutor {
 	TaskQueue&	_queue;
-	TaskQueueEntry&	_task;
+	TaskQueueEntry	_task;
 public:
-	TaskQueueEntry&	task() { return _task; }
+	const TaskQueueEntry&	task() { return _task; }
 private:
 	pthread_t	_thread;
+	pthread_mutex_t	_lock;
+	pthread_cond_t	_cond;
 private:
 	// ensure that the TaskExecutor cannot be copied
 	TaskExecutor&	operator=(const TaskExecutor& other);
 	TaskExecutor(const TaskExecutor& other);
+
+	// private timed wait function
+	bool	wait(float t);
 public:
-	TaskExecutor(TaskQueue& queue, TaskQueueEntry& task);
+	TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task);
 	~TaskExecutor();
 
+	void	cancel();
+	void	wait();
+
 	void	main();
+
+	bool	blocks(const TaskQueueEntry& other);
 
 	friend class TaskQueue;
 };

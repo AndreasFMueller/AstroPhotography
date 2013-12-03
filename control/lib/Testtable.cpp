@@ -21,6 +21,18 @@ std::string	TesttableAdapter::tablename() {
 	return std::string("testtable");
 }
 
+std::string	TesttableAdapter::createstatement() {
+	return std::string(
+	"create table testtable ("
+	"    id integer not null,"
+	"    intfield integer not null default 0,"
+	"    floatfield float not null default 0,"
+	"    stringfield varchar(256) not null default '',"
+	"    primarykey(id)"
+	")"
+	);
+}
+
 TestEntry	TesttableAdapter::row_to_object(int objectid, const Row& row) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "objectid: %d", objectid);
 	TestEntry	entry(objectid);

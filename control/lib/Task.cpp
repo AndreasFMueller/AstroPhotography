@@ -4,15 +4,21 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroTask.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace task {
 
 Task::Task() {
+	_ccdid = 0;
+	_filterposition = 0;
+	_ccdtemperature = -1;
 }
 
 TaskQueueEntry::TaskQueueEntry(long queueid, const Task& task)
-	: _id(queueid), _state(pending) {
+	: Task(task), _id(queueid), _state(pending) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
+		filterwheel().c_str());
 }
 
 bool	TaskQueueEntry::blocks(const TaskQueueEntry& other) const {
