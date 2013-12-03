@@ -1,4 +1,6 @@
 list tasks
+task 40 info
+task 41 info
 task 42 info
 exit
 list modules

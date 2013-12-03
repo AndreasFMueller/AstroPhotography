@@ -28,7 +28,8 @@ void	taskcommand::operator()(const std::string& command,
 	}
 }
 
-static std::ostream&	operator<<(std::ostream& out, Astro::Exposure& exposure) {
+static std::ostream&	operator<<(std::ostream& out,
+				Astro::Exposure& exposure) {
 	out << "exposure time:  " << exposure.exposuretime << std::endl;
 	out << "gain:           " << exposure.gain << std::endl;
 	out << "limit:          " << exposure.limit << std::endl;
@@ -39,12 +40,12 @@ static std::ostream&	operator<<(std::ostream& out, Astro::Exposure& exposure) {
 	}
 	out << std::endl;
 	out << "binning:        " << exposure.mode << std::endl;
-	out << "origin:         " << exposure.frame.origin << std::endl;
-	out << "size:           " << exposure.frame.size << std::endl;
+	out << "frame:          " << exposure.frame << std::endl;
 	return out;
 }
 
-static std::ostream&	operator<<(std::ostream& out, Astro::TaskParameters_var parameters) {
+static std::ostream&	operator<<(std::ostream& out,
+		Astro::TaskParameters_var parameters) {
 	out << "camera:         " << parameters->camera << std::endl;
 	out << "ccd:            " << parameters->ccdid << std::endl;
 	out << "temperature:    " << parameters->ccdtemperature << std::endl;
