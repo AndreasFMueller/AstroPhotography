@@ -241,6 +241,7 @@ public:
 	void	main();
 
 	bool	blocks(const TaskQueueEntry& other);
+	bool	running();
 
 	friend class TaskQueue;
 };

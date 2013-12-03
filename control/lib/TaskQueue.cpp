@@ -477,5 +477,14 @@ TaskExecutorPtr	TaskQueue::executor(int queueid) {
 	return i->second;
 }
 
+/**
+ * \brief Find out whether a queue id is running
+ */
+bool	TaskQueue::running(int queueid) {
+	executormap::iterator	i = executors.find(queueid);
+	return (executors.end() != i);
+	
+}
+
 } // namespace task
 } // namespace astro
