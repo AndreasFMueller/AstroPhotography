@@ -184,15 +184,18 @@ void	Module::close() {
 /**
  * \brief Get a pointer to given symbol
  */
-void	*Module::getSymbol(const std::string& symbolname) const {
+void	*Module::getSymbol(const std::string& symbolname) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking up symbol %s",
 		symbolname.c_str());
 	// make sure the module is already loaded
 	if (!isloaded()) {
+		this->open();
+#if 0
 		std::string	msg = stringprintf("module %s not open",
 			_modulename.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
+#endif
 	}
 
 	// find the symbol for the getDescriptor function
@@ -214,7 +217,7 @@ void	*Module::getSymbol(const std::string& symbolname) const {
  * a method named getDescriptor with C linkage which returns a pointer
  * to a Descriptor object for this method to work.
  */
-ModuleDescriptorPtr	Module::getDescriptor() const {
+ModuleDescriptorPtr	Module::getDescriptor() {
 	void	*s = getSymbol(std::string("getDescriptor"));
 
 	// now cast the symbol to a function that returns a descriptor

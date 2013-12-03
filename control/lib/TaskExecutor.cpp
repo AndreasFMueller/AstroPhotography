@@ -10,6 +10,9 @@
 #include <pthread.h>
 #include <math.h>
 #include <sys/time.h>
+#include <AstroLoader.h>
+#include <AstroDevaccess.h>
+#include <ImageDirectory.h>
 
 using namespace astro::persistence;
 
@@ -57,6 +60,129 @@ bool	TaskExecutor::wait(float t) {
 }
 
 /**
+ * \brief Exposure Task class
+ *
+ * This class encapsulates what the executor has to do
+ */
+class ExposureTask {
+	astro::camera::CameraPtr	camera;
+	astro::camera::CcdPtr		ccd;
+	astro::camera::CoolerPtr	cooler;
+	astro::camera::FilterWheelPtr	filterwheel;
+	TaskExecutor&	_executor;
+	TaskQueueEntry&	_task;
+public:
+	ExposureTask(TaskExecutor& executor, TaskQueueEntry& task);
+	~ExposureTask();
+	void	run();
+};
+
+ExposureTask::ExposureTask(TaskExecutor& executor, TaskQueueEntry& task)
+	: _executor(executor), _task(task) {
+	// create a repository, we are always using the default
+	// repository
+	astro::module::Repository	repository;
+	
+	// get camera and ccd
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %d",
+		_task.camera().c_str(), _task.ccdid());
+	astro::device::DeviceAccessor<astro::camera::CameraPtr>
+		dc(repository);
+	camera = dc.get(_task.camera());
+	ccd = camera->getCcd(_task.ccdid());
+
+	// turn on the cooler
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set cooler to %f",
+		_task.ccdtemperature());
+	if ((ccd->hasCooler()) && (_task.ccdtemperature() > 0)) {
+		cooler = ccd->getCooler();
+	}
+
+	// get the filterwheel
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter %d of wheel '%s'",
+		_task.filterposition(), _task.filterwheel().c_str());
+	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
+		df(repository);
+	if ((_task.filterwheel().size() > 0) && (_task.filterposition() >= 0)) {
+		filterwheel = df.get(_task.filterwheel());
+	}
+}
+
+void	ExposureTask::run() {
+	// set the cooler
+	if (cooler) {
+		cooler->setTemperature(_task.ccdtemperature());
+		cooler->setOn(true);
+	}
+
+	// set the filterwheel position
+	if (filterwheel) {
+		filterwheel->wait(10);
+		filterwheel->select(_task.filterposition());
+	}
+
+	// wait for the cooler, if present, but at most 30 seconds
+	if (cooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for cooler");
+		if (!cooler->wait(30)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"cannot stabilize temperature");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now stable");
+	}
+
+	// wait for the filterwheel if present
+	if (filterwheel) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for filterwheel");
+		if (!filterwheel->wait(30)) {
+			throw std::runtime_error("filter wheel does not idle");
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel now idle");
+	}
+
+	// start exposure
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure");
+	ccd->startExposure(_task.exposure());
+
+	// wait for completion of exposure
+	if (_executor.wait(_task.exposure().exposuretime)) {
+		// wait for the ccd to complete
+		if (ccd->wait()) {
+			// get the image from the ccd
+			astro::image::ImagePtr	image = ccd->getImage();
+
+			// add to the ImageDirectory
+			astro::image::ImageDirectory	imagedir;
+			std::string	filename = imagedir.save(image);
+
+			// remember the filename
+			_task.filename(filename);
+
+			// log info
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"file %s written",
+				_task.filename().c_str());
+			_task.state(TaskQueueEntry::complete);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"could not get image");
+			_task.state(TaskQueueEntry::failed);
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancelled");
+		_task.state(TaskQueueEntry::cancelled);
+	}
+}
+
+ExposureTask::~ExposureTask() {
+	// turn of the cooler
+	if (cooler) {
+		cooler->setOn(false);
+	}
+}
+
+
+/**
  * \brief Task Executor main function
  *
  * Special consideration is needed for cancelling such a thread. If the
@@ -71,34 +197,12 @@ void	TaskExecutor::main() {
 		// inform queue of state change
 		_task.state(TaskQueueEntry::executing);
 		_queue.post(_task.id()); // notify queue of state change
-		
-		// XXX get camera and ccd
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %d",
-			_task.camera().c_str(), _task.ccdid());
 
-		// XXX turn on the cooler
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set cooler to %f",
-			_task.ccdtemperature());
+		ExposureTask	exposuretask(*this, _task);
 
-		// XXX get the filterwheel
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter %d of wheel '%s'",
-			_task.filterposition(), _task.filterwheel().c_str());
-
-		// XXX start exposure
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure");
-
-		// wait for completion of exposure
-		if (wait(_task.exposure().exposuretime)) {
-			// read image, add to the ImageDirectory
-			_task.filename(stringprintf("file%d.fits", _task.id()));
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s written",
-				_task.filename().c_str());
-			_task.state(TaskQueueEntry::complete);
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancelled");
-			_task.state(TaskQueueEntry::cancelled);
-		}
-	} catch (...) {
+		exposuretask.run();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "executor failure: %s", x.what());
 		_task.state(TaskQueueEntry::failed);
 	}
 	_queue.post(_task.id());

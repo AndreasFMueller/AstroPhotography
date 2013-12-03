@@ -6,6 +6,7 @@
 #include <AstroCamera.h>
 #include <stdexcept>
 #include <AstroFormat.h>
+#include <unistd.h>
 
 using namespace astro::image;
 using namespace astro::device;
@@ -81,6 +82,32 @@ void	Cooler::addTemperatureMetadata(ImageBase& image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature unknown: %s",
 			x.what());
 	}
+}
+
+/**
+ * \brief Find out whether the cooler has cooled to a stable temperature
+ */
+bool	Cooler::stable() {
+	if (!isOn()) {
+		return true;
+	}
+	float	actualtemperature = this->getActualTemperature();
+	float	delta = fabs(actualtemperature - temperature);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"T_act = %.1f, T_set = %.1f, delta = %.1f",
+		actualtemperature, temperature, delta);
+	return (delta < 1);
+}
+
+/**
+ * \brief Wait for the cooler to cool down
+ */
+bool	Cooler::wait(float timeout) {
+	while ((timeout > 0) && (!stable())) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for cooler");
+		usleep(100000);
+	}
+	return (timeout < 0) ? false : true;
 }
 
 } // namespace camera

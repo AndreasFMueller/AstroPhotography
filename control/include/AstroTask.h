@@ -230,14 +230,13 @@ private:
 	TaskExecutor&	operator=(const TaskExecutor& other);
 	TaskExecutor(const TaskExecutor& other);
 
-	// private timed wait function
-	bool	wait(float t);
 public:
 	TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task);
 	~TaskExecutor();
 
 	void	cancel();
 	void	wait();
+	bool	wait(float t);
 
 	void	main();
 

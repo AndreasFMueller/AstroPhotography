@@ -73,7 +73,7 @@ class	Module {
 	std::string	getDlname(const std::string& lafilename) const;
 	bool	dlfileexists() const;
 	Module(const std::string& dirname, const std::string& modulename);
-	void	*getSymbol(const std::string& symbolname) const;
+	void	*getSymbol(const std::string& symbolname);
 	astro::device::DeviceLocatorPtr	devicelocator;
 public:
 	bool	operator==(const Module& other) const;
@@ -83,7 +83,7 @@ public:
 	void	open();
 	void	close();
 	static bool	dlclose_on_close;
-	ModuleDescriptorPtr	getDescriptor() const;
+	ModuleDescriptorPtr	getDescriptor();
 	astro::device::DeviceLocatorPtr	getDeviceLocator();
 	friend class RepositoryBackend;
 	friend class ::astro::test::ModuleTest;

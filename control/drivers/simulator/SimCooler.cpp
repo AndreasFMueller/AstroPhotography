@@ -28,10 +28,16 @@ float	SimCooler::getActualTemperature() {
 	double	timepast = simtime() - laststatechange;
 	float	targettemperature = (on) ? temperature : AMBIENT_TEMPERATURE;
 	float	delta = targettemperature - lasttemperature;
+	// for past time < 5, we let the temperature change linearly
+	// at the end of 
+	float	actemp = 0;
 	if (timepast < 5) {
-		return (timepast / 6) * delta + lasttemperature;
+		actemp = (timepast / 6) * delta + lasttemperature;
+	} else {
+		actemp = targettemperature - exp(5 - timepast) * delta / 6;
 	}
-	return targettemperature - exp(5 - timepast) * delta / 6;
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "t = %.1f, T = %.1f", timepast, actemp);
+	return actemp;
 }
 
 void	SimCooler::setTemperature(float _temperature) {

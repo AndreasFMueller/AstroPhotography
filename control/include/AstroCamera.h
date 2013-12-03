@@ -328,6 +328,8 @@ public:
 	virtual bool	isOn();
 	virtual void	setOn(bool onoff);
 	virtual void	addTemperatureMetadata(astro::image::ImageBase& image);
+	bool	stable();
+	bool	wait(float timeout);
 };
 
 /**
@@ -351,6 +353,7 @@ public:
 	virtual void	select(size_t filterindex) = 0;
 	virtual std::string	filterName(size_t filterindex) = 0;
 	virtual State	getState() = 0;
+	bool	wait(float timeout);
 };
 
 /**

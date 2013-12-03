@@ -5,10 +5,16 @@
  */
 #include <AstroTask.h>
 #include <AstroDebug.h>
+#include <AstroLoader.h>
+#include <AstroCamera.h>
+#include <AstroDevaccess.h>
 #include <cstdlib>
 #include <unistd.h>
 
 using namespace astro::persistence;
+using namespace astro::device;
+using namespace astro::module;
+using namespace astro::camera;
 
 namespace astro {
 namespace task {
@@ -27,6 +33,12 @@ int	main(int argc, char *argv[]) {
 			break;
 		}
 
+	// initialize the focuser simulator to the focused position
+	Repository	repository;
+	DeviceAccessor<FocuserPtr>	deviceaccessor(repository);
+	FocuserPtr	focuser = deviceaccessor.get(std::string("focuser:simulator/focuser"));
+	focuser->moveto((focuser->min() + focuser->max()) / 2, 30);
+
 	// create the database
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating the database");
 	DatabaseFactory	factory;
@@ -38,8 +50,8 @@ int	main(int argc, char *argv[]) {
 
 	// submit a job to the task queue
 	Task	task;
-	task.camera("simulator:camera");
-	task.filterwheel("simulator:filterwheel");
+	task.camera("camera:simulator/camera");
+	task.filterwheel("filterwheel:simulator/filterwheel");
 	task.filterposition(0);
 	task.ccdtemperature(260);
 	camera::Exposure	exposure = task.exposure();
@@ -54,7 +66,7 @@ int	main(int argc, char *argv[]) {
 		int queueid = queue.submit(task);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "id %d submitted", queueid);
 	}
-	sleep(10);
+	sleep(60);
 
 	// stop the queue
 	queue.stop();

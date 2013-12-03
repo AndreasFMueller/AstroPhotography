@@ -17,7 +17,7 @@ double	simtime() {
         struct timeval  tv;
         gettimeofday(&tv, NULL);
         double  result = tv.tv_sec;
-        result += 0.0000001 * tv.tv_usec;
+        result += 0.000001 * tv.tv_usec;
 	result += advance;
         return result;
 }
