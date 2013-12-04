@@ -1,7 +1,10 @@
 list tasks
 task 1 info
+task 1 parameters
 task 2 info
+task 2 parameters
 task 3 info
+task 3 parameters
 exit
 list modules
 list images

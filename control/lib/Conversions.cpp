@@ -556,7 +556,8 @@ Astro::TaskParameters	convert(const astro::task::TaskParameters& task) {
 astro::task::TaskInfo     convert(const Astro::TaskInfo& info) {
 	astro::task::TaskInfo	entry(info.taskid);
 	entry.state(convert(info.state));
-	entry.lastchange(info.lastchange);
+	time_t	now = time(NULL);
+	entry.lastchange(now - info.lastchange);
 	entry.cause(std::string(info.cause));
 	entry.filename(std::string(info.filename));
 	return entry;
@@ -566,9 +567,11 @@ Astro::TaskInfo convert(const astro::task::TaskInfo& task) {
 	Astro::TaskInfo	info;
 	info.taskid = task.id();
 	info.state = astro::convert(task.state());
-	info.lastchange = task.lastchange();
+	time_t	now = time(NULL);
+	info.lastchange = now - task.lastchange();
 	info.cause = CORBA::string_dup(task.cause().c_str());
 	info.filename = CORBA::string_dup(task.filename().c_str());
+	return info;
 }
 
 

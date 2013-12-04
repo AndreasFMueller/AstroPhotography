@@ -9,6 +9,7 @@
 #include <CorbaExceptionReporter.h>
 #include <tasks.hh>
 #include <Output.h>
+#include <Conversions.h>
 
 namespace astro {
 namespace cli {
@@ -24,6 +25,10 @@ void	taskcommand::operator()(const std::string& command,
 
 	if (subcommand == "info") {
 		info(taskid);
+		return;
+	}
+	if (subcommand == "parameters") {
+		parameters(taskid);
 		return;
 	}
 }
@@ -55,7 +60,32 @@ static std::ostream&	operator<<(std::ostream& out,
 	return out;
 }
 
+static std::ostream&	operator<<(std::ostream& out, Astro::TaskInfo_var info) {
+	out << "task id:        " << info->taskid << std::endl;
+	out << "state:          " << astro::convert(info->state) << std::endl;
+	out << "lastchange:     ";
+        char    buffer[81];
+        time_t  lastchange = time(NULL) - info->lastchange;;
+        struct tm       *t = localtime(&lastchange);;
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d  %H:%M:%S", t);
+        out << buffer << std::endl;
+	out << "filename:       " << info->filename << std::endl;
+	return out;
+}
+
 void	taskcommand::info(int taskid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "info about task %d", taskid);
+	guidesharedcli	gcli;
+	try {
+		Astro::Task_var	task = gcli->taskqueue->getTask(taskid);
+		Astro::TaskInfo_var	info = task->info();
+		std::cout << info;
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found task");
+	}
+}
+
+void	taskcommand::parameters(int taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "info about task %d", taskid);
 	guidesharedcli	gcli;
 	try {
@@ -63,7 +93,6 @@ void	taskcommand::info(int taskid) {
 		Astro::TaskParameters_var	parameters
 			= task->parameters();
 		std::cout << parameters;
-		std::cout << "image name:     " << task->imagename() << std::endl;
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found task");
 	}
@@ -78,6 +107,7 @@ std::string	taskcommand::help() const {
 		"SYNOPSIS\n"
 		"\n"
 		"\ttask <id> info\n"
+		"\ttask <id> parameters\n"
 		"\n"
 		"DESCRIPTION\n"
 		"\n"

@@ -9,13 +9,15 @@
 #include <tasks.hh>
 #include <AstroTask.h>
 #include <TaskTable.h>
+#include <ImageObjectDirectory.h>
 
 namespace Astro {
 
 /**
  * \brief Task servant definition
  */
-class Task_impl : public virtual POA_Astro::Task {
+class Task_impl : public virtual POA_Astro::Task,
+		public ImageObjectDirectory {
 	astro::task::TaskTable&	_tasktable;
 	long	_queueid;
 	astro::task::TaskQueueEntry	entry();

@@ -92,9 +92,14 @@ module Astro {
 		long	submit(in TaskParameters params) raises(BadParameter);
 
 		/**
-		 * \brief Retreive the parameters of the queue task
+		 * \brief Retrieve the parameters of the queue task
 	 	 */
 		TaskParameters	parameters(in long taskid) raises(NotFound);
+
+		/**
+		 * \brief Retrieve the info of the queue task
+		 */
+		TaskInfo	info(in long taskid) raises(NotFound);
 
 		/**
 		 * \brief Cancel a task

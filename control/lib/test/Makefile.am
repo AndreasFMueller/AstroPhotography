@@ -95,7 +95,7 @@ endif
 # test2_LDADD = -L.. -lastro
 # test2_DEPENDENCIES = ../libastro.la
 
-EXTRA_DIST = test_module.la test_module.so testtable.sh
+EXTRA_DIST = test_module.la test_module.so
 
 #all-am:	tests usbtests 
 #	./usbtests

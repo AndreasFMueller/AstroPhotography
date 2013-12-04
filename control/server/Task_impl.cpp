@@ -43,6 +43,7 @@ Astro::TaskParameters	*Task_impl::parameters() {
 }
 
 Image_ptr	Task_impl::getImage() {
+	return ImageObjectDirectory::getImage(entry().filename());
 }
 
 char	*Task_impl::imagename() {

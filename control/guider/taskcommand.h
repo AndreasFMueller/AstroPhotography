@@ -13,6 +13,7 @@ namespace cli {
 
 class taskcommand : public clicommand {
 	void	info(int taskid);
+	void	parameters(int taskid);
 public:
 	taskcommand(commandfactory& factory) : clicommand(factory, "task") { }
 	~taskcommand() { }

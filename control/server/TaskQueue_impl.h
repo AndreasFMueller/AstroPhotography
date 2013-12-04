@@ -19,6 +19,7 @@ public:
 	virtual Astro::TaskQueue::QueueState	state();
 	virtual ::CORBA::Long	submit(const ::Astro::TaskParameters& params);
 	virtual TaskParameters	*parameters(::CORBA::Long taskid);
+	virtual TaskInfo	*info(::CORBA::Long taskid);
 	virtual void	cancel(::CORBA::Long taskid);
 	virtual void	remove(::CORBA::Long taskid);
 	virtual Astro::TaskQueue::taskidsequence	*tasklist(TaskState state);

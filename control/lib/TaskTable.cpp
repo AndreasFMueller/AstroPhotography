@@ -75,6 +75,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	entry.lastchange(row["lastchange"]->intValue());
 	entry.cause(row["cause"]->stringValue());
 	entry.filename(row["filename"]->stringValue());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 
 	return entry;
 }

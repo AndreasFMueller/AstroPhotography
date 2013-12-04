@@ -52,10 +52,33 @@ TaskParameters	*TaskQueue_impl::parameters(CORBA::Long taskid) {
 		TaskParameters	*parameters = new TaskParameters();
 
 		// convert the parameters
-		astro::task::TaskParameters&	tp(entry);
-		*parameters = astro::convert(tp);
+		*parameters = astro::convert(entry.parameters());
 
 		return parameters;
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", x.what());
+		throw BadParameter(x.what());
+	}
+}
+
+/**
+ * \brief Retrieve the parameters of a task
+ */
+TaskInfo	*TaskQueue_impl::info(CORBA::Long taskid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve info of task %ld", taskid);
+	try {
+		// get the task parameters
+		astro::task::TaskExecutorPtr	executor
+			= _taskqueue.executor(taskid);
+		astro::task::TaskQueueEntry	entry = executor->task();
+
+		// allocate a parameter struct
+		TaskInfo	*info = new TaskInfo();
+
+		// convert the parameters
+		*info = astro::convert(entry.info());
+
+		return info;
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", x.what());
 		throw BadParameter(x.what());
