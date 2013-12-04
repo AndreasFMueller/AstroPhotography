@@ -49,7 +49,7 @@ int	main(int argc, char *argv[]) {
 	TaskQueue	queue(database);
 
 	// submit a job to the task queue
-	Task	task;
+	TaskParameters	task;
 	task.camera("camera:simulator/camera");
 	task.filterwheel("filterwheel:simulator/filterwheel");
 	task.filterposition(0);

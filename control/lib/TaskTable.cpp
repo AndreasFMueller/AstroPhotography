@@ -36,20 +36,22 @@ std::string	TaskTableAdapter::createstatement() {
 	"    binx integer not null default 1,\n"
 	"    biny integer not null default 1,\n"
 	"    shutteropen integer not null default 1,\n"
+	"    state integer not null default 0,\n"
+	"    lastchange integer not null default 0,\n"
+	"    cause varchar(256) not null default '',\n"
 	"    filename varchar(256) not null default '',\n"
-	"    state int not null default 0,\n"
 	"    primary key(id)\n"
 	")");
 }
 
 TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert object %d", objectid);
-	Task	task;
-	task.camera(row["camera"]->stringValue());
-	task.ccdid(row["ccdid"]->intValue());
-	task.ccdtemperature(row["temperature"]->doubleValue());
-	task.filterwheel(row["filterwheel"]->stringValue());
-	task.filterposition(row["position"]->intValue());
+	TaskParameters	parameters;
+	parameters.camera(row["camera"]->stringValue());
+	parameters.ccdid(row["ccdid"]->intValue());
+	parameters.ccdtemperature(row["temperature"]->doubleValue());
+	parameters.filterwheel(row["filterwheel"]->stringValue());
+	parameters.filterposition(row["position"]->intValue());
 	ImagePoint	origin(row["originx"]->intValue(),
 				row["originy"]->intValue());
 	ImageSize	size(row["width"]->intValue(),
@@ -66,11 +68,13 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 
 	Binning	mode(row["binx"]->intValue(), row["biny"]->intValue());
 	exposure.mode = mode;
-	task.exposure(exposure);
+	parameters.exposure(exposure);
 
-	TaskQueueEntry	entry(objectid, task);
-	entry.filename(row["filename"]->stringValue());
+	TaskQueueEntry	entry(objectid, parameters);
 	entry.state((TaskQueueEntry::taskstate)row["state"]->intValue());
+	entry.lastchange(row["lastchange"]->intValue());
+	entry.cause(row["cause"]->stringValue());
+	entry.filename(row["filename"]->stringValue());
 
 	return entry;
 }
@@ -99,8 +103,11 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("biny", factory.get((int)exposure.mode.getY())));
 	spec.insert(Field("shutteropen",
 		factory.get((exposure.shutter == SHUTTER_OPEN) ? 1 : 0)));
-	spec.insert(Field("filename", factory.get(entry.filename())));
+
 	spec.insert(Field("state", factory.get((int)entry.state())));
+	spec.insert(Field("lastchange", factory.get((int)entry.lastchange())));
+	spec.insert(Field("cause", factory.get(entry.cause())));
+	spec.insert(Field("filename", factory.get(entry.filename())));
 	return spec;
 }
 

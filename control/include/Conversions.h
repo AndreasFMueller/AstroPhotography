@@ -96,10 +96,13 @@ Astro::TaskState	convert(const astro::task::TaskQueueEntry::taskstate& state);
 astro::task::TaskQueue::state_type      convert(const Astro::TaskQueue::QueueState state);
 Astro::TaskQueue::QueueState	convert(const astro::task::TaskQueue::state_type     state);
 
+// TaskParameters
+astro::task::TaskParameters	convert(const Astro::TaskParameters& parameters);
+Astro::TaskParameters	convert(const astro::task::TaskParameters& task);
 
-// TaskQueueParameters
-astro::task::Task	convert(const Astro::TaskParameters& parameters);
-Astro::TaskParameters	convert(const astro::task::Task& task);
+// TaskInfo
+astro::task::TaskInfo	convert(const Astro::TaskInfo& info);
+Astro::TaskInfo	convert(const astro::task::TaskInfo& info);
 
 } // namespace astro
 

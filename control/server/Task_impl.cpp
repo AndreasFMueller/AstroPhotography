@@ -28,9 +28,17 @@ Astro::TaskState	Task_impl::state() {
 	return astro::convert(entry().state());
 }
 
+Astro::TaskInfo	*Task_impl::info() {
+	TaskInfo	*info = new TaskInfo();
+	astro::task::TaskInfo	taskinfo = entry().info();
+	(*info) = astro::convert(taskinfo);
+	return info;
+}
+
 Astro::TaskParameters	*Task_impl::parameters() {
 	TaskParameters	*params = new TaskParameters();
-	(*params) = astro::convert(entry());
+	astro::task::TaskParameters	taskparameters = entry().parameters();
+	(*params) = astro::convert(taskparameters);
 	return params;
 }
 

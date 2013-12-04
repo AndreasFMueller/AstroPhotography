@@ -23,6 +23,7 @@ public:
 	long	queueid() const { return _queueid; }
 	Task_impl(astro::task::TaskTable& tasktable, long queueid);
 	virtual TaskState	state();
+	virtual TaskInfo	*info();
 	virtual TaskParameters	*parameters();
 	virtual Image_ptr	getImage();
 	virtual char	*imagename();

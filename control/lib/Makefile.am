@@ -53,7 +53,8 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Conversions.cpp NameService.cpp OrbSingleton.cpp \
 	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
-	Task.cpp TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
+	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
+	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
 	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
 	guiderSK.cc tasksSK.cc \
 	$(uvc_files) \

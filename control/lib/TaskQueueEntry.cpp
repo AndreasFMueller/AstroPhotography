@@ -1,5 +1,5 @@
 /*
- * Task.cpp -- Implementation of the task class
+ * TaskQueueEntry.cpp -- Implementation of the TaskQueueEntry class
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -9,16 +9,31 @@
 namespace astro {
 namespace task {
 
-Task::Task() {
-	_ccdid = 0;
-	_filterposition = 0;
-	_ccdtemperature = -1;
-}
-
-TaskQueueEntry::TaskQueueEntry(long queueid, const Task& task)
-	: Task(task), _id(queueid), _state(pending) {
+TaskQueueEntry::TaskQueueEntry(taskid_t queueid, const TaskParameters& task)
+	: TaskParameters(task), TaskInfo(queueid) {
+	state(pending);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
 		filterwheel().c_str());
+}
+
+TaskParameters	TaskQueueEntry::parameters() const {
+	TaskParameters	parameters;
+	parameters.exposure(exposure());
+	parameters.camera(camera());
+	parameters.ccdid(ccdid());
+	parameters.ccdtemperature(ccdtemperature());
+	parameters.filterwheel(filterwheel());
+	parameters.filterposition(filterposition());
+	return parameters;
+}
+
+TaskInfo	TaskQueueEntry::info() const {
+	TaskInfo	info(id());
+	info.state(state());
+	info.lastchange(lastchange());
+	info.cause(cause());
+	info.filename(filename());
+	return info;
 }
 
 bool	TaskQueueEntry::blocks(const TaskQueueEntry& other) const {

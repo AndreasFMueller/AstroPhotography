@@ -27,8 +27,8 @@ PortableServer::Servant	TaskActivator_impl::incarnate(
 	} catch (const CORBA::BAD_PARAM&) {
 		throw CORBA::OBJECT_NOT_EXIST();
 	}
-	int	id = stoi(idstring);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct servant for task: %d", id);
+	long	id = stoi(idstring);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct servant for task: %ld", id);
 
 	return new Astro::Task_impl(tasktable, id);
 }

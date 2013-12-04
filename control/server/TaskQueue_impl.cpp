@@ -30,10 +30,10 @@ Astro::TaskQueue::QueueState	TaskQueue_impl::state() {
 CORBA::Long	TaskQueue_impl::submit(const TaskParameters& params) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task");
 
-	astro::task::Task	task = astro::convert(params);
+	astro::task::TaskParameters	parameters = astro::convert(params);
 
 	// submit the task to the 
-	return _taskqueue.submit(task);
+	return _taskqueue.submit(parameters);
 }
 
 /**
@@ -46,13 +46,14 @@ TaskParameters	*TaskQueue_impl::parameters(CORBA::Long taskid) {
 		// get the task parameters
 		astro::task::TaskExecutorPtr	executor
 			= _taskqueue.executor(taskid);
-		astro::task::TaskQueueEntry	task = executor->task();
+		astro::task::TaskQueueEntry	entry = executor->task();
 
 		// allocate a parameter struct
 		TaskParameters	*parameters = new TaskParameters();
 
 		// convert the parameters
-		*parameters = astro::convert(task);
+		astro::task::TaskParameters&	tp(entry);
+		*parameters = astro::convert(tp);
 
 		return parameters;
 	} catch (std::exception& x) {

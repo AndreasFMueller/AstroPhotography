@@ -14,14 +14,17 @@
 namespace astro {
 namespace task {
 
+typedef long taskid_t;
+
 /**
- * \brief Task object
+ * \brief TaskParameters object
  *
- * The Task object contains all information needed to start a task. It tells
- * what to do. In contrast, the TaskQueueEntry class below contains in
- * addition information acquired while while performing the task.
+ * The TaskParameters object contains all information needed to
+ * start a task. It tells what to do. In contrast, the TaskQueueEntry
+ * class below contains in addition information acquired while while
+ * performing the task.
  */
-class Task {
+class TaskParameters {
 private:
 	astro::camera::Exposure	_exposure;
 public:
@@ -66,7 +69,45 @@ public:
 			_filterposition = filterposition;
 	}
 
-	Task();
+	TaskParameters();
+};
+
+/**
+ * \brief TaskInfo object
+ *
+ * The Task info object contains all the additional information collected
+ * for a Task during its execution
+ */
+class TaskInfo {
+private:
+	taskid_t	_id;
+public:
+	const taskid_t	id() const { return _id; }
+	void	id(taskid_t i) { _id = i; }
+
+public:
+	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
+private:
+	taskstate	_state;
+	long		_lastchange;
+	std::string	_cause;
+public:
+	taskstate	state() const { return _state; }
+	void	state(taskstate state) { _state = state; }
+
+	long	lastchange() const { return _lastchange; }
+	void	lastchange(long l) { _lastchange = l; }
+
+	const std::string&	cause() const { return _cause; }
+	void	cause(const std::string& c) { _cause = c; }
+
+private:
+	std::string	_filename;
+public:
+	const std::string& filename() const { return _filename; }
+	void	filename(const std::string& filename) { _filename = filename; }
+
+	TaskInfo(taskid_t id);
 };
 
 /**
@@ -77,29 +118,12 @@ public:
  * state and the name of the image file created from the completion of
  * the task.
  */
-class TaskQueueEntry : public Task {
-private:
-	long	_id;
+class TaskQueueEntry : public TaskParameters, public TaskInfo {
 public:
-	const long	id() const { return _id; }
-	void	id(long i) { _id = i; }
+	TaskQueueEntry(taskid_t queueid, const TaskParameters& task);
 
-public:
-	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
-private:
-	taskstate	_state;
-public:
-	taskstate	state() const { return _state; }
-	void	state(taskstate state) { _state = state; }
-
-private:
-	std::string	_filename;
-public:
-	const std::string& filename() const { return _filename; }
-	void	filename(const std::string& filename) { _filename = filename; }
-
-	TaskQueueEntry(long queueid, const Task& task);
-public:
+	TaskParameters	parameters() const;
+	TaskInfo	info() const;
 
 	// find out whether a this task blocks some other task
 	bool	blocks(const TaskQueueEntry& other) const;
@@ -122,7 +146,7 @@ class TaskQueue {
 	astro::persistence::Database	_database;
 
 	// a map containing all active executors
-	typedef std::map<int, TaskExecutorPtr>	executormap;
+	typedef std::map<taskid_t, TaskExecutorPtr>	executormap;
 	executormap	executors;
 
 	// thread performing the task queue management work
@@ -169,7 +193,7 @@ private:
 public:
 	const state_type&	state() const { return _state; }
 private:
-	std::queue<int>	_idqueue;
+	std::queue<taskid_t>	_idqueue;
 private:
 	// prevent copying
 	TaskQueue(const TaskQueue& other);
@@ -188,33 +212,33 @@ private:
 	void	launch(const TaskQueueEntry& entry);
 	// methods to update the executormap/database
 	void	update(const TaskQueueEntry& entry);
-	void	update(int queueid);
-	void	cancel(int queueid);
-	void	cleanup(int queueid);
+	void	update(taskid_t queueid);
+	void	cancel(taskid_t queueid);
+	void	cleanup(taskid_t queueid);
 	bool	blocks(const TaskQueueEntry& entry);
 public:
-	void	post(int queueid);	// signal state change for queueid
-	bool	running(int queueid);
+	void	post(taskid_t queueid);	// signal state change for queueid
+	bool	running(taskid_t queueid);
 
 	// start and stop queue processing
 	void	start();		// start queue processing
 	void	stop();			// stop launching new executors
 	void	cancel();		// cancel all active executors
-	void	wait(int queueid);	// wait for an executor to terminate
+	void	wait(taskid_t queueid);	// wait for an executor to terminate
 	void	wait();			// wait for alle executors to terminate
 	void	shutdown();		// shutdown the queue
 	void	restart();		// restart the queue
 
 	// submit a new task entry
-	int	submit(const Task& entry);
+	taskid_t	submit(const TaskParameters& parameters);
 
 	// information about the queue content
-	int	nexecutors() const { return executors.size(); }
-	TaskExecutorPtr	executor(int queueid);
+	taskid_t	nexecutors() const { return executors.size(); }
+	TaskExecutorPtr	executor(taskid_t queueid);
 
 	// retrieve a list of a queue ids for a given state
-	std::list<long>	tasklist(TaskQueueEntry::taskstate state);
-	bool	exists(int queueid);
+	std::list<taskid_t>	tasklist(TaskQueueEntry::taskstate state);
+	bool	exists(taskid_t queueid);
 };
 
 /**

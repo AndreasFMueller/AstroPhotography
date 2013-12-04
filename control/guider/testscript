@@ -1,7 +1,7 @@
 list tasks
-task 40 info
-task 41 info
-task 42 info
+task 1 info
+task 2 info
+task 3 info
 exit
 list modules
 list images

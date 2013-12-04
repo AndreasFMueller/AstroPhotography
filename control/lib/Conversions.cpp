@@ -494,7 +494,7 @@ convert(const astro::task::TaskQueue::state_type state) {
 }
 
 // Task parameters
-astro::task::Task	convert(const Astro::TaskParameters& parameters) {
+astro::task::TaskParameters	convert(const Astro::TaskParameters& parameters) {
 	astro::camera::Exposure	exposure;
 
 	// origin
@@ -522,7 +522,7 @@ astro::task::Task	convert(const Astro::TaskParameters& parameters) {
 	}
 
 	// remaining parameters
-	astro::task::Task	task;
+	astro::task::TaskParameters	task;
 	task.exposure(exposure);
 	task.camera(std::string(parameters.camera));
 	task.ccdid(parameters.ccdid);
@@ -533,7 +533,7 @@ astro::task::Task	convert(const Astro::TaskParameters& parameters) {
 	return task;
 }
 
-Astro::TaskParameters	convert(const astro::task::Task& task) {
+Astro::TaskParameters	convert(const astro::task::TaskParameters& task) {
 	Astro::TaskParameters	parameters;
 	parameters.camera = CORBA::string_dup(task.camera().c_str());
 	parameters.ccdid = task.ccdid();
@@ -550,5 +550,26 @@ Astro::TaskParameters	convert(const astro::task::Task& task) {
 	parameters.exp.frame = astro::convert(exposure.frame);
 	return parameters;
 }
+
+// Task info, note that the resulting task info structure is necessarily
+// very incomplete
+astro::task::TaskInfo     convert(const Astro::TaskInfo& info) {
+	astro::task::TaskInfo	entry(info.taskid);
+	entry.state(convert(info.state));
+	entry.lastchange(info.lastchange);
+	entry.cause(std::string(info.cause));
+	entry.filename(std::string(info.filename));
+	return entry;
+}
+
+Astro::TaskInfo convert(const astro::task::TaskInfo& task) {
+	Astro::TaskInfo	info;
+	info.taskid = task.id();
+	info.state = astro::convert(task.state());
+	info.lastchange = task.lastchange();
+	info.cause = CORBA::string_dup(task.cause().c_str());
+	info.filename = CORBA::string_dup(task.filename().c_str());
+}
+
 
 } // namespace astro

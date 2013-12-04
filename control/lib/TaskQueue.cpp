@@ -290,13 +290,13 @@ void	TaskQueue::launch() {
  * so that new tasks are written to the database, and launched from the
  * launch method.
  */
-int	TaskQueue::submit(const Task& task) {
+taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task");
 	TaskQueueLock	l(&lock);
 
 	// add the entry to the task table
 	TaskTable	tasktable(_database);
-	TaskQueueEntry	entry(0, task);
+	TaskQueueEntry	entry(0, parameters);
 	entry.state(TaskQueueEntry::pending);
 	long taskqueueid = tasktable.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
@@ -316,7 +316,7 @@ int	TaskQueue::submit(const Task& task) {
  * or by returning an image, then it has to be cleaned up, so we add an entry
  * to the cleanup queue and signal the work thread that it can do the cleanup.
  */
-void	TaskQueue::post(int queueid) {
+void	TaskQueue::post(taskid_t queueid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "post an update for id %d", queueid);
 	TaskQueueLock	l(&lock);
 	// get the entry, and update the database
@@ -351,7 +351,7 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
 /**
  * \brief cancel an executor
  */
-void	TaskQueue::cancel(int queueid) {
+void	TaskQueue::cancel(taskid_t queueid) {
 	executormap::iterator	emapp = executors.find(queueid);
 	if (executors.end() == emapp) {
 		return;
@@ -365,7 +365,7 @@ void	TaskQueue::cancel(int queueid) {
 /**
  * \brief cleanup for the queueid
  */
-void	TaskQueue::cleanup(int queueid) {
+void	TaskQueue::cleanup(taskid_t queueid) {
 	// find the TaskExectuor entry
 	executormap::iterator	i = executors.find(queueid);
 	if (i == executors.end()) {
@@ -432,8 +432,8 @@ void	TaskQueue::cancel() {
 /**
  * \brief Wait for a specific executor to terminate
  */
-void	TaskQueue::wait(int queueid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for queueid %d", queueid);
+void	TaskQueue::wait(taskid_t queueid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for queueid %ld", queueid);
 	TaskQueueLock	l(&lock);
 	while (running(queueid)) {
 		pthread_cond_wait(&wait_cond, &lock);
@@ -469,7 +469,7 @@ void	TaskQueue::wait() {
 /**
  * \brief Find a TaskQueueEntry
  */
-TaskExecutorPtr	TaskQueue::executor(int queueid) {
+TaskExecutorPtr	TaskQueue::executor(taskid_t queueid) {
 	executormap::iterator	i = executors.find(queueid);
 	if (executors.end() == i) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no executor with id %d", queueid);
@@ -481,7 +481,7 @@ TaskExecutorPtr	TaskQueue::executor(int queueid) {
 /**
  * \brief Find out whether a queue id is running
  */
-bool	TaskQueue::running(int queueid) {
+bool	TaskQueue::running(taskid_t queueid) {
 	executormap::iterator	i = executors.find(queueid);
 	return (executors.end() != i);
 	
@@ -501,7 +501,7 @@ std::list<long>	TaskQueue::tasklist(TaskQueueEntry::taskstate state) {
 /**
  * \brief  find out whether the queue id exists
  */
-bool	TaskQueue::exists(int queueid) {
+bool	TaskQueue::exists(taskid_t queueid) {
 	TaskTable	tasktable(_database);
 	return tasktable.exists(queueid);
 }

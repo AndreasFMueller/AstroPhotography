@@ -39,6 +39,27 @@ module Astro {
 			TASK_CANCELLED, TASK_COMPLETED };
 
 	/**
+	 * \brief Information about a task
+	 *
+	 * The TaskParameters structure only contains information abut
+	 * the task parameters, the information needed for launching a
+	 * task. Information collected while the task is running is not
+	 * included. This additional information is returned in a TaskInfo
+	 * structure
+	 */
+	struct TaskInfo {
+		// the task id. This is slightly redundant, as we usually
+		// request tasks by id, but we include it nevertheless
+		long		taskid;
+		// the current state of the task, and when it last changed
+		TaskState	state;
+		long		lastchange;
+		string		cause;
+		// where the produced image is storead
+		string		filename;
+	};
+
+	/**
  	 * \brief Task object
 	 *
 	 * Tasks can manipulated using this interface.
@@ -46,6 +67,7 @@ module Astro {
 	interface Task {
 		TaskState	state();
 		TaskParameters	parameters();
+		TaskInfo	info();
 		string		imagename();
 		Image		getImage();
 	};
