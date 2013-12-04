@@ -11,5 +11,10 @@ namespace task {
 TaskInfo::TaskInfo(long id) : _id(id) {
 }
 
+void	TaskInfo::now() {
+	time_t	t = time(NULL);
+	lastchange(t);
+}
+
 } // namespace task
 } // namespace astro

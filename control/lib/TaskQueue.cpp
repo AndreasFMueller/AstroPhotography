@@ -298,6 +298,7 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	TaskTable	tasktable(_database);
 	TaskQueueEntry	entry(0, parameters);
 	entry.state(TaskQueueEntry::pending);
+	entry.now();
 	long taskqueueid = tasktable.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
 		taskqueueid);
@@ -321,6 +322,7 @@ void	TaskQueue::post(taskid_t queueid) {
 	TaskQueueLock	l(&lock);
 	// get the entry, and update the database
 	TaskExecutorPtr	e = executor(queueid);
+	e->task().now();
 	update(e->task());
 
 	// now check whether cleanup is necessary

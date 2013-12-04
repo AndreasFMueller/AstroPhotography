@@ -97,6 +97,7 @@ public:
 
 	long	lastchange() const { return _lastchange; }
 	void	lastchange(long l) { _lastchange = l; }
+	void	now();
 
 	const std::string&	cause() const { return _cause; }
 	void	cause(const std::string& c) { _cause = c; }
@@ -248,7 +249,7 @@ class TaskExecutor {
 	TaskQueue&	_queue;
 	TaskQueueEntry	_task;
 public:
-	const TaskQueueEntry&	task() { return _task; }
+	TaskQueueEntry&	task() { return _task; }
 private:
 	pthread_t	_thread;
 	pthread_mutex_t	_lock;
