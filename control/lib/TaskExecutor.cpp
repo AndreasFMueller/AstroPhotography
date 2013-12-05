@@ -152,6 +152,8 @@ void	ExposureTask::run() {
 		if (ccd->wait()) {
 			// get the image from the ccd
 			astro::image::ImagePtr	image = ccd->getImage();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
+				image->getFrame().toString().c_str());
 
 			// add to the ImageDirectory
 			astro::image::ImageDirectory	imagedir;
@@ -162,9 +164,11 @@ void	ExposureTask::run() {
 
 			// update the frame information
 			astro::camera::Exposure	exposure = _task.exposure();
-			exposure.frame.setSize(image->size());
-			exposure.frame.setOrigin(image->origin());
 			_task.exposure(exposure);
+
+			// copy the returned image information
+			_task.size(image->size());
+			_task.origin(image->origin());
 
 			// log info
 			debug(LOG_DEBUG, DEBUG_LOG, 0,

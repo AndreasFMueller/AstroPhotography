@@ -33,6 +33,7 @@ TaskInfo	TaskQueueEntry::info() const {
 	info.lastchange(lastchange());
 	info.cause(cause());
 	info.filename(filename());
+	info.frame(frame());
 	return info;
 }
 

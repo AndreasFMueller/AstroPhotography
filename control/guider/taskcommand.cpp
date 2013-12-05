@@ -70,6 +70,7 @@ static std::ostream&	operator<<(std::ostream& out, Astro::TaskInfo_var info) {
         strftime(buffer, sizeof(buffer), "%Y-%m-%d  %H:%M:%S", t);
         out << buffer << std::endl;
 	out << "filename:       " << info->filename << std::endl;
+	out << "frame:          " << info->frame << std::endl;
 	return out;
 }
 

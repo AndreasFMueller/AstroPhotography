@@ -144,6 +144,9 @@ ImagePtr  SimCcd::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
 		image->getFrame().toString().c_str());
 	state = Exposure::idle;
+
+	// origin
+	image->setOrigin(exposure.frame.origin());
 	return image;
 }
 

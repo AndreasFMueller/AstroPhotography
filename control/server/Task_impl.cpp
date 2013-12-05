@@ -6,6 +6,7 @@
 #include "Task_impl.h"
 #include "Conversions.h"
 #include <OrbSingleton.h>
+#include <sstream>
 
 namespace Astro {
 

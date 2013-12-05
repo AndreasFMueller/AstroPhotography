@@ -28,6 +28,7 @@ class TaskParameters {
 private:
 	astro::camera::Exposure	_exposure;
 public:
+	astro::camera::Exposure&	exposure() { return _exposure; }
 	const astro::camera::Exposure&	exposure() const { return _exposure; }
 	void	exposure(const astro::camera::Exposure& exposure) {
 		_exposure = exposure;
@@ -107,6 +108,18 @@ private:
 public:
 	const std::string& filename() const { return _filename; }
 	void	filename(const std::string& filename) { _filename = filename; }
+
+private:
+	astro::image::ImageRectangle	_frame;
+public:
+	const astro::image::ImageRectangle&	frame() const { return _frame; }
+	void	frame(const astro::image::ImageRectangle& f) { _frame = f; }
+
+	const astro::image::ImagePoint&	origin() const { return _frame.origin(); }
+	void	origin(const astro::image::ImagePoint& o) { _frame.setOrigin(o); }
+
+	const astro::image::ImageSize&	size() const { return _frame.size(); }
+	void	size(const astro::image::ImageSize& s) { _frame.setSize(s); }
 
 	TaskInfo(taskid_t id);
 };

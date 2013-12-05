@@ -19,6 +19,7 @@
 #include <guidercommand.h>
 #include <imagecommand.h>
 #include <taskcommand.h>
+#include <submitcommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -140,6 +141,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("task"),
 		commandcreatorptr(new commandcreator<taskcommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("submit"),
+		commandcreatorptr(new commandcreator<submitcommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("sleep"),

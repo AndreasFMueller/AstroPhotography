@@ -57,6 +57,7 @@ module Astro {
 		string		cause;
 		// where the produced image is storead
 		string		filename;
+		ImageRectangle	frame;
 	};
 
 	/**

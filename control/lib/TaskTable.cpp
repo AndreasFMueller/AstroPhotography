@@ -40,6 +40,10 @@ std::string	TaskTableAdapter::createstatement() {
 	"    lastchange integer not null default 0,\n"
 	"    cause varchar(256) not null default '',\n"
 	"    filename varchar(256) not null default '',\n"
+	"    imagex integer not null default 0,\n"
+	"    imagey integer not null default 0,\n"
+	"    imagewidth integer not null default 0,\n"
+	"    imageheight integer not null default 0,\n"
 	"    primary key(id)\n"
 	")");
 }
@@ -71,10 +75,16 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.exposure(exposure);
 
 	TaskQueueEntry	entry(objectid, parameters);
+
 	entry.state((TaskQueueEntry::taskstate)row["state"]->intValue());
 	entry.lastchange(row["lastchange"]->intValue());
 	entry.cause(row["cause"]->stringValue());
 	entry.filename(row["filename"]->stringValue());
+	entry.size(ImageSize(row["imagewidth"]->intValue(),
+			row["imageheight"]->intValue()));
+	entry.origin(ImagePoint(row["imagex"]->intValue(),
+			row["imagey"]->intValue()));
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion complete");
 
 	return entry;
@@ -109,6 +119,10 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("lastchange", factory.get((int)entry.lastchange())));
 	spec.insert(Field("cause", factory.get(entry.cause())));
 	spec.insert(Field("filename", factory.get(entry.filename())));
+	spec.insert(Field("imagex", factory.get((int)entry.origin().x())));
+	spec.insert(Field("imagey", factory.get((int)entry.origin().y())));
+	spec.insert(Field("imagewidth", factory.get((int)entry.size().width())));
+	spec.insert(Field("imageheight", factory.get((int)entry.size().height())));
 	return spec;
 }
 

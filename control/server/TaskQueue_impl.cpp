@@ -31,6 +31,11 @@ CORBA::Long	TaskQueue_impl::submit(const TaskParameters& params) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task");
 
 	astro::task::TaskParameters	parameters = astro::convert(params);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time: %f",
+		parameters.exposure().exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: (%d,%d)",
+		parameters.exposure().frame.origin().x(),
+		parameters.exposure().frame.origin().y());
 
 	// submit the task to the 
 	return _taskqueue.submit(parameters);
@@ -71,6 +76,8 @@ TaskInfo	*TaskQueue_impl::info(CORBA::Long taskid) {
 		astro::task::TaskExecutorPtr	executor
 			= _taskqueue.executor(taskid);
 		astro::task::TaskQueueEntry	entry = executor->task();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
+			entry.frame().toString().c_str());
 
 		// allocate a parameter struct
 		TaskInfo	*info = new TaskInfo();

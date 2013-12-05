@@ -512,6 +512,10 @@ astro::task::TaskParameters	convert(const Astro::TaskParameters& parameters) {
 					parameters.exp.mode.y);
 	exposure.mode = mode;
 
+	exposure.exposuretime = parameters.exp.exposuretime;
+	exposure.gain = parameters.exp.gain;
+	exposure.limit = parameters.exp.limit;
+
 	switch (parameters.exp.shutter) {
 	case Astro::SHUTTER_CLOSED:
 		exposure.shutter = astro::camera::SHUTTER_CLOSED;
@@ -540,14 +544,14 @@ Astro::TaskParameters	convert(const astro::task::TaskParameters& task) {
 	parameters.ccdtemperature = task.ccdtemperature();
 	parameters.filterwheel = CORBA::string_dup(task.filterwheel().c_str());
 	parameters.filterposition = task.filterposition();
-	astro::camera::Exposure	exposure = task.exposure();
-	parameters.exp.exposuretime = exposure.exposuretime;
-	parameters.exp.gain = exposure.gain;
-	parameters.exp.limit = exposure.limit;
-	parameters.exp.mode.x = exposure.mode.getX();
-	parameters.exp.mode.y = exposure.mode.getY();
-	parameters.exp.shutter = astro::convert(exposure.shutter);
-	parameters.exp.frame = astro::convert(exposure.frame);
+	//astro::camera::Exposure	exposure = task.exposure();
+	parameters.exp.exposuretime = task.exposure().exposuretime;
+	parameters.exp.gain = task.exposure().gain;
+	parameters.exp.limit = task.exposure().limit;
+	parameters.exp.mode.x = task.exposure().mode.getX();
+	parameters.exp.mode.y = task.exposure().mode.getY();
+	parameters.exp.shutter = astro::convert(task.exposure().shutter);
+	parameters.exp.frame = astro::convert(task.exposure().frame);
 	return parameters;
 }
 
@@ -560,6 +564,8 @@ astro::task::TaskInfo     convert(const Astro::TaskInfo& info) {
 	entry.lastchange(now - info.lastchange);
 	entry.cause(std::string(info.cause));
 	entry.filename(std::string(info.filename));
+	entry.origin(ImagePoint(info.frame.origin.x, info.frame.origin.y));
+	entry.size(ImageSize(info.frame.size.width, info.frame.size.height));
 	return entry;
 }
 
@@ -571,6 +577,10 @@ Astro::TaskInfo convert(const astro::task::TaskInfo& task) {
 	info.lastchange = now - task.lastchange();
 	info.cause = CORBA::string_dup(task.cause().c_str());
 	info.filename = CORBA::string_dup(task.filename().c_str());
+	info.frame.origin.x = task.origin().x();
+	info.frame.origin.y = task.origin().y();
+	info.frame.size.width = task.size().width();
+	info.frame.size.height = task.size().height();
 	return info;
 }
 

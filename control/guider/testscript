@@ -1,3 +1,9 @@
+submit exposuretime=5 camera=camera:simulator/camera ccdid=0 temperature=260 filterwheel=filterwheel:simulator/filterwheel binning=2x2 origin=(10,10) size=620x460
+exit
+task 18 parameters
+task 18 info
+exit
+exit
 list tasks
 task 9 info
 task 9 parameters
@@ -5,6 +11,13 @@ task 10 info
 task 10 parameters
 task 11 info
 task 11 parameters
+list tasks
+sleep 6
+list tasks
+task 16 parameters
+task 16 info
+task 17 parameters
+task 17 info
 exit
 list modules
 list images
