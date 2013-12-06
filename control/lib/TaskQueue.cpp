@@ -126,16 +126,19 @@ std::string	TaskQueue::statestring(const state_type& state) {
  * This is only possible in the idle state, the method will throw an exception
  * otherwise.
  */
-void	TaskQueue::restart() {
+void	TaskQueue::restart(state_type newstate) {
 	TaskQueueLock	l(&lock);
 	if (state() != idle) {
 		throw std::runtime_error("can start thread only in idle state");
+	}
+	if (newstate == idle) {
+		throw std::runtime_error("cannot restart into idle state");
 	}
 	// launch the work thread
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	pthread_create(&_thread, &attr, queuemain, this);
-	_state = launching;
+	_state = newstate;
 	// at this point, the lock object goes out of scope and releases
 	// the thread that was started previously
 }

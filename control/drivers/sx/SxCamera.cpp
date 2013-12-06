@@ -11,6 +11,7 @@
 #include <SxGuiderPort.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
+#include <SxUtils.h>
 
 using namespace astro::image;
 
@@ -84,8 +85,15 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
  */
 static astro::DeviceName	cameraname(DevicePtr& deviceptr) {
 	DeviceName	modulename("module:sx");
-	return DeviceName(modulename, DeviceName::Camera,
-			deviceptr->getDeviceName());
+debug(LOG_DEBUG, DEBUG_LOG, 0, "current unit name: %s",
+		modulename.unitname().c_str());
+	std::string	unitname = sxname(deviceptr);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "appending unit name '%s'", unitname.c_str());
+	DeviceName	cname(modulename, DeviceName::Camera, unitname);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "cname created");
+	std::string	c = (std::string)cname;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s", c.c_str());
+	return	cname;
 }
 
 /**
@@ -97,16 +105,17 @@ static astro::DeviceName	cameraname(DevicePtr& deviceptr) {
  * release the interface when we need it. However this means that no other
  * instance of the camera object can access the camera (one can also consider
  * this a feature, not a bug). And the destructor absolutely must release
- * interface.
+ * interface. When the constructor is called, the DevicePtr argument 
+ * must refer to an open device.
+ *
  * \param _deviceptr	USB device pointer
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr)
-	: Camera(cameraname(deviceptr)), deviceptr(_deviceptr) {
+	: Camera(cameraname(_deviceptr)), deviceptr(_deviceptr) {
 	// the default is to use the 
 	useControlRequests = false;
 
-	// make sure the device is open
-	deviceptr->open();
+	// find the product id
 	product = deviceptr->descriptor()->idProduct();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product = %04x", product);
 
@@ -162,16 +171,23 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
+#if 0
 	// from product id and model number, try to infer the product name
 	for (unsigned int m = 0; m < NUMBER_SX_MODELS; m++) {
 		if (
 		((models[m].product == 0) || (models[m].product == product)) &&
 		((models[m].model == 0) || (models[m].model == model))
 		) {
-			_name = models[m].name;
+			std::string	un = _name.unitname();
+			un.append("-");
+			un.append(models[m].name);
+			_name.unitname(un);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new unit name: %s",
+				un.c_str());
 			break;
 		}
 	}
+#endif
 
 	// get information about this CCD from the camera
         Request<sx_ccd_params_t>        ccd0request(

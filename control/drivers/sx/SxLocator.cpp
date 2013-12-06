@@ -99,22 +99,15 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 		// ever, but on Linux, we may not have permission to open
 		// all devices
 		try {
-			(*i)->open();
-			DeviceDescriptorPtr	descriptor = (*i)->descriptor();
-			if (SX_VENDOR_ID == descriptor->idVendor()) {
-				std::string	name = stringprintf(
-					"sx:%03d:%03d:%s:%04x:%04x:%s",
-					(*i)->getBusNumber(),
-					(*i)->getDeviceAddress(),
-					descriptor->iProduct().c_str(),
-					descriptor->idVendor(),
-					descriptor->idProduct(),
-					descriptor->iSerialNumber().c_str());
-				names.push_back(name);
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"SX device %s found", name.c_str());
+			DevicePtr	devptr = *i;
+			devptr->open();
+			try {
+				names.push_back("camera:sx/" + sxname(devptr));
+			} catch (std::runtime_error& x) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "found a non"
+					" SX device: %s", x.what());
 			}
-			(*i)->close();
+			devptr->close();
 		} catch (std::exception& x) {
 			// log the error, but don't do anything about it
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device");
@@ -131,21 +124,24 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
  * \return Camera with that name
  */
 CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
-	std::string	sname = name;
+	std::string	sname = name.unitname();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing '%s'", sname.c_str());
 	// parse the name string
-	int	busnumber, deviceaddress;
-	sscanf(sname.c_str(), "sx:%d:%d:", &busnumber, &deviceaddress);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d", sname.c_str(),
+	int	busnumber = 0, deviceaddress = 0;
+	sxparse(sname, busnumber, deviceaddress);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"looking for busnumber=%d, deviceaddress=%d",
 		busnumber, deviceaddress);
 
 	// find the device with this bus number and address
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
-		if (((*i)->getBusNumber() == busnumber) &&
-			((*i)->getDeviceAddress() == deviceaddress)) {
-			DevicePtr	dptr = (*i);
+		DevicePtr	dptr = (*i);
+		if ((dptr->getBusNumber() == busnumber) &&
+			(dptr->getDeviceAddress() == deviceaddress)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "found matching device");
+			dptr->open();
 			return CameraPtr(new SxCamera(dptr));
 		}
 	}

@@ -22,7 +22,7 @@ namespace astro {
  */
 class DeviceName : public std::vector<std::string> {
 public:
-	typedef enum { Camera, Ccd, Cooler, Filterwheel, Guiderport, Focuser }
+	typedef enum { Camera, Ccd, Cooler, Filterwheel, Guiderport, Focuser, Module }
 		device_type;
 	static std::string	type2string(const device_type& type);
 	static device_type	string2type(const std::string& name);
@@ -38,6 +38,7 @@ public:
 	const std::string&	modulename() const;
 public:
 	const std::string&	unitname() const;
+	void	unitname(const std::string& u);
 	std::string	name() const;
 private:
 	DeviceName() { }

@@ -23,6 +23,8 @@ public:
 	virtual void	cancel(::CORBA::Long taskid);
 	virtual void	remove(::CORBA::Long taskid);
 	virtual Astro::TaskQueue::taskidsequence	*tasklist(TaskState state);
+	virtual void	start();
+	virtual void	stop();
 	virtual Task_ptr	getTask(::CORBA::Long taskid);
 };
 

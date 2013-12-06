@@ -55,10 +55,6 @@ void	*start_routine(void *arg) {
 void	SxCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 
-	// start the exposure
-	state = Exposure::exposing;
-	this->startExposure0(exposure);
-
 	// create a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
 	pthread_attr_t	attr;
@@ -144,6 +140,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 	camera.controlRequest(&request);
 
 	// we are now in exposing state
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera now exposing");
 	state = Exposure::exposing;
 }
 
@@ -154,6 +151,10 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
  * always produce 16 bit deep images.
  */
 void	SxCcd::getImage0() {
+	// start the exposure
+	state = Exposure::exposing;
+	this->startExposure0(exposure);
+
 	// compute the target image size, using the binning mode
 	ImageSize	targetsize = exposure.frame.size() / exposure.mode;
 

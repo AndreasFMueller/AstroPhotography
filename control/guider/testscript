@@ -1,3 +1,5 @@
+submit exposuretime=1 camera=camera:sx/253-007-ECHO2-1278-0509 ccdid=0 temperature=260 binning=1x1
+exit
 submit exposuretime=5 camera=camera:simulator/camera ccdid=0 temperature=260 filterwheel=filterwheel:simulator/filterwheel binning=2x2 origin=(10,10) size=620x460
 exit
 task 18 parameters

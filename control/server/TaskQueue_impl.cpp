@@ -25,6 +25,22 @@ Astro::TaskQueue::QueueState	TaskQueue_impl::state() {
 }
 
 /**
+ * \brief start the queue
+ */
+void	TaskQueue_impl::start() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the queue");
+	_taskqueue.start();
+}
+
+/**
+ * \brief stop the queue
+ */
+void	TaskQueue_impl::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the queue");
+	_taskqueue.stop();
+}
+
+/**
  * \brief Submit a new task to the queue
  */
 CORBA::Long	TaskQueue_impl::submit(const TaskParameters& params) {

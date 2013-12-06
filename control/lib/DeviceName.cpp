@@ -19,6 +19,7 @@ DeviceName::DeviceName(const std::string& name) {
 	std::string	path = name.substr(pos + 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "path: %s", path.c_str());
 	split<DeviceName>(path, "/", *this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "have %d components", size());
 }
 
 DeviceName::DeviceName(const std::string& modulename,
@@ -36,6 +37,7 @@ DeviceName::DeviceName(const device_type& type,
 DeviceName::DeviceName(const DeviceName& name, const device_type& type,
 	const std::string& unitname) : _type(type) {
 	std::copy(name.begin(), name.end(), back_inserter(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unit name = %s", unitname.c_str());
 	push_back(unitname);
 }
 
@@ -51,6 +53,14 @@ const std::string&	DeviceName::unitname() const {
 	return this->back();
 }
 
+void	DeviceName::unitname(const std::string& u) {
+	if (size() == 0) {
+		throw std::runtime_error("name empty, can't replace unit name");
+	}
+	pop_back();
+	push_back(u);
+}
+
 std::string	DeviceName::name() const {
 	Concatenator	c("/");
 	std::for_each(++begin(), end(), c);
@@ -60,14 +70,15 @@ std::string	DeviceName::name() const {
 /**
  * \brief Type conversion from name to type code
  */
-#define	Ntypes	6
+#define	Ntypes	7
 static std::string	typenames[Ntypes] = {
 	"camera",
 	"ccd",
 	"cooler",
 	"filterwheel",
 	"guiderport",
-	"focuser"
+	"focuser",
+	"module"
 };
 static DeviceName::device_type	typecode[Ntypes] = {
 	DeviceName::Camera,
@@ -75,7 +86,8 @@ static DeviceName::device_type	typecode[Ntypes] = {
 	DeviceName::Cooler,
 	DeviceName::Filterwheel,
 	DeviceName::Guiderport,
-	DeviceName::Focuser
+	DeviceName::Focuser,
+	DeviceName::Module
 };
 
 DeviceName::device_type	DeviceName::string2type(const std::string& name) {

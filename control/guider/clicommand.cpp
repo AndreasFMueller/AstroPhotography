@@ -20,6 +20,7 @@
 #include <imagecommand.h>
 #include <taskcommand.h>
 #include <submitcommand.h>
+#include <taskqueuecommand.h>
 #include <sstream>
 #include <algorithm>
 
@@ -145,6 +146,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("submit"),
 		commandcreatorptr(new commandcreator<submitcommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("taskqueue"),
+		commandcreatorptr(new commandcreator<taskqueuecommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("sleep"),

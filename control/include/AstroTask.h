@@ -241,7 +241,7 @@ public:
 	void	wait(taskid_t queueid);	// wait for an executor to terminate
 	void	wait();			// wait for alle executors to terminate
 	void	shutdown();		// shutdown the queue
-	void	restart();		// restart the queue
+	void	restart(state_type newstate = stopped);		// restart the queue
 
 	// submit a new task entry
 	taskid_t	submit(const TaskParameters& parameters);

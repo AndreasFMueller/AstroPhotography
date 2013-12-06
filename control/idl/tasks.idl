@@ -86,6 +86,16 @@ module Astro {
 		QueueState	state();
 
 		/**
+		 * \brief start the queue
+		 */
+		void	start();
+
+		/**
+		 * \brief stop the queue
+		 */
+		void	stop();
+
+		/**
 		 * \brief submit a new task
 		 *
 		 * This submits a new task to the queue.
