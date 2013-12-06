@@ -43,8 +43,9 @@ public:
 template<typename activator>
 PortableServer::POA_var	POABuilderActivator<activator>::build(
 		const std::string& poaname, activator *theactivator) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "build a POA named '%s' with activator",
-		poaname.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"build a POA named '%s' with activator %p, POA = %p",
+		poaname.c_str(), theactivator, &*_poa);
 	// create the policy
 	PortableServer::IdAssignmentPolicy_var	assign
 		= _poa->create_id_assignment_policy(PortableServer::USER_ID);
@@ -56,12 +57,14 @@ PortableServer::POA_var	POABuilderActivator<activator>::build(
 	policy_list[0] = PortableServer::IdAssignmentPolicy::_duplicate(assign);
 	policy_list[1] = PortableServer::RequestProcessingPolicy::_duplicate(
 				requestprocessing);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "policy list created");
 
 	// now build the POA
 	PortableServer::POA_var	result_poa
 		= _poa->create_POA(poaname.c_str(),
 			_poa->the_POAManager(), policy_list);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "created POA '%s' with activator");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created POA '%s' with activator",
+		poaname.c_str());
 
 	// cleanup
 	assign->destroy();
