@@ -54,11 +54,18 @@ std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
 
 	// display calibration data
 	Astro::Guider::GuiderState	state = guider->getState();
-	if ((Astro::Guider::GUIDER_CALIBRATED == state) ||
-		(Astro::Guider::GUIDER_GUIDING == state)) {
+	switch (state) {
+	case Astro::Guider::GUIDER_CALIBRATING:
+		out << "cal progress:    ";
+		out << guider->calibrationProgress() << std::endl;
+		break;
+	case Astro::Guider::GUIDER_CALIBRATED:
+	case Astro::Guider::GUIDER_GUIDING:
 		out << guider->getCalibration();
-	} else {
+		break;
+	default:
 		out << "not calibrated" << std::endl;
+		break;
 	}
 	return out;
 }

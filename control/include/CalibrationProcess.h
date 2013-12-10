@@ -30,6 +30,8 @@ class CalibrationProcess : public GuidingProcess {
 	double	grid;
 	bool	calibrated;
 	double	_progress;
+	int	range;
+	double	currentprogress(int ra, int dec) const;
 public:
 	double	progress() const { return _progress; }
 private:

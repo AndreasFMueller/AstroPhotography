@@ -56,6 +56,16 @@ void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
 }
 
 /**
+ * \brief Compute current progress
+ *
+ * This esimates the progress based on the number of points already scanned
+ */
+double	CalibrationProcess::currentprogress(int ra, int dec) const {
+	double	maxpoints = (2 * range + 1) * (2 + range + 1);
+	return ((2 * range + 1) * (ra + range) + (dec + range)) / maxpoints;
+}
+
+/**
  * \brief exception thrown when the calibration is interrupted
  */
 class calibration_interrupted : public std::exception {
@@ -82,7 +92,7 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
 
 	// grid range we want to scan
-	int range = 1;
+	range = 1;
 
 	// the grid constant normally depends on the focallength and the
 	// pixels size. Smaller pixels are larger focallength allow to
@@ -100,8 +110,11 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 			for (int dec = -range; dec <= range; dec++) {
 				measure(calibrator, ra, dec);
 				if (_thread.terminate()) {
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"terminate signal received");
 					throw calibration_interrupted();
 				}
+				_progress = currentprogress(ra, dec);
 			}
 		}
 	} catch (calibration_interrupted&) {
@@ -151,6 +164,7 @@ double	CalibrationProcess::gridconstant(double focallength,
  */
 CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
 	: GuidingProcess(_guider, _tracker) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	calibrated = false;
 	// default exposure settings
 	exposure().exposuretime = 1.;
@@ -164,6 +178,7 @@ CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
  * \brief Destroy a calibration process
  */
 CalibrationProcess::~CalibrationProcess() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy calibration process");
 	try {
 		stop();
 		wait(60);

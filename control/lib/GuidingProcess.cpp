@@ -59,8 +59,13 @@ ThreadBase::ThreadBase() {
  * \brief destroy the thread
  */
 ThreadBase::~ThreadBase() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy ThreadBase");
 	GuidingLock	lock(&mutex);
+	if (!_isrunning) {
+		return;
+	}
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop running thread");
 		stop();
 		void	*result;
 		pthread_join(thread, &result);
@@ -118,7 +123,7 @@ void	ThreadBase::stop() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread);
 
 	// signal the thread that it should terminate
-	_terminate = false;
+	_terminate = true;
 }
 
 /**
@@ -162,6 +167,7 @@ void	ThreadBase::run() {
 //////////////////////////////////////////////////////////////////////
 GuidingProcess::GuidingProcess(Guider& guider, TrackerPtr tracker)
 	: _guider(guider), _tracker(tracker) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a guiding process");
 }
 
 } // namespace guiding

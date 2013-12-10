@@ -48,6 +48,7 @@ void	GuiderStateMachine::configure() {
 }
 
 void	GuiderStateMachine::startCalibrating() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
 	if (!canStartCalibrating()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot start calibrating in state %s", statename());

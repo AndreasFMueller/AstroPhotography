@@ -197,7 +197,7 @@ void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 	
 	// first check whether there already is a calibration process
 	// running
-	if (guiderprocess) {
+	if (calibrationprocess) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"calibration already in progress: %f",
 			calibrationProgress());
