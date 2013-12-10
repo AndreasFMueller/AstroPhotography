@@ -57,6 +57,8 @@ std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
 	if ((Astro::Guider::GUIDER_CALIBRATED == state) ||
 		(Astro::Guider::GUIDER_GUIDING == state)) {
 		out << guider->getCalibration();
+	} else {
+		out << "not calibrated" << std::endl;
 	}
 	return out;
 }
@@ -149,6 +151,15 @@ void	guidercommand::calibrate(GuiderWrapper& guider,
 	guider->startCalibration(focallength);
 }
 
+void	guidercommand::wait(GuiderWrapper& guider,
+		const std::vector<std::string>& arguments) {
+	double	timeout = 60;
+	if (arguments.size() >= 3) {
+		timeout = stod(arguments[2]);
+	}
+	guider->waitCalibration(timeout);
+}
+
 void	guidercommand::operator()(const std::string& command,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
@@ -205,6 +216,10 @@ void	guidercommand::operator()(const std::string& command,
 	if (subcommand == "calibrate") {
 		calibrate(guider, arguments);
 		return;
+	}
+
+	if (subcommand == "wait") {
+		wait(guider, arguments);
 	}
 }
 

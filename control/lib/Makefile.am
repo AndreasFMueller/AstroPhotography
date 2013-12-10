@@ -35,7 +35,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
-	Tracker.cpp Guiding.cpp GuidingProcess.cpp \
+	Tracker.cpp Guider.cpp GuidingProcess.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
 	GuiderCalibrator.cpp GuiderCalibration.cpp \
 	GuiderFactory.cpp \

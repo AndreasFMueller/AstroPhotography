@@ -46,7 +46,8 @@ int	main(int argc, char *argv[]) {
 	TrackerPtr	tracker(startracker);
 
 	// calibrate the 
-	if (!guider.calibrate(tracker)) {
+	guider.startCalibration(tracker);
+	if (!guider.waitCalibration(60)) {
 		std::string	msg = stringprintf("tracker failed to calibrate");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);

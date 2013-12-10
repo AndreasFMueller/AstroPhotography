@@ -117,7 +117,7 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration with focal length %f",
 		focallength);
 	_state.startCalibrating();
-	// get the focal length from the 
+	// get the pixel size from the guider's ccd
 	astro::camera::CcdInfo	info = _guider->ccd()->getInfo();
 	float	pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %f", pixelsize);
@@ -129,10 +129,32 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed");
 
 	// start calibration
+#if 0
 	bool	calibrated
 			= _guider->calibrate(tracker, focallength, pixelsize);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%scalibrated",
-		(calibrated) ? "" : "not ");
+#endif
+	_guider->startCalibration(tracker, focallength, pixelsize);
+}
+
+/**
+ * \brief stop the calibration process
+ */
+void	Guider_impl::cancelCalibration() {
+	_guider->cancelCalibration();
+}
+
+/**
+ * \brief wait for the calibration to complete
+ */
+bool	Guider_impl::waitCalibration(double timeout) {
+	return _guider->waitCalibration(timeout);
+}
+
+/**
+ * \brief retrieve the progress info
+ */
+double	Guider_impl::calibrationProgress() {
+	return _guider->calibrationProgress();
 }
 
 /**

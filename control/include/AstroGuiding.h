@@ -259,6 +259,8 @@ public:
 	const GuiderCalibration&	calibration() const { return _calibration; }
 	GuiderCalibration&	calibration() { return _calibration; }
 	void	calibration(const GuiderCalibration& calibration);
+
+#if 0
 	/**
 	 * \brief Perform guider calibration
 	 * 
@@ -272,17 +274,39 @@ public:
 	 */
 	bool	calibrate(TrackerPtr tracker,
 		double focallength = 0, double pixelsize = 0);
+#endif
 
+	/**
+	 * \brief launch the calibration process
+	 */
+	void	startCalibration(TrackerPtr tracker,
+			double focallength = 0, double pixelsize = 0);
+	/**
+	 * \brief query the progress of the calibration process
+	 */
+	double	calibrationProgress();
+	/**
+	 * \brief cancel the calibratio process
+	 */
+	void	cancelCalibration();
+	/**
+	 * \brief wait for the calibration process to complete
+	 */
+	bool	waitCalibration(double timeout);
+private:
+	CalibrationProcessPtr	calibrationprocess;
 	friend class CalibrationProcess;
 
+#if 0
 private:
 	// here come a few private variables and methods to help with the
 	// calibration process
 	double	gridconstant;
-	bool	calibrated;
 	void	moveto(double ra, double dec);
+#endif
+	bool	calibrated;
 
-	// the following methods 
+	// the following methods manage the guiding thread
 private:
 	GuiderProcessPtr	guiderprocess;
 

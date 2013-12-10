@@ -32,6 +32,8 @@ class guidercommand : public clicommand {
 
 	void	calibrate(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
+	void	wait(GuiderWrapper& guider,
+			const std::vector<std::string>& arguments);
 	void	calibration(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
 public:

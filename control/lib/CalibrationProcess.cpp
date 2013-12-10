@@ -109,14 +109,15 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 		return;
 	}
 	
-	// now compute the calibration data
-	guider().calibration(calibrator.calibrate());
+	// now compute the calibration data, and fix the time constant
+	GuiderCalibration	cal = calibrator.calibrate();
+	cal.rescale(1. / grid);
+	guider().calibration(cal);
+
+	// the guider is now calibrated
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
 		guider().calibration().toString().c_str());
 	calibrated = true;
-
-	// fix time constant
-	calibration().rescale(1. / grid);
 
 	// signal other threads that we are done
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
@@ -235,6 +236,28 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
 }
+
+/**
+ * \brief start the calibration process
+ */
+void	CalibrationProcess::start() {
+	thread->start();
+}
+
+/**
+ * \brief stop the process
+ */
+void	CalibrationProcess::stop() {
+	thread->stop();
+}
+
+/**
+ * \brief wait for the thread to terminate
+ */
+bool	CalibrationProcess::wait(double timeout) {
+	return thread->wait(timeout);
+}
+
 
 } // namespace guiding
 } // namespace astro

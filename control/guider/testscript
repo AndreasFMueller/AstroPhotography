@@ -10,6 +10,17 @@ guider g star 240 180
 guider g calibration 0.7 -0.7 0.2 0.7 0.7 0.1
 guider g info
 guider g calibrate 600
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
 exit
 submit exposuretime=1 camera=camera:sx/253-007-ECHO2-1278-0509 ccdid=0 temperature=260 binning=1x1
 exit

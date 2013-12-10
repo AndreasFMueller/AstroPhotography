@@ -29,7 +29,10 @@ class CalibrationProcess : public GuidingProcess {
 	double	_pixelsize;
 	double	grid;
 	bool	calibrated;
-
+	double	_progress;
+public:
+	double	progress() const { return _progress; }
+private:
 	double	gridconstant(double focallength, double pixelsize) const;
 	Point	pointat(double ra, double dec);
 	void	moveto(double ra, double dec);
@@ -44,8 +47,9 @@ public:
 	~CalibrationProcess();
 	void	calibrate(double focallength, double pixelsize);
 	// methods mandated by the super class
-	void	start() { thread->start(); }
-	void	stop() { thread->stop(); }
+	void	start();
+	void	stop();
+	bool	wait(double timeout);
 	// the main function of the process
 	void	main(GuidingThread<CalibrationProcess>& thread);
 };

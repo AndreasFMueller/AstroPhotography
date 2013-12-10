@@ -80,9 +80,14 @@ module Astro {
 		struct Calibration {
 			float	coefficients[6];
 		};
-		Calibration	getCalibration() raises(BadState);
 		void	useCalibration(in Calibration cal);
+		Calibration	getCalibration() raises(BadState);
+
+		// methods to perform a calibration asynchronously
 		void	startCalibration(in float focallength);
+		double	calibrationProgress() raises(BadState);
+		void	cancelCalibration() raises(BadState);
+		boolean	waitCalibration(in double timeout) raises(BadState);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
