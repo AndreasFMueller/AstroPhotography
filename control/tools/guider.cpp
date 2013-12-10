@@ -206,13 +206,15 @@ int	main(int argc, char *argv[]) {
 
 	// now perform the calibration
 	guider.exposure(exposure);
-	if (!guider.calibrate(tracker)) {
+	guider.startCalibration(tracker);
+	double	timeout = 120;
+	if (!guider.waitCalibration(timeout)) {
 		std::string	msg = stringprintf("tracker failed to calibrate");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
-	// now track for 10 minutes
+	// now track for 2 hours
 	guider.start(tracker);
 	sleep(7200);
 	guider.stop();

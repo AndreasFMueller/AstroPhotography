@@ -584,5 +584,36 @@ Astro::TaskInfo convert(const astro::task::TaskInfo& task) {
 	return info;
 }
 
+// Guider State
+astro::guiding::GuiderState     convert(const Astro::Guider::GuiderState& state) {
+	switch (state) {
+	case Astro::Guider::GUIDER_UNCONFIGURED:
+		return astro::guiding::unconfigured;
+	case Astro::Guider::GUIDER_IDLE:
+		return astro::guiding::idle;
+	case Astro::Guider::GUIDER_CALIBRATING:
+		return astro::guiding::calibrating;
+	case Astro::Guider::GUIDER_CALIBRATED:
+		return astro::guiding::calibrated;
+	case Astro::Guider::GUIDER_GUIDING:
+		return astro::guiding::guiding;
+	}
+}
+
+Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state) {
+	switch (state) {
+	case astro::guiding::unconfigured:
+		return Astro::Guider::GUIDER_UNCONFIGURED;
+	case astro::guiding::idle:
+		return Astro::Guider::GUIDER_IDLE;
+	case astro::guiding::calibrating:
+		return Astro::Guider::GUIDER_CALIBRATING;
+	case astro::guiding::calibrated:
+		return Astro::Guider::GUIDER_CALIBRATED;
+	case astro::guiding::guiding:
+		return Astro::Guider::GUIDER_GUIDING;
+	}
+}
+
 
 } // namespace astro

@@ -161,6 +161,20 @@ CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
 }
 
 /**
+ * \brief Destroy a calibration process
+ */
+CalibrationProcess::~CalibrationProcess() {
+	try {
+		stop();
+		wait(60);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"CalibrationProcess destructor throws exception: %s",
+			x.what());
+	}
+}
+
+/**
  * \brief Calibrate the guiding system
  *
  * This method assumes that the observed star position depends linearly

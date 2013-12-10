@@ -27,7 +27,9 @@ public:
  */
 static void	*springboard_main(void *args) {
 	ThreadBase	*g = (ThreadBase *)args;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function starts");
 	RunAccess(*g).main();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function terminates");
 	return args;
 }
 
@@ -60,6 +62,9 @@ ThreadBase::~ThreadBase() {
 	GuidingLock	lock(&mutex);
 	try {
 		stop();
+		void	*result;
+		pthread_join(thread, &result);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread has terminated");
 	} catch (...) {
 	}
 }
@@ -110,6 +115,7 @@ void	ThreadBase::start() {
  */
 void	ThreadBase::stop() {
 	GuidingLock	lock(&mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread);
 
 	// signal the thread that it should terminate
 	_terminate = false;
@@ -123,6 +129,7 @@ void	ThreadBase::stop() {
  */
 bool	ThreadBase::wait(double timeout) {
 	GuidingLock	lock(&mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop", thread);
 	double	t = Timer::gettime();
 	struct timespec	ts;
 	ts.tv_sec = floor(t);

@@ -198,11 +198,51 @@ class CalibrationProcess;
 typedef std::shared_ptr<CalibrationProcess>	CalibrationProcessPtr;
 
 /**
+ * \brief enumeration type for the state of the guider
+ */
+typedef enum { unconfigured, idle, calibrating, calibrated, guiding } GuiderState;
+
+/**
+ * \brief State machine class for the Guider
+ */
+class GuiderStateMachine {
+	GuiderState	_state;
+	const char	*statename() const;
+public:
+	const GuiderState&	state() const { return _state; }
+	operator GuiderState () { return _state; }
+	operator const GuiderState () const { return _state; }
+
+	// construct the state machine
+	GuiderStateMachine() : _state(astro::guiding::unconfigured) { }
+
+	// methods to find out whether we can accept a configuration, or
+	// start calibration or guiding
+	bool	canConfigure() const;
+	bool	canStartGuiding() const;
+	bool	canStartCalibrating() const;
+	bool	canAcceptCalibration() const;
+	bool	canFailCalibration() const;
+	bool	canStopGuiding() const;
+
+	// state change methods
+	void	configure();
+	void	startCalibrating();
+	void	addCalibration();
+	void	startGuiding();
+	void	stopGuiding();
+};
+
+/**
  * \brief Guider class
  * 
  * The guider class unifies all the operations needed for guiding.
  */
 class Guider {
+private:
+	GuiderStateMachine	_state;
+public:
+	GuiderState	state() const;
 	// The guider is essentially composed of a camera and a guiderport
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
@@ -260,22 +300,6 @@ public:
 	GuiderCalibration&	calibration() { return _calibration; }
 	void	calibration(const GuiderCalibration& calibration);
 
-#if 0
-	/**
-	 * \brief Perform guider calibration
-	 * 
-	 * This method takes a tracker object that is programmed to follow
-	 * a given star, and performs the calibration using that star.
-	 * It needs information about the focal length of the telescope
-	 * to determine the expected effect of the guider port commands
-	 * on the star position detected by the tracker. Without this
-	 * information the tracker might loose the star it is expected
-	 * to track.
-	 */
-	bool	calibrate(TrackerPtr tracker,
-		double focallength = 0, double pixelsize = 0);
-#endif
-
 	/**
 	 * \brief launch the calibration process
 	 */
@@ -296,15 +320,6 @@ public:
 private:
 	CalibrationProcessPtr	calibrationprocess;
 	friend class CalibrationProcess;
-
-#if 0
-private:
-	// here come a few private variables and methods to help with the
-	// calibration process
-	double	gridconstant;
-	void	moveto(double ra, double dec);
-#endif
-	bool	calibrated;
 
 	// the following methods manage the guiding thread
 private:

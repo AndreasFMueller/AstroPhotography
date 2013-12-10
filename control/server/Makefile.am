@@ -12,7 +12,7 @@ noinst_HEADERS = Modules_impl.h \
 	Camera_impl.h Ccd_impl.h GuiderPort_impl.h FilterWheel_impl.h \
 	Cooler_impl.h Focuser_impl.h \
 	GuiderFactory_impl.h Guider_impl.h \
-	PoaNameMap.h POABuilder.h GuiderStateMachine.h \
+	PoaNameMap.h POABuilder.h \
 	ImageObjectDirectory.h \
 	TaskQueue_impl.h TaskActivator_impl.h Task_impl.h
 
@@ -25,7 +25,7 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	GuiderPort_impl.cpp FilterWheel_impl.cpp Cooler_impl.cpp \
 	Focuser_impl.cpp \
 	GuiderFactory_impl.cpp Guider_impl.cpp \
-	PoaNameMap.cpp POABuilder.cpp GuiderStateMachine.cpp \
+	PoaNameMap.cpp POABuilder.cpp \
 	ImageObjectDirectory.cpp \
 	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp
 

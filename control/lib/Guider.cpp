@@ -32,11 +32,18 @@ namespace guiding {
  */
 Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport)
 	: _camera(camera), _guiderport(guiderport), _imager(ccd) {
-	calibrated = false;
 	// default exposure settings
 	exposure().exposuretime = 1.;
 	exposure().frame = ccd->getInfo().getFrame();
 	//gridconstant = 10;
+}
+
+/**
+ * \brief Retrieve the state 
+ */
+GuiderState	Guider::state() const {
+	GuiderState	result = _state;
+	return result;
 }
 
 #if 0
@@ -106,7 +113,7 @@ bool	Guider::calibrate(TrackerPtr tracker,
 	calibration(calibrator.calibrate());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
 		calibration().toString().c_str());
-	calibrated = true;
+	_calibrated = true;
 
 	// fix time constant
 	calibration().a[0] /= gridconstant;
@@ -115,7 +122,7 @@ bool	Guider::calibrate(TrackerPtr tracker,
 	calibration().a[4] /= gridconstant;
 
 	// are we now calibrated?
-	return calibrated;
+	return _calibrated;
 }
 
 /**
@@ -173,8 +180,8 @@ void	Guider::moveto(double ra, double dec) {
  * \brief Set a calibration
  */
 void	Guider::calibration(const GuiderCalibration& calibration) {
+	_state.addCalibration();
 	_calibration = calibration;
-	calibrated = true;
 }
 
 /**
@@ -185,6 +192,9 @@ void	Guider::calibration(const GuiderCalibration& calibration) {
  */
 void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 		double pixelsize) {
+	// go into the calibrating state
+	_state.startCalibrating();
+	
 	// first check whether there already is a calibration process
 	// running
 	if (guiderprocess) {
@@ -206,6 +216,9 @@ void	Guider::startCalibration(TrackerPtr tracker, double focallength,
  * \brief inquire about the current state of the calibration process
  */
 double	Guider::calibrationProgress() {
+	if (_state != calibrating) {
+		throw std::runtime_error("not currently calibrating");
+	}
 	return calibrationprocess->progress();
 }
 
@@ -213,6 +226,9 @@ double	Guider::calibrationProgress() {
  * \brief cancel a calibration that is still in progress
  */
 void	Guider::cancelCalibration() {
+	if (_state != calibrating) {
+		throw std::runtime_error("not currently calibrating");
+	}
 	calibrationprocess->stop();
 }
 
@@ -220,6 +236,9 @@ void	Guider::cancelCalibration() {
  * \brief wait for the calibration to complete
  */
 bool	Guider::waitCalibration(double timeout) {
+	if (_state != calibrating) {
+		throw std::runtime_error("not currently calibrating");
+	}
 	return calibrationprocess->wait(timeout);
 }
 

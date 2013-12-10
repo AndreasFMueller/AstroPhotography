@@ -23,7 +23,7 @@ Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
  * \brief retrieve the state of the state machine
  */
 Guider::GuiderState	Guider_impl::getState() {
-	return _state;
+	return astro::convert(_guider->state());
 }
 
 /**
@@ -106,7 +106,6 @@ void	Guider_impl::useCalibration(const Astro::Guider::Calibration& cal) {
 		cal.coefficients[0], cal.coefficients[1], cal.coefficients[2],
 		cal.coefficients[3], cal.coefficients[4], cal.coefficients[5]
 	);
-	_state.addCalibration();
 	_guider->calibration(astro::convert(cal));
 }
 
@@ -116,7 +115,6 @@ void	Guider_impl::useCalibration(const Astro::Guider::Calibration& cal) {
 void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration with focal length %f",
 		focallength);
-	_state.startCalibrating();
 	// get the pixel size from the guider's ccd
 	astro::camera::CcdInfo	info = _guider->ccd()->getInfo();
 	float	pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
@@ -129,10 +127,6 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed");
 
 	// start calibration
-#if 0
-	bool	calibrated
-			= _guider->calibrate(tracker, focallength, pixelsize);
-#endif
 	_guider->startCalibration(tracker, focallength, pixelsize);
 }
 
@@ -140,6 +134,7 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
  * \brief stop the calibration process
  */
 void	Guider_impl::cancelCalibration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel calibration");
 	_guider->cancelCalibration();
 }
 
@@ -147,6 +142,7 @@ void	Guider_impl::cancelCalibration() {
  * \brief wait for the calibration to complete
  */
 bool	Guider_impl::waitCalibration(double timeout) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for calibration to to complete");
 	return _guider->waitCalibration(timeout);
 }
 
@@ -154,14 +150,18 @@ bool	Guider_impl::waitCalibration(double timeout) {
  * \brief retrieve the progress info
  */
 double	Guider_impl::calibrationProgress() {
-	return _guider->calibrationProgress();
+	double	progress = _guider->calibrationProgress();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check calibration progress: %f",
+		progress);
+	return progress;
 }
 
 /**
  * \brief start guiding with the given interval
  */
 void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
-	_state.startGuiding();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %f",
+		guidinginterval);
 	// XXX actually do the guiding
 }
 
@@ -176,11 +176,12 @@ void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
  * \brief stop the guiding process
  */
 void	Guider_impl::stopGuiding() {
-	_state.stopGuiding();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop guiding");
 	_guider->stop();
 }
 
 ShortImage_ptr	Guider_impl::mostRecentImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve most recent image");
 	// XXX actuall retrieve the most recent image
 	return NULL;
 }

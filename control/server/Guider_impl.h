@@ -8,12 +8,10 @@
 
 #include <guider.hh>
 #include <AstroGuiding.h>
-#include <GuiderStateMachine.h>
 
 namespace Astro {
 
 class Guider_impl : public POA_Astro::Guider {
-	GuiderStateMachine	_state;
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
 public:
