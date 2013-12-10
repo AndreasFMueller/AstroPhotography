@@ -6,6 +6,7 @@
 #include <Simulator.h>
 #include <AstroAdapter.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 #include <unistd.h>
 
 using namespace astro::image;
@@ -15,12 +16,6 @@ using namespace astro::adapter;
 namespace astro {
 namespace camera {
 namespace sim {
-
-static double	now() {
-	struct timeval	now;
-	gettimeofday(&now, NULL);
-	return now.tv_sec + 0.000001 * now.tv_usec;
-}
 
 //////////////////////////////////////////////////////////////////////
 // Simulator camera implementation
@@ -51,7 +46,7 @@ SimCamera::SimCamera() : Camera(cameraname("guidesim")) {
 
 	// neither movement nor exposures are active
 	exposurestart = -1;
-	lastexposure = now();
+	lastexposure = Timer::gettime();
 
 	// create a mutex to protect the movement structures
 	pthread_mutex_init(&mutex, NULL);
@@ -76,7 +71,7 @@ void	SimCamera::complete(movement& mov) {
 	// find out whether some movement is in progress
 	if (mov.starttime > 0) {
 		double	interval = mov.duration;
-		double	nowtime = now();
+		double	nowtime = Timer::gettime();
 		if (nowtime < (mov.starttime + mov.duration)) {
 			interval = (mov.starttime + mov.duration - nowtime);
 		}
@@ -129,7 +124,7 @@ void	SimCamera::activate(float raplus, float raminus,
 	complete_movement();
 
 	// set the new movement state
-	double	movestart = now();
+	double	movestart = Timer::gettime();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "movement start time: %.3f", movestart);
 
 	// right ascension
@@ -172,14 +167,14 @@ void	SimCamera::activate(float raplus, float raminus,
 
 void	SimCamera::startExposure(const Exposure& _exposure) {
 	exposure = _exposure;
-	exposurestart = now();
+	exposurestart = Timer::gettime();
 }
 
 Exposure::State	SimCamera::exposureStatus() {
 	if (exposurestart < 0) {
 		return Exposure::idle;
 	}
-	double	nowtime = now();
+	double	nowtime = Timer::gettime();
 	if (nowtime < exposurestart + exposure.exposuretime) {
 		return Exposure::exposing;
 	}
@@ -188,7 +183,7 @@ Exposure::State	SimCamera::exposureStatus() {
 
 void	SimCamera::await_exposure() {
 	// compute remaining exposure time
-	double	nowtime = now();
+	double	nowtime = Timer::gettime();
 	double	exposed = nowtime - exposurestart;
 	if (exposure.exposuretime > exposed) {
 		double	remaining = exposure.exposuretime - exposed;
@@ -225,7 +220,7 @@ ImagePtr	SimCamera::getImage() {
 	pthread_mutex_unlock(&mutex);
 
 	// add base motion
-	double	nowtime = now();
+	double	nowtime = Timer::gettime();
 	x += vx * (nowtime - lastexposure);
 	y += vy * (nowtime - lastexposure);
 	lastexposure = nowtime;

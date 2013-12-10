@@ -82,7 +82,7 @@ module Astro {
 		};
 		Calibration	getCalibration() raises(BadState);
 		void	useCalibration(in Calibration cal);
-		void	startCalibration(in float sensitivity);
+		void	startCalibration(in float focallength);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be

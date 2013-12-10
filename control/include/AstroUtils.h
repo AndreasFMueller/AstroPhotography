@@ -25,6 +25,7 @@ class Timer {
 	double	endTime;
 public:
 	static double	gettime();
+	static void	sleep(double t);
 	Timer();
 	void	start();
 	void	end();

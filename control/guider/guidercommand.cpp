@@ -5,6 +5,7 @@
  */
 #include <guidercommand.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 //#include <guiders.h>
 #include <iostream>
 #include <Output.h>
@@ -30,9 +31,33 @@ std::ostream&	operator<<(std::ostream& out, const Astro::Point& star) {
 	return out;
 }
 
+std::ostream&	operator<<(std::ostream& out,
+			const Astro::Guider::Calibration& calibration) {
+	out << "calibration:     ";
+	out << stringprintf("[ %10.6f, %10.6f, %10.6f;",
+		calibration.coefficients[0],
+		calibration.coefficients[1],
+		calibration.coefficients[2]);
+	out << std::endl;
+	out << "           :     ";
+	out << stringprintf("  %10.6f, %10.6f, %10.6f   ]",
+		calibration.coefficients[3],
+		calibration.coefficients[4],
+		calibration.coefficients[5]);
+	out << std::endl;
+	return out;
+}
+
 std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
 	out << guider->getExposure();
 	out << guider->getStar();
+
+	// display calibration data
+	Astro::Guider::GuiderState	state = guider->getState();
+	if ((Astro::Guider::GUIDER_CALIBRATED == state) ||
+		(Astro::Guider::GUIDER_GUIDING == state)) {
+		out << guider->getCalibration();
+	}
 	return out;
 }
 
@@ -100,6 +125,30 @@ void	guidercommand::star(GuiderWrapper& guider,
 	guider->setStar(point);
 }
 
+void	guidercommand::calibration(GuiderWrapper& guider,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 8) {
+		throw command_error("calibration command requires 6 arguments");
+	}
+	std::vector<std::string>::const_iterator	i = arguments.begin();
+	i += 2;
+	int	j = 0;
+	Astro::Guider::Calibration	cal;
+	while (j < 6) {
+		cal.coefficients[j++] = stod(*i++);
+	}
+	guider->useCalibration(cal);
+}
+
+void	guidercommand::calibrate(GuiderWrapper& guider,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		throw command_error("calibrate command requires 2 arguments");
+	}
+	float	focallength = stod(arguments[2]);
+	guider->startCalibration(focallength);
+}
+
 void	guidercommand::operator()(const std::string& command,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
@@ -147,6 +196,16 @@ void	guidercommand::operator()(const std::string& command,
 		star(guider, arguments);
 		return;
 	}
+
+	if (subcommand == "calibration") {
+		calibration(guider, arguments);
+		return;
+	}
+
+	if (subcommand == "calibrate") {
+		calibrate(guider, arguments);
+		return;
+	}
 }
 
 std::string	guidercommand::summary() const {
@@ -163,6 +222,7 @@ std::string	guidercommand::help() const {
 	"\tguider <guider> size <x> <y>\n"
 	"\tguider <guider> offset <width> <height>\n"
 	"\tguider <guider> star <x> <y>\n"
+	"\tguider <guider> calibration <a0> <a1> <a2> <a3> <a4> <a5>\n"
 	"\n"
 	"DESCRIPTION\n"
 	"\n"

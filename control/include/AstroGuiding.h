@@ -162,6 +162,7 @@ public:
 	std::string	toString() const;
 	Point	defaultcorrection() const;
 	Point	operator()(const Point& offset, double Deltat) const;
+	void	rescale(double scalefactor);
 };
 
 /**
@@ -193,6 +194,8 @@ public:
 // we only define it in the implementation
 class GuiderProcess;
 typedef std::shared_ptr<GuiderProcess>	GuiderProcessPtr;
+class CalibrationProcess;
+typedef std::shared_ptr<CalibrationProcess>	CalibrationProcessPtr;
 
 /**
  * \brief Guider class
@@ -269,12 +272,14 @@ public:
 	 */
 	bool	calibrate(TrackerPtr tracker,
 		double focallength = 0, double pixelsize = 0);
+
+	friend class CalibrationProcess;
+
 private:
 	// here come a few private variables and methods to help with the
 	// calibration process
 	double	gridconstant;
 	bool	calibrated;
-	void	sleep(double t);
 	void	moveto(double ra, double dec);
 
 	// the following methods 
@@ -298,6 +303,8 @@ public:
 	 * ImageCallbackData.
 	 */
 	astro::callback::CallbackPtr	newimagecallback;
+private:
+	void	callbackImage(ImagePtr image);
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 

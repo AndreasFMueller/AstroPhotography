@@ -17,7 +17,8 @@ bool	GuiderStateMachine::canStartGuiding() const {
 
 bool	GuiderStateMachine::canAcceptCalibration() const {
 	return (_state == Astro::Guider::GUIDER_UNCONFIGURED) ||
-		(_state == Astro::Guider::GUIDER_IDLE);
+		(_state == Astro::Guider::GUIDER_IDLE) ||
+		(_state == Astro::Guider::GUIDER_CALIBRATED);
 }
 
 bool	GuiderStateMachine::canStopGuiding() const {

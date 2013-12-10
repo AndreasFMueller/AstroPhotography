@@ -29,6 +29,11 @@ class guidercommand : public clicommand {
 
 	void	star(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
+
+	void	calibrate(GuiderWrapper& guider,
+			const std::vector<std::string>& arguments);
+	void	calibration(GuiderWrapper& guider,
+			const std::vector<std::string>& arguments);
 public:
 	guidercommand(commandfactory& factory)
 		: clicommand(factory, "guider") { }

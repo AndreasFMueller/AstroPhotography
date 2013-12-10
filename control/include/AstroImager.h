@@ -61,6 +61,8 @@ public:
 	ImagePtr	getImage();
 };
 
+typedef std::shared_ptr<Imager>	ImagerPtr;
+
 } // namespace camera
 } // namespace astro
 

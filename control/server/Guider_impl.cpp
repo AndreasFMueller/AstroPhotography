@@ -101,6 +101,11 @@ Guider::Calibration	Guider_impl::getCalibration() {
  * \brief Use the this calibration
  */
 void	Guider_impl::useCalibration(const Astro::Guider::Calibration& cal) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"set calibration [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
+		cal.coefficients[0], cal.coefficients[1], cal.coefficients[2],
+		cal.coefficients[3], cal.coefficients[4], cal.coefficients[5]
+	);
 	_state.addCalibration();
 	_guider->calibration(astro::convert(cal));
 }
@@ -108,8 +113,26 @@ void	Guider_impl::useCalibration(const Astro::Guider::Calibration& cal) {
 /**
  * \brief start calibrating
  */
-void	Guider_impl::startCalibration(::CORBA::Float sensitivity) {
+void	Guider_impl::startCalibration(::CORBA::Float focallength) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration with focal length %f",
+		focallength);
 	_state.startCalibrating();
+	// get the focal length from the 
+	astro::camera::CcdInfo	info = _guider->ccd()->getInfo();
+	float	pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %f", pixelsize);
+	
+	// construct the tracker
+	astro::camera::Exposure	exposure = _guider->exposure();
+	astro::guiding::TrackerPtr	tracker(
+		new astro::guiding::StarTracker(_point, exposure.frame, 10));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed");
+
+	// start calibration
+	bool	calibrated
+			= _guider->calibrate(tracker, focallength, pixelsize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%scalibrated",
+		(calibrated) ? "" : "not ");
 }
 
 /**
@@ -117,6 +140,7 @@ void	Guider_impl::startCalibration(::CORBA::Float sensitivity) {
  */
 void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
 	_state.startGuiding();
+	// XXX actually do the guiding
 }
 
 /**
@@ -135,6 +159,7 @@ void	Guider_impl::stopGuiding() {
 }
 
 ShortImage_ptr	Guider_impl::mostRecentImage() {
+	// XXX actuall retrieve the most recent image
 	return NULL;
 }
 

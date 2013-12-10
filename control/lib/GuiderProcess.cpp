@@ -6,6 +6,7 @@
 #include <GuiderProcess.h>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <AstroUtils.h>
 
 using namespace astro::camera;
 using namespace astro::image::transform;
@@ -13,12 +14,6 @@ using namespace astro::image;
 
 namespace astro {
 namespace guiding {
-
-static double   now() {
-        struct timeval  now;
-        gettimeofday(&now, NULL);
-        return now.tv_sec + 0.000001 * now.tv_usec;
-}
 
 /**
  * \brief create a GuiderProcess instance
@@ -144,7 +139,7 @@ void	*GuiderProcess::track_main() {
 		// we measure the time it takes to get an exposure. This
 		// may be larger than the interval, so we need the time
 		// to protect from overcorrecting
-		double	starttime = now();
+		double	starttime = Timer::gettime();
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: start new exposure");
 		// initiate an exposure
@@ -157,7 +152,7 @@ void	*GuiderProcess::track_main() {
 		// now retreive the image
 		ImagePtr	image = guider.getImage();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: new image received");
-		double	endtime = now();
+		double	endtime = Timer::gettime();
 
 		// use the tracker to find the tracking offset
 		Point	offset = tracker->operator()(image);

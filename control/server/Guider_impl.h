@@ -39,7 +39,7 @@ public:
 	virtual void	useCalibration(const Astro::Guider::Calibration& cal);
 	virtual void	startCalibration(::CORBA::Float sensitivity);
 
-	// guding relatedm ethods
+	// guding related methods
 	virtual void	startGuiding(::CORBA::Float guidinginterval);
 	virtual ::CORBA::Float	getGuidingInterval();
 	virtual void	stopGuiding();

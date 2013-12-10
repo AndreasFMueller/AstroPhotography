@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, HOchschule Rapperswil
  */
 #include <AstroUtils.h>
+#include <AstroDebug.h>
 #include <includes.h>
 
 namespace astro {
@@ -29,5 +30,13 @@ void	Timer::end() {
 double	Timer::elapsed() {
 	return endTime - startTime;
 }
+
+void    Timer::sleep(double t) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep for %.3f seconds", t);
+	unsigned int    tt = 1000000 * t;
+	usleep(tt);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
+}
+
 
 } // namespace astro
