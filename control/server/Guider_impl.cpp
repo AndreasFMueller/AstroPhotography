@@ -8,15 +8,42 @@
 #include <Ccd_impl.h>
 #include <GuiderPort_impl.h>
 #include <ServantBuilder.h>
+#include <AstroCallback.h>
+#include <AstroUtils.h>
 
 namespace Astro {
 
+//////////////////////////////////////////////////////////////////////
+// 
+//////////////////////////////////////////////////////////////////////
+class GuiderImageCallback : public astro::callback::Callback {
+	astro::Timer	timer;
+	astro::image::ImagePtr	lastimage;
+public:
+	GuiderImageCallback();
+	virtual astro::callback::CallbackDataPtr operator()(
+		astro::callback::CallbackDataPtr data);
+};
+
+GuiderImageCallback::GuiderImageCallback() {
+}
+
+astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
+	astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
+	return data;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Implementation of the Guider_impl class
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief create a guider implementation object
  */
 Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
 	: _guider(guider) {
 	_point = _guider->ccd()->getInfo().getFrame().size().center();
+	_guider->newimagecallback = astro::callback::CallbackPtr(new GuiderImageCallback());
 }
 
 /**
