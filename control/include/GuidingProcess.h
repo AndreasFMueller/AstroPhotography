@@ -8,6 +8,7 @@
 
 #include <AstroGuiding.h>
 #include <pthread.h>
+#include <includes.h>
 
 namespace astro {
 namespace guiding {
