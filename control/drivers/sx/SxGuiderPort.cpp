@@ -142,7 +142,7 @@ SxGuiderPort::~SxGuiderPort() {
  *
  * The main function of the guider port thread waits until either 
  * one of the turnoff variables expires or a state change was signaled 
- * from the activate 
+ * from the activate method.
  */
 void	*SxGuiderPort::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] main function", pthread_self());
@@ -201,9 +201,6 @@ void	*SxGuiderPort::main() {
 			(uint8_t)SX_CMD_SET_STAR2K, (uint16_t)current);
 		camera.controlRequest(&request);
 
-		// release the mutex
-		pthread_mutex_unlock(&mutex);
-
 		// if cancelled, we turminate now
 		if (cancel) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] thread cancelled",
@@ -211,7 +208,9 @@ void	*SxGuiderPort::main() {
 			return NULL;
 		}
 
-		// wait for timeout or condition
+		// wait for timeout or condition, this also releases the
+		// mutex lock as a side effect. When this method returns,
+		// the mutex is again locked.
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%p] wait for next event",
 			pthread_self());
 		pthread_cond_timedwait(&condition, &mutex, &next.ts);
