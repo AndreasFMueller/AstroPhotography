@@ -266,27 +266,5 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
 }
 
-/**
- * \brief start the calibration process
- */
-void	CalibrationProcess::start() {
-	thread->start();
-}
-
-/**
- * \brief stop the process
- */
-void	CalibrationProcess::stop() {
-	thread->stop();
-}
-
-/**
- * \brief wait for the thread to terminate
- */
-bool	CalibrationProcess::wait(double timeout) {
-	return thread->wait(timeout);
-}
-
-
 } // namespace guiding
 } // namespace astro

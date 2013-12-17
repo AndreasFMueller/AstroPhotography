@@ -143,7 +143,9 @@ public:
 };
 
 /**
- * \brief Callback class for Guider debugging/monitoring
+ * \brief Callback data class for Guider debugging/monitoring
+ *
+ * Callback data for the guider transports an image
  */
 class GuiderNewImageCallbackData : public astro::callback::CallbackData {
 	astro::image::ImagePtr	_image;
@@ -153,20 +155,37 @@ public:
 	astro::image::ImagePtr	image() { return _image; }
 };
 
+class GuiderCalibrator;
+
 /**
  * \brief GuiderCalibration
+ *
+ * The Calibration data. The coefficients in the array a correspond to
+ * a matrix that describes how the control commands on the guider port
+ * translate into displacements of the guider image.
  */
 class GuiderCalibration {
-public:
+	friend class GuiderCalibrator;
 	double	a[6];
+public:
+	GuiderCalibration();
 	std::string	toString() const;
 	Point	defaultcorrection() const;
 	Point	operator()(const Point& offset, double Deltat) const;
+
+	const double&	operator[](size_t index) const;
+	double&	operator[](size_t index);
+
 	void	rescale(double scalefactor);
 };
 
 /**
  * \brief GuiderCalibrator
+ *
+ * The GuiderCalibrator collects a set of points and computes the calibration
+ * data from this. The GuiderCalibrator is used by the CalibrationProcess,
+ * it adds points during the calibration using the add method, the calibrate
+ * method then computes the calibration data.
  */
 class GuiderCalibrator {
 public:
@@ -204,6 +223,9 @@ typedef enum { unconfigured, idle, calibrating, calibrated, guiding } GuiderStat
 
 /**
  * \brief State machine class for the Guider
+ *
+ * The state machine ensures that any change is only accepted only if
+ * all prerequisites are met.
  */
 class GuiderStateMachine {
 	GuiderState	_state;
@@ -327,8 +349,10 @@ private:
 
 public:
 	// tracking
-	bool	start(TrackerPtr tracker);
-	bool	stop();
+	void	startGuiding(TrackerPtr tracker);
+	void	stopGuiding();
+	bool	waitGuiding(double timeout);
+	
 	friend class GuiderProcess;
 
 	/**

@@ -28,6 +28,8 @@ Astro::DeviceLocator::device_type	convert(
 		return Astro::DeviceLocator::DEVICE_FILTERWHEEL;
 	case astro::DeviceName::Cooler:
 		return Astro::DeviceLocator::DEVICE_COOLER;
+	case astro::DeviceName::Module:
+		return Astro::DeviceLocator::DEVICE_MODULE;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -48,6 +50,8 @@ astro::DeviceName::device_type	convert(
 		return astro::DeviceName::Filterwheel;
 	case Astro::DeviceLocator::DEVICE_COOLER:
 		return astro::DeviceName::Cooler;
+	case Astro::DeviceLocator::DEVICE_MODULE:
+		return astro::DeviceName::Module;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -67,6 +71,8 @@ std::string	convert2string(astro::DeviceName::device_type fromtype) {
 		return std::string("FILTERWHEEL");
 	case astro::DeviceName::Cooler:
 		return std::string("COOLER");
+	case astro::DeviceName::Module:
+		return std::string("MODULE");
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -86,6 +92,8 @@ std::string	convert2string(Astro::DeviceLocator::device_type fromtype) {
 		return std::string("FILTERWHEEL");
 	case Astro::DeviceLocator::DEVICE_COOLER:
 		return std::string("COOLER");
+	case Astro::DeviceLocator::DEVICE_MODULE:
+		return std::string("MODULE");
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -420,7 +428,7 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 astro::guiding::GuiderCalibration       convert(const Astro::Guider::Calibration& cal) {
 	astro::guiding::GuiderCalibration	result;
 	for (int i = 0; i < 6; i++) {
-		result.a[i] = cal.coefficients[i];
+		result[i] = cal.coefficients[i];
 	}
 	return result;
 }
@@ -428,7 +436,7 @@ astro::guiding::GuiderCalibration       convert(const Astro::Guider::Calibration
 Astro::Guider::Calibration        convert(const astro::guiding::GuiderCalibration& cal) {
 	Astro::Guider::Calibration	result;
 	for (int i = 0; i < 6; i++) {
-		result.coefficients[i] = cal.a[i];
+		result.coefficients[i] = cal[i];
 	}
 	return result;
 }

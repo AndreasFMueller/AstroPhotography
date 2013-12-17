@@ -59,6 +59,7 @@ public:
 	~GuiderProcess();
 	bool	start(TrackerPtr tracker);
 	bool	stop();
+	bool	wait(double timeout);
 	double	getGain() const;
 	void	setGain(double gain);
 };

@@ -19,7 +19,7 @@ module Astro {
 		typedef sequence<string>	DeviceNameList;
 		enum device_type { DEVICE_CAMERA, DEVICE_CCD, DEVICE_FOCUSER,
 					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL,
-					DEVICE_COOLER };
+					DEVICE_COOLER, DEVICE_MODULE };
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *

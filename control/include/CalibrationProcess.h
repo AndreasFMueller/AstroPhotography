@@ -48,10 +48,6 @@ public:
 	CalibrationProcess(Guider& guider, TrackerPtr tracker);
 	~CalibrationProcess();
 	void	calibrate(double focallength, double pixelsize);
-	// methods mandated by the super class
-	void	start();
-	void	stop();
-	bool	wait(double timeout);
 	// the main function of the process
 	void	main(GuidingThread<CalibrationProcess>& thread);
 };

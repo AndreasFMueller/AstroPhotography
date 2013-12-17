@@ -19,6 +19,6 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h \
 	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
 	NameService.h OrbSingleton.h Conversions.h ViewerPipeline.h \
 	CorbaExceptionReporter.h DeviceLocatorAdapter.h Testtable.h \
-	ImageDirectory.h TaskTable.h 
+	ImageDirectory.h TaskTable.h TrackingProcess.h DrivingProcess.h
 
 BUILT_SOURCES = types.hh exceptions.hh image.hh camera.hh module.hh guider.hh

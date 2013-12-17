@@ -54,9 +54,9 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// now simulate tracking
-	guider.start(tracker);
+	guider.startGuiding(tracker);
 	sleep(60);
-	guider.stop();
+	guider.stopGuiding();
 
 	return EXIT_SUCCESS;
 }

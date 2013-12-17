@@ -100,11 +100,23 @@ class GuidingProcess {
 public:
 	Guider&	guider() { return _guider; }
 	const Guider&	guider() const { return _guider; }
+
 private:
 	TrackerPtr	_tracker;
 public:
 	TrackerPtr	tracker() { return _tracker; }
 	const TrackerPtr	tracker() const { return _tracker; }
+
+private:
+	ThreadPtr	_thread;
+public:
+	ThreadPtr	thread() { return _thread; }
+	void	thread(ThreadPtr t) { _thread = t; }
+
+	void	stop() { _thread->stop(); }
+	void	start() { _thread->stop(); }
+	bool	wait(double timeout) { return _thread->wait(timeout); }
+
 	// simplified accessors for the stuff needed during calibration or
 	// guiding
 	astro::camera::Exposure&	exposure() {
@@ -135,8 +147,6 @@ public:
 public:
 	GuidingProcess(Guider& guider, TrackerPtr tracker);
 	
-	virtual void	start() = 0;
-	virtual void	stop() = 0;
 };
 
 } // namespace guiding

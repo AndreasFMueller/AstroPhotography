@@ -204,7 +204,7 @@ void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
  */
 void	Guider_impl::stopGuiding() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop guiding");
-	_guider->stop();
+	_guider->stopGuiding();
 }
 
 ShortImage_ptr	Guider_impl::mostRecentImage() {

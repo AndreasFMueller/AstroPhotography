@@ -215,9 +215,9 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// now track for 2 hours
-	guider.start(tracker);
+	guider.startGuiding(tracker);
 	sleep(7200);
-	guider.stop();
+	guider.stopGuiding();
 
 	return EXIT_SUCCESS;
 }
