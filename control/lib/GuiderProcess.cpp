@@ -288,6 +288,12 @@ void	GuiderProcess::setGain(double _gain) {
 	gain = _gain;
 }
 
+bool	GuiderProcess::wait(double timeout) {
+	Timer::sleep(timeout);
+	return true;
+}
+
+
 } // namespace guiding
 } // namespace astro
 
