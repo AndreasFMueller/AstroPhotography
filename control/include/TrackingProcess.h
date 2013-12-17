@@ -66,7 +66,7 @@ public:
 	TrackingProcess(Guider& _guider, TrackerPtr _tracker,
 		DrivingProcess& drivingprocess);
 	~TrackingProcess();
-
+protected:
 	void	main(GuidingThread<TrackingProcess>& thread);
 };
 

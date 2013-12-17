@@ -54,6 +54,7 @@ private:
 public:
 	DrivingProcess(Guider& _guider);
 	~DrivingProcess();
+protected:
 	void	main(GuidingThread<DrivingProcess>& thread);
 };
 

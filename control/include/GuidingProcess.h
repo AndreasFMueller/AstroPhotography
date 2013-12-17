@@ -47,6 +47,13 @@ protected:
 public:
 	bool	isrunning();
 protected:
+	/**
+	 * \brief Main method for the thread
+	 *
+	 * The thread will ultimately run this method from the run method
+	 * defined below. This allows the thread to perform some
+	 * initializations, e.g. the _isrunning and _terminate variables.
+	 */
 	virtual	void	main() = 0;
 private:
 	// The MainAccess adapter class gives access allows to get access
@@ -68,7 +75,6 @@ public:
 	~ThreadBase();
 	void	start();
 	void	stop();
-public:
 	bool	wait(double timeout);
 };
 typedef std::shared_ptr<ThreadBase>	ThreadPtr;
@@ -87,6 +93,7 @@ class GuidingThread : public ThreadBase {
 	Work&	_work;
 public:
 	GuidingThread(Work& work) : _work(work) { }
+protected:
 	virtual void	main() {
 		_work.main(*this);
 	}
