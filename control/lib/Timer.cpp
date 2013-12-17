@@ -10,7 +10,7 @@
 namespace astro {
 
 Timer::Timer() {
-	startTime = endTime = 0;
+	_startTime = _endTime = 0;
 }
 
 double	Timer::gettime() {
@@ -20,15 +20,15 @@ double	Timer::gettime() {
 }
 
 void	Timer::start() {
-	startTime = gettime();
+	_startTime = gettime();
 }
 
 void	Timer::end() {
-	endTime = gettime();
+	_endTime = gettime();
 }
 
 double	Timer::elapsed() {
-	return endTime - startTime;
+	return _endTime - _startTime;
 }
 
 void    Timer::sleep(double t) {
@@ -37,6 +37,5 @@ void    Timer::sleep(double t) {
 	usleep(tt);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sleep complete");
 }
-
 
 } // namespace astro

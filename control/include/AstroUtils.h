@@ -21,8 +21,13 @@ namespace astro {
  * to correct the two fields for exposure differences.
  */
 class Timer {
-	double	startTime;
-	double	endTime;
+	double	_startTime;
+public:
+	const double&	startTime() const { return _startTime; }
+private:
+	double	_endTime;
+public:
+	const double&	endTime() const { return _endTime; }
 public:
 	static double	gettime();
 	static void	sleep(double t);
