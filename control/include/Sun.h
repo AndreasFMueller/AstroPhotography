@@ -11,6 +11,7 @@
 #include <ctime>
 
 namespace astro {
+namespace sun {
 
 class Sun {
 	double	longitude, latitude, elevation;
@@ -28,6 +29,7 @@ private:
 	void	compute(time_t when);
 };
 
+} // namespace sun
 } // namespace astro
 
 #endif /* _Sun_h */

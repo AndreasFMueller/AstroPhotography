@@ -11,6 +11,12 @@
 
 using namespace astro::image;
 
+/**
+ * \brief Astro library namespace
+ *
+ * All standalone classes are in this namespace. Only the CORBA related
+ * classes are in the separate namespace Astro.
+ */
 namespace astro {
 
 /**

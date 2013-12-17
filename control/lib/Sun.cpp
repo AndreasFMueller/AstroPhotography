@@ -14,6 +14,7 @@
 #include <cmath>
 
 namespace astro {
+namespace sun {
 
 /* A macro to compute the number of days elapsed since 2000 Jan 0.0 */
 /* (which is equal to 1999 Dec 31, 0h UT)                           */
@@ -417,14 +418,21 @@ void	Sun::compute(time_t when) {
 	}
 }
 
+/**
+ * \brief Compute sunrise time
+ */
 time_t	Sun::sunrise(time_t when) {
 	compute(when);
 	return when - (when % 86400) + (int)(rise * 3600);
 }
 
+/**
+ * \brief Compute sunset time
+ */
 time_t	Sun::sunset(time_t when) {
 	compute(when);
 	return when - (when % 86400) + (int)(set * 3600);
 }
 
+} // namespace sun
 } // namespace astro

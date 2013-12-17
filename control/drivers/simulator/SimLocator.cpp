@@ -28,7 +28,7 @@ static std::string      sim_name("simulator");
 static std::string      sim_version(VERSION);
 
 /**
- * \brief Module descriptor for the Starlight express module
+ * \brief Module descriptor for the Simulator module
  */
 class SimDescriptor : public ModuleDescriptor {
 public:

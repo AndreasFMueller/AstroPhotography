@@ -29,7 +29,7 @@ namespace astro {
 /**
  * \brief Main function for the CORBA server
  */
-int	main(int argc, char *argv[]) {
+int	astrod_main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debuglevel = LOG_DEBUG;
 	debugthreads = true;
@@ -206,7 +206,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::astrod_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "astrod terminated by exception: " << x.what()
 			<< std::endl;
