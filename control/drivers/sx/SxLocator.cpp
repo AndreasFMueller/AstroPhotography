@@ -6,9 +6,11 @@
 #include <SxLocator.h>
 #include <SxCamera.h>
 #include <SxUtils.h>
+#include <SxAO.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
+#include <AstroUtils.h>
 #include <includes.h>
 
 using namespace astro::usb;
@@ -146,6 +148,15 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 		}
 	}
 	throw SxError("cannot create a camera from a name");
+}
+
+/**
+ * \brief Get an AO object
+ */
+AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(const DeviceName& name) {
+	std::string	sname = URL::decode(name.unitname());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AO unit device name: %s", sname.c_str());
+	return AdaptiveOpticsPtr(new SxAO(sname));
 }
 
 } // namespace sx

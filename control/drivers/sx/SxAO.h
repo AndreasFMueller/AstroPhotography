@@ -12,6 +12,13 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief This is a driver class for the SX AO-LF adaptive optics unit
+ *
+ * The SX adaptive optics unit uses a serial interface. This has the
+ * disadvantage that adaptive optics units are not discoverable, at least
+ * not directly.
+ */
 class SxAO : public AdaptiveOptics {
 	int	serial;
 	void	initialize(const std::string& serialdevice);
@@ -23,6 +30,8 @@ class SxAO : public AdaptiveOptics {
 	int	offset[2];
 	int	limits[2];
 	bool	findcenter();
+	bool	move2(int x, int y);
+	char	response();
 private:	// prevent copy
 	SxAO(const SxAO& other);
 	SxAO&	operator=(const SxAO& other);
@@ -32,7 +41,11 @@ public:
 protected:
 	virtual void	set0(const Point& position);
 
-	// methods related to the guider port
+	// Methods related to the guider port. These methods will probably
+	// disappear again, as it turns out that the guider port of the AO
+	// unit is not really usable (it cannot activate more than one 
+	// output at the same time, and any other command terminates the
+	// guider port output.
 public:
 	bool	mountmove(char d, int steps = 1);
 	bool	decplus(int steps = 1);

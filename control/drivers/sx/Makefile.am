@@ -30,7 +30,7 @@ aotest_DEPENDENCIES = ../../lib/libastro.la libsx.la
 endif
 
 sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuiderPort.cpp
+	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuiderPort.cpp SxAO.cpp
 sx_la_LDFLAGS = -module
 sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la

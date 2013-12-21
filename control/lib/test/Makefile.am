@@ -28,7 +28,7 @@ endif
 
 # stuff related to testing
 noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
-	tasktest $(uvc_cmds) $(unicap_cmds)
+	tasktest aotest $(uvc_cmds) $(unicap_cmds)
 
 # general tests
 tests_SOURCES = tests.cpp \
@@ -76,6 +76,11 @@ guidetest_DEPENDENCIES = ../libastro.la
 tasktest_SOURCES = tasktest.cpp
 tasktest_LDADD = -L.. -lastro
 tasktest_DEPENDENCIES = ../libastro.la
+
+# test program for AO units
+aotest_SOURCES = aotest.cpp
+aotest_LDADD = -L.. -lastro
+aotest_DEPENDENCIES = ../libastro.la
 
 # tests for UVC cameras
 if ENABLE_UVC

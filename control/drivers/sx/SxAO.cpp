@@ -18,12 +18,14 @@ static astro::DeviceName	aoname(const std::string& name) {
 
 SxAO::SxAO(const std::string& name) : AdaptiveOptics(aoname(name)) {
 	_hasguiderport = false;
-	initialize("/dev/cu.KeySerial1");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AO on device %s", name.c_str());
+	initialize(name.c_str());
 	center();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "AO unit created");
 }
 
 SxAO::~SxAO() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "closing serial interface");
 	close(serial);
 }
 
@@ -65,26 +67,67 @@ bool	SxAO::move(char d, int steps) {
 			cmd, strerror(errno));
 		throw std::runtime_error("cannot write move command");
 	}
-	char	result;
-	if (1 != read(serial, &result, 1)) {
-		throw std::runtime_error("cannot get a response");
-	}
+	char	result = response();
 	if (result == 'G') { return true; }
 	if (result == 'L') { return false; }
 	throw std::runtime_error("incorrect response from AO unit");
+}
+
+char	SxAO::response() {
+	char	result;
+	if (1 != read(serial, &result, 1)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "serial error: %s",
+			strerror(errno));
+		throw std::runtime_error("cannot get a response");
+	}
+	return result;
+}
+
+bool	SxAO::move2(int x, int y) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "move2(%d, %d)", x, y);
+	char	ewchar = (x > 0) ? 'W' : 'T';
+	char	nschar = (y > 0) ? 'N' : 'S';
+	char	cmd[15];
+	snprintf(cmd, sizeof(cmd), "G%c%05dG%c%05d",
+		ewchar, abs(x), nschar, abs(y));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "goto command: %s", cmd);
+	if (14 != write(serial, cmd, 14)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write command %s: %s",
+			cmd, strerror(errno));
+		throw std::runtime_error("cannot write move command");
+	}
+	char	r[3];
+	memset(r, 0, sizeof(r));
+	r[0] = response();
+	r[1] = response();
+	if ((r[0] == 'G') && (r[1] == 'G')) {
+		return true;
+	}
+	if ((r[0] != 'G') || (r[0] != 'L')) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s", r);
+		throw std::runtime_error("bad response for East-West move");
+	}
+	if ((r[1] != 'G') || (r[1] != 'L')) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s", r);
+		throw std::runtime_error("bad response for North-South move");
+	}
+	if (r[0] == 'L') {
+		debug(LOG_ERR, DEBUG_LOG, 0, "east-west jam");
+	}
+	if (r[1] == 'L') {
+		debug(LOG_ERR, DEBUG_LOG, 0, "north-south jam");
+	}
+	return false;
 }
 
 bool	SxAO::findcenter() {
 	if (1 != write(serial, "K", 1)) {
 		throw std::runtime_error("cannot write center command");
 	}
-	char	response;
-	int	bytes;
-	if (1 != (bytes = read(serial, &response, 1))) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot read response: %d",
-			bytes);
-	}
-	if ('K' != response) {
+	char	r = response();
+	if ('K' != r) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"incorrect response from find centre command");
 		throw std::runtime_error("cannot find center");
 	}
 	return true;
@@ -93,7 +136,8 @@ bool	SxAO::findcenter() {
 void	SxAO::initialize(const std::string& serialdevice) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing AO unit");
 	// open the serial device
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening serial port");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "opening serial port %s",
+		serialdevice.c_str());
 	serial = -1;
 	try {
 		serial = open(serialdevice.c_str(), O_RDWR | O_NOCTTY);
@@ -137,10 +181,13 @@ void	SxAO::initialize(const std::string& serialdevice) {
 		limits[0] = limits[1] = 50;
 
 	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot initialize AO unit: %s",
+			x.what());
 		if (serial >= 0) {
 			close(serial);
 			serial = -1;
 		}
+		throw x;
 	}
 }
 
@@ -153,6 +200,7 @@ void	SxAO::set0(const Point& position) {
 	x = lround((position.x() - (offset[0] / (double)limits[0])) * limits[0]);
 	y = lround((position.y() - (offset[1] / (double)limits[1])) * limits[1]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correct: %d, %d", x, y);
+#if 1
 	if (x > 0) {
 		east(x);
 	}
@@ -165,6 +213,27 @@ void	SxAO::set0(const Point& position) {
 	if (y < 0) {
 		south(-y);
 	}
+#else
+	if ((x == 0) && (y == 0)) {
+		return;
+	}
+	if ((x == 0) && (y != 0)) {
+		if (y > 0) {
+			north(y);
+		} else {
+			south(-y);
+		}
+		return;
+	} 
+	if ((x != 0) && (y == 0)) {
+		if (x > 0) {
+			west(x);
+		} else {
+			east(-x);
+		}
+	}
+	move2(x, y);
+#endif
 }
 
 bool	SxAO::mountmove(char d, int steps) {
@@ -176,13 +245,7 @@ bool	SxAO::mountmove(char d, int steps) {
 			strerror(errno));
 		throw std::runtime_error("could not send mount move command");
 	}
-	char	result;
-	if (1 != read(serial, &result, 1)) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"could not read mount move response: %s",
-			strerror(errno));
-		throw std::runtime_error("could not receive mount move response");
-	}
+	char	result = response();
 	return 'M' == result;
 }
 
