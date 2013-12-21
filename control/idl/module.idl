@@ -17,9 +17,9 @@ module Astro {
 		string	getName();
 		string	getVersion();
 		typedef sequence<string>	DeviceNameList;
-		enum device_type { DEVICE_CAMERA, DEVICE_CCD, DEVICE_FOCUSER,
-					DEVICE_GUIDERPORT, DEVICE_FILTERWHEEL,
-					DEVICE_COOLER, DEVICE_MODULE };
+		enum device_type { DEVICE_AO, DEVICE_CAMERA, DEVICE_CCD,
+			DEVICE_COOLER, DEVICE_FILTERWHEEL, DEVICE_FOCUSER,
+			DEVICE_GUIDERPORT, DEVICE_MODULE };
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *

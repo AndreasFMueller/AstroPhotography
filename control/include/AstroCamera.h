@@ -9,6 +9,7 @@
 
 #include <AstroImage.h>
 #include <AstroDevice.h>
+#include <AstroTypes.h>
 #include <vector>
 #include <set>
 #include <cstdint>
@@ -410,6 +411,40 @@ public:
 	virtual unsigned short	current();
 	virtual void	set(unsigned short value);
 	bool	moveto(unsigned short value, unsigned long timeout = 60);
+};
+
+class AdaptiveOptics;
+typedef std::shared_ptr<AdaptiveOptics>	AdaptiveOpticsPtr;
+
+/**
+ * \brief Adaptive Optics unit
+ */
+
+class AdaptiveOptics : public astro::device::Device {
+protected:
+	bool	_hasguiderport;
+public:
+	typedef AdaptiveOpticsPtr	sharedptr;
+	static DeviceName::device_type	devicetype;
+	static DeviceName	defaultname(const DeviceName& parent,
+					const std::string& unitname);
+	AdaptiveOptics(const DeviceName& name);
+	AdaptiveOptics(const std::string& name);
+	virtual ~AdaptiveOptics();
+	// change the position of the adaptive optics device
+	Point	currentposition;
+protected:
+	virtual void	set0(const Point& position);
+public:
+	void	set(const Point& position);
+	Point	get() const { return currentposition; }
+	void	center();
+	// interface to the guider port contained in the unit
+	bool	hasGuiderPort() const { return _hasguiderport; }
+protected:
+	virtual GuiderPortPtr	getGuiderPort0();
+public:
+	GuiderPortPtr	getGuiderPort();
 };
 
 /**

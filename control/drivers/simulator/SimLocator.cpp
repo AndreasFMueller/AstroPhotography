@@ -118,6 +118,9 @@ std::vector<std::string>	SimLocator::getDevicelist(
 	case DeviceName::Cooler:
 		names.push_back(std::string("cooler:simulator/cooler"));
 		break;
+	case DeviceName::Module:
+		names.push_back(std::string("module:simulator"));
+		break;
 	}
 	return names;
 }

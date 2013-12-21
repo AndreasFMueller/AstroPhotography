@@ -37,7 +37,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
 	Tracker.cpp Guider.cpp GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
-	TrackingProcess.cpp DrivingProcess.cpp \
+	TrackingWork.cpp DrivingWork.cpp \
 	GuiderCalibrator.cpp GuiderCalibration.cpp \
 	GuiderFactory.cpp \
 	Simulator.cpp \
@@ -46,6 +46,7 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
 	DeviceAccessor.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
+	AdaptiveOptics.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \

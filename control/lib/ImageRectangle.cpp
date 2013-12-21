@@ -6,6 +6,7 @@
  */
 #include <AstroImage.h>
 #include <AstroFormat.h>
+#include <sstream>
 
 namespace astro {
 namespace image {
@@ -103,8 +104,35 @@ ImagePoint	ImageRectangle::upperRightCorner() const {
  * \brief string representation of the rectangle
  */
 std::string	ImageRectangle::toString() const {
-	return stringprintf("%s@%s", _size.toString().c_str(),
-		_origin.toString().c_str());
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
+	//return stringprintf("%s@%s", _size.toString().c_str(),
+	//	_origin.toString().c_str());
+}
+
+std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle) {
+	out << rectangle.size() << "@" << rectangle.origin();
+	return out;
+}
+
+std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle) {
+	ImageSize	size;
+	in >> size;
+	// the next component must be a single '@' character
+	char	c;
+	in >> c;
+	if (c != '@') {
+		throw std::runtime_error("not a rectangle specification");
+	}
+	ImagePoint	origin;
+	in >> origin;
+
+	// set the result
+	rectangle.setSize(size);
+	rectangle.setOrigin(origin);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed rectangle spec %s",
+		rectangle.toString().c_str());
 }
 
 ImagePoint      ImageRectangle::upperright() const {
@@ -121,6 +149,10 @@ ImagePoint      ImageRectangle::lowerleft() const {
 
 ImagePoint      ImageRectangle::lowerright() const {
 	return _origin + _size.lowerright();
+}
+
+ImagePoint	ImageRectangle::center() const {
+	return _origin + _size.center();
 }
 
 } // namespace image

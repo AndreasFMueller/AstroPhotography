@@ -16,18 +16,20 @@ namespace astro {
 Astro::DeviceLocator::device_type	convert(
 	astro::DeviceName::device_type fromtype) {
 	switch (fromtype) {
+	case astro::DeviceName::AdaptiveOptics:
+		return Astro::DeviceLocator::DEVICE_AO;
 	case astro::DeviceName::Camera:
 		return Astro::DeviceLocator::DEVICE_CAMERA;
 	case astro::DeviceName::Ccd:
 		return Astro::DeviceLocator::DEVICE_CCD;
+	case astro::DeviceName::Cooler:
+		return Astro::DeviceLocator::DEVICE_COOLER;
+	case astro::DeviceName::Filterwheel:
+		return Astro::DeviceLocator::DEVICE_FILTERWHEEL;
 	case astro::DeviceName::Focuser:
 		return Astro::DeviceLocator::DEVICE_FOCUSER;
 	case astro::DeviceName::Guiderport:
 		return Astro::DeviceLocator::DEVICE_GUIDERPORT;
-	case astro::DeviceName::Filterwheel:
-		return Astro::DeviceLocator::DEVICE_FILTERWHEEL;
-	case astro::DeviceName::Cooler:
-		return Astro::DeviceLocator::DEVICE_COOLER;
 	case astro::DeviceName::Module:
 		return Astro::DeviceLocator::DEVICE_MODULE;
 	}
@@ -38,18 +40,20 @@ Astro::DeviceLocator::device_type	convert(
 astro::DeviceName::device_type	convert(
 		Astro::DeviceLocator::device_type fromtype) {
 	switch (fromtype) {
+	case Astro::DeviceLocator::DEVICE_AO:
+		return astro::DeviceName::AdaptiveOptics;
 	case Astro::DeviceLocator::DEVICE_CAMERA:
 		return astro::DeviceName::Camera;
 	case Astro::DeviceLocator::DEVICE_CCD:
 		return astro::DeviceName::Ccd;
+	case Astro::DeviceLocator::DEVICE_COOLER:
+		return astro::DeviceName::Cooler;
+	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
+		return astro::DeviceName::Filterwheel;
 	case Astro::DeviceLocator::DEVICE_FOCUSER:
 		return astro::DeviceName::Focuser;
 	case Astro::DeviceLocator::DEVICE_GUIDERPORT:
 		return astro::DeviceName::Guiderport;
-	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
-		return astro::DeviceName::Filterwheel;
-	case Astro::DeviceLocator::DEVICE_COOLER:
-		return astro::DeviceName::Cooler;
 	case Astro::DeviceLocator::DEVICE_MODULE:
 		return astro::DeviceName::Module;
 	}
@@ -59,18 +63,20 @@ astro::DeviceName::device_type	convert(
 
 std::string	convert2string(astro::DeviceName::device_type fromtype) {
 	switch (fromtype) {
+	case astro::DeviceName::AdaptiveOptics:
+		return std::string("AO");
 	case astro::DeviceName::Camera:
 		return std::string("CAMERA");
 	case astro::DeviceName::Ccd:
 		return std::string("CCD");
+	case astro::DeviceName::Cooler:
+		return std::string("COOLER");
+	case astro::DeviceName::Filterwheel:
+		return std::string("FILTERWHEEL");
 	case astro::DeviceName::Focuser:
 		return std::string("FOCUSER");
 	case astro::DeviceName::Guiderport:
 		return std::string("GUIDERPORT");
-	case astro::DeviceName::Filterwheel:
-		return std::string("FILTERWHEEL");
-	case astro::DeviceName::Cooler:
-		return std::string("COOLER");
 	case astro::DeviceName::Module:
 		return std::string("MODULE");
 	}
@@ -80,18 +86,20 @@ std::string	convert2string(astro::DeviceName::device_type fromtype) {
 
 std::string	convert2string(Astro::DeviceLocator::device_type fromtype) {
 	switch (fromtype) {
+	case Astro::DeviceLocator::DEVICE_AO:
+		return std::string("AO");
 	case Astro::DeviceLocator::DEVICE_CAMERA:
 		return std::string("CAMERA");
 	case Astro::DeviceLocator::DEVICE_CCD:
 		return std::string("CCD");
+	case Astro::DeviceLocator::DEVICE_COOLER:
+		return std::string("COOLER");
+	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
+		return std::string("FILTERWHEEL");
 	case Astro::DeviceLocator::DEVICE_FOCUSER:
 		return std::string("FOCUSER");
 	case Astro::DeviceLocator::DEVICE_GUIDERPORT:
 		return std::string("GUIDERPORT");
-	case Astro::DeviceLocator::DEVICE_FILTERWHEEL:
-		return std::string("FILTERWHEEL");
-	case Astro::DeviceLocator::DEVICE_COOLER:
-		return std::string("COOLER");
 	case Astro::DeviceLocator::DEVICE_MODULE:
 		return std::string("MODULE");
 	}
