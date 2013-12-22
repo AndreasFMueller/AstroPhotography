@@ -41,11 +41,11 @@ CcdPtr	SimCamera::getCcd0(size_t ccdid) {
 }
 
 FilterWheelPtr	SimCamera::getFilterWheel0() {
-	return FilterWheelPtr(new SimFilterWheel(_locator));
+	return _locator.filterwheel();
 }
 
 GuiderPortPtr	SimCamera::getGuiderPort0() {
-	return GuiderPortPtr(new SimGuiderPort(_locator));
+	return _locator.guiderport();
 }
 
 } // namespace simulator

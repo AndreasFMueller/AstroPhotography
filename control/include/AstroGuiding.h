@@ -87,7 +87,7 @@ Point	StarDetector<Pixel>::operator()(
 	}
 	xsum /= weightsum;
 	ysum /= weightsum;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "centroid offsets: %f,%f", xsum, ysum);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "centroid coordinates: %f,%f", xsum, ysum);
 
 	// add the offset of the rectangle to get real coordinates
 	return Point(rectangle.origin().x() + xsum,
@@ -106,6 +106,7 @@ Point	findstar(astro::image::ImagePtr image,
 class Tracker {
 public:
 	virtual Point	operator()(astro::image::ImagePtr newimage) const = 0;
+	virtual	std::string	toString() const = 0;
 };
 
 typedef std::shared_ptr<Tracker>	TrackerPtr;
@@ -116,17 +117,42 @@ typedef std::shared_ptr<Tracker>	TrackerPtr;
  * This Tracker uses the StarTracker 
  */
 class StarTracker : public Tracker {
-	Point	point;
-	astro::image::ImageRectangle rectangle;
-	unsigned int	k;
+	Point	_point;
+	astro::image::ImageRectangle _rectangle;
+	unsigned int	_k;
 public:
+	// constructor
 	StarTracker(const Point& point,
 		const astro::image::ImageRectangle& rectangle,
 		unsigned int k);
+
+	// find the displacement
 	virtual Point	operator()(
 			astro::image::ImagePtr newimage) const;
-	const astro::image::ImageRectangle&	getRectangle() const;
+
+	// accessors for teh tracker configuration data
+	const astro::image::ImageRectangle&	rectangle() const {
+		return _rectangle;
+	}
+	astro::image::ImageRectangle&	rectangle() { return _rectangle; }
+	void	rectangle(const astro::image::ImageRectangle& r) {
+		_rectangle = r;
+	}
+
+	const Point&	point() const { return _point; }
+	Point&	point() { return _point; }
+	void	point(const Point& p) { _point = p; }
+
+	const unsigned int	k() const { return _k; }
+	unsigned int	k() { return _k; }
+	void	k(const unsigned int k) { _k = k; }
+	
+	// find a string representation
+	virtual std::string	toString() const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const StarTracker& tracker);
+std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
 
 /**
  * \brief PhaseCorrelator based Tracker
@@ -140,6 +166,7 @@ public:
 	PhaseTracker(astro::image::ImagePtr image);
 	virtual Point	operator()(
 			astro::image::ImagePtr newimage) const;
+	virtual std::string	toString() const;
 };
 
 /**
@@ -169,6 +196,7 @@ class GuiderCalibration {
 	double	a[6];
 public:
 	GuiderCalibration();
+	GuiderCalibration(const double coefficients[6]);
 	std::string	toString() const;
 	Point	defaultcorrection() const;
 	Point	operator()(const Point& offset, double Deltat) const;
@@ -178,6 +206,9 @@ public:
 
 	void	rescale(double scalefactor);
 };
+
+std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
+std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
 
 /**
  * \brief GuiderCalibrator
@@ -259,6 +290,10 @@ public:
  * \brief Guider class
  * 
  * The guider class unifies all the operations needed for guiding.
+ * First, it takes care of tracking the state the guider is in, using a
+ * GuiderStateMachine object for that purpose. Second, it can handle
+ * a process that performs the calibration. This is controlled by the
+ * guider calibration commands.
  */
 class Guider {
 private:
@@ -275,20 +310,28 @@ public:
 	astro::camera::GuiderPortPtr	guiderport() { return _guiderport; }
 	astro::camera::CameraPtr	camera() { return _camera; }
 private:
-	// Imaging is performed via the imager, but the imager is built from
-	// from the ccd and the some additional data like darks and flats.
-	// The imager is exposed so that the client can change the imager
-	// parameters, e. g. can add a dark image, or enable pixel
-	// interpolation
+	/*
+	 * \brief Image for guiding
+	 *
+	 * Imaging is performed via the imager, but the imager is built from
+	 * from the ccd and the some additional data like darks and flats.
+	 * The imager is exposed so that the client can change the imager
+	 * parameters, e. g. can add a dark image, or enable pixel
+	 * interpolation
+	 */
 	astro::camera::Imager	_imager;
 public:
 	const astro::camera::Imager&	imager() const { return _imager; }
 	astro::camera::Imager&	imager() { return _imager; }
 	astro::camera::CcdPtr		ccd() { return _imager.ccd(); }
 
-	// Controlling the exposure parameters includes changing the rectangle
-	// to use during exposure. Since we don't want to implement methods
-	// for all these details, we just expose the exposure structure
+	/**
+	 * \brief Exposure information for guiding images
+ 	 *
+	 * Controlling the exposure parameters includes changing the rectangle
+	 * to use during exposure. Since we don't want to implement methods
+	 * for all these details, we just expose the exposure structure
+	 */
 private:
 	astro::camera::Exposure	_exposure;
 public:
@@ -301,6 +344,11 @@ public:
 public:
 	/**
 	 * \brief Construct a guider from camera, ccd, and guiderport
+	 *
+	 * After construction, the Guider only knows about the hardware it can
+	 * use for guiding. There is no information about what parts of 
+	 * the image to take into consideration when looking for a guide star,
+	 * or even how to expose an image.
 	 */
 	Guider(astro::camera::CameraPtr camera, astro::camera::CcdPtr ccd,
 		astro::camera::GuiderPortPtr guiderport);
@@ -311,10 +359,13 @@ public:
 	void	startExposure();
 	ImagePtr	getImage();
 
-	// The following members are used for the calibration of the guider.
-	// The guider calibration is encapsulated in a GuiderCalibration
-	// object, the calibration step can be bypassed by setting the
-	// the calibration directly.
+	/**
+	 * \brief Calibration of the guider
+ 	 *
+	 * Guiding is only possible after the Guider has been calibrated.
+	 * The calibration information is stored in the _calibration
+	 * member variable, and is accessible through a set of accessors.
+	 */
 private:
 	GuiderCalibration	_calibration;
 public:
@@ -323,7 +374,27 @@ public:
 	void	calibration(const GuiderCalibration& calibration);
 
 	/**
-	 * \brief launch the calibration process
+	 * \brief Launch the calibration process
+	 *
+	 * The calibration process needs information where to lock for the
+	 * guide star. This information is encoded in the tracker argument.
+	 * The tracker can be asked to analyze an image and to find the
+	 * the displacement of a star image that it has found. Most commonly,
+	 * a StarTracker object is used for this purpose, which also knows
+	 * about the rectangle of the image that was selected and the
+	 * coordinates of the star.
+	 *
+	 * The calibration coefficients depend on the speed of the mount,
+	 * the focal length and the pixel size. Currently, the software
+	 * only knows about the angular speed for the CGEM mount. 
+	 * The focallength and the pixelsize allow to compute reasonable
+	 * values for the calibration displacements.
+	 * \param tracker	The tracker used for tracking. 
+	 * \param focallength	Focallength of the optics used for guiding.
+	 * \param pixelsize	Pixel size of the CCD chip used for guiding.
+	 *			If binning different from 1x1 is used, the
+	 *			pixel size must reflect the size of the binned
+	 *			pixel.
 	 */
 	void	startCalibration(TrackerPtr tracker,
 			double focallength = 0, double pixelsize = 0);

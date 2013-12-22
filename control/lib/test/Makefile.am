@@ -105,4 +105,8 @@ EXTRA_DIST = test_module.la test_module.so
 #all-am:	tests usbtests 
 #	./usbtests
 
+testguide:	guidetest
+	rm -f gt/*
+	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -i gt -C
+
 endif

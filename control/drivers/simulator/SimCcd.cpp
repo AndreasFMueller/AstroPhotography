@@ -34,6 +34,11 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
  * \brief Start simulated exposure
  */
 void    SimCcd::startExposure(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
+	// ensure that the guideport ist updated before we start exposing
+	_locator.simguiderport()->update();
+
+	// start the exposure
 	Ccd::startExposure(exposure);
 	starttime = simtime();
 	state = Exposure::exposing;

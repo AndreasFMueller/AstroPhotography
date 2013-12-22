@@ -42,7 +42,9 @@ public:
 	operator double() const;
 };
 Point	operator*(double l, const Point& other);
+
 std::ostream&	operator<<(std::ostream& out, const Point& other);
+std::istream&	operator>>(std::istream& in, Point& other);
 
 } // namespace astro
 

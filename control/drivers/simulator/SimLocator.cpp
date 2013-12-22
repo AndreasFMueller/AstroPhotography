@@ -5,6 +5,7 @@
  */
 #include <SimLocator.h>
 #include <SimCamera.h>
+#include <SimCcd.h>
 #include <SimUtil.h>
 #include <SimGuiderPort.h>
 #include <SimFilterWheel.h>
@@ -64,6 +65,7 @@ namespace simulator {
 
 SimLocator::SimLocator() {
 	_camera = CameraPtr(new SimCamera(*this));
+	_ccd = CcdPtr(new SimCcd(_camera->getCcdInfo(0), *this));
 	_guiderport = GuiderPortPtr(new SimGuiderPort(*this));
 	_filterwheel = FilterWheelPtr(new SimFilterWheel(*this));
 	_cooler = CoolerPtr(new SimCooler(*this));
@@ -100,6 +102,8 @@ std::vector<std::string>	SimLocator::getDevicelist(
 	DeviceName::device_type device) {
 	std::vector<std::string>	names;
 	switch (device) {
+	case DeviceName::AdaptiveOptics:
+		throw std::runtime_error("SimAO not implemented");
 	case DeviceName::Camera:
 		names.push_back(std::string("camera:simulator/camera"));
 		break;
@@ -148,7 +152,7 @@ CcdPtr	SimLocator::getCcd0(const DeviceName& name) {
 			sname.c_str());
 		throw NotFound("no such ccd");
 	}
-	return _camera->getCcd(0);
+	return _ccd;
 }
 
 GuiderPortPtr	SimLocator::getGuiderPort0(const DeviceName& name) {
@@ -193,6 +197,10 @@ FocuserPtr	SimLocator::getFocuser0(const DeviceName& name) {
 
 SimCamera	*SimLocator::simcamera() {
 	return dynamic_cast<SimCamera *>(&*_camera);
+}
+
+SimCcd	*SimLocator::simccd() {
+	return dynamic_cast<SimCcd *>(&*_ccd);
 }
 
 SimFilterWheel	*SimLocator::simfilterwheel() {

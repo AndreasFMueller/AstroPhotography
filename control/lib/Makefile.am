@@ -24,7 +24,8 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
+libastro_la_SOURCES = debug.cpp utils.cpp \
+	Format.cpp Timer.cpp Concatenator.cpp \
 	URL.cpp DeviceName.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
@@ -35,14 +36,15 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
-	Tracker.cpp Guider.cpp GuidingProcess.cpp GuiderStateMachine.cpp \
+	Tracker.cpp Guider.cpp ThreadBase.cpp \
+	GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
 	TrackingWork.cpp DrivingWork.cpp \
 	GuiderCalibrator.cpp GuiderCalibration.cpp \
 	GuiderFactory.cpp \
 	Simulator.cpp \
 	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
-	ImageProgramCallback.cpp \
+	ImageProgramCallback.cpp SaveImageCallback.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
 	DeviceAccessor.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \

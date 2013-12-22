@@ -31,8 +31,15 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 	imager().startExposure(exposure());
 	ImagePtr	image = guider().getImage();
 
+	// if we have a callback, send the image there
+	if (newimagecallback) {
+		ImageCallbackData	*cbd = new ImageCallbackData("", image);
+		(*newimagecallback)(CallbackDataPtr(cbd));
+	}
+
 	// analze the image
 	Point	point = (*tracker())(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker found %s", point.toString().c_str());
 	return point;
 }
 
@@ -53,6 +60,7 @@ void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
 	point = pointat(-ra, -dec);
 	t = Timer::gettime();
 	calibrator.add(t, Point(0, 0), point);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure %.0f/%.0f complete", ra, dec);
 }
 
 /**
@@ -89,7 +97,8 @@ public:
  *
  */
 void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating: terminate = %s",
+		_thread.terminate() ? "YES" : "NO");
 
 	// grid range we want to scan
 	range = 1;
@@ -166,12 +175,9 @@ CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
 	: GuidingProcess(_guider, _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	calibrated = false;
-	// default exposure settings
-	exposure().exposuretime = 1.;
-	exposure().frame = guider().ccd()->getInfo().getFrame();
-	calibrated = false;
 	// create the thread
-	thread = ThreadPtr(new GuidingThread<CalibrationProcess>(*this));
+	thread(ThreadPtr(new GuidingThread<CalibrationProcess>(*this)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");
 }
 
 /**
@@ -242,8 +248,8 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	if (raminus > t) {
 		t = raminus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f",
-		raplus, raminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f, t = %f",
+		raplus, raminus, t);
 	guiderport()->activate(raplus, raminus, 0, 0);
 	Timer::sleep(t);
 
@@ -259,8 +265,8 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	if (decplus > t) {
 		t = decplus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f",
-		decplus, decminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f, t = %f",
+		decplus, decminus, t);
 	guiderport()->activate(0, 0, decplus, decminus);
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");

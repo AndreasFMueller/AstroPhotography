@@ -7,6 +7,7 @@
 #define _GuidingProcess_h
 
 #include <AstroGuiding.h>
+#include <AstroDebug.h>
 #include <pthread.h>
 #include <includes.h>
 
@@ -120,9 +121,9 @@ public:
 	ThreadPtr	thread() { return _thread; }
 	void	thread(ThreadPtr t) { _thread = t; }
 
-	void	stop() { _thread->stop(); }
-	void	start() { _thread->stop(); }
-	bool	wait(double timeout) { return _thread->wait(timeout); }
+	void	stop();
+	void	start();
+	bool	wait(double timeout);
 
 	// simplified accessors for the stuff needed during calibration or
 	// guiding

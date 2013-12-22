@@ -14,13 +14,21 @@ namespace simulator {
 
 /**
  * \brief Create a simulated GuiderPort
+ *
+ * The default settings of the guider port have a coordinate system rotated
+ * by 30 degrees with respect to the ccd axes. Also the vector in the right
+ * ascension direction is shorter, approximately as if declination was
+ * 45 degrees.
  */
 SimGuiderPort::SimGuiderPort(SimLocator& locator)
 	: GuiderPort("guiderport:simulator/guiderport"), _locator(locator) {
 	starttime = simtime();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SimGuiderPort created at %f",
+		starttime);
 	_omega = 0;
-	_decvector = Point(0, 1);
-	_ravector = Point(1, 0);
+	// the
+	_ravector = sqrt(0.5) * Point(sqrt(3) / 2, 0.5);
+	_decvector = Point(-0.5, sqrt(3) / 2);
 	ra = 0;
 	dec = 0;
 }
@@ -31,16 +39,21 @@ SimGuiderPort::SimGuiderPort(SimLocator& locator)
  * 
  */
 void	SimGuiderPort::update() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port @ %p", this);
 	// if this is the first 
 	if ((ra == 0) && (dec == 0)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no update");
 		return;
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: current offset: %s",
+		_offset.toString().c_str());
 
 	// advance the offset according to last activation
 	double	now = simtime();
 	double	activetime = now - lastactivation;
 	if (fabs(ra) < activetime) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "advance RA by %f", ra);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", ra);
 		_offset = _offset + ra * _ravector;
 		ra = 0;
 	} else {
@@ -51,24 +64,26 @@ void	SimGuiderPort::update() {
 		} else {
 			ra += activetime;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "remaining RA activation: %f",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: remaining RA activation: %f",
 			ra);
 	}
 	if (dec < activetime) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "advance DEC by %f", dec);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", dec);
 		_offset = _offset + dec * _decvector;
 		dec = 0;
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "advance DEC by %f", activetime);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", activetime);
 		_offset = _offset + activetime * _decvector;
 		if (dec > 0) {
 			dec -= activetime;
 		} else {
 			dec += activetime;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "remaining DEC activation: %f",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: remaining DEC activation: %f",
 			dec);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: new offset: %s",
+		_offset.toString().c_str());
 }
 
 /**
@@ -98,7 +113,7 @@ uint8_t	SimGuiderPort::active() {
 void	SimGuiderPort::activate(float raplus, float raminus,
 		float decplus, float decminus) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "activate(raplus = %.3f, raminus = %.3f,"
-		" decplus = %.3f, decminus = %.3f",
+		" decplus = %.3f, decminus = %.3f)",
 		raplus, raminus, decplus, decminus);
 	if ((raplus < 0) || (raminus < 0) || (decminus < 0) || (decplus < 0)) {
 		throw BadParameter("activation times must be nonegative");
@@ -108,7 +123,7 @@ void	SimGuiderPort::activate(float raplus, float raminus,
 	update();
 	
 	// perform this new activation
-	lastactivation = 0;
+	lastactivation = simtime();
 	if (raplus > 0) {
 		ra = raplus;
 	} else {
@@ -119,6 +134,8 @@ void	SimGuiderPort::activate(float raplus, float raminus,
 	} else {
 		dec = -decminus;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new activations: ra = %f, dec = %f",
+		ra, dec);
 }
 
 /**

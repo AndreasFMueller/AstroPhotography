@@ -1,3 +1,5 @@
+submit exposuretime=1 camera=camera:sx/250-017-ECHO2-1278-0126 ccdid=0 temperature=260 binning=1x1
+exit
 focuser f assign focuser:simulator/focuser
 focuser f set 32768 wait
 focuser f info

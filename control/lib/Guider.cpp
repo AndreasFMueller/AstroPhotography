@@ -29,17 +29,28 @@ namespace guiding {
 
 /**
  * \brief Construct a guider from 
+ *
+ * Since the guider includes an exposure, it also initializes the exposure
+ * to some default values. The default exposure time is 1 and the
+ * default frame is the entire CCD area.
  */
 Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport)
 	: _camera(camera), _guiderport(guiderport), _imager(ccd) {
 	// default exposure settings
 	exposure().exposuretime = 1.;
 	exposure().frame = ccd->getInfo().getFrame();
-	//gridconstant = 10;
+
+	// at this point the guider is sufficiently configured, although
+	// this configuration is not optimal
+	_state.configure();
 }
 
 /**
  * \brief Retrieve the state 
+ *
+ * Get the guider state. The guider keeps state information in the guider
+ * state machine, so we have to convert that to the GuiderState constants.
+ * This is done by the cast operator of the GuiderStateMachine class.
  */
 GuiderState	Guider::state() const {
 	GuiderState	result = _state;
@@ -48,6 +59,10 @@ GuiderState	Guider::state() const {
 
 /**
  * \brief Set a calibration
+ *
+ * If the calibration data is already known, then we can immediately set
+ * the calibration without going through the calibration process each time
+ * we build the guider.
  */
 void	Guider::calibration(const GuiderCalibration& calibration) {
 	_state.addCalibration();
@@ -62,6 +77,9 @@ void	Guider::calibration(const GuiderCalibration& calibration) {
  */
 void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 		double pixelsize) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
+		"focallength = %f, pixelsize = %f)",
+		tracker->toString().c_str(), focallength, pixelsize);
 	// go into the calibrating state
 	_state.startCalibrating();
 	
@@ -78,12 +96,19 @@ void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 	calibrationprocess = CalibrationProcessPtr(
 		new CalibrationProcess(*this, tracker));
 
+	// copy the callback
+	if (newimagecallback) {
+		calibrationprocess->newimagecallback = newimagecallback;
+	}
+
 	// start the calibration. This will launch the separate 
 	calibrationprocess->calibrate(focallength, pixelsize);
 }
 
 /**
  * \brief inquire about the current state of the calibration process
+ *
+ * Find out how far along the calibraition process we are. This 
  */
 double	Guider::calibrationProgress() {
 	if (_state != calibrating) {

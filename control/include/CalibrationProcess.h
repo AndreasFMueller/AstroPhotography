@@ -21,6 +21,8 @@ namespace guiding {
 
 /**
  * \brief Encapsulation of the guiding process
+ *
+ * This class contains the work function for guider calibration.
  */
 class CalibrationProcess : public GuidingProcess {
 
@@ -41,15 +43,14 @@ private:
 	void	measure(GuiderCalibrator& calibrator,
 			double deltara, double deltadec);
 
-	// keep track of the thread
-	ThreadPtr	thread;
-
 public:
 	CalibrationProcess(Guider& guider, TrackerPtr tracker);
 	~CalibrationProcess();
 	void	calibrate(double focallength, double pixelsize);
 	// the main function of the process
 	void	main(GuidingThread<CalibrationProcess>& thread);
+
+	callback::CallbackPtr	newimagecallback;
 };
 
 } // namespace guiding
