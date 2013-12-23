@@ -26,7 +26,8 @@ SimGuiderPort::SimGuiderPort(SimLocator& locator)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "SimGuiderPort created at %f",
 		starttime);
 	_omega = 0;
-	// the
+	// the initial mount axis directions are not parallel to the coordinate
+	// axes of the image
 	_ravector = sqrt(0.5) * Point(sqrt(3) / 2, 0.5);
 	_decvector = Point(-0.5, sqrt(3) / 2);
 	ra = 0;
@@ -142,17 +143,22 @@ void	SimGuiderPort::activate(float raplus, float raminus,
  * \brief Retrieve the current offset
  */
 Point	SimGuiderPort::offset() {
-	double	x = _offset.x(), y = _offset.y();
 	double	timepast = simtime() - starttime;
 
 	// drift computation
-	x += _drift.x() * timepast;
-	y += _drift.y() * timepast;
+	Point	p = timepast * _drift;
+debug(LOG_DEBUG, DEBUG_LOG, 0, "drift: %s", p.toString().c_str());
 
-	// XXX Fourier components
+	// Fourier components
+	if (timepast > 360) {
+		double	angle = 0.01 * timepast;
+		Point	fourier = 5. * Point(sin(angle), cos(angle));
+		p = p + fourier;
+	}
 
 	// return the point
-	return Point(x, y);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "complete offset: %s", (_offset + p).toString().c_str());
+	return _offset + p;
 }
 
 double	SimGuiderPort::alpha() {

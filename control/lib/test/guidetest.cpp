@@ -49,6 +49,8 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "                 [a_11,a_12,a_13;a_21,a_22,a_23]";
 	std::cout << std::endl;
+	std::cout << " -T guidetime    time during which to perform guiding";
+	std::cout << std::endl;
 }
 
 /**
@@ -74,7 +76,8 @@ int	guidetest_main(int argc, char *argv[]) {
 	bool	docalibrate = false;
 	char	*imagedir = NULL;
 	double	temperature = 0;
-	while (EOF != (c = getopt(argc, argv, "dk:r:s:h?c:Ci:t:")))
+	double	guidetime = 600;
+	while (EOF != (c = getopt(argc, argv, "dk:r:s:h?c:Ci:t:T:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -114,6 +117,9 @@ int	guidetest_main(int argc, char *argv[]) {
 			if (temperature < 0) {
 				throw std::runtime_error("temperature must be absolute");
 			}
+			break;
+		case 'T':
+			guidetime = atof(optarg);
 			break;
 		}
 
@@ -200,7 +206,7 @@ int	guidetest_main(int argc, char *argv[]) {
 
 	// now simulate tracking
 	guider.startGuiding(tracker);
-	sleep(600);
+	sleep(guidetime);
 	guider.stopGuiding();
 
 	return EXIT_SUCCESS;
