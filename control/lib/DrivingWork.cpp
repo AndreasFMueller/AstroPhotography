@@ -20,8 +20,11 @@ DrivingWork::DrivingWork(Guider& _guider)
 	: GuidingProcess(_guider, TrackerPtr()) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingWork");
 	pthread_mutex_init(&mutex, NULL);
-	tx = 0;
-	ty = 0;
+	defaultx = 0;
+	defaulty = 0;
+	totalx = 0;
+	totaly = 0;
+	stepx = stepy = 1;
 	_interval = 1;
 }
 
@@ -63,9 +66,20 @@ DrivingWork::~DrivingWork() {
  */
 void	DrivingWork::setCorrection(const double& _tx, const double& _ty) {
 	GuidingLock	lock(&mutex);
-	tx = _tx;
-	ty = _ty;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating tx = %f, ty = %f", tx, ty);
+	totalx = fabs(_tx);
+	totalx = fabs(_ty);
+	stepx = (_tx > 0) ? 1 : -1;
+	stepy = (_ty > 0) ? 1 : -1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating totalx = %f, totaly = %f",
+		totalx, totaly);
+}
+
+/**
+ * \brief Set default correction
+ */
+void	DrivingWork::defaultCorrection(const double& _tx, const double& _ty) {
+	defaultx = _tx;
+	defaulty = _ty;
 }
 
 /**
@@ -89,16 +103,38 @@ void	DrivingWork::main(GuidingThread<DrivingWork>& thread) {
 		// data we read my be inconsistent.
 		{
 			GuidingLock	lock(&mutex);
-			if (tx > 0) {
-				raplus = tx * _interval;
+			if (totalx > 0) {
+				double	dx = std::min(_interval, totalx);
+				if (stepx > 0) {
+					raplus = dx;
+				} else {
+					raminus = dx;
+				}
+				totalx -= dx;
 			} else {
-				raminus = -tx * _interval;
+				if (defaultx > 0) {
+					raplus = defaultx * _interval;
+				} else {
+					raminus = -defaultx * _interval;
+				}
 			}
-			if (ty > 0) {
-				decplus = ty * _interval;
+			if (totaly > 0) {
+				double	dy = std::min(_interval, totaly);
+				if (stepy > 0) {
+					decplus = dy;
+				} else {
+					decminus = dy;
+				}
+				totaly -= dy;
 			} else {
-				decminus = -ty * _interval;
+				if (defaulty > 0) {
+					decplus = defaulty * _interval;
+				} else {
+					decminus = -defaulty * _interval;
+				}
 			}
+			if (totalx < 0) { totalx = 0.; }
+			if (totaly < 0) { totaly = 0.; }
 		}
 
 		// now activate the guider port outputs for the times we found

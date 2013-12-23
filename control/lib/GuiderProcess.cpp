@@ -24,7 +24,7 @@ namespace guiding {
 GuiderProcess::GuiderProcess(Guider& _guider, double interval)
 	: guider(_guider), _interval(interval) {
 	// set a default gain
-	_gain = 1;
+	_gain = 1.;
 
 }
 
@@ -63,6 +63,7 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 
 	// create the tracking process
 	trackingwork = new TrackingWork(guider, _tracker, *drivingwork);
+	trackingwork->history_length(0); // XXX temporary, for debugging
 	tracking = ThreadPtr(new GuidingThread<TrackingWork>(*trackingwork));
 
 	// start both processes

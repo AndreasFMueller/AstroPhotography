@@ -184,7 +184,7 @@ int	guidetest_main(int argc, char *argv[]) {
 
 	// now simulate tracking
 	guider.startGuiding(tracker);
-	sleep(60);
+	sleep(600);
 	guider.stopGuiding();
 
 	return EXIT_SUCCESS;

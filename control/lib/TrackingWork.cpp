@@ -6,9 +6,30 @@
 #include <TrackingWork.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <sstream>
+#include <iomanip>
 
 namespace astro {
 namespace guiding {
+
+/**
+ * \brief output a tracking history entry
+ */
+std::ostream&	operator<<(std::ostream& out, const trackinghistoryentry& entry) {
+	out << std::fixed << std::setprecision(3) << entry.first;
+	out << ",";
+	out << entry.second;
+	return out;
+}
+
+/**
+ * \brief convert a tracking history entry to string
+ */
+std::string	toString(const trackinghistoryentry& entry) {
+	std::ostringstream	out;
+	out << entry;
+	return out.str();
+}
 
 /**
  * \brief Construct a new tracking process
@@ -24,6 +45,9 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
+
+	// set the default tracking length 100
+	_history_length = 100;
 
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
@@ -42,7 +66,9 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 		throw std::runtime_error(msg);
 	}
 
-	// inform the drive thread about the default correction
+	// inform the drive thread about the default correction. This will
+	// correct the default offset for 1 second.
+	// We expect to have done something more useful by then
 	_driving.setCorrection(tx, ty);
 }
 
@@ -110,6 +136,11 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 			"TRACK: new image received, elapsed = %f",
 			timer.elapsed());
 
+		// if we have a callback, send the image there
+		if (guider().newimagecallback) {
+			guider().callbackImage(image);
+		}
+
 		// use the tracker to find the tracking offset
 		Point	offset = tracker()->operator()(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -133,25 +164,27 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = guider().calibration()(offset,
-			correctiontime);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: correction: %s",
+		Point	correction = gain() * guider().calibration()(offset,
+				correctiontime);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK: offset = %s, correction = %s",
+			offset.toString().c_str(),
 			correction.toString().c_str());
+
+		// add the correction to the history
+		addHistory(correction);
 
 		// compute the correction, but this must be done with tx, ty
 		// protected from concurrent access, because it may be in an
 		// illegal state temporarily. We also have to divide by the
 		// interval, assuming that we will correct the offset by the
 		// time we get the next image
-		double	tx = -_gain * correction.x() / correctiontime;
-		if (tx > 1) { tx = 1; }
-		if (tx < -1) { tx = -1; }
-		double	ty = -_gain * correction.y() / correctiontime;
-		if (ty > 1) { ty = 1; }
-		if (ty < -1) { ty = -1; }
+		double	tx = -correction.x();
+		double	ty = -correction.y();
 
 		// inform the drive thread about what it should do next
-		_driving.setCorrection(tx, ty);
+		//_driving.setCorrection(tx, ty);
+		_driving.setCorrection(0, 0);
 
 		// this is a possible cancellation point
 		if (thread.terminate()) {
@@ -167,6 +200,39 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 				sleeptime);
 			Timer::sleep(sleeptime);
 		}
+	}
+}
+
+/**
+ * \brief Add a new entry to the tracking history
+ *
+ * This method removes entries from the front of the tracking history if
+ * the history would otherwise become too large.
+ * \param point		new tracking offset
+ */
+void	TrackingWork::addHistory(const Point& point) {
+	double	now = Timer::gettime();
+	trackinghistoryentry	entry(now, point);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking history entry: %s",
+		toString(entry).c_str());
+	// _history_length == 0 means unlimited tracking history length
+	if (_history_length) {
+		while (trackinghistory.size() > _history_length) {
+			trackinghistory.pop_front();
+		}
+	}
+	trackinghistory.push_back(entry);
+	// for debugging
+	dumpHistory(std::cout);
+}
+
+/**
+ * \brief Dump the tracking history to a stream
+ */
+void	TrackingWork::dumpHistory(std::ostream& out) {
+	trackinghistory_type::const_iterator	i;
+	for (i = trackinghistory.begin(); i != trackinghistory.end(); i++) {
+		out << (*i) << std::endl;
 	}
 }
 

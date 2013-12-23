@@ -437,7 +437,7 @@ public:
 	 * ImageCallbackData.
 	 */
 	astro::callback::CallbackPtr	newimagecallback;
-private:
+public:
 	void	callbackImage(ImagePtr image);
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;

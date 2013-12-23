@@ -107,6 +107,6 @@ EXTRA_DIST = test_module.la test_module.so
 
 testguide:	guidetest
 	rm -f gt/*
-	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -i gt -C
+	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -i gt -C 2>&1 | tee testguide.log
 
 endif
