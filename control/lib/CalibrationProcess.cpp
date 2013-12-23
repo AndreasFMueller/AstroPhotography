@@ -12,7 +12,6 @@
 
 using namespace astro::image;
 using namespace astro::camera;
-using namespace astro::callback;
 
 namespace astro {
 namespace guiding {
@@ -30,12 +29,6 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 	// take an image at that position
 	imager().startExposure(exposure());
 	ImagePtr	image = guider().getImage();
-
-	// if we have a callback, send the image there
-	if (newimagecallback) {
-		ImageCallbackData	*cbd = new ImageCallbackData("", image);
-		(*newimagecallback)(CallbackDataPtr(cbd));
-	}
 
 	// analze the image
 	Point	point = (*tracker())(image);

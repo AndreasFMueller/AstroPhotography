@@ -197,7 +197,8 @@ public:
 
 	// accessor for the noise standard deviation
 	const double&	noise() const { return _noise; }
-	void	noise(const double& noise) { _noise = noise; }
+	//void	noise(const double& noise) { _noise = noise; }
+	void	noise(const double& noise);
 
 	// accessor for the shutter flag
 	const bool&	light() const { return _light; }

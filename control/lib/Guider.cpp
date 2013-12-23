@@ -96,11 +96,6 @@ void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 	calibrationprocess = CalibrationProcessPtr(
 		new CalibrationProcess(*this, tracker));
 
-	// copy the callback
-	if (newimagecallback) {
-		calibrationprocess->newimagecallback = newimagecallback;
-	}
-
 	// start the calibration. This will launch the separate 
 	calibrationprocess->calibrate(focallength, pixelsize);
 }

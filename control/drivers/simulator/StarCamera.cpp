@@ -70,6 +70,12 @@ double	StarCameraBase::noisevalue() const {
 	return _noise * inverf(x);
 }
 
+
+void    StarCameraBase::noise(const double& n) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set noise value to %f", n);
+	_noise = n;
+}
+
 /**
  * \brief Compute the image of a star field
  *

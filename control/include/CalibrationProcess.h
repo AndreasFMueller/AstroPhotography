@@ -49,8 +49,6 @@ public:
 	void	calibrate(double focallength, double pixelsize);
 	// the main function of the process
 	void	main(GuidingThread<CalibrationProcess>& thread);
-
-	callback::CallbackPtr	newimagecallback;
 };
 
 } // namespace guiding

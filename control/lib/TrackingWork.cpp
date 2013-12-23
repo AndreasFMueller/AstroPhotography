@@ -136,11 +136,6 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 			"TRACK: new image received, elapsed = %f",
 			timer.elapsed());
 
-		// if we have a callback, send the image there
-		if (guider().newimagecallback) {
-			guider().callbackImage(image);
-		}
-
 		// use the tracker to find the tracking offset
 		Point	offset = tracker()->operator()(image);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -183,8 +178,8 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 		double	ty = -correction.y();
 
 		// inform the drive thread about what it should do next
-		//_driving.setCorrection(tx, ty);
-		_driving.setCorrection(0, 0);
+		_driving.setCorrection(tx, ty);
+		//_driving.setCorrection(0, 0);
 
 		// this is a possible cancellation point
 		if (thread.terminate()) {

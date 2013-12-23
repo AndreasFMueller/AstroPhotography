@@ -67,7 +67,7 @@ DrivingWork::~DrivingWork() {
 void	DrivingWork::setCorrection(const double& _tx, const double& _ty) {
 	GuidingLock	lock(&mutex);
 	totalx = fabs(_tx);
-	totalx = fabs(_ty);
+	totaly = fabs(_ty);
 	stepx = (_tx > 0) ? 1 : -1;
 	stepy = (_ty > 0) ? 1 : -1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating totalx = %f, totaly = %f",

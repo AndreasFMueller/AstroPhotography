@@ -73,7 +73,8 @@ int	guidetest_main(int argc, char *argv[]) {
 	GuiderCalibration	calibration(defaultcalibration);
 	bool	docalibrate = false;
 	char	*imagedir = NULL;
-	while (EOF != (c = getopt(argc, argv, "dk:r:s:h?c:Ci:")))
+	double	temperature = 0;
+	while (EOF != (c = getopt(argc, argv, "dk:r:s:h?c:Ci:t:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -108,6 +109,12 @@ int	guidetest_main(int argc, char *argv[]) {
 		case 'i':
 			imagedir = optarg;
 			break;
+		case 't':
+			temperature = atof(optarg);
+			if (temperature < 0) {
+				throw std::runtime_error("temperature must be absolute");
+			}
+			break;
 		}
 
 	// initialize the random number generator
@@ -125,6 +132,15 @@ int	guidetest_main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %s",
 		camera->name().name().c_str(),
 		ccd->name().name().c_str());
+
+	// if the temperature is set, get the cooler and wait for the
+	// chip to cool down
+	if (temperature > 0) {
+		CoolerPtr	cooler = devicelocator->getCooler("cooler:simulator/cooler");
+		cooler->setTemperature(temperature);
+		cooler->setOn(true);
+		cooler->wait(1000);
+	}
 
 	// get the focuser and ensure the camera is actually in focus
 	FocuserPtr	focuser
