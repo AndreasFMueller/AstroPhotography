@@ -20,10 +20,9 @@ files=`echo *.jpeg | wc -w`
 
 echo producing ${mpegname} from ${files} JPEG images
 
-if type mpeg2enc
-then
-	ls *.jpeg jpeg2yuv -f 25 -I p | \
-		mpeg2enc -f 13 -F 3 -b 10000 -o ${2-test}.mpg
-fi
+LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARYPATH
+export LD_LIBRARY_PATH
+
+jpeg2yuv -f 25 -I p -j %05d.jpg | mpeg2enc -f 13 -F 3 -b 10000 -o ${mpegname}
 
 exit 0
