@@ -136,6 +136,7 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 
 	// signal other threads that we are done
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
+	_progress = 1.0;
 }
 
 /**
@@ -143,18 +144,25 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
  *
  * the grid constant normally depends on the focallength and the
  * pixels size. Smaller pixels are larger focallength allow to
- * use a smaller grid constant. The default value of 10 is a good
- * choice for a 100mm guide scope and 7u pixels as for the SBIG
- * ST-i guider kit
+ * use a smaller grid constant. The default value of 10 seems to be
+ * a good  choice for a 100mm guide scope and 7u pixels as for the
+ * SBIG ST-i guider kit
  */
 double	CalibrationProcess::gridconstant(double focallength,
 	double pixelsize) const {
 	double	gridconstant = 10;
 	if ((focallength > 0) && (pixelsize > 0)) {
-		gridconstant = 10 * (pixelsize / 7.4) / (focallength / 100);
-		if (gridconstant < 2) {
-			gridconstant = 2;
-		}
+		// the angular_default is the angular resolution (in radians)
+		// that is suitable for 10 second drives to calibrate. If 
+		// the pixels are smaller or the focal length is larger,
+		// then a shorter time is ok
+		double	angular_default = 0.0000074 / 0.100;
+		double	angular_resolution = pixelsize / focallength;
+
+		// never make the grid constant smaller than 2 (2 second
+		// drives)
+		gridconstant = std::max(2.,
+			10. * angular_resolution / angular_default);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %f",
 			gridconstant);
 	}
@@ -167,7 +175,10 @@ double	CalibrationProcess::gridconstant(double focallength,
 CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
 	: GuidingProcess(_guider, _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
+	_focallength = 0.600;
+	_pixelsize = 0.000010;
 	calibrated = false;
+	_progress = 0;
 	// create the thread
 	thread(ThreadPtr(new GuidingThread<CalibrationProcess>(*this)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");

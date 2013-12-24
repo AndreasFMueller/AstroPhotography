@@ -25,14 +25,18 @@ std::string	GuiderCalibration::toString() const {
 /**
  * \brief Construct a new GuiderCalibration object
  *
- * This calibration assume that corrections translate 1-1 to image
- * displacements. This is usually wrong, but this default at least 
- * gives something that moves the mount around. So it is useful for
- * for testing the mount, although it is completely useless for guiding.
+ * The default calibration has all members set to zero, in particular,
+ * it cannot be inverted, and it is not possible to compute corrections.
  */
 GuiderCalibration::GuiderCalibration() {
-	a[0] = a[3] = 1.;
-	a[1] = a[2] = a[4] = a[5] = 0.;
+	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
+}
+
+/**
+ * \brief Determinant of the calibration
+ */
+double	GuiderCalibration::det() const {
+	return a[0] * a[4] - a[1] * a[3];
 }
 
 /**
@@ -65,9 +69,12 @@ Point	GuiderCalibration::defaultcorrection() const {
  * however, has to be calculated by the caller.
  */
 Point	GuiderCalibration::operator()(const Point& offset, double Deltat) const {
+        double	determinant = det();
+	if (0 == det()) {
+		throw std::runtime_error("no calibration");
+	}
 	double	Deltax = offset.x() - Deltat * a[2];
 	double	Deltay = offset.y() - Deltat * a[5];
-        double	determinant = a[0] * a[4] - a[3] * a[1];
         double	x = (Deltax * a[4] - Deltay * a[1]) / determinant;
         double	y = (a[0] * Deltay - a[3] * Deltax) / determinant;
 	Point	result(x, y);

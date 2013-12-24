@@ -25,6 +25,7 @@ class ImageObjectDirectory : public astro::image::ImageDirectory {
 public:
 	ImageObjectDirectory() { }
 	Image_ptr	getImage(const std::string& filename);
+	ShortImage_ptr	getShortImage(const std::string& filename);
 };
 
 } // namespace Astro

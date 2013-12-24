@@ -124,6 +124,7 @@ public:
 	void	stop();
 	void	start();
 	bool	wait(double timeout);
+	bool	isrunning() { return _thread->isrunning(); }
 
 	// simplified accessors for the stuff needed during calibration or
 	// guiding

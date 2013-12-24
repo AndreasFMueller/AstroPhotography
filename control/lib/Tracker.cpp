@@ -57,8 +57,8 @@ StarTracker::StarTracker(const Point& point,
 Point	StarTracker::operator()(ImagePtr newimage) const {
 	// find the star on the new image
 	Point	newpoint = findstar(newimage, _rectangle, _k);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s",
-		newpoint.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s, tracking point: %s",
+		newpoint.toString().c_str(), _point.toString().c_str());
 	return newpoint - _point;
 }
 

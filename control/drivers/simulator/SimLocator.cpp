@@ -64,12 +64,31 @@ namespace simulator {
 //////////////////////////////////////////////////////////////////////
 
 SimLocator::SimLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create SimLocator");
+
 	_camera = CameraPtr(new SimCamera(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s",
+		_camera->name().toString().c_str());
+
 	_ccd = CcdPtr(new SimCcd(_camera->getCcdInfo(0), *this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s",
+		_ccd->name().toString().c_str());
+
 	_guiderport = GuiderPortPtr(new SimGuiderPort(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport: %s",
+		_guiderport->name().toString().c_str());
+
 	_filterwheel = FilterWheelPtr(new SimFilterWheel(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
+		_filterwheel->name().toString().c_str());
+
 	_cooler = CoolerPtr(new SimCooler(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s",
+		_cooler->name().toString().c_str());
+
 	_focuser = FocuserPtr(new SimFocuser(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fouser: %s",
+		_focuser->name().toString().c_str());
 }
 
 SimLocator::~SimLocator() {

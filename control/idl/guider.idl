@@ -9,12 +9,15 @@ module Astro {
 	/**
 	 * \brief guiders are described by camera, ccdid and guider port
 	 *
+	 * Camera name and guiderport name are standard device URLs, the 
+	 * ccdid is the number of the ccd.
 	 */
 	struct GuiderDescriptor {
 		string	cameraname;
 		long	ccdid;
 		string	guiderportname;
 	};
+
 	/**
 	 * \brief Interface for guiders
 	 *
@@ -70,6 +73,11 @@ module Astro {
 				raises(BadParameter,BadState);
 		Exposure	getExposure();
 
+		// This is the position of the star we want to track.
+		// It does not have to be exact at the beginning, and
+		// the position is only used as a reference point during 
+		// calibration. During guiding, the guide star is kept
+		// in this position.
 		void	setStar(in Point star)
 				raises(BadParameter,BadState);
 		Point	getStar() raises(BadState);
@@ -104,14 +112,17 @@ module Astro {
 		/**
 		 * \brief 
 		 */
-		ShortImage	mostRecentImage() raises(BadState);
-		Point	mostRecentOffset() raises(BadState);
-		float	mostRecentDelay() raises(BadState);
-		struct GuiderAction {
-			float	ra;
-			float	dec;
+		Image	mostRecentImage() raises(BadState);
+		/**
+		 * \brief Information about recent tracking activities
+		 */
+		struct TrackingInfo {
+			double	timeago;
+			Point	trackingoffset;
+			Point	activation;
 		};
-		GuiderAction	mostRecentAction() raises(BadState);
+		TrackingInfo	mostRecentTrackingInfo()
+						raises(BadState);
 	};
 
 	/**

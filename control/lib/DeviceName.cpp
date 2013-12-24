@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 namespace astro {
 
@@ -65,6 +66,12 @@ std::string	DeviceName::name() const {
 	Concatenator	c("/");
 	std::for_each(++begin(), end(), c);
 	return c;
+}
+
+std::string	DeviceName::toString() const {
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
 }
 
 /**

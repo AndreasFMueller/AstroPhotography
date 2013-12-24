@@ -194,6 +194,7 @@ class GuiderCalibrator;
 class GuiderCalibration {
 	friend class GuiderCalibrator;
 	double	a[6];
+	double	det() const;
 public:
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
@@ -205,6 +206,7 @@ public:
 	double&	operator[](size_t index);
 
 	void	rescale(double scalefactor);
+	bool	iscalibrated() const { return 0. != det(); }
 };
 
 std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
@@ -296,6 +298,7 @@ public:
  * guider calibration commands.
  */
 class Guider {
+	void	checkstate();
 private:
 	GuiderStateMachine	_state;
 public:
@@ -372,6 +375,7 @@ public:
 	const GuiderCalibration&	calibration() const { return _calibration; }
 	GuiderCalibration&	calibration() { return _calibration; }
 	void	calibration(const GuiderCalibration& calibration);
+	bool	iscalibrated() const { return _calibration.iscalibrated(); }
 
 	/**
 	 * \brief Launch the calibration process
@@ -390,11 +394,12 @@ public:
 	 * The focallength and the pixelsize allow to compute reasonable
 	 * values for the calibration displacements.
 	 * \param tracker	The tracker used for tracking. 
-	 * \param focallength	Focallength of the optics used for guiding.
+	 * \param focallength	Focallength of the optics used for guiding,
+	 *			in m.
 	 * \param pixelsize	Pixel size of the CCD chip used for guiding.
 	 *			If binning different from 1x1 is used, the
 	 *			pixel size must reflect the size of the binned
-	 *			pixel.
+	 *			pixel. Unit: meters.
 	 */
 	void	startCalibration(TrackerPtr tracker,
 			double focallength = 0, double pixelsize = 0);
@@ -413,6 +418,7 @@ public:
 private:
 	CalibrationProcessPtr	calibrationprocess;
 	friend class CalibrationProcess;
+	void	calibrationCleanup();
 
 	// the following methods manage the guiding thread
 private:
@@ -420,7 +426,7 @@ private:
 
 public:
 	// tracking
-	void	startGuiding(TrackerPtr tracker);
+	void	startGuiding(TrackerPtr tracker, double interval);
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	
@@ -438,7 +444,13 @@ public:
 	 */
 	astro::callback::CallbackPtr	newimagecallback;
 public:
+	astro::image::ImagePtr	mostRecentImage;
 	void	callbackImage(ImagePtr image);
+
+	/**
+	 * \brief Information about the most recent update
+	 */
+	void lastAction(double& actiontime, Point& offset, Point& activation);
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 

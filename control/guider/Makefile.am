@@ -23,8 +23,8 @@ COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)
-guide_DEPENDENCIES = ../lib/libastro.la
-guide_LDADD = -L../lib -lastro
+guide_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
+guide_LDADD = -L../lib -lastro -lcorbastro
 
 EXTRA_DIST = tokens.l grammar.y testscript
 

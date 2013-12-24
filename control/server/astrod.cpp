@@ -34,6 +34,9 @@ int	main(int argc, char *argv[]) {
 	debuglevel = LOG_DEBUG;
 	debugthreads = true;
 
+	// initialize random number generator (used in the simulator)
+	srandom(0);
+
 	// initialize CORBA
 	Astro::OrbSingleton	orb(argc, argv);
 

@@ -30,8 +30,8 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp
 
 astrod_SOURCES = astrod.cpp
-astrod_DEPENDENCIES = ../lib/libastro.la libserver.la
-astrod_LDADD = libserver.la -L../lib -lastro @SBIGLIBRARY@
+astrod_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la libserver.la
+astrod_LDADD = libserver.la -L../lib -lastro -lcorbastro @SBIGLIBRARY@
 
 test:	astrod
 	./astrod -d -ORBInitRef NameService=corbaname::localhost -b `pwd`/images

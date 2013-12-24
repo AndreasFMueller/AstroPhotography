@@ -47,8 +47,8 @@ tests_SOURCES = tests.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp \
 	DatabaseTest.cpp UpdateSpecTest.cpp TableTest.cpp
-tests_LDADD = -lcppunit -L.. -lastro
-tests_DEPENDENCIES = ../libastro.la
+tests_LDADD = -lcppunit -L.. -lastro -lcorbastro
+tests_DEPENDENCIES = ../libastro.la ../libcorbastro.la
 
 # tests for USB library
 usbtests_SOURCES = usbtests.cpp \
@@ -107,6 +107,6 @@ EXTRA_DIST = test_module.la test_module.so
 
 testguide:	guidetest
 	rm -f gt/*
-	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -t 260 -T 3600 -i gt -C 2>&1 | tee testguide.log
+	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -t 200 -T 3600 -i gt -C 2>&1 | tee testguide.log
 
 endif

@@ -34,7 +34,9 @@ class GuiderProcess {
 	ThreadPtr	tracking;
 	ThreadPtr	driving;
 
-	// Interval between images
+	/**
+	 * \brief Interval between images of the tracking thread
+	 */
 	double	_interval;
 public:
 	const double&	interval() const { return _interval; }
@@ -48,11 +50,15 @@ public:
 	bool	start(TrackerPtr tracker);
 	bool	stop();
 	bool	wait(double timeout);
+	bool	isrunning() { return tracking->isrunning(); }
 private:
 	double	_gain;
 public:
 	double	getGain() const;
 	void	setGain(double gain);
+
+public:
+	void lastAction(double& actiontime, Point& offset, Point& activation);
 };
 
 } // namespace guiding

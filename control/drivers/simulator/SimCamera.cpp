@@ -32,6 +32,11 @@ SimCamera::SimCamera(SimLocator& locator)
 	ccdinfo.push_back(ccdi);
 }
 
+/**
+ * \brief Get the simulated CCD
+ *
+ * The simulator camera only implements a single ccd.
+ */
 CcdPtr	SimCamera::getCcd0(size_t ccdid) {
 	if (0 != ccdid) {
 		throw NotFound("only ccd 0 exists");
@@ -40,10 +45,16 @@ CcdPtr	SimCamera::getCcd0(size_t ccdid) {
 	return CcdPtr(new SimCcd(info, _locator));
 }
 
+/**
+ * \brief Get the filterwheel
+ */
 FilterWheelPtr	SimCamera::getFilterWheel0() {
 	return _locator.filterwheel();
 }
 
+/**
+ * \brief Get the guider port
+ */
 GuiderPortPtr	SimCamera::getGuiderPort0() {
 	return _locator.guiderport();
 }

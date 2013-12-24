@@ -61,6 +61,7 @@ public:
 	bool	operator<(const DeviceName& other) const;
 	// cast to a string
 	operator std::string() const;
+	std::string	toString() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name);

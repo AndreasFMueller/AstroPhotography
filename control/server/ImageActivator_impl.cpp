@@ -89,8 +89,13 @@ void	ImageActivator_impl::etherealize(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "servant deleted");
 
 	// remove the image from the ImageDirectory
-	ImageDirectory::remove(filename);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
+	try {
+		ImageDirectory::remove(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error during etherialize: %s",
+			x.what());
+	}
 }
 
 } // namespace Astro

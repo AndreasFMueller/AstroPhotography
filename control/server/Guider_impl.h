@@ -14,6 +14,7 @@ namespace Astro {
 class Guider_impl : public POA_Astro::Guider {
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
+	astro::guiding::TrackerPtr	getTracker();
 public:
 	Guider_impl(astro::guiding::GuiderPtr guider);
 	virtual ~Guider_impl() { }
@@ -46,10 +47,8 @@ public:
 	virtual void	stopGuiding();
 
 	// monitoring
-	virtual ShortImage_ptr	mostRecentImage();
-	virtual ::Astro::Point	mostRecentOffset();
-	virtual ::CORBA::Float	mostRecentDelay();
-	virtual ::Astro::Guider::GuiderAction	mostRecentAction();
+	virtual Image_ptr	mostRecentImage();
+	virtual Astro::Guider::TrackingInfo	mostRecentTrackingInfo();
 };
 
 } // namespace Astro

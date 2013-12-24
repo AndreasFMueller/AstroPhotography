@@ -158,6 +158,11 @@ void	ThreadBase::stop() {
  */
 bool	ThreadBase::wait(double timeout) {
 	GuidingLock	lock(&mutex);
+	if (!isrunning()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"thread has terminated already, no wait needed");
+		return true;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop", thread);
 	double	t = Timer::gettime() + timeout;
 	struct timespec	ts;

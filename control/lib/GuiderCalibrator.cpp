@@ -33,6 +33,17 @@ void	GuiderCalibrator::add(double t, const Point& offset,
 
 /**
  * \brief compute the calibration data from the raw points
+ *
+ * The guider port activations move a star over the ccd area. The velocity
+ * of this movement is measure in pixels/second. The vector of movement 
+ * induced by the activation of the right ascension guider port controls
+ * has components vx_ra and vy_ra, they are unknowns 0 and 3. The velocity
+ * induced by declination port activation has components vx_dec and vy_dec,
+ * they are unknowns 1 and 4. The drift velocity describes the movement of
+ * the star without any controls applied, they are drift_x and drift_y,
+ * unknowns 2 and 5. The remaining two unknowns 6 and 7 are origin_x and
+ * origin_y, they are the best estimate of the origin at the beginning of the
+ * calibration process (time origin).
  */
 GuiderCalibration	GuiderCalibrator::calibrate() {
 	// build the linear system of equations
@@ -45,14 +56,14 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	std::vector<calibration_point>::const_iterator	ci;
 	int	i = 0;
 	for (ci = calibration_data.begin(); ci != calibration_data.end(); ci++){
-		A[i        ] = ci->offset.x();
-		A[i +     m] = ci->offset.y();
-		A[i + 2 * m] = ci->t;
-		A[i + 3 * m] = 0;
-		A[i + 4 * m] = 0;
-		A[i + 5 * m] = 0;
-		A[i + 6 * m] = 1;
-		A[i + 7 * m] = 0;
+		A[i        ] = ci->offset.x();	// vx_ra
+		A[i +     m] = ci->offset.y();	// vx_dec
+		A[i + 2 * m] = ci->t;		// drift_x
+		A[i + 3 * m] = 0;		// vy_ra
+		A[i + 4 * m] = 0;		// vy_dec
+		A[i + 5 * m] = 0;		// drift_y
+		A[i + 6 * m] = 1;		// origin_x
+		A[i + 7 * m] = 0;		// origin_y
 
 		b[i] = ci->point.x();
 
@@ -107,6 +118,12 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	for (unsigned int i = 0; i < 6; i++) {
 		calibration.a[i] = b[i];
 	}
+
+	// The last two variables are not needed for the calibration, we
+	// throw them away but it might be interesting to at least note them
+	// in the debug log.
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration origin: %.3f, %.3f",
+		b[6], b[7]);
 
 	// return the calibration data
 	return calibration;

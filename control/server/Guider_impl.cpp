@@ -10,11 +10,12 @@
 #include <ServantBuilder.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
+#include <ImageObjectDirectory.h>
 
 namespace Astro {
 
 //////////////////////////////////////////////////////////////////////
-// 
+// callback class for the images
 //////////////////////////////////////////////////////////////////////
 class GuiderImageCallback : public astro::callback::Callback {
 	astro::Timer	timer;
@@ -93,7 +94,9 @@ GuiderPort_ptr	Guider_impl::getGuiderPort() {
  * \brief Configure the guider
  */
 void	Guider_impl::setExposure(const ::Astro::Exposure& exposure) {
-	_guider->exposure(astro::convert(exposure));
+	astro::camera::Exposure	_exposure = astro::convert(exposure);
+	_guider->exposure(_exposure);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s", _exposure.toString().c_str());
 }
 
 /**
@@ -101,6 +104,7 @@ void	Guider_impl::setExposure(const ::Astro::Exposure& exposure) {
  */
 void	Guider_impl::setStar(const Astro::Point& star) {
 	_point = astro::convert(star);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "star set to %s", _point.toString().c_str());
 }
 
 /**
@@ -145,15 +149,14 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 	// get the pixel size from the guider's ccd
 	astro::camera::CcdInfo	info = _guider->ccd()->getInfo();
 	float	pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %f", pixelsize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %fum", 1000000 * pixelsize);
 	
-	// construct the tracker
-	astro::camera::Exposure	exposure = _guider->exposure();
-	astro::guiding::TrackerPtr	tracker(
-		new astro::guiding::StarTracker(_point, exposure.frame, 10));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed");
+	// get the tracker
+	astro::guiding::TrackerPtr	tracker = getTracker();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %s",
+		tracker->toString().c_str());
 
-	// start calibration
+	// start calibration.
 	_guider->startCalibration(tracker, focallength, pixelsize);
 }
 
@@ -189,7 +192,15 @@ double	Guider_impl::calibrationProgress() {
 void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %f",
 		guidinginterval);
-	// XXX actually do the guiding
+
+	// Construct the tracker. The rectangle is a rectangle the size of the
+	astro::guiding::TrackerPtr	tracker = getTracker();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %s",
+		tracker->toString().c_str());
+
+	// start calibration.
+	_guider->startGuiding(tracker, guidinginterval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiding started");
 }
 
 /**
@@ -207,29 +218,58 @@ void	Guider_impl::stopGuiding() {
 	_guider->stopGuiding();
 }
 
-ShortImage_ptr	Guider_impl::mostRecentImage() {
+Image_ptr	Guider_impl::mostRecentImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve most recent image");
-	// XXX actuall retrieve the most recent image
-	return NULL;
+	// actuall retrieve the most recent image from the callback
+	ImagePtr	image = _guider->mostRecentImage;
+
+        Astro::ImageObjectDirectory    directory;
+        std::string     filename = directory.save(image);
+
+        // activate this object
+        return directory.getImage(filename);
 }
 
-Astro::Point	Guider_impl::mostRecentOffset() {
-	Astro::Point	point;
-	return point;
-}
+Astro::Guider::TrackingInfo	Guider_impl::mostRecentTrackingInfo() {
+	// verify that we really are guiding right now
+	if (astro::guiding::guiding != _guider->state()) {
+		throw BadState("not currently guiding");
+	}
 
-::CORBA::Float	Guider_impl::mostRecentDelay() {
-	return 0;
-}
+	// ok, we are guiding. Prepare a result structure
+	Astro::Guider::TrackingInfo	result;
+	// So we query the guider for the contents of this structure
+	double	lastaction;
+	astro::Point	offset;
+	astro::Point	activation;
+	_guider->lastAction(lastaction, offset, activation);
+	result.timeago = astro::Timer::gettime() - lastaction;
+	result.trackingoffset.x = offset.x();
+	result.trackingoffset.y = offset.y();
+	result.activation.x = activation.x();
+	result.activation.y = activation.y();
 
-
-Astro::Guider::GuiderAction	Guider_impl::mostRecentAction() {
-	::Astro::Guider::GuiderAction	action;
-	return  action;
+	// that's it, we are read, return the structure
+	return result;
 }
 
 Astro::GuiderDescriptor	*Guider_impl::getDescriptor() {
+	// XXX implementation missing
 	return NULL;
+}
+
+astro::guiding::TrackerPtr	Guider_impl::getTracker() {
+        astro::camera::Exposure exposure = _guider->exposure();
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s", exposure.frame.origin().toString().c_str());
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "_point: %s", _point.toString().c_str());
+        astro::Point    difference = _point - exposure.frame.origin();
+	int	x = difference.x();
+	int	y = difference.y();
+        astro::image::ImagePoint        trackerstar(x, y);
+        astro::image::ImageRectangle    trackerrectangle(exposure.frame.size());
+        astro::guiding::TrackerPtr      tracker(
+                new astro::guiding::StarTracker(trackerstar, trackerrectangle, 10));
+	return tracker;
 }
 
 } // namespace Astro

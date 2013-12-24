@@ -22,7 +22,7 @@ bool	GuiderStateMachine::canConfigure() const {
 }
 
 bool	GuiderStateMachine::canStartGuiding() const {
-	return (_state == astro::guiding::idle);
+	return (_state == astro::guiding::calibrated);
 }
 
 bool	GuiderStateMachine::canAcceptCalibration() const {

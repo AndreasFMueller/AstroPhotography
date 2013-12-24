@@ -107,6 +107,13 @@ bool	GuiderProcess::wait(double timeout) {
 	return result;
 }
 
+void	GuiderProcess::lastAction(double& actiontime, Point& offset,
+		Point& activation) {
+	if (trackingwork) {
+		trackingwork->lastAction(actiontime, offset, activation);
+	}
+}
+
 
 } // namespace guiding
 } // namespace astro

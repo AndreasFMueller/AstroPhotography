@@ -97,6 +97,9 @@ void	DeviceMap<AstroDevice>::assign(const std::string& deviceid,
 			"'default' is not a vaild device name");
 		throw devicemap_error("invalid device name");
 	}
+	if (maptype::find(deviceid) != maptype::end()) {
+		release(deviceid);
+	}
 	value_type	v(deviceid, DeviceWrapper(device));
 	maptype::insert(v);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device %s stored in map",

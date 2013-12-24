@@ -46,8 +46,8 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	_gain = 1;
 	_interval = 10;
 
-	// set the default tracking length 100
-	_history_length = 100;
+	// set the default tracking length -1, which turns the history off
+	_history_length = -1;
 
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
@@ -142,6 +142,13 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 			"TRACK: current tracker offset: %s",
 			offset.toString().c_str());
 
+		// find out whether the tracker can still track, terminate
+		// if not
+		if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "loss of tracking");
+			return;
+		}
+
 		// The correction should happen within a certain time.
 		// Ideally, when we come back with the next tracker image,
 		// the offset should have been corrected completely.
@@ -181,6 +188,11 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 		_driving.setCorrection(tx, ty);
 		//_driving.setCorrection(0, 0);
 
+		// remember information for monitoring
+		_lastaction = Timer::gettime();
+		_offset = offset;
+		_activation = -correction;
+
 		// this is a possible cancellation point
 		if (thread.terminate()) {
 			return;
@@ -206,12 +218,16 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
  * \param point		new tracking offset
  */
 void	TrackingWork::addHistory(const Point& point) {
+	// return immediately if the tracking history is turned off
+	if (_history_length < 0) {
+		return;
+	}
 	double	now = Timer::gettime();
 	trackinghistoryentry	entry(now, point);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking history entry: %s",
 		toString(entry).c_str());
 	// _history_length == 0 means unlimited tracking history length
-	if (_history_length) {
+	if (_history_length > 0) {
 		while (trackinghistory.size() > _history_length) {
 			trackinghistory.pop_front();
 		}
@@ -229,6 +245,16 @@ void	TrackingWork::dumpHistory(std::ostream& out) {
 	for (i = trackinghistory.begin(); i != trackinghistory.end(); i++) {
 		out << (*i) << std::endl;
 	}
+}
+
+/**
+ * \brief retrieve last action information
+ */
+void	TrackingWork::lastAction(double& actiontime, Point& offset,
+		Point& activation) {
+	actiontime = Timer::gettime() - _lastaction;
+	offset = _offset;
+	activation = _activation;
 }
 
 } // namespace guiding

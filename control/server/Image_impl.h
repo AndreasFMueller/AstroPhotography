@@ -18,10 +18,13 @@ namespace Astro {
  */
 class Image_impl : public virtual POA_Astro::Image, public ImageObjectDirectory {
 	std::string	_filename;
-	void	setup(astro::image::ImagePtr image);
+	astro::image::ImagePtr	_image;
+	void	setup();
 public:
 	// constructors
 	Image_impl(const std::string& filename);
+	Image_impl(astro::image::ImagePtr image);
+	~Image_impl();
 
 	// static fields
 private:

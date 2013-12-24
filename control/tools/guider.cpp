@@ -23,7 +23,6 @@ using namespace astro::io;
 namespace astro {
 
 class NewImageCallback : public Callback {
-	int	counter;
 	FITSdirectory	directory;
 public:
 	NewImageCallback(const std::string& path) : directory(path) { }
@@ -215,7 +214,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// now track for 2 hours
-	guider.startGuiding(tracker);
+	guider.startGuiding(tracker, 10);
 	sleep(7200);
 	guider.stopGuiding();
 
