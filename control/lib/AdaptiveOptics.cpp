@@ -21,10 +21,10 @@ AdaptiveOptics::~AdaptiveOptics() {
 }
 
 void	AdaptiveOptics::set(const Point& position) {
-	if ((position.x() < -1) || (position.x() > 1)) {
+	if ((position.x() < -1) || (position.x() > 1)) {
 		throw std::range_error("x position out of range");
 	}
-	if ((position.y() < -1) || (position.y() > 1)) {
+	if ((position.y() < -1) || (position.y() > 1)) {
 		throw std::range_error("y position out of range");
 	}
 	try {
