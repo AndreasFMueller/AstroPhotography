@@ -254,8 +254,13 @@ Astro::Guider::TrackingInfo	Guider_impl::mostRecentTrackingInfo() {
 }
 
 Astro::GuiderDescriptor	*Guider_impl::getDescriptor() {
-	// XXX implementation missing
-	return NULL;
+	Astro::GuiderDescriptor	*gd = new Astro::GuiderDescriptor();
+	std::string	cameraname = _guider->camera()->name();
+	gd->cameraname = CORBA::string_dup(cameraname.c_str());
+	gd->ccdid = _guider->ccd()->getInfo().getId();
+	std::string	guiderportname = _guider->guiderport()->name();
+	gd->guiderportname = CORBA::string_dup(guiderportname.c_str());
+	return gd;
 }
 
 astro::guiding::TrackerPtr	Guider_impl::getTracker() {
