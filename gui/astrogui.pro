@@ -3,7 +3,8 @@ TEMPLATE = app
 TARGET = capture
 DEPENDPATH += .
 INCLUDEPATH += . -I /usr/local/include -I ../control/include
-LIBS += -L../control/root/lib64 -L/usr/local/lib -L../control/lib -lastro
+LIBS += -L../control/root/lib64 -L/usr/local/lib -L../control/lib -lastro -lcorbastro
+QMAKE_CXXFLAGS += --std=c++11 -stdlib=libc++ -mmacosx-version-min=10.9
 
 HEADERS += \ 
     capturewindow.h \

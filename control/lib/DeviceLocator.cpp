@@ -5,6 +5,7 @@
  */
 #include <AstroLocator.h>
 #include <AstroCamera.h>
+#include <config.h>
 
 using namespace astro::camera;
 

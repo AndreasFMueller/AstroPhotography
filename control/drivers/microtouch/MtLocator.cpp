@@ -8,6 +8,7 @@
 #include <AstroCamera.h>
 #include <AstroExceptions.h>
 #include <AstroLoader.h>
+#include <config.h>
 
 namespace astro {
 namespace module {

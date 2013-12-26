@@ -17,6 +17,7 @@
 #include <NetFocuser.h>
 #include <NetUtils.h>
 #include <DeviceLocatorAdapter.h>
+#include <config.h>
 
 using namespace astro::device;
 

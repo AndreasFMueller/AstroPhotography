@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroLoader.h>
+#include <config.h>
 
 using namespace astro::device;
 

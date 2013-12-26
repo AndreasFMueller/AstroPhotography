@@ -48,9 +48,12 @@ module Astro {
 		GuiderState	getState();
 
 		/**
-		 * \brief Choose a camera to for the guider
+		 * \brief Get the camera that was chosen for the guider
 		 */
 		Camera	getCamera() raises(BadState);
+		/**
+		 * \brief Get the CCD that was chosen for the guider
+		 */
 		Ccd	getCcd() raises(BadState);
 		
 		/**
