@@ -96,6 +96,7 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 
 	// now read the keys
 	readkeys();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "FITSinfileBase constructor complete");
 }
 
 /**
@@ -142,6 +143,9 @@ void	*FITSinfileBase::readdata() throw (FITSexception) {
 	/* now read the data */
 	int	status = 0;
 	long	firstpixel[3] = { 1, 1, 1 };
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS data: pixeltype = %f, "
+		"pixels = %d, planes = %d", pixeltype, size.getPixels(),
+		planes);
 	if (fits_read_pix(fptr, pixeltype, firstpixel, size.getPixels() * planes,
 		NULL, v, NULL, &status)) {
 		free(v);

@@ -28,6 +28,7 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 
 	// take an image at that position
 	imager().startExposure(exposure());
+	usleep(1000000 * exposure().exposuretime);
 	ImagePtr	image = guider().getImage();
 
 	// analze the image
@@ -150,6 +151,9 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
  */
 double	CalibrationProcess::gridconstant(double focallength,
 	double pixelsize) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"grid constant for focallength = %.0fmm, pixelsize = %.1fum",
+		1000 * focallength, 1000000 * pixelsize);
 	double	gridconstant = 10;
 	if ((focallength > 0) && (pixelsize > 0)) {
 		// the angular_default is the angular resolution (in radians)
@@ -163,7 +167,8 @@ double	CalibrationProcess::gridconstant(double focallength,
 		// drives)
 		gridconstant = std::max(2.,
 			10. * angular_resolution / angular_default);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %f",
+		gridconstant = std::min(gridconstant, 10.);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %.3f",
 			gridconstant);
 	}
 	return gridconstant;

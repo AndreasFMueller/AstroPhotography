@@ -125,7 +125,12 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
 	rpd.x_offset = exposure.frame.origin().x();
-	rpd.y_offset = exposure.frame.origin().y();
+	// here is the problem with the y-offset: since our application
+	// always uses a mathematical coordinate system (just us the FITS
+	// file format does), we have to flip the y offset when computing
+	// the subframe
+	rpd.y_offset = info.size().height()
+		- (exposure.frame.size().height() + exposure.frame.origin().y());
 	rpd.width = exposure.frame.size().width();
 	rpd.height = exposure.frame.size().height();
 	rpd.x_bin = exposure.mode.getX();

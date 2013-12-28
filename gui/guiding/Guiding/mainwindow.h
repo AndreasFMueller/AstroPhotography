@@ -14,13 +14,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    	explicit MainWindow(QWidget *parent = 0);
+    	~MainWindow();
 
-	Astro::Guider_var	guider;
+	Astro::GuiderFactory_var	guiderfactory;
 
 private:
-    Ui::MainWindow *ui;
+    	Ui::MainWindow *ui;
 
 private slots:
         void    startGuider();

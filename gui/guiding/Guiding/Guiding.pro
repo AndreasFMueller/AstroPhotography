@@ -17,10 +17,10 @@ LIBS += -L/Users/afm/Projects/Astro/AstroPhotography/control/root/lib -lcorbastr
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    guiderdialog.cpp
+    guiderdialog.cpp logspinbox.cpp
 
 HEADERS  += mainwindow.h \
-    guiderdialog.h
+    guiderdialog.h logspinbox.h
 
 FORMS    += mainwindow.ui \
     guiderdialog.ui

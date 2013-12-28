@@ -9,17 +9,18 @@ noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 	coolercommand.h sleepcommand.h filterwheelcommand.h focusercommand.h \
 	guiderfactorycommand.h guidercommand.h imagecommand.h \
 	ObjWrapper.h Cameras.h Ccds.h Filterwheels.h Focusers.h \
-	Guiders.h Images.h exposurecommand.h taskcommand.h Output.h \
-	submitcommand.h taskqueuecommand.h
+	Guiderports.h Guiders.h Images.h \
+	exposurecommand.h taskcommand.h Output.h \
+	submitcommand.h taskqueuecommand.h guiderportcommand.h
 
 CLASSES = Cameras.cpp Ccds.cpp Filterwheels.cpp Focusers.cpp \
-	Guiders.cpp Images.cpp Output.cpp
+	Guiderports.cpp Guiders.cpp Images.cpp Output.cpp
 COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
 	helpcommand.cpp cameracommand.cpp ccdcommand.cpp coolercommand.cpp \
 	sleepcommand.cpp filterwheelcommand.cpp focusercommand.cpp \
 	guiderfactorycommand.cpp guidercommand.cpp imagecommand.cpp \
 	exposurecommand.cpp taskcommand.cpp submitcommand.cpp \
-	taskqueuecommand.cpp
+	taskqueuecommand.cpp guiderportcommand.cpp
 
 guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)

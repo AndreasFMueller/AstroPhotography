@@ -211,13 +211,19 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 		ccd0.addMode(Binning(3,3));
 		ccd0.addMode(Binning(4,4));
 	}
-	ccdinfo.push_back(ccd0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
-		ccd0.toString().c_str());
 
 	// set pixel width and height
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "params.pixel_uwidth = %hu",
+		params.pixel_uwidth);
 	ccd0.pixelwidth((float)params.pixel_uwidth / (256. * 1000000));
 	ccd0.pixelheight((float)params.pixel_uheight / (256. * 1000000));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel size: %.2fum x %.2fum",
+		1000000 * ccd0.pixelwidth(), 1000000 * ccd0.pixelheight());
+
+	// add the CCDinfo to the ccdinfo array
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Imaging CCD: %s",
+		ccd0.toString().c_str());
+	ccdinfo.push_back(ccd0);
 
 	// find out whether this camera has a cooler
 	if (ccd0request.data()->extra_capabilities & REGULATED_COOLER) {
@@ -300,12 +306,14 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ccd with index %d", ccdindex);
 	if ((model == SX_MODEL_M26C) && (ccdindex == 0)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "create SxCcdM26C for the M26C "
-			"imaging CCD");
+			"imaging CCD: %s",
+			ccdinfo[ccdindex].toString().c_str());
 		return CcdPtr(new SxCcdM26C(ccdinfo[ccdindex], *this,
 			ccdindex));
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd: %s",
+		ccdinfo[ccdindex].toString().c_str());
 	return CcdPtr(new SxCcd(ccdinfo[ccdindex], *this, ccdindex));
 }
 

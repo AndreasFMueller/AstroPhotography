@@ -111,12 +111,18 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
 	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", basedir().c_str());
 	mkstemps(buffer, 5);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
+	unlink(buffer);
 
 	// write the file
 	std::string	fullname(buffer);
-	astro::io::FITSout	outfile(fullname);
-	outfile.setPrecious(false);
-	outfile.write(image);
+	try {
+		astro::io::FITSout	outfile(fullname);
+		outfile.setPrecious(false);
+		outfile.write(image);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write file '%s': %s",
+			fullname.c_str(), x.what());
+	}
 
 	// construct the filename
 	std::string	filename = basename(fullname);

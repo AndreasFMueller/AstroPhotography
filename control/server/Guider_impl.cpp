@@ -218,11 +218,19 @@ void	Guider_impl::stopGuiding() {
 	_guider->stopGuiding();
 }
 
+/**
+ * \brief get most recent image
+ */
 Image_ptr	Guider_impl::mostRecentImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve most recent image");
 	// actuall retrieve the most recent image from the callback
 	ImagePtr	image = _guider->mostRecentImage;
+	if (!image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "there is no most recent image");
+		throw CORBA::OBJECT_NOT_EXIST();
+	}
 
+	// save the image in the image directory
         Astro::ImageObjectDirectory    directory;
         std::string     filename = directory.save(image);
 

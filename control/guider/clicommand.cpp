@@ -17,6 +17,7 @@
 #include <focusercommand.h>
 #include <guiderfactorycommand.h>
 #include <guidercommand.h>
+#include <guiderportcommand.h>
 #include <imagecommand.h>
 #include <taskcommand.h>
 #include <submitcommand.h>
@@ -126,6 +127,10 @@ commandfactory::commandfactory() {
 	commandmap.insert(std::make_pair(
 		commandkey("cooler"),
 		commandcreatorptr(new commandcreator<coolercommand>())
+	));
+	commandmap.insert(std::make_pair(
+		commandkey("guiderport"),
+		commandcreatorptr(new commandcreator<guiderportcommand>())
 	));
 	commandmap.insert(std::make_pair(
 		commandkey("guiderfactory"),

@@ -17,14 +17,92 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>70</y>
+      <x>70</x>
+      <y>160</y>
       <width>114</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
      <string>StartGuider</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cameraLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>62</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Camera:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ccdLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>62</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CCD:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="guiderportLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Guider Port:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="cameraField">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>20</y>
+      <width>391</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>camera:sx/250-006-ECHO2-1278-0509</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="ccdSpinbox">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>50</y>
+      <width>49</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>3</number>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="guiderportField">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>80</y>
+      <width>391</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>guiderport:sx/250-006-ECHO2-1278-0509/guiderport</string>
     </property>
    </widget>
   </widget>

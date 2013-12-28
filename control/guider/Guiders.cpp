@@ -34,6 +34,7 @@ public:
  */
 void	Guider_internals::assign(const std::string& guiderid,
 		const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "assign guider");
 
 	if (arguments.size() < 5) {
 		throw devicemap_error("guider assign needs 5 arguments");
@@ -51,8 +52,9 @@ void	Guider_internals::assign(const std::string& guiderid,
 	descriptor->ccdid = ccdno;
 	descriptor->guiderportname = CORBA::string_dup(guiderportname.c_str());
 	Astro::GuiderDescriptor_var	descvar = descriptor;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "descriptor constructed");
 
-	// geht the modules interface
+	// geht the guider factory interface
 	Astro::OrbSingleton	orb;
 	Astro::GuiderFactory_var	guiderfactory;
 	try {
@@ -63,12 +65,14 @@ void	Guider_internals::assign(const std::string& guiderid,
 			s.c_str());
 		throw std::runtime_error(s);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got guider factory");
+
+	// retrieve the guider
 	Astro::Guider_ptr	guider = guiderfactory->get(*descriptor);
 
 	// assign the Guider_var object to this 
 	DeviceMap<Astro::Guider>::assign(guiderid, guider);
 }
-
 
 //////////////////////////////////////////////////////////////////////
 // Guiders implementation

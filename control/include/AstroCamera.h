@@ -22,7 +22,7 @@ typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
 /**
  * \brief Binning mode specification
  *
- * many astrophotography cameras support, i.e. combining adjacent pixels
+ * many astrophotography cameras support binning, i.e. combining adjacent pixels
  * to form larger pixels. The coordinate values in a binning object
  * can also be set to -1, which means that any positive number would
  * be valid. This simplifies specifying the acceptable binning modes as a list
