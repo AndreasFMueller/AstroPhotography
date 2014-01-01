@@ -125,7 +125,7 @@ AC_ARG_ENABLE(qsi,
 	AC_CHECK_HEADER([qsiapi.h],
                      [AC_DEFINE([HAVE_QSIAPI_H], [1],
                         [Define to 1 if you have <qsiapi.h>.])],
-                     [AC_MSG_ERROR([QSI header not available, install or disable SQI driver])])
+                     [AC_MSG_ERROR([QSI header not available, install or disable QSI driver])])
 	AC_LANG_POP([C++])
 
 	# check whether the qsiapi library is present

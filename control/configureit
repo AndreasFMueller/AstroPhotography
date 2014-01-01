@@ -4,7 +4,7 @@
 CFLAGS="-Wall -g"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
-commonflags="--enable-unittests --enable-microtouch --enable-qsi --enable-qhy"
+commonflags="--enable-unittests --enable-microtouch --enable-qhy"
 
 # first find out what type of system we are
 systemtype=`uname`
@@ -33,6 +33,11 @@ Linux)	if [ -r /etc/debian_version ]
 	fi
 	;;
 esac
+
+if [ -r /usr/local/include/qsiapi.h ]
+then
+	commonflags="${commonflags} --enable-qsi"
+fi
 
 
 # the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
@@ -74,6 +79,6 @@ Darwin)
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
-		--enable-sbig --enable-qsi
+		--enable-sbig
 	;;
 esac
