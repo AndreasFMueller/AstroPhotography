@@ -115,11 +115,24 @@ AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 AC_ARG_ENABLE(qsi,
 [AS_HELP_STRING([--enable-qsi], [build the QSI driver])],
 [
-	enable_qsi=yes
+	# don't enable the QSI driver unless you find the header
+	# and the library
+	enable_qsi=no
+
+	# check whether the qsiapi.h header is present
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS([qsiapi.h])
+	AC_CHECK_HEADER([qsiapi.h],
+                     [AC_DEFINE([HAVE_QSIAPI_H], [1],
+                        [Define to 1 if you have <qsiapi.h>.])],
+                     [AC_MSG_ERROR([QSI header not available, install or disable SQI driver])])
+	AC_LANG_POP([C++])
+
 	# check whether the qsiapi library is present
 	AC_CHECK_LIB([qsiapi], [_ZN10CCCDCameraC1Ev])
 
 	# if we fail, disable qsi
+	enable_qsi=yes
 ],[
 enable_qsi=no
 ]
