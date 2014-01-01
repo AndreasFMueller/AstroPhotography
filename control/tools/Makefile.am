@@ -81,6 +81,8 @@ logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
 logscale_LDADD = -L../lib -lastro 
 
+# The looptest shows how to call imageloop to create a video for a
+# full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
 	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
 		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \

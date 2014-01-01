@@ -63,8 +63,10 @@ void	usage(const char *progname) {
 	std::cout << "  -M meadian   attemtp to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
 	std::cout << "  -F           stay in the foreground" << std::endl;
-	std::cout << "  -P prog      processing script for individual images" << std::endl;
-	std::cout << "  -Q prog      processing script called at the end of a loop" << std::endl;
+	std::cout << "  -P prog      processing script for individual images, e.g. convert" << std::endl;
+	std::cout << "               FITS to JPEG" << std::endl;
+	std::cout << "  -Q prog      processing script called at the end of a loop, e.g. convert" << std::endl;
+	std::cout << "               image sequence to MPEG movie" << std::endl;
 	std::cout << "  -?           display this help message" << std::endl;
 }
 

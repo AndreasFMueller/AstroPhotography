@@ -1,10 +1,15 @@
-QT += widgets
-TEMPLATE = app
+QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 TARGET = capture
-DEPENDPATH += .
-INCLUDEPATH += . -I /usr/local/include -I ../control/include
-LIBS += -L../control/root/lib64 -L/usr/local/lib -L../control/lib -lastro -lcorbastro
-QMAKE_CXXFLAGS += --std=c++11 -stdlib=libc++ -mmacosx-version-min=10.9
+
+TEMPLATE = app
+
+INCLUDEPATH += . -I /Users/afm/Projects/Astro/AstroPhotography/control/root/include -I /usr/local/include
+
+LIBS += -L/Users/afm/Projects/Astro/AstroPhotography/control/root/lib -lcorbastro -lastro -L/usr/local/lib -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
+
+QMAKE_CXXFLAGS += -mmacosx-version-min=10.9 -std=c++11 -stdlib=libc++
 
 HEADERS += \ 
     capturewindow.h \

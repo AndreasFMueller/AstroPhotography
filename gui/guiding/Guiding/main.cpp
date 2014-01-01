@@ -16,7 +16,8 @@ int main(int argc, char *argv[]) {
 	char	*corbaargv[3];
 	corbaargv[0] = strdup(argv[0]);
 	corbaargv[1] = strdup("-ORBInitRef");
-	corbaargv[2] = strdup("NameService=corbaname::localhost");
+	//corbaargv[2] = strdup("NameService=corbaname::localhost");
+	corbaargv[2] = strdup("NameService=corbaname::192.168.199.23");
 	int	corbaargc = 3;
 	orb = CORBA::ORB_init(corbaargc, corbaargv, "omniORB4", options);
 	
