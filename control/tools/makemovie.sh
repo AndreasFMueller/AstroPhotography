@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 # makemovie.sh -- produce an MPEG2 movie from all the JPEG images found in
 #                 a directory
@@ -13,7 +13,7 @@ month=`basename ${dir}`
 dir=`dirname ${dir}`
 year=`basename ${dir}`
 
-mpegname=${year}${month}${day}
+mpegname=${year}${month}${day}.mpg
 
 cd ${directory}
 files=`echo *.jpeg | wc -w`
@@ -23,6 +23,6 @@ echo producing ${mpegname} from ${files} JPEG images
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARYPATH
 export LD_LIBRARY_PATH
 
-jpeg2yuv -f 25 -I p -j %05d.jpg | mpeg2enc -f 13 -F 3 -b 10000 -o ${mpegname}
+jpeg2yuv -f 25 -I p -b 1 -j %05d.jpeg | mpeg2enc -f 13 -F 3 -b 10000 -o ${mpegname}
 
 exit 0
