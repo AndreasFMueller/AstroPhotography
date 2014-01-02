@@ -7,5 +7,14 @@
 fitsimage=${1}
 jpegimage=`echo ${fitsimage} | sed -e 's/-.*.fits/.jpeg/'`
 
-convert ${fitsimage} -rotate 90 -contrast-stretch 20000x65535 ${jpegimage}
+tmpfile=/tmp/t$$.jpeg
+trap "rm -f ${tmpfile}" 0 1 2 3 15
+
+convert ${fitsimage} -rotate 90 -contrast-stretch 20000x65535 ${tmpfile}
+
+convert -size 1040x1040 xc:none -fill ${tmpfile} -draw "circle 520,520 1,520" \
+	${jpegimage}
+
+rm ${tmpfile}
+
 exit 0
