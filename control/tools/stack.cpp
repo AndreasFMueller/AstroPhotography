@@ -23,7 +23,7 @@ void	usage(const char *progname) {
 	std::cout << " -h,-?            display this help" << std::endl;
 }
 
-int	main(int argc, char *argv[]) {
+int	stack_main(int argc, char *argv[]) {
 	int	c;
 	const char	*outfilename = NULL;
 	while (EOF != (c = getopt(argc, argv, "do:")))
@@ -71,7 +71,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		astro::main(argc, argv);
+		astro::stack_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "stack terminated by exception: " << x.what()
 			<< std::endl;
