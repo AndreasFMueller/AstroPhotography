@@ -1,0 +1,26 @@
+.TH LOGIMAGE "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+logimage \- build a dark image
+.SH SYNOPSIS
+.B logimage -dh?
+.I infile outfile
+.SH DESCRIPTION
+The 
+.BR logimage (1)
+command reads a FITS file name
+.I infile
+and takes the binary logarithm of every pixel value and write the
+resulting image to the FITS file
+.IR outfile .
+
+.SH OPTIONS
+.TP
+.B \-d
+increase the debug level.
+.TP
+.B \-h, \-?
+Display a usage message and exit.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller
