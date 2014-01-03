@@ -1,0 +1,108 @@
+.TH GUIDER "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+guider \- Test program for guider testing
+.SH DESCRIPTION
+.SH SYNOPSIS
+.B guider -dh?
+[
+.I cameraoptions
+] [
+.I exposureoptions
+] [
+.BI \-k averagingradius
+] [
+.BI \-x xguidestar
+] [
+.BI \-y yguidestar
+]
+
+.B guider -dh? 
+[
+.I cameraoptions
+]
+.I guidecommands
+
+.SH DESCRIPTION
+The 
+.BR guider (1)
+program serves to test the guider process. It is much less functional
+than the IDL interface to the guider functions of
+.BR astrod (1),
+accessible through the command line client.
+
+The camera options specify a camera, and the 
+.BR guider (1)
+program assumes that the camera also has a guider port and that
+it should use this port for guiding.
+
+When started, the
+.BR guider (1)
+program starts the calibration process. When calibration succeeds, 
+it starts guiding using the exact same parameters, so the calibration
+star and the guider star must be identical, and the same exposure
+parameters are used.
+
+The second synopsis can be used to exercise the guider port of a camera.
+Each guide command activates one output of the guider port for a certain
+time before the next command is executed.
+
+.SH GUIDE COMMANDS
+Guide commands are pairs of the form 
+.I output duration.
+The duration is in milliseconds.
+The 
+.I output
+is one of 
+.IR D+ ,
+.IR D- ,
+.I R+ 
+or
+.I R-.
+
+.SH OPTIONS
+.TP
+.B \-d
+increase the debug level.
+.TP
+.BI \-k averaginradius
+Specify the area over which pixel values should be used to estimate
+the pixel position.
+.TP
+.BI \-x xguidestar
+x-coordinate where to expect and keep the guide star.
+.TP
+.BI \-y yguidestar
+y-coordinate where to expect and keep the guide star.
+.SH "EXPOSURE OPTIONS"
+.TP
+.BI \-e exposuretime
+Sets the exposure time for the exposures taken by the dark program
+in seconds.
+.TP
+.BI \-p path
+Directory where to write copies of the guiding images. If this is not
+set, then guiding images are not saved.
+.TP
+.BI \-r r
+Build a square of side 
+.RI 2 r 
+with the guider star in the center.
+.SH "CAMERA OPTIONS"
+.TP
+.BI \-C cameranumber
+Choose the camera with number
+.I cameranumber
+with then module chosen.
+.TP
+.BI \-c ccid
+Number of the CCD.
+.TP
+.BI \-m modulename
+Take a camera from the module named
+.BR modulename .
+Cameras are numbered from 0 within a driver module.
+
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

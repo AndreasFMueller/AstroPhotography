@@ -133,7 +133,7 @@ int	main(int argc, char *argv[]) {
 	}
 	CameraPtr	camera = locator->getCamera(cameras[cameraid]);
 	CcdPtr	ccd = camera->getCcd(ccdid);
-
+ 
 	// compute the point where we should look for the guide star
 	if (x < 0) {
 		x = ccd->getInfo().size().width() / 2;
@@ -154,7 +154,8 @@ int	main(int argc, char *argv[]) {
 		while (optind < argc) {
 			char	*direction = argv[optind++];
 			double	duration = atoi(argv[optind++]) / 1000.;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "found command %s for %.3fs",
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"found command %s for %.3fs",
 				direction, duration);
 			if (0 == strcmp(direction, "D-")) {
 				guiderport->activate(0, 0, 0, duration);
