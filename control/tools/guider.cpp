@@ -70,7 +70,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 }
 
-int	main(int argc, char *argv[]) {
+int	guider_main(int argc, char *argv[]) {
 	// parse command line arguments
 	int	c;
 	unsigned int	cameraid = 0;
@@ -227,7 +227,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::guider_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "guider terminated by exception: " << x.what()
 			<< std::endl;
