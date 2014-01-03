@@ -292,6 +292,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 		if (k > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure %d", k);
 			startExposure(exposure);
+			usleep(1000000 * exposure.exposuretime);
 		}
 		wait();
 		result.push_back(getImage());

@@ -1,4 +1,4 @@
-/**
+/*
  * getimages.cpp -- tool to retrieve a sequence of images from a camera
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
@@ -79,10 +79,17 @@ int	main(int argc, char *argv[]) {
 	// initialize the orb in case we want to use the net module
 	Astro::OrbSingleton	orb(argc, argv);
 	debugtimeprecision = 3;
+	int	binning = 1;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dc:C:e:ln:p:o:m:h:w:x:y:?Dt:f:F:")))
+	while (EOF != (c = getopt(argc, argv, "b:dc:C:e:ln:p:o:m:h:w:x:y:?Dt:f:F:")))
 		switch (c) {
+		case 'b':
+			binning = atoi(optarg);
+			if ((binning > 4) || (binning < 1)) {
+				throw std::runtime_error("illegal binning mode");
+			}
+			break;
 		case 'D':
 			dark = true;
 			break;
@@ -232,6 +239,7 @@ int	main(int argc, char *argv[]) {
 	// prepare an exposure object
 	Exposure	exposure(imagerectangle, exposuretime);
 	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
+	exposure.mode = Binning(binning, binning);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 
@@ -247,6 +255,7 @@ int	main(int argc, char *argv[]) {
 	// start the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	ccd->startExposure(exposure);
+	usleep(1000000 * exposuretime);
 
 	// read all images
 	ImageSequence	images = ccd->getImageSequence(nImages);

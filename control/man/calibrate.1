@@ -1,0 +1,67 @@
+.TH CALIBRATE "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+calibrate \- calibrate
+.SH SYNOPSIS
+.B calibrate -bidh?
+[
+.BI \-D dark
+] [
+.BI \-F flat
+] [
+.BI \-m min
+] [
+.BI \-M max
+]
+.I infile outfile
+.SH DESCRIPTION
+The 
+.BR calibrate (1)
+command reads a FITS file specified by the
+.I infile
+argument, subtracts the dark image specified in the 
+.I dark
+option argument and divides by the flat field image
+specified in the
+.I flat 
+option argument.
+It then clamps image values to the interval
+given by the
+.I min
+and 
+.I max
+option arguments.
+If 
+It then writes the modified image to the
+.I outfile
+argument.
+The output file will again be a FITS file, but the pixel value will
+be double values.
+.SH OPTIONS
+.TP
+.BI \-d
+increase the debug level.
+.TP
+.BI \-b
+demosaic bayer mosaic images.
+.TP
+.BI \-i
+Interpolate bad pixels.
+This option requrires that there be a dark image specified.
+Undefined pixels in the dark image indicate pixels that need to be
+interpolated.
+.TP
+.BI \-m min
+Set the minimum value. If the minimum value is not specified, 0 is taken
+as the minimum value.
+.TP
+.BI \-M max
+Set the maximum value. If the maximum value is not specified, infinity
+is used as the maximum value, which means that no clamping is performed.
+.TP
+.BI \-h,\-?
+Display a usage message and exit.
+.SH "SEE ALSO"
+.BR clamp (1),
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

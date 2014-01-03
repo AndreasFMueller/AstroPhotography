@@ -1,0 +1,70 @@
+.TH DARK "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+dark \- build a dark image
+.SH SYNOPSIS
+.B dark -dh?
+[
+.BI \-m modulename
+] [
+.BI \-C cameranumber
+] [
+.BI \-c ccdid
+] [
+.BI \-e exposuretime
+] [
+.BI \-n nimages
+] [
+.BI \-o darkfilename
+] [
+.BI \-t temperature
+]
+.I 
+.SH DESCRIPTION
+The 
+.BR dark (1)
+command takes a couple of images with identical parameters and
+converts them into a dark image.
+The dark image will have double value pixels.
+It will usually be more appropriate to use the
+.BR getimages (1)
+command to a set of images, and to turn them into a
+dark field using the
+.BR makedark (1)
+command.
+.SH OPTIONS
+.TP
+.BI \-C cameranumber
+Choose the camera with number
+.I cameranumber
+with then module chosen.
+.TP
+.BI \-c ccid
+Number of the CCD.
+.TP
+.B \-d
+increase the debug level.
+.TP
+.BI \-e exposuretime
+Sets the exposure time for the exposures taken by the dark program
+in seconds.
+.TP
+.BI \-o darkfile
+The dark file to be written.
+.TP
+.BI \-m modulename
+Take a camera from the module named
+.BR modulename .
+Cameras are numbered from 0 within a driver module.
+.TP
+.BI \-n nimages
+Set the number of images to  take for the dark field to
+.IR nimages .
+.TP
+.BI \-t temperature
+Set the temperature to which the CCD should be cooled when taking
+images.
+The temperature has to be specified in degrees Celsius.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

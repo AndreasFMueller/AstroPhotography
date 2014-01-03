@@ -1,0 +1,155 @@
+.TH GETIMAGES "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+getimages \- get a number of images from a CCD camera
+.SH SYNOPSIS
+.B getimages -Ddhl?
+[
+.BI \-C cameraid
+] [
+.BI \-c ccd
+] [
+.BI \-e exposuretime
+] [
+.BI \-F focusername
+] [
+.BI \-f focusvalue
+] [
+.BI \-m modulename
+] [
+.BI \-n nimages
+] [
+.BI \-o outputdir
+] [
+.BI \-p prefix
+] [
+.BI \-t temperature
+] [
+.BI \-w width
+] [
+.BI \-h height
+] [
+.BI \-x xoffset
+] [
+.BI \-y yoffset
+]
+.SH DESCRIPTION
+The 
+.BR getimages (1)
+command takes a number of images using a given camera and ccd and
+stores the images in FITS format in the directory specified by the
+\-o option. The file name is constructed from the prefix, a sequence
+number, and the extensions .fits.
+
+The
+.B \-t
+option allows to cool the CCD to a temperature specified in degrees
+Celsius. Exposures will begin as soon as the CCD temperature has
+been reached.
+
+Using the options
+.BR \-x ,
+.BR \-y ,
+.B \-h
+and
+.BR \-w ,
+a subrectangle  of the full CCD frame can be exposed. Binning is currently
+not supported.
+.SH OPTIONS
+.TP
+.TP
+.BI \-b binning
+Use 
+.IR binning x binning
+for the images.
+.TP
+.BI \-C cameraid
+The number of the camera within the module. If not specified, the first
+camera within the module is taken, which may not be right if more than
+one camera driven by the same module is connected.
+.TP
+.BI \-c ccdid
+Use CCD with number
+.IR ccdid .
+If not specified, the first CCD of the selected camera is used, which
+is usually the main imaging CCD.
+.TP
+.B \-D
+Closes the shutter for the duration of the exposure, producing 
+dark images.
+.TP
+.B \-d
+increase the debug level.
+.TP
+.BI \-e exposuretime
+Exposuretime in seconds for the images. Some cameras, e.g. the USB video
+cameras can expose at 0.1ms resolution. Most CCD cameras for astrophotography
+have 1ms resolution at best, some cameras have minimum exposure times as short
+as 0.1s.
+.TP
+.BI \-F focusername
+The name of the focuser to use for focusing. The getimages program has
+no capability of focusing, but it can set a certain focus value. This is
+mainly for testing, because when instantiating the simulator camera,
+the focus is set randomly and without the ability to set the focus value,
+it would be impossible to take in focus images with the simulated camera.
+.TP
+.BI \-f focusvalue
+Set the focuser specified with the
+.B \-F
+option to the value
+.IR focusvalue .
+.TP
+.B \-l
+List the cameras and terminate without taking any images.
+.TP
+.BI \-m modulename
+Open driver module named
+.IR modulename .
+.TP
+.BI \-n nimages
+The number of images to expose is set to
+.BR nimages .
+Note that images are first exposed, and only then written to the
+output directory. This means that if the command is terminated
+before all images have been taken, nothing will be written to the
+output directory. If this is undesirable, use a script that calls
+.BR getimages (1)
+several times with 
+.I nimages
+set to 1 (the default) instead.
+.TP
+.BI \-o outputdir
+Directory where to write the images.
+.TP
+.BI \-p prefix
+Prefix to use to construct the filename. The file name within the
+output directory will be of the form
+.IR outputdir / prefix "" sequence .FITS.
+The sequence number starts at 0 and is incremented for each image taken.
+It has 3 places and is padded with leading zeros.
+.TP
+.BI \-t temperature
+Temperature in degress Celsius of the CCD chip chosen.
+.BR gettimes (1) waits until the temperature is reached before starting
+any exposures.
+.TP
+.BI \-h height
+Used to take sub images. Specifies the height of the rectangle to retrieve.
+.TP
+.BI \-w width
+Used to take sub images. Specifies the width of the rectangle to retrieve.
+.TP
+.BI \-x xoffset
+Used to take sub images. Specifies the x-offset of the lower left corner
+of the image to retrieve.
+.TP
+.BI \-y yoffset
+Used to take sub images. Specifies the y-offset of the lower left corner
+of the image to retrieve.
+.TP
+.B \-?
+Display a usage message and exit.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller
