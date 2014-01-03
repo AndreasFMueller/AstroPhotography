@@ -3,7 +3,7 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-bin_PROGRAMS = guide
+bin_PROGRAMS = astro
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 	modulecommand.h helpcommand.h cameracommand.h ccdcommand.h \
 	coolercommand.h sleepcommand.h filterwheelcommand.h focusercommand.h \
@@ -22,10 +22,10 @@ COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
 	exposurecommand.cpp taskcommand.cpp submitcommand.cpp \
 	taskqueuecommand.cpp guiderportcommand.cpp
 
-guide_SOURCES = guide.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
+astro_SOURCES = astro.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)
-guide_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
-guide_LDADD = -L../lib -lastro -lcorbastro
+astro_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
+astro_LDADD = -L../lib -lastro -lcorbastro
 
 EXTRA_DIST = tokens.l grammar.y testscript
 
@@ -39,8 +39,8 @@ tokens.cpp:     tokens.l
 grammar.cpp grammar.hpp:        grammar.y
 	$(BISON) -o grammar.cpp -d $< 
 
-test:	guide
-	./guide -ORBInitRef NameService=corbaname::localhost -d -f testscript 
+test:	astro
+	./astro -ORBInitRef NameService=corbaname::localhost -d -f testscript 
 
-testcli:	guide
-	./guide -ORBInitRef NameService=corbaname::localhost -d
+testcli:	astro
+	./astro -ORBInitRef NameService=corbaname::localhost -d
