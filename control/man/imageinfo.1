@@ -1,0 +1,23 @@
+.TH IMAGEINFO "1" "January 2014" "AstropPhotography tools" "User Commands"
+.SH NAME
+imageinfo \- display information about an image
+.SH SYNOPSIS
+.B dark -d
+.I images
+...
+.I 
+.SH DESCRIPTION
+The 
+.BR imageinfo (1)
+command displays information about pixel values of each image file
+specified on the command line. It displays minimum, mean, median
+and maximum value. In addition, the number of NaNs is displayed
+if the pixel type allows for NaNs.
+.SH OPTIONS
+.TP
+.B \-d
+increase the debug level.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

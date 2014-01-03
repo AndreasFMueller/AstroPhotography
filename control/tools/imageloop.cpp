@@ -60,7 +60,7 @@ void	usage(const char *progname) {
 	std::cout << "  -e time      (initial) exposure time, modified later if target mean set" << std::endl;
 	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the mean pixel value stays close to <mean>" << std::endl;
-	std::cout << "  -M meadian   attemtp to vary the exposure time in such a way that" << std::endl;
+	std::cout << "  -M median    attemtp to vary the exposure time in such a way that" << std::endl;
 	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
 	std::cout << "  -F           stay in the foreground" << std::endl;
 	std::cout << "  -P prog      processing script for individual images, e.g. convert" << std::endl;
