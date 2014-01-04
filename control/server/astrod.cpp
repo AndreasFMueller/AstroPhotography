@@ -23,13 +23,35 @@
 #include <POABuilder.h>
 #include <AstroPersistence.h>
 #include <AstroTask.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 
 /**
+ * \brief usage message for astrod program
+ */
+void	usage(const char *progname) {
+	std::cout << "usage: " << progname << " [ -dh? ] [ omniorboptions ] [ -b imagedir ] [ -q dbfile ]" << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "omniorboptions    see the omniorb documentation for these options" << std::endl;
+	std::cout << "                  you should at least add an option that will allow" << std::endl;
+	std::cout << "                  the program to find the COS naming server, something like" << std::endl;
+	std::cout << std::endl;
+	std::cout << "                      -ORBInitRef NameService=corbaname::localhost" << std::endl;
+	std::cout << std::endl;
+	std::cout << "                  will do in most cases." << std::endl;
+	std::cout << " -d               increase debug level" << std::endl;
+	std::cout << " -h, -?           display this help message an exit" << std::endl;
+	std::cout << " -b imagedir      directory containing the images taken by the server" << std::endl;
+	std::cout << "                  and made available to clients" << std::endl;
+	std::cout << " -q dbfile        name of the database file containing persistent" << std::endl;
+	std::cout << "                  task state and possibly other parameters" << std::endl;
+}
+
+/**
  * \brief Main function for the CORBA server
  */
-int	main(int argc, char *argv[]) {
+int	astrod_main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debuglevel = LOG_DEBUG;
 	debugthreads = true;
@@ -43,9 +65,12 @@ int	main(int argc, char *argv[]) {
 	// parameters
 	std::string	databasefile("testdb.db");
 
+	// default operation is in the background
+	bool	stay_in_foreground = false;
+
 	// now parse the command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "db:q:")))
+	while (EOF != (c = getopt(argc, argv, "db:q:h?F")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -56,10 +81,35 @@ int	main(int argc, char *argv[]) {
 		case 'q':
 			databasefile = std::string(optarg);
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'F':
+			stay_in_foreground = true;
+			break;
 		}
 
 	// starting the astro daemon
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "astrod starting up");
+
+	// go into the background
+	if (!stay_in_foreground) {
+		pid_t	child = fork();
+		if (child < 0) {
+			// an error happend
+			throw runtime_errno("cannot fork", errno);
+		}
+		if (child > 0) {
+			// we are in the parent, so we should exist now
+			exit(EXIT_SUCCESS);
+		}
+		if (child == 0) {
+			// we are in the child, so we can proceed, we just
+			// log our success here
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "child forked");
+		}
+	}
 
 	// get the POA
 	CORBA::Object_var	obj
@@ -209,7 +259,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::astrod_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "astrod terminated by exception: " << x.what()
 			<< std::endl;
