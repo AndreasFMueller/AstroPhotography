@@ -89,6 +89,10 @@ script sets some configure options useful for debugging and development,
 e.g. it configures it to install in the directory root. Some tests
 expect it to be installed there.
 
+As a help to configuring the package, the script configureit is provided.
+I use it to select the right configure options on my various development
+platforms.
+
 Dependencies
 ------------
 

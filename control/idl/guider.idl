@@ -19,6 +19,26 @@ module Astro {
 	};
 
 	/**
+	 * \brief Information about recent tracking activities
+	 *
+	 * This 
+	 */
+	struct TrackingInfo {
+		double	timeago;
+		Point	trackingoffset;
+		Point	activation;
+	};
+
+	/**
+	 * \brief Interface to a tracking monitor
+	 */
+	interface TrackingMonitor {
+		void	update(in TrackingMonitor tm);
+		void	stop();
+		void	start();
+	};
+
+	/**
 	 * \brief Interface for guiders
 	 *
 	 * Guiders take information from images shot through a ccd of a
@@ -117,15 +137,33 @@ module Astro {
 		 */
 		Image	mostRecentImage() raises(BadState);
 		/**
-		 * \brief Information about recent tracking activities
+		 * \brief Polling interface to tracking information
 		 */
-		struct TrackingInfo {
-			double	timeago;
-			Point	trackingoffset;
-			Point	activation;
-		};
 		TrackingInfo	mostRecentTrackingInfo()
 						raises(BadState);
+
+		/**
+		 * \brief Callback interface for tracking monitoring
+		 *
+		 * A client interested in updates about tracking activities
+		 * creates a TrackingMonitor service and registeres
+		 * \param monitor	The TrackingMonitor to register.
+		 *			As soon as successfully registered,
+		 *			tracking updates will be sent to
+		 *			monitor.
+		 * \return	The id of the monitor. This id should be
+		 *		used to unregister the service when tracking
+		 *		information is no longer required
+		 */
+		long	register(in TrackingMonitor monitor);
+
+		/**
+		 * \brief Unregister a monitor client
+		 *
+		 * \param monitorid	Id of the monitor returned with the
+		 *			register call
+		 */
+		void	unregister(in long monitorid);
 	};
 
 	/**

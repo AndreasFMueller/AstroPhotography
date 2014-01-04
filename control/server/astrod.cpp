@@ -30,7 +30,7 @@ namespace astro {
 /**
  * \brief usage message for astrod program
  */
-void	usage(const char *progname) {
+void	astrod_usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ -dh? ] [ omniorboptions ] [ -b imagedir ] [ -q dbfile ]" << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "omniorboptions    see the omniorb documentation for these options" << std::endl;
@@ -83,7 +83,7 @@ int	astrod_main(int argc, char *argv[]) {
 			break;
 		case 'h':
 		case '?':
-			usage(argv[0]);
+			astrod_usage(argv[0]);
 			exit(EXIT_SUCCESS);
 		case 'F':
 			stay_in_foreground = true;

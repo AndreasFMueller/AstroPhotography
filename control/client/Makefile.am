@@ -4,6 +4,8 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
+SUBDIRS = . trackingmonitor
+
 bin_PROGRAMS = astroinfo getimage
 noinst_PROGRAMS = astroclient
 

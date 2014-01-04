@@ -36,7 +36,7 @@ static std::string      sbig_version(VERSION);
 static astro::camera::sbig::SbigCameraLocator	*sbig_locator = NULL;
 
 /**
- * \brief Module descriptor for the Starlight express module
+ * \brief Module descriptor for the SBIG module
  */
 class SbigDescriptor : public ModuleDescriptor {
 public:

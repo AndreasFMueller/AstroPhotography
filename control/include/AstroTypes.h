@@ -11,6 +11,19 @@
 
 using namespace astro::image;
 
+/**
+ * \brief The astro namespace is used for all classes of the astro library
+ *
+ * A client of the CORBA server does not use these classes, but uses the
+ * interfaces defined in the IDL instead. Those interfaces are all in the
+ * the namespace Astro (capital A).
+ *
+ * Some of the definitions in the Astro namespace have corresponding
+ * definitions in the astro namespace, although with slight modifications
+ * e.g. to handle access restrictions or type restrictions. There is 
+ * a set of conversion functions to bridge the gap between the two
+ * namespaces.
+ */
 namespace astro {
 
 /**
