@@ -184,9 +184,8 @@ ByteImage_impl::~ByteImage_impl() {
 /**
  * \brief Retrieve the raw image data for a short iamge
  */
-Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
-	Astro::ShortImage::ShortSequence	*result
-		= new Astro::ShortImage::ShortSequence();
+Astro::ShortSequence	*ShortImage_impl::getShorts() {
+	Astro::ShortSequence	*result = new Astro::ShortSequence();
 	astro::image::ImagePtr	_image = getImage();
 	unsigned int	size = _image->size().getPixels();
 	size_t	shorts = astro::image::filter::planes(_image) * size;

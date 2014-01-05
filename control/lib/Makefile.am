@@ -67,6 +67,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
 	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
 	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
+	Tracking.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

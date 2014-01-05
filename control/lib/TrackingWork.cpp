@@ -193,6 +193,14 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 		_offset = offset;
 		_activation = -correction;
 
+		// inform the callback, if there is one
+		if (guider().trackingcallback) {
+			callback::CallbackDataPtr	trackinginfo(
+				new TrackingInfo(_lastaction, _offset,
+					_activation));
+			(*(guider().trackingcallback))(trackinginfo);
+		}
+
 		// this is a possible cancellation point
 		if (thread.terminate()) {
 			return;
@@ -249,6 +257,11 @@ void	TrackingWork::dumpHistory(std::ostream& out) {
 
 /**
  * \brief retrieve last action information
+ *
+ * \param actiontime	time since the last action happened
+ * \param offset	the tracking offset detected by the tracker
+ * \param activation	the activation applied to the guider port to correct
+ *			the tracker offset
  */
 void	TrackingWork::lastAction(double& actiontime, Point& offset,
 		Point& activation) {

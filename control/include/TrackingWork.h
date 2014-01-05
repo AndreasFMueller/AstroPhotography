@@ -111,6 +111,9 @@ private:
 public:
 	void	lastAction(double& actiontime, Point& offset,
 			Point& activation);
+
+public:
+	astro::callback::CallbackPtr	trackingcallback;
 };
 
 } // namespace guiding

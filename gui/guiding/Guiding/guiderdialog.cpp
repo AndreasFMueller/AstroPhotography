@@ -3,7 +3,7 @@
 #include <image.hh>
 #include <AstroDebug.h>
 #include <QWidget>
-
+#include <guidermonitordialog.h>
 
 GuiderDialog::GuiderDialog(Astro::Guider_var guider, QWidget *parent) :
 	QDialog(parent), _guider(guider), ui(new Ui::GuiderDialog)
@@ -44,17 +44,10 @@ GuiderDialog::GuiderDialog(Astro::Guider_var guider, QWidget *parent) :
 	// set guider state
 	setGuiderState(_guider->getState());
 	setStar(_guider->getStar());
-
-	// initialize the timer
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
-	timer->start(1000);
 }
 
 GuiderDialog::~GuiderDialog()
 {
-	timer->stop();
-	delete timer;
 	delete ui;
 }
 
@@ -235,6 +228,19 @@ void	GuiderDialog::guide() {
 }
 
 /**
+ * \brief method called when the monitor open button is clicked
+ */
+void	GuiderDialog::monitor() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open monitor");
+	// First find out whether we have a child that is a dialog of this
+	// type. If so, we just bring it into the foreground
+
+	// Ok, seems we have no previously created dialog, so we create one
+	GuiderMonitorDialog	*monitordialog = new GuiderMonitorDialog(_guider, this);
+	monitordialog->show();
+}
+
+/**
  * \brief handle mouse press events
  */
 void	GuiderDialog::mousePressEvent(QMouseEvent *event) {
@@ -304,6 +310,7 @@ void	GuiderDialog::mousePressEvent(QMouseEvent *event) {
 	_guider->setExposure(exposure);
 }
 
+#if 0
 /**
  * \brief What to do at each timer tick
  */
@@ -331,6 +338,7 @@ void	GuiderDialog::tick() {
 		setGuiderState(_guider->getState());
 	} catch (...) { }
 }
+#endif
 
 /**
  * \brief convert a CORBA image into a QPixmap
@@ -350,7 +358,7 @@ QPixmap	GuiderDialog::image2pixmap(Astro::Image_var image, image_statistics& sta
 	Astro::ShortImage_var	shortimage = Astro::ShortImage::_narrow(image);
 	if (!CORBA::is_nil(shortimage)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a short image");
-		Astro::ShortImage::ShortSequence_var	imagedata
+		Astro::ShortSequence_var	imagedata
 			= shortimage->getShorts();
 
 		// find maximum, minimum and mean value

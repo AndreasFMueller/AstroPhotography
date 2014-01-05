@@ -66,7 +66,7 @@ std::ostream&	operator<<(std::ostream& out,
 }
 
 std::ostream&	operator<<(std::ostream& out,
-			const Astro::Guider::TrackingInfo& trackinginfo) {
+			const Astro::TrackingInfo& trackinginfo) {
 	out << "last action at:  ";
 	double	when = Timer::gettime() - trackinginfo.timeago;
 	time_t	t = floor(when);

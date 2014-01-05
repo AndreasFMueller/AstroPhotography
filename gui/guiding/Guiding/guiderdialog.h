@@ -29,7 +29,6 @@ class GuiderDialog : public QDialog
 	Q_OBJECT
 
 	Astro::Guider_var	_guider;
-	QTimer	*timer;
 	double	lastimageago;
 
 public:
@@ -52,7 +51,7 @@ private slots:
 	void	calibrate();
 	void	guide();
 	void	exposuretime(double t);
-	void	tick();
+	void	monitor();
 };
 
 #endif // GUIDERDIALOG_H

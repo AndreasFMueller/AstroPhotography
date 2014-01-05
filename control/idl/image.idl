@@ -90,10 +90,14 @@ module Astro {
 	};
 
 	/**
+	 * \brief Images consist of an array of short pixel values
+	 */
+	typedef sequence<unsigned short> ShortSequence;
+
+	/**
 	 * \brief An image with short sized pixels
 	 */
 	interface ShortImage : Image {
-		typedef sequence<unsigned short> ShortSequence;
 		ShortSequence	getShorts();
 	};
 

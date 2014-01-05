@@ -254,7 +254,8 @@ void	Guider::checkstate() {
 /**
  * \brief Retrieve information about last activation
  */
-void Guider::lastAction(double& actiontime, Point& offset, Point& activation) {
+void Guider::lastAction(double& actiontime, Point& offset,
+		Point& activation) {
 	if (!guiderprocess) {
 		throw std::runtime_error("not currently guiding");
 	}

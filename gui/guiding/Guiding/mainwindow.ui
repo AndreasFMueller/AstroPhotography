@@ -76,7 +76,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>camera:sx/250-006-ECHO2-1278-0509</string>
+     <string>camera:simulator/camera</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="ccdSpinbox">
@@ -102,7 +102,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>guiderport:sx/250-006-ECHO2-1278-0509/guiderport</string>
+     <string>guiderport:simulator/guiderport</string>
     </property>
    </widget>
   </widget>
@@ -137,7 +137,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>137</x>
-     <y>121</y>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel">
      <x>296</x>

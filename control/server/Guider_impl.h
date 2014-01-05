@@ -8,6 +8,7 @@
 
 #include <guider.hh>
 #include <AstroGuiding.h>
+#include <map>
 
 namespace Astro {
 
@@ -15,15 +16,28 @@ class Guider_impl : public POA_Astro::Guider {
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
 	astro::guiding::TrackerPtr	getTracker();
+	typedef	std::map<::CORBA::Long, TrackingMonitor_var>	monitormap_t;
+	monitormap_t	monitors;
+	typedef std::map<::CORBA::Long, TrackingImageMonitor_var>	imagemonitormap_t;
+	imagemonitormap_t	imagemonitors;
 public:
 	Guider_impl(astro::guiding::GuiderPtr guider);
-	virtual ~Guider_impl() { }
+	virtual ~Guider_impl();
 
 	// state and basic component information
 	virtual ::Astro::Guider::GuiderState	getState();
+	std::string	getCameraName() const {
+		return _guider->camera()->name().toString();
+	}
 	virtual Camera_ptr	getCamera();
 	virtual Ccd_ptr	getCcd();
+	int	getCcdid() const {
+		return _guider->ccd()->getInfo().getId();
+	}
 	virtual GuiderPort_ptr	getGuiderPort();
+	std::string	getGuiderPortName() const {
+		return _guider->guiderport()->name().toString();
+	}
 	virtual ::Astro::GuiderDescriptor	*getDescriptor();
 
 	// setting up the guider
@@ -48,7 +62,18 @@ public:
 
 	// monitoring
 	virtual Image_ptr	mostRecentImage();
-	virtual Astro::Guider::TrackingInfo	mostRecentTrackingInfo();
+	virtual Astro::TrackingInfo	mostRecentTrackingInfo();
+
+	// callback interface for monitoring
+	virtual ::CORBA::Long	registerMonitor(TrackingMonitor_ptr monitor);
+	virtual void	unregisterMonitor(::CORBA::Long monitorid);
+	void	update(const Astro::TrackingInfo& trackinginfo);
+
+	// callback interface for image monitoring
+	virtual ::CORBA::Long	registerImageMonitor(TrackingImageMonitor_ptr imagemonitor);
+	virtual void	unregisterImageMonitor(::CORBA::Long imagemonitorid);
+	void	update(const ::Astro::ImageSize& size,
+			const ::Astro::ShortSequence_var& imagedata);
 };
 
 } // namespace Astro

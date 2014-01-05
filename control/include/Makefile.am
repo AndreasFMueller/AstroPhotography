@@ -22,6 +22,7 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h \
 	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
 	NameService.h OrbSingleton.h Conversions.h ViewerPipeline.h \
 	CorbaExceptionReporter.h DeviceLocatorAdapter.h Testtable.h \
-	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h
+	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \
+	Tracking.h
 
 BUILT_SOURCES = $(CORBAHEADERS)

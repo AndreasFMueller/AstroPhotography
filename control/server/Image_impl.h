@@ -88,7 +88,7 @@ public:
 	ShortImage_impl(const std::string& filename)
 		: Image_impl(filename) { }
 	virtual ~ShortImage_impl();
-	Astro::ShortImage::ShortSequence	*getShorts();
+	Astro::ShortSequence	*getShorts();
 };
 
 } // namespace Astro

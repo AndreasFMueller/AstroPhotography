@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <AstroImage.h>
 #include <AstroCamera.h>
+#include <AstroUtils.h>
 
 namespace astro {
 
@@ -629,6 +630,23 @@ Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state
 	case astro::guiding::guiding:
 		return Astro::Guider::GUIDER_GUIDING;
 	}
+}
+
+// Tracking info
+astro::guiding::TrackingInfo    convert(const Astro::TrackingInfo& trackinginfo) {
+	astro::guiding::TrackingInfo	result(
+		astro::Timer::gettime()  - trackinginfo.timeago,
+		convert(trackinginfo.trackingoffset),
+		convert(trackinginfo.activation));
+	return result;
+}
+
+Astro::TrackingInfo    convert(const astro::guiding::TrackingInfo& trackinginfo) {
+	Astro::TrackingInfo	result;
+	result.timeago = astro::Timer::gettime() - trackinginfo.t;
+	result.trackingoffset = convert(trackinginfo.trackingoffset);
+	result.activation = convert(trackinginfo.correction);
+	return result;
 }
 
 

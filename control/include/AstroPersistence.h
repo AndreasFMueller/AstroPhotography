@@ -27,6 +27,7 @@ public:
 	virtual std::string	stringValue() const = 0;
 	virtual bool	isnull() const { return false; }
 	virtual std::string	toString() const { return stringValue(); }
+	virtual time_t	timeValue() const = 0;
 };
 
 typedef std::shared_ptr<FieldValue>	FieldValuePtr;
@@ -40,6 +41,7 @@ public:
 	FieldValuePtr	get(double value);
 	FieldValuePtr	get(const std::string& value);
 	FieldValuePtr	get(const char *value);
+	FieldValuePtr	getTime(const time_t t);
 };
 
 /**
@@ -52,6 +54,7 @@ public:
 	int	intValue() const { return second->intValue(); }
 	double	doubleValue() const { return second->doubleValue(); }
 	std::string	stringValue() const { return second->stringValue(); }
+	time_t	timeValue() const { return second->timeValue(); }
 	bool	operator==(const std::string& othername) const {
 		return first == othername;
 	}

@@ -11,6 +11,9 @@
 #include <AstroCallback.h>
 #include <AstroUtils.h>
 #include <ImageObjectDirectory.h>
+#include <Tracking.h>
+
+extern astro::persistence::Database	database;
 
 namespace Astro {
 
@@ -20,18 +23,108 @@ namespace Astro {
 class GuiderImageCallback : public astro::callback::Callback {
 	astro::Timer	timer;
 	astro::image::ImagePtr	lastimage;
+	Guider_impl&	_guider;
 public:
-	GuiderImageCallback();
+	GuiderImageCallback(Guider_impl& guider);
 	virtual astro::callback::CallbackDataPtr operator()(
 		astro::callback::CallbackDataPtr data);
 };
 
-GuiderImageCallback::GuiderImageCallback() {
+/**
+ * \brief Create the callback
+ *
+ * We assume that this is equivalent to createing a new guider run
+ */
+GuiderImageCallback::GuiderImageCallback(Guider_impl& guider)
+	: _guider(guider) {
 }
 
 astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 	astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
+	astro::guiding::GuiderNewImageCallbackData	*image
+		= dynamic_cast<astro::guiding::GuiderNewImageCallbackData *>(&*data);
+	if (NULL == image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not image data");
+		return data;
+	}
+	Astro::ImageSize	size = astro::convert(image->image()->size());
+
+	// the access to the pixel array
+	astro::image::Image<unsigned short>	*im
+		= dynamic_cast<astro::image::Image<unsigned short> *>(
+			&*image->image());
+	if (NULL == im) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"only short images can be monitored");
+		return data;
+	}
+
+	// prepare the imagedata
+	::Astro::ShortSequence_var	imagedata = new Astro::ShortSequence();
+	imagedata->length(size.width * size.height);
+
+	// get the pixels
+	for (unsigned int x = 0; x < size.width; x++) {
+		for (unsigned int y = 0; y < size.height; y++) {
+			imagedata[x + size.width * y] = im->pixel(x, y);
+		}
+	}
+
+	// update all image monitors
+	_guider.update(size, imagedata);
+
+	return data;
+}
+
+//////////////////////////////////////////////////////////////////////
+// callback class for tracking info
+//////////////////////////////////////////////////////////////////////
+class TrackingInfoCallback : public astro::callback::Callback {
+	Guider_impl&	_guider;
+	long	guidingrunid;
+public:
+	TrackingInfoCallback(Guider_impl& guider);
+	virtual	astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data);
+};
+
+TrackingInfoCallback::TrackingInfoCallback(Guider_impl& guider)
+	: _guider(guider) {
+	astro::guiding::GuidingRun	guidingrun;
+	guidingrun.camera = guider.getCameraName();
+	guidingrun.ccdid = guider.getCcdid();
+	guidingrun.guiderport = guider.getGuiderPortName();
+	time(&guidingrun.whenstarted);
+	astro::guiding::GuidingRunTable	guidingruntable(database);
+	guidingrunid = guidingruntable.add(guidingrun);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking run with id %d",
+		guidingrunid);
+}
+
+astro::callback::CallbackDataPtr TrackingInfoCallback::operator()(
+	astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking info");
+	astro::guiding::TrackingInfo	*trackinginfo
+		= dynamic_cast<astro::guiding::TrackingInfo *>(&*data);
+
+	// leave immediately, if there is not Tracking info
+	if (NULL == trackinginfo) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"not a tracking info data");
+		return data;
+	}
+
+	// update the guider, this will send the tracking info to the
+	// registered clients
+	_guider.update(astro::convert(*trackinginfo));
+
+	// add an entry to the database
+	astro::guiding::Tracking	tracking(0, guidingrunid, *trackinginfo);
+	astro::guiding::TrackingTable	trackingtable(database);
+	long	tid = trackingtable.add(tracking);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking entry with id %ld", tid);
+
 	return data;
 }
 
@@ -44,7 +137,19 @@ astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
 	: _guider(guider) {
 	_point = _guider->ccd()->getInfo().getFrame().size().center();
-	_guider->newimagecallback = astro::callback::CallbackPtr(new GuiderImageCallback());
+	_guider->newimagecallback = astro::callback::CallbackPtr(
+		new GuiderImageCallback(*this));
+	// create the callback class for 
+	_guider->trackingcallback = astro::callback::CallbackPtr(
+		new TrackingInfoCallback(*this));
+}
+
+/**
+ * \brief Turn of the callbacks in the guider
+ */
+Guider_impl::~Guider_impl() {
+	_guider->newimagecallback = NULL;
+	_guider->trackingcallback = NULL;
 }
 
 /**
@@ -238,14 +343,14 @@ Image_ptr	Guider_impl::mostRecentImage() {
         return directory.getImage(filename);
 }
 
-Astro::Guider::TrackingInfo	Guider_impl::mostRecentTrackingInfo() {
+Astro::TrackingInfo	Guider_impl::mostRecentTrackingInfo() {
 	// verify that we really are guiding right now
 	if (astro::guiding::guiding != _guider->state()) {
 		throw BadState("not currently guiding");
 	}
 
 	// ok, we are guiding. Prepare a result structure
-	Astro::Guider::TrackingInfo	result;
+	Astro::TrackingInfo	result;
 	// So we query the guider for the contents of this structure
 	double	lastaction;
 	astro::Point	offset;
@@ -283,6 +388,169 @@ astro::guiding::TrackerPtr	Guider_impl::getTracker() {
         astro::guiding::TrackerPtr      tracker(
                 new astro::guiding::StarTracker(trackerstar, trackerrectangle, 10));
 	return tracker;
+}
+
+/**
+ * \brief Register a tracking info monitor
+ *
+ * The Guider_impl class keeps the registered monitors in a map with the
+ * monitor id as key. Registering a monitor means creating a new monitor id
+ * never before used and putting the TrackingMonitor reference into the map
+ * under this new id.
+ *
+ * Note the name caused by "register" being a reserved wird in C++.
+ */
+::CORBA::Long	Guider_impl::registerMonitor(::Astro::TrackingMonitor_ptr monitor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TrackingMonitor registration request: %p", this);
+	::CORBA::Long	monitorid = 0;
+	monitormap_t::iterator	i;
+	for (i = monitors.begin(); i != monitors.end(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking id %d", i->first);
+		if (i->first >= monitorid) {
+			monitorid = i->first + 1;
+		}
+	}
+	TrackingMonitor_var	monitorvar
+		= Astro::TrackingMonitor::_duplicate(monitor);
+	monitors.insert(std::make_pair(monitorid, monitorvar));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor registered as %ld",
+		monitorid);
+	return monitorid;
+}
+
+/**
+ * \brief Unregister a monitor id
+ *
+ * \param monitorid	This is the monitor id returned by the register call
+ */
+void	Guider_impl::unregisterMonitor(::CORBA::Long monitorid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister(%ld)", monitorid);
+	if (monitors.find(monitorid) != monitors.end()) {
+		try {
+			monitors.erase(monitorid);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to remove monitor %ld", monitorid);
+		}
+	} else {
+		debug(LOG_ERR, DEBUG_LOG, 0, "monitor %ld does not exist",
+			monitorid);
+		throw CORBA::OBJECT_NOT_EXIST();
+	}
+}
+
+/**
+ * \brief update distribution function
+ *
+ * This method sends the tracking info update to all registered tracking
+ * monitors. However, if a monitor fails, it is removed and has to reregister.
+ */
+void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking info update received");
+	monitormap_t::iterator	i;
+	std::vector<::CORBA::Long>	badmonitors;
+	// send the trackinginfo update to all monitors
+	for (i = monitors.begin(); i != monitors.end(); i++) {
+		try {
+			i->second->update(trackinginfo);
+		} catch (...) {
+			badmonitors.push_back(i->first);
+		}
+	}
+	// remove all monitors that are bad
+	std::vector<::CORBA::Long>::iterator	j;
+	for (j = badmonitors.begin(); j != badmonitors.end(); j++) {
+		try {
+			monitors.erase(*j);
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"error while removing monitor %ld", *j);
+		}
+	}
+}
+
+/**
+ * \brief Register a tracking image monitor
+ *
+ * The Guider_impl class keeps the registered image monitors in a map with the
+ * monitor id as key. Registering a monitor means creating a new monitor id
+ * never before used and putting the TrackingImageMonitor reference into the map
+ * under this new id.
+ *
+ * Note the name caused by "register" being a reserved wird in C++.
+ */
+::CORBA::Long	Guider_impl::registerImageMonitor(::Astro::TrackingImageMonitor_ptr monitor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TrackingMonitor registration request: %p", this);
+	::CORBA::Long	imagemonitorid = 0;
+	imagemonitormap_t::iterator	i;
+	for (i = imagemonitors.begin(); i != imagemonitors.end(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking id %d", i->first);
+		if (i->first >= imagemonitorid) {
+			imagemonitorid = i->first + 1;
+		}
+	}
+	TrackingImageMonitor_var	imagemonitorvar
+		= Astro::TrackingImageMonitor::_duplicate(monitor);
+	imagemonitors.insert(std::make_pair(imagemonitorid, imagemonitorvar));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor registered as %ld",
+		imagemonitorid);
+	return imagemonitorid;
+}
+
+/**
+ * \brief Unregister a imagemonitor id
+ *
+ * \param monitorid	This is the image monitor id returned by the
+ *			register call
+ */
+void	Guider_impl::unregisterImageMonitor(::CORBA::Long imagemonitorid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregisterImageMonitor(%ld)",
+		imagemonitorid);
+	if (imagemonitors.find(imagemonitorid) != imagemonitors.end()) {
+		try {
+			imagemonitors.erase(imagemonitorid);
+		} catch (...) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to remove image monitor %ld",
+				imagemonitorid);
+		}
+	} else {
+		debug(LOG_ERR, DEBUG_LOG, 0, "image monitor %ld does not exist",
+			imagemonitorid);
+		throw CORBA::OBJECT_NOT_EXIST();
+	}
+}
+
+/**
+ * \brief update distribution function
+ *
+ * This method sends the tracking image update to all registered tracking
+ * image monitors. However, if a monitor fails, it is removed and has to
+ * reregister.
+ */
+void	Guider_impl::update(const ::Astro::ImageSize& size,
+		const ::Astro::ShortSequence_var& imagedata) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image update received");
+	imagemonitormap_t::iterator	i;
+	std::vector<::CORBA::Long>	badmonitors;
+	// send the trackinginfo update to all monitors
+	for (i = imagemonitors.begin(); i != imagemonitors.end(); i++) {
+		try {
+			i->second->update(size, imagedata);
+		} catch (...) {
+			badmonitors.push_back(i->first);
+		}
+	}
+	// remove all monitors that are bad
+	std::vector<::CORBA::Long>::iterator	j;
+	for (j = badmonitors.begin(); j != badmonitors.end(); j++) {
+		try {
+			imagemonitors.erase(*j);
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"error while removing imagemonitor %ld", *j);
+		}
+	}
 }
 
 } // namespace Astro

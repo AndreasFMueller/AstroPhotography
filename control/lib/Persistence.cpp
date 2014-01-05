@@ -11,6 +11,23 @@
 namespace astro {
 namespace persistence {
 
+/**
+ * \brief Parse a timestamp string from the database, convert it to Unix time
+ */
+static time_t	string2time(const std::string& s) {
+	struct tm	t;
+	t.tm_year = std::stoi(s.substr(0, 4)) - 1900;
+	t.tm_mon = std::stoi(s.substr(5, 2)) - 1;
+	t.tm_mday = std::stoi(s.substr(8, 2));
+	t.tm_hour = std::stoi(s.substr(11, 2));
+	t.tm_min = std::stoi(s.substr(14, 2));
+	t.tm_sec = std::stoi(s.substr(17, 2));
+	char	b[20];
+	strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S", &t);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse date: %s -> %s", s.c_str(), b);
+	return mktime(&t);
+}
+
 //////////////////////////////////////////////////////////////////////
 // fields with integer values
 //////////////////////////////////////////////////////////////////////
@@ -20,6 +37,7 @@ public:
 	IntegerField(int value) : _value(value) { }
 	double	doubleValue() const { return _value; }
 	int	intValue() const { return _value; }
+	time_t	timeValue() const { return _value; }
 	std::string	stringValue() const {
 		std::ostringstream	out;
 		out << _value;
@@ -41,6 +59,7 @@ public:
 		out << _value;
 		return out.str();
 	}
+	time_t	timeValue() const { return _value; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -56,7 +75,38 @@ public:
 	virtual std::string	toString() const {
 		return "'" + stringValue() + "'";
 	}
+	time_t	timeValue() const {
+		return string2time(_value);
+	}
 };
+
+//////////////////////////////////////////////////////////////////////
+// fields with unix time type
+//////////////////////////////////////////////////////////////////////
+class TimeField : public FieldValue {
+	time_t	_value;
+public:
+	TimeField(const std::string& value);
+	TimeField(time_t t) : _value(t) { }
+	std::string	stringValue() const;
+	int	intValue() const { return _value; }
+	double	doubleValue() const { return _value; }
+	virtual std::string	toString() const {
+		return "'" + stringValue() + "'";
+	}
+	time_t	timeValue() const { return _value; }
+};
+
+TimeField::TimeField(const std::string& value) {
+	_value = string2time(value);
+}
+
+std::string	TimeField::stringValue() const {
+	char	buffer[20];
+	struct tm	*tmp = localtime(&_value);
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tmp);
+	return std::string(buffer);
+}
 
 //////////////////////////////////////////////////////////////////////
 // Null value
@@ -71,6 +121,9 @@ public:
 	}
 	virtual std::string	stringValue() const {
 		throw std::runtime_error("cannot convert NULL to string");
+	}
+	virtual time_t	timeValue() const {
+		throw std::runtime_error("cannot convert NULL to time_t");
 	}
 	virtual bool	isnull() const { return true; }
 };
@@ -95,6 +148,10 @@ FieldValuePtr	FieldValueFactory::get(const char *value) {
 		return FieldValuePtr(new NullField());
 	}
 	return FieldValuePtr(new StringField(std::string(value)));
+}
+
+FieldValuePtr	FieldValueFactory::getTime(const time_t t) {
+	return FieldValuePtr(new TimeField(t));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +222,14 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 	}
 	StringField	*s = dynamic_cast<StringField *>(&*value);
 	if (s) {
+		this->bind(colno, value->stringValue());
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"bound int value '%s' to column %d",
+			value->stringValue().c_str(), colno);
+		return;
+	}
+	TimeField	*t = dynamic_cast<TimeField *>(&*value);
+	if (t) {
 		this->bind(colno, value->stringValue());
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"bound int value '%s' to column %d",

@@ -209,7 +209,7 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "nil short image");
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got a short image");
-		ShortImage::ShortSequence_var	shorts = shortimage->getShorts();
+		ShortSequence_var	shorts = shortimage->getShorts();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d shorts", shorts->length());
 	}
 

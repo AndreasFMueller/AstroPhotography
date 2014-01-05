@@ -108,6 +108,10 @@ Astro::TaskInfo	convert(const astro::task::TaskInfo& info);
 astro::guiding::GuiderState	convert(const Astro::Guider::GuiderState& state);
 Astro::Guider::GuiderState	convert(const astro::guiding::GuiderState& state);
 
+// TrackingInfo
+astro::guiding::TrackingInfo	convert(const Astro::TrackingInfo& trackinginfo);
+Astro::TrackingInfo	convert(const astro::guiding::TrackingInfo& trackinginfo);
+
 } // namespace astro
 
 #endif /* _Conversions_h */

@@ -241,6 +241,21 @@ public:
 	GuiderCalibration	calibrate();
 };
 
+/**
+ * \brief Class to report data 
+ */
+class TrackingInfo : public astro::callback::CallbackData {
+public:
+	double	t;
+	Point	trackingoffset;
+	Point	correction;
+	TrackingInfo(const double& actiontime,
+		const Point& offset, const Point& activation)
+		: t(actiontime), trackingoffset(offset),
+		  correction(activation) {
+	}
+};
+
 // we will need the GuiderProcess class, but as we want to keep the 
 // implementation (using low level threads and other nasty things) hidden,
 // we only define it in the implementation
@@ -448,7 +463,24 @@ public:
 	void	callbackImage(ImagePtr image);
 
 	/**
+	 * \brief Callback for tracking information updates
+	 *
+	 * Whenever the guider process gets a new tracking information,
+	 * it uses the lastAction method to inform the guider about
+	 * that action. If a callback for last actions is installed, this
+	 * information is encapsulated into a callback data structure
+	 * and the callback is called with the update information
+	 */
+	astro::callback::CallbackPtr	trackingcallback;
+	
+public:
+	/**
 	 * \brief Information about the most recent update
+	 *
+ 	 * The information is returned in the reference arguments
+	 * \param actiontime	time when last action occured
+	 * \param offset	the tracking offset observed by the tracker
+	 * \param activation	the activations computed for the next period
 	 */
 	void lastAction(double& actiontime, Point& offset, Point& activation);
 };
