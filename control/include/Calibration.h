@@ -6,6 +6,9 @@
 #ifndef _Calibration_h
 #define _Calibration_h
 
+#include <AstroPersistence.h>
+#include <AstroGuiding.h>
+
 namespace astro {
 namespace guiding {
 
@@ -69,5 +72,7 @@ static astro::persistence::UpdateSpec
 
 typedef astro::persistence::Table<CalibrationPoint, CalibrationPointTableAdapter> CalibrationPointTable;
 
-} // namespace guiding
+} // namespace guiding
 } // namespace astro
+
+#endif /* _Calibration_h */
