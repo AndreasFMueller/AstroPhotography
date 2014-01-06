@@ -28,6 +28,7 @@ module Astro {
 		Point	trackingoffset;
 		Point	activation;
 	};
+	typedef sequence<TrackingInfo> TrackingHistory;
 
 	/**
 	 * \brief Interface to a tracking monitor
@@ -156,6 +157,15 @@ module Astro {
 		 */
 		TrackingInfo	mostRecentTrackingInfo()
 						raises(BadState);
+
+		/**
+		 * \brief Get the complete tracking history
+		 *
+		 * \param guiderunid	ID of the guide run for which the
+		 *			history is requested. -1 means the
+		 *			currently active guide run.
+		 */
+		TrackingHistory	getTrackingHistory(in long guiderunid) raises(BadState);
 
 		/**
 		 * \brief Callback interface for tracking monitoring

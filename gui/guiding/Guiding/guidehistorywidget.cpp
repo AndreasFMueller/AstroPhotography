@@ -125,3 +125,14 @@ void	GuideHistoryWidget::add(double value) {
 	repaint();
 }
 
+/**
+ * \brief Add a set of values to the history
+ */
+void	GuideHistoryWidget::add(const std::list<double>& values) {
+	std::list<double>::const_iterator	i;
+	for (i = values.begin(); i != values.end(); i++) {
+		data.push_back(*i);
+	}
+	repaint();
+}
+

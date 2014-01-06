@@ -22,6 +22,8 @@ class Guider_impl : public POA_Astro::Guider {
 	monitormap_t	monitors;
 	typedef std::map< ::CORBA::Long, TrackingImageMonitor_var>	imagemonitormap_t;
 	imagemonitormap_t	imagemonitors;
+
+	int	guidingrunid;
 public:
 	Guider_impl(astro::guiding::GuiderPtr guider);
 	virtual ~Guider_impl();
@@ -65,6 +67,7 @@ public:
 	// monitoring
 	virtual Image_ptr	mostRecentImage();
 	virtual Astro::TrackingInfo	mostRecentTrackingInfo();
+	virtual Astro::TrackingHistory	*getTrackingHistory(::CORBA::Long guiderunid);
 
 	// callback interface for monitoring
 	virtual ::CORBA::Long	registerMonitor(TrackingMonitor_ptr monitor);

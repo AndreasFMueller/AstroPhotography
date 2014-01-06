@@ -649,5 +649,15 @@ Astro::TrackingInfo    convert(const astro::guiding::TrackingInfo& trackinginfo)
 	return result;
 }
 
+Astro::TrackingInfo    convert(const astro::guiding::Tracking& tracking) {
+	Astro::TrackingInfo	result;
+	result.timeago = astro::Timer::gettime() - tracking.when;
+	result.trackingoffset
+		= astro::convert(astro::Point(tracking.xoffset, tracking.yoffset));
+	result.activation
+		= astro::convert(astro::Point(tracking.racorrection, tracking.deccorrection));
+	return result;
+}
+
 
 } // namespace astro

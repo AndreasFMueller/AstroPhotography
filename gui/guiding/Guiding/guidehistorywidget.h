@@ -32,6 +32,7 @@ public:
 
 public slots:
 	void	add(double value);
+	void	add(const std::list<double>& values);
 
 private slots:
 

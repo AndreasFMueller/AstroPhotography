@@ -10,8 +10,10 @@
 #include <ServantBuilder.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
+#include <AstroFormat.h>
 #include <ImageObjectDirectory.h>
 #include <Tracking.h>
+#include <Conversions.h>
 
 extern astro::persistence::Database	database;
 
@@ -85,7 +87,9 @@ astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 //////////////////////////////////////////////////////////////////////
 class TrackingInfoCallback : public astro::callback::Callback {
 	Guider_impl&	_guider;
-	long	guidingrunid;
+	long	_guidingrunid;
+public:
+	long	guidingrunid() const { return _guidingrunid; }
 public:
 	TrackingInfoCallback(Guider_impl& guider);
 	virtual	astro::callback::CallbackDataPtr	operator()(
@@ -100,9 +104,9 @@ TrackingInfoCallback::TrackingInfoCallback(Guider_impl& guider)
 	guidingrun.guiderport = guider.getGuiderPortName();
 	time(&guidingrun.whenstarted);
 	astro::guiding::GuidingRunTable	guidingruntable(database);
-	guidingrunid = guidingruntable.add(guidingrun);
+	_guidingrunid = guidingruntable.add(guidingrun);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking run with id %d",
-		guidingrunid);
+		_guidingrunid);
 }
 
 /**
@@ -126,7 +130,8 @@ astro::callback::CallbackDataPtr TrackingInfoCallback::operator()(
 	_guider.update(astro::convert(*trackinginfo));
 
 	// add an entry to the database
-	astro::guiding::Tracking	tracking(0, guidingrunid, *trackinginfo);
+	astro::guiding::Tracking	tracking(0, _guidingrunid,
+						*trackinginfo);
 	astro::guiding::TrackingTable	trackingtable(database);
 	long	tid = trackingtable.add(tracking);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking entry with id %ld", tid);
@@ -147,6 +152,7 @@ Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
 	pthread_mutexattr_init(&mattr);
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &mattr);
+	guidingrunid = -1;
 }
 
 /**
@@ -304,8 +310,9 @@ void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
 	// create a set of callbacks
 	_guider->newimagecallback = astro::callback::CallbackPtr(
 		new GuiderImageCallback(*this));
-	_guider->trackingcallback = astro::callback::CallbackPtr(
-		new TrackingInfoCallback(*this));
+	TrackingInfoCallback	*tric = new TrackingInfoCallback(*this);
+	guidingrunid = tric->guidingrunid();
+	_guider->trackingcallback = astro::callback::CallbackPtr(tric);
 
 	// Construct the tracker. The rectangle is a rectangle the size of the
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -380,6 +387,43 @@ Astro::TrackingInfo	Guider_impl::mostRecentTrackingInfo() {
 
 	// that's it, we are read, return the structure
 	return result;
+}
+
+/**
+ * \brief Retrieve the Tracking history of a guide run
+ *
+ * \param guiderunid	The id of the guide run for which we request
+ *			the history. The value -1 means that we want
+ *			to retrieve the currently running guide run
+ */
+Astro::TrackingHistory	*Guider_impl::getTrackingHistory(int guiderunid) {
+	if (guiderunid < 0) {
+		// verify that we really are guiding right now
+		if (astro::guiding::guiding != _guider->state()) {
+			throw BadState("not currently guiding");
+		}
+		guiderunid = guidingrunid;
+	}
+
+	// prepare result
+	Astro::TrackingHistory	*history = new Astro::TrackingHistory();
+
+	// get the tracking table
+	astro::guiding::TrackingTable	trackingtable(database);
+	std::string	condition
+		= astro::stringprintf("guidingrun = %d order by id",
+				guiderunid);
+	std::list<long>	idlist = trackingtable.selectids(condition);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d entries", idlist.size());
+	history->length(idlist.size());
+	std::list<long>::const_iterator	idp;
+	int	i = 0;
+	for (idp = idlist.begin(); idp != idlist.end(); idp++) {
+		astro::guiding::Tracking	ti = trackingtable.byid(*idp);
+		Astro::TrackingInfo	ati = astro::convert(ti);
+		(*history)[i++] = ati;
+	}
+	return history;
 }
 
 Astro::GuiderDescriptor	*Guider_impl::getDescriptor() {

@@ -94,6 +94,30 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 	ui->xhistoryWidget->setColor(QColor(255., 0., 0.));
 	ui->yhistoryWidget->setColor(QColor(0., 0., 255.));
 
+	// get the history data from the guider
+	Astro::TrackingHistory_var	history = guider->getTrackingHistory(-1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "history has %d entries",
+		history->length());
+	
+	// get a list of values
+	std::list<double>	xvalues;
+	std::list<double>	yvalues;
+	unsigned int	startindex = 0;
+	if (history->length() > ui->xhistoryWidget->width()) {
+		startindex = history->length() - ui->xhistoryWidget->width();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "use history data from index %lu",
+		startindex);
+	for (unsigned int i = startindex; i < history->length(); i++) {
+		Astro::TrackingInfo	ti = (history)[i];
+		xvalues.push_back(ti.trackingoffset.x);
+		yvalues.push_back(ti.trackingoffset.y);
+	}
+
+	// add all values to the 
+	ui->xhistoryWidget->add(xvalues);
+	ui->yhistoryWidget->add(yvalues);
+
 	// initialize 
 	data = NULL;
 
