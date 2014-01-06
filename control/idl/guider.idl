@@ -33,14 +33,15 @@ module Astro {
 	 * \brief Interface to a tracking monitor
 	 */
 	interface TrackingMonitor {
-		void	update(in TrackingInfo ti);
+		oneway void	update(in TrackingInfo ti);
+		oneway void	stop();
 	};
 
 	/**
 	 * \brief Interface for tracking image updates
 	 */
 	interface TrackingImageMonitor {
-		void	update(in ImageSize size, in ShortSequence imagedata);
+		oneway void	update(in ImageSize size, in ShortSequence imagedata);
 	};
 
 	/**

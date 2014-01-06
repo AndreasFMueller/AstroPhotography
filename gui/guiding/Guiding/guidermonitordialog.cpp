@@ -5,27 +5,15 @@
 #include <AstroUtils.h>
 #include <math.h>
 #include <time.h>
+#include "connectiondialog.h"
 
-extern CORBA::ORB_ptr  orb;
-
-GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
-	QWidget *parent) : QDialog(parent),
-		_guider(guider),
-		ui(new Ui::GuiderMonitorDialog)
-{
-	ui->setupUi(this);
-	ui->xhistoryWidget->setColor(QColor(255., 0., 0.));
-	ui->yhistoryWidget->setColor(QColor(0., 0., 255.));
-
-	// initialize 
-	data = NULL;
-
-	// create the mutex
-	pthread_mutexattr_t	mattr;
-	pthread_mutexattr_init(&mattr);
-	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&mutex, &mattr);
-	pthread_mutex_lock(&mutex);
+void	GuiderMonitorDialog::registerServants() {
+	// if the implementation pointers are already set, we don't need to
+	// do anything
+	if (tm_impl) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor already up");
+		return;
+	}
 
 	// create a servant
 	tm_impl = new guidermonitor::TrackingMonitor_impl(*this);
@@ -33,15 +21,19 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 
 	// get the root POA
 	CORBA::Object_var	obj
-		= orb->resolve_initial_references("RootPOA");
+		= ConnectionDialog::orb->resolve_initial_references("RootPOA");
 	PortableServer::POA_var	root_poa = PortableServer::POA::_narrow(obj);
 	assert(!CORBA::is_nil(root_poa));
 
-	// activate the servant
+	// activate the servant, we alos remove a reference from the servant
+	// so that the destructor is called when the servant is deactivated
+	// in the unregisterServant() method
 	PortableServer::ObjectId_var	tmid
 		= root_poa->activate_object(tm_impl);
+	tm_impl->_remove_ref();
 	PortableServer::ObjectId_var	timid
 		= root_poa->activate_object(tim_impl);
+	tim_impl->_remove_ref();
 
 	// get a reference to the object, we need it for the registration
 	CORBA::Object_var	tmobj
@@ -58,12 +50,77 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 	imagemonitorid = _guider->registerImageMonitor(timvar);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "monitors registered as %ld, %ld",
 		monitorid, imagemonitorid);
+}
+
+void	GuiderMonitorDialog::unregisterServants() {
+	if (monitorid < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "nothing to unregister");
+		return;
+	}
+	// unregister the callbacks
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister callbacks");
+	_guider->unregisterMonitor(monitorid);
+	monitorid = -1;
+	_guider->unregisterImageMonitor(imagemonitorid);
+	imagemonitorid = -1;
+
+	// remove the servants from the POA
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy TrackingMonitor servant");
+	PortableServer::POA_var	poa = tm_impl->_default_POA();
+	PortableServer::ObjectId_var	tmid = poa->servant_to_id(tm_impl);
+	poa->deactivate_object(tmid);
+	tm_impl = NULL;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy TrackingImageMonitor servant");
+	poa = tim_impl->_default_POA();
+	PortableServer::ObjectId_var	timid = poa->servant_to_id(tim_impl);
+	poa->deactivate_object(timid);
+	tim_impl = NULL;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tracking servants removed");
+}
+
+/**
+ * \brief construct a new GuiderMonitorDialog
+ */
+GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
+	QWidget *parent) : QDialog(parent),
+		_guider(guider),
+		ui(new Ui::GuiderMonitorDialog)
+{
+	ui->setupUi(this);
+
+	// set the color in which the curves will be drawn
+	ui->xhistoryWidget->setColor(QColor(255., 0., 0.));
+	ui->yhistoryWidget->setColor(QColor(0., 0., 255.));
+
+	// initialize 
+	data = NULL;
+
+	// create the mutex
+	pthread_mutexattr_t	mattr;
+	pthread_mutexattr_init(&mattr);
+	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&mutex, &mattr);
+	pthread_mutex_lock(&mutex);
+
+	// make sure these are properly initialized
+	tm_impl = NULL;
+	monitorid = -1;
+	tim_impl = NULL;
+	imagemonitorid = -1;
+
+	// register servants
+	registerServants();
 
 	// connect signals
 	connect(this, SIGNAL(trackingInfoUpdated()), this,
 		SLOT(displayTrackingInfo()), Qt::QueuedConnection);
 	connect(this, SIGNAL(trackingImageUpdated()), this,
 		SLOT(displayTrackingImage()), Qt::QueuedConnection);
+
+	connect(this, SIGNAL(stop()), this, SLOT(terminate()),
+		Qt::QueuedConnection);
 
 	connect(this, SIGNAL(xUpdate(double)), ui->xhistoryWidget,
 		SLOT(add(double)), Qt::QueuedConnection);
@@ -74,19 +131,21 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 	pthread_mutex_unlock(&mutex);
 }
 
+/**
+ * \brief Destroy the GuiderMonitorDialog
+ */
 GuiderMonitorDialog::~GuiderMonitorDialog() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy guider monitor dialog");
 	// unregister the callback servants
-	_guider->unregisterMonitor(monitorid);
-	_guider->unregisterImageMonitor(imagemonitorid);
+	unregisterServants();
 
-	// XXX tell the POA to deactivate the servants, this will also
-	//     deallocate the servants
-	
 	// destroy the GUI part
 	delete ui;
 }
 
+/**
+ * \brief Update the Tracking info
+ */
 void	GuiderMonitorDialog::update(const Astro::TrackingInfo& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "trackingInfo udpated");
 	trackinginfo = ti;
@@ -96,6 +155,11 @@ void	GuiderMonitorDialog::update(const Astro::TrackingInfo& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "trackingInfoUdpated signal emited");
 }
 
+/**
+ * \brief Display the Trakicng info
+ *
+ * This slot should always be called on the main thread.
+ */
 void	GuiderMonitorDialog::displayTrackingInfo() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingInfo");
 	double	t = astro::Timer::gettime() - trackinginfo.timeago;
@@ -106,13 +170,24 @@ void	GuiderMonitorDialog::displayTrackingInfo() {
 	snprintf(buffer + bytes, sizeof(buffer) - bytes, ".%03d",
 		(int)trunc(1000 * (t - t0)));
 	ui->timeField->setText(buffer);
-	ui->xField->setText(tr("%1").arg(trackinginfo.trackingoffset.x));
-	ui->yField->setText(tr("%1").arg(trackinginfo.trackingoffset.y));
-	ui->raField->setText(tr("%1").arg(trackinginfo.activation.x));
-	ui->decField->setText(tr("%1").arg(trackinginfo.activation.y));
+	snprintf(buffer, sizeof(buffer), "%.4f", trackinginfo.trackingoffset.x);
+	ui->xField->setText(buffer);
+	snprintf(buffer, sizeof(buffer), "%.4f", trackinginfo.trackingoffset.y);
+	ui->yField->setText(buffer);
+	snprintf(buffer, sizeof(buffer), "%.4f", trackinginfo.activation.x);
+	ui->raField->setText(buffer);
+	snprintf(buffer, sizeof(buffer), "%.4f", trackinginfo.activation.y);
+	ui->decField->setText(buffer);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingInfo complete");
 }
 
+/**
+ * \brief Update the Image info
+ *
+ * This method uses locking to ensure that updating the data and
+ * displaying are properly serialized. Not doing this results in
+ * crashes.
+ */
 void	GuiderMonitorDialog::update(const Astro::ImageSize& _size,
 		const Astro::ShortSequence& imagedata) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %dx%d image received",
@@ -181,6 +256,9 @@ QPixmap	GuiderMonitorDialog::image2pixmap(const Astro::ImageSize& size,
 	return pixmap;
 }
 
+/**
+ * \brief Display the tracking image
+ */
 void	GuiderMonitorDialog::displayTrackingImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "display tracking image");
 	pthread_mutex_lock(&mutex);
@@ -194,19 +272,51 @@ void	GuiderMonitorDialog::displayTrackingImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image complete");
 }
 
+/**
+ * \brief Handle closing the window
+ *
+ * When the window is closed, the callback servants associated with this
+ * monitor should be removed.
+ */
+void	GuiderMonitorDialog::closeEvent(QCloseEvent *event) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "closing the dialog");
+	unregisterServants();
+}
+
+void	GuiderMonitorDialog::requestStop() {
+	emit stop();
+}
+
+void	GuiderMonitorDialog::terminate() {
+	close();
+}
+
 namespace guidermonitor {
 //////////////////////////////////////////////////////////////////////
 // TrackingMonitor implementation, inside separate namespace
 //////////////////////////////////////////////////////////////////////
+
+TrackingMonitor_impl::~TrackingMonitor_impl() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor servant destroyed");
+}
 
 void	TrackingMonitor_impl::update(const ::Astro::TrackingInfo& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking info received");
 	_guidermonitordialog.update(ti);
 }
 
+void	TrackingMonitor_impl::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "received stop signal");
+	_guidermonitordialog.requestStop();
+}
+
 //////////////////////////////////////////////////////////////////////
 // TrackingImageMonitor implementation
 //////////////////////////////////////////////////////////////////////
+TrackingImageMonitor_impl::~TrackingImageMonitor_impl() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image monitor servant destroyed");
+}
+
 void	TrackingImageMonitor_impl::update(const ::Astro::ImageSize& size,
 		const ::Astro::ShortSequence& imagedata) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image received");

@@ -51,7 +51,7 @@ class Tracking {
 public:
 	int	id() const { return _id; }
 	void	id(int i) { _id = i; }
-	int	guidelog; // references GuiderRun.id
+	int	guidingrun; // references GuiderRun.id
 	double	when;
 	double	xoffset;
 	double	yoffset;
@@ -59,8 +59,8 @@ public:
 	double	deccorrection;
 	
 	Tracking(int i) : _id(i) { }
-	Tracking(int i, const int& _guidelog, const TrackingInfo& trackinfo)
-		: _id(i), guidelog(_guidelog), when(trackinfo.t),
+	Tracking(int i, const int& _guidingrun, const TrackingInfo& trackinfo)
+		: _id(i), guidingrun(_guidingrun), when(trackinfo.t),
 		  xoffset(trackinfo.trackingoffset.x()),
 		  yoffset(trackinfo.trackingoffset.y()),
 		  racorrection(trackinfo.correction.x()),

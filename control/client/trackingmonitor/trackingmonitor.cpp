@@ -20,6 +20,11 @@
 
 namespace astro {
 
+Astro::Guider_var	guider;
+long	monitorid = 0;
+long	imagemonitorid = 0;
+CORBA::ORB_ptr	orbptr;
+
 //////////////////////////////////////////////////////////////////////
 // TrackingMonitor service implementation
 //////////////////////////////////////////////////////////////////////
@@ -43,11 +48,17 @@ class TrackingMonitor_impl : public POA_Astro::TrackingMonitor {
 public:
 	TrackingMonitor_impl() { }
 	virtual void	update(const ::Astro::TrackingInfo& ti);
+	virtual void	stop();
 };
 
 void	TrackingMonitor_impl::update(const ::Astro::TrackingInfo& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update() received");
 	std::cout << ti << std::endl;
+}
+
+void	TrackingMonitor_impl::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
+	kill(getpid(), SIGINT);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -85,11 +96,6 @@ void	TrackingImageMonitor_impl::update(const ::Astro::ImageSize& size,
 	std::cout << std::fixed << std::setprecision(0) << max;
 	std::cout << std::endl;
 }
-
-Astro::Guider_var	guider;
-long	monitorid = 0;
-long	imagemonitorid = 0;
-CORBA::ORB_ptr	orbptr;
 
 void	signal_handler(int sig) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "signal %d received", sig);

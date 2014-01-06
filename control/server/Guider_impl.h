@@ -16,9 +16,11 @@ class Guider_impl : public POA_Astro::Guider {
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
 	astro::guiding::TrackerPtr	getTracker();
-	typedef	std::map<::CORBA::Long, TrackingMonitor_var>	monitormap_t;
+
+	pthread_mutex_t	mutex; // mutex to protect the maps
+	typedef	std::map< ::CORBA::Long, TrackingMonitor_var>	monitormap_t;
 	monitormap_t	monitors;
-	typedef std::map<::CORBA::Long, TrackingImageMonitor_var>	imagemonitormap_t;
+	typedef std::map< ::CORBA::Long, TrackingImageMonitor_var>	imagemonitormap_t;
 	imagemonitormap_t	imagemonitors;
 public:
 	Guider_impl(astro::guiding::GuiderPtr guider);
@@ -68,6 +70,7 @@ public:
 	virtual ::CORBA::Long	registerMonitor(TrackingMonitor_ptr monitor);
 	virtual void	unregisterMonitor(::CORBA::Long monitorid);
 	void	update(const Astro::TrackingInfo& trackinginfo);
+	void	update_stop();
 
 	// callback interface for image monitoring
 	virtual ::CORBA::Long	registerImageMonitor(TrackingImageMonitor_ptr imagemonitor);

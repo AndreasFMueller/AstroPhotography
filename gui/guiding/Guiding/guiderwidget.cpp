@@ -1,15 +1,26 @@
-#include "guiderdialog.h"
-#include "ui_guiderdialog.h"
+/*
+ * guiderwidget.cpp --  guider widget implementation
+ *
+ * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#include "guiderwidget.h"
+#include "ui_guiderwidget.h"
 #include <image.hh>
 #include <AstroDebug.h>
 #include <QWidget>
 #include <guidermonitordialog.h>
 
-GuiderDialog::GuiderDialog(Astro::Guider_var guider, QWidget *parent) :
-	QDialog(parent), _guider(guider), ui(new Ui::GuiderDialog)
+/**
+ * \brief Create a new GuiderWidget
+ */
+GuiderWidget::GuiderWidget(Astro::Guider_var guider, QWidget *parent) :
+	QWidget(parent), _guider(guider), ui(new Ui::GuiderWidget)
 {
-    ui->setupUi(this);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider dialog created");
+	ui->setupUi(this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider widget created");
+
+	// destroy the widget when no longer in use
+	setAttribute(Qt::WA_DeleteOnClose);
 
         Astro::GuiderDescriptor_var     descriptor = _guider->getDescriptor();
 
@@ -44,14 +55,27 @@ GuiderDialog::GuiderDialog(Astro::Guider_var guider, QWidget *parent) :
 	// set guider state
 	setGuiderState(_guider->getState());
 	setStar(_guider->getStar());
+
+	// initialize the timer
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
+	timer->start(1000);
 }
 
-GuiderDialog::~GuiderDialog()
+/**
+ * \brief Destroy the GuiderWidget
+ */
+GuiderWidget::~GuiderWidget()
 {
+	timer->stop();
+	delete timer;
 	delete ui;
 }
 
-void	GuiderDialog::setExposure(const Astro::Exposure& exposure) {
+/**
+ * \brief Set exposure fields from exposure data
+ */
+void	GuiderWidget::setExposure(const Astro::Exposure& exposure) {
 	ui->timeSpinbox->setValue(exposure.exposuretime);
 	char	buffer[21];
 	snprintf(buffer, sizeof(buffer), "%dx%d",
@@ -66,7 +90,7 @@ void	GuiderDialog::setExposure(const Astro::Exposure& exposure) {
 /**
  * \brief Event handler for exposure time changes
  */
-void	GuiderDialog::exposuretime(double t) {
+void	GuiderWidget::exposuretime(double t) {
 	Astro::Exposure	exposure = _guider->getExposure();
 	exposure.exposuretime = t;
 	_guider->setExposure(exposure);
@@ -75,7 +99,7 @@ void	GuiderDialog::exposuretime(double t) {
 /**
  * \brief update guider state
  */
-void	GuiderDialog::setGuiderState(const Astro::Guider::GuiderState& guiderstate) {
+void	GuiderWidget::setGuiderState(const Astro::Guider::GuiderState& guiderstate) {
 	ui->captureButton->setText("Capture");
 	ui->calibrateButton->setText("Calibrate");
 	ui->guideButton->setText("Guide");
@@ -86,12 +110,14 @@ void	GuiderDialog::setGuiderState(const Astro::Guider::GuiderState& guiderstate)
 		ui->calibrateButton->setText("Calibrate: unconfigured");
 		ui->guideButton->setEnabled(false);
 		ui->guideButton->setText("Guide: unconfigured");
+		ui->guidingmonitorButton->setEnabled(false);
 		break;
 	case Astro::Guider::GUIDER_IDLE:
 		ui->captureButton->setEnabled(true);
 		ui->calibrateButton->setEnabled(true);
 		ui->guideButton->setEnabled(false);
 		ui->guideButton->setText("Guider: uncalibrated");
+		ui->guidingmonitorButton->setEnabled(false);
 		break;
 	case Astro::Guider::GUIDER_CALIBRATING:
 		ui->captureButton->setEnabled(false);
@@ -100,11 +126,13 @@ void	GuiderDialog::setGuiderState(const Astro::Guider::GuiderState& guiderstate)
 		ui->calibrateButton->setText("Cancel calibration");
 		ui->guideButton->setEnabled(false);
 		ui->guideButton->setText("Guide: calibrating");
+		ui->guidingmonitorButton->setEnabled(false);
 		break;
 	case Astro::Guider::GUIDER_CALIBRATED:
 		ui->captureButton->setEnabled(true);
 		ui->calibrateButton->setEnabled(true);
 		ui->guideButton->setEnabled(true);
+		ui->guidingmonitorButton->setEnabled(true);
 		break;
 	case Astro::Guider::GUIDER_GUIDING:
 		ui->captureButton->setEnabled(false);
@@ -113,11 +141,15 @@ void	GuiderDialog::setGuiderState(const Astro::Guider::GuiderState& guiderstate)
 		ui->calibrateButton->setText("Calibrate: guiding");
 		ui->guideButton->setEnabled(true);
 		ui->guideButton->setText("Cancel guiding");
+		ui->guidingmonitorButton->setEnabled(true);
 		break;
 	}
 }
 
-void	GuiderDialog::setStar(const Astro::Point& star) {
+/**
+ * \brief Set star coordinate fields from star data
+ */
+void	GuiderWidget::setStar(const Astro::Point& star) {
 	ui->starxField->setText(tr("%1").arg(star.x));
 	ui->staryField->setText(tr("%1").arg(star.y));
 }
@@ -127,11 +159,21 @@ void	GuiderDialog::setStar(const Astro::Point& star) {
  *
  * During the capture, we should disable the buttons
  */
-void	GuiderDialog::capture() {
+void	GuiderWidget::capture() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "capture request");
 	// construct an exposure object for the full image
 	Astro::Exposure	exposure = _guider->getExposure();
 	Astro::Ccd_var	ccd = _guider->getCcd();
+
+	// wait until the ccd is idle or exposed
+	while ((ccd->exposureStatus() != Astro::EXPOSURE_EXPOSED) &&
+		(ccd->exposureStatus() != Astro::EXPOSURE_IDLE)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for camera to be ready");
+		usleep(100000);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd is ready for exposure");
+
+	// prepare exposure structure
 	Astro::CcdInfo_var	info = ccd->getInfo();
 	exposure.frame.origin.x = 0;
 	exposure.frame.origin.y = 0;
@@ -139,12 +181,19 @@ void	GuiderDialog::capture() {
 	exposure.shutter = Astro::SHUTTER_OPEN;
 
 	// cleare the statistics
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "clear statistics");
 	ui->maxField->setText("");
 	ui->minField->setText("");
 	ui->meanField->setText("");
 
 	// send the exposure request to the CCD
-	ccd->startExposure(exposure);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %p", &*ccd);
+	try {
+		ccd->startExposure(exposure);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "startExposure failed");
+		return;
+	}
 
 	// wait for the exposure to complete
 	while (ccd->exposureStatus() != Astro::EXPOSURE_EXPOSED) {
@@ -165,6 +214,8 @@ void	GuiderDialog::capture() {
 	// get image size
 	Astro::ImageSize	size = image->size();
 	ui->scrollAreaWidgetContents->setFixedSize(size.width, size.height);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has size %d x %d",
+		size.width, size.height);
 
 	// Variables for maximum/minimum/mean
 	image_statistics	stats;
@@ -185,7 +236,7 @@ void	GuiderDialog::capture() {
 /**
  * \brief Initiate calibration
  */
-void	GuiderDialog::calibrate() {
+void	GuiderWidget::calibrate() {
 	// action depends on current state
 	switch (_guider->getState()) {
 	case Astro::Guider::GUIDER_IDLE:
@@ -206,9 +257,9 @@ void	GuiderDialog::calibrate() {
 }
 
 /**
- * \brief
+ * \brief Start guiding
  */
-void	GuiderDialog::guide() {
+void	GuiderWidget::guide() {
 	switch (_guider->getState()) {
 	case Astro::Guider::GUIDER_CALIBRATED:
 		_guider->startGuiding(ui->guideintervalSpinbox->value());
@@ -230,20 +281,22 @@ void	GuiderDialog::guide() {
 /**
  * \brief method called when the monitor open button is clicked
  */
-void	GuiderDialog::monitor() {
+void	GuiderWidget::monitor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open monitor");
 	// First find out whether we have a child that is a dialog of this
 	// type. If so, we just bring it into the foreground
 
 	// Ok, seems we have no previously created dialog, so we create one
-	GuiderMonitorDialog	*monitordialog = new GuiderMonitorDialog(_guider, this);
+	GuiderMonitorDialog	*monitordialog
+		= new GuiderMonitorDialog(_guider);
+	monitordialog->setAttribute(Qt::WA_DeleteOnClose);
 	monitordialog->show();
 }
 
 /**
  * \brief handle mouse press events
  */
-void	GuiderDialog::mousePressEvent(QMouseEvent *event) {
+void	GuiderWidget::mousePressEvent(QMouseEvent *event) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mouse press event: %d, %d",
 		event->x(), event->y());
 	QPoint	mousepos = ui->imageLabel->mapFrom(this, event->pos());
@@ -310,35 +363,15 @@ void	GuiderDialog::mousePressEvent(QMouseEvent *event) {
 	_guider->setExposure(exposure);
 }
 
-#if 0
 /**
  * \brief What to do at each timer tick
  */
-void	GuiderDialog::tick() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Timer tick");
-
-	// handle most recent image
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "try most recent image");
-		Astro::Image_var	image = _guider->mostRecentImage();
-		image_statistics	stats;
-		QPixmap	pixmap = image2pixmap(image, stats);
-		ui->guideimageLabel->setPixmap(pixmap);
-		image->remove();
-	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no most recent image: %s",
-			x.what());
-	} catch (...) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"no most recent image, unknown exception");
-	}
-
+void	GuiderWidget::tick() {
 	// update guider state
 	try {
 		setGuiderState(_guider->getState());
 	} catch (...) { }
 }
-#endif
 
 /**
  * \brief convert a CORBA image into a QPixmap
@@ -348,7 +381,7 @@ void	GuiderDialog::tick() {
  * \param image	Image object reference.
  * \param stats	Statistics about the image
  */
-QPixmap	GuiderDialog::image2pixmap(Astro::Image_var image, image_statistics& stats) {
+QPixmap	GuiderWidget::image2pixmap(Astro::Image_var image, image_statistics& stats) {
 	Astro::ImageSize	size = image->size();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image of size %dx%d",
 		size.width, size.height);

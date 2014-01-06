@@ -56,6 +56,7 @@ std::string	TrackingTableAdapter::createstatement() {
 	return std::string(
 	"create table tracking (\n"
 	"    id integer not null,\n"
+	"    guidingrun integer not null,\n"
 	"    trackingtime double not null,\n"
 	"    xoffset double not null,\n"
 	"    yoffset double not null,\n"
@@ -70,6 +71,7 @@ Tracking	TrackingTableAdapter::row_to_object(int objectid,
 			const Row& row) {
 	Tracking	tracking(objectid);
 	tracking.when = row["trackingtime"]->doubleValue();
+	tracking.guidingrun = row["guidingrun"]->intValue();
 	tracking.xoffset = row["xoffset"]->doubleValue();
 	tracking.yoffset = row["yoffset"]->doubleValue();
 	tracking.racorrection = row["racorrection"]->doubleValue();
@@ -81,6 +83,7 @@ UpdateSpec	TrackingTableAdapter::object_to_updatespec(const Tracking& tracking) 
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
 	spec.insert(Field("trackingtime", factory.get(tracking.when)));
+	spec.insert(Field("guidingrun", factory.get(tracking.guidingrun)));
 	spec.insert(Field("xoffset", factory.get(tracking.xoffset)));
 	spec.insert(Field("yoffset", factory.get(tracking.yoffset)));
 	spec.insert(Field("racorrection", factory.get(tracking.racorrection)));

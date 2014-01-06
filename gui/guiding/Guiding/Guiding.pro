@@ -16,12 +16,17 @@ INCLUDEPATH += -I /Users/afm/Projects/Astro/AstroPhotography/control/root/includ
 LIBS += -L/Users/afm/Projects/Astro/AstroPhotography/control/root/lib -lcorbastro -lastro -L/usr/local/lib -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-	guiderdialog.cpp logspinbox.cpp guidermonitordialog.cpp \
-	guidehistorywidget.cpp
+	logspinbox.cpp guidermonitordialog.cpp \
+	guidehistorywidget.cpp connectiondialog.cpp \
+	guidingconnectiondialog.cpp deviceselector.cpp \
+	guideropendialog.cpp guiderwidget.cpp
 
-HEADERS  += mainwindow.h \
-    guiderdialog.h logspinbox.h guidermonitordialog.h guidehistorywidget.h
+HEADERS  += \
+	logspinbox.h guidermonitordialog.h \
+	guidehistorywidget.h connectiondialog.h \
+	guidingconnectiondialog.h deviceselector.h \
+	guideropendialog.h guiderwidget.h
 
-FORMS    += mainwindow.ui \
-    guiderdialog.ui guidermonitordialog.ui
+FORMS    += \
+	guidermonitordialog.ui connectiondialog.ui \
+	guideropendialog.ui guiderwidget.ui

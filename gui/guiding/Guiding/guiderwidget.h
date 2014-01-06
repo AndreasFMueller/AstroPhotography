@@ -1,14 +1,18 @@
-#ifndef GUIDERDIALOG_H
-#define GUIDERDIALOG_H
+/*
+ * guiderwidget.h -- Main window for guider control
+ *
+ * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#ifndef GUIDERWIDGET_H
+#define GUIDERWIDGET_H
 
-#include <guider.hh>
-
-#include <QDialog>
-#include <QMouseEvent>
+#include <QWidget>
 #include <QTimer>
+#include <guider.hh>
+#include <QMouseEvent>
 
 namespace Ui {
-class GuiderDialog;
+class GuiderWidget;
 }
 
 class image_statistics {
@@ -24,27 +28,29 @@ public:
 	void	add(double value);
 };
 
-class GuiderDialog : public QDialog
+class GuiderWidget : public QWidget
 {
 	Q_OBJECT
 
 	Astro::Guider_var	_guider;
+	QTimer	*timer;
 	double	lastimageago;
 
 public:
-	explicit GuiderDialog(Astro::Guider_var guider, QWidget *parent = 0);
-	~GuiderDialog();
+	explicit GuiderWidget(Astro::Guider_var guider, QWidget *parent = 0);
+	~GuiderWidget();
 
 	Astro::Guider_var	guider() { return _guider; }
 	void	setExposure(const Astro::Exposure& exposure);
 	void	setGuiderState(const Astro::Guider::GuiderState& guiderstate);
 	void	setStar(const Astro::Point& star);
-protected:
-	void	mousePressEvent(QMouseEvent *event);
 
 private:
-	Ui::GuiderDialog *ui;
+	Ui::GuiderWidget *ui;
 	QPixmap	image2pixmap(Astro::Image_var image, image_statistics& stats);
+
+protected:
+	void	mousePressEvent(QMouseEvent *event);
 
 private slots:
 	void	capture();
@@ -52,6 +58,7 @@ private slots:
 	void	guide();
 	void	exposuretime(double t);
 	void	monitor();
+	void	tick();
 };
 
-#endif // GUIDERDIALOG_H
+#endif // GUIDERWIDGET_H

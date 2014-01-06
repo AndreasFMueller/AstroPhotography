@@ -35,6 +35,10 @@ class GuiderMonitorDialog : public QDialog
 	QPixmap	image2pixmap(const Astro::ImageSize& size,
 			const unsigned short *imagedata);
 
+	// register and unregister the callback servants and destroy them
+	void	registerServants();
+	void	unregisterServants();
+
 public:
 	explicit GuiderMonitorDialog(Astro::Guider_var guider,
 		QWidget *parent = 0);
@@ -43,16 +47,21 @@ public:
 	void	update(const Astro::TrackingInfo& ti);
 	void	update(const Astro::ImageSize& size,
 			const Astro::ShortSequence& imagedata);
+	void	requestStop();
+
+	void	closeEvent(QCloseEvent *event);
 
 signals:
 	void	trackingInfoUpdated();
 	void	trackingImageUpdated();
 	void	xUpdate(double x);
 	void	yUpdate(double y);
+	void	stop();
 
 public slots:
 	void	displayTrackingInfo();
 	void	displayTrackingImage();
+	void	terminate();
 
 private:
 	Ui::GuiderMonitorDialog *ui;
@@ -69,7 +78,9 @@ class TrackingMonitor_impl : public POA_Astro::TrackingMonitor {
 public:
 	TrackingMonitor_impl(GuiderMonitorDialog& guidermonitordialog)
 		: _guidermonitordialog(guidermonitordialog) { }
+	virtual ~TrackingMonitor_impl();
 	virtual void	update(const ::Astro::TrackingInfo& ti);
+	virtual void	stop();
 };
 
 class TrackingImageMonitor_impl : public POA_Astro::TrackingImageMonitor {
@@ -77,6 +88,7 @@ class TrackingImageMonitor_impl : public POA_Astro::TrackingImageMonitor {
 public:
 	TrackingImageMonitor_impl(GuiderMonitorDialog& guidermonitordialog)
 		: _guidermonitordialog(guidermonitordialog) { }
+	virtual ~TrackingImageMonitor_impl();
 	virtual void	update(const ::Astro::ImageSize& size,
 				const ::Astro::ShortSequence& imagedata);
 };

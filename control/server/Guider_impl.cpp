@@ -39,6 +39,9 @@ GuiderImageCallback::GuiderImageCallback(Guider_impl& guider)
 	: _guider(guider) {
 }
 
+/**
+ * \brief process a new image
+ */
 astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 	astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
@@ -102,6 +105,9 @@ TrackingInfoCallback::TrackingInfoCallback(Guider_impl& guider)
 		guidingrunid);
 }
 
+/**
+ * \brief Process a tracking info update
+ */
 astro::callback::CallbackDataPtr TrackingInfoCallback::operator()(
 	astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking info");
@@ -137,19 +143,16 @@ astro::callback::CallbackDataPtr TrackingInfoCallback::operator()(
 Guider_impl::Guider_impl(astro::guiding::GuiderPtr guider)
 	: _guider(guider) {
 	_point = _guider->ccd()->getInfo().getFrame().size().center();
-	_guider->newimagecallback = astro::callback::CallbackPtr(
-		new GuiderImageCallback(*this));
-	// create the callback class for 
-	_guider->trackingcallback = astro::callback::CallbackPtr(
-		new TrackingInfoCallback(*this));
+	pthread_mutexattr_t	mattr;
+	pthread_mutexattr_init(&mattr);
+	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&mutex, &mattr);
 }
 
 /**
  * \brief Turn of the callbacks in the guider
  */
 Guider_impl::~Guider_impl() {
-	_guider->newimagecallback = NULL;
-	_guider->trackingcallback = NULL;
 }
 
 /**
@@ -298,6 +301,12 @@ void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %f",
 		guidinginterval);
 
+	// create a set of callbacks
+	_guider->newimagecallback = astro::callback::CallbackPtr(
+		new GuiderImageCallback(*this));
+	_guider->trackingcallback = astro::callback::CallbackPtr(
+		new TrackingInfoCallback(*this));
+
 	// Construct the tracker. The rectangle is a rectangle the size of the
 	astro::guiding::TrackerPtr	tracker = getTracker();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed: %s",
@@ -321,6 +330,13 @@ void	Guider_impl::startGuiding(::CORBA::Float guidinginterval) {
 void	Guider_impl::stopGuiding() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop guiding");
 	_guider->stopGuiding();
+
+	// inform the monitors that we have stopped
+	update_stop();
+
+	// destroy the callbacks
+	_guider->newimagecallback = NULL;
+	_guider->trackingcallback = NULL;
 }
 
 /**
@@ -402,6 +418,7 @@ astro::guiding::TrackerPtr	Guider_impl::getTracker() {
  */
 ::CORBA::Long	Guider_impl::registerMonitor(::Astro::TrackingMonitor_ptr monitor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TrackingMonitor registration request: %p", this);
+	pthread_mutex_lock(&mutex);
 	::CORBA::Long	monitorid = 0;
 	monitormap_t::iterator	i;
 	for (i = monitors.begin(); i != monitors.end(); i++) {
@@ -413,6 +430,7 @@ astro::guiding::TrackerPtr	Guider_impl::getTracker() {
 	TrackingMonitor_var	monitorvar
 		= Astro::TrackingMonitor::_duplicate(monitor);
 	monitors.insert(std::make_pair(monitorid, monitorvar));
+	pthread_mutex_unlock(&mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor registered as %ld",
 		monitorid);
 	return monitorid;
@@ -425,6 +443,7 @@ astro::guiding::TrackerPtr	Guider_impl::getTracker() {
  */
 void	Guider_impl::unregisterMonitor(::CORBA::Long monitorid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister(%ld)", monitorid);
+	pthread_mutex_lock(&mutex);
 	if (monitors.find(monitorid) != monitors.end()) {
 		try {
 			monitors.erase(monitorid);
@@ -437,6 +456,7 @@ void	Guider_impl::unregisterMonitor(::CORBA::Long monitorid) {
 			monitorid);
 		throw CORBA::OBJECT_NOT_EXIST();
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 /**
@@ -447,8 +467,9 @@ void	Guider_impl::unregisterMonitor(::CORBA::Long monitorid) {
  */
 void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking info update received");
+	pthread_mutex_lock(&mutex);
 	monitormap_t::iterator	i;
-	std::vector<::CORBA::Long>	badmonitors;
+	std::vector< ::CORBA::Long>	badmonitors;
 	// send the trackinginfo update to all monitors
 	for (i = monitors.begin(); i != monitors.end(); i++) {
 		try {
@@ -458,7 +479,7 @@ void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
 		}
 	}
 	// remove all monitors that are bad
-	std::vector<::CORBA::Long>::iterator	j;
+	std::vector< ::CORBA::Long>::iterator	j;
 	for (j = badmonitors.begin(); j != badmonitors.end(); j++) {
 		try {
 			monitors.erase(*j);
@@ -467,6 +488,7 @@ void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
 				"error while removing monitor %ld", *j);
 		}
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 /**
@@ -481,6 +503,7 @@ void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
  */
 ::CORBA::Long	Guider_impl::registerImageMonitor(::Astro::TrackingImageMonitor_ptr monitor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TrackingMonitor registration request: %p", this);
+	pthread_mutex_lock(&mutex);
 	::CORBA::Long	imagemonitorid = 0;
 	imagemonitormap_t::iterator	i;
 	for (i = imagemonitors.begin(); i != imagemonitors.end(); i++) {
@@ -494,6 +517,7 @@ void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
 	imagemonitors.insert(std::make_pair(imagemonitorid, imagemonitorvar));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor registered as %ld",
 		imagemonitorid);
+	pthread_mutex_unlock(&mutex);
 	return imagemonitorid;
 }
 
@@ -506,6 +530,7 @@ void	Guider_impl::update(const Astro::TrackingInfo& trackinginfo) {
 void	Guider_impl::unregisterImageMonitor(::CORBA::Long imagemonitorid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregisterImageMonitor(%ld)",
 		imagemonitorid);
+	pthread_mutex_lock(&mutex);
 	if (imagemonitors.find(imagemonitorid) != imagemonitors.end()) {
 		try {
 			imagemonitors.erase(imagemonitorid);
@@ -519,6 +544,7 @@ void	Guider_impl::unregisterImageMonitor(::CORBA::Long imagemonitorid) {
 			imagemonitorid);
 		throw CORBA::OBJECT_NOT_EXIST();
 	}
+	pthread_mutex_unlock(&mutex);
 }
 
 /**
@@ -531,8 +557,9 @@ void	Guider_impl::unregisterImageMonitor(::CORBA::Long imagemonitorid) {
 void	Guider_impl::update(const ::Astro::ImageSize& size,
 		const ::Astro::ShortSequence_var& imagedata) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image update received");
+	pthread_mutex_lock(&mutex);
 	imagemonitormap_t::iterator	i;
-	std::vector<::CORBA::Long>	badmonitors;
+	std::vector< ::CORBA::Long>	badmonitors;
 	// send the trackinginfo update to all monitors
 	for (i = imagemonitors.begin(); i != imagemonitors.end(); i++) {
 		try {
@@ -542,7 +569,7 @@ void	Guider_impl::update(const ::Astro::ImageSize& size,
 		}
 	}
 	// remove all monitors that are bad
-	std::vector<::CORBA::Long>::iterator	j;
+	std::vector< ::CORBA::Long>::iterator	j;
 	for (j = badmonitors.begin(); j != badmonitors.end(); j++) {
 		try {
 			imagemonitors.erase(*j);
@@ -551,6 +578,38 @@ void	Guider_impl::update(const ::Astro::ImageSize& size,
 				"error while removing imagemonitor %ld", *j);
 		}
 	}
+	pthread_mutex_unlock(&mutex);
+}
+
+/**
+ * \brief Inform the clients that guiding has stopped
+ */
+void	Guider_impl::update_stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking update stop received");
+	pthread_mutex_lock(&mutex);
+	monitormap_t::iterator	i;
+	std::vector< ::CORBA::Long>	badmonitors;
+	// send the trackinginfo update to all monitors
+	for (i = monitors.begin(); i != monitors.end(); i++) {
+		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending stop to %d",
+				i->first);
+			i->second->stop();
+		} catch (...) {
+			badmonitors.push_back(i->first);
+		}
+	}
+	// remove all monitors that are bad
+	std::vector< ::CORBA::Long>::iterator	j;
+	for (j = badmonitors.begin(); j != badmonitors.end(); j++) {
+		try {
+			monitors.erase(*j);
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"error while removing monitor %ld", *j);
+		}
+	}
+	pthread_mutex_unlock(&mutex);
 }
 
 } // namespace Astro
