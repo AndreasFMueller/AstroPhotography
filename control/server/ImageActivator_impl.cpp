@@ -42,16 +42,35 @@ PortableServer::Servant	ImageActivator_impl::incarnate(
 
 	// read the image
 	astro::io::FITSin	infile(fn);
-	ImagePtr	image = infile.read();
+	ImagePtr	image;
+	try {
+		image = infile.read();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"could not read file %s: %s", fn.c_str(), x.what());
+		throw CORBA::OBJECT_NOT_EXIST();
+	}
 
 	// build a servant of approriate type
-	switch (astro::image::filter::bytespervalue(image)) {
-	case 1:
-		return new Astro::ByteImage_impl(filename);
-		break;
-	case 2:
-		return new Astro::ShortImage_impl(filename);
-		break;
+	try {
+		switch (astro::image::filter::bytespervalue(image)) {
+		case 1:
+			return new Astro::ByteImage_impl(filename);
+			break;
+		case 2:
+			return new Astro::ShortImage_impl(filename);
+			break;
+		default:
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"image type we cannot handle: %d bytes per value",
+				astro::image::filter::bytespervalue(image));
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"exception while creating servant: %s", x.what());
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"exception while creating servant");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create image servant %s",
 		fn.c_str());
@@ -89,8 +108,13 @@ void	ImageActivator_impl::etherealize(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "servant deleted");
 
 	// remove the image from the ImageDirectory
-	ImageDirectory::remove(filename);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
+	try {
+		ImageDirectory::remove(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "error during etherialize: %s",
+			x.what());
+	}
 }
 
 } // namespace Astro

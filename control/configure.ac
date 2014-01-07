@@ -21,7 +21,7 @@ AC_CHECK_TOOL(BISON, bison)
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h termios.h])
 
 # Check for libraries
 AC_CHECK_LIB([m], [sqrt])
@@ -115,11 +115,24 @@ AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 AC_ARG_ENABLE(qsi,
 [AS_HELP_STRING([--enable-qsi], [build the QSI driver])],
 [
-	enable_qsi=yes
+	# don't enable the QSI driver unless you find the header
+	# and the library
+	enable_qsi=no
+
+	# check whether the qsiapi.h header is present
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS([qsiapi.h])
+	AC_CHECK_HEADER([qsiapi.h],
+                     [AC_DEFINE([HAVE_QSIAPI_H], [1],
+                        [Define to 1 if you have <qsiapi.h>.])],
+                     [AC_MSG_ERROR([QSI header not available, install or disable QSI driver])])
+	AC_LANG_POP([C++])
+
 	# check whether the qsiapi library is present
 	AC_CHECK_LIB([qsiapi], [_ZN10CCCDCameraC1Ev])
 
 	# if we fail, disable qsi
+	enable_qsi=yes
 ],[
 enable_qsi=no
 ]
@@ -181,14 +194,15 @@ esac
 AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
-	idl/Makefile server/Makefile client/Makefile tools/Makefile
-	guider/Makefile
+	idl/Makefile server/Makefile tools/Makefile
+	client/Makefile client/trackingmonitor/Makefile
+	cli/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
-	doc/Makefile
+	man/Makefile doc/Makefile
 	test/Makefile])
 AC_OUTPUT
 

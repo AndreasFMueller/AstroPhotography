@@ -21,11 +21,19 @@ namespace guiding {
 
 /**
  * \brief Encapsulation of the guiding process
+ *
+ * This class contains the work function for guider calibration.
  */
 class CalibrationProcess : public GuidingProcess {
 
 	// parameters for the calibration process
+	/**
+	 * \brief focal length of guide scope in mm
+	 */
 	double	_focallength;
+	/**
+	 * \brief Pixel size in um
+ 	 */
 	double	_pixelsize;
 	double	grid;
 	bool	calibrated;
@@ -40,9 +48,6 @@ private:
 	void	moveto(double ra, double dec);
 	void	measure(GuiderCalibrator& calibrator,
 			double deltara, double deltadec);
-
-	// keep track of the thread
-	ThreadPtr	thread;
 
 public:
 	CalibrationProcess(Guider& guider, TrackerPtr tracker);

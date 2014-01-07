@@ -6,10 +6,13 @@
 #include <SxLocator.h>
 #include <SxCamera.h>
 #include <SxUtils.h>
+#include <SxAO.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
+#include <AstroUtils.h>
 #include <includes.h>
+#include <AstroExceptions.h>
 
 using namespace astro::usb;
 
@@ -89,9 +92,8 @@ std::string	SxCameraLocator::getVersion() const {
  */
 std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
-	if (device != DeviceName::Camera) {
-		return names;
-	}
+
+	// list all devices from the context
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
@@ -102,7 +104,12 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 			DevicePtr	devptr = *i;
 			devptr->open();
 			try {
-				names.push_back("camera:sx/" + sxname(devptr));
+				if (device == DeviceName::Camera) {
+					names.push_back("camera:sx/" + sxname(devptr));
+				}
+				if (device == DeviceName::Guiderport) {
+					names.push_back("guiderport:sx/" + sxname(devptr) + "/guiderport");
+				}
 			} catch (std::runtime_error& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found a non"
 					" SX device: %s", x.what());
@@ -113,7 +120,7 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device");
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d SX cameras", names.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d SX devices", names.size());
 	return names;
 }
 
@@ -146,6 +153,31 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 		}
 	}
 	throw SxError("cannot create a camera from a name");
+}
+
+/**
+ * \brief Get an AO object
+ */
+AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(const DeviceName& name) {
+	std::string	sname = URL::decode(name.unitname());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "AO unit device name: %s", sname.c_str());
+	return AdaptiveOpticsPtr(new SxAO(sname));
+}
+
+/**
+ * \brief Get a guider port by name
+ */
+GuiderPortPtr	SxCameraLocator::getGuiderPort0(const DeviceName& name) {
+	DeviceName	cameraname(DeviceName::Camera, name);
+	cameraname.pop_back();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
+		cameraname.toString().c_str());
+	CameraPtr	camera = this->getCamera(cameraname);
+	if (!camera->hasGuiderPort()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no guider port");
+		throw NotFound("camera does not have guider port");
+	}
+	return camera->getGuiderPort();
 }
 
 } // namespace sx

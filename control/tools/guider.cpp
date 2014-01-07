@@ -23,7 +23,6 @@ using namespace astro::io;
 namespace astro {
 
 class NewImageCallback : public Callback {
-	int	counter;
 	FITSdirectory	directory;
 public:
 	NewImageCallback(const std::string& path) : directory(path) { }
@@ -71,7 +70,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 }
 
-int	main(int argc, char *argv[]) {
+int	guider_main(int argc, char *argv[]) {
 	// parse command line arguments
 	int	c;
 	unsigned int	cameraid = 0;
@@ -134,7 +133,7 @@ int	main(int argc, char *argv[]) {
 	}
 	CameraPtr	camera = locator->getCamera(cameras[cameraid]);
 	CcdPtr	ccd = camera->getCcd(ccdid);
-
+ 
 	// compute the point where we should look for the guide star
 	if (x < 0) {
 		x = ccd->getInfo().size().width() / 2;
@@ -155,7 +154,8 @@ int	main(int argc, char *argv[]) {
 		while (optind < argc) {
 			char	*direction = argv[optind++];
 			double	duration = atoi(argv[optind++]) / 1000.;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "found command %s for %.3fs",
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"found command %s for %.3fs",
 				direction, duration);
 			if (0 == strcmp(direction, "D-")) {
 				guiderport->activate(0, 0, 0, duration);
@@ -215,7 +215,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// now track for 2 hours
-	guider.startGuiding(tracker);
+	guider.startGuiding(tracker, 10);
 	sleep(7200);
 	guider.stopGuiding();
 
@@ -227,7 +227,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::guider_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "guider terminated by exception: " << x.what()
 			<< std::endl;

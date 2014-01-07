@@ -94,9 +94,9 @@ CaptureWindow::~CaptureWindow()
 QString	CaptureWindow::getCameraTitle() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting camera title");
 	std::string	cameraname
-		= (camera) ? camera->getName() : std::string("(unknown)");
+		= (camera) ? camera->name().toString() : std::string("(unknown)");
 	std::string	ccdname
-		= (ccd) ?  (ccd->getInfo().name()
+		= (ccd) ?  (ccd->getInfo().name().toString()
 				+ std::string(" (")
 				+ ccd->getInfo().size().toString()
 				+ std::string(")"))

@@ -1,14 +1,35 @@
 /*
- * TrackingProcess.cpp -- Tracking Process
+ * TrackingWork.cpp -- Tracking Process
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <TrackingProcess.h>
+#include <TrackingWork.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <sstream>
+#include <iomanip>
 
 namespace astro {
 namespace guiding {
+
+/**
+ * \brief output a tracking history entry
+ */
+std::ostream&	operator<<(std::ostream& out, const trackinghistoryentry& entry) {
+	out << std::fixed << std::setprecision(3) << entry.first;
+	out << ",";
+	out << entry.second;
+	return out;
+}
+
+/**
+ * \brief convert a tracking history entry to string
+ */
+std::string	toString(const trackinghistoryentry& entry) {
+	std::ostringstream	out;
+	out << entry;
+	return out.str();
+}
 
 /**
  * \brief Construct a new tracking process
@@ -18,13 +39,15 @@ namespace guiding {
  * The initialization ensures that the normal drift of the mount is
  * corrected even when no tracking is active. 
  */
-TrackingProcess::TrackingProcess(Guider& _guider, TrackerPtr _tracker,
-	DrivingProcess& drivingprocess)
-	: GuidingProcess(_guider, _tracker),
-	  _drivingprocess(drivingprocess) {
+TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
+	DrivingWork& driving)
+	: GuidingProcess(_guider, _tracker), _driving(driving) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
+
+	// set the default tracking length -1, which turns the history off
+	_history_length = -1;
 
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
@@ -43,8 +66,10 @@ TrackingProcess::TrackingProcess(Guider& _guider, TrackerPtr _tracker,
 		throw std::runtime_error(msg);
 	}
 
-	// inform the drive thread about the default correction
-	_drivingprocess.setCorrection(tx, ty);
+	// inform the drive thread about the default correction. This will
+	// correct the default offset for 1 second.
+	// We expect to have done something more useful by then
+	_driving.setCorrection(tx, ty);
 }
 
 /**
@@ -54,13 +79,13 @@ TrackingProcess::TrackingProcess(Guider& _guider, TrackerPtr _tracker,
  * driving process may need data structures that would otherwise go away
  * before it terminates. The wait time is at most _interval + 1.
  */
-TrackingProcess::~TrackingProcess() {
+TrackingWork::~TrackingWork() {
 	try {
 		stop();
 		wait(_interval + 1);
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"TrackingProcess destructor throws exception: %s",
+			"TrackingWork destructor throws exception: %s",
 			x.what());
 	}
 }
@@ -71,7 +96,7 @@ TrackingProcess::~TrackingProcess() {
  * This accessor enforces the minimum time interval of 1 second, allthough
  * it is not quite clear why we want this, we certainly could go quicker.
  */
-void	TrackingProcess::interval(const double& i) {
+void	TrackingWork::interval(const double& i) {
 	// remember the tracker
 	if (i < 1) {
 		std::string	msg = stringprintf("cannot guide in %.3f "
@@ -85,7 +110,7 @@ void	TrackingProcess::interval(const double& i) {
 /**
  * \brief Main function for the tracking
  */
-void	TrackingProcess::main(GuidingThread<TrackingProcess>& thread) {
+void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: tracker main function started");
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop
@@ -117,6 +142,13 @@ void	TrackingProcess::main(GuidingThread<TrackingProcess>& thread) {
 			"TRACK: current tracker offset: %s",
 			offset.toString().c_str());
 
+		// find out whether the tracker can still track, terminate
+		// if not
+		if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "loss of tracking");
+			return;
+		}
+
 		// The correction should happen within a certain time.
 		// Ideally, when we come back with the next tracker image,
 		// the offset should have been corrected completely.
@@ -134,25 +166,40 @@ void	TrackingProcess::main(GuidingThread<TrackingProcess>& thread) {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = guider().calibration()(offset,
-			correctiontime);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: correction: %s",
+		Point	correction = gain() * guider().calibration()(offset,
+				correctiontime);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK: offset = %s, correction = %s",
+			offset.toString().c_str(),
 			correction.toString().c_str());
+
+		// add the correction to the history
+		addHistory(correction);
 
 		// compute the correction, but this must be done with tx, ty
 		// protected from concurrent access, because it may be in an
 		// illegal state temporarily. We also have to divide by the
 		// interval, assuming that we will correct the offset by the
 		// time we get the next image
-		double	tx = -_gain * correction.x() / correctiontime;
-		if (tx > 1) { tx = 1; }
-		if (tx < -1) { tx = -1; }
-		double	ty = -_gain * correction.y() / correctiontime;
-		if (ty > 1) { ty = 1; }
-		if (ty < -1) { ty = -1; }
+		double	tx = -correction.x();
+		double	ty = -correction.y();
 
 		// inform the drive thread about what it should do next
-		_drivingprocess.setCorrection(tx, ty);
+		_driving.setCorrection(tx, ty);
+		//_driving.setCorrection(0, 0);
+
+		// remember information for monitoring
+		_lastaction = Timer::gettime();
+		_offset = offset;
+		_activation = -correction;
+
+		// inform the callback, if there is one
+		if (guider().trackingcallback) {
+			callback::CallbackDataPtr	trackinginfo(
+				new TrackingInfo(_lastaction, _offset,
+					_activation));
+			(*(guider().trackingcallback))(trackinginfo);
+		}
 
 		// this is a possible cancellation point
 		if (thread.terminate()) {
@@ -169,6 +216,58 @@ void	TrackingProcess::main(GuidingThread<TrackingProcess>& thread) {
 			Timer::sleep(sleeptime);
 		}
 	}
+}
+
+/**
+ * \brief Add a new entry to the tracking history
+ *
+ * This method removes entries from the front of the tracking history if
+ * the history would otherwise become too large.
+ * \param point		new tracking offset
+ */
+void	TrackingWork::addHistory(const Point& point) {
+	// return immediately if the tracking history is turned off
+	if (_history_length < 0) {
+		return;
+	}
+	double	now = Timer::gettime();
+	trackinghistoryentry	entry(now, point);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking history entry: %s",
+		toString(entry).c_str());
+	// _history_length == 0 means unlimited tracking history length
+	if (_history_length > 0) {
+		while (trackinghistory.size() > _history_length) {
+			trackinghistory.pop_front();
+		}
+	}
+	trackinghistory.push_back(entry);
+	// for debugging
+	dumpHistory(std::cout);
+}
+
+/**
+ * \brief Dump the tracking history to a stream
+ */
+void	TrackingWork::dumpHistory(std::ostream& out) {
+	trackinghistory_type::const_iterator	i;
+	for (i = trackinghistory.begin(); i != trackinghistory.end(); i++) {
+		out << (*i) << std::endl;
+	}
+}
+
+/**
+ * \brief retrieve last action information
+ *
+ * \param actiontime	time since the last action happened
+ * \param offset	the tracking offset detected by the tracker
+ * \param activation	the activation applied to the guider port to correct
+ *			the tracker offset
+ */
+void	TrackingWork::lastAction(double& actiontime, Point& offset,
+		Point& activation) {
+	actiontime = Timer::gettime() - _lastaction;
+	offset = _offset;
+	activation = _activation;
 }
 
 } // namespace guiding

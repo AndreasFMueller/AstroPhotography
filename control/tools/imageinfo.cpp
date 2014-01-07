@@ -55,7 +55,7 @@ void	show_imageinfo(const std::string& filename) {
 /**
  * \brief main function
  */
-int	main(int argc, char *argv[]) {
+int	imageinfo_main(int argc, char *argv[]) {
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {
@@ -85,7 +85,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::imageinfo_main(argc, argv);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "imageinfo terminated: %s",
 			x.what());

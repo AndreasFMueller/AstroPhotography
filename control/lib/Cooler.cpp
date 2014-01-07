@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <AstroFormat.h>
 #include <unistd.h>
+#include <AstroDebug.h>
 
 using namespace astro::image;
 using namespace astro::device;
@@ -16,30 +17,62 @@ namespace camera {
 
 DeviceName::device_type	Cooler::devicetype = DeviceName::Cooler;
 
+/**
+ * \brief auxiliary function to produce a default 
+ */
 DeviceName	Cooler::defaultname(const DeviceName& parent,
 			const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Cooler, unitname);
 }
 
+/**
+ * \brief Create a cooler from the name
+ */
 Cooler::Cooler(const DeviceName& name) : Device(name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
+		Device::name().name().c_str());
 	temperature = 25 + 273.1;
 }
 
+/**
+ * \brief Create a cooler from the unit name
+ */
 Cooler::Cooler(const std::string& name) : Device(name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
+		Device::name().name().c_str());
 	temperature = 25 + 273.1;
 }
 
+/**
+ * \brief Destroy the cooler
+ */
 Cooler::~Cooler() {
 }
 
+/**
+ * \brief Get the current set temperature
+ */
 float	Cooler::getSetTemperature() {
 	return temperature;
 }
 
+/**
+ * \brief Retrieve the actual temperature
+ *
+ * Not all coolers can report the actual temperature. This method must
+ * be overridden by concrete Cooler implementations.
+ */
 float	Cooler::getActualTemperature() {
 	throw std::runtime_error("cannot measure temperature");
 }
 
+/**
+ * \brief Set the set temperature
+ *
+ * Temperature must be absolute, so temperatures below 0 are rejected as
+ * well as temperatures above 350K, as they correspond to heaters rather
+ * than coolers.
+ */
 void	Cooler::setTemperature(float _temperature) {
 	if (_temperature < 0) {
 		throw std::range_error("negative absolute temperature");
@@ -50,9 +83,19 @@ void	Cooler::setTemperature(float _temperature) {
 	temperature = _temperature;
 }
 
+/**
+ * \brief Turn the cooler on/off
+ *
+ * This is an empty implementation that must be overridden by driver classes.
+ */
 void	Cooler::setOn(bool onoff) {
 }
 
+/**
+ * \brief Whether or not the cooler is in
+ *
+ * This is a default implementation, must be overridden by driver classes.
+ */
 bool	Cooler::isOn() {
 	return true;
 }
@@ -61,18 +104,19 @@ bool	Cooler::isOn() {
  * \brief Add temperature metadata to an image
  */
 void	Cooler::addTemperatureMetadata(ImageBase& image) {
+	// if the cooler is not on, then there is nothing to add to the image
 	if (!isOn()) {
 		return;
 	}
 
-	// set temperature
+	// add set temperature information to the image (SET-TEMP)
 	Metavalue	mvsettemp(
 		this->getSetTemperature() - 273.1,
 		std::string("CCD temperature setpoint in "
 			"degrees C"));
 	image.setMetadata(std::string("SET-TEMP"), mvsettemp);
 	
-	// actual temperature
+	// add actual temperature info to the image (CCD-TEMP)
 	try {
 		Metavalue	mvtemp(getActualTemperature() - 273.1,
 			std::string("actual measured sensor temperature "

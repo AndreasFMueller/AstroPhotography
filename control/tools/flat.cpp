@@ -44,7 +44,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a dark image from them.
  */
-int	main(int argc, char *argv[]) {
+int	flat_main(int argc, char *argv[]) {
 	Exposure	exposure;
 	double	exposuretime = 1;
 	unsigned int	nimages = 3;
@@ -73,7 +73,7 @@ int	main(int argc, char *argv[]) {
 			nimages = atoi(optarg);
 			break;
 		case 't':
-			temperature = atof(optarg);
+			temperature = atof(optarg) + 273.1;
 			break;
 		case 'm':
 			modulename = optarg;
@@ -137,7 +137,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::flat_main(argc, argv);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
 			"exception: %s", x.what());

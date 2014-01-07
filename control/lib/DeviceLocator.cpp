@@ -5,6 +5,7 @@
  */
 #include <AstroLocator.h>
 #include <AstroCamera.h>
+#include <config.h>
 
 using namespace astro::camera;
 
@@ -14,6 +15,11 @@ namespace device {
 //////////////////////////////////////////////////////////////////////
 // DeviceCacheAdapter implementation
 //////////////////////////////////////////////////////////////////////
+
+template<>
+AdaptiveOpticsPtr	DeviceCacheAdapter<AdaptiveOptics>::get0(const DeviceName& name) {
+	return _locator->getAdaptiveOptics0(name);
+}
 
 template<>
 CameraPtr	DeviceCacheAdapter<Camera>::get0(const DeviceName& name) {
@@ -26,8 +32,8 @@ CcdPtr	DeviceCacheAdapter<Ccd>::get0(const DeviceName& name) {
 }
 
 template<>
-GuiderPortPtr	DeviceCacheAdapter<GuiderPort>::get0(const DeviceName& name) {
-	return _locator->getGuiderPort0(name);
+CoolerPtr	DeviceCacheAdapter<Cooler>::get0(const DeviceName& name) {
+	return _locator->getCooler0(name);
 }
 
 template<>
@@ -36,21 +42,21 @@ FilterWheelPtr	DeviceCacheAdapter<FilterWheel>::get0(const DeviceName& name) {
 }
 
 template<>
-CoolerPtr	DeviceCacheAdapter<Cooler>::get0(const DeviceName& name) {
-	return _locator->getCooler0(name);
+FocuserPtr	DeviceCacheAdapter<Focuser>::get0(const DeviceName& name) {
+	return _locator->getFocuser0(name);
 }
 
 template<>
-FocuserPtr	DeviceCacheAdapter<Focuser>::get0(const DeviceName& name) {
-	return _locator->getFocuser0(name);
+GuiderPortPtr	DeviceCacheAdapter<GuiderPort>::get0(const DeviceName& name) {
+	return _locator->getGuiderPort0(name);
 }
 
 //////////////////////////////////////////////////////////////////////
 // DeviceLocator implementation
 //////////////////////////////////////////////////////////////////////
 DeviceLocator::DeviceLocator() :
-	cameracache(this), ccdcache(this), guiderportcache(this),
-	filterwheelcache(this), coolercache(this), focusercache(this) {
+	aocache(this), cameracache(this), ccdcache(this), coolercache(this),
+	filterwheelcache(this), focusercache(this), guiderportcache(this) {
 }
 
 DeviceLocator::~DeviceLocator() {
@@ -67,6 +73,10 @@ std::string	DeviceLocator::getVersion() const {
 std::vector<std::string>	DeviceLocator::getDevicelist(const DeviceName::device_type device) {
 	std::vector<std::string>	devices;
 	return devices;
+}
+
+astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics0(const DeviceName& name) {
+	throw std::runtime_error("adaptive optics not implemented");
 }
 
 astro::camera::CameraPtr	DeviceLocator::getCamera0(const DeviceName& name) {
@@ -93,6 +103,9 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {
 	throw std::runtime_error("focuser not implemented");
 }
 
+astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics(const std::string& name) {
+	return aocache.get(name);
+}
 
 astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
 	return cameracache.get(name);
@@ -100,6 +113,10 @@ astro::camera::CameraPtr	DeviceLocator::getCamera(const std::string& name) {
 
 astro::camera::CcdPtr	DeviceLocator::getCcd(const std::string& name) {
 	return ccdcache.get(name);
+}
+
+astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
+	return coolercache.get(name);
 }
 
 astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
@@ -110,26 +127,33 @@ astro::camera::CameraPtr	DeviceLocator::getCamera(size_t index) {
 	return getCamera(cameras[index]);
 }
 
-astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& name) {
-	return guiderportcache.get(name);
-}
-
 astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel(const std::string& name) {
 	return filterwheelcache.get(name);
-}
-
-astro::camera::CoolerPtr	DeviceLocator::getCooler(const std::string& name) {
-	return coolercache.get(name);
 }
 
 astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
 	return focusercache.get(name);
 }
 
+astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& name) {
+	return guiderportcache.get(name);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Locator Adapter class
 //////////////////////////////////////////////////////////////////////
+
+// Adaptive Optics
+template<>
+astro::camera::AdaptiveOpticsPtr	LocatorAdapter<astro::camera::AdaptiveOptics>::get(const DeviceName& name) {
+	return _locator->getAdaptiveOptics(name);
+}
+
+template<>
+astro::camera::AdaptiveOpticsPtr	LocatorAdapter<astro::camera::AdaptiveOptics>::get0(const DeviceName& name) {
+	return _locator->getAdaptiveOptics(name);
+}
 
 // Camera
 template<>

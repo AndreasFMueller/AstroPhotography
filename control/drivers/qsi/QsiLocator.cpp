@@ -24,7 +24,7 @@ static std::string      qsi_name("qsi");
 static std::string      qsi_version(VERSION);
 
 /**
- * \brief Module descriptor for the QSI module
+ * \brief Module descriptor for the Quantum Scientific Imaging (QSI) module
  */
 class QsiDescriptor : public ModuleDescriptor {
 public:

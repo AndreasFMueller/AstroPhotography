@@ -12,10 +12,17 @@
 using namespace astro::image;
 
 /**
- * \brief Astro library namespace
+ * \brief The astro namespace is used for all classes of the astro library
  *
- * All standalone classes are in this namespace. Only the CORBA related
- * classes are in the separate namespace Astro.
+ * A client of the CORBA server does not use these classes, but uses the
+ * interfaces defined in the IDL instead. Those interfaces are all in the
+ * the namespace Astro (capital A).
+ *
+ * Some of the definitions in the Astro namespace have corresponding
+ * definitions in the astro namespace, although with slight modifications
+ * e.g. to handle access restrictions or type restrictions. There is 
+ * a set of conversion functions to bridge the gap between the two
+ * namespaces.
  */
 namespace astro {
 
@@ -48,7 +55,9 @@ public:
 	operator double() const;
 };
 Point	operator*(double l, const Point& other);
+
 std::ostream&	operator<<(std::ostream& out, const Point& other);
+std::istream&	operator>>(std::istream& in, Point& other);
 
 } // namespace astro
 

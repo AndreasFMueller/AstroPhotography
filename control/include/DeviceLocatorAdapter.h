@@ -26,16 +26,16 @@ template<>
 Ccd_ptr	DeviceLocatorAdapter<Ccd_ptr>::get(const char *name);
 
 template<>
-GuiderPort_ptr	DeviceLocatorAdapter<GuiderPort_ptr>::get(const char *name);
+Cooler_ptr	DeviceLocatorAdapter<Cooler_ptr>::get(const char *name);
 
 template<>
 FilterWheel_ptr	DeviceLocatorAdapter<FilterWheel_ptr>::get(const char *name);
 
 template<>
-Cooler_ptr	DeviceLocatorAdapter<Cooler_ptr>::get(const char *name);
+Focuser_ptr	DeviceLocatorAdapter<Focuser_ptr>::get(const char *name);
 
 template<>
-Focuser_ptr	DeviceLocatorAdapter<Focuser_ptr>::get(const char *name);
+GuiderPort_ptr	DeviceLocatorAdapter<GuiderPort_ptr>::get(const char *name);
 
 } // namespace Astro
 

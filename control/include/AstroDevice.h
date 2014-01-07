@@ -22,8 +22,8 @@ namespace astro {
  */
 class DeviceName : public std::vector<std::string> {
 public:
-	typedef enum { Camera, Ccd, Cooler, Filterwheel, Guiderport, Focuser, Module }
-		device_type;
+	typedef enum { AdaptiveOptics, Camera, Ccd, Cooler, Filterwheel,
+		Focuser, Guiderport, Module } device_type;
 	static std::string	type2string(const device_type& type);
 	static device_type	string2type(const std::string& name);
 private:
@@ -61,6 +61,7 @@ public:
 	bool	operator<(const DeviceName& other) const;
 	// cast to a string
 	operator std::string() const;
+	std::string	toString() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name);

@@ -32,7 +32,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a flat image from them.
  */
-int	main(int argc, char *argv[]) {
+int	makeflat_main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	const char	*darkfilename = NULL;
 	int	c;
@@ -115,7 +115,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::makeflat_main(argc, argv);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "makeflat tool terminated by "
 			"exception: %s", x.what());

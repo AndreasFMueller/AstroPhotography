@@ -43,6 +43,7 @@ public:
 	ImagePoint	operator-(const ImagePoint& other) const;
 	bool	operator<(const ImagePoint& point) const;
 	std::string	toString() const;
+	bool	isZero() const { return (_x == 0) && (_y == 0); }
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImagePoint& point);
@@ -92,6 +93,8 @@ public:
 	ImagePoint	center() const;
 	// scaling
 	ImageSize	operator*(const double l) const;
+	// find out whether the rectangle is uninitialized
+	bool	isEmpty() const { return (_width == 0) && (_height == 0); }
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageSize& size);
@@ -138,7 +141,14 @@ public:
 	ImagePoint	upperleft() const;
 	ImagePoint	lowerleft() const;
 	ImagePoint	lowerright() const;
+	// center
+	ImagePoint	center() const;
+	// find out whether the rectangle is uninitialized
+	bool	isEmpty() const { return _size.isEmpty(); }
 };
+
+std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
+std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
 
 /**
  * \brief Image metadata is stored in a map

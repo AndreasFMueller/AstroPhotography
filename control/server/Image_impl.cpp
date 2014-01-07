@@ -16,14 +16,29 @@ namespace Astro {
  * \brief Construct an Image servant from a file
  */
 Image_impl::Image_impl(const std::string& filename) : _filename(filename) {
+	_image = getImage();
 	// read the image file 
-	setup(getImage());
+	setup();
+}
+
+Image_impl::Image_impl(ImagePtr image) : _image(image) {
+	_filename = save(_image);
+	setup();
+}
+
+Image_impl::~Image_impl() {
+	try {
+		ImageDirectory::remove(_filename);
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove %s: %s",
+			_filename.c_str(), x.what());
+	}
 }
 
 /**
  * \brief Initialize static fields in the implementation
  */
-void	Image_impl::setup(astro::image::ImagePtr _image) {
+void	Image_impl::setup() {
 	// origin
 	_origin.x = _image->origin().x();
 	_origin.y = _image->origin().y();
@@ -94,7 +109,7 @@ CORBA::Long	Image_impl::filesize() {
  * the ORB
  */
 void	Image_impl::remove() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove image %s", _filename.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing image %s", _filename.c_str());
 	// we need a poa to clean up
 	OrbSingleton	orb;
 	PortableServer::POA_var	poa = orb.findPOA(PoaName::images());
@@ -103,6 +118,7 @@ void	Image_impl::remove() {
 	PortableServer::ObjectId_var	oid
 		= PortableServer::string_to_ObjectId(_filename.c_str());
 	poa->deactivate_object(oid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s removed", _filename.c_str());
 }
 
 astro::image::ImagePtr	Image_impl::getImage() {
@@ -168,9 +184,8 @@ ByteImage_impl::~ByteImage_impl() {
 /**
  * \brief Retrieve the raw image data for a short iamge
  */
-Astro::ShortImage::ShortSequence	*ShortImage_impl::getShorts() {
-	Astro::ShortImage::ShortSequence	*result
-		= new Astro::ShortImage::ShortSequence();
+Astro::ShortSequence	*ShortImage_impl::getShorts() {
+	Astro::ShortSequence	*result = new Astro::ShortSequence();
 	astro::image::ImagePtr	_image = getImage();
 	unsigned int	size = _image->size().getPixels();
 	size_t	shorts = astro::image::filter::planes(_image) * size;

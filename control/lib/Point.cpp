@@ -4,8 +4,9 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroTypes.h>
-#include <AstroFormat.h>
+#include <sstream>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 
 namespace astro {
 
@@ -35,11 +36,13 @@ Point	operator*(double l, const Point& other) {
 }
 
 std::string	Point::toString() const {
-	return stringprintf("(%.2f,%.2f)", _x, _y);
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
 }
 
 std::ostream&	operator<<(std::ostream& out, const Point& point) {
-	return out << point.toString();
+	out << "(" << point.x() << "," << point.y() << ")";
 }
 
 bool	Point::operator==(const Point& other) const {
@@ -54,6 +57,18 @@ bool	Point::operator!=(const Point& other) const {
 
 Point::operator double() const {
 	return hypot(_x, _y);
+}
+
+std::istream&	operator>>(std::istream& in, Point& point) {
+	double	x, y;
+	absorb(in, '(');
+	in >> x;
+	absorb(in, ',');
+	in >> y;
+	absorb(in, ')');
+	point.setX(x);
+	point.setY(y);
+	return in;
 }
 
 } // namespace astro

@@ -1,5 +1,5 @@
 /**
- * clamp image
+ * clamp image -- image clamping utility
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -31,13 +31,13 @@ void	usage(const char *progname) {
 	std::cout << "  -M max    clamp the image values to at most <max>"
 		<< std::endl;
 	std::cout << "  -d        increase debug level" << std::endl;
-	std::cout << "  -n, -?    show this help message" << std::endl;
+	std::cout << "  -h, -?    show this help message" << std::endl;
 }
 
 /**
  * \brief Main function in astro namespace
  */
-int	main(int argc, char *argv[]) {
+int	clamp_main(int argc, char *argv[]) {
 	int	c;
 	double	minvalue = -1;
 	double	maxvalue = -1;
@@ -101,7 +101,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::clamp_main(argc, argv);
 	} catch (std::exception& x) {
 		std::string	msg = stringprintf("%s terminated: %s",
 			argv[0], x.what());

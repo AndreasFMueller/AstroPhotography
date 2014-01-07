@@ -62,4 +62,12 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+
+#ifdef HAVE_MATH_H
+#include <math.h>
+#endif /* HAVE_MATH_H */
+
 #endif /* _includes_h */

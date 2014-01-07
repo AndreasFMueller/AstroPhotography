@@ -6,7 +6,6 @@
 #ifndef _AstroDebug_h
 #define _AstroDebug_h
 
-#include <config.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <stdarg.h>

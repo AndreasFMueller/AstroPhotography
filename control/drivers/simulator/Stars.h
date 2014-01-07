@@ -108,16 +108,51 @@ public:
  */
 class StarCameraBase {
 	ImageRectangle	_rectangle;
+	/**
+	 * \brief Translation to be applied to the star field
+	 */
 	Point	_translation;
+	/**
+	 * \brief Rotation angle 
+ 	 */
 	double	_alpha;
+	/**
+	 * \brief Factor by which to stretch the star field
+ 	 */
 	double	_stretch;
+	/**
+	 * \brief Dark value
+ 	 */
 	double	_dark;
+	/**
+	 * \brief Noise standard deviation
+ 	 */
 	double	_noise;
+	/**
+	 * \brief Whether or not the camera shutter is open
+	 */
 	bool	_light;
+	/**
+	 * \brief Color
+ 	 */
 	int	_color;
-	void	addHotPixel();
+	/**
+	 * \brief The outer radius if the image is out of focus
+	 *
+	 * Set this value to 0 to get focused images
+	 */
 	double	_radius;
+	/**
+	 * \brief Inner radius to simulate donuts
+	 *
+	 * reflector telescopes have images that show "donuts" when they
+	 * are out of focus. This value describes the inner radius
+	 */
 	double	_innerradius;
+	void	addHotPixel();
+	/**
+	 * \brief Binning mode to apply when exposing
+	 */
 	astro::camera::Binning	_binning;
 	double	bin0(Image<double>& image, unsigned int x, unsigned int y) const;
 	void	fill0(Image<double>& image, const ImagePoint& point,
@@ -142,40 +177,52 @@ public:
 	}
 	const ImageRectangle&	rectangle() const { return _rectangle; }
 
+	// accessors to the translation
 	const Point&	translation() const { return _translation; }
 	void	translation(const Point& translation) {
 		_translation = translation;
 	}
 
+	// accessors for the rotation angle
 	const double&	alpha() const { return _alpha; }
 	void	alpha(const double& alpha) { _alpha = alpha; }
 
+	// accessor for the stretch factor
 	const double&	stretch() const { return _stretch; }
 	void	stretch(const double& stretch) { _stretch = stretch; }
 
+	// accessor for the dark value
 	const double&	dark() const { return _dark; }
 	void	dark(const double& dark) { _dark = dark; }
 
+	// accessor for the noise standard deviation
 	const double&	noise() const { return _noise; }
-	void	noise(const double& noise) { _noise = noise; }
+	//void	noise(const double& noise) { _noise = noise; }
+	void	noise(const double& noise);
 
+	// accessor for the shutter flag
 	const bool&	light() const { return _light; }
 	void	light(const bool& light) { _light = light; }
 
+	// accessor for the color parameter
 	const int&	color() const { return _color; }
 	void	colorfactor(const int& color) { _color = color; }
 
+	// accessor for the out of focus radius
 	const double&	radius() const { return _radius; }
 	void	radius(const double& radius) { _radius = radius; }
 
+	// accessor for the inner radius for donuts
 	const double&	innerradius() const { return _innerradius; }
 	void	innerradius(const double& innerradius) {
 		_innerradius = innerradius;
 	}
 
+	// accessor for the binning mode
 	const astro::camera::Binning&	binning() const { return _binning; }
 	void	binning(const astro::camera::Binning& binning) { _binning = binning; }
 
+	// imaging operator
 	Image<double>	*operator()(const StarField& field) const;
 };
 

@@ -27,13 +27,19 @@ class guidercommand : public clicommand {
 	void	offset(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
 
+	void	image(GuiderWrapper& guider,
+			const std::vector<std::string>& arguments);
+
 	void	star(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
 
-	void	calibrate(GuiderWrapper& guider,
+	void	start(GuiderWrapper& guider,
+			const std::vector<std::string>& arguments);
+	void	stop(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
 	void	wait(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
+
 	void	calibration(GuiderWrapper& guider,
 			const std::vector<std::string>& arguments);
 public:

@@ -54,8 +54,11 @@ std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
 
 std::istream&	operator>>(std::istream& in, ImagePoint& point) {
 	unsigned int	x, y;
-	char	c;
-	in >> c >> x >> c >> y;
+	char	p1, c, p2;
+	in >> p1 >> x >> c >> y >> p2;
+	if ((p1 != '(') || (c != ',') || (p2 != ')')) {
+		throw std::runtime_error("not a point specification");
+	}
 	point.setX(x);
 	point.setY(y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image point: %s",

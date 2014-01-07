@@ -70,21 +70,30 @@ double	StarCameraBase::noisevalue() const {
 	return _noise * inverf(x);
 }
 
+
+void    StarCameraBase::noise(const double& n) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set noise value to %f", n);
+	_noise = n;
+}
+
 /**
  * \brief Compute the image of a star field
  *
  * This method computes the distribution of the stars, with appropriate
  * transformations, and the effect of the focuser.
  */
-
 Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// find out how large we should make the field which we will later
-	// transform
+	// transform. This must be large enough so that we catch starts that 
+	// are just ouside the image area, because the will show up when
+	// the image is out of focus.
 	ImageSize	size = rectangle().size();
 	ImagePoint	offset;
 	if (0 != _radius) {
 		size = ImageSize(size.width() + 2 * _radius + 1,
 				size.height() + 2 * _radius + 1);
+		// we need to ensure that the size is a multiple of
+		// 256 so that the Blurr will work
 		int	width = 256 * (1 + size.width() / 256);
 		int	height = 256 * (1 + size.height() / 256);
 		size = ImageSize(width, height);
@@ -92,6 +101,8 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 			(size.width() - rectangle().size().width()) / 2,
 			(size.height() - rectangle().size().height()) / 2
 		);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s, offset: %s",
+			size.toString().c_str(), offset.toString().c_str());
 	}
 
 	// Here is an ASCII graphic of what we want to accomplish:

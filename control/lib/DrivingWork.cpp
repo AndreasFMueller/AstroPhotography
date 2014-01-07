@@ -1,9 +1,9 @@
 /*
- * DrivingProcess.cpp -- thread handling the guider port during guiding
+ * DrivingWork.cpp -- thread handling the guider port during guiding
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <DrivingProcess.h>
+#include <DrivingWork.h>
 #include <AstroUtils.h>
 
 namespace astro {
@@ -16,12 +16,15 @@ namespace guiding {
  * on the main function. This will be done by the super class' start
  * method.
  */
-DrivingProcess::DrivingProcess(Guider& _guider)
+DrivingWork::DrivingWork(Guider& _guider)
 	: GuidingProcess(_guider, TrackerPtr()) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingProcess");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingWork");
 	pthread_mutex_init(&mutex, NULL);
-	tx = 0;
-	ty = 0;
+	defaultx = 0;
+	defaulty = 0;
+	totalx = 0;
+	totaly = 0;
+	stepx = stepy = 1;
 	_interval = 1;
 }
 
@@ -31,7 +34,7 @@ DrivingProcess::DrivingProcess(Guider& _guider)
  * This non-inline implementation is necessary to ensure proper locking of
  * the shared _interval variable.
  */
-void	DrivingProcess::interval(const double& i) {
+void	DrivingWork::interval(const double& i) {
 	GuidingLock	lock(&mutex);
 	_interval = i;
 }
@@ -43,7 +46,7 @@ void	DrivingProcess::interval(const double& i) {
  * can destroy the mutex. This is why we cannot simply stop the thread
  * in the superclass destructor.
  */
-DrivingProcess::~DrivingProcess() {
+DrivingWork::~DrivingWork() {
 	try {
 		stop();
 		wait(_interval + 1);
@@ -52,7 +55,7 @@ DrivingProcess::~DrivingProcess() {
 			x.what());
 	}
 	pthread_mutex_destroy(&mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DrivingProcess terminated");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DrivingWork terminated");
 }
 
 /**
@@ -61,11 +64,22 @@ DrivingProcess::~DrivingProcess() {
  * The variables tx and ty are needed by the main method so we must
  * properly lock that method out when we change them.
  */
-void	DrivingProcess::setCorrection(const double& _tx, const double& _ty) {
+void	DrivingWork::setCorrection(const double& _tx, const double& _ty) {
 	GuidingLock	lock(&mutex);
-	tx = _tx;
-	ty = _ty;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating tx = %f, ty = %f", tx, ty);
+	totalx = fabs(_tx);
+	totaly = fabs(_ty);
+	stepx = (_tx > 0) ? 1 : -1;
+	stepy = (_ty > 0) ? 1 : -1;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating totalx = %f, totaly = %f",
+		totalx, totaly);
+}
+
+/**
+ * \brief Set default correction
+ */
+void	DrivingWork::defaultCorrection(const double& _tx, const double& _ty) {
+	defaultx = _tx;
+	defaulty = _ty;
 }
 
 /**
@@ -79,7 +93,7 @@ void	DrivingProcess::setCorrection(const double& _tx, const double& _ty) {
  * _interval variable, so the method just computes the time to activate
  * the guiderport and then goes to sleep for the rest of the interval.
  */
-void	DrivingProcess::main(GuidingThread<DrivingProcess>& thread) {
+void	DrivingWork::main(GuidingThread<DrivingWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GUIDE: thread main function starts");
 	do {
 		double	raplus = 0, raminus = 0;
@@ -89,16 +103,38 @@ void	DrivingProcess::main(GuidingThread<DrivingProcess>& thread) {
 		// data we read my be inconsistent.
 		{
 			GuidingLock	lock(&mutex);
-			if (tx > 0) {
-				raplus = tx * _interval;
+			if (totalx > 0) {
+				double	dx = std::min(_interval, totalx);
+				if (stepx > 0) {
+					raplus = dx;
+				} else {
+					raminus = dx;
+				}
+				totalx -= dx;
 			} else {
-				raminus = -tx * _interval;
+				if (defaultx > 0) {
+					raplus = defaultx * _interval;
+				} else {
+					raminus = -defaultx * _interval;
+				}
 			}
-			if (ty > 0) {
-				decplus = ty * _interval;
+			if (totaly > 0) {
+				double	dy = std::min(_interval, totaly);
+				if (stepy > 0) {
+					decplus = dy;
+				} else {
+					decminus = dy;
+				}
+				totaly -= dy;
 			} else {
-				decminus = -ty * _interval;
+				if (defaulty > 0) {
+					decplus = defaulty * _interval;
+				} else {
+					decminus = -defaulty * _interval;
+				}
 			}
+			if (totalx < 0) { totalx = 0.; }
+			if (totaly < 0) { totaly = 0.; }
 		}
 
 		// now activate the guider port outputs for the times we found

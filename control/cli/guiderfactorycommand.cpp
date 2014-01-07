@@ -50,7 +50,7 @@ std::string	guiderfactorycommand::help() const {
 	return std::string(
 	"SYNOPSIS\n"
 	"\n"
-	"\tguiderfactory <guider> <cameraname> <ccd-number> <guiderportname>\n"
+	"\tguiderfactory <guider> assign <cameraname> <ccd-number> <guiderportname>\n"
 	"\tguiderfactory <guider> release\n"
 	"\n"
 	"DESCRIPTION\n"

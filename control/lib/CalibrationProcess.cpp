@@ -12,7 +12,6 @@
 
 using namespace astro::image;
 using namespace astro::camera;
-using namespace astro::callback;
 
 namespace astro {
 namespace guiding {
@@ -29,10 +28,12 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 
 	// take an image at that position
 	imager().startExposure(exposure());
+	usleep(1000000 * exposure().exposuretime);
 	ImagePtr	image = guider().getImage();
 
 	// analze the image
 	Point	point = (*tracker())(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker found %s", point.toString().c_str());
 	return point;
 }
 
@@ -53,6 +54,7 @@ void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
 	point = pointat(-ra, -dec);
 	t = Timer::gettime();
 	calibrator.add(t, Point(0, 0), point);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure %.0f/%.0f complete", ra, dec);
 }
 
 /**
@@ -89,7 +91,8 @@ public:
  *
  */
 void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating: terminate = %s",
+		_thread.terminate() ? "YES" : "NO");
 
 	// grid range we want to scan
 	range = 1;
@@ -134,6 +137,7 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 
 	// signal other threads that we are done
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
+	_progress = 1.0;
 }
 
 /**
@@ -141,19 +145,30 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
  *
  * the grid constant normally depends on the focallength and the
  * pixels size. Smaller pixels are larger focallength allow to
- * use a smaller grid constant. The default value of 10 is a good
- * choice for a 100mm guide scope and 7u pixels as for the SBIG
- * ST-i guider kit
+ * use a smaller grid constant. The default value of 10 seems to be
+ * a good  choice for a 100mm guide scope and 7u pixels as for the
+ * SBIG ST-i guider kit
  */
 double	CalibrationProcess::gridconstant(double focallength,
 	double pixelsize) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"grid constant for focallength = %.0fmm, pixelsize = %.1fum",
+		1000 * focallength, 1000000 * pixelsize);
 	double	gridconstant = 10;
 	if ((focallength > 0) && (pixelsize > 0)) {
-		gridconstant = 10 * (pixelsize / 7.4) / (focallength / 100);
-		if (gridconstant < 2) {
-			gridconstant = 2;
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %f",
+		// the angular_default is the angular resolution (in radians)
+		// that is suitable for 10 second drives to calibrate. If 
+		// the pixels are smaller or the focal length is larger,
+		// then a shorter time is ok
+		double	angular_default = 0.0000074 / 0.100;
+		double	angular_resolution = pixelsize / focallength;
+
+		// never make the grid constant smaller than 2 (2 second
+		// drives)
+		gridconstant = std::max(2.,
+			10. * angular_resolution / angular_default);
+		gridconstant = std::min(gridconstant, 10.);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %.3f",
 			gridconstant);
 	}
 	return gridconstant;
@@ -165,13 +180,13 @@ double	CalibrationProcess::gridconstant(double focallength,
 CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
 	: GuidingProcess(_guider, _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
+	_focallength = 0.600;
+	_pixelsize = 0.000010;
 	calibrated = false;
-	// default exposure settings
-	exposure().exposuretime = 1.;
-	exposure().frame = guider().ccd()->getInfo().getFrame();
-	calibrated = false;
+	_progress = 0;
 	// create the thread
-	thread = ThreadPtr(new GuidingThread<CalibrationProcess>(*this));
+	thread(ThreadPtr(new GuidingThread<CalibrationProcess>(*this)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");
 }
 
 /**
@@ -242,8 +257,8 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	if (raminus > t) {
 		t = raminus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f",
-		raplus, raminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f, t = %f",
+		raplus, raminus, t);
 	guiderport()->activate(raplus, raminus, 0, 0);
 	Timer::sleep(t);
 
@@ -259,8 +274,8 @@ void	CalibrationProcess::moveto(double ra, double dec) {
 	if (decplus > t) {
 		t = decplus;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f",
-		decplus, decminus);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f, t = %f",
+		decplus, decminus, t);
 	guiderport()->activate(0, 0, decplus, decminus);
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");

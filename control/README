@@ -1,6 +1,79 @@
 This Project allows to control astrophotographic cameras and accessories
 and delivers a framework to build astrophotography tools.
 
+What's in the subdirectories
+----------------------------
+
+cli
+	a command line client named astro to access the CORBA server
+
+client
+	some client programs for the CORBA server
+
+doc
+	documentation, currently this contains primarily doxygen generated
+	source code documentation
+
+drivers
+	Contains subdirectories for driver classes for all supported
+	cameras and other devices. This include
+
+	microtouch
+		a driver class to control the Microtouch focuser from
+		Starizona
+	mock1, mock2
+		mockup driver modules for testing
+	net
+		a pseudo driver that gives access to remote cameras over
+		the CORBA interface as if the camera wer actually local
+	qhy
+		drivers for QHYCCD cameras
+	qsi
+		driver for Quantum Scientific Imaging cameras, requires
+		the open source QSI API library to be installed.
+	sbig
+		driver for SBIG cameras. Note that this requires the
+		proprietary SBIG library, which does not support ARM Linux
+	simulator
+		a simulated camera with cooler, focuser and guider port
+		for testing during the day and without a telescope ;-)
+	sx
+		driver for starlight express cameras
+	unicap
+		driver for USB video class cameras, based on the Unicap
+		library and video4linux
+	uvc
+		user space driver for USB video class cameras
+
+idl
+	Interface Definition Language files for all CORBA services
+
+include
+	header files
+
+lib
+	implementation of all classes defined in public header files
+
+man
+	manual pages for all installed programs
+
+root
+	During development, this directory is used as the root directory
+	for the install target.
+
+server
+	Source code for the CORBA server functions
+
+test
+	Some test programs that depend on 
+
+tools
+	some command line tools, mostly for testing
+
+
+Building the software
+---------------------
+
 This is an autotools and libtool based package. To build it, make sure
 you have installed have installed autotools and libtool. Then create
 the build files using
@@ -15,6 +88,13 @@ Then configure the package using the included configureit script. This
 script sets some configure options useful for debugging and development,
 e.g. it configures it to install in the directory root. Some tests
 expect it to be installed there.
+
+As a help to configuring the package, the script configureit is provided.
+I use it to select the right configure options on my various development
+platforms.
+
+Dependencies
+------------
 
 The project depends on the following external packages to compile.
 

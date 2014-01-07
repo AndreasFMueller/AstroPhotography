@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 namespace astro {
 
@@ -67,26 +68,34 @@ std::string	DeviceName::name() const {
 	return c;
 }
 
+std::string	DeviceName::toString() const {
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
+}
+
 /**
  * \brief Type conversion from name to type code
  */
-#define	Ntypes	7
+#define	Ntypes	8
 static std::string	typenames[Ntypes] = {
+	"adaptiveoptics",
 	"camera",
 	"ccd",
 	"cooler",
 	"filterwheel",
-	"guiderport",
 	"focuser",
+	"guiderport",
 	"module"
 };
 static DeviceName::device_type	typecode[Ntypes] = {
+	DeviceName::AdaptiveOptics,
 	DeviceName::Camera,
 	DeviceName::Ccd,
 	DeviceName::Cooler,
 	DeviceName::Filterwheel,
-	DeviceName::Guiderport,
 	DeviceName::Focuser,
+	DeviceName::Guiderport,
 	DeviceName::Module
 };
 

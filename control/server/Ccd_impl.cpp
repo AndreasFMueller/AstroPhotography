@@ -209,6 +209,8 @@ Cooler_ptr	Ccd_impl::getCooler() {
 		throw notimplemented;
 	}
 	CoolerPtr	cooler = _ccd->getCooler();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a cooler: %s",
+		cooler->name().toString().c_str());
 
 	// Use the ServantBuilder to create a servant
 	ServantBuilder<Cooler, Cooler_impl>	servantbuilder;

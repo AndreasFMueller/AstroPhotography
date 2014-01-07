@@ -6,7 +6,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastro.la
+lib_LTLIBRARIES = libastro.la libcorbastro.la
 
 if ENABLE_UNICAP
 unicap_flies = UnicapDevice.cpp
@@ -24,7 +24,14 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
+libcorbastro_la_SOURCES = \
+	Conversions.cpp NameService.cpp OrbSingleton.cpp \
+	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
+	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
+	guiderSK.cc tasksSK.cc
+
+libastro_la_SOURCES = debug.cpp utils.cpp \
+	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
 	URL.cpp DeviceName.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
@@ -35,17 +42,19 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
-	Tracker.cpp Guider.cpp GuidingProcess.cpp GuiderStateMachine.cpp \
+	Tracker.cpp Guider.cpp ThreadBase.cpp \
+	GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
-	TrackingProcess.cpp DrivingProcess.cpp \
+	TrackingWork.cpp DrivingWork.cpp \
 	GuiderCalibrator.cpp GuiderCalibration.cpp \
 	GuiderFactory.cpp \
 	Simulator.cpp \
 	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
-	ImageProgramCallback.cpp \
+	ImageProgramCallback.cpp SaveImageCallback.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
 	DeviceAccessor.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
+	AdaptiveOptics.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
@@ -55,13 +64,10 @@ libastro_la_SOURCES = debug.cpp Format.cpp Timer.cpp Concatenator.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
 	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \
 	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
-	Conversions.cpp NameService.cpp OrbSingleton.cpp \
-	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
 	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
 	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
-	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
-	guiderSK.cc tasksSK.cc \
+	Tracking.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

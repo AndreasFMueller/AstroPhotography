@@ -33,7 +33,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a dark image from them.
  */
-int	main(int argc, char *argv[]) {
+int	makedark_main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "do:")))
@@ -90,7 +90,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::makedark_main(argc, argv);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
 			"exception: %s", x.what());

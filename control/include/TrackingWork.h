@@ -1,16 +1,32 @@
 /*
- * TrackingProcess.h -- thread handling the camera during guiding
+ * TrackingWork.h -- thread handling the camera during guiding
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _TrackingProcess_h
-#define _TrackingProcess_h
+#ifndef _TrackingWork_h
+#define _TrackingWork_h
 
 #include <GuidingProcess.h>
-#include <DrivingProcess.h>
+#include <DrivingWork.h>
+#include <deque>
 
 namespace astro {
 namespace guiding {
+
+/**
+ * \brief Entries in the tracking history
+ */
+typedef	std::pair<double, Point>	trackinghistoryentry;
+
+/**
+ * \brief The tracking history is a double ended queue
+ */
+typedef std::deque<trackinghistoryentry>	trackinghistory_type;
+
+std::ostream&	operator<<(std::ostream& out,
+	const trackinghistoryentry& entry);
+
+std::string	toString(const trackinghistoryentry& entry);
 
 /**
  * \brief Tracking process class
@@ -24,7 +40,27 @@ namespace guiding {
  * the threads that are designed to be independent actually become 
  * synchronized.
  */
-class TrackingProcess : public GuidingProcess {
+class TrackingWork : public GuidingProcess {
+	trackinghistory_type	trackinghistory;
+	void	addHistory(const Point& point);
+public:
+	void	dumpHistory(std::ostream& out);
+
+	/**
+	 * \brief length of the tracking history to keep
+	 *
+	 * The Work class keeps a history of tracking offsets. To keep 
+	 * memory consumption low during long tracking runs, only the
+	 * most recent tracking points are kept, their number is limited by
+	 * the _history_length. The value -1 turns the tracking history off
+	 * completely.
+	 */
+	long	_history_length;
+public:
+	const long&	history_length() const {
+		return _history_length; }
+	void	history_length(const long l) { _history_length = l; }
+private:
 	/**
 	 * \brief 
 	 *
@@ -57,20 +93,30 @@ private:
 	 * This is the driving process. It implements a method setCorrection
 	 * that takes the guider port activation duty cycle data
 	 */
-	DrivingProcess&	_drivingprocess;
+	DrivingWork&	_driving;
 private:
 	// prevent copy
-	TrackingProcess(const TrackingProcess& other);
-	TrackingProcess&	operator=(const TrackingProcess& other);
+	TrackingWork(const TrackingWork& other);
+	TrackingWork&	operator=(const TrackingWork& other);
 public:
-	TrackingProcess(Guider& _guider, TrackerPtr _tracker,
-		DrivingProcess& drivingprocess);
-	~TrackingProcess();
-protected:
-	void	main(GuidingThread<TrackingProcess>& thread);
+	TrackingWork(Guider& _guider, TrackerPtr _tracker,
+		DrivingWork& driving);
+	~TrackingWork();
+
+	void	main(GuidingThread<TrackingWork>& thread);
+private:
+	double	_lastaction;
+	Point	_offset;
+	Point	_activation;
+public:
+	void	lastAction(double& actiontime, Point& offset,
+			Point& activation);
+
+public:
+	astro::callback::CallbackPtr	trackingcallback;
 };
 
 } // namespace guiding
 } // namespace astro
 
-#endif /* _TrackingProcess_h */
+#endif /* _TrackingWork_h */

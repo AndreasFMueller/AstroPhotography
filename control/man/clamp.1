@@ -1,0 +1,41 @@
+.TH CLAMP "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+clamp \- restrict pixel values to a given range
+.SH SYNOPSIS
+.B clamp -dh?
+[
+.BI \-m min
+] [
+.BI \-M max
+]
+.I infile outfile
+.SH DESCRIPTION
+The 
+.BR clamp (1)
+command reads a FITS file specified by the
+.I infile
+argument, restricts the pixel values to interval specified by the
+.I min
+and 
+.I max
+option arguments. It then writes the modified image to the
+.I outfile
+argument. The output file will again be a FITS file witht he same pixel
+type as the input file.
+.SH OPTIONS
+.TP
+.BI \-d
+increase the debug level.
+.TP
+.BI \-m min
+Set the minimum value.
+.TP
+.BI \-M max
+Set the maximum value.
+.TP
+.BI \-h,\-?
+Display a usage message and exit.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

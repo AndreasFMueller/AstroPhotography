@@ -11,6 +11,8 @@
 
 #include <AstroGuiding.h>
 #include <pthread.h>
+#include <TrackingWork.h>
+#include <DrivingWork.h>
 
 using namespace astro::camera;
 
@@ -21,47 +23,42 @@ namespace guiding {
  * \brief Encapsulation of the guiding process
  */
 class GuiderProcess {
-	// guiding: handles the guider port
-	typedef struct thread_s {
-		pthread_attr_t	attr;
-		pthread_t	thread;
-		pthread_cond_t	cond;
-		pthread_mutex_t	mutex;
-	} thread_t;
-	thread_t	guide;
-
-	// tracking: handles the tracker
-	bool	tracking;
-	pthread_attr_t	trackattr;
-	pthread_t	track;
-	
-	// 
-	pthread_mutex_t	mutex; // protects tx, ty variables
-	double	tx, ty;
-	double	gain;
-
 	// common members
 	Guider&	guider;
 	TrackerPtr	tracker;
 
-	// Interval between images
+	// processes for tracking and driving
+	DrivingWork	*drivingwork;
+	TrackingWork	*trackingwork;
+
+	ThreadPtr	tracking;
+	ThreadPtr	driving;
+
+	/**
+	 * \brief Interval between images of the tracking thread
+	 */
 	double	_interval;
 public:
 	const double&	interval() const { return _interval; }
 	void	interval(const double& i) { _interval = i; }
-
-public:
-	// main functions
-	void	*guide_main();
-	void	*track_main();
+private:
+	GuiderProcess(const GuiderProcess& other);
+	GuiderProcess&	operator=(const GuiderProcess& other);
 public:
 	GuiderProcess(Guider& guider, double interval = 10);
 	~GuiderProcess();
 	bool	start(TrackerPtr tracker);
 	bool	stop();
 	bool	wait(double timeout);
+	bool	isrunning() { return tracking->isrunning(); }
+private:
+	double	_gain;
+public:
 	double	getGain() const;
 	void	setGain(double gain);
+
+public:
+	void lastAction(double& actiontime, Point& offset, Point& activation);
 };
 
 } // namespace guiding

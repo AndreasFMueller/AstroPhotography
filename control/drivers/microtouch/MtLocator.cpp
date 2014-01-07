@@ -8,6 +8,7 @@
 #include <AstroCamera.h>
 #include <AstroExceptions.h>
 #include <AstroLoader.h>
+#include <config.h>
 
 namespace astro {
 namespace module {
@@ -82,3 +83,9 @@ FocuserPtr	MtLocator::getFocuser0(const DeviceName& name) {
 } // namespace microtouch
 } // namespace device
 } // namespace astro
+
+extern "C"
+astro::device::DeviceLocator    *getDeviceLocator() {
+        return new astro::device::microtouch::MtLocator();
+}
+

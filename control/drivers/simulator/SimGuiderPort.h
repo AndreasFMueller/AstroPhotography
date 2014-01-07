@@ -25,8 +25,10 @@ class SimGuiderPort : public GuiderPort {
 	double	lastactivation;
 	double	ra, dec;
 	Point	_ravector, _decvector;
-	void	update();
+	SimGuiderPort(const SimGuiderPort& other);
+	SimGuiderPort&	operator=(const SimGuiderPort& other);
 public:
+	void	update();
 	SimGuiderPort(SimLocator& locator);
 	virtual uint8_t	active();
 	virtual void	activate(float raplus, float raminus,

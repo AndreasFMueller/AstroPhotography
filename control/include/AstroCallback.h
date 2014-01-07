@@ -7,6 +7,7 @@
 #define _AstroCallback_h
 
 #include <AstroImage.h>
+#include <ImageDirectory.h>
 
 namespace astro {
 namespace callback {
@@ -54,6 +55,9 @@ public:
 
 /**
  * \brief Program execution callback for images
+ *
+ * This callback executes an external program, the first argument given to
+ * the program is the name of a temporary image file.
  */
 class ImageProgramCallback : public Callback {
 	std::string	_progname;
@@ -67,6 +71,17 @@ public:
 	CallbackDataPtr	operator()(CallbackDataPtr data);
 };
 
+/**
+ * \brief Callback to save an image in an ImageDirectory
+ */
+class SaveImageCallback : public Callback {
+	std::string	lastname;
+public:
+	SaveImageCallback(const std::string& basedir) {
+		image::ImageDirectory::basedir(basedir);
+	}
+	CallbackDataPtr	operator()(CallbackDataPtr data);
+};
 
 } // namespace callback
 } // namespace astro

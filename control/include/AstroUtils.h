@@ -104,6 +104,13 @@ public:
 	static std::string	decode(const std::string& in);
 };
 
+/**
+ * \brief Method to absorb characters from a stream
+ *
+ * This method is very often used when parsing.
+ */
+void	absorb(std::istream& in, char c);
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */

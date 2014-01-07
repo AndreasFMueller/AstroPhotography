@@ -19,7 +19,7 @@ using namespace astro::adapter;
 
 namespace astro {
 
-int	main(int argc, char *argv[]) {
+int	transform_main(int argc, char *argv[]) {
 	// parse command line
 	int	c;
 	Point	translation;
@@ -91,7 +91,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::transform_main(argc, argv);
 	} catch (std::exception& x) {
 		std::cerr << "transform terminated by exception: " << x.what()
 			<< std::endl;

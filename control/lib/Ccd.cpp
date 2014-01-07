@@ -94,7 +94,7 @@ void	CcdInfo::addModes(const BinningSet& modes) {
 std::string	CcdInfo::toString(bool withbinningmodes) const {
 	std::ostringstream	out;
 	out << (std::string)name() <<
-		stringprintf(": %ux%u (%.1fu x %.1fu),",
+		stringprintf(": %ux%u (%.1fum x %.1fum),",
 			_size.width(), _size.height(),
 			_pixelwidth * 1000000, _pixelheight * 1000000);
 	if (withbinningmodes) {
@@ -292,6 +292,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 		if (k > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure %d", k);
 			startExposure(exposure);
+			usleep(1000000 * exposure.exposuretime);
 		}
 		wait();
 		result.push_back(getImage());

@@ -60,7 +60,7 @@ PoaName	PoaName::ccds() {
 }
 
 PoaName	PoaName::coolers() {
-	return ccds().add("FilterWheels");
+	return ccds().add("Coolers");
 }
 
 PoaName	PoaName::focusers() {

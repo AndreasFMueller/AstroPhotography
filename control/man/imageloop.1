@@ -1,0 +1,142 @@
+.TH IMAGELOOP "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+imageloop \- take images in a loop
+.SH SYNOPSIS
+.B dark -dh?FNt
+[
+.I cameraoptions
+] [
+.I exposureoptions
+] [
+.BI \-n nimages
+] [
+.BI \-p period
+] [
+.BI \-o outdir
+] [
+.BI \-L longitude
+] [
+.BI \-l latitude
+] [
+.BI \-P imagescript
+] [
+.BI \-Q sequencescript
+]
+.I 
+.SH DESCRIPTION
+The 
+.BR imageloop (1)
+program takes images in a loop, stores them in an ouput directory.
+The main use of 
+.BR imageloop (1)
+is for imaging programs like an all sky camera lik Starlight
+Express' Oculus sky cam, which allows to take images of the sky.
+In this case, the 
+.BR imageloop (1)
+program can be used to take images all night, and even to put them
+together into an MPEG movie.
+
+.SH OPTIONS
+.TP
+.B \-d
+increase the debug level.
+.TP
+.BI \-P imagescript
+The programm
+.I imagescript
+is executed each time an image has been exposed.
+The name of the file is given as the an argument to the program.
+.TP
+.BI \-Q sequencescript
+When a sequence is complete, e.g. after a night when the
+.B \-N
+option is used, the 
+.I sequencescript 
+is called with the name of the directory where the images are found.
+.TP
+.BI \-n nimages
+Set the number of images to  take for the dark field to
+.IR nimages .
+.TP
+.BI \-E mean
+adapt the exposure time in order to achieve a mean pixel value
+of 
+.IR mean .
+.TP
+.BI \-M median
+adapt the exposreu time order to achieve a median pixel value of
+.IR median .
+.TP
+.BI \-F
+Stay in the foreground. Normally, puts itself in the background.
+.TP
+.BI \-t
+include timestamps in file names.
+.TP
+.BI \-N
+Takes images during the night only. This requires that the
+longitude and latitude are specified using the 
+.B \-L
+and
+.B \-l
+options.
+.TP
+.BI \-p period
+Period between images. 
+.TP
+.BI \-L longitude
+Set the longitude of the observing point.
+.TP
+.BI \-l latitude
+Set the latitude of the observing point.
+.TP
+.BI \-n nimages
+The number of images to take in the loop. This option is incompatible
+with the 
+.B \-N
+option.
+.TP
+.BI \-o outputdir
+Directory where the exposed images are stored in FITS format. 
+If the
+.B \-N
+option is used, then the programm creates a directory hierarchy
+with a directory for the year, the month and the day.
+
+.SH CAMERA OPTIONS
+.TP
+.BI \-C cameranumber
+Choose the camera with number
+.I cameranumber
+with then module chosen.
+.TP
+.BI \-c ccid
+Number of the CCD.
+.TP
+.BI \-m modulename
+Take a camera from the module named
+.BR modulename .
+Cameras are numbered from 0 within a driver module.
+
+.SH EXPOSURE OPTIONS
+.TP
+.BI \-e exposuretime
+Sets the exposure time for the exposures taken by the dark program
+in seconds.
+.TP
+.BI \-w width
+Width of the area to expose.
+.TP
+.BI \-h height
+Height of the area to expose.
+.TP
+.BI \-x xoffset
+x-coordinate of the lower left corner of the area to expose.
+.TP
+.BI \-y yoffset
+y-coordinate of the lower left corner of the area to expose.
+
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

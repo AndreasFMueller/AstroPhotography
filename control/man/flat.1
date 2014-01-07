@@ -1,0 +1,77 @@
+.TH FLAT "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+flat \- build a flat image
+.SH SYNOPSIS
+.B flat -dh?
+[
+.BI \-m modulename
+] [
+.BI \-C cameranumber
+] [
+.BI \-c ccdid
+] [
+.BI \-D darkfile
+] [
+.BI \-e exposuretime
+] [
+.BI \-n nimages
+] [
+.BI \-o flatfilename
+] [
+.BI \-t temperature
+]
+.I 
+.SH DESCRIPTION
+The 
+.BR flat (1)
+command takes a couple of images with identical parameters and
+converts them into a flat field image.
+The flat field image will have double value pixels.
+It will usually be more appropriate to use the
+.BR getimages (1)
+command to a set of images, and to turn them into a
+flat field using the
+.BR makeflat (1)
+command.
+.SH OPTIONS
+.TP
+.BI \-C cameranumber
+Choose the camera with number
+.I cameranumber
+with then module chosen.
+.TP
+.BI \-c ccid
+Number of the CCD.
+.TP
+.BI \-D darkfile
+Use 
+.I darkfile
+as the dark image to apply to the images retrieved before averaging
+them into a flat field.
+.TP
+.B \-d
+increase the debug level.
+.TP
+.BI \-e exposuretime
+Sets the exposure time for the exposures taken by the flat program
+in seconds.
+.TP
+.BI \-o flatfile
+The flat file to be written.
+.TP
+.BI \-m modulename
+Take a camera from the module named
+.BR modulename .
+Cameras are numbered from 0 within a driver module.
+.TP
+.BI \-n nimages
+Set the number of images to  take for the flat field to
+.IR nimages .
+.TP
+.BI \-t temperature
+Set the temperature to which the CCD should be cooled when taking
+images. The temperature must be specified in degrees Celsius.
+.SH "SEE ALSO"
+.BR astrod (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

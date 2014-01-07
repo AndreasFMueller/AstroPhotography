@@ -14,6 +14,7 @@ namespace camera {
 namespace simulator {
 
 class SimCamera;
+class SimCcd;
 class SimFilterWheel;
 class SimGuiderPort;
 class SimCooler;
@@ -22,27 +23,32 @@ class SimFocuser;
 /**
  * \brief The Locator class for Simulator devices
  *
- * All Starlight Express devices are USB devices, so this locator is 
- * essentially a wrapper around a USB context which serves as a factory
- * for the Starlight Express USB devices.
+ * The simulator devices all are singletons. The locator keeps a pointer
+ * to these devices.
  */
 class SimLocator : public astro::device::DeviceLocator {
 	CameraPtr	_camera;
+	CcdPtr		_ccd;
 	GuiderPortPtr	_guiderport;
 	FilterWheelPtr	_filterwheel;
 	CoolerPtr	_cooler;
 	FocuserPtr	_focuser;
+
+	SimLocator(const SimLocator& other);
+	SimLocator&	operator=(const SimLocator& other);
 public:
 	SimLocator();
 	virtual ~SimLocator();
 
 	CameraPtr	camera() { return _camera; }
+	CcdPtr	ccd() { return _ccd; }
 	GuiderPortPtr	guiderport() { return _guiderport; }
 	FilterWheelPtr	filterwheel() { return _filterwheel; }
 	CoolerPtr	cooler() { return _cooler; }
 	FocuserPtr	focuser() { return _focuser; }
 
 	SimCamera	*simcamera();
+	SimCcd		*simccd();
 	SimGuiderPort	*simguiderport();
 	SimFilterWheel	*simfilterwheel();
 	SimCooler	*simcooler();

@@ -8,6 +8,7 @@
 #include <AstroGuiding.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
+#include <sstream>
 
 namespace astro {
 namespace guiding {
@@ -16,16 +17,35 @@ namespace guiding {
  * \brief Format the calibration data for display
  */
 std::string	GuiderCalibration::toString() const {
-	return stringprintf("[ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
-		a[0], a[1], a[2], a[3], a[4], a[5]);
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
 }
 
 /**
  * \brief Construct a new GuiderCalibration object
+ *
+ * The default calibration has all members set to zero, in particular,
+ * it cannot be inverted, and it is not possible to compute corrections.
  */
 GuiderCalibration::GuiderCalibration() {
-	a[0] = a[3] = 1.;
-	a[1] = a[2] = a[4] = a[5] = 0.;
+	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
+}
+
+/**
+ * \brief Determinant of the calibration
+ */
+double	GuiderCalibration::det() const {
+	return a[0] * a[4] - a[1] * a[3];
+}
+
+/**
+ * \brief Construct a GuiderCalibration object from coefficient array
+ */
+GuiderCalibration::GuiderCalibration(const double coefficients[6]) {
+	for (int i = 0; i < 6; i++) {
+		a[i] = coefficients[i];
+	}
 }
 
 /**
@@ -49,9 +69,12 @@ Point	GuiderCalibration::defaultcorrection() const {
  * however, has to be calculated by the caller.
  */
 Point	GuiderCalibration::operator()(const Point& offset, double Deltat) const {
+        double	determinant = det();
+	if (0 == det()) {
+		throw std::runtime_error("no calibration");
+	}
 	double	Deltax = offset.x() - Deltat * a[2];
 	double	Deltay = offset.y() - Deltat * a[5];
-        double	determinant = a[0] * a[4] - a[3] * a[1];
         double	x = (Deltax * a[4] - Deltay * a[1]) / determinant;
         double	y = (a[0] * Deltay - a[3] * Deltax) / determinant;
 	Point	result(x, y);
@@ -88,6 +111,39 @@ void	GuiderCalibration::rescale(double scalefactor) {
 	a[1] *= scalefactor;
 	a[3] *= scalefactor;
 	a[4] *= scalefactor;
+}
+
+/**
+ * \brief Output of guider calibration data
+ */
+std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal) {
+	out << "[" << cal[0] << "," << cal[1] << "," << cal[2] << ";";
+	out << cal[3] << "," << cal[4] << "," << cal[5] << "]";
+	return out;
+}
+
+/**
+ * \brief Parse a guider calibration
+ */
+std::istream&	operator>>(std::istream& in, GuiderCalibration& cal) {
+	double	a[6];
+	absorb(in, '[');
+	in >> a[0];
+	absorb(in, ',');
+	in >> a[1];
+	absorb(in, ',');
+	in >> a[2];
+	absorb(in, ';');
+	in >> a[3];
+	absorb(in, ',');
+	in >> a[4];
+	absorb(in, ',');
+	in >> a[5];
+	absorb(in, ']');
+	// only if we get to this point can we assume that the calibration
+	// was successfully read, and can copy it to the target calibration
+	for (int i = 0; i < 6; i++) { cal[i] = a[i]; }
+	return in;
 }
 
 } // namespace guiding

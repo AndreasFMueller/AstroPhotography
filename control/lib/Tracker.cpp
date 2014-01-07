@@ -7,6 +7,7 @@
 
 #include <AstroGuiding.h>
 #include <AstroUtils.h>
+#include <sstream>
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -48,22 +49,47 @@ Point	findstar(ImagePtr image, const ImageRectangle& rectangle,
 	throw std::runtime_error("cannot find star in this image type");
 }
 
-StarTracker::StarTracker(const Point& _point,
-	const ImageRectangle& _rectangle, unsigned int _k)
-	: point(_point), rectangle(_rectangle), k(_k) {
+StarTracker::StarTracker(const Point& point,
+	const ImageRectangle& rectangle, unsigned int k)
+	: _point(point), _rectangle(rectangle), _k(k) {
 }
 
-Point	StarTracker::operator()(ImagePtr newimage)
-	const {
+Point	StarTracker::operator()(ImagePtr newimage) const {
 	// find the star on the new image
-	Point	newpoint = findstar(newimage, rectangle, k);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s",
-		newpoint.toString().c_str());
-	return newpoint - point;
+	Point	newpoint = findstar(newimage, _rectangle, _k);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s, tracking point: %s",
+		newpoint.toString().c_str(), _point.toString().c_str());
+	return newpoint - _point;
 }
 
-const ImageRectangle&	StarTracker::getRectangle() const {
-	return rectangle;
+std::string	StarTracker::toString() const {
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
+}
+
+std::ostream&	operator<<(std::ostream& out, const StarTracker& tracker) {
+	out << tracker.point();
+	out << "/";
+	out << tracker.rectangle();
+	out << "/";
+	out << tracker.k();
+	return out;
+}
+
+std::istream&	operator>>(std::istream& in, StarTracker& tracker) {
+	Point	p;
+	astro::image::ImageRectangle	r;
+	int	k;
+	in >> p;
+	absorb(in, '/');
+	in >> r;
+	absorb(in, '/');
+	in >> k;
+	tracker.point(p);
+	tracker.rectangle(r);
+	tracker.k(k);
+	return in;
 }
 
 #define	phasetracker_construct(Pixel)					\
@@ -133,6 +159,12 @@ Point	PhaseTracker::operator()(ImagePtr newimage)
 	phasetracker_typed(YUYV<float>);
 	phasetracker_typed(YUYV<double>);
 	throw std::runtime_error("cannot track this image type");
+}
+
+std::string	PhaseTracker::toString() const {
+	std::string	info = stringprintf("PhaseTracker on %s image",
+		image->size().toString().c_str());
+	return info;
 }
 
 } // namespace guiding

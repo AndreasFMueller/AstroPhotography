@@ -14,6 +14,7 @@
 #include <AstroGuiding.h>
 #include <AstroTask.h>
 #include <tasks.hh>
+#include <Tracking.h>
 
 namespace astro {
 
@@ -107,6 +108,11 @@ Astro::TaskInfo	convert(const astro::task::TaskInfo& info);
 // GuiderState
 astro::guiding::GuiderState	convert(const Astro::Guider::GuiderState& state);
 Astro::Guider::GuiderState	convert(const astro::guiding::GuiderState& state);
+
+// TrackingInfo
+astro::guiding::TrackingInfo	convert(const Astro::TrackingInfo& trackinginfo);
+Astro::TrackingInfo	convert(const astro::guiding::TrackingInfo& trackinginfo);
+Astro::TrackingInfo	convert(const astro::guiding::Tracking& trackinginfo);
 
 } // namespace astro
 

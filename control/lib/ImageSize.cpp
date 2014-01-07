@@ -176,6 +176,9 @@ std::istream&	operator>>(std::istream& in, ImageSize& size) {
 	unsigned int	width, height;
 	char	x;
 	in >> width >> x >> height;
+	if (x != 'x') {
+		throw std::runtime_error("not a size specification");
+	}
 	size.setWidth(width);
 	size.setHeight(height);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image size: %s",

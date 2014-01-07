@@ -70,6 +70,7 @@ void	Loop::execute() {
 		// get an image with the current parameters
 		_exposure.exposuretime = exposuretime;
 		_ccd->startExposure(_exposure);
+		usleep(1000000 * exposuretime);
 		if (!_ccd->wait()) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"failed to wait for exposure");

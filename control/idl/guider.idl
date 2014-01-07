@@ -9,12 +9,42 @@ module Astro {
 	/**
 	 * \brief guiders are described by camera, ccdid and guider port
 	 *
+	 * Camera name and guiderport name are standard device URLs, the 
+	 * ccdid is the number of the ccd.
 	 */
 	struct GuiderDescriptor {
 		string	cameraname;
 		long	ccdid;
 		string	guiderportname;
 	};
+
+	/**
+	 * \brief Information about recent tracking activities
+	 *
+	 * This 
+	 */
+	struct TrackingInfo {
+		double	timeago;
+		Point	trackingoffset;
+		Point	activation;
+	};
+	typedef sequence<TrackingInfo> TrackingHistory;
+
+	/**
+	 * \brief Interface to a tracking monitor
+	 */
+	interface TrackingMonitor {
+		oneway void	update(in TrackingInfo ti);
+		oneway void	stop();
+	};
+
+	/**
+	 * \brief Interface for tracking image updates
+	 */
+	interface TrackingImageMonitor {
+		oneway void	update(in ImageSize size, in ShortSequence imagedata);
+	};
+
 	/**
 	 * \brief Interface for guiders
 	 *
@@ -45,9 +75,12 @@ module Astro {
 		GuiderState	getState();
 
 		/**
-		 * \brief Choose a camera to for the guider
+		 * \brief Get the camera that was chosen for the guider
 		 */
 		Camera	getCamera() raises(BadState);
+		/**
+		 * \brief Get the CCD that was chosen for the guider
+		 */
 		Ccd	getCcd() raises(BadState);
 		
 		/**
@@ -70,6 +103,11 @@ module Astro {
 				raises(BadParameter,BadState);
 		Exposure	getExposure();
 
+		// This is the position of the star we want to track.
+		// It does not have to be exact at the beginning, and
+		// the position is only used as a reference point during 
+		// calibration. During guiding, the guide star is kept
+		// in this position.
 		void	setStar(in Point star)
 				raises(BadParameter,BadState);
 		Point	getStar() raises(BadState);
@@ -104,14 +142,53 @@ module Astro {
 		/**
 		 * \brief 
 		 */
-		ShortImage	mostRecentImage() raises(BadState);
-		Point	mostRecentOffset() raises(BadState);
-		float	mostRecentDelay() raises(BadState);
-		struct GuiderAction {
-			float	ra;
-			float	dec;
-		};
-		GuiderAction	mostRecentAction() raises(BadState);
+		Image	mostRecentImage() raises(BadState);
+
+		/**
+		 * \brief Callback interface for Image updates
+		 *
+		 * \param monitor	an image monitor reference
+		 */
+		long	registerImageMonitor(in TrackingImageMonitor imagemonitor);
+		void	unregisterImageMonitor(in long imagemonitorid);
+
+		/**
+		 * \brief Polling interface to tracking information
+		 */
+		TrackingInfo	mostRecentTrackingInfo()
+						raises(BadState);
+
+		/**
+		 * \brief Get the complete tracking history
+		 *
+		 * \param guiderunid	ID of the guide run for which the
+		 *			history is requested. -1 means the
+		 *			currently active guide run.
+		 */
+		TrackingHistory	getTrackingHistory(in long guiderunid) raises(BadState);
+
+		/**
+		 * \brief Callback interface for tracking monitoring
+		 *
+		 * A client interested in updates about tracking activities
+		 * creates a TrackingMonitor service and registeres
+		 * \param monitor	The TrackingMonitor to register.
+		 *			As soon as successfully registered,
+		 *			tracking updates will be sent to
+		 *			monitor.
+		 * \return	The id of the monitor. This id should be
+		 *		used to unregister the service when tracking
+		 *		information is no longer required
+		 */
+		long	registerMonitor(in TrackingMonitor monitor);
+
+		/**
+		 * \brief Unregister a monitor client
+		 *
+		 * \param monitorid	Id of the monitor returned with the
+		 *			register call
+		 */
+		void	unregisterMonitor(in long monitorid);
 	};
 
 	/**

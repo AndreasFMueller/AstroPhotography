@@ -11,6 +11,7 @@
 #include <AstroImage.h>
 #include <map>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 
 using namespace astro::image;
 
@@ -551,7 +552,9 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 	int	status = 0;
 	if (fits_iterate_data(1, &ic, 0, image.getSize().getPixels() * planes,
 		user.workfunc, &user, &status)) {
-		throw FITSexception(errormsg(status));
+		std::string	msg = stringprintf("failure to write image %s: %s",
+			filename.c_str(), errormsg(status).c_str());
+		throw FITSexception(msg);
 	}
 
 	// call postwrite to protect precious files

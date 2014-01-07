@@ -11,6 +11,7 @@
 #include <SimGuiderPort.h>
 #include <SimCooler.h>
 #include <SimFilterWheel.h>
+#include <config.h>
 
 using namespace astro::device;
 

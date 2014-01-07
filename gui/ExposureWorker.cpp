@@ -7,6 +7,7 @@
  */
 #include <ExposureWorker.h>
 #include <capturewindow.h>
+#include <unistd.h>
 
 ExposureWorker::ExposureWorker(CcdPtr _ccd, const Exposure& _exposure,
 	CaptureWindow *_capturewindow,
@@ -19,6 +20,7 @@ ExposureWorker::~ExposureWorker() {
 
 void	ExposureWorker::process() {
 	ccd->startExposure(exposure);
+	usleep(1000000 * exposure.exposuretime);
 	ccd->wait();
 	ImagePtr	image = ccd->getImage();
 	capturewindow->newImage(image);

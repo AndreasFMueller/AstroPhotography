@@ -42,7 +42,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a dark image from them.
  */
-int	main(int argc, char *argv[]) {
+int	dark_main(int argc, char *argv[]) {
 	Exposure	exposure;
 	double	exposuretime = 1;
 	unsigned int	nimages = 3;
@@ -54,29 +54,29 @@ int	main(int argc, char *argv[]) {
 	const char	*modulename = "uvc";
 	while (EOF != (c = getopt(argc, argv, "do:t:n:h?m:C:c:e:")))
 		switch (c) {
+		case 'C':
+			cameranumber = atoi(optarg);
+			break;
+		case 'c':
+			ccdid = atoi(optarg);
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
 			exposuretime = atof(optarg);
 			break;
-		case 'o':
-			outfilename = optarg;
+		case 'm':
+			modulename = optarg;
 			break;
 		case 'n':
 			nimages = atoi(optarg);
 			break;
+		case 'o':
+			outfilename = optarg;
+			break;
 		case 't':
-			temperature = atof(optarg);
-			break;
-		case 'm':
-			modulename = optarg;
-			break;
-		case 'C':
-			cameranumber = atoi(optarg);
-			break;
-		case 'c':
-			ccdid = atoi(optarg);
+			temperature = atof(optarg) + 273.1;
 			break;
 		case 'h':
 		case '?':
@@ -96,7 +96,8 @@ int	main(int argc, char *argv[]) {
 	CameraPtr	camera = locator->getCamera(cameras[cameranumber]);
 	CcdPtr	ccd = camera->getCcd(ccdid);
 	exposure.frame = ccd->getInfo().getFrame();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame: %s", exposure.frame.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame: %s",
+		exposure.frame.toString().c_str());
 
 	// launch the darkframeprocess
 	DarkFrameProcess	dfp(ccd);
@@ -124,7 +125,7 @@ int	main(int argc, char *argv[]) {
 
 int	main(int argc, char *argv[]) {
 	try {
-		return astro::main(argc, argv);
+		return astro::dark_main(argc, argv);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
 			"exception: %s", x.what());

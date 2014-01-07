@@ -26,8 +26,8 @@ imageloop_DEPENDENCIES = ../lib/libastro.la
 imageloop_LDADD = -L../lib -lastro 
 
 getimages_SOURCES = getimages.cpp
-getimages_DEPENDENCIES = ../lib/libastro.la
-getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+getimages_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
+getimages_LDADD = -L../lib -lastro -lcorbastro @SBIGLIBRARY@ 
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = ../lib/libastro.la
@@ -62,8 +62,8 @@ focus_DEPENDENCIES = ../lib/libastro.la
 focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 focustest_SOURCES = focustest.cpp
-focustest_DEPENDENCIES = ../lib/libastro.la
-focustest_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+focustest_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
+focustest_LDADD = -L../lib -lastro -lcorbastro @SBIGLIBRARY@ 
 
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la
@@ -81,6 +81,8 @@ logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
 logscale_LDADD = -L../lib -lastro 
 
+# The looptest shows how to call imageloop to create a video for a
+# full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
 	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
 		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \

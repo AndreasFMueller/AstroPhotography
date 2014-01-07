@@ -1,0 +1,87 @@
+.TH ASTROD "1" "January 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+astrod \- astrophotography server
+.SH SYNOPSIS
+.B astrod -dh?F
+[
+.BI \-b imagedir
+] [
+.BI \-q databasefile
+]
+.SH DESCRIPTION
+The 
+.BR astrod (1)
+program is a CORBA based server to control astrophotography
+equipment remotely. It is the main component of a control system to
+be mounted on the telescope, connected to the cameras, filter wheels,
+focusers or adaptive optics units with short cables. Computers like
+the Raspberry Pi are ideal for this type of application.
+
+The 
+.BR astrod (1)
+program is designed to perform all camera control tasks autonomously.
+So after the telescope has been set up and pointed to the object to
+be fotographred, 
+.BR astrod (1)
+can be asked to calibrate the guide camera, start guiding on a selected
+guide star, and a series of exposures with varying parameters can be
+requested. The program then executes these exposure requests autonomously,
+there is no need to have a control client connected to the server.
+At the end of the observation program, a client can reconnect and collect
+the images.
+
+The
+.BR astrod (1)
+program does not do any image processing. Such processing is likely
+to overwhelm a computer of the type mentionned, and is better done
+off line. The only kind of image processing done is bad pixel interpolation
+for guide cameras
+
+As a simple command line client to access the functions, the program
+.BR astro (1)
+is supplied. It allows to access almost all functions of the 
+.BR astrod (1)
+server, in particular it can initiate calibration and guiding,
+control cameras, retrieve images from cameras and submit exposure
+requests to the task manager.
+
+.SH OPTIONS
+.TP
+.BI \-b imagedir
+All images taken by the server are stored in the directory
+.IR imagedir .
+Nevertheless, images should normally not be taken directly from
+this directory, rather the image interface of the CORBA IDL should
+be used to access the images and delete them when they are no longer
+needed. Most of the time, however, images will be requested through
+the task interface of the server, and only through this task interface
+is it possible to get access to the images together with all the parameters
+of the task from which they were orginally exposed.
+
+The default imge directory is the current working directory at startup.
+.TP
+.B \-d
+increase the debug level.
+.TP
+.B \-F
+Stay in the foreground. Normally, 
+.BR astrod (1)
+places itself into the background when started, which is inconvenient
+for debugging. Consequently, this option is mainly used for debugging.
+.TP
+.BR \-h , " "\-?
+Display a help message and exit.
+.TP
+.BI \-q databasefile
+Tasks sent to the 
+.BR astrod (1)
+server are stored in an SQLite 3 database. When the observations are
+complete, the computer is likely to be powered down, although not
+all images have already been retrieved. When it is powered up again,
+the database still contains all the information about the images,
+and a client can collect the images from the server, and finally release 
+the space taken up by the images.
+.SH "SEE ALSO"
+.BR astro (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller
