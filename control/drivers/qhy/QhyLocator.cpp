@@ -21,7 +21,7 @@ static std::string      qhy_name("qhy");
 static std::string      qhy_version(VERSION);
 
 /**
- * \brief Module descriptor for the Starlight express module
+ * \brief Module descriptor for the QHY module
  */
 class QhyDescriptor : public ModuleDescriptor {
 public:

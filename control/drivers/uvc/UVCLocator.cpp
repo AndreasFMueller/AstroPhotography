@@ -25,7 +25,7 @@ static std::string      uvc_name("uvc");
 static std::string      uvc_version(VERSION);
 
 /**
- * \brief Module descriptor for the Starlight express module
+ * \brief Module descriptor for the USB Video Class module
  */
 class UvcDescriptor : public ModuleDescriptor {
 public:

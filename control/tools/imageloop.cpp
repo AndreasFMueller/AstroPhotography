@@ -95,7 +95,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 
 	// we need a sun object for our location to compute sunrise and
 	// sunset times
-	Sun	sun(longitude, latitude);
+	astro::sun::Sun	sun(longitude, latitude);
 	unsigned int	counter = 0;
 
 	// take images until we have enough (which might be without end)
