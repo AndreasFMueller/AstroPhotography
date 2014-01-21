@@ -86,11 +86,12 @@ void	DatabaseTest::testInsert() {
 	DatabaseFactory	dbf;
 	Database	database = dbf.get("testdb.db");
 	StatementPtr	statement
-		= database->statement("insert into testtable(id, intfield, floatfield, stringfield) values (?, ?, ?, ?)");
-	statement->bind(0, (int)4);
+		= database->statement("insert into testtable(id, intfield, floatfield, stringfield, timefield) values (?, ?, ?, ?, ?)");
+	statement->bind(0, (int)44444);
 	statement->bind(1, (int)47);
 	statement->bind(2, (double)sqrt(47));
 	statement->bind(3, std::string("siebenundvierzig"));
+	statement->bind(4, std::string("2014-01-01 12:34:56"));
 	statement->execute();
 
 	// display 
@@ -109,7 +110,7 @@ void	DatabaseTest::testDelete() {
 	Database	database = dbf.get("testdb.db");
 	StatementPtr	statement
 		= database->statement("delete from testtable where id = ?");
-	statement->bind(0, (int)4);
+	statement->bind(0, (int)44444);
 	statement->execute();
 	// display 
 	statement = database->statement("select * from testtable");

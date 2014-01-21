@@ -1,5 +1,5 @@
 /*
- * Calibration.h -- Table containing calibration data
+ * CalibrationPersistence.h -- Table containing calibration data
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -13,17 +13,19 @@ namespace astro {
 namespace guiding {
 
 /**
- * \brief
+ * \brief Calibration class 
  */
 class Calibration {
-	int	_id;
 public:
-	int	id() const { return _id; }
-	void	id(int i) { _id = i; }
 	time_t	when;
+	std::string	camera;
+	int	ccdid;
+	std::string	guiderport;
 	double	a[6];
 	Calibration() { }
 };
+
+typedef persistence::Persistent<Calibration>	CalibrationRecord;
 
 /**
  * \brief Table adapter for the Calibration
@@ -32,30 +34,15 @@ class CalibrationTableAdapter {
 public:
 static std::string	tablename();
 static std::string	createstatement();
-static Calibration
+static CalibrationRecord
 	row_to_object(int objectid, const astro::persistence::Row& row);
 static astro::persistence::UpdateSpec
-	object_to_updatespec(const Calibration& calibration);
+	object_to_updatespec(const CalibrationRecord& calibration);
 };
 
-typedef astro::persistence::Table<Calibration, CalibrationTableAdapter>	CalibrationTable;
+typedef astro::persistence::Table<CalibrationRecord, CalibrationTableAdapter>	CalibrationTable;
 
-/**
- * \brief calibration raw data
- */
-class CalibrationPoint {
-	int	_id;
-public:
-	int	id() const { return _id; }
-	int	calibration;
-	double	t;
-	double	ra;
-	double	dec;
-	double	x;
-	double	y;
-
-	CalibrationPoint(int i) : _id(i) { }
-};
+typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
 
 /**
  * \brief Table adapter for the calibration points
@@ -64,13 +51,13 @@ class CalibrationPointTableAdapter {
 public:
 static std::string	tablename();
 static std::string	createstatement();
-static CalibrationPoint
+static CalibrationPointRecord
 	row_to_object(int objectid, const astro::persistence::Row& row);
 static astro::persistence::UpdateSpec
-	object_to_updatespec(const CalibrationPoint& calibrationpoint);
+	object_to_updatespec(const CalibrationPointRecord& calibrationpoint);
 };
 
-typedef astro::persistence::Table<CalibrationPoint, CalibrationPointTableAdapter> CalibrationPointTable;
+typedef astro::persistence::Table<CalibrationPointRecord, CalibrationPointTableAdapter> CalibrationPointTable;
 
 } // namespace guiding
 } // namespace astro

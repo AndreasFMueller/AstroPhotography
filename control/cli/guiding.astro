@@ -1,0 +1,39 @@
+camera cam assign camera:simulator/camera
+ccd b assign cam 0
+ccd b info
+focuser f assign focuser:simulator/focuser
+focuser f set 32768 wait
+focuser f info
+cooler b status
+cooler b set 260
+cooler b enable
+cooler b waitfor
+filterwheel fw assign cam
+filterwheel fw wait
+guiderfactory g assign camera:simulator/camera 0 guiderport:simulator/guiderport
+guider g info
+guider g stop guiding
+guider g exposuretime 1
+guider g binning 1 1
+guider g offset 348 120
+guider g size 64 64
+guider g star 380 152
+guider g calibration 0.610605 -0.503400 0.000654 0.363121 0.863558 0.000239
+guider g info
+guider g start guiding 10
+sleep 10
+guider g info
+guider g image i
+image i info
+image i save testimage.fits
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+sleep 10
+guider g info
+exit

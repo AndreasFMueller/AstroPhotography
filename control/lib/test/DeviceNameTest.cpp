@@ -41,13 +41,14 @@ void	DeviceNameTest::testCast() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCast() begin");
 	DeviceName	name1("net", "blubb");
 	std::string	stringname = (std::string)name1;
-	CPPUNIT_ASSERT(stringname == std::string("net:blubb"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name1 = '%s'", stringname.c_str());
+	CPPUNIT_ASSERT(stringname == std::string("camera:net/blubb"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCast() end");
 }
 
 void	DeviceNameTest::testEquality() {
 	DeviceName	name1("net", "blubb");
-	DeviceName	name2("net:blubb");
+	DeviceName	name2("camera:net/blubb");
 	CPPUNIT_ASSERT(name1 == name2);
 }
 

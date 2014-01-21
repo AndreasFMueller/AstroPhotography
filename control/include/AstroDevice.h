@@ -77,6 +77,10 @@ namespace device {
 class Device {
 protected:
 	DeviceName	_name;
+private:
+	// make sure devices cannot be copied
+	Device(const Device& other);
+	Device&	operator=(const Device& other);
 public:
 	Device(const std::string& name) : _name(name) { }
 	Device(const DeviceName& name) : _name(name) { }

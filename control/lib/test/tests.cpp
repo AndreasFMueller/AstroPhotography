@@ -1,5 +1,5 @@
 /*
- * tests.cpp
+ * tests.cpp -- driver for CPP Unit tests
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
@@ -9,6 +9,7 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <OrbSingleton.h>
+#include <cstdlib>
 
 int	main(int argc, char *argv[]) {
 	Astro::OrbSingleton	orb(argc, argv);
@@ -24,7 +25,13 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		}
+	// remove the test database
+	unlink("testdb.db");
+
+	// perform the tests
 	runner.addTest(registry.makeTest());
+
+	// decide what return code to return
 	bool	wasSuccessful = runner.run("", false);
-	return (wasSuccessful) ? 0 : 1;
+	return (wasSuccessful) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

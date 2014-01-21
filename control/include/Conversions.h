@@ -14,7 +14,8 @@
 #include <AstroGuiding.h>
 #include <AstroTask.h>
 #include <tasks.hh>
-#include <Tracking.h>
+#include <TrackingPersistence.h>
+#include <CalibrationPersistence.h>
 
 namespace astro {
 
@@ -85,9 +86,11 @@ Astro::GuiderDescriptor  convert(
 astro::camera::FilterWheel::State	convert(const Astro::FilterwheelState& state);
 Astro::FilterwheelState	convert(const astro::camera::FilterWheel::State& state);
 
+#if 0
 // GuiderCalibration
 astro::guiding::GuiderCalibration	convert(const Astro::Guider::Calibration& cal);
 Astro::Guider::Calibration	convert(const astro::guiding::GuiderCalibration& cal);
+#endif
 
 // TaskState
 astro::task::TaskQueueEntry::taskstate	convert(const Astro::TaskState& state);
@@ -109,10 +112,13 @@ Astro::TaskInfo	convert(const astro::task::TaskInfo& info);
 astro::guiding::GuiderState	convert(const Astro::Guider::GuiderState& state);
 Astro::Guider::GuiderState	convert(const astro::guiding::GuiderState& state);
 
-// TrackingInfo
-astro::guiding::TrackingInfo	convert(const Astro::TrackingInfo& trackinginfo);
-Astro::TrackingInfo	convert(const astro::guiding::TrackingInfo& trackinginfo);
-Astro::TrackingInfo	convert(const astro::guiding::Tracking& trackinginfo);
+// TrackingPoint
+astro::guiding::TrackingPoint	convert(const Astro::TrackingPoint& trackinginfo);
+Astro::TrackingPoint	convert(const astro::guiding::TrackingPoint& trackinginfo);
+
+// CalibrationPoint
+astro::guiding::CalibrationPoint	convert(const Astro::CalibrationPoint& calibrationpoint);
+Astro::CalibrationPoint	convert(const astro::guiding::CalibrationPoint& calibrationpoint);
 
 } // namespace astro
 

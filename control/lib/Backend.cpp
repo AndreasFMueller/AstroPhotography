@@ -83,7 +83,7 @@ public:
 Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 		const std::string& query) 
 	: Statement(query), _backend(backend) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing statement with SQL: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing statement with SQL: '%s'",
 		query.c_str());
 	stmt = NULL;
 	int	rc;
@@ -91,7 +91,7 @@ Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 	if (SQLITE_OK == (rc = sqlite3_prepare_v2(_backend.database(),
 		query.c_str(), query.size(), &stmt, &tail))) {
 		if (NULL == stmt) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "no sql query: %s",
+			debug(LOG_ERR, DEBUG_LOG, 0, "no sql query: '%s'",
 				query.c_str());
 			throw std::runtime_error("no SQL query");
 		}
@@ -106,7 +106,8 @@ Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
  * \brief Destroy the statement
  */
 Sqlite3Statement::~Sqlite3Statement() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy query %s", query().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy statement '%s'",
+		query().c_str());
 	int	rc = sqlite3_finalize(stmt);
 	if (rc != SQLITE_OK) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "error in finalize: %s",

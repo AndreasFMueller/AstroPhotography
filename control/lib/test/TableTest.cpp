@@ -29,8 +29,8 @@ public:
 	void	testDelete();
 
 	CPPUNIT_TEST_SUITE(TableTest);
-	CPPUNIT_TEST(testRetrieve);
 	CPPUNIT_TEST(testInsert);
+	CPPUNIT_TEST(testRetrieve);
 	CPPUNIT_TEST(testUpdate);
 	CPPUNIT_TEST(testDelete);
 	CPPUNIT_TEST_SUITE_END();
@@ -48,8 +48,8 @@ void	TableTest::testRetrieve() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRetrieve() begin");
 	DatabaseFactory	dbf;
 	Database	database = dbf.get("testdb.db");
-	Table<TestEntry, TesttableAdapter>	table(database);
-	TestEntry	entry = table.byid(2);
+	Table<TestRecord, TesttableAdapter>	table(database);
+	TestRecord	entry = table.byid(1);
 	std::ostringstream	out;
 	out << entry;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object 2: %s", out.str().c_str());
@@ -60,11 +60,12 @@ void	TableTest::testInsert() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testInsert() begin");
 	DatabaseFactory	dbf;
 	Database	database = dbf.get("testdb.db");
-	Table<TestEntry, TesttableAdapter>	table(database);
-	TestEntry	entry(0);
+	Table<TestRecord, TesttableAdapter>	table(database);
+	TestRecord	entry(0);
 	entry.intfield(1291);
 	entry.doublefield(12.91);
 	entry.stringfield("Eidgenossenschaft");
+	entry.timefield(time(NULL));
 	int	objectid = table.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new objectid = %d", objectid);
 	entry = table.byid(objectid);
@@ -78,11 +79,12 @@ void	TableTest::testUpdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testUpdate() begin");
 	DatabaseFactory	dbf;
 	Database	database = dbf.get("testdb.db");
-	Table<TestEntry, TesttableAdapter>	table(database);
-	TestEntry	entry(0);
+	Table<TestRecord, TesttableAdapter>	table(database);
+	TestRecord	entry(0);
 	entry.intfield(1918);
 	entry.doublefield(19.18);
 	entry.stringfield("Generalstreik");
+	entry.timefield(time(NULL) + 1000);
 	int	objectid = table.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new objectid = %d", objectid);
 	entry.stringfield("Genf");
@@ -98,7 +100,7 @@ void	TableTest::testDelete() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDelete() begin");
 	DatabaseFactory	dbf;
 	Database	database = dbf.get("testdb.db");
-	Table<TestEntry, TesttableAdapter>	table(database);
+	Table<TestRecord, TesttableAdapter>	table(database);
 	long	objectid = table.nextid() - 1;
 	table.remove(objectid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDelete() end");

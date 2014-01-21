@@ -212,17 +212,16 @@ void	GuiderMonitorDialog::displayTrackingInfo() {
  * displaying are properly serialized. Not doing this results in
  * crashes.
  */
-void	GuiderMonitorDialog::update(const Astro::ImageSize& _size,
-		const Astro::ShortSequence& imagedata) {
+void	GuiderMonitorDialog::update(const Astro::TrackingImage& _image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %dx%d image received",
-		_size.width, _size.height);
+		_image.size.width, _image.size.height);
 	pthread_mutex_lock(&mutex);
-	imagesize = _size;
+	imagesize = _image.size;
 	unsigned long	l = imagesize.width * imagesize.height;
 	unsigned short	*newdata
 		= new unsigned short[l];
 	for (unsigned int i = 0; i < l; i++) {
-		newdata[i] = imagedata[i];
+		newdata[i] = _image.imagedata[i];
 	}
 	unsigned short	*olddata = data;
 	data = newdata;
@@ -341,10 +340,9 @@ TrackingImageMonitor_impl::~TrackingImageMonitor_impl() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image monitor servant destroyed");
 }
 
-void	TrackingImageMonitor_impl::update(const ::Astro::ImageSize& size,
-		const ::Astro::ShortSequence& imagedata) {
+void	TrackingImageMonitor_impl::update(const ::Astro::TrackingImage& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image received");
-	_guidermonitordialog.update(size, imagedata);
+	_guidermonitordialog.update(image);
 }
 
 

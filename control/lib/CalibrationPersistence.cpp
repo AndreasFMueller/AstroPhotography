@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Calibration.h>
+#include <CalibrationPersistence.h>
 
 using namespace astro::persistence;
 
@@ -18,6 +18,9 @@ std::string	CalibrationTableAdapter::createstatement() {
 	return std::string(
 	"create table calibration (\n"
 	"    id integer not null,\n"
+	"    camera varchar(128) not null,\n"
+	"    ccdid integer not null,\n"
+	"    guiderport integer not null,\n"
 	"    whenstarted datettime not null,\n"
 	"    a0 double not null default 0,\n"
 	"    a1 double not null default 0,\n"
@@ -30,9 +33,11 @@ std::string	CalibrationTableAdapter::createstatement() {
 	);
 }
 
-Calibration	CalibrationTableAdapter::row_to_object(int objectid, const Row& row) {
-	Calibration	result;
-	result.id(objectid);
+CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row& row) {
+	Persistent<Calibration>	result(objectid);
+	result.camera = row["camera"]->stringValue();
+	result.ccdid = row["ccdid"]->intValue();
+	result.guiderport = row["guiderport"]->stringValue();
 	result.when = row["whenstarted"]->timeValue();
 	result.a[0] = row["a0"]->doubleValue();
 	result.a[1] = row["a1"]->doubleValue();
@@ -43,9 +48,12 @@ Calibration	CalibrationTableAdapter::row_to_object(int objectid, const Row& row)
 	return result;
 }
 
-UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const Calibration& calibration) {
+UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord& calibration) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("camera", factory.get(calibration.camera)));
+	spec.insert(Field("ccdid", factory.get(calibration.ccdid)));
+	spec.insert(Field("guiderport", factory.get(calibration.guiderport)));
 	spec.insert(Field("whenstarted", factory.getTime(calibration.when)));
 	spec.insert(Field("a0", factory.get(calibration.a[0])));
 	spec.insert(Field("a1", factory.get(calibration.a[1])));
@@ -75,26 +83,34 @@ std::string	CalibrationPointTableAdapter::createstatement() {
 	);
 }
 
-CalibrationPoint	CalibrationPointTableAdapter::row_to_object(int objectid, const Row& row) {
-	CalibrationPoint	point(objectid);
-	point.calibration = row["calibration"]->intValue();
-	point.t = row["t"]->doubleValue();
-	point.ra = row["ra"]->doubleValue();
-	point.dec = row["dec"]->doubleValue();
-	point.x = row["x"]->doubleValue();
-	point.y = row["y"]->doubleValue();
+CalibrationPointRecord	CalibrationPointTableAdapter::row_to_object(int objectid, const Row& row) {
+	double	t = row["t"]->doubleValue();
+
+	double	ra = row["ra"]->doubleValue();
+	double	dec = row["dec"]->doubleValue();
+	Point	offset(ra, dec);
+
+	double	x = row["x"]->doubleValue();
+	double	y = row["y"]->doubleValue();
+	Point	star(x, y);
+
+	CalibrationPoint	calpoint(t, offset, star);
+
+	int	ref = row["calibration"]->intValue();
+
+	CalibrationPointRecord	point(objectid, ref, calpoint);
 	return point;
 }
 
-UpdateSpec	CalibrationPointTableAdapter::object_to_updatespec(const CalibrationPoint& point) {
+UpdateSpec	CalibrationPointTableAdapter::object_to_updatespec(const CalibrationPointRecord& point) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
-	spec.insert(Field("calibration", factory.get(point.calibration)));
+	spec.insert(Field("calibration", factory.get(point.ref())));
 	spec.insert(Field("t", factory.get(point.t)));
-	spec.insert(Field("ra", factory.get(point.ra)));
-	spec.insert(Field("dec", factory.get(point.dec)));
-	spec.insert(Field("x", factory.get(point.x)));
-	spec.insert(Field("y", factory.get(point.y)));
+	spec.insert(Field("ra", factory.get(point.offset.x())));
+	spec.insert(Field("dec", factory.get(point.offset.y())));
+	spec.insert(Field("x", factory.get(point.star.x())));
+	spec.insert(Field("y", factory.get(point.star.y())));
 	return spec;
 }
 

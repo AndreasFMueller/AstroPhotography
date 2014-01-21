@@ -196,7 +196,7 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 		// inform the callback, if there is one
 		if (guider().trackingcallback) {
 			callback::CallbackDataPtr	trackinginfo(
-				new TrackingInfo(_lastaction, _offset,
+				new TrackingPoint(_lastaction, _offset,
 					_activation));
 			(*(guider().trackingcallback))(trackinginfo);
 		}

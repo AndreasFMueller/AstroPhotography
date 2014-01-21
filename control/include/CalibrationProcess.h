@@ -25,7 +25,6 @@ namespace guiding {
  * This class contains the work function for guider calibration.
  */
 class CalibrationProcess : public GuidingProcess {
-
 	// parameters for the calibration process
 	/**
 	 * \brief focal length of guide scope in mm
@@ -40,15 +39,23 @@ class CalibrationProcess : public GuidingProcess {
 	double	_progress;
 	int	range;
 	double	currentprogress(int ra, int dec) const;
+	/**
+	 * \brief start time
+	 */
+	double	starttime;
 public:
 	double	progress() const { return _progress; }
 private:
 	double	gridconstant(double focallength, double pixelsize) const;
-	Point	pointat(double ra, double dec);
+	Point	starAt(double ra, double dec);
 	void	moveto(double ra, double dec);
 	void	measure(GuiderCalibrator& calibrator,
 			double deltara, double deltadec);
-
+	void	callback(const CalibrationPoint& calpoint);
+	void	callback(const GuiderCalibration& calibration);
+private:
+	CalibrationProcess(const CalibrationProcess& other);
+	CalibrationProcess&	operator=(const CalibrationProcess& other);
 public:
 	CalibrationProcess(Guider& guider, TrackerPtr tracker);
 	~CalibrationProcess();

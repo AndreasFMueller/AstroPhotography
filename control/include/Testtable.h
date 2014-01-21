@@ -16,10 +16,6 @@ namespace persistence {
  * \brief Entry in the test table
  */
 class	TestEntry {
-	int	_id;
-public:
-	int	id() const { return _id; }
-
 public:
 	int		_intfield;
 public:
@@ -38,10 +34,18 @@ public:
 	const std::string&	stringfield() const { return _stringfield; }
 	void	stringfield(const std::string s) { _stringfield = s; }
 
-	TestEntry(int id) : _id(id) { }
+private:
+	time_t	_timefield;
+public:
+	const time_t&	timefield() const { return _timefield; }
+	void	timefield(const time_t& t) { _timefield = t; }
+
+	TestEntry() { }
 };
 
-std::ostream&	operator<<(std::ostream& out, const TestEntry& entry);
+typedef Persistent<TestEntry>	TestRecord;
+
+std::ostream&	operator<<(std::ostream& out, const TestRecord& entry);
 
 /**
  * \brief Table adapter 
@@ -50,8 +54,8 @@ class	TesttableAdapter {
 public:
 static std::string	tablename();
 static std::string	createstatement();
-static TestEntry	row_to_object(int objectid, const Row& row);
-static UpdateSpec	object_to_updatespec(const TestEntry& entry);
+static TestRecord	row_to_object(int objectid, const Row& row);
+static UpdateSpec	object_to_updatespec(const TestRecord& entry);
 };
 
 } // namespace persistence

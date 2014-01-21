@@ -11,6 +11,9 @@
 
 namespace Astro {
 
+TrackingHistory	*getTrackingHistory(CORBA::Long id);
+Calibration	*getCalibration(CORBA::Long id);
+
 /**
  * \brief GuiderFactory servant definition
  */
@@ -21,7 +24,18 @@ public:
 		: _guiderfactory(guiderfactory) { }
 	virtual ~GuiderFactory_impl() { }
 	virtual Astro::GuiderFactory::GuiderList	*list();
-	virtual Astro::Guider_ptr	get(const Astro::GuiderDescriptor& descriptor);
+	virtual Astro::Guider_ptr	get(
+		const Astro::GuiderDescriptor& descriptor);
+
+	virtual Astro::GuiderFactory::idlist	*getCalibrations(
+		const Astro::GuiderDescriptor& guider);
+	virtual Astro::GuiderFactory::idlist	*getAllCalibrations();
+	virtual Calibration	*getCalibration(CORBA::Long id);
+
+	virtual Astro::GuiderFactory::idlist	*getGuideruns(
+		const Astro::GuiderDescriptor& guider);
+	virtual Astro::GuiderFactory::idlist	*getAllGuideruns();
+	virtual TrackingHistory	*getTrackingHistory(CORBA::Long id);
 };
 
 } // namespace astro

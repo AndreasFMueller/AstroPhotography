@@ -1,0 +1,12 @@
+camera cam assign camera:sx/250-008-ECHO2-1278-0509
+ccd c assign cam 0
+ccd c start exposuretime=0.2
+ccd c wait
+ccd c image i
+image i save test2.fits
+image i remove
+ccd c start exposuretime=0.1
+ccd c wait
+ccd c image i
+image i save test1.fits
+image i remove

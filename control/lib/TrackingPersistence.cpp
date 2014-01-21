@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Tracking.h>
+#include <TrackingPersistence.h>
 
 using namespace astro::persistence;
 
@@ -27,9 +27,9 @@ std::string	GuidingRunTableAdapter::createstatement() {
 	);
 }
 
-GuidingRun	GuidingRunTableAdapter::row_to_object(int objectid,
+GuidingRunRecord	GuidingRunTableAdapter::row_to_object(int objectid,
 			const Row& row) {
-	GuidingRun	result;
+	Persistent<GuidingRun>	result(objectid);
 	result.whenstarted = row["whenstarted"]->timeValue();
 	result.camera = row["camera"]->stringValue();
 	result.ccdid = row["ccdid"]->intValue();
@@ -37,7 +37,7 @@ GuidingRun	GuidingRunTableAdapter::row_to_object(int objectid,
 	return result;
 }
 
-UpdateSpec	GuidingRunTableAdapter::object_to_updatespec(const GuidingRun& guidingrun) {
+UpdateSpec	GuidingRunTableAdapter::object_to_updatespec(const GuidingRunRecord& guidingrun) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
 	spec.insert(Field("camera", factory.get(guidingrun.camera)));
@@ -67,27 +67,29 @@ std::string	TrackingTableAdapter::createstatement() {
 	);
 }
 
-Tracking	TrackingTableAdapter::row_to_object(int objectid,
+TrackingPointRecord	TrackingTableAdapter::row_to_object(int objectid,
 			const Row& row) {
-	Tracking	tracking(objectid);
-	tracking.when = row["trackingtime"]->doubleValue();
-	tracking.guidingrun = row["guidingrun"]->intValue();
-	tracking.xoffset = row["xoffset"]->doubleValue();
-	tracking.yoffset = row["yoffset"]->doubleValue();
-	tracking.racorrection = row["racorrection"]->doubleValue();
-	tracking.deccorrection = row["deccorrection"]->doubleValue();
+	double	when = row["trackingtime"]->doubleValue();
+	Point	offset(row["xoffset"]->doubleValue(),
+			row["yoffset"]->doubleValue());
+	Point	correction(row["racorrection"]->doubleValue(),
+			row["deccorrection"]->doubleValue());
+	TrackingPoint	ti(when, offset, correction);
+	
+	TrackingPointRecord	tracking(objectid,
+		row["guidingrun"]->intValue(), ti);
 	return tracking;
 }
 
-UpdateSpec	TrackingTableAdapter::object_to_updatespec(const Tracking& tracking) {
+UpdateSpec	TrackingTableAdapter::object_to_updatespec(const TrackingPointRecord& tracking) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
-	spec.insert(Field("trackingtime", factory.get(tracking.when)));
-	spec.insert(Field("guidingrun", factory.get(tracking.guidingrun)));
-	spec.insert(Field("xoffset", factory.get(tracking.xoffset)));
-	spec.insert(Field("yoffset", factory.get(tracking.yoffset)));
-	spec.insert(Field("racorrection", factory.get(tracking.racorrection)));
-	spec.insert(Field("deccorrection", factory.get(tracking.deccorrection)));
+	spec.insert(Field("trackingtime", factory.get(tracking.t)));
+	spec.insert(Field("guidingrun", factory.get(tracking.ref())));
+	spec.insert(Field("xoffset", factory.get(tracking.trackingoffset.x())));
+	spec.insert(Field("yoffset", factory.get(tracking.trackingoffset.y())));
+	spec.insert(Field("racorrection", factory.get(tracking.correction.x())));
+	spec.insert(Field("deccorrection", factory.get(tracking.correction.y())));
 	return spec;
 }
 

@@ -44,6 +44,7 @@ void	UpdateSpecTest::testConstructor() {
 	spec.insert(Field("intfield", factory.get(47)));
 	spec.insert(Field("floatfield", factory.get(4.7)));
 	spec.insert(Field("stringfield", factory.get("siebenundvierzig")));
+	spec.insert(Field("timefield", factory.getTime("2014-01-01 12:34:56")));
 
 	std::string	uq = spec.updatequery("testtable");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update query: %s", uq.c_str());

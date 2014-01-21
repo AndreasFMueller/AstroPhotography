@@ -45,12 +45,20 @@ std::ostream&	operator<<(std::ostream& out, const Astro::Point& star) {
 	return out;
 }
 
+std::ostream&	operator<<(std::ostream& out, const Astro::CalibrationPoint& cp) {
+	out << cp.t << ", " << cp.offset << ", " << cp.star;
+	return out;
+}
+
 /**
  * \brief Display Calibration data.
  */
 std::ostream&	operator<<(std::ostream& out,
-			const Astro::Guider::Calibration& calibration) {
+			const Astro::Calibration& calibration) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "display calibration object");
 	out << "calibration:     ";
+	out << calibration.id << std::endl;
+	out << "coefficients:    ";
 	out << stringprintf("[ %10.6f, %10.6f, %10.6f;",
 		calibration.coefficients[0],
 		calibration.coefficients[1],
@@ -62,11 +70,17 @@ std::ostream&	operator<<(std::ostream& out,
 		calibration.coefficients[4],
 		calibration.coefficients[5]);
 	out << std::endl;
+	out << "points:         ";
+	out << calibration.points.length() << std::endl;
+	for (int i = 0; i < calibration.points.length(); i++) {
+		out << "                ";
+		out << calibration.points[i] << std::endl;
+	}
 	return out;
 }
 
 std::ostream&	operator<<(std::ostream& out,
-			const Astro::TrackingInfo& trackinginfo) {
+			const Astro::TrackingPoint& trackinginfo) {
 	out << "last action at:  ";
 	double	when = Timer::gettime() - trackinginfo.timeago;
 	time_t	t = floor(when);
@@ -83,6 +97,28 @@ std::ostream&	operator<<(std::ostream& out,
 	return out;
 }
 
+std::ostream&	operator<<(std::ostream& out,
+			const Astro::Guider::GuiderState& state) {
+	switch (state) {
+	case Astro::Guider::GUIDER_UNCONFIGURED:
+		out << "unconfigured";
+		break;
+	case Astro::Guider::GUIDER_IDLE:
+		out << "idl";
+		break;
+	case Astro::Guider::GUIDER_CALIBRATING:
+		out << "calibrating";
+		break;
+	case Astro::Guider::GUIDER_GUIDING:
+		out << "guiding";
+		break;
+	case Astro::Guider::GUIDER_CALIBRATED:
+		out << "calibrated";
+		break;
+	}
+	return out;
+}
+
 /**
  * \brief Display Guider information and status.
  */
@@ -92,6 +128,7 @@ std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
 
 	// display calibration data
 	Astro::Guider::GuiderState	state = guider->getState();
+	out << "state:           " << state << std::endl;
 	switch (state) {
 	case Astro::Guider::GUIDER_CALIBRATING:
 		out << "cal progress:    ";
@@ -101,9 +138,11 @@ std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
 		break;
 	case Astro::Guider::GUIDER_GUIDING:
 		out << "guiding:         " << std::endl;
-		out << guider->mostRecentTrackingInfo();
+		out << guider->mostRecentTrackingPoint();
 	case Astro::Guider::GUIDER_CALIBRATED:
-		out << guider->getCalibration();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibration");
+		out << *guider->getCalibration();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got calibration");
 		break;
 	default:
 		out << "not calibrated" << std::endl;
@@ -226,16 +265,10 @@ void	guidercommand::star(GuiderWrapper& guider,
  */
 void	guidercommand::calibration(GuiderWrapper& guider,
 		const std::vector<std::string>& arguments) {
-	if (arguments.size() < 8) {
-		throw command_error("calibration command requires 6 arguments");
+	if (arguments.size() < 3) {
+		throw command_error("calibration command requires an argument");
 	}
-	std::vector<std::string>::const_iterator	i = arguments.begin();
-	i += 2;
-	int	j = 0;
-	Astro::Guider::Calibration	cal;
-	while (j < 6) {
-		cal.coefficients[j++] = stod(*i++);
-	}
+	long	cal = stod(arguments[2]);
 	guider->useCalibration(cal);
 }
 

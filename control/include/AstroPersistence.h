@@ -37,11 +37,12 @@ typedef std::shared_ptr<FieldValue>	FieldValuePtr;
  */
 class FieldValueFactory {
 public:
-	FieldValuePtr	get(int value);
-	FieldValuePtr	get(double value);
-	FieldValuePtr	get(const std::string& value);
-	FieldValuePtr	get(const char *value);
-	FieldValuePtr	getTime(const time_t t);
+	FieldValuePtr	get(int value) const;
+	FieldValuePtr	get(double value) const;
+	FieldValuePtr	get(const std::string& value) const;
+	FieldValuePtr	get(const char *value) const;
+	FieldValuePtr	getTime(const time_t t) const;
+	FieldValuePtr	getTime(const std::string& value) const;
 };
 
 /**
@@ -193,6 +194,38 @@ public:
 	std::list<long>	selectids(const std::string& condition);
 };
 
+/**
+ * \brief Template to create a persistent version of an object
+ *
+ * A persistent version of an object has an id field that allows to identify
+ * the corresponding record in the database.
+ */
+template<typename object>
+class Persistent : public object {
+	int	_id;
+public:
+	const int&	id() const { return _id; }
+	void	id(const int& i) { _id = i; }
+	Persistent(int i) : _id(i) { }
+	Persistent(int i, const object& _object) : object(_object), _id(i) { }
+};
+
+/**
+ * \brief Template to create a persistent version of an object with reference
+ *
+ * This is a persistent version, i.e. it has an id, but it also has a reference
+ * to another persistent object.
+ */
+template<typename object>
+class PersistentRef : public Persistent<object> {
+	int	_ref;
+public:
+	const int&	ref() const { return _ref; }
+	void	ref(const int& r) { _ref = r; }
+	PersistentRef(int i, int r, const object& _object)
+		: Persistent<object>(i, _object), _ref(r) { }
+};
+
 // The table template create below from the TableBase class needs a
 // Table descriptor class that needs some
 //
@@ -217,6 +250,16 @@ public:
 	object	byid(long objectid);
 	long	add(const object&);
 	void	update(long objectid, const object& o);
+
+	std::list<object>	select(const std::string& condition) {
+		std::list<object>	result;
+		std::list<long>	ids = selectids(condition);
+		std::list<long>::iterator	i;
+		for (i = ids.begin(); i != ids.end(); i++) {
+			result.push_back(byid(*i));
+		}
+		return result;
+	}
 };
 
 template<typename object, typename dbadapter>

@@ -9,21 +9,20 @@
 #include <guider.hh>
 #include <AstroGuiding.h>
 #include <map>
+#include <MonitorChannel.h>
 
 namespace Astro {
 
+/**
+ * \brief Implementation class for the Guider class
+ *
+ * The Guider interface is rather complex.
+ */
 class Guider_impl : public POA_Astro::Guider {
 	astro::guiding::GuiderPtr	_guider;
 	astro::Point	_point;
 	astro::guiding::TrackerPtr	getTracker();
 
-	pthread_mutex_t	mutex; // mutex to protect the maps
-	typedef	std::map< ::CORBA::Long, TrackingMonitor_var>	monitormap_t;
-	monitormap_t	monitors;
-	typedef std::map< ::CORBA::Long, TrackingImageMonitor_var>	imagemonitormap_t;
-	imagemonitormap_t	imagemonitors;
-
-	int	guidingrunid;
 public:
 	Guider_impl(astro::guiding::GuiderPtr guider);
 	virtual ~Guider_impl();
@@ -52,34 +51,66 @@ public:
 	virtual	void	setStar(const Astro::Point& star);
 
 	// calibration related methods
-	virtual ::Astro::Guider::Calibration	getCalibration();
-	virtual void	useCalibration(const Astro::Guider::Calibration& cal);
+private:
+	int	calibrationid;
+public:
+	virtual ::Astro::Calibration	*getCalibration();
+	virtual void	useCalibration(CORBA::Long calid);
 	virtual void	startCalibration(::CORBA::Float sensitivity);
 	virtual void	cancelCalibration();
 	virtual CORBA::Double	calibrationProgress();
 	virtual bool	waitCalibration(CORBA::Double timeout);
 
-	// guding related methods
+private:
+	int	guidingrunid;
+public:
+	// guiding related methods
 	virtual void	startGuiding(::CORBA::Float guidinginterval);
 	virtual ::CORBA::Float	getGuidingInterval();
 	virtual void	stopGuiding();
 
 	// monitoring
 	virtual Image_ptr	mostRecentImage();
-	virtual Astro::TrackingInfo	mostRecentTrackingInfo();
+	virtual Astro::TrackingPoint	mostRecentTrackingPoint();
 	virtual Astro::TrackingHistory	*getTrackingHistory(::CORBA::Long guiderunid);
 
+	//////////////////////////////////////////////////////////////////////
 	// callback interface for monitoring
+private:
+	MonitorChannel< ::Astro::TrackingMonitor, ::Astro::TrackingPoint>
+		trackinginfochannel;
+public:
 	virtual ::CORBA::Long	registerMonitor(TrackingMonitor_ptr monitor);
 	virtual void	unregisterMonitor(::CORBA::Long monitorid);
-	void	update(const Astro::TrackingInfo& trackinginfo);
-	void	update_stop();
+	void	update(const Astro::TrackingPoint& trackinginfo);
+	void	tracking_stop();
 
-	// callback interface for image monitoring
-	virtual ::CORBA::Long	registerImageMonitor(TrackingImageMonitor_ptr imagemonitor);
+
+	//////////////////////////////////////////////////////////////////////
+	// callback interface for tracking images
+private:
+	MonitorChannel< ::Astro::TrackingImageMonitor, ::Astro::TrackingImage>
+		trackingimagechannel;
+public:
+	void	update(const ::Astro::TrackingImage& trackingimage);
+	void	trackingimage_stop();
+	virtual ::CORBA::Long	registerImageMonitor(
+			TrackingImageMonitor_ptr imagemonitor);
 	virtual void	unregisterImageMonitor(::CORBA::Long imagemonitorid);
-	void	update(const ::Astro::ImageSize& size,
-			const ::Astro::ShortSequence_var& imagedata);
+
+	//////////////////////////////////////////////////////////////////////
+	// callback interface for calibration points
+private:
+	MonitorChannel<::Astro::CalibrationMonitor, ::Astro::CalibrationPoint>
+		calibrationchannel;
+public:
+	void	update(const ::Astro::CalibrationPoint& calibrationpoint);
+	void	calibration_stop();
+
+	// callback for calibration
+	virtual ::CORBA::Long	registerCalibrationMonitor(
+			CalibrationMonitor_ptr monitor);
+	virtual void	unregisterCalibrationMonitor(::CORBA::Long monitorid);
 };
 
 } // namespace Astro

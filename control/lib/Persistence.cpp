@@ -131,27 +131,31 @@ public:
 //////////////////////////////////////////////////////////////////////
 // FieldValueFactory implementation
 //////////////////////////////////////////////////////////////////////
-FieldValuePtr	FieldValueFactory::get(int value) {
+FieldValuePtr	FieldValueFactory::get(int value) const {
 	return FieldValuePtr(new IntegerField(value));
 }
 
-FieldValuePtr	FieldValueFactory::get(double value) {
+FieldValuePtr	FieldValueFactory::get(double value) const {
 	return FieldValuePtr(new DoubleField(value));
 }
 
-FieldValuePtr	FieldValueFactory::get(const std::string& value) {
+FieldValuePtr	FieldValueFactory::get(const std::string& value) const {
 	return FieldValuePtr(new StringField(value));
 }
 
-FieldValuePtr	FieldValueFactory::get(const char *value) {
+FieldValuePtr	FieldValueFactory::get(const char *value) const {
 	if (NULL == value) {
 		return FieldValuePtr(new NullField());
 	}
 	return FieldValuePtr(new StringField(std::string(value)));
 }
 
-FieldValuePtr	FieldValueFactory::getTime(const time_t t) {
+FieldValuePtr	FieldValueFactory::getTime(const time_t t) const {
 	return FieldValuePtr(new TimeField(t));
+}
+
+FieldValuePtr	FieldValueFactory::getTime(const std::string& value) const {
+	return FieldValuePtr(new TimeField(value));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -216,7 +220,7 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 	if (d) {
 		this->bind(colno, value->doubleValue());
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound int value %f to column %d",
+			"bound double value %f to column %d",
 			value->doubleValue(), colno);
 		return;
 	}
@@ -224,7 +228,7 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 	if (s) {
 		this->bind(colno, value->stringValue());
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound int value '%s' to column %d",
+			"bound string value '%s' to column %d",
 			value->stringValue().c_str(), colno);
 		return;
 	}
@@ -232,7 +236,7 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 	if (t) {
 		this->bind(colno, value->stringValue());
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound int value '%s' to column %d",
+			"bound time value '%s' to column %d",
 			value->stringValue().c_str(), colno);
 		return;
 	}

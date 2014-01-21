@@ -26,9 +26,8 @@ GuiderCalibrator::GuiderCalibrator() {
 /**
  * \brief add another point to the calibration data
  */
-void	GuiderCalibrator::add(double t, const Point& offset,
-		const Point& point) {
-	calibration_data.push_back(calibration_point(t, offset, point));
+void	GuiderCalibrator::add(const CalibrationPoint& calibrationpoint) {
+	calibration_data.push_back(calibrationpoint);
 }
 
 /**
@@ -53,7 +52,7 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	double	b[m];
 
 	// fill in equations
-	std::vector<calibration_point>::const_iterator	ci;
+	std::vector<CalibrationPoint>::const_iterator	ci;
 	int	i = 0;
 	for (ci = calibration_data.begin(); ci != calibration_data.end(); ci++){
 		A[i        ] = ci->offset.x();	// vx_ra
@@ -65,7 +64,7 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 		A[i + 6 * m] = 1;		// origin_x
 		A[i + 7 * m] = 0;		// origin_y
 
-		b[i] = ci->point.x();
+		b[i] = ci->star.x();
 
 		i++;
 
@@ -78,7 +77,7 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 		A[i + 6 * m] = 0;
 		A[i + 7 * m] = 1;
 
-		b[i] = ci->point.y();
+		b[i] = ci->star.y();
 
 		i++;
 	}

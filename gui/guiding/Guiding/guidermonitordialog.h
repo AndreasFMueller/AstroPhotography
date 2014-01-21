@@ -45,8 +45,7 @@ public:
 	~GuiderMonitorDialog();
 
 	void	update(const Astro::TrackingInfo& ti);
-	void	update(const Astro::ImageSize& size,
-			const Astro::ShortSequence& imagedata);
+	void	update(const Astro::TrackingImage& image);
 	void	requestStop();
 
 	void	closeEvent(QCloseEvent *event);
@@ -89,8 +88,8 @@ public:
 	TrackingImageMonitor_impl(GuiderMonitorDialog& guidermonitordialog)
 		: _guidermonitordialog(guidermonitordialog) { }
 	virtual ~TrackingImageMonitor_impl();
-	virtual void	update(const ::Astro::ImageSize& size,
-				const ::Astro::ShortSequence& imagedata);
+	virtual void	update(const ::Astro::TrackingImage& image);
+	virtual void	stop() { }
 };
 
 } // namespace guidermonitor

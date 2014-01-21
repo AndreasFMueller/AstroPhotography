@@ -14,6 +14,14 @@ namespace astro {
 namespace guiding {
 
 /**
+ * \brief convert a Calibration Point to a string
+ */
+std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal) {
+	out << cal.t << "," << cal.offset << "," << cal.star;
+	return out;
+}
+
+/**
  * \brief Format the calibration data for display
  */
 std::string	GuiderCalibration::toString() const {

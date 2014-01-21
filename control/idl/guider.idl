@@ -21,28 +21,101 @@ module Astro {
 	/**
 	 * \brief Information about recent tracking activities
 	 *
-	 * This 
+	 * A Tracking point contains information about when the point
+	 * was measured, the offset that was measured and the correction
+	 * that was applied.
 	 */
-	struct TrackingInfo {
+	struct TrackingPoint {
 		double	timeago;
 		Point	trackingoffset;
 		Point	activation;
 	};
-	typedef sequence<TrackingInfo> TrackingHistory;
+	typedef sequence<TrackingPoint> TrackingPoints;
+
+	/**
+	 * \brief Tracking History 
+	 *
+	 * The tracking history contains information about the guider that
+	 * performed the tracking, the points encountered during the tracking
+	 * and the time when the trackint started.
+	 */
+	struct TrackingHistory {
+		long	guiderunid;
+		long	timeago;
+		GuiderDescriptor	guider;
+		TrackingPoints	points;
+	};
 
 	/**
 	 * \brief Interface to a tracking monitor
+	 *
+	 * A tracking monitor processes new points
 	 */
 	interface TrackingMonitor {
-		oneway void	update(in TrackingInfo ti);
+		oneway void	update(in TrackingPoint ti);
 		oneway void	stop();
 	};
 
 	/**
+	 * \brief Tracking Image structure
+	 *
+	 * The tracking image contains the size of the image and a sequence
+	 * containing the short pixels. 
+	 */
+	struct TrackingImage {
+		ImageSize	size;
+		ShortSequence	imagedata;
+	};
+
+	/**
 	 * \brief Interface for tracking image updates
+	 *
+	 * The image monitor interface receives new tracking images
 	 */
 	interface TrackingImageMonitor {
-		oneway void	update(in ImageSize size, in ShortSequence imagedata);
+		oneway void	update(in TrackingImage ti);
+		oneway void	stop();
+	};
+
+	/**
+	 * \brief Calibration point structure
+	 *
+	 * A calibration point records the time offset after the start
+	 * of the calibration process, the RA/DEC offset of the point and
+	 * the position of the start resulting from applying the offset.
+	 */
+	struct CalibrationPoint {
+		double	t;
+		Point	offset;
+		Point	star;
+	};
+	typedef sequence<CalibrationPoint>	CalibrationSequence;
+
+	/**
+	 * \brief Calibration object
+	 *
+	 * The calibration contains information about the guider that was
+	 * calibrated, the time when the calibration started, the 
+	 * calibration coefficients found, and the points used to compute
+	 * the calibration coefficients.
+	 */
+	struct Calibration {
+		long	id;
+		double	timeago;
+		GuiderDescriptor	guider;
+		float	coefficients[6];
+		CalibrationSequence	points;
+	};
+
+	/**
+	 * \brief Interface for calibration point updates
+	 *
+	 * The calibration monitor processes updates for new calibration
+	 * points.
+	 */
+	interface CalibrationMonitor {
+		oneway void	update(in CalibrationPoint point);
+		oneway void	stop();
 	};
 
 	/**
@@ -78,6 +151,7 @@ module Astro {
 		 * \brief Get the camera that was chosen for the guider
 		 */
 		Camera	getCamera() raises(BadState);
+
 		/**
 		 * \brief Get the CCD that was chosen for the guider
 		 */
@@ -115,10 +189,7 @@ module Astro {
 		/**
 		 * \brief Methods related to calibration
 		 */
-		struct Calibration {
-			float	coefficients[6];
-		};
-		void	useCalibration(in Calibration cal);
+		void	useCalibration(in long id);
 		Calibration	getCalibration() raises(BadState);
 
 		// methods to perform a calibration asynchronously
@@ -126,6 +197,10 @@ module Astro {
 		double	calibrationProgress() raises(BadState);
 		void	cancelCalibration() raises(BadState);
 		boolean	waitCalibration(in double timeout) raises(BadState);
+
+		// callback stuff for 
+		long	registerCalibrationMonitor(in CalibrationMonitor monitor);
+		void	unregisterCalibrationMonitor(in long monitorid);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
@@ -155,7 +230,7 @@ module Astro {
 		/**
 		 * \brief Polling interface to tracking information
 		 */
-		TrackingInfo	mostRecentTrackingInfo()
+		TrackingPoint	mostRecentTrackingPoint()
 						raises(BadState);
 
 		/**
@@ -165,7 +240,8 @@ module Astro {
 		 *			history is requested. -1 means the
 		 *			currently active guide run.
 		 */
-		TrackingHistory	getTrackingHistory(in long guiderunid) raises(BadState);
+		TrackingHistory	getTrackingHistory(in long guiderunid)
+						raises(BadState);
 
 		/**
 		 * \brief Callback interface for tracking monitoring
@@ -198,10 +274,52 @@ module Astro {
 	 * doing their work even when no client is connected. The GuiderFactory
 	 * keeps a repository of guider objects. New guider objects can
 	 * be created by specifying camera, ccd and guider port.
+	 *
+	 * In addition, the guider factory also gives access to calibration
+	 * and tracking data. This is necessary because a guider may
+	 * no longer be around when we want to retrieve the calibration
+	 * or the tracking data. The camera may no longer be connected
+	 * to the server, but the data should still be accessible.
 	 */
 	interface GuiderFactory {
 		typedef sequence<GuiderDescriptor> GuiderList;
 		GuiderList	list();
+
+		/**
+		 * \brief Get a guider based on a guider descriptor
+		 */
 		Guider	get(in GuiderDescriptor descriptor) raises(NotFound);
+
+		typedef sequence<long>	idlist;
+
+		/**
+		 * \brief Retrieve a list of all valid calibration ids
+		 */
+		idlist	getAllCalibrations();
+
+		/**
+		 * \brief Retrieve a list of valid calibration ids for a guider
+		 */
+		idlist	getCalibrations(in GuiderDescriptor guider);
+
+		/**
+		 * \brief Retrieve the Calibration by id
+		 */
+		Calibration	getCalibration(in long id);
+
+		/**
+		 * \brief Retrieve a list of all valid guide run ids
+		 */
+		idlist	getAllGuideruns();
+
+		/**
+		 * \brief Retrieve a list of valid guide run ids for a guider
+		 */
+		idlist	getGuideruns(in GuiderDescriptor guider);
+
+		/**
+		 * \brief Retrieve the Tracking history by id
+		 */
+		TrackingHistory	getTrackingHistory(in long id);
 	};
 };

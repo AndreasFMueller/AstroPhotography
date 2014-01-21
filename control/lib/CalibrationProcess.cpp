@@ -17,12 +17,12 @@ namespace astro {
 namespace guiding {
 
 /**
- * \brief Analize a single grid point
+ * \brief Analyze a single grid point
  *
  * Moves (relatively) to a grid point, takes an image and returns the
  * the offset as measured by the tracker.
  */
-Point	CalibrationProcess::pointat(double ra, double dec) {
+Point	CalibrationProcess::starAt(double ra, double dec) {
 	// move the telescope to the point
 	moveto(grid * ra, grid * dec);
 
@@ -32,9 +32,34 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 	ImagePtr	image = guider().getImage();
 
 	// analze the image
-	Point	point = (*tracker())(image);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker found %s", point.toString().c_str());
-	return point;
+	Point	star = (*tracker())(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker found star at %s",
+		star.toString().c_str());
+	return star;
+}
+
+/**
+ * \brief Send a calibration point to the callback
+ */
+void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "send calibration point to callback");
+	if (guider().calibrationcallback) {
+		astro::callback::CallbackDataPtr	data(
+			new CalibrationPointCallbackData(calpoint));
+		(*guider().calibrationcallback)(data);
+	}
+}
+
+/**
+ * \brief Send the completed calibration data to the callback
+ */
+void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "send guider calibration data");
+	if (guider().calibrationcallback) {
+		astro::callback::CallbackDataPtr	data(
+			new GuiderCalibrationCallbackData(calibration));
+		(*guider().calibrationcallback)(data);
+	}
 }
 
 /**
@@ -46,14 +71,27 @@ Point	CalibrationProcess::pointat(double ra, double dec) {
 void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
 		double ra, double dec) {
 	// move the telescope to the grid point corresponding to ra/dec
-	Point	point = pointat(ra, dec);
-	double	t = Timer::gettime();
-	calibrator.add(t, Point(ra, dec), point);
+	Point	star = starAt(ra, dec);
+	double	t = Timer::gettime() - starttime;
+	CalibrationPoint	calibrationpoint(t, Point(ra, dec), star);
+
+	// add the calibration point to the calibrator
+	calibrator.add(calibrationpoint);
+
+	// give the point to the callback
+	callback(calibrationpoint);
 
 	// move the telescope back
-	point = pointat(-ra, -dec);
-	t = Timer::gettime();
-	calibrator.add(t, Point(0, 0), point);
+	star = starAt(-ra, -dec);
+	t = Timer::gettime() - starttime;
+	CalibrationPoint	zeropoint(t, Point(0, 0), star);
+
+	// also add the new zero point to the calibrator
+	calibrator.add(zeropoint);
+
+	// give this point to the callback
+	callback(zeropoint);
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "measure %.0f/%.0f complete", ra, dec);
 }
 
@@ -93,6 +131,8 @@ public:
 void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating: terminate = %s",
 		_thread.terminate() ? "YES" : "NO");
+	// set the start time
+	starttime = Timer::gettime();
 
 	// grid range we want to scan
 	range = 1;
@@ -129,6 +169,9 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 	GuiderCalibration	cal = calibrator.calibrate();
 	cal.rescale(1. / grid);
 	guider().calibration(cal);
+
+	// inform the callback that calibration is complete
+	callback(cal);
 
 	// the guider is now calibrated
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",

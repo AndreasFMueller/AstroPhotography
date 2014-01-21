@@ -433,6 +433,7 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 	throw std::runtime_error("unknown filter wheel state");
 }
 
+#if 0
 // GuiderCalibration
 astro::guiding::GuiderCalibration       convert(const Astro::Guider::Calibration& cal) {
 	astro::guiding::GuiderCalibration	result;
@@ -449,6 +450,7 @@ Astro::Guider::Calibration        convert(const astro::guiding::GuiderCalibratio
 	}
 	return result;
 }
+#endif
 
 // TaskState
 astro::task::TaskQueueEntry::taskstate  convert(const Astro::TaskState& state) {
@@ -633,31 +635,37 @@ Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state
 }
 
 // Tracking info
-astro::guiding::TrackingInfo    convert(const Astro::TrackingInfo& trackinginfo) {
-	astro::guiding::TrackingInfo	result(
+astro::guiding::TrackingPoint    convert(const Astro::TrackingPoint& trackinginfo) {
+	astro::guiding::TrackingPoint	result(
 		astro::Timer::gettime()  - trackinginfo.timeago,
 		convert(trackinginfo.trackingoffset),
 		convert(trackinginfo.activation));
 	return result;
 }
 
-Astro::TrackingInfo    convert(const astro::guiding::TrackingInfo& trackinginfo) {
-	Astro::TrackingInfo	result;
+Astro::TrackingPoint    convert(const astro::guiding::TrackingPoint& trackinginfo) {
+	Astro::TrackingPoint	result;
 	result.timeago = astro::Timer::gettime() - trackinginfo.t;
 	result.trackingoffset = convert(trackinginfo.trackingoffset);
 	result.activation = convert(trackinginfo.correction);
 	return result;
 }
 
-Astro::TrackingInfo    convert(const astro::guiding::Tracking& tracking) {
-	Astro::TrackingInfo	result;
-	result.timeago = astro::Timer::gettime() - tracking.when;
-	result.trackingoffset
-		= astro::convert(astro::Point(tracking.xoffset, tracking.yoffset));
-	result.activation
-		= astro::convert(astro::Point(tracking.racorrection, tracking.deccorrection));
+// CalibrationPoint
+astro::guiding::CalibrationPoint	convert(const Astro::CalibrationPoint& calibrationpoint) {
+	astro::guiding::CalibrationPoint	result;
+	result.t = calibrationpoint.t;
+	result.offset = convert(calibrationpoint.offset);
+	result.star = convert(calibrationpoint.star);
 	return result;
 }
 
+Astro::CalibrationPoint	convert(const astro::guiding::CalibrationPoint& calibrationpoint) {
+	Astro::CalibrationPoint	result;
+	result.t = calibrationpoint.t;
+	result.offset = convert(calibrationpoint.offset);
+	result.star = convert(calibrationpoint.star);
+	return result;
+}
 
 } // namespace astro

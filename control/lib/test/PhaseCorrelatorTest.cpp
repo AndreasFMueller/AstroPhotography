@@ -9,6 +9,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <iostream>
+#include <sstream>
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -41,6 +42,7 @@ void	PhaseCorrelatorTest::tearDown() {
 }
 
 void	PhaseCorrelatorTest::testInteger() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start Integer test");
 	// create an image
 	int	N = 256;
 	Image<double>	fromimage(N, N);
@@ -65,10 +67,16 @@ void	PhaseCorrelatorTest::testInteger() {
 	// create a phase correclator
 	PhaseCorrelator	pc;
 	Point	translation = pc(fromimage, toimage);
-	std::cout << translation << std::endl;
+
+	// display result
+	std::ostringstream	out;
+	out << translation;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Integer test");
 }
 
 void	PhaseCorrelatorTest::testIntegerNegative() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start IntegerNegative test");
 	// create an image
 	int	N = 256;
 	Image<double>	fromimage(N, N);
@@ -93,10 +101,16 @@ void	PhaseCorrelatorTest::testIntegerNegative() {
 	// create a phase correclator
 	PhaseCorrelator	pc;
 	Point	translation = pc(fromimage, toimage);
-	std::cout << translation << std::endl;
+
+	// display result
+	std::ostringstream	out;
+	out << translation;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end IntegerNegative test");
 }
 
 void	PhaseCorrelatorTest::testHalf() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start Half test");
 	// create an image
 	int	N = 256;
 	Image<double>	fromimage(N, N);
@@ -121,7 +135,12 @@ void	PhaseCorrelatorTest::testHalf() {
 	// create a phase correclator
 	PhaseCorrelator	pc;
 	Point	translation = pc(fromimage, toimage);
-	std::cout << translation << std::endl;
+
+	// display result
+	std::ostringstream	out;
+	out << translation;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Half test");
 }
 
 

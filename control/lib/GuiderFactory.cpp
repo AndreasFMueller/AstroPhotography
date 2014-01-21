@@ -77,7 +77,9 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 
 	// use the information in the descriptor to build a new guider
 	CameraPtr	camera = cameraFromName(guiderdescriptor.cameraname());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructed");
 	CcdPtr	ccd = camera->getCcd(guiderdescriptor.ccdid());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
 	GuiderPortPtr	guiderport;
 	if (guiderdescriptor.guiderportname().size() == 0) {
 		guiderport = camera->getGuiderPort();
@@ -85,9 +87,11 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 		guiderport = guiderportFromName(
 			guiderdescriptor.guiderportname());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "components constructed");
 
 	// with all these components we can now build a new guider
 	GuiderPtr	guider(new Guider(camera, ccd, guiderport));
+	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	return guider;
 }
 

@@ -213,6 +213,47 @@ std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
 std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
 
 /**
+ * \brief Encapsulation of the calibration as callback argument
+ */
+class GuiderCalibrationCallbackData : public astro::callback::CallbackData {
+	GuiderCalibration	_calibration;
+public:
+	GuiderCalibrationCallbackData(const GuiderCalibration& calibration)
+		: _calibration(calibration) { }
+	const GuiderCalibration&	calibration() const {
+		return _calibration;
+	}
+};
+
+/**
+ * \brief CalibrationPoint
+ */
+class CalibrationPoint {
+public:
+	double	t;
+	Point	offset;	// ra, dec
+	Point	star;	// pixel coordinates of observed star
+	CalibrationPoint() { }
+	CalibrationPoint(double _t, const Point& _offset, const Point& _star)
+		: t(_t), offset(_offset), star(_star) { }
+};
+
+std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
+
+/**
+ * \brief Calibration Point encapsulation as callback argument
+ */
+class CalibrationPointCallbackData : public astro::callback::CallbackData {
+	CalibrationPoint	_calibrationpoint;
+public:
+	CalibrationPointCallbackData(const CalibrationPoint& calibrationpoint)
+		: _calibrationpoint(calibrationpoint) { }
+	const CalibrationPoint&	calibrationpoint() const {
+		return _calibrationpoint;
+	}
+};
+
+/**
  * \brief GuiderCalibrator
  *
  * The GuiderCalibrator collects a set of points and computes the calibration
@@ -221,35 +262,22 @@ std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
  * method then computes the calibration data.
  */
 class GuiderCalibrator {
-public:
-	class calibration_point {
-	public:
-		double	t;
-		Point	offset;
-		Point	point;
-		calibration_point(double _t, const Point& _offset,
-			const Point& _point) 
-			: t(_t), offset(_offset), point(_point) {
-		}
-	};
-private:
-	std::vector<calibration_point>	calibration_data;
+	std::vector<CalibrationPoint>	calibration_data;
 public:
 	GuiderCalibrator();
-	void	add(double t, const Point& movement,
-			const Point& point);
+	void	add(const CalibrationPoint& calibrationpoint);
 	GuiderCalibration	calibrate();
 };
 
 /**
  * \brief Class to report data 
  */
-class TrackingInfo : public astro::callback::CallbackData {
+class TrackingPoint : public astro::callback::CallbackData {
 public:
 	double	t;
 	Point	trackingoffset;
 	Point	correction;
-	TrackingInfo(const double& actiontime,
+	TrackingPoint(const double& actiontime,
 		const Point& offset, const Point& activation)
 		: t(actiontime), trackingoffset(offset),
 		  correction(activation) {
@@ -434,6 +462,17 @@ private:
 	CalibrationProcessPtr	calibrationprocess;
 	friend class CalibrationProcess;
 	void	calibrationCleanup();
+
+public:
+	/**
+	 * \brief calibration update callback
+	 *
+	 * This callback is called with a CalibrationPointCallbackData
+	 * argument for each calibration point that was measured by the
+	 * calibration process.
+	 */
+	astro::callback::CallbackPtr	calibrationcallback;
+	
 
 	// the following methods manage the guiding thread
 private:

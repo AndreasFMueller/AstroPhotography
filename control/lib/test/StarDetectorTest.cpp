@@ -41,7 +41,7 @@ void	StarDetectorTest::tearDown() {
 }
 
 void	StarDetectorTest::testDetector() {
-std::cerr << "StarDetector" << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start Detector test");
 	Point	p(480.1, 230.7);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test detect star at %s",
 		p.toString().c_str());
@@ -61,9 +61,9 @@ std::cerr << "StarDetector" << std::endl;
 	StarDetector<unsigned short>	detector(*imagep);
 	ImageRectangle	rectangle(ImagePoint(400,200), ImageSize(100, 100));
 	Point	p2 = detector(rectangle, 8);
-std::cerr << p2 << std::endl;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "detected at: %s",
 		p2.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Detector test");
 }
 
 

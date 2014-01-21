@@ -14,7 +14,10 @@ noinst_HEADERS = Modules_impl.h \
 	GuiderFactory_impl.h Guider_impl.h \
 	PoaNameMap.h POABuilder.h \
 	ImageObjectDirectory.h \
-	TaskQueue_impl.h TaskActivator_impl.h Task_impl.h
+	TaskQueue_impl.h TaskActivator_impl.h Task_impl.h \
+	MonitorChannel.h \
+	GuiderImageCallback.h TrackingInfoCallback.h \
+	CalibrationPointCallback.h
 
 noinst_LTLIBRARIES = libserver.la
 libserver_la_SOURCES = Modules_impl.cpp \
@@ -25,9 +28,12 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	GuiderPort_impl.cpp FilterWheel_impl.cpp Cooler_impl.cpp \
 	Focuser_impl.cpp \
 	GuiderFactory_impl.cpp Guider_impl.cpp \
+	Guider_images.cpp Guider_calibration.cpp Guider_tracking.cpp \
 	PoaNameMap.cpp POABuilder.cpp \
 	ImageObjectDirectory.cpp \
-	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp
+	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp \
+	GuiderImageCallback.cpp TrackingInfoCallback.cpp \
+	CalibrationPointCallback.cpp
 
 astrod_SOURCES = astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la libserver.la

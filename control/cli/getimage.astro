@@ -1,0 +1,18 @@
+camera cam assign camera:simulator/camera
+ccd b assign cam 0
+ccd b info
+focuser f assign focuser:simulator/focuser
+focuser f set 32768 wait
+focuser f info
+cooler b status
+cooler b set 260
+cooler b enable
+cooler b waitfor
+filterwheel fw assign cam
+filterwheel fw wait
+ccd b start exposuretime=1 shutter=open
+ccd b wait
+ccd b image testimage
+image testimage info
+image testimage save testimage.fits
+exit

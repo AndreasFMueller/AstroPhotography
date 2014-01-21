@@ -35,7 +35,7 @@ std::ostream&	operator<<(std::ostream& out, const Astro::Point& p) {
 	return out;
 }
 
-std::ostream&	operator<<(std::ostream& out, const ::Astro::TrackingInfo& ti) {
+std::ostream&	operator<<(std::ostream& out, const ::Astro::TrackingPoint& ti) {
 	out << std::fixed << std::setprecision(3) << Timer::gettime() - ti.timeago;
 	out << "     ";
 	out << ti.trackingoffset;
@@ -47,11 +47,11 @@ std::ostream&	operator<<(std::ostream& out, const ::Astro::TrackingInfo& ti) {
 class TrackingMonitor_impl : public POA_Astro::TrackingMonitor {
 public:
 	TrackingMonitor_impl() { }
-	virtual void	update(const ::Astro::TrackingInfo& ti);
+	virtual void	update(const ::Astro::TrackingPoint& ti);
 	virtual void	stop();
 };
 
-void	TrackingMonitor_impl::update(const ::Astro::TrackingInfo& ti) {
+void	TrackingMonitor_impl::update(const ::Astro::TrackingPoint& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update() received");
 	std::cout << ti << std::endl;
 }
@@ -67,25 +67,24 @@ void	TrackingMonitor_impl::stop() {
 class TrackingImageMonitor_impl : public POA_Astro::TrackingImageMonitor {
 public:
 	TrackingImageMonitor_impl() { }
-	virtual void	update(const ::Astro::ImageSize& size,
-		const ::Astro::ShortSequence& imagedata);
+	virtual void	update(const ::Astro::TrackingImage& image);
+	virtual void	stop() { }
 };
 
-void	TrackingImageMonitor_impl::update(const ::Astro::ImageSize& size,
-		const ::Astro::ShortSequence& imagedata) {
+void	TrackingImageMonitor_impl::update(const ::Astro::TrackingImage& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an image of size %dx%d",
-		size.width, size.height);
+		image.size.width, image.size.height);
 	double	min = 65536;
 	double	max = 0;
 	double	mean = 0;
-	for (unsigned int i = 0; i < imagedata.length(); i++) {
-		unsigned short	v = imagedata[i];
+	for (unsigned int i = 0; i < image.imagedata.length(); i++) {
+		unsigned short	v = image.imagedata[i];
 		if (v > max) { max = v; }
 		if (v < min) { min = v; }
 		mean += v;
 	}
-	mean /= imagedata.length();
-	std::cout << size.width << "x" << size.height << " image, ";
+	mean /= image.imagedata.length();
+	std::cout << image.size.width << "x" << image.size.height << " image, ";
 	std::cout << "min=";
 	std::cout << std::fixed << std::setprecision(0) << min;
 	std::cout << ", ";

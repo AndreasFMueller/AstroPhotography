@@ -46,7 +46,7 @@ tests_SOURCES = tests.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp \
-	DatabaseTest.cpp UpdateSpecTest.cpp TableTest.cpp
+	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp
 tests_LDADD = -lcppunit -L.. -lastro -lcorbastro
 tests_DEPENDENCIES = ../libastro.la ../libcorbastro.la
 
