@@ -22,7 +22,7 @@ libqsi_la_LIBADD = ../../lib/libastro.la
 
 noinst_PROGRAMS = qsitests
 qsitests_SOURCES = qsitests.cpp qsitest.cpp
-qsitests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqsi
+qsitests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqsi -lftdi1
 qsitests_DEPENDENCIES = ../../lib/libastro.la libqsi.la
 
 endif
@@ -30,7 +30,7 @@ endif
 qsi_la_SOURCES = $(SRCFILES)
 qsi_la_LDFLAGS = -module
 qsi_la_DEPENDENCIES = ../../lib/libastro.la
-qsi_la_LIBADD = ../../lib/libastro.la
+qsi_la_LIBADD = ../../lib/libastro.la -lqsiapi -lftdi1
 
 endif
 
