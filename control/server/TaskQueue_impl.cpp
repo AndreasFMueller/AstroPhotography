@@ -173,4 +173,34 @@ Task_ptr	TaskQueue_impl::getTask(::CORBA::Long taskid) {
 	return Task::_narrow(obj);
 }
 
+/**
+ * \brief register a Task monitor
+ */
+CORBA::Long	TaskQueue_impl::registerMonitor(TaskMonitor_ptr taskmonitor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a monitor");
+	return monitorchannel.subscribe(taskmonitor);
+}
+
+/**
+ * \brief unregister a task monitor 
+ */
+void	TaskQueue_impl::unregisterMonitor(::CORBA::Long monitorid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregister the monitor %d", monitorid);
+	monitorchannel.unsubscribe(monitorid);
+}
+
+/**
+ * \brief update all monitors
+ */
+void	TaskQueue_impl::update(const ::Astro::TaskMonitorInfo& taskinfo) {
+	monitorchannel.update(taskinfo);
+}
+
+/**
+ * \brief Distribute the stop signal to all monitors
+ */
+void	TaskQueue_impl::taskmonitor_stop() {
+	monitorchannel.stop();
+}
+
 } // namespace Astro

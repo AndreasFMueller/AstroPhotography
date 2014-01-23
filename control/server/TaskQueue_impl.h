@@ -8,6 +8,7 @@
 
 #include <tasks.hh>
 #include <AstroTask.h>
+#include <MonitorChannel.h>
 
 namespace Astro {
 
@@ -26,6 +27,14 @@ public:
 	virtual void	start();
 	virtual void	stop();
 	virtual Task_ptr	getTask(::CORBA::Long taskid);
+private:
+	MonitorChannel<::Astro::TaskMonitor, ::Astro::TaskMonitorInfo>
+		monitorchannel;
+public:
+	virtual void	update(const Astro::TaskMonitorInfo& taskinf);
+	virtual void	taskmonitor_stop();
+	virtual ::CORBA::Long	registerMonitor(TaskMonitor_ptr taskmonitor);
+	virtual void	unregisterMonitor(::CORBA::Long monitorid);
 };
 
 } // namespace Astro

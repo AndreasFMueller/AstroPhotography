@@ -340,6 +340,8 @@ void	TaskQueue::post(taskid_t queueid) {
 	// will start processing the state change
 }
 
+using astro::callback::CallbackDataPtr;
+
 /**
  * \brief update the task queue with the state of the entry
  */
@@ -351,6 +353,20 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
 	tasktable.update(entry.id(), entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update entry %d in database, state %s",
 		entry.id(), statestring(state()).c_str());
+
+	// if there is no callback, there is nothing to do
+	if (!callback) {
+		return;
+	}
+
+	// distribute the updates also to the callback
+	TaskMonitorInfo	info;
+	info.state(entry.state());
+	info.taskid(entry.id());
+	info.when(time(NULL));
+
+	CallbackDataPtr	cbd(new TaskMonitorCallbackData(info));
+	(*callback)(cbd);
 }
 
 /**

@@ -88,6 +88,10 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 		// ... apply the changes to the table
 		t.update(_calibrationid, record);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point added");
+
+		// inform any clients about the fact that calibration has
+		// ended
+		_guider.calibration_stop();
 	}
 
 	return data;

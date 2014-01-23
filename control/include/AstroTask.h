@@ -10,6 +10,7 @@
 #include <queue>
 #include <pthread.h>
 #include <AstroPersistence.h>
+#include <AstroCallback.h>
 
 namespace astro {
 namespace task {
@@ -123,6 +124,8 @@ public:
 
 	TaskInfo(taskid_t id);
 };
+
+class TaskMonitorInfo;
 
 /**
  * \brief Task Queue entry
@@ -253,6 +256,42 @@ public:
 	// retrieve a list of a queue ids for a given state
 	std::list<taskid_t>	tasklist(TaskQueueEntry::taskstate state);
 	bool	exists(taskid_t queueid);
+
+	// monitoring callback called whenever a task changes state
+	astro::callback::CallbackPtr	callback;
+};
+
+/**
+ * \brief Task Monitor information
+ */
+class TaskMonitorInfo {
+private:
+	long	_taskid;
+public:
+	long	taskid() const { return _taskid; }
+	void	taskid(long ti) { _taskid = ti; }
+private:
+	TaskQueueEntry::taskstate	_state;
+public:
+	TaskQueueEntry::taskstate	state() const { return _state; }
+	void	state(const TaskQueueEntry::taskstate& s) { _state = s; }
+private:
+	time_t	_when;
+public:
+	time_t	when() const { return _when; }
+	void	when(time_t w) { _when = w; }
+};
+
+/**
+ * \brief Callback structure for the monitor
+ */
+class TaskMonitorCallbackData : public astro::callback::CallbackData {
+	TaskMonitorInfo	_info;
+public:
+	TaskMonitorCallbackData(const TaskMonitorInfo& info) : _info(info) { }
+	const	TaskMonitorInfo&	info() const {
+		return _info;
+	}
 };
 
 /**

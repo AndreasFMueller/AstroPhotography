@@ -58,6 +58,8 @@ std::ostream&	operator<<(std::ostream& out,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "display calibration object");
 	out << "calibration:     ";
 	out << calibration.id << std::endl;
+	out << "when:            ";
+	out << calibration.timeago << std::endl;
 	out << "coefficients:    ";
 	out << stringprintf("[ %10.6f, %10.6f, %10.6f;",
 		calibration.coefficients[0],
@@ -70,10 +72,10 @@ std::ostream&	operator<<(std::ostream& out,
 		calibration.coefficients[4],
 		calibration.coefficients[5]);
 	out << std::endl;
-	out << "points:         ";
+	out << "points:          ";
 	out << calibration.points.length() << std::endl;
 	for (int i = 0; i < calibration.points.length(); i++) {
-		out << "                ";
+		out << "                 ";
 		out << calibration.points[i] << std::endl;
 	}
 	return out;

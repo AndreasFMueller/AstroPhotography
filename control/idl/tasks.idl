@@ -74,6 +74,29 @@ module Astro {
 	};
 
 	/**
+	 * \brief Data structure sent to the task monitor
+	 */
+	struct TaskMonitorInfo {
+		long		taskid;
+		TaskState	newstate;
+		double		timeago;
+	};
+
+	/**
+	 * \brief Monitor for Task queues
+	 */
+	interface TaskMonitor {
+		/**
+		 * \break method called when a task changes state
+		 */
+		oneway void	update(in TaskMonitorInfo taskinfo);
+		/**
+		 * \brief called when the task queue is destroyed
+		 */
+		oneway void	stop();
+	};
+
+	/**
 	 * \brief Task queue
 	 *
 	 * The task queue stores exposure tasks and executes them.
@@ -132,5 +155,15 @@ module Astro {
 		 * \brief retrieve a task reference
 		 */
 		Task	getTask(in long taskid) raises(NotFound);
+
+		/**
+		 * \brief register a task monitor
+		 */
+		long	registerMonitor(in TaskMonitor monitor);
+
+		/**
+		 * \brief unregister a task monitor
+		 */
+		void	unregisterMonitor(in long monitorid);
 	};
 };

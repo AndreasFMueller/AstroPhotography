@@ -195,7 +195,8 @@ AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	idl/Makefile server/Makefile tools/Makefile
-	client/Makefile client/trackingmonitor/Makefile
+	client/Makefile
+	client/trackingmonitor/Makefile client/calibrationmonitor/Makefile
 	cli/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile

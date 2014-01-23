@@ -202,6 +202,8 @@ Astro::Calibration	*getCalibration(CORBA::Long id) {
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
 		calibration->id = id;
 		calibration->timeago = now - r.when;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "time ago: %f",
+			calibration->timeago);
 		calibration->guider.cameraname
 			= CORBA::string_dup(r.camera.c_str());
 		calibration->guider.ccdid = r.ccdid;

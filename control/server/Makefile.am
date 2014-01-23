@@ -17,7 +17,8 @@ noinst_HEADERS = Modules_impl.h \
 	TaskQueue_impl.h TaskActivator_impl.h Task_impl.h \
 	MonitorChannel.h \
 	GuiderImageCallback.h TrackingInfoCallback.h \
-	CalibrationPointCallback.h
+	CalibrationPointCallback.h \
+	TaskQueueCallback.h
 
 noinst_LTLIBRARIES = libserver.la
 libserver_la_SOURCES = Modules_impl.cpp \
@@ -33,7 +34,8 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	ImageObjectDirectory.cpp \
 	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp \
 	GuiderImageCallback.cpp TrackingInfoCallback.cpp \
-	CalibrationPointCallback.cpp
+	CalibrationPointCallback.cpp \
+	TaskQueueCallback.cpp
 
 astrod_SOURCES = astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la libserver.la

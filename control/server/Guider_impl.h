@@ -8,7 +8,6 @@
 
 #include <guider.hh>
 #include <AstroGuiding.h>
-#include <map>
 #include <MonitorChannel.h>
 
 namespace Astro {
@@ -84,7 +83,6 @@ public:
 	virtual void	unregisterMonitor(::CORBA::Long monitorid);
 	void	update(const Astro::TrackingPoint& trackinginfo);
 	void	tracking_stop();
-
 
 	//////////////////////////////////////////////////////////////////////
 	// callback interface for tracking images

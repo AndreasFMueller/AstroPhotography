@@ -120,6 +120,10 @@ Astro::TrackingPoint	convert(const astro::guiding::TrackingPoint& trackinginfo);
 astro::guiding::CalibrationPoint	convert(const Astro::CalibrationPoint& calibrationpoint);
 Astro::CalibrationPoint	convert(const astro::guiding::CalibrationPoint& calibrationpoint);
 
+// TaskMonitorInfo
+astro::task::TaskMonitorInfo	convert(const Astro::TaskMonitorInfo& tmi);
+Astro::TaskMonitorInfo	convert(const astro::task::TaskMonitorInfo& tmi);
+
 } // namespace astro
 
 #endif /* _Conversions_h */

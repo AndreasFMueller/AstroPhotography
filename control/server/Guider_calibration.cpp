@@ -34,6 +34,7 @@ Calibration	*Guider_impl::getCalibration() {
  * \brief Use the this calibration
  */
 void	Guider_impl::useCalibration(CORBA::Long id) {
+// XXX implementation missing
 #if 0
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"set calibration [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",

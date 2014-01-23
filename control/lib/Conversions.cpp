@@ -668,4 +668,21 @@ Astro::CalibrationPoint	convert(const astro::guiding::CalibrationPoint& calibrat
 	return result;
 }
 
+// TaskMonitorInfo
+astro::task::TaskMonitorInfo	convert(const Astro::TaskMonitorInfo& tmi) {
+	astro::task::TaskMonitorInfo	taskmonitorinfo;
+	taskmonitorinfo.taskid(tmi.taskid);
+	taskmonitorinfo.when(Timer::gettime() - tmi.timeago);
+	taskmonitorinfo.state(convert(tmi.newstate));
+	return taskmonitorinfo;
+}
+
+Astro::TaskMonitorInfo	convert(const astro::task::TaskMonitorInfo& tmi) {
+	Astro::TaskMonitorInfo	taskmonitorinfo;
+	taskmonitorinfo.taskid = tmi.taskid();
+	taskmonitorinfo.timeago = Timer::gettime() - tmi.when();
+	taskmonitorinfo.newstate = convert(tmi.state());
+	return taskmonitorinfo;
+}
+
 } // namespace astro
