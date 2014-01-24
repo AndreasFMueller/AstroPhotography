@@ -35,6 +35,15 @@ SimGuiderPort::SimGuiderPort(SimLocator& locator)
 }
 
 /**
+ * \brief Signum function
+ */
+static double	sign(double x) {
+	if (x > 0) { return 1; }
+	if (x < 0) { return -1; }
+	return 0;
+}
+
+/**
  * \brief Update the offset to the current time
  *
  * 
@@ -52,39 +61,47 @@ void	SimGuiderPort::update() {
 
 	// advance the offset according to last activation
 	double	now = simtime();
+
+	// activetime is the time since the last activation call. Since only
+	// part of the activations may have been executed, we compute that
+	// part, and subtract it from current ra/dec values
 	double	activetime = now - lastactivation;
+
+	// update the ra variable. This depends on the time since the last
+	// call to update
+	double	rachange = 0;
 	if (fabs(ra) < activetime) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", ra);
-		_offset = _offset + ra * _ravector;
-		ra = 0;
+		// there was enough time to execute the complete activation
+		rachange = ra;
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "advance RA by %f", activetime);
-		_offset = _offset + activetime * _ravector;
-		if (ra > 0) {
-			ra -= activetime;
-		} else {
-			ra += activetime;
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: remaining RA activation: %f",
-			ra);
+		// the activation could only partially be executed, so we
+		// have to compute this partial activation
+		rachange = sign(ra) * activetime;
 	}
-	if (dec < activetime) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", dec);
-		_offset = _offset + dec * _decvector;
-		dec = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", rachange);
+	ra -= rachange;
+	_offset = _offset + rachange * _ravector;
+
+	// update the dec variable, again this depends on the time since the
+	// last call to update
+	double	decchange = 0;
+	if (fabs(dec) < activetime) {
+		// last call was a long time ago, full activation can be
+		// executed
+		decchange = dec;
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", activetime);
-		_offset = _offset + activetime * _decvector;
-		if (dec > 0) {
-			dec -= activetime;
-		} else {
-			dec += activetime;
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "update: remaining DEC activation: %f",
-			dec);
+		// not enough time to execute activation
+		decchange = sign(dec) * activetime;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", decchange);
+	dec -= decchange;
+	_offset = _offset + decchange * _decvector;
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: new offset: %s",
 		_offset.toString().c_str());
+
+	// we must now remember that the activation time has changed
+	lastactivation = now;
 }
 
 /**
@@ -147,14 +164,15 @@ Point	SimGuiderPort::offset() {
 
 	// drift computation
 	Point	p = timepast * _drift;
-debug(LOG_DEBUG, DEBUG_LOG, 0, "drift: %s", p.toString().c_str());
 
 	// Fourier components
+#if 0
 	if (timepast > 360) {
 		double	angle = 0.01 * timepast;
 		Point	fourier = 5. * Point(sin(angle), cos(angle));
 		p = p + fourier;
 	}
+#endif
 
 	// return the point
 debug(LOG_DEBUG, DEBUG_LOG, 0, "complete offset: %s", (_offset + p).toString().c_str());
