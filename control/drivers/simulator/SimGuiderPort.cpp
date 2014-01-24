@@ -46,10 +46,13 @@ static double	sign(double x) {
 /**
  * \brief Update the offset to the current time
  *
- * 
+ * The update method rolls the position changes forward. Each time it is
+ * called, it compues the offset that guider port activations may have 
+ * cased since the last activation, and applies them to the offset.
+ * It then computes the remaining activation that has not been applied
+ * yet.
  */
 void	SimGuiderPort::update() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port @ %p", this);
 	// if this is the first 
 	if ((ra == 0) && (dec == 0)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no update");
@@ -166,16 +169,15 @@ Point	SimGuiderPort::offset() {
 	Point	p = timepast * _drift;
 
 	// Fourier components
-#if 0
 	if (timepast > 360) {
 		double	angle = 0.01 * timepast;
 		Point	fourier = 5. * Point(sin(angle), cos(angle));
 		p = p + fourier;
 	}
-#endif
 
 	// return the point
-debug(LOG_DEBUG, DEBUG_LOG, 0, "complete offset: %s", (_offset + p).toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "complete offset: %s",
+		(_offset + p).toString().c_str());
 	return _offset + p;
 }
 
