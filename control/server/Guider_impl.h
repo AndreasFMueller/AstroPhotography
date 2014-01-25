@@ -99,7 +99,7 @@ public:
 	//////////////////////////////////////////////////////////////////////
 	// callback interface for calibration points
 private:
-	MonitorChannel<::Astro::CalibrationMonitor, ::Astro::CalibrationPoint>
+	MonitorChannel< ::Astro::CalibrationMonitor, ::Astro::CalibrationPoint>
 		calibrationchannel;
 public:
 	void	update(const ::Astro::CalibrationPoint& calibrationpoint);

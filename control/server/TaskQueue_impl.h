@@ -28,7 +28,7 @@ public:
 	virtual void	stop();
 	virtual Task_ptr	getTask(::CORBA::Long taskid);
 private:
-	MonitorChannel<::Astro::TaskMonitor, ::Astro::TaskMonitorInfo>
+	MonitorChannel< ::Astro::TaskMonitor, ::Astro::TaskMonitorInfo>
 		monitorchannel;
 public:
 	virtual void	update(const Astro::TaskMonitorInfo& taskinf);
