@@ -18,7 +18,7 @@ noinst_HEADERS = Modules_impl.h \
 	MonitorChannel.h \
 	GuiderImageCallback.h TrackingInfoCallback.h \
 	CalibrationPointCallback.h \
-	TaskQueueCallback.h
+	TaskQueueCallback.h ServerDatabase.h
 
 noinst_LTLIBRARIES = libserver.la
 libserver_la_SOURCES = Modules_impl.cpp \
@@ -35,14 +35,14 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	TaskQueue_impl.cpp TaskActivator_impl.cpp Task_impl.cpp \
 	GuiderImageCallback.cpp TrackingInfoCallback.cpp \
 	CalibrationPointCallback.cpp \
-	TaskQueueCallback.cpp
+	TaskQueueCallback.cpp ServerDatabase.cpp
 
 astrod_SOURCES = astrod.cpp
 astrod_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la libserver.la
 astrod_LDADD = libserver.la -L../lib -lastro -lcorbastro @SBIGLIBRARY@
 
 test:	astrod
-	./astrod -d -ORBInitRef NameService=corbaname::localhost -F -b `pwd`/images
+	./astrod -d -ORBInitRef NameService=corbaname::localhost -F -b `pwd`/images 2>&1 | tee astrod.log
 
 
 

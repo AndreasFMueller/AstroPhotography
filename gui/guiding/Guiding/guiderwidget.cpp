@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <QWidget>
 #include <guidermonitordialog.h>
+#include <calibrationmonitor.h>
 
 /**
  * \brief Create a new GuiderWidget
@@ -291,6 +292,16 @@ void	GuiderWidget::monitor() {
 		= new GuiderMonitorDialog(_guider);
 	monitordialog->setAttribute(Qt::WA_DeleteOnClose);
 	monitordialog->show();
+}
+
+/**
+ * \brief method called when the calibration open button is clicked
+ */
+void	GuiderWidget::calibration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open calibraiton");
+	CalibrationMonitor	*monitor = new CalibrationMonitor(_guider);
+	monitor->setAttribute(Qt::WA_DeleteOnClose);
+	monitor->show();
 }
 
 /**

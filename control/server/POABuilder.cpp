@@ -32,7 +32,8 @@ PortableServer::POA_var	POABuilder::build(const std::string& poaname) {
 	// cleanup
 	assign->destroy();
 	lifespan->destroy();
-	return result;
+	PortableServer::POA::_duplicate(result);
+	return result._retn();
 }
 
 } // namespace astro

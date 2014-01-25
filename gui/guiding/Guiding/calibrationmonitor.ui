@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CalibrationMonitor</class>
+ <widget class="QWidget" name="CalibrationMonitor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>418</width>
+    <height>562</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Calibration</string>
+  </property>
+  <widget class="QGroupBox" name="calibrationpointsGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>401</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Calibration points and errors</string>
+   </property>
+   <widget class="CalibrationPointWidget" name="calibrationpointsWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>141</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="CalibrationPointWidget" name="errorsWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>30</y>
+      <width>141</width>
+      <height>141</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="ErrorWidget" name="xerrorWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>30</y>
+      <width>81</width>
+      <height>66</height>
+     </rect>
+    </property>
+    <property name="whatsThis">
+     <string notr="true" extracomment="Residual error in CCD x-axis after calibration correction"/>
+    </property>
+   </widget>
+   <widget class="ErrorWidget" name="yerrorWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>105</y>
+      <width>81</width>
+      <height>65</height>
+     </rect>
+    </property>
+    <property name="whatsThis">
+     <string notr="true" extracomment="Residual error in CCD y-axis after calibration correction"/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="calibrationGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>401</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Calibration</string>
+   </property>
+   <widget class="CalibrationWidget" name="calibrationWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>29</y>
+      <width>121</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="whatsThis">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="raLabel">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>55</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RA:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="decLabel">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>80</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DEC:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="driftLabel">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>105</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Drift:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="xLabel">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>30</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>x</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="yLabel">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>30</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>y</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="separator1">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>55</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>,</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="separator2">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>80</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>,</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="separator3">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>105</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>,</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="raxField">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>55</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="rayField">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>55</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="decyField">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>80</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="decxField">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>80</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="driftxField">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>105</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="driftyField">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>105</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.000000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="startLabel">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>130</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="startField">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>130</y>
+      <width>171</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="rawdataGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>350</y>
+     <width>401</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Raw calibration points</string>
+   </property>
+   <widget class="QListWidget" name="calibrationpointList">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>381</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Courier New</family>
+      <kerning>false</kerning>
+     </font>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CalibrationPointWidget</class>
+   <extends>QWidget</extends>
+   <header>calibrationpointwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CalibrationWidget</class>
+   <extends>QWidget</extends>
+   <header>calibrationwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ErrorWidget</class>
+   <extends>QWidget</extends>
+   <header>errorwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -40,7 +40,16 @@ static astro::persistence::UpdateSpec
 	object_to_updatespec(const CalibrationRecord& calibration);
 };
 
-typedef astro::persistence::Table<CalibrationRecord, CalibrationTableAdapter>	CalibrationTable;
+class CalibrationTable : public astro::persistence::Table<CalibrationRecord, CalibrationTableAdapter> {
+public:
+	CalibrationTable(astro::persistence::Database& database);
+	// select a list of calibrations based on a guider descriptor
+	std::list<long>	selectids(const GuiderDescriptor& guiderdescriptor);
+	// we must explicitly make the selectids method from the parent
+	// visible in the namespace of this class, because it clashes with
+	// our new selectids method
+	using Table<CalibrationRecord, CalibrationTableAdapter>::selectids;
+};
 
 typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
 

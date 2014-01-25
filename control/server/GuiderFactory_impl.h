@@ -22,16 +22,18 @@ class GuiderFactory_impl : public POA_Astro::GuiderFactory {
 public:
 	inline GuiderFactory_impl(astro::guiding::GuiderFactoryPtr guiderfactory)
 		: _guiderfactory(guiderfactory) { }
-	virtual ~GuiderFactory_impl() { }
+	virtual ~GuiderFactory_impl();
 	virtual Astro::GuiderFactory::GuiderList	*list();
 	virtual Astro::Guider_ptr	get(
 		const Astro::GuiderDescriptor& descriptor);
 
+	// methods related to the calibration
 	virtual Astro::GuiderFactory::idlist	*getCalibrations(
 		const Astro::GuiderDescriptor& guider);
 	virtual Astro::GuiderFactory::idlist	*getAllCalibrations();
 	virtual Calibration	*getCalibration(CORBA::Long id);
 
+	// methods related to the tracking histories
 	virtual Astro::GuiderFactory::idlist	*getGuideruns(
 		const Astro::GuiderDescriptor& guider);
 	virtual Astro::GuiderFactory::idlist	*getAllGuideruns();

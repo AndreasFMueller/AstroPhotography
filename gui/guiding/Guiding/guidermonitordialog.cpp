@@ -8,6 +8,7 @@
 #include "connectiondialog.h"
 
 void	GuiderMonitorDialog::registerServants() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register servants for monitoring");
 	// if the implementation pointers are already set, we don't need to
 	// do anything
 	if (tm_impl) {
@@ -18,6 +19,7 @@ void	GuiderMonitorDialog::registerServants() {
 	// create a servant
 	tm_impl = new guidermonitor::TrackingMonitor_impl(*this);
 	tim_impl = new guidermonitor::TrackingImageMonitor_impl(*this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "servants created");
 
 	// get the root POA
 	CORBA::Object_var	obj
@@ -88,6 +90,7 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 		_guider(guider),
 		ui(new Ui::GuiderMonitorDialog)
 {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating a guider monitor dialog");
 	ui->setupUi(this);
 
 	// set the color in which the curves will be drawn
@@ -95,21 +98,22 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 	ui->yhistoryWidget->setColor(QColor(0., 0., 255.));
 
 	// get the history data from the guider
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get history data");
 	Astro::TrackingHistory_var	history = guider->getTrackingHistory(-1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "history has %d entries",
-		history->length());
+		history->points.length());
 	
 	// get a list of values
 	std::list<double>	xvalues;
 	std::list<double>	yvalues;
 	unsigned int	startindex = 0;
-	if (history->length() > ui->xhistoryWidget->width()) {
-		startindex = history->length() - ui->xhistoryWidget->width();
+	if (history->points.length() > ui->xhistoryWidget->width()) {
+		startindex = history->points.length() - ui->xhistoryWidget->width();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "use history data from index %lu",
 		startindex);
-	for (unsigned int i = startindex; i < history->length(); i++) {
-		Astro::TrackingInfo	ti = (history)[i];
+	for (unsigned int i = startindex; i < history->points.length(); i++) {
+		Astro::TrackingPoint	ti = (history->points)[i];
 		xvalues.push_back(ti.trackingoffset.x);
 		yvalues.push_back(ti.trackingoffset.y);
 	}
@@ -127,6 +131,7 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &mattr);
 	pthread_mutex_lock(&mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock created");
 
 	// make sure these are properly initialized
 	tm_impl = NULL;
@@ -139,7 +144,7 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 
 	// connect signals
 	connect(this, SIGNAL(trackingInfoUpdated()), this,
-		SLOT(displayTrackingInfo()), Qt::QueuedConnection);
+		SLOT(displayTrackingPoint()), Qt::QueuedConnection);
 	connect(this, SIGNAL(trackingImageUpdated()), this,
 		SLOT(displayTrackingImage()), Qt::QueuedConnection);
 
@@ -153,6 +158,7 @@ GuiderMonitorDialog::GuiderMonitorDialog(Astro::Guider_var guider,
 
 	// release the lock
 	pthread_mutex_unlock(&mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "release the lock");
 }
 
 /**
@@ -170,7 +176,7 @@ GuiderMonitorDialog::~GuiderMonitorDialog() {
 /**
  * \brief Update the Tracking info
  */
-void	GuiderMonitorDialog::update(const Astro::TrackingInfo& ti) {
+void	GuiderMonitorDialog::update(const Astro::TrackingPoint& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "trackingInfo udpated");
 	trackinginfo = ti;
 	emit trackingInfoUpdated();
@@ -184,8 +190,8 @@ void	GuiderMonitorDialog::update(const Astro::TrackingInfo& ti) {
  *
  * This slot should always be called on the main thread.
  */
-void	GuiderMonitorDialog::displayTrackingInfo() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingInfo");
+void	GuiderMonitorDialog::displayTrackingPoint() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingPoint");
 	double	t = astro::Timer::gettime() - trackinginfo.timeago;
 	time_t	t0 = trunc(t);
 	char	buffer[30];
@@ -202,7 +208,7 @@ void	GuiderMonitorDialog::displayTrackingInfo() {
 	ui->raField->setText(buffer);
 	snprintf(buffer, sizeof(buffer), "%.4f", trackinginfo.activation.y);
 	ui->decField->setText(buffer);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingInfo complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "displayTrackingPoint complete");
 }
 
 /**
@@ -318,12 +324,17 @@ namespace guidermonitor {
 //////////////////////////////////////////////////////////////////////
 // TrackingMonitor implementation, inside separate namespace
 //////////////////////////////////////////////////////////////////////
+TrackingMonitor_impl::TrackingMonitor_impl(
+	GuiderMonitorDialog& guidermonitordialog)
+		: _guidermonitordialog(guidermonitordialog) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a tracking monitor");
+}
 
 TrackingMonitor_impl::~TrackingMonitor_impl() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor servant destroyed");
 }
 
-void	TrackingMonitor_impl::update(const ::Astro::TrackingInfo& ti) {
+void	TrackingMonitor_impl::update(const ::Astro::TrackingPoint& ti) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking info received");
 	_guidermonitordialog.update(ti);
 }
@@ -336,6 +347,12 @@ void	TrackingMonitor_impl::stop() {
 //////////////////////////////////////////////////////////////////////
 // TrackingImageMonitor implementation
 //////////////////////////////////////////////////////////////////////
+TrackingImageMonitor_impl::TrackingImageMonitor_impl(
+	GuiderMonitorDialog& guidermonitordialog)
+		: _guidermonitordialog(guidermonitordialog) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct an image monitor");
+}
+
 TrackingImageMonitor_impl::~TrackingImageMonitor_impl() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image monitor servant destroyed");
 }

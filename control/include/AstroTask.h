@@ -252,6 +252,9 @@ public:
 	// information about the queue content
 	taskid_t	nexecutors() const { return executors.size(); }
 	TaskExecutorPtr	executor(taskid_t queueid);
+	TaskQueueEntry	entry(taskid_t queueid);
+	TaskInfo	info(taskid_t queueid);
+	TaskParameters	parameters(taskid_t queueid);
 
 	// retrieve a list of a queue ids for a given state
 	std::list<taskid_t>	tasklist(TaskQueueEntry::taskstate state);

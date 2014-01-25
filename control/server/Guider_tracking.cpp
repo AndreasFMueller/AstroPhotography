@@ -1,5 +1,5 @@
 /*
- * Guider_impl.cpp -- implementation of the guider servant
+ * Guider_tracking.cpp -- implementation of the guider servant
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -18,8 +18,7 @@
 #include <TrackingInfoCallback.h>
 #include <CalibrationPointCallback.h>
 #include <GuiderFactory_impl.h>
-
-extern astro::persistence::Database	database;
+#include <ServerDatabase.h>
 
 namespace Astro {
 
@@ -112,9 +111,11 @@ Astro::TrackingHistory	*Guider_impl::getTrackingHistory(int guiderunid) {
 		}
 		guiderunid = guidingrunid;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history for run %d",
+		guiderunid);
 
-	// prepare result
-	return getTrackingHistory(guiderunid);
+	// get the result from the guider factory
+	return ServerDatabase().getTrackingHistory(guiderunid);
 }
 
 /**

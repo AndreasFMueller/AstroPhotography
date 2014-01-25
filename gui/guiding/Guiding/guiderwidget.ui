@@ -625,6 +625,29 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="calibrationLabel">
+            <property name="text">
+             <string>Calibration:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="calibrationButton">
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Open</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>
@@ -707,11 +730,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>calibrationButton</sender>
+   <signal>clicked()</signal>
+   <receiver>GuiderWidget</receiver>
+   <slot>calibration()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>843</x>
+     <y>477</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>880</x>
+     <y>504</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>capture()</slot>
   <slot>calibrate()</slot>
   <slot>guide()</slot>
   <slot>monitor()</slot>
+  <slot>calibration()</slot>
  </slots>
 </ui>

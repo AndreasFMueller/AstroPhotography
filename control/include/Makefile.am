@@ -4,7 +4,8 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-CORBAHEADERS = types.hh exceptions.hh image.hh camera.hh module.hh guider.hh
+CORBAHEADERS = types.hh exceptions.hh image.hh camera.hh module.hh \
+	guider.hh tasks.hh
 
 include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroLoader.h AstroDisplay.h AstroImager.h \

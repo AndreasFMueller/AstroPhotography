@@ -26,7 +26,7 @@ class GuiderMonitorDialog : public QDialog
 	long	monitorid;
 	guidermonitor::TrackingImageMonitor_impl	*tim_impl;
 	long	imagemonitorid;
-	Astro::TrackingInfo	trackinginfo;
+	Astro::TrackingPoint	trackinginfo;
 
 	// image information
 	pthread_mutex_t	mutex;			// lock to protect
@@ -44,7 +44,7 @@ public:
 		QWidget *parent = 0);
 	~GuiderMonitorDialog();
 
-	void	update(const Astro::TrackingInfo& ti);
+	void	update(const Astro::TrackingPoint& ti);
 	void	update(const Astro::TrackingImage& image);
 	void	requestStop();
 
@@ -58,7 +58,7 @@ signals:
 	void	stop();
 
 public slots:
-	void	displayTrackingInfo();
+	void	displayTrackingPoint();
 	void	displayTrackingImage();
 	void	terminate();
 
@@ -75,18 +75,19 @@ namespace guidermonitor {
 class TrackingMonitor_impl : public POA_Astro::TrackingMonitor {
 	GuiderMonitorDialog&	_guidermonitordialog;
 public:
-	TrackingMonitor_impl(GuiderMonitorDialog& guidermonitordialog)
-		: _guidermonitordialog(guidermonitordialog) { }
+	TrackingMonitor_impl(GuiderMonitorDialog& guidermonitordialog);
 	virtual ~TrackingMonitor_impl();
-	virtual void	update(const ::Astro::TrackingInfo& ti);
+	virtual void	update(const ::Astro::TrackingPoint& ti);
 	virtual void	stop();
 };
 
+/**
+ * \brief Monitor for Image updates
+ */
 class TrackingImageMonitor_impl : public POA_Astro::TrackingImageMonitor {
 	GuiderMonitorDialog&	_guidermonitordialog;
 public:
-	TrackingImageMonitor_impl(GuiderMonitorDialog& guidermonitordialog)
-		: _guidermonitordialog(guidermonitordialog) { }
+	TrackingImageMonitor_impl(GuiderMonitorDialog& guidermonitordialog);
 	virtual ~TrackingImageMonitor_impl();
 	virtual void	update(const ::Astro::TrackingImage& image);
 	virtual void	stop() { }

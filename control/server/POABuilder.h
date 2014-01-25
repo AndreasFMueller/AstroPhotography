@@ -71,7 +71,7 @@ PortableServer::POA_var	POABuilderActivator<activator>::build(
 	requestprocessing->destroy();
 
 	// now assign the activator
-	PortableServer::ServantManager_var	activator_ref
+	PortableServer::ServantManager_ptr	activator_ref
 		= theactivator->_this();
 	result_poa->set_servant_manager(activator_ref);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Activator set");
@@ -79,7 +79,8 @@ PortableServer::POA_var	POABuilderActivator<activator>::build(
 	// return the constructed POA
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"POA construction with activator complete");
-	return result_poa;
+	PortableServer::POA::_duplicate(result_poa);
+	return result_poa._retn();
 }
 
 } // namespace astro

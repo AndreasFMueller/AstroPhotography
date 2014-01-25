@@ -86,11 +86,8 @@ Astro::GuiderDescriptor  convert(
 astro::camera::FilterWheel::State	convert(const Astro::FilterwheelState& state);
 Astro::FilterwheelState	convert(const astro::camera::FilterWheel::State& state);
 
-#if 0
 // GuiderCalibration
-astro::guiding::GuiderCalibration	convert(const Astro::Guider::Calibration& cal);
-Astro::Guider::Calibration	convert(const astro::guiding::GuiderCalibration& cal);
-#endif
+astro::guiding::GuiderCalibration	convert(const Astro::Calibration& cal);
 
 // TaskState
 astro::task::TaskQueueEntry::taskstate	convert(const Astro::TaskState& state);

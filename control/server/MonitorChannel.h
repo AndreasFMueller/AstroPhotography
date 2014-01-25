@@ -88,7 +88,7 @@ template<typename monitorinterface, typename argtype>
 	// add the monitor to the map. The key is the monitor id, so that
 	// we can easily find it in the unsubscribe method
 	monitors.insert(std::make_pair(monitorid, monitorvar));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking monitor registered as %ld",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor registered as %ld",
 		monitorid);
 
 	// release the lock
@@ -133,7 +133,7 @@ void	MonitorChannel<monitorinterface, argtype>::unsubscribe(::CORBA::Long id) {
  */
 template<typename monitorinterface, typename argtype>
 void	MonitorChannel<monitorinterface, argtype>::update(const argtype& data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking image update received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image update received");
 
 	// lock the mutex to protect the map
 	pthread_mutex_lock(&mutex);
@@ -141,7 +141,7 @@ void	MonitorChannel<monitorinterface, argtype>::update(const argtype& data) {
 	// build a list of bad monitors which we will later remove from the map
 	std::vector< ::CORBA::Long>	badmonitors;
 
-	// send the trackinginfo update to all monitors
+	// send the update to all monitors
 	typename monitormap_t::iterator	i;
 	for (i = monitors.begin(); i != monitors.end(); i++) {
 		try {
@@ -171,7 +171,7 @@ void	MonitorChannel<monitorinterface, argtype>::update(const argtype& data) {
  */
 template<typename monitorinterface, typename argtype>
 void	MonitorChannel<monitorinterface, argtype>::stop() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking update stop received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update stop received");
 
 	// lock the mutex to protect the 
 	pthread_mutex_lock(&mutex);
@@ -179,12 +179,12 @@ void	MonitorChannel<monitorinterface, argtype>::stop() {
 	// prepare a list of monitors
 	std::vector< ::CORBA::Long>	badmonitors;
 
-	// send the trackinginfo update to all monitors
+	// send the update to all monitors
 	typename monitormap_t::iterator	i;
 	for (i = monitors.begin(); i != monitors.end(); i++) {
 		try {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "sending stop to %d",
-				i->first);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"sending stop to monitor %d", i->first);
 			i->second->stop();
 		} catch (...) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "error while updating %d",

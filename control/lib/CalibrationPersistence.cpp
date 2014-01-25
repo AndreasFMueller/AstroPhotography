@@ -10,6 +10,9 @@ using namespace astro::persistence;
 namespace astro {
 namespace guiding {
 
+//////////////////////////////////////////////////////////////////////
+// CalibrationTableAdapter implementation
+//////////////////////////////////////////////////////////////////////
 std::string	CalibrationTableAdapter::tablename() {
 	return std::string("calibration");
 }
@@ -64,6 +67,32 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 	return spec;
 }
 
+//////////////////////////////////////////////////////////////////////
+// CalibrationTable implementation
+//////////////////////////////////////////////////////////////////////
+CalibrationTable::CalibrationTable(Database& database)
+	: Table<CalibrationRecord, CalibrationTableAdapter>(database) {
+}
+
+/**
+ * \brief Retrieve calibration ids for a selected guider
+ */
+std::list<long>	CalibrationTable::selectids(
+	const GuiderDescriptor& guiderdescriptor) {
+	std::string	condition = stringprintf(
+		"camera = '%s' and ccdid = %d and guiderport = '%s' "
+		"order by whenstarted",
+		guiderdescriptor.cameraname().c_str(),
+		guiderdescriptor.ccdid(),
+		guiderdescriptor.guiderportname().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition for calibrations: %s",
+		condition.c_str());	
+	return selectids(condition);
+}
+
+//////////////////////////////////////////////////////////////////////
+// CalibrationPointTableAdapter implementation
+//////////////////////////////////////////////////////////////////////
 std::string	CalibrationPointTableAdapter::tablename() {
 	return std::string("calibrationpoint");
 }

@@ -262,5 +262,15 @@ void Guider::lastAction(double& actiontime, Point& offset,
 	guiderprocess->lastAction(actiontime, offset, activation);
 }
 
+/**
+ * \brief Retrieve a descriptor
+ */
+GuiderDescriptor	Guider::getDescriptor() const {
+	std::string	cameraname = _camera->name().toString();
+	std::string	guidername = _guiderport->name().toString();
+	int	ccdid = getCcdInfo().getId();
+	return GuiderDescriptor(cameraname, ccdid, guidername);
+}
+
 } // namespace guiding
 } // namespace astro

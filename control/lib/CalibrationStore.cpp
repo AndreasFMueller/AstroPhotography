@@ -18,7 +18,7 @@ namespace guiding {
  */
 std::list<long>	CalibrationStore::getAllCalibrations() {
 	CalibrationTable	table(_database);
-	return table.selectids("order by whenstarted");
+	return table.selectids(std::string("order by whenstarted"));
 }
 
 /**

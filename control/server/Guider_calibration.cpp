@@ -18,8 +18,8 @@
 #include <TrackingInfoCallback.h>
 #include <CalibrationPointCallback.h>
 #include <GuiderFactory_impl.h>
-
-extern astro::persistence::Database	database;
+#include <ServerDatabase.h>
+#include <AstroFormat.h>
 
 namespace Astro {
 
@@ -27,22 +27,66 @@ namespace Astro {
  * \brief Retrieve the calibration from the guider
  */
 Calibration	*Guider_impl::getCalibration() {
-	return Astro::getCalibration(calibrationid);
+	return ServerDatabase().getCalibration(calibrationid);
 }
 
 /**
  * \brief Use the this calibration
+ *
+ * This method retrieves a calibration record from the database and installs
+ * it as the current calibration in the guider. This allows to reuse previously
+ * recorded calibrations. The calibration is identified by its id. If a negative
+ * id is specified, the most recent calibration matching the guider descriptor
+ * is used.
+ * \param id	id of the calibration to install
  */
 void	Guider_impl::useCalibration(CORBA::Long id) {
-// XXX implementation missing
+	// get the the database
+	astro::persistence::Database	database = ServerDatabase().database();
+
+	// get the calibration table
+	astro::guiding::CalibrationTable	table(database);
+
+	// if the id is negative, then we should use the most recent
+	// calibration we can find
+	if (id < 0) {
+		// retrieve a list of calibrations done with this guider
+		astro::guiding::GuiderDescriptor	descriptor
+			= _guider->getDescriptor();
+		std::list<long>	idlist = table.selectids(descriptor);
+
+		// if there are none, we throw an exception
+		if (idlist.size() == 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no calibration for %s",
+				descriptor.toString().c_str());
+			throw NotFound("no calibration for this guider");
+		}
 #if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"set calibration [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
-		cal.coefficients[0], cal.coefficients[1], cal.coefficients[2],
-		cal.coefficients[3], cal.coefficients[4], cal.coefficients[5]
-	);
-	_guider->calibration(astro::convert(cal));
+for (std::list<long>::const_iterator i = idlist.begin(); i != idlist.end(); i++) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "id: %d", *i);
+}
 #endif
+
+		// take the last entry
+		id = idlist.back();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "last calibration id: %d", id);
+	}
+
+	// retrieve calibration data from the database
+	astro::guiding::CalibrationRecord	record = table.byid(id);
+
+	// copy the data into the calibration object
+	astro::guiding::GuiderCalibration	cal;
+	for (int i = 0; i < 6; i++) {
+		cal[i] = record.a[i];
+	}
+	calibrationid = id;
+
+	// set the calibration
+	_guider->calibration(cal);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"set calibration %d: [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
+		calibrationid, cal[0], cal[1], cal[2], cal[3], cal[4], cal[5]);
 }
 
 /**
@@ -61,7 +105,8 @@ void	Guider_impl::startCalibration(::CORBA::Float focallength) {
 
 	// prepare a calibration callback so that the results of the calibration
 	// points get recorded in the database
-	CalibrationPointCallback	*calcb = new CalibrationPointCallback(*this);
+	CalibrationPointCallback	*calcb
+		= new CalibrationPointCallback(*this);
 	calibrationid = calcb->calibrationid();
 	_guider->calibrationcallback = astro::callback::CallbackPtr(calcb);
 

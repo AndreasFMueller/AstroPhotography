@@ -13,8 +13,7 @@
 #include <TrackingPersistence.h>
 #include <Conversions.h>
 #include <TrackingInfoCallback.h>
-
-extern astro::persistence::Database	database;
+#include <ServerDatabase.h>
 
 namespace Astro {
 
@@ -34,6 +33,7 @@ TrackingInfoCallback::TrackingInfoCallback(Guider_impl& guider)
 	astro::guiding::GuidingRunRecord	record(0, guidingrun);
 
 	// add the record to the table
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::GuidingRunTable	guidingruntable(database);
 	_guidingrunid = guidingruntable.add(record);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking run with id %d",
@@ -63,6 +63,7 @@ astro::callback::CallbackDataPtr TrackingInfoCallback::operator()(
 	// add an entry to the database
 	astro::guiding::TrackingPointRecord	tracking(0, _guidingrunid,
 							*trackinginfo);
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::TrackingTable	trackingtable(database);
 	long	tid = trackingtable.add(tracking);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking entry with id %ld", tid);

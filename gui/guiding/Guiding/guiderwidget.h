@@ -58,6 +58,7 @@ private slots:
 	void	guide();
 	void	exposuretime(double t);
 	void	monitor();
+	void	calibration();
 	void	tick();
 };
 

@@ -19,8 +19,6 @@
 #include <CalibrationPointCallback.h>
 #include <GuiderFactory_impl.h>
 
-extern astro::persistence::Database	database;
-
 namespace Astro {
 
 /**

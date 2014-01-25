@@ -60,8 +60,7 @@ typename device::_ptr_type	ServantBuilder<device, device_impl>::operator()(
 
 	// find out whether the servant already exists
 	try {
-		CORBA::Object_var	obj = poa->id_to_reference(oid);
-		return device::_narrow(obj);
+		return device::_narrow(poa->id_to_reference(oid));
 	} catch (PortableServer::POA::ObjectNotActive&) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has no servant yet",
 			name.c_str());
@@ -73,8 +72,7 @@ typename device::_ptr_type	ServantBuilder<device, device_impl>::operator()(
 		sharedptr	dptr = la.get(name);
 		poa->activate_object_with_id(oid, new device_impl(dptr));
 
-		CORBA::Object_var	obj = poa->id_to_reference(oid);
-		return device::_narrow(obj);
+		return device::_narrow(poa->id_to_reference(oid));
 	} catch (...) {
 		NotFound	notfound;
                 notfound.cause = CORBA::string_dup("device not found");
@@ -99,8 +97,7 @@ ServantBuilder<device, device_impl>::operator()(sharedptr& devptr) {
 
 	// find out whether the servant already exists
 	try {
-		CORBA::Object_var	obj = poa->id_to_reference(oid);
-		return device::_narrow(obj);
+		return device::_narrow(poa->id_to_reference(oid));
 	} catch (PortableServer::POA::ObjectNotActive&) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has no servant yet",
 			name.c_str());
@@ -109,15 +106,13 @@ ServantBuilder<device, device_impl>::operator()(sharedptr& devptr) {
 	// create a new servant
 	try {
 		poa->activate_object_with_id(oid, new device_impl(devptr));
-		CORBA::Object_var	obj = poa->id_to_reference(oid);
-		return device::_narrow(obj);
+		return device::_narrow(poa->id_to_reference(oid));
 	} catch (...) {
 		NotFound	notfound;
                 notfound.cause = CORBA::string_dup("device not found");
 		throw notfound;
 	}
 }
-
 
 } // namespace Astro
 

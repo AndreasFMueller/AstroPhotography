@@ -284,6 +284,25 @@ public:
 	}
 };
 
+/**
+ * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
+ */
+class GuiderDescriptor {
+	std::string	_cameraname;
+	unsigned int	_ccdid;
+	std::string	_guiderportname;
+public:
+	GuiderDescriptor(const std::string& cameraname, unsigned int ccdid,
+		const std::string& guiderportname) : _cameraname(cameraname),
+		_ccdid(ccdid), _guiderportname(guiderportname) { }
+	bool	operator==(const GuiderDescriptor& other) const;
+	bool	operator<(const GuiderDescriptor& other) const;
+	std::string	cameraname() const { return _cameraname; }
+	unsigned int	ccdid() const { return _ccdid; }
+	std::string	guiderportname() const { return _guiderportname; }
+	std::string	toString() const;
+};
+
 // we will need the GuiderProcess class, but as we want to keep the 
 // implementation (using low level threads and other nasty things) hidden,
 // we only define it in the implementation
@@ -370,6 +389,10 @@ public:
 	const astro::camera::Imager&	imager() const { return _imager; }
 	astro::camera::Imager&	imager() { return _imager; }
 	astro::camera::CcdPtr		ccd() { return _imager.ccd(); }
+	astro::camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
+	int	ccdid() const { return getCcdInfo().getId(); }
+
+	GuiderDescriptor	getDescriptor() const;
 
 	/**
 	 * \brief Exposure information for guiding images
@@ -525,6 +548,7 @@ public:
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 
+#if 0
 /**
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
  */
@@ -543,6 +567,7 @@ public:
 	std::string	guiderportname() const { return _guiderportname; }
 	std::string	toString() const;
 };
+#endif
 
 /**
  * \brief GuiderFactory class

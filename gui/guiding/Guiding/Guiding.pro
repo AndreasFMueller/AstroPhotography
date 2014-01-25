@@ -19,14 +19,19 @@ SOURCES += main.cpp\
 	logspinbox.cpp guidermonitordialog.cpp \
 	guidehistorywidget.cpp connectiondialog.cpp \
 	guidingconnectiondialog.cpp deviceselector.cpp \
-	guideropendialog.cpp guiderwidget.cpp
+	guideropendialog.cpp guiderwidget.cpp \
+	calibrationmonitor.cpp errorwidget.cpp \
+	calibrationpointwidget.cpp calibrationwidget.cpp
 
 HEADERS  += \
 	logspinbox.h guidermonitordialog.h \
 	guidehistorywidget.h connectiondialog.h \
 	guidingconnectiondialog.h deviceselector.h \
-	guideropendialog.h guiderwidget.h
+	guideropendialog.h guiderwidget.h \
+	calibrationmonitor.h errorwidget.h \
+	calibrationpointwidget.h calibrationwidget.h
 
 FORMS    += \
 	guidermonitordialog.ui connectiondialog.ui \
-	guideropendialog.ui guiderwidget.ui
+	guideropendialog.ui guiderwidget.ui \
+	calibrationmonitor.ui

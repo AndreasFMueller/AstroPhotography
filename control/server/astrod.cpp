@@ -24,8 +24,7 @@
 #include <AstroPersistence.h>
 #include <AstroTask.h>
 #include <AstroExceptions.h>
-
-astro::persistence::Database	database;
+#include <ServerDatabase.h>
 
 namespace astro {
 
@@ -49,7 +48,6 @@ void	astrod_usage(const char *progname) {
 	std::cout << " -q dbfile        name of the database file containing persistent" << std::endl;
 	std::cout << "                  task state and possibly other parameters" << std::endl;
 }
-
 
 /**
  * \brief Main function for the CORBA server
@@ -113,6 +111,10 @@ int	astrod_main(int argc, char *argv[]) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "child forked");
 		}
 	}
+
+	// build the database
+	Astro::ServerDatabase	s(databasefile);
+	persistence::Database	database = s.database();
 
 	// get the POA
 	CORBA::Object_var	obj
@@ -221,8 +223,6 @@ int	astrod_main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageActivator set");
 
 	// create the task queue
-	astro::persistence::DatabaseFactory	factory;
-	database = factory.get(databasefile);
 	astro::task::TaskQueue	taskqueue(database);
 
 	// create the servant for TaskQueue
@@ -250,6 +250,7 @@ int	astrod_main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "poa manager activated");
 
 	// run the orb
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "run the orb");
 	orb.orbvar()->run();
 	orb.orbvar()->destroy();
 

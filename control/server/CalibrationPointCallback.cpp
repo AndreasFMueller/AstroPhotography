@@ -9,9 +9,7 @@
 #include <CalibrationPersistence.h>
 #include <Conversions.h>
 #include <CalibrationPointCallback.h>
-
-extern astro::persistence::Database     database;
-
+#include <ServerDatabase.h>
 
 namespace Astro {
 
@@ -35,7 +33,8 @@ CalibrationPointCallback::CalibrationPointCallback(Guider_impl& guider)
 	astro::guiding::CalibrationRecord	record(0, calibration);
 
 	// add the record to the table
-	astro::guiding::CalibrationTable	calibrationtable(database);
+	astro::persistence::Database	db = ServerDatabase().database();
+	astro::guiding::CalibrationTable	calibrationtable(db);
 	_calibrationid = calibrationtable.add(record);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new calibration created: %d",
 		_calibrationid);
@@ -61,7 +60,8 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 			_calibrationid, calibrationpoint->calibrationpoint());
 
 		// add the record to the table
-		astro::guiding::CalibrationPointTable	t(database);
+		astro::persistence::Database	db = ServerDatabase().database();
+		astro::guiding::CalibrationPointTable	t(db);
 		t.add(record);
 
 		// also update the remote clients
@@ -76,7 +76,8 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "process the completed record");
 		// when this callback is called, there already exists
 		// a calibration record. So we just get this record...
-		astro::guiding::CalibrationTable	t(database);
+		astro::persistence::Database	db = ServerDatabase().database();
+		astro::guiding::CalibrationTable	t(db);
 		astro::guiding::CalibrationRecord	record
 			= t.byid(_calibrationid);
 

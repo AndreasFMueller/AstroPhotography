@@ -287,7 +287,7 @@ Astro::BinningSet_var	convert(const astro::camera::BinningSet& set) {
 	for (i = set.begin(); i != set.end(); i++, j++) {
 		result[j] = convert(*i);
 	}
-	return result;
+	return result._retn();
 }
 
 // Exposure
@@ -433,24 +433,14 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 	throw std::runtime_error("unknown filter wheel state");
 }
 
-#if 0
 // GuiderCalibration
-astro::guiding::GuiderCalibration       convert(const Astro::Guider::Calibration& cal) {
+astro::guiding::GuiderCalibration       convert(const Astro::Calibration& cal) {
 	astro::guiding::GuiderCalibration	result;
 	for (int i = 0; i < 6; i++) {
 		result[i] = cal.coefficients[i];
 	}
 	return result;
 }
-
-Astro::Guider::Calibration        convert(const astro::guiding::GuiderCalibration& cal) {
-	Astro::Guider::Calibration	result;
-	for (int i = 0; i < 6; i++) {
-		result.coefficients[i] = cal[i];
-	}
-	return result;
-}
-#endif
 
 // TaskState
 astro::task::TaskQueueEntry::taskstate  convert(const Astro::TaskState& state) {

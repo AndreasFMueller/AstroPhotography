@@ -59,6 +59,7 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	double	tx = -correction.x();
 	double	ty = -correction.y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %.3fs, ty = %.3fs", tx, ty);
+#if 0
 	if ((fabs(tx) > 1) || (fabs(ty) > 1)) {
 		std::string	msg = stringprintf("default activation times "
 			"%.3f, %.3f out of range", tx, ty);
@@ -70,6 +71,7 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// correct the default offset for 1 second.
 	// We expect to have done something more useful by then
 	_driving.setCorrection(tx, ty);
+#endif
 }
 
 /**

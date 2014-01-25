@@ -13,6 +13,13 @@ namespace Ui {
 class ConnectionDialog;
 }
 
+/**
+ * \brief Dialog to select a server connection
+ *
+ * This class prompts the user to select a server to connect to. It then
+ * creates the connection and launches the initial application dialog.
+ * For this, the accept slot should by overridden in derived classes
+ */
 class ConnectionDialog : public QDialog
 {
 	Q_OBJECT

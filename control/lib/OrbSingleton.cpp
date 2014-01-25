@@ -135,7 +135,7 @@ Modules_var	OrbSingleton::getModules() {
                 throw std::runtime_error("nil object reference");
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a Modules object");
-	return modules;
+	return modules._retn();
 }
 
 /**
@@ -158,7 +158,7 @@ Images_var	OrbSingleton::getImages() {
                 throw std::runtime_error("nil object reference");
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a images object");
-	return images;
+	return images._retn();
 }
 
 /**
@@ -181,7 +181,7 @@ TaskQueue_var	OrbSingleton::getTaskQueue() {
                 throw std::runtime_error("nil object reference");
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a taskqueue object");
-	return taskqueue;
+	return taskqueue._retn();
 }
 
 /**
@@ -203,7 +203,7 @@ GuiderFactory_var	OrbSingleton::getGuiderfactory() {
                 throw std::runtime_error("nil object reference");
         }
         debug(LOG_DEBUG, DEBUG_LOG, 0, "got a reference to a GuiderFactory object");
-	return guiderfactory;
+	return guiderfactory._retn();
 }
 
 /**
@@ -222,21 +222,21 @@ DeviceLocator_var	OrbSingleton::getDeviceLocator(
 	Astro::DeviceLocator_ptr	locator
 		= drivermodule->getDeviceLocator();
 	Astro::DeviceLocator_var	locatorvar = locator;
-	return locatorvar;
+	return locatorvar._retn();
 }
 
 /**
  * \brief Find a POA of a given name
  */
 PortableServer::POA_var	OrbSingleton::findPOA(const std::vector<std::string>& poaname) {
-	CORBA::Object_var	obj
+	CORBA::Object_ptr	obj
 		= _orbvar->resolve_initial_references("RootPOA");
 	PortableServer::POA_var	poa
 		= PortableServer::POA::_narrow(obj);
 	for (int i = 0; i < poaname.size(); i++) {
 		poa = poa->find_POA(poaname[i].c_str(), 0);
 	}
-	return poa;
+	return poa._retn();
 }
 
 } // namespace Astro

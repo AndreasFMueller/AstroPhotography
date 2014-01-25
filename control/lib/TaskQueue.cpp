@@ -488,7 +488,7 @@ void	TaskQueue::wait() {
 }
 
 /**
- * \brief Find a TaskQueueEntry
+ * \brief Find a TaskExecutor
  */
 TaskExecutorPtr	TaskQueue::executor(taskid_t queueid) {
 	executormap::iterator	i = executors.find(queueid);
@@ -526,6 +526,26 @@ bool	TaskQueue::exists(taskid_t queueid) {
 	TaskTable	tasktable(_database);
 	return tasktable.exists(queueid);
 }
+
+TaskQueueEntry	TaskQueue::entry(taskid_t queueid) {
+	TaskTable	tasktable(_database);
+	return tasktable.byid(queueid);
+}
+
+/**
+ * \brief Retrieve info about a task
+ */
+TaskInfo        TaskQueue::info(taskid_t queueid) {
+	return entry(queueid).info();
+}
+
+/**
+ * \brief Retrieve parameters of a task
+ */
+TaskParameters  TaskQueue::parameters(taskid_t queueid) {
+	return entry(queueid).parameters();
+}
+
 
 } // namespace task
 } // namespace astro

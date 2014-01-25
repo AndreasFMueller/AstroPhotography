@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TaskMainWindow</class>
+ <widget class="QMainWindow" name="TaskMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>976</width>
+    <height>653</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QListWidget" name="tasklistWidget"/>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="taskdetailGroup">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Task Details</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>976</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionStartQueue"/>
+   <addaction name="actionStopQueue"/>
+  </widget>
+  <action name="actionStartQueue">
+   <property name="text">
+    <string>Start Queue</string>
+   </property>
+   <property name="toolTip">
+    <string>Start the Queue</string>
+   </property>
+  </action>
+  <action name="actionStopQueue">
+   <property name="text">
+    <string>Stop Queue</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop the task queue</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>toolBar</sender>
+   <signal>actionTriggered(QAction*)</signal>
+   <receiver>TaskMainWindow</receiver>
+   <slot>handleToolbarAction(QAction*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>startQueue()</slot>
+  <slot>stopQueue()</slot>
+  <slot>handleToolbarAction(QAction*)</slot>
+ </slots>
+</ui>

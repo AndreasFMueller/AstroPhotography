@@ -211,33 +211,33 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 	IntegerField	*i = dynamic_cast<IntegerField *>(&*value);
 	if (i) {
 		this->bind(colno, value->intValue());
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound int value %d to column %d",
-			value->intValue(), colno);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"bound int value %d to column %d",
+		//	value->intValue(), colno);
 		return;
 	}
 	DoubleField	*d = dynamic_cast<DoubleField *>(&*value);
 	if (d) {
 		this->bind(colno, value->doubleValue());
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound double value %f to column %d",
-			value->doubleValue(), colno);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"bound double value %f to column %d",
+		//	value->doubleValue(), colno);
 		return;
 	}
 	StringField	*s = dynamic_cast<StringField *>(&*value);
 	if (s) {
 		this->bind(colno, value->stringValue());
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound string value '%s' to column %d",
-			value->stringValue().c_str(), colno);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"bound string value '%s' to column %d",
+		//	value->stringValue().c_str(), colno);
 		return;
 	}
 	TimeField	*t = dynamic_cast<TimeField *>(&*value);
 	if (t) {
 		this->bind(colno, value->stringValue());
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"bound time value '%s' to column %d",
-			value->stringValue().c_str(), colno);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"bound time value '%s' to column %d",
+		//	value->stringValue().c_str(), colno);
 		return;
 	}
 }
@@ -338,7 +338,7 @@ void	UpdateSpec::bind(StatementPtr& stmt) const {
 }
 
 void	UpdateSpec::bindid(StatementPtr& stmt, int id) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "binding id: %d", id);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "binding id: %d", id);
 	stmt->bind(size(), id);
 }
 
@@ -380,7 +380,7 @@ std::string	TableBase::selectquery() const {
 		columnnamelist());
 	out << " from " << _tablename << " where id = ?";
 	std::string	query = out.str();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s", query.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s", query.c_str());
 	return query;
 }
 
@@ -408,7 +408,7 @@ Row	TableBase::rowbyid(long objectid) {
 	std::string	sq = selectquery(); 
 	StatementPtr	stmt = _database->statement(sq);
 	stmt->bind(0, (int)objectid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
 	Result	result = stmt->result();
 	if (result.size() != 1) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "internal error: objectid");
@@ -480,8 +480,8 @@ std::list<long>	TableBase::selectids(const std::string& condition) {
 	for (rowp = result.begin(); rowp != result.end(); rowp++) {
 		idlist.push_back((*rowp)[0]->intValue());
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "list of %d ids retrieved",
-		idlist.size());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "list of %d ids retrieved",
+	//	idlist.size());
 	return idlist;
 }
 

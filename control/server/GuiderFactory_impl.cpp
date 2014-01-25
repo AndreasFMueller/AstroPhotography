@@ -11,14 +11,20 @@
 #include <TrackingStore.h>
 #include <CalibrationStore.h>
 #include <AstroUtils.h>
-
-extern astro::persistence::Database	database;
+#include <ServerDatabase.h>
 
 namespace Astro {
 
 //////////////////////////////////////////////////////////////////////
 // GuiderFactory implementation
 //////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief
+ */
+GuiderFactory_impl::~GuiderFactory_impl() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the guider factory");
+}
 
 /**
  * \brief create a list of available guiders
@@ -101,6 +107,7 @@ static GuiderFactory::idlist	*list2idlist(const std::list<long>& ids) {
 GuiderFactory::idlist	*GuiderFactory_impl::getGuideruns(
 				const Astro::GuiderDescriptor& descriptor) {
 	// get a Tracking store and retrieve a list of ids from it
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::TrackingStore	store(database);
 	return list2idlist(store.getTrackings(astro::convert(descriptor)));
 }
@@ -110,6 +117,7 @@ GuiderFactory::idlist	*GuiderFactory_impl::getGuideruns(
  */
 GuiderFactory::idlist	*GuiderFactory_impl::getAllGuideruns() {
 	// get a Tracking store and retrieve a list of ids from it
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::TrackingStore	store(database);
 	return list2idlist(store.getAllTrackings());
 }
@@ -120,6 +128,7 @@ GuiderFactory::idlist	*GuiderFactory_impl::getAllGuideruns() {
 GuiderFactory::idlist	*GuiderFactory_impl::getCalibrations(
 				const Astro::GuiderDescriptor& descriptor) {
 	// get a Tracking store and retrieve a list of ids from it
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::CalibrationStore	store(database);
 	return list2idlist(store.getCalibrations(astro::convert(descriptor)));
 }
@@ -129,6 +138,7 @@ GuiderFactory::idlist	*GuiderFactory_impl::getCalibrations(
  */
 GuiderFactory::idlist	*GuiderFactory_impl::getAllCalibrations() {
 	// get a Tracking store and retrieve a list of ids from it
+	astro::persistence::Database	database = ServerDatabase().database();
 	astro::guiding::CalibrationStore	store(database);
 	return list2idlist(store.getAllCalibrations());
 }
@@ -137,17 +147,20 @@ GuiderFactory::idlist	*GuiderFactory_impl::getAllCalibrations() {
  * \brief Retrieve a guide history based on an id
  */
 TrackingHistory	*GuiderFactory_impl::getTrackingHistory(CORBA::Long id) {
-	return getTrackingHistory(id);
+	return ServerDatabase().getTrackingHistory(id);
 }
 
+#if 0
 /**
  * \brief Retrieve a guide history based on an id
  */
 TrackingHistory	*getTrackingHistory(CORBA::Long id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getTrackingHistory");
 	TrackingHistory	*history = new TrackingHistory();
 	double	now = astro::Timer::gettime();
 
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 		// get the database
 		astro::guiding::GuidingRunTable	gt(database);
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
@@ -158,17 +171,26 @@ TrackingHistory	*getTrackingHistory(CORBA::Long id) {
 		history->guider.ccdid = r.ccdid;
 		history->guider.guiderportname
 			= CORBA::string_dup(r.guiderport.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"timeago = %f, camera = %s, ccd = %d, guiderport = %s",
+			history->timeago,
+			history->guider.cameraname._ptr,
+			history->guider.ccdid,
+			history->guider.guiderportname._ptr);
 
 		// get the tracking points
 		astro::guiding::TrackingStore	store(database);
 		std::list<astro::guiding::TrackingPointRecord>	points
 			= store.getHistory(id);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %d points",
+			points.size());
 		history->points.length(points.size());
 		std::list<astro::guiding::TrackingPointRecord>::iterator i;
 		int	j = 0;
 		for (i = points.begin(); i != points.end(); i++, j++) {
 			(history->points)[j] = astro::convert(*i);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "points transferred");
 
 		// that's it, we have copied all the data
 		return history;
@@ -181,23 +203,28 @@ TrackingHistory	*getTrackingHistory(CORBA::Long id) {
 		throw NotFound(buffer);
 	}
 }
+#endif
 
 /**
  * \brief Get a calibration based on the id
  */
 Astro::Calibration	*GuiderFactory_impl::getCalibration(CORBA::Long id) {
-	return getCalibration(id);
+	return ServerDatabase().getCalibration(id);
 }
 
+#if 0
 /**
  * \brief Get a calibration based on the id
  */
 Astro::Calibration	*getCalibration(CORBA::Long id) {
+	return ServerDatabase::getCalibration(id);
 	Calibration	*calibration = new Calibration();
 	try {
 		double	now = astro::Timer::gettime();
 
 		// get the calibration record
+		astro::persistence::Database	database
+			= ServerDatabase::database();
 		astro::guiding::CalibrationTable	ct(database);
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
 		calibration->id = id;
@@ -236,7 +263,7 @@ Astro::Calibration	*getCalibration(CORBA::Long id) {
 			"calibration %d not found", id);
 		throw NotFound(buffer);;
 	}
-
 }
+#endif
 
 } // namespace Astro

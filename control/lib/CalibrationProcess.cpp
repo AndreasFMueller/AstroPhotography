@@ -73,7 +73,7 @@ void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
 	// move the telescope to the grid point corresponding to ra/dec
 	Point	star = starAt(ra, dec);
 	double	t = Timer::gettime() - starttime;
-	CalibrationPoint	calibrationpoint(t, Point(ra, dec), star);
+	CalibrationPoint	calibrationpoint(t, Point(grid * ra, grid * dec), star);
 
 	// add the calibration point to the calibrator
 	calibrator.add(calibrationpoint);
@@ -147,6 +147,11 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 	// prepare a GuiderCalibrator class that does the actual computation
 	GuiderCalibrator	calibrator;
 
+	// measure the initial point
+	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));
+	calibrator.add(initialpoint);
+	callback(initialpoint);
+
 	// perform a grid search
 	try {
 		for (int ra = -range; ra <= range; ra++) {
@@ -167,7 +172,7 @@ void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
 	
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();
-	cal.rescale(1. / grid);
+	//cal.rescale(1. / grid);
 	guider().calibration(cal);
 
 	// inform the callback that calibration is complete

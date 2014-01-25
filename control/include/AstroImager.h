@@ -49,6 +49,7 @@ private:
 	CcdPtr	_ccd;
 public:
 	CcdPtr	ccd() { return _ccd; }
+	CcdPtr	ccd() const { return _ccd; }
 
 public:
 	Imager(CcdPtr ccd = CcdPtr());

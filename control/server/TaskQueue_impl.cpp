@@ -64,21 +64,16 @@ TaskParameters	*TaskQueue_impl::parameters(CORBA::Long taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve parameters of task %ld",
 		taskid);
 	try {
-		// get the task parameters
-		astro::task::TaskExecutorPtr	executor
-			= _taskqueue.executor(taskid);
-		astro::task::TaskQueueEntry	entry = executor->task();
-
 		// allocate a parameter struct
 		TaskParameters	*parameters = new TaskParameters();
 
 		// convert the parameters
-		*parameters = astro::convert(entry.parameters());
+		*parameters = astro::convert(_taskqueue.parameters(taskid));
 
 		return parameters;
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", x.what());
-		throw BadParameter(x.what());
+		throw NotFound(x.what());
 	}
 }
 
@@ -88,23 +83,16 @@ TaskParameters	*TaskQueue_impl::parameters(CORBA::Long taskid) {
 TaskInfo	*TaskQueue_impl::info(CORBA::Long taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve info of task %ld", taskid);
 	try {
-		// get the task parameters
-		astro::task::TaskExecutorPtr	executor
-			= _taskqueue.executor(taskid);
-		astro::task::TaskQueueEntry	entry = executor->task();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
-			entry.frame().toString().c_str());
-
 		// allocate a parameter struct
 		TaskInfo	*info = new TaskInfo();
 
 		// convert the parameters
-		*info = astro::convert(entry.info());
+		*info = astro::convert(_taskqueue.info(taskid));
 
 		return info;
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", x.what());
-		throw BadParameter(x.what());
+		throw NotFound(x.what());
 	}
 }
 
