@@ -9,6 +9,8 @@
 #include <QMainWindow>
 #include <tasks.hh>
 #include <QTimer>
+#include <deque>
+#include <pthread.h>
 
 namespace Ui {
 class TaskMainWindow;
@@ -33,13 +35,15 @@ class TaskMainWindow : public QMainWindow
 	void	addTasks(Astro::TaskQueue::taskidsequence_var taskids);
 	taskmonitor::TaskMonitor_impl	*tm_impl;
 	int	monitorid;
+	void	remove(int taskid);
+	std::deque<int>	taskids;
+	pthread_mutex_t	lock;
 public:
 	explicit TaskMainWindow(QWidget *parent = 0);
 	~TaskMainWindow();
 
 signals:
 	void	submitTask(int multiplicity);
-	void	taskUpdateSignal(int taskid);
 
 private slots:
 	void	tick();
@@ -51,6 +55,7 @@ public slots:
 	void	handleToolbarAction(QAction *);
 	void	submitTask();
 	void	taskUpdateSlot(int taskid);
+	void	buttonSlot(int taskid);
 
 private:
 	Ui::TaskMainWindow *ui;

@@ -234,7 +234,6 @@ private:
 	// methods to update the executormap/database
 	void	update(const TaskQueueEntry& entry);
 	void	update(taskid_t queueid);
-	void	cancel(taskid_t queueid);
 	void	cleanup(taskid_t queueid);
 	bool	blocks(const TaskQueueEntry& entry);
 public:
@@ -249,6 +248,8 @@ public:
 	void	wait();			// wait for alle executors to terminate
 	void	shutdown();		// shutdown the queue
 	void	restart(state_type newstate = stopped);		// restart the queue
+	void	remove(taskid_t queueid);
+	void	cancel(taskid_t queueid);
 
 	// submit a new task entry
 	taskid_t	submit(const TaskParameters& parameters);
@@ -266,6 +267,9 @@ public:
 
 	// monitoring callback called whenever a task changes state
 	astro::callback::CallbackPtr	callback;
+private:
+	void	call(const TaskInfo& info);
+	void	call(const TaskQueueEntry& entry);
 };
 
 /**

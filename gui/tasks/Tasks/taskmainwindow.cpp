@@ -42,6 +42,12 @@ TaskMainWindow::TaskMainWindow(QWidget *parent) :
 	// retrieve the task lists
 	retrieveTasklist();
 
+	// create the mutex
+	pthread_mutexattr_t	mattr;
+	pthread_mutexattr_init(&mattr);
+	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&lock, &mattr);
+
 	// other initializations
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -50,9 +56,6 @@ TaskMainWindow::TaskMainWindow(QWidget *parent) :
 	// connect the submitTask signal with the task creators submit slot
 	connect(this, SIGNAL(submitTask(int)),
 		ui->creatorWidget, SLOT(submitTask(int)),
-		Qt::QueuedConnection);
-	connect(this, SIGNAL(taskUpdateSignal(int)),
-		this, SLOT(taskRealUpdate(int)),
 		Qt::QueuedConnection);
 
 	// to register the callback, we need the POA
@@ -108,6 +111,12 @@ void	TaskMainWindow::addTasks(Astro::TaskQueue::taskidsequence_var taskids) {
 			TaskItem	*ti = new TaskItem(info, params);
 			ui->tasklistWidget->addItem(lwi);
 			ui->tasklistWidget->setItemWidget(lwi, ti);
+
+			// connect the button signal of the task item
+			// to the buttonSlot
+			connect(ti, SIGNAL(buttonSignal(int)),
+				this, SLOT(buttonSlot(int)),
+				Qt::QueuedConnection);
 		} catch (const Astro::NotFound) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "task %d not found",
 			taskid);
@@ -192,6 +201,24 @@ void	TaskMainWindow::tick() {
 	if (wt != windowTitle()) {
 		setWindowTitle(wt);
 	}
+
+	// process all the task ids in the queue
+	pthread_mutex_lock(&lock);
+	while (taskids.size()) {
+		int	taskid = taskids.front();
+		taskids.pop_front();
+		pthread_mutex_unlock(&lock);
+
+		try {
+			taskRealUpdate(taskid);
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "error in taskid %d",
+				taskid);
+		}
+
+		pthread_mutex_lock(&lock);
+	}
+	pthread_mutex_unlock(&lock);
 }
 
 /**
@@ -239,10 +266,15 @@ void	TaskMainWindow::handleToolbarAction(QAction *action) {
  * \brief Update slot
  */
 void	TaskMainWindow::taskUpdateSlot(int taskid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskUpdateSignal(%d)", taskid);
-	emit taskUpdateSignal(taskid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskUpdateSlot(%d)", taskid);
+	pthread_mutex_lock(&lock);
+	taskids.push_back(taskid);
+	pthread_mutex_unlock(&lock);
 }
 
+/**
+ * \brief Really do the update
+ */
 void	TaskMainWindow::taskRealUpdate(int taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "real task update %d", taskid);
 
@@ -250,6 +282,11 @@ void	TaskMainWindow::taskRealUpdate(int taskid) {
 	Astro::TaskInfo_var	info;
 	try {
 		info = taskqueue->info(taskid);
+	} catch (Astro::NotFound x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d not found, removing it",
+			taskid);
+		remove(taskid);
+		return;
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get task info: %s",
 			x.what());
@@ -277,6 +314,11 @@ void	TaskMainWindow::taskRealUpdate(int taskid) {
 		ui->tasklistWidget->addItem(lwi);
 		ui->tasklistWidget->setItemWidget(lwi, ti);
 
+		// connect the task item to the button slot
+		connect(ti, SIGNAL(buttonSignal(int)),
+			this, SLOT(buttonSlot(int)),
+			Qt::QueuedConnection);
+
 		// make sure the list is repainted
 		repaint();
 
@@ -295,8 +337,6 @@ void	TaskMainWindow::taskRealUpdate(int taskid) {
 	for (int i = 0; i < ui->tasklistWidget->count(); i++) {
 		QListWidgetItem	*lwi = ui->tasklistWidget->item(i);
 		TaskItem	*ti = (TaskItem *)ui->tasklistWidget->itemWidget(lwi);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "entry %d: taskid = %d",
-			i, ti->id());
 		if (ti->id() != taskid) {
 			continue;
 		} else {
@@ -307,6 +347,37 @@ void	TaskMainWindow::taskRealUpdate(int taskid) {
 	}
 
 	repaint();
+}
+
+void	TaskMainWindow::buttonSlot(int taskid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "handle the button in task %d", taskid);
+	try {
+		Astro::TaskInfo	info = *taskqueue->info(taskid);
+		if (info.state == Astro::TASK_EXECUTING) {
+			taskqueue->cancel(taskid);
+		} else {
+			taskqueue->remove(taskid);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot cancel/remove: %s",
+			x.what());
+	}
+}
+
+void	TaskMainWindow::remove(int taskid) {
+	taskinfo.erase(taskid);
+	taskparameters.erase(taskid);
+
+	// find the item in the list that matches the id
+	for (int i = 0; i < ui->tasklistWidget->count(); i++) {
+		QListWidgetItem	*lwi = ui->tasklistWidget->item(i);
+		TaskItem	*ti = (TaskItem *)ui->tasklistWidget->itemWidget(lwi);
+		if (ti->id() == taskid) {
+			QListWidgetItem	*lwi = ui->tasklistWidget->takeItem(i);
+			delete lwi;
+			return;
+		}
+	}
 }
 
 namespace taskmonitor {

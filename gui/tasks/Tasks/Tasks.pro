@@ -19,13 +19,13 @@ SOURCES += main.cpp \
 	connectiondialog.cpp taskconnectiondialog.cpp \
 	deviceselector.cpp \
         mainwindow.cpp \
-    taskmainwindow.cpp taskitem.cpp taskcreator.cpp
+	taskmainwindow.cpp taskitem.cpp taskcreator.cpp
 
 HEADERS  += mainwindow.h \
 	connectiondialog.h taskconnectiondialog.h \
 	deviceselector.h \
-    taskmainwindow.h taskitem.h taskcreator.h
+	taskmainwindow.h taskitem.h taskcreator.h
 
 FORMS    += mainwindow.ui \
 	connectiondialog.ui \
-    taskmainwindow.ui taskcreator.ui
+	taskmainwindow.ui taskcreator.ui

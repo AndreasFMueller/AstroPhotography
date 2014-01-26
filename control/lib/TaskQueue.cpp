@@ -308,15 +308,10 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	long taskqueueid = tasktable.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
 		taskqueueid);
+	entry.id(taskqueueid);
 
 	// inform any monitor client about the new entry
-	TaskMonitorInfo	info;
-	info.state(entry.state());
-	info.taskid(taskqueueid);
-	info.when(time(NULL));
-
-	callback::CallbackDataPtr	cbd(new TaskMonitorCallbackData(info));
-	(*callback)(cbd);
+	call(entry);
 
 	// call launch, which will lauch all entries 
 	launch();
@@ -368,19 +363,35 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update entry %d in database, state %s",
 		entry.id(), statestring(state()).c_str());
 
+	// inform the clients
+	call(entry);
+}
+
+/**
+ * \brief Call the callback with the info
+ */
+void	TaskQueue::call(const TaskInfo& info) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "info.id() = %d", info.id());
 	// if there is no callback, there is nothing to do
 	if (!callback) {
 		return;
 	}
 
 	// distribute the updates also to the callback
-	TaskMonitorInfo	info;
-	info.state(entry.state());
-	info.taskid(entry.id());
-	info.when(time(NULL));
+	TaskMonitorInfo	monitorinfo;
+	monitorinfo.state(info.state());
+	monitorinfo.taskid(info.id());
+	monitorinfo.when(time(NULL));
 
-	CallbackDataPtr	cbd(new TaskMonitorCallbackData(info));
+	CallbackDataPtr	cbd(new TaskMonitorCallbackData(monitorinfo));
 	(*callback)(cbd);
+}
+
+/**
+ * \brief Call the callback for a taskentry
+ */
+void	TaskQueue::call(const TaskQueueEntry& entry) {
+	call(entry.info());
 }
 
 /**
@@ -414,6 +425,33 @@ void	TaskQueue::cleanup(taskid_t queueid) {
 
 	// remove the execturo from the queue
 	executors.erase(i);
+}
+
+/**
+ * \brief Remove a task
+ */
+void	TaskQueue::remove(taskid_t queueid) {
+	executormap::iterator	i = executors.find(queueid);
+	if (i != executors.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "executor for %d present",
+			queueid);
+		throw std::runtime_error("process still executing");
+	}
+
+	// remove task from teh database
+	TaskQueueLock	l(&lock);
+
+	// since we want later to inform the client via the callback, we have
+	// to read the entry first
+	TaskInfo	taskinfo = info(queueid);
+
+	// remove the entry
+	TaskTable	tasktable(_database);
+	tasktable.remove(queueid);
+
+	// if we can uccessfully remove the entry, then we should inform
+	// the clients that the state has changed
+	call(taskinfo);
 }
 
 /**

@@ -122,11 +122,17 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "got task info");
  * \brief Cancel 
  */
 void	TaskQueue_impl::cancel(CORBA::Long taskid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel task %ld", taskid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel task %d", taskid);
+	if (!_taskqueue.exists(taskid)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d does not exist ", taskid);
+		throw NotFound("task does not exist");
+	}
 	try {
-		//_taskqueue.cancel(taskid);
+		_taskqueue.cancel(taskid);
 	} catch (const std::exception& x) {
-		
+		std::string	msg = astro::stringprintf("task %d exists, "
+			"but cannot be cancelled: %s", taskid, x.what());
+		throw NotFound(x.what());
 	}
 }
 
@@ -135,6 +141,16 @@ void	TaskQueue_impl::cancel(CORBA::Long taskid) {
  */
 void	TaskQueue_impl::remove(CORBA::Long taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove task %ld", taskid);
+	if (!_taskqueue.exists(taskid)) {
+		throw NotFound("task does not exist");
+	}
+	try {
+		_taskqueue.remove(taskid);
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("task %d exists, "
+			"but cannot be removed: %s", taskid, x.what());
+		throw BadState(msg.c_str());
+	}
 }
 
 /**

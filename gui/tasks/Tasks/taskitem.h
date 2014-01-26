@@ -8,24 +8,29 @@
 
 #include <QWidget>
 #include <tasks.hh>
+#include <QPushButton>
 
 class TaskItem : public QWidget {
+	Q_OBJECT
 
+	QPushButton	*button;
 	Astro::TaskInfo	info;
-public:
-	int	id() const { return info.taskid; }
-private:
 	Astro::TaskParameters	parameters;	
-	void	draw();
 public:
-	TaskItem(const Astro::TaskInfo& _info,
-		const Astro::TaskParameters& _parameters,
-		QWidget *parent = 0);
+	explicit TaskItem(const Astro::TaskInfo& _info,
+			const Astro::TaskParameters& _parameters,
+			QWidget *parent = 0);
 	virtual ~TaskItem();
 	void	paintEvent(QPaintEvent *event);
-	void	updateInfo(const Astro::TaskInfo& newinfo) {
-		info = newinfo;
-	}
+	void	updateInfo(const Astro::TaskInfo& newinfo);
+	int	id() const;
+private:	
+	void	draw();
+signals:
+	void	buttonSignal(int taskid);
+
+public slots:
+	void	handleButton();
 };
 
 #endif /* _taskitem_h */
