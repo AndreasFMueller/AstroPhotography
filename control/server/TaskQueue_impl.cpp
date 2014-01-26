@@ -100,6 +100,8 @@ TaskInfo	*TaskQueue_impl::info(CORBA::Long taskid) {
 		TaskInfo	*info = new TaskInfo();
 
 		// convert the parameters
+		astro::task::TaskInfo	ti = _taskqueue.info(taskid);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "got task info");
 		*info = astro::convert(_taskqueue.info(taskid));
 
 		return info;

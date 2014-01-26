@@ -83,8 +83,8 @@ public:
 Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 		const std::string& query) 
 	: Statement(query), _backend(backend) {
-//	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing statement with SQL: '%s'",
-//		query.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing statement with SQL: '%s'",
+		query.c_str());
 	stmt = NULL;
 	int	rc;
 	const char	*tail;
@@ -228,6 +228,12 @@ Result	Sqlite3Statement::result() {
 //////////////////////////////////////////////////////////////////////
 Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	: _filename(filename) {
+	// check whether this version of sqlite is compiled with mutexes
+	if (sqlite3_threadsafe()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "backend is thread safe");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "backend is NOT thread safe");
+	}
 	// open the database
 	_database = NULL;
 	if (sqlite3_open(_filename.c_str(), &_database)) {

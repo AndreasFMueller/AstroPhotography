@@ -406,6 +406,7 @@ long	TableBase::nextid() {
  */
 Row	TableBase::rowbyid(long objectid) {
 	std::string	sq = selectquery(); 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s", sq.c_str());
 	StatementPtr	stmt = _database->statement(sq);
 	stmt->bind(0, (int)objectid);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
