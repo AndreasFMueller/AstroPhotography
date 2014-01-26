@@ -19,7 +19,14 @@ TaskQueue_impl::TaskQueue_impl(astro::task::TaskQueue& taskqueue)
 	: _taskqueue(taskqueue) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue servant created");
 
-	_taskqueue.callback = astro::callback::CallbackPtr(new TaskQueueCallback(*this));
+	// recover from crashes
+	_taskqueue.recover();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "database recovered");
+
+	// install the callback
+	_taskqueue.callback = astro::callback::CallbackPtr(
+		new TaskQueueCallback(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback installed");
 }
 
 /**

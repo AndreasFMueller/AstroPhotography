@@ -219,6 +219,10 @@ public:
 	TaskQueue(astro::persistence::Database database);
 	~TaskQueue();
 
+	// recover from crash by turning all executing entries into
+	// failed entries
+	void	recover();
+
 	// main function
 	void	main();
 

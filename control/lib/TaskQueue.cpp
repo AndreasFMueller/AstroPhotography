@@ -560,6 +560,31 @@ TaskParameters  TaskQueue::parameters(taskid_t queueid) {
 	return entry(queueid).parameters();
 }
 
+/**
+ * \brief Recover from a crash
+ */
+void	TaskQueue::recover() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "database recovery");
+	TaskQueueLock	l(&lock);
+
+	time_t	now = time(NULL);
+	std::string	query = stringprintf(
+		"update taskqueue set "
+		"state = %d, "
+		"lastchange = %d, "
+		"cause = 'server crash' "
+		"where state = %d", TaskInfo::failed, now,
+		TaskInfo::executing);
+	try {
+		_database->query(query);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "error in recovery query: %s",
+			x.what());
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query '%s' fixed database consistency",
+		query.c_str());
+}
 
 } // namespace task
 } // namespace astro
