@@ -456,6 +456,7 @@ astro::task::TaskQueueEntry::taskstate  convert(const Astro::TaskState& state) {
 	case Astro::TASK_COMPLETED:
 		return astro::task::TaskQueueEntry::complete;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 Astro::TaskState        convert(const astro::task::TaskQueueEntry::taskstate& state) {
@@ -471,6 +472,7 @@ Astro::TaskState        convert(const astro::task::TaskQueueEntry::taskstate& st
 	case astro::task::TaskQueueEntry::complete:
 		return Astro::TASK_COMPLETED;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 // TaskQueueState
@@ -486,6 +488,7 @@ convert(const Astro::TaskQueue::QueueState state) {
 	case Astro::TaskQueue::STOPPED:
 		return astro::task::TaskQueue::stopped;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 Astro::TaskQueue::QueueState
@@ -500,6 +503,7 @@ convert(const astro::task::TaskQueue::state_type state) {
 	case astro::task::TaskQueue::stopped:
 		return Astro::TaskQueue::STOPPED;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 // Task parameters
@@ -607,6 +611,7 @@ astro::guiding::GuiderState     convert(const Astro::Guider::GuiderState& state)
 	case Astro::Guider::GUIDER_GUIDING:
 		return astro::guiding::guiding;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state) {
@@ -622,6 +627,7 @@ Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state
 	case astro::guiding::guiding:
 		return Astro::Guider::GUIDER_GUIDING;
 	}
+	throw std::runtime_error("unknown state");
 }
 
 // Tracking info

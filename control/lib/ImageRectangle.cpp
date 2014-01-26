@@ -133,6 +133,7 @@ std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle) {
 	rectangle.setOrigin(origin);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed rectangle spec %s",
 		rectangle.toString().c_str());
+	return in;
 }
 
 ImagePoint      ImageRectangle::upperright() const {

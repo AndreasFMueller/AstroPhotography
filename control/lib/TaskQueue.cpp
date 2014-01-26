@@ -118,6 +118,7 @@ std::string	TaskQueue::statestring(const state_type& state) {
 	case stopped:
 		return std::string("stopped");
 	}
+	throw std::runtime_error("invalid state");
 }
 
 /**

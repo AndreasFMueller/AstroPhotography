@@ -71,7 +71,7 @@ double	RectangleFunction::operator()(size_t x, size_t y) const {
 		(y <= (rectangle.origin().y() + rectangle.size().height()))) {
 		hx = (x - innerrectangle.origin().y() - innerrectangle.size().height())/ymargin;
 	}
-	return hanningfunction(hx) * hanningfunction(y);
+	return hanningfunction(hx) * hanningfunction(hy);
 }
 
 /**
