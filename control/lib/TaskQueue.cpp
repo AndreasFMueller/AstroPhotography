@@ -264,6 +264,10 @@ void	TaskQueue::launch(const TaskQueueEntry& entry) {
  * \brief launch as many tasks as possible
  */
 void	TaskQueue::launch() {
+	if (_state != launching) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not launching");
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching all possible pending task");
 	// private method, only called from methods that have already locked
 	// the queue
@@ -288,10 +292,8 @@ void	TaskQueue::launch() {
 /**
  * \brief submit a new entry
  *
- * This is currently only a test function, it bypasses the launch method
- * completely, and does not involve the database. Later, this will be modified
- * so that new tasks are written to the database, and launched from the
- * launch method.
+ * This method creates a new entry in the database. It then calls launch,
+ * which will launch all possible tasks.
  */
 taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task");
@@ -306,8 +308,19 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
 		taskqueueid);
 
+	// inform any monitor client about the new entry
+	TaskMonitorInfo	info;
+	info.state(entry.state());
+	info.taskid(taskqueueid);
+	info.when(time(NULL));
+
+	callback::CallbackDataPtr	cbd(new TaskMonitorCallbackData(info));
+	(*callback)(cbd);
+
 	// call launch, which will lauch all entries 
 	launch();
+
+	// return the queue id
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new queueid %d", taskqueueid);
 	return taskqueueid;
 }

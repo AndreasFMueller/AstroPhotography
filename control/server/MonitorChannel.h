@@ -133,7 +133,7 @@ void	MonitorChannel<monitorinterface, argtype>::unsubscribe(::CORBA::Long id) {
  */
 template<typename monitorinterface, typename argtype>
 void	MonitorChannel<monitorinterface, argtype>::update(const argtype& data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image update received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update received");
 
 	// lock the mutex to protect the map
 	pthread_mutex_lock(&mutex);

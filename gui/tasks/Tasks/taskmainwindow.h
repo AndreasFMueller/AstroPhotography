@@ -1,3 +1,8 @@
+/*
+ * taskmainwindow.h -- define TaskMainWindow
+ *
+ * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
 #ifndef TASKMAINWINDOW_H
 #define TASKMAINWINDOW_H
 
@@ -8,6 +13,12 @@
 namespace Ui {
 class TaskMainWindow;
 }
+
+namespace taskmonitor {
+
+class TaskMonitor_impl;
+
+} // namespace taskmonitor
 
 class TaskMainWindow : public QMainWindow
 {
@@ -20,20 +31,42 @@ class TaskMainWindow : public QMainWindow
 	taskinfo_t	taskinfo;
 	taskparameter_t	taskparameters;
 	void	addTasks(Astro::TaskQueue::taskidsequence_var taskids);
+	taskmonitor::TaskMonitor_impl	*tm_impl;
+	int	monitorid;
 public:
 	explicit TaskMainWindow(QWidget *parent = 0);
 	~TaskMainWindow();
 
+signals:
+	void	submitTask(int multiplicity);
+	void	taskUpdateSignal(int taskid);
+
 private slots:
 	void	tick();
+	void	taskRealUpdate(int taskid);
 
 public slots:
 	void	startQueue();
 	void	stopQueue();
 	void	handleToolbarAction(QAction *);
+	void	submitTask();
+	void	taskUpdateSlot(int taskid);
 
 private:
 	Ui::TaskMainWindow *ui;
 };
+
+namespace taskmonitor {
+
+class TaskMonitor_impl : public POA_Astro::TaskMonitor {
+	TaskMainWindow&	_mainwindow;
+public:
+	TaskMonitor_impl(TaskMainWindow& mainwindow);
+	virtual ~TaskMonitor_impl();
+	virtual void	update(const Astro::TaskMonitorInfo& tmi);
+	virtual void	stop();
+};
+
+} // namespace taskmonitor
 
 #endif // TASKMAINWINDOW_H

@@ -8,12 +8,25 @@
 #include <Conversions.h>
 #include <AstroFormat.h>
 #include <OrbSingleton.h>
+#include <TaskQueueCallback.h>
 
 namespace Astro {
 
+/**
+ * \brief Create a new TaskQueue instance
+ */
 TaskQueue_impl::TaskQueue_impl(astro::task::TaskQueue& taskqueue)
 	: _taskqueue(taskqueue) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue servant created");
+
+	_taskqueue.callback = astro::callback::CallbackPtr(new TaskQueueCallback(*this));
+}
+
+/**
+ * \brief Cleanup
+ */
+TaskQueue_impl::~TaskQueue_impl() {
+	_taskqueue.callback = astro::callback::CallbackPtr();
 }
 
 /**
@@ -181,6 +194,8 @@ void	TaskQueue_impl::unregisterMonitor(::CORBA::Long monitorid) {
  * \brief update all monitors
  */
 void	TaskQueue_impl::update(const ::Astro::TaskMonitorInfo& taskinfo) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "send info about task %d",
+		taskinfo.taskid);
 	monitorchannel.update(taskinfo);
 }
 

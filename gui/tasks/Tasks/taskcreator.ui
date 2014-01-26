@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TaskCreator</class>
+ <widget class="QWidget" name="TaskCreator">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>856</width>
+    <height>122</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="3">
+    <widget class="QComboBox" name="filterpositionComboBox"/>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLabel" name="temperatureLabel">
+     <property name="text">
+      <string>Temperature:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QDoubleSpinBox" name="temperatureSpinBox">
+     <property name="maximumSize">
+      <size>
+       <width>90</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="minimum">
+      <double>-60.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>30.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QDoubleSpinBox" name="exposureTime">
+     <property name="maximumSize">
+      <size>
+       <width>90</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>3600.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="ccdLabel">
+     <property name="text">
+      <string>CCD:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="DeviceSelector" name="cameraComboBox">
+     <property name="minimumSize">
+      <size>
+       <width>250</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="cameraLabel">
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Camera:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4">
+    <widget class="QRadioButton" name="lightRadioButton">
+     <property name="maximumSize">
+      <size>
+       <width>70</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>LIGHT</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="filterwheelLabel">
+     <property name="text">
+      <string>Filterwheel:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="DeviceSelector" name="filterwheelComboBox"/>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="exposureLabel">
+     <property name="maximumSize">
+      <size>
+       <width>90</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Exposure:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="positionLabel">
+     <property name="text">
+      <string>Position:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSpinBox" name="ccdSpinBox">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5">
+    <widget class="QComboBox" name="binningComboBox">
+     <property name="maximumSize">
+      <size>
+       <width>70</width>
+       <height>16777215</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DeviceSelector</class>
+   <extends>QComboBox</extends>
+   <header>deviceselector.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cameraComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>TaskCreator</receiver>
+   <slot>selectCamera(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>116</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterwheelComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>TaskCreator</receiver>
+   <slot>selectFilterwheel(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>121</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>selectCamera(int)</slot>
+  <slot>selectFilterwheel(int)</slot>
+ </slots>
+</ui>

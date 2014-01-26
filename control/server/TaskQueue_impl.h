@@ -16,7 +16,7 @@ class TaskQueue_impl : public POA_Astro::TaskQueue {
 	astro::task::TaskQueue&	_taskqueue;
 public:
 	TaskQueue_impl(astro::task::TaskQueue& taskqueue);
-
+	~TaskQueue_impl();
 	virtual Astro::TaskQueue::QueueState	state();
 	virtual ::CORBA::Long	submit(const ::Astro::TaskParameters& params);
 	virtual TaskParameters	*parameters(::CORBA::Long taskid);
