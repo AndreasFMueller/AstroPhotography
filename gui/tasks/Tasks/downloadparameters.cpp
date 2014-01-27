@@ -14,6 +14,18 @@
 #include <stdexcept>
 #include <image.hh>
 
+/**
+ * \brief Construct a Downloadparameters object
+ */
+DownloadParameters::DownloadParameters() {
+	binning = false;
+	exposuretime = false;
+	temperature = false;
+	filter = false;
+	shutter = false;
+	date = false;
+}
+
 static std::string	qstring2string(const QString& qstring) {
 	QByteArray ba = qstring.toLatin1();
 	std::string	result(ba.data());
@@ -22,15 +34,9 @@ static std::string	qstring2string(const QString& qstring) {
 	return result;
 }
 
-std::string	DownloadParameters::filename(long taskid) {
-	std::string	d = qstring2string(directory);
-	std::string	f = qstring2string(prefix);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "filename(%d)", taskid);
-	f = astro::stringprintf("%s/%s-%d", d.c_str(), f.c_str(), taskid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "f = %s", f.c_str());
-	return f;
-}
-
+/**
+ * \brief Filename from task info and parameters
+ */
 std::string	DownloadParameters::filename(const Astro::TaskInfo_var& info,
 			const Astro::TaskParameters_var& parameters) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct filename");
@@ -75,6 +81,9 @@ std::string	DownloadParameters::filename(const Astro::TaskInfo_var& info,
 	return out.str();
 }
 
+/**
+ * \brief Download all tasks from a list of tasks
+ */
 void	DownloadParameters::download(Astro::TaskQueue_var taskqueue,
 		const std::list<long>& taskids) {
 	std::list<long>::const_iterator	i;
@@ -85,6 +94,9 @@ void	DownloadParameters::download(Astro::TaskQueue_var taskqueue,
 	}
 }
 
+/**
+ * \brief Download a task based on the task id
+ */
 void	DownloadParameters::download(Astro::TaskQueue_var taskqueue,
 		long taskid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskid = %d", taskid);
@@ -92,9 +104,7 @@ void	DownloadParameters::download(Astro::TaskQueue_var taskqueue,
 	Astro::TaskParameters_var	parameters
 		= taskqueue->parameters(taskid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parameters received");
-	std::string	f = (usetaskid())
-				? filename(taskid)
-				: filename(info, parameters);
+	std::string	f = filename(info, parameters);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", f.c_str());
 
 	// create a file
@@ -123,6 +133,9 @@ void	DownloadParameters::download(Astro::TaskQueue_var taskqueue,
 
 }
 
+/**
+ * \brief whether any attribute is to be included in the file names
+ */
 bool	DownloadParameters::usetaskid() const {
 	return !(exposuretime || binning || filter || shutter || temperature || date);
 }

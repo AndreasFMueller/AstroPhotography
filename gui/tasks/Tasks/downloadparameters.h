@@ -21,12 +21,13 @@ public:
 	bool	temperature;
 	bool	date;
 
+	DownloadParameters();
+
 	void	download(Astro::TaskQueue_var taskqueue,
 			const std::list<long>& taskids);
 private:
 	void	download(Astro::TaskQueue_var taskqueue, long taskid);
 	bool	usetaskid() const;
-	std::string	filename(long taskid);
 	std::string	filename(const Astro::TaskInfo_var& info,
 				const Astro::TaskParameters_var& parameters);
 };

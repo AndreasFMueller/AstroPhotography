@@ -13,7 +13,6 @@
 class TaskItem : public QWidget {
 	Q_OBJECT
 
-	QPushButton	*button;
 	Astro::TaskInfo	info;
 	Astro::TaskParameters	parameters;	
 public:
@@ -26,11 +25,7 @@ public:
 	int	id() const;
 private:	
 	void	draw();
-signals:
-	void	buttonSignal(int taskid);
 
-public slots:
-	void	handleButton();
 };
 
 #endif /* _taskitem_h */

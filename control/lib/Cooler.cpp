@@ -149,7 +149,8 @@ bool	Cooler::stable() {
 bool	Cooler::wait(float timeout) {
 	while ((timeout > 0) && (!stable())) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for cooler");
-		usleep(100000);
+		usleep(1000000);
+		timeout -= 1;
 	}
 	return (timeout < 0) ? false : true;
 }

@@ -11,6 +11,7 @@
 #include <TaskItem.h>
 #include <cassert>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <downloaddialog.h>
 #include <iostream>
 
@@ -115,12 +116,6 @@ void	TaskMainWindow::addTasks(const std::set<long>& taskids) {
 			TaskItem	*ti = new TaskItem(info, params);
 			ui->tasklistWidget->addItem(lwi);
 			ui->tasklistWidget->setItemWidget(lwi, ti);
-
-			// connect the button signal of the task item
-			// to the buttonSlot
-			connect(ti, SIGNAL(buttonSignal(int)),
-				this, SLOT(buttonSlot(int)),
-				Qt::QueuedConnection);
 		} catch (const Astro::NotFound) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "task %d not found",
 			taskid);
@@ -317,6 +312,27 @@ void	TaskMainWindow::fileSelected(const QString& directory) {
 void	TaskMainWindow::deleteSelected() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete selected entries");
 	std::list<long>	selected = selectedTaskids();
+
+	QMessageBox	msgBox;
+	msgBox.setText("Delete task");
+	char	buffer[128];
+	snprintf(buffer, sizeof(buffer),
+		"Do you really want to delete %d tasks?",
+		selected.size());
+	msgBox.setInformativeText(buffer);
+	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+
+	int	ret = msgBox.exec();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ret = %d", ret);
+
+	switch (ret) {
+	case QMessageBox::Ok:
+		break;
+	case QMessageBox::Cancel:
+		return;
+	}
+
 	std::list<long>::const_iterator	i;
 	for(i = selected.begin(); i != selected.end(); i++) {
 		try {
@@ -413,11 +429,6 @@ void	TaskMainWindow::taskRealUpdate(int taskid) {
 		TaskItem	*ti = new TaskItem(info, params);
 		ui->tasklistWidget->addItem(lwi);
 		ui->tasklistWidget->setItemWidget(lwi, ti);
-
-		// connect the task item to the button slot
-		connect(ti, SIGNAL(buttonSignal(int)),
-			this, SLOT(buttonSlot(int)),
-			Qt::QueuedConnection);
 
 		// make sure the list is repainted
 		repaint();

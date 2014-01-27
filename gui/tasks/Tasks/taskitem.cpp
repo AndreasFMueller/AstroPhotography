@@ -10,15 +10,9 @@
 TaskItem::TaskItem(const Astro::TaskInfo& _info,
 	const Astro::TaskParameters& _parameters, QWidget *parent) :
 	QWidget(parent), info(_info), parameters(_parameters) {
-	button = new QPushButton(this);
-	connect(button, SIGNAL(clicked()),
-		this, SLOT(handleButton()), Qt::QueuedConnection);
 }
 
 TaskItem::~TaskItem() {
-	if (button) {
-		delete button;
-	}
 }
 
 static QColor	pending_color(224., 224., 255.);
@@ -36,31 +30,26 @@ void	TaskItem::draw() {
 		painter.fillRect(0, 0, height(), height(), pending_color);
 		statestring = "pending";
 		statecolor = QColor(0, 0, 255);
-		button->setText(QString("Remove"));
 		break;
 	case Astro::TASK_EXECUTING:
 		painter.fillRect(0, 0, height(), height(), executing_color);
 		statestring = "executing";
 		statecolor = QColor(0, 0, 255);
-		button->setText(QString("Cancel"));
 		break;
 	case Astro::TASK_FAILED:
 		painter.fillRect(0, 0, height(), height(), failed_color);
 		statestring = "failed";
 		statecolor = QColor(255, 0, 0);
-		button->setText(QString("Remove"));
 		break;
 	case Astro::TASK_CANCELLED:
 		painter.fillRect(0, 0, height(), height(), cancelled_color);
 		statestring = "cancelled";
 		statecolor = QColor(255, 255, 0);
-		button->setText(QString("Remove"));
 		break;
 	case Astro::TASK_COMPLETED:
 		painter.fillRect(0, 0, height(), height(), completed_color);
 		statestring = "completed";
 		statecolor = QColor(0, 128, 0);
-		button->setText(QString("Remove"));
 		break;
 	}
 
@@ -200,23 +189,14 @@ void	TaskItem::draw() {
 	QFont	font = painter.font();
 	font.setPointSize(30);
 	painter.setFont(font);
-	painter.drawText(5, 5, height() - 10,  (2 * height() / 3) - 10,
+	painter.drawText(5, 5, height() - 10,  height() - 10,
 		Qt::AlignCenter, tr("%1").arg(info.taskid));
 
-	button->setGeometry(5, 2 * height() / 3, height() - 10, height() / 3);
 }
 
 void	TaskItem::paintEvent(QPaintEvent *event) {
 	//QWidget::paintEvent(event);
 	draw();
-}
-
-void	TaskItem::handleButton() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting button signal for %d",
-		info.taskid);
-	int	id = info.taskid;
-	button->setEnabled(false);
-	emit buttonSignal(id);
 }
 
 void	TaskItem::updateInfo(const Astro::TaskInfo& newinfo) {
