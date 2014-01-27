@@ -109,7 +109,7 @@ void	ImageActivator_impl::etherealize(
 
 	// remove the image from the ImageDirectory
 	try {
-		ImageDirectory::remove(filename);
+		ImageDatabaseDirectory::remove(filename);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s deleted", filename.c_str());
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "error during etherialize: %s",

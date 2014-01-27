@@ -21,7 +21,7 @@ namespace Astro {
  * Images are identified by a string id, which can be any valid file
  * name. 
  */
-class ImageObjectDirectory : public astro::image::ImageDirectory {
+class ImageObjectDirectory : public astro::image::ImageDatabaseDirectory {
 public:
 	ImageObjectDirectory() { }
 	Image_ptr	getImage(const std::string& filename);

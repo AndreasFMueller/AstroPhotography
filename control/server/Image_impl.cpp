@@ -28,7 +28,7 @@ Image_impl::Image_impl(ImagePtr image) : _image(image) {
 
 Image_impl::~Image_impl() {
 	try {
-		ImageDirectory::remove(_filename);
+		ImageDatabaseDirectory::remove(_filename);
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot remove %s: %s",
 			_filename.c_str(), x.what());

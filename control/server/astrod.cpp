@@ -115,6 +115,7 @@ int	astrod_main(int argc, char *argv[]) {
 	// build the database
 	Astro::ServerDatabase	s(databasefile);
 	persistence::Database	database = s.database();
+	astro::image::ImageDatabaseDirectory::database(database);
 
 	// get the POA
 	CORBA::Object_var	obj
