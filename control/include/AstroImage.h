@@ -264,6 +264,7 @@ public:
 	bool	hasMetadata(const std::string& name) const;
 	Metavalue	getMetadata(const std::string& name) const;
 	void	setMetadata(const std::string& name, const Metavalue& mv);
+	int	nMetadata() const { return metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
 protected:

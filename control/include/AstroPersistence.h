@@ -191,6 +191,7 @@ public:
 	void	updaterow(long objectid, const UpdateSpec& updatespec);
 	bool	exists(long objectid);
 	void	remove(long objectid);
+	void	remove(const std::list<long>& objectids);
 	std::list<long>	selectids(const std::string& condition);
 };
 
@@ -222,6 +223,8 @@ class PersistentRef : public Persistent<object> {
 public:
 	const int&	ref() const { return _ref; }
 	void	ref(const int& r) { _ref = r; }
+	PersistentRef(int i, int r)
+		: Persistent<object>(i), _ref(r) { }
 	PersistentRef(int i, int r, const object& _object)
 		: Persistent<object>(i, _object), _ref(r) { }
 };
