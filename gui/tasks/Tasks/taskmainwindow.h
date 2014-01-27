@@ -11,6 +11,8 @@
 #include <QTimer>
 #include <deque>
 #include <pthread.h>
+#include <set>
+#include <downloadparameters.h>
 
 namespace Ui {
 class TaskMainWindow;
@@ -32,12 +34,14 @@ class TaskMainWindow : public QMainWindow
 	typedef std::map<int, Astro::TaskParameters_var>	taskparameter_t;
 	taskinfo_t	taskinfo;
 	taskparameter_t	taskparameters;
-	void	addTasks(Astro::TaskQueue::taskidsequence_var taskids);
+	void	addTasks(const std::set<long>& taskids);
 	taskmonitor::TaskMonitor_impl	*tm_impl;
 	int	monitorid;
 	void	remove(int taskid);
 	std::deque<int>	taskids;
 	pthread_mutex_t	lock;
+	std::list<long>	selectedTaskids();
+	DownloadParameters	downloadparameters;
 public:
 	explicit TaskMainWindow(QWidget *parent = 0);
 	~TaskMainWindow();
@@ -52,10 +56,15 @@ private slots:
 public slots:
 	void	startQueue();
 	void	stopQueue();
+	void	downloadSelected();
+	void	deleteSelected();
 	void	handleToolbarAction(QAction *);
 	void	submitTask();
 	void	taskUpdateSlot(int taskid);
 	void	buttonSlot(int taskid);
+	void	selectionChanged();
+	void	fileSelected(const QString& file);
+	void	downloadParametersAccepted();
 
 private:
 	Ui::TaskMainWindow *ui;

@@ -29,11 +29,17 @@
       <property name="dragDropMode">
        <enum>QAbstractItemView::NoDragDrop</enum>
       </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectItems</enum>
       </property>
       <property name="movement">
-       <enum>QListView::Snap</enum>
+       <enum>QListView::Static</enum>
+      </property>
+      <property name="spacing">
+       <number>0</number>
       </property>
      </widget>
     </item>
@@ -141,6 +147,8 @@
    </attribute>
    <addaction name="actionStartQueue"/>
    <addaction name="actionStopQueue"/>
+   <addaction name="actionDownload"/>
+   <addaction name="actionDelete"/>
   </widget>
   <action name="actionStartQueue">
    <property name="text">
@@ -156,6 +164,16 @@
    </property>
    <property name="toolTip">
     <string>Stop the task queue</string>
+   </property>
+  </action>
+  <action name="actionDownload">
+   <property name="text">
+    <string>Download</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
    </property>
   </action>
  </widget>
@@ -201,11 +219,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>tasklistWidget</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>TaskMainWindow</receiver>
+   <slot>selectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>51</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>212</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>startQueue()</slot>
   <slot>stopQueue()</slot>
   <slot>handleToolbarAction(QAction*)</slot>
   <slot>submitTask()</slot>
+  <slot>selectionChanged()</slot>
  </slots>
 </ui>

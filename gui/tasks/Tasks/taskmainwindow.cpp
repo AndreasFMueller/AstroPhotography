@@ -10,6 +10,9 @@
 #include <AstroDebug.h>
 #include <TaskItem.h>
 #include <cassert>
+#include <QFileDialog>
+#include <downloaddialog.h>
+#include <iostream>
 
 /**
  * \brief Create a new TaskMainWindow
@@ -85,17 +88,18 @@ TaskMainWindow::TaskMainWindow(QWidget *parent) :
 TaskMainWindow::~TaskMainWindow()
 {
 	taskqueue->unregisterMonitor(monitorid);
-    delete ui;
+	delete ui;
 }
 
 /**
  * \brief Add the tasks from a sequence of ids
  */
-void	TaskMainWindow::addTasks(Astro::TaskQueue::taskidsequence_var taskids) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %d tasks", taskids->length());
+void	TaskMainWindow::addTasks(const std::set<long>& taskids) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %d tasks", taskids.size());
 	time_t	now = time(NULL);
-	for (int i = 0; i < taskids->length(); i++) {
-		int	taskid = taskids[i];
+	std::set<long>::const_iterator	i;
+	for (i = taskids.begin(); i != taskids.end(); i++) {
+		int	taskid = *i;
 		try {
 			// get the task info
 			Astro::TaskInfo_var	info = taskqueue->info(taskid);
@@ -127,6 +131,13 @@ void	TaskMainWindow::addTasks(Astro::TaskQueue::taskidsequence_var taskids) {
 	}
 }
 
+static void	addids(std::set<long>& taskids,
+			Astro::TaskQueue::taskidsequence_var ids) {
+	for (int i = 0; i < ids->length(); i++) {
+		taskids.insert(ids[i]);
+	}
+}
+
 /**
  * \brief Retrieve the task list
  */
@@ -135,31 +146,30 @@ void	TaskMainWindow::retrieveTasklist() {
 	taskinfo.clear();
 	taskparameters.clear();
 
+	std::set<long>	taskids;
+
 	// process each state in sequence
 	Astro::TaskQueue::taskidsequence_var	pending
 		= taskqueue->tasklist(Astro::TASK_PENDING);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pending: %d", pending->length());
-	addTasks(pending);
+	addids(taskids, pending);
 
 	Astro::TaskQueue::taskidsequence_var	executing
 		= taskqueue->tasklist(Astro::TASK_EXECUTING);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "executing: %d", executing->length());
-	addTasks(executing);
+	addids(taskids, executing);
 
 	Astro::TaskQueue::taskidsequence_var	failed
 		= taskqueue->tasklist(Astro::TASK_FAILED);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "failed: %d", failed->length());
-	addTasks(failed);
+	addids(taskids, failed);
 
 	Astro::TaskQueue::taskidsequence_var	cancelled
 		= taskqueue->tasklist(Astro::TASK_CANCELLED);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelled: %d", cancelled->length());
-	addTasks(cancelled);
+	addids(taskids, cancelled);
 
 	Astro::TaskQueue::taskidsequence_var	completed
 		= taskqueue->tasklist(Astro::TASK_COMPLETED);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "completed: %d", completed->length());
-	addTasks(completed);
+	addids(taskids, completed);
+
+	addTasks(taskids);
 }
 
 /**
@@ -238,6 +248,88 @@ void	TaskMainWindow::stopQueue() {
 }
 
 /**
+ * \brief Retrieve a list of selected task ids
+ */
+std::list<long>	TaskMainWindow::selectedTaskids() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve a list of selected items");
+	std::list<long>	taskids;
+	for (int i = 0; i < ui->tasklistWidget->count(); i++) {
+		QListWidgetItem	*item = ui->tasklistWidget->item(i);
+		if (item->isSelected()) {
+			TaskItem	*ti = (TaskItem *)ui->tasklistWidget->itemWidget(item);
+			taskids.push_back(ti->id());
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d selected task ids", taskids.size());
+	return taskids;
+}
+
+/**
+ * \brief Download all selected 
+ */
+void	TaskMainWindow::downloadSelected() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "download selected entries");
+	std::list<long>	selected = selectedTaskids();
+	if (selected.size() == 0) {
+		return;
+	}
+
+	// create a parameter dialog
+	DownloadDialog	*dialog = new DownloadDialog(downloadparameters, this);
+	dialog->setModal(true);
+	dialog->show();
+}
+
+/**
+ * \brief Slot called when the download parameters are accepted
+ */
+void	TaskMainWindow::downloadParametersAccepted() {
+	// open a file dialog to select the directory where the
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a file dialog");
+	QFileDialog	*filedialog = new QFileDialog(this);
+	//filedialog->setAcceptMode(QFileDialog::AcceptSave);
+	filedialog->setFileMode(QFileDialog::DirectoryOnly);
+	filedialog->show();
+	connect(filedialog, SIGNAL(fileSelected(const QString&)),
+		this, SLOT(fileSelected(const QString&)),
+		Qt::QueuedConnection);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dialog created");
+}
+
+/**
+ * \brief Slot called when a directory is selected
+ */
+void	TaskMainWindow::fileSelected(const QString& directory) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file selected");
+	downloadparameters.directory = directory;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "directory string length %d",
+		downloadparameters.directory.length());
+
+	// perform the download of all files
+	downloadparameters.download(taskqueue, selectedTaskids());
+}
+
+/**
+ * \brief Delete selected items
+ */
+void	TaskMainWindow::deleteSelected() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete selected entries");
+	std::list<long>	selected = selectedTaskids();
+	std::list<long>::const_iterator	i;
+	for(i = selected.begin(); i != selected.end(); i++) {
+		try {
+			taskqueue->remove(*i);
+		} catch (const std::exception& x) {
+		
+		} catch (...) {
+			
+		}
+	}
+}
+
+/**
  * \brief Slot to start tasks in the queue
  */
 void	TaskMainWindow::submitTask() {
@@ -258,6 +350,14 @@ void	TaskMainWindow::handleToolbarAction(QAction *action) {
 	}
 	if (action == ui->actionStopQueue) {
 		stopQueue();
+		return;
+	}
+	if (action == ui->actionDelete) {
+		deleteSelected();
+		return;
+	}
+	if (action == ui->actionDownload) {
+		downloadSelected();
 		return;
 	}
 }
@@ -378,6 +478,10 @@ void	TaskMainWindow::remove(int taskid) {
 			return;
 		}
 	}
+}
+
+void	TaskMainWindow::selectionChanged() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "selection changed");
 }
 
 namespace taskmonitor {
