@@ -163,7 +163,7 @@ void	ExposureTask::run() {
 			image->setMetadata("FILTER", Metavalue(filtername, ""));
 
 			// add to the ImageDirectory
-			astro::image::ImageDirectory	imagedir;
+			astro::image::ImageDatabaseDirectory	imagedir;
 			std::string	filename = imagedir.save(image);
 
 			// remember the filename

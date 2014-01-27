@@ -470,6 +470,16 @@ void	TableBase::remove(long objectid) {
 }
 
 /**
+ * \brief Remove a list of entries
+ */
+void	TableBase::remove(const std::list<long>& objectids) {
+	std::list<long>::const_iterator	i;
+	for (i = objectids.begin(); i != objectids.end(); i++) {
+		remove(*i);
+	}
+}
+
+/**
  * \brief retrieve a list of all object ids satisfying a condition
  */
 std::list<long>	TableBase::selectids(const std::string& condition) {

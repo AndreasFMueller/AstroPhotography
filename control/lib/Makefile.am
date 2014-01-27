@@ -36,7 +36,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
-	ImageDirectory.cpp \
+	ImageDirectory.cpp ImageDatabaseDirectory.cpp \
 	Metavalue.cpp Sun.cpp ViewerPipeline.cpp Viewer.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
@@ -69,6 +69,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
 	TrackingPersistence.cpp CalibrationPersistence.cpp \
 	CalibrationStore.cpp TrackingStore.cpp \
+	ImagePersistence.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 
