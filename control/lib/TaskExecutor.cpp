@@ -118,9 +118,13 @@ void	ExposureTask::run() {
 	}
 
 	// set the filterwheel position
+	std::string	filtername("NONE");
 	if (filterwheel) {
+		// XXX make sure filter wheel is ready, but this is a
+		//     waste of time
 		filterwheel->wait(10);
 		filterwheel->select(_task.filterposition());
+		filtername = filterwheel->filterName(_task.filterposition());
 	}
 
 	// wait for the cooler, if present, but at most 30 seconds
@@ -154,6 +158,9 @@ void	ExposureTask::run() {
 			astro::image::ImagePtr	image = ccd->getImage();
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 				image->getFrame().toString().c_str());
+
+			// add filter information to the image, if present
+			image->setMetadata("FILTER", Metavalue(filtername, ""));
 
 			// add to the ImageDirectory
 			astro::image::ImageDirectory	imagedir;

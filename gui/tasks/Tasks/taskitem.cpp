@@ -182,7 +182,7 @@ void	TaskItem::draw() {
 	painter.drawText(pvoff,       2 * h,  80, h, flags, exposure);
 	painter.drawText(pvoff +  80, 2 * h,  50, h, flags, binning);
 	painter.drawText(pvoff + 130, 2 * h,  60, h, flags, shutter);
-	painter.drawText(pvoff + 180, 2 * h, 100, h, flags, buffer);
+	painter.drawText(pvoff + 180, 2 * h, 200, h, flags, buffer);
 
 	// filter
 	if (strlen(parameters.filterwheel.in()) > 0) {
@@ -215,6 +215,7 @@ void	TaskItem::handleButton() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting button signal for %d",
 		info.taskid);
 	int	id = info.taskid;
+	button->setEnabled(false);
 	emit buttonSignal(id);
 }
 
