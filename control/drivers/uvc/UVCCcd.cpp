@@ -115,7 +115,7 @@ std::pair<float, float>	UvcCcd::gainInterval() {
  * individual image. So we just retrieve an image of one image, and
  * extract the image from the sequence.
  */
-ImagePtr	UvcCcd::getImage() {
+ImagePtr	UvcCcd::getRawImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image");
 	// retrieve an image
 	ImageSequence	sequence = getImageSequence(1);

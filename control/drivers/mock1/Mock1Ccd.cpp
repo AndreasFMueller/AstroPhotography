@@ -49,10 +49,7 @@ void    Mock1Ccd::cancelExposure() {
 /**
  * \brief Retrieve the image
  */
-ImagePtr    Mock1Ccd::getImage() {
-	if (Exposure::exposed != state) {
-		throw BadState("no exposed image available");
-	}
+ImagePtr    Mock1Ccd::getRawImage() {
 	Image<unsigned char>	image(info.size());
 	image.fill(128);
 	ImageSize	blocksize(5, 5);

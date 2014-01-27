@@ -90,7 +90,7 @@ void	NetCcd::cancelExposure() {
  * This method is somewhat convoluted, because we have to go through the
  * file system to convert the data into an Image object
  */
-ImagePtr	NetCcd::getImage() {
+ImagePtr	NetCcd::getRawImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve image");
 	Astro::Image_ptr	image = _ccd->getImage();
 

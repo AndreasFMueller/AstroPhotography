@@ -154,7 +154,7 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
  * This method waits until the exposure is completed and then downloads the
  * image from the camera.
  */
-ImagePtr	SbigCcd::getImage() {
+ImagePtr	SbigCcd::getRawImage() {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
 	if (state == Exposure::idle) {

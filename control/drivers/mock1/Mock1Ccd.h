@@ -26,7 +26,7 @@ public:
 	virtual void    startExposure(const Exposure& exposure);
 	virtual Exposure::State exposureStatus();
 	virtual void    cancelExposure();
-	virtual ImagePtr    getImage();
+	virtual ImagePtr    getRawImage();
 }; 
 
 } // namespace mock1

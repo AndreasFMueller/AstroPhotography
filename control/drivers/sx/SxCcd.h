@@ -64,7 +64,7 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 	virtual void	getImage0();
 public:
-	virtual ImagePtr	getImage();
+	virtual ImagePtr	getRawImage();
 
 	// cooler stuff
 	virtual bool	hasCooler() const;

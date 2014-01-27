@@ -31,7 +31,7 @@ public:
 	virtual shutter_state	getShutterState() { return shutter; }
 	virtual void	setShuterState(const shutter_state& state);
 
-	virtual astro::image::ImagePtr	getImage();
+	virtual astro::image::ImagePtr	getRawImage();
 
 	virtual bool	hasCooler() const { return true; }
 	virtual CoolerPtr	getCooler0() { return _locator.cooler(); }

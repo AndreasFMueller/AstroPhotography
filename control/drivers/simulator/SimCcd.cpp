@@ -119,7 +119,7 @@ void    SimCcd::setShuterState(const shutter_state& state) {
 /**
  * \brief Retrieve an image
  */
-ImagePtr  SimCcd::getImage() {
+ImagePtr  SimCcd::getRawImage() {
 	// we need a camera to convert the starfield into an image
 	starcamera.rectangle(exposure.frame);
 

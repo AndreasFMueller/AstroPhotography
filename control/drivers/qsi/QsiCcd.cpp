@@ -82,7 +82,7 @@ void	QsiCcd::setShutterState(const shutter_state& state) {
 	throw std::runtime_error("cannot directly control shutter state");
 }
 
-ImagePtr	QsiCcd::getImage() {
+ImagePtr	QsiCcd::getRawImage() {
 	int	x, y, z;
 	_camera.camera().get_ImageArraySize(x, y, z);
 	if (z > 1) {

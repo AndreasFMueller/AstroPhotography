@@ -31,7 +31,7 @@ public:
 	virtual shutter_state	getShutterState();
 	virtual void	setShutterState(const shutter_state& state);
 
-	virtual	ImagePtr	getImage();
+	virtual	ImagePtr	getRawImage();
 
 	// cooler interface
 	virtual bool	hasCooler() const { return cooler; }

@@ -22,7 +22,7 @@ public:
 	UvcCcd(const CcdInfo& info, int interface, int format, int frame,
 		UvcCamera& camera);
 	virtual void    startExposure(const Exposure& exposure);
-	virtual ImagePtr	getImage();
+	virtual ImagePtr	getRawImage();
 	virtual ImageSequence	getImageSequence(unsigned int imagecount);
 
 	// gain control

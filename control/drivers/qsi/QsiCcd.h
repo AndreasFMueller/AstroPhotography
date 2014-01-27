@@ -27,7 +27,7 @@ public:
 	virtual void	setShutterState(const shutter_state& state);
 
 	// image retrieval
-	virtual astro::image::ImagePtr	getImage();
+	virtual astro::image::ImagePtr	getRawImage();
 
 protected:
 	virtual CoolerPtr	getCooler0();

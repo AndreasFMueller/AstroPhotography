@@ -68,7 +68,7 @@ void	SxCcd::startExposure(const Exposure& exposure) {
  * This method is very simple as it only has to check whether the image has
  * already been exposed.
  */
-ImagePtr	SxCcd::getImage() {
+ImagePtr	SxCcd::getRawImage() {
 	if (state != Exposure::exposed) {
 		throw BadState("no exposure available");
 	}
