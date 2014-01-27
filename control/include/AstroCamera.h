@@ -237,7 +237,10 @@ public:
 	}
 
 	// image retrievel functions
-	virtual astro::image::ImagePtr	getImage();
+private:
+	virtual astro::image::ImagePtr	getRawImage();
+public:
+	astro::image::ImagePtr	getImage();
 	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount);
 
 	// handling the cooler
