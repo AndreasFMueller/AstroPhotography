@@ -269,13 +269,33 @@ bool	Ccd::wait() {
 }
 
 /**
- * \brief Retrieve an image from the camera
+ * \brief Retrieve a raw image from the camera
+ */
+astro::image::ImagePtr	Ccd::getRawImage() {
+	throw NotImplemented("getImage not implemented");
+}
+
+/**
+ * \brief Retrieve an image
+ *
+ * This is the common driver method, it calls the raw image retrieval
+ * function of the derived class, and if it gets an image back, it adds
+ * the common metadata.
  */
 astro::image::ImagePtr	Ccd::getImage() {
+	// must have an exposed image to call this method
 	if (Exposure::exposed != state) {
 		throw BadState("no exposed image to retrieve");
 	}
-	throw NotImplemented("getImage not implemented");
+	ImagePtr	image = this->getRawImage();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a %d x %d image",
+		image->size().width(), image->size().height());
+
+	// add exposure meta data
+	exposure.addToImage(*image);
+
+	// that's it, return the image
+	return image;
 }
 
 /**

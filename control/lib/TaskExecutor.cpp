@@ -133,6 +133,7 @@ void	ExposureTask::run() {
 		if (!cooler->wait(30)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"cannot stabilize temperature");
+			// XXX what do we do when the cooler cannot stabilize?
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now stable");
 	}
@@ -161,6 +162,11 @@ void	ExposureTask::run() {
 
 			// add filter information to the image, if present
 			image->setMetadata("FILTER", Metavalue(filtername, ""));
+
+			// add temperature metadata
+			if (cooler) {
+				cooler->addTemperatureMetadata(*image);
+			}
 
 			// add to the ImageDirectory
 			astro::image::ImageDatabaseDirectory	imagedir;
