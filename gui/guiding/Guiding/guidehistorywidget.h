@@ -6,7 +6,7 @@
 #ifndef _guidehistorywidget_h
 #define _guidehistorywidget_h
 
-#include <QWidget.h>
+#include <QWidget>
 #include <deque>
 #include <cmath>
 

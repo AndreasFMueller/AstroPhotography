@@ -6,7 +6,7 @@
 #ifndef _calibrationpointwidget_h
 #define _calibrationpointwidget_h
 
-#include <QWidget.h>
+#include <QWidget>
 #include <guider.hh>
 
 /**
