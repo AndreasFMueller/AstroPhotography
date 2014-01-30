@@ -70,7 +70,7 @@ module Astro {
 		TaskParameters	parameters();
 		TaskInfo	info();
 		string		imagename();
-		Image		getImage();
+		Image		getImage() raises(NotFound);
 	};
 
 	/**

@@ -110,8 +110,8 @@ module Astro {
 	interface Images {
 		typedef sequence<string>	ImageList;
 		ImageList	listImages();
-		long	imageSize(in string name);
-		long	imageAge(in string name);
-		Image	getImage(in string name);
+		long	imageSize(in string name) raises(NotFound);
+		long	imageAge(in string name) raises(NotFound);
+		Image	getImage(in string name) raises(NotFound);
 	};
 };

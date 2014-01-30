@@ -22,25 +22,41 @@ DownloadReportDialog::DownloadReportDialog(const std::list<fileinfo>& files,
 		files.size());
 	ui->setupUi(this);
 
+	// compute the total size
+	unsigned long	totalsize = 0;
+	std::list<fileinfo>::const_iterator	i;
+	for (i = files.begin(); i != files.end(); i++) {
+		totalsize += i->size;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "total size: %lu", totalsize);
+
 	// update the summary
-	char	buffer[128];
-	snprintf(buffer, sizeof(buffer), "%d files downloaded", files.size());
-	ui->downloadSummary->setText(buffer);
+	if (0 == files.size()) {
+		ui->downloadSummary->setText(QString("no files downloaded"));
+	} else if (1 == files.size()) {
+		ui->downloadSummary->setText(QString("one file downloaded"));
+	} else {
+		char	buffer[128];
+		snprintf(buffer, sizeof(buffer), "%lu files downloaded",
+			files.size());
+		ui->downloadSummary->setText(QString(buffer));
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "summary set");
 
 	// compute the maximum file name length
-	std::list<fileinfo>::const_iterator	i;
-	int	filenamesize = 0;
+	unsigned int	filenamesize = 8;
 	for (i = files.begin(); i != files.end(); i++) {
 		if (i->name.size() > filenamesize) {
 			filenamesize = i->name.size();
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "file name size: %s", filenamesize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file name size: %u", filenamesize);
 
 	// add all entries to the list
 	for (i = files.begin(); i != files.end(); i++) {
+		char	buffer[128];
 		snprintf(buffer, sizeof(buffer),
-			"%-*.*s  %8dkB", filenamesize, filenamesize,
+			"%-*.*s  %8ldkB", filenamesize, filenamesize,
 			i->name.c_str(), i->size / 1024);
 		ui->downloadList->addItem(buffer);
 	}
