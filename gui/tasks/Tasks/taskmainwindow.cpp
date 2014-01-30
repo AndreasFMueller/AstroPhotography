@@ -8,7 +8,7 @@
 #include <connectiondialog.h>
 #include <stdexcept>
 #include <AstroDebug.h>
-#include <TaskItem.h>
+#include <taskitem.h>
 #include <cassert>
 #include <QFileDialog>
 #include <QMessageBox>

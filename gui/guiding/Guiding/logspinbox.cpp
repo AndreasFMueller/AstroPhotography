@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <LogSpinBox.h>
+#include <logspinbox.h>
 #include <math.h>
 #include <AstroDebug.h>
 

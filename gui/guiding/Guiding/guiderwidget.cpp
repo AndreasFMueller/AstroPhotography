@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <guidermonitordialog.h>
 #include <calibrationmonitor.h>
+#include <unistd.h>
 
 /**
  * \brief Create a new GuiderWidget

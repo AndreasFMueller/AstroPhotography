@@ -5,11 +5,11 @@ TARGET = capture
 
 TEMPLATE = app
 
-INCLUDEPATH += . -I /Users/afm/Projects/Astro/AstroPhotography/control/root/include -I /usr/local/include
+INCLUDEPATH += . /home/afm/Projects/AstroPhotography/gui/../control/root/include  -I/usr/local/include   -I/usr/local/include  
 
-LIBS += -L/Users/afm/Projects/Astro/AstroPhotography/control/root/lib -lcorbastro -lastro -L/usr/local/lib -lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread
+LIBS += -L/home/afm/Projects/AstroPhotography/gui/../control/root/lib64 -lcorbastro -lastro  -L/usr/local/lib64 -lomniORB4 -lomnithread   -L/usr/local/lib64 -lCOS4 -lomniORB4 -lomnithread  
 
-QMAKE_CXXFLAGS += -mmacosx-version-min=10.9 -std=c++11 -stdlib=libc++
+QMAKE_CXXFLAGS += -g -Wall -O2 --std=c++11 -D__x86_64__ -D__linux__ -D__OSVERSION__=2   -D__x86_64__ -D__linux__ -D__OSVERSION__=2  
 
 HEADERS += \ 
     capturewindow.h \

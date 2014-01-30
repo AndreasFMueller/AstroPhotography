@@ -1,0 +1,26 @@
+QT += core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+TARGET = capture
+
+TEMPLATE = app
+
+INCLUDEPATH += . @prefix@/include @CPPFLAGS@
+
+LIBS += -L@prefix@/lib64 -lcorbastro -lastro @LIBS@
+
+QMAKE_CXXFLAGS += @CXXFLAGS@
+
+HEADERS += \ 
+    capturewindow.h \
+    exposurewidget.h \
+    ExposureWorker.h \
+    LogSpinBox.h
+FORMS += \ 
+    capturewindow.ui \
+    exposurewidget.ui
+SOURCES = capture.cpp \ 
+    capturewindow.cpp \
+    exposurewidget.cpp \
+    ExposureWorker.cpp \
+    LogSpinBox.cpp

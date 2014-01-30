@@ -11,9 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Tasks
 TEMPLATE = app
 
-INCLUDEPATH += /home/afm/Projects/AstroPhotography/gui/../control/root/include  -I/usr/local/include   -I/usr/local/include  
+INCLUDEPATH += @prefix@/include @CPPFLAGS@
 
-LIBS += -L/home/afm/Projects/AstroPhotography/gui/../control/root/lib64 -lcorbastro -lastro  -L/usr/local/lib64 -lomniORB4 -lomnithread   -L/usr/local/lib64 -lCOS4 -lomniORB4 -lomnithread  
+LIBS += -L@prefix@/lib64 -lcorbastro -lastro @LIBS@
 
 SOURCES += main.cpp \
 	connectiondialog.cpp taskconnectiondialog.cpp \
