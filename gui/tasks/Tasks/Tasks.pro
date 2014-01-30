@@ -19,16 +19,16 @@ SOURCES += main.cpp \
 	connectiondialog.cpp taskconnectiondialog.cpp \
 	deviceselector.cpp \
         mainwindow.cpp \
-	taskmainwindow.cpp taskitem.cpp taskcreator.cpp \
-    downloaddialog.cpp downloadparameters.cpp
+	taskmainwindow.cpp TaskMonitor_impl.cpp taskitem.cpp taskcreator.cpp \
+	downloaddialog.cpp downloadparameters.cpp downloadreportdialog.cpp
 
 HEADERS  += mainwindow.h \
 	connectiondialog.h taskconnectiondialog.h \
 	deviceselector.h \
 	taskmainwindow.h taskitem.h taskcreator.h \
-    downloaddialog.h downloadparameters.h
+	downloaddialog.h downloadparameters.h downloadreportdialog.h
 
 FORMS    += mainwindow.ui \
 	connectiondialog.ui \
 	taskmainwindow.ui taskcreator.ui \
-    downloaddialog.ui
+	downloaddialog.ui downloadreportdialog.ui

@@ -14,6 +14,10 @@ class DeviceSelector : public QComboBox {
 
 private:
 
+	void	devices(Astro::DriverModule_var& driver,
+			const Astro::DeviceLocator::device_type& type);
+
+
 public:
 	DeviceSelector(QWidget *parent = NULL);
 	virtual ~DeviceSelector();

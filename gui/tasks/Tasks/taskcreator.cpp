@@ -34,13 +34,22 @@ TaskCreator::TaskCreator(QWidget *parent) :
 
 	// find out what cameras there are
 	ui->cameraComboBox->set(modules, Astro::DeviceLocator::DEVICE_CAMERA);
-	selectCamera(0);
+	if (ui->cameraComboBox->count() == 0) {
+		ui->cameraComboBox->setEnabled(false);
+	} else {
+		selectCamera(0);
+	}
 
 	// find a list of filter wheels
 	ui->filterwheelComboBox->addItem(QString("none"));
 	ui->filterwheelComboBox->set(modules,
 		Astro::DeviceLocator::DEVICE_FILTERWHEEL);
 	selectFilterwheel(0);
+
+	// if there are no filter wheels, disable the selection alltogether
+	if (ui->filterwheelComboBox->count() <= 1) {
+		ui->filterwheelComboBox->setEnabled(false);
+	}
 }
 
 static std::string	qstring2string(QString qstring) {
@@ -51,19 +60,20 @@ static std::string	qstring2string(QString qstring) {
 /**
  * \brief Get the device locator for the object name
  */
-Astro::DeviceLocator_var	TaskCreator::getDeviceLocator(const std::string& name) {
+Astro::DeviceLocator_ptr	TaskCreator::getDeviceLocator(const std::string& name) {
+	// prepare a device locator, initially, this will be a null locator,
+	// but that's exactly what we want as an error return
+	Astro::DeviceLocator_var	devicelocator(NULL);
+
 	// extract the module name
 	if (name.find(':') == std::string::npos) {
-		return Astro::DeviceLocator_var(NULL);
+		return devicelocator._retn();
 	}
 	std::string	devname = name.substr(name.find(':') + 1);
 	if (devname.find('/') != std::string::npos) {
 		devname = devname.substr(0, devname.find('/'));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "module name: %s", devname.c_str());
-
-	// prepare a device locator
-	Astro::DeviceLocator_var	devicelocator;
 
 	// ask modules and find out whether this thing has a device locator
 	CORBA::String_var	drivername = CORBA::string_dup(devname.c_str());
@@ -90,7 +100,7 @@ Astro::DeviceLocator_var	TaskCreator::getDeviceLocator(const std::string& name) 
 /**
  * \brief Get a Camera reference
  */
-Astro::Camera_var	TaskCreator::getCamera(const std::string& cameraname) {
+Astro::Camera_ptr	TaskCreator::getCamera(const std::string& cameraname) {
 	Astro::DeviceLocator_var	dev = getDeviceLocator(cameraname);
 	if (CORBA::is_nil(dev)) {
 		return Astro::Camera_var(NULL);
@@ -105,7 +115,7 @@ Astro::Camera_var	TaskCreator::getCamera(const std::string& cameraname) {
 /**
  * \brief Get a FilterWheel reference
  */
-Astro::FilterWheel_var	TaskCreator::getFilterwheel(
+Astro::FilterWheel_ptr	TaskCreator::getFilterwheel(
 		const std::string& filterwheelname) {
 	Astro::DeviceLocator_var	dev = getDeviceLocator(filterwheelname);
 	Astro::FilterWheel_var	filterwheel;
@@ -172,10 +182,10 @@ void	TaskCreator::selectCamera(int cameraposition) {
 /**
  * \brief Select a FilterWheel, updates parameter input widgets
  */
-void	TaskCreator::selectFilterwheel(int filterwheelposition) {
+void	TaskCreator::selectFilterwheel(int filterwheelindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "select filterwheel %d",
-		filterwheelposition);
-	if (0 == filterwheelposition) {
+		filterwheelindex);
+	if (0 == filterwheelindex) {
 		ui->filterpositionComboBox->clear();
 		ui->filterpositionComboBox->setEnabled(false);
 		ui->positionLabel->setEnabled(false);
@@ -187,7 +197,7 @@ void	TaskCreator::selectFilterwheel(int filterwheelposition) {
 
 	// get the filterwheel name
 	std::string	filterwheelname = qstring2string(
-		ui->filterwheelComboBox->itemText(filterwheelposition));
+		ui->filterwheelComboBox->itemText(filterwheelindex));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve filterwheel %s",
 		filterwheelname.c_str());
 	Astro::FilterWheel_var	filterwheel = getFilterwheel(filterwheelname);

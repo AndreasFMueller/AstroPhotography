@@ -167,11 +167,17 @@
    </property>
   </action>
   <action name="actionDownload">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Download</string>
    </property>
   </action>
   <action name="actionDelete">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
