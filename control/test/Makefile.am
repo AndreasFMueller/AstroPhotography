@@ -12,8 +12,15 @@ tests_SOURCES = tests.cpp  Mock1Test.cpp
 postinstall_tests_SOURCES = postinstall_tests.cpp RepositoryTest.cpp
 loadtest_SOURCES = loadtest.cpp
 
-LDADD = -lcppunit -L../lib -lcorbastro -lastro
-DEPENDENCIES = ../lib/libastro.a ../lib/libcorbastro.a
+if ENABLE_CORBA
+LDADD = -lcppunit -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/corba/lib -lcorbastro 
+DEPENDENCIES = $(top_builddir)/lib/libastro.a \
+	$(top_builddir)/corba/lib/libcorbastro.a
+else
+LDADD = -lcppunit -L$(top_builddir)/lib -lastro 
+DEPENDENCIES = $(top_builddir)/lib/libastro.a
+endif
 
 all-am: tests
 	./tests -d

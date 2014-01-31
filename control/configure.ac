@@ -35,14 +35,38 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
 AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
 
+######################################################################
 # use pkg-config to find out about the flags to use for omniorb
-if type pkg-config >/dev/null
+if pkg-config --exists omniORB4
 then
-	ORBLIBS="`pkg-config omniORB4 --libs`"
-else
-	ORBLIBS="-lomniCodeSets4 -lomniConnectionMgmt4 -lomniDynamic4 -lomniORB4 -lomnithread"
+	has_omniorb=yes
 fi
-LIBS="${ORBLIBS} ${LIBS}"
+if pkg-config --exists omniCOS4
+then
+	:
+else
+	has_omniorb=no
+fi
+AC_ARG_ENABLE(corba,
+[AS_HELP_STRING([--enable-corba], [also build the CORBA components])],
+[
+	if test x$has_omniorb = xyes
+	then
+		LIBS="${LIBS} `pkg-config --libs omniORB4`"
+		LIBS="${LIBS} `pkg-config --libs omniCOS4`"
+		CXXFLAGS="${CXXFLAGS} `pkg --cflags omniORB4`"
+		CXXFLAGS="${CXXFLAGS} `pkg --cflags omniCOS4`"
+		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
+		# add the idl include directory to the cflags
+		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
+	else
+		AC_MSG_ERROR([omniORB not available])
+		AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+	fi
+],[
+	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+])
+AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
 
 ######################################################################
 # decide whether or not to build the test programs
@@ -115,6 +139,13 @@ AM_CONDITIONAL(ENABLE_SBIG, test x$enable_sbig = xyes)
 AC_ARG_ENABLE(qsi,
 [AS_HELP_STRING([--enable-qsi], [build the QSI driver])],
 [
+	AC_CHECK_PROGS(LIBQSIAPICONFIG, libqsiapi-config, /bin/false)
+	if ${LIBQSIAPICONFIG} --version > /dev/null
+	then
+		:
+	else
+		AC_MSG_ERROR([QSI configuration utility not found])
+	fi
 	# don't enable the QSI driver unless you find the header
 	# and the library
 	enable_qsi=no
@@ -128,16 +159,19 @@ AC_ARG_ENABLE(qsi,
                      [AC_MSG_ERROR([QSI header not available, install or disable QSI driver])])
 	AC_LANG_POP([C++])
 
-	# check whether the qsiapi library is present
-	AC_CHECK_LIB([qsiapi], [_ZN10CCCDCameraC1Ev])
-
+	QSICFLAGS="`${LIBQSIAPICONFIG} --cflags`"
+	QSILIBS="`${LIBQSIAPICONFIG} --libs`"
 	# if we fail, disable qsi
 	enable_qsi=yes
 ],[
-enable_qsi=no
+	enable_qsi=no
+	QSICFLAGS=
+	QSILIBS=
 ]
 )
 AM_CONDITIONAL(ENABLE_QSI, test x$enable_qsi = xyes)
+AC_SUBST(QSICFLAGS)
+AC_SUBST(QSILIBS)
 
 ######################################################################
 # enable the qhy driver
@@ -175,6 +209,9 @@ AC_ARG_ENABLE(microtouch,
 AM_CONDITIONAL(ENABLE_MICROTOUCH, test x${enable_microtouch} = xyes)
 
 ######################################################################
+# check for ICE (www.zeroc.com)
+
+######################################################################
 
 # Checks for typedefs
 AC_C_CONST
@@ -194,10 +231,11 @@ esac
 AC_SUBST(SHLIB_EXT)
 
 AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
-	idl/Makefile server/Makefile tools/Makefile
-	client/Makefile
-	client/trackingmonitor/Makefile client/calibrationmonitor/Makefile
-	cli/Makefile
+	corba/Makefile corba/idl/Makefile corba/include/Makefile
+	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
+	corba/client/Makefile corba/client/trackingmonitor/Makefile
+	corba/client/calibrationmonitor/Makefile
+	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile

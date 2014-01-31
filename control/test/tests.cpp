@@ -4,6 +4,7 @@
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
  */
+#include <includes.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 #include <AstroDebug.h>
@@ -11,7 +12,9 @@
 #include <OrbSingleton.h>
 
 int	main(int argc, char *argv[]) {
+#ifdef ENABLE_CORBA
 	Astro::OrbSingleton	orb(argc, argv);
+#endif /* ENABLE_CORBA */
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {

@@ -4,6 +4,8 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
+if ENABLE_CORBA
+
 bin_PROGRAMS = astrod
 
 noinst_HEADERS = Modules_impl.h \
@@ -38,12 +40,12 @@ libserver_la_SOURCES = Modules_impl.cpp \
 	TaskQueueCallback.cpp ServerDatabase.cpp
 
 astrod_SOURCES = astrod.cpp
-astrod_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la libserver.la
-astrod_LDADD = libserver.la -L../lib -lastro -lcorbastro @SBIGLIBRARY@
+astrod_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
+	$(top_builddir)/corba/lib/libcorbastro.la libserver.la
+astrod_LDADD = libserver.la -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/corba/lib -lcorbastro @SBIGLIBRARY@
 
 test:	astrod
 	./astrod -d -ORBInitRef NameService=corbaname::localhost -F -b `pwd`/images 2>&1 | tee astrod.log
 
-
-
-
+endif

@@ -13,7 +13,9 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <AstroIO.h>
+#ifdef ENABLE_CORBA
 #include <OrbSingleton.h>
+#endif /* ENABLE_CORBA */
 
 using namespace astro;
 using namespace astro::module;
@@ -77,7 +79,9 @@ int	main(int argc, char *argv[]) {
 	const char	*focuser = NULL;
 
 	// initialize the orb in case we want to use the net module
+#ifdef ENABLE_CORBA
 	Astro::OrbSingleton	orb(argc, argv);
+#endif /* ENABLE_CORBA */
 	debugtimeprecision = 3;
 	int	binning = 1;
 

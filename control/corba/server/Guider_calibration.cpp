@@ -61,11 +61,6 @@ void	Guider_impl::useCalibration(CORBA::Long id) {
 				descriptor.toString().c_str());
 			throw NotFound("no calibration for this guider");
 		}
-#if 0
-for (std::list<long>::const_iterator i = idlist.begin(); i != idlist.end(); i++) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "id: %d", *i);
-}
-#endif
 
 		// take the last entry
 		id = idlist.back();

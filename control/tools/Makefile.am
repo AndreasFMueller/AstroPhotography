@@ -26,8 +26,13 @@ imageloop_DEPENDENCIES = ../lib/libastro.la
 imageloop_LDADD = -L../lib -lastro 
 
 getimages_SOURCES = getimages.cpp
-getimages_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
-getimages_LDADD = -L../lib -lastro -lcorbastro @SBIGLIBRARY@ 
+if ENABLE_CORBA
+getimages_DEPENDENCIES = ../lib/libastro.la ../corba/lib/libcorbastro.la
+getimages_LDADD = -L../lib -lastro -L../corba/lib -lcorbastro @SBIGLIBRARY@ 
+else
+getimages_DEPENDENCIES = ../lib/libastro.la 
+getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+endif
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = ../lib/libastro.la
@@ -62,8 +67,13 @@ focus_DEPENDENCIES = ../lib/libastro.la
 focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
 
 focustest_SOURCES = focustest.cpp
-focustest_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
-focustest_LDADD = -L../lib -lastro -lcorbastro @SBIGLIBRARY@ 
+if ENABLE_CORBA
+focustest_DEPENDENCIES = ../lib/libastro.la ../corba/lib/libcorbastro.la
+focustest_LDADD = -L../lib -lastro -L../corba/lib -lcorbastro @SBIGLIBRARY@ 
+else
+focustest_DEPENDENCIES = ../lib/libastro.la
+focustest_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+endif
 
 guider_SOURCES = guider.cpp
 guider_DEPENDENCIES = ../lib/libastro.la

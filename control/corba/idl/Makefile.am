@@ -4,9 +4,10 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-
 EXTRA_DIST = exceptions.idl types.idl image.idl camera.idl module.idl \
 	guider.idl tasks.idl
+
+if ENABLE_CORBA
 
 all-am:	../lib/typesSK.cc ../include/types.hh \
 	../lib/exceptionsSK.cc ../include/exceptions.hh \
@@ -50,3 +51,5 @@ all-am:	../lib/typesSK.cc ../include/types.hh \
 	omniidl -bcxx tasks.idl
 	mv tasks.hh ../include
 	mv tasksSK.cc ../lib
+
+endif

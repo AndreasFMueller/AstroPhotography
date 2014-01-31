@@ -3,6 +3,8 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+if ENABLE_CORBA
+
 bin_PROGRAMS = astro
 noinst_HEADER = cli.h guidecli.h clicommand.h listcommand.h locatorcommand.h \
 	modulecommand.h helpcommand.h cameracommand.h ccdcommand.h \
@@ -24,8 +26,10 @@ COMMANDS = listcommand.cpp locatorcommand.cpp modulecommand.cpp \
 
 astro_SOURCES = astro.cpp cli.cpp grammar.cpp tokens.cpp guidecli.cpp \
 	clicommand.cpp $(CLASSES) $(COMMANDS)
-astro_DEPENDENCIES = ../lib/libastro.la ../lib/libcorbastro.la
-astro_LDADD = -L../lib -lastro -lcorbastro
+astro_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
+	$(top_builddir)/corba/lib/libcorbastro.la
+astro_LDADD = -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/corba/lib -lcorbastro
 
 EXTRA_DIST = tokens.l grammar.y testscript
 
@@ -44,3 +48,5 @@ test:	astro
 
 testcli:	astro
 	./astro -ORBInitRef NameService=corbaname::localhost -d
+
+endif 

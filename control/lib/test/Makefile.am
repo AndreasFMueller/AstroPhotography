@@ -47,8 +47,8 @@ tests_SOURCES = tests.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp
-tests_LDADD = -lcppunit -L.. -lastro -lcorbastro
-tests_DEPENDENCIES = ../libastro.la ../libcorbastro.la
+tests_LDADD = -lcppunit -L.. -lastro 
+tests_DEPENDENCIES = ../libastro.la 
 
 # tests for USB library
 usbtests_SOURCES = usbtests.cpp \

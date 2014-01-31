@@ -6,7 +6,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastro.la libcorbastro.la
+lib_LTLIBRARIES = libastro.la
 
 if ENABLE_UNICAP
 unicap_flies = UnicapDevice.cpp
@@ -23,12 +23,6 @@ uvc_files = \
 else
 uvc_files =
 endif
-
-libcorbastro_la_SOURCES = \
-	Conversions.cpp NameService.cpp OrbSingleton.cpp \
-	CorbaExceptionReporter.cpp DeviceLocatorAdapter.cpp \
-	typesSK.cc exceptionsSK.cc imageSK.cc cameraSK.cc moduleSK.cc \
-	guiderSK.cc tasksSK.cc
 
 libastro_la_SOURCES = debug.cpp utils.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \

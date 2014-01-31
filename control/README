@@ -4,12 +4,6 @@ and delivers a framework to build astrophotography tools.
 What's in the subdirectories
 ----------------------------
 
-cli
-	a command line client named astro to access the CORBA server
-
-client
-	some client programs for the CORBA server
-
 doc
 	documentation, currently this contains primarily doxygen generated
 	source code documentation
@@ -45,8 +39,21 @@ drivers
 	uvc
 		user space driver for USB video class cameras
 
-idl
-	Interface Definition Language files for all CORBA services
+corba
+	Contains CORBA IDL and supporting classes, a server application
+	and some client programs to talk to the server
+
+	idl
+		Interface Definition Language files for all CORBA services
+	cli
+		a command line client named astro to access the CORBA server
+	client
+		some client programs for the CORBA server
+	server
+		Source code for the CORBA server functions
+
+ice
+	idl
 
 include
 	header files
@@ -60,9 +67,6 @@ man
 root
 	During development, this directory is used as the root directory
 	for the install target.
-
-server
-	Source code for the CORBA server functions
 
 test
 	Some test programs that depend on 

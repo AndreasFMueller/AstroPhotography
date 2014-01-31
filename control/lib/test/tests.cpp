@@ -8,11 +8,9 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <includes.h>
 #include <AstroDebug.h>
-#include <OrbSingleton.h>
 #include <cstdlib>
 
 int	main(int argc, char *argv[]) {
-	Astro::OrbSingleton	orb(argc, argv);
 	CppUnit::TextUi::TestRunner	runner;
 	CppUnit::TestFactoryRegistry	&registry
 		= CppUnit::TestFactoryRegistry::getRegistry();

@@ -3,16 +3,18 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil 
  */
+#include <includes.h>
 #include <AstroCamera.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <AstroFilterfunc.h>
-#include <OrbSingleton.h>
 #include <AstroGuiding.h>
 #include <AstroIO.h>
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
-#include <includes.h>
+#ifdef ENABLE_CORBA
+#include <OrbSingleton.h>
+#endif /* ENABLE_CORBA */
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -42,7 +44,9 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	darkimage;
 
 	// get the ORB
+#ifdef ENABLE_CORBA
 	Astro::OrbSingleton	orb(argc, argv);
+#endif /* ENABLE_CORBA */
 	debugtimeprecision = 3;
 
 	while (EOF != (c = getopt(argc, argv, "dm:C:c:F:f:b:e:s:E:p:")))
