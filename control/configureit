@@ -5,7 +5,12 @@ CFLAGS="-Wall -g"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests --enable-microtouch --enable-qhy --enable-corba"
-commonflags="--enable-unittests --enable-microtouch --enable-qhy"
+commonflags="--enable-unittests --enable-microtouch --enable-qhy --enable-ice"
+
+PATH=/Library/Developer/Ice-3.5.1/bin/c++11:/Library/Developer/Ice-3.5.1/bin:$PATH
+CFLAGS="${CPPFLAGS} -I/Library/Developer/Ice-3.5.1/include"
+LDFLAGS="${LDFLAGS} -L/Library/Developer/Ice-3.5.1/lib/c++11"
+export PATH CFLAGS LDFLAGS
 
 # first find out what type of system we are
 systemtype=`uname`

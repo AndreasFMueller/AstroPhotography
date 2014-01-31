@@ -3,11 +3,11 @@
 
 AC_PREREQ(2.57)
 AC_REVISION([1.0])
-AC_INIT
+AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
 LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
 AC_CANONICAL_TARGET([])
-AM_INIT_AUTOMAKE(astro, 1.0)
+AM_INIT_AUTOMAKE([-Wall])
 AC_CONFIG_HEADERS(include/config.h)
 
 # some configuration directives
@@ -18,6 +18,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
+AC_CHECK_TOOLS(SLICE2CPP, slice2cpp)
 
 # Checks for header files
 AC_HEADER_STDC
@@ -67,6 +68,17 @@ AC_ARG_ENABLE(corba,
 	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
 ])
 AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
+
+######################################################################
+# detect ICE support
+AC_ARG_ENABLE(ice,
+[AS_HELP_STRING([--enable-ice], [also build the ICE components])],
+[
+	enable_ice=yes
+],[
+	enable_ice=no
+])
+AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
 
 ######################################################################
 # decide whether or not to build the test programs
@@ -235,6 +247,8 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
 	corba/client/Makefile corba/client/trackingmonitor/Makefile
 	corba/client/calibrationmonitor/Makefile
+	ice/Makefile ice/slice/Makefile ice/include/Makefile
+	ice/lib/Makefile ice/client/Makefile ice/server/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
