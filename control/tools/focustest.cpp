@@ -12,7 +12,7 @@
 #include <AstroIO.h>
 #include <AstroCalibration.h>
 #include <AstroInterpolation.h>
-#ifdef ENABLE_CORBA
+#if ENABLE_CORBA
 #include <OrbSingleton.h>
 #endif /* ENABLE_CORBA */
 
@@ -44,7 +44,7 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	darkimage;
 
 	// get the ORB
-#ifdef ENABLE_CORBA
+#if ENABLE_CORBA
 	Astro::OrbSingleton	orb(argc, argv);
 #endif /* ENABLE_CORBA */
 	debugtimeprecision = 3;

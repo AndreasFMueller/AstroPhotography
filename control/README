@@ -53,7 +53,10 @@ corba
 		Source code for the CORBA server functions
 
 ice
+	Contains ICE IDL and supporting classes for an ICE based server
+
 	idl
+
 
 include
 	header files
@@ -123,15 +126,15 @@ Mandatory packages:
    problems for relatively large numbers of equations or unknowns need to
    be solved. For these operations, LAPACK is used.
 
- - omniORB: The client-server-communication uses Corba, and the build system
-   assumes that omniORB is preinstalled for the purpose.
-
  - GLPK, the GNU Linear Programming toolKit. This package is used for the
    algorithm that finds a background to subtract.
 
  - SQLite3 is used for persistence of various types of objects
 
 Optional packages:
+
+ - omniORB: The client-server-communication uses Corba, and the build system
+   assumes that omniORB is preinstalled for the purpose.
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
    by using the Video4Linux and the Unicap library. See
