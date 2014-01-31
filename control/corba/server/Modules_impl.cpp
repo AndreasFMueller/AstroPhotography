@@ -67,8 +67,11 @@ Astro::_objref_DriverModule     *Modules_impl::getModule(const char *_name) {
 	std::string	name(_name);
 
 	// get the available modules names
+	if (!repository.contains(name)) {
+#if 0
 	std::vector<std::string>	names = modulenames();
 	if (names.end() == std::find(names.begin(), names.end(), name)) {
+#endif
 		NotFound	notfound;
 		notfound.cause = CORBA::string_dup("module not available");
 		throw notfound;

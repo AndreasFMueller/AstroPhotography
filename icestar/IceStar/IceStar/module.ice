@@ -30,12 +30,12 @@ module snowstar {
 		 * \param devicetype	Type of device to construct the list
 		 */
 		DeviceNameList	getDevicelist(devicetype type);
-		Camera*		getCamera(string name) throws NotFound;
-		Ccd*		getCcd(string name) throws NotFound;
-		GuiderPort*	getGuiderPort(string name) throws NotFound;
-		FilterWheel*	getFilterWheel(string name) throws NotFound;
-		Cooler*		getCooler(string name) throws NotFound;
-		Focuser*	getFocuser(string name) throws NotFound;
+		Camera		getCamera(string name) throws NotFound;
+		Ccd		getCcd(string name) throws NotFound;
+		GuiderPort	getGuiderPort(string name) throws NotFound;
+		FilterWheel	getFilterWheel(string name) throws NotFound;
+		Cooler		getCooler(string name) throws NotFound;
+		Focuser		getFocuser(string name) throws NotFound;
 	};
 
 	struct Descriptor {
@@ -72,7 +72,7 @@ module snowstar {
 	interface Modules {
 		int	numberOfModules();
 		ModuleNameSequence	getModuleNames();
-		DriverModule*	getModule(string name) throws NotFound;
+		DriverModule	getModule(string name) throws NotFound;
 	};
 };
 

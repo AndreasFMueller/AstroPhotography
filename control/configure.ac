@@ -71,14 +71,17 @@ AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
 
 ######################################################################
 # detect ICE support
-AC_ARG_ENABLE(ice,
-[AS_HELP_STRING([--enable-ice], [also build the ICE components])],
+AC_ARG_WITH([ice],
+[AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
 	enable_ice=yes
+	ICEDIR=${with_ice}
 ],[
 	enable_ice=no
+	ICEDIR=
 ])
 AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
+AC_SUBST(ICEDIR)
 
 ######################################################################
 # decide whether or not to build the test programs

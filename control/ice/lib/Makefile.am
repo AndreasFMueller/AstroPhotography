@@ -14,6 +14,6 @@ BUILT_SOURCES = $(slice_sources)
 
 libiceastro_la_SOURCES = \
 	$(slice_sources)
-libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include
+libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
 
 endif
