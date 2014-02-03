@@ -7,6 +7,12 @@
 
 namespace snowstar {
 
+FocuserI::FocuserI(astro::camera::FocuserPtr focuser) : _focuser(focuser) {
+}
+
+FocuserI::~FocuserI() {
+}
+
 std::string	FocuserI::getName(const Ice::Current& current) {
 	return _focuser->name();
 }

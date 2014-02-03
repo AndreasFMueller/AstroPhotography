@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <Ice/Ice.h>
-#include <module.h>
+#include <device.h>
 #include <cstdlib>
 #include <iostream>
 #include <AstroDebug.h>
@@ -37,25 +37,18 @@ int	main(int argc, char *argv[]) {
 
 	try {
 		Ice::ObjectPrx	base
-			= ic->stringToProxy("Modules:default -p 10000");
-		snowstar::ModulesPrx	modules = ModulesPrx::checkedCast(base);
-		if (!modules) {
+			= ic->stringToProxy("Devices:default -h othello -p 10000");
+		snowstar::DevicesPrx	devices = DevicesPrx::checkedCast(base);
+		if (!devices) {
 			throw "invalid proxy";
 		}
-		std::cout << "number of modules: ";
-		std::cout << modules->numberOfModules(); 
-		std::cout << std::endl;
-
-		std::vector<std::string>	modulenames
-			= modules->getModuleNames();
+		std::cout << "Cameras:" << std::endl;
+		std::vector<std::string>	devicenames
+			= devices->getDevicelist(DevCAMERA); 
 		std::vector<std::string>::const_iterator	i;
-		for (i = modulenames.begin(); i != modulenames.end(); i++) {
+		for (i = devicenames.begin(); i != devicenames.end(); i++) {
 			std::cout << *i << std::endl;
 		}
-
-		// now get a certain module
-		DriverModulePrx	module = modules->getModule(modulename);
-		std::cout << "Module: " << module->getName() << std::endl;
 		
 		status = EXIT_SUCCESS;
 	} catch (const Ice::Exception& icex) {

@@ -8,12 +8,19 @@ if ENABLE_ICE
 
 bin_PROGRAMS = snowstar
 
-noinst_HEADERS = ModulesI.h DriverModuleI.h DeviceLocatorI.h CoolerI.h \
-	CcdI.h CameraI.h FilterWheelI.h GuiderPortI.h FocuserI.h
+noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CameraI.h \
+	FilterWheelI.h GuiderPortI.h FocuserI.h \
+	DeviceServantLocator.h NameConverter.h \
+	ImagesI.h ImageI.h ImageLocator.h
+	
 
 snowstar_SOURCES = snowstar.cpp \
-	ModulesI.cpp DriverModuleI.cpp DeviceLocatorI.cpp CoolerI.cpp \
-	CcdI.cpp CameraI.cpp  FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp
+	DevicesI.cpp DevicesIconversions.cpp \
+	CoolerI.cpp CcdI.cpp CcdIconversions.cpp CameraI.cpp \
+	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
+	DeviceServantLocator.cpp NameConverter.cpp \
+	ImagesI.cpp ImageI.cpp ImageLocator.cpp
+
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 snowstar_LDADD = -L$(top_builddir)/lib -lastro \
@@ -22,6 +29,6 @@ snowstar_LDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIc
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
 
 test:	snowstar
-	./snowstar -d
+	./snowstar -d -b images
 
 endif

@@ -6,6 +6,8 @@
 #include <AstroLocator.h>
 #include <AstroCamera.h>
 #include <config.h>
+#include <AstroFormat.h>
+#include <AstroExceptions.h>
 
 using namespace astro::camera;
 
@@ -70,8 +72,20 @@ std::string	DeviceLocator::getVersion() const {
 	return std::string(VERSION);
 }
 
-std::vector<std::string>	DeviceLocator::getDevicelist(const DeviceName::device_type device) {
+std::vector<std::string>	DeviceLocator::getDevicelist(
+					const DeviceName::device_type device) {
 	std::vector<std::string>	devices;
+	return devices;
+}
+
+std::vector<DeviceName>	DeviceLocator::getDeviceList(
+					const DeviceName::device_type device) {
+	std::vector<DeviceName>	devices;
+	std::vector<std::string>	l = getDevicelist(device);
+	std::vector<std::string>::const_iterator	i;
+	for (i = l.begin(); i != l.end(); i++) {
+		devices.push_back(DeviceName(*i));
+	}
 	return devices;
 }
 
@@ -84,11 +98,30 @@ astro::camera::CameraPtr	DeviceLocator::getCamera0(const DeviceName& name) {
 }
 
 astro::camera::CcdPtr	DeviceLocator::getCcd0(const DeviceName& name) {
-	throw std::runtime_error("ccds not implemented");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find ccd %s", name.toString().c_str());
+	DeviceName	cameraname = name.parent(DeviceName::Camera);
+	CameraPtr	camera = this->getCamera(cameraname);
+	int	nccds = camera->nCcds();
+	for (int i = 0; i < nccds; i++) {
+		CcdInfo	info = camera->getCcdInfo(i);
+		if (info.name() == name) {
+			return camera->getCcd(i);
+		}
+	}
+	throw NotFound(stringprintf("ccd %s not found",
+		name.toString().c_str()));
 }
 
 astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort0(const DeviceName& name) {
-	throw std::runtime_error("guiderport not implemented");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find guiderport %s",
+		name.toString().c_str());
+	DeviceName	cameraname = name.parent(DeviceName::Camera);
+	CameraPtr	camera = this->getCamera(cameraname);
+	if (camera->hasGuiderPort()) {
+		return camera->getGuiderPort();
+	}
+	throw NotFound(stringprintf("guiderport %s not found",
+		name.toString().c_str()));
 }
 
 astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName& name) {
@@ -96,7 +129,15 @@ astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName& n
 }
 
 astro::camera::CoolerPtr	DeviceLocator::getCooler0(const DeviceName& name) {
-	throw std::runtime_error("cooler not implemented");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find cooler %s",
+		name.toString().c_str());
+	DeviceName	ccdname = name.parent(DeviceName::Ccd);
+	CcdPtr	ccd = this->getCcd(ccdname);
+	if (ccd->hasCooler()) {
+		return ccd->getCooler();
+	}
+	throw NotFound(stringprintf("cooler %s not found",
+		name.toString().c_str()));
 }
 
 astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {

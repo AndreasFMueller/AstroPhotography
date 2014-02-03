@@ -51,6 +51,11 @@ astro::camera::CameraPtr
 		const DeviceName& name);
 
 template<>
+astro::camera::CcdPtr
+	DeviceAccessor<astro::camera::CcdPtr>::get(
+		const DeviceName& name);
+
+template<>
 astro::camera::GuiderPortPtr
 	DeviceAccessor<astro::camera::GuiderPortPtr>::get(
 		const DeviceName& name);

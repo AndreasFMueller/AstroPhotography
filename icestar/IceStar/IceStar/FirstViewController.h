@@ -7,9 +7,52 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "DeviceListController.h"
+#import "BinningController.h"
 
-@interface FirstViewController : UIViewController
+@interface FirstViewController : UIViewController<UIPopoverControllerDelegate,UITableViewDelegate> {
+    IBOutlet UIButton   *cameraButton;
+    IBOutlet UIButton   *ccdButton;
+    IBOutlet UIButton   *binningButton;
+    IBOutlet UITextField    *exposureField;
+    IBOutlet UISwitch   *shutterSwitch;
+    
+    IBOutlet UISwitch   *coolerSwitch;
+    IBOutlet UISlider   *temperatureSlider;
+    IBOutlet UILabel    *temperatureLabel;
+    IBOutlet UILabel    *actualtemperatureLabel;
+    
+    IBOutlet UIButton   *captureButton;
+    
+    NSDate  *exposureStart;
+    IBOutlet UIProgressView *progressView;
+    
+    NSTimer *timer; // for temperature updates
+    NSTimer *progresstimer; // timer for progress updates
+    NSTimer *exposuretimer; // for timing the end of the exposure
+    
+    UIPopoverController *popover;
+    
+    snowstarCameraPrx   *camera;
+    snowstarCcdPrx  *ccd;
+    snowstarCcdInfo *ccdinfo;
+    snowstarCoolerPrx   *cooler;
+    snowstarExposure    *exposure;
+}
 
-- (IBAction)connect:(id)sender;
+- (IBAction)cameraselection:(id)sender;
+- (IBAction)binningselection:(id)sender;
+
+- (void)selectCamera: (NSString *)cameraname;
+- (void)selectCcd: (int)ccdid;
+- (void)selectBinning: (snowstarBinningMode *)binning;
+
+- (IBAction)temperatureChanged: (id)sender;
+
+- (IBAction)toggleExposure: (id)sender;
+- (void)timerTick: (NSTimer *)timer;
+- (void)retrieveImage: (NSTimer *)exposuretimer;
+- (void)updateProgress: (NSTimer *)progresstimer;
+- (IBAction)exposuretimeChanged: (id)sender;
 
 @end

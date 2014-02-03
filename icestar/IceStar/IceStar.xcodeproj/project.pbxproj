@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		90341E79189E83290078FFDB /* DeviceListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90341E78189E83290078FFDB /* DeviceListController.m */; };
+		904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FC8189E93E200C6F1FB /* BinningController.m */; };
+		904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */; };
 		90751B1D189BFCC700031C9D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B1C189BFCC700031C9D /* Foundation.framework */; };
 		90751B1F189BFCC700031C9D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B1E189BFCC700031C9D /* CoreGraphics.framework */; };
 		90751B21189BFCC700031C9D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B20189BFCC700031C9D /* UIKit.framework */; };
@@ -26,12 +29,14 @@
 		90751B5C189C000400031C9D /* exceptions.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B55189C000400031C9D /* exceptions.ice */; };
 		90751B5D189C000400031C9D /* guider.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B56189C000400031C9D /* guider.ice */; };
 		90751B5E189C000400031C9D /* image.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B57189C000400031C9D /* image.ice */; };
-		90751B5F189C000400031C9D /* module.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B58189C000400031C9D /* module.ice */; };
 		90751B60189C000400031C9D /* tasks.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B59189C000400031C9D /* tasks.ice */; };
 		90751B61189C000400031C9D /* types.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B5A189C000400031C9D /* types.ice */; };
 		90751B63189C02C100031C9D /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B62189C02C100031C9D /* CFNetwork.framework */; };
 		90751B65189C02D000031C9D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B64189C02D000031C9D /* Security.framework */; };
 		90751B67189C02E100031C9D /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B66189C02E100031C9D /* ExternalAccessory.framework */; };
+		90751B69189E695D00031C9D /* device.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B68189E695D00031C9D /* device.ice */; };
+		90751B6C189E739F00031C9D /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 90751B6B189E739F00031C9D /* Connection.m */; };
+		90751B70189E7D5500031C9D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 90751B6F189E7D5500031C9D /* Settings.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +50,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		90341E77189E83290078FFDB /* DeviceListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceListController.h; sourceTree = "<group>"; };
+		90341E78189E83290078FFDB /* DeviceListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceListController.m; sourceTree = "<group>"; };
+		904A8FC7189E93E200C6F1FB /* BinningController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BinningController.h; sourceTree = "<group>"; };
+		904A8FC8189E93E200C6F1FB /* BinningController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BinningController.m; sourceTree = "<group>"; };
+		904A8FCA189EA40300C6F1FB /* CcdSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CcdSelectionController.h; sourceTree = "<group>"; };
+		904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CcdSelectionController.m; sourceTree = "<group>"; };
 		90751B19189BFCC700031C9D /* IceStar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IceStar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90751B1C189BFCC700031C9D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		90751B1E189BFCC700031C9D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -70,12 +81,15 @@
 		90751B55189C000400031C9D /* exceptions.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = exceptions.ice; sourceTree = "<group>"; };
 		90751B56189C000400031C9D /* guider.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = guider.ice; sourceTree = "<group>"; };
 		90751B57189C000400031C9D /* image.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = image.ice; sourceTree = "<group>"; };
-		90751B58189C000400031C9D /* module.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = module.ice; sourceTree = "<group>"; };
 		90751B59189C000400031C9D /* tasks.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = tasks.ice; sourceTree = "<group>"; };
 		90751B5A189C000400031C9D /* types.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = types.ice; sourceTree = "<group>"; };
 		90751B62189C02C100031C9D /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		90751B64189C02D000031C9D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		90751B66189C02E100031C9D /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
+		90751B68189E695D00031C9D /* device.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = device.ice; path = IceStar/device.ice; sourceTree = "<group>"; };
+		90751B6A189E739F00031C9D /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		90751B6B189E739F00031C9D /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
+		90751B6F189E7D5500031C9D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +122,7 @@
 		90751B10189BFCC700031C9D = {
 			isa = PBXGroup;
 			children = (
+				90751B68189E695D00031C9D /* device.ice */,
 				90751B22189BFCC700031C9D /* IceStar */,
 				90751B44189BFCC800031C9D /* IceStarTests */,
 				90751B1B189BFCC700031C9D /* Frameworks */,
@@ -147,7 +162,6 @@
 				90751B55189C000400031C9D /* exceptions.ice */,
 				90751B56189C000400031C9D /* guider.ice */,
 				90751B57189C000400031C9D /* image.ice */,
-				90751B58189C000400031C9D /* module.ice */,
 				90751B59189C000400031C9D /* tasks.ice */,
 				90751B5A189C000400031C9D /* types.ice */,
 				90751B2E189BFCC800031C9D /* Main.storyboard */,
@@ -157,6 +171,15 @@
 				90751B35189BFCC800031C9D /* SecondViewController.m */,
 				90751B37189BFCC800031C9D /* Images.xcassets */,
 				90751B23189BFCC700031C9D /* Supporting Files */,
+				90751B6A189E739F00031C9D /* Connection.h */,
+				90751B6B189E739F00031C9D /* Connection.m */,
+				90751B6F189E7D5500031C9D /* Settings.bundle */,
+				90341E77189E83290078FFDB /* DeviceListController.h */,
+				90341E78189E83290078FFDB /* DeviceListController.m */,
+				904A8FC7189E93E200C6F1FB /* BinningController.h */,
+				904A8FC8189E93E200C6F1FB /* BinningController.m */,
+				904A8FCA189EA40300C6F1FB /* CcdSelectionController.h */,
+				904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */,
 			);
 			path = IceStar;
 			sourceTree = "<group>";
@@ -266,6 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90751B70189E7D5500031C9D /* Settings.bundle in Resources */,
 				90751B38189BFCC800031C9D /* Images.xcassets in Resources */,
 				90751B27189BFCC800031C9D /* InfoPlist.strings in Resources */,
 				90751B30189BFCC800031C9D /* Main.storyboard in Resources */,
@@ -288,16 +312,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				90751B61189C000400031C9D /* types.ice in Sources */,
+				90341E79189E83290078FFDB /* DeviceListController.m in Sources */,
 				90751B60189C000400031C9D /* tasks.ice in Sources */,
+				90751B69189E695D00031C9D /* device.ice in Sources */,
 				90751B36189BFCC800031C9D /* SecondViewController.m in Sources */,
 				90751B5C189C000400031C9D /* exceptions.ice in Sources */,
 				90751B5D189C000400031C9D /* guider.ice in Sources */,
 				90751B5E189C000400031C9D /* image.ice in Sources */,
+				904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */,
 				90751B2D189BFCC800031C9D /* AppDelegate.m in Sources */,
+				904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */,
 				90751B33189BFCC800031C9D /* FirstViewController.m in Sources */,
 				90751B29189BFCC800031C9D /* main.m in Sources */,
-				90751B5F189C000400031C9D /* module.ice in Sources */,
 				90751B5B189C000400031C9D /* camera.ice in Sources */,
+				90751B6C189E739F00031C9D /* Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -514,6 +542,7 @@
 				90751B50189BFCC800031C9D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		90751B51189BFCC800031C9D /* Build configuration list for PBXNativeTarget "IceStarTests" */ = {
 			isa = XCConfigurationList;
@@ -522,6 +551,7 @@
 				90751B53189BFCC800031C9D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -14,8 +14,8 @@ namespace snowstar {
 class CoolerI : public Cooler {
 	astro::camera::CoolerPtr	_cooler;
 public:
-	CoolerI(astro::camera::CoolerPtr& cooler) : _cooler(cooler) { }
-	virtual ~CoolerI() { }
+	CoolerI(astro::camera::CoolerPtr cooler);
+	virtual ~CoolerI();
 	float	getSetTemperature(const Ice::Current& current);
 	float	getActualTemperature(const Ice::Current& current);
 	void	setTemperature(float temperature, const Ice::Current& current);

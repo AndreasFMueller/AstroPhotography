@@ -14,8 +14,8 @@ namespace snowstar {
 class CameraI : public Camera {
 	astro::camera::CameraPtr	_camera;
 public:
-	CameraI(astro::camera::CameraPtr camera) : _camera(camera) { }
-	virtual	~CameraI() { }
+	CameraI(astro::camera::CameraPtr camera);
+	virtual	~CameraI();
 	std::string	getName(const Ice::Current& current);
 	int	nCcds(const Ice::Current& current);
 	CcdInfo	getCcdinfo(int ccdid, const Ice::Current& current);

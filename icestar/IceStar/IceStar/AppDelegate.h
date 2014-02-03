@@ -7,9 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Connection.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate> {
+    Connection *connection;
+}
 
 @property (strong, nonatomic) UIWindow *window;
+@property (readwrite) Connection *connection;
 
 @end

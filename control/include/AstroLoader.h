@@ -10,12 +10,14 @@
 
 #include <AstroCamera.h>
 #include <AstroLocator.h>
+#include <AstroExceptions.h>
 
 #include <string>
 #include <vector>
 #include <stdexcept>
 //#include <tr1/memory>
 #include <memory>
+#include <list>
 
 namespace astro {
 // the Module constructor is private, but we would like to test it
@@ -135,6 +137,27 @@ public:
 	bool	contains(const std::string& modulename) const;
 	ModulePtr	getModule(const std::string& modulename) 
 		throw (repository_error);
+};
+
+/**
+ * \brief The Devices object unifies access to devices across modules
+ *
+ * Going through the modules is usually not interesting for a user of
+ * the devices, so we provide the Devices object to allow access to 
+ * the devices directly.
+ */
+class Devices {
+	Repository&	_repository;
+public:
+	Devices(Repository& repository) : _repository(repository) { }
+	typedef	std::list<DeviceName>	devicelist;
+	devicelist	getDevicelist(DeviceName::device_type type);
+	camera::CameraPtr	getCamera(const DeviceName& name);
+	camera::CcdPtr		getCcd(const DeviceName& name);
+	camera::GuiderPortPtr	getGuiderPort(const DeviceName& name);
+	camera::FilterWheelPtr	getFilterWheel(const DeviceName& name);
+	camera::CoolerPtr	getCooler(const DeviceName& name);
+	camera::FocuserPtr	getFocuser(const DeviceName& name);
 };
 
 } // namespace module

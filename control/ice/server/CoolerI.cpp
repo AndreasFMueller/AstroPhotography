@@ -7,6 +7,12 @@
 
 namespace snowstar {
 
+CoolerI::CoolerI(astro::camera::CoolerPtr cooler) : _cooler(cooler) {
+}
+
+CoolerI::~CoolerI() {
+}
+
 float	CoolerI::getSetTemperature(const Ice::Current& current) {
 	return _cooler->getSetTemperature();
 }

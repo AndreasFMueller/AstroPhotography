@@ -11,8 +11,8 @@
 module snowstar {
 	// exposure related data structures
 	struct BinningMode {
-		long	x;
-		long	y;
+		int	x;
+		int	y;
 	};
 
 	sequence<BinningMode>	BinningSet;
@@ -75,7 +75,7 @@ module snowstar {
 	 */
 	struct CcdInfo {
 		string	name;
-		long	id;
+		int	id;
 		ImageSize	size;
 		BinningSet	binningmodes;
 		bool	shutter;
@@ -119,7 +119,7 @@ module snowstar {
 		/**
 		 * \brief Find out how long ago the last exposure was started
 		 */
-		long	lastExposureStart();
+		int	lastExposureStart();
 
 		/**
 		 * \brief Cancel an exposure
@@ -139,7 +139,7 @@ module snowstar {
 		 * For this method to work the Ccd must be in state exposed.
 		 * Retreiving the image will update the state to idle.
 		 */
-		Image	getImage() throws BadState;
+		Image*	getImage() throws BadState;
 
 		/**
 		 * \brief Find out whether this CCD has a gain setting.
@@ -165,7 +165,7 @@ module snowstar {
 		/**
 		 * \brief Get the Cooler
 		 */
-		Cooler	getCooler() throws NotImplemented;
+		Cooler*	getCooler() throws NotImplemented;
 	};
 
 	/**
@@ -277,19 +277,19 @@ module snowstar {
 		 *
 		 * This method also counts empty filter positions in the wheel.
 		 */
-		long	nFilters();
+		int	nFilters();
 		/**
 		 * \brief Query the current filter position.
 		 */
-		long	currentPosition();
+		int	currentPosition();
 		/**
 		 * \brief Move the filter wheel to a given position
 		 */
-		void	select(long position) throws NotFound;
+		void	select(int position) throws NotFound;
 		/**
 		 * \brief Get the name of the filter
 		 */
-		string	filterName(long position) throws NotFound;
+		string	filterName(int position) throws NotFound;
 		/**
 		 * \brief Query the filter wheel state
 		 */
@@ -301,10 +301,10 @@ module snowstar {
 	 */
 	interface Focuser {
 		string	getName();
-		long	min();
-		long	max();
-		long	current();
-		void	set(long value);
+		int	min();
+		int	max();
+		int	current();
+		void	set(int value);
 	};
 
 	/**
@@ -323,7 +323,7 @@ module snowstar {
 		/**
 		 * \brief Find out how many CCDs the camera has
 	 	 */
-		long	nCcds();
+		int	nCcds();
 		/**
 		 * \brief Get Information about the CCD.
 		 *
@@ -331,11 +331,11 @@ module snowstar {
 		 * typically only information available without accessing
 		 * the CCD. It should be sufficient to plan an exposure.
 		 */
-		CcdInfo	getCcdinfo(long ccdid) throws NotFound;
+		CcdInfo	getCcdinfo(int ccdid) throws NotFound;
 		/**
 		 * \brief Retrieve a CCD.
 		 */
-		Ccd	getCcd(long ccdid) throws NotFound;
+		Ccd*	getCcd(int ccdid) throws NotFound;
 		// FilterWheel
 		/**
 		 * \brief Find out whether the camera has FilterWheel
@@ -344,7 +344,7 @@ module snowstar {
 		/**
 		 * \brief Get the FilterWheel
 		 */
-		FilterWheel	getFilterWheel() throws NotImplemented;
+		FilterWheel*	getFilterWheel() throws NotImplemented;
 		// Guider Port
 		/**
 		 * \brief Find out whether the camera has a guider port.
@@ -353,6 +353,6 @@ module snowstar {
 		/**
 		 * \brief Get the Guider Port
 		 */
-		GuiderPort	getGuiderPort() throws NotImplemented;
+		GuiderPort*	getGuiderPort() throws NotImplemented;
 	};
 };

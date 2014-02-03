@@ -46,7 +46,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
 	ImageProgramCallback.cpp SaveImageCallback.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
-	DeviceAccessor.cpp \
+	DeviceAccessor.cpp Devices.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
 	AdaptiveOptics.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \

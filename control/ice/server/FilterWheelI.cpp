@@ -7,6 +7,9 @@
 
 namespace snowstar {
 
+FilterWheelI::~FilterWheelI() {
+}
+
 std::string	FilterWheelI::getName(const Ice::Current& current) {
 	return _filterwheel->name().toString();
 }
@@ -28,8 +31,8 @@ std::string	FilterWheelI::filterName(int position,
 	return _filterwheel->filterName(position);
 }
 
-FilterwheelState	FilterWheelI::getState(const Ice::Current& current) {
-	switch (_filterwheel->getState()) {
+FilterwheelState	FilterWheelI::convert(const astro::camera::FilterWheel::State& s) {
+	switch (s) {
 	case astro::camera::FilterWheel::idle:
 		return snowstar::FwIDLE;
 	case astro::camera::FilterWheel::moving:
@@ -37,6 +40,10 @@ FilterwheelState	FilterWheelI::getState(const Ice::Current& current) {
 	case astro::camera::FilterWheel::unknown:
 		return snowstar::FwUNKNOWN;
 	}
+}
+
+FilterwheelState	FilterWheelI::getState(const Ice::Current& current) {
+	return convert(_filterwheel->getState());
 }
 
 } // namespace snowstar

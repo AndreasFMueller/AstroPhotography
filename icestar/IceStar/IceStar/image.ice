@@ -47,7 +47,7 @@ module snowstar {
 		 * return either bytes or unsigned shorts.
 		 * 
 		 */
-		long	bytesPerPixel();
+		int	bytesPerPixel();
 
 		/**
 		 * \brief Number of planes.
@@ -55,12 +55,12 @@ module snowstar {
 		 * This is usually 1, but for cameras that return color images
 		 * it can be 2 (YUYV pixels) or 3 (RGB pixels).
 		 */
-		long	planes();
+		int	planes();
 
 		/**
 		 * \brief Pixel value type size
 		 */
-		long	bytesPerValue();
+		int	bytesPerValue();
 
 		/**
 		 * \brief Retrieve the imagedata
@@ -73,7 +73,7 @@ module snowstar {
 		/**
 		 * \brief get the file size
 		 */
-		long	filesize();
+		int	filesize();
 
 		/**
 		 * \brief Destroy a servant
@@ -110,8 +110,8 @@ module snowstar {
 	sequence<string>	ImageList;
 	interface Images {
 		ImageList	listImages();
-		long	imageSize(string name) throws NotFound;
-		long	imageAge(string name) throws NotFound;
-		Image	getImage(string name) throws NotFound;
+		int	imageSize(string name) throws NotFound;
+		int	imageAge(string name) throws NotFound;
+		Image*	getImage(string name) throws NotFound;
 	};
 };

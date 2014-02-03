@@ -4,8 +4,9 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _AstroExceptions_h
-#include <errno.h>
+#define _AstroExceptions_h
 
+#include <errno.h>
 #include <stdexcept>
 
 namespace astro {
@@ -30,6 +31,7 @@ public:
 class NotFound : public std::runtime_error {
 public:
 	NotFound(const char *cause) : std::runtime_error(cause) { }
+	NotFound(const std::string& cause) : std::runtime_error(cause) { }
 };
 
 /**
@@ -42,6 +44,7 @@ public:
 class NotImplemented : public std::runtime_error {
 public:
 	NotImplemented(const char *cause) : std::runtime_error(cause) { }
+	NotImplemented(const std::string& cause) : std::runtime_error(cause) { }
 };
 
 /**
@@ -54,6 +57,7 @@ public:
 class BadParameter : public std::runtime_error {
 public:
 	BadParameter(const char *cause) : std::runtime_error(cause) { }
+	BadParameter(const std::string& cause) : std::runtime_error(cause) { }
 };
 
 namespace camera {
@@ -68,6 +72,7 @@ namespace camera {
 class BadState : public std::runtime_error {
 public:
 	BadState(const char *cause) : std::runtime_error(cause) { }
+	BadState(const std::string& cause) : std::runtime_error(cause) { }
 };
 	
 } // namespace camera

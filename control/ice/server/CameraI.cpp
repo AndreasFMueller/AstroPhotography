@@ -9,8 +9,15 @@
 #include <CcdI.h>
 #include <Ice/Communicator.h>
 #include <Ice/ObjectAdapter.h>
+#include <NameConverter.h>
 
 namespace snowstar {
+
+CameraI::CameraI(astro::camera::CameraPtr camera) : _camera(camera) {
+}
+
+CameraI::~CameraI() {
+}
 
 std::string	CameraI::getName(const Ice::Current& current) {
 	return _camera->name().toString();
@@ -22,38 +29,21 @@ int	CameraI::nCcds(const Ice::Current& current) {
 
 CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& current) {
 	astro::camera::CcdInfo	info = _camera->getCcdInfo(ccdid);
-	CcdInfo	result;
-	result.name = info.name();
-	result.id = info.getId();
-	result.size.width = info.size().width();
-	result.size.height = info.size().height();
-	result.shutter = info.shutter();
-	result.pixelheight = info.pixelheight();
-	result.pixelwidth = info.pixelwidth();
-	astro::camera::BinningSet::const_iterator	b;
-	for (b = info.modes().begin(); b != info.modes().end(); b++) {
-		BinningMode	mode;
-		mode.x = b->getX();
-		mode.y = b->getY();
-		result.binningmodes.push_back(mode);
-	}
-	return result;
+	return CcdI::convert(info);
 }
 
 typedef IceUtil::Handle<CcdI>        CcdIPtr;
 
 CcdPrx	CameraI::getCcd(int ccdid, const Ice::Current& current) {
-	astro::camera::CcdPtr	ccd = _camera->getCcd(ccdid);
-	std::string	name = ccd->name();
+	std::string	name = NameConverter::urlencode(_camera->getCcd(ccdid)->name());
 
 	// get adapter/communicator information
 	Ice::ObjectAdapterPtr	adapter = current.adapter;
 	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
 
 	// build the server
-	CcdIPtr	servant = new CcdI(ccd);
 	CcdPrx proxy = CcdPrx::uncheckedCast(
-			adapter->add(servant, ic->stringToIdentity(name)));
+			adapter->createProxy(ic->stringToIdentity(name)));
 	
 	return proxy;
 }
@@ -65,17 +55,15 @@ bool	CameraI::hasFilterWheel(const Ice::Current& current) {
 typedef IceUtil::Handle<FilterWheelI>        FilterWheelIPtr;
 
 FilterWheelPrx	CameraI::getFilterWheel(const Ice::Current& current) {
-	astro::camera::FilterWheelPtr	filterwheel = _camera->getFilterWheel();
-	std::string	name = filterwheel->name();
+	std::string	name = NameConverter::urlencode(_camera->getFilterWheel()->name());
 
 	// get adapter/communicator information
 	Ice::ObjectAdapterPtr	adapter = current.adapter;
 	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
 
 	// build the server
-	FilterWheelIPtr	servant = new FilterWheelI(filterwheel);
 	FilterWheelPrx proxy = FilterWheelPrx::uncheckedCast(
-			adapter->add(servant, ic->stringToIdentity(name)));
+			adapter->createProxy(ic->stringToIdentity(name)));
 	
 	return proxy;
 }
@@ -87,17 +75,15 @@ bool	CameraI::hasGuiderPort(const Ice::Current& current) {
 typedef IceUtil::Handle<GuiderPortI>        GuiderPortIPtr;
 
 GuiderPortPrx	CameraI::getGuiderPort(const Ice::Current& current) {
-	astro::camera::GuiderPortPtr	guiderport = _camera->getGuiderPort();
-	std::string	name = guiderport->name();
+	std::string	name = NameConverter::urlencode(_camera->getGuiderPort()->name());
 
 	// get adapter/communicator information
 	Ice::ObjectAdapterPtr	adapter = current.adapter;
 	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
 
 	// build the server
-	GuiderPortIPtr	servant = new GuiderPortI(guiderport);
 	GuiderPortPrx proxy = GuiderPortPrx::uncheckedCast(
-			adapter->add(servant, ic->stringToIdentity(name)));
+			adapter->createProxy(ic->stringToIdentity(name)));
 	
 	return proxy;
 }

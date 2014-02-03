@@ -12,7 +12,7 @@ std::string	GuiderPortI::getName(const Ice::Current& current) {
 }
 
 Ice::Byte	GuiderPortI::active(const Ice::Current& current) {
-	_guiderport->active();
+	return _guiderport->active();
 }
 
 void	GuiderPortI::activate(float ra, float dec, const Ice::Current& current) {

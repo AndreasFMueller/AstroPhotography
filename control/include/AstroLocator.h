@@ -121,6 +121,8 @@ public:
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(
 		const DeviceName::device_type device = DeviceName::Camera);
+	std::vector<DeviceName>	getDeviceList(
+		const DeviceName::device_type device = DeviceName::Camera);
 	astro::camera::AdaptiveOpticsPtr	getAdaptiveOptics(const std::string& name);
 	astro::camera::CameraPtr	getCamera(const std::string& name);
 	astro::camera::CameraPtr	getCamera(size_t index);

@@ -8,15 +8,33 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
 class CcdI : public Ccd {
 	astro::camera::CcdPtr	_ccd;
+	astro::image::ImageDirectory	_imagedirectory;
 	time_t	laststart;
 public:
-	CcdI(astro::camera::CcdPtr ccd) : _ccd(ccd) { }
-	virtual	~CcdI() { }
+	CcdI(astro::camera::CcdPtr ccd,
+		astro::image::ImageDirectory& imagedirectory)
+			: _ccd(ccd), _imagedirectory(imagedirectory) { }
+	virtual	~CcdI();
+
+	// conversion functions for CCD related structures
+static	CcdInfo	convert(const astro::camera::CcdInfo& info);
+
+static	Exposure	convert(const astro::camera::Exposure& exp);
+static	astro::camera::Exposure	convert(const Exposure& exp);
+
+static	ExposureState	convert(const astro::camera::Exposure::State& state);
+static	astro::camera::Exposure::State	convert(const ExposureState& state);
+
+static	ShutterState	convert(const astro::camera::shutter_state& state);
+static	astro::camera::shutter_state	convert(const ShutterState& state);
+
+	// interface methods
 	std::string	getName(const Ice::Current& current);
 	CcdInfo	getInfo(const Ice::Current& current);
 	void	startExposure(const Exposure&, const Ice::Current& current);
@@ -36,29 +54,3 @@ public:
 } // namespace snowstar
 
 #endif /* _CcdI_h */
-
-
-#if 0
-virtual ::std::string getName(const Ice::Current& current);
-virtual Ice::Byte active(const Ice::Current& current);
-virtual void activate(Ice::Float, Ice::Float, const Ice::Current& current);
-virtual ::std::string getName(const Ice::Current& current);
-virtual Ice::Int nFilters(const Ice::Current& current);
-virtual Ice::Int currentPosition(const Ice::Current& current);
-virtual void select(Ice::Int, const Ice::Current& current);
-virtual ::std::string filterName(Ice::Int, const Ice::Current& current);
-virtual ::snowstar::FilterwheelState getState(const Ice::Current& current);
-virtual ::std::string getName(const Ice::Current& current);
-virtual Ice::Int min(const Ice::Current& current);
-virtual Ice::Int max(const Ice::Current& current);
-virtual Ice::Int current(const Ice::Current& current);
-virtual void set(Ice::Int, const Ice::Current& current);
-virtual ::std::string getName(const Ice::Current& current);
-virtual Ice::Int nCcds(const Ice::Current& current);
-virtual ::snowstar::CcdInfo getCcdinfo(Ice::Int, const Ice::Current& current);
-virtual ::snowstar::CcdPrx getCcd(Ice::Int, const Ice::Current& current);
-virtual bool hasFilterWheel(const Ice::Current& current);
-virtual ::snowstar::FilterWheelPrx getFilterWheel(const Ice::Current& current);
-virtual bool hasGuiderPort(const Ice::Current& current);
-virtual ::snowstar::GuiderPortPrx getGuiderPort(const Ice::Current& current);
-#endif

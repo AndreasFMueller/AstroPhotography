@@ -14,8 +14,8 @@ namespace snowstar {
 class FocuserI : public Focuser {
 	astro::camera::FocuserPtr	_focuser;
 public:
-	FocuserI(astro::camera::FocuserPtr focuser) : _focuser(focuser) { }
-	~FocuserI() { }
+	FocuserI(astro::camera::FocuserPtr focuser);
+	virtual ~FocuserI();
 	virtual std::string	getName(const Ice::Current& current);
 	virtual int	min(const Ice::Current& current);
 	virtual int	max(const Ice::Current& current);
