@@ -12,14 +12,14 @@ module snowstar {
 	struct TaskParameters {
 		// camera
 		string	camera;
-		long	ccdid;
+		int	ccdid;
 
 		// cooler stuff
 		float	ccdtemperature;
 
 		// filterwheel parameters
 		string	filterwheel;
-		long	filterposition;
+		int	filterposition;
 
 		// exposure stuff
 		Exposure	exp;
@@ -50,10 +50,10 @@ module snowstar {
 	struct TaskInfo {
 		// the task id. This is slightly redundant, as we usually
 		// request tasks by id, but we include it nevertheless
-		long		taskid;
+		int		taskid;
 		// the current state of the task, and when it last changed
 		TaskState	state;
-		long		lastchange;
+		int		lastchange;
 		string		cause;
 		// where the produced image is storead
 		string		filename;
@@ -77,7 +77,7 @@ module snowstar {
 	 * \brief Data structure sent to the task monitor
 	 */
 	struct TaskMonitorInfo {
-		long		taskid;
+		int		taskid;
 		TaskState	newstate;
 		double		timeago;
 	};
@@ -96,7 +96,7 @@ module snowstar {
 		void	stop();
 	};
 
-	sequence<long> taskidsequence;
+	sequence<int> taskidsequence;
 
 	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING, QueueSTOPPED };
 	/**
@@ -125,27 +125,27 @@ module snowstar {
 		 *
 		 * This submits a new task to the queue.
 		 */
-		long	submit(TaskParameters params) throws BadParameter;
+		int	submit(TaskParameters params) throws BadParameter;
 
 		/**
 		 * \brief Retrieve the parameters of the queue task
 	 	 */
-		TaskParameters	parameters(long taskid) throws NotFound;
+		TaskParameters	parameters(int taskid) throws NotFound;
 
 		/**
 		 * \brief Retrieve the info of the queue task
 		 */
-		TaskInfo	info(long taskid) throws NotFound;
+		TaskInfo	info(int taskid) throws NotFound;
 
 		/**
 		 * \brief Cancel a task
 		 */
-		void	cancel(long taskid) throws BadState, NotFound;
+		void	cancel(int taskid) throws BadState, NotFound;
 
 		/**
 		 * \brief Remove a task from the queue
 		 */
-		void	remove(long taskid) throws BadState, NotFound;
+		void	remove(int taskid) throws BadState, NotFound;
 
 		/**
 		 * \brief retrieve a list of tasks
@@ -155,16 +155,16 @@ module snowstar {
 		/**
 		 * \brief retrieve a task reference
 		 */
-		Task	getTask(long taskid) throws NotFound;
+		Task	getTask(int taskid) throws NotFound;
 
 		/**
 		 * \brief register a task monitor
 		 */
-		long	registerMonitor(TaskMonitor monitor);
+		int	registerMonitor(TaskMonitor monitor);
 
 		/**
 		 * \brief unregister a task monitor
 		 */
-		void	unregisterMonitor(long monitorid);
+		void	unregisterMonitor(int monitorid);
 	};
 };

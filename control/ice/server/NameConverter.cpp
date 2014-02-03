@@ -7,16 +7,21 @@
 #include <sstream>
 #include <iomanip>
 #include <AstroDebug.h>
+#include <cctype>
 
 namespace snowstar {
 
+/**
+ * \brief URLencode a string
+ *
+ * This is a rather primitive URL encoder: it converts everything that is
+ * not alphanumeric (based on the isalnum function from cctype).
+ */
 std::string	NameConverter::urlencode(const std::string& name) {
 	std::ostringstream	out;
 	for (int i = 0; i < name.size(); i++) {
 		char	c = name[i];
-		if ((('a' <= c) && (c <= 'z')) ||
-			(('A' <= c) && (c <= 'Z')) ||
-			(('0' <= c) && (c <= '9'))) {
+		if (isalnum(c)) {
 			out << c;
 		} else {
 			out << "%";
@@ -24,10 +29,16 @@ std::string	NameConverter::urlencode(const std::string& name) {
 		}
 	}
 	std::string	s = out.str();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s", name.c_str(), s.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s", name.c_str(), s.c_str());
 	return s;
 }
 
+/**
+ * \brief URLdecode a string
+ *
+ * URL decode strings. This isn't very intelligent, e.g. it does not check
+ * whether the characters following the % sign really form a hex number.
+ */
 std::string	NameConverter::urldecode(const std::string& name) {
 	std::ostringstream	out;
 	int i = 0;
@@ -43,7 +54,7 @@ std::string	NameConverter::urldecode(const std::string& name) {
 		}
 	}
 	std::string	s = out.str();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s", name.c_str(), s.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s", name.c_str(), s.c_str());
 	return s;
 }
 

@@ -16,16 +16,16 @@ module snowstar {
 	 * is in the lower left corner of the image.
  	 */
 	struct ImagePoint {
-		long	x;
-		long	y;
+		int	x;
+		int	y;
 	};
 
 	/**
 	 * \brief Size of an image in pixels
 	 */
 	struct ImageSize {
-		long	width;
-		long	height;
+		int	width;
+		int	height;
 	};
 
 	/**

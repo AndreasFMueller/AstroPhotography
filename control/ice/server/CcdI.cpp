@@ -8,6 +8,7 @@
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
 #include <NameConverter.h>
+#include <AstroExceptions.h>
 
 namespace snowstar {
 
@@ -24,6 +25,13 @@ CcdInfo	CcdI::getInfo(const Ice::Current& current) {
 
 ExposureState	CcdI::exposureStatus(const Ice::Current& current) {
 	return convert(_ccd->exposureStatus());
+}
+
+void	CcdI::startExposure(const Exposure& exposure,
+		const Ice::Current& current) {
+	image.reset();
+	_ccd->startExposure(convert(exposure));
+	laststart = time(NULL);
 }
 
 int	CcdI::lastExposureStart(const Ice::Current& current) {
@@ -44,7 +52,15 @@ Exposure	CcdI::getExposure(const Ice::Current& current) {
 
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	// get the image and add it to the ImageDirectory
-	astro::image::ImagePtr	image = _ccd->getImage();
+	if (!image) {
+		try {
+			image = _ccd->getImage();
+		} catch (astro::camera::BadState& bsx) {
+			throw BadState("no image");
+		}
+	}
+
+	// save image
 	std::string	filename = _imagedirectory.save(image);
 
 	// create an identity
@@ -56,7 +72,7 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
 
         // build the proxy for the image
-	ImagePrx	proxy = ImagePrx::uncheckedCast(
+	ImagePrx	proxy = ShortImagePrx::uncheckedCast(
 		adapter->createProxy(ic->stringToIdentity(identity)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy returned");
 

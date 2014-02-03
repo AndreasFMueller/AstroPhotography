@@ -24,6 +24,9 @@
     
     IBOutlet UIButton   *captureButton;
     
+    IBOutlet UIScrollView   *scrollView;
+    UIImageView             *imageView;
+    
     NSDate  *exposureStart;
     IBOutlet UIProgressView *progressView;
     
@@ -38,6 +41,8 @@
     snowstarCcdInfo *ccdinfo;
     snowstarCoolerPrx   *cooler;
     snowstarExposure    *exposure;
+    
+    BOOL    allowTemperatureUpdate;
 }
 
 - (IBAction)cameraselection:(id)sender;

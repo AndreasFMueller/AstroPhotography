@@ -16,6 +16,7 @@ class CcdI : public Ccd {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImageDirectory	_imagedirectory;
 	time_t	laststart;
+	astro::image::ImagePtr	image;
 public:
 	CcdI(astro::camera::CcdPtr ccd,
 		astro::image::ImageDirectory& imagedirectory)

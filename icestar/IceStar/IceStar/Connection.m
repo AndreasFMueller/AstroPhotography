@@ -25,8 +25,14 @@
             host = @"localhost";
         }
         
+        // create properties
+        id<ICEProperties>   props = [ICEUtil createProperties];
+        [props setProperty: @"Ice.MessageSizeMax" value: @"65536"];
+        ICEInitializationData *initializationdata = [ICEInitializationData initializationData];
+        initializationdata.properties = props;
+        
         // get the remote host and portnumber from the default settings
-        communicator = [ICEUtil createCommunicator];
+        communicator = [ICEUtil createCommunicator: initializationdata];
         
         // build the name for the remote device
         NSString    *name = [NSString stringWithFormat: @"Devices:default -h %@ -p %d", host, port];

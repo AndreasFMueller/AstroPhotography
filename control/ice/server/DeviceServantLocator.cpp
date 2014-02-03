@@ -36,18 +36,19 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie) {
 	std::string	name = NameConverter::urldecode(current.id.name);
 
-	// log the request
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get device for id %s",
-		current.id.name.c_str());
-
 	// the device we are going to return
 	Ice::ObjectPtr	ptr;
 
 	// look in the cache
 	devicemap::iterator	i = devices.find(name);
 	if (i != devices.end()) {
+		ptr = i->second;
 		return ptr;
 	}
+
+	// log the request
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get new device servant for name %s",
+		name.c_str());
 
 	// convert the name into a devicename
 	astro::DeviceName	devicename(name);

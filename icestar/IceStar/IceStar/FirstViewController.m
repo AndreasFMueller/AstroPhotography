@@ -13,6 +13,7 @@
 #import "AppDelegate.h"
 #import "CcdSelectionController.h"
 #include <math.h>
+#import "image.h"
 
 @interface FirstViewController ()
 
@@ -23,6 +24,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    // add the image View
+    imageView = [[UIImageView alloc] init];
+    [scrollView addSubview: imageView];
+    NSLog(@"scrollview size: %f x %f",scrollView.frame.size.width, scrollView.frame.size.height);
 	// Do any additional setup after loading the view, typically from a nib.
     exposure = [[snowstarExposure alloc] init];
     exposure.mode = [[snowstarBinningMode alloc] init];
@@ -35,9 +40,12 @@
     exposure.frame.origin = [[snowstarImagePoint alloc] init];
     exposure.frame.origin.x = 0;
     exposure.frame.origin.y = 0;
+    exposure.gain = 1;
+    exposure.limit = 1000000;
     timer = [NSTimer timerWithTimeInterval: 2.0 target: self selector: @selector(timerTick:) userInfo: nil repeats: YES];
     [[NSRunLoop currentRunLoop] addTimer: timer forMode: NSDefaultRunLoopMode];
     NSLog(@"timer created");
+    allowTemperatureUpdate = YES;
     [timer fire];
 }
 
@@ -204,9 +212,11 @@
 
 - (void)timerTick: (NSTimer *)timer {
     NSLog(@"timer tick");
-    
+    return;
     // cooler update
-    [self updateCooler];
+    if (allowTemperatureUpdate) {
+        [self updateCooler];
+    }
 }
 
 - (void)cancelExposureDisplay {
@@ -227,7 +237,7 @@
 }
 
 - (void)startExposure: (id)sender {
-    NSLog(@"exposure.mode = %dx%d, size = %lldx%lld", exposure.mode.x, exposure.mode.y, exposure.frame.size.width, exposure.frame.size.height);
+    NSLog(@"exposure.mode = %dx%d, size = %dx%d", exposure.mode.x, exposure.mode.y, exposure.frame.size.width, exposure.frame.size.height);
     int state = [ccd exposureStatus];
     switch (state) {
         case snowstarEXPOSING:
@@ -239,6 +249,9 @@
             break;
     }
     
+    allowTemperatureUpdate = NO;
+    exposure.shutter = (shutterSwitch.isOn) ? snowstarShOPEN : snowstarShCLOSED;
+    NSLog(@"exposure.shutter = %d", exposure.shutter);
     [ccd startExposure: exposure];
     exposureStart = [NSDate date];
     
@@ -284,7 +297,52 @@
     if (state == snowstarEXPOSED) {
         NSLog(@"time to retrieve the image");
         snowstarImagePrx    *image = [ccd getImage];
-        NSLog(@"file name: file size: %d", [image filesize]);
+        snowstarMutableImageFile    *file = [image file];
+        NSLog(@"file size: %d, bytes received: %d", [image filesize], [file length]);
+        snowstarShortImagePrx   *shortimage = [snowstarShortImagePrx checkedCast: image];
+        if (nil == shortimage) {
+            NSLog(@"image is not a short image");
+        } else {
+            snowstarImageSize   *size = [image size];
+            snowstarMutableShortSequence    *imagedata = [shortimage getShorts];
+            int l = [imagedata length];
+            NSLog(@"got %d bytes of image data", l);
+            
+            // convert the image data into a CGDataProvider
+            NSMutableData  *bytedata = [NSMutableData dataWithCapacity: l];
+            for (int x = 0; x < size.width; x++) {
+                for (int y = 0; y < size.height; y++) {
+                    int i = x + y * size.width;
+                    int j = x + (size.height - y - 1) * size.width;
+                    ((unsigned char *)bytedata.bytes)[i] = ((unsigned short *)imagedata.bytes)[j] >> 8;
+                }
+            }
+            CGDataProviderRef   data = CGDataProviderCreateWithCFData((CFDataRef)bytedata);
+            
+            // convert the image data into CGImage
+            CGImageRef  cgimage = CGImageCreate(size.width, size.height, 8, 8, size.width, CGColorSpaceCreateDeviceGray(),
+                          kCGBitmapByteOrderDefault,
+                          data,
+                          nil,
+                          NO, kCGRenderingIntentDefault);
+            UIImage *image = [UIImage imageWithCGImage: cgimage];
+            imageView.image = image;
+            [imageView sizeToFit];
+            
+            int xinset = 0;
+            if (size.width < scrollView.frame.size.width) {
+                xinset = (scrollView.frame.size.width - size.width) / 2;
+            }
+            int yinset = 0;
+            if (size.height < scrollView.frame.size.height) {
+                yinset = (scrollView.frame.size.height - size.height) / 2;
+            }
+            scrollView.contentInset = UIEdgeInsetsMake(yinset, xinset, yinset, xinset);
+            scrollView.contentSize = CGSizeMake(size.width, size.height);
+            [scrollView setNeedsLayout];
+            NSLog(@"scrollview size: %f x %f",scrollView.frame.size.width, scrollView.frame.size.height);
+            allowTemperatureUpdate = YES;
+        }
     }
     [progressView setHidden: YES];
     exposureStart = nil;

@@ -28,6 +28,9 @@ class SxCamera : public Camera {
 	sx_firmware_version_t	firmware_version;
 	bool	_hasCooler;
 	bool	_hasGuiderPort;
+	bool	_has_interline_ccd;
+public:
+	bool	hasInterlineCcd() const { return _has_interline_ccd; }
 public:
 	// USB related methods
 	DevicePtr	getDevicePtr();

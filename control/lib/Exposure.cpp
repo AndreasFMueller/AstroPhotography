@@ -23,10 +23,11 @@ Exposure::Exposure(const ImageRectangle& _frame,
 }
 
 std::string	Exposure::toString() const {
-	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs",
+	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs %s g=%.1f, l=%.0f",
 		frame.size().width(), frame.size().height(),
 		frame.origin().x(), frame.origin().y(),
-		mode.toString().c_str(), exposuretime);
+		mode.toString().c_str(), exposuretime,
+		(shutter == SHUTTER_OPEN) ? "light" : "dark", gain, limit);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {

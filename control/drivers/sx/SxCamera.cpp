@@ -171,6 +171,9 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	model = modelrequest.data()->model;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "model = %04x", model);
 
+	// find out whether this is a model with an interline CCD
+	_has_interline_ccd = (0x10 == (0x7f & model));
+
 #if 0
 	// from product id and model number, try to infer the product name
 	for (unsigned int m = 0; m < NUMBER_SX_MODELS; m++) {
@@ -399,6 +402,7 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	// optional receive phase of the control request
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing IN transfer");
 	BulkTransfer	in(inendpoint, receivelength, request->payload());
+	in.setTimeout(10000);
 	deviceptr->submit(&in);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "IN transfer complete:\n%s",
 		request->payloadHex().c_str());

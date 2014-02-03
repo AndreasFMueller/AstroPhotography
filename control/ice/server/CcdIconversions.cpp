@@ -41,8 +41,7 @@ Exposure	CcdI::convert(const astro::camera::Exposure& exp) {
 	exposure.exposuretime = exp.exposuretime;
 	exposure.gain = exp.gain;
 	exposure.limit = exp.limit;
-	exposure.shutter = (exp.limit == astro::camera::SHUTTER_OPEN)
-				? ShOPEN : ShCLOSED;
+	exposure.shutter = convert(exp.shutter);
 	exposure.mode.x = exp.mode.getX();
 	exposure.mode.y = exp.mode.getY();
 	return exposure;
@@ -58,18 +57,10 @@ astro::camera::Exposure	CcdI::convert(const Exposure& exposure) {
 	exp.exposuretime = exposure.exposuretime;
 	exp.gain = exposure.gain;
 	exp.limit = exposure.limit;
-	exp.shutter = (exposure.shutter == ShOPEN)
-				? astro::camera::SHUTTER_OPEN
-				: astro::camera::SHUTTER_CLOSED;
+	exp.shutter = convert(exposure.shutter);
 	exp.mode.setX(exposure.mode.x);
 	exp.mode.setY(exposure.mode.y);
 	return exp;
-}
-
-void	CcdI::startExposure(const Exposure& exposure,
-		const Ice::Current& current) {
-	_ccd->startExposure(convert(exposure));
-	laststart = time(NULL);
 }
 
 ExposureState	CcdI::convert(const astro::camera::Exposure::State& s) {
@@ -99,21 +90,35 @@ astro::camera::Exposure::State	CcdI::convert(const ExposureState& s) {
 }
 
 ShutterState	CcdI::convert(const astro::camera::shutter_state& s) {
+	ShutterState	result = snowstar::ShOPEN;
 	switch (s) {
 	case astro::camera::SHUTTER_OPEN:
-		return snowstar::ShOPEN;
+		result = snowstar::ShOPEN;
+		break;
 	case astro::camera::SHUTTER_CLOSED:
-		return snowstar::ShCLOSED;
+		result = snowstar::ShCLOSED;
+		break;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
+		(s == astro::camera::SHUTTER_OPEN) ? "open" : "closed",
+		(result == ShOPEN) ? "open" : "closed");
+	return result;
 }
 
 astro::camera::shutter_state	CcdI::convert(const ShutterState& s) {
+	astro::camera::shutter_state	result = astro::camera::SHUTTER_OPEN;
 	switch (s) {
 	case snowstar::ShOPEN:
-		return astro::camera::SHUTTER_OPEN;
+		result = astro::camera::SHUTTER_OPEN;
+		break;
 	case snowstar::ShCLOSED:
-		return astro::camera::SHUTTER_CLOSED;
+		result = astro::camera::SHUTTER_CLOSED;
+		break;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
+		(s == ShOPEN) ? "open" : "closed",
+		(result == astro::camera::SHUTTER_OPEN) ? "open" : "closed");
+	return result;
 }
 
 } // namespace snowstar

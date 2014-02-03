@@ -122,6 +122,18 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		throw SxError("binning mode not supported");
 	}
 
+	// if this is an interline CCD, we should send a clear before we start
+	// an exposure, maybe allways
+	if ((camera.hasInterlineCcd()) && (getInfo().getId() == 0)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "extra clear for interline "
+			"cameras");
+		EmptyRequest    resetrequest(
+			RequestBase::vendor_specific_type,
+			RequestBase::device_recipient, (uint16_t)0,
+			(uint8_t)SX_CMD_CLEAR_PIXELS, (uint16_t)0);
+		camera.controlRequest(&resetrequest);
+	}
+
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
 	rpd.x_offset = exposure.frame.origin().x();

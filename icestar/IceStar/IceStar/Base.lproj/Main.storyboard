@@ -179,6 +179,10 @@
                                 <rect key="frame" x="20" y="276" width="728" height="2"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </progressView>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qfe-fO-ij7">
+                                <rect key="frame" x="0.0" y="281" width="768" height="694"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            </scrollView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -197,7 +201,8 @@
                         <outlet property="coolerSwitch" destination="nGJ-NQ-4fD" id="1Kb-qm-1S2"/>
                         <outlet property="exposureField" destination="xfj-CZ-Bme" id="BGY-8R-MaA"/>
                         <outlet property="progressView" destination="Ve4-KO-CvR" id="VcF-j7-Lhw"/>
-                        <outlet property="shutterSwitch" destination="U1J-cT-Nlr" id="ncl-Hr-tLi"/>
+                        <outlet property="scrollView" destination="qfe-fO-ij7" id="x6Z-BO-wZo"/>
+                        <outlet property="shutterSwitch" destination="U1J-cT-Nlr" id="mtk-Fe-lO7"/>
                         <outlet property="temperatureLabel" destination="JJS-ix-isO" id="g9x-LM-5mT"/>
                         <outlet property="temperatureSlider" destination="kIs-dt-66P" id="Wnw-qN-BFM"/>
                     </connections>

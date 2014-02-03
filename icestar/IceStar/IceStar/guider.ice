@@ -14,7 +14,7 @@ module snowstar {
 	 */
 	struct GuiderDescriptor {
 		string	cameraname;
-		long	ccdid;
+		int	ccdid;
 		string	guiderportname;
 	};
 
@@ -40,8 +40,8 @@ module snowstar {
 	 * and the time when the trackint started.
 	 */
 	struct TrackingHistory {
-		long	guiderunid;
-		long	timeago;
+		int	guiderunid;
+		int	timeago;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
 	};
@@ -101,7 +101,7 @@ module snowstar {
 	 */
 	sequence<float>	calibrationcoefficients;
 	struct Calibration {
-		long	id;
+		int	id;
 		double	timeago;
 		GuiderDescriptor	guider;
 		calibrationcoefficients	coefficients;
@@ -190,7 +190,7 @@ module snowstar {
 		/**
 		 * \brief Methods related to calibration
 		 */
-		void	useCalibration(long id);
+		void	useCalibration(int id);
 		Calibration	getCalibration() throws BadState;
 
 		// methods to perform a calibration asynchronously
@@ -200,8 +200,8 @@ module snowstar {
 		bool	waitCalibration(double timeout) throws BadState;
 
 		// callback stuff for 
-		long	registerCalibrationMonitor(CalibrationMonitor monitor);
-		void	unregisterCalibrationMonitor(long monitorid);
+		int	registerCalibrationMonitor(CalibrationMonitor monitor);
+		void	unregisterCalibrationMonitor(int monitorid);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
@@ -225,8 +225,8 @@ module snowstar {
 		 *
 		 * \param monitor	an image monitor reference
 		 */
-		long	registerImageMonitor(TrackingImageMonitor imagemonitor);
-		void	unregisterImageMonitor(long imagemonitorid);
+		int	registerImageMonitor(TrackingImageMonitor imagemonitor);
+		void	unregisterImageMonitor(int imagemonitorid);
 
 		/**
 		 * \brief Polling interface to tracking information
@@ -240,7 +240,7 @@ module snowstar {
 		 *			history is requested. -1 means the
 		 *			currently active guide run.
 		 */
-		TrackingHistory	getTrackingHistory(long guiderunid)
+		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
 
 		/**
@@ -256,7 +256,7 @@ module snowstar {
 		 *		used to unregister the service when tracking
 		 *		information is no longer required
 		 */
-		long	registerMonitor(TrackingMonitor monitor);
+		int	registerMonitor(TrackingMonitor monitor);
 
 		/**
 		 * \brief Unregister a monitor client
@@ -264,7 +264,7 @@ module snowstar {
 		 * \param monitorid	Id of the monitor returned with the
 		 *			register call
 		 */
-		void	unregisterMonitor(long monitorid);
+		void	unregisterMonitor(int monitorid);
 	};
 
 	/**
@@ -282,7 +282,7 @@ module snowstar {
 	 * to the server, but the data should still be accessible.
 	 */
 	sequence<GuiderDescriptor> GuiderList;
-	sequence<long>	idlist;
+	sequence<int>	idlist;
 	interface GuiderFactory {
 		GuiderList	list();
 
@@ -305,7 +305,7 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Calibration by id
 		 */
-		Calibration	getCalibration(long id);
+		Calibration	getCalibration(int id);
 
 		/**
 		 * \brief Retrieve a list of all valid guide run ids
@@ -320,6 +320,6 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Tracking history by id
 		 */
-		TrackingHistory	getTrackingHistory(long id);
+		TrackingHistory	getTrackingHistory(int id);
 	};
 };
