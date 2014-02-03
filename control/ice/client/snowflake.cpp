@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <AstroDebug.h>
+#include <tasks.h>
 
 using namespace snowstar;
 
@@ -30,24 +31,37 @@ int	main(int argc, char *argv[]) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 'm':
-			modulename = optarg;
-			break;
 		}
 
 	try {
 		Ice::ObjectPrx	base
-			= ic->stringToProxy("Devices:default -h othello -p 10000");
-		snowstar::DevicesPrx	devices = DevicesPrx::checkedCast(base);
-		if (!devices) {
+			= ic->stringToProxy("Tasks:default -h othello -p 10000");
+		snowstar::TaskQueuePrx	tasks = TaskQueuePrx::checkedCast(base);
+		if (!tasks) {
 			throw "invalid proxy";
 		}
-		std::cout << "Cameras:" << std::endl;
-		std::vector<std::string>	devicenames
-			= devices->getDevicelist(DevCAMERA); 
-		std::vector<std::string>::const_iterator	i;
-		for (i = devicenames.begin(); i != devicenames.end(); i++) {
-			std::cout << *i << std::endl;
+		taskidsequence sequence = tasks->tasklist(TskCOMPLETED);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "number of tasks: %d",
+			sequence.size());
+		taskidsequence::const_iterator	i;
+		for (i = sequence.begin(); i != sequence.end(); i++) {
+			TaskInfo	info = tasks->info(*i);
+			std::cout << "id:     " << info.taskid << std::endl;
+			std::cout << "last:   " << info.lastchange << std::endl;
+			std::cout << "cause:  " << info.cause << std::endl;
+			std::cout << "file:   " << info.filename << std::endl;
+
+			TaskParameters	parm = tasks->parameters(*i);
+			std::cout << "camera: " << parm.camera << std::endl;
+			std::cout << "ccd:    " << parm.ccdid << std::endl;
+			std::cout << "temp:   " << parm.ccdtemperature << std::endl;
+			std::cout << "fw:     " << parm.filterwheel << std::endl;
+			std::cout << "filter: " << parm.filterposition << std::endl;
+
+			TaskPrx	task = tasks->getTask(*i);
+			std::cout << "file2:  " << task->imagename() << std::endl;
+			std::cout << std::endl;
+			
 		}
 		
 		status = EXIT_SUCCESS;

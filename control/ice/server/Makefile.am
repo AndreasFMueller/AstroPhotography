@@ -11,7 +11,9 @@ bin_PROGRAMS = snowstar
 noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CameraI.h \
 	FilterWheelI.h GuiderPortI.h FocuserI.h \
 	DeviceServantLocator.h NameConverter.h \
-	ImagesI.h ImageI.h ImageLocator.h
+	ImagesI.h ImageI.h ImageLocator.h \
+	TypesI.h \
+	TaskQueueI.h TaskI.h TaskLocator.h
 	
 
 snowstar_SOURCES = snowstar.cpp \
@@ -19,7 +21,9 @@ snowstar_SOURCES = snowstar.cpp \
 	CoolerI.cpp CcdI.cpp CcdIconversions.cpp CameraI.cpp \
 	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
 	DeviceServantLocator.cpp NameConverter.cpp \
-	ImagesI.cpp ImageI.cpp ImageLocator.cpp
+	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
+	TypesI.cpp \
+	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
@@ -29,6 +33,6 @@ snowstar_LDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIc
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
 
 test:	snowstar
-	./snowstar -d -b images
+	./snowstar -d -b images -q testdb.db
 
 endif

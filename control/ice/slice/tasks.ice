@@ -70,7 +70,7 @@ module snowstar {
 		TaskParameters	parameters();
 		TaskInfo	info();
 		string		imagename();
-		Image		getImage() throws NotFound;
+		Image*		getImage() throws NotFound;
 	};
 
 	/**
@@ -80,20 +80,6 @@ module snowstar {
 		int		taskid;
 		TaskState	newstate;
 		double		timeago;
-	};
-
-	/**
-	 * \brief Monitor for Task queues
-	 */
-	interface TaskMonitor {
-		/**
-		 * \break method called when a task changes state
-		 */
-		void	update(TaskMonitorInfo taskinfo);
-		/**
-		 * \brief called when the task queue is destroyed
-		 */
-		void	stop();
 	};
 
 	sequence<int> taskidsequence;
@@ -155,16 +141,6 @@ module snowstar {
 		/**
 		 * \brief retrieve a task reference
 		 */
-		Task	getTask(int taskid) throws NotFound;
-
-		/**
-		 * \brief register a task monitor
-		 */
-		int	registerMonitor(TaskMonitor monitor);
-
-		/**
-		 * \brief unregister a task monitor
-		 */
-		void	unregisterMonitor(int monitorid);
+		Task*	getTask(int taskid) throws NotFound;
 	};
 };
