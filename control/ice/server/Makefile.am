@@ -13,7 +13,8 @@ noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CameraI.h \
 	DeviceServantLocator.h NameConverter.h \
 	ImagesI.h ImageI.h ImageLocator.h \
 	TypesI.h \
-	TaskQueueI.h TaskI.h TaskLocator.h
+	TaskQueueI.h TaskI.h TaskLocator.h \
+	GuiderFactoryI.h
 	
 
 snowstar_SOURCES = snowstar.cpp \
@@ -23,7 +24,8 @@ snowstar_SOURCES = snowstar.cpp \
 	DeviceServantLocator.cpp NameConverter.cpp \
 	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
 	TypesI.cpp \
-	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp
+	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp \
+	GuiderFactoryI.cpp GuiderIconversions.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
