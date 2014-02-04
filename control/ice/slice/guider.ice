@@ -151,12 +151,12 @@ module snowstar {
 		/**
 		 * \brief Get the camera that was chosen for the guider
 		 */
-		Camera	getCamera() throws BadState;
+		Camera*	getCamera() throws BadState;
 
 		/**
 		 * \brief Get the CCD that was chosen for the guider
 		 */
-		Ccd	getCcd() throws BadState;
+		Ccd*	getCcd() throws BadState;
 		
 		/**
 		 * \brief Choose a guider port for the guider
@@ -165,7 +165,7 @@ module snowstar {
 		 * it is assumed that the guider port of the chosen
 		 * camera should be used
 		 */
-		GuiderPort	getGuiderPort() throws BadState;
+		GuiderPort*	getGuiderPort() throws BadState;
 
 		/**
 		 * \brief return the descriptor that created the guider
@@ -221,14 +221,6 @@ module snowstar {
 		Image	mostRecentImage() throws BadState;
 
 		/**
-		 * \brief Callback interface for Image updates
-		 *
-		 * \param monitor	an image monitor reference
-		 */
-		int	registerImageMonitor(TrackingImageMonitor imagemonitor);
-		void	unregisterImageMonitor(int imagemonitorid);
-
-		/**
 		 * \brief Polling interface to tracking information
 		 */
 		TrackingPoint	mostRecentTrackingPoint() throws BadState;
@@ -242,29 +234,6 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
-
-		/**
-		 * \brief Callback interface for tracking monitoring
-		 *
-		 * A client interested in updates about tracking activities
-		 * creates a TrackingMonitor service and registeres
-		 * \param monitor	The TrackingMonitor to register.
-		 *			As soon as successfully registered,
-		 *			tracking updates will be sent to
-		 *			monitor.
-		 * \return	The id of the monitor. This id should be
-		 *		used to unregister the service when tracking
-		 *		information is no longer required
-		 */
-		int	registerMonitor(TrackingMonitor monitor);
-
-		/**
-		 * \brief Unregister a monitor client
-		 *
-		 * \param monitorid	Id of the monitor returned with the
-		 *			register call
-		 */
-		void	unregisterMonitor(int monitorid);
 	};
 
 	/**
@@ -289,7 +258,7 @@ module snowstar {
 		/**
 		 * \brief Get a guider based on a guider descriptor
 		 */
-		Guider	get(GuiderDescriptor descriptor) throws NotFound;
+		Guider*	get(GuiderDescriptor descriptor) throws NotFound;
 
 
 		/**
