@@ -4,6 +4,8 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <GuiderPortI.h>
+#include <NameConverter.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -28,6 +30,12 @@ void	GuiderPortI::activate(float ra, float dec, const Ice::Current& current) {
 		decminus = -dec;
 	}
 	_guiderport->activate(raplus, raminus, decplus, decminus);
+}
+
+GuiderPortPrx	GuiderPortI::createProxy(const std::string& guiderportname,
+			const Ice::Current& current) {
+	return snowstar::createProxy<GuiderPortPrx>(
+		NameConverter::urlencode(guiderportname), current);
 }
 
 } // namespace snowstar

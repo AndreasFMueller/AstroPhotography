@@ -29,9 +29,6 @@ static astro::DeviceName::device_type	convert(const devicetype& type);
 	virtual DeviceNameList getDevicelist(devicetype,
 			const Ice::Current& current);
 
-private:
-	Ice::ObjectPrx	getObject(const std::string& name,
-				const Ice::Current& current);
 public:
 	virtual CameraPrx	getCamera(const std::string& name,
 					const Ice::Current& current);

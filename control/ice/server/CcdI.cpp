@@ -4,11 +4,14 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CcdI.h>
+#include <CcdIconversions.h>
 #include <CoolerI.h>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
 #include <NameConverter.h>
 #include <AstroExceptions.h>
+#include <ImageI.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -62,21 +65,7 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 
 	// save image
 	std::string	filename = _imagedirectory.save(image);
-
-	// create an identity
-	std::string	identity = std::string("image/") + filename;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image idenity: %s", identity.c_str());
-
-        // get the adapter and communicator
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-        // build the proxy for the image
-	ImagePrx	proxy = ShortImagePrx::uncheckedCast(
-		adapter->createProxy(ic->stringToIdentity(identity)));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy returned");
-
-        return proxy;
+	return ImageI::createProxy(filename, current);
 }
 
 bool	CcdI::hasGain(const Ice::Current& current) {
@@ -103,16 +92,12 @@ typedef IceUtil::Handle<CoolerI>	CoolerIPtr;
 
 CoolerPrx	CcdI::getCooler(const Ice::Current& current) {
 	std::string	name = NameConverter::urlencode(_ccd->getCooler()->name());
+	return snowstar::createProxy<CoolerPrx>(name, current);
+}
 
-	// get adapter/communicator information
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build the server
-	CoolerPrx proxy = CoolerPrx::uncheckedCast(
-			adapter->createProxy(ic->stringToIdentity(name)));
-	
-	return proxy;
+CcdPrx	CcdI::createProxy(const std::string& ccdname,
+		const Ice::Current& current) {
+	return snowstar::createProxy<CcdPrx>(NameConverter::urlencode(ccdname), current);
 }
 
 } // namespace snowstar

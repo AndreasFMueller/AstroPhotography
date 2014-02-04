@@ -16,6 +16,8 @@
 #include <AstroTask.h>
 #include <TaskQueueI.h>
 #include <TaskLocator.h>
+#include <GuiderFactoryI.h>
+#include <GuiderLocator.h>
 
 namespace snowstar {
 
@@ -68,6 +70,9 @@ int	main(int argc, char *argv[]) {
 		= dbfactory.get(databasefile);
 	astro::task::TaskQueue	taskqueue(database);
 
+	// create guider factory
+	astro::guiding::GuiderFactory	guiderfactory(repository);
+
 	// initialize servant
 	try {
 		// create the adapter
@@ -96,6 +101,13 @@ int	main(int argc, char *argv[]) {
 		adapter->add(object, ic->stringToIdentity("Tasks"));
 		adapter->addServantLocator(new TaskLocator(database), "task");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
+
+		// add a servant for the guider factory
+		GuiderLocator	*guiderlocator = new GuiderLocator();
+		object = new GuiderFactoryI(database, guiderfactory,
+			guiderlocator);
+		adapter->add(object, ic->stringToIdentity("Guiders"));
+		adapter->addServantLocator(guiderlocator, "guider");
 
 		// activate the adapter
 		adapter->activate();

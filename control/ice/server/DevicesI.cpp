@@ -4,9 +4,8 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <DevicesI.h>
-#include <Ice/ObjectAdapter.h>
-#include <Ice/Communicator.h>
 #include <AstroLoader.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -24,47 +23,34 @@ DeviceNameList DevicesI::getDevicelist(devicetype type,
 	return convert(devicelist);
 }
 
-Ice::ObjectPrx	DevicesI::getObject(const std::string& name,
-					const Ice::Current& current) {
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-	try {
-		return adapter->createProxy(ic->stringToIdentity(name));
-	} catch (const astro::BadParameter& badparameter) {
-		throw BadParameter(badparameter.what());
-	} catch (...) {
-		throw NotFound(name);
-	}
-}
-
 CameraPrx	DevicesI::getCamera(const std::string& name,
 					const Ice::Current& current) {
-	return CameraPrx::uncheckedCast(getObject(name, current));
+	return createProxy<CameraPrx>(name, current);
 }
 
 CcdPrx		DevicesI::getCcd(const std::string& name,
 					const Ice::Current& current) {
-	return CcdPrx::uncheckedCast(getObject(name, current));
+	return createProxy<CcdPrx>(name, current);
 }
 
 GuiderPortPrx	DevicesI::getGuiderPort(const std::string& name,
 					const Ice::Current& current) {
-	return GuiderPortPrx::uncheckedCast(getObject(name, current));
+	return createProxy<GuiderPortPrx>(name, current);
 }
 
 FilterWheelPrx	DevicesI::getFilterWheel(const std::string& name,
 					const Ice::Current& current) {
-	return FilterWheelPrx::uncheckedCast(getObject(name, current));
+	return createProxy<FilterWheelPrx>(name, current);
 }
 
 CoolerPrx	DevicesI::getCooler(const std::string& name,
 					const Ice::Current& current) {
-	return CoolerPrx::uncheckedCast(getObject(name, current));
+	return createProxy<CoolerPrx>(name, current);
 }
 
 FocuserPrx	DevicesI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
-	return FocuserPrx::uncheckedCast(getObject(name, current));
+	return createProxy<FocuserPrx>(name, current);
 }
 
 } // namespace snowstar

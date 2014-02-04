@@ -23,17 +23,7 @@ public:
 			: _ccd(ccd), _imagedirectory(imagedirectory) { }
 	virtual	~CcdI();
 
-	// conversion functions for CCD related structures
-static	CcdInfo	convert(const astro::camera::CcdInfo& info);
-
-static	Exposure	convert(const astro::camera::Exposure& exp);
-static	astro::camera::Exposure	convert(const Exposure& exp);
-
-static	ExposureState	convert(const astro::camera::Exposure::State& state);
-static	astro::camera::Exposure::State	convert(const ExposureState& state);
-
-static	ShutterState	convert(const astro::camera::shutter_state& state);
-static	astro::camera::shutter_state	convert(const ShutterState& state);
+static	CcdPrx	createProxy(const std::string& ccdname, const Ice::Current& current);
 
 	// interface methods
 	std::string	getName(const Ice::Current& current);

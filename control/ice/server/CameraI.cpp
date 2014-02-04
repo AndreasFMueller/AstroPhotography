@@ -7,9 +7,9 @@
 #include <GuiderPortI.h>
 #include <FilterWheelI.h>
 #include <CcdI.h>
-#include <Ice/Communicator.h>
-#include <Ice/ObjectAdapter.h>
+#include <CcdIconversions.h>
 #include <NameConverter.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -29,7 +29,7 @@ int	CameraI::nCcds(const Ice::Current& current) {
 
 CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& current) {
 	astro::camera::CcdInfo	info = _camera->getCcdInfo(ccdid);
-	return CcdI::convert(info);
+	return convert(info);
 }
 
 typedef IceUtil::Handle<CcdI>        CcdIPtr;
@@ -37,15 +37,7 @@ typedef IceUtil::Handle<CcdI>        CcdIPtr;
 CcdPrx	CameraI::getCcd(int ccdid, const Ice::Current& current) {
 	std::string	name = NameConverter::urlencode(_camera->getCcd(ccdid)->name());
 
-	// get adapter/communicator information
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build the server
-	CcdPrx proxy = CcdPrx::uncheckedCast(
-			adapter->createProxy(ic->stringToIdentity(name)));
-	
-	return proxy;
+	return CcdI::createProxy(name, current);
 }
 
 bool	CameraI::hasFilterWheel(const Ice::Current& current) {
@@ -56,16 +48,7 @@ typedef IceUtil::Handle<FilterWheelI>        FilterWheelIPtr;
 
 FilterWheelPrx	CameraI::getFilterWheel(const Ice::Current& current) {
 	std::string	name = NameConverter::urlencode(_camera->getFilterWheel()->name());
-
-	// get adapter/communicator information
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build the server
-	FilterWheelPrx proxy = FilterWheelPrx::uncheckedCast(
-			adapter->createProxy(ic->stringToIdentity(name)));
-	
-	return proxy;
+	return FilterWheelI::createProxy(name, current);
 }
 
 bool	CameraI::hasGuiderPort(const Ice::Current& current) {
@@ -76,16 +59,12 @@ typedef IceUtil::Handle<GuiderPortI>        GuiderPortIPtr;
 
 GuiderPortPrx	CameraI::getGuiderPort(const Ice::Current& current) {
 	std::string	name = NameConverter::urlencode(_camera->getGuiderPort()->name());
+	return GuiderPortI::createProxy(name, current);
+}
 
-	// get adapter/communicator information
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build the server
-	GuiderPortPrx proxy = GuiderPortPrx::uncheckedCast(
-			adapter->createProxy(ic->stringToIdentity(name)));
-	
-	return proxy;
+CameraPrx	CameraI::createProxy(const std::string& cameraname,
+			const Ice::Current& current) {
+	return snowstar::createProxy<CameraPrx>(NameConverter::urlencode(cameraname), current);
 }
 
 } // namespace snowstar

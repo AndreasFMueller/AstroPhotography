@@ -22,6 +22,8 @@ public:
 	bool	isOn(const Ice::Current& current);
 	void	setOn(bool onoff, const Ice::Current& current);
 	std::string	getName(const Ice::Current& current);
+static	CoolerPrx	createProxy(const std::string& coolername,
+				const Ice::Current& current);
 };
 
 } // namespace snowstar

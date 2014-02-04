@@ -8,12 +8,16 @@
 #include <TrackingStore.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <GuiderI.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
 GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
-		astro::guiding::GuiderFactoryPtr _guiderfactory)
-	: database(_database), guiderfactory(_guiderfactory) {
+		astro::guiding::GuiderFactory& _guiderfactory,
+		GuiderLocator *_locator)
+	: database(_database), guiderfactory(_guiderfactory),
+	  locator(_locator) {
 }
 
 GuiderFactoryI::~GuiderFactoryI() {
@@ -21,7 +25,7 @@ GuiderFactoryI::~GuiderFactoryI() {
 
 GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
 	std::vector<astro::guiding::GuiderDescriptor>	l
-		= guiderfactory->list();
+		= guiderfactory.list();
 	GuiderList	result;
 	std::vector<astro::guiding::GuiderDescriptor>::const_iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
@@ -32,7 +36,21 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
 
 GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 			const Ice::Current& current) {
-	return NULL;
+	// name of the guider
+	astro::guiding::GuiderDescriptor	d = convert(descriptor);
+	std::string	guidername = d.toString();
+
+	// get an GuiderPtr from teh 
+	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
+
+	// create a GuiderI object
+	Ice::ObjectPtr	guiderptr = new GuiderI(guider);
+
+	// add the guider we have constructed to the D
+	locator->add(guidername, guiderptr);
+
+	// create a proxy
+	return createProxy<GuiderPrx>("guider/" + guidername, current);
 }
 
 idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& current) {
@@ -56,7 +74,7 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 
 Calibration	GuiderFactoryI::getCalibration(int id,
 			const Ice::Current& current) {
-	// XXX use the database to retrieve the complete calibration data
+	// use the database to retrieve the complete calibration data
 	Calibration	calibration;
 	try {
 		astro::guiding::CalibrationTable	ct(database);

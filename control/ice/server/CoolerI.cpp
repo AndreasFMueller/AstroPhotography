@@ -4,6 +4,8 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CoolerI.h>
+#include <NameConverter.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -35,6 +37,12 @@ void	CoolerI::setOn(bool onoff, const Ice::Current& current) {
 
 std::string	CoolerI::getName(const Ice::Current& current) {
 	return _cooler->name();
+}
+
+CoolerPrx	CoolerI::createProxy(const std::string& coolername,
+			const Ice::Current& current) {
+	return snowstar::createProxy<CoolerPrx>(
+		NameConverter::urlencode(coolername), current);
 }
 
 } // namespace snowstar

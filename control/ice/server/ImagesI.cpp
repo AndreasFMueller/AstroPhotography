@@ -6,6 +6,7 @@
 #include <ImagesI.h>
 #include <Ice/Communicator.h>
 #include <Ice/ObjectAdapter.h>
+#include <ImageI.h>
 
 namespace snowstar {
 
@@ -36,17 +37,7 @@ int	ImagesI::imageAge(const std::string& name,
 
 ImagePrx	ImagesI::getImage(const std::string& name,
 				const Ice::Current& current) {
-	std::string	identity = std::string("image/") + name;
-	
-	// get the adapter and communicator
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build the proxy for the image
-	ImagePrx	proxy = ImagePrx::uncheckedCast(
-		adapter->createProxy(ic->stringToIdentity(identity)));
-
-	return proxy;
+	return ImageI::createProxy(name, current);
 }
 
 } // namespace snowtar

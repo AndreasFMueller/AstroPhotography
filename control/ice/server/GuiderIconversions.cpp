@@ -4,10 +4,26 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <GuiderFactoryI.h>
+#include <GuiderI.h>
 #include <TypesI.h>
 #include <AstroGuiding.h>
 
 namespace snowstar {
+
+GuiderState	convert(const astro::guiding::GuiderState& state) {
+	switch (state) {
+	case astro::guiding::unconfigured:
+		return GuiderUNCONFIGURED;
+	case astro::guiding::idle:
+		return GuiderIDLE;
+	case astro::guiding::calibrating:
+		return GuiderCALIBRATING;
+	case astro::guiding::calibrated:
+		return GuiderCALIBRATED;
+	case astro::guiding::guiding:
+		return GuiderGUIDING;
+	}
+}
 
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	GuiderDescriptor	result;

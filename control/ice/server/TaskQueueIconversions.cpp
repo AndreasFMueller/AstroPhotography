@@ -6,6 +6,7 @@
 #include <TaskQueueI.h>
 #include <TypesI.h>
 #include <CcdI.h>
+#include <CcdIconversions.h>
 
 namespace snowstar {
 
@@ -57,13 +58,13 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.ccdtemperature = parameters.ccdtemperature();
 	result.filterwheel = parameters.filterwheel();
 	result.filterposition = parameters.filterposition();
-	result.exp = CcdI::convert(parameters.exposure());
+	result.exp = convert(parameters.exposure());
 	return result;
 }
 
 astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	astro::task::TaskParameters	result;
-	result.exposure(CcdI::convert(parameters.exp));
+	result.exposure(convert(parameters.exp));
 	result.camera(parameters.camera);
 	result.ccdid(parameters.ccdid);
 	result.ccdtemperature(parameters.ccdtemperature);

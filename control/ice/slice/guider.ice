@@ -199,10 +199,6 @@ module snowstar {
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
 
-		// callback stuff for 
-		int	registerCalibrationMonitor(CalibrationMonitor monitor);
-		void	unregisterCalibrationMonitor(int monitorid);
-
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
@@ -218,7 +214,7 @@ module snowstar {
 		/**
 		 * \brief 
 		 */
-		Image	mostRecentImage() throws BadState;
+		Image*	mostRecentImage() throws BadState;
 
 		/**
 		 * \brief Polling interface to tracking information

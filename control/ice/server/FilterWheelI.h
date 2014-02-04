@@ -24,6 +24,8 @@ static	FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 	virtual void	select(int, const Ice::Current& current);
 	virtual std::string	filterName(int, const Ice::Current& current);
 	virtual FilterwheelState	getState(const Ice::Current& current);
+static	FilterWheelPrx	createProxy(const std::string& filterwheelname,
+		const Ice::Current& current);
 };
 
 } // namespace snowstar

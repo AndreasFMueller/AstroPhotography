@@ -21,6 +21,8 @@ public:
 	virtual std::string	getName(const Ice::Current& current);
 	virtual Ice::Byte	active(const Ice::Current& current);
 	virtual void	activate(float, float, const Ice::Current& current);
+static	GuiderPortPrx	createProxy(const std::string& name,
+		const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -8,6 +8,7 @@
 
 #include <guider.h>
 #include <AstroGuiding.h>
+#include <GuiderLocator.h>
 
 namespace snowstar {
 
@@ -20,10 +21,12 @@ CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
 
 class GuiderFactoryI : public GuiderFactory {
 	astro::persistence::Database	database;
-	astro::guiding::GuiderFactoryPtr	guiderfactory;
+	astro::guiding::GuiderFactory&	guiderfactory;
+	GuiderLocator	*locator;
 public:
 	GuiderFactoryI(astro::persistence::Database database,
-		astro::guiding::GuiderFactoryPtr guiderfactory);
+		astro::guiding::GuiderFactory& guiderfactory,
+		GuiderLocator *locator);
 	virtual ~GuiderFactoryI();
 	// conversions
 

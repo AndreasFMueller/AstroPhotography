@@ -9,6 +9,7 @@
 #include <Ice/Communicator.h>
 #include <TaskQueueI.h>
 #include <TaskTable.h>
+#include <ImageI.h>
 
 namespace snowstar {
 
@@ -45,18 +46,8 @@ std::string	TaskI::imagename(const Ice::Current& current) {
 }
 
 ImagePrx	TaskI::getImage(const Ice::Current& current) {
-	std::ostringstream	out;
-	out << "images/" << entry().filename();
-	std::string	identity = out.str();
-
-	// get the adapter and communicator
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-        // build the proxy for the image
-	ImagePrx	proxy = ShortImagePrx::uncheckedCast(
-		adapter->createProxy(ic->stringToIdentity(identity)));
-	return proxy;
+	std::string	filename = entry().filename();
+	return ImageI::createProxy(filename, current);
 }
 
 } // namespace snowstar

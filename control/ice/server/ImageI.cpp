@@ -10,6 +10,9 @@
 #include <includes.h>
 #include <AstroImage.h>
 #include <TypesI.h>
+#include <Ice/ObjectAdapter.h>
+#include <Ice/Communicator.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -177,6 +180,12 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& current) {
         sequence_yuyv(unsigned short, size);
         sequence_rgb(unsigned short, size);
 	return result;
+}
+
+ImagePrx	ImageI::createProxy(const std::string& filename,
+			const Ice::Current& current) {
+	std::string	identity = std::string("image/") + filename;
+	return snowstar::createProxy<ImagePrx>(identity, current);
 }
 
 } // namespace snowstar

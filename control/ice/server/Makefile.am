@@ -8,13 +8,13 @@ if ENABLE_ICE
 
 bin_PROGRAMS = snowstar
 
-noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CameraI.h \
+noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CcdIconversions.h CameraI.h \
 	FilterWheelI.h GuiderPortI.h FocuserI.h \
 	DeviceServantLocator.h NameConverter.h \
 	ImagesI.h ImageI.h ImageLocator.h \
 	TypesI.h \
 	TaskQueueI.h TaskI.h TaskLocator.h \
-	GuiderFactoryI.h
+	GuiderIconversions.h GuiderFactoryI.h GuiderI.h GuiderLocator.h
 	
 
 snowstar_SOURCES = snowstar.cpp \
@@ -25,7 +25,7 @@ snowstar_SOURCES = snowstar.cpp \
 	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
 	TypesI.cpp \
 	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp \
-	GuiderFactoryI.cpp GuiderIconversions.cpp
+	GuiderIconversions.cpp GuiderFactoryI.cpp GuiderI.cpp GuiderLocator.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

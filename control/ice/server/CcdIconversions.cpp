@@ -3,15 +3,12 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <CcdI.h>
-#include <CoolerI.h>
-#include <Ice/ObjectAdapter.h>
-#include <Ice/Communicator.h>
+#include <CcdIconversions.h>
 #include <AstroDebug.h>
 
 namespace snowstar {
 
-CcdInfo	CcdI::convert(const astro::camera::CcdInfo& info) {
+CcdInfo	convert(const astro::camera::CcdInfo& info) {
 	CcdInfo	result;
 	result.name = info.name();
 	result.id = info.getId();
@@ -32,7 +29,7 @@ CcdInfo	CcdI::convert(const astro::camera::CcdInfo& info) {
 	return result;
 }
 
-Exposure	CcdI::convert(const astro::camera::Exposure& exp) {
+Exposure	convert(const astro::camera::Exposure& exp) {
 	Exposure	exposure;
 	exposure.frame.origin.x = exp.frame.origin().x();
 	exposure.frame.origin.y = exp.frame.origin().y();
@@ -47,7 +44,7 @@ Exposure	CcdI::convert(const astro::camera::Exposure& exp) {
 	return exposure;
 }
 
-astro::camera::Exposure	CcdI::convert(const Exposure& exposure) {
+astro::camera::Exposure	convert(const Exposure& exposure) {
 	astro::camera::Exposure	exp;
 	exp.frame = astro::image::ImageRectangle(
 		astro::image::ImagePoint(exposure.frame.origin.x,
@@ -63,7 +60,7 @@ astro::camera::Exposure	CcdI::convert(const Exposure& exposure) {
 	return exp;
 }
 
-ExposureState	CcdI::convert(const astro::camera::Exposure::State& s) {
+ExposureState	convert(const astro::camera::Exposure::State& s) {
 	switch (s) {
 	case astro::camera::Exposure::idle:
 		return IDLE;
@@ -76,7 +73,7 @@ ExposureState	CcdI::convert(const astro::camera::Exposure::State& s) {
 	}
 }
 
-astro::camera::Exposure::State	CcdI::convert(const ExposureState& s) {
+astro::camera::Exposure::State	convert(const ExposureState& s) {
 	switch (s) {
 	case IDLE:
 		return astro::camera::Exposure::idle;
@@ -89,7 +86,7 @@ astro::camera::Exposure::State	CcdI::convert(const ExposureState& s) {
 	}
 }
 
-ShutterState	CcdI::convert(const astro::camera::shutter_state& s) {
+ShutterState	convert(const astro::camera::shutter_state& s) {
 	ShutterState	result = snowstar::ShOPEN;
 	switch (s) {
 	case astro::camera::SHUTTER_OPEN:
@@ -105,7 +102,7 @@ ShutterState	CcdI::convert(const astro::camera::shutter_state& s) {
 	return result;
 }
 
-astro::camera::shutter_state	CcdI::convert(const ShutterState& s) {
+astro::camera::shutter_state	convert(const ShutterState& s) {
 	astro::camera::shutter_state	result = astro::camera::SHUTTER_OPEN;
 	switch (s) {
 	case snowstar::ShOPEN:

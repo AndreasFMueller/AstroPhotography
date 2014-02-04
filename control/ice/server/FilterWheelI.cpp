@@ -4,6 +4,8 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <FilterWheelI.h>
+#include <NameConverter.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -44,6 +46,12 @@ FilterwheelState	FilterWheelI::convert(const astro::camera::FilterWheel::State& 
 
 FilterwheelState	FilterWheelI::getState(const Ice::Current& current) {
 	return convert(_filterwheel->getState());
+}
+
+FilterWheelPrx	FilterWheelI::createProxy(const std::string& filterwheelname,
+	const Ice::Current& current) {
+	return snowstar::createProxy<FilterWheelPrx>(
+		NameConverter::urlencode(filterwheelname), current);
 }
 
 } // namespace snowstar
