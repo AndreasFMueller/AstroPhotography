@@ -37,7 +37,7 @@ public:
 	virtual ImageFile	file(const Ice::Current& current);
 	virtual int	filesize(const Ice::Current& current);
 	virtual void	remove(const Ice::Current& current);
-static	ImagePrx	createProxy(const std::string& filename,
+	ImagePrx	createProxy(const std::string& filename,
 				const Ice::Current& current);
 };
 

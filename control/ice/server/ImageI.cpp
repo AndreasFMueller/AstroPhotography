@@ -185,7 +185,13 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& current) {
 ImagePrx	ImageI::createProxy(const std::string& filename,
 			const Ice::Current& current) {
 	std::string	identity = std::string("image/") + filename;
-	return snowstar::createProxy<ImagePrx>(identity, current);
+	switch (_bytesperpixel) {
+	case 1:
+		return snowstar::createProxy<ByteImagePrx>(identity, current);
+	case 2:
+		return snowstar::createProxy<ShortImagePrx>(identity, current);
+	}
+	throw BadParameter("image has unsupported pixel type");
 }
 
 } // namespace snowstar

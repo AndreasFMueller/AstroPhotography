@@ -32,6 +32,7 @@ public:
 	bool	isFile(const std::string& filename) const;
 	long	fileSize(const std::string& filename) const;
 	long	fileAge(const std::string& filename) const;
+	int	bytesPerPixel(const std::string& filename) const;
 	virtual std::list<std::string>	fileList() const;
 	virtual std::string	save(astro::image::ImagePtr image);
 	virtual void	remove(const std::string& filename);

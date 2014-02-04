@@ -47,7 +47,8 @@ std::string	TaskI::imagename(const Ice::Current& current) {
 
 ImagePrx	TaskI::getImage(const Ice::Current& current) {
 	std::string	filename = entry().filename();
-	return ImageI::createProxy(filename, current);
+	//return ImageI::createProxy(filename, current);
+	return NULL;
 }
 
 } // namespace snowstar

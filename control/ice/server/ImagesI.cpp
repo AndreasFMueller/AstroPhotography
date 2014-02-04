@@ -4,8 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <ImagesI.h>
-#include <Ice/Communicator.h>
-#include <Ice/ObjectAdapter.h>
+#include <ProxyCreator.h>
 #include <ImageI.h>
 
 namespace snowstar {
@@ -35,9 +34,23 @@ int	ImagesI::imageAge(const std::string& name,
 	return imagedirectory.fileAge(name);
 }
 
-ImagePrx	ImagesI::getImage(const std::string& name,
+ImagePrx	getImage(const std::string& filename,
+			astro::image::ImageDirectory& imagedirectory,
 				const Ice::Current& current) {
-	return ImageI::createProxy(name, current);
+	// find the identity
+	std::string     identity = std::string("image/") + filename;
+
+	// find the number bytes per pixel
+	int	bytesperpixel = imagedirectory.bytesPerPixel(filename);
+
+	// create the proxy
+	switch (bytesperpixel) {
+	case 1:
+		return snowstar::createProxy<ByteImagePrx>(identity, current);
+	case 2:
+		return snowstar::createProxy<ShortImagePrx>(identity, current);
+	}
+	throw BadParameter("pixel format not supported");
 }
 
 } // namespace snowtar

@@ -11,6 +11,10 @@
 
 namespace snowstar {
 
+ImagePrx	getImage(const std::string& name,
+			astro::image::ImageDirectory& imagedirectory,
+			const Ice::Current& current);
+
 class ImagesI : public Images {
 	astro::image::ImageDirectory&	imagedirectory;
 public:
@@ -22,7 +26,9 @@ public:
 	int	imageAge(const std::string& name,
 				const Ice::Current& current);
 	ImagePrx	getImage(const std::string& name,
-				const Ice::Current& current);
+				const Ice::Current& current) {
+		return snowstar::getImage(name, imagedirectory, current);
+	}
 };
 
 } // namespace snowtar

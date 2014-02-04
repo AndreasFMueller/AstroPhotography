@@ -72,6 +72,34 @@ long	ImageDirectory::fileAge(const std::string& name) const {
 }
 
 /**
+ * \brief Get the pixel size
+ * 
+ * For this we read the headers of the FITS file, and derive the size from
+ * the header information.
+ */
+int	ImageDirectory::bytesPerPixel(const std::string& filename) const {
+	std::string	f = fullname(filename);
+	io::FITSinfileBase	infile(f);
+
+	switch (infile.getImgtype()) {
+	case BYTE_IMG:
+	case SBYTE_IMG:
+		return sizeof(unsigned char) * infile.getPlanes();
+	case USHORT_IMG:
+	case SHORT_IMG:
+		return sizeof(unsigned short) * infile.getPlanes();
+	case ULONG_IMG:
+	case LONG_IMG:
+		return sizeof(unsigned long) * infile.getPlanes();
+	case FLOAT_IMG:
+		return sizeof(float) * infile.getPlanes();
+	case DOUBLE_IMG:
+		return sizeof(double) * infile.getPlanes();
+	}
+	return 2;
+}
+
+/**
  * \brief Get a list of file names
  */
 std::list<std::string>	ImageDirectory::fileList() const {

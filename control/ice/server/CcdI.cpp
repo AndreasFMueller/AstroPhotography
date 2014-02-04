@@ -6,12 +6,12 @@
 #include <CcdI.h>
 #include <CcdIconversions.h>
 #include <CoolerI.h>
-#include <Ice/ObjectAdapter.h>
-#include <Ice/Communicator.h>
 #include <NameConverter.h>
 #include <AstroExceptions.h>
 #include <ImageI.h>
+#include <ImagesI.h>
 #include <ProxyCreator.h>
+#include <AstroExceptions.h>
 
 namespace snowstar {
 
@@ -44,8 +44,8 @@ int	CcdI::lastExposureStart(const Ice::Current& current) {
 void	CcdI::cancelExposure(const Ice::Current& current) {
 	try {
 		_ccd->cancelExposure();
-	} catch (...) {
-		// XXX handle exceptions
+	} catch (const astro::camera::BadState& badstate) {
+		throw BadState(badstate.what());
 	}
 }
 
@@ -65,7 +65,8 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 
 	// save image
 	std::string	filename = _imagedirectory.save(image);
-	return ImageI::createProxy(filename, current);
+	
+	return snowstar::getImage(filename, _imagedirectory, current);
 }
 
 bool	CcdI::hasGain(const Ice::Current& current) {

@@ -64,6 +64,7 @@ public:
 	int	getPixeltype() const { return pixeltype; }
 	int	getPlanes() const { return planes; }
 	int	getImgtype() const { return imgtype; }
+	int	getBytesPerPixel() const;
 };
 
 /**
