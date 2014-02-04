@@ -7,8 +7,7 @@
 #include <algorithm>
 #include <AstroFormat.h>
 #include <sstream>
-#include <Ice/Communicator.h>
-#include <Ice/ObjectAdapter.h>
+#include <ProxyCreator.h>
 
 namespace snowstar {
 
@@ -78,16 +77,8 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "identity for task: %s",
 		identity.c_str());
 
-	// get the adapter and communicator
-	Ice::ObjectAdapterPtr	adapter = current.adapter;
-	Ice::CommunicatorPtr	ic = adapter->getCommunicator();
-
-	// build a proxy for the task
-	TaskPrx	proxy = TaskPrx::uncheckedCast(
-		adapter->createProxy(ic->stringToIdentity(identity)));
-
-	// create a proxy for this task
-	return proxy;
+	// create the proxy
+	return createProxy<TaskPrx>(identity, current);
 }
 
 } // namespace snowstar
