@@ -19,8 +19,9 @@ namespace guiding {
  * only the derived class knows the work function that must be executed
  * by the thread.
  */
-GuidingProcess::GuidingProcess(Guider& guider, TrackerPtr tracker)
-	: _guider(guider), _tracker(tracker) {
+GuidingProcess::GuidingProcess(Guider& guider, TrackerPtr tracker,
+	persistence::Database database)
+	: _guider(guider), _tracker(tracker), _database(database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a guiding process: exposure %s", _guider.exposure().toString().c_str());
 }
 

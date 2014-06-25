@@ -9,6 +9,7 @@
 #include <guider.h>
 #include <AstroGuiding.h>
 #include <GuiderLocator.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
@@ -23,10 +24,12 @@ class GuiderFactoryI : public GuiderFactory {
 	astro::persistence::Database	database;
 	astro::guiding::GuiderFactory&	guiderfactory;
 	GuiderLocator	*locator;
+	astro::image::ImageDirectory	imagedirectory;
 public:
 	GuiderFactoryI(astro::persistence::Database database,
 		astro::guiding::GuiderFactory& guiderfactory,
-		GuiderLocator *locator);
+		GuiderLocator *locator,
+		astro::image::ImageDirectory& imagedirectory);
 	virtual ~GuiderFactoryI();
 	// conversions
 

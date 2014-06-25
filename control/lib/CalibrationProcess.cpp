@@ -225,8 +225,9 @@ double	CalibrationProcess::gridconstant(double focallength,
 /**
  * \brief Construct a guider from 
  */
-CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker)
-	: GuidingProcess(_guider, _tracker) {
+CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker,
+	persistence::Database _database)
+	: GuidingProcess(_guider, _tracker, _database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	_focallength = 0.600;
 	_pixelsize = 0.000010;

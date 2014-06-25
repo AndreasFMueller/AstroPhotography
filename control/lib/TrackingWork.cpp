@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <sstream>
 #include <iomanip>
+#include <TrackingPersistence.h>
 
 namespace astro {
 namespace guiding {
@@ -46,9 +47,6 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	_gain = 1;
 	_interval = 10;
 
-	// set the default tracking length -1, which turns the history off
-	_history_length = -1;
-
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
 	// using the 
@@ -72,6 +70,22 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// We expect to have done something more useful by then
 	_driving.setCorrection(tx, ty);
 #endif
+
+	// if we have a database, then we should create a new record
+	if (database()) {
+		GuidingRun	guidingrun;
+		guidingrun.camera = guider().cameraname();
+		guidingrun.ccdid = guider().ccdid();
+		guidingrun.guiderport = guider().guiderportname();
+		time(&guidingrun.whenstarted);
+
+		// add guiding run record to the database
+		GuidingRunRecord	record(0, guidingrun);
+		GuidingRunTable	guidingruntable(database());
+		_id = guidingruntable.add(record);
+	} else {
+		_id = 0;
+	}
 }
 
 /**
@@ -175,9 +189,6 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 			offset.toString().c_str(),
 			correction.toString().c_str());
 
-		// add the correction to the history
-		addHistory(correction);
-
 		// compute the correction, but this must be done with tx, ty
 		// protected from concurrent access, because it may be in an
 		// illegal state temporarily. We also have to divide by the
@@ -191,15 +202,22 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 		//_driving.setCorrection(0, 0);
 
 		// remember information for monitoring
-		_lastaction = Timer::gettime();
-		_offset = offset;
-		_activation = -correction;
+		_last.t = Timer::gettime();
+		_last.trackingoffset = offset;
+		_last.correction = -correction;
+
+		// if we have a database, add the point to the tracking table
+		if (database()) {
+			// add point to table
+			TrackingPointRecord	tracking(0, _id, _last);
+			TrackingTable	trackingtable(database());
+			trackingtable.add(tracking);
+		}
 
 		// inform the callback, if there is one
 		if (guider().trackingcallback) {
 			callback::CallbackDataPtr	trackinginfo(
-				new TrackingPoint(_lastaction, _offset,
-					_activation));
+				new TrackingPoint(_last));
 			(*(guider().trackingcallback))(trackinginfo);
 		}
 
@@ -221,43 +239,6 @@ void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
 }
 
 /**
- * \brief Add a new entry to the tracking history
- *
- * This method removes entries from the front of the tracking history if
- * the history would otherwise become too large.
- * \param point		new tracking offset
- */
-void	TrackingWork::addHistory(const Point& point) {
-	// return immediately if the tracking history is turned off
-	if (_history_length < 0) {
-		return;
-	}
-	double	now = Timer::gettime();
-	trackinghistoryentry	entry(now, point);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking history entry: %s",
-		toString(entry).c_str());
-	// _history_length == 0 means unlimited tracking history length
-	if (_history_length > 0) {
-		while (trackinghistory.size() > _history_length) {
-			trackinghistory.pop_front();
-		}
-	}
-	trackinghistory.push_back(entry);
-	// for debugging
-	dumpHistory(std::cout);
-}
-
-/**
- * \brief Dump the tracking history to a stream
- */
-void	TrackingWork::dumpHistory(std::ostream& out) {
-	trackinghistory_type::const_iterator	i;
-	for (i = trackinghistory.begin(); i != trackinghistory.end(); i++) {
-		out << (*i) << std::endl;
-	}
-}
-
-/**
  * \brief retrieve last action information
  *
  * \param actiontime	time since the last action happened
@@ -267,9 +248,9 @@ void	TrackingWork::dumpHistory(std::ostream& out) {
  */
 void	TrackingWork::lastAction(double& actiontime, Point& offset,
 		Point& activation) {
-	actiontime = Timer::gettime() - _lastaction;
-	offset = _offset;
-	activation = _activation;
+	actiontime = Timer::gettime() - _last.t;
+	offset = _last.trackingoffset;
+	activation = _last.correction;
 }
 
 } // namespace guiding

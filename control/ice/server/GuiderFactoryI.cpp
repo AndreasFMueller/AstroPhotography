@@ -15,9 +15,10 @@ namespace snowstar {
 
 GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
 		astro::guiding::GuiderFactory& _guiderfactory,
-		GuiderLocator *_locator)
+		GuiderLocator *_locator,
+		ImageDirectory& _imagedirectory)
 	: database(_database), guiderfactory(_guiderfactory),
-	  locator(_locator) {
+	  locator(_locator), imagedirectory(_imagedirectory) {
 }
 
 GuiderFactoryI::~GuiderFactoryI() {
@@ -44,7 +45,8 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
 
 	// create a GuiderI object
-	Ice::ObjectPtr	guiderptr = new GuiderI(guider);
+	Ice::ObjectPtr	guiderptr = new GuiderI(guider, imagedirectory,
+		database);
 
 	// add the guider we have constructed to the D
 	locator->add(guidername, guiderptr);

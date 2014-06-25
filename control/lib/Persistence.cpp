@@ -345,7 +345,7 @@ void	UpdateSpec::bindid(StatementPtr& stmt, int id) const {
 //////////////////////////////////////////////////////////////////////
 // TableBase implementation
 //////////////////////////////////////////////////////////////////////
-TableBase::TableBase(Database& database, const std::string& tablename,
+TableBase::TableBase(Database database, const std::string& tablename,
 	const std::string& createstatement)
 	: _database(database), _tablename(tablename) {
 	// test whether the database contains the table

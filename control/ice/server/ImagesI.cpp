@@ -34,23 +34,29 @@ int	ImagesI::imageAge(const std::string& name,
 	return imagedirectory.fileAge(name);
 }
 
-ImagePrx	getImage(const std::string& filename,
-			astro::image::ImageDirectory& imagedirectory,
+ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 				const Ice::Current& current) {
 	// find the identity
 	std::string     identity = std::string("image/") + filename;
 
-	// find the number bytes per pixel
-	int	bytesperpixel = imagedirectory.bytesPerPixel(filename);
-
 	// create the proxy
-	switch (bytesperpixel) {
+	switch (bytesPerPixel) {
 	case 1:
 		return snowstar::createProxy<ByteImagePrx>(identity, current);
 	case 2:
 		return snowstar::createProxy<ShortImagePrx>(identity, current);
 	}
 	throw BadParameter("pixel format not supported");
+}
+
+ImagePrx	getImage(const std::string& filename,
+			astro::image::ImageDirectory& imagedirectory,
+				const Ice::Current& current) {
+	// find the number bytes per pixel
+	int	bytesperpixel = imagedirectory.bytesPerPixel(filename);
+
+	// create the proxy
+	return getImage(filename, bytesperpixel, current);
 }
 
 } // namespace snowtar

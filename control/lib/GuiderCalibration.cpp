@@ -92,26 +92,6 @@ Point	GuiderCalibration::operator()(const Point& offset, double Deltat) const {
 }
 
 /**
- * \brief Access to the calibration data
- */
-const double&	GuiderCalibration::operator[](size_t index) const {
-	if (index > 5) {
-		throw std::range_error("calibration data index too large");
-	}
-	return a[index];
-}
-
-/**
- * \brief Access to the calibration data
- */
-double&	GuiderCalibration::operator[](size_t index) {
-	if (index > 5) {
-		throw std::range_error("calibration data index too large");
-	}
-	return a[index];
-}
-
-/**
  * \brief Rescale the grid dependent part of the calibration
  */
 void	GuiderCalibration::rescale(double scalefactor) {
@@ -150,7 +130,7 @@ std::istream&	operator>>(std::istream& in, GuiderCalibration& cal) {
 	absorb(in, ']');
 	// only if we get to this point can we assume that the calibration
 	// was successfully read, and can copy it to the target calibration
-	for (int i = 0; i < 6; i++) { cal[i] = a[i]; }
+	for (int i = 0; i < 6; i++) { cal.a[i] = a[i]; }
 	return in;
 }
 

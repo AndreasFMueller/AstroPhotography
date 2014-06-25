@@ -57,7 +57,8 @@ private:
 	CalibrationProcess(const CalibrationProcess& other);
 	CalibrationProcess&	operator=(const CalibrationProcess& other);
 public:
-	CalibrationProcess(Guider& guider, TrackerPtr tracker);
+	CalibrationProcess(Guider& guider, TrackerPtr tracker,
+		persistence::Database database);
 	~CalibrationProcess();
 	void	calibrate(double focallength, double pixelsize);
 	// the main function of the process

@@ -13,6 +13,7 @@
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
 #include <ProxyCreator.h>
+#include <ImagesI.h>
 
 namespace snowstar {
 
@@ -24,7 +25,7 @@ ImageI::ImageI(astro::image::ImageDirectory& imagedirectory,
 	// size
 	_size = convert(_image->size());
 	// bytes per pixel
-	_bytesperpixel = astro::image::filter::bytesperpixel(_image);
+	_bytesperpixel = _image->bytesPerPixel();
 	// bytes per value
 	_bytespervalue = astro::image::filter::bytespervalue(_image);
 	// planes
@@ -184,14 +185,7 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& current) {
 
 ImagePrx	ImageI::createProxy(const std::string& filename,
 			const Ice::Current& current) {
-	std::string	identity = std::string("image/") + filename;
-	switch (_bytesperpixel) {
-	case 1:
-		return snowstar::createProxy<ByteImagePrx>(identity, current);
-	case 2:
-		return snowstar::createProxy<ShortImagePrx>(identity, current);
-	}
-	throw BadParameter("image has unsupported pixel type");
+	return getImage(filename, _bytesperpixel, current);
 }
 
 } // namespace snowstar

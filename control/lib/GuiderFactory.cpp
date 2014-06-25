@@ -90,7 +90,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "components constructed");
 
 	// with all these components we can now build a new guider
-	GuiderPtr	guider(new Guider(camera, ccd, guiderport));
+	GuiderPtr	guider(new Guider(camera, ccd, guiderport, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	return guider;
 }

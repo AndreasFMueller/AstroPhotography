@@ -21,6 +21,7 @@ public:
 		: _database(database) { }
 	std::list<long>	getAllCalibrations();
 	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
+	GuiderCalibration	getCalibration(long id);
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);
 };
 

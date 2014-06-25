@@ -71,7 +71,7 @@ int	main(int argc, char *argv[]) {
 	astro::task::TaskQueue	taskqueue(database);
 
 	// create guider factory
-	astro::guiding::GuiderFactory	guiderfactory(repository);
+	astro::guiding::GuiderFactory	guiderfactory(repository, database);
 
 	// initialize servant
 	try {
@@ -105,7 +105,7 @@ int	main(int argc, char *argv[]) {
 		// add a servant for the guider factory
 		GuiderLocator	*guiderlocator = new GuiderLocator();
 		object = new GuiderFactoryI(database, guiderfactory,
-			guiderlocator);
+			guiderlocator, imagedirectory);
 		adapter->add(object, ic->stringToIdentity("Guiders"));
 		adapter->addServantLocator(guiderlocator, "guider");
 

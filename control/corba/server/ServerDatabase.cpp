@@ -86,6 +86,9 @@ TrackingHistory	*ServerDatabase::getTrackingHistory(CORBA::Long id) {
 /**
  * \brief Get a calibration based on the id
  */
+// XXX This method is redundant, the CalibrationStore class now implements
+// XXX essentially the same functionality. This method should be reimplemented
+// XXX base on the calibration store
 Astro::Calibration	*ServerDatabase::getCalibration(CORBA::Long id) {
 	Calibration	*calibration = new Calibration();
 	try {

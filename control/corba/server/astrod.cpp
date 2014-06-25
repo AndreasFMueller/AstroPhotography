@@ -188,7 +188,7 @@ int	astrod_main(int argc, char *argv[]) {
 	// create a servant for the guider factory
 	astro::module::Repository	repository;
 	astro::guiding::GuiderFactoryPtr
-		gfptr(new astro::guiding::GuiderFactory(repository));
+		gfptr(new astro::guiding::GuiderFactory(repository, database));
 	Astro::GuiderFactory_impl	*guiderfactory
 		= new Astro::GuiderFactory_impl(gfptr);
 	PortableServer::ObjectId_var	guiderfactorysid

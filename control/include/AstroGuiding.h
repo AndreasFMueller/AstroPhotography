@@ -27,11 +27,11 @@ namespace guiding {
  */
 template<typename Pixel>
 class StarDetector {
-	const astro::image::ConstImageAdapter<Pixel>&	image;
+	const image::ConstImageAdapter<Pixel>&	image;
 public:
-	StarDetector(const astro::image::ConstImageAdapter<Pixel>& _image);
+	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
 	Point	operator()(
-		const astro::image::ImageRectangle& rectangle,
+		const image::ImageRectangle& rectangle,
 		unsigned int k) const;
 }; 
 
@@ -40,7 +40,7 @@ public:
  */
 template<typename Pixel>
 StarDetector<Pixel>::StarDetector(
-	const astro::image::ConstImageAdapter<Pixel>& _image) : image(_image) {
+	const image::ConstImageAdapter<Pixel>& _image) : image(_image) {
 }
 
 /**
@@ -52,13 +52,13 @@ StarDetector<Pixel>::StarDetector(
  */
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
-		const astro::image::ImageRectangle& rectangle,
+		const image::ImageRectangle& rectangle,
 		unsigned int k) const {
 	// work only in the rectangle
-	astro::adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
+	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
 	// determine the brightest pixel within the rectangle
-	astro::image::ImageSize	size = adapter.getSize();
+	image::ImageSize	size = adapter.getSize();
 	unsigned	maxx = -1, maxy = -1;
 	double	maxvalue = 0;
 	for (unsigned int x = 0; x < size.width(); x++) {
@@ -94,8 +94,8 @@ Point	StarDetector<Pixel>::operator()(
 		rectangle.origin().y() + ysum);
 }
 
-Point	findstar(astro::image::ImagePtr image,
-	const astro::image::ImageRectangle& rectangle, unsigned int k);
+Point	findstar(image::ImagePtr image,
+	const image::ImageRectangle& rectangle, unsigned int k);
 
 /**
  * \brief Tracker class
@@ -105,7 +105,7 @@ Point	findstar(astro::image::ImagePtr image,
  */
 class Tracker {
 public:
-	virtual Point	operator()(astro::image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(image::ImagePtr newimage) const = 0;
 	virtual	std::string	toString() const = 0;
 };
 
@@ -118,24 +118,24 @@ typedef std::shared_ptr<Tracker>	TrackerPtr;
  */
 class StarTracker : public Tracker {
 	Point	_point;
-	astro::image::ImageRectangle _rectangle;
+	image::ImageRectangle _rectangle;
 	unsigned int	_k;
 public:
 	// constructor
 	StarTracker(const Point& point,
-		const astro::image::ImageRectangle& rectangle,
+		const image::ImageRectangle& rectangle,
 		unsigned int k);
 
 	// find the displacement
 	virtual Point	operator()(
-			astro::image::ImagePtr newimage) const;
+			image::ImagePtr newimage) const;
 
 	// accessors for teh tracker configuration data
-	const astro::image::ImageRectangle&	rectangle() const {
+	const image::ImageRectangle&	rectangle() const {
 		return _rectangle;
 	}
-	astro::image::ImageRectangle&	rectangle() { return _rectangle; }
-	void	rectangle(const astro::image::ImageRectangle& r) {
+	image::ImageRectangle&	rectangle() { return _rectangle; }
+	void	rectangle(const image::ImageRectangle& r) {
 		_rectangle = r;
 	}
 
@@ -161,11 +161,10 @@ std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
  * where there is no good guide star.
  */
 class PhaseTracker : public Tracker {
-	astro::image::ImagePtr	image;
+	image::ImagePtr	image;
 public:
-	PhaseTracker(astro::image::ImagePtr image);
-	virtual Point	operator()(
-			astro::image::ImagePtr newimage) const;
+	PhaseTracker(image::ImagePtr image);
+	virtual Point	operator()(image::ImagePtr newimage) const;
 	virtual std::string	toString() const;
 };
 
@@ -174,56 +173,15 @@ public:
  *
  * Callback data for the guider transports an image
  */
-class GuiderNewImageCallbackData : public astro::callback::CallbackData {
-	astro::image::ImagePtr	_image;
+class GuiderNewImageCallbackData : public callback::CallbackData {
+	image::ImagePtr	_image;
 public:
-	GuiderNewImageCallbackData(astro::image::ImagePtr image)
+	GuiderNewImageCallbackData(image::ImagePtr image)
 		: _image(image) { }
-	astro::image::ImagePtr	image() { return _image; }
+	image::ImagePtr	image() { return _image; }
 };
 
 class GuiderCalibrator;
-
-/**
- * \brief GuiderCalibration
- *
- * The Calibration data. The coefficients in the array a correspond to
- * a matrix that describes how the control commands on the guider port
- * translate into displacements of the guider image.
- */
-class GuiderCalibration {
-	friend class GuiderCalibrator;
-	double	a[6];
-	double	det() const;
-public:
-	GuiderCalibration();
-	GuiderCalibration(const double coefficients[6]);
-	std::string	toString() const;
-	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset, double Deltat) const;
-
-	const double&	operator[](size_t index) const;
-	double&	operator[](size_t index);
-
-	void	rescale(double scalefactor);
-	bool	iscalibrated() const { return 0. != det(); }
-};
-
-std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
-std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
-
-/**
- * \brief Encapsulation of the calibration as callback argument
- */
-class GuiderCalibrationCallbackData : public astro::callback::CallbackData {
-	GuiderCalibration	_calibration;
-public:
-	GuiderCalibrationCallbackData(const GuiderCalibration& calibration)
-		: _calibration(calibration) { }
-	const GuiderCalibration&	calibration() const {
-		return _calibration;
-	}
-};
 
 /**
  * \brief CalibrationPoint
@@ -238,12 +196,50 @@ public:
 		: t(_t), offset(_offset), star(_star) { }
 };
 
+/**
+ * \brief GuiderCalibration
+ *
+ * The Calibration data. The coefficients in the array a correspond to
+ * a matrix that describes how the control commands on the guider port
+ * translate into displacements of the guider image.
+ */
+class GuiderCalibration : public std::vector<CalibrationPoint> {
+public:
+	double	a[6];
+	double	det() const;
+	GuiderCalibration();
+	GuiderCalibration(const double coefficients[6]);
+	std::string	toString() const;
+	Point	defaultcorrection() const;
+	Point	operator()(const Point& offset, double Deltat) const;
+
+	void	rescale(double scalefactor);
+	bool	iscalibrated() const { return 0. != det(); }
+	void	add(const CalibrationPoint& p) { push_back(p); }
+};
+
+std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
+std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
+
+/**
+ * \brief Encapsulation of the calibration as callback argument
+ */
+class GuiderCalibrationCallbackData : public callback::CallbackData {
+	GuiderCalibration	_calibration;
+public:
+	GuiderCalibrationCallbackData(const GuiderCalibration& calibration)
+		: _calibration(calibration) { }
+	const GuiderCalibration&	calibration() const {
+		return _calibration;
+	}
+};
+
 std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
 
 /**
  * \brief Calibration Point encapsulation as callback argument
  */
-class CalibrationPointCallbackData : public astro::callback::CallbackData {
+class CalibrationPointCallbackData : public callback::CallbackData {
 	CalibrationPoint	_calibrationpoint;
 public:
 	CalibrationPointCallbackData(const CalibrationPoint& calibrationpoint)
@@ -262,7 +258,7 @@ public:
  * method then computes the calibration data.
  */
 class GuiderCalibrator {
-	std::vector<CalibrationPoint>	calibration_data;
+	GuiderCalibration	_calibration;
 public:
 	GuiderCalibrator();
 	void	add(const CalibrationPoint& calibrationpoint);
@@ -272,11 +268,12 @@ public:
 /**
  * \brief Class to report data 
  */
-class TrackingPoint : public astro::callback::CallbackData {
+class TrackingPoint : public callback::CallbackData {
 public:
 	double	t;
 	Point	trackingoffset;
 	Point	correction;
+	TrackingPoint() : t(0) { }
 	TrackingPoint(const double& actiontime,
 		const Point& offset, const Point& activation)
 		: t(actiontime), trackingoffset(offset),
@@ -331,7 +328,7 @@ public:
 	operator const GuiderState () const { return _state; }
 
 	// construct the state machine
-	GuiderStateMachine() : _state(astro::guiding::unconfigured) { }
+	GuiderStateMachine() : _state(guiding::unconfigured) { }
 
 	// methods to find out whether we can accept a configuration, or
 	// start calibration or guiding
@@ -369,11 +366,13 @@ public:
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
-	astro::camera::CameraPtr	_camera;
-	astro::camera::GuiderPortPtr	_guiderport;
+	camera::CameraPtr	_camera;
+	camera::GuiderPortPtr	_guiderport;
 public:
-	astro::camera::GuiderPortPtr	guiderport() { return _guiderport; }
-	astro::camera::CameraPtr	camera() { return _camera; }
+	camera::CameraPtr	camera() { return _camera; }
+	std::string	cameraname() { return _camera->name(); }
+	camera::GuiderPortPtr	guiderport() { return _guiderport; }
+	std::string	guiderportname() { return _guiderport->name(); }
 private:
 	/*
 	 * \brief Image for guiding
@@ -384,12 +383,12 @@ private:
 	 * parameters, e. g. can add a dark image, or enable pixel
 	 * interpolation
 	 */
-	astro::camera::Imager	_imager;
+	camera::Imager	_imager;
 public:
-	const astro::camera::Imager&	imager() const { return _imager; }
-	astro::camera::Imager&	imager() { return _imager; }
-	astro::camera::CcdPtr		ccd() { return _imager.ccd(); }
-	astro::camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
+	const camera::Imager&	imager() const { return _imager; }
+	camera::Imager&	imager() { return _imager; }
+	camera::CcdPtr		ccd() { return _imager.ccd(); }
+	camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
 	int	ccdid() const { return getCcdInfo().getId(); }
 
 	GuiderDescriptor	getDescriptor() const;
@@ -402,13 +401,15 @@ public:
 	 * for all these details, we just expose the exposure structure
 	 */
 private:
-	astro::camera::Exposure	_exposure;
+	camera::Exposure	_exposure;
 public:
-	const astro::camera::Exposure&	exposure() const { return _exposure; }
-	astro::camera::Exposure&	exposure() { return _exposure; }
-	void	exposure(const astro::camera::Exposure& exposure) {
+	const camera::Exposure&	exposure() const { return _exposure; }
+	camera::Exposure&	exposure() { return _exposure; }
+	void	exposure(const camera::Exposure& exposure) {
 		_exposure = exposure;
 	}
+private:
+	persistence::Database	_database;
 
 public:
 	/**
@@ -419,8 +420,9 @@ public:
 	 * the image to take into consideration when looking for a guide star,
 	 * or even how to expose an image.
 	 */
-	Guider(astro::camera::CameraPtr camera, astro::camera::CcdPtr ccd,
-		astro::camera::GuiderPortPtr guiderport);
+	Guider(camera::CameraPtr camera, camera::CcdPtr ccd,
+		camera::GuiderPortPtr guiderport,
+		persistence::Database database = NULL);
 
 	// We should be able to get images through the imager, using the
 	// previously defined exposure structure.
@@ -466,8 +468,9 @@ public:
 	 *			If binning different from 1x1 is used, the
 	 *			pixel size must reflect the size of the binned
 	 *			pixel. Unit: meters.
+	 * \return		the id of the calibration run
 	 */
-	void	startCalibration(TrackerPtr tracker,
+	int	startCalibration(TrackerPtr tracker,
 			double focallength = 0, double pixelsize = 0);
 	/**
 	 * \brief query the progress of the calibration process
@@ -481,7 +484,9 @@ public:
 	 * \brief wait for the calibration process to complete
 	 */
 	bool	waitCalibration(double timeout);
+	int	calibrationid() { return _calibrationid; }
 private:
+	int	_calibrationid;
 	CalibrationProcessPtr	calibrationprocess;
 	friend class CalibrationProcess;
 	void	calibrationCleanup();
@@ -494,8 +499,7 @@ public:
 	 * argument for each calibration point that was measured by the
 	 * calibration process.
 	 */
-	astro::callback::CallbackPtr	calibrationcallback;
-	
+	callback::CallbackPtr	calibrationcallback;
 
 	// the following methods manage the guiding thread
 private:
@@ -519,9 +523,9 @@ public:
 	 * gets a new image, it calls this callback with an argument of type
 	 * ImageCallbackData.
 	 */
-	astro::callback::CallbackPtr	newimagecallback;
+	callback::CallbackPtr	newimagecallback;
 public:
-	astro::image::ImagePtr	mostRecentImage;
+	image::ImagePtr	mostRecentImage;
 	void	callbackImage(ImagePtr image);
 
 	/**
@@ -533,7 +537,7 @@ public:
 	 * information is encapsulated into a callback data structure
 	 * and the callback is called with the update information
 	 */
-	astro::callback::CallbackPtr	trackingcallback;
+	callback::CallbackPtr	trackingcallback;
 	
 public:
 	/**
@@ -548,42 +552,23 @@ public:
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 
-#if 0
-/**
- * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
- */
-class GuiderDescriptor {
-	std::string	_cameraname;
-	unsigned int	_ccdid;
-	std::string	_guiderportname;
-public:
-	GuiderDescriptor(const std::string& cameraname, unsigned int ccdid,
-		const std::string& guiderportname) : _cameraname(cameraname),
-		_ccdid(ccdid), _guiderportname(guiderportname) { }
-	bool	operator==(const GuiderDescriptor& other) const;
-	bool	operator<(const GuiderDescriptor& other) const;
-	std::string	cameraname() const { return _cameraname; }
-	unsigned int	ccdid() const { return _ccdid; }
-	std::string	guiderportname() const { return _guiderportname; }
-	std::string	toString() const;
-};
-#endif
-
 /**
  * \brief GuiderFactory class
  */
 class GuiderFactory {
-	astro::module::Repository	repository;
+	module::Repository	repository;
+	persistence::Database	database;
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
 	// auxiliary functions to simplify the 
-	astro::camera::CameraPtr	cameraFromName(const std::string& name);
-	astro::camera::GuiderPortPtr	guiderportFromName(
+	camera::CameraPtr	cameraFromName(const std::string& name);
+	camera::GuiderPortPtr	guiderportFromName(
 						const std::string& name);
 public:
 	GuiderFactory() { }
-	GuiderFactory(astro::module::Repository _repository)
-		: repository(_repository) { }
+	GuiderFactory(module::Repository _repository,
+		persistence::Database& _database)
+		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
 };

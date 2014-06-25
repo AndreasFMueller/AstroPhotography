@@ -11,10 +11,12 @@
 #include <CalibrationProcess.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
+#include <CalibrationPersistence.h>
 
 using namespace astro::image;
 using namespace astro::camera;
 using namespace astro::callback;
+using namespace astro::persistence;
 
 namespace astro {
 namespace guiding {
@@ -30,8 +32,10 @@ namespace guiding {
  * to some default values. The default exposure time is 1 and the
  * default frame is the entire CCD area.
  */
-Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport)
-	: _camera(camera), _guiderport(guiderport), _imager(ccd) {
+Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport,
+	Database database)
+	: _camera(camera), _guiderport(guiderport), _imager(ccd),
+	  _database(database) {
 	// default exposure settings
 	exposure().exposuretime = 1.;
 	exposure().frame = ccd->getInfo().getFrame();
@@ -92,7 +96,7 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-void	Guider::startCalibration(TrackerPtr tracker, double focallength,
+int	Guider::startCalibration(TrackerPtr tracker, double focallength,
 		double pixelsize) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
 		"focallength = %f, pixelsize = %f)",
@@ -115,10 +119,28 @@ void	Guider::startCalibration(TrackerPtr tracker, double focallength,
 
 	// now create a new calibration process
 	calibrationprocess = CalibrationProcessPtr(
-		new CalibrationProcess(*this, tracker));
+		new CalibrationProcess(*this, tracker, _database));
 
 	// start the calibration. This will launch the separate 
 	calibrationprocess->calibrate(focallength, pixelsize);
+
+	// register the new calibration in the database
+	_calibrationid = 0;
+	if (_database) {
+		// prepare data for the calibration recrod
+		Calibration	calibration;
+		calibration.camera = cameraname();
+		calibration.ccdid = ccdid();
+		calibration.guiderport = guiderportname();
+		time(&calibration.when);
+		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
+
+		// add the record to the database
+		CalibrationRecord	record(0, calibration);
+		CalibrationTable	calibrationtable(_database);
+		_calibrationid = calibrationtable.add(record);
+	}
+	return _calibrationid;
 }
 
 /**

@@ -27,7 +27,7 @@ CalibrationPointCallback::CalibrationPointCallback(Guider_impl& guider)
 	calibration.ccdid = guider.getCcdid();
 	calibration.guiderport = guider.getGuiderPortName();
 	time(&calibration.when);
-	for (int i = 0; i < 6; i++) { calibration.a[0] = 0; }
+	for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 
 	// create a record 
 	astro::guiding::CalibrationRecord	record(0, calibration);
@@ -83,7 +83,7 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 
 		// ... udpate it with the new data ..
 		for (int i = 0; i < 6; i++) {
-			record.a[i] = calibration->calibration()[i];
+			record.a[i] = calibration->calibration().a[i];
 		}
 
 		// ... apply the changes to the table

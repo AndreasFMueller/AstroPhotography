@@ -183,7 +183,7 @@ protected:
 protected:
 	
 public:
-	TableBase(Database& database, const std::string& tablename,
+	TableBase(Database database, const std::string& tablename,
 		const std::string& createstatement = std::string());
 	Row	rowbyid(long objectid);
 	long	nextid();
@@ -247,7 +247,7 @@ public:
 template<typename object, typename dbadapter>
 class Table : public TableBase {
 public:
-	Table(Database& database)
+	Table(Database database)
 		: TableBase(database, dbadapter::tablename(),
 			dbadapter::createstatement()) { }
 	object	byid(long objectid);

@@ -8,6 +8,8 @@
 
 #include <guider.h>
 #include <AstroGuiding.h>
+#include <ImageDirectory.h>
+#include <AstroPersistence.h>
 
 namespace snowstar {
 
@@ -15,11 +17,16 @@ GuiderState	convert(const astro::guiding::GuiderState& state);
 
 class GuiderI : public Guider {
 	astro::guiding::GuiderPtr	guider;
+	astro::image::ImageDirectory	imagedirectory;
+	astro::persistence::Database	database;
 	Point	_point;
 	int	calibrationid;
 	int	guidingrunid;
+	astro::guiding::TrackerPtr	getTracker();
 public:
-	GuiderI(astro::guiding::GuiderPtr _guider);
+	GuiderI(astro::guiding::GuiderPtr _guider,
+		astro::image::ImageDirectory& imagedirectoy,
+		astro::persistence::Database database);
 	virtual ~GuiderI();
 	virtual GuiderState getState(const Ice::Current& current);
 	virtual CameraPrx getCamera(const Ice::Current& current);

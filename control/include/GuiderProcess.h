@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <TrackingWork.h>
 #include <DrivingWork.h>
+#include <AstroPersistence.h>
 
 using namespace astro::camera;
 
@@ -42,10 +43,13 @@ public:
 	const double&	interval() const { return _interval; }
 	void	interval(const double& i) { _interval = i; }
 private:
+	persistence::Database	database;
+private:
 	GuiderProcess(const GuiderProcess& other);
 	GuiderProcess&	operator=(const GuiderProcess& other);
 public:
-	GuiderProcess(Guider& guider, double interval = 10);
+	GuiderProcess(Guider& guider, double interval = 10,
+		persistence::Database database = NULL);
 	~GuiderProcess();
 	bool	start(TrackerPtr tracker);
 	bool	stop();

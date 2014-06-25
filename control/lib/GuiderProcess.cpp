@@ -21,8 +21,9 @@ namespace guiding {
  * This also initializes the values for guider port activation to values that
  * compensate the drift to first order.
  */
-GuiderProcess::GuiderProcess(Guider& _guider, double interval)
-	: guider(_guider), _interval(interval) {
+GuiderProcess::GuiderProcess(Guider& _guider, double interval,
+	persistence::Database _database)
+	: guider(_guider), _interval(interval), database(_database)  {
 	// set a default gain
 	_gain = 1.;
 
@@ -63,7 +64,6 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 
 	// create the tracking process
 	trackingwork = new TrackingWork(guider, _tracker, *drivingwork);
-	trackingwork->history_length(0); // XXX temporary, for debugging
 	tracking = ThreadPtr(new GuidingThread<TrackingWork>(*trackingwork));
 
 	// start both processes

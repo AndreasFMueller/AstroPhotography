@@ -11,6 +11,8 @@
 
 namespace snowstar {
 
+ImagePrx	getImage(const std::string& name, int bytesPerPixel,
+			const Ice::Current& current);
 ImagePrx	getImage(const std::string& name,
 			astro::image::ImageDirectory& imagedirectory,
 			const Ice::Current& current);

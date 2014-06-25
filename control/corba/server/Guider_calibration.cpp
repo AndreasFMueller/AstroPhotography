@@ -73,7 +73,7 @@ void	Guider_impl::useCalibration(CORBA::Long id) {
 	// copy the data into the calibration object
 	astro::guiding::GuiderCalibration	cal;
 	for (int i = 0; i < 6; i++) {
-		cal[i] = record.a[i];
+		cal.a[i] = record.a[i];
 	}
 	calibrationid = id;
 

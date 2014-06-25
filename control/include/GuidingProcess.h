@@ -8,6 +8,7 @@
 
 #include <AstroGuiding.h>
 #include <AstroDebug.h>
+#include <AstroPersistence.h>
 #include <pthread.h>
 #include <includes.h>
 
@@ -116,6 +117,11 @@ public:
 	const TrackerPtr	tracker() const { return _tracker; }
 
 private:
+	persistence::Database	_database;
+public:
+	persistence::Database	database() { return _database; }
+
+private:
 	ThreadPtr	_thread;
 public:
 	ThreadPtr	thread() { return _thread; }
@@ -154,7 +160,8 @@ public:
 	}
 
 public:
-	GuidingProcess(Guider& guider, TrackerPtr tracker);
+	GuidingProcess(Guider& guider, TrackerPtr tracker,
+		persistence::Database database = NULL);
 	
 };
 

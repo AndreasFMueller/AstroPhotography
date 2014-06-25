@@ -52,5 +52,31 @@ std::list<CalibrationPointRecord>	CalibrationStore::getCalibrationPoints(long id
 	return table.select(out.str());
 }
 
+/**
+ * \brief Get the complete calibration
+ *
+ * \param id of the calibration to retrieve
+ */
+GuiderCalibration	CalibrationStore::getCalibration(long id) {
+	GuiderCalibration	calibration;
+
+	// get the calibration table
+	CalibrationTable	ct(_database);
+	CalibrationRecord	r = ct.byid(id);
+	for (int i = 0; i < 6; i++) {
+		calibration.a[i] = r.a[i];
+	}
+
+	// add the points
+	std::list<CalibrationPointRecord>	points
+		= getCalibrationPoints(id);
+	std::list<CalibrationPointRecord>::const_iterator	i;
+	for (i = points.begin(); i != points.end(); i++) {
+		CalibrationPoint	p = *i;
+		calibration.push_back(p);
+	}
+	return calibration;
+}
+
 } // namespace guiding
 } // namespace astro

@@ -27,7 +27,7 @@ GuiderCalibrator::GuiderCalibrator() {
  * \brief add another point to the calibration data
  */
 void	GuiderCalibrator::add(const CalibrationPoint& calibrationpoint) {
-	calibration_data.push_back(calibrationpoint);
+	_calibration.push_back(calibrationpoint);
 }
 
 /**
@@ -46,7 +46,7 @@ void	GuiderCalibrator::add(const CalibrationPoint& calibrationpoint) {
  */
 GuiderCalibration	GuiderCalibrator::calibrate() {
 	// build the linear system of equations
-	int	m = 2 * calibration_data.size(); // number of equations
+	int	m = 2 * _calibration.size(); // number of equations
 	int	n = 8; // number of unknowns
 	double	A[n * m];
 	double	b[m];
@@ -54,7 +54,7 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	// fill in equations
 	std::vector<CalibrationPoint>::const_iterator	ci;
 	int	i = 0;
-	for (ci = calibration_data.begin(); ci != calibration_data.end(); ci++){
+	for (ci = _calibration.begin(); ci != _calibration.end(); ci++){
 		A[i        ] = ci->offset.x();	// vx_ra
 		A[i +     m] = ci->offset.y();	// vx_dec
 		A[i + 2 * m] = ci->t;		// drift_x
@@ -113,9 +113,8 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	}
 
 	// store the results in the calibration data array
-	GuiderCalibration	calibration;
 	for (unsigned int i = 0; i < 6; i++) {
-		calibration.a[i] = b[i];
+		_calibration.a[i] = b[i];
 	}
 
 	// The last two variables are not needed for the calibration, we
@@ -125,7 +124,7 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 		b[6], b[7]);
 
 	// return the calibration data
-	return calibration;
+	return _calibration;
 }
 
 } // namespace guiding

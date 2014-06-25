@@ -10,10 +10,16 @@
 #include <CameraI.h>
 #include <CcdI.h>
 #include <GuiderPortI.h>
+#include <ImagesI.h>
+#include <CalibrationStore.h>
 
 namespace snowstar {
 
-GuiderI::GuiderI(astro::guiding::GuiderPtr _guider) : guider(_guider) {
+GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
+	astro::image::ImageDirectory& _imagedirectory,
+	astro::persistence::Database _database)
+	: guider(_guider), imagedirectory(_imagedirectory),
+	  database(_database) {
 }
 
 GuiderI::~GuiderI() {
@@ -59,16 +65,25 @@ Point GuiderI::getStar(const Ice::Current& current) {
 }
 
 void GuiderI::useCalibration(Ice::Int calibrationid, const Ice::Current& current) {
-	// XXX retrieve guider data from the database
+	// retrieve guider data from the database
+	astro::guiding::CalibrationStore	calibrationstore(database);
+	astro::guiding::GuiderCalibration	calibration
+		= calibrationstore.getCalibration(calibrationid);
 
-	// XXX install calibration data in the gudier
+	// install calibration data in the guider
+	guider->calibration(calibration);
 }
 
 Calibration GuiderI::getCalibration(const Ice::Current& current) {
 	// XXX use database to retrieve calibration
+	Calibration	calibration;
+	return calibration;
 }
 
-void GuiderI::startCalibration(Ice::Float, const Ice::Current& current) {
+void GuiderI::startCalibration(Ice::Float focallength,
+	const Ice::Current& current) {
+	// XXX callback stuff
+
 	// XXX compute calibration parameters
 
 	// XXX construct a tracker
@@ -86,15 +101,30 @@ bool GuiderI::waitCalibration(Ice::Double timeout, const Ice::Current& current) 
 	return guider->waitCalibration(timeout);
 }
 
-void GuiderI::startGuiding(Ice::Float, const Ice::Current& current) {
-	// XXX builde a tracker
+astro::guiding::TrackerPtr	 GuiderI::getTracker() {
+	astro::camera::Exposure	exposure = guider->exposure();
+	astro::Point	d = convert(_point) - exposure.frame.origin();
+	astro::image::ImagePoint	trackerstar(d.x(), d.y());
+	astro::image::ImageRectangle	trackerrectangle(exposure.frame.size());
+	astro::guiding::TrackerPtr	tracker(
+		new astro::guiding::StarTracker(trackerstar,
+			trackerrectangle, 10));
+	return tracker;
+}
 
-	// XXX start guiding
+void GuiderI::startGuiding(Ice::Float guidinginterval,
+		const Ice::Current& current) {
+	// builde a tracker
+	astro::guiding::TrackerPtr	tracker = getTracker();
+
+	// start guiding
+	guider->startGuiding(tracker, guidinginterval);
 
 	// XXX install publisher
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& current) {
+	// XXX need access to interval somehow
 }
 
 void GuiderI::stopGuiding(const Ice::Current& current) {
@@ -104,10 +134,17 @@ void GuiderI::stopGuiding(const Ice::Current& current) {
 }
 
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
-	// XXX retrieve image
-	// XXX store image in image directory
-	// XXX return a proxy for the image
-	return NULL;
+	// retrieve image
+	astro::image::ImagePtr	image = guider->mostRecentImage;
+	if (!image) {
+		throw NotFound("no image available");
+	}
+
+	// store image in image directory
+	std::string	filename = imagedirectory.save(image);
+
+	// return a proxy for the image
+	return getImage(filename, image->bytesPerPixel(), current);
 }
 
 TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& current) {
@@ -129,7 +166,9 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& current) {
 	return result;
 }
 
-TrackingHistory GuiderI::getTrackingHistory(Ice::Int id, const Ice::Current& current) {
+TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
+	const Ice::Current& current) {
+	// XXX implementation missing
 }
 
 } // namespace snowstar

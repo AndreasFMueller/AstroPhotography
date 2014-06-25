@@ -41,25 +41,6 @@ std::string	toString(const trackinghistoryentry& entry);
  * synchronized.
  */
 class TrackingWork : public GuidingProcess {
-	trackinghistory_type	trackinghistory;
-	void	addHistory(const Point& point);
-public:
-	void	dumpHistory(std::ostream& out);
-
-	/**
-	 * \brief length of the tracking history to keep
-	 *
-	 * The Work class keeps a history of tracking offsets. To keep 
-	 * memory consumption low during long tracking runs, only the
-	 * most recent tracking points are kept, their number is limited by
-	 * the _history_length. The value -1 turns the tracking history off
-	 * completely.
-	 */
-	long	_history_length;
-public:
-	const long&	history_length() const {
-		return _history_length; }
-	void	history_length(const long l) { _history_length = l; }
 private:
 	/**
 	 * \brief 
@@ -86,6 +67,10 @@ public:
 	const double&	interval() const { return _interval; }
 	void	interval(const double& i);
 private:
+	int	_id;
+public:
+	int	id() const { return _id; }
+private:
 	/**
 	 * \brief The process to drive
 	 *
@@ -105,9 +90,7 @@ public:
 
 	void	main(GuidingThread<TrackingWork>& thread);
 private:
-	double	_lastaction;
-	Point	_offset;
-	Point	_activation;
+	TrackingPoint	_last;
 public:
 	void	lastAction(double& actiontime, Point& offset,
 			Point& activation);
