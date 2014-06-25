@@ -378,7 +378,7 @@ public:
 template<typename Pixel>
 MaskingAdapter<Pixel>::MaskingAdapter(const ConstImageAdapter<Pixel>& _image,
 	const MaskingFunction& _maskingfunction)
-	: ConstImageAdapter<Pixel>(image.getSize()),
+	: ConstImageAdapter<Pixel>(_image.getSize()),
 	  image(_image), maskingfunction(_maskingfunction) {
 }
 

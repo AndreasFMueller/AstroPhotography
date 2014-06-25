@@ -45,7 +45,7 @@ private:
 public:
 	const std::string&	defaultname() const { return _defaultname; }
 	void	defaultname(const std::string& name);
-	DeviceWrapper	defaultdevice() { return byname(defaultname); }
+	DeviceWrapper	defaultdevice() { return byname(_defaultname); }
 public:
 	DeviceWrapper	byname(const std::string& deviceid);
 	void	release(const std::string& deviceid);

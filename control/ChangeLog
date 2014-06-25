@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20140625:
+	* fix some typos
+	* ensure instantiation of MinimumEstimator classes
+
 20120117:
 	* start the project
 

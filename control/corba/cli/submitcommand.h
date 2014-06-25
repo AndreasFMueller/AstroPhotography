@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _submitcommand_h
-#define _submitcomnand_h
+#define _submitcommand_h
 
 #include <clicommand.h>
 

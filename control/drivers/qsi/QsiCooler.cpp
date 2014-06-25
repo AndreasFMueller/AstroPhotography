@@ -10,7 +10,7 @@ namespace camera {
 namespace qsi {
 
 QsiCooler::QsiCooler(QsiCamera& camera)
-	: Cooler(DeviceName(_camera.name(), DeviceName::Cooler, "cooler")),
+	: Cooler(DeviceName(camera.name(), DeviceName::Cooler, "cooler")),
 	  _camera(camera) {
 }
 

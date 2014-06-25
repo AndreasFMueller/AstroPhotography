@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _coolercommand_h
-#define _coolercommand_H
+#define _coolercommand_h
 
 #include <clicommand.h>
 #include <camera.hh>

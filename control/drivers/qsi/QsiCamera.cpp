@@ -4,11 +4,17 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <QsiCamera.h>
+#include <QsiCcd.h>
+#include <QsiFilterWheel.h>
+#include <QsiGuiderPort.h>
 
 namespace astro {
 namespace camera {
 namespace qsi {
 
+/**
+ * \brief Construct a QSI camera object
+ */
 QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	try {
 		DeviceName	devname(name());
@@ -69,36 +75,69 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	ccdinfo.push_back(info);
 }
 
+/**
+ * \brief Destroy the QSI camera object
+ */
 QsiCamera::~QsiCamera() {
 	camera().put_Connected(false);
 }
 
+/**
+ * \brief Perform a camera reset on the QSI camera
+ */
 void	QsiCamera::reset() {
+	// XXX perform a camera reset
 }
 
+/**
+ * \brief Get the CCD from the camera
+ */
 CcdPtr	QsiCamera::getCcd0(size_t id) {
 	if (id > 0) {
 		throw std::invalid_argument("only CCD 0 defined");
 	}
+	return CcdPtr(new QsiCcd(ccdinfo[0], *this));
 }
 
+/**
+ * \brief Find out whether the camera has a filter wheel
+ */
 bool	QsiCamera::hasFilterWheel() const {
 	return _hasfilterwheel;
 }
 
+/**
+ * \brief Get the Filter wheel
+ */
 FilterWheelPtr	QsiCamera::getFilterWheel0() {
-	return FilterWheelPtr();
+	if (!_hasfilterwheel) {
+		throw std::invalid_argument("camera has no filter wheel");
+	}
+	return FilterWheelPtr(new QsiFilterWheel(*this));
 }
 
+/**
+ * \brief Check whether the camera has a guider port
+ */
 bool	QsiCamera::hasGuiderPort() const {
 	return _hasguiderport;
 }
 
+/**
+ * \brief Get the Guider port
+ */
 GuiderPortPtr	QsiCamera::getGuiderPort0() {
-	return GuiderPortPtr();
+	if (!_hasguiderport) {
+		throw std::runtime_error("camera has no guider port");
+	}
+	return GuiderPortPtr(new QsiGuiderPort(*this));
 }
 
+/**
+ * \brief Find out whether the camera is color
+ */
 bool	QsiCamera::isColor() const {
+	// XXX dummy implementation, only monochrome chips
 	return false;
 }
 

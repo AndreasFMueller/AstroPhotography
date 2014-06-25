@@ -56,6 +56,9 @@ public:
 	virtual Astro::Image::ImageFile	*file();
 	virtual CORBA::Long	filesize();
 
+	// make remove visible and prevent clang from complaining about
+	// a virtual function being hidden by the declaration of remove()
+	using ImageDatabaseDirectory::remove;
 	virtual void	remove();
 protected:
 	astro::image::ImagePtr	getImage();

@@ -17,6 +17,7 @@ namespace qsi {
 class QsiCcd;
 class QsiCooler;
 class QsiFilterWheel;
+class QsiGuiderPort;
 
 class QsiCamera : public Camera {
 	QSICamera	_camera;
@@ -24,6 +25,7 @@ class QsiCamera : public Camera {
 friend class QsiCcd; // allow the CCD to get the QSICamera
 friend class QsiCooler; // allow the Cooler to get the QSICamera
 friend class QsiFilterWheel; // allow the Filterwheel to get the QSICamera
+friend class QsiGuiderPort; // allow the GuiderPort to get the QSICamera
 	bool	_hasfilterwheel;
 	bool	_hasguiderport;
 public:

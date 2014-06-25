@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _ccdcommand_h
-#define _ccdcommand_H
+#define _ccdcommand_h
 
 #include <clicommand.h>
 #include <Ccds.h>

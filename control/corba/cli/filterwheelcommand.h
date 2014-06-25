@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _filterwheelcommand_h
-#define _filterwheelcommand_H
+#define _filterwheelcommand_h
 
 #include <clicommand.h>
 #include <Filterwheels.h>

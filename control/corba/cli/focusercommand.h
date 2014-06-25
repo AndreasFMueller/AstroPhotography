@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _focusercommand_h
-#define _focusercommand_H
+#define _focusercommand_h
 
 #include <clicommand.h>
 #include <Focusers.h>

@@ -209,6 +209,7 @@ public:
 	double	det() const;
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
+	GuiderCalibration(const float coefficients[6]); // needed for CORBA
 	std::string	toString() const;
 	Point	defaultcorrection() const;
 	Point	operator()(const Point& offset, double Deltat) const;

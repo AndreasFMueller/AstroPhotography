@@ -57,6 +57,15 @@ GuiderCalibration::GuiderCalibration(const double coefficients[6]) {
 }
 
 /**
+ * \brief Construct a GuiderCalibration object from coefficient array
+ */
+GuiderCalibration::GuiderCalibration(const float coefficients[6]) {
+	for (int i = 0; i < 6; i++) {
+		a[i] = coefficients[i];
+	}
+}
+
+/**
  * \brief compute correction for drift
  * 
  * While a correction for some offset depends on the time within which

@@ -38,7 +38,7 @@ NetCcd::NetCcd(const CcdInfo& _info, Astro::Ccd_ptr ccd)
 }
 
 NetCcd::NetCcd(Astro::Ccd_ptr ccd)
-	: Ccd(convert(_ccd->getInfo())), _ccd(ccd) {
+	: Ccd(convert(ccd->getInfo())), _ccd(ccd) {
 	Astro::Ccd_Helper::duplicate(_ccd);
 	synchronize();
 }

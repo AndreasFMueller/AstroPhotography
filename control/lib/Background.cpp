@@ -479,9 +479,14 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "Z = %f", Z);
 
 	// return
 	return h;
-
-
 }
+
+// force instantiation for the two most commonly used functions. We need to
+// do this because we have not defined the operator() method of the
+// MinimumEstimator class in the header file, so it cannot be instantiated
+// where used
+template class MinimumEstimator<LinearFunction>;
+template class MinimumEstimator<QuadraticFunction>;
 
 //////////////////////////////////////////////////////////////////////
 // BackgroundExtractor implementation

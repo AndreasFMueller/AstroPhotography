@@ -4,7 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _sleepcommand_h
-#define _sleepcommand_H
+#define _sleepcommand_h
 
 #include <clicommand.h>
 

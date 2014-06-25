@@ -17,8 +17,9 @@ namespace astro {
 
 void	display_ccdinfo(Astro::CcdInfo *ccdinfo) {
 	printf("\t\t\t\t\tName: %s\n", ccdinfo->name.in());
-	printf("\t\t\t\t\tSize: %ldx%ld\n",
-		ccdinfo->size.width, ccdinfo->size.height);
+	long	width = ccdinfo->size.width;
+	long	height = ccdinfo->size.height;
+	printf("\t\t\t\t\tSize: %ldx%ld\n", width, height);
 	printf("\t\t\t\t\tShutter: %s\n", (ccdinfo->shutter) ? "YES" : "NO");
 	for (int i = 0; i < ccdinfo->binningmodes.length(); i++) {
 		printf("\t\t\t\t\t\t%dx%d\n",

@@ -435,11 +435,7 @@ Astro::FilterwheelState convert(const astro::camera::FilterWheel::State& state) 
 
 // GuiderCalibration
 astro::guiding::GuiderCalibration       convert(const Astro::Calibration& cal) {
-	astro::guiding::GuiderCalibration	result;
-	for (int i = 0; i < 6; i++) {
-		result[i] = cal.coefficients[i];
-	}
-	return result;
+	return astro::guiding::GuiderCalibration(cal.coefficients);
 }
 
 // TaskState
