@@ -12,6 +12,21 @@ namespace astro {
 namespace focusing {
 
 /**
+ * \brief FocusEvaluator class to evaluate the focus of an image
+ *
+ * Base class defining the interface. Derived classes are expected to
+ * implement the operator() which returns the focus figure of merit for
+ * an image. This figure of merit must be smallest when focus is achieved,
+ * and should be roughly proportional to the offset from the correct
+ * the focus position.
+ */
+class FocusEvaluator {
+public:
+	double	operator()(const ImagePtr image) = 0;
+};
+typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
+
+/**
  * \brief Class encapsulating the automatic focusing process
  *
  * In automatic focusing, the focus position is changed several times,
