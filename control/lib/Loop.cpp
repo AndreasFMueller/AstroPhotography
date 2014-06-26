@@ -87,7 +87,7 @@ void	Loop::execute() {
 		// callback on the image
 		if (_newImageCallback) {
 			CallbackDataPtr	cbd = CallbackDataPtr(
-				new ImageCallbackData(imagefilename, image));
+				new FileImageCallbackData(imagefilename, image));
 			(*_newImageCallback)(cbd);
 		}
 

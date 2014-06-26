@@ -29,8 +29,8 @@ astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image received");
 
 	// get the image data from the callback argument
-	astro::guiding::GuiderNewImageCallbackData	*image
-		= dynamic_cast<astro::guiding::GuiderNewImageCallbackData *>(&*data);
+	astro::callback::ImageCallbackData	*image
+		= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
 	if (NULL == image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not image data");
 		return data;

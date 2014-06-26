@@ -11,13 +11,27 @@
 namespace astro {
 namespace focusing {
 
+/**
+ * \brief Class encapsulating the automatic focusing process
+ *
+ * In automatic focusing, the focus position is changed several times,
+ * and an image is taken in these focus positions. The image is valuated
+ * according to some focus figure of merit. This figure of merit is then
+ * used to compute the best focus position, which is then set.
+ */
 class Focusing {
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED } focus_status;
 private:
 	astro::camera::CameraPtr	_camera;
+public:
+	astro::camera::CameraPtr	camera() { return _camera; }
+private:
 	astro::camera::FocuserPtr	_focuser;
+public:
+	astro::camera::FocuserPtr	focuser() { return _focuser; }
+private:
 	focus_mode	_mode;
 	volatile focus_status	_status;
 public:

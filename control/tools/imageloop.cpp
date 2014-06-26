@@ -195,7 +195,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 				}
 				// prepare the argument data
 				CallbackDataPtr	cbd(
-					new ImageCallbackData(directory.path(),
+					new FileImageCallbackData(directory.path(),
 						ImagePtr()));
 				// now call the callback
 				(*loopcallback)(cbd);
@@ -230,7 +230,7 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 	if (loopcallback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "loop callback");
 		CallbackDataPtr	cbd(
-			new ImageCallbackData(directory.path(), ImagePtr()));
+			new FileImageCallbackData(directory.path(), ImagePtr()));
 		(*loopcallback)(cbd);
 	}
 }

@@ -25,6 +25,9 @@ public:
 
 /**
  * \brief main function for the separate thread executes the image program
+ *
+ * This method assumes that the image comes with a filename, where the image
+ * can also be read from.
  */
 static void	*imageprogramcallback(void *data) {
 	// resolve the argument
@@ -35,8 +38,8 @@ static void	*imageprogramcallback(void *data) {
 	std::shared_ptr<callbackargs>	ptr(cba);
 
 	// get the data
-	ImageCallbackData	*icb
-		= dynamic_cast<ImageCallbackData *>(&*(ptr->data));
+	FileImageCallbackData	*icb
+		= dynamic_cast<FileImageCallbackData *>(&*(ptr->data));
 	if (NULL == icb) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "callback called with bad data");
 		return NULL;
@@ -60,12 +63,14 @@ static void	*imageprogramcallback(void *data) {
 
 /**
  * \brief Execute a program on an image file
+ *
+ * \param data	callback data of type FileImageCallbackData
  */
 CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback called");
 	// ensure that we have the right type of data
-	ImageCallbackData	*icb
-		= dynamic_cast<ImageCallbackData *>(&*data);
+	FileImageCallbackData	*icb
+		= dynamic_cast<FileImageCallbackData *>(&*data);
 	if (NULL == icb) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"argument is not ImageCallbackData");

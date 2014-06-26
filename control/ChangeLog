@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20140626:
+	* eliminate the GuiderNewImageCallbackData, replaced by the revamped
+	  ImageCallbackData class
+
 20140625:
 	* fix many warnings
 	* add QsiGuiderPort implementation
