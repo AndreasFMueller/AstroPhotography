@@ -1,6 +1,9 @@
 ChangeLog for the Astro project.
 
 20140625:
+	* fix many warnings
+	* add QsiGuiderPort implementation
+	* complete the Ccd implementation of the Qsi camera
 	* fix some typos
 	* ensure instantiation of MinimumEstimator classes
 
