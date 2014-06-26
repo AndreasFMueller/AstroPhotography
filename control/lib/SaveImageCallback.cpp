@@ -15,8 +15,7 @@ namespace callback {
 /**
  * \brief Save an image to the image directory
  *
- * \param data	callback data of type ImageCallbackData or
- *              GuiderNewImageCallbackData
+ * \param data	callback data of type ImageCallbackData
  * \return the same callback data
  */
 CallbackDataPtr	SaveImageCallback::operator()(CallbackDataPtr data) {

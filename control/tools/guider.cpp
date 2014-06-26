@@ -31,8 +31,8 @@ public:
 
 CallbackDataPtr	NewImageCallback::operator()(CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback received");
-	GuiderNewImageCallbackData	*datap
-		= dynamic_cast<GuiderNewImageCallbackData *>(&*data);
+	ImageCallbackData	*datap
+		= dynamic_cast<ImageCallbackData *>(&*data);
 	if (datap == NULL) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "argument not of correct type");
 	}

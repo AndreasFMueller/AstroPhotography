@@ -168,21 +168,6 @@ public:
 	virtual std::string	toString() const;
 };
 
-#if 0
-/**
- * \brief Callback data class for Guider debugging/monitoring
- *
- * Callback data for the guider transports an image
- */
-class GuiderNewImageCallbackData : public callback::CallbackData {
-	image::ImagePtr	_image;
-public:
-	GuiderNewImageCallbackData(image::ImagePtr image)
-		: _image(image) { }
-	image::ImagePtr	image() { return _image; }
-};
-#endif
-
 class GuiderCalibrator;
 
 /**
