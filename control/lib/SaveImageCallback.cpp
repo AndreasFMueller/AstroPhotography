@@ -12,6 +12,13 @@ using namespace astro::guiding;
 namespace astro {
 namespace callback {
 
+/**
+ * \brief Save an image to the image directory
+ *
+ * \param data	callback data of type ImageCallbackData or
+ *              GuiderNewImageCallbackData
+ * \return the same callback data
+ */
 CallbackDataPtr	SaveImageCallback::operator()(CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback called");
 	image::ImagePtr	image;
@@ -21,13 +28,6 @@ CallbackDataPtr	SaveImageCallback::operator()(CallbackDataPtr data) {
 		= dynamic_cast<ImageCallbackData *>(&*data);
 	if (NULL != icb) {
 		image = icb->image();
-	}
-
-	// handle GuiderNewImageCallbackData
-	GuiderNewImageCallbackData	*nicb
-		= dynamic_cast<GuiderNewImageCallbackData *>(&*data);
-	if (NULL != nicb) {
-		image = nicb->image();
 	}
 
 	// if we have no image, we cannot handle the callback

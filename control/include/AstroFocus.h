@@ -17,7 +17,13 @@ public:
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED } focus_status;
 private:
 	astro::camera::CameraPtr	_camera;
+public:
+	astro::camera::CameraPtr	camera() { return _camera; }
+private:
 	astro::camera::FocuserPtr	_focuser;
+public:
+	astro::camera::FocuserPtr	focuser() { return _focuser; }
+private:
 	focus_mode	_mode;
 	volatile focus_status	_status;
 public:

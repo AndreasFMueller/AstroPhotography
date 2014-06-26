@@ -168,6 +168,7 @@ public:
 	virtual std::string	toString() const;
 };
 
+#if 0
 /**
  * \brief Callback data class for Guider debugging/monitoring
  *
@@ -180,6 +181,7 @@ public:
 		: _image(image) { }
 	image::ImagePtr	image() { return _image; }
 };
+#endif
 
 class GuiderCalibrator;
 

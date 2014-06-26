@@ -41,16 +41,30 @@ public:
 typedef	std::shared_ptr<Callback>	CallbackPtr;
 
 /**
- * \brief Per image program execution callback argument
+ * \brief Image callback argument
  */
 class ImageCallbackData : public CallbackData {
+	astro::image::ImagePtr	_image;
+public:
+	ImageCallbackData(astro::image::ImagePtr image) : _image(image) { }
+	astro::image::ImagePtr	image() const { return _image; }
+};
+
+/**
+ * \brief Image callback including filename
+ *
+ * This is used in places where a recommended file name is also needed,
+ * like when an external program must be called. The image contained in
+ * the callback data is expected to be stored in the file.
+ */
+class FileImageCallbackData : public ImageCallbackData {
 	std::string	_filename;
 	astro::image::ImagePtr	_image;
 public:
-	ImageCallbackData(const std::string& filename, astro::image::ImagePtr image)
-		: _filename(filename), _image(image) { }
+	FileImageCallbackData(const std::string& filename,
+		astro::image::ImagePtr image)
+		: ImageCallbackData(image), _filename(filename) { }
 	const std::string&	filename() const { return _filename; }
-	astro::image::ImagePtr	image() const { return _image; }
 };
 
 /**
@@ -73,9 +87,12 @@ public:
 
 /**
  * \brief Callback to save an image in an ImageDirectory
+ *
+ * This callback expects callback data of type ImageCallbackData, which 
+ * includes a filename together with the image, and adds the image to
+ * the ImageDirectory.
  */
 class SaveImageCallback : public Callback {
-	std::string	lastname;
 public:
 	SaveImageCallback(const std::string& basedir) {
 		image::ImageDirectory::basedir(basedir);

@@ -200,8 +200,8 @@ ImagePtr	Guider::getImage() {
 void	Guider::callbackImage(ImagePtr image) {
 	if (newimagecallback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
-		GuiderNewImageCallbackData	*argp = 
-			new GuiderNewImageCallbackData(image);
+		ImageCallbackData	*argp = 
+			new ImageCallbackData(image);
 		CallbackDataPtr	arg(argp);
 		newimagecallback->operator()(arg);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
