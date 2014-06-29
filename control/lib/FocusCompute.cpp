@@ -121,7 +121,7 @@ double	FocusCompute::focus() const {
 		}
 	}
 	int	jmin = -1;
-	for (int j = 1; j < size() - 1; j++) {
+	for (int j = 0; j < size() - 1; j++) {
 		if (m > errors[j]) {
 			jmin = j;
 			m = errors[j];
