@@ -19,7 +19,8 @@ microtouch_files =
 endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
-	focus focustest transform guider dark flat clamp logscale stack
+	focus focustest transform guider dark flat clamp logscale stack \
+	focusing
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -90,6 +91,10 @@ clamp_LDADD = -L../lib -lastro
 logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
 logscale_LDADD = -L../lib -lastro 
+
+focusing_SOURCES = focusing.cpp
+focusing_DEPENDENCIES = ../lib/libastro.la
+focusing_LDADD = -L../lib -lastro 
 
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.

@@ -7,6 +7,8 @@
 #define _AstroFocus_h
 
 #include <AstroCamera.h>
+#include <AstroCallback.h>
+#include <Thread.h>
 
 namespace astro {
 namespace focusing {
@@ -27,6 +29,20 @@ public:
 typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 
 /**
+ * \brief Callback data for the focusing process
+ */
+class FocusCallbackData : public astro::callback::ImageCallbackData {
+	double	_value;
+public:
+	double	value() const { return _value; }
+	FocusCallbackData(astro::image::ImagePtr image, double value)
+		: ImageCallbackData(image), _value(value) { }
+};
+
+// we need the FocusWork forward declaration in the next class
+class FocusWork;
+
+/**
  * \brief Class encapsulating the automatic focusing process
  *
  * In automatic focusing, the focus position is changed several times,
@@ -35,28 +51,54 @@ typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
  * used to compute the best focus position, which is then set.
  */
 class Focusing {
+	astro::callback::CallbackPtr	_callback;
+public:
+	astro::callback::CallbackPtr	callback() { return _callback; }
+	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED } focus_status;
 private:
-	astro::camera::CameraPtr	_camera;
+	astro::camera::CcdPtr	_ccd;
 public:
-	astro::camera::CameraPtr	camera() { return _camera; }
+	astro::camera::CcdPtr	ccd() { return _ccd; }
 private:
 	astro::camera::FocuserPtr	_focuser;
 public:
 	astro::camera::FocuserPtr	focuser() { return _focuser; }
 private:
+	int	_steps;
+public:
+	int	steps() const { return _steps; }
+	void	steps(int s) { _steps = s; }
+private:
+	FocusEvaluatorPtr	_evaluator;
+public:
+	FocusEvaluatorPtr	evaluator() { return _evaluator; }
+	void	evaluator(FocusEvaluatorPtr e) { _evaluator = e; }
+private:
+	astro::camera::Exposure	_exposure;
+public:
+	astro::camera::Exposure	exposure() { return _exposure; }
+	void	exposure(astro::camera::Exposure e) { _exposure = e; }
+private:
 	focus_mode	_mode;
 	volatile focus_status	_status;
+	void	status(focus_status s) { _status = s; }
+	friend class FocusWork;
 public:
-	Focusing(astro::camera::CameraPtr camera,
-		astro::camera::FocuserPtr focuser);
-	void	start(int min, int max);
 	focus_status	status() const { return _status; }
+public:
+	Focusing(astro::camera::CcdPtr ccd,
+		astro::camera::FocuserPtr focuser);
+	~Focusing();
+	void	start(int min, int max);
 	void	cancel();
 	focus_mode	mode() const { return _mode; }
 	void	mode(focus_mode mode) { _mode = mode; }
+public:
+	astro::thread::ThreadPtr	thread;
+	FocusWork	*work;
 };
 
 } // namespace focusing

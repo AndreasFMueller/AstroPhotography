@@ -187,7 +187,14 @@ bool	ThreadBase::wait(double timeout) {
 void	ThreadBase::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run the thread main function");
 	// run the main methodrun the main method
-	this->main();
+	try {
+		this->main();
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "exception in thread: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception in thread");
+	}
 	
 	// when the main function terminates, we signal this to all
 	// waiting clients

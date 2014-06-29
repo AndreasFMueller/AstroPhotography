@@ -46,7 +46,9 @@ tests_SOURCES = tests.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp \
-	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp
+	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
+	FocusComputeTest.cpp
+
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
 

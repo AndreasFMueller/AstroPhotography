@@ -1,5 +1,10 @@
 ChangeLog for the Astro project.
 
+20140629:
+	* GuidingThread -> Thread
+	* add focusing.cpp tool
+	* add FocusingWork and Focusing classes
+
 20140626:
 	* eliminate the GuiderNewImageCallbackData, replaced by the revamped
 	  ImageCallbackData class
