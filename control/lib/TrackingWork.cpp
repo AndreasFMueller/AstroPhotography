@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <TrackingPersistence.h>
 
+using astro::thread::Thread;
+
 namespace astro {
 namespace guiding {
 
@@ -126,7 +128,7 @@ void	TrackingWork::interval(const double& i) {
 /**
  * \brief Main function for the tracking
  */
-void	TrackingWork::main(GuidingThread<TrackingWork>& thread) {
+void	TrackingWork::main(Thread<TrackingWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: tracker main function started");
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop

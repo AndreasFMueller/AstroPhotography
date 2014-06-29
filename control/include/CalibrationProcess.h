@@ -62,7 +62,7 @@ public:
 	~CalibrationProcess();
 	void	calibrate(double focallength, double pixelsize);
 	// the main function of the process
-	void	main(GuidingThread<CalibrationProcess>& thread);
+	void	main(astro::thread::Thread<CalibrationProcess>& thread);
 };
 
 } // namespace guiding

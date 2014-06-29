@@ -11,9 +11,12 @@
 #include <AstroPersistence.h>
 #include <pthread.h>
 #include <includes.h>
+#include <Thread.h>
 
 namespace astro {
 namespace guiding {
+
+#if 0
 
 /**
  * \brief Locking class to make locking more automatic
@@ -100,6 +103,7 @@ protected:
 		_work.main(*this);
 	}
 };
+#endif
 
 /**
  * \brief Guiding Process base class
@@ -122,10 +126,10 @@ public:
 	persistence::Database	database() { return _database; }
 
 private:
-	ThreadPtr	_thread;
+	astro::thread::ThreadPtr	_thread;
 public:
-	ThreadPtr	thread() { return _thread; }
-	void	thread(ThreadPtr t) { _thread = t; }
+	astro::thread::ThreadPtr	thread() { return _thread; }
+	void	thread(astro::thread::ThreadPtr t) { _thread = t; }
 
 	void	stop();
 	void	start();

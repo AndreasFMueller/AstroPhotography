@@ -70,7 +70,7 @@ public:
 	DrivingWork(Guider& _guider);
 	~DrivingWork();
 
-	void	main(GuidingThread<DrivingWork>& thread);
+	void	main(astro::thread::Thread<DrivingWork>& thread);
 };
 
 } // namespace guiding

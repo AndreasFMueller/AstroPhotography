@@ -3,13 +3,13 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <GuidingProcess.h>
+#include <Thread.h>
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
 
 namespace astro {
-namespace guiding {
+namespace thread {
 
 /**
  * \brief Accessor class to the run method of the thread
@@ -57,7 +57,7 @@ ThreadBase::ThreadBase() {
 	pthread_mutexattr_init(&mattr);
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&mutex, &mattr);
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 
 	// cond
 	pthread_condattr_t	cattr;
@@ -101,7 +101,7 @@ ThreadBase::~ThreadBase() {
  * \brief find out whether a thread is running
  */
 bool	ThreadBase::isrunning() {
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 	return _isrunning;
 }
 
@@ -110,7 +110,7 @@ bool	ThreadBase::isrunning() {
  */
 void	ThreadBase::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 
 	if (isrunning()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread already running");
@@ -143,7 +143,7 @@ void	ThreadBase::start() {
  * This works by setting the _terminate variable
  */
 void	ThreadBase::stop() {
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread);
 
 	// signal the thread that it should terminate
@@ -157,7 +157,7 @@ void	ThreadBase::stop() {
  * just have to wait until it is signalled.
  */
 bool	ThreadBase::wait(double timeout) {
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 	if (!isrunning()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"thread has terminated already, no wait needed");
@@ -195,10 +195,10 @@ void	ThreadBase::run() {
 
 	// and we remember that we are not running
 	{
-		GuidingLock	lock(&mutex);
+		Lock	lock(&mutex);
 		_isrunning = false;
 	}
 }
 
-} // namespace guiding
+} // namespace thread
 } // namespace astro

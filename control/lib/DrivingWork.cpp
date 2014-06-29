@@ -6,6 +6,8 @@
 #include <DrivingWork.h>
 #include <AstroUtils.h>
 
+using namespace astro::thread;
+
 namespace astro {
 namespace guiding {
 
@@ -35,7 +37,7 @@ DrivingWork::DrivingWork(Guider& _guider)
  * the shared _interval variable.
  */
 void	DrivingWork::interval(const double& i) {
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 	_interval = i;
 }
 
@@ -65,7 +67,7 @@ DrivingWork::~DrivingWork() {
  * properly lock that method out when we change them.
  */
 void	DrivingWork::setCorrection(const double& _tx, const double& _ty) {
-	GuidingLock	lock(&mutex);
+	Lock	lock(&mutex);
 	totalx = fabs(_tx);
 	totaly = fabs(_ty);
 	stepx = (_tx > 0) ? 1 : -1;
@@ -93,7 +95,7 @@ void	DrivingWork::defaultCorrection(const double& _tx, const double& _ty) {
  * _interval variable, so the method just computes the time to activate
  * the guiderport and then goes to sleep for the rest of the interval.
  */
-void	DrivingWork::main(GuidingThread<DrivingWork>& thread) {
+void	DrivingWork::main(astro::thread::Thread<DrivingWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GUIDE: thread main function starts");
 	do {
 		double	raplus = 0, raminus = 0;
@@ -102,7 +104,7 @@ void	DrivingWork::main(GuidingThread<DrivingWork>& thread) {
 		// this must be done while the mutex is held, or the
 		// data we read my be inconsistent.
 		{
-			GuidingLock	lock(&mutex);
+			Lock	lock(&mutex);
 			if (totalx > 0) {
 				double	dx = std::min(_interval, totalx);
 				if (stepx > 0) {

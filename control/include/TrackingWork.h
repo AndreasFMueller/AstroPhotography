@@ -88,7 +88,7 @@ public:
 		DrivingWork& driving);
 	~TrackingWork();
 
-	void	main(GuidingThread<TrackingWork>& thread);
+	void	main(astro::thread::Thread<TrackingWork>& thread);
 private:
 	TrackingPoint	_last;
 public:

@@ -11,6 +11,7 @@
 using namespace astro::camera;
 using namespace astro::image::transform;
 using namespace astro::image;
+using namespace astro::thread;
 
 namespace astro {
 namespace guiding {
@@ -60,11 +61,11 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching guiding threads");
 	// create the driving process
 	drivingwork = new DrivingWork(guider);
-	driving = ThreadPtr(new GuidingThread<DrivingWork>(*drivingwork));
+	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(*drivingwork));
 
 	// create the tracking process
 	trackingwork = new TrackingWork(guider, _tracker, *drivingwork);
-	tracking = ThreadPtr(new GuidingThread<TrackingWork>(*trackingwork));
+	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(*trackingwork));
 
 	// start both processes
 	driving->start();

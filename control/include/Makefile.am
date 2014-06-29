@@ -15,7 +15,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h \
 	AstroPersistence.h AstroTask.h AstroInterpolation.h
 
-noinst_HEADERS = PixelValue.h Simulator.h Sun.h \
+noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
 	ViewerPipeline.h Testtable.h \
 	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \

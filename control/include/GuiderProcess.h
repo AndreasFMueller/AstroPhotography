@@ -14,6 +14,7 @@
 #include <TrackingWork.h>
 #include <DrivingWork.h>
 #include <AstroPersistence.h>
+#include <Thread.h>
 
 using namespace astro::camera;
 
@@ -32,8 +33,8 @@ class GuiderProcess {
 	DrivingWork	*drivingwork;
 	TrackingWork	*trackingwork;
 
-	ThreadPtr	tracking;
-	ThreadPtr	driving;
+	astro::thread::ThreadPtr	tracking;
+	astro::thread::ThreadPtr	driving;
 
 	/**
 	 * \brief Interval between images of the tracking thread

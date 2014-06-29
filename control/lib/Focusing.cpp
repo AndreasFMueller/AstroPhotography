@@ -16,9 +16,15 @@ Focusing::Focusing(CameraPtr camera, FocuserPtr focuser)
 	_status = IDLE;
 }
 
-void	Focusing::start() {
+/**
+ * \brief Start the focusing process in a given interval
+ */
+void	Focusing::start(int min, int max) {
 }
 
+/**
+ * \brief Cancel the focusing process
+ */
 void	Focusing::cancel() {
 }
 

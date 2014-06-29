@@ -12,6 +12,7 @@
 
 using namespace astro::image;
 using namespace astro::camera;
+using namespace astro::thread;
 
 namespace astro {
 namespace guiding {
@@ -128,7 +129,7 @@ public:
  * central position.
  *
  */
-void	CalibrationProcess::main(GuidingThread<CalibrationProcess>& _thread) {
+void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating: terminate = %s",
 		_thread.terminate() ? "YES" : "NO");
 	// set the start time
@@ -234,7 +235,7 @@ CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker,
 	calibrated = false;
 	_progress = 0;
 	// create the thread
-	thread(ThreadPtr(new GuidingThread<CalibrationProcess>(*this)));
+	thread(ThreadPtr(new astro::thread::Thread<CalibrationProcess>(*this)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");
 }
 

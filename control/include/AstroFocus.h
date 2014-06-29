@@ -22,7 +22,7 @@ namespace focusing {
  */
 class FocusEvaluator {
 public:
-	double	operator()(const ImagePtr image) = 0;
+	virtual double	operator()(const ImagePtr image) = 0;
 };
 typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 
@@ -52,7 +52,7 @@ private:
 public:
 	Focusing(astro::camera::CameraPtr camera,
 		astro::camera::FocuserPtr focuser);
-	void	start();
+	void	start(int min, int max);
 	focus_status	status() const { return _status; }
 	void	cancel();
 	focus_mode	mode() const { return _mode; }
