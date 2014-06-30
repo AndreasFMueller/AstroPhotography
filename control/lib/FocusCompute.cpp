@@ -37,7 +37,7 @@ std::pair<double, double>	FocusCompute::solve(double *positions,
 		a[i] = positions[i];
 		a[i + m] = 1.;
 		b[i] = values[i];
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%f * a + b = %f",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%f * a + b = %g",
 			positions[i], values[i]);
 	}
 
@@ -62,7 +62,7 @@ std::pair<double, double>	FocusCompute::solve(double *positions,
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "b[0] = %f, b[1] = %f", b[0], b[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "b[0] = %g, b[1] = %g", b[0], b[1]);
 
 	// compute the optimal position
 	double	position = -b[1] / b[0];
@@ -79,7 +79,7 @@ std::pair<double, double>	FocusCompute::solve(double *positions,
 	std::pair<double, double>	result;
 	result.first = position;
 	result.second = sqrt(sum);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "position: %f, error: %f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "position: %f, error: %g",
 		result.first, result.second);
 	return result;
 }

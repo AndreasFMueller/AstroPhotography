@@ -11,6 +11,8 @@
 #include <includes.h>
 #include <AstroFocus.h>
 #include <AstroFilterfunc.h>
+#include <AstroFormat.h>
+#include <AstroIO.h>
 
 using namespace astro::focusing;
 
@@ -25,6 +27,61 @@ public:
 	virtual double	operator()(const ImagePtr image) {
 		double  fwhm = astro::image::filter::focusFWHM(image, _center, _radius);
 		return fwhm;
+	}
+};
+
+class FWHM2Evaluator : public FocusEvaluator {
+	ImagePoint	_center;
+	double	_radius;
+public:
+	FWHM2Evaluator(const ImagePoint& center, double radius = 20)
+		: _center(center), _radius(radius) { }
+	virtual double	operator()(const ImagePtr image) {
+		double  fwhm = astro::image::filter::focusFWHM2(image, _center, _radius);
+		return fwhm;
+	}
+};
+
+class FOMEvaluator : public FocusEvaluator {
+public:
+	FOMEvaluator() { }
+	virtual double	operator()(const ImagePtr image) {
+		double  fom = astro::image::filter::focusFOM(image);
+		return 1. / fom;
+	}
+};
+
+class FocusingCallback : public astro::callback::Callback {
+	std::string	_prefix;
+	int	counter;
+public:
+	FocusingCallback(const std::string& prefix) : _prefix(prefix) {
+		counter = 0;
+	}
+	astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "executing callback");
+		if (!data) {
+			return data;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "find argument type");
+		astro::callback::ImageCallbackData	*i
+			= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
+		if (NULL == i) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "not an ImageCallbackData");
+			return data;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got an ImageCallbackData");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image size: %s", i->image()->size().toString().c_str());
+		std::string	filename
+			= _prefix + stringprintf("-%d.fits", counter++);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "file name: %s",
+			filename.c_str());
+#if 1
+		astro::io::FITSout	outfile(filename);
+		outfile.write(i->image());
+#endif
+		return data;
 	}
 };
 
@@ -104,6 +161,7 @@ int	main(int argc, char *argv[]) {
 	exposure.frame = ImageRectangle(
 		ImagePoint(x - width / 2, y - height / 2),
 		ImageSize(width, height));
+	exposure.shutter = astro::camera::SHUTTER_OPEN;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 
@@ -111,7 +169,17 @@ int	main(int argc, char *argv[]) {
 	Focusing	focusing(ccd, focuser);
 	focusing.exposure(exposure);
 	focusing.steps(steps);
-	focusing.evaluator(FocusEvaluatorPtr(new FWHMEvaluator(ImagePoint(x, y), 50)));
+
+	//focusing.evaluator(FocusEvaluatorPtr(new FWHMEvaluator(ImagePoint(x, y), 50)));
+	focusing.evaluator(FocusEvaluatorPtr(new FWHM2Evaluator(ImagePoint(x, y), 50)));
+	//focusing.evaluator(FocusEvaluatorPtr(new FOMEvaluator()));
+
+	// install the callback
+	astro::callback::CallbackPtr	cbptr = astro::callback::CallbackPtr(
+		new FocusingCallback(std::string("fc/image")));
+	focusing.callback(cbptr);
+
+	// now start the process
 	focusing.start(min, max);
 
 	// wait until focusing is complete

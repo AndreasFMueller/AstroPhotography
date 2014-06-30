@@ -115,6 +115,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 			try {
 				astro::callback::CallbackDataPtr	data(new FocusCallbackData(image, value));
 				(*callback())(data);
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 			} catch (...) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"exception during callback");

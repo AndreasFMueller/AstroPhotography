@@ -425,6 +425,9 @@ public:
 
 	ImageSize	getSize() const { return adaptersize; }
 	virtual const Pixel	pixel(unsigned int x, unsigned int y) const = 0;
+	const Pixel	pixel(ImagePoint p) const {
+		return pixel(p.x(), p.y());
+	}
 };
 
 /**

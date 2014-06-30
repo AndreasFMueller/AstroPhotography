@@ -10,6 +10,7 @@
 #include <AstroAdapter.h>
 #include <limits>
 #include <AstroDebug.h>
+#include <list>
 
 namespace astro {
 namespace image {
@@ -552,6 +553,118 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 
 	// return value
 	return fwhm;
+}
+
+/**
+ * \brief New implementation using Miniball algorithm
+ *
+ * This filter first determines the maximum value within the circle and
+ * then collects all pixels within the circle that have a pixel value larger
+ * than half maximum. Then the MiniBall algorithm is used to find the diameter.
+ */
+template<typename Pixel>
+class FWHM2 : PixelTypeFilter<Pixel, double> {
+	ImagePoint	point;
+	unsigned int	r;
+public:
+	FWHM2(const ImagePoint& _point, unsigned int _r)
+		: point(_point), r(_r) {
+	}
+	virtual Pixel	operator()(const ConstImageAdapter<Pixel>& image) {
+		return this->filter(image);
+	}
+	virtual double	filter(const ConstImageAdapter<Pixel>& image);
+};
+
+double	MinRadius(const std::list<ImagePoint>& points);
+
+template<typename Pixel>
+double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
+	// find the maximum value in the area defined by point and radius
+	ImagePoint	lowerleft(point.x() - r, point.y() - r);
+	ImageRectangle	rectangle(lowerleft, ImageSize(2 * r + 1, 2 * r + 1));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
+		rectangle.toString().c_str());
+	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
+
+	// locate the maximum in a rectangle around the point
+	Max<Pixel, double>	m;
+	double	maxvalue = m.filter(wa);
+
+	// the maximum point we have found is with respect to the window,
+	// but that was a restriction only for finding the maximum. So
+	// we now compute the target point relative to the whole image
+	ImagePoint	target = lowerleft + m.getPoint();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum %f at %s",
+		(double)maxvalue, target.toString().c_str());
+
+	// collect points that have pixel value > half maximum
+	double	halfmax = maxvalue / 2;
+	std::list<ImagePoint>	points;
+
+	// to collect the points, we start at the target point, and move
+	// outwards in 'circles' until we either hit the boundary of the image
+	// or get a circle without any points
+	points.push_back(target);
+	int	radius = 1;
+	int	points_in_circle = 1;
+	do {
+		points_in_circle = 0;
+		if ((radius > target.x()) || (radius > target.y()) ||
+			(radius > (image.getSize().width() - target.x())) ||
+			(radius > (image.getSize().height() - target.y()))) {
+			// if we break here, then this implies that 
+			// points_in_circle == 0, so the loop will terminate
+			break;
+		}
+		for (int x = -radius; x <= radius; x++) {
+			// top
+			ImagePoint	p1(target.x() + x, target.y() + radius);
+			if (image.pixel(p1) > halfmax) {
+				points.push_back(p1);
+				points_in_circle++;
+			}
+			// bottom
+			ImagePoint	p2(target.x() + x, target.y() - radius);
+			if (image.pixel(p2) > halfmax) {
+				points.push_back(p2);
+				points_in_circle++;
+			}
+		}
+		for (int y = 1; y <= 2 * radius; y++) {
+			// right
+			ImagePoint	p1(target.x() + radius, target.y() + y);
+			if (image.pixel(p1) > halfmax) {
+				points.push_back(p1);
+				points_in_circle++;
+			}
+			// left
+			ImagePoint	p2(target.x() - radius, target.y() + y);
+			if (image.pixel(p2) > halfmax) {
+				points.push_back(p2);
+				points_in_circle++;
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points added for radius %d",
+			points_in_circle, radius);
+		radius++;
+	} while ((points_in_circle > 0) && (radius < r));
+#if 0	
+	for (unsigned int x = 0; x < wa.getSize().width(); x++) {
+		for (unsigned int y = 0; y < wa.getSize().height(); y++) {
+			if (wa.pixel(x, y) > halfmax) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"adding point (%d,%d)", x, y);
+				points.push_back(ImagePoint(x, y));
+			}
+		}
+	}
+#endif
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d points", points.size());
+	
+	// now use Miniball to get access to the 
+	return MinRadius(points);
 }
 
 /**

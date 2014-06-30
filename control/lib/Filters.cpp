@@ -228,6 +228,27 @@ double	focusFWHM(const ImagePtr& image, const ImagePoint& center,
 	return 0;
 }
 
+#define	filter_focusfwhm2(image, Pixel, center, r)			\
+{									\
+	Image<Pixel >	*imagep						\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		FWHM2<Pixel>	fwhm(center, r);			\
+		return fwhm.filter(*imagep);				\
+	}								\
+}
+
+double	focusFWHM2(const ImagePtr& image, const ImagePoint& center,
+	unsigned int r) {
+	filter_focusfwhm2(image, unsigned char, center, r);
+	filter_focusfwhm2(image, unsigned short, center, r);
+	filter_focusfwhm2(image, unsigned int, center, r);
+	filter_focusfwhm2(image, unsigned long, center, r);
+	filter_focusfwhm2(image, float, center, r);
+	filter_focusfwhm2(image, double, center, r);
+	return 0;
+}
+
 #define	filter_mask(image, pixel, mf)					\
 	{								\
 		Image<pixel>	*imagep					\
