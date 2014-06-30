@@ -51,7 +51,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	AdaptiveOptics.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
-	MinRadius.cpp \
+	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	FocusWork.cpp FocusCompute.cpp \

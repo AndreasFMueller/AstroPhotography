@@ -932,7 +932,39 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "xscaling = %f, yscaling = %f", xscaling, yscalin
 	}
 };
 
-} // namespace image
+//////////////////////////////////////////////////////////////////////
+// Level detection adapter
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Adapter to create a mask of pixels exceeding a value
+ *
+ */
+template<typename Pixel>
+class LevelMaskAdapter : public ConstImageAdapter<unsigned char> {
+	const ConstImageAdapter<Pixel>&	_image;
+	double	_level;
+public:
+	LevelMaskAdapter(const ConstImageAdapter<Pixel>& image,
+		const double level) :
+		ConstImageAdapter<unsigned char>(image.getSize()),
+		_image(image), _level(level) {
+	}
+	virtual const unsigned char	pixel(unsigned int x, unsigned int y) const {
+		return (_image.pixel(x, y) >= _level) ? 1 : 0;
+	}
+};
+
+/**
+ * \brief Extract a mask from an image
+ */
+class LevelMaskExtractor {
+	double	_level;
+public:
+	LevelMaskExtractor(double level) : _level(level) { }
+	ImagePtr	operator()(const ImagePtr image) const;
+};
+
+} // namespace adapter
 } // namespace astro
 
 

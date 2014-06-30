@@ -618,6 +618,10 @@ public:
 		return pixels[pixeloffset(x, y)];
 	}
 
+	const Pixel	pixel(const ImagePoint& p) const {
+		return pixel(p.x(), p.y());
+	}
+
 	/**
 	 * \brief Read/write access to pixels specified by image coordinates
  	 */
@@ -625,8 +629,16 @@ public:
 		return pixels[pixeloffset(x, y)];
 	}
 
+	Pixel&	pixel(const ImagePoint& p) {
+		return pixel(p.x(), p.y());
+	}
+
 	Pixel&	writablepixel(unsigned int x, unsigned int y) {
 		return pixels[pixeloffset(x, y)];
+	}
+
+	Pixel&	writablepixel(const ImagePoint& p) {
+		return writablepixel(p.x(), p.y());
 	}
 
 	// Iterators come either from Rows or from Columns

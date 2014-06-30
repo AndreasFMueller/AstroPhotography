@@ -171,7 +171,7 @@ int	main(int argc, char *argv[]) {
 	focusing.steps(steps);
 
 	//focusing.evaluator(FocusEvaluatorPtr(new FWHMEvaluator(ImagePoint(x, y), 50)));
-	focusing.evaluator(FocusEvaluatorPtr(new FWHM2Evaluator(ImagePoint(x, y), 50)));
+	focusing.evaluator(FocusEvaluatorPtr(new FWHM2Evaluator(ImagePoint(width/2, height / 2), 50)));
 	//focusing.evaluator(FocusEvaluatorPtr(new FOMEvaluator()));
 
 	// install the callback

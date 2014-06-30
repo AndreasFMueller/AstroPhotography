@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20140630:
+	* new impementation FWHM2
+	* Connected Component class
+	* MinRadius class
+	* LevelMask extraction adapter
+
 20140629:
 	* GuidingThread -> Thread
 	* add focusing.cpp tool

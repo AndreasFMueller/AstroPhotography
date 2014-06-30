@@ -11,6 +11,7 @@
 #include <limits>
 #include <AstroDebug.h>
 #include <list>
+#include <ConnectedComponent.h>
 
 namespace astro {
 namespace image {
@@ -580,6 +581,8 @@ double	MinRadius(const std::list<ImagePoint>& points);
 
 template<typename Pixel>
 double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dowing FWHM2 from %s image",
+		image.getSize().toString().c_str());
 	// find the maximum value in the area defined by point and radius
 	ImagePoint	lowerleft(point.x() - r, point.y() - r);
 	ImageRectangle	rectangle(lowerleft, ImageSize(2 * r + 1, 2 * r + 1));
@@ -599,67 +602,25 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 		(double)maxvalue, target.toString().c_str());
 
 	// collect points that have pixel value > half maximum
-	double	halfmax = maxvalue / 2;
-	std::list<ImagePoint>	points;
+	astro::adapter::LevelMaskAdapter<Pixel>	lma(image, maxvalue / 2.);
+	ImagePtr	levelmask(new Image<unsigned char>(lma));
 
-	// to collect the points, we start at the target point, and move
-	// outwards in 'circles' until we either hit the boundary of the image
-	// or get a circle without any points
-	points.push_back(target);
-	int	radius = 1;
-	int	points_in_circle = 1;
-	do {
-		points_in_circle = 0;
-		if ((radius > target.x()) || (radius > target.y()) ||
-			(radius > (image.getSize().width() - target.x())) ||
-			(radius > (image.getSize().height() - target.y()))) {
-			// if we break here, then this implies that 
-			// points_in_circle == 0, so the loop will terminate
-			break;
-		}
-		for (int x = -radius; x <= radius; x++) {
-			// top
-			ImagePoint	p1(target.x() + x, target.y() + radius);
-			if (image.pixel(p1) > halfmax) {
-				points.push_back(p1);
-				points_in_circle++;
-			}
-			// bottom
-			ImagePoint	p2(target.x() + x, target.y() - radius);
-			if (image.pixel(p2) > halfmax) {
-				points.push_back(p2);
-				points_in_circle++;
-			}
-		}
-		for (int y = 1; y <= 2 * radius; y++) {
-			// right
-			ImagePoint	p1(target.x() + radius, target.y() + y);
-			if (image.pixel(p1) > halfmax) {
-				points.push_back(p1);
-				points_in_circle++;
-			}
-			// left
-			ImagePoint	p2(target.x() - radius, target.y() + y);
-			if (image.pixel(p2) > halfmax) {
-				points.push_back(p2);
-				points_in_circle++;
-			}
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points added for radius %d",
-			points_in_circle, radius);
-		radius++;
-	} while ((points_in_circle > 0) && (radius < r));
-#if 0	
-	for (unsigned int x = 0; x < wa.getSize().width(); x++) {
-		for (unsigned int y = 0; y < wa.getSize().height(); y++) {
-			if (wa.pixel(x, y) > halfmax) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"adding point (%d,%d)", x, y);
+	// extract the connected component of this levelmask
+	ImagePtr	connected = ConnectedComponent(target)(levelmask);
+	Image<unsigned char>	*conn
+		= dynamic_cast<Image<unsigned char> *>(&*connected);
+
+	// add points in connected component to the list
+	std::list<ImagePoint>	points;
+	unsigned int	width = conn->getSize().width();
+	unsigned int	height = conn->getSize().height();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			if (conn->pixel(x, y)) {
 				points.push_back(ImagePoint(x, y));
 			}
 		}
 	}
-#endif
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d points", points.size());
 	
