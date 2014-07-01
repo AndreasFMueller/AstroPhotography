@@ -49,6 +49,13 @@ extern bool	saturated(const ImagePtr& image, const ImageRectangle& rect);
 
 extern RGB<double>	whitebalance(const ImagePtr& image);
 
+extern double	focus_horizontalgradient(const ImagePtr& image);
+extern double	focus_verticalgradient(const ImagePtr& image);
+extern double	focus_squaredgradient(const ImagePtr& image);
+extern double	focus_horizontalbrenner(const ImagePtr& image);
+extern double	focus_verticalbrenner(const ImagePtr& image);
+extern double	focus_squaredbrenner(const ImagePtr& image);
+
 
 } // namespace filter
 } // namespace image

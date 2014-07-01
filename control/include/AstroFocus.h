@@ -74,7 +74,6 @@ static std::string	name_of_status(focus_status);
 private:
 	volatile focus_status	_status;
 	void	status(focus_status s) { _status = s; }
-	friend class FocusWork;	// allow the FocusWork class update the status
 public:
 	focus_status	status() const { return _status; }
 
@@ -114,7 +113,6 @@ public:
 	astro::camera::Exposure	exposure() { return _exposure; }
 	void	exposure(astro::camera::Exposure e) { _exposure = e; }
 
-private:
 	bool	completed() const {
 		return (_status == FOCUSED) || (_status == FAILED);
 	}
@@ -127,6 +125,7 @@ public:
 public:
 	astro::thread::ThreadPtr	thread;
 	FocusWork	*work;
+	friend class FocusWork;	// allow the FocusWork class update the status
 };
 
 } // namespace focusing

@@ -676,6 +676,33 @@ RGB<double>	WhiteBalance<Pixel>::filter(
 	return result;
 }
 
+/**
+ * \brief Filter that computes the sum of an image
+ */
+template<typename Pixel>
+class Sum {
+public:
+	Sum() { }
+	double	filter(const ConstImageAdapter<Pixel>& image) const;
+};
+
+template<typename Pixel>
+double	Sum<Pixel>::filter(const ConstImageAdapter<Pixel>& image) const {
+	double	sum = 0;
+	unsigned int	width = image.getSize().width();
+	unsigned int	height = image.getSize().height();
+	bool	check_nan = std::numeric_limits<Pixel>::has_quiet_NaN;
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			Pixel	v = image.pixel(x, y);
+			if ((check_nan) && (v != v))
+				continue;
+			sum += v;
+		}
+	}
+	return sum;
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro
