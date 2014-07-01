@@ -687,7 +687,7 @@ const RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Color adaapters
+// Color adapters
 //////////////////////////////////////////////////////////////////////
 template<typename T>
 class ColorAdapter : public ConstImageAdapter<T> {
@@ -800,18 +800,38 @@ const	RGB<T>	YUYVAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 //////////////////////////////////////////////////////////////////////
 // Function adapter
 //////////////////////////////////////////////////////////////////////
+template <typename Pixel>
 class FunctionAdapter : public ConstImageAdapter<double> {
-	const ConstImageAdapter<double>&	image;
+	const ConstImageAdapter<Pixel>&	image;
 	double	(*f)(double);
 public:
-	FunctionAdapter(const ConstImageAdapter<double>& _image,
+	FunctionAdapter(const ConstImageAdapter<Pixel>& _image,
 		double (*_f)(double))
 		: ConstImageAdapter<double>(_image.getSize()),
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
 	}
 	virtual const double	pixel(unsigned int x, unsigned int y) const {
-		return f(image.pixel(x,y));
+		double	v = image.pixel(x, y);
+		return f(v);
+	}
+};
+
+/**
+ * \brief Adapter to square all the pixel values of an image
+ *
+ * This could be implemented with a Function adapter, but this special
+ * case can probably be handled more efficiently
+ */
+template<typename Pixel>
+class SquareAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	SquareAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) { }
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		double	v = image.pixel(x, y);
+		return v * v;
 	}
 };
 
