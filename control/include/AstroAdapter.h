@@ -984,6 +984,122 @@ public:
 	ImagePtr	operator()(const ImagePtr image) const;
 };
 
+//////////////////////////////////////////////////////////////////////
+// various focus measure adapters
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class HorizontalGradientAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	HorizontalGradientAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (x >= (image.getSize().width() - 1)) {
+			return 0;
+		}
+		double	dx = (double)image.pixel(x + 1, y)
+				- (double)image.pixel(x, y);
+		return dx * dx;
+	}
+};
+
+template<typename Pixel>
+class VerticalGradientAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	VerticalGradientAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (y >= (image.getSize().height() - 1)) {
+			return 0;
+		}
+		double	dy = (double)image.pixel(x, y + 1)
+				- (double)image.pixel(x, y);
+		return dy * dy;
+	}
+};
+
+template<typename Pixel>
+class SquaredGradientAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	SquaredGradientAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (x >= (image.getSize().width() - 1)) {
+			return 0;
+		}
+		if (y >= (image.getSize().height() - 1)) {
+			return 0;
+		}
+		double	dx = (double)image.pixel(x + 1, y)
+				- (double)image.pixel(x, y);
+		double	dy = (double)image.pixel(x, y + 1)
+				- (double)image.pixel(x, y);
+		return dx * dx + dy * dy;
+	}
+};
+
+template<typename Pixel>
+class HorizontalBrennerAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	HorizontalBrennerAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (x > (image.getSize().width() - 2)) {
+			return 0;
+		}
+		double	dx = (double)image.pixel(x + 2, y)
+				- (double)image.pixel(x, y);
+		return dx * dx;
+	}
+};
+
+template<typename Pixel>
+class VerticalBrennerAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	VerticalBrennerAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (y > (image.getSize().height() - 2)) {
+			return 0;
+		}
+		double	dy = (double)image.pixel(x, y + 2)
+			- (double)image.pixel(x, y);
+		return dy * dy;
+	}
+};
+
+template<typename Pixel>
+class BrennerAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	BrennerAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
+	}
+	virtual const double	pixel(unsigned int x, unsigned int y) const {
+		if (x > (image.getSize().width() - 2)) {
+			return 0;
+		}
+		if (y > (image.getSize().height() - 2)) {
+			return 0;
+		}
+		double	dx = (double)image.pixel(x + 2, y)
+				- (double)image.pixel(x, y);
+		double	dy = (double)image.pixel(x, y + 2)
+			- (double)image.pixel(x, y);
+		return dx * dx + dy * dy;
+	}
+};
+
+
 } // namespace adapter
 } // namespace astro
 

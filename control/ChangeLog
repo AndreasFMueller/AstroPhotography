@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20140701:
+	* add SquareAdapter
+	* add various focus measure adapters for autofocus
+
 20140630:
 	* new impementation FWHM2
 	* Connected Component class
