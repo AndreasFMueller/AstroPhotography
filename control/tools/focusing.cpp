@@ -52,6 +52,23 @@ public:
 	}
 };
 
+/**
+ * \brief Convert the method name to a code
+ */
+Focusing::focus_method	method_from_name(const std::string& name) {
+	int	l = name.size();
+	if (l == 0) {
+		throw std::runtime_error("unknown method");
+	}
+	if (name == std::string("fwhm").substr(0, l)) {
+		return Focusing::FWHM;
+	}
+	if (name == std::string("measure").substr(0, l)) {
+		return Focusing::MEASURE;
+	}
+	throw std::runtime_error("unknown method");
+}
+
 int	main(int argc, char *argv[]) {
 	int	c;
 	unsigned short	min = 28000;
@@ -64,7 +81,8 @@ int	main(int argc, char *argv[]) {
 	int	y = -1;
 	int	width = -1;
 	int	height = -1;
-	while (EOF != (c = getopt(argc, argv, "dm:M:C:F:s:e:x:y:w:h:")))
+	Focusing::focus_method	method = Focusing::FWHM;
+	while (EOF != (c = getopt(argc, argv, "dm:M:C:F:s:e:x:y:w:h:a:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -99,6 +117,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			height = atoi(optarg);
+			break;
+		case 'a':
+			method = method_from_name(optarg);
 			break;
 		}
 
@@ -136,12 +157,7 @@ int	main(int argc, char *argv[]) {
 	Focusing	focusing(ccd, focuser);
 	focusing.exposure(exposure);
 	focusing.steps(steps);
-
-#if 0
-	//focusing.evaluator(FocusEvaluatorPtr(new FWHMEvaluator(ImagePoint(x, y), 50)));
-	focusing.evaluator(FocusEvaluatorPtr(new FWHM2Evaluator(ImagePoint(width/2, height / 2), 50)));
-	//focusing.evaluator(FocusEvaluatorPtr(new FOMEvaluator()));
-#endif
+	focusing.method(method);
 
 	// install the callback
 	astro::callback::CallbackPtr	cbptr = astro::callback::CallbackPtr(
@@ -153,31 +169,17 @@ int	main(int argc, char *argv[]) {
 
 	// wait until focusing is complete
 	while (!focusing.completed()) {
-		std::string	statusname;
-		switch (focusing.status()) {
-		case Focusing::IDLE:
-			statusname = "idle";
-			break;
-		case Focusing::MOVING:
-			statusname = "moving";
-			break;
-		case Focusing::MEASURING:
-			statusname = "measuring";
-			break;
-		case Focusing::FOCUSED:
-			statusname = "focused";
-			break;
-		case Focusing::FAILED:
-			statusname = "failed";
-			break;
-		}
+		std::string	statusname
+			= Focusing::name_of_status(focusing.status());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing status: %s",
 			statusname.c_str());
 		sleep(1);
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing process complete");
-	return EXIT_SUCCESS;
+	Focusing::focus_status	state = focusing.status();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing process complete: %s",
+		Focusing::name_of_status(state).c_str());
+	return (Focusing::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 } // namespace astro

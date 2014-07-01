@@ -84,5 +84,48 @@ void	Focusing::cancel() {
 	}
 }
 
+std::string	Focusing::name_of_method(focus_method m) {
+	switch (m) {
+	case FWHM:
+		return std::string("fwhm");
+	case MEASURE:
+		return std::string("measure");
+	}
+	throw std::runtime_error("bad focus method");
+}
+
+std::string	Focusing::name_of_status(focus_status s) {
+	switch (s) {
+	case IDLE:
+		return std::string("idle");
+		break;
+	case MOVING:
+		return std::string("moving");
+		break;
+	case MEASURING:
+		return std::string("measuring");
+		break;
+	case FOCUSED:
+		return std::string("focused");
+		break;
+	case FAILED:
+		return std::string("failed");
+		break;
+	}
+	throw std::runtime_error("bad focus status");
+}
+
+std::string	Focusing::name_of_mode(focus_mode m) {
+	switch (m) {
+	case ONE_SIDED:
+		return std::string("one-sided");
+		break;
+	case TWO_SIDED:
+		return std::string("two-sided");
+		break;
+	}
+	throw std::runtime_error("bad focus mode");
+}
+
 } // namespace focusing
 } // namespace astro

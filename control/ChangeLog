@@ -5,6 +5,7 @@ ChangeLog for the Astro project.
 	* add various focus measure adapters for autofocus
 	* refactor FocusWork class
 	* fix a bug in the moveto method of the Focuser base class
+	* make focus method selectable in focusing tool
 
 20140630:
 	* new impementation FWHM2

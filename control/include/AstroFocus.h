@@ -57,8 +57,11 @@ public:
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
+static std::string	name_of_mode(focus_mode);
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
+static std::string	name_of_status(focus_status);
 	typedef enum { FWHM, MEASURE } focus_method;
+static std::string	name_of_method(focus_method);
 private:
 	astro::camera::CcdPtr	_ccd;
 public:
