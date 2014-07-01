@@ -73,7 +73,7 @@ bool	FocusWork::complete() {
 /**
  * \brief Main function of the Focusing process
  */
-void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
+void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing work");
 	if (!complete()) {
 		throw std::runtime_error("focuser not completely specified");
@@ -83,7 +83,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 
 	// determine how many intermediate steps we want to access
 
-	if (_min < focuser()->min()) {
+	if (min() < focuser()->min()) {
 		throw std::runtime_error("minimum too small");
 	}
 
@@ -95,11 +95,11 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 			position);
 
 		// move to new position
-		_focusing.status(Focusing::MOVING);
+		focusingstatus(Focusing::MOVING);
 		focuser()->moveto(position);
 		
 		// get an image from the Ccd
-		_focusing.status(Focusing::MEASURING);
+		focusingstatus(Focusing::MEASURING);
 		ccd()->startExposure(exposure());
 		ccd()->wait();
 		ImagePtr	image = ccd()->getImage();
@@ -131,7 +131,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 	// move to the focus position
 	unsigned short	targetposition = focusposition;
 	focuser()->moveto(targetposition);
-	_focusing.status(Focusing::FOCUSED);
+	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
 }
 

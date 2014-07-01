@@ -78,7 +78,7 @@ int	logscale_main(int argc, char *argv[]) {
 	LuminanceAdapter<double, double>	la(*imageptr);
 
 	// create image from log adapter
-	FunctionAdapter	fa(la, log2);
+	FunctionAdapter<double>	fa(la, log2);
 	Image<double>	*logimage = new Image<double>(fa);
 	ImagePtr	outimage(logimage);
 

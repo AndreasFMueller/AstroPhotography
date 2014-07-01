@@ -183,7 +183,7 @@ int	main(int argc, char *argv[]) {
 	focusing.start(min, max);
 
 	// wait until focusing is complete
-	while (Focusing::FOCUSED != focusing.status()) {
+	while (!focusing.completed()) {
 		std::string	statusname;
 		switch (focusing.status()) {
 		case Focusing::IDLE:
@@ -197,6 +197,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case Focusing::FOCUSED:
 			statusname = "focused";
+			break;
+		case Focusing::FAILED:
+			statusname = "failed";
 			break;
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing status: %s",

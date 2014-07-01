@@ -46,7 +46,7 @@ void	Focusing::start(int min, int max) {
 	_status = IDLE;
 
 	// create the focus work
-	work = new FocusWork(*this);
+	work = new VCurveFocusWork(*this);
 	work->ccd(ccd());
 	work->focuser(focuser());
 	work->exposure(exposure());

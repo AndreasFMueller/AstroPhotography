@@ -3,6 +3,8 @@ ChangeLog for the Astro project.
 20140701:
 	* add SquareAdapter
 	* add various focus measure adapters for autofocus
+	* refactor FocusWork class
+	* fix a bug in the moveto method of the Focuser base class
 
 20140630:
 	* new impementation FWHM2

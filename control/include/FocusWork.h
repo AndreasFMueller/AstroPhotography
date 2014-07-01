@@ -60,18 +60,35 @@ private:
 public:	
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
-private:
+protected:
 	bool	complete();
 	Focusing&	_focusing;
+	Focusing::focus_status	focusingstatus() { return _focusing.status(); }
+	void	focusingstatus(Focusing::focus_status s) { _focusing.status(s); }
 public:
 	FocusWork(Focusing& focusing);
-	void	main(astro::thread::Thread<FocusWork>& thread);
+	virtual ~FocusWork() { }
+	virtual void	main(astro::thread::Thread<FocusWork>& thread) = 0;
 
 	// forbid copying by declaring copy constructor and assignment
 	// operator private
 private:
 	FocusWork(const FocusWork& other);
 	FocusWork&	operator=(const FocusWork& other);
+};
+
+/**
+ * \brief Focusing class work method based on a V-Curve
+ *
+ * This work class moves the focuser to a list of focus positions and
+ * determines the FWHM through an FWHM2 evaluator. From the various
+ * FWHM measures obtained, it infers the optimal focus position.
+ */
+class VCurveFocusWork : public FocusWork {
+public:
+	VCurveFocusWork(Focusing& focusing) : FocusWork(focusing) { }
+	virtual ~VCurveFocusWork() { }
+	virtual void	main(astro::thread::Thread<FocusWork>& thread);
 };
 
 } // namespace focusing

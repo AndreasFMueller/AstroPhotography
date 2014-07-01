@@ -57,7 +57,7 @@ public:
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
-	typedef enum { IDLE, MOVING, MEASURING, FOCUSED } focus_status;
+	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
 private:
 	astro::camera::CcdPtr	_ccd;
 public:
@@ -88,6 +88,9 @@ private:
 	friend class FocusWork;
 public:
 	focus_status	status() const { return _status; }
+	bool	completed() const {
+		return (_status == FOCUSED) || (_status == FAILED);
+	}
 public:
 	Focusing(astro::camera::CcdPtr ccd,
 		astro::camera::FocuserPtr focuser);

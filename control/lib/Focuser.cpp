@@ -64,7 +64,7 @@ bool	Focuser::moveto(unsigned short value, unsigned long timeout) {
 	time(&now);
 	unsigned short	currentposition = current();
 	do {
-		if (currentposition != current()) {
+		if (value != currentposition) {
 			usleep(100000);
 		}
 		currentposition = current();
