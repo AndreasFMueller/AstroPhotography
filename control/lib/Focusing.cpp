@@ -127,5 +127,33 @@ std::string	Focusing::name_of_mode(focus_mode m) {
 	throw std::runtime_error("bad focus mode");
 }
 
+Focusing::focus_mode	Focusing::mode_from_name(const std::string& name) {
+	int	l = name.size();
+	if (l == 0) {
+		throw std::runtime_error("unknown mode");
+	}
+	if (name == std::string("one-sided").substr(0, l)) {
+		return Focusing::ONE_SIDED;
+	}
+	if (name == std::string("two-sided").substr(0, l)) {
+		return Focusing::TWO_SIDED;
+	}
+	throw std::runtime_error("unknown mode");
+}
+
+Focusing::focus_method	Focusing::method_from_name(const std::string& name) {
+	int	l = name.size();
+	if (l == 0) {
+		throw std::runtime_error("unknown method");
+	}
+	if (name == std::string("fwhm").substr(0, l)) {
+		return Focusing::FWHM;
+	}
+	if (name == std::string("measure").substr(0, l)) {
+		return Focusing::MEASURE;
+	}
+	throw std::runtime_error("unknown method");
+}
+
 } // namespace focusing
 } // namespace astro

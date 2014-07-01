@@ -44,30 +44,11 @@ public:
 			= _prefix + stringprintf("-%d.fits", counter++);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file name: %s",
 			filename.c_str());
-#if 1
 		astro::io::FITSout	outfile(filename);
 		outfile.write(i->image());
-#endif
 		return data;
 	}
 };
-
-/**
- * \brief Convert the method name to a code
- */
-Focusing::focus_method	method_from_name(const std::string& name) {
-	int	l = name.size();
-	if (l == 0) {
-		throw std::runtime_error("unknown method");
-	}
-	if (name == std::string("fwhm").substr(0, l)) {
-		return Focusing::FWHM;
-	}
-	if (name == std::string("measure").substr(0, l)) {
-		return Focusing::MEASURE;
-	}
-	throw std::runtime_error("unknown method");
-}
 
 int	main(int argc, char *argv[]) {
 	int	c;
@@ -119,7 +100,7 @@ int	main(int argc, char *argv[]) {
 			height = atoi(optarg);
 			break;
 		case 'a':
-			method = method_from_name(optarg);
+			method = Focusing::method_from_name(optarg);
 			break;
 		}
 

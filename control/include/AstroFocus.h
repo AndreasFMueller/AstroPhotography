@@ -51,47 +51,70 @@ class FocusWork;
  * used to compute the best focus position, which is then set.
  */
 class Focusing {
+	// callback for images
 	astro::callback::CallbackPtr	_callback;
 public:
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
+
+	// focusing mode
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
 static std::string	name_of_mode(focus_mode);
+static focus_mode	mode_from_name(const std::string& name);
+private:
+	focus_mode	_mode;
+public:
+	focus_mode	mode() const { return _mode; }
+	void	mode(focus_mode mode) { _mode = mode; }
+
+	// focusing status (what is it doing right now?)
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
 static std::string	name_of_status(focus_status);
+private:
+	volatile focus_status	_status;
+	void	status(focus_status s) { _status = s; }
+	friend class FocusWork;	// allow the FocusWork class update the status
+public:
+	focus_status	status() const { return _status; }
+
+	// method for focusing
 	typedef enum { FWHM, MEASURE } focus_method;
 static std::string	name_of_method(focus_method);
+static focus_method	method_from_name(const std::string& name);
+private:
+	focus_method	_method;
+public:
+	focus_method	method() const { return _method; }
+	void	method(focus_method m) { _method = m; }
+
+	// CCD to be used to get images
 private:
 	astro::camera::CcdPtr	_ccd;
 public:
 	astro::camera::CcdPtr	ccd() { return _ccd; }
+
+	// focuser to use to change focus
 private:
 	astro::camera::FocuserPtr	_focuser;
 public:
 	astro::camera::FocuserPtr	focuser() { return _focuser; }
+
+	// subdivision steps for the interval
 private:
 	int	_steps;
 public:
 	int	steps() const { return _steps; }
 	void	steps(int s) { _steps = s; }
+
+	// exposure specification for images
 private:
 	astro::camera::Exposure	_exposure;
 public:
 	astro::camera::Exposure	exposure() { return _exposure; }
 	void	exposure(astro::camera::Exposure e) { _exposure = e; }
+
 private:
-	focus_mode	_mode;
-	focus_method	_method;
-public:
-	focus_method	method() const { return _method; }
-	void	method(focus_method m) { _method = m; }
-private:
-	volatile focus_status	_status;
-	void	status(focus_status s) { _status = s; }
-	friend class FocusWork;
-public:
-	focus_status	status() const { return _status; }
 	bool	completed() const {
 		return (_status == FOCUSED) || (_status == FAILED);
 	}
@@ -101,8 +124,6 @@ public:
 	~Focusing();
 	void	start(int min, int max);
 	void	cancel();
-	focus_mode	mode() const { return _mode; }
-	void	mode(focus_mode mode) { _mode = mode; }
 public:
 	astro::thread::ThreadPtr	thread;
 	FocusWork	*work;
