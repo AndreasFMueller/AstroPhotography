@@ -58,6 +58,7 @@ public:
 public:
 	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
+	typedef enum { FWHM, MEASURE } focus_method;
 private:
 	astro::camera::CcdPtr	_ccd;
 public:
@@ -71,11 +72,6 @@ private:
 public:
 	int	steps() const { return _steps; }
 	void	steps(int s) { _steps = s; }
-private:
-	FocusEvaluatorPtr	_evaluator;
-public:
-	FocusEvaluatorPtr	evaluator() { return _evaluator; }
-	void	evaluator(FocusEvaluatorPtr e) { _evaluator = e; }
 private:
 	astro::camera::Exposure	_exposure;
 public:

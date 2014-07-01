@@ -18,39 +18,6 @@ using namespace astro::focusing;
 
 namespace astro {
 
-class FWHMEvaluator : public FocusEvaluator {
-	ImagePoint	_center;
-	double	_radius;
-public:
-	FWHMEvaluator(const ImagePoint& center, double radius = 20)
-		: _center(center), _radius(radius) { }
-	virtual double	operator()(const ImagePtr image) {
-		double  fwhm = astro::image::filter::focusFWHM(image, _center, _radius);
-		return fwhm;
-	}
-};
-
-class FWHM2Evaluator : public FocusEvaluator {
-	ImagePoint	_center;
-	double	_radius;
-public:
-	FWHM2Evaluator(const ImagePoint& center, double radius = 20)
-		: _center(center), _radius(radius) { }
-	virtual double	operator()(const ImagePtr image) {
-		double  fwhm = astro::image::filter::focusFWHM2(image, _center, _radius);
-		return fwhm;
-	}
-};
-
-class FOMEvaluator : public FocusEvaluator {
-public:
-	FOMEvaluator() { }
-	virtual double	operator()(const ImagePtr image) {
-		double  fom = astro::image::filter::focusFOM(image);
-		return 1. / fom;
-	}
-};
-
 class FocusingCallback : public astro::callback::Callback {
 	std::string	_prefix;
 	int	counter;
@@ -170,9 +137,11 @@ int	main(int argc, char *argv[]) {
 	focusing.exposure(exposure);
 	focusing.steps(steps);
 
+#if 0
 	//focusing.evaluator(FocusEvaluatorPtr(new FWHMEvaluator(ImagePoint(x, y), 50)));
 	focusing.evaluator(FocusEvaluatorPtr(new FWHM2Evaluator(ImagePoint(width/2, height / 2), 50)));
 	//focusing.evaluator(FocusEvaluatorPtr(new FOMEvaluator()));
+#endif
 
 	// install the callback
 	astro::callback::CallbackPtr	cbptr = astro::callback::CallbackPtr(

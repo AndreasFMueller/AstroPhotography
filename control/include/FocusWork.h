@@ -51,11 +51,6 @@ public:
 	const astro::camera::Exposure&	exposure() { return _exposure; }
 	void	exposure(const astro::camera::Exposure& e) { _exposure = e; }
 private:
-	FocusEvaluatorPtr	_evaluator;
-public:
-	FocusEvaluatorPtr	evaluator() { return _evaluator; }
-	void	evaluator(FocusEvaluatorPtr e) { _evaluator = e; }
-private:
 	astro::callback::CallbackPtr	_callback;
 public:	
 	astro::callback::CallbackPtr	callback() { return _callback; }

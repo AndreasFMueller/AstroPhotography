@@ -54,7 +54,6 @@ void	Focusing::start(int min, int max) {
 	work->max(max);
 	work->steps(steps());
 	work->callback(callback());
-	work->evaluator(evaluator());
 
 	// start a thread with this work
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting a thread");
