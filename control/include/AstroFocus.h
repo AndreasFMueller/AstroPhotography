@@ -79,6 +79,11 @@ public:
 	void	exposure(astro::camera::Exposure e) { _exposure = e; }
 private:
 	focus_mode	_mode;
+	focus_method	_method;
+public:
+	focus_method	method() const { return _method; }
+	void	method(focus_method m) { _method = m; }
+private:
 	volatile focus_status	_status;
 	void	status(focus_status s) { _status = s; }
 	friend class FocusWork;

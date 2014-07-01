@@ -73,7 +73,7 @@ private:
 };
 
 /**
- * \brief Focusing class work method based on a V-Curve
+ * \brief Focusing work class method based on a V-Curve
  *
  * This work class moves the focuser to a list of focus positions and
  * determines the FWHM through an FWHM2 evaluator. From the various
@@ -83,6 +83,19 @@ class VCurveFocusWork : public FocusWork {
 public:
 	VCurveFocusWork(Focusing& focusing) : FocusWork(focusing) { }
 	virtual ~VCurveFocusWork() { }
+	virtual void	main(astro::thread::Thread<FocusWork>& thread);
+};
+
+/**
+ * \brief Focusing work class method based  on a focus measure
+ *
+ * This work class moves the focuser with the goal to maximize some focus
+ * measure
+ */
+class MeasureFocusWork : public FocusWork {
+public:
+	MeasureFocusWork(Focusing& focusing) : FocusWork(focusing) { }
+	virtual ~MeasureFocusWork() { }
 	virtual void	main(astro::thread::Thread<FocusWork>& thread);
 };
 

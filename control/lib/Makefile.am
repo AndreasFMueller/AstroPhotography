@@ -55,6 +55,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	FocusWork.cpp VCurveFocusWork.cpp FocusCompute.cpp \
+	MeasureFocusWork.cpp \
 	USBContextHolder.cpp USBContext.cpp \
 	USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \

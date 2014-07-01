@@ -16,6 +16,7 @@ namespace focusing {
  */
 Focusing::Focusing(CcdPtr ccd, FocuserPtr focuser)
 	: _ccd(ccd), _focuser(focuser) {
+	_method = FWHM;
 	_mode = TWO_SIDED;
 	_status = IDLE;
 	work = NULL;
@@ -46,7 +47,15 @@ void	Focusing::start(int min, int max) {
 	_status = IDLE;
 
 	// create the focus work
-	work = new VCurveFocusWork(*this);
+	FocusWork	*work;
+	switch (method()) {
+	case Focusing::FWHM:
+		work = new VCurveFocusWork(*this);
+		break;
+	case Focusing::MEASURE:
+		work = new MeasureFocusWork(*this);
+		break;
+	}
 	work->ccd(ccd());
 	work->focuser(focuser());
 	work->exposure(exposure());
