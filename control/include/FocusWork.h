@@ -55,6 +55,7 @@ private:
 public:	
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
+	void	callback(ImagePtr image, double value);
 protected:
 	bool	complete();
 	Focusing&	_focusing;
@@ -87,12 +88,44 @@ public:
 };
 
 /**
+ * \brief Focus information
+ */
+class FocusValue {
+public:
+	unsigned short	position;
+	double	value;
+	FocusValue(unsigned short _position, double _value)
+		: position(_position), value(_value) { }
+	std::string	toString() const;
+	bool	operator==(const FocusValue& other) const;
+};
+
+/**
+ * \brief Interval of focus positions and values
+ */
+class FocusInterval : public std::pair<FocusValue, FocusValue> {
+public:
+	FocusInterval(const FocusValue& left, const FocusValue& right);
+	unsigned short	length() const;
+	unsigned short	center() const;
+	FocusValue&	left() { return first; }
+	FocusValue&	right() { return second; }
+	const FocusValue&	left() const { return first; }
+	const FocusValue&	right() const { return second; }
+	std::string	toString() const;
+	FocusInterval	operator-(const FocusInterval& other) const;
+};
+
+/**
  * \brief Focusing work class method based  on a focus measure
  *
  * This work class moves the focuser with the goal to maximize some focus
  * measure
  */
 class MeasureFocusWork : public FocusWork {
+	int	counter;
+	FocusValue	measureat(unsigned short pos);
+	FocusInterval	subdivide(const FocusInterval& interval);
 public:
 	MeasureFocusWork(Focusing& focusing) : FocusWork(focusing) { }
 	virtual ~MeasureFocusWork() { }

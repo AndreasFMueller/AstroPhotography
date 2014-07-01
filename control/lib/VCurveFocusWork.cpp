@@ -73,16 +73,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 		fc.insert(std::pair<unsigned short, double>(position, value));
 
 		// send the callback data
-		if (callback()) {
-			try {
-				astro::callback::CallbackDataPtr	data(new FocusCallbackData(image, value));
-				(*callback())(data);
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
-			} catch (...) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"exception during callback");
-			}
-		}
+		callback(image, value);
 	}
 
 	// compute the best focus position

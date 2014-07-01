@@ -66,5 +66,22 @@ bool	FocusWork::complete() {
 	return true;
 }
 
+/**
+ * \brief Call the callback with image and focus value
+ */
+void	FocusWork::callback(ImagePtr image, double value) {
+	// send the callback data
+	if (!callback()) {
+		return;
+	}
+	try {
+		astro::callback::CallbackDataPtr	data(new FocusCallbackData(image, value));
+		(*callback())(data);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during callback");
+	}
+}
+
 } // namespace focusing
 } // namespace astro
