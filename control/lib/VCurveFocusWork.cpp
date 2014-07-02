@@ -10,6 +10,8 @@
 #include <FocusCompute.h>
 #include <AstroFilterfunc.h>
 
+using namespace astro::image::filter;
+
 namespace astro {
 namespace focusing {
 
@@ -20,8 +22,7 @@ public:
 	FWHM2Evaluator(const ImagePoint& center, double radius = 20)
 		: _center(center), _radius(radius) { }
 	virtual double	operator()(const ImagePtr image) {
-		double  fwhm = astro::image::filter::focusFWHM2(image,
-				_center, _radius);
+		double  fwhm = focusFWHM2(image, _center, _radius);
 		return fwhm;
 	}
 };
@@ -67,13 +68,15 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 		ImagePtr	image = ccd()->getImage();
 		
 		// turn the image into a value
-		double	value = evaluator(image);
+		FWHMInfo	fwhminfo = focusFWHM2_extended(image,
+					size.center(), radius);
+		double	value = fwhminfo.radius;
 
 		// add the new value 
 		fc.insert(std::pair<unsigned short, double>(position, value));
 
 		// send the callback data
-		callback(image, value);
+		callback(combine(image, fwhminfo), value);
 	}
 
 	// compute the best focus position
@@ -94,6 +97,13 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 	focuser()->moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
+}
+
+/**
+ * \brief Combine image, mask and center into a color image
+ */
+ImagePtr	VCurveFocusWork::combine(ImagePtr image, FWHMInfo& fwhminfo) {
+	return image;
 }
 
 } // namespace focusing

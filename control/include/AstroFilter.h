@@ -576,14 +576,7 @@ public:
 		return this->filter(image);
 	}
 	virtual double	filter(const ConstImageAdapter<Pixel>& image);
-	typedef struct fwhminfo_s {
-		ImagePoint	maxpoint;
-		double		maxvalue;
-		ImagePtr	mask;
-		ImagePoint	center;
-		double		radius;
-	} fwhminfo;
-	fwhminfo	filter_extended(const ConstImageAdapter<Pixel>& image);
+	FWHMInfo	filter_extended(const ConstImageAdapter<Pixel>& image);
 };
 
 extern double	MinRadius(const std::list<ImagePoint>& points, ImagePoint& center);
@@ -595,7 +588,7 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 }
 
 template<typename Pixel>
-typename FWHM2<Pixel>::fwhminfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
+FWHMInfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dowing FWHM2 from %s image",
 		image.getSize().toString().c_str());
 	if (!image.getSize().contains(point)) {
@@ -637,7 +630,7 @@ typename FWHM2<Pixel>::fwhminfo	FWHM2<Pixel>::filter_extended(const ConstImageAd
 	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
 
 	// prepare the result
-	fwhminfo	result;
+	FWHMInfo	result;
 
 	// locate the maximum in a rectangle around the point
 	Max<Pixel, double>	m;

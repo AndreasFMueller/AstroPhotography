@@ -81,6 +81,7 @@ private:
  * FWHM measures obtained, it infers the optimal focus position.
  */
 class VCurveFocusWork : public FocusWork {
+	ImagePtr	combine(ImagePtr image, FWHMInfo& fwhminfo);
 public:
 	VCurveFocusWork(Focusing& focusing) : FocusWork(focusing) { }
 	virtual ~VCurveFocusWork() { }

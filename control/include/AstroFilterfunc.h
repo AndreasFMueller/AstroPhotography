@@ -40,6 +40,8 @@ extern double	focusFWHM(const ImagePtr& image, const ImagePoint& where,
 			unsigned int r);
 extern double	focusFWHM2(const ImagePtr& image, const ImagePoint& where,
 			unsigned int r);
+extern FWHMInfo	focusFWHM2_extended(const ImagePtr& image,
+			const ImagePoint& where, unsigned int r);
 
 extern void	mask(MaskingFunction& maskingfunction, ImagePtr image);
 

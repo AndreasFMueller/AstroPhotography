@@ -933,6 +933,18 @@ public:
 	std::string	toString() const;
 };
 
+/**
+ * \brief FWHM information
+ */
+class FWHMInfo {
+public:
+	ImagePoint	maxpoint;
+	double		maxvalue;
+	ImagePtr	mask;
+	ImagePoint	center;
+	double		radius;
+};
+
 } // namespace image
 } // namespace astro
 

@@ -249,6 +249,28 @@ double	focusFWHM2(const ImagePtr& image, const ImagePoint& center,
 	return 0;
 }
 
+#define	filter_focusFWHM2_extended(image, Pixel, center, r)		\
+{									\
+	Image<Pixel >	*imagep						\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		FWHM2<Pixel >	fwhm(center, r);			\
+		FWHMInfo	result = fwhm.filter_extended(*imagep);	\
+		return result;						\
+	}								\
+}
+
+FWHMInfo	focusFWHM2_extended(const ImagePtr& image,
+			const ImagePoint& center, unsigned int r) {
+	filter_focusFWHM2_extended(image, unsigned char, center, r);
+	filter_focusFWHM2_extended(image, unsigned short, center, r);
+	filter_focusFWHM2_extended(image, unsigned int, center, r);
+	filter_focusFWHM2_extended(image, unsigned long, center, r);
+	filter_focusFWHM2_extended(image, float, center, r);
+	filter_focusFWHM2_extended(image, double, center, r);
+	throw std::runtime_error("cannot compute FWHM2 for this pixel type");
+}
+
 #define	filter_mask(image, pixel, mf)					\
 	{								\
 		Image<pixel>	*imagep					\
