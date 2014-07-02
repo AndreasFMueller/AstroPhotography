@@ -14,7 +14,7 @@ namespace filter {
 /**
  *  \brief Function to compute the radius of a ball contining a list of points
  */
-double	MinRadius(const std::list<ImagePoint>& points) {
+double	MinRadius(const std::list<ImagePoint>& points, ImagePoint& cp) {
 	if (points.size() < 2) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not enough points: %d",
 			points.size());
@@ -43,11 +43,17 @@ double	MinRadius(const std::list<ImagePoint>& points) {
 
 	// access the results
 	const double	*center = mb.center();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "center: (%f, %f)",
-		center[0], center[1]);
+	cp.x((int)center[0]);
+	cp.y((int)center[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "center: %s", cp.toString().c_str());
 	double	radius = sqrt(mb.squared_radius());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius: %f", radius);
 	return radius;
+}
+
+double	MinRadius(const std::list<ImagePoint>& points) {
+	ImagePoint	where;
+	return MinRadius(points, where);
 }
 
 } // namespace filter

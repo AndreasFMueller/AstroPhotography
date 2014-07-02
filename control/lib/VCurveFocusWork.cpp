@@ -90,6 +90,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 
 	// move to the focus position
 	unsigned short	targetposition = focusposition;
+	focusingstatus(Focusing::MOVING);
 	focuser()->moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");

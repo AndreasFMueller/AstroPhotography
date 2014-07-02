@@ -576,12 +576,26 @@ public:
 		return this->filter(image);
 	}
 	virtual double	filter(const ConstImageAdapter<Pixel>& image);
+	typedef struct fwhminfo_s {
+		ImagePoint	maxpoint;
+		double		maxvalue;
+		ImagePtr	mask;
+		ImagePoint	center;
+		double		radius;
+	} fwhminfo;
+	fwhminfo	filter_extended(const ConstImageAdapter<Pixel>& image);
 };
 
-double	MinRadius(const std::list<ImagePoint>& points);
+extern double	MinRadius(const std::list<ImagePoint>& points, ImagePoint& center);
+extern double	MinRadius(const std::list<ImagePoint>& points);
 
 template<typename Pixel>
 double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
+	return filter_extended(image).radius;
+}
+
+template<typename Pixel>
+typename FWHM2<Pixel>::fwhminfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dowing FWHM2 from %s image",
 		image.getSize().toString().c_str());
 	if (!image.getSize().contains(point)) {
@@ -622,14 +636,19 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 		rectangle.toString().c_str());
 	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
 
+	// prepare the result
+	fwhminfo	result;
+
 	// locate the maximum in a rectangle around the point
 	Max<Pixel, double>	m;
 	double	maxvalue = m.filter(wa);
+	result.maxvalue = maxvalue;
 
 	// the maximum point we have found is with respect to the window,
 	// but that was a restriction only for finding the maximum. So
 	// we now compute the target point relative to the whole image
 	ImagePoint	target = lowerleft + m.getPoint();
+	result.maxpoint = target;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum %f at %s",
 		(double)maxvalue, target.toString().c_str());
 
@@ -639,6 +658,7 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 
 	// extract the connected component of this levelmask
 	ImagePtr	connected = ConnectedComponent(target)(levelmask);
+	result.mask = connected;
 	Image<unsigned char>	*conn
 		= dynamic_cast<Image<unsigned char> *>(&*connected);
 
@@ -655,7 +675,8 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d points", points.size());
 	
 	// now use Miniball to get access to the 
-	return MinRadius(points);
+	result.radius = MinRadius(points, result.center);
+	return result;
 }
 
 /**

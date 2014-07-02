@@ -35,6 +35,8 @@ class ImagePoint {
 public:
 	unsigned int	x() const { return _x; }
 	unsigned int	y() const { return _y; }
+	void	x(unsigned int x) { _x = x; }
+	void	y(unsigned int y) { _y = y; }
 	void	setX(unsigned int x) { _x = x; }
 	void	setY(unsigned int y) { _y = y; }
 	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }

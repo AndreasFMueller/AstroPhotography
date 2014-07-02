@@ -122,3 +122,6 @@ testfocus3:	focustest
 	./focustest -d -ORBInitRef NameService=corbaname::localhost \
 		-m simulator -C 0 -c 0 -E 4 -F simulator -f sim-focuser \
 		-p 32768 -b 28000 -e 38001 -s 4 | tee focus3.csv
+
+focusingtest:	focusing
+	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
