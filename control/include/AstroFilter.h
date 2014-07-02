@@ -583,9 +583,32 @@ template<typename Pixel>
 double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dowing FWHM2 from %s image",
 		image.getSize().toString().c_str());
+	if (!image.getSize().contains(point)) {
+		throw std::runtime_error("point is outside image");
+	}
+	unsigned int	width = image.getSize().width();
+	unsigned int	height = image.getSize().height();
+
+	// first ensure that we take a radius small enough to fit inside
+	// the image rectangle
+	int	radius = r;
+	if (point.x() < radius) {
+		radius = point.x();
+	}
+	if (point.x() + radius >= width) {
+		radius = width - point.x() - 1;
+	}
+	if (point.y() < radius) {
+		radius = point.y();
+	}
+	if (point.y() + radius >= height) {
+		radius = height - point.y() - 1;
+	}
+
 	// find the maximum value in the area defined by point and radius
-	ImagePoint	lowerleft(point.x() - r, point.y() - r);
-	ImageRectangle	rectangle(lowerleft, ImageSize(2 * r + 1, 2 * r + 1));
+	ImagePoint	lowerleft(point.x() - radius, point.y() - radius);
+	ImageRectangle	rectangle(lowerleft,
+				ImageSize(2 * radius + 1, 2 * radius + 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
 		rectangle.toString().c_str());
 	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
@@ -612,8 +635,6 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 
 	// add points in connected component to the list
 	std::list<ImagePoint>	points;
-	unsigned int	width = conn->getSize().width();
-	unsigned int	height = conn->getSize().height();
 	for (unsigned int x = 0; x < width; x++) {
 		for (unsigned int y = 0; y < height; y++) {
 			if (conn->pixel(x, y)) {
