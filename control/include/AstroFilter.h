@@ -12,6 +12,7 @@
 #include <AstroDebug.h>
 #include <list>
 #include <ConnectedComponent.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -609,6 +610,14 @@ double	FWHM2<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	ImagePoint	lowerleft(point.x() - radius, point.y() - radius);
 	ImageRectangle	rectangle(lowerleft,
 				ImageSize(2 * radius + 1, 2 * radius + 1));
+	if (!image.getSize().bounds(rectangle)) {
+		std::string	msg = stringprintf("search rectangle %s does "
+			"not fit image rectangle %s",
+			rectangle.toString().c_str(),
+			image.getSize().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum in %s",
 		rectangle.toString().c_str());
 	astro::adapter::WindowAdapter<Pixel>	wa(image, rectangle);
