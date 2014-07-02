@@ -1099,6 +1099,150 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+// Adapter to combine several images into a single color image
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class CombinationAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	const ConstImageAdapter<Pixel>&	_red;
+	const ConstImageAdapter<Pixel>&	_green;
+	const ConstImageAdapter<Pixel>&	_blue;
+public:
+	CombinationAdapter(const ConstImageAdapter<Pixel>& red,
+		const ConstImageAdapter<Pixel>& green,
+		const ConstImageAdapter<Pixel>& blue)
+		: ConstImageAdapter<RGB<Pixel> >(red.getSize()),
+		  _red(red), _green(green), _blue(blue) {
+		if ((red.getSize() != green.getSize())
+			|| (red.getSize() != blue.getSize())) {
+			throw std::runtime_error("image sizes don't match");
+		}
+	}
+	virtual const RGB<Pixel>	pixel(unsigned int x, unsigned int y) const {
+		Pixel	r = _red.pixel(x, y);
+		Pixel	g = _green.pixel(x, y);
+		Pixel	b = _blue.pixel(x, y);
+		return RGB<Pixel>(r, g, b);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Adapter to draw crosshairs at a point
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class CrosshairAdapter : public ConstImageAdapter<Pixel> {
+	ImagePoint	where;
+	int	length;
+public:
+	CrosshairAdapter(const ImageSize& _size, const ImagePoint& _where,
+		int _length = 3)
+		: ConstImageAdapter<Pixel>(_size), where(_where),
+		  length(_length) { }
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		int	deltax = x - where.x();
+		int	deltay = y - where.y();
+		if ((deltax != 0) && (deltay != 0)) {
+			return 0;
+		}
+		if ((deltax == 0) && (abs(deltay) < length)) {
+			return std::numeric_limits<Pixel>::max();
+		}
+		if ((deltay == 0) && (abs(deltax) < length)) {
+			return std::numeric_limits<Pixel>::max();
+		}
+		return 0;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Adapter to draw a circle at a point with a given radius
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class CircleAdapter : public ConstImageAdapter<Pixel> {
+	double	radius;
+	ImagePoint	center;
+public:
+	CircleAdapter(const ImageSize& _size, const ImagePoint& _center,
+		double _radius) : ConstImageAdapter<Pixel>(_size),
+				radius(_radius), center(_center) {
+	}
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		if (hypot((double)x - (double)center.x(),
+			(double)y - (double)center.y()) <= radius) {
+			return std::numeric_limits<Pixel>::max() / 2;
+		}
+		return 0;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Min/Maximum adapter for two images
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class MaxAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	first;
+	const ConstImageAdapter<Pixel>&	second;
+public:
+	MaxAdapter(const ConstImageAdapter<Pixel>& _first,
+		const ConstImageAdapter<Pixel>& _second)
+		: ConstImageAdapter<Pixel>(_first.getSize()),
+		  first(_first), second(_second) {
+		if (first.getSize() != second.getSize()) {
+			throw std::runtime_error("images have different size");
+		}
+	}
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		Pixel	v1 = first.pixel(x, y);
+		Pixel	v2 = second.pixel(x, y);
+		if (v1 > v2) {
+			return v1;
+		}
+		return v2;
+	}
+};
+
+template<typename Pixel>
+class MinAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	first;
+	const ConstImageAdapter<Pixel>&	second;
+public:
+	MinAdapter(const ConstImageAdapter<Pixel>& _first,
+		const ConstImageAdapter<Pixel>& _second)
+		: ConstImageAdapter<Pixel>(_first.getSize()),
+		  first(_first), second(_second) {
+		if (first.getSize() != second.getSize()) {
+			throw std::runtime_error("images have different size");
+		}
+	}
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		Pixel	v1 = first.pixel(x, y);
+		Pixel	v2 = second.pixel(x, y);
+		if (v1 > v2) {
+			return v2;
+		}
+		return v1;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Rescale an image to a given value
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class RescaleAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>& image;
+	double	multiplier;
+public:
+	RescaleAdapter(const ConstImageAdapter<Pixel>& _image, double maxvalue)
+		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
+		multiplier = std::numeric_limits<Pixel>::max() / maxvalue;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "create rescale with multiplier %f", multiplier);
+	}
+
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		Pixel	v = image.pixel(x, y) * multiplier;
+		return v;
+	}
+};
 
 } // namespace adapter
 } // namespace astro

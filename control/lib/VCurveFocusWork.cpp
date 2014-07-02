@@ -9,8 +9,11 @@
 #include <AstroFormat.h>
 #include <FocusCompute.h>
 #include <AstroFilterfunc.h>
+#include <AstroFilter.h>
+#include <AstroAdapter.h>
 
 using namespace astro::image::filter;
+using namespace astro::adapter;
 
 namespace astro {
 namespace focusing {
@@ -100,10 +103,60 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 }
 
 /**
+ */
+
+#define	convert_to_unsigned_char(image, Pixel, green)			\
+if (NULL == green) {							\
+	Image<Pixel>	*imagep = dynamic_cast<Image<Pixel> *>(&*image);	\
+	if (NULL != imagep) {						\
+		green = new Image<unsigned char>(*imagep);		\
+	}								\
+}
+
+/**
  * \brief Combine image, mask and center into a color image
  */
 ImagePtr	VCurveFocusWork::combine(ImagePtr image, FWHMInfo& fwhminfo) {
-	return image;
+	// first build the red channel from the mask
+	Image<unsigned char>	*red
+		= dynamic_cast<Image<unsigned char> *>(&*fwhminfo.mask);
+	if (NULL == red) {
+		throw std::logic_error("internal error, mask has not 8bit pixel type");
+	}
+
+	// then build the green channel from the original image
+	Image<unsigned char>	*green = NULL;
+	convert_to_unsigned_char(image, unsigned char, green);
+	convert_to_unsigned_char(image, unsigned short, green);
+	convert_to_unsigned_char(image, unsigned int, green);
+	convert_to_unsigned_char(image, unsigned long, green);
+	if (NULL == green) {
+		throw std::runtime_error("cannot convert image to 8bit");
+	}
+
+	// get the maximum value of the image
+	double	maxvalue = Max<unsigned char, double>().filter(*green);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value of image: %f", maxvalue);
+
+	// wrap green in a smart pointer to ensure that it is destroyed when
+	// it goes out of scope
+	ImagePtr	greenptr(green);
+	RescaleAdapter<unsigned char>	rescale(*green, maxvalue);
+
+	// create the blue image
+	CrosshairAdapter<unsigned char>	crosshair(image->size(), fwhminfo.maxpoint, 20);
+	CircleAdapter<unsigned char>	circle(image->size(), fwhminfo.center,
+						fwhminfo.radius);
+	MaxAdapter<unsigned char>	blue(crosshair, circle);
+
+	// now use a combination adapter to put all these images together
+	// into a single color image
+	CombinationAdapter<unsigned char>	combinator(*red, rescale, blue);
+	Image<RGB<unsigned char> >	*result
+		= new Image<RGB<unsigned char> >(combinator);
+
+
+	return ImagePtr(result);;
 }
 
 } // namespace focusing

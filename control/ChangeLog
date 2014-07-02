@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20140702:
+	* combine image, mask and circle to a single color image
+	* fix an off by one error
+
 20140701:
 	* add SquareAdapter
 	* add various focus measure adapters for autofocus

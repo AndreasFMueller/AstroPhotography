@@ -52,8 +52,8 @@ public:
 
 int	main(int argc, char *argv[]) {
 	int	c;
-	unsigned short	min = 28000;
-	unsigned short	max = 36000;
+	unsigned short	min = 24000;
+	unsigned short	max = 40000;
 	int	steps = 10;
 	DeviceName	ccdname("ccd:simulator/camera/ccd");
 	DeviceName	focusername("focuser:simulator/focuser");

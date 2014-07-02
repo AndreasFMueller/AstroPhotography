@@ -29,8 +29,8 @@ void	FocusWork::steps(unsigned short s) {
 	if (s < 3) {
 		throw std::invalid_argument("at least three steps needed");
 	}
-	if (s > 10) {
-		throw std::invalid_argument("more than 10 steps no reasonable");
+	if (s > 100) {
+		throw std::invalid_argument("more than 100 steps no reasonable");
 	}
 	_steps = s;
 }
