@@ -67,6 +67,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 		// get an image from the Ccd
 		focusingstatus(Focusing::MEASURING);
 		ccd()->startExposure(exposure());
+		usleep(1000000 * exposure().exposuretime);
 		ccd()->wait();
 		ImagePtr	image = ccd()->getImage();
 		
