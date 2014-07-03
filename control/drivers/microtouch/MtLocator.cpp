@@ -9,6 +9,7 @@
 #include <AstroExceptions.h>
 #include <AstroLoader.h>
 #include <config.h>
+#include <MtFocuser.h>
 
 namespace astro {
 namespace module {
@@ -61,6 +62,7 @@ std::string	MtLocator::getVersion() const {
 
 std::vector<std::string>	MtLocator::getDevicelist(
 	DeviceName::device_type device) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve device list");
 	std::vector<std::string>	names;
 	if (DeviceName::Focuser != device) {
 		return names;
@@ -70,6 +72,7 @@ std::vector<std::string>	MtLocator::getDevicelist(
 }
 
 FocuserPtr	MtLocator::getFocuser0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a focuser");
 	std::string	sname = name;
 	if (sname != "focuser:microtouch/focuser") {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser %s does not exist",
@@ -77,7 +80,7 @@ FocuserPtr	MtLocator::getFocuser0(const DeviceName& name) {
 		throw NotFound("no such focuser");
 	}
 	// create the focuser
-	return FocuserPtr();
+	return FocuserPtr(new MtFocuser());
 }
 
 } // namespace microtouch
@@ -86,6 +89,7 @@ FocuserPtr	MtLocator::getFocuser0(const DeviceName& name) {
 
 extern "C"
 astro::device::DeviceLocator    *getDeviceLocator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve device locator");
         return new astro::device::microtouch::MtLocator();
 }
 

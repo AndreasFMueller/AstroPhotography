@@ -164,6 +164,7 @@ void	Module::open() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "library opened: handle = %p", handle);
 }
 
 /**
@@ -175,6 +176,7 @@ void	Module::open() {
  * way to prevent closing the shared library alltogether.
  */
 void	Module::close() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "closing library");
 	if ((handle) && (dlclose_on_close)) {
 		dlclose(handle);
 	}
@@ -206,6 +208,7 @@ void	*Module::getSymbol(const std::string& symbolname) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::invalid_argument(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "symbol found at %p", s);
 
 	return s;
 }
@@ -223,7 +226,9 @@ ModuleDescriptorPtr	Module::getDescriptor() {
 	// now cast the symbol to a function that returns a descriptor
 	// pointer
 	typedef ModuleDescriptor	*(*getter)();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "call the getDescriptor function");
 	ModuleDescriptor	*d = ((getter)s)();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "module descriptor at %p", d);
 	return ModuleDescriptorPtr(d);
 }
 
@@ -248,6 +253,7 @@ DeviceLocatorPtr	Module::getDeviceLocator() {
 	// now cast the symbol to a function that returns a descriptor pointer
 	typedef DeviceLocator	*(*getter)();
 	DeviceLocator	*c = ((getter)s)();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found device locator at %p", c);
 	devicelocator = DeviceLocatorPtr(c);
 	return devicelocator;
 }

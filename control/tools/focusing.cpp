@@ -122,6 +122,16 @@ int	main(int argc, char *argv[]) {
 	// get the focuser
 	astro::camera::FocuserPtr	focuser
 		= devices.getFocuser(focusername);
+	if (focuser->min() > min) {
+		std::cerr << "valid range starts at " << focuser->min()
+			<< ", " << min << " too small" << std::endl;
+		return EXIT_FAILURE;
+	}
+	if (focuser->max() < max) {
+		std::cerr << "valid range ends at " << focuser->max()
+			<< ", " << max << " too large" << std::endl;
+		return EXIT_FAILURE;
+	}
 	sleep(2); // to ensure the filter wheel is idle for the simulator
 
 	// prepare the exposure 
