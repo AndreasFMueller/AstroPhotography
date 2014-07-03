@@ -1,5 +1,5 @@
 /*
- * VCurveFocusWork.cpp -- implement the work finding the focus using a V-Curve
+ * MeasureFocusWork.cpp -- implement the work finding the focus using a measure
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -10,6 +10,12 @@
 #include <FocusCompute.h>
 #include <AstroFilterfunc.h>
 #include <stdexcept>
+#include <AstroFilter.h>
+#include <AstroAdapter.h>
+
+using namespace astro::adapter;
+using namespace astro::image::filter;
+using namespace astro::image;
 
 namespace astro {
 namespace focusing {
@@ -64,6 +70,42 @@ public:
 };
 
 /**
+ * \brief Combine image and edge detection in one color image
+ */
+ImagePtr	MeasureFocusWork::combine(ImagePtr image, FocusInfo& focusinfo) {
+	// find the maximum value of the edges
+	Image<double>	*im = dynamic_cast<Image<double> *>(&*focusinfo.edges);
+	if (NULL == im) {
+		throw std::runtime_error("edges image has incorrect pixel type");
+	}
+	double	maxvalue = Max<double, double>().filter(*im);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum edge value: %f", maxvalue);
+	
+
+	// create an adapter that rescales to a reasonable value
+	RescaleAdapter<double>	rescale(*im, maxvalue);
+	TypeConversionAdapter<unsigned char, double>	tc(rescale);
+	Image<unsigned char>	*red = new Image<unsigned char>(tc);
+	ImagePtr	redptr(red);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum red: %f",
+		astro::image::filter::max(redptr));
+
+	// Rescale the image to produce the green channel
+	Image<unsigned char>	*green = FocusWork::green(image);
+	ImagePtr	greenptr(green);
+
+	// create a constant blue channel
+	ConstantValueAdapter<unsigned char>	blue(image->size(), 0);
+
+	// combine the channels to a color image
+	CombinationAdapter<unsigned char>	combinator(*red, *green, blue);
+	Image<RGB<unsigned char> >	*result
+		= new Image<RGB<unsigned char> >(combinator);
+
+	return ImagePtr(result);
+}
+
+/**
  * \brief Subdivide a focus interval
  */
 FocusInterval	MeasureFocusWork::subdivide(const FocusInterval& interval) {
@@ -96,12 +138,12 @@ FocusValue	MeasureFocusWork::measureat(unsigned short pos) {
 	ccd()->startExposure(exposure());
 	ccd()->wait();
 	ImagePtr	image = ccd()->getImage();
-	double	value = astro::image::filter::focus_squaredgradient(image);
+	FocusInfo	fi = astro::image::filter::focus_squaredgradient_extended(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pos = %hu, value = %g(%f)",
-		pos, value, log10(value));
+		pos, fi.value, log10(fi.value));
 	// call the callback
-	callback(image, value);
-	return FocusValue(pos, value);
+	callback(combine(image, fi), fi.value);
+	return FocusValue(pos, fi.value);
 }
 
 /**

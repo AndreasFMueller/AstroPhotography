@@ -945,6 +945,15 @@ public:
 	double		radius;
 };
 
+/**
+ * \brief Information about focus quality
+ */
+class FocusInfo {
+public:
+	double		value;
+	ImagePtr	edges;
+};
+
 } // namespace image
 } // namespace astro
 

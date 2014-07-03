@@ -71,6 +71,8 @@ public:
 private:
 	FocusWork(const FocusWork& other);
 	FocusWork&	operator=(const FocusWork& other);
+protected:
+	Image<unsigned char>	*green(ImagePtr image);
 };
 
 /**
@@ -127,6 +129,7 @@ class MeasureFocusWork : public FocusWork {
 	int	counter;
 	FocusValue	measureat(unsigned short pos);
 	FocusInterval	subdivide(const FocusInterval& interval);
+	ImagePtr	combine(ImagePtr image, FocusInfo& focusinf);
 public:
 	MeasureFocusWork(Focusing& focusing) : FocusWork(focusing) { }
 	virtual ~MeasureFocusWork() { }

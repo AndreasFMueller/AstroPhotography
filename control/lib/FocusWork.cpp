@@ -8,6 +8,11 @@
 #include <limits>
 #include <AstroFormat.h>
 #include <FocusCompute.h>
+#include <AstroAdapter.h>
+#include <AstroFilter.h>
+
+using namespace astro::adapter;
+using namespace astro::image::filter;
 
 namespace astro {
 namespace focusing {
@@ -81,6 +86,49 @@ void	FocusWork::callback(ImagePtr image, double value) {
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during callback");
 	}
+}
+
+/**
+ */
+
+#define	convert_to_unsigned_char(image, Pixel, green)			\
+if (NULL == green) {							\
+	Image<Pixel>	*imagep = dynamic_cast<Image<Pixel> *>(&*image);	\
+	if (NULL != imagep) {						\
+		green = new Image<unsigned char>(*imagep);		\
+	}								\
+}
+
+/**
+ * \brief Extract and rescale the image as the green channel
+ */
+Image<unsigned char>	*FocusWork::green(ImagePtr image) {
+	Image<unsigned char>	*result = NULL;
+	convert_to_unsigned_char(image, unsigned char, result);
+	convert_to_unsigned_char(image, unsigned short, result);
+	convert_to_unsigned_char(image, unsigned int, result);
+	convert_to_unsigned_char(image, unsigned long, result);
+	if (NULL == result) {
+		throw std::runtime_error("cannot convert image to 8bit");
+	}
+
+	// get the maximum value of the image
+	double	maxvalue = Max<unsigned char, double>().filter(*result);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value of image: %f", maxvalue);
+
+	// new rescale all pixels
+	double	multiplier = 255 / maxvalue;
+	unsigned int	width = image->size().width();
+	unsigned int	height = image->size().height();
+	for (unsigned int x = 0; x < width; x++) {
+		for (unsigned int y = 0; y < height; y++) {
+			result->writablepixel(x, y) = 
+				result->pixel(x, y) * multiplier;
+		}
+	}
+
+	// return the converted result
+	return result;
 }
 
 } // namespace focusing
