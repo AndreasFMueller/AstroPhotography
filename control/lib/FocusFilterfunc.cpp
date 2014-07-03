@@ -84,6 +84,41 @@ double	focus_squaredbrenner(const ImagePtr& image) {
 	return 0;
 }
 
+#define	filter_extended_typed(adapter, image, pixel)			\
+{									\
+	Image<pixel >	*imagep						\
+		= dynamic_cast<Image<pixel > *>(&*image);		\
+	if (NULL != imagep) {						\
+		adapter<pixel >	ba(*imagep);				\
+		FocusInfo	result;					\
+		Image<double>	*edges = new Image<double>(ba);		\
+		result.edges = ImagePtr(edges);				\
+		Sum<double>	sum;					\
+		result.value = sum.filter(*edges);			\
+		return result;						\
+	}								\
+}
+
+FocusInfo	focus_squaredbrenner_extended(const ImagePtr& image) {
+	filter_extended_typed(BrennerAdapter, image, unsigned char);
+	filter_extended_typed(BrennerAdapter, image, unsigned short);
+	filter_extended_typed(BrennerAdapter, image, unsigned int);
+	filter_extended_typed(BrennerAdapter, image, unsigned long);
+	filter_extended_typed(BrennerAdapter, image, float);
+	filter_extended_typed(BrennerAdapter, image, double);
+	throw std::runtime_error("cannot analyize image with this pixel type");
+}
+
+FocusInfo	focus_squaredgradient_extended(const ImagePtr& image) {
+	filter_extended_typed(SquaredGradientAdapter, image, unsigned char);
+	filter_extended_typed(SquaredGradientAdapter, image, unsigned short);
+	filter_extended_typed(SquaredGradientAdapter, image, unsigned int);
+	filter_extended_typed(SquaredGradientAdapter, image, unsigned long);
+	filter_extended_typed(SquaredGradientAdapter, image, float);
+	filter_extended_typed(SquaredGradientAdapter, image, double);
+	throw std::runtime_error("cannot analyzie image with this pixel type");
+}
+
 } // namespace filter
 } // namespace image
 } // namespace astro

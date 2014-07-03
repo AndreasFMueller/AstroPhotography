@@ -58,6 +58,9 @@ extern double	focus_horizontalbrenner(const ImagePtr& image);
 extern double	focus_verticalbrenner(const ImagePtr& image);
 extern double	focus_squaredbrenner(const ImagePtr& image);
 
+extern FocusInfo	focus_squaredbrenner_extended(const ImagePtr& image);
+extern FocusInfo	focus_squaredgradient_extended(const ImagePtr& image);
+
 
 } // namespace filter
 } // namespace image

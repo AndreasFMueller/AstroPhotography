@@ -126,23 +126,8 @@ ImagePtr	VCurveFocusWork::combine(ImagePtr image, FWHMInfo& fwhminfo) {
 	}
 
 	// then build the green channel from the original image
-	Image<unsigned char>	*green = NULL;
-	convert_to_unsigned_char(image, unsigned char, green);
-	convert_to_unsigned_char(image, unsigned short, green);
-	convert_to_unsigned_char(image, unsigned int, green);
-	convert_to_unsigned_char(image, unsigned long, green);
-	if (NULL == green) {
-		throw std::runtime_error("cannot convert image to 8bit");
-	}
-
-	// get the maximum value of the image
-	double	maxvalue = Max<unsigned char, double>().filter(*green);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value of image: %f", maxvalue);
-
-	// wrap green in a smart pointer to ensure that it is destroyed when
-	// it goes out of scope
+	Image<unsigned char>	*green = FocusWork::green(image);
 	ImagePtr	greenptr(green);
-	RescaleAdapter<unsigned char>	rescale(*green, maxvalue);
 
 	// create the blue image
 	CrosshairAdapter<unsigned char>	crosshair(image->size(), fwhminfo.maxpoint, 20);
@@ -152,12 +137,11 @@ ImagePtr	VCurveFocusWork::combine(ImagePtr image, FWHMInfo& fwhminfo) {
 
 	// now use a combination adapter to put all these images together
 	// into a single color image
-	CombinationAdapter<unsigned char>	combinator(*red, rescale, blue);
+	CombinationAdapter<unsigned char>	combinator(*red, *green, blue);
 	Image<RGB<unsigned char> >	*result
 		= new Image<RGB<unsigned char> >(combinator);
 
-
-	return ImagePtr(result);;
+	return ImagePtr(result);
 }
 
 } // namespace focusing

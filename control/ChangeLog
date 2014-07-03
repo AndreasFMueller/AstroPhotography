@@ -1,5 +1,13 @@
 ChangeLog for the Astro project.
 
+20140703:
+	* add type conversion adapter
+	* add constant value adapter
+	* fix MicroTouch implementation
+	* Add FocusInfo and extended focus measure filters
+	* move combination code to FocusWork
+	* test FWHM code on real stars, seems to work, but guidance is important
+
 20140702:
 	* combine image, mask and circle to a single color image
 	* fix an off by one error

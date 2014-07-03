@@ -1226,6 +1226,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 // Rescale an image to a given value
+// (duplicates but also simplifies RescalingAdapter)
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel>
 class RescaleAdapter : public ConstImageAdapter<Pixel> {
@@ -1234,13 +1235,59 @@ class RescaleAdapter : public ConstImageAdapter<Pixel> {
 public:
 	RescaleAdapter(const ConstImageAdapter<Pixel>& _image, double maxvalue)
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
-		multiplier = std::numeric_limits<Pixel>::max() / maxvalue;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "create rescale with multiplier %f", multiplier);
+		if (std::numeric_limits<Pixel>::is_integer) {
+			multiplier = std::numeric_limits<Pixel>::max() / maxvalue;
+		} else {
+			multiplier = 1 / maxvalue;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"create rescale with multiplier %g", multiplier);
 	}
 
 	const Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	v = image.pixel(x, y) * multiplier;
 		return v;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// An adapter that returns an image of uniform value
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ConstantValueAdapter : public ConstImageAdapter<Pixel> {
+	Pixel	value;
+public:
+	ConstantValueAdapter(const ImageSize& _size, Pixel _value)
+		: ConstImageAdapter<Pixel>(_size), value(_value) { }
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		return value;
+	}
+
+};
+
+//////////////////////////////////////////////////////////////////////
+// Type conversion
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel, typename srcPixel>
+class TypeConversionAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<srcPixel>&	image;
+public:
+	TypeConversionAdapter(const ConstImageAdapter<srcPixel>& _image)
+		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) { }
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		Pixel	result;
+		if ((std::numeric_limits<Pixel>::is_integer)
+			&& (!std::numeric_limits<srcPixel>::is_integer)) {
+			convertPixel(result, std::numeric_limits<Pixel>::max()
+						* image.pixel(x, y));
+		} else if ((!std::numeric_limits<Pixel>::is_integer)
+			&& (std::numeric_limits<srcPixel>::is_integer)) {
+			convertPixel(result, image.pixel(x, y) /
+				(Pixel)std::numeric_limits<srcPixel>::max());
+		} else {
+			convertPixel(result, image.pixel(x, y));
+		}
+		return result;
 	}
 };
 
