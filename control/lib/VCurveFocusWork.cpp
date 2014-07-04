@@ -84,7 +84,15 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 	}
 
 	// compute the best focus position
-	double	focusposition = fc.focus();
+	double	focusposition = 0;
+	try {
+		focusposition = fc.focus();
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no optimal focus position: %s",
+			x.what());
+		focusingstatus(Focusing::FAILED);
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "optimal focus position: %f",
 		focusposition);
 
