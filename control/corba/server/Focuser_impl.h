@@ -23,6 +23,7 @@ public:
 	virtual CORBA::UShort	min();
 	virtual CORBA::UShort	max();
 	virtual CORBA::UShort	current();
+	virtual CORBA::UShort	backlash();
 	virtual void	set(CORBA::UShort value);
 	virtual char	*getName();
 };

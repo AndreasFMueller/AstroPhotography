@@ -62,6 +62,10 @@ unsigned short	SimFocuser::current() {
 	return _value;
 }
 
+unsigned short	SimFocuser::backlash() {
+	return 1000;
+}
+
 void	SimFocuser::set(unsigned short value) {
 	current();
 	if (value == target) {

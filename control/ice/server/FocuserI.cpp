@@ -29,6 +29,10 @@ int	FocuserI::current(const Ice::Current& current) {
 	return _focuser->current();
 }
 
+int	FocuserI::backlash(const Ice::Current& current) {
+	return _focuser->backlash();
+}
+
 void	FocuserI::set(int position, const Ice::Current& current) {
 	_focuser->set(position);
 }

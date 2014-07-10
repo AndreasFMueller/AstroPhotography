@@ -17,7 +17,6 @@ namespace focusing {
 Focusing::Focusing(CcdPtr ccd, FocuserPtr focuser)
 	: _ccd(ccd), _focuser(focuser) {
 	_method = FWHM;
-	_mode = TWO_SIDED;
 	_status = IDLE;
 	work = NULL;
 	_steps = 3;
@@ -113,32 +112,6 @@ std::string	Focusing::name_of_status(focus_status s) {
 		break;
 	}
 	throw std::runtime_error("bad focus status");
-}
-
-std::string	Focusing::name_of_mode(focus_mode m) {
-	switch (m) {
-	case ONE_SIDED:
-		return std::string("one-sided");
-		break;
-	case TWO_SIDED:
-		return std::string("two-sided");
-		break;
-	}
-	throw std::runtime_error("bad focus mode");
-}
-
-Focusing::focus_mode	Focusing::mode_from_name(const std::string& name) {
-	int	l = name.size();
-	if (l == 0) {
-		throw std::runtime_error("unknown mode");
-	}
-	if (name == std::string("one-sided").substr(0, l)) {
-		return Focusing::ONE_SIDED;
-	}
-	if (name == std::string("two-sided").substr(0, l)) {
-		return Focusing::TWO_SIDED;
-	}
-	throw std::runtime_error("unknown mode");
 }
 
 Focusing::focus_method	Focusing::method_from_name(const std::string& name) {

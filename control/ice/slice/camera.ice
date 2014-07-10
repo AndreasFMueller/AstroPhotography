@@ -304,6 +304,7 @@ module snowstar {
 		int	min();
 		int	max();
 		int	current();
+		int	backlash();
 		void	set(int value);
 	};
 

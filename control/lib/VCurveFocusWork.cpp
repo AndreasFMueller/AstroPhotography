@@ -61,8 +61,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 			position);
 
 		// move to new position
-		focusingstatus(Focusing::MOVING);
-		focuser()->moveto(position);
+		moveto(position);
 		
 		// get an image from the Ccd
 		focusingstatus(Focusing::MEASURING);
@@ -105,21 +104,9 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 
 	// move to the focus position
 	unsigned short	targetposition = focusposition;
-	focusingstatus(Focusing::MOVING);
-	focuser()->moveto(targetposition);
+	moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
-}
-
-/**
- */
-
-#define	convert_to_unsigned_char(image, Pixel, green)			\
-if (NULL == green) {							\
-	Image<Pixel>	*imagep = dynamic_cast<Image<Pixel> *>(&*image);	\
-	if (NULL != imagep) {						\
-		green = new Image<unsigned char>(*imagep);		\
-	}								\
 }
 
 /**

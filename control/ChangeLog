@@ -1,5 +1,10 @@
 ChangeLog for the Astro project.
 
+20140710:
+	* add backlash compensation to FocusWork
+	* add backlash to simulator (how can we get backlash information into
+	  other camera/focuser combinations?)
+
 20140703:
 	* add type conversion adapter
 	* add constant value adapter

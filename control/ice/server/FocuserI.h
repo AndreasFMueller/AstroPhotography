@@ -19,6 +19,7 @@ public:
 	virtual std::string	getName(const Ice::Current& current);
 	virtual int	min(const Ice::Current& current);
 	virtual int	max(const Ice::Current& current);
+	virtual int	backlash(const Ice::Current& current);
 	virtual int	current(const Ice::Current& current);
 	virtual void	set(int position, const Ice::Current& current);
 };

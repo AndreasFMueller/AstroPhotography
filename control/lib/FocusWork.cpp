@@ -89,6 +89,7 @@ void	FocusWork::callback(ImagePtr image, double value) {
 }
 
 /**
+ * \brief Convert the image to unsigned char pixel type
  */
 
 #define	convert_to_unsigned_char(image, Pixel, green)			\
@@ -101,6 +102,10 @@ if (NULL == green) {							\
 
 /**
  * \brief Extract and rescale the image as the green channel
+ *
+ * Independently of the pixel type of the focus camera, convert the image
+ * to 8 bit and rescale the values so that th use the full range of the
+ * camera.
  */
 Image<unsigned char>	*FocusWork::green(ImagePtr image) {
 	Image<unsigned char>	*result = NULL;
@@ -129,6 +134,69 @@ Image<unsigned char>	*FocusWork::green(ImagePtr image) {
 
 	// return the converted result
 	return result;
+}
+
+/**
+ * \brief Move Focuser to a given position
+ *
+ * This method ensures that the movement always comes from the same side.
+ * If the current position below the new position, nothing needs to be
+ * done. If however the current position is above the new position then
+ * the focuser is first moved to the target position minus the backlash
+ * amount before being moved to the target position.
+ */
+void	FocusWork::moveto(unsigned short position) {
+	// ensure we are inside the interval
+	if (position < min()) {
+		throw std::runtime_error("internal error: Focuser move below min");
+	}
+	if (position > max()) {
+		throw std::runtime_error("interval error: focuser move above max()");
+	}
+
+	// switch state to moving
+	focusingstatus(Focusing::MOVING);
+
+	// check whether backlash compensation is needed
+	if ((backlash() > 0) && (focuser()->current() > position)) {
+		unsigned short	compensated = position - backlash();
+		if (position < backlash()) {
+			debug(LOG_WARNING, DEBUG_LOG, 0,
+				"not enough room for backlash: current = %hu, "
+				"position = %hu, backlash = %hu",
+				focuser()->current(), position, backlash());
+			compensated = 0;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"moving to compensated position: %hu", compensated);
+		focuser()->moveto(compensated);
+	}
+
+	// now move to the final position
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "move to final position: %hu",
+		position);
+	focuser()->moveto(position);
+}
+
+/**
+ * \brief Find backlash amount from Focuser
+ */
+unsigned short	FocusWork::backlash() {
+	return (focuser()) ? focuser()->backlash() : 0;
+}
+
+/**
+ * \brief get Focusing status
+ */
+Focusing::focus_status	FocusWork::focusingstatus() {
+	return _focusing.status();
+}
+
+/**
+ * \brief set the focusing status
+ */
+void	FocusWork::focusingstatus(Focusing::focus_status s) {
+	_focusing.status(s);
 }
 
 } // namespace focusing

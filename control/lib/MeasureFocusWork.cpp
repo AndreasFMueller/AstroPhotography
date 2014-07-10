@@ -132,8 +132,7 @@ FocusInterval	MeasureFocusWork::subdivide(const FocusInterval& interval) {
  */
 FocusValue	MeasureFocusWork::measureat(unsigned short pos) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "measurement at pos = %hu", pos);
-	focusingstatus(Focusing::MOVING);
-	focuser()->moveto(pos);
+	moveto(pos);
 	focusingstatus(Focusing::MEASURING);
 	ccd()->startExposure(exposure());
 	ccd()->wait();

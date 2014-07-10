@@ -57,17 +57,6 @@ public:
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 
-	// focusing mode
-public:
-	typedef enum { ONE_SIDED, TWO_SIDED } focus_mode;
-static std::string	name_of_mode(focus_mode);
-static focus_mode	mode_from_name(const std::string& name);
-private:
-	focus_mode	_mode;
-public:
-	focus_mode	mode() const { return _mode; }
-	void	mode(focus_mode mode) { _mode = mode; }
-
 	// focusing status (what is it doing right now?)
 	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
 static std::string	name_of_status(focus_status);

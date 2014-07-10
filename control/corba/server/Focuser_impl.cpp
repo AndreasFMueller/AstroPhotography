@@ -24,6 +24,10 @@ CORBA::UShort	Focuser_impl::current() {
 	return _focuser->current();
 }
 
+CORBA::UShort	Focuser_impl::backlash() {
+	return _focuser->backlash();
+}
+
 void	Focuser_impl::set(CORBA::UShort value) {
 	_focuser->set(value);
 }

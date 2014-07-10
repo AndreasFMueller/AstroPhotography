@@ -306,6 +306,7 @@ module Astro {
 		unsigned short	min();
 		unsigned short	max();
 		unsigned short	current();
+		unsigned short	backlash();
 		void	set(in unsigned short value);
 	};
 

@@ -23,18 +23,21 @@ namespace focusing {
 class FocusWork {
 	unsigned short	_min;
 public:
-	unsigned short	min() const { return _min; }
+	const unsigned short&	min() const { return _min; }
 	void	min(unsigned short m) { _min = m; }
 private:
 	unsigned short	_max;
 public:
-	unsigned short	max() const { return _max; }
+	const unsigned short&	max() const { return _max; }
 	void	max(unsigned short m) { _max = m; }
 private:
 	unsigned short	_steps;
 public:
-	unsigned short	steps() const { return _steps; }
+	const unsigned short&	steps() const { return _steps; }
 	void	steps(unsigned short s);
+public:
+	unsigned short	backlash();
+	void	moveto(unsigned short position);
 private:
 	astro::camera::CcdPtr	_ccd;
 public:
@@ -59,8 +62,8 @@ public:
 protected:
 	bool	complete();
 	Focusing&	_focusing;
-	Focusing::focus_status	focusingstatus() { return _focusing.status(); }
-	void	focusingstatus(Focusing::focus_status s) { _focusing.status(s); }
+	Focusing::focus_status	focusingstatus();
+	void	focusingstatus(Focusing::focus_status s);
 public:
 	FocusWork(Focusing& focusing);
 	virtual ~FocusWork() { }
