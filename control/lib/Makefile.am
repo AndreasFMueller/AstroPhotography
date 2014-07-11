@@ -26,7 +26,7 @@ endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
-	URL.cpp DeviceName.cpp \
+	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
 	Point.cpp Pixel.cpp MosaicType.cpp Coordinates.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
@@ -70,4 +70,4 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 
-libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\"
+libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

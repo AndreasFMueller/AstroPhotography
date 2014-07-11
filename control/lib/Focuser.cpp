@@ -37,6 +37,9 @@ unsigned short	Focuser::current() {
 }
 
 unsigned short	Focuser::backlash() {
+	if (hasProperty("backlash")) {
+		return std::stoi(getProperty("backlesh"));
+	}
 	return 0;
 }
 

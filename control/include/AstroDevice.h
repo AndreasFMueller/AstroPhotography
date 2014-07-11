@@ -9,8 +9,29 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <map>
 
 namespace astro {
+
+/**
+ * \brief Properties abstraction
+ */
+class Properties {
+public:
+	typedef std::map<std::string, std::string>	propertymap_type;
+private:
+	propertymap_type	properties;
+	void	setup(const std::string& name, const std::string& filename);
+public:
+	Properties(const std::string& devicename);
+	virtual ~Properties();
+	virtual bool	hasProperty(const std::string& name) const;
+	virtual std::string	getProperty(const std::string& name) const;
+	virtual std::string	getProperty(const std::string& name,
+				const std::string& defaultvalue) const;
+	virtual void	setProperty(const std::string& name,
+				const std::string& value);
+};
 
 /**
  * \brief Name of a device
@@ -74,7 +95,7 @@ namespace device {
  * Every device must have a DeviceName. The device name specifies the full
  * path to the device
  */
-class Device {
+class Device : public Properties {
 protected:
 	DeviceName	_name;
 private:
@@ -82,8 +103,9 @@ private:
 	Device(const Device& other);
 	Device&	operator=(const Device& other);
 public:
-	Device(const std::string& name) : _name(name) { }
-	Device(const DeviceName& name) : _name(name) { }
+	Device(const std::string& name);
+	Device(const DeviceName& name);
+	virtual ~Device();
 	const DeviceName&	name() const { return _name; }
 };
 

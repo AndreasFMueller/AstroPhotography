@@ -1,4 +1,3 @@
-
 /*
  * SplitterTest.cpp -- test the device name class
  *

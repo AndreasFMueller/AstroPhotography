@@ -234,6 +234,10 @@ AC_C_CONST
 # Checks for library functions
 AC_CHECK_FUNCS([memset strdup strerror trunc])
 
+# device property file location
+DEVICEPROPERTIES=${sysconfdir}/device.properties
+AC_SUBST(DEVICEPROPERTIES)
+
 # definitions for the extension for shared libraries
 case `uname` in
 	Darwin*)
