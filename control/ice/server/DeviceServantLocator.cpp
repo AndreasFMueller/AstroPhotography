@@ -98,6 +98,9 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 
 	case astro::DeviceName::Module:
 		throw NotImplemented("no module access through devices");
+
+	case astro::DeviceName::Mount:
+		throw NotImplemented("mount access not yet implemented");
 	};
 
 	devices.insert(std::make_pair(name, ptr));

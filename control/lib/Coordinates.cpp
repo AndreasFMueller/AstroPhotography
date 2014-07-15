@@ -21,19 +21,11 @@ Angle::Angle(double angle) : _angle(angle) {
 	reduce();
 }
 
-double	Angle::radians() const {
-	return _angle;
-}
-
-void	Angle::setRadians(double radians) {
-	_angle = radians;
-}
-
 double	Angle::degrees() const {
 	return 180 * _angle / M_PI;
 }
 
-void	Angle::setDegrees(double degrees) {
+void	Angle::degrees(double degrees) {
 	_angle = M_PI * degrees / 180;
 }
 
@@ -41,7 +33,7 @@ double	Angle::hours() const {
 	return 12 * _angle / M_PI;
 }
 
-void	Angle::setHours(double hours) {
+void	Angle::hours(double hours) {
 	_angle = M_PI * hours / 12;
 }
 

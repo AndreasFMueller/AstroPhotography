@@ -19,7 +19,7 @@ module Astro {
 		typedef sequence<string>	DeviceNameList;
 		enum device_type { DEVICE_AO, DEVICE_CAMERA, DEVICE_CCD,
 			DEVICE_COOLER, DEVICE_FILTERWHEEL, DEVICE_FOCUSER,
-			DEVICE_GUIDERPORT, DEVICE_MODULE };
+			DEVICE_GUIDERPORT, DEVICE_MODULE, DEVICE_MOUNT };
 		/**
 		 * \brief Retrieve a list of device names for a device type
 		 *
@@ -36,6 +36,7 @@ module Astro {
 		FilterWheel	getFilterWheel(in string name) raises(NotFound);
 		Cooler		getCooler(in string name) raises(NotFound);
 		Focuser		getFocuser(in string name) raises(NotFound);
+		//Mount		getMount(in string name) raises(NotFound);
 	};
 
 	struct Descriptor {

@@ -39,6 +39,8 @@ devicetype	DevicesI::convert(const astro::DeviceName::device_type& type) {
 		return DevGUIDERPORT;
 	case astro::DeviceName::Module:
 		return DevMODULE;
+	case astro::DeviceName::Mount:
+		return DevMOUNT;
 	}
 }
 
@@ -60,6 +62,8 @@ astro::DeviceName::device_type	DevicesI::convert(const devicetype& type) {
 		return astro::DeviceName::Guiderport;
 	case DevMODULE:
 		return astro::DeviceName::Module;
+	case DevMOUNT:
+		return astro::DeviceName::Mount;
 	}
 }
 

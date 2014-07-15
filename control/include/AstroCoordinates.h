@@ -15,11 +15,11 @@ protected:
 public:
 	Angle(double angle = 0);
 	double	degrees() const;
-	void	setDegrees(double degrees);
+	void	degrees(double degrees);
 	double	hours() const;
-	void	setHours(double hours);
-	double	radians() const;
-	void	setRadians(double radians);
+	void	hours(double hours);
+	double	radians() const { return _angle; }
+	void	radians(double radians) { _angle = radians; }
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;
@@ -29,12 +29,19 @@ class RaDec {
 	Angle	_ra;
 	Angle	_dec;
 public:
-	Angle	ra() const;
-	Angle	dec() const;
+	RaDec(const Angle& ra, const Angle& dec) : _ra(ra), _dec(dec) { }
+	const Angle&	ra() const { return _ra; }
+	const Angle&	dec() const { return _dec; }
 };
 
-
-
+class	AzmAlt {
+	Angle	_azm;
+	Angle	_alt;
+public:
+	AzmAlt(const Angle& azm, const Angle& alt) : _azm(azm), _alt(alt) { }
+	const Angle&	azm() const { return _azm; }
+	const Angle&	alt() const { return _alt; }
+};
 
 } // namespace astro
 

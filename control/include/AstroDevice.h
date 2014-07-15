@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include <AstroCoordinates.h>
 
 namespace astro {
 
@@ -44,7 +45,7 @@ public:
 class DeviceName : public std::vector<std::string> {
 public:
 	typedef enum { AdaptiveOptics, Camera, Ccd, Cooler, Filterwheel,
-		Focuser, Guiderport, Module } device_type;
+		Focuser, Guiderport, Module, Mount } device_type;
 	static std::string	type2string(const device_type& type);
 	static device_type	string2type(const std::string& name);
 private:
@@ -108,6 +109,35 @@ public:
 	virtual ~Device();
 	const DeviceName&	name() const { return _name; }
 };
+
+/**
+ * \brief Base class for all Mounts
+ *
+ * A camera is mounted on a mount, together with the Telescope (which does
+ * not have a class representing it). Mounts can return the current coordinates
+ * the telescope is pointing to, and one can slew the telescope to a
+ * given position using the Goto methods.
+ */
+class Mount : public Device {
+public:
+	typedef enum mount_state { IDLE, TRACKING, GOTO } mount_state;
+	Mount(const std::string& name) : Device(name) { }
+	Mount(const DeviceName& name) : Device(name) { }
+	virtual ~Mount() { }
+
+	// state
+	virtual mount_state	state() { return IDLE; }
+
+	// position commands
+	virtual RaDec	getRaDec();
+	virtual AzmAlt	getAzmAlt();
+
+	// goto commands
+	virtual void	Goto(const RaDec& radec);
+	virtual void	Goto(const AzmAlt& azmalt);
+	virtual void	cancel();
+};
+typedef std::shared_ptr<Mount>	MountPtr;
 
 } // namespace device
 } // namespace astro

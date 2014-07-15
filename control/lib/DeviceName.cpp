@@ -77,7 +77,7 @@ std::string	DeviceName::toString() const {
 /**
  * \brief Type conversion from name to type code
  */
-#define	Ntypes	8
+#define	Ntypes	9
 static std::string	typenames[Ntypes] = {
 	"adaptiveoptics",
 	"camera",
@@ -86,7 +86,8 @@ static std::string	typenames[Ntypes] = {
 	"filterwheel",
 	"focuser",
 	"guiderport",
-	"module"
+	"module",
+	"mount"
 };
 static DeviceName::device_type	typecode[Ntypes] = {
 	DeviceName::AdaptiveOptics,
@@ -96,7 +97,8 @@ static DeviceName::device_type	typecode[Ntypes] = {
 	DeviceName::Filterwheel,
 	DeviceName::Focuser,
 	DeviceName::Guiderport,
-	DeviceName::Module
+	DeviceName::Module,
+	DeviceName::Mount
 };
 
 DeviceName::device_type	DeviceName::string2type(const std::string& name) {

@@ -14,7 +14,7 @@ module snowstar {
 
 	enum devicetype { DevAO, DevCAMERA, DevCCD,
 		DevCOOLER, DevFILTERWHEEL, DevFOCUSER,
-		DevGUIDERPORT, DevMODULE };
+		DevGUIDERPORT, DevMODULE, DevMOUNT };
 	/**
 	 * \brief Device Locator interface within a module
 	 */

@@ -33,6 +33,8 @@ Astro::DeviceLocator::device_type	convert(
 		return Astro::DeviceLocator::DEVICE_GUIDERPORT;
 	case astro::DeviceName::Module:
 		return Astro::DeviceLocator::DEVICE_MODULE;
+	case astro::DeviceName::Mount:
+		return Astro::DeviceLocator::DEVICE_MOUNT;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -57,6 +59,8 @@ astro::DeviceName::device_type	convert(
 		return astro::DeviceName::Guiderport;
 	case Astro::DeviceLocator::DEVICE_MODULE:
 		return astro::DeviceName::Module;
+	case Astro::DeviceLocator::DEVICE_MOUNT:
+		return astro::DeviceName::Mount;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -80,6 +84,8 @@ std::string	convert2string(astro::DeviceName::device_type fromtype) {
 		return std::string("GUIDERPORT");
 	case astro::DeviceName::Module:
 		return std::string("MODULE");
+	case astro::DeviceName::Mount:
+		return std::string("MOUNT");
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
@@ -103,6 +109,8 @@ std::string	convert2string(Astro::DeviceLocator::device_type fromtype) {
 		return std::string("GUIDERPORT");
 	case Astro::DeviceLocator::DEVICE_MODULE:
 		return std::string("MODULE");
+	case Astro::DeviceLocator::DEVICE_MOUNT:
+		return std::string("MOUNT");
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", fromtype);
 	throw std::runtime_error("illegal type");
