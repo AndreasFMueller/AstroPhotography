@@ -28,6 +28,17 @@ typedef struct onebyte_s {
 /**
  * \brief Initialize the MicroTouch device
  *
+ * The constructor also contains the initialization sequence of the
+ * USB serial chip of the MicroTouch. Unfortunately, this chip is not open,
+ * so I had to reverse engineer the initialization sequence using a USB
+ * protocol analyzer. I have no idea what these commands mean, but they
+ * work. The control requests in binary are displayed in the comments below.
+ *
+ * I assume that these control requests initialize the serial communication
+ * with the AVR processor in the MicroTouch. As soon as they are sent, you
+ * can just send and receive serial data on the buld endpoints the USB
+ * serial chip also provides. 
+ *
  * \param device USB device representing the MicroTouch
  */
 MicroTouch::MicroTouch(DevicePtr _device) throw(USBError) : device(_device) {
@@ -44,31 +55,31 @@ MicroTouch::MicroTouch(DevicePtr _device) throw(USBError) : device(_device) {
 	std::cout << "out:" <<std::endl;
 	std::cout << *outendpoint;
 
-	/* 40 00 FF FF 00 00 00 00 */
+	/* control request: 40 00 FF FF 00 00 00 00 */
 	EmptyRequest	setup1(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		(uint16_t)0x0000, (uint8_t)0x00, (uint16_t)0xffff);
 	device->controlRequest(&setup1);
 
-	/* 40 01 00 20 00 00 00 00 */
+	/* control request: 40 01 00 20 00 00 00 00 */
 	EmptyRequest	setup2(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x01, 0x2000);
 	device->controlRequest(&setup2);
 
-	/* C0 FF 0B 37 00 00 01 00 */
+	/* control request: C0 FF 0B 37 00 00 01 00 */
 	Request<onebyte_t>	setup3(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0xff, 0x370b);
 	device->controlRequest(&setup3);
 
-	/* 40 12 0C 00 00 00 00 00 */
+	/* control request: 40 12 0C 00 00 00 00 00 */
 	EmptyRequest	setup4(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x12, 0x000c);
 	device->controlRequest(&setup4);
 
-	/* 40 01 C0 00 00 00 00 00 */
+	/* control request: 40 01 C0 00 00 00 00 00 */
 	EmptyRequest	setup5(RequestBase::vendor_specific_type,
 		RequestBase::device_recipient,
 		0x0000, 0x01, 0x00c0);
@@ -85,6 +96,8 @@ struct mtdata {
 
 /**
  * \brief get a word from the remote device
+ *
+ * \param code	command code to send to the device
  */
 uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
 	mtdata<2>	result = get<2>(code);
@@ -96,6 +109,8 @@ uint16_t	MicroTouch::getWord(uint8_t code) throw(MicroTouchError) {
 
 /**
  * \brief get a byte from the remote device
+ *
+ * \param code	command code to send to the device
  */
 uint8_t	MicroTouch::getByte(uint8_t code) throw(MicroTouchError) {
 	mtdata<1>	result = get<1>(code);
@@ -105,6 +120,9 @@ uint8_t	MicroTouch::getByte(uint8_t code) throw(MicroTouchError) {
 
 /**
  * \brief Query the position from the MicroTouch.
+ *
+ * The position is returned as two a 16bit word when a GETPOSITION 
+ * is sent to the MicroTouch device.
  *
  * \return The current stepper motor position.
  */
@@ -132,6 +150,12 @@ bool	MicroTouch::isTemperatureCompensating() throw(MicroTouchError) {
 
 /**
  * \brief Drive the stepper motor to a given position.
+ *
+ * To set the position on the microtouch, one has to send the SETPOSITION
+ * command byte followed by 4 bytes indicating the position. The first
+ * byte is the result of the integer division position / 1000. The next 
+ * three bytes are the last three decimal digits of position, in binary.
+ *
  * \param position	the position to drive to.
  */
 void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
@@ -160,6 +184,7 @@ void	MicroTouch::setPosition(uint16_t position) throw(MicroTouchError) {
 
 /**
  * \brief Get the current temperature
+ *
  * \return give the temperature of the hand controller in degrees Celsius.
  */
 float	MicroTouch::getTemperature() throw(MicroTouchError) {

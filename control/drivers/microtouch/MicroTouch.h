@@ -13,6 +13,9 @@ namespace astro {
 namespace device {
 namespace microtouch {
 
+/*
+ * Here are the command bytes I was able to reveres engineer
+ */
 #define MICROTOUCH_ISMOVING		0x82
 #define	MICROTOUCH_GETTEMPERATURE	0x84
 #define MICROTOUCH_ISTEMPCOMPENSATING	0x89
@@ -44,6 +47,20 @@ class MicroTouch {
 		mtdata() { }
 	} __attribute__((packed));
 
+	/**
+ 	 * \brief Retrieve a block of data from the Microtouch device
+	 *
+	 * This private template function is sends a command byte to the
+	 * microtouch device and returns a number of bytes received from
+	 * the device as a response. The template argument n is the size
+	 * of the data block to receive.
+	 *
+	 * This method is also used to send commands with arguments. In this
+	 * case, it is used with n=0 so that only the command byte is sent,
+	 * and a bulk transfer is used to send the arguments.
+	 *
+	 * \param code	command byte to send to the device
+ 	 */
 	template<size_t n>
 	mtdata<n>	get(uint8_t code) throw(MicroTouchError) {
 		mtdata<0>	request_data(code);
