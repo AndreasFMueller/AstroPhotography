@@ -21,5 +21,5 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \
 	TrackingPersistence.h CalibrationPersistence.h \
 	TrackingStore.h CalibrationStore.h ImagePersistence.h \
-	FocusWork.h FocusCompute.h Serial.h
+	FocusWork.h FocusCompute.h Serial.h
 

@@ -4,10 +4,9 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 pkglib_LTLIBRARIES = celestron.la
-noinst_HEADERS = CelestronLocator.h 
-	SimFocuser.h Stars.h Blurr.h
+noinst_HEADERS = CelestronLocator.h CelestronMount.h
 
-SRCFILES = CelestronLocator.cpp
+SRCFILES = CelestronLocator.cpp CelestronMount.cpp
 
 celestron_la_SOURCES = $(SRCFILES)
 celestron_la_LDFLAGS = -module
