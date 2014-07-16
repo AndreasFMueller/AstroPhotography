@@ -110,6 +110,9 @@ public:
 	const DeviceName&	name() const { return _name; }
 };
 
+class Mount;
+typedef std::shared_ptr<Mount>	MountPtr;
+
 /**
  * \brief Base class for all Mounts
  *
@@ -120,7 +123,9 @@ public:
  */
 class Mount : public Device {
 public:
+	typedef MountPtr	sharedptr;
 	typedef enum mount_state { IDLE, TRACKING, GOTO } mount_state;
+	static DeviceName::device_type	devicetype;
 	Mount(const std::string& name) : Device(name, DeviceName::Mount) { }
 	Mount(const DeviceName& name) : Device(name, DeviceName::Mount) { }
 	virtual ~Mount() { }
@@ -137,7 +142,6 @@ public:
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual void	cancel();
 };
-typedef std::shared_ptr<Mount>	MountPtr;
 
 } // namespace device
 } // namespace astro

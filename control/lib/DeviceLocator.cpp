@@ -10,6 +10,7 @@
 #include <AstroExceptions.h>
 
 using namespace astro::camera;
+using namespace astro::device;
 
 namespace astro {
 namespace device {
@@ -53,12 +54,18 @@ GuiderPortPtr	DeviceCacheAdapter<GuiderPort>::get0(const DeviceName& name) {
 	return _locator->getGuiderPort0(name);
 }
 
+template<>
+MountPtr	DeviceCacheAdapter<Mount>::get0(const DeviceName& name) {
+	return _locator->getMount0(name);
+}
+
 //////////////////////////////////////////////////////////////////////
 // DeviceLocator implementation
 //////////////////////////////////////////////////////////////////////
 DeviceLocator::DeviceLocator() :
 	aocache(this), cameracache(this), ccdcache(this), coolercache(this),
-	filterwheelcache(this), focusercache(this), guiderportcache(this) {
+	filterwheelcache(this), focusercache(this), guiderportcache(this),
+	mountcache(this) {
 }
 
 DeviceLocator::~DeviceLocator() {
@@ -144,6 +151,10 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {
 	throw std::runtime_error("focuser not implemented");
 }
 
+astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName& name) {
+	throw std::runtime_error("mount not implemented");
+}
+
 astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics(const std::string& name) {
 	return aocache.get(name);
 }
@@ -180,6 +191,9 @@ astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& nam
 	return guiderportcache.get(name);
 }
 
+astro::device::MountPtr	DeviceLocator::getMount(const std::string& name) {
+	return mountcache.get(name);
+}
 
 //////////////////////////////////////////////////////////////////////
 // Locator Adapter class
@@ -280,6 +294,19 @@ template<>
 astro::camera::FocuserPtr	LocatorAdapter<astro::camera::Focuser>::get0(
 					const DeviceName& name) {
         return _locator->getFocuser(name);
+}
+
+// Mount
+template<>
+astro::device::MountPtr	LocatorAdapter<astro::device::Mount>::get(
+					const DeviceName& name) {
+	return _locator->getMount(name);
+}
+
+template<>
+astro::device::MountPtr	LocatorAdapter<astro::device::Mount>::get0(
+					const DeviceName& name) {
+	return _locator->getMount(name);
 }
 
 } // namespace device

@@ -8,6 +8,8 @@
 namespace astro {
 namespace device {
 
+DeviceName::device_type Mount::devicetype = DeviceName::Mount;
+
 /**
  * \brief Get current mount position in RA and DEC
  */

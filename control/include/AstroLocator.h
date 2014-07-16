@@ -56,6 +56,10 @@ template<>
 astro::camera::GuiderPortPtr
 DeviceCacheAdapter<astro::camera::GuiderPort>::get0(const DeviceName& name);
 
+template<>
+astro::device::MountPtr
+DeviceCacheAdapter<astro::device::Mount>::get0(const DeviceName& name);
+
 /**
  * \brief Cache for devices
  *
@@ -106,6 +110,7 @@ class   DeviceLocator {
 	DeviceCache<astro::camera::FilterWheel>	filterwheelcache;
 	DeviceCache<astro::camera::Focuser>	focusercache;
 	DeviceCache<astro::camera::GuiderPort>	guiderportcache;
+	DeviceCache<astro::device::Mount>	mountcache;
 public:
 	virtual astro::camera::AdaptiveOpticsPtr	getAdaptiveOptics0(const DeviceName& name);
 	virtual	astro::camera::CameraPtr	getCamera0(const DeviceName& name);
@@ -114,6 +119,7 @@ public:
 	virtual	astro::camera::FilterWheelPtr	getFilterWheel0(const DeviceName& name);
 	virtual	astro::camera::FocuserPtr	getFocuser0(const DeviceName& name);
 	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual	astro::device::MountPtr		getMount0(const DeviceName& name);
 public:
 	DeviceLocator();
 	virtual ~DeviceLocator();
@@ -131,6 +137,7 @@ public:
 	astro::camera::FilterWheelPtr	getFilterWheel(const std::string& name);
 	astro::camera::CoolerPtr	getCooler(const std::string& name);
 	astro::camera::FocuserPtr	getFocuser(const std::string& name);
+	astro::device::MountPtr		getMount(const std::string& name);
 };
 
 typedef std::shared_ptr<DeviceLocator>	DeviceLocatorPtr;
@@ -195,6 +202,10 @@ template<>
 astro::camera::FocuserPtr
 LocatorAdapter<astro::camera::Focuser>::get0(const DeviceName& name);
 
+template<>
+astro::device::MountPtr
+LocatorAdapter<astro::device::Mount>::get0(const DeviceName& name);
+
 
 template<>
 astro::camera::AdaptiveOpticsPtr
@@ -223,6 +234,10 @@ LocatorAdapter<astro::camera::Cooler>::get(const DeviceName& name);
 template<>
 astro::camera::FocuserPtr
 LocatorAdapter<astro::camera::Focuser>::get(const DeviceName& name);
+
+template<>
+astro::device::MountPtr
+LocatorAdapter<astro::device::Mount>::get(const DeviceName& name);
 
 } // namespace device
 } // namespace astro
