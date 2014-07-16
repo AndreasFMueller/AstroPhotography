@@ -262,6 +262,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
+	drivers/celestron/Makefile
 	man/Makefile doc/Makefile
 	test/Makefile])
 AC_OUTPUT
