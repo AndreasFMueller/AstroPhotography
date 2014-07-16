@@ -12,6 +12,7 @@ namespace astro {
 namespace device {
 
 class Serial {
+	std::string	_serialdevice;
 	int	fd;
 private:
 	// private copy constructor to prevent copying
@@ -20,6 +21,9 @@ private:
 public:
 	Serial(const std::string& devicename, unsigned int baudrate = 9600);
 	~Serial();
+	int	write(const std::string& data);
+	std::string	read(int count);
+	const std::string&	serialdevice() const { return _serialdevice; }
 };
 
 } // namespace device

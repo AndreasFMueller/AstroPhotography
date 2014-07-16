@@ -14,16 +14,31 @@ namespace camera {
 
 DeviceName::device_type	FilterWheel::devicetype = DeviceName::Filterwheel;
 
-DeviceName	FilterWheel::defaultname(const DeviceName& parent, const std::string& unitname) {
+/**
+ * \brief Create the name of the filterwheel
+ */
+DeviceName	FilterWheel::defaultname(const DeviceName& parent,
+			const std::string& unitname) {
 	return DeviceName(parent, DeviceName::Filterwheel, unitname);
 }
 
-FilterWheel::FilterWheel(const DeviceName& name) : Device(name) {
+/**
+ * \brief Constructor for Filterwheels
+ */
+FilterWheel::FilterWheel(const DeviceName& name)
+	: Device(name, DeviceName::Filterwheel) {
 }
 
-FilterWheel::FilterWheel(const std::string& name) : Device(name) {
+/**
+ * \brief Constructor for Filterwheels
+ */
+FilterWheel::FilterWheel(const std::string& name)
+	: Device(name, DeviceName::Filterwheel) {
 }
 
+/**
+ * \brief destroy the filterwheel
+ */
 FilterWheel::~FilterWheel() {
 }
 

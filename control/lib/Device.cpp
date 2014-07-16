@@ -11,13 +11,21 @@ namespace device {
 /**
  * \brief Construct a device
  */
-Device::Device(const std::string& name) : Properties(name), _name(name) {
+Device::Device(const std::string& devname, DeviceName::device_type type)
+	: Properties(devname), _name(devname) {
+	if (name().type() != type) {
+		throw std::runtime_error("name type does not match");
+	}
 }
 
 /**
  * \brief Construct a device from a device name
  */
-Device::Device(const DeviceName& name) : Properties(name), _name(name) {
+Device::Device(const DeviceName& devname, DeviceName::device_type type)
+	: Properties(devname), _name(devname) {
+	if (name().type() != type) {
+		throw std::runtime_error("name type does not match");
+	}
 }
 
 /**

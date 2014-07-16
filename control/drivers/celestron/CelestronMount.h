@@ -10,7 +10,9 @@ namespace astro {
 namespace driver {
 namespace celestron {
 
-class CelestronMount : public astro::device::Device, public astro::device::Serial {
+class CelestronMount : public astro::device::Mount,
+			public astro::device::Serial {
+	void	getprompt();
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();

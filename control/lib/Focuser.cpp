@@ -15,10 +15,10 @@ namespace camera {
 
 DeviceName::device_type	Focuser::devicetype = DeviceName::Focuser;
 
-Focuser::Focuser(const DeviceName& name) : Device(name) {
+Focuser::Focuser(const DeviceName& name) : Device(name, DeviceName::Focuser) {
 }
 
-Focuser::Focuser(const std::string& name) : Device(name) {
+Focuser::Focuser(const std::string& name) : Device(name, DeviceName::Focuser) {
 }
 
 Focuser::~Focuser() {
@@ -38,7 +38,7 @@ unsigned short	Focuser::current() {
 
 unsigned short	Focuser::backlash() {
 	if (hasProperty("backlash")) {
-		return std::stoi(getProperty("backlesh"));
+		return std::stoi(getProperty("backlash"));
 	}
 	return 0;
 }

@@ -28,7 +28,7 @@ DeviceName	Cooler::defaultname(const DeviceName& parent,
 /**
  * \brief Create a cooler from the name
  */
-Cooler::Cooler(const DeviceName& name) : Device(name) {
+Cooler::Cooler(const DeviceName& name) : Device(name, DeviceName::Cooler) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 	temperature = 25 + 273.1;
@@ -37,7 +37,7 @@ Cooler::Cooler(const DeviceName& name) : Device(name) {
 /**
  * \brief Create a cooler from the unit name
  */
-Cooler::Cooler(const std::string& name) : Device(name) {
+Cooler::Cooler(const std::string& name) : Device(name, DeviceName::Cooler) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create cooler named %s",
 		Device::name().name().c_str());
 	temperature = 25 + 273.1;

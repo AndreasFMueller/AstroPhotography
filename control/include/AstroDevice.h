@@ -104,8 +104,8 @@ private:
 	Device(const Device& other);
 	Device&	operator=(const Device& other);
 public:
-	Device(const std::string& name);
-	Device(const DeviceName& name);
+	Device(const std::string& name, DeviceName::device_type type);
+	Device(const DeviceName& name, DeviceName::device_type type);
 	virtual ~Device();
 	const DeviceName&	name() const { return _name; }
 };
@@ -121,8 +121,8 @@ public:
 class Mount : public Device {
 public:
 	typedef enum mount_state { IDLE, TRACKING, GOTO } mount_state;
-	Mount(const std::string& name) : Device(name) { }
-	Mount(const DeviceName& name) : Device(name) { }
+	Mount(const std::string& name) : Device(name, DeviceName::Mount) { }
+	Mount(const DeviceName& name) : Device(name, DeviceName::Mount) { }
 	virtual ~Mount() { }
 
 	// state

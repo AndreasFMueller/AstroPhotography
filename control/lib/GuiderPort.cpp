@@ -15,10 +15,12 @@ DeviceName	GuiderPort::defaultname(const DeviceName& parent,
 	return DeviceName(parent, DeviceName::Guiderport, unitname);
 }
 
-GuiderPort::GuiderPort(const DeviceName& name) : Device(name) {
+GuiderPort::GuiderPort(const DeviceName& name)
+	: Device(name, DeviceName::Guiderport) {
 }
 
-GuiderPort::GuiderPort(const std::string& name) : Device(name) {
+GuiderPort::GuiderPort(const std::string& name)
+	: Device(name, DeviceName::Guiderport) {
 }
 
 GuiderPort::~GuiderPort() {

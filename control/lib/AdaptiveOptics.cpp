@@ -11,10 +11,12 @@ namespace camera {
 
 DeviceName::device_type	AdaptiveOptics::devicetype = DeviceName::AdaptiveOptics;
 
-AdaptiveOptics::AdaptiveOptics(const DeviceName& name) : Device(name) {
+AdaptiveOptics::AdaptiveOptics(const DeviceName& name)
+	: Device(name, DeviceName::AdaptiveOptics) {
 }
 
-AdaptiveOptics::AdaptiveOptics(const std::string& name) : Device(name) {
+AdaptiveOptics::AdaptiveOptics(const std::string& name)
+	: Device(name, DeviceName::AdaptiveOptics) {
 }
 
 AdaptiveOptics::~AdaptiveOptics() {

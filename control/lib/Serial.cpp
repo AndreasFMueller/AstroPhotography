@@ -14,7 +14,8 @@ namespace device {
 /** 
  * \brief Open a serial device
  */
-Serial::Serial(const std::string& devicename, unsigned int baudrate) {
+Serial::Serial(const std::string& devicename, unsigned int baudrate)
+	: _serialdevice(devicename) {
 	// initialize fd
 	fd = -1;
 
@@ -116,6 +117,40 @@ Serial::~Serial() {
 	}
 	fd = -1;
 }
+
+/**
+ * \brief Write a buffer of data to the serial connection
+ */
+int	Serial::write(const std::string& data) {
+	int	rc = ::write(fd, data.c_str(), data.size());
+	if (rc < 0) {
+		std::string	msg = stringprintf("cannot write %d bytes: %s",
+					data.size(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return rc;
+}
+
+/**
+ * \brief Read a number of bytes from the serial connection
+ */
+std::string	Serial::read(int count) {
+	char	buffer[count];
+	int	bytes = 0;
+	do {
+		int	rc = ::read(fd, buffer + bytes, count - bytes);
+		if (rc < 0) {
+			std::string	msg = stringprintf("cannot read %d "
+				"bytes: %s", count, strerror(errno));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+		bytes += rc;
+	} while (count > bytes);
+	return std::string(buffer, count);
+}
+
 
 } // namespace device
 } // namespace astro

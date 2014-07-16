@@ -1,5 +1,13 @@
 ChangeLog for the Astro project.
 
+20140716:
+	* add serial communication class
+	* add celestron driver
+	* enforce device type matching name in all device constructors
+
+20140715:
+	* add Mount class
+
 20140710:
 	* add backlash compensation to FocusWork
 	* add backlash to simulator (how can we get backlash information into

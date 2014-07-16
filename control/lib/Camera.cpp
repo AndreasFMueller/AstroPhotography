@@ -37,10 +37,10 @@ DeviceName	Camera::defaultname(const DeviceName& parent,
 	return DeviceName(parent, DeviceName::Camera, unitname);
 }
 
-Camera::Camera(const std::string& name) : Device(name) {
+Camera::Camera(const std::string& name) : Device(name, DeviceName::Camera) {
 }
 
-Camera::Camera(const DeviceName& name) : Device(name) {
+Camera::Camera(const DeviceName& name) : Device(name, DeviceName::Camera) {
 }
 
 Camera::~Camera() {

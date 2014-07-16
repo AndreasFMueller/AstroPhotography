@@ -212,7 +212,8 @@ public:
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
-	Ccd(const CcdInfo& _info) : astro::device::Device(_info.name()),
+	Ccd(const CcdInfo& _info)
+		: astro::device::Device(_info.name(), DeviceName::Ccd),
 		info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
