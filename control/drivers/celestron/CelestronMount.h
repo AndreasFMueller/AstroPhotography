@@ -13,6 +13,11 @@ namespace celestron {
 class CelestronMount : public astro::device::Mount,
 			public astro::device::Serial {
 	void	getprompt();
+	double	angle(uint16_t a);
+	double	angle(uint32_t a);
+	uint16_t	angle16(const Angle& a);
+	uint32_t	angle32(const Angle& a);
+	std::pair<double, double>	parseangles(const std::string& s);
 public:
 	CelestronMount(const std::string& devicename);
 	virtual ~CelestronMount();
