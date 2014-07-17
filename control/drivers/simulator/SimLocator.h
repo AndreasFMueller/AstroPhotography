@@ -19,6 +19,7 @@ class SimFilterWheel;
 class SimGuiderPort;
 class SimCooler;
 class SimFocuser;
+class SimMount;
 
 /**
  * \brief The Locator class for Simulator devices
@@ -33,6 +34,7 @@ class SimLocator : public astro::device::DeviceLocator {
 	FilterWheelPtr	_filterwheel;
 	CoolerPtr	_cooler;
 	FocuserPtr	_focuser;
+	astro::device::MountPtr	_mount;
 
 	SimLocator(const SimLocator& other);
 	SimLocator&	operator=(const SimLocator& other);
@@ -46,6 +48,7 @@ public:
 	FilterWheelPtr	filterwheel() { return _filterwheel; }
 	CoolerPtr	cooler() { return _cooler; }
 	FocuserPtr	focuser() { return _focuser; }
+	astro::device::MountPtr	mount() { return _mount; }
 
 	SimCamera	*simcamera();
 	SimCcd		*simccd();
@@ -53,6 +56,7 @@ public:
 	SimFilterWheel	*simfilterwheel();
 	SimCooler	*simcooler();
 	SimFocuser	*simfocuser();
+	SimMount	*simmount();
 
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
@@ -65,6 +69,7 @@ protected:
 	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
 	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual FocuserPtr	getFocuser0(const DeviceName& name);
+	virtual astro::device::MountPtr	getMount0(const DeviceName& name);
 };
 
 } // namespace simulator

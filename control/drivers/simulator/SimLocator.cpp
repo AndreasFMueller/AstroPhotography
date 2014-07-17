@@ -11,6 +11,7 @@
 #include <SimFilterWheel.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
+#include <SimMount.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
@@ -87,8 +88,12 @@ SimLocator::SimLocator() {
 		_cooler->name().toString().c_str());
 
 	_focuser = FocuserPtr(new SimFocuser(*this));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "fouser: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser: %s",
 		_focuser->name().toString().c_str());
+
+	_mount = astro::device::MountPtr(new SimMount(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount: %s",
+		_mount->name().toString().c_str());
 }
 
 SimLocator::~SimLocator() {
@@ -143,6 +148,9 @@ std::vector<std::string>	SimLocator::getDevicelist(
 		break;
 	case DeviceName::Module:
 		names.push_back(std::string("module:simulator"));
+		break;
+	case DeviceName::Mount:
+		names.push_back(std::string("mount:simulator/mount"));
 		break;
 	}
 	return names;
@@ -214,6 +222,16 @@ FocuserPtr	SimLocator::getFocuser0(const DeviceName& name) {
 	return _focuser;
 }
 
+astro::device::MountPtr	SimLocator::getMount0(const DeviceName& name) {
+	std::string	mname = name;
+	if (mname != "mount:simulator/mount") {
+		debug(LOG_ERR, DEBUG_LOG, 0, "mount %s does not exist",
+			mname.c_str());
+		throw NotFound("no such mount");
+	}
+	return _mount;
+}
+
 SimCamera	*SimLocator::simcamera() {
 	return dynamic_cast<SimCamera *>(&*_camera);
 }
@@ -236,6 +254,10 @@ SimCooler	*SimLocator::simcooler() {
 
 SimFocuser	*SimLocator::simfocuser() {
 	return dynamic_cast<SimFocuser *>(&*_focuser);
+}
+
+SimMount	*SimLocator::simmount() {
+	return dynamic_cast<SimMount *>(&*_mount);
 }
 
 } // namespace simulator

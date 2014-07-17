@@ -3,6 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswi
  */
+#ifndef _CelestronMount_h
+#define _CelestronMount_h
+
 #include <AstroDevice.h>
 #include <Serial.h>
 
@@ -34,3 +37,5 @@ public:
 } // namepace celestron
 } // namespace driver
 } // namespace astro
+
+#endif /* _CelestronMount */
