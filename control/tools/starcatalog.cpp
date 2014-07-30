@@ -30,6 +30,16 @@ void	starmain(const std::string& starname) {
 		<< std::endl;
 }
 
+void	zonemain(const uint16_t z) {
+	std::cout << "list zone " << z << std::endl;
+	Ucac4ZonePtr	zone = ucac4->zone(z);
+	for (uint32_t n = 1; n <= zone->nstars(); n++) {
+		Ucac4Star	star = zone->get(n);
+		std::cout << star.toString() << std::endl;
+	}
+	zone->first(Angle(M_PI));
+}
+
 /**
  * \brief Main function for the starcatalog program
  */
@@ -57,6 +67,13 @@ int	main(int argc, char *argv[]) {
 	if (command == "star") {
 		for (; optind < argc; optind++) {
 			starmain(std::string(argv[optind]));
+		}
+		return EXIT_SUCCESS;
+	}
+	if (command == "zone") {
+		for (; optind < argc; optind++) {
+			uint16_t	zone = atoi(argv[optind]);
+			zonemain(zone);
 		}
 		return EXIT_SUCCESS;
 	}

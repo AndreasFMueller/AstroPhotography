@@ -77,8 +77,8 @@ std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star) {
 // Ucac4Star
 //////////////////////////////////////////////////////////////////////
 std::string	Ucac4Star::toString() const {
-	return stringprintf("%s %8.4f %8.4f", number.toString().c_str(),
-		position.ra().hours(), position.dec().degrees());
+	return stringprintf("%s %8.4f %8.4f %6.3f", number.toString().c_str(),
+		position.ra().hours(), position.dec().degrees(), mag1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -161,7 +161,6 @@ static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 				const UCAC4_STAR *star) {
 	Ucac4Star	result(zone, number);
 	result.id_number = star->id_number;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "id: %d\n", result.id_number);
 	result.position.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.position.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;
 	result.mag1 = star->mag1 * 0.001;
@@ -254,9 +253,9 @@ Ucac4Zone::Ucac4Zone(uint16_t zone, const std::string& zonefilename)
 		throw std::runtime_error(msg);
 	}
 	data_len = sb.st_size;
-	nstars = sb.st_size / 78;
+	_nstars = sb.st_size / 78;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "zone '%s' has %d stars",
-		zonefilename.c_str(), nstars);
+		zonefilename.c_str(), _nstars);
 
 	// open the file for reading
 	int	fd = open(zonefilename.c_str(), O_RDONLY);
@@ -293,21 +292,50 @@ Ucac4Zone::~Ucac4Zone() {
  * \brief get a particular star from the zone
  */
 Ucac4Star	Ucac4Zone::get(uint32_t number) const {
-	if (number > nstars) {
+	if (number == 0) {
+		throw std::runtime_error("cannot get star number 0");
+	}
+	if (number > _nstars) {
 		std::string	msg = stringprintf("%ul exceeds number of "
-			"stars %d", number, nstars);
+			"stars %d", number, _nstars);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	return UCAC4_to_Ucac4Star(_zone, number,
-			&((UCAC4_STAR *)data_ptr)[number]);
+			&((UCAC4_STAR *)data_ptr)[number - 1]);
 }
 
 /**
  * \brief Get the first star number exceeding the ra
  */
 uint32_t	Ucac4Zone::first(const Angle& ra) const {
-	uint32_t	l1 = 0, l2 = nstars;
+	// get the last star an make sure the 
+	Ucac4Star	laststar = get(_nstars - 1);
+	if (laststar.position.ra() < ra) {
+		return _nstars;
+	}
+
+	// search in the interval
+	uint32_t	l1 = 1, l2 = _nstars;
+	Angle	ra1 = get(l1).position.ra();
+	Angle	ra2 = get(l2).position.ra();
+	while ((l2 - l1) > 1) {
+		uint32_t	l = (l1 + l2) / 2;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new subdivision: %lu", l);
+		Angle	ra0 = get(l).position.ra();
+		if (ra0 < ra) {
+			l1 = l;
+			ra1 = ra0;
+		}
+		if (ra <= ra0) {
+			l2 = l;
+			ra2 = ra0;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%u = %f < %f <= %f",
+			l1, l2, ra1.hours(), ra.hours(), ra2.hours());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "first: %lu", l2);
+	return l2;
 }
 
 /**

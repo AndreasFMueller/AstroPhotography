@@ -95,8 +95,16 @@ bool	Angle::operator<(const Angle& other) const {
 	return _angle < other._angle;
 }
 
+bool	Angle::operator<=(const Angle& other) const {
+	return _angle <= other._angle;
+}
+
 bool	Angle::operator>(const Angle& other) const {
 	return _angle > other._angle;
+}
+
+bool	Angle::operator>=(const Angle& other) const {
+	return _angle >= other._angle;
 }
 
 double	cos(const Angle& a) { return ::cos(a.radians()); }

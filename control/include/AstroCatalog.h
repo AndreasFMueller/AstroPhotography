@@ -98,7 +98,10 @@ class Ucac4Zone {
 public:
 	uint16_t	zone() const { return _zone; }
 private:
-	int	nstars;
+	uint32_t	_nstars;
+public:
+	uint32_t	nstars() const { return _nstars; }
+private:
 	size_t	data_len;
 	void	*data_ptr;
 public:
