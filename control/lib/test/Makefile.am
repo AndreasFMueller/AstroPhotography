@@ -47,7 +47,8 @@ tests_SOURCES = tests.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	GuiderFactoryTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
-	FocusComputeTest.cpp MinRadiusTest.cpp
+	FocusComputeTest.cpp MinRadiusTest.cpp \
+	Ucac4Test.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 

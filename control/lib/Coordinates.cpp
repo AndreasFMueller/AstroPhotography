@@ -6,8 +6,21 @@
 #include <AstroCoordinates.h>
 #include <cmath>
 #include <stdexcept>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
+
+static std::string	xms(double value, const char separator) {
+	int	sign = (value >= 0) ? 1 : -1;
+	value = fabs(value);
+	int	X = floor(value);
+	value = 60 * (value - X);
+	int	M = floor(value);
+	double	S = 60 * (value - M);
+	return stringprintf("%02d%c%02d%c%06.3f", sign * X, separator, M,
+		separator, S);
+}
 
 static double	angle_reduction(const double a, const double base) {
 	double	ab = a - base;
@@ -39,7 +52,7 @@ double	Angle::radians_to_degrees(const double r) {
 }
 
 Angle::Angle(double angle) : _angle(angle) {
-	reduce();
+	//reduce();
 }
 
 double	Angle::degrees() const {
@@ -50,12 +63,20 @@ void	Angle::degrees(double degrees) {
 	_angle = degrees_to_radians(degrees);
 }
 
+std::string	Angle::dms(const char separator) const {
+	return xms(degrees(), separator);
+}
+
 double	Angle::hours() const {
 	return radians_to_hours(_angle);
 }
 
 void	Angle::hours(double hours) {
 	_angle = radians_to_hours(hours);
+}
+
+std::string	Angle::hms(const char separator) const {
+	return xms(hours(), separator);
 }
 
 Angle	Angle::operator+(const Angle& other) const {

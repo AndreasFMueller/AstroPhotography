@@ -69,6 +69,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	TrackingPersistence.cpp CalibrationPersistence.cpp \
 	CalibrationStore.cpp TrackingStore.cpp \
 	ImagePersistence.cpp \
+	Catalog.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 
