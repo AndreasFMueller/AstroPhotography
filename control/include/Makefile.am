@@ -13,7 +13,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
 	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h \
-	AstroPersistence.h AstroTask.h AstroInterpolation.h \
+	AstroPersistence.h AstroTask.h AstroInterpolation.h \
 	AstroCatalog.h
 
 noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \

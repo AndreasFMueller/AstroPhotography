@@ -70,4 +70,8 @@
 #include <math.h>
 #endif /* HAVE_MATH_H */
 
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif /* HAVE_SYS_MMAN_H */
+
 #endif /* _includes_h */

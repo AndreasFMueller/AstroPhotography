@@ -68,6 +68,11 @@ bool	Ucac4StarNumber::operator!=(const Ucac4StarNumber& other) {
 	return !(*this == other);
 }
 
+std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star) {
+	out << star.toString();
+	return out;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Ucac4Star
 //////////////////////////////////////////////////////////////////////
@@ -110,6 +115,9 @@ Ucac4::Ucac4(const std::string& directory) : _directory(directory) {
 	for (uint16_t zone = 1; zone <= 900; zone++) {
 		checkfile(zonefilename(zone));
 	}
+
+	// make sure the zone is empty
+	cachedzone = NULL;
 }
 
 #pragma pack(push, 1)
@@ -149,9 +157,11 @@ UCAC4_STAR
 
 #define	MARCSEC_to_RADIANS	(M_PI / (180 * 60 * 60 * 1000))
 
-static Ucac4Star	UCAC4_to_Ucac4Star(const UCAC4_STAR *star) {
-	Ucac4Star	result(star->ucac2_zone, star->ucac2_number);
+static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
+				const UCAC4_STAR *star) {
+	Ucac4Star	result(zone, number);
 	result.id_number = star->id_number;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "id: %d\n", result.id_number);
 	result.position.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.position.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;
 	result.mag1 = star->mag1 * 0.001;
@@ -170,6 +180,23 @@ static Ucac4Star	UCAC4_to_Ucac4Star(const UCAC4_STAR *star) {
 }
 
 /* Note: sizeof( UCAC4_STAR) = 78 bytes */
+
+Ucac4ZonePtr	Ucac4::zone(uint16_t zone) const {
+	std::string	zfn = zonefilename(zone);
+	return Ucac4ZonePtr(new Ucac4Zone(zone, zfn));
+}
+
+/**
+ * \brief Get a particular zone in the cache
+ */
+Ucac4ZonePtr	Ucac4::getzone(uint16_t z) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving zone %hu", z);
+	if ((cachedzone == NULL) || (cachedzone->zone() != z)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "opening zone");
+		cachedzone = zone(z);
+	} 
+	return cachedzone;
+}
 
 /**
  * \brief find a particular star
@@ -199,47 +226,94 @@ Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
 		zone, number);
 
 	// open the zone file
-	std::string	filename = zonefilename(zone);
-	int	fd = open(filename.c_str(), O_RDONLY);
-	if (fd < 0) {
-		std::string	msg = stringprintf("cannot open catalog file "
-			"%s: %s", filename.c_str(), strerror(errno));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "opened zone file %s", filename.c_str());
-	
-	// move to the record position
-	off_t	where = 78 * (number - 1);
-	if (lseek(fd, where, SEEK_SET) < 0) {
-		std::string	msg = stringprintf("cannot seek to %u: %s",
-			number, strerror(errno));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		close(fd);
-		throw std::runtime_error(msg);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "seeked to offset %lu", where);
-
-	// read the record 
-	UCAC4_STAR	star;
-	if (78 != read(fd, &star, 78)) {
-		std::string	msg = stringprintf("cannot read record: %s",
-					strerror(errno));
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		close(fd);
-		throw std::runtime_error(msg);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "record read, number = %lu",
-		star.ucac2_number);
-
-	// convert the record to a Ucac4Star
-	return UCAC4_to_Ucac4Star(&star);
+	return getzone(zone)->get(number);
 }
 
 /**
  * \brief Retrieve all stars in a window
  */
 std::set<Ucac4Star>	Ucac4::find(const SkyWindow& window,
+				float minimum_magnitude) {
+	std::set<Ucac4Star>	result;
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Ucac4Zone implementation
+//////////////////////////////////////////////////////////////////////
+Ucac4Zone::Ucac4Zone(uint16_t zone, const std::string& zonefilename)
+		: _zone(zone) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create zone %hu from file %s",
+		zone, zonefilename.c_str());
+	// find the file
+	struct stat	sb;
+	if (stat(zonefilename.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat zone file "
+			"'%s': %s", zonefilename.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	data_len = sb.st_size;
+	nstars = sb.st_size / 78;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "zone '%s' has %d stars",
+		zonefilename.c_str(), nstars);
+
+	// open the file for reading
+	int	fd = open(zonefilename.c_str(), O_RDONLY);
+	if (fd < 0) {
+		std::string	msg = stringprintf("cannot open zone file "
+			"'%s': %s", zonefilename.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// map the file
+	data_ptr = mmap(NULL, sb.st_size, PROT_READ, MAP_FILE | MAP_PRIVATE,
+		fd, 0);
+	if ((void *)(-1) == data_ptr) {
+		std::string	msg = stringprintf("cannot map file '%s': %s",
+			zonefilename.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	close(fd);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "zone data mapped to %p", data_ptr);
+}
+
+/**
+ * \brief Destroy the zone, unmap the file
+ */
+Ucac4Zone::~Ucac4Zone() {
+	if (data_ptr) {
+		munmap(data_ptr, data_len);
+	}
+}
+
+/**
+ * \brief get a particular star from the zone
+ */
+Ucac4Star	Ucac4Zone::get(uint32_t number) const {
+	if (number > nstars) {
+		std::string	msg = stringprintf("%ul exceeds number of "
+			"stars %d", number, nstars);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	return UCAC4_to_Ucac4Star(_zone, number,
+			&((UCAC4_STAR *)data_ptr)[number]);
+}
+
+/**
+ * \brief Get the first star number exceeding the ra
+ */
+uint32_t	Ucac4Zone::first(const Angle& ra) const {
+	uint32_t	l1 = 0, l2 = nstars;
+}
+
+/**
+ * \brief 
+ */
+std::set<Ucac4Star>	Ucac4Zone::find(const SkyWindow& window,
 				float minimum_magnitude) {
 	std::set<Ucac4Star>	result;
 	return result;

@@ -55,6 +55,7 @@ public:
 	bool	operator==(const Ucac4StarNumber& other);
 	bool	operator!=(const Ucac4StarNumber& other);
 };
+std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star);
 
 /**
  * \brief Star from the UC4 catalog
@@ -90,6 +91,27 @@ public:
 };
 
 /**
+ * \brief A zone of the UC4 catalog
+ */
+class Ucac4Zone {
+	uint16_t	_zone;
+public:
+	uint16_t	zone() const { return _zone; }
+private:
+	int	nstars;
+	size_t	data_len;
+	void	*data_ptr;
+public:
+	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
+	~Ucac4Zone();
+	Ucac4Star	get(uint32_t number) const;
+	uint32_t	first(const Angle& ra) const;
+	std::set<Ucac4Star>	find(const SkyWindow& window,
+		float minimum_magnitude = -std::numeric_limits<float>::min());
+};
+typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
+
+/**
  * \brief UC4 Catalog
  */
 class Ucac4 {
@@ -97,8 +119,11 @@ class Ucac4 {
 	Ucac4Star	find(uint16_t zone, uint32_t number);
 	std::string	zonefilename(uint16_t zone) const;
 	std::string	indexfilename() const;
+	Ucac4ZonePtr	cachedzone;
+	Ucac4ZonePtr	getzone(uint16_t zone);
 public:
 	Ucac4(const std::string& directory);
+	Ucac4ZonePtr	zone(uint16_t zone) const;
 	Ucac4Star	find(const RaDec& position);
 	Ucac4Star	find(const std::string& ucacnumber);
 	Ucac4Star	find(const Ucac4StarNumber& number);

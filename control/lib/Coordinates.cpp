@@ -91,6 +91,14 @@ Angle	Angle::operator*(const double& other) const {
 	return Angle(_angle * other);
 }
 
+bool	Angle::operator<(const Angle& other) const {
+	return _angle < other._angle;
+}
+
+bool	Angle::operator>(const Angle& other) const {
+	return _angle > other._angle;
+}
+
 double	cos(const Angle& a) { return ::cos(a.radians()); }
 double	sin(const Angle& a) { return ::sin(a.radians()); }
 double	tan(const Angle& a) { return ::tan(a.radians()); }
@@ -98,6 +106,9 @@ double	cot(const Angle& a) { return 1. / tan(a); }
 double	sec(const Angle& a) { return 1 / cos(a); }
 double	csc(const Angle& a) { return 1 / sin(a); }
 
+//////////////////////////////////////////////////////////////////////
+// TwoAngles implementation
+//////////////////////////////////////////////////////////////////////
 Angle&	TwoAngles::operator[](int i) {
 	switch (i) {
 	case 0:	return a1();
@@ -114,6 +125,9 @@ const Angle&	TwoAngles::operator[](int i) const {
 	throw std::range_error("angle index out of range");
 }
 
+//////////////////////////////////////////////////////////////////////
+// SphericalCoordinates implementation
+//////////////////////////////////////////////////////////////////////
 SphericalCoordinates::SphericalCoordinates(const LongLat& longlat)
 	: TwoAngles(longlat.longitude(), Angle(M_PI / 2) - longlat.latitude()) {
 }
@@ -122,6 +136,9 @@ SphericalCoordinates::SphericalCoordinates(const RaDec& radec)
 	: TwoAngles(radec.ra(), Angle(M_PI / 2) - radec.dec()) {
 }
 
+//////////////////////////////////////////////////////////////////////
+// UnitVector implementation
+//////////////////////////////////////////////////////////////////////
 UnitVector::UnitVector(const SphericalCoordinates& spherical) {
 	_x[2] = cos(spherical.theta());
 	double	r = sin(spherical.theta());

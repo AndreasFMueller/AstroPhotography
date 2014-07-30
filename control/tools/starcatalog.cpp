@@ -20,8 +20,9 @@ Ucac4Ptr	ucac4;
  * \brief Read a star by name from the database and show some info about it
  */
 void	starmain(const std::string& starname) {
-	Ucac4Star	star = ucac4->find(starname);
-	std::cout << starname
+	Ucac4StarNumber	number(starname);
+	Ucac4Star	star = ucac4->find(number);
+	std::cout << star.number 
 		<< ": RA=" << star.position.ra().hms(' ')
 		<< ", DEC=" << star.position.dec().dms(' ')
 		<< ", mag=" << star.mag1
