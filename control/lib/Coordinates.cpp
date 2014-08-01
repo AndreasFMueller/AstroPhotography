@@ -31,7 +31,7 @@ void	Angle::reduce(double base) {
 	_angle = angle_reduction(_angle, base);
 }
 
-Angle	Angle::reduced(const double base) {
+Angle	Angle::reduced(const double base) const {
 	return Angle(angle_reduction(_angle, base));
 }
 
@@ -107,6 +107,14 @@ bool	Angle::operator>=(const Angle& other) const {
 	return _angle >= other._angle;
 }
 
+bool	Angle::operator==(const Angle& other) const {
+	return 0 == angle_reduction(other._angle, _angle);
+}
+
+bool	Angle::operator!=(const Angle& other) const {
+	return !((*this) == other);
+}
+
 double	cos(const Angle& a) { return ::cos(a.radians()); }
 double	sin(const Angle& a) { return ::sin(a.radians()); }
 double	tan(const Angle& a) { return ::tan(a.radians()); }
@@ -162,6 +170,10 @@ bool	RaDec::operator>(const RaDec& other) const {
 
 bool	RaDec::operator<=(const RaDec& other) const {
 	return !(*this > other);
+}
+
+std::string	RaDec::toString() const {
+	return ra().hms() + " " + dec().dms();
 }
 
 //////////////////////////////////////////////////////////////////////

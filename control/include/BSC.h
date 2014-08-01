@@ -37,6 +37,8 @@ class BSC {
 public:
 	BSC(const std::string& filename, const std::string& notesfile);
 	const BSCStar&	find(int number) const;
+	std::set<BSCStar>	find(const SkyWindow& window,
+					double minimum_magnitude) const;
 };
 
 } // namespace catalog 

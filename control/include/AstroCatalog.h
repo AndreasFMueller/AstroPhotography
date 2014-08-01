@@ -29,12 +29,12 @@ public:
 	const Angle&	decheight() const { return _decheight; }
 public:
 	SkyWindow(const RaDec& center, const Angle& rawidth,
-		const Angle& decheight)
-		: _center(center), _rawidth(rawidth), _decheight(decheight) { }
+		const Angle& decheight);
 	bool	contains(const RaDec& position) const;
 	std::pair<double, double>	decinterval() const;
 	Angle	leftra() const;
 	Angle	rightra() const;
+	virtual std::string	toString() const;
 };
 
 /**

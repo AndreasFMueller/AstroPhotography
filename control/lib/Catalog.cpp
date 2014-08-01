@@ -15,14 +15,29 @@ namespace catalog {
 // SkyWindow
 //////////////////////////////////////////////////////////////////////
 
+SkyWindow::SkyWindow(const RaDec& center,
+	const Angle& rawidth, const Angle& decheight) : _center(center) {
+	_rawidth = rawidth.reduced();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "window height: %f",
+		decheight.degrees());
+	_decheight = decheight.reduced(-M_PI / 2);
+}
+
 static double	reduce(double x, double left) {
 	return x - 2 * M_PI * floor((x - left) / (2 * M_PI));
+}
+
+std::string	SkyWindow::toString() const {
+	return stringprintf("%.3fx%.3f@%s", _rawidth.hours(),
+		_decheight.degrees(), _center.toString().c_str());
 }
 
 /**
  * \brief find out whether a position is within the window
  */
 bool	SkyWindow::contains(const RaDec& position) const {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether %s is in %s",
+	//	position.toString().c_str(), toString().c_str());
 	// check right ascension
 	double	left = _center.ra().radians() - _rawidth.radians() / 2.;
 	double	right = _center.ra().radians() + _rawidth.radians() / 2.;
@@ -30,11 +45,14 @@ bool	SkyWindow::contains(const RaDec& position) const {
 	if (ra > right) {
 		return false;
 	}
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "check declination");
 
 	// check declination
-	double	top = _center.dec().radians() - _decheight.radians() / 2.;
-	double	bottom = _center.dec().radians() + _decheight.radians() / 2.;
+	double	bottom = _center.dec().radians() - _decheight.radians() / 2.;
+	double	top = _center.dec().radians() + _decheight.radians() / 2.;
 	double	dec = reduce(position.dec().radians(), bottom);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "top = %f, bottom = %f, dec = %f",
+	//	180 * top / M_PI, 180 * bottom / M_PI, 180 * dec / M_PI);
 	if (dec > top) {
 		return false;
 	}

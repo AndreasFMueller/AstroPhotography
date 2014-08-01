@@ -1,9 +1,9 @@
 /*
- * BSCTest.cpp -- tests for the BSC catalog 
+ * Tycho2Test.cpp -- tests for the Tycho2 catalog 
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <BSC.h>
+#include <Tycho2.h>
 #include <AstroDebug.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
@@ -15,7 +15,7 @@ using namespace astro::catalog;
 namespace astro {
 namespace test {
 
-class BSCTest : public CppUnit::TestFixture {
+class Tycho2Test : public CppUnit::TestFixture {
 private:
 public:
 	void	setUp();
@@ -24,47 +24,45 @@ public:
 	void	testAccess();
 	void	testWindow();
 
-	CPPUNIT_TEST_SUITE(BSCTest);
+	CPPUNIT_TEST_SUITE(Tycho2Test);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testAccess);
 	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(BSCTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(Tycho2Test);
 
-void	BSCTest::setUp() {
+void	Tycho2Test::setUp() {
 }
 
-void	BSCTest::tearDown() {
+void	Tycho2Test::tearDown() {
 }
 
-void	BSCTest::testConstructor() {
+void	Tycho2Test::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
+	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
-void	BSCTest::testAccess() {
+void	Tycho2Test::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
-	BSCStar	firststar = catalog.find(1);
-	std::cout << firststar.toString() << std::endl;
-	BSCStar	laststar = catalog.find(9110);
-	std::cout << laststar.toString() << std::endl;
+	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
+	Tycho2Star	firststar = catalog.find(0);
+	Tycho2Star	laststar = catalog.find(catalog.nstars() - 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
 
-void	BSCTest::testWindow() {
+void	Tycho2Test::testWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
+	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);
 	center.dec().degrees(-16.71611583333333333333);
-	Angle	width; width.hours(6);
-	Angle	height; height.degrees(90);
+	Angle	width; width.hours(1);
+	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	std::set<BSCStar>	stars = catalog.find(window, 6);
+	std::set<Tycho2Star>	stars = catalog.find(window, 6);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars.size());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }

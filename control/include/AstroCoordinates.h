@@ -35,7 +35,7 @@ public:
 	Angle	operator+(const Angle& other) const;
 	Angle	operator-(const Angle& other) const;
 	Angle	operator*(const double& other) const;
-	Angle	reduced(const double base = 0);
+	Angle	reduced(const double base = 0) const;
 static double	hours_to_radians(const double h);
 static double	degrees_to_radians(const double d);
 static double	radians_to_hours(const double r);
@@ -44,6 +44,8 @@ static double	radians_to_degrees(const double r);
 	bool	operator<=(const Angle& other) const;
 	bool	operator>(const Angle& other) const;
 	bool	operator>=(const Angle& other) const;
+	bool	operator==(const Angle& other) const;
+	bool	operator!=(const Angle& other) const;
 };
 
 double	cos(const Angle& a);
@@ -110,6 +112,7 @@ public:
 	bool	operator>(const RaDec& other) const;
 	bool	operator<=(const RaDec& other) const;
 	bool	operator>=(const RaDec& other) const;
+	virtual std::string	toString() const;
 };
 
 class	AzmAlt : public TwoAngles {
