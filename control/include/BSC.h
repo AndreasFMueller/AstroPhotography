@@ -25,6 +25,7 @@ public:
 	bool	operator>(const BSCStar& other) const;
 	bool	operator<=(const BSCStar& other) const;
 	bool	operator>=(const BSCStar& other) const;
+	virtual std::string	toString() const;
 };
 
 /**

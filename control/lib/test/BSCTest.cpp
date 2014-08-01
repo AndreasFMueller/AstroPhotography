@@ -61,11 +61,16 @@ void	BSCTest::testWindow() {
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);
 	center.dec().degrees(-16.71611583333333333333);
-	Angle	width; width.hours(6);
-	Angle	height; height.degrees(90);
+	Angle	width; width.hours(1);
+	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	std::set<BSCStar>	stars = catalog.find(window, 6);
+	std::set<BSCStar>	stars = catalog.find(window, 4.5);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars.size());
+	CPPUNIT_ASSERT(stars.size() == 10);
+	std::set<BSCStar>::const_iterator	s;
+	for (s = stars.begin(); s != stars.end(); s++) {
+		std::cout << s->toString().c_str() << std::endl;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }
 

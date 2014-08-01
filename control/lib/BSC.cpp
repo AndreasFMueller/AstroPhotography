@@ -52,6 +52,10 @@ bool	BSCStar::operator>=(const BSCStar& other) const {
 	return number >= other.number;
 }
 
+std::string	BSCStar::toString() const {
+	return Star::toString() + " " + name;
+}
+
 //////////////////////////////////////////////////////////////////////
 // BSC implementation
 //////////////////////////////////////////////////////////////////////
