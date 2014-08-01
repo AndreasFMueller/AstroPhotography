@@ -72,7 +72,7 @@ double	Angle::hours() const {
 }
 
 void	Angle::hours(double hours) {
-	_angle = radians_to_hours(hours);
+	_angle = hours_to_radians(hours);
 }
 
 std::string	Angle::hms(const char separator) const {
@@ -131,6 +131,37 @@ const Angle&	TwoAngles::operator[](int i) const {
 	case 1: return a2();
 	}
 	throw std::range_error("angle index out of range");
+}
+
+//////////////////////////////////////////////////////////////////////
+// Comparison operators for RaDec
+//////////////////////////////////////////////////////////////////////
+bool	RaDec::operator<(const RaDec& other) const {
+	if (dec() < other.dec()) {
+		return true;
+	}
+	if (dec() > other.dec()) {
+		return false;
+	}
+	return ra() < other.ra();
+}
+
+bool	RaDec::operator>=(const RaDec& other) const {
+	return !(*this < other);
+}
+
+bool	RaDec::operator>(const RaDec& other) const {
+	if (dec() > other.dec()) {
+		return true;
+	}
+	if (dec() < other.dec()) {
+		return false;
+	}
+	return ra() > other.ra();
+}
+
+bool	RaDec::operator<=(const RaDec& other) const {
+	return !(*this > other);
 }
 
 //////////////////////////////////////////////////////////////////////

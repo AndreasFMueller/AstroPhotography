@@ -106,6 +106,10 @@ public:
 	Angle&	ra() { return a1(); }
 	const Angle&	dec() const { return a2(); }
 	Angle&	dec() { return a2(); }
+	bool	operator<(const RaDec& other) const;
+	bool	operator>(const RaDec& other) const;
+	bool	operator<=(const RaDec& other) const;
+	bool	operator>=(const RaDec& other) const;
 };
 
 class	AzmAlt : public TwoAngles {

@@ -48,7 +48,7 @@ tests_SOURCES = tests.cpp \
 	GuiderFactoryTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
-	Ucac4Test.cpp
+	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 

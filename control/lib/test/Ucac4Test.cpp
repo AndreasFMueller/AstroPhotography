@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AstroCatalog.h>
+#include <Ucac4.h>
 #include <AstroDebug.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
