@@ -49,7 +49,7 @@ public:
 	float	ra_sigma, dec_sigma;
 
 	// information about the star
-	float	mag1, mag2;
+	float	mag2;
 	float	magsigma;
 	uint8_t	obj_type;
 	uint8_t	double_star_flag;

@@ -56,7 +56,7 @@ std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star) {
 //////////////////////////////////////////////////////////////////////
 std::string	Ucac4Star::toString() const {
 	return stringprintf("%s %8.4f %8.4f %6.3f", number.toString().c_str(),
-		ra().hours(), dec().degrees(), mag1);
+		ra().hours(), dec().degrees(), mag());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -141,8 +141,14 @@ static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 	result.id_number = star->id_number;
 	result.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;
-	result.mag1 = star->mag1 * 0.001;
+	// Proper motion
+	result.pm().ra() = MARCSEC_to_RADIANS * star->pm_ra / cos(result.dec());
+	result.pm().dec() = MARCSEC_to_RADIANS * star->pm_dec;
+
+	// magnitude
+	result.mag() = star->mag1 * 0.001;
 	result.mag2 = star->mag2 * 0.001;
+
 	result.magsigma = star->mag_sigma * 0.001;
 	result.obj_type = star->obj_type;
 	result.double_star_flag = star->double_star_flag;

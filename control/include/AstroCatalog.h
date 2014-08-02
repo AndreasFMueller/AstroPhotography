@@ -35,12 +35,25 @@ public:
 	Angle	leftra() const;
 	Angle	rightra() const;
 	virtual std::string	toString() const;
+	static SkyWindow	all;
+};
+
+/**
+ * \brief
+ */
+class CelestialObject : public RaDec {
+protected:
+	RaDec	_pm; // proper motion in ra/yr dec/yr
+public:
+	const RaDec&	pm() const { return _pm; }
+	RaDec&	pm() { return _pm; }
+	RaDec	position(const double epoch) const;
 };
 
 /**
  * \brief Star base class
  */
-class Star : public RaDec {
+class Star : public CelestialObject {
 protected:
 	float	_mag;
 public:

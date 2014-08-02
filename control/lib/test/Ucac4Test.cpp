@@ -41,7 +41,7 @@ void	Ucac4Test::tearDown() {
 
 void	Ucac4Test::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	Ucac4	catalog("/usr/local/u4");
+	Ucac4	catalog("/usr/local/starcatalogs/u4");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
@@ -59,7 +59,7 @@ void	Ucac4Test::testNumber() {
 
 void	Ucac4Test::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
-	Ucac4	catalog("/usr/local/u4");
+	Ucac4	catalog("/usr/local/starcatalogs/u4");
 	Ucac4StarNumber	name(47, 11);
 	Ucac4Star	star = catalog.find(name);
 	CPPUNIT_ASSERT(star.number == name);

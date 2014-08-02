@@ -41,13 +41,13 @@ void	BSCTest::tearDown() {
 
 void	BSCTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
+	BSC	catalog("/usr/local/starcatalogs/bsc/catalog", "/usr/local/starcatalogs/bsc/notes");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
 void	BSCTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
+	BSC	catalog("/usr/local/starcatalogs/bsc/catalog", "/usr/local/starcatalogs/bsc/notes");
 	BSCStar	firststar = catalog.find(1);
 	std::cout << firststar.toString() << std::endl;
 	BSCStar	laststar = catalog.find(9110);
@@ -57,7 +57,7 @@ void	BSCTest::testAccess() {
 
 void	BSCTest::testWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
-	BSC	catalog("/usr/local/bsc/catalog", "/usr/local/bsc/notes");
+	BSC	catalog("/usr/local/starcatalogs/bsc/catalog", "/usr/local/starcatalogs/bsc/notes");
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);
 	center.dec().degrees(-16.71611583333333333333);

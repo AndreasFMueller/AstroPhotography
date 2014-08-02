@@ -25,15 +25,21 @@ BSCStar::BSCStar(const char *l) {
 		sao = 0;
 	}
 	_mag = std::stod(line.substr(102, 5));
+	// RA
 	ra().hours(std::stod(line.substr(75, 2))
 		+ std::stod(line.substr(77, 2)) / 60
 		+ std::stod(line.substr(79, 4)) / 3600);
+
+	// DEC
 	dec().degrees(
 		((line.substr(83, 1) == "-") ? -1 : 1) * 
 			(std::stod(line.substr(84, 2))
 			 + std::stod(line.substr(86, 2)) / 60
 			 + std::stod(line.substr(88, 2)) / 3600));
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", toString().c_str());
+
+	// proper motion
+	pm().ra().degrees(std::stod(line.substr(148, 6)) / 3600);
+	pm().dec().degrees(std::stod(line.substr(154, 6)) / 3600);
 };
 
 bool	BSCStar::operator<(const BSCStar& other) const {

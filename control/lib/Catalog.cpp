@@ -82,6 +82,19 @@ Angle	SkyWindow::rightra() const {
 	return Angle(_center.ra() + _rawidth * 0.5).reduced();
 }
 
+SkyWindow	SkyWindow::all(RaDec(M_PI, 0), Angle(2 * M_PI), Angle(M_PI));
+
+
+//////////////////////////////////////////////////////////////////////
+// Celestial Object implementation
+//////////////////////////////////////////////////////////////////////
+RaDec	CelestialObject::position(const double epoch) const {
+	RaDec	result;
+	result.ra() = ra() + pm().ra() * epoch;
+	result.dec() = dec() + pm().dec() * epoch;
+	return result;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Star implementation
 //////////////////////////////////////////////////////////////////////

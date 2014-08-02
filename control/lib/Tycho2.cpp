@@ -25,8 +25,14 @@ void	Tycho2Star::setup(const std::string& line) {
 if (_mag < 2) {
 debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %f", line.substr(123,6).c_str(), _mag);
 }
+	// RA and DEC
 	ra().degrees(std::stod(line.substr(15, 12)));
 	dec().degrees(std::stod(line.substr(28, 12)));
+
+	// proper motion
+	pm().ra().degrees(std::stod(line.substr(41, 7)) / 3600000);
+	pm().dec().degrees(std::stod(line.substr(49, 7)) / 3600000);
+
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s %s %.3f",
 	//	ra().hms().c_str(), dec().dms().c_str(),
 	//	mag());

@@ -41,13 +41,13 @@ void	Tycho2Test::tearDown() {
 
 void	Tycho2Test::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
+	Tycho2	catalog("/usr/local/starcatalogs/tycho2/tyc2.dat");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
 void	Tycho2Test::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
-	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
+	Tycho2	catalog("/usr/local/starcatalogs/tycho2/tyc2.dat");
 	Tycho2Star	firststar = catalog.find(0);
 	Tycho2Star	laststar = catalog.find(catalog.nstars() - 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
@@ -55,7 +55,7 @@ void	Tycho2Test::testAccess() {
 
 void	Tycho2Test::testWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
-	Tycho2	catalog("/usr/local/tycho2/tyc2.dat");
+	Tycho2	catalog("/usr/local/starcatalogs/tycho2/tyc2.dat");
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);
 	center.dec().degrees(-16.71611583333333333333);
