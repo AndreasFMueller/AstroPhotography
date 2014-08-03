@@ -3,8 +3,12 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _Tycho2_h
+#define _Tycho2_h
+
 #include <AstroCatalog.h>
 #include <string>
+#include <MappedFile.h>
 
 namespace astro {
 namespace catalog {
@@ -14,25 +18,22 @@ namespace catalog {
  */
 class Tycho2Star : public Star {
 	void	setup(const std::string& line);
+	int	_hip;
 public:
-	Tycho2Star(const char *line);
+	bool	isHipparcosStar() { return _hip >= 0; }
+	int	hip() const { return _hip; }
 	Tycho2Star(const std::string& line);
 };
 
 /**
  * \brief Tycho2 catalog 
  */
-class Tycho2 {
+class Tycho2 : public MappedFile {
 	std::string	_filename;
-	unsigned int	_nstars;
 public:
-	unsigned int	nstars() const { return _nstars; }
-private:
-	size_t	data_len;
-	char	*data_ptr;
+	unsigned int	nstars() const { return nrecords(); }
 public:
 	Tycho2(const std::string& filename);
-	~Tycho2();
 	Tycho2Star	find(unsigned int index) const;
 	std::set<Tycho2Star>	find(const SkyWindow& window,
 					double minimum_magnitude);
@@ -40,3 +41,5 @@ public:
 
 } // namespace catalog
 } // namespace astro
+
+#endif /* _Tycho2_h */

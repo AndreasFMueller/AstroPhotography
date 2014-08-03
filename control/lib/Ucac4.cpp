@@ -75,7 +75,7 @@ std::string	Ucac4::indexfilename() const {
 }
 
 static void	checkfile(const std::string& filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking file %s", filename.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking file %s", filename.c_str());
 	struct stat	sb;
 	if (stat(filename.c_str(), &sb) < 0) {
 		std::string	msg = stringprintf("cannot stat %s: %s",
@@ -249,52 +249,7 @@ std::set<Ucac4Star>	Ucac4::find(const SkyWindow& window,
 // Ucac4Zone implementation
 //////////////////////////////////////////////////////////////////////
 Ucac4Zone::Ucac4Zone(uint16_t zone, const std::string& zonefilename)
-		: _zone(zone) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create zone %hu from file %s",
-		zone, zonefilename.c_str());
-	// find the file
-	struct stat	sb;
-	if (stat(zonefilename.c_str(), &sb) < 0) {
-		std::string	msg = stringprintf("cannot stat zone file "
-			"'%s': %s", zonefilename.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	data_len = sb.st_size;
-	_nstars = sb.st_size / 78;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "zone '%s' has %d stars",
-		zonefilename.c_str(), _nstars);
-
-	// open the file for reading
-	int	fd = open(zonefilename.c_str(), O_RDONLY);
-	if (fd < 0) {
-		std::string	msg = stringprintf("cannot open zone file "
-			"'%s': %s", zonefilename.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	// map the file
-	data_ptr = mmap(NULL, sb.st_size, PROT_READ, MAP_FILE | MAP_PRIVATE,
-		fd, 0);
-	if ((void *)(-1) == data_ptr) {
-		close(fd);
-		std::string	msg = stringprintf("cannot map file '%s': %s",
-			zonefilename.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	close(fd);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "zone data mapped to %p", data_ptr);
-}
-
-/**
- * \brief Destroy the zone, unmap the file
- */
-Ucac4Zone::~Ucac4Zone() {
-	if (data_ptr) {
-		munmap(data_ptr, data_len);
-	}
+		: MappedFile(zonefilename, sizeof(UCAC4_STAR)), _zone(zone) {
 }
 
 /**
@@ -304,14 +259,9 @@ Ucac4Star	Ucac4Zone::get(uint32_t number) const {
 	if (number == 0) {
 		throw std::runtime_error("cannot get star number 0");
 	}
-	if (number > _nstars) {
-		std::string	msg = stringprintf("%ul exceeds number of "
-			"stars %d", number, _nstars);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	return UCAC4_to_Ucac4Star(_zone, number,
-			&((UCAC4_STAR *)data_ptr)[number - 1]);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "getting star %u", number);
+	std::string	line = MappedFile::get(number - 1);
+	return UCAC4_to_Ucac4Star(_zone, number, (UCAC4_STAR *)line.data());
 }
 
 /**
@@ -319,13 +269,13 @@ Ucac4Star	Ucac4Zone::get(uint32_t number) const {
  */
 uint32_t	Ucac4Zone::first(const Angle& ra) const {
 	// get the last star an make sure the 
-	Ucac4Star	laststar = get(_nstars - 1);
+	Ucac4Star	laststar = get(nstars() - 1);
 	if (laststar.ra() < ra) {
-		return _nstars;
+		return nstars();
 	}
 
 	// search in the interval
-	uint32_t	l1 = 1, l2 = _nstars;
+	uint32_t	l1 = 1, l2 = nstars();
 	Angle	ra1 = get(l1).ra();
 	Angle	ra2 = get(l2).ra();
 	while ((l2 - l1) > 1) {
@@ -359,15 +309,24 @@ std::set<Ucac4Star>	Ucac4Zone::find(const SkyWindow& window,
 	uint32_t	maxindex = first(window.rightra());
 	if (minindex < maxindex) {
 		for (uint32_t number = minindex; number < maxindex; number++) {
-			result.insert(get(number));
+			Ucac4Star	star = get(number);
+			if (star.mag() < minimum_magnitude) {
+				result.insert(star);
+			}
 		}
 	}
 	if (maxindex < minindex) {
 		for (uint32_t number = 1; number < maxindex; number++) {
-			result.insert(get(number));
+			Ucac4Star	star = get(number);
+			if (star.mag() < minimum_magnitude) {
+				result.insert(star);
+			}
 		}
-		for (uint32_t number = minindex; number < _nstars; number++) {
-			result.insert(get(number));
+		for (uint32_t number = minindex; number < nstars(); number++) {
+			Ucac4Star	star = get(number);
+			if (star.mag() < minimum_magnitude) {
+				result.insert(star);
+			}
 		}
 	}
 

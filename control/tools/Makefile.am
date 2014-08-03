@@ -20,7 +20,7 @@ endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
-	focusing starcatalog
+	focusing starcatalog buildcatalog
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -100,6 +100,10 @@ starcatalog_SOURCES = starcatalog.cpp
 starcatalog_DEPENDENCIES = ../lib/libastro.la
 starcatalog_LDADD = -L../lib -lastro 
 
+buildcatalog_SOURCES = buildcatalog.cpp
+buildcatalog_DEPENDENCIES = ../lib/libastro.la
+buildcatalog_LDADD = -L../lib -lastro 
+
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
@@ -129,3 +133,11 @@ testfocus3:	focustest
 
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
+
+catalogtest:	buildcatalog
+	./buildcatalog -d \
+		-h /usr/local/starcatalogs/hipparcos/hip_main.dat \
+		-t /usr/local/starcatalogs/tycho2/tyc2.dat \
+		-u /usr/local/starcatalogs/u4 \
+		/usr/local/starcatalogs/database/stars.db
+	

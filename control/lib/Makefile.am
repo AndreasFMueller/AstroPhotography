@@ -69,7 +69,9 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	TrackingPersistence.cpp CalibrationPersistence.cpp \
 	CalibrationStore.cpp TrackingStore.cpp \
 	ImagePersistence.cpp \
-	Catalog.cpp Ucac4.cpp Tycho2.cpp BSC.cpp \
+	Catalog.cpp MappedFile.cpp Ucac4.cpp Tycho2.cpp BSC.cpp Hipparcos.cpp \
+	DatabaseCatalog.cpp \
+	Chart.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

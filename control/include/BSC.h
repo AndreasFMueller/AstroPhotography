@@ -3,6 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _BSC_h
+#define _BSC_h
+
 #include <AstroCatalog.h>
 #include <string>
 #include <vector>
@@ -44,3 +47,5 @@ public:
 
 } // namespace catalog 
 } // namespace astro
+
+#endif /* _BSC_h */

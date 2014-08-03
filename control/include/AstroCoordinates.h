@@ -85,17 +85,6 @@ public:
 	Angle&	theta() { return a2(); }
 };
 
-class	UnitVector {
-	double	_x[3];
-public:
-	UnitVector(const SphericalCoordinates& spherical);
-	double	operator*(const UnitVector& other) const;
-	double	x() const { return _x[0]; }
-	double	y() const { return _x[1]; }
-	double	z() const { return _x[2]; }
-	Angle	operator-(const UnitVector& other) const;
-};
-
 Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2);
 
 class RaDec : public TwoAngles {
@@ -113,6 +102,22 @@ public:
 	bool	operator<=(const RaDec& other) const;
 	bool	operator>=(const RaDec& other) const;
 	virtual std::string	toString() const;
+};
+
+class	UnitVector {
+	double	_x[3];
+public:
+	UnitVector();
+	UnitVector(const SphericalCoordinates& spherical);
+	UnitVector(const RaDec& radec);
+	double	operator*(const UnitVector& other) const;
+	UnitVector	cross(const UnitVector& other) const;
+	double	x() const { return _x[0]; }
+	double	y() const { return _x[1]; }
+	double	z() const { return _x[2]; }
+	Angle	operator-(const UnitVector& other) const;
+	UnitVector	operator-() const;
+	std::string	toString() const;
 };
 
 class	AzmAlt : public TwoAngles {

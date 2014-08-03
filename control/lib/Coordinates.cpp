@@ -190,6 +190,19 @@ SphericalCoordinates::SphericalCoordinates(const RaDec& radec)
 //////////////////////////////////////////////////////////////////////
 // UnitVector implementation
 //////////////////////////////////////////////////////////////////////
+UnitVector::UnitVector() {
+	_x[0] = 1.;
+	_x[1] = 0.;
+	_x[2] = 0.;
+}
+
+UnitVector::UnitVector(const RaDec& radec) {
+	_x[2] = sin(radec.dec());
+	double	r = cos(radec.dec());
+	_x[0] = r * cos(radec.ra());
+	_x[1] = r * sin(radec.ra());
+}
+
 UnitVector::UnitVector(const SphericalCoordinates& spherical) {
 	_x[2] = cos(spherical.theta());
 	double	r = sin(spherical.theta());
@@ -207,6 +220,32 @@ Angle	UnitVector::operator-(const UnitVector& other) const {
 
 Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2) {
 	return UnitVector(s1) - UnitVector(s2);
+}
+
+UnitVector	UnitVector::cross(const UnitVector& other) const {
+	UnitVector	result;
+	result._x[0] = _x[1] * other._x[2] - _x[2] * other._x[1];
+	result._x[1] = _x[2] * other._x[0] - _x[0] * other._x[2];
+	result._x[2] = _x[0] * other._x[1] - _x[1] * other._x[0];
+	double	scale = sqrt(result._x[0] * result._x[0]
+			   + result._x[1] * result._x[1]
+			   + result._x[2] * result._x[2]);
+	result._x[0] /= scale;
+	result._x[1] /= scale;
+	result._x[2] /= scale;
+	return result;
+}
+
+UnitVector	UnitVector::operator-() const {
+	UnitVector	result;
+	result._x[0] = -_x[0];
+	result._x[1] = -_x[1];
+	result._x[2] = -_x[2];
+	return result;
+}
+
+std::string	UnitVector::toString() const {
+	return stringprintf("(%f,%f,%f)", _x[0], _x[1], _x[2]);
 }
 
 } // namespace astro

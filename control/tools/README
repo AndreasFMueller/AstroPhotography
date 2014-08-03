@@ -1,2 +1,9 @@
 This directory contains a set of tools to exercise the functions
 implemented in the library.
+
+
+buildcatalog
+	builds a unified sqlite3 based star catalog from Hipparcos,
+	Tycho-2 und UCAC4 complete from the brightest stars down to
+	16th magnitude
+

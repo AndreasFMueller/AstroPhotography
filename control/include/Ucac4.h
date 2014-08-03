@@ -11,6 +11,7 @@
 #include <set>
 #include <limits.h>
 #include <string>
+#include <MappedFile.h>
 
 namespace astro {
 namespace catalog {
@@ -75,20 +76,13 @@ public:
 /**
  * \brief A zone of the UC4 catalog
  */
-class Ucac4Zone {
+class Ucac4Zone : public MappedFile {
 	uint16_t	_zone;
 public:
 	uint16_t	zone() const { return _zone; }
-private:
-	uint32_t	_nstars;
-public:
-	uint32_t	nstars() const { return _nstars; }
-private:
-	size_t	data_len;
-	void	*data_ptr;
+	uint32_t	nstars() const { return nrecords(); }
 public:
 	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
-	~Ucac4Zone();
 	Ucac4Star	get(uint32_t number) const;
 	uint32_t	first(const Angle& ra) const;
 	std::set<Ucac4Star>	find(const SkyWindow& window,
