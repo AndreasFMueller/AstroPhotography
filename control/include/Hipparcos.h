@@ -40,7 +40,7 @@ public:
 	typedef std::shared_ptr<starset>	starsetptr;
 	Hipparcos(const std::string& filename);
 	HipparcosStar	find(unsigned int hip) const;
-	starset	find(const SkyWindow& window,
+	starsetptr	find(const SkyWindow& window,
 			const MagnitudeRange& magrange) const;
 };
 

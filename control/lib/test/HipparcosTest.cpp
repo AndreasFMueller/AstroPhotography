@@ -59,12 +59,12 @@ void	HipparcosTest::testWindow() {
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	std::set<HipparcosStar>	stars = catalog->find(window,
+	Hipparcos::starsetptr	stars = catalog->find(window,
 					MagnitudeRange(-30, 4.5));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars.size());
-	CPPUNIT_ASSERT(stars.size() == 10);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
+	CPPUNIT_ASSERT(stars->size() == 10);
 	std::set<HipparcosStar>::const_iterator	s;
-	for (s = stars.begin(); s != stars.end(); s++) {
+	for (s = stars->begin(); s != stars->end(); s++) {
 		std::cout << s->toString().c_str() << std::endl;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
@@ -72,10 +72,10 @@ void	HipparcosTest::testWindow() {
 
 void	HipparcosTest::testAll() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAll() begin");
-	std::set<HipparcosStar>	stars = catalog->find(SkyWindow::all,
+	Hipparcos::starsetptr	stars = catalog->find(SkyWindow::all,
 		MagnitudeRange(-30, 6));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars with mag<=6: %u", stars.size());
-	CPPUNIT_ASSERT(5041 == stars.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars with mag<=6: %u", stars->size());
+	CPPUNIT_ASSERT(5041 == stars->size());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAll() end");
 }
 

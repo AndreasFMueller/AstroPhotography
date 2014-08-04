@@ -74,15 +74,16 @@ Tycho2Star	Tycho2::find(unsigned int index) const {
 /**
  * \brief get all stars from a window
  */
-Tycho2::starset	Tycho2::find(const SkyWindow& window,
+Tycho2::starsetptr	Tycho2::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) const {
-	starset	result;
+	starset	*result = new starset();
+	starsetptr	resultptr(result);
 	for (unsigned int index = 0; index < nstars(); index++) {
 		try {
 			Tycho2Star	star = find(index);
 			if ((window.contains(star))
 				&& (magrange.contains(star.mag()))) {
-				result.insert(star);
+				result->insert(star);
 			}
 		} catch (std::exception& x) {
 /*
@@ -91,8 +92,8 @@ Tycho2::starset	Tycho2::find(const SkyWindow& window,
 */
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u stars", result.size());
-	return result;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %u stars", result->size());
+	return resultptr;
 }
 
 } // namespace catalog

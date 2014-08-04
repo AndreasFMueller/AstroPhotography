@@ -215,9 +215,12 @@ Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
 /**
  * \brief Retrieve all stars in a window
  */
-Ucac4::starset	Ucac4::find(const SkyWindow& window,
+Ucac4::starsetptr	Ucac4::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
-	Ucac4::starset	result;
+	// prepare the empty result set
+	starset	*result = new starset();
+	starsetptr	resultptr(result);
+
 	// find minimum an maximum zone numbers
 	std::pair<double, double>	interval = window.decinterval();
 	uint16_t	minzone = 1 + floor((interval.first + M_PI / 2) / (0.2 * M_PI / 180));
@@ -230,18 +233,13 @@ Ucac4::starset	Ucac4::find(const SkyWindow& window,
 	uint32_t	counter = 0;
 	for (uint16_t zoneno = minzone; zoneno <= maxzone; zoneno++) {
 		Ucac4ZonePtr	z = zone(zoneno);
-		starset	stars = z->find(window, magrange);
-		starset::const_iterator	s;
-		for (s = stars.begin(); s != stars.end(); s++) {
-			result.insert(*s);
-			counter++;
-		}
+		z->add(resultptr, window, magrange);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars found, %u in set", counter,
-		result.size());
+		result->size());
 
 	// thats it
-	return result;
+	return resultptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -299,9 +297,15 @@ uint32_t	Ucac4Zone::first(const Angle& ra) const {
 /**
  * \brief 
  */
-Ucac4Zone::starset	Ucac4Zone::find(const SkyWindow& window,
+Ucac4Zone::starsetptr	Ucac4Zone::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
-	starset	result;
+	starset	*result = new starset();
+	starsetptr	resultptr(result);
+	return add(resultptr, window, magrange);
+}
+
+Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4::starsetptr set,
+		const SkyWindow& window, const MagnitudeRange& magrange) {
 
 	// get the maximum and minimum RA
 	uint32_t	minindex = first(window.leftra());
@@ -310,7 +314,7 @@ Ucac4Zone::starset	Ucac4Zone::find(const SkyWindow& window,
 		for (uint32_t number = minindex; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
-				result.insert(star);
+				set->insert(star);
 			}
 		}
 	}
@@ -318,21 +322,21 @@ Ucac4Zone::starset	Ucac4Zone::find(const SkyWindow& window,
 		for (uint32_t number = 1; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
-				result.insert(star);
+				set->insert(star);
 			}
 		}
 		for (uint32_t number = minindex; number < nstars(); number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
-				result.insert(star);
+				set->insert(star);
 			}
 		}
 	}
 
 	// return stars
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars from zone %hu", result.size(),
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars from zone %hu", set->size(),
 		_zone);
-	return result;
+	return set;
 }
 
 } // namespace catalog

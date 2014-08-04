@@ -95,17 +95,18 @@ HipparcosStar	Hipparcos::find(unsigned int hip) const {
 /**
  * \brief Retrieve stars in a a window an not too faint
  */
-Hipparcos::starset	Hipparcos::find(const SkyWindow& window,
+Hipparcos::starsetptr	Hipparcos::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) const {
-	starset	result;
+	starset	*result = new starset();
+	starsetptr	resultptr(result);
 	const_iterator	s;
 	for (s = begin(); s != end(); s++) {
 		if (window.contains(s->second)
 			&& (magrange.contains(s->second.mag()))) {
-			result.insert(s->second);
+			result->insert(s->second);
 		}
 	}
-	return result;
+	return resultptr;
 }
 
 

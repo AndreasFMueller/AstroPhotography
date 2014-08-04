@@ -87,8 +87,10 @@ public:
 	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
 	Ucac4Star	get(uint32_t number) const;
 	uint32_t	first(const Angle& ra) const;
-	starset	find(const SkyWindow& window,
-			const MagnitudeRange& magrange);
+	starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
+	starsetptr	add(starsetptr set, const SkyWindow& window,
+				const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
 
@@ -110,8 +112,8 @@ public:
 	Ucac4Star	find(const RaDec& position);
 	Ucac4Star	find(const std::string& ucacnumber);
 	Ucac4Star	find(const Ucac4StarNumber& number);
-	starset	find(const SkyWindow& window,
-			const MagnitudeRange& magrange);
+	starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4>	Ucac4Ptr;
 

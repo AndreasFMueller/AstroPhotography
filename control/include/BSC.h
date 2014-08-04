@@ -43,8 +43,8 @@ public:
 	typedef std::shared_ptr<starset>	starsetptr;
 	BSC(const std::string& filename, const std::string& notesfile);
 	const BSCStar&	find(int number) const;
-	starset	find(const SkyWindow& window,
-			const MagnitudeRange& magrange) const;
+	starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange) const;
 };
 
 } // namespace catalog 

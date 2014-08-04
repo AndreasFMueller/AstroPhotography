@@ -94,9 +94,9 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	if (!hiprange.empty()) {
 		// get brightest stars from Hipparcos catalog
 		Hipparcos	catalog(hipparcosfile);
-		Hipparcos::starset	stars = catalog.find(window, hiprange);
+		Hipparcos::starsetptr	stars = catalog.find(window, hiprange);
 		Hipparcos::starset::const_iterator	s;
-		for (s = stars.begin(); s != stars.end(); s++) {
+		for (s = stars->begin(); s != stars->end(); s++) {
 			Star	star = *s;
 			result->insert(star);
 		}
@@ -106,9 +106,9 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// stars already retrieved from the Hipparcos catalog
 	if (!tycho2range.empty()) {
 		Tycho2	catalog(tycho2file);
-		Tycho2::starset	stars = catalog.find(window, magrange);
+		Tycho2::starsetptr	stars = catalog.find(window, magrange);
 		Tycho2::starset::const_iterator	s;
-		for (s = stars.begin(); s != stars.end(); s++) {
+		for (s = stars->begin(); s != stars->end(); s++) {
 			// only take stars not in the Hipparcos catalog and
 			// brighter than magnitude 10, as we will get the
 			// fainter stars from Ucac4
@@ -122,9 +122,9 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// get all matching stars from the UCAC4 catalog
 	if (!ucac4range.empty()) {
 		Ucac4	catalog(ucac4dir);
-		Ucac4::starset	stars = catalog.find(window, magrange);
+		Ucac4::starsetptr	stars = catalog.find(window, magrange);
 		Ucac4::starset::const_iterator	s;
-		for (s = stars.begin(); s != stars.end(); s++) {
+		for (s = stars->begin(); s != stars->end(); s++) {
 			// only take stars fainter than mag 10.0, as the
 			// brighter stars already came from Tycho2.
 			// There is a probability < 0.001 to loose a star due

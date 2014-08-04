@@ -62,11 +62,11 @@ void	Tycho2Test::testWindow() {
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	std::set<Tycho2Star>	stars = catalog.find(window,
-						MagnitudeRange(-30., 4.5));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars.size());
-	std::set<Tycho2Star>::const_iterator	s;
-	for (s = stars.begin(); s != stars.end(); s++) {
+	Tycho2::starsetptr	stars = catalog.find(window,
+					MagnitudeRange(-30., 4.5));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
+	Tycho2::starset::const_iterator	s;
+	for (s = stars->begin(); s != stars->end(); s++) {
 		std::cout << s->toString() << std::endl;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");

@@ -37,8 +37,8 @@ public:
 	typedef std::shared_ptr<starset>	starsetptr;
 	Tycho2(const std::string& filename);
 	Tycho2Star	find(unsigned int index) const;
-	starset	find(const SkyWindow& window,
-			const MagnitudeRange& magrange) const;
+	starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange) const;
 };
 
 } // namespace catalog
