@@ -72,6 +72,23 @@ class CatalogBackend;
 typedef std::shared_ptr<CatalogBackend>	CatalogBackendPtr;
 
 /**
+ * \brief A class to encode a magnitude range
+ */
+class MagnitudeRange : std::pair<float, float> {
+public:
+	MagnitudeRange(float brightest, float faintest)
+		: std::pair<float, float>(brightest, faintest) {
+	}
+	float	brightest() const { return first; }
+	float&	brightest() { return first; }
+	float	faintest() const { return second; }
+	float&	faintest() { return second; }
+	bool	in(float mag) {
+		return (brightest() <= mag) && (mag <= faintest());
+	}
+};
+
+/**
  * \brief A collection of star catalogs
  */
 class Catalog {
