@@ -24,7 +24,7 @@ public:
 	CatalogBackend();
 	~CatalogBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
-					double minimum_magnitude);
+						const MagnitudeRange& magrange);
 };
 
 /**
@@ -39,7 +39,7 @@ public:
 	FileBackend(const std::string& basedir);
 	~FileBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
-					double minimum_magnitude);
+						const MagnitudeRange& magrange);
 };
 
 /**
@@ -51,7 +51,7 @@ public:
 	DatabaseBackend(const std::string& dbfilename);
 	~DatabaseBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
-					double minimum_magnitude);
+						const MagnitudeRange& magrange);
 	void	add(int id, const Star& star, const std::string& name);
 	void	clear();
 };

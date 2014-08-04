@@ -10,12 +10,14 @@ namespace astro {
 namespace catalog {
 
 CatalogBackend::CatalogBackend() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "CatalogBackend constructor");
 }
 
 CatalogBackend::~CatalogBackend() {
 }
 
-Catalog::starsetptr	find(const SkyWindow& window, double minimum_magnitude) {
+Catalog::starsetptr	CatalogBackend::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) {
 	throw std::runtime_error("find method must be overridden");
 }
 

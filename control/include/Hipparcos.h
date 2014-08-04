@@ -36,10 +36,12 @@ class Hipparcos : public MappedFile,
 		public std::map<unsigned int, HipparcosStar> {
 	std::string	_filename;
 public:
+	typedef std::set<HipparcosStar>	starset;
+	typedef std::shared_ptr<starset>	starsetptr;
 	Hipparcos(const std::string& filename);
 	HipparcosStar	find(unsigned int hip) const;
-	std::set<HipparcosStar>	find(const SkyWindow& window,
-					double minimum_magnitude) const;
+	starset	find(const SkyWindow& window,
+			const MagnitudeRange& magrange) const;
 };
 
 } // namespace catalog 

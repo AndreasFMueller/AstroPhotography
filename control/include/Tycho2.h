@@ -33,10 +33,12 @@ class Tycho2 : public MappedFile {
 public:
 	unsigned int	nstars() const { return nrecords(); }
 public:
+	typedef std::set<Tycho2Star>	starset;
+	typedef std::shared_ptr<starset>	starsetptr;
 	Tycho2(const std::string& filename);
 	Tycho2Star	find(unsigned int index) const;
-	std::set<Tycho2Star>	find(const SkyWindow& window,
-					double minimum_magnitude);
+	starset	find(const SkyWindow& window,
+			const MagnitudeRange& magrange) const;
 };
 
 } // namespace catalog

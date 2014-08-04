@@ -44,7 +44,7 @@ Chart::~Chart() {
  * 
  * \param stars		a set of stars to be drawn inside the image
  */
-void	Chart::draw(const std::set<Star>& stars) {
+void	Chart::draw(const Catalog::starset& stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create image for %u stars",
 		stars.size());
 
@@ -69,6 +69,15 @@ void	Chart::draw(const std::set<Star>& stars) {
 			}
 		}
 	}
+}
+
+void	Chart::draw(const Catalog::starsetptr stars) {
+	Catalog::starset	*starsp
+		= dynamic_cast<Catalog::starset *>(&*stars);
+	if (starsp == NULL) {
+		throw std::runtime_error("no star set provided");
+	}
+	draw(*starsp);
 }
 
 

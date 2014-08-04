@@ -39,10 +39,12 @@ class BSC {
 	std::string	_notesfile;
 	std::map<unsigned short, BSCStar>	stars;
 public:
+	typedef std::set<BSCStar>	starset;
+	typedef std::shared_ptr<starset>	starsetptr;
 	BSC(const std::string& filename, const std::string& notesfile);
 	const BSCStar&	find(int number) const;
-	std::set<BSCStar>	find(const SkyWindow& window,
-					double minimum_magnitude) const;
+	starset	find(const SkyWindow& window,
+			const MagnitudeRange& magrange) const;
 };
 
 } // namespace catalog 

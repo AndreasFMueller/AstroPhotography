@@ -95,13 +95,13 @@ HipparcosStar	Hipparcos::find(unsigned int hip) const {
 /**
  * \brief Retrieve stars in a a window an not too faint
  */
-std::set<HipparcosStar>	Hipparcos::find(const SkyWindow& window,
-				double minimum_magnitude) const {
-	std::set<HipparcosStar>	result;
+Hipparcos::starset	Hipparcos::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) const {
+	starset	result;
 	const_iterator	s;
 	for (s = begin(); s != end(); s++) {
 		if (window.contains(s->second)
-			&& (s->second.mag() < minimum_magnitude)) {
+			&& (magrange.contains(s->second.mag()))) {
 			result.insert(s->second);
 		}
 	}

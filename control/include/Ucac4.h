@@ -82,11 +82,13 @@ public:
 	uint16_t	zone() const { return _zone; }
 	uint32_t	nstars() const { return nrecords(); }
 public:
+	typedef std::set<Ucac4Star>	starset;
+	typedef std::shared_ptr<starset>	starsetptr;
 	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
 	Ucac4Star	get(uint32_t number) const;
 	uint32_t	first(const Angle& ra) const;
-	std::set<Ucac4Star>	find(const SkyWindow& window,
-		float minimum_magnitude = -std::numeric_limits<float>::min());
+	starset	find(const SkyWindow& window,
+			const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
 
@@ -101,13 +103,15 @@ class Ucac4 {
 	Ucac4ZonePtr	cachedzone;
 	Ucac4ZonePtr	getzone(uint16_t zone);
 public:
+	typedef std::set<Ucac4Star>	starset;
+	typedef std::shared_ptr<starset>	starsetptr;
 	Ucac4(const std::string& directory);
 	Ucac4ZonePtr	zone(uint16_t zone) const;
 	Ucac4Star	find(const RaDec& position);
 	Ucac4Star	find(const std::string& ucacnumber);
 	Ucac4Star	find(const Ucac4StarNumber& number);
-	std::set<Ucac4Star>	find(const SkyWindow& window,
-		float minimum_magnitude = -std::numeric_limits<float>::min());
+	starset	find(const SkyWindow& window,
+			const MagnitudeRange& magrange);
 };
 typedef std::shared_ptr<Ucac4>	Ucac4Ptr;
 

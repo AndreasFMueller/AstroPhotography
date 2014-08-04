@@ -74,14 +74,14 @@ Tycho2Star	Tycho2::find(unsigned int index) const {
 /**
  * \brief get all stars from a window
  */
-std::set<Tycho2Star>	Tycho2::find(const SkyWindow& window,
-				double minimum_magnitude) {
-	std::set<Tycho2Star>	result;
+Tycho2::starset	Tycho2::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) const {
+	starset	result;
 	for (unsigned int index = 0; index < nstars(); index++) {
 		try {
 			Tycho2Star	star = find(index);
 			if ((window.contains(star))
-				&& (star.mag() < minimum_magnitude)) {
+				&& (magrange.contains(star.mag()))) {
 				result.insert(star);
 			}
 		} catch (std::exception& x) {

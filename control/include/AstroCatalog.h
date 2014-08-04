@@ -83,9 +83,11 @@ public:
 	float&	brightest() { return first; }
 	float	faintest() const { return second; }
 	float&	faintest() { return second; }
-	bool	in(float mag) {
+	bool	contains(float mag) const {
 		return (brightest() <= mag) && (mag <= faintest());
 	}
+	bool	empty() const { return (first == second); }
+	std::string	toString() const;
 };
 
 /**
@@ -98,7 +100,7 @@ public:
 	typedef	std::set<Star>	starset;
 	typedef std::shared_ptr<starset>	starsetptr;
 	starsetptr	find(const SkyWindow& window,
-				double minimum_magnitude);
+				const MagnitudeRange& magrange);
 };
 
 /**
@@ -160,7 +162,8 @@ public:
 	~Chart();
 	SkyWindow	getWindow() const;
 	astro::Point	point(const RaDec& star) const;
-	void	draw(const std::set<Star>& star);
+	void	draw(const Catalog::starset& star);
+	void	draw(const Catalog::starsetptr star);
 };
 
 /**

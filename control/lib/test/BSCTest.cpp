@@ -64,7 +64,8 @@ void	BSCTest::testWindow() {
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	std::set<BSCStar>	stars = catalog.find(window, 4.5);
+	std::set<BSCStar>	stars = catalog.find(window,
+					MagnitudeRange(-30, 4.5));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars.size());
 	CPPUNIT_ASSERT(stars.size() == 10);
 	std::set<BSCStar>::const_iterator	s;

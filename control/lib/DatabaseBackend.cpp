@@ -82,7 +82,7 @@ DatabaseBackend::~DatabaseBackend() {
  * \brief Retrieve stars in a window up to a given magnitude
  */
 Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
-			double minimum_magnitude) {
+				const MagnitudeRange& magrange) {
 	std::set<Star>	*stars = new std::set<Star>;
 	Catalog::starsetptr	result(stars);
 	int	rc;
@@ -90,7 +90,7 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	const char	*tail;
 	std::string	query(	"select ra, dec, pmra, pmdec, mag "
 				"from star "
-				"where mag < ? "
+				"where mag <= ? and mag >= ? "
 				"  and ? <= ra and ra <= ? "
 				"  and ? <= dec and dec <= ?");
 	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
@@ -102,17 +102,18 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	}
 
 	// bind the values
-	sqlite3_bind_double(stmt, 1, minimum_magnitude);
+	sqlite3_bind_double(stmt, 1, magrange.faintest());
+	sqlite3_bind_double(stmt, 2, magrange.brightest());
 	double	ramax = (window.center().ra() + window.rawidth() * 0.5).hours();
 	double	ramin = (window.center().ra() - window.rawidth() * 0.5).hours();
-	sqlite3_bind_double(stmt, 2, ramin);
-	sqlite3_bind_double(stmt, 3, ramax);
+	sqlite3_bind_double(stmt, 3, ramin);
+	sqlite3_bind_double(stmt, 4, ramax);
 	double	decmax = (window.center().dec()
 				+ window.decheight() * 0.5).degrees();
 	double	decmin = (window.center().dec()
 				- window.decheight() * 0.5).degrees();
-	sqlite3_bind_double(stmt, 4, decmin);
-	sqlite3_bind_double(stmt, 5, decmax);
+	sqlite3_bind_double(stmt, 5, decmin);
+	sqlite3_bind_double(stmt, 6, decmax);
 
 	// execute the query
 	rc = sqlite3_step(stmt);

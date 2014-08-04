@@ -278,6 +278,14 @@ SkyWindow	SkyRectangle::containedin() const {
 }
 
 //////////////////////////////////////////////////////////////////////
+// MagnitudeRange implementation
+//////////////////////////////////////////////////////////////////////
+std::string	MagnitudeRange::toString() const {
+	return stringprintf("[%.2f, %.2f]", brightest(), faintest());
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // Catalog implementation
 //////////////////////////////////////////////////////////////////////
 
@@ -321,8 +329,8 @@ Catalog::Catalog(const std::string& filename) {
  * \brief Retrieve stars from a compiled catalog
  */
 Catalog::starsetptr	Catalog::find(const SkyWindow& window,
-				double minimum_magnitude) {
-	return backend->find(window, minimum_magnitude);
+				const MagnitudeRange& magrange) {
+	return backend->find(window, magrange);
 }
 
 } // namespace catalog

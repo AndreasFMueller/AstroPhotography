@@ -124,12 +124,13 @@ const BSCStar&	BSC::find(int number) const {
 /**
  * \brief Get a list of stars of a given minimum magnitude
  */
-std::set<BSCStar>	BSC::find(const SkyWindow& window,
-				double minimum_magnitude) const {
-	std::set<BSCStar>	result;
+BSC::starset	BSC::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) const {
+	starset	result;
 	std::map<unsigned short, BSCStar>::const_iterator	i;
 	for (i = stars.begin(); i != stars.end(); i++) {
-		if ((i->second.mag() < minimum_magnitude) && window.contains(i->second)) {
+		if ((magrange.contains(i->second.mag()))
+			&& window.contains(i->second)) {
 			result.insert(i->second);
 		}
 	}

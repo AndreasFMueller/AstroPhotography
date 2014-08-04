@@ -215,9 +215,9 @@ Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
 /**
  * \brief Retrieve all stars in a window
  */
-std::set<Ucac4Star>	Ucac4::find(const SkyWindow& window,
-				float minimum_magnitude) {
-	std::set<Ucac4Star>	result;
+Ucac4::starset	Ucac4::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) {
+	Ucac4::starset	result;
 	// find minimum an maximum zone numbers
 	std::pair<double, double>	interval = window.decinterval();
 	uint16_t	minzone = 1 + floor((interval.first + M_PI / 2) / (0.2 * M_PI / 180));
@@ -230,9 +230,8 @@ std::set<Ucac4Star>	Ucac4::find(const SkyWindow& window,
 	uint32_t	counter = 0;
 	for (uint16_t zoneno = minzone; zoneno <= maxzone; zoneno++) {
 		Ucac4ZonePtr	z = zone(zoneno);
-		std::set<Ucac4Star>	stars = z->find(window,
-						minimum_magnitude);
-		std::set<Ucac4Star>::const_iterator	s;
+		starset	stars = z->find(window, magrange);
+		starset::const_iterator	s;
 		for (s = stars.begin(); s != stars.end(); s++) {
 			result.insert(*s);
 			counter++;
@@ -300,9 +299,9 @@ uint32_t	Ucac4Zone::first(const Angle& ra) const {
 /**
  * \brief 
  */
-std::set<Ucac4Star>	Ucac4Zone::find(const SkyWindow& window,
-				float minimum_magnitude) {
-	std::set<Ucac4Star>	result;
+Ucac4Zone::starset	Ucac4Zone::find(const SkyWindow& window,
+				const MagnitudeRange& magrange) {
+	starset	result;
 
 	// get the maximum and minimum RA
 	uint32_t	minindex = first(window.leftra());
@@ -310,7 +309,7 @@ std::set<Ucac4Star>	Ucac4Zone::find(const SkyWindow& window,
 	if (minindex < maxindex) {
 		for (uint32_t number = minindex; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
-			if (star.mag() < minimum_magnitude) {
+			if (magrange.contains(star.mag())) {
 				result.insert(star);
 			}
 		}
@@ -318,13 +317,13 @@ std::set<Ucac4Star>	Ucac4Zone::find(const SkyWindow& window,
 	if (maxindex < minindex) {
 		for (uint32_t number = 1; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
-			if (star.mag() < minimum_magnitude) {
+			if (magrange.contains(star.mag())) {
 				result.insert(star);
 			}
 		}
 		for (uint32_t number = minindex; number < nstars(); number++) {
 			Ucac4Star	star = get(number);
-			if (star.mag() < minimum_magnitude) {
+			if (magrange.contains(star.mag())) {
 				result.insert(star);
 			}
 		}

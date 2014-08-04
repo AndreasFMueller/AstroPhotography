@@ -52,63 +52,89 @@ FileBackend::~FileBackend() {
  * \brief
  */
 Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
-				double minimum_magnitude) {
+				const MagnitudeRange& magrange) {
 	// prepare the result set
 	Catalog::starset	*result = new Catalog::starset;
 	Catalog::starsetptr	resultptr(result);
-{
-	// get brightest stars from Hipparcos catalog
-	Hipparcos	catalog(hipparcosfile);
-	std::set<HipparcosStar>	stars = catalog.find(window, minimum_magnitude);
-	std::set<HipparcosStar>::const_iterator	s;
-	for (s = stars.begin(); s != stars.end(); s++) {
-		Star	star = *s;
-		result->insert(star);
+
+#define	Hipparcos_Tycho2_Cutover	7.
+#define	Tycho2_Ucac4_Cutover	10.
+
+	// find the range of magnitudes we want to get from the Hipparcos
+	// catalog
+	MagnitudeRange	hiprange = magrange;
+	MagnitudeRange	tycho2range = magrange;
+	MagnitudeRange	ucac4range = magrange;
+	if (magrange.contains(Hipparcos_Tycho2_Cutover)) {
+		hiprange.faintest() = Hipparcos_Tycho2_Cutover;
+		tycho2range.brightest() = Hipparcos_Tycho2_Cutover;
 	}
-}
-	if (minimum_magnitude < 7) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"Tycho2 and UCAC4 catalog not needed");
-		return resultptr;
+	if (magrange.contains(Tycho2_Ucac4_Cutover)) {
+		tycho2range.faintest() = Tycho2_Ucac4_Cutover;
+		ucac4range.brightest() = Tycho2_Ucac4_Cutover;
 	}
 
-{
+	// handle cases that need only part of the catalogs
+	if (magrange.faintest() < Hipparcos_Tycho2_Cutover) {
+		tycho2range = MagnitudeRange(0, 0);
+		ucac4range = MagnitudeRange(0, 0);
+	}
+	if (magrange.brightest() > Hipparcos_Tycho2_Cutover) {
+		hiprange = MagnitudeRange(0, 0);
+	}
+	if (magrange.brightest() > Tycho2_Ucac4_Cutover) {
+		hiprange = MagnitudeRange(0, 0);
+		tycho2range = MagnitudeRange(0, 0);
+	}
+	if (magrange.faintest() < Tycho2_Ucac4_Cutover) {
+		ucac4range = MagnitudeRange(0, 0);
+	}
+
+	// if any there are stars requested from the Hipparcos catalog, get them
+	if (!hiprange.empty()) {
+		// get brightest stars from Hipparcos catalog
+		Hipparcos	catalog(hipparcosfile);
+		Hipparcos::starset	stars = catalog.find(window, hiprange);
+		Hipparcos::starset::const_iterator	s;
+		for (s = stars.begin(); s != stars.end(); s++) {
+			Star	star = *s;
+			result->insert(star);
+		}
+	}
+
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
-	Tycho2	catalog(tycho2file);
-	std::set<Tycho2Star>	stars = catalog.find(window, minimum_magnitude);
-	std::set<Tycho2Star>::const_iterator	s;
-	for (s = stars.begin(); s != stars.end(); s++) {
-		// only take stars not in the Hipparcos catalog and brighter
-		// than magnitude 10, as we will get the fainter stars from
-		// Ucac4
-		if ((!s->isHipparcosStar()) && (s->mag() < 10)) {
-			Star	star = *s;
-			result->insert(star);
+	if (!tycho2range.empty()) {
+		Tycho2	catalog(tycho2file);
+		Tycho2::starset	stars = catalog.find(window, magrange);
+		Tycho2::starset::const_iterator	s;
+		for (s = stars.begin(); s != stars.end(); s++) {
+			// only take stars not in the Hipparcos catalog and
+			// brighter than magnitude 10, as we will get the
+			// fainter stars from Ucac4
+			if ((!s->isHipparcosStar()) && (s->mag() < 10)) {
+				Star	star = *s;
+				result->insert(star);
+			}
 		}
 	}
-}
 
-	if (minimum_magnitude < 10) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "UCAC4 catalog not needed");
-		return resultptr;
-	}
-
-{
 	// get all matching stars from the UCAC4 catalog
-	Ucac4	catalog(ucac4dir);
-	std::set<Ucac4Star>	stars = catalog.find(window, minimum_magnitude);
-	std::set<Ucac4Star>::const_iterator	s;
-	for (s = stars.begin(); s != stars.end(); s++) {
-		// only take stars fainter than mag 10.0, as the brighter
-		// stars already came from Tycho2. There is a probability
-		// < 0.001 to loose a star due to the cutoff
-		if (s->mag() > 9.99) {
-			Star	star = *s;
-			result->insert(star);
+	if (!ucac4range.empty()) {
+		Ucac4	catalog(ucac4dir);
+		Ucac4::starset	stars = catalog.find(window, magrange);
+		Ucac4::starset::const_iterator	s;
+		for (s = stars.begin(); s != stars.end(); s++) {
+			// only take stars fainter than mag 10.0, as the
+			// brighter stars already came from Tycho2.
+			// There is a probability < 0.001 to loose a star due
+			// to the cutoff
+			if (s->mag() > 9.99) {
+				Star	star = *s;
+				result->insert(star);
+			}
 		}
 	}
-}
 
 	return resultptr;
 }
