@@ -42,6 +42,7 @@ public:
 		: _x(point.x()), _y(point.y()) {}
 	double	x() const { return _x; }
 	double	y() const { return _y; }
+	double	abs() const;
 	void	setX(double x) { _x = x; }
 	void	setY(double y) { _y = y; }
 	Point	operator+(const Point& other) const;

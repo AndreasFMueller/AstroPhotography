@@ -8,6 +8,7 @@
 
 #include <AstroTypes.h>
 #include <AstroImage.h>
+#include <AstroTransform.h>
 
 namespace astro {
 namespace image {
@@ -19,31 +20,40 @@ namespace project {
  * Projections are affine transformations composed with a radius dependent
  * homothety.
  */
-class Projection {
-	float	a[6];	// 
-	float	b[2];	// 
+class Projection : public astro::image::transform::Transform {
+	float	b[2];
 	float	w(float r) const;
-	float	wi(float r) const;
 public:
 	Projection();
-	Projection	inverse() const;
 	Point	operator()(const Point& p) const;
-	Point	operator()(const ImagePoint& p) const;
 };
 
-#if 0
 /**
  * \brief Apply a projection to an image
  */
-class ProjectionAdapter : public ConstImageAdapter<float> {
-	const ConstImageAdapter<float>& image;
+template<typename Pixel>
+class ProjectionAdapter : public ConstImageAdapter<Pixel> {
+	const astro::image::transform::PixelInterpolationAdapter<Pixel> image;
 	Projection	projection;
+	Point	center;
+	Point	targetcenter;
 public:
-	ProjectionAdapter(const ConstImageAdapter<float>& image,
-		const Projection& projection);
-	virtual const float	pixel(unsigned int x, unsigned int y) const;
+	ProjectionAdapter(const ImageSize targetsize,
+		const ConstImageAdapter<float>& _image,
+		const Projection& _projection)
+		: ConstImageAdapter<Pixel>(targetsize), image(_image),
+		  projection(_projection) {
+		center = ConstImageAdapter<Pixel>::getSize().center();
+		targetcenter = targetsize.center();
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
 };
-#endif
+
+template<typename Pixel>
+const Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+	Point	p(x - center.x(), y - center.y());
+	return image(projection(p) + targetcenter);
+}
 
 } // namespace project
 } // namespace image

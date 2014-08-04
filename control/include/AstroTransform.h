@@ -84,6 +84,67 @@ const Pixel	TranslationAdapter<Pixel>::pixel(unsigned int x, unsigned int y) con
 ImagePtr	translate(ImagePtr source, const Point& translation);
 
 /**
+ * \brief Adapter to interpolate pixels
+ */
+template<typename Pixel>
+class PixelInterpolationAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	PixelInterpolationAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
+	}
+	const Pixel	pixel(const astro::Point& t) const {
+		// find out in which pixel this is located
+		int     tx = floor(t.x());
+		int     ty = floor(t.y());
+
+		// compute the weights
+		double  wx = t.x() - tx;
+		double  wy = t.y() - ty;
+
+		// compute the weights
+		double  weights[4];
+		weights[0] = (1 - wx) * (1 - wy);
+		weights[1] = wx * (1 - wy);
+		weights[2] = (1 - wx) * wy;
+		weights[3] = wx * wy;
+
+		// now compute the weighted sum of the pixels
+		Pixel   a[4];
+		ImageSize       size = ConstImageAdapter<Pixel>::getSize();
+
+		// lower left corner
+		if (size.contains(tx    , ty    )) {
+			a[0] = image.pixel(tx    , ty    );
+		} else {
+			a[0] = Pixel(0);
+		}
+		// lower right corner
+		if (size.contains(tx + 1, ty    )) {
+			a[1] = image.pixel(tx + 1, ty    );
+		} else {
+			a[1] = Pixel(0);
+		}
+		// upper left corner
+		if (size.contains(tx    , ty + 1)) {
+			a[2] = image.pixel(tx    , ty + 1);
+		} else {
+			a[2] = Pixel(0);
+		}
+		// upper right corner
+		if (size.contains(tx + 1, ty + 1)) {
+			a[3] = image.pixel(tx + 1, ty + 1);
+		} else {
+			a[3] = Pixel(0);
+		}
+		return weighted_sum(4, weights, a);
+	}
+	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+		return image.pixel(x, y);
+	}
+};
+
+/**
  * \brief Abstraction of an affine transform
  */
 
@@ -136,7 +197,7 @@ public:
  */
 template<typename Pixel>
 class TransformAdapter : public ConstImageAdapter<Pixel> {
-	const ConstImageAdapter<Pixel>& image;
+	const PixelInterpolationAdapter<Pixel>	image;
 	Transform	transform;
 	Transform	inverse;
 public:
@@ -159,8 +220,8 @@ TransformAdapter<Pixel>::TransformAdapter(const ImageSize& targetsize,
 template<typename Pixel>
 TransformAdapter<Pixel>::TransformAdapter(
 	const ConstImageAdapter<Pixel>& _image, const Transform& _transform)
-	: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
-	  transform(_transform) {
+	: ConstImageAdapter<Pixel>(_image.getSize()),
+	  image(_image), transform(_transform) {
 	inverse = transform.inverse();
 }
 
@@ -169,51 +230,7 @@ const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	const {
 	// compute the image if the point x, y under the inverse transform
 	Point	t = inverse(Point(x, y));
-
-	// find out in which pixel this is located
-	int	tx = floor(t.x());
-	int	ty = floor(t.y());
-
-	// compute the weights
-	double	wx = t.x() - tx;
-	double	wy = t.y() - ty;
-
-	// compute the weights
-	double	weights[4];
-	weights[0] = (1 - wx) * (1 - wy);
-	weights[1] = wx * (1 - wy);
-	weights[2] = (1 - wx) * wy;
-	weights[3] = wx * wy;
-
-	// now compute the weighted sum of the pixels
-	Pixel	a[4];
-	ImageSize	size = image.getSize();
-
-	// lower left corner
-	if (size.contains(tx    , ty    )) {
-		a[0] = image.pixel(tx    , ty    );
-	} else {
-		a[0] = Pixel(0);
-	}
-	// lower right corner
-	if (size.contains(tx + 1, ty    )) {
-		a[1] = image.pixel(tx + 1, ty    );
-	} else {
-		a[1] = Pixel(0);
-	}
-	// upper left corner
-	if (size.contains(tx    , ty + 1)) {
-		a[2] = image.pixel(tx    , ty + 1);
-	} else {
-		a[2] = Pixel(0);
-	}
-	// upper right corner
-	if (size.contains(tx + 1, ty + 1)) {
-		a[3] = image.pixel(tx + 1, ty + 1);
-	} else {
-		a[3] = Pixel(0);
-	}
-	return weighted_sum(4, weights, a);
+	return image.pixel(t);
 }
 
 ImagePtr	transform(ImagePtr image, const Transform& transform);

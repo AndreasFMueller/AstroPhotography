@@ -34,7 +34,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Metavalue.cpp Sun.cpp ViewerPipeline.cpp Viewer.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
-	Subgrid.cpp Transform.cpp Adapters.cpp DisplayConverter.cpp \
+	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
+	Transform.cpp Projection.cpp \
 	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
 	Tracker.cpp Guider.cpp ThreadBase.cpp \
 	GuidingProcess.cpp GuiderStateMachine.cpp \

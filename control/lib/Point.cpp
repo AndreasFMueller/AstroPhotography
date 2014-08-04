@@ -72,4 +72,8 @@ std::istream&	operator>>(std::istream& in, Point& point) {
 	return in;
 }
 
+double	Point::abs() const {
+	return hypot(_x, _y);
+}
+
 } // namespace astro
