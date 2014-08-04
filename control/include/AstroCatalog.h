@@ -68,14 +68,14 @@ public:
 	std::string	toString() const;
 };
 
-class DatabaseCatalog;
-typedef std::shared_ptr<DatabaseCatalog>	DatabaseCatalogPtr;
+class CatalogBackend;
+typedef std::shared_ptr<CatalogBackend>	CatalogBackendPtr;
 
 /**
  * \brief A collection of star catalogs
  */
 class Catalog {
-	DatabaseCatalogPtr	database;
+	CatalogBackendPtr	backend;
 public:
 	Catalog(const std::string& filename);
 	typedef	std::set<Star>	starset;

@@ -1,14 +1,14 @@
 /*
- * DatabaseCatalog.cpp -- Database Catalog implementation
+ * DatabaseBackend.cpp -- Database Catalog implementation
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <DatabaseCatalog.h>
+#include <CatalogBackend.h>
 
 namespace astro {
 namespace catalog {
 
-DatabaseCatalog::DatabaseCatalog(const std::string& dbfilename) {
+DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
 	// open the database
 	if (sqlite3_open(dbfilename.c_str(), &db)) {
 		throw std::runtime_error("cannot open/create database");
@@ -74,14 +74,14 @@ DatabaseCatalog::DatabaseCatalog(const std::string& dbfilename) {
 /**
  * \brief close the database
  */
-DatabaseCatalog::~DatabaseCatalog() {
+DatabaseBackend::~DatabaseBackend() {
 	sqlite3_close(db);
 }
 
 /**
  * \brief Retrieve stars in a window up to a given magnitude
  */
-Catalog::starsetptr	DatabaseCatalog::find(const SkyWindow& window,
+Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 			double minimum_magnitude) {
 	std::set<Star>	*stars = new std::set<Star>;
 	Catalog::starsetptr	result(stars);
@@ -142,7 +142,7 @@ Catalog::starsetptr	DatabaseCatalog::find(const SkyWindow& window,
 /**
  * \brief add a star to the catalog
  */
-void	DatabaseCatalog::add(int id, const Star& star, const std::string& name) {
+void	DatabaseBackend::add(int id, const Star& star, const std::string& name) {
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
@@ -178,7 +178,7 @@ void	DatabaseCatalog::add(int id, const Star& star, const std::string& name) {
 /**
  * \brief Clear the database
  */
-void	DatabaseCatalog::clear() {
+void	DatabaseBackend::clear() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "clearing database");
 	char	*errmsg;
 	int	rc = sqlite3_exec(db, "delete from star;", NULL, NULL, &errmsg);

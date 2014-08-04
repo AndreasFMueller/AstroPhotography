@@ -20,7 +20,7 @@ class Tycho2Star : public Star {
 	void	setup(const std::string& line);
 	int	_hip;
 public:
-	bool	isHipparcosStar() { return _hip >= 0; }
+	bool	isHipparcosStar() const { return _hip >= 0; }
 	int	hip() const { return _hip; }
 	Tycho2Star(const std::string& line);
 };

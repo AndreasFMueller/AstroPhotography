@@ -7,7 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>
-#include <DatabaseCatalog.h>
+#include <CatalogBackend.h>
 
 namespace astro {
 namespace catalog {
@@ -96,6 +96,9 @@ SkyWindow	SkyWindow::all(RaDec(M_PI, 0), Angle(2 * M_PI), Angle(M_PI));
 //////////////////////////////////////////////////////////////////////
 // Celestial Object implementation
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief Compute proper motion corrected position of an object
+ */
 RaDec	CelestialObject::position(const double epoch) const {
 	RaDec	result;
 	result.ra() = ra() + pm().ra() * epoch;
@@ -106,6 +109,9 @@ RaDec	CelestialObject::position(const double epoch) const {
 //////////////////////////////////////////////////////////////////////
 // Star implementation
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief string representation of a star
+ */
 std::string	Star::toString() const {
 	return stringprintf("%s %s %.2f",
 			ra().hms().c_str(), dec().dms().c_str(), mag());
@@ -114,6 +120,14 @@ std::string	Star::toString() const {
 //////////////////////////////////////////////////////////////////////
 // SkyRectangle implementation
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief SkyRectangle constructor
+ *
+ * The SkyRectangle implementation uses three unit vectors to compute the
+ * central projections. These are a vector pointing to the center of the
+ * rectangle, and vectors representing the cartesian coordinate system of
+ * the rectangle.
+ */
 SkyRectangle::SkyRectangle(const SkyWindow& window) : SkyWindow(window) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a rectangle");
 	direction = UnitVector(window.center());
@@ -142,35 +156,74 @@ SkyRectangle::SkyRectangle(const SkyWindow& window) : SkyWindow(window) {
 		uplimit, rightlimit);
 }
 
+/**
+ * \brief 
+ */
 SkyRectangle::SkyRectangle() : SkyWindow(SkyWindow::all) {
 	
 }
 
+/**
+ * \brief Find out wheter a point on the sky is projected into the rectangle
+ */
 bool	SkyRectangle::contains(const RaDec& point) const {
 	Point	p = map(point);
 	return ((fabs(p.x()) <= rightlimit) && (fabs(p.y()) <= uplimit));
 }
 
+/**
+ * \brief Map a point on the sky to coordinates relative to the center
+ *
+ * The coordinate system has the vertical axis pointing to the northern
+ * celestial pole. Coordinates of points in the rectangle are in the
+ * interval [-1, 1]. Points outside the rectangle can also be mapped provided
+ * the are on the half sphere that can be mapped using central projection.
+ * Coordinate values can be arbitrarily large in that case.
+ */
 Point	SkyRectangle::map(const RaDec& where) const {
 	// compute the angle between the horizontal plane and the drection
 	UnitVector	newpoint(where);
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %s",
 	//	newpoint.toString().c_str());
+
+	// newpoint * direction gives the cosine of the angle between the
+	// point and the point at the center of the rectangle.
 	double	l = newpoint * direction;
 	if (l < 0) {
 		throw std::runtime_error("cannot image more than half sphere");
 	}
+
+	// Scaling the unit vector to the point by the reciprocal of this
+	// value gives a vector in the plane of the rectangle. Thus by 
+	// projecting the scaled vector onto the vectors rightvector
+	// and upvector gives the coordinates in the rectangle
 	double	x = (newpoint * rightvector) / l;
 	double	y = (newpoint * upvector) / l;
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, y = %f", x, y);
+
 	return Point(x, y);
 }
 
+/**
+ * \brief Map a point on the sky to the point coordinates in the rectangle
+ *
+ * The Point value return has coordinates in the interval [0,1], which
+ * applications can use to map to pixel coordinates.
+ */
 Point	SkyRectangle::map2(const RaDec& where) const {
 	Point	p = map(where);
 	return Point((1 + p.x() / rightlimit) / 2, (1 + p.y() / uplimit) / 2);
 }
 
+/**
+ * \brief Find a window that contains the image rectangle
+ *
+ * The SkyRectangle describes a rectangle projected onto the clestial sphere,
+ * but for retrieval of stars from the star catalog, a SkyWindow must be
+ * specified. This method computes the smallest SkyWindow that contains the
+ * projected image rectangle.
+ *
+ * To compute the window, spherical trigonometry is used.
+ */
 SkyWindow	SkyRectangle::containedin() const {
 	RaDec	newcenter;
 	newcenter.ra() = center().ra();
@@ -228,13 +281,48 @@ SkyWindow	SkyRectangle::containedin() const {
 // Catalog implementation
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief Create a compilied catalog
+ *
+ * No catalog is complete enough for our purposes. But getting stars from
+ * the files can be quite time consuming. This problem is solved by the
+ * database backend, bat that requires quite a bit of disk space.
+ * To unify the catalog access and make it transparent for the application,
+ * the Catalog constructor decides about the backend to use based on the
+ * type of the file argument. If the filename refers to a directory, it
+ * is assumed that the file based backend should be used. If filename
+ * names a file, it is assumed that this is a database file, and the
+ * database backend is used on this file.
+ * \param filename	name of database file or base directory for catalogs
+ */
 Catalog::Catalog(const std::string& filename) {
-	database = DatabaseCatalogPtr(new DatabaseCatalog(filename));
+	// find out whether filename points to a file (i.e. use database
+	// backend) or to a directory (use file backend)
+	struct stat	sb;
+	if (stat(filename.c_str(), &sb) < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot stat %s: %s",
+			filename.c_str(), strerror(errno));
+		throw std::runtime_error("cannot stat catalog file");
+	}
+
+	// depending on the file type, open different backends
+	if (sb.st_mode & S_IFDIR) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "open file backend based at %s",
+			filename.c_str());
+		backend = CatalogBackendPtr(new FileBackend(filename));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "open db backend on file %s",
+			filename.c_str());
+		backend = CatalogBackendPtr(new DatabaseBackend(filename));
+	}
 }
 
+/**
+ * \brief Retrieve stars from a compiled catalog
+ */
 Catalog::starsetptr	Catalog::find(const SkyWindow& window,
 				double minimum_magnitude) {
-	return database->find(window, minimum_magnitude);
+	return backend->find(window, minimum_magnitude);
 }
 
 } // namespace catalog
