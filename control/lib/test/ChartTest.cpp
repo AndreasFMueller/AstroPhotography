@@ -3,16 +3,12 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AstroCatalog.h>
-#include <Hipparcos.h>
-#include <Tycho2.h>
-#include <Ucac4.h>
+#include <AstroChart.h>
 #include <AstroDebug.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
-#include <algorithm>
 #include <AstroIO.h>
 
 using namespace astro::catalog;
@@ -43,10 +39,6 @@ void	ChartTest::tearDown() {
 
 void	ChartTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() begin");
-	// get a catalog
-	Hipparcos	catalog1("/usr/local/starcatalogs/hipparcos/hip_main.dat");
-	Tycho2	catalog2("/usr/local/starcatalogs/tycho2/tyc2.dat");
-	Ucac4	catalog3("/usr/local/starcatalogs/u4");
 
 	// get the center, in the constellation andromeda
 	RaDec	center;

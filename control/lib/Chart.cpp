@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AstroCatalog.h>
+#include <AstroChart.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 

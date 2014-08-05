@@ -72,7 +72,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	ImagePersistence.cpp \
 	Catalog.cpp MappedFile.cpp Ucac4.cpp Tycho2.cpp BSC.cpp Hipparcos.cpp \
 	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
-	Chart.cpp \
+	SkyRectangle.cpp Chart.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 
