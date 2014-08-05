@@ -15,7 +15,7 @@ namespace catalog {
 // BSCStar implementation
 //////////////////////////////////////////////////////////////////////
 
-BSCStar::BSCStar(const char *l) {
+BSCStar::BSCStar(const char *l) : Star(std::string("BSC") + std::string(l, 4)) {
 	std::string	line(l);
 	number = std::stoi(line.substr(0, 4));
 	name = line.substr(4, 10);

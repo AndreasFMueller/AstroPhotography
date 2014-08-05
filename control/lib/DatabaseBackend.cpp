@@ -88,7 +88,7 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
-	std::string	query(	"select ra, dec, pmra, pmdec, mag "
+	std::string	query(	"select ra, dec, pmra, pmdec, mag, name "
 				"from star "
 				"where mag <= ? and mag >= ? "
 				"  and ? <= ra and ra <= ? "
@@ -118,7 +118,7 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	// execute the query
 	rc = sqlite3_step(stmt);
 	while (rc == SQLITE_OK) {
-		Star	star;
+		Star	star(std::string((char *)sqlite3_column_text(stmt, 5)));
 		double	ra = sqlite3_column_double(stmt, 0);
 		star.ra().hours(ra);
 		double	dec = sqlite3_column_double(stmt, 1);
@@ -140,10 +140,46 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	return result;
 }
 
+Star	DatabaseBackend::find(const std::string& name) {
+	int	rc;
+	sqlite3_stmt	*stmt;
+	const char	*tail;
+	std::string	query(	"select ra, dec, pmra, pmdec, mag, name "
+				"from star where name = ?");
+	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
+		query.size(), &stmt, &tail))) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot prepare select query [%s]: %d",
+			query.c_str(), rc);
+		throw std::runtime_error("cannot prepare select");
+	}
+
+	// bind the values
+	sqlite3_bind_text(stmt, 1, name.c_str(), name.size(), SQLITE_STATIC);
+
+	// execute the query
+	rc = sqlite3_step(stmt);
+	Star	star(std::string((char *)sqlite3_column_text(stmt, 5)));
+	double	ra = sqlite3_column_double(stmt, 0);
+	star.ra().hours(ra);
+	double	dec = sqlite3_column_double(stmt, 1);
+	star.dec().degrees(dec);
+	RaDec	pm;
+	double	pmra = sqlite3_column_double(stmt, 2);
+	star.pm().ra().hours(pmra);
+	double	pmdec = sqlite3_column_double(stmt, 3);
+	star.pm().dec().degrees(pmdec);
+	double	mag = sqlite3_column_double(stmt, 4);
+	star.mag() = mag;
+
+	sqlite3_finalize(stmt);
+	return star;
+}
+
 /**
  * \brief add a star to the catalog
  */
-void	DatabaseBackend::add(int id, const Star& star, const std::string& name) {
+void	DatabaseBackend::add(int id, const Star& star) {
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
@@ -165,7 +201,7 @@ void	DatabaseBackend::add(int id, const Star& star, const std::string& name) {
 	sqlite3_bind_double(stmt, 4, star.pm().ra().hours());
 	sqlite3_bind_double(stmt, 5, star.pm().dec().degrees());
 	sqlite3_bind_double(stmt, 6, star.mag());
-	sqlite3_bind_text(stmt, 7, name.c_str(), name.size(),
+	sqlite3_bind_text(stmt, 7, star.name().c_str(), star.name().size(),
 		SQLITE_TRANSIENT);
 	
 	rc = sqlite3_step(stmt);

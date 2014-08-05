@@ -5,7 +5,7 @@
  */
 #include <AstroCatalog.h>
 #include <AstroFormat.h>
-#include <DatabaseCatalog.h>
+#include <CatalogBackend.h>
 #include <Hipparcos.h>
 #include <Tycho2.h>
 #include <Ucac4.h>
@@ -44,7 +44,7 @@ int	main(int argc, char *argv[]) {
 	std::string	databasefilename(argv[optind++]);
 
 	// open the database catalog
-	DatabaseCatalog	database(databasefilename);
+	DatabaseBackend	database(databasefilename);
 	database.clear();
 	int	id = 0;
 	int	counter = 0;
@@ -55,7 +55,7 @@ int	main(int argc, char *argv[]) {
 	Hipparcos::const_iterator	s;
 	for (s = hipparcos.begin(); s != hipparcos.end(); s++) {
 		Star	star = s->second;
-		database.add(id++, star, stringprintf("HIP%u", s->second.hip));
+		database.add(id++, star);
 		counter++;
 		if (0 == (counter % 10000)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from "
@@ -77,7 +77,7 @@ int	main(int argc, char *argv[]) {
 				Star	star = tycho2star;
 				std::string	name = stringprintf("T%u",
 							index);
-				database.add(id++, star, name);
+				database.add(id++, star);
 				counter++;
 				if (0 == (counter % 10000)) {
 					debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -101,7 +101,7 @@ int	main(int argc, char *argv[]) {
 		for (uint32_t number = 1; number <= zone->nstars(); number++) {
 			Ucac4Star	ucac4star = zone->get(number);
 			Star	star = ucac4star;
-			database.add(id++, star, ucac4star.number.toString());
+			database.add(id++, star);
 			counter++;
 			if (0 == (counter % 10000)) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,

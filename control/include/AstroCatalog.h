@@ -64,8 +64,10 @@ public:
  * Stars are celestial objects that in addition have a magnitude
  */
 class Star : public CelestialObject {
+	std::string	_name;
 public:
-	Star() { _mag = 0; }
+	Star(const std::string& name) : _name(name) { _mag = 0; }
+	const std::string	name() const { return _name; }
 	std::string	toString() const;
 };
 
@@ -119,6 +121,7 @@ public:
 	typedef std::shared_ptr<starset>	starsetptr;
 	starsetptr	find(const SkyWindow& window,
 				const MagnitudeRange& magrange);
+	Star	find(const std::string& name);
 };
 
 } // namespace catalog

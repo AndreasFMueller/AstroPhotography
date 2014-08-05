@@ -139,5 +139,32 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	return resultptr;
 }
 
+Star	FileBackend::find(const std::string& name) {
+	// check for Hipparcos stars
+	if (name.substr(0, 3) == "HIP") {
+		Hipparcos	catalog(hipparcosfile);
+		HipparcosStar	hstar = catalog.find(std::stoi(name.substr(3)));
+		Star	star = hstar;
+		return star;
+	}
+
+	// check for Tycho2 star
+	if (name.substr(0, 1) == "T") {
+		Tycho2	catalog(tycho2file);
+		Tycho2Star	tstar = catalog.find(std::stoi(name.substr(1)));
+		Star	star = tstar;
+		return star;
+	}
+
+	// check for Ucac4 star
+	if (name.substr(0, 5) == "UCAC4") {
+		Ucac4	catalog(ucac4dir);
+		Ucac4Star	ustar = catalog.find(name);
+		Star	star = ustar;
+		return star;
+	}
+	throw std::runtime_error("unkonwn star name");
+}
+
 } // namespace catalog
 } // namespace astro

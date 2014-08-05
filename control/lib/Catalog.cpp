@@ -185,5 +185,12 @@ Catalog::starsetptr	Catalog::find(const SkyWindow& window,
 	return backend->find(window, magrange);
 }
 
+/**
+ * \brief Retrieve stars from a compiled catalog
+ */
+Star	Catalog::find(const std::string& name) {
+	return backend->find(name);
+}
+
 } // namespace catalog
 } // namespace astro

@@ -22,7 +22,7 @@ class Tycho2Star : public Star {
 public:
 	bool	isHipparcosStar() const { return _hip >= 0; }
 	int	hip() const { return _hip; }
-	Tycho2Star(const std::string& line);
+	Tycho2Star(int number, const std::string& line);
 };
 
 /**

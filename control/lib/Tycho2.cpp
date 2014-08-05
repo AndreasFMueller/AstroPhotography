@@ -49,7 +49,8 @@ void	Tycho2Star::setup(const std::string& line) {
 	}
 }
 
-Tycho2Star::Tycho2Star(const std::string& line) {
+Tycho2Star::Tycho2Star(int number, const std::string& line)
+	: Star(stringprintf("T%d", number)) {
 	setup(line);
 }
 
@@ -68,7 +69,7 @@ Tycho2Star	Tycho2::find(unsigned int index) const {
 	if (index >= nstars()) {
 		throw std::runtime_error("not that many stars in Tycho2");
 	}
-	return Tycho2Star(get(index));
+	return Tycho2Star(index, get(index));
 }
 
 /**

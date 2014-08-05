@@ -62,8 +62,11 @@ public:
 	float	mag_j, mag_h, mag_k;
 
 	// constructor
-	Ucac4Star(const std::string& starnumber) : number(starnumber) { }
-	Ucac4Star(uint16_t zone, uint32_t _number) : number(zone, _number) { }
+	Ucac4Star(const std::string& starnumber)
+		: Star(starnumber), number(starnumber) { }
+	Ucac4Star(uint16_t zone, uint32_t _number)
+		: Star(Ucac4StarNumber(zone, _number).toString()),
+		  number(zone, _number) { }
 
 	// additional methods
 	std::string	toString() const;

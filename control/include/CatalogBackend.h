@@ -25,6 +25,7 @@ public:
 	~CatalogBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
+	virtual Star	find(const std::string& name);
 };
 
 /**
@@ -40,6 +41,7 @@ public:
 	~FileBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
+	virtual Star	find(const std::string& name);
 };
 
 /**
@@ -52,8 +54,9 @@ public:
 	~DatabaseBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
-	void	add(int id, const Star& star, const std::string& name);
+	void	add(int id, const Star& star);
 	void	clear();
+	virtual Star	find(const std::string& name);
 };
 
 } // namespace catalog

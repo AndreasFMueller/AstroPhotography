@@ -21,7 +21,8 @@ namespace catalog {
  * \param line	The line is a 451 character long record containing the star
  *		information in text form
  */
-HipparcosStar::HipparcosStar(const std::string& line) {
+HipparcosStar::HipparcosStar(const std::string& line)
+	: Star(stringprintf("HIP%u", std::stoi(std::string(line, 8, 6)))) {
 	hip = std::stoi(std::string(line, 8, 6));
 	ra().hours(std::stoi(line.substr(17, 2))
 		+ std::stoi(line.substr(20, 2)) / 60.
