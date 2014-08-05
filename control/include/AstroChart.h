@@ -33,7 +33,7 @@ public:
 /**
  * \brief Chart abstraction
  *
- * class to produce charts for sets of stars
+ * Class to produce charts for sets of stars. 
  */
 class Chart {
 private:
@@ -79,7 +79,11 @@ public:
  * \brief DiffractionChart
  *
  * Chart built based on the assumption that star images are only modified
- * by diffraction into an Airy disk
+ * by diffraction into an Airy disk. To compute the diffraction pattern,
+ * the aperture must be known. This model is only useful for extremely
+ * good atmospheric conditions (perfect seeing), and small apertures, as
+ * for large apertures the size of the airy disk is probably on the order
+ * of the pixels of the camera.
  */
 class DiffractionChart : public Chart {
 	double	_aperture;
@@ -96,6 +100,11 @@ public:
 
 /**
  * \brief TurbulenceChart
+ *
+ * The TurbulenceChart assumes that the main reason stars are not points is
+ * seeing. This is probably what you one expects in near civilization 
+ * viewing conditions. The FWHM of the seeing disk is given by the turbulence
+ * parameter.
  */
 class TurbulenceChart : public Chart {
 	double	_turbulence;

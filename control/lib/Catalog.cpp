@@ -118,6 +118,18 @@ std::string	Star::toString() const {
 }
 
 //////////////////////////////////////////////////////////////////////
+// DeepSkyObject implementation
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief string representation of a DeepSkyObject
+ */
+std::string	DeepSkyObject::toString() const {
+	return stringprintf("%s: %s %s %.2f (%s)", name.c_str(),
+			ra().hms().c_str(), dec().dms().c_str(), mag(),
+			constellation.c_str());
+}
+
+//////////////////////////////////////////////////////////////////////
 // MagnitudeRange implementation
 //////////////////////////////////////////////////////////////////////
 std::string	MagnitudeRange::toString() const {

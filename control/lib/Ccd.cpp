@@ -294,6 +294,9 @@ astro::image::ImagePtr	Ccd::getImage() {
 	// add exposure meta data
 	exposure.addToImage(*image);
 
+	// XXX if available, position information from the mount should
+	//     also be added
+
 	// that's it, return the image
 	return image;
 }

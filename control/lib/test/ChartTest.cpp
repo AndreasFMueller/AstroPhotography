@@ -69,7 +69,7 @@ void	ChartTest::testImage() {
 	chart.maxradius(7);
 	//chart.aperture(0.280);
 	chart.turbulence(2);
-	chart.scale(50);
+	chart.scale(500);
 	//chart.logarithmic(true);
 
 	// extract the window 

@@ -51,6 +51,11 @@ public:
 	const RaDec&	pm() const { return _pm; }
 	RaDec&	pm() { return _pm; }
 	RaDec	position(const double epoch) const;
+protected:
+	float	_mag;
+public:
+	const float&	mag() const { return _mag; }
+	float&	mag() { return _mag; }
 };
 
 /**
@@ -59,12 +64,25 @@ public:
  * Stars are celestial objects that in addition have a magnitude
  */
 class Star : public CelestialObject {
-protected:
-	float	_mag;
 public:
-	const float&	mag() const { return _mag; }
-	float&	mag() { return _mag; }
 	Star() { _mag = 0; }
+	std::string	toString() const;
+};
+
+/**
+ * \brief Deep Sky objects
+ */
+class DeepSkyObject : public CelestialObject {
+public:
+	DeepSkyObject() { _mag = 0; }
+	std::string	name;
+	std::string	constellation;
+	typedef enum { Galaxy, OpenCluster, GlobularCluster, BrightNebula,
+			PlanetaryNebula, ClusterNebulosity, Asterism,
+			Knot, TripleStar, DoubleStar, SingleStar, Uncertain,
+			Unidentified, Nonexistent, PlateDefect } object_class;
+	object_class	classification;
+	Angle	size;
 	std::string	toString() const;
 };
 
