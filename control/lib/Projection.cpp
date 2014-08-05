@@ -15,6 +15,11 @@ namespace project {
 // Projection implementation
 //////////////////////////////////////////////////////////////////////
 
+Projection::Projection(double angle, const Point& translation,
+	double scalefactor) 
+	: Transform(angle, translation, scalefactor) {
+}
+
 float	Projection::w(float r) const {
 	float	x = r * r;
 	return 1. + x * (b[0] + x * b[1]);

@@ -25,6 +25,8 @@ class Projection : public astro::image::transform::Transform {
 	float	w(float r) const;
 public:
 	Projection();
+	Projection(double angle, const Point& translation,
+                double scalefactor = 1);
 	Point	operator()(const Point& p) const;
 };
 
@@ -39,7 +41,7 @@ class ProjectionAdapter : public ConstImageAdapter<Pixel> {
 	Point	targetcenter;
 public:
 	ProjectionAdapter(const ImageSize targetsize,
-		const ConstImageAdapter<float>& _image,
+		const ConstImageAdapter<Pixel>& _image,
 		const Projection& _projection)
 		: ConstImageAdapter<Pixel>(targetsize), image(_image),
 		  projection(_projection) {
@@ -52,8 +54,39 @@ public:
 template<typename Pixel>
 const Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	Point	p(x - center.x(), y - center.y());
-	return image(projection(p) + targetcenter);
+	return image.pixel(projection(p) + targetcenter);
 }
+
+/**
+ * \brief Residuals needed to analyze transforms
+ */
+class Residual : public std::pair<ImagePoint, Point> {
+public:
+	Residual(const ImagePoint& _from, const Point& _offset)
+		: std::pair<ImagePoint, Point>(_from, _offset) {
+	}
+	const ImagePoint&	from() const { return first; }
+	ImagePoint&	from() { return first; }
+	const Point&	offset() const { return second; }
+	Point&	offset() { return second; }
+};
+
+/**
+ * \brief Analysis of a transformation
+ */
+class ProjectionAnalyzer {
+	const ConstImageAdapter<double>& baseimage;
+	unsigned int	spacing;
+	unsigned int	patchsize;
+public:
+	ProjectionAnalyzer(const ConstImageAdapter<double>& _baseimage,
+		unsigned int _spacing = 128, unsigned int _patchsize = 128)
+                : baseimage(_baseimage),
+                  spacing(_spacing), patchsize(_patchsize)  {
+	}
+        std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
+};
+
 
 } // namespace project
 } // namespace image
