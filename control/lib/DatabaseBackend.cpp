@@ -4,6 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CatalogBackend.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace catalog {
@@ -16,7 +17,6 @@ DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
 
 	// prepare a query to find out whether the table already exists
 	int	rc;
-	sqlite3_stmt	*stmt;
 	const char	*tail;
 	std::string	table_query(	"select count(*) "
 					"from sqlite_master "
@@ -44,6 +44,7 @@ DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
 
 	// cleanup
 	sqlite3_finalize(stmt);
+	stmt = NULL;
 
 	// check whether table exists
 	if (count == 1) {
@@ -177,11 +178,14 @@ Star	DatabaseBackend::find(const std::string& name) {
 }
 
 /**
- * \brief add a star to the catalog
+ * \brief prepare the insert statement
  */
-void	DatabaseBackend::add(int id, const Star& star) {
+void	DatabaseBackend::prepare() {
+	if (NULL != stmt) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "statement already prepared");
+		return;
+	}
 	int	rc;
-	sqlite3_stmt	*stmt;
 	const char	*tail;
 	std::string	insert_query(
 		"insert into star (id, ra, dec, pmra, pmdec, mag, name) "
@@ -191,21 +195,67 @@ void	DatabaseBackend::add(int id, const Star& star) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"cannot prepare insert query [%s]: %d",
 			insert_query.c_str(), rc);
+		stmt = NULL;
 		throw std::runtime_error("cannot prepare insert");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "insert query '%s' prepared",
+		insert_query.c_str());
+}
+
+/**
+ * \brief Clean up the prepare statement
+ */
+void	DatabaseBackend::finalize() {
+	if (NULL == stmt) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no statement to finalize");
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "finalizing insert statement");
+	sqlite3_finalize(stmt);
+	stmt = NULL;
+}
+
+/**
+ * \brief add a star to the catalog
+ */
+void	DatabaseBackend::add(int id, const Star& star) {
+	int	rc;
+	bool	cleanup_needed = false;
+	if (NULL == stmt) {
+		prepare();
+		cleanup_needed = true;
 	}
 
 	// bind the values from the star
-	sqlite3_bind_int(stmt, 1, id);
-	sqlite3_bind_double(stmt, 2, star.ra().hours());
-	sqlite3_bind_double(stmt, 3, star.dec().degrees());
-	sqlite3_bind_double(stmt, 4, star.pm().ra().hours());
-	sqlite3_bind_double(stmt, 5, star.pm().dec().degrees());
-	sqlite3_bind_double(stmt, 6, star.mag());
-	sqlite3_bind_text(stmt, 7, star.name().c_str(), star.name().size(),
-		SQLITE_TRANSIENT);
+#define	ADD_BIND_ERROR							\
+	if (rc != SQLITE_OK) {						\
+		std::string	msg = stringprintf("cannot bind: %d", rc);\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());	\
+		throw std::runtime_error(msg);				\
+	}
+	rc = sqlite3_bind_int(stmt, 1, id);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 2, star.ra().hours());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 3, star.dec().degrees());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 4, star.pm().ra().hours());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 5, star.pm().dec().degrees());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 6, star.mag());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_text(stmt, 7, star.name().c_str(), star.name().size(),
+		SQLITE_STATIC);
+	ADD_BIND_ERROR;
 	
 	rc = sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+	sqlite3_reset(stmt); // needed to reuse the statment for another insert
+
+	if (cleanup_needed) {
+		finalize();
+	}
+
 	if ((rc != SQLITE_OK) && (rc != SQLITE_DONE)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot insert: %d", rc);
 		throw std::runtime_error("cannot insert star");

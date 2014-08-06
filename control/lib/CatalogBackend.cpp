@@ -21,5 +21,9 @@ Catalog::starsetptr	CatalogBackend::find(const SkyWindow& window,
 	throw std::runtime_error("find method must be overridden");
 }
 
+Star	CatalogBackend::find(const std::string& name) {
+	throw std::runtime_error("find method must be overridden");
+}
+
 } // namespace catalog
 } // namespace astro

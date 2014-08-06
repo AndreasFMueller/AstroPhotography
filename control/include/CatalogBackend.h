@@ -49,12 +49,15 @@ public:
  */
 class DatabaseBackend : public CatalogBackend {
 	sqlite3	*db;
+	sqlite3_stmt	*stmt;
 public:
 	DatabaseBackend(const std::string& dbfilename);
 	~DatabaseBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
+	void	prepare();
 	void	add(int id, const Star& star);
+	void	finalize();
 	void	clear();
 	virtual Star	find(const std::string& name);
 };

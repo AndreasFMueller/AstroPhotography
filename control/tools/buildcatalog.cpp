@@ -46,6 +46,7 @@ int	main(int argc, char *argv[]) {
 	// open the database catalog
 	DatabaseBackend	database(databasefilename);
 	database.clear();
+	database.prepare();
 	int	id = 0;
 	int	counter = 0;
 
@@ -111,6 +112,8 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Ucac4", counter);
+
+	database.finalize();
 
 	return EXIT_SUCCESS;
 }
