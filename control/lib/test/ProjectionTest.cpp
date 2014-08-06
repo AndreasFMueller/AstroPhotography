@@ -12,7 +12,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
 
-using namespace astro::image::project;
+using namespace astro::image::transform;
 using namespace astro::io;
 using namespace astro::adapter;
 

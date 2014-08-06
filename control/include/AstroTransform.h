@@ -85,13 +85,23 @@ ImagePtr	translate(ImagePtr source, const Point& translation);
 
 /**
  * \brief Adapter to interpolate pixels
+ *
+ * If the pixel type allows NaNs, then pixels that are mapped outside the
+ * original image are given NaN values. This allows e.g. the Analyzer to
+ * to detect when there is no data to compute a residual.
  */
 template<typename Pixel>
 class PixelInterpolationAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
+	Pixel	defaultpixel;
 public:
 	PixelInterpolationAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
+		if (std::numeric_limits<Pixel>::has_quiet_NaN) {
+			defaultpixel = std::numeric_limits<Pixel>::quiet_NaN();
+		} else {
+			defaultpixel = Pixel(0);
+		}
 	}
 	const Pixel	pixel(const astro::Point& t) const {
 		// find out in which pixel this is located
@@ -117,25 +127,25 @@ public:
 		if (size.contains(tx    , ty    )) {
 			a[0] = image.pixel(tx    , ty    );
 		} else {
-			a[0] = Pixel(0);
+			a[0] = defaultpixel;
 		}
 		// lower right corner
 		if (size.contains(tx + 1, ty    )) {
 			a[1] = image.pixel(tx + 1, ty    );
 		} else {
-			a[1] = Pixel(0);
+			a[1] = defaultpixel;
 		}
 		// upper left corner
 		if (size.contains(tx    , ty + 1)) {
 			a[2] = image.pixel(tx    , ty + 1);
 		} else {
-			a[2] = Pixel(0);
+			a[2] = defaultpixel;
 		}
 		// upper right corner
 		if (size.contains(tx + 1, ty + 1)) {
 			a[3] = image.pixel(tx + 1, ty + 1);
 		} else {
-			a[3] = Pixel(0);
+			a[3] = defaultpixel;
 		}
 		return weighted_sum(4, weights, a);
 	}
@@ -157,6 +167,7 @@ public:
 	const Point&	offset() const { return second; }
 	Point&	offset() { return second; }
 	bool	invalid() const;
+	bool	valid() const { return !invalid(); }
 };
 
 /**
@@ -196,6 +207,10 @@ public:
 	Transform	operator+(const Point& translation) const;
 	Transform	operator+(const astro::image::ImagePoint& translation)
 				const;
+
+	// access to the coefficients
+	double	operator[](int i) const;
+	double&	operator[](int i);
 
 	// operating on points 
 	Point	operator()(const Point& point) const;

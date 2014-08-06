@@ -50,7 +50,10 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 				translation.toString().c_str());
 
 			// add the residual to the result set
-			result.push_back(Residual(frompoint, translation));
+			Residual	residual(frompoint, translation);
+			if (residual.valid()) {
+				result.push_back(residual);
+			}
 		}
 	}
 

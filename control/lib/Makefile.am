@@ -35,7 +35,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
-	Transform.cpp Projection.cpp Residual.cpp \
+	Transform.cpp Projection.cpp Residual.cpp ProjectionCorrector.cpp \
 	PhaseCorrelator.cpp Analyzer.cpp TransformAnalyzer.cpp Stacker.cpp \
 	Tracker.cpp Guider.cpp ThreadBase.cpp \
 	GuidingProcess.cpp GuiderStateMachine.cpp \

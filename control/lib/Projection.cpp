@@ -5,11 +5,9 @@
  */
 #include <AstroProjection.h>
 
-using namespace astro::image::transform;
-
 namespace astro {
 namespace image {
-namespace project {
+namespace transform {
 
 //////////////////////////////////////////////////////////////////////
 // Projection implementation
@@ -20,8 +18,8 @@ Projection::Projection(double angle, const Point& translation,
 	: Transform(angle, translation, scalefactor) {
 }
 
-float	Projection::w(float r) const {
-	float	x = r * r;
+double	Projection::w(double r) const {
+	double	x = r * r;
 	return 1. + x * (b[0] + x * b[1]);
 }
 
@@ -32,6 +30,26 @@ Projection::Projection() {
 Point	Projection::operator()(const Point& p) const {
 	Point	result = Transform::operator()(p);
 	return result * (double)w(result.abs());
+}
+
+double	Projection::operator[](int i) const {
+	if (i < 6) {
+		return Transform::operator[](i);
+	}
+	if (i < 8) {
+		return b[i - 6];
+	}
+	throw std::range_error("out of range");
+}
+
+double&	Projection::operator[](int i) {
+	if (i < 6) {
+		return Transform::operator[](i);
+	}
+	if (i < 8) {
+		return b[i - 6];
+	}
+	throw std::range_error("out of range");
 }
 
 } // namespace project

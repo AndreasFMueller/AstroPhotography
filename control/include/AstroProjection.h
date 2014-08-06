@@ -12,7 +12,7 @@
 
 namespace astro {
 namespace image {
-namespace project {
+namespace transform {
 
 /**
  * \brief A projection
@@ -20,14 +20,16 @@ namespace project {
  * Projections are affine transformations composed with a radius dependent
  * homothety.
  */
-class Projection : public astro::image::transform::Transform {
-	float	b[2];
-	float	w(float r) const;
+class Projection : public Transform {
+	double	b[2];
+	double	w(double r) const;
 public:
 	Projection();
 	Projection(double angle, const Point& translation,
                 double scalefactor = 1);
 	Point	operator()(const Point& p) const;
+	double	operator[](int i) const;
+	double&	operator[](int i);
 };
 
 /**
@@ -35,7 +37,7 @@ public:
  */
 template<typename Pixel>
 class ProjectionAdapter : public ConstImageAdapter<Pixel> {
-	const astro::image::transform::PixelInterpolationAdapter<Pixel> image;
+	const PixelInterpolationAdapter<Pixel> image;
 	Projection	projection;
 	Point	center;
 	Point	targetcenter;
@@ -56,6 +58,22 @@ const Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) cons
 	Point	p(x - center.x(), y - center.y());
 	return image.pixel(projection(p) + targetcenter);
 }
+
+/**
+ * \brief Correct a projection from a list of Residuals
+ */
+class ProjectionCorrector {
+	ImageSize	size;
+	Projection	projection;
+	const std::vector<Residual>&	residuals;
+public:
+	ProjectionCorrector(const ImageSize& _size,
+		const Projection& _projection,
+		const std::vector<Residual>& _residuals)
+		: size(_size), projection(_projection), residuals(_residuals) {
+	}
+	Projection	corrected() const;
+};
 
 } // namespace project
 } // namespace image

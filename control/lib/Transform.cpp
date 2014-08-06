@@ -403,6 +403,20 @@ Transform	Transform::operator+(const ImagePoint& translation) const {
 	return operator+(Point(translation));
 }
 
+double	Transform::operator[](int i) const {
+	if ((i < 0) || (i > 5)) {
+		throw std::range_error("out of range");
+	}
+	return a[i];
+}
+
+double&	Transform::operator[](int i) {
+	if ((i < 0) || (i > 5)) {
+		throw std::range_error("out of range");
+	}
+	return a[i];
+}
+
 Point	Transform::operator()(const Point& point) const {
 	return Point(
 		a[0] * point.x() + a[1] * point.y() + a[2],
