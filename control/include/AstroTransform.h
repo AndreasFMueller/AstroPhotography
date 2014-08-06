@@ -145,6 +145,21 @@ public:
 };
 
 /**
+ * \brief Residuals needed to analyze transforms
+ */
+class Residual : public std::pair<ImagePoint, Point> {
+public:
+	Residual(const ImagePoint& _from, const Point& _offset)
+		: std::pair<ImagePoint, Point>(_from, _offset) {
+	}
+	const ImagePoint&	from() const { return first; }
+	ImagePoint&	from() { return first; }
+	const Point&	offset() const { return second; }
+	Point&	offset() { return second; }
+	bool	invalid() const;
+};
+
+/**
  * \brief Abstraction of an affine transform
  */
 
@@ -156,8 +171,11 @@ public:
 	Transform(const Transform& other);
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
+#if 0
 	Transform(const std::vector<Point>& frompoints,
 		const std::vector<Point>& topoints);
+#endif
+	Transform(const std::vector<Residual>& residuals);
 
 	// check whether this is a certain type of transform
 	bool	isIdentity() const;
@@ -253,19 +271,30 @@ public:
 };
 
 /**
- * \brief Find a general transformation between
+ * \brief Analysis of a transformation and get a list of 
  */
-class TransformAnalyzer {
+class Analyzer {
 	const ConstImageAdapter<double>& baseimage;
 	unsigned int	spacing;
 	unsigned int	patchsize;
 public:
+	Analyzer(const ConstImageAdapter<double>& _baseimage,
+		unsigned int _spacing = 128, unsigned int _patchsize = 128)
+                : baseimage(_baseimage),
+                  spacing(_spacing), patchsize(_patchsize)  {
+	}
+        std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
+};
+
+/**
+ * \brief Find a general transformation between
+ */
+class TransformAnalyzer : public Analyzer {
+public:
 	TransformAnalyzer(const ConstImageAdapter<double>& _baseimage,
 		unsigned int _spacing = 128, unsigned int _patchsize = 128)
-		: baseimage(_baseimage),
-		  spacing(_spacing), patchsize(_patchsize)  {
-	}
-	Transform	operator()(const ConstImageAdapter<double>& image) const;
+		: Analyzer(_baseimage, _spacing, _patchsize) { }
+	Transform	transform(const ConstImageAdapter<double>& image) const;
 };
 
 } // namespace transform

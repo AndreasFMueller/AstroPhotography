@@ -35,8 +35,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
-	Transform.cpp Projection.cpp \
-	PhaseCorrelator.cpp TransformAnalyzer.cpp Stacker.cpp \
+	Transform.cpp Projection.cpp Residual.cpp \
+	PhaseCorrelator.cpp Analyzer.cpp TransformAnalyzer.cpp Stacker.cpp \
 	Tracker.cpp Guider.cpp ThreadBase.cpp \
 	GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
@@ -74,7 +74,6 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	NGCIC.cpp \
 	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
 	SkyRectangle.cpp Chart.cpp \
-	ProjectionAnalyzer.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

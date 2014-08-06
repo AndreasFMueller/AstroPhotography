@@ -15,8 +15,11 @@ namespace transform {
 /**
  * \brief Get the transform from the base image to the argument image
  */
-Transform	TransformAnalyzer::operator()(
+Transform	TransformAnalyzer::transform(
 			const ConstImageAdapter<double>& image) const {
+	std::vector<Residual>	residuals = (*this)(image);
+
+#if 0
 	// compute a suiteable grid of points where we want to phase
 	// correlate
 	int	hsteps = ((image.getSize().width() - spacing) / 2) / spacing;
@@ -62,6 +65,8 @@ Transform	TransformAnalyzer::operator()(
 
 	// compute the transform from the two sets of points
 	return Transform(frompoints, topoints);
+#endif
+	return Transform(residuals);
 }
 
 } // namespace transform

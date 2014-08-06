@@ -59,23 +59,20 @@ void	TransformTest::testIdentity() {
 
 void	TransformTest::testPoints() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point test");
-	Point	P1(0, 0);
-	Point	P2(1, 0);
-	Point	P3(1, 1);
-	std::vector<Point>	frompoints;
-	frompoints.push_back(P1);
-	frompoints.push_back(P2);
-	frompoints.push_back(P3);
+	ImagePoint	P1(0, 0);
+	ImagePoint	P2(1, 0);
+	ImagePoint	P3(1, 1);
 
 	Point	Q1(2, 3);
 	Point	Q2(2, 4);
 	Point	Q3(1, 4);
-	std::vector<Point>	topoints;
-	topoints.push_back(Q1);
-	topoints.push_back(Q2);
-	topoints.push_back(Q3);
+
+	std::vector<Residual>	residuals;
+	residuals.push_back(Residual(P1, Q1));
+	residuals.push_back(Residual(P2, Q2));
+	residuals.push_back(Residual(P3, Q3));
 	
-	Transform	t1(frompoints, topoints);
+	Transform	t1(residuals);
 	Transform	t2(M_PI/2, Point(2, 3));
 	CPPUNIT_ASSERT(t1 == t2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point test complete");
@@ -115,23 +112,20 @@ void	TransformTest::testAnglePreserving() {
 
 void	TransformTest::testAreaPreserving() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "area preserving test");
-	Point	P1(0, 0);
-	Point	P2(1, 0);
-	Point	P3(1, 1);
-	std::vector<Point>	frompoints;
-	frompoints.push_back(P1);
-	frompoints.push_back(P2);
-	frompoints.push_back(P3);
+	ImagePoint	P1(0, 0);
+	ImagePoint	P2(1, 0);
+	ImagePoint	P3(1, 1);
 
 	Point	Q1(0, 0);
 	Point	Q2(1, 0);
 	Point	Q3(0, 1);
-	std::vector<Point>	topoints;
-	topoints.push_back(Q1);
-	topoints.push_back(Q2);
-	topoints.push_back(Q3);
+
+	std::vector<Residual>	residuals;
+	residuals.push_back(Residual(P1, Q1));
+	residuals.push_back(Residual(P2, Q2));
+	residuals.push_back(Residual(P3, Q3));
 	
-	Transform	t1(frompoints, topoints);
+	Transform	t1(residuals);
 	CPPUNIT_ASSERT(t1.isAreaPreserving());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "area preserving test complete");
 }

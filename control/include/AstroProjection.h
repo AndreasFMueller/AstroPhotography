@@ -57,37 +57,6 @@ const Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) cons
 	return image.pixel(projection(p) + targetcenter);
 }
 
-/**
- * \brief Residuals needed to analyze transforms
- */
-class Residual : public std::pair<ImagePoint, Point> {
-public:
-	Residual(const ImagePoint& _from, const Point& _offset)
-		: std::pair<ImagePoint, Point>(_from, _offset) {
-	}
-	const ImagePoint&	from() const { return first; }
-	ImagePoint&	from() { return first; }
-	const Point&	offset() const { return second; }
-	Point&	offset() { return second; }
-};
-
-/**
- * \brief Analysis of a transformation
- */
-class ProjectionAnalyzer {
-	const ConstImageAdapter<double>& baseimage;
-	unsigned int	spacing;
-	unsigned int	patchsize;
-public:
-	ProjectionAnalyzer(const ConstImageAdapter<double>& _baseimage,
-		unsigned int _spacing = 128, unsigned int _patchsize = 128)
-                : baseimage(_baseimage),
-                  spacing(_spacing), patchsize(_patchsize)  {
-	}
-        std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
-};
-
-
 } // namespace project
 } // namespace image
 } // namespace astro

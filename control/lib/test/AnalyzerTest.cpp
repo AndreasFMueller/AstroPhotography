@@ -1,5 +1,5 @@
 /*
- * ProjectionAnalyzerTest.cpp
+ * AnalyzerTest.cpp
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -12,34 +12,34 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
 
-using namespace astro::image::project;
+using namespace astro::image::transform;
 using namespace astro::adapter;
 using namespace astro::io;
 
 namespace astro {
 namespace test {
 
-class ProjectionAnalyzerTest : public CppUnit::TestFixture {
+class AnalyzerTest : public CppUnit::TestFixture {
 private:
 public:
 	void	setUp();
 	void	tearDown();
 	void	testResiduals();
 
-	CPPUNIT_TEST_SUITE(ProjectionAnalyzerTest);
+	CPPUNIT_TEST_SUITE(AnalyzerTest);
 	CPPUNIT_TEST(testResiduals);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(ProjectionAnalyzerTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(AnalyzerTest);
 
-void	ProjectionAnalyzerTest::setUp() {
+void	AnalyzerTest::setUp() {
 }
 
-void	ProjectionAnalyzerTest::tearDown() {
+void	AnalyzerTest::tearDown() {
 }
 
-void	ProjectionAnalyzerTest::testResiduals() {
+void	AnalyzerTest::testResiduals() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testResiduals() begin");
 	// read the chart image
 	FITSinfile<float>	chart("deneb-chart.fits");
@@ -51,7 +51,7 @@ void	ProjectionAnalyzerTest::testResiduals() {
 	Image<double>	*image2 = projected.read();
 
 	// compute the residuals
-	ProjectionAnalyzer	analyzer(base);
+	Analyzer	analyzer(base);
 	std::vector<Residual>	residuals = analyzer(*image2);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d residuals", residuals.size());

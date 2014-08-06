@@ -84,6 +84,7 @@ Transform::Transform(double angle, const Point& translation, double scale) {
 	a[5] = translation.y();
 }
 
+#if 0
 /**
  * \brief Find the optimal transform from one set of points to the other
  */
@@ -139,6 +140,98 @@ Transform::Transform(const std::vector<Point>& frompoints,
 		A[i + 5 * m] = 1;
 
                 b[i] = toi->y();
+
+		i++;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of equations: %d", i);
+
+	// solve the linear system
+	char	trans = 'N';
+	int	n = 6;
+	int	nrhs = 1;
+	int	lda = m;
+	int	ldb = m;
+	int	lwork = -1;
+	int	info = 0;
+
+	// first call to dgels is set up to determine the needed size of the
+	// work array.
+	double	x;
+	dgels_(&trans, &m, &n, &nrhs, A, &lda, b, &ldb, &x, &lwork, &info);
+	if (info != 0) {
+		std::string	msg = stringprintf("dgels cannot determine "
+			"work area size: %d", info);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	lwork = x;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "need work area of size %d", lwork);
+
+	// with the correct work array in place, the next call solves the
+	// equations
+	double	work[lwork];
+	dgels_(&trans, &m, &n, &nrhs, A, &lda, b, &ldb, work, &lwork, &info);
+	if (info != 0) {
+		std::string	msg = stringprintf("dgels cannot solve "
+			"equations: %d", info);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// copy result vector
+	for (int i = 0; i < 6; i++) {
+		a[i] = b[i];
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "transformation found: %s",
+		this->toString().c_str());
+}
+#endif
+
+/**
+ * \brief Find the optimal transform from one set of points to the other
+ */
+Transform::Transform(const std::vector<Residual>& residuals) {
+
+	// make sure we have enough points
+	if (residuals.size() < 3) {
+		std::string	msg("need at least three points");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "determine best transformation between two sets of %d points", residuals.size());
+
+	// allocate space for the linear system
+	int	m = 2 * residuals.size();
+	double	A[6 * m];
+	double	b[m];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "A size: %d, b size: %d", 6 * m, m);
+
+	// set up linear system of equations
+	std::vector<Residual>::const_iterator	residual;
+	int	i = 0;
+	for (residual = residuals.begin(); residual != residuals.end();
+		residual++) {
+		// add coefficients to A array
+		A[i        ] = residual->from().x();
+		A[i +     m] = residual->from().y();
+		A[i + 2 * m] = 1;
+		A[i + 3 * m] = 0;
+		A[i + 4 * m] = 0;
+		A[i + 5 * m] = 0;
+
+                b[i] = residual->offset().x();
+
+		i++;
+
+		A[i        ] = 0;
+		A[i +     m] = 0;
+		A[i + 2 * m] = 0;
+		A[i + 3 * m] = residual->from().x();
+		A[i + 4 * m] = residual->from().y();
+		A[i + 5 * m] = 1;
+
+                b[i] = residual->offset().y();
 
 		i++;
 	}

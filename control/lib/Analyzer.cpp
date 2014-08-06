@@ -1,18 +1,18 @@
 /*
- * ProjectionAnalyzer.cpp -- Analyze residuals of a projection
+ * Analyzer.cpp -- Analyze residuals of a transform
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AstroProjection.h>
+#include <AstroTransform.h>
 #include <AstroAdapter.h>
 
 using namespace astro::adapter;
 
 namespace astro {
 namespace image {
-namespace project {
+namespace transform {
 
-std::vector<Residual>	ProjectionAnalyzer::operator()(const ConstImageAdapter<double>& image) const {
+std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& image) const {
 	std::vector<Residual>	result;
 
 	// compute a suiteable grid of points where we want to phase
@@ -57,6 +57,6 @@ std::vector<Residual>	ProjectionAnalyzer::operator()(const ConstImageAdapter<dou
 	return result;
 }
 
-} // namespace project
+} // namespace transform
 } // namespace image 
-} // namespace astro
+} // namespace astro
