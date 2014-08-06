@@ -167,6 +167,18 @@ SkyWindow	SkyRectangle::containedin() const {
 		newcenter.dec() = (w + delta - height * 0.5) * (-1);
 		return SkyWindow(newcenter, width, height);
 	}
+	throw std::runtime_error("internal error, center not on sphere");
+}
+
+/**
+ * \brief Map a point in the image back to the sphere
+ *
+ * \param p	the point in the image
+ */
+RaDec	SkyRectangle::inverse(const astro::Point& p) const {
+	return RaDec(direction
+			+ rightvector * (p.x() * rightlimit)
+			+ upvector * (p.y() * uplimit));
 }
 
 } // namespace catalog

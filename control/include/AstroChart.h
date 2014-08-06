@@ -28,6 +28,7 @@ public:
 	astro::Point	map(const RaDec& where) const;
 	astro::Point	map2(const RaDec& where) const;
 	SkyWindow	containedin() const;
+	RaDec	inverse(const astro::Point& p) const;
 };
 
 /**

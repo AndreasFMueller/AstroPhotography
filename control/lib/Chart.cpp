@@ -12,6 +12,17 @@ using namespace astro::image;
 namespace astro {
 namespace catalog {
 
+/**
+ * \brief Create a chart object
+ *
+ * The focallength and pixelsize together with the image size give the
+ * angular dimensions of the rectangle on the sky.
+ * \param size		The size of the chart image
+ * \param center	The center of the chart image on the sky, right
+ *			ascension and declination
+ * \param focallength	The focal length of the telescope to simulate
+ * \param pixelsize	The pixel size of the camera
+ */
 Chart::Chart(const ImageSize& size,
 	const RaDec& center, double focallength, double pixelsize)
                 : _focallength(focallength),
@@ -36,6 +47,9 @@ Chart::Chart(const ImageSize& size,
 	// XXX add the center coordinates to the FITS file
 }
 
+/**
+ * \brief Destroy the chart object
+ */
 Chart::~Chart() {
 }
 
@@ -71,6 +85,9 @@ void	Chart::draw(const Catalog::starset& stars) {
 	}
 }
 
+/**
+ * \brief Draw a sets of of stars to the chart
+ */
 void	Chart::draw(const Catalog::starsetptr stars) {
 	Catalog::starset	*starsp
 		= dynamic_cast<Catalog::starset *>(&*stars);

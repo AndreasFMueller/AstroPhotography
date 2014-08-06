@@ -171,10 +171,6 @@ public:
 	Transform(const Transform& other);
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
-#if 0
-	Transform(const std::vector<Point>& frompoints,
-		const std::vector<Point>& topoints);
-#endif
 	Transform(const std::vector<Residual>& residuals);
 
 	// check whether this is a certain type of transform

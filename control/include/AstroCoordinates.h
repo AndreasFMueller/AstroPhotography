@@ -87,12 +87,14 @@ public:
 
 Angle	operator-(const SphericalCoordinates& s1, const SphericalCoordinates& s2);
 
+class Vector;
 class RaDec : public TwoAngles {
 public:
 	RaDec() { }
 	RaDec(const Angle& ra, const Angle& dec) : TwoAngles(ra, dec) { }
 	RaDec(const SphericalCoordinates& spherical)
 		: TwoAngles(spherical.phi(), Angle(M_PI / 2) - spherical.theta()) { }
+	RaDec(const Vector& vector);
 	const Angle&	ra() const { return a1(); }
 	Angle&	ra() { return a1(); }
 	const Angle&	dec() const { return a2(); }
@@ -104,20 +106,37 @@ public:
 	virtual std::string	toString() const;
 };
 
-class	UnitVector {
+//class	UnitVector;
+class	Vector {
+protected:
 	double	_x[3];
+public:
+	Vector();
+	Vector(const double x[3]);
+	Vector	cross(const Vector& other) const;
+	double	x() const { return _x[0]; }
+	double	y() const { return _x[1]; }
+	double	z() const { return _x[2]; }
+	double	abs() const;
+	double	operator*(const Vector& other) const;
+	Vector	operator+(const Vector& other) const;
+	Vector	operator-(const Vector& other) const;
+	Vector	operator-() const;
+	Vector	operator*(double l) const;
+	std::string	toString() const;
+	Vector	normalized() const;
+};
+
+class	UnitVector : public Vector {
 public:
 	UnitVector();
 	UnitVector(const SphericalCoordinates& spherical);
 	UnitVector(const RaDec& radec);
-	double	operator*(const UnitVector& other) const;
-	UnitVector	cross(const UnitVector& other) const;
-	double	x() const { return _x[0]; }
-	double	y() const { return _x[1]; }
-	double	z() const { return _x[2]; }
-	Angle	operator-(const UnitVector& other) const;
-	UnitVector	operator-() const;
-	std::string	toString() const;
+	UnitVector(const double x[3]);
+	UnitVector(const Vector& other);
+	UnitVector&	operator=(const Vector& other);
+	Angle	angle(const UnitVector& other) const;
+	Vector	operator()(const Vector& other) const;
 };
 
 class	AzmAlt : public TwoAngles {
