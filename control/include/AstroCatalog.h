@@ -66,6 +66,8 @@ public:
 class Star : public CelestialObject {
 	std::string	_name;
 public:
+	char	catalog;
+	uint32_t	catalognumber;
 	Star(const std::string& name) : _name(name) { _mag = 0; }
 	const std::string	name() const { return _name; }
 	std::string	toString() const;

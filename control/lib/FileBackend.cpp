@@ -49,7 +49,15 @@ FileBackend::~FileBackend() {
 }
 
 /**
- * \brief
+ * \brief retrieve stars from all catalogs combined
+ *
+ * This method uses the Hipparcos, Tycho-2 and UCAC4 catalogs in that sequence
+ * to get a complete catalog up to magnitude 16. It stops when it can be
+ * sure that the catalog is complete. This will happen when the limiting
+ * magnitude of the request (the magrange.faintest() value) is smaller than
+ * the magnitude up to which the catalog in question is complete. For
+ * magnitutes <= 7, the Hipparcos catalog is complete, for magnitudes <= 10,
+ * the Tycho-2 catalog is complete with very high probability. 
  */
 Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
@@ -57,44 +65,14 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	Catalog::starset	*result = new Catalog::starset;
 	Catalog::starsetptr	resultptr(result);
 
-#define	Hipparcos_Tycho2_Cutover	7.
-#define	Tycho2_Ucac4_Cutover	10.
-
-	// find the range of magnitudes we want to get from the Hipparcos
-	// catalog
-	MagnitudeRange	hiprange = magrange;
-	MagnitudeRange	tycho2range = magrange;
-	MagnitudeRange	ucac4range = magrange;
-	if (magrange.contains(Hipparcos_Tycho2_Cutover)) {
-		hiprange.faintest() = Hipparcos_Tycho2_Cutover;
-		tycho2range.brightest() = Hipparcos_Tycho2_Cutover;
-	}
-	if (magrange.contains(Tycho2_Ucac4_Cutover)) {
-		tycho2range.faintest() = Tycho2_Ucac4_Cutover;
-		ucac4range.brightest() = Tycho2_Ucac4_Cutover;
-	}
-
-	// handle cases that need only part of the catalogs
-	if (magrange.faintest() < Hipparcos_Tycho2_Cutover) {
-		tycho2range = MagnitudeRange(0, 0);
-		ucac4range = MagnitudeRange(0, 0);
-	}
-	if (magrange.brightest() > Hipparcos_Tycho2_Cutover) {
-		hiprange = MagnitudeRange(0, 0);
-	}
-	if (magrange.brightest() > Tycho2_Ucac4_Cutover) {
-		hiprange = MagnitudeRange(0, 0);
-		tycho2range = MagnitudeRange(0, 0);
-	}
-	if (magrange.faintest() < Tycho2_Ucac4_Cutover) {
-		ucac4range = MagnitudeRange(0, 0);
-	}
+#define	Hipparcos_Complete_Magnitude	7.
+#define	Tycho2_Complete_Magnitude	10.
 
 	// if any there are stars requested from the Hipparcos catalog, get them
-	if (!hiprange.empty()) {
+	{
 		// get brightest stars from Hipparcos catalog
 		Hipparcos	catalog(hipparcosfile);
-		Hipparcos::starsetptr	stars = catalog.find(window, hiprange);
+		Hipparcos::starsetptr	stars = catalog.find(window, magrange);
 		Hipparcos::starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			Star	star = *s;
@@ -102,9 +80,18 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 		}
 	}
 
+	// if the faintest magnitude is brighter than the magnitude to
+	// which the Hipparcos catalog is complete, then we can skip 
+	// Tacho-2 and UCAC4
+	if (magrange.faintest() < Hipparcos_Complete_Magnitude) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "faintest magnitude complete "
+			"in Hipparcos catalog");
+		return resultptr;
+	}
+
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
-	if (!tycho2range.empty()) {
+	{
 		Tycho2	catalog(tycho2file);
 		Tycho2::starsetptr	stars = catalog.find(window, magrange);
 		Tycho2::starset::const_iterator	s;
@@ -112,24 +99,28 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 			// only take stars not in the Hipparcos catalog and
 			// brighter than magnitude 10, as we will get the
 			// fainter stars from Ucac4
-			if ((!s->isHipparcosStar()) && (s->mag() < 10)) {
+			if (!s->isHipparcosStar()) {
 				Star	star = *s;
 				result->insert(star);
 			}
 		}
 	}
 
+	// if the faintestmagnitude is bright enough so that the Tycho-2
+	// catalog is complete up to this magnitude, then we can skip UCAC4
+	if (magrange.faintest() < Tycho2_Complete_Magnitude) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "faintest magnitude complete "
+			"in Tycho-2 catalog");
+		return resultptr;
+	}
+
 	// get all matching stars from the UCAC4 catalog
-	if (!ucac4range.empty()) {
+	{
 		Ucac4	catalog(ucac4dir);
 		Ucac4::starsetptr	stars = catalog.find(window, magrange);
 		Ucac4::starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
-			// only take stars fainter than mag 10.0, as the
-			// brighter stars already came from Tycho2.
-			// There is a probability < 0.001 to loose a star due
-			// to the cutoff
-			if (s->mag() > 9.99) {
+			if (!s->hiptyc2) {
 				Star	star = *s;
 				result->insert(star);
 			}
@@ -139,6 +130,9 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	return resultptr;
 }
 
+/**
+ * \brief Get a star from the unified catalogs by name
+ */
 Star	FileBackend::find(const std::string& name) {
 	// check for Hipparcos stars
 	if (name.substr(0, 3) == "HIP") {

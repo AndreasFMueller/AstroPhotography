@@ -5,6 +5,7 @@
  */
 #include <CatalogBackend.h>
 #include <AstroFormat.h>
+#include <Ucac4.h>
 
 namespace astro {
 namespace catalog {
@@ -61,7 +62,8 @@ DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
 					"    pmra double not null, "
 					"    pmdec double not null, "
 					"    mag double not null, "
-					"    name varchar(16) not null, "
+					"    catalog char(1) not null, "
+					"    catalognumber integer not null, "
 					"    primary key(id));");
 	rc = sqlite3_exec(db, create_query.c_str(), NULL, NULL, &errmsg);
 	if (rc != SQLITE_OK) {
@@ -79,6 +81,20 @@ DatabaseBackend::~DatabaseBackend() {
 	sqlite3_close(db);
 }
 
+static std::string	starname(char catalog, uint32_t catalognumber) {
+	switch (catalog) {
+	case 'H':
+		return stringprintf("HIP%u", catalognumber);
+	case 'T':
+		return stringprintf("T%u", catalognumber);
+	case 'U':
+		return stringprintf("UCAC4-%u-%u",
+			catalognumber / 1000000,
+			catalognumber % 1000000);
+	}
+	throw std::runtime_error("unkonwn catalog");
+}
+
 /**
  * \brief Retrieve stars in a window up to a given magnitude
  */
@@ -89,7 +105,8 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
-	std::string	query(	"select ra, dec, pmra, pmdec, mag, name "
+	std::string	query(	"select ra, dec, pmra, pmdec, mag, catalog, "
+				"       catalognumber "
 				"from star "
 				"where mag <= ? and mag >= ? "
 				"  and ? <= ra and ra <= ? "
@@ -119,7 +136,9 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	// execute the query
 	rc = sqlite3_step(stmt);
 	while (rc == SQLITE_OK) {
-		Star	star(std::string((char *)sqlite3_column_text(stmt, 5)));
+		char	catalog = sqlite3_column_text(stmt, 5)[0];
+		uint32_t	catalognumber = sqlite3_column_int(stmt, 6);
+		Star	star(starname(catalog, catalognumber));
 		double	ra = sqlite3_column_double(stmt, 0);
 		star.ra().hours(ra);
 		double	dec = sqlite3_column_double(stmt, 1);
@@ -145,8 +164,19 @@ Star	DatabaseBackend::find(const std::string& name) {
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
-	std::string	query(	"select ra, dec, pmra, pmdec, mag, name "
-				"from star where name = ?");
+
+	char	catalog = name[0];
+	uint32_t	catalognumber;
+	switch (catalog) {
+	case 'H':	catalognumber = std::stoi(name.substr(3)); break;
+	case 'T':	catalognumber = std::stoi(name.substr(1)); break;
+	case 'U':	catalognumber = Ucac4StarNumber(name).catalognumber();
+			break;
+	}
+
+	std::string	query(	"select ra, dec, pmra, pmdec, mag "
+				"from star where catalog = ? "
+				" and catalognumber = ?");
 	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
 		query.size(), &stmt, &tail))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -156,11 +186,14 @@ Star	DatabaseBackend::find(const std::string& name) {
 	}
 
 	// bind the values
-	sqlite3_bind_text(stmt, 1, name.c_str(), name.size(), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, &catalog, 1, SQLITE_STATIC);
+	sqlite3_bind_int(stmt, 2, catalognumber);
 
 	// execute the query
 	rc = sqlite3_step(stmt);
-	Star	star(std::string((char *)sqlite3_column_text(stmt, 5)));
+
+	Star	star(starname(catalog, catalognumber));
+
 	double	ra = sqlite3_column_double(stmt, 0);
 	star.ra().hours(ra);
 	double	dec = sqlite3_column_double(stmt, 1);
@@ -188,8 +221,9 @@ void	DatabaseBackend::prepare() {
 	int	rc;
 	const char	*tail;
 	std::string	insert_query(
-		"insert into star (id, ra, dec, pmra, pmdec, mag, name) "
-		"values (?, ?, ?, ?, ?, ?, ?);");
+		"insert into star (id, ra, dec, pmra, pmdec, mag, catalog, "
+		"                  catalognumber) "
+		"values (?, ?, ?, ?, ?, ?, ?, ?);");
 	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, insert_query.c_str(),
 		insert_query.size(), &stmt, &tail))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -245,15 +279,18 @@ void	DatabaseBackend::add(int id, const Star& star) {
 	ADD_BIND_ERROR;
 	rc = sqlite3_bind_double(stmt, 6, star.mag());
 	ADD_BIND_ERROR;
-	rc = sqlite3_bind_text(stmt, 7, star.name().c_str(), star.name().size(),
-		SQLITE_STATIC);
+	char	catalog = star.catalog;
+	rc = sqlite3_bind_text(stmt, 7, &catalog, 1, SQLITE_STATIC);
 	ADD_BIND_ERROR;
+	rc = sqlite3_bind_int(stmt, 8, star.catalognumber);
 	
 	rc = sqlite3_step(stmt);
-	sqlite3_reset(stmt); // needed to reuse the statment for another insert
 
 	if (cleanup_needed) {
 		finalize();
+	} else {
+		// reset needed to reuse the statement for another insert
+		sqlite3_reset(stmt);
 	}
 
 	if ((rc != SQLITE_OK) && (rc != SQLITE_DONE)) {
@@ -272,6 +309,21 @@ void	DatabaseBackend::clear() {
 	if (rc != SQLITE_OK) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot clear: %s", errmsg);
 		throw std::runtime_error("clear failed");
+	}
+}
+
+/**
+ * \brief Create an Index on RA/DEC to bring performance to an acceptable level
+ */
+void	DatabaseBackend::createindex() {
+	// create the table if necessary
+	char	*errmsg;
+	std::string	query("create index staridx1 on star (dec, ra);");
+	int	rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &errmsg);
+	if (rc != SQLITE_OK) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create index: %s",
+			errmsg);
+		throw std::runtime_error("cannot create index ");
 	}
 }
 

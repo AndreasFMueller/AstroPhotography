@@ -60,6 +60,7 @@ public:
 	void	finalize();
 	void	clear();
 	virtual Star	find(const std::string& name);
+	void	createindex();
 };
 
 } // namespace catalog

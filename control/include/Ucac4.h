@@ -34,6 +34,9 @@ public:
 	bool	operator==(const Ucac4StarNumber& other) const;
 	bool	operator!=(const Ucac4StarNumber& other) const;
 	bool	operator<(const Ucac4StarNumber& other) const;
+	uint32_t	catalognumber() const {
+		return _zone * 1000000 + _number;
+	}
 };
 std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star);
 
@@ -60,6 +63,9 @@ public:
 	// 2MASS information
 	uint32_t	twmass_id;
 	float	mag_j, mag_h, mag_k;
+
+	// whether this is a Hipparcos/Tycho-2 star
+	bool	hiptyc2;
 
 	// constructor
 	Ucac4Star(const std::string& starnumber)

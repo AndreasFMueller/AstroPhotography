@@ -138,6 +138,8 @@ UCAC4_STAR
 static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 				const UCAC4_STAR *star) {
 	Ucac4Star	result(zone, number);
+	result.catalog = 'U';
+	result.catalognumber = zone * 100000000 + number;
 	result.id_number = star->id_number;
 	result.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;
@@ -159,6 +161,8 @@ static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 	result.mag_j = star->mag_j * 0.001;
 	result.mag_h = star->mag_h * 0.001;
 	result.mag_k = star->mag_k * 0.001;
+	int	icf1 = star->catalog_flags % 100000000;
+	result.hiptyc2 = (icf1 == 1) || (icf1 == 3);
 	return result;
 }
 

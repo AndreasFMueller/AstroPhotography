@@ -24,6 +24,8 @@ namespace catalog {
 HipparcosStar::HipparcosStar(const std::string& line)
 	: Star(stringprintf("HIP%u", std::stoi(std::string(line, 8, 6)))) {
 	hip = std::stoi(std::string(line, 8, 6));
+	catalog = 'H';
+	catalognumber = hip;
 	ra().hours(std::stoi(line.substr(17, 2))
 		+ std::stoi(line.substr(20, 2)) / 60.
 		+ std::stod(line.substr(23, 5)) / 3600.);

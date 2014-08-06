@@ -51,8 +51,8 @@ int	main(int argc, char *argv[]) {
 	int	counter = 0;
 
 	// open the hipparcos catalog
+#if 0
 	Hipparcos	hipparcos(hipfile);
-#if 1
 	Hipparcos::const_iterator	s;
 	for (s = hipparcos.begin(); s != hipparcos.end(); s++) {
 		Star	star = s->second;
@@ -64,11 +64,13 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Hipparcos", counter);
+#else
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Hipparcos catalog disabled");
 #endif
 
 	// open the Tycho2 catalog
+#if 0
 	Tycho2	tycho2(tycho2file);
-#if 1
 	unsigned int	index;
 	counter = 0;
 	for (index = 0; index < tycho2.nstars(); index++) {
@@ -92,8 +94,11 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Tycho2", counter);
+#else
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tycho-2 catalog disabled");
 #endif
 
+#if 1
 	// open UCAC4 catalog
 	Ucac4	ucac4(ucac4dir);
 	counter = 0;
@@ -101,19 +106,31 @@ int	main(int argc, char *argv[]) {
 		Ucac4ZonePtr	zone = ucac4.zone(zonenumber);
 		for (uint32_t number = 1; number <= zone->nstars(); number++) {
 			Ucac4Star	ucac4star = zone->get(number);
-			Star	star = ucac4star;
-			database.add(id++, star);
-			counter++;
-			if (0 == (counter % 10000)) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"%d stars added from Ucac4 so far",
-					counter);
+			if (!ucac4star.hiptyc2) {
+				Star	star = ucac4star;
+				database.add(id++, star);
+				counter++;
+				if (0 == (counter % 10000)) {
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"%d stars added from Ucac4 so far",
+						counter);
+				}
 			}
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Ucac4", counter);
+#else
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "UCAC4 catalog disabled");
+#endif
 
 	database.finalize();
+
+	try {
+		database.createindex();
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "error while creating index: %s",
+			x.what());
+	}
 
 	return EXIT_SUCCESS;
 }

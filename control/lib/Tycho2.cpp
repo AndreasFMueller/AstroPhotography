@@ -51,6 +51,8 @@ void	Tycho2Star::setup(const std::string& line) {
 
 Tycho2Star::Tycho2Star(int number, const std::string& line)
 	: Star(stringprintf("T%d", number)) {
+	catalog = 'T';
+	catalognumber = number;
 	setup(line);
 }
 
