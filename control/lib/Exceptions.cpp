@@ -10,8 +10,8 @@
 namespace astro {
 
 runtime_errno::runtime_errno(const char *cause, int unix_errno)
-	: std::runtime_error(stringprintf("%s: %s", cause, strerror(errno))),
-	  _unix_errno(errno) {
+	: std::runtime_error(stringprintf("%s: %s", cause, strerror(unix_errno))),
+	  _unix_errno(unix_errno) {
 }
 
 } // namespace astro
