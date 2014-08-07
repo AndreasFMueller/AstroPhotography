@@ -208,9 +208,16 @@ int __sunriset__( int year, int month, int day, double lon, double lat,
 
 /* The "workhorse" function */
 
+#if __GNUC__
+#define FUNCTION_IS_NOT_USED __attribute__ ((unused))
+#else /* __GNUC__ */
+#define FUNCTION_IS_NOT_USED
+#endif /* __GNUC__ */
 
 static double __daylen__( int year, int month, int day, double lon, double lat,
-                   double altit, int upper_limb )
+                   double altit, int upper_limb ) FUNCTION_IS_NOT_USED;
+static double __daylen__( int year, int month, int day, double lon, double lat,
+                   double altit, int upper_limb ) 
 /**********************************************************************/
 /* Note: year,month,date = calendar date, 1801-2099 only.             */
 /*       Eastern longitude positive, Western longitude negative       */
