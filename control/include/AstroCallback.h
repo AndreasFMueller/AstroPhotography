@@ -34,7 +34,7 @@ typedef	std::shared_ptr<CallbackData>	CallbackDataPtr;
 class Callback {
 public:
 	virtual CallbackDataPtr	operator()(CallbackDataPtr data) {
-		return CallbackDataPtr();
+		return data;
 	}
 };
 

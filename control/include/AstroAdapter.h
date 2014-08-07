@@ -26,7 +26,7 @@ public:
 	IdentityAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
 	}
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y);
 	}
 };
@@ -48,7 +48,7 @@ class WindowAdapter : public ConstImageAdapter<Pixel> {
 public:
 	WindowAdapter(const ConstImageAdapter<Pixel>& image, const ImageRectangle& frame);
 	
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -65,7 +65,7 @@ WindowAdapter<Pixel>::WindowAdapter(const ConstImageAdapter<Pixel>& _image,
  * \bief Access pixel inside the subwindow
  */
 template<typename Pixel>
-const Pixel	WindowAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	WindowAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	return	image.pixel(frame.origin().x() + x, frame.origin().y() + y);
 }
 
@@ -80,7 +80,7 @@ class ConvertingAdapter : public ConstImageAdapter<TargetPixel> {
 	const ConstImageAdapter<SourcePixel>&	 image;
 public:
 	ConvertingAdapter(const ConstImageAdapter<SourcePixel>& image);
-	virtual const TargetPixel	pixel(unsigned int x, unsigned int y) const;
+	virtual TargetPixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename TargetPixel, typename SourcePixel>
@@ -90,7 +90,7 @@ ConvertingAdapter<TargetPixel, SourcePixel>::ConvertingAdapter(
 }
 
 template<typename TargetPixel, typename SourcePixel>
-const TargetPixel	ConvertingAdapter<TargetPixel, SourcePixel>::pixel(unsigned int x, unsigned int y) const {
+TargetPixel	ConvertingAdapter<TargetPixel, SourcePixel>::pixel(unsigned int x, unsigned int y) const {
 	const SourcePixel	t = image.pixel(x, y);
 	// convert to Pixel type
 	TargetPixel	p(t);
@@ -111,7 +111,7 @@ class ConstSubgridAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ConstSubgridAdapter(const ConstImageAdapter<Pixel>& image,
 		const Subgrid& subgrid);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -126,7 +126,7 @@ ConstSubgridAdapter<Pixel>::ConstSubgridAdapter(
 }
 	
 template<typename Pixel>
-const Pixel	ConstSubgridAdapter<Pixel>::pixel(unsigned int x,
+Pixel	ConstSubgridAdapter<Pixel>::pixel(unsigned int x,
 			unsigned int y) const {
 	return image.pixel(subgrid.x(x), subgrid.y(y));
 }
@@ -141,7 +141,7 @@ class SubgridAdapter : public ImageAdapter<Pixel> {
 public:
 	SubgridAdapter(ImageAdapter<Pixel>& image,
 		const Subgrid& subgrid);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 	virtual Pixel&	writablepixel(unsigned int x, unsigned int y);
 };
 
@@ -157,7 +157,7 @@ SubgridAdapter<Pixel>::SubgridAdapter(
 }
 	
 template<typename Pixel>
-const Pixel	SubgridAdapter<Pixel>::pixel(unsigned int x,
+Pixel	SubgridAdapter<Pixel>::pixel(unsigned int x,
 			unsigned int y) const {
 	return image.pixel(subgrid.x(x), subgrid.y(y));
 }
@@ -211,7 +211,7 @@ class AddAdapter : public ArithmeticAdapter<Pixel> {
 public:
 	AddAdapter(const ConstImageAdapter<Pixel>& summand1,
 		const ConstImageAdapter<Pixel>& summand2);
-	virtual const double	pixel(unsigned int x, unsigned int y) const;
+	virtual double	pixel(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -227,7 +227,7 @@ AddAdapter<Pixel>::AddAdapter(const ConstImageAdapter<Pixel>& summand1,
  * \brief Perform the addition
  */
 template<typename Pixel>
-const double	AddAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+double	AddAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	double	result = 0;
 	result += ArithmeticAdapter<Pixel>::operand1.pixel(x, y);
 	result += ArithmeticAdapter<Pixel>::operand2.pixel(x, y);
@@ -239,7 +239,7 @@ class MultiplyAdapter : public ArithmeticAdapter<Pixel> {
 public:
 	MultiplyAdapter(const ConstImageAdapter<Pixel>& summand1,
 		const ConstImageAdapter<Pixel>& summand2);
-	virtual const double	pixel(unsigned int x, unsigned int y) const;
+	virtual double	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -250,7 +250,7 @@ MultiplyAdapter<Pixel>::MultiplyAdapter(
 }
 
 template<typename Pixel>
-const double	MultiplyAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+double	MultiplyAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	double	result = 1;
 	result *= ArithmeticAdapter<Pixel>::operand1.pixel(x, y);
 	result *= ArithmeticAdapter<Pixel>::operand2.pixel(x, y);
@@ -275,7 +275,7 @@ class LaplacianAdapter : public ConstImageAdapter<double> {
 public:
 	LaplacianAdapter(const ConstImageAdapter<Pixel>& image,
 		bool diagonal = false);
-	const double	pixel(unsigned int x, unsigned int y) const;
+	double	pixel(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -301,7 +301,7 @@ LaplacianAdapter<Pixel>::LaplacianAdapter(
  * artefacts do not misrepresent e.g. the focus.
  */
 template<typename Pixel>
-const double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+double	LaplacianAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 			const {
 	double	result = 0;
 	int	counter = 0;
@@ -345,7 +345,7 @@ class FocusFOMAdapter : public ConstImageAdapter<double> {
 public:
 	FocusFOMAdapter(const ConstImageAdapter<Pixel>& image,
 		bool diagonal = false);
-	const double	pixel(unsigned int x, unsigned int y) const;
+	double	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -359,7 +359,7 @@ FocusFOMAdapter<Pixel>::FocusFOMAdapter(const ConstImageAdapter<Pixel>& _image,
 }
 
 template<typename Pixel>
-const double FocusFOMAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+double FocusFOMAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	return -multiply.pixel(x + 1, y + 1);
 }
 
@@ -373,7 +373,7 @@ class MaskingAdapter : public ConstImageAdapter<Pixel> {
 public:
 	MaskingAdapter(const ConstImageAdapter<Pixel>& image,
 		const MaskingFunction& maskingfunction);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -384,7 +384,7 @@ MaskingAdapter<Pixel>::MaskingAdapter(const ConstImageAdapter<Pixel>& _image,
 }
 
 template<typename Pixel>
-const Pixel	MaskingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	MaskingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	Pixel	v = image.pixel(x, y);
 	double m = maskingfunction(x, y);
 	v *= m;
@@ -402,7 +402,7 @@ class CachingAdapter : public ConstImageAdapter<Pixel> {
 public:
 	CachingAdapter(const ConstImageAdapter<Pixel>& image);
 	~CachingAdapter();
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -423,7 +423,7 @@ CachingAdapter<Pixel>::~CachingAdapter() {
 }
 
 template<typename Pixel>
-const Pixel	CachingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	CachingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	// check if a cached value is available
 	unsigned int	offset = ConstImageAdapter<Pixel>::adaptersize.offset(x, y);
 	if (tags[offset]) {
@@ -448,7 +448,7 @@ public:
 	DownSamplingAdapter(const ConstImageAdapter<Pixel>& image,
 		const ImageSize& sampling);
 	virtual	~DownSamplingAdapter();
-	const Pixel	pixel(unsigned int x, unsigned int y) const;
+	Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -474,7 +474,7 @@ DownSamplingAdapter<Pixel>::~DownSamplingAdapter() {
 }
 
 template<typename Pixel>
-const Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
+Pixel	DownSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
 	unsigned int	originx = x * sampling.width();
 	unsigned int	originy = y * sampling.height();
@@ -498,7 +498,7 @@ class UpSamplingAdapter : public ConstImageAdapter<Pixel> {
 public:
 	UpSamplingAdapter(const ConstImageAdapter<Pixel>& image,
 		const ImageSize& sampling);
-	const Pixel	pixel(unsigned int x, unsigned int y) const;
+	Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -511,7 +511,7 @@ UpSamplingAdapter<Pixel>::UpSamplingAdapter(
 }
 
 template<typename Pixel>
-const Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
+Pixel	UpSamplingAdapter<Pixel>::pixel(unsigned int x,
 	unsigned int y) const {
 	return image.pixel(x / sampling.width(), y / sampling.height());
 }
@@ -526,7 +526,7 @@ class LuminanceAdapter : public ConstImageAdapter<T> {
 	const ConstImageAdapter<Pixel>&	image;
 public:
 	LuminanceAdapter(const ConstImageAdapter<Pixel>& image);
-	const T	pixel(unsigned int x, unsigned int y) const;
+	T	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel, typename T>
@@ -536,7 +536,7 @@ LuminanceAdapter<Pixel, T>::LuminanceAdapter(
 }
 
 template<typename Pixel, typename T>
-const T	LuminanceAdapter<Pixel, T>::pixel(unsigned int x,
+T	LuminanceAdapter<Pixel, T>::pixel(unsigned int x,
 			unsigned int y) const {
 	T	v = luminance(image.pixel(x, y));
 	return v;
@@ -554,7 +554,7 @@ class RescalingAdapter : public ConstImageAdapter<Pixel> {
 public:
 	RescalingAdapter(const ConstImageAdapter<Pixel>& image,
 		double _minpixel, double scale);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -565,7 +565,7 @@ RescalingAdapter<Pixel>::RescalingAdapter(const ConstImageAdapter<Pixel>& _image
 }
 
 template<typename Pixel>
-const Pixel	RescalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+Pixel	RescalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
 	const {
 	return (image.pixel(x, y) - zero) * scale;
 }
@@ -584,7 +584,7 @@ class ConstPixelValueAdapter : public ConstImageAdapter<Pixel> {
 	const Image<double>		*doubleimage;
 public:
 	ConstPixelValueAdapter(const ImagePtr& image);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -607,7 +607,7 @@ ConstPixelValueAdapter<Pixel>::ConstPixelValueAdapter(const ImagePtr& image)
 }
 
 template <typename Pixel>
-const Pixel	ConstPixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	ConstPixelValueAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
 	if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
 	if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
@@ -674,7 +674,7 @@ class RGBAdapter : public ConstImageAdapter<RGB<double> > {
 	const ConstImageAdapter<RGB<T> >&	image;
 public:
 	RGBAdapter(const ConstImageAdapter<RGB<T> >& image);
-	const RGB<double>	pixel(unsigned int x, unsigned int y) const;
+	RGB<double>	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename T>
@@ -683,7 +683,7 @@ RGBAdapter<T>::RGBAdapter(const ConstImageAdapter<RGB<T> >& _image)
 }
 
 template<typename T>
-const RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
+RGB<double>	RGBAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 	return RGB<double>(image.pixel(x, y));
 }
 
@@ -697,7 +697,7 @@ protected:
 public:
 	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ConstImageAdapter<T>(image.getSize()), _image(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		T	v = _image.pixel(x, y).luminance();
 		return v;
 	}
@@ -709,7 +709,7 @@ public:
 	using ColorAdapter<T>::_image;
 	ColorRedAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).R;
 	}
 };
@@ -720,7 +720,7 @@ public:
 	using ColorAdapter<T>::_image;
 	ColorGreenAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).G;
 	}
 };
@@ -731,7 +731,7 @@ public:
 	using ColorAdapter<T>::_image;
 	ColorBlueAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).B;
 	}
 };
@@ -742,7 +742,7 @@ public:
 	using ColorAdapter<T>::_image;
 	ColorMaxAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).max();
 	}
 };
@@ -753,7 +753,7 @@ public:
 	using ColorAdapter<T>::_image;
 	ColorMinAdapter(const ConstImageAdapter<RGB<T> >& image)
 		: ColorAdapter<T>(image) { }
-	virtual const T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y).min();
 	}
 };
@@ -766,7 +766,7 @@ class YUYVAdapter : public ConstImageAdapter<RGB<T> > {
 	const ConstImageAdapter<YUYV<T> >&	image;
 public:
 	YUYVAdapter(const ConstImageAdapter<YUYV<T> >& image);
-	virtual const RGB<T>	pixel(unsigned int x, unsigned int y) const;
+	virtual RGB<T>	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename T>
@@ -777,7 +777,7 @@ YUYVAdapter<T>::YUYVAdapter(const ConstImageAdapter<YUYV<T> >& _image)
 }
 
 template<typename T>
-const	RGB<T>	YUYVAdapter<T>::pixel(unsigned int x, unsigned int y) const {
+RGB<T>	YUYVAdapter<T>::pixel(unsigned int x, unsigned int y) const {
 	// get the pixel pair
 	unsigned int	pairx = x - (x % 2);
 	YUYV<T>	yuyvpixels[2];
@@ -812,7 +812,7 @@ public:
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		double	v = image.pixel(x, y);
 		return f(v);
 	}
@@ -830,7 +830,7 @@ class SquareAdapter : public ConstImageAdapter<double> {
 public:
 	SquareAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) { }
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		double	v = image.pixel(x, y);
 		return v * v;
 	}
@@ -852,7 +852,7 @@ public:
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image),
 		  direction(_direction) {
 	}
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
 		
 		switch (direction) {
 		case NONE:
@@ -880,7 +880,7 @@ class MosaicAdapter : public ConstImageAdapter<Pixel> {
 public:
 	MosaicAdapter(const ConstImageAdapter<RGB<Pixel> >& _image,
 		const MosaicType& _mosaic);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -891,7 +891,7 @@ MosaicAdapter<Pixel>::MosaicAdapter(
 }
 
 template<typename Pixel>
-const Pixel	MosaicAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	MosaicAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	if (mosaic.isR(x, y)) {
 		return image.pixel(x, y).R;
 	}
@@ -917,7 +917,7 @@ public:
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating functor adapter");
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		return f(image.pixel(x,y));
 	}
 };
@@ -946,7 +946,7 @@ public:
 		yscaling = _source.size().height() / (double)target.height();
 debug(LOG_DEBUG, DEBUG_LOG, 0, "xscaling = %f, yscaling = %f", xscaling, yscaling);
 	}
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
 		unsigned int	xx = trunc(_source.origin().x() + xscaling * x);
 		unsigned int	yy = trunc(_source.origin().y() + yscaling * y);
 		return _image.pixel(xx, yy);
@@ -970,7 +970,7 @@ public:
 		ConstImageAdapter<unsigned char>(image.getSize()),
 		_image(image), _level(level) {
 	}
-	virtual const unsigned char	pixel(unsigned int x, unsigned int y) const {
+	virtual unsigned char	pixel(unsigned int x, unsigned int y) const {
 		return (_image.pixel(x, y) >= _level) ? 1 : 0;
 	}
 };
@@ -995,7 +995,7 @@ public:
 	HorizontalGradientAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (x >= (image.getSize().width() - 1)) {
 			return 0;
 		}
@@ -1012,7 +1012,7 @@ public:
 	VerticalGradientAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (y >= (image.getSize().height() - 1)) {
 			return 0;
 		}
@@ -1029,7 +1029,7 @@ public:
 	SquaredGradientAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (x >= (image.getSize().width() - 1)) {
 			return 0;
 		}
@@ -1051,7 +1051,7 @@ public:
 	HorizontalBrennerAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (x > (image.getSize().width() - 2)) {
 			return 0;
 		}
@@ -1068,7 +1068,7 @@ public:
 	VerticalBrennerAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (y > (image.getSize().height() - 2)) {
 			return 0;
 		}
@@ -1085,7 +1085,7 @@ public:
 	BrennerAdapter(const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<double>(_image.getSize()), image(_image) {
 	}
-	virtual const double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(unsigned int x, unsigned int y) const {
 		if (x > (image.getSize().width() - 2)) {
 			return 0;
 		}
@@ -1119,7 +1119,7 @@ public:
 			throw std::runtime_error("image sizes don't match");
 		}
 	}
-	virtual const RGB<Pixel>	pixel(unsigned int x, unsigned int y) const {
+	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const {
 		Pixel	r = _red.pixel(x, y);
 		Pixel	g = _green.pixel(x, y);
 		Pixel	b = _blue.pixel(x, y);
@@ -1139,7 +1139,7 @@ public:
 		int _length = 3)
 		: ConstImageAdapter<Pixel>(_size), where(_where),
 		  length(_length) { }
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		int	deltax = x - where.x();
 		int	deltay = y - where.y();
 		if ((deltax != 0) && (deltay != 0)) {
@@ -1167,7 +1167,7 @@ public:
 		double _radius) : ConstImageAdapter<Pixel>(_size),
 				radius(_radius), center(_center) {
 	}
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		if (hypot((double)x - (double)center.x(),
 			(double)y - (double)center.y()) <= radius) {
 			return std::numeric_limits<Pixel>::max() / 2;
@@ -1192,7 +1192,7 @@ public:
 			throw std::runtime_error("images have different size");
 		}
 	}
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	v1 = first.pixel(x, y);
 		Pixel	v2 = second.pixel(x, y);
 		if (v1 > v2) {
@@ -1215,7 +1215,7 @@ public:
 			throw std::runtime_error("images have different size");
 		}
 	}
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	v1 = first.pixel(x, y);
 		Pixel	v2 = second.pixel(x, y);
 		if (v1 > v2) {
@@ -1245,7 +1245,7 @@ public:
 			"create rescale with multiplier %g", multiplier);
 	}
 
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	v = image.pixel(x, y) * multiplier;
 		return v;
 	}
@@ -1260,7 +1260,7 @@ class ConstantValueAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ConstantValueAdapter(const ImageSize& _size, Pixel _value)
 		: ConstImageAdapter<Pixel>(_size), value(_value) { }
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		return value;
 	}
 
@@ -1275,7 +1275,7 @@ class TypeConversionAdapter : public ConstImageAdapter<Pixel> {
 public:
 	TypeConversionAdapter(const ConstImageAdapter<srcPixel>& _image)
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) { }
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	result;
 		if ((std::numeric_limits<Pixel>::is_integer)
 			&& (!std::numeric_limits<srcPixel>::is_integer)) {
@@ -1304,7 +1304,7 @@ public:
 		const ConstImageAdapter<Pixel>& _image)
 		: ConstImageAdapter<Pixel>(size), image(_image) {
 	}
-	const Pixel	pixel(const astro::Point& t) const {
+	Pixel	pixel(const astro::Point& t) const {
 		// find out in which pixel this is located
 		int     tx = floor(t.x());
 		int     ty = floor(t.y());

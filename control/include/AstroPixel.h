@@ -109,7 +109,7 @@ struct Int2Type {
 
 template<typename destValue, typename srcValue, typename sizedifference>
 void	convertPixelInteger(destValue& dest, const srcValue& src,
-	sizedifference x) {
+	sizedifference) {
 	dest = destValue(src);
 }
 
@@ -119,7 +119,7 @@ void	convertPixelInteger(destValue& dest, const srcValue& src,
 #define CONVERT_PIXEL_INTEGER_SHIFT_LEFT(p)				\
 template<typename destValue, typename srcValue>				\
 void	convertPixelInteger(destValue& dest, const srcValue& src,	\
-		Int2Type<p> x) {					\
+		Int2Type<p>) {					\
 	dest = destValue(src) << (p << 3);				\
 }
 CONVERT_PIXEL_INTEGER_SHIFT_LEFT(7)
@@ -133,7 +133,7 @@ CONVERT_PIXEL_INTEGER_SHIFT_LEFT(1)
 #define	CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(p)				\
 template<typename destValue, typename srcValue>				\
 void	convertPixelInteger(destValue& dest, const srcValue& src,	\
-		Int2Type<-p> x) {					\
+		Int2Type<-p>) {					\
 	dest = destValue(src >> (p << 3));				\
 }
 
@@ -264,14 +264,14 @@ struct  color_traits<double> {
 template<typename destPixel, typename srcPixel,
 	typename desttraits, typename srctraits>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const desttraits& dt, const srctraits& ds) {
+		const desttraits&, const srctraits&) {
 	convertPixelValue(dest, src);
 }
 
 /* monochrome -> RGB */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const rgb_color_tag& dt, const monochrome_color_tag& ds) {
+		const rgb_color_tag&, const monochrome_color_tag&) {
 	convertPixelValue(dest.R, src);
 	dest.G = dest.R;
 	dest.B = dest.R;
@@ -280,7 +280,7 @@ void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 /* RGB -> monochrome */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const monochrome_color_tag& dt, const rgb_color_tag& ds) {
+		const monochrome_color_tag&, const rgb_color_tag&) {
 	typename srcPixel::value_type	y;
 	y = src.luminance();
 	convertPixelValue(dest, y);
@@ -289,14 +289,14 @@ void	convertPixelTyped(destPixel& dest, const srcPixel& src,
 /* YUYV -> monochrome */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const monochrome_color_tag& dt, const yuyv_color_tag& ds) {
+		const monochrome_color_tag&, const yuyv_color_tag&) {
 	convertPixelValue(dest, src.y);
 }
 
 /*  monochrome -> YUYV */
 template<typename destPixel, typename srcPixel>
 void	convertPixelTyped(destPixel& dest, const srcPixel& src,
-		const yuyv_color_tag& dt, const monochrome_color_tag& ds) {
+		const yuyv_color_tag&, const monochrome_color_tag&) {
 	convertPixelValue(dest.y, src);
 	dest.uv = destPixel::zero;
 }
@@ -648,7 +648,7 @@ public:
 template<typename destPixel, typename srcPixel,
 	typename desttraits, typename srctraits>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
-		const desttraits& dt, const srctraits& ds) {
+		const desttraits&, const srctraits&) {
 	convertPixel(*dest, *src);
 	dest++; src++;
 	convertPixel(*dest, *src);
@@ -657,7 +657,7 @@ void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 /* conversion RGB --> YUYV */
 template<typename destPixel, typename srcPixel>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
-		const yuyv_color_tag& dt, const rgb_color_tag& ds) {
+		const yuyv_color_tag&, const rgb_color_tag&) {
 	typename srcPixel::value_type	Y, U, V;
 	Y = round( 0.256788 * src[0].R
 		 + 0.504129 * src[0].G
@@ -680,12 +680,12 @@ void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 template<>
 void	convertPixelPairTyped(YUYV<unsigned char> *dest,
 		const RGB<unsigned char> *src,
-		const yuyv_color_tag& dt, const rgb_color_tag& ds);
+		const yuyv_color_tag&, const rgb_color_tag&);
 
 /* conversion YUYV --> RGB */
 template<typename destPixel, typename srcPixel>
 void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
-		const rgb_color_tag& dt, const yuyv_color_tag& ds) {
+		const rgb_color_tag&, const yuyv_color_tag&) {
 	double	C, D, E;
 	typename srcPixel::value_type	R, G, B;
 	typename srcPixel::value_type	lower;
@@ -719,7 +719,7 @@ void	convertPixelPairTyped(destPixel *dest, const srcPixel *src,
 template<>
 void	convertPixelPairTyped(RGB<unsigned char> *dest,
 		const YUYV<unsigned char> *src,
-		const rgb_color_tag& dt, const yuyv_color_tag& ds);
+		const rgb_color_tag&, const yuyv_color_tag&);
 
 template<typename destPixel, typename srcPixel>
 void	convertPixelPair(destPixel *dest, const srcPixel *src) {
@@ -771,7 +771,7 @@ unsigned int	bitsPerPixel(RGB<P>) {
  */
 template<typename Pixel>
 Pixel	weighted_sum_typed(unsigned int number_of_terms, const double *weights,
-		const Pixel *pixels, const monochrome_color_tag& tag) {
+		const Pixel *pixels, const monochrome_color_tag&) {
 	double	result = 0;
 	double	weightsum = 0;
 	for (unsigned int i = 0; i < number_of_terms; i++) {
@@ -784,7 +784,7 @@ Pixel	weighted_sum_typed(unsigned int number_of_terms, const double *weights,
 template<typename Pixel>
 Pixel	weighted_sum_typed(unsigned int number_of_terms,
 			const double *weights, const Pixel *pixels,
-			const rgb_color_tag& tag) {
+			const rgb_color_tag&) {
 	RGB<double>	result = 0;
 	double	weightsum = 0;
 	for (unsigned int i = 0; i < number_of_terms; i++) {
@@ -800,7 +800,7 @@ template<typename Pixel, int n>
 Multiplane<Pixel, n>	weighted_sum_typed_n(unsigned int number_of_terms,
 				const double *weights,
 				const Multiplane<Pixel, n> *pixels,
-				const multiplane_color_tag& tag) {
+				const multiplane_color_tag&) {
 	Multiplane<double, n>	result = 0;
 	double	weightsum = 0;
 	for (unsigned int i = 0; i < number_of_terms; i++) {
@@ -816,7 +816,7 @@ Multiplane<Pixel, n>	weighted_sum_typed_n(unsigned int number_of_terms,
 template<typename Pixel>
 Pixel	weighted_sum_typed(unsigned int number_of_terms,
 			const double *weights, const Pixel *pixels,
-			const multiplane_color_tag& tag) {
+			const multiplane_color_tag&) {
 	return weighted_sum_typed_n<Pixel::value_type, Pixel::planes>(
 		number_of_terms, weights, pixels, multiplane_color_tag());
 }
@@ -876,22 +876,22 @@ public:
  * Retrieve luminance information from a pixel, independent of time.
  */
 template<typename Pixel>
-double	luminance_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+double	luminance_typed(const Pixel& pixel, const monochrome_color_tag&) {
 	return pixel;
 }
 
 template<typename Pixel>
-double	luminance_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+double	luminance_typed(const Pixel& pixel, const multiplane_color_tag&) {
 	return pixel.luminance();
 }
 
 template<typename Pixel>
-double	luminance_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+double	luminance_typed(const Pixel& pixel, const rgb_color_tag&) {
 	return pixel.luminance();
 }
 
 template<typename Pixel>
-double	luminance_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+double	luminance_typed(const Pixel& pixel, const yuyv_color_tag&) {
 	return pixel.luminance();
 }
 
@@ -905,28 +905,29 @@ double	luminance(const Pixel& pixel) {
  * \brief Find the maximum possible value for a pixel type
  */
 template<typename Pixel>
-double	maximum_typed(const Pixel& pixel, const monochrome_color_tag& tag) {
+double	maximum_typed(const Pixel&, const monochrome_color_tag&) {
 	return std::numeric_limits<Pixel>::max();
 }
 
 template<typename Pixel>
-double	maximum_typed(const Pixel& pixel, const multiplane_color_tag& tag) {
+double	maximum_typed(const Pixel&, const multiplane_color_tag&) {
 	return std::numeric_limits<typename Pixel::value_type>::max();
 }
 
 template<typename Pixel>
-double	maximum_typed(const Pixel& pixel, const rgb_color_tag& tag) {
+double	maximum_typed(const Pixel&, const rgb_color_tag&) {
 	return std::numeric_limits<typename Pixel::value_type>::max();
 }
 
 template<typename Pixel>
-double	maximum_typed(const Pixel& pixel, const yuyv_color_tag& tag) {
+double	maximum_typed(const Pixel&, const yuyv_color_tag&) {
 	return std::numeric_limits<typename Pixel::value_type>::max();
 }
 
 template<typename Pixel>
 double pixel_maximum() {
-	return maximum_typed(Pixel(), typename color_traits<Pixel>::color_category());
+	return maximum_typed(Pixel(),
+			typename color_traits<Pixel>::color_category());
 }
 
 

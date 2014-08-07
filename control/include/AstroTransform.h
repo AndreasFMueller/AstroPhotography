@@ -26,7 +26,7 @@ class TranslationAdapter : public ConstImageAdapter<Pixel> {
 public:
 	TranslationAdapter(const ConstImageAdapter<Pixel>& image,
 		const Point& translation);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -51,7 +51,7 @@ TranslationAdapter<Pixel>::TranslationAdapter(
 }
 
 template<typename Pixel>
-const Pixel	TranslationAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	TranslationAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	Pixel	a[4];
 	ImageSize	size = ConstImageAdapter<Pixel>::getSize();
 	// lower left corner
@@ -103,7 +103,7 @@ public:
 			defaultpixel = Pixel(0);
 		}
 	}
-	const Pixel	pixel(const astro::Point& t) const {
+	Pixel	pixel(const astro::Point& t) const {
 		// find out in which pixel this is located
 		int     tx = floor(t.x());
 		int     ty = floor(t.y());
@@ -149,7 +149,7 @@ public:
 		}
 		return weighted_sum(4, weights, a);
 	}
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const {
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
 		return image.pixel(x, y);
 	}
 };
@@ -235,7 +235,7 @@ public:
 		const Transform& transform);
 	TransformAdapter(const ConstImageAdapter<Pixel>& image,
 		const Transform& transform);
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
@@ -255,8 +255,7 @@ TransformAdapter<Pixel>::TransformAdapter(
 }
 
 template<typename Pixel>
-const Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
-	const {
+Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	// compute the image if the point x, y under the inverse transform
 	Point	t = inverse(Point(x, y));
 	return image.pixel(t);

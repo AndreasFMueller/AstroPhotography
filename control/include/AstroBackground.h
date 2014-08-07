@@ -142,7 +142,7 @@ public:
 	FunctionBaseAdapter(const ImageSize& size, const FunctionBase *funcp)
 		: ConstImageAdapter<float>(size), _funcp(funcp) {
 	}
-	const float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(unsigned int x, unsigned int y) const {
 		return (*_funcp)(x, y);
 	}
 };
@@ -166,7 +166,7 @@ public:
 		  _origin(origin) {
 	}
 
-	const float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(unsigned int x, unsigned int y) const {
 		return _function->evaluate(_origin.x() + x, _origin.y() + y);
 	}
 };
@@ -179,7 +179,7 @@ public:
 		: FunctionPtrAdapter(image.getSize(), function, origin),
 		  _image(image) {
 	}
-	const float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(unsigned int x, unsigned int y) const {
 //debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d = %f - %f",
 //	x, y, _image.pixel(x, y), FunctionPtrAdapter::pixel(x, y));
 		return _image.pixel(x, y) - FunctionPtrAdapter::pixel(x, y);
@@ -306,7 +306,7 @@ public:
 		ConstImageAdapter<float>(size), _func(func), _origin(origin) {
 	}
 
-	virtual const float	pixel(unsigned int x, unsigned int y) const {
+	virtual float	pixel(unsigned int x, unsigned int y) const {
 		return _func(_origin.x() + x, _origin.y() + y);
 	}
 };
@@ -327,7 +327,7 @@ public:
 		  _func(func), _origin(origin) {
 	}
 
-	virtual const float	pixel(unsigned int x, unsigned int y) const {
+	virtual float	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y)
 				- _func(_origin.x() + x, _origin.y() + y);
 	}
@@ -478,7 +478,7 @@ public:
 		: ConstImageAdapter<RGB<float> >(image.getSize()),
 		  _image(image) {
 	}
-	virtual const RGB<float>	pixel(unsigned int x, unsigned int y) const {
+	virtual RGB<float>	pixel(unsigned int x, unsigned int y) const {
 		return _image.pixel(x, y) - _background(x, y);
 	}
 	const Background<float>&	background() const { return _background; }
@@ -527,8 +527,7 @@ public:
 		}
 		min = RGB<Pixel>(minvalue);
 	}
-	virtual const RGB<Pixel>	pixel(unsigned int x, unsigned int y)
-		const {
+	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const {
 		return (_background(ImagePoint(x, y)) - min) * scale;
 	}
 };

@@ -496,7 +496,7 @@ template<typename f>
 Background<float>	getBackground(const ImagePoint& center,
 				bool symmetric,
 				const Image<RGB<float> >& image,
-				const f& t) {
+				const f& /* t */) {
 	// compute the lower bound for each color 
 	unsigned int	alpha = 100;
 	ColorRedAdapter<float>		redimage(image);
@@ -517,7 +517,7 @@ template<typename f>
 Background<float>	getBackground(const ImagePoint& center,
 				bool symmetric, unsigned int alpha,
 				const Image<float>& image,
-				const f& t) {
+				const f& /* t */) {
 	// compute the lower bound for each color 
 	MinimumEstimator<typename f::FunctionType>	me(image, alpha);
 	FunctionPtr	l = me(center, symmetric);

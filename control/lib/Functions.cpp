@@ -265,7 +265,7 @@ double	QuadraticFunction::norm() const {
 	return sqrt(s);
 }
 
-void	QuadraticFunction::reduce(const std::vector<FunctionBase::doublevaluepair>& values) {
+void	QuadraticFunction::reduce(const std::vector<FunctionBase::doublevaluepair>& /* values */) {
 	throw std::runtime_error("QuadraticFunction::reduce not implemented");
 }
 

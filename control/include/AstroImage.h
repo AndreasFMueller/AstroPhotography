@@ -426,8 +426,8 @@ public:
 	ConstImageAdapter(const ImageSize& _size) : adaptersize(_size) { }
 
 	ImageSize	getSize() const { return adaptersize; }
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const = 0;
-	const Pixel	pixel(ImagePoint p) const {
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const = 0;
+	Pixel	pixel(ImagePoint p) const {
 		return pixel(p.x(), p.y());
 	}
 };
@@ -616,11 +616,11 @@ public:
 	 * \brief Read only access to pixel values specified by image
 	 *        coordinates
 	 */
-	const Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int x, unsigned int y) const {
 		return pixels[pixeloffset(x, y)];
 	}
 
-	const Pixel	pixel(const ImagePoint& p) const {
+	Pixel	pixel(const ImagePoint& p) const {
 		return pixel(p.x(), p.y());
 	}
 

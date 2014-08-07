@@ -50,11 +50,11 @@ public:
 		center = ConstImageAdapter<Pixel>::getSize().center();
 		targetcenter = targetsize.center();
 	}
-	virtual const Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
-const Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	Point	p(x - center.x(), y - center.y());
 	return image.pixel(projection(p) + targetcenter);
 }

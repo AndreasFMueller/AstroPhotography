@@ -143,8 +143,7 @@ public:
 	Point&	point() { return _point; }
 	void	point(const Point& p) { _point = p; }
 
-	const unsigned int	k() const { return _k; }
-	unsigned int	k() { return _k; }
+	unsigned int	k() const { return _k; }
 	void	k(const unsigned int k) { _k = k; }
 	
 	// find a string representation
@@ -313,7 +312,7 @@ class GuiderStateMachine {
 public:
 	const GuiderState&	state() const { return _state; }
 	operator GuiderState () { return _state; }
-	operator const GuiderState () const { return _state; }
+	operator GuiderState () const { return _state; }
 
 	// construct the state machine
 	GuiderStateMachine() : _state(guiding::unconfigured) { }
