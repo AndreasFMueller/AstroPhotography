@@ -1,7 +1,7 @@
 #
 # configuration used for development purposes on Linux and Mac OS X
 #
-CFLAGS="-Wall -g"
+CFLAGS="-Wall -Wextra -g"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 commonflags="--enable-unittests --enable-microtouch --enable-qhy --enable-corba"
