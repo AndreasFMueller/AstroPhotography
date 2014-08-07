@@ -43,7 +43,7 @@ void    SimFilterWheel::select(size_t filterindex) {
 			"of filters");
 	}
 	// if we are already at the right position, return
-	int	currentposition = currentPosition();
+	unsigned int	currentposition = currentPosition();
 	if (filterindex == currentposition) {
 		return;
 	}

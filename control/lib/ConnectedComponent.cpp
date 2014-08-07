@@ -118,7 +118,7 @@ ImagePtr	ConnectedComponent::operator()(const ImagePtr image) const {
 	// convert pixel values to 0/1
 	unsigned int	npixels = connected->getSize().getPixels();
 	unsigned int	counter = 0;
-	for (int offset = 0; offset < npixels; offset++) {
+	for (unsigned int offset = 0; offset < npixels; offset++) {
 		(*connected)[offset] = ((*connected)[offset] > 0) ? 1 : 0;
 		counter += (*connected)[offset];
 	}
@@ -140,7 +140,7 @@ ImagePtr	ConnectedComponent::operator()(const ImagePtr image) const {
 
 	// everything that is not marked so far has to be turned off
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn off pixels outside component");
-	for (int offset = 0; offset < npixels; offset++) {
+	for (unsigned int offset = 0; offset < npixels; offset++) {
 		if ((*connected)[offset] < 255) {
 			(*connected)[offset] = 0;
 		}

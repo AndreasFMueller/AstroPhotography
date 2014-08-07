@@ -189,6 +189,7 @@ Ucac4ZonePtr	Ucac4::getzone(uint16_t z) {
  * \brief find a particular star
  */
 Ucac4Star	Ucac4::find(const RaDec& position) {
+	// XXX imlementation missing
 }
 
 /**

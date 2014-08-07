@@ -38,7 +38,7 @@ bool	QsiCooler::isOn() {
 }
 
 void	QsiCooler::setOn(bool onoff) {
-	_camera.camera().put_CoolerOn(&onoff);
+	_camera.camera().put_CoolerOn(onoff);
 }
 
 } // namespace qsi

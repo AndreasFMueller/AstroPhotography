@@ -233,7 +233,7 @@ PortableServer::POA_var	OrbSingleton::findPOA(const std::vector<std::string>& po
 		= _orbvar->resolve_initial_references("RootPOA");
 	PortableServer::POA_var	poa
 		= PortableServer::POA::_narrow(obj);
-	for (int i = 0; i < poaname.size(); i++) {
+	for (unsigned int i = 0; i < poaname.size(); i++) {
 		poa = poa->find_POA(poaname[i].c_str(), 0);
 	}
 	return poa._retn();

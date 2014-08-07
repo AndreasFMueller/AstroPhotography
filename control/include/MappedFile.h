@@ -18,9 +18,9 @@ class MappedFile {
 	size_t	_recordlength;
 	void	*data_ptr;
 	size_t	data_len;
-	int	_nrecords;
+	size_t	_nrecords;
 public:
-	int	nrecords() const { return _nrecords; }
+	size_t	nrecords() const { return _nrecords; }
 private:
 	// private copy constructors to prevent copying
 	MappedFile(const MappedFile&);

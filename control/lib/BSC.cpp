@@ -7,6 +7,7 @@
 #include <fstream>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace catalog {
@@ -66,6 +67,21 @@ std::string	BSCStar::toString() const {
 // BSC implementation
 //////////////////////////////////////////////////////////////////////
 BSC::BSC(const std::string& filename, const std::string& notesfile) {
+	// check whether we have the files
+	struct stat	sb;
+	if (stat(filename.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat %s: %s",
+			filename.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	if (stat(notesfile.c_str(), &sb) < 0) {
+		std::string	msg = stringprintf("cannot stat %s: %s",
+			notesfile.c_str(), strerror(errno));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
 	// open the catalog file
 	std::ifstream	in(filename);
 

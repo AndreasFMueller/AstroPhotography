@@ -76,8 +76,8 @@ void	Chart::draw(const Catalog::starset& stars) {
 	}
 
 	// limit the pixel values to 1
-	for (int x = 0; x < size().width(); x++) {
-		for (int y =0; y < size().height(); y++) {
+	for (unsigned int x = 0; x < size().width(); x++) {
+		for (unsigned int y =0; y < size().height(); y++) {
 			if (_image->pixel(x, y) > 1) {
 				_image->pixel(x, y) = 1;
 			}

@@ -30,8 +30,8 @@ namespace astro {
 int	main(int argc, char *argv[]) {
 	int	c;
 	double	exposuretime = 0.1;
-	int	cameraid = 0;
-	int	ccdid = 0;
+	unsigned int	cameraid = 0;
+	unsigned int	ccdid = 0;
 	int	length = 512;
 	std::string	cameratype("uvc");
 

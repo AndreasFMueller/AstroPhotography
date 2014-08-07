@@ -33,7 +33,7 @@ std::pair<double, double>	FocusCompute::solve(double *positions,
 	int	info = 0;	
 	double	a[2 * size()];
 	double	b[size()];
-	for (int i = 0; i < size(); i++) {
+	for (unsigned int i = 0; i < size(); i++) {
 		a[i] = positions[i];
 		a[i + m] = 1.;
 		b[i] = values[i];
@@ -70,7 +70,7 @@ std::pair<double, double>	FocusCompute::solve(double *positions,
 
 	// compute the error
 	double	sum = 0;
-	for (int i = 0; i < size(); i++) {
+	for (unsigned int i = 0; i < size(); i++) {
 		double	d = b[0] * positions[i] + b[1] - values[i];
 		sum += d * d;
 	}
@@ -103,8 +103,8 @@ double	FocusCompute::focus() const {
 	double	errors[size()];
 
 	// change sign of one value after the other
-	for (int j = 0; j < size(); j++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying position %d", j);
+	for (unsigned int j = 0; j < size(); j++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying position %u", j);
 		values[j] = -values[j];
 		std::pair<double, double>	v = solve(positions, values);
 		errors[j] = v.second;
@@ -114,27 +114,28 @@ double	FocusCompute::focus() const {
 
 	// find the minimum
 	double	m = 0;
-	for (int j = 0; j < size(); j++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "error[%d] = %f", j, errors[j]);
+	for (unsigned int j = 0; j < size(); j++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "error[%u] = %f", j, errors[j]);
 		if (m < errors[j]) {
 			m = errors[j];
 		}
 	}
-	int	jmin = -1;
-	for (int j = 0; j < size() - 1; j++) {
+	unsigned int	jmin = 0;
+	for (unsigned int j = 0; j < size() - 1; j++) {
 		if (m > errors[j]) {
-			jmin = j;
+			jmin = j + 1;
 			m = errors[j];
 		}
 	}
 
 	// if j is negative, then we have no solution
-	if (jmin < 0) {
+	if (jmin == 0) {
 		throw std::runtime_error("no solution found");
 	}
+	jmin -= 1;
 
 	// compute for position found
-	for (int j = 0; j < size(); j++) {
+	for (unsigned int j = 0; j < size(); j++) {
 		if (j <= jmin) {
 			values[j] = -fabs(values[j]);
 		} else {

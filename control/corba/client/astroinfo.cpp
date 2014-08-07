@@ -21,7 +21,7 @@ void	display_ccdinfo(Astro::CcdInfo *ccdinfo) {
 	long	height = ccdinfo->size.height;
 	printf("\t\t\t\t\tSize: %ldx%ld\n", width, height);
 	printf("\t\t\t\t\tShutter: %s\n", (ccdinfo->shutter) ? "YES" : "NO");
-	for (int i = 0; i < ccdinfo->binningmodes.length(); i++) {
+	for (unsigned int i = 0; i < ccdinfo->binningmodes.length(); i++) {
 		printf("\t\t\t\t\t\t%dx%d\n",
 			ccdinfo->binningmodes[i].x,
 			ccdinfo->binningmodes[i].y);

@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <stdexcept>
 
 namespace astro {
 namespace catalog {

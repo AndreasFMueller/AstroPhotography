@@ -38,8 +38,8 @@ astro::callback::CallbackDataPtr GuiderImageCallback::operator()(
 	Astro::TrackingImage_var	trackingimage
 		= new Astro::TrackingImage();
 	trackingimage->size = astro::convert(image->image()->size());
-	int	width = trackingimage->size.width;
-	int	height = trackingimage->size.height;
+	unsigned int	width = trackingimage->size.width;
+	unsigned int	height = trackingimage->size.height;
 
 	// the access to the pixel array
 	astro::image::Image<unsigned short>	*im

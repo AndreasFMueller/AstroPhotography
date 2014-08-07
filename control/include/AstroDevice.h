@@ -11,6 +11,7 @@
 #include <iostream>
 #include <map>
 #include <AstroCoordinates.h>
+#include <memory>
 
 namespace astro {
 

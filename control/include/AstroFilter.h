@@ -238,6 +238,7 @@ protected:
 		case B:		return m.blue();
 		case Gb:	return m.greenb();
 		}
+		throw std::runtime_error("compiler error, should not get here");
 	}
 public:
 	MosaicMean(color_type _color) : color(_color) { }

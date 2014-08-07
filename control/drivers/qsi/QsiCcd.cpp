@@ -68,6 +68,7 @@ Exposure::State	QsiCcd::exposureStatus() {
 	case QSICamera::CameraError:
 		return Exposure::exposed;
 	}
+	throw std::runtime_error("unknown state encountered");
 }
 
 void	QsiCcd::cancelExposure() {

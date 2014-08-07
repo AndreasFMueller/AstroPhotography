@@ -101,7 +101,7 @@ CcdPtr	Camera::getCcd(size_t ccdid) {
  * \brief Get a Ccd by name
  */
 CcdPtr	Camera::getCcd(const DeviceName& ccdname) {
-	for (int i = 0; i < nCcds(); i++) {
+	for (unsigned int i = 0; i < nCcds(); i++) {
 		if (getCcdInfo(i).name() == ccdname) {
 			return getCcd(i);
 		}

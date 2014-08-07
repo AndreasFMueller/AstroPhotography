@@ -36,7 +36,7 @@ void	PropertiesTest::tearDown() {
 
 void	PropertiesTest::testSet() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSet() begin");
-	putenv("DEVICEPROPERTIES=test.properties");
+	putenv((char *)"DEVICEPROPERTIES=test.properties");
 	astro::Properties	properties("ccd:sx/001-137/Imaging");
 	CPPUNIT_ASSERT(properties.getProperty("limit") == "4711");
 	CPPUNIT_ASSERT(properties.getProperty("min") == "klein");
