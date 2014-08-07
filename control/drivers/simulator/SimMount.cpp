@@ -27,11 +27,11 @@ AzmAlt	SimMount::getAzmAlt() {
 	throw std::runtime_error("XXX cannot get AzmAlt");
 }
 
-void	SimMount::Goto(const RaDec& radec) {
+void	SimMount::Goto(const RaDec& /* radec */) {
 	throw std::runtime_error("XXX cannot goto RaDec");
 }
 
-void	SimMount::Goto(const AzmAlt& azmalt) {
+void	SimMount::Goto(const AzmAlt& /* azmalt */) {
 	throw std::runtime_error("XXX cannot goto AzmAlt");
 }
 

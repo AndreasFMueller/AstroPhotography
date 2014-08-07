@@ -18,12 +18,12 @@ CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name) {
 }
 
 template<>
-GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName& name) {
+GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName&) {
 	return _camera->getGuiderPort();
 }
 
 template<>
-FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName& name) {
+FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName&) {
 	return _camera->getFilterWheel();
 }
 

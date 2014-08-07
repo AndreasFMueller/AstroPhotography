@@ -397,8 +397,8 @@ public:
  * and then written to three planes.
  */
 template<typename Pixel>
-int	FITSWriteDoWork(const long totaln, long offset,
-		long firstn, long nvalues, int narray,
+int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
+		long /* firstn */, long nvalues, int /* narray */,
 		iteratorCol *data, void *userPointer,
 		monochrome_color_tag) {
 	// get the data array
@@ -425,8 +425,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
  * each pixel to the three planes of the FITS file.
  */
 template<typename Pixel>
-int	FITSWriteDoWork(const long totaln, long offset,
-		long firstn, long nvalues, int narray,
+int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
+		long /* firstn */, long /* nvalues */, int /* narray */,
 		iteratorCol *data, void *userPointer,
 		rgb_color_tag) {
 	// get the data array, and write a zero into it
@@ -453,8 +453,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
  * \brief Work function to write YUYV Pixels to the FITS file
  */
 template<typename Pixel>
-int	FITSWriteDoWork(const long totaln, long offset,
-		long firstn, long nvalues, int narray,
+int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
+		long /* firstn */, long /* nvalues */, int /* narray */,
 		iteratorCol *data, void *userPointer,
 		yuyv_color_tag) {
 	// get the data array and write a zero into it
@@ -488,8 +488,8 @@ int	FITSWriteDoWork(const long totaln, long offset,
  * \brief Work function to write Multiplane pixels to the FITS file
  */
 template<typename Pixel>
-int	FITSWriteDoWork(const long totaln, long offset,
-		long firstn, long nvalues, int narray,
+int	FITSWriteDoWork(const long /* totaln */, long /* offset */,
+		long /* firstn */, long /* nvalues */, int /* narray */,
 		iteratorCol *data, void *userPointer,
 		multiplane_color_tag) {
 	// get the data array, and write a zero into it

@@ -18,7 +18,7 @@ namespace astro {
 /**
  * \brief Inverse error function
  */
-const double	inverf(double y) {
+double	inverf(double y) {
 	if ((y < -1) || (y > 1)) {
 		throw std::range_error("impossible erf(x) value");
 	}
@@ -38,7 +38,7 @@ const double	inverf(double y) {
 	return xneu;
 }
 
-const double	Finv(double y) {
+double	Finv(double y) {
 	return sqrt(2) * inverf(2 * y - 1);
 }
 

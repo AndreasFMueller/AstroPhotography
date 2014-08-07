@@ -27,7 +27,7 @@ void	perror(const char *errormsg, short errorcode) {
 	fprintf(stderr, "%s: %s\n", errormsg, results.errorString);
 }
 
-int	main(int argc, char *argv[]) {
+int	main(int /* argc */, char * /* argv */[]) {
 	printf("open driver\n");
 	short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
 	if (e != CE_NO_ERROR) {

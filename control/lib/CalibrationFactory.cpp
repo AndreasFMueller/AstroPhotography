@@ -57,7 +57,7 @@ bool	consistent(const ImageSequence& images) {
  * to base the creation of a calibration image, so it just returns an
  * empty image pointer.
  */
-ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence& images) const {
+ImagePtr	CalibrationFrameFactory::operator()(const ImageSequence&) const {
 	debug(LOG_ERR, DEBUG_LOG, 0, "base class factory method called, "
 		"probably an error");
 	return ImagePtr();

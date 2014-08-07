@@ -79,8 +79,13 @@ std::string	DeviceLocator::getVersion() const {
 	return std::string(VERSION);
 }
 
+/**
+ * \brief Return list of devices
+ *
+ * The base class always returns an empty list
+ */
 std::vector<std::string>	DeviceLocator::getDevicelist(
-					const DeviceName::device_type device) {
+					const DeviceName::device_type) {
 	std::vector<std::string>	devices;
 	return devices;
 }
@@ -96,11 +101,11 @@ std::vector<DeviceName>	DeviceLocator::getDeviceList(
 	return devices;
 }
 
-astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics0(const DeviceName& name) {
+astro::camera::AdaptiveOpticsPtr	DeviceLocator::getAdaptiveOptics0(const DeviceName&) {
 	throw std::runtime_error("adaptive optics not implemented");
 }
 
-astro::camera::CameraPtr	DeviceLocator::getCamera0(const DeviceName& name) {
+astro::camera::CameraPtr	DeviceLocator::getCamera0(const DeviceName&) {
 	throw std::runtime_error("cameras not implemented");
 }
 
@@ -131,7 +136,7 @@ astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort0(const DeviceName& nam
 		name.toString().c_str()));
 }
 
-astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName& name) {
+astro::camera::FilterWheelPtr	DeviceLocator::getFilterWheel0(const DeviceName&) {
 	throw std::runtime_error("filterwheel not implemented");
 }
 
@@ -147,11 +152,11 @@ astro::camera::CoolerPtr	DeviceLocator::getCooler0(const DeviceName& name) {
 		name.toString().c_str()));
 }
 
-astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName& name) {
+astro::camera::FocuserPtr	DeviceLocator::getFocuser0(const DeviceName&) {
 	throw std::runtime_error("focuser not implemented");
 }
 
-astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName& name) {
+astro::device::MountPtr	DeviceLocator::getMount0(const DeviceName&) {
 	throw std::runtime_error("mount not implemented");
 }
 

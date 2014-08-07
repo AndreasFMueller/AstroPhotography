@@ -84,7 +84,7 @@ class TaskInfo {
 private:
 	taskid_t	_id;
 public:
-	const taskid_t	id() const { return _id; }
+	taskid_t	id() const { return _id; }
 	void	id(taskid_t i) { _id = i; }
 
 public:

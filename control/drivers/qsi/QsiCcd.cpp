@@ -79,7 +79,7 @@ shutter_state	QsiCcd::getShutterState() {
 	throw std::runtime_error("cannot query current shutter state");
 }
 
-void	QsiCcd::setShutterState(const shutter_state& state) {
+void	QsiCcd::setShutterState(const shutter_state& /* state */) {
 	throw std::runtime_error("cannot directly control shutter state");
 }
 
