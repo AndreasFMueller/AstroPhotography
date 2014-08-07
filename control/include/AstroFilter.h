@@ -600,7 +600,7 @@ FWHMInfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 
 	// first ensure that we take a radius small enough to fit inside
 	// the image rectangle
-	int	radius = r;
+	unsigned int	radius = r;
 	if (point.x() < radius) {
 		radius = point.x();
 	}

@@ -16,7 +16,7 @@ namespace astro {
 namespace camera {
 namespace mock1 {
 
-Mock1Camera::Mock1Camera(int _id) : astro::camera::Camera(cameraname(id)), id(_id) {
+Mock1Camera::Mock1Camera(int _id) : astro::camera::Camera(cameraname(_id)), id(_id) {
 
 	CcdInfo	ccd0(DeviceName(name(), DeviceName::Ccd, "primary ccd"),
 		ImageSize(1024, 768), 0);

@@ -42,7 +42,9 @@ class DeviceAccessor : DeviceAccessorBase {
 public:
 	DeviceAccessor(astro::module::Repository& repository)
 		: DeviceAccessorBase(repository) { }
-	DeviceType	get(const DeviceName& name) { return DeviceType(); }
+	DeviceType	get(const DeviceName& /* name */) {
+		return DeviceType();
+	}
 };
 
 template<>

@@ -1193,14 +1193,14 @@ public:
 private:
 	// find out whether a camera terminal supports a given control
 	template<typename T>
-	bool	controlSupported(const T& p, camera_terminal_control_tag) {
+	bool	controlSupported(const T& /* p */, camera_terminal_control_tag) {
 		uint32_t	bm = controlCameraControls();
 		return (bm & (1 << T::control_type::bit)) ? true : false;
 	}
 
 	// find out whether a processing unit supports a given control
 	template<typename T>
-	bool	controlSupported(const T& p, processing_unit_control_tag) {
+	bool	controlSupported(const T& /* p */, processing_unit_control_tag) {
 		uint32_t	bm = controlProcessingUnitControls();
 		return (bm & (1 << T::control_type::bit)) ? true : false;
 	}
@@ -1296,7 +1296,7 @@ private:
 	// private templates for the various types of requests
 	// SET_CUR requests
 	template<typename T>
-	void	doSetCurrent(const T& p, video_control_tag) {
+	void	doSetCurrent(const T& /* p */, video_control_tag) {
 		uint16_t	wIndex = controlInterfaceNumber();
 		Request<T>	r(RequestBase::class_specific_type,
 			RequestBase::interface_recipient, wIndex,
