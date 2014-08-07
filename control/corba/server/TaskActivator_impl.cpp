@@ -17,7 +17,7 @@ namespace Astro {
  */
 PortableServer::Servant	TaskActivator_impl::incarnate(
 				const PortableServer::ObjectId& oid,
-				PortableServer::POA_ptr poa
+				PortableServer::POA_ptr /* poa */
 	) throw (CORBA::SystemException, PortableServer::ForwardRequest) {
 	// the object id encodes the file name, so first have to convert
 	// the object id into a file name
@@ -38,9 +38,9 @@ PortableServer::Servant	TaskActivator_impl::incarnate(
  */
 void	TaskActivator_impl::etherealize(
 		const PortableServer::ObjectId&	oid,
-		PortableServer::POA_ptr		poa,
+		PortableServer::POA_ptr		/* poa */,
 		PortableServer::Servant		serv,
-		CORBA::Boolean			cleanup_in_progress,
+		CORBA::Boolean			/* cleanup_in_progress */,
 		CORBA::Boolean			remaining_activations
 	) throw (CORBA::SystemException) {
 

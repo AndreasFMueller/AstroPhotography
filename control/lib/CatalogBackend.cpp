@@ -16,12 +16,12 @@ CatalogBackend::CatalogBackend() {
 CatalogBackend::~CatalogBackend() {
 }
 
-Catalog::starsetptr	CatalogBackend::find(const SkyWindow& window,
-				const MagnitudeRange& magrange) {
+Catalog::starsetptr	CatalogBackend::find(const SkyWindow& /* window */,
+				const MagnitudeRange& /* magrange */) {
 	throw std::runtime_error("find method must be overridden");
 }
 
-Star	CatalogBackend::find(const std::string& name) {
+Star	CatalogBackend::find(const std::string& /* name */) {
 	throw std::runtime_error("find method must be overridden");
 }
 

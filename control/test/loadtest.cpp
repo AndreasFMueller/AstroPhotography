@@ -44,6 +44,6 @@ void	test() {
 	module2->close();
 }
 
-int	main(int argc, char *argv[]) {
+int	main(int /* argc */, char * /* argv */[]) {
 	test();
 }

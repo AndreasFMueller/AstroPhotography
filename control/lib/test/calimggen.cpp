@@ -85,7 +85,7 @@ void	CalImgGen::setBadcolumn(const double _badcolumn) {
 	changed = true;
 }
 
-int	main(int argc, char *argv[]) {
+int	main(int /* argc */, char * /* argv */ []) {
 	return EXIT_SUCCESS;
 }
 

@@ -208,7 +208,7 @@ void	DiffractionChart::aperture(double a) {
 /**
  * \brief Airy pattern
  */
-double	DiffractionChart::pointspreadfunction(double r, double mag) const {
+double	DiffractionChart::pointspreadfunction(double r, double /* mag */) const {
 	double	x = _xfactor * r;
 	double	a = sqr(2 * j1(x) / x);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%f: airy(%f) = %f", r, x, a);
@@ -225,7 +225,7 @@ TurbulenceChart::TurbulenceChart(const ImageSize& size, const RaDec& center,
 	turbulence(1);
 }
 
-double	TurbulenceChart::pointspreadfunction(double r, double mag) const {
+double	TurbulenceChart::pointspreadfunction(double r, double /* mag */) const {
 	//return 10 * exp(-sqr(r * sqrt(sqrt((mag < 1) ? 1 : mag)) / _turbulence));
 	return exp(-sqr(r / _turbulence));
 }

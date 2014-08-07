@@ -27,14 +27,14 @@ AzmAlt	Mount::getAzmAlt() {
 /**
  * \brief Move mount to new position in RA and DEC
  */
-void	Mount::Goto(const RaDec& radec) {
+void	Mount::Goto(const RaDec& /* radec */) {
 	throw std::runtime_error("Goto not implemented");
 }
 
 /**
  * \brief Move mount to new position in azimut and elevation
  */	
-void	Mount::Goto(const AzmAlt& azmalt) {
+void	Mount::Goto(const AzmAlt& /* azmalt */) {
 	throw std::runtime_error("Goto not implemented");
 }
 

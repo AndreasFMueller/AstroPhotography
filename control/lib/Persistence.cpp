@@ -278,7 +278,7 @@ std::string	UpdateSpec::selectquery(const std::string& tablename) const {
 class	questionmarklist : public std::string {
 	int	counter;
 public:
-	void	operator()(const UpdateSpec::value_type& v) {
+	void	operator()(const UpdateSpec::value_type& /* v */) {
 		if (counter++) {
 			append(", ");
 		}

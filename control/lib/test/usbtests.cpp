@@ -8,7 +8,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <AstroDebug.h>
 
-int	main(int argc, char *argv[]) {
+int	main(int /* argc */, char * /* argv */[]) {
 	debuglevel = LOG_DEBUG;
 	CppUnit::TextUi::TestRunner	runner;
 	CppUnit::TestFactoryRegistry	&registry

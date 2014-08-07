@@ -70,8 +70,9 @@ std::vector<std::string>	CelestronLocator::getDevicelist(
 	return names;
 }
 
-MountPtr	CelestronLocator::getMount0(const DeviceName& name) {
+MountPtr	CelestronLocator::getMount0(const DeviceName& /* name */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a celestron mount");
+	// Implementation incomplete
 	// create the Mount
 	return MountPtr();
 }

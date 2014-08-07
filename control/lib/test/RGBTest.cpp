@@ -70,13 +70,13 @@ static unsigned char    limit(int x) {
  * http://msdn.microsoft.com/en-us/library/windows/desktop/dd206750(v=vs.85).aspx
  */
 
-static unsigned char    red(int c, int d, int e) {
+static unsigned char    red(int c, int /* d */, int e) {
         return limit((298 * c           + 409 * e + 128) >> 8);
 }
 static unsigned char    green(int c, int d, int e) {
         return limit((298 * c - 100 * d - 208 * e + 128) >> 8);
 }
-static unsigned char    blue(int c, int d, int e) {
+static unsigned char    blue(int c, int d, int /* e */) {
         return limit((298 * c + 516 * d           + 128) >> 8);
 }
 

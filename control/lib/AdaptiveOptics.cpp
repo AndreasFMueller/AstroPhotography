@@ -39,7 +39,7 @@ void	AdaptiveOptics::set(const Point& position) {
 	}
 }
 
-void	AdaptiveOptics::set0(const Point& position) {
+void	AdaptiveOptics::set0(const Point& /* position */) {
 	throw NotImplemented("get/set must be implement in driver class");
 }
 

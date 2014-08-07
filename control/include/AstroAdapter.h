@@ -1260,7 +1260,7 @@ class ConstantValueAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ConstantValueAdapter(const ImageSize& _size, Pixel _value)
 		: ConstImageAdapter<Pixel>(_size), value(_value) { }
-	Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(unsigned int /* x */, unsigned int /* y */) const {
 		return value;
 	}
 

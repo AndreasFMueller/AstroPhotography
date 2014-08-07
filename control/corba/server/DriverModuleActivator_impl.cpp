@@ -14,7 +14,7 @@ namespace Astro {
  */
 PortableServer::Servant DriverModuleActivator_impl::incarnate(
 	const PortableServer::ObjectId& oid,
-	PortableServer::POA_ptr poa
+	PortableServer::POA_ptr /* poa */
 ) throw (CORBA::SystemException, PortableServer::ForwardRequest) {
 	// extract the driver module name from the object id
 	std::string	modid;
@@ -60,9 +60,9 @@ PortableServer::Servant DriverModuleActivator_impl::incarnate(
  */
 void	DriverModuleActivator_impl::etherealize(
 	const PortableServer::ObjectId& oid,
-	PortableServer::POA_ptr		poa,
+	PortableServer::POA_ptr		/* poa */,
 	PortableServer::Servant		serv,
-	CORBA::Boolean			cleanup_in_progress,
+	CORBA::Boolean			/* cleanup_in_progress */,
 	CORBA::Boolean			remaining_activations
 ) throw(CORBA::SystemException) {
 

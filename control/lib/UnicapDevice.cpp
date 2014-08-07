@@ -21,7 +21,7 @@ namespace unicap {
 UnicapError::UnicapError(const char *cause) : std::runtime_error(cause) {
 }
 
-UnicapError::UnicapError(unicap_status_t status, const char *cause)
+UnicapError::UnicapError(unicap_status_t /* status */, const char *cause)
 	: std::runtime_error(cause) {
 }
 
@@ -134,7 +134,7 @@ int	UnicapDevice::numFormats() const {
 	return nformats;
 }
 
-UnicapFormat	UnicapDevice::getFormat(int index) {
+UnicapFormat	UnicapDevice::getFormat(int /* index */) {
 	unicap_format_t	format;
 	unicap_status_t	rc = unicap_get_format(handle, &format);
 	if (rc != STATUS_SUCCESS) {
@@ -199,15 +199,16 @@ std::ostream&	operator<<(std::ostream& out, const UnicapDevice& device) {
 /**
  * \brief Callback method.
  */
-void	UnicapDevice::callback(unicap_event_t event,
+void	UnicapDevice::callback(unicap_event_t /* event */,
 	unicap_data_buffer_t *buffer) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame received");
 	frames.push_back(FramePtr(new Frame(width, height, buffer->data,
 		buffer->buffer_size)));
 }
 
-static void	new_frame_callback(unicap_event_t event, unicap_handle_t handle,
-	unicap_data_buffer_t *buffer, void *user_data) {
+static void	new_frame_callback(unicap_event_t event,
+	unicap_handle_t /* handle */, unicap_data_buffer_t *buffer,
+	void *user_data) {
 	UnicapDevice	*unicapdevice = (UnicapDevice *)user_data;
 	unicapdevice->callback(event, buffer);
 }

@@ -57,6 +57,9 @@ SimCamera::~SimCamera() {
 }
 
 CcdPtr	SimCamera::getCcd0(size_t id) {
+	if (id > 0) {
+		throw std::runtime_error("only ccd0 available");
+	}
 	return CcdPtr(new SimCcd(ccdinfo[0], *this));
 }
 

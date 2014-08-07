@@ -125,7 +125,7 @@ std::string	ExceptionReporter::operator()(const CORBA::SystemException& x) const
 	return out.str();
 }
 
-std::string	ExceptionReporter::operator()(const CORBA::UserException& x) const {
+std::string	ExceptionReporter::operator()(const CORBA::UserException& /* x */) const {
 	return "CORBA::UserException";
 }
 

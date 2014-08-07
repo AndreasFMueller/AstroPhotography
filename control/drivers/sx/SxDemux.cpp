@@ -123,7 +123,7 @@ void	Demuxer::set_pixel(Image<unsigned short>& image, int x, int y,
 }
 
 void	Demuxer::operator()(Image<unsigned short>& image,
-			const Field& field1, const Field& field2) {
+			const Field& /* field1 */, const Field& /* field2 */) {
 	width = image.size().width();
 	height = image.size().height();
 }

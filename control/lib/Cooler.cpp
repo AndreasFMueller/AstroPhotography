@@ -88,7 +88,7 @@ void	Cooler::setTemperature(float _temperature) {
  *
  * This is an empty implementation that must be overridden by driver classes.
  */
-void	Cooler::setOn(bool onoff) {
+void	Cooler::setOn(bool /* onoff */) {
 }
 
 /**

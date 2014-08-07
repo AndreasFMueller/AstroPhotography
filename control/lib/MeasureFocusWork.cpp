@@ -148,7 +148,7 @@ FocusValue	MeasureFocusWork::measureat(unsigned short pos) {
 /**
  * \brief Main function of the Focusing process
  */
-void	MeasureFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
+void	MeasureFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing work");
 	if (!complete()) {
 		focusingstatus(Focusing::FAILED);

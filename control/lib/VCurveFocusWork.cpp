@@ -33,7 +33,7 @@ public:
 /**
  * \brief Main function of the Focusing process
  */
-void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& thread) {
+void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing work");
 	if (!complete()) {
 		focusingstatus(Focusing::FAILED);

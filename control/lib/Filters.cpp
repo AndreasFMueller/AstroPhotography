@@ -382,7 +382,7 @@ double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
 	return 0;
 }
 
-bool	saturated(const ImagePtr& image, const ImageRectangle& rect) {
+bool	saturated(const ImagePtr& /* image */, const ImageRectangle& /* rect */) {
 	return true;
 }
 
@@ -478,7 +478,7 @@ int	bytesperpixel(const ImagePtr& image) {
 	return planes(image) * bytespervalue(image);
 }
 
-RGB<double>	whitebalance(const ImagePtr& image) {
+RGB<double>	whitebalance(const ImagePtr& /* image */) {
 	return RGB<double>(1., 1., 1.);
 }
 

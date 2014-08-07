@@ -43,7 +43,7 @@ unsigned short	Focuser::backlash() {
 	return 0;
 }
 
-void	Focuser::set(unsigned short value) {
+void	Focuser::set(unsigned short /* value */) {
 	throw NotImplemented("base Focuser does not implement set method");
 }
 
