@@ -18,11 +18,15 @@ namespace transform {
 /**
  * \brief get the corrected projection
  */
-Projection	ProjectionCorrector::corrected() const {
+Projection	ProjectionCorrector::corrected(
+			const std::vector<Residual>& residuals) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "correct projection: %s",
+		centeredprojection.toString().c_str());
 	// allocate an array for the computation of the correction
 	int	n = 2 * residuals.size();
 	double	a[8 * n];
 	double	b[n];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d equations", n);
 
 	// start filling in the arrays
 	std::vector<Residual>::const_iterator	r;
@@ -32,30 +36,65 @@ Projection	ProjectionCorrector::corrected() const {
 		b[i + 1] = r->offset().y();
 	}
 
-	double	h = 0.01;
-	for (int j = 0; j < 8; j++) {
-		Projection	pr = projection;
-		pr[j] += h;
-		for (r = residuals.begin(), i = 0; r != residuals.end();
-			r++, i += 16) {
-			Point	p1 = projection(r->from());
-			Point	p2 = pr(r->from());
-			Point	delta = (p2 - p1) * (1 / h);
-			a[j + i    ] = delta.x();
-			a[j + i + 8] = delta.y();
+	// display the right hand side
+	if (debuglevel >= LOG_DEBUG) {
+		std::string	msg("b = [\n");
+		for (i = 0; i < 2 * residuals.size(); i++) {
+			msg += stringprintf("%f;\n", b[i]);
 		}
+		msg += std::string("];\n");
+		std::cout << msg;
 	}
 
+	// build the matrix of derivatives
+	double	h = 0.01;
+	for (int j = 0; j < 8; j++) {
+		CenteredProjection	pr = centeredprojection;
+		pr[j] += h;
+		for (r = residuals.begin(), i = 0; r != residuals.end();
+			r++, i += 2) {
+			Point	p1 = centeredprojection(r->from());
+			Point	p2 = pr(r->from());
+			Point	delta = (p2 - p1) * (1 / h);
+			a[i     + n * j] = delta.x();
+			a[i + 1 + n * j] = delta.y();
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "derivative matrix computed");
+
+	// report the derivatives matrix for debugging
+	if (debuglevel >= LOG_DEBUG) {
+		std::string	msg("A = [\n");
+		for (i = 0; i < 2 * residuals.size(); i++) {
+			msg += stringprintf("/* %3d */ ", i);
+			for (int j = 0; j < 8; j++) {
+				if (j > 0) { msg += std::string(","); }
+				msg += stringprintf(" %10.3g", a[i + n * j]);
+			}
+			msg += stringprintf(";\n");
+		}
+		msg += std::string("];\n");
+		std::cout << msg;
+	}
+
+	// compute liwork (based on dgelsd documentation)
+	int	nlvl = 4; /* LOG_2(8 / SMLSIZ + 1) + 1 */
+	int	liwork = (3 * nlvl + 11) * 8;
+
 	// solve the system of equations, gives the correction
-	char	trans = 'N';
 	int	m = 8;
 	int	nrhs = 1;
 	int	lda = n;
 	int	ldb = n;
+	double	s[8];
+	double	rcond = 0;
+	int	rank = 0;
 	int	lwork = -1;
+	int	iwork_length = liwork;
 	int	info = 0;
 	double	x;
-	dgels_(&trans, &n, &m, &nrhs, a, &lda, b, &ldb, &x, &lwork, &info);
+	dgelsd_(&n, &m, &nrhs, a, &lda, b, &ldb, s, &rcond, &rank, &x, &lwork,
+		&iwork_length, &info);
 	if (info != 0) {
 		std::string     msg = stringprintf("dgels cannot determine "
 			"work area size: %d", info);
@@ -63,24 +102,45 @@ Projection	ProjectionCorrector::corrected() const {
 		throw std::runtime_error(msg);
 	}
 	lwork = x;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "need work area of size %d", lwork);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "need work area of size %d, "
+		"and iwork of size %d", lwork, iwork_length);
 
 	// with the correct work array in place, the next call solves the
 	// equations
 	double  work[lwork];
-	dgels_(&trans, &m, &n, &nrhs, a, &lda, b, &ldb, work, &lwork, &info);
+	int	iwork[iwork_length];
+	dgelsd_(&n, &m, &nrhs, a, &lda, b, &ldb, s, &rcond, &rank, work, &lwork,
+		iwork, &info);
 	if (info != 0) {
 		std::string     msg = stringprintf("dgels cannot solve "
 			"equations: %d", info);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	if (info == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "reported iwork length: %d",
+			iwork[0]);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "system of equations solved, rank = %d",
+		rank);
+	if (debuglevel >= LOG_DEBUG) {
+		for (int j = 0; j < 8; j++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"singular value[%d] = %f", j, s[j]);
+		}
+	}
 
         // copy result vector
-	Projection	pr = projection;
+	CenteredProjection	pr = centeredprojection;
 	for (int j = 0; j < 8; j++) {
-		pr[j] += b[j];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "correction[%d] = %g", j, b[j]);
+		pr[j] -= b[j];
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "original projection: %s",
+		centeredprojection.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new projection: %s",
+		pr.toString().c_str());
 
 	return pr;
 }

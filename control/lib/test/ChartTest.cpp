@@ -54,18 +54,28 @@ void	ChartTest::testImage() {
 	// small magellanic cloud
 	//center.ra().hours(0 + 51./60);
 	//center.dec().degrees(-73 - 6./60);
+
+	// Deneb
 	center.ra().hours(20. + 41./60 + 25.9/3600);
 	center.dec().degrees(45 + 16./60 + 49./3600);
+
+	//  36UMa
+	//center.ra().hours(10. + 30./60 + 37.6/3600);
+	//center.dec().degrees(55 + 58./60 + 50.0/3600);
+
+	// M31
+	center.ra().hours(0. + 42./60 + 44.3/3600);
+	center.dec().degrees(41 + 16./60 + 9./3600);
 
 	// create chart object
 	// SX MC26C 50mm 
 	//DiffractionChart	chart(ImageSize(3900, 2616), center, 0.050, 0.00000605);
 	// SX MC26C 135mm 
-	//DiffractionChart	chart(ImageSize(3900, 2616), center, 0.135, 0.00000605);
+	TurbulenceChart	chart(ImageSize(3900, 2616), center, 0.135, 0.00000605);
 	// SX MC26, primary focus
-	TurbulenceChart	chart(ImageSize(3900, 2616), center, 0.560, 0.00000605);
+	//TurbulenceChart	chart(ImageSize(3900, 2616), center, 0.560, 0.00000605);
 	// SBIG 16803, Cassegrain focus
-	//DiffractionChart	chart(ImageSize(4096, 4096), center, 2.800, 0.000015);
+	//TurbulenceChart	chart(ImageSize(4096, 4096), center, 2.800, 0.000015);
 	chart.maxradius(7);
 	//chart.aperture(0.280);
 	chart.turbulence(2);
@@ -77,7 +87,9 @@ void	ChartTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get stars from window %s",
 		window.toString().c_str());
 
-	double	limit_mag = 20;
+	//double	limit_mag = 20;
+	double	limit_mag = 14; // for M31
+	chart.scale(100); // M31
 
 	// retrieve Hipparcos stars
 	Catalog	catalog("/usr/local/starcatalogs");

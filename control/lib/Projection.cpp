@@ -16,6 +16,7 @@ namespace transform {
 Projection::Projection(double angle, const Point& translation,
 	double scalefactor) 
 	: Transform(angle, translation, scalefactor) {
+	b[0] = b[1] = 0;
 }
 
 double	Projection::w(double r) const {
@@ -50,6 +51,24 @@ double&	Projection::operator[](int i) {
 		return b[i - 6];
 	}
 	throw std::range_error("out of range");
+}
+
+std::string	Projection::toString() const {
+	return Transform::toString()
+		+ stringprintf(" b = [ %f, %f ]", b[0], b[1]);
+}
+
+//////////////////////////////////////////////////////////////////////
+// CenteredProjection implementation
+//////////////////////////////////////////////////////////////////////
+
+Point	CenteredProjection::operator()(const Point& p) const {
+	Point	q(p.x() - center.x(), p.y() - center.y());
+	return Transform::operator()(q) + targetcenter;
+}
+
+Point	CenteredProjection::operator()(unsigned int x, unsigned int y) const {
+	return (*this)(Point(x, y));
 }
 
 } // namespace project

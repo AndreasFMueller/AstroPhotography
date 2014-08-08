@@ -15,6 +15,10 @@ extern "C" {
 void	dgels_(char *trans, int *m, int *n, int *nrhs, double *a, int *lda,
 		double *b, int *ldb, double *work, int *lwork, int *info);
 
+void	dgelsd_(int *m, int *n, int *nrhs, double *a, int *lda,
+		double *b, int *ldb, double *s, double *rcond, int *rank,
+		double *work, int *lwork, int *iwork, int *info);
+
 #ifdef __cplusplus
 }
 #endif

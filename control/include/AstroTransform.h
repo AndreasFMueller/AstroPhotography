@@ -209,14 +209,14 @@ public:
 				const;
 
 	// access to the coefficients
-	double	operator[](int i) const;
-	double&	operator[](int i);
+	virtual double	operator[](int i) const;
+	virtual double&	operator[](int i);
 
 	// operating on points 
-	Point	operator()(const Point& point) const;
+	virtual Point	operator()(const Point& point) const;
 
 	// for debugging
-	std::string	toString() const;
+	virtual std::string	toString() const;
 	friend std::ostream&	operator<<(std::ostream& out,
 		const Transform& transform);
 };

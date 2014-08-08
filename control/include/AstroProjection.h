@@ -27,9 +27,25 @@ public:
 	Projection();
 	Projection(double angle, const Point& translation,
                 double scalefactor = 1);
-	Point	operator()(const Point& p) const;
-	double	operator[](int i) const;
-	double&	operator[](int i);
+	virtual Point	operator()(const Point& p) const;
+	virtual double	operator[](int i) const;
+	virtual double&	operator[](int i);
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief A projection with centers different from (0,0)
+ */
+class CenteredProjection : public Projection {
+	Point	targetcenter;
+	Point	center;
+public:
+	CenteredProjection(const Point _targetcenter, const Point _center,
+		Projection _projection) : Projection(_projection),
+			targetcenter(_targetcenter), center(_center) {
+	}
+	virtual Point	operator()(const Point& p) const;
+	virtual Point	operator()(unsigned int x, unsigned int y) const;
 };
 
 /**
@@ -38,41 +54,36 @@ public:
 template<typename Pixel>
 class ProjectionAdapter : public ConstImageAdapter<Pixel> {
 	const PixelInterpolationAdapter<Pixel> image;
-	Projection	projection;
-	Point	center;
-	Point	targetcenter;
+	CenteredProjection	centeredprojection;
 public:
 	ProjectionAdapter(const ImageSize targetsize,
 		const ConstImageAdapter<Pixel>& _image,
 		const Projection& _projection)
 		: ConstImageAdapter<Pixel>(targetsize), image(_image),
-		  projection(_projection) {
-		center = ConstImageAdapter<Pixel>::getSize().center();
-		targetcenter = targetsize.center();
+		  centeredprojection(targetsize.center(),
+			ConstImageAdapter<Pixel>::getSize().center(),
+			_projection) {
 	}
 	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
 };
 
 template<typename Pixel>
 Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
-	Point	p(x - center.x(), y - center.y());
-	return image.pixel(projection(p) + targetcenter);
+	return image.pixel(centeredprojection(x, y));
 }
 
 /**
  * \brief Correct a projection from a list of Residuals
  */
 class ProjectionCorrector {
-	ImageSize	size;
-	Projection	projection;
-	const std::vector<Residual>&	residuals;
+	CenteredProjection	centeredprojection;
 public:
-	ProjectionCorrector(const ImageSize& _size,
-		const Projection& _projection,
-		const std::vector<Residual>& _residuals)
-		: size(_size), projection(_projection), residuals(_residuals) {
+	ProjectionCorrector(const ImageSize& _targetsize,
+		const ImageSize& _size, const Projection& _projection)
+		: centeredprojection(_targetsize.center(), _size.center(),
+			_projection) {
 	}
-	Projection	corrected() const;
+	Projection	corrected(const std::vector<Residual>& residuals) const;
 };
 
 } // namespace project
