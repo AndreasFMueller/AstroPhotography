@@ -10,18 +10,6 @@
 namespace astro {
 namespace image {
 
-int	Metavalue::getType() const {
-	return datatype;
-}
-
-std::string     Metavalue::getValue() const {
-	return value;
-}
-
-std::string     Metavalue::getComment() const {
-	return comment;
-}
-
 Metavalue::Metavalue(const std::string& _value, const std::string& _comment)
 	: value(_value), comment(_comment) {
 	datatype = TSTRING;

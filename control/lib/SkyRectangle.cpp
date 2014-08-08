@@ -21,12 +21,33 @@ namespace catalog {
  * the rectangle.
  */
 SkyRectangle::SkyRectangle(const SkyWindow& window) : SkyWindow(window) {
+	setup();
+}
+
+/**
+ * \brief Create a default SkyRectangle for the full sky
+ */
+SkyRectangle::SkyRectangle() : SkyWindow(SkyWindow::all) {
+	setup();
+}
+
+/**
+ * \brief Create a SkyWindow from an image
+ */
+SkyRectangle::SkyRectangle(const ImageBase& image) : SkyWindow(image) {
+	setup();
+}
+
+/**
+ * \brief Setup the intern
+ */
+void	SkyRectangle::setup() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a rectangle");
-	direction = UnitVector(window.center());
+	direction = UnitVector(this->center());
 
 	// arrow to the right
 	RaDec	right;
-	right.ra() = window.center().ra() - Angle(M_PI / 2);
+	right.ra() = this->center().ra() - Angle(M_PI / 2);
 	right.dec().degrees(0);
 	rightvector = UnitVector(right);
 
@@ -34,8 +55,8 @@ SkyRectangle::SkyRectangle(const SkyWindow& window) : SkyWindow(window) {
 	upvector = -direction.cross(rightvector);
 
 	// limits
-	uplimit = tan(window.decheight() * 0.5);
-	rightlimit = tan(window.rawidth() * 0.5);
+	uplimit = tan(this->decheight() * 0.5);
+	rightlimit = tan(this->rawidth() * 0.5);
 
 	// what we did in the constructor
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "direction=%s",
@@ -46,13 +67,6 @@ SkyRectangle::SkyRectangle(const SkyWindow& window) : SkyWindow(window) {
 		upvector.toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "uplimit = %f, leftlimit = %f",
 		uplimit, rightlimit);
-}
-
-/**
- * \brief 
- */
-SkyRectangle::SkyRectangle() : SkyWindow(SkyWindow::all) {
-	
 }
 
 /**
@@ -179,6 +193,13 @@ RaDec	SkyRectangle::inverse(const astro::Point& p) const {
 	return RaDec(direction
 			+ rightvector * (p.x() * rightlimit)
 			+ upvector * (p.y() * uplimit));
+}
+
+/**
+ * \brief Add the metadata to an image
+ */
+void	SkyRectangle::addMetadata(ImageBase& image) const {
+	SkyWindow::addMetadata(image);
 }
 
 } // namespace catalog

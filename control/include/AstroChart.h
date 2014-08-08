@@ -1,5 +1,5 @@
 /*
- * AstroChart.h -- Using 
+ * AstroChart.h -- Using Star catalogs to create charts
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -13,6 +13,24 @@ namespace astro {
 namespace catalog {
 
 /**
+ * \brief ImageGeometry
+ */
+class ImageGeometry {
+	ImageSize	_size;
+	double	_pixelsize;
+	double	_focallength;
+public:
+	ImageGeometry(const ImageSize& size, double pixelsize,
+		double focallength) : _size(size), _pixelsize(pixelsize),
+			_focallength(focallength)  { }
+	ImageGeometry(const ImageBase& image);
+	const ImageSize&	size() const { return _size; }
+	double	pixelsize() const { return _pixelsize; }
+	double	focallength() const { return _focallength; }
+	void	addMetadata(ImageBase& image) const;
+};
+
+/**
  * \brief A rectangle on the sky
  */
 class SkyRectangle : public SkyWindow {
@@ -21,14 +39,34 @@ class SkyRectangle : public SkyWindow {
 	UnitVector	upvector;
 	double	uplimit;
 	double	rightlimit;
+	void	setup();
 public:
 	SkyRectangle();
 	SkyRectangle(const SkyWindow& window);
+	SkyRectangle(const ImageBase& image);
 	bool	contains(const RaDec& point) const;
 	astro::Point	map(const RaDec& where) const;
 	astro::Point	map2(const RaDec& where) const;
 	SkyWindow	containedin() const;
 	RaDec	inverse(const astro::Point& p) const;
+	void	addMetadata(ImageBase& image) const;
+};
+
+/**
+ * \brief Chart abstraction
+ *
+ * A Chart consists of an image and SkyRectangle that defines the
+ * coordinate system.
+ */
+class Chart {
+private:
+	SkyRectangle	_rectangle;
+	ImagePtr	_imageptr;
+public:
+	Chart(const SkyRectangle rectangle, const ImagePtr image)
+		: _rectangle(rectangle), _imageptr(image) { }
+	const SkyRectangle	rectangle() const { return _rectangle; }
+	const ImagePtr	image() const { return _imageptr; }
 };
 
 /**
@@ -36,12 +74,11 @@ public:
  *
  * Class to produce charts for sets of stars. 
  */
-class Chart {
+class ChartFactory {
 private:
 	Image<float>	*_image;
 	ImagePtr	_imageptr;
 public:
-	ImagePtr	image() const { return _imageptr; }
 	const astro::image::ImageSize	size() const { return _image->size(); }
 private:
 	double	_scale;
@@ -67,13 +104,15 @@ protected:
 	double	_focallength;
 	double	_pixelsize;
 public:
-	Chart(const astro::image::ImageSize& size, const RaDec& center,
+	ChartFactory(const astro::image::ImageSize& size, const RaDec& center,
 		double focallength, double pixelsize);
-	~Chart();
+	~ChartFactory();
+	Chart	chart() const { return Chart(_rectangle, _imageptr); }
 	SkyWindow	getWindow() const;
 	astro::Point	point(const RaDec& star) const;
 	void	draw(const Catalog::starset& star);
 	void	draw(const Catalog::starsetptr star);
+	void	clear();
 };
 
 /**
@@ -86,7 +125,7 @@ public:
  * for large apertures the size of the airy disk is probably on the order
  * of the pixels of the camera.
  */
-class DiffractionChart : public Chart {
+class DiffractionChartFactory : public ChartFactory {
 	double	_aperture;
 	double	_xfactor;
 public:
@@ -95,7 +134,7 @@ public:
 private:
 	virtual double	pointspreadfunction(double r, double mag) const;
 public:
-	DiffractionChart(const astro::image::ImageSize& size,
+	DiffractionChartFactory(const astro::image::ImageSize& size,
 		const RaDec& center, double focallength, double pixelsize);
 };
 
@@ -107,7 +146,7 @@ public:
  * viewing conditions. The FWHM of the seeing disk is given by the turbulence
  * parameter.
  */
-class TurbulenceChart : public Chart {
+class TurbulenceChartFactory : public ChartFactory {
 	double	_turbulence;
 public:
 	double	turbulence() const { return _turbulence; }
@@ -115,8 +154,15 @@ public:
 private:
 	virtual double	pointspreadfunction(double r, double mag) const;
 public:
-	TurbulenceChart(const astro::image::ImageSize& size,
+	TurbulenceChartFactory(const astro::image::ImageSize& size,
 		const RaDec& center, double focallength, double pixelsize);
+};
+
+/**
+ * \brief Normalize an image
+ */
+class ImageNormalizer {
+public:
 };
 
 } // namespace catalog

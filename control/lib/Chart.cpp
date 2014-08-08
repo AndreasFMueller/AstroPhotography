@@ -23,7 +23,7 @@ namespace catalog {
  * \param focallength	The focal length of the telescope to simulate
  * \param pixelsize	The pixel size of the camera
  */
-Chart::Chart(const ImageSize& size,
+ChartFactory::ChartFactory(const ImageSize& size,
 	const RaDec& center, double focallength, double pixelsize)
                 : _focallength(focallength),
                   _pixelsize(pixelsize) {
@@ -44,13 +44,21 @@ Chart::Chart(const ImageSize& size,
 	SkyWindow	window(center, width, height);
 	_rectangle = SkyRectangle(window);
 
-	// XXX add the center coordinates to the FITS file
+	// add the center coordinates to the FITS file
+	_rectangle.addMetadata(*_image);
 }
 
 /**
  * \brief Destroy the chart object
  */
-Chart::~Chart() {
+ChartFactory::~ChartFactory() {
+}
+
+/**
+ * \brief clear the image again
+ */
+void	ChartFactory::clear() {
+	_image->clear();
 }
 
 /**
@@ -58,7 +66,7 @@ Chart::~Chart() {
  * 
  * \param stars		a set of stars to be drawn inside the image
  */
-void	Chart::draw(const Catalog::starset& stars) {
+void	ChartFactory::draw(const Catalog::starset& stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create image for %u stars",
 		stars.size());
 
@@ -88,7 +96,7 @@ void	Chart::draw(const Catalog::starset& stars) {
 /**
  * \brief Draw a sets of of stars to the chart
  */
-void	Chart::draw(const Catalog::starsetptr stars) {
+void	ChartFactory::draw(const Catalog::starsetptr stars) {
 	Catalog::starset	*starsp
 		= dynamic_cast<Catalog::starset *>(&*stars);
 	if (starsp == NULL) {
@@ -103,7 +111,7 @@ void	Chart::draw(const Catalog::starsetptr stars) {
  *
  * \param star		the star to be drawn
  */
-void	Chart::draw(const Star& star) {
+void	ChartFactory::draw(const Star& star) {
 
 	// compute the pixel coordinates of the star
 	astro::Point	p = point(star);
@@ -151,7 +159,7 @@ void	Chart::draw(const Star& star) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d pixels set", counter);
 }
 
-double	Chart::pointspreadfunction(double r, double mag) const {
+double	ChartFactory::pointspreadfunction(double r, double mag) const {
 	if (r > (_maxradius * (20 - mag) / 20.)) {
 		return 0;
 	}
@@ -168,7 +176,7 @@ static double	sqr(double y) {
  * \param window	the sky window where stars should be placed
  * \param star		the star to be placed inside the window
  */
-Point	Chart::point(const RaDec& star) const {
+Point	ChartFactory::point(const RaDec& star) const {
 	Point	p = _rectangle.map2(star);
 	double	x = size().width() * p.x();
 	double	y = size().height() * p.y();
@@ -180,7 +188,7 @@ Point	Chart::point(const RaDec& star) const {
  *
  * \param center	get the window of appropriate size
  */
-SkyWindow	Chart::getWindow() const {
+SkyWindow	ChartFactory::getWindow() const {
 	return _rectangle.containedin();
 }
 
@@ -188,9 +196,9 @@ SkyWindow	Chart::getWindow() const {
 // DiffractionChart class implementation
 //////////////////////////////////////////////////////////////////////
 
-DiffractionChart::DiffractionChart(const ImageSize& size,
+DiffractionChartFactory::DiffractionChartFactory(const ImageSize& size,
 	const RaDec& center, double focallength, double pixelsize)
-                : Chart(size, center, focallength, pixelsize) {
+                : ChartFactory(size, center, focallength, pixelsize) {
 	// set the aperture
 	aperture(0.280);
 }
@@ -198,7 +206,7 @@ DiffractionChart::DiffractionChart(const ImageSize& size,
 /**
  * \brief set the aperture
  */
-void	DiffractionChart::aperture(double a) {
+void	DiffractionChartFactory::aperture(double a) {
 	_aperture = a;
 	_xfactor =  (M_PI * _aperture * _pixelsize)
 			/ (_focallength * 0.000000550);
@@ -208,7 +216,7 @@ void	DiffractionChart::aperture(double a) {
 /**
  * \brief Airy pattern
  */
-double	DiffractionChart::pointspreadfunction(double r, double /* mag */) const {
+double	DiffractionChartFactory::pointspreadfunction(double r, double /* mag */) const {
 	double	x = _xfactor * r;
 	double	a = sqr(2 * j1(x) / x);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%f: airy(%f) = %f", r, x, a);
@@ -218,14 +226,14 @@ double	DiffractionChart::pointspreadfunction(double r, double /* mag */) const {
 //////////////////////////////////////////////////////////////////////
 // TurbulenceChart class implementation
 //////////////////////////////////////////////////////////////////////
-TurbulenceChart::TurbulenceChart(const ImageSize& size, const RaDec& center,
+TurbulenceChartFactory::TurbulenceChartFactory(const ImageSize& size, const RaDec& center,
 	double focallength, double pixelsize)
-		: Chart(size, center, focallength, pixelsize) {
+		: ChartFactory(size, center, focallength, pixelsize) {
 	// set the tolerance value
 	turbulence(1);
 }
 
-double	TurbulenceChart::pointspreadfunction(double r, double /* mag */) const {
+double	TurbulenceChartFactory::pointspreadfunction(double r, double /* mag */) const {
 	//return 10 * exp(-sqr(r * sqrt(sqrt((mag < 1) ? 1 : mag)) / _turbulence));
 	return exp(-sqr(r / _turbulence));
 }

@@ -32,6 +32,7 @@ public:
 public:
 	SkyWindow(const RaDec& center, const Angle& rawidth,
 		const Angle& decheight);
+	SkyWindow(const ImageBase& image);
 	bool	contains(const RaDec& position) const;
 	std::pair<double, double>	decinterval() const;
 	Angle	leftra() const;
@@ -39,6 +40,7 @@ public:
 	Angle	bottomdec() const;
 	virtual std::string	toString() const;
 	static SkyWindow	all;
+	void	addMetadata(ImageBase& image) const;
 };
 
 /**

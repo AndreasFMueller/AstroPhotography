@@ -24,6 +24,21 @@ SkyWindow::SkyWindow(const RaDec& center,
 	_decheight = decheight.reduced(-M_PI / 2);
 }
 
+SkyWindow::SkyWindow(const ImageBase& image) {
+	_center.ra().hours(
+		std::stod(image.getMetadata(std::string("RACENTR"))
+			.getValue()));
+	_center.ra().degrees(
+		std::stod(image.getMetadata(std::string("DECCENTR"))
+			.getValue()));
+	_rawidth.hours(
+		std::stod(image.getMetadata(std::string("RAWIDTH"))
+			.getValue()));
+	_decheight.degrees(
+		std::stod(image.getMetadata(std::string("DECHIGHT"))
+			.getValue()));
+}
+
 static double	reduce(double x, double left) {
 	return x - 2 * M_PI * floor((x - left) / (2 * M_PI));
 }
@@ -95,6 +110,12 @@ void	SkyWindow::addMetadata(ImageBase& image) const {
 	image.setMetadata(std::string("DECCENTR"), 
 		Metavalue(center().dec().degrees(),
 			std::string("declination of image center in degrees")));
+	image.setMetadata(std::string("RAWIDTH"), 
+		Metavalue(_rawidth.hours(),
+			std::string("right ascension image width in hours")));
+	image.setMetadata(std::string("DECHIGHT"), 
+		Metavalue(_decheight.degrees(),
+			std::string("declination image with in degrees")));
 }
 
 } // namespace catalog

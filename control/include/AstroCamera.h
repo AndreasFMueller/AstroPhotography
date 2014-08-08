@@ -183,6 +183,9 @@ public:
 	// utility functions
 	astro::image::ImageRectangle	clipRectangle(const astro::image::ImageRectangle& rectangle) const;
 	astro::image::ImageRectangle	centeredRectangle(const astro::image::ImageSize& size) const;
+
+	// add metadata from the CCDinfo
+	void	addMetadata(ImageBase& image) const;
 };
 std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 

@@ -132,6 +132,8 @@ ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
 
 /**
  * \brief Get a centered rectangle of a given size
+ *
+ * \param s	size for the rectangled to be computed
  */
 ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
 	unsigned int	w = s.width();
@@ -145,6 +147,21 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
 	unsigned int	xoffset = (_size.width() - w) / 2;
 	unsigned int	yoffset = (_size.height() - h) / 2;
 	return ImageRectangle(ImagePoint(xoffset, yoffset), ImageSize(w, h));
+}
+
+/**
+ * \brief Add Metadata from the CCD to the image
+ *
+ * \param image	image to add the information to
+ */
+void	CcdInfo::addMetadata(ImageBase& image) const {
+	image.setMetadata(std::string("PXLWIDTH"),
+		Metavalue(_pixelwidth * 1000000.,
+			std::string("width of a pixel in microns")));
+	image.setMetadata(std::string("PXLHIGHT"),
+		Metavalue(_pixelheight * 1000000.,
+			std::string("height of a pixel in microns")));
+
 }
 
 //////////////////////////////////////////////////////////////////////

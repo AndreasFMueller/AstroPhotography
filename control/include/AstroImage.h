@@ -160,9 +160,9 @@ class Metavalue {
 	std::string	value;
 	std::string	comment;
 public:
-	std::string	getValue() const;
-	std::string	getComment() const;
-	int	getType() const;
+	const std::string&	getValue() const { return value; }
+	const std::string&	getComment() const { return comment; }
+	int	getType() const { return datatype; }
 	Metavalue(const std::string& _value, const std::string& _comment);
 	Metavalue(const bool b, const std::string& _comment);
 	Metavalue(const char c, const std::string& _comment);
@@ -751,6 +751,13 @@ public:
 				pixels + r.firstoffset + subframe.origin().x()
 					+ frame.size().width(), value);
 		}
+	}
+
+	/**
+	 * \brief Clear an image
+ 	 */
+	void	clear() {
+		fill(0);
 	}
 
 	/**

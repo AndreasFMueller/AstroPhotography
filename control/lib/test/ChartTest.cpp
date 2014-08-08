@@ -69,27 +69,27 @@ void	ChartTest::testImage() {
 
 	// create chart object
 	// SX MC26C 50mm 
-	//DiffractionChart	chart(ImageSize(3900, 2616), center, 0.050, 0.00000605);
+	//DiffractionChartFactory	chart(ImageSize(3900, 2616), center, 0.050, 0.00000605);
 	// SX MC26C 135mm 
-	TurbulenceChart	chart(ImageSize(3900, 2616), center, 0.135, 0.00000605);
+	TurbulenceChartFactory	chartfactory(ImageSize(3900, 2616), center, 0.135, 0.00000605);
 	// SX MC26, primary focus
-	//TurbulenceChart	chart(ImageSize(3900, 2616), center, 0.560, 0.00000605);
+	//TurbulenceChartFactory	chart(ImageSize(3900, 2616), center, 0.560, 0.00000605);
 	// SBIG 16803, Cassegrain focus
-	//TurbulenceChart	chart(ImageSize(4096, 4096), center, 2.800, 0.000015);
-	chart.maxradius(7);
+	//TurbulenceChartFactory	chart(ImageSize(4096, 4096), center, 2.800, 0.000015);
+	chartfactory.maxradius(7);
 	//chart.aperture(0.280);
-	chart.turbulence(2);
-	chart.scale(500);
+	chartfactory.turbulence(2);
+	chartfactory.scale(500);
 	//chart.logarithmic(true);
 
 	// extract the window 
-	SkyWindow	window = chart.getWindow();
+	SkyWindow	window = chartfactory.getWindow();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get stars from window %s",
 		window.toString().c_str());
 
 	//double	limit_mag = 20;
 	double	limit_mag = 14; // for M31
-	chart.scale(100); // M31
+	chartfactory.scale(100); // M31
 
 	// retrieve Hipparcos stars
 	Catalog	catalog("/usr/local/starcatalogs");
@@ -101,7 +101,8 @@ void	ChartTest::testImage() {
 		stars->size());
 
 	// create the image
-	chart.draw(stars);
+	chartfactory.draw(stars);
+	Chart	chart = chartfactory.chart();
 	astro::image::ImagePtr	image = chart.image();
 	astro::io::FITSout	out("chart.fits");
 	out.setPrecious(false);
