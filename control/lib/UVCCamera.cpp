@@ -91,8 +91,10 @@ void	UVCCamera::getCur(uint8_t interface) {
  *			interface associaten descriptor does not
  *			declare itself as a video interface association
  *                      descriptor (handles the TIS camera)
+ * XXX apparently the force parameter is never used, so the question should be
+ *     asked whether we can remove it.
  */
-UVCCamera::UVCCamera(Device& _device, bool force) throw(USBError)
+UVCCamera::UVCCamera(Device& _device, bool /* force */) throw(USBError)
 	: device(_device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a UVC camera object");
 
