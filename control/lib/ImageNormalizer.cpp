@@ -14,6 +14,20 @@ namespace catalog {
 ImageNormalizer::ImageNormalizer(ChartFactory& factory) : _factory(factory) { }
 
 /**
+ * \brief Auxiliary function to extract current center coordinates from image
+ */
+static RaDec	get_center(ImagePtr image) {
+	RaDec	center;
+	std::string	v = image->getMetadata("RACENTR").getValue();
+	center.ra().hours(std::stod(v));
+	v = image->getMetadata("DECCENTR").getValue();
+	center.dec().degrees(std::stod(v));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current image center: %s",
+		center.toString().c_str());
+	return center;
+}
+
+/**
  * \brief Compute the true 
  *
  * \param image			
@@ -28,7 +42,9 @@ RaDec	ImageNormalizer::operator()(ImagePtr image, Projection& projection) {
 		geometry.toString().c_str());
 
 	// find the current central coordinates of the image
-	
+	RaDec	center = get_center(image);
+
+	// compute the coordinates of the center
 }
 
 } // namespace catalog
