@@ -24,6 +24,12 @@ ImageSize::ImageSize(unsigned int width, unsigned int height)
 }
 
 /**
+ * \brief Destructor
+ */
+ImageSize::~ImageSize() {
+}
+
+/**
  * \brief Width accessor
  */
 void	ImageSize::setWidth(unsigned int width) {
