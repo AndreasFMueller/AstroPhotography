@@ -39,6 +39,14 @@ SkyRectangle::SkyRectangle(const ImageBase& image) : SkyWindow(image) {
 }
 
 /**
+ * \brief Create a SkyWindow from a point on the sky and a geometry
+ */
+SkyRectangle::SkyRectangle(const RaDec& center, const ImageGeometry& geometry)
+	: SkyWindow(center, geometry.rawidth(), geometry.decheight()) {
+	setup();
+}
+
+/**
  * \brief Setup the intern
  */
 void	SkyRectangle::setup() {
@@ -118,6 +126,19 @@ Point	SkyRectangle::map(const RaDec& where) const {
 Point	SkyRectangle::map2(const RaDec& where) const {
 	Point	p = map(where);
 	return Point((1 + p.x() / rightlimit) / 2, (1 + p.y() / uplimit) / 2);
+}
+
+/**
+ * \brief compute the point where a star should be placed
+ *
+ * The map methods give size independent coordinates, but this method
+ * uses the actual image size to give pixel coordinates for the star
+ */
+Point	SkyRectangle::point(const ImageSize& size, const RaDec& star) const {
+	Point   p = map2(star);
+	double  x = size.width() * p.x();
+	double  y = size.height() * p.y();
+	return Point(x, y);
 }
 
 /**

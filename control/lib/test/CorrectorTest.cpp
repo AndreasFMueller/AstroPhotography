@@ -101,7 +101,7 @@ void	CorrectorTest::testCorrector() {
 
 void	CorrectorTest::testAndromeda() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAndromeda() begin");
-
+#if 0
 	// read the deneb image
 	FITSin	in("andromeda-base.fits");
 	ImagePtr	imageptr = in.read();
@@ -145,7 +145,7 @@ void	CorrectorTest::testAndromeda() {
 		out.setPrecious(false);
 		out.write(result);
 	}
-
+#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAndromeda() end");
 }
 

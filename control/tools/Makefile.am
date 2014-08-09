@@ -20,7 +20,7 @@ endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
-	focusing starcatalog buildcatalog
+	focusing starcatalog buildcatalog fitsheader
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -104,6 +104,10 @@ buildcatalog_SOURCES = buildcatalog.cpp
 buildcatalog_DEPENDENCIES = ../lib/libastro.la
 buildcatalog_LDADD = -L../lib -lastro 
 
+fitsheader_SOURCES = fitsheader.cpp
+fitsheader_DEPENDENCIES = ../lib/libastro.la
+fitsheader_LDADD = -L../lib -lastro 
+
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
@@ -141,3 +145,16 @@ catalogtest:	buildcatalog
 		-u /usr/local/starcatalogs/u4 \
 		/usr/local/starcatalogs/database/stars.db
 	
+
+fitsheadertest:	fitsheader
+	cp andromeda-chart.fits headertest.fits
+	./fitsheader -d add headertest.fits \
+		DECCENTR 41.269167 "declination of image center in degrees" \
+		DECHIGHT 6.717103 "declination image with in degrees" \
+		RACENTR 0.712306 "right ascension of image center in hours" \
+		RAWIDTH 0.667602 "right ascension image width in hours" \
+		PXLWIDTH 6.05 "width of a pixel in microns" \
+		PXLHIGHT 6.05 "height of a pixel in microns" \
+		FOCUS 0.135 "telescope focal length" \
+		BLUBB 4711 "test integer" \
+		FOO mustbestring "test string"

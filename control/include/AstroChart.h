@@ -8,6 +8,7 @@
 
 #include <AstroCoordinates.h>
 #include <AstroCatalog.h>
+#include <AstroProjection.h>
 
 namespace astro {
 namespace catalog {
@@ -15,19 +16,21 @@ namespace catalog {
 /**
  * \brief ImageGeometry
  */
-class ImageGeometry {
+class ImageGeometry : public ImageSize {
 	ImageSize	_size;
 	double	_pixelsize;
 	double	_focallength;
 public:
-	ImageGeometry(const ImageSize& size, double pixelsize,
-		double focallength) : _size(size), _pixelsize(pixelsize),
+	ImageGeometry(const ImageSize& size, double focallength,
+		double pixelsize) : ImageSize(size), _pixelsize(pixelsize),
 			_focallength(focallength)  { }
 	ImageGeometry(const ImageBase& image);
-	const ImageSize&	size() const { return _size; }
 	double	pixelsize() const { return _pixelsize; }
 	double	focallength() const { return _focallength; }
 	void	addMetadata(ImageBase& image) const;
+	Angle	rawidth() const;
+	Angle	decheight() const;
+	virtual std::string	toString() const;
 };
 
 /**
@@ -44,14 +47,17 @@ public:
 	SkyRectangle();
 	SkyRectangle(const SkyWindow& window);
 	SkyRectangle(const ImageBase& image);
+	SkyRectangle(const RaDec& center, const ImageGeometry& geometry);
 	bool	contains(const RaDec& point) const;
 	astro::Point	map(const RaDec& where) const;
 	astro::Point	map2(const RaDec& where) const;
+	astro::Point	point(const ImageSize& size, const RaDec& where) const;
 	SkyWindow	containedin() const;
 	RaDec	inverse(const astro::Point& p) const;
 	void	addMetadata(ImageBase& image) const;
 };
 
+class ChartFactory;
 /**
  * \brief Chart abstraction
  *
@@ -61,12 +67,57 @@ public:
 class Chart {
 private:
 	SkyRectangle	_rectangle;
+	ImageSize	_size;
+	Image<float>	*_image;
 	ImagePtr	_imageptr;
 public:
-	Chart(const SkyRectangle rectangle, const ImagePtr image)
-		: _rectangle(rectangle), _imageptr(image) { }
-	const SkyRectangle	rectangle() const { return _rectangle; }
+	Chart(const SkyRectangle rectangle, const ImageSize& size);
+	const SkyRectangle&	rectangle() const { return _rectangle; }
+	const ImageSize&	size() const { return _size; }
 	const ImagePtr	image() const { return _imageptr; }
+friend class ChartFactory;
+};
+
+/**
+ * \brief Point spread functions
+ */
+class PointSpreadFunction {
+public:
+	virtual double	operator()(double r, double mag) const = 0;
+};
+
+/**
+ * \brief Point spread function the just turns a star into a circle
+ */
+class CirclePointSpreadFunction : public PointSpreadFunction {
+	double	_maxradius;
+public:
+	CirclePointSpreadFunction(double maxradius) : _maxradius(maxradius) { }
+	virtual double	operator()(double r, double mag) const;
+};
+
+/**
+ * \brief The point spread function for an image dominated by diffraction
+ */
+class DiffractionPointSpreadFunction : public PointSpreadFunction {
+	double	_aperture;
+	double	_xfactor;
+public:
+	DiffractionPointSpreadFunction(const ImageGeometry& geometry,
+		double aperture);
+	virtual double	operator()(double r, double mag) const;
+};
+
+/**
+ * \brief The point spread function for an image dominated by turbulence
+ */
+class TurbulencePointSpreadFunction : public PointSpreadFunction {
+	double	_turbulence;
+public:
+	TurbulencePointSpreadFunction(double turbulence = 2.)
+		: _turbulence(turbulence) {
+	}
+	virtual double	operator()(double r, double mag) const;
 };
 
 /**
@@ -75,94 +126,65 @@ public:
  * Class to produce charts for sets of stars. 
  */
 class ChartFactory {
+// parameters valid for all images
 private:
-	Image<float>	*_image;
-	ImagePtr	_imageptr;
+	Catalog&	_catalog;
+	PointSpreadFunction&	pointspreadfunction;
+private:
+	double	_limit_magnitude;
 public:
-	const astro::image::ImageSize	size() const { return _image->size(); }
+	double	limit_magnitude() const { return _limit_magnitude; }
+	void	limit_magnitude(double l) { _limit_magnitude = l; }
 private:
 	double	_scale;
 public:
 	double	scale() const { return _scale; }
 	void	scale(double s) { _scale = s; }
 private:
-	bool	_logarithmic;
-public:
-	bool	logarithmic() const { return _logarithmic; }
-	void	logarithmic(bool l) { _logarithmic = l; }
-private:
 	double	_maxradius;
 public:
 	unsigned int	maxradius() const { return _maxradius; }
 	void	maxradius(unsigned int m) { _maxradius = m; }
-protected:
-	virtual double	pointspreadfunction(double r, double mag) const;
 private:
-	SkyRectangle	_rectangle;
-	void	draw(const Star& star);
-protected:
-	double	_focallength;
-	double	_pixelsize;
+	bool	_logarithmic;
 public:
-	ChartFactory(const astro::image::ImageSize& size, const RaDec& center,
-		double focallength, double pixelsize);
+	bool	logarithmic() const { return _logarithmic; }
+	void	logarithmic(bool l) { _logarithmic = l; }
+public:
+	// constructors
+	ChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+		double limit_magnitude = 16,
+		double scale = 1, double maxradius = 7,
+		bool logarithmic = false)
+		: _catalog(catalog), pointspreadfunction(psf),
+		  _limit_magnitude(limit_magnitude),
+		  _scale(scale), _maxradius(maxradius),
+		  _logarithmic(logarithmic) {
+	}
 	~ChartFactory();
-	Chart	chart() const { return Chart(_rectangle, _imageptr); }
-	SkyWindow	getWindow() const;
-	astro::Point	point(const RaDec& star) const;
-	void	draw(const Catalog::starset& star);
-	void	draw(const Catalog::starsetptr star);
-	void	clear();
-};
 
-/**
- * \brief DiffractionChart
- *
- * Chart built based on the assumption that star images are only modified
- * by diffraction into an Airy disk. To compute the diffraction pattern,
- * the aperture must be known. This model is only useful for extremely
- * good atmospheric conditions (perfect seeing), and small apertures, as
- * for large apertures the size of the airy disk is probably on the order
- * of the pixels of the camera.
- */
-class DiffractionChartFactory : public ChartFactory {
-	double	_aperture;
-	double	_xfactor;
-public:
-	double	aperture() const { return _aperture; }
-	void	aperture(double a);
+	// functions needed to produce a chart
+	Chart	chart(const RaDec& center, const ImageGeometry& geometry);
 private:
-	virtual double	pointspreadfunction(double r, double mag) const;
-public:
-	DiffractionChartFactory(const astro::image::ImageSize& size,
-		const RaDec& center, double focallength, double pixelsize);
-};
-
-/**
- * \brief TurbulenceChart
- *
- * The TurbulenceChart assumes that the main reason stars are not points is
- * seeing. This is probably what you one expects in near civilization 
- * viewing conditions. The FWHM of the seeing disk is given by the turbulence
- * parameter.
- */
-class TurbulenceChartFactory : public ChartFactory {
-	double	_turbulence;
-public:
-	double	turbulence() const { return _turbulence; }
-	void	turbulence(double t) { _turbulence = t; }
-private:
-	virtual double	pointspreadfunction(double r, double mag) const;
-public:
-	TurbulenceChartFactory(const astro::image::ImageSize& size,
-		const RaDec& center, double focallength, double pixelsize);
+	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+			const Catalog::starset& star);
+	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+			const Catalog::starsetptr star);
+	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+			const Star& star);
 };
 
 /**
  * \brief Normalize an image
+ *
+ * Find a projection 
  */
 class ImageNormalizer {
+	ChartFactory&	_factory;
 public:
+	ImageNormalizer(ChartFactory& factory);
+	RaDec	operator()(astro::image::ImagePtr image,
+			astro::image::transform::Projection& projection);
 };
 
 } // namespace catalog

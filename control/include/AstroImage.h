@@ -86,7 +86,7 @@ public:
 	unsigned int	offset(unsigned int x, unsigned int y) const;
 	unsigned int	offset(const ImagePoint& point) const;
 	// text representation
-	std::string	toString() const;
+	virtual std::string	toString() const;
 	// corners
 	ImagePoint	upperright() const;
 	ImagePoint	upperleft() const;

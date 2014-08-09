@@ -45,19 +45,22 @@ void	ChartTest::testImage() {
 	// get the center, in the constellation andromeda
 	//center.ra().hours(42./60 + 44./3600);
 	//center.dec().degrees(41 + 16./60 + 10./3600);
+
 	// Orion
 	//center.ra().hours(4 + 43/60. + 25/3600.);
 	//center.dec().degrees(-10 - 58./60 -43./36000);
+
 	// M13
 	//center.ra().hours(16 + 41./60 + 41.44/3600);
 	//center.dec().degrees(36 + 27./60 + 36.9/3600);
+
 	// small magellanic cloud
 	//center.ra().hours(0 + 51./60);
 	//center.dec().degrees(-73 - 6./60);
 
 	// Deneb
-	center.ra().hours(20. + 41./60 + 25.9/3600);
-	center.dec().degrees(45 + 16./60 + 49./3600);
+	//center.ra().hours(20. + 41./60 + 25.9/3600);
+	//center.dec().degrees(45 + 16./60 + 49./3600);
 
 	//  36UMa
 	//center.ra().hours(10. + 30./60 + 37.6/3600);
@@ -68,41 +71,29 @@ void	ChartTest::testImage() {
 	center.dec().degrees(41 + 16./60 + 9./3600);
 
 	// create chart object
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create the geometry");
 	// SX MC26C 50mm 
-	//DiffractionChartFactory	chart(ImageSize(3900, 2616), center, 0.050, 0.00000605);
+	//ImageGeometry	geometry(ImageSize(3900, 2616), 0.050, 0.00000605);
 	// SX MC26C 135mm 
-	TurbulenceChartFactory	chartfactory(ImageSize(3900, 2616), center, 0.135, 0.00000605);
+	ImageGeometry	geometry(ImageSize(3900, 2616), 0.135, 0.00000605);
 	// SX MC26, primary focus
-	//TurbulenceChartFactory	chart(ImageSize(3900, 2616), center, 0.560, 0.00000605);
+	//ImageGeometry	geometry(ImageSize(3900, 2616), 0.560, 0.00000605);
 	// SBIG 16803, Cassegrain focus
-	//TurbulenceChartFactory	chart(ImageSize(4096, 4096), center, 2.800, 0.000015);
-	chartfactory.maxradius(7);
-	//chart.aperture(0.280);
-	chartfactory.turbulence(2);
-	chartfactory.scale(500);
-	//chart.logarithmic(true);
+	//ImageGeometry	geometry(ImageSize(4096, 4096), 2.800, 0.000015);
 
-	// extract the window 
-	SkyWindow	window = chartfactory.getWindow();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get stars from window %s",
-		window.toString().c_str());
+	// star catalog
+	Catalog	catalog("/usr/local/starcatalogs");
 
+	// point spread function
+	TurbulencePointSpreadFunction	psf(2);
+
+	// build the factory
 	//double	limit_mag = 20;
 	double	limit_mag = 14; // for M31
-	chartfactory.scale(100); // M31
-
-	// retrieve Hipparcos stars
-	Catalog	catalog("/usr/local/starcatalogs");
-	Catalog::starsetptr	stars = catalog.find(window,
-					MagnitudeRange(-30, limit_mag));
-
-	// report number of stars found
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "chart contains %u stars",
-		stars->size());
+	ChartFactory	factory(catalog, psf, limit_mag, 500, 7);
 
 	// create the image
-	chartfactory.draw(stars);
-	Chart	chart = chartfactory.chart();
+	Chart	chart = factory.chart(center, geometry);
 	astro::image::ImagePtr	image = chart.image();
 	astro::io::FITSout	out("chart.fits");
 	out.setPrecious(false);

@@ -19,8 +19,8 @@ SkyWindow::SkyWindow(const RaDec& center,
 	} else {
 		_rawidth = rawidth;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "window height: %f",
-		decheight.degrees());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "window dimensions: RA = %f hours, "
+		"DEC = %f degrees", rawidth.hours(), decheight.degrees());
 	_decheight = decheight.reduced(-M_PI / 2);
 }
 

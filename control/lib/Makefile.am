@@ -74,7 +74,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	Catalog.cpp MappedFile.cpp Ucac4.cpp Tycho2.cpp BSC.cpp Hipparcos.cpp \
 	NGCIC.cpp \
 	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
-	ImageGeometry.cpp SkyRectangle.cpp Chart.cpp \
+	ImageGeometry.cpp SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

@@ -12,68 +12,79 @@ using namespace astro::image;
 namespace astro {
 namespace catalog {
 
+//////////////////////////////////////////////////////////////////////
+// Chart implementation
+//////////////////////////////////////////////////////////////////////
 /**
- * \brief Create a chart object
- *
- * The focallength and pixelsize together with the image size give the
- * angular dimensions of the rectangle on the sky.
- * \param size		The size of the chart image
- * \param center	The center of the chart image on the sky, right
- *			ascension and declination
- * \param focallength	The focal length of the telescope to simulate
- * \param pixelsize	The pixel size of the camera
+ * \brief Create a chart
  */
-ChartFactory::ChartFactory(const ImageSize& size,
-	const RaDec& center, double focallength, double pixelsize)
-                : _focallength(focallength),
-                  _pixelsize(pixelsize) {
+Chart::Chart(const SkyRectangle rectangle, const ImageSize& size)
+	: _rectangle(rectangle), _size(size) {
 	// create the image
 	_image =  new Image<float>(size);
 	_imageptr = ImagePtr(_image);
 	_image->fill(0);
 
-	// set up parameters for the image
-	_maxradius = 7;
-	_logarithmic = false;
-	_scale = 1;
-
-	// compute the rectangle of the camera
-	double	pixelangle = _pixelsize / _focallength;
-	Angle	width(size.width() * pixelangle);
-	Angle	height(size.height() * pixelangle);
-	SkyWindow	window(center, width, height);
-	_rectangle = SkyRectangle(window);
-
-	// add the center coordinates to the FITS file
-	_rectangle.addMetadata(*_image);
+	// add the metadata
+	rectangle.addMetadata(*_image);
 }
 
+//////////////////////////////////////////////////////////////////////
+// ChartFactory implementation
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief Destroy the chart object
  */
 ChartFactory::~ChartFactory() {
 }
 
+
 /**
- * \brief clear the image again
+ * \brief Create a chart
+ *
+ * This method creates an image with the geometry required by the the
+ * geometry argument, retrieves stars up to the limiting magnitude from
+ * the star catalog, adds them to the image and returns everything as a
+ * chart.
  */
-void	ChartFactory::clear() {
-	_image->clear();
+Chart	ChartFactory::chart(const RaDec& center, const ImageGeometry& geometry) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "chart @%s, geometry=%s",
+		center.toString().c_str(), geometry.toString().c_str());
+	// first evaluate the geometry and find a rectangle
+	SkyRectangle	rectangle(center, geometry);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting chart for rectangle: %s",
+		rectangle.toString().c_str());
+
+	// create the Chart
+	Chart	chart(rectangle, geometry);
+
+	// next find a window to get all the stars in the window
+	SkyWindow	window = rectangle.containedin();
+	Catalog::starsetptr	stars = _catalog.find(window,
+                                        MagnitudeRange(-30, _limit_magnitude));
+
+	// add the stars to the image
+	draw(*chart._image, rectangle, stars);
+
+	// return the completed chart
+	return chart;
 }
+
 
 /**
  * \brief draw a set of stars into the chart
  * 
  * \param stars		a set of stars to be drawn inside the image
  */
-void	ChartFactory::draw(const Catalog::starset& stars) {
+void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+		const Catalog::starset& stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create image for %u stars",
 		stars.size());
 
 	std::set<Star>::const_iterator	s;
 	for (s = stars.begin(); s != stars.end(); s++) {
 		try {
-			draw(*s);
+			draw(image, rectangle, *s);
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot map star %s",
 				s->toString().c_str());
@@ -84,10 +95,10 @@ void	ChartFactory::draw(const Catalog::starset& stars) {
 	}
 
 	// limit the pixel values to 1
-	for (unsigned int x = 0; x < size().width(); x++) {
-		for (unsigned int y =0; y < size().height(); y++) {
-			if (_image->pixel(x, y) > 1) {
-				_image->pixel(x, y) = 1;
+	for (unsigned int x = 0; x < image.size().width(); x++) {
+		for (unsigned int y =0; y < image.size().height(); y++) {
+			if (image.pixel(x, y) > 1) {
+				image.pixel(x, y) = 1;
 			}
 		}
 	}
@@ -96,13 +107,14 @@ void	ChartFactory::draw(const Catalog::starset& stars) {
 /**
  * \brief Draw a sets of of stars to the chart
  */
-void	ChartFactory::draw(const Catalog::starsetptr stars) {
+void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+		const Catalog::starsetptr stars) {
 	Catalog::starset	*starsp
 		= dynamic_cast<Catalog::starset *>(&*stars);
 	if (starsp == NULL) {
 		throw std::runtime_error("no star set provided");
 	}
-	draw(*starsp);
+	draw(image, rectangle, *starsp);
 }
 
 
@@ -111,10 +123,11 @@ void	ChartFactory::draw(const Catalog::starsetptr stars) {
  *
  * \param star		the star to be drawn
  */
-void	ChartFactory::draw(const Star& star) {
+void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+		const Star& star) {
 
 	// compute the pixel coordinates of the star
-	astro::Point	p = point(star);
+	astro::Point	p = rectangle.point(image.size(), star);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing star %s at %s",
 		star.toString().c_str(), p.toString().c_str());
 
@@ -132,11 +145,11 @@ void	ChartFactory::draw(const Star& star) {
 	int	xmin = p.x() - _maxradius - 1;
 	if (xmin < 0) { xmin = 0; }
 	int	xmax = p.x() + _maxradius + 1;
-	if (xmax > (int)size().width()) { xmax = size().width(); }
+	if (xmax > (int)image.size().width()) { xmax = image.size().width(); }
 	int	ymin = p.y() - _maxradius - 1;
 	if (ymin < 0) { ymin = 0; }
 	int	ymax = p.y() + _maxradius + 1;
-	if (ymax > (int)size().height()) { ymax = size().height(); }
+	if (ymax > (int)image.size().height()) { ymax = image.size().height(); }
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "xrange = [%d, %d), yrange = [%d, %d)",
 		xmin, xmax, ymin, ymax);
 
@@ -145,7 +158,7 @@ void	ChartFactory::draw(const Star& star) {
 	for (int x = xmin; x < xmax; x++) {
 		for (int y = ymin; y < ymax; y++) {
 			double	z = hypot(x - p.x(), y - p.y());
-			_image->pixel(x, y) += I * pointspreadfunction(z, star.mag());
+			image.pixel(x, y) += I * pointspreadfunction(z, star.mag());
 			counter++;
 #if 0
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "new value at %d,%d= %f",
@@ -159,7 +172,7 @@ void	ChartFactory::draw(const Star& star) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d pixels set", counter);
 }
 
-double	ChartFactory::pointspreadfunction(double r, double mag) const {
+double	CirclePointSpreadFunction::operator()(double r, double mag) const {
 	if (r > (_maxradius * (20 - mag) / 20.)) {
 		return 0;
 	}
@@ -170,53 +183,19 @@ static double	sqr(double y) {
 	return y * y;
 }
 
-/**
- * \brief Get the pixel coordinate point of the star in the window
- *
- * \param window	the sky window where stars should be placed
- * \param star		the star to be placed inside the window
- */
-Point	ChartFactory::point(const RaDec& star) const {
-	Point	p = _rectangle.map2(star);
-	double	x = size().width() * p.x();
-	double	y = size().height() * p.y();
-	return Point(x, y);
-}
-
-/**
- * \brief Get the window around a center point on the sky
- *
- * \param center	get the window of appropriate size
- */
-SkyWindow	ChartFactory::getWindow() const {
-	return _rectangle.containedin();
-}
-
 //////////////////////////////////////////////////////////////////////
-// DiffractionChart class implementation
+// DiffractionPointSpreadFunction class implementation
 //////////////////////////////////////////////////////////////////////
 
-DiffractionChartFactory::DiffractionChartFactory(const ImageSize& size,
-	const RaDec& center, double focallength, double pixelsize)
-                : ChartFactory(size, center, focallength, pixelsize) {
-	// set the aperture
-	aperture(0.280);
-}
-
-/**
- * \brief set the aperture
- */
-void	DiffractionChartFactory::aperture(double a) {
-	_aperture = a;
-	_xfactor =  (M_PI * _aperture * _pixelsize)
-			/ (_focallength * 0.000000550);
+DiffractionPointSpreadFunction::DiffractionPointSpreadFunction(
+	const ImageGeometry& geometry, double aperture) {
+	_aperture = aperture;
+	_xfactor =  (M_PI * _aperture * geometry.pixelsize())
+			/ (geometry.focallength() * 0.000000550);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "_xfactor = %f", _xfactor);
 }
 
-/**
- * \brief Airy pattern
- */
-double	DiffractionChartFactory::pointspreadfunction(double r, double /* mag */) const {
+double	DiffractionPointSpreadFunction::operator()(double r, double /* mag */) const {
 	double	x = _xfactor * r;
 	double	a = sqr(2 * j1(x) / x);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%f: airy(%f) = %f", r, x, a);
@@ -224,17 +203,9 @@ double	DiffractionChartFactory::pointspreadfunction(double r, double /* mag */) 
 }
 
 //////////////////////////////////////////////////////////////////////
-// TurbulenceChart class implementation
+// TurbulencePointSpreadFunction class implementation
 //////////////////////////////////////////////////////////////////////
-TurbulenceChartFactory::TurbulenceChartFactory(const ImageSize& size, const RaDec& center,
-	double focallength, double pixelsize)
-		: ChartFactory(size, center, focallength, pixelsize) {
-	// set the tolerance value
-	turbulence(1);
-}
-
-double	TurbulenceChartFactory::pointspreadfunction(double r, double /* mag */) const {
-	//return 10 * exp(-sqr(r * sqrt(sqrt((mag < 1) ? 1 : mag)) / _turbulence));
+double	TurbulencePointSpreadFunction::operator()(double r, double /* mag */) const {
 	return exp(-sqr(r / _turbulence));
 }
 

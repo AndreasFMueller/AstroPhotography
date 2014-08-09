@@ -51,7 +51,8 @@ tests_SOURCES = tests.cpp \
 	SkyWindowTest.cpp \
 	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
 	NGCICTest.cpp ChartTest.cpp SkyRectangleTest.cpp \
-	ProjectionTest.cpp AnalyzerTest.cpp CorrectorTest.cpp
+	ProjectionTest.cpp AnalyzerTest.cpp CorrectorTest.cpp \
+	ImageNormalizerTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
