@@ -17,7 +17,6 @@ namespace catalog {
  * \brief ImageGeometry
  */
 class ImageGeometry : public ImageSize {
-	ImageSize	_size;
 	double	_pixelsize;
 	double	_focallength;
 public:
@@ -31,6 +30,7 @@ public:
 	Angle	rawidth() const;
 	Angle	decheight() const;
 	virtual std::string	toString() const;
+	Point	coordinates(const Point& a) const;
 };
 
 /**

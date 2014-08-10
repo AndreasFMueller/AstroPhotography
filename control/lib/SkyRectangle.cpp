@@ -208,6 +208,10 @@ SkyWindow	SkyRectangle::containedin() const {
 /**
  * \brief Map a point in the image back to the sphere
  *
+ * Since the SkyRectangle has no concept of image resolution, the coordinates
+ * given by the Point p must be in [-1,1]\times[-1,1]. The coordinates method
+ * of the ImageGeometry class can be used to convert pixel coordinates to
+ * relative coordinates.
  * \param p	the point in the image
  */
 RaDec	SkyRectangle::inverse(const astro::Point& p) const {

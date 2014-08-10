@@ -76,4 +76,85 @@ double	Point::abs() const {
 	return hypot(_x, _y);
 }
 
+Point	Point::center(const std::set<Point>& points) {
+	return 0.5 * (lowerleft(points) + upperright(points));
+}
+
+class LeftCompare {
+public:
+	bool	operator()(const Point& a, const Point& b) const {
+		return (a.x() < b.x());
+	}
+};
+
+class RightCompare {
+public:
+	bool	operator()(const Point& a, const Point& b) const {
+		return (a.x() > b.x());
+	}
+};
+
+class BottomCompare {
+public:
+	bool	operator()(const Point& a, const Point& b) const {
+		return (a.y() < b.y());
+	}
+};
+
+class TopCompare {
+public:
+	bool	operator()(const Point& a, const Point& b) const {
+		return (a.y() > b.y());
+	}
+};
+
+Point	Point::lowerleft(const std::set<Point>& points) {
+	double	x = std::min_element(points.begin(), points.end(),
+			LeftCompare())->x();
+	double	y = std::min_element(points.begin(), points.end(),
+			BottomCompare())->y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "left = %f, lower = %f", x, y);
+	return Point(x, y);
+}
+
+Point	Point::lowerright(const std::set<Point>& points) {
+	double	x = std::min_element(points.begin(), points.end(),
+			RightCompare())->x();
+	double	y = std::min_element(points.begin(), points.end(),
+			BottomCompare())->y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "right = %f, lower = %f", x, y);
+	return Point(x, y);
+}
+
+Point	Point::upperleft(const std::set<Point>& points) {
+	double	x = std::min_element(points.begin(), points.end(),
+			LeftCompare())->x();
+	double	y = std::min_element(points.begin(), points.end(),
+			TopCompare())->y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "left = %f, upper = %f", x, y);
+	return Point(x, y);
+}
+
+Point	Point::upperright(const std::set<Point>& points) {
+	double	x = std::min_element(points.begin(), points.end(),
+			RightCompare())->x();
+	double	y = std::min_element(points.begin(), points.end(),
+			TopCompare())->y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "right = %f, upper = %f", x, y);
+	return Point(x, y);
+}
+
+class PointAverager {
+	Point	sum;
+	unsigned int	counter;
+public:
+	PointAverager() { sum = Point(0, 0); counter = 0; }
+	void	operator()(const Point& p) { sum = sum + p; counter++; }
+	Point	average() const { return sum * (1. / counter); }
+};
+
+Point	Point::centroid(const std::set<Point>& points) {
+	return for_each(points.begin(), points.end(), PointAverager()).average();
+}
+
 } // namespace astro

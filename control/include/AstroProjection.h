@@ -22,6 +22,7 @@ namespace transform {
  */
 class Projection : public Transform {
 	double	b[2];
+protected:
 	double	w(double r) const;
 public:
 	Projection();
@@ -60,8 +61,9 @@ public:
 		const ConstImageAdapter<Pixel>& _image,
 		const Projection& _projection)
 		: ConstImageAdapter<Pixel>(targetsize), image(_image),
-		  centeredprojection(targetsize.center(),
-			ConstImageAdapter<Pixel>::getSize().center(),
+		  centeredprojection(
+			_image.getSize().center(),
+			targetsize.center(),
 			_projection) {
 	}
 	virtual Pixel	pixel(unsigned int x, unsigned int y) const;

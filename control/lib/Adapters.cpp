@@ -50,5 +50,30 @@ ImagePtr	upsample(ImagePtr image, const ImageSize& sampling) {
 	throw std::runtime_error("cannot upsample this image type");
 }
 
+#define type_convert_typed(image, Pixel)				\
+{									\
+	Image<Pixel >	*imageptr					\
+		= dynamic_cast<Image<Pixel > *>(&*image);		\
+	if (NULL != imageptr) {						\
+		return new TypeConversionAdapter<double, Pixel >(*imageptr);\
+	}								\
+}
+
+static ConstImageAdapter<double>	*type_convert(const ImagePtr image) {
+	type_convert_typed(image, unsigned char);
+	type_convert_typed(image, unsigned short);
+	type_convert_typed(image, unsigned int);
+	type_convert_typed(image, unsigned long);
+	type_convert_typed(image, float);
+	type_convert_typed(image, double);
+	throw std::runtime_error("cannot convert this image to double pixel");
+}
+
+DoubleAdapter::DoubleAdapter(const ImagePtr image) :
+	ConstImageAdapter<double>(image->size()), _image(image) {
+	ConstImageAdapter<double>	*adapter = type_convert(image);
+	doubleimage = std::shared_ptr<ConstImageAdapter<double> >(adapter);
+}
+
 } // namespace image
 } // namespace astro

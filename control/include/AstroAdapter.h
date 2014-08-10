@@ -1292,6 +1292,16 @@ public:
 	}
 };
 
+class DoubleAdapter : public ConstImageAdapter<double> {
+	const ImagePtr	_image;
+	std::shared_ptr<ConstImageAdapter<double> >	doubleimage;
+public:
+	DoubleAdapter(const ImagePtr image);
+	virtual double	pixel(unsigned int x, unsigned int y) const {
+		return doubleimage->pixel(x, y);
+	}
+};
+
 #if 0
 //////////////////////////////////////////////////////////////////////
 // Pixel interpolation adapter

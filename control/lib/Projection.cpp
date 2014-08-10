@@ -21,7 +21,8 @@ Projection::Projection(double angle, const Point& translation,
 
 double	Projection::w(double r) const {
 	double	x = r * r;
-	return 1. + x * (b[0] + x * b[1]);
+	//return 1. + x * (b[0] + x * b[1]);
+	return 1.;
 }
 
 Projection::Projection() {
@@ -64,7 +65,8 @@ std::string	Projection::toString() const {
 
 Point	CenteredProjection::operator()(const Point& p) const {
 	Point	q(p.x() - center.x(), p.y() - center.y());
-	return Transform::operator()(q) + targetcenter;
+	Point	u =  Transform::operator()(q);
+	return u * w(u.abs()) + targetcenter;
 }
 
 Point	CenteredProjection::operator()(unsigned int x, unsigned int y) const {

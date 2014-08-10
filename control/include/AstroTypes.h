@@ -8,6 +8,7 @@
 
 #include <AstroImage.h>
 #include <iostream>
+#include <set>
 
 using namespace astro::image;
 
@@ -54,11 +55,49 @@ public:
 	bool	operator==(const Point& other) const;
 	bool	operator!=(const Point& other) const;
 	operator double() const;
+	static Point	center(const std::set<Point>& points);
+	static Point	lowerleft(const std::set<Point>& points);
+	static Point	lowerright(const std::set<Point>& points);
+	static Point	upperleft(const std::set<Point>& points);
+	static Point	upperright(const std::set<Point>& points);
+	static Point	centroid(const std::set<Point>& points);
 };
 Point	operator*(double l, const Point& other);
 
 std::ostream&	operator<<(std::ostream& out, const Point& other);
 std::istream&	operator>>(std::istream& in, Point& other);
+
+/**
+ * \brief Dimensions of a rectangle in double coordinates
+ */
+class Size {
+	double	_width;
+	double	_height;
+	void	setup(const Point& lowerleft, const Point& upperright);
+public:
+	Size(double width, double height) : _width(width), _height(height) { }
+	Size(const Point& lowerleft, const Point& upperright);
+	Size(const std::set<Point>& points);
+	double width() const { return _width; }
+	void	width(double w) { _width = w; }
+	double height() const { return _height; }
+	void	height(double h) { _height = h; }
+	std::string	toString() const;
+};
+std::ostream&	operator<<(std::ostream& out, const Size& size);
+
+/**
+ * \brief A rectangle in arbitrary coordinates
+ */
+class Rectangle: public Point, public Size {
+public:
+	Rectangle(Point origin, Size size) : Point(origin), Size(size) { }
+	Rectangle(const std::set<Point>& points);
+	Point	origin() const { return Point(*this); }
+	Size	size() const { return Size(*this); }
+	std::string	toString() const;
+};
+std::ostream&	operator<<(std::ostream& out, const Rectangle& rectangle);
 
 } // namespace astro
 

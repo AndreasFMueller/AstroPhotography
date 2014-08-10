@@ -182,10 +182,10 @@ Transform	Transform::inverse() const {
 	Transform	result;
 	// inverse of the matrix
 	double	det = a[0] * a[4] - a[1] * a[3];
-	result.a[0] =  a[0] / det;
-	result.a[1] = -a[3] / det;
-	result.a[3] = -a[1] / det;
-	result.a[4] =  a[4] / det;
+	result.a[0] =  a[4] / det;
+	result.a[1] = -a[1] / det;
+	result.a[3] = -a[3] / det;
+	result.a[4] =  a[0] / det;
 	// offset
 	result.a[2] = -(result.a[0] * a[2] + result.a[1] * a[5]);
 	result.a[5] = -(result.a[3] * a[2] + result.a[4] * a[5]);

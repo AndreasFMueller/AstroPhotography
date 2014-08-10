@@ -50,7 +50,7 @@ void	ImageNormalizerTest::testImageNormalizer() {
 	ImageNormalizer	normalizer(factory);
 	
 	// prepare the initial transformation
-	Projection	projection(M_PI * 160 / 180, Point(838, 182), 0.98);
+	Projection	projection(M_PI * 162 / 180, Point(838, 182), 0.98);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "projection: %s",
 		projection.toString().c_str());
 

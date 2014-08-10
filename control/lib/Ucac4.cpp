@@ -282,7 +282,7 @@ uint32_t	Ucac4Zone::first(const Angle& ra) const {
 	Angle	ra2 = get(l2).ra();
 	while ((l2 - l1) > 1) {
 		uint32_t	l = (l1 + l2) / 2;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "new subdivision: %lu", l);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "new subdivision: %lu", l);
 		Angle	ra0 = get(l).ra();
 		if (ra0 < ra) {
 			l1 = l;
@@ -292,8 +292,8 @@ uint32_t	Ucac4Zone::first(const Angle& ra) const {
 			l2 = l;
 			ra2 = ra0;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%u = %f < %f <= %f",
-			l1, l2, ra1.hours(), ra.hours(), ra2.hours());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%u = %f < %f <= %f",
+		//	l1, l2, ra1.hours(), ra.hours(), ra2.hours());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "first: %lu", l2);
 	return l2;

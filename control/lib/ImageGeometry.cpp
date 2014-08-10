@@ -75,5 +75,13 @@ std::string	ImageGeometry::toString() const {
 		ImageSize::toString().c_str(), _pixelsize, _focallength);
 }
 
+/**
+ * \brief compute relative coordinates
+ */
+Point	ImageGeometry::coordinates(const Point& a) const {
+	Point	relative = (a - center());
+	return Point(2 * relative.x() / width(), 2 * relative.y() / height());
+}
+
 } // namespace catalog
 } // namespace astro
