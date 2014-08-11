@@ -148,6 +148,9 @@ public:
 	ImagePoint	center() const;
 	// find out whether the rectangle is uninitialized
 	bool	isEmpty() const { return _size.isEmpty(); }
+	// subimage
+	ImagePoint	subimage(const ImagePoint& point) const;
+	ImagePoint	subimage(unsigned int x, unsigned int y) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);

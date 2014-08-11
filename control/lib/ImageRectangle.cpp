@@ -156,5 +156,16 @@ ImagePoint	ImageRectangle::center() const {
 	return _origin + _size.center();
 }
 
+ImagePoint	ImageRectangle::subimage(unsigned int x, unsigned int y) const {
+	if (!_size.contains(x, y)) {
+		throw std::runtime_error("outside image");
+	}
+	return ImagePoint(_origin.x() + x, _origin.y() + y);
+}
+
+ImagePoint	ImageRectangle::subimage(const ImagePoint& point) const {
+	return subimage(point.x(), point.y());
+}
+
 } // namespace image
 } // namespace astro

@@ -69,6 +69,46 @@ Pixel	WindowAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
 	return	image.pixel(frame.origin().x() + x, frame.origin().y() + y);
 }
 
+template<typename Pixel>
+class SubimageAdapter : public ImageAdapter<Pixel> {
+	ImageAdapter<Pixel>&	_image;
+	ImageRectangle	_frame;
+public:
+	SubimageAdapter(ImageAdapter<Pixel>& image, const ImageRectangle& frame)
+		: ImageAdapter<Pixel>(frame.size()), _image(image),
+		  _frame(frame) {
+		if (!ImageRectangle(image.getSize()).contains(frame)) {
+			throw std::runtime_error("frame not inside image");
+		}
+	}
+	virtual Pixel& writablepixel(unsigned int x, unsigned int y) {
+		ImagePoint	p = _frame.subimage(x, y);
+		return _image.writablepixel(p.x(), p.y());
+	}
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
+		ImagePoint	p = _frame.subimage(x, y);
+		return _image.pixel(p.x(), p.y());
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// Copying image
+//////////////////////////////////////////////////////////////////////
+template<typename dstPixel, typename srcPixel>
+void	copy(ImageAdapter<dstPixel>& target,
+		const ConstImageAdapter<srcPixel>& source) {
+	if (target.getSize() != source.getSize()) {
+		throw std::runtime_error("image copy size mismatch");
+	}
+	unsigned int	w = source.getSize().width();
+	unsigned int	h = source.getSize().height();
+	for (unsigned int x = 0; x < w; x++) {
+		for (unsigned int y = 0; y < h; y++) {
+			target.writablepixel(x, y) = source.pixel(x, y);
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 // Converting Pixel values
 //////////////////////////////////////////////////////////////////////

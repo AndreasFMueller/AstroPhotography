@@ -134,7 +134,7 @@ PhaseTracker::PhaseTracker(ImagePtr _image) {
 		Image<double>	*imagep					\
 			= dynamic_cast<Image<double> *>(&*image);	\
 		PhaseCorrelator	pc;					\
-		return pc(*imagep, newla);				\
+		return pc(*imagep, newla).first;			\
 	}								\
 }
 

@@ -68,7 +68,7 @@ class Chart {
 private:
 	SkyRectangle	_rectangle;
 	ImageSize	_size;
-	Image<float>	*_image;
+	Image<double>	*_image;
 	ImagePtr	_imageptr;
 public:
 	Chart(const SkyRectangle rectangle, const ImageSize& size);
@@ -166,11 +166,11 @@ public:
 	// functions needed to produce a chart
 	Chart	chart(const RaDec& center, const ImageGeometry& geometry);
 private:
-	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+	void	draw(Image<double>& image, const SkyRectangle& rectangle,
 			const Catalog::starset& star);
-	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+	void	draw(Image<double>& image, const SkyRectangle& rectangle,
 			const Catalog::starsetptr star);
-	void	draw(Image<float>& image, const SkyRectangle& rectangle,
+	void	draw(Image<double>& image, const SkyRectangle& rectangle,
 			const Star& star);
 };
 

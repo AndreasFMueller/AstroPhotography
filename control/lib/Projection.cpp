@@ -21,8 +21,7 @@ Projection::Projection(double angle, const Point& translation,
 
 double	Projection::w(double r) const {
 	double	x = r * r;
-	//return 1. + x * (b[0] + x * b[1]);
-	return 1.;
+	return 1. + x * (1e-6 * b[0] + x * b[1] * 1e-12);
 }
 
 Projection::Projection() {

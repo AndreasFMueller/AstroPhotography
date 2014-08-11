@@ -31,6 +31,28 @@ static RaDec	get_center(ImagePtr image) {
 	return center;
 }
 
+static void	writefile(const std::string& filename,
+			const ConstImageAdapter<double>& image) {
+	FITSoutfile<double>	out(filename);
+	out.setPrecious(false);
+	out.write(Image<double>(image));
+}
+
+static void	writefile(const std::string& filename, ImagePtr image) {
+	// build an image 
+	Image<double>	*imagep = dynamic_cast<Image<double> *>(&*image);
+	if (NULL == imagep) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s not a double image",
+			filename.c_str());
+		return;
+	}
+
+	// write the projected image
+	FITSoutfile<double>	out(filename);
+	out.setPrecious(false);
+	out.write(*imagep);
+}
+
 /**
  * \brief Compute the true 
  *
@@ -117,63 +139,54 @@ RaDec	ImageNormalizer::operator()(ImagePtr image, Projection& projection) {
 		// compute a chart for that larger rectangle
 		Chart	chart = _factory.chart(newcenter, chartgeometry);
 		if (debuglevel >= LOG_DEBUG) {
-			FITSout	out(stringprintf("foo-%d.fits", iterations));
-			out.setPrecious(false);
-			out.write(chart.image());
+			writefile(stringprintf("foo-%d-chart.fits",
+				iterations), chart.image());
 		}
 
 		// we use the chart as the base
 		DoubleAdapter	doublechart(chart.image());
-		Analyzer	analyzer(doublechart, 256, 256);
+		Analyzer	analyzer(doublechart, 512, 512);
 
+		ProjectionAdapter<double>	projected(
+			doublechart.getSize(), doubleimage, projection);
 		// also write the transformed image 
 		if (debuglevel >= LOG_DEBUG) {
-			// build an image 
-			ProjectionAdapter<double>	projected(
-				doublechart.getSize(), doubleimage, projection);
-			Image<double>	*projectedimage
-				= new Image<double>(projected);
-			ImagePtr	projectedimageptr(projectedimage);
-
-			// write the projected image
-			FITSout	out(stringprintf("blubb-%d.fits", iterations));
-			out.setPrecious(false);
-			out.write(projectedimageptr);
+			writefile(stringprintf("foo-%d-projected.fits",
+				iterations), projected);
 		}
 
 		// compute the residuals
-		std::vector<Residual>	residuals = analyzer(doubleimage);
+		std::vector<Residual>	residuals = analyzer(projected);
 
-		// convert the 
+		// convert the residuals to the right coordinate system ???
+#if 1
 		std::vector<Residual>::iterator	r;
 		for (r = residuals.begin(); r != residuals.end(); r++) {
 			r->second = -inverse(r->second);
 		}
+#endif
 
 		// try to match the larger rectangle inside the chart
 		ProjectionCorrector	corrector(doublechart.getSize(),
 					doubleimage.getSize(), projection);
 		projection = corrector.corrected(residuals);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "projection: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "corrected projection: %s",
 			projection.toString().c_str());
 
-		// build an image 
-		ProjectionAdapter<double>	projected(doublechart.getSize(),
-						doubleimage, projection);
-		Image<double>	*projectedimage = new Image<double>(projected);
-		ImagePtr	projectedimageptr(projectedimage);
-
-		// write the new corrected image
-		FITSout	imgout(stringprintf("bar-%d.fits", iterations));
-		imgout.setPrecious(false);
-		imgout.write(projectedimageptr);
+		// write the projected image
+		if (debuglevel >= LOG_DEBUG) {
+			writefile(stringprintf("foo-%d-corrected.fits",
+				iterations),
+				ProjectionAdapter<double>(doublechart.getSize(),
+					doubleimage, projection));
+		}
 
 		// use the new center
 		center = newcenter;
 
 		// count the iterations
 		iterations++;
-	} while (iterations < 1);
+	} while (iterations < 10);
 
 	// give back the new center
 	return center;

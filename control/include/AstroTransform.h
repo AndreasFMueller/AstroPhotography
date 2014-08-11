@@ -158,14 +158,20 @@ public:
  * \brief Residuals needed to analyze transforms
  */
 class Residual : public std::pair<ImagePoint, Point> {
+	ImagePoint	_from;
+	Point	_offset;
+	double	_weight;
 public:
-	Residual(const ImagePoint& _from, const Point& _offset)
-		: std::pair<ImagePoint, Point>(_from, _offset) {
+	Residual(const ImagePoint& from, const Point& offset,
+		double weight = 1.)
+		: _from(from), _offset(offset), _weight(weight) {
 	}
-	const ImagePoint&	from() const { return first; }
-	ImagePoint&	from() { return first; }
-	const Point&	offset() const { return second; }
-	Point&	offset() { return second; }
+	const ImagePoint&	from() const { return _from; }
+	ImagePoint&	from() { return _from; }
+	const Point&	offset() const { return _offset; }
+	Point&	offset() { return _offset; }
+	const double&	weight() const { return _weight; }
+	double&	weight() { return _weight; }
 	bool	invalid() const;
 	bool	valid() const { return !invalid(); }
 };
@@ -273,11 +279,14 @@ class PhaseCorrelator {
 	double	value(const double *a, const astro::image::ImageSize& size,
 			int x, int y) const;
 	Point	centroid(const double *a, const astro::image::ImageSize& size,
-			const astro::image::ImagePoint& center,
+			const astro::Point& center,
 			unsigned int k = 2) const;
+	bool	hanning;
 public:
-	Point	operator()(const ConstImageAdapter<double>& fromimage,
-			const ConstImageAdapter<double>& toimage);
+	PhaseCorrelator(bool _hanning = true) : hanning(_hanning) { }
+	std::pair<Point, double>	operator()(
+		const ConstImageAdapter<double>& fromimage,
+		const ConstImageAdapter<double>& toimage);
 };
 
 /**

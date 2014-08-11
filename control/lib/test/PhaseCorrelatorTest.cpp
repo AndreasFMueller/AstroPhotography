@@ -8,11 +8,16 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
+#include <AstroIO.h>
+#include <AstroAdapter.h>
 #include <iostream>
 #include <sstream>
+#include <includes.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;
+using namespace astro::io;
+using namespace astro::adapter;
 
 namespace astro {
 namespace test {
@@ -25,11 +30,13 @@ public:
 	void	testInteger();
 	void	testIntegerNegative();
 	void	testHalf();
+	void	testImage();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
 	CPPUNIT_TEST(testInteger);
 	CPPUNIT_TEST(testIntegerNegative);
 	CPPUNIT_TEST(testHalf);
+	CPPUNIT_TEST(testImage);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -66,7 +73,7 @@ void	PhaseCorrelatorTest::testInteger() {
 
 	// create a phase correclator
 	PhaseCorrelator	pc;
-	Point	translation = pc(fromimage, toimage);
+	Point	translation = pc(fromimage, toimage).first;
 
 	// display result
 	std::ostringstream	out;
@@ -100,7 +107,7 @@ void	PhaseCorrelatorTest::testIntegerNegative() {
 
 	// create a phase correclator
 	PhaseCorrelator	pc;
-	Point	translation = pc(fromimage, toimage);
+	Point	translation = pc(fromimage, toimage).first;
 
 	// display result
 	std::ostringstream	out;
@@ -134,7 +141,7 @@ void	PhaseCorrelatorTest::testHalf() {
 
 	// create a phase correclator
 	PhaseCorrelator	pc;
-	Point	translation = pc(fromimage, toimage);
+	Point	translation = pc(fromimage, toimage).first;
 
 	// display result
 	std::ostringstream	out;
@@ -143,6 +150,36 @@ void	PhaseCorrelatorTest::testHalf() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Half test");
 }
 
+void	PhaseCorrelatorTest::testImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "beginImage test");
+
+	FITSin	imagefile("./test-image.fits");
+	ImagePtr	imageptr = imagefile.read();
+	Image<unsigned char>	*image = dynamic_cast<Image<unsigned char> *>(&*imageptr);
+	TypeConversionAdapter<double, unsigned char>	doubleimage(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	FITSin	chartfile("./test-chart.fits");
+	ImagePtr	chartptr = chartfile.read();
+	Image<unsigned char>	*chart = dynamic_cast<Image<unsigned char> *>(&*chartptr);
+	TypeConversionAdapter<double, unsigned char>	doublechart(*chart);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
+
+	// create a phase correlator
+	PhaseCorrelator	pc(false);
+	std::pair<Point, double>	result = pc(doubleimage, doublechart);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
+
+	// expected result: (-15,26)
+	Point	target(-15, 26);
+	Point	effective(round(result.first.x()), round(result.first.y()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s ?= %s",
+		target.toString().c_str(), effective.toString().c_str());
+	CPPUNIT_ASSERT(target == effective);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "endImage test");
+}
 
 } // namespace test
 } // namespace astro

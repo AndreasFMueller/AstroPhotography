@@ -17,15 +17,14 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 
 	// compute a suiteable grid of points where we want to phase
 	// correlate
-	int	hsteps = ((image.getSize().width() - spacing) / 2) / spacing;
-	int	vsteps = ((image.getSize().height() - spacing) / 2) / spacing;
+	int	hsteps = ((image.getSize().width() - patchsize) / 2) / spacing;
+	int	vsteps = ((image.getSize().height() - patchsize) / 2) / spacing;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "hsteps = %d, vsteps = %d",
 		hsteps, vsteps);
-	ImagePoint	center(image.getSize().width() / 2,
-				image.getSize().height() / 2);
+	ImagePoint	center = image.getSize().center();
 
 	// to detect the shifts, we use a phase correlator
-	transform::PhaseCorrelator	pc;
+	transform::PhaseCorrelator	pc(false);
 
 	// now compute the shift for each point
 	for (int h = -hsteps; h <= hsteps; h++) {
@@ -42,15 +41,19 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 				window.toString().c_str());
 
 			// compute the translation between the windows
-			WindowAdapter<double>	frompatch(baseimage, window);
-			WindowAdapter<double>	topatch(image, window);
-			Point	translation = pc(frompatch, topatch);
+			WindowAdapter<double>	frompatch(image, window);
+			WindowAdapter<double>	topatch(baseimage, window);
+			std::pair<Point, double>	delta
+				= pc(frompatch, topatch);
+			Point	translation = delta.first;
+			double	weight = delta.second;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
 				frompoint.toString().c_str(),
 				translation.toString().c_str());
 
 			// add the residual to the result set
-			Residual	residual(frompoint, translation);
+			Residual	residual(frompoint, translation,
+						weight);
 			if (residual.valid()) {
 				result.push_back(residual);
 			}

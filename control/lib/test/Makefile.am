@@ -28,7 +28,7 @@ endif
 
 # stuff related to testing
 noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
-	tasktest aotest $(uvc_cmds) $(unicap_cmds)
+	tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
 
 # general tests
 tests_SOURCES = tests.cpp \
@@ -88,6 +88,11 @@ tasktest_DEPENDENCIES = ../libastro.la
 aotest_SOURCES = aotest.cpp
 aotest_LDADD = -L.. -lastro
 aotest_DEPENDENCIES = ../libastro.la
+
+# test program for phase correlation of images
+phasecorr_SOURCES = phasecorr.cpp
+phasecorr_LDADD = -L.. -lastro
+phasecorr_DEPENDENCIES = ../libastro.la
 
 # tests for UVC cameras
 if ENABLE_UVC

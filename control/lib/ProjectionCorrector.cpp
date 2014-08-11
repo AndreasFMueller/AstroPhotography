@@ -30,7 +30,7 @@ Projection	ProjectionCorrector::corrected(
 
 	// start filling in the arrays
 	std::vector<Residual>::const_iterator	r;
-	int	i;
+	unsigned int	i;
 	for (r = residuals.begin(), i = 0; r != residuals.end(); r++, i += 2) {
 		b[i    ] = r->offset().x();
 		b[i + 1] = r->offset().y();
@@ -75,6 +75,16 @@ Projection	ProjectionCorrector::corrected(
 		}
 		msg += std::string("];\n");
 		std::cout << msg;
+	}
+
+	// apply the weights
+	for (r = residuals.begin(), i = 0; r != residuals.end(); r++, i++) {
+		b[2 * i    ] *= r->weight();
+		b[2 * i + 1] *= r->weight();
+		for (unsigned int j = 0; j < 8; j++) {
+			a[2 * i     + n * j] *= r->weight();
+			a[2 * i + 1 + n * j] *= r->weight();
+		}
 	}
 
 	// compute liwork (based on dgelsd documentation)
@@ -134,7 +144,7 @@ Projection	ProjectionCorrector::corrected(
 	CenteredProjection	pr = centeredprojection;
 	for (int j = 0; j < 8; j++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "correction[%d] = %g", j, b[j]);
-		pr[j] -= b[j];
+		pr[j] += b[j];
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "original projection: %s",

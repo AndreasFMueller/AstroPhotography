@@ -21,7 +21,7 @@ namespace catalog {
 Chart::Chart(const SkyRectangle rectangle, const ImageSize& size)
 	: _rectangle(rectangle), _size(size) {
 	// create the image
-	_image =  new Image<float>(size);
+	_image =  new Image<double>(size);
 	_imageptr = ImagePtr(_image);
 	_image->fill(0);
 
@@ -76,7 +76,7 @@ Chart	ChartFactory::chart(const RaDec& center, const ImageGeometry& geometry) {
  * 
  * \param stars		a set of stars to be drawn inside the image
  */
-void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+void	ChartFactory::draw(Image<double>& image, const SkyRectangle& rectangle,
 		const Catalog::starset& stars) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create image for %u stars",
 		stars.size());
@@ -107,7 +107,7 @@ void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
 /**
  * \brief Draw a sets of of stars to the chart
  */
-void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+void	ChartFactory::draw(Image<double>& image, const SkyRectangle& rectangle,
 		const Catalog::starsetptr stars) {
 	Catalog::starset	*starsp
 		= dynamic_cast<Catalog::starset *>(&*stars);
@@ -123,7 +123,7 @@ void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
  *
  * \param star		the star to be drawn
  */
-void	ChartFactory::draw(Image<float>& image, const SkyRectangle& rectangle,
+void	ChartFactory::draw(Image<double>& image, const SkyRectangle& rectangle,
 		const Star& star) {
 
 	// compute the pixel coordinates of the star
