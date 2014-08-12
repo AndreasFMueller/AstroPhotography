@@ -48,10 +48,12 @@ tests_SOURCES = tests.cpp \
 	GuiderFactoryTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
+	ProjectionTest.cpp StereographicProjectionTest.cpp \
 	SkyWindowTest.cpp \
 	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
-	NGCICTest.cpp ChartTest.cpp SkyRectangleTest.cpp \
-	ProjectionTest.cpp AnalyzerTest.cpp CorrectorTest.cpp \
+	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
+	SkyRectangleTest.cpp \
+	AnalyzerTest.cpp CorrectorTest.cpp \
 	ImageNormalizerTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro 

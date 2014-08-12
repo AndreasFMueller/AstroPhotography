@@ -181,8 +181,8 @@ std::string	RaDec::toString() const {
 	return ra().hms() + " " + dec().dms();
 }
 
-const RaDec	north_pole(Angle(0), Angle(M_PI / 2));
-const RaDec	south_pole(Angle(0), Angle(-M_PI / 2));
+const RaDec	RaDec::north_pole(Angle(0), Angle(M_PI / 2));
+const RaDec	RaDec::south_pole(Angle(0), Angle(-M_PI / 2));
 
 //////////////////////////////////////////////////////////////////////
 // SphericalCoordinates implementation

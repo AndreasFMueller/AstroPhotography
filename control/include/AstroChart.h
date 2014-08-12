@@ -120,14 +120,9 @@ public:
 	virtual double	operator()(double r, double mag) const;
 };
 
-/**
- * \brief Chart abstraction
- *
- * Class to produce charts for sets of stars. 
- */
-class ChartFactory {
+class ChartFactoryBase {
 // parameters valid for all images
-private:
+protected:
 	Catalog&	_catalog;
 	PointSpreadFunction&	pointspreadfunction;
 private:
@@ -152,7 +147,7 @@ public:
 	void	logarithmic(bool l) { _logarithmic = l; }
 public:
 	// constructors
-	ChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+	ChartFactoryBase(Catalog& catalog, PointSpreadFunction& psf,
 		double limit_magnitude = 16,
 		double scale = 1, double maxradius = 7,
 		bool logarithmic = false)
@@ -161,17 +156,38 @@ public:
 		  _scale(scale), _maxradius(maxradius),
 		  _logarithmic(logarithmic) {
 	}
-	~ChartFactory();
+
+protected:
+	void	draw(Image<double>& image, const Point& p,
+			const Star& star) const;
+	void	limit(Image<double>& image, double limit) const;
+};
+
+/**
+ * \brief Chart factory abstraction
+ *
+ * Class to produce charts for sets of stars. 
+ */
+class ChartFactory : public ChartFactoryBase {
+public:
+	// constructors
+	ChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+		double limit_magnitude = 16,
+		double scale = 1, double maxradius = 7,
+		bool logarithmic = false)
+		: ChartFactoryBase(catalog, psf, limit_magnitude, scale,
+		  maxradius, logarithmic) {
+	}
 
 	// functions needed to produce a chart
-	Chart	chart(const RaDec& center, const ImageGeometry& geometry);
+	Chart	chart(const RaDec& center, const ImageGeometry& geometry) const;
 private:
 	void	draw(Image<double>& image, const SkyRectangle& rectangle,
-			const Catalog::starset& star);
+			const Catalog::starset& star) const;
 	void	draw(Image<double>& image, const SkyRectangle& rectangle,
-			const Catalog::starsetptr star);
+			const Catalog::starsetptr star) const;
 	void	draw(Image<double>& image, const SkyRectangle& rectangle,
-			const Star& star);
+			const Star& star) const;
 };
 
 /**
@@ -185,6 +201,49 @@ public:
 	ImageNormalizer(ChartFactory& factory);
 	RaDec	operator()(astro::image::ImagePtr image,
 			astro::image::transform::Projection& projection);
+};
+
+/**
+ * \brief StereographicChart
+ */
+class StereographicChart {
+	RaDec	_center;
+	Image<double>	*_image;
+	ImagePtr	_imageptr;
+public:
+	StereographicChart(const RaDec& center, unsigned int diameter);
+	const ImageSize&	size() const { return _imageptr->size(); }
+	const ImagePtr	image() const { return _imageptr; }
+friend class StereographicChartFactory;
+};
+
+/**
+ * \brief Factory for stereographic charts
+ */
+class StereographicChartFactory : public ChartFactoryBase {
+public:
+	StereographicChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+		double limit_magnitude = 16,
+		double scale = 1, double maxradius = 7,
+		bool logarithmic = false)
+		: ChartFactoryBase(catalog, psf, limit_magnitude, scale,
+		  maxradius, logarithmic) {
+	}
+
+	StereographicChart	chart(const RaDec& center,
+					unsigned int diameter) const;
+private:
+	void	draw(Image<double>& image,
+			const astro::image::transform::StereographicProjection& projection,
+			const Star& star) const;
+
+	void	draw(Image<double>& image,
+			const astro::image::transform::StereographicProjection& projection,
+			const Catalog::starsetptr stars) const;
+
+	void	draw(Image<double>& image,
+			const astro::image::transform::StereographicProjection& projection,
+			const Catalog::starset& stars) const;
 };
 
 } // namespace catalog

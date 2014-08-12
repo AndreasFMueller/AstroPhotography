@@ -9,6 +9,7 @@
 #include <AstroTypes.h>
 #include <AstroImage.h>
 #include <AstroTransform.h>
+#include <AstroCoordinates.h>
 
 namespace astro {
 namespace image {
@@ -86,6 +87,18 @@ public:
 			_projection) {
 	}
 	Projection	corrected(const std::vector<Residual>& residuals) const;
+};
+
+/**
+ * \brief Stereographic projection map
+ */
+class StereographicProjection {
+	UnitVector	center;
+	UnitVector	right;
+	UnitVector	up;
+public:
+	StereographicProjection(const RaDec& _center);
+	virtual Point	operator()(const RaDec& p) const;
 };
 
 } // namespace project

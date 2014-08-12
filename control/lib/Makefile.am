@@ -76,6 +76,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	NGCIC.cpp \
 	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
 	ImageGeometry.cpp SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
+	StereographicProjection.cpp StereographicChart.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 
