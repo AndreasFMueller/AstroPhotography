@@ -104,6 +104,8 @@ public:
 	bool	operator<=(const RaDec& other) const;
 	bool	operator>=(const RaDec& other) const;
 	virtual std::string	toString() const;
+static const RaDec	north_pole;
+static const RaDec	south_pole;
 };
 
 //class	UnitVector;
