@@ -72,7 +72,6 @@ void	StereographicChartTest::testImage() {
 		out.write(image);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() end");
-exit(EXIT_SUCCESS);
 }
 
 } // namespace test

@@ -40,6 +40,7 @@ tests_SOURCES = tests.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
+	PreviewAdapterTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
@@ -52,9 +53,10 @@ tests_SOURCES = tests.cpp \
 	SkyWindowTest.cpp \
 	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
 	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
-	SkyRectangleTest.cpp \
-	AnalyzerTest.cpp CorrectorTest.cpp \
-	ImageNormalizerTest.cpp
+	SkyRectangleTest.cpp
+#	AnalyzerTest.cpp CorrectorTest.cpp \
+#	ImageNormalizerTest.cpp
+
 
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
