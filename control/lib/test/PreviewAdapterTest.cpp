@@ -22,7 +22,7 @@ private:
 public:
 	void	setUp();
 	void	tearDown();
-	void	testXXX();
+	void	testShort();
 
 	CPPUNIT_TEST_SUITE(PreviewAdapterTest);
 	CPPUNIT_TEST(testShort);
