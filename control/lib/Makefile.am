@@ -25,7 +25,7 @@ uvc_files =
 endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp \
-	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
+	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
 	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \
@@ -78,6 +78,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp \
 	ImageGeometry.cpp SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
 	StereographicProjection.cpp StereographicChart.cpp \
 	PreviewAdapter.cpp ImageProcessing.cpp \
+	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

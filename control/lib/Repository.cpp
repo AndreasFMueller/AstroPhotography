@@ -8,6 +8,7 @@
 #include <includes.h>
 #include <iostream>
 #include <pthread.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace module {
@@ -15,6 +16,7 @@ namespace module {
 class RepositoryBackend;
 typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Locker class
 //////////////////////////////////////////////////////////////////////
@@ -36,6 +38,7 @@ public:
 		pthread_mutex_unlock(_lock);
 	}
 };
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // Repositories collection

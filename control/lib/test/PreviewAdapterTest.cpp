@@ -50,7 +50,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "set pixel %u to %u", i, i * 3);
 		(*image2)[i] = i * 3;
 	}
 	ImagePtr	imageptr(image2);
-	PreviewAdapter	*p = PreviewAdapter::get(imageptr);
+	PreviewAdapterPtr	p = PreviewAdapter::get(imageptr);
 	for (unsigned int y = 0; y < 48; y++) {
 		for (unsigned int x = 0; x < 64; x++) {
 			int	i = imageptr->pixeloffset(x, y);
@@ -58,7 +58,6 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "set pixel %u to %u", i, i * 3);
 			CPPUNIT_ASSERT(p->monochrome_pixel(x, y) == v);
 		}
 	}
-	delete p;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShort() end");
 }
 

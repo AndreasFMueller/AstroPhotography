@@ -10,6 +10,7 @@
 #include <vector>
 #include <set>
 #include <AstroDebug.h>
+#include <pthread.h>
 
 namespace astro {
 
@@ -110,6 +111,21 @@ public:
  * This method is very often used when parsing.
  */
 void	absorb(std::istream& in, char c);
+
+/**
+ * \brief Locker class
+ *
+ * We want to make sure the pthread_mutex is unlocked when an exception
+ * is thrown, so we have to encapsulate the locking operation in a
+ * class that locks when the object is created an unlocks then it is
+ * destroyed.
+ */
+class PthreadLocker {
+	pthread_mutex_t *_lock;
+public:
+	PthreadLocker(pthread_mutex_t *lock, bool blocking = true);
+	~PthreadLocker();
+};
 
 } // namespace astro
 

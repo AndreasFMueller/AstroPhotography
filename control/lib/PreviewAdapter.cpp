@@ -124,7 +124,8 @@ PreviewAdapter::~PreviewAdapter() {
 	const Image<Pixel>	*p					\
 		= dynamic_cast<const Image<Pixel> *>(image);		\
 	if (NULL != p) {						\
-		return new TypedImagePreviewAdapter<Pixel>(p);		\
+		return PreviewAdapterPtr(				\
+			new TypedImagePreviewAdapter<Pixel>(p));	\
 	}								\
 }
 
@@ -133,11 +134,12 @@ PreviewAdapter::~PreviewAdapter() {
 	const Image<RGB<Pixel> >	*p				\
 		= dynamic_cast<const Image<RGB<Pixel> > *>(image);	\
 	if (NULL != p) {						\
-		return new TypedRGBImagePreviewAdapter<Pixel>(p);	\
+		return PreviewAdapterPtr(				\
+			new TypedRGBImagePreviewAdapter<Pixel>(p));	\
 	}								\
 }
 
-PreviewAdapter	*PreviewAdapter::get(const ImageBase *image) {
+PreviewAdapterPtr	PreviewAdapter::get(const ImageBase *image) {
 	monochrome_preview_adapter(image, unsigned char);
 	monochrome_preview_adapter(image, unsigned short);
 	monochrome_preview_adapter(image, unsigned int);
@@ -153,7 +155,7 @@ PreviewAdapter	*PreviewAdapter::get(const ImageBase *image) {
 	throw std::runtime_error("cannot preview this image");
 }
 
-PreviewAdapter	*PreviewAdapter::get(ImagePtr image) {
+PreviewAdapterPtr	PreviewAdapter::get(ImagePtr image) {
 	monochrome_preview_adapter(&*image, unsigned char);
 	monochrome_preview_adapter(&*image, unsigned short);
 	monochrome_preview_adapter(&*image, unsigned int);

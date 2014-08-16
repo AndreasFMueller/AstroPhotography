@@ -7,12 +7,15 @@
 #define _AstroProcess_h
 
 #include <memory>
+#include <list>
 #include <AstroImage.h>
 #include <AstroAdapter.h>
 
 namespace astro {
 namespace adapter {
 
+class PreviewAdapter;
+typedef std::shared_ptr<PreviewAdapter>	PreviewAdapterPtr;
 /**
  * \brief Adapter fro Previewing 
  *
@@ -60,22 +63,21 @@ private:
 public:
 	PreviewAdapter() { _min = 0.; _max = 1.; }
 	virtual ~PreviewAdapter();
-static PreviewAdapter	*get(const ImageBase *image);
-static PreviewAdapter	*get(ImagePtr image);
+static PreviewAdapterPtr	get(const ImageBase *image);
+static PreviewAdapterPtr	get(ImagePtr image);
 };
-
 
 /**
  * \brief Adapter to return unsigned char images
  */
 class PreviewMonochromeAdapter : public ConstImageAdapter<unsigned char> {
-	const PreviewAdapter&	previewadapter;
+	const PreviewAdapterPtr	previewadapter;
 public:
-	PreviewMonochromeAdapter(const PreviewAdapter& _previewadapter)
-		: ConstImageAdapter<unsigned char>(_previewadapter.size()),
+	PreviewMonochromeAdapter(const PreviewAdapterPtr _previewadapter)
+		: ConstImageAdapter<unsigned char>(_previewadapter->size()),
 		  previewadapter(_previewadapter) { }
 	virtual unsigned char	pixel(unsigned int x, unsigned int y) const {
-		return previewadapter.monochrome_pixel(x, y);
+		return previewadapter->monochrome_pixel(x, y);
 	}
 };
 
@@ -83,14 +85,14 @@ public:
  * \brief Adapter to return unsigned char RGB images
  */
 class PreviewColorAdapter : public ConstImageAdapter<RGB<unsigned char> > {
-	const PreviewAdapter&	previewadapter;
+	const PreviewAdapterPtr	previewadapter;
 public:
-	PreviewColorAdapter(const PreviewAdapter& _previewadapter)
-		: ConstImageAdapter<RGB<unsigned char> >(_previewadapter.size()),
+	PreviewColorAdapter(const PreviewAdapterPtr _previewadapter)
+		: ConstImageAdapter<RGB<unsigned char> >(_previewadapter->size()),
 		  previewadapter(_previewadapter) { }
 	virtual RGB<unsigned char>	pixel(unsigned int x,
 						unsigned int y) const {
-		return previewadapter.color_pixel(x, y);
+		return previewadapter->color_pixel(x, y);
 	}
 };
 
@@ -98,8 +100,12 @@ public:
 
 namespace process {
 
+class ProcessingController;
+typedef std::shared_ptr<ProcessingController>	ProcessingControllerPtr;
 class ProcessingStep;
 typedef std::shared_ptr<ProcessingStep>	ProcessingStepPtr;
+class ProcessingThread;
+typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
 
 /**
  * \brief ProcessingStep base class
@@ -112,18 +118,61 @@ typedef std::shared_ptr<ProcessingStep>	ProcessingStepPtr;
  */
 class ProcessingStep {
 private:
-	astro::adapter::PreviewAdapter	*preview;
+	// precursors and successors of each step, these turn the processing
+	// steps into directed graph
+	typedef	std::list<ProcessingStep *>	steps;
+	steps	_precursors;
+	const steps	precursors() const {
+		return _precursors;
+	}
+	steps	_successors;
+	const steps	successors() const {
+		return _successors;
+	}
+protected:
+	// derived classes have their own methods to handle their inputs,
+	// but the use the methods here to maintain the dependency graph
+	void	add_precursor(ProcessingStep *step);
+	void	remove_precursor(ProcessingStep *step);
+	void	add_successor(ProcessingStep *step);
+	void	remove_successor(ProcessingStep *step);
+private:
+	void	add_precursor(ProcessingStepPtr step);
+	void	remove_precursor(ProcessingStepPtr step);
+	void	add_successor(ProcessingStepPtr step);
+	void	remove_successor(ProcessingStepPtr step);
+	friend class ProcessingController;
 public:
-	astro::adapter::PreviewMonochromeAdapter	monochrome_preview();
-	astro::adapter::PreviewColorAdapter	color_preview();
+	void	remove_me();
 
 	// Do the actual processing
+public:
+	/**
+	 * State of a processing step:
+	 * idle:      the processing step is currently not completely configured
+	 *            it cannot even decide whether it needs work. This is the
+	 *            default state in which all processing steps are created.
+	 * needswork: the processing step is completely configured, but
+	 *            it needs to work before it can provide any results.
+	 *            This state is also reached when the state of a previous
+	 *            has changed.
+	 * working:   the processing step is current being worked on by some
+	 *            thread
+	 * complete:  the work for this processing step is complete
+	 */
+	typedef enum { idle, needswork, working, complete } state; 
+protected:
+	state	_status;
 private:
 	volatile float	_completion;
 public:
 	float	completion() const { return _completion; }
-	bool	completed() const { return _completion >= 1.; }
+	state	status() const { return _status; }
+	state	checkstate();
 	void	work();
+	virtual void	cancel() = 0;
+private:
+	virtual state	do_work();
 
 	// constructor
 public:
@@ -133,6 +182,15 @@ private:	// prevent copying
 	ProcessingStep(const ProcessingStep& other);
 	ProcessingStep&	operator=(const ProcessingStep& other);
 
+	// access to the preview for this processing step. The preview
+	// pointer is protected so that derived classes can assign a 
+	// suitable preview class.
+protected:
+	astro::adapter::PreviewAdapterPtr	preview;
+public:
+	astro::adapter::PreviewMonochromeAdapter	monochrome_preview();
+	astro::adapter::PreviewColorAdapter	color_preview();
+
 	// The processing step has at least one output, which must be an
 	// image. The processing may have some byproducts, but they are
  	// processing step dependen
@@ -140,6 +198,60 @@ public:
 	virtual const ConstImageAdapter<double>&	out() const;
 	virtual bool	hasColor() const;
 	virtual const ConstImageAdapter<RGB<double> >&	out_color() const;
+};
+
+/**
+ * \brief Processing unit of work is executed by a thread
+ */
+class ProcessingThread {
+protected:
+	ProcessingStepPtr	_step;
+public:
+	ProcessingStepPtr	step() { return _step; }
+protected:
+	ProcessingThread(ProcessingStepPtr step) : _step(step) { }
+	virtual ~ProcessingThread();
+public:
+	virtual void	cancel() = 0;
+	virtual void	wait() = 0;
+	virtual void	run() = 0;
+	virtual bool	isrunning() = 0;
+	ProcessingStep::state	status() const { return _step->status(); }
+static ProcessingThreadPtr	get(ProcessingStepPtr step);
+};
+
+/**
+ * \brief Manage a network of processing steps
+ *
+ * The Processing controller allows to manipulate a network of processing
+ * steps by name, and controls the execution of the work to be done, possibly
+ * in multiple threads.
+ */
+class ProcessingController {
+	typedef	std::map<std::string, ProcessingThreadPtr>	stepmap;
+	stepmap	steps;
+public:
+	ProcessingController();
+	~ProcessingController();
+
+	// adding and removing steps
+	void	addstep(const std::string& name, ProcessingThreadPtr step);
+	void	removestep(const std::string& name);
+	void	removestep(ProcessingThreadPtr step);
+
+	// network maintenance
+	void	add_precursor(const std::string& target,
+			const std::string& precursor);
+	void	remove_precursor(const std::string& target,
+			const std::string& precursor);
+	void	add_successor(const std::string& target,
+			const std::string& successor);
+	void	remove_successor(const std::string& target,
+			const std::string& successor);
+
+	// locating steps 
+	ProcessingThreadPtr	find(const std::string& name);
+	std::string	name(ProcessingThreadPtr step);
 };
 
 /**
@@ -182,14 +294,15 @@ public:
 /**
  * \brief Processor to create a flat image from a set of inputs
  */
-class LightProcessor {
+class LightProcessor : public ProcessingStep {
 public:
 };
 
 /**
  * \brief
  */
-class {
+class RGBDemosaicing : public ProcessingStep {
+public:
 };
 
 } // namespace process
