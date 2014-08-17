@@ -5,6 +5,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroProcess.h>
+#include <includes.h>
 
 namespace astro {
 namespace process {
@@ -101,6 +102,9 @@ void	ProcessingController::remove_successor(const std::string& target_name,
 //////////////////////////////////////////////////////////////////////
 // execution
 //////////////////////////////////////////////////////////////////////
+/**
+ * \brief Find out whether there is any thread that needs work
+ */
 bool	ProcessingController::haswork() {
 	return std::any_of(steps.begin(), steps.end(),
 		[](stepmap::value_type& v) {
@@ -110,18 +114,115 @@ bool	ProcessingController::haswork() {
 	);
 }
 
-void	ProcessingController::execute() {
-	while (haswork()) {
-		stepmap::iterator	i = std::find_if(steps.begin(),
-			steps.end(),
-			[](stepmap::value_type& v) {
-				return (v.second->step()->status()
-					== ProcessingStep::needswork);
+/**
+ * \brief Get one step that needs work
+ */
+ProcessingController::stepmap::iterator	ProcessingController::stepneedingwork() {
+	return std::find_if(steps.begin(),
+		steps.end(),
+		[](stepmap::value_type& v) {
+			return (v.second->step()->status()
+				== ProcessingStep::needswork);
+		}
+	);
+}
+
+/**
+ * \brief Auxiliary class for communication with threads
+ */
+class procpipe {
+public:
+	std::string	_name;
+	int	fildes[2];
+	procpipe(const std::string& name) : _name(name) {
+		if (::pipe(fildes) < 0) {
+			throw std::runtime_error(std::string("cannot create pipe: ")
+				+ std::string(strerror(errno)));
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "fd pair %d-%d created",
+			fildes[0], fildes[1]);
+	}
+	~procpipe() {
+		close(fildes[0]);
+		close(fildes[1]);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "fd pair %d-%d destroyed",
+			fildes[0], fildes[1]);
+	}
+};
+typedef std::shared_ptr<procpipe>	procpipeptr;
+
+typedef std::list<procpipeptr>	pipelist;
+
+/**
+ * \brief Execute all threads that can be executed
+ */
+void	ProcessingController::execute(size_t nthreads) {
+	if (nthreads == 0) {
+		throw std::runtime_error("cannot execute with no threads");
+	}
+	pipelist	pipes;
+	// keep working while we have 
+	while (haswork() || (pipes.size() > 0)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"still has work, starting threads");
+
+		// start threads while there is space
+		while (haswork() && (pipes.size() < nthreads)) {
+			stepmap::iterator	i = stepneedingwork();
+			std::string	name = i->first;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "starting '%s'",
+				name.c_str());
+			// create a pipe
+			procpipeptr	p = procpipeptr(new procpipe(name));
+			pipes.push_back(p);
+			i->second->run(p->fildes[1]);
+		}
+
+		// wait for any processes to terminate
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for threads");
+		struct pollfd	pollfds[pipes.size()];
+		struct pollfd	*pollp = (struct pollfd *)pollfds;
+		int	n = 0;
+		int	*np = &n;
+		std::for_each(pipes.begin(), pipes.end(),
+			[np,pollp](procpipeptr p) {
+				pollp[*np].fd = p->fildes[0];
+				pollp[*np].events = POLLIN;
+				pollp[*np].revents = 0;
+				(*np)++;
 			}
 		);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting %s", i->first.c_str());
-		i->second->run();
-		i->second->wait();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "polling %d file descriptors",
+			n);
+		
+		if ((poll(pollfds, pipes.size(), -1)) < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot poll pipes");
+		}
+
+		// now analyze the events returned in the pollfd array
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "reaping %d threads", n);
+		for (int i = 0; i < n; i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %d -> %d", i,
+				pollfds[i].fd);
+			if (pollfds[i].revents & POLLIN) {
+				int	fd = pollfds[i].fd;
+				// find the associate name
+				pipelist::iterator	pp =
+				std::find_if(pipes.begin(), pipes.end(),
+					[fd](procpipeptr p) {
+						return p->fildes[0] == fd;
+					}
+				);
+				std::string	name = (*pp)->_name;
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "%s terminated",
+					name.c_str());
+				pipes.erase(pp);
+				// wait for the thread
+				steps.find(name)->second->wait();
+			}
+		}
+
+		// start again
 	}
 }
 

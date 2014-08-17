@@ -20,6 +20,7 @@ namespace process {
 class ProcessingThreadImpl : public ProcessingThread {
 	pthread_t	thread;
 	pthread_mutex_t	_lock;
+	pthread_cond_t	_cond;
 	int		_fd;
 public:
 	ProcessingThreadImpl(ProcessingStepPtr step);
@@ -30,6 +31,7 @@ public:
 	bool	working;
 	virtual bool	isrunning();
 	virtual void	work();
+	virtual void	started();
 };
 
 /**
@@ -41,6 +43,11 @@ ProcessingThreadImpl::ProcessingThreadImpl(ProcessingStepPtr step)
 	pthread_mutexattr_init(&mattr);
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&_lock, &mattr);
+
+        pthread_condattr_t      cattr;
+        pthread_condattr_init(&cattr);
+        pthread_cond_init(&_cond, &cattr);
+
 	working = false;
 }
 
@@ -102,8 +109,9 @@ static void	*run_processing_thread(void *arg) {
  */
 void	ProcessingThreadImpl::run(int fd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting thread");
-	PthreadLocker	lock(&_lock);
+	pthread_mutex_lock(&_lock);
 	if (working) {
+		pthread_mutex_unlock(&_lock);
 		throw std::runtime_error("thread already running");
 	}
 	_fd = fd;
@@ -112,9 +120,14 @@ void	ProcessingThreadImpl::run(int fd) {
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	if (pthread_create(&thread, &attr, run_processing_thread, this)) {
+		pthread_mutex_unlock(&_lock);
 		working = false;
 		return;
 	}
+
+	// wait until the thread is in state working
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for thread to start up");
+	pthread_cond_wait(&_cond, &_lock);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread successfully started");
 }
 
@@ -159,11 +172,22 @@ bool	ProcessingThreadImpl::isrunning() {
 }
 
 /**
+ * \brief signal that the thread has started
+ */
+void	ProcessingThreadImpl::started() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "signal that thread has started");
+	{
+		PthreadLocker	lock(&_lock);
+		pthread_cond_broadcast(&_cond);
+	}
+}
+
+/**
  * \brief Work function of the thread
  */
 void	ProcessingThreadImpl::work() {
 	try {
-		_step->work();
+		_step->work(this);
 	} catch (...) {
 
 	}

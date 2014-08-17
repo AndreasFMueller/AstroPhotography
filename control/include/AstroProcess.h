@@ -179,7 +179,7 @@ public:
 	state	status() const { return _status; }
 	state	status(state newsstate);
 	virtual state	checkstate();
-	void	work();
+	void	work(ProcessingThread *thread = NULL);
 	virtual void	cancel();
 private:
 	virtual state	do_work();
@@ -226,6 +226,7 @@ public:
 	virtual void	wait() = 0;
 	virtual void	run(int fd = -1) = 0;
 	virtual bool	isrunning() = 0;
+	virtual void	started() = 0;
 	ProcessingStep::state	status() const { return _step->status(); }
 static ProcessingThreadPtr	get(ProcessingStepPtr step);
 };
@@ -265,7 +266,9 @@ public:
 
 	// execute all the necessary steps
 	bool	haswork();
-	void	execute();
+	void	execute(size_t nthreads = 1);
+private:
+	stepmap::iterator	stepneedingwork();
 };
 
 /**

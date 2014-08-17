@@ -78,4 +78,12 @@
 #include <execinfo.h>
 #endif /* HAVE_EXECINFO_H */
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
+
+#ifdef HAVE_POLL_H
+#include <poll.h>
+#endif /* HAVE_POLL_H */
+
 #endif /* _includes_h */

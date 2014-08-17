@@ -17,6 +17,9 @@ using namespace astro::process;
 namespace astro {
 namespace test {
 
+/**
+ * \brief Test step class for testing ProcessingThread
+ */
 class ThreadTestStep : public ProcessingStep {
 	bool cancelrequest;
 public:
@@ -26,7 +29,7 @@ public:
 		int	s = 20;
 		while (s-- > 0) {
 			_completion = s / 20.;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "completion: %.2f", s);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "completion: %.2f", _completion);
 			usleep(100000);
 			if (cancelrequest) {
 				return ProcessingStep::needswork;
@@ -40,6 +43,9 @@ public:
 	}
 };
 
+/**
+ * \brief Unit test class for ProcessingThread
+ */
 class ProcessingThreadTest : public CppUnit::TestFixture {
 public:
 	void	setUp();

@@ -15,15 +15,22 @@ using namespace astro::process;
 namespace astro {
 namespace test {
 
+/**
+ * \brief A test step class
+ */
 class ControllerTestStep : public ProcessingStep {
 	bool cancelrequest;
 public:
 	ControllerTestStep() { cancelrequest = false; }
 	virtual ProcessingStep::state	do_work() {
 		cancelrequest = false;
-		int	s = 20;
+		int	runtime = 10 + random() % 8;
+		int	s = runtime;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "work will take %.1fs", s / 10.);
 		while (s-- > 0) {
-			_completion = s / 20.;
+			_completion = 1 - s / (double)runtime;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "completion: %.2f",
+				_completion);
 			usleep(100000);
 			if (cancelrequest) {
 				return ProcessingStep::needswork;
@@ -37,6 +44,9 @@ public:
 	}
 };
 
+/**
+ * \brief Test class for ProcessingController
+ */
 class ProcessingControllerTest : public CppUnit::TestFixture {
 public:
 	void	setUp();
@@ -108,7 +118,7 @@ void	ProcessingControllerTest::testExecute() {
 	controller.find("one")->checkstate();
 	CPPUNIT_ASSERT(controller.find("one")->status()
 		== ProcessingStep::needswork);
-	controller.execute();
+	controller.execute(2);
 	CPPUNIT_ASSERT(controller.find("one")->status()
 		== ProcessingStep::complete);
 	CPPUNIT_ASSERT(controller.find("two")->status()

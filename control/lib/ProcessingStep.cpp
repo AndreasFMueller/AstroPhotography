@@ -136,7 +136,7 @@ void	ProcessingStep::remove_me() {
 /**
  * \brief Work on this step
  */
-void	ProcessingStep::work() {
+void	ProcessingStep::work(ProcessingThread *thread) {
 	// ensure that we really are in state needswork, by checking all
 	// precursors
 	if (_status != needswork) {
@@ -146,6 +146,11 @@ void	ProcessingStep::work() {
 
 	// set the status to working
 	status(working);
+
+	// signal to the calling thread that we have started up
+	if (thread != NULL) {
+		thread->started();
+	}
 	
 	// if there is need for work, do the work
 	status(do_work());
@@ -196,6 +201,8 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 			return a->status() < b->status();
 		}
 	))->status();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor state: %s",
+		statename(minstate).c_str());
 	return minstate;
 }
 
@@ -212,7 +219,8 @@ ProcessingStep::state	ProcessingStep::checkstate() {
 	// find the smallest state that we should be in according to
 	// our predecessors. We use a lambda comparator for this purpose
 	state	minstate = precursorstate();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "lowest precursor: %d", minstate);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lowest precursor: %s",
+		statename(minstate).c_str());
 
 	// if the state changes, signal to all our successors that we
 	// have changed state, we again use a lambda for this
