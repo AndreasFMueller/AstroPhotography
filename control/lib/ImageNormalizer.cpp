@@ -53,6 +53,11 @@ static void	writefile(const std::string& filename, ImagePtr image) {
 	out.write(*imagep);
 }
 
+static void	reporting(int iterations, const Chart& chart, ConstImageAdapter<double>& projected) {
+	writefile(stringprintf("foo-%d-chart.fits", iterations), chart.image());
+	writefile(stringprintf("foo-%d-projected.fits", iterations), projected);
+}
+
 /**
  * \brief Compute the true 
  *
@@ -159,12 +164,10 @@ RaDec	ImageNormalizer::operator()(ImagePtr image, Projection& projection) {
 		std::vector<Residual>	residuals = analyzer(projected);
 
 		// convert the residuals to the right coordinate system ???
-#if 1
 		std::vector<Residual>::iterator	r;
 		for (r = residuals.begin(); r != residuals.end(); r++) {
 			r->second = -inverse(r->second);
 		}
-#endif
 
 		// try to match the larger rectangle inside the chart
 		ProjectionCorrector	corrector(doublechart.getSize(),

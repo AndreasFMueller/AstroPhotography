@@ -9,6 +9,7 @@
 #include <AstroProcess.h>
 #include <algorithm>
 #include <includes.h>
+#include <AstroDebug.h>
 
 using namespace astro::adapter;
 
@@ -139,47 +140,115 @@ void	ProcessingStep::work() {
 	// ensure that we really are in state needswork, by checking all
 	// precursors
 	if (_status != needswork) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no work needed");
 		return;
 	}
+
+	// set the status to working
+	status(working);
 	
 	// if there is need for work, do the work
-	_status = do_work();
+	status(do_work());
 }
 
 /**
  * \brief Dummy work method
  */
 ProcessingStep::state	ProcessingStep::do_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "1 second dummy work");
 	sleep(1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dummy work done");
 	return complete;
+}
+
+/**
+ * \brief Cancellation
+ *
+ * Default imlementation does not do anything
+ */
+void	ProcessingStep::cancel() {
+	return;
 }
 
 //////////////////////////////////////////////////////////////////////
 // State management
 //////////////////////////////////////////////////////////////////////
-ProcessingStep::state	ProcessingStep::checkstate() {
-	// find the smallest state that we should be in according to
-	// our predecessors. We use a lambda comparator for this purpose
+std::string	ProcessingStep::statename(state s) {
+	switch (s) {
+	case idle:	return std::string("idle");
+	case needswork:	return std::string("needswork");
+	case working:	return std::string("working");
+	case complete:	return std::string("complete");
+	}
+	throw std::runtime_error("internal error: unknown state");
+}
+
+ProcessingStep::state	ProcessingStep::precursorstate() const {
+	// if there is no precursor, then we can consider them all complete
+	if (_precursors.size() == 0) {
+		return complete;
+	}
+
+	// if there are any precursors, we have to check their minimum state
 	state	minstate = (*std::min_element(_precursors.begin(),
 		_precursors.end(),
 		[](const ProcessingStep *a, const ProcessingStep *b) {
 			return a->status() < b->status();
 		}
 	))->status();
+	return minstate;
+}
 
-	// if the state does not change, return (this terminates the recursion)
-	if (minstate == status()) {
-		return status();
-	}
+ProcessingStep::state	ProcessingStep::checkstate() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking state in %p", this);
+	// find the smallest state that we should be in according to
+	// our predecessors. We use a lambda comparator for this purpose
+	state	minstate = precursorstate();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lowest precursor: %d", minstate);
 
 	// if the state changes, signal to all our successors that we
 	// have changed state, we again use a lambda for this
-	_status = minstate;
+	state	newstate = minstate;
+	if (minstate == complete) {
+		if (_status == idle) {
+			newstate = needswork;
+		} else {
+			newstate = _status;
+		}
+	} else {
+		newstate = idle;
+	}
+
+	// if the state does not change, return (this terminates the recursion)
+	if (newstate == status()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no state change");
+		return status();
+	}
+
+	// change state, and tell successors to check their state too
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "change state to %s",
+		statename(minstate).c_str());
+	_status = newstate;
 	std::for_each(_successors.begin(), _successors.end(),
 		[](steps::value_type x) { x->checkstate(); });
 
 	// return the new state
 	return status();
+}
+
+ProcessingStep::state	ProcessingStep::status(state newstate) {
+	state	pc = precursorstate();
+	// first check the maximum state we can possible have
+	if (newstate > pc) {
+		return _status;
+	}
+	if (_status == newstate) {
+		return _status;
+	}
+	_status = newstate;
+	std::for_each(_successors.begin(), _successors.end(),
+		[](steps::value_type x) { x->checkstate(); });
+	return _status;
 }
 
 //////////////////////////////////////////////////////////////////////

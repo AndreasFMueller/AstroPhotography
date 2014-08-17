@@ -98,6 +98,12 @@ public:
 
 } // namespace adapter
 
+namespace test {
+
+class ProcessingStepTest;
+
+} // namespace test
+
 namespace process {
 
 class ProcessingController;
@@ -142,6 +148,7 @@ private:
 	void	add_successor(ProcessingStepPtr step);
 	void	remove_successor(ProcessingStepPtr step);
 	friend class ProcessingController;
+	friend class astro::test::ProcessingStepTest; // allow test class access
 public:
 	void	remove_me();
 
@@ -161,16 +168,19 @@ public:
 	 * complete:  the work for this processing step is complete
 	 */
 	typedef enum { idle, needswork, working, complete } state; 
+static std::string	statename(state s);
+private:
+	state	precursorstate() const;
 protected:
 	state	_status;
-private:
 	volatile float	_completion;
 public:
 	float	completion() const { return _completion; }
 	state	status() const { return _status; }
+	state	status(state newsstate);
 	state	checkstate();
 	void	work();
-	virtual void	cancel() = 0;
+	virtual void	cancel();
 private:
 	virtual state	do_work();
 

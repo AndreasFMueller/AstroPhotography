@@ -32,6 +32,7 @@ noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 
 # general tests
 tests_SOURCES = tests.cpp \
+	StacktraceTest.cpp \
 	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
 	DeviceNameTest.cpp PropertiesTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
@@ -40,7 +41,7 @@ tests_SOURCES = tests.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
-	PreviewAdapterTest.cpp \
+	PreviewAdapterTest.cpp ProcessingStepTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \

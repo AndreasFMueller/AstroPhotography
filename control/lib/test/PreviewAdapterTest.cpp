@@ -46,7 +46,6 @@ void	PreviewAdapterTest::testShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShort() begin");
 	Image<unsigned short>	*image2 = new Image<unsigned short>(64, 48);
 	for (unsigned int i = 0; i < image2->size().getPixels(); i++) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "set pixel %u to %u", i, i * 3);
 		(*image2)[i] = i * 3;
 	}
 	ImagePtr	imageptr(image2);

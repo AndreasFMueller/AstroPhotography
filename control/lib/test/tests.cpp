@@ -9,8 +9,12 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <cstdlib>
+#include <stacktrace.h>
 
 int	main(int argc, char *argv[]) {
+	// install the segmentation fault handler
+	signal(SIGSEGV, stderr_stacktrace);
+
 	CppUnit::TextUi::TestRunner	runner;
 	CppUnit::TestFactoryRegistry	&registry
 		= CppUnit::TestFactoryRegistry::getRegistry();

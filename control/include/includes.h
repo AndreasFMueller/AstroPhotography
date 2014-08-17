@@ -74,4 +74,8 @@
 #include <sys/mman.h>
 #endif /* HAVE_SYS_MMAN_H */
 
+#ifdef HAVE_EXECINFO_H
+#include <execinfo.h>
+#endif /* HAVE_EXECINFO_H */
+
 #endif /* _includes_h */
