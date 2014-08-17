@@ -41,7 +41,7 @@ tests_SOURCES = tests.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
-	PreviewAdapterTest.cpp ProcessingStepTest.cpp \
+	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \

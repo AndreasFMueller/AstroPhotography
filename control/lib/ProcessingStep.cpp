@@ -199,6 +199,14 @@ ProcessingStep::state	ProcessingStep::precursorstate() const {
 	return minstate;
 }
 
+/**
+ * \brief verify the current state of the step
+ *
+ * Derived classes may want to override this method to ensure that the are
+ * always in state idle as long as they are not fully configured. Maybe we
+ * could remove this requirement by adding an additional state unconfigured
+ * below the idle level.
+ */
 ProcessingStep::state	ProcessingStep::checkstate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking state in %p", this);
 	// find the smallest state that we should be in according to

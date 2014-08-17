@@ -9,35 +9,10 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 
-using namespace astro::image;
 using namespace astro::process;
 
 namespace astro {
 namespace test {
-
-class TestStep : public ProcessingStep {
-	bool cancelrequest;
-public:
-	TestStep() { cancelrequest = false; }
-	virtual ProcessingStep::state	do_work() {
-#if 0
-		cancelrequest = false;
-		int	s = 20;
-		while (s-- > 0) {
-			_comletion = s / 20.
-			usleep(100000)
-			if (cancelrequest) {
-				return;
-			}
-		}
-#endif
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "working");
-		return ProcessingStep::complete;
-	}
-	void	cancel() {
-		cancelrequest = true;
-	}
-};
 
 class ProcessingStepTest : public CppUnit::TestFixture {
 public:
@@ -67,9 +42,7 @@ void	ProcessingStepTest::testBase() {
 	ProcessingStep	base;
 	CPPUNIT_ASSERT(base.status() == ProcessingStep::idle);
 	base.work();
-	CPPUNIT_ASSERT(base.status() == ProcessingStep::idle);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting state needswork");
-	base.status(ProcessingStep::needswork);
+	base.checkstate();
 	CPPUNIT_ASSERT(base.status() == ProcessingStep::needswork);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "do work");
 	base.work();
@@ -79,10 +52,10 @@ void	ProcessingStepTest::testBase() {
 
 void	ProcessingStepTest::testDependency() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDependency() begin");
-	ProcessingStepPtr	step1(new TestStep());
-	ProcessingStepPtr	step2(new TestStep());
-	ProcessingStepPtr	step3(new TestStep());
-	ProcessingStepPtr	step4(new TestStep());
+	ProcessingStepPtr	step1(new ProcessingStep());
+	ProcessingStepPtr	step2(new ProcessingStep());
+	ProcessingStepPtr	step3(new ProcessingStep());
+	ProcessingStepPtr	step4(new ProcessingStep());
 	step1->add_successor(step2);
 	step1->add_successor(step3);
 	step4->add_precursor(step2);

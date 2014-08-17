@@ -178,7 +178,7 @@ public:
 	float	completion() const { return _completion; }
 	state	status() const { return _status; }
 	state	status(state newsstate);
-	state	checkstate();
+	virtual state	checkstate();
 	void	work();
 	virtual void	cancel();
 private:

@@ -90,6 +90,7 @@ static void	*run_processing_thread(void *arg) {
  * This method starts a thread
  */
 void	ProcessingThreadImpl::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting thread");
 	PthreadLocker	lock(&_lock);
 	if (working) {
 		throw std::runtime_error("thread already running");
@@ -102,6 +103,7 @@ void	ProcessingThreadImpl::run() {
 		working = false;
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread successfully started");
 }
 
 /**
@@ -159,6 +161,7 @@ void	ProcessingThreadImpl::work() {
  * \brief factory method of the ProcessingThread class
  */
 ProcessingThreadPtr	ProcessingThread::get(ProcessingStepPtr step) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create new thread object");
 	return ProcessingThreadPtr(new ProcessingThreadImpl(step));
 }
 
