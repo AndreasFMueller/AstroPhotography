@@ -261,10 +261,13 @@ public:
  * gives access to such files, and allows to preview them.
  */
 class ImageFile : public ProcessingStep {
+	std::string	_filename;
 	ImagePtr	_image;
 public:
-	ImageFile();
-	
+	ImageFile(const std::string& filename) : _filename(filename) { }
+	// the actual work function has to read the image, and has to
+	// construct the preview adapter
+	void	work();
 };
 
 /**
@@ -278,10 +281,12 @@ public:
 class ImageCalibration : public ProcessingStep {
 	ImagePtr	_dark;
 	ImagePtr	_flat;
-	const ConstImageAdapter<double>&	image;
+	const ConstImageAdapter<double>	*image;
 public:
 	ImageCalibration(const ConstImageAdapter<double>&,
 		ImagePtr _dark, ImagePtr _flat);
+	// there is no work to, as calibration can be done on the fly
+	void	work();
 };
 
 /**
