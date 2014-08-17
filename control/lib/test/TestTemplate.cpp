@@ -15,10 +15,10 @@ class TemplateTest : public CppUnit::TestFixture {
 public:
 	void	setUp();
 	void	tearDown();
-	void	testXXX();
+	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(TemplateTest);
-	CPPUNIT_TEST(testXXX);
+	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -30,10 +30,12 @@ void	TemplateTest::setUp() {
 void	TemplateTest::tearDown() {
 }
 
+#if 0
 void	TemplateTest::testXXX() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() begin");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() end");
 }
+#endif
 
 } // namespace test
 } // namespace astro

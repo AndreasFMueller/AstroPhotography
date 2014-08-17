@@ -31,11 +31,12 @@ ProcessingController::~ProcessingController() {
  * \brief add a processing step to the map
  */
 void	ProcessingController::addstep(const std::string& name,
-		ProcessingThreadPtr step) {
+		ProcessingStepPtr step) {
 	if (steps.find(name) != steps.end()) {
 		throw std::runtime_error("duplicate processing step name");
 	}
-	steps.insert(std::make_pair(name, step));
+	ProcessingThreadPtr	thread = ProcessingThread::get(step);
+	steps.insert(std::make_pair(name, thread));
 }
 
 /**
@@ -51,10 +52,10 @@ void	ProcessingController::removestep(const std::string& name) {
 /**
  * \brief Find the name of a processing step
  */
-std::string	ProcessingController::name(ProcessingThreadPtr step) {
+std::string	ProcessingController::name(ProcessingStepPtr step) {
 	stepmap::iterator	s = std::find_if(steps.begin(), steps.end(),
 		[step](stepmap::value_type& v) {
-			return (v.second == step);
+			return (v.second->step() == step);
 		}
 	);
 	if (s == steps.end()) {
@@ -66,12 +67,12 @@ std::string	ProcessingController::name(ProcessingThreadPtr step) {
 /**
  * \brief Find a step by name
  */
-ProcessingThreadPtr	ProcessingController::find(const std::string& name) {
+ProcessingStepPtr	ProcessingController::find(const std::string& name) {
 	stepmap::iterator	i = steps.find(name);
 	if (i == steps.end()) {
 		throw std::runtime_error("step named " + name + " not found");
 	}
-	return i->second;
+	return i->second->step();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -79,22 +80,22 @@ ProcessingThreadPtr	ProcessingController::find(const std::string& name) {
 //////////////////////////////////////////////////////////////////////
 void	ProcessingController::add_precursor(const std::string& target_name,
 		const std::string& precursor_name) {
-	find(target_name)->step()->add_precursor(find(precursor_name)->step());
+	find(target_name)->add_precursor(find(precursor_name));
 }
 
 void	ProcessingController::add_successor(const std::string& target_name,
 		const std::string& successor_name) {
-	find(target_name)->step()->add_successor(find(successor_name)->step());
+	find(target_name)->add_successor(find(successor_name));
 }
 
 void	ProcessingController::remove_precursor(const std::string& target_name,
 		const std::string& precursor_name) {
-	find(target_name)->step()->remove_precursor(find(precursor_name)->step());
+	find(target_name)->remove_precursor(find(precursor_name));
 }
 
 void	ProcessingController::remove_successor(const std::string& target_name,
 		const std::string& successor_name) {
-	find(target_name)->step()->remove_successor(find(successor_name)->step());
+	find(target_name)->remove_successor(find(successor_name));
 }
 
 } // namespace process

@@ -245,9 +245,9 @@ public:
 	~ProcessingController();
 
 	// adding and removing steps
-	void	addstep(const std::string& name, ProcessingThreadPtr step);
+	void	addstep(const std::string& name, ProcessingStepPtr step);
 	void	removestep(const std::string& name);
-	void	removestep(ProcessingThreadPtr step);
+	void	removestep(ProcessingStepPtr step);
 
 	// network maintenance
 	void	add_precursor(const std::string& target,
@@ -260,8 +260,8 @@ public:
 			const std::string& successor);
 
 	// locating steps 
-	ProcessingThreadPtr	find(const std::string& name);
-	std::string	name(ProcessingThreadPtr step);
+	ProcessingStepPtr	find(const std::string& name);
+	std::string	name(ProcessingStepPtr step);
 };
 
 /**
