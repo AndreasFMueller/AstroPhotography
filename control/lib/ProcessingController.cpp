@@ -98,5 +98,32 @@ void	ProcessingController::remove_successor(const std::string& target_name,
 	find(target_name)->remove_successor(find(successor_name));
 }
 
+//////////////////////////////////////////////////////////////////////
+// execution
+//////////////////////////////////////////////////////////////////////
+bool	ProcessingController::haswork() {
+	return std::any_of(steps.begin(), steps.end(),
+		[](stepmap::value_type& v) {
+			return (v.second->step()->status()
+				== ProcessingStep::needswork);
+		}
+	);
+}
+
+void	ProcessingController::execute() {
+	while (haswork()) {
+		stepmap::iterator	i = std::find_if(steps.begin(),
+			steps.end(),
+			[](stepmap::value_type& v) {
+				return (v.second->step()->status()
+					== ProcessingStep::needswork);
+			}
+		);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting %s", i->first.c_str());
+		i->second->run();
+		i->second->wait();
+	}
+}
+
 } // namespace process
 } // namespace astro

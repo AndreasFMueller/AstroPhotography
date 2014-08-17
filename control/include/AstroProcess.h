@@ -224,7 +224,7 @@ protected:
 public:
 	virtual void	cancel() = 0;
 	virtual void	wait() = 0;
-	virtual void	run() = 0;
+	virtual void	run(int fd = -1) = 0;
 	virtual bool	isrunning() = 0;
 	ProcessingStep::state	status() const { return _step->status(); }
 static ProcessingThreadPtr	get(ProcessingStepPtr step);
@@ -262,6 +262,10 @@ public:
 	// locating steps 
 	ProcessingStepPtr	find(const std::string& name);
 	std::string	name(ProcessingStepPtr step);
+
+	// execute all the necessary steps
+	bool	haswork();
+	void	execute();
 };
 
 /**

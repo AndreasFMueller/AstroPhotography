@@ -42,10 +42,12 @@ public:
 	void	setUp();
 	void	tearDown();
 	void	testNames();
+	void	testExecute();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(ProcessingControllerTest);
 	CPPUNIT_TEST(testNames);
+	CPPUNIT_TEST(testExecute);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -82,6 +84,40 @@ void	ProcessingControllerTest::testNames() {
 	CPPUNIT_ASSERT(controller.name(three) == std::string("three"));
 	CPPUNIT_ASSERT(controller.name(four) == std::string("four"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testNames() end");
+}
+
+void	ProcessingControllerTest::testExecute() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testExecute() begin");
+	ProcessingController	controller;
+	ProcessingStepPtr	one =
+		ProcessingStepPtr(new ControllerTestStep());
+	controller.addstep("one", one);
+	ProcessingStepPtr	two =
+		ProcessingStepPtr(new ControllerTestStep());
+	controller.addstep("two", two);
+	ProcessingStepPtr	three =
+		ProcessingStepPtr(new ControllerTestStep());
+	controller.addstep("three", three);
+	ProcessingStepPtr	four =
+		ProcessingStepPtr(new ControllerTestStep());
+	controller.addstep("four", four);
+	controller.add_successor("one", "two");
+	controller.add_successor("one", "three");
+	controller.add_precursor("four", "two");
+	controller.add_precursor("four", "three");
+	controller.find("one")->checkstate();
+	CPPUNIT_ASSERT(controller.find("one")->status()
+		== ProcessingStep::needswork);
+	controller.execute();
+	CPPUNIT_ASSERT(controller.find("one")->status()
+		== ProcessingStep::complete);
+	CPPUNIT_ASSERT(controller.find("two")->status()
+		== ProcessingStep::complete);
+	CPPUNIT_ASSERT(controller.find("three")->status()
+		== ProcessingStep::complete);
+	CPPUNIT_ASSERT(controller.find("four")->status()
+		== ProcessingStep::complete);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testExecute() end");
 }
 
 #if 0

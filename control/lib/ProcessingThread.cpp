@@ -6,20 +6,25 @@
 #include <AstroProcess.h>
 #include <pthread.h>
 #include <AstroUtils.h>
+#include <includes.h>
 
 namespace astro {
 namespace process {
 
+//////////////////////////////////////////////////////////////////////
+// Derived Implementation class for Processing Threads
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief Implementation class hiding the thread implementation 
  */
 class ProcessingThreadImpl : public ProcessingThread {
 	pthread_t	thread;
 	pthread_mutex_t	_lock;
+	int		_fd;
 public:
 	ProcessingThreadImpl(ProcessingStepPtr step);
 	virtual ~ProcessingThreadImpl();
-	virtual void	run();
+	virtual void	run(int fd = -1);
 	virtual void	cancel();
 	virtual void	wait();
 	bool	working;
@@ -39,6 +44,12 @@ ProcessingThreadImpl::ProcessingThreadImpl(ProcessingStepPtr step)
 	working = false;
 }
 
+/**
+ * \brief Destroy a thread
+ *
+ * Destroying a thread means that we first have to cancel a running thread
+ * and then wait for the thread to finish
+ */
 ProcessingThreadImpl::~ProcessingThreadImpl() {
 	if (isrunning()) {
 		try {
@@ -89,12 +100,13 @@ static void	*run_processing_thread(void *arg) {
  *
  * This method starts a thread
  */
-void	ProcessingThreadImpl::run() {
+void	ProcessingThreadImpl::run(int fd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting thread");
 	PthreadLocker	lock(&_lock);
 	if (working) {
 		throw std::runtime_error("thread already running");
 	}
+	_fd = fd;
 	working = true;
 	// create a new thread
 	pthread_attr_t	attr;
@@ -155,8 +167,20 @@ void	ProcessingThreadImpl::work() {
 	} catch (...) {
 
 	}
+	if (_fd >= 0) {
+		unsigned char	rc = _step->status();
+		if (1 != ::write(_fd, &rc, 1)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"cannot signal the controller: %s",
+				strerror(errno));
+		}
+		close(_fd);
+	}
 }
 
+//////////////////////////////////////////////////////////////////////
+// Some methods of the ProcessingThread that were not inlined
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief factory method of the ProcessingThread class
  */
