@@ -388,6 +388,10 @@ public:
  * \brief Common methods for calbration image generators
  */
 class CalibrationProcessor : public CalibrationImage {
+	int	_spacing;
+public:
+	int	spacing() const { return _spacing; }
+	void	spacing(int s) { _spacing = s; }
 protected:
 	size_t		nrawimages;
 	ImageStep	**rawimages;
@@ -395,6 +399,20 @@ protected:
 	void	get(unsigned int x, unsigned int y, double *values, int& n);
 	Image<double>	*image;
 	ImagePtr	imageptr;
+	// as a basis for deciding which values should go into the
+	// construction of the calibration image, we compute medians,
+	// means and standard deviations. 
+	Image<double>	*medians;
+	Image<double>	*means;
+	Image<double>	*stddevs;
+private:
+	typedef struct {
+		double median;
+		double mean;
+		double stddev;
+	} aggregates;
+	aggregates	tile(int x, int y, int step);
+	void	filltile(int x, int y, int step);
 public:
 	CalibrationProcessor(CalibrationImage::caltype t);
 	~CalibrationProcessor();

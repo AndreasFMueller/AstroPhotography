@@ -19,6 +19,10 @@ CalibrationProcessor::CalibrationProcessor(CalibrationImage::caltype t)
 	: CalibrationImage(t) {
 	rawimages = NULL;
 	nrawimages = 0;
+	_spacing = 1;
+	medians = NULL;
+	means = NULL;
+	stddevs = NULL;
 }
 
 /**
@@ -89,7 +93,7 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 		}
 	}
 
-	// now build a targemt image
+	// now build a target image
 	if (nrawimages == 0) {
 		throw std::runtime_error("no template size");
 	}
@@ -104,8 +108,113 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 	// make the image availabe as preview
 	_preview = PreviewAdapter::get(imageptr);
 
+	// prepare images for medians, means and stddevs
+	int	step = _spacing * 12;
+	ImageSize	subsize(_spacing * size.width() / step,
+				_spacing * size.height() / step);
+	medians = new Image<double>(subsize);
+	means = new Image<double>(subsize);
+	stddevs = new Image<double>(subsize);
+	for (unsigned int x = step / 2; x < size.width(); x += step) {
+		for (unsigned int y = step / 2; y < size.height(); x += step) {
+			
+		}
+	}
+
 	// common work done
 	return ProcessingStep::complete;
+}
+
+/**
+ * \brief compute the aggregates for a tile
+ *
+ * Compute the averages for a tile
+ */
+CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int step) {
+	// compute the rectangle we want to use
+	int	width = step + 8;
+	width = _spacing * (width / (2 * _spacing));
+
+	// compute the rectangle we have to scan
+	int	minx = xc - width;
+	int	maxx = xc + width;
+	int	miny = yc - width;
+	int	maxy = yc + width;
+
+	// now scan the image for pixel values
+	std::multiset<double>	pixels;
+	int	w = image->size().width();
+	int	h = image->size().height();
+	for (int i = 0; i < (int)nrawimages; i++) {
+		for (int x = minx; x <= maxx; x += _spacing) {
+			for (int y = miny; y < maxy; y += _spacing) {
+				if ((x < 0) || (x >= w) || (y < 0) || (y >= h)){
+					continue;
+				}
+				double	v = rawimages[i]->out().pixel(x, y);
+				if (v == v) {
+					pixels.insert(v);
+				}
+			}
+		}
+	}
+
+	// compute median and averages
+	aggregates	a;
+	a.median = 0; a.mean = 0; a.stddev = 0;
+
+	// first the median
+	std::multiset<double>::const_iterator	mit = pixels.begin();
+	std::advance(mit, pixels.size() / 2);
+	a.median = *mit;
+	if (0 == (pixels.size() % 2)) {
+		a.median = (a.median + *++mit) / 2;
+	}
+
+	// now the sum of values and their squares
+	int	counter = 0;
+	std::multiset<double>::const_iterator	begin = pixels.begin();
+	std::multiset<double>::const_iterator	end = pixels.begin();
+	int	m = pixels.size() / 10;
+	std::advance(begin, m);
+	std::advance(end, pixels.size() - m);
+	std::for_each(begin, end,
+		[a,counter](double x) mutable {
+			a.mean += x;
+			a.stddev += x + x;
+			counter++;
+		}
+	);
+
+	// compute standard mean and standard deviaton from this
+	a.mean = a.mean / counter;
+	a.stddev = (a.stddev / counter - a.mean * a.mean)
+		* counter / (counter - 1.);
+
+	// we are done
+	return a;
+}
+
+
+
+/**
+ * \brief compute all averages for a tile position
+ *
+ * If the grid spacing is 1, then this amounts to just a single computation.
+ * If the grid spacing is 2, as should be used for RGB images, then we
+ * compute four sets of aggregates, one for every RGGB subgrid.
+ */
+void	CalibrationProcessor::filltile(int x, int y, int step) {
+	int	xs = _spacing * x / step;
+	int	ys = _spacing * y / step;
+	for (int dx = 0; dx < _spacing; dx++) {
+		for (int dy = 0; dy < _spacing; dy++) {
+			aggregates	a = tile(x + dx, y + dy, step);
+			medians->writablepixel(xs + dx, ys + dy) = a.median;
+			means->writablepixel(xs + dx, ys + dy) = a.mean;
+			stddevs->writablepixel(xs + dx, ys + dy) = a.stddev;
+		}
+	}
 }
 
 /**
