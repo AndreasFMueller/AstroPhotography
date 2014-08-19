@@ -393,12 +393,15 @@ protected:
 	ImageStep	**rawimages;
 	size_t	getPrecursors();
 	void	get(unsigned int x, unsigned int y, double *values, int& n);
+	Image<double>	*image;
+	ImagePtr	imageptr;
 public:
 	CalibrationProcessor(CalibrationImage::caltype t);
 	~CalibrationProcessor();
 	virtual ProcessingStep::state	do_work() = 0;
 	// this ensures that the CalibrationProcessor cannot be instantiated
 	// directly, only its derived classes can
+	virtual const ConstImageAdapter<double>&	out() const;
 protected:
 	ProcessingStep::state	common_work();
 };

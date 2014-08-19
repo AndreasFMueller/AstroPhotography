@@ -7,6 +7,8 @@
 #include <AstroProcess.h>
 #include <AstroDebug.h>
 
+using namespace astro::adapter;
+
 namespace astro {
 namespace process {
 
@@ -30,6 +32,9 @@ CalibrationProcessor::~CalibrationProcessor() {
 
 /**
  * \brief Find all RawImage precursors
+ *
+ * get pointers to all the precursors of type ImageStep, others don't have
+ * image data output, so they cannot be used to build calibration images
  */
 size_t	CalibrationProcessor::getPrecursors() {
 	typedef ImageStep *ImageStepPtr;
@@ -83,6 +88,23 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 			return ProcessingStep::idle;
 		}
 	}
+
+	// now build a targemt image
+	if (nrawimages == 0) {
+		throw std::runtime_error("no template size");
+	}
+	Image<double>	*_image
+		= new Image<double>(rawimages[0]->out().getSize());
+	imageptr = ImagePtr(_image);
+	image = _image;
+	image->fill(0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create empty %s image",
+		image->size().toString().c_str());
+
+	// make the image availabe as preview
+	_preview = PreviewAdapter::get(imageptr);
+
+	// common work done
 	return ProcessingStep::complete;
 }
 
@@ -98,6 +120,16 @@ void	CalibrationProcessor::get(unsigned int x, unsigned int y,
 			values[n++] = v;
 		}
 	}
+}
+
+/**
+ * \brief access to the calibration image
+ */
+const ConstImageAdapter<double>&	CalibrationProcessor::out() const {
+	if (NULL == image) {
+		throw std::runtime_error("no image available");
+	}
+	return *image;
 }
 
 //////////////////////////////////////////////////////////////////////
