@@ -189,7 +189,6 @@ public:
 	virtual void	cancel();
 protected:
 	virtual state	do_work();
-
 	// constructor
 public:
 	ProcessingStep();
@@ -197,6 +196,16 @@ public:
 private:	// prevent copying
 	ProcessingStep(const ProcessingStep& other);
 	ProcessingStep&	operator=(const ProcessingStep& other);
+};
+
+/**
+ * \brief Image Steps also have image output and preview
+ */
+class ImageStep : public ProcessingStep {
+	// constructor
+public:
+	ImageStep();
+	virtual ~ImageStep();
 
 	// access to the preview for this processing step. The preview
 	// pointer is protected so that derived classes can assign a 
@@ -284,30 +293,41 @@ private:
 };
 
 /**
+ * \brief Using a raw image as input
+ */
+class RawImage : public ImageStep {
+protected:
+	ImagePtr	_image;
+	ProcessingStep::state	common_work();
+public:
+	RawImage(ImagePtr image);
+	ImageRectangle	subframe() const;
+	virtual ProcessingStep::state	do_work();
+};
+
+/**
  * \brief Reading a Disk file
  *
  * The input for all processing are files stored on disk. This class
  * gives access to such files, and allows to preview them.
  */
-class RawImageFile : public ProcessingStep {
+class RawImageFile : public RawImage {
 	std::string	_filename;
-	ImagePtr	_image;
 public:
 	RawImageFile(const std::string& filename);
 	virtual ~RawImageFile();
 	// the actual work function has to read the image, and has to
 	// construct the preview adapter
 	virtual ProcessingStep::state	do_work();
-	ImageRectangle	subframe() const;
 };
 
 /**
  * \brief Write an image to a disk file
  */
-class WriteImage : public ProcessingStep {
+class WriteImage : public ImageStep {
 	std::string	_filename;
 	bool	_precious;
-	ProcessingStep	*input() const;
+	ImageStep	*input() const;
 public:
 	WriteImage(const std::string& filename, bool precious = false);
 	virtual ProcessingStep::state	do_work();
@@ -321,7 +341,7 @@ public:
  * A Calibration image can be read from a file, or it can be created on
  * the fly
  */
-class CalibrationImage : public ProcessingStep {
+class CalibrationImage : public ImageStep {
 public:
 	typedef enum { DARK, FLAT } caltype;
 protected:
@@ -354,7 +374,7 @@ public:
  * original image will typicall be unsigned char or unsigned short. The
  * flat and the dark will both be float images.
  */
-class ImageCalibration : public ProcessingStep {
+class ImageCalibration : public ImageStep {
 	const ConstImageAdapter<double>	*_image;
 	const CalibrationImage	*calimage(CalibrationImage::caltype) const;
 public:
@@ -370,8 +390,9 @@ public:
 class CalibrationProcessor : public CalibrationImage {
 protected:
 	size_t		nrawimages;
-	RawImageFile	**rawimages;
+	ImageStep	**rawimages;
 	size_t	getPrecursors();
+	void	get(unsigned int x, unsigned int y, double *values, int& n);
 public:
 	CalibrationProcessor(CalibrationImage::caltype t);
 	~CalibrationProcessor();
@@ -403,7 +424,7 @@ public:
 /**
  * \brief
  */
-class RGBDemosaicing : public ProcessingStep {
+class RGBDemosaicing : public ImageStep {
 public:
 };
 

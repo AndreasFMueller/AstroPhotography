@@ -17,6 +17,49 @@ using namespace astro::io;
 namespace astro {
 namespace process {
 
+//////////////////////////////////////////////////////////////////////
+// Raw image in memory
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief Constructor for in Memory image
+ */
+RawImage::RawImage(ImagePtr image) : _image(image) {
+
+}
+
+/**
+ * \brief Access to subframe information
+ */
+ImageRectangle	RawImage::subframe() const {
+	return _image->getFrame();
+}
+
+/**
+ * \brief Work function of the processing step
+ */
+ProcessingStep::state	RawImage::common_work() {
+	// add the preview
+	_preview = PreviewAdapter::get(_image);
+
+	// create the adapters for output
+	_out = ImageStep::outPtr(new DoubleAdapter(_image));
+
+	// if we succeed in all this, then the new state should be complete
+	return ProcessingStep::complete;
+}
+
+/**
+ * \brief Work for an in memory image
+ */
+ProcessingStep::state	RawImage::do_work() {
+	return common_work();
+}
+
+//////////////////////////////////////////////////////////////////////
+// Raw image from a file
+//////////////////////////////////////////////////////////////////////
+
 /**
  * \brief Create a processing step for raw images
  *
@@ -24,7 +67,8 @@ namespace process {
  * the state accordingly. 
  * \param filename	name of the raw image file
  */
-RawImageFile::RawImageFile(const std::string& filename) : _filename(filename) {
+RawImageFile::RawImageFile(const std::string& filename)
+	: RawImage(ImagePtr()), _filename(filename) {
 	// initialize undefined fields
 	_out = NULL;
 
@@ -60,21 +104,8 @@ ProcessingStep::state	RawImageFile::do_work() {
 		return ProcessingStep::idle;
 	}
 
-	// add the preview
-	_preview = PreviewAdapter::get(_image);
-
-	// create the adapters for output
-	_out = ProcessingStep::outPtr(new DoubleAdapter(_image));
-
 	// if we succeed in all this, then the new state should be complete
-	return ProcessingStep::complete;
-}
-
-/**
- * \brief Access to subframe information
- */
-ImageRectangle	RawImageFile::subframe() const {
-	return _image->getFrame();
+	return common_work();
 }
 
 } // namespace process

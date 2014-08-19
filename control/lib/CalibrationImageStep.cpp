@@ -54,7 +54,7 @@ ProcessingStep::state	CalibrationImageFile::do_work() {
 	_preview->max(max);
 
 	// output
-	_out = ProcessingStep::outPtr(new DoubleAdapter(_image));
+	_out = ImageStep::outPtr(new DoubleAdapter(_image));
 
 	// that's it
 	return ProcessingStep::complete;

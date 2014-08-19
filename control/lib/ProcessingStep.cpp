@@ -144,11 +144,6 @@ void	ProcessingStep::work(ProcessingThread *thread) {
 		return;
 	}
 
-	// if we start working, then we should also invalidate preview
-	// and output
-	_preview.reset();
-	_out.reset();
-
 	// set the status to working
 	status(working);
 
@@ -270,35 +265,6 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 	std::for_each(_successors.begin(), _successors.end(),
 		[](steps::value_type x) { x->checkstate(); });
 	return _status;
-}
-
-//////////////////////////////////////////////////////////////////////
-// Preview access
-//////////////////////////////////////////////////////////////////////
-PreviewMonochromeAdapter	ProcessingStep::monochrome_preview() {
-	return PreviewMonochromeAdapter(preview());
-}
-
-PreviewColorAdapter	ProcessingStep::color_preview() {
-	return PreviewColorAdapter(preview());
-}
-
-//////////////////////////////////////////////////////////////////////
-// Access to output images
-//////////////////////////////////////////////////////////////////////
-const ConstImageAdapter<double>&	ProcessingStep::out() const {
-	if (NULL == _out) {
-		throw std::runtime_error("no output available");
-	}
-	return *_out;
-}
-
-bool	ProcessingStep::hasColor() const {
-	return false;
-}
-
-const ConstImageAdapter<RGB<double> >&	ProcessingStep::out_color() const {
-	throw std::runtime_error("not implemented");
 }
 
 } // namespace process

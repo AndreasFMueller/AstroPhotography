@@ -23,11 +23,19 @@ WriteImage::WriteImage(const std::string& filename, bool precious)
 /**
  * \brief Get the input step
  */
-ProcessingStep	*WriteImage::input() const {
-	if (precursors().size() < 1) {
+ImageStep	*WriteImage::input() const {
+	steps::const_iterator	i
+		= std::find_if(precursors().begin(), precursors().end(),
+			[](ProcessingStep *step) {
+				ImageStep	*image
+					= dynamic_cast<ImageStep *>(step);
+				return (NULL != image);
+			}
+		);
+	if (i == precursors().end()) {
 		std::runtime_error("no precursors set");
 	}
-	return *precursors().begin();
+	return dynamic_cast<ImageStep *>(*i);
 }
 
 /**

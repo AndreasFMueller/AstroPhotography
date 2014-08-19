@@ -29,22 +29,27 @@ CalibrationProcessor::~CalibrationProcessor() {
 }
 
 /**
- * \brief Find all RawImageFile precursors
+ * \brief Find all RawImage precursors
  */
 size_t	CalibrationProcessor::getPrecursors() {
-	typedef RawImageFile	*RawImageFilePtr;
-	rawimages = new RawImageFilePtr[precursors().size()];
+	typedef ImageStep *ImageStepPtr;
+	rawimages = new ImageStepPtr[precursors().size()];
 	nrawimages = 0;
-/*
+
+	// the lambda below cannot capture members, so we have to capture
+	// local variables
+	ImageStep	**ri = rawimages;
+	int	n = 0;
 	std::for_each(precursors().begin(), precursors().end(),
-		[rawimages,nrawimages](ProcessingStep *step) {
-			RawImageFile	*f = dynamic_cast<RawImageFile *>(step);
+		[ri,n](ProcessingStep *step) mutable {
+			ImageStep	*f = dynamic_cast<ImageStep *>(step);
 			if (NULL != f) {
-				rawimages[nrawimages++] = f;
+				ri[n++] = f;
 			}
 		}
 	);
-*/
+	nrawimages = n;
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d raw images");
 	return nrawimages;
 }
@@ -82,6 +87,23 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 }
 
 /**
+ * \brief get pixel values at a given point
+ */
+void	CalibrationProcessor::get(unsigned int x, unsigned int y,
+	double *values, int& n) {
+	n = 0;
+	for (size_t i = 0; i < nrawimages; i++) {
+		double	v = rawimages[i]->out().pixel(x, y);
+		if (v == v) {
+			values[n++] = v;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// creating a dark image
+//////////////////////////////////////////////////////////////////////
+/**
  * \brief Work to construct dark images
  */
 ProcessingStep::state	DarkProcessor::do_work() {
@@ -98,6 +120,9 @@ ProcessingStep::state	DarkProcessor::do_work() {
 	return ProcessingStep::complete;
 }
 
+//////////////////////////////////////////////////////////////////////
+// creating a flat image
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief Work to construct flat images
  */

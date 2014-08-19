@@ -162,6 +162,9 @@ ProcessingStep::state	ImageCalibration::do_work() {
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
 		[dark, flat](ProcessingStep *step) {
+			if (NULL == dynamic_cast<ImageStep *>(step)) {
+				return false;
+			}
 			return ((step != dark) && (step != flat));
 		}
 	);
@@ -169,7 +172,7 @@ ProcessingStep::state	ImageCalibration::do_work() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image to calibrate");
 		return ProcessingStep::idle;
 	}
-	ProcessingStep	*image = *i;
+	ImageStep	*image = dynamic_cast<ImageStep *>(*i);
 
 	// ensure that the _image is properly removed
 	if (NULL != _image) {
