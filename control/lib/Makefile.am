@@ -79,7 +79,9 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp \
 	StereographicProjection.cpp StereographicChart.cpp \
 	PreviewAdapter.cpp ImageProcessing.cpp \
 	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
-	RawImageFileStep.cpp \
+	RawImageFileStep.cpp WriteImageStep.cpp \
+	ImageCalibrationStep.cpp CalibrationImageStep.cpp \
+	CalibrationProcessorStep.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

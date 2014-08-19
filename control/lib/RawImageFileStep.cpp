@@ -61,13 +61,20 @@ ProcessingStep::state	RawImageFile::do_work() {
 	}
 
 	// add the preview
-	preview = PreviewAdapter::get(_image);
+	_preview = PreviewAdapter::get(_image);
 
 	// create the adapters for output
 	_out = ProcessingStep::outPtr(new DoubleAdapter(_image));
 
 	// if we succeed in all this, then the new state should be complete
 	return ProcessingStep::complete;
+}
+
+/**
+ * \brief Access to subframe information
+ */
+ImageRectangle	RawImageFile::subframe() const {
+	return _image->getFrame();
 }
 
 } // namespace process

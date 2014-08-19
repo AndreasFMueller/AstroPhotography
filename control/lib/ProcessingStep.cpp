@@ -144,6 +144,11 @@ void	ProcessingStep::work(ProcessingThread *thread) {
 		return;
 	}
 
+	// if we start working, then we should also invalidate preview
+	// and output
+	_preview.reset();
+	_out.reset();
+
 	// set the status to working
 	status(working);
 
@@ -253,8 +258,8 @@ ProcessingStep::state	ProcessingStep::checkstate() {
 }
 
 ProcessingStep::state	ProcessingStep::status(state newstate) {
-	state	pc = precursorstate();
 	// first check the maximum state we can possible have
+	state	pc = precursorstate();
 	if (newstate > pc) {
 		return _status;
 	}
@@ -271,11 +276,11 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 // Preview access
 //////////////////////////////////////////////////////////////////////
 PreviewMonochromeAdapter	ProcessingStep::monochrome_preview() {
-	return PreviewMonochromeAdapter(preview);
+	return PreviewMonochromeAdapter(preview());
 }
 
 PreviewColorAdapter	ProcessingStep::color_preview() {
-	return PreviewColorAdapter(preview);
+	return PreviewColorAdapter(preview());
 }
 
 //////////////////////////////////////////////////////////////////////

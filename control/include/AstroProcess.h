@@ -101,6 +101,7 @@ public:
 namespace test {
 
 class ProcessingStepTest;
+class WriteImageFileStepTest;
 
 } // namespace test
 
@@ -123,32 +124,37 @@ typedef std::shared_ptr<ProcessingThread>	ProcessingThreadPtr;
  * 
  */
 class ProcessingStep {
-private:
 	// precursors and successors of each step, these turn the processing
 	// steps into directed graph
+public:	
 	typedef	std::list<ProcessingStep *>	steps;
+private:
 	steps	_precursors;
+	steps	_successors;
+protected:
 	const steps	precursors() const {
 		return _precursors;
 	}
-	steps	_successors;
 	const steps	successors() const {
 		return _successors;
 	}
 protected:
-	// derived classes have their own methods to handle their inputs,
-	// but the use the methods here to maintain the dependency graph
+	// derived classes may have their own methods to handle their inputs,
+	// but they use the methods here to maintain the dependency graph
 	void	add_precursor(ProcessingStep *step);
 	void	remove_precursor(ProcessingStep *step);
 	void	add_successor(ProcessingStep *step);
 	void	remove_successor(ProcessingStep *step);
+	// Derived classes may need access to precursors
 private:
 	void	add_precursor(ProcessingStepPtr step);
 	void	remove_precursor(ProcessingStepPtr step);
 	void	add_successor(ProcessingStepPtr step);
 	void	remove_successor(ProcessingStepPtr step);
 	friend class ProcessingController;
-	friend class astro::test::ProcessingStepTest; // allow test class access
+	// allow test class access
+	friend class astro::test::ProcessingStepTest;
+	friend class astro::test::WriteImageFileStepTest;
 public:
 	void	remove_me();
 
@@ -196,8 +202,11 @@ private:	// prevent copying
 	// pointer is protected so that derived classes can assign a 
 	// suitable preview class.
 protected:
-	astro::adapter::PreviewAdapterPtr	preview;
+	astro::adapter::PreviewAdapterPtr	_preview;
 public:
+	virtual astro::adapter::PreviewAdapterPtr	preview() const {
+		return _preview;
+	}
 	astro::adapter::PreviewMonochromeAdapter	monochrome_preview();
 	astro::adapter::PreviewColorAdapter	color_preview();
 
@@ -289,6 +298,52 @@ public:
 	// the actual work function has to read the image, and has to
 	// construct the preview adapter
 	virtual ProcessingStep::state	do_work();
+	ImageRectangle	subframe() const;
+};
+
+/**
+ * \brief Write an image to a disk file
+ */
+class WriteImage : public ProcessingStep {
+	std::string	_filename;
+	bool	_precious;
+	ProcessingStep	*input() const;
+public:
+	WriteImage(const std::string& filename, bool precious = false);
+	virtual ProcessingStep::state	do_work();
+	virtual astro::adapter::PreviewAdapterPtr	preview() const;
+	virtual const ConstImageAdapter<double>&	out() const;
+};
+
+/**
+ * \brief Calibration Image steps
+ *
+ * A Calibration image can be read from a file, or it can be created on
+ * the fly
+ */
+class CalibrationImage : public ProcessingStep {
+public:
+	typedef enum { DARK, FLAT } caltype;
+protected:
+	caltype	_type;
+public:
+	caltype	type() const { return _type; }
+	CalibrationImage(caltype t) : _type(t) { }
+static	std::string	caltypename(caltype t);
+};
+
+/**
+ * \brief Calibration image read from a file
+ */
+class CalibrationImageFile : public CalibrationImage {
+	std::string	_filename;
+	ImagePtr	_image;
+public:
+	CalibrationImageFile(const std::string& filename,
+		const CalibrationImage::caltype type)
+			: CalibrationImage(type), _filename(filename) {
+	}
+	virtual ProcessingStep::state	do_work();
 };
 
 /**
@@ -300,28 +355,49 @@ public:
  * flat and the dark will both be float images.
  */
 class ImageCalibration : public ProcessingStep {
-	ImagePtr	_dark;
-	ImagePtr	_flat;
 	const ConstImageAdapter<double>	*_image;
+	const CalibrationImage	*calimage(CalibrationImage::caltype) const;
 public:
-	ImageCalibration(const ConstImageAdapter<double>&,
-		ImagePtr _dark, ImagePtr _flat);
+	ImageCalibration();
+	virtual ~ImageCalibration();
 	// there is no work to, as calibration can be done on the fly
 	virtual ProcessingStep::state	do_work();
 };
 
 /**
+ * \brief Common methods for calbration image generators
+ */
+class CalibrationProcessor : public CalibrationImage {
+protected:
+	size_t		nrawimages;
+	RawImageFile	**rawimages;
+	size_t	getPrecursors();
+public:
+	CalibrationProcessor(CalibrationImage::caltype t);
+	~CalibrationProcessor();
+	virtual ProcessingStep::state	do_work() = 0;
+	// this ensures that the CalibrationProcessor cannot be instantiated
+	// directly, only its derived classes can
+protected:
+	ProcessingStep::state	common_work();
+};
+
+/**
  * \brief Processor to create a dark image from a set of inputs
  */
-class DarkProcessor : public ProcessingStep {
+class DarkProcessor : public CalibrationProcessor {
 public:
+	DarkProcessor() : CalibrationProcessor(CalibrationImage::DARK) { }
+	virtual ProcessingStep::state	do_work();
 };
 
 /**
  * \brief Processor to create a flat image from a set of inputs
  */
-class LightProcessor : public ProcessingStep {
+class FlatProcessor : public CalibrationProcessor {
 public:
+	FlatProcessor() : CalibrationProcessor(CalibrationImage::FLAT) { }
+	virtual ProcessingStep::state	do_work();
 };
 
 /**

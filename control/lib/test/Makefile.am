@@ -43,6 +43,7 @@ tests_SOURCES = tests.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
 	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
 	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
+	WriteImageFileStepTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \
