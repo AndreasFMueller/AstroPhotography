@@ -428,6 +428,7 @@ public:
 	typedef	Pixel	pixel_type;
 
 	ConstImageAdapter(const ImageSize& _size) : adaptersize(_size) { }
+	virtual ~ConstImageAdapter() { }
 
 	ImageSize	getSize() const { return adaptersize; }
 	virtual Pixel	pixel(unsigned int x, unsigned int y) const = 0;

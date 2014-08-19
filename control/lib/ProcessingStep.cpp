@@ -282,7 +282,10 @@ PreviewColorAdapter	ProcessingStep::color_preview() {
 // Access to output images
 //////////////////////////////////////////////////////////////////////
 const ConstImageAdapter<double>&	ProcessingStep::out() const {
-	throw std::runtime_error("not implemented");
+	if (NULL == _out) {
+		throw std::runtime_error("no output available");
+	}
+	return *_out;
 }
 
 bool	ProcessingStep::hasColor() const {

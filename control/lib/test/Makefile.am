@@ -42,7 +42,7 @@ tests_SOURCES = tests.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
 	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
-	ProcessingControllerTest.cpp \
+	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \

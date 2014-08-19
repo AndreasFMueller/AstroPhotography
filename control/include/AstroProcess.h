@@ -181,7 +181,7 @@ public:
 	virtual state	checkstate();
 	void	work(ProcessingThread *thread = NULL);
 	virtual void	cancel();
-private:
+protected:
 	virtual state	do_work();
 
 	// constructor
@@ -204,6 +204,9 @@ public:
 	// The processing step has at least one output, which must be an
 	// image. The processing may have some byproducts, but they are
  	// processing step dependen
+protected:
+	typedef std::shared_ptr<ConstImageAdapter<double> >	outPtr;
+	outPtr	_out;
 public:
 	virtual const ConstImageAdapter<double>&	out() const;
 	virtual bool	hasColor() const;
@@ -277,14 +280,15 @@ private:
  * The input for all processing are files stored on disk. This class
  * gives access to such files, and allows to preview them.
  */
-class ImageFile : public ProcessingStep {
+class RawImageFile : public ProcessingStep {
 	std::string	_filename;
 	ImagePtr	_image;
 public:
-	ImageFile(const std::string& filename) : _filename(filename) { }
+	RawImageFile(const std::string& filename);
+	virtual ~RawImageFile();
 	// the actual work function has to read the image, and has to
 	// construct the preview adapter
-	void	work();
+	virtual ProcessingStep::state	do_work();
 };
 
 /**
@@ -298,18 +302,18 @@ public:
 class ImageCalibration : public ProcessingStep {
 	ImagePtr	_dark;
 	ImagePtr	_flat;
-	const ConstImageAdapter<double>	*image;
+	const ConstImageAdapter<double>	*_image;
 public:
 	ImageCalibration(const ConstImageAdapter<double>&,
 		ImagePtr _dark, ImagePtr _flat);
 	// there is no work to, as calibration can be done on the fly
-	void	work();
+	virtual ProcessingStep::state	do_work();
 };
 
 /**
  * \brief Processor to create a dark image from a set of inputs
  */
-class DarkProcessor {
+class DarkProcessor : public ProcessingStep {
 public:
 };
 
