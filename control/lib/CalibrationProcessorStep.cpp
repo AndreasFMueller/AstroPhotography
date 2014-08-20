@@ -20,6 +20,7 @@ CalibrationProcessor::CalibrationProcessor(CalibrationImage::caltype t)
 	rawimages = NULL;
 	nrawimages = 0;
 	_spacing = 1;
+	_step = 10;
 	medians = NULL;
 	means = NULL;
 	stddevs = NULL;
@@ -109,15 +110,15 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 	_preview = PreviewAdapter::get(imageptr);
 
 	// prepare images for medians, means and stddevs
-	int	step = _spacing * 12;
-	ImageSize	subsize(_spacing * size.width() / step,
-				_spacing * size.height() / step);
+	int	grid = _spacing * _step;
+	ImageSize	subsize(_spacing * size.width() / grid,
+				_spacing * size.height() / grid);
 	medians = new Image<double>(subsize);
 	means = new Image<double>(subsize);
 	stddevs = new Image<double>(subsize);
-	for (unsigned int x = step / 2; x < size.width(); x += step) {
-		for (unsigned int y = step / 2; y < size.height(); x += step) {
-			
+	for (unsigned int x = grid; x < size.width(); x += 2 * grid) {
+		for (unsigned int y = grid; y < size.height(); x += 2 * grid) {
+			filltile(x, y, grid);
 		}
 	}
 
@@ -126,31 +127,76 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 }
 
 /**
+ * \brief Compute the median of a multiset of doubles
+ */
+static double	median(const std::multiset<double> values) {
+	std::multiset<double>::const_iterator	i = values.begin();
+	std::advance(i, values.size() / 2);
+	double	m = *i;
+	if (0 == (values.size() % 2)) {
+		m = (m + *++i) / 2;
+	}
+	return m;
+}
+
+/**
  * \brief compute the aggregates for a tile
  *
- * Compute the averages for a tile
+ * Compute the averages for a tile. The values are taken from a slightly larger
+ * piece of the image, like this:
+ *
+ *
+ *        <------ width --------> <------- width ------->
+ *       +-----------------------+-----------------------+
+ *       |                       |                       |  ^
+ *       |                       |                       |  |
+ *       |       +---------------+---------------+       |  |
+ *       |       |               |               |       |  |
+ *       |       |               |               |       |  | width
+ *       |       |               |               |       |  |
+ *       |       |               |               |       |  |
+ *       |       |               |               |       |  |
+ *       |       |               | (xc,yc)       |       |  v
+ *       +-------+---------------+---------------+-------+
+ *       |       |<----grid----->|<----grid---^->|       |
+ *       |       |               |            |  |       |
+ *       |       |               |            |  |       |
+ *       |       |               |       grid |  |       |
+ *       |       |               |            |  |       |
+ *       |       |               |            v  |       |
+ *       |       +---------------+---------------+       |
+ *       |                       |                       |
+ *       |                       |                       |
+ *       +-----------------------+-----------------------+
+ *
+ * 
  */
-CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int step) {
-	// compute the rectangle we want to use
-	int	width = step + 8;
-	width = _spacing * (width / (2 * _spacing));
+CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int grid) {
+	// compute the rectangle we want to use, the width must be a multiple
+	// of _spacing to ensure that we get all points from the appropriate
+	// subgrid
+	int	width = grid + _spacing * (8 / _spacing);
 
-	// compute the rectangle we have to scan
+	// compute the rectangle we have to scan. At the boundary of the
+	// image, we have to correct the computed minimum and maximum indices
+	// to ensure we never try to access pixel values outside the image area
 	int	minx = xc - width;
+	while (minx < 0) { minx += _spacing; }
 	int	maxx = xc + width;
+	while (maxx >= image->size().width()) { maxx -= _spacing; }
 	int	miny = yc - width;
+	while (miny < 0) { miny += _spacing; }
 	int	maxy = yc + width;
+	while (maxy >= image->size().height()) { maxy -= _spacing; }
 
-	// now scan the image for pixel values
+	// now scan the image rectangle for pixel values. We only take the
+	// valid values, NaNs are ignored, and collect them in a multiset.
+	// This way we automatically get them sorted. This makes computing
+	// the medians more efficient
 	std::multiset<double>	pixels;
-	int	w = image->size().width();
-	int	h = image->size().height();
 	for (int i = 0; i < (int)nrawimages; i++) {
 		for (int x = minx; x <= maxx; x += _spacing) {
 			for (int y = miny; y < maxy; y += _spacing) {
-				if ((x < 0) || (x >= w) || (y < 0) || (y >= h)){
-					continue;
-				}
 				double	v = rawimages[i]->out().pixel(x, y);
 				if (v == v) {
 					pixels.insert(v);
@@ -164,12 +210,7 @@ CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int 
 	a.median = 0; a.mean = 0; a.stddev = 0;
 
 	// first the median
-	std::multiset<double>::const_iterator	mit = pixels.begin();
-	std::advance(mit, pixels.size() / 2);
-	a.median = *mit;
-	if (0 == (pixels.size() % 2)) {
-		a.median = (a.median + *++mit) / 2;
-	}
+	a.median = median(pixels);
 
 	// now the sum of values and their squares
 	int	counter = 0;
@@ -177,7 +218,7 @@ CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int 
 	std::multiset<double>::const_iterator	end = pixels.begin();
 	int	m = pixels.size() / 10;
 	std::advance(begin, m);
-	std::advance(end, pixels.size() - m);
+	std::advance(end, pixels.size() - m - 1);
 	std::for_each(begin, end,
 		[a,counter](double x) mutable {
 			a.mean += x;
@@ -204,12 +245,12 @@ CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int 
  * If the grid spacing is 2, as should be used for RGB images, then we
  * compute four sets of aggregates, one for every RGGB subgrid.
  */
-void	CalibrationProcessor::filltile(int x, int y, int step) {
-	int	xs = _spacing * x / step;
-	int	ys = _spacing * y / step;
+void	CalibrationProcessor::filltile(int x, int y, int grid) {
+	int	xs = _spacing * x / (2 * grid);
+	int	ys = _spacing * y / (2 * grid);
 	for (int dx = 0; dx < _spacing; dx++) {
 		for (int dy = 0; dy < _spacing; dy++) {
-			aggregates	a = tile(x + dx, y + dy, step);
+			aggregates	a = tile(x + dx, y + dy, grid);
 			medians->writablepixel(xs + dx, ys + dy) = a.median;
 			means->writablepixel(xs + dx, ys + dy) = a.mean;
 			stddevs->writablepixel(xs + dx, ys + dy) = a.stddev;
@@ -221,13 +262,22 @@ void	CalibrationProcessor::filltile(int x, int y, int step) {
  * \brief get pixel values at a given point
  */
 void	CalibrationProcessor::get(unsigned int x, unsigned int y,
-	double *values, int& n) {
+	double *values, int& n, const aggegates& a) const {
 	n = 0;
 	for (size_t i = 0; i < nrawimages; i++) {
 		double	v = rawimages[i]->out().pixel(x, y);
-		if (v == v) {
-			values[n++] = v;
+		// ignore invalid pixels
+		if (v != v) {
+			continue;
 		}
+
+		// if a pixel value is too far away, ignore it as well
+		if (a.improbable(v)) {
+			continue;
+		}
+
+		// if a pixel value survives both checks, use it
+		values[n++] = v;
 	}
 }
 
@@ -239,6 +289,19 @@ const ConstImageAdapter<double>&	CalibrationProcessor::out() const {
 		throw std::runtime_error("no image available");
 	}
 	return *image;
+}
+
+/**
+ * \brief get the aggregates representative for an image point
+ */
+CalbrationProcessor::aggregates	aggr(unsigned int x, unsigned int y) const {
+	aggegates	result;
+	int	xa = _spacing * x / _step + x % _spacing;
+	int	ya = _spacing * y / _step + y % _spacing;
+	result.median = medians->pixel(xa, ya);
+	result.mean = menas->pixel(xa, ya);
+	result.stddev = stddevs->pixel(xa, ya);
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -254,8 +317,16 @@ ProcessingStep::state	DarkProcessor::do_work() {
 		return preparation;
 	}
 
-	// create an adapter that is capable of computing the pixel values
-	// for the dark
+	// Doing the pixel specific work.
+	double	values[nrawimages];
+	int	n;
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
+			aggregates	a = aggr(x, y);
+			get(x, y, values, n);
+			// compute the average			
+		}
+	}
 
 	// cheat
 	return ProcessingStep::complete;

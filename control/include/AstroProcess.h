@@ -392,11 +392,17 @@ class CalibrationProcessor : public CalibrationImage {
 public:
 	int	spacing() const { return _spacing; }
 	void	spacing(int s) { _spacing = s; }
+private:
+	int	_step;
+public:
+	int	step() const { return _step; }
+	void	step(int s) { _step = s; }
 protected:
 	size_t		nrawimages;
 	ImageStep	**rawimages;
 	size_t	getPrecursors();
-	void	get(unsigned int x, unsigned int y, double *values, int& n);
+	void	get(unsigned int x, unsigned int y, double *values, int& n,
+			const aggegrates& a) const;
 	Image<double>	*image;
 	ImagePtr	imageptr;
 	// as a basis for deciding which values should go into the
@@ -406,13 +412,19 @@ protected:
 	Image<double>	*means;
 	Image<double>	*stddevs;
 private:
-	typedef struct {
+	class aggegates {
+	public:
 		double median;
 		double mean;
 		double stddev;
+		aggregates() { median = 0; mean = 0; stddev = 0; }
+		bool	improbable(double x) {
+			return (fabs(x - mean) > 3 * stddev);
+		}
 	} aggregates;
 	aggregates	tile(int x, int y, int step);
 	void	filltile(int x, int y, int step);
+	aggregates	aggr(unsigned int x, unsigned int y) const;
 public:
 	CalibrationProcessor(CalibrationImage::caltype t);
 	~CalibrationProcessor();
