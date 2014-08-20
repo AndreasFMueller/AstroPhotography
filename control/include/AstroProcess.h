@@ -322,6 +322,18 @@ public:
 };
 
 /**
+ * \brief Create an image from the input an 
+ */
+class ImageBufferStep : public ImageStep {
+	Image<double>	*image;
+	ImagePtr	imageptr;
+public:
+	ImageBufferStep();
+	virtual ProcessingStep::state	do_work();
+	virtual const ConstImageAdapter<double>&	out() const;
+};
+
+/**
  * \brief Write an image to a disk file
  */
 class WriteImage : public ImageStep {
@@ -401,8 +413,18 @@ protected:
 	size_t		nrawimages;
 	ImageStep	**rawimages;
 	size_t	getPrecursors();
+	class aggregates {
+	public:
+		double median;
+		double mean;
+		double stddev;
+		aggregates() { median = 0; mean = 0; stddev = 0; }
+		bool	improbable(double x) const {
+			return (fabs(x - mean) > 3 * stddev);
+		}
+	};
 	void	get(unsigned int x, unsigned int y, double *values, int& n,
-			const aggegrates& a) const;
+			const aggregates& a) const;
 	Image<double>	*image;
 	ImagePtr	imageptr;
 	// as a basis for deciding which values should go into the
@@ -412,16 +434,6 @@ protected:
 	Image<double>	*means;
 	Image<double>	*stddevs;
 private:
-	class aggegates {
-	public:
-		double median;
-		double mean;
-		double stddev;
-		aggregates() { median = 0; mean = 0; stddev = 0; }
-		bool	improbable(double x) {
-			return (fabs(x - mean) > 3 * stddev);
-		}
-	} aggregates;
 	aggregates	tile(int x, int y, int step);
 	void	filltile(int x, int y, int step);
 	aggregates	aggr(unsigned int x, unsigned int y) const;

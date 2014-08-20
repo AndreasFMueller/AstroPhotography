@@ -6,6 +6,7 @@
  */
 #include <AstroProcess.h>
 #include <AstroDebug.h>
+#include <AstroFilterfunc.h>
 
 using namespace astro::adapter;
 
@@ -65,6 +66,17 @@ size_t	CalibrationProcessor::getPrecursors() {
 }
 
 /**
+ * \brief compute the mean of an array of doubles
+ */
+static double	mean(const double *x, int n) {
+	double	sum = 0;
+	for (int i = 0; i < n; i++) {
+		sum += x[i];
+	}
+	return sum / n;
+}
+
+/**
  * \brief Common work for both ClabrationProcessors
  *
  * This step essentially takes care of getting all the precursor images
@@ -119,6 +131,23 @@ ProcessingStep::state	CalibrationProcessor::common_work() {
 	for (unsigned int x = grid; x < size.width(); x += 2 * grid) {
 		for (unsigned int y = grid; y < size.height(); x += 2 * grid) {
 			filltile(x, y, grid);
+		}
+	}
+
+	// Doing the pixel specific work.
+	double	values[nrawimages];
+	int	n;
+	for (unsigned int x = 0; x < image->size().width(); x++) {
+		for (unsigned int y = 0; y < image->size().height(); y++) {
+			aggregates	a = aggr(x, y);
+			get(x, y, values, n, a);
+			// compute the average			
+			if (n > 1) {
+				image->writablepixel(x, y) = mean(values, n);
+			} else {
+				image->writablepixel(x, y)
+				= std::numeric_limits<double>::has_quiet_NaN;
+			}
 		}
 	}
 
@@ -183,11 +212,11 @@ CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int 
 	int	minx = xc - width;
 	while (minx < 0) { minx += _spacing; }
 	int	maxx = xc + width;
-	while (maxx >= image->size().width()) { maxx -= _spacing; }
+	while (maxx >= (int)image->size().width()) { maxx -= _spacing; }
 	int	miny = yc - width;
 	while (miny < 0) { miny += _spacing; }
 	int	maxy = yc + width;
-	while (maxy >= image->size().height()) { maxy -= _spacing; }
+	while (maxy >= (int)image->size().height()) { maxy -= _spacing; }
 
 	// now scan the image rectangle for pixel values. We only take the
 	// valid values, NaNs are ignored, and collect them in a multiset.
@@ -260,9 +289,12 @@ void	CalibrationProcessor::filltile(int x, int y, int grid) {
 
 /**
  * \brief get pixel values at a given point
+ *
+ * This method collects all the values at pixel position (x,y) that are not
+ * too far away from the mean.
  */
 void	CalibrationProcessor::get(unsigned int x, unsigned int y,
-	double *values, int& n, const aggegates& a) const {
+	double *values, int& n, const aggregates& a) const {
 	n = 0;
 	for (size_t i = 0; i < nrawimages; i++) {
 		double	v = rawimages[i]->out().pixel(x, y);
@@ -294,12 +326,12 @@ const ConstImageAdapter<double>&	CalibrationProcessor::out() const {
 /**
  * \brief get the aggregates representative for an image point
  */
-CalbrationProcessor::aggregates	aggr(unsigned int x, unsigned int y) const {
-	aggegates	result;
+CalibrationProcessor::aggregates	CalibrationProcessor::aggr(unsigned int x, unsigned int y) const {
+	aggregates	result;
 	int	xa = _spacing * x / _step + x % _spacing;
 	int	ya = _spacing * y / _step + y % _spacing;
 	result.median = medians->pixel(xa, ya);
-	result.mean = menas->pixel(xa, ya);
+	result.mean = means->pixel(xa, ya);
 	result.stddev = stddevs->pixel(xa, ya);
 	return result;
 }
@@ -309,23 +341,17 @@ CalbrationProcessor::aggregates	aggr(unsigned int x, unsigned int y) const {
 //////////////////////////////////////////////////////////////////////
 /**
  * \brief Work to construct dark images
+ *
+ * The common work method collects aggregates around grid points, then
+ * this method computes averages from pixel values that are not too far
+ * away from the averages. If there are not enough pixels to compute a
+ * reasonable value, the pixel is set to NaN.
  */
 ProcessingStep::state	DarkProcessor::do_work() {
 	// common preparation work
 	ProcessingStep::state	preparation = common_work();
 	if (preparation != ProcessingStep::complete) {
 		return preparation;
-	}
-
-	// Doing the pixel specific work.
-	double	values[nrawimages];
-	int	n;
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
-			aggregates	a = aggr(x, y);
-			get(x, y, values, n);
-			// compute the average			
-		}
 	}
 
 	// cheat
@@ -343,6 +369,18 @@ ProcessingStep::state	FlatProcessor::do_work() {
 	ProcessingStep::state	preparation = common_work();
 	if (preparation != ProcessingStep::complete) {
 		return preparation;
+	}
+
+	// compute the mean value of all pixels in the image
+	double	m = astro::image::filter::mean(imageptr);
+
+	// ensure that the average value is 1
+	unsigned int	w = image->size().width();
+	unsigned int	h = image->size().height();
+	for (unsigned int x = 0; x < w; x++) {
+		for (unsigned int y = 0; y < h; y++) {
+			image->writablepixel(x, y) = image->pixel(x, y) / m;
+		}
 	}
 
 	// cheat
