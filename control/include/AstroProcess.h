@@ -366,8 +366,13 @@ protected:
 	caltype	_type;
 public:
 	caltype	type() const { return _type; }
-	CalibrationImage(caltype t) : _type(t) { }
 static	std::string	caltypename(caltype t);
+protected:
+	ImagePtr	_image;
+	virtual ProcessingStep::state	do_work();
+public:
+	CalibrationImage(caltype t) : _type(t) { }
+	CalibrationImage(caltype t, ImagePtr image);
 };
 
 /**
@@ -375,7 +380,6 @@ static	std::string	caltypename(caltype t);
  */
 class CalibrationImageFile : public CalibrationImage {
 	std::string	_filename;
-	ImagePtr	_image;
 public:
 	CalibrationImageFile(const std::string& filename,
 		const CalibrationImage::caltype type)

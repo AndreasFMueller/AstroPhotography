@@ -83,6 +83,9 @@ public:
 		double	value = _image.pixel(x, y);
 		if (_dark) {
 			value -= darkpixel(x, y);
+			if (value < 0) {
+				value = 0;
+			}
 		}
 		if (_flat) {
 			value /= flatpixel(x, y);

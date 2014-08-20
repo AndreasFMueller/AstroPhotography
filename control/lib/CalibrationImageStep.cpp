@@ -28,6 +28,50 @@ std::string	CalibrationImage::caltypename(caltype t) {
 	throw std::runtime_error("internal error, calibration types");
 }
 
+/**
+ * \brief create an CalibrationImage from an image
+ */
+CalibrationImage::CalibrationImage(caltype t, ImagePtr image) 
+                : _type(t), _image(image) {
+	_out = ImageStep::outPtr(new DoubleAdapter(image));
+	_preview = PreviewAdapter::get(_image);
+}
+
+/**
+ * \brief Work method
+ *
+ * If the calibration step does not have an image, then we try to use
+ * the output of the precursor
+ */
+ProcessingStep::state	CalibrationImage::do_work() {
+	// if we have an image, we don't need to do anything;
+	if (NULL != _image) {
+		return ProcessingStep::complete;
+	}
+
+	// get the precursor
+	steps::const_iterator	pp =
+		find_if(precursors().begin(), precursors().end(),
+			[](ProcessingStep *step) {
+				return (dynamic_cast<ImageStep *>(step)
+					!= NULL);
+			}
+		);
+	if (pp == precursors().end()) {
+		throw std::runtime_error("no precursor image");
+	}
+	ImageStep	*precursor = dynamic_cast<ImageStep *>(*pp);
+
+	// construct an identity adapter toa ccess the precursor output
+	_out = ImageStep::outPtr(new IdentityAdapter<double>(precursor->out()));
+
+	// make the preview of the precursor available for the preview
+	_preview = precursor->preview();
+
+	// done
+	return ProcessingStep::complete;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Calibration images read from files
 //////////////////////////////////////////////////////////////////////
@@ -45,13 +89,6 @@ ProcessingStep::state	CalibrationImageFile::do_work() {
 	// preview scaled in such way as to make visible the full range of
 	// values
 	_preview = PreviewAdapter::get(_image);
-	double	min = astro::image::filter::min(_image);
-	double	max = astro::image::filter::max(_image);
-	if (min == max) {
-		max = max + 1;
-	}
-	_preview->min(min);
-	_preview->max(max);
 
 	// output
 	_out = ImageStep::outPtr(new DoubleAdapter(_image));

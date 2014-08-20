@@ -4,6 +4,9 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroProcess.h>
+#include <AstroFilter.h>
+
+using namespace astro::image::filter;
 
 namespace astro {
 namespace adapter {
@@ -124,8 +127,19 @@ PreviewAdapter::~PreviewAdapter() {
 	const Image<Pixel>	*p					\
 		= dynamic_cast<const Image<Pixel> *>(image);		\
 	if (NULL != p) {						\
-		return PreviewAdapterPtr(				\
-			new TypedImagePreviewAdapter<Pixel>(p));	\
+		Max<Pixel, double>	max;				\
+		double	maxvalue = max.filter(*p);			\
+		Min<Pixel, double>	min;				\
+		double	minvalue = min.filter(*p);			\
+		if (minvalue == maxvalue) {				\
+			maxvalue = minvalue + 1;			\
+		}							\
+		PreviewAdapterPtr	preview				\
+			= PreviewAdapterPtr(				\
+				new TypedImagePreviewAdapter<Pixel>(p));\
+		preview->min(minvalue);					\
+		preview->min(maxvalue);					\
+		return preview;						\
 	}								\
 }
 
@@ -134,10 +148,23 @@ PreviewAdapter::~PreviewAdapter() {
 	const Image<RGB<Pixel> >	*p				\
 		= dynamic_cast<const Image<RGB<Pixel> > *>(image);	\
 	if (NULL != p) {						\
-		return PreviewAdapterPtr(				\
-			new TypedRGBImagePreviewAdapter<Pixel>(p));	\
+		LuminanceAdapter<RGB<Pixel>, double>	l(*p);		\
+		Max<double, double>	max;				\
+		double	maxvalue = max.filter(l);			\
+		Min<double, double>	min;				\
+		double	minvalue = min.filter(l);			\
+		if (minvalue == maxvalue) {				\
+			maxvalue = minvalue + 1;			\
+		}							\
+		PreviewAdapterPtr	preview				\
+			= PreviewAdapterPtr(				\
+				new TypedRGBImagePreviewAdapter<Pixel>(p));\
+		preview->min(minvalue);					\
+		preview->min(maxvalue);					\
+		return preview;						\
 	}								\
 }
+
 
 PreviewAdapterPtr	PreviewAdapter::get(const ImageBase *image) {
 	monochrome_preview_adapter(image, unsigned char);
