@@ -200,6 +200,9 @@ private:	// prevent copying
 
 /**
  * \brief Image Steps also have image output and preview
+ *
+ * Image Steps are Processing steps that have an output method
+ * and a preview adapter.
  */
 class ImageStep : public ProcessingStep {
 	// constructor
@@ -233,6 +236,9 @@ public:
 
 /**
  * \brief Processing unit of work is executed by a thread
+ *
+ * ProcessingThead objects are wrappers around a processing step
+ * that handles running the work function in a separate thread.
  */
 class ProcessingThread {
 protected:
