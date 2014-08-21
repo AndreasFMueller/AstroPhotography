@@ -5,6 +5,7 @@
  */
 #include <AstroUtils.h>
 #include <includes.h>
+#include <stdexcept>
 
 namespace astro {
 

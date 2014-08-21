@@ -86,4 +86,8 @@
 #include <poll.h>
 #endif /* HAVE_POLL_H */
 
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif /* HAVE_SIGNAL_H */
+
 #endif /* _includes_h */
