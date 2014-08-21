@@ -110,6 +110,69 @@ void	copy(ImageAdapter<dstPixel>& target,
 }
 
 //////////////////////////////////////////////////////////////////////
+// Embedding an image in a larger image or adding border
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class EmbeddingAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_outer;
+	const ConstImageAdapter<Pixel>&	_inner;
+	ImagePoint	_offset;
+public:
+	EmbeddingAdapter(const ConstImageAdapter<Pixel>& outer,
+		const ConstImageAdapter<Pixel>& inner, ImagePoint offset)
+			: ConstImageAdapter<Pixel>(outer.getSize()),
+			  _outer(outer), _inner(inner), _offset(offset) { }
+	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
+		if (x < _offset.x()) {
+			return _outer.pixel(x, y);
+		}
+		if (y < _offset.y()) {
+			return _outer.pixel(x, y);
+		}
+		ImageSize&	size = ConstImageAdapter<Pixel>::getSize();
+		if (x >= (size.width() + _offset.x())) {
+			return _outer.pixel(x, y);
+		}
+		if (y >= (size.height() + _offset.y())) {
+			return _outer.pixel(x, y);
+		}
+		return _inner.pixel(x - _offset.x(), y - _offset.y());
+	}
+};
+
+/**
+ * \brief Embed an image in a black rectangle at an offset
+ */
+template<typename Pixel>
+class BorderAdapter : public ConstImageAdapter<Pixel> {
+	ImagePoint	_offset;
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	BorderAdapter(const ImageSize& size, const ImagePoint& offset,
+		const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(size), _offset(offset),
+		  _image(image) {
+	}
+	const Pixel	pixel(unsigned int x, unsigned int y) const {
+		if (x < _offset.x()) {
+			return Pixel(0);
+		}
+		if (y < _offset.y()) {
+			return Pixel(0);
+		}
+		ImageSize&	size = ConstImageAdapter<Pixel>::getSize();
+		if (x >= size.width() + _offset.x()) {
+			return Pixel(0);
+		}
+		if (y >= size.height() + _offset.y()) {
+			return Pixel(0);
+		}
+		return _image.pixel(x - _offset.x(), y - _offset.y());
+	}
+};
+
+
+//////////////////////////////////////////////////////////////////////
 // Converting Pixel values
 //////////////////////////////////////////////////////////////////////
 /**
