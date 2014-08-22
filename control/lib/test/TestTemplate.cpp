@@ -11,27 +11,27 @@
 namespace astro {
 namespace test {
 
-class TemplateTest : public CppUnit::TestFixture {
+class TestTemplate: public CppUnit::TestFixture {
 public:
 	void	setUp();
 	void	tearDown();
 	//void	testXXX();
 
-	CPPUNIT_TEST_SUITE(TemplateTest);
+	CPPUNIT_TEST_SUITE(TestTemplate);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TemplateTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestTemplate);
 
-void	TemplateTest::setUp() {
+void	TestTemplate::setUp() {
 }
 
-void	TemplateTest::tearDown() {
+void	TestTemplate::tearDown() {
 }
 
 #if 0
-void	TemplateTest::testXXX() {
+void	TestTemplate::testXXX() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() begin");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() end");
 }

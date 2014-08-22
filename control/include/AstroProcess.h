@@ -100,8 +100,12 @@ public:
 
 namespace test {
 
+// we need to declare some test classes so that they can get access
+// to the protected methods (otherwise we could only test the classes
+// from derived classes, which does not make sense.
 class ProcessingStepTest;
 class WriteImageFileStepTest;
+class ImageBufferStepTest;
 
 } // namespace test
 
@@ -155,6 +159,7 @@ private:
 	// allow test class access
 	friend class astro::test::ProcessingStepTest;
 	friend class astro::test::WriteImageFileStepTest;
+	friend class astro::test::ImageBufferStepTest;
 public:
 	void	remove_me();
 
@@ -196,42 +201,6 @@ public:
 private:	// prevent copying
 	ProcessingStep(const ProcessingStep& other);
 	ProcessingStep&	operator=(const ProcessingStep& other);
-};
-
-/**
- * \brief Image Steps also have image output and preview
- *
- * Image Steps are Processing steps that have an output method
- * and a preview adapter.
- */
-class ImageStep : public ProcessingStep {
-	// constructor
-public:
-	ImageStep();
-	virtual ~ImageStep();
-
-	// access to the preview for this processing step. The preview
-	// pointer is protected so that derived classes can assign a 
-	// suitable preview class.
-protected:
-	astro::adapter::PreviewAdapterPtr	_preview;
-public:
-	virtual astro::adapter::PreviewAdapterPtr	preview() const {
-		return _preview;
-	}
-	astro::adapter::PreviewMonochromeAdapter	monochrome_preview();
-	astro::adapter::PreviewColorAdapter	color_preview();
-
-	// The processing step has at least one output, which must be an
-	// image. The processing may have some byproducts, but they are
- 	// processing step dependen
-protected:
-	typedef std::shared_ptr<ConstImageAdapter<double> >	outPtr;
-	outPtr	_out;
-public:
-	virtual const ConstImageAdapter<double>&	out() const;
-	virtual bool	hasColor() const;
-	virtual const ConstImageAdapter<RGB<double> >&	out_color() const;
 };
 
 /**
@@ -299,14 +268,50 @@ private:
 };
 
 /**
+ * \brief Image Steps also have image output and preview
+ *
+ * Image Steps are Processing steps that have an output method
+ * and a preview adapter.
+ */
+class ImageStep : public ProcessingStep {
+	// constructor
+public:
+	ImageStep();
+	virtual ~ImageStep();
+
+	// access to the preview for this processing step. The preview
+	// pointer is protected so that derived classes can assign a 
+	// suitable preview class.
+protected:
+	astro::adapter::PreviewAdapterPtr	_preview;
+public:
+	virtual astro::adapter::PreviewAdapterPtr	preview() const {
+		return _preview;
+	}
+	astro::adapter::PreviewMonochromeAdapter	monochrome_preview();
+	astro::adapter::PreviewColorAdapter	color_preview();
+
+	// The processing step has at least one output, which must be an
+	// image. The processing may have some byproducts, but they are
+ 	// processing step dependen
+protected:
+	typedef std::shared_ptr<ConstImageAdapter<double> >	outPtr;
+	outPtr	_out;
+public:
+	virtual const ConstImageAdapter<double>&	out() const;
+	virtual bool	hasColor() const;
+	virtual const ConstImageAdapter<RGB<double> >&	out_color() const;
+};
+
+/**
  * \brief Using a raw image as input
  */
-class RawImage : public ImageStep {
+class RawImageStep : public ImageStep {
 protected:
 	ImagePtr	_image;
 	ProcessingStep::state	common_work();
 public:
-	RawImage(ImagePtr image);
+	RawImageStep(ImagePtr image);
 	ImageRectangle	subframe() const;
 	virtual ProcessingStep::state	do_work();
 };
@@ -317,11 +322,11 @@ public:
  * The input for all processing are files stored on disk. This class
  * gives access to such files, and allows to preview them.
  */
-class RawImageFile : public RawImage {
+class RawImageFileStep : public RawImageStep {
 	std::string	_filename;
 public:
-	RawImageFile(const std::string& filename);
-	virtual ~RawImageFile();
+	RawImageFileStep(const std::string& filename);
+	virtual ~RawImageFileStep();
 	// the actual work function has to read the image, and has to
 	// construct the preview adapter
 	virtual ProcessingStep::state	do_work();
@@ -342,12 +347,12 @@ public:
 /**
  * \brief Write an image to a disk file
  */
-class WriteImage : public ImageStep {
+class WriteImageStep : public ImageStep {
 	std::string	_filename;
 	bool	_precious;
 	ImageStep	*input() const;
 public:
-	WriteImage(const std::string& filename, bool precious = false);
+	WriteImageStep(const std::string& filename, bool precious = false);
 	virtual ProcessingStep::state	do_work();
 	virtual astro::adapter::PreviewAdapterPtr	preview() const;
 	virtual const ConstImageAdapter<double>&	out() const;
@@ -359,7 +364,7 @@ public:
  * A Calibration image can be read from a file, or it can be created on
  * the fly
  */
-class CalibrationImage : public ImageStep {
+class CalibrationImageStep : public ImageStep {
 public:
 	typedef enum { DARK, FLAT } caltype;
 protected:
@@ -371,19 +376,19 @@ protected:
 	ImagePtr	_image;
 	virtual ProcessingStep::state	do_work();
 public:
-	CalibrationImage(caltype t) : _type(t) { }
-	CalibrationImage(caltype t, ImagePtr image);
+	CalibrationImageStep(caltype t) : _type(t) { }
+	CalibrationImageStep(caltype t, ImagePtr image);
 };
 
 /**
  * \brief Calibration image read from a file
  */
-class CalibrationImageFile : public CalibrationImage {
+class CalibrationImageFileStep : public CalibrationImageStep {
 	std::string	_filename;
 public:
-	CalibrationImageFile(const std::string& filename,
-		const CalibrationImage::caltype type)
-			: CalibrationImage(type), _filename(filename) {
+	CalibrationImageFileStep(const std::string& filename,
+		const CalibrationImageStep::caltype type)
+			: CalibrationImageStep(type), _filename(filename) {
 	}
 	virtual ProcessingStep::state	do_work();
 };
@@ -396,12 +401,12 @@ public:
  * original image will typicall be unsigned char or unsigned short. The
  * flat and the dark will both be float images.
  */
-class ImageCalibration : public ImageStep {
+class ImageCalibrationStep : public ImageStep {
 	const ConstImageAdapter<double>	*_image;
-	const CalibrationImage	*calimage(CalibrationImage::caltype) const;
+	const CalibrationImageStep	*calimage(CalibrationImageStep::caltype) const;
 public:
-	ImageCalibration();
-	virtual ~ImageCalibration();
+	ImageCalibrationStep();
+	virtual ~ImageCalibrationStep();
 	// there is no work to, as calibration can be done on the fly
 	virtual ProcessingStep::state	do_work();
 };
@@ -409,7 +414,7 @@ public:
 /**
  * \brief Common methods for calbration image generators
  */
-class CalibrationProcessor : public CalibrationImage {
+class CalibrationProcessorStep : public CalibrationImageStep {
 	int	_spacing;
 public:
 	int	spacing() const { return _spacing; }
@@ -448,8 +453,8 @@ private:
 	void	filltile(int x, int y, int step);
 	aggregates	aggr(unsigned int x, unsigned int y) const;
 public:
-	CalibrationProcessor(CalibrationImage::caltype t);
-	~CalibrationProcessor();
+	CalibrationProcessorStep(CalibrationImageStep::caltype t);
+	~CalibrationProcessorStep();
 	virtual ProcessingStep::state	do_work() = 0;
 	// this ensures that the CalibrationProcessor cannot be instantiated
 	// directly, only its derived classes can
@@ -461,25 +466,27 @@ protected:
 /**
  * \brief Processor to create a dark image from a set of inputs
  */
-class DarkProcessor : public CalibrationProcessor {
+class DarkProcessorStep : public CalibrationProcessorStep {
 public:
-	DarkProcessor() : CalibrationProcessor(CalibrationImage::DARK) { }
+	DarkProcessorStep()
+		: CalibrationProcessorStep(CalibrationImageStep::DARK) { }
 	virtual ProcessingStep::state	do_work();
 };
 
 /**
  * \brief Processor to create a flat image from a set of inputs
  */
-class FlatProcessor : public CalibrationProcessor {
+class FlatProcessorStep : public CalibrationProcessorStep {
 public:
-	FlatProcessor() : CalibrationProcessor(CalibrationImage::FLAT) { }
+	FlatProcessorStep()
+		: CalibrationProcessorStep(CalibrationImageStep::FLAT) { }
 	virtual ProcessingStep::state	do_work();
 };
 
 /**
  * \brief
  */
-class RGBDemosaicing : public ImageStep {
+class RGBDemosaicingStep : public ImageStep {
 public:
 };
 

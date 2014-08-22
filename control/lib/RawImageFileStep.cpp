@@ -24,21 +24,23 @@ namespace process {
 /**
  * \brief Constructor for in Memory image
  */
-RawImage::RawImage(ImagePtr image) : _image(image) {
-
+RawImageStep::RawImageStep(ImagePtr image) : _image(image) {
+	// a raw image has no inputs, so it can never be in a state less 
+	// than needswork
+	status(ProcessingStep::needswork);
 }
 
 /**
  * \brief Access to subframe information
  */
-ImageRectangle	RawImage::subframe() const {
+ImageRectangle	RawImageStep::subframe() const {
 	return _image->getFrame();
 }
 
 /**
  * \brief Work function of the processing step
  */
-ProcessingStep::state	RawImage::common_work() {
+ProcessingStep::state	RawImageStep::common_work() {
 	// add the preview
 	_preview = PreviewAdapter::get(_image);
 
@@ -52,7 +54,7 @@ ProcessingStep::state	RawImage::common_work() {
 /**
  * \brief Work for an in memory image
  */
-ProcessingStep::state	RawImage::do_work() {
+ProcessingStep::state	RawImageStep::do_work() {
 	return common_work();
 }
 
@@ -67,8 +69,8 @@ ProcessingStep::state	RawImage::do_work() {
  * the state accordingly. 
  * \param filename	name of the raw image file
  */
-RawImageFile::RawImageFile(const std::string& filename)
-	: RawImage(ImagePtr()), _filename(filename) {
+RawImageFileStep::RawImageFileStep(const std::string& filename)
+	: RawImageStep(ImagePtr()), _filename(filename) {
 	// initialize undefined fields
 	_out = NULL;
 
@@ -89,13 +91,13 @@ RawImageFile::RawImageFile(const std::string& filename)
 /**
  * \brief Destroy the step
  */
-RawImageFile::~RawImageFile() {
+RawImageFileStep::~RawImageFileStep() {
 }
 
 /**
  * \brief Work function of the processing step
  */
-ProcessingStep::state	RawImageFile::do_work() {
+ProcessingStep::state	RawImageFileStep::do_work() {
 	// read the file
 	try {
 		FITSin	in(_filename);

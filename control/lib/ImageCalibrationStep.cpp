@@ -16,14 +16,14 @@ namespace process {
 /**
  * \brief Create an Image Calibration step
  */
-ImageCalibration::ImageCalibration() {
+ImageCalibrationStep::ImageCalibrationStep() {
 	_image = NULL;
 }
 
 /**
  * \brief Destroy an Image Calibration step
  */
-ImageCalibration::~ImageCalibration() {
+ImageCalibrationStep::~ImageCalibrationStep() {
 	if (NULL != _image) {
 		delete _image;
 	}
@@ -32,13 +32,13 @@ ImageCalibration::~ImageCalibration() {
 /**
  * \brief Auxiliary function to search the precursors for a calibration image
  */
-const CalibrationImage	*ImageCalibration::calimage(
-				CalibrationImage::caltype t) const {
+const CalibrationImageStep	*ImageCalibrationStep::calimage(
+				CalibrationImageStep::caltype t) const {
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
 		[t](ProcessingStep *step) {
-			CalibrationImage	*image
-				= dynamic_cast<CalibrationImage *>(step);
+			CalibrationImageStep	*image
+				= dynamic_cast<CalibrationImageStep *>(step);
 			if (image == NULL) {
 				return false;
 			}
@@ -48,10 +48,10 @@ const CalibrationImage	*ImageCalibration::calimage(
 	if (i == precursors().end()) {
 		throw std::runtime_error(
 			stringprintf("no precursor of type %s found",
-				CalibrationImage::caltypename(t).c_str()));
+				CalibrationImageStep::caltypename(t).c_str()));
 	}
-	const CalibrationImage	*result
-		= dynamic_cast<const CalibrationImage *>(*i);
+	const CalibrationImageStep	*result
+		= dynamic_cast<const CalibrationImageStep *>(*i);
 	if (NULL == result) {
 		std::runtime_error("precursor is not a clibration image");
 	}
@@ -63,8 +63,8 @@ const CalibrationImage	*ImageCalibration::calimage(
  */
 class CalibrationAdapter : public ConstImageAdapter<double> {
 protected:
-	const CalibrationImage *_dark;
-	const CalibrationImage *_flat;
+	const CalibrationImageStep *_dark;
+	const CalibrationImageStep *_flat;
 	const ConstImageAdapter<double>& _image;
 	virtual double	darkpixel(unsigned int x, unsigned int y) const {
 		return _dark->out().pixel(x, y);
@@ -74,7 +74,8 @@ protected:
 	}
 public:
 	CalibrationAdapter(
-		const CalibrationImage *dark, const CalibrationImage *flat,
+		const CalibrationImageStep *dark,
+		const CalibrationImageStep *flat,
 		const ConstImageAdapter<double>& image)
 		: ConstImageAdapter<double>(image.getSize()),
 		  _dark(dark), _flat(flat), _image(image) { }
@@ -109,7 +110,7 @@ class WindowedCalibrationAdapter : public CalibrationAdapter {
 	}
 public:
 	WindowedCalibrationAdapter(
-		const CalibrationImage *dark, const CalibrationImage *flat,
+		const CalibrationImageStep *dark, const CalibrationImageStep *flat,
 		const ConstImageAdapter<double>& image,
 		const ImageRectangle& window) 
 		: CalibrationAdapter(dark, flat, image), _window(window) {
@@ -136,17 +137,17 @@ public:
  * Image calibration needs a dark image an a flat image, which it looks
  * for among the precursors. It then calibrates the remaining image
  */
-ProcessingStep::state	ImageCalibration::do_work() {
+ProcessingStep::state	ImageCalibrationStep::do_work() {
 	// scan precursors for dark, flat and image to calibrate
-	const CalibrationImage	*dark = NULL;
-	const CalibrationImage	*flat = NULL;
+	const CalibrationImageStep	*dark = NULL;
+	const CalibrationImageStep	*flat = NULL;
 	try {
-		dark = calimage(CalibrationImage::DARK);
+		dark = calimage(CalibrationImageStep::DARK);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a dark precursor: %s",
 			dark->out().getSize().toString().c_str());
 	} catch (...) { }
 	try {
-		flat = calimage(CalibrationImage::FLAT);
+		flat = calimage(CalibrationImageStep::FLAT);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a flat precursor: %s",
 			flat->out().getSize().toString().c_str());
 	} catch (...) { }
@@ -192,7 +193,8 @@ ProcessingStep::state	ImageCalibration::do_work() {
 		// this case can only be handled if the precursor is a raw
 		// image (which will normally be the case) and has metadata
 		// indicating that this is a subrectangle image
-		RawImageFile	*raw = dynamic_cast<RawImageFile *>(image);
+		RawImageFileStep	*raw
+			= dynamic_cast<RawImageFileStep *>(image);
 		if (NULL == raw) {
 			std::string	msg("not a RawImageFile, "
 				"cannot get subframe info");

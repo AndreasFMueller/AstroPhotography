@@ -40,8 +40,8 @@ void	WriteImageFileStepTest::tearDown() {
 void	WriteImageFileStepTest::testWrite() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWrite() begin");
 	unlink("andromeda-double.fits");
-	ProcessingStep	*input = new RawImageFile("andromeda-base.fits");
-	ProcessingStep	*output = new WriteImage("andromeda-double.fits");
+	ProcessingStep	*input = new RawImageFileStep("andromeda-base.fits");
+	ProcessingStep	*output = new WriteImageStep("andromeda-double.fits");
 	output->add_precursor(input);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "input step prepared");
 	input->work();

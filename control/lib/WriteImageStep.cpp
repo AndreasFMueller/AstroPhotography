@@ -16,14 +16,14 @@ namespace process {
 /**
  * \brief Construct an image writer
  */
-WriteImage::WriteImage(const std::string& filename, bool precious)
+WriteImageStep::WriteImageStep(const std::string& filename, bool precious)
 	: _filename(filename), _precious(precious) {
 }
 
 /**
  * \brief Get the input step
  */
-ImageStep	*WriteImage::input() const {
+ImageStep	*WriteImageStep::input() const {
 	steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
 			[](ProcessingStep *step) {
@@ -41,7 +41,7 @@ ImageStep	*WriteImage::input() const {
 /**
  * \brief Do the actual work of writing a file
  */
-ProcessingStep::state	WriteImage::do_work() {
+ProcessingStep::state	WriteImageStep::do_work() {
 	try {
 		//
 		// turn the precessor's output into an image
@@ -68,7 +68,7 @@ ProcessingStep::state	WriteImage::do_work() {
  * insist, we can give you the preview of the input, which should be
  * identical.
  */
-PreviewAdapterPtr	WriteImage::preview() const {
+PreviewAdapterPtr	WriteImageStep::preview() const {
 	return input()->preview();
 }
 
@@ -78,7 +78,7 @@ PreviewAdapterPtr	WriteImage::preview() const {
  * Writing a file doesn't really produce an image output, so we just
  * forward the output of the input
  */
-const ConstImageAdapter<double>&        WriteImage::out() const {
+const ConstImageAdapter<double>&        WriteImageStep::out() const {
 	return input()->out();
 }
 

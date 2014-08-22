@@ -16,8 +16,8 @@ namespace process {
 /**
  * \brief Create a new calibration processor
  */
-CalibrationProcessor::CalibrationProcessor(CalibrationImage::caltype t)
-	: CalibrationImage(t) {
+CalibrationProcessorStep::CalibrationProcessorStep(CalibrationImageStep::caltype t)
+	: CalibrationImageStep(t) {
 	rawimages = NULL;
 	nrawimages = 0;
 	_spacing = 1;
@@ -30,7 +30,7 @@ CalibrationProcessor::CalibrationProcessor(CalibrationImage::caltype t)
 /**
  * \brief Destroy the calibration processor
  */
-CalibrationProcessor::~CalibrationProcessor() {
+CalibrationProcessorStep::~CalibrationProcessorStep() {
 	if (NULL != rawimages) {
 		delete rawimages;
 	}
@@ -42,7 +42,7 @@ CalibrationProcessor::~CalibrationProcessor() {
  * get pointers to all the precursors of type ImageStep, others don't have
  * image data output, so they cannot be used to build calibration images
  */
-size_t	CalibrationProcessor::getPrecursors() {
+size_t	CalibrationProcessorStep::getPrecursors() {
 	typedef ImageStep *ImageStepPtr;
 	rawimages = new ImageStepPtr[precursors().size()];
 	nrawimages = 0;
@@ -81,7 +81,7 @@ static double	mean(const double *x, int n) {
  *
  * This step essentially takes care of getting all the precursor images
  */
-ProcessingStep::state	CalibrationProcessor::common_work() {
+ProcessingStep::state	CalibrationProcessorStep::common_work() {
 	if (NULL != rawimages) {
 		delete rawimages;
 		rawimages = NULL;
@@ -200,7 +200,7 @@ static double	median(const std::multiset<double> values) {
  *
  * 
  */
-CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int grid) {
+CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int yc, int grid) {
 	// compute the rectangle we want to use, the width must be a multiple
 	// of _spacing to ensure that we get all points from the appropriate
 	// subgrid
@@ -274,7 +274,7 @@ CalibrationProcessor::aggregates	CalibrationProcessor::tile(int xc, int yc, int 
  * If the grid spacing is 2, as should be used for RGB images, then we
  * compute four sets of aggregates, one for every RGGB subgrid.
  */
-void	CalibrationProcessor::filltile(int x, int y, int grid) {
+void	CalibrationProcessorStep::filltile(int x, int y, int grid) {
 	int	xs = _spacing * x / (2 * grid);
 	int	ys = _spacing * y / (2 * grid);
 	for (int dx = 0; dx < _spacing; dx++) {
@@ -293,7 +293,7 @@ void	CalibrationProcessor::filltile(int x, int y, int grid) {
  * This method collects all the values at pixel position (x,y) that are not
  * too far away from the mean.
  */
-void	CalibrationProcessor::get(unsigned int x, unsigned int y,
+void	CalibrationProcessorStep::get(unsigned int x, unsigned int y,
 	double *values, int& n, const aggregates& a) const {
 	n = 0;
 	for (size_t i = 0; i < nrawimages; i++) {
@@ -316,7 +316,7 @@ void	CalibrationProcessor::get(unsigned int x, unsigned int y,
 /**
  * \brief access to the calibration image
  */
-const ConstImageAdapter<double>&	CalibrationProcessor::out() const {
+const ConstImageAdapter<double>&	CalibrationProcessorStep::out() const {
 	if (NULL == image) {
 		throw std::runtime_error("no image available");
 	}
@@ -326,7 +326,7 @@ const ConstImageAdapter<double>&	CalibrationProcessor::out() const {
 /**
  * \brief get the aggregates representative for an image point
  */
-CalibrationProcessor::aggregates	CalibrationProcessor::aggr(unsigned int x, unsigned int y) const {
+CalibrationProcessorStep::aggregates	CalibrationProcessorStep::aggr(unsigned int x, unsigned int y) const {
 	aggregates	result;
 	int	xa = _spacing * x / _step + x % _spacing;
 	int	ya = _spacing * y / _step + y % _spacing;
@@ -347,7 +347,7 @@ CalibrationProcessor::aggregates	CalibrationProcessor::aggr(unsigned int x, unsi
  * away from the averages. If there are not enough pixels to compute a
  * reasonable value, the pixel is set to NaN.
  */
-ProcessingStep::state	DarkProcessor::do_work() {
+ProcessingStep::state	DarkProcessorStep::do_work() {
 	// common preparation work
 	ProcessingStep::state	preparation = common_work();
 	if (preparation != ProcessingStep::complete) {
@@ -364,7 +364,7 @@ ProcessingStep::state	DarkProcessor::do_work() {
 /**
  * \brief Work to construct flat images
  */
-ProcessingStep::state	FlatProcessor::do_work() {
+ProcessingStep::state	FlatProcessorStep::do_work() {
 	// common preparation work
 	ProcessingStep::state	preparation = common_work();
 	if (preparation != ProcessingStep::complete) {

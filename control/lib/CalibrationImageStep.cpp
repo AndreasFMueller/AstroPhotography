@@ -20,7 +20,7 @@ namespace process {
 /**
  * \brief Convert the calibration type to a string for display purposes
  */
-std::string	CalibrationImage::caltypename(caltype t) {
+std::string	CalibrationImageStep::caltypename(caltype t) {
 	switch (t) {
 	case DARK: return std::string("dark");
 	case FLAT: return std::string("flat");
@@ -31,7 +31,7 @@ std::string	CalibrationImage::caltypename(caltype t) {
 /**
  * \brief create an CalibrationImage from an image
  */
-CalibrationImage::CalibrationImage(caltype t, ImagePtr image) 
+CalibrationImageStep::CalibrationImageStep(caltype t, ImagePtr image) 
                 : _type(t), _image(image) {
 	_out = ImageStep::outPtr(new DoubleAdapter(image));
 	_preview = PreviewAdapter::get(_image);
@@ -43,7 +43,7 @@ CalibrationImage::CalibrationImage(caltype t, ImagePtr image)
  * If the calibration step does not have an image, then we try to use
  * the output of the precursor
  */
-ProcessingStep::state	CalibrationImage::do_work() {
+ProcessingStep::state	CalibrationImageStep::do_work() {
 	// if we have an image, we don't need to do anything;
 	if (NULL != _image) {
 		return ProcessingStep::complete;
@@ -76,7 +76,7 @@ ProcessingStep::state	CalibrationImage::do_work() {
 // Calibration images read from files
 //////////////////////////////////////////////////////////////////////
 
-ProcessingStep::state	CalibrationImageFile::do_work() {
+ProcessingStep::state	CalibrationImageFileStep::do_work() {
 	try {
 		FITSin	in(_filename);
 		_image = in.read();
