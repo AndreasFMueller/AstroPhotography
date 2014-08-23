@@ -404,7 +404,6 @@ public:
  * flat and the dark will both be float images.
  */
 class ImageCalibrationStep : public ImageStep {
-	const ConstImageAdapter<double>	*_image;
 	const CalibrationImageStep	*calimage(CalibrationImageStep::caltype) const;
 public:
 	ImageCalibrationStep();

@@ -40,7 +40,7 @@ FITSfile::FITSfile(const std::string& _filename,
  *
  * This destructor closes the file, if it is open
  */
-FITSfile::~FITSfile() throw (FITSexception) {
+FITSfile::~FITSfile() {
 	if (NULL == fptr) {
 		return;
 	}

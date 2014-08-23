@@ -18,16 +18,12 @@ namespace process {
  * \brief Create an Image Calibration step
  */
 ImageCalibrationStep::ImageCalibrationStep() {
-	_image = NULL;
 }
 
 /**
  * \brief Destroy an Image Calibration step
  */
 ImageCalibrationStep::~ImageCalibrationStep() {
-	if (NULL != _image) {
-		delete _image;
-	}
 }
 
 #if 0
@@ -218,16 +214,10 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image to calibration: size=%s",
 		image->out().getSize().toString().c_str());
 
-	// ensure that a preexisting _image is properly removed
-	if (NULL != _image) {
-		delete _image;
-		_image = NULL;
-	}
-
 	// now build the calibration adapter
 	if (image->out().getSize() == dark->out().getSize()) {
 		// create a calibration adapter
-		_image = new CalibrationAdapter(dark, flat, image->out());
+		_out = outPtr(new CalibrationAdapter(dark, flat, image->out()));
 	} else {
 		// the image size and the dark size don't agree, so we
 		// assume that the image is actuall a subframe, so we can
@@ -250,8 +240,8 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		// since we now have subframe info, we can create a calibration
 		// adapter for the subframe
 		ImageRectangle	window = raw->subframe();
-		_image = new WindowedCalibrationAdapter(dark, flat,
-				image->out(), window);
+		_out = outPtr(new WindowedCalibrationAdapter(dark, flat,
+				image->out(), window));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "windowed calibration adapter "
 			"for subframe %s created", window.toString().c_str());
 	}

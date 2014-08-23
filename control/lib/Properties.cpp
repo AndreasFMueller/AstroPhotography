@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <AstroDebug.h>
+#include <stdexcept>
 
 namespace astro {
 

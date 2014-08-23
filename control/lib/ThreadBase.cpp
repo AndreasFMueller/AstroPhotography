@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <stdexcept>
 
 namespace astro {
 namespace thread {

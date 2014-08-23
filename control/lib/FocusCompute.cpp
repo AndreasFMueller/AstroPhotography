@@ -8,6 +8,7 @@
 #include <lapack.h>
 #include <AstroFormat.h>
 #include <math.h>
+#include <stdexcept>
 
 namespace astro {
 namespace focusing {

@@ -59,7 +59,7 @@ protected:
 
 	FITSfile(const std::string & filename,
 		int _pixeltype, int _planes, int _imgtype);
-	virtual ~FITSfile() throw (FITSexception);
+	virtual ~FITSfile();
 public:
 	int	getPixeltype() const { return pixeltype; }
 	int	getPlanes() const { return planes; }

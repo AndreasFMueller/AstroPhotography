@@ -103,6 +103,7 @@ void	ImageCalibrationStepTest::testCalibration() {
 	controller.add_precursor("calibration", "raw");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursors set");
 
+#if 0
 	darkstep->work();
 	CPPUNIT_ASSERT(darkstep->status() == ProcessingStep::complete);
 	flatstep->work();
@@ -113,7 +114,7 @@ void	ImageCalibrationStepTest::testCalibration() {
 	calibrationstep->work();
 	CPPUNIT_ASSERT(calibrationstep->status() == ProcessingStep::complete);
 	
-#if 0
+#else
 	// perform the calibration
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start process execution");
 	controller.execute(2);
@@ -125,10 +126,13 @@ void	ImageCalibrationStepTest::testCalibration() {
 
 	// verify that calibration returns the correct value
 	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; x < size.height(); y++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%d: v = %f",
-				x, y, image->pixel(x, y));
-			CPPUNIT_ASSERT(image->pixel(x, y) == 32768);
+		for (unsigned int y = 0; y < size.height(); y++) {
+			double	rawv = image->pixel(x, y);
+			double	calibratedv = calibrationstep->out().pixel(x, y);
+			//debug(LOG_DEBUG, DEBUG_LOG, 0,
+			//	"%u,%u: rawv = %f, v = %f", x, y, rawv,
+			//	calibratedv);
+			CPPUNIT_ASSERT(round(calibratedv) == 32768);
 		}
 	}
 

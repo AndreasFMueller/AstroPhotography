@@ -84,7 +84,8 @@ bool	ImagePoint::operator<(const ImagePoint& other) const {
  * \brief Compute distances
  */
 float	ImagePoint::distance(const ImagePoint& p) const {
-	return hypot(_x - p.x(), _y - p.y());
+	return hypot((_x < p.x()) ? (p.x() - _x) : (_x - p.x()),
+			(_y < p.y()) ? (p.y() - _y) : (_y - p.y()));
 }
 
 } // namespace image
