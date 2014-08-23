@@ -30,37 +30,37 @@ endif
 noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
 	tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
 
-# general tests
-tests_SOURCES = tests.cpp \
-	StacktraceTest.cpp \
-	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
-	DeviceNameTest.cpp PropertiesTest.cpp \
-	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
-	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
-	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
-	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
-	TranslationTest.cpp FWHMTest.cpp \
-	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
-	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
-	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
-	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
-	ImageCalibrationStepTest.cpp \
-	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
-	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
-	BinningTest.cpp \
-	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
-	GuiderFactoryTest.cpp \
-	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
-	FocusComputeTest.cpp MinRadiusTest.cpp \
-	ProjectionTest.cpp StereographicProjectionTest.cpp \
-	SkyWindowTest.cpp \
-	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
-	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
-	SkyRectangleTest.cpp
-#	AnalyzerTest.cpp CorrectorTest.cpp \
-#	ImageNormalizerTest.cpp
-
+## general tests
+#tests_SOURCES = tests.cpp \
+#	StacktraceTest.cpp \
+#	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
+#	DeviceNameTest.cpp PropertiesTest.cpp \
+#	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
+#	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
+#	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
+#	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
+#	TranslationTest.cpp FWHMTest.cpp \
+#	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
+#	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
+#	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
+#	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
+#	ImageCalibrationStepTest.cpp \
+#	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
+#	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
+#	BinningTest.cpp \
+#	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+#	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
+#	GuiderFactoryTest.cpp \
+#	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
+#	FocusComputeTest.cpp MinRadiusTest.cpp \
+#	ProjectionTest.cpp StereographicProjectionTest.cpp \
+#	SkyWindowTest.cpp \
+#	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
+#	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
+#	SkyRectangleTest.cpp
+##	AnalyzerTest.cpp CorrectorTest.cpp \
+##	ImageNormalizerTest.cpp
+tests_SOURCES = tests.cpp ImageCalibrationStepTest.cpp
 
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
