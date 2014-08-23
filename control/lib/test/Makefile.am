@@ -44,6 +44,7 @@ tests_SOURCES = tests.cpp \
 	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
 	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
 	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
+	ImageCalibrationStepTest.cpp \
 	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
 	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
 	BinningTest.cpp \

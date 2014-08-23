@@ -46,6 +46,7 @@ public:
 	bool	operator<(const ImagePoint& point) const;
 	std::string	toString() const;
 	bool	isZero() const { return (_x == 0) && (_y == 0); }
+	float	distance(const ImagePoint& p) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImagePoint& point);

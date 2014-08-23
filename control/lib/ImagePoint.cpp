@@ -7,6 +7,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <includes.h>
 
 namespace astro {
 namespace image {
@@ -77,6 +78,13 @@ bool	ImagePoint::operator<(const ImagePoint& other) const {
 		return false;
 	}
 	return _y < other._y;
+}
+
+/**
+ * \brief Compute distances
+ */
+float	ImagePoint::distance(const ImagePoint& p) const {
+	return hypot(_x - p.x(), _y - p.y());
 }
 
 } // namespace image
