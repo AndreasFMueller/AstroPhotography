@@ -27,41 +27,53 @@ uvc_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests usbtests calimggen caltests simtest guidetest \
-	tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
+noinst_PROGRAMS = tests processtests catalogtests \
+	usbtests calimggen caltests simtest \
+	guidetest tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
 
 ## general tests
-#tests_SOURCES = tests.cpp \
-#	StacktraceTest.cpp \
-#	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
-#	DeviceNameTest.cpp PropertiesTest.cpp \
-#	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
-#	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
-#	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
-#	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
-#	TranslationTest.cpp FWHMTest.cpp \
-#	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
-#	PreviewAdapterTest.cpp ProcessingStepTest.cpp ProcessingThreadTest.cpp \
-#	ProcessingControllerTest.cpp RawImageFileStepTest.cpp \
-#	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
-#	ImageCalibrationStepTest.cpp \
-#	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
-#	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
-#	BinningTest.cpp \
-#	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-#	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
-#	GuiderFactoryTest.cpp \
-#	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
-#	FocusComputeTest.cpp MinRadiusTest.cpp \
-#	ProjectionTest.cpp StereographicProjectionTest.cpp \
-#	SkyWindowTest.cpp \
-#	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
-#	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
-#	SkyRectangleTest.cpp
-##	AnalyzerTest.cpp CorrectorTest.cpp \
-##	ImageNormalizerTest.cpp
-tests_SOURCES = tests.cpp ImageCalibrationStepTest.cpp
+tests_SOURCES = tests.cpp \
+	StacktraceTest.cpp \
+	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
+	DeviceNameTest.cpp PropertiesTest.cpp \
+	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
+	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
+	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
+	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
+	TranslationTest.cpp FWHMTest.cpp \
+	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
+	PreviewAdapterTest.cpp \
+	RawImageFileStepTest.cpp \
+	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
+	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
+	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
+	BinningTest.cpp \
+	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
+	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
+	ImageCalibrationStepTest.cpp \
+	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
+	FocusComputeTest.cpp MinRadiusTest.cpp \
+	AnalyzerTest.cpp CorrectorTest.cpp \
+	GuiderFactoryTest.cpp 
 
+# tests related to the processing engine. These tests include stuff
+processtests_SOURCES = processtests.cpp \
+	ProcessingStepTest.cpp ProcessingThreadTest.cpp \
+	ProcessingControllerTest.cpp 
+processtests_LDADD = -lcppunit -L.. -lastro 
+processtests_DEPENDENCIES = ../libastro.la 
+
+# tests related to star catalogs and charting
+catalogtests_SOURCES = catalogtests.cpp \
+	ProjectionTest.cpp StereographicProjectionTest.cpp \
+	SkyWindowTest.cpp \
+	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
+	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
+	ImageNormalizerTest.cpp SkyRectangleTest.cpp
+catalogtests_LDADD = -lcppunit -L.. -lastro 
+catalogtests_DEPENDENCIES = ../libastro.la 
+
+# test for the image processing stuff (takes time)
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
 

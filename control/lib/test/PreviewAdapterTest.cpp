@@ -50,6 +50,8 @@ void	PreviewAdapterTest::testShort() {
 	}
 	ImagePtr	imageptr(image2);
 	PreviewAdapterPtr	p = PreviewAdapter::get(imageptr);
+	p->min(0);
+	p->max(65535);
 	for (unsigned int y = 0; y < 48; y++) {
 		for (unsigned int x = 0; x < 64; x++) {
 			int	i = imageptr->pixeloffset(x, y);

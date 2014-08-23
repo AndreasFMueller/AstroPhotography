@@ -8,6 +8,7 @@
 #include <AstroUtils.h>
 #include <AstroFormat.h>
 #include <includes.h>
+#include <stdexcept>
 
 using namespace astro::device;
 

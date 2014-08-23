@@ -455,7 +455,7 @@ FunctionPtr	MinimumEstimator<FunctionType>::operator()(const ImagePoint& center,
 				tileiterator->origin());
 			OrderStatisticsFilter<float>	of(_alpha);
 			float	Z = of(la);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "Z = %f", Z);
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "Z = %f", Z);
 			tv.push_back(std::make_pair(*tileiterator, Z));
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "values computed");

@@ -41,6 +41,8 @@ void	RawImageFileStepTest::tearDown() {
 void	RawImageFileStepTest::testFile() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFile() begin");
 	RawImageFileStep	file("andromeda-base.fits");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "status: %s",
+		ProcessingStep::statename(file.status()).c_str());
 	CPPUNIT_ASSERT(file.status() == ProcessingStep::needswork);
 	file.work();
 	CPPUNIT_ASSERT(file.status() == ProcessingStep::complete);

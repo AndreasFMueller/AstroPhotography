@@ -103,7 +103,7 @@ void	ImageCalibrationStepTest::testCalibration() {
 	controller.add_precursor("calibration", "raw");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursors set");
 
-#if 1
+#if 0
 	darkstep->work();
 	CPPUNIT_ASSERT(darkstep->status() == ProcessingStep::complete);
 	flatstep->work();
