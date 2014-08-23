@@ -70,12 +70,15 @@ std::vector<GuiderDescriptor>	GuiderFactory::list() const {
  * \brief Get an existing guider or build a new one from the descriptor
  */
 GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether guider is in cache");
 	guidermap_t::iterator	i = guiders.find(guiderdescriptor);
 	if (i != guiders.end()) {
 		return i->second;
 	}
 
 	// use the information in the descriptor to build a new guider
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera %s",
+		guiderdescriptor.cameraname().c_str());
 	CameraPtr	camera = cameraFromName(guiderdescriptor.cameraname());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructed");
 	CcdPtr	ccd = camera->getCcd(guiderdescriptor.ccdid());

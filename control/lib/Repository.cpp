@@ -9,36 +9,13 @@
 #include <iostream>
 #include <pthread.h>
 #include <AstroUtils.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace module {
 
 class RepositoryBackend;
 typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
-
-#if 0
-//////////////////////////////////////////////////////////////////////
-// Locker class
-//////////////////////////////////////////////////////////////////////
-/**
- * \brief Locker class
- *
- * We want to make sure the pthread_mutex is unlocked when an exception
- * is thrown, so we have to encapsulate the locking operation in a
- * class that locks when the object is created an unlocks then it is
- * destroyed.
- */
-class PthreadLocker {
-	pthread_mutex_t	*_lock;
-public:
-	PthreadLocker(pthread_mutex_t *lock) : _lock(lock) {
-		pthread_mutex_lock(_lock);
-	}
-	~PthreadLocker() {
-		pthread_mutex_unlock(_lock);
-	}
-};
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // Repositories collection
@@ -98,6 +75,7 @@ public:
  * \brief Retrieve a repository backend associated with a path
  */
 RepositoryBackendPtr	Repositories::get(const std::string& path) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for %s", path.c_str());
 	std::string	key = path;
 	if (key.size() == 0) {
 		key = std::string(PKGLIBDIR);
