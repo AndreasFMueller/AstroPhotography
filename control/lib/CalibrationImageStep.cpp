@@ -35,6 +35,7 @@ CalibrationImageStep::CalibrationImageStep(caltype t, ImagePtr image)
                 : _type(t), _image(image) {
 	_out = ImageStep::outPtr(new DoubleAdapter(image));
 	_preview = PreviewAdapter::get(_image);
+	status(ProcessingStep::needswork);
 }
 
 /**

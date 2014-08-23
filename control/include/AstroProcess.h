@@ -106,6 +106,7 @@ namespace test {
 class ProcessingStepTest;
 class WriteImageFileStepTest;
 class ImageBufferStepTest;
+class ImageCalibrationStepTest;
 
 } // namespace test
 
@@ -160,6 +161,7 @@ private:
 	friend class astro::test::ProcessingStepTest;
 	friend class astro::test::WriteImageFileStepTest;
 	friend class astro::test::ImageBufferStepTest;
+	friend class astro::test::ImageCalibrationStepTest;
 public:
 	void	remove_me();
 

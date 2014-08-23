@@ -6,6 +6,7 @@
 #include <AstroProcess.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <algorithm>
 
 using namespace astro::image;
 using namespace astro::adapter;
@@ -29,14 +30,36 @@ ImageCalibrationStep::~ImageCalibrationStep() {
 	}
 }
 
+#if 0
+class find_step {
+	CalibrationImageStep::caltype	_t;
+public:
+	find_step(CalibrationImageStep::caltype t) : _t(t) { }
+	bool	operator()(ProcessingStep *step) {
+		CalibrationImageStep	*image
+			= dynamic_cast<CalibrationImageStep *>(step);
+		if (image == NULL) {
+			return false;
+		}
+		return (_t == image->type());
+	}
+};
+#endif
+
 /**
  * \brief Auxiliary function to search the precursors for a calibration image
  */
 const CalibrationImageStep	*ImageCalibrationStep::calimage(
 				CalibrationImageStep::caltype t) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for a precursor of type %s "
+		"among %d precursors",
+		CalibrationImageStep::caltypename(t).c_str(),
+		precursors().size());
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
+#if 1
 		[t](ProcessingStep *step) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "investigating: %p", step);
 			CalibrationImageStep	*image
 				= dynamic_cast<CalibrationImageStep *>(step);
 			if (image == NULL) {
@@ -44,17 +67,28 @@ const CalibrationImageStep	*ImageCalibrationStep::calimage(
 			}
 			return (t == image->type());
 		}
+#else
+		find_step(t)
+#endif
 	);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether we have a precursor");
 	if (i == precursors().end()) {
 		throw std::runtime_error(
 			stringprintf("no precursor of type %s found",
 				CalibrationImageStep::caltypename(t).c_str()));
 	}
-	const CalibrationImageStep	*result
-		= dynamic_cast<const CalibrationImageStep *>(*i);
+	ProcessingStep	*s = *i;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "we have a precursor at %p = %p, %p",
+		*i, s, *precursors().begin());
+	CalibrationImageStep	*result
+		= dynamic_cast<CalibrationImageStep *>(s);
 	if (NULL == result) {
-		std::runtime_error("precursor is not a clibration image");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is not a "
+			"calibration image");
+		throw std::runtime_error("precursor is not a clibration image");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found precursor in state %s",
+		ProcessingStep::statename(result->status()).c_str());
 	return result;
 }
 
@@ -110,7 +144,8 @@ class WindowedCalibrationAdapter : public CalibrationAdapter {
 	}
 public:
 	WindowedCalibrationAdapter(
-		const CalibrationImageStep *dark, const CalibrationImageStep *flat,
+		const CalibrationImageStep *dark,
+		const CalibrationImageStep *flat,
 		const ConstImageAdapter<double>& image,
 		const ImageRectangle& window) 
 		: CalibrationAdapter(dark, flat, image), _window(window) {
@@ -138,14 +173,17 @@ public:
  * for among the precursors. It then calibrates the remaining image
  */
 ProcessingStep::state	ImageCalibrationStep::do_work() {
-	// scan precursors for dark, flat and image to calibrate
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform image calibration");
+	// scan precursors for a dark image
 	const CalibrationImageStep	*dark = NULL;
-	const CalibrationImageStep	*flat = NULL;
 	try {
 		dark = calimage(CalibrationImageStep::DARK);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a dark precursor: %s",
 			dark->out().getSize().toString().c_str());
 	} catch (...) { }
+
+	// scan precursors for a flat image
+	const CalibrationImageStep	*flat = NULL;
 	try {
 		flat = calimage(CalibrationImageStep::FLAT);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found a flat precursor: %s",
@@ -177,8 +215,10 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 		return ProcessingStep::idle;
 	}
 	ImageStep	*image = dynamic_cast<ImageStep *>(*i);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image to calibration: size=%s",
+		image->out().getSize().toString().c_str());
 
-	// ensure that the _image is properly removed
+	// ensure that a preexisting _image is properly removed
 	if (NULL != _image) {
 		delete _image;
 		_image = NULL;
@@ -186,9 +226,14 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 
 	// now build the calibration adapter
 	if (image->out().getSize() == dark->out().getSize()) {
-		_image = new CalibrationAdapter(dark, flat,
-			image->out());
+		// create a calibration adapter
+		_image = new CalibrationAdapter(dark, flat, image->out());
 	} else {
+		// the image size and the dark size don't agree, so we
+		// assume that the image is actuall a subframe, so we can
+		// calibrate with the appropriate subframe of the dark and
+		// flat frames. For this to work, we have to get the subframe
+		// size
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for subframe info");
 		// this case can only be handled if the precursor is a raw
 		// image (which will normally be the case) and has metadata
@@ -202,9 +247,13 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 			throw ProcessingStep::idle;
 		}
 
+		// since we now have subframe info, we can create a calibration
+		// adapter for the subframe
 		ImageRectangle	window = raw->subframe();
 		_image = new WindowedCalibrationAdapter(dark, flat,
 				image->out(), window);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "windowed calibration adapter "
+			"for subframe %s created", window.toString().c_str());
 	}
 	return ProcessingStep::complete;
 }
