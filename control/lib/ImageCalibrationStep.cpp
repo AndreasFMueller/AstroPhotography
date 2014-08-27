@@ -42,6 +42,32 @@ public:
 };
 #endif
 
+ProcessingStep	*blubb = NULL;
+
+ProcessingStep::steps::const_iterator	find_step(
+	const ProcessingStep::steps& precursors,
+	CalibrationImageStep::caltype t) {
+
+	ProcessingStep::steps::const_iterator	i;
+	for (i = precursors.begin(); i != precursors.end(); i++) {
+		ProcessingStep	*step = *i;
+		CalibrationImageStep	*image
+			= dynamic_cast<CalibrationImageStep *>(step);
+		if (image == NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"%p not a calibration image", step);
+			continue;
+		}
+		if (t == image->type()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "type matched: %p, %p, %p",
+				image, step, *i);
+			blubb = *i;
+			return i;
+		}
+	}
+	return precursors.end();
+}
+
 /**
  * \brief Auxiliary function to search the precursors for a calibration image
  */
@@ -51,6 +77,7 @@ const CalibrationImageStep	*ImageCalibrationStep::calimage(
 		"among %d precursors",
 		CalibrationImageStep::caltypename(t).c_str(),
 		precursors().size());
+#if 0
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
 #if 1
@@ -67,17 +94,18 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "investigating: %p", step);
 		find_step(t)
 #endif
 	);
+#else
+	ProcessingStep::steps::const_iterator	i = find_step(precursors(), t);
+#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether we have a precursor");
-	if (i == precursors().end()) {
+	if (precursors().end() == i) {
 		throw std::runtime_error(
 			stringprintf("no precursor of type %s found",
 				CalibrationImageStep::caltypename(t).c_str()));
 	}
-	ProcessingStep	*s = *i;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "we have a precursor at %p = %p, %p",
-		*i, s, *precursors().begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "we have a precursor at %p, %p", *i, blubb);
 	CalibrationImageStep	*result
-		= dynamic_cast<CalibrationImageStep *>(s);
+		= dynamic_cast<CalibrationImageStep *>(blubb);
 	if (NULL == result) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is not a "
 			"calibration image");

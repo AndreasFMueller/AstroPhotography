@@ -57,7 +57,7 @@ void	AnalyzerTest::testResiduals() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d residuals", residuals.size());
 	std::vector<Residual>::const_iterator	r;
 	for (r = residuals.begin(); r != residuals.end(); r++) {
-		std::cout << r->first << " -> " << r->second << std::endl;
+		// std::cout << r->first << " -> " << r->second << std::endl;
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testResiduals() end");

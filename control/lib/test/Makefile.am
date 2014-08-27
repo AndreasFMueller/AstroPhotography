@@ -27,7 +27,7 @@ uvc_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests processtests catalogtests \
+noinst_PROGRAMS = tests processtests catalogtests singletest \
 	usbtests calimggen caltests simtest \
 	guidetest tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
 
@@ -50,11 +50,17 @@ tests_SOURCES = tests.cpp \
 	BinningTest.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
-	ImageCalibrationStepTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
-	GuiderFactoryTest.cpp 
+	GuiderFactoryTest.cpp \
+	ImageCalibrationStepTest.cpp 
+
+# single test
+singletest_SOURCES = singletest.cpp \
+	ImageCalibrationStepTest.cpp 
+singletest_LDADD = -lcppunit -L.. -lastro 
+singletest_DEPENDENCIES = ../libastro.la 
 
 # tests related to the processing engine. These tests include stuff
 processtests_SOURCES = processtests.cpp \

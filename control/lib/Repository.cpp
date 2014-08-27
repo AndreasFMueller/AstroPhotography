@@ -24,11 +24,15 @@ typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
  * \brief A collection of RepositoryBackends
  *
  * A static object of this type gives access to all backends that have been
- * accessed by a program
+ * accessed by a program. There may be multiple directories containing
+ * driver modules, and we don't want to open them over and over again.
+ * The Repositories object mediates access to the repositories and thus
+ * ensures that each repository is instantiated only once.
  */
 class Repositories {
 	pthread_mutex_t	mutex;
-	std::map<std::string, RepositoryBackendPtr>	_repositories;
+	typedef	std::map<std::string, RepositoryBackendPtr>	backendmap;
+	backendmap	_repositories;
 public:
 	Repositories();
 	~Repositories();
@@ -52,13 +56,16 @@ Repositories::~Repositories() {
 //////////////////////////////////////////////////////////////////////
 /**
  * \brief Repository backend class
+ *
+ * The repository backend is what the Repositories class returns.
  */
 class RepositoryBackend {
 	std::string	_path;
 public:
 	const std::string&	path() const { return _path; }
 private:
-	std::map<std::string, ModulePtr>	modulecache;
+	typedef	std::map<std::string, ModulePtr>	modulemap;
+	modulemap	modulecache;
 	void	checkpath(const std::string& path) const throw(repository_error);
 public:
 	RepositoryBackend() throw (repository_error);
@@ -75,7 +82,8 @@ public:
  * \brief Retrieve a repository backend associated with a path
  */
 RepositoryBackendPtr	Repositories::get(const std::string& path) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for %s", path.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve backend for '%s'",
+		path.c_str());
 	std::string	key = path;
 	if (key.size() == 0) {
 		key = std::string(PKGLIBDIR);
@@ -83,14 +91,14 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
 			key.c_str());
 	}
 	//PthreadLocker(&mutex);
-	std::map<std::string, RepositoryBackendPtr>::iterator	r
-		= _repositories.find(path);
+	backendmap::iterator	r = _repositories.find(key);
 	if (r != _repositories.end()) {
 		return r->second;
 	}
-	RepositoryBackend	*rb = new RepositoryBackend(path);
-	RepositoryBackendPtr	rbp(rb);
-	_repositories.insert(std::make_pair(path, rbp));
+
+	// there is no backend yet, so we have to create it
+	RepositoryBackendPtr	rbp(new RepositoryBackend(key));
+	_repositories.insert(std::make_pair(key, rbp));
 	return rbp;
 }
 
@@ -131,6 +139,8 @@ void	RepositoryBackend::checkpath(const std::string& path) const
  */
 RepositoryBackend::RepositoryBackend(const std::string& path)
 	throw (repository_error) : _path(path) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating repository backend at %s",
+		path.c_str());
 	if (_path.size() == 0) {
 		_path = std::string(PKGLIBDIR);
 	}
@@ -213,6 +223,7 @@ std::vector<ModulePtr>	RepositoryBackend::modules() const {
 		}
 	}
 	closedir(dir);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d modules", result.size());
 	return result;
 }
 
@@ -227,6 +238,8 @@ std::vector<ModulePtr>	RepositoryBackend::modules() const {
  * the code file is also available and readable.
  */
 bool	RepositoryBackend::contains(const std::string& modulename) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check for module %s",
+		modulename.c_str());
 	try {
 		Module(_path, modulename);
 	} catch (std::exception) {
@@ -245,6 +258,7 @@ bool	RepositoryBackend::contains(const std::string& modulename) const {
  *				is missing.
  */
 ModulePtr	RepositoryBackend::getModule(const std::string& modulename) throw(repository_error) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get module '%s'", modulename.c_str());
 	try {
 		if (modulecache.find(modulename) == modulecache.end()) {
 			ModulePtr	module(new Module(_path, modulename));

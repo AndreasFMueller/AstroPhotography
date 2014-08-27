@@ -94,6 +94,8 @@ SimLocator::SimLocator() {
 	_mount = astro::device::MountPtr(new SimMount(*this));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount: %s",
 		_mount->name().toString().c_str());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SimLocator created");
 }
 
 SimLocator::~SimLocator() {
