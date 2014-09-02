@@ -203,6 +203,8 @@ public:
 private:	// prevent copying
 	ProcessingStep(const ProcessingStep& other);
 	ProcessingStep&	operator=(const ProcessingStep& other);
+public:
+	std::string	type_name() const;
 };
 
 /**
@@ -404,8 +406,8 @@ public:
  * flat and the dark will both be float images.
  */
 class ImageCalibrationStep : public ImageStep {
-	const CalibrationImageStep	*calimage(CalibrationImageStep::caltype) const;
 public:
+	const CalibrationImageStep	*calimage(CalibrationImageStep::caltype) const;
 	ImageCalibrationStep();
 	virtual ~ImageCalibrationStep();
 	// there is no work to, as calibration can be done on the fly

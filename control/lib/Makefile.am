@@ -24,7 +24,7 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp \
+libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
 	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \

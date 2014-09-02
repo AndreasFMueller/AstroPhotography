@@ -33,8 +33,10 @@ std::string	CalibrationImageStep::caltypename(caltype t) {
  */
 CalibrationImageStep::CalibrationImageStep(caltype t, ImagePtr image) 
                 : _type(t), _image(image) {
-	_out = ImageStep::outPtr(new DoubleAdapter(image));
-	_preview = PreviewAdapter::get(_image);
+	if (NULL != _image) {
+		_out = ImageStep::outPtr(new DoubleAdapter(_image));
+		_preview = PreviewAdapter::get(_image);
+	}
 	status(ProcessingStep::needswork);
 }
 
@@ -61,6 +63,7 @@ ProcessingStep::state	CalibrationImageStep::do_work() {
 	if (pp == precursors().end()) {
 		throw std::runtime_error("no precursor image");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", *pp);
 	ImageStep	*precursor = dynamic_cast<ImageStep *>(*pp);
 
 	// construct an identity adapter toa ccess the precursor output

@@ -16,6 +16,7 @@
 #include <vector>
 #include <map>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace image {
@@ -259,7 +260,7 @@ public:
  * a smart pointer has to be used anyway. Such smart pointers are
  * defined for the Image template class that inherits from ImageBase.
  */
-class ImageBase {
+class ImageBase : public Typename {
 	/**
 	 * \brief Metadata for the image
 	 *

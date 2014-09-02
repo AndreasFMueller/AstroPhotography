@@ -127,6 +127,14 @@ public:
 	~PthreadLocker();
 };
 
+/**
+ * \brief Mixin class for type name information
+ */
+class Typename {
+public:
+	virtual std::string	type_name() const;
+};
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */

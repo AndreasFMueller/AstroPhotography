@@ -1,5 +1,5 @@
 /*
- * ImageBase.cpp
+ * ImageBase.cpp -- implementation of base image class methods
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
@@ -7,6 +7,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <typeinfo>
 
 namespace astro {
 namespace image {
@@ -189,6 +190,26 @@ ImageMetadata::const_iterator	ImageBase::begin() const {
 ImageMetadata::const_iterator	ImageBase::end() const {
 	return metadata.end();
 }
+
+#if 0
+/**
+ * \brief retrieve the image type
+ */
+static std::string      get_typename(const ImageBase *image) {
+	try {
+                return std::string(typeid(*image).name());
+        } catch (std::bad_typeid& x) {
+                return stringprintf("(unknown Image type[%s])", x.what());
+        }
+}
+
+/**
+ * \brief Get the name of the image (mainly for debugging)
+ */
+std::string     ImageBase::type_name() const {
+        return get_typename(this);
+}
+#endif
 
 } // namespace image
 } // namespace astro

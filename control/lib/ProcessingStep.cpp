@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <includes.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
+#include <typeinfo>
 
 using namespace astro::adapter;
 
@@ -30,8 +32,22 @@ ProcessingStep::ProcessingStep() {
  * \brief Destroy the processing step
  */
 ProcessingStep::~ProcessingStep() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying %s @ %p",
+		type_name().c_str(),  this);
 	// ensure we are neither precursor nor successor of any other step
 	remove_me();
+}
+
+static std::string	get_typename(const ProcessingStep *step) {
+	try {
+		return std::string(typeid(*step).name());
+	} catch (std::bad_typeid& x) {
+		return stringprintf("(unknown [%s])", x.what());
+	}
+}
+
+std::string	ProcessingStep::type_name() const {
+	return get_typename(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -41,9 +57,12 @@ ProcessingStep::~ProcessingStep() {
  * \brief add a precursor
  */
 void	ProcessingStep::add_precursor(ProcessingStep *step) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add precursor %s @ %p",
+		get_typename(step).c_str(),  step);
 	// don't add if already present
 	if (_precursors.end()
 		!= std::find(_precursors.begin(), _precursors.end(), step)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%p alread present", step);
 		return;
 	}
 	// add to the precursors vector
@@ -60,9 +79,12 @@ void	ProcessingStep::add_precursor(ProcessingStepPtr step) {
  * \brief add a successor
  */
 void	ProcessingStep::add_successor(ProcessingStep *step) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add successor %s @ %p",
+		get_typename(step).c_str(),  step);
 	// don't add if already present
 	if (_successors.end()
 		!= std::find(_successors.begin(), _successors.end(), step)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%p alread present", step);
 		return;
 	}
 	// add to the successors vector
@@ -119,13 +141,28 @@ void	ProcessingStep::remove_successor(ProcessingStepPtr step) {
  * \brief Remove a processing step
  */
 void	ProcessingStep::remove_me() {
+	// remove me from precursors
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from precursors of %s @ %p",
+		type_name().c_str(), this);
 	steps	stepvector = _precursors;
 	std::for_each(stepvector.begin(), stepvector.end(),
-		[this](steps::value_type& x) { x->remove_successor(this); }
+		[this](steps::value_type& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove precursor %s",
+				get_typename(x).c_str());
+			x->remove_successor(this);
+		}
 	);
+
+	// remove me from successors
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove from successors of %s @ %p",
+		type_name().c_str(), this);
 	stepvector = _successors;
 	std::for_each(stepvector.begin(), stepvector.end(),
-		[this](steps::value_type& x) { x->remove_precursor(this); }
+		[this](steps::value_type& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "remove successor %s",
+				get_typename(x).c_str());
+			x->remove_precursor(this);
+		}
 	);
 }
 

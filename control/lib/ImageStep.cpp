@@ -22,7 +22,7 @@ namespace process {
 /**
  * \brief Create a new processing step
  */
-ImageStep::ImageStep() {
+ImageStep::ImageStep() : _preview(NULL), _out(NULL) {
 	_status = idle;
 }
 
@@ -30,8 +30,7 @@ ImageStep::ImageStep() {
  * \brief Destroy the processing step
  */
 ImageStep::~ImageStep() {
-	// ensure we are neither precursor nor successor of any other step
-	remove_me();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying an %s", type_name().c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
