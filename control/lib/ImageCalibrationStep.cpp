@@ -28,38 +28,6 @@ ImageCalibrationStep::~ImageCalibrationStep() {
 }
 
 /**
- * \brief Auxiliary class to help find the right precursor
- */
-class find_step {
-	CalibrationImageStep::caltype	_t;
-public:
-	/**
-	 * \brief construct a predicate to find cal images of a given type
-	 */
-	find_step(CalibrationImageStep::caltype t) : _t(t) {
-	}
-
-	/**
-	 * \brief Check whether a given step is a calibration image
-	 */
-	bool	operator()(const ProcessingStep *step) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "check %s @ %p",
-			step->type_name().c_str(), step);
-		// check whether its a calibration image
-		const CalibrationImageStep	*image
-			= dynamic_cast<const CalibrationImageStep *>(step);
-		if (image == NULL) {
-			return false;
-		}
-		// check whether the type matches
-		bool	result = (_t == image->type());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "has correct type: %s",
-			(result) ? "YES" : "NO");
-		return result;
-	}
-};
-
-/**
  * \brief Auxiliary function to search the precursors for a calibration image
  */
 const CalibrationImageStep	*ImageCalibrationStep::calimage(
@@ -71,21 +39,28 @@ const CalibrationImageStep	*ImageCalibrationStep::calimage(
 
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
-			find_step(t));
+		// lambda predicate to find precursor steps that are 
+		// calibration images and of the correct type
+		[t](const ProcessingStep *step) {
+			// check whether its a calibration image
+			const CalibrationImageStep	*image
+				= dynamic_cast<const CalibrationImageStep *>(step);
+			if (image == NULL) {
+				return false;
+			}
+			// check whether the type matches
+			return (t == image->type());
+		}
+	);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "check whether we have a precursor");
+	// find out whether the find_if algorithm did find a suitable precursor
 	if (precursors().end() == i) {
 		throw std::runtime_error(
 			stringprintf("no precursor of type %s found",
 				CalibrationImageStep::caltypename(t).c_str()));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "we have a precursor");
-	*i;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "we have a precursor %s at %p",
-		(*i)->type_name().c_str(), *i);
 	const CalibrationImageStep	*result
 		= dynamic_cast<const CalibrationImageStep *>(*i);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dynamic cast successful");
 	if (NULL == result) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor is not a "
 			"calibration image");
@@ -171,25 +146,6 @@ public:
 };
 
 /**
- * \brief Auxiliary predicate class to find images to calibrate
- */
-class	find_image {
-	const CalibrationImageStep	*_dark;
-	const CalibrationImageStep	*_flat;
-public:
-	find_image(const CalibrationImageStep *dark,
-		const CalibrationImageStep *flat)
-		: _dark(dark), _flat(flat) {
-	}
-	bool	operator()(const ProcessingStep *step) const {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"step = %p, dark = %p, flat = %p",
-			step, _dark, _flat);
-		return ((step != _dark) && (step != _flat));
-	}
-};
-
-/**
  * \brief Do the actual work
  *
  * Image calibration needs a dark image an a flat image, which it looks
@@ -227,7 +183,6 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for different image");
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
-#if 0
 		[dark, flat](ProcessingStep *step) {
 			if (NULL == dynamic_cast<ImageStep *>(step)) {
 				return false;
@@ -237,9 +192,6 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 				step, dark, flat);
 			return ((step != dark) && (step != flat));
 		}
-#else
-		find_image(dark, flat)
-#endif
 	);
 	if (i == precursors().end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image to calibrate");
