@@ -33,6 +33,7 @@ CalibrationProcessorStep::CalibrationProcessorStep(CalibrationImageStep::caltype
 CalibrationProcessorStep::~CalibrationProcessorStep() {
 	if (NULL != rawimages) {
 		delete rawimages;
+		rawimages = NULL;
 	}
 }
 

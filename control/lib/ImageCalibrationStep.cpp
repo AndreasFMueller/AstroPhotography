@@ -24,6 +24,7 @@ ImageCalibrationStep::ImageCalibrationStep() {
  * \brief Destroy an Image Calibration step
  */
 ImageCalibrationStep::~ImageCalibrationStep() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image calibration step deleted");
 }
 
 /**
@@ -170,6 +171,25 @@ public:
 };
 
 /**
+ * \brief Auxiliary predicate class to find images to calibrate
+ */
+class	find_image {
+	const CalibrationImageStep	*_dark;
+	const CalibrationImageStep	*_flat;
+public:
+	find_image(const CalibrationImageStep *dark,
+		const CalibrationImageStep *flat)
+		: _dark(dark), _flat(flat) {
+	}
+	bool	operator()(const ProcessingStep *step) const {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"step = %p, dark = %p, flat = %p",
+			step, _dark, _flat);
+		return ((step != _dark) && (step != _flat));
+	}
+};
+
+/**
  * \brief Do the actual work
  *
  * Image calibration needs a dark image an a flat image, which it looks
@@ -204,19 +224,28 @@ ProcessingStep::state	ImageCalibrationStep::do_work() {
 	}
 
 	// find an image that is different
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for different image");
 	ProcessingStep::steps::const_iterator	i
 		= std::find_if(precursors().begin(), precursors().end(),
+#if 0
 		[dark, flat](ProcessingStep *step) {
 			if (NULL == dynamic_cast<ImageStep *>(step)) {
 				return false;
 			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"step = %p, dark = %p, flat = %p",
+				step, dark, flat);
 			return ((step != dark) && (step != flat));
 		}
+#else
+		find_image(dark, flat)
+#endif
 	);
 	if (i == precursors().end()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image to calibrate");
 		return ProcessingStep::idle;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found an image to calibrate");
 	ImageStep	*image = dynamic_cast<ImageStep *>(*i);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image to calibration: size=%s",
 		image->out().getSize().toString().c_str());
