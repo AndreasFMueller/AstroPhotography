@@ -30,7 +30,6 @@ LDFLAGS="${LDFLAGS} -rdynamic"
 
 # Check for libraries
 AC_CHECK_LIB([m], [sqrt])
-AC_CHECK_LIB([cfitsio], [ftffrw_])
 AC_CHECK_LIB([dl], [dlopen])
 AC_CHECK_LIB([usb-1.0], [libusb_bulk_transfer])
 AC_CHECK_LIB([lapack], [dgels_], [LIBS="-llapack $LIBS"],
@@ -39,6 +38,16 @@ AC_CHECK_LIB([fftw3], [fftw_malloc])
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([glpk], [glp_create_prob])
 AC_CHECK_LIB([sqlite3], [sqlite3_initialize])
+
+######################################################################
+# if cfits is installed with pkginfo, we use that
+if pkg-config --exists cfitsio
+then
+	LIBS="${LIBS} `pkg-config --libs cfitsio`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags cfitsio`"
+else
+AC_CHECK_LIB([cfitsio], [ftffrw_])
+fi
 
 ######################################################################
 # use pkg-config to find out about the flags to use for omniorb
@@ -59,8 +68,8 @@ AC_ARG_ENABLE(corba,
 	then
 		LIBS="${LIBS} `pkg-config --libs omniORB4`"
 		LIBS="${LIBS} `pkg-config --libs omniCOS4`"
-		CXXFLAGS="${CXXFLAGS} `pkg --cflags omniORB4`"
-		CXXFLAGS="${CXXFLAGS} `pkg --cflags omniCOS4`"
+		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
+		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
 		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
 		# add the idl include directory to the cflags
 		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
