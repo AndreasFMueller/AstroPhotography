@@ -40,13 +40,16 @@ void	ImageCalibrationStepTest::testCalibration() {
 	// create calibration images
 	ImageSize	size(40, 32);
 	Image<float>	*dark = new Image<float>(size);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark: %s @ %p", dark->type_name().c_str(), dark);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark: %s @ %p",
+		dark->type_name().c_str(), dark);
 	ImagePtr	darkptr(dark);
 	Image<float>	*flat = new Image<float>(size);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat: %s @ %p", flat->type_name().c_str(), flat);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat: %s @ %p",
+		flat->type_name().c_str(), flat);
 	ImagePtr	flatptr(flat);
 	Image<double>	*image = new Image<double>(size);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image: %s @ %p", image->type_name().c_str(), image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image: %s @ %p",
+		image->type_name().c_str(), image);
 	ImagePtr	imageptr(image);
 	for (unsigned int x = 0; x < size.width(); x++) {
 		for (unsigned int y = 0; y < size.height(); y++) {
@@ -72,14 +75,16 @@ void	ImageCalibrationStepTest::testCalibration() {
 	// create calibration image steps
 	CalibrationImageStep	*darkstep
 		= new CalibrationImageStep(CalibrationImageStep::DARK, darkptr);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark: %s @ %p", darkstep->type_name().c_str(), darkstep);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark: %s @ %p",
+		darkstep->type_name().c_str(), darkstep);
 	ProcessingStepPtr	darkstepptr(darkstep);
 	CPPUNIT_ASSERT(darkstepptr->status() == ProcessingStep::needswork);
 	controller.addstep("dark", darkstepptr);
 
 	CalibrationImageStep	*flatstep
 		= new CalibrationImageStep(CalibrationImageStep::FLAT, flatptr);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat: %s @ %p", flatstep->type_name().c_str(), flatstep);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat: %s @ %p",
+		flatstep->type_name().c_str(), flatstep);
 	ProcessingStepPtr	flatstepptr(flatstep);
 	CPPUNIT_ASSERT(flatstepptr->status() == ProcessingStep::needswork);
 	controller.addstep("flat", flatstepptr);
@@ -102,11 +107,8 @@ void	ImageCalibrationStepTest::testCalibration() {
 
 	// define dependencies
 	controller.add_precursor("calibration", "dark");
-	const CalibrationImageStep	*s = calibrationstep->calimage(CalibrationImageStep::DARK);
 	controller.add_precursor("calibration", "flat");
-	s = calibrationstep->calimage(CalibrationImageStep::DARK);
 	controller.add_precursor("calibration", "raw");
-	s = calibrationstep->calimage(CalibrationImageStep::DARK);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursors set");
 	
 	// perform the calibration

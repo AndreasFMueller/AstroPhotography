@@ -38,31 +38,88 @@ CalibrationProcessorStep::~CalibrationProcessorStep() {
 }
 
 /**
+ * \brief Get tile x coordinate from image coordinates
+ */
+int	CalibrationProcessorStep::xt(int x) const {
+	return _spacing * (x / (2 * _step));
+}
+
+/**
+ * \brief Get tile y coordinate from image coordinates
+ */
+int	CalibrationProcessorStep::yt(int y) const {
+	return _spacing * (y / (2 * _step));
+}
+
+/**
+ * \brief Center x coordinate from image coordinate
+ */
+int	CalibrationProcessorStep::xc(int x) const {
+	return xi(x / (2 * _step));
+}
+
+/**
+ * \brief Center y coordinate from image coordinate
+ */
+int	CalibrationProcessorStep::yc(int y) const {
+	return yi(y / (2 * _step));
+}
+
+/**
+ * \brief Image x coordinate from tile coordinate
+ */
+int	CalibrationProcessorStep::xi(int x) const {
+	return _step * (1 + 2 * x);
+}
+
+/**
+ * \brief Image y coordinate from tile coordinate
+ */
+int	CalibrationProcessorStep::yi(int y) const {
+	return _step * (1 + 2 * y);
+}
+
+/**
+ * \brief Get size for the tile images for aggregates
+ */
+ImageSize	CalibrationProcessorStep::tileimagesize(const ImageSize& size) const {
+	int	s = _spacing * _step * 2;
+	return ImageSize(_spacing * (1 + size.width() / s),
+			_spacing * (1 + size.height() / s));
+}
+
+/**
  * \brief Find all RawImage precursors
  *
  * get pointers to all the precursors of type ImageStep, others don't have
  * image data output, so they cannot be used to build calibration images
  */
 size_t	CalibrationProcessorStep::getPrecursors() {
-	typedef ImageStep *ImageStepPtr;
-	rawimages = new ImageStepPtr[precursors().size()];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testing %d precursors",
+		precursors().size());
+	typedef ImageStep *ImageStepP;
+	rawimages = new ImageStepP[precursors().size()];
 	nrawimages = 0;
 
 	// the lambda below cannot capture members, so we have to capture
 	// local variables
 	ImageStep	**ri = rawimages;
+	for (unsigned int i = 0; i < precursors().size(); i++) {
+		rawimages[i] = NULL;
+	}
 	int	n = 0;
+	int	*np = &n;
 	std::for_each(precursors().begin(), precursors().end(),
-		[ri,n](ProcessingStep *step) mutable {
+		[ri,np](ProcessingStep *step) mutable {
 			ImageStep	*f = dynamic_cast<ImageStep *>(step);
 			if (NULL != f) {
-				ri[n++] = f;
+				ri[(*np)++] = f;
 			}
 		}
 	);
 	nrawimages = n;
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d raw images");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d raw images", nrawimages);
 	return nrawimages;
 }
 
@@ -83,6 +140,7 @@ static double	mean(const double *x, int n) {
  * This step essentially takes care of getting all the precursor images
  */
 ProcessingStep::state	CalibrationProcessorStep::common_work() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "common: getting precursor images");
 	if (NULL != rawimages) {
 		delete rawimages;
 		rawimages = NULL;
@@ -116,31 +174,36 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 	imageptr = ImagePtr(_image);
 	image = _image;
 	image->fill(0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create empty %s image",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "common: create empty %s image",
 		image->size().toString().c_str());
 
 	// make the image availabe as preview
 	_preview = PreviewAdapter::get(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview adapter created");
 
 	// prepare images for medians, means and stddevs
-	int	grid = _spacing * _step;
-	ImageSize	subsize(_spacing * size.width() / grid,
-				_spacing * size.height() / grid);
+	ImageSize	subsize = tileimagesize(size);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "aggregate image size: %s",
+		subsize.toString().c_str());
 	medians = new Image<double>(subsize);
 	means = new Image<double>(subsize);
 	stddevs = new Image<double>(subsize);
-	for (unsigned int x = grid; x < size.width(); x += 2 * grid) {
-		for (unsigned int y = grid; y < size.height(); x += 2 * grid) {
-			filltile(x, y, grid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filling statistics images");
+	for (unsigned int x = 0; x < subsize.width(); x += _spacing) {
+		for (unsigned int y = 0; y < subsize.height(); y += _spacing) {
+			filltile(x, y);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "statistics images ready");
 
 	// Doing the pixel specific work.
 	double	values[nrawimages];
 	int	n;
 	for (unsigned int x = 0; x < image->size().width(); x++) {
 		for (unsigned int y = 0; y < image->size().height(); y++) {
+debug(LOG_DEBUG, DEBUG_LOG, 0, "computing pixel value (%d,%d)", x, y);
 			aggregates	a = aggr(x, y);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "mean = %f, stddev = %f", a.mean, a.stddev);
 			get(x, y, values, n, a);
 			// compute the average			
 			if (n > 1) {
@@ -151,6 +214,7 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration pixels computed");
 
 	// common work done
 	return ProcessingStep::complete;
@@ -168,6 +232,32 @@ static double	median(const std::multiset<double> values) {
 	}
 	return m;
 }
+
+// auxiliar class to compute aggregations
+class aggregator {
+	int _counter;
+	double  _xsum;
+	double  _x2sum;
+public:
+	int     counter() const { return _counter; }
+	double mean() const {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "xsum = %f, counter = %d",
+			_xsum, _counter);
+		return _xsum / _counter;
+	}
+	double stddev() const { 
+		double  m = mean();
+		return sqrt((_x2sum / _counter - m * m) * _counter / (_counter - 1.));
+	}
+	aggregator() : _counter(0), _xsum(0), _x2sum(0) { }
+	void    operator()(double x) {
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "add value  %f", 65535 * x);
+		_xsum += x;
+		_x2sum += x * x;
+		_counter++;
+	}
+};
+
 
 /**
  * \brief compute the aggregates for a tile
@@ -201,11 +291,12 @@ static double	median(const std::multiset<double> values) {
  *
  * 
  */
-CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int yc, int grid) {
+CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int yc) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "compute aggregates for tile centered at %d,%d", xc, yc);
 	// compute the rectangle we want to use, the width must be a multiple
 	// of _spacing to ensure that we get all points from the appropriate
 	// subgrid
-	int	width = grid + _spacing * (8 / _spacing);
+	int	width = _spacing * (_step + 8 / _spacing);
 
 	// compute the rectangle we have to scan. At the boundary of the
 	// image, we have to correct the computed minimum and maximum indices
@@ -218,6 +309,8 @@ CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int 
 	while (miny < 0) { miny += _spacing; }
 	int	maxy = yc + width;
 	while (maxy >= (int)image->size().height()) { maxy -= _spacing; }
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d <= x <= %d (%d), %d <= y <= %d (%d)",
+		minx, maxx, maxx - minx, miny, maxy, maxy - miny);
 
 	// now scan the image rectangle for pixel values. We only take the
 	// valid values, NaNs are ignored, and collect them in a multiset.
@@ -234,33 +327,27 @@ CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int 
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d values found", pixels.size());
 
 	// compute median and averages
 	aggregates	a;
-	a.median = 0; a.mean = 0; a.stddev = 0;
 
 	// first the median
 	a.median = median(pixels);
 
 	// now the sum of values and their squares
-	int	counter = 0;
 	std::multiset<double>::const_iterator	begin = pixels.begin();
 	std::multiset<double>::const_iterator	end = pixels.begin();
 	int	m = pixels.size() / 10;
 	std::advance(begin, m);
 	std::advance(end, pixels.size() - m - 1);
-	std::for_each(begin, end,
-		[a,counter](double x) mutable {
-			a.mean += x;
-			a.stddev += x + x;
-			counter++;
-		}
-	);
+	aggregator	ag = std::for_each(begin, end, aggregator());
 
-	// compute standard mean and standard deviaton from this
-	a.mean = a.mean / counter;
-	a.stddev = (a.stddev / counter - a.mean * a.mean)
-		* counter / (counter - 1.);
+	// get the aggregates
+	a.mean = ag.mean();
+	a.stddev = ag.stddev();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "median = %f, mean = %f, stddev = %f",
+		a.median, a.mean, a.stddev);
 
 	// we are done
 	return a;
@@ -274,16 +361,24 @@ CalibrationProcessorStep::aggregates	CalibrationProcessorStep::tile(int xc, int 
  * If the grid spacing is 1, then this amounts to just a single computation.
  * If the grid spacing is 2, as should be used for RGB images, then we
  * compute four sets of aggregates, one for every RGGB subgrid.
+ * \param x	x coordindate in tile coordinates
+ * \param y	y coordindate in tile coordinates
+ * \param grid	grid constant 
  */
-void	CalibrationProcessorStep::filltile(int x, int y, int grid) {
-	int	xs = _spacing * x / (2 * grid);
-	int	ys = _spacing * y / (2 * grid);
+void	CalibrationProcessorStep::filltile(int x, int y) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing tile @(%d,%d)", x, y);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image coordinates center tile: (%d,%d)",
+		xi(x), yi(x));
 	for (int dx = 0; dx < _spacing; dx++) {
 		for (int dy = 0; dy < _spacing; dy++) {
-			aggregates	a = tile(x + dx, y + dy, grid);
-			medians->writablepixel(xs + dx, ys + dy) = a.median;
-			means->writablepixel(xs + dx, ys + dy) = a.mean;
-			stddevs->writablepixel(xs + dx, ys + dy) = a.stddev;
+			int	xx = xi(x) + dx;
+			int	yy = xi(y) + dy;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "xx = %d, yy = %d",
+				xx, yy);
+			aggregates	a = tile(xx, yy);
+			medians->writablepixel(xx, yy) = a.median;
+			means->writablepixel(xx, yy) = a.mean;
+			stddevs->writablepixel(xx, yy) = a.stddev;
 		}
 	}
 }
@@ -306,12 +401,14 @@ void	CalibrationProcessorStep::get(unsigned int x, unsigned int y,
 
 		// if a pixel value is too far away, ignore it as well
 		if (a.improbable(v)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "value %f improbable", v);
 			continue;
 		}
 
 		// if a pixel value survives both checks, use it
 		values[n++] = v;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d values found", n);
 }
 
 /**
@@ -328,12 +425,15 @@ const ConstImageAdapter<double>&	CalibrationProcessorStep::out() const {
  * \brief get the aggregates representative for an image point
  */
 CalibrationProcessorStep::aggregates	CalibrationProcessorStep::aggr(unsigned int x, unsigned int y) const {
-	aggregates	result;
 	int	xa = _spacing * x / _step + x % _spacing;
 	int	ya = _spacing * y / _step + y % _spacing;
+	aggregates	result;
 	result.median = medians->pixel(xa, ya);
 	result.mean = means->pixel(xa, ya);
 	result.stddev = stddevs->pixel(xa, ya);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"aggregate(%u,%u) -> (%d,%d): median = %f, mean = %f, stddev = %f",
+		x, y, xa, ya, result.median, result.mean, result.stddev);
 	return result;
 }
 

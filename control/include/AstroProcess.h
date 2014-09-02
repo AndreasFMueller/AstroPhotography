@@ -416,7 +416,29 @@ public:
 
 /**
  * \brief Common methods for calbration image generators
+ *
+ * The calibration image processor computes calibration image pixel values
+ * from the averages computed in tiles.
  */
+//
+//
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+// 3*_step +---------o---------+---------o---------+---------o-----
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+// 2*_step +---------+---------+---------+---------+---------+-----
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+//   _step +---------o---------+---------o---------+---------o-----
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+//         |         |         |         |         |         |
+//       0 +---------+---------+---------+---------+---------+-----
+//         0        _step   2*_step   3*_step   4*_step   5*_step
+//
 class CalibrationProcessorStep : public CalibrationImageStep {
 	int	_spacing;
 public:
@@ -428,15 +450,30 @@ public:
 	int	step() const { return _step; }
 	void	step(int s) { _step = s; }
 protected:
+	int	grid() const { return _step * _spacing; }
 	size_t		nrawimages;
 	ImageStep	**rawimages;
 	size_t	getPrecursors();
+
+	// conversion of image coordinates to tile coordinates
+	// tile center coordinates from image coordinates 
+	int	xc(int x) const;
+	int	yc(int y) const;
+	// image coordinates from tile coordinates
+	int	xi(int x) const;
+	int	yi(int y) const;
+	// tile coordinates from image coordinates
+	int	xt(int x) const;
+	int	yt(int y) const;
+
+	ImageSize	tileimagesize(const ImageSize& size) const;
+
+	// aggregator class
 	class aggregates {
 	public:
-		double median;
-		double mean;
-		double stddev;
-		aggregates() { median = 0; mean = 0; stddev = 0; }
+		double	mean;
+		double	median;
+		double	stddev;
 		bool	improbable(double x) const {
 			return (fabs(x - mean) > 3 * stddev);
 		}
@@ -452,8 +489,8 @@ protected:
 	Image<double>	*means;
 	Image<double>	*stddevs;
 private:
-	aggregates	tile(int x, int y, int step);
-	void	filltile(int x, int y, int step);
+	aggregates	tile(int x, int y);
+	void	filltile(int x, int y);
 	aggregates	aggr(unsigned int x, unsigned int y) const;
 public:
 	CalibrationProcessorStep(CalibrationImageStep::caltype t);

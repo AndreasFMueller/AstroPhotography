@@ -44,7 +44,7 @@ void	AnalyzerTest::testResiduals() {
 	// read the chart image
 	FITSinfile<float>	chart("deneb-chart.fits");
 	Image<float>	*image1 = chart.read();
-	TypeConversionAdapter<double, float>	base(*image1);
+	TypeReductionAdapter<double, float>	base(*image1);
 
 	// read the projected image
 	FITSinfile<double>	projected("deneb-projected.fits");

@@ -84,7 +84,7 @@ ImagePtr	MeasureFocusWork::combine(ImagePtr image, FocusInfo& focusinfo) {
 
 	// create an adapter that rescales to a reasonable value
 	RescaleAdapter<double>	rescale(*im, maxvalue);
-	TypeConversionAdapter<unsigned char, double>	tc(rescale);
+	TypeReductionAdapter<unsigned char, double>	tc(rescale);
 	Image<unsigned char>	*red = new Image<unsigned char>(tc);
 	ImagePtr	redptr(red);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum red: %f",

@@ -1373,10 +1373,10 @@ public:
 // Type conversion
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel, typename srcPixel>
-class TypeConversionAdapter : public ConstImageAdapter<Pixel> {
+class TypeReductionAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<srcPixel>&	image;
 public:
-	TypeConversionAdapter(const ConstImageAdapter<srcPixel>& _image)
+	TypeReductionAdapter(const ConstImageAdapter<srcPixel>& _image)
 		: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) { }
 	Pixel	pixel(unsigned int x, unsigned int y) const {
 		Pixel	result;
@@ -1392,6 +1392,17 @@ public:
 			convertPixel(result, image.pixel(x, y));
 		}
 		return result;
+	}
+};
+
+template<typename Pixel>
+class TypeConversionAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+public:
+	TypeConversionAdapter(const ConstImageAdapter<Pixel>& _image)
+		: ConstImageAdapter<double>(_image.getSize()), image(_image) { }
+	double	pixel(unsigned int x, unsigned int y) const {
+		return image.pixel(x, y);
 	}
 };
 

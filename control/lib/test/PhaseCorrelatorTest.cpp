@@ -156,13 +156,13 @@ void	PhaseCorrelatorTest::testImage() {
 	FITSin	imagefile("./test-image.fits");
 	ImagePtr	imageptr = imagefile.read();
 	Image<unsigned char>	*image = dynamic_cast<Image<unsigned char> *>(&*imageptr);
-	TypeConversionAdapter<double, unsigned char>	doubleimage(*image);
+	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
 	FITSin	chartfile("./test-chart.fits");
 	ImagePtr	chartptr = chartfile.read();
 	Image<unsigned char>	*chart = dynamic_cast<Image<unsigned char> *>(&*chartptr);
-	TypeConversionAdapter<double, unsigned char>	doublechart(*chart);
+	TypeReductionAdapter<double, unsigned char>	doublechart(*chart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
 
 	// create a phase correlator

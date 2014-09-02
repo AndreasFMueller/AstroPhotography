@@ -51,7 +51,7 @@ void	ProjectionTest::testConstructor() {
 	CPPUNIT_ASSERT(NULL != image);
 
 	// adapter to convert to double
-	TypeConversionAdapter<double, unsigned char>	doubleimage(*image);
+	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 
 	// create the transform
 	Projection	projection(-M_PI * 49 / 180, Point(318, 40));
@@ -82,7 +82,7 @@ void	ProjectionTest::testAndromeda() {
 	CPPUNIT_ASSERT(NULL != image);
 
 	// adapter to convert to double
-	TypeConversionAdapter<double, unsigned char>	doubleimage(*image);
+	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 
 	// create the transform
 	Projection	projection(M_PI * 160 / 180, Point(838, 182));

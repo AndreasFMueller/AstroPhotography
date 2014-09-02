@@ -55,7 +55,7 @@ ImagePtr	upsample(ImagePtr image, const ImageSize& sampling) {
 	Image<Pixel >	*imageptr					\
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imageptr) {						\
-		return new TypeConversionAdapter<double, Pixel >(*imageptr);\
+		return new TypeConversionAdapter<Pixel >(*imageptr);	\
 	}								\
 }
 

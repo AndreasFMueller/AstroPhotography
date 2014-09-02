@@ -58,7 +58,7 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ImageCalibrationStepTest.cpp 
+	CalibrationProcessorStepTest.cpp 
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 

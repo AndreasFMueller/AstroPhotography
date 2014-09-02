@@ -62,9 +62,11 @@ void	ProcessingStep::add_precursor(ProcessingStep *step) {
 	// don't add if already present
 	if (_precursors.end()
 		!= std::find(_precursors.begin(), _precursors.end(), step)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%p alread present", step);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor %p already present",
+			step);
 		return;
 	}
+
 	// add to the precursors vector
 	_precursors.push_back(step);
 	// tell the step that it has a new successor
