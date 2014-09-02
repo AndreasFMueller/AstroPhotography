@@ -103,47 +103,32 @@ void	ImageCalibrationStepTest::testCalibration() {
 	// define dependencies
 	controller.add_precursor("calibration", "dark");
 	const CalibrationImageStep	*s = calibrationstep->calimage(CalibrationImageStep::DARK);
-#if 0
 	controller.add_precursor("calibration", "flat");
 	s = calibrationstep->calimage(CalibrationImageStep::DARK);
-	//controller.add_precursor("calibration", "raw");
-	//s = calibrationstep->calimage(CalibrationImageStep::DARK);
+	controller.add_precursor("calibration", "raw");
+	s = calibrationstep->calimage(CalibrationImageStep::DARK);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursors set");
 	
-
-#if 1
-	darkstep->work();
-	CPPUNIT_ASSERT(darkstep->status() == ProcessingStep::complete);
-	flatstep->work();
-	CPPUNIT_ASSERT(flatstep->status() == ProcessingStep::complete);
-	rawstep->work();
-	CPPUNIT_ASSERT(rawstep->status() == ProcessingStep::complete);
-
-	calibrationstep->work();
-	CPPUNIT_ASSERT(calibrationstep->status() == ProcessingStep::complete);
-	
-#else
 	// perform the calibration
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start process execution");
 	controller.execute(2);
-#endif
-//	CPPUNIT_ASSERT(calibrationstepptr->status()
-//			== ProcessingStep::complete);
-//	debug(LOG_DEBUG, DEBUG_LOG, 0, "state after execution: %s",
-//		ProcessingStep::statename(calibrationstepptr->status()).c_str());
-//
-//	// verify that calibration returns the correct value
-//	for (unsigned int x = 0; x < size.width(); x++) {
-//		for (unsigned int y = 0; y < size.height(); y++) {
-//			double	rawv = image->pixel(x, y);
-//			double	calibratedv = calibrationstep->out().pixel(x, y);
-//			//debug(LOG_DEBUG, DEBUG_LOG, 0,
-//			//	"%u,%u: rawv = %f, v = %f", x, y, rawv,
-//			//	calibratedv);
-//			CPPUNIT_ASSERT(round(calibratedv) == 32768);
-//		}
-//	}
-#endif
+	CPPUNIT_ASSERT(calibrationstepptr->status()
+			== ProcessingStep::complete);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state after execution: %s",
+		ProcessingStep::statename(calibrationstepptr->status()).c_str());
+
+	// verify that calibration returns the correct value
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
+			double	rawv = image->pixel(x, y);
+			double	calibratedv = calibrationstep->out().pixel(x, y);
+			//debug(LOG_DEBUG, DEBUG_LOG, 0,
+			//	"%u,%u: rawv = %f, v = %f", x, y, rawv,
+			//	calibratedv);
+			CPPUNIT_ASSERT(round(calibratedv) == 32768);
+		}
+	}
+
 	// that's it
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCalibration() end");
 }

@@ -137,10 +137,10 @@ private:
 	steps	_precursors;
 	steps	_successors;
 protected:
-	const steps	precursors() const {
+	const steps&	precursors() const {
 		return _precursors;
 	}
-	const steps	successors() const {
+	const steps&	successors() const {
 		return _successors;
 	}
 protected:
