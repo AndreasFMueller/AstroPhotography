@@ -17,6 +17,8 @@
 #include <map>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <typeinfo>
+#include <typeindex>
 
 namespace astro {
 namespace image {
@@ -162,13 +164,13 @@ std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
  * \brief Image metadata is stored in a map
  */
 class Metavalue {
-	int	datatype;
+	std::type_index	datatype;
 	std::string	value;
 	std::string	comment;
 public:
 	const std::string&	getValue() const { return value; }
 	const std::string&	getComment() const { return comment; }
-	int	getType() const { return datatype; }
+	std::type_index	getType() const { return datatype; }
 	Metavalue(const std::string& _value, const std::string& _comment);
 	Metavalue(const bool b, const std::string& _comment);
 	Metavalue(const char c, const std::string& _comment);
@@ -181,10 +183,28 @@ public:
 	Metavalue(const unsigned long ul, const std::string& _comment);
 	Metavalue(const float f, const std::string& _comment);
 	Metavalue(const double f, const std::string& _comment);
-	Metavalue(int _datatype, const std::string& _value,
+	Metavalue(std::type_index _datatype, const std::string& _value,
 		const std::string& _comment);
+	operator	bool() const;
+	operator	char() const;
+	operator	unsigned char() const;
+	operator	short() const;
+	operator	unsigned short() const;
+	operator	int() const;
+	operator	unsigned int() const;
+	operator	long() const;
+	operator	unsigned long() const;
+	operator	float() const;
+	operator	double() const;
 };
 typedef std::multimap<std::string, Metavalue>	ImageMetadata;
+
+/**
+ * \brief A class that is aware of valid FITS keys
+ */
+class Metadata : public std::multimap<std::string, Metavalue> {
+public:
+};
 
 /**
  * \brief MosaicType

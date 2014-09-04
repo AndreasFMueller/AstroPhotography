@@ -158,7 +158,7 @@ void	*FITSinfileBase::readdata() throw (FITSexception) {
 #define	IGNORED_KEYWORDS_N	8
 const char	*ignored_keywords[IGNORED_KEYWORDS_N] = {
 	"SIMPLE", "BITPIX", "PCOUNT", "GCOUNT",
-	"XTENSION", "END", "BSCALE", "BZERO"
+	"XTENSION", "END", "BSCALE", "BZERO",
 };
 
 /**
@@ -205,18 +205,23 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 				keynum);
 			return;
 		}
-		FITShdu	hdu;		
-		hdu.name = keyname;
-		if (!ignored(hdu.name)) {
+		keynum++;
+		std::string	name(keyname);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "key '%s' found", name.c_str());
+		if (name.size() == 0) {
+			continue;
+		}
+		if (!ignored(name)) {
+			FITShdu	hdu(name, FITSExtensions::index(name));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s hdu",
+				hdu.type.name());
 			hdu.comment = comment;
 			hdu.value = value;
-			hdu.type = TSTRING;
-			headers.insert(make_pair(hdu.name, hdu));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
 				hdu.name.c_str(), hdu.value.c_str(),
 				hdu.comment.c_str());
+			headers.insert(make_pair(hdu.name, hdu));
 		}
-		keynum++;
 	}
 }
 
@@ -224,7 +229,7 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
  * \brief Copy the headers read from the FITS file into the Image metadata
  */
 void	FITSinfileBase::addHeaders(ImageBase *image) const {
-	std::map<std::string, FITShdu>::const_iterator	hi;
+	std::multimap<std::string, FITShdu>::const_iterator	hi;
 	for (hi = headers.begin(); hi != headers.end(); hi++) {
 		std::string	key = hi->second.name;
 		std::string	value = hi->second.value;
@@ -321,80 +326,94 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	ImageMetadata::const_iterator	i;
 	for (i = image.begin(); i != image.end(); i++) {
 		const char	*key = i->first.c_str();
-		const char	*comment = i->second.getComment().c_str();
-		int	type = i->second.getType();
+		Metavalue	value = i->second;
+		const char	*comment = value.getComment().c_str();
+		std::type_index	type = value.getType();
 		int	status = 0;
 		int	rc = 0;
-		std::string	value = i->second.getValue();
-		// next few variables are used as buffers for the fits_write_key
-		// function
-		int		logicalvalue;
-		char		charvalue;
-		short		shortvalue;
-		unsigned short	ushortvalue;
-		int		intvalue;
-		unsigned int	uintvalue;
-		long		longvalue;
-		unsigned long	ulongvalue;
-		float		floatvalue;
-		double		doublevalue;
-		switch (type) {
-		case TLOGICAL:
-			logicalvalue = (value[0] == 'T') ? 1 : 0;
-			rc = fits_write_key(fptr, type, key, &logicalvalue,
+
+		if (type == std::type_index(typeid(bool))) {
+			int	logicalvalue = (bool)value;
+			rc = fits_write_key(fptr, TLOGICAL, key, &logicalvalue,
 				comment, &status);
-			break;
-		case TSTRING:
-			rc = fits_write_key(fptr, type, key,
-				(void *)value.c_str(),
-				comment, &status);
-			break;
-		case TBYTE:
-			charvalue = atoi(value.c_str());
-			rc = fits_write_key(fptr, type, key, &charvalue,
-				comment, &status);
-			break;
-		case TSHORT:
-			shortvalue = atoi(value.c_str());
-			rc = fits_write_key(fptr, type, key, &shortvalue,
-				comment, &status);
-			break;
-		case TUSHORT:
-			ushortvalue = atoi(value.c_str());
-			rc = fits_write_key(fptr, type, key, &ushortvalue,
-				comment, &status);
-			break;
-		case TINT:
-			intvalue = atoi(value.c_str());
-			rc = fits_write_key(fptr, type, key, &intvalue,
-				comment, &status);
-			break;
-		case TUINT:
-			uintvalue = atoi(value.c_str());
-			rc = fits_write_key(fptr, type, key, &uintvalue,
-				comment, &status);
-			break;
-		case TLONG:
-			longvalue = atol(value.c_str());
-			rc = fits_write_key(fptr, type, key, &longvalue,
-				comment, &status);
-			break;
-		case TULONG:
-			ulongvalue = atol(value.c_str());
-			rc = fits_write_key(fptr, type, key, &ulongvalue,
-				comment, &status);
-			break;
-		case TFLOAT:
-			floatvalue = strtof(value.c_str(), NULL);
-			rc = fits_write_key(fptr, type, key, &floatvalue,
-				comment, &status);
-			break;
-		case TDOUBLE:
-			doublevalue = strtod(value.c_str(), NULL);
-			rc = fits_write_key(fptr, type, key, &doublevalue,
-				comment, &status);
-			break;
+			goto writedone;
 		}
+
+		if (type == std::type_index(typeid(std::string))) {
+			rc = fits_write_key(fptr, TSTRING, key,
+				(void *)value.getValue().c_str(),
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(char))) {
+			char	charvalue = (char)value;
+			rc = fits_write_key(fptr, TBYTE, key, &charvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(short))) {
+			short	shortvalue = (short)value;
+			rc = fits_write_key(fptr, TSHORT, key, &shortvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(unsigned short))) {
+			unsigned short	ushortvalue = (unsigned short)value;
+			rc = fits_write_key(fptr, TUSHORT, key, &ushortvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(int))) {
+			int	intvalue = (int)value;
+			rc = fits_write_key(fptr, TINT, key, &intvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(unsigned int))) {
+			unsigned int	uintvalue = (unsigned int)value;
+			rc = fits_write_key(fptr, TUINT, key, &uintvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(long))) {
+			long	longvalue = (long)value;
+			rc = fits_write_key(fptr, TLONG, key, &longvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(unsigned long))) {
+			unsigned long	ulongvalue = (unsigned long)value;
+			rc = fits_write_key(fptr, TULONG, key, &ulongvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(float))) {
+			float	floatvalue = (float)value;
+			rc = fits_write_key(fptr, TFLOAT, key, &floatvalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(double))) {
+			double doublevalue = (double)value;
+			rc = fits_write_key(fptr, TDOUBLE, key, &doublevalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write entry of type %s",
+			type.name());
+		continue;
+	
+	writedone:
 		if (rc) {
 			throw FITSexception(errormsg(status));
 		}

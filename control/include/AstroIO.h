@@ -34,9 +34,20 @@ public:
  */
 struct FITShdu {
 	std::string	name;
+	std::type_index	type;
 	std::string	value;
 	std::string	comment;
-	int	type;
+	FITShdu(const std::string& _name, std::type_index _type)
+		: name(_name), type(_type) {
+	}
+};
+
+class FITSExtensions {
+public:
+static int	type(const std::string& name);
+static std::type_index	index(const std::string& name);
+static std::type_index	index(int tp);
+static int	type(std::type_index idx);
 };
 
 /**
@@ -49,7 +60,7 @@ struct FITShdu {
  */
 class FITSfile {
 protected:
-	std::map<std::string, FITShdu>	headers;
+	std::multimap<std::string, FITShdu>	headers;
 	std::string	errormsg(int status) const;
 	std::string	filename;
 	fitsfile	*fptr;

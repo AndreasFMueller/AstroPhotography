@@ -12,6 +12,10 @@ namespace process {
 //////////////////////////////////////////////////////////////////////
 // adapter to do the interpolation
 //////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief Adapter class for interpolation of bad pixels
+ */
 class InterpolationAdapter : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_image;
 	unsigned int	_spacing;
@@ -22,6 +26,9 @@ public:
 		  _spacing(spacing) {
 	}
 
+	/**
+	 * \brief Interpolate a particular pixel
+	 */
 	double	pixel(unsigned int x, unsigned int y) const {
 		double	v = _image.pixel(x, y);
 		if (v == v) {
