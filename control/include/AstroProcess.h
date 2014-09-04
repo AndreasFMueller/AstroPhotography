@@ -418,18 +418,40 @@ public:
  * \brief Common methods for calbration image generators
  *
  * The calibration image processor computes calibration image pixel values
- * from the averages computed in tiles.
+ * from the averages computed in tiles. The tiles are centered at coordinates
+ * that are odd multiples of _step.
+ *
+ * The image may have non-comparable pixels. E.g. a color sensor has color
+ * filters on each pixel, so the R, G, and B pixels are different, and must
+ * be treated separately to compute the calibration image. Pixels of the same
+ * color form a subgrid, the _spacing parameter is the grid constant of the
+ * subgrid. Monochrome images, where all pixels are comparable, use
+ * _spacing = 1. Bayer filter sensors use _spacing = 2. To ensure that the
+ * tile center coordinates always belong th the same subgrid, _step must be
+ * a multiple of _spacing. Note that the _spacing parameter has no influence
+ * on the position of the tile centers or the size of the tiles, it only affects
+ * the size of the target image (it multiplies each dimension by _spacing)
+ * and the number of pixels that contribute to a tile aggregate (it devidides
+ * it by _spacing).
+ *
+ * To make the code more readable, this class always uses short to represent
+ * tile coordinates.
  */
-//
+// The dots represent the area of the image that used to compute the aggregates
+// for the tile with coordinates (1,1).
 //
 //         |         |         |         |         |         |
-//         |         |         |         |         |         |
+//         |         |       ..|.........|.........|..       |
+// 4*_step +---------+---------+---------+---------+---------+-----
+//         |         |       ..|.........|.........|..       |
+//         |         |       ..|.........|.........|..       |
+//         |         |       ..|.........|.........|..       |
 // 3*_step +---------o---------+---------o---------+---------o-----
-//         |         |         |         |         |         |
-//         |         |         |         |         |         |
-//         |         |         |         |         |         |
+//         |         |       ..|.........|.........|..       |
+//         |         |       ..|.........|.........|..       |
+//         |         |       ..|.........|.........|..       |
 // 2*_step +---------+---------+---------+---------+---------+-----
-//         |         |         |         |         |         |
+//         |         |       ..|.........|.........|..       |
 //         |         |         |         |         |         |
 //         |         |         |         |         |         |
 //   _step +---------o---------+---------o---------+---------o-----
@@ -443,12 +465,43 @@ class CalibrationProcessorStep : public CalibrationImageStep {
 	int	_spacing;
 public:
 	int	spacing() const { return _spacing; }
-	void	spacing(int s) { _spacing = s; }
+	void	spacing(int s);
 private:
 	int	_step;
 public:
 	int	step() const { return _step; }
-	void	step(int s) { _step = s; }
+	void	step(int s);
+	void	setStepAndSpacing(int newstep, int newspacing);
+private:
+	double	_tolerance;
+public:
+	double	tolerance() const { return _tolerance; }
+	void	tolerance(double t);
+private:
+	double	_maxoffset;
+public:
+	double	maxoffset() const { return _maxoffset; }
+	void	maxoffset(double m) { _maxoffset = m; }
+private:
+	double	_margin;
+public:
+	double	margin() const { return _margin; }
+	void	margin(double m) { _margin = m; }
+
+	/**
+ 	 * \brief Method type 
+	 * 
+	 * constructing a dark or flat images involves deciding which pixel
+	 * values should be considered when computing a new pixel value.
+	 * 
+	 */
+	typedef enum { mean_method, median_method } method_type;
+private:
+	method_type	_method;
+public:
+	method_type	method() const { return _method; }
+	void	method(method_type m) { _method = m; }
+	
 protected:
 	int	grid() const { return _step * _spacing; }
 	size_t		nrawimages;
@@ -460,26 +513,30 @@ protected:
 	int	xc(int x) const;
 	int	yc(int y) const;
 	// image coordinates from tile coordinates
-	int	xi(int x) const;
-	int	yi(int y) const;
+	int	xi(short x) const;
+	int	yi(short y) const;
 	// tile coordinates from image coordinates
-	int	xt(int x) const;
-	int	yt(int y) const;
+	short	xt(int x) const;
+	short	yt(int y) const;
 
 	ImageSize	tileimagesize(const ImageSize& size) const;
 
 	// aggregator class
+public:
 	class aggregates {
 	public:
 		double	mean;
 		double	median;
 		double	stddev;
-		bool	improbable(double x) const {
-			return (fabs(x - mean) > 3 * stddev);
+		bool	improbable(double x, double tolerance = 3.) const {
+			return (fabs(x - mean) > tolerance * stddev);
 		}
 	};
+protected:
+#if 0
 	void	get(unsigned int x, unsigned int y, double *values, int& n,
 			const aggregates& a) const;
+#endif
 	Image<double>	*image;
 	ImagePtr	imageptr;
 	// as a basis for deciding which values should go into the
@@ -490,7 +547,7 @@ protected:
 	Image<double>	*stddevs;
 private:
 	aggregates	tile(int x, int y);
-	void	filltile(int x, int y);
+	void	filltile(short x, short y);
 	aggregates	aggr(unsigned int x, unsigned int y) const;
 public:
 	CalibrationProcessorStep(CalibrationImageStep::caltype t);

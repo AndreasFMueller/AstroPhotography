@@ -55,7 +55,7 @@ void	ImageCalibrationStepTest::testCalibration() {
 		for (unsigned int y = 0; y < size.height(); y++) {
 			//debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%u", x, y);
 			double	v = 32768;
-			double	offset = 1024 + random() % 128;
+			double	offset = 1024 + x + y + random() % 128;
 			dark->writablepixel(x, y) = offset;
 			float	d = size.center().distance(ImagePoint(x, y));
 			double	f = 1 + 0.001 * d;

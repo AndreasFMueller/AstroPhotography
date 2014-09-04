@@ -86,9 +86,13 @@ void	CalibrationProcessorStepTest::testDark() {
 	ProcessingController	controller;
 	
 	DarkProcessorStep	*darkprocessor = new DarkProcessorStep();
-	ProcessingStepPtr	step = ProcessingStepPtr(darkprocessor);
+	ProcessingStepPtr	darkstep = ProcessingStepPtr(darkprocessor);
+	controller.addstep("dark", darkstep);
+	darkprocessor->tolerance(3.);
 
-	controller.addstep("dark", step);
+	FlatProcessorStep	*flatprocessor = new FlatProcessorStep();
+	ProcessingStepPtr	flatstep = ProcessingStepPtr(flatprocessor);
+	controller.addstep("flat", flatstep);
 
 	ImageSize	size(512, 256);
 
@@ -110,25 +114,57 @@ void	CalibrationProcessorStepTest::testDark() {
 		CPPUNIT_ASSERT(processingstep->status() == ProcessingStep::complete);
 		controller.addstep(name, processingstep);
 		controller.add_precursor("dark", name);
+		controller.add_precursor("flat", name);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "all raw images prepared");
 
-	// process the images
-	//controller.execute(2);
+	// ensure that the calibration processors know whether work needs to
+	// be done
 	darkprocessor->checkstate();
+	flatprocessor->checkstate();
 	CPPUNIT_ASSERT(darkprocessor->status() == ProcessingStep::needswork);
-	darkprocessor->work();
-	CPPUNIT_ASSERT(darkprocessor->status() == ProcessingStep::complete);
+	CPPUNIT_ASSERT(flatprocessor->status() == ProcessingStep::needswork);
 
-	// check the output adapter for bad pixels 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking bad pixels");
-	const ConstImageAdapter<double>&	out = darkprocessor->out();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark value(100, 200) = %f", out.pixel(100, 200));
-	CPPUNIT_ASSERT(out.pixel(100, 200) != out.pixel(100, 200));
-	CPPUNIT_ASSERT(out.pixel(110, 200) != out.pixel(110, 200));
-	CPPUNIT_ASSERT(out.pixel(112, 200) != out.pixel(112, 200));
-	CPPUNIT_ASSERT(out.pixel(400, 100) != out.pixel(400, 100));
-	CPPUNIT_ASSERT(out.pixel(401, 100) != out.pixel(401, 100));
+	// process the images
+	controller.execute(1);
+	//darkprocessor->work();
+	CPPUNIT_ASSERT(darkprocessor->status() == ProcessingStep::complete);
+	CPPUNIT_ASSERT(flatprocessor->status() == ProcessingStep::complete);
+
+	// check the dark output adapter for bad pixels 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking bad pixels in dark image");
+	const ConstImageAdapter<double>&	darkout = darkprocessor->out();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dark value(100, 200) = %f", darkout.pixel(100, 200));
+	CPPUNIT_ASSERT(darkout.pixel(100, 200) != darkout.pixel(100, 200));
+	CPPUNIT_ASSERT(darkout.pixel(110, 200) != darkout.pixel(110, 200));
+	CPPUNIT_ASSERT(darkout.pixel(112, 200) != darkout.pixel(112, 200));
+	CPPUNIT_ASSERT(darkout.pixel(400, 100) != darkout.pixel(400, 100));
+	CPPUNIT_ASSERT(darkout.pixel(401, 100) != darkout.pixel(401, 100));
+
+	// count the values that are close to the target value
+	int	goodpixels = 0;
+	for (unsigned int x = 0; x < size.width(); x++) {
+		for (unsigned int y = 0; y < size.height(); y++) {
+			double 	v = darkout.pixel(x, y);
+			if (v == v) {
+				if (fabs(v - (1000 + x + y)) < 100) {
+					goodpixels++;
+				}
+			}
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of good pixels: %d", goodpixels);
+	CPPUNIT_ASSERT(goodpixels > 0.8 * size.getPixels());
+
+	// check the flat output adapter for bad pixels
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking bad pixels in flat image");
+	const ConstImageAdapter<double>&	flatout = flatprocessor->out();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flat value(100, 200) = %f", flatout.pixel(100, 200));
+	CPPUNIT_ASSERT(flatout.pixel(100, 200) != flatout.pixel(100, 200));
+	CPPUNIT_ASSERT(flatout.pixel(110, 200) != flatout.pixel(110, 200));
+	CPPUNIT_ASSERT(flatout.pixel(112, 200) != flatout.pixel(112, 200));
+	CPPUNIT_ASSERT(flatout.pixel(400, 100) != flatout.pixel(400, 100));
+	CPPUNIT_ASSERT(flatout.pixel(401, 100) != flatout.pixel(401, 100));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDark() end");
 }

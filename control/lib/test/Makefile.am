@@ -62,6 +62,9 @@ singletest_SOURCES = singletest.cpp \
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 
+single:	singletest
+	./singletest -d 2>&1 | tee single.log
+
 # tests related to the processing engine. These tests include stuff
 processtests_SOURCES = processtests.cpp \
 	ProcessingStepTest.cpp ProcessingThreadTest.cpp \
