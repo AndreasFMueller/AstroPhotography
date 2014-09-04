@@ -81,7 +81,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
 	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
 	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
 	ImageCalibrationStep.cpp CalibrationImageStep.cpp ImageBufferStep.cpp \
-	CalibrationProcessorStep.cpp \
+	CalibrationProcessorStep.cpp InterpolationStep.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

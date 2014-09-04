@@ -54,11 +54,11 @@ tests_SOURCES = tests.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
-	ImageCalibrationStepTest.cpp 
+	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp 
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	CalibrationProcessorStepTest.cpp 
+	InterpolationStepTest.cpp 
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 

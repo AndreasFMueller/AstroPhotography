@@ -533,10 +533,6 @@ public:
 		}
 	};
 protected:
-#if 0
-	void	get(unsigned int x, unsigned int y, double *values, int& n,
-			const aggregates& a) const;
-#endif
 	Image<double>	*image;
 	ImagePtr	imageptr;
 	// as a basis for deciding which values should go into the
@@ -577,6 +573,16 @@ class FlatProcessorStep : public CalibrationProcessorStep {
 public:
 	FlatProcessorStep()
 		: CalibrationProcessorStep(CalibrationImageStep::FLAT) { }
+	virtual ProcessingStep::state	do_work();
+};
+
+/**
+ * \brief Processing step to interpolate pixels
+ */
+class InterpolationStep : public ImageStep {
+	int	_spacing;
+public:
+	InterpolationStep(int spacing = 1);
 	virtual ProcessingStep::state	do_work();
 };
 
