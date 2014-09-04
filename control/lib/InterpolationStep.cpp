@@ -91,8 +91,7 @@ public:
 /**
  * \brief construct an interpolation step
  */
-InterpolationStep::InterpolationStep(int spacing)
-	: _spacing(spacing) {
+InterpolationStep::InterpolationStep(int spacing) : _spacing(spacing) {
 }
 
 /**
@@ -104,15 +103,13 @@ InterpolationStep::InterpolationStep(int spacing)
  */
 ProcessingStep::state	InterpolationStep::do_work() {
 	// find the single precursor, which also must be an image step
-	if (precursors().size() == 0) {
+	ImageStep	*imagestep = NULL;
+	try {
+		imagestep = input();
+	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"not precursor for interpolation");
+			"not precursor for interpolation: %s", x.what());
 		return ProcessingStep::idle;
-	}
-	ProcessingStep	*step = *precursors().begin();
-	ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
-	if (NULL == imagestep) {
-		throw std::runtime_error("precursor is not an image step");
 	}
 
 	// take the output from the precursor to buil the interpolation

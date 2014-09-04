@@ -21,33 +21,16 @@ WriteImageStep::WriteImageStep(const std::string& filename, bool precious)
 }
 
 /**
- * \brief Get the input step
- */
-ImageStep	*WriteImageStep::input() const {
-	steps::const_iterator	i
-		= std::find_if(precursors().begin(), precursors().end(),
-			[](ProcessingStep *step) {
-				ImageStep	*image
-					= dynamic_cast<ImageStep *>(step);
-				return (NULL != image);
-			}
-		);
-	if (i == precursors().end()) {
-		std::runtime_error("no precursors set");
-	}
-	return dynamic_cast<ImageStep *>(*i);
-}
-
-/**
  * \brief Do the actual work of writing a file
  */
 ProcessingStep::state	WriteImageStep::do_work() {
 	try {
-		//
 		// turn the precessor's output into an image
 		Image<double>	image(input()->out());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %s image",
 			image.size().toString().c_str());
+
+		// XXX copy the metadata
 
 		// write the image
 		FITSoutfile<double>	outfile(_filename);
@@ -82,6 +65,19 @@ const ConstImageAdapter<double>&        WriteImageStep::out() const {
 	return input()->out();
 }
 
+/**
+ * \brief Find out whether meta data is available
+ */
+bool	WriteImageStep::hasMetadata(const std::string& name) const {
+	return input()->hasMetadata(name);
+}
+
+/**
+ * \brief Access to meta data
+ */
+astro::image::Metavalue	WriteImageStep::getMetadata(const std::string& name) const {
+	return input()->getMetadata(name);
+}
 
 } // namespace process
 } // namespace astro

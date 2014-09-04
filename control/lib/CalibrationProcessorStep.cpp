@@ -580,6 +580,26 @@ CalibrationProcessorStep::aggregates	CalibrationProcessorStep::aggr(
 	return result;
 }
 
+/**
+ * \brief find out whether the image has metadata
+ */
+bool	CalibrationProcessorStep::hasMetadata(const std::string& name) const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return image->hasMetadata(name);
+}
+
+/**
+ * \brief Get the meta data from the image
+ */
+astro::image::Metavalue	CalibrationProcessorStep::getMetadata(const std::string& name) const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return image->getMetadata(name);
+}
+
 //////////////////////////////////////////////////////////////////////
 // creating a dark image
 //////////////////////////////////////////////////////////////////////
@@ -597,6 +617,8 @@ ProcessingStep::state	DarkProcessorStep::do_work() {
 	if (preparation != ProcessingStep::complete) {
 		return preparation;
 	}
+
+	// XXX create the meta data 
 
 	// done
 	return ProcessingStep::complete;
@@ -627,6 +649,7 @@ ProcessingStep::state	FlatProcessorStep::do_work() {
 			image->writablepixel(x, y) = image->pixel(x, y) / m;
 		}
 	}
+
 
 	// cheat
 	return ProcessingStep::complete;

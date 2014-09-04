@@ -306,5 +306,24 @@ ProcessingStep::state	ProcessingStep::status(state newstate) {
 	return _status;
 }
 
+//////////////////////////////////////////////////////////////////////
+// meta data access
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Find out whether the meta value is present
+ */
+bool	ProcessingStep::hasMetadata(const std::string& /* name */) const {
+	return false;
+}
+
+/**
+ * \brief Find the value of a meta data element
+ */
+astro::image::Metavalue	ProcessingStep::getMetadata(const std::string& name) const {
+	std::string	msg = stringprintf("unknown extensions '%s'",
+		name.c_str());
+	throw std::runtime_error(msg);
+}
+
 } // namespace process
 } // namespace astro

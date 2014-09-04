@@ -53,18 +53,7 @@ ProcessingStep::state	CalibrationImageStep::do_work() {
 	}
 
 	// get the precursor
-	steps::const_iterator	pp =
-		find_if(precursors().begin(), precursors().end(),
-			[](ProcessingStep *step) {
-				return (dynamic_cast<ImageStep *>(step)
-					!= NULL);
-			}
-		);
-	if (pp == precursors().end()) {
-		throw std::runtime_error("no precursor image");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", *pp);
-	ImageStep	*precursor = dynamic_cast<ImageStep *>(*pp);
+	ImageStep	*precursor = input();
 
 	// construct an identity adapter toa ccess the precursor output
 	_out = ImageStep::outPtr(new IdentityAdapter<double>(precursor->out()));
@@ -101,6 +90,28 @@ ProcessingStep::state	CalibrationImageFileStep::do_work() {
 	return ProcessingStep::complete;
 }
 
+//////////////////////////////////////////////////////////////////////
+// access to metadata
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Find out whether meta data is present
+ */
+bool	CalibrationImageStep::hasMetadata(const std::string& name) const {
+	if (NULL == _image) {
+		input()->hasMetadata(name);
+	}
+	return _image->hasMetadata(name);
+}
+
+/**
+ * \brief Access to meta data
+ */
+astro::image::Metavalue	CalibrationImageStep::getMetadata(const std::string& name) const {
+	if (NULL == _image) {
+		input()->getMetadata(name);
+	}
+	return _image->getMetadata(name);
+}
 
 } // namespace process
 } // namespace astro

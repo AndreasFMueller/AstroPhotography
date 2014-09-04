@@ -58,6 +58,20 @@ ProcessingStep::state	RawImageStep::do_work() {
 	return common_work();
 }
 
+/**
+ * \brief ask whether the image has meta data
+ */
+bool	RawImageStep::hasMetadata(const std::string& name) const {
+	return _image->hasMetadata(name);
+}
+
+/**
+ * \brief get the meta data from the image
+ */ 
+astro::image::Metavalue	RawImageStep::getMetadata(const std::string& name) const {
+	return _image->getMetadata(name);
+}
+
 //////////////////////////////////////////////////////////////////////
 // Raw image from a file
 //////////////////////////////////////////////////////////////////////

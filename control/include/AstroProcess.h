@@ -205,6 +205,8 @@ private:	// prevent copying
 	ProcessingStep&	operator=(const ProcessingStep& other);
 public:
 	std::string	type_name() const;
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -305,6 +307,12 @@ public:
 	virtual const ConstImageAdapter<double>&	out() const;
 	virtual bool	hasColor() const;
 	virtual const ConstImageAdapter<RGB<double> >&	out_color() const;
+protected:
+	ImageStep	*input() const;
+public:
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -318,6 +326,9 @@ public:
 	RawImageStep(ImagePtr image);
 	ImageRectangle	subframe() const;
 	virtual ProcessingStep::state	do_work();
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -346,6 +357,9 @@ public:
 	ImageBufferStep();
 	virtual ProcessingStep::state	do_work();
 	virtual const ConstImageAdapter<double>&	out() const;
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -354,12 +368,14 @@ public:
 class WriteImageStep : public ImageStep {
 	std::string	_filename;
 	bool	_precious;
-	ImageStep	*input() const;
 public:
 	WriteImageStep(const std::string& filename, bool precious = false);
 	virtual ProcessingStep::state	do_work();
 	virtual astro::adapter::PreviewAdapterPtr	preview() const;
 	virtual const ConstImageAdapter<double>&	out() const;
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -382,6 +398,9 @@ protected:
 public:
 	CalibrationImageStep(caltype t) : _type(t) { }
 	CalibrationImageStep(caltype t, ImagePtr image);
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**
@@ -535,6 +554,11 @@ public:
 protected:
 	Image<double>	*image;
 	ImagePtr	imageptr;
+public:
+	// metadata
+	virtual bool	hasMetadata(const std::string& name) const;
+	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
+protected:
 	// as a basis for deciding which values should go into the
 	// construction of the calibration image, we compute medians,
 	// means and standard deviations. 

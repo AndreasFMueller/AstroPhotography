@@ -62,5 +62,45 @@ const ConstImageAdapter<RGB<double> >&	ImageStep::out_color() const {
 	throw std::runtime_error("not implemented");
 }
 
+//////////////////////////////////////////////////////////////////////
+// Access to the first image precursor
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Get an ImageStep precursors
+ */
+ImageStep	*ImageStep::input() const {
+	// get the precursor
+	steps::const_iterator	pp =
+		find_if(precursors().begin(), precursors().end(),
+			[](ProcessingStep *step) {
+				return (dynamic_cast<ImageStep *>(step)
+					!= NULL);
+			}
+		);
+	if (pp == precursors().end()) {
+		throw std::runtime_error("no precursor image");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "precursor: %p", *pp);
+	ImageStep	*precursor = dynamic_cast<ImageStep *>(*pp);
+	return precursor;
+}
+
+//////////////////////////////////////////////////////////////////////
+// meta data access
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Test precursor image for metadata
+ */
+bool	ImageStep::hasMetadata(const std::string& name) const {
+	return input()->hasMetadata(name);
+}
+
+/**
+ * \brief Get metadata from the precursor image
+ */
+astro::image::Metavalue	ImageStep::getMetadata(const std::string& name) const {
+	return input()->getMetadata(name);
+}
+
 } // namespace process
 } // namespace astro

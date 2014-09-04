@@ -23,21 +23,8 @@ ImageBufferStep::ImageBufferStep() {
  * \brief The processing step creates a buffered image
  */
 ProcessingStep::state	ImageBufferStep::do_work() {
-	// get the first of the image inputs
-	steps::const_iterator	i
-		= std::find_if(precursors().begin(), precursors().end(),
-			[](ProcessingStep *step) {
-				return (NULL != dynamic_cast<ImageStep *>(step));
-			}
-	);
-
-	// check whether we have a precursor image
-	if (i == precursors().end()) {
-		throw std::runtime_error("no precursor image");
-	}
-
 	// create a new image
-	ImageStep	*imagestep = dynamic_cast<ImageStep *>(*i);
+	ImageStep	*imagestep = input();
 	image = new Image<double>(imagestep->out());
 	imageptr = ImagePtr(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "created %s image buffer",
@@ -58,6 +45,26 @@ const ConstImageAdapter<double>&	ImageBufferStep::out() const {
 		throw std::runtime_error("no image present");
 	}
 	return *image;
+}
+
+/**
+ * \brief Find out whether metadata exists for the image
+ */
+bool	ImageBufferStep::hasMetadata(const std::string& name) const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return input()->hasMetadata(name);
+}
+
+/**
+ * \brief Get metadata from the image
+ */
+astro::image::Metavalue	ImageBufferStep::getMetadata(const std::string& name) const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return input()->getMetadata(name);
 }
 
 } // namespace process
