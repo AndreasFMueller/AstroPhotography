@@ -7,6 +7,8 @@
 #include <string>
 #include <typeinfo>
 #include <typeindex>
+#include <mutex>
+#include <list>
 
 namespace astro {
 namespace io {
@@ -132,6 +134,21 @@ std::type_index	FITSExtensions::index(int tp) {
 	default:
 		throw std::invalid_argument("unknown type");
 	}
+}
+
+static std::set<std::string>	nameset;
+
+void	build_nameset() {
+	for (int i = 0; i < Nextensions; i++) {
+		nameset.insert(extensions[i].name);
+	}
+}
+
+std::once_flag	nameset_once;
+
+const std::set<std::string>&	FITSExtensions::names() {
+	std::call_once(nameset_once, build_nameset);
+	return nameset;
 }
 
 } // namespace io

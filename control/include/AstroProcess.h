@@ -540,7 +540,7 @@ protected:
 
 	ImageSize	tileimagesize(const ImageSize& size) const;
 
-	// aggregator class
+	// aggregates class
 public:
 	class aggregates {
 	public:
@@ -554,6 +554,8 @@ public:
 protected:
 	Image<double>	*image;
 	ImagePtr	imageptr;
+private:
+	void	copy_common_metadata(const std::string& name);
 public:
 	// metadata
 	virtual bool	hasMetadata(const std::string& name) const;

@@ -9,6 +9,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
 #include <numeric>
+#include <algorithm>
 
 using namespace astro::adapter;
 
@@ -61,7 +62,7 @@ private:
 	double	_maxoffset;
 	double	_median;
 public:
-	aggregator(double median, double maxoffset)
+	aggregator(double median = 0., double maxoffset = 0.)
 		: _counter(0), _xsum(0), _x2sum(0),
 		  _maxoffset(maxoffset), _median(median) { }
 	void    operator()(double x) {
@@ -73,6 +74,30 @@ public:
 		_counter++;
 	}
 };
+
+/**
+ * \brief Aggregator for extension values
+ */
+class extension_aggregator : public aggregator {
+	std::string	_name;
+public:
+	extension_aggregator(const std::string& name) : _name(name) {
+	}
+	void	operator()(ProcessingStep *step) {
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+		if (NULL == imagestep) {
+			return;
+		}
+		try {
+			double	exptime = step->getMetadata(_name);
+			aggregator::operator()(exptime);
+		} catch (std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"image does not have EXPTIME");
+		}
+	}
+};
+
 
 /**
  * \brief Auxiliary class to build values
@@ -130,6 +155,54 @@ public:
 	}
 };
 
+
+/**
+ * \brief Predicate class that finds out whether a step has a given metadata
+ */
+class has_metadata {
+	std::string	_name;
+public:
+	has_metadata(const std::string& name) : _name(name) { }
+	bool	operator()(ProcessingStep *step) const {
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+		if (NULL == imagestep) {
+			return false;
+		}
+		return imagestep->hasMetadata(_name);
+	}
+};
+
+/**
+ * \brief Predicate class to decide whether all precursors have identical meta data
+ */
+class	has_same_metadata {
+	std::string	_name;
+	long	value;
+	bool	has_value;
+public:
+	has_same_metadata(const std::string& name) : _name(name) {
+		has_value = false;
+	}
+	bool	operator()(ProcessingStep *step) {
+		ImageStep	*imagestep = dynamic_cast<ImageStep *>(step);
+		if (NULL == imagestep) {
+			return false;
+		}
+		if (has_value) {
+			Metavalue	mv = imagestep->getMetadata(_name);
+			if (value != (long)mv) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"different values: %ld != %ld",
+					value, (long)mv);
+				return false;
+			}
+		} else {
+			value = (long)imagestep->getMetadata(_name);
+			has_value = true;
+		}
+		return imagestep->hasMetadata(_name);
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // constructor/destructor
@@ -357,6 +430,42 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 	image->fill(0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "common: create empty %s image",
 		image->size().toString().c_str());
+
+	// CCD temperature metadata
+	extension_aggregator	ccdtemp
+		= std::for_each(precursors().begin(), precursors().end(),
+			extension_aggregator("CCD-TEMP"));
+	if (ccdtemp.counter() > 1) {
+		if ((ccdtemp.stddev() / ccdtemp.mean()) < 0.1) {
+			image->setMetadata("CCD-TEMP", Metavalue(ccdtemp.mean(),
+				"CCD temperature in degrees C"));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD-TEMP = %f",
+				ccdtemp.mean());
+		}
+	}
+
+	// SET temperature metadata
+	extension_aggregator	settemp
+		= std::for_each(precursors().begin(), precursors().end(),
+			extension_aggregator("SET-TEMP"));
+	if (settemp.counter() > 1) {
+		if ((settemp.stddev() / settemp.mean()) < 0.1) {
+			image->setMetadata("SET-TEMP", Metavalue(settemp.mean(),
+				"set temperature in degrees C"));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "SET-TEMP = %f",
+				settemp.mean());
+		}
+	}
+
+	// ensure all images have the same values for metadata, and also
+	// set the common metadata in the target image
+	//    XBINNING, YBINNING
+	//    XORGSUBF, YORGSUBF
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "copy metadata");
+	copy_common_metadata("XBINNING");
+	copy_common_metadata("YBINNING");
+	copy_common_metadata("XORGSUBF");
+	copy_common_metadata("YORGSUBF");
 
 	// make the image availabe as preview
 	_preview = PreviewAdapter::get(imageptr);
@@ -600,9 +709,41 @@ astro::image::Metavalue	CalibrationProcessorStep::getMetadata(const std::string&
 	return image->getMetadata(name);
 }
 
+/**
+ * \brief copy metadata to the new image
+ */
+void	CalibrationProcessorStep::copy_common_metadata(const std::string& name) {
+	// first see whether none of the precursors has the meta data
+	bool	none_has = std::none_of(precursors().begin(),
+			precursors().end(), has_metadata(name));
+	if (none_has) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no entry has metadata %s",
+			name.c_str());
+		return;
+	}
+
+	// if not, then all must have it, an all with the same value
+	bool	all_have = std::all_of(precursors().begin(), precursors().end(),
+				has_same_metadata(name));
+	if (!all_have) {
+		std::string	msg = stringprintf("not all images have the "
+			"same %s value", name.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// set the medata of the commen value
+	ImageStep	*imagestep = input();
+	Metavalue	v = imagestep->getMetadata(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "all entries have same "
+		"metadata %s = %ld", name.c_str(), (long)v);
+	image->setMetadata(name, v);
+}
+
 //////////////////////////////////////////////////////////////////////
 // creating a dark image
 //////////////////////////////////////////////////////////////////////
+
 /**
  * \brief Work to construct dark images
  *
@@ -619,6 +760,19 @@ ProcessingStep::state	DarkProcessorStep::do_work() {
 	}
 
 	// XXX create the meta data 
+
+	// EXPTIME meta data
+	extension_aggregator	exptime
+		= std::for_each(precursors().begin(), precursors().end(),
+			extension_aggregator("EXPTIME"));
+	if (exptime.counter() > 1) {
+		if ((exptime.stddev() / exptime.mean()) < 0.1) {
+			image->setMetadata("EXPTIME", Metavalue(exptime.mean(),
+				"exposure time in seconds"));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "EXPTIME = %f",
+				exptime.mean());
+		}
+	}
 
 	// done
 	return ProcessingStep::complete;

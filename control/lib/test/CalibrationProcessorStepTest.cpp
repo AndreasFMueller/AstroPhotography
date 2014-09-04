@@ -104,6 +104,13 @@ void	CalibrationProcessorStepTest::testDark() {
 		Image<unsigned short>	*image
 			= new Image<unsigned short>(size);
 		darkimage(image);
+		image->setMetadata("EXPTIME", Metavalue((double)47, "exposure time"));
+		image->setMetadata("CCD-TEMP", Metavalue((double)-20.3, "ccd temperatur in degrees C"));
+		image->setMetadata("SET-TEMP", Metavalue((double)-20., "set temperatur in degrees C"));
+		image->setMetadata("XBINNING", Metavalue((long)2, "X binning"));
+		image->setMetadata("YBINNING", Metavalue((long)2, "Y binning"));
+		image->setMetadata("XORGSUBF", Metavalue((long)23, "X subframe offset"));
+		image->setMetadata("YORGSUBF", Metavalue((long)32, "Y subframe offset"));
 
 		ImagePtr	imageptr(image);
 		ProcessingStepPtr	processingstep =
@@ -141,6 +148,14 @@ void	CalibrationProcessorStepTest::testDark() {
 	CPPUNIT_ASSERT(darkout.pixel(400, 100) != darkout.pixel(400, 100));
 	CPPUNIT_ASSERT(darkout.pixel(401, 100) != darkout.pixel(401, 100));
 
+	CPPUNIT_ASSERT(fabs((double)darkprocessor->getMetadata("EXPTIME") - 47.) < 0.1);
+	CPPUNIT_ASSERT(fabs((double)darkprocessor->getMetadata("CCD-TEMP") + 20.3) < 0.1);
+	CPPUNIT_ASSERT(fabs((double)darkprocessor->getMetadata("SET-TEMP") + 20.) < 0.1);
+	CPPUNIT_ASSERT((long)darkprocessor->getMetadata("XBINNING") == 2);
+	CPPUNIT_ASSERT((long)darkprocessor->getMetadata("YBINNING") == 2);
+	CPPUNIT_ASSERT((long)darkprocessor->getMetadata("XORGSUBF") == 23);
+	CPPUNIT_ASSERT((long)darkprocessor->getMetadata("YORGSUBF") == 32);
+
 	// count the values that are close to the target value
 	int	goodpixels = 0;
 	for (unsigned int x = 0; x < size.width(); x++) {
@@ -165,6 +180,13 @@ void	CalibrationProcessorStepTest::testDark() {
 	CPPUNIT_ASSERT(flatout.pixel(112, 200) != flatout.pixel(112, 200));
 	CPPUNIT_ASSERT(flatout.pixel(400, 100) != flatout.pixel(400, 100));
 	CPPUNIT_ASSERT(flatout.pixel(401, 100) != flatout.pixel(401, 100));
+
+	CPPUNIT_ASSERT(fabs((double)flatprocessor->getMetadata("CCD-TEMP") + 20.3) < 0.1);
+	CPPUNIT_ASSERT(fabs((double)flatprocessor->getMetadata("SET-TEMP") + 20.) < 0.1);
+	CPPUNIT_ASSERT((long)flatprocessor->getMetadata("XBINNING") == 2);
+	CPPUNIT_ASSERT((long)flatprocessor->getMetadata("YBINNING") == 2);
+	CPPUNIT_ASSERT((long)flatprocessor->getMetadata("XORGSUBF") == 23);
+	CPPUNIT_ASSERT((long)flatprocessor->getMetadata("YORGSUBF") == 32);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDark() end");
 }

@@ -30,7 +30,8 @@ ProcessingStep::state	WriteImageStep::do_work() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "got %s image",
 			image.size().toString().c_str());
 
-		// XXX copy the metadata
+		// copy the metadata
+		astro::io::copy_metadata(*this, image, FITSExtensions::names());
 
 		// write the image
 		FITSoutfile<double>	outfile(_filename);

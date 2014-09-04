@@ -10,6 +10,7 @@
 #include <fitsio.h>
 #include <AstroImage.h>
 #include <map>
+#include <set>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 
@@ -30,7 +31,7 @@ public:
 };
 
 /**
- * \brief structure to abstract 
+ * \brief structure to abstract the metadata as it is read from the FITS file
  */
 struct FITShdu {
 	std::string	name;
@@ -42,13 +43,34 @@ struct FITShdu {
 	}
 };
 
+/**
+ * \brief A class grouping some global information about FITS extensions
+ */
 class FITSExtensions {
 public:
 static int	type(const std::string& name);
 static std::type_index	index(const std::string& name);
 static std::type_index	index(int tp);
 static int	type(std::type_index idx);
+static const std::set<std::string>&	names();
 };
+
+/**
+ * \brief Template function to copy metadata
+ */
+template<typename srctype, typename desttype>
+void	copy_metadata(const srctype& src, desttype& dest,
+		const std::set<std::string>& names) {
+	std::set<std::string>::const_iterator	name;
+	for (name = names.begin(); name != names.end(); name++) {
+		try {
+			dest.setMetadata(*name, src.getMetadata(*name));
+		} catch (std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot copy %s: %s",
+				name->c_str(), x.what());
+		}
+	}
+}
 
 /**
  * \brief FITS file base class
