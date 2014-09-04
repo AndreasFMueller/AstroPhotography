@@ -54,7 +54,8 @@ tests_SOURCES = tests.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
-	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp 
+	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
+	InterpolationStepTest.cpp 
 
 # single test
 singletest_SOURCES = singletest.cpp \

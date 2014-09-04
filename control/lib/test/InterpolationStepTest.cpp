@@ -65,31 +65,37 @@ void	InterpolationStepTest::testInterpolate() {
 	std::list<ImagePoint>	badpixels;
 	int	counter = 10;
 	while (counter--) {
-		ImagePoint	point(random() % (size.width() / 2), random() % size.height());
+		ImagePoint	point(1 + random() % (size.width() / 2),
+					1 + random() % (size.height() - 2));
 		badpixels.push_back(point);
-		image->writablepixel(point) = std::numeric_limits<double>::quiet_NaN();
+		image->writablepixel(point)
+			= std::numeric_limits<double>::quiet_NaN();
 	}
 
 	unsigned int	xb = 3 * size.width() / 4;
 	// make a bad vertical line
 	for (unsigned int y = 10; y < 20; y++) {
-		image->writablepixel(xb, y) = std::numeric_limits<double>::quiet_NaN();
+		image->writablepixel(xb, y)
+			= std::numeric_limits<double>::quiet_NaN();
 	}
 
 	// make a bad horizontal line
 	for (unsigned int dx = 0; dx < 10; dx++) {
-		image->writablepixel(xb + dx, 30) = std::numeric_limits<double>::quiet_NaN();
+		image->writablepixel(xb + dx, 30)
+			= std::numeric_limits<double>::quiet_NaN();
 	}
 	
 	// make a 3x3 block of pixels bad
 	for (unsigned int x = xb; x < xb + 3; x++) {
 		for (unsigned int y = 40; y < 40 + 3; y++) {
-			image->writablepixel(x, y) = std::numeric_limits<double>::quiet_NaN();
+			image->writablepixel(x, y)
+				= std::numeric_limits<double>::quiet_NaN();
 		}
 	}
 
 	// build an RawImageStep from it
-	ProcessingStepPtr	imagestep = ProcessingStepPtr(new RawImageStep(imageptr));
+	ProcessingStepPtr	imagestep
+		= ProcessingStepPtr(new RawImageStep(imageptr));
 	controller.addstep("image", imagestep);
 
 	// add the interpolation step
@@ -110,7 +116,8 @@ void	InterpolationStepTest::testInterpolate() {
 			point.toString().c_str());
 		double	v = interpol->out().pixel(point);
 		double	v2 = pixelvalue(point);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@%s: %f ?= %f", point.toString().c_str(), v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@%s: %f ?= %f",
+			point.toString().c_str(), v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) < 0.01);
 	}
 
@@ -119,19 +126,22 @@ void	InterpolationStepTest::testInterpolate() {
 	for (unsigned int y = 11; y < 19; y++) {
 		double	v = interpol->out().pixel(xb, y);
 		double	v2 = pixelvalue(xb, y);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f ?= %f", xb, y, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f ?= %f",
+			xb, y, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) < 0.01);
 	}
 	{
 		double	v = interpol->out().pixel(xb, 10);
 		double	v2 = pixelvalue(xb, 10);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f", xb, 10, v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f",
+			xb, 10, v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) < 0.01 + M_E / 3.);
 	}
 	{
 		double	v = interpol->out().pixel(xb, 19);
 		double	v2 = pixelvalue(xb, 19);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f", xb, 19, v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f",
+			xb, 19, v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) < 0.01 + M_E / 3.);
 	}
 
@@ -140,19 +150,22 @@ void	InterpolationStepTest::testInterpolate() {
 	for (unsigned int dx = 1; dx < 9; dx++) {
 		double	v = interpol->out().pixel(xb + dx, 30);
 		double	v2 = pixelvalue(xb + dx, 30);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f ?= %f", xb, 30, v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f ?= %f",
+			xb, 30, v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) < 0.01);
 	}
 	{
 		double	v = interpol->out().pixel(xb, 30);
 		double	v2 = pixelvalue(xb, 30);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f", xb, 30, v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f",
+			xb, 30, v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) <= 0.01 + M_PI / 3);
 	}
 	{
 		double	v = interpol->out().pixel(xb + 9, 30);
 		double	v2 = pixelvalue(xb + 9, 30);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f", xb, 30, v, v2);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "@(%u,%u): %f close to %f",
+			xb, 30, v, v2);
 		CPPUNIT_ASSERT(fabs(v - v2) <= 0.01 + M_PI / 3);
 	}
 
@@ -165,7 +178,8 @@ void	InterpolationStepTest::testInterpolate() {
 			}
 			double	v = interpol->out().pixel(x, y);
 			double	v2 = pixelvalue(x, y);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "check point %u,%u: %f close to %f?", x, y, v, v2);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%u,%u: %f close to %f?",
+				x, y, v, v2);
 			CPPUNIT_ASSERT(v == v);
 			CPPUNIT_ASSERT(fabs(v - pixelvalue(x, y)) < 0.01 + M_PI);
 		}
