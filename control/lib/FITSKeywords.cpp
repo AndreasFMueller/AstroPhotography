@@ -19,7 +19,7 @@ typedef struct {
 	std::type_index	index;
 } FITSKeyword;
 
-#define	Nkeywors	71
+#define	Nkeywors	72
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -377,6 +377,11 @@ FITSKeyword	keywors[Nkeywors] = {
 	std::string("BAYER"),
 	std::string("Bayer RGB filter layout"),
 	std::type_index(typeid(std::string))
+},
+{ // 71
+	std::string("IMAGEID"),
+	std::string("Image id in repositry"),
+	std::type_index(typeid(long))
 },
 };
 
