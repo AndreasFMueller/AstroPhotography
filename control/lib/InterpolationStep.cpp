@@ -106,7 +106,7 @@ ProcessingStep::state	InterpolationStep::do_work() {
 	ImageStep	*imagestep = NULL;
 	try {
 		imagestep = input();
-	} catch (std::exception& x) {
+	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"not precursor for interpolation: %s", x.what());
 		return ProcessingStep::idle;
