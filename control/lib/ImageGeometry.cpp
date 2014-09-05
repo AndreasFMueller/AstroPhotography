@@ -7,6 +7,9 @@
 #include <string>
 #include <includes.h>
 #include <AstroFormat.h>
+#include <AstroIO.h>
+
+using namespace astro::io;
 
 namespace astro {
 namespace catalog {
@@ -17,15 +20,14 @@ namespace catalog {
  * \param image		image to add the meta data to
  */
 void	ImageGeometry::addMetadata(ImageBase& image) const {
-	image.setMetadata(std::string("PXLWIDTH"), 
-		Metavalue(_pixelsize * 1000000.,
-			std::string("width of a pixel in microns")));
-	image.setMetadata(std::string("PXLHIGHT"), 
-		Metavalue(_pixelsize * 1000000.,
-			std::string("height of a pixel in microns")));
-	image.setMetadata(std::string("FOCAL"),
-		Metavalue(_focallength,
-			std::string("focal length in m")));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("PXLWIDTH"), 
+			_pixelsize * 1000000.));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("PXLHIGHT"), 
+			_pixelsize * 1000000.));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("FOCAL"), _focallength));
 }
 
 /**
@@ -39,17 +41,16 @@ void	ImageGeometry::addMetadata(ImageBase& image) const {
 ImageGeometry::ImageGeometry(const ImageBase& image)
 		: ImageSize(image.size()) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get pixel width: %s",
-		image.getMetadata(std::string("PXLWIDTH")).getValue().c_str());
-	_pixelsize = std::stod(image.getMetadata(std::string("PXLWIDTH"))
-		.getValue()) / 1000000.;
+		((std::string)(image.getMetadata(std::string("PXLWIDTH")))).c_str());
+	_pixelsize = (double)(image.getMetadata(std::string("PXLWIDTH")))
+			/ 1000000.;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel size: %f", _pixelsize);
-	double	pxy = std::stod(image.getMetadata(std::string("PXLHIGHT"))
-		.getValue()) / 1000000.;
+	double	pxy = (double)(image.getMetadata(std::string("PXLHIGHT")))
+			/ 1000000.;
 	if (_pixelsize != pxy) {
 		throw std::runtime_error("cannot handle nonsquare pixels");
 	}
-	_focallength = std::stod(image.getMetadata(std::string("FOCAL"))
-		.getValue());
+	_focallength = (double)(image.getMetadata(std::string("FOCAL")));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focal length: %f", _focallength);
 }
 

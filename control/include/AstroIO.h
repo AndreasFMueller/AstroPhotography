@@ -46,13 +46,25 @@ struct FITShdu {
 /**
  * \brief A class grouping some global information about FITS extensions
  */
-class FITSExtensions {
+class FITSKeywords {
 public:
+// name list
+static const std::set<std::string>&	names();
+static bool known(const std::string& name);
+
+// get type and comment for a given name
 static int	type(const std::string& name);
 static std::type_index	index(const std::string& name);
+static const std::string&	comment(const std::string& name);
+
+// conversion between FITS type integer and std::type_index
 static std::type_index	index(int tp);
 static int	type(std::type_index idx);
-static const std::set<std::string>&	names();
+
+// factory methods to create 
+static Metavalue	meta(const std::string& name, long value);
+static Metavalue	meta(const std::string& name, double value);
+static Metavalue	meta(const std::string& name, const std::string& value);
 };
 
 /**
@@ -64,7 +76,7 @@ void	copy_metadata(const srctype& src, desttype& dest,
 	std::set<std::string>::const_iterator	name;
 	for (name = names.begin(); name != names.end(); name++) {
 		try {
-			dest.setMetadata(*name, src.getMetadata(*name));
+			dest.setMetadata(src.getMetadata(*name));
 		} catch (std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot copy %s: %s",
 				name->c_str(), x.what());

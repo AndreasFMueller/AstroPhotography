@@ -6,8 +6,10 @@
 #include <AstroCamera.h>
 #include <AstroFormat.h>
 #include <cmath>
+#include <AstroIO.h>
 
 using namespace astro::image;
+using namespace astro::io;
 
 namespace astro {
 namespace camera {
@@ -36,38 +38,33 @@ std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {
 
 void	Exposure::addToImage(ImageBase& image) const {
 	// exposure time
-	Metavalue	mv(exposuretime,
-		std::string("duration of exposure in seconds"));
-	image.setMetadata(std::string("EXPTIME"), mv);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("EXPTIME"), exposuretime));
 
 	// X binning
-	unsigned int	binning;
+	long	binning;
 	binning = mode.getX();
-	Metavalue	mvbinx(binning,
-		std::string("binning factor used on X axis"));
-	image.setMetadata(std::string("XBINNING"), mvbinx);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("XBINNING"), binning));
 
 	// Y binning
 	binning = mode.getY();
-	Metavalue	mvbiny(binning,
-		std::string("binning factor used on Y axis"));
-	image.setMetadata(std::string("YBINNING"), mvbiny);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("YBINNING"), binning));
 
 	// subframe information
-	Metavalue	mvorigx(frame.origin().x(),
-		std::string("subframe origin on X axis"));
-	image.setMetadata(std::string("XORGSUBF"), mvorigx);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("XORGSUBF"),
+			(long)frame.origin().x()));
 
-	Metavalue	mvorigy(frame.origin().y(),
-		std::string("subframe origin on Y axis"));
-	image.setMetadata(std::string("YORGSUBF"), mvorigy);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("YORGSUBF"),
+			(long)frame.origin().y()));
 
 	// limit information
 	if (limit != INFINITY) {
-		Metavalue	mvlimit(limit, 
-			std::string("pixel values above this level are "
-			"considered saturated"));
-		image.setMetadata(std::string("DATAMAX"), mvlimit);
+		image.setMetadata(
+			FITSKeywords::meta(std::string("DATAMAX"), limit));
 	}
 }
 

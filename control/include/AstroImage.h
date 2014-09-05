@@ -161,30 +161,45 @@ std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
 std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
 
 /**
- * \brief Image metadata is stored in a map
+ * \brief Image metadata is stored in a multi map
  */
 class Metavalue {
+	std::string	keyword;
 	std::type_index	datatype;
 	std::string	value;
 	std::string	comment;
+	void	standardize(const std::string& _keyword);
 public:
+	const std::string&	getKeyword() const { return keyword; }
 	const std::string&	getValue() const { return value; }
 	const std::string&	getComment() const { return comment; }
 	std::type_index	getType() const { return datatype; }
-	Metavalue(const std::string& _value, const std::string& _comment);
-	Metavalue(const bool b, const std::string& _comment);
-	Metavalue(const char c, const std::string& _comment);
-	Metavalue(const unsigned char uc, const std::string& _comment);
-	Metavalue(const short s, const std::string& _comment);
-	Metavalue(const unsigned short us, const std::string& _comment);
-	Metavalue(const int i, const std::string& _comment);
-	Metavalue(const unsigned int ui, const std::string& _comment);
-	Metavalue(const long l, const std::string& _comment);
-	Metavalue(const unsigned long ul, const std::string& _comment);
-	Metavalue(const float f, const std::string& _comment);
-	Metavalue(const double f, const std::string& _comment);
-	Metavalue(std::type_index _datatype, const std::string& _value,
+	Metavalue(const std::string& _keyword, const std::string& _value,
 		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const bool b,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const char c,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const unsigned char uc,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const short s,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const unsigned short us,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const int i,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const unsigned int ui,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const long l,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const unsigned long ul,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const float f,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const double f,
+		const std::string& _comment);
+	Metavalue(const std::string& _keyword, std::type_index _datatype,
+		const std::string& _value, const std::string& _comment);
 	operator	bool() const;
 	operator	char() const;
 	operator	unsigned char() const;
@@ -196,6 +211,7 @@ public:
 	operator	unsigned long() const;
 	operator	float() const;
 	operator	double() const;
+	operator	std::string() const;
 };
 typedef std::multimap<std::string, Metavalue>	ImageMetadata;
 
@@ -291,7 +307,7 @@ public:
 	// access to metadata
 	bool	hasMetadata(const std::string& name) const;
 	Metavalue	getMetadata(const std::string& name) const;
-	void	setMetadata(const std::string& name, const Metavalue& mv);
+	void	setMetadata(const Metavalue& mv);
 	int	nMetadata() const { return metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;

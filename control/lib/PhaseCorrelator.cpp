@@ -287,10 +287,10 @@ try {
 					= value(a, size, x, y);
 			}
 		}
-		correlation.setMetadata(std::string("XOFFSET"),
-			Metavalue(result.x(), "x offset of correlation"));
-		correlation.setMetadata(std::string("YOFFSET"),
-			Metavalue(result.y(), "y offset of correlation"));
+		correlation.setMetadata(
+			FITSKeywords::meta(std::string("XOFFSET"), result.x()));
+		correlation.setMetadata(
+			FITSKeywords::meta(std::string("YOFFSET"), result.y()));
 		out.write(correlation);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "file %d written",

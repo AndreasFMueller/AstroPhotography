@@ -8,10 +8,12 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
+#include <AstroIO.h>
 #include <includes.h>
 #include <sstream>
 
 using namespace astro::image;
+using namespace astro::io;
 
 namespace astro {
 namespace camera {
@@ -155,12 +157,12 @@ ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
  * \param image	image to add the information to
  */
 void	CcdInfo::addMetadata(ImageBase& image) const {
-	image.setMetadata(std::string("PXLWIDTH"),
-		Metavalue(_pixelwidth * 1000000.,
-			std::string("width of a pixel in microns")));
-	image.setMetadata(std::string("PXLHIGHT"),
-		Metavalue(_pixelheight * 1000000.,
-			std::string("height of a pixel in microns")));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("PXLWIDTH"),
+			_pixelwidth * 1000000.));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("PXLHIGHT"),
+			_pixelheight * 1000000.));
 
 }
 

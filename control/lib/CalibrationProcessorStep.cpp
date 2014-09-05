@@ -10,8 +10,10 @@
 #include <AstroFormat.h>
 #include <numeric>
 #include <algorithm>
+#include <AstroIO.h>
 
 using namespace astro::adapter;
+using namespace astro::io;
 
 namespace astro {
 namespace process {
@@ -93,7 +95,7 @@ public:
 			aggregator::operator()(exptime);
 		} catch (std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"image does not have EXPTIME");
+				"image does not have %s", _name.c_str());
 		}
 	}
 };
@@ -437,8 +439,8 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 			extension_aggregator("CCD-TEMP"));
 	if (ccdtemp.counter() > 1) {
 		if ((ccdtemp.stddev() / ccdtemp.mean()) < 0.1) {
-			image->setMetadata("CCD-TEMP", Metavalue(ccdtemp.mean(),
-				"CCD temperature in degrees C"));
+			image->setMetadata(
+				FITSKeywords::meta("CCD-TEMP", ccdtemp.mean()));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD-TEMP = %f",
 				ccdtemp.mean());
 		}
@@ -450,8 +452,8 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 			extension_aggregator("SET-TEMP"));
 	if (settemp.counter() > 1) {
 		if ((settemp.stddev() / settemp.mean()) < 0.1) {
-			image->setMetadata("SET-TEMP", Metavalue(settemp.mean(),
-				"set temperature in degrees C"));
+			image->setMetadata(
+				FITSKeywords::meta("SET-TEMP", settemp.mean()));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "SET-TEMP = %f",
 				settemp.mean());
 		}
@@ -737,7 +739,7 @@ void	CalibrationProcessorStep::copy_common_metadata(const std::string& name) {
 	Metavalue	v = imagestep->getMetadata(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "all entries have same "
 		"metadata %s = %ld", name.c_str(), (long)v);
-	image->setMetadata(name, v);
+	image->setMetadata(v);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -767,8 +769,8 @@ ProcessingStep::state	DarkProcessorStep::do_work() {
 			extension_aggregator("EXPTIME"));
 	if (exptime.counter() > 1) {
 		if ((exptime.stddev() / exptime.mean()) < 0.1) {
-			image->setMetadata("EXPTIME", Metavalue(exptime.mean(),
-				"exposure time in seconds"));
+			image->setMetadata(
+				FITSKeywords::meta("EXPTIME", exptime.mean()));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "EXPTIME = %f",
 				exptime.mean());
 		}

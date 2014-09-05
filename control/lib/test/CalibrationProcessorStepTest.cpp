@@ -9,9 +9,11 @@
 #include <AstroDebug.h>
 #include <AstroProcess.h>
 #include <AstroFormat.h>
+#include <AstroIO.h>
 #include <math.h>
 
 using namespace astro::process;
+using namespace astro::io;
 
 namespace astro {
 namespace test {
@@ -104,13 +106,22 @@ void	CalibrationProcessorStepTest::testDark() {
 		Image<unsigned short>	*image
 			= new Image<unsigned short>(size);
 		darkimage(image);
-		image->setMetadata("EXPTIME", Metavalue((double)47, "exposure time"));
-		image->setMetadata("CCD-TEMP", Metavalue((double)-20.3, "ccd temperatur in degrees C"));
-		image->setMetadata("SET-TEMP", Metavalue((double)-20., "set temperatur in degrees C"));
-		image->setMetadata("XBINNING", Metavalue((long)2, "X binning"));
-		image->setMetadata("YBINNING", Metavalue((long)2, "Y binning"));
-		image->setMetadata("XORGSUBF", Metavalue((long)23, "X subframe offset"));
-		image->setMetadata("YORGSUBF", Metavalue((long)32, "Y subframe offset"));
+		image->setMetadata(FITSKeywords::meta("EXPTIME", (double)47));
+		image->setMetadata(FITSKeywords::meta("CCD-TEMP", (double)-20.3));
+		image->setMetadata(FITSKeywords::meta("SET-TEMP", (double)-20.));
+		image->setMetadata(FITSKeywords::meta("XBINNING", (long)2));
+		image->setMetadata(FITSKeywords::meta("YBINNING", (long)2));
+		image->setMetadata(FITSKeywords::meta("XORGSUBF", (long)23));
+		image->setMetadata(FITSKeywords::meta("YORGSUBF", (long)32));
+
+		// verify that the metadata is present
+		CPPUNIT_ASSERT((double)(image->getMetadata("EXPTIME")) == (double)47);
+		CPPUNIT_ASSERT((double)(image->getMetadata("CCD-TEMP")) == (double)-20.3);
+		CPPUNIT_ASSERT((double)(image->getMetadata("SET-TEMP")) == (double)-20.);
+		CPPUNIT_ASSERT((long)(image->getMetadata("XBINNING")) == (long)2);
+		CPPUNIT_ASSERT((long)(image->getMetadata("YBINNING")) == (long)2);
+		CPPUNIT_ASSERT((long)(image->getMetadata("XORGSUBF")) == (long)23);
+		CPPUNIT_ASSERT((long)(image->getMetadata("YORGSUBF")) == (long)32);
 
 		ImagePtr	imageptr(image);
 		ProcessingStepPtr	processingstep =

@@ -7,7 +7,10 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <AstroIO.h>
 #include <CatalogBackend.h>
+
+using namespace astro::io;
 
 namespace astro {
 namespace catalog {
@@ -26,17 +29,13 @@ SkyWindow::SkyWindow(const RaDec& center,
 
 SkyWindow::SkyWindow(const ImageBase& image) {
 	_center.ra().hours(
-		std::stod(image.getMetadata(std::string("RACENTR"))
-			.getValue()));
+		(double)(image.getMetadata(std::string("RACENTR"))));
 	_center.ra().degrees(
-		std::stod(image.getMetadata(std::string("DECCENTR"))
-			.getValue()));
+		(double)(image.getMetadata(std::string("DECCENTR"))));
 	_rawidth.hours(
-		std::stod(image.getMetadata(std::string("RAWIDTH"))
-			.getValue()));
+		(double)(image.getMetadata(std::string("RAWIDTH"))));
 	_decheight.degrees(
-		std::stod(image.getMetadata(std::string("DECHIGHT"))
-			.getValue()));
+		(double)(image.getMetadata(std::string("DECHIGHT"))));
 }
 
 static double	reduce(double x, double left) {
@@ -104,18 +103,18 @@ Angle	SkyWindow::bottomdec() const {
 SkyWindow	SkyWindow::all(RaDec(M_PI, 0), Angle(2 * M_PI), Angle(M_PI));
 
 void	SkyWindow::addMetadata(ImageBase& image) const {
-	image.setMetadata(std::string("RACENTR"), 
-		Metavalue(center().ra().hours(),
-			std::string("right ascension of image center in hours")));
-	image.setMetadata(std::string("DECCENTR"), 
-		Metavalue(center().dec().degrees(),
-			std::string("declination of image center in degrees")));
-	image.setMetadata(std::string("RAWIDTH"), 
-		Metavalue(_rawidth.hours(),
-			std::string("right ascension image width in hours")));
-	image.setMetadata(std::string("DECHIGHT"), 
-		Metavalue(_decheight.degrees(),
-			std::string("declination image with in degrees")));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("RACENTR"), 
+			center().ra().hours()));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("DECCENTR"), 
+			center().dec().degrees()));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("RAWIDTH"), 
+			_rawidth.hours()));
+	image.setMetadata(
+		FITSKeywords::meta(std::string("DECHIGHT"), 
+			_decheight.degrees()));
 }
 
 } // namespace catalog

@@ -6,72 +6,109 @@
 #include <AstroImage.h>
 #include <fitsio.h>
 #include <AstroFormat.h>
+#include <AstroIO.h>
+
+using namespace astro::io;
 
 namespace astro {
 namespace image {
 
-Metavalue::Metavalue(const std::string& _value, const std::string& _comment)
-	: datatype(typeid(_value)), value(_value), comment(_comment) {
+void	Metavalue::standardize(const std::string& _keyword) {
+	if (FITSKeywords::known(_keyword)) {
+		datatype = FITSKeywords::index(_keyword);
+		comment = FITSKeywords::comment(_keyword);
+	}
 }
 
-Metavalue::Metavalue(const bool b, const std::string& _comment)
-	: datatype(typeid(b)), comment(_comment) {
-	value = (b) ? std::string("T") : std::string("F");
-}
-
-Metavalue::Metavalue(const char c, const std::string& _comment)
-	: datatype(typeid(c)), comment(_comment) {
-	value = stringprintf("%d", c);
-}
-
-Metavalue::Metavalue(const unsigned char uc, const std::string& _comment)
-	: datatype(typeid(uc)), comment(_comment) {
-	value = stringprintf("%u", uc);
-}
-
-Metavalue::Metavalue(const short s, const std::string& _comment)
-	: datatype(typeid(s)), comment(_comment) {
-	value = stringprintf("%hd", s);
-}
-
-Metavalue::Metavalue(const unsigned short us, const std::string& _comment)
-	: datatype(typeid(us)), comment(_comment) {
-	value = stringprintf("%hu", us);
-}
-
-Metavalue::Metavalue(const int i, const std::string& _comment)
-	: datatype(typeid(i)), comment(_comment) {
-	value = stringprintf("%d", i);
-}
-
-Metavalue::Metavalue(const unsigned int ui, const std::string& _comment)
-	: datatype(typeid(ui)), comment(_comment) {
-	value = stringprintf("%u", ui);
-}
-
-Metavalue::Metavalue(const long l, const std::string& _comment)
-	: datatype(typeid(l)), comment(_comment) {
-	value = stringprintf("%ld", l);
-}
-
-Metavalue::Metavalue(const unsigned long ul, const std::string& _comment)
-	: datatype(typeid(ul)), comment(_comment) {
-	value = stringprintf("%lu", ul);
-}
-
-Metavalue::Metavalue(const float f, const std::string& _comment)
-	: datatype(typeid(f)), comment(_comment) {
-	value = stringprintf("%f", f);
-}
-
-Metavalue::Metavalue(const double f, const std::string& _comment)
-	: datatype(typeid(f)), comment(_comment) {
-	value = stringprintf("%f", f);
-}
-
-Metavalue::Metavalue(std::type_index _datatype, const std::string& _value,
+Metavalue::Metavalue(const std::string& _keyword, const std::string& _value,
 	const std::string& _comment)
-		: datatype(_datatype), value(_value), comment(_comment) {
+	: keyword(_keyword), datatype(typeid(_value)), value(_value),
+	  comment(_comment) {
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const bool b,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(b)), comment(_comment) {
+	value = (b) ? std::string("T") : std::string("F");
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const char c,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(c)), comment(_comment) {
+	value = stringprintf("%d", c);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const unsigned char uc,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(uc)), comment(_comment) {
+	value = stringprintf("%u", uc);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const short s,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(s)), comment(_comment) {
+	value = stringprintf("%hd", s);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const unsigned short us,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(us)), comment(_comment) {
+	value = stringprintf("%hu", us);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const int i,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(i)), comment(_comment) {
+	value = stringprintf("%d", i);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const unsigned int ui,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(ui)), comment(_comment) {
+	value = stringprintf("%u", ui);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const long l,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(l)), comment(_comment) {
+	value = stringprintf("%ld", l);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const unsigned long ul,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(ul)), comment(_comment) {
+	value = stringprintf("%lu", ul);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const float f,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(f)), comment(_comment) {
+	value = stringprintf("%f", f);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, const double f,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(f)), comment(_comment) {
+	value = stringprintf("%f", f);
+	standardize(_keyword);
+}
+
+Metavalue::Metavalue(const std::string& _keyword, std::type_index _datatype,
+	const std::string& _value, const std::string& _comment)
+		: keyword(_keyword), datatype(_datatype), value(_value),
+		  comment(_comment) {
+	standardize(_keyword);
 }
 
 Metavalue::operator bool() const {
@@ -141,6 +178,10 @@ Metavalue::operator	float() const {
 
 Metavalue::operator	double() const {
 	return std::stod(value);
+}
+
+Metavalue::operator	std::string() const {
+	return value;
 }
 
 } // namespace image

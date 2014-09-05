@@ -15,8 +15,10 @@
 #include <ImageDirectory.h>
 #include <errno.h>
 #include <string.h>
+#include <AstroIO.h>
 
 using namespace astro::persistence;
+using namespace astro::io;
 
 namespace astro {
 namespace task {
@@ -161,7 +163,8 @@ void	ExposureTask::run() {
 				image->getFrame().toString().c_str());
 
 			// add filter information to the image, if present
-			image->setMetadata("FILTER", Metavalue(filtername, ""));
+			image->setMetadata(
+				FITSKeywords::meta("FILTER", filtername));
 
 			// add temperature metadata
 			if (cooler) {

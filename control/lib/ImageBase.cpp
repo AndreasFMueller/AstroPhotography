@@ -94,7 +94,7 @@ void	ImageBase::setMosaicType(MosaicType::mosaic_type _mosaic) {
 
 	// if the new value is nonzero, add it
 	if (value.size() > 0) {
-		Metavalue	mv(value, std::string("Bayer Color Matrix"));
+		Metavalue	mv("BAYER", value, std::string("Bayer Color Matrix"));
 		std::pair<std::string, Metavalue>	p(mosaic_key, mv);
 		metadata.insert(metadata.begin(), p);
 	}
@@ -159,15 +159,18 @@ Metavalue	ImageBase::getMetadata(const std::string& name) const {
 /**
  * \brief Update metadata
  */
-void	ImageBase::setMetadata(const std::string& name, const Metavalue& mv) {
+void	ImageBase::setMetadata(const Metavalue& mv) {
 	// XXX ensure that values that are managed by the image functions
 	//     cannot be set through this interface (the ignored function
 	//     in Fits.cpp has this functionality), unfortuntately, it's in
 	//     wrong file...
 	
+	const std::string&	name = mv.getKeyword();
 	if (hasMetadata(name)) {
 		//metadata[name] = mv;
 	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "inserting '%s' value '%s'",
+			name.c_str(), mv.getValue().c_str());
 		metadata.insert(make_pair(name, mv));
 	}
 }

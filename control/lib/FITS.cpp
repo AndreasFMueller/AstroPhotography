@@ -212,7 +212,7 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 			continue;
 		}
 		if (!ignored(name)) {
-			FITShdu	hdu(name, FITSExtensions::index(name));
+			FITShdu	hdu(name, FITSKeywords::index(name));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s hdu",
 				hdu.type.name());
 			hdu.comment = comment;
@@ -234,8 +234,8 @@ void	FITSinfileBase::addHeaders(ImageBase *image) const {
 		std::string	key = hi->second.name;
 		std::string	value = hi->second.value;
 		std::string	comment = hi->second.comment;
-		Metavalue	mv(hi->second.type, value, comment);
-		image->setMetadata(key, mv);
+		Metavalue	mv(key, hi->second.type, value, comment);
+		image->setMetadata(mv);
 	}
 }
 

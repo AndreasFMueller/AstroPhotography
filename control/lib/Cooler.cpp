@@ -8,8 +8,10 @@
 #include <AstroFormat.h>
 #include <unistd.h>
 #include <AstroDebug.h>
+#include <AstroIO.h>
 
 using namespace astro::image;
+using namespace astro::io;
 using namespace astro::device;
 
 namespace astro {
@@ -110,18 +112,15 @@ void	Cooler::addTemperatureMetadata(ImageBase& image) {
 	}
 
 	// add set temperature information to the image (SET-TEMP)
-	Metavalue	mvsettemp(
-		this->getSetTemperature() - 273.1,
-		std::string("CCD temperature setpoint in "
-			"degrees C"));
-	image.setMetadata(std::string("SET-TEMP"), mvsettemp);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("SET-TEMP"),
+			this->getSetTemperature() - 273.1));
 	
 	// add actual temperature info to the image (CCD-TEMP)
 	try {
-		Metavalue	mvtemp(getActualTemperature() - 273.1,
-			std::string("actual measured sensor temperature "
-				"at the start of exposure in degrees C"));
-		image.setMetadata(std::string("CCD-TEMP"), mvtemp);
+		image.setMetadata(
+			FITSKeywords::meta(std::string("CCD-TEMP"),
+				getActualTemperature() - 273.1));
 	} catch (std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature unknown: %s",
 			x.what());
