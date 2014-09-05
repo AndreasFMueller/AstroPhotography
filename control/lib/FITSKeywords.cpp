@@ -160,12 +160,12 @@ FITSKeyword	keywors[Nkeywors] = {
 { // 27
 	std::string("DATE"),
 	std::string("date of file creation"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(FITSdate))
 },
 { // 28
 	std::string("DATE-OBS"),
 	std::string("date of observation"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(FITSdate))
 },
 { // 29
 	std::string("EQUINOX"),
@@ -549,6 +549,15 @@ Metavalue	FITSKeywords::meta(const std::string& name,
 			const std::string& value) {
 	FITSKeyword	k = keyword(name);
 	return Metavalue(name, k.index, value, k.comment);
+}
+
+/**
+ * \brief Factory method to create metavalues with the right comments
+ */
+Metavalue	FITSKeywords::meta(const std::string& name,
+			const FITSdate& value) {
+	FITSKeyword	k = keyword(name);
+	return Metavalue(name, k.index, value.showLong(), k.comment);
 }
 
 /**

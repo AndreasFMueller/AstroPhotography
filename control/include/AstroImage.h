@@ -215,6 +215,8 @@ public:
 		const std::string& _comment);
 	Metavalue(const std::string& _keyword, const double f,
 		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const FITSdate& d,
+		const std::string& _comment);
 	Metavalue(const std::string& _keyword, std::type_index _datatype,
 		const std::string& _value, const std::string& _comment);
 	operator	bool() const;
@@ -229,6 +231,7 @@ public:
 	operator	float() const;
 	operator	double() const;
 	operator	std::string() const;
+	operator	FITSdate() const;
 };
 
 /**
