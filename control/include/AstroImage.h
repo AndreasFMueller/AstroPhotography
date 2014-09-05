@@ -161,6 +161,23 @@ std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
 std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
 
 /**
+ * \brief 
+ *
+ * FITS files contain date / time information in a special format
+ */
+class FITSdate {
+	time_t	when;
+public:
+	FITSdate(const std::string& date);
+	FITSdate(time_t t);
+	FITSdate();
+	std::string	showLong() const;
+	std::string	showShort() const;
+	bool	operator==(const FITSdate& other) const;
+	bool	operator<(const FITSdate& other) const;
+};
+
+/**
  * \brief Image metadata is stored in a multi map
  */
 class Metavalue {
@@ -198,6 +215,8 @@ public:
 		const std::string& _comment);
 	Metavalue(const std::string& _keyword, const double f,
 		const std::string& _comment);
+	Metavalue(const std::string& _keyword, const FITSdate& d,
+		const std::string& _comment);
 	Metavalue(const std::string& _keyword, std::type_index _datatype,
 		const std::string& _value, const std::string& _comment);
 	operator	bool() const;
@@ -212,14 +231,17 @@ public:
 	operator	float() const;
 	operator	double() const;
 	operator	std::string() const;
+	operator	FITSdate() const;
 };
-typedef std::multimap<std::string, Metavalue>	ImageMetadata;
 
 /**
  * \brief A class that is aware of valid FITS keys
  */
-class Metadata : public std::multimap<std::string, Metavalue> {
+class ImageMetadata : public std::multimap<std::string, Metavalue> {
 public:
+	bool	hasMetadata(const std::string& keyword) const;
+	const Metavalue&	getMetadata(const std::string& keyword) const;
+	void	setMetadata(const Metavalue& mv);
 };
 
 /**

@@ -32,7 +32,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
 	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
 	ImageDirectory.cpp ImageDatabaseDirectory.cpp \
-	Metavalue.cpp Sun.cpp ViewerPipeline.cpp Viewer.cpp \
+	FITSdate.cpp Metavalue.cpp ImageMetadata.cpp \
+	Sun.cpp ViewerPipeline.cpp Viewer.cpp \
 	Functions.cpp Background.cpp \
 	Histogram.cpp \
 	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
@@ -54,7 +55,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
 	Mount.cpp \
 	Serial.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
-	FITSKeywords.cpp \
+	FITSKeywords.cpp ImageEnvelope.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \

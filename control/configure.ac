@@ -62,11 +62,19 @@ AC_ARG_ENABLE(corba,
 	then
 		LIBS="${LIBS} `pkg-config --libs omniORB4`"
 		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
+<<<<<<< HEAD
 		if pkg-config --exists omniCOS4
 		then
 			LIBS="${LIBS} `pkg-config --libs omniCOS4`"
 			CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
 		fi
+=======
+                if pkg-config --exists omniCOS4
+                then
+                        LIBS="${LIBS} `pkg-config --libs omniCOS4`"
+                        CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
+                fi
+>>>>>>> 954ce4cd8a73de864788eefcee9ee973a1f75a99
 		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
 		# add the idl include directory to the cflags
 		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"

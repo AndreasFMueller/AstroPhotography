@@ -19,7 +19,7 @@ typedef struct {
 	std::type_index	index;
 } FITSKeyword;
 
-#define	Nkeywors	71
+#define	Nkeywors	72
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -160,12 +160,12 @@ FITSKeyword	keywors[Nkeywors] = {
 { // 27
 	std::string("DATE"),
 	std::string("date of file creation"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(FITSdate))
 },
 { // 28
 	std::string("DATE-OBS"),
 	std::string("date of observation"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(FITSdate))
 },
 { // 29
 	std::string("EQUINOX"),
@@ -378,6 +378,11 @@ FITSKeyword	keywors[Nkeywors] = {
 	std::string("Bayer RGB filter layout"),
 	std::type_index(typeid(std::string))
 },
+{ // 71
+	std::string("IMAGEID"),
+	std::string("Image id in repositry"),
+	std::type_index(typeid(long))
+},
 };
 
 int	FITSKeywords::type(std::type_index idx) {
@@ -544,6 +549,15 @@ Metavalue	FITSKeywords::meta(const std::string& name,
 			const std::string& value) {
 	FITSKeyword	k = keyword(name);
 	return Metavalue(name, k.index, value, k.comment);
+}
+
+/**
+ * \brief Factory method to create metavalues with the right comments
+ */
+Metavalue	FITSKeywords::meta(const std::string& name,
+			const FITSdate& value) {
+	FITSKeyword	k = keyword(name);
+	return Metavalue(name, k.index, value.showLong(), k.comment);
 }
 
 /**

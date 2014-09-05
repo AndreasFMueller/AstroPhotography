@@ -140,13 +140,17 @@ void	ImageBase::setMosaicType(const std::string& mosaic_name) {
  * \param name	 name of the metadata element
  */
 bool	ImageBase::hasMetadata(const std::string& name) const {
+#if 0
 	return (metadata.find(name) != metadata.end());
+#endif
+	return metadata.hasMetadata(name);
 }
 
 /**
  * \brief Retrieve metadata
  */
 Metavalue	ImageBase::getMetadata(const std::string& name) const {
+#if 0
 	if (hasMetadata(name)) {
 		return metadata.find(name)->second;
 	}
@@ -154,12 +158,15 @@ Metavalue	ImageBase::getMetadata(const std::string& name) const {
 		name.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
+#endif
+	metadata.getMetadata(name);
 }
 
 /**
  * \brief Update metadata
  */
 void	ImageBase::setMetadata(const Metavalue& mv) {
+#if 0
 	// XXX ensure that values that are managed by the image functions
 	//     cannot be set through this interface (the ignored function
 	//     in Fits.cpp has this functionality), unfortuntately, it's in
@@ -173,6 +180,8 @@ void	ImageBase::setMetadata(const Metavalue& mv) {
 			name.c_str(), mv.getValue().c_str());
 		metadata.insert(make_pair(name, mv));
 	}
+#endif
+	metadata.setMetadata(mv);
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image) {

@@ -65,6 +65,7 @@ static int	type(std::type_index idx);
 static Metavalue	meta(const std::string& name, long value);
 static Metavalue	meta(const std::string& name, double value);
 static Metavalue	meta(const std::string& name, const std::string& value);
+static Metavalue	meta(const std::string& name, const FITSdate& value);
 };
 
 /**

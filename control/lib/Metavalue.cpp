@@ -104,6 +104,13 @@ Metavalue::Metavalue(const std::string& _keyword, const double f,
 	standardize(_keyword);
 }
 
+Metavalue::Metavalue(const std::string& _keyword, const FITSdate& d,
+	const std::string& _comment)
+	: keyword(_keyword), datatype(typeid(FITSdate)), comment(_comment) {
+	value = d.showLong();
+	standardize(_keyword);
+}
+
 Metavalue::Metavalue(const std::string& _keyword, std::type_index _datatype,
 	const std::string& _value, const std::string& _comment)
 		: keyword(_keyword), datatype(_datatype), value(_value),
@@ -182,6 +189,10 @@ Metavalue::operator	double() const {
 
 Metavalue::operator	std::string() const {
 	return value;
+}
+
+Metavalue::operator	FITSdate() const {
+	return FITSdate(value);
 }
 
 } // namespace image
