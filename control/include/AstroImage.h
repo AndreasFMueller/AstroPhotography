@@ -166,13 +166,15 @@ std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
  * FITS files contain date / time information in a special format
  */
 class FITSdate {
-	time_t	when;
+	struct timeval	when;
 public:
 	FITSdate(const std::string& date);
 	FITSdate(time_t t);
+	FITSdate(const struct timeval& tv);
 	FITSdate();
-	std::string	showLong() const;
 	std::string	showShort() const;
+	std::string	showLong() const;
+	std::string	showVeryLong() const;
 	bool	operator==(const FITSdate& other) const;
 	bool	operator<(const FITSdate& other) const;
 };

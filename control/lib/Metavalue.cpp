@@ -107,7 +107,7 @@ Metavalue::Metavalue(const std::string& _keyword, const double f,
 Metavalue::Metavalue(const std::string& _keyword, const FITSdate& d,
 	const std::string& _comment)
 	: keyword(_keyword), datatype(typeid(FITSdate)), comment(_comment) {
-	value = d.showLong();
+	value = d.showVeryLong();
 	standardize(_keyword);
 }
 

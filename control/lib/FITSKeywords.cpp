@@ -557,7 +557,7 @@ Metavalue	FITSKeywords::meta(const std::string& name,
 Metavalue	FITSKeywords::meta(const std::string& name,
 			const FITSdate& value) {
 	FITSKeyword	k = keyword(name);
-	return Metavalue(name, k.index, value.showLong(), k.comment);
+	return Metavalue(name, k.index, value.showVeryLong(), k.comment);
 }
 
 /**
