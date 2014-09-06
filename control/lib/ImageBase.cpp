@@ -159,7 +159,14 @@ Metavalue	ImageBase::getMetadata(const std::string& name) const {
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 #endif
-	metadata.getMetadata(name);
+	return metadata.getMetadata(name);
+}
+
+/**
+ * \brief Remove the metadata of a given type
+ */
+void	ImageBase::removeMetadata(const std::string& name) {
+	metadata.remove(name);
 }
 
 /**

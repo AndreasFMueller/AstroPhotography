@@ -327,6 +327,8 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	for (i = image.begin(); i != image.end(); i++) {
 		const char	*key = i->first.c_str();
 		Metavalue	value = i->second;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing '%s'",
+			value.toString().c_str());
 		const char	*comment = value.getComment().c_str();
 		std::type_index	type = value.getType();
 		int	status = 0;
@@ -406,6 +408,17 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 			double doublevalue = (double)value;
 			rc = fits_write_key(fptr, TDOUBLE, key, &doublevalue,
 				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(void))) {
+			if (key == std::string("HISTORY")) {
+				rc = fits_write_history(fptr, comment, &status);
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "write HISTORY: %s, %d", comment, rc);
+			}
+			if (key == std::string("COMMENT")) {
+				rc = fits_write_comment(fptr, comment, &status);
+			}
 			goto writedone;
 		}
 

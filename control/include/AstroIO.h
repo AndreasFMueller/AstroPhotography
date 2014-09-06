@@ -56,6 +56,7 @@ static bool known(const std::string& name);
 static int	type(const std::string& name);
 static std::type_index	index(const std::string& name);
 static const std::string&	comment(const std::string& name);
+static bool	unique(const std::string& name);
 
 // conversion between FITS type integer and std::type_index
 static std::type_index	index(int tp);
@@ -602,6 +603,12 @@ void	FITSoutfile<Pixel>::write(const Image<Pixel>& image)
 		std::string	msg = stringprintf("failure to write image %s: %s",
 			filename.c_str(), errormsg(status).c_str());
 		throw FITSexception(msg);
+	}
+
+	// flush the file
+	if (fits_flush_file(fptr, &status)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "flushing file failed: %s",
+			errormsg(status).c_str());
 	}
 
 	// call postwrite to protect precious files

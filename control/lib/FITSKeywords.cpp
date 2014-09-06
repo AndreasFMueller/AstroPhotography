@@ -17,6 +17,7 @@ typedef struct {
 	std::string	name;
 	std::string	comment;
 	std::type_index	index;
+	bool	unique;
 } FITSKeyword;
 
 #define	Nkeywors	72
@@ -25,363 +26,435 @@ FITSKeyword	keywors[Nkeywors] = {
 { // 0
 	std::string("AUTHOR"),
 	std::string("author of the data"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	false
 },
 { // 1
 	std::string("BITPIX"),
 	std::string("bits per data value"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 2
 	std::string("BLANK"),
 	std::string("value used for undefined array elements"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 3
 	std::string("BLOCKED"),
 	std::string("is physical blocksize a multiple of 2880"),
-	std::type_index(typeid(bool))
+	std::type_index(typeid(bool)),
+	true
 },
 { // 4
 	std::string("BSCALE"),
 	std::string("linear factor in scaling equation"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 5
 	std::string("BUNIT"),
 	std::string("physical units of the array values"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 6
 	std::string("BZERO"),
 	std::string("zero point in scaling equation"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 7
 	std::string("CDELT1"),
 	std::string("coordinate increment along axis 1"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 8
 	std::string("CDELT2"),
 	std::string("coordinate increment along axis 2"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 9
 	std::string("CDELT3"),
 	std::string("coordinate increment along axis 3"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
-{	// special type just as history, 10
+{ // 10
 	std::string("COMMENT"),
 	std::string("descriptive comment"),
-	std::type_index(typeid(std::string)),
+	std::type_index(typeid(void)),
+	false
 },
 { // 11
 	std::string("CROTA1"),
 	std::string("coordinate system rotation angle"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 12
 	std::string("CROTA2"),
 	std::string("coordinate system rotation angle"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 13
 	std::string("CROTA3"),
 	std::string("coordinate system rotation angle"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 14
 	std::string("CRPIX1"),
 	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 15
 	std::string("CRPIX2"),
 	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 16
 	std::string("CRPIX3"),
 	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 17
 	std::string("CRPIX2"),
 	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 18
 	std::string("CRPIX3"),
 	std::string("coordinate system reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 19
 	std::string("CRVAL1"),
 	std::string("coordinate system value at reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 20
 	std::string("CRVAL2"),
 	std::string("coordinate system value at reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 21
 	std::string("CRVAL3"),
 	std::string("coordinate system value at reference pixel"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 22
 	std::string("CTYPE1"),
 	std::string("name of the coordinate axis 1"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 23
 	std::string("CTYPE2"),
 	std::string("name of the coordinate axis 1"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 24
 	std::string("CTYPE3"),
 	std::string("name of the coordinate axis 1"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 25
 	std::string("DATAMIN"),
 	std::string("minimum data value"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 26
 	std::string("DATAMAX"),
 	std::string("maximum data value"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 27
 	std::string("DATE"),
 	std::string("date of file creation"),
-	std::type_index(typeid(FITSdate))
+	std::type_index(typeid(FITSdate)),
+	true
 },
 { // 28
 	std::string("DATE-OBS"),
 	std::string("date of observation"),
-	std::type_index(typeid(FITSdate))
+	std::type_index(typeid(FITSdate)),
+	true
 },
 { // 29
 	std::string("EQUINOX"),
 	std::string("equinox of celestial coordinate system"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 30
 	std::string("EXTEND"),
 	std::string("may the FITS file contain extensions?"),
-	std::type_index(typeid(bool))
+	std::type_index(typeid(bool)),
+	true
 },
 { // 31
 	std::string("EXTLEVEL"),
 	std::string("hierarchical level of the extension"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	false
 },
 { // 32
 	std::string("EXTNAME"),
 	std::string("name of the extension"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	false
 },
 { // 33
 	std::string("EXTVER"),
 	std::string("version of the extension"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	false
 },
 { // 34
 	std::string("GCOUNT"),
 	std::string("group count"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	false
 },
 { // 35
 	std::string("GROUPS"),
 	std::string("indicate random groups structure"),
-	std::type_index(typeid(bool))
+	std::type_index(typeid(bool)),
+	false
 },
-{	// we need a special type, these records have no command field, 36
+{ // 36
 	std::string("HISTORY"),
 	std::string("processing history of data"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(void)),
+	false
 },
 { // 37
 	std::string("INSTRUME"),
 	std::string("name of instrument"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 38
 	std::string("NAXIS"),
 	std::string("number of axes"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 39
 	std::string("NAXIS1"),
 	std::string("size of axis 1"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 40
 	std::string("NAXIS2"),
 	std::string("size of axis 2"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 41
 	std::string("NAXIS3"),
 	std::string("size of axis 3"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 42
 	std::string("OBJECT"),
 	std::string("name of observed object"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 43
 	std::string("OBSERVER"),
 	std::string("observer who acquired the data"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 44
 	std::string("ORIGIN"),
 	std::string("organization responsible for the data"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 45
 	std::string("PCOUNT"),
 	std::string("parameter count"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 46
 	std::string("PSCAL0"),
 	std::string("parameter scaling factor"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 47
 	std::string("PTYPE0"),
 	std::string("name of random groups parameter"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 48
 	std::string("PZERO0"),
 	std::string("parameter scaling zero point"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 49
 	std::string("REFERENC"),
 	std::string("bibliographic reference"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 50
 	std::string("SIMPLE"),
 	std::string("does file conform to the Standard?"),
-	std::type_index(typeid(bool))
+	std::type_index(typeid(bool)),
+	true
 },
 { // 51
 	std::string("TELESCOP"),
 	std::string("name of telescope"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 52
 	std::string("XTENSION"),
 	std::string("makes beginning of a new HDU"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	false
 },
 // nonstandard keywords
 { // 53
 	std::string("DECCENTR"),
 	std::string("declination of image center in degrees"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 54
 	std::string("DECHIGHT"),
 	std::string("height of image in declination degrees"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 55
 	std::string("RACENTR"),
 	std::string("right ascension of image center in hours"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 56
 	std::string("RAWIDTH"),
 	std::string("width of image in right ascension hours"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 57
 	std::string("PXLWIDTH"),
 	std::string("width of a pixeln in microns"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 58
 	std::string("PXLHIGHT"),
 	std::string("hight of pixel in microns"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 59
 	std::string("FOCAL"),
 	std::string("focal length of instrumen in meteres"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 60
 	std::string("XOFFSET"),
 	std::string("x offset of image center"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 61
 	std::string("YOFFSET"),
 	std::string("y offset of image center"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 62
 	std::string("EXPTIME"),
 	std::string("exposure time in seconds"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 63
 	std::string("XBINNING"),
 	std::string("binning in x direction"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 64
 	std::string("YBINNING"),
 	std::string("binning in y direction"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 65
 	std::string("XORGSUBF"),
 	std::string("x origin of subframe"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 66
 	std::string("YORGSUBF"),
 	std::string("y origin of subframe"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 { // 67
 	std::string("SET-TEMP"),
 	std::string("set temperature of CCD in degrees C"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 68
 	std::string("CCD-TEMP"),
 	std::string("actual temperature of CCD in degrees C"),
-	std::type_index(typeid(double))
+	std::type_index(typeid(double)),
+	true
 },
 { // 69
 	std::string("FILTER"),
 	std::string("name of filter"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 70
 	std::string("BAYER"),
 	std::string("Bayer RGB filter layout"),
-	std::type_index(typeid(std::string))
+	std::type_index(typeid(std::string)),
+	true
 },
 { // 71
 	std::string("IMAGEID"),
 	std::string("Image id in repositry"),
-	std::type_index(typeid(long))
+	std::type_index(typeid(long)),
+	true
 },
 };
 
@@ -548,7 +621,11 @@ Metavalue	FITSKeywords::meta(const std::string& name, double value) {
 Metavalue	FITSKeywords::meta(const std::string& name,
 			const std::string& value) {
 	FITSKeyword	k = keyword(name);
-	return Metavalue(name, k.index, value, k.comment);
+	if (k.index == std::type_index(typeid(void))) {
+		return Metavalue(name, k.index, "", value);
+	} else {
+		return Metavalue(name, k.index, value, k.comment);
+	}
 }
 
 /**
@@ -565,6 +642,13 @@ Metavalue	FITSKeywords::meta(const std::string& name,
  */
 const std::string&	FITSKeywords::comment(const std::string& name) {
 	return keyword(name).comment;
+}
+
+/**
+ * \brief Find out whether the header can appear multiple times
+ */
+bool	FITSKeywords::unique(const std::string& name) {
+	return keyword(name).unique;
 }
 
 } // namespace io

@@ -15,6 +15,7 @@
 #include <limits>
 #include <vector>
 #include <map>
+#include <list>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
 #include <typeinfo>
@@ -161,9 +162,11 @@ std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
 std::istream&	operator>>(std::istream& in, ImageRectangle& rectangle);
 
 /**
- * \brief 
+ * \brief Object representing a date in a FITS header
  *
- * FITS files contain date / time information in a special format
+ * FITS files contain date / time information in a special format, this
+ * class converts it to a Unix struct timeval and is able to format
+ * in different forms.
  */
 class FITSdate {
 	struct timeval	when;
@@ -237,22 +240,26 @@ public:
 	operator	double() const;
 	operator	std::string() const;
 	operator	FITSdate() const;
+	std::string	toString() const;
 };
 
 /**
  * \brief A class that is aware of valid FITS keys
  */
-class ImageMetadata : public std::multimap<std::string, Metavalue> {
+class ImageMetadata : public std::list<std::pair<std::string, Metavalue> > {
 public:
 	bool	hasMetadata(const std::string& keyword) const;
 	const Metavalue&	getMetadata(const std::string& keyword) const;
 	void	setMetadata(const Metavalue& mv);
+	ImageMetadata::const_iterator	find(const std::string& keyword) const;
+	ImageMetadata::iterator	find(const std::string& keyword);
+	void	remove(const std::string& keyword);
 };
 
 /**
  * \brief MosaicType
  *
- *
+ * Bayer RGB mosaic type
  */
 class MosaicType {
 public:
@@ -334,6 +341,7 @@ public:
 	// access to metadata
 	bool	hasMetadata(const std::string& name) const;
 	Metavalue	getMetadata(const std::string& name) const;
+	void	removeMetadata(const std::string& name);
 	void	setMetadata(const Metavalue& mv);
 	int	nMetadata() const { return metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
