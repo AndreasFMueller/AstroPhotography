@@ -162,5 +162,3 @@ bool	FITSdate::operator<(const FITSdate& other) const {
 
 } // namespace image
 } // namespace astro
-
-

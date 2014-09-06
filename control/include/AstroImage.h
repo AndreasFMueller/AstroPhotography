@@ -177,6 +177,9 @@ public:
 	std::string	showVeryLong() const;
 	bool	operator==(const FITSdate& other) const;
 	bool	operator<(const FITSdate& other) const;
+	operator	time_t() const { return when.tv_sec; }
+	operator	struct timeval() const { return when; }
+	operator	std::string() const { return showVeryLong(); }
 };
 
 /**
