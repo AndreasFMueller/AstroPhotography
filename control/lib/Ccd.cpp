@@ -163,7 +163,6 @@ void	CcdInfo::addMetadata(ImageBase& image) const {
 	image.setMetadata(
 		FITSKeywords::meta(std::string("PXLHIGHT"),
 			_pixelheight * 1000000.));
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -406,6 +405,9 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
 void	Ccd::addMetadata(ImageBase& image) {
 	this->addExposureMetadata(image);
 	this->addTemperatureMetadata(image);
+	image.setMetadata(
+		FITSKeywords::meta(std::string("DATE-OBS"),
+			FITSdate()));
 }
 
 } // namespace camera

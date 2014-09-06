@@ -17,20 +17,21 @@ namespace image {
 FITSdate::FITSdate(const std::string& date) {
 	int	rc = 0;
 	const char	*r = "([0-9]{4})-([0-9]{2})-([0-9]{2})"
-			"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.[0-9]{3}){0,1}){0,1}";
+			"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}";
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "regular expression: %s", r);
 	regex_t	regex;
 	if (regcomp(&regex, r, REG_EXTENDED)) {
 		throw std::runtime_error("internal error: RE does not compile");
 	}
-	regmatch_t	matches[10];
+#define	nmatches	10
+	regmatch_t	matches[nmatches];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "matching %s against %s",
 		date.c_str(), r);
-	rc = regexec(&regex, date.c_str(), 10, matches, 0);
+	rc = regexec(&regex, date.c_str(), nmatches, matches, 0);
 	if (rc) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no match");
 	}
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < nmatches; i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d]: %d - %d", i,
 			matches[i].rm_so, matches[i].rm_eo);
 	}
@@ -69,8 +70,10 @@ FITSdate::FITSdate(const std::string& date) {
 	result.tm_gmtoff = 0;
 
 	// convert to unix time
-	when = timegm(&result);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d, %s", when, ctime(&when));
+	when.tv_sec = timegm(&result);
+	when.tv_usec = 1000 * ((matches[9].rm_so < 0) ? 0
+			: std::stoi(date.substr(matches[9].rm_so,
+				matches[9].rm_eo - matches[9].rm_so)));
 cleanup:
 	regfree(&regex);
 	if (rc) {
@@ -81,16 +84,24 @@ cleanup:
 }
 
 /**
+ * \brief Create a FITSdate from unix time with usecs
+ */
+FITSdate::FITSdate(const struct timeval& tv) : when(tv) {
+}
+
+/**
  * \brief Create a FITSdate object from unix time
  */
-FITSdate::FITSdate(time_t t) : when(t) {
+FITSdate::FITSdate(time_t t) {
+	when.tv_sec = t;
+	when.tv_usec = 0;
 }
 
 /**
  * \brief CReate a FITSdate object representing the current time
  */
 FITSdate::FITSdate() {
-	time(&when);
+	gettimeofday(&when, NULL);
 }
 
 /**
@@ -98,7 +109,7 @@ FITSdate::FITSdate() {
  */
 std::string	FITSdate::showShort() const {
 	struct tm	result;
-	gmtime_r(&when, &result);
+	gmtime_r(&when.tv_sec, &result);
 	char	b[128];
 	strftime(b, sizeof(b), "%Y-%m-%d", &result);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "short form: %s", b);
@@ -110,7 +121,7 @@ std::string	FITSdate::showShort() const {
  */
 std::string	FITSdate::showLong() const {
 	struct tm	result;
-	gmtime_r(&when, &result);
+	gmtime_r(&when.tv_sec, &result);
 	char	b[128];
 	strftime(b, sizeof(b), "%Y-%m-%dT%H:%M:%S", &result);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "long form: %s", b);
@@ -118,20 +129,36 @@ std::string	FITSdate::showLong() const {
 }
 
 /**
+ * \brief Convert a FITSdate to a full date string including milliseconds
+ */
+std::string	FITSdate::showVeryLong() const {
+	struct tm	result;
+	gmtime_r(&when.tv_sec, &result);
+	char	b[128];
+	strftime(b, sizeof(b), "%Y-%m-%dT%H:%M:%S", &result);
+	std::string	ts = std::string(b)
+				+ stringprintf(".%03d", when.tv_usec / 1000);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "very long form: %s", ts.c_str());
+	return ts;
+}
+
+/**
  * \brief Equality operator
  */
 bool	FITSdate::operator==(const FITSdate& other) const {
-	return when == other.when;
+	return (when.tv_sec == other.when.tv_sec) 
+		&& (when.tv_usec == other.when.tv_usec);
 }
 
 /**
  * \brief Comparison operator
  */
 bool	FITSdate::operator<(const FITSdate& other) const {
-	return when < other.when;
+	if (when.tv_sec == other.when.tv_sec) {
+		return when.tv_usec < other.when.tv_usec;
+	}
+	return when.tv_sec < other.when.tv_sec;
 }
 
 } // namespace image
 } // namespace astro
-
-

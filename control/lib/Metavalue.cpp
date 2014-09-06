@@ -107,7 +107,7 @@ Metavalue::Metavalue(const std::string& _keyword, const double f,
 Metavalue::Metavalue(const std::string& _keyword, const FITSdate& d,
 	const std::string& _comment)
 	: keyword(_keyword), datatype(typeid(FITSdate)), comment(_comment) {
-	value = d.showLong();
+	value = d.showVeryLong();
 	standardize(_keyword);
 }
 
@@ -115,7 +115,11 @@ Metavalue::Metavalue(const std::string& _keyword, std::type_index _datatype,
 	const std::string& _value, const std::string& _comment)
 		: keyword(_keyword), datatype(_datatype), value(_value),
 		  comment(_comment) {
-	standardize(_keyword);
+	if (datatype != std::type_index(typeid(void))) {
+		standardize(_keyword);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "don't standardize comments");
+	}
 }
 
 Metavalue::operator bool() const {
@@ -193,6 +197,12 @@ Metavalue::operator	std::string() const {
 
 Metavalue::operator	FITSdate() const {
 	return FITSdate(value);
+}
+
+std::string	Metavalue::toString() const {
+	return stringprintf("%s[%s]: %s / %s", 
+		keyword.c_str(), datatype.name(),
+		value.c_str(), comment.c_str());
 }
 
 } // namespace image
