@@ -15,7 +15,7 @@ namespace project {
 /**
  * \brief Construct metadata from an image
  */
-ImageEnvelope::ImageEnvelope(const ImagePtr image) {
+ImageEnvelope::ImageEnvelope(const ImagePtr image) : _size(image->size()) {
 	copy_metadata(*image, metadata, FITSKeywords::names());
 }
 
@@ -31,6 +31,30 @@ const Metavalue&	ImageEnvelope::getMetadata(const std::string& keyword) const {
  */
 std::string	ImageEnvelope::cameraname() const {
 	return (std::string)getMetadata("CAMERA");
+}
+
+float	ImageEnvelope::exposuretime() const {
+	double	t = getMetadata("EXPTIME");
+	return t;
+}
+
+float	ImageEnvelope::temperature() const {
+	double	t = getMetadata("CCD-TEMP");
+	return t;
+};
+
+ImageSpec::category_t	ImageEnvelope::category() const {
+	std::string	purpose = getMetadata("PURPOSE");
+	if (purpose == "dark") {
+		return ImageSpec::dark;
+	}
+	if (purpose == "flat") {
+		return ImageSpec::flat;
+	}
+	if (purpose == "light") {
+		return ImageSpec::light;
+	}
+	throw std::runtime_error("internal error: unknown purpose");
 }
 
 } // namespace project

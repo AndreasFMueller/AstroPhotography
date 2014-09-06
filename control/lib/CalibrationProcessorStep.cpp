@@ -776,6 +776,9 @@ ProcessingStep::state	DarkProcessorStep::do_work() {
 		}
 	}
 
+	// add the purpose
+	image->setMetadata(FITSKeywords::meta("PURPOSE", "dark"));
+
 	// done
 	return ProcessingStep::complete;
 }
@@ -806,6 +809,8 @@ ProcessingStep::state	FlatProcessorStep::do_work() {
 		}
 	}
 
+	// add the purpose
+	image->setMetadata(FITSKeywords::meta("PURPOSE", "flat"));
 
 	// cheat
 	return ProcessingStep::complete;

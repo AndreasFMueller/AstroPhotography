@@ -18,6 +18,12 @@ void	Metavalue::standardize(const std::string& _keyword) {
 		datatype = FITSKeywords::index(_keyword);
 		comment = FITSKeywords::comment(_keyword);
 	}
+	if (_keyword == "PURPOSE") {
+		if ((value != "dark") && (value != "flat")
+			&& (value != "light")) {
+			throw std::runtime_error("illegal value for PURPOSE");
+		}
+	}
 }
 
 Metavalue::Metavalue(const std::string& _keyword, const std::string& _value,
