@@ -29,10 +29,10 @@ public:
 
 	// name of the camera that took the image
 private:
-	std::string	_cameraname;
+	std::string	_camera;
 public:
-	const std::string&	cameraname() const { return _cameraname; }
-	void	cameraname(const std::string& c) { _cameraname = c; }
+	const std::string&	camera() const { return _camera; }
+	void	camera(const std::string& c) { _camera = c; }
 
 	// exposure time of the image
 private:
@@ -55,6 +55,7 @@ public:
 	const std::string&	project() const { return _project; }
 	void	project(const std::string& p) { _project = p; }
 
+	// constructor
 	ImageSpec();
 };
 
@@ -65,24 +66,87 @@ public:
  * to request the image itself.
  */
 class ImageEnvelope {
+private:
 	long	_id;
 public:
 	long	id() const { return _id; }
 	void	id(long l) { _id = l; }
 	operator	long() const { return _id; }
-	astro::image::ImageMetadata	metadata;
-	astro::image::ImageSize	_size;
-	const astro::image::ImageSize&	size() const { return _size; }
-	void	size(const astro::image::ImageSize& s) { _size = s; }
+
+	// constructor
 	ImageEnvelope(long id) : _id(id) { }
 	ImageEnvelope(const astro::image::ImagePtr image);
 
-	std::string	cameraname() const;
-	float	exposuretime() const;
-	float	temperature() const;
-	ImageSpec::category_t	category() const;
-	std::string	project() const;
+	// filename
+private:
+	std::string	_filename;
+public:
+	const std::string&	filename() const { return _filename; }
+	void	filename(const std::string& f) { _filename = f; }
 
+	// project
+private:
+	std::string	_project;
+public:
+	const std::string&	project() const { return _project; }
+	void	project(const std::string& p) { _project = p; }
+
+	// created
+private:
+	time_t	_created;
+public:
+	time_t	created() const { return _created; }
+	void	created(time_t c) { _created = c; }
+
+	// camera
+private:
+	std::string	_camera;
+public:
+	const std::string&	camera() const { return _camera; }
+	void	camera(const std::string& c) { _camera = c; }
+
+	// size
+private:
+	astro::image::ImageSize	_size;
+public:
+	const astro::image::ImageSize&	size() const { return _size; }
+	void	size(const astro::image::ImageSize& s) { _size = s; }
+
+	// exposuretime
+private:
+	float	_exposuretime;
+public:
+	float	exposuretime() const { return _exposuretime; }
+	void	exposuretime(float e) { _exposuretime = e; }
+
+	// temperature
+private:
+	float	_temperature;
+public:
+	float	temperature() const { return _temperature; }
+	void	temperature(float t) { _temperature = t; }
+
+	// category
+private:
+	ImageSpec::category_t	_category;
+public:
+	ImageSpec::category_t	category() const { return _category; }
+	void	category(ImageSpec::category_t c) { _category = c; }
+
+	// bayer
+private:
+	std::string	_bayer;
+public:
+	const std::string&	bayer() const { return _bayer; }
+	void	bayer(const std::string& b) { _bayer = b; }
+
+private:
+	time_t	_observation;
+public:
+	time_t	observation() const { return _observation; }
+	void	observation(time_t o) { _observation = o; }
+
+	astro::image::ImageMetadata	metadata;
 	const astro::image::Metavalue&	getMetadata(const std::string& keyword) const;
 	friend class ImageServer;
 	std::string	toString() const;

@@ -93,6 +93,10 @@ void	ImageServer::scan_file(const std::string& filename) {
 	imageserverinfo.filename = filename;
 	imageserverinfo.project = "unknown";
 	imageserverinfo.created = sb.st_ctime;
+	try {
+		imageserverinfo.camera
+			= (std::string)infile.getMetadata("INSTRUME");
+	} catch(...) { }
 	imageserverinfo.width = infile.getSize().width();
 	imageserverinfo.height = infile.getSize().height();
 	imageserverinfo.depth = infile.getPlanes();
@@ -193,6 +197,8 @@ ImagePtr	ImageServer::getImage(long id) {
 static ImageEnvelope	convert(const ImageServerRecord& imageserverinfo,
 				MetadataTable& metadatatable) {
 	ImageEnvelope	result(imageserverinfo.id());
+
+	// 
 	result.size(ImageSize(imageserverinfo.width, imageserverinfo.width));
 
 	// retrieve all the metadata available
@@ -209,6 +215,25 @@ static ImageEnvelope	convert(const ImageServerRecord& imageserverinfo,
 		result.metadata.setMetadata(m);
 	}
 
+	// envelope variables
+	result.filename(imageserverinfo.filename);
+	result.project(imageserverinfo.project);
+	result.created(imageserverinfo.created);
+	result.camera(imageserverinfo.camera);
+	result.exposuretime(imageserverinfo.exposuretime);
+	result.temperature(imageserverinfo.temperature);
+	if (imageserverinfo.category == "light") {
+		result.category(ImageSpec::light);
+	}
+	if (imageserverinfo.category == "dark") {
+		result.category(ImageSpec::dark);
+	}
+	if (imageserverinfo.category == "flat") {
+		result.category(ImageSpec::flat);
+	}
+	result.bayer(imageserverinfo.bayer);
+	result.observation((time_t)FITSdate(imageserverinfo.observation));
+
 	// we are done, return the envelope
 	return result;
 }
@@ -223,25 +248,6 @@ ImageEnvelope	ImageServer::getEnvelope(long id) {
 	// read the global information from the database
 	ImageServerRecord	imageserverinfo
 		= ImageServerTable(_database).byid(id);
-#if 0
-	result._size = ImageSize(imageserverinfo.width, imageserverinfo.width);
-
-	// retrieve all the metadata available
-	std::string	condition = stringprintf("imageid = %ld", id);
-	std::list<MetadataRecord>	mdrecords
-		= MetadataTable(_database).select(condition);
-
-	// convert the MetadataRecords into actual metadata
-	std::list<MetadataRecord>::const_iterator	mi;
-	for (mi = mdrecords.begin(); mi != mdrecords.end(); mi++) {
-		Metavalue	m = FITSKeywords::meta(mi->key, mi->value,
-					mi->comment);
-		result.metadata.setMetadata(m);
-	}
-
-	// we are done, return the envelope
-	return result;
-#endif
 	MetadataTable	metadatatable(_database);
 	return convert(imageserverinfo, metadatatable);
 }
@@ -278,6 +284,10 @@ long	ImageServer::save(ImagePtr image) {
 	try {
 		imageserverinfo.project
 			= (std::string)image->getMetadata("PROJECT");
+	} catch (...) { }
+	try {
+		imageserverinfo.camera
+			= (std::string)image->getMetadata("INSTRUME");
 	} catch (...) { }
 	imageserverinfo.width = image->size().width();
 	imageserverinfo.height = image->size().height();
@@ -381,9 +391,9 @@ std::set<ImageEnvelope>	ImageServer::get(const ImageSpec& spec) {
 	}
 
 	// add cameraname condition
-	if (spec.cameraname().size() > 0) {
+	if (spec.camera().size() > 0) {
 		conditions.push_back(condition(stringprintf("cameraname = '%s'",
-			spec.cameraname().c_str())));
+			spec.camera().c_str())));
 	}
 
 	// add exposure time condition

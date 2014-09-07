@@ -30,6 +30,7 @@ bool	ImageServerInfo::operator==(const ImageServerInfo& other) const {
 	if (filename != other.filename) { return false; }
 	if (project != other.project) { return false; }
 	if (created != other.created) { return false; }
+	if (camera != other.camera) { return false; }
 	if (width != other.width) { return false; }
 	if (height != other.height) { return false; }
 	if (depth != other.depth) { return false; }
@@ -57,6 +58,7 @@ std::string	ImageServerTableAdapter::createstatement() {
 		"    filename varchar(1024) not null,\n"
 		"    project varchar(128) not null,\n"
 		"    created datetime not null,\n"
+		"    camera varchar(128) not null,\n"
 		"    width int not null,\n"
 		"    height int not null,\n"
 		"    depth int not null default 1,\n"
@@ -78,6 +80,7 @@ ImageServerRecord	ImageServerTableAdapter::row_to_object(int objectid,
 	record.filename = row["filename"]->stringValue();
 	record.project = row["project"]->stringValue();
 	record.created = row["created"]->timeValue();
+	record.camera = row["camera"]->stringValue();
 	record.width = row["width"]->intValue();
 	record.height = row["height"]->intValue();
 	record.depth = row["depth"]->intValue();
@@ -96,6 +99,7 @@ UpdateSpec	ImageServerTableAdapter::object_to_updatespec(const ImageServerRecord
 	spec.insert(Field("filename", factory.get(imagerec.filename)));
 	spec.insert(Field("project", factory.get(imagerec.project)));
 	spec.insert(Field("created", factory.getTime(imagerec.created)));
+	spec.insert(Field("camera", factory.get(imagerec.camera)));
 	spec.insert(Field("width", factory.get(imagerec.width)));
 	spec.insert(Field("height", factory.get(imagerec.height)));
 	spec.insert(Field("depth", factory.get(imagerec.depth)));

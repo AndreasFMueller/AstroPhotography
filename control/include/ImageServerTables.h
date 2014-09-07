@@ -21,6 +21,7 @@ public:
 	std::string	filename;
 	std::string	project;
 	time_t	created;
+	std::string	camera;
 	int	width;
 	int	height;
 	int	depth;
