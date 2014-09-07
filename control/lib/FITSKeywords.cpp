@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	73
+#define	Nkeywors	74
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -462,6 +462,12 @@ FITSKeyword	keywors[Nkeywors] = {
 	std::type_index(typeid(std::string)),
 	true
 },
+{ // 73
+	std::string("PROJECT"),
+	std::string("project this image was taken for"),
+	std::type_index(typeid(std::string)),
+	true
+},
 };
 
 int	FITSKeywords::type(std::type_index idx) {
@@ -608,29 +614,34 @@ std::type_index	FITSKeywords::index(const std::string& name) {
 /**
  * \brief Factory method to create metavalues with the right comments
  */
-Metavalue	FITSKeywords::meta(const std::string& name, long value) {
+Metavalue	FITSKeywords::meta(const std::string& name, long value,
+			const std::string& comment) {
 	FITSKeyword	k = keyword(name);
-	return Metavalue(name, k.index, stringprintf("%ld", value), k.comment);
+	return Metavalue(name, k.index, stringprintf("%ld", value),
+		(comment.size() == 0) ? k.comment : comment);
 }
 
 /**
  * \brief Factory method to create metavalues with the right comments
  */
-Metavalue	FITSKeywords::meta(const std::string& name, double value) {
+Metavalue	FITSKeywords::meta(const std::string& name, double value,
+			const std::string& comment) {
 	FITSKeyword	k = keyword(name);
-	return Metavalue(name, k.index, stringprintf("%f", value), k.comment);
+	return Metavalue(name, k.index, stringprintf("%f", value),
+		(comment.size() == 0) ? k.comment : comment);
 }
 
 /**
  * \brief Factory method to create metavalues with the right comments
  */
 Metavalue	FITSKeywords::meta(const std::string& name,
-			const std::string& value) {
+			const std::string& value, const std::string& comment) {
 	FITSKeyword	k = keyword(name);
 	if (k.index == std::type_index(typeid(void))) {
 		return Metavalue(name, k.index, "", value);
 	} else {
-		return Metavalue(name, k.index, value, k.comment);
+		return Metavalue(name, k.index, value,
+			(comment.size() == 0) ? k.comment : comment);
 	}
 }
 
@@ -638,9 +649,10 @@ Metavalue	FITSKeywords::meta(const std::string& name,
  * \brief Factory method to create metavalues with the right comments
  */
 Metavalue	FITSKeywords::meta(const std::string& name,
-			const FITSdate& value) {
+			const FITSdate& value, const std::string& comment) {
 	FITSKeyword	k = keyword(name);
-	return Metavalue(name, k.index, value.showVeryLong(), k.comment);
+	return Metavalue(name, k.index, value.showVeryLong(),
+			(comment.size() == 0) ? k.comment : comment);
 }
 
 /**

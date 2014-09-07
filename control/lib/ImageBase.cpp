@@ -55,6 +55,14 @@ unsigned int	ImageBase::bytesPerPixel() const {
 	return this->bitsPerPixel() / 8;
 }
 
+unsigned int	ImageBase::bytesPerPlane() const {
+	return bytesPerPixel() / planes();
+}
+
+unsigned int	ImageBase::bitsPerPlane() const {
+	return bitsPerPixel() / planes();
+}
+
 static std::string	mosaic_key("BAYER");
 
 /**

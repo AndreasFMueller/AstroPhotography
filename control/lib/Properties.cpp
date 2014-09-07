@@ -8,6 +8,7 @@
 #include <fstream>
 #include <AstroDebug.h>
 #include <stdexcept>
+#include <AstroUtils.h>
 
 namespace astro {
 
@@ -36,13 +37,6 @@ Properties::Properties(const std::string& name) {
 }
 
 Properties::~Properties() {
-}
-
-static std::string	trim(const std::string& s) {
-	size_t	start = s.find_first_not_of(" \t\n");
-	std::string	s1 = s.substr(start);
-	size_t	end = s.find_last_not_of(" \t");
-	return s1.substr(0, end + 1);
 }
 
 static std::string	removecomments(const std::string& s) {

@@ -5,6 +5,7 @@
  */
 #include <AstroProject.h>
 #include <AstroIO.h>
+#include <sstream>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -55,6 +56,16 @@ ImageSpec::category_t	ImageEnvelope::category() const {
 		return ImageSpec::light;
 	}
 	throw std::runtime_error("internal error: unknown purpose");
+}
+
+std::string	ImageEnvelope::toString() const {
+	std::stringstream	out;
+	out << "id = " << _id << ", size = " << _size.toString() << std::endl;
+	ImageMetadata::const_iterator	mi;
+	for (mi = metadata.begin(); mi != metadata.end(); mi++) {
+		out << mi->second.toString() << std::endl;
+	}
+	return out.str();
 }
 
 } // namespace project

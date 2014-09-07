@@ -16,6 +16,16 @@ namespace astro {
 namespace io {
 
 /**
+ * \brief remove quotation marks from a string if present
+ */
+std::string	FITShdu::unquote(const std::string& s) {
+	if ((s[0] == '\'') && (s[s.size() - 1] == '\'')) {
+		return s.substr(1, s.size() - 2);
+	}
+	return s;
+}
+
+/**
  * \brief Retrieve a human readable error message from the fits library
  */
 std::string	FITSfile::errormsg(int status) const {
@@ -274,7 +284,7 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s hdu",
 				hdu.type.name());
 			hdu.comment = comment;
-			hdu.value = value;
+			hdu.value = FITShdu::unquote(value);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
 				hdu.name.c_str(), hdu.value.c_str(),
 				hdu.comment.c_str());
@@ -455,6 +465,13 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 		if (type == std::type_index(typeid(double))) {
 			double doublevalue = (double)value;
 			rc = fits_write_key(fptr, TDOUBLE, key, &doublevalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(FITSdate))) {
+			rc = fits_write_key(fptr, TSTRING, key,
+				(void *)((std::string)value).c_str(),
 				comment, &status);
 			goto writedone;
 		}

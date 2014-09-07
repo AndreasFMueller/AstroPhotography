@@ -743,12 +743,36 @@ void	convertPixelArray(destPixel *dest, const srcPixel *src, int length) {
 }
 
 /**
+ * \brief template with specialisations for the Planes function
+ */
+template<typename P>
+unsigned int	planes(P) {
+	return 1;
+}
+
+template<typename P>
+unsigned int	planes(YUYV<P>) {
+	return 2;
+}
+
+template<typename P>
+unsigned int	planes(RGB<P>) {
+	return 3;
+}
+
+template<typename P, int n>
+unsigned int	planes(Multiplane<P, n>) {
+	return n;
+}
+
+/**
  * \brief template with specializations for the bitsPerPixel function
  */
 template<typename P>
 unsigned int	bitsPerPixel(P) {
 	return std::numeric_limits<P>::digits;
 }
+
 template<typename P>
 unsigned int	bitsPerPixel(YUYV<P>) {
 	return 2 * std::numeric_limits<P>::digits;
@@ -757,6 +781,11 @@ unsigned int	bitsPerPixel(YUYV<P>) {
 template<typename P>
 unsigned int	bitsPerPixel(RGB<P>) {
 	return 3 * std::numeric_limits<P>::digits;
+}
+
+template<typename P, int n>
+unsigned int	bitsPerPixel(Multiplane<P, n>) {
+	return n * std::numeric_limits<P>::digits;
 }
 
 /**

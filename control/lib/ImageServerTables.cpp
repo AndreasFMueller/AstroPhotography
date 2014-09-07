@@ -6,6 +6,7 @@
 #include <ImageServerTables.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <includes.h>
 
 namespace astro {
 namespace project {
@@ -13,6 +14,18 @@ namespace project {
 //////////////////////////////////////////////////////////////////////
 // ImageServerInfo implementation (if necessary)
 //////////////////////////////////////////////////////////////////////
+ImageServerInfo::ImageServerInfo() {
+	project = "unknow";
+	created = time(NULL);
+	pixeltype = 8;
+	depth = 1;
+	exposuretime = 0;
+	temperature = 0;
+	category = "light";
+	bayer = "    ";
+	observation = "1970-00-00T00:00:00.000";
+}
+
 bool	ImageServerInfo::operator==(const ImageServerInfo& other) const {
 	if (filename != other.filename) { return false; }
 	if (project != other.project) { return false; }

@@ -193,7 +193,7 @@ class Metavalue {
 	std::type_index	datatype;
 	std::string	value;
 	std::string	comment;
-	void	standardize(const std::string& _keyword);
+	void	standardize();
 public:
 	const std::string&	getKeyword() const { return keyword; }
 	const std::string&	getValue() const { return value; }
@@ -241,6 +241,7 @@ public:
 	operator	std::string() const;
 	operator	FITSdate() const;
 	std::string	toString() const;
+	bool	operator==(const Metavalue& other) const;
 };
 
 /**
@@ -378,6 +379,9 @@ public:
 
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	unsigned int bytesPerPixel() const;
+	virtual unsigned int	planes() const { return 0; }
+	unsigned int bytesPerPlane() const;
+	unsigned int bitsPerPlane() const;
 
 	// pixel range stuff
 	virtual double	minimum() const { return 0; }
@@ -852,6 +856,13 @@ public:
  	 */
 	virtual unsigned int	bitsPerPixel() const {
 		return astro::image::bitsPerPixel(Pixel());
+	}
+
+	/**
+	 * \brief Determine the number of planes
+	 */
+	virtual unsigned int	planes() const {
+		return astro::image::planes(Pixel());
 	}
 
 	/**

@@ -66,11 +66,13 @@ class ImageEnvelope {
 	long	_id;
 public:
 	long	id() const { return _id; }
+	void	id(long l) { _id = l; }
 	operator	long() const { return _id; }
 private:
 	astro::image::ImageMetadata	metadata;
 	astro::image::ImageSize	_size;
 public:
+	ImageEnvelope(long id) : _id(id) { }
 	ImageEnvelope(const astro::image::ImagePtr image);
 
 	std::string	cameraname() const;
@@ -82,6 +84,7 @@ public:
 
 	const astro::image::Metavalue&	getMetadata(const std::string& keyword) const;
 	friend class ImageServer;
+	std::string	toString() const;
 };
 
 /**
@@ -99,9 +102,10 @@ class ImageServer {
 	void	scan_file(const std::string& filename);
 public:
 	ImageServer(astro::persistence::Database database,
-		const std::string& directory);
+		const std::string& directory, bool scan = true);
 
 	std::string	filename(long id);
+	std::string	pathname(long id);
 	astro::image::ImagePtr	getImage(long id);
 	ImageEnvelope	getEnvelope(long id);
 

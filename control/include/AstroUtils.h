@@ -135,6 +135,21 @@ public:
 	virtual std::string	type_name() const;
 };
 
+/**
+ * \brief Remove white space at the beginning and end of a string
+ */
+std::string	trim(const std::string& s);
+
+/**
+ * \brief Remove white space at the end of a string
+ */
+std::string	rtrim(const std::string& s);
+
+/**
+ * \brief Remove white space at the begining of a string
+ */
+std::string	ltrim(const std::string& s);
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */

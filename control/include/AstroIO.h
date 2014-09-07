@@ -33,7 +33,9 @@ public:
 /**
  * \brief structure to abstract the metadata as it is read from the FITS file
  */
-struct FITShdu {
+class FITShdu {
+public:
+static	std::string	unquote(const std::string& s);
 	std::string	name;
 	std::type_index	type;
 	std::string	value;
@@ -63,10 +65,14 @@ static std::type_index	index(int tp);
 static int	type(std::type_index idx);
 
 // factory methods to create 
-static Metavalue	meta(const std::string& name, long value);
-static Metavalue	meta(const std::string& name, double value);
-static Metavalue	meta(const std::string& name, const std::string& value);
-static Metavalue	meta(const std::string& name, const FITSdate& value);
+static Metavalue	meta(const std::string& name, long value,
+				const std::string& comment = std::string(""));
+static Metavalue	meta(const std::string& name, double value,
+				const std::string& comment = std::string(""));
+static Metavalue	meta(const std::string& name, const std::string& value,
+				const std::string& comment = std::string(""));
+static Metavalue	meta(const std::string& name, const FITSdate& value,
+				const std::string& comment = std::string(""));
 static Metavalue	meta(const FITShdu& hdu);
 };
 

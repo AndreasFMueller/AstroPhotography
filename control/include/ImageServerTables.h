@@ -31,6 +31,7 @@ public:
 	std::string	bayer;
 	std::string	observation;
 	bool	operator==(const ImageServerInfo& other) const;
+	ImageServerInfo();
 };
 
 /**
