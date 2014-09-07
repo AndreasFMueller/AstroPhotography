@@ -63,6 +63,7 @@ public:
 	ImageServerTable(Database database)
 		: Table<ImageServerRecord, ImageServerTableAdapter>(database) {
 	}
+	long	id(const std::string& filename);
 };
 
 /**
@@ -83,6 +84,12 @@ public:
 class MetadataRecord : public PersistentRef<MetadataInfo> {
 public:
 	MetadataRecord(int id, int ref) : PersistentRef<MetadataInfo>(id, ref) { }
+	bool	operator<(const MetadataRecord& other) const {
+		if (id() == other.id()) {
+			return seqno < other.seqno;
+		}
+		return id() < other.id();
+	}
 };
 
 /**

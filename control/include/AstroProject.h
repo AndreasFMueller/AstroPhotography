@@ -93,7 +93,7 @@ public:
 class ImageServer {
 	astro::persistence::Database	_database;
 	std::string	_directory;
-	void	setup_tables();
+	long	id(const std::string& filename);
 	void	scan_directory(bool recurse = false);
 	void	scan_recursive();
 	void	scan_file(const std::string& filename);

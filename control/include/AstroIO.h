@@ -67,6 +67,7 @@ static Metavalue	meta(const std::string& name, long value);
 static Metavalue	meta(const std::string& name, double value);
 static Metavalue	meta(const std::string& name, const std::string& value);
 static Metavalue	meta(const std::string& name, const FITSdate& value);
+static Metavalue	meta(const FITShdu& hdu);
 };
 
 /**
@@ -86,6 +87,11 @@ void	copy_metadata(const srctype& src, desttype& dest,
 	}
 }
 
+template<typename srctype, typename desttype>
+void	copy_metadata(const srctype& src, desttype& dest) {
+	copy_metadata<srctype, desttype>(src, dest, FITSKeywords::names());
+}
+
 /**
  * \brief FITS file base class
  *
@@ -96,7 +102,15 @@ void	copy_metadata(const srctype& src, desttype& dest,
  */
 class FITSfile {
 protected:
-	std::multimap<std::string, FITShdu>	headers;
+	// header stuff
+	typedef	std::list<std::pair<std::string, FITShdu> >	headerlist;
+	headerlist	headers;
+	headerlist::const_iterator	find(const std::string& name) const;
+	headerlist::iterator	find(const std::string& name);
+	bool	hasHDU(const std::string& keyword) const;
+	const FITShdu&	getHDU(const std::string& keyword) const;
+
+	// file stuff
 	std::string	errormsg(int status) const;
 	std::string	filename;
 	fitsfile	*fptr;
@@ -112,6 +126,9 @@ public:
 	int	getPlanes() const { return planes; }
 	int	getImgtype() const { return imgtype; }
 	int	getBytesPerPixel() const;
+	bool	hasMetadata(const std::string& key) const;
+	Metavalue	getMetadata(const std::string& key) const;
+	ImageMetadata	getAllMetadata() const;
 };
 
 /**

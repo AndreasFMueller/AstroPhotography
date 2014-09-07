@@ -40,7 +40,7 @@ void	ImageServerTest::tearDown() {
 void	ImageServerTest::testScan() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScan() begin");
 	// dummy database
-	Database	database;
+	Database	database = DatabaseFactory::get("imageserver.db");
 	
 	char	path[MAXPATHLEN];
 	std::string	directory(getcwd(path, MAXPATHLEN));

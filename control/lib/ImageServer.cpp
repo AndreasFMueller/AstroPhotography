@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroIO.h>
 #include <includes.h>
+#include <ImageServerTables.h>
 
 using namespace astro::persistence;
 using namespace astro::image;
@@ -20,11 +21,16 @@ namespace project {
  */
 ImageServer::ImageServer(Database database, const std::string& directory)
 	: _database(database), _directory(directory) {
-	// ensure that the database has the right tables
-	setup_tables();
-
 	// scan the directory for 
 	scan_directory();
+}
+
+/**
+ * \brief get the id of an image identified by its filename
+ */
+long	ImageServer::id(const std::string& filename) {
+	ImageServerTable	images(_database);
+	return images.id(filename);
 }
 
 /**
@@ -61,11 +67,68 @@ void	ImageServer::scan_file(const std::string& filename) {
 	}
 
 	// find out whether the database already contains this filename
+	ImageServerTable	images(_database);
+	try {
+		long	id = images.id(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exists with id %ld", 
+			filename.c_str(), id);
+		// if we get to this point, the file already exists, so we
+		// skip it
+		return;
+	} catch (...) {
+		// file does not exist
+	}
 
 	// read the metadata
         io::FITSinfileBase      infile(fullname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %s",
 		infile.getSize().toString().c_str());
+
+	// create an information record
+	ImageServerRecord	imageserverinfo;
+	imageserverinfo.filename = filename;
+	imageserverinfo.project = "unknown";
+	imageserverinfo.created = sb.st_ctime;
+	imageserverinfo.width = infile.getSize().width();
+	imageserverinfo.height = infile.getSize().height();
+	imageserverinfo.depth = infile.getPlanes();
+	imageserverinfo.pixeltype = infile.getPixeltype();
+	imageserverinfo.exposuretime = 0;
+	try {
+		imageserverinfo.exposuretime
+			= (double)infile.getMetadata("EXPTIME");
+	} catch(...) { }
+	imageserverinfo.temperature = 0;
+	try {
+		imageserverinfo.temperature
+			= (double)infile.getMetadata("CCD-TEMP");
+	} catch(...) { }
+	imageserverinfo.category = "light";
+	imageserverinfo.bayer = "    ";
+	imageserverinfo.observation = "1970-01-01T00:00:00.000";
+
+	// add the entry to the table
+	long	imageid = images.add(imageserverinfo);
+
+	// in the part below we need the metatdata table
+	MetadataTable	metadatatable(_database);
+
+	// get all the metadata from the infile
+	int	seqno = 0;
+	ImageMetadata	md = infile.getAllMetadata();
+
+	// now add an entry for each meta data record
+	ImageMetadata::const_iterator	mi;
+	for (mi = md.begin(); mi != md.end(); mi++) {
+		MetadataRecord	m(-1, imageid);
+		m.seqno = seqno;
+		m.key = mi->first;
+		m.value = mi->second.getValue();
+		m.comment = mi->second.getComment();
+		metadatatable.add(m);
+		seqno++;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d metadata records added");
 
 }
 
@@ -82,6 +145,9 @@ void	ImageServer::scan_directory(bool recurse) {
 		return;
 	}
 
+	// set up a counter so we can count the number of files we find
+	int	counter = 0;
+
 	// open the directory
 	DIR     *dir = opendir(_directory.c_str());
 	if (NULL == dir) {
@@ -91,18 +157,14 @@ void	ImageServer::scan_directory(bool recurse) {
 	while (NULL != (d = readdir(dir))) {
 		std::string     filename(d->d_name, d->d_namlen);
 		scan_file(filename);
+		counter++;
 	}
 
 	// close the directory
 	closedir(dir);
-	
-}
 
-/**
- * \brief Ensure that the 
- */
-void	ImageServer::setup_tables() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the tables");
+	// report the number of files scanned
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d files scanned", counter);
 }
 
 /**

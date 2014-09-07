@@ -52,6 +52,64 @@ FITSfile::~FITSfile() {
 }
 
 /**
+ * \brief Auxiliary predicate class to find headers
+ */
+class match_header_name {
+	std::string	_name;
+public:
+	match_header_name(const std::string& name) : _name(name) { }
+	bool	operator()(const std::pair<std::string, FITShdu>& v) const {
+		return v.first == _name;
+	}
+};
+
+/**
+ * \brief Header access
+ */
+FITSfile::headerlist::const_iterator	FITSfile::find(const std::string& name) const {
+	return std::find_if(headers.begin(), headers.end(),
+		match_header_name(name));
+}
+
+FITSfile::headerlist::iterator	FITSfile::find(const std::string& name) {
+	return std::find_if(headers.begin(), headers.end(),
+		match_header_name(name));
+}
+
+bool	FITSfile::hasHDU(const std::string& keyword) const {
+	return find(keyword) != headers.end();
+}
+
+const FITShdu&	FITSfile::getHDU(const std::string& keyword) const {
+	if (!hasHDU(keyword)) {
+		std::string	msg = stringprintf("no header with keyword %s",
+			keyword.c_str());
+		throw std::runtime_error(msg);
+	}
+	return find(keyword)->second;
+}
+
+/**
+ * \brief metadata access
+ */
+bool	FITSfile::hasMetadata(const std::string& keyword) const {
+	return hasHDU(keyword);
+}
+
+Metavalue	FITSfile::getMetadata(const std::string& keyword) const {
+	return FITSKeywords::meta(getHDU(keyword));
+}
+
+ImageMetadata	FITSfile::getAllMetadata() const {
+	ImageMetadata	meta;
+	headerlist::const_iterator	hi;
+	for (hi = headers.begin(); hi != headers.end(); hi++) {
+		meta.setMetadata(FITSKeywords::meta(hi->second));
+	}
+	return meta;
+}
+
+/**
  * \brief Open a FITS file for reading
  */
 FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception)
@@ -220,7 +278,7 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
 				hdu.name.c_str(), hdu.value.c_str(),
 				hdu.comment.c_str());
-			headers.insert(make_pair(hdu.name, hdu));
+			headers.push_back(make_pair(hdu.name, hdu));
 		}
 	}
 }
@@ -229,26 +287,16 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
  * \brief Copy the headers read from the FITS file into the Image metadata
  */
 void	FITSinfileBase::addHeaders(ImageBase *image) const {
-	std::multimap<std::string, FITShdu>::const_iterator	hi;
-	for (hi = headers.begin(); hi != headers.end(); hi++) {
-		std::string	key = hi->second.name;
-		std::string	value = hi->second.value;
-		std::string	comment = hi->second.comment;
-		Metavalue	mv(key, hi->second.type, value, comment);
-		image->setMetadata(mv);
-	}
+	ImageMetadata	metadata = getAllMetadata();
+	copy_metadata(metadata, *image);
 }
 
 bool	FITSinfileBase::hasHeader(const std::string& key) const {
-	return (headers.find(key) != headers.end());
+	return hasHDU(key);
 }
 
 std::string	FITSinfileBase::getHeader(const std::string& key) const {
-	std::map<std::string, FITShdu>::const_iterator hi = headers.find(key);
-	if (hi == headers.end()) {
-		throw std::runtime_error("header not found");
-	}
-	return hi->second.value;
+	return getHDU(key).value;
 }
 
 /**

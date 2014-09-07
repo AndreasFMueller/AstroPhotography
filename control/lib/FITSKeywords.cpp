@@ -644,6 +644,16 @@ Metavalue	FITSKeywords::meta(const std::string& name,
 }
 
 /**
+ * \brief Factory method to convert metavalues from FITShdu
+ */
+Metavalue	FITSKeywords::meta(const FITShdu& hdu) {
+	std::string	key = hdu.name;
+	std::string	value = hdu.value;
+	std::string	comment = hdu.comment;
+	return Metavalue(key, hdu.type, value, comment);
+}
+
+/**
  * \brief Get the standard comment for this keyword
  */
 const std::string&	FITSKeywords::comment(const std::string& name) {

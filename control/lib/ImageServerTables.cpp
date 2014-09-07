@@ -4,6 +4,8 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <ImageServerTables.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace project {
@@ -91,6 +93,21 @@ UpdateSpec	ImageServerTableAdapter::object_to_updatespec(const ImageServerRecord
 	spec.insert(Field("bayer", factory.get(imagerec.bayer)));
 	spec.insert(Field("observation", factory.get(imagerec.observation)));
 	return spec;
+}
+
+//////////////////////////////////////////////////////////////////////
+// ImageServerTable implementation
+//////////////////////////////////////////////////////////////////////
+long	ImageServerTable::id(const std::string& filename) {
+	std::string	condition = stringprintf("filename = '%s'",
+				filename.c_str());
+	std::list<object_type>	objects = select(condition);
+	if (objects.size() == 0) {
+		std::string	msg = stringprintf("no image with filename %s",
+			filename.c_str());
+		throw std::runtime_error(msg);
+	}
+	return objects.begin()->id();
 }
 
 //////////////////////////////////////////////////////////////////////

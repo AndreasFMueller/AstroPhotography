@@ -247,6 +247,7 @@ public:
 template<typename object, typename dbadapter>
 class Table : public TableBase {
 public:
+	typedef	object object_type;
 	Table(Database database)
 		: TableBase(database, dbadapter::tablename(),
 			dbadapter::createstatement()) { }
