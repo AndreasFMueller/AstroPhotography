@@ -78,6 +78,7 @@ public:
 	float	temperature() const;
 	const astro::image::ImageSize&	size() const { return _size; }
 	ImageSpec::category_t	category() const;
+	std::string	project() const;
 
 	const astro::image::Metavalue&	getMetadata(const std::string& keyword) const;
 	friend class ImageServer;

@@ -152,7 +152,7 @@ typedef std::shared_ptr<DatabaseBackend>	Database;
  */
 class DatabaseFactory {
 public:
-	Database	get(const std::string& name);
+static Database	get(const std::string& name);
 };
 
 /**

@@ -348,11 +348,14 @@ void	UpdateSpec::bindid(StatementPtr& stmt, int id) const {
 TableBase::TableBase(Database database, const std::string& tablename,
 	const std::string& createstatement)
 	: _database(database), _tablename(tablename) {
+	if (NULL == _database) {
+		throw std::runtime_error("no database persent");
+	}
 	// test whether the database contains the table
-	if (!database->hastable(tablename)) {
+	if (!_database->hastable(tablename)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating table using %s",
 			createstatement.c_str());
-		database->query(createstatement);
+		_database->query(createstatement);
 	}
 
 	// get all the column names

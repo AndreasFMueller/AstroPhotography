@@ -60,10 +60,13 @@ void	ImageServer::scan_file(const std::string& filename) {
 		return;
 	}
 
+	// find out whether the database already contains this filename
+
 	// read the metadata
         io::FITSinfileBase      infile(fullname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %s",
 		infile.getSize().toString().c_str());
+
 }
 
 /**
