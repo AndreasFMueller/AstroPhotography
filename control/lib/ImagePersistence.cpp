@@ -1,5 +1,5 @@
 /*
- * ImagePersistence.pp -- table for images and image attributes
+ * ImagePersistence.cpp -- table for images and image attributes
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

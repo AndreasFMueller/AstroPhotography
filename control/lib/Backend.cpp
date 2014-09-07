@@ -95,9 +95,11 @@ Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 				query.c_str());
 			throw std::runtime_error("no SQL query");
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "statement prepared");
 		return;
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "remaining query: %s", tail);
+	debug(LOG_ERR, DEBUG_LOG, 0, "prepare failed (%d): remaining query: %s",
+		rc, tail);
 	throw Sqlite3Exception(_backend,
 		stringprintf("remaining query: %s", tail));
 }
@@ -391,6 +393,8 @@ std::string	Sqlite3Exception::cause(Sqlite3Backend& database,
  * \brief Backend factory implementation
  */
 Database	DatabaseFactory::get(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create backend on file %s",
+		name.c_str());
 	return Database(new Sqlite3Backend(name));
 }
 

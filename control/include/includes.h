@@ -90,4 +90,8 @@
 #include <signal.h>
 #endif /* HAVE_SIGNAL_H */
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif /* HAVE_SYS_PARAM_H */
+
 #endif /* _includes_h */

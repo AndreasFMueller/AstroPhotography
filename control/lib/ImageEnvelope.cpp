@@ -5,6 +5,7 @@
  */
 #include <AstroProject.h>
 #include <AstroIO.h>
+#include <sstream>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -15,8 +16,8 @@ namespace project {
 /**
  * \brief Construct metadata from an image
  */
-ImageEnvelope::ImageEnvelope(const ImagePtr image) {
-	copy_metadata(*image, metadata, FITSKeywords::names());
+ImageEnvelope::ImageEnvelope(const ImagePtr image) : _size(image->size()) {
+	copy_metadata(*image, metadata);
 }
 
 /**
@@ -31,6 +32,40 @@ const Metavalue&	ImageEnvelope::getMetadata(const std::string& keyword) const {
  */
 std::string	ImageEnvelope::cameraname() const {
 	return (std::string)getMetadata("CAMERA");
+}
+
+float	ImageEnvelope::exposuretime() const {
+	double	t = getMetadata("EXPTIME");
+	return t;
+}
+
+float	ImageEnvelope::temperature() const {
+	double	t = getMetadata("CCD-TEMP");
+	return t;
+};
+
+ImageSpec::category_t	ImageEnvelope::category() const {
+	std::string	purpose = getMetadata("PURPOSE");
+	if (purpose == "dark") {
+		return ImageSpec::dark;
+	}
+	if (purpose == "flat") {
+		return ImageSpec::flat;
+	}
+	if (purpose == "light") {
+		return ImageSpec::light;
+	}
+	throw std::runtime_error("internal error: unknown purpose");
+}
+
+std::string	ImageEnvelope::toString() const {
+	std::stringstream	out;
+	out << "id = " << _id << ", size = " << _size.toString() << std::endl;
+	ImageMetadata::const_iterator	mi;
+	for (mi = metadata.begin(); mi != metadata.end(); mi++) {
+		out << mi->second.toString() << std::endl;
+	}
+	return out.str();
 }
 
 } // namespace project

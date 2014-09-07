@@ -152,7 +152,7 @@ typedef std::shared_ptr<DatabaseBackend>	Database;
  */
 class DatabaseFactory {
 public:
-	Database	get(const std::string& name);
+static Database	get(const std::string& name);
 };
 
 /**
@@ -247,6 +247,7 @@ public:
 template<typename object, typename dbadapter>
 class Table : public TableBase {
 public:
+	typedef	object object_type;
 	Table(Database database)
 		: TableBase(database, dbadapter::tablename(),
 			dbadapter::createstatement()) { }

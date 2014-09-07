@@ -31,7 +31,7 @@ ProcessingStep::state	WriteImageStep::do_work() {
 			image.size().toString().c_str());
 
 		// copy the metadata
-		astro::io::copy_metadata(*this, image, FITSKeywords::names());
+		astro::io::copy_metadata(*this, image);
 
 		// write the image
 		FITSoutfile<double>	outfile(_filename);

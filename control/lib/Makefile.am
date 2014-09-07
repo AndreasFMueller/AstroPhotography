@@ -24,7 +24,7 @@ else
 uvc_files =
 endif
 
-libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
+libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
 	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
@@ -55,7 +55,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp \
 	Mount.cpp \
 	Serial.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
-	FITSKeywords.cpp ImageEnvelope.cpp \
+	FITSKeywords.cpp ImageServerTables.cpp \
+	ImageEnvelope.cpp ImageServer.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \

@@ -60,7 +60,7 @@ public:
 };
 
 /** 
- * \brief Class for 
+ * \brief Class for image attributes
  */
 class ImageAttribute {
 public:

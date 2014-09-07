@@ -55,6 +55,14 @@ unsigned int	ImageBase::bytesPerPixel() const {
 	return this->bitsPerPixel() / 8;
 }
 
+unsigned int	ImageBase::bytesPerPlane() const {
+	return bytesPerPixel() / planes();
+}
+
+unsigned int	ImageBase::bitsPerPlane() const {
+	return bitsPerPixel() / planes();
+}
+
 static std::string	mosaic_key("BAYER");
 
 /**
@@ -140,9 +148,6 @@ void	ImageBase::setMosaicType(const std::string& mosaic_name) {
  * \param name	 name of the metadata element
  */
 bool	ImageBase::hasMetadata(const std::string& name) const {
-#if 0
-	return (metadata.find(name) != metadata.end());
-#endif
 	return metadata.hasMetadata(name);
 }
 
@@ -150,15 +155,6 @@ bool	ImageBase::hasMetadata(const std::string& name) const {
  * \brief Retrieve metadata
  */
 Metavalue	ImageBase::getMetadata(const std::string& name) const {
-#if 0
-	if (hasMetadata(name)) {
-		return metadata.find(name)->second;
-	}
-	std::string	msg = stringprintf("image has no '%s' metadata",
-		name.c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
-#endif
 	return metadata.getMetadata(name);
 }
 
@@ -173,21 +169,6 @@ void	ImageBase::removeMetadata(const std::string& name) {
  * \brief Update metadata
  */
 void	ImageBase::setMetadata(const Metavalue& mv) {
-#if 0
-	// XXX ensure that values that are managed by the image functions
-	//     cannot be set through this interface (the ignored function
-	//     in Fits.cpp has this functionality), unfortuntately, it's in
-	//     wrong file...
-	
-	const std::string&	name = mv.getKeyword();
-	if (hasMetadata(name)) {
-		//metadata[name] = mv;
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "inserting '%s' value '%s'",
-			name.c_str(), mv.getValue().c_str());
-		metadata.insert(make_pair(name, mv));
-	}
-#endif
 	metadata.setMetadata(mv);
 }
 

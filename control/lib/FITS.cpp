@@ -16,6 +16,16 @@ namespace astro {
 namespace io {
 
 /**
+ * \brief remove quotation marks from a string if present
+ */
+std::string	FITShdu::unquote(const std::string& s) {
+	if ((s[0] == '\'') && (s[s.size() - 1] == '\'')) {
+		return s.substr(1, s.size() - 2);
+	}
+	return s;
+}
+
+/**
  * \brief Retrieve a human readable error message from the fits library
  */
 std::string	FITSfile::errormsg(int status) const {
@@ -49,6 +59,64 @@ FITSfile::~FITSfile() {
 		throw FITSexception(errormsg(status));
 	}
 	fptr = NULL;
+}
+
+/**
+ * \brief Auxiliary predicate class to find headers
+ */
+class match_header_name {
+	std::string	_name;
+public:
+	match_header_name(const std::string& name) : _name(name) { }
+	bool	operator()(const std::pair<std::string, FITShdu>& v) const {
+		return v.first == _name;
+	}
+};
+
+/**
+ * \brief Header access
+ */
+FITSfile::headerlist::const_iterator	FITSfile::find(const std::string& name) const {
+	return std::find_if(headers.begin(), headers.end(),
+		match_header_name(name));
+}
+
+FITSfile::headerlist::iterator	FITSfile::find(const std::string& name) {
+	return std::find_if(headers.begin(), headers.end(),
+		match_header_name(name));
+}
+
+bool	FITSfile::hasHDU(const std::string& keyword) const {
+	return find(keyword) != headers.end();
+}
+
+const FITShdu&	FITSfile::getHDU(const std::string& keyword) const {
+	if (!hasHDU(keyword)) {
+		std::string	msg = stringprintf("no header with keyword %s",
+			keyword.c_str());
+		throw std::runtime_error(msg);
+	}
+	return find(keyword)->second;
+}
+
+/**
+ * \brief metadata access
+ */
+bool	FITSfile::hasMetadata(const std::string& keyword) const {
+	return hasHDU(keyword);
+}
+
+Metavalue	FITSfile::getMetadata(const std::string& keyword) const {
+	return FITSKeywords::meta(getHDU(keyword));
+}
+
+ImageMetadata	FITSfile::getAllMetadata() const {
+	ImageMetadata	meta;
+	headerlist::const_iterator	hi;
+	for (hi = headers.begin(); hi != headers.end(); hi++) {
+		meta.setMetadata(FITSKeywords::meta(hi->second));
+	}
+	return meta;
 }
 
 /**
@@ -216,11 +284,11 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s hdu",
 				hdu.type.name());
 			hdu.comment = comment;
-			hdu.value = value;
+			hdu.value = FITShdu::unquote(value);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s = %s/%s",
 				hdu.name.c_str(), hdu.value.c_str(),
 				hdu.comment.c_str());
-			headers.insert(make_pair(hdu.name, hdu));
+			headers.push_back(make_pair(hdu.name, hdu));
 		}
 	}
 }
@@ -229,26 +297,16 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
  * \brief Copy the headers read from the FITS file into the Image metadata
  */
 void	FITSinfileBase::addHeaders(ImageBase *image) const {
-	std::multimap<std::string, FITShdu>::const_iterator	hi;
-	for (hi = headers.begin(); hi != headers.end(); hi++) {
-		std::string	key = hi->second.name;
-		std::string	value = hi->second.value;
-		std::string	comment = hi->second.comment;
-		Metavalue	mv(key, hi->second.type, value, comment);
-		image->setMetadata(mv);
-	}
+	ImageMetadata	metadata = getAllMetadata();
+	copy_metadata(metadata, *image);
 }
 
 bool	FITSinfileBase::hasHeader(const std::string& key) const {
-	return (headers.find(key) != headers.end());
+	return hasHDU(key);
 }
 
 std::string	FITSinfileBase::getHeader(const std::string& key) const {
-	std::map<std::string, FITShdu>::const_iterator hi = headers.find(key);
-	if (hi == headers.end()) {
-		throw std::runtime_error("header not found");
-	}
-	return hi->second.value;
+	return getHDU(key).value;
 }
 
 /**
@@ -407,6 +465,13 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 		if (type == std::type_index(typeid(double))) {
 			double doublevalue = (double)value;
 			rc = fits_write_key(fptr, TDOUBLE, key, &doublevalue,
+				comment, &status);
+			goto writedone;
+		}
+
+		if (type == std::type_index(typeid(FITSdate))) {
+			rc = fits_write_key(fptr, TSTRING, key,
+				(void *)((std::string)value).c_str(),
 				comment, &status);
 			goto writedone;
 		}
