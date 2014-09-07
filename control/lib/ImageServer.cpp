@@ -8,6 +8,7 @@
 #include <AstroIO.h>
 #include <includes.h>
 #include <ImageServerTables.h>
+#include <numeric>
 
 using namespace astro::persistence;
 using namespace astro::image;
@@ -189,6 +190,29 @@ ImagePtr	ImageServer::getImage(long id) {
 	return in.read();
 }
 
+static ImageEnvelope	convert(const ImageServerRecord& imageserverinfo,
+				MetadataTable& metadatatable) {
+	ImageEnvelope	result(imageserverinfo.id());
+	result.size(ImageSize(imageserverinfo.width, imageserverinfo.width));
+
+	// retrieve all the metadata available
+	std::string	condition = stringprintf("imageid = %ld",
+					imageserverinfo.id());
+	std::list<MetadataRecord>	mdrecords
+		= metadatatable.select(condition);
+
+	// convert the MetadataRecords into actual metadata
+	std::list<MetadataRecord>::const_iterator	mi;
+	for (mi = mdrecords.begin(); mi != mdrecords.end(); mi++) {
+		Metavalue	m = FITSKeywords::meta(mi->key, mi->value,
+					mi->comment);
+		result.metadata.setMetadata(m);
+	}
+
+	// we are done, return the envelope
+	return result;
+}
+
 /**
  * \brief Retrieve the metadata for an image
  */
@@ -199,6 +223,7 @@ ImageEnvelope	ImageServer::getEnvelope(long id) {
 	// read the global information from the database
 	ImageServerRecord	imageserverinfo
 		= ImageServerTable(_database).byid(id);
+#if 0
 	result._size = ImageSize(imageserverinfo.width, imageserverinfo.width);
 
 	// retrieve all the metadata available
@@ -216,14 +241,9 @@ ImageEnvelope	ImageServer::getEnvelope(long id) {
 
 	// we are done, return the envelope
 	return result;
-}
-
-/**
- * \brief Get the envelopes that match specification
- */
-std::set<ImageEnvelope>	ImageServer::get(const ImageSpec& /* spec */) {
-	std::set<ImageEnvelope>	images;
-	return images;
+#endif
+	MetadataTable	metadatatable(_database);
+	return convert(imageserverinfo, metadatatable);
 }
 
 /**
@@ -314,6 +334,97 @@ long	ImageServer::save(ImagePtr image) {
  */
 void	ImageServer::remove(long id) {
 	ImageServerTable(_database).remove(id);
+}
+
+static float	temperature_min(float temperature) {
+	return 0.99 * (273.15 + temperature) - 273.15;
+}
+
+static float	temperature_max(float temperature) {
+	return 1.01 * (273.15 + temperature) - 273.15;
+}
+
+class condition : public std::string {
+public:
+	condition(const std::string& s) : std::string(s) { }
+
+	condition	operator+(const condition& other) {
+		if ((size() == 0) && (other.size() == 0)) {
+			return std::string("");
+		}
+		if (size() == 0) {
+			return other;
+		}
+		if (other.size() == 0) {
+			return *this;
+		}
+		return condition("(" + *this + ") and (" + other + ")");
+	}
+};
+
+/**
+ * \brief get a set of images matching the specifcation
+ */
+std::set<ImageEnvelope>	ImageServer::get(const ImageSpec& spec) {
+	std::list<condition>	conditions;
+	// add category condition
+	switch (spec.category()) {
+	case ImageSpec::light:
+		conditions.push_back(condition("category = 'light'"));
+		break;
+	case ImageSpec::dark:
+		conditions.push_back(condition("category = 'dark'"));
+		break;
+	case ImageSpec::flat:
+		conditions.push_back(condition("category = 'flat'"));
+		break;
+	}
+
+	// add cameraname condition
+	if (spec.cameraname().size() > 0) {
+		conditions.push_back(condition(stringprintf("cameraname = '%s'",
+			spec.cameraname().c_str())));
+	}
+
+	// add exposure time condition
+	if (spec.exposuretime() > 0) {
+		conditions.push_back(condition(stringprintf(
+			"%f <= exposuretime and exposuretime <= %f",
+			spec.exposuretime() * 0.9, spec.exposuretime() * 1.1)));
+	}
+
+	// add temperature condition
+	if (spec.temperature() > -273.15) {
+		conditions.push_back(condition(stringprintf(
+			"%f <= temperature and temperature < %f",
+			temperature_min(spec.temperature()),
+			temperature_max(spec.temperature()))));
+	}
+
+	// add project condition
+	if (spec.project().size() > 0) {
+		conditions.push_back(condition(stringprintf(
+			"project = '%s'", spec.project().c_str())));
+	}
+
+	// concatenate the conditions
+	condition	all =  std::accumulate(conditions.begin(),
+					conditions.end(), condition(""));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulated condition %s", all.c_str());
+
+	// query the database 
+	ImageServerTable	imageservertable(_database);
+	MetadataTable	metadatatable(_database);
+
+	std::list<ImageServerRecord>	images = imageservertable.select(all);
+
+	// build the result set
+	std::set<ImageEnvelope>	resultset;
+	std::list<ImageServerRecord>::const_iterator	ii;
+	for (ii = images.begin(); ii != images.end(); ii++) {
+		resultset.insert(convert(*ii, metadatatable));
+	}
+	return resultset;
 }
 
 } // namespace project

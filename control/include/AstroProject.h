@@ -20,7 +20,7 @@ namespace project {
  */
 class ImageSpec {
 public:
-	typedef enum { dark = 1, flat = 2, light = 0 } category_t;
+	typedef enum { light = 0, dark = 1, flat = 2 } category_t;
 private:
 	category_t	_category;
 public:
@@ -54,6 +54,8 @@ private:
 public:
 	const std::string&	project() const { return _project; }
 	void	project(const std::string& p) { _project = p; }
+
+	ImageSpec();
 };
 
 /**
@@ -68,17 +70,16 @@ public:
 	long	id() const { return _id; }
 	void	id(long l) { _id = l; }
 	operator	long() const { return _id; }
-private:
 	astro::image::ImageMetadata	metadata;
 	astro::image::ImageSize	_size;
-public:
+	const astro::image::ImageSize&	size() const { return _size; }
+	void	size(const astro::image::ImageSize& s) { _size = s; }
 	ImageEnvelope(long id) : _id(id) { }
 	ImageEnvelope(const astro::image::ImagePtr image);
 
 	std::string	cameraname() const;
 	float	exposuretime() const;
 	float	temperature() const;
-	const astro::image::ImageSize&	size() const { return _size; }
 	ImageSpec::category_t	category() const;
 	std::string	project() const;
 

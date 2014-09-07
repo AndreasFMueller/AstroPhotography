@@ -33,8 +33,8 @@ void	Metavalue::standardize() {
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "purpose: %s", value.c_str());
 	}
-	if ((keyword == "INSTRUME") || (keyword == "PURPOSE")
-		|| (keyword == "PROJECT") || (keyword == "BAYER")) {
+	if ((keyword == "INSTRUME") || (keyword == "PROJECT")
+		|| (keyword == "BAYER")) {
 		value = rtrim(value);
 	}
 }

@@ -28,11 +28,13 @@ public:
 	void	tearDown();
 	void	testScan();
 	void	testImage();
+	void	testSelect();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(ImageServerTest);
 	CPPUNIT_TEST(testScan);
 	CPPUNIT_TEST(testImage);
+	CPPUNIT_TEST(testSelect);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -79,6 +81,10 @@ void	ImageServerTest::testImage() {
 	ImageServer	server(database, directory, false);
 
 	long	imageid = server.save(imageptr);
+	server.save(imageptr);
+	server.save(imageptr);
+	server.save(imageptr);
+	server.save(imageptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageid = %ld", imageid);
 
 	ImagePtr	image2 = server.getImage(imageid);
@@ -98,6 +104,18 @@ void	ImageServerTest::testImage() {
 		== (double)image2->getMetadata("CCD-TEMP"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() end");
+}
+
+void	ImageServerTest::testSelect() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() begin");
+	ImageServer	server(database, directory, false);
+	ImageSpec	spec;
+	spec.category(ImageSpec::dark);
+	spec.temperature(-47);
+	std::set<ImageEnvelope>	resultset = server.get(spec);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d darks with temperature -47",
+		resultset.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() end");
 }
 
 #if 0
