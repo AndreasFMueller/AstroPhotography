@@ -10,6 +10,7 @@
 #include <typeinfo>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <algorithm>
 
 using namespace astro::config;
 
@@ -30,7 +31,10 @@ static struct option	longopts[] = {
  * \brief usage message
  */
 void	usage(const char *progname) {
-	std::cerr << "usage: " << progname << " [ options ]" << std::endl;
+	std::cerr << "usage: " << progname << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
+	std::cerr << "Get, set or delete configuration variables in domain (currently only 'global'";
+	std::cerr << "is valid), identified by the section and the name.";
+	std::cerr << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
 	std::cerr << "  -d,--debug                   increase debug level";
@@ -75,7 +79,7 @@ int	command_set(const std::vector<std::string>& arguments) {
  */
 int	command_get_global(const std::vector<std::string>& arguments) {
 	if (arguments.size() < 4) {
-		std::cerr << "not enough arguments for set command";
+		std::cerr << "not enough arguments for get command";
 		std::cerr << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -103,6 +107,78 @@ int	command_get(const std::vector<std::string>& arguments) {
 	std::string	domain = arguments[1];
 	if (domain == "global") {
 		return command_get_global(arguments);
+	}
+	std::cerr << "command not implemented" << std::endl;
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the global delete command
+ */
+int	command_delete_global(const std::vector<std::string>& arguments) {
+	if (arguments.size() < 4) {
+		std::cerr << "not enough arguments for delete command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+	}
+	try {
+		ConfigurationPtr	configuration = Configuration::get();
+		configuration->removeglobal(arguments[2], arguments[3]); 
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		std::cerr << "not found: "  << x.what() << std::endl;
+	}
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the delete command
+ */
+int	command_delete(const std::vector<std::string>& arguments) {
+	if (arguments.size() < 2) {
+		std::cerr << "not enough arguments for get command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+	}
+	std::string	domain = arguments[1];
+	if (domain == "global") {
+		return command_delete_global(arguments);
+	}
+	std::cerr << "command not implemented" << std::endl;
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the list global command
+ */
+int	command_list_global(const std::vector<std::string>& /* arguments */) {
+	std::list<ConfigurationEntry>	entries
+		= Configuration::get()->globallist();
+	std::for_each(entries.begin(), entries.end(),
+		[](ConfigurationEntry entry) {
+			std::cout << entry.section;
+			std::cout << "\t";
+			std::cout << entry.name;
+			std::cout << "\t";
+			std::cout << entry.value;
+			std::cout << "\n";
+		}
+	);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief 
+ */
+int	command_list(const std::vector<std::string>& arguments) {
+	if (arguments.size() < 2) {
+		std::cerr << "not enough arguments for get command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+	}
+	std::string	domain = arguments[1];
+	if (domain == "global") {
+		return command_list_global(arguments);
 	}
 	std::cerr << "command not implemented" << std::endl;
 	return EXIT_FAILURE;
@@ -155,6 +231,12 @@ int	main(int argc, char *argv[]) {
 	}
 	if (verb == "set") {
 		return command_set(arguments);
+	}
+	if (verb == "delete") {
+		return command_delete(arguments);
+	}
+	if (verb == "list") {
+		return command_list(arguments);
 	}
 	
 	std::cerr << "command " << verb << " not implemented" << std::endl;

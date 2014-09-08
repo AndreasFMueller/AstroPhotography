@@ -65,6 +65,13 @@ static DeviceMapperPtr	get(astro::persistence::Database database);
 
 typedef std::shared_ptr<Configuration>	ConfigurationPtr;
 
+class ConfigurationEntry {
+public:
+	std::string	section;
+	std::string	name;
+	std::string	value;
+};
+
 /**
  * \brief Configuration repository class
  *
@@ -91,6 +98,7 @@ static void	set_default(const std::string& filename);
 			const std::string& name, const std::string& value) = 0;
 	virtual void	removeglobal(const std::string& section,
 				const std::string& name) = 0;
+	virtual std::list<ConfigurationEntry>	globallist() = 0;
 	virtual DeviceMapperPtr	devicemapper() = 0;
 };
 

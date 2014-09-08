@@ -38,6 +38,7 @@ public:
 			const std::string& name, const std::string& value);
 	virtual void	removeglobal(const std::string& name,
 				const std::string& value);
+	virtual std::list<ConfigurationEntry>	globallist();
 	virtual DeviceMapperPtr	devicemapper();
 };
 
@@ -200,6 +201,24 @@ std::string	Configuration::get_default() {
  */
 void	Configuration::set_default(const std::string& filename) {
 	default_config = filename;
+}
+
+/**
+ * \brief 
+ */
+std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
+	GlobalTable	globals(database);
+	std::list<GlobalRecord>	records = globals.select("0 = 0");
+	std::list<ConfigurationEntry>	result;
+	std::list<GlobalRecord>::const_iterator	i;
+	for (i = records.begin(); i != records.end(); i++) {
+		ConfigurationEntry	entry;
+		entry.section = i->section;
+		entry.name = i->name;
+		entry.value = i->value;
+		result.push_back(entry);
+	}
+	return result;
 }
 
 } // namespace config
