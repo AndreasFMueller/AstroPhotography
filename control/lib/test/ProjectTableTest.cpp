@@ -1,5 +1,5 @@
 /*
- * ProjectTableTest.cpp -- template for tests
+ * ProjectTableTest.cpp -- Test the project table 
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

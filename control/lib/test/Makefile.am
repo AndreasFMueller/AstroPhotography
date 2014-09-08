@@ -52,6 +52,7 @@ tests_SOURCES = tests.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
+	ProjectTableTest.cpp GlobalTableTest.cpp ConfigurationTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
@@ -60,7 +61,7 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ProjectTableTest.cpp
+	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 

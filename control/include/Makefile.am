@@ -15,6 +15,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h \
 	AstroPersistence.h AstroTask.h AstroInterpolation.h \
 	AstroCatalog.h AstroChart.h AstroProjection.h AstroProcess.h \
+	AstroConfig.h \
 	stacktrace.h
 
 noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
@@ -26,5 +27,5 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	FocusWork.h FocusCompute.h Serial.h \
 	MappedFile.h Ucac4.h Tycho2.h BSC.h Hipparcos.h NGCIC.h \
 	CatalogBackend.h ImageServerTables.h ImageServersTable.h \
-	ProjectTable.h
+	ProjectTable.h GlobalTable.h
 

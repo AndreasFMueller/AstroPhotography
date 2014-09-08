@@ -3,6 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _ProjectTable_h
+#define _ProjectTable_h
+
 #include <AstroPersistence.h>
 
 using namespace astro::persistence;
@@ -52,3 +55,5 @@ public:
 
 } // namespace project
 } // namespace astro
+
+#endif /* _ProjectTable_h */

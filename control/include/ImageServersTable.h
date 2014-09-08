@@ -3,6 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _ImageServersTable_h
+#define _ImageServersTable_h
+
 #include <AstroPersistence.h>
 #include <AstroProject.h>
 
@@ -55,3 +58,5 @@ public:
 
 } // namespace astro
 } // namespace project
+
+#endif /* _ImageServersTable_h */
