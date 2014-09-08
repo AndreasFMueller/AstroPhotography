@@ -38,6 +38,7 @@ public:
 			const std::string& name, const std::string& value);
 	virtual void	removeglobal(const std::string& name,
 				const std::string& value);
+	virtual DeviceMapperPtr	devicemapper();
 };
 
 /**
@@ -168,6 +169,13 @@ ConfigurationPtr	Configuration::get(const std::string& filename) {
 	ConfigurationPtr	config(new ConfigurationBackend(filename));
 	configurationmap.insert(std::make_pair(filename, config));
 	return config;
+}
+
+/**
+ * \brief Get the device mapper
+ */
+DeviceMapperPtr	ConfigurationBackend::devicemapper() {
+	return DeviceMapper::get(database);
 }
 
 } // namespace config

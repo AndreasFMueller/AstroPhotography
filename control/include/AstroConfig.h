@@ -11,13 +11,6 @@
 #include <memory>
 
 namespace astro {
-
-// we need to declar the test class, which happens to be in a different
-// namespace, because we want to give it access to the internals of the class
-namespace test {
-class DeviceMapperTest;
-} // namespace test
-
 namespace config {
 
 /**
@@ -53,7 +46,6 @@ class Configuration;
  * \brief  Device Mapper class
  */
 class DeviceMapper {
-static DeviceMapperPtr	get(astro::persistence::Database database);
 	DeviceMap	select(const std::string& condition);
 public:
 	virtual DeviceMap	find(const std::string& name) = 0;
@@ -68,8 +60,7 @@ public:
 	virtual void	remove(const std::string& name) = 0;
 	virtual void	remove(const DeviceName& devicename,
 				const std::string& servername) = 0;
-	friend class astro::test::DeviceMapperTest;
-	friend class Configuration;
+static DeviceMapperPtr	get(astro::persistence::Database database);
 };
 
 typedef std::shared_ptr<Configuration>	ConfigurationPtr;
@@ -98,6 +89,7 @@ static ConfigurationPtr	get(const std::string& filename);
 			const std::string& name, const std::string& value) = 0;
 	virtual void	removeglobal(const std::string& section,
 				const std::string& name) = 0;
+	virtual DeviceMapperPtr	devicemapper() = 0;
 };
 
 } // namespace config

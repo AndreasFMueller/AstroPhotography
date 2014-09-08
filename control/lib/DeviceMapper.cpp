@@ -40,6 +40,7 @@ public:
 	virtual void	remove(const std::string& name);
 	virtual void	remove(const DeviceName& devicename,
 				const std::string& servername);
+	virtual DeviceMapperPtr	devicemapper();
 };
 
 /**
@@ -169,6 +170,13 @@ void	DeviceMapperBackend::remove(const std::string& name) {
 void	DeviceMapperBackend::remove(const DeviceName& devicename,
 		const std::string& servername) {
 	devicemap.remove(id(devicename, servername));
+}
+
+/**
+ * \brief 
+ */
+DeviceMapperPtr	DeviceMapperBackend::devicemapper() {
+	return DeviceMapper::get(database);
 }
 
 //////////////////////////////////////////////////////////////////////
