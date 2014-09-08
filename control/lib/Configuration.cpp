@@ -21,6 +21,7 @@ namespace config {
  * This is used to hide the fact that there 
  */
 class ConfigurationBackend : public Configuration {
+	std::string	dbfilename;
 	Database	database;
 	GlobalRecord	getglobal(const std::string& section,
 				const std::string& name);
@@ -42,9 +43,10 @@ public:
 /**
  * \brief Construct a configuration backend
  */
-ConfigurationBackend::ConfigurationBackend(const std::string& filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", filename.c_str());
-	database = DatabaseFactory::get(filename);
+ConfigurationBackend::ConfigurationBackend(const std::string& filename)
+	: dbfilename(filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", dbfilename.c_str());
+	database = DatabaseFactory::get(dbfilename);
 }
 
 /**

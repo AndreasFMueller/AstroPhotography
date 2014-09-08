@@ -53,6 +53,7 @@ tests_SOURCES = tests.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
 	ProjectTableTest.cpp GlobalTableTest.cpp ConfigurationTest.cpp \
+	DeviceMapTableTest.cpp DeviceMapperTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
@@ -61,7 +62,7 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	DeviceMapTableTest.cpp
+	DeviceMapperTest.cpp
 #	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 

@@ -57,7 +57,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	FITSKeywords.cpp ImageServerTables.cpp ImageServersTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageServer.cpp \
-	Configuration.cpp GlobalTable.cpp ProjectTable.cpp DeviceMapTable.cpp \
+	Configuration.cpp GlobalTable.cpp ProjectTable.cpp \
+	DeviceMapTable.cpp DeviceMapper.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
