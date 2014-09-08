@@ -12,9 +12,9 @@ namespace astro {
 namespace project {
 
 //////////////////////////////////////////////////////////////////////
-// ImageServerInfo implementation (if necessary)
+// ImageInfo implementation (if necessary)
 //////////////////////////////////////////////////////////////////////
-ImageServerInfo::ImageServerInfo() {
+ImageInfo::ImageInfo() {
 	project = "unknow";
 	created = time(NULL);
 	pixeltype = 8;
@@ -26,7 +26,7 @@ ImageServerInfo::ImageServerInfo() {
 	observation = "1970-00-00T00:00:00.000";
 }
 
-bool	ImageServerInfo::operator==(const ImageServerInfo& other) const {
+bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (filename != other.filename) { return false; }
 	if (project != other.project) { return false; }
 	if (created != other.created) { return false; }
@@ -44,16 +44,16 @@ bool	ImageServerInfo::operator==(const ImageServerInfo& other) const {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ImageServer table adapter implementation
+// Image table adapter implementation
 //////////////////////////////////////////////////////////////////////
 
-std::string	ImageServerTableAdapter::tablename() {
-	return std::string("imageserver");
+std::string	ImageTableAdapter::tablename() {
+	return std::string("images");
 }
 
-std::string	ImageServerTableAdapter::createstatement() {
+std::string	ImageTableAdapter::createstatement() {
 	return std::string(
-		"create table imageserver (\n"
+		"create table images (\n"
 		"    id integer not null,\n"
 		"    filename varchar(1024) not null,\n"
 		"    project varchar(128) not null,\n"
@@ -70,13 +70,13 @@ std::string	ImageServerTableAdapter::createstatement() {
 		"    observation varchar(25) not null,\n"
 		"    primary key(id)\n"
 		");\n"
-		"create unique index imageserver_x1 on imageserver(filename);\n"
+		"create unique index imageserver_x1 on images(filename);\n"
 	);
 }
 
-ImageServerRecord	ImageServerTableAdapter::row_to_object(int objectid,
+ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 				const Row& row) {
-	ImageServerRecord	record(objectid);
+	ImageRecord	record(objectid);
 	record.filename = row["filename"]->stringValue();
 	record.project = row["project"]->stringValue();
 	record.created = row["created"]->timeValue();
@@ -93,7 +93,7 @@ ImageServerRecord	ImageServerTableAdapter::row_to_object(int objectid,
 	return record;
 }
 
-UpdateSpec	ImageServerTableAdapter::object_to_updatespec(const ImageServerRecord& imagerec) {
+UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
 	spec.insert(Field("filename", factory.get(imagerec.filename)));
@@ -113,9 +113,9 @@ UpdateSpec	ImageServerTableAdapter::object_to_updatespec(const ImageServerRecord
 }
 
 //////////////////////////////////////////////////////////////////////
-// ImageServerTable implementation
+// ImageTable implementation
 //////////////////////////////////////////////////////////////////////
-long	ImageServerTable::id(const std::string& filename) {
+long	ImageTable::id(const std::string& filename) {
 	std::string	condition = stringprintf("filename = '%s'",
 				filename.c_str());
 	std::list<object_type>	objects = select(condition);

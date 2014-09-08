@@ -1,5 +1,5 @@
 /*
- * ImageServerTables.h
+ * ImageServerTables.h -- Tables for the image server
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -16,7 +16,7 @@ namespace project {
 /**
  * \brief The data contained in the image server table
  */
-class ImageServerInfo {
+class ImageInfo {
 public:
 	std::string	filename;
 	std::string	project;
@@ -31,39 +31,37 @@ public:
 	std::string	category;
 	std::string	bayer;
 	std::string	observation;
-	bool	operator==(const ImageServerInfo& other) const;
-	ImageServerInfo();
+	bool	operator==(const ImageInfo& other) const;
+	ImageInfo();
 };
 
 /**
  * \brief Wrapper around the image info that adds the object id
  */
-class ImageServerRecord : public Persistent<ImageServerInfo> {
+class ImageRecord : public Persistent<ImageInfo> {
 public:
-	ImageServerRecord(int id)
-		: Persistent<ImageServerInfo>(id) { }
-	ImageServerRecord()
-		: Persistent<ImageServerInfo>(-1) { }
+	ImageRecord(int id) : Persistent<ImageInfo>(id) { }
+	ImageRecord() : Persistent<ImageInfo>(-1) { }
 };
 
 /**
- * \brief Adapter for the imageserver table
+ * \brief Adapter for the images table
  */
-class ImageServerTableAdapter {
+class ImageTableAdapter {
 public:
 static std::string      tablename();
 static std::string      createstatement();
-static ImageServerRecord row_to_object(int objectid, const Row& row);
-static UpdateSpec object_to_updatespec(const ImageServerRecord& imageinfo);
+static ImageRecord row_to_object(int objectid, const Row& row);
+static UpdateSpec object_to_updatespec(const ImageRecord& imageinfo);
 };
 
 /**
- * \brief The talbe for Image server info
+ * \brief The table for image info
  */
-class ImageServerTable : public Table<ImageServerRecord, ImageServerTableAdapter> {
+class ImageTable : public Table<ImageRecord, ImageTableAdapter> {
 public:
-	ImageServerTable(Database database)
-		: Table<ImageServerRecord, ImageServerTableAdapter>(database) {
+	ImageTable(Database database)
+		: Table<ImageRecord, ImageTableAdapter>(database) {
 	}
 	long	id(const std::string& filename);
 };

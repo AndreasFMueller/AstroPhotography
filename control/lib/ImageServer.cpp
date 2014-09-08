@@ -33,7 +33,7 @@ ImageServer::ImageServer(Database database, const std::string& directory,
  * \brief get the id of an image identified by its filename
  */
 long	ImageServer::id(const std::string& filename) {
-	ImageServerTable	images(_database);
+	ImageTable	images(_database);
 	return images.id(filename);
 }
 
@@ -71,7 +71,7 @@ void	ImageServer::scan_file(const std::string& filename) {
 	}
 
 	// find out whether the database already contains this filename
-	ImageServerTable	images(_database);
+	ImageTable	images(_database);
 	try {
 		long	id = images.id(filename);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s exists with id %ld", 
@@ -89,34 +89,34 @@ void	ImageServer::scan_file(const std::string& filename) {
 		infile.getSize().toString().c_str());
 
 	// create an information record
-	ImageServerRecord	imageserverinfo;
-	imageserverinfo.filename = filename;
-	imageserverinfo.project = "unknown";
-	imageserverinfo.created = sb.st_ctime;
+	ImageRecord	imageinfo;
+	imageinfo.filename = filename;
+	imageinfo.project = "unknown";
+	imageinfo.created = sb.st_ctime;
 	try {
-		imageserverinfo.camera
+		imageinfo.camera
 			= (std::string)infile.getMetadata("INSTRUME");
 	} catch(...) { }
-	imageserverinfo.width = infile.getSize().width();
-	imageserverinfo.height = infile.getSize().height();
-	imageserverinfo.depth = infile.getPlanes();
-	imageserverinfo.pixeltype = infile.getPixeltype();
-	imageserverinfo.exposuretime = 0;
+	imageinfo.width = infile.getSize().width();
+	imageinfo.height = infile.getSize().height();
+	imageinfo.depth = infile.getPlanes();
+	imageinfo.pixeltype = infile.getPixeltype();
+	imageinfo.exposuretime = 0;
 	try {
-		imageserverinfo.exposuretime
+		imageinfo.exposuretime
 			= (double)infile.getMetadata("EXPTIME");
 	} catch(...) { }
-	imageserverinfo.temperature = 0;
+	imageinfo.temperature = 0;
 	try {
-		imageserverinfo.temperature
+		imageinfo.temperature
 			= (double)infile.getMetadata("CCD-TEMP");
 	} catch(...) { }
-	imageserverinfo.category = "light";
-	imageserverinfo.bayer = "    ";
-	imageserverinfo.observation = "1970-01-01T00:00:00.000";
+	imageinfo.category = "light";
+	imageinfo.bayer = "    ";
+	imageinfo.observation = "1970-01-01T00:00:00.000";
 
 	// add the entry to the table
-	long	imageid = images.add(imageserverinfo);
+	long	imageid = images.add(imageinfo);
 
 	// in the part below we need the metatdata table
 	MetadataTable	metadatatable(_database);
@@ -178,7 +178,7 @@ void	ImageServer::scan_directory(bool recurse) {
  * \brief Retrieve an image
  */
 std::string	ImageServer::filename(long id) {
-	return ImageServerTable(_database).byid(id).filename;
+	return ImageTable(_database).byid(id).filename;
 }
 
 std::string	ImageServer::pathname(long id) {
@@ -194,16 +194,16 @@ ImagePtr	ImageServer::getImage(long id) {
 	return in.read();
 }
 
-static ImageEnvelope	convert(const ImageServerRecord& imageserverinfo,
+static ImageEnvelope	convert(const ImageRecord& imageinfo,
 				MetadataTable& metadatatable) {
-	ImageEnvelope	result(imageserverinfo.id());
+	ImageEnvelope	result(imageinfo.id());
 
 	// 
-	result.size(ImageSize(imageserverinfo.width, imageserverinfo.width));
+	result.size(ImageSize(imageinfo.width, imageinfo.width));
 
 	// retrieve all the metadata available
 	std::string	condition = stringprintf("imageid = %ld",
-					imageserverinfo.id());
+					imageinfo.id());
 	std::list<MetadataRecord>	mdrecords
 		= metadatatable.select(condition);
 
@@ -216,23 +216,23 @@ static ImageEnvelope	convert(const ImageServerRecord& imageserverinfo,
 	}
 
 	// envelope variables
-	result.filename(imageserverinfo.filename);
-	result.project(imageserverinfo.project);
-	result.created(imageserverinfo.created);
-	result.camera(imageserverinfo.camera);
-	result.exposuretime(imageserverinfo.exposuretime);
-	result.temperature(imageserverinfo.temperature);
-	if (imageserverinfo.category == "light") {
+	result.filename(imageinfo.filename);
+	result.project(imageinfo.project);
+	result.created(imageinfo.created);
+	result.camera(imageinfo.camera);
+	result.exposuretime(imageinfo.exposuretime);
+	result.temperature(imageinfo.temperature);
+	if (imageinfo.category == "light") {
 		result.category(ImageSpec::light);
 	}
-	if (imageserverinfo.category == "dark") {
+	if (imageinfo.category == "dark") {
 		result.category(ImageSpec::dark);
 	}
-	if (imageserverinfo.category == "flat") {
+	if (imageinfo.category == "flat") {
 		result.category(ImageSpec::flat);
 	}
-	result.bayer(imageserverinfo.bayer);
-	result.observation((time_t)FITSdate(imageserverinfo.observation));
+	result.bayer(imageinfo.bayer);
+	result.observation((time_t)FITSdate(imageinfo.observation));
 
 	// we are done, return the envelope
 	return result;
@@ -246,10 +246,9 @@ ImageEnvelope	ImageServer::getEnvelope(long id) {
 	ImageEnvelope	result(id);
 
 	// read the global information from the database
-	ImageServerRecord	imageserverinfo
-		= ImageServerTable(_database).byid(id);
+	ImageRecord	imageinfo = ImageTable(_database).byid(id);
 	MetadataTable	metadatatable(_database);
-	return convert(imageserverinfo, metadatatable);
+	return convert(imageinfo, metadatatable);
 }
 
 /**
@@ -278,45 +277,45 @@ long	ImageServer::save(ImagePtr image) {
 	out.write(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image written to %s", fullname.c_str());
 
-	// build imageserverinfo reocord
-	ImageServerRecord	imageserverinfo(-1);
-	imageserverinfo.filename = filename;
+	// build imageinfo reocord
+	ImageRecord	imageinfo(-1);
+	imageinfo.filename = filename;
 	try {
-		imageserverinfo.project
+		imageinfo.project
 			= (std::string)image->getMetadata("PROJECT");
 	} catch (...) { }
 	try {
-		imageserverinfo.camera
+		imageinfo.camera
 			= (std::string)image->getMetadata("INSTRUME");
 	} catch (...) { }
-	imageserverinfo.width = image->size().width();
-	imageserverinfo.height = image->size().height();
-	imageserverinfo.depth = image->planes();
-	imageserverinfo.pixeltype = image->bitsPerPlane();
+	imageinfo.width = image->size().width();
+	imageinfo.height = image->size().height();
+	imageinfo.depth = image->planes();
+	imageinfo.pixeltype = image->bitsPerPlane();
 	try {
-		imageserverinfo.exposuretime
+		imageinfo.exposuretime
 			= (double)image->getMetadata("EXPTIME");
 	} catch (...) { }
 	try {
-		imageserverinfo.temperature
+		imageinfo.temperature
 			= (double)image->getMetadata("CCD-TEMP");
 	} catch (...) { }
 	try {
-		imageserverinfo.category
+		imageinfo.category
 			= (std::string)image->getMetadata("PURPOSE");
 	} catch (...) { }
 	try {
-		imageserverinfo.bayer
+		imageinfo.bayer
 			= (std::string)image->getMetadata("BAYER");
 	} catch (...) { }
 	try {
-		imageserverinfo.observation
+		imageinfo.observation
 			= (std::string)image->getMetadata("DATE-OBS");
 	} catch (...) { }
 
-	// save the imageserver info
-	ImageServerTable	images(_database);
-	long	imageid = images.add(imageserverinfo);
+	// save the image info
+	ImageTable	images(_database);
+	long	imageid = images.add(imageinfo);
 
 	// write the metadata to the metadata tabe
 	MetadataTable	metadata(_database);
@@ -343,7 +342,7 @@ long	ImageServer::save(ImagePtr image) {
  * \brief Remove the image and the metadata from the database
  */
 void	ImageServer::remove(long id) {
-	ImageServerTable(_database).remove(id);
+	ImageTable(_database).remove(id);
 }
 
 static float	temperature_min(float temperature) {
@@ -423,14 +422,14 @@ std::set<ImageEnvelope>	ImageServer::get(const ImageSpec& spec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulated condition %s", all.c_str());
 
 	// query the database 
-	ImageServerTable	imageservertable(_database);
+	ImageTable	imagetable(_database);
 	MetadataTable	metadatatable(_database);
 
-	std::list<ImageServerRecord>	images = imageservertable.select(all);
+	std::list<ImageRecord>	images = imagetable.select(all);
 
 	// build the result set
 	std::set<ImageEnvelope>	resultset;
-	std::list<ImageServerRecord>::const_iterator	ii;
+	std::list<ImageRecord>::const_iterator	ii;
 	for (ii = images.begin(); ii != images.end(); ii++) {
 		resultset.insert(convert(*ii, metadatatable));
 	}
