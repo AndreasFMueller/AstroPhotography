@@ -79,6 +79,8 @@ public:
 	// factory methods for the configuration
 static ConfigurationPtr	get();
 static ConfigurationPtr	get(const std::string& filename);
+static std::string	get_default();
+static void	set_default(const std::string& filename);
 	// global configuration variables
 	virtual std::string	global(const std::string& section,
 				const std::string& name) = 0;

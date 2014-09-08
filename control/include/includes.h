@@ -94,4 +94,8 @@
 #include <sys/param.h>
 #endif /* HAVE_SYS_PARAM_H */
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif /* HAVE_GETOPT_H */
+
 #endif /* _includes_h */

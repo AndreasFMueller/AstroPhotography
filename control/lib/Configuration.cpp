@@ -122,6 +122,13 @@ void	ConfigurationBackend::removeglobal(const std::string& section,
 	}
 }
 
+/**
+ * \brief Get the device mapper
+ */
+DeviceMapperPtr	ConfigurationBackend::devicemapper() {
+	return DeviceMapper::get(database);
+}
+
 //////////////////////////////////////////////////////////////////////
 // implementation of the static methods of the Configuration fact
 //////////////////////////////////////////////////////////////////////
@@ -129,10 +136,7 @@ void	ConfigurationBackend::removeglobal(const std::string& section,
 typedef std::map<std::string, ConfigurationPtr>	configurationmap_t;
 static configurationmap_t	configurationmap;
 
-/**
- * \brief Get the configuration
- */
-ConfigurationPtr	Configuration::get() {
+static std::string	configfilename() {
 	std::string	filename;
 	// get the path in the home directory
 	char	*home = getenv("HOME");
@@ -145,6 +149,14 @@ ConfigurationPtr	Configuration::get() {
 	if (NULL != apconfig) {
 		filename = std::string(apconfig);
 	}
+	return filename;
+}
+
+/**
+ * \brief Get the configuration
+ */
+ConfigurationPtr	Configuration::get() {
+	std::string	filename = get_default();
 
 	// if the filename is still empty, then we have a problem
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configuration file: %s",
@@ -171,11 +183,23 @@ ConfigurationPtr	Configuration::get(const std::string& filename) {
 	return config;
 }
 
+static std::string	default_config;
+
 /**
- * \brief Get the device mapper
+ * \brief get the default configuration filename
  */
-DeviceMapperPtr	ConfigurationBackend::devicemapper() {
-	return DeviceMapper::get(database);
+std::string	Configuration::get_default() {
+	if (0 == default_config.size()) {
+		default_config = configfilename();
+	}
+	return default_config;
+}
+
+/**
+ * \brief set the default filename
+ */
+void	Configuration::set_default(const std::string& filename) {
+	default_config = filename;
 }
 
 } // namespace config

@@ -393,7 +393,7 @@ std::string	Sqlite3Exception::cause(Sqlite3Backend& database,
  * \brief Backend factory implementation
  */
 Database	DatabaseFactory::get(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create backend on file %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create backend on file '%s'",
 		name.c_str());
 	return Database(new Sqlite3Backend(name));
 }
