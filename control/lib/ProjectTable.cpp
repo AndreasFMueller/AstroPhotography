@@ -22,7 +22,7 @@ std::string	ProjectTableAdapter::createstatement() {
 		"create table projects (\n"
 		"    id int not null,\n"
 		"    name varchar(32) not null,\n"
-		"    description varchar(1024) not null,\n"
+		"    description varchar(1024) not null default '',\n"
 		"    started datetime not null,\n"
 		"    primary key(id)\n"
 		");\n"
