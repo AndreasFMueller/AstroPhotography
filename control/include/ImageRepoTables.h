@@ -25,6 +25,8 @@ public:
 	int	width;
 	int	height;
 	int	depth;
+	int	xbin;
+	int	ybin;
 	int	pixeltype;
 	double	exposuretime;
 	double	temperature;

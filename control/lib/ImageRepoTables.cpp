@@ -24,6 +24,8 @@ ImageInfo::ImageInfo() {
 	category = "light";
 	bayer = "    ";
 	observation = "1970-00-00T00:00:00.000";
+	xbin = 1;
+	ybin = 1;
 }
 
 bool	ImageInfo::operator==(const ImageInfo& other) const {
@@ -33,6 +35,8 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (camera != other.camera) { return false; }
 	if (width != other.width) { return false; }
 	if (height != other.height) { return false; }
+	if (xbin != other.xbin) { return false; }
+	if (ybin != other.ybin) { return false; }
 	if (depth != other.depth) { return false; }
 	if (pixeltype != other.pixeltype) { return false; }
 	if (exposuretime != other.exposuretime) { return false; }
@@ -61,6 +65,8 @@ std::string	ImageTableAdapter::createstatement() {
 		"    camera varchar(128) not null,\n"
 		"    width int not null,\n"
 		"    height int not null,\n"
+		"    xbin int not null,\n"
+		"    ybin int not null,\n"
 		"    depth int not null default 1,\n"
 		"    pixeltype int not null default 16,\n"
 		"    exposuretime float not null default 1,\n"
@@ -83,6 +89,8 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.camera = row["camera"]->stringValue();
 	record.width = row["width"]->intValue();
 	record.height = row["height"]->intValue();
+	record.xbin = row["xbin"]->intValue();
+	record.ybin = row["ybin"]->intValue();
 	record.depth = row["depth"]->intValue();
 	record.pixeltype = row["pixeltype"]->intValue();
 	record.exposuretime = row["exposuretime"]->doubleValue();
@@ -103,6 +111,8 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("width", factory.get(imagerec.width)));
 	spec.insert(Field("height", factory.get(imagerec.height)));
 	spec.insert(Field("depth", factory.get(imagerec.depth)));
+	spec.insert(Field("xbin", factory.get(imagerec.xbin)));
+	spec.insert(Field("ybin", factory.get(imagerec.ybin)));
 	spec.insert(Field("pixeltype", factory.get(imagerec.pixeltype)));
 	spec.insert(Field("exposuretime", factory.get(imagerec.exposuretime)));
 	spec.insert(Field("temperature", factory.get(imagerec.temperature)));

@@ -21,7 +21,9 @@ public:
 	ProjectInfo();
 	std::string	name;
 	std::string	description;
+	std::string	object;
 	time_t	started;
+	std::string	repository;
 };
 
 /**
@@ -51,6 +53,9 @@ public:
 	ProjectTable(Database& database)
 		: Table<ProjectRecord, ProjectTableAdapter>(database) {
 	}
+	ProjectRecord	get(const std::string& name);
+	int	getid(const std::string& name);
+	void	remove(const std::string& name);
 };
 
 } // namespace project

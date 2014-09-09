@@ -11,6 +11,7 @@
 #include <GlobalTable.h>
 #include <ImageReposTable.h>
 #include <AstroProject.h>
+#include <ProjectTable.h>
 
 using namespace astro::persistence;
 using namespace astro::project;
@@ -50,6 +51,12 @@ public:
 	virtual void	removerepo(const std::string& name);
 	virtual std::list<ImageRepoInfo>	listrepo();
 
+	// project definition
+	virtual project::Project	project(const std::string& name);
+	virtual void	addproject(const project::Project& project);
+	virtual void	removeproject(const std::string& name);
+	virtual std::list<project::Project>	listprojects();
+
 	// devicemapper access
 	virtual DeviceMapperPtr	devicemapper();
 };
@@ -63,6 +70,9 @@ ConfigurationBackend::ConfigurationBackend(const std::string& filename)
 	database = DatabaseFactory::get(dbfilename);
 }
 
+//////////////////////////////////////////////////////////////////////
+// global variable access
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief Get a global record from the global table
  */
@@ -136,6 +146,27 @@ void	ConfigurationBackend::removeglobal(const std::string& section,
 }
 
 /**
+ * \brief 
+ */
+std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
+	GlobalTable	globals(database);
+	std::list<GlobalRecord>	records = globals.select("0 = 0");
+	std::list<ConfigurationEntry>	result;
+	std::list<GlobalRecord>::const_iterator	i;
+	for (i = records.begin(); i != records.end(); i++) {
+		ConfigurationEntry	entry;
+		entry.section = i->section;
+		entry.name = i->name;
+		entry.value = i->value;
+		result.push_back(entry);
+	}
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// repository access
+//////////////////////////////////////////////////////////////////////
+/**
  * \brief get a repository
  */
 ImageRepo	ConfigurationBackend::repo(const std::string& name) {
@@ -199,30 +230,74 @@ std::list<ImageRepoInfo>	ConfigurationBackend::listrepo() {
 	return result;
 }
 
+//////////////////////////////////////////////////////////////////////
+// project access
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Get a project from the configuration
+ */
+Project	ConfigurationBackend::project(const std::string& name) {
+	ProjectTable	projects(database);
+	ProjectRecord	record = projects.get(name);
+	Project	project;
+	project.name(record.name);
+	project.description(record.description);
+	project.object(record.object);
+	project.repository(record.repository);
+	project.started(record.started);
+	return project;
+}
 
+/**
+ * \brief add a project to the configuration
+ */
+void	ConfigurationBackend::addproject(const Project& project) {
+	ProjectTable	projects(database);
+	ProjectRecord	record;
+	record.name = project.name();
+	record.description = project.description();
+	record.object = project.object();
+	record.started = project.started();
+	record.repository = project.repository();
+	projects.add(record);
+}
+
+/**
+ * \brief Remove a project
+ */
+void	ConfigurationBackend::removeproject(const std::string& name) {
+	ProjectTable	projects(database);
+	projects.remove(name);
+}
+
+/**
+ * \brief Get a list of projects defined in this configuration
+ */
+std::list<Project>	ConfigurationBackend::listprojects() {
+	std::list<Project>	result;
+	ProjectTable	projects(database);
+	std::list<ProjectRecord>	records = projects.select("0 = 0");
+	std::list<ProjectRecord>::const_iterator	pi;
+	for (pi = records.begin(); pi != records.end(); pi++) {
+		Project	project;
+		project.name(pi->name);
+		project.description(pi->description);
+		project.object(pi->object);
+		project.started(pi->started);
+		project.repository(pi->repository);
+		result.push_back(project);
+	}
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// device mapper access
+//////////////////////////////////////////////////////////////////////
 /**
  * \brief Get the device mapper
  */
 DeviceMapperPtr	ConfigurationBackend::devicemapper() {
 	return DeviceMapper::get(database);
-}
-
-/**
- * \brief 
- */
-std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
-	GlobalTable	globals(database);
-	std::list<GlobalRecord>	records = globals.select("0 = 0");
-	std::list<ConfigurationEntry>	result;
-	std::list<GlobalRecord>::const_iterator	i;
-	for (i = records.begin(); i != records.end(); i++) {
-		ConfigurationEntry	entry;
-		entry.section = i->section;
-		entry.name = i->name;
-		entry.value = i->value;
-		result.push_back(entry);
-	}
-	return result;
 }
 
 //////////////////////////////////////////////////////////////////////

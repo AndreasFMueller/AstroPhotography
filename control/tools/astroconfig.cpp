@@ -33,9 +33,24 @@ static struct option	longopts[] = {
  * \brief usage message
  */
 void	usage(const char *progname) {
-	std::cerr << "usage: " << progname << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
+	std::cerr << "usage:" << std::endl;
+	std::cerr << progname << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
 	std::cerr << "Get, set or delete configuration variables in domain (currently only 'global'";
 	std::cerr << "is valid), identified by the section and the name.";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] imagerepo list" << std::endl;
+	std::cerr << progname << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << progname << " [ options ] imagerepo remove <reponame>";
+	std::cerr << "list, add or delete image repositores" << std::endl;
+	std::cerr << progname << " [ options ] project list";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] project add <projname> ...";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] project show <projname>";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] project remove <projname>";
+	std::cerr << std::endl;
+	std::cerr << "list, add or remove projects, show project details";
 	std::cerr << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
@@ -169,20 +184,9 @@ int	command_list_global(const std::vector<std::string>& /* arguments */) {
 	return EXIT_SUCCESS;
 }
 
-#if 0
-class ImageEnvelopeDisplay {
-	std::ostream&	out;
-public:
-	ImageEnvelopeDisplay(std::ostream& _out) : out(_out) { }
-	void	operator()(const ImageEnvelope& image) {
-		std::cout << stringprintf("[%04ld] %-8.8s %-10.10s",
-			image.id(), image.camera().c_str(),
-			image.size().toString().c_str());
-		std::cout << std::endl;
-	}
-};
-#endif
-
+/**
+ * \brief List all repositories
+ */
 int	list_repo() {
 	std::list<ImageRepoInfo>	repoinfolist
 		= Configuration::get()->listrepo();
@@ -196,6 +200,7 @@ int	list_repo() {
 				repoinfo.directory.c_str());
 		}
 	);
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -223,6 +228,83 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		configuration->removerepo(arguments[2]);
 		return EXIT_SUCCESS;
 	}
+	std::cerr << "unknown subcommand " << arguments[1] << std::endl;
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the project command
+ */
+int	command_project(const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "project command");
+	if (arguments.size() < 2) {
+		throw std::runtime_error("not enough arguments for project command");
+	}
+	std::string	subcommand = arguments[1];
+	if (subcommand == "list") {
+		// list projects
+		std::list<Project>	projects
+			= Configuration::get()->listprojects();
+		if (projects.size() == 0) {
+			return EXIT_SUCCESS;
+		}
+		std::cout << "started  project         repository  description";
+		std::cout << std::endl;
+		std::for_each(projects.begin(), projects.end(),
+			[](const Project& project) {
+				std::cout << timeformat("%d.%m.%y ",
+					project.started());
+				std::cout << stringprintf("%-16.16s",
+					project.name().c_str());
+				std::cout << stringprintf("%-11.11s ",
+					project.repository().c_str());
+				std::cout << project.description();
+				std::cout << std::endl;
+			}
+		);
+		return EXIT_SUCCESS;
+	}
+	std::string	projectname = arguments[2];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "project name = %s",
+		projectname.c_str());
+
+	// there must be more arguments
+	if (arguments.size() < 3) {
+		throw std::runtime_error("not enough arguments");
+		return EXIT_FAILURE;
+	}
+	if (subcommand == "add") {
+		// XXX implementation incomplete
+		Project	project;
+		project.name(projectname);
+		Configuration::get()->addproject(project);
+		return EXIT_SUCCESS;
+	}
+	if (subcommand == "show") {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "show project '%s'",
+			projectname.c_str());
+		Project	project = Configuration::get()->project(projectname);
+		std::cout << "name:         ";
+		std::cout << project.name() << std::endl;
+		std::cout << "description:  ";
+		std::cout << project.description() << std::endl;
+		std::cout << "object:       ";
+		std::cout << project.object() << std::endl;
+		std::cout << "repository:   ";
+		std::cout << project.repository() << std::endl;
+		std::cout << "started:      ";
+		std::cout << timeformat("%Y-%m-%d %H:%M:%S", project.started());
+		std::cout << std::endl;
+		return EXIT_SUCCESS;
+	}
+	if (subcommand == "remove") {
+		Configuration::get()->removeproject(projectname);
+		return EXIT_SUCCESS;
+	}
+
+	// if we get to this point, then we have an unknown command
+	std::cerr << "unknown project subcommand " << subcommand << std::endl;
+	return EXIT_FAILURE;
 }
 
 /**
@@ -298,6 +380,9 @@ int	main(int argc, char *argv[]) {
 	}
 	if (verb == "imagerepo") {
 		return command_imagerepo(arguments);
+	}
+	if (verb == "project") {
+		return command_project(arguments);
 	}
 	
 	std::cerr << "command " << verb << " not implemented" << std::endl;

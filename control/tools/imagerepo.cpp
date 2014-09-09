@@ -11,22 +11,54 @@
 #include <includes.h>
 #include <AstroConfig.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
+#include <AstroUtils.h>
 
 using namespace astro::config;
+using namespace astro::project;
 
 namespace astro {
 
-int	command_add(const std::vector<std::string>& arguments) {
+int	command_add(const std::string& /* reponame */,
+		const std::vector<std::string>& arguments) {
 	std::cerr << "'add' command not implemented" << std::endl;
 	return EXIT_FAILURE;
 }	
 
-int	command_list(const std::vector<std::string>& arguments) {
-	std::cerr << "'list' command not implemented" << std::endl;
-	return EXIT_FAILURE;
+int	command_list(const std::string& reponame) {
+	ImageRepo	repo = Configuration::get()->repo(reponame);
+	std::set<ImageEnvelope>	images = repo.get(ImageSpec());
+	if (images.size() == 0) {
+		return EXIT_SUCCESS;
+	}
+	std::cout << "[ id ] camera   size       bin   exp  temp observation    project " << std::endl;
+
+	std::for_each(images.begin(), images.end(),
+		[](const ImageEnvelope& image) {
+			std::cout << stringprintf("[%04ld] ", image.id());
+			std::cout << stringprintf("%-8.8s ",
+				image.camera().c_str());
+			std::cout << stringprintf("%-11.11s",
+				image.size().toString().c_str());
+			std::cout << stringprintf("%-3.3s ",
+				image.binning().toString().substr(1,3).c_str());
+			std::cout << stringprintf("%5.0f",
+				image.exposuretime());
+			std::cout << stringprintf("%6.1f ",
+				image.temperature());
+			std::cout << timeformat("%d.%m.%y %H:%m ",
+				image.observation());
+			std::cout << stringprintf("%-8.8s ",
+				image.project().c_str());
+			std::cout << image.filename();
+			std::cout << std::endl;
+		}
+	);
+	return EXIT_SUCCESS;
 }	
 
-int	command_get(const std::vector<std::string>& arguments) {
+int	command_get(const std::string& reponame,
+		const std::vector<std::string>& arguments) {
 	std::cerr << "'get' command not implemented" << std::endl;
 	return EXIT_FAILURE;
 }	
@@ -97,16 +129,16 @@ int	main(int argc, char *argv[]) {
 		usage(argv[0]);
 		return EXIT_FAILURE;
 	}
-	std::string	imservername = arguments[0];
+	std::string	reponame = arguments[0];
 	std::string	command = arguments[1];
 	if (command == "add") {
-		return command_add(arguments);
+		return command_add(reponame, arguments);
 	}
 	if (command == "list") {
-		return command_list(arguments);
+		return command_list(reponame);
 	}
 	if (command == "get") {
-		return command_get(arguments);
+		return command_get(reponame, arguments);
 	}
 
 	// get the image server from the configuration

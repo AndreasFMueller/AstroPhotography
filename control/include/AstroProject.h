@@ -8,6 +8,7 @@
 
 #include <AstroImage.h>
 #include <AstroPersistence.h>
+#include <AstroCamera.h>
 
 namespace astro {
 namespace project {
@@ -112,6 +113,13 @@ public:
 	const astro::image::ImageSize&	size() const { return _size; }
 	void	size(const astro::image::ImageSize& s) { _size = s; }
 
+	// binning
+private:
+	astro::camera::Binning	_binning;
+public:
+	const astro::camera::Binning	binning() const { return _binning; }
+	void	binning(const astro::camera::Binning& b) { _binning = b; }
+
 	// exposuretime
 private:
 	float	_exposuretime;
@@ -191,6 +199,33 @@ public:
 	bool	operator==(const ImageRepoInfo& other) const;
 };
 
+/**
+ * \brief Project information
+ */
+class Project {
+	std::string	_name;
+	std::string	_description;
+	std::string	_object;
+	std::string	_repository;
+	time_t	_started;
+public:
+	Project();
+
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n) { _name = n; }
+
+	const std::string&	description() const { return _description; }
+	void	description(const std::string& d) { _description = d; }
+
+	const std::string	object() const { return _object; }
+	void	object(const std::string& o) { _object = o; }
+
+	const std::string	repository() const { return _repository; }
+	void	repository(const std::string& r) { _repository = r; }
+
+	time_t	started() const { return _started; }
+	void	started(time_t s) { _started = s; }
+};
 
 } // namespace project
 } // namespace astro

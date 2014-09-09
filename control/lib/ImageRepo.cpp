@@ -13,6 +13,7 @@
 using namespace astro::persistence;
 using namespace astro::image;
 using namespace astro::io;
+using namespace astro::camera;
 
 namespace astro {
 namespace project {
@@ -99,6 +100,16 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	} catch(...) { }
 	imageinfo.width = infile.getSize().width();
 	imageinfo.height = infile.getSize().height();
+	imageinfo.xbin = 1;
+	try {
+		imageinfo.xbin
+			= (int)infile.getMetadata("XBINNING");
+	} catch(...) { }
+	imageinfo.ybin = 1;
+	try {
+		imageinfo.ybin
+			= (int)infile.getMetadata("YBINNING");
+	} catch(...) { }
 	imageinfo.depth = infile.getPlanes();
 	imageinfo.pixeltype = infile.getPixeltype();
 	imageinfo.exposuretime = 0;
@@ -198,8 +209,9 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 				MetadataTable& metadatatable) {
 	ImageEnvelope	result(imageinfo.id());
 
-	// 
+	// image geometry
 	result.size(ImageSize(imageinfo.width, imageinfo.width));
+	result.binning(Binning(imageinfo.xbin, imageinfo.ybin));
 
 	// retrieve all the metadata available
 	std::string	condition = stringprintf("imageid = %ld",
@@ -290,6 +302,14 @@ long	ImageRepo::save(ImagePtr image) {
 	} catch (...) { }
 	imageinfo.width = image->size().width();
 	imageinfo.height = image->size().height();
+	try {
+		imageinfo.xbin
+			= (int)image->getMetadata("XBINNING");
+	} catch (...) { }
+	try {
+		imageinfo.ybin
+			= (int)image->getMetadata("YBINNING");
+	} catch (...) { }
 	imageinfo.depth = image->planes();
 	imageinfo.pixeltype = image->bitsPerPlane();
 	try {

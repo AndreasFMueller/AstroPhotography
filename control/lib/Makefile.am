@@ -26,7 +26,7 @@ endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
-	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
+	URL.cpp DeviceName.cpp Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
@@ -57,7 +57,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	FITSKeywords.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
-	Configuration.cpp GlobalTable.cpp ProjectTable.cpp \
+	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
 	DeviceMapTable.cpp DeviceMapper.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \

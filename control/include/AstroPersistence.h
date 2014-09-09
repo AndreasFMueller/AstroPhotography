@@ -181,7 +181,7 @@ protected:
 	std::vector<std::string>	_fieldnames;
 	std::string	selectquery() const;
 protected:
-	
+	Database	database() { return _database; }
 public:
 	TableBase(Database database, const std::string& tablename,
 		const std::string& createstatement = std::string());

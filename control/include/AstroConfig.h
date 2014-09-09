@@ -115,6 +115,12 @@ static void	set_default(const std::string& filename);
 	virtual void	removerepo(const std::string& name) = 0;
 	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
 
+	// project definition
+	virtual project::Project	project(const std::string& name) = 0;
+	virtual void	addproject(const project::Project& project) = 0;
+	virtual void	removeproject(const std::string& name) = 0;
+	virtual std::list<project::Project>	listprojects() = 0;
+
 	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;
 };

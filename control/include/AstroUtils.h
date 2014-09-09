@@ -150,6 +150,11 @@ std::string	rtrim(const std::string& s);
  */
 std::string	ltrim(const std::string& s);
 
+//////////////////////////////////////////////////////////////////////
+// formatting functions for time
+//////////////////////////////////////////////////////////////////////
+std::string	timeformat(const std::string& format, time_t when);
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */
