@@ -1,5 +1,5 @@
 /*
- * ImageServerTest.cpp -- Tests for the ImageServer class
+ * ImageRepoTest.cpp -- Tests for the ImageRepo class
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -19,7 +19,7 @@ using namespace astro::io;
 namespace astro {
 namespace test {
 
-class ImageServerTest: public CppUnit::TestFixture {
+class ImageRepoTest: public CppUnit::TestFixture {
 	std::string	databasename;
 	Database	database;
 	std::string	directory;
@@ -31,7 +31,7 @@ public:
 	void	testSelect();
 	//void	testXXX();
 
-	CPPUNIT_TEST_SUITE(ImageServerTest);
+	CPPUNIT_TEST_SUITE(ImageRepoTest);
 	CPPUNIT_TEST(testScan);
 	CPPUNIT_TEST(testImage);
 	CPPUNIT_TEST(testSelect);
@@ -39,31 +39,31 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(ImageServerTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(ImageRepoTest);
 
-void	ImageServerTest::setUp() {
+void	ImageRepoTest::setUp() {
 	databasename = std::string("imageserver.db");
 	char	path[MAXPATHLEN];
 	directory = std::string(getcwd(path, MAXPATHLEN));
 	database = DatabaseFactory::get(databasename);
 }
 
-void	ImageServerTest::tearDown() {
+void	ImageRepoTest::tearDown() {
 	database.reset();
 }
 
-void	ImageServerTest::testScan() {
+void	ImageRepoTest::testScan() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScan() begin");
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan directory %s",
 		directory.c_str());
 	
-	ImageServer	server(database, directory);
+	ImageRepo	server(database, directory);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScan() end");
 }
 
-void	ImageServerTest::testImage() {
+void	ImageRepoTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() begin");
 
 	ImageSize	size(360, 240);
@@ -78,7 +78,7 @@ void	ImageServerTest::testImage() {
 	imageptr->setMetadata(FITSKeywords::meta("CCD-TEMP", -47.1));
 	imageptr->setMetadata(FITSKeywords::meta("BAYER", "RGGB"));
 
-	ImageServer	server(database, directory, false);
+	ImageRepo	server(database, directory, false);
 
 	long	imageid = server.save(imageptr);
 	server.save(imageptr);
@@ -106,9 +106,9 @@ void	ImageServerTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() end");
 }
 
-void	ImageServerTest::testSelect() {
+void	ImageRepoTest::testSelect() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() begin");
-	ImageServer	server(database, directory, false);
+	ImageRepo	server(database, directory, false);
 	ImageSpec	spec;
 	spec.category(ImageSpec::dark);
 	spec.temperature(-47);
@@ -119,7 +119,7 @@ void	ImageServerTest::testSelect() {
 }
 
 #if 0
-void	ImageServerTest::testXXX() {
+void	ImageRepoTest::testXXX() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() begin");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() end");
 }

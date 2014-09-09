@@ -1,10 +1,10 @@
 /*
- * ImageServerTables.h -- Tables for the image server
+ * ImageRepoTables.h -- Tables for the image repository
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _ImageServerTables_h
-#define _ImageServerTables_h
+#ifndef _ImageRepoTables_h
+#define _ImageRepoTables_h
 
 #include <AstroPersistence.h>
 
@@ -117,4 +117,4 @@ public:
 } // namespace project
 } // namespace astro
 
-#endif /* _ImageServerTables_h */
+#endif /* _ImageRepoTables_h */

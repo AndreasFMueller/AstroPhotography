@@ -1,5 +1,5 @@
 /*
- * ImageServer.cpp -- implementation of the image server
+ * ImageRepo.cpp -- implementation of the image repository
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -7,7 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroIO.h>
 #include <includes.h>
-#include <ImageServerTables.h>
+#include <ImageRepoTables.h>
 #include <numeric>
 
 using namespace astro::persistence;
@@ -20,7 +20,7 @@ namespace project {
 /**
  * \brief Create an image server
  */
-ImageServer::ImageServer(Database database, const std::string& directory,
+ImageRepo::ImageRepo(Database database, const std::string& directory,
 	bool scan)
 	: _database(database), _directory(directory) {
 	// scan the directory for 
@@ -32,7 +32,7 @@ ImageServer::ImageServer(Database database, const std::string& directory,
 /**
  * \brief get the id of an image identified by its filename
  */
-long	ImageServer::id(const std::string& filename) {
+long	ImageRepo::id(const std::string& filename) {
 	ImageTable	images(_database);
 	return images.id(filename);
 }
@@ -40,7 +40,7 @@ long	ImageServer::id(const std::string& filename) {
 /**
  * \brief process a single file during a scan
  */
-void	ImageServer::scan_file(const std::string& filename) {
+void	ImageRepo::scan_file(const std::string& filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scanning file '%s' (%d)",
 		filename.c_str(), filename.length());
 	// does the filename end in ".fits"?
@@ -142,7 +142,7 @@ void	ImageServer::scan_file(const std::string& filename) {
 /**
  * \brief Scan a directory for images
  */
-void	ImageServer::scan_directory(bool recurse) {
+void	ImageRepo::scan_directory(bool recurse) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan directory %s", _directory.c_str());
 
 	if (recurse) {
@@ -177,18 +177,18 @@ void	ImageServer::scan_directory(bool recurse) {
 /**
  * \brief Retrieve an image
  */
-std::string	ImageServer::filename(long id) {
+std::string	ImageRepo::filename(long id) {
 	return ImageTable(_database).byid(id).filename;
 }
 
-std::string	ImageServer::pathname(long id) {
+std::string	ImageRepo::pathname(long id) {
 	return _directory + "/" + filename(id);
 }
 
 /**
  * \brief Get an image
  */
-ImagePtr	ImageServer::getImage(long id) {
+ImagePtr	ImageRepo::getImage(long id) {
 	std::string	f = pathname(id);
 	FITSin	in(f);
 	return in.read();
@@ -241,7 +241,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 /**
  * \brief Retrieve the metadata for an image
  */
-ImageEnvelope	ImageServer::getEnvelope(long id) {
+ImageEnvelope	ImageRepo::getEnvelope(long id) {
 	// create a result record
 	ImageEnvelope	result(id);
 
@@ -254,7 +254,7 @@ ImageEnvelope	ImageServer::getEnvelope(long id) {
 /**
  * \brief Save an image in the repository
  */
-long	ImageServer::save(ImagePtr image) {
+long	ImageRepo::save(ImagePtr image) {
 	// first we have to create a file name for the image
 	char	buffer[MAXPATHLEN];
 	snprintf(buffer, sizeof(buffer), "%s/image-XXXXX.fits",
@@ -341,7 +341,7 @@ long	ImageServer::save(ImagePtr image) {
 /**
  * \brief Remove the image and the metadata from the database
  */
-void	ImageServer::remove(long id) {
+void	ImageRepo::remove(long id) {
 	ImageTable(_database).remove(id);
 }
 
@@ -374,7 +374,7 @@ public:
 /**
  * \brief get a set of images matching the specifcation
  */
-std::set<ImageEnvelope>	ImageServer::get(const ImageSpec& spec) {
+std::set<ImageEnvelope>	ImageRepo::get(const ImageSpec& spec) {
 	std::list<condition>	conditions;
 	// add category condition
 	switch (spec.category()) {

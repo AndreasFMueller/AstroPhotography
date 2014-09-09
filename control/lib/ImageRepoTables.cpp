@@ -1,9 +1,9 @@
 /*
- * ImageServerTables.cpp -- image server table adapter implementations
+ * ImageRepoTables.cpp -- image server table adapter implementations
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ImageServerTables.h>
+#include <ImageRepoTables.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>

@@ -36,7 +36,7 @@ tests_SOURCES = tests.cpp \
 	StacktraceTest.cpp TrimTest.cpp \
 	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
 	DeviceNameTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
-	FITSKeywordTest.cpp ImageServerTablesTest.cpp ImageServerTest.cpp \
+	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \

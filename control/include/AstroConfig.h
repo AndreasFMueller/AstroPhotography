@@ -8,6 +8,7 @@
 
 #include <AstroPersistence.h>
 #include <AstroDevice.h>
+#include <AstroProject.h>
 #include <memory>
 
 namespace astro {
@@ -94,6 +95,7 @@ static ConfigurationPtr	get();
 static ConfigurationPtr	get(const std::string& filename);
 static std::string	get_default();
 static void	set_default(const std::string& filename);
+
 	// global configuration variables
 	virtual std::string	global(const std::string& section,
 				const std::string& name) = 0;
@@ -105,6 +107,15 @@ static void	set_default(const std::string& filename);
 	virtual void	removeglobal(const std::string& section,
 				const std::string& name) = 0;
 	virtual std::list<ConfigurationEntry>	globallist() = 0;
+
+	// image repository access
+	virtual astro::project::ImageRepo	repo(const std::string& name) = 0;
+	virtual void	addrepo(const std::string& name,
+				const std::string& directory) = 0;
+	virtual void	removerepo(const std::string& name) = 0;
+	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
+
+	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;
 };
 

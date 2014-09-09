@@ -9,10 +9,12 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <includes.h>
 #include <algorithm>
 
 using namespace astro::config;
+using namespace astro::project;
 
 namespace astro {
 
@@ -167,6 +169,62 @@ int	command_list_global(const std::vector<std::string>& /* arguments */) {
 	return EXIT_SUCCESS;
 }
 
+#if 0
+class ImageEnvelopeDisplay {
+	std::ostream&	out;
+public:
+	ImageEnvelopeDisplay(std::ostream& _out) : out(_out) { }
+	void	operator()(const ImageEnvelope& image) {
+		std::cout << stringprintf("[%04ld] %-8.8s %-10.10s",
+			image.id(), image.camera().c_str(),
+			image.size().toString().c_str());
+		std::cout << std::endl;
+	}
+};
+#endif
+
+int	list_repo() {
+	std::list<ImageRepoInfo>	repoinfolist
+		= Configuration::get()->listrepo();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d ImageRepoInfo objects",
+		repoinfolist.size());
+	std::for_each(repoinfolist.begin(), repoinfolist.end(),
+		[](const ImageRepoInfo& repoinfo) {
+			std::cout << stringprintf("%-8.8s %s %s\n",
+				repoinfo.reponame.c_str(),
+				repoinfo.database.c_str(),
+				repoinfo.directory.c_str());
+		}
+	);
+}
+
+/**
+ * \brief Implementation of the image repository commands
+ */
+int	command_imagerepo(const std::vector<std::string>& arguments) {
+	if (arguments.size() < 2) {
+		std::cerr << "no image repo sub command" << std::endl;
+		return EXIT_FAILURE;
+	}
+	ConfigurationPtr	configuration = Configuration::get();
+	if (arguments[1] == "add") {
+		if (arguments.size() < 4) {
+			std::cerr << "not enough arguments for add command";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+		configuration->addrepo(arguments[2], arguments[3]);
+		return EXIT_SUCCESS;
+	}
+	if (arguments[1] == "list") {
+		return list_repo();
+	}
+	if (arguments[1] == "delete") {
+		configuration->removerepo(arguments[2]);
+		return EXIT_SUCCESS;
+	}
+}
+
 /**
  * \brief 
  */
@@ -238,6 +296,9 @@ int	main(int argc, char *argv[]) {
 	if (verb == "list") {
 		return command_list(arguments);
 	}
+	if (verb == "imagerepo") {
+		return command_imagerepo(arguments);
+	}
 	
 	std::cerr << "command " << verb << " not implemented" << std::endl;
 	return EXIT_FAILURE;
@@ -254,4 +315,5 @@ int	main(int argc, char *argv[]) {
 	} catch (...) {
 		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

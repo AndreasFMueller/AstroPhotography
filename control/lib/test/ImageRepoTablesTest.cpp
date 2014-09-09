@@ -1,5 +1,5 @@
 /*
- * ImageServerTablesTest.cpp -- template for tests
+ * ImageRepoTablesTest.cpp -- template for tests
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -8,7 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
-#include <ImageServerTables.h>
+#include <ImageRepoTables.h>
 #include <includes.h>
 
 using namespace astro::project;
@@ -17,40 +17,40 @@ using namespace astro::persistence;
 namespace astro {
 namespace test {
 
-class ImageServerTablesTest : public CppUnit::TestFixture {
+class ImageRepoTablesTest : public CppUnit::TestFixture {
 	Database	database;
 public:
 	void	setUp();
 	void	tearDown();
-	void	testImageServerTable();
+	void	testImageRepoTable();
 	void	testMetadataTable();
 	//void	testXXX();
 
-	CPPUNIT_TEST_SUITE(ImageServerTablesTest);
-	CPPUNIT_TEST(testImageServerTable);
+	CPPUNIT_TEST_SUITE(ImageRepoTablesTest);
+	CPPUNIT_TEST(testImageRepoTable);
 	CPPUNIT_TEST(testMetadataTable);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(ImageServerTablesTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(ImageRepoTablesTest);
 
 std::string	dbfilename("imageservertest.db");
 
-void	ImageServerTablesTest::setUp() {
+void	ImageRepoTablesTest::setUp() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up clean database");
 	unlink(dbfilename.c_str());
 	database = DatabaseFactory::get(dbfilename);
 }
 
-void	ImageServerTablesTest::tearDown() {
+void	ImageRepoTablesTest::tearDown() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying test database");
 	database.reset();
 //	unlink(dbfilename.c_str());
 }
 
-void	ImageServerTablesTest::testImageServerTable() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImageServerTable() begin");
+void	ImageRepoTablesTest::testImageRepoTable() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImageRepoTable() begin");
 	ImageTable	images(database);
 	ImageRecord	imageinfo1;
 	imageinfo1.filename = "testfile.fits";
@@ -88,10 +88,10 @@ void	ImageServerTablesTest::testImageServerTable() {
 	CPPUNIT_ASSERT(imageinfo1.category == imageinfo2.category);
 	CPPUNIT_ASSERT(imageinfo1.bayer == imageinfo2.bayer);
 	CPPUNIT_ASSERT(imageinfo1.observation == imageinfo2.observation);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImageServerTable() end");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImageRepoTable() end");
 }
 
-void	ImageServerTablesTest::testMetadataTable() {
+void	ImageRepoTablesTest::testMetadataTable() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMetadataTable() begin");
 	ImageTable	images(database);
 	ImageRecord	imageinfo1;
@@ -133,7 +133,7 @@ void	ImageServerTablesTest::testMetadataTable() {
 }
 
 #if 0
-void	ImageServerTablesTest::testXXX() {
+void	ImageRepoTablesTest::testXXX() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() begin");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testXXX() end");
 }

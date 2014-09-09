@@ -62,7 +62,7 @@ public:
 /**
  * \brief An object containing anything but the image itself
  *
- * The ImageServer can find ImageEnvelope objects, but it can also be used
+ * The ImageRepo can find ImageEnvelope objects, but it can also be used
  * to request the image itself.
  */
 class ImageEnvelope {
@@ -148,7 +148,7 @@ public:
 
 	astro::image::ImageMetadata	metadata;
 	const astro::image::Metavalue&	getMetadata(const std::string& keyword) const;
-	friend class ImageServer;
+	friend class ImageRepo;
 	std::string	toString() const;
 };
 
@@ -158,7 +158,7 @@ public:
  * The image server is an interface to retrieve images identified either
  * by an id or by some attributes collected in the ImageSpec class.
  */
-class ImageServer {
+class ImageRepo {
 	astro::persistence::Database	_database;
 	std::string	_directory;
 	long	id(const std::string& filename);
@@ -166,7 +166,7 @@ class ImageServer {
 	void	scan_recursive();
 	void	scan_file(const std::string& filename);
 public:
-	ImageServer(astro::persistence::Database database,
+	ImageRepo(astro::persistence::Database database,
 		const std::string& directory, bool scan = true);
 
 	std::string	filename(long id);
@@ -178,6 +178,17 @@ public:
 	void	remove(long id);
 
 	std::set<ImageEnvelope>	get(const ImageSpec& spec);
+};
+
+/**
+ * \brief A class describing an image repository
+ */
+class ImageRepoInfo {
+public:
+	std::string	reponame;
+	std::string	database;
+	std::string	directory;
+	bool	operator==(const ImageRepoInfo& other) const;
 };
 
 

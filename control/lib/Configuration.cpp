@@ -9,8 +9,11 @@
 #include <AstroFormat.h>
 #include <cstdlib>
 #include <GlobalTable.h>
+#include <ImageReposTable.h>
+#include <AstroProject.h>
 
 using namespace astro::persistence;
+using namespace astro::project;
 
 namespace astro {
 namespace config {
@@ -39,6 +42,15 @@ public:
 	virtual void	removeglobal(const std::string& name,
 				const std::string& value);
 	virtual std::list<ConfigurationEntry>	globallist();
+
+	// access to repositories
+	virtual ImageRepo	repo(const std::string& name);
+	virtual void	addrepo(const std::string& name,
+				const std::string& directory);
+	virtual void	removerepo(const std::string& name);
+	virtual std::list<ImageRepoInfo>	listrepo();
+
+	// devicemapper access
 	virtual DeviceMapperPtr	devicemapper();
 };
 
@@ -124,10 +136,93 @@ void	ConfigurationBackend::removeglobal(const std::string& section,
 }
 
 /**
+ * \brief get a repository
+ */
+ImageRepo	ConfigurationBackend::repo(const std::string& name) {
+	return ImageRepoTable(database).get(name);
+}
+
+/**
+ * \brief add a repository
+ */
+void	ConfigurationBackend::addrepo(const std::string& name,
+		const std::string& directory) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add image repo %s in directory %s",
+		name.c_str(), directory.c_str());
+
+	// first find out whether the repository already exists
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "test whether repo '%s' exists",
+			name.c_str());
+		repo(name);
+		return;
+	} catch (...) { }
+
+	// prepare the entry for the database
+	ImageRepoRecord	imagerepoinfo;
+	imagerepoinfo.reponame = name;
+	imagerepoinfo.database = directory + std::string("/.astro.db");
+	imagerepoinfo.directory = directory;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using database name %s",
+		imagerepoinfo.database.c_str());
+
+	// create a new repository
+	Database	db = DatabaseFactory::get(imagerepoinfo.database);
+	ImageRepo	imagerepo(db, directory, true);
+
+	// add the repository info to the database
+	ImageRepoTable	repos(database);
+	repos.add(imagerepoinfo);
+}
+
+/**
+ * \brief delete a repository
+ */
+void	ConfigurationBackend::removerepo(const std::string& name) {
+	ImageRepoTable(database).remove(name);
+}
+
+std::list<ImageRepoInfo>	ConfigurationBackend::listrepo() {
+	ImageRepoTable	repos(database);
+	std::list<ImageRepoInfo>	result;
+	std::list<ImageRepoRecord>	repolist = repos.select("0 = 0");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d image repo records",
+		repolist.size());
+	std::list<ImageRepoRecord>::const_iterator	i;
+	for (i = repolist.begin(); i != repolist.end(); i++) {
+		ImageRepoInfo	info;
+		info.reponame = i->reponame;
+		info.database = i->database;
+		info.directory = i->directory;
+		result.push_back(info);
+	}
+	return result;
+}
+
+
+/**
  * \brief Get the device mapper
  */
 DeviceMapperPtr	ConfigurationBackend::devicemapper() {
 	return DeviceMapper::get(database);
+}
+
+/**
+ * \brief 
+ */
+std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
+	GlobalTable	globals(database);
+	std::list<GlobalRecord>	records = globals.select("0 = 0");
+	std::list<ConfigurationEntry>	result;
+	std::list<GlobalRecord>::const_iterator	i;
+	for (i = records.begin(); i != records.end(); i++) {
+		ConfigurationEntry	entry;
+		entry.section = i->section;
+		entry.name = i->name;
+		entry.value = i->value;
+		result.push_back(entry);
+	}
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -201,24 +296,6 @@ std::string	Configuration::get_default() {
  */
 void	Configuration::set_default(const std::string& filename) {
 	default_config = filename;
-}
-
-/**
- * \brief 
- */
-std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
-	GlobalTable	globals(database);
-	std::list<GlobalRecord>	records = globals.select("0 = 0");
-	std::list<ConfigurationEntry>	result;
-	std::list<GlobalRecord>::const_iterator	i;
-	for (i = records.begin(); i != records.end(); i++) {
-		ConfigurationEntry	entry;
-		entry.section = i->section;
-		entry.name = i->name;
-		entry.value = i->value;
-		result.push_back(entry);
-	}
-	return result;
 }
 
 } // namespace config
