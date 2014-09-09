@@ -335,6 +335,7 @@ astro::camera::Exposure	convert(const Astro::Exposure& exposure) {
 		result.limit = exposure.limit;
 	}
 	result.shutter = convert(exposure.shutter);
+	result.purpose = convert(exposure.purpose);
 	result.mode = convert(exposure.mode);
 	return result;
 }
@@ -346,6 +347,7 @@ Astro::Exposure	convert(const astro::camera::Exposure& exposure) {
 	result.gain = exposure.gain;
 	result.limit = exposure.limit;
 	result.shutter = convert(exposure.shutter);
+	result.purpose = convert(exposure.purpose);
 	result.mode = convert(exposure.mode);
 	return result;
 }
