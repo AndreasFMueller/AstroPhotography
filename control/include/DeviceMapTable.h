@@ -17,6 +17,7 @@ class DeviceMapInfo {
 public:
 	std::string	name;
 	std::string	devicename;
+	int	unitid;
 	std::string	servername;
 	std::string	description;
 };

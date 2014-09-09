@@ -25,20 +25,21 @@ public:
 	DeviceMapperBackend(Database _database)
 		: database(_database), devicemap(_database) { }
 	int	id(const std::string& name);
-	int	id(const DeviceName& name, const std::string& servername);
+	int	id(const DeviceName& name, int unitid,
+			const std::string& servername);
 	virtual DeviceMap	find(const std::string& name);
-	virtual DeviceMap	find(const DeviceName& devicename,
+	virtual DeviceMap	find(const DeviceName& devicename, int unitid,
 					const std::string& servername);
 	virtual void    add(const DeviceMap& devicemap);
 private:
 	void	update(int id, const DeviceMap& d);
 public:
 	virtual void    update(const std::string& name, const DeviceMap& d);
-	virtual void    update(const DeviceName& devicename, 
+	virtual void    update(const DeviceName& devicename,  int unitid,
 				const std::string& servername,
 				const DeviceMap& d);
 	virtual void	remove(const std::string& name);
-	virtual void	remove(const DeviceName& devicename,
+	virtual void	remove(const DeviceName& devicename, int unitid,
 				const std::string& servername);
 	virtual DeviceMapperPtr	devicemapper();
 };
@@ -57,6 +58,7 @@ DeviceMap	DeviceMapperBackend::select(const std::string& condition) {
 	DeviceMapRecord	record = *records.begin();
 	DeviceMap	result(DeviceName(record.devicename));
 	result.name(record.name);
+	result.unitid(record.unitid);
 	result.servername(record.servername);
 	result.description(record.description);
 	return result;
@@ -88,11 +90,12 @@ int	DeviceMapperBackend::id(const std::string& name) {
 /**
  * \brief Get the id of a map entry based on device name and server
  */
-int	DeviceMapperBackend::id(const DeviceName& devicename,
+int	DeviceMapperBackend::id(const DeviceName& devicename, int unitid,
 			const std::string& servername) {
 	std::string	condition = stringprintf(
-		"devicename = '%s' and servername = '%s'", 
+		"devicename = '%s' and unitid = %d and servername = '%s'", 
 		database->escape(devicename.toString()).c_str(),
+		unitid,
 		database->escape(servername).c_str());
 	return selectid(condition);
 }
@@ -110,10 +113,11 @@ DeviceMap	DeviceMapperBackend::find(const std::string& name) {
  * \brief Retrieve a name based on the device name and the server name
  */
 DeviceMap	DeviceMapperBackend::find(const DeviceName& devicename,
-			const std::string& servername) {
+			int unitid, const std::string& servername) {
 	std::string	condition = stringprintf(
-		"devicename = '%s' and servername = '%s'", 
+		"devicename = '%s' and unitid = %d and servername = '%s'", 
 		database->escape(devicename.toString()).c_str(),
+		unitid,
 		database->escape(servername).c_str());
 	return select(condition);
 }
@@ -127,6 +131,7 @@ void	DeviceMapperBackend::add(const DeviceMap& d) {
 	DeviceMapRecord	record;
 	record.name = d.name();
 	record.devicename = d.devicename().toString();
+	record.unitid = d.unitid();
 	record.servername = d.servername();
 	record.description = d.description();
 	devicemap.add(record);
@@ -136,6 +141,7 @@ void	DeviceMapperBackend::update(int id, const DeviceMap& d) {
 	DeviceMapRecord	record(id);
 	record.name = d.name();
 	record.devicename = d.devicename().toString();
+	record.unitid = d.unitid();
 	record.servername = d.servername();
 	record.description = d.description();
 	devicemap.update(id, record);
@@ -152,9 +158,9 @@ void	DeviceMapperBackend::update(const std::string& name,
 /**
  * \brief update an entry identified by device name and server
  */
-void	DeviceMapperBackend::update(const DeviceName& devicename,
+void	DeviceMapperBackend::update(const DeviceName& devicename, int unitid,
 		const std::string& servername, const DeviceMap& dm) {
-	update(id(devicename, servername), dm);
+	update(id(devicename, unitid, servername), dm);
 }
 
 /**
@@ -167,9 +173,9 @@ void	DeviceMapperBackend::remove(const std::string& name) {
 /**
  * \brief Remove a map entry based on the devicename and servername
  */
-void	DeviceMapperBackend::remove(const DeviceName& devicename,
-		const std::string& servername) {
-	devicemap.remove(id(devicename, servername));
+void	DeviceMapperBackend::remove(const DeviceName& devicename, int unitid,
+		const std::string& servername) {
+	devicemap.remove(id(devicename, unitid, servername));
 }
 
 /**

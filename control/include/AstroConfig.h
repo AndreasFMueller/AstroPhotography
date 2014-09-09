@@ -19,13 +19,19 @@ namespace config {
 class DeviceMap {
 	std::string	_name;
 	DeviceName	_devicename;
+	int		_unitid;
 	std::string	_servername;
 	std::string	_description;
 public:
-	DeviceMap(const DeviceName& devicename) : _devicename(devicename) { }
+	DeviceMap(const DeviceName& devicename) : _devicename(devicename),
+		_unitid(0) {
+	}
 
 	const std::string&	name() const { return _name; }
 	void	name(const std::string& n) { _name = n; }
+
+	int	unitid() const { return _unitid; }
+	void	unitid(int i) { _unitid = i; }
 
 	const std::string&	servername() const { return _servername; }
 	void	servername(const std::string& s) { _servername = s; }
@@ -49,16 +55,16 @@ class DeviceMapper {
 	DeviceMap	select(const std::string& condition);
 public:
 	virtual DeviceMap	find(const std::string& name) = 0;
-	virtual DeviceMap	find(const DeviceName& devicename,
+	virtual DeviceMap	find(const DeviceName& devicename, int unitid,
 					const std::string& servername) = 0;
 	virtual void	add(const DeviceMap& devicemap) = 0;
 	virtual void	update(const std::string& name,
 				const DeviceMap& devicemap) = 0;
-	virtual void	update(const DeviceName& devicename,
+	virtual void	update(const DeviceName& devicename, int unitid,
 				const std::string& servername,
 				const DeviceMap& devicemap) = 0;
 	virtual void	remove(const std::string& name) = 0;
-	virtual void	remove(const DeviceName& devicename,
+	virtual void	remove(const DeviceName& devicename, int unitid,
 				const std::string& servername) = 0;
 static DeviceMapperPtr	get(astro::persistence::Database database);
 };

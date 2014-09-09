@@ -48,18 +48,22 @@ void	DeviceMapTableTest::testDeviceMap() {
 	devicemap1.description = "Description of devicemap1";
 	devicemap1.servername = "localhost";
 	devicemap1.devicename = "camera:simulator/camera";
+	devicemap1.unitid = 47;
 	long	id1 = devicemap.add(devicemap1);
 	DeviceMapRecord	devicemap2;
 	devicemap2.name = "devicemap2";
 	devicemap2.description = "Description of devicemap2";
 	devicemap2.servername = "titus";
 	devicemap2.devicename = "camera:simulator/camera";
+	devicemap2.unitid = 48;
 	long	id2 = devicemap.add(devicemap2);
 	DeviceMapRecord	devicemap3 = devicemap.byid(id1);
 	CPPUNIT_ASSERT(devicemap1.name == devicemap3.name);
+	CPPUNIT_ASSERT(devicemap1.unitid == devicemap3.unitid);
 	CPPUNIT_ASSERT(devicemap1.description == devicemap3.description);
 	DeviceMapRecord	devicemap4 = devicemap.byid(id2);
 	CPPUNIT_ASSERT(devicemap2.name == devicemap4.name);
+	CPPUNIT_ASSERT(devicemap2.unitid == devicemap4.unitid);
 	CPPUNIT_ASSERT(devicemap2.description == devicemap4.description);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDeviceMap() end");
 }

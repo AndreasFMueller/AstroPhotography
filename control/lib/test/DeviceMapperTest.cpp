@@ -55,12 +55,14 @@ void	DeviceMapperTest::testAdd() {
 		cameraname.toString().c_str());
 	DeviceMap	mapentry1(cameraname);
 	mapentry1.name("SIM");
+	mapentry1.unitid(1);
 	mapentry1.servername("");
 	mapentry1.description("mapper entry for the simulator camera");
 	devicemapper->add(mapentry1);
 
 	cameraname = DeviceName("camera:sx/camera1");
 	DeviceMap	mapentry2(cameraname);
+	mapentry2.unitid(2);
 	mapentry2.name("SX");
 	mapentry2.servername("titus");
 	mapentry2.description("mapper entry for the SX camera");
@@ -79,12 +81,13 @@ void	DeviceMapperTest::testFind() {
 	DeviceMap	mapentry1 = devicemapper->find("SIM");
 	DeviceName	cameraname("camera:simulator/camera");
 	CPPUNIT_ASSERT(mapentry1.devicename() == cameraname);
+	CPPUNIT_ASSERT(mapentry1.unitid() == 1);
 	CPPUNIT_ASSERT(mapentry1.servername() == "");
 	CPPUNIT_ASSERT(mapentry1.description()
 		== "mapper entry for the simulator camera");
 	
 	cameraname = DeviceName("camera:sx/camera1");
-	DeviceMap	mapentry2 = devicemapper->find(cameraname, "titus");
+	DeviceMap	mapentry2 = devicemapper->find(cameraname, 2, "titus");
 	CPPUNIT_ASSERT(mapentry2.name() == "SX");
 	CPPUNIT_ASSERT(mapentry2.devicename() == cameraname);
 	CPPUNIT_ASSERT(mapentry2.servername() == "titus");
@@ -103,25 +106,30 @@ void	DeviceMapperTest::testUpdate() {
 	DeviceMap	mapentry1 = devicemapper->find("SIM");
 	DeviceName	cameraname("camera:simulator/camera2");
 	mapentry1.devicename(cameraname);
+	mapentry1.unitid(3);
 	devicemapper->update("SIM", mapentry1);
 	
 	DeviceMap	mapentry2 = devicemapper->find("SIM");
 	CPPUNIT_ASSERT(mapentry2.devicename() == cameraname);
+	CPPUNIT_ASSERT(mapentry2.unitid() == 3);
 	CPPUNIT_ASSERT(mapentry2.servername() == "");
 	CPPUNIT_ASSERT(mapentry2.description() == 
 		"mapper entry for the simulator camera");
 
 	// update the SX camera
 	DeviceMap	mapentry3
-		= devicemapper->find(DeviceName("camera:sx/camera1"), "titus");
+		= devicemapper->find(DeviceName("camera:sx/camera1"), 2,
+			"titus");
 	mapentry3.name("SY");
-	devicemapper->update(DeviceName("camera:sx/camera1"), "titus",
+	mapentry3.unitid(4);
+	devicemapper->update(DeviceName("camera:sx/camera1"), 2, "titus",
 		mapentry3);
 	
 	DeviceMap	mapentry4 = devicemapper->find("SY");
 	CPPUNIT_ASSERT(mapentry4.devicename()
 		== DeviceName("camera:sx/camera1"));
 	CPPUNIT_ASSERT(mapentry4.servername() == "titus");
+	CPPUNIT_ASSERT(mapentry4.unitid() == 4);
 	CPPUNIT_ASSERT(mapentry4.description()
 		== "mapper entry for the SX camera");
 
@@ -138,7 +146,7 @@ void	DeviceMapperTest::testRemove() {
 		devicemapper->find("SY");
 	} catch (std::exception& x) {
 	}
-	devicemapper->remove(DeviceName("camera:simulator/camera2"), "");
+	devicemapper->remove(DeviceName("camera:simulator/camera2"), 3, "");
 	try {
 		devicemapper->find("SIM");
 	} catch (std::exception& x) {
