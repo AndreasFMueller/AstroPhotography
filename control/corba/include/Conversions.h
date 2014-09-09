@@ -54,6 +54,10 @@ Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle);
 astro::camera::shutter_state	convert(const Astro::ShutterState& state);
 Astro::ShutterState	convert(const astro::camera::shutter_state state);
 
+// exposure purpose
+astro::camera::Exposure::purpose_t	convert(const Astro::ExposurePurpose& purpose);
+Astro::ExposurePurpose convert(const astro::camera::Exposure::purpose_t& purpose);
+
 // Binning mode
 astro::camera::Binning	convert(const Astro::BinningMode& mode);
 Astro::BinningMode	convert(const astro::camera::Binning& mode);
