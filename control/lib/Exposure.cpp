@@ -15,13 +15,14 @@ namespace astro {
 namespace camera {
 
 Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
-	mode(1,1), shutter(SHUTTER_OPEN) {
+	mode(1,1), shutter(SHUTTER_OPEN), purpose(Exposure::light) {
 }
 
 Exposure::Exposure(const ImageRectangle& _frame,
 	float _exposuretime)
                 : frame(_frame), exposuretime(_exposuretime), gain(1.),
-		  limit(INFINITY), shutter(SHUTTER_OPEN) {
+		  limit(INFINITY), shutter(SHUTTER_OPEN),
+		  purpose(Exposure::light) {
 }
 
 std::string	Exposure::toString() const {
@@ -66,6 +67,14 @@ void	Exposure::addToImage(ImageBase& image) const {
 		image.setMetadata(
 			FITSKeywords::meta(std::string("DATAMAX"), limit));
 	}
+
+	// purpose information
+	image.setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
+		(purpose == light)
+			? std::string("light")
+			: ((purpose == dark) 
+				? std::string("dark")
+				: std::string("flat"))));
 }
 
 } // namespace camera

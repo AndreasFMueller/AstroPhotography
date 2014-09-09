@@ -91,6 +91,9 @@ public:
 	Binning	mode;
 	shutter_state	shutter;
 
+	typedef	enum { light, dark, flat } purpose_t;
+	purpose_t	purpose;
+
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
 		float _exposuretime);
