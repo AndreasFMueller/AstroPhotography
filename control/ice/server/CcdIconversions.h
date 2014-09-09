@@ -22,6 +22,9 @@ astro::camera::Exposure::State	convert(const ExposureState& state);
 ShutterState	convert(const astro::camera::shutter_state& state);
 astro::camera::shutter_state	convert(const ShutterState& state);
 
+ExposurePurpose	convert(const astro::camera::Exposure::purpose_t& state);
+astro::camera::Exposure::purpose_t	convert(const ExposurePurpose& state);
+
 } // namespace snowstar
 
 #endif /* _CcdIconversions_h */

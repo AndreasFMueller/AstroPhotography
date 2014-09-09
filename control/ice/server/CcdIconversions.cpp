@@ -39,6 +39,7 @@ Exposure	convert(const astro::camera::Exposure& exp) {
 	exposure.gain = exp.gain;
 	exposure.limit = exp.limit;
 	exposure.shutter = convert(exp.shutter);
+	exposure.purpose = convert(exp.purpose);
 	exposure.mode.x = exp.mode.getX();
 	exposure.mode.y = exp.mode.getY();
 	return exposure;
@@ -55,6 +56,7 @@ astro::camera::Exposure	convert(const Exposure& exposure) {
 	exp.gain = exposure.gain;
 	exp.limit = exposure.limit;
 	exp.shutter = convert(exposure.shutter);
+	exp.purpose = convert(exposure.purpose);
 	exp.mode.setX(exposure.mode.x);
 	exp.mode.setY(exposure.mode.y);
 	return exp;
@@ -116,6 +118,30 @@ astro::camera::shutter_state	convert(const ShutterState& s) {
 		(s == ShOPEN) ? "open" : "closed",
 		(result == astro::camera::SHUTTER_OPEN) ? "open" : "closed");
 	return result;
+}
+
+ExposurePurpose convert(const astro::camera::Exposure::purpose_t& purpose) {
+	switch (purpose) {
+	case astro::camera::Exposure::light:
+		return snowstar::ExLIGHT;
+	case astro::camera::Exposure::dark:
+		return snowstar::ExDARK;
+	case astro::camera::Exposure::flat:
+		return snowstar::ExFLAT;
+	}
+	throw std::runtime_error("unknown exposure purpose");
+}
+
+astro::camera::Exposure::purpose_t      convert(const ExposurePurpose& purpose) {
+	switch (purpose) {
+	case snowstar::ExLIGHT;
+		return astro::camera::Exposure::light;
+	case snowstar::ExDARK;
+		return astro::camera::Exposure::light;
+	case snowstar::ExFLAT;
+		return astro::camera::Exposure::light;
+	}
+	throw std::runtime_error("unknown exposure purpose");
 }
 
 } // namespace snowstar

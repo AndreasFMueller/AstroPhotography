@@ -18,6 +18,7 @@ module snowstar {
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };
+	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT };
 
 	/**
 	 * \brief Exposure request structure
@@ -57,6 +58,13 @@ module snowstar {
 		 * For dark images, the shutter needs to be closed.
 		 */
 		ShutterState	shutter;
+		/**
+		 * \brief Exposure purpose
+		 *
+		 * The camera may behave differently if it knows what the
+		 * purpose of the exposure is.
+		 */
+		ExposurePurpose	purpose;
 		/**
 		 * \brief Binning mode to use during readout
 		 *
