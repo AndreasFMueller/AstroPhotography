@@ -128,7 +128,7 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	imageinfo.uuid = "";
 	try {
 		imageinfo.uuid = (std::string)(infile.getMetadata("UUID"));
-	} catch (...) { }
+	} catch (...) { }
 
 	// add the entry to the table
 	long	imageid = images.add(imageinfo);
@@ -249,6 +249,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	}
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
+	result.uuid(UUID(imageinfo.uuid));
 
 	// we are done, return the envelope
 	return result;
@@ -345,7 +346,7 @@ long	ImageRepo::save(ImagePtr image) {
 	try {
 		imageinfo.uuid
 			= (std::string)image->getMetadata("UUID");
-	} catch (...) { }
+	} catch (...) { }
 
 	// save the image info
 	ImageTable	images(_database);
