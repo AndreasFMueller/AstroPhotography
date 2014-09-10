@@ -10,6 +10,7 @@
 #include <typeinfo>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include <includes.h>
 #include <algorithm>
 
@@ -274,9 +275,18 @@ int	command_project(const std::vector<std::string>& arguments) {
 		return EXIT_FAILURE;
 	}
 	if (subcommand == "add") {
-		// XXX implementation incomplete
 		Project	project;
 		project.name(projectname);
+		AttributeValuePairs	av(arguments, 3);
+		if (av.has("description")) {
+			project.description(av("description"));
+		}
+		if (av.has("repository")) {
+			project.repository(av("repository"));
+		}
+		if (av.has("object")) {
+			project.object(av("object"));
+		}
 		Configuration::get()->addproject(project);
 		return EXIT_SUCCESS;
 	}

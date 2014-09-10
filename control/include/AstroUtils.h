@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <AstroDebug.h>
 #include <pthread.h>
 
@@ -150,10 +151,49 @@ std::string	rtrim(const std::string& s);
  */
 std::string	ltrim(const std::string& s);
 
-//////////////////////////////////////////////////////////////////////
-// formatting functions for time
-//////////////////////////////////////////////////////////////////////
-std::string	timeformat(const std::string& format, time_t when);
+/**
+ * \brief Format a time stamp
+ *
+ * The strftime function is used on a struct tm to format Unix timestamps.
+ * However, using strftime is mildly annoying, localtime needs  time_t
+ * pointer, not a time_t value, so it cannot in some cases, extra code
+ * needs to be written just to get that pointer. Furthermore, strftime
+ * writes to a buffer, in C++ we would prefer to work with a std::string.
+ * This is what this function provides. It formats a time_t value as
+ * a timestamp using the strftime format specification in the first
+ * argument.
+ *
+ * \param format	strftime format specification
+ * \param when		Unix time value to format
+ * \param local		whether or not local time should be used for the
+ *			format. If false, GMT is used.
+ */
+std::string	timeformat(const std::string& format, time_t when,
+			bool local = true);
+
+/**
+ * \brief Attribute value pairs container
+ *
+ * Command line applications use arguments of the form attribute=value
+ * instead of position arguments to simplify matters for users. This
+ * class provides a method to parse a vector of such attribute value
+ * strings into a map of attribute value pairs.
+ */
+class AttributeValuePairs {
+public:
+	typedef std::pair<std::string, std::string>	pair_t;
+	typedef std::multimap<std::string, std::string>	map_t;
+private:
+	map_t	data;
+	pair_t	parse(const std::string& argument) const;
+public:
+	AttributeValuePairs();
+	AttributeValuePairs(const std::vector<std::string>& arguments,
+		int skip = 0);
+	bool	has(const std::string& attribute) const;
+	std::string	operator()(const std::string& attribute) const;
+	std::set<std::string>	get(const std::string& attribute) const;
+};
 
 } // namespace astro
 

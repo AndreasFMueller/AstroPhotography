@@ -8,8 +8,13 @@
 
 namespace astro {
 
-std::string	timeformat(const std::string& format, time_t when) {
-	struct tm	*tmp = localtime(&when);
+std::string	timeformat(const std::string& format, time_t when, bool local) {
+	struct tm	*tmp = NULL;
+	if (local) {
+		tmp = localtime(&when);
+	} else {
+		tmp = gmtime(&when);
+	}
 	char	buffer[1024];
 	strftime(buffer, sizeof(buffer), format.c_str(), tmp);
 	return std::string(buffer);
