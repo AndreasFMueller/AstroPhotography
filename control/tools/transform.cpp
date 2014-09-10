@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <stacktrace.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -90,11 +91,14 @@ int	transform_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::transform_main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "transform terminated by exception: " << x.what()
-			<< std::endl;
-		return EXIT_FAILURE;
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

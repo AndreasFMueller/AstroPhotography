@@ -13,6 +13,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
+#include <stacktrace.h>
 
 using namespace astro::config;
 using namespace astro::project;
@@ -148,9 +149,10 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
+	} catch (const std::exception& x) {
 		std::cerr << "terminated by " << typeid(x).name() << ": ";
 		std::cerr << x.what() << std::endl;
 	} catch (...) {

@@ -15,6 +15,7 @@
 #if ENABLE_CORBA
 #include <OrbSingleton.h>
 #endif /* ENABLE_CORBA */
+#include <stacktrace.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -198,10 +199,14 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << argv[0] << " terminated by exception: "
-			<< x.what() << std::endl;
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

@@ -11,6 +11,8 @@
 #include <Ucac4.h>
 #include <includes.h>
 #include <iostream>
+#include <stacktrace.h>
+#include <typeinfo>
 
 using namespace astro::catalog;
 
@@ -138,11 +140,12 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "terminated by exception: " << x.what()
-			<< std::endl;
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "terminated by unknown exception" << std::endl;
 	}

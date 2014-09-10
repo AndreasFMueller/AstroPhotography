@@ -16,6 +16,9 @@
 #include <AstroLoop.h>
 #include <AstroCallback.h>
 #include <Sun.h>
+#include <stacktrace.h>
+#include <iostream>
+#include <typeinfo>
 
 using namespace astro;
 using namespace astro::io;
@@ -421,10 +424,14 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s terminated: %s",
-			argv[0], x.what());
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

@@ -7,6 +7,7 @@
 #include <AstroStacking.h>
 #include <AstroDebug.h>
 #include <AstroIO.h>
+#include <stacktrace.h>
 
 using namespace astro::image;
 using namespace astro::image::stacking;
@@ -70,10 +71,14 @@ int	stack_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
-		astro::stack_main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "stack terminated by exception: " << x.what()
-			<< std::endl;
+		return astro::stack_main(argc, argv);
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

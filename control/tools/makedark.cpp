@@ -8,6 +8,7 @@
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
+#include <stacktrace.h>
 
 using namespace astro::calibration;
 using namespace astro::io;
@@ -89,12 +90,14 @@ int	makedark_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::makedark_main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
-			"exception: %s", x.what());
-		std::cerr << "makedark tool terminated: " << x.what()
-			<< std::endl;
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

@@ -16,6 +16,7 @@
 #include <AstroFilter.h>
 #include <AstroFilterfunc.h>
 #include <AstroIO.h>
+#include <stacktrace.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -124,11 +125,14 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "focus terminated by exception: " << x.what()
-			<< std::endl;
+	} catch (const std::exception& x) {
+		std::cerr << "focus terminated by " << typeid(x).name();
+		std::cerr << ": " << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
 	return EXIT_FAILURE;
 }

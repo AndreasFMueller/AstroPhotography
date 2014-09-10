@@ -9,6 +9,7 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroCatalog.h>
+#include <stacktrace.h>
 
 using namespace astro::catalog;
 
@@ -107,11 +108,14 @@ int	main(int argc, char *argv[]) {
 
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "starcatalog terminated by exception: "
-			<< x.what() << std::endl;
-		return EXIT_FAILURE;
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << x.what() << std::endl;
+	} catch (...) {
+		std::cerr << "terminated by unknown exception" << std::endl;
 	}
+	return EXIT_FAILURE;
 }

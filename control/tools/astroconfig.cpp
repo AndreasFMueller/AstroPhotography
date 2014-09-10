@@ -13,6 +13,7 @@
 #include <AstroUtils.h>
 #include <includes.h>
 #include <algorithm>
+#include <stacktrace.h>
 
 using namespace astro::config;
 using namespace astro::project;
@@ -402,6 +403,7 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {

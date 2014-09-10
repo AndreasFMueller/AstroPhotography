@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fitsio.h>
 #include <string>
+#include <stacktrace.h>
 
 namespace astro {
 
@@ -166,15 +167,17 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "fitsheader terminated by exception: ";
-		std::cerr << x.what() << std::endl;
+	} catch (const std::exception& x) {
+		std::cerr << "fitsheader terminated by " << typeid(x).name();
+		std::cerr << ": " << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "fitsheader terminated by unknown exception";
 		std::cerr << std::endl;
 	}
+	return EXIT_FAILURE;
 }
 
 
