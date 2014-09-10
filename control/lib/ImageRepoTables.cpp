@@ -44,6 +44,7 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (category != other.category) { return false; }
 	if (bayer != other.bayer) { return false; }
 	if (observation != other.observation) { return false; }
+	if (uuid != other.uuid) { return false; }
 	return true;
 }
 
@@ -74,6 +75,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    category char(5) not null default 'light',\n"
 		"    bayer char(4) not null default '    ',\n"
 		"    observation varchar(25) not null,\n"
+		"    uuid varchar(36) not null,\n"
 		"    primary key(id)\n"
 		");\n"
 		"create unique index imageserver_x1 on images(filename);\n"
@@ -98,6 +100,7 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.category = row["category"]->stringValue();
 	record.bayer = row["bayer"]->stringValue();
 	record.observation = row["observation"]->stringValue();
+	record.uuid = row["uuid"]->stringValue();
 	return record;
 }
 
@@ -119,6 +122,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("category", factory.get(imagerec.category)));
 	spec.insert(Field("bayer", factory.get(imagerec.bayer)));
 	spec.insert(Field("observation", factory.get(imagerec.observation)));
+	spec.insert(Field("uuid", factory.get(imagerec.uuid)));
 	return spec;
 }
 

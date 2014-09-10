@@ -195,6 +195,21 @@ public:
 	std::set<std::string>	get(const std::string& attribute) const;
 };
 
+/**
+ * \brief Universally unique id used to tell images appart
+ *
+ * Images created by the system are tagged with UUIDs so that copies can
+ * easily be detected as equal.
+ */
+class UUID {
+	std::string	_uuid;
+public:
+	UUID();
+	UUID(const std::string& uuid);
+	bool	operator==(const UUID& other) const;
+	operator	std::string() const;
+};
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */

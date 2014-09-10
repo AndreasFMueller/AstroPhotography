@@ -73,6 +73,11 @@ public:
 	long	id() const { return _id; }
 	void	id(long l) { _id = l; }
 	operator	long() const { return _id; }
+private:
+	UUID	_uuid;
+public:
+	const UUID&	uuid() const { return _uuid; }
+	void	uuid(const UUID& u) { _uuid = u; }
 
 	// constructor
 	ImageEnvelope(long id) : _id(id) { }

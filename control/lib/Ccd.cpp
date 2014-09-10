@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
 #include <AstroIO.h>
+#include <AstroUtils.h>
 #include <includes.h>
 #include <sstream>
 
@@ -408,6 +409,7 @@ void	Ccd::addMetadata(ImageBase& image) {
 	image.setMetadata(
 		FITSKeywords::meta(std::string("DATE-OBS"),
 			FITSdate()));
+	image.setMetadata(FITSKeywords::meta(std::string("UUID"), UUID()));
 }
 
 } // namespace camera

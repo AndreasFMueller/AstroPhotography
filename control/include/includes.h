@@ -98,4 +98,8 @@
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
 
+#ifdef HAVE_UUID_UUID_H
+#include <uuid/uuid.h>
+#endif /* HAVE_UUID_UUID_H */
+
 #endif /* _includes_h */

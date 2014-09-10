@@ -125,6 +125,10 @@ void	ImageRepo::scan_file(const std::string& filename) {
 	imageinfo.category = "light";
 	imageinfo.bayer = "    ";
 	imageinfo.observation = "1970-01-01T00:00:00.000";
+	imageinfo.uuid = "";
+	try {
+		imageinfo.uuid = (std::string)(infile.getMetadata("UUID"));
+	} catch (...) { }
 
 	// add the entry to the table
 	long	imageid = images.add(imageinfo);
@@ -283,6 +287,12 @@ long	ImageRepo::save(ImagePtr image) {
 	std::string	filename = fullname.substr(_directory.size() + 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "full name: %s", fullname.c_str());
 
+	// if the image does not have a UUID yet, add one
+	if (!image->hasMetadata("UUID")) {
+		image->setMetadata(FITSKeywords::meta("UUID",
+			(std::string)UUID()));
+	}
+
 	// write the image
 	unlink(fullname.c_str());
 	FITSout	out(fullname);
@@ -332,6 +342,10 @@ long	ImageRepo::save(ImagePtr image) {
 		imageinfo.observation
 			= (std::string)image->getMetadata("DATE-OBS");
 	} catch (...) { }
+	try {
+		imageinfo.uuid
+			= (std::string)image->getMetadata("UUID");
+	} catch (...) { }
 
 	// save the image info
 	ImageTable	images(_database);

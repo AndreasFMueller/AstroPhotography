@@ -13,17 +13,26 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
+#include <AstroIO.h>
 #include <stacktrace.h>
 
 using namespace astro::config;
 using namespace astro::project;
+using namespace astro::io;
 
 namespace astro {
 
-int	command_add(const std::string& /* reponame */,
+int	command_add(const std::string& reponame,
 		const std::vector<std::string>& arguments) {
-	std::cerr << "'add' command not implemented" << std::endl;
-	return EXIT_FAILURE;
+	// the next argument must be the image file name
+	if (arguments.size() < 3) {
+		throw std::runtime_error("no image to add specified");
+	}
+	std::string	imagefilename = arguments[2];
+	FITSin	in(imagefilename);
+	ImagePtr	image = in.read();
+	Configuration::get()->repo(reponame).save(image);
+	return EXIT_SUCCESS;
 }	
 
 int	command_list(const std::string& reponame) {

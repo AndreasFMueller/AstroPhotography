@@ -33,6 +33,7 @@ public:
 	std::string	category;
 	std::string	bayer;
 	std::string	observation;
+	std::string	uuid;
 	bool	operator==(const ImageInfo& other) const;
 	ImageInfo();
 };
