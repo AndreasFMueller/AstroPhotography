@@ -173,7 +173,7 @@ void	ImageRepo::scan_directory(bool recurse) {
 	}
 	struct dirent	*d;
 	while (NULL != (d = readdir(dir))) {
-		std::string     filename(d->d_name, d->d_namlen);
+		std::string     filename(d->d_name);
 		scan_file(filename);
 		counter++;
 	}
