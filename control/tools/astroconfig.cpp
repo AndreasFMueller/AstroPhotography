@@ -42,7 +42,9 @@ void	usage(const char *progname) {
 	std::cerr << std::endl;
 	std::cerr << progname << " [ options ] imagerepo list" << std::endl;
 	std::cerr << progname << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << std::endl;
 	std::cerr << progname << " [ options ] imagerepo remove <reponame>";
+	std::cerr << std::endl;
 	std::cerr << "list, add or delete image repositores" << std::endl;
 	std::cerr << progname << " [ options ] project list";
 	std::cerr << std::endl;
@@ -63,7 +65,7 @@ void	usage(const char *progname) {
 }
 
 /**
- * \brief
+ * \brief set a global configuration variable
  */
 int	command_set_global(const std::vector<std::string>& arguments) {
 	if (arguments.size() < 5) {
@@ -89,7 +91,7 @@ int	command_set(const std::vector<std::string>& arguments) {
 	if (domain == "global") {
 		return command_set_global(arguments);
 	}
-	std::cerr << "command not implemented" << std::endl;
+	std::cerr << "domain " << domain << "  not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 
@@ -127,7 +129,7 @@ int	command_get(const std::vector<std::string>& arguments) {
 	if (domain == "global") {
 		return command_get_global(arguments);
 	}
-	std::cerr << "command not implemented" << std::endl;
+	std::cerr << "domain " << domain << " not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 
@@ -163,7 +165,7 @@ int	command_delete(const std::vector<std::string>& arguments) {
 	if (domain == "global") {
 		return command_delete_global(arguments);
 	}
-	std::cerr << "command not implemented" << std::endl;
+	std::cerr << "domain " << domain << " not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 
@@ -331,7 +333,7 @@ int	command_list(const std::vector<std::string>& arguments) {
 	if (domain == "global") {
 		return command_list_global(arguments);
 	}
-	std::cerr << "command not implemented" << std::endl;
+	std::cerr << "domain " << domain << " not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 

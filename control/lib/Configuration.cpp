@@ -199,7 +199,7 @@ void	ConfigurationBackend::addrepo(const std::string& name,
 
 	// create a new repository
 	Database	db = DatabaseFactory::get(imagerepoinfo.database);
-	ImageRepo	imagerepo(db, directory, true);
+	ImageRepo	imagerepo(db, directory, false);
 
 	// add the repository info to the database
 	ImageRepoTable	repos(database);

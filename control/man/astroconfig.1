@@ -1,0 +1,194 @@
+.TH ASTROCONFIG 1 "Sept 2014"
+.SH NAME
+astroconfig \- astrophotography configuration management 
+
+.SH SYNOPSIS
+.B astroconfig
+[
+.I options
+] 
+{ get | set | delete } 
+.I domain section name 
+[
+.I value
+]
+
+.B astroconfig
+[
+.I options
+] 
+imagerepo list
+
+.B astroconfig
+[
+.I options
+] 
+imagerepo add
+.I reponame directory
+
+.B astroconfig
+[
+.I options
+]
+project add
+.I projname
+...
+
+.B astroconfig
+[
+.I options
+]
+project { remove | show }
+.I projname
+
+.SH DESCRIPTION
+The programs of the AstroPhotography need a lot of common configuration
+information. This information is stored in a sqlite3 database and
+managed through the 
+.BR astrconfig (1)
+command and some other tools, most importantly the 
+.BR devicemapper (1)
+command.
+
+The first synopsis shows the 
+
+Images are stored in image repositories, essentially directories
+containing FITS files and a database containing metadata about the files.
+The 
+.BR imagerepo (1)
+command is used to maintain the contents of these repositories, but
+repositories are created using the 
+.B imagerepo
+subcommands of the
+.BR astroconfig (1)
+command.
+The second and third synopsis show the commands used for this purpose.
+
+Images are also groupd together using projects. A project contains
+information about the repository is to used for the images, or what
+object is to be imaged. The 
+.B project
+subcommands of the
+.BR astroconfig (1)
+command needed for project management are shown in the fourth and fifth
+synopsis.
+
+.SH CONFIGURATION COMMANDS
+The configuration commands allow to set configuration variables.
+Configuration variables are grouped domains, of which currently only
+the 
+.I global
+domain is implemented. Within a domain, variables are grouped in
+sections, which are arbitrary strings as defined by the consumers of the
+configuration information. The top level section is designed by '.'.
+The following subcommands are implemented:
+.TP
+.BI get \ domain\ section\ name
+Get the value of variable 
+.I name
+in section
+.I section
+in domain
+.IR domain ,
+which currently must be 
+.IR global .
+
+.TP
+.BI set \ domain\ section\ name\ value
+Set the value of the variable named
+.I name
+in section
+.I section
+and domain
+.IR domain .
+
+.TP
+.BI delete \ domain\ section\ name
+Delete the configuration variable named
+.I name
+in section
+.I section 
+and domain
+.IR domain .
+
+.SH IMAGEREPO COMMANDS
+The image repository commands are used to create, list and destroy
+image repositories. These commands to not change the contents of the
+image directories.
+
+.TP
+.BI imagerepo \ name \ list
+Display a list of images contained in the image repository named
+.IR name .
+.TP
+.BI imagerepo \ name \ add \ directory
+Add an image repository named
+.I name
+to the configuration database. The images will be stored in the 
+.IR directory ,
+and the database containing the metadata will bi named 
+.IR directory/.astro.db .
+Any files contained in the directory will not be touched by this
+command.
+.TP
+.BI imagerepo \ name \ remove
+Remove the image repository named
+.I name 
+from the configuration database.
+.SH PROJECT COMMANDS
+A project is a collection of configuration information needed for a set
+of astrophotography images. The name of the project allows to easily
+access this configuration information information with a simple handle,
+the project name. The
+.B project
+subcommands of the
+.BR astroconfig (1)
+command allow to change project information.
+.TP
+.B project list
+.TP
+.BI project\ add \ name\ attribute=value\ ...
+Add a new project entry to the configuration. Additional parameters are
+specified in the form of
+.I attribute=value
+pairs, for a list of known parameters check the section on project
+attributes below.
+.TP
+.BI project\ show \ name
+.TP
+.BI project\ remove \ name
+Remove the project named
+.IR name .
+The repository associated with the project is not affected by this operation.
+
+.SH PROJECT ATTRIBUTES
+The following attribute names can be used with projects:
+.TP
+description
+A description of the project (at most 1024 characters). This field
+is for display purposes only.
+.TP
+object
+A concise description of the object to be imaged.
+.TP
+repository
+The image repository to be used to store the images taken. 
+
+.SH OPTIONS
+.TP
+.B \-\-help,\-h
+Display a help message.
+.TP
+.B \-\-debug,\-d
+Increase the debug level
+.TP
+.BI \-\-config= config.db ,\-c \ config.db
+The configuration is stored in a sqlite3 database file. This option
+can be used to use a different database file than the default
+.IR ~/.astrophoto.db .
+
+.SH FILES
+.I ~/.astrophoto.db
+
+.SH AUTHOR
+Andreas Mueller
