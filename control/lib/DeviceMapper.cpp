@@ -41,6 +41,7 @@ public:
 	virtual void	remove(const std::string& name);
 	virtual void	remove(const DeviceName& devicename, int unitid,
 				const std::string& servername);
+	virtual std::list<DeviceMap>	select();
 	virtual DeviceMapperPtr	devicemapper();
 };
 
@@ -183,6 +184,21 @@ void	DeviceMapperBackend::remove(const DeviceName& devicename, int unitid,
  */
 DeviceMapperPtr	DeviceMapperBackend::devicemapper() {
 	return DeviceMapper::get(database);
+}
+
+std::list<DeviceMap>	DeviceMapperBackend::select() {
+	std::list<DeviceMapRecord>	records = devicemap.select("0 = 0");
+	std::list<DeviceMap>	result;
+	std::list<DeviceMapRecord>::const_iterator	di;
+	for (di = records.begin(); di != records.end(); di++) {
+		DeviceMap	d(DeviceName(di->devicename));
+		d.name(di->name);
+		d.unitid(di->unitid);
+		d.servername(di->servername);
+		d.description(di->description);
+		result.push_back(d);
+	}
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////

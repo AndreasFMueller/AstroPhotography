@@ -67,6 +67,7 @@ public:
 	virtual void	remove(const std::string& name) = 0;
 	virtual void	remove(const DeviceName& devicename, int unitid,
 				const std::string& servername) = 0;
+	virtual std::list<DeviceMap>	select() = 0;
 static DeviceMapperPtr	get(astro::persistence::Database database);
 };
 
