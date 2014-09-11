@@ -11,6 +11,7 @@
 #include <fitsio.h>
 #include <string>
 #include <stacktrace.h>
+#include <typeinfo>
 
 namespace astro {
 

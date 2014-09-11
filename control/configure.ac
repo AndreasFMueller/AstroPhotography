@@ -49,6 +49,15 @@ else
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 fi
 
+# if uuid is configured with pkg-config
+if pkg-config --exists uuid
+then
+	LIBS="${LIBS} `pkg-config --libs uuid`"
+	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags uuid`"
+else
+AC_CHECK_LIB([uuid], [uuid_parse])
+fi
+
 ######################################################################
 # use pkg-config to find out about the flags to use for omniorb
 if pkg-config --exists omniORB4

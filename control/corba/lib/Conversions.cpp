@@ -234,7 +234,7 @@ Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle) {
 
 // shutter state
 
-astro::camera::shutter_state    convert(const Astro::ShutterState& state) {
+astro::camera::shutter_state    convert(const Astro::ShutterState state) {
 	switch (state) {
 	case Astro::SHUTTER_OPEN:
 		return astro::camera::SHUTTER_OPEN;
@@ -258,7 +258,7 @@ Astro::ShutterState     convert(const astro::camera::shutter_state state) {
 }
 
 // exposure purpose
-astro::camera::Exposure::purpose_t        convert(const Astro::ExposurePurpose& purpose) {
+astro::camera::Exposure::purpose_t        convert(const Astro::ExposurePurpose purpose) {
 	switch (purpose) {
 	case Astro::PURPOSE_LIGHT:
 		return astro::camera::Exposure::light;
@@ -270,7 +270,7 @@ astro::camera::Exposure::purpose_t        convert(const Astro::ExposurePurpose& 
 	throw std::runtime_error("unknown exposure purpose");
 }
 
-Astro::ExposurePurpose convert(const astro::camera::Exposure::purpose_t& purpose) {
+Astro::ExposurePurpose convert(const astro::camera::Exposure::purpose_t purpose) {
 	switch (purpose) {
 	case astro::camera::Exposure::light:
 		return Astro::PURPOSE_LIGHT;

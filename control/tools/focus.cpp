@@ -17,6 +17,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroIO.h>
 #include <stacktrace.h>
+#include <includes.h>
 
 using namespace astro;
 using namespace astro::module;
