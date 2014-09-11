@@ -1,0 +1,129 @@
+.TH IMAGREPO "1" "September 2014" "AstroPhotography tools" "User Commands"
+.SH NAME
+imagerepo \- manage contents of an image repository
+.SH SYNOPSIS
+.B imagerepo
+[
+.I options
+]
+.I reponame
+.B list
+
+.B imagerepo
+[
+.I options
+]
+.I reponame
+.B add
+.I image.fits
+
+.B imagerepo
+[
+.I options
+]
+.I reponame
+.B show 
+.I id
+
+.B imagerepo
+[
+.I options
+]
+.I reponame
+.B remove 
+.I id
+
+.B imagerepo
+[
+.I options
+]
+.I reponame
+{
+.B copy
+|
+.B move
+}
+.I id targetrepo
+
+.SH DESCRIPTION
+The 
+.BR imagerepo (1)
+command is used to add and remove image files in repositories, to
+list the contents of a repository, or to move or
+copy image files between repositories.
+
+Inside the repository, image files are identfied using a number.
+To find the identifer of an image file, use the 
+.B list
+subcommand. Using the
+.IR id ,
+it is possible to remove a single file from the repository, and
+to move or copy a file from one repository to another. Here are
+the details of these commands:
+.TP
+.B list
+Display a list of images contained in the repository.
+.TP
+.BI add \ image.fits
+Add the image contained in the file
+.I image.fits
+to the repository.  The
+.BR imagerepo (1)
+command
+copies the image into the repository directory, collecting the metadata
+in the database. If the image does not yet have a unique id, one is
+added.
+.TP
+.BI show \ id
+Display more detailed information about an image. Use the \-\-verbose
+option to display even more information, including all headers of the
+original FITS image.
+.TP
+.BI remove \ id
+Remove the image file identified by the identifier
+.I id
+from the repository.
+.TP
+.BI copy \ id\ targetrepo
+Copy the image identified by the identifier
+.I id
+to the target repository named
+.IR targetrepo .
+.TP
+.BI move \ id\ targetrepo
+Move the image identified by the identifier
+.I id
+to the target repository named
+.IR targetrepo .
+
+.SH UNIQUE IDS
+All images stored in a repository are equipped with a unique id.
+This allows to track copies of images that appear in multiple repositories.
+It is not possible to add a FITS image twice with the same UUID. 
+Of course, this does not prevent images without UUIDs from being added
+multiple times.
+
+.SH OPTIONS
+.TP
+.B \-\-help,\-h
+Display a help message.
+.TP
+.B \-\-debug,\-d
+Increase the debug level
+.TP
+.BI \-\-config= config.db ,\-c \ config.db
+The configuration is stored in a sqlite3 database file. This option
+can be used to use a different database file than the default
+.IR ~/.astrophoto.db .
+.TP
+.B \-\-verbose,\-v
+Increase verbosity level. This forces the image list show the unique id,
+and to include all FITS headers in the
+.B show 
+command output.
+
+
+.SH "SEE ALSO"
+.BR astroconfig (1)
+.SH AUTHORS
+Prof. Dr. Andreas Mueller

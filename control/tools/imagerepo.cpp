@@ -121,7 +121,6 @@ int	command_remove(const std::string& reponame,
  */
 int	copy_or_move(const std::string& reponame,
 		const std::vector<std::string>& arguments, bool copy) {
-	std::cerr << "'copy' command not implemented" << std::endl;
 	if (arguments.size() < 4) {
 		throw std::runtime_error("not enough arguments for 'copy'");
 	}
@@ -143,7 +142,7 @@ int	copy_or_move(const std::string& reponame,
  */
 int	command_move(const std::string& reponame,
 		const std::vector<std::string>& arguments) {
-	return copy_or_move(reponame, arguments, true);
+	return copy_or_move(reponame, arguments, false);
 }
 
 /**
@@ -151,7 +150,7 @@ int	command_move(const std::string& reponame,
  */
 int	command_copy(const std::string& reponame,
 		const std::vector<std::string>& arguments) {
-	return copy_or_move(reponame, arguments, false);
+	return copy_or_move(reponame, arguments, true);
 }
 
 /**
