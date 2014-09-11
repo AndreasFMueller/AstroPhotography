@@ -209,6 +209,7 @@ public:
 	bool	operator==(const UUID& other) const;
 	operator	std::string() const;
 };
+std::ostream&	operator<<(std::ostream& out, const UUID& uuid);
 
 } // namespace astro
 

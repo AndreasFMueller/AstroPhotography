@@ -226,7 +226,7 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 	if (arguments[1] == "list") {
 		return list_repo();
 	}
-	if (arguments[1] == "delete") {
+	if (arguments[1] == "remove") {
 		configuration->removerepo(arguments[2]);
 		return EXIT_SUCCESS;
 	}

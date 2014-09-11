@@ -175,6 +175,7 @@ public:
 	FITSdate(time_t t);
 	FITSdate(const struct timeval& tv);
 	FITSdate();
+	struct timeval	time() const { return when; }
 	std::string	showShort() const;
 	std::string	showLong() const;
 	std::string	showVeryLong() const;

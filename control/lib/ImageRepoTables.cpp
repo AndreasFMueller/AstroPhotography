@@ -23,7 +23,7 @@ ImageInfo::ImageInfo() {
 	temperature = 0;
 	category = "light";
 	bayer = "    ";
-	observation = "1970-00-00T00:00:00.000";
+	observation = "1970-01-01T00:00:00.000";
 	xbin = 1;
 	ybin = 1;
 }
@@ -79,6 +79,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    primary key(id)\n"
 		");\n"
 		"create unique index imageserver_x1 on images(filename);\n"
+		"create unique index imageserver_x2 on images(uuid);\n"
 	);
 }
 

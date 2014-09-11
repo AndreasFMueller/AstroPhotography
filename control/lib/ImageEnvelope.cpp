@@ -14,9 +14,23 @@ namespace astro {
 namespace project {
 
 /**
+ * \brief Construct empty envelope
+ */
+ImageEnvelope::ImageEnvelope(long id) : _id(id) {
+	_created = time(NULL);
+	_observation = 0;
+	_exposuretime = 0.;
+	_temperature = 0.;
+}
+
+/**
  * \brief Construct metadata from an image
  */
 ImageEnvelope::ImageEnvelope(const ImagePtr image) : _size(image->size()) {
+	_created = time(NULL);
+	_observation = 0;
+	_exposuretime = 0.;
+	_temperature = 0.;
 	copy_metadata(*image, metadata);
 }
 

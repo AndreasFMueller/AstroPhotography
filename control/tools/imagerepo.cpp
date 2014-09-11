@@ -22,6 +22,11 @@ using namespace astro::io;
 
 namespace astro {
 
+bool	verbose = false;
+
+/**
+ * \brief Command to add an image to the repository
+ */
 int	command_add(const std::string& reponame,
 		const std::vector<std::string>& arguments) {
 	// the next argument must be the image file name
@@ -35,13 +40,21 @@ int	command_add(const std::string& reponame,
 	return EXIT_SUCCESS;
 }	
 
+/**
+ * \brief command to list the contents of a repository
+ */
 int	command_list(const std::string& reponame) {
 	ImageRepo	repo = Configuration::get()->repo(reponame);
 	std::set<ImageEnvelope>	images = repo.get(ImageSpec());
 	if (images.size() == 0) {
 		return EXIT_SUCCESS;
 	}
-	std::cout << "[ id ] camera   size       bin   exp  temp observation    project " << std::endl;
+	std::cout << "[ id ] camera   size       bin   exp  temp observation    project  ";
+	if (verbose) {
+		std::cout << "UUID                                ";
+	}
+	std::cout << "filename";
+	std::cout << std::endl;
 
 	std::for_each(images.begin(), images.end(),
 		[](const ImageEnvelope& image) {
@@ -60,35 +73,147 @@ int	command_list(const std::string& reponame) {
 				image.observation());
 			std::cout << stringprintf("%-8.8s ",
 				image.project().c_str());
+			if (verbose) {
+				std::cout << stringprintf("%-36.36s ",
+					((std::string)image.uuid()).c_str());
+			}
 			std::cout << image.filename();
 			std::cout << std::endl;
 		}
 	);
 	return EXIT_SUCCESS;
-}	
+}
 
+/**
+ * \brief Command to retrieve an image from the repository
+ */
 int	command_get(const std::string& reponame,
 		const std::vector<std::string>& arguments) {
-	std::cerr << "'get' command not implemented" << std::endl;
-	return EXIT_FAILURE;
+	if (arguments.size() < 4) {
+		throw std::runtime_error("not enough arguments for 'get'");
+	}
+	int	id = std::stol(arguments[2]);
+	std::string	filename = arguments[3];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "extract image to %s", filename.c_str());
+	ImagePtr	image = Configuration::get()->repo(reponame).getImage(id);
+	FITSout	out(filename);
+	out.setPrecious(false);
+	out.write(image);
+	return EXIT_SUCCESS;
 }	
+
+/**
+ * \brief Command to remove an image from the repository
+ */
+int	command_remove(const std::string& reponame,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		throw std::runtime_error("missing id argument");
+	}
+	int	id = std::stol(arguments[2]);
+	ImageRepo	repo = Configuration::get()->repo(reponame);
+	repo.remove(id);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Common part of copy or move operation
+ */
+int	copy_or_move(const std::string& reponame,
+		const std::vector<std::string>& arguments, bool copy) {
+	std::cerr << "'copy' command not implemented" << std::endl;
+	if (arguments.size() < 4) {
+		throw std::runtime_error("not enough arguments for 'copy'");
+	}
+	ImageRepo	srcrepo = Configuration::get()->repo(reponame);
+	int	id = std::stol(arguments[2]);
+	ImagePtr	image = srcrepo.getImage(id);
+	std::string	targetrepo = arguments[3];
+	Configuration::get()->repo(targetrepo).save(image);
+	if (copy) {
+		return EXIT_SUCCESS;
+	}
+	// move operation also deletes the image from the source repo
+	srcrepo.remove(id);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Command to move an image from one repository to another
+ */
+int	command_move(const std::string& reponame,
+		const std::vector<std::string>& arguments) {
+	return copy_or_move(reponame, arguments, true);
+}
+
+/**
+ * \brief Command to copy an image from one repository to another
+ */
+int	command_copy(const std::string& reponame,
+		const std::vector<std::string>& arguments) {
+	return copy_or_move(reponame, arguments, false);
+}
+
+/**
+ * \brief Command to show all info about an image
+ */
+int	command_show(const std::string& reponame,
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		throw std::runtime_error("not enough arguments for 'show'");
+	}
+	int	id = std::stol(arguments[2]);
+	ImageRepo	repo = Configuration::get()->repo(reponame);
+	ImageEnvelope	image = repo.getEnvelope(id);
+	std::cout << "id:              " << image.id() << std::endl;
+	std::cout << "filename:        " << image.filename() << std::endl;
+	std::cout << "project:         " << image.project() << std::endl;
+	std::cout << "created:         " << timeformat("%Y-%m-%d %H:%M:%S",
+		image.created()) << std::endl;
+	std::cout << "camera:          " << image.camera() << std::endl;
+	std::cout << "size:            " << image.size().toString() << std::endl;
+	std::cout << "binning:         " << image.binning().toString() << std::endl;
+	std::cout << "exposure time:   " << image.exposuretime() << std::endl;
+	std::cout << "CCD temperature: " << image.temperature() << std::endl;
+	std::cout << "observation at:  " << timeformat("%Y-%m-%d %H:%M:%S",
+		image.observation()) << std::endl;
+	std::cout << "UUID:            " << image.uuid() << std::endl;
+	if (verbose) {
+		std::cout << "FITS headers:" << std::endl;
+		std::for_each(image.metadata.begin(), image.metadata.end(),
+			[](const ImageMetadata::value_type& mv) {
+				std::cout << "    " << mv.second.toString();
+				std::cout << std::endl;
+			}
+		);
+	}
+	return EXIT_SUCCESS;
+}
 
 /**
  * \brief Usage function in 
  */
 void	usage(const char *progname) {
 	std::cerr << "usage:" << std::endl;
-	std::cerr << progname << " [ options ] <server> add <image.fits>";
+	std::cerr << progname << " [ options ] <repo> add <image.fits>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] <server> list" << std::endl;
-	std::cerr << progname << " [ options ] <server> get <id> <image.fits>";
+	std::cerr << progname << " [ options ] <repo> list" << std::endl;
+	std::cerr << progname << " [ options ] <repo> get <id> <image.fits>";
 	std::cerr << std::endl;
-	std::cerr << "add, list and retrieve images in image server <server>";
+	std::cerr << progname << " [ options ] <repo> { show | remove } <id>";
+	std::cerr << std::endl;
+	std::cerr << "add, list, retrieve and delete images in image repository <repo>";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
+	std::cerr << std::endl;
+	std::cerr << "copy or move an image with id <id> from repo <srcrepo> to <targetrepo>";
 	std::cerr << std::endl;
 	std::cerr << "optoins:" << std::endl;
 	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
 	std::cerr << std::endl;
 	std::cerr << "  -d,--debug           increase debug level" << std::endl;
+	std::cerr << "  -v,--verbose         show more details in repo listing";
+	std::cerr << std::endl;
 	std::cerr << "  -h,--help            display this help message";
 	std::cerr << std::endl;
 }
@@ -97,6 +222,7 @@ static struct option	longopts[] = {
 { "config",	required_argument,	NULL,		'c' }, /* 0 */
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
 { "help",	no_argument,		NULL,		'h' }, /* 2 */
+{ "verbose",	no_argument,		NULL,		'v' }, /* 3 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -107,7 +233,7 @@ int	main(int argc, char *argv[]) {
 	std::string	configfile;
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhv", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
@@ -119,6 +245,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
+			break;
+		case 'v':
+			verbose = true;
 			break;
 		case 1:
 			switch (longindex) {
@@ -149,6 +278,18 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "get") {
 		return command_get(reponame, arguments);
+	}
+	if (command == "remove") {
+		return command_remove(reponame, arguments);
+	}
+	if (command == "move") {
+		return command_move(reponame, arguments);
+	}
+	if (command == "copy") {
+		return command_copy(reponame, arguments);
+	}
+	if (command == "show") {
+		return command_show(reponame, arguments);
 	}
 
 	// get the image server from the configuration

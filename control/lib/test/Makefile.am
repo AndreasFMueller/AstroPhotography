@@ -62,7 +62,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	DeviceMapperTest.cpp
+	FITSdateTest.cpp
+#	DeviceMapperTest.cpp
 #	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 

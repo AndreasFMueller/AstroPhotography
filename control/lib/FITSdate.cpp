@@ -63,6 +63,13 @@ FITSdate::FITSdate(const std::string& date) {
 	result.tm_sec = (matches[7].rm_so < 0) ? 0
 		: std::stoi(date.substr(matches[7].rm_so,
 			matches[7].rm_eo - matches[7].rm_so));
+debug(LOG_DEBUG, DEBUG_LOG, 0, "year=%d, month=%d, day=%d, hour=%d, min=%d, sec=%d",
+result.tm_year,
+result.tm_mon,
+result.tm_mday,
+result.tm_hour,
+result.tm_min,
+result.tm_sec);
 
 	// remaining fields
 	result.tm_isdst = 0;
@@ -74,6 +81,8 @@ FITSdate::FITSdate(const std::string& date) {
 	when.tv_usec = 1000 * ((matches[9].rm_so < 0) ? 0
 			: std::stoi(date.substr(matches[9].rm_so,
 				matches[9].rm_eo - matches[9].rm_so)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "time: %d.%06d", when.tv_sec,
+		when.tv_usec);
 cleanup:
 	regfree(&regex);
 	if (rc) {

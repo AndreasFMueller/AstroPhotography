@@ -164,7 +164,6 @@ void	ImageRepo::scan_directory(bool recurse) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"recursive scan not implemented");
 		throw std::runtime_error("not implemented");
-		return;
 	}
 
 	// set up a counter so we can count the number of files we find
@@ -214,7 +213,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	ImageEnvelope	result(imageinfo.id());
 
 	// image geometry
-	result.size(ImageSize(imageinfo.width, imageinfo.width));
+	result.size(ImageSize(imageinfo.width, imageinfo.height));
 	result.binning(Binning(imageinfo.xbin, imageinfo.ybin));
 
 	// retrieve all the metadata available
@@ -264,6 +263,24 @@ ImageEnvelope	ImageRepo::getEnvelope(long id) {
 
 	// read the global information from the database
 	ImageRecord	imageinfo = ImageTable(_database).byid(id);
+	MetadataTable	metadatatable(_database);
+	return convert(imageinfo, metadatatable);
+}
+
+/**
+ * \brief Retrieve image information based on the uuid
+ */
+ImageEnvelope	ImageRepo::getEnvelope(const UUID& uuid) {
+	ImageTable	images(_database);
+	std::string	condition = stringprintf("uuid = '%s'",
+				((std::string)(uuid)).c_str());
+	std::list<ImageRecord>	records = images.select(condition);
+	if (0 == records.size()) {
+		std::string	msg = stringprintf("no image with uuid %s",
+			((std::string)uuid).c_str());
+		throw std::runtime_error(msg);
+	}
+	ImageRecord	imageinfo = *(records.begin());
 	MetadataTable	metadatatable(_database);
 	return convert(imageinfo, metadatatable);
 }

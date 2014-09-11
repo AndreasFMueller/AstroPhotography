@@ -13,7 +13,7 @@ UUID::UUID() {
 	uuid_t	out;
 	uuid_generate_time(out);
 	char	buffer[37];
-	uuid_unparse(out, buffer);
+	uuid_unparse_lower(out, buffer);
 	_uuid = std::string(buffer);
 }
 
@@ -29,6 +29,10 @@ bool	UUID::operator==(const UUID& other) const {
 
 UUID::operator	std::string() const {
 	return _uuid;
+}
+
+std::ostream&	operator<<(std::ostream& out, const UUID& uuid) {
+	return out << (std::string)uuid;
 }
 
 } // namespace astro

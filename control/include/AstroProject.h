@@ -80,7 +80,7 @@ public:
 	void	uuid(const UUID& u) { _uuid = u; }
 
 	// constructor
-	ImageEnvelope(long id) : _id(id) { }
+	ImageEnvelope(long id);
 	ImageEnvelope(const astro::image::ImagePtr image);
 
 	// filename
@@ -186,6 +186,7 @@ public:
 	std::string	pathname(long id);
 	astro::image::ImagePtr	getImage(long id);
 	ImageEnvelope	getEnvelope(long id);
+	ImageEnvelope	getEnvelope(const UUID& uid);
 
 	long	save(astro::image::ImagePtr image);
 	void	remove(long id);
