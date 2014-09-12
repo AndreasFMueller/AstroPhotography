@@ -76,6 +76,11 @@ public:
  * starts with a type designator, one of the strings "camera", "ccd",
  * "cooler", "filterwheel", "guiderport", "focuser", followed by a colon
  * and a sequence of path components separated by other slashes.
+ *
+ * Device names should encode physical paths that the driver can interpret.
+ * It is okay if the path changes when the device is unplugged an replugged,
+ * there is the astro::config::DeviceMapper class to map more user accessible
+ * device names to these physical device names.
  */
 class DeviceName : public std::vector<std::string> {
 public:
