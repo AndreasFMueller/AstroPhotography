@@ -17,6 +17,40 @@ namespace astro {
 
 /**
  * \brief Properties abstraction
+ *
+ * Properties are configuration data associated with the hardware, and not
+ * with the users. A camera attached to a multiuser system needs some 
+ * configuration information that is the same for all users, like the
+ * port it is connected to, or communication parameters. These would go
+ * into the device properties file. The device properties file is typically
+ * installed in system location, and not accessible for ordinary users.
+ *
+ * Probably the only clients of this class are the device driver modules,
+ * so it is their responsibility to document the properties they would
+ * like to read from a file. A possible example would be the serial port
+ * that a Celestron mount would need. This information does not change over
+ * time (USB parameters may be different each time the device is plugged in,
+ * but there are usually methods to recognize the device and make it available
+ * under a constant path name, see udev(7)). So the celestron driver would
+ * read the device properties file typicall from a location like
+ * /usr/local/etc/device.properties and find in it its configuration parameters
+ * like the serial port device name, and the version of the protocol to
+ * use. The celestron driver thus has to document the property names
+ * I wants to read, e.g. celestron.mount.device and celestron.mount.version.
+ *
+ * Drivers also may use a naming scheme that allows for multiple devices
+ * handled by the same driver. In the example of the celestron driver for
+ * celestron mounts, the driver could use a device naming scheme like
+ * mount:celestron/1, mount:celestron/2 etc., and then read the associated
+ * configuration information from variables celestron.mount.1.device and
+ * celestron.mount.2device respectively. The driver could also use the variable
+ * without a device number as a default, which is overridden by the 
+ * property that includes the device number in its name.
+ *
+ * Configuration information that depends on a particular user or project
+ * is maintained in the configuration subsystem in AstroConfig.h, it uses
+ * a database as its data store and some command line tools are offered 
+ * to maintain this configuration information.
  */
 class Properties {
 public:
