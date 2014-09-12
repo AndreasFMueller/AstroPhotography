@@ -12,6 +12,13 @@
 #include <memory>
 
 namespace astro {
+
+/**
+ * \brief Namespace for the configuration subsystem
+ *
+ * All classes helping to maintain user accessible configuration information
+ * are in this namespace.
+ */
 namespace config {
 
 /**
