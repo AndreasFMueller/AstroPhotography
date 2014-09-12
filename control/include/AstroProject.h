@@ -180,7 +180,7 @@ class ImageRepo {
 	void	scan_file(const std::string& filename);
 public:
 	ImageRepo(astro::persistence::Database database,
-		const std::string& directory, bool scan = true);
+		const std::string& directory, bool scan = false);
 
 	std::string	filename(long id);
 	std::string	pathname(long id);

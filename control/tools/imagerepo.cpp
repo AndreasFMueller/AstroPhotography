@@ -207,7 +207,7 @@ void	usage(const char *progname) {
 	std::cerr << std::endl;
 	std::cerr << "copy or move an image with id <id> from repo <srcrepo> to <targetrepo>";
 	std::cerr << std::endl;
-	std::cerr << "optoins:" << std::endl;
+	std::cerr << "options:" << std::endl;
 	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
 	std::cerr << std::endl;
 	std::cerr << "  -d,--debug           increase debug level" << std::endl;

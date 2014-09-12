@@ -51,10 +51,6 @@ unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
 	return frame.size().offset(p);
 }
 
-unsigned int	ImageBase::bytesPerPixel() const {
-	return this->bitsPerPixel() / 8;
-}
-
 unsigned int	ImageBase::bytesPerPlane() const {
 	return bytesPerPixel() / planes();
 }
@@ -191,25 +187,9 @@ ImageMetadata::const_iterator	ImageBase::end() const {
 	return metadata.end();
 }
 
-#if 0
-/**
- * \brief retrieve the image type
- */
-static std::string      get_typename(const ImageBase *image) {
-	try {
-                return std::string(typeid(*image).name());
-        } catch (std::bad_typeid& x) {
-                return stringprintf("(unknown Image type[%s])", x.what());
-        }
+std::type_index	ImageBase::pixel_type() const {
+	return std::type_index(typeid(void));
 }
-
-/**
- * \brief Get the name of the image (mainly for debugging)
- */
-std::string     ImageBase::type_name() const {
-        return get_typename(this);
-}
-#endif
 
 } // namespace image
 } // namespace astro
