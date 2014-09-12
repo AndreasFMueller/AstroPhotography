@@ -169,7 +169,43 @@ int	remove_cmd(const std::vector<std::string>& arguments) {
 void	usage(const std::string& progname) {
 	std::cerr << "usage:" << std::endl;
 	std::cerr << progname << " [ options ] list" << std::endl;
-	std::cerr << "display a list of device mappings" << std::endl;
+	std::cerr << progname << " [ options ] scan <module> ...";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] map <name> <devicename> "
+					"[ attr=value ... ]";
+	std::cerr << std::endl;
+	std::cerr << progname << " [ options ] remove <name>" << std::endl;
+	std::cerr << "The list command displays a list of device mappings present in the database.";
+	std::cerr << std::endl;
+	std::cerr << "The scan command scans the named modules and displays the devices recoginized";
+	std::cerr << std::endl;
+	std::cerr << "by this module." << std::endl;
+	std::cerr << "The map command creates and updates a map entries. "
+			"The <devicename> must";
+	std::cerr << std::endl;
+	std::cerr << "always be specified, this is the parameter that might "
+			"change when the";
+	std::cerr << std::endl;
+	std::cerr << "device is plugged in. The additional attribute value "
+			"pairs are normally only";
+	std::cerr << std::endl;
+	std::cerr << "set the first time, the attributes 'unit' and "
+			"'description are recognized.";
+	std::cerr << std::endl;
+	std::cerr << "The remove command removes a named map entry.";
+	std::cerr << std::endl;
+	std::cerr << "Options:" << std::endl;
+	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
+	std::cerr << std::endl;
+	std::cerr << "  -d,--debug           increase debug level" << std::endl;
+	std::cerr << "  -h,--help            display this help message";
+	std::cerr << std::endl;
+	std::cerr << "  -s,--server=server   use remote server for device "
+			"location";
+	std::cerr << std::endl;
+	std::cerr << "  -v,--verbose         show more details in repo listing";
+	std::cerr << std::endl;
+
 }
 
 static struct option	longopts[] = {
@@ -198,6 +234,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
+			return EXIT_FAILURE;
 			break;
 		case 's':
 			servername = optarg;
