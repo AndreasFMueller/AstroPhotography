@@ -25,11 +25,13 @@ public:
 	void	testEquality();
 	void	testPixels();
 	void	testBounds();
+	void	testSpec();
 
 	CPPUNIT_TEST_SUITE(ImageSizeTest);
 	CPPUNIT_TEST(testEquality);
 	CPPUNIT_TEST(testPixels);
 	CPPUNIT_TEST(testBounds);
+	CPPUNIT_TEST(testSpec);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -75,6 +77,14 @@ void	ImageSizeTest::testBounds() {
 	CPPUNIT_ASSERT(!i1->bounds(ImagePoint(7, 0)));
 	CPPUNIT_ASSERT(!i1->bounds(ImagePoint(7, 10)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBounds() end");
+}
+
+void	ImageSizeTest::testSpec() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSpec() begin");
+	ImageSize	size("1848x1291");
+	CPPUNIT_ASSERT(size.width() == 1848);
+	CPPUNIT_ASSERT(size.height() == 1291);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSpec() end");
 }
 
 } // namespace test

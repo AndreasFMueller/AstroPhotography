@@ -62,7 +62,7 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	FITSdateTest.cpp
+	ImagePointTest.cpp
 #	DeviceMapperTest.cpp
 #	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 

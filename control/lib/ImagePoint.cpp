@@ -8,9 +8,44 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <regex.h>
 
 namespace astro {
 namespace image {
+
+/**
+ * \brief Construct an ImagePoint from a point specification
+ *
+ * A valid specification is (x,y), where the parentheses are
+ * option.
+ */
+ImagePoint::ImagePoint(const std::string& pointspec) {
+	int	rc = 0;
+	const char	*r = "\\(?([0-9]+),([0-9]+)\\)?";
+	regex_t	regex;
+	if (regcomp(&regex, r, REG_EXTENDED)) {
+		throw std::runtime_error("internal error, RE does not compile");
+	}
+#define nmatches 3
+	regmatch_t	matches[nmatches];
+	rc = regexec(&regex, pointspec.c_str(), nmatches, matches, 0);
+	for (int i = 0; i < nmatches; i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d]: %d - %d", i,
+			matches[i].rm_so, matches[i].rm_eo);
+	}
+	if (rc) {
+		goto cleanup;
+	}
+	_x = std::stoi(pointspec.substr(matches[1].rm_so,
+                        matches[1].rm_eo - matches[1].rm_so));
+	_y = std::stoi(pointspec.substr(matches[2].rm_so,
+                        matches[2].rm_eo - matches[2].rm_so));
+cleanup:
+	regfree(&regex);
+	if (rc) {
+		throw std::runtime_error("ImagePoint: no match");
+	}
+}
 
 /**
  * \brief compare points

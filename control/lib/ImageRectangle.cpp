@@ -7,6 +7,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <sstream>
+#include <regex.h>
 
 namespace astro {
 namespace image {
@@ -38,6 +39,51 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
 	  _size(subrectangle.size()) {
 	if (!rectangle.contains(subrectangle)) {
 		throw std::range_error("subrectangle not contained in rectangle");
+	}
+}
+
+/**
+ * \brief Parse a rectangle specification
+ *
+ * Rectangle specification mimic the way X11 specifies the geometry of a window.
+ * A correct rectangle specification is of the form widthxheight@(x,y).
+ */
+ImageRectangle::ImageRectangle(const std::string& rectanglespec) {
+	int	rc = 0;
+	const char	*r = "([0-9]+)x([0-9]+)@\\(?([0-9]+),([0-9]+)\\)?";
+	regex_t	regex;
+	if (regcomp(&regex, r, REG_EXTENDED)) {
+		throw std::runtime_error("internal error: RE does not compile");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "matching '%s' against re '%s'",
+		rectanglespec.c_str(), r);
+#define nmatches	5
+	regmatch_t	matches[nmatches];
+	rc = regexec(&regex, rectanglespec.c_str(), nmatches, matches, 0);
+#if 0
+	for (int i = 0; i < 5; i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d]: %d - %d", i,
+			matches[i].rm_so, matches[i].rm_eo);
+	}
+#endif
+	int	width, height, x, y;
+	if (rc) {
+		goto cleanup;
+	}
+	width = std::stoi(rectanglespec.substr(matches[1].rm_so,
+			matches[1].rm_eo - matches[1].rm_so));
+	height = std::stoi(rectanglespec.substr(matches[2].rm_so,
+			matches[2].rm_eo - matches[2].rm_so));
+	_size = ImageSize(width, height);
+	x = std::stoi(rectanglespec.substr(matches[3].rm_so,
+			matches[3].rm_eo - matches[3].rm_so));
+	y = std::stoi(rectanglespec.substr(matches[4].rm_so,
+			matches[4].rm_eo - matches[4].rm_so));
+	_origin = ImagePoint(x, y);
+cleanup:
+	regfree(&regex);
+	if (rc) {
+		throw std::runtime_error("ImageRectangle: no match");
 	}
 }
 
@@ -109,6 +155,10 @@ std::string	ImageRectangle::toString() const {
 	return out.str();
 	//return stringprintf("%s@%s", _size.toString().c_str(),
 	//	_origin.toString().c_str());
+}
+
+ImageRectangle::operator	std::string() const {
+	return toString();
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle) {

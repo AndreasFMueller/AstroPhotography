@@ -44,6 +44,7 @@ public:
 	void	setX(unsigned int x) { _x = x; }
 	void	setY(unsigned int y) { _y = y; }
 	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }
+	ImagePoint(const std::string& pointspec);
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
@@ -77,6 +78,7 @@ public:
 	unsigned int	getPixels() const { return pixels; }
 	// constructors
 	ImageSize(unsigned int width = 0, unsigned int height = 0);
+	ImageSize(const std::string& sizespec);
 	virtual ~ImageSize();
 	// comparision
 	bool	operator==(const ImageSize& other) const;
@@ -134,6 +136,7 @@ public:
 		const ImagePoint& translatedby);
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
+	ImageRectangle(const std::string& rectanglespec);
 	// oeprators
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
@@ -144,6 +147,7 @@ public:
 	ImagePoint	upperLeftCorner() const;
 	// text represenation
 	std::string	toString() const;
+	operator	std::string() const;
 	// corners
 	ImagePoint	upperright() const;
 	ImagePoint	upperleft() const;

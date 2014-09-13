@@ -24,6 +24,20 @@ ImageSize::ImageSize(unsigned int width, unsigned int height)
 }
 
 /**
+ * \brief Construct the size based on a size specification
+ *
+ * Valid size specifications are of the form widthxheight
+ */
+ImageSize::ImageSize(const std::string& sizespec) {
+	std::string::size_type	offset = sizespec.find('x');
+	if (offset == std::string::npos) {
+		throw std::runtime_error("not a size specification");
+	}
+	_width = std::stoi(sizespec.substr(0, offset));
+	_height = std::stoi(sizespec.substr(offset + 1));
+}
+
+/**
  * \brief Destructor
  */
 ImageSize::~ImageSize() {
