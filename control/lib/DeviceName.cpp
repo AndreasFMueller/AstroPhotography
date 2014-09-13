@@ -46,6 +46,12 @@ DeviceName::DeviceName(const DeviceName& other)
 	: std::vector<std::string>(other), _type(other.type()) {
 }
 
+DeviceName&	DeviceName::operator=(const DeviceName& other) {
+	std::copy(other.begin(), other.end(), begin());
+	_type = other._type;
+	return *this;
+}
+
 const std::string&	DeviceName::modulename() const {
 	return this->front();
 }

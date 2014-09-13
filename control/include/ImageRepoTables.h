@@ -43,8 +43,7 @@ public:
  */
 class ImageRecord : public Persistent<ImageInfo> {
 public:
-	ImageRecord(int id) : Persistent<ImageInfo>(id) { }
-	ImageRecord() : Persistent<ImageInfo>(-1) { }
+	ImageRecord(int id = -1) : Persistent<ImageInfo>(id) { }
 };
 
 /**

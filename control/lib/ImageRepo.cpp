@@ -21,9 +21,9 @@ namespace project {
 /**
  * \brief Create an image server
  */
-ImageRepo::ImageRepo(Database database, const std::string& directory,
-	bool scan)
-	: _database(database), _directory(directory) {
+ImageRepo::ImageRepo(const std::string& name, Database database,
+	const std::string& directory, bool scan)
+	: _name(name), _database(database), _directory(directory) {
 	// scan the directory for 
 	if (scan) {
 		scan_directory();
@@ -289,37 +289,15 @@ ImageEnvelope	ImageRepo::getEnvelope(const UUID& uuid) {
  * \brief Save an image in the repository
  */
 long	ImageRepo::save(ImagePtr image) {
-	// first we have to create a file name for the image
-	char	buffer[MAXPATHLEN];
-	snprintf(buffer, sizeof(buffer), "%s/image-XXXXX.fits",
-		_directory.c_str());
-	if (mkstemps(buffer, 5) < 0) {
-		std::string	msg
-			= stringprintf("cannot create a filename: %s",
-				strerror(errno));;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-
-	std::string	fullname = std::string(buffer);
-	std::string	filename = fullname.substr(_directory.size() + 1);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "full name: %s", fullname.c_str());
-
 	// if the image does not have a UUID yet, add one
 	if (!image->hasMetadata("UUID")) {
 		image->setMetadata(FITSKeywords::meta("UUID",
 			(std::string)UUID()));
 	}
 
-	// write the image
-	unlink(fullname.c_str());
-	FITSout	out(fullname);
-	out.write(image);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image written to %s", fullname.c_str());
-
 	// build imageinfo reocord
-	ImageRecord	imageinfo(-1);
-	imageinfo.filename = filename;
+	long	imageid = -1;
+	ImageRecord	imageinfo(imageid);
 	try {
 		imageinfo.project
 			= (std::string)image->getMetadata("PROJECT");
@@ -365,26 +343,76 @@ long	ImageRepo::save(ImagePtr image) {
 			= (std::string)image->getMetadata("UUID");
 	} catch (...) { }
 
-	// save the image info
-	ImageTable	images(_database);
-	long	imageid = images.add(imageinfo);
+	// begin a transaction in the database
+	_database->begin();
 
-	// write the metadata to the metadata tabe
-	MetadataTable	metadata(_database);
-	
-	// now add an entry for each meta data record
-	ImageMetadata::const_iterator	mi;
-	long	seqno = 0;
-	for (mi = image->begin(); mi != image->end(); mi++) {
-		MetadataRecord	m(-1, imageid);
-		m.seqno = seqno;
-		m.key = mi->first;
-		m.value = mi->second.getValue();
-		m.comment = mi->second.getComment();
-		metadata.add(m);
-		seqno++;
+	// now try to save the image info record
+	try {
+		// save the image info
+		ImageTable	images(_database);
+		imageid = images.add(imageinfo);
+
+		// write the metadata to the metadata tabe
+		MetadataTable	metadata(_database);
+		
+		// now add an entry for each meta data record
+		ImageMetadata::const_iterator	mi;
+		long	seqno = 0;
+		for (mi = image->begin(); mi != image->end(); mi++) {
+			MetadataRecord	m(-1, imageid);
+			m.seqno = seqno;
+			m.key = mi->first;
+			m.value = mi->second.getValue();
+			m.comment = mi->second.getComment();
+			metadata.add(m);
+			seqno++;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d metadata records added",
+			seqno);
+
+		// first we have to create a file name for the image
+		std::string	fullname
+			= stringprintf("%s/image-%s-%05ld.fits",
+				_directory.c_str(), _name.c_str(), imageid);
+		std::string	filename
+			= fullname.substr(_directory.size() + 1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "full name: %s",
+			fullname.c_str());
+
+		// write the image
+		unlink(fullname.c_str());
+		try {
+			FITSout	out(fullname);
+			out.write(image);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "image written to %s",
+				fullname.c_str());
+		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing the image to "
+				"'%s' failed, cleaning up", fullname.c_str());
+			unlink(fullname.c_str());
+			throw;
+		}
+
+		// now we have to update the filename, which only became known
+		// when the ID became known from the add operation
+		update_filename(imageid, filename);
+
+		// commit the transaction, only at this point do the database
+		// entries become persistent. This ensures that information
+		// about the image only becomes visible in the database when
+		// the image file has actually been written to disk
+		_database->commit();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %ld committed as '%s'",
+			imageid, filename.c_str());
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"adding image failed, rolling back");
+		// if anything fails, then we roll back the transaction, so
+		// the database will be clean again. In particular, if the
+		// disk write fails, nothing will show up in the database.
+		_database->rollback();
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d metadata records added", seqno);
+
 
 	// done
 	return imageid;
@@ -394,7 +422,44 @@ long	ImageRepo::save(ImagePtr image) {
  * \brief Remove the image and the metadata from the database
  */
 void	ImageRepo::remove(long id) {
-	ImageTable(_database).remove(id);
+	_database->begin();
+	try {
+		// first get the path name from the database
+		std::string	fullname = pathname(id);
+
+		// now we have the information that we need, so we can
+		// remove all other traces from the database. Since we
+		// are in a transaction, nothing is actually lost until
+		// we commit the transaction
+		ImageTable	images(_database);
+		images.remove(id);
+
+		// now remove the image file
+		if (unlink(fullname.c_str())) {
+			std::string	msg = stringprintf("cannot remove "
+				"image '%s': %s",
+				fullname.c_str(), strerror(errno));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"image file '%s' successfully removed",
+			fullname.c_str());
+
+		// ok, if we get to this point, then the image was removed,
+		// and we have to commit to ensure that the database is
+		// consistent with the disk
+		_database->commit();
+	} catch (...) {
+		// Oops, there was a problem removing the file. We better roll
+		// back the transaction to ensure that the database is still
+		// consistent with the on disk storage
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "error during remove, "
+			"rolling back");
+		_database->rollback();
+		throw;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %ld removed from repository", id);
 }
 
 static float	temperature_min(float temperature) {
@@ -486,6 +551,18 @@ std::set<ImageEnvelope>	ImageRepo::get(const ImageSpec& spec) {
 		resultset.insert(convert(*ii, metadatatable));
 	}
 	return resultset;
+}
+
+/**
+ * \brief update the filename of an entry
+ */
+void	ImageRepo::update_filename(long id, const std::string& filename) {
+	ImageTable	imagetable(_database);
+	UpdateSpec	updatespec;
+	FieldValueFactory	factory;
+	updatespec.insert(std::make_pair(std::string("filename"),
+		factory.get(filename)));
+	imagetable.updaterow(id, updatespec);
 }
 
 } // namespace project

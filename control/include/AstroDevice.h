@@ -113,6 +113,7 @@ public:
 	// conversion to child device names of a different type
 	DeviceName(const DeviceName& name, const device_type& type,
 		const std::string& unitname);
+	DeviceName&	operator=(const DeviceName& other);
 
 	// get the parent of a certain type
 	DeviceName	parent(const device_type& devicetype) const;

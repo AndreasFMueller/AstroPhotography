@@ -29,12 +29,14 @@ public:
 	void	testScan();
 	void	testImage();
 	void	testSelect();
+	void	testRemove();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(ImageRepoTest);
 	CPPUNIT_TEST(testScan);
 	CPPUNIT_TEST(testImage);
 	CPPUNIT_TEST(testSelect);
+	CPPUNIT_TEST(testRemove);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -42,7 +44,7 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION(ImageRepoTest);
 
 void	ImageRepoTest::setUp() {
-	databasename = std::string("imageserver.db");
+	databasename = std::string("imagerepo.db");
 	char	path[MAXPATHLEN];
 	directory = std::string(getcwd(path, MAXPATHLEN));
 	database = DatabaseFactory::get(databasename);
@@ -58,7 +60,7 @@ void	ImageRepoTest::testScan() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scan directory %s",
 		directory.c_str());
 	
-	ImageRepo	server(database, directory);
+	ImageRepo	repo("repotest", database, directory);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScan() end");
 }
@@ -78,16 +80,16 @@ void	ImageRepoTest::testImage() {
 	imageptr->setMetadata(FITSKeywords::meta("CCD-TEMP", -47.1));
 	imageptr->setMetadata(FITSKeywords::meta("BAYER", "RGGB"));
 
-	ImageRepo	server(database, directory, false);
+	ImageRepo	repo("repotest", database, directory, false);
 
-	long	imageid = server.save(imageptr);
-	server.save(imageptr);
-	server.save(imageptr);
-	server.save(imageptr);
-	server.save(imageptr);
+	long	imageid = repo.save(imageptr);
+	repo.save(imageptr);
+	repo.save(imageptr);
+	repo.save(imageptr);
+	repo.save(imageptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageid = %ld", imageid);
 
-	ImagePtr	image2 = server.getImage(imageid);
+	ImagePtr	image2 = repo.getImage(imageid);
 	CPPUNIT_ASSERT(image->getMetadata("PURPOSE")
 		== image2->getMetadata("PURPOSE"));
 	CPPUNIT_ASSERT(image->getMetadata("PROJECT")
@@ -108,14 +110,27 @@ void	ImageRepoTest::testImage() {
 
 void	ImageRepoTest::testSelect() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() begin");
-	ImageRepo	server(database, directory, false);
+	ImageRepo	repo("repotest", database, directory, false);
 	ImageSpec	spec;
 	spec.category(ImageSpec::dark);
 	spec.temperature(-47);
-	std::set<ImageEnvelope>	resultset = server.get(spec);
+	std::set<ImageEnvelope>	resultset = repo.get(spec);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d darks with temperature -47",
 		resultset.size());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() end");
+}
+
+void	ImageRepoTest::testRemove() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRemove() begin");
+	ImageRepo	repo("repotest", database, directory, false);
+	ImageSpec	spec;
+	spec.category(ImageSpec::dark);
+	std::set<ImageEnvelope>	resultset = repo.get(spec);
+	std::set<ImageEnvelope>::const_iterator	ii;
+	for (ii = resultset.begin(); ii != resultset.end(); ii++) {
+		repo.remove(ii->id());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRemove() end");
 }
 
 #if 0

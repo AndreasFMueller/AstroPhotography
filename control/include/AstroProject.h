@@ -172,16 +172,19 @@ public:
  * by an id or by some attributes collected in the ImageSpec class.
  */
 class ImageRepo {
+	std::string	_name;
 	astro::persistence::Database	_database;
 	std::string	_directory;
 	long	id(const std::string& filename);
 	void	scan_directory(bool recurse = false);
 	void	scan_recursive();
 	void	scan_file(const std::string& filename);
+	void	update_filename(long id, const std::string& filename);
 public:
-	ImageRepo(astro::persistence::Database database,
+	ImageRepo(const std::string& name,
+		astro::persistence::Database database,
 		const std::string& directory, bool scan = false);
-
+	const std::string&	name() const { return _name; }
 	std::string	filename(long id);
 	std::string	pathname(long id);
 	astro::image::ImagePtr	getImage(long id);

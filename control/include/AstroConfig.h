@@ -106,6 +106,152 @@ static DeviceMapperPtr	get(astro::persistence::Database database);
 
 typedef std::shared_ptr<Configuration>	ConfigurationPtr;
 
+class Instrument;
+
+/**
+ * \brief Components of an instrument
+ *
+ * Components of an instrument are devices with different purposes. The
+ * _type member indicates what purpose a component has. But there are
+ * two ways to get a device name. When the device name is always the same,
+ * as e.g. for the QSI cameras, then the component can refer to that
+ * name directly. If, however, the device name may change, as for most
+ * USB devices, then we need the device mapper, and the component should
+ * only refer to the name of the map entry. The two different types of
+ * components are implemented as derived classes of the InstrumentComponent
+ * class.
+ */
+class InstrumentComponent {
+	DeviceName::device_type	_type;
+public:
+	DeviceName::device_type	type() const { return _type; }
+
+	typedef enum { direct, mapped, derived } component_t;
+private:
+	component_t	_component_type;
+public:
+	component_t	component_type() const { return _component_type; }
+
+	InstrumentComponent(DeviceName::device_type t, component_t c)
+		: _type(t), _component_type(c) { }
+	virtual	DeviceName	devicename() = 0;
+	virtual	int	unit() = 0;
+	virtual std::string	name() const = 0;
+};
+typedef std::shared_ptr<InstrumentComponent>	InstrumentComponentPtr;
+
+/**
+ * \brief Mapped Instrument component
+ *
+ * This class represents instrument components that may change name
+ * and thus need access to the DeviceMapper.
+ */
+class InstrumentComponentMapped : public InstrumentComponent {
+	astro::persistence::Database	_database;
+	std::string	_name;
+public:
+	InstrumentComponentMapped(DeviceName::device_type t,
+		astro::persistence::Database database, const std::string& name)
+		: InstrumentComponent(t, InstrumentComponent::mapped),
+		  _database(database), _name(name) { }
+	virtual DeviceName	devicename();
+	virtual int	unit();
+	virtual std::string	name() const;
+};
+
+/**
+ * \brief  Direct instrument component
+ *
+ * This class represents instrument components that have a permanent
+ * device name assignment, i.e. that don't need the DeviceMapper to resolve
+ * the device name.
+ */
+class InstrumentComponentDirect : public InstrumentComponent {
+	DeviceName	_devicename;
+	int	_unit;
+public:
+	InstrumentComponentDirect(DeviceName::device_type t,
+		const DeviceName& devicename, int unit)
+		: InstrumentComponent(t, InstrumentComponent::direct),
+		  _devicename(devicename), _unit(unit) {
+	}
+	virtual DeviceName	devicename() { return _devicename; }
+	virtual int	unit() { return _unit; }
+	virtual std::string	name() const;
+};
+
+class Instrument;
+typedef std::shared_ptr<Instrument>	InstrumentPtr;
+
+/**
+ * \brief Derived instrument component
+ *
+ * This class represents an instrument component that is also a component
+ * of some other device. E.g. the Guider port is often a component of
+ * a camera, and similarly for filterwheels, 
+ */
+class InstrumentComponentDerived : public InstrumentComponent {
+	InstrumentPtr		_instrument;
+	DeviceName::device_type	_derivedfrom;
+	int			_unit;
+public:
+	InstrumentComponentDerived(DeviceName::device_type t,
+		InstrumentPtr instrument, DeviceName::device_type derivedfrom,
+		int unit)
+		: InstrumentComponent(t, InstrumentComponent::derived),
+		  _instrument(instrument), _derivedfrom(derivedfrom),
+		  _unit(unit) {
+	}
+	virtual DeviceName	devicename();
+	virtual int	unit() { return _unit; }
+	virtual std::string	name() const;
+	DeviceName::device_type	derivedfrom() const { return _derivedfrom; }
+};
+
+
+/**
+ * \brief Instrument abstraction
+ *
+ * Instruments are collections of devices that need to be controlled in
+ * unison for successful execution of a project. It will almost always
+ * contain a camera device, but sometimes it will also include coolers,
+ * filterwheels, adaptive optics units, or the mount, even if it is just
+ * used to retrieve metadata.
+ *
+ * Projects use Instruments, as they can find all they need within in
+ * Instrument object. The Instrument object has two different ways how
+ * it can access a component. Either the component device name is fixed
+ * over time, or the device mapper should be used to find the device name
+ * that is currently valid.
+ */
+class Instrument {
+private:
+	astro::persistence::Database	_database;
+	std::string	_name;
+public:
+	const std::string& name() const { return _name; }
+
+	typedef	std::map<DeviceName::device_type, InstrumentComponentPtr>	component_map;
+private:
+	component_map	components;
+public:
+	Instrument(astro::persistence::Database database,
+		const std::string& name);
+	bool	has(DeviceName::device_type type) const;
+
+	InstrumentComponentPtr	component(DeviceName::device_type type) const;
+
+	InstrumentComponent::component_t	component_type(DeviceName::device_type type) const;
+
+	DeviceName	devicename(DeviceName::device_type type);
+	std::string	name(DeviceName::device_type type);
+	int	unit(DeviceName::device_type type);
+
+	void	add(InstrumentComponentPtr component);
+
+	std::list<DeviceName::device_type>	component_types() const;
+};
+
 /**
  * \brief Configuration database entry
  *
@@ -207,6 +353,12 @@ static void	set_default(const std::string& filename);
 
 	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;
+
+	// instrument access
+	virtual InstrumentPtr	instrument(const std::string& name) = 0;
+	virtual void	addInstrument(InstrumentPtr instrument) = 0;
+	virtual void	removeInstrument(const std::string& name) = 0;
+	virtual std::list<InstrumentPtr>	listinstruments() = 0;
 };
 
 } // namespace config

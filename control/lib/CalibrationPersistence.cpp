@@ -101,7 +101,8 @@ std::string	CalibrationPointTableAdapter::createstatement() {
 	return std::string(
 	"create table calibrationpoint (\n"
 	"    id int not null,\n"
-	"    calibration int not null,\n"
+	"    calibration int not null references calibration(id) "
+		"on delete cascade on update cascade,\n"
 	"    t double not null default 0,\n"
 	"    ra double not null default 0,\n"
 	"    dec double not null default 0,\n"

@@ -164,7 +164,8 @@ std::string	MetadataTableAdapter::createstatement() {
 	return std::string(
 		"create table metadata (\n"
 		"    id integer not null,\n"
-		"    imageid integer not null references imageserver(id),\n"
+		"    imageid integer not null references images(id) "
+			"on delete cascade on update cascade,\n"
 		"    seqno integer not null,\n"
 		"    key char(8) not null,\n"
 		"    value varchar(72),\n"

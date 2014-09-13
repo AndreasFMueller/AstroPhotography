@@ -243,7 +243,21 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	}
 
 	// some pragmas
-	sqlite3_exec(_database, "PRAGMA temp_store = MEMORY;", NULL, NULL, NULL);
+	char	*errmesg = NULL;
+	if (sqlite3_exec(_database, "PRAGMA temp_store = MEMORY;", NULL, NULL,
+		&errmesg)) {
+		std::string	msg = stringprintf("'PRAGMA temp_store = "
+			"MEMORY' failed: %s", errmesg);
+		sqlite3_free(errmesg);
+		throw std::runtime_error(msg);
+	}
+	if (sqlite3_exec(_database, "PRAGMA foreign_keys = ON;", NULL, NULL,
+		&errmesg)) {
+		std::string	msg = stringprintf("'PRAGMA foreign_keys = "
+			"ON' failed: %s", errmesg);
+		sqlite3_free(errmesg);
+		throw std::runtime_error(msg);
+	}
 }
 
 Sqlite3Backend::~Sqlite3Backend() {

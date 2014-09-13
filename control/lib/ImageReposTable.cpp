@@ -78,7 +78,7 @@ ImageRepo	ImageRepoTable::get(const std::string& name) {
 	ImageRepoRecord	server = *records.begin();
 
 	// convert this record to an ImageRepo
-	return ImageRepo(DatabaseFactory::get(server.database),
+	return ImageRepo(name, DatabaseFactory::get(server.database),
 		server.directory);
 }
 
