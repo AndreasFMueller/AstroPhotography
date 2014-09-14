@@ -211,6 +211,17 @@ public:
 };
 std::ostream&	operator<<(std::ostream& out, const UUID& uuid);
 
+/**
+ * \brief Path encoding 
+ */
+class Path : public std::vector<std::string> {
+public:
+	Path(const std::string& path);
+	std::string	basename() const;
+	std::string	dirname() const;
+	bool	isAbsolute() const;
+};
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */
