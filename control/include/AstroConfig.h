@@ -138,7 +138,9 @@ public:
 		: _type(t), _component_type(c) { }
 	virtual	DeviceName	devicename() = 0;
 	virtual	int	unit() = 0;
+	virtual void	unit(int u) = 0;
 	virtual std::string	name() const = 0;
+	virtual void	name(const std::string& n) = 0;
 	virtual std::string	toString();
 };
 typedef std::shared_ptr<InstrumentComponent>	InstrumentComponentPtr;
@@ -159,7 +161,9 @@ public:
 		  _database(database), _name(name) { }
 	virtual DeviceName	devicename();
 	virtual int	unit();
+	virtual void	unit(int u);
 	virtual std::string	name() const;
+	virtual void	name(const std::string& n);
 };
 
 /**
@@ -180,7 +184,11 @@ public:
 	}
 	virtual DeviceName	devicename() { return _devicename; }
 	virtual int	unit() { return _unit; }
-	virtual std::string	name() const;
+	virtual void	unit(int u) { _unit = u; }
+	virtual std::string	name() const { return _devicename.toString(); }
+	virtual void	name(const std::string& n) {
+		_devicename = DeviceName(n);
+	}
 };
 
 class Instrument;
@@ -207,7 +215,9 @@ public:
 	}
 	virtual DeviceName	devicename();
 	virtual int	unit() { return _unit; }
+	virtual void	unit(int u) { _unit = u; }
 	virtual std::string	name() const;
+	virtual void	name(const std::string& n);
 	DeviceName::device_type	derivedfrom() const { return _derivedfrom; }
 };
 

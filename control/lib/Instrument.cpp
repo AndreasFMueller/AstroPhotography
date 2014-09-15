@@ -36,12 +36,6 @@ std::string	InstrumentComponent::toString() {
 // Instrument Component methods for direct components
 //////////////////////////////////////////////////////////////////////
 
-std::string     InstrumentComponentDirect::name() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "direct name: %s",
-		_devicename.toString().c_str());
-	return _devicename.toString();
-}
-
 //////////////////////////////////////////////////////////////////////
 // Instrument Component methods for mapped components
 //////////////////////////////////////////////////////////////////////
@@ -63,11 +57,22 @@ int	InstrumentComponentMapped::unit() {
 }
 
 /**
+ * \brief Try to change the unit number in a mapped device
+ */
+void	InstrumentComponentMapped::unit(int u) {
+	throw std::runtime_error("cannot change unit for mapped component, use device mapper to change unit id");
+}
+
+/**
  * \brief get the name
  */
 std::string	InstrumentComponentMapped::name() const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mapped name: %s", _name.c_str());
 	return _name;
+}
+
+void	InstrumentComponentMapped::name(const std::string& n) {
+	_name = n;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -89,6 +94,10 @@ DeviceName	InstrumentComponentDerived::devicename() {
  */
 std::string	InstrumentComponentDerived::name() const {
 	return InstrumentComponentTableAdapter::type(_derivedfrom);
+}
+
+void	InstrumentComponentDerived::name(const std::string& n) {
+	_derivedfrom = InstrumentComponentTableAdapter::type(n);
 }
 
 //////////////////////////////////////////////////////////////////////

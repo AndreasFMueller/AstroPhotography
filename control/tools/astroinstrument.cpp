@@ -98,7 +98,6 @@ int	cmd_show(const std::string& instrumentname,
 	std::list<DeviceName::device_type>	types
 		= instrument->component_types();
 	std::cout << " has " << types.size() << " components" << std::endl;
-
 	for (auto ptr = types.begin(); ptr != types.end(); ptr++) {
 		InstrumentComponentPtr	component = instrument->component(*ptr);
 		std::cout << component->toString() << std::endl;
@@ -216,7 +215,38 @@ int	cmd_component_update(const std::string& instrumentname,
 	// get the attribute value types from the remaining arguments
 	AttributeValuePairs	av(arguments, 3);
 
+	// check for the type
+	if (av.has("type")) {
+		InstrumentComponent::component_t	ctype
+			= InstrumentComponentTableAdapter::component_type(
+				av("type"));
+		if (ctype != component->component_type()) {
+			throw std::runtime_error("cannot change type, delete "
+				"and add component of new type");
+		}
+	}
+
 	// XXX modify the component
+	if (av.has("unit")) {
+		component->unit(std::stoi(av("unit")));
+	}
+	switch (component->component_type()) {
+	case InstrumentComponent::direct:
+		if (av.has("device")) {
+			component->name(av("device"));
+		}
+		break;
+	case InstrumentComponent::mapped:
+		if (av.has("name")) {
+			component->name(av("name"));
+		}
+		break;
+	case InstrumentComponent::derived:
+		if (av.has("from")) {
+			component->name(av("from"));
+		}
+		break;
+	}
 
 	// persist in the database
 	config->database()->begin("updatecomponent");
