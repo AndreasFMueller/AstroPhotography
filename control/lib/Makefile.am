@@ -26,7 +26,7 @@ endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
-	AttributeValuePairs.cpp UUID.cpp \
+	AttributeValuePairs.cpp UUID.cpp Path.cpp \
 	URL.cpp DeviceName.cpp Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \

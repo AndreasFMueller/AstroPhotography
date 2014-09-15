@@ -344,7 +344,7 @@ long	ImageRepo::save(ImagePtr image) {
 	} catch (...) { }
 
 	// begin a transaction in the database
-	_database->begin();
+	_database->begin("saveimage");
 
 	// now try to save the image info record
 	try {
@@ -401,7 +401,7 @@ long	ImageRepo::save(ImagePtr image) {
 		// entries become persistent. This ensures that information
 		// about the image only becomes visible in the database when
 		// the image file has actually been written to disk
-		_database->commit();
+		_database->commit("saveimage");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %ld committed as '%s'",
 			imageid, filename.c_str());
 	} catch (...) {
@@ -410,7 +410,8 @@ long	ImageRepo::save(ImagePtr image) {
 		// if anything fails, then we roll back the transaction, so
 		// the database will be clean again. In particular, if the
 		// disk write fails, nothing will show up in the database.
-		_database->rollback();
+		_database->rollback("saveimage");
+		throw;
 	}
 
 

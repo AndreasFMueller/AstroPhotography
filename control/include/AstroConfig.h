@@ -125,18 +125,21 @@ class InstrumentComponent {
 	DeviceName::device_type	_type;
 public:
 	DeviceName::device_type	type() const { return _type; }
+	std::string	type_name() const;
 
 	typedef enum { direct, mapped, derived } component_t;
 private:
 	component_t	_component_type;
 public:
 	component_t	component_type() const { return _component_type; }
+	std::string	component_typename() const;
 
 	InstrumentComponent(DeviceName::device_type t, component_t c)
 		: _type(t), _component_type(c) { }
 	virtual	DeviceName	devicename() = 0;
 	virtual	int	unit() = 0;
 	virtual std::string	name() const = 0;
+	virtual std::string	toString();
 };
 typedef std::shared_ptr<InstrumentComponent>	InstrumentComponentPtr;
 
@@ -248,6 +251,10 @@ public:
 	int	unit(DeviceName::device_type type);
 
 	void	add(InstrumentComponentPtr component);
+	void	remove(DeviceName::device_type type);
+
+	int	ncomponents() const { return components.size(); }
+	std::string	toString() const;
 
 	std::list<DeviceName::device_type>	component_types() const;
 };
@@ -359,6 +366,9 @@ static void	set_default(const std::string& filename);
 	virtual void	addInstrument(InstrumentPtr instrument) = 0;
 	virtual void	removeInstrument(const std::string& name) = 0;
 	virtual std::list<InstrumentPtr>	listinstruments() = 0;
+
+	// access to the raw database
+	virtual persistence::Database	database() = 0;
 };
 
 } // namespace config

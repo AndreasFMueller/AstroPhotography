@@ -26,8 +26,8 @@ namespace config {
  * This is used to hide the fact that there 
  */
 class ConfigurationBackend : public Configuration {
-	std::string	dbfilename;
-	Database	database;
+	std::string	_dbfilename;
+	Database	_database;
 	GlobalRecord	getglobal(const std::string& section,
 				const std::string& name);
 public:
@@ -66,15 +66,18 @@ public:
 
 	// devicemapper access
 	virtual DeviceMapperPtr	devicemapper();
+
+	// get the configuration database
+	virtual Database	database();
 };
 
 /**
  * \brief Construct a configuration backend
  */
 ConfigurationBackend::ConfigurationBackend(const std::string& filename)
-	: dbfilename(filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", dbfilename.c_str());
-	database = DatabaseFactory::get(dbfilename);
+	: _dbfilename(filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", _dbfilename.c_str());
+	_database = DatabaseFactory::get(_dbfilename);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -85,11 +88,11 @@ ConfigurationBackend::ConfigurationBackend(const std::string& filename)
  */
 GlobalRecord	ConfigurationBackend::getglobal(const std::string& section,
 			const std::string& name) {
-	GlobalTable	globals(database);
+	GlobalTable	globals(_database);
 	std::string	condition
 		= stringprintf("section = '%s' and name = '%s'",
-			database->escape(section).c_str(),
-			database->escape(name).c_str());
+			_database->escape(section).c_str(),
+			_database->escape(name).c_str());
 	std::list<GlobalRecord>	records = globals.select(condition);
 	if (0 == records.size()) {
 		std::string	msg = stringprintf("no variable for %s",
@@ -128,7 +131,7 @@ std::string	ConfigurationBackend::global(const std::string& section,
  */
 void	ConfigurationBackend::setglobal(const std::string& section,
 		const std::string& name, const std::string& value) {
-	GlobalTable	globals(database);
+	GlobalTable	globals(_database);
 	try {
 		GlobalRecord	record = getglobal(section, name);
 	} catch (...) {
@@ -145,7 +148,7 @@ void	ConfigurationBackend::setglobal(const std::string& section,
  */
 void	ConfigurationBackend::removeglobal(const std::string& section,
 		const std::string& name) {
-	GlobalTable	globals(database);
+	GlobalTable	globals(_database);
 	try {
 		globals.remove(getglobal(section, name).id());
 	} catch (...) {
@@ -156,7 +159,7 @@ void	ConfigurationBackend::removeglobal(const std::string& section,
  * \brief 
  */
 std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
-	GlobalTable	globals(database);
+	GlobalTable	globals(_database);
 	std::list<GlobalRecord>	records = globals.select("0 = 0");
 	std::list<ConfigurationEntry>	result;
 	std::list<GlobalRecord>::const_iterator	i;
@@ -177,7 +180,7 @@ std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
  * \brief get a repository
  */
 ImageRepo	ConfigurationBackend::repo(const std::string& name) {
-	return ImageRepoTable(database).get(name);
+	return ImageRepoTable(_database).get(name);
 }
 
 /**
@@ -209,7 +212,7 @@ void	ConfigurationBackend::addrepo(const std::string& name,
 	ImageRepo	imagerepo(name, db, directory, false);
 
 	// add the repository info to the database
-	ImageRepoTable	repos(database);
+	ImageRepoTable	repos(_database);
 	repos.add(imagerepoinfo);
 }
 
@@ -217,11 +220,11 @@ void	ConfigurationBackend::addrepo(const std::string& name,
  * \brief delete a repository
  */
 void	ConfigurationBackend::removerepo(const std::string& name) {
-	ImageRepoTable(database).remove(name);
+	ImageRepoTable(_database).remove(name);
 }
 
 std::list<ImageRepoInfo>	ConfigurationBackend::listrepo() {
-	ImageRepoTable	repos(database);
+	ImageRepoTable	repos(_database);
 	std::list<ImageRepoInfo>	result;
 	std::list<ImageRepoRecord>	repolist = repos.select("0 = 0");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d image repo records",
@@ -244,7 +247,7 @@ std::list<ImageRepoInfo>	ConfigurationBackend::listrepo() {
  * \brief Get a project from the configuration
  */
 Project	ConfigurationBackend::project(const std::string& name) {
-	ProjectTable	projects(database);
+	ProjectTable	projects(_database);
 	ProjectRecord	record = projects.get(name);
 	Project	project;
 	project.name(record.name);
@@ -259,7 +262,7 @@ Project	ConfigurationBackend::project(const std::string& name) {
  * \brief add a project to the configuration
  */
 void	ConfigurationBackend::addproject(const Project& project) {
-	ProjectTable	projects(database);
+	ProjectTable	projects(_database);
 	ProjectRecord	record;
 	record.name = project.name();
 	record.description = project.description();
@@ -273,7 +276,7 @@ void	ConfigurationBackend::addproject(const Project& project) {
  * \brief Remove a project
  */
 void	ConfigurationBackend::removeproject(const std::string& name) {
-	ProjectTable	projects(database);
+	ProjectTable	projects(_database);
 	projects.remove(name);
 }
 
@@ -282,7 +285,7 @@ void	ConfigurationBackend::removeproject(const std::string& name) {
  */
 std::list<Project>	ConfigurationBackend::listprojects() {
 	std::list<Project>	result;
-	ProjectTable	projects(database);
+	ProjectTable	projects(_database);
 	std::list<ProjectRecord>	records = projects.select("0 = 0");
 	std::list<ProjectRecord>::const_iterator	pi;
 	for (pi = records.begin(); pi != records.end(); pi++) {
@@ -304,7 +307,7 @@ std::list<Project>	ConfigurationBackend::listprojects() {
  * \brief Get the device mapper
  */
 DeviceMapperPtr	ConfigurationBackend::devicemapper() {
-	return DeviceMapper::get(database);
+	return DeviceMapper::get(_database);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -315,17 +318,17 @@ DeviceMapperPtr	ConfigurationBackend::devicemapper() {
  */
 InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 	// find the id
-	InstrumentTable	instruments(database);
+	InstrumentTable	instruments(_database);
 	int	instrumentid = instruments.id(name);
 
 	// retrieve the instrument record
 	InstrumentRecord	instrumentrecord
 					= instruments.byid(instrumentid);
-	InstrumentPtr	instrument(new Instrument(database,
+	InstrumentPtr	instrument(new Instrument(_database,
 				instrumentrecord.name));
 
 	// retrieve all the matching metadata
-	InstrumentComponentTable	components(database);
+	InstrumentComponentTable	components(_database);
 	std::string	condition = stringprintf("instrument = %d",
 						instrumentid);
 	auto l = components.select(condition);
@@ -346,7 +349,7 @@ InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 			// not an actuald evie name, but rather the name of
 			// the map entry
 			iptr = InstrumentComponentPtr(
-				new InstrumentComponentMapped(type, database,
+				new InstrumentComponentMapped(type, _database,
 					ptr->devicename));
 			break;
 		case InstrumentComponent::direct:
@@ -407,12 +410,12 @@ void	ConfigurationBackend::addInstrument(InstrumentPtr instrument) {
 		instrument->name().c_str());
 
 	// open a transaction bracket
-	database->begin();
+	_database->begin("addinstrument");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transaction opened");
 
 	try {
 		// create an instrument entry
-		InstrumentTable	instruments(database);
+		InstrumentTable	instruments(_database);
 		InstrumentRecord	instrumentrecord;
 		instrumentrecord.name = instrument->name();
 		long	instrumentid = instruments.add(instrumentrecord);
@@ -421,7 +424,7 @@ void	ConfigurationBackend::addInstrument(InstrumentPtr instrument) {
 
 		// for each component type, create an entry if the type
 		// is present
-		InstrumentComponentTable	components(database);
+		InstrumentComponentTable	components(_database);
 		std::list<DeviceName::device_type>	types
 			= instrument->component_types();
 		for (auto ptr = types.begin(); ptr != types.end(); ptr++) {
@@ -435,11 +438,12 @@ void	ConfigurationBackend::addInstrument(InstrumentPtr instrument) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entry complete");
 
 		// commit the additions
-		database->commit();
+		_database->commit("addinstrument");
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to add '%s': %s",
 			instrument->name().c_str(), x.what());
-		database->rollback();
+		_database->rollback("addinstrument");
+		throw;
 	}
 }
 
@@ -450,7 +454,7 @@ void	ConfigurationBackend::addInstrument(InstrumentPtr instrument) {
 void	ConfigurationBackend::removeInstrument(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove instrument named '%s'",
 		name.c_str());
-	InstrumentTable	instruments(database);
+	InstrumentTable	instruments(_database);
 	long	instrumentid = instruments.id(name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete instrument id = %ld",
 		instrumentid);
@@ -462,8 +466,22 @@ void	ConfigurationBackend::removeInstrument(const std::string& name) {
  */
 std::list<InstrumentPtr>	ConfigurationBackend::listinstruments() {
 	std::list<InstrumentPtr>	result;
-	
+	InstrumentTable	instruments(_database);
+	std::list<InstrumentRecord>	records = instruments.select("0 = 0");
+	for (auto ptr = records.begin(); ptr != records.end(); ptr++) {
+		result.push_back(instrument(ptr->name));
+	}
 	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// database method implementation
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief access to the database
+ */
+Database	ConfigurationBackend::database() {
+	return _database;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -68,8 +68,11 @@ public:
 	virtual std::vector<std::string>
 		fieldnames(const std::string& tablename);
 	virtual void	begin();
+	virtual void	begin(const std::string& savepoint);
 	virtual void	commit();
+	virtual void	commit(const std::string& savepoint);
 	virtual void	rollback();
+	virtual void	rollback(const std::string& savepoint);
 	virtual StatementPtr	statement(const std::string& query);
 	virtual bool	hastable(const std::string& tablename);
 };
@@ -346,6 +349,10 @@ void	Sqlite3Backend::begin() {
 	query("BEGIN TRANSACTION;");
 }
 
+void	Sqlite3Backend::begin(const std::string& savepoint) {
+	query("SAVEPOINT " + savepoint + ";");
+}
+
 /**
  * \brief Commit a transaction
  */
@@ -353,11 +360,19 @@ void	Sqlite3Backend::commit() {
 	query("COMMIT TRANSACTION;");
 }
 
+void	Sqlite3Backend::commit(const std::string& savepoint) {
+	query("RELEASE SAVEPOINT " + savepoint + ";");
+}
+
 /**
  * \brief Roll back a transaction
  */
 void	Sqlite3Backend::rollback() {
 	query("ROLLBACK TRANSACTION;");
+}
+
+void	Sqlite3Backend::rollback(const std::string& savepoint) {
+	query("ROLLBACK TO SAVEPOINT " + savepoint + ";");
 }
 
 /**

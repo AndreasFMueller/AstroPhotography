@@ -84,6 +84,7 @@ int	main(int argc, char *argv[]) {
 	Astro::OrbSingleton	orb(argc, argv);
 #endif /* ENABLE_CORBA */
 	debugtimeprecision = 3;
+	debugthreads = 1;
 	int	binning = 1;
 
 	// parse the command line
@@ -261,6 +262,7 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	ccd->startExposure(exposure);
 	usleep(1000000 * exposuretime);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
 	// read all images
 	ImageSequence	images = ccd->getImageSequence(nImages);

@@ -216,6 +216,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	time(&lastexposurestart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
+	state = Exposure::exposing;
 }
 
 /**
@@ -245,13 +246,17 @@ void    Ccd::cancelExposure() {
  * \brief Waiting for completion is generic (except possibly for UVC cameras)
  */
 bool	Ccd::wait() {
-	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
+	switch (exposureStatus()) {
+	case Exposure::idle:
+	case Exposure::cancelling:
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot wait: no exposure in progress");
 		throw BadState("cannot wait: no exposure requested");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for exposure to complete");
-	if (Exposure::exposing == state) {
+	case Exposure::exposed:
+		return true;
+	case Exposure::exposing:
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"waiting for exposure to complete");
 		// has the exposure time already expired? If so, we wait at
 		// least as the exposure time indicates
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -262,7 +267,7 @@ bool	Ccd::wait() {
 		time_t	now = time(NULL);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
 		int	delta = endtime - now;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %u", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %d", delta);
 		if (delta > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
 				"to expire: %u", delta);
@@ -283,7 +288,7 @@ bool	Ccd::wait() {
 			// XXX bad things should happen
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %d", state);
 	return (Exposure::exposed == state);
 }
 

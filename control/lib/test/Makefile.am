@@ -33,7 +33,7 @@ noinst_PROGRAMS = tests processtests catalogtests singletest \
 
 ## general tests
 tests_SOURCES = tests.cpp \
-	StacktraceTest.cpp TrimTest.cpp \
+	StacktraceTest.cpp TrimTest.cpp PathTest.cpp \
 	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
 	DeviceNameTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
 	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
@@ -62,7 +62,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	InstrumentTest.cpp
+	PathTest.cpp
+#	InstrumentTest.cpp
 #	ImageRepoTest.cpp
 #	DeviceMapperTest.cpp
 #	ConfigurationTest.cpp

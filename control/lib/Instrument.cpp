@@ -6,6 +6,8 @@
 #include <AstroConfig.h>
 #include <InstrumentTables.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
+#include <sstream>
 
 using namespace astro::persistence;
 
@@ -16,7 +18,19 @@ namespace config {
 // Instrument Component methods 
 //////////////////////////////////////////////////////////////////////
 
-// none
+std::string	InstrumentComponent::type_name() const {
+	return InstrumentComponentTableAdapter::type(_type);
+}
+
+std::string	InstrumentComponent::component_typename() const {
+	return InstrumentComponentTableAdapter::component_type(_component_type);
+}
+
+std::string	InstrumentComponent::toString() {
+	return stringprintf("%-16.16s %-8.8s %-40.40s  %ld",
+		type_name().c_str(), component_typename().c_str(),
+		name().c_str(), unit());
+}
 
 //////////////////////////////////////////////////////////////////////
 // Instrument Component methods for direct components
@@ -83,8 +97,10 @@ std::string	InstrumentComponentDerived::name() const {
 /**
  * \brief Create a new Instrument
  */
-Instrument::Instrument(Database database, const std::string& name)
-	: _database(database), _name(name) {
+Instrument::Instrument(Database db, const std::string& name)
+	: _database(db), _name(name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument '%s' created",
+		name.c_str());
 }
 
 /**
@@ -142,10 +158,33 @@ void	Instrument::add(InstrumentComponentPtr component) {
 }
 
 /**
+ * \brief Remove an instrument component from an instrument
+ */
+void	Instrument::remove(DeviceName::device_type type) {
+	components.erase(type);
+}
+
+/**
  * \brief Unit associated with a device type
  */
 int	Instrument::unit(DeviceName::device_type type) {
 	return component(type)->unit();
+}
+
+/**
+ * \brief Convert the Instrument to a string version
+ */
+std::string	Instrument::toString() const {
+	std::ostringstream	out;
+	out << stringprintf("%-16.16s ", _name.c_str());
+	std::list<DeviceName::device_type>      types = component_types();
+	for (auto ptr = types.begin(); ptr != types.end(); ptr++) {
+		if (ptr != types.begin()) {
+			out << ",";
+		}
+		out << InstrumentComponentTableAdapter::type(*ptr);
+	}
+	return out.str();
 }
 
 /**

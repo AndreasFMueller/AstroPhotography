@@ -159,8 +159,11 @@ public:
 	virtual std::vector<std::string>
 		fieldnames(const std::string& tablename) = 0;
 	virtual void	begin() = 0;
+	virtual void	begin(const std::string& savepoint) = 0;
 	virtual void	commit() = 0;
+	virtual void	commit(const std::string& savepoint) = 0;
 	virtual void	rollback() = 0;
+	virtual void	rollback(const std::string& savepoint) = 0;
 	virtual StatementPtr	statement(const std::string& query) = 0;
 	virtual bool	hastable(const std::string& tablename) = 0;
 };
