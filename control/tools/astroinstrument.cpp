@@ -34,8 +34,9 @@ static struct option	longopts[] = {
  * \brief Usage function for the 
  */
 void	usage(const std::string& progname) {
-	std::string	prg = Path(progname).basename();
+	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
 	std::cout << prg << " [ options ] list" << std::endl;
 	std::cout << prg << " [ options ] { add | show | remove } <name>";
 	std::cout << std::endl;
@@ -47,10 +48,17 @@ void	usage(const std::string& progname) {
 		"[ attr=value ]";
 	std::cout << std::endl;
 	std::cout << prg << " [ options ] help" << std::endl;
+	std::cout << std::endl;
 	std::cout << "the following attributes are known:" << std::endl;
-	std::cout << "  unit=<u>      " << std::endl;
-	std::cout << "  device=<d>    " << std::endl;
-	std::cout << "  name=<n>      " << std::endl;
+	std::cout << "  unit=<u>      unit number of a device" << std::endl;
+	std::cout << "  device=<d>    device name of a direct component";
+	std::cout << std::endl;
+	std::cout << "  name=<n>      name of a mapped component" << std::endl;
+	std::cout << "  kind=<k>      component kind (direct, mapped, derived)";
+	std::cout << std::endl;
+	std::cout << "  from=<f>      the device type from which this component"
+		" is derived" << std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -c,--config=<cfg>   use configuraton file <cfg> instead "
 			"of the default";
