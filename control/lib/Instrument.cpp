@@ -10,6 +10,8 @@
 #include <sstream>
 
 using namespace astro::persistence;
+using namespace astro::module;
+using namespace astro::camera;
 
 namespace astro {
 namespace config {
@@ -59,7 +61,7 @@ int	InstrumentComponentMapped::unit() {
 /**
  * \brief Try to change the unit number in a mapped device
  */
-void	InstrumentComponentMapped::unit(int u) {
+void	InstrumentComponentMapped::unit(int /* u */) {
 	throw std::runtime_error("cannot change unit for mapped component, use device mapper to change unit id");
 }
 
@@ -206,6 +208,156 @@ std::list<DeviceName::device_type>	Instrument::component_types() const {
 	}
 	return result;
 }
+
+/**
+ * \brief Get an adaptive optics unit from an instrument
+ */
+AdaptiveOpticsPtr	Instrument::adaptiveoptics() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	aoptr = component(DeviceName::AdaptiveOptics);
+	switch (aoptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getAdaptiveOptics(aoptr->devicename());
+	case InstrumentComponent::derived:
+		throw std::runtime_error("don't know how to derive camera");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO for instrument '%s'",
+		_name.c_str());
+}
+
+/**
+ * \brief Get a camera from an instrument
+ */
+CameraPtr	Instrument::camera() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	cameraptr = component(DeviceName::Camera);
+	switch (cameraptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getCamera(cameraptr->devicename());
+	case InstrumentComponent::derived:
+		throw std::runtime_error("don't know how to derive camera");
+	}
+}
+
+/**
+ * \brief Get a CCD from an instrument
+ */
+CcdPtr	Instrument::ccd() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve CCD for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	ccdptr = component(DeviceName::Ccd);
+	switch (ccdptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getCcd(ccdptr->devicename());
+	case InstrumentComponent::derived:
+		break;
+	}
+	// if we get to this point, then we have to derive id
+	InstrumentComponentDerived	*from
+		= dynamic_cast<InstrumentComponentDerived *>(&*ccdptr);
+	if (from->derivedfrom() != DeviceName::Camera) {
+		throw std::runtime_error("only know how to derive from a camera");
+	}
+	return camera()->getCcd(ccdptr->unit());
+}
+
+/**
+ * \brief Get a cooler from an instrument
+ */
+CoolerPtr	Instrument::cooler() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Cooler for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	coolerptr = component(DeviceName::Cooler);
+	switch (coolerptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getCooler(coolerptr->devicename());
+	case InstrumentComponent::derived:
+		break;
+	}
+	InstrumentComponentDerived	*from
+		= dynamic_cast<InstrumentComponentDerived *>(&*coolerptr);
+	if (from->derivedfrom() != DeviceName::Ccd) {
+		throw std::runtime_error("only know how to derive from a ccd");
+	}
+	return ccd()->getCooler();
+}
+
+/**
+ * \brief get a Filterwheel from an instrument
+ */
+FilterWheelPtr	Instrument::filterwheel() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve FilterWheel for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	filterwheelptr
+		= component(DeviceName::Filterwheel);
+	switch (filterwheelptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getFilterWheel(filterwheelptr->devicename());
+	case InstrumentComponent::derived:
+		break;
+	}
+	// if we get to this point, then we have to derive id
+	InstrumentComponentDerived	*from
+		= dynamic_cast<InstrumentComponentDerived *>(&*filterwheelptr);
+	if (from->derivedfrom() != DeviceName::Camera) {
+		throw std::runtime_error("only know how to derive from a camera");
+	}
+	return camera()->getFilterWheel();
+}
+
+/**
+ * \brief get the Focuser for an instrument
+ */
+FocuserPtr	Instrument::focuser() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Focuser for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	focuserptr = component(DeviceName::Focuser);
+	switch (focuserptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getFocuser(focuserptr->devicename());
+	case InstrumentComponent::derived:
+		throw std::runtime_error("don't know how to derived Focuser");
+	}
+}
+
+/**
+ * \brief get a Mount from an instrument
+ */
+MountPtr	Instrument::mount() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Mount for instrument '%s'",
+		_name.c_str());
+	Repository	repository;
+	Devices	devices(repository);
+	InstrumentComponentPtr	mountptr = component(DeviceName::Mount);
+	switch (mountptr->component_type()) {
+	case InstrumentComponent::direct:
+	case InstrumentComponent::mapped:
+		return devices.getMount(mountptr->devicename());
+	case InstrumentComponent::derived:
+		throw std::runtime_error("don't know how to derive mount");
+	}
+}
+
 
 } // namespace config
 } // namespace astro

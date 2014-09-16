@@ -22,9 +22,11 @@ public:
 	void	tearDown() { }
 	void	testEquality();
 	void	testPermits();
+	void	testParse();
 
 	CPPUNIT_TEST_SUITE(BinningTest);
 	CPPUNIT_TEST(testPermits);
+	CPPUNIT_TEST(testParse);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -46,6 +48,17 @@ void	BinningTest::testPermits() {
 	CPPUNIT_ASSERT(!bs.permits(Binning(3,2)));
 	CPPUNIT_ASSERT(!bs.permits(Binning(3,4)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPermits() end");
+}
+
+void	BinningTest::testParse() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testParse() begin");
+	Binning	b1("(4x3)");
+	CPPUNIT_ASSERT(b1.getX() == 4);
+	CPPUNIT_ASSERT(b1.getY() == 3);
+	Binning	b2("(2,7)");
+	CPPUNIT_ASSERT(b2.getX() == 2);
+	CPPUNIT_ASSERT(b2.getY() == 7);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testParse() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BinningTest);

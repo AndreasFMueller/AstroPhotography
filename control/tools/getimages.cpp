@@ -12,6 +12,8 @@
 #include <AstroLoader.h>
 #include <AstroCamera.h>
 #include <AstroDevice.h>
+#include <AstroConfig.h>
+#include <AstroProject.h>
 #include <AstroIO.h>
 #if ENABLE_CORBA
 #include <OrbSingleton.h>
@@ -24,6 +26,8 @@ using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::image;
 using namespace astro::io;
+using namespace astro::config;
+using namespace astro::project;
 
 namespace astro {
 
@@ -60,24 +64,43 @@ void	usage(const char *progname) {
 		<< std::endl;
 }
 
+static struct option	longopts[] = {
+/* name			argument?		int*	int */
+{ "binning",		required_argument,	NULL,	'b' }, /*  0 */
+{ "config",		required_argument,	NULL,	'c' }, /*  1 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  2 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  3 */
+{ "filter",		required_argument,	NULL,	'f' }, /*  4 */
+{ "focus",		required_argument,	NULL,	'F' }, /*  5 */
+{ "help",		no_argument,		NULL,	'h' }, /*  6 */
+{ "instrument",		required_argument,	NULL,	'i' }, /*  7 */
+{ "number",		required_argument,	NULL,	'n' }, /*  8 */
+{ "purpose",		required_argument,	NULL,	'p' }, /*  9 */
+{ "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
+{ "repo",		required_argument,	NULL,	'r' }, /* 11 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 12 */
+{ NULL,			0,			NULL,    0  }
+};
+
 int	main(int argc, char *argv[]) {
-	int	c;
 	unsigned int	nImages = 1;
+	std::string	instrumentname;
+#if 0
 	unsigned int	cameranumber = 0;
 	unsigned int	ccdid = 0;
 	unsigned int	xoffset = 0;
 	unsigned int	yoffset = 0;
 	unsigned int	width = 0;
 	unsigned int	height = 0;
-	float	exposuretime = 0.01;
 	const char	*outputdir = ".";
 	const char	*prefix = "test";
 	const char	*cameratype = "uvc";
-	bool	listonly = false;
 	bool	dark = false;
-	double	temperature = -1;
 	unsigned short	focus = 32768;
 	const char	*focuser = NULL;
+#endif
+	float	exposuretime = 1.; // default exposure time: 1 second
+	double	temperature = std::numeric_limits<double>::quiet_NaN(); 
 
 	// initialize the orb in case we want to use the net module
 #if ENABLE_CORBA
@@ -85,149 +108,122 @@ int	main(int argc, char *argv[]) {
 #endif /* ENABLE_CORBA */
 	debugtimeprecision = 3;
 	debugthreads = 1;
-	int	binning = 1;
+	Binning	binning;
+	std::string	filtername;
+	std::string	reponame;
+	ImageRectangle	frame;
+	Exposure::purpose_t	purpose;
+	unsigned short	focusposition = 0;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "b:dc:C:e:ln:p:o:m:h:w:x:y:?Dt:f:F:")))
+	int	c;
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:F:hi:n:p:r:t:",
+		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
-			binning = atoi(optarg);
-			if ((binning > 4) || (binning < 1)) {
-				throw std::runtime_error("illegal binning mode");
-			}
+			binning = Binning(optarg);
 			break;
-		case 'D':
-			dark = true;
+		case 'c':
+			Configuration::set_default(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 'n':
-			nImages = atoi(optarg);
-			break;
 		case 'e':
 			exposuretime = atof(optarg);
 			break;
-		case 'p':
-			prefix = optarg;
-			break;
-		case 'o':
-			outputdir = optarg;
-			break;
-		case 'm':
-			cameratype = optarg;
-			break;
-		case 'C':
-			cameranumber = atoi(optarg);
-			break;
-		case 'c':
-			ccdid = atoi(optarg);
-			break;
-		case 'l':
-			listonly = true;
-			break;
-		case 'w':
-			width = atoi(optarg);
-			break;
-		case 'h':
-			height = atoi(optarg);
-			break;
-		case 'x':
-			xoffset = atoi(optarg);
-			break;
-		case 'y':
-			yoffset = atoi(optarg);
-			break;
-		case 't':
-			temperature = atof(optarg) + 273.1;
-			break;
 		case 'f':
-			focus = atoi(optarg);
+			filtername = optarg;
 			break;
 		case 'F':
-			focuser = optarg;
+			focusposition = std::stol(optarg);
 			break;
-		case '?':
+		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'i':
+			instrumentname = optarg;
+			break;
+		case 'n':
+			nImages = atoi(optarg);
+			break;
+		case 'p':
+			purpose = Exposure::string2purpose(optarg);
+			break;
+		case 'r':
+			reponame = optarg;
+			break;
+		case 't':
+			temperature = std::stod(optarg);
+			break;
+		case 1:
+			switch (longindex) {
+			case 7:
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"rectangle options");
+				frame = ImageRectangle(optarg);
+				break;
+			default:
+				// ingore others
+				break;
+			}
 		}
+	}
 
-	// load the camera driver library
-	Repository	repository;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "recovering module '%s'", cameratype);
-	ModulePtr	module = repository.getModule(cameratype);
-	module->open();
+	// get the configuration
+	ConfigurationPtr	config = Configuration::get();
 
-	// get the camera
-	DeviceLocatorPtr	locator = module->getDeviceLocator();
-	std::vector<std::string>	cameras = locator->getDevicelist();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "have found %d cameras", cameras.size());
-	if (0 == cameras.size()) {
-		std::cerr << "no cameras found" << std::endl;
-		return EXIT_FAILURE;
+	// check whether we have an instrument
+	if (0 == instrumentname.size()) {
+		throw std::runtime_error("instrument name not set");
 	}
-	if (listonly) {
-		int	counter = 0;
-		// list the cameras available from this locator
-		std::vector<std::string>::const_iterator	i;
-		for (i = cameras.begin(); i != cameras.end(); i++) {
-			std::cout << cameratype << "[" <<  counter++ << "]"
-				<< ": " << *i << std::endl;
-		}
-		return EXIT_SUCCESS;
-	}
-	if (cameranumber >= cameras.size()) {
-		std::string	msg = stringprintf("camera %d out of range",
-			cameranumber);
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s\n", msg.c_str());
-		throw std::range_error(msg);
-	}
-	std::string	cameraname = cameras[cameranumber];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting camera %s",
-		cameraname.c_str());
-	CameraPtr	camera = locator->getCamera(cameraname);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera loaded: %s", cameraname.c_str());
+	InstrumentPtr	instrument = config->instrument(instrumentname);
 
-	// get a CCD
-	CcdPtr	ccd = camera->getCcd(ccdid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd: %s",
-		ccd->getInfo().toString().c_str());
+	// make sure we have a repository, because we would not know
+	// where to store the images otherweise
+	if (0 == reponame.size()) {
+		throw std::runtime_error("repository name not set");
+	}
+	ImageRepo	repo = config->repo(reponame);
 
-	// create the image rectangle
-	if (width == 0) {
-		width = ccd->getInfo().size().width();
+	// get the devices
+	CameraPtr	camera = instrument->camera();
+	CcdPtr		ccd = instrument->ccd();
+
+	// get the image repository
+	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
+		frame = ccd->getInfo().getFrame();
+	} else {
+		frame = ccd->getInfo().clipRectangle(frame);
 	}
-	if (height == 0) {
-		height = ccd->getInfo().size().height();
-	}
-	ImageRectangle	imagerectangle = ccd->getInfo().clipRectangle(
-		ImageRectangle(ImagePoint(xoffset, yoffset),
-			ImageSize(width, height)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image rectangle: %s",
+		frame.toString().c_str());
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
-	if (focuser) {
-		std::string	name(focuser);
-		FocuserPtr	f = locator->getFocuser(std::string(focuser));
-		f->set(focus);
-		while (f->current() != focus) {
+	if (focusposition > 0) {
+		FocuserPtr	focuser = instrument->focuser();
+		focuser->set(focusposition);
+		while (focuser->current() != focusposition) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"current = %hu, focus = %hu",
-				f->current(), focus);
+				focuser->current(), focusposition);
 			usleep(100000);
 		}
 	}
 
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
-	bool	usecooler = (ccd->hasCooler() && (temperature > 0));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler: %s, temperature = %f",
-		usecooler ? "YES" : "NO", temperature);
-	CoolerPtr	cooler;
-	if (usecooler) {
+	CoolerPtr	cooler(NULL);
+	if (temperature == temperature) {
+		double	absolute = 273.15 + temperature;
+		if (absolute < 0) {
+			throw std::runtime_error("bad temperature");
+		}
+		CoolerPtr	cooler = instrument->cooler();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
-		cooler = ccd->getCooler();
-		cooler->setTemperature(temperature);
+		cooler->setTemperature(absolute);
 		cooler->setOn(true);
 		// wait until the temperature is within 1 degree of the
 		// set temperature
@@ -235,17 +231,19 @@ int	main(int argc, char *argv[]) {
 		do {
 			sleep(1);
 			double	actual = cooler->getActualTemperature();
-			delta = fabs(temperature - actual);
+			delta = fabs(absolute - actual);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"set: %.1f, actual: %1.f, delta: %.1f",
-				temperature, actual, delta);
+				absolute, actual, delta);
 		} while (delta > 1);
 	}
 
 	// prepare an exposure object
-	Exposure	exposure(imagerectangle, exposuretime);
-	exposure.shutter = (dark) ? SHUTTER_CLOSED : SHUTTER_OPEN;
-	exposure.mode = Binning(binning, binning);
+	Exposure	exposure(frame, exposuretime);
+	exposure.purpose = purpose;
+	exposure.shutter = (purpose == Exposure::dark)
+				? SHUTTER_CLOSED : SHUTTER_OPEN;
+	exposure.mode = binning;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 
@@ -261,7 +259,6 @@ int	main(int argc, char *argv[]) {
 	// start the exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
 	ccd->startExposure(exposure);
-	usleep(1000000 * exposuretime);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
 	// read all images
@@ -269,27 +266,17 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieved %d images", images.size());
 
 	// turn of the cooler to save energy
-	if (usecooler) {
+	if (cooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler off");
 		cooler->setOn(false);
 	}
 
-	// write the images to a file
+	// write the images to the repository
 	ImageSequence::const_iterator	imageptr;
 	int	counter = 0;
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
-		std::string	filename = stringprintf("%s/%s%03d.fits",
-			outputdir, prefix, counter++);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s of size %s",
-			filename.c_str(), (*imageptr)->size().toString().c_str());
-		if (debuglevel >= LOG_DEBUG) {
-			std::ostringstream	out;
-			out << **imageptr;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "image info: %s",
-				out.str().c_str());
-		}
-		unlink(filename.c_str());
-		FITSout	out(filename);
-		out.write(*imageptr);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image");
+		repo.save(*imageptr);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
 

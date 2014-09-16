@@ -9,6 +9,7 @@
 #include <AstroPersistence.h>
 #include <AstroDevice.h>
 #include <AstroProject.h>
+#include <AstroLoader.h>
 #include <memory>
 
 namespace astro {
@@ -267,6 +268,16 @@ public:
 	std::string	toString() const;
 
 	std::list<DeviceName::device_type>	component_types() const;
+
+	// retrieve devices from an instrument
+	astro::camera::AdaptiveOpticsPtr	adaptiveoptics();
+	astro::camera::CameraPtr		camera();
+	astro::camera::CcdPtr			ccd();
+	astro::camera::CoolerPtr		cooler();
+	astro::camera::FilterWheelPtr		filterwheel();
+	astro::camera::FocuserPtr		focuser();
+	astro::camera::GuiderPortPtr		guiderport();
+	astro::device::MountPtr			mount();
 };
 
 /**

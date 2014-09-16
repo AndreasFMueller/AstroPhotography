@@ -24,7 +24,7 @@ std::string	demangle(const std::string& mangled_name) {
 		std::string	msg = stringprintf("demangling failed: %d",
 			status);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+		return mangled_name;
 	}
 	std::string	result(demangled);
 	free(demangled);

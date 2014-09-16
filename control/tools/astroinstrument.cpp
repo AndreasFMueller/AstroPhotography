@@ -129,7 +129,7 @@ int	cmd_remove(const std::string& instrumentname,
  * INSTR is the name of the instrument, cname is the device type of the
  * component to be added. Some of the valid device types are camera,
  * ccd, adaptiveoptics, cooler, filterwheel, ... 
- * The following attribute value pairs are unit=<u>, type=<t> (required),
+ * The following attribute value pairs are unit=<u>, kind=<t> (required),
  * device=<d>, name=<n>, from=<f>
  */
 int	cmd_component_add(const std::string& instrumentname,

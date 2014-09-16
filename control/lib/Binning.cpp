@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <stdexcept>
 #include <limits>
+#include <regex.h>
 
 using namespace astro::image;
 
@@ -20,6 +21,40 @@ namespace camera {
 Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
 	if (x == 0) { x = 1; }
 	if (y == 0) { y = 1; }
+}
+
+/**
+ * \brief parse a Binning specification
+ */
+Binning::Binning(const std::string& binningspec) {
+	int	rc = 0;
+	const char	*r = "\\(?([0-9]+)[,x]([0-9]+)\\)?";
+	regex_t	regex;
+	if (rc = regcomp(&regex, r, REG_EXTENDED)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "regex compile error: %d", rc);
+		throw std::runtime_error("internal error, RE does not compile");
+	}
+#define	nmatches	3
+	regmatch_t	matches[nmatches];
+	rc = regexec(&regex, binningspec.c_str(), nmatches, matches, 0);
+#if 0
+	for (int i = 0; i < nmatches; i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d]: %d - %d", i,
+			matches[i].rm_so, matches[i].rm_eo);
+	}
+#endif
+	if (rc) {
+		goto cleanup;
+	}
+	x = std::stoi(binningspec.substr(matches[1].rm_so,
+			matches[1].rm_eo - matches[1].rm_so));
+	y = std::stoi(binningspec.substr(matches[2].rm_so,
+			matches[2].rm_eo - matches[2].rm_so));
+cleanup:
+	regfree(&regex);
+	if (rc) {
+		throw std::runtime_error("ImagePoint: no match");
+	}
 }
 
 /**

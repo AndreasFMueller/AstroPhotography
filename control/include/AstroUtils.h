@@ -225,7 +225,7 @@ public:
 /**
  * \brief Demangling of symbols and type names if available
  */
-std::string	demangle(const std::string& mangled_name);
+std::string	demangle(const std::string& mangled_name) throw();
 
 } // namespace astro
 

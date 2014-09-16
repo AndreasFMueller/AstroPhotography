@@ -152,12 +152,14 @@ public:
 	Devices(Repository& repository) : _repository(repository) { }
 	typedef	std::list<DeviceName>	devicelist;
 	devicelist	getDevicelist(DeviceName::device_type type);
+	camera::AdaptiveOpticsPtr	getAdaptiveOptics(const DeviceName& name);
 	camera::CameraPtr	getCamera(const DeviceName& name);
 	camera::CcdPtr		getCcd(const DeviceName& name);
 	camera::GuiderPortPtr	getGuiderPort(const DeviceName& name);
 	camera::FilterWheelPtr	getFilterWheel(const DeviceName& name);
 	camera::CoolerPtr	getCooler(const DeviceName& name);
 	camera::FocuserPtr	getFocuser(const DeviceName& name);
+	device::MountPtr	getMount(const DeviceName& name);
 };
 
 } // namespace module
