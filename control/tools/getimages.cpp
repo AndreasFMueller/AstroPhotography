@@ -112,7 +112,7 @@ int	main(int argc, char *argv[]) {
 	std::string	filtername;
 	std::string	reponame;
 	ImageRectangle	frame;
-	Exposure::purpose_t	purpose;
+	Exposure::purpose_t	purpose = Exposure::light;
 	unsigned short	focusposition = 0;
 
 	// parse the command line
