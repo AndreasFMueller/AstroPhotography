@@ -130,7 +130,8 @@ int	main(int argc, char *argv[]) {
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "focus terminated by " << typeid(x).name();
+		std::cerr << "focus terminated by ";
+		std::cerr << astro::demangle(typeid(x).name());
 		std::cerr << ": " << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "terminated by unknown exception" << std::endl;

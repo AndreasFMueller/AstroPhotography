@@ -193,21 +193,22 @@ int	command_show(const std::string& reponame,
  * \brief Usage function in 
  */
 void	usage(const char *progname) {
-	std::cerr << "usage:" << std::endl;
-	std::cerr << progname << " [ options ] <repo> add <image.fits>";
+	Path	path(progname);
+	std::cerr << "Usage:" << std::endl;
+	std::cerr << path.basename() << " [ options ] <repo> add <image.fits>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] <repo> list" << std::endl;
-	std::cerr << progname << " [ options ] <repo> get <id> <image.fits>";
+	std::cerr << path.basename() << " [ options ] <repo> list" << std::endl;
+	std::cerr << path.basename() << " [ options ] <repo> get <id> <image.fits>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] <repo> { show | remove } <id>";
+	std::cerr << path.basename() << " [ options ] <repo> { show | remove } <id>";
 	std::cerr << std::endl;
 	std::cerr << "add, list, retrieve and delete images in image repository <repo>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
+	std::cerr << path.basename() << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
 	std::cerr << std::endl;
 	std::cerr << "copy or move an image with id <id> from repo <srcrepo> to <targetrepo>";
 	std::cerr << std::endl;
-	std::cerr << "options:" << std::endl;
+	std::cerr << "Options:" << std::endl;
 	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
 	std::cerr << std::endl;
 	std::cerr << "  -d,--debug           increase debug level" << std::endl;
@@ -302,7 +303,8 @@ int	main(int argc, char *argv[]) {
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "terminated by " << typeid(x).name() << ": ";
+		std::cerr << "terminated by ";
+		std::cerr << astro::demangle(typeid(x).name()) << ": ";
 		std::cerr << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "terminated by unknown exception" << std::endl;

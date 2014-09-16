@@ -35,24 +35,25 @@ static struct option	longopts[] = {
  * \brief usage message
  */
 void	usage(const char *progname) {
+	Path	path(progname);
 	std::cerr << "usage:" << std::endl;
-	std::cerr << progname << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
+	std::cerr << path.basename() << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
 	std::cerr << "Get, set or delete configuration variables in domain (currently only 'global'";
 	std::cerr << "is valid), identified by the section and the name.";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] imagerepo list" << std::endl;
-	std::cerr << progname << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << path.basename() << " [ options ] imagerepo list" << std::endl;
+	std::cerr << path.basename() << " [ options ] imagerepo add <reponame> <director>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] imagerepo remove <reponame>";
+	std::cerr << path.basename() << " [ options ] imagerepo remove <reponame>";
 	std::cerr << std::endl;
 	std::cerr << "list, add or delete image repositores" << std::endl;
-	std::cerr << progname << " [ options ] project list";
+	std::cerr << path.basename() << " [ options ] project list";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] project add <projname> ...";
+	std::cerr << path.basename() << " [ options ] project add <projname> ...";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] project show <projname>";
+	std::cerr << path.basename() << " [ options ] project show <projname>";
 	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] project remove <projname>";
+	std::cerr << path.basename() << " [ options ] project remove <projname>";
 	std::cerr << std::endl;
 	std::cerr << "list, add or remove projects, show project details";
 	std::cerr << std::endl;
@@ -407,8 +408,9 @@ int	main(int argc, char *argv[]) {
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "terminated by " << typeid(x).name() << ": ";
-		std::cerr << x.what() << std::endl;
+		std::cerr << "terminated by ";
+		std::cerr << astro::demangle(typeid(x).name());
+		std::cerr << ": " << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "terminated by unknown exception" << std::endl;
 	}

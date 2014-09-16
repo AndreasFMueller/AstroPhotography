@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include <iostream>
 #include <fitsio.h>
 #include <string>
@@ -172,7 +173,8 @@ int	main(int argc, char *argv[]) {
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
-		std::cerr << "fitsheader terminated by " << typeid(x).name();
+		std::cerr << "fitsheader terminated by ";
+		std::cerr << astro::demangle(typeid(x).name());
 		std::cerr << ": " << x.what() << std::endl;
 	} catch (...) {
 		std::cerr << "fitsheader terminated by unknown exception";
