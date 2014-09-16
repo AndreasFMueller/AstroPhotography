@@ -4,6 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUtils.h>
+#include <stdexcept>
 
 namespace astro {
 
