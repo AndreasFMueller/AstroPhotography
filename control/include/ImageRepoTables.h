@@ -30,7 +30,7 @@ public:
 	int	pixeltype;
 	double	exposuretime;
 	double	temperature;
-	std::string	category;
+	std::string	purpose;
 	std::string	bayer;
 	std::string	observation;
 	std::string	uuid;

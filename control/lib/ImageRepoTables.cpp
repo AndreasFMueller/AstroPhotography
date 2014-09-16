@@ -21,7 +21,7 @@ ImageInfo::ImageInfo() {
 	depth = 1;
 	exposuretime = 0;
 	temperature = 0;
-	category = "light";
+	purpose = "light";
 	bayer = "    ";
 	observation = "1970-01-01T00:00:00.000";
 	xbin = 1;
@@ -41,7 +41,7 @@ bool	ImageInfo::operator==(const ImageInfo& other) const {
 	if (pixeltype != other.pixeltype) { return false; }
 	if (exposuretime != other.exposuretime) { return false; }
 	if (temperature != other.temperature) { return false; }
-	if (category != other.category) { return false; }
+	if (purpose != other.purpose) { return false; }
 	if (bayer != other.bayer) { return false; }
 	if (observation != other.observation) { return false; }
 	if (uuid != other.uuid) { return false; }
@@ -72,7 +72,7 @@ std::string	ImageTableAdapter::createstatement() {
 		"    pixeltype int not null default 16,\n"
 		"    exposuretime float not null default 1,\n"
 		"    temperature float not null default 0,\n"
-		"    category char(5) not null default 'light',\n"
+		"    purpose char(5) not null default 'light',\n"
 		"    bayer char(4) not null default '    ',\n"
 		"    observation varchar(25) not null,\n"
 		"    uuid varchar(36) not null,\n"
@@ -98,7 +98,7 @@ ImageRecord	ImageTableAdapter::row_to_object(int objectid,
 	record.pixeltype = row["pixeltype"]->intValue();
 	record.exposuretime = row["exposuretime"]->doubleValue();
 	record.temperature = row["temperature"]->doubleValue();
-	record.category = row["category"]->stringValue();
+	record.purpose = row["purpose"]->stringValue();
 	record.bayer = row["bayer"]->stringValue();
 	record.observation = row["observation"]->stringValue();
 	record.uuid = row["uuid"]->stringValue();
@@ -120,7 +120,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 	spec.insert(Field("pixeltype", factory.get(imagerec.pixeltype)));
 	spec.insert(Field("exposuretime", factory.get(imagerec.exposuretime)));
 	spec.insert(Field("temperature", factory.get(imagerec.temperature)));
-	spec.insert(Field("category", factory.get(imagerec.category)));
+	spec.insert(Field("purpose", factory.get(imagerec.purpose)));
 	spec.insert(Field("bayer", factory.get(imagerec.bayer)));
 	spec.insert(Field("observation", factory.get(imagerec.observation)));
 	spec.insert(Field("uuid", factory.get(imagerec.uuid)));

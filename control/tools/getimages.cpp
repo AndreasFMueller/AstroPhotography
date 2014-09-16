@@ -276,6 +276,11 @@ int	main(int argc, char *argv[]) {
 	int	counter = 0;
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image");
+		if ((*imageptr)->hasMetadata(std::string("INSTRUME"))) {
+		}
+		(*imageptr)->setMetadata(
+			FITSKeywords::meta(std::string("INSTRUME"),
+				instrument->name()));
 		repo.save(*imageptr);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);

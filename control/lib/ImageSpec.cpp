@@ -9,7 +9,8 @@ namespace astro {
 namespace project {
 
 ImageSpec::ImageSpec() {
-	_category = light;
+	//_purpose = astro::camera::Exposure::light;
+	_purpose = (astro::camera::Exposure::purpose_t)-1;
 	_exposuretime = -1;
 	_temperature = -300;
 }

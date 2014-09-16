@@ -19,6 +19,7 @@
 using namespace astro::config;
 using namespace astro::project;
 using namespace astro::io;
+using namespace astro::camera;
 
 namespace astro {
 
@@ -49,11 +50,11 @@ int	command_list(const std::string& reponame) {
 	if (images.size() == 0) {
 		return EXIT_SUCCESS;
 	}
-	std::cout << "[ id ] camera   size       bin   exp  temp observation    project  ";
+	std::cout << "[ id ] camera   size       purpose bin   exp  temp observation    project  ";
 	if (verbose) {
 		std::cout << "UUID                                ";
+		std::cout << "filename";
 	}
-	std::cout << "filename";
 	std::cout << std::endl;
 
 	std::for_each(images.begin(), images.end(),
@@ -63,21 +64,23 @@ int	command_list(const std::string& reponame) {
 				image.camera().c_str());
 			std::cout << stringprintf("%-11.11s",
 				image.size().toString().c_str());
+			std::cout << stringprintf("%-8.8s",
+				Exposure::purpose2string(image.purpose()).c_str());
 			std::cout << stringprintf("%-3.3s ",
 				image.binning().toString().substr(1,3).c_str());
 			std::cout << stringprintf("%5.0f",
 				image.exposuretime());
 			std::cout << stringprintf("%6.1f ",
 				image.temperature());
-			std::cout << timeformat("%d.%m.%y %H:%m ",
+			std::cout << timeformat("%d.%m.%y %H:%M ",
 				image.observation());
 			std::cout << stringprintf("%-8.8s ",
 				image.project().c_str());
 			if (verbose) {
 				std::cout << stringprintf("%-36.36s ",
 					((std::string)image.uuid()).c_str());
+				std::cout << image.filename();
 			}
-			std::cout << image.filename();
 			std::cout << std::endl;
 		}
 	);
@@ -169,7 +172,7 @@ int	command_show(const std::string& reponame,
 	std::cout << "project:         " << image.project() << std::endl;
 	std::cout << "created:         " << timeformat("%Y-%m-%d %H:%M:%S",
 		image.created()) << std::endl;
-	std::cout << "camera:          " << image.camera() << std::endl;
+	std::cout << "instrument:      " << image.camera() << std::endl;
 	std::cout << "size:            " << image.size().toString() << std::endl;
 	std::cout << "binning:         " << image.binning().toString() << std::endl;
 	std::cout << "exposure time:   " << image.exposuretime() << std::endl;

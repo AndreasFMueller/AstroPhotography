@@ -218,7 +218,7 @@ Metavalue::operator	FITSdate() const {
 
 std::string	Metavalue::toString() const {
 	return stringprintf("%s[%s]: %s / %s", 
-		keyword.c_str(), datatype.name(),
+		keyword.c_str(), demangle(datatype.name()).c_str(),
 		value.c_str(), comment.c_str());
 }
 

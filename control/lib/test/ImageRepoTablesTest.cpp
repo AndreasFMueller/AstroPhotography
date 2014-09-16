@@ -62,7 +62,7 @@ void	ImageRepoTablesTest::testImageRepoTable() {
 	imageinfo1.pixeltype = 8;
 	imageinfo1.exposuretime = 47.11;
 	imageinfo1.temperature = -47.11;
-	imageinfo1.category = "light";
+	imageinfo1.purpose = "light";
 	imageinfo1.bayer = "RGGB";
 	imageinfo1.observation = "1962-02-14T12:34:56.777";
 	long	id = images.add(imageinfo1);
@@ -85,7 +85,7 @@ void	ImageRepoTablesTest::testImageRepoTable() {
 	CPPUNIT_ASSERT(imageinfo1.pixeltype == imageinfo2.pixeltype);
 	CPPUNIT_ASSERT(imageinfo1.exposuretime == imageinfo2.exposuretime);
 	CPPUNIT_ASSERT(imageinfo1.temperature == imageinfo2.temperature);
-	CPPUNIT_ASSERT(imageinfo1.category == imageinfo2.category);
+	CPPUNIT_ASSERT(imageinfo1.purpose == imageinfo2.purpose);
 	CPPUNIT_ASSERT(imageinfo1.bayer == imageinfo2.bayer);
 	CPPUNIT_ASSERT(imageinfo1.observation == imageinfo2.observation);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImageRepoTable() end");
@@ -104,7 +104,7 @@ void	ImageRepoTablesTest::testMetadataTable() {
 	imageinfo1.pixeltype = 8;
 	imageinfo1.exposuretime = 47.11;
 	imageinfo1.temperature = -47.11;
-	imageinfo1.category = "light";
+	imageinfo1.purpose = "light";
 	imageinfo1.bayer = "RGGB";
 	imageinfo1.observation = "1962-02-14T12:34:56.777";
 	long	id = images.add(imageinfo1);

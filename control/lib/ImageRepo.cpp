@@ -122,7 +122,7 @@ void	ImageRepo::scan_file(const std::string& filename) {
 		imageinfo.temperature
 			= (double)infile.getMetadata("CCD-TEMP");
 	} catch(...) { }
-	imageinfo.category = "light";
+	imageinfo.purpose = "light";
 	imageinfo.bayer = "    ";
 	imageinfo.observation = "1970-01-01T00:00:00.000";
 	imageinfo.uuid = "";
@@ -237,15 +237,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	result.camera(imageinfo.camera);
 	result.exposuretime(imageinfo.exposuretime);
 	result.temperature(imageinfo.temperature);
-	if (imageinfo.category == "light") {
-		result.category(ImageSpec::light);
-	}
-	if (imageinfo.category == "dark") {
-		result.category(ImageSpec::dark);
-	}
-	if (imageinfo.category == "flat") {
-		result.category(ImageSpec::flat);
-	}
+	result.purpose(Exposure::string2purpose(imageinfo.purpose));
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
 	result.uuid(UUID(imageinfo.uuid));
@@ -327,7 +319,7 @@ long	ImageRepo::save(ImagePtr image) {
 			= (double)image->getMetadata("CCD-TEMP");
 	} catch (...) { }
 	try {
-		imageinfo.category
+		imageinfo.purpose
 			= (std::string)image->getMetadata("PURPOSE");
 	} catch (...) { }
 	try {
@@ -494,18 +486,13 @@ public:
  */
 std::set<ImageEnvelope>	ImageRepo::get(const ImageSpec& spec) {
 	std::list<condition>	conditions;
-	// add category condition
-	switch (spec.category()) {
-	case ImageSpec::light:
-		conditions.push_back(condition("category = 'light'"));
-		break;
-	case ImageSpec::dark:
-		conditions.push_back(condition("category = 'dark'"));
-		break;
-	case ImageSpec::flat:
-		conditions.push_back(condition("category = 'flat'"));
-		break;
+	// add purpose condition
+	if (spec.purpose() >= 0) {
+		conditions.push_back(condition(stringprintf("purpose = '%s'",
+			Exposure::purpose2string(spec.purpose()).c_str())));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "conditions so far: %d",
+		conditions.size());
 
 	// add cameraname condition
 	if (spec.camera().size() > 0) {
@@ -532,6 +519,11 @@ std::set<ImageEnvelope>	ImageRepo::get(const ImageSpec& spec) {
 	if (spec.project().size() > 0) {
 		conditions.push_back(condition(stringprintf(
 			"project = '%s'", spec.project().c_str())));
+	}
+
+	// if we have no conditions so far, build an empty condition
+	if (0 == conditions.size()) {
+		conditions.push_back(condition("0 = 0"));
 	}
 
 	// concatenate the conditions

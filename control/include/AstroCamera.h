@@ -93,7 +93,7 @@ public:
 	shutter_state	shutter;
 
 	// fields related tot he exposure purpose
-	typedef	enum { light, dark, flat } purpose_t;
+	typedef	enum { light = 0, dark = 1, flat = 2 } purpose_t;
 	purpose_t	purpose;
 static std::string	purpose2string(purpose_t p);
 static purpose_t	string2purpose(const std::string& p);

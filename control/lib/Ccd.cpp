@@ -316,7 +316,8 @@ astro::image::ImagePtr	Ccd::getImage() {
 		image->size().width(), image->size().height());
 
 	// add exposure meta data
-	exposure.addToImage(*image);
+	addMetadata(*image);
+	//exposure.addToImage(*image);
 
 	// XXX if available, position information from the mount should
 	//     also be added
@@ -414,6 +415,7 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
 void	Ccd::addMetadata(ImageBase& image) {
 	this->addExposureMetadata(image);
 	this->addTemperatureMetadata(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding DATE-OBS and UUID");
 	image.setMetadata(
 		FITSKeywords::meta(std::string("DATE-OBS"),
 			FITSdate()));

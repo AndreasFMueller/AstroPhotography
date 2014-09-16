@@ -20,13 +20,11 @@ namespace project {
  * the attributes relevant to building dark and flat images.
  */
 class ImageSpec {
-public:
-	typedef enum { light = 0, dark = 1, flat = 2 } category_t;
 private:
-	category_t	_category;
+	astro::camera::Exposure::purpose_t	_purpose;
 public:
-	category_t	category() const { return _category; }
-	void	category(category_t c) { _category = c; }
+	astro::camera::Exposure::purpose_t	purpose() const { return _purpose; }
+	void	purpose(astro::camera::Exposure::purpose_t p) { _purpose = p; }
 
 	// name of the camera that took the image
 private:
@@ -139,12 +137,12 @@ public:
 	float	temperature() const { return _temperature; }
 	void	temperature(float t) { _temperature = t; }
 
-	// category
+	// purpose
 private:
-	ImageSpec::category_t	_category;
+	astro::camera::Exposure::purpose_t	_purpose;
 public:
-	ImageSpec::category_t	category() const { return _category; }
-	void	category(ImageSpec::category_t c) { _category = c; }
+	astro::camera::Exposure::purpose_t	purpose() const { return _purpose; }
+	void	purpose(astro::camera::Exposure::purpose_t c) { _purpose = c; }
 
 	// bayer
 private:

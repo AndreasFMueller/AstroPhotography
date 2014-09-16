@@ -15,6 +15,7 @@ using namespace astro::project;
 using namespace astro::persistence;
 using namespace astro::image;
 using namespace astro::io;
+using namespace astro::camera;
 
 namespace astro {
 namespace test {
@@ -112,7 +113,7 @@ void	ImageRepoTest::testSelect() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSelect() begin");
 	ImageRepo	repo("repotest", database, directory, false);
 	ImageSpec	spec;
-	spec.category(ImageSpec::dark);
+	spec.purpose(Exposure::dark);
 	spec.temperature(-47);
 	std::set<ImageEnvelope>	resultset = repo.get(spec);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d darks with temperature -47",
@@ -124,7 +125,7 @@ void	ImageRepoTest::testRemove() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRemove() begin");
 	ImageRepo	repo("repotest", database, directory, false);
 	ImageSpec	spec;
-	spec.category(ImageSpec::dark);
+	spec.purpose(Exposure::dark);
 	std::set<ImageEnvelope>	resultset = repo.get(spec);
 	std::set<ImageEnvelope>::const_iterator	ii;
 	for (ii = resultset.begin(); ii != resultset.end(); ii++) {
