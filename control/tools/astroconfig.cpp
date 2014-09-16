@@ -36,26 +36,40 @@ static struct option	longopts[] = {
  */
 void	usage(const char *progname) {
 	Path	path(progname);
+	std::string	p = std::string("    ") + path.basename();
 	std::cerr << "usage:" << std::endl;
-	std::cerr << path.basename() << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
-	std::cerr << "Get, set or delete configuration variables in domain (currently only 'global'";
-	std::cerr << "is valid), identified by the section and the name.";
 	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] imagerepo list" << std::endl;
-	std::cerr << path.basename() << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << p << " [ options ] help" << std::endl;
 	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] imagerepo remove <reponame>";
+	std::cerr << "display a help message about the astrconfig command";
+	std::cerr << std::endl;
+	std::cerr << std::endl;
+	std::cerr << p << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
+	std::cerr << std::endl;
+	std::cerr << "Get, set or delete configuration variables in domain "
+		"(currently only" << std::endl;
+	std::cerr << "'global' is valid), identified by the section and "
+		"the name." << std::endl;
+	std::cerr << std::endl;
+	std::cerr << p << " [ options ] imagerepo list" << std::endl;
+	std::cerr << p << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << std::endl;
+	std::cerr << p << " [ options ] imagerepo remove <reponame>";
+	std::cerr << std::endl;
 	std::cerr << std::endl;
 	std::cerr << "list, add or delete image repositores" << std::endl;
-	std::cerr << path.basename() << " [ options ] project list";
 	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] project add <projname> ...";
+	std::cerr << p << " [ options ] project list";
 	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] project show <projname>";
+	std::cerr << p << " [ options ] project add <projname> ...";
 	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] project remove <projname>";
+	std::cerr << p << " [ options ] project show <projname>";
+	std::cerr << std::endl;
+	std::cerr << p << " [ options ] project remove <projname>";
+	std::cerr << std::endl;
 	std::cerr << std::endl;
 	std::cerr << "list, add or remove projects, show project details";
+	std::cerr << std::endl;
 	std::cerr << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
