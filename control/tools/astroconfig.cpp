@@ -66,6 +66,14 @@ void	usage(const char *progname) {
 }
 
 /**
+ * \brief help command
+ */
+int	command_help(const std::vector<std::string>& /* arguments */) {
+	usage("astroconfig");
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief set a global configuration variable
  */
 int	command_set_global(const std::vector<std::string>& arguments) {
@@ -377,7 +385,9 @@ int	main(int argc, char *argv[]) {
 	}
 
 	std::string	verb = arguments[0];
-	
+	if (verb == "help") {
+		return command_help(arguments);
+	}
 	if (verb == "get") {
 		return command_get(arguments);
 	}
