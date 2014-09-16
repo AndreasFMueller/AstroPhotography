@@ -58,7 +58,7 @@ int	show_imageinfo(ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring nans");
 	}
 	
-	std::cout << "min = " << minimum;
+	std::cout << "min=" << minimum;
 	if (median < mean) {
 		std::cout << " median=" << median;
 		std::cout << " mean=" << mean;
@@ -186,17 +186,14 @@ int	imageinfo_main(int argc, char *argv[]) {
 		throw std::runtime_error("not image file arguments");
 	}
 
-	int	counter = 0;
 	for (; optind < argc; optind++) {
-		if (counter++ > 0) {
-			std::cout << std::endl;
-		}
 		std::string	argument(argv[optind]);
 		if (reponame.size() != 0) {
 			show_imagerepo(argument);
 		} else {
-			return show_imagefile(argument);
+			show_imagefile(argument);
 		}
+		std::cout << std::endl;
 	}
 	
 	return EXIT_SUCCESS;
