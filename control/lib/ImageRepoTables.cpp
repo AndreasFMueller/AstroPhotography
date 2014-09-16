@@ -78,8 +78,8 @@ std::string	ImageTableAdapter::createstatement() {
 		"    uuid varchar(36) not null,\n"
 		"    primary key(id)\n"
 		");\n"
-		"create unique index imageserver_x1 on images(filename);\n"
-		"create unique index imageserver_x2 on images(uuid);\n"
+		"create unique index images_x1 on images(filename);\n"
+		"create unique index images_x2 on images(uuid);\n"
 	);
 }
 

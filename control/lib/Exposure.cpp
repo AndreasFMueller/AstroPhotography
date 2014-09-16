@@ -82,7 +82,8 @@ std::string	Exposure::purpose2string(purpose_t p) {
 	case light:
 		return std::string("light");
 	}
-	throw std::runtime_error("unknown purpose");
+	std::string	msg = stringprintf("unknown purpose %d", p);
+	throw std::runtime_error(msg);
 }
 
 Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
@@ -92,10 +93,11 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 	if (p == "flat") {
 		return flat;
 	}
-	if (p == "ligth") {
+	if (p == "light") {
 		return light;
 	}
-	throw std::runtime_error("unknown purpose");
+	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
+	throw std::runtime_error(msg);
 }
 
 std::string	Exposure::state2string(State s) {

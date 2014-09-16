@@ -333,6 +333,8 @@ astro::image::ImagePtr	Ccd::getImage() {
  * \param imagecount	number of images to retrieve
  */
 astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting image sequence of %d images",
+		imagecount);
 	astro::image::ImageSequence	result;
 	unsigned int	k = 0;
 	while (k < imagecount) {
@@ -342,6 +344,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 			usleep(1000000 * exposure.exposuretime);
 		}
 		wait();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image complete");
 		result.push_back(getImage());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %d retrieved", k);
 		k++;
