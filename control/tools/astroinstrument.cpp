@@ -46,6 +46,7 @@ void	usage(const std::string& progname) {
 	std::cout << prg << " [ options ] <name> update <type> "
 		"[ attr=value ]";
 	std::cout << std::endl;
+	std::cout << prg << " [ options ] help" << std::endl;
 	std::cout << "the following attributes are known:" << std::endl;
 	std::cout << "  unit=<u>      " << std::endl;
 	std::cout << "  device=<d>    " << std::endl;
@@ -57,6 +58,14 @@ void	usage(const std::string& progname) {
 	std::cout << " -d,--debug          increase debug level" << std::endl;
 	std::cout << " -h,--help           show help message and exit";
 	std::cout << std::endl;
+}
+
+/**
+ * \brief display a help message
+ */
+int	cmd_help() {
+	usage("astroinstrument");
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -315,6 +324,9 @@ int	commands(const std::vector<std::string>& arguments) {
 	// generic list command
 	if (arguments[0] == "list") {
 		return cmd_list();
+	}
+	if (arguments[0] == "help") {
+		return cmd_help();
 	}
 
 	// instrument specific commands
