@@ -23,8 +23,6 @@ void	Metavalue::standardize() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "check value for PURPOSE: [%s]",
 			value.c_str());
 		value = trim(value);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
-				value.c_str());
 		if ((value != "dark") && (value != "flat")
 			&& (value != "light")) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
