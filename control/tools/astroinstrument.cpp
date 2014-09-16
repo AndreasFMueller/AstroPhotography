@@ -13,6 +13,7 @@
 #include <AstroPersistence.h>
 #include <InstrumentTables.h>
 #include <algorithm>
+#include <stacktrace.h>
 
 using namespace astro::config;
 using namespace astro::persistence;
@@ -342,6 +343,8 @@ int	commands(const std::vector<std::string>& arguments) {
 		throw std::runtime_error("not enough arguments");
 	}
 	std::string	instrumentname = arguments[1];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrumentname = %s",
+		instrumentname.c_str());
 	if (arguments[0] == "add") {
 		return cmd_add(instrumentname, arguments);
 	}
@@ -353,23 +356,27 @@ int	commands(const std::vector<std::string>& arguments) {
 	}
 	// component commands start here
 	instrumentname = arguments[0];
-	std::string	componenttype = arguments[2];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrumentname = %s",
+		instrumentname.c_str());
 	if (arguments.size() < 3) {
 		throw std::runtime_error("not enough arguments");
 	}
-	if (arguments[1] == "add") {
+	std::string	componenttype = arguments[2];
+	std::string	cmd = arguments[1];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "command = %s", cmd.c_str());
+	if (cmd == "add") {
 		return cmd_component_add(instrumentname, componenttype,
 			arguments);
 	}
-	if (arguments[1] == "update") {
+	if (cmd == "update") {
 		return cmd_component_update(instrumentname, componenttype,
 			arguments);
 	}
-	if (arguments[1] == "remove") {
+	if (cmd == "remove") {
 		return cmd_component_remove(instrumentname, componenttype,
 			arguments);
 	}
-	if (arguments[1] == "show") {
+	if (cmd == "show") {
 		return cmd_component_show(instrumentname, componenttype,
 			arguments);
 	}
@@ -414,6 +421,7 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
 	try {
 		return astro::main(argc, argv);
 	} catch (const std::exception& x) {
