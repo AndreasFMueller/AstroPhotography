@@ -38,8 +38,13 @@ void	usage(const std::string& progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << prg << " [ options ] list" << std::endl;
 	std::cout << prg << " [ options ] { add | show | remove } <name>";
+	std::cout << std::endl;
 	std::cout << prg << " [ options ] <name> add <cname> [ attr=value ]";
-	std::cout << prg << " [ options ] <name> { show | remove } <type> [ attr=value ]";
+	std::cout << std::endl;
+	std::cout << prg << " [ options ] <name> { show | remove } <type>";
+	std::cout << std::endl;
+	std::cout << prg << " [ options ] <name> update <type> "
+		"[ attr=value ]";
 	std::cout << std::endl;
 	std::cout << "the following attributes are known:" << std::endl;
 	std::cout << "  unit=<u>      " << std::endl;
@@ -149,8 +154,8 @@ int	cmd_component_add(const std::string& instrumentname,
 	// check for the type
 	InstrumentComponent::component_t 	ctype
 		= InstrumentComponent::direct;
-	if (av.has("type")) {
-		std::string	t = av("type");
+	if (av.has("kind")) {
+		std::string	t = av("kind");
 		ctype = InstrumentComponentTableAdapter::component_type(t);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "the component type is %s", 
@@ -216,10 +221,10 @@ int	cmd_component_update(const std::string& instrumentname,
 	AttributeValuePairs	av(arguments, 3);
 
 	// check for the type
-	if (av.has("type")) {
+	if (av.has("kind")) {
 		InstrumentComponent::component_t	ctype
 			= InstrumentComponentTableAdapter::component_type(
-				av("type"));
+				av("kind"));
 		if (ctype != component->component_type()) {
 			throw std::runtime_error("cannot change type, delete "
 				"and add component of new type");

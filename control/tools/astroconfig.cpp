@@ -341,15 +341,13 @@ int	command_list(const std::vector<std::string>& arguments) {
  * \brief main method of the astroconfig program
  */
 int	main(int argc, char *argv[]) {
-	std::string	configfile;
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
-			configfile = std::string(optarg);
-			Configuration::set_default(configfile);
+			Configuration::set_default(std::string(optarg));
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
