@@ -36,7 +36,7 @@ static struct option	longopts[] = {
  */
 void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
-	std::cout << "usage:" << std::endl;
+	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << prg << " [ options ] list" << std::endl;
 	std::cout << prg << " [ options ] { add | show | remove } <name>";
@@ -50,17 +50,23 @@ void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << prg << " [ options ] help" << std::endl;
 	std::cout << std::endl;
-	std::cout << "the following attributes are known:" << std::endl;
-	std::cout << "  unit=<u>      unit number of a device" << std::endl;
-	std::cout << "  device=<d>    device name of a direct component";
+	std::cout << "The following attributes are known (in brackets the "
+		"kinds of components" << std::endl;
+	std::cout << "supporting this attribute, the letters mean: d=derived, "
+		"m=mapped, r=derived):" << std::endl;
+	std::cout << "  unit=<u>      unit number of a device [all]";
 	std::cout << std::endl;
-	std::cout << "  name=<n>      name of a mapped component" << std::endl;
-	std::cout << "  kind=<k>      component kind (direct, mapped, derived)";
+	std::cout << "  device=<d>    device name of a direct component [d]";
+	std::cout << std::endl;
+	std::cout << "  name=<n>      name of a mapped component [m]" << std::endl;
+	std::cout << "  kind=<k>      component kind (direct, mapped, derived) [all]";
 	std::cout << std::endl;
 	std::cout << "  from=<f>      the device type from which this component"
 		" is derived" << std::endl;
+	std::cout << "  server=<s>    component is accessible on server <s>";
 	std::cout << std::endl;
-	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Options:" << std::endl;
 	std::cout << " -c,--config=<cfg>   use configuraton file <cfg> instead "
 			"of the default";
 	std::cout << std::endl;
@@ -184,13 +190,17 @@ int	cmd_component_add(const std::string& instrumentname,
 	if (av.has("unit")) {
 		unit = std::stoi(av("unit"));
 	}
+	std::string	servername;
+	if (av.has("server")) {
+		servername = av("server");
+	}
 
 	// now use different code for the various types of component classes
 	switch (ctype) {
 	case InstrumentComponent::direct:
 		component = InstrumentComponentPtr(
 			new InstrumentComponentDirect(type,
-				DeviceName(av("device")), unit));
+				DeviceName(av("device")), unit, servername));
 		break;
 	case InstrumentComponent::mapped:
 		// construct a mapped component
@@ -257,6 +267,12 @@ int	cmd_component_update(const std::string& instrumentname,
 	case InstrumentComponent::direct:
 		if (av.has("device")) {
 			component->name(av("device"));
+		}
+		if (av.has("server")) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "update servername to"
+				" '%s'", av("server").c_str());
+			dynamic_cast<InstrumentComponentDirect *>(&*component)
+				->servername(av("server"));
 		}
 		break;
 	case InstrumentComponent::mapped:

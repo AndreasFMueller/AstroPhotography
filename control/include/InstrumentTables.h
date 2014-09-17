@@ -67,6 +67,7 @@ public:
 	std::string	componenttype;
 	std::string	devicename;
 	int	unit;
+	std::string	servername;
 };
 
 /**

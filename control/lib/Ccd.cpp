@@ -317,10 +317,12 @@ astro::image::ImagePtr	Ccd::getImage() {
 
 	// add exposure meta data
 	addMetadata(*image);
-	//exposure.addToImage(*image);
 
 	// XXX if available, position information from the mount should
 	//     also be added
+
+	// set state to idle
+	state = Exposure::idle;
 
 	// that's it, return the image
 	return image;

@@ -29,9 +29,9 @@ std::string	InstrumentComponent::component_typename() const {
 }
 
 std::string	InstrumentComponent::toString() {
-	return stringprintf("%-16.16s %-8.8s %-40.40s  %ld",
+	return stringprintf("%-16.16s %-8.8s %-32.32s  %-2ld %s",
 		type_name().c_str(), component_typename().c_str(),
-		name().c_str(), unit());
+		name().c_str(), unit(), servername().c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -77,6 +77,11 @@ void	InstrumentComponentMapped::name(const std::string& n) {
 	_name = n;
 }
 
+std::string	InstrumentComponentMapped::servername() {
+	DeviceMapperPtr	devicemapper = DeviceMapper::get(_database);
+	return devicemapper->find(_name).servername();
+}
+
 //////////////////////////////////////////////////////////////////////
 // Instrument Component methods fro derived components
 //////////////////////////////////////////////////////////////////////
@@ -100,6 +105,10 @@ std::string	InstrumentComponentDerived::name() const {
 
 void	InstrumentComponentDerived::name(const std::string& n) {
 	_derivedfrom = InstrumentComponentTableAdapter::type(n);
+}
+
+std::string	InstrumentComponentDerived::servername() {
+	return _instrument->servername(_derivedfrom);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -152,6 +161,13 @@ std::string	Instrument::name(DeviceName::device_type type) {
  */
 DeviceName	Instrument::devicename(DeviceName::device_type type) {
 	return component(type)->devicename();
+}
+
+/**
+ * \brief Get the server name on which the device runs
+ */
+std::string	Instrument::servername(DeviceName::device_type type) {
+	return component(type)->servername();
 }
 
 /**

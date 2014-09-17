@@ -52,7 +52,7 @@ void	usage(const char *progname) {
 		"the name." << std::endl;
 	std::cerr << std::endl;
 	std::cerr << p << " [ options ] imagerepo list" << std::endl;
-	std::cerr << p << " [ options ] imagerepo add <reponame> <director>";
+	std::cerr << p << " [ options ] imagerepo add <reponame> <directory>";
 	std::cerr << std::endl;
 	std::cerr << p << " [ options ] imagerepo remove <reponame>";
 	std::cerr << std::endl;

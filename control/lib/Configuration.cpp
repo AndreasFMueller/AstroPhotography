@@ -358,7 +358,7 @@ InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 			iptr = InstrumentComponentPtr(
 				new InstrumentComponentDirect(type,
 					DeviceName(ptr->devicename),
-					ptr->unit));
+					ptr->unit, ptr->servername));
 			break;
 		case InstrumentComponent::derived:
 			// in this case, the devicename is really the component
@@ -397,6 +397,11 @@ static InstrumentComponentRecord	componentrecord(long instrumentid,
 		= InstrumentComponentTableAdapter::type(
 			component->type());
 	componentrecord.devicename = component->name();
+	if (component->component_type() == InstrumentComponent::direct) {
+		componentrecord.servername = component->servername();
+	} else {
+		componentrecord.servername = "";
+	}
 
 	// that's it, return the record
 	return componentrecord;

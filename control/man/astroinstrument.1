@@ -166,6 +166,12 @@ Only for mapped components, and required for them.
 from
 Defines the type of component this component is derived from. Only
 for derived components, and required for them.
+.TP
+servername
+Name of the server on which this device is accessible. Only for direct
+components. Derived components get their servername from the component
+they are derived from. Mapped components get the server name from the
+device mapping.
 
 .SH OPTIONS
 .TP

@@ -57,11 +57,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		exposure.exposuretime, (light) ? "light" : "dark");
 
 	// check the current state of the camera
-//	while (1) {
-//		usleep(100000);
-//		debug(LOG_DEBUG, DEBUG_LOG, 0, "keep waiting");
-		exposureStatus();
-//	}
+	exposureStatus();
 }
 
 std::string	state2string(QSICamera::CameraState qsistate) {
@@ -178,7 +174,6 @@ ImagePtr	QsiCcd::getRawImage() {
 	Image<unsigned short>	*image = new Image<unsigned short>(size);
 	ImagePtr	result(image);
 	_camera.camera().get_ImageArray(image->pixels);
-	addMetadata(*image);
 	return result;
 }
 

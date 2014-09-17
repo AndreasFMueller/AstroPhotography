@@ -602,7 +602,7 @@ static const FITSKeyword&	keyword(const std::string& name) {
 	std::map<std::string, FITSKeyword>::const_iterator	k
 		= keywordmap.find(name);
 	if (keywordmap.find(name) == keywordmap.end()) {
-		std::string	msg = stringprintf("unknow FITS keyword '%s'",
+		std::string	msg = stringprintf("unknown FITS keyword '%s'",
 			name.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);

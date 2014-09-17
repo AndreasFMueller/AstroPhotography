@@ -149,6 +149,7 @@ std::string	InstrumentComponentTableAdapter::createstatement() {
 		"    componenttype varchar(16) not null,\n"
 		"    device varchar(128) not null,\n"
 		"    unit int not null,\n"
+		"    servername varchar(128) not null default '',\n"
 		"    primary key(id)\n"
 		");\n"
 		"create unique index components_idx1 "
@@ -166,6 +167,7 @@ InstrumentComponentRecord	InstrumentComponentTableAdapter::row_to_object(int obj
 	record.componenttype = row["componenttype"]->stringValue();
 	record.devicename = row["device"]->stringValue();
 	record.unit = row["unit"]->intValue();
+	record.servername = row["servername"]->stringValue();
 	return record;
 }
 
@@ -178,6 +180,7 @@ UpdateSpec	InstrumentComponentTableAdapter::object_to_updatespec(const Instrumen
 				factory.get(component.componenttype)));
 	spec.insert(Field("device", factory.get(component.devicename)));
 	spec.insert(Field("unit", factory.get(component.unit)));
+	spec.insert(Field("servername", factory.get(component.servername)));
 	return spec;
 }
 

@@ -15,7 +15,7 @@ namespace project {
 // ImageInfo implementation (if necessary)
 //////////////////////////////////////////////////////////////////////
 ImageInfo::ImageInfo() {
-	project = "unknow";
+	project = "unknown";
 	created = time(NULL);
 	pixeltype = 8;
 	depth = 1;

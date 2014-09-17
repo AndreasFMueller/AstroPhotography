@@ -142,6 +142,7 @@ public:
 	virtual void	unit(int u) = 0;
 	virtual std::string	name() const = 0;
 	virtual void	name(const std::string& n) = 0;
+	virtual std::string	servername() = 0;
 	virtual std::string	toString();
 };
 typedef std::shared_ptr<InstrumentComponent>	InstrumentComponentPtr;
@@ -165,6 +166,7 @@ public:
 	virtual void	unit(int u);
 	virtual std::string	name() const;
 	virtual void	name(const std::string& n);
+	virtual std::string	servername();
 };
 
 /**
@@ -177,11 +179,14 @@ public:
 class InstrumentComponentDirect : public InstrumentComponent {
 	DeviceName	_devicename;
 	int	_unit;
+	std::string	_servername;
 public:
 	InstrumentComponentDirect(DeviceName::device_type t,
-		const DeviceName& devicename, int unit)
+		const DeviceName& devicename, int unit,
+		const std::string& servername)
 		: InstrumentComponent(t, InstrumentComponent::direct),
-		  _devicename(devicename), _unit(unit) {
+		  _devicename(devicename), _unit(unit),
+		  _servername(servername) {
 	}
 	virtual DeviceName	devicename() { return _devicename; }
 	virtual int	unit() { return _unit; }
@@ -190,6 +195,8 @@ public:
 	virtual void	name(const std::string& n) {
 		_devicename = DeviceName(n);
 	}
+	virtual std::string	servername() { return _servername; }
+	virtual void	servername(const std::string& s) { _servername = s; }
 };
 
 class Instrument;
@@ -219,6 +226,7 @@ public:
 	virtual void	unit(int u) { _unit = u; }
 	virtual std::string	name() const;
 	virtual void	name(const std::string& n);
+	virtual std::string	servername();
 	DeviceName::device_type	derivedfrom() const { return _derivedfrom; }
 };
 
@@ -260,6 +268,7 @@ public:
 	DeviceName	devicename(DeviceName::device_type type);
 	std::string	name(DeviceName::device_type type);
 	int	unit(DeviceName::device_type type);
+	std::string	servername(DeviceName::device_type type);
 
 	void	add(InstrumentComponentPtr component);
 	void	remove(DeviceName::device_type type);
