@@ -67,7 +67,7 @@ ImageRepo	ImageRepoTable::get(const std::string& name) {
 				name.c_str());
 	std::list<ImageRepoRecord>	records = select(condition);
 	if (0 == records.size()) {
-		std::string	msg = stringprintf("no image server named '%s'",
+		std::string	msg = stringprintf("no image repo named '%s'",
 			name.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -90,7 +90,7 @@ void	ImageRepoTable::remove(const std::string& name) {
 				name.c_str());
 	std::list<ImageRepoRecord>	records = select(condition);
 	if (0 == records.size()) {
-		std::string	msg = stringprintf("no image server named '%s'",
+		std::string	msg = stringprintf("no image repo named '%s'",
 			name.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);

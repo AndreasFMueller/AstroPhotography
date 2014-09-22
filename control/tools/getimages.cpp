@@ -34,34 +34,41 @@ namespace astro {
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -d             increase debug level" << std::endl;
-	std::cout << " -?             display this help message and exit"
+	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"
 		<< std::endl;
-	std::cout << " -n nImages     number of images to capture"
-		<< std::endl;
-	std::cout << " -e exptime     exposure time"
-		<< std::endl;
-	std::cout << " -p prefix      prefix of captured image files"
-		<< std::endl;
-	std::cout << " -o outputdir      outputdir directory" << std::endl;
-	std::cout << " -m modulename  driver modue name, type of the camera"
-		<< std::endl;
-	std::cout << " -C cameraid    camera number (default 0)"
-		<< std::endl;
-	std::cout << " -c ccdid       id of the CCD to use (default 0)"
-		<< std::endl;
-	std::cout << " -w width       width of image rectangle"
-		<< std::endl;
-	std::cout << " -h height      height of image rectangle"
-		<< std::endl;
-	std::cout << " -x xoffset     horizontal offset of image rectangle"
-		<< std::endl;
-	std::cout << " -y yoffset     vertical offset of image rectangle"
-		<< std::endl;
-	std::cout << " -t temp        cool the CCD to temperature <temp> in decrees Celsius"
-		<< std::endl;
-	std::cout << " -l             list only, lists the devices"
-		<< std::endl;
+	std::cout << " -c,--config=<cfg>     use configuration from file <cfg>";
+	std::cout << std::endl;
+	std::cout << " -d,--debug            increase debug level" << std::endl;
+	std::cout << " -e,--exposure=<e>     set exposure time to <e>";
+	std::cout << std::endl;
+	std::cout << " -f,--filter=<f>       use filter numbered <f>";
+	std::cout << std::endl;
+	std::cout << " -F,--focus=<F>        move to focus position <F> before "
+			"exposing";
+	std::cout << std::endl;
+	std::cout << " -h,--help             display this help message and exit";
+	std::cout << std::endl;
+	std::cout << " -i,--instrument=<INS> use instrument named INS";
+	std::cout << std::endl;
+	std::cout << " -n,--number=<n>       take <n> exposures with these "
+			"settings";
+	std::cout << std::endl;
+	std::cout << " -p,--purpose=<p>      images have purpose <p>, i.e. one of light, dark";
+	std::cout << std::endl;
+	std::cout << "                       or flat";
+	std::cout << std::endl;
+	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
+		"specified by <rec>.";
+	std::cout << std::endl;
+	std::cout << "                       <rec> must be of the form";
+	std::cout << std::endl;
+	std::cout << "                       widthxheight@(xoffset,yoffset)";
+	std::cout << std::endl;
+	std::cout << " -r,--repo=<repo>      write images to repository <repo>";
+	std::cout << std::endl;
+	std::cout << " -t,--temperature=<t>  cool ccd to temperature <t>";
+	std::cout << std::endl;
+
 }
 
 static struct option	longopts[] = {
@@ -181,7 +188,7 @@ int	main(int argc, char *argv[]) {
 	InstrumentPtr	instrument = config->instrument(instrumentname);
 
 	// make sure we have a repository, because we would not know
-	// where to store the images otherweise
+	// where to store the images otherwise
 	if (0 == reponame.size()) {
 		throw std::runtime_error("repository name not set");
 	}
@@ -211,6 +218,14 @@ int	main(int argc, char *argv[]) {
 				focuser->current(), focusposition);
 			usleep(100000);
 		}
+	}
+
+	// if the filter name is specified, get the filterwheel from the
+	// instrument and set the filter
+	if (filtername.size() > 0) {
+		FilterWheelPtr	filterwheel = instrument->filterwheel();
+		filterwheel->select(std::stoi(filtername));
+		filterwheel->wait(20);
 	}
 
 	// if the temperature is set, and the ccd has a cooler, lets
