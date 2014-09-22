@@ -69,6 +69,10 @@ void	FilterWheel::select(const std::string& filtername) {
 			return;
 		}
 	}
+	try {
+		select(std::stod(filtername));
+	} catch (...) {
+	}
 	std::string	msg = stringprintf("filter named '%s' not found",
 		filtername.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

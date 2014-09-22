@@ -224,7 +224,7 @@ int	main(int argc, char *argv[]) {
 	// instrument and set the filter
 	if (filtername.size() > 0) {
 		FilterWheelPtr	filterwheel = instrument->filterwheel();
-		filterwheel->select(std::stoi(filtername));
+		filterwheel->select(filtername);
 		filterwheel->wait(20);
 	}
 

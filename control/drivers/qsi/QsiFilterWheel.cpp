@@ -59,6 +59,10 @@ void	QsiFilterWheel::select(const std::string& filtername) {
 			return;
 		}
 	}
+	try {
+		select(std::stoi(filtername));
+	} catch (...) {
+	}
 	std::string	msg = stringprintf("filter '%s' not found",
 		filtername.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
