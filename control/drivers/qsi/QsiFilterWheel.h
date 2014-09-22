@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <QsiCamera.h>
+#include <vector>
 
 namespace astro {
 namespace camera {
@@ -16,12 +17,14 @@ namespace qsi {
 class QsiFilterWheel : public FilterWheel {
 	QsiCamera&	_camera;
 	unsigned int	nfilters;
+	std::vector<std::string>	filternames;
 public:
 	QsiFilterWheel(QsiCamera& camera);
 	virtual ~QsiFilterWheel();
 	virtual unsigned int	nFilters();
 	virtual unsigned int	currentPosition();
 	virtual void	select(size_t filterindex);
+	virtual void	select(const std::string& filtername);
 	virtual std::string	filterName(size_t filterindex);
 	virtual FilterWheel::State	getState();
 };

@@ -366,10 +366,11 @@ public:
 	FilterWheel(const std::string& name);
 	FilterWheel(const DeviceName& name);
 	virtual ~FilterWheel();
-	virtual unsigned int	nFilters() = 0;
+	virtual unsigned int	nFilters();
 	virtual unsigned int	currentPosition() = 0;
 	virtual void	select(size_t filterindex) = 0;
-	virtual std::string	filterName(size_t filterindex) = 0;
+	virtual void	select(const std::string& name);
+	virtual std::string	filterName(size_t filterindex);
 	virtual State	getState() = 0;
 	bool	wait(float timeout);
 };
