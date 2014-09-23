@@ -46,4 +46,20 @@ module snowstar {
 		float	x;
 		float	y;
 	};
+
+	/**
+	 * \brief sky point specification for equatorial mounts
+	 */
+	struct RaDec {
+		float	ra;	// right ascension in hours
+		float	dec;	// declination in degrees
+	};
+
+	/**
+	 * \brief sky point specification for AltAzimut mounts
+	 */
+	struct AzmAlt {
+		float	azm;	// azimut in degrees
+		float	alt;	// altitude above horizon in degrees
+	};
 };

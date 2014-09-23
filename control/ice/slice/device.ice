@@ -76,5 +76,20 @@ module snowstar {
 		ModuleNameList	getModuleNames();
 		DriverModule*	getModule(string name) throws NotFound;
 	};
+
+	// state of mount
+	enum mountstate { MountIDLE, MountTRACKING, MountGOTO };
+
+	/**
+	 * \brief 
+	 */
+	interface Mount {
+		mountstate	state();
+		RaDec	getRaDec();
+		AzmAlt	getAzmAlt();
+		void	GotoRaDec(RaDec radecposition);
+		void	GotoAzmAlt(AzmAlt azmaltposition);
+		void	cancel();
+	};
 };
 

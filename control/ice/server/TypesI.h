@@ -9,6 +9,7 @@
 #include <types.h>
 #include <AstroTypes.h>
 #include <AstroImage.h>
+#include <AstroCoordinates.h>
 
 namespace snowstar {
 
@@ -23,6 +24,12 @@ astro::image::ImageRectangle	convert(const ImageRectangle& rectangle);
 
 Point	convert(const astro::Point& point);
 astro::Point	convert(const Point& point);
+
+RaDec	convert(const astro::RaDec& radec);
+astro::RaDec	convert(const RaDec& radec);
+
+AzmAlt	convert(const astro::AzmAlt& azmalt);
+astro::AzmAlt	convert(const AzmAlt& azmalt);
 
 } // namespace snowstar
 

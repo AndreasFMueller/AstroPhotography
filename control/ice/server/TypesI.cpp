@@ -52,5 +52,35 @@ astro::Point	convert(const Point& point) {
 	return astro::Point(point.x, point.y);
 }
 
+astro::RaDec	convert(const RaDec& radec) {
+	astro::Angle	ra;
+	ra.hours(radec.ra);
+	astro::Angle	dec;
+	dec.degrees(radec.dec);
+	return astro::RaDec(ra, dec);
+}
+
+RaDec	convert(const astro::RaDec& radec) {
+	RaDec	result;
+	result.ra = radec.ra().hours();
+	result.dec = radec.dec().degrees();
+	return result;
+}
+
+astro::AzmAlt	convert(const AzmAlt& azmalt) {
+	astro::Angle	azm;
+	azm.degrees(azmalt.azm);
+	astro::Angle	alt;
+	alt.degrees(azmalt.alt);
+	return astro::AzmAlt(azm, alt);
+}
+
+AzmAlt	convert(const astro::AzmAlt& azmalt) {
+	AzmAlt	result;
+	result.azm = azmalt.azm().degrees();
+	result.alt = azmalt.alt().degrees();
+	return result;
+}
+
 } // namespace snowstar
 
