@@ -20,7 +20,9 @@ public:
 	virtual std::string	getVersion(const Ice::Current& current);
 	virtual DeviceNameList	getDevicelist(devicetype type,
 					const Ice::Current& current);
-
+	
+	virtual AdaptiveOpticsPrx	getAdaptiveOptics(const std::string& name,
+					const Ice::Current& current);
 	virtual CameraPrx	getCamera(const std::string& name,
 					const Ice::Current& current);
 	virtual CcdPrx		getCcd(const std::string& name,
@@ -32,6 +34,8 @@ public:
 	virtual CoolerPrx	getCooler(const std::string& name,
 					const Ice::Current& current);
 	virtual FocuserPrx	getFocuser(const std::string& name,
+					const Ice::Current& current);
+	virtual MountPrx	getMount(const std::string& name,
 					const Ice::Current& current);
 };
 

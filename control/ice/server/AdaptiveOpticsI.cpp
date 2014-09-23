@@ -38,5 +38,8 @@ GuiderPortPrx	AdaptiveOpticsI::getGuiderPort(const Ice::Current& current) {
 	return GuiderPortI::createProxy(name, current);
 }
 
+void	AdaptiveOpticsI::center(const Ice::Current& /* current */) {
+	_ao->center();
+}
 
 } // namespace snowstar

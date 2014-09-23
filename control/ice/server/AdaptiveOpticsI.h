@@ -21,6 +21,7 @@ public:
 	virtual Point	get(const Ice::Current& current);
 	virtual bool	hasGuiderPort(const Ice::Current& current);
 	virtual GuiderPortPrx	getGuiderPort(const Ice::Current& current);	
+	virtual void	center(const Ice::Current& current);
 };
 
 } // namespace snowstar

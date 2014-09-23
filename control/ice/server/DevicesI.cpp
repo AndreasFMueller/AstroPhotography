@@ -23,6 +23,11 @@ DeviceNameList DevicesI::getDevicelist(devicetype type,
 	return convert(devicelist);
 }
 
+AdaptiveOpticsPrx	DevicesI::getAdaptiveOptics(const std::string& name,
+					const Ice::Current& current) {
+	return createProxy<AdaptiveOpticsPrx>(name, current);
+}
+
 CameraPrx	DevicesI::getCamera(const std::string& name,
 					const Ice::Current& current) {
 	return createProxy<CameraPrx>(name, current);
@@ -51,6 +56,11 @@ CoolerPrx	DevicesI::getCooler(const std::string& name,
 FocuserPrx	DevicesI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
 	return createProxy<FocuserPrx>(name, current);
+}
+
+MountPrx	DevicesI::getMount(const std::string& name,
+					const Ice::Current& current) {
+	return createProxy<MountPrx>(name, current);
 }
 
 } // namespace snowstar

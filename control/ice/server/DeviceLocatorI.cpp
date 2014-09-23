@@ -29,6 +29,11 @@ std::string	DeviceLocatorI::getVersion(const Ice::Current& /* current */) {
 	return _locator->getVersion();
 }
 
+AdaptiveOpticsPrx	DeviceLocatorI::getAdaptiveOptics(const std::string& name,
+			const Ice::Current& current) {
+	return createProxy<AdaptiveOpticsPrx>(name, current);
+}
+
 CameraPrx	DeviceLocatorI::getCamera(const std::string& name,
 			const Ice::Current& current) {
 	return createProxy<CameraPrx>(name, current);
@@ -57,6 +62,11 @@ CoolerPrx       DeviceLocatorI::getCooler(const std::string& name,
 FocuserPrx      DeviceLocatorI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
 	return createProxy<FocuserPrx>(name, current);
+}
+
+MountPrx      DeviceLocatorI::getMount(const std::string& name,
+					const Ice::Current& current) {
+	return createProxy<MountPrx>(name, current);
 }
 
 

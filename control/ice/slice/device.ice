@@ -9,6 +9,22 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
+
+	// state of mount
+	enum mountstate { MountIDLE, MountTRACKING, MountGOTO };
+
+	/**
+	 * \brief Interface to a telescope mount
+	 */
+	interface Mount {
+		mountstate	state();
+		RaDec	getRaDec();
+		AzmAlt	getAzmAlt();
+		void	GotoRaDec(RaDec radecposition);
+		void	GotoAzmAlt(AzmAlt azmaltposition);
+		void	cancel();
+	};
+
 	// device related stuff
 	sequence<string>	DeviceNameList;
 
@@ -33,12 +49,14 @@ module snowstar {
 		/**
 		 * \brief Retrieve a device of a certain type
 		 */
+		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
 		Camera*		getCamera(string name) throws NotFound;
 		Ccd*		getCcd(string name) throws NotFound;
 		GuiderPort*	getGuiderPort(string name) throws NotFound;
 		FilterWheel*	getFilterWheel(string name) throws NotFound;
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;
+		Mount*		getMount(string name) throws NotFound;
 	};
 
 	/**
@@ -48,12 +66,14 @@ module snowstar {
 		string	getName();
 		string	getVersion();
 		DeviceNameList	getDevicelist(devicetype type);
+		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
 		Camera*		getCamera(string name) throws NotFound;
 		Ccd*		getCcd(string name) throws NotFound;
 		GuiderPort*	getGuiderPort(string name) throws NotFound;
 		FilterWheel*	getFilterWheel(string name) throws NotFound;
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;
+		Mount*		getMount(string name) throws NotFound;
 	};
 
 	/**
@@ -75,21 +95,6 @@ module snowstar {
 		int	numberOfModules();
 		ModuleNameList	getModuleNames();
 		DriverModule*	getModule(string name) throws NotFound;
-	};
-
-	// state of mount
-	enum mountstate { MountIDLE, MountTRACKING, MountGOTO };
-
-	/**
-	 * \brief 
-	 */
-	interface Mount {
-		mountstate	state();
-		RaDec	getRaDec();
-		AzmAlt	getAzmAlt();
-		void	GotoRaDec(RaDec radecposition);
-		void	GotoAzmAlt(AzmAlt azmaltposition);
-		void	cancel();
 	};
 };
 
