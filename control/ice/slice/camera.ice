@@ -368,4 +368,34 @@ module snowstar {
 		 */
 		GuiderPort*	getGuiderPort() throws NotImplemented;
 	};
+
+	/**
+	 * \brief AdaptiveOptics abstraction
+	 */
+	interface AdaptiveOptics {
+		/**
+ 		 * \brief Get the name of the adaptive optics unit
+		 */
+		string	getName();
+		/**
+ 		 * \brief Set a position offset
+		 */
+		void	set(Point position);
+		/**
+		 * \brief Get the position offset
+		 */
+		Point	get();
+		/**
+		 * \brief Center (reset) the adaptive optics unit
+		 */
+		void	center();
+		/**
+		 * \brief find out whether the 
+		 */
+		bool	hasGuiderPort();
+		/**
+		 * \brief get the guider port of the adaptive optics unit
+		 */
+		GuiderPort*	getGuiderPort() throws NotImplemented;
+	};
 };

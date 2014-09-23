@@ -11,6 +11,7 @@ bin_PROGRAMS = snowstar
 noinst_HEADERS = DevicesI.h \
 	CoolerI.h CcdI.h CcdIconversions.h CameraI.h \
 	FilterWheelI.h GuiderPortI.h FocuserI.h \
+	AdaptiveOpticsI.h \
 	DeviceServantLocator.h NameConverter.h \
 	ImagesI.h ImageI.h ImageLocator.h \
 	TypesI.h \
@@ -24,6 +25,7 @@ snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp DevicesIconversions.cpp \
 	CoolerI.cpp CcdI.cpp CcdIconversions.cpp CameraI.cpp \
 	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
+	AdaptiveOpticsI.cpp \
 	DeviceServantLocator.cpp NameConverter.cpp \
 	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
 	TypesI.cpp \
