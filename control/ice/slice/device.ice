@@ -40,5 +40,41 @@ module snowstar {
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;
 	};
+
+	/**
+	 * \brief Device Locator interface, locates devices in a module
+	 */
+	interface DeviceLocator {
+		string	getName();
+		string	getVersion();
+		DeviceNameList	getDevicelist(devicetype type);
+		Camera*		getCamera(string name) throws NotFound;
+		Ccd*		getCcd(string name) throws NotFound;
+		GuiderPort*	getGuiderPort(string name) throws NotFound;
+		FilterWheel*	getFilterWheel(string name) throws NotFound;
+		Cooler*		getCooler(string name) throws NotFound;
+		Focuser*	getFocuser(string name) throws NotFound;
+	};
+
+	/**
+	 * \brief interface to a driver module
+ 	 */
+	interface DriverModule {
+		string	getName();
+		string	getVersion();
+		bool	hasLocator();
+		DeviceLocator*	getDeviceLocator() throws NotFound;
+	};
+
+	sequence<string>	ModuleNameList;
+
+	/**
+	 * \brief get access to modules
+	 */
+	interface Modules {
+		int	numberOfModules();
+		ModuleNameList	getModuleNames();
+		DriverModule*	getModule(string name) throws NotFound;
+	};
 };
 

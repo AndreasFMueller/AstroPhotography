@@ -295,6 +295,10 @@ module snowstar {
 		 */
 		void	select(int position) throws NotFound;
 		/**
+		 * \brief Move the filter wheel to a given filter name
+		 */
+		void	selectName(string filtername) throws NotFound;
+		/**
 		 * \brief Get the name of the filter
 		 */
 		string	filterName(int position) throws NotFound;

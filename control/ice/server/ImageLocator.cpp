@@ -15,7 +15,7 @@ ImageLocator::ImageLocator(astro::image::ImageDirectory& imagedirectory)
 }
 
 Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
-					Ice::LocalObjectPtr& cookie) {
+					Ice::LocalObjectPtr& /* cookie */) {
 	std::string	name = current.id.name;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s", name.c_str());
 
@@ -49,12 +49,12 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	return ptr;
 }
 
-void	ImageLocator::finished(const Ice::Current& current,
-				const Ice::ObjectPtr& servant,
-				const Ice::LocalObjectPtr& cookie) {
+void	ImageLocator::finished(const Ice::Current& /* current */,
+				const Ice::ObjectPtr& /* servant */,
+				const Ice::LocalObjectPtr& /* cookie */) {
 }
 
-void	ImageLocator::deactivate(const std::string& category) {
+void	ImageLocator::deactivate(const std::string& /* category */) {
 }
 
 } // namespace snowstar

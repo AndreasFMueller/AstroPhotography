@@ -8,15 +8,18 @@ if ENABLE_ICE
 
 bin_PROGRAMS = snowstar
 
-noinst_HEADERS = DevicesI.h CoolerI.h CcdI.h CcdIconversions.h CameraI.h \
+noinst_HEADERS = DevicesI.h \
+	CoolerI.h CcdI.h CcdIconversions.h CameraI.h \
 	FilterWheelI.h GuiderPortI.h FocuserI.h \
 	DeviceServantLocator.h NameConverter.h \
 	ImagesI.h ImageI.h ImageLocator.h \
 	TypesI.h \
 	TaskQueueI.h TaskI.h TaskLocator.h \
-	GuiderIconversions.h GuiderFactoryI.h GuiderI.h GuiderLocator.h
+	GuiderIconversions.h GuiderFactoryI.h GuiderI.h \
+	GuiderLocator.h \
+	ModulesI.h DriverModuleI.h DriverModuleLocator.h \
+	DeviceLocatorI.h DeviceLocatorLocator.h
 	
-
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp DevicesIconversions.cpp \
 	CoolerI.cpp CcdI.cpp CcdIconversions.cpp CameraI.cpp \
@@ -25,7 +28,10 @@ snowstar_SOURCES = snowstar.cpp \
 	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
 	TypesI.cpp \
 	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp \
-	GuiderIconversions.cpp GuiderFactoryI.cpp GuiderI.cpp GuiderLocator.cpp
+	GuiderIconversions.cpp GuiderFactoryI.cpp GuiderI.cpp \
+	GuiderLocator.cpp \
+	ModulesI.cpp DriverModuleI.cpp DriverModuleLocator.cpp \
+	DeviceLocatorI.cpp DeviceLocatorLocator.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

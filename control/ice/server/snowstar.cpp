@@ -18,6 +18,9 @@
 #include <TaskLocator.h>
 #include <GuiderFactoryI.h>
 #include <GuiderLocator.h>
+#include <ModulesI.h>
+#include <DriverModuleLocator.h>
+#include <DeviceLocatorLocator.h>
 
 namespace snowstar {
 
@@ -84,22 +87,24 @@ int	main(int argc, char *argv[]) {
 		// add a servant for devices to the device adapter
 		Ice::ObjectPtr	object = new DevicesI(devices);
 		adapter->add(object, ic->stringToIdentity("Devices"));
-		adapter->addServantLocator(
-			new DeviceServantLocator(repository, imagedirectory),
-			"");
+		DeviceServantLocator	*deviceservantlocator
+			= new DeviceServantLocator(repository, imagedirectory);
+		adapter->addServantLocator(deviceservantlocator, "");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "devices servant added");
 
 		// add a servant for images to the adapter
 		object = new ImagesI(imagedirectory);
 		adapter->add(object, ic->stringToIdentity("Images"));
-		adapter->addServantLocator(
-			new ImageLocator(imagedirectory), "image");
+		ImageLocator	*imagelocator
+			= new ImageLocator(imagedirectory);
+		adapter->addServantLocator(imagelocator, "image");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
 
 		// add a servant for taskqueue to the adapter
 		object = new TaskQueueI(taskqueue);
 		adapter->add(object, ic->stringToIdentity("Tasks"));
-		adapter->addServantLocator(new TaskLocator(database), "task");
+		TaskLocator	*tasklocator = new TaskLocator(database);
+		adapter->addServantLocator(tasklocator, "task");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
 
 		// add a servant for the guider factory
@@ -108,6 +113,18 @@ int	main(int argc, char *argv[]) {
 			guiderlocator, imagedirectory);
 		adapter->add(object, ic->stringToIdentity("Guiders"));
 		adapter->addServantLocator(guiderlocator, "guider");
+
+		// add a servant for the modules
+		object = new ModulesI();
+		adapter->add(object, ic->stringToIdentity("Modules"));
+		DriverModuleLocator	*drivermodulelocator
+			= new DriverModuleLocator(repository);
+		adapter->addServantLocator(drivermodulelocator, "drivermodule");
+		DeviceLocatorLocator	*devicelocatorlocator
+			= new DeviceLocatorLocator(repository);
+		adapter->addServantLocator(devicelocatorlocator,
+				"devicelocator");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
 
 		// activate the adapter
 		adapter->activate();

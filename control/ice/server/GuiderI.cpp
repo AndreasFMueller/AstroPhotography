@@ -25,7 +25,7 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 GuiderI::~GuiderI() {
 }
 
-GuiderState GuiderI::getState(const Ice::Current& current) {
+GuiderState GuiderI::getState(const Ice::Current& /* current */) {
 	return convert(guider->state());
 }
 
@@ -44,27 +44,27 @@ GuiderPortPrx GuiderI::getGuiderPort(const Ice::Current& current) {
 	return GuiderPortI::createProxy(name, current);
 }
 
-GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& current) {
+GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
 	return convert(guider->getDescriptor());
 }
 
-void GuiderI::setExposure(const Exposure& exposure, const Ice::Current& current) {
+void GuiderI::setExposure(const Exposure& exposure, const Ice::Current& /* current */) {
 	guider->exposure(convert(exposure));
 }
 
-Exposure GuiderI::getExposure(const Ice::Current& current) {
+Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
 	return convert(guider->exposure());
 }
 
-void GuiderI::setStar(const Point& point, const Ice::Current& current) {
+void GuiderI::setStar(const Point& point, const Ice::Current& /* current */) {
 	_point = point;
 }
 
-Point GuiderI::getStar(const Ice::Current& current) {
+Point GuiderI::getStar(const Ice::Current& /* current */) {
 	return _point;
 }
 
-void GuiderI::useCalibration(Ice::Int calibrationid, const Ice::Current& current) {
+void GuiderI::useCalibration(Ice::Int calibrationid, const Ice::Current& /* current */) {
 	// retrieve guider data from the database
 	astro::guiding::CalibrationStore	calibrationstore(database);
 	astro::guiding::GuiderCalibration	calibration
@@ -74,14 +74,14 @@ void GuiderI::useCalibration(Ice::Int calibrationid, const Ice::Current& current
 	guider->calibration(calibration);
 }
 
-Calibration GuiderI::getCalibration(const Ice::Current& current) {
+Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	// XXX use database to retrieve calibration
 	Calibration	calibration;
 	return calibration;
 }
 
 void GuiderI::startCalibration(Ice::Float focallength,
-	const Ice::Current& current) {
+	const Ice::Current& /* current */) {
 	// XXX callback stuff
 
 	// XXX compute calibration parameters
@@ -89,15 +89,15 @@ void GuiderI::startCalibration(Ice::Float focallength,
 	// XXX construct a tracker
 }
 
-Ice::Double GuiderI::calibrationProgress(const Ice::Current& current) {
+Ice::Double GuiderI::calibrationProgress(const Ice::Current& /* current */) {
 	return guider->calibrationProgress();
 }
 
-void GuiderI::cancelCalibration(const Ice::Current& current) {
+void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
 	guider->cancelCalibration();
 }
 
-bool GuiderI::waitCalibration(Ice::Double timeout, const Ice::Current& current) {
+bool GuiderI::waitCalibration(Ice::Double timeout, const Ice::Current& /* current */) {
 	return guider->waitCalibration(timeout);
 }
 
@@ -113,7 +113,7 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 }
 
 void GuiderI::startGuiding(Ice::Float guidinginterval,
-		const Ice::Current& current) {
+		const Ice::Current& /* current */) {
 	// builde a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
 
@@ -123,11 +123,11 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	// XXX install publisher
 }
 
-Ice::Float GuiderI::getGuidingInterval(const Ice::Current& current) {
+Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
 	// XXX need access to interval somehow
 }
 
-void GuiderI::stopGuiding(const Ice::Current& current) {
+void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	guider->stopGuiding();
 
 	// XXX remove publisher
@@ -147,7 +147,7 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	return getImage(filename, image->bytesPerPixel(), current);
 }
 
-TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& current) {
+TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
 	if (astro::guiding::guiding != guider->state()) {
 		throw BadState("not currently guiding");
 	}
@@ -167,7 +167,7 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& current) {
 }
 
 TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
-	const Ice::Current& current) {
+	const Ice::Current& /* current */) {
 	// XXX implementation missing
 }
 

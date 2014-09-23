@@ -1,24 +1,23 @@
 /*
- * TaskLocator.h -- locate a task servant
+ * DriverModuleLocator.h -- locate a device module
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _TaskLocator_h
-#define _TaskLocator_h
+#ifndef _DriverModuleLocator_h
+#define _DriverModuleLocator_h
 
 #include <Ice/Ice.h>
-#include <AstroPersistence.h>
+#include <AstroLoader.h>
 
 namespace snowstar {
 
-class TaskLocator : public Ice::ServantLocator {
-	astro::persistence::Database&	database;
+class DriverModuleLocator : public Ice::ServantLocator {
+	astro::module::Repository	_repository;
 public:
-	TaskLocator(astro::persistence::Database& database);
-
+	DriverModuleLocator(astro::module::Repository& repository);
+	virtual ~DriverModuleLocator();
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);
-
 	virtual void	finished(const Ice::Current& current,
 				const Ice::ObjectPtr& servant,
 				const Ice::LocalObjectPtr& cookie);
@@ -28,4 +27,4 @@ public:
 
 } // namespace snowstar
 
-#endif /* _TaskLocator_h */
+#endif /* _DriverModuleLocator_h */

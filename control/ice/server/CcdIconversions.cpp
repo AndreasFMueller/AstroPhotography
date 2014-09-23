@@ -137,9 +137,9 @@ astro::camera::Exposure::purpose_t      convert(const ExposurePurpose& purpose) 
 	case snowstar::ExLIGHT:
 		return astro::camera::Exposure::light;
 	case snowstar::ExDARK:
-		return astro::camera::Exposure::light;
+		return astro::camera::Exposure::dark;
 	case snowstar::ExFLAT:
-		return astro::camera::Exposure::light;
+		return astro::camera::Exposure::flat;
 	}
 	throw std::runtime_error("unknown exposure purpose");
 }

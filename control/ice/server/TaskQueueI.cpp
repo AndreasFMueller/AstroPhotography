@@ -23,41 +23,41 @@ TaskQueueI::~TaskQueueI() {
 }
 
 // interface methods
-QueueState TaskQueueI::state(const Ice::Current& current) {
+QueueState TaskQueueI::state(const Ice::Current& /* current */) {
 	return convert(taskqueue.state());
 }
 
-void TaskQueueI::start(const Ice::Current& current) {
+void TaskQueueI::start(const Ice::Current& /* current */) {
 	taskqueue.start();
 }
 
-void TaskQueueI::stop(const Ice::Current& current) {
+void TaskQueueI::stop(const Ice::Current& /* current */) {
 	taskqueue.stop();
 }
 
 int TaskQueueI::submit(const TaskParameters& parameters,
-		const Ice::Current& current) {
+		const Ice::Current& /* current */) {
 	return taskqueue.submit(snowstar::convert(parameters));
 }
 
-TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& current) {
+TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
 	return snowstar::convert(taskqueue.parameters(taskid));
 }
 
-TaskInfo TaskQueueI::info(int taskid, const Ice::Current& current) {
+TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	return snowstar::convert(taskqueue.info(taskid));
 }
 
-void TaskQueueI::cancel(int taskid, const Ice::Current& current) {
+void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	taskqueue.cancel(taskid);
 }
 
-void TaskQueueI::remove(int taskid, const Ice::Current& current) {
+void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 	taskqueue.remove(taskid);
 }
 
 taskidsequence TaskQueueI::tasklist(TaskState state,
-		const Ice::Current& current) {
+		const Ice::Current& /* current */) {
 	std::list<long>	taskidlist = taskqueue.tasklist(snowstar::convert(state));
 	taskidsequence	result;
 	std::copy(taskidlist.begin(), taskidlist.end(), back_inserter(result));

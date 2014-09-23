@@ -24,7 +24,7 @@ GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
 GuiderFactoryI::~GuiderFactoryI() {
 }
 
-GuiderList	GuiderFactoryI::list(const Ice::Current& current) {
+GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
 	std::vector<astro::guiding::GuiderDescriptor>	l
 		= guiderfactory.list();
 	GuiderList	result;
@@ -55,7 +55,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	return createProxy<GuiderPrx>("guider/" + guidername, current);
 }
 
-idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& current) {
+idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
 	astro::guiding::CalibrationStore	store(database);
 	std::list<long> calibrations = store.getAllCalibrations();
 	idlist	result;
@@ -65,7 +65,7 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& current) {
 }
 
 idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	astro::guiding::CalibrationStore	store(database);
 	std::list<long> calibrations = store.getCalibrations(convert(guider));
 	idlist	result;
@@ -75,7 +75,7 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 }
 
 Calibration	GuiderFactoryI::getCalibration(int id,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	// use the database to retrieve the complete calibration data
 	Calibration	calibration;
 	try {
@@ -107,7 +107,7 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 	}
 }
 
-idlist	GuiderFactoryI::getAllGuideruns(const Ice::Current& current) {
+idlist	GuiderFactoryI::getAllGuideruns(const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);
 	std::list<long>	trackings = store.getAllTrackings();
 	idlist	result;
@@ -116,7 +116,7 @@ idlist	GuiderFactoryI::getAllGuideruns(const Ice::Current& current) {
 }
 
 idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);
 	std::list<long>	trackings = store.getTrackings(convert(guider));
 	idlist	result;
@@ -125,7 +125,7 @@ idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
 }
 
 TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);
 	TrackingHistory	history;
 	history.guiderunid = id;

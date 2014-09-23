@@ -17,7 +17,7 @@ DevicesI::~DevicesI() {
 }
 
 DeviceNameList DevicesI::getDevicelist(devicetype type,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	astro::module::Devices::devicelist	devicelist
 		= _devices.getDevicelist(convert(type));
 	return convert(devicelist);
