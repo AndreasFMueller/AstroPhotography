@@ -54,7 +54,7 @@ void	QsiFilterWheel::select(size_t filterindex) {
 
 void	QsiFilterWheel::select(const std::string& filtername) {
 	for (unsigned int index = 0; index < nfilters; index++) {
-		if (filternames[index] == filtername) {
+		if (filternames[index] == filtername) {
 			select(index);
 			return;
 		}
