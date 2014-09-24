@@ -41,10 +41,15 @@ void	usage(const char *progname) {
 	std::cout << " -d,--debug            increase debug level" << std::endl;
 	std::cout << " -e,--exposure=<e>     set exposure time to <e>";
 	std::cout << std::endl;
-	std::cout << " -f,--filter=<f>       use filter numbered <f>";
+	std::cout << " -f,--filter=<f>       use filter numbered <f>, ignored "
+		"if the instrument has";
+	std::cout << std::endl;
+	std::cout << "                       no filter wheel";
 	std::cout << std::endl;
 	std::cout << " -F,--focus=<F>        move to focus position <F> before "
-			"exposing";
+		"exposing, ignored";
+	std::cout << std::endl;
+	std::cout << "                       if th einstrument has no focuser";
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
 	std::cout << std::endl;
@@ -53,7 +58,8 @@ void	usage(const char *progname) {
 	std::cout << " -n,--number=<n>       take <n> exposures with these "
 			"settings";
 	std::cout << std::endl;
-	std::cout << " -p,--purpose=<p>      images have purpose <p>, i.e. one of light, dark";
+	std::cout << " -p,--purpose=<p>      images have purpose <p>, i.e. one "
+		"of light, dark";
 	std::cout << std::endl;
 	std::cout << "                       or flat";
 	std::cout << std::endl;
@@ -66,7 +72,10 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << " -r,--repo=<repo>      write images to repository <repo>";
 	std::cout << std::endl;
-	std::cout << " -t,--temperature=<t>  cool ccd to temperature <t>";
+	std::cout << " -t,--temperature=<t>  cool ccd to temperature <t>, "
+		"ignored if the instrument";
+	std::cout << std::endl;
+	std::cout << "                       has no cooler";
 	std::cout << std::endl;
 
 }
@@ -92,20 +101,6 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	unsigned int	nImages = 1;
 	std::string	instrumentname;
-#if 0
-	unsigned int	cameranumber = 0;
-	unsigned int	ccdid = 0;
-	unsigned int	xoffset = 0;
-	unsigned int	yoffset = 0;
-	unsigned int	width = 0;
-	unsigned int	height = 0;
-	const char	*outputdir = ".";
-	const char	*prefix = "test";
-	const char	*cameratype = "uvc";
-	bool	dark = false;
-	unsigned short	focus = 32768;
-	const char	*focuser = NULL;
-#endif
 	float	exposuretime = 1.; // default exposure time: 1 second
 	double	temperature = std::numeric_limits<double>::quiet_NaN(); 
 
@@ -209,7 +204,7 @@ int	main(int argc, char *argv[]) {
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
-	if (focusposition > 0) {
+	if ((focusposition > 0) && (instrument->has(DeviceName::Focuser))) {
 		FocuserPtr	focuser = instrument->focuser();
 		focuser->set(focusposition);
 		while (focuser->current() != focusposition) {
@@ -222,7 +217,8 @@ int	main(int argc, char *argv[]) {
 
 	// if the filter name is specified, get the filterwheel from the
 	// instrument and set the filter
-	if (filtername.size() > 0) {
+	if ((filtername.size() > 0)
+		&& (instrument->has(DeviceName::Filterwheel))) {
 		FilterWheelPtr	filterwheel = instrument->filterwheel();
 		filterwheel->select(filtername);
 		filterwheel->wait(20);
@@ -231,12 +227,13 @@ int	main(int argc, char *argv[]) {
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
 	CoolerPtr	cooler(NULL);
-	if (temperature == temperature) {
+	if ((temperature == temperature)
+		&& (instrument->has(DeviceName::Cooler))) {
 		double	absolute = 273.15 + temperature;
 		if (absolute < 0) {
 			throw std::runtime_error("bad temperature");
 		}
-		CoolerPtr	cooler = instrument->cooler();
+		cooler = instrument->cooler();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
 		cooler->setTemperature(absolute);
 		cooler->setOn(true);
