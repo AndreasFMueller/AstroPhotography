@@ -12,8 +12,10 @@ slice_sources = camera.cpp exceptions.cpp guider.cpp image.cpp device.cpp \
 
 BUILT_SOURCES = $(slice_sources)
 
+SOURCES = RemoteInstrument.cpp CommunicatorSingleton.cpp
+
 libiceastro_la_SOURCES = \
-	$(slice_sources)
+	$(slice_sources) $(SOURCES)
 libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
 
 endif

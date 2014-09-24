@@ -131,6 +131,16 @@ bool	Instrument::has(const DeviceName::device_type type) const {
 }
 
 /**
+ * \brief Check whether an instrument component is local
+ */
+bool	Instrument::isLocal(const DeviceName::device_type type) const {
+	if (!has(type)) {
+		throw std::runtime_error("no component of this type");
+	}
+	return (component(type)->servername().size() == 0);
+}
+
+/**
  * \brief
  */
 InstrumentComponentPtr	Instrument::component(DeviceName::device_type type) const {

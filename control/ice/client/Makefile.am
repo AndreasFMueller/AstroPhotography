@@ -5,7 +5,7 @@
 #
 if ENABLE_ICE
 
-noinst_PROGRAMS = snowflake snowscan
+noinst_PROGRAMS = snowflake snowscan iceimages
 
 snowflake_SOURCES = snowflake.cpp
 
@@ -30,6 +30,11 @@ snowscan_LDADD = $(ICELDADD)
 snowscan_LDFLAGS = $(ICELDFLAGS)
 snowscan_CPPFLAGS = $(ICECPPFLAGS)
 
+iceimages_SOURCES = iceimages.cpp
+iceimages_DEPENDENCIES = $(ICEDEPENDENCIES)
+iceimages_LDADD = $(ICELDADD)
+iceimages_LDFLAGS = $(ICELDFLAGS)
+iceimages_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

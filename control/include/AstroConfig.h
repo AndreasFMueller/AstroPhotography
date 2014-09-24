@@ -259,7 +259,8 @@ private:
 public:
 	Instrument(astro::persistence::Database database,
 		const std::string& name);
-	bool	has(DeviceName::device_type type) const;
+	bool	has(const DeviceName::device_type type) const;
+	bool	isLocal(const DeviceName::device_type type) const;
 
 	InstrumentComponentPtr	component(DeviceName::device_type type) const;
 

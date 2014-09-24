@@ -102,4 +102,8 @@
 #include <uuid/uuid.h>
 #endif /* HAVE_UUID_UUID_H */
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif /* HAVE_NETDB_H */
+
 #endif /* _includes_h */

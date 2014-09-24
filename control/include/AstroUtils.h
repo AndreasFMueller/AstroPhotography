@@ -227,6 +227,23 @@ public:
  */
 std::string	demangle(const std::string& mangled_name) throw();
 
+/**
+ * \brief a class that handles parsing server names with attached ports
+ */
+class ServerName {
+	std::string	_host;
+	unsigned short	_port;
+public:
+	const std::string& host() const { return _host; }
+	unsigned short	port() const { return _port; }
+
+	// constructor
+	ServerName(const std::string& _host, unsigned short port);
+	ServerName(const std::string& servername);
+
+	operator	std::string() const;
+};
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */
