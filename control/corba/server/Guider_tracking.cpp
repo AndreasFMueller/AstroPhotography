@@ -103,7 +103,7 @@ Astro::TrackingPoint	Guider_impl::mostRecentTrackingPoint() {
  *			the history. The value -1 means that we want
  *			to retrieve the currently running guide run
  */
-Astro::TrackingHistory	*Guider_impl::getTrackingHistory(int guiderunid) {
+Astro::TrackingHistory	*Guider_impl::getTrackingHistory(::CORBA::Long guiderunid) {
 	if (guiderunid < 0) {
 		// verify that we really are guiding right now
 		if (astro::guiding::guiding != _guider->state()) {
