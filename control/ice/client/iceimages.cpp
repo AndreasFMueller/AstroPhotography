@@ -21,7 +21,6 @@
 
 using namespace astro;
 using namespace astro::module;
-using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::image;
 using namespace astro::io;
@@ -79,6 +78,19 @@ void	usage(const char *progname) {
 
 }
 
+snowstar::ExposurePurpose	string2purpose(const std::string& purpose) {
+	if (purpose == "light") {
+		return snowstar::ExLIGHT;
+	}
+	if (purpose == "dark") {
+		return snowstar::ExDARK;
+	}
+	if (purpose == "flat") {
+		return snowstar::ExFLAT;
+	}
+	throw std::runtime_error("unknown purpose");
+}
+
 static struct option	longopts[] = {
 /* name			argument?		int*	int */
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
@@ -108,11 +120,17 @@ int	main(int argc, char *argv[]) {
 	// initialize the orb in case we want to use the net module
 	debugtimeprecision = 3;
 	debugthreads = 1;
-	Binning	binning;
 	std::string	filtername;
 	std::string	reponame;
+
+	// exposure structure
 	ImageRectangle	frame;
-	Exposure::purpose_t	purpose = Exposure::light;
+	struct snowstar::Exposure	exposure;
+	exposure.purpose = snowstar::ExposurePurpose::ExLIGHT;
+	exposure.mode.x = 1;
+	exposure.mode.y = 1;
+
+	// focus position
 	unsigned short	focusposition = 0;
 
 	// parse the command line
@@ -122,7 +140,11 @@ int	main(int argc, char *argv[]) {
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
-			binning = Binning(optarg);
+			{
+			astro::camera::Binning	b(optarg);
+			exposure.mode.x = b.getX();
+			exposure.mode.y = b.getY();
+			}
 			break;
 		case 'c':
 			Configuration::set_default(optarg);
@@ -149,7 +171,7 @@ int	main(int argc, char *argv[]) {
 			nImages = atoi(optarg);
 			break;
 		case 'p':
-			purpose = Exposure::string2purpose(optarg);
+			exposure.purpose = string2purpose(optarg);
 			break;
 		case 'r':
 			reponame = optarg;
@@ -192,16 +214,14 @@ int	main(int argc, char *argv[]) {
 	snowstar::CameraPrx	camera = instrument.camera_proxy();
 	snowstar::CcdPrx	ccd = instrument.ccd_proxy();
 
-#if 0
 	// get the image repository
 	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
-		frame = ccd->getInfo().getFrame();
+		// XXX get frame from camera
+		//frame = ccd->getInfo().getFrame();
 	} else {
-		frame = ccd->getInfo().clipRectangle(frame);
+		// XXX clip frame to camera rectangle
+		//frame = ccd->getInfo().clipRectangle(frame);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image rectangle: %s",
-		frame.toString().c_str());
-#endif
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
@@ -253,22 +273,21 @@ int	main(int argc, char *argv[]) {
 				absolute, actual, delta);
 		} while (delta > 1);
 	}
-#if 0
 
 	// prepare an exposure object
-	Exposure	exposure(frame, exposuretime);
-	exposure.purpose = purpose;
-	exposure.shutter = (purpose == Exposure::dark)
-				? SHUTTER_CLOSED : SHUTTER_OPEN;
-	exposure.mode = binning;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
-		exposure.toString().c_str());
+	exposure.exposuretime = exposuretime;
+	exposure.frame.origin.x = frame.origin().x();
+	exposure.frame.origin.y = frame.origin().y();
+	exposure.frame.size.width = frame.size().width();
+	exposure.frame.size.height = frame.size().height();
+	exposure.shutter = (exposure.purpose == snowstar::ExDARK)
+				? snowstar::ShCLOSED : snowstar::ShOPEN;
 
 	// check whether the remote camera already has an exposed image,
 	// in which case we want to cancel it
-	if (Exposure::exposed == ccd->exposureStatus()) {
+	if (snowstar::EXPOSED == ccd->exposureStatus()) {
 		ccd->cancelExposure();
-		while (Exposure::idle != ccd->exposureStatus()) {
+		while (snowstar::IDLE != ccd->exposureStatus()) {
 			usleep(100000);
 		}
 	}
@@ -278,10 +297,7 @@ int	main(int argc, char *argv[]) {
 	ccd->startExposure(exposure);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
-	// read all images
-	ImageSequence	images = ccd->getImageSequence(nImages);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieved %d images", images.size());
-#endif
+	// XXX retrieve images
 
 	// turn of the cooler to save energy
 	if (hascooler) {
