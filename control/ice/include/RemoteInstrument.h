@@ -20,7 +20,7 @@ namespace snowstar {
  * provides methods that return proxies for the remote devices.
  */
 class RemoteInstrument : public astro::config::Instrument {
-	DevicesPrx	devices(astro::config::InstrumentComponentPtr component);
+	DevicesPrx	devices(const astro::ServerName& servername);
 public:
 	RemoteInstrument(astro::persistence::Database database,
 		const std::string& name);

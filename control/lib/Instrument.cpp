@@ -249,10 +249,8 @@ AdaptiveOpticsPtr	Instrument::adaptiveoptics() {
 	case InstrumentComponent::mapped:
 		return devices.getAdaptiveOptics(aoptr->devicename());
 	case InstrumentComponent::derived:
-		throw std::runtime_error("don't know how to derive camera");
+		throw std::runtime_error("don't know how to derive AO");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO for instrument '%s'",
-		_name.c_str());
 }
 
 /**
@@ -271,6 +269,7 @@ CameraPtr	Instrument::camera() {
 	case InstrumentComponent::derived:
 		throw std::runtime_error("don't know how to derive camera");
 	}
+	throw std::runtime_error("unknown component type");
 }
 
 /**
@@ -364,6 +363,7 @@ FocuserPtr	Instrument::focuser() {
 	case InstrumentComponent::derived:
 		throw std::runtime_error("don't know how to derived Focuser");
 	}
+	throw std::runtime_error("unknown component type");
 }
 
 /**
@@ -382,6 +382,7 @@ MountPtr	Instrument::mount() {
 	case InstrumentComponent::derived:
 		throw std::runtime_error("don't know how to derive mount");
 	}
+	throw std::runtime_error("unknown component type");
 }
 
 

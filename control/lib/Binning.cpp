@@ -30,7 +30,7 @@ Binning::Binning(const std::string& binningspec) {
 	int	rc = 0;
 	const char	*r = "\\(?([0-9]+)[,x]([0-9]+)\\)?";
 	regex_t	regex;
-	if (rc = regcomp(&regex, r, REG_EXTENDED)) {
+	if (0 != (rc = regcomp(&regex, r, REG_EXTENDED))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "regex compile error: %d", rc);
 		throw std::runtime_error("internal error, RE does not compile");
 	}

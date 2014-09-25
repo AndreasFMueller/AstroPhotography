@@ -77,7 +77,7 @@ std::string	AttributeValuePairs::operator()(const std::string& attribute) const 
 /**
  * \brief Get all values for an attribute
  */
-std::set<std::string>	AttributeValuePairs::get(const std::string& attribute) const {
+std::set<std::string>	AttributeValuePairs::get(const std::string& /* attribute */) const {
 	std::set<std::string>	result;
 	throw std::runtime_error("XXX get not implemented");
 	return result;
