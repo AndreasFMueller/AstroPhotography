@@ -6,7 +6,7 @@
 #include <AdaptiveOpticsI.h>
 #include <GuiderPortI.h>
 #include <NameConverter.h>
-#include <TypesI.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 

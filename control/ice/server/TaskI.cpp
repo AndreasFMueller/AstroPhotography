@@ -10,6 +10,7 @@
 #include <TaskQueueI.h>
 #include <TaskTable.h>
 #include <ImageI.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -45,7 +46,7 @@ std::string	TaskI::imagename(const Ice::Current& /* current */) {
 	return entry().filename();
 }
 
-ImagePrx	TaskI::getImage(const Ice::Current& current) {
+ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
 	std::string	filename = entry().filename();
 	//return ImageI::createProxy(filename, current);
 	return NULL;

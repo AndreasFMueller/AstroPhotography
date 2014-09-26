@@ -9,28 +9,26 @@ if ENABLE_ICE
 bin_PROGRAMS = snowstar
 
 noinst_HEADERS = DevicesI.h \
-	CoolerI.h CcdI.h CcdIconversions.h CameraI.h \
+	CoolerI.h CcdI.h CameraI.h \
 	FilterWheelI.h GuiderPortI.h FocuserI.h \
 	AdaptiveOpticsI.h MountI.h \
 	DeviceServantLocator.h NameConverter.h \
 	ImagesI.h ImageI.h ImageLocator.h \
-	TypesI.h \
 	TaskQueueI.h TaskI.h TaskLocator.h \
-	GuiderIconversions.h GuiderFactoryI.h GuiderI.h \
+	GuiderFactoryI.h GuiderI.h \
 	GuiderLocator.h \
 	ModulesI.h DriverModuleI.h DriverModuleLocator.h \
 	DeviceLocatorI.h DeviceLocatorLocator.h
 	
 snowstar_SOURCES = snowstar.cpp \
-	DevicesI.cpp DevicesIconversions.cpp \
-	CoolerI.cpp CcdI.cpp CcdIconversions.cpp CameraI.cpp \
+	DevicesI.cpp \
+	CoolerI.cpp CcdI.cpp CameraI.cpp \
 	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
 	AdaptiveOpticsI.cpp MountI.cpp \
 	DeviceServantLocator.cpp NameConverter.cpp \
 	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
-	TypesI.cpp \
-	TaskQueueI.cpp TaskQueueIconversions.cpp TaskI.cpp TaskLocator.cpp \
-	GuiderIconversions.cpp GuiderFactoryI.cpp GuiderI.cpp \
+	TaskQueueI.cpp TaskI.cpp TaskLocator.cpp \
+	GuiderFactoryI.cpp GuiderI.cpp \
 	GuiderLocator.cpp \
 	ModulesI.cpp DriverModuleI.cpp DriverModuleLocator.cpp \
 	DeviceLocatorI.cpp DeviceLocatorLocator.cpp

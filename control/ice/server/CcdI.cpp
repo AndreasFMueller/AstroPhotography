@@ -4,7 +4,6 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CcdI.h>
-#include <CcdIconversions.h>
 #include <CoolerI.h>
 #include <NameConverter.h>
 #include <AstroExceptions.h>
@@ -12,6 +11,7 @@
 #include <ImagesI.h>
 #include <ProxyCreator.h>
 #include <AstroExceptions.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 

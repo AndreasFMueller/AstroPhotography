@@ -6,6 +6,7 @@
 #include <DeviceLocatorI.h>
 #include <DevicesI.h>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -18,7 +19,7 @@ DeviceLocatorI::~DeviceLocatorI() {
 
 DeviceNameList	DeviceLocatorI::getDevicelist(devicetype type,
 	const Ice::Current& /* current */) {
-	return _locator->getDevicelist(DevicesI::convert(type));
+	return _locator->getDevicelist(convert(type));
 }
 
 std::string	DeviceLocatorI::getName(const Ice::Current& /* current */) {

@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <sstream>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 

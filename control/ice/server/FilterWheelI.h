@@ -17,7 +17,6 @@ public:
 	FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
 		: _filterwheel(filterwheel) { }
 	virtual	~FilterWheelI();
-static	FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 	virtual std::string	getName(const Ice::Current& current);
 	virtual int	nFilters(const Ice::Current& current);
 	virtual int	currentPosition(const Ice::Current& current);

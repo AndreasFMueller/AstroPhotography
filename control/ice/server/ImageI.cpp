@@ -9,7 +9,7 @@
 #include <cstring>
 #include <includes.h>
 #include <AstroImage.h>
-#include <TypesI.h>
+#include <IceConversions.h>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
 #include <ProxyCreator.h>

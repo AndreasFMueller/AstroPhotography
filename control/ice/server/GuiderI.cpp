@@ -4,9 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <GuiderI.h>
-#include <GuiderIconversions.h>
-#include <CcdIconversions.h>
-#include <TypesI.h>
+#include <IceConversions.h>
 #include <CameraI.h>
 #include <CcdI.h>
 #include <GuiderPortI.h>
@@ -160,7 +158,7 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */
 	
 	// construct a tracking point
 	TrackingPoint	result;
-	result.timeago = lastaction;
+	result.timeago = converttime(lastaction);
 	result.trackingoffset = convert(offset);
 	result.activation = convert(activation);
 	return result;

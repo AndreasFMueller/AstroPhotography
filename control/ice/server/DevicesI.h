@@ -18,13 +18,6 @@ public:
 	DevicesI(astro::module::Devices& devices);
 	virtual ~DevicesI();
 
-	// conversion methods
-static std::vector<std::string>	convert(
-		const astro::module::Devices::devicelist& list);
-
-static devicetype	convert(const astro::DeviceName::device_type& type);
-static astro::DeviceName::device_type	convert(const devicetype& type);
-
 	// interface methods
 	virtual DeviceNameList getDevicelist(devicetype,
 			const Ice::Current& current);

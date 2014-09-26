@@ -13,13 +13,6 @@
 
 namespace snowstar {
 
-GuiderDescriptor	convert(const astro::guiding::GuiderDescriptor& gd);
-astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
-
-TrackingPoint	convert(const astro::guiding::TrackingPoint& trackingpoint);
-
-CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
-
 class GuiderFactoryI : public GuiderFactory {
 	astro::persistence::Database	database;
 	astro::guiding::GuiderFactory&	guiderfactory;

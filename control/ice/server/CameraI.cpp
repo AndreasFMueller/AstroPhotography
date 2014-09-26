@@ -7,9 +7,9 @@
 #include <GuiderPortI.h>
 #include <FilterWheelI.h>
 #include <CcdI.h>
-#include <CcdIconversions.h>
 #include <NameConverter.h>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 

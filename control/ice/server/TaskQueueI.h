@@ -11,21 +11,12 @@
 
 namespace snowstar {
 
-TaskState	convert(const astro::task::TaskInfo::taskstate& state);
-astro::task::TaskInfo::taskstate	convert(const TaskState& state);
-
-TaskInfo	convert(const astro::task::TaskInfo& info);
-
-TaskParameters	convert(const astro::task::TaskParameters& parameters);
-astro::task::TaskParameters	convert(const TaskParameters& parameters);
-
 class TaskQueueI : public TaskQueue {
 	astro::task::TaskQueue&	taskqueue;
 public:
 	TaskQueueI(astro::task::TaskQueue& taskqueue);
 	virtual	~TaskQueueI();
 	// conversion 
-	QueueState	convert(const astro::task::TaskQueue::state_type& state);
 
 	// interface methods
 	virtual QueueState state(const Ice::Current& current);

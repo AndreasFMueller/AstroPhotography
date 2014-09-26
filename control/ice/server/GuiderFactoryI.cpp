@@ -10,6 +10,7 @@
 #include <AstroFormat.h>
 #include <GuiderI.h>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -82,7 +83,7 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		astro::guiding::CalibrationTable	ct(database);
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
 		calibration.id = r.id();
-		calibration.timeago = r.when;
+		calibration.timeago = converttime(r.when);
 		calibration.guider.cameraname = r.camera;
 		calibration.guider.ccdid = r.ccdid;
 		calibration.guider.guiderportname = r.guiderport;
@@ -134,7 +135,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 	try {
 		astro::guiding::GuidingRunTable	gt(database);
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
-		history.timeago = r.whenstarted;
+		history.timeago = converttime(r.whenstarted);
 		history.guider.cameraname = r.camera;
 		history.guider.ccdid = r.ccdid;
 		history.guider.guiderportname = r.guiderport;

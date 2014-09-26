@@ -6,6 +6,7 @@
 #include <FilterWheelI.h>
 #include <NameConverter.h>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -35,17 +36,6 @@ void	FilterWheelI::selectName(const std::string& filtername, const Ice::Current&
 std::string	FilterWheelI::filterName(int position,
 			const Ice::Current& /* current */) {
 	return _filterwheel->filterName(position);
-}
-
-FilterwheelState	FilterWheelI::convert(const astro::camera::FilterWheel::State& s) {
-	switch (s) {
-	case astro::camera::FilterWheel::idle:
-		return snowstar::FwIDLE;
-	case astro::camera::FilterWheel::moving:
-		return snowstar::FwMOVING;
-	case astro::camera::FilterWheel::unknown:
-		return snowstar::FwUNKNOWN;
-	}
 }
 
 FilterwheelState	FilterWheelI::getState(const Ice::Current& /* current */) {

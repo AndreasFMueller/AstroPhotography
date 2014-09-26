@@ -26,9 +26,6 @@ public:
 	virtual mountstate	state(const Ice::Current& current);
 };
 
-mountstate	convert(astro::device::Mount::mount_state s);
-astro::device::Mount::mount_state	convert(mountstate s);
-
 } // namespace snowstar
 
 #endif /* _MountI_h */
