@@ -161,13 +161,14 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 1:
 			switch (longindex) {
-			case 7:
+			case 10:
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"rectangle options");
+					"rectangle %s", optarg);
 				frame = ImageRectangle(optarg);
 				break;
 			default:
-				// ingore others
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore %d",
+					longindex);
 				break;
 			}
 		}
