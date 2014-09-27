@@ -18,7 +18,6 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
-AC_PATH_TOOL(SLICE2CPP, slice2cpp)
 
 # Checks for header files
 AC_HEADER_STDC
@@ -93,14 +92,27 @@ AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
 AC_ARG_WITH([ice],
 [AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
-	enable_ice=yes
 	ICEDIR=${with_ice}
+	PATH=${PATH}:${ICEDIR}/bin:${ICEDIR}/c++/bin
 ],[
-	enable_ice=no
 	ICEDIR=
 ])
-AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
 AC_SUBST(ICEDIR)
+AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+
+AC_ARG_ENABLE(ice,
+[AS_HELP_STRING([--enable-ice], [also bulid the ZeroC ICE components])],
+[
+	enable_ice=yes
+	AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
+],[
+	enable_ice=no
+	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+])
+
+AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
+
+AC_PATH_TOOL(SLICE2CPP, slice2cpp)
 
 ######################################################################
 # decide whether or not to build the test programs

@@ -62,7 +62,7 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags}
+	./configure --prefix=`pwd`/root ${commonflags} --enable-ice
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
@@ -88,6 +88,6 @@ Darwin)
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
 	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
-		--enable-sbig
+		--enable-sbig --enable-ice
 	;;
 esac
