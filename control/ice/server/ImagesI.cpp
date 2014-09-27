@@ -42,9 +42,11 @@ ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 	// create the proxy
 	switch (bytesPerPixel) {
 	case 1:
-		return snowstar::createProxy<ByteImagePrx>(identity, current);
+		return snowstar::createProxy<ByteImagePrx>(identity, current,
+			false);
 	case 2:
-		return snowstar::createProxy<ShortImagePrx>(identity, current);
+		return snowstar::createProxy<ShortImagePrx>(identity, current,
+			false);
 	}
 	throw BadParameter("pixel format not supported");
 }

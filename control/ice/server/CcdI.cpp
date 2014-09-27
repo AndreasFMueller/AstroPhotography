@@ -93,13 +93,13 @@ bool	CcdI::hasCooler(const Ice::Current& /* current */) {
 typedef IceUtil::Handle<CoolerI>	CoolerIPtr;
 
 CoolerPrx	CcdI::getCooler(const Ice::Current& current) {
-	std::string	name = NameConverter::urlencode(_ccd->getCooler()->name());
+	std::string	name = _ccd->getCooler()->name();
 	return snowstar::createProxy<CoolerPrx>(name, current);
 }
 
 CcdPrx	CcdI::createProxy(const std::string& ccdname,
 		const Ice::Current& current) {
-	return snowstar::createProxy<CcdPrx>(NameConverter::urlencode(ccdname), current);
+	return snowstar::createProxy<CcdPrx>(ccdname, current);
 }
 
 } // namespace snowstar

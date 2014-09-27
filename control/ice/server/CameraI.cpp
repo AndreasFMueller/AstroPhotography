@@ -35,8 +35,7 @@ CcdInfo	CameraI::getCcdinfo(int ccdid, const Ice::Current& /* current */) {
 typedef IceUtil::Handle<CcdI>        CcdIPtr;
 
 CcdPrx	CameraI::getCcd(int ccdid, const Ice::Current& current) {
-	std::string	name = NameConverter::urlencode(_camera->getCcd(ccdid)->name());
-
+	std::string	name = _camera->getCcd(ccdid)->name();
 	return CcdI::createProxy(name, current);
 }
 
@@ -47,7 +46,7 @@ bool	CameraI::hasFilterWheel(const Ice::Current& /* current */) {
 typedef IceUtil::Handle<FilterWheelI>        FilterWheelIPtr;
 
 FilterWheelPrx	CameraI::getFilterWheel(const Ice::Current& current) {
-	std::string	name = NameConverter::urlencode(_camera->getFilterWheel()->name());
+	std::string	name = _camera->getFilterWheel()->name();
 	return FilterWheelI::createProxy(name, current);
 }
 
@@ -58,13 +57,13 @@ bool	CameraI::hasGuiderPort(const Ice::Current& /* current */) {
 typedef IceUtil::Handle<GuiderPortI>        GuiderPortIPtr;
 
 GuiderPortPrx	CameraI::getGuiderPort(const Ice::Current& current) {
-	std::string	name = NameConverter::urlencode(_camera->getGuiderPort()->name());
+	std::string	name = _camera->getGuiderPort()->name();
 	return GuiderPortI::createProxy(name, current);
 }
 
 CameraPrx	CameraI::createProxy(const std::string& cameraname,
 			const Ice::Current& current) {
-	return snowstar::createProxy<CameraPrx>(NameConverter::urlencode(cameraname), current);
+	return snowstar::createProxy<CameraPrx>(cameraname, current);
 }
 
 } // namespace snowstar

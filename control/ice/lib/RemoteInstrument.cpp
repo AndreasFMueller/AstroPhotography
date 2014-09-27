@@ -17,13 +17,14 @@ namespace snowstar {
 
 RemoteInstrument::RemoteInstrument(Database database, const std::string& name)
 	: Instrument(database, name)  {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument %s", name.c_str());
 }
 
 /**
  * \brief Retrieve a Devices proxy for a given server name
  */
 DevicesPrx	RemoteInstrument::devices(const astro::ServerName& servername) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve remote camera from %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve remote devices from %s",
 		servername.host().c_str());
 
 	// connect to the remote server
@@ -68,6 +69,7 @@ AdaptiveOpticsPrx       RemoteInstrument::adaptiveoptics_proxy() {
  * \brief Retrieve a camera proxy
  */
 CameraPrx               RemoteInstrument::camera_proxy() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera proxy");
 	if (!has(astro::DeviceName::Camera)) {
 		throw std::runtime_error("no camera device");
 	}
@@ -78,6 +80,8 @@ CameraPrx               RemoteInstrument::camera_proxy() {
 	// get the camera ptr
 	InstrumentComponentPtr	cameraptr
 		= component(astro::DeviceName::Camera);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
+		cameraptr->devicename().toString().c_str());
 
 	// Camera cannot be derived
 	if (cameraptr->component_type() == InstrumentComponent::derived) {
@@ -87,7 +91,9 @@ CameraPrx               RemoteInstrument::camera_proxy() {
 	// get the camera device for mapped or direct components
 	astro::ServerName	servername = cameraptr->servername();
 	std::string	devicename = cameraptr->devicename().toString();
-	return devices(servername)->getCamera(devicename);
+	CameraPrx	camera = devices(servername)->getCamera(devicename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remote camera retrieved");
+	return camera;
 }
 
 /**
@@ -121,8 +127,9 @@ CcdPrx                  RemoteInstrument::ccd_proxy() {
 	InstrumentComponentDerived	*from
 		= dynamic_cast<InstrumentComponentDerived *>(&*ccdptr);
 	if (from->derivedfrom() != astro::DeviceName::Camera) {
-		throw std::runtime_error("onlny know how to derive from camera");
+		throw std::runtime_error("only know how to derive from camera");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Ccd from the camera");
 	return camera_proxy()->getCcd(ccdptr->unit());
 }
 

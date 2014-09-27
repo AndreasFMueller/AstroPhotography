@@ -212,7 +212,7 @@ int	cmd_component_add(const std::string& instrumentname,
 		// construct a derived compont, where from attribute contains
 		// the type of the component this component is derived from
 		component = InstrumentComponentPtr(
-			new InstrumentComponentDerived(type, instrument,
+			new InstrumentComponentDerived(type, *instrument,
 				InstrumentComponentTableAdapter::type(av("from")),
 				unit));
 		break;

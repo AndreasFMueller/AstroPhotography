@@ -7,6 +7,8 @@
 #include <AstroLoader.h>
 #include <ProxyCreator.h>
 #include <IceConversions.h>
+#include <AstroDebug.h>
+#include <NameConverter.h>
 
 namespace snowstar {
 

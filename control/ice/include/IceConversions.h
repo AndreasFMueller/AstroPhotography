@@ -113,6 +113,9 @@ astro::task::TaskMonitorInfo	convert(const TaskMonitorInfo& monitorinfo);
 mountstate	convert(astro::device::Mount::mount_state s);
 astro::device::Mount::mount_state	convert(mountstate s);
 
+// Image
+astro::image::ImagePtr	convert(ImagePrx image);
+
 } // namespace snowstar
 
 #endif /* _IceConversions_h */

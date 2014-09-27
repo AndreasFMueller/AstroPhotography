@@ -21,7 +21,7 @@ std::string	InstrumentTableAdapter::createstatement() {
 	return std::string(
 		"create table instruments (\n"
 		"    id integer not null,\n"
-		"    name integer not null,\n"
+		"    name varchar(128) not null,\n"
 		"    primary key(id)\n"
 		");\n"
 		"create unique index instruments_idx1 on instruments(name);\n"

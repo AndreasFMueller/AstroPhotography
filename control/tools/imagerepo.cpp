@@ -50,7 +50,7 @@ int	command_list(const std::string& reponame) {
 	if (images.size() == 0) {
 		return EXIT_SUCCESS;
 	}
-	std::cout << "id   camera   size       purpose bin   exp  temp observation    project  ";
+	std::cout << "id   instrument size       purpose bin   exp  temp observation    project  ";
 	if (verbose) {
 		std::cout << "UUID                                ";
 		std::cout << "filename";
@@ -60,7 +60,7 @@ int	command_list(const std::string& reponame) {
 	std::for_each(images.begin(), images.end(),
 		[](const ImageEnvelope& image) {
 			std::cout << stringprintf("%04ld ", image.id());
-			std::cout << stringprintf("%-8.8s ",
+			std::cout << stringprintf("%-10.10s ",
 				image.camera().c_str());
 			std::cout << stringprintf("%-11.11s",
 				image.size().toString().c_str());

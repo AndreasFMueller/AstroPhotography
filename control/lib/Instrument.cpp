@@ -93,7 +93,7 @@ std::string	InstrumentComponentMapped::servername() {
  * correct subdevice of the parent device.
  */
 DeviceName	InstrumentComponentDerived::devicename() {
-	return _instrument->devicename(_derivedfrom);
+	return _instrument.devicename(_derivedfrom);
 }
 
 /**
@@ -108,7 +108,7 @@ void	InstrumentComponentDerived::name(const std::string& n) {
 }
 
 std::string	InstrumentComponentDerived::servername() {
-	return _instrument->servername(_derivedfrom);
+	return _instrument.servername(_derivedfrom);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -119,8 +119,76 @@ std::string	InstrumentComponentDerived::servername() {
  */
 Instrument::Instrument(Database db, const std::string& name)
 	: _database(db), _name(name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument '%s' created",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument '%s' constructed",
 		name.c_str());
+
+	// get the information from the instruments table
+	InstrumentTable	instruments(_database);
+
+	// find out whether there already is an instrument in the table
+	int	instrumentid = -1;
+	try {
+		instrumentid = instruments.id(name);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument already exists");
+	} catch (const std::runtime_error& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"instrument does not exist, creating one");
+		InstrumentRecord        instrumentrecord;
+		instrumentrecord.name = name;
+		instrumentid = instruments.add(instrumentrecord);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "id of new instrument: %d",
+			instrumentid);
+	}
+
+	// retrieve all the matching metadata
+	InstrumentComponentTable	components(_database);
+	std::string	condition = stringprintf("instrument = %d",
+						instrumentid);
+	auto l = components.select(condition);
+	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
+		// find the type from the string version of the type
+		DeviceName::device_type	type
+			= InstrumentComponentTableAdapter::type(ptr->type);
+		InstrumentComponent::component_t	ctype
+			= InstrumentComponentTableAdapter::component_type(
+				ptr->componenttype);
+
+		// construct suitable InstrumentComponent objects depending
+		// on the mapped field of the component record
+		InstrumentComponentPtr	iptr;
+		switch (ctype) {
+		case InstrumentComponent::mapped:
+			// in the case of mapped devices, teh device name is
+			// not an actuald evie name, but rather the name of
+			// the map entry
+			iptr = InstrumentComponentPtr(
+				new InstrumentComponentMapped(type, _database,
+					ptr->devicename));
+			break;
+		case InstrumentComponent::direct:
+			// for direct components, matters are simplest, so
+			// all fields have the meaning the name suggest
+			iptr = InstrumentComponentPtr(
+				new InstrumentComponentDirect(type,
+					DeviceName(ptr->devicename),
+					ptr->unit, ptr->servername));
+			break;
+		case InstrumentComponent::derived:
+			// in this case, the devicename is really the component
+			// type from which the component should be derived
+			iptr = InstrumentComponentPtr(
+				new InstrumentComponentDerived(type, *this,
+					InstrumentComponentTableAdapter::type(
+						ptr->devicename),
+					ptr->unit));
+			break;
+		}
+
+		// add the new component
+		add(iptr);
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument constructed");
 }
 
 /**
@@ -239,6 +307,9 @@ std::list<DeviceName::device_type>	Instrument::component_types() const {
  * \brief Get an adaptive optics unit from an instrument
  */
 AdaptiveOpticsPtr	Instrument::adaptiveoptics() {
+	if (!isLocal(DeviceName::AdaptiveOptics)) {
+		throw std::runtime_error("not a local adaptive optics");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -257,6 +328,9 @@ AdaptiveOpticsPtr	Instrument::adaptiveoptics() {
  * \brief Get a camera from an instrument
  */
 CameraPtr	Instrument::camera() {
+	if (!isLocal(DeviceName::Camera)) {
+		throw std::runtime_error("not a local camera");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve camera for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -276,6 +350,9 @@ CameraPtr	Instrument::camera() {
  * \brief Get a CCD from an instrument
  */
 CcdPtr	Instrument::ccd() {
+	if (!isLocal(DeviceName::Ccd)) {
+		throw std::runtime_error("not a local ccd");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve CCD for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -301,6 +378,9 @@ CcdPtr	Instrument::ccd() {
  * \brief Get a cooler from an instrument
  */
 CoolerPtr	Instrument::cooler() {
+	if (!isLocal(DeviceName::Cooler)) {
+		throw std::runtime_error("not a local cooler");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Cooler for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -325,6 +405,9 @@ CoolerPtr	Instrument::cooler() {
  * \brief get a Filterwheel from an instrument
  */
 FilterWheelPtr	Instrument::filterwheel() {
+	if (!isLocal(DeviceName::Filterwheel)) {
+		throw std::runtime_error("not a local filterwheel");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve FilterWheel for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -351,6 +434,9 @@ FilterWheelPtr	Instrument::filterwheel() {
  * \brief get the Focuser for an instrument
  */
 FocuserPtr	Instrument::focuser() {
+	if (!isLocal(DeviceName::Focuser)) {
+		throw std::runtime_error("not a local focuser");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Focuser for instrument '%s'",
 		_name.c_str());
 	Repository	repository;
@@ -370,6 +456,9 @@ FocuserPtr	Instrument::focuser() {
  * \brief get a Mount from an instrument
  */
 MountPtr	Instrument::mount() {
+	if (!isLocal(DeviceName::Mount)) {
+		throw std::runtime_error("not a local mount");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Mount for instrument '%s'",
 		_name.c_str());
 	Repository	repository;

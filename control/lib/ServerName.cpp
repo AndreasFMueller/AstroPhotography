@@ -6,6 +6,7 @@
 #include <AstroUtils.h>
 #include <AstroFormat.h>
 #include <includes.h>
+#include <AstroDebug.h>
 
 namespace astro {
 
@@ -31,8 +32,10 @@ ServerName::ServerName(const std::string& servername) {
 		_port = icestar_port();
 		return;
 	}
-	_host = servername.substr(0, pos - 1);
+	_host = servername.substr(0, pos);
 	_port = std::stoi(servername.substr(pos + 1));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "host = %s, port = %hu", _host.c_str(),
+		_port);
 }
 
 ServerName::operator	std::string() const {

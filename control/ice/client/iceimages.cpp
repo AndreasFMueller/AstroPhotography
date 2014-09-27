@@ -18,6 +18,7 @@
 #include <camera.h>
 #include <CommunicatorSingleton.h>
 #include <RemoteInstrument.h>
+#include <IceConversions.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -27,7 +28,7 @@ using namespace astro::io;
 using namespace astro::config;
 using namespace astro::project;
 
-namespace astro {
+namespace snowstar {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
@@ -78,19 +79,6 @@ void	usage(const char *progname) {
 
 }
 
-snowstar::ExposurePurpose	string2purpose(const std::string& purpose) {
-	if (purpose == "light") {
-		return snowstar::ExLIGHT;
-	}
-	if (purpose == "dark") {
-		return snowstar::ExDARK;
-	}
-	if (purpose == "flat") {
-		return snowstar::ExFLAT;
-	}
-	throw std::runtime_error("unknown purpose");
-}
-
 static struct option	longopts[] = {
 /* name			argument?		int*	int */
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
@@ -120,15 +108,14 @@ int	main(int argc, char *argv[]) {
 	// initialize the orb in case we want to use the net module
 	debugtimeprecision = 3;
 	debugthreads = 1;
+	astro::camera::Binning	binning;
 	std::string	filtername;
 	std::string	reponame;
 
 	// exposure structure
-	ImageRectangle	frame;
-	struct snowstar::Exposure	exposure;
-	exposure.purpose = snowstar::ExposurePurpose::ExLIGHT;
-	exposure.mode.x = 1;
-	exposure.mode.y = 1;
+	astro::image::ImageRectangle	frame;
+	astro::camera::Exposure::purpose_t	purpose
+		= astro::camera::Exposure::light;
 
 	// focus position
 	unsigned short	focusposition = 0;
@@ -140,11 +127,7 @@ int	main(int argc, char *argv[]) {
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
-			{
-			astro::camera::Binning	b(optarg);
-			exposure.mode.x = b.getX();
-			exposure.mode.y = b.getY();
-			}
+			binning = astro::camera::Binning(optarg);
 			break;
 		case 'c':
 			Configuration::set_default(optarg);
@@ -171,7 +154,7 @@ int	main(int argc, char *argv[]) {
 			nImages = atoi(optarg);
 			break;
 		case 'p':
-			exposure.purpose = string2purpose(optarg);
+			purpose = astro::camera::Exposure::string2purpose(optarg);
 			break;
 		case 'r':
 			reponame = optarg;
@@ -184,7 +167,7 @@ int	main(int argc, char *argv[]) {
 			case 7:
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"rectangle options");
-				frame = ImageRectangle(optarg);
+				frame = astro::image::ImageRectangle(optarg);
 				break;
 			default:
 				// ingore others
@@ -212,15 +195,14 @@ int	main(int argc, char *argv[]) {
 
 	// get the devices
 	snowstar::CameraPrx	camera = instrument.camera_proxy();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a camera");
 	snowstar::CcdPrx	ccd = instrument.ccd_proxy();
 
 	// get the image repository
 	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
-		// XXX get frame from camera
-		//frame = ccd->getInfo().getFrame();
+		frame = convert(ccd->getInfo()).getFrame();
 	} else {
-		// XXX clip frame to camera rectangle
-		//frame = ccd->getInfo().clipRectangle(frame);
+		frame = convert(ccd->getInfo()).clipRectangle(frame);
 	}
 
 	// if the focuser is specified, we try to get it and then set
@@ -275,13 +257,13 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// prepare an exposure object
+	astro::camera::Exposure	exposure(frame, exposuretime);
+	exposure.purpose = purpose;
+	exposure.shutter = (purpose == astro::camera::Exposure::dark)
+				? astro::camera::SHUTTER_CLOSED
+				: astro::camera::SHUTTER_OPEN;
 	exposure.exposuretime = exposuretime;
-	exposure.frame.origin.x = frame.origin().x();
-	exposure.frame.origin.y = frame.origin().y();
-	exposure.frame.size.width = frame.size().width();
-	exposure.frame.size.height = frame.size().height();
-	exposure.shutter = (exposure.purpose == snowstar::ExDARK)
-				? snowstar::ShCLOSED : snowstar::ShOPEN;
+	exposure.mode = binning;
 
 	// check whether the remote camera already has an exposed image,
 	// in which case we want to cancel it
@@ -292,12 +274,49 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
-	// start the exposure
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
-	ccd->startExposure(exposure);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
+	// start a sequence of images
+	int	imagecounter = 0;
+	while (imagecounter < nImages) {
+		// start the exposure
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure %d",
+			imagecounter);
+		ccd->startExposure(convert(exposure));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
-	// XXX retrieve images
+		// wait for the exposure to complete
+		useconds_t	t = 1000000 * exposure.exposuretime;
+		usleep(t);
+		while (ccd->exposureStatus() == snowstar::EXPOSING) {
+			usleep(100000);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd state  now: %d",
+			ccd->exposureStatus());
+		if (ccd->exposureStatus() != snowstar::EXPOSED) {
+			throw std::runtime_error("ccd state not exposed!");
+		}
+
+		// get the image data
+		ImagePrx	image = ccd->getImage();
+
+		// convert image to an astro::image::imagePtr
+		astro::image::ImagePtr	imageptr = convert(image);
+
+		// add the instrument information (because that was not
+		// available to the server)
+		if (!imageptr->hasMetadata(std::string("INSTRUME"))) {
+			imageptr->setMetadata(astro::io::FITSKeywords::meta(
+				std::string("INSTRUME"), instrumentname));
+		}
+
+		// write the image to the repository
+		repo.save(imageptr);
+
+		// get rid of the image on the server side
+		image->remove();
+
+		// increase the counter
+		imagecounter++;
+	}
 
 	// turn of the cooler to save energy
 	if (hascooler) {
@@ -305,30 +324,15 @@ int	main(int argc, char *argv[]) {
 		cooler->setOn(false);
 	}
 
-#if 0
-	// write the images to the repository
-	ImageSequence::const_iterator	imageptr;
-	int	counter = 0;
-	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image");
-		if ((*imageptr)->hasMetadata(std::string("INSTRUME"))) {
-		}
-		(*imageptr)->setMetadata(
-			FITSKeywords::meta(std::string("INSTRUME"),
-				instrument->name()));
-		repo.save(*imageptr);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
-#endif
 	return EXIT_SUCCESS;
 }
 
-} // namespace astro
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
 	signal(SIGSEGV, stderr_stacktrace);
 	try {
-		return astro::main(argc, argv);
+		return snowstar::main(argc, argv);
 	} catch (const std::exception& x) {
 		std::cerr << "terminated by ";
 		std::cerr << astro::demangle(typeid(x).name()) << ": ";

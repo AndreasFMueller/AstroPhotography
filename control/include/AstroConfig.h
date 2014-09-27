@@ -210,12 +210,12 @@ typedef std::shared_ptr<Instrument>	InstrumentPtr;
  * a camera, and similarly for filterwheels, 
  */
 class InstrumentComponentDerived : public InstrumentComponent {
-	InstrumentPtr		_instrument;
+	Instrument&		_instrument;
 	DeviceName::device_type	_derivedfrom;
 	int			_unit;
 public:
 	InstrumentComponentDerived(DeviceName::device_type t,
-		InstrumentPtr instrument, DeviceName::device_type derivedfrom,
+		Instrument& instrument, DeviceName::device_type derivedfrom,
 		int unit)
 		: InstrumentComponent(t, InstrumentComponent::derived),
 		  _instrument(instrument), _derivedfrom(derivedfrom),

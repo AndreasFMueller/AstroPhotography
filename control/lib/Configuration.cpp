@@ -327,6 +327,7 @@ InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 	InstrumentPtr	instrument(new Instrument(_database,
 				instrumentrecord.name));
 
+#if 0
 	// retrieve all the matching metadata
 	InstrumentComponentTable	components(_database);
 	std::string	condition = stringprintf("instrument = %d",
@@ -374,6 +375,7 @@ InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 		// add the new component
 		instrument->add(iptr);
 	}
+#endif
 
 	// return the instrument
 	return instrument;
