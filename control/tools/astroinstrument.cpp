@@ -111,8 +111,6 @@ int	cmd_add(const std::string& instrumentname,
 	InstrumentPtr	instrument(new Instrument(config->database(),
 				instrumentname));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument created");
-	config->addInstrument(instrument);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument added");
 	return EXIT_SUCCESS;
 }
 

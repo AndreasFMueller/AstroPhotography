@@ -327,56 +327,6 @@ InstrumentPtr	ConfigurationBackend::instrument(const std::string& name) {
 	InstrumentPtr	instrument(new Instrument(_database,
 				instrumentrecord.name));
 
-#if 0
-	// retrieve all the matching metadata
-	InstrumentComponentTable	components(_database);
-	std::string	condition = stringprintf("instrument = %d",
-						instrumentid);
-	auto l = components.select(condition);
-	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
-		// find the type from the string version of the type
-		DeviceName::device_type	type
-			= InstrumentComponentTableAdapter::type(ptr->type);
-		InstrumentComponent::component_t	ctype
-			= InstrumentComponentTableAdapter::component_type(
-				ptr->componenttype);
-
-		// construct suitable InstrumentComponent objects depending
-		// on the mapped field of the component record
-		InstrumentComponentPtr	iptr;
-		switch (ctype) {
-		case InstrumentComponent::mapped:
-			// in the case of mapped devices, teh device name is
-			// not an actuald evie name, but rather the name of
-			// the map entry
-			iptr = InstrumentComponentPtr(
-				new InstrumentComponentMapped(type, _database,
-					ptr->devicename));
-			break;
-		case InstrumentComponent::direct:
-			// for direct components, matters are simplest, so
-			// all fields have the meaning the name suggest
-			iptr = InstrumentComponentPtr(
-				new InstrumentComponentDirect(type,
-					DeviceName(ptr->devicename),
-					ptr->unit, ptr->servername));
-			break;
-		case InstrumentComponent::derived:
-			// in this case, the devicename is really the component
-			// type from which the component should be derived
-			iptr = InstrumentComponentPtr(
-				new InstrumentComponentDerived(type, instrument,
-					InstrumentComponentTableAdapter::type(
-						ptr->devicename),
-					ptr->unit));
-			break;
-		}
-
-		// add the new component
-		instrument->add(iptr);
-	}
-#endif
-
 	// return the instrument
 	return instrument;
 }
