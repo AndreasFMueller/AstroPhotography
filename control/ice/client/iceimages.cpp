@@ -105,7 +105,6 @@ int	main(int argc, char *argv[]) {
 	float	exposuretime = 1.; // default exposure time: 1 second
 	double	temperature = std::numeric_limits<double>::quiet_NaN(); 
 
-	// initialize the orb in case we want to use the net module
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	astro::camera::Binning	binning;
