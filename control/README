@@ -131,6 +131,9 @@ Mandatory packages:
 
  - SQLite3 is used for persistence of various types of objects
 
+ - UUID, library for unique ids, used to tag FITS files so that duplicates
+   can be recognized
+
 Optional packages:
 
  - omniORB: The client-server-communication uses Corba, and the build system

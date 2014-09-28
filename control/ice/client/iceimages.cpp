@@ -100,7 +100,7 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
-	unsigned int	nImages = 1;
+	int	nImages = 1;
 	std::string	instrumentname;
 	float	exposuretime = 1.; // default exposure time: 1 second
 	double	temperature = std::numeric_limits<double>::quiet_NaN(); 
