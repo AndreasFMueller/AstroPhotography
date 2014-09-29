@@ -80,6 +80,7 @@ SuSE)
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
+		--with-ice=/opt/Ice-3.5.1 --enable-ice \
 		${sbigoption}
 	;;
 Darwin)
