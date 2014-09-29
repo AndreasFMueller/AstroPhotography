@@ -12,6 +12,7 @@
 #include <map>
 #include <AstroDebug.h>
 #include <pthread.h>
+#include <mutex>
 
 namespace astro {
 
@@ -123,9 +124,40 @@ void	absorb(std::istream& in, char c);
  */
 class PthreadLocker {
 	pthread_mutex_t *_lock;
+	// prevent copying of the locker
+	PthreadLocker(const PthreadLocker& other);
+	PthreadLocker&	operator=(const PthreadLocker other);
 public:
 	PthreadLocker(pthread_mutex_t *lock, bool blocking = true);
 	~PthreadLocker();
+};
+
+/**
+ * \brief Mutex locker class
+ *
+ * Does essentially the same as the pthread mutex locker class, but for
+ * C++11 Lockables
+ */
+template<typename Lockable>
+class MutexLocker {
+	Lockable&	_mtx;
+private:
+	// prevent copying of the locker class
+	MutexLocker(const MutexLocker& other);
+	//MutexLocker&	MutexLocker::operator=(const MutexLocker& other);
+public:
+	MutexLocker(Lockable& mtx, bool blocking = true) : _mtx(mtx) {
+		if (blocking) {
+			_mtx.lock();
+			return;
+		}
+		if (!_mtx.try_lock()) {
+			throw std::runtime_error("cannot lock");
+		}
+	}
+	~MutexLocker() {
+		_mtx.unlock();
+	}
 };
 
 /**

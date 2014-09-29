@@ -117,6 +117,8 @@ public:
 	friend class FocusWork;	// allow the FocusWork class update the status
 };
 
+typedef std::shared_ptr<Focusing>	FocusingPtr;
+
 } // namespace focusing
 } // namespace astro
 
