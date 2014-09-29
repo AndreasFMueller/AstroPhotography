@@ -5,6 +5,7 @@
  */
 #include <CommunicatorSingleton.h>
 #include <AstroDebug.h>
+#include <stdexcept>
 
 namespace snowstar {
 

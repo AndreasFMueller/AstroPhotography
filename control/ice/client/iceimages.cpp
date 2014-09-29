@@ -100,12 +100,11 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
-	unsigned int	nImages = 1;
+	int	nImages = 1;
 	std::string	instrumentname;
 	float	exposuretime = 1.; // default exposure time: 1 second
 	double	temperature = std::numeric_limits<double>::quiet_NaN(); 
 
-	// initialize the orb in case we want to use the net module
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	astro::camera::Binning	binning;
