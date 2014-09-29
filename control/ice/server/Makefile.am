@@ -19,7 +19,7 @@ noinst_HEADERS = DevicesI.h \
 	GuiderLocator.h \
 	ModulesI.h DriverModuleI.h DriverModuleLocator.h \
 	DeviceLocatorI.h DeviceLocatorLocator.h \
-	FocusingFactoryI.h
+	FocusingFactoryI.h FocusingI.h
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \
@@ -33,7 +33,7 @@ snowstar_SOURCES = snowstar.cpp \
 	GuiderLocator.cpp \
 	ModulesI.cpp DriverModuleI.cpp DriverModuleLocator.cpp \
 	DeviceLocatorI.cpp DeviceLocatorLocator.cpp \
-	FocusingFactoryI.cpp
+	FocusingFactoryI.cpp FocusingI.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

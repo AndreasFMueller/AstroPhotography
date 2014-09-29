@@ -635,4 +635,57 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 	return result;
 }
 
+// Focusing
+FocusState	convert(astro::focusing::Focusing::focus_status s) {
+	switch (s) {
+	case astro::focusing::Focusing::IDLE:
+		return FocusIDLE;
+	case astro::focusing::Focusing::MOVING:
+		return FocusMOVING;
+	case astro::focusing::Focusing::MEASURING:
+		return FocusMEASURING;
+	case astro::focusing::Focusing::FOCUSED:
+		return FocusFOCUSED;
+	case astro::focusing::Focusing::FAILED:
+		return FocusFAILED;
+	}
+	throw std::runtime_error("unknown focus state");
+}
+
+astro::focusing::Focusing::focus_status	convert(FocusState s) {
+	switch (s) {
+	case FocusIDLE:
+		return astro::focusing::Focusing::IDLE;
+	case FocusMOVING:
+		return astro::focusing::Focusing::MOVING;
+	case FocusMEASURING:
+		return astro::focusing::Focusing::MEASURING;
+	case FocusFOCUSED:
+		return astro::focusing::Focusing::FOCUSED;
+	case FocusFAILED:
+		return astro::focusing::Focusing::FAILED;
+	}
+	throw std::runtime_error("unknown focus state");
+}
+
+FocusMethod	convert(astro::focusing::Focusing::focus_method m) {
+	switch (m) {
+	case astro::focusing::Focusing::FWHM:
+		return FocusingFWHM;
+	case astro::focusing::Focusing::MEASURE:
+		return FocusingMEASURE;
+	}
+	throw std::runtime_error("unknown focus method");
+}
+
+astro::focusing::Focusing::focus_method	convert(FocusMethod m) {
+	switch (m) {
+	case FocusingFWHM:
+		return astro::focusing::Focusing::FWHM;
+	case FocusingMEASURE:
+		return astro::focusing::Focusing::MEASURE;
+	}
+	throw std::runtime_error("unknown focus method");
+}
+
 } // namespace snowstar

@@ -10,10 +10,12 @@
 #include <AstroGuiding.h>
 #include <AstroTask.h>
 #include <AstroDevice.h>
+#include <AstroFocus.h>
 #include <types.h>
 #include <device.h>
 #include <camera.h>
 #include <guider.h>
+#include <focusing.h>
 #include <tasks.h>
 #include <sys/time.h>
 
@@ -115,6 +117,13 @@ astro::device::Mount::mount_state	convert(mountstate s);
 
 // Image
 astro::image::ImagePtr	convert(ImagePrx image);
+
+// Focusing
+FocusState	convert(astro::focusing::Focusing::focus_status s);
+astro::focusing::Focusing::focus_status	convert(FocusState s);
+
+FocusMethod	convert(astro::focusing::Focusing::focus_method m);
+astro::focusing::Focusing::focus_method	convert(FocusMethod m);
 
 } // namespace snowstar
 

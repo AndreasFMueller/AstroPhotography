@@ -34,6 +34,7 @@ class FocusingContext {
 public:
 	int	id;
 	astro::focusing::FocusingPtr	focusing;
+	Ice::ObjectPtr	focusingptr;
 };
 
 /**

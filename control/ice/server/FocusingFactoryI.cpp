@@ -47,6 +47,7 @@ FocusingContext	FocusingSingleton::get(const std::string& ccd,
 	// now use the data to create a new focusing context
 	FocusingContext	context;
 	context.id = nextid;
+	
 
 	// insert the context in the map
 	focusings.insert(std::make_pair(key, context));
