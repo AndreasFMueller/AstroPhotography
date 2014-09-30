@@ -91,6 +91,7 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] cancel" << std::endl;
 	std::cout << p << " [ options ] status" << std::endl;
 	std::cout << p << " [ options ] history" << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
 
 	std::cout << "start, monitor, cancel or report the status of a "
 		"focusing operation";
@@ -200,7 +201,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
-			break;
+			return EXIT_SUCCESS;
 		case 'i':
 			instrumentname = optarg;
 			break;
@@ -224,6 +225,10 @@ int	main(int argc, char *argv[]) {
 	}
 	std::string	command = argv[optind++];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: %s", command.c_str()); 
+	if (command == "help") {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
 
 
 	// get the configuration
