@@ -7,11 +7,17 @@
 #define _FocusingI_h
 
 #include <focusing.h>
+#include <AstroFocus.h>
 
 namespace snowstar {
 
-class FocusingI : public Focusing {
+class FocusingI : public Focusing, public astro::callback::Callback {
+	astro::focusing::FocusingPtr	_focusingptr;
+	FocusHistory	_history;
 public:
+	FocusingI(astro::focusing::FocusingPtr focusingptr);
+	virtual ~FocusingI();
+
 	FocusState	status(const Ice::Current& current);
 
 	FocusMethod	method(const Ice::Current& current);
@@ -31,6 +37,25 @@ public:
 	FocuserPrx	getFocuser(const Ice::Current& current);
 
 	FocusHistory	history(const Ice::Current& current);
+	void	addPoint(const FocusPoint& point);
+	void	changeState(FocusState state);
+	// callback stuff
+private:
+	std::set<FocusCallbackPrx>	callbackproxies;
+public:
+	void	registerCallback(const Ice::Identity& callbackidentity,
+			const Ice::Current& current);
+	void	unregisterCallback(const Ice::Identity& callbackidentity,
+			const Ice::Current& current);
+
+};
+
+class FocusingCallback : public astro::callback::Callback {
+	FocusingI&	_focusing;
+public:
+	FocusingCallback(FocusingI& focusing) : _focusing(focusing) { }
+	virtual astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data);
 };
 
 } // namespace snowstar

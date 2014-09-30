@@ -25,6 +25,7 @@ public:
 	const std::string	focuser() const { return second; }
 	std::string&	focuser() { return second; }
 	void	focuser(const std::string& f) { second = f; }
+	std::string	toString() const;
 };
 
 /**
@@ -61,8 +62,10 @@ static FocusingContext	get(int id);
  * is found, creates a new one. The id in the FocusingContext is then used
  * to create a string identifier for the Ice proxy.
  */
-class FocusingFactoryI {
+class FocusingFactoryI : public FocusingFactory {
 public:
+	FocusingFactoryI();
+	virtual ~FocusingFactoryI();
 	FocusingPrx	get(const std::string& ccd, const std::string& focuser,
 				const Ice::Current& current);
 };

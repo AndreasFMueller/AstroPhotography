@@ -19,6 +19,7 @@
 #include <CommunicatorSingleton.h>
 #include <RemoteInstrument.h>
 #include <IceConversions.h>
+#include <CommonClientTasks.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -107,7 +108,7 @@ int	main(int argc, char *argv[]) {
 
 	debugtimeprecision = 3;
 	debugthreads = 1;
-	astro::camera::Binning	binning;
+	std::string	binning;
 	std::string	filtername;
 	std::string	reponame;
 
@@ -126,7 +127,7 @@ int	main(int argc, char *argv[]) {
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
-			binning = astro::camera::Binning(optarg);
+			binning = optarg;
 			break;
 		case 'c':
 			Configuration::set_default(optarg);
@@ -199,23 +200,15 @@ int	main(int argc, char *argv[]) {
 	snowstar::CcdPrx	ccd = instrument.ccd_proxy();
 
 	// get the image repository
-	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
-		frame = convert(ccd->getInfo()).getFrame();
-	} else {
-		frame = convert(ccd->getInfo()).clipRectangle(frame);
-	}
+	CcdTask	ccdtask(ccd);
+	ccdtask.frame(frame);
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
 	if ((focusposition > 0) && (instrument.has(DeviceName::Focuser))) {
 		snowstar::FocuserPrx	focuser = instrument.focuser_proxy();
-		focuser->set(focusposition);
-		while (focuser->current() != focusposition) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"current = %hu, focus = %hu",
-				focuser->current(), focusposition);
-			usleep(100000);
-		}
+		FocuserTask	focusertask(focuser, focusposition);
+		focusertask.wait();
 	}
 
 	// if the filter name is specified, get the filterwheel from the
@@ -224,55 +217,28 @@ int	main(int argc, char *argv[]) {
 		&& (instrument.has(DeviceName::Filterwheel))) {
 		snowstar::FilterWheelPrx	filterwheel
 			= instrument.filterwheel_proxy();
-		filterwheel->selectName(filtername);
-		while (filterwheel->getState() != snowstar::FwIDLE) ;
+		FilterwheelTask	filterwheeltask(filterwheel, filtername);
+		filterwheeltask.wait();
 	}
 
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
-	bool	hascooler = false;
 	snowstar::CoolerPrx	cooler;
-	if ((temperature == temperature)
-		&& (instrument.has(DeviceName::Cooler))) {
-		hascooler = true;
-		double	absolute = 273.15 + temperature;
-		if (absolute < 0) {
-			throw std::runtime_error("bad temperature");
-		}
+	if (instrument.has(DeviceName::Cooler)) {
 		cooler = instrument.cooler_proxy();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
-		cooler->setTemperature(absolute);
-		cooler->setOn(true);
-		// wait until the temperature is within 1 degree of the
-		// set temperature
-		double	delta;
-		do {
-			sleep(1);
-			double	actual = cooler->getActualTemperature();
-			delta = fabs(absolute - actual);
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"set: %.1f, actual: %1.f, delta: %.1f",
-				absolute, actual, delta);
-		} while (delta > 1);
 	}
+	CoolerTask	coolertask(cooler, temperature);
+	coolertask.wait();
 
 	// prepare an exposure object
-	astro::camera::Exposure	exposure(frame, exposuretime);
-	exposure.purpose = purpose;
-	exposure.shutter = (purpose == astro::camera::Exposure::dark)
-				? astro::camera::SHUTTER_CLOSED
-				: astro::camera::SHUTTER_OPEN;
-	exposure.exposuretime = exposuretime;
-	exposure.mode = binning;
+	ccdtask.frame(frame);
+	ccdtask.binning(binning);
+	ccdtask.exposuretime(exposuretime);
+	ccdtask.purpose(purpose);
 
 	// check whether the remote camera already has an exposed image,
 	// in which case we want to cancel it
-	if (snowstar::EXPOSED == ccd->exposureStatus()) {
-		ccd->cancelExposure();
-		while (snowstar::IDLE != ccd->exposureStatus()) {
-			usleep(100000);
-		}
-	}
+	ccdtask.available();
 
 	// start a sequence of images
 	int	imagecounter = 0;
@@ -280,20 +246,11 @@ int	main(int argc, char *argv[]) {
 		// start the exposure
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure %d",
 			imagecounter);
-		ccd->startExposure(convert(exposure));
+		ccdtask.start();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
 		// wait for the exposure to complete
-		useconds_t	t = 1000000 * exposure.exposuretime;
-		usleep(t);
-		while (ccd->exposureStatus() == snowstar::EXPOSING) {
-			usleep(100000);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd state  now: %d",
-			ccd->exposureStatus());
-		if (ccd->exposureStatus() != snowstar::EXPOSED) {
-			throw std::runtime_error("ccd state not exposed!");
-		}
+		ccdtask.wait();
 
 		// get the image data
 		ImagePrx	image = ccd->getImage();
@@ -318,12 +275,7 @@ int	main(int argc, char *argv[]) {
 		imagecounter++;
 	}
 
-	// turn of the cooler to save energy
-	if (hascooler) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler off");
-		cooler->setOn(false);
-	}
-
+	// turn of the cooler to save energy, this is done by the destructor
 	return EXIT_SUCCESS;
 }
 

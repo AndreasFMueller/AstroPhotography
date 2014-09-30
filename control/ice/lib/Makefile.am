@@ -7,13 +7,13 @@ if ENABLE_ICE
 
 lib_LTLIBRARIES = libiceastro.la
 
-slice_sources = camera.cpp exceptions.cpp guider.cpp image.cpp device.cpp \
-	tasks.cpp types.cpp
+slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
+	device.cpp tasks.cpp types.cpp
 
 BUILT_SOURCES = $(slice_sources)
 
 additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
-	IceConversions.cpp
+	IceConversions.cpp CommonClientTasks.cpp
 
 libiceastro_la_SOURCES = \
 	$(slice_sources) $(additional_sources)

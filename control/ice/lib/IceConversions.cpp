@@ -671,18 +671,18 @@ astro::focusing::Focusing::focus_status	convert(FocusState s) {
 FocusMethod	convert(astro::focusing::Focusing::focus_method m) {
 	switch (m) {
 	case astro::focusing::Focusing::FWHM:
-		return FocusingFWHM;
+		return FocusFWHM;
 	case astro::focusing::Focusing::MEASURE:
-		return FocusingMEASURE;
+		return FocusMEASURE;
 	}
 	throw std::runtime_error("unknown focus method");
 }
 
 astro::focusing::Focusing::focus_method	convert(FocusMethod m) {
 	switch (m) {
-	case FocusingFWHM:
+	case FocusFWHM:
 		return astro::focusing::Focusing::FWHM;
-	case FocusingMEASURE:
+	case FocusMEASURE:
 		return astro::focusing::Focusing::MEASURE;
 	}
 	throw std::runtime_error("unknown focus method");

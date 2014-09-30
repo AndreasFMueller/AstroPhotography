@@ -7,15 +7,13 @@
 #define _FocusingLocator_h
 
 #include <Ice/Ice.h>
+#include <map>
 
 namespace snowstar {
 
 class FocusingLocator : public Ice::ServantLocator {
-	typedef	std::map<int id, Ice::ObjectPtr>	focusingmap;
-	focusingmap	focusings;
 public:
 	FocusingLocator();
-	void	add(const int id, Ice::ObjectPtr focusingptr);
 
 	virtual	Ice::ObjectPtr  locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

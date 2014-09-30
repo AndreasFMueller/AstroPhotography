@@ -4,6 +4,7 @@
 // (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 
@@ -18,7 +19,7 @@ enum FocusState {
 	// pictures
 	FocusMOVING,
 	// the camera is exposing, i.e. 
-	FocusMEASING,
+	FocusMEASURING,
 	// the focusing process completed, i.e. an optimal focus position was
 	// found and the focuser has been moved to that position
 	FocusFOCUSED,
@@ -44,6 +45,11 @@ struct FocusPoint {
 	double	value;
 };
 sequence<FocusPoint>	FocusHistory;
+
+interface FocusCallback {
+	void	addPoint(FocusPoint point);
+	void	changeState(FocusState state);
+};
 
 /**
  * \brief Focusing interface
@@ -116,6 +122,16 @@ interface Focusing {
  	 * \brief Get the focusing history
 	 */
 	FocusHistory	history();
+
+	/**
+	 * \brief add a callback to the server
+	 */
+	void	registerCallback(Ice::Identity callbackidentity);
+
+	/**
+	 * \brief remove a callback from the server
+	 */
+	void	unregisterCallback(Ice::Identity callbackidentity);
 };
 
 /**

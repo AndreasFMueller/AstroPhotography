@@ -34,8 +34,7 @@ void	GuiderPortI::activate(float ra, float dec, const Ice::Current& /* current *
 
 GuiderPortPrx	GuiderPortI::createProxy(const std::string& guiderportname,
 			const Ice::Current& current) {
-	return snowstar::createProxy<GuiderPortPrx>(
-		NameConverter::urlencode(guiderportname), current);
+	return snowstar::createProxy<GuiderPortPrx>(guiderportname, current);
 }
 
 } // namespace snowstar

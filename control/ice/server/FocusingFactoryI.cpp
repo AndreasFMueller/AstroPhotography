@@ -7,11 +7,19 @@
 #include <AstroFormat.h>
 #include <ProxyCreator.h>
 #include <IceConversions.h>
+#include <AstroDevaccess.h>
 #include <AstroUtils.h>
+#include <FocusingI.h>
 
 namespace snowstar {
 
+std::string	FocusingKey::toString() const {
+	return ccd() + " " + focuser();
+}
+
 std::mutex	factory_mutex;
+
+FocusingSingleton::FocusingMap	FocusingSingleton::focusings;
 
 /**
  * \brief factory method for focusing contexts
@@ -28,6 +36,8 @@ FocusingContext	FocusingSingleton::get(const std::string& ccd,
 	// find the focusing context
 	auto ptr = focusings.find(key);
 	if (ptr != focusings.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found existing %s",
+			key.toString().c_str());
 		return ptr->second;
 	}
 
@@ -44,10 +54,24 @@ FocusingContext	FocusingSingleton::get(const std::string& ccd,
 		)->second.id;
 	}
 
+	// we need pointers for deives
+	astro::module::Repository	repository;
+	astro::module::Devices	devices(repository);
+
+	astro::DeviceName	ccdname(ccd);
+	astro::camera::CcdPtr	ccdptr
+		= devices.getCcd(ccdname);
+
+	astro::DeviceName	focusername(focuser);
+	astro::camera::FocuserPtr	focuserptr
+		= devices.getFocuser(focusername);
+
 	// now use the data to create a new focusing context
 	FocusingContext	context;
 	context.id = nextid;
-	
+	context.focusing = astro::focusing::FocusingPtr(
+		new astro::focusing::Focusing(ccdptr, focuserptr));
+	context.focusingptr = new FocusingI(context.focusing);
 
 	// insert the context in the map
 	focusings.insert(std::make_pair(key, context));
@@ -60,7 +84,10 @@ FocusingContext	FocusingSingleton::get(const std::string& ccd,
  * \brief factory method to retrieve focusing context identified by id
  */
 FocusingContext	FocusingSingleton::get(int id) {
+	// ensure exclusive access to the focusing map
 	astro::MutexLocker<std::mutex>	lock(factory_mutex);
+
+	// search the map for an entry with a given id
 	auto ptr = std::find_if(focusings.begin(), focusings.end(),
 		[id](const FocusingMap::value_type& focusing) {
 			return (focusing.second.id == id);
@@ -80,7 +107,15 @@ FocusingPrx	FocusingFactoryI::get(const std::string& ccd,
 	FocusingContext	ctx = FocusingSingleton::get(ccd, focuser);
 	std::string	focusingname = astro::stringprintf("focusing/%d",
 		ctx.id);
-	return createProxy<FocusingPrx>(focusingname, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created proxy: %s",
+		focusingname.c_str());
+	return createProxy<FocusingPrx>(focusingname, current, false);
+}
+
+FocusingFactoryI::FocusingFactoryI() {
+}
+
+FocusingFactoryI::~FocusingFactoryI() {
 }
 
 } // namespace snowstar

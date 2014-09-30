@@ -58,7 +58,8 @@ private:
 public:	
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
-	void	callback(ImagePtr image, double value);
+	void	callback(ImagePtr image, int position, double value);
+	void	callback(Focusing::focus_status state);
 protected:
 	bool	complete();
 	Focusing&	_focusing;

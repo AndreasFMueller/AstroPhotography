@@ -79,7 +79,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		fc.insert(std::pair<unsigned short, double>(position, value));
 
 		// send the callback data
-		callback(combine(image, fwhminfo), value);
+		callback(combine(image, fwhminfo), position, value);
 	}
 
 	// compute the best focus position

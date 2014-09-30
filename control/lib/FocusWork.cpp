@@ -74,13 +74,28 @@ bool	FocusWork::complete() {
 /**
  * \brief Call the callback with image and focus value
  */
-void	FocusWork::callback(ImagePtr image, double value) {
+void	FocusWork::callback(ImagePtr image, int position, double value) {
 	// send the callback data
 	if (!callback()) {
 		return;
 	}
 	try {
-		astro::callback::CallbackDataPtr	data(new FocusCallbackData(image, value));
+		astro::callback::CallbackDataPtr	data(
+			new FocusCallbackData(image, position, value));
+		(*callback())(data);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during callback");
+	}
+}
+
+void	FocusWork::callback(Focusing::focus_status state) {
+	if (!callback()) {
+		return;
+	}
+	try {
+		astro::callback::CallbackDataPtr	data(
+			new FocusCallbackState(state));
 		(*callback())(data);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 	} catch (...) {
@@ -196,6 +211,7 @@ Focusing::focus_status	FocusWork::focusingstatus() {
  * \brief set the focusing status
  */
 void	FocusWork::focusingstatus(Focusing::focus_status s) {
+	callback(s);
 	_focusing.status(s);
 }
 

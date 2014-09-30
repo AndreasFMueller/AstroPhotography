@@ -100,7 +100,7 @@ static purpose_t	string2purpose(const std::string& p);
 
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
-		float _exposuretime);
+		float _exposuretime = 1);
 
 	// state related methods
 	typedef enum state_e {

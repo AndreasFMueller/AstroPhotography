@@ -13,13 +13,89 @@
 #include <AstroDebug.h>
 #include <getopt.h>
 #include <CommunicatorSingleton.h>
+#include <RemoteInstrument.h>
+#include <IceConversions.h>
+#include <AstroFormat.h>
+#include <CommonClientTasks.h>
+#include <IceUtil/UUID.h>
+
+using namespace astro::config;
+using namespace astro;
 
 namespace snowstar {
 
+/**
+ * \brief convert state to a string representation
+ */
+static std::string	status2string(FocusState state) {
+	switch (state) {
+	case FocusIDLE:
+		return std::string("idle");
+	case FocusMOVING:
+		return std::string("moving");
+	case FocusMEASURING:
+		return std::string("measuring");
+	case FocusFOCUSED:
+		return std::string("focused");
+	case FocusFAILED:
+		return std::string("failed");
+	}
+	throw std::runtime_error("unknown state");
+}
+
+/**
+ * \brief Callback class for the icefocus program
+ *
+ * This callback simply displays the callback information received
+ */
+class FocusCallbackI : public FocusCallback {
+public:
+	/**
+	 * \brief Create a callback object
+	 */
+	FocusCallbackI() {
+	}
+
+	/**
+	 * \brief add a point
+	 */
+	void	addPoint(const FocusPoint& point,
+			const Ice::Current& /* current */) {
+		std::cout << timeformat("%H:%M:%S ", time(NULL));
+		std::cout << point.position << ": " << point.value;
+		std::cout << std::endl;
+	}
+
+	/**
+ 	 * \brief change the state
+	 */
+	void	changeState(FocusState state,
+			const Ice::Current& /* current */) {
+		std::cout << timeformat("%H:%M:%S ", time(NULL));
+		std::cout << "new state: ";
+		std::cout << status2string(state);
+		std::cout << std::endl;
+	}
+};
+
+/**
+ * \brief Usage method
+ */
 void	usage(const char *progname) {
 	astro::Path	path(progname);
-	std::cout << path.basename() << " [ options ]" << std::endl;
-	std::cout << "perform focusing using ccd and focuser of an instrument";
+	std::string	p = std::string("    ") + path.basename();
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] start <min> <max>" << std::endl;
+	std::cout << p << " [ options ] monitor" << std::endl;
+	std::cout << p << " [ options ] cancel" << std::endl;
+	std::cout << p << " [ options ] status" << std::endl;
+	std::cout << p << " [ options ] history" << std::endl;
+
+	std::cout << "start, monitor, cancel or report the status of a "
+		"focusing operation";
+	std::cout << std::endl;
+	std::cout << "positions <min> and <max>";
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"
@@ -45,6 +121,9 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "                       widthxheight@(xoffset,yoffset)";
 	std::cout << std::endl;
+	std::cout << " -s,--steps=<s>        subdivide the interval in <s> "
+		"steps";
+	std::cout << std::endl;
 	std::cout << " -t,--temperature=<t>  cool ccd to temperature <t>, "
 		"ignored if the instrument";
 	std::cout << std::endl;
@@ -52,6 +131,9 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 }
 
+/**
+ * \brief long options
+ */
 static struct option	longopts[] = {
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
 { "config",		required_argument,	NULL,	'c' }, /*  1 */
@@ -61,27 +143,48 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /*  5 */
 { "instrument",		required_argument,	NULL,	'i' }, /*  6 */
 { "rectangle",		required_argument,	NULL,	'r' }, /*  7 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  8 */
+{ "steps",		required_argument,	NULL,	's' }, /*  8 */
+{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
 { NULL,			0,			NULL,    0  }
 };
+
+/**
+ * \brief Display the history of the last focusing run
+ */
+static void	show_history(const FocusHistory& history) {
+	std::for_each(history.begin(), history.end(),
+		[](const FocusPoint& point) {
+			std::cout << point.position << ": " << point.value;
+			std::cout << std::endl;
+		}
+	);
+}
+
+volatile bool	signal_received = false;
+void	handler(int /* sig */) {
+	signal_received = true;
+}
 
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
 	std::string	instrumentname;
+	int	steps = 10;
 	double	exposuretime = 1.0;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
-	astro::camera::Binning	binning;
-	astro::image::ImageRectangle	frame;
+	std::string	binning;
+	std::string	frame;
 	std::string	filtername;
+	astro::focusing::Focusing::focus_method	method
+		= astro::focusing::Focusing::FWHM;
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:r:t:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:m:r:t:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
-			binning = astro::camera::Binning(optarg);
+			binning = optarg;
 			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
@@ -101,16 +204,169 @@ int	main(int argc, char *argv[]) {
 		case 'i':
 			instrumentname = optarg;
 			break;
+		case 'm':
+			method = astro::focusing::Focusing::method_from_name(optarg);
+			break;
 		case 'r':
-			frame = astro::image::ImageRectangle(optarg);
+			frame = optarg;
+			break;
+		case 's':
+			steps = std::stoi(optarg);
 			break;
 		case 't':
 			temperature = std::stod(optarg);
 			break;
 		}
 
+	// the next argument is the command
+	if (argc <= optind) {
+		throw std::runtime_error("not enough arguments");
+	}
+	std::string	command = argv[optind++];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: %s", command.c_str()); 
 
-	throw std::runtime_error("not implemented");
+
+	// get the configuration
+	ConfigurationPtr	config = Configuration::get();
+
+	// check whether we have an instrument
+	if (0 == instrumentname.size()) {
+		throw std::runtime_error("instrument name not set");
+	}
+	RemoteInstrument	instrument(config->database(),
+						instrumentname);
+	// get the device names
+	CcdPrx	ccdprx = instrument.ccd_proxy();
+	std::string	ccdname = ccdprx->getName();
+	FocuserPrx	focuserprx = instrument.focuser_proxy();
+	std::string	focusername = focuserprx->getName();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s focuser: %s", ccdname.c_str(),
+		focusername.c_str());
+
+	// first get a connection to the server
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	astro::ServerName	servername
+		= instrument.servername(astro::DeviceName::Ccd);
+	std::string	connectstring
+		= astro::stringprintf("FocusingFactory:default -h %s -p %hu",
+			servername.host().c_str(), servername.port());
+	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	FocusingFactoryPrx	focusingfactory
+		= FocusingFactoryPrx::checkedCast(base);
+
+	// get the focusing interface
+	FocusingPrx	focusing = focusingfactory->get(ccdname, focusername);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a focusing proxy");
+
+	// creating a callback
+	Ice::ObjectPtr	callback = new FocusCallbackI();
+	Ice::ObjectAdapterPtr	adapter
+		= ic->createObjectAdapter("");
+	Ice::Identity	ident;
+	ident.name = IceUtil::generateUUID();
+	ident.category = "";
+	adapter->add(callback, ident);
+	adapter->activate();
+	focusing->ice_getConnection()->setAdapter(adapter);
+
+	// handle the simple commands
+	if (command == "status") {
+		std::cout << "status: ";
+		std::cout << status2string(focusing->status());
+		std::cout << std::endl;
+		return EXIT_SUCCESS;
+	}
+	if (command == "history") {
+		show_history(focusing->history());
+		return EXIT_SUCCESS;
+	}
+	if (command == "monitor") {
+		std::cout << "current status: ";
+		std::cout << status2string(focusing->status());
+		std::cout << std::endl;
+		focusing->registerCallback(ident);
+		signal(SIGINT, handler);
+		while (!signal_received) {
+			sleep(1);
+		}
+		focusing->unregisterCallback(ident);
+		return EXIT_SUCCESS;
+	}
+
+	if (command == "cancel") {
+		focusing->cancel();
+		std::cout << "cancel command sent" << std::endl;
+		return EXIT_SUCCESS;
+	}
+
+	// throw exception for unknown commands
+	if (command != "start") {
+		throw std::runtime_error("unknown command");
+	}
+
+	// next two arguments are the 
+	if ((argc - optind) < 2) {
+		throw std::runtime_error("missing intervale arguments");
+	}
+	int	min = std::stoi(argv[optind++]);
+	int	max = std::stoi(argv[optind++]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "interval [%d,%d]", min, max);
+	if (min >= max) {
+		throw std::runtime_error("not an interval");
+	}
+
+
+	// ensure that focuser is ready
+	FocusState	state = focusing->status();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current state = %d", state);
+	if ((state == FocusMOVING) && (state == FocusMEASURING)) {
+		throw std::runtime_error("already focusing");
+	}
+
+	// set up the exposure
+	CcdTask	ccdtask(ccdprx);
+	ccdtask.frame(frame);
+	ccdtask.binning(binning);
+	ccdtask.exposuretime(exposuretime);
+
+	// set up the focusing
+	focusing->setSteps(steps);
+	focusing->setMethod(convert(method));
+
+	// start the focusing process
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting between %d and %d", min, max);
+	focusing->start(min, max);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing started, status: %d",
+		focusing->status());
+
+	// wait for the process to complete
+	bool	completed = false;
+	signal(SIGINT, handler);
+	do {
+		sleep(1);
+		switch (focusing->status()) {
+        	case FocusIDLE:
+        	case FocusMOVING:
+        	case FocusMEASURING:
+			break;
+        	case FocusFOCUSED:
+        	case FocusFAILED:
+			completed = true;
+			break;
+		}
+	} while ((!completed) && (!signal_received));
+	if (completed) {
+		std::cout << "final focus position: " << focuserprx->current();
+		std::cout << std::endl;
+
+		// display the history
+		show_history(focusing->history());
+	} else {
+		std::cout << "focusing incomplete" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 } // namespace snowstar

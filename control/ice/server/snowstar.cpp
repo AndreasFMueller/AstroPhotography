@@ -21,6 +21,8 @@
 #include <ModulesI.h>
 #include <DriverModuleLocator.h>
 #include <DeviceLocatorLocator.h>
+#include <FocusingFactoryI.h>
+#include <FocusingLocator.h>
 
 namespace snowstar {
 
@@ -125,6 +127,13 @@ int	main(int argc, char *argv[]) {
 		adapter->addServantLocator(devicelocatorlocator,
 				"devicelocator");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
+
+		// add a servant for Focusing
+		object = new FocusingFactoryI();
+		adapter->add(object, ic->stringToIdentity("FocusingFactory"));
+		FocusingLocator	*focusinglocator = new FocusingLocator();
+		adapter->addServantLocator(focusinglocator, "focusing");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");
 
 		// activate the adapter
 		adapter->activate();

@@ -141,7 +141,7 @@ FocusValue	MeasureFocusWork::measureat(unsigned short pos) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pos = %hu, value = %g(%f)",
 		pos, fi.value, log10(fi.value));
 	// call the callback
-	callback(combine(image, fi), fi.value);
+	callback(combine(image, fi), pos, fi.value);
 	return FocusValue(pos, fi.value);
 }
 
