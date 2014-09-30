@@ -117,14 +117,18 @@ void	FocusingI::addPoint(const FocusPoint& point) {
 		point.position, point.value);
 	_history.push_back(point);
 
-	std::for_each(callbackproxies.begin(), callbackproxies.end(),
-		[point](FocusCallbackPrx callback) {
-			try {
-				callback->addPoint(point);
-			} catch (...) {
-			}
+	std::list<FocusCallbackPrx>	todelete;
+	for (auto ptr = callbackproxies.begin(); ptr != callbackproxies.end();
+		ptr++) {
+		try {
+			(*ptr)->addPoint(point);
+		} catch (...) {
+			todelete.push_back(*ptr);
 		}
-	);
+	}
+	for (auto ptr = todelete.begin(); ptr != todelete.end(); ptr++) {
+		callbackproxies.erase(*ptr);
+	}
 }
 
 /**
@@ -132,14 +136,18 @@ void	FocusingI::addPoint(const FocusPoint& point) {
  */
 void	FocusingI::changeState(FocusState state) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new state %d", state);
-	std::for_each(callbackproxies.begin(), callbackproxies.end(),
-		[state](FocusCallbackPrx callback) {
-			try {
-				callback->changeState(state);
-			} catch (...) {
-			}
+	std::list<FocusCallbackPrx>	todelete;
+	for (auto ptr = callbackproxies.begin(); ptr != callbackproxies.end();
+		ptr++) {
+		try {
+			(*ptr)->changeState(state);
+		} catch (...) {
+			todelete.push_back(*ptr);
 		}
-	);
+	}
+	for (auto ptr = todelete.begin(); ptr != todelete.end(); ptr++) {
+		callbackproxies.erase(*ptr);
+	}
 }
 
 /**

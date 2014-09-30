@@ -12,12 +12,24 @@ namespace snowstar {
 static bool	initialized = false;
 Ice::CommunicatorPtr	CommunicatorSingleton::_communicator;
 
+/**
+ * \brief Create the Communicator singleton
+ */
 CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
+	// set property to turn of ACM, because it will be useless in
+	// all the programs that use fixed proxies and callbacks
+	Ice::PropertiesPtr props = Ice::createProperties(argc, argv);
+	props->setProperty("Ice.ACM.Client", "0");
+
+	// initialize the communicator
 	_communicator = Ice::initialize(argc, argv);
 	initialized = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "communicator initialized");
 }
 
+/**
+ * \brief get the Communicator
+ */
 Ice::CommunicatorPtr	CommunicatorSingleton::get() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "communicator being retrieved");
 	if (!initialized) {
