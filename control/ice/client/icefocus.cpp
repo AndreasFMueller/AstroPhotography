@@ -304,7 +304,15 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("unknown command");
 	}
 
-	// next two arguments are the 
+	// make sure temperature is set
+	CoolerPrx	cooler;
+	if (instrument.has(DeviceName::Cooler)) {
+		cooler = instrument.cooler_proxy();
+	}
+	CoolerTask      coolertask(cooler, temperature);
+	coolertask.wait();
+
+	// next two arguments are the interval boundaries
 	if ((argc - optind) < 2) {
 		throw std::runtime_error("missing intervale arguments");
 	}
