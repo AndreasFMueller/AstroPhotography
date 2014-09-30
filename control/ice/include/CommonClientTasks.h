@@ -6,6 +6,7 @@
 #include <AstroFormat.h>
 #include <camera.h>
 #include <AstroCamera.h>
+#include <Ice/Ice.h>
 
 namespace snowstar {
 
@@ -76,6 +77,18 @@ public:
 	FilterwheelTask(FilterWheelPrx& filterwheel,
 		const std::string& filtername);
 	void	wait(int timeout = 60);
+};
+
+/**
+ * \brief Callback adapter
+ */
+class CallbackAdapter {
+	Ice::ObjectAdapterPtr	_adapter;
+public:
+	Ice::ObjectAdapterPtr	adapter() { return _adapter; }
+	CallbackAdapter(Ice::CommunicatorPtr communicator);
+	Ice::Identity	add(Ice::ObjectPtr callback);
+	void	connect(IceProxy::Ice::Object& proxy);
 };
 
 } // namespace snowstar

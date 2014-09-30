@@ -11,7 +11,10 @@
 
 namespace snowstar {
 
-class FocusingI : public Focusing, public astro::callback::Callback {
+/**
+ * \brief Focusing servant implementation
+ */
+class FocusingI : public Focusing {
 	astro::focusing::FocusingPtr	_focusingptr;
 	FocusHistory	_history;
 public:
@@ -50,6 +53,12 @@ public:
 
 };
 
+/**
+ * \brief Callback class to be installed in the Focusing class
+ *
+ * The astro::focusing::Focusing class can accept a callback. An instance
+ * of the FocusingCallback class can be installed there 
+ */
 class FocusingCallback : public astro::callback::Callback {
 	FocusingI&	_focusing;
 public:

@@ -260,14 +260,9 @@ int	main(int argc, char *argv[]) {
 
 	// creating a callback
 	Ice::ObjectPtr	callback = new FocusCallbackI();
-	Ice::ObjectAdapterPtr	adapter
-		= ic->createObjectAdapter("");
-	Ice::Identity	ident;
-	ident.name = IceUtil::generateUUID();
-	ident.category = "";
-	adapter->add(callback, ident);
-	adapter->activate();
-	focusing->ice_getConnection()->setAdapter(adapter);
+	CallbackAdapter	adapter(ic);
+	Ice::Identity	ident = adapter.add(callback);
+	focusing->ice_getConnection()->setAdapter(adapter.adapter());
 
 	// handle the simple commands
 	if (command == "status") {
@@ -354,7 +349,7 @@ int	main(int argc, char *argv[]) {
 			completed = true;
 			break;
 		}
-	} while ((!completed) && (!signal_received));
+	} while ((!completed) && (!signal_received));
 	if (completed) {
 		std::cout << "final focus position: " << focuserprx->current();
 		std::cout << std::endl;

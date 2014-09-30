@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <math.h>
 #include <IceConversions.h>
+#include <IceUtil/UUID.h>
 
 namespace snowstar {
 
@@ -273,6 +274,26 @@ void	FilterwheelTask::wait(int timeout) {
 		throw std::runtime_error("filterwheel did not stabilize");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel is idle again");
+}
+
+//////////////////////////////////////////////////////////////////////
+// Client Callback adapter
+//////////////////////////////////////////////////////////////////////
+CallbackAdapter::CallbackAdapter(Ice::CommunicatorPtr communicator) {
+	_adapter = communicator->createObjectAdapter("");
+	_adapter->activate();
+}
+
+void	CallbackAdapter::connect(IceProxy::Ice::Object& proxy) {
+	proxy.ice_getConnection()->setAdapter(_adapter);
+}
+
+Ice::Identity	CallbackAdapter::add(Ice::ObjectPtr callback) {
+	Ice::Identity	ident;
+	ident.name = IceUtil::generateUUID();
+	ident.category = "";
+	_adapter->add(callback, ident);
+	return ident;
 }
 
 } // namespace snowstar
