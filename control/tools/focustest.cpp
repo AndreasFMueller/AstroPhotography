@@ -15,7 +15,7 @@
 #if ENABLE_CORBA
 #include <OrbSingleton.h>
 #endif /* ENABLE_CORBA */
-#include <stacktrace.h>
+#include <AstroUtils.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -29,7 +29,7 @@ using namespace astro::interpolation;
 
 namespace astro {
 
-int	main(int argc, char *argv[]) {
+int	focustest_main(int argc, char *argv[]) {
 
 	int	c;
 	const char	*cameramodulename = "simulator";
@@ -199,15 +199,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::focustest_main>(argc, argv);
 }

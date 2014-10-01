@@ -169,4 +169,26 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	// XXX implementation missing
 }
 
+void    GuiderI::registerImageMonitor(const Ice::Identity& imagecallback,
+		const Ice::Current& current) {
+	// XXX implementation missing
+}
+
+void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
+		const Ice::Current& current) {
+	// XXX implementation missing
+}
+
+void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
+		const Ice::Current& current) {
+	// XXX implementation missing
+}
+
+void    GuiderI::unregisterTrackingMonitor(const Ice::Identity& trackingcallback,
+		const Ice::Current& current) {
+	// XXX implementation missing
+}
+
+
+
 } // namespace snowstar

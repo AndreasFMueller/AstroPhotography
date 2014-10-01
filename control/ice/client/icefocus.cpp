@@ -5,7 +5,6 @@
  */
 #include <stdexcept>
 #include <iostream>
-#include <stacktrace.h>
 #include <focusing.h>
 #include <typeinfo>
 #include <AstroUtils.h>
@@ -115,6 +114,11 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << " -i,--instrument=<INS> use instrument named INS";
 	std::cout << std::endl;
+	std::cout << " -m,--method=<m>       method to use to estimate focus "
+		"quality: either";
+	std::cout << std::endl;
+	std::cout << "                       fwhm or measure, default is fwhm";
+	std::cout << std::endl;
 	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
 		"specified by <rec>.";
 	std::cout << std::endl;
@@ -143,9 +147,10 @@ static struct option	longopts[] = {
 { "filter",		required_argument,	NULL,	'f' }, /*  4 */
 { "help",		no_argument,		NULL,	'h' }, /*  5 */
 { "instrument",		required_argument,	NULL,	'i' }, /*  6 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /*  7 */
-{ "steps",		required_argument,	NULL,	's' }, /*  8 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
+{ "method",		required_argument,	NULL,	'm' }, /*  7 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /*  8 */
+{ "steps",		required_argument,	NULL,	's' }, /*  9 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 10 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -166,7 +171,7 @@ void	handler(int /* sig */) {
 	signal_received = true;
 }
 
-int	main(int argc, char *argv[]) {
+int	icefocus_main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
 	std::string	instrumentname;
@@ -380,17 +385,6 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return snowstar::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name());
-		std::cerr << ": " << x.what();
-		std::cerr << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<snowstar::icefocus_main>(argc, argv);
 }
 

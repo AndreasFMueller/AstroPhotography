@@ -11,14 +11,14 @@
 #include <Ucac4.h>
 #include <includes.h>
 #include <iostream>
-#include <stacktrace.h>
 #include <typeinfo>
+#include <AstroUtils.h>
 
 using namespace astro::catalog;
 
 namespace astro {
 
-int	main(int argc, char *argv[]) {
+int	buildcatalog_main(int argc, char *argv[]) {
 	int	c;
 	std::string	hipfile;
 	std::string	tycho2file;
@@ -140,15 +140,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::buildcatalog_main>(argc, argv);
 }

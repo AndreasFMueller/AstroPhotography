@@ -13,7 +13,6 @@
 #include <AstroCallback.h>
 #include <AstroIO.h>
 #include <AstroUtils.h>
-#include <stacktrace.h>
 #include <typeinfo>
 
 using namespace astro::camera;
@@ -229,15 +228,5 @@ int	guider_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::guider_main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::guider_main>(argc, argv);
 }

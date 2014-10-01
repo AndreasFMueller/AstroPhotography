@@ -12,7 +12,6 @@
 #include <AstroIO.h>
 #include <AstroDemosaic.h>
 #include <AstroImager.h>
-#include <stacktrace.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -101,15 +100,5 @@ int	clamp_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::clamp_main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::clamp_main>(argc, argv);
 }

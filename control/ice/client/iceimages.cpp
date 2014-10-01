@@ -12,7 +12,6 @@
 #include <AstroConfig.h>
 #include <AstroProject.h>
 #include <AstroIO.h>
-#include <stacktrace.h>
 #include <Ice/Ice.h>
 #include <device.h>
 #include <camera.h>
@@ -98,7 +97,7 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,    0  }
 };
 
-int	main(int argc, char *argv[]) {
+int	iceimages_main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
 	int	nImages = 1;
@@ -282,15 +281,5 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return snowstar::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<snowstar::iceimages_main>(argc, argv);
 }

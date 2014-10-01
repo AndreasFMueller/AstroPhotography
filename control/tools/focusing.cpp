@@ -13,7 +13,6 @@
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
 #include <AstroIO.h>
-#include <stacktrace.h>
 
 using namespace astro::focusing;
 
@@ -51,7 +50,7 @@ public:
 	}
 };
 
-int	main(int argc, char *argv[]) {
+int	focusing_main(int argc, char *argv[]) {
 	int	c;
 	unsigned short	min = 24000;
 	unsigned short	max = 40000;
@@ -177,16 +176,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "focusing terminated by ";
-		std::cerr << astro::demangle(typeid(x).name());
-		std::cerr << ": " << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "focusing terminated by unknown exception"
-			<< std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::focusing_main>(argc, argv);
 }

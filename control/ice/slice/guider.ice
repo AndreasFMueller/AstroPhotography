@@ -4,6 +4,7 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil 2013
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 	/**
@@ -230,6 +231,14 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+
+
+		// callbacks for monitoring
+		void	registerImageMonitor(Ice::Identity imagemonitor);
+		void	unregisterImageMonitor(Ice::Identity imagemonitor);
+
+		void	registerTrackingMonitor(Ice::Identity trackingmonitor);
+		void	unregisterTrackingMonitor(Ice::Identity trackingmonitor);
 	};
 
 	/**

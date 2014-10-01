@@ -10,7 +10,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroDebug.h>
 #include <stdexcept>
-#include <stacktrace.h>
+#include <AstroUtils.h>
 #include <AstroConfig.h>
 #include <AstroProject.h>
 
@@ -202,14 +202,5 @@ int	imageinfo_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::imageinfo_main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by " << typeid(x).name() << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::imageinfo_main>(argc, argv);
 }
