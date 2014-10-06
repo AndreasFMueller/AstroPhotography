@@ -161,6 +161,7 @@ devicetype	convert(const astro::DeviceName::device_type& type) {
 	case astro::DeviceName::Mount:
 		return DevMOUNT;
 	}
+	throw std::runtime_error("unknown device type");
 }
 
 astro::DeviceName::device_type	convert(const devicetype& type) {
@@ -184,6 +185,7 @@ astro::DeviceName::device_type	convert(const devicetype& type) {
 	case DevMOUNT:
 		return astro::DeviceName::Mount;
 	}
+	throw std::runtime_error("unknown device type");
 }
 
 // CCD related
@@ -273,6 +275,7 @@ ExposureState	convert(const astro::camera::Exposure::State& s) {
 	case astro::camera::Exposure::exposed:
 		return EXPOSED;
 	}
+	throw std::runtime_error("unknown exposure state");
 }
 
 astro::camera::Exposure::State	convert(const ExposureState& s) {
@@ -286,6 +289,7 @@ astro::camera::Exposure::State	convert(const ExposureState& s) {
 	case EXPOSED:
 		return astro::camera::Exposure::exposed;
 	}
+	throw std::runtime_error("unknown exposure state");
 }
 
 ShutterState	convert(const astro::camera::shutter_state& s) {
@@ -354,6 +358,7 @@ FilterwheelState	convert(const astro::camera::FilterWheel::State& s) {
 	case astro::camera::FilterWheel::unknown:
 		return snowstar::FwUNKNOWN;
 	}
+	throw std::runtime_error("unknown filterwheel state");
 }
 
 astro::camera::FilterWheel::State convert(const FilterwheelState& s) {
@@ -365,6 +370,7 @@ astro::camera::FilterWheel::State convert(const FilterwheelState& s) {
 	case snowstar::FwUNKNOWN:
 		return astro::camera::FilterWheel::unknown;
 	}
+	throw std::runtime_error("unknown filterwheel state");
 }
 
 // Guider
@@ -381,6 +387,7 @@ GuiderState	convert(const astro::guiding::GuiderState& state) {
 	case astro::guiding::guiding:
 		return GuiderGUIDING;
 	}
+	throw std::runtime_error("unknown guider state");
 }
 
 astro::guiding::GuiderState	convert(const GuiderState& state) {
@@ -396,6 +403,7 @@ astro::guiding::GuiderState	convert(const GuiderState& state) {
 	case GuiderGUIDING:
 		return astro::guiding::guiding;
 	}
+	throw std::runtime_error("unknown guider state");
 }
 
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
@@ -458,6 +466,7 @@ astro::task::TaskInfo::taskstate	convert(const TaskState& state) {
 	case TskCOMPLETED:
 		return astro::task::TaskInfo::complete;
 	}
+	throw std::runtime_error("unknown task state");
 }
 
 TaskState	convert(const astro::task::TaskInfo::taskstate& state) {
@@ -473,6 +482,7 @@ TaskState	convert(const astro::task::TaskInfo::taskstate& state) {
 	case astro::task::TaskInfo::complete:
 		return TskCOMPLETED;
 	}
+	throw std::runtime_error("unknown task state");
 }
 
 TaskInfo	convert(const astro::task::TaskInfo& info) {
@@ -529,6 +539,7 @@ QueueState	convert(const astro::task::TaskQueue::state_type& state) {
 	case astro::task::TaskQueue::stopped:
 		return QueueSTOPPED;
 	}
+	throw std::runtime_error("unknown queue state");
 }
 
 astro::task::TaskQueue::state_type	convert(const QueueState& state) {
@@ -542,6 +553,7 @@ astro::task::TaskQueue::state_type	convert(const QueueState& state) {
 	case QueueSTOPPED:
 		return astro::task::TaskQueue::stopped;
 	}
+	throw std::runtime_error("unknown queue state");
 }
 
 TaskMonitorInfo convert(const astro::task::TaskMonitorInfo& monitorinfo) {
@@ -615,7 +627,8 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 		throw std::runtime_error("cannot create temp file");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "out fd = %d", out);
-	if (file.size() != write(out, file.data(), file.size())) {
+	int	s = file.size();
+	if (s != write(out, file.data(), s)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "writing temp file failed: %s",
 			strerror(errno));
 	}
