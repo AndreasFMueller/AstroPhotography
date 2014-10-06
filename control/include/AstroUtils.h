@@ -302,7 +302,7 @@ int	main_function(int argc, char *argv[]) {
 	} catch (const std::exception& x) {
 		std::cerr << Path(argv[0]).basename();
 		std::cerr << " terminated by ";
-		std::cerr << demangle(typeid(x).name());
+		std::cerr << astro::demangle(typeid(x).name());
 		std::cerr << ": " << x.what();
 		std::cerr << std::endl;
 	} catch (...) {

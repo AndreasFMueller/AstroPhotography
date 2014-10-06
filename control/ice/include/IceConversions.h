@@ -86,6 +86,9 @@ astro::camera::FilterWheel::State convert(const FilterwheelState& s);
 GuiderState     convert(const astro::guiding::GuiderState& state);
 astro::guiding::GuiderState     convert(const GuiderState& state);
 
+std::string	guiderstate2string(GuiderState state);
+GuiderState	string2guiderstate(const std::string& s);
+
 GuiderDescriptor	convert(const astro::guiding::GuiderDescriptor& gd);
 astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
 

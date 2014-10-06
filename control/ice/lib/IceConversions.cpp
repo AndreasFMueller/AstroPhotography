@@ -398,6 +398,41 @@ astro::guiding::GuiderState	convert(const GuiderState& state) {
 	}
 }
 
+GuiderState	string2guiderstate(const std::string& s) {
+	if (s == "unconfigured") {
+		return GuiderUNCONFIGURED;
+	}
+	if (s == "idle") {
+		return GuiderIDLE;
+	}
+	if (s == "calibrating") {
+		return GuiderCALIBRATING;
+	}
+	if (s == "calibated") {
+		return GuiderCALIBRATED;
+	}
+	if (s == "guiding") {
+		return GuiderGUIDING;
+	}
+	throw std::runtime_error("unknown guider state");
+}
+
+std::string	guiderstate2string(GuiderState state) {
+	switch (state) {
+	case GuiderUNCONFIGURED:
+		return std::string("unconfigured");
+	case GuiderIDLE:
+		return std::string("idle");
+	case GuiderCALIBRATING:
+		return std::string("calibrating");
+	case GuiderCALIBRATED:
+		return std::string("calibrated");
+	case GuiderGUIDING:
+		return std::string("guiding");
+	}
+	throw std::runtime_error("unknown guider state");
+}
+
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	GuiderDescriptor	result;
 	result.cameraname = gd.cameraname();
