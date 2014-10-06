@@ -1,3 +1,13 @@
+#
+# environmane -- set environment for configure/compile
+#
+# Use this script to set environment before compiling. This mainly serves
+# to fix broken packages, like ZeroC ICE, which does not correctly set the
+# linker path in their programs and shared libraries, so we must use
+# LD_LIBRARY_PATH
+#
+# (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
 LD_LIBRARY_PATH=/opt/Ice-3.5.1/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH
 
