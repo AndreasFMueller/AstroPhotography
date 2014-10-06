@@ -17,6 +17,7 @@
 #include <iostream>
 #include <syslog.h>
 #include <cstdio>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
