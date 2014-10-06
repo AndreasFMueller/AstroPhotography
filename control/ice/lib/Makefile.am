@@ -17,6 +17,6 @@ additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
 
 libiceastro_la_SOURCES = \
 	$(slice_sources) $(additional_sources)
-libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
+libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 endif

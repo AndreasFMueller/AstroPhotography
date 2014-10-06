@@ -39,8 +39,8 @@ snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro
-snowstar_LDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIceUtil
-snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
+snowstar_LDFLAGS = @ICELIBS@
+snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 test:	snowstar
 	./snowstar -d -b images -q testdb.db

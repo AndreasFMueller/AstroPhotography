@@ -27,7 +27,7 @@ camera.h camera.cpp:
 # to the slic2cpp command
 #
 $(SLICEHEADERS) $(SLICESOURCE): $(SLICES)
-	@SLICE2CPP@ -I. -I/Library/Developer/Ice-3.5.1/slice $(SLICES)
+	@SLICE2CPP@ -I. -I@SLICEDIR@ $(SLICES)
 	for h in camera exceptions focusing guider image device tasks types; \
 	do \
 		mv $${h}.h ../include; \

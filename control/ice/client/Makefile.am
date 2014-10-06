@@ -14,33 +14,37 @@ ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro
-ICELDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIceUtil
-ICECPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
+ICELIBS = @ICELIBS@
+ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
-snowflake_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
-	$(top_builddir)/ice/lib/libiceastro.la
-snowflake_LDADD = -L$(top_builddir)/lib -lastro \
-	-L$(top_builddir)/ice/lib -liceastro
-snowflake_LDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIceUtil
-snowflake_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
+snowflake_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowflake_LDADD = $(ICELDADD)
+snowflake_LDFLAGS = $(ICELIBS)
+snowflake_CPPFLAGS = $(ICECPPFLAGS)
 
 snowscan_SOURCES = snowscan.cpp
 snowscan_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowscan_LDADD = $(ICELDADD)
-snowscan_LDFLAGS = $(ICELDFLAGS)
+snowscan_LDFLAGS = $(ICELIBS)
 snowscan_CPPFLAGS = $(ICECPPFLAGS)
 
 iceimages_SOURCES = iceimages.cpp
 iceimages_DEPENDENCIES = $(ICEDEPENDENCIES)
 iceimages_LDADD = $(ICELDADD)
-iceimages_LDFLAGS = $(ICELDFLAGS)
+iceimages_LDFLAGS = $(ICELIBS)
 iceimages_CPPFLAGS = $(ICECPPFLAGS)
 
 icefocus_SOURCES = icefocus.cpp
 icefocus_DEPENDENCIES = $(ICEDEPENDENCIES)
 icefocus_LDADD = $(ICELDADD)
-icefocus_LDFLAGS = $(ICELDFLAGS)
+icefocus_LDFLAGS = $(ICELIBS)
 icefocus_CPPFLAGS = $(ICECPPFLAGS)
+
+icemount_SOURCES = icemount.cpp
+icemount_DEPENDENCIES = $(ICEDEPENDENCIES)
+icemount_LDADD = $(ICELDADD)
+icemount_LDFLAGS = $(ICELIBS)
+icemount_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

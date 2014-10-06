@@ -89,25 +89,61 @@ AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
 
 ######################################################################
 # detect ICE support
+ICELIBS=
+ICEINCLUDE=
+SLICEDIR=
 AC_ARG_WITH([ice],
 [AS_HELP_STRING([--with-ice=dir], [build the ICE components from path])],
 [
 	ICEDIR=${with_ice}
 	PATH=${PATH}:${ICEDIR}/bin:${ICEDIR}/c++/bin
+	if test -d ${ICEDIR}/lib64
+	then
+		ICELIBS="-L${ICEDIR}/lib64 -Wl,-rpath,${ICEDIR}/lib64"
+	else
+		if [ -d ${ICEDIR}/lib]
+		then
+			ICELIBS="-L${ICEDIR}/lib -Wl,-rpath,${ICEDIR}/lib"
+		fi
+	fi
+	if test -d ${ICEDIR}/include
+	then
+		ICEINCLUDE=-I${ICEDIR}/include
+	fi
+	if test -d ${ICEDIR}/slice
+	then
+		SLICEDIR=${ICEDIR}/slice
+	fi
 ],[
 	ICEDIR=
 ])
+ICELIBS="${ICELIBS} -lIce -lIceUtil"
 AC_SUBST(ICEDIR)
-AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+AC_SUBST(ICELIBS)
+AC_SUBST(ICEINCLUDE)
+AC_ARG_WITH([slice],
+[AS_HELP_STRING([--with-slice=dir], [where to find the slice definitions])],
+[
+	SLICEDIR=${with_slice}
+],[
+	if test -z "${SLICEDIR}"
+	then
+		AC_MSG_ERROR([slice directory not found])
+	fi
+])
+AC_SUBST(SLICEDIR)
+
+#
+AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
 
 AC_ARG_ENABLE(ice,
 [AS_HELP_STRING([--enable-ice], [also bulid the ZeroC ICE components])],
 [
 	enable_ice=yes
-	AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
+	AC_DEFINE([ENABLE_ICE], [1], [Define to 1 if ICE is enabled.])
 ],[
 	enable_ice=no
-	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+	AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
 ])
 
 AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
