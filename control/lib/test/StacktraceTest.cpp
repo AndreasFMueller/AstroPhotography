@@ -7,7 +7,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
-#include <stacktrace.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace test {

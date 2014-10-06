@@ -21,7 +21,7 @@ endif
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
 	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
-	devicemapper astroinstrument
+	devicemapper astroinstrument astromount
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = ../lib/libastro.la
@@ -124,6 +124,10 @@ devicemapper_LDADD = -L../lib -lastro
 astroinstrument_SOURCES = astroinstrument.cpp
 astroinstrument_DEPENDENCIES = ../lib/libastro.la
 astroinstrument_LDADD = -L../lib -lastro
+
+astromount_SOURCES = astromount.cpp
+astromount_DEPENDENCIES = ../lib/libastro.la
+astromount_LDADD = -L../lib -lastro
 
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.

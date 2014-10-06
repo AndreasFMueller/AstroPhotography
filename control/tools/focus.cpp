@@ -16,7 +16,7 @@
 #include <AstroFilter.h>
 #include <AstroFilterfunc.h>
 #include <AstroIO.h>
-#include <stacktrace.h>
+#include <AstroUtils.h>
 #include <includes.h>
 
 using namespace astro;
@@ -29,7 +29,10 @@ using namespace astro::io;
 
 namespace astro {
 
-int	main(int argc, char *argv[]) {
+/**
+ * \brief main function for the focus program
+ */
+int	focus_main(int argc, char *argv[]) {
 	int	c;
 	double	exposuretime = 0.1;
 	unsigned int	cameraid = 0;
@@ -126,15 +129,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "focus terminated by ";
-		std::cerr << astro::demangle(typeid(x).name());
-		std::cerr << ": " << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::focus_main>(argc, argv);
 }

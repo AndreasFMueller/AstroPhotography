@@ -18,7 +18,7 @@
 #if ENABLE_CORBA
 #include <OrbSingleton.h>
 #endif /* ENABLE_CORBA */
-#include <stacktrace.h>
+#include <AstroUtils.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -98,7 +98,10 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,    0  }
 };
 
-int	main(int argc, char *argv[]) {
+/**
+ * \brief Main method for the getimages program
+ */
+int	getimages_main(int argc, char *argv[]) {
 	unsigned int	nImages = 1;
 	std::string	instrumentname;
 	float	exposuretime = 1.; // default exposure time: 1 second
@@ -304,15 +307,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return main_function<astro::getimages_main>(argc, argv);
 }

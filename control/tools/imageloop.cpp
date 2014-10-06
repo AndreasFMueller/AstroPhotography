@@ -15,8 +15,8 @@
 #include <AstroDevice.h>
 #include <AstroLoop.h>
 #include <AstroCallback.h>
+#include <AstroUtils.h>
 #include <Sun.h>
-#include <stacktrace.h>
 #include <iostream>
 #include <typeinfo>
 
@@ -239,7 +239,10 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 }
 
 
-int	main(int argc, char *argv[]) {
+/**
+ * \brief Main function for the imageloop program
+ */
+int	imageloop_main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	int	c;
@@ -424,15 +427,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return main_function<astro::imageloop_main>(argc, argv);
 }

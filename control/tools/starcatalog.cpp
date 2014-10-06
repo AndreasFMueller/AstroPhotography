@@ -10,7 +10,6 @@
 #include <AstroDebug.h>
 #include <AstroCatalog.h>
 #include <AstroUtils.h>
-#include <stacktrace.h>
 
 using namespace astro::catalog;
 
@@ -51,7 +50,7 @@ void	areamain(Catalog& catalog, double minmag) {
 /**
  * \brief Main function for the starcatalog program
  */
-int	main(int argc, char *argv[]) {
+int	starcatalog_main(int argc, char *argv[]) {
 	int	c;
 	std::string	path("/usr/local/starcatalogs");
 	while (EOF != (c = getopt(argc, argv, "dp:m:R:D:H:W:")))
@@ -109,15 +108,5 @@ int	main(int argc, char *argv[]) {
 
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::starcatalog_main>(argc, argv);
 }

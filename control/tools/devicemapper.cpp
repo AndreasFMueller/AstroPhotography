@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <iostream>
 #include <typeinfo>
-#include <stacktrace.h>
 #include <includes.h>
 #include <AstroConfig.h>
 #include <AstroDebug.h>
@@ -220,7 +219,7 @@ static struct option	longopts[] = {
 /**
  * \brief The main method of the devicemapper command
  */
-int	main(int argc, char *argv[]) {
+int	devicemapper_main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dhs:v", longopts,
@@ -280,15 +279,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::devicemapper_main>(argc, argv);
 }

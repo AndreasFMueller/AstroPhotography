@@ -49,6 +49,19 @@ public:
 	virtual ImagePrx mostRecentImage(const Ice::Current& current);
 	virtual TrackingPoint mostRecentTrackingPoint(const Ice::Current& current);
 	virtual TrackingHistory getTrackingHistory(Ice::Int, const Ice::Current& current);
+
+	virtual void	registerImageMonitor(
+				const Ice::Identity& imagecallback,
+				const Ice::Current& current);
+	virtual void	unregisterImageMonitor(
+				const Ice::Identity& imagecallback,
+				const Ice::Current& current);
+	virtual void	registerTrackingMonitor(
+				const Ice::Identity& trackingcallback,
+				const Ice::Current& current);
+	virtual void	unregisterTrackingMonitor(
+				const Ice::Identity& trackingcallback,
+				const Ice::Current& current);
 };
 
 } // namespace snowstar

@@ -14,7 +14,6 @@
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 #include <AstroIO.h>
-#include <stacktrace.h>
 
 using namespace astro::config;
 using namespace astro::project;
@@ -232,7 +231,7 @@ static struct option	longopts[] = {
 /**
  * \brief Main function of the imagerepo program
  */
-int	main(int argc, char *argv[]) {
+int	imagerepo_main(int argc, char *argv[]) {
 	std::string	configfile;
 	int	c;
 	int	longindex;
@@ -302,15 +301,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	signal(SIGSEGV, stderr_stacktrace);
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name()) << ": ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::imagerepo_main>(argc, argv);
 }

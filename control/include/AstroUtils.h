@@ -13,6 +13,21 @@
 #include <AstroDebug.h>
 #include <pthread.h>
 #include <mutex>
+#include <cstdlib>
+#include <iostream>
+#include <syslog.h>
+#include <cstdio>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void	syslog_stacktrace(int sig);
+extern void	stderr_stacktrace(int sig);
+
+#ifdef __cplusplus
+}
+#endif
 
 namespace astro {
 
@@ -275,6 +290,28 @@ public:
 
 	operator	std::string() const;
 };
+
+/**
+ * \brief A template to unify what we do in the main function of all programs
+ */
+template <int mainfunction(int, char *[])>
+int	main_function(int argc, char *argv[]) {
+	signal(SIGSEGV, stderr_stacktrace);
+	try {
+		return mainfunction(argc, argv);
+	} catch (const std::exception& x) {
+		std::cerr << Path(argv[0]).basename();
+		std::cerr << " terminated by ";
+		std::cerr << astro::demangle(typeid(x).name());
+		std::cerr << ": " << x.what();
+		std::cerr << std::endl;
+	} catch (...) {
+		std::cerr << Path(argv[0]).basename();
+		std::cerr << " terminated by unknown exception";
+		std::cerr << std::endl;
+	}
+	return EXIT_FAILURE;
+}
 
 } // namespace astro
 
