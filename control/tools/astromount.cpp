@@ -63,6 +63,13 @@ int	help_command() {
 	std::cout << "    On most mounts this will only work if the mount has "
 		"been calibrated." << std::endl;
 	std::cout << std::endl;
+	std::cout << "cancel MOUNT" << std::endl;
+	std::cout << "    Cancel a GOTO command currently in process"
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "wait MOUNT" << std::endl;
+	std::cout << "    Wait completion of a GOTO or cancel command."
+		<< std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -108,6 +115,28 @@ int	get_command(MountPtr mount) {
 }
 
 /**
+ * \brief Implementation of wait command
+ */
+int	wait_command(MountPtr mount, bool dowait) {
+	if (dowait) {
+		Mount::mount_state	state = mount->state();
+		do {
+			sleep(1);
+			state = mount->state();
+		} while (state == Mount::GOTO);
+	}
+	return get_command(mount);
+}
+
+/**
+ * \brief Implementation of cancel command
+ */
+int	cancel_command(MountPtr mount) {
+	mount->cancel();
+	return wait_command(mount, await_completion);
+}
+
+/**
  * \brief Implementation of the set command
  */
 int	set_command(MountPtr mount, const RaDec& radec) {
@@ -115,14 +144,7 @@ int	set_command(MountPtr mount, const RaDec& radec) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dec = %s", radec.dec().dms().c_str());
 	if (!dryrun) {
 		mount->Goto(radec);
-
-		if (await_completion) {
-			Mount::mount_state	state = mount->state();
-			do {
-				sleep(1);
-				state = mount->state();
-			} while (state == Mount::GOTO);
-		}
+		return wait_command(mount, await_completion);
 	}
 	return get_command(mount);
 }
@@ -149,6 +171,8 @@ void	usage(const std::string& progname) {
 	std::cout << prg << "[ options ] list" << std::endl;
 	std::cout << prg << "[ options ] get MOUNT" << std::endl;
 	std::cout << prg << "[ options ] set MOUNT ra dec" << std::endl;
+	std::cout << prg << "[ options ] cancel MOUNT" << std::endl;
+	std::cout << prg << "[ options ] wait MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "list mounts, get or set RA and DEC of a mount";
 	std::cout << std::endl;
@@ -239,6 +263,12 @@ int main(int argc, char *argv[]) {
 	MountPtr	mount = devices.getMount(mountname);
 	if (command == "get") {
 		return get_command(mount);
+	}
+	if (command == "cancel") {
+		return cancel_command(mount);
+	}
+	if (command == "wait") {
+		return wait_command(mount, true);
 	}
 	if (command == "set") {
 		if (argc < optind + 2) {
