@@ -3,6 +3,8 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+if ENABLE_SX
+
 pkglib_LTLIBRARIES = sx.la 
 
 noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
@@ -35,3 +37,4 @@ sx_la_LDFLAGS = -module
 sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la
 
+endif

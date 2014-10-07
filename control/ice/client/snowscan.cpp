@@ -161,7 +161,8 @@ int	main(int argc, char *argv[]) {
 			servername.c_str(), port);
 
 	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
-	snowstar::ModulesPrx	modules = snowstar::ModulesPrx::checkedCast(base);
+	snowstar::ModulesPrx	modules
+		= snowstar::ModulesPrx::checkedCast(base);
 	if (!modules) {
 		throw std::runtime_error("no modules proxy");
 	}

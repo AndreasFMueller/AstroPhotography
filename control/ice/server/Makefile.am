@@ -38,8 +38,7 @@ snowstar_SOURCES = snowstar.cpp \
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 snowstar_LDADD = -L$(top_builddir)/lib -lastro \
-	-L$(top_builddir)/ice/lib -liceastro
-snowstar_LDFLAGS = @ICELIBS@
+	-L$(top_builddir)/ice/lib -liceastro @ICELIBS@
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 test:	snowstar

@@ -29,7 +29,7 @@ namespace snowstar {
 /**
  * \brief Main function for the Snowstar server
  */
-int	main(int argc, char *argv[]) {
+int	snowstar_main(int argc, char *argv[]) {
 	int	status = EXIT_SUCCESS;
 
 	// get properties from the command line
@@ -139,7 +139,7 @@ int	main(int argc, char *argv[]) {
 		adapter->activate();
 		ic->waitForShutdown();
 	} catch (const Ice::Exception& ex) {
-		std::cerr << "ICE exception: " << ex << std::endl;
+		std::cerr << "ICE exception: " << ex.what() << std::endl;
 		status = EXIT_FAILURE;
 	} catch (const char *msg) {
 		std::cerr << msg << std::endl;
@@ -156,12 +156,5 @@ int	main(int argc, char *argv[]) {
 } // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	try {
-		return snowstar::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "exception: " << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<snowstar::snowstar_main>(argc, argv);
 }
