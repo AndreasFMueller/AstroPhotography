@@ -17,6 +17,9 @@ namespace device {
  */
 Serial::Serial(const std::string& devicename, unsigned int baudrate)
 	: _serialdevice(devicename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "serial device on '%s'",
+		devicename.c_str());
+
 	// initialize fd
 	fd = -1;
 
@@ -44,6 +47,7 @@ Serial::Serial(const std::string& devicename, unsigned int baudrate)
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "device opened");
 
 	// the device must be a tty
 	if (!isatty(fd)) {
@@ -152,6 +156,17 @@ std::string	Serial::read(int count) {
 	return std::string(buffer, count);
 }
 
+std::string	Serial::readto(char promptchar) {
+	std::string	result;
+	char	c;
+	do {
+		if (1 != ::read(fd, &c, 1)) {
+			throw std::runtime_error("cannot read next byte");
+		}
+		result.push_back(c);
+	} while (c != promptchar);
+	return result;
+}
 
 } // namespace device
 } // namespace astro

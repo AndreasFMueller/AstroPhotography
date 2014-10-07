@@ -18,8 +18,8 @@ static std::string	xms(double value, const char separator) {
 	value = 60 * (value - X);
 	int	M = floor(value);
 	double	S = 60 * (value - M);
-	return stringprintf("%02d%c%02d%c%06.3f", sign * X, separator, M,
-		separator, S);
+	return stringprintf("%c%02d%c%02d%c%06.3f", (sign < 0) ? '-' : '+',
+		X, separator, M, separator, S);
 }
 
 static double	angle_reduction(const double a, const double base) {

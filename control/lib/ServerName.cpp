@@ -21,6 +21,9 @@ static unsigned short	icestar_port() {
 	return serv->s_port;
 }
 
+ServerName::ServerName() : _host("localhost"), _port(icestar_port()) {
+}
+
 ServerName::ServerName(const std::string& host, unsigned short port)
 	: _host(host), _port(port) {
 }

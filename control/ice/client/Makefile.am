@@ -5,10 +5,8 @@
 #
 if ENABLE_ICE
 
-noinst_PROGRAMS = snowflake snowscan iceimages icefocus snowguide
-
-snowflake_SOURCES = snowflake.cpp
-
+bin_PROGRAMS = snowscan iceimages icefocus snowguide icemount
+noinst_PROGRAMS = snowflake 
 
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
@@ -17,6 +15,7 @@ ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
 ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
+snowflake_SOURCES = snowflake.cpp
 snowflake_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowflake_LDADD = $(ICELDADD)
 snowflake_CPPFLAGS = $(ICECPPFLAGS)

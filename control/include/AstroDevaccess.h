@@ -77,6 +77,11 @@ astro::camera::FocuserPtr
 	DeviceAccessor<astro::camera::FocuserPtr>::get(
 		const DeviceName& name);
 
+template<>
+astro::device::MountPtr
+	DeviceAccessor<astro::device::MountPtr>::get(
+		const DeviceName& name);
+
 } // namespace device
 } // namespace astro
 

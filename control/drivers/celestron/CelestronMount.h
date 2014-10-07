@@ -10,11 +10,12 @@
 #include <Serial.h>
 
 namespace astro {
-namespace driver {
+namespace device {
 namespace celestron {
 
 class CelestronMount : public astro::device::Mount,
 			public astro::device::Serial {
+	int	version;
 	void	getprompt();
 	double	angle(uint16_t a);
 	double	angle(uint32_t a);
@@ -35,7 +36,7 @@ public:
 };
 
 } // namepace celestron
-} // namespace driver
+} // namespace device
 } // namespace astro
 
 #endif /* _CelestronMount */

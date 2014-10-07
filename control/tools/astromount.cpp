@@ -11,12 +11,20 @@
 #include <AstroLoader.h>
 #include <AstroDevice.h>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::device;
 using namespace astro::module;
 
-namespace astro {
+namespace astromount {
 
+static bool	dryrun = false;
+static bool	decimal = false;
+static bool	await_completion = false;
+
+/**
+ * \brief The list command
+ */
 int	list_command(astro::module::Devices& devices) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list command");
 	Devices::devicelist	l = devices.getDevicelist(DeviceName::Mount);
@@ -28,6 +36,9 @@ int	list_command(astro::module::Devices& devices) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief The help command
+ */
 int	help_command() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "help command");
 	std::cout << "commands: help, list, get, set" << std::endl;
@@ -40,8 +51,8 @@ int	help_command() {
 		<< std::endl;
 	std::cout << std::endl;
 	std::cout << "get MOUNT" << std::endl;
-	std::cout << "    Receive current position and tracking status of mount with"
-		<< std::endl;
+	std::cout << "    Receive current position and tracking status of "
+		"mount with" << std::endl;
 	std::cout << "    device name MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "set MOUNT RA DEC" << std::endl;
@@ -55,14 +66,65 @@ int	help_command() {
 	return EXIT_SUCCESS;
 }
 
+static std::string	state2string(Mount::mount_state state) {
+	switch (state) {
+	case Mount::IDLE:
+		return std::string("idle");
+	case Mount::ALIGNED:
+		return std::string("aligned");
+	case Mount::TRACKING:
+		return std::string("tracking");
+	case Mount::GOTO:
+		return std::string("goto");
+	}
+}
+
+/**
+ * \brief Implementation of the get command
+ */
 int	get_command(MountPtr mount) {
-	throw std::runtime_error("get implementation missing");
+	RaDec	radec = mount->getRaDec();
+	if (decimal) {
+		std::cout << radec.ra().hours();
+		std::cout << " ";
+		if (radec.dec() > Angle(M_PI)) {
+			std::cout << (radec.dec() - Angle(2 * M_PI)).degrees();
+		} else {
+			std::cout << radec.dec().degrees();
+		}
+	} else {
+		std::cout << radec.ra().hms();
+		std::cout << " ";
+		if (radec.dec() > Angle(M_PI)) {
+			std::cout << (radec.dec() - Angle(2 * M_PI)).dms();
+		} else {
+			std::cout << radec.dec().dms();
+		}
+	}
+	std::cout << " ";
+	std::cout << state2string(mount->state());
+	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
 
-int	set_command(MountPtr mount) {
-	throw std::runtime_error("set implementation missing");
-	return EXIT_SUCCESS;
+/**
+ * \brief Implementation of the set command
+ */
+int	set_command(MountPtr mount, const RaDec& radec) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ra = %s", radec.ra().hms().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "dec = %s", radec.dec().dms().c_str());
+	if (!dryrun) {
+		mount->Goto(radec);
+
+		if (await_completion) {
+			Mount::mount_state	state = mount->state();
+			do {
+				sleep(1);
+				state = mount->state();
+			} while (state == Mount::GOTO);
+		}
+	}
+	return get_command(mount);
 }
 
 /**
@@ -73,6 +135,9 @@ static struct option    longopts[] = {
 { "config",	required_argument,	NULL,		'c' }, /* 0 */
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
 { "help",	no_argument,		NULL,		'h' }, /* 2 */
+{ "dryrun",	no_argument,		NULL,		'n' }, /* 3 */
+{ "decimal",	no_argument,		NULL,		'f' }, /* 4 */
+{ "wait",	no_argument,		NULL,		'w' }, /* 5 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -91,15 +156,26 @@ void	usage(const std::string& progname) {
 	std::cout << "Options:" << std::endl;
 	std::cout << " -h,--help          display help message and exit"
 		 << std::endl;
-	std::cout << " -d,--debug         increase debug level" << std::endl;
 	std::cout << " -c,--config=<cfg>  use configuration from file <cfg>"
-		 << std::endl;
+		<< std::endl;
+	std::cout << " -d,--debug         increase debug level" << std::endl;
+	std::cout << " -f,--decimal       display angles in decimal format"
+		<< std::endl;
+	std::cout << " -n,--dryrun        dry run, parse arguments but don't "
+		"move telescope" << std::endl;
+	std::cout << " -w,--wait          wait for completion of goto command"
+		<< std::endl;
+	std::cout << std::endl;
 }
 
-int mount_main(int argc, char *argv[]) {
+/**
+ * \brief Main method
+ */
+int main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount utility");
 	int	c;
 	int	longindex;
+	putenv("POSIXLY_CORRECT=1");
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
 		&longindex))) {
 		switch (c) {
@@ -112,6 +188,15 @@ int mount_main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'n':
+			dryrun = true;
+			break;
+		case 'f':
+			decimal = true;
+			break;
+		case 'w':
+			await_completion = true;
+			break;
 		case 1:
 			switch (longindex) {
 			}
@@ -151,12 +236,25 @@ int mount_main(int argc, char *argv[]) {
 		mountname.toString().c_str());
 
 	// use the Devices class to get the mount associated with this name
+	MountPtr	mount = devices.getMount(mountname);
+	if (command == "get") {
+		return get_command(mount);
+	}
+	if (command == "set") {
+		if (argc < optind + 2) {
+			throw std::runtime_error("two angle arguments missing");
+		}
+		RaDec	radec;
+		radec.ra().hours(std::stod(argv[optind++]));
+		radec.dec().degrees(std::stod(argv[optind++]));
+		return set_command(mount, radec);
+	}
 
-	return EXIT_SUCCESS;
+	throw std::runtime_error("unknown command");
 }
 
-} // namespace astro
+} // namespace astromount
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::mount_main>(argc, argv);
+	return astro::main_function<astromount::main>(argc, argv);
 }

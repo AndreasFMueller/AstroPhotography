@@ -23,6 +23,7 @@ public:
 	~Serial();
 	int	write(const std::string& data);
 	std::string	read(int count);
+	std::string	readto(char promptchar);
 	const std::string&	serialdevice() const { return _serialdevice; }
 };
 

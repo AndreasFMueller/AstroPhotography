@@ -6,7 +6,7 @@
 #
 if ENABLE_CORBA
 
-bin_PROGRAMS = astrod
+sbin_PROGRAMS = astrod
 
 noinst_HEADERS = Modules_impl.h \
 	DriverModuleActivator_impl.h DriverModule_impl.h DeviceLocator_impl.h \

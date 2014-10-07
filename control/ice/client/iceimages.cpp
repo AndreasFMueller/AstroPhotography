@@ -27,8 +27,9 @@ using namespace astro::image;
 using namespace astro::io;
 using namespace astro::config;
 using namespace astro::project;
+using namespace snowstar;
 
-namespace snowstar {
+namespace iceimages {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
@@ -97,7 +98,7 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,    0  }
 };
 
-int	iceimages_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
 	int	nImages = 1;
@@ -278,8 +279,8 @@ int	iceimages_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // namespace snowstar
+} // namespace iceimages
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::iceimages_main>(argc, argv);
+	return astro::main_function<iceimages::main>(argc, argv);
 }

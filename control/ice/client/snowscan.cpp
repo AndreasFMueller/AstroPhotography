@@ -10,8 +10,11 @@
 #include <AstroFormat.h>
 #include <includes.h>
 #include <device.h>
+#include <CommunicatorSingleton.h>
 
-namespace snowflake {
+using namespace snowstar;
+
+namespace snowscan {
 
 /**
  * \brief list of options for the snowscan command
@@ -120,14 +123,8 @@ int	command_scan(snowstar::ModulesPrx& modules,
 }
 
 int	main(int argc, char *argv[]) {
-	// connect to the server
-	Ice::InitializationData	id;
-	Ice::CommunicatorPtr	ic;
-	try {
-		ic = Ice::initialize(argc, argv, id);
-	} catch (...) {
-		throw;
-	}
+	CommunicatorSingleton cs(argc, argv);
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 
 	// some variables changed by options
 	unsigned short	port = 10000;
@@ -187,20 +184,8 @@ int	main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }
 	
-} // namespace astro
+} // namespace snowscan
 
 int main(int argc, char *argv[]) {
-	try {
-		return snowflake::main(argc, argv);
-	} catch (const Ice::Exception& icex) {
-		std::cerr << "terminated to ICE exception: ";
-		std::cerr << icex << std::endl;
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by ";
-		std::cerr << astro::demangle(typeid(x).name());
-		std::cerr << ": " << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<snowscan::main>(argc, argv);
 }

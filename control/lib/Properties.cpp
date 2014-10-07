@@ -70,6 +70,8 @@ public:
  * \brief parse a buffer into a property triple
  */
 property_triple::property_triple(const std::string& buffer) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating property from '%s'",
+		buffer.c_str());
 	std::string	b = standardize(buffer);
 	size_t	equalsign = b.rfind('=');
 	if (std::string::npos == equalsign) {
@@ -92,11 +94,12 @@ property_triple::property_triple(const std::string& buffer) {
  * \brief initialize the properties
  */
 void	Properties::setup(const std::string& name, const std::string& filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading properties from file %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading properties from file '%s'",
 		filename.c_str());
 	std::ifstream	in(filename.c_str());
 	if (!in) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot open file");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot open file '%s'",
+			filename.c_str());
 		return;
 	}
 	static const size_t	buffer_size = 10240;
@@ -106,14 +109,20 @@ void	Properties::setup(const std::string& name, const std::string& filename) {
 	while (!in.eof()) {
 		in.getline(b, buffer_size);
 		std::string	buffer(b);
-		if (in.good()) {
-			try {
-				property_triple	t(buffer);
-				if (name == t.devicename) {
-					setProperty(t.property, t.value);
-				}
-			} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got buffer: '%s'",
+			buffer.c_str());
+		try {
+			property_triple	t(buffer);
+			if (name == t.devicename) {
+				setProperty(t.property, t.value);
+			} else {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%s != %s", name.c_str(),
+					t.devicename.c_str());
 			}
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during "
+				"property creation: %s", x.what());
 		}
 	}
 	in.close();

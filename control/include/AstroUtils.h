@@ -286,6 +286,7 @@ public:
 	unsigned short	port() const { return _port; }
 
 	// constructor
+	ServerName();
 	ServerName(const std::string& _host, unsigned short port);
 	ServerName(const std::string& servername);
 

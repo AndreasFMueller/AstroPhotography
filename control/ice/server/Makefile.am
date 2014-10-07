@@ -6,7 +6,7 @@
 
 if ENABLE_ICE
 
-bin_PROGRAMS = snowstar
+sbin_PROGRAMS = snowstar
 
 noinst_HEADERS = DevicesI.h \
 	CoolerI.h CcdI.h CameraI.h \

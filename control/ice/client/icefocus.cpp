@@ -20,8 +20,9 @@
 
 using namespace astro::config;
 using namespace astro;
+using namespace snowstar;
 
-namespace snowstar {
+namespace icefocus {
 
 /**
  * \brief convert state to a string representation
@@ -171,7 +172,7 @@ void	handler(int /* sig */) {
 	signal_received = true;
 }
 
-int	icefocus_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
 	std::string	instrumentname;
@@ -382,9 +383,9 @@ int	icefocus_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // namespace snowstar
+} // namespace icefocus
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowstar::icefocus_main>(argc, argv);
+	return astro::main_function<icefocus::main>(argc, argv);
 }
 
