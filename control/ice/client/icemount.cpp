@@ -15,6 +15,8 @@ using namespace snowstar;
 
 namespace icemount {
 
+bool	await_completion = false;
+
 /**
  * \brief Usage function for the icemount function
  */
@@ -27,6 +29,8 @@ void	usage(const std::string& progname) {
 	std::cout << p << " [ options ] list" << std::endl;
 	std::cout << p << " [ options ] get MOUNT" << std::endl;
 	std::cout << p << " [ options ] set MOUNT RA DEC" << std::endl;
+	std::cout << p << " [ options ] cancel MOUNT" << std::endl;
+	std::cout << p << " [ options ] wait MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "get help about the icemount command, list mounts, get "
 		"right ascension from" << std::endl;
@@ -37,9 +41,9 @@ void	usage(const std::string& progname) {
 	std::cout << std::endl;
 	std::cout << " -d,--debug         increase debug level" << std::endl;
 	std::cout << " -h,--help          display this help message"
-		 << std::endl;
-	std::cout << " -c,--config=<cfg>  use configuration from file <cfg>"
-		 << std::endl;
+		<< std::endl;
+	std::cout << " -w,--wait          wait for goto completion"
+		<< std::endl;
 	std::cout << std::endl;
 }
 
@@ -47,10 +51,10 @@ void	usage(const std::string& progname) {
  * \brief array of options
  */
 static struct option    longopts[] = {
-{ "config",	required_argument,		NULL,	'c' }, /* 1 */
 { "debug",	no_argument,			NULL,	'd' }, /* 2 */
 { "help",	no_argument,			NULL,	'h' }, /* 3 */
 { "server",	required_argument,		NULL,	's' }, /* 4 */
+{ "wait",	no_argument,			NULL,	'w' }, /* 6 */
 { NULL,		0,				NULL,	0   }
 };
 
@@ -74,26 +78,72 @@ int	command_help() {
 		"mount has already" << std::endl;
 	std::cout << "    been calibrated." << std::endl;
 	std::cout << std::endl;
+	return EXIT_SUCCESS;
 }
 
-int	command_list() {
+int	command_list(DevicesPrx devices) {
+	DeviceNameList	list = devices->getDevicelist(DevMOUNT);
+	std::for_each(list.begin(), list.end(), 
+		[](const std::string& name) {
+			std::cout << name << std::endl;
+		}
+	);
+	return EXIT_SUCCESS;
 }
 
-int	command_get() {
+int	command_get(MountPrx mount) {
+	RaDec	radec = mount->getRaDec();
+	std::cout << radec.ra << " " << radec.dec << " ";
+	switch (mount->state()) {
+	case MountIDLE:
+		std::cout << "idle";
+		break;
+	case MountALIGNED:
+		std::cout << "aligned";
+		break;
+	case MountTRACKING:
+		std::cout << "tracking";	
+		break;
+	case MountGOTO:
+		std::cout << "goto";	
+		break;
+	}
+	std::cout << std::endl;
+	return EXIT_SUCCESS;
 }
 
-int	command_set() {
+int	command_wait(MountPrx mount, bool dowait) {
+	if (dowait) {
+		mountstate	s = mount->state();
+		while (s == MountGOTO) {
+			sleep(1);
+			s = mount->state();
+		}
+	}
+	return command_get(mount);
+}
+
+int	command_cancel(MountPrx mount) {
+	mount->cancel();
+	return command_wait(mount, await_completion);
+}
+
+int	command_set(MountPrx mount, RaDec radec) {
+	mount->GotoRaDec(radec);
+	return command_wait(mount, await_completion);
 }
 
 /**
  * \brief main function 
  */
 int	main(int argc, char *argv[]) {
+	CommunicatorSingleton	communicator(argc, argv);
 	
 	int	c;
 	int	longindex;
 	astro::ServerName	servername;
-	while (EOF != (c = getopt_long(argc, argv, "dhc:", longopts,
+	putenv("POSIXLY_CORRECT=1");
+	while (EOF != (c = getopt_long(argc, argv, "dhc:fw", longopts,
 		&longindex)))
 		switch (c) {
 		case 'd':
@@ -102,11 +152,11 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'c':
-			astro::config::Configuration::set_default(optarg);
-			break;
 		case 's':
 			servername = astro::ServerName(optarg);
+			break;
+		case 'w':
+			await_completion = true;
 			break;
 		}
 
@@ -122,19 +172,51 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// we need a remote device proxy for all other commands
+	std::string	connectstring
+		= astro::stringprintf("Devices:default -h %s -p %hu",
+			servername.host().c_str(), servername.port());
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	DevicesPrx	devices = DevicesPrx::checkedCast(base);
 
 	// handle the list command
 	if (command == "list") {
-		return command_list();
+		return command_list(devices);
 	}
 
 	// for the other commands we need the mount name
 	if (argc <= optind) {
 		throw std::runtime_error("no mount name");
 	}
-	astro::DeviceName	mountname(argv[optind++]);
+	std::string	mountname(argv[optind++]);
 
-	return EXIT_SUCCESS;
+	// get a proxy for the mount
+	MountPrx	mount = devices->getMount(mountname);
+
+	// get command
+	if (command == "get") {
+		return command_get(mount);
+	}
+	if (command == "cancel") {
+		return command_cancel(mount);
+	}
+	if (command == "wait") {
+		return command_wait(mount, true);
+	}
+
+	// two more arguments are angles
+	if (command == "set") {
+		if (argc < (optind + 2)) {
+			throw std::runtime_error("missing angle arguments");
+		}
+		RaDec	radec;
+		radec.ra = std::stod(argv[optind++]);
+		radec.dec = std::stod(argv[optind++]);
+		return command_set(mount, radec);
+	}
+
+	// if we get here, then an unknown command was given
+	throw std::runtime_error("unknown command");
 }
 
 } // namespace icemount

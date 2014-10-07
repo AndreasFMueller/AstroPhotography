@@ -11,7 +11,7 @@
 module snowstar {
 
 	// state of mount
-	enum mountstate { MountIDLE, MountTRACKING, MountGOTO };
+	enum mountstate { MountIDLE, MountALIGNED, MountTRACKING, MountGOTO };
 
 	/**
 	 * \brief Interface to a telescope mount

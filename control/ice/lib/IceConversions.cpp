@@ -104,7 +104,11 @@ astro::RaDec	convert(const RaDec& radec) {
 RaDec	convert(const astro::RaDec& radec) {
 	RaDec	result;
 	result.ra = radec.ra().hours();
-	result.dec = radec.dec().degrees();
+	if (radec.dec() > astro::Angle(M_PI)) {
+		result.dec = (radec.dec() - astro::Angle(2 * M_PI)).degrees();
+	} else {
+		result.dec = radec.dec().degrees();
+	}
 	return result;
 }
 
@@ -612,6 +616,8 @@ mountstate	convert(astro::device::Mount::mount_state s) {
 	switch (s) {
 	case astro::device::Mount::IDLE:
 		return MountIDLE;
+	case astro::device::Mount::ALIGNED:
+		return MountALIGNED;
 	case astro::device::Mount::TRACKING:
 		return MountTRACKING;
 	case astro::device::Mount::GOTO:
@@ -624,6 +630,8 @@ astro::device::Mount::mount_state	convert(mountstate s) {
 	switch (s) {
 	case MountIDLE:
 		return astro::device::Mount::IDLE;
+	case MountALIGNED:
+		return astro::device::Mount::ALIGNED;
 	case MountTRACKING:
 		return astro::device::Mount::TRACKING;
 	case MountGOTO:
