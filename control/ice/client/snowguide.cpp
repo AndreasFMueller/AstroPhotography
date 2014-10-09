@@ -19,6 +19,9 @@ using namespace snowstar;
 
 namespace snowguide {
 
+/**
+ * \brief usage method
+ */
 void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
@@ -30,6 +33,7 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] guide [ <calibrationid> ] " << std::endl;
 	std::cout << p << " [ options ] cancel" << std::endl;
 	std::cout << p << " [ options ] list" << std::endl;
+	std::cout << p << " [ options ] history" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Operations related to guiding, i.e. calibrating a "
 		"guider, starting and";
@@ -63,6 +67,98 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "                       has no cooler";
 	std::cout << std::endl;
+}
+
+/**
+ * \brief Help command implementation
+ */
+int	help_command() {
+	std::cout <<
+"The snowguide program takes the CCD and guiderport defined for" << std::endl <<
+"an instrument (specified via the --instrument option) and" << std::endl <<
+"builds a guider from them. It understands a number of sub-" << std::endl <<
+"commands to control guding via this guider. Subcommands are" << std::endl <<
+"specified using the command syntax" << std::endl
+<< std::endl << 
+"    snowguide [ options ] subcommand" << std::endl
+<< std::endl << 
+"The folloowing subcommands are available:" << std::endl
+<< std::endl
+<< std::endl << 
+"help" << std::endl << 
+"    display this help message and exit" << std::endl
+<< std::endl << 
+"calibrate [ calibrationid ]" << std::endl <<
+"    Use the calibration run specified by <calibrationid> or, if" << std::endl<<
+"    <calibrationid> is not specified, start a new calibration" << std::endl <<
+"    run. In the latter case the focallength must be specified" << std::endl <<
+"    via the -f option." << std::endl
+<< std::endl << 
+"monitor" << std::endl <<
+"    Monitor the guiding process. This subcommand reports all" << std::endl <<
+"    state changes and all commands sent to the telescope mount" << std::endl
+<< std::endl << 
+"guide" << std::endl <<
+"    Start guiding with the current calibration id." << std::endl
+<< std::endl << 
+"cancel" << std::endl <<
+"    Cancel the current calibration or guiding process." << std::endl
+<< std::endl << 
+"list" << std::endl <<
+"    List the calibrations available for this guider. The" << std::endl <<
+"    calibration id can be used with the calibrate subcommand" << std::endl <<
+"    to bring the guider into the calibrated state, a prerequi-" << std::endl <<
+"    sitefor guiding" << std::endl
+<< std::endl << 
+"history" << std::endl <<
+"    Display the tracking history of the current guiding run." << std::endl
+<< std::endl <<
+"For a summary of the options available to all subcommands," << std::endl <<
+"run the astroguide command with the --help option."
+<< std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the cancel command
+ */
+int	cancel_command(GuiderPrx guider) {
+	if (guider->getState() == GuiderCALIBRATING) {
+		guider->cancelCalibration();
+		return EXIT_SUCCESS;
+	}
+	if (guider->getState() == GuiderGUIDING) {
+		guider->stopGuiding();
+		return EXIT_SUCCESS;
+	}
+	std::cerr << "nothing to cancel, wrong state" << std::endl;
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the list command
+ */
+int	list_command(GuiderFactoryPrx guiderfactory,
+		GuiderDescriptor descriptor) {
+	idlist	l = guiderfactory->getCalibrations(descriptor);
+	std::cout << "number of calibrations: " << l.size() << std::endl;
+	std::for_each(l.begin(), l.end(),
+		[](int i) {
+			std::cout << i << std::endl;
+		}
+	);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of calibrate command
+ */
+int	calibrate_command(GuiderPrx guider, int calibrationid) {
+	if (calibrationid > 0) {
+		guider->useCalibration(calibrationid);
+		return EXIT_SUCCESS;
+	}
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -130,8 +226,7 @@ int	main(int argc, char *argv[]) {
 
 	// handle the help command
 	if (command == "help") {
-		usage(argv[0]);
-		return EXIT_SUCCESS;
+		return help_command();
 	}
 
 	// get the configuration
@@ -179,12 +274,16 @@ int	main(int argc, char *argv[]) {
 
 	// the next action depends on the command to execute
 	if (command == "cancel") {
+		return cancel_command(guider);
 	}
 	if (command == "guide") {
 	}
 	if (command == "calibrate") {
 	}
 	if (command == "list") {
+		return list_command(guiderfactory, descriptor);
+	}
+	if (command == "history") {
 	}
 
 	return EXIT_SUCCESS;

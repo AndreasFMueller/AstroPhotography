@@ -122,6 +122,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		DriverModuleLocator	*drivermodulelocator
 			= new DriverModuleLocator(repository);
 		adapter->addServantLocator(drivermodulelocator, "drivermodule");
+
+		// add servant locator for device locator
 		DeviceLocatorLocator	*devicelocatorlocator
 			= new DeviceLocatorLocator(repository);
 		adapter->addServantLocator(devicelocatorlocator,

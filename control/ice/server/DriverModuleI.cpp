@@ -28,7 +28,7 @@ bool	DriverModuleI::hasLocator(const Ice::Current& /* current */) {
 }
 
 DeviceLocatorPrx	DriverModuleI::getDeviceLocator(const Ice::Current& current) {
-	return snowstar::createProxy<DeviceLocatorPrx>(std::string("devicelocator/") + _module->getDescriptor()->name(), current);
+	return snowstar::createProxy<DeviceLocatorPrx>(std::string("devicelocator/") + _module->getDescriptor()->name(), current, false);
 }
 
 } // namespace snowstar

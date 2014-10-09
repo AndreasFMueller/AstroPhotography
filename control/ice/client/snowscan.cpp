@@ -92,6 +92,8 @@ void	devicelist(snowstar::DeviceLocatorPrx devicelocator,
  */
 int	command_scan(snowstar::ModulesPrx& modules,
 		const std::string& modulename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scanning module %s",
+		modulename.c_str());
 	std::cout << "scanning module " << modulename << std::endl;
 	snowstar::DriverModulePrx	module
 		= modules->getModule(modulename);
@@ -151,7 +153,6 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
-
 	// connect to the server
 	std::string	connectstring
 		= astro::stringprintf("Modules:default -h %s -p %hu",
@@ -163,6 +164,8 @@ int	main(int argc, char *argv[]) {
 	if (!modules) {
 		throw std::runtime_error("no modules proxy");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected to %s",
+		connectstring.c_str());
 
 	// next argument is the module
 	if (argc <= optind) {

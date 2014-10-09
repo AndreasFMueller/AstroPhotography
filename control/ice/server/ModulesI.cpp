@@ -25,7 +25,9 @@ ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
 
 DriverModulePrx	ModulesI::getModule(const std::string& modulename,
 	const Ice::Current& current) {
-	return snowstar::createProxy<DriverModulePrx>(std::string("drivermodule/") + modulename, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for module '%s'",
+		modulename.c_str());
+	return snowstar::createProxy<DriverModulePrx>(std::string("drivermodule/") + modulename, current, false);
 }
 
 } // namespace snowstar
