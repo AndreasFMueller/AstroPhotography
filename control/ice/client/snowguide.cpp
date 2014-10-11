@@ -14,10 +14,17 @@
 #include <RemoteInstrument.h>
 #include <guider.h>
 #include <IceConversions.h>
+#include <AstroUtils.h>
+#include <AstroImage.h>
 
 using namespace snowstar;
 
 namespace snowguide {
+
+bool	verbose = false;
+snowstar::ImagePoint	star;
+float	focallength = 0;
+Exposure	exposure;
 
 /**
  * \brief usage method
@@ -33,7 +40,8 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] guide [ <calibrationid> ] " << std::endl;
 	std::cout << p << " [ options ] cancel" << std::endl;
 	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] history" << std::endl;
+	std::cout << p << " [ options ] tracks" << std::endl;
+	std::cout << p << " [ options ] history [ trackid ]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Operations related to guiding, i.e. calibrating a "
 		"guider, starting and";
@@ -66,6 +74,8 @@ void	usage(const char *progname) {
 		"ignored if the instrument";
 	std::cout << std::endl;
 	std::cout << "                       has no cooler";
+	std::cout << std::endl;
+	std::cout << " -v,--verbose          enable verbose mode";
 	std::cout << std::endl;
 }
 
@@ -121,6 +131,8 @@ int	help_command() {
 
 /**
  * \brief Implementation of the cancel command
+ *
+ * This command cancels a calibration process or a guiding process.
  */
 int	cancel_command(GuiderPrx guider) {
 	if (guider->getState() == GuiderCALIBRATING) {
@@ -136,6 +148,60 @@ int	cancel_command(GuiderPrx guider) {
 }
 
 /**
+ * \brief A class to display calibration points
+ */
+class CalibrationPoint_display {
+	std::ostream&	_out;
+public:
+	CalibrationPoint_display(std::ostream& out) : _out(out) { }
+	void	operator()(const CalibrationPoint& calpoint);
+};
+
+void	CalibrationPoint_display::operator()(const CalibrationPoint& calpoint) {
+	_out << "         ";
+	_out << astro::stringprintf("%.1f: ", calpoint.t);
+	_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
+			calpoint.offset.x, calpoint.offset.y,
+			calpoint.star.x, calpoint.star.y);
+	_out << std::endl;
+}
+
+/**
+ * \brief A class to display a calibration
+ */
+class Calibration_display {
+	std::ostream&	_out;
+public:
+	Calibration_display(std::ostream& out) : _out(out) { }
+	void	operator()(const Calibration& cal);
+};
+
+void	Calibration_display::operator()(const Calibration& cal) {
+	// id and timestamp
+	_out << astro::stringprintf("%4d: ", cal.id);
+	_out << astro::timeformat("%Y-%m-%d %H:%M, ",
+		converttime(cal.timeago));
+	_out << cal.points.size() << " points" << std::endl;
+
+	// calibration coefficients
+	_out << std::string("     ");
+	for (int k = 0; k < 3; k++) {
+		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
+	}
+	_out << std::endl << std::string("     ");
+	for (int k = 3; k < 6; k++) {
+		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
+	}
+	_out << std::endl;
+
+	// calibration points if verbose
+	if (verbose) {
+		std::for_each(cal.points.begin(), cal.points.end(),
+			CalibrationPoint_display(_out));
+	}
+}
+
+/**
  * \brief Implementation of the list command
  */
 int	list_command(GuiderFactoryPrx guiderfactory,
@@ -143,11 +209,11 @@ int	list_command(GuiderFactoryPrx guiderfactory,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations from remote server");
 	idlist	l = guiderfactory->getCalibrations(descriptor);
 	std::cout << "number of calibrations: " << l.size() << std::endl;
-	std::for_each(l.begin(), l.end(),
-		[](int i) {
-			std::cout << i << std::endl;
-		}
-	);
+	idlist::iterator	i;
+	for (i = l.begin(); i != l.end(); i++) {
+		Calibration	cal = guiderfactory->getCalibration(*i);
+		(Calibration_display(std::cout))(cal);
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -160,6 +226,13 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
 	}
+	if (focallength < 0) {
+		throw std::runtime_error("focal length not set");
+	}
+	if ((star.x == 0) && (star.y == 0)) {
+		throw std::runtime_error("calibration star not set");
+	}
+	guider->startCalibration(focallength);
 	return EXIT_SUCCESS;
 }
 
@@ -172,10 +245,89 @@ int	guide_command() {
 }
 
 /**
- * \brief Implementation of the history command
+ * \brief Tracks command implementation
+ *
+ * The tracks command displays a list of tracks available. If the verbose
+ * flag is set, then information about each track is also returned, i.e.
+ * the number of points and the duration. This information requires that
+ * the points be retrieved from the server as well. This is a little wasteful,
+ * but the data size is still quite managable, and there does not seem to
+ * be a performance issue from this.
  */
-int	history_command() {
-	throw std::runtime_error("history command not implemented");
+int	tracks_command(GuiderFactoryPrx guiderfactory,
+		GuiderDescriptor descriptor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracks from remote server");
+	idlist	l = guiderfactory->getGuideruns(descriptor);
+	std::cout << l.size() << " tracks" << std::endl;
+	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
+		int	id = *ptr;
+		if (verbose) {
+			std::cout << astro::stringprintf("%4d: ", id);
+			TrackingHistory	history
+				= guiderfactory->getTrackingHistory(id);
+			std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+				converttime((double)history.timeago));
+			if (history.points.size() > 1) {
+				std::cout << astro::stringprintf(" %6d pts",
+					history.points.size());
+				std::cout << astro::stringprintf("  %6.0fsec", 
+					history.points.begin()->timeago
+					- history.points.rbegin()->timeago);
+			}
+		} else {	
+			std::cout << id;
+		}
+		std::cout << std::endl;
+	}
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Tracking point display class
+ *
+ * This class is a functor class used to display a tracking point. It also
+ * keeps track of the index of the point being displayed.
+ */
+class TrackingPoint_display {
+	std::ostream&	_out;
+	int	counter;
+public:
+	TrackingPoint_display(std::ostream& out) : _out(out) {
+		counter = 1;
+	}
+	void	operator()(const TrackingPoint& point);
+};
+
+void	TrackingPoint_display::operator()(const TrackingPoint& point) {
+	_out << astro::stringprintf("[%04d] ", ++counter);
+	_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
+		converttime(point.timeago));
+	_out << astro::stringprintf(".%03.0f ",
+		1000 * (point.timeago - trunc(point.timeago)));
+	_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
+			point.trackingoffset.x, point.trackingoffset.y,
+			point.activation.x, point.activation.y);
+	_out << std::endl;
+}
+
+/**
+ * \brief Implementation of the history command
+ *
+ * The tracking history is identified by the id. If the verbose flag is set,
+ * then all the points of the tracking history are displayed.
+ */
+int	history_command(GuiderFactoryPrx guiderfactory, long id) {
+	TrackingHistory	history = guiderfactory->getTrackingHistory(id);
+	std::cout << history.guiderunid << ": ";
+	std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+		converttime((double)history.timeago));
+	std::cout << std::endl;
+	if (verbose) {
+		std::for_each(history.points.begin(), history.points.end(),
+			TrackingPoint_display(std::cout)
+		);
+	}
+
 	return EXIT_SUCCESS;
 }
 
@@ -190,7 +342,9 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /*  4 */
 { "instrument",		required_argument,	NULL,	'i' }, /*  5 */
 { "rectangle",		required_argument,	NULL,	'r' }, /*  6 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  7 */
+{ "star",		required_argument,	NULL,	's' }, /*  7 */
+{ "temperature",	required_argument,	NULL,	't' }, /*  8 */
+{ "verbose",		no_argument,		NULL,	'v' }, /*  9 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -201,7 +355,6 @@ int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	communicator(argc, argv);
 
 	std::string	instrumentname;
-	double	exposuretime = 1.0;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
 	std::string	binning;
 	std::string	frame;
@@ -209,7 +362,9 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:hi:r:t:",
+	exposure.exposuretime = 1.;
+
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:r:s:t:v",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -222,7 +377,10 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
-			exposuretime = std::stod(optarg);
+			exposure.exposuretime = std::stod(optarg);
+			break;
+		case 'f':
+			focallength = std::stod(optarg);
 			break;
 		case 'h':
 			usage(argv[0]);
@@ -233,8 +391,14 @@ int	main(int argc, char *argv[]) {
 		case 'r':
 			frame = optarg;
 			break;
+		case 's':
+			star = convert(astro::image::ImagePoint(optarg));
+			break;
 		case 't':
 			temperature = std::stod(optarg);
+			break;
+		case 'v':
+			verbose = true;
 			break;
 		}
 
@@ -303,25 +467,50 @@ int	main(int argc, char *argv[]) {
 	if (command == "cancel") {
 		return cancel_command(guider);
 	}
+	if (command == "list") {
+		return list_command(guiderfactory, descriptor);
+	}
+	if (command == "tracks") {
+		return tracks_command(guiderfactory, descriptor);
+	}
+	if (command == "history") {
+		if (argc <= optind) {
+			throw std::runtime_error("missing history id");
+		}
+		long	historyid = std::stoi(argv[optind++]);
+		return history_command(guiderfactory, historyid);
+	}
+	if (command == "calibrate") {
+		// next argument must be the calibration id, if it is present
+		if (argc > optind) {
+			int calibrationid = std::stoi(argv[optind++]);
+			return calibrate_command(guider, calibrationid);
+		}
+	}
+
+	// the guide and calibrate commands need an exposure
+	exposure.gain = 1;
+	exposure.limit = 0;
+	exposure.shutter = ShOPEN;
+	exposure.purpose = ExLIGHT;
+	if (binning.size() > 0) {
+		exposure.mode = convert(astro::camera::Binning(binning));
+	} else {
+		exposure.mode.x = 1;
+		exposure.mode.y = 1;
+	}
+	guider->setExposure(exposure);
+
+	// implement the guide and calibrate commands
 	if (command == "guide") {
 		return guide_command();
 	}
 	if (command == "calibrate") {
 		// next argument must be the calibration id, if it is present
-		int	calibrationid = -1;
-		if (argc > optind) {
-			calibrationid = std::stoi(argv[optind++]);
-		}
-		return calibrate_command(guider, calibrationid);
-	}
-	if (command == "list") {
-		return list_command(guiderfactory, descriptor);
-	}
-	if (command == "history") {
-		return history_command();
+		return calibrate_command(guider, -1);
 	}
 
-	return EXIT_SUCCESS;
+	throw std::runtime_error("unknown command");
 }
 
 } // namespace snowguide

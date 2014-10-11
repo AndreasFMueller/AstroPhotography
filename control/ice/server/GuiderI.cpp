@@ -46,7 +46,10 @@ GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
 	return convert(guider->getDescriptor());
 }
 
-void GuiderI::setExposure(const Exposure& exposure, const Ice::Current& /* current */) {
+void GuiderI::setExposure(const Exposure& exposure,
+	const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure: time=%f",
+		exposure.exposuretime);
 	guider->exposure(convert(exposure));
 }
 
@@ -62,7 +65,8 @@ Point GuiderI::getStar(const Ice::Current& /* current */) {
 	return _point;
 }
 
-void GuiderI::useCalibration(Ice::Int calibrationid, const Ice::Current& /* current */) {
+void GuiderI::useCalibration(Ice::Int calibrationid,
+	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
 	astro::guiding::CalibrationStore	calibrationstore(database);
 	astro::guiding::GuiderCalibration	calibration
@@ -80,6 +84,7 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 
 void GuiderI::startCalibration(Ice::Float focallength,
 	const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration");
 	// XXX callback stuff
 
 	// XXX compute calibration parameters

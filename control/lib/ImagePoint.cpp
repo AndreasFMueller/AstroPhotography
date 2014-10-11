@@ -43,7 +43,9 @@ ImagePoint::ImagePoint(const std::string& pointspec) {
 cleanup:
 	regfree(&regex);
 	if (rc) {
-		throw std::runtime_error("ImagePoint: no match");
+		std::string	msg = stringprintf("point specification '%s' "
+			"does not match regex", pointspec.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 

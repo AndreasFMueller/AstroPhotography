@@ -53,7 +53,9 @@ Binning::Binning(const std::string& binningspec) {
 cleanup:
 	regfree(&regex);
 	if (rc) {
-		throw std::runtime_error("ImagePoint: no match");
+		std::string	msg = stringprintf("binning specification '%s' "
+			"does not match regex", binningspec.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
