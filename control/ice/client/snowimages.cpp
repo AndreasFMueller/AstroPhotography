@@ -1,5 +1,5 @@
 /*
- * iceimages.cpp -- tool to retrieve a sequence of images from a remote camera
+ * snowimages.cpp -- tool to retrieve a sequence of images from a remote camera
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -29,7 +29,7 @@ using namespace astro::config;
 using namespace astro::project;
 using namespace snowstar;
 
-namespace iceimages {
+namespace snowimages {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
@@ -279,8 +279,8 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // namespace iceimages
+} // namespace snowimages
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<iceimages::main>(argc, argv);
+	return astro::main_function<snowimages::main>(argc, argv);
 }

@@ -41,8 +41,8 @@ void	usage(const char *progname) {
 	std::cout << "monitoring the guding process, and cancelling it.";
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"
-		<< std::endl;
+	std::cout << " -b,--binning=XxY      select XxY binning mode (default "
+		"1x1)" << std::endl;
 	std::cout << " -c,--config=<cfg>     use configuration from file <cfg>";
 	std::cout << std::endl;
 	std::cout << " -d,--debug            increase debug level" << std::endl;
@@ -140,6 +140,7 @@ int	cancel_command(GuiderPrx guider) {
  */
 int	list_command(GuiderFactoryPrx guiderfactory,
 		GuiderDescriptor descriptor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations from remote server");
 	idlist	l = guiderfactory->getCalibrations(descriptor);
 	std::cout << "number of calibrations: " << l.size() << std::endl;
 	std::for_each(l.begin(), l.end(),
@@ -154,10 +155,27 @@ int	list_command(GuiderFactoryPrx guiderfactory,
  * \brief Implementation of calibrate command
  */
 int	calibrate_command(GuiderPrx guider, int calibrationid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d", calibrationid);
 	if (calibrationid > 0) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
 	}
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the guide command
+ */
+int	guide_command() {
+	throw std::runtime_error("guide command not implemented");
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the history command
+ */
+int	history_command() {
+	throw std::runtime_error("history command not implemented");
 	return EXIT_SUCCESS;
 }
 
@@ -176,6 +194,9 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,    0  }
 };
 
+/**
+ * \brief Main program for the snowguide program
+ */
 int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	communicator(argc, argv);
 
@@ -247,6 +268,7 @@ int	main(int argc, char *argv[]) {
 		std::string(servername).c_str());
 
 	// get camera, ccd and proxy
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the device from the instrument");
 	CameraPrx	camera = instrument.camera_proxy();
 	CcdPrx		ccd = instrument.ccd_proxy();
 	GuiderPortPrx	guiderport = instrument.guiderport_proxy();
@@ -256,6 +278,11 @@ int	main(int argc, char *argv[]) {
 	descriptor.cameraname = camera->getName();
 	descriptor.ccdid = ccd->getInfo().id;
 	descriptor.guiderportname = guiderport->getName();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s",
+		descriptor.cameraname.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port: %s",
+		descriptor.guiderportname.c_str());
 
 	// connect to the guider factory of a remote server
 	std::string     connectstring
@@ -277,13 +304,21 @@ int	main(int argc, char *argv[]) {
 		return cancel_command(guider);
 	}
 	if (command == "guide") {
+		return guide_command();
 	}
 	if (command == "calibrate") {
+		// next argument must be the calibration id, if it is present
+		int	calibrationid = -1;
+		if (argc > optind) {
+			calibrationid = std::stoi(argv[optind++]);
+		}
+		return calibrate_command(guider, calibrationid);
 	}
 	if (command == "list") {
 		return list_command(guiderfactory, descriptor);
 	}
 	if (command == "history") {
+		return history_command();
 	}
 
 	return EXIT_SUCCESS;

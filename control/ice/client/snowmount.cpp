@@ -1,5 +1,5 @@
 /*
- * icemount.cpp -- query or position mount
+ * snowmount.cpp -- query or position mount
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -13,12 +13,12 @@
 
 using namespace snowstar;
 
-namespace icemount {
+namespace snowmount {
 
 bool	await_completion = false;
 
 /**
- * \brief Usage function for the icemount function
+ * \brief Usage function for the snowmount function
  */
 void	usage(const std::string& progname) {
 	astro::Path	path(progname);
@@ -32,7 +32,7 @@ void	usage(const std::string& progname) {
 	std::cout << p << " [ options ] cancel MOUNT" << std::endl;
 	std::cout << p << " [ options ] wait MOUNT" << std::endl;
 	std::cout << std::endl;
-	std::cout << "get help about the icemount command, list mounts, get "
+	std::cout << "get help about the snowmount command, list mounts, get "
 		"right ascension from" << std::endl;
 	std::cout << "the mount, or move the mount to the given coordinates."
 		<< std::endl;
@@ -58,19 +58,26 @@ static struct option    longopts[] = {
 { NULL,		0,				NULL,	0   }
 };
 
+/**
+ * \brief Help command implementation
+ */
 int	command_help() {
-	std::cout << "The icemount command understands the ollowing subcommands:";
+	std::cout << "The snowmount command understands the ollowing "
+		"subcommands:" << std::endl;
 	std::cout << std::endl;
 	std::cout << "help" << std::endl;
 	std::cout << "    Display this help" << std::endl;
+	std::cout << std::endl;
 	std::cout << "list" << std::endl;
 	std::cout << "    List all mounts available from the server"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "get MOUNT" << std::endl;
 	std::cout << "    Get right ascension and declination from the named "
 		"mount. This command" << std::endl;
 	std::cout << "    may not work if the mount has not be calibrated yet"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "set MOUNT RA DEC" << std::endl;
 	std::cout << "    Move the mount to the specified right ascension and "
 		"declination." << std::endl;
@@ -91,6 +98,9 @@ int	command_list(DevicesPrx devices) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Get command implementation
+ */
 int	command_get(MountPrx mount) {
 	RaDec	radec = mount->getRaDec();
 	std::cout << radec.ra << " " << radec.dec << " ";
@@ -112,6 +122,9 @@ int	command_get(MountPrx mount) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Wait command implementation
+ */
 int	command_wait(MountPrx mount, bool dowait) {
 	if (dowait) {
 		mountstate	s = mount->state();
@@ -123,11 +136,17 @@ int	command_wait(MountPrx mount, bool dowait) {
 	return command_get(mount);
 }
 
+/**
+ * \brief Cancel command implementation
+ */
 int	command_cancel(MountPrx mount) {
 	mount->cancel();
 	return command_wait(mount, await_completion);
 }
 
+/**
+ * \brief Set command implementation
+ */
 int	command_set(MountPrx mount, RaDec radec) {
 	mount->GotoRaDec(radec);
 	return command_wait(mount, await_completion);
@@ -219,8 +238,8 @@ int	main(int argc, char *argv[]) {
 	throw std::runtime_error("unknown command");
 }
 
-} // namespace icemount
+} // namespace snowmount
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<icemount::main>(argc, argv);
+	return astro::main_function<snowmount::main>(argc, argv);
 }

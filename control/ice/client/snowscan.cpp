@@ -124,6 +124,9 @@ int	command_scan(snowstar::ModulesPrx& modules,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Main function for the snowcan program
+ */
 int	main(int argc, char *argv[]) {
 	CommunicatorSingleton cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();

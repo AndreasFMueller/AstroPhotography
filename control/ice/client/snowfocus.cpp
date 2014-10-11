@@ -1,5 +1,5 @@
 /*
- * icefocus.cpp -- focusing client 
+ * snowfocus.cpp -- focusing client 
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -22,7 +22,7 @@ using namespace astro::config;
 using namespace astro;
 using namespace snowstar;
 
-namespace icefocus {
+namespace snowfocus {
 
 /**
  * \brief convert state to a string representation
@@ -44,7 +44,7 @@ static std::string	status2string(FocusState state) {
 }
 
 /**
- * \brief Callback class for the icefocus program
+ * \brief Callback class for the snowfocus program
  *
  * This callback simply displays the callback information received
  */
@@ -172,6 +172,9 @@ void	handler(int /* sig */) {
 	signal_received = true;
 }
 
+/**
+ * \brief Main function for the snowfocus program
+ */
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 
@@ -383,9 +386,9 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // namespace icefocus
+} // namespace snowfocus
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<icefocus::main>(argc, argv);
+	return astro::main_function<snowfocus::main>(argc, argv);
 }
 

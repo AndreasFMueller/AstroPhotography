@@ -36,6 +36,9 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
 	return result;
 }
 
+/**
+ * \brief Get the proxy
+ */
 GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 			const Ice::Current& current) {
 	// name of the guider
@@ -53,7 +56,8 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	locator->add(guidername, guiderptr);
 
 	// create a proxy
-	return createProxy<GuiderPrx>("guider/" + guidername, current);
+	std::string	ename = NameConverter::urlencode(guidername);
+	return createProxy<GuiderPrx>("guider/" + ename, current, false);
 }
 
 idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
@@ -67,8 +71,11 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
 
 idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations");
 	astro::guiding::CalibrationStore	store(database);
 	std::list<long> calibrations = store.getCalibrations(convert(guider));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d calibrations",
+		calibrations.size());
 	idlist	result;
 	std::copy(calibrations.begin(), calibrations.end(),
 		back_inserter(result));

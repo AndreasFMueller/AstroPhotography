@@ -5,7 +5,7 @@
 #
 if ENABLE_ICE
 
-bin_PROGRAMS = snowscan iceimages icefocus snowguide icemount
+bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount
 noinst_PROGRAMS = snowflake 
 
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
@@ -25,20 +25,20 @@ snowscan_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowscan_LDADD = $(ICELDADD)
 snowscan_CPPFLAGS = $(ICECPPFLAGS)
 
-iceimages_SOURCES = iceimages.cpp
-iceimages_DEPENDENCIES = $(ICEDEPENDENCIES)
-iceimages_LDADD = $(ICELDADD)
-iceimages_CPPFLAGS = $(ICECPPFLAGS)
+snowimages_SOURCES = snowimages.cpp
+snowimages_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowimages_LDADD = $(ICELDADD)
+snowimages_CPPFLAGS = $(ICECPPFLAGS)
 
-icefocus_SOURCES = icefocus.cpp
-icefocus_DEPENDENCIES = $(ICEDEPENDENCIES)
-icefocus_LDADD = $(ICELDADD)
-icefocus_CPPFLAGS = $(ICECPPFLAGS)
+snowfocus_SOURCES = snowfocus.cpp
+snowfocus_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowfocus_LDADD = $(ICELDADD)
+snowfocus_CPPFLAGS = $(ICECPPFLAGS)
 
-icemount_SOURCES = icemount.cpp
-icemount_DEPENDENCIES = $(ICEDEPENDENCIES)
-icemount_LDADD = $(ICELDADD)
-icemount_CPPFLAGS = $(ICECPPFLAGS)
+snowmount_SOURCES = snowmount.cpp
+snowmount_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowmount_LDADD = $(ICELDADD)
+snowmount_CPPFLAGS = $(ICECPPFLAGS)
 
 snowguide_SOURCES = snowguide.cpp
 snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
