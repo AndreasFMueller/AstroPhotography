@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <regex.h>
+#include <mutex>
 
 namespace astro {
 
@@ -108,7 +110,7 @@ bool	Angle::operator>=(const Angle& other) const {
 }
 
 bool	Angle::operator==(const Angle& other) const {
-	return 0 == angle_reduction(other._angle, _angle);
+	return _angle == angle_reduction(other._angle, _angle);
 }
 
 bool	Angle::operator!=(const Angle& other) const {
@@ -122,12 +124,109 @@ double	cot(const Angle& a) { return 1. / tan(a); }
 double	sec(const Angle& a) { return 1 / cos(a); }
 double	csc(const Angle& a) { return 1 / sin(a); }
 
-Angle	Angle::hms_to_angle(const std::string& hms, const char separator) {
-	return Angle();
+
+class angle_parser {
+public:
+static const char	*r;
+static regex_t	*regex;
+	std::string	_xms;
+	double	_value;
+public:
+	angle_parser(const std::string& xms);
+	double	value() const { return _value; }
+protected:
+	int	integer(const regmatch_t& rm) const;
+	double	fraction(const regmatch_t& rm) const;
+	int	sign(const regmatch_t& rm) const;
+};
+
+const char *angle_parser::r
+= "([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?";
+// 1      2       34           5 6       78           9 1       1
+//                                                      0       1
+#define	nmatches	12
+regex_t	*angle_parser::regex = NULL;
+
+std::once_flag	angle_parser_once;
+
+static void	angle_parser_setup() {
+	angle_parser::regex = new regex_t;
+	if (NULL == angle_parser::regex) {
+		throw std::runtime_error("out of memory");
+	}
+	if (regcomp(angle_parser::regex, angle_parser::r, REG_EXTENDED)) {
+		delete angle_parser::regex;
+		angle_parser::regex = NULL;
+		throw std::runtime_error("internal error, can't compile "
+			"regex");
+	}
 }
 
-Angle	Angle::dms_to_angle(const std::string& dms, const char separator) {
-	return Angle::hms_to_angle(dms, separator) * 15;
+int	angle_parser::integer(const regmatch_t& rm) const {
+	if (rm.rm_so >= 0) {
+		std::string	x = _xms.substr(rm.rm_so, rm.rm_eo - rm.rm_so);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "std::stoi(%s)", x.c_str());
+		return std::stoi(x);
+	}
+	return 0;
+}
+
+double	angle_parser::fraction(const regmatch_t& rm) const {
+	if (rm.rm_so > 0) {
+		std::string	x = _xms.substr(rm.rm_so, rm.rm_eo - rm.rm_so);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "std::stod(%s)", x.c_str());
+		return std::stod(x);
+	}
+	return 0;
+}
+
+int	angle_parser::sign(const regmatch_t& rm) const {
+	if (rm.rm_so >= 0) {
+		return (_xms[rm.rm_so] == '-') ? -1 : 1;
+	}
+	return 1;
+}
+
+angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
+	std::call_once(angle_parser_once, angle_parser_setup);
+
+	regmatch_t	matches[nmatches];
+	if (regexec(angle_parser::regex, _xms.c_str(), nmatches, matches, 0)) {
+		std::string	msg = stringprintf("%s doesn't match regex '%s",
+			_xms.c_str(), angle_parser::r);
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse %s", _xms.c_str());
+	_value = 0;
+	_value += integer(matches[2]);
+	_value += fraction(matches[4]);
+
+	// minutes
+	_value += integer(matches[6]) / 60.;
+
+	// with fractional part
+	_value += fraction(matches[8]) / 60.;
+
+	// seconds
+	_value += integer(matches[10]) / 3600.;
+	_value += fraction(matches[11]) / 3600.;
+
+	// add sign
+	_value *= sign(matches[1]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed value: %s -> %f", _xms.c_str(),
+		_value);
+}
+
+Angle	Angle::hms_to_angle(const std::string& hms) {
+	Angle	result;
+	result.hours(angle_parser(hms).value());
+	return result;
+}
+
+Angle	Angle::dms_to_angle(const std::string& dms) {
+	Angle	result;
+	result.degrees(angle_parser(dms).value());
+	return result;
 }
 
 
