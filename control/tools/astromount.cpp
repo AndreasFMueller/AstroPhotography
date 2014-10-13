@@ -275,8 +275,8 @@ int main(int argc, char *argv[]) {
 			throw std::runtime_error("two angle arguments missing");
 		}
 		RaDec	radec;
-		radec.ra().hours(std::stod(argv[optind++]));
-		radec.dec().degrees(std::stod(argv[optind++]));
+		radec.ra() = Angle::hms_to_angle(argv[optind++]);
+		radec.dec() = Angle::dms_to_angle(argv[optind++]);
 		return set_command(mount, radec);
 	}
 

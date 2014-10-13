@@ -16,6 +16,7 @@ using namespace snowstar;
 namespace snowmount {
 
 bool	await_completion = false;
+bool	decimal = false;
 
 /**
  * \brief Usage function for the snowmount function
@@ -40,6 +41,9 @@ void	usage(const std::string& progname) {
 	std::cout << "Options:" << std::endl;
 	std::cout << std::endl;
 	std::cout << " -d,--debug         increase debug level" << std::endl;
+	std::cout << " -f,--decimal       display angles as decimal numbers "
+		"instead of the" << std::endl;
+	std::cout << "                    DD:MM:SS.sss format" << std::endl;
 	std::cout << " -h,--help          display this help message"
 		<< std::endl;
 	std::cout << " -w,--wait          wait for goto completion"
@@ -51,10 +55,11 @@ void	usage(const std::string& progname) {
  * \brief array of options
  */
 static struct option    longopts[] = {
-{ "debug",	no_argument,			NULL,	'd' }, /* 2 */
+{ "debug",	no_argument,			NULL,	'd' }, /* 1 */
+{ "decimal",	no_argument,			NULL,	'f' }, /* 2 */
 { "help",	no_argument,			NULL,	'h' }, /* 3 */
 { "server",	required_argument,		NULL,	's' }, /* 4 */
-{ "wait",	no_argument,			NULL,	'w' }, /* 6 */
+{ "wait",	no_argument,			NULL,	'w' }, /* 5 */
 { NULL,		0,				NULL,	0   }
 };
 
@@ -103,7 +108,13 @@ int	command_list(DevicesPrx devices) {
  */
 int	command_get(MountPrx mount) {
 	RaDec	radec = mount->getRaDec();
-	std::cout << radec.ra << " " << radec.dec << " ";
+	astro::Angle	ra;	ra.hours(radec.ra);
+	astro::Angle	dec;	dec.degrees(radec.dec);
+	if (decimal) {
+		std::cout << ra.hms() << " " << dec.dms() << " ";
+	} else {
+		std::cout << ra.hours() << " " << dec.degrees() << " ";
+	}
 	switch (mount->state()) {
 	case MountIDLE:
 		std::cout << "idle";
@@ -168,6 +179,9 @@ int	main(int argc, char *argv[]) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'f':
+			decimal = true;
+			break;
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
@@ -229,8 +243,12 @@ int	main(int argc, char *argv[]) {
 			throw std::runtime_error("missing angle arguments");
 		}
 		RaDec	radec;
-		radec.ra = std::stod(argv[optind++]);
-		radec.dec = std::stod(argv[optind++]);
+		astro::Angle	ra
+			= astro::Angle::hms_to_angle(argv[optind++]);
+		radec.ra = ra.hours();
+		astro::Angle	dec
+			= astro::Angle::dms_to_angle(argv[optind++]);
+		radec.dec = dec.degrees();
 		return command_set(mount, radec);
 	}
 

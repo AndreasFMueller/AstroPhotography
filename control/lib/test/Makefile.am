@@ -58,11 +58,12 @@ tests_SOURCES = tests.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
 	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
-	InterpolationStepTest.cpp 
+	InterpolationStepTest.cpp AngleTest.cpp
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	BinningTest.cpp
+	AngleTest.cpp
+#	BinningTest.cpp
 #	PathTest.cpp
 #	InstrumentTest.cpp
 #	ImageRepoTest.cpp
