@@ -122,6 +122,15 @@ double	cot(const Angle& a) { return 1. / tan(a); }
 double	sec(const Angle& a) { return 1 / cos(a); }
 double	csc(const Angle& a) { return 1 / sin(a); }
 
+Angle	Angle::hms_to_angle(const std::string& hms, const char separator) {
+	return Angle();
+}
+
+Angle	Angle::dms_to_angle(const std::string& dms, const char separator) {
+	return Angle::hms_to_angle(dms, separator) * 15;
+}
+
+
 //////////////////////////////////////////////////////////////////////
 // TwoAngles implementation
 //////////////////////////////////////////////////////////////////////
