@@ -11,6 +11,7 @@
 #include <AstroTask.h>
 #include <AstroDevice.h>
 #include <AstroFocus.h>
+#include <TrackingPersistence.h>
 #include <types.h>
 #include <device.h>
 #include <camera.h>
@@ -94,6 +95,9 @@ astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
 
 TrackingPoint	convert(const astro::guiding::TrackingPoint& trackingpoint);
 astro::guiding::TrackingPoint	convert(const TrackingPoint& trackingpoint);
+
+TrackingHistory	convert(const astro::guiding::TrackingHistory& history);
+astro::guiding::TrackingHistory	convert(const TrackingHistory& history);
 
 CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
 astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);

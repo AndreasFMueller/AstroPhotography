@@ -22,7 +22,7 @@ public:
 	int	ccdid;
 	std::string	guiderport;
 	double	a[6];
-	Calibration() { }
+	Calibration();
 };
 
 typedef persistence::Persistent<Calibration>	CalibrationRecord;

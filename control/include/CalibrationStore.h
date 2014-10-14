@@ -14,6 +14,9 @@
 namespace astro {
 namespace guiding {
 
+/**
+ * \brief a simplified interface to the calibration persistence  tables
+ */
 class CalibrationStore {
 	astro::persistence::Database&	_database;
 public:
@@ -21,8 +24,15 @@ public:
 		: _database(database) { }
 	std::list<long>	getAllCalibrations();
 	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
+
+	// access to calibrations
 	GuiderCalibration	getCalibration(long id);
+	long	addCalibration(const Calibration& calibration);
+	void	updateCalibration(long id, const GuiderCalibration& calibration);
+
+	// guider points
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);
+	void	addPoint(long id, const CalibrationPoint& point);
 };
 
 } // namespace guiding

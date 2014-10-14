@@ -62,4 +62,15 @@ module snowstar {
 		float	azm;	// azimut in degrees
 		float	alt;	// altitude above horizon in degrees
 	};
+
+	/**
+	 * \brief base class for all callbacks interfaces
+	 *
+	 * Callbacks monitor some process, so they all need notifcation when
+	 * that process has completed. They may want to extend that facility
+	 * e.g. to report the final state.
+	 */
+	interface Callback {
+		void	stop();
+	};
 };

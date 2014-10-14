@@ -42,7 +42,7 @@ module snowstar {
 	 */
 	struct TrackingHistory {
 		int	guiderunid;
-		int	timeago;
+		double	timeago;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
 	};
@@ -52,9 +52,8 @@ module snowstar {
 	 *
 	 * A tracking monitor processes new points
 	 */
-	interface TrackingMonitor {
+	interface TrackingMonitor extends Callback {
 		void	update(TrackingPoint ti);
-		void	stop();
 	};
 
 	/**
@@ -73,9 +72,8 @@ module snowstar {
 	 *
 	 * The image monitor interface receives new tracking images
 	 */
-	interface TrackingImageMonitor {
+	interface TrackingImageMonitor extends Callback {
 		void	update(TrackingImage ti);
-		void	stop();
 	};
 
 	/**
@@ -115,9 +113,8 @@ module snowstar {
 	 * The calibration monitor processes updates for new calibration
 	 * points.
 	 */
-	interface CalibrationMonitor {
+	interface CalibrationMonitor extends Callback {
 		void	update(CalibrationPoint point);
-		void	stop();
 	};
 
 	/**
@@ -199,6 +196,10 @@ module snowstar {
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
+
+		// methods for monitoring of the calibration process
+		void	registerCalibrationMonitor(Ice::Identity calibrationmonitor);
+		void	unregisterCalibrationMonitor(Ice::Identity calibrationmonitor);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be

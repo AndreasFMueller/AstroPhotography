@@ -475,6 +475,32 @@ astro::guiding::TrackingPoint   convert(const TrackingPoint& trackingpoint) {
 	return result;
 }
 
+astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
+	astro::guiding::TrackingHistory	result;
+	result.camera = history.guider.cameraname;
+	result.ccdid = history.guider.ccdid;
+	result.guiderport = history.guider.guiderportname;
+	result.whenstarted = converttime(history.timeago);
+	for (auto ptr = history.points.begin(); ptr != history.points.end();
+		ptr++) {
+		result.points.push_back(convert(*ptr));
+	}
+	return result;
+}
+
+TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
+	TrackingHistory	result;
+	result.guider.cameraname = history.camera;
+	result.guider.ccdid = history.ccdid;
+	result.guider.guiderportname = history.guiderport;
+	result.timeago = converttime(history.whenstarted);
+	for (auto ptr = history.points.begin(); ptr != history.points.end();
+		ptr++) {
+		result.points.push_back(convert(*ptr));
+	}
+	return result;
+}
+
 CalibrationPoint        convert(const astro::guiding::CalibrationPoint& cp) {
 	CalibrationPoint	result;
 	result.t = cp.t;

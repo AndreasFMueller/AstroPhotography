@@ -19,7 +19,8 @@ noinst_HEADERS = DevicesI.h \
 	GuiderLocator.h \
 	ModulesI.h DriverModuleI.h DriverModuleLocator.h \
 	DeviceLocatorI.h DeviceLocatorLocator.h \
-	FocusingFactoryI.h FocusingI.h FocusingLocator.h
+	FocusingFactoryI.h FocusingI.h FocusingLocator.h \
+	CallbackHandler.h
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \

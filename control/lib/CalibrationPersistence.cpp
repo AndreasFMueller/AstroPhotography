@@ -1,5 +1,5 @@
 /*
- * Calibration.cpp -- implementation of the calibration table
+ * CalibrationPersistence.cpp -- implementation of the calibration table
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -9,6 +9,14 @@ using namespace astro::persistence;
 
 namespace astro {
 namespace guiding {
+
+//////////////////////////////////////////////////////////////////////
+// Calibration constructor
+//////////////////////////////////////////////////////////////////////
+Calibration::Calibration() {
+	time(&when);
+	for (int i = 0; i < 6; i++) { a[i] = 0.; }
+}
 
 //////////////////////////////////////////////////////////////////////
 // CalibrationTableAdapter implementation
