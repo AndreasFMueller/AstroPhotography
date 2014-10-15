@@ -57,26 +57,6 @@ module snowstar {
 	};
 
 	/**
-	 * \brief Tracking Image structure
-	 *
-	 * The tracking image contains the size of the image and a sequence
-	 * containing the short pixels. 
-	 */
-	struct TrackingImage {
-		ImageSize	size;
-		ShortSequence	imagedata;
-	};
-
-	/**
-	 * \brief Interface for tracking image updates
-	 *
-	 * The image monitor interface receives new tracking images
-	 */
-	interface TrackingImageMonitor extends Callback {
-		void	update(TrackingImage ti);
-	};
-
-	/**
 	 * \brief Calibration point structure
 	 *
 	 * A calibration point records the time offset after the start

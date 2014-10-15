@@ -125,12 +125,16 @@ astro::device::Mount::mount_state	convert(mountstate s);
 // Image
 astro::image::ImagePtr	convert(ImagePrx image);
 
+astro::image::ImagePtr	convertsimple(SimpleImage image);
+SimpleImage	convertsimple(astro::image::ImagePtr image);
+
 // Focusing
 FocusState	convert(astro::focusing::Focusing::focus_status s);
 astro::focusing::Focusing::focus_status	convert(FocusState s);
 
 FocusMethod	convert(astro::focusing::Focusing::focus_method m);
 astro::focusing::Focusing::focus_method	convert(FocusMethod m);
+
 
 } // namespace snowstar
 

@@ -19,7 +19,7 @@ void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
 		const astro::callback::CallbackDataPtr d);
 
 template<>
-void	callback_adapter<TrackingImageMonitorPrx>(TrackingImageMonitorPrx& p,
+void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 		const astro::callback::CallbackDataPtr d);
 
 template<>
@@ -92,8 +92,8 @@ public:
 
 	// callback handlers
 private:
-	SnowCallback<TrackingImageMonitorPrx>	trackingimagecallbacks;
-	SnowCallback<TrackingImageMonitorPrx>	trackingcallbacks;
+	SnowCallback<ImageMonitorPrx>	imagecallbacks;
+	SnowCallback<ImageMonitorPrx>	trackingcallbacks;
 	SnowCallback<CalibrationMonitorPrx>	calibrationcallbacks;
 
 	// methods for registration and unregistration of callbacks
@@ -154,10 +154,10 @@ public:
 /**
  * \brief Adapter class for image callback
  */
-class GuiderITrackingImageCallback : public astro::callback::Callback {
+class GuiderIImageCallback : public astro::callback::Callback {
 	GuiderI&	_guider;
 public:
-	GuiderITrackingImageCallback(GuiderI& guider) : _guider(guider) { }
+	GuiderIImageCallback(GuiderI& guider) : _guider(guider) { }
 	astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr& data) {
 		_guider.trackingImageUpdate(data);

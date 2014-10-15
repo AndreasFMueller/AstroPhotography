@@ -5,4 +5,4 @@
 #
 
 noinst_HEADERS = RemoteInstrument.h CommunicatorSingleton.h IceConversions.h \
-	CommonClientTasks.h
+	CommonClientTasks.h ImageCallbackI.h
