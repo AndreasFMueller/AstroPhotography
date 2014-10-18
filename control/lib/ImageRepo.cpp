@@ -200,12 +200,33 @@ std::string	ImageRepo::pathname(long id) {
 }
 
 /**
+ * \brief Find the id based on the UUID
+ */
+long	ImageRepo::getId(const UUID& uuid) {
+	ImageTable	images(_database);
+	std::string	condition = stringprintf("uuid = '%s'",
+				((std::string)(uuid)).c_str());
+	std::list<ImageRecord>	records = images.select(condition);
+	if (0 == records.size()) {
+		std::string	msg = stringprintf("no image with uuid %s",
+			((std::string)uuid).c_str());
+		throw std::runtime_error(msg);
+	}
+	ImageRecord	imageinfo = *(records.begin());
+	return imageinfo.id();
+}
+
+/**
  * \brief Get an image
  */
 ImagePtr	ImageRepo::getImage(long id) {
 	std::string	f = pathname(id);
 	FITSin	in(f);
 	return in.read();
+}
+
+ImagePtr	ImageRepo::getImage(const UUID& uuid) {
+	return getImage(getId(uuid));
 }
 
 static ImageEnvelope	convert(const ImageRecord& imageinfo,
@@ -455,6 +476,13 @@ void	ImageRepo::remove(long id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %ld removed from repository", id);
 }
 
+/**
+ * \brief Remove an image based on the uuid
+ */
+void	ImageRepo::remove(const UUID& uuid) {
+	remove(getId(uuid));
+}
+
 static float	temperature_min(float temperature) {
 	return 0.99 * (273.15 + temperature) - 273.15;
 }
@@ -556,6 +584,19 @@ void	ImageRepo::update_filename(long id, const std::string& filename) {
 	updatespec.insert(std::make_pair(std::string("filename"),
 		factory.get(filename)));
 	imagetable.updaterow(id, updatespec);
+}
+
+/**
+ * \brief get the set of all uuids from the imagetable
+ */
+std::set<UUID>	ImageRepo::getUUIDs(const std::string& condition) {
+	ImageTable	imagetable(_database);
+	std::list<ImageRecord>	images = imagetable.select(condition);
+	std::set<UUID>	result;
+	for (auto ptr = images.begin(); ptr != images.end(); ptr++) {
+		result.insert(ptr->uuid);
+	}
+	return result;
 }
 
 } // namespace project

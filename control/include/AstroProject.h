@@ -185,14 +185,29 @@ public:
 	const std::string&	name() const { return _name; }
 	std::string	filename(long id);
 	std::string	pathname(long id);
+	long	getId(const UUID& uuid);
 	astro::image::ImagePtr	getImage(long id);
+	astro::image::ImagePtr	getImage(const UUID& uuid);
 	ImageEnvelope	getEnvelope(long id);
-	ImageEnvelope	getEnvelope(const UUID& uid);
+	ImageEnvelope	getEnvelope(const UUID& uuid);
 
 	long	save(astro::image::ImagePtr image);
 	void	remove(long id);
+	void	remove(const UUID& uuid);
 
 	std::set<ImageEnvelope>	get(const ImageSpec& spec);
+	std::set<UUID>	getUUIDs(const std::string& condition);
+};
+
+/**
+ * \brief A class that implements a replication from one repo to another
+ */
+class RepoReplicator {
+	std::set<long>	uuid2ids(ImageRepo& repo, const std::set<UUID>& uuids);
+public:
+	RepoReplicator();
+	int	replicate(ImageRepo& from, ImageRepo& to, bool remove = false);
+	int	synchronize(ImageRepo& repo1, ImageRepo& repo2);
 };
 
 /**

@@ -112,9 +112,11 @@ int	command_remove(const std::string& reponame,
 	if (arguments.size() < 3) {
 		throw std::runtime_error("missing id argument");
 	}
-	int	id = std::stol(arguments[2]);
-	ImageRepo	repo = Configuration::get()->repo(reponame);
-	repo.remove(id);
+	for (int i = 2; i < arguments.size(); i++) {
+		int	id = std::stol(arguments[i]);
+		ImageRepo	repo = Configuration::get()->repo(reponame);
+		repo.remove(id);
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -156,6 +158,41 @@ int	command_copy(const std::string& reponame,
 }
 
 /**
+ * \brief Command to replicate images from one repository to another
+ */
+int	command_replicate(const std::string& srcreponame, 
+		const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "replication command");
+	if (arguments.size() < 3) {
+		throw std::runtime_error("destination repo missing");
+	}
+	std::string	dstreponame = arguments[2];
+	RepoReplicator	replicator;
+	ImageRepo	srcrepo = Configuration::get()->repo(srcreponame);
+	ImageRepo	dstrepo = Configuration::get()->repo(dstreponame);
+	int	count = replicator.replicate(srcrepo, dstrepo);
+	std::cout << "files replicated: " << count << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Command to synchronize two repositories
+ */
+int	command_synchronize(const std::string& repo1name, 
+		const std::vector<std::string>& arguments) {
+	if (arguments.size() < 3) {
+		throw std::runtime_error("destination repo missing");
+	}
+	std::string	repo2name = arguments[2];
+	RepoReplicator	replicator;
+	ImageRepo	repo1 = Configuration::get()->repo(repo1name);
+	ImageRepo	repo2 = Configuration::get()->repo(repo2name);
+	int	count = replicator.replicate(repo1, repo2);
+	std::cout << "files synchronized: " << count << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Command to show all info about an image
  */
 int	command_show(const std::string& reponame,
@@ -163,30 +200,44 @@ int	command_show(const std::string& reponame,
 	if (arguments.size() < 3) {
 		throw std::runtime_error("not enough arguments for 'show'");
 	}
-	int	id = std::stol(arguments[2]);
-	ImageRepo	repo = Configuration::get()->repo(reponame);
-	ImageEnvelope	image = repo.getEnvelope(id);
-	std::cout << "id:              " << image.id() << std::endl;
-	std::cout << "filename:        " << image.filename() << std::endl;
-	std::cout << "project:         " << image.project() << std::endl;
-	std::cout << "created:         " << timeformat("%Y-%m-%d %H:%M:%S",
-		image.created()) << std::endl;
-	std::cout << "instrument:      " << image.camera() << std::endl;
-	std::cout << "size:            " << image.size().toString() << std::endl;
-	std::cout << "binning:         " << image.binning().toString() << std::endl;
-	std::cout << "exposure time:   " << image.exposuretime() << std::endl;
-	std::cout << "CCD temperature: " << image.temperature() << std::endl;
-	std::cout << "observation at:  " << timeformat("%Y-%m-%d %H:%M:%S",
-		image.observation()) << std::endl;
-	std::cout << "UUID:            " << image.uuid() << std::endl;
-	if (verbose) {
-		std::cout << "FITS headers:" << std::endl;
-		std::for_each(image.metadata.begin(), image.metadata.end(),
-			[](const ImageMetadata::value_type& mv) {
-				std::cout << "    " << mv.second.toString();
-				std::cout << std::endl;
-			}
-		);
+	for (int i = 2; i < arguments.size(); i++) {
+		int	id = std::stol(arguments[i]);
+		ImageRepo	repo = Configuration::get()->repo(reponame);
+		ImageEnvelope	image = repo.getEnvelope(id);
+		std::cout << "id:              "
+			<< image.id() << std::endl;
+		std::cout << "filename:        "
+			<< image.filename() << std::endl;
+		std::cout << "project:         "
+			<< image.project() << std::endl;
+		std::cout << "created:         "
+			<< timeformat("%Y-%m-%d %H:%M:%S",
+				image.created()) << std::endl;
+		std::cout << "instrument:      "
+			<< image.camera() << std::endl;
+		std::cout << "size:            "
+			<< image.size().toString() << std::endl;
+		std::cout << "binning:         "
+			<< image.binning().toString() << std::endl;
+		std::cout << "exposure time:   "
+			<< image.exposuretime() << std::endl;
+		std::cout << "CCD temperature: "
+			<< image.temperature() << std::endl;
+		std::cout << "observation at:  "
+			<< timeformat("%Y-%m-%d %H:%M:%S",
+				image.observation()) << std::endl;
+		std::cout << "UUID:            " << image.uuid() << std::endl;
+		if (verbose) {
+			std::cout << "FITS headers:" << std::endl;
+			std::for_each(image.metadata.begin(),
+				image.metadata.end(),
+				[](const ImageMetadata::value_type& mv) {
+					std::cout << "    "
+						<< mv.second.toString();
+					std::cout << std::endl;
+				}
+			);
+		}
 	}
 	return EXIT_SUCCESS;
 }
@@ -196,28 +247,39 @@ int	command_show(const std::string& reponame,
  */
 void	usage(const char *progname) {
 	Path	path(progname);
-	std::cerr << "Usage:" << std::endl;
-	std::cerr << path.basename() << " [ options ] <repo> add <image.fits>";
-	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] <repo> list" << std::endl;
-	std::cerr << path.basename() << " [ options ] <repo> get <id> <image.fits>";
-	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] <repo> { show | remove } <id>";
-	std::cerr << std::endl;
-	std::cerr << "add, list, retrieve and delete images in image repository <repo>";
-	std::cerr << std::endl;
-	std::cerr << path.basename() << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
-	std::cerr << std::endl;
-	std::cerr << "copy or move an image with id <id> from repo <srcrepo> to <targetrepo>";
-	std::cerr << std::endl;
-	std::cerr << "Options:" << std::endl;
-	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
-	std::cerr << std::endl;
-	std::cerr << "  -d,--debug           increase debug level" << std::endl;
-	std::cerr << "  -v,--verbose         show more details in repo listing";
-	std::cerr << std::endl;
-	std::cerr << "  -h,--help            display this help message";
-	std::cerr << std::endl;
+	std::cout << "Usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <repo> add <image.fits>";
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <repo> list" << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <repo> get <id> <image.fits>";
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <repo> { show | remove } <ids>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "add, list, retrieve and delete images in image repository <repo>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "copy or move an image with id <id> from repo <srcrepo> to <targetrepo>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ options ] <srcrepo> { replicate | synchronize } <targetrepo>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "replicate images from <srcrepo> to <targetrepo>, synchronize two repositories";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "  -c,--config=<cfg>    use configuration file <cfg>";
+	std::cout << std::endl;
+	std::cout << "  -d,--debug           increase debug level" << std::endl;
+	std::cout << "  -v,--verbose         show more details in repo listing";
+	std::cout << std::endl;
+	std::cout << "  -h,--help            display this help message";
+	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
@@ -247,7 +309,7 @@ int	imagerepo_main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
-			break;
+			return EXIT_SUCCESS;
 		case 'v':
 			verbose = true;
 			break;
@@ -292,6 +354,12 @@ int	imagerepo_main(int argc, char *argv[]) {
 	}
 	if (command == "show") {
 		return command_show(reponame, arguments);
+	}
+	if (command == "replicate") {
+		return command_replicate(reponame, arguments);
+	}
+	if (command == "synchronize") {
+		return command_synchronize(reponame, arguments);
 	}
 
 	// get the image server from the configuration

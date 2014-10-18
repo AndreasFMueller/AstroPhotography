@@ -58,6 +58,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	FITSKeywords.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
+	RepoReplicator.cpp \
 	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
 	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
 	InstrumentTables.cpp \

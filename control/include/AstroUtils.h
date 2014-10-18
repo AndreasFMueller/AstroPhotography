@@ -255,6 +255,8 @@ public:
 	UUID();
 	UUID(const std::string& uuid);
 	bool	operator==(const UUID& other) const;
+	bool	operator<(const UUID& other) const;
+	UUID&	operator=(const UUID& other);
 	operator	std::string() const;
 };
 std::ostream&	operator<<(std::ostream& out, const UUID& uuid);

@@ -27,6 +27,15 @@ bool	UUID::operator==(const UUID& other) const {
 	return (0 == uuid_compare(a, b));
 }
 
+bool	UUID::operator<(const UUID& other) const {
+	return _uuid < other._uuid;
+}
+
+UUID&	UUID::operator=(const UUID& other) {
+	_uuid = other._uuid;
+	return *this;
+}
+
 UUID::operator	std::string() const {
 	return _uuid;
 }
