@@ -40,7 +40,7 @@ void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
  * \brief calback adapter for Tracking monitor
  */
 template<>
-void	callback_adapter<TrackingImageMonitorPrx>(TrackingImageMonitorPrx& p,
+void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
 	// first check whether we really got an image
 	astro::callback::ImageCallbackData	*imageptr
@@ -50,8 +50,8 @@ void	callback_adapter<TrackingImageMonitorPrx>(TrackingImageMonitorPrx& p,
 	}
 
 	// convert the image so that it is understood by the
-	// TrackingImageMonitor proxy
-	TrackingImage	image;
+	// ImageMonitor proxy
+	SimpleImage	image;
 	image.size = convert(imageptr->image()->size());
 
 	// create an adapter to a shor timage
@@ -293,7 +293,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 
 	// send the clients that guiding was stopped
 	trackingcallbacks.stop();
-	trackingimagecallbacks.stop();
+	imagecallbacks.stop();
 
 	// remove the callback
 	guider->trackingcallback.reset();
@@ -357,7 +357,7 @@ void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallb
  */
 void    GuiderI::registerImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
-	trackingimagecallbacks.registerCallback(imagecallback, current);
+	imagecallbacks.registerCallback(imagecallback, current);
 }
 
 /**
@@ -365,7 +365,7 @@ void    GuiderI::registerImageMonitor(const Ice::Identity& imagecallback,
  */
 void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
 		const Ice::Current& current) {
-	trackingimagecallbacks.unregisterCallback(imagecallback, current);
+	imagecallbacks.unregisterCallback(imagecallback, current);
 }
 
 /**
@@ -408,7 +408,7 @@ void	GuiderI::trackingUpdate(const astro::callback::CallbackDataPtr data) {
  * \brief Handle a new image from the tracking process
  */
 void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
-	trackingimagecallbacks(data);
+	imagecallbacks(data);
 }
 
 /**

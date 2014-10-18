@@ -13,7 +13,8 @@ slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
 BUILT_SOURCES = $(slice_sources)
 
 additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
-	IceConversions.cpp CommonClientTasks.cpp
+	IceConversions.cpp CommonClientTasks.cpp ImageCallbackI.cpp \
+	ImageConversions.cpp
 
 libiceastro_la_SOURCES = \
 	$(slice_sources) $(additional_sources)

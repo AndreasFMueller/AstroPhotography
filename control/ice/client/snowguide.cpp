@@ -16,6 +16,7 @@
 #include <IceConversions.h>
 #include <AstroUtils.h>
 #include <AstroImage.h>
+#include <ImageCallbackI.h>
 
 using namespace snowstar;
 
@@ -25,6 +26,12 @@ bool	verbose = false;
 snowstar::ImagePoint	star;
 float	focallength = 0;
 Exposure	exposure;
+std::string	prefix("p");
+volatile bool	completed = false;
+
+void	signal_handler(int /* sig */) {
+	completed = true;
+}
 
 /**
  * \brief usage method
@@ -37,6 +44,7 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] calibrate" << std::endl;
 	std::cout << p << " [ options ] monitor" << std::endl;
+	std::cout << p << " [ options ] images" << std::endl;
 	std::cout << p << " [ options ] guide [ <calibrationid> ] " << std::endl;
 	std::cout << p << " [ options ] cancel" << std::endl;
 	std::cout << p << " [ options ] list" << std::endl;
@@ -145,6 +153,42 @@ int	cancel_command(GuiderPrx guider) {
 	}
 	std::cerr << "nothing to cancel, wrong state" << std::endl;
 	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the image command
+ */
+int	images_command(GuiderPrx guider, const std::string& path) {
+	// create a Image callback object
+	Ice::ObjectPtr	callback = new ImageCallbackI(path, prefix);
+
+	// register the callback with the adapter
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	CallbackAdapter	adapter(ic);
+	Ice::Identity	ident = adapter.add(callback);
+	guider->ice_getConnection()->setAdapter(adapter.adapter());
+
+	// register the image callback with the server
+	guider->registerImageMonitor(ident);
+
+	// wait until the callback gets the information that the process
+	// completed
+	signal(SIGINT, signal_handler);
+	while (!completed) {
+		sleep(1);
+	}
+
+	// unregister the callback before exiting
+	guider->unregisterImageMonitor(ident);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the monitor command
+ */
+int	monitor_command(GuiderPrx guider) {
+	// The type of callback to install depends on the current guider state
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -342,10 +386,11 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /*  4 */
 { "instrument",		required_argument,	NULL,	'i' }, /*  5 */
 { "rectangle",		required_argument,	NULL,	'r' }, /*  6 */
-{ "star",		required_argument,	NULL,	's' }, /*  7 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  8 */
-{ "verbose",		no_argument,		NULL,	'v' }, /*  9 */
-{ NULL,			0,			NULL,    0  }
+{ "prefix",		required_argument,	NULL,	'p' }, /*  7 */
+{ "star",		required_argument,	NULL,	's' }, /*  8 */
+{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 10 */
+{ NULL,			0,			NULL,    0  }  /* 11 */
 };
 
 /**
@@ -387,6 +432,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'i':
 			instrumentname = optarg;
+			break;
+		case 'p':
+			prefix = std::string(optarg);
 			break;
 		case 'r':
 			frame = optarg;
@@ -457,16 +505,8 @@ int	main(int argc, char *argv[]) {
 	GuiderFactoryPrx	guiderfactory
 		= GuiderFactoryPrx::checkedCast(base);
 
-	// retrieve a guider
-	GuiderPrx	guider = guiderfactory->get(descriptor);
-	GuiderState	state = guider->getState();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found the guider in state %s",
-		guiderstate2string(state).c_str());
-
-	// the next action depends on the command to execute
-	if (command == "cancel") {
-		return cancel_command(guider);
-	}
+	// the next action depends on the command to execute. This first
+	// group of commands does not need a guider
 	if (command == "list") {
 		return list_command(guiderfactory, descriptor);
 	}
@@ -480,12 +520,33 @@ int	main(int argc, char *argv[]) {
 		long	historyid = std::stoi(argv[optind++]);
 		return history_command(guiderfactory, historyid);
 	}
+
+	// retrieve a guider
+	GuiderPrx	guider = guiderfactory->get(descriptor);
+	GuiderState	state = guider->getState();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found the guider in state %s",
+		guiderstate2string(state).c_str());
+
+	// commands needing a guider
+	if (command == "cancel") {
+		return cancel_command(guider);
+	}
+	if (command == "image") {
+		if (argc <= optind) {
+			throw std::runtime_error("");
+		}
+		return images_command(guider, std::string(argv[optind++]));
+	}
+	if (command == "monitor") {
+		return monitor_command(guider);
+	}
 	if (command == "calibrate") {
 		// next argument must be the calibration id, if it is present
-		if (argc > optind) {
-			int calibrationid = std::stoi(argv[optind++]);
-			return calibrate_command(guider, calibrationid);
+		if (argc <= optind) {
+			throw std::runtime_error("no calibration id specified");
 		}
+		int calibrationid = std::stoi(argv[optind++]);
+		return calibrate_command(guider, calibrationid);
 	}
 
 	// the guide and calibrate commands need an exposure
