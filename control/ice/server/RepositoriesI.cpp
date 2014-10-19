@@ -30,8 +30,8 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 
 RepositoryPrx	RepositoriesI::get(const std::string& reponame,
 			const Ice::Current& current) {
-	// XXX create an implementation in the repository locator
-	return createProxy<RepositoryPrx>("repository/" + reponame, current);
+	return createProxy<RepositoryPrx>("repository/" + reponame, current,
+		false);
 }
 
 } // namespace snowstar

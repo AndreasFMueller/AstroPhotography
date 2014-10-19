@@ -6,6 +6,9 @@
 #include <IceConversions.h>
 #include <type_traits>
 #include <limits>
+#include <includes.h>
+#include <AstroIO.h>
+#include <typeinfo>
 
 namespace snowstar {
 
@@ -130,13 +133,142 @@ SimpleImage	convertsimple(astro::image::ImagePtr image) {
 	return result;
 }
 
-astro::image::ImagePtr  convertfile(ImageFile imagefile) {
-	astro::image::ImagePtr	imageptr(NULL);
-	return imageptr;
+static std::string	tempfilename() {
+	char	*tmpdir = "/tmp";
+	if (NULL != getenv("TMPDIR")) {
+		tmpdir = getenv("TMPDIR");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "temp an image");
+	char    buffer[1024];
+	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", tmpdir);
+	mkstemps(buffer, 5);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
+	unlink(buffer);
+
+	return std::string(buffer);
 }
 
+/**
+ * \brief Convert an ImageFile buffer to an ImagePtr
+ */
+astro::image::ImagePtr  convertfile(ImageFile imagefile) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagefile has size %d",
+		imagefile.size());
+
+	// here is the result image we would like to return
+	astro::image::ImagePtr	result;
+
+	// generate a temporary file name
+	std::string	filename = tempfilename();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filename: %s",
+		filename.c_str());
+
+	try {
+		// open the temporary file
+		int	fd = open(filename.c_str(),
+				O_CREAT | O_TRUNC | O_WRONLY, 0666);
+		if (fd < 0) {
+			std::string	msg = astro::stringprintf("cannot "
+				"create temporary file: %s", strerror(errno));
+			throw std::runtime_error(msg);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "fd: %d", fd);
+
+		// write the image data to a temporary file
+		ssize_t	l = write(fd, imagefile.data(), imagefile.size());
+		if (l < 0) {
+			std::string	msg = astro::stringprintf("could not "
+				"write data: %s", strerror(errno));
+			close(fd);
+			throw std::runtime_error(msg);
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bytes written: %d", l);
+		if (imagefile.size() != l) {
+			throw std::runtime_error("failed to write image");
+		}
+		close(fd);
+
+		// read the image
+		astro::io::FITSin	in(filename);
+		result = in.read();
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to convert: %s (%s)",
+			x.what(), typeid(x).name());
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception during conversion");
+	}
+
+	// unlink the temporary file
+	unlink(filename.c_str());
+
+	// throw an exception if the image is NULL
+	if (NULL == result) {
+		throw std::runtime_error("cannot convert image");
+	}
+	return result;
+}
+
+/**
+ * \brief Convert an ImagePtr into an ImageFile
+ */
 ImageFile       convertfile(astro::image::ImagePtr imageptr) {
-	ImageFile	result;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert image of size %dx%d",
+		imageptr->size().width(), imageptr->size().height());
+	// generate a temporary file name
+	std::string	filename = tempfilename();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tempfile: %s", filename.c_str());
+
+	// write the image to a temporary file
+	try {
+		astro::io::FITSout	out(filename);
+		out.setPrecious(false);
+		out.write(imageptr);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write image: %s",
+			x.what());
+		throw;
+	}
+
+	// find out how large the image is
+	struct stat	sb;
+	int	rc = stat(filename.c_str(), &sb);
+	if (rc < 0) {
+		throw NotFound("cannot stat temp image");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file has size %d", sb.st_size);
+
+	// empty image
+	if (0 == sb.st_size) {
+		return ImageFile();
+	}
+
+	// read the image into a buffer
+	int	fd = open(filename.c_str(), O_RDONLY);
+	if (fd < 0) {
+		throw NotFound("temporary file disappeared");
+	}
+
+	unsigned char	*buffer = new unsigned char[sb.st_size];
+	if (sb.st_size != read(fd, buffer, sb.st_size)) {
+		delete[] buffer;
+		close(fd);
+		throw BadParameter("could not read file in full length");
+	}
+	close(fd);
+
+	// create an image file object
+	ImageFile	result(sb.st_size);
+	for (int i = 0; i < sb.st_size; i++) {
+		result[i] = buffer[i];
+	}
+
+	// clean up memory
+	delete[] buffer;
+
+	// unlink the image
+	unlink(filename.c_str());
+
+	// read the image into a 
 	return result;
 }
 

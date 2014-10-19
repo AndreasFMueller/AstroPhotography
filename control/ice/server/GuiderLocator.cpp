@@ -15,7 +15,7 @@ GuiderLocator::GuiderLocator() {
 }
 
 /**
- * \brief add a guider to the 
+ * \brief add a guider to the  guidermap
  */
 void	GuiderLocator::add(const std::string& name, Ice::ObjectPtr guiderptr) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guider %s", name.c_str());
@@ -27,7 +27,7 @@ void	GuiderLocator::add(const std::string& name, Ice::ObjectPtr guiderptr) {
 }
 
 /**
- * \brief locate a guider
+ * \brief locate a guider in the map
  */
 Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie) {

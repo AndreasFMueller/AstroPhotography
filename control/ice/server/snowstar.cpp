@@ -26,6 +26,7 @@
 #include <AstroConfig.h>
 #include <repository.h>
 #include <RepositoriesI.h>
+#include <RepositoryLocator.h>
 
 namespace snowstar {
 
@@ -159,6 +160,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		object = new RepositoriesI();
 		adapter->add(object, ic->stringToIdentity("Repositories"));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Repositories servant added");
+		RepositoryLocator	*repolocator = new RepositoryLocator();
+		adapter->addServantLocator(repolocator, "repository");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Repository servant added");
 
 		// activate the adapter
 		adapter->activate();
