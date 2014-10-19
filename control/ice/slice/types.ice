@@ -1,5 +1,5 @@
 //
-// types.idl -- common type definitions
+// types.ice -- common type definitions
 //
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //

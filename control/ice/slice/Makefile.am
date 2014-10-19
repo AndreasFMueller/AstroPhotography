@@ -5,7 +5,7 @@
 # $Id$
 #
 SLICES = camera.ice exceptions.ice focusing.ice guider.ice image.ice \
-	device.ice tasks.ice types.ice
+	device.ice tasks.ice types.ice repository.ice
 
 EXTRA_DIST = $(SLICES)
 

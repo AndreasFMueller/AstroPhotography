@@ -1,5 +1,5 @@
 //
-// image.idl -- Interface definition for images access
+// image.ice -- Interface definition for images access
 //
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
