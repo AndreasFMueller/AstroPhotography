@@ -5,7 +5,7 @@
 #
 if ENABLE_ICE
 
-bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount
+bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount snowrepo
 noinst_PROGRAMS = snowflake 
 
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
@@ -44,6 +44,11 @@ snowguide_SOURCES = snowguide.cpp
 snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowguide_LDADD = $(ICELDADD)
 snowguide_CPPFLAGS = $(ICECPPFLAGS)
+
+snowrepo_SOURCES = snowrepo.cpp
+snowrepo_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowrepo_LDADD = $(ICELDADD)
+snowrepo_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

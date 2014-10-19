@@ -8,7 +8,7 @@ if ENABLE_ICE
 lib_LTLIBRARIES = libiceastro.la
 
 slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
-	device.cpp tasks.cpp types.cpp
+	device.cpp tasks.cpp types.cpp repository.cpp
 
 BUILT_SOURCES = $(slice_sources)
 

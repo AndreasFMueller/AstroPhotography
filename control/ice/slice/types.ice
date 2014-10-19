@@ -8,6 +8,8 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
+	sequence<int>	idlist;
+
 	// Image related data structures
 	/**
 	 * \brief Pixel coordinates of a pixel in an image

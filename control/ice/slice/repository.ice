@@ -17,11 +17,13 @@ module snowstar {
 	 */
 	interface Repository {
 		uuidlist	getUUIDs();
-		sequence<long>	getId(string uuid);
-		ImageFile	getImage(long id);
-		void	save(ImageFile imagefile);
-		void	remove(long id);
-	}
+		int		getId(string uuid);
+		ImageFile	getImage(int id);
+		int	save(ImageFile image);
+		void	remove(int id);
+	};
+
+	sequence<string>	reponamelist;
 
 	/**
 	 * \brief Repository selection on server
@@ -30,6 +32,7 @@ module snowstar {
 	 * allows to retrieve a proxy to a repository.
 	 */
 	interface Repositories {
-		Repository	get(string reponame);
-	}
+		reponamelist	list();
+		Repository*	get(string reponame);
+	};
 };

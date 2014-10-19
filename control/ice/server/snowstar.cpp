@@ -23,8 +23,19 @@
 #include <DeviceLocatorLocator.h>
 #include <FocusingFactoryI.h>
 #include <FocusingLocator.h>
+#include <AstroConfig.h>
+#include <repository.h>
+#include <RepositoriesI.h>
 
 namespace snowstar {
+
+static struct option	longopts[] = {
+{ "base",		required_argument,	NULL,	'b' }, /* 0 */
+{ "config",		required_argument,	NULL,	'c' }, /* 1 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 2 */
+{ "database",		required_argument,	NULL,	'q' }, /* 3 */
+{ NULL,			0,			NULL,	0   }, /* 4 */
+};
 
 /**
  * \brief Main function for the Snowstar server
@@ -45,11 +56,18 @@ int	snowstar_main(int argc, char *argv[]) {
 		throw;
 	}
 
+	// default configuration
+	std::string	databasefile("testdb.db");
+
 	// parse the command line
 	int	c;
-	std::string	databasefile("testdb.db");
-	while (EOF != (c = getopt(argc, argv, "db:q:")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:",
+		longopts, &longindex)))
 		switch (c) {
+		case 'c':
+			astro::config::Configuration::set_default(optarg);
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
@@ -136,6 +154,11 @@ int	snowstar_main(int argc, char *argv[]) {
 		FocusingLocator	*focusinglocator = new FocusingLocator();
 		adapter->addServantLocator(focusinglocator, "focusing");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");
+
+		// add a servant for Repositories
+		object = new RepositoriesI();
+		adapter->add(object, ic->stringToIdentity("Repositories"));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Repositories servant added");
 
 		// activate the adapter
 		adapter->activate();

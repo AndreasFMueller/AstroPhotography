@@ -130,6 +130,14 @@ SimpleImage	convertsimple(astro::image::ImagePtr image) {
 	return result;
 }
 
+astro::image::ImagePtr  convertfile(ImageFile imagefile) {
+	astro::image::ImagePtr	imageptr(NULL);
+	return imageptr;
+}
 
+ImageFile       convertfile(astro::image::ImagePtr imageptr) {
+	ImageFile	result;
+	return result;
+}
 
 } // namespace snowstar

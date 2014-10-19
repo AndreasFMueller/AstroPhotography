@@ -128,6 +128,9 @@ astro::image::ImagePtr	convert(ImagePrx image);
 astro::image::ImagePtr	convertsimple(SimpleImage image);
 SimpleImage	convertsimple(astro::image::ImagePtr image);
 
+astro::image::ImagePtr	convertfile(ImageFile imagefile);
+ImageFile	convertfile(astro::image::ImagePtr imageptr);
+
 // Focusing
 FocusState	convert(astro::focusing::Focusing::focus_status s);
 astro::focusing::Focusing::focus_status	convert(FocusState s);

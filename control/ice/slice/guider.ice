@@ -237,7 +237,6 @@ module snowstar {
 	 * to the server, but the data should still be accessible.
 	 */
 	sequence<GuiderDescriptor> GuiderList;
-	sequence<int>	idlist;
 	interface GuiderFactory {
 		GuiderList	list();
 
