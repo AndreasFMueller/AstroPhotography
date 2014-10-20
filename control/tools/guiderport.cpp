@@ -64,6 +64,20 @@ void	prog1(astro::camera::GuiderPortPtr guiderport) {
 	}
 }
 
+void	prog2(astro::camera::GuiderPortPtr guiderport) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting program 3");
+	while (1) {
+		guiderport->activate(4, 3, 2, 1);
+		sleep(5);
+		guiderport->activate(3, 2, 1, 4);
+		sleep(5);
+		guiderport->activate(2, 1, 4, 3);
+		sleep(5);
+		guiderport->activate(1, 4, 3, 2);
+		sleep(5);
+	}
+}
+
 int	main(int argc, char *argv[]) {
 
 	int	c;
@@ -108,6 +122,9 @@ int	main(int argc, char *argv[]) {
 		break;
 	case 1:
 		prog1(guiderport);
+		break;
+	case 2:
+		prog2(guiderport);
 		break;
 	default:
 		throw std::runtime_error("unknown program number");
