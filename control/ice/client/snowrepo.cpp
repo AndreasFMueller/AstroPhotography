@@ -91,9 +91,9 @@ int	command_push(astro::project::ImageRepo& localrepo,
 
 	// now copy all the images to the remote repo
 	for (auto ptr = copyids.begin(); ptr != copyids.end(); ptr++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", *ptr);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "push image id %d", *ptr);
 		if (verbose) {
-			std::cout << "copy file " << *ptr << std::endl;
+			std::cout << "push file " << *ptr << std::endl;
 		}
 		if (!dryrun) {
 			remoterepo->save(convertfile(localrepo.getImage(*ptr)));
@@ -118,14 +118,14 @@ int	command_pull(astro::project::ImageRepo& localrepo,
 	std::set_difference(remoteuuids.begin(), remoteuuids.end(),
 		localuuids.begin(), localuuids.end(),
 		std::inserter(tocopy, tocopy.begin()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d uuids to copy", tocopy.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d uuids to pull", tocopy.size());
 	
 	// get the ids for the images
 	std::set<int>	copyids;
 	for (auto ptr = tocopy.begin(); ptr != tocopy.end(); ptr++) {
 		copyids.insert(remoterepo->getId(*ptr));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids to copy", copyids.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids to pull", copyids.size());
 	if (verbose) {
 		std::cout << "found " << copyids.size();
 		std::cout << " files identified for pull operation";
@@ -134,7 +134,7 @@ int	command_pull(astro::project::ImageRepo& localrepo,
 
 	// copy the images from the remote repository
 	for (auto ptr = copyids.begin(); ptr != copyids.end(); ptr++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", *ptr);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "pull image id %d", *ptr);
 		if (verbose) {
 			std::cout << "pulling " << *ptr << std::endl;
 		}
