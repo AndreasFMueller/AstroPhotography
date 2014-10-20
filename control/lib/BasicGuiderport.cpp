@@ -149,25 +149,25 @@ void	BasicGuiderport::activate(float raplus, float raminus,
 		= std::chrono::steady_clock::now();
 	long long	delta = (raplus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %ldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %lldms", delta);
 	}
 	nextchange[0] = now + std::chrono::milliseconds(delta);
 
 	delta = (raminus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %ldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %lldms", delta);
 	}
 	nextchange[1] = now + std::chrono::milliseconds(delta);
 
 	delta = (decplus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %ldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %lldms", delta);
 	}
 	nextchange[2] = now + std::chrono::milliseconds(delta);
 
 	delta = (decminus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %ldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %lldms", delta);
 	}
 	nextchange[3] = now + std::chrono::milliseconds(delta);
 
