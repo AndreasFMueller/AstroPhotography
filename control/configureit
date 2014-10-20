@@ -54,7 +54,10 @@ fi
 if [ -n "${ICEDIR}" ]
 then
 	PATH=${ICEDIR}/bin:${PATH}
-	PATH=${ICEDIR}/bin/c++11:${PATH}
+	if [ -d ${ICEDIR}/bin/c++11 ]
+	then
+		PATH="${ICEDIR}/bin/c++11:${PATH}"
+	fi
 	commonflags="${commonflags} --with-ice=${ICEDIR} --enable-ice"
 fi
 
@@ -67,6 +70,7 @@ Linux)	if [ -r /etc/debian_version ]
 	then
 		echo "configuring for Debian"
 		systemtype=Debian
+		commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
 	else
 		if [ -r /etc/SuSE-release ]
 		then

@@ -8,6 +8,15 @@
 #
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-LD_LIBRARY_PATH=/opt/Ice-3.5.1/lib64:$LD_LIBRARY_PATH
+if [ -f /opt/Ice-3.5.1/lib64/libIceUtil.so ]
+then
+	LD_LIBRARY_PATH=/opt/Ice-3.5.1/lib64:$LD_LIBRARY_PATH
+fi
+
+if [ -f /opt/Ice-3.5.1/lib/libIceUtil.so ]
+then
+	LD_LIBRARY_PATH=/opt/Ice-3.5.1/lib:$LD_LIBRARY_PATH
+fi
+
 export LD_LIBRARY_PATH
 
