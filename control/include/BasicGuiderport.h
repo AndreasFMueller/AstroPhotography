@@ -10,6 +10,8 @@
 #include <AstroCamera.h>
 #include <Serial.h>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
 #include <chrono>
 
 namespace astro {

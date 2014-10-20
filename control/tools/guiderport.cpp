@@ -9,6 +9,7 @@
 #include <AstroUtils.h>
 #include <getopt.h>
 #include <AstroLoader.h>
+#include <includes.h>
 
 using namespace astro;
 
