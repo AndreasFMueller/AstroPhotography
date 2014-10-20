@@ -20,9 +20,12 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 	// all the programs that use fixed proxies and callbacks
 	Ice::PropertiesPtr props = Ice::createProperties(argc, argv);
 	props->setProperty("Ice.ACM.Client", "0");
+	props->setProperty("Ice.MessageSizeMax", "65536");
+	Ice::InitializationData	id;
+	id.properties = props;
 
 	// initialize the communicator
-	_communicator = Ice::initialize(argc, argv);
+	_communicator = Ice::initialize(id);
 	initialized = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "communicator initialized");
 }
