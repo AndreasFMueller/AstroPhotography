@@ -22,6 +22,7 @@ namespace astro {
 
 std::string	servername;
 bool	verbose = false;
+std::string	type("camera");
 
 /**
  * \brief list of device mappingslist of device mappings
@@ -85,7 +86,8 @@ void	scan_module::operator()(const std::string& modulename) {
 	DeviceLocatorPtr	locator = module->getDeviceLocator();
 
 	// get a list of devices
-	std::vector<std::string>	devices = locator->getDevicelist();
+	std::vector<std::string>	devices = locator->getDevicelist(
+		astro::DeviceName::string2type(type));
 
 	// display the devices
 	std::for_each(devices.begin(), devices.end(), 
@@ -166,45 +168,47 @@ int	remove_cmd(const std::vector<std::string>& arguments) {
  * \brief Display commands 
  */
 void	usage(const std::string& progname) {
-	std::cerr << "usage:" << std::endl;
-	std::cerr << progname << " [ options ] list" << std::endl;
-	std::cerr << progname << " [ options ] scan <module> ...";
-	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] map <name> <devicename> "
+	std::cout << "usage:" << std::endl;
+	std::string	p = "    " + Path(progname).basename();
+	std::cout << p << " [ options ] list" << std::endl;
+	std::cout << p << " [ options ] scan <module> ...";
+	std::cout << std::endl;
+	std::cout << p << " [ options ] map <name> <devicename> "
 					"[ attr=value ... ]";
-	std::cerr << std::endl;
-	std::cerr << progname << " [ options ] remove <name>" << std::endl;
-	std::cerr << "The list command displays a list of device mappings present in the database.";
-	std::cerr << std::endl;
-	std::cerr << "The scan command scans the named modules and displays the devices recoginized";
-	std::cerr << std::endl;
-	std::cerr << "by this module." << std::endl;
-	std::cerr << "The map command creates and updates a map entries. "
+	std::cout << std::endl;
+	std::cout << p << " [ options ] remove <name>" << std::endl;
+	std::cout << "The list command displays a list of device mappings present in the database.";
+	std::cout << std::endl;
+	std::cout << "The scan command scans the named modules and displays the devices recoginized";
+	std::cout << std::endl;
+	std::cout << "by this module." << std::endl;
+	std::cout << "The map command creates and updates a map entries. "
 			"The <devicename> must";
-	std::cerr << std::endl;
-	std::cerr << "always be specified, this is the parameter that might "
+	std::cout << std::endl;
+	std::cout << "always be specified, this is the parameter that might "
 			"change when the";
-	std::cerr << std::endl;
-	std::cerr << "device is plugged in. The additional attribute value "
+	std::cout << std::endl;
+	std::cout << "device is plugged in. The additional attribute value "
 			"pairs are normally only";
-	std::cerr << std::endl;
-	std::cerr << "set the first time, the attributes 'unit' and "
+	std::cout << std::endl;
+	std::cout << "set the first time, the attributes 'unit' and "
 			"'description are recognized.";
-	std::cerr << std::endl;
-	std::cerr << "The remove command removes a named map entry.";
-	std::cerr << std::endl;
-	std::cerr << "Options:" << std::endl;
-	std::cerr << "  -c,--config=<cfg>    use configuration file <cfg>";
-	std::cerr << std::endl;
-	std::cerr << "  -d,--debug           increase debug level" << std::endl;
-	std::cerr << "  -h,--help            display this help message";
-	std::cerr << std::endl;
-	std::cerr << "  -s,--server=server   use remote server for device "
+	std::cout << std::endl;
+	std::cout << "The remove command removes a named map entry.";
+	std::cout << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "  -c,--config=<cfg>    use configuration file <cfg>";
+	std::cout << std::endl;
+	std::cout << "  -d,--debug           increase debug level" << std::endl;
+	std::cout << "  -h,--help            display this help message";
+	std::cout << std::endl;
+	std::cout << "  -s,--server=server   use remote server for device "
 			"location";
-	std::cerr << std::endl;
-	std::cerr << "  -v,--verbose         show more details in repo listing";
-	std::cerr << std::endl;
-
+	std::cout << std::endl;
+	std::cout << "  -t,--type=devtype    scan for devices of type <devtype>";
+	std::cout << std::endl;
+	std::cout << "  -v,--verbose         show more details in repo listing";
+	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
@@ -212,7 +216,8 @@ static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
 { "help",	no_argument,		NULL,		'h' }, /* 2 */
 { "server",	required_argument,	NULL,		's' }, /* 3 */
-{ "verbose",	no_argument,		NULL,		'v' }, /* 4 */
+{ "type",	required_argument,	NULL,		't' }, /* 4 */
+{ "verbose",	no_argument,		NULL,		'v' }, /* 5 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -222,7 +227,7 @@ static struct option	longopts[] = {
 int	devicemapper_main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dhs:v", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhs:t:v", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
@@ -237,6 +242,9 @@ int	devicemapper_main(int argc, char *argv[]) {
 			break;
 		case 's':
 			servername = optarg;
+			break;
+		case 't':
+			type = optarg;
 			break;
 		case 'v':
 			verbose = true;

@@ -8,21 +8,18 @@
 
 #include <AstroDevice.h>
 #include <AstroCamera.h>
-#include <Serial.h>
+#include <BasicGuiderport.h>
 
 namespace astro {
 namespace device {
 namespace gpio {
 
-class GpioGuiderport : public astro::camera::GuiderPort {
+class GpioGuiderport : public astro::camera::BasicGuiderport {
 public:
 	GpioGuiderport(const std::string& devicename);
 	virtual ~GpioGuiderport();
 
-	// accessors
-	virtual uint8_t	active();
-	virtual void	activate(float raplus, float raminus,
-				float declus, float decminus);
+	virtual void	do_activate(uint8_t active);
 };
 
 } // namepace gpio

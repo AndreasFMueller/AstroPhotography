@@ -63,7 +63,7 @@ std::string	GpioLocator::getVersion() const {
 
 std::vector<std::string>	GpioLocator::getDevicelist(
 	DeviceName::device_type device) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve device list");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve device list: %d", device);
 	std::vector<std::string>	names;
 	if (DeviceName::Guiderport != device) {
 		return names;

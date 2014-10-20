@@ -10,23 +10,23 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroDevice.h>
+#include <chrono>
+#include <sstream>
 
 namespace astro {
 namespace device {
 namespace gpio {
 
 GpioGuiderport::GpioGuiderport(const std::string& devicename)
-	: astro::camera::GuiderPort(devicename) {
+	: astro::camera::BasicGuiderport(devicename) {
+	start();
 }
 
 GpioGuiderport::~GpioGuiderport() {
 }
 
-uint8_t	GpioGuiderport::active() {
-}
-
-void	GpioGuiderport::activate(float raplus, float raminus,
-		float decplus, float decminus) {
+void	GpioGuiderport::do_activate(uint8_t active) {
+	BasicGuiderport::do_activate(active);
 }
 
 } // namespace gpio
