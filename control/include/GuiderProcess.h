@@ -10,7 +10,6 @@
 #define _GuiderProcess_h
 
 #include <AstroGuiding.h>
-#include <pthread.h>
 #include <TrackingWork.h>
 #include <DrivingWork.h>
 #include <AstroPersistence.h>

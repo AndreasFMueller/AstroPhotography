@@ -11,7 +11,6 @@
 #include <set>
 #include <map>
 #include <AstroDebug.h>
-#include <pthread.h>
 #include <mutex>
 #include <cstdlib>
 #include <iostream>
@@ -129,24 +128,6 @@ public:
  * This method is very often used when parsing.
  */
 void	absorb(std::istream& in, char c);
-
-/**
- * \brief Locker class
- *
- * We want to make sure the pthread_mutex is unlocked when an exception
- * is thrown, so we have to encapsulate the locking operation in a
- * class that locks when the object is created an unlocks then it is
- * destroyed.
- */
-class PthreadLocker {
-	pthread_mutex_t *_lock;
-	// prevent copying of the locker
-	PthreadLocker(const PthreadLocker& other);
-	PthreadLocker&	operator=(const PthreadLocker other);
-public:
-	PthreadLocker(pthread_mutex_t *lock, bool blocking = true);
-	~PthreadLocker();
-};
 
 /**
  * \brief Mutex locker class

@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroUtils.h>
 #include <stdexcept>
+#include <chrono>
 
 namespace astro {
 namespace thread {
@@ -38,12 +39,11 @@ public:
  * This function uses the RunAccess class to get access to the run method
  * of the thread class handed in as the argument.
  */
-static void	*springboard_main(void *threadbase) {
+static void	springboard_main(void *threadbase) {
 	ThreadBase	*g = (ThreadBase *)threadbase;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function starts");
 	RunAccess(*g).main();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function terminates");
-	return threadbase;
 }
 
 /**
@@ -53,17 +53,8 @@ static void	*springboard_main(void *threadbase) {
  */
 ThreadBase::ThreadBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create new ThreadBase");
-	// mutex
-	pthread_mutexattr_t	mattr;
-	pthread_mutexattr_init(&mattr);
-	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&mutex, &mattr);
-	Lock	lock(&mutex);
-
-	// cond
-	pthread_condattr_t	cattr;
-	pthread_condattr_init(&cattr);
-	pthread_cond_init(&waitcond, &cattr);
+	// mutex initialization
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 
 	// at this point the lock object goes out of scope and thus
 	// unlocks the mutex
@@ -87,8 +78,7 @@ ThreadBase::~ThreadBase() {
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop running thread");
 		stop();
-		void	*result;
-		pthread_join(thread, &result);
+		thread.join();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread has terminated");
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf(
@@ -102,7 +92,7 @@ ThreadBase::~ThreadBase() {
  * \brief find out whether a thread is running
  */
 bool	ThreadBase::isrunning() {
-	Lock	lock(&mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	return _isrunning;
 }
 
@@ -111,7 +101,7 @@ bool	ThreadBase::isrunning() {
  */
 void	ThreadBase::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
-	Lock	lock(&mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 
 	if (isrunning()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "thread already running");
@@ -122,13 +112,7 @@ void	ThreadBase::start() {
 	_isrunning = false;
 
 	// start the thread
-	pthread_attr_t	attr;
-	pthread_attr_init(&attr);
-	if (pthread_create(&thread, &attr, springboard_main, this)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start thread: %s",
-			strerror(errno));
-		throw std::runtime_error("failed to start thread");
-	}
+	thread = std::thread::thread(springboard_main, this);
 
 	// now that the thread is running, we should remember this in the
 	// variable _running variable
@@ -144,8 +128,8 @@ void	ThreadBase::start() {
  * This works by setting the _terminate variable
  */
 void	ThreadBase::stop() {
-	Lock	lock(&mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread.get_id());
 
 	// signal the thread that it should terminate
 	_terminate = true;
@@ -158,25 +142,17 @@ void	ThreadBase::stop() {
  * just have to wait until it is signalled.
  */
 bool	ThreadBase::wait(double timeout) {
-	Lock	lock(&mutex);
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (!isrunning()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"thread has terminated already, no wait needed");
 		return true;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop", thread);
-	double	t = Timer::gettime() + timeout;
-	struct timespec	ts;
-	ts.tv_sec = floor(t);
-	ts.tv_nsec = 1000000000 * (t - floor(t));
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"wait at most until %d.%09d (%f seconds)",
-		ts.tv_sec, ts.tv_nsec, timeout);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop", thread.get_id());
 
-	// wait for the thread function to signal termination
-	int	rc = pthread_cond_timedwait(&waitcond, &mutex, &ts);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete: rc = %d", rc);
-	return (rc == 0);
+	long long	ns = 1000000000 * timeout;
+	return std::cv_status::no_timeout
+		== waitcond.wait_for(lock, std::chrono::nanoseconds(ns));
 }
 
 /**
@@ -199,11 +175,11 @@ void	ThreadBase::run() {
 	
 	// when the main function terminates, we signal this to all
 	// waiting clients
-	pthread_cond_broadcast(&waitcond);
+	waitcond.notify_all();
 
 	// and we remember that we are not running
 	{
-		Lock	lock(&mutex);
+		std::unique_lock<std::recursive_mutex>	lock(mutex);
 		_isrunning = false;
 	}
 }

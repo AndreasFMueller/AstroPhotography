@@ -7,9 +7,9 @@
 #include <AstroLoader.h>
 #include <includes.h>
 #include <iostream>
-#include <pthread.h>
 #include <AstroUtils.h>
 #include <AstroDebug.h>
+#include <mutex>
 
 namespace astro {
 namespace module {
@@ -30,7 +30,7 @@ typedef std::shared_ptr<RepositoryBackend>	RepositoryBackendPtr;
  * ensures that each repository is instantiated only once.
  */
 class Repositories {
-	pthread_mutex_t	mutex;
+	std::mutex	mutex;
 	typedef	std::map<std::string, RepositoryBackendPtr>	backendmap;
 	backendmap	_repositories;
 public:
@@ -42,13 +42,9 @@ public:
 static Repositories	repositories;
 
 Repositories::Repositories() {
-	pthread_mutexattr_t	attr;
-	pthread_mutexattr_init(&attr);
-	pthread_mutex_init(&mutex, &attr);
 }
 
 Repositories::~Repositories() {
-	pthread_mutex_destroy(&mutex);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -90,7 +86,7 @@ RepositoryBackendPtr	Repositories::get(const std::string& path) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "key for empty path is %s",
 			key.c_str());
 	}
-	//PthreadLocker(&mutex);
+	// std::unique_lock(mutex);
 	backendmap::iterator	r = _repositories.find(key);
 	if (r != _repositories.end()) {
 		return r->second;

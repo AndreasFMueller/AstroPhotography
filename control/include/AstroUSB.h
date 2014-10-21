@@ -14,6 +14,9 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #define	CC_VIDEO			0x0e
 
@@ -550,9 +553,10 @@ class IsoTransfer : public Transfer {
 public:
 	std::list<std::string>	packets;
 private:
-	pthread_t	eventthread;
-	pthread_mutex_t	mutex;
-	pthread_cond_t	condition;
+	std::thread	eventthread;
+	std::mutex	mutex;
+	std::unique_lock<std::mutex>	lock;
+	std::condition_variable	condition;
 public:
 	virtual void	callback(libusb_transfer *transfer);
 	virtual void	handlevents();

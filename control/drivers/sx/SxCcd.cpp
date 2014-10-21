@@ -38,12 +38,10 @@ SxCcd::~SxCcd() {
 /**
  * \brief Start Routine of the exposure thread
  */
-void	*start_routine(void *arg) {
+void	start_routine(SxCcd *ccd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure thread");
-	SxCcd	*ccd = (SxCcd *)arg;
 	ccd->getImage0();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end exposure thread");
-	return NULL;
 }
 
 /**
@@ -57,9 +55,7 @@ void	SxCcd::startExposure(const Exposure& exposure) {
 
 	// create a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
-	pthread_attr_t	attr;
-	pthread_attr_init(&attr);
-	pthread_create(&thread, &attr, start_routine, this);
+	thread = std::thread::thread(start_routine, this);
 }
 
 /**
@@ -72,8 +68,7 @@ ImagePtr	SxCcd::getRawImage() {
 	if (state != Exposure::exposed) {
 		throw BadState("no exposure available");
 	}
-	void	*result = NULL;
-	pthread_join(thread, &result);
+	thread.join();
 	state = Exposure::idle;
 	return image;
 }

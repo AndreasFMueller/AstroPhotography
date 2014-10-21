@@ -11,7 +11,6 @@
 
 #include <AstroGuiding.h>
 #include <GuidingProcess.h>
-#include <pthread.h>
 
 using namespace astro::camera;
 using namespace astro::image;

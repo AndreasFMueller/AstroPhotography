@@ -8,7 +8,7 @@
 
 #include <AstroCamera.h>
 #include <includes.h>
-#include <pthread.h>
+#include <mutex>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -63,7 +63,7 @@ private:
 	double	lastexposure;
 
 	// complete the current movement
-	pthread_mutex_t	mutex;
+	std::mutex	mutex;
 	void	complete(movement& mov);
 	void	complete_movement();
 	void	await_exposure();
