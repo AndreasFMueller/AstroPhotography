@@ -29,6 +29,8 @@ using namespace astro::config;
 using namespace astro::project;
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowimages {
 
 void	usage(const char *progname) {
@@ -280,7 +282,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowimages
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowimages::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowimages::main>(argc, argv);
 }

@@ -13,6 +13,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowmount {
 
 bool	await_completion = false;
@@ -257,7 +259,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowmount
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowmount::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowmount::main>(argc, argv);
 }

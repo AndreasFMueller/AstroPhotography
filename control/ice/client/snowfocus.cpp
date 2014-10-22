@@ -22,6 +22,8 @@ using namespace astro::config;
 using namespace astro;
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowfocus {
 
 /**
@@ -387,8 +389,10 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowfocus
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowfocus::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowfocus::main>(argc, argv);
 }
 

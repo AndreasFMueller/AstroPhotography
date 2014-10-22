@@ -15,6 +15,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowflake {
 
 int	main(int argc, char *argv[]) {
@@ -63,7 +65,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowflake
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowflake::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowflake::main>(argc, argv);
 }

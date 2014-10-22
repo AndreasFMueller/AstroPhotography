@@ -20,6 +20,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowguide {
 
 bool	verbose = false;
@@ -575,7 +577,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowguide
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowguide::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowguide::main>(argc, argv);
 }

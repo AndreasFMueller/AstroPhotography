@@ -14,6 +14,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowrepo {
 
 std::string	server("localhost");
@@ -290,7 +292,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowrepo
+} // namespace app
+} // namespace snowstar
 
 int main(int argc, char *argv[]) {
-	return astro::main_function<snowrepo::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowrepo::main>(argc, argv);
 }

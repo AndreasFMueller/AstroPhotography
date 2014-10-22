@@ -14,6 +14,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowscan {
 
 /**
@@ -191,7 +193,9 @@ int	main(int argc, char *argv[]) {
 }
 	
 } // namespace snowscan
+} // namespace app
+} // namespace snowstar
 
 int main(int argc, char *argv[]) {
-	return astro::main_function<snowscan::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowscan::main>(argc, argv);
 }
