@@ -14,10 +14,11 @@
 #include <includes.h>
 #include <algorithm>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::project;
 
-namespace astro {
+namespace astroconfig {
 
 /**
  * \brief Table of options
@@ -362,7 +363,7 @@ int	command_list(const std::vector<std::string>& arguments) {
 /**
  * \brief main method of the astroconfig program
  */
-int	astroconfig_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
@@ -424,8 +425,8 @@ int	astroconfig_main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }
 
-} // namespace astro
+} // namespace astroconfig
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::astroconfig_main>(argc, argv);
+	return astro::main_function<astroconfig::main>(argc, argv);
 }
