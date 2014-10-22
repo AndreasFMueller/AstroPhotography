@@ -30,6 +30,8 @@ using namespace astro::config;
 using namespace astro::project;
 
 namespace astro {
+namespace app {
+namespace getimages {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
@@ -101,7 +103,7 @@ static struct option	longopts[] = {
 /**
  * \brief Main method for the getimages program
  */
-int	getimages_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	unsigned int	nImages = 1;
 	std::string	instrumentname;
 	float	exposuretime = 1.; // default exposure time: 1 second
@@ -304,8 +306,10 @@ int	getimages_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace getimages
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return main_function<astro::getimages_main>(argc, argv);
+	return main_function<astro::app::getimages::main>(argc, argv);
 }

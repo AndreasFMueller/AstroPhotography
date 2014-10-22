@@ -14,6 +14,8 @@
 #include <typeinfo>
 
 namespace astro {
+namespace app {
+namespace fitsheader {
 
 /**
  * \brief Display all headers of a fits file
@@ -100,7 +102,7 @@ void	add_header(fitsfile *fits, const char *key, const char *value,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "header '%s' added", key);
 }
 
-int	fitsheader_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "d")))
 		switch (c) {
@@ -165,10 +167,12 @@ int	fitsheader_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace fitsheader
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::fitsheader_main>(argc, argv);
+	return astro::main_function<astro::app::fitsheader::main>(argc, argv);
 }
 
 

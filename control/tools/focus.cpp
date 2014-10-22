@@ -28,11 +28,13 @@ using namespace astro::image::filter;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace focus {
 
 /**
  * \brief main function for the focus program
  */
-int	focus_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	double	exposuretime = 0.1;
 	unsigned int	cameraid = 0;
@@ -126,8 +128,10 @@ int	focus_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace focus
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::focus_main>(argc, argv);
+	return astro::main_function<astro::app::focus::main>(argc, argv);
 }

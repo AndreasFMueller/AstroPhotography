@@ -16,6 +16,8 @@
 
 using namespace astro::catalog;
 
+namespace astro {
+namespace app {
 namespace buildcatalog {
 
 int	main(int argc, char *argv[]) {
@@ -138,7 +140,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace buildcatalog
+} // namespace app
+} // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<buildcatalog::main>(argc, argv);
+	return astro::main_function<astro::app::buildcatalog::main>(argc, argv);
 }

@@ -21,6 +21,8 @@ using namespace astro::calibration;
 using namespace astro::interpolation;
 using namespace astro::camera;
 
+namespace astro {
+namespace app {
 namespace calibrate {
 
 /**
@@ -162,8 +164,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace calibrate
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<calibrate::main>(argc, argv);
+	return astro::main_function<astro::app::calibrate::main>(argc, argv);
 }

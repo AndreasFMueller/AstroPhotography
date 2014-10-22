@@ -30,6 +30,8 @@ using namespace astro::task;
 using namespace astro::callback;
 
 namespace astro {
+namespace app {
+namespace imageloop {
 
 /**
  * \brief Usage of the imageloop program
@@ -242,7 +244,7 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 /**
  * \brief Main function for the imageloop program
  */
-int	imageloop_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	int	c;
@@ -424,8 +426,10 @@ int	imageloop_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imageloop
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return main_function<astro::imageloop_main>(argc, argv);
+	return main_function<astro::app::imageloop::main>(argc, argv);
 }

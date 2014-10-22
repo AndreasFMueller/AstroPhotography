@@ -14,6 +14,7 @@
 #include <AstroConfig.h>
 #include <AstroProject.h>
 
+using namespace astro;
 using namespace astro::image;
 using namespace astro::image::filter;
 using namespace astro::project;
@@ -21,6 +22,8 @@ using namespace astro::config;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace imageinfo {
 
 static std::string	reponame;
 
@@ -155,7 +158,7 @@ static struct option    longopts[] = {
 /**
  * \brief main function
  */
-int	imageinfo_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dr:", longopts,
@@ -199,8 +202,10 @@ int	imageinfo_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imageinfo
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::imageinfo_main>(argc, argv);
+	return astro::main_function<astro::app::imageinfo::main>(argc, argv);
 }

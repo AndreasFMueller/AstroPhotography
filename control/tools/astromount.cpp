@@ -16,7 +16,9 @@ using namespace astro::config;
 using namespace astro::device;
 using namespace astro::module;
 
-namespace astromount {
+namespace astro {
+namespace app {
+namespace mount {
 
 static bool	dryrun = false;
 static bool	decimal = false;
@@ -283,8 +285,10 @@ int main(int argc, char *argv[]) {
 	throw std::runtime_error("unknown command");
 }
 
-} // namespace astromount
+} // namespace mount
+} // namespace app
+} // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astromount::main>(argc, argv);
+	return astro::main_function<astro::app::mount::main>(argc, argv);
 }

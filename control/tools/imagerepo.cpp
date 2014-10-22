@@ -15,12 +15,15 @@
 #include <AstroUtils.h>
 #include <AstroIO.h>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::project;
 using namespace astro::io;
 using namespace astro::camera;
 
 namespace astro {
+namespace app {
+namespace imagerepo {
 
 bool	verbose = false;
 
@@ -293,7 +296,7 @@ static struct option	longopts[] = {
 /**
  * \brief Main function of the imagerepo program
  */
-int	imagerepo_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	std::string	configfile;
 	int	c;
 	int	longindex;
@@ -366,8 +369,10 @@ int	imagerepo_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imagerepo
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::imagerepo_main>(argc, argv);
+	return astro::main_function<astro::app::imagerepo::main>(argc, argv);
 }

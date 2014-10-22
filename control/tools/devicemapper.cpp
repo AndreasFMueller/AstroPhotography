@@ -19,6 +19,8 @@ using namespace astro::module;
 using namespace astro::device;
 
 namespace astro {
+namespace app {
+namespace devicemapper {
 
 std::string	servername;
 bool	verbose = false;
@@ -224,7 +226,7 @@ static struct option	longopts[] = {
 /**
  * \brief The main method of the devicemapper command
  */
-int	devicemapper_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dhs:t:v", longopts,
@@ -284,8 +286,10 @@ int	devicemapper_main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }
 
+} // namespace devicemapper
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::devicemapper_main>(argc, argv);
+	return astro::main_function<astro::app::devicemapper::main>(argc, argv);
 }

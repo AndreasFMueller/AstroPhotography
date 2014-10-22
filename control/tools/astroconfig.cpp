@@ -18,7 +18,9 @@ using namespace astro;
 using namespace astro::config;
 using namespace astro::project;
 
-namespace astroconfig {
+namespace astro {
+namespace app {
+namespace config {
 
 /**
  * \brief Table of options
@@ -425,8 +427,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }
 
-} // namespace astroconfig
+} // namespace config
+} // namespace app
+} // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astroconfig::main>(argc, argv);
+	return astro::main_function<astro::app::config::main>(argc, argv);
 }

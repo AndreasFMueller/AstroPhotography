@@ -11,9 +11,12 @@
 #include <AstroCatalog.h>
 #include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::catalog;
 
 namespace astro {
+namespace app {
+namespace starcatalog {
 
 RaDec	center(0, 0);
 Angle	rawidth(1 * M_PI / 180);
@@ -50,7 +53,7 @@ void	areamain(Catalog& catalog, double minmag) {
 /**
  * \brief Main function for the starcatalog program
  */
-int	starcatalog_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	std::string	path("/usr/local/starcatalogs");
 	while (EOF != (c = getopt(argc, argv, "dp:m:R:D:H:W:")))
@@ -104,9 +107,10 @@ int	starcatalog_main(int argc, char *argv[]) {
 	throw std::runtime_error("unknown command '" + command + "'");
 }
 
+} // namespace starcatalog
+} // namespace app
 } // namespace astro
 
-
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::starcatalog_main>(argc, argv);
+	return astro::main_function<astro::app::starcatalog::main>(argc, argv);
 }

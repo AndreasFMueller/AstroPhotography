@@ -13,6 +13,8 @@
 
 using namespace astro;
 
+namespace astro {
+namespace app {
 namespace guiderport {
 
 void	usage(const char *progname) {
@@ -133,8 +135,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
-} // guiderport
+} // namespace guiderport
+} // namespace app
+} // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<guiderport::main>(argc, argv);
+	return astro::main_function<astro::app::guiderport::main>(argc, argv);
 }

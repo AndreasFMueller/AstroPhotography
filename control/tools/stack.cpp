@@ -9,11 +9,14 @@
 #include <AstroIO.h>
 #include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::image;
 using namespace astro::image::stacking;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace stack {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ -dh? ] [ -o outfile ] files..." << std::endl;
@@ -24,7 +27,7 @@ void	usage(const char *progname) {
 	std::cout << " -h,-?            display this help" << std::endl;
 }
 
-int	stack_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	const char	*outfilename = NULL;
 	while (EOF != (c = getopt(argc, argv, "do:")))
@@ -68,8 +71,10 @@ int	stack_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace stack
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::stack_main>(argc, argv);
+	return astro::main_function<astro::app::stack::main>(argc, argv);
 }
