@@ -21,7 +21,7 @@ using namespace astro::calibration;
 using namespace astro::interpolation;
 using namespace astro::camera;
 
-namespace astro {
+namespace calibrate {
 
 /**
  * \brief usage
@@ -47,7 +47,7 @@ void	usage(const char *progname) {
 /**
  * \brief Main function in astro namespace
  */
-int	calibrate_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	const char	*darkfilename = NULL;
 	const char	*flatfilename = NULL;
@@ -165,5 +165,5 @@ int	calibrate_main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::calibrate_main>(argc, argv);
+	return astro::main_function<calibrate::main>(argc, argv);
 }
