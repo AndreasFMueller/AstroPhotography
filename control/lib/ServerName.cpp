@@ -45,4 +45,12 @@ ServerName::operator	std::string() const {
 	return stringprintf("%s:%hu", _host.c_str(), _port);
 }
 
+std::string	ServerName::connect(const std::string& service) const {
+	std::string	connectstring = stringprintf("%s:default -h %s -p %hu",
+		service.c_str(), host().c_str(), port());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to %s",
+		connectstring.c_str());
+	return connectstring;
+}
+
 } // namespace astro

@@ -499,11 +499,8 @@ int	main(int argc, char *argv[]) {
 		descriptor.guiderportname.c_str());
 
 	// connect to the guider factory of a remote server
-	std::string     connectstring
-                = astro::stringprintf("Guiders:default -h %s -p %hu",
-                        servername.host().c_str(), servername.port());
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-        Ice::ObjectPrx  base = ic->stringToProxy(connectstring);
+        Ice::ObjectPrx  base = ic->stringToProxy(servername.connect("Guiders"));
 	GuiderFactoryPrx	guiderfactory
 		= GuiderFactoryPrx::checkedCast(base);
 

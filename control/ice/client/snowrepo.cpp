@@ -226,16 +226,12 @@ int	main(int argc, char *argv[]) {
 	// all other commands need a remote Repositories reference
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	astro::ServerName	servername(server);
-	std::string	connectstring
-		= astro::stringprintf("Repositories:default -h %s -p %hu",
-			servername.host().c_str(), servername.port());
-	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	Ice::ObjectPrx	base = ic->stringToProxy(
+					servername.connect("Repositories"));
 	RepositoriesPrx	repositories = RepositoriesPrx::checkedCast(base);
 	if (!repositories) {
 		throw std::runtime_error("no repositories proxy");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "connected to %s",
-		connectstring.c_str());
 
 	// list command needs nothing more
 	if (command == "list") {

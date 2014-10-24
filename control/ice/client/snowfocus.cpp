@@ -263,10 +263,8 @@ int	main(int argc, char *argv[]) {
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	astro::ServerName	servername
 		= instrument.servername(astro::DeviceName::Ccd);
-	std::string	connectstring
-		= astro::stringprintf("FocusingFactory:default -h %s -p %hu",
-			servername.host().c_str(), servername.port());
-	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	Ice::ObjectPrx	base = ic->stringToProxy(
+				servername.connect("FocusingFactory"));
 	FocusingFactoryPrx	focusingfactory
 		= FocusingFactoryPrx::checkedCast(base);
 

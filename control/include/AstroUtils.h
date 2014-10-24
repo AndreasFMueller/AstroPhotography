@@ -267,6 +267,7 @@ class ServerName {
 public:
 	const std::string& host() const { return _host; }
 	unsigned short	port() const { return _port; }
+	std::string	connect(const std::string& service) const;
 
 	// constructor
 	ServerName();

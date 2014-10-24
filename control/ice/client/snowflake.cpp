@@ -25,16 +25,19 @@ int	main(int argc, char *argv[]) {
 
 	// parse command line
 	int	c;
-	std::string	modulename;
-	while (EOF != (c = getopt(argc, argv, "dm:")))
+	astro::ServerName	servername("localhost");
+	while (EOF != (c = getopt(argc, argv, "ds:")))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 's':
+			servername = astro::ServerName(optarg);
+			break;
 		}
 
 	Ice::ObjectPrx	base
-		= ic->stringToProxy("Tasks:default -h othello -p 10000");
+		= ic->stringToProxy(servername.connect("Tasks"));
 	snowstar::TaskQueuePrx	tasks = TaskQueuePrx::checkedCast(base);
 	if (!tasks) {
 		throw "invalid proxy";
