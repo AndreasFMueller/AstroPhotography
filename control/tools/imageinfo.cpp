@@ -100,10 +100,10 @@ int	show_imagefile(const std::string& filename) {
  */
 int	show_imagerepo(const std::string& argument) {
 	try {
-		ImageRepo	repo = Configuration::get()->repo(reponame);
+		ImageRepoPtr	repo = Configuration::get()->repo(reponame);
 		long	imageid = std::stol(argument);
 		std::cout << imageid << ": ";
-		ImagePtr	image = repo.getImage(imageid);
+		ImagePtr	image = repo->getImage(imageid);
 		return show_imageinfo(image);
 	} catch (std::exception& x) {
 		std::cerr << "could not process " << argument;

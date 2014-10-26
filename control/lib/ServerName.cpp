@@ -53,4 +53,12 @@ std::string	ServerName::connect(const std::string& service) const {
 	return connectstring;
 }
 
+bool	ServerName::isDefault() const {
+	return isDefaultPort() && (_host == std::string("localhost"));
+}
+
+bool	ServerName::isDefaultPort() const {
+	return _port == 10000;
+}
+
 } // namespace astro

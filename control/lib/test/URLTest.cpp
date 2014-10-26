@@ -41,12 +41,20 @@ void	URLTest::tearDown() {
 
 void	URLTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	URL	url("method:bla1/bla2/bla3");
-	CPPUNIT_ASSERT(url.size() == 3);
-	CPPUNIT_ASSERT(url.method() == "method");
-	CPPUNIT_ASSERT(url[0] == "bla1");
-	CPPUNIT_ASSERT(url[1] == "bla2");
-	CPPUNIT_ASSERT(url[2] == "bla3");
+	URL	url1("method://host:4711/path1/path2/path3");
+	std::string	s1 = (std::string)url1;
+	CPPUNIT_ASSERT(url1.method() == "method");
+	CPPUNIT_ASSERT(url1.port() == 4711);
+	CPPUNIT_ASSERT(url1.host() == "host");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "url1: %s", s1.c_str());
+	URL	url2("method:bla1/bla2/bla3");
+	std::string	s2(url2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "url2: %s", s2.c_str());
+	CPPUNIT_ASSERT(url2.size() == 3);
+	CPPUNIT_ASSERT(url2.method() == "method");
+	CPPUNIT_ASSERT(url2[0] == "bla1");
+	CPPUNIT_ASSERT(url2[1] == "bla2");
+	CPPUNIT_ASSERT(url2[2] == "bla3");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 

@@ -193,7 +193,7 @@ int	main(int argc, char *argv[]) {
 	if (0 == reponame.size()) {
 		throw std::runtime_error("repository name not set");
 	}
-	ImageRepo	repo = config->repo(reponame);
+	ImageRepoPtr	repo = config->repo(reponame);
 
 	// get the devices
 	CameraPtr	camera = instrument->camera();
@@ -299,7 +299,7 @@ int	main(int argc, char *argv[]) {
 		(*imageptr)->setMetadata(
 			FITSKeywords::meta(std::string("INSTRUME"),
 				instrument->name()));
-		repo.save(*imageptr);
+		repo->save(*imageptr);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
 

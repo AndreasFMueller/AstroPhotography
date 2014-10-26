@@ -247,7 +247,18 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 			std::cerr << std::endl;
 			return EXIT_FAILURE;
 		}
-		configuration->addrepo(arguments[2], arguments[3]);
+		std::string	reponame = arguments[2];
+		std::string	directory = arguments[3];
+		struct stat	sb;
+		if (stat(reponame.c_str(), &sb) < 0) {
+			if (mkdir(directory.c_str(), 0777) < 0) {
+				std::string	msg = astro::stringprintf(
+					"cannot create directory %s: %s",
+					directory.c_str(), strerror(errno));
+				throw std::runtime_error(msg);
+			}
+		}
+		configuration->addrepo(reponame, directory);
 		return EXIT_SUCCESS;
 	}
 	if (arguments[1] == "list") {

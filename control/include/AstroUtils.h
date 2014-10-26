@@ -109,20 +109,6 @@ container&	split(const std::string& data, const std::string& separator,
 }
 
 /**
- * \brief URL related stuff
- */
-class URL : public std::vector<std::string> {
-	std::string	_method;
-public:
-	const std::string&	method() const { return _method; }
-public:
-	URL(const std::string& urlstring);
-	operator std::string() const;
-	static std::string	encode(const std::string& in);
-	static std::string	decode(const std::string& in);
-};
-
-/**
  * \brief Method to absorb characters from a stream
  *
  * This method is very often used when parsing.
@@ -247,6 +233,7 @@ std::ostream&	operator<<(std::ostream& out, const UUID& uuid);
  */
 class Path : public std::vector<std::string> {
 public:
+	Path() { }
 	Path(const std::string& path);
 	std::string	basename() const;
 	std::string	dirname() const;
@@ -263,10 +250,15 @@ std::string	demangle(const std::string& mangled_name) throw();
  */
 class ServerName {
 	std::string	_host;
-	unsigned short	_port;
 public:
 	const std::string& host() const { return _host; }
+	void	host(const std::string& h) { _host = h; }
+private:
+	unsigned short	_port;
+public:
 	unsigned short	port() const { return _port; }
+	void	port(const unsigned short p) { _port = p; }
+public:
 	std::string	connect(const std::string& service) const;
 
 	// constructor
@@ -274,8 +266,26 @@ public:
 	ServerName(const std::string& _host, unsigned short port);
 	ServerName(const std::string& servername);
 
+	bool	isDefault() const;
+	bool	isDefaultPort() const;
 	operator	std::string() const;
 };
+
+/**
+ * \brief URL related stuff
+ */
+class URL : public ServerName, public Path {
+	std::string	_method;
+public:
+	const std::string&	method() const { return _method; }
+public:
+	URL(const std::string& urlstring);
+	operator std::string() const;
+	static std::string	encode(const std::string& in);
+	static std::string	decode(const std::string& in);
+	std::string	path() const;
+};
+
 
 /**
  * \brief A template to unify what we do in the main function of all programs

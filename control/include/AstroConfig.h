@@ -377,7 +377,7 @@ static void	set_default(const std::string& filename);
 	virtual std::list<ConfigurationEntry>	globallist() = 0;
 
 	// image repository access
-	virtual astro::project::ImageRepo	repo(const std::string& name) = 0;
+	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory) = 0;
 	virtual void	removerepo(const std::string& name) = 0;
