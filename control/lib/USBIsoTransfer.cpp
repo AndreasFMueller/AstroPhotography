@@ -187,7 +187,7 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	// the mutex is locked, it will not start working just yet, only
 	// when the mutex is unlocked, that thread will be released
 	try {
-		eventthread = std::thread::thread(isotransfer_event_thread, this);
+		eventthread = std::thread(isotransfer_event_thread, this);
 	} catch (...) {
 		throw USBError("cannot create event handling thread");
 	}

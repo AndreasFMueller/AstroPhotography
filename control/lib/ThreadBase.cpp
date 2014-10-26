@@ -112,7 +112,7 @@ void	ThreadBase::start() {
 	_isrunning = false;
 
 	// start the thread
-	thread = std::thread::thread(springboard_main, this);
+	thread = std::thread(springboard_main, this);
 
 	// now that the thread is running, we should remember this in the
 	// variable _running variable

@@ -55,7 +55,7 @@ void	SxCcd::startExposure(const Exposure& exposure) {
 
 	// create a new thread
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a new thread");
-	thread = std::thread::thread(start_routine, this);
+	thread = std::thread(start_routine, this);
 }
 
 /**

@@ -105,7 +105,7 @@ Linux)
 	./configure --prefix=`pwd`/root ${commonflags}
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++0x"
+	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
 	./configure --prefix=`pwd`/root ${commonflags} --enable-ice
