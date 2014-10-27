@@ -14,10 +14,13 @@
 #include <includes.h>
 #include <algorithm>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::project;
 
 namespace astro {
+namespace app {
+namespace config {
 
 /**
  * \brief Table of options
@@ -244,7 +247,18 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 			std::cerr << std::endl;
 			return EXIT_FAILURE;
 		}
-		configuration->addrepo(arguments[2], arguments[3]);
+		std::string	reponame = arguments[2];
+		std::string	directory = arguments[3];
+		struct stat	sb;
+		if (stat(reponame.c_str(), &sb) < 0) {
+			if (mkdir(directory.c_str(), 0777) < 0) {
+				std::string	msg = astro::stringprintf(
+					"cannot create directory %s: %s",
+					directory.c_str(), strerror(errno));
+				throw std::runtime_error(msg);
+			}
+		}
+		configuration->addrepo(reponame, directory);
 		return EXIT_SUCCESS;
 	}
 	if (arguments[1] == "list") {
@@ -362,7 +376,7 @@ int	command_list(const std::vector<std::string>& arguments) {
 /**
  * \brief main method of the astroconfig program
  */
-int	astroconfig_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
@@ -424,8 +438,10 @@ int	astroconfig_main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
 }
 
+} // namespace config
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::astroconfig_main>(argc, argv);
+	return astro::main_function<astro::app::config::main>(argc, argv);
 }

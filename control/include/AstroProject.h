@@ -198,16 +198,18 @@ public:
 	std::set<ImageEnvelope>	get(const ImageSpec& spec);
 	std::set<UUID>	getUUIDs(const std::string& condition);
 };
+typedef std::shared_ptr<ImageRepo>	ImageRepoPtr;
 
 /**
  * \brief A class that implements a replication from one repo to another
  */
 class RepoReplicator {
-	std::set<long>	uuid2ids(ImageRepo& repo, const std::set<UUID>& uuids);
+	std::set<long>	uuid2ids(ImageRepoPtr repo, const std::set<UUID>& uuids);
 public:
 	RepoReplicator();
-	int	replicate(ImageRepo& from, ImageRepo& to, bool remove = false);
-	int	synchronize(ImageRepo& repo1, ImageRepo& repo2);
+	int	replicate(ImageRepoPtr from, ImageRepoPtr to,
+			bool remove = false);
+	int	synchronize(ImageRepoPtr repo1, ImageRepoPtr repo2);
 };
 
 /**

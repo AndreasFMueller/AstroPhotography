@@ -133,6 +133,9 @@ SimpleImage	convertsimple(astro::image::ImagePtr image) {
 	return result;
 }
 
+/**
+ * \brief auxiliary function ot create a temporary file
+ */
 static std::string	tempfilename() {
 	char	*tmpdir = "/tmp";
 	if (NULL != getenv("TMPDIR")) {

@@ -46,7 +46,7 @@ Ice::ObjectPtr	RepositoryLocator::locate(const Ice::Current& current,
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 	Ice::ObjectPtr	repositoryptr = new RepositoryI(
-		config->repo(repositoryname));
+		*config->repo(repositoryname));
 	add(repositoryname, repositoryptr);
 	return repositoryptr;
 }

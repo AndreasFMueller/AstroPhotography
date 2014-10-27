@@ -6,44 +6,37 @@
 #ifndef _Thread_h
 #define _Thread_h
 
-#include <pthread.h>
 #include <AstroDebug.h>
 #include <includes.h>
 #include <memory>
 #include <AstroFormat.h>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
 
 namespace astro {
 namespace thread {
 
-/**
- * \brief Locking class to make locking more automatic
- */
-class Lock {
-	pthread_mutex_t	*_mutex;
-public:
-	Lock(pthread_mutex_t *mutex) : _mutex(mutex) {
-		if (pthread_mutex_lock(_mutex)) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "locking fails: %s",
-				strerror(errno));
-		}
-	}
-	~Lock() {
-		if (pthread_mutex_unlock(_mutex)) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "");
-		}
-	}
-};
-
+// the RunAccess class is used to work around the access restrictions to
+// the run method. We want to be sure that only ThreadBase class can access
+// the run method, but the thread main function must have access, so we
+// mediate access to it through the RunAccess class, which will be a friend
+// of the ThreadBase class.
 class RunAccess;
 
 /**
  * \brief Class encapsulating the thread stuff
  */
 class ThreadBase {
-	pthread_t	thread;
+	// default construction of the thread does not start execution
+	std::thread	thread;
 private:
-	pthread_cond_t	waitcond; // waiting
-	pthread_mutex_t	mutex;
+	// the condition variable is used for waiting on the thread to
+	// complete. If one wants to wait for the thread to complete,
+	// one waits on the condition variable until the run method signals
+	// that main has terminated.
+	std::condition_variable_any	waitcond;
+	std::recursive_mutex	mutex;
 protected:
 	volatile bool	_isrunning;
 public:

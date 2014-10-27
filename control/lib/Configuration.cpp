@@ -46,7 +46,7 @@ public:
 	virtual std::list<ConfigurationEntry>	globallist();
 
 	// access to repositories
-	virtual ImageRepo	repo(const std::string& name);
+	virtual ImageRepoPtr	repo(const std::string& name);
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory);
 	virtual void	removerepo(const std::string& name);
@@ -179,8 +179,8 @@ std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
 /**
  * \brief get a repository
  */
-ImageRepo	ConfigurationBackend::repo(const std::string& name) {
-	return ImageRepoTable(_database).get(name);
+ImageRepoPtr	ConfigurationBackend::repo(const std::string& name) {
+	return ImageRepoPtr(new ImageRepo(ImageRepoTable(_database).get(name)));
 }
 
 /**

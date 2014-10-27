@@ -17,6 +17,7 @@
 #endif /* ENABLE_CORBA */
 #include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::camera;
 using namespace astro::image;
 using namespace astro::module;
@@ -28,8 +29,10 @@ using namespace astro::calibration;
 using namespace astro::interpolation;
 
 namespace astro {
+namespace app {
+namespace focustest {
 
-int	focustest_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 
 	int	c;
 	const char	*cameramodulename = "simulator";
@@ -196,8 +199,10 @@ int	focustest_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace focustest
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::focustest_main>(argc, argv);
+	return astro::main_function<astro::app::focustest::main>(argc, argv);
 }

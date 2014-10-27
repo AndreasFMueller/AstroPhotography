@@ -8,7 +8,6 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <includes.h>
-#include <pthread.h>
 
 using namespace astro::camera;
 using namespace astro::device;

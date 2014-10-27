@@ -26,5 +26,5 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	FocusWork.h FocusCompute.h Serial.h \
 	MappedFile.h Ucac4.h Tycho2.h BSC.h Hipparcos.h NGCIC.h \
 	CatalogBackend.h ImageRepoTables.h ImageReposTable.h \
-	ProjectTable.h GlobalTable.h
+	ProjectTable.h GlobalTable.h BasicGuiderport.h
 

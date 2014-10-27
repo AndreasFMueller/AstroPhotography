@@ -62,7 +62,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	AngleTest.cpp
+	URLTest.cpp
+#	AngleTest.cpp
 #	BinningTest.cpp
 #	PathTest.cpp
 #	InstrumentTest.cpp

@@ -15,12 +15,15 @@
 #include <AstroUtils.h>
 #include <AstroIO.h>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::project;
 using namespace astro::io;
 using namespace astro::camera;
 
 namespace astro {
+namespace app {
+namespace imagerepo {
 
 bool	verbose = false;
 
@@ -36,7 +39,7 @@ int	command_add(const std::string& reponame,
 	std::string	imagefilename = arguments[2];
 	FITSin	in(imagefilename);
 	ImagePtr	image = in.read();
-	Configuration::get()->repo(reponame).save(image);
+	Configuration::get()->repo(reponame)->save(image);
 	return EXIT_SUCCESS;
 }	
 
@@ -44,8 +47,8 @@ int	command_add(const std::string& reponame,
  * \brief command to list the contents of a repository
  */
 int	command_list(const std::string& reponame) {
-	ImageRepo	repo = Configuration::get()->repo(reponame);
-	std::set<ImageEnvelope>	images = repo.get(ImageSpec());
+	ImageRepoPtr	repo = Configuration::get()->repo(reponame);
+	std::set<ImageEnvelope>	images = repo->get(ImageSpec());
 	if (images.size() == 0) {
 		return EXIT_SUCCESS;
 	}
@@ -97,7 +100,7 @@ int	command_get(const std::string& reponame,
 	int	id = std::stol(arguments[2]);
 	std::string	filename = arguments[3];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "extract image to %s", filename.c_str());
-	ImagePtr	image = Configuration::get()->repo(reponame).getImage(id);
+	ImagePtr	image = Configuration::get()->repo(reponame)->getImage(id);
 	FITSout	out(filename);
 	out.setPrecious(false);
 	out.write(image);
@@ -112,10 +115,10 @@ int	command_remove(const std::string& reponame,
 	if (arguments.size() < 3) {
 		throw std::runtime_error("missing id argument");
 	}
-	for (int i = 2; i < arguments.size(); i++) {
+	for (unsigned int i = 2; i < arguments.size(); i++) {
 		int	id = std::stol(arguments[i]);
-		ImageRepo	repo = Configuration::get()->repo(reponame);
-		repo.remove(id);
+		ImageRepoPtr	repo = Configuration::get()->repo(reponame);
+		repo->remove(id);
 	}
 	return EXIT_SUCCESS;
 }
@@ -128,16 +131,16 @@ int	copy_or_move(const std::string& reponame,
 	if (arguments.size() < 4) {
 		throw std::runtime_error("not enough arguments for 'copy'");
 	}
-	ImageRepo	srcrepo = Configuration::get()->repo(reponame);
+	ImageRepoPtr	srcrepo = Configuration::get()->repo(reponame);
 	int	id = std::stol(arguments[2]);
-	ImagePtr	image = srcrepo.getImage(id);
+	ImagePtr	image = srcrepo->getImage(id);
 	std::string	targetrepo = arguments[3];
-	Configuration::get()->repo(targetrepo).save(image);
+	Configuration::get()->repo(targetrepo)->save(image);
 	if (copy) {
 		return EXIT_SUCCESS;
 	}
 	// move operation also deletes the image from the source repo
-	srcrepo.remove(id);
+	srcrepo->remove(id);
 	return EXIT_SUCCESS;
 }
 
@@ -168,8 +171,8 @@ int	command_replicate(const std::string& srcreponame,
 	}
 	std::string	dstreponame = arguments[2];
 	RepoReplicator	replicator;
-	ImageRepo	srcrepo = Configuration::get()->repo(srcreponame);
-	ImageRepo	dstrepo = Configuration::get()->repo(dstreponame);
+	ImageRepoPtr	srcrepo = Configuration::get()->repo(srcreponame);
+	ImageRepoPtr	dstrepo = Configuration::get()->repo(dstreponame);
 	int	count = replicator.replicate(srcrepo, dstrepo);
 	std::cout << "files replicated: " << count << std::endl;
 	return EXIT_SUCCESS;
@@ -185,8 +188,8 @@ int	command_synchronize(const std::string& repo1name,
 	}
 	std::string	repo2name = arguments[2];
 	RepoReplicator	replicator;
-	ImageRepo	repo1 = Configuration::get()->repo(repo1name);
-	ImageRepo	repo2 = Configuration::get()->repo(repo2name);
+	ImageRepoPtr	repo1 = Configuration::get()->repo(repo1name);
+	ImageRepoPtr	repo2 = Configuration::get()->repo(repo2name);
 	int	count = replicator.replicate(repo1, repo2);
 	std::cout << "files synchronized: " << count << std::endl;
 	return EXIT_SUCCESS;
@@ -200,10 +203,10 @@ int	command_show(const std::string& reponame,
 	if (arguments.size() < 3) {
 		throw std::runtime_error("not enough arguments for 'show'");
 	}
-	for (int i = 2; i < arguments.size(); i++) {
+	for (unsigned int i = 2; i < arguments.size(); i++) {
 		int	id = std::stol(arguments[i]);
-		ImageRepo	repo = Configuration::get()->repo(reponame);
-		ImageEnvelope	image = repo.getEnvelope(id);
+		ImageRepoPtr	repo = Configuration::get()->repo(reponame);
+		ImageEnvelope	image = repo->getEnvelope(id);
 		std::cout << "id:              "
 			<< image.id() << std::endl;
 		std::cout << "filename:        "
@@ -293,7 +296,7 @@ static struct option	longopts[] = {
 /**
  * \brief Main function of the imagerepo program
  */
-int	imagerepo_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	std::string	configfile;
 	int	c;
 	int	longindex;
@@ -366,8 +369,10 @@ int	imagerepo_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imagerepo
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::imagerepo_main>(argc, argv);
+	return astro::main_function<astro::app::imagerepo::main>(argc, argv);
 }

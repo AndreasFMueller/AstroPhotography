@@ -25,7 +25,7 @@ uvc_files =
 endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
-	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
+	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
 	AttributeValuePairs.cpp UUID.cpp Path.cpp demangle.cpp ServerName.cpp \
 	URL.cpp DeviceName.cpp Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
@@ -55,6 +55,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	AdaptiveOptics.cpp \
 	Mount.cpp \
 	Serial.cpp \
+	BasicGuiderport.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
 	FITSKeywords.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \

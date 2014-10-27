@@ -14,9 +14,12 @@
 #include <AstroFormat.h>
 #include <AstroIO.h>
 
+using namespace astro;
 using namespace astro::focusing;
 
 namespace astro {
+namespace app {
+namespace focusing {
 
 class FocusingCallback : public astro::callback::Callback {
 	std::string	_prefix;
@@ -50,7 +53,7 @@ public:
 	}
 };
 
-int	focusing_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	unsigned short	min = 24000;
 	unsigned short	max = 40000;
@@ -173,8 +176,10 @@ int	focusing_main(int argc, char *argv[]) {
 	return (Focusing::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+} // namespace focusing
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::focusing_main>(argc, argv);
+	return astro::main_function<astro::app::focusing::main>(argc, argv);
 }

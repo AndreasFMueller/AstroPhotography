@@ -22,6 +22,8 @@ using namespace astro::config;
 using namespace astro;
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowfocus {
 
 /**
@@ -261,10 +263,8 @@ int	main(int argc, char *argv[]) {
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	astro::ServerName	servername
 		= instrument.servername(astro::DeviceName::Ccd);
-	std::string	connectstring
-		= astro::stringprintf("FocusingFactory:default -h %s -p %hu",
-			servername.host().c_str(), servername.port());
-	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	Ice::ObjectPrx	base = ic->stringToProxy(
+				servername.connect("FocusingFactory"));
 	FocusingFactoryPrx	focusingfactory
 		= FocusingFactoryPrx::checkedCast(base);
 
@@ -387,8 +387,10 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowfocus
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowfocus::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowfocus::main>(argc, argv);
 }
 

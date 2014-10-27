@@ -14,10 +14,13 @@
 #include <InstrumentTables.h>
 #include <algorithm>
 
+using namespace astro;
 using namespace astro::config;
 using namespace astro::persistence;
 
 namespace astro {
+namespace app {
+namespace instrument {
 
 /**
  * \brief Table of options for the astroinstrument
@@ -399,7 +402,7 @@ int	commands(const std::vector<std::string>& arguments) {
 /**
  * \brief main method of the astroinstrument command
  */
-int	instrument_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
@@ -431,8 +434,10 @@ int	instrument_main(int argc, char *argv[]) {
 	return commands(arguments);
 }
 
+} // namespace instrument
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::instrument_main>(argc, argv);
+	return astro::main_function<astro::app::instrument::main>(argc, argv);
 }

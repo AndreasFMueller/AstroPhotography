@@ -13,6 +13,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowmount {
 
 bool	await_completion = false;
@@ -205,11 +207,8 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// we need a remote device proxy for all other commands
-	std::string	connectstring
-		= astro::stringprintf("Devices:default -h %s -p %hu",
-			servername.host().c_str(), servername.port());
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-	Ice::ObjectPrx	base = ic->stringToProxy(connectstring);
+	Ice::ObjectPrx	base = ic->stringToProxy(servername.connect("Devices"));
 	DevicesPrx	devices = DevicesPrx::checkedCast(base);
 
 	// handle the list command
@@ -257,7 +256,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowmount
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowmount::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowmount::main>(argc, argv);
 }

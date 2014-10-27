@@ -29,6 +29,8 @@ using namespace astro::config;
 using namespace astro::project;
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowimages {
 
 void	usage(const char *progname) {
@@ -192,7 +194,7 @@ int	main(int argc, char *argv[]) {
 	if (0 == reponame.size()) {
 		throw std::runtime_error("repository name not set");
 	}
-	ImageRepo	repo = config->repo(reponame);
+	ImageRepoPtr	repo = config->repo(reponame);
 
 	// get the devices
 	snowstar::CameraPrx	camera = instrument.camera_proxy();
@@ -266,7 +268,7 @@ int	main(int argc, char *argv[]) {
 		}
 
 		// write the image to the repository
-		repo.save(imageptr);
+		repo->save(imageptr);
 
 		// get rid of the image on the server side
 		image->remove();
@@ -280,7 +282,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowimages
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowimages::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowimages::main>(argc, argv);
 }

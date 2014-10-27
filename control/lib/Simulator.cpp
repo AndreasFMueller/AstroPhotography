@@ -47,13 +47,9 @@ SimCamera::SimCamera() : Camera(cameraname("guidesim")) {
 	// neither movement nor exposures are active
 	exposurestart = -1;
 	lastexposure = Timer::gettime();
-
-	// create a mutex to protect the movement structures
-	pthread_mutex_init(&mutex, NULL);
 }
 
 SimCamera::~SimCamera() {
-	pthread_mutex_destroy(&mutex);
 }
 
 CcdPtr	SimCamera::getCcd0(size_t id) {
@@ -121,7 +117,7 @@ void	SimCamera::activate(float raplus, float raminus,
 		"dec+ = %.3f, dec- = %.3f", raplus, raminus, decplus, decminus);
 
 	// ensure noboy else can change the structures
-	pthread_mutex_lock(&mutex);
+	std::unique_lock<std::mutex>	lock(mutex);
 
 	// complete any pending movement
 	complete_movement();
@@ -165,7 +161,6 @@ void	SimCamera::activate(float raplus, float raminus,
 				dec.duration);
 		}
 	}
-	pthread_mutex_unlock(&mutex);
 }
 
 void	SimCamera::startExposure(const Exposure& _exposure) {
@@ -218,9 +213,10 @@ ImagePtr	SimCamera::getImage() {
 
 	// complete any pending motions
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "complete movement up to now");
-	pthread_mutex_lock(&mutex);
-	complete_movement();
-	pthread_mutex_unlock(&mutex);
+	{
+		std::unique_lock<std::mutex>	lock(mutex);
+		complete_movement();
+	}
 
 	// add base motion
 	double	nowtime = Timer::gettime();

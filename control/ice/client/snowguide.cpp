@@ -20,6 +20,8 @@
 
 using namespace snowstar;
 
+namespace snowstar {
+namespace app {
 namespace snowguide {
 
 bool	verbose = false;
@@ -497,11 +499,8 @@ int	main(int argc, char *argv[]) {
 		descriptor.guiderportname.c_str());
 
 	// connect to the guider factory of a remote server
-	std::string     connectstring
-                = astro::stringprintf("Guiders:default -h %s -p %hu",
-                        servername.host().c_str(), servername.port());
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-        Ice::ObjectPrx  base = ic->stringToProxy(connectstring);
+        Ice::ObjectPrx  base = ic->stringToProxy(servername.connect("Guiders"));
 	GuiderFactoryPrx	guiderfactory
 		= GuiderFactoryPrx::checkedCast(base);
 
@@ -575,7 +574,9 @@ int	main(int argc, char *argv[]) {
 }
 
 } // namespace snowguide
+} // namespace app
+} // namespace snowstar
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<snowguide::main>(argc, argv);
+	return astro::main_function<snowstar::app::snowguide::main>(argc, argv);
 }

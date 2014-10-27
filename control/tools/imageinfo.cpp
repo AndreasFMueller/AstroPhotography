@@ -14,6 +14,7 @@
 #include <AstroConfig.h>
 #include <AstroProject.h>
 
+using namespace astro;
 using namespace astro::image;
 using namespace astro::image::filter;
 using namespace astro::project;
@@ -21,6 +22,8 @@ using namespace astro::config;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace imageinfo {
 
 static std::string	reponame;
 
@@ -97,10 +100,10 @@ int	show_imagefile(const std::string& filename) {
  */
 int	show_imagerepo(const std::string& argument) {
 	try {
-		ImageRepo	repo = Configuration::get()->repo(reponame);
+		ImageRepoPtr	repo = Configuration::get()->repo(reponame);
 		long	imageid = std::stol(argument);
 		std::cout << imageid << ": ";
-		ImagePtr	image = repo.getImage(imageid);
+		ImagePtr	image = repo->getImage(imageid);
 		return show_imageinfo(image);
 	} catch (std::exception& x) {
 		std::cerr << "could not process " << argument;
@@ -155,7 +158,7 @@ static struct option    longopts[] = {
 /**
  * \brief main function
  */
-int	imageinfo_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dr:", longopts,
@@ -199,8 +202,10 @@ int	imageinfo_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imageinfo
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::imageinfo_main>(argc, argv);
+	return astro::main_function<astro::app::imageinfo::main>(argc, argv);
 }

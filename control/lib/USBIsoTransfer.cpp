@@ -110,13 +110,12 @@ int	IsoSegment::extract(std::list<std::string>& packets) {
 // IsoTransfer implementation
 //////////////////////////////////////////////////////////////////////
 IsoTransfer::IsoTransfer(EndpointDescriptorPtr _endpoint, int _totalpackets)
-	: Transfer(_endpoint), totalpackets(_totalpackets) {
+	: Transfer(_endpoint), totalpackets(_totalpackets),
+	  lock(mutex, std::defer_lock) {
 }
 
-static void	*isotransfer_event_thread(void *arguments) {
-	IsoTransfer	*isotransferptr = (IsoTransfer *)arguments;
+static void	isotransfer_event_thread(IsoTransfer *isotransferptr) {
 	isotransferptr->handlevents();
-	return NULL;
 }
 
 /**
@@ -126,10 +125,7 @@ void	IsoTransfer::handlevents() {
 	libusb_context	*ctx = getContext();
 
 	// wait for the mutex to unlock
-	if (pthread_mutex_lock(&mutex)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "event thread cannot lock mutex");
-		return;
-	}
+	lock.lock();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "event handling thread released");
 
 	// the mutex was locked, so we can now start handling segments
@@ -184,36 +180,30 @@ void	IsoTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 	// mark the transfer as incomplete
 	complete = false;
 
-	// create condition variable and mutex
-	pthread_cond_init(&condition, NULL);
-	pthread_mutex_init(&mutex, NULL);
-	pthread_mutex_lock(&mutex); // this will block the thread
+	// lock the mutex, this will cause the thread to block when it starts
+	lock.lock();
 	
 	// now create a new thread which will handle the events. But because
 	// the mutex is locked, it will not start working just yet, only
 	// when the mutex is unlocked, that thread will be released
-	pthread_attr_t	attrs;
-	pthread_attr_init(&attrs);
-	int	rc = pthread_create(&eventthread, &attrs,
-		isotransfer_event_thread, this);
-	if (rc) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start thread: %s",
-			strerror(rc));
+	try {
+		eventthread = std::thread(isotransfer_event_thread, this);
+	} catch (...) {
 		throw USBError("cannot create event handling thread");
 	}
 
 	// wait for completion of the request, using the condition variable
-	if ((rc = pthread_cond_wait(&condition, &mutex))) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cond wait: %s",
-			strerror(rc));
+	// this will release the lock, so the thread will be released too
+	try {
+		condition.wait(lock);
+	} catch (...) {
 		throw USBError("cannot release event handling thread");
 	}
 
-	// clean up condition variable and mutex
-	pthread_cond_destroy(&condition);
-	pthread_mutex_destroy(&mutex);
-
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "all callbacks completed");
+
+	// wait for the thread to terminate
+	eventthread.join();
 
 	// copy all the packets
 	while (outgoing.size() > 0) {
@@ -229,7 +219,7 @@ IsoTransfer::~IsoTransfer() {
 }
 
 
-void	IsoTransfer::callback(libusb_transfer *transfer) {
+void	IsoTransfer::callback(libusb_transfer * /* transfer */) {
 	// the front element of the incoming queue is the one we were
 	// working on before the callback completed. So we have to
 	// take it from the incoming queue and add it to the outgoing
@@ -244,8 +234,8 @@ void	IsoTransfer::callback(libusb_transfer *transfer) {
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "all segments complete");
 		complete = true;
-		pthread_mutex_unlock(&mutex);
-		pthread_cond_signal(&condition);
+		lock.unlock();
+		condition.notify_one();
 	}
 }
 

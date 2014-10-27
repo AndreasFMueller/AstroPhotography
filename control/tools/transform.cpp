@@ -13,14 +13,17 @@
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::image;
 using namespace astro::image::transform;
 using namespace astro::io;
 using namespace astro::adapter;
 
 namespace astro {
+namespace app {
+namespace transform {
 
-int	transform_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	// parse command line
 	int	c;
 	Point	translation;
@@ -88,8 +91,10 @@ int	transform_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace transform
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::transform_main>(argc, argv);
+	return astro::main_function<astro::app::transform::main>(argc, argv);
 }

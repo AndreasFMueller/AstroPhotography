@@ -7,7 +7,7 @@
 #define _DrivingWork_h
 
 #include <GuidingProcess.h>
-#include <pthread.h>
+#include <mutex>
 
 namespace astro {
 namespace guiding {
@@ -21,7 +21,7 @@ namespace guiding {
  * setCorrection method.
  */
 class DrivingWork : public GuidingProcess {
-	pthread_mutex_t	mutex;
+	std::mutex	mutex;
 	/**
  	 * \brief Control interval for the port driving process
 	 *
