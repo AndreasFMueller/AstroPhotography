@@ -225,35 +225,6 @@ public:
 /**
  * \brief Replicator class to replicate a local repository with a remote repo
  */
-<<<<<<< HEAD
-int	command_pull(astro::project::ImageRepo& localrepo,
-		const std::set<std::string>& localuuids,
-		RepositoryPrx remoterepo,
-		const std::set<std::string>& remoteuuids) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pull command");
-	// get the uuids that should be copied
-	std::list<std::string>	tocopy;
-	std::set_difference(remoteuuids.begin(), remoteuuids.end(),
-		localuuids.begin(), localuuids.end(),
-		std::inserter(tocopy, tocopy.begin()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d uuids to pull", tocopy.size());
-	
-	// get the ids for the images
-	std::set<int>	copyids;
-	for (auto ptr = tocopy.begin(); ptr != tocopy.end(); ptr++) {
-		copyids.insert(remoterepo->getId(*ptr));
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids to pull", copyids.size());
-	if (verbose) {
-		std::cout << "found " << copyids.size();
-		std::cout << " files identified for pull operation";
-		std::cout << std::endl;
-	}
-
-	// copy the images from the remote repository
-	for (auto ptr = copyids.begin(); ptr != copyids.end(); ptr++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "pull image id %d", *ptr);
-=======
 class LocalRepoReplicator : public BaseRepoReplicator {
 protected:
 	astro::project::ImageRepoPtr	localrepository;
@@ -281,7 +252,6 @@ public:
 	}
 	virtual void	push(int id) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", id);
->>>>>>> 601ebbbc4bdd5f52b58d1cd7b3b75bf1130482d7
 		if (verbose) {
 			std::cout << "copy file " << id << std::endl;
 		}
