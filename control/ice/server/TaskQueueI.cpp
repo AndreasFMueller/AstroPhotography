@@ -12,12 +12,30 @@
 
 namespace snowstar {
 
+template<>
+void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	astro::task::TaskMonitorInfo	*taskmonitorinfo
+		= dynamic_cast<astro::task::TaskMonitorInfo *>(&*data);
+
+	// if there is no task monitor info, then give up immediately
+	if (NULL == taskmonitorinfo) {
+		return;
+	}
+
+	// send the information to the clients
+	p->update(convert(*taskmonitorinfo));
+}
+
 TaskQueueI::TaskQueueI(astro::task::TaskQueue& _taskqueue)
 	: taskqueue(_taskqueue) {
 	// recover from crashes
 	taskqueue.recover();
 
-	// XXX install callback that publishes updates
+	// install callback that publishes updates
+	TaskQueueICallback	*taskqueuecallback
+		= new TaskQueueICallback(*this);
+	taskqueue.callback = astro::callback::CallbackPtr(taskqueuecallback);
 }
 
 TaskQueueI::~TaskQueueI() {
@@ -80,6 +98,21 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 
 	// create the proxy
 	return createProxy<TaskPrx>(identity, current);
+}
+
+void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new monitor");
+	callbacks.registerCallback(callback, current);
+}
+
+void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	callbacks.unregisterCallback(callback, current);
+}
+
+void	TaskQueueI::taskUpdate(const astro::callback::CallbackDataPtr data) {
+	callbacks(data);
 }
 
 } // namespace snowstar
