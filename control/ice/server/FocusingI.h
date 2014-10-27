@@ -8,8 +8,13 @@
 
 #include <focusing.h>
 #include <AstroFocus.h>
+#include <CallbackHandler.h>
 
 namespace snowstar {
+
+template<>
+void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& p,
+		const astro::callback::CallbackDataPtr d);
 
 /**
  * \brief Focusing servant implementation
@@ -44,13 +49,13 @@ public:
 	void	changeState(FocusState state);
 	// callback stuff
 private:
-	std::set<FocusCallbackPrx>	callbackproxies;
+	SnowCallback<FocusCallbackPrx>	callbacks;
 public:
 	void	registerCallback(const Ice::Identity& callbackidentity,
 			const Ice::Current& current);
 	void	unregisterCallback(const Ice::Identity& callbackidentity,
 			const Ice::Current& current);
-
+	void	updateFocusing(const astro::callback::CallbackDataPtr data);
 };
 
 /**

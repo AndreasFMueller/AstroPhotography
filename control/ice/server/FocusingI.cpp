@@ -12,6 +12,28 @@
 namespace snowstar {
 
 //////////////////////////////////////////////////////////////////////
+// Focusing callback adapter
+//////////////////////////////////////////////////////////////////////
+template<>
+void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& prx,
+		const astro::callback::CallbackDataPtr data) {
+	astro::focusing::FocusCallbackData	*focusdata
+		= dynamic_cast<astro::focusing::FocusCallbackData *>(&*data);
+	if (NULL != focusdata) {
+		FocusPoint	p;
+		p.position = focusdata->position();
+		p.value = focusdata->value();
+		prx->addPoint(p);
+	}
+	astro::focusing::FocusCallbackState	*focusstate
+		= dynamic_cast<astro::focusing::FocusCallbackState *>(&*data);
+	if (NULL != focusstate) {
+		prx->changeState(convert(focusstate->state()));
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // focusing servant implementation
 //////////////////////////////////////////////////////////////////////
 FocusingI::FocusingI(astro::focusing::FocusingPtr focusingptr) {
@@ -116,38 +138,6 @@ void	FocusingI::addPoint(const FocusPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding a point %d: %f",
 		point.position, point.value);
 	_history.push_back(point);
-
-	std::list<FocusCallbackPrx>	todelete;
-	for (auto ptr = callbackproxies.begin(); ptr != callbackproxies.end();
-		ptr++) {
-		try {
-			(*ptr)->addPoint(point);
-		} catch (...) {
-			todelete.push_back(*ptr);
-		}
-	}
-	for (auto ptr = todelete.begin(); ptr != todelete.end(); ptr++) {
-		callbackproxies.erase(*ptr);
-	}
-}
-
-/**
- * \brief send a change state callback to all registered callbacks
- */
-void	FocusingI::changeState(FocusState state) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new state %d", state);
-	std::list<FocusCallbackPrx>	todelete;
-	for (auto ptr = callbackproxies.begin(); ptr != callbackproxies.end();
-		ptr++) {
-		try {
-			(*ptr)->changeState(state);
-		} catch (...) {
-			todelete.push_back(*ptr);
-		}
-	}
-	for (auto ptr = todelete.begin(); ptr != todelete.end(); ptr++) {
-		callbackproxies.erase(*ptr);
-	}
 }
 
 /**
@@ -155,9 +145,7 @@ void	FocusingI::changeState(FocusState state) {
  */
 void	FocusingI::registerCallback(const Ice::Identity& callbackidentity,
 		const Ice::Current& current) {
-	FocusCallbackPrx	callback = FocusCallbackPrx::uncheckedCast(
-		current.con->createProxy(callbackidentity));
-	callbackproxies.insert(callback);
+	callbacks.registerCallback(callbackidentity, current);
 }
 
 /**
@@ -165,9 +153,22 @@ void	FocusingI::registerCallback(const Ice::Identity& callbackidentity,
  */
 void	FocusingI::unregisterCallback(const Ice::Identity& callbackidentity,
 		const Ice::Current& current) {
-	FocusCallbackPrx	callback = FocusCallbackPrx::uncheckedCast(
-		current.con->createProxy(callbackidentity));
-	callbackproxies.erase(callback);
+	callbacks.unregisterCallback(callbackidentity, current);
+}
+
+/**
+ * \brief Update fromthe callback
+ */
+void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
+	astro::focusing::FocusCallbackData	*focusdata
+		= dynamic_cast<astro::focusing::FocusCallbackData *>(&*data);
+	if (NULL != focusdata) {
+		FocusPoint	p;
+		p.position = focusdata->position();
+		p.value = focusdata->value();
+		addPoint(p);
+	}
+	callbacks(data);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -175,19 +176,7 @@ void	FocusingI::unregisterCallback(const Ice::Identity& callbackidentity,
 //////////////////////////////////////////////////////////////////////
 astro::callback::CallbackDataPtr	FocusingCallback::operator()(
 	astro::callback::CallbackDataPtr data) {
-	astro::focusing::FocusCallbackData	*focusdata
-		= dynamic_cast<astro::focusing::FocusCallbackData *>(&*data);
-	if (NULL != focusdata) {
-		FocusPoint	p;
-		p.position = focusdata->position();
-		p.value = focusdata->value();
-		_focusing.addPoint(p);
-	}
-	astro::focusing::FocusCallbackState	*focusstate
-		= dynamic_cast<astro::focusing::FocusCallbackState *>(&*data);
-	if (NULL != focusstate) {
-		_focusing.changeState(convert(focusstate->state()));
-	}
+	_focusing.updateFocusing(data);
 	return data;
 }
 
