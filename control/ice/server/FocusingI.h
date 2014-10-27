@@ -46,7 +46,6 @@ public:
 
 	FocusHistory	history(const Ice::Current& current);
 	void	addPoint(const FocusPoint& point);
-	void	changeState(FocusState state);
 	// callback stuff
 private:
 	SnowCallback<FocusCallbackPrx>	callbacks;

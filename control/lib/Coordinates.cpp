@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
-#include <regex.h>
+#include <regex>
 #include <mutex>
 
 namespace astro {
@@ -124,95 +124,82 @@ double	cot(const Angle& a) { return 1. / tan(a); }
 double	sec(const Angle& a) { return 1 / cos(a); }
 double	csc(const Angle& a) { return 1 / sin(a); }
 
-
 class angle_parser {
 public:
-static const char	*r;
-static regex_t	*regex;
+	static std::string	r;
+	static std::regex	regex;
 	std::string	_xms;
 	double	_value;
-public:
 	angle_parser(const std::string& xms);
 	double	value() const { return _value; }
-protected:
-	int	integer(const regmatch_t& rm) const;
-	double	fraction(const regmatch_t& rm) const;
-	int	sign(const regmatch_t& rm) const;
+	int	integer(const std::smatch& matches, int i);
+	double	fraction(const std::smatch& matches, int i);
+	int	sign(const std::smatch& matches, int i);
 };
 
-const char *angle_parser::r
-= "([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?";
-// 1      2       34           5 6       78           9 1       1
-//                                                      0       1
-#define	nmatches	12
-regex_t	*angle_parser::regex = NULL;
+//                               1      2       34           5 6       78           9 1       1
+//                                                                                    0       1
+std::string	angle_parser::r("([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?");
+std::regex	angle_parser::regex(r, std::regex::extended);
 
-std::once_flag	angle_parser_once;
-
-static void	angle_parser_setup() {
-	angle_parser::regex = new regex_t;
-	if (NULL == angle_parser::regex) {
-		throw std::runtime_error("out of memory");
+int	angle_parser::integer(const std::smatch& matches, int i) {
+	if (matches.position(i) < 0) {
+		return 0;
 	}
-	if (regcomp(angle_parser::regex, angle_parser::r, REG_EXTENDED)) {
-		delete angle_parser::regex;
-		angle_parser::regex = NULL;
-		throw std::runtime_error("internal error, can't compile "
-			"regex");
+	if (matches.length(i) == 0) {
+		return 0;
 	}
+	return std::stoi(matches[i]);
 }
 
-int	angle_parser::integer(const regmatch_t& rm) const {
-	if (rm.rm_so >= 0) {
-		std::string	x = _xms.substr(rm.rm_so, rm.rm_eo - rm.rm_so);
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "std::stoi(%s)", x.c_str());
-		return std::stoi(x);
+double	angle_parser::fraction(const std::smatch& matches, int i) {
+	if (matches.position(i) < 0) {
+		return 0.;
 	}
-	return 0;
+	if (matches.length(i) == 0) {
+		return 0.;
+	}
+	return std::stod(matches[i]);
 }
 
-double	angle_parser::fraction(const regmatch_t& rm) const {
-	if (rm.rm_so > 0) {
-		std::string	x = _xms.substr(rm.rm_so, rm.rm_eo - rm.rm_so);
-		//debug(LOG_DEBUG, DEBUG_LOG, 0, "std::stod(%s)", x.c_str());
-		return std::stod(x);
+int	angle_parser::sign(const std::smatch& matches, int i) {
+	if (matches.position(i) < 0) {
+		return 1;
 	}
-	return 0;
-}
-
-int	angle_parser::sign(const regmatch_t& rm) const {
-	if (rm.rm_so >= 0) {
-		return (_xms[rm.rm_so] == '-') ? -1 : 1;
-	}
-	return 1;
+	return (matches[i] == "-") ? -1 : 1;
 }
 
 angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
-	std::call_once(angle_parser_once, angle_parser_setup);
-
-	regmatch_t	matches[nmatches];
-	if (regexec(angle_parser::regex, _xms.c_str(), nmatches, matches, 0)) {
-		std::string	msg = stringprintf("%s doesn't match regex '%s",
-			_xms.c_str(), angle_parser::r);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse angle spec: %s", _xms.c_str());
+	std::smatch	matches;
+	if (!std::regex_match(_xms, matches, regex)) {
+		std::string	msg = stringprintf("bad angle spec '%s'",
+			_xms.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse %s", _xms.c_str());
+
+	for (int i = 0; i < 12; i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "matches[%d]: %d %d '%s'",
+			i, matches.position(i), matches.length(i), matches[i]);
+	}
+
 	_value = 0;
-	_value += integer(matches[2]);
-	_value += fraction(matches[4]);
+	_value += integer(matches, 2);
+	_value += fraction(matches, 4);
 
 	// minutes
-	_value += integer(matches[6]) / 60.;
+	_value += integer(matches, 6) / 60.;
 
 	// with fractional part
-	_value += fraction(matches[8]) / 60.;
+	_value += fraction(matches, 8) / 60.;
 
 	// seconds
-	_value += integer(matches[10]) / 3600.;
-	_value += fraction(matches[11]) / 3600.;
+	_value += integer(matches, 10) / 3600.;
+	_value += fraction(matches, 11) / 3600.;
 
 	// add sign
-	_value *= sign(matches[1]);
+	_value *= sign(matches, 1);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed value: %s -> %f", _xms.c_str(),
 		_value);
 }

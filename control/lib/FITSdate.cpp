@@ -6,7 +6,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <includes.h>
-#include <regex.h>
+#include <regex>
 
 namespace astro {
 namespace image {
@@ -15,61 +15,42 @@ namespace image {
  * \brief Create an FITSdate object from a FITS formatted date specification
  */
 FITSdate::FITSdate(const std::string& date) {
-	int	rc = 0;
-	const char	*r = "([0-9]{4})-([0-9]{2})-([0-9]{2})"
-			"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}";
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "regular expression: %s", r);
-	regex_t	regex;
-	if (regcomp(&regex, r, REG_EXTENDED)) {
-		throw std::runtime_error("internal error: RE does not compile");
+	std::string	r("([0-9]{4})-([0-9]{2})-([0-9]{2})"
+		"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}");
+	std::regex	regex(r, std::regex::extended);
+	std::smatch	matches;
+
+	if (!std::regex_match(date, matches, regex)) {
+		std::string	msg = stringprintf("bad FITSdate '%s'",
+			date.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-#define	nmatches	10
-	regmatch_t	matches[nmatches];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "matching %s against %s",
-		date.c_str(), r);
-	rc = regexec(&regex, date.c_str(), nmatches, matches, 0);
-	if (rc) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no match");
-	}
-	for (int i = 0; i < nmatches; i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d]: %d - %d", i,
-			matches[i].rm_so, matches[i].rm_eo);
-	}
+
 	struct tm	result;
 
 	// year
-	result.tm_year = std::stoi(date.substr(matches[1].rm_so,
-		matches[1].rm_eo - matches[1].rm_so)) - 1900;
+	result.tm_year = std::stoi(matches[1]) - 1900;
 
 	// month
-	result.tm_mon = std::stoi(date.substr(matches[2].rm_so,
-		matches[2].rm_eo - matches[2].rm_so)) - 1;
+	result.tm_mon = std::stoi(matches[2]) - 1;
 
 	// day
-	result.tm_mday = std::stoi(date.substr(matches[3].rm_so,
-		matches[3].rm_eo - matches[3].rm_so));
+	result.tm_mday = std::stoi(matches[3]);
 
 	// hour
-	result.tm_hour = (matches[5].rm_so < 0) ? 0
-		: std::stoi(date.substr(matches[5].rm_so,
-			matches[5].rm_eo - matches[5].rm_so));
+	result.tm_hour = (matches.position(5) < 0) ? 0 : std::stoi(matches[5]);
 
 	// minutes
-	result.tm_min = (matches[6].rm_so < 0) ? 0
-		: std::stoi(date.substr(matches[6].rm_so,
-			matches[6].rm_eo - matches[6].rm_so));
+	result.tm_min = (matches.position(6) < 0) ? 0 : std::stoi(matches[6]);
 
 	// seconds
-	result.tm_sec = (matches[7].rm_so < 0) ? 0
-		: std::stoi(date.substr(matches[7].rm_so,
-			matches[7].rm_eo - matches[7].rm_so));
-debug(LOG_DEBUG, DEBUG_LOG, 0, "year=%d, month=%d, day=%d, hour=%d, min=%d, sec=%d",
-result.tm_year,
-result.tm_mon,
-result.tm_mday,
-result.tm_hour,
-result.tm_min,
-result.tm_sec);
+	result.tm_sec = (matches.position(7) < 0) ? 0 : std::stoi(matches[7]);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"year=%d, month=%d, day=%d, hour=%d, min=%d, sec=%d",
+		result.tm_year, result.tm_mon, result.tm_mday,
+		result.tm_hour, result.tm_min, result.tm_sec);
 
 	// remaining fields
 	result.tm_isdst = 0;
@@ -78,18 +59,12 @@ result.tm_sec);
 
 	// convert to unix time
 	when.tv_sec = timegm(&result);
-	when.tv_usec = 1000 * ((matches[9].rm_so < 0) ? 0
-			: std::stoi(date.substr(matches[9].rm_so,
-				matches[9].rm_eo - matches[9].rm_so)));
+	when.tv_usec = 0;
+	if ((matches.position(9) > 0) && (matches.length(9) > 0)) {
+		when.tv_usec = 1000 * std::stoi(matches[9]);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "time: %d.%06d", when.tv_sec,
 		when.tv_usec);
-cleanup:
-	regfree(&regex);
-	if (rc) {
-		std::string	msg = stringprintf("%s doesn't match date spec",
-			date.c_str());
-		throw std::runtime_error(msg);
-	}
 }
 
 /**
