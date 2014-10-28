@@ -27,7 +27,6 @@ using boost::regex_match;
 } // namespace astro
 
 #else
-#error "std regex library"
 
 #include <regex>
 
