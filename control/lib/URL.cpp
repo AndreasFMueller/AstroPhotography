@@ -7,7 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <stdexcept>
-#include <regex>
+#include <astroregex.h>
 
 namespace astro {
 
@@ -19,10 +19,10 @@ URL::URL(const std::string& urlstring) {
 	//                 1        2  3          4 5           6               8
 	//                 method      hostname
 	std::string	r("([a-z]*):(//([a-z\\.]+)(:([0-9]+))?/)?(([0-9a-zA-Z]*)(/[-0-9a-zA-Z]+)*)");
-	std::regex	rx(r, std::regex::extended);
-	std::smatch	matchresults;
+	astro::regex	rx(r, std::regex::extended);
+	astro::smatch	matchresults;
 
-	if (!std::regex_match(urlstring, matchresults, rx)) {
+	if (!regex_match(urlstring, matchresults, rx)) {
 		std::string	msg = stringprintf("url '%s' does not match "
 			"regex '%s'", urlstring.c_str(), r.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

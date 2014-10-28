@@ -7,7 +7,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <sstream>
-#include <regex>
+#include <astroregex.h>
 
 namespace astro {
 namespace image {
@@ -50,9 +50,9 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
  */
 ImageRectangle::ImageRectangle(const std::string& rectanglespec) {
 	std::string	r("([0-9]+)x([0-9]+)@\\(?([0-9]+),([0-9]+)\\)?");
-	std::regex	regex(r, std::regex::extended);
-	std::smatch	matches;
-	if (!std::regex_match(rectanglespec, matches, regex)) {
+	astro::regex	regex(r, std::regex::extended);
+	astro::smatch	matches;
+	if (!regex_match(rectanglespec, matches, regex)) {
 		std::string	msg = stringprintf("bad rectangle spec '%s'", 
 			rectanglespec.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

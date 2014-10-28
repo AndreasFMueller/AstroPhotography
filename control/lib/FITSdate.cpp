@@ -6,7 +6,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <includes.h>
-#include <regex>
+#include <astroregex.h>
 
 namespace astro {
 namespace image {
@@ -18,10 +18,10 @@ FITSdate::FITSdate(const std::string& date) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing FITSdate: %s", date.c_str());
 	std::string	r("([0-9]{4})-([0-9]{2})-([0-9]{2})"
 		"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}");
-	std::regex	regex(r, std::regex::extended);
-	std::smatch	matches;
+	astro::regex	regex(r, std::regex::extended);
+	astro::smatch	matches;
 
-	if (!std::regex_match(date, matches, regex)) {
+	if (!regex_match(date, matches, regex)) {
 		std::string	msg = stringprintf("bad FITSdate '%s'",
 			date.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

@@ -8,7 +8,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>
-#include <regex>
+#include <astroregex.h>
 
 namespace astro {
 namespace image {
@@ -21,9 +21,9 @@ namespace image {
  */
 ImagePoint::ImagePoint(const std::string& pointspec) {
 	std::string	r("\\(?([0-9]+),([0-9]+)\\)?");
-	std::regex	regex(r, std::regex::extended);
-	std::smatch	matches;
-	if (!std::regex_match(pointspec, matches, regex)) {
+	astro::regex	regex(r, std::regex::extended);
+	astro::smatch	matches;
+	if (!regex_match(pointspec, matches, regex)) {
 		std::string	msg = stringprintf("bad pointspec '%s'",
 			pointspec.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

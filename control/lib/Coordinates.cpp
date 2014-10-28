@@ -11,6 +11,7 @@
 #include <regex>
 #include <mutex>
 #include <typeinfo>
+#include <astroregex.h>
 
 namespace astro {
 
@@ -128,8 +129,6 @@ double	csc(const Angle& a) { return 1 / sin(a); }
 class angle_parser {
 public:
 	static std::string	r;
-	std::regex	regex;
-	std::string	_xms;
 	double	_value;
 	angle_parser(const std::string& xms);
 	double	value() const { return _value; }
@@ -141,7 +140,6 @@ public:
 //                               1      2       34           5 6       78           9 1       1
 //                                                                                    0       1
 std::string	angle_parser::r("([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?");
-//std::regex	angle_parser::regex(r, std::regex::extended);
 
 int	angle_parser::integer(const std::smatch& matches, int i) {
 	if (matches.position(i) < 0) {
@@ -170,19 +168,20 @@ int	angle_parser::sign(const std::smatch& matches, int i) {
 	return (matches[i] == "-") ? -1 : 1;
 }
 
-angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse angle spec: %s", _xms.c_str());
+angle_parser::angle_parser(const std::string& xms) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse angle spec: %s", xms.c_str());
+	astro::regex	regex;
 	try {
-		regex = std::regex(r, std::regex::extended);
+		regex = astro::regex(r, std::regex::extended);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "regex exception: %s %s",
 			typeid(x).name(), x.what());
 		throw;
 	}
-	std::smatch	matches;
-	if (!std::regex_match(_xms, matches, regex)) {
+	astro::smatch	matches;
+	if (!regex_match(xms, matches, regex)) {
 		std::string	msg = stringprintf("bad angle spec '%s'",
-			_xms.c_str());
+			xms.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -211,7 +210,7 @@ angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
 
 	// add sign
 	_value *= sign(matches, 1);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed value: %s -> %f", _xms.c_str(),
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed value: %s -> %f", xms.c_str(),
 		_value);
 }
 

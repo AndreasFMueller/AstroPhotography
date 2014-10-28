@@ -8,7 +8,7 @@
 #include <AstroFormat.h>
 #include <stdexcept>
 #include <limits>
-#include <regex>
+#include <astroregex.h>
 
 using namespace astro::image;
 
@@ -28,10 +28,10 @@ Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
  */
 Binning::Binning(const std::string& binningspec) {
 	std::string	r("\\(?([0-9]+)[,x]([0-9]+)\\)?");
-	std::regex	regex(r, std::regex::extended);
-	std::smatch	matches;
+	astro::regex	regex(r, std::regex::extended);
+	astro::smatch	matches;
 
-	if (!std::regex_match(binningspec, matches, regex)) {
+	if (!regex_match(binningspec, matches, regex)) {
 		std::string	msg = stringprintf("bad binning spec '%s'",
 			binningspec.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
