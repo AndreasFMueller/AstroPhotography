@@ -260,6 +260,7 @@ public:
 	ImageMetadata::const_iterator	find(const std::string& keyword) const;
 	ImageMetadata::iterator	find(const std::string& keyword);
 	void	remove(const std::string& keyword);
+	void	dump() const;
 };
 
 /**
@@ -352,6 +353,7 @@ public:
 	int	nMetadata() const { return metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
+	void	dump_metadata() const;
 protected:
 	MosaicType	mosaic;
 public:

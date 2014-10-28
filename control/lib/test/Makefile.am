@@ -62,7 +62,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ImageRepoTest.cpp
+	FITSKeywordTest.cpp
+#	ImageRepoTest.cpp
 #	InstrumentTest.cpp
 #	DeviceMapperTest.cpp
 #	ConfigurationTest.cpp

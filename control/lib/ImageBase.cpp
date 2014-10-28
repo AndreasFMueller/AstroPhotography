@@ -191,5 +191,9 @@ std::type_index	ImageBase::pixel_type() const {
 	return std::type_index(typeid(void));
 }
 
+void	ImageBase::dump_metadata() const {
+	metadata.dump();
+}
+
 } // namespace image
 } // namespace astro
