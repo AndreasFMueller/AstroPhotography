@@ -304,9 +304,15 @@ ImageEnvelope	ImageRepo::getEnvelope(const UUID& uuid) {
 long	ImageRepo::save(ImagePtr image) {
 	// if the image does not have a UUID yet, add one
 	if (!image->hasMetadata("UUID")) {
+		UUID	uuid;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new uuid: %s",
+			((std::string)uuid).c_str());
 		image->setMetadata(FITSKeywords::meta("UUID",
-			(std::string)UUID()));
+			(std::string)uuid));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image uuid: %s",
+		((std::string)(image->getMetadata("UUID"))).c_str());
+
 
 	// build imageinfo reocord
 	long	imageid = -1;

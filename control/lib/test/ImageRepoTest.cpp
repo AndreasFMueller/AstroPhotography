@@ -84,10 +84,21 @@ void	ImageRepoTest::testImage() {
 	ImageRepo	repo("repotest", database, directory, false);
 
 	long	imageid = repo.save(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "1st image saved: %d", imageid);
+	// add the same image for times
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "uuid: %s", ((std::string)(imageptr->getMetadata("UUID"))).c_str());
+	imageptr->removeMetadata("UUID");
 	repo.save(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "2nd image saved");
+	imageptr->removeMetadata("UUID");
 	repo.save(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "3rd image saved");
+	imageptr->removeMetadata("UUID");
 	repo.save(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "4th image saved");
+	imageptr->removeMetadata("UUID");
 	repo.save(imageptr);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "5th image saved");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageid = %ld", imageid);
 
 	ImagePtr	image2 = repo.getImage(imageid);

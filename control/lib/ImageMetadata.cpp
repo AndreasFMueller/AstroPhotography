@@ -78,9 +78,10 @@ ImageMetadata::iterator	ImageMetadata::find(const std::string& keyword) {
  * \brief Delete all entries for a given keyword
  */
 void	ImageMetadata::remove(const std::string& keyword) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove '%s' metavalues",
-		keyword.c_str());
-	std::remove_if(begin(), end(), keyword_comparator(keyword));
+	iterator	i;
+	while (end() != (i = find(keyword))) {
+		erase(i);
+	}
 }
 
 } // namespace image

@@ -32,79 +32,6 @@ time_t	TimeField::string2time(const std::string& s) {
 	return mktime(&t);
 }
 
-#if 0
-//////////////////////////////////////////////////////////////////////
-// fields with integer values
-//////////////////////////////////////////////////////////////////////
-class IntegerField : public FieldValue {
-	int	_value;
-public:
-	IntegerField(int value) : _value(value) { }
-	double	doubleValue() const { return _value; }
-	int	intValue() const { return _value; }
-	time_t	timeValue() const { return _value; }
-	std::string	stringValue() const {
-		std::ostringstream	out;
-		out << _value;
-		return out.str();
-	}
-};
-
-//////////////////////////////////////////////////////////////////////
-// fields with double values
-//////////////////////////////////////////////////////////////////////
-class DoubleField : public FieldValue {
-	double	_value;
-public:
-	DoubleField(double value) : _value(value) { }
-	double	doubleValue() const { return _value; }
-	int	intValue() const { int v = _value; return v; }
-	std::string	stringValue() const {
-		std::ostringstream	out;
-		out << _value;
-		return out.str();
-	}
-	time_t	timeValue() const { return _value; }
-};
-
-//////////////////////////////////////////////////////////////////////
-// fields with string values
-//////////////////////////////////////////////////////////////////////
-class StringField : public FieldValue {
-	std::string	_value;
-public:
-	StringField(const std::string& value) : _value(value) { }
-	std::string	stringValue() const { return _value; }
-	int	intValue() const { return std::stoi(_value); }
-	double	doubleValue() const { return std::stof(_value); }
-	virtual std::string	toString() const {
-		return "'" + stringValue() + "'";
-	}
-	time_t	timeValue() const {
-		return string2time(_value);
-	}
-};
-#endif
-
-//////////////////////////////////////////////////////////////////////
-// fields with unix time type
-//////////////////////////////////////////////////////////////////////
-#if 0
-class TimeField : public FieldValue {
-	time_t	_value;
-public:
-	TimeField(const std::string& value);
-	TimeField(time_t t) : _value(t) { }
-	std::string	stringValue() const;
-	int	intValue() const { return _value; }
-	double	doubleValue() const { return _value; }
-	virtual std::string	toString() const {
-		return "'" + stringValue() + "'";
-	}
-	time_t	timeValue() const { return _value; }
-};
-#endif
-
 TimeField::TimeField(const std::string& value) {
 	_value = string2time(value);
 }
@@ -115,28 +42,6 @@ std::string	TimeField::stringValue() const {
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tmp);
 	return std::string(buffer);
 }
-
-#if 0
-//////////////////////////////////////////////////////////////////////
-// Null value
-//////////////////////////////////////////////////////////////////////
-class NullField : public FieldValue {
-public:
-	virtual int	intValue() const {
-		throw std::runtime_error("cannot convert NULL to int");
-	}
-	virtual double	doubleValue() const {
-		throw std::runtime_error("cannot convert NULL to double");
-	}
-	virtual std::string	stringValue() const {
-		throw std::runtime_error("cannot convert NULL to string");
-	}
-	virtual time_t	timeValue() const {
-		throw std::runtime_error("cannot convert NULL to time_t");
-	}
-	virtual bool	isnull() const { return true; }
-};
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // FieldValueFactory implementation
