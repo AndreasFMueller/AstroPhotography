@@ -6,9 +6,11 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _astroregex_h
+#define _astroregex_h
 
 // first ensure that we read the configuration constants
-#ifndef HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
@@ -25,6 +27,7 @@ using boost::regex_match;
 } // namespace astro
 
 #else
+#error "std regex library"
 
 #include <regex>
 
@@ -37,3 +40,5 @@ using std::regex_match;
 } // namespace astro
 
 #endif /* ENABLE_BOOSTREGEX */
+
+#endif /* _astroregex_h */

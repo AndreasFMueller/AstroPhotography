@@ -19,7 +19,7 @@ URL::URL(const std::string& urlstring) {
 	//                 1        2  3          4 5           6               8
 	//                 method      hostname
 	std::string	r("([a-z]*):(//([a-z\\.]+)(:([0-9]+))?/)?(([0-9a-zA-Z]*)(/[-0-9a-zA-Z]+)*)");
-	astro::regex	rx(r, std::regex::extended);
+	astro::regex	rx(r, astro::regex::extended);
 	astro::smatch	matchresults;
 
 	if (!regex_match(urlstring, matchresults, rx)) {
@@ -29,11 +29,11 @@ URL::URL(const std::string& urlstring) {
 		throw std::runtime_error(msg);
 	}
 
-#if 0
+#if 1
 	// the string matched, so we should be able to get the match results
 	// from the expression
 	int	i;
-	std::smatch::iterator	ptr;
+	astro::smatch::iterator	ptr;
 	for (i = 0, ptr = matchresults.begin(); ptr != matchresults.end();
 		ptr++, i++) {
 		std::cout << "[" << i << "] ";

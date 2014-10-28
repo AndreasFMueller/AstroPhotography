@@ -18,7 +18,7 @@ FITSdate::FITSdate(const std::string& date) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing FITSdate: %s", date.c_str());
 	std::string	r("([0-9]{4})-([0-9]{2})-([0-9]{2})"
 		"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}");
-	astro::regex	regex(r, std::regex::extended);
+	astro::regex	regex(r, astro::regex::extended);
 	astro::smatch	matches;
 
 	if (!regex_match(date, matches, regex)) {

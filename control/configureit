@@ -102,13 +102,14 @@ case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CXXFLAGS
-	./configure --prefix=`pwd`/root ${commonflags}
+	./configure --prefix=`pwd`/root ${commonflags} --enable-boostregex
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-ice
+	./configure --prefix=`pwd`/root ${commonflags} --enable-ice \
+		--enable-boostregex
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
@@ -126,7 +127,7 @@ SuSE)
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
-		${sbigoption}
+		${sbigoption} --enable-boostregex
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"

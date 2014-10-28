@@ -28,7 +28,7 @@ Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
  */
 Binning::Binning(const std::string& binningspec) {
 	std::string	r("\\(?([0-9]+)[,x]([0-9]+)\\)?");
-	astro::regex	regex(r, std::regex::extended);
+	astro::regex	regex(r, astro::regex::extended);
 	astro::smatch	matches;
 
 	if (!regex_match(binningspec, matches, regex)) {

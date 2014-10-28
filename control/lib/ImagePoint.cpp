@@ -21,7 +21,7 @@ namespace image {
  */
 ImagePoint::ImagePoint(const std::string& pointspec) {
 	std::string	r("\\(?([0-9]+),([0-9]+)\\)?");
-	astro::regex	regex(r, std::regex::extended);
+	astro::regex	regex(r, astro::regex::extended);
 	astro::smatch	matches;
 	if (!regex_match(pointspec, matches, regex)) {
 		std::string	msg = stringprintf("bad pointspec '%s'",
