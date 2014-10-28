@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroPersistence.h>
+#include <FieldPersistence.h>
 #include <sstream>
 #include <AstroDebug.h>
 #include <stdexcept>
@@ -14,7 +15,7 @@ namespace persistence {
 /**
  * \brief Parse a timestamp string from the database, convert it to Unix time
  */
-static time_t	string2time(const std::string& s) {
+time_t	TimeField::string2time(const std::string& s) {
 	struct tm	t;
 	t.tm_year = std::stoi(s.substr(0, 4)) - 1900;
 	t.tm_mon = std::stoi(s.substr(5, 2)) - 1;
@@ -22,12 +23,16 @@ static time_t	string2time(const std::string& s) {
 	t.tm_hour = std::stoi(s.substr(11, 2));
 	t.tm_min = std::stoi(s.substr(14, 2));
 	t.tm_sec = std::stoi(s.substr(17, 2));
+        t.tm_isdst = 0;
+        t.tm_zone = NULL;
+        t.tm_gmtoff = 0;
 	char	b[20];
 	strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S", &t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse date: %s -> %s", s.c_str(), b);
 	return mktime(&t);
 }
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // fields with integer values
 //////////////////////////////////////////////////////////////////////
@@ -79,10 +84,12 @@ public:
 		return string2time(_value);
 	}
 };
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // fields with unix time type
 //////////////////////////////////////////////////////////////////////
+#if 0
 class TimeField : public FieldValue {
 	time_t	_value;
 public:
@@ -96,6 +103,7 @@ public:
 	}
 	time_t	timeValue() const { return _value; }
 };
+#endif
 
 TimeField::TimeField(const std::string& value) {
 	_value = string2time(value);
@@ -108,6 +116,7 @@ std::string	TimeField::stringValue() const {
 	return std::string(buffer);
 }
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Null value
 //////////////////////////////////////////////////////////////////////
@@ -127,6 +136,7 @@ public:
 	}
 	virtual bool	isnull() const { return true; }
 };
+#endif
 
 //////////////////////////////////////////////////////////////////////
 // FieldValueFactory implementation

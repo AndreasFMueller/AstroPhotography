@@ -29,7 +29,7 @@ URL::URL(const std::string& urlstring) {
 		throw std::runtime_error(msg);
 	}
 
-#if 1
+#if 0
 	// the string matched, so we should be able to get the match results
 	// from the expression
 	int	i;

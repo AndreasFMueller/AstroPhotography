@@ -10,6 +10,7 @@
 #include <AstroFormat.h>
 #include <ImageRepoTables.h>
 #include <includes.h>
+#include <AstroUtils.h>
 
 using namespace astro::project;
 using namespace astro::persistence;
@@ -35,7 +36,7 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ImageRepoTablesTest);
 
-std::string	dbfilename("imageservertest.db");
+std::string	dbfilename("imagerepotest.db");
 
 void	ImageRepoTablesTest::setUp() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up clean database");
@@ -68,6 +69,7 @@ void	ImageRepoTablesTest::testImageRepoTable() {
 	long	id = images.add(imageinfo1);
 	for (int count = 0; count < 10; count++) {
 		imageinfo1.filename = stringprintf("test%d.fits", count);
+		imageinfo1.uuid = astro::UUID();
 		images.add(imageinfo1);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "added object %ld", id);
@@ -78,6 +80,8 @@ void	ImageRepoTablesTest::testImageRepoTable() {
 	imageinfo1.filename = "testfile.fits";
 	CPPUNIT_ASSERT(imageinfo1.filename == imageinfo2.filename);
 	CPPUNIT_ASSERT(imageinfo1.project == imageinfo2.project);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "created1 = %d, created2 = %d",
+		imageinfo1.created, imageinfo2.created);
 	CPPUNIT_ASSERT(imageinfo1.created == imageinfo2.created);
 	CPPUNIT_ASSERT(imageinfo1.width == imageinfo2.width);
 	CPPUNIT_ASSERT(imageinfo1.height == imageinfo2.height);
@@ -107,6 +111,7 @@ void	ImageRepoTablesTest::testMetadataTable() {
 	imageinfo1.purpose = "light";
 	imageinfo1.bayer = "RGGB";
 	imageinfo1.observation = "1962-02-14T12:34:56.777";
+	imageinfo1.uuid = astro::UUID();
 	long	id = images.add(imageinfo1);
 	MetadataTable	metadata(database);
 	MetadataRecord	meta(-1, id);
