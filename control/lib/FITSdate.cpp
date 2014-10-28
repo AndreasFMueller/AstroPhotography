@@ -15,6 +15,7 @@ namespace image {
  * \brief Create an FITSdate object from a FITS formatted date specification
  */
 FITSdate::FITSdate(const std::string& date) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing FITSdate: %s", date.c_str());
 	std::string	r("([0-9]{4})-([0-9]{2})-([0-9]{2})"
 		"(T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.([0-9]{3})){0,1}){0,1}");
 	std::regex	regex(r, std::regex::extended);
@@ -29,24 +30,17 @@ FITSdate::FITSdate(const std::string& date) {
 
 	struct tm	result;
 
-	// year
+	// year, month, day
 	result.tm_year = std::stoi(matches[1]) - 1900;
-
-	// month
 	result.tm_mon = std::stoi(matches[2]) - 1;
-
-	// day
 	result.tm_mday = std::stoi(matches[3]);
 
-	// hour
+	// hour, minutes, seconds
 	result.tm_hour = (matches.position(5) < 0) ? 0 : std::stoi(matches[5]);
-
-	// minutes
 	result.tm_min = (matches.position(6) < 0) ? 0 : std::stoi(matches[6]);
-
-	// seconds
 	result.tm_sec = (matches.position(7) < 0) ? 0 : std::stoi(matches[7]);
 
+	// parsed components so far
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"year=%d, month=%d, day=%d, hour=%d, min=%d, sec=%d",
 		result.tm_year, result.tm_mon, result.tm_mday,

@@ -10,6 +10,7 @@
 #include <AstroDebug.h>
 #include <regex>
 #include <mutex>
+#include <typeinfo>
 
 namespace astro {
 
@@ -127,7 +128,7 @@ double	csc(const Angle& a) { return 1 / sin(a); }
 class angle_parser {
 public:
 	static std::string	r;
-	static std::regex	regex;
+	std::regex	regex;
 	std::string	_xms;
 	double	_value;
 	angle_parser(const std::string& xms);
@@ -140,7 +141,7 @@ public:
 //                               1      2       34           5 6       78           9 1       1
 //                                                                                    0       1
 std::string	angle_parser::r("([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?");
-std::regex	angle_parser::regex(r, std::regex::extended);
+//std::regex	angle_parser::regex(r, std::regex::extended);
 
 int	angle_parser::integer(const std::smatch& matches, int i) {
 	if (matches.position(i) < 0) {
@@ -171,6 +172,13 @@ int	angle_parser::sign(const std::smatch& matches, int i) {
 
 angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse angle spec: %s", _xms.c_str());
+	try {
+		regex = std::regex(r, std::regex::extended);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "regex exception: %s %s",
+			typeid(x).name(), x.what());
+		throw;
+	}
 	std::smatch	matches;
 	if (!std::regex_match(_xms, matches, regex)) {
 		std::string	msg = stringprintf("bad angle spec '%s'",
@@ -184,17 +192,20 @@ angle_parser::angle_parser(const std::string& xms) : _xms(xms) {
 			i, matches.position(i), matches.length(i), matches[i]);
 	}
 
+	// initialization
 	_value = 0;
+
+	// handle the case of decimal number
 	_value += integer(matches, 2);
 	_value += fraction(matches, 4);
 
-	// minutes
+	// separate minutes field
 	_value += integer(matches, 6) / 60.;
 
 	// with fractional part
 	_value += fraction(matches, 8) / 60.;
 
-	// seconds
+	// separate seconds field
 	_value += integer(matches, 10) / 3600.;
 	_value += fraction(matches, 11) / 3600.;
 
