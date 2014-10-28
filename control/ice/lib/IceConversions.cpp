@@ -554,7 +554,7 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 	TaskInfo	result;
 	result.taskid = info.id();
 	result.state = convert(info.state());
-	result.lastchange = info.lastchange();
+	result.lastchange = converttime((time_t)info.lastchange());
 	result.cause = info.cause();
 	result.filename = info.filename();
 	result.frame = snowstar::convert(info.frame());
@@ -564,7 +564,7 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 astro::task::TaskInfo	convert(const TaskInfo& info) {
 	astro::task::TaskInfo	result(info.taskid);
 	result.state(convert(info.state));
-	result.lastchange(info.lastchange);
+	result.lastchange(converttime(info.lastchange));
 	result.cause(info.cause);
 	result.filename(info.filename);
 	result.frame(snowstar::convert(info.frame));

@@ -68,10 +68,12 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 }
 
 void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for %d", taskid);
 	taskqueue.cancel(taskid);
 }
 
 void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove request for %d", taskid);
 	taskqueue.remove(taskid);
 }
 

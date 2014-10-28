@@ -54,7 +54,7 @@ module snowstar {
 		int		taskid;
 		// the current state of the task, and when it last changed
 		TaskState	state;
-		int		lastchange;
+		double		lastchange;
 		string		cause;
 		// where the produced image is storead
 		string		filename;

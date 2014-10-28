@@ -127,6 +127,8 @@ void	ExposureTask::run() {
 			// XXX what do we do when the cooler cannot stabilize?
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now stable");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no cooler");
 	}
 
 	// wait for the filterwheel if present
@@ -136,14 +138,18 @@ void	ExposureTask::run() {
 			throw std::runtime_error("filter wheel does not idle");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel now idle");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filter");
 	}
 
 	// start exposure
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
+		_task.exposure().exposuretime);
 	ccd->startExposure(_task.exposure());
 
 	// wait for completion of exposure
 	if (_executor.wait(_task.exposure().exposuretime)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for completion");
 		// wait for the ccd to complete
 		if (ccd->wait()) {
 			// get the image from the ccd
