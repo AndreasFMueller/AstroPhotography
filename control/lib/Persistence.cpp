@@ -23,7 +23,7 @@ time_t	TimeField::string2time(const std::string& s) {
 	t.tm_hour = std::stoi(s.substr(11, 2));
 	t.tm_min = std::stoi(s.substr(14, 2));
 	t.tm_sec = std::stoi(s.substr(17, 2));
-        t.tm_isdst = 0;
+        t.tm_isdst = -1;
         t.tm_zone = NULL;
         t.tm_gmtoff = 0;
 	char	b[20];
@@ -32,15 +32,19 @@ time_t	TimeField::string2time(const std::string& s) {
 	return mktime(&t);
 }
 
+std::string	TimeField::time2string(time_t t) {
+	char	buffer[20];
+	struct tm	*tmp = localtime(&t);
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tmp);
+	return std::string(buffer);
+}
+
 TimeField::TimeField(const std::string& value) {
 	_value = string2time(value);
 }
 
 std::string	TimeField::stringValue() const {
-	char	buffer[20];
-	struct tm	*tmp = localtime(&_value);
-	strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tmp);
-	return std::string(buffer);
+	return time2string(_value);
 }
 
 //////////////////////////////////////////////////////////////////////

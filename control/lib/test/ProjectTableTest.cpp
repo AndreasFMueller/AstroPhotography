@@ -59,6 +59,9 @@ void	ProjectTableTest::testProject() {
 	ProjectRecord	project4 = projects.byid(id2);
 	CPPUNIT_ASSERT(project2.name == project4.name);
 	CPPUNIT_ASSERT(project2.description == project4.description);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d - %d = %d",
+		project2.started, project4.started,
+		project2.started - project4.started);
 	CPPUNIT_ASSERT(project2.started == project4.started);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testProject() end");
 }

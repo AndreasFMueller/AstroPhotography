@@ -55,6 +55,7 @@ class TimeField : public FieldValue {
 	time_t	_value;
 public:
 	static	time_t	string2time(const std::string& value);
+	static	std::string	time2string(time_t t);
 	TimeField(const std::string& value);
 	TimeField(time_t t) : _value(t) { }
 	std::string	stringValue() const;
