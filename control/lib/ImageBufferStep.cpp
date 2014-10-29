@@ -67,5 +67,19 @@ astro::image::Metavalue	ImageBufferStep::getMetadata(const std::string& name) co
 	return input()->getMetadata(name);
 }
 
+ImageMetadata::const_iterator	ImageBufferStep::begin() const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return input()->begin();
+}
+
+ImageMetadata::const_iterator	ImageBufferStep::end() const {
+	if (NULL == image) {
+		throw std::runtime_error("no image");
+	}
+	return input()->end();
+}
+
 } // namespace process
 } // namespace astro

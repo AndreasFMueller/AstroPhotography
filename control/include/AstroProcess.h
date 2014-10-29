@@ -313,6 +313,8 @@ public:
 	// metadata
 	virtual bool	hasMetadata(const std::string& name) const;
 	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
+	virtual ImageMetadata::const_iterator	begin() const;
+	virtual ImageMetadata::const_iterator	end() const;
 };
 
 /**
@@ -329,6 +331,8 @@ public:
 	// metadata
 	virtual bool	hasMetadata(const std::string& name) const;
 	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
+	virtual ImageMetadata::const_iterator	begin() const;
+	virtual ImageMetadata::const_iterator	end() const;
 };
 
 /**
@@ -360,6 +364,8 @@ public:
 	// metadata
 	virtual bool	hasMetadata(const std::string& name) const;
 	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
+	virtual ImageMetadata::const_iterator	begin() const;
+	virtual ImageMetadata::const_iterator	end() const;
 };
 
 /**
@@ -373,9 +379,6 @@ public:
 	virtual ProcessingStep::state	do_work();
 	virtual astro::adapter::PreviewAdapterPtr	preview() const;
 	virtual const ConstImageAdapter<double>&	out() const;
-	// metadata
-	virtual bool	hasMetadata(const std::string& name) const;
-	virtual astro::image::Metavalue	getMetadata(const std::string& name) const;
 };
 
 /**

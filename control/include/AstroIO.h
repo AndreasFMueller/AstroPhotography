@@ -76,19 +76,13 @@ static Metavalue	meta(const std::string& name, const FITSdate& value,
 static Metavalue	meta(const FITShdu& hdu);
 };
 
-/**
- * \brief Template function to copy metadata
- */
 template<typename srctype, typename desttype>
-void	copy_metadata(const srctype& src, desttype& dest,
+void	copy_metadata(const srctype& src, desttype& dst,
 		const std::set<std::string>& names) {
-	std::set<std::string>::const_iterator	name;
-	for (name = names.begin(); name != names.end(); name++) {
-		try {
-			dest.setMetadata(src.getMetadata(*name));
-		} catch (std::exception& x) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot copy %s: %s",
-				name->c_str(), x.what());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "copying image metadata");
+	for (auto ptr = src.begin(); ptr != src.end(); ptr++) {
+		if (names.end() != names.find(ptr->second.getKeyword())) {
+			dst.setMetadata(ptr->second);
 		}
 	}
 }

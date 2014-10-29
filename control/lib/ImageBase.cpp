@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <typeinfo>
+#include <AstroIO.h>
 
 namespace astro {
 namespace image {

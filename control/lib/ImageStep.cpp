@@ -102,5 +102,13 @@ astro::image::Metavalue	ImageStep::getMetadata(const std::string& name) const {
 	return input()->getMetadata(name);
 }
 
+ImageMetadata::const_iterator	ImageStep::begin() const {
+	return input()->begin();
+}
+
+ImageMetadata::const_iterator	ImageStep::end() const {
+	return input()->end();
+}
+
 } // namespace process
 } // namespace astro
