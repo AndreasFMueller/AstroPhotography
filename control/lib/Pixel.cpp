@@ -6,6 +6,7 @@
  */
 
 #include <AstroPixel.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace image {
@@ -119,6 +120,18 @@ COLOR_CONSTANTS(unsigned long, unsigned long)
  */
 COLOR_CONSTANTS(float, unsigned int)
 COLOR_CONSTANTS(double, unsigned long)
+
+template<>
+unsigned char   conversionFunction<unsigned char, float>(const float& src) {
+	unsigned char	x = src;
+	return x;
+}
+
+template<>
+unsigned char   conversionFunction<unsigned char, double>(const double& src) {
+	unsigned char	x = src;
+	return x;
+}
 
 } // image
 } // astro
