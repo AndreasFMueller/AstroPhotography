@@ -5,16 +5,56 @@
 #
 if ENABLE_ICE
 
-noinst_PROGRAMS = snowflake
+bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount snowrepo \
+	snowtask
+noinst_PROGRAMS = snowflake 
+
+ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
+	$(top_builddir)/ice/lib/libiceastro.la
+ICELIBS = @ICELIBS@
+ICELDADD = -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
+ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 snowflake_SOURCES = snowflake.cpp
+snowflake_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowflake_LDADD = $(ICELDADD)
+snowflake_CPPFLAGS = $(ICECPPFLAGS)
 
-snowflake_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
-	$(top_builddir)/ice/lib/libiceastro.la
-snowflake_LDADD = -L$(top_builddir)/lib -lastro \
-	-L$(top_builddir)/ice/lib -liceastro
-snowflake_LDFLAGS = -L@ICEDIR@/lib/c++11 -Wl,-rpath,@ICEDIR@/lib/c++11 -lIce -lIceUtil
-snowflake_CPPFLAGS = -I$(top_builddir)/ice/include -I@ICEDIR@/include
+snowscan_SOURCES = snowscan.cpp
+snowscan_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowscan_LDADD = $(ICELDADD)
+snowscan_CPPFLAGS = $(ICECPPFLAGS)
+
+snowimages_SOURCES = snowimages.cpp
+snowimages_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowimages_LDADD = $(ICELDADD)
+snowimages_CPPFLAGS = $(ICECPPFLAGS)
+
+snowfocus_SOURCES = snowfocus.cpp
+snowfocus_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowfocus_LDADD = $(ICELDADD)
+snowfocus_CPPFLAGS = $(ICECPPFLAGS)
+
+snowmount_SOURCES = snowmount.cpp
+snowmount_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowmount_LDADD = $(ICELDADD)
+snowmount_CPPFLAGS = $(ICECPPFLAGS)
+
+snowguide_SOURCES = snowguide.cpp
+snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowguide_LDADD = $(ICELDADD)
+snowguide_CPPFLAGS = $(ICECPPFLAGS)
+
+snowrepo_SOURCES = snowrepo.cpp
+snowrepo_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowrepo_LDADD = $(ICELDADD)
+snowrepo_CPPFLAGS = $(ICECPPFLAGS)
+
+snowtask_SOURCES = snowtask.cpp
+snowtask_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowtask_LDADD = $(ICELDADD)
+snowtask_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

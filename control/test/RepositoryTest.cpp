@@ -44,37 +44,44 @@ void	RepositoryTest::tearDown() {
 }
 
 void	RepositoryTest::testListmodules() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testListmodules() begin");
 	const std::vector<ModulePtr>	modules
 		= repository->modules();
 	CPPUNIT_ASSERT(modules.size() >= 2);
 	CPPUNIT_ASSERT(repository->contains("mock1"));
 	CPPUNIT_ASSERT(repository->contains("mock2"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testListmodules() end");
 }
 
 void	RepositoryTest::testOpen() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOpen() begin");
 	ModulePtr	module = repository->getModule("mock1");
 	module->open();
 	CPPUNIT_ASSERT(module->isloaded());
 	module->close();
 	CPPUNIT_ASSERT(!module->isloaded());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOpen() end");
 }
 
 void	RepositoryTest::moduleTest(ModulePtr module) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moduleTest() begin");
 	ModuleDescriptorPtr	descriptor = module->getDescriptor();
 	bool	result1 = descriptor->name() == "mock1";
 	CPPUNIT_ASSERT(result1);
 	bool	result2 = descriptor->version() == VERSION;
 	CPPUNIT_ASSERT(result2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moduleTest() end");
 }
 
 void	RepositoryTest::testDescriptor() {
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDescriptor() begin");
 	ModulePtr	module = repository->getModule("mock1");
 	Module::dlclose_on_close = false;
 
 	module->open();
 	moduleTest(module);
 	module->close();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDescriptor() end");
 }
 
 } // namespace test

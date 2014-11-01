@@ -32,7 +32,7 @@ std::list<long>	CalibrationStore::getCalibrations(
 	std::ostringstream	out;
 	out << " camera = '" << guider.cameraname() << "' and ";
 	out << " ccdid = " << guider.ccdid() << " and ";
-	out << " cameraport = " << guider.guiderportname();
+	out << " guiderport = '" << guider.guiderportname() << "'";
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -63,9 +63,6 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 	// get the calibration table
 	CalibrationTable	ct(_database);
 	CalibrationRecord	r = ct.byid(id);
-	for (int i = 0; i < 6; i++) {
-		calibration.a[i] = r.a[i];
-	}
 
 	// add the points
 	std::list<CalibrationPointRecord>	points
@@ -77,6 +74,38 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 	}
 	return calibration;
 }
+
+/**
+ * \brief Add a calibration to the database
+ */
+long	CalibrationStore::addCalibration(const Calibration& calibration) {
+	CalibrationTable	t(_database);
+	CalibrationRecord	record(0, calibration);
+	return t.add(record);
+}
+
+/**
+ * \brief update a calibration record in the database
+ */
+void	CalibrationStore::updateCalibration(long id,
+		const GuiderCalibration& calibration) {
+	CalibrationTable	t(_database);
+	CalibrationRecord	record = t.byid(id);
+	for (int i = 0; i < 6; i++) {
+		record.a[i] = calibration.a[i];
+	}
+	t.update(id, record);
+}
+
+/**
+ * \brief Add a point to an existing calibration process
+ */
+void	CalibrationStore::addPoint(long id, const CalibrationPoint& point) {
+	CalibrationPointRecord	record(0, id, point);
+	CalibrationPointTable	t(_database);
+	t.add(record);
+}
+
 
 } // namespace guiding
 } // namespace astro

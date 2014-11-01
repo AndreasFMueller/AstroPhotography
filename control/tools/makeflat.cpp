@@ -9,12 +9,16 @@
 #include <AstroCalibration.h>
 #include <AstroIO.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::calibration;
 using namespace astro::io;
 using namespace astro::image;
 
 namespace astro {
+namespace app {
+namespace makeflat {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ -d?h ] [ -o outfile ] [ -D dark ] [ -o outfile ] files ..." << std::endl;
@@ -32,7 +36,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a flat image from them.
  */
-int	makeflat_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	const char	*darkfilename = NULL;
 	int	c;
@@ -111,15 +115,10 @@ int	makeflat_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace makeflat
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::makeflat_main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "makeflat tool terminated by "
-			"exception: %s", x.what());
-		std::cerr << "makeflat tool terminated: " << x.what()
-			<< std::endl;
-	}
+	return astro::main_function<astro::app::makeflat::main>(argc, argv);
 }

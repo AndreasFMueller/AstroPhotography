@@ -23,8 +23,6 @@ void	Metavalue::standardize() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "check value for PURPOSE: [%s]",
 			value.c_str());
 		value = trim(value);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
-				value.c_str());
 		if ((value != "dark") && (value != "flat")
 			&& (value != "light")) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
@@ -33,8 +31,8 @@ void	Metavalue::standardize() {
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "purpose: %s", value.c_str());
 	}
-	if ((keyword == "INSTRUME") || (keyword == "PURPOSE")
-		|| (keyword == "PROJECT") || (keyword == "BAYER")) {
+	if ((keyword == "INSTRUME") || (keyword == "PROJECT")
+		|| (keyword == "BAYER")) {
 		value = rtrim(value);
 	}
 }
@@ -220,7 +218,7 @@ Metavalue::operator	FITSdate() const {
 
 std::string	Metavalue::toString() const {
 	return stringprintf("%s[%s]: %s / %s", 
-		keyword.c_str(), datatype.name(),
+		keyword.c_str(), demangle(datatype.name()).c_str(),
 		value.c_str(), comment.c_str());
 }
 

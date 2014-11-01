@@ -23,9 +23,26 @@ public:
 	int	ccdid;
 	std::string	guiderport;
 	GuidingRun() { }
+	GuidingRun(time_t _whenstarted, const std::string& _camera,
+		int _ccdid, const std::string& _guiderport)
+		: whenstarted(_whenstarted), camera(_camera), ccdid(_ccdid),
+		  guiderport(_guiderport) {
+	}
 };
 
 typedef persistence::Persistent<GuidingRun>	GuidingRunRecord;
+
+/**
+ * \brief A class encapsulating a full history, including tracking points
+ */
+class TrackingHistory : public GuidingRun {
+public:
+	std::list<TrackingPoint>	points;
+	TrackingHistory() { }
+	TrackingHistory(const GuidingRun& guidingrun) 
+		: GuidingRun(guidingrun) {
+	}
+};
 
 /**
  * \brief Adapter for GuidingRun table entries

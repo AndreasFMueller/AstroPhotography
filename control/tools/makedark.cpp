@@ -8,12 +8,16 @@
 #include <AstroImage.h>
 #include <AstroCalibration.h>
 #include <AstroIO.h>
+#include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::calibration;
 using namespace astro::io;
 using namespace astro::image;
 
 namespace astro {
+namespace app {
+namespace makedark {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] darkimages"
@@ -33,7 +37,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a dark image from them.
  */
-int	makedark_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
 	while (EOF != (c = getopt(argc, argv, "do:")))
@@ -86,15 +90,10 @@ int	makedark_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace makedark
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::makedark_main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
-			"exception: %s", x.what());
-		std::cerr << "makedark tool terminated: " << x.what()
-			<< std::endl;
-	}
+	return astro::main_function<astro::app::makedark::main>(argc, argv);
 }

@@ -66,19 +66,5 @@ const ConstImageAdapter<double>&        WriteImageStep::out() const {
 	return input()->out();
 }
 
-/**
- * \brief Find out whether meta data is available
- */
-bool	WriteImageStep::hasMetadata(const std::string& name) const {
-	return input()->hasMetadata(name);
-}
-
-/**
- * \brief Access to meta data
- */
-astro::image::Metavalue	WriteImageStep::getMetadata(const std::string& name) const {
-	return input()->getMetadata(name);
-}
-
 } // namespace process
 } // namespace astro

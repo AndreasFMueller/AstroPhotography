@@ -28,17 +28,6 @@ public:
 };
 typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 
-/**
- * \brief Callback data for the focusing process
- */
-class FocusCallbackData : public astro::callback::ImageCallbackData {
-	double	_value;
-public:
-	double	value() const { return _value; }
-	FocusCallbackData(astro::image::ImagePtr image, double value)
-		: ImageCallbackData(image), _value(value) { }
-};
-
 // we need the FocusWork forward declaration in the next class
 class FocusWork;
 
@@ -105,6 +94,9 @@ public:
 	bool	completed() const {
 		return (_status == FOCUSED) || (_status == FAILED);
 	}
+private:
+	Focusing(const Focusing& other);
+	Focusing&	operator=(const Focusing& other);
 public:
 	Focusing(astro::camera::CcdPtr ccd,
 		astro::camera::FocuserPtr focuser);
@@ -115,6 +107,33 @@ public:
 	astro::thread::ThreadPtr	thread;
 	FocusWork	*work;
 	friend class FocusWork;	// allow the FocusWork class update the status
+};
+
+typedef std::shared_ptr<Focusing>	FocusingPtr;
+
+/**
+ * \brief Callback data for the focusing process
+ */
+class FocusCallbackData : public astro::callback::ImageCallbackData {
+	int	_position;
+	double	_value;
+public:
+	int	position() const { return _position; }
+	double	value() const { return _value; }
+	FocusCallbackData(astro::image::ImagePtr image,
+		int position, double value)
+		: ImageCallbackData(image), _position(position), _value(value) {
+	}
+};
+
+/**
+ * \brief Callback data object to inform about a state change
+ */
+class FocusCallbackState : public astro::callback::CallbackData {
+	Focusing::focus_status	_state;
+public:
+	Focusing::focus_status	state() const { return _state; }
+	FocusCallbackState(Focusing::focus_status state) : _state(state) { }
 };
 
 } // namespace focusing

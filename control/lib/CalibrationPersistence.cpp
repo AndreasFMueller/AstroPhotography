@@ -1,5 +1,5 @@
 /*
- * Calibration.cpp -- implementation of the calibration table
+ * CalibrationPersistence.cpp -- implementation of the calibration table
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -9,6 +9,14 @@ using namespace astro::persistence;
 
 namespace astro {
 namespace guiding {
+
+//////////////////////////////////////////////////////////////////////
+// Calibration constructor
+//////////////////////////////////////////////////////////////////////
+Calibration::Calibration() {
+	time(&when);
+	for (int i = 0; i < 6; i++) { a[i] = 0.; }
+}
 
 //////////////////////////////////////////////////////////////////////
 // CalibrationTableAdapter implementation
@@ -101,7 +109,8 @@ std::string	CalibrationPointTableAdapter::createstatement() {
 	return std::string(
 	"create table calibrationpoint (\n"
 	"    id int not null,\n"
-	"    calibration int not null,\n"
+	"    calibration int not null references calibration(id) "
+		"on delete cascade on update cascade,\n"
 	"    t double not null default 0,\n"
 	"    ra double not null default 0,\n"
 	"    dec double not null default 0,\n"

@@ -12,7 +12,10 @@
 #include <AstroGuiding.h>
 #include <AstroCallback.h>
 #include <AstroIO.h>
+#include <AstroUtils.h>
+#include <typeinfo>
 
+using namespace astro;
 using namespace astro::camera;
 using namespace astro::device;
 using namespace astro::module;
@@ -21,6 +24,8 @@ using namespace astro::callback;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace guider {
 
 class NewImageCallback : public Callback {
 	FITSdirectory	directory;
@@ -70,7 +75,7 @@ void	usage(const char *progname) {
 		<< std::endl;
 }
 
-int	guider_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	// parse command line arguments
 	int	c;
 	unsigned int	cameraid = 0;
@@ -223,13 +228,10 @@ int	guider_main(int argc, char *argv[]) {
 }
 
 
+} // namespace guider
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::guider_main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "guider terminated by exception: " << x.what()
-			<< std::endl;
-	}
+	return astro::main_function<astro::app::guider::main>(argc, argv);
 }

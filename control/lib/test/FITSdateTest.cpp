@@ -19,6 +19,7 @@ class FITSdateTest: public CppUnit::TestFixture {
 public:
 	void	setUp();
 	void	tearDown();
+	void	testZero();
 	void	testShort();
 	void	testLong();
 	void	testVeryLong();
@@ -27,6 +28,7 @@ public:
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(FITSdateTest);
+	CPPUNIT_TEST(testZero);
 	CPPUNIT_TEST(testShort);
 	CPPUNIT_TEST(testLong);
 	CPPUNIT_TEST(testVeryLong);
@@ -43,20 +45,31 @@ void	FITSdateTest::setUp() {
 void	FITSdateTest::tearDown() {
 }
 
-void	FITSdateTest::testShort() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
+void	FITSdateTest::testZero() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testZero() begin");
+	std::string	s("1970-01-01T00:00:00.000");
+	FITSdate	d(s);
+	struct timeval	tv = d.time();
+	CPPUNIT_ASSERT(tv.tv_sec == 0);
+	CPPUNIT_ASSERT(tv.tv_usec == 0);
+	CPPUNIT_ASSERT(s == (std::string)d);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testZero() end");
+}
 
-	std::string	s("1962-02-14");
+void	FITSdateTest::testShort() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShort() begin");
+
+	std::string	s("1982-02-14");
 	FITSdate	d(s);
 	CPPUNIT_ASSERT(d.showShort() == s);
-	CPPUNIT_ASSERT(d.showLong() == "1962-02-14T00:00:00");
-	CPPUNIT_ASSERT(d.showVeryLong() == "1962-02-14T00:00:00.000");
+	CPPUNIT_ASSERT(d.showLong() == "1982-02-14T00:00:00");
+	CPPUNIT_ASSERT(d.showVeryLong() == "1982-02-14T00:00:00.000");
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testShort() end");
 }
 
 void	FITSdateTest::testLong() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLong() begin");
 
 	std::string	s("1999-04-18T12:13:14");
 	FITSdate	d(s);
@@ -64,11 +77,11 @@ void	FITSdateTest::testLong() {
 	CPPUNIT_ASSERT(d.showShort() == "1999-04-18");
 	CPPUNIT_ASSERT(d.showVeryLong() == "1999-04-18T12:13:14.000");
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLong() end");
 }
 
 void	FITSdateTest::testVeryLong() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVeryLong() begin");
 
 	std::string	s("2001-12-31T21:32:43.000");
 	FITSdate	d(s);
@@ -76,12 +89,12 @@ void	FITSdateTest::testVeryLong() {
 	CPPUNIT_ASSERT(d.showLong() == "2001-12-31T21:32:43");
 	CPPUNIT_ASSERT(d.showShort() == "2001-12-31");
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVeryLong() end");
 }
 
 void	FITSdateTest::testComparison() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testComparison() begin");
-	FITSdate	past("1962-02-14");
+	FITSdate	past("1982-02-14");
 	FITSdate	now;
 	CPPUNIT_ASSERT(past < now);
 	CPPUNIT_ASSERT(past == past);

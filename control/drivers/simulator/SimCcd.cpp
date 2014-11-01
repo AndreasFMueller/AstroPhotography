@@ -127,6 +127,12 @@ ImagePtr  SimCcd::getRawImage() {
 	starcamera.stretch(exposure.exposuretime);
 	starcamera.light(exposure.shutter == SHUTTER_OPEN);
 
+	// flat images need special treatment
+	if (exposure.purpose == Exposure::flat) {
+		starcamera.light(false);
+		starcamera.dark(20000. * exposure.exposuretime);
+	}
+
 	// geometric distortion (guiderport)
 	starcamera.translation(_locator.simguiderport()->offset());
 	starcamera.alpha(_locator.simguiderport()->alpha());

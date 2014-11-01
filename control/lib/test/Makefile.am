@@ -33,10 +33,10 @@ noinst_PROGRAMS = tests processtests catalogtests singletest \
 
 ## general tests
 tests_SOURCES = tests.cpp \
-	StacktraceTest.cpp TrimTest.cpp \
+	StacktraceTest.cpp TrimTest.cpp PathTest.cpp \
 	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
 	DeviceNameTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
-	FITSKeywordTest.cpp ImageServerTablesTest.cpp \
+	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
 	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
@@ -52,15 +52,23 @@ tests_SOURCES = tests.cpp \
 	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
 	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
 	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
+	ProjectTableTest.cpp GlobalTableTest.cpp ConfigurationTest.cpp \
+	DeviceMapTableTest.cpp DeviceMapperTest.cpp \
 	FocusComputeTest.cpp MinRadiusTest.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
 	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
-	InterpolationStepTest.cpp 
+	InterpolationStepTest.cpp AngleTest.cpp
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ImageServerTest.cpp
+	PixelTest.cpp
+#	ProjectTableTest.cpp
+#	FITSKeywordTest.cpp
+#	ImageRepoTest.cpp
+#	InstrumentTest.cpp
+#	DeviceMapperTest.cpp
+#	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 

@@ -269,17 +269,20 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 		if (fits_read_keyn(fptr, keynum, keyname, value, comment,
 			&status)) {
 			// we are at the end of the headers, so we return
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d headers read",
-				keynum);
-			return;
+			break;
 		}
-		keynum++;
 		std::string	name(keyname);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "key '%s' found", name.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "key[%d] '%s' found", keynum,
+			name.c_str());
 		if (name.size() == 0) {
-			continue;
+			// an empty key means that we are at the end of the
+			// list of attributes, so we stop at this point
+			break;
 		}
-		if (!ignored(name)) {
+		if (ignored(name)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "header '%s' ignored",
+				name.c_str());
+		} else {
 			FITShdu	hdu(name, FITSKeywords::index(name));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "type %s hdu",
 				hdu.type.name());
@@ -290,7 +293,10 @@ void	FITSinfileBase::readkeys() throw (FITSexception) {
 				hdu.comment.c_str());
 			headers.push_back(make_pair(hdu.name, hdu));
 		}
+		keynum++;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d headers read (headers.size() = %d)",
+		keynum - 1, headers.size());
 }
 
 /**

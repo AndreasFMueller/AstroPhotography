@@ -9,15 +9,15 @@
 
 namespace snowstar {
 
-std::string	GuiderPortI::getName(const Ice::Current& current) {
+std::string	GuiderPortI::getName(const Ice::Current& /* current */) {
 	return _guiderport->name();
 }
 
-Ice::Byte	GuiderPortI::active(const Ice::Current& current) {
+Ice::Byte	GuiderPortI::active(const Ice::Current& /* current */) {
 	return _guiderport->active();
 }
 
-void	GuiderPortI::activate(float ra, float dec, const Ice::Current& current) {
+void	GuiderPortI::activate(float ra, float dec, const Ice::Current& /* current */) {
 	double  raplus = 0, raminus = 0, decplus = 0, decminus = 0;
 	if (ra > 0) {
 		raplus = ra;
@@ -34,8 +34,7 @@ void	GuiderPortI::activate(float ra, float dec, const Ice::Current& current) {
 
 GuiderPortPrx	GuiderPortI::createProxy(const std::string& guiderportname,
 			const Ice::Current& current) {
-	return snowstar::createProxy<GuiderPortPrx>(
-		NameConverter::urlencode(guiderportname), current);
+	return snowstar::createProxy<GuiderPortPrx>(guiderportname, current);
 }
 
 } // namespace snowstar

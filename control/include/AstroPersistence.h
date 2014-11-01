@@ -15,6 +15,15 @@
 #include <stdexcept>
 
 namespace astro {
+
+/**
+ * \brief A simple persistence layer for the astrophotography project
+ *
+ * Metadata for astrophotography projects as well as taks information 
+ * for the task manager need to be stored in an sqlite3 database. 
+ * This namespace contain some classes an templates that simplify 
+ * database access.
+ */
 namespace persistence {
 
 /**
@@ -98,6 +107,12 @@ std::ostream&	operator<<(std::ostream& out, const Result& result);
 
 /**
  * \brief Interface for statements
+ *
+ * This essentially encapsulates a query string with place holders.
+ * The sqlite3 database provides many methods to bind values to those
+ * place holders, this class provides a strictly typed object oriented
+ * interface to the same functionality, and eases the transition to the
+ * types used in the rest of the system.
  */
 class Statement {
 	std::string	_query;
@@ -132,6 +147,10 @@ typedef std::shared_ptr<Statement>	StatementPtr;
 
 /**
  * \brief The generic backend interface
+ *
+ * This class only defines the interface, a derived backend class will
+ * implement the methods for a particular type of database. Thus applications
+ * using this interface are not tied to the actual database system used.
  */
 class DatabaseBackend {
 public:
@@ -140,8 +159,11 @@ public:
 	virtual std::vector<std::string>
 		fieldnames(const std::string& tablename) = 0;
 	virtual void	begin() = 0;
+	virtual void	begin(const std::string& savepoint) = 0;
 	virtual void	commit() = 0;
+	virtual void	commit(const std::string& savepoint) = 0;
 	virtual void	rollback() = 0;
+	virtual void	rollback(const std::string& savepoint) = 0;
 	virtual StatementPtr	statement(const std::string& query) = 0;
 	virtual bool	hastable(const std::string& tablename) = 0;
 };
@@ -181,7 +203,7 @@ protected:
 	std::vector<std::string>	_fieldnames;
 	std::string	selectquery() const;
 protected:
-	
+	Database	database() { return _database; }
 public:
 	TableBase(Database database, const std::string& tablename,
 		const std::string& createstatement = std::string());

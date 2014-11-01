@@ -1,5 +1,5 @@
 //
-// types.idl -- common type definitions
+// types.ice -- common type definitions
 //
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
@@ -8,6 +8,8 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
+	sequence<int>	idlist;
+
 	// Image related data structures
 	/**
 	 * \brief Pixel coordinates of a pixel in an image
@@ -45,5 +47,32 @@ module snowstar {
 	struct Point {
 		float	x;
 		float	y;
+	};
+
+	/**
+	 * \brief sky point specification for equatorial mounts
+	 */
+	struct RaDec {
+		float	ra;	// right ascension in hours
+		float	dec;	// declination in degrees
+	};
+
+	/**
+	 * \brief sky point specification for AltAzimut mounts
+	 */
+	struct AzmAlt {
+		float	azm;	// azimut in degrees
+		float	alt;	// altitude above horizon in degrees
+	};
+
+	/**
+	 * \brief base class for all callbacks interfaces
+	 *
+	 * Callbacks monitor some process, so they all need notifcation when
+	 * that process has completed. They may want to extend that facility
+	 * e.g. to report the final state.
+	 */
+	interface Callback {
+		void	stop();
 	};
 };

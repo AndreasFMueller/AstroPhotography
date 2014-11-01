@@ -94,5 +94,18 @@ astro::camera::FocuserPtr
 	return locator(name.modulename())->getFocuser((std::string)name);
 }
 
+template<>
+astro::device::MountPtr
+	DeviceAccessor<astro::device::MountPtr>::get(
+		const DeviceName& name) {
+	if (name.type() != DeviceName::Mount) {
+		std::string	msg = stringprintf("%s is not a mount name",
+			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "bad request: %s", msg.c_str());
+		throw BadParameter(msg);
+	}
+	return locator(name.modulename())->getMount((std::string)name);
+}
+
 } // namespace device
 } // namespace astro

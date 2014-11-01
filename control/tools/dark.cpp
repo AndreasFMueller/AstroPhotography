@@ -12,6 +12,7 @@
 #include <AstroLoader.h>
 #include <AstroDevice.h>
 
+using namespace astro;
 using namespace astro::calibration;
 using namespace astro::io;
 using namespace astro::image;
@@ -20,6 +21,8 @@ using namespace astro::module;
 using namespace astro::device;
 
 namespace astro {
+namespace app {
+namespace dark {
 
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] darkimages"
@@ -42,7 +45,7 @@ void	usage(const char *progname) {
  * This tool takes a list of image names on the command line, reads them,
  * and produces a dark image from them.
  */
-int	dark_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	Exposure	exposure;
 	double	exposuretime = 1;
 	unsigned int	nimages = 3;
@@ -121,15 +124,10 @@ int	dark_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace dark
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::dark_main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "makedark tool terminated by "
-			"exception: %s", x.what());
-		std::cerr << "makedark tool terminated: " << x.what()
-			<< std::endl;
-	}
+	return astro::main_function<astro::app::dark::main>(argc, argv);
 }

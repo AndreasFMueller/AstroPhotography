@@ -8,16 +8,13 @@
 
 #include <tasks.h>
 #include <AstroTask.h>
+#include <CallbackHandler.h>
 
 namespace snowstar {
 
-TaskState	convert(const astro::task::TaskInfo::taskstate& state);
-astro::task::TaskInfo::taskstate	convert(const TaskState& state);
-
-TaskInfo	convert(const astro::task::TaskInfo& info);
-
-TaskParameters	convert(const astro::task::TaskParameters& parameters);
-astro::task::TaskParameters	convert(const TaskParameters& parameters);
+template<>
+void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
+		const astro::callback::CallbackDataPtr d);
 
 class TaskQueueI : public TaskQueue {
 	astro::task::TaskQueue&	taskqueue;
@@ -25,7 +22,6 @@ public:
 	TaskQueueI(astro::task::TaskQueue& taskqueue);
 	virtual	~TaskQueueI();
 	// conversion 
-	QueueState	convert(const astro::task::TaskQueue::state_type& state);
 
 	// interface methods
 	virtual QueueState state(const Ice::Current& current);
@@ -41,6 +37,30 @@ public:
 	virtual taskidsequence tasklist(TaskState state,
 			const Ice::Current& current);
 	virtual TaskPrx getTask(int taskid, const Ice::Current& current);
+
+	// callback handlers
+private:
+	SnowCallback<TaskMonitorPrx>	callbacks;
+public:
+	virtual void	registerMonitor(const Ice::Identity& callback,
+				const Ice::Current& current);
+	virtual void	unregisterMonitor(const Ice::Identity& callbac,
+				const Ice::Current& current);
+	void	taskUpdate(const astro::callback::CallbackDataPtr data);
+};
+
+/**
+ * \brief Callback class for task monitoring
+ */
+class TaskQueueICallback : public astro::callback::Callback {
+	TaskQueueI&	_taskqueue;
+public:
+	TaskQueueICallback(TaskQueueI& taskqueue) : _taskqueue(taskqueue) { }
+	astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr& data) {
+		_taskqueue.taskUpdate(data);
+		return data;
+	}
 };
 
 } // namespace snowstar

@@ -9,6 +9,7 @@
 #include <AstroExceptions.h>
 #include <AstroLoader.h>
 #include <config.h>
+#include <CelestronMount.h>
 
 namespace astro {
 namespace module {
@@ -70,11 +71,13 @@ std::vector<std::string>	CelestronLocator::getDevicelist(
 	return names;
 }
 
-MountPtr	CelestronLocator::getMount0(const DeviceName& /* name */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a celestron mount");
-	// Implementation incomplete
-	// create the Mount
-	return MountPtr();
+MountPtr	CelestronLocator::getMount0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the celestron mount '%s'",
+		name.toString().c_str());
+
+	CelestronMount	*mount = new CelestronMount(name);
+
+	return MountPtr(mount);
 }
 
 } // namespace celestron

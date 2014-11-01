@@ -13,6 +13,7 @@
 #include <AstroIO.h>
 #include <AstroDemosaic.h>
 #include <AstroImager.h>
+#include <AstroUtils.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -21,6 +22,8 @@ using namespace astro::interpolation;
 using namespace astro::camera;
 
 namespace astro {
+namespace app {
+namespace calibrate {
 
 /**
  * \brief usage
@@ -46,7 +49,7 @@ void	usage(const char *progname) {
 /**
  * \brief Main function in astro namespace
  */
-int	calibrate_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	const char	*darkfilename = NULL;
 	const char	*flatfilename = NULL;
@@ -161,15 +164,10 @@ int	calibrate_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace calibrate
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::calibrate_main(argc, argv);
-	} catch (std::exception& x) {
-		std::string	msg = stringprintf("%s terminated: %s",
-			argv[0], x.what());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		std::cerr << msg << std::endl;
-	}
+	return astro::main_function<astro::app::calibrate::main>(argc, argv);
 }

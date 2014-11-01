@@ -18,6 +18,7 @@ module snowstar {
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };
+	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT };
 
 	/**
 	 * \brief Exposure request structure
@@ -57,6 +58,13 @@ module snowstar {
 		 * For dark images, the shutter needs to be closed.
 		 */
 		ShutterState	shutter;
+		/**
+		 * \brief Exposure purpose
+		 *
+		 * The camera may behave differently if it knows what the
+		 * purpose of the exposure is.
+		 */
+		ExposurePurpose	purpose;
 		/**
 		 * \brief Binning mode to use during readout
 		 *
@@ -287,6 +295,10 @@ module snowstar {
 		 */
 		void	select(int position) throws NotFound;
 		/**
+		 * \brief Move the filter wheel to a given filter name
+		 */
+		void	selectName(string filtername) throws NotFound;
+		/**
 		 * \brief Get the name of the filter
 		 */
 		string	filterName(int position) throws NotFound;
@@ -353,6 +365,36 @@ module snowstar {
 		bool	hasGuiderPort();
 		/**
 		 * \brief Get the Guider Port
+		 */
+		GuiderPort*	getGuiderPort() throws NotImplemented;
+	};
+
+	/**
+	 * \brief AdaptiveOptics abstraction
+	 */
+	interface AdaptiveOptics {
+		/**
+ 		 * \brief Get the name of the adaptive optics unit
+		 */
+		string	getName();
+		/**
+ 		 * \brief Set a position offset
+		 */
+		void	set(Point position);
+		/**
+		 * \brief Get the position offset
+		 */
+		Point	get();
+		/**
+		 * \brief Center (reset) the adaptive optics unit
+		 */
+		void	center();
+		/**
+		 * \brief find out whether the 
+		 */
+		bool	hasGuiderPort();
+		/**
+		 * \brief get the guider port of the adaptive optics unit
 		 */
 		GuiderPort*	getGuiderPort() throws NotImplemented;
 	};

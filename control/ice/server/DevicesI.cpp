@@ -6,6 +6,9 @@
 #include <DevicesI.h>
 #include <AstroLoader.h>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
+#include <AstroDebug.h>
+#include <NameConverter.h>
 
 namespace snowstar {
 
@@ -17,10 +20,15 @@ DevicesI::~DevicesI() {
 }
 
 DeviceNameList DevicesI::getDevicelist(devicetype type,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	astro::module::Devices::devicelist	devicelist
 		= _devices.getDevicelist(convert(type));
 	return convert(devicelist);
+}
+
+AdaptiveOpticsPrx	DevicesI::getAdaptiveOptics(const std::string& name,
+					const Ice::Current& current) {
+	return createProxy<AdaptiveOpticsPrx>(name, current);
 }
 
 CameraPrx	DevicesI::getCamera(const std::string& name,
@@ -51,6 +59,11 @@ CoolerPrx	DevicesI::getCooler(const std::string& name,
 FocuserPrx	DevicesI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
 	return createProxy<FocuserPrx>(name, current);
+}
+
+MountPrx	DevicesI::getMount(const std::string& name,
+					const Ice::Current& current) {
+	return createProxy<MountPrx>(name, current);
 }
 
 } // namespace snowstar

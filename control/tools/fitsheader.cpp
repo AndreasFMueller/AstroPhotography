@@ -7,11 +7,15 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include <iostream>
 #include <fitsio.h>
 #include <string>
+#include <typeinfo>
 
 namespace astro {
+namespace app {
+namespace fitsheader {
 
 /**
  * \brief Display all headers of a fits file
@@ -163,18 +167,12 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace fitsheader
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "fitsheader terminated by exception: ";
-		std::cerr << x.what() << std::endl;
-	} catch (...) {
-		std::cerr << "fitsheader terminated by unknown exception";
-		std::cerr << std::endl;
-	}
+	return astro::main_function<astro::app::fitsheader::main>(argc, argv);
 }
 
 

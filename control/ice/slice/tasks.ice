@@ -4,6 +4,7 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 	/**
@@ -53,7 +54,7 @@ module snowstar {
 		int		taskid;
 		// the current state of the task, and when it last changed
 		TaskState	state;
-		int		lastchange;
+		double		lastchange;
 		string		cause;
 		// where the produced image is storead
 		string		filename;
@@ -82,9 +83,17 @@ module snowstar {
 		double		timeago;
 	};
 
+	/**
+	 * \brief Interface to monitor a task
+	 */
+	interface TaskMonitor extends Callback {
+		void	update(TaskMonitorInfo info);
+	};
+
 	sequence<int> taskidsequence;
 
-	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING, QueueSTOPPED };
+	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING,
+		QueueSTOPPED };
 	/**
 	 * \brief Task queue
 	 *
@@ -142,5 +151,11 @@ module snowstar {
 		 * \brief retrieve a task reference
 		 */
 		Task*	getTask(int taskid) throws NotFound;
+
+		/**
+		 * \brief register a callback
+		 */
+		void	registerMonitor(Ice::Identity taskmonitor);
+		void	unregisterMonitor(Ice::Identity taskmonitor);
 	};
 };

@@ -33,6 +33,7 @@ public:
 	void	testTranslation();
 	void	testSubrectangle();
 	void	testSubrectangleDoesNotFit();
+	void	testRectangleSpec();
 
 	CPPUNIT_TEST_SUITE(ImageRectangleTest);
 	CPPUNIT_TEST(testAccessors);
@@ -44,6 +45,7 @@ public:
 	CPPUNIT_TEST(testTranslation);
 	CPPUNIT_TEST(testSubrectangle);
 	CPPUNIT_TEST_EXCEPTION(testSubrectangleDoesNotFit, std::range_error);
+	CPPUNIT_TEST(testRectangleSpec);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -159,6 +161,21 @@ void	ImageRectangleTest::testSubrectangleDoesNotFit() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() begin");
 	ImageRectangle	r(*r3, *r2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testSubrectangleDoesNotFit() end");
+}
+
+void	ImageRectangleTest::testRectangleSpec() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRectangleSpec() begin");
+	ImageRectangle	rectangle("1848x1291@(47,11)");
+	CPPUNIT_ASSERT(rectangle.size().width() == 1848);
+	CPPUNIT_ASSERT(rectangle.size().height() == 1291);
+	CPPUNIT_ASSERT(rectangle.origin().x() == 47);
+	CPPUNIT_ASSERT(rectangle.origin().y() == 11);
+	ImageRectangle	rectangle2("1848x1291@47,11");
+	CPPUNIT_ASSERT(rectangle2.size().width() == 1848);
+	CPPUNIT_ASSERT(rectangle2.size().height() == 1291);
+	CPPUNIT_ASSERT(rectangle2.origin().x() == 47);
+	CPPUNIT_ASSERT(rectangle2.origin().y() == 11);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRectangleSpec() end");
 }
 
 } // namespace test

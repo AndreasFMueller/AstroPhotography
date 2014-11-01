@@ -10,6 +10,7 @@
 #include <TaskQueueI.h>
 #include <TaskTable.h>
 #include <ImageI.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 
@@ -29,23 +30,23 @@ astro::task::TaskQueueEntry	TaskI::entry() {
 	return result;
 }
 
-TaskState	TaskI::state(const Ice::Current& current) {
+TaskState	TaskI::state(const Ice::Current& /* current */) {
 	return snowstar::convert(entry().state());
 }
 
-TaskParameters	TaskI::parameters(const Ice::Current& current) {
+TaskParameters	TaskI::parameters(const Ice::Current& /* current */) {
 	return snowstar::convert(entry().parameters());
 }
 
-TaskInfo	TaskI::info(const Ice::Current& current) {
+TaskInfo	TaskI::info(const Ice::Current& /* current */) {
 	return snowstar::convert(entry().info());
 }
 
-std::string	TaskI::imagename(const Ice::Current& current) {
+std::string	TaskI::imagename(const Ice::Current& /* current */) {
 	return entry().filename();
 }
 
-ImagePrx	TaskI::getImage(const Ice::Current& current) {
+ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
 	std::string	filename = entry().filename();
 	//return ImageI::createProxy(filename, current);
 	return NULL;

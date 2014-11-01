@@ -54,8 +54,26 @@ corba
 
 ice
 	Contains ICE IDL and supporting classes for an ICE based server
+	named "snowstar". This server makes all telescope control operations
+	available through an ICE based interface. The idea is that a simple
+	computer like athe Odroid U3 can control a telescope and all camera
+	equipment without a permanent connection to a client.
 
-	idl
+	slice
+		interface definition for ICE interfaces
+
+	include
+		Headers generated from slice source code and for classes
+		common to several clients
+
+	lib
+		Various support classes used in the clients
+
+	client
+		Various command line clients for the snowstar server
+
+	server
+		The source code for teh snowstar server
 
 
 include
@@ -131,10 +149,21 @@ Mandatory packages:
 
  - SQLite3 is used for persistence of various types of objects
 
+ - UUID, library for unique ids, used to tag FITS files so that duplicates
+   can be recognized
+
+ - The std::regex class of the C++11 standard is used, but g++, although it
+   does come with the appropriate headers, does not implement the std::regex
+   class. In this case, the regex class from the boost library can be used,
+   it should be configured using the --enable-boostregex option to configure.
+
 Optional packages:
 
  - omniORB: The client-server-communication uses Corba, and the build system
    assumes that omniORB is preinstalled for the purpose.
+
+ - ZeroC ICE is the prefered communications engine, version 3.5.1 is required
+   for C++11 support and for ARM.
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
    by using the Video4Linux and the Unicap library. See

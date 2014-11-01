@@ -1,5 +1,5 @@
 /*
- * TaskLocator.h -- locate a task servantion
+ * TaskLocator.h -- locate a task servant
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

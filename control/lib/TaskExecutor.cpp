@@ -39,28 +39,17 @@ static void	*taskmain(void *p) {
  * interrupted. If true, the wait completed.
  */
 bool	TaskExecutor::wait(float t) {
+	std::unique_lock<std::mutex>	lock(_lock);
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds", t);
-	int	seconds = floor(t);
-	int	nanoseconds = 1000000000 * (t - seconds);
-	struct timeval	tv;
-	struct timespec	ts;
-	gettimeofday(&tv, NULL);
-	ts.tv_sec = tv.tv_sec + floor(t);
-	ts.tv_nsec = tv.tv_usec + nanoseconds;
-	if (ts.tv_nsec > 999999999) {
-		ts.tv_sec += ts.tv_nsec / 1000000000;
-		ts.tv_nsec = ts.tv_nsec % 1000000000;
-	}
+	long long	ns = 1000000000 * t;
 	
 	// wait for completion of exposure
-	int	rc = pthread_cond_timedwait(&_cond, &_lock, &ts);
-	if (rc == 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait cancelled");
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete: %s (%d)",
-			strerror(rc), rc);
-	}
-	return (rc == ETIMEDOUT) ? true : false;
+	bool	timedout = (std::cv_status::no_timeout !=
+			_cond.wait_for(lock, std::chrono::nanoseconds(ns)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %s",
+		(timedout) ? "cancelled" : "complete");
+	return timedout;
 }
 
 /**
@@ -138,6 +127,8 @@ void	ExposureTask::run() {
 			// XXX what do we do when the cooler cannot stabilize?
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler now stable");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no cooler");
 	}
 
 	// wait for the filterwheel if present
@@ -147,14 +138,18 @@ void	ExposureTask::run() {
 			throw std::runtime_error("filter wheel does not idle");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel now idle");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filter");
 	}
 
 	// start exposure
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
+		_task.exposure().exposuretime);
 	ccd->startExposure(_task.exposure());
 
 	// wait for completion of exposure
 	if (_executor.wait(_task.exposure().exposuretime)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for completion");
 		// wait for the ccd to complete
 		if (ccd->wait()) {
 			// get the image from the ccd
@@ -219,7 +214,7 @@ ExposureTask::~ExposureTask() {
  */
 void	TaskExecutor::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main started");
-	pthread_mutex_lock(&_lock);
+	std::unique_lock<std::mutex>	lock(_lock);
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entering main task region");
 		// inform queue of state change
@@ -234,7 +229,7 @@ void	TaskExecutor::main() {
 		_task.state(TaskQueueEntry::failed);
 	}
 	_queue.post(_task.id());
-	pthread_mutex_unlock(&_lock);
+	lock.unlock();
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main terminated");
 }
@@ -250,23 +245,13 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	: _queue(queue), _task(task) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new executor");
 
+	std::unique_lock<std::mutex>	lock(_lock);
+
 	// initialize pthead resources
-	pthread_mutexattr_t	mattr;
-	pthread_mutexattr_init(&mattr);
-	pthread_mutex_init(&_lock, &mattr);
-	pthread_mutex_lock(&_lock);
-
-	pthread_condattr_t	cattr;
-	pthread_condattr_init(&cattr);
-	pthread_cond_init(&_cond, &cattr);
-
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	pthread_create(&_thread, &attr, taskmain, this);
 	pthread_attr_destroy(&attr);
-
-	// release the lock
-	pthread_mutex_unlock(&_lock);
 }
 
 /**
@@ -281,7 +266,7 @@ TaskExecutor::~TaskExecutor() {
  * \brief cancel execution 
  */
 void	TaskExecutor::cancel() {
-	pthread_cond_signal(&_cond);
+	_cond.notify_one();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancel signal sent");
 }
 

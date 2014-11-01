@@ -51,5 +51,21 @@ std::list<TrackingPointRecord>	TrackingStore::getHistory(long id) {
 	return table.select(out.str());
 }
 
+/**
+ * \brief Get the complete history
+ *
+ * The tracking history contains the information in both the guiding record
+ * as well as all the tracking points.
+ */
+TrackingHistory	TrackingStore::get(long id) {
+	GuidingRunTable	table(_database);
+	TrackingHistory	history(table.byid(id));
+	std::list<TrackingPointRecord>	track = getHistory(id);
+	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
+		history.points.push_back(*ptr);
+	}
+	return history;
+}
+
 } // namespace guiding
 } // namespace astro

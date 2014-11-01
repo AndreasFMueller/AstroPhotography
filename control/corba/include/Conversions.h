@@ -11,6 +11,7 @@
 #include <AstroLocator.h>
 #include <AstroCamera.h>
 #include <guider.hh>
+#include <camera.hh>
 #include <AstroGuiding.h>
 #include <AstroTask.h>
 #include <tasks.hh>
@@ -51,8 +52,12 @@ astro::image::ImageRectangle	convert(const Astro::ImageRectangle& rectangle);
 Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle);
 
 // shutter state
-astro::camera::shutter_state	convert(const Astro::ShutterState& state);
+astro::camera::shutter_state	convert(const Astro::ShutterState state);
 Astro::ShutterState	convert(const astro::camera::shutter_state state);
+
+// exposure purpose
+astro::camera::Exposure::purpose_t	convert(const Astro::ExposurePurpose purpose);
+Astro::ExposurePurpose convert(const astro::camera::Exposure::purpose_t purpose);
 
 // Binning mode
 astro::camera::Binning	convert(const Astro::BinningMode& mode);

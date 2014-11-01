@@ -15,13 +15,14 @@ namespace astro {
 namespace camera {
 
 Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
-	mode(1,1), shutter(SHUTTER_OPEN) {
+	mode(1,1), shutter(SHUTTER_OPEN), purpose(Exposure::light) {
 }
 
 Exposure::Exposure(const ImageRectangle& _frame,
 	float _exposuretime)
                 : frame(_frame), exposuretime(_exposuretime), gain(1.),
-		  limit(INFINITY), shutter(SHUTTER_OPEN) {
+		  limit(INFINITY), shutter(SHUTTER_OPEN),
+		  purpose(Exposure::light) {
 }
 
 std::string	Exposure::toString() const {
@@ -66,6 +67,67 @@ void	Exposure::addToImage(ImageBase& image) const {
 		image.setMetadata(
 			FITSKeywords::meta(std::string("DATAMAX"), limit));
 	}
+
+	// purpose information
+	image.setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
+		purpose2string(purpose)));
+}
+
+std::string	Exposure::purpose2string(purpose_t p) {
+	switch (p) {
+	case dark:
+		return std::string("dark");
+	case flat:
+		return std::string("flat");
+	case light:
+		return std::string("light");
+	}
+	std::string	msg = stringprintf("unknown purpose %d", p);
+	throw std::runtime_error(msg);
+}
+
+Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
+	if (p == "dark") {
+		return dark;
+	}
+	if (p == "flat") {
+		return flat;
+	}
+	if (p == "light") {
+		return light;
+	}
+	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
+	throw std::runtime_error(msg);
+}
+
+std::string	Exposure::state2string(State s) {
+	switch (s) {
+	case idle:
+		return std::string("idle");
+	case exposing:
+		return std::string("exposing");
+	case exposed:
+		return std::string("exposed");
+	case cancelling:
+		return std::string("cancelling");
+	}
+	throw std::runtime_error("unknown exposure state");
+}
+
+Exposure::State	Exposure::string2state(const std::string& s) {
+	if (s == "idle") {
+		return idle;
+	}
+	if (s == "exposing") {
+		return exposing;
+	}
+	if (s == "exposed") {
+		return exposed;
+	}
+	if (s == "cancelling") {
+		return cancelling;
+	}
+	throw std::runtime_error("unknown exposure state");
 }
 
 } // namespace camera

@@ -15,7 +15,10 @@
 #include <AstroDevice.h>
 #include <AstroLoop.h>
 #include <AstroCallback.h>
+#include <AstroUtils.h>
 #include <Sun.h>
+#include <iostream>
+#include <typeinfo>
 
 using namespace astro;
 using namespace astro::io;
@@ -27,6 +30,8 @@ using namespace astro::task;
 using namespace astro::callback;
 
 namespace astro {
+namespace app {
+namespace imageloop {
 
 /**
  * \brief Usage of the imageloop program
@@ -236,6 +241,9 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 }
 
 
+/**
+ * \brief Main function for the imageloop program
+ */
 int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debugthreads = 1;
@@ -418,13 +426,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace imageloop
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s terminated: %s",
-			argv[0], x.what());
-	}
+	return main_function<astro::app::imageloop::main>(argc, argv);
 }

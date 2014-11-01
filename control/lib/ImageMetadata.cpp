@@ -51,6 +51,9 @@ void    ImageMetadata::setMetadata(const Metavalue& mv) {
 	}
 }
 
+/**
+ * \brief helper class to to look for a particular key
+ */
 class keyword_comparator {
 	std::string	_keyword;
 public:
@@ -78,9 +81,18 @@ ImageMetadata::iterator	ImageMetadata::find(const std::string& keyword) {
  * \brief Delete all entries for a given keyword
  */
 void	ImageMetadata::remove(const std::string& keyword) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove '%s' metavalues",
-		keyword.c_str());
-	std::remove_if(begin(), end(), keyword_comparator(keyword));
+	iterator	i;
+	while (end() != (i = find(keyword))) {
+		erase(i);
+	}
+}
+
+void	ImageMetadata::dump() const {
+	int	counter = 0;
+	for (auto ptr = begin(); ptr != end(); ptr++, counter++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "meta[%d] %s", counter,
+			ptr->second.toString().c_str());
+	}
 }
 
 } // namespace image

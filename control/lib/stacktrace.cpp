@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <stacktrace.h>
+#include <AstroUtils.h>
 #include <includes.h>
 
 extern "C" void	syslog_stacktrace(int sig) {

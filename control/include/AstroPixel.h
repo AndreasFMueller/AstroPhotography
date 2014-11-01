@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <typeinfo>
 
 namespace astro {
 namespace image {
@@ -119,7 +120,7 @@ void	convertPixelInteger(destValue& dest, const srcValue& src,
 #define CONVERT_PIXEL_INTEGER_SHIFT_LEFT(p)				\
 template<typename destValue, typename srcValue>				\
 void	convertPixelInteger(destValue& dest, const srcValue& src,	\
-		Int2Type<p>) {					\
+		Int2Type<p>) {						\
 	dest = destValue(src) << (p << 3);				\
 }
 CONVERT_PIXEL_INTEGER_SHIFT_LEFT(7)
@@ -133,7 +134,7 @@ CONVERT_PIXEL_INTEGER_SHIFT_LEFT(1)
 #define	CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(p)				\
 template<typename destValue, typename srcValue>				\
 void	convertPixelInteger(destValue& dest, const srcValue& src,	\
-		Int2Type<-p>) {					\
+		Int2Type<-p>) {						\
 	dest = destValue(src >> (p << 3));				\
 }
 
@@ -144,7 +145,27 @@ CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(4)
 CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(5)
 CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(6)
 CONVERT_PIXEL_INTEGER_SHIFT_RIGHT(7)
- 
+
+/**
+ * \brief conversionFunction template
+ *
+ * This template works around the problem that the compiler may convert
+ * unsigned char to int, and thes the converPixelValueX template function
+ * may not work correctly. This template is specialized for unsigned char
+ * destination values, which means that the compiler cannot optimize the
+ * function call away, so it will be called and thus the unsigned char
+ * return time is really enforced.
+ */
+template<typename destValue, typename srcValue>
+destValue	conversionFunction(const srcValue& src) {
+	return destValue(src);
+}
+
+template<>
+unsigned char	conversionFunction<unsigned char, float>(const float& src);
+template<>
+unsigned char	conversionFunction<unsigned char, double>(const double& src);
+
 /**
  * \brief Convert Pixel values template.
  *
@@ -158,7 +179,7 @@ template<typename destValue, typename srcValue,
 	typename isintegraldest, typename isintegralsrc>
 void	convertPixelValueX(destValue& dest, const srcValue& src,
 		isintegraldest, isintegralsrc) {
-	dest = destValue(src);
+	dest = conversionFunction<destValue, srcValue>(src);
 }
 
 /**

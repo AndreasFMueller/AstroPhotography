@@ -9,10 +9,14 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroCatalog.h>
+#include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::catalog;
 
 namespace astro {
+namespace app {
+namespace starcatalog {
 
 RaDec	center(0, 0);
 Angle	rawidth(1 * M_PI / 180);
@@ -103,15 +107,10 @@ int	main(int argc, char *argv[]) {
 	throw std::runtime_error("unknown command '" + command + "'");
 }
 
+} // namespace starcatalog
+} // namespace app
 } // namespace astro
 
-
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "starcatalog terminated by exception: "
-			<< x.what() << std::endl;
-		return EXIT_FAILURE;
-	}
+	return astro::main_function<astro::app::starcatalog::main>(argc, argv);
 }

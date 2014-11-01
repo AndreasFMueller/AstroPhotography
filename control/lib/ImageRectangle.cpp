@@ -7,6 +7,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <sstream>
+#include <astroregex.h>
 
 namespace astro {
 namespace image {
@@ -39,6 +40,31 @@ ImageRectangle::ImageRectangle(const ImageRectangle& rectangle,
 	if (!rectangle.contains(subrectangle)) {
 		throw std::range_error("subrectangle not contained in rectangle");
 	}
+}
+
+/**
+ * \brief Parse a rectangle specification
+ *
+ * Rectangle specification mimic the way X11 specifies the geometry of a window.
+ * A correct rectangle specification is of the form widthxheight@(x,y).
+ */
+ImageRectangle::ImageRectangle(const std::string& rectanglespec) {
+	std::string	r("([0-9]+)x([0-9]+)@\\(?([0-9]+),([0-9]+)\\)?");
+	astro::regex	regex(r, astro::regex::extended);
+	astro::smatch	matches;
+	if (!regex_match(rectanglespec, matches, regex)) {
+		std::string	msg = stringprintf("bad rectangle spec '%s'", 
+			rectanglespec.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	int	width = std::stoi(matches[1]);
+	int	height = std::stoi(matches[2]);
+	_size = ImageSize(width, height);
+	int	x = std::stoi(matches[3]);
+	int	y = std::stoi(matches[4]);
+	_origin = ImagePoint(x, y);
 }
 
 /**
@@ -109,6 +135,10 @@ std::string	ImageRectangle::toString() const {
 	return out.str();
 	//return stringprintf("%s@%s", _size.toString().c_str(),
 	//	_origin.toString().c_str());
+}
+
+ImageRectangle::operator	std::string() const {
+	return toString();
 }
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle) {

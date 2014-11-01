@@ -25,8 +25,9 @@ uvc_files =
 endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
-	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp PthreadLocker.cpp \
-	URL.cpp DeviceName.cpp Device.cpp Properties.cpp \
+	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
+	AttributeValuePairs.cpp UUID.cpp Path.cpp demangle.cpp ServerName.cpp \
+	URL.cpp DeviceName.cpp Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
@@ -54,9 +55,14 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	AdaptiveOptics.cpp \
 	Mount.cpp \
 	Serial.cpp \
+	BasicGuiderport.cpp \
 	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
-	FITSKeywords.cpp ImageServerTables.cpp \
-	ImageEnvelope.cpp ImageServer.cpp \
+	FITSKeywords.cpp ImageRepoTables.cpp ImageReposTable.cpp \
+	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
+	RepoReplicator.cpp \
+	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
+	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
+	InstrumentTables.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \

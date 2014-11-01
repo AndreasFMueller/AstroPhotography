@@ -15,7 +15,9 @@
 #if ENABLE_CORBA
 #include <OrbSingleton.h>
 #endif /* ENABLE_CORBA */
+#include <AstroUtils.h>
 
+using namespace astro;
 using namespace astro::camera;
 using namespace astro::image;
 using namespace astro::module;
@@ -27,6 +29,8 @@ using namespace astro::calibration;
 using namespace astro::interpolation;
 
 namespace astro {
+namespace app {
+namespace focustest {
 
 int	main(int argc, char *argv[]) {
 
@@ -195,13 +199,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace focustest
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << argv[0] << " terminated by exception: "
-			<< x.what() << std::endl;
-	}
+	return astro::main_function<astro::app::focustest::main>(argc, argv);
 }

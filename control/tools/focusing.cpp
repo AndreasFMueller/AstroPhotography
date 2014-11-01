@@ -14,9 +14,12 @@
 #include <AstroFormat.h>
 #include <AstroIO.h>
 
+using namespace astro;
 using namespace astro::focusing;
 
 namespace astro {
+namespace app {
+namespace focusing {
 
 class FocusingCallback : public astro::callback::Callback {
 	std::string	_prefix;
@@ -173,17 +176,10 @@ int	main(int argc, char *argv[]) {
 	return (Focusing::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+} // namespace focusing
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "focusing terminated by exception: " << x.what()
-			<< std::endl;
-	} catch (...) {
-		std::cerr << "focusing terminated by unknown exception"
-			<< std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::app::focusing::main>(argc, argv);
 }

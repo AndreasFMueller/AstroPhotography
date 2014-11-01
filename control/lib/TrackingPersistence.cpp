@@ -56,7 +56,8 @@ std::string	TrackingTableAdapter::createstatement() {
 	return std::string(
 	"create table tracking (\n"
 	"    id integer not null,\n"
-	"    guidingrun integer not null,\n"
+	"    guidingrun integer not null references guidingrun(id) "
+	"	on delete cascade on update cascade,\n"
 	"    trackingtime double not null,\n"
 	"    xoffset double not null,\n"
 	"    yoffset double not null,\n"

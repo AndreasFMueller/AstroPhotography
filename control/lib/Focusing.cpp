@@ -20,6 +20,7 @@ Focusing::Focusing(CcdPtr ccd, FocuserPtr focuser)
 	_status = IDLE;
 	work = NULL;
 	_steps = 3;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create Focusing @ %p", this);
 }
 
 /**
@@ -41,6 +42,13 @@ Focusing::~Focusing() {
  * \brief Start the focusing process in a given interval
  */
 void	Focusing::start(int min, int max) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing @ %p", this);
+	if (NULL != thread) {
+		if (thread->isrunning()) {
+			throw std::runtime_error("already focusing, "
+				"cancel first");
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focus search between %d and %d",
 		min, max);
 	_status = IDLE;

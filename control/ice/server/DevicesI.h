@@ -18,18 +18,13 @@ public:
 	DevicesI(astro::module::Devices& devices);
 	virtual ~DevicesI();
 
-	// conversion methods
-static std::vector<std::string>	convert(
-		const astro::module::Devices::devicelist& list);
-
-static devicetype	convert(const astro::DeviceName::device_type& type);
-static astro::DeviceName::device_type	convert(const devicetype& type);
-
 	// interface methods
 	virtual DeviceNameList getDevicelist(devicetype,
 			const Ice::Current& current);
 
 public:
+	virtual AdaptiveOpticsPrx	getAdaptiveOptics(const std::string& name,
+					const Ice::Current& current);
 	virtual CameraPrx	getCamera(const std::string& name,
 					const Ice::Current& current);
 	virtual CcdPrx		getCcd(const std::string&,
@@ -41,6 +36,8 @@ public:
 	virtual CoolerPrx	getCooler(const std::string&,
 					const Ice::Current& current);
 	virtual FocuserPrx	getFocuser(const std::string&,
+					const Ice::Current& current);
+	virtual MountPrx	getMount(const std::string&,
 					const Ice::Current& current);
 };
 

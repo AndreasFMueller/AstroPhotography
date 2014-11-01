@@ -209,6 +209,43 @@ void	Guider::callbackImage(ImagePtr image) {
 }
 
 /**
+ * \brief get a good measure for the pixel size of the CCD
+ *
+ * This method returns the average of the pixel dimensions, this will
+ * give strange values for binned cameras. Binning looks like a strange
+ * idea for a guide camera anyway.
+ */
+double	Guider::getPixelsize() {
+	astro::camera::CcdInfo  info = ccd()->getInfo();
+	float	_pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %fum", 1000000 * _pixelsize);
+	return _pixelsize;
+}
+
+/**
+ * \brief get a default tracker
+ *
+ * This is not the only possible tracker to use with the guiding process,
+ * but it works currently quite well
+ */
+TrackerPtr	Guider::getTracker(const Point& point) {
+	astro::camera::Exposure exp = exposure();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s",
+		exp.frame.origin().toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point: %s",
+		point.toString().c_str());
+	astro::Point    difference = point - exp.frame.origin();
+	int	x = difference.x();
+	int	y = difference.y();
+	astro::image::ImagePoint        trackerstar(x, y);
+	astro::image::ImageRectangle    trackerrectangle(exp.frame.size());
+	astro::guiding::TrackerPtr      tracker(
+		new astro::guiding::StarTracker(trackerstar,
+			trackerrectangle, 10));
+	return tracker;
+}
+
+/**
  * \brief start tracking
  */
 void	Guider::startGuiding(TrackerPtr tracker, double interval) {
@@ -231,6 +268,13 @@ void	Guider::stopGuiding() {
  */
 bool	Guider::waitGuiding(double timeout) {
 	return guiderprocess->wait(timeout);
+}
+
+/**
+ * \brief retrieve the interval from the guider process
+ */
+double	Guider::getInterval() {
+	return guiderprocess->interval();
 }
 
 /**

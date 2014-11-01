@@ -1,5 +1,5 @@
 //
-// image.idl -- Interface definition for images access
+// image.ice -- Interface definition for images access
 //
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
@@ -113,5 +113,23 @@ module snowstar {
 		int	imageSize(string name) throws NotFound;
 		int	imageAge(string name) throws NotFound;
 		Image*	getImage(string name) throws NotFound;
+	};
+
+	/**
+	 * \brief Small image for callbacks
+	 */
+	struct SimpleImage {
+		ImageSize	size;
+		ShortSequence	imagedata;
+	};
+
+	/**
+	 * \brief Callback to send images in a sequence to clients
+	 *
+	 * The guider and the focusing process both send image updates to
+	 * a monitoring client. They share the callback interface below
+	 */
+	interface ImageMonitor extends Callback {
+		void	update(SimpleImage image);
 	};
 };

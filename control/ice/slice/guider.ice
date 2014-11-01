@@ -4,6 +4,7 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil 2013
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 	/**
@@ -41,7 +42,7 @@ module snowstar {
 	 */
 	struct TrackingHistory {
 		int	guiderunid;
-		int	timeago;
+		double	timeago;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
 	};
@@ -51,30 +52,8 @@ module snowstar {
 	 *
 	 * A tracking monitor processes new points
 	 */
-	interface TrackingMonitor {
+	interface TrackingMonitor extends Callback {
 		void	update(TrackingPoint ti);
-		void	stop();
-	};
-
-	/**
-	 * \brief Tracking Image structure
-	 *
-	 * The tracking image contains the size of the image and a sequence
-	 * containing the short pixels. 
-	 */
-	struct TrackingImage {
-		ImageSize	size;
-		ShortSequence	imagedata;
-	};
-
-	/**
-	 * \brief Interface for tracking image updates
-	 *
-	 * The image monitor interface receives new tracking images
-	 */
-	interface TrackingImageMonitor {
-		void	update(TrackingImage ti);
-		void	stop();
 	};
 
 	/**
@@ -114,9 +93,8 @@ module snowstar {
 	 * The calibration monitor processes updates for new calibration
 	 * points.
 	 */
-	interface CalibrationMonitor {
+	interface CalibrationMonitor extends Callback {
 		void	update(CalibrationPoint point);
-		void	stop();
 	};
 
 	/**
@@ -199,6 +177,10 @@ module snowstar {
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
 
+		// methods for monitoring of the calibration process
+		void	registerCalibrationMonitor(Ice::Identity calibrationmonitor);
+		void	unregisterCalibrationMonitor(Ice::Identity calibrationmonitor);
+
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
@@ -230,6 +212,14 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+
+
+		// callbacks for monitoring
+		void	registerImageMonitor(Ice::Identity imagemonitor);
+		void	unregisterImageMonitor(Ice::Identity imagemonitor);
+
+		void	registerTrackingMonitor(Ice::Identity trackingmonitor);
+		void	unregisterTrackingMonitor(Ice::Identity trackingmonitor);
 	};
 
 	/**
@@ -247,7 +237,6 @@ module snowstar {
 	 * to the server, but the data should still be accessible.
 	 */
 	sequence<GuiderDescriptor> GuiderList;
-	sequence<int>	idlist;
 	interface GuiderFactory {
 		GuiderList	list();
 

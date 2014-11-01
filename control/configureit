@@ -1,18 +1,64 @@
 #
-# configuration used for development purposes on Linux and Mac OS X
+# configuration used for development purposes on all development plattforms
+# (currently Mac OS X, OpenSuSE, Ubuntu)
 #
-CFLAGS="-Wall -Wextra -g"
+# (c) 2014 Prof Dr Andreas Muelle, Hochschule Rapperswil
+#
+
+# set default compiler flags
+# the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
+# C++ modules, but I'm not convinced. The tests still crash when
+# unloading the modules
+CFLAGS="-Wall -Wextra -g -O2"
 CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
-commonflags="--enable-unittests --enable-microtouch --enable-qhy --enable-corba"
 
+# always enable unit tests 
+commonflags="--enable-unittests"
+
+# we always build the microtouch driver, as it is very small and we need
+# the USB library it depends on anyway
+commonflags="${commonflags} --enable-microtouch"
+
+# enable building the SX driver, SX is our main test hardware, so we always
+# build that on the test systems
+commonflags="${commonflags} --enable-sx"
+
+# check whether the libqhyccd library is installed, and build the qhy
+# driver if it is
+if [ -d /usr/local/include/libqhyccd ]
+then
+	commonflags="${commonflags} --enable-qhy"
+fi
+
+# find out whether we have the QSI library installed, and trigger building
+# the QSI driver
+if [ -r /usr/local/include/qsiapi.h ]
+then
+	commonflags="${commonflags} --enable-qsi"
+fi
+
+# the next few sections are about whether or not to build the ICE components
 # add ICE PATH for Mac OS X
 if [ -d /Library/Developer/Ice-3.5.1 ]
 then
-	PATH=/Library/Developer/Ice-3.5.1/bin:${PATH}
-	PATH=/Library/Developer/Ice-3.5.1/bin/c++11:${PATH}
-	export PATH
-	commonflags="${commonflags} --with-ice=/Library/Developer/Ice-3.5.1"
+	ICEDIR=/Library/Developer/Ice-3.5.1
+fi
+
+# add ICE PATH for an ICE that we compiled ourselves
+if [ -d /opt/Ice-3.5.1 ]
+then
+	ICEDIR=/opt/Ice-3.5.1
+fi
+
+if [ -n "${ICEDIR}" ]
+then
+	PATH=${ICEDIR}/bin:${PATH}
+	if [ -d ${ICEDIR}/bin/c++11 ]
+	then
+		PATH="${ICEDIR}/bin/c++11:${PATH}"
+	fi
+	commonflags="${commonflags} --with-ice=${ICEDIR} --enable-ice"
 fi
 
 # first find out what type of system we are
@@ -24,6 +70,7 @@ Linux)	if [ -r /etc/debian_version ]
 	then
 		echo "configuring for Debian"
 		systemtype=Debian
+		commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
 	else
 		if [ -r /etc/SuSE-release ]
 		then
@@ -34,7 +81,8 @@ Linux)	if [ -r /etc/debian_version ]
 		fi
 	fi
 	# find out whether we should try to build the sbig driver
-	if [ -r /usr/local/lib64/libsbigudrv.so -a -r /usr/local/include/sbigudrv.h ]
+	if [ -r /usr/local/lib64/libsbigudrv.so -a \
+		-r /usr/local/include/sbigudrv.h ]
 	then
 		sbigoption=--enable-sbig
 	else
@@ -43,26 +91,25 @@ Linux)	if [ -r /etc/debian_version ]
 	;;
 esac
 
-if [ -r /usr/local/include/qsiapi.h ]
+# build the CORBA components if corba is present
+if `pkg-config --exists omniORB4`
 then
-	commonflags="${commonflags} --enable-qsi"
+	commonflags="${commonflags} --enable-corba"
 fi
 
-
-# the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
-# C++ modules, but I'm not convinced. The tests still crash when
-# unloading the modules
+# now that we have all the information, run the configure script
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CXXFLAGS
-	./configure --prefix=`pwd`/root ${commonflags}
+	./configure --prefix=`pwd`/root ${commonflags} --enable-boostregex
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++0x"
+	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags}
+	./configure --prefix=`pwd`/root ${commonflags} --enable-ice \
+		--enable-boostregex
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
@@ -80,7 +127,7 @@ SuSE)
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
-		${sbigoption}
+		${sbigoption} --enable-boostregex
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
@@ -91,3 +138,5 @@ Darwin)
 		--enable-sbig
 	;;
 esac
+
+

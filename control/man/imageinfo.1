@@ -2,7 +2,7 @@
 .SH NAME
 imageinfo \- display information about an image
 .SH SYNOPSIS
-.B dark -d
+.B imageinfo [ options ]
 .I images
 ...
 .I 
@@ -10,13 +10,88 @@ imageinfo \- display information about an image
 The 
 .BR imageinfo (1)
 command displays information about pixel values of each image file
-specified on the command line. It displays minimum, mean, median
+specified on the command line.
+It displays minimum, mean, median
 and maximum value. In addition, the number of NaNs is displayed
 if the pixel type allows for NaNs.
 .SH OPTIONS
 .TP
-.B \-d
+.B \-c,\-\-config= config
+Use a configuration detabase different from the default
+.IR ~/.astrophoto.db .
+.TP
+.B \-d,\-\-debug
 increase the debug level.
+.TP
+.B \-f,\-\-fits
+In addition to the pixel related information, also show the information
+contained in the FITS headers.
+.TP
+.B \-h,\-\-help
+Display a help message about the available commands and exit.
+.TP
+.BI \-r,\-\-repo= repository
+Instead of from files, read image information from the image repository
+named
+.IR repository .
+In this case, the 
+.I images
+arguments are ids (numbers) specifying the images in the repository.
+There are no glob pattern matching available for these ids, instead
+one should use tools like 
+.BR seq (1)
+to produce sequences of ids.
+.TP
+.B \-v,\-\-verbose
+Verbose display. In addition to the pixel value information, information
+about the pixel type and image depth is displayed in verbose display.
+For the meaning of the attributes see the section ATTRIBUTES below.
+.SH ATTRIBUTES
+The results of imageinfo are displayed as a list of attribute=value
+pairs. The following attributes are available, some only in verbose
+mode. Information only displayed in verbose mode is marked by a (V).
+
+.TP
+Bpp
+The number of bytes per pixel (V).
+.TP
+bpp
+The number of bits per pixel (V).
+.TP
+max
+The maximum of the actual values of the image.
+.TP
+maxvalue
+The maximum possible value of a pixel (V).
+.TP
+mean
+The mean of the actual pixel values of the image.
+.TP
+median
+The median of the actual pixel values of the image.
+.TP
+min
+The minimum of the actual values of the image.
+.TP
+minvalue
+The minimum possible value of a pixel (V).
+.TP
+nans
+Number of nans of a floating point image. They usually correspond
+to bad pixels. When images are transformed, some areas may not be covered
+by image data and a are filled in with Nans. In these cases, an excessive
+number of nans is displayed. Using Nans ensures that these pixels are
+never used to compute any displayable pixel.
+This is attribute is not displayed for images with integer pixels.
+.TP
+pixel_type
+Type of pixel. This is the C++ type identifier of the pixel type (V).
+.TP
+planes
+The number of planes, typically 1 for raw and monochrome images, 
+3 for processed RGB images.
+.SH FILES
+.IR ~/.astrophoto.db
 .SH "SEE ALSO"
 .BR astrod (1)
 .SH AUTHORS

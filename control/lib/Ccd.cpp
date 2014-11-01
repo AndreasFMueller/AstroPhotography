@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
 #include <AstroIO.h>
+#include <AstroUtils.h>
 #include <includes.h>
 #include <sstream>
 
@@ -215,6 +216,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	time(&lastexposurestart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
+	state = Exposure::exposing;
 }
 
 /**
@@ -244,13 +246,17 @@ void    Ccd::cancelExposure() {
  * \brief Waiting for completion is generic (except possibly for UVC cameras)
  */
 bool	Ccd::wait() {
-	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
+	switch (exposureStatus()) {
+	case Exposure::idle:
+	case Exposure::cancelling:
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot wait: no exposure in progress");
 		throw BadState("cannot wait: no exposure requested");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for exposure to complete");
-	if (Exposure::exposing == state) {
+	case Exposure::exposed:
+		return true;
+	case Exposure::exposing:
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"waiting for exposure to complete");
 		// has the exposure time already expired? If so, we wait at
 		// least as the exposure time indicates
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -261,7 +267,7 @@ bool	Ccd::wait() {
 		time_t	now = time(NULL);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
 		int	delta = endtime - now;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %u", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %d", delta);
 		if (delta > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
 				"to expire: %u", delta);
@@ -282,7 +288,7 @@ bool	Ccd::wait() {
 			// XXX bad things should happen
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %d", state);
 	return (Exposure::exposed == state);
 }
 
@@ -310,10 +316,13 @@ astro::image::ImagePtr	Ccd::getImage() {
 		image->size().width(), image->size().height());
 
 	// add exposure meta data
-	exposure.addToImage(*image);
+	addMetadata(*image);
 
 	// XXX if available, position information from the mount should
 	//     also be added
+
+	// set state to idle
+	state = Exposure::idle;
 
 	// that's it, return the image
 	return image;
@@ -327,6 +336,8 @@ astro::image::ImagePtr	Ccd::getImage() {
  * \param imagecount	number of images to retrieve
  */
 astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting image sequence of %d images",
+		imagecount);
 	astro::image::ImageSequence	result;
 	unsigned int	k = 0;
 	while (k < imagecount) {
@@ -336,6 +347,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 			usleep(1000000 * exposure.exposuretime);
 		}
 		wait();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image complete");
 		result.push_back(getImage());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %d retrieved", k);
 		k++;
@@ -405,9 +417,11 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
 void	Ccd::addMetadata(ImageBase& image) {
 	this->addExposureMetadata(image);
 	this->addTemperatureMetadata(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding DATE-OBS and UUID");
 	image.setMetadata(
 		FITSKeywords::meta(std::string("DATE-OBS"),
 			FITSdate()));
+	image.setMetadata(FITSKeywords::meta(std::string("UUID"), UUID()));
 }
 
 } // namespace camera

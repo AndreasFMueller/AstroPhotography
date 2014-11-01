@@ -1,5 +1,5 @@
 /**
- * logimage.cpp -- take binary logarithm of all pixels of an image
+ * logscale.cpp -- take binary logarithm of all pixels of an image
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -14,6 +14,7 @@
 #include <AstroImager.h>
 #include <AstroAdapter.h>
 #include <cmath>
+#include <typeinfo>
 
 using namespace astro;
 using namespace astro::io;
@@ -21,6 +22,8 @@ using namespace astro::calibration;
 using namespace astro::adapter;
 
 namespace astro {
+namespace app {
+namespace logscale {
 
 /**
  * \brief usage
@@ -36,7 +39,7 @@ void	usage(const char *progname) {
 /**
  * \brief Main function in astro namespace
  */
-int	logscale_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 
 	// parse the command line
@@ -91,15 +94,10 @@ int	logscale_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace logscale
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::logscale_main(argc, argv);
-	} catch (std::exception& x) {
-		std::string	msg = stringprintf("%s terminated: %s",
-			argv[0], x.what());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		std::cerr << msg << std::endl;
-	}
+	return astro::main_function<astro::app::logscale::main>(argc, argv);
 }

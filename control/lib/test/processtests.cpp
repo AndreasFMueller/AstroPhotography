@@ -9,7 +9,7 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <cstdlib>
-#include <stacktrace.h>
+#include <AstroUtils.h>
 
 int	main(int argc, char *argv[]) {
 	// install the segmentation fault handler

@@ -21,7 +21,6 @@
 #include <AstroFormat.h>
 #include <SbigCamera.h>
 #include <includes.h>
-#include <pthread.h>
 
 //////////////////////////////////////////////////////////////////////
 // Implementation of the SBIG Express Module Descriptor
@@ -74,16 +73,17 @@ namespace sbig {
 // SbigLock implementation
 //////////////////////////////////////////////////////////////////////
 
-static pthread_mutex_t sbigmutex;
+static std::recursive_mutex	sbigmutex;
+static std::unique_lock<std::recursive_mutex>	sbiglock(sbigmutex, std::defer_lock);
 
 SbigLock::SbigLock() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locking sbig mutex");
-	pthread_mutex_lock(&sbigmutex);
+	sbigmutex.lock();
 }
 
 SbigLock::~SbigLock() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unlocking sbig mutex");
-	pthread_mutex_unlock(&sbigmutex);
+	sbigmutex.unlock();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -102,11 +102,6 @@ std::string	SbigCameraLocator::getVersion() const {
 }
 
 SbigCameraLocator::SbigCameraLocator() {
-	pthread_mutexattr_t	mta;
-	pthread_mutexattr_init(&mta);
-	pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&sbigmutex, &mta);
-
 	if (0 == driveropen) {
 		short	e = SBIGUnivDrvCommand(CC_OPEN_DRIVER, NULL, NULL);
 		if (e != CE_NO_ERROR) {

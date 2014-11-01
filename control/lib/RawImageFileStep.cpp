@@ -72,6 +72,14 @@ astro::image::Metavalue	RawImageStep::getMetadata(const std::string& name) const
 	return _image->getMetadata(name);
 }
 
+ImageMetadata::const_iterator	RawImageStep::begin() const {
+	return _image->begin();
+}
+
+ImageMetadata::const_iterator	RawImageStep::end() const {
+	return _image->end();
+}
+
 //////////////////////////////////////////////////////////////////////
 // Raw image from a file
 //////////////////////////////////////////////////////////////////////

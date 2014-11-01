@@ -9,7 +9,7 @@
 #include <cstring>
 #include <includes.h>
 #include <AstroImage.h>
-#include <TypesI.h>
+#include <IceConversions.h>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
 #include <ProxyCreator.h>
@@ -39,27 +39,27 @@ ImageI::~ImageI() {
 		_filename.c_str());
 }
 
-ImageSize       ImageI::size(const Ice::Current& current) {
+ImageSize       ImageI::size(const Ice::Current& /* current */) {
 	return _size;
 }
 
-ImagePoint      ImageI::origin(const Ice::Current& current) {
+ImagePoint      ImageI::origin(const Ice::Current& /* current */) {
 	return _origin;
 }
 
-int     ImageI::bytesPerPixel(const Ice::Current& current) {
+int     ImageI::bytesPerPixel(const Ice::Current& /* current */) {
 	return _bytesperpixel;
 }
 
-int     ImageI::planes(const Ice::Current& current) {
+int     ImageI::planes(const Ice::Current& /* current */) {
 	return _planes;
 }
 
-int     ImageI::bytesPerValue(const Ice::Current& current) {
+int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
 	return _bytespervalue;
 }
 
-ImageFile       ImageI::file(const Ice::Current& current) {
+ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	std::vector<Ice::Byte>	result;
 	std::string	fullname = _imagedirectory.fullname(_filename);
 
@@ -100,11 +100,11 @@ ImageFile       ImageI::file(const Ice::Current& current) {
 	return result;
 }
 
-int     ImageI::filesize(const Ice::Current& current) {
+int     ImageI::filesize(const Ice::Current& /* current */) {
 	return _imagedirectory.fileSize(_filename);
 }
 
-void    ImageI::remove(const Ice::Current& current) {
+void    ImageI::remove(const Ice::Current& /* current */) {
 }
 
 #define	sequence_mono(pixel, size)					\
@@ -154,7 +154,7 @@ ByteImageI::ByteImageI(astro::image::ImageDirectory& imagedirectory,
 ByteImageI::~ByteImageI() {
 }
 
-ByteSequence	ByteImageI::getBytes(const Ice::Current& current) {
+ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 	ByteSequence	result;
 	unsigned int	size = _image->size().getPixels();
 	sequence_mono(unsigned char, size);
@@ -174,7 +174,7 @@ ShortImageI::ShortImageI(astro::image::ImageDirectory& imagedirectory,
 ShortImageI::~ShortImageI() {
 }
 
-ShortSequence	ShortImageI::getShorts(const Ice::Current& current) {
+ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 	ShortSequence	result;
 	unsigned int	size = _image->size().getPixels();
         sequence_mono(unsigned short, size);

@@ -68,8 +68,11 @@ public:
 	virtual std::vector<std::string>
 		fieldnames(const std::string& tablename);
 	virtual void	begin();
+	virtual void	begin(const std::string& savepoint);
 	virtual void	commit();
+	virtual void	commit(const std::string& savepoint);
 	virtual void	rollback();
+	virtual void	rollback(const std::string& savepoint);
 	virtual StatementPtr	statement(const std::string& query);
 	virtual bool	hastable(const std::string& tablename);
 };
@@ -243,7 +246,21 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	}
 
 	// some pragmas
-	sqlite3_exec(_database, "PRAGMA temp_store = MEMORY;", NULL, NULL, NULL);
+	char	*errmesg = NULL;
+	if (sqlite3_exec(_database, "PRAGMA temp_store = MEMORY;", NULL, NULL,
+		&errmesg)) {
+		std::string	msg = stringprintf("'PRAGMA temp_store = "
+			"MEMORY' failed: %s", errmesg);
+		sqlite3_free(errmesg);
+		throw std::runtime_error(msg);
+	}
+	if (sqlite3_exec(_database, "PRAGMA foreign_keys = ON;", NULL, NULL,
+		&errmesg)) {
+		std::string	msg = stringprintf("'PRAGMA foreign_keys = "
+			"ON' failed: %s", errmesg);
+		sqlite3_free(errmesg);
+		throw std::runtime_error(msg);
+	}
 }
 
 Sqlite3Backend::~Sqlite3Backend() {
@@ -332,6 +349,10 @@ void	Sqlite3Backend::begin() {
 	query("BEGIN TRANSACTION;");
 }
 
+void	Sqlite3Backend::begin(const std::string& savepoint) {
+	query("SAVEPOINT " + savepoint + ";");
+}
+
 /**
  * \brief Commit a transaction
  */
@@ -339,11 +360,19 @@ void	Sqlite3Backend::commit() {
 	query("COMMIT TRANSACTION;");
 }
 
+void	Sqlite3Backend::commit(const std::string& savepoint) {
+	query("RELEASE SAVEPOINT " + savepoint + ";");
+}
+
 /**
  * \brief Roll back a transaction
  */
 void	Sqlite3Backend::rollback() {
 	query("ROLLBACK TRANSACTION;");
+}
+
+void	Sqlite3Backend::rollback(const std::string& savepoint) {
+	query("ROLLBACK TO SAVEPOINT " + savepoint + ";");
 }
 
 /**
@@ -393,7 +422,7 @@ std::string	Sqlite3Exception::cause(Sqlite3Backend& database,
  * \brief Backend factory implementation
  */
 Database	DatabaseFactory::get(const std::string& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create backend on file %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create backend on file '%s'",
 		name.c_str());
 	return Database(new Sqlite3Backend(name));
 }

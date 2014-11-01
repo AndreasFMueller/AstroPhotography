@@ -21,7 +21,6 @@ namespace guiding {
 DrivingWork::DrivingWork(Guider& _guider)
 	: GuidingProcess(_guider, TrackerPtr()) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingWork");
-	pthread_mutex_init(&mutex, NULL);
 	defaultx = 0;
 	defaulty = 0;
 	totalx = 0;
@@ -37,7 +36,7 @@ DrivingWork::DrivingWork(Guider& _guider)
  * the shared _interval variable.
  */
 void	DrivingWork::interval(const double& i) {
-	Lock	lock(&mutex);
+	std::unique_lock<std::mutex>	lock(mutex);
 	_interval = i;
 }
 
@@ -56,7 +55,6 @@ DrivingWork::~DrivingWork() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "error during destructor: %s",
 			x.what());
 	}
-	pthread_mutex_destroy(&mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DrivingWork terminated");
 }
 
@@ -67,7 +65,7 @@ DrivingWork::~DrivingWork() {
  * properly lock that method out when we change them.
  */
 void	DrivingWork::setCorrection(const double& _tx, const double& _ty) {
-	Lock	lock(&mutex);
+	std::unique_lock<std::mutex>	lock(mutex);
 	totalx = fabs(_tx);
 	totaly = fabs(_ty);
 	stepx = (_tx > 0) ? 1 : -1;
@@ -104,7 +102,7 @@ void	DrivingWork::main(astro::thread::Thread<DrivingWork>& thread) {
 		// this must be done while the mutex is held, or the
 		// data we read my be inconsistent.
 		{
-			Lock	lock(&mutex);
+			std::unique_lock<std::mutex>	lock(mutex);
 			if (totalx > 0) {
 				double	dx = std::min(_interval, totalx);
 				if (stepx > 0) {

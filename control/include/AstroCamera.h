@@ -34,6 +34,7 @@ class	Binning {
 public:
 	Binning(unsigned int _x = 1, unsigned int _y = 1);
 	Binning(const Binning& other) : x(other.x), y(other.y) { }
+	Binning(const std::string& binning);
 	bool	operator==(const Binning& other) const;
 	bool	operator!=(const Binning& other) const;
 	bool	operator<(const Binning& other) const;
@@ -91,13 +92,22 @@ public:
 	Binning	mode;
 	shutter_state	shutter;
 
+	// fields related tot he exposure purpose
+	typedef	enum { light = 0, dark = 1, flat = 2 } purpose_t;
+	purpose_t	purpose;
+static std::string	purpose2string(purpose_t p);
+static purpose_t	string2purpose(const std::string& p);
+
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
-		float _exposuretime);
+		float _exposuretime = 1);
 
+	// state related methods
 	typedef enum state_e {
 		idle, exposing, exposed, cancelling
 	} State;
+static std::string	state2string(State s);
+static State	string2state(const std::string& s);
 	virtual std::string	toString() const;
 
 	void	addToImage(astro::image::ImageBase& image) const;
@@ -356,10 +366,11 @@ public:
 	FilterWheel(const std::string& name);
 	FilterWheel(const DeviceName& name);
 	virtual ~FilterWheel();
-	virtual unsigned int	nFilters() = 0;
+	virtual unsigned int	nFilters();
 	virtual unsigned int	currentPosition() = 0;
 	virtual void	select(size_t filterindex) = 0;
-	virtual std::string	filterName(size_t filterindex) = 0;
+	virtual void	select(const std::string& name);
+	virtual std::string	filterName(size_t filterindex);
 	virtual State	getState() = 0;
 	bool	wait(float timeout);
 };

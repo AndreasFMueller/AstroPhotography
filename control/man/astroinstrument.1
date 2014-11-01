@@ -1,0 +1,193 @@
+.TH ASTROINSTRUMENT 1 "Sept 2014"
+.SH NAME
+astroinstrument \- Instrument configuration tool
+
+.SH SYNOPSIS
+.B astroinstrument
+[
+.I options
+] 
+list
+
+.B astroinstrument
+[
+.I options
+] 
+help
+
+.B astroinstrument
+[
+.I options
+] 
+{ add | show | remove } <name>
+
+.B astroinstrument
+[
+.I options
+] 
+.I name
+add
+.I cname
+[
+.I attr=value
+]
+
+.B astroinstrument
+[
+.I options
+] 
+.I name 
+{ show | remove }
+.I type
+[
+.I attr=value
+]
+
+.SH DESCRIPTION
+An instrument is a named collection of astrophotography devices as managed
+by the astrophotography tools. The purpose of have a simple handle on the
+configuration used in an astrophotography project.
+Usually an instrument includes a least a camera,
+a CCD chip and a cooler for the CCD for a camera with cooled chips.
+More complex instruments might include  filter wheel, an adaptive
+optics system or a mount. 
+The 
+.BR astroinstrument (1)
+is used to configure, update and view instrument configurations. 
+To build an instrument, one first adds the instrument name using
+the 
+.B add
+.I name
+command, and then uses the 
+.I name
+.B add 
+.I component
+command to add components to the instrument.
+
+There are three kinds of components that can be attached to an instrument.
+.TP
+direct component
+A direct component describes the device directly through the device name
+URI and a unit id.
+.TP
+mapped component
+Mapped components are useful for situations where the device may change 
+the device name when plugged in. In those cases, the
+.BR devicemapper (1)
+program can be used to create a stable name for the device. By only
+adapting the device mapping, configurations refering to the stable name
+will always get the correct name. Mapped components refer to the
+device mapper name.
+.TP
+derived component
+This kind of component is used when the component is really part of
+some other part. This is most commonly used for CCDs, which are usually
+part of the camera. 
+
+.SH CONFIGURATION COMMANDS
+.TP
+.B help
+Display a short help message.
+.TP
+.B list
+This shows a list of instrument
+names together with a comma separated list of components that are
+attached to an instrument.
+.TP
+.BI add \ name
+Add a new instrument named 
+.IR name .
+.TP
+.BI show \ name
+Show details of the instrument named
+.IR name .
+.TP
+.BI remove \ name
+Remove an instrument from the configuration database.
+.TP
+.IB name \ add \ type\ [\ attr=value\ ] 
+Add a component of type 
+.I type
+to the instrument named
+.IR name .
+Valid component types are 
+.IR adaptiveoptics , 
+.IR camera ,
+.IR ccd ,
+.IR cooler ,
+.IR filterwheel ,
+.IR focuser ,
+.IR guiderport ,
+.I module 
+and
+.IR mount .
+For valid attribute value pairs see the section ATTRIBUTES below.
+.TP
+.IB name \ update \ type\ [\ attr=value\ ] 
+Update the component of type 
+.I type
+in the instrument named
+.I name 
+using the attribute value pairs.
+For valid attribute value pairs see the section ATTRIBUTES below.
+.TP
+.B name \ {\ show\ |\ remove\ } \ type
+Show or remove the component of type
+.I type
+in the instrument named
+.IR name .
+
+.SH ATTRIBUTES
+The set of valid attributes depends on the kind of component being
+manipulated. 
+.TP
+kind
+The kind of the component to be created. Valid values are
+.IR direct ,
+.I mapped
+and
+.IR derived .
+Default value is 
+.IR direct ,
+i.e. if nothing is specified, a direct component will be created.
+.TP
+unit
+Defines the unit number for devices that support this concept.
+Default value is 0.
+.TP
+device
+The string form of the device url. Only for direct components, and
+required for them.
+.TP
+name
+Defines the device mapper name to use to access the real device.
+Only for mapped components, and required for them.
+.TP
+from
+Defines the type of component this component is derived from. Only
+for derived components, and required for them.
+.TP
+servername
+Name of the server on which this device is accessible. Only for direct
+components. Derived components get their servername from the component
+they are derived from. Mapped components get the server name from the
+device mapping.
+
+.SH OPTIONS
+.TP
+.B \-\-help,\-h
+Display a help message.
+.TP
+.B \-\-debug,\-d
+Increase the debug level
+.TP
+.BI \-\-config= config.db ,\-c \ config.db
+The configuration is stored in a sqlite3 database file. This option
+can be used to use a different database file than the default
+.IR ~/.astrophoto.db .
+
+.SH FILES
+.I ~/.astrophoto.db
+
+.SH AUTHOR
+Andreas Mueller

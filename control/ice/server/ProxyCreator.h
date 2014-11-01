@@ -9,14 +9,20 @@
 #include <string>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
+#include <NameConverter.h>
 
 namespace snowstar {
 
 template<typename prx>
-prx createProxy(const std::string& name, const Ice::Current& current) {
+prx createProxy(const std::string& name, const Ice::Current& current,
+		bool encoded = true) {
 	Ice::ObjectAdapterPtr	a = current.adapter;
 	Ice::CommunicatorPtr	ic = a->getCommunicator();
-	return prx::uncheckedCast(a->createProxy(ic->stringToIdentity(name)));
+	std::string	ename = name;
+	if (encoded) {
+		ename = NameConverter::urlencode(name);
+	}
+	return prx::uncheckedCast(a->createProxy(ic->stringToIdentity(ename)));
 }
 
 } // namespace snowstar

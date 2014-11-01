@@ -22,6 +22,7 @@ public:
 	std::list<long>	getAllTrackings();
 	std::list<long>	getTrackings(const GuiderDescriptor& guider);
 	std::list<TrackingPointRecord>	getHistory(long id);
+	TrackingHistory	get(long id);
 };
 
 } // namespace guiding

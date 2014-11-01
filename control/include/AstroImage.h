@@ -44,6 +44,7 @@ public:
 	void	setX(unsigned int x) { _x = x; }
 	void	setY(unsigned int y) { _y = y; }
 	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }
+	ImagePoint(const std::string& pointspec);
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
 	ImagePoint	operator-(const ImagePoint& other) const;
@@ -77,6 +78,7 @@ public:
 	unsigned int	getPixels() const { return pixels; }
 	// constructors
 	ImageSize(unsigned int width = 0, unsigned int height = 0);
+	ImageSize(const std::string& sizespec);
 	virtual ~ImageSize();
 	// comparision
 	bool	operator==(const ImageSize& other) const;
@@ -134,6 +136,7 @@ public:
 		const ImagePoint& translatedby);
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
+	ImageRectangle(const std::string& rectanglespec);
 	// oeprators
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
@@ -144,6 +147,7 @@ public:
 	ImagePoint	upperLeftCorner() const;
 	// text represenation
 	std::string	toString() const;
+	operator	std::string() const;
 	// corners
 	ImagePoint	upperright() const;
 	ImagePoint	upperleft() const;
@@ -175,6 +179,7 @@ public:
 	FITSdate(time_t t);
 	FITSdate(const struct timeval& tv);
 	FITSdate();
+	struct timeval	time() const { return when; }
 	std::string	showShort() const;
 	std::string	showLong() const;
 	std::string	showVeryLong() const;
@@ -255,6 +260,7 @@ public:
 	ImageMetadata::const_iterator	find(const std::string& keyword) const;
 	ImageMetadata::iterator	find(const std::string& keyword);
 	void	remove(const std::string& keyword);
+	void	dump() const;
 };
 
 /**
@@ -347,6 +353,7 @@ public:
 	int	nMetadata() const { return metadata.size(); }
 	ImageMetadata::const_iterator	begin() const;
 	ImageMetadata::const_iterator	end() const;
+	void	dump_metadata() const;
 protected:
 	MosaicType	mosaic;
 public:
@@ -378,7 +385,7 @@ public:
 	virtual unsigned int	pixeloffset(const ImagePoint& p) const;
 
 	virtual unsigned int bitsPerPixel() const { return 0; }
-	unsigned int bytesPerPixel() const;
+	virtual unsigned int bytesPerPixel() const { return 0; }
 	virtual unsigned int	planes() const { return 0; }
 	unsigned int bytesPerPlane() const;
 	unsigned int bitsPerPlane() const;
@@ -390,6 +397,9 @@ public:
 	// text representation (for debugging)
 	friend std::ostream&	operator<<(std::ostream& out,
 		const ImageBase& image);
+
+	// type index of the pixel type
+	virtual std::type_index	pixel_type() const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageBase& image);
@@ -853,9 +863,24 @@ public:
 
 	/**
 	 * \brief Determine number of bits of a pixel
+	 *
+	 * For floating point values, this is the mantissa size. So this
+	 * value gives information about the resolution.
  	 */
 	virtual unsigned int	bitsPerPixel() const {
 		return astro::image::bitsPerPixel(Pixel());
+	}
+
+	/**
+ 	 * \brief Determine the number of bytes per pixel
+	 *
+	 * This value gives information about the storage requirements of
+	 * a pixel. For doubles, this returns 8, while the bitsPerPixel
+	 * method returns only 53 for the 53 significant digits of the
+	 * mantissa.
+ 	 */
+	virtual unsigned int	bytesPerPixel() const {
+		return sizeof(Pixel);
 	}
 
 	/**
@@ -870,6 +895,10 @@ public:
  	 */
 	virtual double	maximum() const {
 		return pixel_maximum<Pixel>();
+	}
+
+	virtual std::type_index	pixel_type() const {
+		return std::type_index(typeid(Pixel));
 	}
 };
 

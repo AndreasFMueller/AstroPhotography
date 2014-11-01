@@ -20,7 +20,7 @@ typedef struct {
 	bool	unique;
 } FITSKeyword;
 
-#define	Nkeywors	74
+#define	Nkeywors	75
 FITSKeyword	keywors[Nkeywors] = {
 // standard keywords
 { // 0
@@ -468,6 +468,12 @@ FITSKeyword	keywors[Nkeywors] = {
 	std::type_index(typeid(std::string)),
 	true
 },
+{ // 74
+	std::string("UUID"),
+	std::string("UUID of images"),
+	std::type_index(typeid(std::string)),
+	true
+},
 };
 
 int	FITSKeywords::type(std::type_index idx) {
@@ -596,7 +602,7 @@ static const FITSKeyword&	keyword(const std::string& name) {
 	std::map<std::string, FITSKeyword>::const_iterator	k
 		= keywordmap.find(name);
 	if (keywordmap.find(name) == keywordmap.end()) {
-		std::string	msg = stringprintf("unknow FITS keyword '%s'",
+		std::string	msg = stringprintf("unknown FITS keyword '%s'",
 			name.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);

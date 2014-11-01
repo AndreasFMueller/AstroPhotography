@@ -18,6 +18,8 @@ using namespace astro::io;
 using namespace astro::calibration;
 
 namespace astro {
+namespace app {
+namespace clamp {
 
 /**
  * \brief usage
@@ -37,7 +39,7 @@ void	usage(const char *progname) {
 /**
  * \brief Main function in astro namespace
  */
-int	clamp_main(int argc, char *argv[]) {
+int	main(int argc, char *argv[]) {
 	int	c;
 	double	minvalue = -1;
 	double	maxvalue = -1;
@@ -97,15 +99,10 @@ int	clamp_main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace clamp
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::clamp_main(argc, argv);
-	} catch (std::exception& x) {
-		std::string	msg = stringprintf("%s terminated: %s",
-			argv[0], x.what());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		std::cerr << msg << std::endl;
-	}
+	return astro::main_function<astro::app::clamp::main>(argc, argv);
 }

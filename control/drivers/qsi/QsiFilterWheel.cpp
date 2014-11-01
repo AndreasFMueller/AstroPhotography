@@ -5,6 +5,8 @@
  */
 #include <QsiFilterWheel.h>
 #include <AstroExceptions.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {
@@ -17,6 +19,13 @@ QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
 	int	filtercount = 0;
 	_camera.camera().get_FilterCount(filtercount);
 	nfilters = filtercount;
+	// retrieve filter names
+	std::string	*names = new std::string[nfilters];
+	_camera.camera().get_Names(names);
+	for (unsigned int index = 0; index < nfilters; index++) {
+		filternames.push_back(names[index]);
+	}
+	delete[] names;
 }
 
 QsiFilterWheel::~QsiFilterWheel() {
@@ -43,15 +52,28 @@ void	QsiFilterWheel::select(size_t filterindex) {
 	_camera.camera().put_Position(position);
 }
 
+void	QsiFilterWheel::select(const std::string& filtername) {
+	for (unsigned int index = 0; index < nfilters; index++) {
+		if (filternames[index] == filtername) {
+			select(index);
+			return;
+		}
+	}
+	try {
+		select(std::stoi(filtername));
+	} catch (...) {
+	}
+	std::string	msg = stringprintf("filter '%s' not found",
+		filtername.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
 std::string	QsiFilterWheel::filterName(size_t filterindex) {
 	if (filterindex >= nfilters) {
 		throw std::invalid_argument("filter index too large");
 	}
-	std::string	*names = new std::string[nfilters];
-	_camera.camera().get_Names(names);
-	std::string	filtername(names[filterindex]);
-	delete[] names;
-	return filtername;
+	return filternames[filterindex];
 }
 
 FilterWheel::State	QsiFilterWheel::getState() {

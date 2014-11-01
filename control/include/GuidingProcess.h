@@ -9,7 +9,6 @@
 #include <AstroGuiding.h>
 #include <AstroDebug.h>
 #include <AstroPersistence.h>
-#include <pthread.h>
 #include <includes.h>
 #include <Thread.h>
 

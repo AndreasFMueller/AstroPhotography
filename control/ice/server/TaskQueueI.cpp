@@ -8,56 +8,77 @@
 #include <AstroFormat.h>
 #include <sstream>
 #include <ProxyCreator.h>
+#include <IceConversions.h>
 
 namespace snowstar {
+
+template<>
+void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
+		const astro::callback::CallbackDataPtr data) {
+	astro::task::TaskMonitorInfo	*taskmonitorinfo
+		= dynamic_cast<astro::task::TaskMonitorInfo *>(&*data);
+
+	// if there is no task monitor info, then give up immediately
+	if (NULL == taskmonitorinfo) {
+		return;
+	}
+
+	// send the information to the clients
+	p->update(convert(*taskmonitorinfo));
+}
 
 TaskQueueI::TaskQueueI(astro::task::TaskQueue& _taskqueue)
 	: taskqueue(_taskqueue) {
 	// recover from crashes
 	taskqueue.recover();
 
-	// XXX install callback that publishes updates
+	// install callback that publishes updates
+	TaskQueueICallback	*taskqueuecallback
+		= new TaskQueueICallback(*this);
+	taskqueue.callback = astro::callback::CallbackPtr(taskqueuecallback);
 }
 
 TaskQueueI::~TaskQueueI() {
 }
 
 // interface methods
-QueueState TaskQueueI::state(const Ice::Current& current) {
+QueueState TaskQueueI::state(const Ice::Current& /* current */) {
 	return convert(taskqueue.state());
 }
 
-void TaskQueueI::start(const Ice::Current& current) {
+void TaskQueueI::start(const Ice::Current& /* current */) {
 	taskqueue.start();
 }
 
-void TaskQueueI::stop(const Ice::Current& current) {
+void TaskQueueI::stop(const Ice::Current& /* current */) {
 	taskqueue.stop();
 }
 
 int TaskQueueI::submit(const TaskParameters& parameters,
-		const Ice::Current& current) {
+		const Ice::Current& /* current */) {
 	return taskqueue.submit(snowstar::convert(parameters));
 }
 
-TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& current) {
+TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
 	return snowstar::convert(taskqueue.parameters(taskid));
 }
 
-TaskInfo TaskQueueI::info(int taskid, const Ice::Current& current) {
+TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	return snowstar::convert(taskqueue.info(taskid));
 }
 
-void TaskQueueI::cancel(int taskid, const Ice::Current& current) {
+void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for %d", taskid);
 	taskqueue.cancel(taskid);
 }
 
-void TaskQueueI::remove(int taskid, const Ice::Current& current) {
+void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove request for %d", taskid);
 	taskqueue.remove(taskid);
 }
 
 taskidsequence TaskQueueI::tasklist(TaskState state,
-		const Ice::Current& current) {
+		const Ice::Current& /* current */) {
 	std::list<long>	taskidlist = taskqueue.tasklist(snowstar::convert(state));
 	taskidsequence	result;
 	std::copy(taskidlist.begin(), taskidlist.end(), back_inserter(result));
@@ -79,6 +100,21 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 
 	// create the proxy
 	return createProxy<TaskPrx>(identity, current);
+}
+
+void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new monitor");
+	callbacks.registerCallback(callback, current);
+}
+
+void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
+		const Ice::Current& current) {
+	callbacks.unregisterCallback(callback, current);
+}
+
+void	TaskQueueI::taskUpdate(const astro::callback::CallbackDataPtr data) {
+	callbacks(data);
 }
 
 } // namespace snowstar

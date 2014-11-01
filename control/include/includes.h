@@ -94,4 +94,16 @@
 #include <sys/param.h>
 #endif /* HAVE_SYS_PARAM_H */
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif /* HAVE_GETOPT_H */
+
+#ifdef HAVE_UUID_UUID_H
+#include <uuid/uuid.h>
+#endif /* HAVE_UUID_UUID_H */
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif /* HAVE_NETDB_H */
+
 #endif /* _includes_h */

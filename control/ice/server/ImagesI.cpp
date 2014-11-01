@@ -17,7 +17,7 @@ ImagesI::ImagesI(astro::image::ImageDirectory& _imagedirectory)
 ImagesI::~ImagesI() {
 }
 
-ImageList	ImagesI::listImages(const Ice::Current& current) {
+ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
 	ImageList	result;
 	std::list<std::string>	names = imagedirectory.fileList();
 	std::copy(names.begin(), names.end(), back_inserter(result));
@@ -25,12 +25,12 @@ ImageList	ImagesI::listImages(const Ice::Current& current) {
 }
 
 int	ImagesI::imageSize(const std::string& name,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	return imagedirectory.fileSize(name);
 }
 
 int	ImagesI::imageAge(const std::string& name,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	return imagedirectory.fileAge(name);
 }
 
@@ -42,9 +42,11 @@ ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 	// create the proxy
 	switch (bytesPerPixel) {
 	case 1:
-		return snowstar::createProxy<ByteImagePrx>(identity, current);
+		return snowstar::createProxy<ByteImagePrx>(identity, current,
+			false);
 	case 2:
-		return snowstar::createProxy<ShortImagePrx>(identity, current);
+		return snowstar::createProxy<ShortImagePrx>(identity, current,
+			false);
 	}
 	throw BadParameter("pixel format not supported");
 }

@@ -14,7 +14,7 @@ namespace astro {
  */
 std::string	Typename::type_name() const {
 	try {
-		return std::string(typeid(*this).name());
+		return demangle(typeid(*this).name());
 	} catch (std::bad_typeid& x) {
 		return stringprintf("(bad type[%s])", x.what());
 	}

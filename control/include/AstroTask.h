@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <AstroPersistence.h>
 #include <AstroCallback.h>
+#include <mutex>
+#include <condition_variable>
 
 namespace astro {
 namespace task {
@@ -169,12 +171,12 @@ class TaskQueue {
 	// thread performing the task queue management work
 	pthread_t	_thread;
 	// lock to protect the data structures
-	pthread_mutex_t	lock;
+	std::recursive_mutex	lock;
 	// condition variable to signal to the task queue thread
-	pthread_cond_t	statechange_cond;
+	std::condition_variable_any	statechange_cond;
 
 	// condition variable and lock used for the wait operation
-	pthread_cond_t	wait_cond;
+	std::condition_variable_any	wait_cond;
 
 	// various variables used to exchange information with 
 public:
@@ -315,8 +317,8 @@ public:
 	TaskQueueEntry&	task() { return _task; }
 private:
 	pthread_t	_thread;
-	pthread_mutex_t	_lock;
-	pthread_cond_t	_cond;
+	std::mutex	_lock;
+	std::condition_variable	_cond;
 private:
 	// ensure that the TaskExecutor cannot be copied
 	TaskExecutor&	operator=(const TaskExecutor& other);

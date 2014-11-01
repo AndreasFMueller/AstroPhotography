@@ -11,6 +11,8 @@
 #include <FilterWheelI.h>
 #include <FocuserI.h>
 #include <GuiderPortI.h>
+#include <AdaptiveOpticsI.h>
+#include <MountI.h>
 #include <AstroDevice.h>
 #include <AstroDevaccess.h>
 #include <NameConverter.h>
@@ -33,7 +35,7 @@ DeviceServantLocator::DeviceServantLocator(
  * \brief Create a servant 
  */
 Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
-			Ice::LocalObjectPtr& cookie) {
+			Ice::LocalObjectPtr& /* cookie */) {
 	std::string	name = NameConverter::urldecode(current.id.name);
 
 	// the device we are going to return
@@ -57,7 +59,10 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 	// get the device
 	switch (devicename.type()) {
 	case astro::DeviceName::AdaptiveOptics:
-		throw NotImplemented("adaptive optics not implemented");
+		ptr = new AdaptiveOpticsI(
+			DeviceAccessor<astro::camera::AdaptiveOpticsPtr>(
+				_repository).get(devicename));
+		break;
 
 	case astro::DeviceName::Camera:
 		ptr = new CameraI(
@@ -100,19 +105,22 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 		throw NotImplemented("no module access through devices");
 
 	case astro::DeviceName::Mount:
-		throw NotImplemented("mount access not yet implemented");
+		ptr = new MountI(
+			DeviceAccessor<astro::device::MountPtr>(
+				_repository).get(devicename));
+		break;
 	};
 
 	devices.insert(std::make_pair(name, ptr));
 	return ptr;
 }
 
-void	DeviceServantLocator::finished(const Ice::Current& current,
-		const Ice::ObjectPtr& servant,
-		const Ice::LocalObjectPtr& cookie) {
+void	DeviceServantLocator::finished(const Ice::Current& /* current */,
+		const Ice::ObjectPtr& /* servant */,
+		const Ice::LocalObjectPtr& /* cookie */) {
 }
 
-void	DeviceServantLocator::deactivate(const std::string& category) {
+void	DeviceServantLocator::deactivate(const std::string& /* category */) {
 }
 
 } // namespace snowstar

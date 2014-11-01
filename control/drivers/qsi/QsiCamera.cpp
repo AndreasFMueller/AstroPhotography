@@ -41,9 +41,9 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// get pixel dimensions
 	double	pixelsize;
 	camera().get_PixelSizeX(&pixelsize);
-	info.pixelwidth(pixelsize);
+	info.pixelwidth(pixelsize / 1000000.);
 	camera().get_PixelSizeY(&pixelsize);
-	info.pixelheight(pixelsize);
+	info.pixelheight(pixelsize / 1000000.);
 
 	// get the binning modes
 	bool	p2bin;

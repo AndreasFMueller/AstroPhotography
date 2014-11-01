@@ -23,10 +23,12 @@ public:
 	void	tearDown();
 	void	testEquality();
 	void	testArithmetic();
+	void	testPointSpec();
 
 	CPPUNIT_TEST_SUITE(ImagePointTest);
 	CPPUNIT_TEST(testEquality);
 	CPPUNIT_TEST(testArithmetic);
+	CPPUNIT_TEST(testPointSpec);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -56,6 +58,17 @@ void	ImagePointTest::testArithmetic() {
 	CPPUNIT_ASSERT((*p1 + *p3) == ImagePoint(8, 9));
 	CPPUNIT_ASSERT((*p1 - *p3) == ImagePoint(-2, 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testArithmetic() end");
+}
+
+void	ImagePointTest::testPointSpec() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPointSpec() begin");
+	ImagePoint	point1("1848,1291");
+	CPPUNIT_ASSERT(point1.x() == 1848);
+	CPPUNIT_ASSERT(point1.y() == 1291);
+	ImagePoint	point2("(1848,1291)");
+	CPPUNIT_ASSERT(point2.x() == 1848);
+	CPPUNIT_ASSERT(point2.y() == 1291);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testPointSpec() end");
 }
 
 } // namespace test

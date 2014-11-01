@@ -13,13 +13,13 @@
 
 namespace snowstar {
 
-GuiderDescriptor	convert(const astro::guiding::GuiderDescriptor& gd);
-astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
-
-TrackingPoint	convert(const astro::guiding::TrackingPoint& trackingpoint);
-
-CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
-
+/**
+ * \brief The guider factory implementation object
+ *
+ * This class implements the servant for the guider factory interface.
+ * It is essentially a wrapper around the original guiderfactory object,
+ * but it needs some support structure, e.g. the database for persistence.
+ */
 class GuiderFactoryI : public GuiderFactory {
 	astro::persistence::Database	database;
 	astro::guiding::GuiderFactory&	guiderfactory;

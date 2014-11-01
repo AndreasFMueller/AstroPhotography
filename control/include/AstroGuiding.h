@@ -493,10 +493,16 @@ private:
 	GuiderProcessPtr	guiderprocess;
 
 public:
+	// methods involved with creating a tracker
+	double	getPixelsize();
+	TrackerPtr	getTracker(const Point& point);
+
+public:
 	// tracking
 	void	startGuiding(TrackerPtr tracker, double interval);
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
+	double	getInterval();
 	
 	friend class GuiderProcess;
 

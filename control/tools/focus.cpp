@@ -16,6 +16,8 @@
 #include <AstroFilter.h>
 #include <AstroFilterfunc.h>
 #include <AstroIO.h>
+#include <AstroUtils.h>
+#include <includes.h>
 
 using namespace astro;
 using namespace astro::module;
@@ -26,7 +28,12 @@ using namespace astro::image::filter;
 using namespace astro::io;
 
 namespace astro {
+namespace app {
+namespace focus {
 
+/**
+ * \brief main function for the focus program
+ */
 int	main(int argc, char *argv[]) {
 	int	c;
 	double	exposuretime = 0.1;
@@ -121,14 +128,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace focus
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (std::exception& x) {
-		std::cerr << "focus terminated by exception: " << x.what()
-			<< std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::app::focus::main>(argc, argv);
 }

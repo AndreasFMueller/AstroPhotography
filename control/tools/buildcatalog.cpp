@@ -11,17 +11,31 @@
 #include <Ucac4.h>
 #include <includes.h>
 #include <iostream>
+#include <typeinfo>
+#include <AstroUtils.h>
 
 using namespace astro::catalog;
 
 namespace astro {
+namespace app {
+namespace buildcatalog {
+
+static struct option	longopts[] = {
+{ "debug",	no_argument,		NULL,		'd' }, /* 0 */
+{ "hipparchos", required_argument,	NULL,		'h' }, /* 1 */
+{ "tycho2",	required_argument,	NULL,		't' }, /* 2 */
+{ "ucac4",	required_argument,	NULL,		'u' }, /* 3 */
+{ NULL,		0,			NULL,		0   }
+};
 
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	std::string	hipfile;
 	std::string	tycho2file;
 	std::string	ucac4dir;
-	while (EOF != (c = getopt(argc, argv, "dh:t:u:")))
+	while (EOF != (c = getopt_long(argc, argv, "dh:t:u:", longopts,
+		&longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -135,16 +149,10 @@ int	main(int argc, char *argv[]) {
 	return EXIT_SUCCESS;
 }
 
+} // namespace buildcatalog
+} // namespace app
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by exception: " << x.what()
-			<< std::endl;
-	} catch (...) {
-		std::cerr << "terminated by unknown exception" << std::endl;
-	}
-	return EXIT_FAILURE;
+	return astro::main_function<astro::app::buildcatalog::main>(argc, argv);
 }

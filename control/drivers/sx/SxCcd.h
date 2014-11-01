@@ -10,7 +10,7 @@
 #include <SxDemux.h>
 #include <AstroImage.h>
 #include <AstroUtils.h>
-#include <pthread.h>
+#include <thread>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -50,7 +50,7 @@ public:
  */
 class SxCcd : public Ccd {
 	// we need a separate thread that retrieves the image
-	pthread_t	thread;
+	std::thread	thread;
 protected:
 	ImagePtr	image;
 	SxCamera&	camera;

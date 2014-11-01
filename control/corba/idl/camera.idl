@@ -18,6 +18,7 @@ module Astro {
 	typedef sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { SHUTTER_CLOSED, SHUTTER_OPEN };
+	enum ExposurePurpose { PURPOSE_LIGHT, PURPOSE_DARK, PURPOSE_FLAT };
 
 	/**
 	 * \brief Exposure request structure
@@ -57,6 +58,14 @@ module Astro {
 		 * For dark images, the shutter needs to be closed.
 		 */
 		ShutterState	shutter;
+		/**
+		 * \brief Purpose of an expousre
+		 *
+		 * Although shutter state already tells the camera what it
+		 * should do, the driver may want to behave differently
+		 * depending on the purpose of the exposure.
+		 */
+		ExposurePurpose	purpose;
 		/**
 		 * \brief Binning mode to use during readout
 		 *

@@ -7,6 +7,8 @@
 #include <pthread.h>
 #include <AstroUtils.h>
 #include <includes.h>
+#include <mutex>
+#include <condition_variable>
 
 namespace astro {
 namespace process {
@@ -19,8 +21,8 @@ namespace process {
  */
 class ProcessingThreadImpl : public ProcessingThread {
 	pthread_t	thread;
-	pthread_mutex_t	_lock;
-	pthread_cond_t	_cond;
+	std::recursive_mutex	_lock;
+	std::condition_variable_any	_cond;
 	int		_fd;
 public:
 	ProcessingThreadImpl(ProcessingStepPtr step);
@@ -39,15 +41,6 @@ public:
  */
 ProcessingThreadImpl::ProcessingThreadImpl(ProcessingStepPtr step)
 	: ProcessingThread(step) {
-	pthread_mutexattr_t	mattr;
-	pthread_mutexattr_init(&mattr);
-	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&_lock, &mattr);
-
-        pthread_condattr_t      cattr;
-        pthread_condattr_init(&cattr);
-        pthread_cond_init(&_cond, &cattr);
-
 	working = false;
 }
 
@@ -109,9 +102,8 @@ static void	*run_processing_thread(void *arg) {
  */
 void	ProcessingThreadImpl::run(int fd) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting thread");
-	pthread_mutex_lock(&_lock);
+	std::unique_lock<std::recursive_mutex>	lock(_lock);
 	if (working) {
-		pthread_mutex_unlock(&_lock);
 		throw std::runtime_error("thread already running");
 	}
 	_fd = fd;
@@ -120,14 +112,14 @@ void	ProcessingThreadImpl::run(int fd) {
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	if (pthread_create(&thread, &attr, run_processing_thread, this)) {
-		pthread_mutex_unlock(&_lock);
+		lock.unlock();
 		working = false;
 		return;
 	}
 
 	// wait until the thread is in state working
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for thread to start up");
-	pthread_cond_wait(&_cond, &_lock);
+	_cond.wait(lock);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread successfully started");
 }
 
@@ -167,7 +159,7 @@ void	ProcessingThreadImpl::wait() {
  * \brief Ask whether the thread is still running
  */
 bool	ProcessingThreadImpl::isrunning() {
-	PthreadLocker	lock(&_lock);
+	std::unique_lock<std::recursive_mutex>	lock(_lock);
 	return working;
 }
 
@@ -177,8 +169,8 @@ bool	ProcessingThreadImpl::isrunning() {
 void	ProcessingThreadImpl::started() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "signal that thread has started");
 	{
-		PthreadLocker	lock(&_lock);
-		pthread_cond_broadcast(&_cond);
+		std::unique_lock<std::recursive_mutex>	lock(_lock);
+		_cond.notify_all();
 	}
 }
 

@@ -40,7 +40,7 @@ ProcessingStep::~ProcessingStep() {
 
 static std::string	get_typename(const ProcessingStep *step) {
 	try {
-		return std::string(typeid(*step).name());
+		return demangle(typeid(*step).name());
 	} catch (std::bad_typeid& x) {
 		return stringprintf("(unknown [%s])", x.what());
 	}

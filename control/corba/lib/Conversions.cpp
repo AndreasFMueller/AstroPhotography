@@ -234,15 +234,15 @@ Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle) {
 
 // shutter state
 
-astro::camera::shutter_state    convert(const Astro::ShutterState& state) {
+astro::camera::shutter_state    convert(const Astro::ShutterState state) {
 	switch (state) {
 	case Astro::SHUTTER_OPEN:
 		return astro::camera::SHUTTER_OPEN;
 	case Astro::SHUTTER_CLOSED:
 		return astro::camera::SHUTTER_CLOSED;
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", state);
-	throw std::runtime_error("illegal type");
+	debug(LOG_ERR, DEBUG_LOG, 0, "unknown shutter state: %d", state);
+	throw std::runtime_error("unknown shutter state");
 }
 
 
@@ -253,9 +253,35 @@ Astro::ShutterState     convert(const astro::camera::shutter_state state) {
 	case astro::camera::SHUTTER_CLOSED:
 		return Astro::SHUTTER_CLOSED;
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "illegal type: %d", state);
-	throw std::runtime_error("illegal type");
+	debug(LOG_ERR, DEBUG_LOG, 0, "unknown shutter state: %d", state);
+	throw std::runtime_error("unknown shutter state");
 }
+
+// exposure purpose
+astro::camera::Exposure::purpose_t        convert(const Astro::ExposurePurpose purpose) {
+	switch (purpose) {
+	case Astro::PURPOSE_LIGHT:
+		return astro::camera::Exposure::light;
+	case Astro::PURPOSE_DARK:
+		return astro::camera::Exposure::dark;
+	case Astro::PURPOSE_FLAT:
+		return astro::camera::Exposure::flat;
+	}
+	throw std::runtime_error("unknown exposure purpose");
+}
+
+Astro::ExposurePurpose convert(const astro::camera::Exposure::purpose_t purpose) {
+	switch (purpose) {
+	case astro::camera::Exposure::light:
+		return Astro::PURPOSE_LIGHT;
+	case astro::camera::Exposure::dark:
+		return Astro::PURPOSE_DARK;
+	case astro::camera::Exposure::flat:
+		return Astro::PURPOSE_FLAT;
+	}
+	throw std::runtime_error("unknown exposure purpose");
+}
+
 
 // Binning mode
 astro::camera::Binning	convert(const Astro::BinningMode& mode) {
@@ -309,6 +335,7 @@ astro::camera::Exposure	convert(const Astro::Exposure& exposure) {
 		result.limit = exposure.limit;
 	}
 	result.shutter = convert(exposure.shutter);
+	result.purpose = convert(exposure.purpose);
 	result.mode = convert(exposure.mode);
 	return result;
 }
@@ -320,6 +347,7 @@ Astro::Exposure	convert(const astro::camera::Exposure& exposure) {
 	result.gain = exposure.gain;
 	result.limit = exposure.limit;
 	result.shutter = convert(exposure.shutter);
+	result.purpose = convert(exposure.purpose);
 	result.mode = convert(exposure.mode);
 	return result;
 }

@@ -21,6 +21,7 @@ private:
 public:
 	void	setUp();
 	void	tearDown();
+	void	testUnsignedChar();
 	void	testMonochrome();
 	void	testMono2RGB();
 	void	testRGB2Mono();
@@ -32,6 +33,7 @@ public:
 	void	testCharAndShort();
 
 	CPPUNIT_TEST_SUITE(PixelTest);
+	CPPUNIT_TEST(testUnsignedChar);
 	CPPUNIT_TEST(testMonochrome);
 	CPPUNIT_TEST(testMono2RGB);
 	CPPUNIT_TEST(testRGB2Mono);
@@ -79,6 +81,7 @@ void	PixelTest::testMonochrome() {
 	// float 257 overflows the result...
 	f = 257.;
 	convertPixelValue(uc, f);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "conversion overflow: %d", (int)uc);
 	CPPUNIT_ASSERT(uc == 1);
 
 	long long	ll = 0x1122334455667788;
@@ -187,6 +190,16 @@ void	PixelTest::testConversionParameters() {
 	COLOR_ASSERTS(float, unsigned int);
 	COLOR_ASSERTS(double, unsigned long);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConversionParameters() end");
+}
+
+void	PixelTest::testUnsignedChar() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testUnsignedChar() begin");
+	float	f = 257.;
+	//double	f = 257.;
+	unsigned char	u;
+	convertPixelValue(u, f);
+	CPPUNIT_ASSERT(u == 1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testUnsignedChar() end");
 }
 
 } // namespace test

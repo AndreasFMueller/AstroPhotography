@@ -51,6 +51,13 @@ Devices::devicelist	Devices::getDevicelist(DeviceName::device_type type) {
 /**
  * \brief Get a camera by name
  */
+AdaptiveOpticsPtr	Devices::getAdaptiveOptics(const DeviceName& name) {
+	return DeviceAccessor<AdaptiveOpticsPtr>(_repository).get(name);
+}
+
+/**
+ * \brief Get a camera by name
+ */
 CameraPtr	Devices::getCamera(const DeviceName& name) {
 	return DeviceAccessor<CameraPtr>(_repository).get(name);
 }
@@ -88,6 +95,13 @@ FocuserPtr	Devices::getFocuser(const DeviceName& name) {
  */
 GuiderPortPtr	Devices::getGuiderPort(const DeviceName& name) {
 	return DeviceAccessor<GuiderPortPtr>(_repository).get(name);
+}
+
+/**
+ * \brief Get a mount by name
+ */
+MountPtr	Devices::getMount(const DeviceName& name) {
+	return DeviceAccessor<MountPtr>(_repository).get(name);
 }
 
 } // namespace module
