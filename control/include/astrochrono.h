@@ -14,14 +14,17 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#if ENABLE_BOOSTREGEX
+#if ENABLE_BOOSTCHRONO
 
 #include <boost/chrono.hpp>
 
 namespace astro {
+namespace chrono {
 
-typedef	boost::chrono	chrono;
+typedef	boost::chrono::steady_clock	steady_clock;
+typedef	boost::chrono::milliseconds	milliseconds;
 
+} // namespace chrono
 } // namespace astro
 
 #else
@@ -29,11 +32,14 @@ typedef	boost::chrono	chrono;
 #include <chrono>
 
 namespace astro {
+namespace chrono {
 
-typedef	std::chrono	chrono;
+typedef	std::chrono::steady_clock	steady_clock;
+typedef	std::chrono::milliseconds	milliseconds;
 
+} // namespace chrono
 } // namespace astro
 
-#endif /* ENABLE_BOOSTREGEX */
+#endif /* ENABLE_BOOSTCHRONO */
 
 #endif /* _astrochrono_h */

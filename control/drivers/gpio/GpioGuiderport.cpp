@@ -10,7 +10,6 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroDevice.h>
-#include <chrono>
 #include <sstream>
 
 namespace astro {
