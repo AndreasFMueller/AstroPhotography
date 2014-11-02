@@ -10,7 +10,7 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroDevice.h>
-#include <chrono>
+#include <astrochrono.h>
 #include <sstream>
 
 namespace astro {
@@ -70,12 +70,12 @@ void	BasicGuiderport::run() {
 	// start endless loop
 	do {
 		// what time do we have now?
-		std::chrono::steady_clock::time_point now
-			= std::chrono::steady_clock::now();
+		chrono::steady_clock::time_point now
+			= chrono::steady_clock::now();
 
 		// when do we imperatively have our next stop?
-		std::chrono::steady_clock::time_point next = now +
-				std::chrono::milliseconds(1000);
+		chrono::steady_clock::time_point next = now +
+				chrono::milliseconds(1000);
 
 		// set the active pins
 		uint8_t	a = 0;
@@ -145,31 +145,31 @@ uint8_t	BasicGuiderport::active() {
  */
 void	BasicGuiderport::activate(float raplus, float raminus,
 		float decplus, float decminus) {
-	std::chrono::steady_clock::time_point now
-		= std::chrono::steady_clock::now();
+	chrono::steady_clock::time_point now
+		= chrono::steady_clock::now();
 	long long	delta = (raplus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %lldms", delta);
 	}
-	nextchange[0] = now + std::chrono::milliseconds(delta);
+	nextchange[0] = now + chrono::milliseconds(delta);
 
 	delta = (raminus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %lldms", delta);
 	}
-	nextchange[1] = now + std::chrono::milliseconds(delta);
+	nextchange[1] = now + chrono::milliseconds(delta);
 
 	delta = (decplus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %lldms", delta);
 	}
-	nextchange[2] = now + std::chrono::milliseconds(delta);
+	nextchange[2] = now + chrono::milliseconds(delta);
 
 	delta = (decminus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %lldms", delta);
 	}
-	nextchange[3] = now + std::chrono::milliseconds(delta);
+	nextchange[3] = now + chrono::milliseconds(delta);
 
 	cond.notify_one();
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "thread notified");

@@ -27,5 +27,5 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	MappedFile.h Ucac4.h Tycho2.h BSC.h Hipparcos.h NGCIC.h \
 	CatalogBackend.h ImageRepoTables.h ImageReposTable.h \
 	ProjectTable.h GlobalTable.h BasicGuiderport.h \
-	FieldPersistence.h
+	FieldPersistence.h astroregex.h astrochrono.h
 

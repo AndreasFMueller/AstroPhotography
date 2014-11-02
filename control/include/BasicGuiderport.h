@@ -12,7 +12,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#include <chrono>
+#include <astrochrono.h>
 
 namespace astro {
 namespace camera {
@@ -26,7 +26,7 @@ namespace camera {
  * activates the output pins of the particular hardware.
  */
 class BasicGuiderport : public astro::camera::GuiderPort {
-	std::chrono::steady_clock::time_point	nextchange[4];
+	chrono::steady_clock::time_point	nextchange[4];
 	volatile bool	_running;
 	volatile uint8_t	_active;
 public:

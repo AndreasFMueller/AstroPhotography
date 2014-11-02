@@ -71,19 +71,11 @@ AC_ARG_ENABLE(corba,
 	then
 		LIBS="${LIBS} `pkg-config --libs omniORB4`"
 		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
-<<<<<<< HEAD
 		if pkg-config --exists omniCOS4
 		then
 			LIBS="${LIBS} `pkg-config --libs omniCOS4`"
 			CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
 		fi
-=======
-                if pkg-config --exists omniCOS4
-                then
-                        LIBS="${LIBS} `pkg-config --libs omniCOS4`"
-                        CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
-                fi
->>>>>>> 954ce4cd8a73de864788eefcee9ee973a1f75a99
 		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
 		# add the idl include directory to the cflags
 		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
@@ -206,6 +198,23 @@ then
 	AC_DEFINE([ENABLE_BOOSTREGEX], [1], [Define to 1 if boost::regex should be used])
 else
 	AC_DEFINE([ENABLE_BOOSTREGEX], [0], [Define to 1 if boost::regex should be used])
+fi
+
+## BOOSTCHRONO ########################################################
+# use boost chrono
+AC_ARG_ENABLE(boostchrono,
+[AS_HELP_STRING([--enable-boostchrono], [use chrono class from boost instead of C++11])],
+[
+	enable_boostchrono=yes
+],[
+	enable_boostchrono=no
+])
+if test ${enable_boostchrono} = yes
+then
+	LIBS="${LIBS} -lboost_chrono"
+	AC_DEFINE([ENABLE_BOOSTREGEX], [1], [Define to 1 if boost::chrono should be used])
+else
+	AC_DEFINE([ENABLE_BOOSTREGEX], [0], [Define to 1 if boost::chrono should be used])
 fi
 
 ## UNITTESTS #########################################################
