@@ -212,9 +212,9 @@ AC_ARG_ENABLE(boostchrono,
 if test ${enable_boostchrono} = yes
 then
 	LIBS="${LIBS} -lboost_chrono"
-	AC_DEFINE([ENABLE_BOOSTREGEX], [1], [Define to 1 if boost::chrono should be used])
+	AC_DEFINE([ENABLE_BOOSTCHRONO], [1], [Define to 1 if boost::chrono should be used])
 else
-	AC_DEFINE([ENABLE_BOOSTREGEX], [0], [Define to 1 if boost::chrono should be used])
+	AC_DEFINE([ENABLE_BOOSTCHRONO], [0], [Define to 1 if boost::chrono should be used])
 fi
 
 ## UNITTESTS #########################################################

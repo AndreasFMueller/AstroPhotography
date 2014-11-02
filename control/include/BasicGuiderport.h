@@ -26,7 +26,7 @@ namespace camera {
  * activates the output pins of the particular hardware.
  */
 class BasicGuiderport : public astro::camera::GuiderPort {
-	chrono::steady_clock::time_point	nextchange[4];
+	astro::chrono::steady_clock::time_point	nextchange[4];
 	volatile bool	_running;
 	volatile uint8_t	_active;
 public:
