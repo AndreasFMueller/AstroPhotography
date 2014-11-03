@@ -75,4 +75,12 @@ module snowstar {
 	interface Callback {
 		void	stop();
 	};
+
+	/**
+	 * \brief Binning mode used for an image
+	 */
+	struct BinningMode {
+		int	x;
+		int	y;
+	};
 };

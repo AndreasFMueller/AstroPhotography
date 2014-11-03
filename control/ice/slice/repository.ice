@@ -9,6 +9,24 @@ module snowstar {
 	sequence<string>	uuidlist;
 
 	/**
+	 * \brief Information about an image an image repository
+	 */
+	struct ImageInfo {
+		int	id;
+		string	uuid;
+		string	filename;
+		string	project;
+		double	createdago;
+		string	camera;
+		ImageSize	size;
+		BinningMode	binning;
+		double	exposuretime;
+		double	temperature;
+		string	purpose;
+		double	observationago;
+	};
+
+	/**
 	 * \brief Image Repository interface
 	 *
 	 * This interface does not give the full local access to a repository,
@@ -17,8 +35,10 @@ module snowstar {
 	 */
 	interface Repository {
 		uuidlist	getUUIDs();
+		uuidlist	getUUIDsCondition(string condition);
 		int		getId(string uuid);
 		ImageFile	getImage(int id);
+		ImageInfo	getInfo(int id);
 		int	save(ImageFile image);
 		void	remove(int id);
 	};

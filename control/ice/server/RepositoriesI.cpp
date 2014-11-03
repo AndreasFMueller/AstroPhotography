@@ -30,6 +30,7 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 
 RepositoryPrx	RepositoriesI::get(const std::string& reponame,
 			const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request repo '%s'", reponame.c_str());
 	return createProxy<RepositoryPrx>("repository/" + reponame, current,
 		false);
 }

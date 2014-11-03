@@ -9,12 +9,6 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
-	// exposure related data structures
-	struct BinningMode {
-		int	x;
-		int	y;
-	};
-
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };

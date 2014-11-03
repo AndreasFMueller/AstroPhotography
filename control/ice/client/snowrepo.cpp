@@ -19,6 +19,7 @@ namespace app {
 namespace snowrepo {
 
 std::string	server("localhost");
+std::string	project("");
 bool	dryrun = false;
 bool	verbose = false;
 
@@ -37,6 +38,7 @@ void	usage(const char *progname) {
 	std::cout << " -c,--config=<cfg>       use configuration <cfg>" << std::endl;
 	std::cout << " -d,--debug              increase debug level" << std::endl;
 	std::cout << " -n,--dry-run            don't do anything, just report on what would be done" << std::endl;
+	std::cout << " -p,--project=<project>  only replicate images of some project" << std::endl;
 	std::cout << " -s,--server=<server>    connect to repositories on server <server>, which" << std::endl;
 	std::cout << "                         can either be a simple server name or a string" << std::endl;
 	std::cout << "                         of the form <host>:<port>" << std::endl;
@@ -97,6 +99,54 @@ int	command_list(const astro::ServerName& servername) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief List the contents of a repository
+ */
+int	command_list(const astro::ServerName& servername,
+		const std::string& reponame) {
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(
+					servername.connect("Repositories"));
+	RepositoriesPrx	remoterepositories = RepositoriesPrx::checkedCast(base);
+	if (!remoterepositories) {
+		throw std::runtime_error("no repositories proxy");
+	}
+	RepositoryPrx	repository;
+	repository = remoterepositories->get(reponame);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got remote repository %s",
+		reponame.c_str());
+
+	// retrieve a list of uuids from the remote server
+	std::string	condition("0 = 0");
+	if (project.size() > 0) {
+		condition = astro::stringprintf("project = '%s'",
+			project.c_str());
+	}
+	uuidlist u = repository->getUUIDsCondition(condition);
+	std::set<int>	ids;
+	for (auto ptr = u.begin(); ptr != u.end(); ptr++) {
+		ids.insert(repository->getId(*ptr));
+	}
+	std::cout << "id   size      purpose bin  exp  temp observation    project" << std::endl;
+	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
+		int	id = *ptr;
+		ImageInfo	info = repository->getInfo(id);
+		std::cout << astro::stringprintf("%04d %-9.9s ", id,
+			convert(info.size).toString().c_str());
+		std::cout << astro::stringprintf("%-8.8s",
+			info.purpose.c_str());
+		std::cout << astro::stringprintf("%1dx%1d%5.1f %5.1f ",
+			info.binning.x, info.binning.y,
+			info.exposuretime,
+			info.temperature);
+		std::cout << astro::timeformat("%d.%m.%y %H:%M ",
+                                converttime(info.observationago));
+		std::cout << info.project << std::endl;
+	}
+	
+	return EXIT_SUCCESS;
+}
+
 static struct option	longopts[] = {
 { "config",	required_argument,	NULL,	'c' }, /* 0 */
 { "debug",	no_argument,		NULL,	'd' }, /* 1 */
@@ -116,15 +166,24 @@ protected:
 	RepositoryPrx	remoterepository;
 	std::set<std::string>	remoteuuids;
 	std::set<std::string>	getUUIDs(RepositoryPrx repo) {
-		uuidlist u = repo->getUUIDs();
+		uuidlist u = repo->getUUIDsCondition(condition());
 		std::set<std::string>	remoteuuids;
 		std::copy(u.begin(), u.end(),
 			std::inserter(remoteuuids, remoteuuids.begin()));
 		return remoteuuids;
 	}
 	std::set<std::string>	localuuids;
+	std::string	_project;
+	std::string	condition() const {
+		if (_project.size() > 0) {
+			return astro::stringprintf("project = '%s'",
+				_project.c_str());
+		}
+		return std::string("0 = 0");
+	}
 public:
-	BaseRepoReplicator(const astro::URL& url) {
+	BaseRepoReplicator(const astro::URL& url, const std::string& project)
+		: _project(project) {
 		Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 		Ice::ObjectPrx	base = ic->stringToProxy(
 						url.connect("Repositories"));
@@ -229,7 +288,7 @@ class LocalRepoReplicator : public BaseRepoReplicator {
 protected:
 	astro::project::ImageRepoPtr	localrepository;
 	std::set<std::string>	getUUIDs(astro::project::ImageRepo& repo) {
-		std::set<astro::UUID>	uuids = repo.getUUIDs("0 = 0");
+		std::set<astro::UUID>	uuids = repo.getUUIDs(condition());
 		std::set<std::string>	localuuids;
 		std::copy(uuids.begin(), uuids.end(),
 			std::inserter(localuuids, localuuids.begin()));
@@ -237,7 +296,8 @@ protected:
 	}
 public:
 	LocalRepoReplicator(const std::string& localreponame,
-		const astro::URL& remoteurl) : BaseRepoReplicator(remoteurl) {
+		const astro::URL& remoteurl, const std::string& project)
+		: BaseRepoReplicator(remoteurl, project) {
 		astro::config::ConfigurationPtr	config
 			= astro::config::Configuration::get();
 		localrepository = config->repo(localreponame);
@@ -285,8 +345,8 @@ protected:
 	RepositoryPrx	localrepository;
 public:
 	RemoteRepoReplicator(const astro::URL& localurl,
-		const astro::URL& remoteurl)
-		: BaseRepoReplicator(remoteurl) {
+		const astro::URL& remoteurl, const std::string& project)
+		: BaseRepoReplicator(remoteurl, project) {
 		Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 		Ice::ObjectPrx	base = ic->stringToProxy(
 					localurl.connect("Repositories"));
@@ -337,7 +397,7 @@ int	main(int argc, char *argv[]) {
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dhs:v",
+	while (EOF != (c = getopt_long(argc, argv, "c:dhp:s:v",
 		longopts, &longindex)))
 		switch (c) {
 		case 'c':
@@ -351,6 +411,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'n':
 			dryrun = true;
+			break;
+		case 'p':
+			project = optarg;
 			break;
 		case 's':
 			server = optarg;
@@ -378,7 +441,11 @@ int	main(int argc, char *argv[]) {
 
 	// list command needs nothing more
 	if (command == "list") {
-		return command_list(servername);
+		if (argc <= optind) {
+			return command_list(servername);
+		}
+		std::string	reponame = argv[optind++];
+		return command_list(servername, reponame);
 	}
 
 	// remaining commands need a local and a remote repository name
@@ -406,10 +473,12 @@ int	main(int argc, char *argv[]) {
 	// create the replicator
 	try {
 		astro::URL	localurl(localreponame);
-		RemoteRepoReplicator	replicator(localreponame, remoteurl);
+		RemoteRepoReplicator	replicator(localreponame, remoteurl,
+						project);
 		return replicator.command(command);
 	} catch (...) {
-		LocalRepoReplicator	replicator(localreponame, remoteurl);
+		LocalRepoReplicator	replicator(localreponame, remoteurl,
+						project);
 		return replicator.command(command);
 	}
 

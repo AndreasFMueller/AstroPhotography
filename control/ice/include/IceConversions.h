@@ -11,6 +11,7 @@
 #include <AstroTask.h>
 #include <AstroDevice.h>
 #include <AstroFocus.h>
+#include <AstroProject.h>
 #include <TrackingPersistence.h>
 #include <types.h>
 #include <device.h>
@@ -18,6 +19,7 @@
 #include <guider.h>
 #include <focusing.h>
 #include <tasks.h>
+#include <repository.h>
 #include <sys/time.h>
 
 namespace snowstar {
@@ -138,6 +140,9 @@ astro::focusing::Focusing::focus_status	convert(FocusState s);
 FocusMethod	convert(astro::focusing::Focusing::focus_method m);
 astro::focusing::Focusing::focus_method	convert(FocusMethod m);
 
+// Repository related conversions
+ImageInfo	convert(const astro::project::ImageEnvelope& envelope);
+astro::project::ImageEnvelope	convert(const ImageInfo& info);
 
 } // namespace snowstar
 
