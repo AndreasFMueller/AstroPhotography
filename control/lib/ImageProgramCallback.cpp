@@ -6,6 +6,7 @@
 #include <AstroCallback.h>
 #include <AstroFormat.h>
 #include <includes.h>
+#include <thread>
 
 using namespace astro::image;
 
@@ -29,10 +30,7 @@ public:
  * This method assumes that the image comes with a filename, where the image
  * can also be read from.
  */
-static void	*imageprogramcallback(void *data) {
-	// resolve the argument
-	callbackargs	*cba = (callbackargs *)data;
-
+static void	imageprogramcallback(callbackargs *cba) {
 	// we create a shared ptr for cba, which will take ownership of the
 	// callback arguments and deallocate them when we exit this function
 	std::shared_ptr<callbackargs>	ptr(cba);
@@ -42,7 +40,7 @@ static void	*imageprogramcallback(void *data) {
 		= dynamic_cast<FileImageCallbackData *>(&*(ptr->data));
 	if (NULL == icb) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "callback called with bad data");
-		return NULL;
+		return;
 	}
 
 	// execute the program
@@ -53,12 +51,9 @@ static void	*imageprogramcallback(void *data) {
 	int	rc = system(cmd.c_str());
 	if (rc) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "return value: %d", rc);
-		return NULL;
+		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command executed successfully");
-
-	// that's it
-	return NULL;
 }
 
 /**
@@ -76,6 +71,7 @@ CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 			"argument is not ImageCallbackData");
 		return CallbackDataPtr();
 	}
+
 	// if we should wait for the completion of the program, we just issue
 	// the system call
 	if (_wait) {
@@ -88,7 +84,6 @@ CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 		return data;
 	}
 
-
 	// if we get to this point, then it is expected that we perform the
 	// execution of the program from a separate thread, so that several
 	// threads can be running on different images. We have to ensure that
@@ -97,11 +92,9 @@ CallbackDataPtr	ImageProgramCallback::operator()(CallbackDataPtr data) {
 	callbackargs	*cba = new callbackargs(*this, data);
 
 	// create the thread
-	pthread_t	thread;
-	pthread_attr_t	attr;
-	pthread_attr_init(&attr);
-	int	rc = pthread_create(&thread, &attr, imageprogramcallback, cba);
-	if (rc) {
+	try {
+		std::thread	thread(imageprogramcallback, cba);
+	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start program: %s",
 			strerror(errno));
 		// in this case we have to release the callback arguments

@@ -8,11 +8,11 @@
 
 #include <AstroCamera.h>
 #include <queue>
-#include <pthread.h>
 #include <AstroPersistence.h>
 #include <AstroCallback.h>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
 
 namespace astro {
 namespace task {
@@ -171,7 +171,7 @@ class TaskQueue {
 	executormap	executors;
 
 	// thread performing the task queue management work
-	pthread_t	_thread;
+	std::thread	_thread;
 	// lock to protect the data structures
 	std::recursive_mutex	lock;
 	// condition variable to signal to the task queue thread
@@ -310,19 +310,24 @@ public:
 	}
 };
 
-class ExposureTask;
+class CancellableWork;
 
 /**
  * \brief TaskExecutor
+ *
+ * The task executor holds the thread that performs the actual work. The work
+ * is divided among the main() method and the exposurework class. The main()
+ * method does the stuff related to maintaining the state in the task executor,
+ * and the ExposreWork class does the exposure specific stuff.
  */
 class TaskExecutor {
 	TaskQueue&	_queue;
 	TaskQueueEntry	_task;
-	ExposureTask	*exposuretask;
+	CancellableWork	*exposurework;
 public:
 	TaskQueueEntry&	task() { return _task; }
 private:
-	pthread_t	_thread;
+	std::thread	_thread;
 	// the _lock and _cond variables are used to communicate with the 
 	// executor. The conditiona variable is signaled when the thread
 	// has stared running
@@ -347,8 +352,6 @@ private:
 public:
 	void	cancel();
 	void	wait();
-	bool	wait(float t);
-
 
 	bool	blocks(const TaskQueueEntry& other);
 	bool	running();

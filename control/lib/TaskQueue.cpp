@@ -7,7 +7,6 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <TaskTable.h>
 
 using namespace astro::persistence;
@@ -21,10 +20,8 @@ namespace task {
  * This function is only used as a springboard to jump to the main function
  * in the TaskQueue object.
  */
-static void	*queuemain(void *p) {
-	TaskQueue	*queue = (TaskQueue *)p;
+static void	queuemain(TaskQueue *queue) {
 	queue->main();
-	return queue;
 }
 
 /**
@@ -134,9 +131,7 @@ void	TaskQueue::restart(state_type newstate) {
 		throw std::runtime_error("cannot restart into idle state");
 	}
 	// launch the work thread
-	pthread_attr_t	attr;
-	pthread_attr_init(&attr);
-	pthread_create(&_thread, &attr, queuemain, this);
+	_thread = std::thread(queuemain, this);
 	_state = newstate;
 	// at this point, the lock object goes out of scope and releases
 	// the thread that was started previously
@@ -164,7 +159,7 @@ void	TaskQueue::shutdown() {
 
 	// wait for the thread to terminate
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for thread to terminated");
-	pthread_join(_thread, NULL);
+	_thread.join();
 }
 
 /**

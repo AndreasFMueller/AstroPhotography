@@ -77,6 +77,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
 	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
 	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
+	CancellableWork.cpp ExposureWork.cpp \
 	TrackingPersistence.cpp CalibrationPersistence.cpp \
 	CalibrationStore.cpp TrackingStore.cpp \
 	ImagePersistence.cpp \
