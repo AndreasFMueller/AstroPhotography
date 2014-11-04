@@ -310,18 +310,26 @@ public:
 	}
 };
 
+class ExposureTask;
+
 /**
  * \brief TaskExecutor
  */
 class TaskExecutor {
 	TaskQueue&	_queue;
 	TaskQueueEntry	_task;
+	ExposureTask	*exposuretask;
 public:
 	TaskQueueEntry&	task() { return _task; }
 private:
 	pthread_t	_thread;
+	// the _lock and _cond variables are used to communicate with the 
+	// executor. The conditiona variable is signaled when the thread
+	// has stared running
 	std::mutex	_lock;
 	std::condition_variable	_cond;
+public:
+	void	main();
 private:
 	// ensure that the TaskExecutor cannot be copied
 	TaskExecutor&	operator=(const TaskExecutor& other);
@@ -331,11 +339,16 @@ public:
 	TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task);
 	~TaskExecutor();
 
+private:
+	// for cancel and wait methos, we use another couple of mutex and
+	// condition variables. Whenever there is an occasion to wait inside
+	std::mutex	wait_lock;
+	std::condition_variable	wait_cond;
+public:
 	void	cancel();
 	void	wait();
 	bool	wait(float t);
 
-	void	main();
 
 	bool	blocks(const TaskQueueEntry& other);
 	bool	running();

@@ -39,6 +39,7 @@ static void	*taskmain(void *p) {
  * interrupted. If true, the wait completed.
  */
 bool	TaskExecutor::wait(float t) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "acquiring the lock");
 	std::unique_lock<std::mutex>	lock(_lock);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds", t);
@@ -68,10 +69,39 @@ public:
 	ExposureTask(TaskExecutor& executor, TaskQueueEntry& task);
 	~ExposureTask();
 	void	run();
+private:
+	std::mutex	_lock;
+	std::condition_variable	_cond;
+	bool	cancelled;
+public:
+	void	cancel();
+	void	wait();
+	bool	wait(float t);
 };
+
+void	ExposureTask::wait() {
+	std::unique_lock<std::mutex>	lock(_lock);
+	_cond.wait(lock);
+}
+
+bool	ExposureTask::wait(float t) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "acquiring the ExposureTask::_lock");
+	std::unique_lock<std::mutex>	lock(_lock);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds", t);
+	long long	ns = 1000000000 * t;
+	
+	// wait for completion of exposure
+	bool	timedout = (std::cv_status::no_timeout !=
+			_cond.wait_for(lock, std::chrono::nanoseconds(ns)));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %s",
+		(timedout) ? "cancelled" : "complete");
+	return timedout;
+}
 
 ExposureTask::ExposureTask(TaskExecutor& executor, TaskQueueEntry& task)
 	: _executor(executor), _task(task) {
+	cancelled = false;
 	// create a repository, we are always using the default
 	// repository
 	astro::module::Repository	repository;
@@ -99,8 +129,16 @@ ExposureTask::ExposureTask(TaskExecutor& executor, TaskQueueEntry& task)
 	if ((_task.filterwheel().size() > 0) && (_task.filterposition() >= 0)) {
 		filterwheel = df.get(_task.filterwheel());
 	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ExposureTask created");
 }
 
+/**
+ * \brief Task execution function
+ *
+ * In this function, all waits should use the wait function to ensure that
+ * cancel is recognized
+ */
 void	ExposureTask::run() {
 	// set the cooler
 	if (cooler) {
@@ -148,7 +186,9 @@ void	ExposureTask::run() {
 	ccd->startExposure(_task.exposure());
 
 	// wait for completion of exposure
-	if (_executor.wait(_task.exposure().exposuretime)) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",
+		_task.exposure().exposuretime);
+	if (wait(_task.exposure().exposuretime)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for completion");
 		// wait for the ccd to complete
 		if (ccd->wait()) {
@@ -221,15 +261,22 @@ void	TaskExecutor::main() {
 		_task.state(TaskQueueEntry::executing);
 		_queue.post(_task.id()); // notify queue of state change
 
-		ExposureTask	exposuretask(*this, _task);
+		// we signal to the constructor that the thread is now fully
+		// running, with the correct state set in the task queue
+		_cond.notify_one();
+		lock.unlock();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "constructor signaled");
 
-		exposuretask.run();
+		// the exposure task starts to run when we call the run method
+		// this is also the moment when the 
+		exposuretask->run();
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "executor failure: %s", x.what());
 		_task.state(TaskQueueEntry::failed);
 	}
+
+	// post the curretn state to the queue
 	_queue.post(_task.id());
-	lock.unlock();
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main terminated");
 }
@@ -244,14 +291,22 @@ void	TaskExecutor::main() {
 TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	: _queue(queue), _task(task) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new executor");
-
+	// create the lock
 	std::unique_lock<std::mutex>	lock(_lock);
+
+	// create a new ExposureTask object. The ExposureTask contains
+	// the logic to actually execute the task
+	exposuretask = new ExposureTask(*this, _task);
 
 	// initialize pthead resources
 	pthread_attr_t	attr;
 	pthread_attr_init(&attr);
 	pthread_create(&_thread, &attr, taskmain, this);
 	pthread_attr_destroy(&attr);
+
+	// now wait for the condition variable to be signaled. This will
+	// indicate that the thread has indeed started running
+	_cond.wait(lock);
 }
 
 /**
@@ -266,7 +321,7 @@ TaskExecutor::~TaskExecutor() {
  * \brief cancel execution 
  */
 void	TaskExecutor::cancel() {
-	_cond.notify_one();
+	exposuretask->cancel();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread cancel signal sent");
 }
 
