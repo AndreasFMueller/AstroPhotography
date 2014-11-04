@@ -27,25 +27,6 @@ namespace app {
 namespace snowfocus {
 
 /**
- * \brief convert state to a string representation
- */
-static std::string	status2string(FocusState state) {
-	switch (state) {
-	case FocusIDLE:
-		return std::string("idle");
-	case FocusMOVING:
-		return std::string("moving");
-	case FocusMEASURING:
-		return std::string("measuring");
-	case FocusFOCUSED:
-		return std::string("focused");
-	case FocusFAILED:
-		return std::string("failed");
-	}
-	throw std::runtime_error("unknown state");
-}
-
-/**
  * \brief Callback class for the snowfocus program
  *
  * This callback simply displays the callback information received
@@ -75,7 +56,7 @@ public:
 			const Ice::Current& /* current */) {
 		std::cout << timeformat("%H:%M:%S ", time(NULL));
 		std::cout << "new state: ";
-		std::cout << status2string(state);
+		std::cout << focusingstate2string(state);
 		std::cout << std::endl;
 	}
 };
@@ -187,7 +168,7 @@ int	main(int argc, char *argv[]) {
 	std::string	binning;
 	std::string	frame;
 	std::string	filtername;
-	astro::focusing::Focusing::focus_method	method
+	astro::focusing::Focusing::method_type	method
 		= astro::focusing::Focusing::FWHM;
 
 	int	c;
@@ -217,7 +198,7 @@ int	main(int argc, char *argv[]) {
 			instrumentname = optarg;
 			break;
 		case 'm':
-			method = astro::focusing::Focusing::method_from_name(optarg);
+			method = astro::focusing::Focusing::string2method(optarg);
 			break;
 		case 'r':
 			frame = optarg;
@@ -281,7 +262,7 @@ int	main(int argc, char *argv[]) {
 	// handle the simple commands
 	if (command == "status") {
 		std::cout << "status: ";
-		std::cout << status2string(focusing->status());
+		std::cout << focusingstate2string(focusing->status());
 		std::cout << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -291,7 +272,7 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "monitor") {
 		std::cout << "current status: ";
-		std::cout << status2string(focusing->status());
+		std::cout << focusingstate2string(focusing->status());
 		std::cout << std::endl;
 		focusing->registerCallback(ident);
 		signal(SIGINT, handler);

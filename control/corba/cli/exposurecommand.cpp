@@ -72,11 +72,11 @@ void	ExposureParser::operator()(const std::string& valuepair) {
 	}
 	if ("shutter" == attribute) {
 		if ("closed" == value) {
-			_exposure.shutter = astro::camera::SHUTTER_CLOSED;
+			_exposure.shutter = astro::camera::Shutter::CLOSED;
 			return;
 		}
 		if ("open" == value) {
-			_exposure.shutter = astro::camera::SHUTTER_OPEN;
+			_exposure.shutter = astro::camera::Shutter::OPEN;
 			return;
 		}
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad shutter value: %s",

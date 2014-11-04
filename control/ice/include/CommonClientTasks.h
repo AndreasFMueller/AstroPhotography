@@ -27,7 +27,7 @@ public:
 	void	exposuretime(double exposuretime);
 	void	purpose(const astro::camera::Exposure::purpose_t purpose);
 	void	purpose(const std::string& purposename);
-	void	shutter(astro::camera::shutter_state shutter);
+	void	shutter(astro::camera::Shutter::state shutter);
 	Exposure	exposure() const;
 	void	start();
 	void	wait(int timeout = 60);

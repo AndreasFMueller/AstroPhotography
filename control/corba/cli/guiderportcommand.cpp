@@ -26,7 +26,7 @@ namespace cli {
  * \brief release a guiderport 
  */
 void	guiderportcommand::release(const std::string& guiderportid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport release subcommand");
 	Guiderports	guiderports;
 	guiderports.release(guiderportid);
@@ -62,7 +62,7 @@ void	guiderportcommand::assign(const std::string& guiderportid,
 /**
  * \brief execute a subcommand
  */
-void	guiderportcommand::operator()(const std::string& commandname,
+void	guiderportcommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport command");
 

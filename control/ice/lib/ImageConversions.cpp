@@ -13,6 +13,60 @@
 namespace snowstar {
 
 /**
+ * \brief Convert an Imge Proxy into an image
+ */
+astro::image::ImagePtr	convert(ImagePrx image) {
+	// get the image data from the server
+	ImageFile	file = image->file();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got image of size %d", file.size());
+
+	// construct a temporary file name
+	char	buffer[1024];
+	if (getenv("TMPDIR")) {
+		snprintf(buffer, sizeof(buffer), "%s/convert-XXXXXX.fits",
+			getenv("TMPDIR"));
+	} else {
+		strcpy(buffer, "/tmp/convert-XXXXXX.fits");
+	}
+	if (mkstemps(buffer, 5) < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create temp file: %s",
+			strerror(errno));
+		throw std::runtime_error("cannot create tmp file name");
+	}
+	std::string	filename(buffer);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "temporary image file: %s", buffer);
+
+	// write image data to a temporary file
+	int	out = open(buffer, O_CREAT | O_WRONLY, 0666);
+	if (out < 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create temporary file %s",
+			buffer);
+		throw std::runtime_error("cannot create temp file");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "out fd = %d", out);
+	int	s = file.size();
+	if (s != write(out, file.data(), s)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "writing temp file failed: %s",
+			strerror(errno));
+	}
+	close(out);
+
+	// use FITS classes to read the temporary file
+	astro::io::FITSin	in(filename);
+	astro::image::ImagePtr	result = in.read();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image with pixel type %s",
+		result->size().toString().c_str(),
+		astro::demangle(result->pixel_type().name()).c_str());
+
+	// unlink the temporary file
+	unlink(filename.c_str());
+
+	// return the image we just read
+	return result;
+}
+
+
+/**
  * \brief Convert a simple image to a astro::image::Image
  */
 astro::image::ImagePtr	convertsimple(SimpleImage image) {
@@ -137,7 +191,7 @@ SimpleImage	convertsimple(astro::image::ImagePtr image) {
  * \brief auxiliary function ot create a temporary file
  */
 static std::string	tempfilename() {
-	char	*tmpdir = "/tmp";
+	const char	*tmpdir = "/tmp";
 	if (NULL != getenv("TMPDIR")) {
 		tmpdir = getenv("TMPDIR");
 	}
@@ -186,7 +240,7 @@ astro::image::ImagePtr  convertfile(ImageFile imagefile) {
 			throw std::runtime_error(msg);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bytes written: %d", l);
-		if (imagefile.size() != l) {
+		if ((ssize_t)imagefile.size() != l) {
 			throw std::runtime_error("failed to write image");
 		}
 		close(fd);

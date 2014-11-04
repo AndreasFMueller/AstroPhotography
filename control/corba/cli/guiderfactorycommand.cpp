@@ -16,12 +16,12 @@ void	guiderfactorycommand::assign(const std::string& guiderid,
 }
 
 void	guiderfactorycommand::release(const std::string& guiderid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments * */) {
 	Guiders	guiders;
 	guiders.release(guiderid);
 }
 
-void	guiderfactorycommand::operator()(const std::string& command,
+void	guiderfactorycommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("guiderfactory command requires more "

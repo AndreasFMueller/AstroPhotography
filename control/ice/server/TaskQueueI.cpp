@@ -9,6 +9,7 @@
 #include <sstream>
 #include <ProxyCreator.h>
 #include <IceConversions.h>
+#include <AstroDebug.h>
 
 namespace snowstar {
 
@@ -43,27 +44,34 @@ TaskQueueI::~TaskQueueI() {
 
 // interface methods
 QueueState TaskQueueI::state(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state request");
 	return convert(taskqueue.state());
 }
 
 void TaskQueueI::start(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start request");
 	taskqueue.start();
 }
 
 void TaskQueueI::stop(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request");
 	taskqueue.stop();
 }
 
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s'",
+		parameters.camera.c_str());
 	return taskqueue.submit(snowstar::convert(parameters));
 }
 
 TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query parameters of task %d", taskid);
 	return snowstar::convert(taskqueue.parameters(taskid));
 }
 
 TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query info of task %d", taskid);
 	return snowstar::convert(taskqueue.info(taskid));
 }
 
@@ -79,6 +87,8 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 
 taskidsequence TaskQueueI::tasklist(TaskState state,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "list tasks in state %s",
+		astro::task::TaskInfo::state2string(convert(state)).c_str());
 	std::list<long>	taskidlist = taskqueue.tasklist(snowstar::convert(state));
 	taskidsequence	result;
 	std::copy(taskidlist.begin(), taskidlist.end(), back_inserter(result));
@@ -104,12 +114,13 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 
 void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new monitor");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a new monitor callback");
 	callbacks.registerCallback(callback, current);
 }
 
 void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregistering a monitor callback");
 	callbacks.unregisterCallback(callback, current);
 }
 

@@ -91,7 +91,7 @@ void	Focusing::cancel() {
 	}
 }
 
-std::string	Focusing::name_of_method(focus_method m) {
+std::string	Focusing::method2string(method_type m) {
 	switch (m) {
 	case FWHM:
 		return std::string("fwhm");
@@ -101,7 +101,7 @@ std::string	Focusing::name_of_method(focus_method m) {
 	throw std::runtime_error("bad focus method");
 }
 
-std::string	Focusing::name_of_status(focus_status s) {
+std::string	Focusing::state2string(state_type s) {
 	switch (s) {
 	case IDLE:
 		return std::string("idle");
@@ -122,7 +122,26 @@ std::string	Focusing::name_of_status(focus_status s) {
 	throw std::runtime_error("bad focus status");
 }
 
-Focusing::focus_method	Focusing::method_from_name(const std::string& name) {
+Focusing::state_type	Focusing::string2state(const std::string& s) {
+	if (s == "idle") {
+		return Focusing::IDLE;
+	}
+	if (s == "moving") {
+		return Focusing::MOVING;
+	}
+	if (s == "measuring") {
+		return Focusing::MEASURING;
+	}
+	if (s == "focused") {
+		return Focusing::FOCUSED;
+	}
+	if (s == "failed") {
+		return Focusing::FAILED;
+	}
+	throw std::runtime_error("bad focus status");
+}
+
+Focusing::method_type	Focusing::string2method(const std::string& name) {
 	int	l = name.size();
 	if (l == 0) {
 		throw std::runtime_error("unknown method");

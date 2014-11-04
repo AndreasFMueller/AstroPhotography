@@ -75,7 +75,7 @@ int	help_command() {
 	return EXIT_SUCCESS;
 }
 
-static std::string	state2string(Mount::mount_state state) {
+static std::string	state2string(Mount::state_type state) {
 	switch (state) {
 	case Mount::IDLE:
 		return std::string("idle");
@@ -121,7 +121,7 @@ int	get_command(MountPtr mount) {
  */
 int	wait_command(MountPtr mount, bool dowait) {
 	if (dowait) {
-		Mount::mount_state	state = mount->state();
+		Mount::state_type	state = mount->state();
 		do {
 			sleep(1);
 			state = mount->state();

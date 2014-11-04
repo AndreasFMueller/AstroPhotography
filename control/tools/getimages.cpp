@@ -260,7 +260,7 @@ int	main(int argc, char *argv[]) {
 	Exposure	exposure(frame, exposuretime);
 	exposure.purpose = purpose;
 	exposure.shutter = (purpose == Exposure::dark)
-				? SHUTTER_CLOSED : SHUTTER_OPEN;
+				? Shutter::CLOSED : Shutter::OPEN;
 	exposure.mode = binning;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());

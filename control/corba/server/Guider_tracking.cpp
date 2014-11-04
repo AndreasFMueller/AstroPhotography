@@ -75,7 +75,7 @@ void	Guider_impl::stopGuiding() {
  */
 Astro::TrackingPoint	Guider_impl::mostRecentTrackingPoint() {
 	// verify that we really are guiding right now
-	if (astro::guiding::guiding != _guider->state()) {
+	if (astro::guiding::Guide::guiding != _guider->state()) {
 		throw BadState("not currently guiding");
 	}
 
@@ -106,7 +106,7 @@ Astro::TrackingPoint	Guider_impl::mostRecentTrackingPoint() {
 Astro::TrackingHistory	*Guider_impl::getTrackingHistory(::CORBA::Long guiderunid) {
 	if (guiderunid < 0) {
 		// verify that we really are guiding right now
-		if (astro::guiding::guiding != _guider->state()) {
+		if (astro::guiding::Guide::guiding != _guider->state()) {
 			throw BadState("not currently guiding");
 		}
 		guiderunid = guidingrunid;

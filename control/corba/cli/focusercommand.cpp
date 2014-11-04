@@ -20,12 +20,12 @@ std::ostream&	operator<<(std::ostream& out, FocuserWrapper& focuser) {
 }
 
 void	focusercommand::info(FocuserWrapper& focuser,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	std::cout << focuser;
 }
 
 void	focusercommand::release(const std::string& focuserid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	Focusers	focusers;
 	focusers.release(focuserid);
 }
@@ -64,7 +64,7 @@ void	focusercommand::set(FocuserWrapper& focuser,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set command complete");
 }
 
-void	focusercommand::operator()(const std::string& commandname,
+void	focusercommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("focuser command requires 2 arguments");

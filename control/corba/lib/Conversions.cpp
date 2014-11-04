@@ -234,23 +234,23 @@ Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle) {
 
 // shutter state
 
-astro::camera::shutter_state    convert(const Astro::ShutterState state) {
+astro::camera::Shutter::state    convert(const Astro::ShutterState state) {
 	switch (state) {
 	case Astro::SHUTTER_OPEN:
-		return astro::camera::SHUTTER_OPEN;
+		return astro::camera::Shutter::OPEN;
 	case Astro::SHUTTER_CLOSED:
-		return astro::camera::SHUTTER_CLOSED;
+		return astro::camera::Shutter::CLOSED;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "unknown shutter state: %d", state);
 	throw std::runtime_error("unknown shutter state");
 }
 
 
-Astro::ShutterState     convert(const astro::camera::shutter_state state) {
+Astro::ShutterState     convert(const astro::camera::Shutter::state state) {
 	switch (state) {
-	case astro::camera::SHUTTER_OPEN:
+	case astro::camera::Shutter::OPEN:
 		return Astro::SHUTTER_OPEN;
-	case astro::camera::SHUTTER_CLOSED:
+	case astro::camera::Shutter::CLOSED:
 		return Astro::SHUTTER_CLOSED;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "unknown shutter state: %d", state);
@@ -563,10 +563,10 @@ astro::task::TaskParameters	convert(const Astro::TaskParameters& parameters) {
 
 	switch (parameters.exp.shutter) {
 	case Astro::SHUTTER_CLOSED:
-		exposure.shutter = astro::camera::SHUTTER_CLOSED;
+		exposure.shutter = astro::camera::Shutter::CLOSED;
 		break;
 	case Astro::SHUTTER_OPEN:
-		exposure.shutter = astro::camera::SHUTTER_OPEN;
+		exposure.shutter = astro::camera::Shutter::OPEN;
 		break;
 	}
 
@@ -630,33 +630,33 @@ Astro::TaskInfo convert(const astro::task::TaskInfo& task) {
 }
 
 // Guider State
-astro::guiding::GuiderState     convert(const Astro::Guider::GuiderState& state) {
+astro::guiding::Guide::state     convert(const Astro::Guider::GuiderState& state) {
 	switch (state) {
 	case Astro::Guider::GUIDER_UNCONFIGURED:
-		return astro::guiding::unconfigured;
+		return astro::guiding::Guide::unconfigured;
 	case Astro::Guider::GUIDER_IDLE:
-		return astro::guiding::idle;
+		return astro::guiding::Guide::idle;
 	case Astro::Guider::GUIDER_CALIBRATING:
-		return astro::guiding::calibrating;
+		return astro::guiding::Guide::calibrating;
 	case Astro::Guider::GUIDER_CALIBRATED:
-		return astro::guiding::calibrated;
+		return astro::guiding::Guide::calibrated;
 	case Astro::Guider::GUIDER_GUIDING:
-		return astro::guiding::guiding;
+		return astro::guiding::Guide::guiding;
 	}
 	throw std::runtime_error("unknown state");
 }
 
-Astro::Guider::GuiderState      convert(const astro::guiding::GuiderState& state) {
+Astro::Guider::GuiderState      convert(const astro::guiding::Guide::state& state) {
 	switch (state) {
-	case astro::guiding::unconfigured:
+	case astro::guiding::Guide::unconfigured:
 		return Astro::Guider::GUIDER_UNCONFIGURED;
-	case astro::guiding::idle:
+	case astro::guiding::Guide::idle:
 		return Astro::Guider::GUIDER_IDLE;
-	case astro::guiding::calibrating:
+	case astro::guiding::Guide::calibrating:
 		return Astro::Guider::GUIDER_CALIBRATING;
-	case astro::guiding::calibrated:
+	case astro::guiding::Guide::calibrated:
 		return Astro::Guider::GUIDER_CALIBRATED;
-	case astro::guiding::guiding:
+	case astro::guiding::Guide::guiding:
 		return Astro::Guider::GUIDER_GUIDING;
 	}
 	throw std::runtime_error("unknown state");

@@ -91,6 +91,8 @@ public:
 
 public:
 	typedef enum { pending, executing, failed, cancelled, complete } taskstate;
+static std::string	state2string(taskstate t);
+static taskstate	string2state(const std::string& s);
 private:
 	taskstate	_state;
 	long		_lastchange;
@@ -206,7 +208,8 @@ public:
 	// state. From there, launching of executors can still be resumed
 	// by calling the start method.
 	typedef enum { idle, launching, stopping, stopped } state_type;
-	static std::string	statestring(const state_type& state);
+	static std::string	state2string(const state_type& state);
+	static state_type	string2state(const std::string& s);
 private:
 	state_type	_state;
 public:

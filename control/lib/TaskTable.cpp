@@ -68,7 +68,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	exposure.gain = row["gain"]->doubleValue();
 	exposure.limit = row["vlimit"]->doubleValue();
 	exposure.shutter = (row["shutteropen"]->intValue())
-				? camera::SHUTTER_OPEN : camera::SHUTTER_CLOSED;
+				? camera::Shutter::OPEN : camera::Shutter::CLOSED;
 
 	Binning	mode(row["binx"]->intValue(), row["biny"]->intValue());
 	exposure.mode = mode;
@@ -113,7 +113,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("binx", factory.get((int)exposure.mode.getX())));
 	spec.insert(Field("biny", factory.get((int)exposure.mode.getY())));
 	spec.insert(Field("shutteropen",
-		factory.get((exposure.shutter == SHUTTER_OPEN) ? 1 : 0)));
+		factory.get((exposure.shutter == Shutter::OPEN) ? 1 : 0)));
 
 	spec.insert(Field("state", factory.get((int)entry.state())));
 	spec.insert(Field("lastchange", factory.get((int)entry.lastchange())));

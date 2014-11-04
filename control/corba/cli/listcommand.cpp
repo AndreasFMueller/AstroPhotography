@@ -11,7 +11,7 @@
 namespace astro {
 namespace cli {
 
-void	listcommand::operator()(const std::string& command,
+void	listcommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() == 0) {
 		throw command_error("list command requires arguments");
@@ -132,7 +132,7 @@ void	listcommand::listtasks(const std::vector<std::string>& arguments) {
 	}
 	Astro::TaskQueue::taskidsequence_var	taskids
 		= gcli->taskqueue->tasklist(state);
-	for (int i = 0; i < taskids->length(); i++) {
+	for (unsigned int i = 0; i < taskids->length(); i++) {
 		std::cout << taskids[i] << std::endl;
 	}
 }

@@ -10,6 +10,7 @@
 #include <CommonClientTasks.h>
 #include <includes.h>
 #include <AstroConfig.h>
+#include <IceConversions.h>
 
 using namespace snowstar;
 
@@ -117,20 +118,7 @@ int	command_get(MountPrx mount) {
 	} else {
 		std::cout << ra.hours() << " " << dec.degrees() << " ";
 	}
-	switch (mount->state()) {
-	case MountIDLE:
-		std::cout << "idle";
-		break;
-	case MountALIGNED:
-		std::cout << "aligned";
-		break;
-	case MountTRACKING:
-		std::cout << "tracking";	
-		break;
-	case MountGOTO:
-		std::cout << "goto";	
-		break;
-	}
+	std::cout << state2string(mount->state());
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }

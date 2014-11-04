@@ -49,11 +49,11 @@ Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport,
  * \brief Retrieve the state 
  *
  * Get the guider state. The guider keeps state information in the guider
- * state machine, so we have to convert that to the GuiderState constants.
+ * state machine, so we have to convert that to the Guider::state constants.
  * This is done by the cast operator of the GuiderStateMachine class.
  */
-GuiderState	Guider::state() const {
-	GuiderState	result = _state;
+Guide::state	Guider::state() const {
+	Guide::state	result = _state;
 	return result;
 }
 
@@ -80,7 +80,7 @@ void	Guider::calibration(const GuiderCalibration& calibration) {
  */
 void	Guider::calibrationCleanup() {
 	// if we are already calibrating, we should not cleanup
-	if (state() == calibrating) {
+	if (state() == Guide::calibrating) {
 		return;
 	}
 
@@ -149,7 +149,7 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength,
  * Find out how far along the calibraition process we are. This 
  */
 double	Guider::calibrationProgress() {
-	if (_state != calibrating) {
+	if (_state != Guide::calibrating) {
 		throw std::runtime_error("not currently calibrating");
 	}
 	return calibrationprocess->progress();
@@ -159,7 +159,7 @@ double	Guider::calibrationProgress() {
  * \brief cancel a calibration that is still in progress
  */
 void	Guider::cancelCalibration() {
-	if (_state != calibrating) {
+	if (_state != Guide::calibrating) {
 		throw std::runtime_error("not currently calibrating");
 	}
 	calibrationprocess->stop();
@@ -169,7 +169,7 @@ void	Guider::cancelCalibration() {
  * \brief wait for the calibration to complete
  */
 bool	Guider::waitCalibration(double timeout) {
-	if (_state != calibrating) {
+	if (_state != Guide::calibrating) {
 		throw std::runtime_error("not currently calibrating");
 	}
 	return calibrationprocess->wait(timeout);
@@ -286,13 +286,13 @@ double	Guider::getInterval() {
  * to reflect the state.
  */
 void	Guider::checkstate() {
-	GuiderState	s = _state;
+	Guide::state	s = _state;
 	switch (s) {
-	case unconfigured:
+	case Guide::unconfigured:
 		break;
-	case idle:
+	case Guide::idle:
 		break;
-	case calibrating:
+	case Guide::calibrating:
 		if (calibrationprocess) {
 			if (!calibrationprocess->isrunning()) {
 				if (iscalibrated()) {
@@ -304,9 +304,9 @@ void	Guider::checkstate() {
 			}
 		}
 		break;
-	case calibrated:
+	case Guide::calibrated:
 		break;
-	case guiding:
+	case Guide::guiding:
 		if (guiderprocess) {
 			if (!guiderprocess->isrunning()) {
 				_state.addCalibration();

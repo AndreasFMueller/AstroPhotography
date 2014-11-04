@@ -50,15 +50,15 @@ void	CcdTask::exposuretime(double exposuretime) {
 void	CcdTask::purpose(const astro::camera::Exposure::purpose_t purpose) {
 	_exposure.purpose = purpose;
 	_exposure.shutter = (purpose == astro::camera::Exposure::dark)
-				? astro::camera::SHUTTER_CLOSED
-				: astro::camera::SHUTTER_OPEN;
+				? astro::camera::Shutter::CLOSED
+				: astro::camera::Shutter::OPEN;
 }
 
 void	CcdTask::purpose(const std::string& purposename) {
 	purpose(astro::camera::Exposure::string2purpose(purposename));
 }
 
-void	CcdTask::shutter(astro::camera::shutter_state shutter) {
+void	CcdTask::shutter(astro::camera::Shutter::state shutter) {
 	_exposure.shutter = shutter;
 }
 

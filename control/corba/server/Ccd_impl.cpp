@@ -179,7 +179,7 @@ ShutterState	Ccd_impl::getShutterState() {
  * structure.
  */
 void	Ccd_impl::setShutterState(ShutterState state) {
-	astro::camera::shutter_state	shutterstate = astro::convert(state);
+	astro::camera::Shutter::state	shutterstate = astro::convert(state);
 	try {
 		_ccd->setShutterState(shutterstate);
 	} catch (astro::NotImplemented& nix) {

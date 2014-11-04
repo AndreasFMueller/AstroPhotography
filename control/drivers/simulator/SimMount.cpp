@@ -15,7 +15,7 @@ SimMount::SimMount(SimLocator& locator)
 	 : Mount(DeviceName("mount:simulator/mount")), _locator(locator) {
 }
 
-Mount::mount_state	SimMount::state() {
+Mount::state_type	SimMount::state() {
 	return Mount::IDLE;
 }
 

@@ -59,12 +59,12 @@ public:
 	astro::callback::CallbackPtr	callback() { return _callback; }
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 	void	callback(ImagePtr image, int position, double value);
-	void	callback(Focusing::focus_status state);
+	void	callback(Focusing::state_type state);
 protected:
 	bool	complete();
 	Focusing&	_focusing;
-	Focusing::focus_status	focusingstatus();
-	void	focusingstatus(Focusing::focus_status s);
+	Focusing::state_type	focusingstatus();
+	void	focusingstatus(Focusing::state_type s);
 public:
 	FocusWork(Focusing& focusing);
 	virtual ~FocusWork() { }

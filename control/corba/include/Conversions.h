@@ -52,8 +52,8 @@ astro::image::ImageRectangle	convert(const Astro::ImageRectangle& rectangle);
 Astro::ImageRectangle	convert(const astro::image::ImageRectangle& rectangle);
 
 // shutter state
-astro::camera::shutter_state	convert(const Astro::ShutterState state);
-Astro::ShutterState	convert(const astro::camera::shutter_state state);
+astro::camera::Shutter::state	convert(const Astro::ShutterState state);
+Astro::ShutterState	convert(const astro::camera::Shutter::state state);
 
 // exposure purpose
 astro::camera::Exposure::purpose_t	convert(const Astro::ExposurePurpose purpose);
@@ -111,8 +111,8 @@ astro::task::TaskInfo	convert(const Astro::TaskInfo& info);
 Astro::TaskInfo	convert(const astro::task::TaskInfo& info);
 
 // GuiderState
-astro::guiding::GuiderState	convert(const Astro::Guider::GuiderState& state);
-Astro::Guider::GuiderState	convert(const astro::guiding::GuiderState& state);
+astro::guiding::Guide::state	convert(const Astro::Guider::GuiderState& state);
+Astro::Guider::GuiderState	convert(const astro::guiding::Guide::state& state);
 
 // TrackingPoint
 astro::guiding::TrackingPoint	convert(const Astro::TrackingPoint& trackinginfo);

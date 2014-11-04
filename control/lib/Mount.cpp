@@ -45,5 +45,41 @@ void	Mount::Goto(const AzmAlt& /* azmalt */) {
 void	Mount::cancel() {
 }
 
+/**
+ * \brief Convert mount state type into a string
+ */
+std::string	Mount::state2string(Mount::state_type s) {
+	switch (s) {
+	case IDLE:
+		return std::string("idle");
+	case ALIGNED:
+		return std::string("aligned");
+	case TRACKING:
+		return std::string("tracking");
+	case GOTO:
+		return std::string("goto");
+	}
+	throw std::runtime_error("undefined mount state code");
+}
+
+/**
+ * \brief Convert mount state string into state code
+ */
+Mount::state_type	Mount::string2state(const std::string& s) {
+	if (s == "idle") {
+		return IDLE;
+	}
+	if (s == "aligned") {
+		return ALIGNED;
+	}
+	if (s == "tracking") {
+		return TRACKING;
+	}
+	if (s == "goto") {
+		return GOTO;
+	}
+	throw std::runtime_error("undefined mount state name");
+}
+
 } // namespace device
 } // namespace astro

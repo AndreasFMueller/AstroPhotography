@@ -375,16 +375,16 @@ CoolerPtr	Ccd::getCooler0() {
 /**
  * \brief Retrieve the state of the shutter
  */
-shutter_state	Ccd::getShutterState() {
+Shutter::state	Ccd::getShutterState() {
 	throw NotImplemented("camera has no shutter");
 }
 
 /**
  * \brief Set the state of the shutter
  */
-void	Ccd::setShutterState(const shutter_state& state) {
+void	Ccd::setShutterState(const Shutter::state& state) {
 	// always accept shutter open
-	if (SHUTTER_OPEN == state) {
+	if (Shutter::OPEN == state) {
 		return;
 	}
 	throw NotImplemented("camera has no shutter");

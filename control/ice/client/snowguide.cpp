@@ -188,7 +188,7 @@ int	images_command(GuiderPrx guider, const std::string& path) {
 /**
  * \brief Implementation of the monitor command
  */
-int	monitor_command(GuiderPrx guider) {
+int	monitor_command(GuiderPrx /* guider */) {
 	// The type of callback to install depends on the current guider state
 	return EXIT_SUCCESS;
 }

@@ -30,7 +30,7 @@ void	GuiderLocator::add(const std::string& name, Ice::ObjectPtr guiderptr) {
  * \brief locate a guider in the map
  */
 Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
-			Ice::LocalObjectPtr& cookie) {
+			Ice::LocalObjectPtr& /* cookie */) {
 	std::string	guidername = NameConverter::urldecode(current.id.name);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider %s",
 		guidername.c_str());
@@ -44,12 +44,12 @@ Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
 	return i->second;
 }
 
-void	GuiderLocator::finished(const Ice::Current& current,
-				const Ice::ObjectPtr& servant,
-				const Ice::LocalObjectPtr& cookie) {
+void	GuiderLocator::finished(const Ice::Current& /* current */,
+				const Ice::ObjectPtr& /* servant */,
+				const Ice::LocalObjectPtr& /* cookie */) {
 }
 
-void	GuiderLocator::deactivate(const std::string& category) {
+void	GuiderLocator::deactivate(const std::string& /* category */) {
 }
 
 } // namespace snowstar

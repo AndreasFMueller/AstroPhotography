@@ -65,7 +65,7 @@ int	main(int argc, char *argv[]) {
 	int	y = -1;
 	int	width = -1;
 	int	height = -1;
-	Focusing::focus_method	method = Focusing::FWHM;
+	Focusing::method_type	method = Focusing::FWHM;
 	while (EOF != (c = getopt(argc, argv, "dm:M:C:F:s:e:x:y:w:h:a:")))
 		switch (c) {
 		case 'd':
@@ -103,7 +103,7 @@ int	main(int argc, char *argv[]) {
 			height = atoi(optarg);
 			break;
 		case 'a':
-			method = Focusing::method_from_name(optarg);
+			method = Focusing::string2method(optarg);
 			break;
 		}
 
@@ -143,7 +143,7 @@ int	main(int argc, char *argv[]) {
 	exposure.frame = ImageRectangle(
 		ImagePoint(x - width / 2, y - height / 2),
 		ImageSize(width, height));
-	exposure.shutter = astro::camera::SHUTTER_OPEN;
+	exposure.shutter = astro::camera::Shutter::OPEN;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 
@@ -164,15 +164,15 @@ int	main(int argc, char *argv[]) {
 	// wait until focusing is complete
 	while (!focusing.completed()) {
 		std::string	statusname
-			= Focusing::name_of_status(focusing.status());
+			= Focusing::state2string(focusing.status());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing status: %s",
 			statusname.c_str());
 		sleep(1);
 	}
 
-	Focusing::focus_status	state = focusing.status();
+	Focusing::state_type	state = focusing.status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing process complete: %s",
-		Focusing::name_of_status(state).c_str());
+		Focusing::state2string(state).c_str());
 	return (Focusing::FOCUSED == state) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

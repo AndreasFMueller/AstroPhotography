@@ -34,7 +34,7 @@ std::ostream&	operator<<(std::ostream& out, CoolerWrapper& cooler) {
 }
 
 void	coolercommand::status(CoolerWrapper& cooler,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	std::cout << cooler;
 }
 
@@ -51,12 +51,12 @@ void	coolercommand::set(CoolerWrapper& cooler,
 }
 
 void	coolercommand::enable(CoolerWrapper& cooler,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	cooler->setOn(true);
 }
 
 void	coolercommand::disable(CoolerWrapper& cooler,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	cooler->setOn(false);
 }
 
@@ -83,7 +83,7 @@ void	coolercommand::waitfor(CoolerWrapper& cooler,
 	}
 }
 
-void	coolercommand::operator()(const std::string& commandname,
+void	coolercommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("cooler command requires 2 arguments");

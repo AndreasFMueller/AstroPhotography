@@ -31,66 +31,6 @@ void	signal_handler(int /* sig */) {
 }
 
 /**
- * \brief Convert task state to a string for display
- */
-static std::string	state2string(TaskState state) {
-	switch (state) {
-	case TskPENDING:
-		return std::string("pending");
-		break;
-	case TskEXECUTING:
-		return std::string("executing");
-		break;
-	case TskFAILED:
-		return std::string("failed");
-		break;
-	case TskCANCELLED:
-		return std::string("cancelled");
-		break;
-	case TskCOMPLETED:
-		return std::string("completed");
-		break;
-	}
-	throw std::runtime_error("unknown task state code");
-}
-
-static TaskState	string2taskstate(const std::string& statestring) {
-	if (statestring == "pending") {
-		return TskPENDING;
-	}
-	if (statestring == "executing") {
-		return TskEXECUTING;
-	}
-	if (statestring == "failed") {
-		return TskFAILED;
-	}
-	if (statestring == "cancelled") {
-		return TskCANCELLED;
-	}
-	if (statestring == "completed") {
-		return TskCOMPLETED;
-	}
-	throw std::runtime_error("unknown task state name");
-}
-
-/**
- * \brief Convert queue state to a string for display
- */
-static std::string	state2string(QueueState state) {
-	switch (state) {
-	case QueueIDLE:
-		return std::string("idle");
-	case QueueLAUNCHING:
-		return std::string("launching");
-	case QueueSTOPPING:
-		return std::string("stopping");
-	case QueueSTOPPED:
-		return std::string("stopped");
-	}
-	throw std::runtime_error("unknown queue state code");
-}
-
-/**
  * \brief A monitor implementation todisplay state changes
  */
 class TaskMonitorI : public TaskMonitor {
@@ -185,7 +125,7 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 		case TskCANCELLED:
 			std::cout << "X";
 			break;
-		case TskCOMPLETED:
+		case TskCOMPLETE:
 			std::cout << "C";
 			break;
 		}
@@ -210,7 +150,7 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 		case TskCANCELLED:
 			std::cout << info.cause;
 			break;
-		case TskCOMPLETED:
+		case TskCOMPLETE:
 			std::cout << info.filename;
 			break;
 		}
@@ -239,6 +179,11 @@ int	command_list(TaskQueuePrx tasks, const std::string& statestring) {
 	return common_list(tasks, ids);
 }
 
+/**
+ * \brief Implementation of list command with no arguments
+ *
+ * The list command with no arguments retrieves all tasks from the server
+ */
 int	command_list(TaskQueuePrx tasks) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for tasks of all states");
 	std::set<int>	ids;
@@ -271,7 +216,7 @@ int	command_list(TaskQueuePrx tasks) {
 			std::inserter(ids, ids.begin()));
 	}
 	{
-		taskidsequence	result = tasks->tasklist(TskCOMPLETED);
+		taskidsequence	result = tasks->tasklist(TskCOMPLETE);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d completed tasks",
 			result.size());
 		std::copy(result.begin(), result.end(),
@@ -358,11 +303,17 @@ int	command_remove(TaskQueuePrx tasks, std::list<int> ids) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Implementation of the cancel command
+ */
 int	command_cancel(TaskQueuePrx tasks, std::list<int> ids) {
 	std::for_each(ids.begin(), ids.end(), TaskCanceller(tasks));
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Implementation of the submit command
+ */
 int	command_submit(TaskQueuePrx tasks) {
 	TaskParameters	parameters;
 	parameters.camera = "camera:simulator/camera";
@@ -376,10 +327,13 @@ int	command_submit(TaskQueuePrx tasks) {
 	return EXIT_FAILURE;
 }
 
+/**
+ * \brief Implementation of the image command
+ */
 int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 	// check whether the task really is completed
 	TaskInfo	info = tasks->info(id);
-	if (TskCOMPLETED != info.state) {
+	if (TskCOMPLETE != info.state) {
 		throw std::runtime_error("task not completed");
 	}
 
@@ -418,6 +372,7 @@ void	usage(const char *progname) {
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] monitor" << std::endl;
 	std::cout << p << " [ options ] list [ state ]" << std::endl;
 	std::cout << p << " [ options ] start" << std::endl;
@@ -449,6 +404,14 @@ void	usage(const char *progname) {
 }
 
 /**
+ * \brief Display help about this program
+ */
+int	command_help(const char *progname) {
+	usage(progname);
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Options for the snowtask program
  */
 static struct option	longopts[] = {
@@ -463,7 +426,7 @@ static struct option	longopts[] = {
 { "purpose",	required_argument,	NULL,		'p' }, /* 8 */
 { "rectangle",	required_argument,	NULL,		'r' }, /* 9 */
 { "server",	required_argument,	NULL,		's' }, /* 9 */
-{ "temperature",required_argument,	NULL,		't' }, /* 0 */
+{ "temperature",required_argument,	NULL,		't' }, /* 0 */
 { "verbose",	no_argument,		NULL,		'v' }, /* 0 */
 { NULL,		0,			NULL,		0   }
 };
@@ -530,6 +493,9 @@ int	main(int argc, char *argv[]) {
 	std::string	command = argv[optind++];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "working on command %s",
 		command.c_str());
+	if (command == "help") {
+		return command_help(argv[0]);
+	}
 
 	// get the Tasks interface
         Ice::ObjectPrx  base = ic->stringToProxy(servername.connect("Tasks"));

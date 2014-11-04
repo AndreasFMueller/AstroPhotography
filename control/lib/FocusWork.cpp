@@ -89,7 +89,7 @@ void	FocusWork::callback(ImagePtr image, int position, double value) {
 	}
 }
 
-void	FocusWork::callback(Focusing::focus_status state) {
+void	FocusWork::callback(Focusing::state_type state) {
 	if (!callback()) {
 		return;
 	}
@@ -203,14 +203,14 @@ unsigned short	FocusWork::backlash() {
 /**
  * \brief get Focusing status
  */
-Focusing::focus_status	FocusWork::focusingstatus() {
+Focusing::state_type	FocusWork::focusingstatus() {
 	return _focusing.status();
 }
 
 /**
  * \brief set the focusing status
  */
-void	FocusWork::focusingstatus(Focusing::focus_status s) {
+void	FocusWork::focusingstatus(Focusing::state_type s) {
 	callback(s);
 	_focusing.status(s);
 }

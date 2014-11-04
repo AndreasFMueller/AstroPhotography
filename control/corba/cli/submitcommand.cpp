@@ -88,12 +88,12 @@ void	TaskParameterParser::operator()(const std::string& valuepair) {
 	if ("shutter" == attribute) {
 		if ("closed" == value) {
 			_parameters.exposure().shutter
-				= astro::camera::SHUTTER_CLOSED;
+				= astro::camera::Shutter::CLOSED;
 			return;
 		}
 		if ("open" == value) {
 			_parameters.exposure().shutter
-				= astro::camera::SHUTTER_OPEN;
+				= astro::camera::Shutter::OPEN;
 			return;
 		}
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad shutter value: %s",
@@ -104,7 +104,7 @@ void	TaskParameterParser::operator()(const std::string& valuepair) {
 		attribute.c_str());
 }
 
-void	submitcommand::operator()(const std::string& command,
+void	submitcommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new exposure");
 	astro::task::TaskParameters	parameters;

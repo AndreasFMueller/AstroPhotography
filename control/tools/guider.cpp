@@ -195,7 +195,7 @@ int	main(int argc, char *argv[]) {
 	// get a first image from the ccd, which we use to find the brightest
 	// star
 	Exposure	exposure(ccd->getInfo().getFrame(), exposuretime);
-	exposure.shutter = SHUTTER_OPEN;
+	exposure.shutter = Shutter::OPEN;
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starwindow: %s", starwindow.toString().c_str());

@@ -74,7 +74,7 @@ void	imagecommand::remove(ImageWrapper& image) {
 	image->remove();
 }
 
-void	imagecommand::operator()(const std::string& command,
+void	imagecommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("image command requires arguments");

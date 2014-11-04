@@ -73,8 +73,11 @@ astro::camera::Exposure convert(const Exposure& exp);
 ExposureState	convert(const astro::camera::Exposure::State& state);
 astro::camera::Exposure::State  convert(const ExposureState& state);
 
-ShutterState	convert(const astro::camera::shutter_state& state);
-astro::camera::shutter_state	convert(const ShutterState& state);
+ShutterState	convert(const astro::camera::Shutter::state& state);
+astro::camera::Shutter::state	convert(const ShutterState& state);
+
+std::string	state2string(ShutterState s);
+ShutterState	string2shutterstate(const std::string& s);
 
 ExposurePurpose	convert(const astro::camera::Exposure::purpose_t& state);
 astro::camera::Exposure::purpose_t	convert(const ExposurePurpose& state);
@@ -86,8 +89,8 @@ astro::camera::FilterWheel::State convert(const FilterwheelState& s);
 // tracking related
 
 // Guider related
-GuiderState     convert(const astro::guiding::GuiderState& state);
-astro::guiding::GuiderState     convert(const GuiderState& state);
+GuiderState     convert(const astro::guiding::Guide::state& state);
+astro::guiding::Guide::state     convert(const GuiderState& state);
 
 std::string	guiderstate2string(GuiderState state);
 GuiderState	string2guiderstate(const std::string& s);
@@ -108,6 +111,9 @@ astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);
 
+std::string	state2string(TaskState s);
+TaskState	string2taskstate(const std::string& s);
+
 TaskInfo	convert(const astro::task::TaskInfo& info);
 astro::task::TaskInfo	convert(const TaskInfo& info);
 
@@ -120,9 +126,14 @@ astro::task::TaskQueue::state_type	convert(const QueueState& state);
 TaskMonitorInfo	convert(const astro::task::TaskMonitorInfo& monitorinfo);
 astro::task::TaskMonitorInfo	convert(const TaskMonitorInfo& monitorinfo);
 
+std::string	state2string(QueueState s);
+
 // Mount
-mountstate	convert(astro::device::Mount::mount_state s);
-astro::device::Mount::mount_state	convert(mountstate s);
+mountstate	convert(astro::device::Mount::state_type s);
+astro::device::Mount::state_type	convert(mountstate s);
+
+std::string	state2string(mountstate s);
+mountstate	string2mountstate(const std::string& s);
 
 // Image
 astro::image::ImagePtr	convert(ImagePrx image);
@@ -134,11 +145,17 @@ astro::image::ImagePtr	convertfile(ImageFile imagefile);
 ImageFile	convertfile(astro::image::ImagePtr imageptr);
 
 // Focusing
-FocusState	convert(astro::focusing::Focusing::focus_status s);
-astro::focusing::Focusing::focus_status	convert(FocusState s);
+FocusState	convert(astro::focusing::Focusing::state_type s);
+astro::focusing::Focusing::state_type	convert(FocusState s);
 
-FocusMethod	convert(astro::focusing::Focusing::focus_method m);
-astro::focusing::Focusing::focus_method	convert(FocusMethod m);
+std::string	focusingstate2string(FocusState s);
+FocusState	focusingstring2state(const std::string& s);
+
+FocusMethod	convert(astro::focusing::Focusing::method_type m);
+astro::focusing::Focusing::method_type	convert(FocusMethod m);
+
+std::string	focusingmethod2string(FocusMethod m);
+FocusMethod	focusingstring2method(const std::string& m);
 
 // Repository related conversions
 ImageInfo	convert(const astro::project::ImageEnvelope& envelope);

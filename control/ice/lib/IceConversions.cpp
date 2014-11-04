@@ -10,6 +10,7 @@
 
 namespace snowstar {
 
+#if 0
 // time conversions
 time_t	converttime(double timeago) {
 	time_t	now;
@@ -296,35 +297,43 @@ astro::camera::Exposure::State	convert(const ExposureState& s) {
 	throw std::runtime_error("unknown exposure state");
 }
 
-ShutterState	convert(const astro::camera::shutter_state& s) {
+ShutterState	string2shutterstate(const std::string& s) {
+	return convert(astro::camera::Shutter::string2state(s));
+}
+
+std::string	state2string(ShutterState state) {
+	return astro::camera::Shutter::state2string(convert(state));
+}
+
+ShutterState	convert(const astro::camera::Shutter::state& s) {
 	ShutterState	result = snowstar::ShOPEN;
 	switch (s) {
-	case astro::camera::SHUTTER_OPEN:
+	case astro::camera::Shutter::OPEN:
 		result = snowstar::ShOPEN;
 		break;
-	case astro::camera::SHUTTER_CLOSED:
+	case astro::camera::Shutter::CLOSED:
 		result = snowstar::ShCLOSED;
 		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
-		(s == astro::camera::SHUTTER_OPEN) ? "open" : "closed",
-		(result == ShOPEN) ? "open" : "closed");
+		astro::camera::Shutter::state2string(s).c_str(),
+		state2string(result).c_str());
 	return result;
 }
 
-astro::camera::shutter_state	convert(const ShutterState& s) {
-	astro::camera::shutter_state	result = astro::camera::SHUTTER_OPEN;
+astro::camera::Shutter::state	convert(const ShutterState& s) {
+	astro::camera::Shutter::state	result = astro::camera::Shutter::OPEN;
 	switch (s) {
 	case snowstar::ShOPEN:
-		result = astro::camera::SHUTTER_OPEN;
+		result = astro::camera::Shutter::OPEN;
 		break;
 	case snowstar::ShCLOSED:
-		result = astro::camera::SHUTTER_CLOSED;
+		result = astro::camera::Shutter::CLOSED;
 		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
 		(s == ShOPEN) ? "open" : "closed",
-		(result == astro::camera::SHUTTER_OPEN) ? "open" : "closed");
+		astro::camera::Shutter::state2string(result).c_str());
 	return result;
 }
 
@@ -378,71 +387,44 @@ astro::camera::FilterWheel::State convert(const FilterwheelState& s) {
 }
 
 // Guider
-GuiderState	convert(const astro::guiding::GuiderState& state) {
+GuiderState	convert(const astro::guiding::Guide::state& state) {
 	switch (state) {
-	case astro::guiding::unconfigured:
+	case astro::guiding::Guide::unconfigured:
 		return GuiderUNCONFIGURED;
-	case astro::guiding::idle:
+	case astro::guiding::Guide::idle:
 		return GuiderIDLE;
-	case astro::guiding::calibrating:
+	case astro::guiding::Guide::calibrating:
 		return GuiderCALIBRATING;
-	case astro::guiding::calibrated:
+	case astro::guiding::Guide::calibrated:
 		return GuiderCALIBRATED;
-	case astro::guiding::guiding:
+	case astro::guiding::Guide::guiding:
 		return GuiderGUIDING;
 	}
 	throw std::runtime_error("unknown guider state");
 }
 
-astro::guiding::GuiderState	convert(const GuiderState& state) {
+astro::guiding::Guide::state	convert(const GuiderState& state) {
 	switch (state) {
 	case GuiderUNCONFIGURED:
-		return astro::guiding::unconfigured;
+		return astro::guiding::Guide::unconfigured;
 	case GuiderIDLE:
-		return astro::guiding::idle;
+		return astro::guiding::Guide::idle;
 	case GuiderCALIBRATING:
-		return astro::guiding::calibrating;
+		return astro::guiding::Guide::calibrating;
 	case GuiderCALIBRATED:
-		return astro::guiding::calibrated;
+		return astro::guiding::Guide::calibrated;
 	case GuiderGUIDING:
-		return astro::guiding::guiding;
+		return astro::guiding::Guide::guiding;
 	}
 	throw std::runtime_error("unknown guider state");
 }
 
 GuiderState	string2guiderstate(const std::string& s) {
-	if (s == "unconfigured") {
-		return GuiderUNCONFIGURED;
-	}
-	if (s == "idle") {
-		return GuiderIDLE;
-	}
-	if (s == "calibrating") {
-		return GuiderCALIBRATING;
-	}
-	if (s == "calibated") {
-		return GuiderCALIBRATED;
-	}
-	if (s == "guiding") {
-		return GuiderGUIDING;
-	}
-	throw std::runtime_error("unknown guider state");
+	return convert(astro::guiding::Guide::string2state(s));
 }
 
 std::string	guiderstate2string(GuiderState state) {
-	switch (state) {
-	case GuiderUNCONFIGURED:
-		return std::string("unconfigured");
-	case GuiderIDLE:
-		return std::string("idle");
-	case GuiderCALIBRATING:
-		return std::string("calibrating");
-	case GuiderCALIBRATED:
-		return std::string("calibrated");
-	case GuiderGUIDING:
-		return std::string("guiding");
-	}
-	throw std::runtime_error("unknown guider state");
+	return astro::guiding::Guide::state2string(convert(state));
 }
 
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
@@ -528,7 +510,7 @@ astro::task::TaskInfo::taskstate	convert(const TaskState& state) {
 		return astro::task::TaskInfo::failed;
 	case TskCANCELLED:
 		return astro::task::TaskInfo::cancelled;
-	case TskCOMPLETED:
+	case TskCOMPLETE:
 		return astro::task::TaskInfo::complete;
 	}
 	throw std::runtime_error("unknown task state");
@@ -545,9 +527,17 @@ TaskState	convert(const astro::task::TaskInfo::taskstate& state) {
 	case astro::task::TaskInfo::cancelled:
 		return TskCANCELLED;
 	case astro::task::TaskInfo::complete:
-		return TskCOMPLETED;
+		return TskCOMPLETE;
 	}
 	throw std::runtime_error("unknown task state");
+}
+
+std::string	state2string(TaskState s) {
+	return astro::task::TaskInfo::state2string(convert(s));
+}
+
+TaskState	string2taskstate(const std::string& s) {
+	return convert(astro::task::TaskInfo::string2state(s));
 }
 
 TaskInfo	convert(const astro::task::TaskInfo& info) {
@@ -619,6 +609,14 @@ astro::task::TaskQueue::state_type	convert(const QueueState& state) {
 		return astro::task::TaskQueue::stopped;
 	}
 	throw std::runtime_error("unknown queue state");
+}
+
+std::string	state2string(QueueState s) {
+	return astro::task::TaskQueue::state2string(convert(s));
+}
+
+QueueState	string2queuestate(const std::string& s) {
+	return convert(astro::task::TaskQueue::string2state(s));
 }
 
 TaskMonitorInfo convert(const astro::task::TaskMonitorInfo& monitorinfo) {
@@ -718,7 +716,7 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 }
 
 // Focusing
-FocusState	convert(astro::focusing::Focusing::focus_status s) {
+FocusState	convert(astro::focusing::Focusing::state s) {
 	switch (s) {
 	case astro::focusing::Focusing::IDLE:
 		return FocusIDLE;
@@ -734,7 +732,7 @@ FocusState	convert(astro::focusing::Focusing::focus_status s) {
 	throw std::runtime_error("unknown focus state");
 }
 
-astro::focusing::Focusing::focus_status	convert(FocusState s) {
+astro::focusing::Focusing::state	convert(FocusState s) {
 	switch (s) {
 	case FocusIDLE:
 		return astro::focusing::Focusing::IDLE;
@@ -748,6 +746,14 @@ astro::focusing::Focusing::focus_status	convert(FocusState s) {
 		return astro::focusing::Focusing::FAILED;
 	}
 	throw std::runtime_error("unknown focus state");
+}
+
+std::string	focusingstate2string(FocusState s) {
+	return astro::focusing::Focusing::state2string(convert(s));
+}
+
+FocusState	focusingstring2state(const std::string& s) {
+	return convert(astro::focusing::Focusing::string2state(s));
 }
 
 FocusMethod	convert(astro::focusing::Focusing::focus_method m) {
@@ -804,5 +810,6 @@ astro::project::ImageEnvelope	convert(const ImageInfo& info) {
 	return envelope;
 }
 
+#endif
 
 } // namespace snowstar

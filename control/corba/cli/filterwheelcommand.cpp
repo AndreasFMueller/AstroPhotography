@@ -43,14 +43,14 @@ std::ostream&	operator<<(std::ostream& out, FilterwheelWrapper filterwheel) {
 }
 
 void	filterwheelcommand::info(FilterwheelWrapper& filterwheel,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel %s info",
 		filterwheel->getName());
 	std::cout << filterwheel;
 }
 
 void	filterwheelcommand::release(const std::string& filterwheelid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	Filterwheels	filterwheels;
 	filterwheels.release(filterwheelid);
 }
@@ -76,14 +76,14 @@ void	filterwheelcommand::position(FilterwheelWrapper& filterwheel,
 }
 
 void	filterwheelcommand::wait(FilterwheelWrapper& filterwheel,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	while (filterwheel->getState() != Astro::FILTERWHEEL_IDLE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting");
 		usleep(1000000);
 	}
 }
 
-void	filterwheelcommand::operator()(const std::string& commandname,
+void	filterwheelcommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("filterwheel command requires 2 arguments");

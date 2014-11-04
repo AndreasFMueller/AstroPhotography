@@ -28,8 +28,8 @@ public:
 	virtual astro::camera::Exposure::State exposureStatus();
 	virtual void    cancelExposure();
 
-	virtual shutter_state   getShutterState();
-	virtual void    setShutterState(const shutter_state& state);
+	virtual Shutter::state   getShutterState();
+	virtual void    setShutterState(const Shutter::state& state);
 
 	virtual astro::image::ImagePtr  getRawImage();
 

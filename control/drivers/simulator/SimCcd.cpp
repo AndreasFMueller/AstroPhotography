@@ -112,7 +112,7 @@ bool    SimCcd::wait() {
 /**
  * \brief Remember the shutter state
  */
-void    SimCcd::setShuterState(const shutter_state& state) {
+void    SimCcd::setShuterState(const Shutter::state& state) {
 	shutter = state;
 }
 
@@ -125,7 +125,7 @@ ImagePtr  SimCcd::getRawImage() {
 
 	// exposure influence
 	starcamera.stretch(exposure.exposuretime);
-	starcamera.light(exposure.shutter == SHUTTER_OPEN);
+	starcamera.light(exposure.shutter == Shutter::OPEN);
 
 	// flat images need special treatment
 	if (exposure.purpose == Exposure::flat) {

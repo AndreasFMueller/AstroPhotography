@@ -14,7 +14,7 @@
 namespace astro {
 namespace cli {
 
-void	taskcommand::operator()(const std::string& command,
+void	taskcommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("task command requires arguments");

@@ -314,7 +314,7 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 }
 
 TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */) {
-	if (astro::guiding::guiding != guider->state()) {
+	if (astro::guiding::Guide::guiding != guider->state()) {
 		throw BadState("not currently guiding");
 	}
 

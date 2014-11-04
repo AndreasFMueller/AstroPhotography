@@ -17,7 +17,19 @@
 namespace astro {
 namespace camera {
 
-typedef enum shutter_state { SHUTTER_CLOSED, SHUTTER_OPEN } shutter_state;
+/**
+ * \brief Shutter class
+ *
+ * The shutter class is essentially empty except for a state type used
+ * to indicate the current state of the shutter of a camera and conversion
+ * functions from and to strings.
+ */
+class Shutter {
+public:
+	typedef enum state { CLOSED, OPEN } state;
+static std::string	state2string(state s);
+static state	string2state(const std::string& s);
+};
 
 /**
  * \brief Binning mode specification
@@ -90,7 +102,7 @@ public:
 	float	gain;
 	float	limit;
 	Binning	mode;
-	shutter_state	shutter;
+	Shutter::state	shutter;
 
 	// fields related tot he exposure purpose
 	typedef	enum { light = 0, dark = 1, flat = 2 } purpose_t;
@@ -241,8 +253,8 @@ public:
 
 	// methods to control a shutter
 	bool	hasShutter() const { return info.shutter(); }
-	virtual shutter_state	getShutterState();
-	virtual void	setShutterState(const shutter_state& state);
+	virtual Shutter::state	getShutterState();
+	virtual void	setShutterState(const Shutter::state& state);
 
 	// gain related methods
 	virtual bool	hasGain() { return false; }
@@ -359,6 +371,8 @@ public:
 class FilterWheel : public astro::device::Device {
 public:
 	typedef enum state_e { idle, moving, unknown } State;
+static std::string	state2string(State s);
+static State	string2state(const std::string& s);
 	typedef FilterWheelPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,

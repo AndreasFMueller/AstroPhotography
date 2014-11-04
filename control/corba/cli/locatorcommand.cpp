@@ -8,9 +8,8 @@
 namespace astro {
 namespace cli {
 
-void	locatorcommand::operator()(const std::string& command,
-		const std::vector<std::string>& arguments) {
-	
+void	locatorcommand::operator()(const std::string& /* command */,
+		const std::vector<std::string>& /* arguments */) {
 }
 
 std::string	locatorcommand::summary() const {

@@ -18,7 +18,7 @@ namespace astro {
 namespace cli {
 
 std::ostream&	operator<<(std::ostream& out, Astro::BinningSet& binningset) {
-	for (int i = 0; i < binningset.length(); i++) {
+	for (unsigned int i = 0; i < binningset.length(); i++) {
 		if (i > 0) { out << ", "; }
 		out << binningset[i];
 	}
@@ -52,7 +52,7 @@ std::ostream&	operator<<(std::ostream& out, Astro::CcdInfo_var info) {
 }
 
 void	ccdcommand::info(CcdWrapper& ccd,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %s info", ccd->getName());
 	std::cout << "name:       " << ccd->getName() << std::endl;
 	Astro::CcdInfo_var	info = ccd->getInfo();
@@ -100,7 +100,7 @@ void	ccdcommand::start(CcdWrapper& ccd,
 }
 
 void	ccdcommand::cancel(CcdWrapper& ccd,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	if (!((Astro::EXPOSURE_EXPOSING == ccd->exposureStatus()) ||
 		(Astro::EXPOSURE_EXPOSED == ccd->exposureStatus()))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "not exposing/exposed");
@@ -110,7 +110,7 @@ void	ccdcommand::cancel(CcdWrapper& ccd,
 }
 
 void	ccdcommand::wait(CcdWrapper& ccd,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	// wait for completion of this exposure
 	while (Astro::EXPOSURE_EXPOSING == ccd->exposureStatus()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -138,7 +138,7 @@ void	ccdcommand::image(CcdWrapper& ccd,
 }
 
 void	ccdcommand::release(const std::string& ccdid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	Ccds	ccds;
 	ccds.release(ccdid);
 }
@@ -154,7 +154,7 @@ void	ccdcommand::assign(const std::string& ccdid,
 	}
 }
 
-void	ccdcommand::operator()(const std::string& commandname,
+void	ccdcommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("ccd command requires 2 arguments");

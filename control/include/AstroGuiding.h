@@ -298,7 +298,14 @@ typedef std::shared_ptr<CalibrationProcess>	CalibrationProcessPtr;
 /**
  * \brief enumeration type for the state of the guider
  */
-typedef enum { unconfigured, idle, calibrating, calibrated, guiding } GuiderState;
+class Guide {
+public:
+	typedef enum {
+		unconfigured, idle, calibrating, calibrated, guiding
+	} state;
+static std::string	state2string(state s);
+static state	string2state(const std::string& s);
+};
 
 /**
  * \brief State machine class for the Guider
@@ -307,15 +314,15 @@ typedef enum { unconfigured, idle, calibrating, calibrated, guiding } GuiderStat
  * all prerequisites are met.
  */
 class GuiderStateMachine {
-	GuiderState	_state;
+	Guide::state	_state;
 	const char	*statename() const;
 public:
-	const GuiderState&	state() const { return _state; }
-	operator GuiderState () { return _state; }
-	operator GuiderState () const { return _state; }
+	const Guide::state&	state() const { return _state; }
+	operator Guide::state () { return _state; }
+	operator Guide::state () const { return _state; }
 
 	// construct the state machine
-	GuiderStateMachine() : _state(guiding::unconfigured) { }
+	GuiderStateMachine() : _state(Guide::unconfigured) { }
 
 	// methods to find out whether we can accept a configuration, or
 	// start calibration or guiding
@@ -348,7 +355,7 @@ class Guider {
 private:
 	GuiderStateMachine	_state;
 public:
-	GuiderState	state() const;
+	Guide::state	state() const;
 	// The guider is essentially composed of a camera and a guiderport
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here

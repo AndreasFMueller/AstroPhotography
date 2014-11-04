@@ -15,13 +15,13 @@ namespace astro {
 namespace camera {
 
 Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
-	mode(1,1), shutter(SHUTTER_OPEN), purpose(Exposure::light) {
+	mode(1,1), shutter(Shutter::OPEN), purpose(Exposure::light) {
 }
 
 Exposure::Exposure(const ImageRectangle& _frame,
 	float _exposuretime)
                 : frame(_frame), exposuretime(_exposuretime), gain(1.),
-		  limit(INFINITY), shutter(SHUTTER_OPEN),
+		  limit(INFINITY), shutter(Shutter::OPEN),
 		  purpose(Exposure::light) {
 }
 
@@ -30,7 +30,7 @@ std::string	Exposure::toString() const {
 		frame.size().width(), frame.size().height(),
 		frame.origin().x(), frame.origin().y(),
 		mode.toString().c_str(), exposuretime,
-		(shutter == SHUTTER_OPEN) ? "light" : "dark", gain, limit);
+		(shutter == Shutter::OPEN) ? "light" : "dark", gain, limit);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {

@@ -25,7 +25,7 @@ namespace cli {
  * \brief release a camera 
  */
 void	cameracommand::release(const std::string& cameraid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera release subcommand");
 	Cameras	cameras;
 	cameras.release(cameraid);
@@ -47,7 +47,7 @@ std::ostream&	operator<<(std::ostream& out, Astro::CcdInfo *ccdinfo) {
  * \brief display information about a camera available in the Cameras object
  */
 void	cameracommand::info(const std::string& cameraid,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera info subcommand");
 	Cameras	cameras;
 	CameraWrapper	camera = cameras.byname(cameraid);
@@ -73,7 +73,7 @@ void	cameracommand::assign(const std::string& cameraid,
 /**
  * \brief execute a subcommand
  */
-void	cameracommand::operator()(const std::string& commandname,
+void	cameracommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera command");
 

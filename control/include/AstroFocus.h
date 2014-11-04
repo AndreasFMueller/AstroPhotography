@@ -47,23 +47,24 @@ public:
 	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
 
 	// focusing status (what is it doing right now?)
-	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } focus_status;
-static std::string	name_of_status(focus_status);
+	typedef enum { IDLE, MOVING, MEASURING, FOCUSED, FAILED } state_type;
+static std::string	state2string(state_type);
+static state_type	string2state(const std::string& s);
 private:
-	volatile focus_status	_status;
-	void	status(focus_status s) { _status = s; }
+	volatile state_type	_status;
+	void	status(state_type s) { _status = s; }
 public:
-	focus_status	status() const { return _status; }
+	state_type	status() const { return _status; }
 
 	// method for focusing
-	typedef enum { FWHM, MEASURE } focus_method;
-static std::string	name_of_method(focus_method);
-static focus_method	method_from_name(const std::string& name);
+	typedef enum { FWHM, MEASURE } method_type;
+static std::string	method2string(method_type);
+static method_type	string2method(const std::string& name);
 private:
-	focus_method	_method;
+	method_type	_method;
 public:
-	focus_method	method() const { return _method; }
-	void	method(focus_method m) { _method = m; }
+	method_type	method() const { return _method; }
+	void	method(method_type m) { _method = m; }
 
 	// CCD to be used to get images
 private:
@@ -130,10 +131,10 @@ public:
  * \brief Callback data object to inform about a state change
  */
 class FocusCallbackState : public astro::callback::CallbackData {
-	Focusing::focus_status	_state;
+	Focusing::state_type	_state;
 public:
-	Focusing::focus_status	state() const { return _state; }
-	FocusCallbackState(Focusing::focus_status state) : _state(state) { }
+	Focusing::state_type	state() const { return _state; }
+	FocusCallbackState(Focusing::state_type state) : _state(state) { }
 };
 
 } // namespace focusing

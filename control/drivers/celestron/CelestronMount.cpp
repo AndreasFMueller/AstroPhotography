@@ -79,13 +79,13 @@ void	CelestronMount::getprompt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got # back");
 }
 
-Mount::mount_state	CelestronMount::state() {
+Mount::state_type	CelestronMount::state() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending J command to check alignment");
 	write("J");
 	std::string	s = readto('#');
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "response: %s (%d bytes, %02X)",
 		s.c_str(), s.size(), s[0]);
-	mount_state	result = IDLE;
+	state_type	result = IDLE;
 	if (s[0] == 1) {
 		result = TRACKING;
 	}

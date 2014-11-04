@@ -17,7 +17,7 @@ namespace simulator {
 class SimCcd : public Ccd {
 	SimLocator&	_locator;
 	double	starttime;
-	shutter_state	shutter;
+	Shutter::state	shutter;
 	StarField	starfield;
 	StarCamera<unsigned short>	starcamera;
 public:
@@ -28,8 +28,8 @@ public:
 	virtual void	cancelExposure();
 	virtual bool	wait();
 
-	virtual shutter_state	getShutterState() { return shutter; }
-	virtual void	setShuterState(const shutter_state& state);
+	virtual Shutter::state	getShutterState() { return shutter; }
+	virtual void	setShuterState(const Shutter::state& state);
 
 	virtual astro::image::ImagePtr	getRawImage();
 

@@ -14,7 +14,7 @@ TaskLocator::TaskLocator(astro::persistence::Database& _database)
 }
 
 Ice::ObjectPtr	TaskLocator::locate(const Ice::Current& current,
-		Ice::LocalObjectPtr& cookie) {
+		Ice::LocalObjectPtr& /* cookie */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a task %s",
 		current.id.name.c_str());
 
@@ -30,12 +30,12 @@ Ice::ObjectPtr	TaskLocator::locate(const Ice::Current& current,
 	return object;
 }
 
-void	TaskLocator::finished(const Ice::Current& current,
-			const Ice::ObjectPtr& servant,
-			const Ice::LocalObjectPtr& cookie) {
+void	TaskLocator::finished(const Ice::Current& /* current */,
+			const Ice::ObjectPtr& /* servant */,
+			const Ice::LocalObjectPtr& /* cookie */) {
 }
 
-void	TaskLocator::deactivate(const std::string& category) {
+void	TaskLocator::deactivate(const std::string& /* category */) {
 }
 
 } // namespace snowstar

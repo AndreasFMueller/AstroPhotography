@@ -74,7 +74,7 @@ std::ostream&	operator<<(std::ostream& out,
 	out << std::endl;
 	out << "points:          ";
 	out << calibration.points.length() << std::endl;
-	for (int i = 0; i < calibration.points.length(); i++) {
+	for (unsigned int i = 0; i < calibration.points.length(); i++) {
 		out << "                 ";
 		out << calibration.points[i] << std::endl;
 	}
@@ -159,7 +159,7 @@ std::ostream&	operator<<(std::ostream& out, GuiderWrapper& guider) {
  * This command displays the current exposure setting of the guider
  */
 void	guidercommand::exposure(GuiderWrapper& guider,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	std::cout << guider->getExposure();
 }
 
@@ -169,7 +169,7 @@ void	guidercommand::exposure(GuiderWrapper& guider,
  * THis command displays complete information about the guider
  */
 void	guidercommand::info(GuiderWrapper& guider,
-		const std::vector<std::string>& arguments) {
+		const std::vector<std::string>& /* arguments */) {
 	std::cout << guider;
 }
 
@@ -408,7 +408,7 @@ void	guidercommand::image(GuiderWrapper& guider,
  * This operator analyzes the command arguments and calls the appropriate
  * subcommand method.
  */
-void	guidercommand::operator()(const std::string& command,
+void	guidercommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 2) {
 		throw command_error("guider command requires more "

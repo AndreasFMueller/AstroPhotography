@@ -110,14 +110,14 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 
 	// use the shutter info 
 	switch (exposure.shutter) {
-	case SHUTTER_OPEN:
+	case Shutter::OPEN:
 		params.openShutter = ((id == 2)
 					? SC_OPEN_EXT_SHUTTER
 					: SC_OPEN_SHUTTER);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter open command: %hd",
 			params.openShutter);
 		break;
-	case SHUTTER_CLOSED:
+	case Shutter::CLOSED:
 		params.openShutter = ((id == 2)
 					? SC_CLOSE_EXT_SHUTTER
 					: SC_CLOSE_SHUTTER);
@@ -298,7 +298,7 @@ CoolerPtr	SbigCcd::getCooler0() {
 /**
  * \brief Query the shutter state
  */
-shutter_state	SbigCcd::getShutterState() {
+Shutter::state	SbigCcd::getShutterState() {
 	SbigLock	lock;
 	camera.sethandle();
 
@@ -312,15 +312,15 @@ shutter_state	SbigCcd::getShutterState() {
 		throw NotImplemented("cannot query command status");
 	}
 
-	shutter_state	state;
+	Shutter::state	state;
 	switch ((results.status >> 10) & 0x3) {
 	case SS_OPEN:
 	case SS_OPENING:
-		state = SHUTTER_OPEN;
+		state = Shutter::OPEN;
 		break;
 	case SS_CLOSED:
 	case SS_CLOSING:
-		state = SHUTTER_CLOSED;
+		state = Shutter::CLOSED;
 		break;
 	}
 
@@ -330,7 +330,7 @@ shutter_state	SbigCcd::getShutterState() {
 /**
  * \brief Set the shutter state.
  */
-void	SbigCcd::setShutterState(const shutter_state& state) {
+void	SbigCcd::setShutterState(const Shutter::state& state) {
 	SbigLock	lock;
 	camera.sethandle();
 
@@ -366,12 +366,12 @@ void	SbigCcd::setShutterState(const shutter_state& state) {
 		break;
 	}
 	switch (state) {
-	case SHUTTER_CLOSED:
+	case Shutter::CLOSED:
 		misc.shutterCommand = (id == 2)
 					? SC_CLOSE_EXT_SHUTTER
 					: SC_CLOSE_SHUTTER;
 		break;
-	case SHUTTER_OPEN:
+	case Shutter::OPEN:
 		misc.shutterCommand = (id == 2) 
 					? SC_OPEN_EXT_SHUTTER
 					: SC_OPEN_SHUTTER;

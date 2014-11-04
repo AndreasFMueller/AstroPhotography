@@ -154,7 +154,7 @@ CoolerPtr	NetCcd::getCooler0() {
 /**
  * \brief Get the Shutter state of this CCD
  */
-shutter_state	NetCcd::getShutterState() {
+Shutter::state	NetCcd::getShutterState() {
 	return convert(_ccd->getShutterState());
 }
 
@@ -165,7 +165,7 @@ shutter_state	NetCcd::getShutterState() {
  * in special cases. It is usually preferred to use the shutter member
  * of the Exposure object when starting a new exposure.
  */
-void	NetCcd::setShutterState(const shutter_state& state) {
+void	NetCcd::setShutterState(const Shutter::state& state) {
 	_ccd->setShutterState(convert(state));
 }
 

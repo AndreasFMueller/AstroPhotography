@@ -9,7 +9,7 @@
 namespace astro {
 namespace cli {
 
-void	sleepcommand::operator()(const std::string& commandname,
+void	sleepcommand::operator()(const std::string& /* commandname */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 1) {
 		throw command_error("sleep command requires time argument");

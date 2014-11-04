@@ -37,7 +37,7 @@ module snowstar {
 	 * is in the cancelled state.
 	 */
 	enum TaskState	{ TskPENDING, TskEXECUTING, TskFAILED,
-			TskCANCELLED, TskCOMPLETED };
+			TskCANCELLED, TskCOMPLETE };
 
 	/**
 	 * \brief Information about a task

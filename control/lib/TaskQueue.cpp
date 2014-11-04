@@ -86,7 +86,7 @@ void	TaskQueue::main() {
 /**
  * \brief convert state value into a string
  */
-std::string	TaskQueue::statestring(const state_type& state) {
+std::string	TaskQueue::state2string(const state_type& state) {
 	switch (state) {
 	case idle:
 		return std::string("idle");
@@ -98,6 +98,25 @@ std::string	TaskQueue::statestring(const state_type& state) {
 		return std::string("stopped");
 	}
 	throw std::runtime_error("invalid state");
+}
+
+/**
+ * \brief convert state string into a state value
+ */
+TaskQueue::state_type	TaskQueue::string2state(const std::string& s) {
+	if (s == "idle") {
+		return idle;
+	}
+	if (s == "launching") {
+		return launching;
+	}
+	if (s == "stopping") {
+		return stopping;
+	}
+	if (s == "stopped") {
+		return stopped;
+	}
+	throw std::runtime_error("invalid state name");
 }
 
 /**
@@ -322,7 +341,7 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
 	TaskTable	tasktable(_database);
 	tasktable.update(entry.id(), entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update entry %d in database, state %s",
-		entry.id(), statestring(state()).c_str());
+		entry.id(), state2string(state()).c_str());
 
 	// inform the clients
 	call(entry);

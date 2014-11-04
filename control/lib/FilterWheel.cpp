@@ -16,6 +16,37 @@ namespace camera {
 DeviceName::device_type	FilterWheel::devicetype = DeviceName::Filterwheel;
 
 /**
+ * \brief Convert filterwheel state to a readable string
+ */
+std::string	FilterWheel::state2string(State s) {
+	switch (s) {
+	case idle:
+		return std::string("idle");
+	case moving:
+		return std::string("moving");
+	case unknown:
+		return std::string("unknown");
+	}
+	throw std::runtime_error("unknown filterwheel state code");
+}
+
+/**
+ * \brief Convert filterwheel state name string to a state code
+ */
+FilterWheel::State	FilterWheel::string2state(const std::string& s) {
+	if (s == "idle") {
+		return idle;
+	}
+	if (s == "moving") {
+		return moving;
+	}
+	if (s == "unknown") {
+		return unknown;
+	}
+	throw std::runtime_error("unknown filterwheel state string");
+}
+
+/**
  * \brief Create the name of the filterwheel
  */
 DeviceName	FilterWheel::defaultname(const DeviceName& parent,

@@ -11,7 +11,7 @@
 namespace astro {
 namespace cli {
 
-void	modulecommand::operator()(const std::string& command,
+void	modulecommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() < 1) {
 		throw command_error("module command requires arguments");

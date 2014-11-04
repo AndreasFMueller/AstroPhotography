@@ -42,7 +42,7 @@ int	main(int argc, char *argv[]) {
 	if (!tasks) {
 		throw "invalid proxy";
 	}
-	taskidsequence sequence = tasks->tasklist(TskCOMPLETED);
+	taskidsequence sequence = tasks->tasklist(TskCOMPLETE);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of tasks: %d",
 		sequence.size());
 	taskidsequence::const_iterator	i;

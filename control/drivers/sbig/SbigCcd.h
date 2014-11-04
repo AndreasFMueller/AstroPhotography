@@ -28,8 +28,8 @@ public:
 	virtual void	startExposure(const Exposure& exposure);
 
 	// shutter interface
-	virtual shutter_state	getShutterState();
-	virtual void	setShutterState(const shutter_state& state);
+	virtual Shutter::state	getShutterState();
+	virtual void	setShutterState(const Shutter::state& state);
 
 	virtual	ImagePtr	getRawImage();
 

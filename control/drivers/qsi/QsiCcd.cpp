@@ -51,7 +51,7 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	_camera.camera().put_StartY(origin.y());
 
 	// get shutter info
-	bool	light = (exposure.shutter == SHUTTER_OPEN);
+	bool	light = (exposure.shutter == Shutter::OPEN);
 	_camera.camera().StartExposure(exposure.exposuretime, light);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
 		exposure.exposuretime, (light) ? "light" : "dark");
@@ -155,11 +155,11 @@ void	QsiCcd::cancelExposure() {
 	state = Exposure::idle;
 }
 
-shutter_state	QsiCcd::getShutterState() {
+Shutter::state	QsiCcd::getShutterState() {
 	throw std::runtime_error("cannot query current shutter state");
 }
 
-void	QsiCcd::setShutterState(const shutter_state& /* state */) {
+void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
 	throw std::runtime_error("cannot directly control shutter state");
 }
 

@@ -165,14 +165,18 @@ typedef std::shared_ptr<Mount>	MountPtr;
 class Mount : public Device {
 public:
 	typedef MountPtr	sharedptr;
-	typedef enum mount_state { IDLE, ALIGNED, TRACKING, GOTO } mount_state;
+
+	typedef enum state_type { IDLE, ALIGNED, TRACKING, GOTO } state_type;
+	static std::string	state2string(state_type s);
+	static state_type	string2state(const std::string& s);
+
 	static DeviceName::device_type	devicetype;
 	Mount(const std::string& name) : Device(name, DeviceName::Mount) { }
 	Mount(const DeviceName& name) : Device(name, DeviceName::Mount) { }
 	virtual ~Mount() { }
 
 	// state
-	virtual mount_state	state() { return IDLE; }
+	virtual state_type	state() { return IDLE; }
 
 	// position commands
 	virtual RaDec	getRaDec();

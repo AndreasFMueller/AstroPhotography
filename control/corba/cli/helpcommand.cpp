@@ -10,7 +10,7 @@
 namespace astro {
 namespace cli {
 
-void	helpcommand::operator()(const std::string& command,
+void	helpcommand::operator()(const std::string& /* command */,
 		const std::vector<std::string>& arguments) {
 	if (arguments.size() == 0) {
 		std::cout << factory().summary() << std::endl;

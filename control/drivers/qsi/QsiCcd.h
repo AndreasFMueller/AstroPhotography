@@ -23,8 +23,8 @@ public:
 	virtual void	cancelExposure();
 
 	// shutter stuff
-	virtual shutter_state	getShutterState();
-	virtual void	setShutterState(const shutter_state& state);
+	virtual Shutter::state	getShutterState();
+	virtual void	setShutterState(const Shutter::state& state);
 
 	// image retrieval
 	virtual astro::image::ImagePtr	getRawImage();

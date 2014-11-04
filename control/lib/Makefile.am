@@ -40,7 +40,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
 	Transform.cpp Projection.cpp Residual.cpp ProjectionCorrector.cpp \
 	PhaseCorrelator.cpp Analyzer.cpp TransformAnalyzer.cpp Stacker.cpp \
-	Tracker.cpp Guider.cpp ThreadBase.cpp \
+	Tracker.cpp Guide.cpp Guider.cpp ThreadBase.cpp \
 	GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
 	TrackingWork.cpp DrivingWork.cpp \
@@ -50,7 +50,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
 	ImageProgramCallback.cpp SaveImageCallback.cpp \
 	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
-	DeviceAccessor.cpp Devices.cpp \
+	DeviceAccessor.cpp Devices.cpp Shutter.cpp \
 	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
 	AdaptiveOptics.cpp \
 	Mount.cpp \

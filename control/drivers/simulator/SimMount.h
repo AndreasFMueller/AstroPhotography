@@ -16,7 +16,7 @@ namespace simulator {
 class SimMount : public astro::device::Mount {
 	SimLocator&	_locator;
 public:
-	astro::device::Mount::mount_state	state();
+	astro::device::Mount::state_type	state();
 	SimMount(SimLocator &locator);
 	RaDec	getRaDec();
 	AzmAlt	getAzmAlt();

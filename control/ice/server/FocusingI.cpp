@@ -56,9 +56,9 @@ FocusMethod	FocusingI::method(const Ice::Current& /* current */) {
 
 void	FocusingI::setMethod(FocusMethod method,
 		const Ice::Current& /* current */) {
-	astro::focusing::Focusing::focus_method	m = convert(method);
+	astro::focusing::Focusing::method_type	m = convert(method);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the method to %s",
-		astro::focusing::Focusing::name_of_method(m).c_str());
+		astro::focusing::Focusing::method2string(m).c_str());
 	_focusingptr->method(m);
 }
 

@@ -27,7 +27,7 @@ public:
 	virtual ~CelestronMount();
 
 	// accessors
-	virtual astro::device::Mount::mount_state	state();
+	virtual astro::device::Mount::state_type	state();
 	virtual RaDec	getRaDec();
 	virtual AzmAlt	getAzmAlt();
 	virtual void	Goto(const RaDec& radec);
