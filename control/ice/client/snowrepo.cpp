@@ -9,8 +9,10 @@
 #include <AstroDebug.h>
 #include <AstroConfig.h>
 #include <AstroFormat.h>
+#include <AstroIO.h>
 #include <repository.h>
 #include <IceConversions.h>
+#include <RepoReplicators.h>
 
 using namespace snowstar;
 
@@ -29,10 +31,26 @@ void	usage(const char *progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] help" << std::endl;
-	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] { push | pull | synchronize } <localrepo> <remoterepo>" << std::endl;
 	std::cout << std::endl;
-	std::cout << "replicate files from a local repository to a remote repository" << std::endl;
+	std::cout << p << " [ options ] list [ reponame ]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "List names of repositories known on a repository server, "
+		"list contents of a " << std::endl;
+	std::cout << "remote repo." << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] { push | pull | synchronize } "
+		"<localrepo> <remoterepo>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "replicate files from a local repository to a remote "
+		"repository" << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] add reponame images ..." << std::endl;
+	std::cout << p << " [ options ] get reponame id filename" << std::endl;
+	std::cout << p << " [ options ] remove reponame id ..." << std::endl;
+	std::cout << std::endl;
+	std::cout << "Add images to a remote repository, retrieve an image or "
+		"delete images from a" << std::endl;
+	std::cout << "remote repository." << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -c,--config=<cfg>       use configuration <cfg>" << std::endl;
@@ -75,6 +93,11 @@ int	command_help(const char *progname) {
 		"repository URL of the form" << std::endl;
 	std::cout << "repo://<hostname>:<port>/<reponame>" << std::endl;
 	std::cout << std::endl;
+	std::cout << "The snowrepo program also allows to add, retrieve or "
+		"delete individual images" << std::endl;
+	std::cout << "to or from the image repository. This extends the "
+		"functionality of the local" << std::endl;
+	std::cout << "imagerepo(1) program" << std::endl;
 	usage(progname);
 	return EXIT_SUCCESS;
 }
@@ -100,10 +123,10 @@ int	command_list(const astro::ServerName& servername) {
 }
 
 /**
- * \brief List the contents of a repository
+ * \brief Auxiliary function to get a remote repository proxy
  */
-int	command_list(const astro::ServerName& servername,
-		const std::string& reponame) {
+static RepositoryPrx	getRemoteRepo(const astro::ServerName& servername,
+				const std::string& reponame) {
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	Ice::ObjectPrx	base = ic->stringToProxy(
 					servername.connect("Repositories"));
@@ -115,6 +138,15 @@ int	command_list(const astro::ServerName& servername,
 	repository = remoterepositories->get(reponame);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got remote repository %s",
 		reponame.c_str());
+	return repository;
+}
+
+/**
+ * \brief List the contents of a repository
+ */
+int	command_list(const astro::ServerName& servername,
+		const std::string& reponame) {
+	RepositoryPrx	repository = getRemoteRepo(servername, reponame);
 
 	// retrieve a list of uuids from the remote server
 	std::string	condition("0 = 0");
@@ -127,11 +159,17 @@ int	command_list(const astro::ServerName& servername,
 	for (auto ptr = u.begin(); ptr != u.end(); ptr++) {
 		ids.insert(repository->getId(*ptr));
 	}
-	std::cout << "id   size      purpose bin  exp  temp observation    project" << std::endl;
+	std::cout << "id   instrument size      purpose bin  exp  temp "
+		"observation    project ";
+	if (verbose) {
+		std::cout << " uuid                                 filename";
+	}
+	std::cout << std::endl;
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
 		int	id = *ptr;
 		ImageInfo	info = repository->getInfo(id);
-		std::cout << astro::stringprintf("%04d %-9.9s ", id,
+		std::cout << astro::stringprintf("%04d %-10.10s %-9.9s ", id,
+			info.instrument.c_str(),
 			convert(info.size).toString().c_str());
 		std::cout << astro::stringprintf("%-8.8s",
 			info.purpose.c_str());
@@ -141,9 +179,75 @@ int	command_list(const astro::ServerName& servername,
 			info.temperature);
 		std::cout << astro::timeformat("%d.%m.%y %H:%M ",
                                 converttime(info.observationago));
-		std::cout << info.project << std::endl;
+		std::cout << astro::stringprintf("%-8.8s",
+			info.project.c_str());
+		if (verbose) {
+			std::cout << astro::stringprintf(" %-36.36s %s",
+				info.uuid.c_str(),
+				info.filename.c_str());
+		}
+		std::cout << std::endl;
 	}
 	
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the add command
+ *
+ * This command adds images identified by filename to the remote repository
+ */
+int	command_add(const astro::ServerName& servername,
+		const std::string& reponame,
+		const std::list<std::string>& filenames) {
+	// get the repo
+	RepositoryPrx	repository = getRemoteRepo(servername, reponame);
+
+	// go through the images
+	for (auto ptr = filenames.begin(); ptr != filenames.end(); ptr++) {
+		astro::io::FITSin	in(*ptr);
+		astro::image::ImagePtr	imageptr = in.read();
+		repository->save(convertfile(imageptr));
+	}
+	
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the get command
+ *
+ * This command retrieves an image identified by id from a remote repository,
+ * and saves it as a local file.
+ */
+int	command_get(const astro::ServerName& servername,
+		const std::string& reponame, int id,
+		const std::string& filename) {
+	// get the repo
+	RepositoryPrx	repository = getRemoteRepo(servername, reponame);
+
+	ImageFile	image = repository->getImage(id);
+	astro::io::FITSout	out(filename);
+	out.write(convertfile(image));
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the remove command
+ *
+ * This command removes images identified by a list of ids from a remote
+ * repository.
+ */
+int	command_remove(const astro::ServerName& servername,
+		const std::string& reponame, const std::list<int>& ids) {
+	// get the repo
+	RepositoryPrx	repository = getRemoteRepo(servername, reponame);
+	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
+		if (dryrun) {
+			std::cout << "remove " << *ptr << std::endl;
+		} else {
+			repository->remove(*ptr);
+		}
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -155,238 +259,6 @@ static struct option	longopts[] = {
 { "server",	required_argument,	NULL,	's' }, /* 4 */
 { "verbose",	no_argument,		NULL,	'v' }, /* 5 */
 { NULL,		0,			NULL,	0   }
-};
-
-/**
- * \brief base replicator class
- */
-class BaseRepoReplicator {
-protected:
-	RepositoriesPrx	remoterepositories;
-	RepositoryPrx	remoterepository;
-	std::set<std::string>	remoteuuids;
-	std::set<std::string>	getUUIDs(RepositoryPrx repo) {
-		uuidlist u = repo->getUUIDsCondition(condition());
-		std::set<std::string>	remoteuuids;
-		std::copy(u.begin(), u.end(),
-			std::inserter(remoteuuids, remoteuuids.begin()));
-		return remoteuuids;
-	}
-	std::set<std::string>	localuuids;
-	std::string	_project;
-	std::string	condition() const {
-		if (_project.size() > 0) {
-			return astro::stringprintf("project = '%s'",
-				_project.c_str());
-		}
-		return std::string("0 = 0");
-	}
-public:
-	BaseRepoReplicator(const astro::URL& url, const std::string& project)
-		: _project(project) {
-		Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-		Ice::ObjectPrx	base = ic->stringToProxy(
-						url.connect("Repositories"));
-		remoterepositories = RepositoriesPrx::checkedCast(base);
-		if (!remoterepositories) {
-			throw std::runtime_error("no repositories proxy");
-		}
-		remoterepository = remoterepositories->get(url.path());
-		if (!remoterepository) {
-			throw std::runtime_error("no repository proxy");
-		}
-		remoteuuids = getUUIDs(remoterepository);
-	}
-	virtual std::set<int>	getlocalids(const std::list<std::string>& tocopy) const = 0;
-	virtual void	push(const int id) = 0;
-	virtual void	pull(const int id) = 0;
-	int	push() {
-		// get the uuids that should be copied
-		std::list<std::string>	tocopy;
-		std::set_difference(localuuids.begin(), localuuids.end(),
-			remoteuuids.begin(), remoteuuids.end(),
-			std::inserter(tocopy, tocopy.begin()));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d uuids to copy",
-			tocopy.size());
-		
-		// get the ids for the images
-		std::set<int>	copyids = getlocalids(tocopy);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids to copy",
-			copyids.size());
-		if (verbose) {
-			std::cout << "found " << copyids.size();
-			std::cout << " files identified for push operation";
-			std::cout << std::endl;
-		}
-
-		// now copy all the images to the remote repo
-		for (auto ptr = copyids.begin(); ptr != copyids.end(); ptr++) {
-			push(*ptr);
-		}
-		return EXIT_SUCCESS;
-	}
-	int	pull() {
-		// get the uuids that should be copied
-		std::list<std::string>	tocopy;
-		std::set_difference(remoteuuids.begin(), remoteuuids.end(),
-			localuuids.begin(), localuuids.end(),
-			std::inserter(tocopy, tocopy.begin()));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d uuids to copy",
-			tocopy.size());
-		
-		// get the ids for the images
-		std::set<int>	copyids;
-		for (auto ptr = tocopy.begin(); ptr != tocopy.end(); ptr++) {
-			copyids.insert(remoterepository->getId(*ptr));
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids to copy",
-			copyids.size());
-		if (verbose) {
-			std::cout << "found " << copyids.size();
-			std::cout << " files identified for pull operation";
-			std::cout << std::endl;
-		}
-
-		// copy the images from the remote repository
-		for (auto ptr = copyids.begin(); ptr != copyids.end(); ptr++) {
-			pull(*ptr);
-		}
-		return EXIT_SUCCESS;
-	}
-	int	sync() {
-		int	rc = push();
-		if (rc) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to push");
-			return EXIT_FAILURE;
-		}
-		rc = pull();
-		if (rc) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "failed to pull");
-			return EXIT_FAILURE;
-		}
-		return EXIT_SUCCESS;
-	}
-	int	command(const std::string& commandname) {
-		if (commandname == "push") {
-			return push();
-		}
-		if (commandname == "pull") {
-			return pull();
-		}
-		if (commandname == "sync") {
-			return sync();
-		}
-		std::cerr << "unknown command";
-		return EXIT_FAILURE;
-	}
-};
-
-/**
- * \brief Replicator class to replicate a local repository with a remote repo
- */
-class LocalRepoReplicator : public BaseRepoReplicator {
-protected:
-	astro::project::ImageRepoPtr	localrepository;
-	std::set<std::string>	getUUIDs(astro::project::ImageRepo& repo) {
-		std::set<astro::UUID>	uuids = repo.getUUIDs(condition());
-		std::set<std::string>	localuuids;
-		std::copy(uuids.begin(), uuids.end(),
-			std::inserter(localuuids, localuuids.begin()));
-		return localuuids;
-	}
-public:
-	LocalRepoReplicator(const std::string& localreponame,
-		const astro::URL& remoteurl, const std::string& project)
-		: BaseRepoReplicator(remoteurl, project) {
-		astro::config::ConfigurationPtr	config
-			= astro::config::Configuration::get();
-		localrepository = config->repo(localreponame);
-		localuuids = getUUIDs(*localrepository);
-	}
-	virtual std::set<int>	getlocalids(const std::list<std::string>& tocopy) const {
-		std::set<int>	copyids;
-		for (auto ptr = tocopy.begin(); ptr != tocopy.end(); ptr++) {
-			copyids.insert(localrepository->getId(astro::UUID(*ptr)));
-		}
-		return copyids;
-	}
-	virtual void	push(int id) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", id);
-		if (verbose) {
-			std::cout << "copy file " << id << std::endl;
-		}
-		if (!dryrun) {
-			astro::image::ImagePtr	imageptr
-				= localrepository->getImage(id);
-			remoterepository->save(convertfile(imageptr));
-		}
-	}
-	virtual void	pull(int id) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", id);
-		if (verbose) {
-			std::cout << "pulling " << id << std::endl;
-		}
-		if (!dryrun) {
-			ImageFile imagefile = remoterepository->getImage(id);
-			localrepository->save(convertfile(imagefile));
-		}
-	}
-};
-
-/**
- * \brief Replicator to replicate between two remote repositories
- *
- * The first remote repository is called the local repository although
- * it is remote image repository.
- */
-class RemoteRepoReplicator : public BaseRepoReplicator {
-protected:
-	RepositoriesPrx	localrepositories;
-	RepositoryPrx	localrepository;
-public:
-	RemoteRepoReplicator(const astro::URL& localurl,
-		const astro::URL& remoteurl, const std::string& project)
-		: BaseRepoReplicator(remoteurl, project) {
-		Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-		Ice::ObjectPrx	base = ic->stringToProxy(
-					localurl.connect("Repositories"));
-		localrepositories = RepositoriesPrx::checkedCast(base);
-		if (!localrepositories) {
-			throw std::runtime_error("no repositories proxy");
-		}
-		localrepository = localrepositories->get(localurl.path());
-		if (!remoterepository) {
-			throw std::runtime_error("no repository proxy");
-		}
-		localuuids = getUUIDs(localrepository);
-	}
-	virtual std::set<int>	getlocalids(const std::list<std::string>& tocopy) const {
-		std::set<int>	copyids;
-		for (auto ptr = tocopy.begin(); ptr != tocopy.end(); ptr++) {
-			copyids.insert(localrepository->getId(*ptr));
-		}
-		return copyids;
-	}
-	virtual void	push(int id) {	
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", id);
-		if (verbose) {
-			std::cout << "pushing " << id << std::endl;
-		}
-		if (!dryrun) {
-			ImageFile imagefile = localrepository->getImage(id);
-			remoterepository->save(imagefile);
-		}
-	}
-	virtual void	pull(int id) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy image id %d", id);
-		if (verbose) {
-			std::cout << "pulling " << id << std::endl;
-		}
-		if (!dryrun) {
-			ImageFile imagefile = remoterepository->getImage(id);
-			localrepository->save(imagefile);
-		}
-	}
 };
 
 /**
@@ -448,11 +320,44 @@ int	main(int argc, char *argv[]) {
 		return command_list(servername, reponame);
 	}
 
-	// remaining commands need a local and a remote repository name
+	// remaining commands need at least a local repository name
 	if (argc <= optind) {
 		throw std::runtime_error("local repository name missing");
 	}
 	std::string	localreponame = argv[optind++];
+
+	// add command uses remaining arguments as file names
+	if (command == "add") {
+		std::list<std::string>	filenames;
+		while (optind < argc) {
+			filenames.push_back(argv[optind++]);
+		}
+		return command_add(servername, localreponame, filenames);
+	}
+
+	// get command uses two more arguments: 
+	if (command == "get") {
+		if (optind >= argc) {
+			throw std::runtime_error("id argument missing");
+		}
+		int	id = std::stoi(argv[optind++]);
+		if (optind >= argc) {
+			throw std::runtime_error("file name argument missing");
+		}
+		std::string	filename(argv[optind++]);
+		return command_get(servername, localreponame, id, filename);
+	}
+
+	// the remove command uses the remaining arguments as ids
+	if (command == "remove") {
+		std::list<int>	ids;
+		while (optind < argc) {
+			ids.push_back(std::stoi(argv[optind++]));
+		}
+		return command_remove(servername, localreponame, ids);
+	}
+
+	// get the remote repository name
 	if (argc <= optind) {
 		throw std::runtime_error("remote repository name missing");
 	}
@@ -475,10 +380,14 @@ int	main(int argc, char *argv[]) {
 		astro::URL	localurl(localreponame);
 		RemoteRepoReplicator	replicator(localreponame, remoteurl,
 						project);
+		replicator.verbose(verbose);
+		replicator.dryrun(dryrun);
 		return replicator.command(command);
 	} catch (...) {
 		LocalRepoReplicator	replicator(localreponame, remoteurl,
 						project);
+		replicator.verbose(verbose);
+		replicator.dryrun(dryrun);
 		return replicator.command(command);
 	}
 

@@ -778,7 +778,7 @@ ImageInfo	convert(const astro::project::ImageEnvelope& envelope) {
 	result.filename = envelope.filename();
 	result.project = envelope.project();
 	result.createdago = converttime(envelope.created());
-	result.camera = envelope.camera();
+	result.instrument = envelope.camera();
 	result.size = convert(envelope.size());
 	result.binning = convert(envelope.binning());
 	result.exposuretime = envelope.exposuretime();
@@ -794,7 +794,7 @@ astro::project::ImageEnvelope	convert(const ImageInfo& info) {
 	envelope.filename(info.filename);
 	envelope.project(info.project);
 	envelope.created(converttime(info.createdago));
-	envelope.camera(info.camera);
+	envelope.camera(info.instrument);
 	envelope.size(convert(info.size));
 	envelope.binning(convert(info.binning));
 	envelope.exposuretime(info.exposuretime);

@@ -10,6 +10,9 @@ module snowstar {
 
 	/**
 	 * \brief Information about an image an image repository
+	 *
+	 * This structure mirrors the ImageEnvelope class in the 
+	 * the AstroProject.h header
 	 */
 	struct ImageInfo {
 		int	id;
@@ -17,7 +20,7 @@ module snowstar {
 		string	filename;
 		string	project;
 		double	createdago;
-		string	camera;
+		string	instrument;
 		ImageSize	size;
 		BinningMode	binning;
 		double	exposuretime;

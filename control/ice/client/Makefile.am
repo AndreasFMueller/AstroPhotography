@@ -46,7 +46,7 @@ snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowguide_LDADD = $(ICELDADD)
 snowguide_CPPFLAGS = $(ICECPPFLAGS)
 
-snowrepo_SOURCES = snowrepo.cpp
+snowrepo_SOURCES = snowrepo.cpp RepoReplicators.cpp
 snowrepo_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowrepo_LDADD = $(ICELDADD)
 snowrepo_CPPFLAGS = $(ICECPPFLAGS)

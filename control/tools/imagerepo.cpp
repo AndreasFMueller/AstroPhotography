@@ -52,7 +52,8 @@ int	command_list(const std::string& reponame) {
 	if (images.size() == 0) {
 		return EXIT_SUCCESS;
 	}
-	std::cout << "id   instrument size       purpose bin   exp  temp observation    project  ";
+	std::cout << "id   instrument size       purpose bin   exp  temp "
+		"observation    project  ";
 	if (verbose) {
 		std::cout << "UUID                                ";
 		std::cout << "filename";
