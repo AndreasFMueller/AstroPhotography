@@ -175,10 +175,34 @@ void	ExposureWork::run() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",
 		_task.exposure().exposuretime);
 	CcdCondition	ccdcondition(ccd, camera::Exposure::exposed);
-	if (!wait(_task.exposure().exposuretime + 30, ccdcondition)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for image failed");
-		throw std::runtime_error("failed waiting for image");
+
+	// if waiting is cancelled, then we have to cancel the exposure
+	// also
+	try {
+		if (!wait(_task.exposure().exposuretime + 30, ccdcondition)) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"waiting for image failed");
+			throw std::runtime_error("failed waiting for image");
+		}
+	} catch (CancelException& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel exception caught");
+		// cancel the image...
+		ccd->cancelExposure();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure cancelled, waiting");
+
+		// ... and wait until either the camera is in a safe state
+		do {
+			sleep(1);
+			
+		} while ((ccd->exposureStatus() == camera::Exposure::cancelling)
+			|| (ccd->exposureStatus() == camera::Exposure::exposing));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait comlete");
+
+		// now throw again to signal the work process that the process
+		// was in fact cancelled
+		throw;
 	}
+
 
 	// get the image from the ccd
 	astro::image::ImagePtr	image = ccd->getImage();

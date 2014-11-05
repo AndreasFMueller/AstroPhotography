@@ -78,7 +78,7 @@ single:	singletest
 # tests related to the processing engine. These tests include stuff
 processtests_SOURCES = processtests.cpp \
 	ProcessingStepTest.cpp ProcessingThreadTest.cpp \
-	ProcessingControllerTest.cpp 
+	ProcessingControllerTest.cpp
 processtests_LDADD = -lcppunit -L.. -lastro 
 processtests_DEPENDENCIES = ../libastro.la 
 

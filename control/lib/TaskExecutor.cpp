@@ -38,18 +38,27 @@ static void	taskmain(TaskExecutor *te) {
  * that must be cancelled.
  */
 void	TaskExecutor::main() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "main started");
+	// acquiring the lock ensures that the new thread is blocked until
+	// the starting thread is ready to release it.
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main started LOCK");
 	std::unique_lock<std::mutex>	lock(_lock);
+	// by sending the notification, we signal to the starting thread
+	// that we are now up and running
+	_cond.notify_all();
+	lock.unlock();
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock release UNLOCK");
+
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entering main task region");
 		// inform queue of state change
 		_task.state(TaskQueueEntry::executing);
 		_queue.post(_task.id()); // notify queue of state change
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "update posted");
 
 		// we signal to the constructor that the thread is now fully
 		// running, with the correct state set in the task queue
 		_cond.notify_one();
-		lock.unlock();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "constructor signaled");
 
 		// the exposure task starts to run when we call the run method
@@ -79,7 +88,7 @@ void	TaskExecutor::main() {
  */
 TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	: _queue(queue), _task(task) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new executor");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new executor LOCK");
 	// create the lock
 	std::unique_lock<std::mutex>	lock(_lock);
 
@@ -93,8 +102,13 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	// now wait for the condition variable to be signaled. This will
 	// indicate that the thread has indeed started running. Doing this
 	// ensures that the TaskExecutor thread is running and everything in
-	// the new state before the constructor returns.
+	// the new state before the constructor returns. The wait call 
+	// atomically unlocks the lock and waits for the condition variable
+	// to be signaled.
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting releases lock: UNLOCK");
 	_cond.wait(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completion locks: LOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task executor now up and running UNLOCK");
 }
 
 /**
@@ -121,7 +135,10 @@ void	TaskExecutor::cancel() {
  * \brief wait for the thread to terminate
  */
 void	TaskExecutor::wait() {
-	_thread.join();
+	try {
+		_thread.join();
+	} catch (...) {
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread terminated");
 }
 

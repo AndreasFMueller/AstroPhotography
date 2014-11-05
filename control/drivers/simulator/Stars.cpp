@@ -84,7 +84,7 @@ double	Star::intensity(const Point& where) const {
 void	Star::magnitude(const double& magnitude) {
 	_magnitude = magnitude;
 	_peak = pow(10, -(magnitude / 2.5));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "peak(%f) = %f", _magnitude, _peak);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "peak(%f) = %f", _magnitude, _peak);
 }
 
 /**

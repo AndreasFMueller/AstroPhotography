@@ -178,6 +178,9 @@ class TaskQueue {
 	std::condition_variable_any	statechange_cond;
 
 	// condition variable and lock used for the wait operation
+	// task executors that have completed use this condition variable
+	// to signal their state change to the thread that processes the
+	// queue
 	std::condition_variable_any	wait_cond;
 
 	// various variables used to exchange information with 
@@ -215,6 +218,8 @@ private:
 public:
 	const state_type&	state() const { return _state; }
 private:
+	// the idqueue contains the task ids of the task executors that
+	// need a status update
 	std::queue<taskid_t>	_idqueue;
 private:
 	// prevent copying

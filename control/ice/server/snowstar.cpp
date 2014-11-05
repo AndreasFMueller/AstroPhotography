@@ -42,6 +42,11 @@ static struct option	longopts[] = {
  * \brief Main function for the Snowstar server
  */
 int	snowstar_main(int argc, char *argv[]) {
+	// default debug settings
+	debugtimeprecision = 3;
+	debugthreads = true;
+
+	// resturn status
 	int	status = EXIT_SUCCESS;
 
 	// get properties from the command line
@@ -60,10 +65,13 @@ int	snowstar_main(int argc, char *argv[]) {
 	// default configuration
 	std::string	databasefile("testdb.db");
 
+	// port numbers
+	unsigned short	port = 10000;
+
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:p:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'c':
@@ -77,6 +85,9 @@ int	snowstar_main(int argc, char *argv[]) {
 			break;
 		case 'q':
 			databasefile = std::string(optarg);
+			break;
+		case 'p':
+			port = std::stoi(optarg);
 			break;
 		}
 
@@ -100,9 +111,11 @@ int	snowstar_main(int argc, char *argv[]) {
 	// initialize servant
 	try {
 		// create the adapter
+		std::string	connectstring = astro::stringprintf(
+			"default -p %hu", port);
 		Ice::ObjectAdapterPtr	adapter
 			= ic->createObjectAdapterWithEndpoints("Astro",
-				"default -p 10000");
+				connectstring);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adapters created");
 
 		// add a servant for devices to the device adapter

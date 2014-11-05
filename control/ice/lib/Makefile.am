@@ -3,9 +3,6 @@
 #
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-if ENABLE_ICE
-
-lib_LTLIBRARIES = libiceastro.la
 
 slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
 	device.cpp tasks.cpp types.cpp repository.cpp
@@ -18,6 +15,10 @@ additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
 	MountConversions.cpp FocusingConversions.cpp RepositoryConversions.cpp \
 	CommonClientTasks.cpp ImageCallbackI.cpp \
 	ImageConversions.cpp
+
+if ENABLE_ICE
+
+lib_LTLIBRARIES = libiceastro.la
 
 libiceastro_la_SOURCES = \
 	$(slice_sources) $(additional_sources)

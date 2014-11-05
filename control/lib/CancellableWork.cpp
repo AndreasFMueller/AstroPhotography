@@ -4,6 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CancellableWork.h>
+#include <astrochrono.h>
 
 namespace astro {
 namespace task {
@@ -34,6 +35,7 @@ void	CancellableWork::cancel() {
  */
 void	CancellableWork::cancellation_point() {
 	if (cancelled()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelling");
 		throw CancelException();
 	}
 }
@@ -66,9 +68,24 @@ bool	CancellableWork::wait(float t, Condition& condition) {
 	std::unique_lock<std::mutex>    lock(wait_lock);
 	cancellation_point();
 
-	// XXX we need to keep track of the elapsed time, we want to exit the
-	//     loop as soon as the timeout expires
-	while (true) {
+	// compute the time when we have to stop at the latest
+	astro::chrono::steady_clock::time_point	now
+		= astro::chrono::steady_clock::now();
+	long	ms = 1000 * t;
+	astro::chrono::steady_clock::time_point	final = now +
+		astro::chrono::milliseconds(ms);
+
+	// compute the next point in time to stop
+	astro::chrono::steady_clock::time_point	next = now +
+		astro::chrono::milliseconds(1000);
+
+	do {
+		// compute the time when we should stop next 
+		next = next + astro::chrono::milliseconds(1000);
+		if (next > final) {
+			next = final;
+		}
+
 		// check whether the work has been cancelled
 		cancellation_point();
 
@@ -80,17 +97,15 @@ bool	CancellableWork::wait(float t, Condition& condition) {
 		// wait for one second, then try again
 		long long       ns = 1000000000;
 		bool    timedout = (std::cv_status::no_timeout !=
-			wait_cond.wait_for(lock, std::chrono::nanoseconds(ns)));
+			wait_cond.wait_until(lock, next));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %s",
 			(timedout) ? "cancelled" : "complete");
 
 		// if we are not timed out, then the thread was cancelled
-		if (!timedout) {
-			return false;
-		}
+		cancellation_point();
 
 		// try again
-	}
+	} while (next < final);
 	// timeout exit
 	return false;
 }
