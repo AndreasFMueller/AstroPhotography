@@ -36,6 +36,7 @@ std::string	TaskTableAdapter::createstatement() {
 	"    binx integer not null default 1,\n"
 	"    biny integer not null default 1,\n"
 	"    shutteropen integer not null default 1,\n"
+	"    purpose integer not null default 0,\n"
 	"    state integer not null default 0,\n"
 	"    lastchange integer not null default 0,\n"
 	"    cause varchar(256) not null default '',\n"
@@ -69,6 +70,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	exposure.limit = row["vlimit"]->doubleValue();
 	exposure.shutter = (row["shutteropen"]->intValue())
 				? camera::Shutter::OPEN : camera::Shutter::CLOSED;
+	exposure.purpose = (Exposure::purpose_t)row["purpose"]->intValue();
 
 	Binning	mode(row["binx"]->intValue(), row["biny"]->intValue());
 	exposure.mode = mode;
@@ -114,6 +116,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("biny", factory.get((int)exposure.mode.getY())));
 	spec.insert(Field("shutteropen",
 		factory.get((exposure.shutter == Shutter::OPEN) ? 1 : 0)));
+	spec.insert(Field("purpose", factory.get((int)exposure.purpose)));
 
 	spec.insert(Field("state", factory.get((int)entry.state())));
 	spec.insert(Field("lastchange", factory.get((int)entry.lastchange())));

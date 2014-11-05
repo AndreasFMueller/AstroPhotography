@@ -60,8 +60,8 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s'",
-		parameters.camera.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purp = %d",
+		parameters.camera.c_str(), parameters.exp.purpose);
 	return taskqueue.submit(snowstar::convert(parameters));
 }
 
