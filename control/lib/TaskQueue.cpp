@@ -269,6 +269,9 @@ void	TaskQueue::launch(const TaskQueueEntry& entry) {
 	executormap::value_type	mapentry(entry.id(), _executor);
 	executors.insert(mapentry);
 
+	// now we can release the executor
+	_executor->release();
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new entry %d added to executors map",
 		entry.id());
 }

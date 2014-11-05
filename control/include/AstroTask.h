@@ -347,6 +347,7 @@ private:
 
 public:
 	TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task);
+	void	release();
 	~TaskExecutor();
 
 private:

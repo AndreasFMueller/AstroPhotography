@@ -98,6 +98,11 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 
 	// initialize pthead resources
 	_thread = std::thread(taskmain, this);
+}
+
+void	TaskExecutor::release() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "release executor LOCK");
+	std::unique_lock<std::mutex>	lock(_lock);
 
 	// now wait for the condition variable to be signaled. This will
 	// indicate that the thread has indeed started running. Doing this
@@ -108,7 +113,7 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting releases lock: UNLOCK");
 	_cond.wait(lock);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completion locks: LOCK");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "task executor now up and running UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task executor now released UNLOCK");
 }
 
 /**
