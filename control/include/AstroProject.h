@@ -224,6 +224,68 @@ public:
 };
 
 /**
+ * \brief Project part
+ */
+class Part {
+private:
+	long	_partno;
+public:
+	long	partno() const { return _partno; }
+	void	partno(long p) { _partno = p; }
+	bool	operator<(const Part& other) const {
+		return _partno < other._partno;
+	}
+private:
+	std::string	_instrument;
+public:
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i) { _instrument = i; }
+
+private:
+	astro::camera::Exposure	_exposure;
+public:
+	astro::camera::Exposure	exposure() const { return _exposure; }
+	void	exposure(const astro::camera::Exposure e) { _exposure = e; }
+
+private:
+	std::string	_filtername;
+public:
+	std::string	filtername() const { return _filtername; }
+	void	filtername(const std::string& f) { _filtername = f; }
+
+private:
+	float	_temperature;
+public:
+	float	temperature() const { return _temperature; }
+	void	temperature(float t) { _temperature = t; }
+
+private:
+	std::string	_taskserver;
+public:
+	std::string	taskserver() const { return _taskserver; }
+	void	taskserver(const std::string& u) { _taskserver = u; }
+
+private:
+	long	_taskid;
+public:
+	long	taskid() const { return _taskid; }
+	void	taskid(long t) { _taskid = t; }
+
+private:
+	long	_repoid;
+public:
+	long	repoid() const { return _repoid; }
+	void	repoid(long r) { _repoid = r; }
+
+	Part() {
+		_partno = -1;
+		_taskid = -1;
+		_repoid = -1;
+	}
+};
+typedef std::shared_ptr<Part>	PartPtr;
+
+/**
  * \brief Project information
  */
 class Project {
@@ -233,10 +295,9 @@ class Project {
 	std::string	_repository;
 	time_t	_started;
 public:
-	Project();
+	Project(const std::string& name);
 
 	const std::string&	name() const { return _name; }
-	void	name(const std::string& n) { _name = n; }
 
 	const std::string&	description() const { return _description; }
 	void	description(const std::string& d) { _description = d; }
@@ -249,6 +310,9 @@ public:
 
 	time_t	started() const { return _started; }
 	void	started(time_t s) { _started = s; }
+
+	std::map<long, PartPtr>	parts;
+	PartPtr	part(long partno);
 };
 
 } // namespace project

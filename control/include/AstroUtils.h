@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <list>
 #include <map>
 #include <AstroDebug.h>
 #include <mutex>
@@ -205,9 +206,13 @@ public:
 	AttributeValuePairs();
 	AttributeValuePairs(const std::vector<std::string>& arguments,
 		int skip = 0);
+	AttributeValuePairs(const std::list<std::string>& arguments,
+		int skip = 0);
 	bool	has(const std::string& attribute) const;
 	std::string	operator()(const std::string& attribute) const;
 	std::set<std::string>	get(const std::string& attribute) const;
+	void	erase(const std::string& attribute);
+	std::set<std::string>	attributes() const;
 };
 
 /**

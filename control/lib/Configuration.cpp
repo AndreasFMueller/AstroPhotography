@@ -58,6 +58,15 @@ public:
 	virtual void	removeproject(const std::string& name);
 	virtual std::list<project::Project>	listprojects();
 
+	// project part definition
+	virtual project::PartPtr	part(const std::string& projectname,
+						long partno);
+	virtual void	addpart(const std::string& projectname,
+				const project::Part& part);
+	virtual void	removepart(const std::string& projectname, long partno);
+	virtual std::list<project::PartPtr>	listparts(
+					const std::string& projectname);
+
 	// instrument access
 	virtual InstrumentPtr	instrument(const std::string& name);
 	virtual void    addInstrument(InstrumentPtr instrument);
@@ -248,14 +257,17 @@ std::list<ImageRepoInfo>	ConfigurationBackend::listrepo() {
  */
 Project	ConfigurationBackend::project(const std::string& name) {
 	ProjectTable	projects(_database);
+	long	projectid = projects.getid(name);
+	return projects.projectById(projectid);
+#if 0
 	ProjectRecord	record = projects.get(name);
-	Project	project;
-	project.name(record.name);
+	Project	project(name);
 	project.description(record.description);
 	project.object(record.object);
 	project.repository(record.repository);
 	project.started(record.started);
 	return project;
+#endif
 }
 
 /**
@@ -263,6 +275,8 @@ Project	ConfigurationBackend::project(const std::string& name) {
  */
 void	ConfigurationBackend::addproject(const Project& project) {
 	ProjectTable	projects(_database);
+	projects.add(project);
+#if 0
 	ProjectRecord	record;
 	record.name = project.name();
 	record.description = project.description();
@@ -270,6 +284,7 @@ void	ConfigurationBackend::addproject(const Project& project) {
 	record.started = project.started();
 	record.repository = project.repository();
 	projects.add(record);
+#endif
 }
 
 /**
@@ -289,13 +304,55 @@ std::list<Project>	ConfigurationBackend::listprojects() {
 	std::list<ProjectRecord>	records = projects.select("0 = 0");
 	std::list<ProjectRecord>::const_iterator	pi;
 	for (pi = records.begin(); pi != records.end(); pi++) {
-		Project	project;
-		project.name(pi->name);
+		Project	project(pi->name);
 		project.description(pi->description);
 		project.object(pi->object);
 		project.started(pi->started);
 		project.repository(pi->repository);
 		result.push_back(project);
+	}
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Part access
+//////////////////////////////////////////////////////////////////////
+
+project::PartPtr        ConfigurationBackend::part(const std::string& projectname,
+				long partno) {
+	return project(projectname).part(partno);
+}
+
+void    ConfigurationBackend::addpart(const std::string& projectname, 
+		const project::Part& part) {
+	ProjectTable	projects(_database);
+	int	projectid = projects.getid(projectname);
+	PartTable	parts(_database);
+	parts.add(projectid, part);
+}
+
+void    ConfigurationBackend::removepart(const std::string& projectname,
+		long partno) {
+	std::string	query(	"delete from part "
+				"where partno = ? and project = ("
+				"  select id from projects where name = ?"
+				")");
+	StatementPtr	stmt = _database->statement(query);
+	FieldValueFactory	factory;
+	stmt->bind(0, factory.get((int)partno));
+	stmt->bind(1, factory.get(projectname));
+	stmt->execute();
+}
+
+std::list<project::PartPtr>     ConfigurationBackend::listparts(
+					const std::string& projectname) {
+	project::Project	proj = project(projectname);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found project, %d parts",
+		proj.parts.size());
+	std::list<project::PartPtr>	result;
+	for (auto ptr = proj.parts.begin(); ptr != proj.parts.end(); ptr++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "part");
+		result.push_back(ptr->second);
 	}
 	return result;
 }

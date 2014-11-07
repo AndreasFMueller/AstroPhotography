@@ -51,6 +51,18 @@ AttributeValuePairs::AttributeValuePairs(const std::vector<std::string>& argumen
 	}
 }
 
+AttributeValuePairs::AttributeValuePairs(const std::list<std::string>& arguments, int skip) {
+	std::list<std::string>::const_iterator	ai = arguments.begin();
+	std::advance(ai, skip);
+	while (ai != arguments.end()) {
+		try {
+			pair_t	p = parse(*ai);
+			data.insert(p);
+		} catch (...) { }
+		ai++;
+	}
+}
+
 /**
  * \brief Find out whether an attribute of a given name exists
  */
@@ -80,6 +92,28 @@ std::string	AttributeValuePairs::operator()(const std::string& attribute) const 
 std::set<std::string>	AttributeValuePairs::get(const std::string& /* attribute */) const {
 	std::set<std::string>	result;
 	throw std::runtime_error("XXX get not implemented");
+	return result;
+}
+
+/**
+ * \brief Remove an attribute from the attribute value pairs
+ */
+void	AttributeValuePairs::erase(const std::string& attribute) {
+	map_t::iterator	i = data.find(attribute);
+	if (i == data.end()) {
+		return;
+	}
+	data.erase(i);
+}
+
+/**
+ * \brief return a list of all attributes
+ */
+std::set<std::string>	AttributeValuePairs::attributes() const {
+	std::set<std::string>	result;
+	for (auto ptr = data.begin(); ptr != data.end(); ptr++) {
+		result.insert(ptr->first);
+	}
 	return result;
 }
 

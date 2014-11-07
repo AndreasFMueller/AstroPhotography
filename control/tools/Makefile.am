@@ -21,7 +21,7 @@ endif
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
 	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
-	devicemapper astroinstrument astromount
+	devicemapper astroinstrument astromount astroproject
 
 noinst_PROGRAMS = guiderport
 
@@ -114,6 +114,10 @@ fitsheader_LDADD = -L../lib -lastro
 astroconfig_SOURCES = astroconfig.cpp
 astroconfig_DEPENDENCIES = ../lib/libastro.la
 astroconfig_LDADD = -L../lib -lastro
+
+astroproject_SOURCES = astroproject.cpp
+astroproject_DEPENDENCIES = ../lib/libastro.la
+astroproject_LDADD = -L../lib -lastro
 
 imagerepo_SOURCES = imagerepo.cpp
 imagerepo_DEPENDENCIES = ../lib/libastro.la

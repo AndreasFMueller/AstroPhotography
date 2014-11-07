@@ -61,18 +61,6 @@ void	usage(const char *progname) {
 	std::cerr << std::endl;
 	std::cerr << "list, add or delete image repositores" << std::endl;
 	std::cerr << std::endl;
-	std::cerr << p << " [ options ] project list";
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] project add <projname> ...";
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] project show <projname>";
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] project remove <projname>";
-	std::cerr << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "list, add or remove projects, show project details";
-	std::cerr << std::endl;
-	std::cerr << std::endl;
 	std::cerr << "options:" << std::endl;
 	std::cerr << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
 	std::cerr << "  -d,--debug                   increase debug level";
@@ -273,90 +261,6 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 }
 
 /**
- * \brief Implementation of the project command
- */
-int	command_project(const std::vector<std::string>& arguments) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "project command");
-	if (arguments.size() < 2) {
-		throw std::runtime_error("not enough arguments for project command");
-	}
-	std::string	subcommand = arguments[1];
-	if (subcommand == "list") {
-		// list projects
-		std::list<Project>	projects
-			= Configuration::get()->listprojects();
-		if (projects.size() == 0) {
-			return EXIT_SUCCESS;
-		}
-		std::cout << "started  project         repository  description";
-		std::cout << std::endl;
-		std::for_each(projects.begin(), projects.end(),
-			[](const Project& project) {
-				std::cout << timeformat("%d.%m.%y ",
-					project.started());
-				std::cout << stringprintf("%-16.16s",
-					project.name().c_str());
-				std::cout << stringprintf("%-11.11s ",
-					project.repository().c_str());
-				std::cout << project.description();
-				std::cout << std::endl;
-			}
-		);
-		return EXIT_SUCCESS;
-	}
-	std::string	projectname = arguments[2];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "project name = %s",
-		projectname.c_str());
-
-	// there must be more arguments
-	if (arguments.size() < 3) {
-		throw std::runtime_error("not enough arguments");
-		return EXIT_FAILURE;
-	}
-	if (subcommand == "add") {
-		Project	project;
-		project.name(projectname);
-		AttributeValuePairs	av(arguments, 3);
-		if (av.has("description")) {
-			project.description(av("description"));
-		}
-		if (av.has("repository")) {
-			project.repository(av("repository"));
-		}
-		if (av.has("object")) {
-			project.object(av("object"));
-		}
-		Configuration::get()->addproject(project);
-		return EXIT_SUCCESS;
-	}
-	if (subcommand == "show") {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "show project '%s'",
-			projectname.c_str());
-		Project	project = Configuration::get()->project(projectname);
-		std::cout << "name:         ";
-		std::cout << project.name() << std::endl;
-		std::cout << "description:  ";
-		std::cout << project.description() << std::endl;
-		std::cout << "object:       ";
-		std::cout << project.object() << std::endl;
-		std::cout << "repository:   ";
-		std::cout << project.repository() << std::endl;
-		std::cout << "started:      ";
-		std::cout << timeformat("%Y-%m-%d %H:%M:%S", project.started());
-		std::cout << std::endl;
-		return EXIT_SUCCESS;
-	}
-	if (subcommand == "remove") {
-		Configuration::get()->removeproject(projectname);
-		return EXIT_SUCCESS;
-	}
-
-	// if we get to this point, then we have an unknown command
-	std::cerr << "unknown project subcommand " << subcommand << std::endl;
-	return EXIT_FAILURE;
-}
-
-/**
  * \brief 
  */
 int	command_list(const std::vector<std::string>& arguments) {
@@ -429,9 +333,6 @@ int	main(int argc, char *argv[]) {
 	}
 	if (verb == "imagerepo") {
 		return command_imagerepo(arguments);
-	}
-	if (verb == "project") {
-		return command_project(arguments);
 	}
 	
 	std::cerr << "command " << verb << " not implemented" << std::endl;
