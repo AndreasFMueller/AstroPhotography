@@ -313,6 +313,7 @@ public:
 
 	std::map<long, PartPtr>	parts;
 	PartPtr	part(long partno);
+	void	add(PartPtr part);
 };
 
 } // namespace project

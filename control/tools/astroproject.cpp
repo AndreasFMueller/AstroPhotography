@@ -22,6 +22,8 @@ namespace astro {
 namespace app {
 namespace project {
 
+bool	verbose = false;
+
 /**
  * \brief Table of options
  */
@@ -30,6 +32,7 @@ static struct option	longopts[] = {
 { "config",	required_argument,	NULL,		'c' }, /* 0 */
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
 { "help",	no_argument,		NULL,		'h' }, /* 2 */
+{ "verbose",	no_argument,		NULL,		'v' }, /* 3 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -47,7 +50,7 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] add <projname> ..." << std::endl;
+	std::cout << p << " [ options ] add <projname> attributes ..." << std::endl;
 	std::cout << p << " [ options ] show <projname>" << std::endl;
 	std::cout << p << " [ options ] remove <projname>" << std::endl;
 	std::cout << std::endl;
@@ -62,7 +65,8 @@ void	usage(const char *progname) {
 	std::cout << "    repository=<repo>" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] <proj> list" << std::endl;
-	std::cout << p << " [ options ] <proj> add number ..." << std::endl;
+	std::cout << p << " [ options ] <proj> add number attributes ..." << std::endl;
+	std::cout << p << " [ options ] <proj> copy number newnumber" << std::endl;
 	std::cout << p << " [ options ] <proj> show number" << std::endl;
 	std::cout << p << " [ options ] <proj> remove number" << std::endl;
 	std::cout << std::endl;
@@ -90,6 +94,8 @@ void	usage(const char *progname) {
 	std::cout << "  -d,--debug                   increase debug level";
 	std::cout << std::endl;
 	std::cout << "  -h,--help                    show this help message";
+	std::cout << std::endl;
+	std::cout << "  -v,--verbose                 verbose display (mostly for list command)";
 	std::cout << std::endl;
 }
 
@@ -210,24 +216,51 @@ int	command_partlist(const std::string& projectname,
 		std::cerr << "no parts" << std::endl;
 		return EXIT_SUCCESS;
 	}
-	std::cout << "part instrument size        exp  temp purpose filter "
-		"taskserver    taskid repoid"
+	std::cout << "part instrument ";
+	if (verbose) {
+		std::cout << "rectangle           bin      exp  gain limit   temp purpose filter     taskserver         ";
+	} else {
+		std::cout << "size        exp  temp purpose filter taskserver    ";
+	}
+	std::cout << "taskid repoid"
 		<< std::endl;
 	for (auto ptr = parts.begin(); ptr != parts.end(); ptr++) {
 		std::cout << stringprintf("%04d ", (*ptr)->partno());
 		std::cout << stringprintf("%-10.10s ",
 			(*ptr)->instrument().c_str());
 		astro::camera::Exposure	e = (*ptr)->exposure();
-		std::cout << stringprintf("%-10.10s",
-			e.frame.size().toString().c_str());
-		std::cout << stringprintf("%5.0f", e.exposuretime);
-		std::cout << stringprintf("%6.1f", (*ptr)->temperature());
+		if (verbose) {
+			std::cout << stringprintf("%-18.18s ",
+				e.frame.toString().c_str());
+			std::cout << stringprintf(" %-5.5s",
+					e.mode.toString().c_str());
+			int	lt = ceil(3 - log10(e.exposuretime));
+			if (lt < 0) { lt = 0; }
+			std::cout << stringprintf("%7.*f", lt, e.exposuretime);
+			lt = ceil(2 - log10(e.gain));
+			if (lt < 0) { lt = 0; }
+			std::cout << stringprintf("%6.*f", lt, e.gain);
+			std::cout << stringprintf("%6.0f", e.limit);
+			std::cout << stringprintf("%7.1f", (*ptr)->temperature());
+		} else {
+			std::cout << stringprintf("%-10.10s",
+				e.frame.size().toString().c_str());
+			std::cout << stringprintf("%5.0f", e.exposuretime);
+			std::cout << stringprintf("%6.1f", (*ptr)->temperature());
+		}
 		std::cout << stringprintf(" %-7.7s",
 			astro::camera::Exposure::purpose2string(e.purpose).c_str());
-		std::cout << stringprintf(" %-6.6s",
-			(*ptr)->filtername().c_str());
-		std::cout << stringprintf(" %-13.13s",
-			(*ptr)->taskserver().c_str());
+		if (verbose) {
+			std::cout << stringprintf(" %-10.10s",
+				(*ptr)->filtername().c_str());
+			std::cout << stringprintf(" %-18.18s",
+				(*ptr)->taskserver().c_str());
+		} else {
+			std::cout << stringprintf(" %-6.6s",
+				(*ptr)->filtername().c_str());
+			std::cout << stringprintf(" %-13.13s",
+				(*ptr)->taskserver().c_str());
+		}
 		if ((*ptr)->taskid() >= 0) {
 			std::cout << stringprintf(" %6ld",
 				(*ptr)->taskid());
@@ -336,6 +369,24 @@ int	command_partshow(const std::string& projectname, long partno,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show part %ld to project %s", partno,
 		projectname.c_str());
 	PartPtr	part = Configuration::get()->part(projectname, partno);
+	std::cout << "No:           " << part->partno() << std::endl;
+	std::cout << "Filtername:   " << part->filtername() << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Copy a part
+ */
+int	command_partcopy(const std::string& projectname, long partno,
+		const std::list<std::string>& arguments) {
+	if (arguments.size() == 0) {
+		std::cerr << "missing new part number" << std::endl;
+		return EXIT_FAILURE;
+	}
+	long	newpartno = std::stol(arguments.front());
+	PartPtr	part = Configuration::get()->part(projectname, partno);
+	part->partno(newpartno);
+	Configuration::get()->addpart(projectname, *part);
 	return EXIT_SUCCESS;
 }
 
@@ -367,6 +418,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
+			break;
+		case 'v':
+			verbose = true;
 			break;
 		case 1:
 			switch (longindex) {
@@ -433,8 +487,11 @@ int	main(int argc, char *argv[]) {
 	if (verb == "add") {
 		return command_partadd(projectname, partno, arguments);
 	}
+	if (verb == "copy") {
+		return command_partcopy(projectname, partno, arguments);
+	}
 	if (verb == "show") {
-		return command_partadd(projectname, partno, arguments);
+		return command_partshow(projectname, partno, arguments);
 	}
 	if (verb == "remove") {
 		return command_partremove(projectname, partno, arguments);

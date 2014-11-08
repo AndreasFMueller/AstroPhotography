@@ -21,5 +21,9 @@ PartPtr	Project::part(long partno) {
 	return i->second;
 }
 
+void	Project::add(PartPtr part) {
+	parts.insert(std::make_pair(part->partno(), part));
+}
+
 } // namespace project
 } // namespace astro

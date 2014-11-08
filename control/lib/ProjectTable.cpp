@@ -129,7 +129,7 @@ Project	ProjectTable::projectById(long objectid) {
 	std::list<PartRecord>::const_iterator	i;
 	for (i = partlist.begin(); i != partlist.end(); i++) {
 		PartPtr	part(new Part(*i));
-		project.parts.insert(std::make_pair(i->id(), part));
+		project.add(part);
 	}
 	return project;
 }
