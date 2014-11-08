@@ -22,10 +22,9 @@ class ExposureWork : public CancellableWork {
 	astro::camera::CcdPtr           ccd;
 	astro::camera::CoolerPtr        cooler;
 	astro::camera::FilterWheelPtr   filterwheel;
-	TaskExecutor&   _executor;
 	TaskQueueEntry& _task;
 public:
-	ExposureWork(TaskExecutor& executor, TaskQueueEntry& task);
+	ExposureWork(TaskQueueEntry& task);
 	~ExposureWork();
 	virtual void    run();
 };

@@ -58,7 +58,7 @@ int	main(int argc, char *argv[]) {
 		std::cout << "ccd:    " << parm.ccdid << std::endl;
 		std::cout << "temp:   " << parm.ccdtemperature << std::endl;
 		std::cout << "fw:     " << parm.filterwheel << std::endl;
-		std::cout << "filter: " << parm.filterposition << std::endl;
+		std::cout << "filter: " << parm.filter << std::endl;
 
 		TaskPrx	task = tasks->getTask(*i);
 		std::cout << "file2:  " << task->imagename() << std::endl;

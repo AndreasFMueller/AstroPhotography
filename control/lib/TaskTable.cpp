@@ -25,7 +25,7 @@ std::string	TaskTableAdapter::createstatement() {
 	"    ccdid integer not null default 0,\n"
 	"    temperature float not null default -1,\n"
 	"    filterwheel varchar(256) not null default '',\n"
-	"    position integer not null default 0,\n"
+	"    filter varchar(32) not null default '',\n"
 	"    originx integer not null default 0,\n"
 	"    originy integer not null default 0,\n"
 	"    width integer not null default 0,\n"
@@ -56,7 +56,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.ccdid(row["ccdid"]->intValue());
 	parameters.ccdtemperature(row["temperature"]->doubleValue());
 	parameters.filterwheel(row["filterwheel"]->stringValue());
-	parameters.filterposition(row["position"]->intValue());
+	parameters.filter(row["filter"]->stringValue());
 	ImagePoint	origin(row["originx"]->intValue(),
 				row["originy"]->intValue());
 	ImageSize	size(row["width"]->intValue(),
@@ -100,7 +100,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("ccdid", factory.get((int)entry.ccdid())));
 	spec.insert(Field("temperature", factory.get(entry.ccdtemperature())));
 	spec.insert(Field("filterwheel", factory.get(entry.filterwheel())));
-	spec.insert(Field("position", factory.get((int)entry.filterposition())));
+	spec.insert(Field("filter", factory.get(entry.filter())));
 	Exposure	exposure = entry.exposure();
 	ImageRectangle	frame = exposure.frame;
 	spec.insert(Field("originx", factory.get((int)frame.origin().x())));

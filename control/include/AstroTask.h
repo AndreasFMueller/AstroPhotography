@@ -66,12 +66,10 @@ public:
 	}
 
 private:
-	long	_filterposition;
+	std::string	_filter;
 public:
-	long	filterposition() const { return _filterposition; }
-	void	filterposition(long filterposition) {
-			_filterposition = filterposition;
-	}
+	std::string	filter() const { return _filter; }
+	void	filter(std::string filter) { _filter = filter; }
 
 	TaskParameters();
 };

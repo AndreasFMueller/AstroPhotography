@@ -52,7 +52,7 @@ int	main(int argc, char *argv[]) {
 	TaskParameters	task;
 	task.camera("camera:simulator/camera");
 	task.filterwheel("filterwheel:simulator/filterwheel");
-	task.filterposition(0);
+	task.filter("0");
 	task.ccdtemperature(260);
 	camera::Exposure	exposure = task.exposure();
 

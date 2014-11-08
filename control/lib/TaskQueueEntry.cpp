@@ -23,7 +23,7 @@ TaskParameters	TaskQueueEntry::parameters() const {
 	parameters.ccdid(ccdid());
 	parameters.ccdtemperature(ccdtemperature());
 	parameters.filterwheel(filterwheel());
-	parameters.filterposition(filterposition());
+	parameters.filter(filter());
 	return parameters;
 }
 

@@ -29,8 +29,7 @@ namespace task {
  * The constructor sets up the devices used for task execution. This should
  * not take any noticable time, in particular this can be done synchronously.
  */
-ExposureWork::ExposureWork(TaskExecutor& executor, TaskQueueEntry& task)
-	: _executor(executor), _task(task) {
+ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	// create a repository, we are always using the default
 	// repository
 	astro::module::Repository	repository;
@@ -51,11 +50,11 @@ ExposureWork::ExposureWork(TaskExecutor& executor, TaskQueueEntry& task)
 	}
 
 	// get the filterwheel
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter %d of wheel '%s'",
-		_task.filterposition(), _task.filterwheel().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter '%s' of wheel '%s'",
+		_task.filter().c_str(), _task.filterwheel().c_str());
 	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
 		df(repository);
-	if ((_task.filterwheel().size() > 0) && (_task.filterposition() >= 0)) {
+	if ((_task.filterwheel().size() > 0) && (_task.filter().size() >= 0)) {
 		filterwheel = df.get(_task.filterwheel());
 	}
 
@@ -133,8 +132,8 @@ void	ExposureWork::run() {
 		}
 
 		// select the new filter
-		filterwheel->select(_task.filterposition());
-		filtername = filterwheel->filterName(_task.filterposition());
+		filterwheel->select(_task.filter());
+		filtername = _task.filter();
 	}
 
 	// wait for the cooler, if present, but at most 30 seconds

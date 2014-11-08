@@ -94,7 +94,7 @@ TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 
 	// create a new ExposureTask object. The ExposureTask contains
 	// the logic to actually execute the task
-	exposurework = new ExposureWork(*this, _task);
+	exposurework = new ExposureWork(_task);
 
 	// initialize pthead resources
 	_thread = std::thread(taskmain, this);

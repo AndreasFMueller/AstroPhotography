@@ -577,7 +577,7 @@ astro::task::TaskParameters	convert(const Astro::TaskParameters& parameters) {
 	task.ccdid(parameters.ccdid);
 	task.ccdtemperature(parameters.ccdtemperature);
 	task.filterwheel(std::string(parameters.filterwheel));
-	task.filterposition(parameters.filterposition);
+	task.filter(std::string(parameters.filter));
 
 	return task;
 }
@@ -588,7 +588,7 @@ Astro::TaskParameters	convert(const astro::task::TaskParameters& task) {
 	parameters.ccdid = task.ccdid();
 	parameters.ccdtemperature = task.ccdtemperature();
 	parameters.filterwheel = CORBA::string_dup(task.filterwheel().c_str());
-	parameters.filterposition = task.filterposition();
+	parameters.filter = CORBA::string_dup(task.filter().c_str());
 	//astro::camera::Exposure	exposure = task.exposure();
 	parameters.exp.exposuretime = task.exposure().exposuretime;
 	parameters.exp.gain = task.exposure().gain;

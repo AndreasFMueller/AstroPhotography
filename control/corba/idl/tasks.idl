@@ -19,7 +19,7 @@ module Astro {
 
 		// filterwheel parameters
 		string	filterwheel;
-		long	filterposition;
+		string	filter;
 
 		// exposure stuff
 		Exposure	exp;

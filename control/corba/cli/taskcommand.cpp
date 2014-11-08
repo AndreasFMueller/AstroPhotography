@@ -55,7 +55,7 @@ static std::ostream&	operator<<(std::ostream& out,
 	out << "ccd:            " << parameters->ccdid << std::endl;
 	out << "temperature:    " << parameters->ccdtemperature << std::endl;
 	out << "filterwheel:    " << parameters->filterwheel << std::endl;
-	out << "filterposition: " << parameters->filterposition << std::endl;
+	out << "filter:         " << parameters->filter << std::endl;
 	out << parameters->exp;
 	return out;
 }

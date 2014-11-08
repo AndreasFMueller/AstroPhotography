@@ -101,7 +101,7 @@ int	command_submit(const std::string& projectname,
 	} catch (...) {
 	}
 	#endif
-	parameters.filterposition = 0;
+	parameters.filter = "";
 
 	// exposure parameters
 	parameters.exp = convert(part->exposure());

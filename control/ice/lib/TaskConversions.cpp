@@ -77,7 +77,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.ccdid = parameters.ccdid();
 	result.ccdtemperature = parameters.ccdtemperature();
 	result.filterwheel = parameters.filterwheel();
-	result.filterposition = parameters.filterposition();
+	result.filter = parameters.filter();
 	result.exp = convert(parameters.exposure());
 	return result;
 }
@@ -89,7 +89,7 @@ astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	result.ccdid(parameters.ccdid);
 	result.ccdtemperature(parameters.ccdtemperature);
 	result.filterwheel(parameters.filterwheel);
-	result.filterposition(parameters.filterposition);
+	result.filter(parameters.filter);
 	return result;
 }
 

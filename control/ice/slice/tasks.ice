@@ -20,7 +20,7 @@ module snowstar {
 
 		// filterwheel parameters
 		string	filterwheel;
-		int	filterposition;
+		string	filter;
 
 		// exposure stuff
 		Exposure	exp;

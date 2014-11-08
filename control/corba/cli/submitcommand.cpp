@@ -50,9 +50,9 @@ void	TaskParameterParser::operator()(const std::string& valuepair) {
 	}
 	std::istringstream      in(value);
 	if ("position" == attribute) {
-		int	position;
+		std::string	position;
 		in >> position;
-		_parameters.filterposition(position);
+		_parameters.filter(position);
 		return;
 	}
 	if ("origin" == attribute) {

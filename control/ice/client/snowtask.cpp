@@ -25,7 +25,7 @@ bool	verbose = false;
 bool	dryrun = false;
 astro::camera::Exposure	exposure;
 std::string	instrumentname;
-int	filterposition;
+std::string	filter;
 double	temperature = 273.15;
 
 void	signal_handler(int /* sig */) {
@@ -348,7 +348,7 @@ int	command_submit(TaskQueuePrx tasks) {
 	} catch (...) {
 	}
 #endif
-	parameters.filterposition = filterposition;
+	parameters.filter = filter;
 
 	// exposure parameters
 	parameters.exp = convert(exposure);
@@ -534,7 +534,7 @@ int	main(int argc, char *argv[]) {
 			exposure.exposuretime = std::stod(optarg);
 			break;
 		case 'f':
-			filterposition = std::stod(optarg);
+			filter = optarg;
 			break;
 		case 'h':
 		case '?':
