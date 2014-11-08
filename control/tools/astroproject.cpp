@@ -141,7 +141,7 @@ int	command_add(const std::string& projectname,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "project name = %s",
 		projectname.c_str());
 	Project	project(projectname);
-	AttributeValuePairs	av(arguments, 3);
+	AttributeValuePairs	av(arguments);
 	if (av.has("description")) {
 		project.description(av("description"));
 		av.erase("description");

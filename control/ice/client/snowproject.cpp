@@ -22,26 +22,6 @@ namespace snowproject {
 
 bool	verbose = false;
 
-#if 0
-std::string	when(double timeago) {
-	time_t	t = converttime(timeago);
-	//debug(LOG_DEBUG, DEBUG_LOG, 0, "timeago = %.0f, %24.24s", timeago,
-	//	ctime(&t));
-	struct tm	*tp = localtime(&t);
-	char	buffer[128];
-	if (timeago > 86400 * 365) {
-		strftime(buffer, sizeof(buffer), "%y %b", tp);
-	}
-	if (timeago > 86400) {
-		strftime(buffer, sizeof(buffer), "%b %d", tp);
-	}
-	if (timeago <= 86400) {
-		strftime(buffer, sizeof(buffer), "%H:%M:%S", tp);
-	}
-	return std::string(buffer);
-}
-#endif
-
 /**
  * \brief Usage function for the snowtask program
  */
@@ -70,6 +50,9 @@ int	command_help(const char *progname) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief implementation of the submit command, part specific version
+ */
 int	command_submit(const std::string& projectname,
 		astro::project::PartPtr part) {
 	// get the parameters for the part
@@ -128,10 +111,13 @@ int	command_submit(const std::string& projectname,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d", taskid);
 
 	// add the task id to the part
-	astro::config::Configuration::get()->parttask(projectname, part->partno(), taskid);
+	config->parttask(projectname, part->partno(), taskid);
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief implementation of the submit command, global version
+ */
 int	command_submit(const astro::project::Project& project,
 		const std::list<long>& partnos) {
 	for (auto partnoptr = partnos.begin(); partnoptr != partnos.end();
@@ -146,6 +132,9 @@ int	command_submit(const astro::project::Project& project,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief implementation of the image command, part specific version
+ */
 int	command_image(const astro::project::Project& project,
 		astro::project::PartPtr partptr) {
 	// get the configuration
@@ -204,6 +193,9 @@ int	command_image(const astro::project::Project& project,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief implementation of the image command, global version
+ */
 int	command_image(const astro::project::Project& project,
 		const std::list<long> partnos) {
 	for (auto partnoptr = partnos.begin(); partnoptr != partnos.end();
@@ -295,7 +287,7 @@ int	main(int argc, char *argv[]) {
 		return command_image(project, partnos);
 	}
 
-	return EXIT_FAILURE;
+	throw std::runtime_error("unknown command");
 }
 
 } // namespace snowtask
