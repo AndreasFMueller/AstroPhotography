@@ -9,6 +9,7 @@
 #include <AstroCallback.h>
 #include <typeinfo>
 #include <Ice/Connection.h>
+#include <AstroDebug.h>
 
 namespace snowstar {
 
@@ -48,18 +49,21 @@ public:
 			const Ice::Current& current);
 	void	cleanup(const std::list<Ice::Identity>& todelete);
 	void	clear();
-	astro::callback::CallbackDataPtr	operator()(astro::callback::CallbackDataPtr data);
+	virtual astro::callback::CallbackDataPtr	operator()(astro::callback::CallbackDataPtr data);
 	void	stop();
 };
 
 /**
  * \brief Register a callback with the callback object
+ *
+ * The callbacks must use oneway calls to prevent deadlocks
  */
 template<typename proxy>
 void	SnowCallback<proxy>::registerCallback(const Ice::Identity& identity,
 		const Ice::Current& current) {
-	proxy	callback = proxy::uncheckedCast(
-			current.con->createProxy(identity));
+	Ice::ObjectPrx	oneway
+		= current.con->createProxy(identity)->ice_oneway();
+	proxy	callback = proxy::uncheckedCast(oneway);
 	callbacks.insert(std::make_pair(identity, callback));
 }
 
@@ -89,7 +93,6 @@ template<typename proxy>
 void	SnowCallback<proxy>::clear() {
 	callbacks.clear();
 }
-
 
 /**
  * \brief perform a callback call

@@ -33,7 +33,7 @@ CallbackDataPtr	TaskQueueCallback::operator()(CallbackDataPtr data) {
 	}
 
 	// send the udpate to the taskqueue
-	_taskqueue.update(astro::convert(tmcd->info()));
+	_taskqueue.update(astro::convert(tmcd->data()));
 
 	// that's it
 	return data;

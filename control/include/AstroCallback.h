@@ -27,6 +27,18 @@ public:
 typedef	std::shared_ptr<CallbackData>	CallbackDataPtr;
 
 /**
+ * \brief Template envelope to turn any object into a callback data
+ */
+template<typename payload>
+class CallbackDataEnvelope : public CallbackData {
+	payload	_data;
+public:
+	CallbackDataEnvelope(const payload& data) : _data(data) { }
+	const payload&	data() const { return _data; }
+	operator	payload() const { return _data; }
+};
+
+/**
  * \brief A Callback is a functor that processes CallbackData
  *
  * The base class functor just is the identity operator.

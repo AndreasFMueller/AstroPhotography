@@ -10,22 +10,32 @@
 #include <ProxyCreator.h>
 #include <IceConversions.h>
 #include <AstroDebug.h>
+#include <typeinfo>
 
 namespace snowstar {
 
+/**
+ * \brief Spezialization of the callback_adapter for TaskMonitorPrx
+ */
 template<>
 void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
-	astro::task::TaskMonitorInfo	*taskmonitorinfo
-		= dynamic_cast<astro::task::TaskMonitorInfo *>(&*data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"callback_adapter for TaskMonitorPrx: %s",
+		typeid(*data).name());
+	astro::task::TaskMonitorCallbackData	*tmcd
+		= dynamic_cast<astro::task::TaskMonitorCallbackData *>(&*data);
 
 	// if there is no task monitor info, then give up immediately
-	if (NULL == taskmonitorinfo) {
+	if (NULL == tmcd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no task monitor callback data");
 		return;
 	}
+	const astro::task::TaskMonitorInfo&	ti = tmcd->data();
 
 	// send the information to the clients
-	p->update(convert(*taskmonitorinfo));
+	p->update(convert(ti));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending update returned");
 }
 
 TaskQueueI::TaskQueueI(astro::task::TaskQueue& _taskqueue)
@@ -37,6 +47,8 @@ TaskQueueI::TaskQueueI(astro::task::TaskQueue& _taskqueue)
 	TaskQueueICallback	*taskqueuecallback
 		= new TaskQueueICallback(*this);
 	taskqueue.callback = astro::callback::CallbackPtr(taskqueuecallback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue callback installed %p",
+		taskqueuecallback);
 }
 
 TaskQueueI::~TaskQueueI() {
@@ -125,7 +137,9 @@ void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
 }
 
 void	TaskQueueI::taskUpdate(const astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskQueueI::taskUpdate called");
 	callbacks(data);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskQueueI::taskUpdate completed");
 }
 
 } // namespace snowstar

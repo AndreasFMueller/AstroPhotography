@@ -38,7 +38,7 @@ void	signal_handler(int /* sig */) {
 class TaskMonitorI : public TaskMonitor {
 public:
 	TaskMonitorI() {
-		std::cout << "Date       Time     Id     new state";
+		std::cout << "Date       Time         Id new state";
 		std::cout << std::endl;
 	}
 	void	stop(const Ice::Current& /* current */) {	

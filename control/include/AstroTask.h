@@ -306,14 +306,7 @@ public:
 /**
  * \brief Callback structure for the monitor
  */
-class TaskMonitorCallbackData : public astro::callback::CallbackData {
-	TaskMonitorInfo	_info;
-public:
-	TaskMonitorCallbackData(const TaskMonitorInfo& info) : _info(info) { }
-	const	TaskMonitorInfo&	info() const {
-		return _info;
-	}
-};
+typedef callback::CallbackDataEnvelope<TaskMonitorInfo>	TaskMonitorCallbackData;
 
 class CancellableWork;
 

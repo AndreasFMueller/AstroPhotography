@@ -408,11 +408,14 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
  * \brief Call the callback with the info
  */
 void	TaskQueue::call(const TaskInfo& info) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "info.id() = %d", info.id());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback for task info.id() = %d",
+		info.id());
 	// if there is no callback, there is nothing to do
-	if (!callback) {
+	if (NULL == callback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback installed");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback = %p", &*callback);
 
 	// distribute the updates also to the callback
 	TaskMonitorInfo	monitorinfo;
@@ -422,6 +425,7 @@ void	TaskQueue::call(const TaskInfo& info) {
 
 	CallbackDataPtr	cbd(new TaskMonitorCallbackData(monitorinfo));
 	(*callback)(cbd);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback complete");
 }
 
 /**

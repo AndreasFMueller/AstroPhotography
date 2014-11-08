@@ -9,6 +9,7 @@
 #include <tasks.h>
 #include <AstroTask.h>
 #include <CallbackHandler.h>
+#include <AstroDebug.h>
 
 namespace snowstar {
 
@@ -18,6 +19,9 @@ void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
 
 class TaskQueueI : public TaskQueue {
 	astro::task::TaskQueue&	taskqueue;
+private:
+	TaskQueueI(const TaskQueueI& other);
+	TaskQueue&	operator=(const TaskQueueI& other);
 public:
 	TaskQueueI(astro::task::TaskQueue& taskqueue);
 	virtual	~TaskQueueI();
@@ -56,8 +60,9 @@ class TaskQueueICallback : public astro::callback::Callback {
 	TaskQueueI&	_taskqueue;
 public:
 	TaskQueueICallback(TaskQueueI& taskqueue) : _taskqueue(taskqueue) { }
-	astro::callback::CallbackDataPtr	operator()(
-		astro::callback::CallbackDataPtr& data) {
+	virtual astro::callback::CallbackDataPtr	operator()(
+		astro::callback::CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskQueueICallback::operator()");
 		_taskqueue.taskUpdate(data);
 		return data;
 	}

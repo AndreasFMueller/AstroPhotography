@@ -130,7 +130,7 @@ class GuiderICalibrationCallback : public astro::callback::Callback {
 	GuiderI&	_guider;
 public:
 	GuiderICalibrationCallback(GuiderI& guider) : _guider(guider) { }
-	astro::callback::CallbackDataPtr	operator()(
+	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr& data) {
 		_guider.calibrationUpdate(data);
 		return data;
@@ -144,7 +144,7 @@ class GuiderITrackingCallback : public astro::callback::Callback {
 	GuiderI&	_guider;
 public:
 	GuiderITrackingCallback(GuiderI& guider) : _guider(guider) { }
-	astro::callback::CallbackDataPtr	operator()(
+	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr& data) {
 		_guider.trackingUpdate(data);
 		return data;
@@ -158,7 +158,7 @@ class GuiderIImageCallback : public astro::callback::Callback {
 	GuiderI&	_guider;
 public:
 	GuiderIImageCallback(GuiderI& guider) : _guider(guider) { }
-	astro::callback::CallbackDataPtr	operator()(
+	virtual astro::callback::CallbackDataPtr	operator()(
 		astro::callback::CallbackDataPtr& data) {
 		_guider.trackingImageUpdate(data);
 		return data;
