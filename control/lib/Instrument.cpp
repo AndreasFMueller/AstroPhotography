@@ -86,14 +86,20 @@ std::string	InstrumentComponentMapped::servername() {
 // Instrument Component methods fro derived components
 //////////////////////////////////////////////////////////////////////
 /**
- * \brief Name of the parent device
+ * \brief Name of the device
  *
  * For derived components, this only returns the device name of the
  * parent device, it is the client's responsibilty to retrieve the
  * correct subdevice of the parent device.
  */
 DeviceName	InstrumentComponentDerived::devicename() {
-	return _instrument.devicename(_derivedfrom);
+	DeviceName	name = _instrument.devicename(_derivedfrom);
+	if (type() != DeviceName::Ccd) {
+		name.type(type());
+		return name;
+	} else {
+		return DeviceName(name, type(), stringprintf("%d", unit()));
+	}
 }
 
 /**

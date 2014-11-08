@@ -20,9 +20,6 @@ namespace snowstar {
 template<>
 void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"callback_adapter for TaskMonitorPrx: %s",
-		typeid(*data).name());
 	astro::task::TaskMonitorCallbackData	*tmcd
 		= dynamic_cast<astro::task::TaskMonitorCallbackData *>(&*data);
 

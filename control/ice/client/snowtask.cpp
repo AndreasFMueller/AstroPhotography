@@ -105,13 +105,14 @@ std::string	when(double timeago) {
 int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "listing %d tasks", ids.size());
 	std::set<int>::const_iterator	i;
-	std::cout << "task S size      bin time  temp purpose when     ";
+	std::cout << "task S size      bin  time  temp purpose filter   when     ";
 	if (verbose) {
 		std::cout << astro::stringprintf("%-40.40s", "camera");
 	}
 	std::cout << "info" << std::endl;
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
 		TaskParameters	parameters = tasks->parameters(*ptr);
+		ImageSize	size = parameters.exp.frame.size;
 		TaskInfo	info = tasks->info(*ptr);
 		std::cout << astro::stringprintf("%4d ", info.taskid);
 		switch (info.state) {
@@ -129,17 +130,26 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 			break;
 		case TskCOMPLETE:
 			std::cout << "C";
+			size = info.frame.size;
 			break;
 		}
 		std::string	s = astro::stringprintf("%dx%d",
-				info.frame.size.width, info.frame.size.height);
-		std::cout << astro::stringprintf(" %-9.9s %1dx%1d %4.0f %5.1f",
+					size.width, size.height);
+		std::cout << astro::stringprintf(" %-9.9s %1dx%1d ",
 			s.c_str(),
-			parameters.exp.mode.x, parameters.exp.mode.y,
-			parameters.exp.exposuretime,
+			parameters.exp.mode.x, parameters.exp.mode.y);
+		int	l = floor(log10(parameters.exp.exposuretime));
+		if (l < 0) { l = 0; }
+		l = 3 - l;
+		if (l < 0) { l = 0; }
+		std::cout << astro::stringprintf("%5.*f", l,
+				parameters.exp.exposuretime);
+		std::cout << astro::stringprintf(" %5.1f",
 			parameters.ccdtemperature - 273.15);
 		std::cout << astro::stringprintf(" %-7.7s",
 			astro::camera::Exposure::purpose2string(convert(parameters.exp.purpose)).c_str());
+		std::cout << astro::stringprintf(" %-8.8s",
+			parameters.filter.c_str());
 		std::cout << astro::stringprintf(" %-8.8s ",
 			when(info.lastchange).c_str());
 		if (verbose) {
@@ -341,13 +351,11 @@ int	command_submit(TaskQueuePrx tasks) {
 
 	// filterwheel parameters
 	parameters.filterwheel = "";
-#if 0
 	try {
 		parameters.filterwheel = instrument->component(
 			astro::DeviceName::Filterwheel)->name();
 	} catch (...) {
 	}
-#endif
 	parameters.filter = filter;
 
 	// exposure parameters

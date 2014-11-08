@@ -94,14 +94,12 @@ int	command_submit(const std::string& projectname,
 
 	// filterwheel parameters
 	parameters.filterwheel = "";
-	#if 0
 	try {
-		parameters.filterwheel = instrument->component(
-			astro::DeviceName::Filterwheel)->name();
+		parameters.filterwheel = instrument->devicename(
+			astro::DeviceName::Filterwheel).toString();
 	} catch (...) {
 	}
-	#endif
-	parameters.filter = "";
+	parameters.filter = part->filtername();
 
 	// exposure parameters
 	parameters.exp = convert(part->exposure());

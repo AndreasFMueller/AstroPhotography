@@ -234,7 +234,9 @@ int	command_partlist(const std::string& projectname,
 				e.frame.toString().c_str());
 			std::cout << stringprintf(" %-5.5s",
 					e.mode.toString().c_str());
-			int	lt = ceil(3 - log10(e.exposuretime));
+			int	lt = floor(log10(e.exposuretime));
+			if (lt < 0) { lt = 0; }
+			lt = 3 - lt;
 			if (lt < 0) { lt = 0; }
 			std::cout << stringprintf("%7.*f", lt, e.exposuretime);
 			lt = ceil(2 - log10(e.gain));
@@ -364,8 +366,7 @@ int	command_partadd(const std::string& projectname, long partno,
 /**
  * \brief Show details about a part
  */
-int	command_partshow(const std::string& projectname, long partno,
-		const std::list<std::string>& /* arguments */) {
+int	command_partshow(const std::string& projectname, long partno) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show part %ld to project %s", partno,
 		projectname.c_str());
 	PartPtr	part = Configuration::get()->part(projectname, partno);
@@ -378,26 +379,33 @@ int	command_partshow(const std::string& projectname, long partno,
  * \brief Copy a part
  */
 int	command_partcopy(const std::string& projectname, long partno,
-		const std::list<std::string>& arguments) {
-	if (arguments.size() == 0) {
+		const std::list<long>& partnos) {
+	if (partnos.size() == 0) {
 		std::cerr << "missing new part number" << std::endl;
 		return EXIT_FAILURE;
 	}
-	long	newpartno = std::stol(arguments.front());
-	PartPtr	part = Configuration::get()->part(projectname, partno);
-	part->partno(newpartno);
-	Configuration::get()->addpart(projectname, *part);
+	ConfigurationPtr	config = Configuration::get();
+	PartPtr	part = config->part(projectname, partno);
+	for (auto ptr = partnos.begin(); ptr != partnos.end(); ptr++) {
+		long	newpartno = *ptr;
+		part->partno(newpartno);
+		config->addpart(projectname, *part);
+	}
 	return EXIT_SUCCESS;
 }
 
 /**
  * \brief Remove a part from the project
  */
-int	command_partremove(const std::string& projectname, long partno,
-		const std::list<std::string>& /* arguments */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove part %ld to project %s", partno,
-		projectname.c_str());
-	Configuration::get()->removepart(projectname, partno);
+int	command_partremove(const std::string& projectname,
+		const std::list<long>& partnos) {
+	ConfigurationPtr	config = Configuration::get();
+	for (auto ptr = partnos.begin(); ptr != partnos.end(); ptr++) {
+		long	partno = *ptr;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove part %ld to project %s",
+			partno, projectname.c_str());
+		config->removepart(projectname, partno);
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -487,14 +495,21 @@ int	main(int argc, char *argv[]) {
 	if (verb == "add") {
 		return command_partadd(projectname, partno, arguments);
 	}
+	std::list<long>	partnos;
+	partnos.push_back(partno);
+	while (arguments.size()) {
+		partnos.push_back(std::stol(arguments.front()));
+		arguments.pop_front();
+	}
 	if (verb == "copy") {
-		return command_partcopy(projectname, partno, arguments);
+		partnos.pop_front();
+		return command_partcopy(projectname, partno, partnos);
 	}
 	if (verb == "show") {
-		return command_partshow(projectname, partno, arguments);
+		return command_partshow(projectname, partno);
 	}
 	if (verb == "remove") {
-		return command_partremove(projectname, partno, arguments);
+		return command_partremove(projectname, partnos);
 	}
 
 	std::cerr << "command " << verb << " not implemented" << std::endl;

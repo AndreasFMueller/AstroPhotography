@@ -138,9 +138,11 @@ std::vector<std::string>	SimLocator::getDevicelist(
 		break;
 	case DeviceName::Guiderport:
 		names.push_back(std::string("guiderport:simulator/guiderport"));
+		names.push_back(std::string("guiderport:simulator/camera"));
 		break;
 	case DeviceName::Filterwheel:
 		names.push_back(std::string("filterwheel:simulator/filterwheel"));
+		names.push_back(std::string("filterwheel:simulator/camera"));
 		break;
 	case DeviceName::Focuser:
 		names.push_back(std::string("focuser:simulator/focuser"));
@@ -186,20 +188,22 @@ CcdPtr	SimLocator::getCcd0(const DeviceName& name) {
 
 GuiderPortPtr	SimLocator::getGuiderPort0(const DeviceName& name) {
 	std::string	sname = name;
-	if (sname != "guiderport:simulator/guiderport") {
+	if ((sname != "guiderport:simulator/guiderport") &&
+		(sname != "guiderport:simulator/camera")) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport %s does not exist",
 			sname.c_str());
-		throw NotFound("no such camera");
+		throw NotFound("no such guiderport");
 	}
 	return _guiderport;
 }
 
 FilterWheelPtr	SimLocator::getFilterWheel0(const DeviceName& name) {
 	std::string	sname = name;
-	if (sname != "filterwheel:simulator/filterwheel") {
+	if ((sname != "filterwheel:simulator/filterwheel") &&
+		(sname != "filterwheel:simulator/camera")) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "filterwheel %s does not exist",
 			sname.c_str());
-		throw NotFound("no such camera");
+		throw NotFound("no such filterwheel");
 	}
 	return _filterwheel;
 }
