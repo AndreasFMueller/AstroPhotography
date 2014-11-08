@@ -59,7 +59,8 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 		= dynamic_cast<astro::image::Image<unsigned short> *>(
 			&*imageptr->image());
 	if (NULL == im) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "don't know how to handle non short images");
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"don't know how to handle non short images");
 		return;
 	}
 
@@ -87,7 +88,7 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
 	if (NULL != calibrationpoint) {
 		// convert the calibration point into
 		CalibrationPoint	point
-			= convert(calibrationpoint->calibrationpoint());
+			= convert(calibrationpoint->data());
 		p->update(point);
 		return;
 	}
@@ -421,16 +422,14 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 	if (NULL != calibrationpoint) {
 		// add the point to the calibration run
 		astro::guiding::CalibrationStore	store(database);
-		store.addPoint(calibrationid,
-			calibrationpoint->calibrationpoint());
+		store.addPoint(calibrationid, calibrationpoint->data());
 	}
 	astro::guiding::GuiderCalibrationCallbackData	*calibration
 		= dynamic_cast<astro::guiding::GuiderCalibrationCallbackData *>(&*data);
 	if (NULL != calibration) {
 		// add the calibration result to the database
 		astro::guiding::CalibrationStore	store(database);
-		store.updateCalibration(calibrationid,
-			calibration->calibration());
+		store.updateCalibration(calibrationid, calibration->data());
 	}
 
 	// send calibration callbacks to the registered callbacks

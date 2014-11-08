@@ -211,30 +211,14 @@ std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
 /**
  * \brief Encapsulation of the calibration as callback argument
  */
-class GuiderCalibrationCallbackData : public callback::CallbackData {
-	GuiderCalibration	_calibration;
-public:
-	GuiderCalibrationCallbackData(const GuiderCalibration& calibration)
-		: _calibration(calibration) { }
-	const GuiderCalibration&	calibration() const {
-		return _calibration;
-	}
-};
+typedef callback::CallbackDataEnvelope<GuiderCalibration>	GuiderCalibrationCallbackData;
 
 std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
 
 /**
  * \brief Calibration Point encapsulation as callback argument
  */
-class CalibrationPointCallbackData : public callback::CallbackData {
-	CalibrationPoint	_calibrationpoint;
-public:
-	CalibrationPointCallbackData(const CalibrationPoint& calibrationpoint)
-		: _calibrationpoint(calibrationpoint) { }
-	const CalibrationPoint&	calibrationpoint() const {
-		return _calibrationpoint;
-	}
-};
+typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
 /**
  * \brief GuiderCalibrator

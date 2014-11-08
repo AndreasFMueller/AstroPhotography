@@ -57,7 +57,7 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "process a calibration point");
 		// convert into a record
 		astro::guiding::CalibrationPointRecord	record(0,
-			_calibrationid, calibrationpoint->calibrationpoint());
+			_calibrationid, calibrationpoint->data());
 
 		// add the record to the table
 		astro::persistence::Database	db = ServerDatabase().database();
@@ -83,7 +83,7 @@ CallbackDataPtr	CalibrationPointCallback::operator()(CallbackDataPtr data) {
 
 		// ... udpate it with the new data ..
 		for (int i = 0; i < 6; i++) {
-			record.a[i] = calibration->calibration().a[i];
+			record.a[i] = calibration->data().a[i];
 		}
 
 		// ... apply the changes to the table
