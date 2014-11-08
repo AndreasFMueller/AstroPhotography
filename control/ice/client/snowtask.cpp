@@ -358,7 +358,7 @@ int	command_submit(TaskQueuePrx tasks) {
 	// everything is ready now, submit the task
 	int	taskid = tasks->submit(parameters);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d", taskid);
-	return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -448,8 +448,8 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] cancel id ..." << std::endl;
 	std::cout << p << " [ options ] remove id ..." << std::endl;
 	std::cout << p << " [ options ] submit" << std::endl;
+	std::cout << p << " [ options ] project projectname partno" << std::endl;
 	std::cout << p << " [ options ] image id filename" << std::endl;
-	std::cout << p << " [ options ] repository id reponame" << std::endl;
 	std::cout << std::endl;
 	std::cout << "possible task states:" << std::endl;
 	std::cout << "    pending    " << std::endl;

@@ -13,7 +13,7 @@ Project::Project(const std::string& name) : _name(name) {
 	_started = time(NULL);
 }
 
-PartPtr	Project::part(long partno) {
+PartPtr	Project::part(long partno) const {
 	std::map<long, PartPtr>::const_iterator	i = parts.find(partno);
 	if (i == parts.end()) {
 		throw std::runtime_error("part no not found");

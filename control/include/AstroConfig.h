@@ -397,6 +397,10 @@ static void	set_default(const std::string& filename);
 					long partno) = 0;
 	virtual std::list<project::PartPtr>	listparts(
 					const std::string& projectname) = 0;
+	virtual void	parttask(const std::string& projectname, long partno,
+				int taskid) = 0;
+	virtual void	partrepo(const std::string& projectname, long partno,
+				int repoid) = 0;
 
 	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;

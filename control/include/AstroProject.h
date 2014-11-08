@@ -312,7 +312,7 @@ public:
 	void	started(time_t s) { _started = s; }
 
 	std::map<long, PartPtr>	parts;
-	PartPtr	part(long partno);
+	PartPtr	part(long partno) const;
 	void	add(PartPtr part);
 };
 

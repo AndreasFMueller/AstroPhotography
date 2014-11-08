@@ -331,13 +331,13 @@ Part	PartTable::partById(long objectid) {
 }
 
 void	PartTable::task(long projectid, long partno, long taskid) {
-	std::string	query(	"update part set taskid = ? "
+	std::string	query(	"update part set task = ? "
 				"where project = ? and partno = ?");
 	StatementPtr	stmt = database()->statement(query);
 	FieldValueFactory	factory;
-	stmt->bind(1, factory.get((int)taskid));
-	stmt->bind(2, factory.get((int)projectid));
-	stmt->bind(3, factory.get((int)partno));
+	stmt->bind(0, factory.get((int)taskid));
+	stmt->bind(1, factory.get((int)projectid));
+	stmt->bind(2, factory.get((int)partno));
 	stmt->execute();
 }
 
@@ -346,9 +346,9 @@ void	PartTable::repo(long projectid, long partno, long repoid) {
 				"where project = ? and partno = ?");
 	StatementPtr	stmt = database()->statement(query);
 	FieldValueFactory	factory;
-	stmt->bind(1, factory.get((int)repoid));
-	stmt->bind(2, factory.get((int)projectid));
-	stmt->bind(3, factory.get((int)partno));
+	stmt->bind(0, factory.get((int)repoid));
+	stmt->bind(1, factory.get((int)projectid));
+	stmt->bind(2, factory.get((int)partno));
 	stmt->execute();
 }
 

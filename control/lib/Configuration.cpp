@@ -66,6 +66,10 @@ public:
 	virtual void	removepart(const std::string& projectname, long partno);
 	virtual std::list<project::PartPtr>	listparts(
 					const std::string& projectname);
+	virtual void	parttask(const std::string& projectname, long partno,
+				int taskid);
+	virtual void	partrepo(const std::string& projectname, long partno,
+				int repoid);
 
 	// instrument access
 	virtual InstrumentPtr	instrument(const std::string& name);
@@ -259,15 +263,6 @@ Project	ConfigurationBackend::project(const std::string& name) {
 	ProjectTable	projects(_database);
 	long	projectid = projects.getid(name);
 	return projects.projectById(projectid);
-#if 0
-	ProjectRecord	record = projects.get(name);
-	Project	project(name);
-	project.description(record.description);
-	project.object(record.object);
-	project.repository(record.repository);
-	project.started(record.started);
-	return project;
-#endif
 }
 
 /**
@@ -276,15 +271,6 @@ Project	ConfigurationBackend::project(const std::string& name) {
 void	ConfigurationBackend::addproject(const Project& project) {
 	ProjectTable	projects(_database);
 	projects.add(project);
-#if 0
-	ProjectRecord	record;
-	record.name = project.name();
-	record.description = project.description();
-	record.object = project.object();
-	record.started = project.started();
-	record.repository = project.repository();
-	projects.add(record);
-#endif
 }
 
 /**
@@ -355,6 +341,22 @@ std::list<project::PartPtr>     ConfigurationBackend::listparts(
 		result.push_back(ptr->second);
 	}
 	return result;
+}
+
+void	ConfigurationBackend::parttask(const std::string& projectname,
+		long partno, int taskid) {
+	ProjectTable	projects(_database);
+	int	projectid = projects.getid(projectname);
+	PartTable	parts(_database);
+	parts.task(projectid, partno, taskid);
+}
+
+void	ConfigurationBackend::partrepo(const std::string& projectname,
+		long partno, int repoid) {
+	ProjectTable	projects(_database);
+	int	projectid = projects.getid(projectname);
+	PartTable	parts(_database);
+	parts.repo(projectid, partno, repoid);
 }
 
 //////////////////////////////////////////////////////////////////////
