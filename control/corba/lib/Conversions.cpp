@@ -589,7 +589,6 @@ Astro::TaskParameters	convert(const astro::task::TaskParameters& task) {
 	parameters.ccdtemperature = task.ccdtemperature();
 	parameters.filterwheel = CORBA::string_dup(task.filterwheel().c_str());
 	parameters.filter = CORBA::string_dup(task.filter().c_str());
-	//astro::camera::Exposure	exposure = task.exposure();
 	parameters.exp.exposuretime = task.exposure().exposuretime;
 	parameters.exp.gain = task.exposure().gain;
 	parameters.exp.limit = task.exposure().limit;

@@ -200,23 +200,6 @@ else
 	AC_DEFINE([ENABLE_BOOSTREGEX], [0], [Define to 1 if boost::regex should be used])
 fi
 
-## BOOSTCHRONO ########################################################
-# use boost chrono
-AC_ARG_ENABLE(boostchrono,
-[AS_HELP_STRING([--enable-boostchrono], [use chrono class from boost instead of C++11])],
-[
-	enable_boostchrono=yes
-],[
-	enable_boostchrono=no
-])
-if test ${enable_boostchrono} = yes
-then
-	LIBS="${LIBS} -lboost_chrono"
-	AC_DEFINE([ENABLE_BOOSTCHRONO], [1], [Define to 1 if boost::chrono should be used])
-else
-	AC_DEFINE([ENABLE_BOOSTCHRONO], [0], [Define to 1 if boost::chrono should be used])
-fi
-
 ## UNITTESTS #########################################################
 # decide whether or not to build the test programs
 AC_ARG_ENABLE(unittests,

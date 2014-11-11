@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CancellableWork.h>
-#include <astrochrono.h>
+#include <chrono>
 
 namespace astro {
 namespace task {
@@ -69,19 +69,19 @@ bool	CancellableWork::wait(float t, Condition& condition) {
 	cancellation_point();
 
 	// compute the time when we have to stop at the latest
-	astro::chrono::steady_clock::time_point	now
-		= astro::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point	now
+		= std::chrono::steady_clock::now();
 	long	ms = 1000 * t;
-	astro::chrono::steady_clock::time_point	final = now +
-		astro::chrono::milliseconds(ms);
+	std::chrono::steady_clock::time_point	final = now +
+		std::chrono::milliseconds(ms);
 
 	// compute the next point in time to stop
-	astro::chrono::steady_clock::time_point	next = now +
-		astro::chrono::milliseconds(1000);
+	std::chrono::steady_clock::time_point	next = now +
+		std::chrono::milliseconds(1000);
 
 	do {
 		// compute the time when we should stop next 
-		next = next + astro::chrono::milliseconds(1000);
+		next = next + std::chrono::milliseconds(1000);
 		if (next > final) {
 			next = final;
 		}

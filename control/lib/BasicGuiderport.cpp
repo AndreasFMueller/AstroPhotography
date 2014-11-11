@@ -10,7 +10,7 @@
 #include <includes.h>
 #include <stdexcept>
 #include <AstroDevice.h>
-#include <astrochrono.h>
+#include <chrono>
 #include <sstream>
 
 namespace astro {
@@ -70,12 +70,12 @@ void	BasicGuiderport::run() {
 	// start endless loop
 	do {
 		// what time do we have now?
-		astro::chrono::steady_clock::time_point now
-			= astro::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point now
+			= std::chrono::steady_clock::now();
 
 		// when do we imperatively have our next stop?
-		astro::chrono::steady_clock::time_point next = now +
-				astro::chrono::milliseconds(1000);
+		std::chrono::steady_clock::time_point next = now +
+				std::chrono::milliseconds(1000);
 
 		// set the active pins
 		uint8_t	a = 0;
@@ -145,31 +145,31 @@ uint8_t	BasicGuiderport::active() {
  */
 void	BasicGuiderport::activate(float raplus, float raminus,
 		float decplus, float decminus) {
-	astro::chrono::steady_clock::time_point now
-		= astro::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point now
+		= std::chrono::steady_clock::now();
 	long long	delta = (raplus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %lldms", delta);
 	}
-	nextchange[0] = now + astro::chrono::milliseconds(delta);
+	nextchange[0] = now + std::chrono::milliseconds(delta);
 
 	delta = (raminus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %lldms", delta);
 	}
-	nextchange[1] = now + astro::chrono::milliseconds(delta);
+	nextchange[1] = now + std::chrono::milliseconds(delta);
 
 	delta = (decplus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %lldms", delta);
 	}
-	nextchange[2] = now + astro::chrono::milliseconds(delta);
+	nextchange[2] = now + std::chrono::milliseconds(delta);
 
 	delta = (decminus * 1000);
 	if (delta > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %lldms", delta);
 	}
-	nextchange[3] = now + astro::chrono::milliseconds(delta);
+	nextchange[3] = now + std::chrono::milliseconds(delta);
 
 	cond.notify_one();
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "thread notified");
