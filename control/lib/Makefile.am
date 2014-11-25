@@ -62,7 +62,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	RepoReplicator.cpp \
 	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
 	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
-	InstrumentTables.cpp \
+	InstrumentTables.cpp ServerTable.cpp \
 	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
 	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \

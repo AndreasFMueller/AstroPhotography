@@ -22,7 +22,6 @@ namespace astro {
 namespace app {
 namespace devicemapper {
 
-std::string	servername;
 bool	verbose = false;
 std::string	type("camera");
 
@@ -72,11 +71,6 @@ public:
 void	scan_module::operator()(const std::string& modulename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scanning module '%s'",
 		modulename.c_str());
-	if (servername.size() != 0) {
-		std::cerr << "remove device mapping currently not supported";
-		std::cerr << std::endl;
-		throw std::runtime_error("remote device mapping not supported");
-	}
 
 	// get a repository
 	Repository	repository;
@@ -142,7 +136,9 @@ int	map_cmd(const std::vector<std::string> arguments) {
 	if (pairs.has("unit")) {
 		devmap.unitid(std::stol(pairs("unit")));
 	}
-	devmap.servername(servername);
+	if (pairs.has("server")) {
+		devmap.servername(pairs("server"));
+	}
 
 	// perform the update
 	if (newmapping) {
@@ -171,22 +167,22 @@ int	remove_cmd(const std::vector<std::string>& arguments) {
  */
 void	usage(const std::string& progname) {
 	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
 	std::string	p = "    " + Path(progname).basename();
+	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] scan <module> ...";
-	std::cout << std::endl;
+	std::cout << p << " [ options ] scan <module> ..." << std::endl;
 	std::cout << p << " [ options ] map <name> <devicename> "
-					"[ attr=value ... ]";
-	std::cout << std::endl;
+					"[ attr=value ... ]" << std::endl;
 	std::cout << p << " [ options ] remove <name>" << std::endl;
-	std::cout << "The list command displays a list of device mappings present in the database.";
 	std::cout << std::endl;
-	std::cout << "The scan command scans the named modules and displays the devices recoginized";
-	std::cout << std::endl;
+	std::cout << "The list command displays a list of device mappings "
+		"present in the database." << std::endl;
+	std::cout << "The scan command scans the named modules and displays "
+		"the devices recoginized" << std::endl;
 	std::cout << "by this module." << std::endl;
-	std::cout << "The map command creates and updates a map entries. "
-			"The <devicename> must";
-	std::cout << std::endl;
+	std::cout << "The map command creates and updates a map entry. "
+			"The <devicename> must" << std::endl;
 	std::cout << "always be specified, this is the parameter that might "
 			"change when the";
 	std::cout << std::endl;
@@ -194,9 +190,17 @@ void	usage(const std::string& progname) {
 			"pairs are normally only";
 	std::cout << std::endl;
 	std::cout << "set the first time, the attributes 'unit' and "
-			"'description are recognized.";
+			"'description' are recognized." << std::endl;
+	std::cout << "The remove command removes a named map entry."
+		<< std::endl;
 	std::cout << std::endl;
-	std::cout << "The remove command removes a named map entry.";
+	std::cout << "attributes recognized by the map command:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "  unit             the unit number (currently CCD only)"
+		<< std::endl;
+	std::cout << "  server           the URL of the server" << std::endl;
+	std::cout << "  description      a short description of the component"
+		<< std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << "  -c,--config=<cfg>    use configuration file <cfg>";
@@ -217,7 +221,6 @@ static struct option	longopts[] = {
 { "config",	required_argument,	NULL,		'c' }, /* 0 */
 { "debug",	no_argument,		NULL,		'd' }, /* 1 */
 { "help",	no_argument,		NULL,		'h' }, /* 2 */
-{ "server",	required_argument,	NULL,		's' }, /* 3 */
 { "type",	required_argument,	NULL,		't' }, /* 4 */
 { "verbose",	no_argument,		NULL,		'v' }, /* 5 */
 { NULL,		0,			NULL,		0   }
@@ -241,9 +244,6 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_FAILURE;
-			break;
-		case 's':
-			servername = optarg;
 			break;
 		case 't':
 			type = optarg;
@@ -269,6 +269,10 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("not enough arguments");
 	}
 	std::string	cmd = arguments[0];
+	if (cmd == "help") {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
 	if (cmd == "list") {
 		return list_cmd(arguments);
 	}
@@ -282,7 +286,8 @@ int	main(int argc, char *argv[]) {
 		return remove_cmd(arguments);
 	}
 
-	// 
+	// if we get to this point, then the command was not recognized
+	std::cerr << "command '" << cmd << "' not known" << std::endl;
 	return EXIT_FAILURE;
 }
 

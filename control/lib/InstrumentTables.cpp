@@ -44,11 +44,7 @@ UpdateSpec	InstrumentTableAdapter::object_to_updatespec(const InstrumentRecord& 
 long	InstrumentTable::id(const std::string& name) {
 	std::string	condition = stringprintf("name = '%s'",
 				_database->escape(name).c_str());
-	std::list<long>	ids = selectids(condition);
-	if (ids.size() == 1) {
-		return *ids.begin();
-	}
-	throw std::runtime_error("name not found");
+	return TableBase::id(condition);
 }
 
 //////////////////////////////////////////////////////////////////////

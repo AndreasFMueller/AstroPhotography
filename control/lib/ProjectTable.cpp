@@ -307,11 +307,7 @@ long	PartTable::add(long projectid, const Part& part) {
 long	PartTable::id(long projectid, long partno) {
 	std::string	condition = stringprintf("id = %d and partno = %d",
 		projectid, partno);
-	std::list<long>	l = selectids(condition);
-	if (l.size() != 1) {
-		throw std::runtime_error("no record found");
-	}
-	return *l.begin();
+	return TableBase::id(condition);
 }
 
 void	PartTable::update(long projectid, const Part& part) {

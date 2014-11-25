@@ -133,13 +133,7 @@ UpdateSpec	ImageTableAdapter::object_to_updatespec(const ImageRecord& imagerec) 
 long	ImageTable::id(const std::string& filename) {
 	std::string	condition = stringprintf("filename = '%s'",
 				filename.c_str());
-	std::list<object_type>	objects = select(condition);
-	if (objects.size() == 0) {
-		std::string	msg = stringprintf("no image with filename %s",
-			filename.c_str());
-		throw std::runtime_error(msg);
-	}
-	return objects.begin()->id();
+	return TableBase::id(condition);
 }
 
 //////////////////////////////////////////////////////////////////////

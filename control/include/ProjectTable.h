@@ -76,7 +76,7 @@ public:
 	PartTable(Database& database)
 		: Table<PartRecord, PartTableAdapter>(database) {
 	}
-	long	id(long projectid, long partno);
+	virtual long	id(long projectid, long partno);
 	using Table<PartRecord, PartTableAdapter>::add;
 	long	add(long projectid, const Part& part);
 	void	update(long projectid, const Part& part);

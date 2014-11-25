@@ -13,6 +13,7 @@
 #include <AstroProject.h>
 #include <ProjectTable.h>
 #include <InstrumentTables.h>
+#include <ServerTable.h>
 
 using namespace astro::persistence;
 using namespace astro::project;
@@ -44,6 +45,12 @@ public:
 	virtual void	removeglobal(const std::string& name,
 				const std::string& value);
 	virtual std::list<ConfigurationEntry>	globallist();
+
+	// access to server information
+	virtual ServerInfo	server(const std::string& name);
+	virtual void	addserver(const ServerInfo& server);
+	virtual void	removeserver(const std::string& server);
+	virtual std::list<ServerInfo>	listservers();
 
 	// access to repositories
 	virtual ImageRepoPtr	repo(const std::string& name);
@@ -182,6 +189,45 @@ std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
 		entry.name = i->name;
 		entry.value = i->value;
 		result.push_back(entry);
+	}
+	return result;
+}
+
+//////////////////////////////////////////////////////////////////////
+// server information access
+//////////////////////////////////////////////////////////////////////
+ServerInfo	ConfigurationBackend::server(const std::string& name) {
+	ServerTable	servers(_database);
+	long	serverid = servers.id(name);
+	ServerRecord	record = servers.byid(serverid);
+	ServerInfo	si(record.name, ServerName(record.url));
+	si.info(record.info);
+	return si;
+}
+
+void	ConfigurationBackend::addserver(const ServerInfo& server) {
+	ServerTable	servers(_database);
+	ServerRecord	si(-1);
+	si.name = server.name();
+	si.url = (std::string)server.servername();
+	si.info = server.info();
+	servers.add(si);
+}
+
+void	ConfigurationBackend::removeserver(const std::string& name) {
+	ServerTable	servers(_database);
+	long	serverid = servers.id(name);
+	servers.remove(serverid);
+}
+
+std::list<ServerInfo>	ConfigurationBackend::listservers() {
+	std::list<ServerInfo>	result;
+	ServerTable	servers(_database);
+	std::list<ServerRecord>	rl = servers.select("0 = 0");
+	for (auto ptr = rl.begin(); ptr != rl.end(); ptr++) {
+		ServerInfo	si(ptr->name, ServerName(ptr->url));
+		si.info(ptr->info);
+		result.push_back(si);
 	}
 	return result;
 }

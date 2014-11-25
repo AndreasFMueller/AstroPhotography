@@ -23,6 +23,29 @@ namespace astro {
 namespace config {
 
 /**
+ * \brief Information about a server
+ */
+class ServerInfo {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n) { _name = n; }
+private:
+	ServerName	_servername;
+public:
+	const ServerName	servername() const { return _servername; }
+	void	servername(const ServerName& s) { _servername = s; }
+private:
+	std::string	_info;
+public:
+	const std::string	info() const { return _info; }
+	void	info(const std::string& i) { _info = i; }
+public:
+	ServerInfo(const std::string& name, const ServerName& servername)
+		: _name(name), _servername(servername) { }
+};
+
+/**
  * \brief Device mapping entry
  *
  * The class astro::config::DeviceMapper performs mapping from physical 
@@ -375,6 +398,12 @@ static void	set_default(const std::string& filename);
 	virtual void	removeglobal(const std::string& section,
 				const std::string& name) = 0;
 	virtual std::list<ConfigurationEntry>	globallist() = 0;
+
+	// server access
+	virtual	ServerInfo	server(const std::string& name) = 0;
+	virtual void	addserver(const ServerInfo& server) = 0;
+	virtual void	removeserver(const std::string& name) = 0;
+	virtual std::list<ServerInfo>	listservers() = 0;
 
 	// image repository access
 	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;

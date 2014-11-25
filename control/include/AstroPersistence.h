@@ -210,6 +210,7 @@ public:
 	Row	rowbyid(long objectid);
 	long	nextid();
 	long	addrow(const UpdateSpec& updatespec);
+	virtual long	id(const std::string& condition);
 	void	updaterow(long objectid, const UpdateSpec& updatespec);
 	bool	exists(long objectid);
 	void	remove(long objectid);

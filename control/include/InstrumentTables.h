@@ -55,7 +55,7 @@ public:
 	InstrumentTable(Database database)
 		: Table<InstrumentRecord, InstrumentTableAdapter>(database) {
 	}
-	long	id(const std::string& name);
+	virtual long	id(const std::string& name);
 };
 
 /**

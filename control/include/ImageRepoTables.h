@@ -65,7 +65,7 @@ public:
 	ImageTable(Database database)
 		: Table<ImageRecord, ImageTableAdapter>(database) {
 	}
-	long	id(const std::string& filename);
+	virtual long	id(const std::string& filename);
 };
 
 /**

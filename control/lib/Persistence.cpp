@@ -418,5 +418,18 @@ std::list<long>	TableBase::selectids(const std::string& condition) {
 	return idlist;
 }
 
+/**
+ * \brief Find the record id the satisfies some uniqueness constraint
+ */
+long	TableBase::id(const std::string& condition) {
+	std::ostringstream	out;
+	out << "select id from " << _tablename << " where " << condition;
+	Result	result = _database->query(out.str());
+	if (1 != result.size()) {
+		throw std::runtime_error("not found");
+	}
+	return (*result.begin())[0]->intValue();
+}
+
 } // namespace persistence
 } // namespace astro
