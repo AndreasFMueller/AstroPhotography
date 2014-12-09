@@ -57,12 +57,16 @@ ImagePtr	translate(ImagePtr source, const Point& translation) {
 // Transform implementation
 //////////////////////////////////////////////////////////////////////
 
+void	Transform::identity() {
+	a[0] = 1; a[1] = 0; a[2] = 0;
+	a[3] = 0; a[4] = 1; a[5] = 0;
+}
+
 /**
  * \brief Default transform is the identity
  */
 Transform::Transform() {
-	a[0] = 1; a[1] = 0; a[2] = 0;
-	a[3] = 0; a[4] = 1; a[5] = 0;
+	identity();
 }
 
 /**
@@ -85,15 +89,40 @@ Transform::Transform(double angle, const Point& translation, double scale) {
 }
 
 /**
+ * \brief Extract the average translation from a number of residuals
+ */
+void	Transform::translation(const std::vector<Residual>& residuals) {
+	if (residuals.size() == 0) {
+		throw std::runtime_error("need at least one residual to "
+			"extract translation");
+	}
+	identity();
+
+	// compute the average of all translations
+	Point	sum;
+	for (auto r = residuals.begin(); r != residuals.end(); r++) {
+		sum = sum + r->offset();
+	}
+	sum = (1. / residuals.size()) * sum;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "average translation: %s",
+		std::string(sum).c_str());
+
+	// the average translation becomes the constant part of the transform
+	a[2] = sum.x();
+	a[5] = sum.y();
+}
+
+/**
  * \brief Find the optimal transform from one set of points to the other
  */
 Transform::Transform(const std::vector<Residual>& residuals) {
 
 	// make sure we have enough points
 	if (residuals.size() < 3) {
-		std::string	msg("need at least three points");
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not enough data for full "
+			"transform, extracting translation only");
+		translation(residuals);
+		return;
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "determine best transformation between two sets of %d points", residuals.size());

@@ -18,19 +18,44 @@ namespace astro {
 namespace app {
 namespace stack {
 
+static struct option	longopts[] = {
+/* name		argument?		int*		int */
+{ "debug",	no_argument,		NULL,		'd' }, /* 0 */
+{ "help",	no_argument,		NULL,		'h' }, /* 1 */
+{ "output",	required_argument,	NULL,		'o' }, /* 2 */
+{ NULL,		0,			NULL,		 0  }
+};
+
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -dh? ] [ -o outfile ] files..." << std::endl;
-	std::cout << "stack a set of images to produce a target image" << std::endl;
+	Path	path(progname);
+	std::cout << "usage: " << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << path.basename() << " [ -dh? ] [ -o outfile ] "
+		"files..." << std::endl;
+	std::cout << std::endl;
+	std::cout << "stack a set of images to produce a target image. The "
+		"file name arguments" << std::endl;
+	std::cout << "are interpreted as FITS images to be stacked. "
+		"All images are aligned with" << std::endl;
+	std::cout << "the first image in the list and added to it. "
+		"The resulting image is then" << std::endl;
+	std::cout << "output to the output file." << std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -d               increase debug level" << std::endl;
 	std::cout << " -o outfile       filename of output file" << std::endl;
 	std::cout << " -h,-?            display this help" << std::endl;
 }
 
+/**
+ * \brief Main method for the stacker program
+ */
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	const char	*outfilename = NULL;
-	while (EOF != (c = getopt(argc, argv, "do:")))
+	while (EOF != (c = getopt_long(argc, argv, "dh?o:", longopts,
+		&longindex))) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -43,6 +68,7 @@ int	main(int argc, char *argv[]) {
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		}
+	}
 
 	// read all the images
 	ImageSequence	images;

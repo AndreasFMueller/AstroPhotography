@@ -21,19 +21,30 @@ namespace astro {
 namespace app {
 namespace clamp {
 
+static struct option	longopts[] = {
+/* name		argument?		int*		int */
+{ "debug",	no_argument,		NULL,		'd' }, /* 0 */
+{ "min",	required_argument,	NULL,		'm' }, /* 1 */
+{ "max",	required_argument,	NULL,		'M' }, /* 2 */
+{ "help",	no_argument,		NULL,		'h' }, /* 3 */
+{ NULL,		0,			NULL,		 0  }
+};
+
 /**
  * \brief usage
  */
 void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] infile outfile"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -m min    clamp the image values to at least <min>"
+	std::cout << std::endl;
+	std::cout << "  -m,--min=min  clamp the image values to at least <min>"
 		<< std::endl;
-	std::cout << "  -M max    clamp the image values to at most <max>"
+	std::cout << "  -M,--max=max  clamp the image values to at most <max>"
 		<< std::endl;
-	std::cout << "  -d        increase debug level" << std::endl;
-	std::cout << "  -h, -?    show this help message" << std::endl;
+	std::cout << "  -d,--debug    increase debug level" << std::endl;
+	std::cout << "  -h,-?,--help  show this help message" << std::endl;
 }
 
 /**
@@ -45,7 +56,9 @@ int	main(int argc, char *argv[]) {
 	double	maxvalue = -1;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:bi")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hm:M:bi", longopts,
+		&longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;

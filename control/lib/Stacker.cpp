@@ -47,9 +47,13 @@ public:
 };
 
 ImagePtr	MonochromeStacker::operator()(ImageSequence images) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start stacking of %d images",
+		images.size());
 	// get the base image
 	ImagePtr	baseimage = *images.begin();
 	ConstPixelValueAdapter<double>	base(baseimage);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "base image has size %s",
+		baseimage->size().toString().c_str());
 
 	// for each image in the sequence, find the transform relative to the
 	// base image
@@ -58,8 +62,9 @@ ImagePtr	MonochromeStacker::operator()(ImageSequence images) {
 	for (imgp++; imgp != images.end(); imgp++) {
 		ImagePtr	imageptr = *imgp;
 		ConstPixelValueAdapter<double>	img(imageptr);
-		TransformAnalyzer	ta(base);
+		TransformAnalyzer	ta(base, 2048, 2048);
 		Transform	t = ta(img);
+		t = t.inverse();
 		transforms.push_back(t);
 	}
 

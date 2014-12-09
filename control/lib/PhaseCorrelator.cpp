@@ -162,15 +162,17 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 		throw std::runtime_error(msg);
 	}
 	size_t	n = size.getPixels();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %lu pixels", n);
 	
 	// allocate memory for the images
-	double	a[n];
-	double	b[n];
+	double	*a = new double[n];
+	double	*b = new double[n];
+debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 
 	// allocate memory for the fourier transforms
 	size_t	nc = size.width() * (1 + size.height() / 2);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel count: %u, fourier transform: %u",
-		n, nc);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel count: %lu, "
+		"fourier transform: %lu", n, nc);
 	fftw_complex	*af = (fftw_complex *)fftw_malloc(
 					sizeof(fftw_complex) * nc);
 	fftw_complex	*bf = (fftw_complex *)fftw_malloc(
@@ -222,7 +224,7 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 		af[i][1] = product[1];
 	}
 
-	// perform the back transform
+	// perform the reverse Fourier transform
 	fftw_execute(r);
 
 #if 0
@@ -310,6 +312,11 @@ try {
 	fftw_free(af);
 	fftw_free(bf);
 	fftw_cleanup();
+
+	// at this point we no longer need the a and b arrays, so we free
+	// them in order not to forget this later
+	delete[] a;
+	delete[] b;
 
 	// result
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d] translation: %s",

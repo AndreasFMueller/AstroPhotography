@@ -646,6 +646,35 @@ T	LuminanceAdapter<Pixel, T>::pixel(unsigned int x,
 }
 
 //////////////////////////////////////////////////////////////////////
+// Clamping adapter
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel, typename T>
+class ClampingAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<Pixel>&	image;
+	T	minimum;
+	T	maximum;
+public:
+	ClampingAdapter(const ConstImageAdapter<Pixel>& _image,
+		T _minimum, T _maximum) :
+		ConstImageAdapter<T>(_image.getSize()), image(_image),
+		minimum(_minimum), maximum(_maximum) {
+	}
+	T	pixel(unsigned int x, unsigned int y) const;
+};
+
+template<typename Pixel, typename T>
+T	ClampingAdapter<Pixel, T>::pixel(unsigned int x, unsigned int y) const {
+	T	v = image.pixel(x, y);
+	if (v < minimum) {
+		return minimum;
+	}
+	if (v > maximum) {
+		return maximum;
+	}
+	return v;
+}
+
+//////////////////////////////////////////////////////////////////////
 // Rescaling adapter
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel>

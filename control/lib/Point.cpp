@@ -41,6 +41,12 @@ std::string	Point::toString() const {
 	return out.str();
 }
 
+Point::operator	std::string() const {
+	std::ostringstream	out;
+	out << *this;
+	return out.str();
+}
+
 std::ostream&	operator<<(std::ostream& out, const Point& point) {
 	out << "(" << point.x() << "," << point.y() << ")";
 	return out;

@@ -52,6 +52,7 @@ public:
 	Point	operator*(double l) const;
 	friend Point	operator*(double l, const Point& other);
 	std::string	toString() const;
+	operator	std::string() const;
 	bool	operator==(const Point& other) const;
 	bool	operator!=(const Point& other) const;
 	operator double() const;

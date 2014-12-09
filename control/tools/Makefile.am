@@ -21,7 +21,8 @@ endif
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
 	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
-	devicemapper astroinstrument astromount astroproject
+	devicemapper astroinstrument astromount astroproject rescale \
+	gammacorrect
 
 noinst_PROGRAMS = guiderport
 
@@ -91,9 +92,17 @@ clamp_SOURCES = clamp.cpp
 clamp_DEPENDENCIES = ../lib/libastro.la
 clamp_LDADD = -L../lib -lastro 
 
+rescale_SOURCES = rescale.cpp
+rescale_DEPENDENCIES = ../lib/libastro.la
+rescale_LDADD = -L../lib -lastro 
+
 logscale_SOURCES = logscale.cpp
 logscale_DEPENDENCIES = ../lib/libastro.la
 logscale_LDADD = -L../lib -lastro 
+
+gammacorrect_SOURCES = gammacorrect.cpp
+gammacorrect_DEPENDENCIES = ../lib/libastro.la
+gammacorrect_LDADD = -L../lib -lastro 
 
 focusing_SOURCES = focusing.cpp
 focusing_DEPENDENCIES = ../lib/libastro.la
@@ -189,3 +198,9 @@ fitsheadertest:	fitsheader
 		FOCUS 0.135 "telescope focal length" \
 		BLUBB 4711 "test integer" \
 		FOO mustbestring "test string"
+
+.PHONY:	orion
+orion:
+	rm -f orion.fits
+	./stack --debug --output=orion.fits orion/orion*.fits 2>&1 | tee stack.log
+#	./stack --debug --output=orion.fits orion/orion1.fits orion/orion2.fits 2>&1 | tee stack.log

@@ -69,6 +69,13 @@ std::string	ImagePoint::toString() const {
 }
 
 /**
+ * \brief Cast to string
+ */
+ImagePoint::operator	std::string() const {
+	return stringprintf("(%u,%u)", _x, _y);
+}
+
+/**
  * \brief Point output
  */
 std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {

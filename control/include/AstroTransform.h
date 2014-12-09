@@ -174,6 +174,7 @@ public:
 	double&	weight() { return _weight; }
 	bool	invalid() const;
 	bool	valid() const { return !invalid(); }
+	operator	std::string() const;
 };
 
 /**
@@ -182,6 +183,8 @@ public:
 
 class Transform {
 	double	a[6];
+	void	identity();
+	void	translation(const std::vector<Residual>& residuals);
 public:
 	// constructors
 	Transform();
@@ -302,6 +305,8 @@ public:
                 : baseimage(_baseimage),
                   spacing(_spacing), patchsize(_patchsize)  {
 	}
+	Residual	translation(const ConstImageAdapter<double>& image,
+		const ImagePoint& where, unsigned int _patchsize) const;
         std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
 };
 

@@ -50,6 +50,7 @@ public:
 	ImagePoint	operator-(const ImagePoint& other) const;
 	bool	operator<(const ImagePoint& point) const;
 	std::string	toString() const;
+	operator	std::string() const;
 	bool	isZero() const { return (_x == 0) && (_y == 0); }
 	float	distance(const ImagePoint& p) const;
 };
