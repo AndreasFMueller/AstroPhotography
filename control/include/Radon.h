@@ -10,7 +10,7 @@ namespace image {
 namespace radon {
 
 /**
- * \brief
+ * \brief Class representing a segment of a curve
  */
 class segment {
 	int	_x, _y;
@@ -23,7 +23,7 @@ public:
 };
 
 /**
- * \brief
+ * \brief Class representing a circle built from curve segments
  */
 class circle {
 	void	add_segments(const segment& s);
@@ -39,7 +39,7 @@ public:
 };
 
 /**
- * \brief
+ * \brief An adapter to compute the circle transform for a given circle
  */
 class CircleAdapter : public ConstImageAdapter<double> {
 	const circle&	_circ;

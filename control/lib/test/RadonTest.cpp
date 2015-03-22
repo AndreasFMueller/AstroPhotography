@@ -54,7 +54,7 @@ void	RadonTest::testCircleTransform() {
 	// create a circle object
 	double	radius = 100;
 	double	sigma = 10;
-	circle	c(radius);
+	circle	c(radius - 4);
 
 	// create an image with a circle
 	Image<double>	*image = new Image<double>(300, 300);
