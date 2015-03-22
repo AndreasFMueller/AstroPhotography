@@ -134,8 +134,7 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
-	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
-		--enable-sbig
+	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc
 	;;
 esac
 

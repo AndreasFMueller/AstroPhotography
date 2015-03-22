@@ -15,7 +15,7 @@ class DriverModuleActivator_impl
 	: public virtual POA_PortableServer::ServantActivator {
 	astro::module::Repository       repository;
 public:
-	DriverModuleActivator_impl() { }
+	DriverModuleActivator_impl();
 
 	virtual PortableServer::Servant incarnate(
 		const PortableServer::ObjectId& oid,

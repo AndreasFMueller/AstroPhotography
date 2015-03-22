@@ -9,6 +9,9 @@
 
 namespace Astro {
 
+DriverModuleActivator_impl::DriverModuleActivator_impl() {
+}
+
 /**
  * \brief request that a certain DriverModule be activated
  */

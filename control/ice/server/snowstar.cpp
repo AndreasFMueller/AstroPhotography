@@ -35,7 +35,8 @@ static struct option	longopts[] = {
 { "config",		required_argument,	NULL,	'c' }, /* 1 */
 { "debug",		no_argument,		NULL,	'd' }, /* 2 */
 { "database",		required_argument,	NULL,	'q' }, /* 3 */
-{ NULL,			0,			NULL,	0   }, /* 4 */
+{ "sslport",		required_argument,	NULL,	's' }, /* 4 */
+{ NULL,			0,			NULL,	0   }, /* 5 */
 };
 
 /**
@@ -55,6 +56,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	try {
 		props = Ice::createProperties(argc, argv);
 		props->setProperty("Ice.MessageSizeMax", "65536"); // 64 MB
+		props->setProperty("Ice.Plugin.IceSSL", "IceSSL:createIceSSL");
 		Ice::InitializationData	id;
 		id.properties = props;
 		ic = Ice::initialize(id);
@@ -67,11 +69,12 @@ int	snowstar_main(int argc, char *argv[]) {
 
 	// port numbers
 	unsigned short	port = 10000;
+	unsigned short	sslport = 0;
 
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:p:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:p:s:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'c':
@@ -88,6 +91,9 @@ int	snowstar_main(int argc, char *argv[]) {
 			break;
 		case 'p':
 			port = std::stoi(optarg);
+			break;
+		case 's':
+			sslport = std::stoi(optarg);
 			break;
 		}
 
@@ -113,6 +119,10 @@ int	snowstar_main(int argc, char *argv[]) {
 		// create the adapter
 		std::string	connectstring = astro::stringprintf(
 			"default -p %hu", port);
+		if (sslport > 0) {
+			connectstring += astro::stringprintf(" -p %hu:ssl",
+				sslport);
+		}
 		Ice::ObjectAdapterPtr	adapter
 			= ic->createObjectAdapterWithEndpoints("Astro",
 				connectstring);
