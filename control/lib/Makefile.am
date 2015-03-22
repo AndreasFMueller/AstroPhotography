@@ -36,7 +36,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	FITSdate.cpp Metavalue.cpp ImageMetadata.cpp \
 	Sun.cpp ViewerPipeline.cpp Viewer.cpp \
 	Functions.cpp Background.cpp \
-	Histogram.cpp \
+	Histogram.cpp Radon.cpp \
 	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
 	Transform.cpp Projection.cpp Residual.cpp ProjectionCorrector.cpp \
 	PhaseCorrelator.cpp Analyzer.cpp TransformAnalyzer.cpp Stacker.cpp \

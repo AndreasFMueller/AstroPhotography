@@ -39,7 +39,7 @@ tests_SOURCES = tests.cpp \
 	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
-	ImageTest.cpp RGBTest.cpp MosaicTest.cpp \
+	ImageTest.cpp RGBTest.cpp MosaicTest.cpp RadonTest.cpp \
 	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
 	TranslationTest.cpp FWHMTest.cpp \
 	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
@@ -62,7 +62,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	PixelTest.cpp
+	RadonTest.cpp
+#	PixelTest.cpp
 #	ProjectTableTest.cpp
 #	FITSKeywordTest.cpp
 #	ImageRepoTest.cpp
