@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20150607:
+	* add "othello" driver module for the guiderport device
+
 20140716:
 	* add serial communication class
 	* add celestron driver

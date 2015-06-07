@@ -236,6 +236,17 @@ AC_ARG_ENABLE(sx,
 ])
 AM_CONDITIONAL(ENABLE_SX, test x$enable_sx = xyes)
 
+## OTHELLO ###########################################################
+# decide whether to build the SX driver
+AC_ARG_ENABLE(othello,
+[AS_HELP_STRING([--enable-othello], [build the Othello driver])],
+[
+	enable_othello=yes
+],[
+	enable_othello=no
+])
+AM_CONDITIONAL(ENABLE_OTHELLO, test x$enable_othello = xyes)
+
 ## SBIG ##############################################################
 # check for SBIG library
 AC_ARG_ENABLE(sbig,
@@ -385,7 +396,7 @@ AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/test/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
-	drivers/sx/Makefile drivers/sbig/Makefile
+	drivers/sx/Makefile drivers/sbig/Makefile drivers/othello/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile

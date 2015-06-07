@@ -109,6 +109,8 @@ public:
 	DeviceName(const std::string& modulename, const std::string& unitname);
 	DeviceName(const device_type& type,
 		const std::vector<std::string>& components);
+	DeviceName(const device_type& type,
+		const std::string& modulename, const std::string& unitname);
 	DeviceName(const DeviceName& other);
 	// conversion to child device names of a different type
 	DeviceName(const DeviceName& name, const device_type& type,

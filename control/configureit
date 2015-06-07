@@ -14,7 +14,7 @@ CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 
 # always enable unit tests 
-commonflags="--enable-unittests"
+commonflags="--enable-unittests --enable-othello"
 
 # we always build the microtouch driver, as it is very small and we need
 # the USB library it depends on anyway

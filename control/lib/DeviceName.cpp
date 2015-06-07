@@ -35,6 +35,13 @@ DeviceName::DeviceName(const device_type& type,
 	std::copy(components.begin(), components.end(), back_inserter(*this));
 }
 
+DeviceName::DeviceName(const device_type& type,
+	const std::string& modulename, const std::string& unitname)
+	: _type(type) {
+	push_back(modulename);
+	push_back(unitname);
+}
+
 DeviceName::DeviceName(const DeviceName& name, const device_type& type,
 	const std::string& unitname) : _type(type) {
 	std::copy(name.begin(), name.end(), back_inserter(*this));
