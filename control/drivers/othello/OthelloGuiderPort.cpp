@@ -43,7 +43,7 @@ static uint16_t	othellotime(float t) {
 	if (t > 655.35) {
 		return 65535;
 	}
-	uint16_t result = 1000 * t;
+	uint16_t result = 100 * t;
 	return result;
 }
 
