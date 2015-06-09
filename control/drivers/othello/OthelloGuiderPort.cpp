@@ -32,10 +32,10 @@ OthelloGuiderPort::~OthelloGuiderPort() {
 }
 
 typedef struct othello_set_all_times_s {
-	uint16_t	raplus;
-	uint16_t	decplus;
-	uint16_t	decminus;
-	uint16_t	raminus;
+	uint16_t	raplus;		// port 0 on GuiderPort
+	uint16_t	decplus;	// port 1 on GuiderPort
+	uint16_t	decminus;	// port 2 on GuiderPort
+	uint16_t	raminus;	// port 3 on GuiderPort
 } __attribute__((packed)) othello_set_all_times_t;
 
 static uint16_t	othellotime(float t) {
