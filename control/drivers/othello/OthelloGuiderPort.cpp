@@ -33,9 +33,9 @@ OthelloGuiderPort::~OthelloGuiderPort() {
 
 typedef struct othello_set_all_times_s {
 	uint16_t	raplus;
-	uint16_t	raminus;
 	uint16_t	decplus;
 	uint16_t	decminus;
+	uint16_t	raminus;
 } __attribute__((packed)) othello_set_all_times_t;
 
 static uint16_t	othellotime(float t) {

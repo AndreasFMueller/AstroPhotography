@@ -23,44 +23,56 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "open the guider port and activate the outputs in one of the programs" << std::endl;
 	std::cout << "identified by the program number. The following programs are available:" << std::endl;
-	std::cout << "   1: activate each output for 1 second" << std::endl;
+	std::cout << "   1: activate each output for 1 second in the order" << std::endl;
+	std::cout << "      RA+, RA-, DEC+, DEC-" << std::endl;
+	std::cout << "   2: do binary count using the port bits in increased significance" << std::endl;
+	std::cout << "      as RA+, RA-, DEC+, DEC-" << std::endl;
 	std::cout << "options:" << std::endl;
+	std::cout << "   3: " << std::endl;
+	std::cout << "   4: RA backlash calibration 3s RA+, 3s RA-" << std::endl;
+	std::cout << "   5: DEC backlash calibration 3s DEC+, 3s DEC-" << std::endl;
 	std::cout << "  -d,--debug      increase debug level" << std::endl;
 	std::cout << "  -h,--help       display this help message and exit";
+	std::cout << "  -s,--scale=s    scale all times by the factor s";
 	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
-{ "debug",	no_argument,	NULL,	'd' },
-{ "help",	no_argument,	NULL,	'h' },
-{ NULL,		0,		NULL,	0   }
+{ "debug",	no_argument,		NULL,	'd' },
+{ "help",	no_argument,		NULL,	'h' },
+{ "scale",	required_argument,	NULL,	's' },
+{ NULL,		0,			NULL,	 0   }
 };
+
+static float scale = 1;
 
 void	prog0(astro::camera::GuiderPortPtr guiderport) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting program 1");
+	int	pause = scale + 2;
 	while (1) {
-		guiderport->activate(0.5, 0, 0, 0);
-		sleep(2);
-		guiderport->activate(0, 0.5, 0, 0);
-		sleep(2);
-		guiderport->activate(0, 0, 0.5, 0);
-		sleep(2);
-		guiderport->activate(0, 0, 0, 0.5);
-		sleep(3);
+		guiderport->activate(scale, 0, 0, 0);
+		sleep(pause);
+		guiderport->activate(0, scale, 0, 0);
+		sleep(pause);
+		guiderport->activate(0, 0, scale, 0);
+		sleep(pause);
+		guiderport->activate(0, 0, 0, scale);
+		sleep(pause);
 	}
 }
 
 void	prog1(astro::camera::GuiderPortPtr guiderport) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting program 2");
+	int	pause = scale;
 	while (1) {
 		for (int i = 0; i < 16; i++) {
-			float	raplus = (i & 1) ? 10 : 0;
-			float	raminus = (i & 2) ? 10 : 0;
-			float	decplus = (i & 4) ? 10 : 0;
-			float	decminus = (i & 8) ? 10 : 0;
+			float	raplus = (i & 1) ? scale : 0;
+			float	raminus = (i & 2) ? scale : 0;
+			float	decplus = (i & 4) ? scale : 0;
+			float	decminus = (i & 8) ? scale : 0;
 			guiderport->activate(raplus, raminus,
 				decplus, decminus);
-			sleep(1);
+			sleep(pause);
 		}
 		sleep(1);
 	}
@@ -68,23 +80,57 @@ void	prog1(astro::camera::GuiderPortPtr guiderport) {
 
 void	prog2(astro::camera::GuiderPortPtr guiderport) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting program 3");
+	int	pause = 5 * scale;
 	while (1) {
-		guiderport->activate(4, 3, 2, 1);
-		sleep(5);
-		guiderport->activate(3, 2, 1, 4);
-		sleep(5);
-		guiderport->activate(2, 1, 4, 3);
-		sleep(5);
-		guiderport->activate(1, 4, 3, 2);
-		sleep(5);
+		guiderport->activate(4 * scale, 3 * scale, 2 * scale, 1 * scale);
+		sleep(pause);
+		guiderport->activate(3 * scale, 2 * scale, 1 * scale, 4 * scale);
+		sleep(pause);
+		guiderport->activate(2 * scale, 1 * scale, 4 * scale, 3 * scale);
+		sleep(pause);
+		guiderport->activate(1 * scale, 4 * scale, 3 * scale, 2 * scale);
+		sleep(pause);
 	}
 }
+
+void	prog3(astro::camera::GuiderPortPtr guiderport) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting RA backlash calibration");
+	int	pause = scale;
+	if (pause == 0) {
+		pause = 1;
+	}
+	while (1) {
+		guiderport->activate(pause,0,0,0);
+		sleep(pause);
+		guiderport->activate(0,pause,0,0);
+		sleep(pause);
+	}
+}
+
+void	prog4(astro::camera::GuiderPortPtr guiderport) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting DEC backlash calibration");
+	int	pause = scale;
+	if (pause == 0) {
+		pause = 1;
+	}
+	while (1) {
+		guiderport->activate(0,0,pause,0);
+		sleep(pause);
+		guiderport->activate(0,0,0,pause);
+		sleep(pause);
+	}
+}
+
+typedef void (*program_t)(astro::camera::GuiderPortPtr);
+program_t	programtable[5] = {
+	prog0, prog1, prog2, prog3, prog4
+};
 
 int	main(int argc, char *argv[]) {
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dh", longopts, &longindex)))
+	while (EOF != (c = getopt_long(argc, argv, "dhs:", longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -94,6 +140,12 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 's':
+			scale = atof(optarg);
+			if (scale <= 0) {
+				throw std::runtime_error("scale must be positive");
+			}
+			break;
 		}
 
 	// next argument must be the device name
@@ -118,19 +170,10 @@ int	main(int argc, char *argv[]) {
 		devicename.toString().c_str());
 
 	// run the different programs
-	switch (prognumber) {
-	case 0:
-		prog0(guiderport);
-		break;
-	case 1:
-		prog1(guiderport);
-		break;
-	case 2:
-		prog2(guiderport);
-		break;
-	default:
+	if ((prognumber > 4) || (prognumber < 0)) {
 		throw std::runtime_error("unknown program number");
 	}
+	programtable[prognumber](guiderport);
 
 	return EXIT_SUCCESS;
 }
@@ -140,5 +183,9 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	return astro::main_function<astro::app::guiderport::main>(argc, argv);
+	try {
+		return astro::main_function<astro::app::guiderport::main>(argc, argv);
+	} catch (const std::exception& x) {
+		std::cerr << "terminated by exception: " << x.what() << std::endl;
+	}
 }
