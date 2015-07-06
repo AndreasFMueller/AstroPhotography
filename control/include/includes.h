@@ -106,4 +106,8 @@
 #include <netdb.h>
 #endif /* HAVE_NETDB_H */
 
+#ifdef HAVE_ASSERT_H
+#include <assert.h>
+#endif /* HAVE_ASSERT_H */
+
 #endif /* _includes_h */

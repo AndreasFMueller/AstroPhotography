@@ -21,7 +21,7 @@ AC_CHECK_TOOL(BISON, bison)
 
 # Checks for header files
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h termios.h sys/mman.h execinfo.h sys/select.h poll.h signal.h sys/param.h getopt.h uuid/uuid.h netdb.h])
+AC_CHECK_HEADERS([stdlib.h stdio.h unistd.h math.h errno.h string.h stdarg.h libintl.h locale.h syslog.h sys/types.h sys/stat.h sys/time.h dirent.h fcntl.h sys/file.h dlfcn.h libusb-1.0/libusb.h fftw3.h Accelerate/Accelerate.h termios.h sys/mman.h execinfo.h sys/select.h poll.h signal.h sys/param.h getopt.h uuid/uuid.h netdb.h assert.h])
 
 # We want to use backtrace API for stack dumps, this requires the use of
 # the -rdynamic option during compile
@@ -57,6 +57,25 @@ then
 else
 AC_CHECK_LIB([uuid], [uuid_parse])
 fi
+
+## DNS-DS ############################################################
+servicediscovery=
+case `uname` in
+Linux)	servicediscovery=avahi
+	AC_DEFINE([USE_SD_AVAHI], [1], [Define to 1 if using AVAHI for service discovery.])
+	# find out whether we have AVAHI support
+	if pkg-config --exists avahi-client
+	then
+		LIBS="${LIBS} `pkg-config --libs avahi-client`"
+		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags avahi-client`"
+	fi
+	;;
+Darwin)	servicediscovery=bonjour
+	AC_DEFINE([USE_SD_BONJOUR], [0], [Define to 1 if using Bonjour for service discovery.])
+	;;
+esac
+AM_CONDITIONAL(ENABLE_AVAHI, test x$servicediscovery = xavahi)
+AM_CONDITIONAL(ENABLE_BONJOUR, test x$servicediscovery = xbonjour)
 
 ## CORBA #############################################################
 # use pkg-config to find out about the flags to use for omniorb

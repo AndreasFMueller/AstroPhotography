@@ -24,6 +24,13 @@ else
 uvc_files =
 endif
 
+if ENABLE_AVAHI
+avahi_files = AvahiDiscovery.cpp
+endif
+if ENABLE_BONJOUR
+bonjour_files = BonjourDiscovery.cpp
+endif
+
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
 	AttributeValuePairs.cpp UUID.cpp Path.cpp demangle.cpp ServerName.cpp \
@@ -92,6 +99,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
 	ImageCalibrationStep.cpp CalibrationImageStep.cpp ImageBufferStep.cpp \
 	CalibrationProcessorStep.cpp InterpolationStep.cpp \
+	ServiceDiscovery.cpp $(avahi_files) $(bonjour_files) \
 	$(uvc_files) \
 	$(unicap_flies)
 
