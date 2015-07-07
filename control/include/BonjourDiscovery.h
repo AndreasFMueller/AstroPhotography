@@ -8,13 +8,25 @@
 
 #include <ServiceDiscovery.h>
 #include <dns_sd.h>
+#include <thread>
 
 namespace astro {
 namespace discover {
 
 class BonjourDiscovery : public ServiceDiscovery {
+	DNSServiceRef	sdRef;
+	std::thread	*thread;
 public:
 	BonjourDiscovery();
+	~BonjourDiscovery();
+	void	browsereply_callback(DNSServiceRef sdRef, 
+			DNSServiceFlags flags, 
+			uint32_t interfaceIndex, 
+			DNSServiceErrorType errorCode, 
+			const char *serviceName, 
+			const char *regtype, 
+			const char *replyDomain);
+	void	main();
 };
 
 class BonjourPublisher : public ServicePublisher {
