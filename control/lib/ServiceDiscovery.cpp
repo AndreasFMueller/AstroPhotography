@@ -81,9 +81,6 @@ const std::set<ServiceObject>&	ServiceDiscovery::resolve() const {
  * \brief Add a service to the services set
  */
 void	ServiceDiscovery::add(const ServiceObject& so) {
-	if (has(so.name())) {
-		remove(so.name());
-	}
 	services.insert(so);
 }
 
@@ -108,15 +105,6 @@ const ServiceObject&	ServiceDiscovery::find(const std::string& name) const {
 		return *i;
 	}
 	throw std::runtime_error("service not found");
-}
-
-/**
- * \brief Find out whether a service of a given name exists
- */
-bool	ServiceDiscovery::has(const std::string& name) {
-	ServiceSet::iterator	i = find_if(services.begin(), services.end(),
-					HasNamePredicate(name));
-	return i != services.end();
 }
 
 /**

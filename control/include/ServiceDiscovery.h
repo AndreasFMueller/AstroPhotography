@@ -120,7 +120,6 @@ public:
 	// methods to add and remove services when the implementation
 	// detects a change
 public:
-	bool	has(const std::string& name);
 	void	add(const ServiceObject& so);
 	void	remove(const std::string& name);
 };

@@ -35,7 +35,8 @@ ServiceObject::ServiceObject(const std::string& name, const std::string& tn)
  * \brief Convert the service object into a string representation
  */
 std::string	ServiceObject::toString() const {
-	return stringprintf("%s:%d@%s", name().c_str(), port(), host().c_str());
+	return stringprintf("%s/%s:%d@%s", name().c_str(),
+		type_name(_type).c_str(), port(), host().c_str());
 }
 
 /**
