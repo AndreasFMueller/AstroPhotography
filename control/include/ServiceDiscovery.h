@@ -160,6 +160,7 @@ public:
 	typedef std::set<ServiceObject::service_type>	ServiceTypeSet;
 protected:
 	ServiceTypeSet	published;
+	bool	has(ServiceObject::service_type type) const;
 public:
 	void	add(ServiceObject::service_type type);
 	void	revoke(ServiceObject::service_type type);

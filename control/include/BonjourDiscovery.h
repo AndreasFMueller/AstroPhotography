@@ -7,6 +7,7 @@
 #define _BonjourDiscovery_h
 
 #include <ServiceDiscovery.h>
+#include <dns_sd.h>
 
 namespace astro {
 namespace discover {
@@ -17,8 +18,17 @@ public:
 };
 
 class BonjourPublisher : public ServicePublisher {
+	DNSServiceRef	sdRef;
 public:
 	BonjourPublisher(const std::string& servername, int port);
+	~BonjourPublisher();
+	virtual void	publish();
+	void	registerreply_callback(DNSServiceRef sdRef,
+			DNSServiceFlags flags,
+			DNSServiceErrorType errorCode,
+			const char *name,
+			const char *regtype,
+			const char *domain);
 };
 
 } // namespace discover

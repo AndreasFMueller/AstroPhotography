@@ -16,7 +16,7 @@
 #include <AvahiDiscovery.h>
 #endif /* USE_SD_AVAHI */
 
-#if USE_SD_BONOUR
+#if USE_SD_BONJOUR
 #include <BonjourDiscovery.h>
 #endif /* USE_SD_BONJOUR */
 

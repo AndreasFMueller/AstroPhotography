@@ -16,7 +16,7 @@
 #include <AvahiDiscovery.h>
 #endif /* USE_SD_AVAHI */
 
-#if USE_SD_BONOUR
+#if USE_SD_BONJOUR
 #include <BonjourDiscovery.h>
 #endif /* USE_SD_BONJOUR */
 
@@ -80,6 +80,13 @@ public:
 		return _type == type;
 	}
 };
+
+bool	ServicePublisher::has(ServiceObject::service_type type) const {
+	ServiceTypeSet::const_iterator	i
+		= find_if(published.begin(), published.end(),
+			HasTypePredicate(type));
+	return (i != published.end());
+}
 
 /**
  * \brief Revoke a service

@@ -71,7 +71,7 @@ Linux)	servicediscovery=avahi
 	fi
 	;;
 Darwin)	servicediscovery=bonjour
-	AC_DEFINE([USE_SD_BONJOUR], [0], [Define to 1 if using Bonjour for service discovery.])
+	AC_DEFINE([USE_SD_BONJOUR], [1], [Define to 1 if using Bonjour for service discovery.])
 	;;
 esac
 AM_CONDITIONAL(ENABLE_AVAHI, test x$servicediscovery = xavahi)
