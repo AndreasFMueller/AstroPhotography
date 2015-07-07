@@ -8,7 +8,7 @@
 namespace astro {
 namespace discover {
 
-BonjourDiscovery::BonjourDiscovery(service_type t) : ServiceDiscovery(t) {
+BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 }
 
 } // namespace discover

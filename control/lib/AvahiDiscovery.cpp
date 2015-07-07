@@ -11,6 +11,7 @@
 #include <thread>
 #include <avahi-client/client.h>
 #include <avahi-client/lookup.h>
+#include <avahi-client/publish.h>
 #include <avahi-common/simple-watch.h>
 #include <avahi-common/error.h>
 
@@ -28,10 +29,8 @@ static void	avahi_main(AvahiDiscovery *discovery) {
  * function, which is just a redirection to the main method of the 
  * AvahiDiscovery object.
  */
-AvahiDiscovery::AvahiDiscovery(service_type t)
-	: ServiceDiscovery(t), thread(avahi_main, this) {
+AvahiDiscovery::AvahiDiscovery() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AvahiDiscovery object");
-	
 }
 
 /**
@@ -54,24 +53,24 @@ AvahiDiscovery::~AvahiDiscovery() {
  */
 static void	client_callback(AvahiClient *client, AvahiClientState state,
 			void *userdata) {
-	assert(client);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "client_callback called");
 	AvahiDiscovery	*discovery = (AvahiDiscovery *)userdata;
+	discovery->client_callback(client, state);
+}
+
+void	AvahiDiscovery::client_callback(AvahiClient *client,
+		AvahiClientState state) {
+	assert(client);
 	switch (state) {
 	case AVAHI_CLIENT_FAILURE:
 		debug(LOG_ERR, DEBUG_LOG, 0, "server connection failure: %s",
 			avahi_strerror(avahi_client_errno(client)));
-		avahi_simple_poll_quit(discovery->simple_poll);
+		avahi_simple_poll_quit(simple_poll);
 		break;
 
 	case AVAHI_CLIENT_S_RUNNING:
-		break;
-
 	case AVAHI_CLIENT_S_COLLISION:
-		break;
-
 	case AVAHI_CLIENT_S_REGISTERING:
-		break;
-
 	case AVAHI_CLIENT_CONNECTING:
 		break;
 	}
@@ -95,9 +94,34 @@ static void	resolve_callback(
 			AvahiLookupResultFlags flags,
 			void* userdata) {
 	AvahiDiscovery	*discovery = ((AvahiDiscovery *)userdata);
+	discovery->resolve_callback(resolver, interface, protocol, event,
+		name, type, domain, host_name, address, port, txt, flags);
+}
 
-	discovery->add(ServiceObject(name, port, host_name));
-
+void	AvahiDiscovery::resolve_callback(
+			AvahiServiceResolver *resolver,
+			AvahiIfIndex interface,
+			AvahiProtocol protocol,
+			AvahiResolverEvent event,
+			const char *name,
+			const char *type,
+			const char *domain,
+			const char *host_name,
+			const AvahiAddress *address,
+			uint16_t port,
+			AvahiStringList *txt,
+			AvahiLookupResultFlags flags) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "service %s %s resolved", name, type);
+	while (txt) {
+		std::string	s((char *)avahi_string_list_get_text(txt),
+					avahi_string_list_get_size(txt));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding txt '%s'", s.c_str());
+		ServiceObject::service_type	t = ServiceObject::type_name(s);
+		ServiceObject	o(name, t);
+		o.host(host_name);
+		add(o);
+		txt = avahi_string_list_get_next(txt);
+	}
 	avahi_service_resolver_free(resolver);
 }
 
@@ -115,12 +139,25 @@ static void	browse_callback(
 			AvahiLookupResultFlags flags,
 			void* userdata) {
 	AvahiDiscovery	*discovery = ((AvahiDiscovery *)userdata);
+	discovery->browse_callback(sb, interface, protocol, event,
+		name, type, domain, flags);
+}
+
+void	AvahiDiscovery::browse_callback(
+			AvahiServiceBrowser *sb,
+			AvahiIfIndex interface,
+			AvahiProtocol protocol,
+			AvahiBrowserEvent event,
+			const char *name,
+			const char *type,
+			const char *domain,
+			AvahiLookupResultFlags flags) {
 	AvahiClient	*client = avahi_service_browser_get_client(sb);
 	switch (event) {
 	case AVAHI_BROWSER_FAILURE:
 		debug(LOG_ERR, DEBUG_LOG, 0, "browser failure: %s",
 			avahi_strerror(avahi_client_errno(client)));
-		avahi_simple_poll_quit(discovery->simple_poll);
+		avahi_simple_poll_quit(simple_poll);
 		break;
 	case AVAHI_BROWSER_NEW:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -129,13 +166,14 @@ static void	browse_callback(
 
 		avahi_service_resolver_new(client, interface, protocol, name,
 			type, domain, AVAHI_PROTO_UNSPEC,
-			(AvahiLookupFlags)0, resolve_callback,
-			discovery);
+			(AvahiLookupFlags)0, discover::resolve_callback,
+			this);
 		break;
 	case AVAHI_BROWSER_REMOVE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"remove service %s of type %s in domain %s",
 			name, type, domain);
+		remove(name);
 		break;
 	case AVAHI_BROWSER_ALL_FOR_NOW:
 		break;
@@ -172,7 +210,7 @@ void	AvahiDiscovery::main() {
 	// create avahi client
 	int	error;
 	client = avahi_client_new(avahi_simple_poll_get(simple_poll),
-		(AvahiClientFlags)0, client_callback, this, &error);
+		(AvahiClientFlags)0, discover::client_callback, this, &error);
 	if (NULL == client) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "failed to create client: %s",
 			avahi_strerror(error));
@@ -182,8 +220,8 @@ void	AvahiDiscovery::main() {
 
 	// create the service browser
 	sb = avahi_service_browser_new(client, AVAHI_IF_UNSPEC,
-		AVAHI_PROTO_UNSPEC, dnssd_type.c_str(), NULL,
-		(AvahiLookupFlags)0, browse_callback, this);
+		AVAHI_PROTO_UNSPEC, "_astro._tcp", NULL,
+		(AvahiLookupFlags)0, discover::browse_callback, this);
 	if (NULL == sb) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create browser: %s",
 			avahi_strerror(avahi_client_errno(client)));
@@ -195,6 +233,8 @@ void	AvahiDiscovery::main() {
 	_valid = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "running simple_poll loop");
 	avahi_simple_poll_loop(simple_poll);
+
+	_valid = false;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);

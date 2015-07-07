@@ -13,7 +13,12 @@ namespace discover {
 
 class BonjourDiscovery : public ServiceDiscovery {
 public:
-	BonjourDiscovery(service_type t);
+	BonjourDiscovery();
+};
+
+class BonjourPublisher : public ServicePublisher {
+public:
+	BonjourPublisher(const std::string& servername, int port);
 };
 
 } // namespace discover
