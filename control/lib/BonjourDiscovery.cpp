@@ -75,7 +75,6 @@ static void	discover_main(BonjourDiscovery *discovery) {
 
 ServiceObject	BonjourDiscovery::find(const ServiceKey& key) {
 	BonjourResolver	resolver(key);
-	std::this_thread::sleep_for(std::chrono::seconds(2));
 	return resolver.resolved();
 }
 
@@ -92,7 +91,6 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 
 	// start a thread
 	thread = new std::thread(discover_main, this);
-	return;
 }
 
 BonjourDiscovery::~BonjourDiscovery() {

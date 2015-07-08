@@ -12,6 +12,9 @@
 namespace astro {
 namespace discover {
 
+/**
+ * \brief trampoline function for ResolveReply callbacks
+ */
 static void	resolvereply_callback(
 			DNSServiceRef sdRef,
 			DNSServiceFlags flags,
@@ -28,34 +31,9 @@ static void	resolvereply_callback(
 		errorCode, fullname, hosttarget, port, txtLen, txtRecord);
 }
 
-void	resolve_main(BonjourResolver *resolver) {
-	resolver->main();
-}
-
-BonjourResolver::BonjourResolver(const ServiceKey& key)
-	: _key(key), _resolved(key) {
-	sdRef = NULL;
-	thread = NULL;
-	DNSServiceResolve(&sdRef, 0, 0, _key.name().c_str(),
-		_key.type().c_str(), _key.domain().c_str(),
-		discover::resolvereply_callback, this);
-	thread = new std::thread(resolve_main, this);
-}
-
-BonjourResolver::~BonjourResolver() {
-	if (sdRef) {
-		close(DNSServiceRefSockFD(sdRef));
-	}
-	if (thread) {
-		thread->join();
-		delete thread;
-	}
-	if (sdRef) {
-		DNSServiceRefDeallocate(sdRef);
-		sdRef = NULL;
-	}
-}
-
+/**
+ * \brief ResolveReply callback
+ */
 void	BonjourResolver::resolvereply_callback(
 		DNSServiceRef sdRef,
 		DNSServiceFlags flags,
@@ -72,11 +50,11 @@ void	BonjourResolver::resolvereply_callback(
 	}
 	if (port) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "have port: %d", ntohs(port));
-		_resolved.port(ntohs(port));
+		_object.port(ntohs(port));
 	}
 	if (hosttarget) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "have host: %s", hosttarget);
-		_resolved.host(hosttarget);
+		_object.host(hosttarget);
 	}
 	int	i = 0;
 	while (i < txtLen) {
@@ -85,25 +63,66 @@ void	BonjourResolver::resolvereply_callback(
 			std::string	name((char *)txtRecord + i + 1, l);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
 				i, l, name.c_str());
-			_resolved.set(name);
+			_object.set(name);
 			i += l + 1;
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object: %s",
-		_resolved.toString().c_str());
+		_object.toString().c_str());
 	if (!(flags & kDNSServiceFlagsMoreComing)) {
 		DNSServiceRefDeallocate(sdRef);
 		sdRef = NULL;
 	}
 }
 
-void	BonjourResolver::main() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start resolver thread");
+/**
+ * \brief Resolve function used for the future object
+ */
+ServiceObject	do_resolve(BonjourResolver *resolver) {
+	return resolver->do_resolve();
+}
+
+/**
+ * \brief main resolve function
+ */
+ServiceObject	BonjourResolver::do_resolve() {
+	DNSServiceResolve(&sdRef, 0, 0, _key.name().c_str(),
+		_key.type().c_str(), _key.domain().c_str(),
+		discover::resolvereply_callback, this);
 	int	error;
 	do {
 		error = DNSServiceProcessResult(sdRef);
 	} while (error == kDNSServiceErr_NoError);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "end resolver thread");
+	return _object;
+}
+
+/**
+ * \brief Construct a resolver object
+ */
+BonjourResolver::BonjourResolver(const ServiceKey& key)
+	: _key(key), _object(key) {
+	sdRef = NULL;
+	_resolved = std::async(discover::do_resolve, this);
+}
+
+/**
+ * \brief Destroy the resolver object
+ */
+BonjourResolver::~BonjourResolver() {
+	if (sdRef) {
+		close(DNSServiceRefSockFD(sdRef));
+		DNSServiceRefDeallocate(sdRef);
+		sdRef = NULL;
+	}
+}
+
+/**
+ * \brief retrieve the value of the future
+ *
+ * This method blocks until the asynchronous resolution is complete
+ */
+const ServiceObject&	BonjourResolver::resolved() {
+	return _resolved.get();
 }
 
 } // namespace discover

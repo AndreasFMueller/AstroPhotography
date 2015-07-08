@@ -8,21 +8,24 @@
 
 #include <ServiceDiscovery.h>
 #include <dns_sd.h>
-#include <thread>
+#include <future>
 
 namespace astro {
 namespace discover {
 
 /**
  * \brief Resolver class for Bonjour implementation
+ *
+ * This class uses a std::future object to synchronize with the resolving
+ * thread
  */
 class BonjourResolver {
 	ServiceKey      _key;
+	ServiceObject	_object;
 	DNSServiceRef   sdRef;
-	std::thread     *thread;
-	ServiceObject   _resolved;
+	std::future<ServiceObject>	_resolved;
 public:
-	const ServiceObject&    resolved() const { return _resolved; }
+	const ServiceObject&    resolved();
 	BonjourResolver(const ServiceKey& key);
 	~BonjourResolver();
 	void    resolvereply_callback(
@@ -36,7 +39,7 @@ public:
 			uint16_t txtLen,
 			const unsigned char *txtRecord
 		);
-	void    main();
+	ServiceObject    do_resolve();
 };
 
 
