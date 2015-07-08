@@ -30,8 +30,8 @@ class HasNamePredicate {
 	std::string	name;
 public:
 	HasNamePredicate(const std::string& n) : name(n) { }
-	bool	operator()(const ServiceObject& so) const {
-		return so.name() == name;
+	bool	operator()(const ServiceKey& key) const {
+		return key.name() == name;
 	}
 };
 
@@ -73,38 +73,32 @@ ServiceDiscoveryPtr	ServiceDiscovery::get() {
 #endif /* USE_SD_BONJOUR */
 }
 
-const std::set<ServiceObject>&	ServiceDiscovery::resolve() const {
-	return services;
+ServiceObject	ServiceDiscovery::find(const std::string& name) {
+	ServiceKeySet::iterator	i
+		= find_if(servicekeys.begin(), servicekeys.end(),
+			HasNamePredicate(name));
+	if (i == servicekeys.end()) {
+		throw std::runtime_error("service not found");
+	}
+	return find(*i);
 }
 
 /**
  * \brief Add a service to the services set
  */
-void	ServiceDiscovery::add(const ServiceObject& so) {
-	services.insert(so);
+void	ServiceDiscovery::add(const ServiceKey& key) {
+	remove(key);
+	servicekeys.insert(key);
 }
 
 /**
  * \brief Remove a service from the services set
  */
-void	ServiceDiscovery::remove(const std::string& name) {
-	ServiceSet::iterator	i = find_if(services.begin(), services.end(),
-					HasNamePredicate(name));
-	if (i != services.end()) {
-		services.erase(i);
+void	ServiceDiscovery::remove(const ServiceKey& key) {
+	ServiceKeySet::iterator	i = servicekeys.find(key);
+	if (i != servicekeys.end()) {
+		servicekeys.erase(i);
 	}
-}
-
-/**
- * \brief Find a service object
- */
-const ServiceObject&	ServiceDiscovery::find(const std::string& name) const {
-	ServiceSet::iterator	i = find_if(services.begin(), services.end(),
-					HasNamePredicate(name));
-	if (i != services.end()) {
-		return *i;
-	}
-	throw std::runtime_error("service not found");
 }
 
 /**
@@ -119,9 +113,18 @@ public:
 	}
 };
 
+class ServiceKeyDisplay {
+	std::ostream&	_out;
+public:
+	ServiceKeyDisplay(std::ostream& out) : _out(out) { }
+	void	operator()(const ServiceKey& key) {
+		_out << key.toString() << std::endl;
+	}
+};
+
 std::ostream&	operator<<(std::ostream& out,
-			const ServiceDiscovery::ServiceSet& services) {
-	for_each(services.begin(), services.end(), ServiceDisplay(out));
+			const ServiceDiscovery::ServiceKeySet& services) {
+	for_each(services.begin(), services.end(), ServiceKeyDisplay(out));
 	return out;
 }
 

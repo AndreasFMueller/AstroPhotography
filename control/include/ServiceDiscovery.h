@@ -9,11 +9,84 @@
 #include <string>
 #include <memory>
 #include <set>
+#include <list>
 #include <iostream>
 
 namespace astro {
 namespace discover {
 
+/**
+ * \brief Key for identifying services
+ *
+ * Services are identified by their name, which must be unique within
+ * a domain.
+ */
+class ServiceKey {
+	std::string	_name;
+	std::string	_type;
+	std::string	_domain;
+public:
+	const std::string&	name() const { return _name; }
+	const std::string&	type() const { return _type; }
+	const std::string&	domain() const { return _domain; }
+public:
+	ServiceKey(const std::string& name, const std::string& type,
+		const std::string& domain);
+	bool	operator<(const ServiceKey& other) const;
+	std::string	toString() const;
+};
+
+/**
+ * \brief A class encoding the services implemented by an _astro._tcp server
+ */
+class ServiceSubset {
+public:
+	typedef enum {
+		/**
+		 * An instrument service gives information about the URLs
+		 * that make up an instrument, i.e. cameras, CCDs, coolers,
+		 * guider ports, etc. 
+		 */
+		INSTRUMENTS = 1,
+		/**
+		 * A task server can be used to control a camera to take
+		 * exposures. 
+		 */
+		TASKS = 2,
+		/**
+		 * a guiding server can use a and a guiderport to guide a
+		 * telescope.
+		 */
+		GUIDING = 4,
+		/**
+		 * a images service makes images available to clients
+		 */
+		IMAGES = 8
+	} service_type;
+private:
+	int	_services;
+	bool	validtype(service_type t) const;
+public:
+	service_type	string2type(const std::string& name) const;
+	std::string	type2string(service_type type) const;
+
+	void	set(service_type type);
+	void	set(const std::string& type) { set(string2type(type)); }
+
+	void	unset(service_type type);
+	void	unset(const std::string& type) { unset(string2type(type)); }
+
+	bool	has(service_type type) const;
+	bool	has(const std::string& type) const {
+			return has(string2type(type));
+	}
+
+	std::list<std::string>	types() const;
+
+	ServiceSubset();
+	ServiceSubset(const std::list<std::string>& names);
+
+};
 
 /**
  * \brief Objects encapsulating the information published in dns-ds
@@ -26,47 +99,8 @@ namespace discover {
  * it publishes. All these service entries will usually have the same
  * port, but we at least allow for them to listen on different ports.
  */
-class ServiceObject {
-public:
-	typedef enum {
-		/**
-		 * An instrument service gives information about the URLs
-		 * that make up an instrument, i.e. cameras, CCDs, coolers,
-		 * guider ports, etc. Instrument services have DNS DS
-		 * entries of the form
-		 * <servername>._instruments._astro._tcp.local
-		 */
-		INSTRUMENTS,
-		/**
-		 * A task server can be used to control a camera to take
-		 * exposures. A task server has a DNS-DS name of the form
-		 * <servername>._tasks._astro._tcp.local
-		 */
-		TASKS,
-		/**
-		 * a guiding server can use a and a guiderport to guide a
-		 * telescope. The associated DNS-DS name is
-		 * <servername>._guiding._astro._tcp.local
-		 */
-		GUIDING,
-		/**
-		 * a images service makes images available to clients under
-		 * DNS-DS name <servername>._images._astro._tcp.local
-		 */
-		IMAGES
-	} service_type;
-private:
-	service_type	_type;
-public:
-	service_type	type() const { return _type; }
-
-	static std::string	type_name(service_type t);
-	static service_type	type_name(const std::string& n);
-private:
-	std::string	_name;
-public:
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& n) { _name = n; }
+class ServiceObject : public ServiceKey, public ServiceSubset {
+	// the _port and _host attributes are available only after resolution
 private:
 	int	_port;
 public:
@@ -77,9 +111,10 @@ private:
 public:
 	const std::string&	host() const { return _host; }
 	void	host(const std::string& h) { _host = h; }
+
+	// constructors
 public:
-	ServiceObject(const std::string& name, service_type type);
-	ServiceObject(const std::string& name, const std::string& tn);
+	ServiceObject(const ServiceKey& key);
 
 	// convert an object to a string representation
 	std::string	toString() const;
@@ -87,6 +122,8 @@ public:
 	// comparison
 	bool	operator<(const ServiceObject& other) const;
 };
+
+std::ostream&	operator<<(std::ostream& out, const ServiceObject& o);
 
 class ServiceDiscovery;
 typedef std::shared_ptr<ServiceDiscovery>	ServiceDiscoveryPtr;
@@ -110,25 +147,24 @@ public:
 	// we keep a set of services we have published and a set of
 	// services that have been seen. Both are of type ServiceSet
 public:
-	typedef std::set<ServiceObject>	ServiceSet;
+	typedef std::set<ServiceKey>	ServiceKeySet;
 private:
-	ServiceSet	services;
+	ServiceKeySet	servicekeys;
 public:
-	const ServiceSet&	resolve() const;
-	const ServiceObject&	find(const std::string& name) const;
-
-	// methods to add and remove services when the implementation
-	// detects a change
+	const ServiceKeySet&	list() const { return servicekeys; }
+protected:
+	void	add(const ServiceKey& key);
+	void	remove(const ServiceKey& key);
 public:
-	void	add(const ServiceObject& so);
-	void	remove(const std::string& name);
+	ServiceObject	find(const std::string& name);
+	virtual ServiceObject	find(const ServiceKey& key) = 0;
 };
 
 /**
  * \brief Display a list of services
  */
 std::ostream&	operator<<(std::ostream& out,
-			const ServiceDiscovery::ServiceSet& services);
+			const ServiceDiscovery::ServiceKeySet& services);
 
 class ServicePublisher;
 typedef std::shared_ptr<ServicePublisher>	ServicePublisherPtr;
@@ -138,7 +174,7 @@ typedef std::shared_ptr<ServicePublisher>	ServicePublisherPtr;
  *
  * The same remarks apply as for the ServiceDiscovery class.
  */
-class ServicePublisher {
+class ServicePublisher : public ServiceSubset {
 	std::string	_servername;
 public:
 	const std::string&	servername() const { return _servername; }
@@ -154,16 +190,6 @@ public:
 	static ServicePublisherPtr	get(const std::string& servername,
 						int port);
 
-	// we keep a set of services we have published and a set of
-	// services that have been seen. Both are of type ServiceSet
-public:
-	typedef std::set<ServiceObject::service_type>	ServiceTypeSet;
-protected:
-	ServiceTypeSet	published;
-	bool	has(ServiceObject::service_type type) const;
-public:
-	void	add(ServiceObject::service_type type);
-	void	revoke(ServiceObject::service_type type);
 	virtual void	publish();
 };
 

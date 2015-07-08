@@ -56,48 +56,8 @@ ServicePublisher::~ServicePublisher() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy the service publishing object");
 }
 
-/**
- * \brief Publish a service object
- */
-void	ServicePublisher::add(ServiceObject::service_type type) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "add %s",
-		ServiceObject::type_name(type).c_str());
-	published.insert(type);
-}
-
 void	ServicePublisher::publish() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish now");
-}
-
-/**
- * \brief Predicate class to be used in algorithms
- */
-class HasTypePredicate {
-	ServiceObject::service_type	_type;
-public:
-	HasTypePredicate(ServiceObject::service_type type) : _type(type) { }
-	bool	operator()(ServiceObject::service_type type) {
-		return _type == type;
-	}
-};
-
-bool	ServicePublisher::has(ServiceObject::service_type type) const {
-	ServiceTypeSet::const_iterator	i
-		= find_if(published.begin(), published.end(),
-			HasTypePredicate(type));
-	return (i != published.end());
-}
-
-/**
- * \brief Revoke a service
- */
-void	ServicePublisher::revoke(ServiceObject::service_type type) {
-	ServiceTypeSet::iterator	i
-		= find_if(published.begin(), published.end(),
-			HasTypePredicate(type));
-	if (i != published.end()) {
-		published.erase(i);
-	}
 }
 
 /**

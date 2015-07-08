@@ -28,7 +28,7 @@ if ENABLE_AVAHI
 avahi_files = AvahiBase.cpp AvahiDiscovery.cpp AvahiPublisher.cpp
 endif
 if ENABLE_BONJOUR
-bonjour_files = BonjourDiscovery.cpp BonjourPublisher.cpp
+bonjour_files = BonjourResolver.cpp BonjourDiscovery.cpp BonjourPublisher.cpp
 endif
 
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
@@ -99,7 +99,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
 	ImageCalibrationStep.cpp CalibrationImageStep.cpp ImageBufferStep.cpp \
 	CalibrationProcessorStep.cpp InterpolationStep.cpp \
-	ServiceObject.cpp ServiceDiscovery.cpp ServicePublisher.cpp \
+	ServiceKey.cpp ServiceSubset.cpp ServiceObject.cpp \
+	ServiceDiscovery.cpp ServicePublisher.cpp \
 	$(avahi_files) $(bonjour_files) \
 	$(uvc_files) \
 	$(unicap_flies)

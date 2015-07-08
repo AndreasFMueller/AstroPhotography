@@ -29,6 +29,9 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "  -p,--port=<port>  use <port> as the port number";
 	std::cout << std::endl;
+	std::cout << "  -t,--timeout=<t>  terminate after <t> seconds, don't "
+		"terminate if t=0";
+	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
@@ -36,6 +39,7 @@ static struct option	longopts[] = {
 	{ "help",	no_argument,		NULL,	'h' },
 	{ "port",	required_argument,	NULL,	'p' },
 	{ "name",	required_argument,	NULL,	'n' },
+	{ "timeout",	required_argument,	NULL,	't' },
 	{ NULL,		0,			NULL,	 0  }
 };
 
@@ -49,8 +53,9 @@ int	main(int argc, char *argv[]) {
 	if (0 == gethostname(h, sizeof(h))) {
 		hostname = std::string(h, strlen(h));
 	}
+	int	timeout = 10;
 
-	while (EOF != (c = getopt_long(argc, argv, "dhp:n:",
+	while (EOF != (c = getopt_long(argc, argv, "dhp:n:t:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -67,6 +72,9 @@ int	main(int argc, char *argv[]) {
 		case 'n':
 			hostname = std::string(optarg);
 			break;
+		case 't':
+			timeout = std::stoi(optarg);
+			break;
 		}
 
 	// additional arguments are service names and ports
@@ -80,15 +88,17 @@ int	main(int argc, char *argv[]) {
 
 	// publish a service
 	for (int i = optind; i < argc; i++) {
-		ServiceObject::service_type	t
-			= ServiceObject::type_name(argv[i]);
-		sd->add(t);
+		sd->set(argv[i]);
 	}
 	sd->publish();
 
 	// wait some time
-	std::this_thread::sleep_for(std::chrono::seconds(10));
+	if (timeout == 0) {
+		timeout = 2147483647;
+	}
+	std::this_thread::sleep_for(std::chrono::seconds(timeout));
 
+#if 0
 	// remove the service
 	for (int i = optind; i < argc; i++) {
 		ServiceObject::service_type	t
@@ -99,6 +109,7 @@ int	main(int argc, char *argv[]) {
 
 	// wait some more
 	std::this_thread::sleep_for(std::chrono::seconds(1));
+#endif
 
 	// that's it, done
 	return EXIT_SUCCESS;

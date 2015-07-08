@@ -12,6 +12,9 @@
 namespace astro {
 namespace discover {
 
+/**
+ * \brief Trampoline-Callback for browse replies
+ */
 static void	browsereply_callback(DNSServiceRef sdRef,
 			DNSServiceFlags flags,
 			uint32_t interfaceIndex,
@@ -26,7 +29,12 @@ static void	browsereply_callback(DNSServiceRef sdRef,
 		errorCode, serviceName, regtype, replyDomain);
 }
 
-
+/**
+ * \brief Callback for browse replies
+ *
+ * This callback is called when then browser detects a change in the 
+ * set of service providers published on the net.
+ */
 void    BonjourDiscovery::browsereply_callback(DNSServiceRef sdRef,
 			DNSServiceFlags flags,
 			uint32_t interfaceIndex,
@@ -34,10 +42,21 @@ void    BonjourDiscovery::browsereply_callback(DNSServiceRef sdRef,
 			const char *serviceName,
 			const char *regtype,
 			const char *replyDomain) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found servive %s/%s@%s", serviceName,
-		regtype, replyDomain);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d found servive %s/%s@%s", flags,
+		serviceName, regtype, replyDomain);
+	
+	if (flags && kDNSServiceFlagsAdd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add service");
+		add(ServiceKey(serviceName, regtype, replyDomain));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove service");
+		remove(ServiceKey(serviceName, regtype, replyDomain));
+	}
 }
 
+/**
+ * \brief Main method for the 
+ */
 void	BonjourDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
 	int	error;
@@ -47,11 +66,21 @@ void	BonjourDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end thread");
 }
 
-static void	bonjour_main(BonjourDiscovery *discovery) {
+/**
+ * \brief trampoline function 
+ */
+static void	discover_main(BonjourDiscovery *discovery) {
 	discovery->main();
 }
 
+ServiceObject	BonjourDiscovery::find(const ServiceKey& key) {
+	BonjourResolver	resolver(key);
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+	return resolver.resolved();
+}
+
 BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
+	thread = NULL;
 	sdRef = NULL;
 	DNSServiceErrorType	error = DNSServiceBrowse(&sdRef, 0, 0,
 		"_astro._tcp", NULL, discover::browsereply_callback, this);
@@ -62,14 +91,18 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DNSServiceBrowse started");
 
 	// start a thread
-	thread = new std::thread(bonjour_main, this);
+	thread = new std::thread(discover_main, this);
 	return;
 }
 
 BonjourDiscovery::~BonjourDiscovery() {
-	close(DNSServiceRefSockFD(sdRef));
-	thread->join();
-	delete thread;
+	if (sdRef) {
+		close(DNSServiceRefSockFD(sdRef));
+	}
+	if (thread) {
+		thread->join();
+		delete thread;
+	}
 	if (sdRef) {
 		DNSServiceRefDeallocate(sdRef);
 		sdRef = NULL;

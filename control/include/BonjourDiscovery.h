@@ -13,6 +13,41 @@
 namespace astro {
 namespace discover {
 
+/**
+ * \brief Resolver class for Bonjour implementation
+ */
+class BonjourResolver {
+	ServiceKey      _key;
+	DNSServiceRef   sdRef;
+	std::thread     *thread;
+	ServiceObject   _resolved;
+public:
+	const ServiceObject&    resolved() const { return _resolved; }
+	BonjourResolver(const ServiceKey& key);
+	~BonjourResolver();
+	void    resolvereply_callback(
+			DNSServiceRef sdRef,
+			DNSServiceFlags flags,
+			uint32_t interfaceIndex,
+			DNSServiceErrorType errorCode,
+			const char *fullname,
+			const char *hosttarget,
+			uint16_t port,
+			uint16_t txtLen,
+			const unsigned char *txtRecord
+		);
+	void    main();
+};
+
+
+/**
+ * \brief Implementation class for Bonjour based service discovery
+ *
+ * Discovery using Bonjour is the method of choice on the Mac. Although
+ * the same API is available for Linux as well, Avahi is much more common
+ * on that plattform. But since Avahi is not reasonably available on 
+ * Mac OS X, wie have to write a separate implementation.
+ */
 class BonjourDiscovery : public ServiceDiscovery {
 	DNSServiceRef	sdRef;
 	std::thread	*thread;
@@ -27,8 +62,12 @@ public:
 			const char *regtype, 
 			const char *replyDomain);
 	void	main();
+	virtual ServiceObject	find(const ServiceKey& key);
 };
 
+/**
+ * \brief Implementation class for Bonjour based service publishing
+ */
 class BonjourPublisher : public ServicePublisher {
 	DNSServiceRef	sdRef;
 public:

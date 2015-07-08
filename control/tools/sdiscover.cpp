@@ -26,19 +26,24 @@ void	usage(const char *progname) {
 	std::cout << "  -h,--help         display this help message and exit";
 	std::cout << std::endl;
 	std::cout << "                    are 'images', 'tasks', 'guiding' and 'instrument'";
+	std::cout << "  -t,--timeout=<t>  wait for <t> seconds until exiting";
+	std::cout << std::endl;
 	std::cout << std::endl;
 }
 
 static struct option	longopts[] = {
 	{ "debug",	no_argument,		NULL,	'd' },
 	{ "help",	no_argument,		NULL,	'h' },
+	{ "timeout",	required_argument,	NULL,	't' },
 	{ NULL,		0,			NULL,	 0  }
 };
 
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dh", longopts, &longindex)))
+	int	timeout = 10;
+	while (EOF != (c = getopt_long(argc, argv, "dht:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -48,16 +53,28 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 't':
+			timeout = std::stoi(optarg);
+			break;
 		}
+
+	if (timeout == 0) {
+		timeout = 2147483647;
+	}
 
 	// create a service discovery object
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
-	std::this_thread::sleep_for(std::chrono::seconds(10));
-	std::cout << sd->resolve() << std::endl;
+	std::this_thread::sleep_for(std::chrono::seconds(timeout));
 
-	// get a list of services 
-	std::set<ServiceObject>	s = sd->resolve();
+	// display list of services 
+	ServiceDiscovery::ServiceKeySet	s = sd->list();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "services found: %d", s.size());
+	std::cout << s << std::endl;
+
+	// resolve the first service
+	ServiceKey	key = *(sd->list().begin());
+	ServiceObject	object = sd->find(key);
+	std::cout << object.toString() << std::endl;
 
 	return EXIT_SUCCESS;
 }

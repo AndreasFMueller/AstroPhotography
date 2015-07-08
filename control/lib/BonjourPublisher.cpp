@@ -48,22 +48,22 @@ void	BonjourPublisher::publish() {
 	sdRef = NULL;
 	char	buffer[100];
 	int	l = 0;
-	if (has(ServiceObject::IMAGES)) {
+	if (has(ServiceSubset::IMAGES)) {
 		buffer[l] = 6;
 		strcpy(buffer + l + 1, "images");
 		l += 7;
 	}
-	if (has(ServiceObject::TASKS)) {
+	if (has(ServiceSubset::TASKS)) {
 		buffer[l] = 5;
 		strcpy(buffer + l + 1, "tasks");
 		l += 6;
 	}
-	if (has(ServiceObject::INSTRUMENTS)) {
+	if (has(ServiceSubset::INSTRUMENTS)) {
 		buffer[l] = 11;
 		strcpy(buffer + l + 1, "instruments");
 		l += 12;
 	}
-	if (has(ServiceObject::GUIDING)) {
+	if (has(ServiceSubset::GUIDING)) {
 		buffer[l] = 7;
 		strcpy(buffer + l + 1, "guiding");
 		l += 8;
