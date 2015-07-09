@@ -19,24 +19,16 @@ namespace astro {
 namespace discover {
 
 /**
- * \brief Trampoline function to run the threads main method
- */
-static void	avahi_main(AvahiBase *base) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "call the virtual main method");
-	base->main();
-}
-
-/**
  * \brief Constructor for the AvahiDiscovery object
  *
  * This constructor also creates the thread and launches it on the avahi_main
  * function, which is just a redirection to the main method of the 
  * AvahiDiscovery object.
  */
-AvahiBase::AvahiBase() : simple_poll(NULL), client(NULL),
-	thread(avahi_main, this) {
+AvahiBase::AvahiBase() : simple_poll(NULL), client(NULL) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AvahiBase object");
-	_valid = _prom.get_future();
+	_fut = _prom.get_future();
+	_valid = true;
 }
 
 /**
@@ -45,14 +37,7 @@ AvahiBase::AvahiBase() : simple_poll(NULL), client(NULL),
  * This destrutctor must cancel the the simple_poll thread
  */
 AvahiBase::~AvahiBase() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiBase");
-	if (valid()) {
-		avahi_simple_poll_quit(simple_poll);
-	}
-	// wait for the thread to terminate
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "join the thread");
-	thread.join();
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiBase object");
 	if (client) {
 		avahi_client_free(client);
 		client = NULL;
@@ -61,15 +46,20 @@ AvahiBase::~AvahiBase() {
 		avahi_simple_poll_free(simple_poll);
 		simple_poll = NULL;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiBase object");
 }
 
 /**
  * \brief Test validity
  */
 bool	AvahiBase::valid() {
+	bool	result;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "is future valid?");
-	bool	result = _valid.get();
+	try {
+		result = _fut.get();
+	} catch (const std::exception& x) {
+		_valid = false;
+		result = _valid;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got value");
 	return result;
 }
@@ -113,9 +103,12 @@ bool	AvahiBase::main_startup() {
 
 	// event loop for the poll
 	_prom.set_value(true);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main_startup complete");
 	return true;
 fail:
+	_valid = false;
 	_prom.set_value(false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "main_startup failed");
 	return false;
 }
 
@@ -130,7 +123,7 @@ void	AvahiBase::client_callback(AvahiClient *client,
 		debug(LOG_ERR, DEBUG_LOG, 0, "server connection failure: %s",
 			avahi_strerror(avahi_client_errno(client)));
 		avahi_simple_poll_quit(simple_poll);
-		_prom.set_value(false);
+		_valid = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "client callback completed");
 }

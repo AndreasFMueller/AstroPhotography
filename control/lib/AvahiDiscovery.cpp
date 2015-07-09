@@ -114,6 +114,7 @@ void	AvahiDiscovery::main() {
 		this);
 	AvahiServiceBrowser	*sb = NULL;
 	if (!main_startup()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "main startup failed");
 		return;
 	}
 
@@ -136,7 +137,7 @@ void	AvahiDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
 fail:
-	_prom.set_value(false);
+	_valid = false;
 	if (sb) {
 		avahi_service_browser_free(sb);
 		sb = NULL;
