@@ -37,9 +37,9 @@ static void	resolvereply_callback(
 void	BonjourResolver::resolvereply_callback(
 		DNSServiceRef sdRef,
 		DNSServiceFlags flags,
-		uint32_t interfaceIndex,
-		DNSServiceErrorType errorCode,
-		const char *fullname,
+		uint32_t /* interfaceIndex */,
+		DNSServiceErrorType /* errorCode */,
+		const char * /* fullname */,
 		const char *hosttarget,
 		uint16_t port,
 		uint16_t txtLen,
@@ -80,14 +80,20 @@ void	BonjourResolver::resolvereply_callback(
  * \brief main resolve function
  */
 ServiceObject	BonjourResolver::do_resolve() {
-	sdRef = NULL;
-	DNSServiceResolve(&sdRef, 0, 0, _key.name().c_str(),
-		_key.type().c_str(), _key.domain().c_str(),
+	DNSServiceRef	sdRef = NULL;
+	DNSServiceResolve(&sdRef, 0, kDNSServiceInterfaceIndexAny,
+		_key.name().c_str(), _key.type().c_str(),
+		_key.domain().c_str(),
 		discover::resolvereply_callback, this);
 	int	error;
 	do {
 		error = DNSServiceProcessResult(sdRef);
 	} while (error == kDNSServiceErr_NoError);
+	if (sdRef) {
+		close(DNSServiceRefSockFD(sdRef));
+		DNSServiceRefDeallocate(sdRef);
+		sdRef = NULL;
+	}
 	return _object;
 }
 
@@ -101,11 +107,6 @@ BonjourResolver::BonjourResolver(const ServiceKey& key) : ServiceResolver(key) {
  * \brief Destroy the resolver object
  */
 BonjourResolver::~BonjourResolver() {
-	if (sdRef) {
-		close(DNSServiceRefSockFD(sdRef));
-		DNSServiceRefDeallocate(sdRef);
-		sdRef = NULL;
-	}
 }
 
 } // namespace discover

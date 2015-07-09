@@ -20,7 +20,6 @@ namespace discover {
  * thread
  */
 class BonjourResolver : public ServiceResolver {
-	DNSServiceRef   sdRef;
 public:
 	BonjourResolver(const ServiceKey& key);
 	~BonjourResolver();
