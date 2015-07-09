@@ -67,7 +67,7 @@ void	BonjourDiscovery::main() {
 }
 
 /**
- * \brief trampoline function 
+ * \brief trampoline main function 
  */
 static void	discover_main(BonjourDiscovery *discovery) {
 	discovery->main();
@@ -81,7 +81,8 @@ ServiceObject	BonjourDiscovery::find(const ServiceKey& key) {
 BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 	thread = NULL;
 	sdRef = NULL;
-	DNSServiceErrorType	error = DNSServiceBrowse(&sdRef, 0, 0,
+	DNSServiceErrorType	error = DNSServiceBrowse(&sdRef, 0,
+		kDNSServiceInterfaceIndexAny,
 		"_astro._tcp", NULL, discover::browsereply_callback, this);
 	if (error != kDNSServiceErr_NoError) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "browser failed: %d", error);
