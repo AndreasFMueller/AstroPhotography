@@ -53,10 +53,17 @@ static void	entry_group_callback(AvahiEntryGroup *g,
 	discovery->entry_group_callback(g, state);
 }
 
+/**
+ * \brief Callback for the entry group
+ *
+ * When this callback is called, then the entry group is ready to receive
+ * service entries. We will then save the group
+ */
 void	AvahiPublisher::entry_group_callback(AvahiEntryGroup *g,
 		AvahiEntryGroupState state) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"AvahiPublisher::entry_group_callback %p, %p, %d", this, g, state);
+		"AvahiPublisher::entry_group_callback %p, %p, %d", this, g,
+		state);
 
 	// remember the group, if we don't have it already
 	if (!(group == g || group == NULL)) {
@@ -67,16 +74,16 @@ void	AvahiPublisher::entry_group_callback(AvahiEntryGroup *g,
 
 	switch (state) {
 	case AVAHI_ENTRY_GROUP_UNCOMMITED:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "uncommited");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "group uncommited");
 		break;
 	case AVAHI_ENTRY_GROUP_REGISTERING:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "group registering");
 		break;
 	case AVAHI_ENTRY_GROUP_ESTABLISHED:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "established");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "group established");
 		break;
 	case AVAHI_ENTRY_GROUP_COLLISION:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "collision");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "group collision");
 		break;
 	case AVAHI_ENTRY_GROUP_FAILURE:
 		debug(LOG_ERR, DEBUG_LOG, 0, "error during group operation: %s",
@@ -89,26 +96,15 @@ void	AvahiPublisher::entry_group_callback(AvahiEntryGroup *g,
 }
 
 /**
- * \brief Client callback implementation
+ * \brief callback reporting state changes in the avahi client
  */
-static void	client_callback(AvahiClient *client, AvahiClientState state,
-			void *userdata) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "client_callback called");
-	AvahiPublisher	*discovery = (AvahiPublisher *)userdata;
-	discovery->client_callback(client, state);
-}
-
 void	AvahiPublisher::client_callback(AvahiClient *client,
 		AvahiClientState state) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "AvahiPublisher::client_callback");
+	// handle failure
+	AvahiBase::client_callback(client, state);
 	assert(client);
 	switch (state) {
-	case AVAHI_CLIENT_FAILURE:
-		debug(LOG_ERR, DEBUG_LOG, 0, "server connection failure: %s",
-			avahi_strerror(avahi_client_errno(client)));
-		avahi_simple_poll_quit(simple_poll);
-		break;
-
 	case AVAHI_CLIENT_S_RUNNING:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "client (%p) is running",
 			client);
@@ -189,7 +185,7 @@ void	AvahiPublisher::add_service_objects(AvahiClient *client) {
 		servername().c_str(), "_astro._tcp",
 		NULL, NULL, port(), strlist);
 
-	//avahi_string_list_free(strlist);
+	avahi_string_list_free(strlist);
 
 	if (rc == AVAHI_ERR_COLLISION) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "name collision, exiting");
@@ -203,6 +199,7 @@ void	AvahiPublisher::add_service_objects(AvahiClient *client) {
 	}
 
 	// commit the group
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "commiting the group");
 	rc = avahi_entry_group_commit(group);
 	if (rc < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot commit: %s",
@@ -220,7 +217,7 @@ static void	modify_callback(AvahiTimeout *e, void *userdata) {
 	publisher->modify_callback(e);
 }
 
-void	AvahiPublisher::modify_callback(AvahiTimeout *e) {
+void	AvahiPublisher::modify_callback(AvahiTimeout * /* e */) {
 	if (avahi_client_get_state(client) == AVAHI_CLIENT_S_RUNNING) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "modify published services");
 		if (group)
@@ -230,6 +227,13 @@ void	AvahiPublisher::modify_callback(AvahiTimeout *e) {
 }
 
 void	AvahiPublisher::publish() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish %s:%d %s",
+		servername().c_str(), port(),
+		ServiceSubset::toString().c_str());
+	if (!valid()) {
+		throw std::runtime_error("publishing thread failed");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "valid");
 	// rebuild the services
 	struct timeval	tv;
 	avahi_simple_poll_get(simple_poll)->timeout_new(
@@ -247,42 +251,17 @@ void	AvahiPublisher::publish() {
 void	AvahiPublisher::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program started for publishing %p",
 		this);
-	_valid = false;
-
-	// create avahi client objects
-	client = NULL;
-	simple_poll = NULL;
-
-	// create Avahi simple poll object
-	simple_poll = avahi_simple_poll_new();
-	if (NULL == simple_poll) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"failed to create simple poll object");
-		goto fail;
+	if (!main_startup()) {
+		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "simple poll created");
-
-	// create avahi client
-	int	error;
-	client = avahi_client_new(avahi_simple_poll_get(simple_poll),
-		(AvahiClientFlags)0, discover::client_callback, this, &error);
-	if (NULL == client) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "failed to create client: %s",
-			avahi_strerror(error));
-		goto fail;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "avahi client created @ %p", client);
 
 	// event loop for the poll
-	_valid = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "running simple_poll loop");
 	avahi_simple_poll_loop(simple_poll);
 
-	_valid = false;
-
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
-fail:
+	_prom.set_value(false);
 	if (client) {
 		avahi_client_free(client);
 		client = NULL;

@@ -5,6 +5,7 @@
  */
 #include <ServiceDiscovery.h>
 #include <AstroDebug.h>
+#include <sstream>
 
 namespace astro {
 namespace discover {
@@ -27,6 +28,21 @@ std::string	ServiceSubset::type2string(service_type type) const {
 	case IMAGES:		return std::string("images");
 	default:	throw std::runtime_error("invalid type code");
 	}
+}
+
+std::string	ServiceSubset::toString() const {
+	std::ostringstream	out;
+	std::list<std::string>	t = types();
+	out << "[";
+	std::list<std::string>::const_iterator	i;
+	for (i = t.begin(); i != t.end(); i++) {
+		if (i != t.begin()) {
+			out << " ,";
+		}
+		out << "'" << *i << "'";
+	}
+	out << "]";
+	return out.str();
 }
 
 ServiceSubset::ServiceSubset() {

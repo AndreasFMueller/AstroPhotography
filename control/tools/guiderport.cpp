@@ -183,9 +183,5 @@ int	main(int argc, char *argv[]) {
 } // namespace astro
 
 int	main(int argc, char *argv[]) {
-	try {
-		return astro::main_function<astro::app::guiderport::main>(argc, argv);
-	} catch (const std::exception& x) {
-		std::cerr << "terminated by exception: " << x.what() << std::endl;
-	}
+	return astro::main_function<astro::app::guiderport::main>(argc, argv);
 }

@@ -18,10 +18,6 @@
 namespace astro {
 namespace discover {
 
-static void	avahi_main(AvahiDiscovery *discovery) {
-	discovery->main();
-}
-
 /**
  * \brief Constructor for the AvahiDiscovery object
  *
@@ -46,34 +42,6 @@ AvahiDiscovery::~AvahiDiscovery() {
 	// wait for the thread to terminate
 	thread.join();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiDiscovery object");
-}
-
-/**
- * \brief Client callback implementation
- */
-static void	client_callback(AvahiClient *client, AvahiClientState state,
-			void *userdata) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "client_callback called");
-	AvahiDiscovery	*discovery = (AvahiDiscovery *)userdata;
-	discovery->client_callback(client, state);
-}
-
-void	AvahiDiscovery::client_callback(AvahiClient *client,
-		AvahiClientState state) {
-	assert(client);
-	switch (state) {
-	case AVAHI_CLIENT_FAILURE:
-		debug(LOG_ERR, DEBUG_LOG, 0, "server connection failure: %s",
-			avahi_strerror(avahi_client_errno(client)));
-		avahi_simple_poll_quit(simple_poll);
-		break;
-
-	case AVAHI_CLIENT_S_RUNNING:
-	case AVAHI_CLIENT_S_COLLISION:
-	case AVAHI_CLIENT_S_REGISTERING:
-	case AVAHI_CLIENT_CONNECTING:
-		break;
-	}
 }
 
 /**
@@ -144,32 +112,10 @@ void	AvahiDiscovery::browse_callback(
 void	AvahiDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program started for discovery %p",
 		this);
-	_valid = false;
-
-	// create avahi client objects
 	AvahiServiceBrowser	*sb = NULL;
-	AvahiClient		*client = NULL;
-	simple_poll = NULL;
-
-	// create Avahi simple poll object
-	simple_poll = avahi_simple_poll_new();
-	if (NULL == simple_poll) {
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"failed to create simple poll object");
-		goto fail;
+	if (!main_startup()) {
+		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "simple poll created");
-
-	// create avahi client
-	int	error;
-	client = avahi_client_new(avahi_simple_poll_get(simple_poll),
-		(AvahiClientFlags)0, discover::client_callback, this, &error);
-	if (NULL == client) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "failed to create client: %s",
-			avahi_strerror(error));
-		goto fail;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "avahi client created");
 
 	// create the service browser
 	sb = avahi_service_browser_new(client, AVAHI_IF_UNSPEC,
@@ -183,15 +129,14 @@ void	AvahiDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "avahi service browser created");
 
 	// event loop for the poll
-	_valid = true;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "running simple_poll loop");
 	avahi_simple_poll_loop(simple_poll);
 
-	_valid = false;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
 fail:
+	_prom.set_value(false);
 	if (sb) {
 		avahi_service_browser_free(sb);
 		sb = NULL;

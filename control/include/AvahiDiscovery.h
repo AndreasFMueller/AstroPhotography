@@ -23,12 +23,15 @@ namespace discover {
  */
 class	AvahiBase {
 protected:
-	bool	_valid;
+	std::promise<bool>	_prom;
+	std::future<bool>	_valid;
 public:
-	bool	valid() const { return _valid; }
+	bool	valid();
 protected:
-	std::thread	thread;
 	AvahiSimplePoll	*simple_poll;
+	AvahiClient	*client;
+	std::thread	thread;
+	bool	main_startup();
 private:
 	// make AvahiDiscovery uncopiable
 	AvahiBase(const AvahiBase& other);
@@ -38,6 +41,8 @@ public:
 	virtual ~AvahiBase();
 	// virtual main function, needs to be implemented in derived class
 	virtual void	main() = 0;
+	virtual void	client_callback(AvahiClient *client,
+				AvahiClientState state);
 };
 
 /**
@@ -64,6 +69,10 @@ public:
 			uint16_t port,
 			AvahiStringList *txt,
 			AvahiLookupResultFlags flags);
+/*
+	virtual void	client_callback(AvahiClient *client,
+				AvahiClientState state);
+*/
 };
 
 /**
@@ -76,9 +85,6 @@ public:
 	virtual void	main();
 
 public:
-	// callback related to client activities
-	void	client_callback(AvahiClient *c, AvahiClientState state);
-
 	// callback related to browsing
 	void     browse_callback(
 			AvahiServiceBrowser *sb,
@@ -107,7 +113,6 @@ public:
 	AvahiEntryGroup	*group;
 	void	entry_group_callback(AvahiEntryGroup *g,
 			AvahiEntryGroupState state);
-	AvahiClient	*client;
 
 	// callback related to client activities
 	void	client_callback(AvahiClient *c, AvahiClientState state);

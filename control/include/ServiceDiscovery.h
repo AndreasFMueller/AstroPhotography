@@ -83,6 +83,7 @@ public:
 	}
 
 	std::list<std::string>	types() const;
+	std::string	toString() const;
 
 	ServiceSubset();
 	ServiceSubset(const std::list<std::string>& names);
