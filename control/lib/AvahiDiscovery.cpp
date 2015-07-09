@@ -77,55 +77,6 @@ void	AvahiDiscovery::client_callback(AvahiClient *client,
 }
 
 /**
- * \brief Resolution callback implementation
- */
-static void	resolve_callback(
-			AvahiServiceResolver *resolver,
-			AvahiIfIndex interface,
-			AvahiProtocol protocol,
-			AvahiResolverEvent event,
-			const char *name,
-			const char *type,
-			const char *domain,
-			const char *host_name,
-			const AvahiAddress *address,
-			uint16_t port,
-			AvahiStringList *txt,
-			AvahiLookupResultFlags flags,
-			void* userdata) {
-	AvahiDiscovery	*discovery = ((AvahiDiscovery *)userdata);
-	discovery->resolve_callback(resolver, interface, protocol, event,
-		name, type, domain, host_name, address, port, txt, flags);
-}
-
-void	AvahiDiscovery::resolve_callback(
-			AvahiServiceResolver *resolver,
-			AvahiIfIndex interface,
-			AvahiProtocol protocol,
-			AvahiResolverEvent event,
-			const char *name,
-			const char *type,
-			const char *domain,
-			const char *host_name,
-			const AvahiAddress *address,
-			uint16_t port,
-			AvahiStringList *txt,
-			AvahiLookupResultFlags flags) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "service %s %s resolved", name, type);
-	while (txt) {
-		std::string	s((char *)avahi_string_list_get_text(txt),
-					avahi_string_list_get_size(txt));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding txt '%s'", s.c_str());
-		ServiceObject::service_type	t = ServiceObject::type_name(s);
-		ServiceObject	o(name, t);
-		o.host(host_name);
-		add(o);
-		txt = avahi_string_list_get_next(txt);
-	}
-	avahi_service_resolver_free(resolver);
-}
-
-/**
  * \brief Browse Callback implementation
  */
 static void	browse_callback(
@@ -163,17 +114,19 @@ void	AvahiDiscovery::browse_callback(
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"new service %s of type %s in domain %s",
 			name, type, domain);
-
-		avahi_service_resolver_new(client, interface, protocol, name,
-			type, domain, AVAHI_PROTO_UNSPEC,
-			(AvahiLookupFlags)0, discover::resolve_callback,
-			this);
+		{
+			ServiceKey	key(name, type, domain);
+			add(key);
+		}
 		break;
 	case AVAHI_BROWSER_REMOVE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"remove service %s of type %s in domain %s",
 			name, type, domain);
-		remove(name);
+		{
+			ServiceKey	key(name, type, domain);
+			remove(key);
+		}
 		break;
 	case AVAHI_BROWSER_ALL_FOR_NOW:
 		break;
@@ -251,6 +204,11 @@ fail:
 		avahi_simple_poll_free(simple_poll);
 		simple_poll = NULL;
 	}
+}
+
+ServiceObject	AvahiDiscovery::find(const ServiceKey& key) {
+	ServiceObject	result(key);
+	return result;
 }
 
 } // namespace discover

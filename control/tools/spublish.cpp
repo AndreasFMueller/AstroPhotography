@@ -98,19 +98,6 @@ int	main(int argc, char *argv[]) {
 	}
 	std::this_thread::sleep_for(std::chrono::seconds(timeout));
 
-#if 0
-	// remove the service
-	for (int i = optind; i < argc; i++) {
-		ServiceObject::service_type	t
-			= ServiceObject::type_name(argv[i]);
-		sd->revoke(t);
-	}
-	sd->publish();
-
-	// wait some more
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-#endif
-
 	// that's it, done
 	return EXIT_SUCCESS;
 }

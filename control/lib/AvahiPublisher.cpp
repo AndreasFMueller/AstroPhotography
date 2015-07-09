@@ -165,30 +165,19 @@ fail:
  * \brief Add all service objects to the group
  */
 void	AvahiPublisher::add_service_objects(AvahiClient *client) {
-	if (published.size() == 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no services to add");
-		return;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding services (%d)",
-		published.size());
 	// build an array for the text records
 	AvahiStringList	*strlist = NULL;
-	for (ServiceTypeSet::iterator j = published.begin();
-		j != published.end(); j++) {
-		switch (*j) {
-		case ServiceObject::INSTRUMENTS:
-			strlist = avahi_string_list_add(strlist, "instruments");
-			break;
-		case ServiceObject::TASKS:
-			strlist = avahi_string_list_add(strlist, "tasks");
-			break;
-		case ServiceObject::GUIDING:
-			strlist = avahi_string_list_add(strlist, "guiding");
-			break;
-		case ServiceObject::IMAGES:
-			strlist = avahi_string_list_add(strlist, "images");
-			break;
-		}
+	if (has(ServiceSubset::INSTRUMENTS)) {
+		strlist = avahi_string_list_add(strlist, "instruments");
+	}
+	if (has(ServiceSubset::TASKS)) {
+		strlist = avahi_string_list_add(strlist, "tasks");
+	}
+	if (has(ServiceSubset::GUIDING)) {
+		strlist = avahi_string_list_add(strlist, "guiding");
+	}
+	if (has(ServiceSubset::IMAGES)) {
+		strlist = avahi_string_list_add(strlist, "images");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "created stringlist of %d elements",
 		avahi_string_list_length(strlist));

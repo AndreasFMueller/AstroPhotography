@@ -19,13 +19,9 @@ namespace discover {
  * This class uses a std::future object to synchronize with the resolving
  * thread
  */
-class BonjourResolver {
-	ServiceKey      _key;
-	ServiceObject	_object;
+class BonjourResolver : public ServiceResolver {
 	DNSServiceRef   sdRef;
-	std::future<ServiceObject>	_resolved;
 public:
-	const ServiceObject&    resolved();
 	BonjourResolver(const ServiceKey& key);
 	~BonjourResolver();
 	void    resolvereply_callback(
@@ -39,7 +35,7 @@ public:
 			uint16_t txtLen,
 			const unsigned char *txtRecord
 		);
-	ServiceObject    do_resolve();
+	virtual ServiceObject    do_resolve();
 };
 
 

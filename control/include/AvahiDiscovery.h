@@ -41,6 +41,32 @@ public:
 };
 
 /**
+ * \brief resolver class for Avahi implementation
+ */
+class AvahiResolver : public ServiceResolver {
+	AvahiClient	*_client;
+public:
+	AvahiResolver(const ServiceKey& key, AvahiClient *client);
+	~AvahiResolver();
+	virtual ServiceObject	do_resolve();
+
+	// callback related to name resolution
+	void	resolve_callback(
+			AvahiServiceResolver *resolver,
+			AvahiIfIndex interface,
+			AvahiProtocol protocol,
+			AvahiResolverEvent event,
+			const char *name,
+			const char *type,
+			const char *domain,
+			const char *host_name,
+			const AvahiAddress *address,
+			uint16_t port,
+			AvahiStringList *txt,
+			AvahiLookupResultFlags flags);
+};
+
+/**
  * \brief Service discovery using Avahi*
  */
 class AvahiDiscovery : public ServiceDiscovery, public AvahiBase {
@@ -64,20 +90,8 @@ public:
 			const char *domain,
 			AvahiLookupResultFlags flags);
 
-	// callback related to name resolution
-	void	resolve_callback(
-			AvahiServiceResolver *resolver,
-			AvahiIfIndex interface,
-			AvahiProtocol protocol,
-			AvahiResolverEvent event,
-			const char *name,
-			const char *type,
-			const char *domain,
-			const char *host_name,
-			const AvahiAddress *address,
-			uint16_t port,
-			AvahiStringList *txt,
-			AvahiLookupResultFlags flags);
+
+	virtual ServiceObject	find(const ServiceKey& key);
 };
 
 /**

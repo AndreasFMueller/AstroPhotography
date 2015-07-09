@@ -75,17 +75,12 @@ void	BonjourResolver::resolvereply_callback(
 	}
 }
 
-/**
- * \brief Resolve function used for the future object
- */
-ServiceObject	do_resolve(BonjourResolver *resolver) {
-	return resolver->do_resolve();
-}
 
 /**
  * \brief main resolve function
  */
 ServiceObject	BonjourResolver::do_resolve() {
+	sdRef = NULL;
 	DNSServiceResolve(&sdRef, 0, 0, _key.name().c_str(),
 		_key.type().c_str(), _key.domain().c_str(),
 		discover::resolvereply_callback, this);
@@ -99,10 +94,7 @@ ServiceObject	BonjourResolver::do_resolve() {
 /**
  * \brief Construct a resolver object
  */
-BonjourResolver::BonjourResolver(const ServiceKey& key)
-	: _key(key), _object(key) {
-	sdRef = NULL;
-	_resolved = std::async(discover::do_resolve, this);
+BonjourResolver::BonjourResolver(const ServiceKey& key) : ServiceResolver(key) {
 }
 
 /**
@@ -114,15 +106,6 @@ BonjourResolver::~BonjourResolver() {
 		DNSServiceRefDeallocate(sdRef);
 		sdRef = NULL;
 	}
-}
-
-/**
- * \brief retrieve the value of the future
- *
- * This method blocks until the asynchronous resolution is complete
- */
-const ServiceObject&	BonjourResolver::resolved() {
-	return _resolved.get();
 }
 
 } // namespace discover

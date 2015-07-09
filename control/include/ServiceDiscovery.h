@@ -11,6 +11,7 @@
 #include <set>
 #include <list>
 #include <iostream>
+#include <future>
 
 namespace astro {
 namespace discover {
@@ -124,6 +125,21 @@ public:
 };
 
 std::ostream&	operator<<(std::ostream& out, const ServiceObject& o);
+
+/**
+ * \brief Resolver base class
+ */
+class ServiceResolver {
+protected:
+	ServiceKey	_key;
+	ServiceObject	_object;
+	std::future<ServiceObject>	_resolved;
+public:
+	ServiceResolver(const ServiceKey& key);
+	virtual ~ServiceResolver();
+	ServiceObject	resolved();
+	virtual ServiceObject	do_resolve() = 0;
+};
 
 class ServiceDiscovery;
 typedef std::shared_ptr<ServiceDiscovery>	ServiceDiscoveryPtr;
