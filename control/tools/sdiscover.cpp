@@ -70,6 +70,10 @@ int	main(int argc, char *argv[]) {
 	ServiceDiscovery::ServiceKeySet	s = sd->list();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "services found: %d", s.size());
 	std::cout << s << std::endl;
+	if (s.size() == 0) {
+		std::cout << "no services found" << std::endl;
+		return EXIT_SUCCESS;
+	}
 
 	// resolve the first service
 	ServiceKey	key = *(sd->list().begin());

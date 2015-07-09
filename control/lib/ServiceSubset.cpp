@@ -45,15 +45,30 @@ std::string	ServiceSubset::toString() const {
 	return out.str();
 }
 
+void	ServiceSubset::set(const std::list<std::string>& names) {
+	std::list<std::string>::const_iterator	i;
+	for (i = names.begin(); i != names.end(); i++) {
+		set(string2type(*i));
+	}
+}
+
+void	ServiceSubset::unset(const std::list<std::string>& names) {
+	std::list<std::string>::const_iterator	i;
+	for (i = names.begin(); i != names.end(); i++) {
+		unset(string2type(*i));
+	}
+}
+
 ServiceSubset::ServiceSubset() {
 	_services = 0;
 }
 
 ServiceSubset::ServiceSubset(const std::list<std::string>& names) {
-	std::list<std::string>::const_iterator	i;
-	for (i = names.begin(); i != names.end(); i++) {
-		set(string2type(*i));
-	}
+	set(names);
+}
+
+ServiceSubset::ServiceSubset(const std::string& txt) {
+	set(txtparse(txt));
 }
 
 bool	ServiceSubset::validtype(service_type s) const {
@@ -93,6 +108,50 @@ bool	ServiceSubset::has(service_type s) const {
 		throw std::runtime_error("invalid service code");
 	}
 	return (_services & s) ? true : false;
+}
+
+std::string	ServiceSubset::txtrecord() const {
+	char    buffer[100];
+	int     l = 0;
+	if (has(ServiceSubset::IMAGES)) {
+		buffer[l] = 6;
+		strcpy(buffer + l + 1, "images");
+		l += 7;
+	}
+	if (has(ServiceSubset::TASKS)) {
+		buffer[l] = 5;
+		strcpy(buffer + l + 1, "tasks");
+		l += 6;
+	}
+	if (has(ServiceSubset::INSTRUMENTS)) {
+		buffer[l] = 11;
+		strcpy(buffer + l + 1, "instruments");
+		l += 12;
+	}
+	if (has(ServiceSubset::GUIDING)) {
+		buffer[l] = 7;
+		strcpy(buffer + l + 1, "guiding");
+		l += 8;
+	}
+	return std::string(buffer, l);
+}
+
+std::list<std::string>	ServiceSubset::txtparse(const std::string& txt) {
+	std::list<std::string>	result;
+	const char	*txtRecord = txt.data();
+	size_t	txtLen = txt.size();
+	size_t	i = 0;
+	while (i < txtLen) {
+		int     l = txtRecord[i];
+		if (l > 0) {
+			std::string     name((char *)txtRecord + i + 1, l);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
+				i, l, name.c_str());
+			result.push_back(name);
+			i += l + 1;
+		}
+	}
+	return result;
 }
 
 } // namespace discover

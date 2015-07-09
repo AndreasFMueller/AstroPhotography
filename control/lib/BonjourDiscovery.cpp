@@ -42,7 +42,7 @@ void    BonjourDiscovery::browsereply_callback(DNSServiceRef sdRef,
 			const char *serviceName,
 			const char *regtype,
 			const char *replyDomain) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d found servive %s/%s@%s", flags,
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d found service %s/%s@%s", flags,
 		serviceName, regtype, replyDomain);
 	
 	if (flags && kDNSServiceFlagsAdd) {
@@ -59,6 +59,7 @@ void    BonjourDiscovery::browsereply_callback(DNSServiceRef sdRef,
  */
 void	BonjourDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
+	assert(sdRef != NULL);
 	int	error;
 	do {
 		error = DNSServiceProcessResult(sdRef);
@@ -69,7 +70,7 @@ void	BonjourDiscovery::main() {
 /**
  * \brief trampoline main function 
  */
-static void	discover_main(BonjourDiscovery *discovery) {
+static void	main(BonjourDiscovery *discovery) {
 	discovery->main();
 }
 
@@ -88,10 +89,11 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "browser failed: %d", error);
 		throw std::runtime_error("cannot create browser");
 	}
+	assert(sdRef != NULL);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DNSServiceBrowse started");
 
 	// start a thread
-	thread = new std::thread(discover_main, this);
+	thread = new std::thread(discover::main, this);
 }
 
 BonjourDiscovery::~BonjourDiscovery() {
@@ -101,6 +103,7 @@ BonjourDiscovery::~BonjourDiscovery() {
 	if (thread) {
 		thread->join();
 		delete thread;
+		thread = NULL;
 	}
 	if (sdRef) {
 		DNSServiceRefDeallocate(sdRef);

@@ -12,11 +12,13 @@ namespace discover {
 BonjourPublisher::BonjourPublisher(const std::string& servername, int port)
 	: ServicePublisher(servername, port) {
 	sdRef = NULL;
+	_complete = false;
 }
 
 BonjourPublisher::~BonjourPublisher() {
 	if (sdRef) {
 		DNSServiceRefDeallocate(sdRef);
+		sdRef = NULL;
 	}
 }
 
@@ -26,6 +28,7 @@ static void registerreply_callback(DNSServiceRef sdRef,
 		const char *name,
 		const char *regtype,
 		const char *domain, void *context) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registerreply callback");
 	BonjourPublisher	*publisher = (BonjourPublisher *)context;
 	publisher->registerreply_callback(sdRef, flags, errorCode, name,
 		regtype, domain);
@@ -37,42 +40,42 @@ void	BonjourPublisher::registerreply_callback(DNSServiceRef sdRef,
                         const char *name, 
                         const char *regtype, 
                         const char *domain) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "service found: %s/%s@%s",
-		name, regtype, domain);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registerreply: %s/%s@%s, flags = %d",
+		name, regtype, domain, flags);
+	if (!(flags & kDNSServiceFlagsMoreComing)) {
+		_complete = true;
+	}
 }
 
 void	BonjourPublisher::publish() {
 	if (sdRef) {
 		DNSServiceRefDeallocate(sdRef);
+		sdRef = NULL;
 	}
-	sdRef = NULL;
-	char	buffer[100];
-	int	l = 0;
-	if (has(ServiceSubset::IMAGES)) {
-		buffer[l] = 6;
-		strcpy(buffer + l + 1, "images");
-		l += 7;
-	}
-	if (has(ServiceSubset::TASKS)) {
-		buffer[l] = 5;
-		strcpy(buffer + l + 1, "tasks");
-		l += 6;
-	}
-	if (has(ServiceSubset::INSTRUMENTS)) {
-		buffer[l] = 11;
-		strcpy(buffer + l + 1, "instruments");
-		l += 12;
-	}
-	if (has(ServiceSubset::GUIDING)) {
-		buffer[l] = 7;
-		strcpy(buffer + l + 1, "guiding");
-		l += 8;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "length = %d", l);
+
 	unsigned short	portnumber = port();
-	DNSServiceRegister(&sdRef, 0, 0, servername().c_str(), "_astro._tcp",
-		NULL, NULL, htons(portnumber), l, buffer,
+	std::string	txt = txtrecord();
+	_complete = false;
+
+	DNSServiceErrorType	error = DNSServiceRegister(&sdRef,
+		kDNSServiceInterfaceIndexAny, 0,
+		servername().c_str(), "_astro._tcp", NULL, NULL,
+		htons(portnumber), txt.size(), txt.data(),
 		discover::registerreply_callback, this);
+
+	if (error != kDNSServiceErr_NoError) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "registring failed: %d", error);
+		DNSServiceRefDeallocate(sdRef);
+		sdRef = NULL;
+		return;
+	}
+
+	do {
+		error = DNSServiceProcessResult(sdRef);
+	} while (!_complete);
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registration complete");
+	return;
 }
 
 } // namespace discover

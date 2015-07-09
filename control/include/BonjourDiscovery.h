@@ -68,6 +68,7 @@ public:
  */
 class BonjourPublisher : public ServicePublisher {
 	DNSServiceRef	sdRef;
+	bool		_complete;
 public:
 	BonjourPublisher(const std::string& servername, int port);
 	~BonjourPublisher();

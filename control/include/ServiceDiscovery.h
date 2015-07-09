@@ -73,20 +73,28 @@ public:
 
 	void	set(service_type type);
 	void	set(const std::string& type) { set(string2type(type)); }
+	void	set(const std::list<std::string>& names);
 
 	void	unset(service_type type);
 	void	unset(const std::string& type) { unset(string2type(type)); }
+	void	unset(const std::list<std::string>& names);
 
 	bool	has(service_type type) const;
 	bool	has(const std::string& type) const {
 			return has(string2type(type));
 	}
 
+	void	clear() { _services = 0; }
+
 	std::list<std::string>	types() const;
 	std::string	toString() const;
 
+	std::string	txtrecord() const;
+	static std::list<std::string>	txtparse(const std::string& txt);
+
 	ServiceSubset();
 	ServiceSubset(const std::list<std::string>& names);
+	ServiceSubset(const std::string& txt);
 
 };
 
@@ -202,6 +210,7 @@ public:
 public:
 	ServicePublisher(const std::string& servername, int port);
 	virtual ~ServicePublisher();
+
 
 	// factory method for an implementation class
 	static ServicePublisherPtr	get(const std::string& servername,

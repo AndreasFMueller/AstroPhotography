@@ -56,17 +56,9 @@ void	BonjourResolver::resolvereply_callback(
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "have host: %s", hosttarget);
 		_object.host(hosttarget);
 	}
-	int	i = 0;
-	while (i < txtLen) {
-		int	l = txtRecord[i];
-		if (l > 0) {
-			std::string	name((char *)txtRecord + i + 1, l);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
-				i, l, name.c_str());
-			_object.set(name);
-			i += l + 1;
-		}
-	}
+	std::string	txt((char *)txtRecord, txtLen);
+	_object.set(ServiceSubset::txtparse(txt));
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object: %s",
 		_object.toString().c_str());
 	if (!(flags & kDNSServiceFlagsMoreComing)) {
@@ -74,7 +66,6 @@ void	BonjourResolver::resolvereply_callback(
 		sdRef = NULL;
 	}
 }
-
 
 /**
  * \brief main resolve function
