@@ -27,6 +27,8 @@
 #include <repository.h>
 #include <RepositoriesI.h>
 #include <RepositoryLocator.h>
+#include <ServiceDiscovery.h>
+#include <AstroFormat.h>
 
 namespace snowstar {
 
@@ -36,8 +38,54 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /* 2 */
 { "database",		required_argument,	NULL,	'q' }, /* 3 */
 { "sslport",		required_argument,	NULL,	's' }, /* 4 */
-{ NULL,			0,			NULL,	0   }, /* 5 */
+{ "name",		required_argument,	NULL,	'n' }, /* 5 */
+{ NULL,			0,			NULL,	 0  }, /* 6 */
 };
+
+class service_location {
+public:
+	std::string	servicename;
+	unsigned short	port;
+	unsigned short	sslport;
+	bool	ssl;
+	service_location() : port(0), sslport(0), ssl(false) { }
+	void	locate();
+};
+
+void	service_location::locate() {
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	if (servicename.size() == 0) {
+		if (config->hasglobal("service", "name")) {
+			servicename = config->global("service", "name");
+		} else {
+			char	h[1024];
+			if (gethostname(h, sizeof(h)) < 0) {
+				std::string	msg = astro::stringprintf(
+					"cannot figure out host name: %s",
+					strerror(errno));
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+				throw std::runtime_error(msg);
+			}
+			servicename = std::string(h);
+		}
+	}
+	if (port == 0) {
+		if (config->hasglobal("service", "port")) {
+			std::string	s = config->global("service", "port");
+			port = std::stoi(s);
+		} else {
+			port = 10000;
+		}
+	}
+	if (sslport == 0) {
+		if (config->hasglobal("service", "sslport")) {
+			std::string s = config->global("service", "sslport");
+			sslport = std::stoi(s);
+		}
+	}
+	ssl = (sslport > 0);
+}
 
 /**
  * \brief Main function for the Snowstar server
@@ -66,62 +114,88 @@ int	snowstar_main(int argc, char *argv[]) {
 
 	// default configuration
 	std::string	databasefile("testdb.db");
+	std::string	servicename("");
 
 	// port numbers
-	unsigned short	port = 10000;
-	unsigned short	sslport = 0;
+	service_location	location;
 
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dq:p:s:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dn:p:q:s:",
 		longopts, &longindex)))
 		switch (c) {
+		case 'b':
+			astro::image::ImageDirectory::basedir(optarg);
+			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 'b':
-			astro::image::ImageDirectory::basedir(optarg);
-			break;
 		case 'q':
 			databasefile = std::string(optarg);
 			break;
 		case 'p':
-			port = std::stoi(optarg);
+			location.port = std::stoi(optarg);
 			break;
 		case 's':
-			sslport = std::stoi(optarg);
+			location.sslport = std::stoi(optarg);
+			break;
+		case 'n':
+			location.servicename = std::string(optarg);
 			break;
 		}
+
+	// determine which service name to use
+	location.locate();
+	astro::discover::ServicePublisherPtr	sp
+		= astro::discover::ServicePublisher::get(location.servicename,
+			location.port);
+	astro::discover::ServicePublisherPtr	sps;
+	if (location.ssl) {
+		sps = astro::discover::ServicePublisher::get(
+			location.servicename + "-ssl", location.sslport);
+	}
 
 	// set up the repository
 	astro::module::Repository	repository;
 	astro::module::Devices	devices(repository);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices set up");
+	sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
+	if (sps) { sps->set(astro::discover::ServiceSubset::INSTRUMENTS); }
 
 	// create image directory
 	astro::image::ImageDirectory	imagedirectory;
+	sp->set(astro::discover::ServiceSubset::IMAGES);
+	if (sps) { sps->set(astro::discover::ServiceSubset::IMAGES); }
 
 	// create database and task queue
 	astro::persistence::DatabaseFactory	dbfactory;
 	astro::persistence::Database	database
 		= dbfactory.get(databasefile);
 	astro::task::TaskQueue	taskqueue(database);
+	sp->set(astro::discover::ServiceSubset::TASKS);
+	if (sps) { sps->set(astro::discover::ServiceSubset::TASKS); }
 
 	// create guider factory
 	astro::guiding::GuiderFactory	guiderfactory(repository, database);
+	sp->set(astro::discover::ServiceSubset::GUIDING);
+	if (sps) { sps->set(astro::discover::ServiceSubset::GUIDING); }
+
+	// publish the service name
+	sp->publish();
+	if (sps) { sps->publish(); }
 
 	// initialize servant
 	try {
 		// create the adapter
 		std::string	connectstring = astro::stringprintf(
-			"default -p %hu", port);
-		if (sslport > 0) {
+			"default -p %hu", location.port);
+		if (location.sslport > 0) {
 			connectstring += astro::stringprintf(" -p %hu:ssl",
-				sslport);
+				location.sslport);
 		}
 		Ice::ObjectAdapterPtr	adapter
 			= ic->createObjectAdapterWithEndpoints("Astro",
