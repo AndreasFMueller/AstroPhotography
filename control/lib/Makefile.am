@@ -25,8 +25,8 @@ uvc_files =
 endif
 
 if ENABLE_AVAHI
-avahi_files = AvahiBase.cpp AvahiResolver.cpp AvahiDiscovery.cpp \
-	AvahiPublisher.cpp
+avahi_files = AvahiBase.cpp AvahiServiceSubset.cpp AvahiThread.cpp \
+	AvahiResolver.cpp AvahiDiscovery.cpp AvahiPublisher.cpp
 endif
 if ENABLE_BONJOUR
 bonjour_files = BonjourResolver.cpp BonjourDiscovery.cpp BonjourPublisher.cpp

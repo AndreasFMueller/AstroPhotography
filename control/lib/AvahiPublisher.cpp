@@ -74,16 +74,16 @@ void	AvahiPublisher::entry_group_callback(AvahiEntryGroup *g,
 
 	switch (state) {
 	case AVAHI_ENTRY_GROUP_UNCOMMITED:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "group uncommited");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d group uncommited", state);
 		break;
 	case AVAHI_ENTRY_GROUP_REGISTERING:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "group registering");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d group registering", state);
 		break;
 	case AVAHI_ENTRY_GROUP_ESTABLISHED:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "group established");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d group established", state);
 		break;
 	case AVAHI_ENTRY_GROUP_COLLISION:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "group collision");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d group collision", state);
 		break;
 	case AVAHI_ENTRY_GROUP_FAILURE:
 		debug(LOG_ERR, DEBUG_LOG, 0, "error during group operation: %s",
@@ -109,7 +109,7 @@ void	AvahiPublisher::client_callback(AvahiClient *client,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "client (%p) is running",
 			client);
 		// create services
-		create_services(client);
+		//create_services(client);
 		break;
 
 	case AVAHI_CLIENT_S_COLLISION:
@@ -119,11 +119,15 @@ void	AvahiPublisher::client_callback(AvahiClient *client,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "registering");
 		// if the group exist, reset it
 		if (group) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "resetting the group");
 			avahi_entry_group_reset(group);
 		}
 		break;
 
 	case AVAHI_CLIENT_CONNECTING:
+		break;
+	case AVAHI_CLIENT_FAILURE:
+		// not used, as this is handled in AvahiBase::client_callback
 		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "client callback completed");
@@ -162,20 +166,8 @@ fail:
  */
 void	AvahiPublisher::add_service_objects(AvahiClient *client) {
 	// build an array for the text records
-	AvahiStringList	*strlist = NULL;
-	if (has(ServiceSubset::INSTRUMENTS)) {
-		strlist = avahi_string_list_add(strlist, "instruments");
-	}
-	if (has(ServiceSubset::TASKS)) {
-		strlist = avahi_string_list_add(strlist, "tasks");
-	}
-	if (has(ServiceSubset::GUIDING)) {
-		strlist = avahi_string_list_add(strlist, "guiding");
-	}
-	if (has(ServiceSubset::IMAGES)) {
-		strlist = avahi_string_list_add(strlist, "images");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "created stringlist of %d elements",
+	AvahiStringList	*strlist = AvahiServiceSubset::stringlist(*this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d txt entries",
 		avahi_string_list_length(strlist));
 
 	// first we have to add the service with the name of the object
@@ -218,12 +210,16 @@ static void	modify_callback(AvahiTimeout *e, void *userdata) {
 }
 
 void	AvahiPublisher::modify_callback(AvahiTimeout * /* e */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "modify_callback called");
 	if (avahi_client_get_state(client) == AVAHI_CLIENT_S_RUNNING) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "modify published services");
-		if (group)
+		if (group) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "resetting the group");
 			avahi_entry_group_reset(group);
+		}
 		create_services(client);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "modify_callback complete");
 }
 
 void	AvahiPublisher::publish() {
@@ -233,13 +229,14 @@ void	AvahiPublisher::publish() {
 	if (!valid()) {
 		throw std::runtime_error("publishing thread failed");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "valid");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread is still valid");
 	// rebuild the services
 	struct timeval	tv;
 	avahi_simple_poll_get(simple_poll)->timeout_new(
 		avahi_simple_poll_get(simple_poll),
 		avahi_elapse_time(&tv, 0, 100),
 		discover::modify_callback, this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish completed");
 }
 
 /**
@@ -261,7 +258,7 @@ void	AvahiPublisher::main() {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
-	_prom.set_value(false);
+	_valid = false;
 	if (client) {
 		avahi_client_free(client);
 		client = NULL;

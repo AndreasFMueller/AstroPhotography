@@ -35,12 +35,6 @@ AvahiDiscovery::AvahiDiscovery() {
  * This destrutctor must cancel the the simple_poll thread
  */
 AvahiDiscovery::~AvahiDiscovery() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "join the thread");
-	if (valid()) {
-		avahi_simple_poll_quit(simple_poll);
-	}
-	// wait for the thread to terminate
-	thread.join();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiDiscovery object");
 }
 
@@ -114,6 +108,7 @@ void	AvahiDiscovery::main() {
 		this);
 	AvahiServiceBrowser	*sb = NULL;
 	if (!main_startup()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "main startup failed");
 		return;
 	}
 
@@ -136,7 +131,7 @@ void	AvahiDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
 fail:
-	_prom.set_value(false);
+	_valid = false;
 	if (sb) {
 		avahi_service_browser_free(sb);
 		sb = NULL;

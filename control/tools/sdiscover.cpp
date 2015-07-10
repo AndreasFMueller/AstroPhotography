@@ -76,6 +76,10 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// resolve the first service
+	if (s.size() == 0) {
+		std::cout << "no services found" << std::endl;
+		return EXIT_SUCCESS;
+	}
 	ServiceKey	key = *(sd->list().begin());
 	ServiceObject	object = sd->find(key);
 	std::cout << object.toString() << std::endl;

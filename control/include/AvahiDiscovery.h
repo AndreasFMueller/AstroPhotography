@@ -17,6 +17,18 @@ namespace astro {
 namespace discover {
 
 /**
+ * \brief ServiceSubset classes to convert type to 
+ */
+class AvahiServiceSubset : public ServiceSubset {
+public:
+	AvahiServiceSubset() { }
+	AvahiServiceSubset(const std::list<std::string>& names);
+	
+	static AvahiStringList	*stringlist(const ServiceSubset& s);
+	AvahiStringList	*stringlist() const;
+};
+
+/**
  * \brief Avahi base class
  *
  * The Avahi base class handles the thread management
@@ -24,13 +36,13 @@ namespace discover {
 class	AvahiBase {
 protected:
 	std::promise<bool>	_prom;
-	std::future<bool>	_valid;
+	std::shared_future<bool>	_fut;
+	bool	_valid;
 public:
 	bool	valid();
 protected:
 	AvahiSimplePoll	*simple_poll;
 	AvahiClient	*client;
-	std::thread	thread;
 	bool	main_startup();
 private:
 	// make AvahiDiscovery uncopiable
@@ -40,9 +52,20 @@ public:
 	AvahiBase();
 	virtual ~AvahiBase();
 	// virtual main function, needs to be implemented in derived class
-	virtual void	main() = 0;
 	virtual void	client_callback(AvahiClient *client,
 				AvahiClientState state);
+};
+
+/**
+ * \brief Thread encapsulation for Avahi
+ */
+class AvahiThread : public AvahiBase {
+protected:
+	std::thread	thread;
+public:
+	virtual void	main() = 0;
+	AvahiThread();
+	virtual ~AvahiThread();
 };
 
 /**
@@ -78,7 +101,7 @@ public:
 /**
  * \brief Service discovery using Avahi*
  */
-class AvahiDiscovery : public ServiceDiscovery, public AvahiBase {
+class AvahiDiscovery : public ServiceDiscovery, public AvahiThread {
 public:
 	AvahiDiscovery();
 	virtual ~AvahiDiscovery();
@@ -103,7 +126,7 @@ public:
 /**
  * \brief Service publishing using Avahi
  */
-class AvahiPublisher : public ServicePublisher, public AvahiBase {
+class AvahiPublisher : public ServicePublisher, public AvahiThread {
 public:
 	AvahiPublisher(const std::string& servername, int port);
 	virtual ~AvahiPublisher();

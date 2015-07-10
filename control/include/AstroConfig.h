@@ -326,6 +326,17 @@ public:
 };
 
 /**
+ * \brief exception class to use when entries are not found
+ */
+class NoSuchEntry : public std::runtime_error {
+public:
+	NoSuchEntry(const std::string& domain, const std::string& section,
+		const std::string& name);
+	NoSuchEntry(const std::string& cause);
+	NoSuchEntry();
+};
+
+/**
  * \brief Configuration repository class
  *
  * All configuration information can be accessed through this interface.
@@ -388,6 +399,8 @@ static std::string	get_default();
 static void	set_default(const std::string& filename);
 
 	// global configuration variables
+	virtual bool	hasglobal(const std::string& section,
+				const std::string& name) = 0;
 	virtual std::string	global(const std::string& section,
 				const std::string& name) = 0;
 	virtual std::string	global(const std::string& section,
