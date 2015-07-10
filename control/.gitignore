@@ -1,6 +1,8 @@
 *.fits
 *.db
 *.log
+*.hh
+*.hpp
 ice/lib/camera.cpp
 ice/lib/device.cpp
 ice/lib/exceptions.cpp
