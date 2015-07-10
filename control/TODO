@@ -1,0 +1,8 @@
+configuration system:
+
+      -	configuration system should use only one table for all domains
+      - configurations should be ICE accessible
+
+Avahi:
+      -	race condition in AvahiThread
+
