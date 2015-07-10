@@ -6,3 +6,11 @@ configuration system:
 Avahi:
       -	race condition in AvahiThread
 
+URLs:
+      - give every component an URL by which it can be identified
+      - create classes to connect to any component by URL
+      - convert the net driver from CORBA to ZeroC (or create a new
+	driver, e.g. called nice ;-)
+
+Instruments:
+      - add instrument implementation to the ICE server
