@@ -35,12 +35,6 @@ AvahiDiscovery::AvahiDiscovery() {
  * This destrutctor must cancel the the simple_poll thread
  */
 AvahiDiscovery::~AvahiDiscovery() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "join the thread");
-	if (valid()) {
-		avahi_simple_poll_quit(simple_poll);
-	}
-	// wait for the thread to terminate
-	thread.join();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiDiscovery object");
 }
 

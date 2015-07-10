@@ -45,7 +45,9 @@ AvahiThread::AvahiThread() : thread(avahi_main, this) {
 AvahiThread::~AvahiThread() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy AvahiThread");
 	if (valid()) {
-		avahi_simple_poll_quit(simple_poll);
+		if (simple_poll) {
+			avahi_simple_poll_quit(simple_poll);
+		}
 	}
 	// wait for the thread to terminate
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "join the thread");

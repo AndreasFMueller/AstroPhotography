@@ -69,9 +69,13 @@ int	main(int argc, char *argv[]) {
 	// display list of services 
 	ServiceDiscovery::ServiceKeySet	s = sd->list();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "services found: %d", s.size());
-	std::cout << s << std::endl;
+	std::cout << s;
 
 	// resolve the first service
+	if (s.size() == 0) {
+		std::cout << "no services found" << std::endl;
+		return EXIT_SUCCESS;
+	}
 	ServiceKey	key = *(sd->list().begin());
 	ServiceObject	object = sd->find(key);
 	std::cout << object.toString() << std::endl;
