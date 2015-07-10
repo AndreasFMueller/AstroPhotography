@@ -21,6 +21,27 @@ using namespace astro::project;
 namespace astro {
 namespace config {
 
+//////////////////////////////////////////////////////////////////////
+// Implementation of the NoSuchEntry Exception
+//////////////////////////////////////////////////////////////////////
+
+static std::string nosuchmessage_format(const std::string& domain,
+	const std::string& section, const std::string& name) {
+	return stringprintf("no entry %s/%s/%s",
+		domain.c_str(), section.c_str(), name.c_str());
+}
+
+NoSuchEntry::NoSuchEntry(const std::string& domain, const std::string& section,
+	const std::string& name)
+	: std::runtime_error(nosuchmessage_format(domain, section, name)) {
+}
+
+NoSuchEntry::NoSuchEntry(const std::string& msg) : std::runtime_error(msg) {
+}
+
+NoSuchEntry::NoSuchEntry() : std::runtime_error("no such config entry") {
+}
+
 /**
  * \brief configuration backend
  *
@@ -35,6 +56,8 @@ public:
 	// constructor
 	ConfigurationBackend(const std::string& filename);
 	// global configuratoin variables
+	virtual bool	hasglobal(const std::string& section,
+				const std::string& name);
 	virtual std::string	global(const std::string& section,
 					const std::string& name);
 	virtual std::string	global(const std::string& section,
@@ -118,9 +141,22 @@ GlobalRecord	ConfigurationBackend::getglobal(const std::string& section,
 		std::string	msg = stringprintf("no variable for %s",
 					condition.c_str());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+		throw NoSuchEntry("global", section, name);
 	}
 	return *records.begin();
+}
+
+/**
+ * \brief Find out whether a given configuration value exists
+ */
+bool	ConfigurationBackend::hasglobal(const std::string& section,
+		const std::string& name) {
+	try {
+		getglobal(section, name);
+	} catch (const NoSuchEntry& x) {
+		return false;
+	}
+	return true;
 }
 
 /**
