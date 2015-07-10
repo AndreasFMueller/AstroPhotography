@@ -27,6 +27,7 @@ static void	avahi_main(AvahiThread *base) {
 	 * XXX There is a problem here: we cannot call the virtual function
 	 * XXX unless the derived constructors have completed, so this
 	 * XXX is bound lead to a race condition problem.
+	 */
 	base->main();
 }
 
