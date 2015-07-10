@@ -1,5 +1,9 @@
 ChangeLog for the Astro project.
 
+20150710:
+	* add zeroconf stuff
+	* add instruments interface
+
 20150607:
 	* add "othello" driver module for the guiderport device
 

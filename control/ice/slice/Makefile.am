@@ -5,17 +5,17 @@
 # $Id$
 #
 SLICES = camera.ice exceptions.ice focusing.ice guider.ice image.ice \
-	device.ice tasks.ice types.ice repository.ice
+	device.ice tasks.ice types.ice repository.ice instruments.ice
 
 EXTRA_DIST = $(SLICES)
 
 SLICEHEADERS = ../include/camera.h ../include/exceptions.h \
 	../include/focusing.h ../include/guider.h ../include/image.h \
 	../include/device.h ../include/tasks.h ../include/types.h \
-	../include/repository.h
+	../include/repository.h ../include/instruments.h
 SLICESOURCE = ../lib/camera.cpp ../lib/exceptions.cpp ../lib/focusing.cpp \
 	../lib/guider.cpp ../lib/image.cpp ../lib/device.cpp ../lib/tasks.cpp \
-	../lib/types.cpp  ../lib/repository.cpp
+	../lib/types.cpp  ../lib/repository.cpp ../instruments.cpp
 
 if ENABLE_ICE
 
@@ -29,7 +29,8 @@ camera.h camera.cpp:
 #
 $(SLICEHEADERS) $(SLICESOURCE): $(SLICES)
 	@SLICE2CPP@ -I. -I@SLICEDIR@ $(SLICES)
-	for h in camera exceptions focusing guider image device tasks types repository; \
+	for h in camera exceptions focusing guider image device tasks types \
+		repository instruments; \
 	do \
 		mv $${h}.h ../include; \
 		mv $${h}.cpp ../lib; \

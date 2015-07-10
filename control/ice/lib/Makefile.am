@@ -5,7 +5,7 @@
 #
 
 slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
-	device.cpp tasks.cpp types.cpp repository.cpp
+	device.cpp tasks.cpp types.cpp repository.cpp instruments.cpp
 
 BUILT_SOURCES = $(slice_sources)
 
