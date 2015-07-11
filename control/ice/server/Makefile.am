@@ -21,7 +21,8 @@ noinst_HEADERS = DevicesI.h \
 	DeviceLocatorI.h DeviceLocatorLocator.h \
 	FocusingFactoryI.h FocusingI.h FocusingLocator.h \
 	CallbackHandler.h \
-	RepositoriesI.h RepositoryI.h RepositoryLocator.h
+	RepositoriesI.h RepositoryI.h RepositoryLocator.h \
+	InstrumentI.h InstrumentLocator.h InstrumentsI.h
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \
@@ -36,7 +37,8 @@ snowstar_SOURCES = snowstar.cpp \
 	ModulesI.cpp DriverModuleI.cpp DriverModuleLocator.cpp \
 	DeviceLocatorI.cpp DeviceLocatorLocator.cpp \
 	FocusingFactoryI.cpp FocusingI.cpp FocusingLocator.cpp \
-	RepositoriesI.cpp RepositoryI.cpp RepositoryLocator.cpp
+	RepositoriesI.cpp RepositoryI.cpp RepositoryLocator.cpp \
+	InstrumentI.cpp InstrumentLocator.cpp InstrumentsI.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

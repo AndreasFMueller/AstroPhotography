@@ -13,6 +13,7 @@
 #include <AstroFocus.h>
 #include <AstroProject.h>
 #include <TrackingPersistence.h>
+#include <ServiceDiscovery.h>
 #include <types.h>
 #include <device.h>
 #include <camera.h>
@@ -20,6 +21,7 @@
 #include <focusing.h>
 #include <tasks.h>
 #include <repository.h>
+#include <instruments.h>
 #include <sys/time.h>
 
 namespace snowstar {
@@ -160,6 +162,16 @@ FocusMethod	focusingstring2method(const std::string& m);
 // Repository related conversions
 ImageInfo	convert(const astro::project::ImageEnvelope& envelope);
 astro::project::ImageEnvelope	convert(const ImageInfo& info);
+
+// Instrument related conversions
+InstrumentComponent	convert(const astro::discover::InstrumentComponent& component);
+astro::discover::InstrumentComponent	convert(const struct InstrumentComponent& component);
+
+InstrumentComponentList	convert(const astro::discover::Instrument::ComponentList& list);
+astro::discover::Instrument::ComponentList	convert(const InstrumentComponentList& list);
+
+InstrumentList	convert(const astro::discover::InstrumentList &list);
+astro::discover::InstrumentList	convertInstrumentList(const InstrumentList& list);
 
 } // namespace snowstar
 

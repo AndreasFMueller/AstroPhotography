@@ -90,6 +90,7 @@ public:
 	void	remove(const std::string& name,
 			InstrumentComponent::Type type, int index);
 	void	remove(const InstrumentComponentKey& key);
+	void	remove(const std::string& name);
 	std::list<std::string>	names();
 	InstrumentPtr	get(const std::string& name);
 	InstrumentComponent	get(const std::string& name, 
@@ -164,6 +165,14 @@ void	InstrumentBackendImpl::remove(const std::string& name,
 		statement->execute();
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "renumber comleted");
+}
+
+void	InstrumentBackendImpl::remove(const std::string& name) {
+	std::string	query(	"delete from instrumentcomponents "
+				"where name = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, name);
+	statement->execute();
 }
 
 /**
@@ -261,6 +270,16 @@ InstrumentPtr	InstrumentBackendImpl::get(const std::string& name) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// InstrumentList implemenation
+//////////////////////////////////////////////////////////////////////
+InstrumentList::InstrumentList(const std::list<std::string>& list) {
+	std::list<std::string>::const_iterator	i;
+	for (i = list.begin(); i != list.end(); i++) {
+		push_back(*i);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
 // Instrument Backend
 //////////////////////////////////////////////////////////////////////
 
@@ -271,7 +290,7 @@ InstrumentBackend::InstrumentBackend(persistence::Database database) {
 	InstrumentBackendImpl	backend(database);
 }
 
-std::list<std::string>	InstrumentBackend::names() {
+InstrumentList	InstrumentBackend::names() {
 	InstrumentBackendImpl	backend;
 	return backend.names();
 }
@@ -279,6 +298,11 @@ std::list<std::string>	InstrumentBackend::names() {
 InstrumentPtr	InstrumentBackend::get(const std::string& name) {
 	InstrumentBackendImpl	backend;
 	return backend.get(name);
+}
+
+void	InstrumentBackend::remove(const std::string& name) {
+	InstrumentBackendImpl	backend;
+	backend.remove(name);
 }
 
 } // namespace discover

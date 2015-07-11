@@ -228,7 +228,12 @@ class Instrument;
 class	InstrumentComponentKey {
 public:
 	typedef enum { 
-		CCD, GuiderCCD, Cooler, GuiderPort, Focuser, AdaptiveOptics
+		CCD = 0,
+		GuiderCCD = 1,
+		Cooler = 2,
+		GuiderPort = 3,
+		Focuser = 4,
+		AdaptiveOptics = 5
 	} Type;
 	std::string	_name;
 	Type	_type;
@@ -305,9 +310,16 @@ public:
 	virtual int	add(const InstrumentComponent& component) = 0;
 	virtual void	update(const InstrumentComponent& component) = 0;
 	virtual void	remove(InstrumentComponentKey::Type type, int index) = 0;
-	std::list<InstrumentComponent>	list(InstrumentComponentKey::Type type);
-	std::list<InstrumentComponent>	list();
+	typedef std::list<InstrumentComponent>	ComponentList;
+	ComponentList	list(InstrumentComponentKey::Type type);
+	ComponentList	list();
 
+};
+
+class InstrumentList : public std::list<std::string> {
+public:
+	InstrumentList() { }
+	InstrumentList(const std::list<std::string>& list);
 };
 
 /**
@@ -318,8 +330,9 @@ public:
 	InstrumentBackend();
 	InstrumentBackend(astro::persistence::Database database);
 	// static methods to get information about available 
-	static std::list<std::string>	names();
+	static InstrumentList	names();
 	static InstrumentPtr	get(const std::string& name);
+	static void	remove(const std::string& name);
 };
 
 } // namespace discover
