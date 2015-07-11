@@ -219,6 +219,53 @@ public:
 	virtual void	publish();
 };
 
+class Instrument;
+
+/**
+ * \brief Instrument Component
+ */
+class InstrumentComponent {
+public:
+	typedef enum { 
+		CCD, GuiderCCD, Cooler, GuiderPort, Focuser, AdaptiveOptics
+	} Type;
+private:
+	Type	_type;
+	int	_index;
+	std::string	_servicename;
+	std::string	_deviceurl;
+public:
+	Type	type() const { return _type; }
+	int	index() const { return _index; }
+	const std::string&	servicename() const { return _servicename; }
+	const std::string&	deviceurl() const { return _deviceurl; }
+	InstrumentComponent(Type type, const std::string& servicename,
+		const std::string& deviceurl);
+	friend class Instrument;
+};
+
+/**
+ * \brief Instrument abstraction
+ */
+class Instrument {
+	std::string	_name;
+public:
+	const std::string&	name() const { return _name; }
+	Instrument(const std::string& name) : _name(name) { }
+private:
+	void	add(std::list<InstrumentComponent>& l,
+			InstrumentComponent::Type type);
+public:
+	virtual int	nComponentsOfType(InstrumentComponent::Type type) = 0;
+	static InstrumentComponent	get(InstrumentComponent::Type type,
+						int index);
+	virtual int	add(const InstrumentComponent& component) = 0;
+	virtual void	update(const InstrumentComponent& component) = 0;
+	virtual void	remove(InstrumentComponent::Type type, int index) = 0;
+	std::list<InstrumentComponent>	list(InstrumentComponent::Type type);
+	std::list<InstrumentComponent>	list();
+};
+
 } // namespace discover
 } // namespace astro
 

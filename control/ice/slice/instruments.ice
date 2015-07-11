@@ -83,6 +83,11 @@ module snowstar {
 				throws BadParameter, NotFound;
 
 		/**
+		 * \brief Remove a component
+		 */
+		void	remove(Type type, int index) throws NotFound;
+
+		/**
 		 * \brief Return a list of all components of the instrument
 		 *
 		 * This method gives a list of all components of this
