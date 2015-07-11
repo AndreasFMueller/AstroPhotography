@@ -182,6 +182,7 @@ protected:
 	void	add(const ServiceKey& key);
 	void	remove(const ServiceKey& key);
 public:
+	bool	has(const std::string& name);
 	ServiceObject	find(const std::string& name);
 	virtual ServiceObject	find(const ServiceKey& key) = 0;
 };

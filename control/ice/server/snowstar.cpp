@@ -29,6 +29,8 @@
 #include <RepositoryLocator.h>
 #include <ServiceDiscovery.h>
 #include <AstroFormat.h>
+#include <InstrumentLocator.h>
+#include <InstrumentsI.h>
 
 namespace snowstar {
 
@@ -260,6 +262,14 @@ int	snowstar_main(int argc, char *argv[]) {
 		RepositoryLocator	*repolocator = new RepositoryLocator();
 		adapter->addServantLocator(repolocator, "repository");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Repository servant added");
+
+		// add a servant for Instruments
+		object = new InstrumentsI();
+		adapter->add(object, ic->stringToIdentity("Instruments"));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Instruments servant added");
+		InstrumentLocator	*instrumentlocator = new InstrumentLocator();
+		adapter->addServantLocator(instrumentlocator, "instrument");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Instrument servant added");
 
 		// activate the adapter
 		adapter->activate();
