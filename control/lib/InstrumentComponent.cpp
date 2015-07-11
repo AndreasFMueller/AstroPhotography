@@ -11,10 +11,17 @@ namespace discover {
 /**
  * \brief Constructor for Instrument components
  */
-InstrumentComponent::InstrumentComponent(Type type,
+InstrumentComponent::InstrumentComponent(const std::string& instrumentname,
+	InstrumentComponentKey::Type type,
 	const std::string& servicename, const std::string& deviceurl)
-	: _type(type), _index(-1), _servicename(servicename),
-	  _deviceurl(deviceurl) {
+	: InstrumentComponentKey(instrumentname, type),
+	  _servicename(servicename), _deviceurl(deviceurl) {
+}
+
+InstrumentComponent::InstrumentComponent(const InstrumentComponentKey& key,
+	const std::string& servicename, const std::string& deviceurl)
+	: InstrumentComponentKey(key),
+	  _servicename(servicename), _deviceurl(deviceurl) {
 }
 
 } // namespace discover

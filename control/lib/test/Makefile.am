@@ -58,18 +58,13 @@ tests_SOURCES = tests.cpp \
 	AnalyzerTest.cpp CorrectorTest.cpp \
 	GuiderFactoryTest.cpp \
 	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
-	InterpolationStepTest.cpp AngleTest.cpp
+	InterpolationStepTest.cpp AngleTest.cpp \
+	InstrumentComponentTest.cpp
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	RadonTest.cpp
-#	PixelTest.cpp
-#	ProjectTableTest.cpp
-#	FITSKeywordTest.cpp
-#	ImageRepoTest.cpp
+	InstrumentComponentTest.cpp
 #	InstrumentTest.cpp
-#	DeviceMapperTest.cpp
-#	ConfigurationTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
 

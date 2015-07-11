@@ -232,6 +232,8 @@ public:
 	void	id(const int& i) { _id = i; }
 	Persistent(int i) : _id(i) { }
 	Persistent(int i, const object& _object) : object(_object), _id(i) { }
+	Persistent(const object& _object, int i = -1)
+		: object(_object), _id(i) { }
 };
 
 /**

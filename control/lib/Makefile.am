@@ -104,6 +104,7 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	ServiceResolver.cpp ServiceDiscovery.cpp ServicePublisher.cpp \
 	$(avahi_files) $(bonjour_files) \
 	InstrumentComponent.cpp ServiceInstrument.cpp \
+	InstrumentComponentTable.cpp \
 	$(uvc_files) \
 	$(unicap_flies)
 

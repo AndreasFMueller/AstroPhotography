@@ -222,28 +222,63 @@ public:
 class Instrument;
 
 /**
- * \brief Instrument Component
+ * \brief Key class for access to instruments and components
  */
-class InstrumentComponent {
+class	InstrumentComponentKey {
 public:
 	typedef enum { 
 		CCD, GuiderCCD, Cooler, GuiderPort, Focuser, AdaptiveOptics
 	} Type;
-private:
+	std::string	_name;
 	Type	_type;
 	int	_index;
+public:
+	const std::string&	name() const { return _name; }
+	std::string&	name() { return _name; }
+	void	name(const std::string& n) { _name = n; }
+
+	Type	type() const { return _type; }
+	Type&	type() { return _type; }
+	void	type(Type t) { _type = t; }
+
+	int	index() const { return _index; }
+	int&	index() { return _index; }
+	void	index(int i) { _index = i; }
+
+	InstrumentComponentKey(const std::string& name, Type type,
+		int index = -1) : _name(name), _type(type), _index(index) {
+	}
+	InstrumentComponentKey() : _type(CCD), _index(0) {
+	}
+	bool	operator<(const InstrumentComponentKey& other) const {
+		if (_name < other._name) { return true; }
+		if (_name > other._name) { return false; }
+		if (_type < other._type) { return true; }
+		if (_type > other._type) { return false; }
+		return (_index < other._index);
+	}
+};
+
+/**
+ * \brief Instrument Component
+ */
+class InstrumentComponent : public InstrumentComponentKey {
+private:
 	std::string	_servicename;
 	std::string	_deviceurl;
 public:
-	Type	type() const { return _type; }
-	int	index() const { return _index; }
 	const std::string&	servicename() const { return _servicename; }
 	const std::string&	deviceurl() const { return _deviceurl; }
-	InstrumentComponent(Type type, const std::string& servicename,
-		const std::string& deviceurl);
+	InstrumentComponent(const std::string& instrumentname,
+		InstrumentComponentKey::Type type,
+		const std::string& servicename, const std::string& deviceurl);
+	InstrumentComponent(const InstrumentComponentKey& key,
+		const std::string& servicename, const std::string& deviceurl);
 	friend class Instrument;
 };
 
+class Instrument;
+typedef std::shared_ptr<Instrument>	InstrumentPtr;
 /**
  * \brief Instrument abstraction
  */
@@ -256,14 +291,26 @@ private:
 	void	add(std::list<InstrumentComponent>& l,
 			InstrumentComponent::Type type);
 public:
-	virtual int	nComponentsOfType(InstrumentComponent::Type type) = 0;
-	static InstrumentComponent	get(InstrumentComponent::Type type,
-						int index);
+	// get a component
+	InstrumentComponent	get(InstrumentComponent::Type type, int index);
+
+	virtual int	nComponentsOfType(InstrumentComponentKey::Type type) = 0;
 	virtual int	add(const InstrumentComponent& component) = 0;
 	virtual void	update(const InstrumentComponent& component) = 0;
-	virtual void	remove(InstrumentComponent::Type type, int index) = 0;
-	std::list<InstrumentComponent>	list(InstrumentComponent::Type type);
+	virtual void	remove(InstrumentComponentKey::Type type, int index) = 0;
+	std::list<InstrumentComponent>	list(InstrumentComponentKey::Type type);
 	std::list<InstrumentComponent>	list();
+
+};
+
+/**
+ * \brief Instrument Backend
+ */
+class InstrumentBackend {
+public:
+	// static methods to get information about available 
+	static std::list<std::string>	names();
+	static InstrumentPtr	get(const std::string& name);
 };
 
 } // namespace discover
