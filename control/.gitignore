@@ -1,7 +1,9 @@
+indclude/config.h
 *.fits
 *.db
 *.log
 *.hh
+*.cc
 *.hpp
 ice/lib/camera.cpp
 ice/lib/device.cpp
