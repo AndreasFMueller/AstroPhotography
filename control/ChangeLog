@@ -1,5 +1,8 @@
 ChangeLog for the Astro project.
 
+20150711:
+	* add persistence to instruments
+
 20150710:
 	* add zeroconf stuff
 	* add instruments interface

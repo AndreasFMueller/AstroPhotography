@@ -14,6 +14,11 @@ using namespace astro::persistence;
 namespace astro {
 namespace discover {
 
+/**
+ * \brief Component info class
+ *
+ * This class represents the information in an instrument component 
+ */
 class InstrumentComponentInfo : public InstrumentComponentKey {
 	std::string	_servicename;
 	std::string	_deviceurl;
@@ -39,6 +44,8 @@ public:
 
 /**
  * \brief Record definition for the instrument component table
+ *
+ * The record is what the table interface uses 
  */
 class InstrumentComponentRecord : public Persistent<InstrumentComponentInfo> {
 public:
@@ -51,6 +58,10 @@ public:
 
 /**
  * \brief Table adapter for the InstrumentComponent Table
+ *
+ * The table adapter for the instrument components table provides the
+ * create statement and the methods to convert objects to updates and vice
+ * versa
  */
 class InstrumentComponentTableAdapter {
 public:
@@ -64,6 +75,9 @@ static UpdateSpec       object_to_updatespec(
 
 /**
  * \brief InstrumentComponent Table
+ *
+ * The Table class for the InstrumentComponentTable gives access to the 
+ * objects in the table
  */
 class InstrumentComponentTable : public Table<InstrumentComponentRecord,
 	InstrumentComponentTableAdapter> {

@@ -12,6 +12,7 @@
 #include <list>
 #include <iostream>
 #include <future>
+#include <AstroPersistence.h>
 
 namespace astro {
 namespace discover {
@@ -248,6 +249,9 @@ public:
 	InstrumentComponentKey(const std::string& name, Type type,
 		int index = -1) : _name(name), _type(type), _index(index) {
 	}
+	InstrumentComponentKey(Type type, int index = -1)
+		: _type(type), _index(index) {
+	}
 	InstrumentComponentKey() : _type(CCD), _index(0) {
 	}
 	bool	operator<(const InstrumentComponentKey& other) const {
@@ -268,13 +272,16 @@ private:
 	std::string	_deviceurl;
 public:
 	const std::string&	servicename() const { return _servicename; }
+	void	servicename(const std::string& s) { _servicename = s; }
+
 	const std::string&	deviceurl() const { return _deviceurl; }
+	void	deviceurl(const std::string& d) { _deviceurl = d; }
+
 	InstrumentComponent(const std::string& instrumentname,
 		InstrumentComponentKey::Type type,
 		const std::string& servicename, const std::string& deviceurl);
 	InstrumentComponent(const InstrumentComponentKey& key,
 		const std::string& servicename, const std::string& deviceurl);
-	friend class Instrument;
 };
 
 class Instrument;
@@ -292,7 +299,7 @@ private:
 			InstrumentComponent::Type type);
 public:
 	// get a component
-	InstrumentComponent	get(InstrumentComponent::Type type, int index);
+	virtual InstrumentComponent	get(InstrumentComponent::Type type, int index) = 0;
 
 	virtual int	nComponentsOfType(InstrumentComponentKey::Type type) = 0;
 	virtual int	add(const InstrumentComponent& component) = 0;
@@ -308,6 +315,8 @@ public:
  */
 class InstrumentBackend {
 public:
+	InstrumentBackend();
+	InstrumentBackend(astro::persistence::Database database);
 	// static methods to get information about available 
 	static std::list<std::string>	names();
 	static InstrumentPtr	get(const std::string& name);
