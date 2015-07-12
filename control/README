@@ -130,27 +130,29 @@ Mandatory packages:
    themselves. For Mac OS X, libusb 1.0.16 (release candidate at least 10,
    previous versions cannot call libusb_context twice) or newer must be
    used, as previous versions have bugs that cause the software to fail
-   on that plattform.
+   on that plattform. (Ubuntu: libusb-dev)
 
  - CPPUnit: Unit testing framework for C++, available on SourceFoge:
-   http://sourceforge.net/projects/cppunit/
+   http://sourceforge.net/projects/cppunit/ (Ubuntu: libcppunit-dev)
 
  - Cfitsio: C-Library to manipulate FITS files, available from the
    NASA web site: http://heasarc.gsfc.nasa.gov/fitsio/
    The website also has links to online documentation here:
    http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+   (Ubuntu: libcfitsio3-dev)
 
  - LAPACK: in several places, linear systems of equations and least squares
    problems for relatively large numbers of equations or unknowns need to
-   be solved. For these operations, LAPACK is used.
+   be solved. For these operations, LAPACK is used. (Ubuntu: liblapack-dev)
 
  - GLPK, the GNU Linear Programming toolKit. This package is used for the
-   algorithm that finds a background to subtract.
+   algorithm that finds a background to subtract. (Ubuntu: libglpk-dev)
 
- - SQLite3 is used for persistence of various types of objects
+ - SQLite3 is used for persistence of various types of objects (Ubuntu:
+   libsqlite3-dev)
 
  - UUID, library for unique ids, used to tag FITS files so that duplicates
-   can be recognized
+   can be recognized (Ubuntu: uuid-dev)
 
  - The std::regex class of the C++11 standard is used, but g++, although it
    does come with the appropriate headers, does not implement the std::regex
@@ -161,13 +163,14 @@ Optional packages:
 
  - omniORB: The client-server-communication uses Corba, and the build system
    assumes that omniORB is preinstalled for the purpose.
+   (Ubuntu: omniorb omniorb-nameserver libomniorb4-dev libcos4-dev)
 
  - ZeroC ICE is the prefered communications engine, version 3.5.1 is required
-   for C++11 support and for ARM.
+   for C++11 support and for ARM. (Ubuntu: zeroc-ice35)
 
  - Unicap: on Linux, accessing USB Video class cameras is simplified
    by using the Video4Linux and the Unicap library. See
-   http://unicap-imaging.org
+   http://unicap-imaging.org (Ubuntu: libunicap2-dev)
 
  - SBIG driver library. Astrophotography cameras by SBIG are supported
    via the SBIG driver library, which can be obtained from the SBIG
@@ -179,6 +182,22 @@ Some issues:
    hand, CORBA defines a member function minor in CORBA::SystemException.
    This only works if the minor macro is overridden. One way to do this is
    to include sys/sysmacros in /usr/local/include/omniORB4/CORBA_Exception.h
+
+Ubuntu:
+
+   Here is a list of Debian package names that need to be installed.
+   Mandatory:
+	libusb-dev
+	libcppunit-dev
+	libcfitsio3-dev
+	liblapack-dev
+	libglpk-dev
+	libsqlite3-dev
+	uuid-dev
+   Optional:
+	omniorb omniorb-nameserver libomniorb4-dev libcos4-dev
+	zeroc-ice35
+	libunicap2-dev
 
 --
 $Id$
