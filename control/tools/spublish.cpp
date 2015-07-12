@@ -83,20 +83,19 @@ int	main(int argc, char *argv[]) {
 
 	// create a service discovery object
 	ServicePublisherPtr	sd = ServicePublisher::get(hostname, port);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "publishing object created");
-	sd->publish();
-	std::this_thread::sleep_for(std::chrono::seconds(7));
 
 	// publish a service
 	for (int i = optind; i < argc; i++) {
 		sd->set(argv[i]);
 	}
 	sd->publish();
+#if 0
 	std::this_thread::sleep_for(std::chrono::seconds(7));
 
 	sd->clear();
 	sd->publish();
 	std::this_thread::sleep_for(std::chrono::seconds(7));
+#endif
 
 	// wait some time
 	if (timeout == 0) {
