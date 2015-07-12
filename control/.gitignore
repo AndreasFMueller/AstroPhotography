@@ -22,5 +22,7 @@ ice/include/instruments.h
 ice/include/repository.h
 ice/include/tasks.h
 ice/include/types.h
+ice/slice/*.h
+ice/slice/*.cpp
 
 
