@@ -73,6 +73,13 @@ ServiceDiscoveryPtr	ServiceDiscovery::get() {
 #endif /* USE_SD_BONJOUR */
 }
 
+bool	ServiceDiscovery::has(const std::string& name) {
+	ServiceKeySet::iterator	i
+		= find_if(servicekeys.begin(), servicekeys.end(),
+			HasNamePredicate(name));
+	return (i != servicekeys.end());
+}
+
 ServiceObject	ServiceDiscovery::find(const std::string& name) {
 	ServiceKeySet::iterator	i
 		= find_if(servicekeys.begin(), servicekeys.end(),

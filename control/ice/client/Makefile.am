@@ -6,7 +6,7 @@
 if ENABLE_ICE
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount snowrepo \
-	snowtask snowproject
+	snowtask snowproject snowinstrument
 noinst_PROGRAMS = snowflake 
 
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
@@ -60,6 +60,11 @@ snowproject_SOURCES = snowproject.cpp
 snowproject_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowproject_LDADD = $(ICELDADD)
 snowproject_CPPFLAGS = $(ICECPPFLAGS)
+
+snowinstrument_SOURCES = snowinstrument.cpp
+snowinstrument_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowinstrument_LDADD = $(ICELDADD)
+snowinstrument_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

@@ -15,25 +15,27 @@ module snowstar {
 	 * to talk about CCDs and their coolers or guider ports.
 	 */
 	enum InstrumentComponentType {
-		InstrumentCCD,
-		InstrumentGuiderCCD,
-		InstrumentCooler,
-		InstrumentGuiderPort,
-		InstrumentFocuser,
-		InstrumentAdaptiveOptics
+		InstrumentCCD = 0,
+		InstrumentGuiderCCD = 1,
+		InstrumentCooler = 2,
+		InstrumentGuiderPort = 3,
+		InstrumentFocuser = 4,
+		InstrumentAdaptiveOptics = 5
 	};
 
 	/**
  	 * \brief Information about a component
 	 */
 	struct InstrumentComponent {
+		// name of the instrument this component belongs to
+		string	instrumentname;
 		// the type of the component
 		InstrumentComponentType	type;
 		// if the instruments has multiple instruments, then we want
 		// a way to identify the component
 		int	index;
 		// name of the server as published in mDNS
-		string	servername;
+		string	servicename;
 		// device url on the server (i.e. a local name)
 		string	deviceurl;
 	};
@@ -85,7 +87,7 @@ module snowstar {
 		/**
 		 * \brief Remove a component
 		 */
-		void	remove(Type type, int index) throws NotFound;
+		void	remove(InstrumentComponentType type, int index) throws NotFound;
 
 		/**
 		 * \brief Return a list of all components of the instrument
@@ -108,7 +110,6 @@ module snowstar {
 	interface Instruments {
 		InstrumentList	list();
 		Instrument	*get(string name) throws NotFound;
-		void	create(string name) throws BadState;
 		void	remove(string name) throws NotFound;
 	};
 
