@@ -47,6 +47,6 @@ snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 test:	snowstar
-	./snowstar -d -b images -q testdb.db 2>&1 | tee test.log
+	./snowstar -d -b images -q testdb.db -n server 2>&1 | tee test.log
 
 endif

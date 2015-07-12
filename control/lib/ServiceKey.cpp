@@ -29,6 +29,13 @@ bool	ServiceKey::operator<(const ServiceKey& other) const {
 	return (_type < other._type);
 }
 
+bool	ServiceKey::operator==(const ServiceKey& other) const {
+	if (_name != other._name) { return false; }
+	if (_type != other._type) { return false; }
+	if (_domain != other._domain) { return false; }
+	return true;
+}
+
 std::string	ServiceKey::toString() const {
 	return _name + "/" + _type + "@" + _domain;
 }

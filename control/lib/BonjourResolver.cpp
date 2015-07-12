@@ -14,6 +14,17 @@ namespace discover {
 
 /**
  * \brief trampoline function for ResolveReply callbacks
+ *
+ * \param sdRef
+ * \param flags
+ * \param interfaceIndex
+ * \param errorCode
+ * \param fullname
+ * \param hosttarget
+ * \param port
+ * \param txtLen
+ * \param TxtRecord
+ * \param context
  */
 static void	resolvereply_callback(
 			DNSServiceRef sdRef,
@@ -33,6 +44,16 @@ static void	resolvereply_callback(
 
 /**
  * \brief ResolveReply callback
+ *
+ * \param sdRef
+ * \param flags
+ * \param interfaceIndex
+ * \param errorCode
+ * \param fullname
+ * \param hosttarget
+ * \param port
+ * \param txtLen
+ * \param txtRecord
  */
 void	BonjourResolver::resolvereply_callback(
 		DNSServiceRef sdRef,
@@ -57,6 +78,8 @@ void	BonjourResolver::resolvereply_callback(
 		_object.host(hosttarget);
 	}
 	std::string	txt((char *)txtRecord, txtLen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "txt set, length %d (%d)",
+		txt.size(), txtLen);
 	_object.set(ServiceSubset::txtparse(txt));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object: %s",
@@ -71,6 +94,7 @@ void	BonjourResolver::resolvereply_callback(
  * \brief main resolve function
  */
 ServiceObject	BonjourResolver::do_resolve() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start resolving");
 	DNSServiceRef	sdRef = NULL;
 	DNSServiceResolve(&sdRef, 0, kDNSServiceInterfaceIndexAny,
 		_key.name().c_str(), _key.type().c_str(),
@@ -85,6 +109,7 @@ ServiceObject	BonjourResolver::do_resolve() {
 		DNSServiceRefDeallocate(sdRef);
 		sdRef = NULL;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolution complete");
 	return _object;
 }
 

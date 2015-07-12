@@ -73,35 +73,75 @@ ServiceDiscoveryPtr	ServiceDiscovery::get() {
 #endif /* USE_SD_BONJOUR */
 }
 
+/**
+ * \brief check whether the service name is already known
+ */
 bool	ServiceDiscovery::has(const std::string& name) {
+	std::unique_lock<std::recursive_mutex>	lock(servicelock);
 	ServiceKeySet::iterator	i
 		= find_if(servicekeys.begin(), servicekeys.end(),
 			HasNamePredicate(name));
 	return (i != servicekeys.end());
 }
 
-ServiceObject	ServiceDiscovery::find(const std::string& name) {
+bool	ServiceDiscovery::has(const ServiceKey& key) {
+	ServiceKeySet::iterator	i;
+	for (i = servicekeys.begin(); i != servicekeys.end(); i++) {
+		if (key == *i) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * \brief wait for a name to arrive
+ */
+ServiceKey	ServiceDiscovery::waitfor(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for '%s'", name.c_str());
+	std::unique_lock<std::recursive_mutex>	lock(servicelock);
+	while (!has(name)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "name not found, waiting");
+		servicecondition.wait(lock);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "condition called");
+	}
+	return find(name);
+}
+
+/**
+ * \brief find a name in the list of available services, and resolve it
+ */
+ServiceKey	ServiceDiscovery::find(const std::string& name) {
+	std::unique_lock<std::recursive_mutex>	lock(servicelock);
 	ServiceKeySet::iterator	i
 		= find_if(servicekeys.begin(), servicekeys.end(),
 			HasNamePredicate(name));
 	if (i == servicekeys.end()) {
 		throw std::runtime_error("service not found");
 	}
-	return find(*i);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s", i->toString().c_str());
+	return *i;
 }
 
 /**
  * \brief Add a service to the services set
  */
 void	ServiceDiscovery::add(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add new key: %s",
+		key.toString().c_str());
+	std::unique_lock<std::recursive_mutex>	lock(servicelock);
 	remove(key);
 	servicekeys.insert(key);
+	servicecondition.notify_all();
 }
 
 /**
  * \brief Remove a service from the services set
  */
 void	ServiceDiscovery::remove(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove key: %s",
+		key.toString().c_str());
+	std::unique_lock<std::recursive_mutex>	lock(servicelock);
 	ServiceKeySet::iterator	i = servicekeys.find(key);
 	if (i != servicekeys.end()) {
 		servicekeys.erase(i);

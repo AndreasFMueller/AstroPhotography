@@ -34,9 +34,9 @@ static void registerreply_callback(DNSServiceRef sdRef,
 		regtype, domain);
 }
 
-void	BonjourPublisher::registerreply_callback(DNSServiceRef sdRef, 
+void	BonjourPublisher::registerreply_callback(DNSServiceRef /* sdRef */,
                         DNSServiceFlags flags, 
-                        DNSServiceErrorType errorCode, 
+                        DNSServiceErrorType /* errorCode */,
                         const char *name, 
                         const char *regtype, 
                         const char *domain) {

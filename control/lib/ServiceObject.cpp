@@ -9,6 +9,7 @@
 #include <ServiceDiscovery.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include <stdexcept>
 #include <algorithm>
 
@@ -37,6 +38,10 @@ std::string	ServiceObject::toString() const {
  */
 bool	ServiceObject::operator<(const ServiceObject& other) const {
 	return ServiceKey::operator<(other);
+}
+
+std::string	ServiceObject::connect(const std::string& service) const {
+	return astro::ServerName(_host, _port).connect(service);
 }
 
 } // namespace discover

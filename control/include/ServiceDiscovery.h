@@ -13,6 +13,8 @@
 #include <iostream>
 #include <future>
 #include <AstroPersistence.h>
+#include <mutex>
+#include <condition_variable>
 
 namespace astro {
 namespace discover {
@@ -34,7 +36,9 @@ public:
 public:
 	ServiceKey(const std::string& name, const std::string& type,
 		const std::string& domain);
+	ServiceKey() { }
 	bool	operator<(const ServiceKey& other) const;
+	bool	operator==(const ServiceKey& other) const;
 	std::string	toString() const;
 };
 
@@ -69,8 +73,8 @@ private:
 	int	_services;
 	bool	validtype(service_type t) const;
 public:
-	service_type	string2type(const std::string& name) const;
-	std::string	type2string(service_type type) const;
+	static service_type	string2type(const std::string& name);
+	static std::string	type2string(service_type type);
 
 	void	set(service_type type);
 	void	set(const std::string& type) { set(string2type(type)); }
@@ -127,6 +131,9 @@ public:
 public:
 	ServiceObject(const ServiceKey& key);
 
+	// get an ICE connection string
+	std::string	connect(const std::string& service) const;
+
 	// convert an object to a string representation
 	std::string	toString() const;
 
@@ -143,11 +150,15 @@ class ServiceResolver {
 protected:
 	ServiceKey	_key;
 	ServiceObject	_object;
-	std::future<ServiceObject>	_resolved;
+	std::shared_future<ServiceObject>	_resolved;
+	// locking to ensure resolution is initiated only once
+	std::mutex	resolvinglock;
+	bool		resolving;
 public:
 	ServiceResolver(const ServiceKey& key);
 	virtual ~ServiceResolver();
 	ServiceObject	resolved();
+	void	resolve();
 	virtual ServiceObject	do_resolve() = 0;
 };
 
@@ -175,6 +186,8 @@ public:
 public:
 	typedef std::set<ServiceKey>	ServiceKeySet;
 private:
+	std::recursive_mutex	servicelock;
+	std::condition_variable_any	servicecondition;
 	ServiceKeySet	servicekeys;
 public:
 	const ServiceKeySet&	list() const { return servicekeys; }
@@ -183,7 +196,9 @@ protected:
 	void	remove(const ServiceKey& key);
 public:
 	bool	has(const std::string& name);
-	ServiceObject	find(const std::string& name);
+	bool	has(const ServiceKey& key);
+	ServiceKey	waitfor(const std::string& name);
+	ServiceKey	find(const std::string& name);
 	virtual ServiceObject	find(const ServiceKey& key) = 0;
 };
 

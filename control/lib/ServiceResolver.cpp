@@ -17,10 +17,19 @@ ServiceObject   do_resolve(ServiceResolver *resolver) {
 
 ServiceResolver::ServiceResolver(const ServiceKey& key)
 	: _key(key), _object(key) {
-	_resolved = std::async(discover::do_resolve, this);
+	resolving = false;
 }
 
 ServiceResolver::~ServiceResolver() {
+}
+
+void	ServiceResolver::resolve() {
+	std::unique_lock<std::mutex>	lock(resolvinglock);
+	if (resolving) {
+		return;
+	}
+	resolving = true;
+	_resolved = std::async(discover::do_resolve, this);
 }
 
 ServiceObject	ServiceResolver::resolved() {

@@ -12,7 +12,7 @@ namespace astro {
 namespace discover {
 
 ServiceSubset::service_type	ServiceSubset::string2type(
-					const std::string& name) const {
+					const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "decode: '%s'", name.c_str());
 	if (name == "instruments") return INSTRUMENTS;
 	if (name == "tasks")       return TASKS;
@@ -21,7 +21,7 @@ ServiceSubset::service_type	ServiceSubset::string2type(
 	throw std::runtime_error("invalid string type name");
 }
 
-std::string	ServiceSubset::type2string(service_type type) const {
+std::string	ServiceSubset::type2string(service_type type) {
 	switch (type) {
 	case INSTRUMENTS:	return std::string("instruments");
 	case TASKS:		return std::string("tasks");
@@ -49,7 +49,9 @@ std::string	ServiceSubset::toString() const {
 void	ServiceSubset::set(const std::list<std::string>& names) {
 	std::list<std::string>::const_iterator	i;
 	for (i = names.begin(); i != names.end(); i++) {
-		set(string2type(*i));
+		std::string	s = *i;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set: %s", s.c_str());
+		set(string2type(s));
 	}
 }
 
@@ -149,8 +151,8 @@ std::list<std::string>	ServiceSubset::txtparse(const std::string& txt) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "txt[%d](%d) = '%s'",
 				i, l, name.c_str());
 			result.push_back(name);
-			i += l + 1;
 		}
+		i += l + 1;
 	}
 	return result;
 }

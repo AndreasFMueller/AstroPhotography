@@ -20,7 +20,8 @@ InstrumentsI::~InstrumentsI() {
 InstrumentPrx	InstrumentsI::get(const std::string& name,
 			const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request instrument '%s'", name.c_str());
-	return createProxy<InstrumentPrx>("insttrument/" + name, current,
+
+	return createProxy<InstrumentPrx>("instrument/" + name, current,
 		false);
 }
 

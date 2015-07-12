@@ -35,10 +35,10 @@ static void	browsereply_callback(DNSServiceRef sdRef,
  * This callback is called when then browser detects a change in the 
  * set of service providers published on the net.
  */
-void    BonjourDiscovery::browsereply_callback(DNSServiceRef sdRef,
+void    BonjourDiscovery::browsereply_callback(DNSServiceRef /* sdRef */,
 			DNSServiceFlags flags,
-			uint32_t interfaceIndex,
-			DNSServiceErrorType errorCode,
+			uint32_t /* interfaceIndex */,
+			DNSServiceErrorType /* errorCode */,
 			const char *serviceName,
 			const char *regtype,
 			const char *replyDomain) {
@@ -75,7 +75,9 @@ static void	main(BonjourDiscovery *discovery) {
 }
 
 ServiceObject	BonjourDiscovery::find(const ServiceKey& key) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolving %s", key.toString().c_str());
 	BonjourResolver	resolver(key);
+	resolver.resolve();
 	return resolver.resolved();
 }
 
