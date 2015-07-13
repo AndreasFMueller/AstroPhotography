@@ -70,6 +70,7 @@ int	main(int argc, char *argv[]) {
 
 	// create a service discovery object
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
+	sd->start();
 
 	// if we have a name to wait for, we use this
 	ServiceKey	key;

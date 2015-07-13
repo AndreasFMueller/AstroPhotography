@@ -11,27 +11,37 @@ noinst_HEADERS = NiceLocator.h
 
 SRCFILES = NiceLocator.cpp
 
+ICELIBS = @ICELIBS@
+ICELDADD = -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
+ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
+	$(top_builddir)/ice/lib/libiceastro.la
+
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libnice.la
 
 libnice_la_SOURCES = $(SRCFILES)
-libnice_la_DEPENDENCIES = $(tob_builddir)/lib/libastro.la
-libnice_la_LIBADD = $(top_builddir)/lib/libastro.la
+libnice_la_DEPENDENCIES = $(ICEDEPENDENCIES)
+libnice_la_LIBADD = $(ICELDADD)
+libnice_la_CPPFLAGS = $(ICECPPFLAGS)
 
 noinst_PROGRAMS = nicetests
-nicetests_SOURCES = nicetests.cpp
-nicetests_LDADD = -lcppunit $(top_builddir)/lib/libastro.la -L. -lnice
-nicetests_DEPENDENCIES = $(top_builddir)/lib/libastro.la libnice.la
+nicetests_SOURCES = nicetests.cpp LocatorTest.cpp
+nicetests_LDADD = -lcppunit $(ICELDADD) -L. -lnice
+nicetests_DEPENDENCIES = $(ICEDPENDENCIES)
+nicetests_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	nicetests
 	./nicetests -d
 
 endif
 
-nice_la_SOURCES = $(SRFILES)
+nice_la_SOURCES = $(SRCFILES)
 nice_la_LDFLAGS = -module
-nice_la_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-nice_la_LIBADD = $(top_builddir)/lib/libastro.la
+nice_la_DEPENDENCIES = $(ICEDEPENDENCIES)
+nice_la_LIBADD = $(ICELDADD)
+nice_la_CPPFLAGS = $(ICECPPFLAGS)
 
 endif
