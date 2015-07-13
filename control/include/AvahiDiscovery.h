@@ -73,6 +73,10 @@ public:
  */
 class AvahiResolver : public ServiceResolver {
 	AvahiClient	*_client;
+	// a std::future variable is used as the handshake mechanism
+	// to signal completion of the resolution
+	std::shared_ptr<std::future<bool> >	fut;
+	std::shared_ptr<std::promise<bool> >	prom;
 public:
 	AvahiResolver(const ServiceKey& key, AvahiClient *client);
 	~AvahiResolver();
@@ -92,10 +96,6 @@ public:
 			uint16_t port,
 			AvahiStringList *txt,
 			AvahiLookupResultFlags flags);
-/*
-	virtual void	client_callback(AvahiClient *client,
-				AvahiClientState state);
-*/
 };
 
 /**

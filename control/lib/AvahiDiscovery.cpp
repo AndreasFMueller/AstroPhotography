@@ -78,6 +78,8 @@ void	AvahiDiscovery::browse_callback(
 			name, type, domain);
 		{
 			ServiceKey	key(name, type, domain);
+			key.interface(interface);
+			key.protocol(protocol);
 			add(key);
 		}
 		break;
@@ -127,7 +129,6 @@ void	AvahiDiscovery::main() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "running simple_poll loop");
 	avahi_simple_poll_loop(simple_poll);
 
-
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main program for discover %p complete",
 		this);
 fail:
@@ -147,7 +148,9 @@ fail:
 }
 
 ServiceObject	AvahiDiscovery::find(const ServiceKey& key) {
-	ServiceObject	result(key);
+	AvahiResolver	resolver(key, client);
+	resolver.resolve();
+	ServiceObject	result = resolver.resolved();
 	return result;
 }
 

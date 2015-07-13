@@ -29,14 +29,22 @@ class ServiceKey {
 	std::string	_name;
 	std::string	_type;
 	std::string	_domain;
+	int	_interface;
+	int	_protocol;
 public:
 	const std::string&	name() const { return _name; }
 	const std::string&	type() const { return _type; }
 	const std::string&	domain() const { return _domain; }
-public:
+
 	ServiceKey(const std::string& name, const std::string& type,
 		const std::string& domain);
 	ServiceKey() { }
+
+	int	interface() const { return _interface; }
+	void	interface(int i) { _interface = i; }
+	int	protocol() const { return _protocol; }
+	void	protocol(int p) { _protocol = p; }
+
 	bool	operator<(const ServiceKey& other) const;
 	bool	operator==(const ServiceKey& other) const;
 	std::string	toString() const;
