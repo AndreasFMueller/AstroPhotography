@@ -108,8 +108,7 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-ice \
-		--enable-boostregex
+	./configure --prefix=`pwd`/root ${commonflags} --enable-ice 
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
