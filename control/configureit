@@ -92,10 +92,10 @@ Linux)	if [ -r /etc/debian_version ]
 esac
 
 # build the CORBA components if corba is present
-if `pkg-config --exists omniORB4`
-then
-	commonflags="${commonflags} --enable-corba"
-fi
+#if `pkg-config --exists omniORB4`
+#then
+#	commonflags="${commonflags} --enable-corba"
+#fi
 
 # now that we have all the information, run the configure script
 case ${systemtype} in

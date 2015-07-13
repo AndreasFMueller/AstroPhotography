@@ -20,7 +20,14 @@ int	ModulesI::numberOfModules(const Ice::Current& /* current */) {
 }
 
 ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
-	return _repository.moduleNames();
+	ModuleNameList	result = _repository.moduleNames();
+	// suppress names that should not be published
+	ModuleNameList::iterator	i;
+	i = find(result.begin(), result.end(), std::string("mock2"));
+	if (i != result.end()) result.erase(i);
+	i = find(result.begin(), result.end(), std::string("not"));
+	if (i != result.end()) result.erase(i);
+	return result;
 }
 
 DriverModulePrx	ModulesI::getModule(const std::string& modulename,
