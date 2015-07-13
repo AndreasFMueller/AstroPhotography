@@ -227,11 +227,8 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "service: %s", name.c_str());
 	astro::discover::ServiceDiscoveryPtr	discovery
 		= astro::discover::ServiceDiscovery::get();
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	while (!discovery->has(name)) {
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
-	astro::discover::ServiceKey	key = discovery->find(name);
+	discovery->start();
+	astro::discover::ServiceKey	key = discovery->waitfor(name);
 	astro::discover::ServiceObject	serviceobject = discovery->find(key);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "host: %s, port: %d",
 		serviceobject.host().c_str(), serviceobject.port());

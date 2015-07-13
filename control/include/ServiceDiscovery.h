@@ -189,6 +189,9 @@ public:
 	// factory method for an implementation class
 	static ServiceDiscoveryPtr	get();
 
+	// start it
+	virtual void	start() = 0;
+
 	// we keep a set of services we have published and a set of
 	// services that have been seen. Both are of type ServiceSet
 public:

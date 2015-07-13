@@ -38,8 +38,25 @@ static void	avahi_main(AvahiThread *base) {
  * function, which is just a redirection to the main method of the 
  * AvahiDiscovery object.
  */
-AvahiThread::AvahiThread() : thread(avahi_main, this) {
+AvahiThread::AvahiThread() : thread(NULL), running(false) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AvahiThread object");
+}
+
+/**
+ * \brief Start the thread
+ *
+ * This method starts the thread and ensures, using the mtx and the running
+ * variable, that it is run only once.
+ */
+void	AvahiThread::start() {
+	std::unique_lock<std::mutex>	mtx;
+	if (running) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread already running");
+		return;
+	}
+	running = true;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching thread");
+	thread = new std::thread(avahi_main, this);
 }
 
 /**
@@ -56,7 +73,7 @@ AvahiThread::~AvahiThread() {
 	}
 	// wait for the thread to terminate
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "join the thread");
-	thread.join();
+	thread->join();
 }
 
 } // namespace discover

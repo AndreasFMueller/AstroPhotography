@@ -93,7 +93,9 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 	}
 	assert(sdRef != NULL);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DNSServiceBrowse started");
+}
 
+void	BonjourDiscovery::start() {
 	// start a thread
 	thread = new std::thread(discover::main, this);
 }

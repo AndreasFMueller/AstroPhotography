@@ -61,11 +61,18 @@ public:
  */
 class AvahiThread : public AvahiBase {
 protected:
-	std::thread	thread;
+	std::thread	*thread;
+private:
+	bool	running;
+	std::mutex	mtx;
+	AvahiThread(const AvahiThread& other);
+	AvahiThread&	operator=(const AvahiThread& other);
 public:
 	virtual void	main() = 0;
 	AvahiThread();
 	virtual ~AvahiThread();
+protected:
+	virtual void	start();
 };
 
 /**
@@ -121,6 +128,7 @@ public:
 
 
 	virtual ServiceObject	find(const ServiceKey& key);
+	void	start() { AvahiThread::start(); }
 };
 
 /**

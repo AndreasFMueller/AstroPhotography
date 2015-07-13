@@ -61,6 +61,7 @@ public:
 			const char *replyDomain);
 	void	main();
 	virtual ServiceObject	find(const ServiceKey& key);
+	virtual void	start();
 };
 
 /**

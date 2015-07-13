@@ -226,6 +226,7 @@ void	AvahiPublisher::publish() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "publish %s:%d %s",
 		servername().c_str(), port(),
 		ServiceSubset::toString().c_str());
+	start();
 	if (!valid()) {
 		throw std::runtime_error("publishing thread failed");
 	}
