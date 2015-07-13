@@ -7,6 +7,9 @@
 #include <AstroFormat.h>
 #include <includes.h>
 #include <AstroDebug.h>
+#include <ServiceDiscovery.h>
+
+using namespace astro::discover;
 
 namespace astro {
 
@@ -21,22 +24,45 @@ static unsigned short	icestar_port() {
 	return serv->s_port;
 }
 
+static ServiceObject	resolve(const std::string& name) {
+	ServiceDiscoveryPtr	discovery = ServiceDiscovery::get();
+	ServiceKey	key = discovery->waitfor(name);
+	return discovery->find(key);
+}
+
+unsigned short	ServerName::port() const {
+	if (!_isdynamic) {
+		return _port;
+	}
+	return resolve(_host).port();
+}
+
+std::string	ServerName::host() const {
+	if (!_isdynamic) {
+		return _host;
+	}
+	return resolve(_host).host();
+}
+
 ServerName::ServerName() : _host("localhost"), _port(icestar_port()) {
+	_isdynamic = false;
 }
 
 ServerName::ServerName(const std::string& host, unsigned short port)
 	: _host(host), _port(port) {
+	_isdynamic = false;
 }
 
-ServerName::ServerName(const std::string& servername) {
-	std::string::size_type	pos = servername.find(':');
+ServerName::ServerName(const std::string& servicename) {
+	std::string::size_type	pos = servicename.find(':');
 	if (pos == std::string::npos) {
-		_host = servername;
+		_isdynamic = true;
+		_host = servicename;
 		_port = icestar_port();
 		return;
 	}
-	_host = servername.substr(0, pos);
-	_port = std::stoi(servername.substr(pos + 1));
+	_host = servicename.substr(0, pos);
+	_port = std::stoi(servicename.substr(pos + 1));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "host = %s, port = %hu", _host.c_str(),
 		_port);
 }
@@ -46,8 +72,18 @@ ServerName::operator	std::string() const {
 }
 
 std::string	ServerName::connect(const std::string& service) const {
+	std::string	h;
+	unsigned short	p;
+	if (_isdynamic) {
+		ServiceObject	object = resolve(_host);
+		h = object.host();
+		p = object.port();
+	} else {
+		h = host().c_str();
+		p =  port();
+	}
 	std::string	connectstring = stringprintf("%s:default -h %s -p %hu",
-		service.c_str(), host().c_str(), port());
+		service.c_str(), h.c_str(), p);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to %s",
 		connectstring.c_str());
 	return connectstring;
@@ -58,7 +94,7 @@ bool	ServerName::isDefault() const {
 }
 
 bool	ServerName::isDefaultPort() const {
-	return _port == 10000;
+	return _port == default_port;
 }
 
 } // namespace astro

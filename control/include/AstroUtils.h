@@ -256,20 +256,25 @@ std::string	demangle(const std::string& mangled_name) throw();
 class ServerName {
 	std::string	_host;
 public:
-	const std::string& host() const { return _host; }
+	std::string	host() const;
 	void	host(const std::string& h) { _host = h; }
 private:
 	unsigned short	_port;
 public:
-	unsigned short	port() const { return _port; }
+	unsigned short	port() const;
 	void	port(const unsigned short p) { _port = p; }
+private:
+	bool	_isdynamic; 
+public:
+	bool	isdynamic() const { return _isdynamic; }
+
 public:
 	std::string	connect(const std::string& service) const;
 
 	// constructor
 	ServerName();
 	ServerName(const std::string& _host, unsigned short port);
-	ServerName(const std::string& servername);
+	ServerName(const std::string& dynamicname);
 
 	bool	isDefault() const;
 	bool	isDefaultPort() const;

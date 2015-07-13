@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20150713:
+	* fix threading issues in Avahi implementation
+	* make service discover work in Linux
+	* extend ServerName class to include name resolution via DNS Service
+	  discovery
+
 20150711:
 	* add persistence to instruments
 
