@@ -7,9 +7,14 @@ if ENABLE_ICE
 
 pkglib_LTLIBRARIES = nice.la
 
-noinst_HEADERS = NiceLocator.h
+noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuiderPort.h \
+	NiceFilterWheel.h NiceCcd.h NiceCooler.h NiceAdaptiveOptics.h \
+	NiceFocuser.h
 
-SRCFILES = NiceLocator.cpp
+SRCFILES = DeviceNicer.cpp DeviceDenicer.cpp NiceDevice.cpp \
+	NiceLocator.cpp NiceCamera.cpp NiceGuiderPort.cpp NiceCcd.cpp \
+	NiceFilterWheel.cpp NiceCooler.cpp NiceAdaptiveOptics.cpp \
+	NiceFocuser.cpp
 
 ICELIBS = @ICELIBS@
 ICELDADD = -L$(top_builddir)/lib -lastro \

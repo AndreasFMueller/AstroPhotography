@@ -22,10 +22,12 @@ public:
 	void	testModule();
 	void	testLocator();
 	void	testDeviceList();
+	void	testDevice();
 	CPPUNIT_TEST_SUITE(NiceLocatorTest);
 	CPPUNIT_TEST(testModule);
 	CPPUNIT_TEST(testLocator);
 	CPPUNIT_TEST(testDeviceList);
+	CPPUNIT_TEST(testDevice);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -61,6 +63,15 @@ void	NiceLocatorTest::testDeviceList() {
 	}
 	delete devicelocator;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDeviceList() end");
+}
+
+void	NiceLocatorTest::testDevice() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDevice() begin");
+	astro::device::DeviceLocator	*devicelocator = getDeviceLocator();
+	std::string	devicename("camera:nice/server/simluator/camera");
+	astro::camera::CameraPtr	camera
+		= devicelocator->getCamera0(devicename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDevice() end");
 }
 
 /*
