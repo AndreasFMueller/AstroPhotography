@@ -25,7 +25,9 @@ ModuleNameList	ModulesI::getModuleNames(const Ice::Current& /* current */) {
 	ModuleNameList::iterator	i;
 	i = find(result.begin(), result.end(), std::string("mock2"));
 	if (i != result.end()) result.erase(i);
-	i = find(result.begin(), result.end(), std::string("not"));
+	i = find(result.begin(), result.end(), std::string("net"));
+	if (i != result.end()) result.erase(i);
+	i = find(result.begin(), result.end(), std::string("nice"));
 	if (i != result.end()) result.erase(i);
 	return result;
 }

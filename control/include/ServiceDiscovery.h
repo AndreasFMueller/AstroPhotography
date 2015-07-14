@@ -260,7 +260,8 @@ public:
 		Cooler = 2,
 		GuiderPort = 3,
 		Focuser = 4,
-		AdaptiveOptics = 5
+		AdaptiveOptics = 5,
+		FilterWheel = 6
 	} Type;
 	std::string	_name;
 	Type	_type;

@@ -55,6 +55,10 @@ void	NiceLocatorTest::testDeviceList() {
 	astro::device::DeviceLocator	*devicelocator = getDeviceLocator();
 	std::this_thread::sleep_for(std::chrono::seconds(5));
 	std::vector<std::string>	list = devicelocator->getDevicelist();
+	std::vector<std::string>::const_iterator	i;
+	for (i = list.begin(); i != list.end(); i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device: %s", i->c_str());
+	}
 	delete devicelocator;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDeviceList() end");
 }

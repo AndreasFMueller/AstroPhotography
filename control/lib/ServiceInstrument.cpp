@@ -38,6 +38,7 @@ std::list<InstrumentComponent>	Instrument::list() {
 	add(result, InstrumentComponent::GuiderPort);
 	add(result, InstrumentComponent::Focuser);
 	add(result, InstrumentComponent::AdaptiveOptics);
+	add(result, InstrumentComponent::FilterWheel);
 	return result;
 }
 

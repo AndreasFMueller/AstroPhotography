@@ -20,7 +20,8 @@ module snowstar {
 		InstrumentCooler = 2,
 		InstrumentGuiderPort = 3,
 		InstrumentFocuser = 4,
-		InstrumentAdaptiveOptics = 5
+		InstrumentAdaptiveOptics = 5,
+		InstrumentFilterWheel = 6
 	};
 
 	/**

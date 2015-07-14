@@ -44,6 +44,9 @@ static InstrumentComponentType	string2type(const std::string& componenttype) {
 	if (componenttype == "AdaptiveOptics") {
 		return InstrumentAdaptiveOptics;
 	}
+	if (componenttype == "FilterWheel") {
+		return InstrumentFilterWheel;
+	}
 	throw std::runtime_error("unknown component type");
 }
 
@@ -61,6 +64,8 @@ static std::string	type2string(InstrumentComponentType type) {
 			return std::string("Focuser");
 		case InstrumentAdaptiveOptics:
 			return std::string("AdaptiveOptics");
+		case InstrumentFilterWheel:
+			return std::string("FilterWheel");
 	}
 	throw std::runtime_error("invalid type code");
 }

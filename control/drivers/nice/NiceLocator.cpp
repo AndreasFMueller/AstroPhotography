@@ -1,5 +1,5 @@
 /*
- * NiceLocator.cpp -- Locator for net services
+ * NiceLocator.cpp -- Locator for nice services
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -68,6 +68,10 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting devices from module %s",
 		module->getName().c_str());
 	std::vector<std::string>	result;
+	if (!module->hasLocator()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "does not have a a locator");
+		return result;
+	}
 	snowstar::DeviceLocatorPrx locator = module->getDeviceLocator();
 	snowstar::DeviceNameList	names
 		= locator->getDevicelist(snowstar::convert(device));
@@ -95,10 +99,6 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 	snowstar::ModuleNameList::const_iterator	i;
 	for (i = list.begin(); i != list.end(); i++) {
 		std::string	name = *i;
-		if (name == "net") {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring net module");
-			continue;
-		}
 		snowstar::DriverModulePrx	module = modules->getModule(*i);
 		std::vector<std::string>	names
 			= getDevicelist(device, module);
