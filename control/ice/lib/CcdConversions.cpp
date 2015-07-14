@@ -178,4 +178,15 @@ astro::camera::Exposure::purpose_t      convert(const ExposurePurpose& purpose) 
 	throw std::runtime_error("unknown exposure purpose");
 }
 
+std::pair<float, float>	convert(const Interval& interval) {
+	return std::make_pair(interval.min, interval.max);
+}
+
+Interval	convert(const std::pair<float, float>& interval) {
+	Interval	result;
+	result.min = interval.first;
+	result.max = interval.second;
+	return result;
+}
+
 } // namespace snowstar

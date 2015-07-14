@@ -52,6 +52,9 @@ astro::RaDec	convert(const RaDec& radec);
 AzmAlt	convert(const astro::AzmAlt& azmalt);
 astro::AzmAlt	convert(const AzmAlt& azmalt);
 
+Interval	convert(const std::pair<float, float>& interval);
+std::pair<float, float>	convert(const Interval& interval);
+
 // Device conversions
 DeviceNameList  convert(const astro::module::Devices::devicelist& list);
 astro::module::Devices::devicelist	convert(const DeviceNameList& list);

@@ -48,8 +48,7 @@ bool	NiceCcd::hasGain() {
 }
 
 std::pair<float, float>	NiceCcd::gainInterval() {
-	// XXX gain interval currently not available in the ICE interface
-	return std::make_pair(0.0, 1.0);
+	return snowstar::convert(_ccd->gainInterval());
 }
 
 bool	NiceCcd::hasCooler() const {

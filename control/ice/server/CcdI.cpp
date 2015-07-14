@@ -73,6 +73,10 @@ bool	CcdI::hasGain(const Ice::Current& /* current */) {
 	return _ccd->hasGain();
 }
 
+Interval	CcdI::gainInterval(const Ice::Current& /* current */) {
+	return convert(_ccd->gainInterval());
+}
+
 bool	CcdI::hasShutter(const Ice::Current& /* current */) {
 	return _ccd->hasShutter();
 }

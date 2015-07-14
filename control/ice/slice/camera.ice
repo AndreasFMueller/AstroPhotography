@@ -89,6 +89,11 @@ module snowstar {
 
 	enum ExposureState { IDLE, EXPOSING, EXPOSED, CANCELLING };
 
+	struct Interval {
+		float	min;
+		float	max;
+	};
+
 	/**
 	 * \brief Interface to a CCD chip of a camera.
 	 *
@@ -147,6 +152,10 @@ module snowstar {
 		 * \brief Find out whether this CCD has a gain setting.
 		 */
 		bool	hasGain();
+		/**
+		 * \brief get the interval of valid gain values
+		 */
+		Interval	gainInterval();
 		/**
 		 * \brief Find out whether this CCD has a shutter
 		 */
