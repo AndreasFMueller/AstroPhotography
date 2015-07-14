@@ -245,6 +245,11 @@ public:
 						int port);
 
 	virtual void	publish();
+private:
+static	void	add_published(const std::string& name);
+static	void	remove_published(const std::string& name);
+public:
+static bool	ispublished(const std::string& name);
 };
 
 class Instrument;

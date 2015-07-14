@@ -85,5 +85,28 @@ ServicePublisherPtr	ServicePublisher::get(const std::string& servername,
 #endif /* USE_SD_BONJOUR */
 }
 
+static std::recursive_mutex	published_mtx;
+
+static std::set<std::string>	published_services;
+
+void	ServicePublisher::add_published(const std::string& name) {
+	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	published_services.insert(name);
+}
+
+void	ServicePublisher::remove_published(const std::string& name) {
+	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	std::set<std::string>::iterator	i = published_services.find(name);
+	if (i != published_services.end()) {
+		published_services.erase(i);
+	}
+}
+
+bool	ServicePublisher::ispublished(const std::string& name) {
+	std::unique_lock<std::recursive_mutex>	lock(published_mtx);
+	std::set<std::string>::iterator	i = published_services.find(name);
+	return (i != published_services.end());
+}
+
 } // namespace discover
 } // namespace astro

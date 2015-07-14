@@ -22,9 +22,6 @@ namespace nice {
 class NiceLocator : public astro::device::DeviceLocator {
 	// members related to service discovery
 	astro::discover::ServiceDiscoveryPtr	discovery;
-	std::set<std::string>	ignoredservices;
-public:
-	void	ignoreservice(const std::string& service);
 private:
 
 	// modules map

@@ -33,7 +33,7 @@ libnice_la_LIBADD = $(ICELDADD)
 libnice_la_CPPFLAGS = $(ICECPPFLAGS)
 
 noinst_PROGRAMS = nicetests
-nicetests_SOURCES = nicetests.cpp LocatorTest.cpp
+nicetests_SOURCES = nicetests.cpp LocatorTest.cpp CameraTest.cpp
 nicetests_LDADD = -lcppunit $(ICELDADD) -L. -lnice
 nicetests_DEPENDENCIES = $(ICEDPENDENCIES)
 nicetests_CPPFLAGS = $(ICECPPFLAGS)

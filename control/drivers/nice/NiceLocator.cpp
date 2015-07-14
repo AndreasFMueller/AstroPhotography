@@ -16,6 +16,7 @@
 #include <NiceAdaptiveOptics.h>
 #include <NiceFilterWheel.h>
 #include <NiceCooler.h>
+#include <ServiceDiscovery.h>
 
 namespace astro {
 namespace camera {
@@ -62,6 +63,7 @@ namespace nice {
 //////////////////////////////////////////////////////////////////////
 // NiceLocator class
 //////////////////////////////////////////////////////////////////////
+
 NiceLocator::NiceLocator() {
 	discovery = ServiceDiscovery::get();
 	discovery->start();
@@ -227,6 +229,8 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 
 	// got through the servers and 
 	for (i = services.begin(); i != services.end(); i++) {
+		if (ServicePublisher::ispublished(i->name()))
+			continue;
 		std::vector<std::string> names = getDevicelist(device, *i);
 		std::copy(names.begin(), names.end(),
 			std::back_inserter<std::vector<std::string> >(result));
@@ -237,11 +241,15 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 	return result;
 }
 
+/**
+ * \brief Check whether the name is of the right type
+ */
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
 	if (name.type() != type) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a camera",
-			name.toString().c_str());
+			name.toString().c_str(),
+			DeviceName::type2string(type).c_str());
 		throw std::runtime_error("name is not a camera");
 	}
 }
@@ -330,10 +338,6 @@ AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
 	snowstar::AdaptiveOpticsPrx	adaptiveoptics
 		= locator->getAdaptiveOptics(denicer.devicename().toString());
 	return AdaptiveOpticsPtr(new NiceAdaptiveOptics(adaptiveoptics, name));
-}
-
-void	NiceLocator::ignoreservice(const std::string& service) {
-	ignoredservices.insert(service);
 }
 
 } // namespace nice
