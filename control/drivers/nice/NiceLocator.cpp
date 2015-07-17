@@ -182,7 +182,7 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 }
 
 /**
- * \brief 
+ * \brief Get the dvice names from a given service
  */
 std::vector<std::string>	NiceLocator::getDevicelist(
 					DeviceName::device_type device,
@@ -199,10 +199,12 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 	snowstar::ModuleNameList::const_iterator	i;
 	for (i = list.begin(); i != list.end(); i++) {
 		std::string	name = *i;
+		if ((name == "mock2") || (name == "nice"))
+			continue;
 		snowstar::DriverModulePrx	module = modules->getModule(*i);
 		std::vector<std::string>	names
 			= getDevicelist(device, module);
-		names = DeviceNicer(key.name())(names);
+		names = astro::device::nice::DeviceNicer(key.name())(names);
 		std::copy(names.begin(), names.end(),
 			std::back_inserter<std::vector<std::string> >(result));
 	}
@@ -246,11 +248,16 @@ std::vector<std::string>	NiceLocator::getDevicelist(
  */
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
-	if (name.type() != type) {
+	if (!name.hasType(type)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a camera",
 			name.toString().c_str(),
 			DeviceName::type2string(type).c_str());
 		throw std::runtime_error("name is not a camera");
+	}
+	if (name.isLocalDevice()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s is not a network device name",
+			name.toString().c_str());
+		throw std::logic_error("not a network device name");
 	}
 }
 
@@ -260,83 +267,84 @@ void	NiceLocator::check(const DeviceName& name,
 CameraPtr	NiceLocator::getCamera0(const DeviceName& name) {
 	check(name, DeviceName::Camera);
 
-	// denice the camera name
-	DeviceDenicer	denicer(name);
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
 
-	// request a proxy for the camera with the deniced name
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
-
-	// wrap the proxy 
 	snowstar::CameraPrx	camera
-		= locator->getCamera(denicer.devicename().toString());
+		= locator->getCamera(remotename.toString());
 	return CameraPtr(new NiceCamera(camera, name));
 }
 
 CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 	check(name, DeviceName::Ccd);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::CcdPrx	ccd
-		= locator->getCcd(denicer.devicename().toString());
+		= locator->getCcd(remotename.toString());
 	return CcdPtr(new NiceCcd(ccd, name));
 }
 
 GuiderPortPtr	NiceLocator::getGuiderPort0(const DeviceName& name) {
 	check(name, DeviceName::Guiderport);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::GuiderPortPrx	guiderport
-		= locator->getGuiderPort(denicer.devicename().toString());
+		= locator->getGuiderPort(remotename.toString());
 	return GuiderPortPtr(new NiceGuiderPort(guiderport, name));
 }
 
 FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {
 	check(name, DeviceName::Filterwheel);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::FilterWheelPrx	filterwheel
-		= locator->getFilterWheel(denicer.devicename().toString());
+		= locator->getFilterWheel(remotename.toString());
 	return FilterWheelPtr(new NiceFilterWheel(filterwheel, name));
 }
 
 CoolerPtr	NiceLocator::getCooler0(const DeviceName& name) {
 	check(name, DeviceName::Cooler);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::CoolerPrx	cooler
-		= locator->getCooler(denicer.devicename().toString());
+		= locator->getCooler(remotename.toString());
 	return CoolerPtr(new NiceCooler(cooler, name));
 }
 
 FocuserPtr	NiceLocator::getFocuser0(const DeviceName& name) {
 	check(name, DeviceName::Focuser);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::FocuserPrx	focuser
-		= locator->getFocuser(denicer.devicename().toString());
+		= locator->getFocuser(remotename.toString());
 	return FocuserPtr(new NiceFocuser(focuser, name));
 }
 
 AdaptiveOpticsPtr	NiceLocator::getAdaptiveOptics0(const DeviceName& name) {
 	check(name, DeviceName::AdaptiveOptics);
-	DeviceDenicer	denicer(name);
-	std::string	modulename = denicer.devicename().modulename();
-	snowstar::DeviceLocatorPrx	locator = getLocator(denicer.service(),
-						modulename);
+
+	astro::DeviceName	remotename = name.localdevice();
+	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
+						remotename.modulename());
+
 	snowstar::AdaptiveOpticsPrx	adaptiveoptics
-		= locator->getAdaptiveOptics(denicer.devicename().toString());
+		= locator->getAdaptiveOptics(remotename.toString());
 	return AdaptiveOpticsPtr(new NiceAdaptiveOptics(adaptiveoptics, name));
 }
 

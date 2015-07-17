@@ -6,13 +6,24 @@
 #include <NiceCcd.h>
 #include <IceConversions.h>
 #include <NiceCooler.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace camera {
 namespace nice {
 
+static CcdInfo	ccd_rename(const CcdInfo info, const DeviceName& devicename) {
+	CcdInfo	result(devicename, info.size(), info.getId());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "renamed to: %s",
+		result.name().toString().c_str());
+	result.addModes(info.modes());
+	result.setShutter(info.shutter());
+	return result;
+}
+
 NiceCcd::NiceCcd(snowstar::CcdPrx ccd, const DeviceName& devicename)
-	: Ccd(convert(ccd->getInfo())), NiceDevice(devicename), _ccd(ccd) {
+	: Ccd(ccd_rename(snowstar::convert(ccd->getInfo()), devicename)),
+	  NiceDevice(devicename), _ccd(ccd) {
 }
 
 NiceCcd::~NiceCcd() {
@@ -23,11 +34,13 @@ void	NiceCcd::startExposure(const Exposure& exposure) {
 }
 
 Exposure::State	NiceCcd::exposureStatus() {
-	return snowstar::convert(_ccd->exposureStatus());
+	state = snowstar::convert(_ccd->exposureStatus());
+	return state;
 }
 
 void	NiceCcd::cancelExposure() {
 	_ccd->cancelExposure();
+	state = snowstar::convert(_ccd->exposureStatus());
 }
 
 Shutter::state	NiceCcd::getShutterState() {
@@ -39,6 +52,7 @@ void	NiceCcd::setShutterState(const Shutter::state& state) {
 }
 
 astro::image::ImagePtr	NiceCcd::getRawImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve raw image");
 	snowstar::ImagePrx	image = _ccd->getImage();
 	return snowstar::convert(image);
 }

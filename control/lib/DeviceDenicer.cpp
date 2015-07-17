@@ -3,11 +3,11 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <NiceDevice.h>
+#include <Nice.h>
 #include <AstroDebug.h>
 
 namespace astro {
-namespace camera {
+namespace device {
 namespace nice {
 
 void	DeviceDenicer::setup(const DeviceName& original) {
@@ -50,5 +50,5 @@ DeviceName	DeviceDenicer::devicename() const {
 }
 
 } // namespace nice
-} // namespace astro
+} // namespace device
 } // namespace astro

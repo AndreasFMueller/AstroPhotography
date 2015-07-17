@@ -124,9 +124,19 @@ public:
 	bool	operator==(const DeviceName& other) const;
 	bool	operator!=(const DeviceName& other) const;
 	bool	operator<(const DeviceName& other) const;
+
 	// cast to a string
 	operator std::string() const;
 	std::string	toString() const;
+
+	// methods related to nice names
+	bool	isNetworkDevice() const;	// camera:nice/service/module/p
+	bool	isLocalDevice() const;	// camera:module/path
+	bool	isServedByUs() const;	// nice device served by our process
+	bool	isServedBy(const std::string& service) const;
+	const std::string&	servicename() const;
+	DeviceName	localdevice() const;
+	DeviceName	netdevice(const std::string& service) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name);

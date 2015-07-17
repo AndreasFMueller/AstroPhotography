@@ -309,6 +309,7 @@ astro::image::ImagePtr	Ccd::getRawImage() {
 astro::image::ImagePtr	Ccd::getImage() {
 	// must have an exposed image to call this method
 	if (Exposure::exposed != state) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %d", state);
 		throw BadState("no exposed image to retrieve");
 	}
 	ImagePtr	image = this->getRawImage();

@@ -11,7 +11,7 @@ noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuiderPort.h \
 	NiceFilterWheel.h NiceCcd.h NiceCooler.h NiceAdaptiveOptics.h \
 	NiceFocuser.h
 
-SRCFILES = DeviceNicer.cpp DeviceDenicer.cpp NiceDevice.cpp \
+SRCFILES = NiceDevice.cpp \
 	NiceLocator.cpp NiceCamera.cpp NiceGuiderPort.cpp NiceCcd.cpp \
 	NiceFilterWheel.cpp NiceCooler.cpp NiceAdaptiveOptics.cpp \
 	NiceFocuser.cpp

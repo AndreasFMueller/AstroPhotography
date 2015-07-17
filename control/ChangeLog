@@ -1,5 +1,11 @@
 ChangeLog for the Astro project.
 
+20150717:
+	* Move DeviceNicer and Denicer to astro::device::nice and to the
+	  main library, so that we can use network names in the main library
+	* improve DeviceName class so that it understands local and network
+	  device names, and can convert between them
+
 20150713:
 	* fix threading issues in Avahi implementation
 	* make service discover work in Linux

@@ -7,9 +7,11 @@
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 #include <AstroDebug.h>
+#include <Nice.h>
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
+#include <ServiceDiscovery.h>
 
 namespace astro {
 
@@ -200,6 +202,52 @@ DeviceName	DeviceName::parent(const DeviceName::device_type& devicetype) const {
 	}
 	result.type(devicetype);
 	return result;
+}
+
+bool	DeviceName::isNetworkDevice() const {
+	return (modulename() == "nice");
+}
+
+bool	DeviceName::isLocalDevice() const {
+	return !isLocalDevice();
+}
+
+bool	DeviceName::isServedByUs() const {
+	if (isLocalDevice()) {
+		return false;
+	}
+	std::string	service = servicename();
+	return astro::discover::ServicePublisher::ispublished(service);
+}
+
+DeviceName	DeviceName::localdevice() const {
+	if (isLocalDevice()) {
+		return *this;
+	}
+	astro::device::nice::DeviceDenicer	d(*this);
+	return d.devicename();
+}
+
+DeviceName	DeviceName::netdevice(const std::string& service) const {
+	if (isNetworkDevice()) {
+		return *this;
+	}
+	astro::device::nice::DeviceNicer	n(service);
+	return n(*this);
+}
+
+const std::string&	DeviceName::servicename() const {
+	if (isLocalDevice()) {
+		throw std::logic_error("not a network device");
+	}
+	return operator[](1);
+}
+
+bool	DeviceName::isServedBy(const std::string& service) const {
+	if (isLocalDevice()) {
+		return false;
+	}
+	return servicename() == service;
 }
 
 } // namespace astro

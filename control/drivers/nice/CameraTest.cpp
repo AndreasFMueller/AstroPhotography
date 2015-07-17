@@ -10,6 +10,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <AstroDebug.h>
+#include <AstroIO.h>
 
 namespace astro {
 namespace test {
@@ -41,6 +42,18 @@ void	NiceCameraTest::testCamera() {
 	astro::camera::CcdPtr	ccd = camera->getCcd(0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd name: %s",
 		ccd->name().toString().c_str());
+	astro::camera::Exposure	exposure;
+	exposure.exposuretime = 4;
+	exposure.frame = ccd->getInfo().getFrame();
+	exposure.shutter = astro::camera::Shutter::OPEN;
+	exposure.purpose = astro::camera::Exposure::light;
+	ccd->startExposure(exposure);
+	ccd->wait();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "status: %d", ccd->exposureStatus());
+	astro::image::ImagePtr	image = ccd->getImage();
+	astro::io::FITSout	out("test.fits");
+	out.setPrecious(false);
+	out.write(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testCamera() end");
 };
 

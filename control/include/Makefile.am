@@ -30,5 +30,5 @@ noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
 	ProjectTable.h GlobalTable.h BasicGuiderport.h \
 	FieldPersistence.h astroregex.h \
 	ServiceDiscovery.h AvahiDiscovery.h BonjourDiscovery.h \
-	InstrumentComponentTable.h
+	InstrumentComponentTable.h Nice.h
 

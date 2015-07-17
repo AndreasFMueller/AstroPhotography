@@ -3,10 +3,10 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <NiceDevice.h>
+#include <Nice.h>
 
 namespace astro {
-namespace camera {
+namespace device {
 namespace nice {
 
 DeviceNicer::DeviceNicer(const std::string& servicename)
@@ -37,5 +37,5 @@ std::vector<std::string>	DeviceNicer::operator()(const std::vector<std::string>&
 }
 
 } // namespace nice
-} // namespace camera
+} // namespace device
 } // namespace astro

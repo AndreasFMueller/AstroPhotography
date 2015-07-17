@@ -35,7 +35,8 @@ endif
 libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
 	AttributeValuePairs.cpp UUID.cpp Path.cpp demangle.cpp ServerName.cpp \
-	URL.cpp DeviceName.cpp Device.cpp Properties.cpp timeformat.cpp \
+	URL.cpp DeviceName.cpp DeviceNicer.cpp DeviceDenicer.cpp \
+	Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \
 	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \

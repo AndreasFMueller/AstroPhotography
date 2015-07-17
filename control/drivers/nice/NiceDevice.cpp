@@ -12,7 +12,7 @@ namespace camera {
 namespace nice {
 
 NiceDevice::NiceDevice(const DeviceName& devicename) {
-	DeviceDenicer	denicer(devicename);
+	astro::device::nice::DeviceDenicer	denicer(devicename);
 	_service = denicer.service();
 	DeviceName	*d = new DeviceName(denicer.devicename());
 	_localname = std::shared_ptr<DeviceName>(d);
@@ -22,7 +22,7 @@ NiceDevice::~NiceDevice() {
 }
 
 DeviceName	NiceDevice::nice(const DeviceName& name) {
-	DeviceNicer	nicer(service());
+	astro::device::nice::DeviceNicer	nicer(service());
 	return nicer(name);
 }
 

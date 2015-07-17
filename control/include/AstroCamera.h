@@ -116,7 +116,7 @@ static purpose_t	string2purpose(const std::string& p);
 
 	// state related methods
 	typedef enum state_e {
-		idle, exposing, exposed, cancelling
+		idle = 0, exposing = 1, exposed = 2, cancelling = 3
 	} State;
 static std::string	state2string(State s);
 static State	string2state(const std::string& s);

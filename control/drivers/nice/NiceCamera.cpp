@@ -28,7 +28,9 @@ NiceCamera::~NiceCamera() {
 
 CcdPtr	NiceCamera::getCcd0(size_t id) {
 	snowstar::CcdPrx	ccd = _camera->getCcd(id);
-	return CcdPtr(new NiceCcd(ccd, ccd->getName()));
+	std::string	servicename = name()[1];
+	astro::device::nice::DeviceNicer	nicer(servicename);
+	return CcdPtr(new NiceCcd(ccd, nicer(ccd->getName())));
 }
 
 bool	NiceCamera::hasFilterWheel() const {
