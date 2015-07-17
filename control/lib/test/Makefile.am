@@ -35,7 +35,7 @@ noinst_PROGRAMS = tests processtests catalogtests singletest \
 tests_SOURCES = tests.cpp \
 	StacktraceTest.cpp TrimTest.cpp PathTest.cpp \
 	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
-	DeviceNameTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
+	DeviceNameTest.cpp NiceTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
 	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
 	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
@@ -63,7 +63,8 @@ tests_SOURCES = tests.cpp \
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	InstrumentComponentTest.cpp
+	NiceTest.cpp 
+#	InstrumentComponentTest.cpp
 #	InstrumentTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
 singletest_DEPENDENCIES = ../libastro.la 
