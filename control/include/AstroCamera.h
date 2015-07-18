@@ -96,17 +96,50 @@ std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
  * subframe with size (200,300) results in a 100x100 image being returned.
  */
 class	Exposure {
+	astro::image::ImageRectangle	_frame;
 public:
-	astro::image::ImageRectangle	frame;
-	float	exposuretime;
-	float	gain;
-	float	limit;
-	Binning	mode;
-	Shutter::state	shutter;
+	const image::ImageRectangle&	frame() const { return _frame; }
+	void	frame(const image::ImageRectangle& f) { _frame = f; }
+	const ImagePoint&	origin() const { return _frame.origin(); }
+	const ImageSize&	size() const { return _frame.size(); }
+	unsigned int	width() const { return size().width(); }
+	unsigned int	height() const { return size().height(); }
+	unsigned int	x() const { return origin().x(); }
+	unsigned int	y() const { return origin().y(); }
+private:
+	float	_exposuretime;
+public:
+	float	exposuretime() const { return _exposuretime; }
+	void	exposuretime(float e) { _exposuretime = e; }
+private:
+	float	_gain;
+public:
+	float	gain() const { return _gain; }
+	void	gain(float g) { _gain = g; }
+private:
+	float	_limit;
+public:
+	float	limit() const { return _limit; }
+	void	limit(float l) { l = _limit; }
+private:
+	Binning	_mode;
+public:
+	const Binning&	mode() const { return _mode; }
+	void	mode(const Binning& m) { _mode = m; }
+private:
+	Shutter::state	_shutter;
+public:
+	Shutter::state	shutter() const { return _shutter; }
+	void	shutter(Shutter::state s) { _shutter = s; }
 
 	// fields related tot he exposure purpose
 	typedef	enum { light = 0, dark = 1, flat = 2 } purpose_t;
-	purpose_t	purpose;
+private:
+	purpose_t	_purpose;
+public:
+	purpose_t	purpose() const { return _purpose; }
+	void	purpose(purpose_t p) { _purpose = p; }
+
 static std::string	purpose2string(purpose_t p);
 static purpose_t	string2purpose(const std::string& p);
 

@@ -58,12 +58,12 @@ UvcCcdBY8::UvcCcdBY8(const CcdInfo& info, int interface, int format,
 void	UvcCcd::startExposure(const Exposure& exposure) {
 	this->exposure = exposure;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
-	if (exposure.frame.size() != info.size()) {
+	if (exposure.frame().size() != info.size()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot take subimages");
 		throw UvcError("UVC driver cannot take subimages");
 	}
 
-	if ((exposure.frame.origin().x() != 0) || (exposure.frame.origin().y() != 0)) {
+	if ((exposure.frame().origin().x() != 0) || (exposure.frame().origin().y() != 0)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "UVC images cannot have offset");
 		throw UvcError("UVC driver cannot have offsets");
 	}
@@ -75,10 +75,10 @@ void	UvcCcd::startExposure(const Exposure& exposure) {
 	//camera.disableAutoWhiteBalance();
 
 	// set the gain
-	camera.setGain(exposure.gain);
+	camera.setGain(exposure.gain());
 
 	// set exposure time
-	camera.setExposureTime(exposure.exposuretime);
+	camera.setExposureTime(exposure.exposuretime());
 
 	// status
 	state = Exposure::exposed;

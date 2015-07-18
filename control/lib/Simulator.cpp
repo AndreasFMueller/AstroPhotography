@@ -173,7 +173,7 @@ Exposure::State	SimCamera::exposureStatus() {
 		return Exposure::idle;
 	}
 	double	nowtime = Timer::gettime();
-	if (nowtime < exposurestart + exposure.exposuretime) {
+	if (nowtime < exposurestart + exposure.exposuretime()) {
 		return Exposure::exposing;
 	}
 	return Exposure::exposed;
@@ -183,8 +183,8 @@ void	SimCamera::await_exposure() {
 	// compute remaining exposure time
 	double	nowtime = Timer::gettime();
 	double	exposed = nowtime - exposurestart;
-	if (exposure.exposuretime > exposed) {
-		double	remaining = exposure.exposuretime - exposed;
+	if (exposure.exposuretime() > exposed) {
+		double	remaining = exposure.exposuretime() - exposed;
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"remaining time to exposure: %.3f", remaining);
 		int	useconds = 1000000 * remaining;
@@ -238,8 +238,8 @@ ImagePtr	SimCamera::getImage() {
 	}
 	// now extract the window defiend in the frame
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "extracting %s window",
-		exposure.frame.toString().c_str());
-	WindowAdapter<unsigned short>	wa(image, exposure.frame);
+		exposure.frame().toString().c_str());
+	WindowAdapter<unsigned short>	wa(image, exposure.frame());
 	return ImagePtr(new Image<unsigned short>(wa));
 }
 

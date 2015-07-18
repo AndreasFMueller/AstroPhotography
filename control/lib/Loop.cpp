@@ -51,7 +51,7 @@ void	Loop::execute() {
 	_timer.limit(_period);
 
 	// now initialize exposure computation loop
-	double	exposuretime = _exposure.exposuretime;
+	double	exposuretime = _exposure.exposuretime();
 	_counter = 0;
 	while ((_counter++ < _nImages) || (_nImages == 0)) {
 		// make sure the exposure time is not too long
@@ -65,10 +65,10 @@ void	Loop::execute() {
 
 		// get an exposure
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s, time %fs",
-			_exposure.frame.toString().c_str(), exposuretime);
+			_exposure.frame().toString().c_str(), exposuretime);
 
 		// get an image with the current parameters
-		_exposure.exposuretime = exposuretime;
+		_exposure.exposuretime(exposuretime);
 		_ccd->startExposure(_exposure);
 		usleep(1000000 * exposuretime);
 		if (!_ccd->wait()) {

@@ -49,7 +49,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	}
 
 	// based on the exposure specification, build an evaluator
-	ImageSize	size = exposure().frame.size();
+	ImageSize	size = exposure().size();
 	int	radius = std::min(size.width(), size.height()) / 2;
 	FWHM2Evaluator	evaluator(size.center(), radius);
 
@@ -66,7 +66,7 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		// get an image from the Ccd
 		focusingstatus(Focusing::MEASURING);
 		ccd()->startExposure(exposure());
-		usleep(1000000 * exposure().exposuretime);
+		usleep(1000000 * exposure().exposuretime());
 		ccd()->wait();
 		ImagePtr	image = ccd()->getImage();
 		

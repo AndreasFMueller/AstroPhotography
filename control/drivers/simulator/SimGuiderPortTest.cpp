@@ -67,7 +67,7 @@ void	SimGuiderPortTest::testTranslation() {
 	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
 	CcdPtr	ccd = camera->getCcd(0);
 	Exposure	exposure;
-	exposure.exposuretime = 1;
+	exposure.exposuretime(1);
 	ccd->startExposure(exposure);
 	ccd->wait();
 	ImagePtr	image = ccd->getImage();
@@ -101,7 +101,7 @@ void	SimGuiderPortTest::testRotation() {
 	CameraPtr	camera = locator->getCamera("camera:simulator/camera");
 	CcdPtr	ccd = camera->getCcd(0);
 	Exposure	exposure;
-	exposure.exposuretime = 1;
+	exposure.exposuretime(1);
 	ccd->startExposure(exposure);
 	ccd->wait();
 	ImagePtr	image = ccd->getImage();

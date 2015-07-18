@@ -43,10 +43,10 @@ void	NiceCameraTest::testCamera() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd name: %s",
 		ccd->name().toString().c_str());
 	astro::camera::Exposure	exposure;
-	exposure.exposuretime = 4;
-	exposure.frame = ccd->getInfo().getFrame();
-	exposure.shutter = astro::camera::Shutter::OPEN;
-	exposure.purpose = astro::camera::Exposure::light;
+	exposure.exposuretime(4);
+	exposure.frame(ccd->getInfo().getFrame());
+	exposure.shutter(astro::camera::Shutter::OPEN);
+	exposure.purpose(astro::camera::Exposure::light);
 	ccd->startExposure(exposure);
 	ccd->wait();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "status: %d", ccd->exposureStatus());

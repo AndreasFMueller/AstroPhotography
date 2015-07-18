@@ -260,9 +260,9 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
  */
 astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 	astro::camera::Exposure	exposure = guider->exposure();
-	astro::Point	d = convert(_point) - exposure.frame.origin();
+	astro::Point	d = convert(_point) - exposure.frame().origin();
 	astro::image::ImagePoint	trackerstar(d.x(), d.y());
-	astro::image::ImageRectangle	trackerrectangle(exposure.frame.size());
+	astro::image::ImageRectangle	trackerrectangle(exposure.frame().size());
 	astro::guiding::TrackerPtr	tracker(
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));

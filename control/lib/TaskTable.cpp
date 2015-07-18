@@ -63,17 +63,18 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 				row["height"]->intValue());
 
 	Exposure	exposure;
-	exposure.frame.setOrigin(origin);
-	exposure.frame.setSize(size);
-	exposure.exposuretime = row["exposuretime"]->doubleValue();
-	exposure.gain = row["gain"]->doubleValue();
-	exposure.limit = row["vlimit"]->doubleValue();
-	exposure.shutter = (row["shutteropen"]->intValue())
-				? camera::Shutter::OPEN : camera::Shutter::CLOSED;
-	exposure.purpose = (Exposure::purpose_t)row["purpose"]->intValue();
+	ImageRectangle	frame(origin, size);
+	exposure.frame(frame);
+	exposure.exposuretime(row["exposuretime"]->doubleValue());
+	exposure.gain(row["gain"]->doubleValue());
+	exposure.limit(row["vlimit"]->doubleValue());
+	exposure.shutter((row["shutteropen"]->intValue())
+				? camera::Shutter::OPEN
+				: camera::Shutter::CLOSED);
+	exposure.purpose((Exposure::purpose_t)row["purpose"]->intValue());
 
 	Binning	mode(row["binx"]->intValue(), row["biny"]->intValue());
-	exposure.mode = mode;
+	exposure.mode(mode);
 	parameters.exposure(exposure);
 
 	TaskQueueEntry	entry(objectid, parameters);
@@ -102,21 +103,21 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("filterwheel", factory.get(entry.filterwheel())));
 	spec.insert(Field("filter", factory.get(entry.filter())));
 	Exposure	exposure = entry.exposure();
-	ImageRectangle	frame = exposure.frame;
+	ImageRectangle	frame = exposure.frame();
 	spec.insert(Field("originx", factory.get((int)frame.origin().x())));
 	spec.insert(Field("originy", factory.get((int)frame.origin().y())));
 	spec.insert(Field("width", factory.get((int)frame.size().width())));
 	spec.insert(Field("height", factory.get((int)frame.size().height())));
 
 	spec.insert(Field("exposuretime",
-		factory.get((double)exposure.exposuretime)));
-	spec.insert(Field("gain", factory.get((double)exposure.gain)));
-	spec.insert(Field("vlimit", factory.get((double)exposure.limit)));
-	spec.insert(Field("binx", factory.get((int)exposure.mode.getX())));
-	spec.insert(Field("biny", factory.get((int)exposure.mode.getY())));
+		factory.get((double)exposure.exposuretime())));
+	spec.insert(Field("gain", factory.get((double)exposure.gain())));
+	spec.insert(Field("vlimit", factory.get((double)exposure.limit())));
+	spec.insert(Field("binx", factory.get((int)exposure.mode().getX())));
+	spec.insert(Field("biny", factory.get((int)exposure.mode().getY())));
 	spec.insert(Field("shutteropen",
-		factory.get((exposure.shutter == Shutter::OPEN) ? 1 : 0)));
-	spec.insert(Field("purpose", factory.get((int)exposure.purpose)));
+		factory.get((exposure.shutter() == Shutter::OPEN) ? 1 : 0)));
+	spec.insert(Field("purpose", factory.get((int)exposure.purpose())));
 
 	spec.insert(Field("state", factory.get((int)entry.state())));
 	spec.insert(Field("lastchange", factory.get((int)entry.lastchange())));

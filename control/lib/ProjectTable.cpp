@@ -248,14 +248,14 @@ PartInfo::operator	Part() const {
 	astro::image::ImagePoint	origin(xoffset, yoffset);
 	astro::image::ImageRectangle	frame(size, origin);
 	astro::camera::Exposure	exposure;
-	exposure.frame = frame;
-	exposure.exposuretime = exposuretime;
-	exposure.gain = gain;
-	exposure.limit = limit;
-	exposure.mode = astro::camera::Binning(binx, biny);
-	exposure.shutter = (shutter)	? astro::camera::Shutter::OPEN
-					: astro::camera::Shutter::CLOSED;
-	exposure.purpose = (astro::camera::Exposure::purpose_t)purpose;
+	exposure.frame(frame);
+	exposure.exposuretime(exposuretime);
+	exposure.gain(gain);
+	exposure.limit(limit);
+	exposure.mode(astro::camera::Binning(binx, biny));
+	exposure.shutter((shutter)	? astro::camera::Shutter::OPEN
+					: astro::camera::Shutter::CLOSED);
+	exposure.purpose((astro::camera::Exposure::purpose_t)purpose);
 	part.exposure(exposure);
 	part.filtername(filtername);
 	part.temperature(temperature);
@@ -271,16 +271,16 @@ PartInfo::operator	Part() const {
 PartInfo::PartInfo(const Part& part) {
 	partno = part.partno();
 	instrument = part.instrument();
-	width = part.exposure().frame.size().width();
-	height = part.exposure().frame.size().height();
-	xoffset = part.exposure().frame.origin().x();
-	yoffset = part.exposure().frame.origin().y();
-	exposuretime = part.exposure().exposuretime;
-	gain	 = part.exposure().gain;
-	limit = part.exposure().limit;
-	binx = part.exposure().mode.getX();
-	biny = part.exposure().mode.getY();
-	switch (part.exposure().shutter) {
+	width = part.exposure().width();
+	height = part.exposure().height();
+	xoffset = part.exposure().x();
+	yoffset = part.exposure().y();
+	exposuretime = part.exposure().exposuretime();
+	gain	 = part.exposure().gain();
+	limit = part.exposure().limit();
+	binx = part.exposure().mode().getX();
+	biny = part.exposure().mode().getY();
+	switch (part.exposure().shutter()) {
 	case astro::camera::Shutter::OPEN:
 		shutter = 1;
 		break;
@@ -288,7 +288,7 @@ PartInfo::PartInfo(const Part& part) {
 		shutter = 0;
 		break;
 	}
-	purpose = part.exposure().purpose;
+	purpose = part.exposure().purpose();
 	filtername = part.filtername();
 	temperature = part.temperature();
 	taskserver = part.taskserver();

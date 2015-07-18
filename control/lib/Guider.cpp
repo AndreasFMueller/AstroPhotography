@@ -37,8 +37,8 @@ Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport,
 	: _camera(camera), _guiderport(guiderport), _imager(ccd),
 	  _database(database) {
 	// default exposure settings
-	exposure().exposuretime = 1.;
-	exposure().frame = ccd->getInfo().getFrame();
+	exposure().exposuretime(1.);
+	exposure().frame(ccd->getInfo().getFrame());
 
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not optimal
@@ -231,14 +231,14 @@ double	Guider::getPixelsize() {
 TrackerPtr	Guider::getTracker(const Point& point) {
 	astro::camera::Exposure exp = exposure();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s",
-		exp.frame.origin().toString().c_str());
+		exp.origin().toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point: %s",
 		point.toString().c_str());
-	astro::Point    difference = point - exp.frame.origin();
+	astro::Point    difference = point - exp.origin();
 	int	x = difference.x();
 	int	y = difference.y();
 	astro::image::ImagePoint        trackerstar(x, y);
-	astro::image::ImageRectangle    trackerrectangle(exp.frame.size());
+	astro::image::ImageRectangle    trackerrectangle(exp.size());
 	astro::guiding::TrackerPtr      tracker(
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));

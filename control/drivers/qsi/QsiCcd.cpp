@@ -33,13 +33,13 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
 	// set the binning mode
-	_camera.camera().put_BinX(exposure.mode.getX());
-	_camera.camera().put_BinY(exposure.mode.getY());
+	_camera.camera().put_BinX(exposure.mode().getX());
+	_camera.camera().put_BinY(exposure.mode().getY());
 
 	// compute the frame size in binned pixels, as this is what
 	// the QSI camera expects
-	ImagePoint	origin = exposure.frame.origin() / exposure.mode;
-	ImageSize	size = exposure.frame.size() / exposure.mode;
+	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
+	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting %s image",
 		frame.toString().c_str());
@@ -51,10 +51,10 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	_camera.camera().put_StartY(origin.y());
 
 	// get shutter info
-	bool	light = (exposure.shutter == Shutter::OPEN);
-	_camera.camera().StartExposure(exposure.exposuretime, light);
+	bool	light = (exposure.shutter() == Shutter::OPEN);
+	_camera.camera().StartExposure(exposure.exposuretime(), light);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
-		exposure.exposuretime, (light) ? "light" : "dark");
+		exposure.exposuretime(), (light) ? "light" : "dark");
 
 	// check the current state of the camera
 	exposureStatus();

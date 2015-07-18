@@ -14,23 +14,23 @@ using namespace astro::io;
 namespace astro {
 namespace camera {
 
-Exposure::Exposure() : exposuretime(1.), gain(1.), limit(INFINITY),
-	mode(1,1), shutter(Shutter::OPEN), purpose(Exposure::light) {
+Exposure::Exposure() : _exposuretime(1.), _gain(1.), _limit(INFINITY),
+	_mode(1,1), _shutter(Shutter::OPEN), _purpose(Exposure::light) {
 }
 
-Exposure::Exposure(const ImageRectangle& _frame,
-	float _exposuretime)
-                : frame(_frame), exposuretime(_exposuretime), gain(1.),
-		  limit(INFINITY), shutter(Shutter::OPEN),
-		  purpose(Exposure::light) {
+Exposure::Exposure(const ImageRectangle& frame,
+	float exposuretime)
+                : _frame(frame), _exposuretime(exposuretime), _gain(1.),
+		  _limit(INFINITY), _shutter(Shutter::OPEN),
+		  _purpose(Exposure::light) {
 }
 
 std::string	Exposure::toString() const {
 	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs %s g=%.1f, l=%.0f",
-		frame.size().width(), frame.size().height(),
-		frame.origin().x(), frame.origin().y(),
-		mode.toString().c_str(), exposuretime,
-		(shutter == Shutter::OPEN) ? "light" : "dark", gain, limit);
+		_frame.size().width(), _frame.size().height(),
+		_frame.origin().x(), _frame.origin().y(),
+		_mode.toString().c_str(), _exposuretime,
+		(_shutter == Shutter::OPEN) ? "light" : "dark", _gain, _limit);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {
@@ -40,37 +40,37 @@ std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {
 void	Exposure::addToImage(ImageBase& image) const {
 	// exposure time
 	image.setMetadata(
-		FITSKeywords::meta(std::string("EXPTIME"), exposuretime));
+		FITSKeywords::meta(std::string("EXPTIME"), _exposuretime));
 
 	// X binning
 	long	binning;
-	binning = mode.getX();
+	binning = _mode.getX();
 	image.setMetadata(
 		FITSKeywords::meta(std::string("XBINNING"), binning));
 
 	// Y binning
-	binning = mode.getY();
+	binning = _mode.getY();
 	image.setMetadata(
 		FITSKeywords::meta(std::string("YBINNING"), binning));
 
 	// subframe information
 	image.setMetadata(
 		FITSKeywords::meta(std::string("XORGSUBF"),
-			(long)frame.origin().x()));
+			(long)_frame.origin().x()));
 
 	image.setMetadata(
 		FITSKeywords::meta(std::string("YORGSUBF"),
-			(long)frame.origin().y()));
+			(long)_frame.origin().y()));
 
 	// limit information
-	if (limit != INFINITY) {
+	if (_limit != INFINITY) {
 		image.setMetadata(
-			FITSKeywords::meta(std::string("DATAMAX"), limit));
+			FITSKeywords::meta(std::string("DATAMAX"), _limit));
 	}
 
 	// purpose information
 	image.setMetadata(FITSKeywords::meta(std::string("PURPOSE"),
-		purpose2string(purpose)));
+		purpose2string(_purpose)));
 }
 
 std::string	Exposure::purpose2string(purpose_t p) {

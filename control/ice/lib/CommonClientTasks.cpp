@@ -21,9 +21,9 @@ CcdTask::CcdTask(CcdPrx& ccd) : _ccd(ccd) {
 void	CcdTask::frame(const astro::image::ImageRectangle& frame) {
 	astro::camera::CcdInfo	ccdinfo = convert(_ccd->getInfo());
 	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
-		_exposure.frame = ccdinfo.getFrame();
+		_exposure.frame(ccdinfo.getFrame());
 	} else {
-		_exposure.frame = ccdinfo.clipRectangle(frame);
+		_exposure.frame(ccdinfo.clipRectangle(frame));
 	}
 }
 
@@ -34,24 +34,24 @@ void	CcdTask::frame(const std::string& framespec) {
 }
 
 void	CcdTask::binning(const astro::camera::Binning& binning) {
-	_exposure.mode = binning;
+	_exposure.mode(binning);
 }
 
 void	CcdTask::binning(const std::string& binning) {
 	if (binning.size() > 0) {
-		_exposure.mode = astro::camera::Binning(binning);
+		_exposure.mode(astro::camera::Binning(binning));
 	}
 }
 
 void	CcdTask::exposuretime(double exposuretime) {
-	_exposure.exposuretime = exposuretime;
+	_exposure.exposuretime(exposuretime);
 }
 
 void	CcdTask::purpose(const astro::camera::Exposure::purpose_t purpose) {
-	_exposure.purpose = purpose;
-	_exposure.shutter = (purpose == astro::camera::Exposure::dark)
+	_exposure.purpose(purpose);
+	_exposure.shutter((purpose == astro::camera::Exposure::dark)
 				? astro::camera::Shutter::CLOSED
-				: astro::camera::Shutter::OPEN;
+				: astro::camera::Shutter::OPEN);
 }
 
 void	CcdTask::purpose(const std::string& purposename) {
@@ -59,7 +59,7 @@ void	CcdTask::purpose(const std::string& purposename) {
 }
 
 void	CcdTask::shutter(astro::camera::Shutter::state shutter) {
-	_exposure.shutter = shutter;
+	_exposure.shutter(shutter);
 }
 
 Exposure	CcdTask::exposure() const {
@@ -98,7 +98,7 @@ void	CcdTask::available(int timeout) {
  * \brief Wait for the exposure to complete
  */
 void	CcdTask::wait(int timeout) {
-	useconds_t	t = 1000000 * _exposure.exposuretime;
+	useconds_t	t = 1000000 * _exposure.exposuretime();
 	usleep(t);
 	time_t	end;
 	time(&end);

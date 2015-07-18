@@ -126,7 +126,7 @@ int	main(int argc, char *argv[]) {
 
 	// prepare the Exposure object we will later use for exposing
 	Exposure	exposure;
-	exposure.exposuretime = exposuretime;
+	exposure.exposuretime(exposuretime);
 
 	// now we need to create a dark image, except if we already have
 	// one, from the D option

@@ -408,10 +408,10 @@ int	main(int argc, char *argv[]) {
 	// depending on the target values, construct a timer
 	ExposureTimer	timer;
 	if (targetmean > 0) {
-		timer = ExposureTimer(exposure.exposuretime,
+		timer = ExposureTimer(exposure.exposuretime(),
 			targetmean, ExposureTimer::MEAN);
 	} else if (targetmedian > 0) {
-		timer = ExposureTimer(exposure.exposuretime,
+		timer = ExposureTimer(exposure.exposuretime(),
 			targetmedian, ExposureTimer::MEDIAN);
 	}
 

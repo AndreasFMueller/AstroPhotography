@@ -20,7 +20,7 @@ namespace mock1 {
  */
 void    Mock1Ccd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
-	frame = exposure.frame;
+	frame = exposure.frame();
 	state = Exposure::exposing;
 	// XXX should start a thread that does nothing for exposuretime seconds
 	sleep(1);

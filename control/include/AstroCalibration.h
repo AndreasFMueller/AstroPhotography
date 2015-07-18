@@ -130,10 +130,10 @@ public:
 		_nimages = 3;
 	}
 	double	exposuretime() const {
-		return exposure.exposuretime;
+		return exposure.exposuretime();
 	}
 	void	setExposuretime(const float exposuretime) {
-		exposure.exposuretime = exposuretime;
+		exposure.exposuretime(exposuretime);
 	}
 
 	float	temperature() const { return _temperature; }

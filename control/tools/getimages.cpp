@@ -258,10 +258,10 @@ int	main(int argc, char *argv[]) {
 
 	// prepare an exposure object
 	Exposure	exposure(frame, exposuretime);
-	exposure.purpose = purpose;
-	exposure.shutter = (purpose == Exposure::dark)
-				? Shutter::CLOSED : Shutter::OPEN;
-	exposure.mode = binning;
+	exposure.purpose(purpose);
+	exposure.shutter((purpose == Exposure::dark)
+				? Shutter::CLOSED : Shutter::OPEN);
+	exposure.mode(binning);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 

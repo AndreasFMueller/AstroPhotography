@@ -635,7 +635,7 @@ ImagePtr	DarkFrameProcess::get() {
 	prepare();
 
 	// start exposure
-	exposure.shutter = Shutter::CLOSED;
+	exposure.shutter(Shutter::CLOSED);
 	ccd->startExposure(exposure);
 
 	// get a sequence of images
@@ -658,7 +658,7 @@ ImagePtr	FlatFrameProcess::get() {
 	prepare();
 
 	// start exposure
-	exposure.shutter = Shutter::OPEN;
+	exposure.shutter(Shutter::OPEN);
 	ccd->startExposure(exposure);
 
 	// get a sequence of images

@@ -111,9 +111,9 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 
 	// we should check that the selected binning mode is in fact 
 	// available
-	if (!info.modes().permits(exposure.mode)) {
+	if (!info.modes().permits(exposure.mode())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "binning mode %s not supported",
-			exposure.mode.toString().c_str());
+			exposure.mode().toString().c_str());
 		throw SxError("binning mode not supported");
 	}
 
@@ -131,18 +131,18 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
-	rpd.x_offset = exposure.frame.origin().x();
+	rpd.x_offset = exposure.x();
 	// here is the problem with the y-offset: since our application
 	// always uses a mathematical coordinate system (just us the FITS
 	// file format does), we have to flip the y offset when computing
 	// the subframe
 	rpd.y_offset = info.size().height()
-		- (exposure.frame.size().height() + exposure.frame.origin().y());
-	rpd.width = exposure.frame.size().width();
-	rpd.height = exposure.frame.size().height();
-	rpd.x_bin = exposure.mode.getX();
-	rpd.y_bin = exposure.mode.getY();
-	rpd.delay = 1000 * exposure.exposuretime;
+		- (exposure.height() + exposure.y());
+	rpd.width = exposure.width();
+	rpd.height = exposure.height();
+	rpd.x_bin = exposure.mode().getX();
+	rpd.y_bin = exposure.mode().getY();
+	rpd.delay = 1000 * exposure.exposuretime();
 
 	// build a control request
 	Request<sx_read_pixels_delayed_t>	request(
@@ -168,7 +168,7 @@ void	SxCcd::getImage0() {
 	this->startExposure0(exposure);
 
 	// compute the target image size, using the binning mode
-	ImageSize	targetsize = exposure.frame.size() / exposure.mode;
+	ImageSize	targetsize = exposure.size() / exposure.mode();
 
 	// compute the size of the buffer, and create a buffer for the data
 	int	size = targetsize.getPixels();
@@ -179,7 +179,7 @@ void	SxCcd::getImage0() {
 		sizeof(unsigned short) * size, (unsigned char *)data);
 
 	// timeout depends on the actual data size we want to transfer
-	int	timeout = 1100 * exposure.exposuretime + 30000;
+	int	timeout = 1100 * exposure.exposuretime() + 30000;
 	transfer.setTimeout(timeout);
 
 	// submit the transfer
@@ -189,19 +189,19 @@ void	SxCcd::getImage0() {
 	// when the transfer completes, one can use the data for the image
 	Image<unsigned short>	*_image
 		= new Image<unsigned short>(targetsize, data);
-	_image->setOrigin(exposure.frame.origin());
+	_image->setOrigin(exposure.origin());
 
 	// if this is a color camera (which we can find out from the model
 	// of the camera), then we should add RGB information to the image
 	// but only in 1x1 binning mode
-	if ((camera.isColor()) && (exposure.mode == Binning())) {
+	if ((camera.isColor()) && (exposure.mode() == Binning())) {
 		// add bayer info, this depends on the subframe we are
 		// requesting
 		_image->setMosaicType(
 			(MosaicType::mosaic_type)(
 			MosaicType::BAYER_RGGB \
-				| ((exposure.frame.origin().x() % 2) << 1) \
-				| (exposure.frame.origin().y() % 2)));
+				| ((exposure.x() % 2) << 1) \
+				| (exposure.y() % 2)));
 	}
 
 	// images are upside down, since our origin is always the lower
@@ -210,12 +210,12 @@ void	SxCcd::getImage0() {
 	f(*_image);
 
 	// if the exposure requests a limiting function, we apply it now
-	if (exposure.limit < INFINITY) {
+	if (exposure.limit() < INFINITY) {
 		for (unsigned int offset = 0; offset < _image->size().getPixels();
 			offset++) {
 			unsigned short	pv = _image->pixels[offset];
-			if (pv > exposure.limit) {
-				pv = exposure.limit;
+			if (pv > exposure.limit()) {
+				pv = exposure.limit();
 			}
 			_image->pixels[offset] = pv;
 		}

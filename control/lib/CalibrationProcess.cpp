@@ -29,7 +29,7 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
 
 	// take an image at that position
 	imager().startExposure(exposure());
-	usleep(1000000 * exposure().exposuretime);
+	usleep(1000000 * exposure().exposuretime());
 	ImagePtr	image = guider().getImage();
 
 	// analze the image

@@ -128,8 +128,8 @@ void	sxtest::testCamera() {
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(176, 0),
 		ImageSize(1040, 1040)), default_exposure);
-	//exposure.limit = 62000;
-	exposure.mode = Binning(1,1);
+	//exposure.limit(62000);
+	exposure.mode(Binning(1,1));
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 	Image<unsigned short>	*shortimage
@@ -151,8 +151,8 @@ void	sxtest::testFullimage() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ccd->getInfo().getFrame(), default_exposure);
-	//exposure.limit = 62000;
-	exposure.mode = Binning(1,1);
+	//exposure.limit(62000);
+	exposure.mode(Binning(1,1));
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 	Image<unsigned short>	*shortimage
@@ -190,8 +190,8 @@ void	sxtest::testSubimage() {
 	
 	Exposure	exposure(ImageRectangle(ImagePoint(1450, 808),
 		ImageSize(1000, 1000)), default_exposure);
-	//exposure.limit = 62000;
-	exposure.mode = Binning(1,1);
+	//exposure.limit(62000);
+	exposure.mode(Binning(1,1));
 	ccd->startExposure(exposure);
 	ImagePtr	image = ccd->getImage();
 
@@ -254,8 +254,8 @@ void	sxtest::testImageSequence() {
 	std::cout << ccd->getInfo() << std::endl;
 	
 	Exposure	exposure(ccd->getInfo().getFrame(), default_exposure);
-	//exposure.limit = 62000;
-	exposure.mode = Binning(1,1);
+	//exposure.limit(62000);
+	exposure.mode(Binning(1,1));
 	ccd->startExposure(exposure);
 
 	// now retrieve a sequence of images

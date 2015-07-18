@@ -64,25 +64,25 @@ astro::camera::CcdInfo	convert(const CcdInfo& info) {
 
 Exposure	convert(const astro::camera::Exposure& exp) {
 	Exposure	exposure;
-	exposure.frame = convert(exp.frame);
-	exposure.exposuretime = exp.exposuretime;
-	exposure.gain = exp.gain;
-	exposure.limit = exp.limit;
-	exposure.shutter = convert(exp.shutter);
-	exposure.purpose = convert(exp.purpose);
-	exposure.mode = convert(exp.mode);
+	exposure.frame = convert(exp.frame());
+	exposure.exposuretime = exp.exposuretime();
+	exposure.gain = exp.gain();
+	exposure.limit = exp.limit();
+	exposure.shutter = convert(exp.shutter());
+	exposure.purpose = convert(exp.purpose());
+	exposure.mode = convert(exp.mode());
 	return exposure;
 }
 
 astro::camera::Exposure	convert(const Exposure& exposure) {
 	astro::camera::Exposure	exp;
-	exp.frame = convert(exposure.frame);
-	exp.exposuretime = exposure.exposuretime;
-	exp.gain = exposure.gain;
-	exp.limit = exposure.limit;
-	exp.shutter = convert(exposure.shutter);
-	exp.purpose = convert(exposure.purpose);
-	exp.mode = convert(exposure.mode);
+	exp.frame(convert(exposure.frame));
+	exp.exposuretime(exposure.exposuretime);
+	exp.gain(exposure.gain);
+	exp.limit(exposure.limit);
+	exp.shutter(convert(exposure.shutter));
+	exp.purpose(convert(exposure.purpose));
+	exp.mode(convert(exposure.mode));
 	return exp;
 }
 

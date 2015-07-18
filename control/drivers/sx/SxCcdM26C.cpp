@@ -39,29 +39,34 @@ Exposure	SxCcdM26C::m26cExposure() {
 	Exposure	m26c = exposure;
 
 	// adapt the size suitable for the M26C chip
-	unsigned int	height = exposure.frame.size().width() / 4;
-	unsigned int	width = exposure.frame.size().height() * 2;
-	if (m26c.mode.getX() > 1) {
+	unsigned int	height = exposure.width() / 4;
+	unsigned int	width = exposure.height() * 2;
+	if (m26c.mode().getX() > 1) {
 		height -=  height % 2;
 	}
-	m26c.frame.setSize(ImageSize(width, height));
+	ImageSize	m26c_size(width, height);
+	//m26c.frame.setSize(m26c_size);
 
 	// the integer arithmetic may have changed some parameters in the
 	// m26c object, so we have to recompute the size the client will see
-	exposure.frame.setSize(ImageSize(m26c.frame.size().height() * 4,
-					m26c.frame.size().width() / 2));
+	ImageSize	exposure_size(m26c_size.height() * 4,
+					m26c_size.width() / 2);
 
 	// adapt the top left corner
-	unsigned int	originy = exposure.frame.origin().x() / 4;
-	unsigned int	originx = exposure.frame.origin().y() * 2;
-	if (m26c.mode.getY() > 1) {
+	unsigned int	originy = exposure.frame().origin().x() / 4;
+	unsigned int	originx = exposure.frame().origin().y() * 2;
+	if (m26c.mode().getY() > 1) {
 		originy -= originy % 2;
 	}
-	m26c.frame.setOrigin(ImagePoint(originx, originy));
+	ImagePoint	m26c_origin(originx, originy);
+	ImageRectangle	m26c_frame(m26c_origin, m26c_size);
+	m26c.frame(m26c_frame);
 
 	// fix the origin too
-	exposure.frame.setOrigin(ImagePoint(m26c.frame.origin().y() * 4,
-					m26c.frame.origin().x() / 2));
+	ImagePoint	exposure_origin(m26c_origin.y() * 4,
+					m26c_origin.x() / 2);
+	ImageRectangle	exposure_frame(exposure_origin, exposure_size);
+	exposure.frame(exposure_frame);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "m26c specific exposure: %s",
 		m26c.toString().c_str());
@@ -69,9 +74,9 @@ Exposure	SxCcdM26C::m26cExposure() {
 		exposure.toString().c_str());
 
 	// copy stuff that is not affected
-	m26c.mode = exposure.mode;
-	m26c.exposuretime = exposure.exposuretime;
-	m26c.gain = 1.;
+	m26c.mode(exposure.mode());
+	m26c.exposuretime(exposure.exposuretime());
+	m26c.gain(1.);
 
 	// return the modified exposure structure
 	return m26c;
@@ -89,15 +94,15 @@ SxCcdM26C::SxCcdM26C(const CcdInfo& info, SxCamera& camera, int id)
  */
 Field	*SxCcdM26C::readField() {
 	// allocate a structure for the result
-	size_t	l = (m26c.frame.size() / m26c.mode).getPixels();
-	Field	*field = new Field(exposure.frame.size(), l);
+	size_t	l = (m26c.frame().size() / m26c.mode()).getPixels();
+	Field	*field = new Field(exposure.frame().size(), l);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer field of size %u", l);
 
 	// perform the data transfer
 	try {
 		BulkTransfer	transfer(camera.getEndpoint(), (int)l * 2,
 			(unsigned char *)field->data);
-		int	timeout = exposure.exposuretime * 1100
+		int	timeout = exposure.exposuretime() * 1100
 				+ EXPOSURE_ADCONVERSION_TIME;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting timeout: %d", timeout);
 		transfer.setTimeout(timeout);
@@ -124,13 +129,13 @@ void	SxCcdM26C::exposeField(int field) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request exposure of a field %d", field);
 	// compute a better request for the M26C camera
 	sx_read_pixels_delayed_t	rpd;
-	rpd.delay = 1000 * m26c.exposuretime;
-	rpd.width = m26c.frame.size().width();
-	rpd.height = m26c.frame.size().height();
-	rpd.x_offset = m26c.frame.origin().x();
-	rpd.y_offset = m26c.frame.origin().y();
-	rpd.x_bin = m26c.mode.getX();
-	rpd.y_bin = m26c.mode.getY();
+	rpd.delay = 1000 * m26c.exposuretime();
+	rpd.width = m26c.width();
+	rpd.height = m26c.height();
+	rpd.x_offset = m26c.x();
+	rpd.y_offset = m26c.y();
+	rpd.x_bin = m26c.mode().getX();
+	rpd.y_bin = m26c.mode().getY();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"request: %hux%hu@(%hu,%hu)/(%d,%d), t=%ums",
 		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
@@ -166,12 +171,12 @@ void	SxCcdM26C::requestField(int field) {
 	// downloads the already exposed field
 #if 1
 	sx_read_pixels_t	rp;
-	rp.width = m26c.frame.size().width();
-	rp.height = m26c.frame.size().height();
-	rp.x_offset = m26c.frame.origin().x();
-	rp.y_offset = m26c.frame.origin().y();
-	rp.x_bin = m26c.mode.getX();
-	rp.y_bin = m26c.mode.getY();
+	rp.width = m26c.width();
+	rp.height = m26c.height();
+	rp.x_offset = m26c.x();
+	rp.y_offset = m26c.y();
+	rp.x_bin = m26c.mode().getX();
+	rp.y_bin = m26c.mode().getY();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
 		rp.width, rp.height, rp.x_offset, rp.y_offset,
 		rp.x_bin, rp.y_bin);
@@ -258,12 +263,12 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 		exp.toString().c_str());
 	Exposure	symexp = exp;
 	int	x[4], y[4];
-	x[0] = exp.frame.origin().x();
-	y[0] = exp.frame.origin().y();
+	x[0] = exp.x();
+	y[0] = exp.y();
 	x[1] = M26C_WIDTH - x[0];
 	y[1] = M26C_HEIGHT - y[0];
-	x[2] = exp.frame.origin().x() + exp.frame.size().width();
-	y[2] = exp.frame.origin().y() + exp.frame.size().height();
+	x[2] = exp.x() + exp.width();
+	y[2] = exp.y() + exp.height();
 	x[3] = M26C_WIDTH - x[2];
 	y[3] = M26C_HEIGHT - y[2];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x[] = %d %d %d %d",
@@ -272,15 +277,17 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 		y[0], y[1], y[2], y[3]);
 
 	// symmetrized origin
-	symexp.frame.setOrigin(ImagePoint(min(x, 4), min(y, 4)));
+	ImagePoint	origin(min(x, 4), min(y, 4));
 	
 	// symmetrize size
-	unsigned int	sizex = max(x, 4) - symexp.frame.origin().x();
+	unsigned int	sizex = max(x, 4) - symexp.x();
 	if (sizex > 3900) {
 		sizex = 3900;
 	}
-	unsigned int	sizey = max(y, 4) - symexp.frame.origin().y();
-	symexp.frame.setSize(ImageSize(sizex, sizey));
+	unsigned int	sizey = max(y, 4) - symexp.y();
+	ImageSize	size(sizex, sizey);
+	ImageRectangle	frame(origin, size);
+	symexp.frame(frame);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetrized exposure: %s",
 		symexp.toString().c_str());
@@ -333,7 +340,7 @@ void	SxCcdM26C::getImage0() {
 
 	// for long exposures, we just read the second field.
 	Field	*field1 = NULL;
-	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
+	if (exposure.exposuretime() > EXPOSURE_FIELD_CUTOVER) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "request second field 1");
 		timer.end();
 		requestField(1);
@@ -353,12 +360,12 @@ void	SxCcdM26C::getImage0() {
 	}
 
 	// rescale the first field, if we did only one exposure
-	if (exposure.exposuretime > EXPOSURE_FIELD_CUTOVER) {
+	if (exposure.exposuretime() > EXPOSURE_FIELD_CUTOVER) {
 		//double	deadtime = 3.37; // exposuretime = 11
 		//double	deadtime = 3.99; // exposuretime = 20
 		double	deadtime = 1.2;
 		double	scalefactor
-			= (timer.elapsed() - deadtime) / exposure.exposuretime;
+			= (timer.elapsed() - deadtime) / exposure.exposuretime();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "scalefactor = %f", scalefactor);
 		// rescale the field. We have to multiply the first field
 		// with the scaling factor, because of overflows
@@ -372,13 +379,13 @@ void	SxCcdM26C::getImage0() {
 
 	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*_image = new Image<unsigned short>(
-		exposure.frame.size() / exposure.mode);
-	_image->setOrigin(exposure.frame.origin());
+		exposure.frame().size() / exposure.mode());
+	_image->setOrigin(exposure.frame().origin());
 	_image->setMosaicType(MosaicType::BAYER_RGGB);
 
 	// now we have to demultiplex the two fields
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "demultiplex the fields");
-	if (1 == exposure.mode.getX()) {
+	if (1 == exposure.mode().getX()) {
 		DemuxerUnbinned	demuxer;
 		demuxer(*_image, *field0, *field1);
 	} else {

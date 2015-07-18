@@ -60,7 +60,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 
 	// if the task does not have a frame size, then take the one from the
 	// the CCD
-	if (_task.frame().size() == ImageSize()) {
+	if (_task.size() == ImageSize()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using the full chip");
 		_task.frame(ccd->getInfo().getFrame());
 	}
@@ -167,18 +167,18 @@ void	ExposureWork::run() {
 
 	// start exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: time=%f",
-		_task.exposure().exposuretime);
+		_task.exposure().exposuretime());
 	ccd->startExposure(_task.exposure());
 
 	// wait for completion of exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",
-		_task.exposure().exposuretime);
+		_task.exposure().exposuretime());
 	CcdCondition	ccdcondition(ccd, camera::Exposure::exposed);
 
 	// if waiting is cancelled, then we have to cancel the exposure
 	// also
 	try {
-		if (!wait(_task.exposure().exposuretime + 30, ccdcondition)) {
+		if (!wait(_task.exposure().exposuretime() + 30, ccdcondition)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"waiting for image failed");
 			throw std::runtime_error("failed waiting for image");

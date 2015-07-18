@@ -198,15 +198,15 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 
 	// if the size was not specified in the exposure, take the full
 	// CCD size
-        if (exposure.frame.size() == ImageSize(0, 0)) {
-                exposure.frame = getInfo().getFrame();
+        if (exposure.size() == ImageSize(0, 0)) {
+                exposure.frame(getInfo().getFrame());
         }
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %s -> %s",
 		_exposure.toString().c_str(),
 		exposure.toString().c_str());
 
 	// check that the frame to be exposed fits into the CCD
-        if (!info.size().bounds(exposure.frame)) {
+        if (!info.size().bounds(exposure.frame())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure does not fit in ccd");
                 throw BadParameter("exposure does not fit ccd");
         }
@@ -261,9 +261,9 @@ bool	Ccd::wait() {
 		// least as the exposure time indicates
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"lastexposurestart: %d, exposuretime: %f",
-			lastexposurestart, exposure.exposuretime);
+			lastexposurestart, exposure.exposuretime());
 		double	endtime = lastexposurestart;
-		endtime += exposure.exposuretime;
+		endtime += exposure.exposuretime();
 		time_t	now = time(NULL);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
 		int	delta = endtime - now;
@@ -345,7 +345,7 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 		if (k > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure %d", k);
 			startExposure(exposure);
-			usleep(1000000 * exposure.exposuretime);
+			usleep(1000000 * exposure.exposuretime());
 		}
 		wait();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image complete");

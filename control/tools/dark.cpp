@@ -98,9 +98,9 @@ int	main(int argc, char *argv[]) {
 	std::vector<std::string>	cameras = locator->getDevicelist();
 	CameraPtr	camera = locator->getCamera(cameras[cameranumber]);
 	CcdPtr	ccd = camera->getCcd(ccdid);
-	exposure.frame = ccd->getInfo().getFrame();
+	exposure.frame(ccd->getInfo().getFrame());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "frame: %s",
-		exposure.frame.toString().c_str());
+		exposure.frame().toString().c_str());
 
 	// launch the darkframeprocess
 	DarkFrameProcess	dfp(ccd);

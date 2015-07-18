@@ -530,7 +530,7 @@ int	main(int argc, char *argv[]) {
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
-			exposure.mode = astro::camera::Binning(optarg);
+			exposure.mode(astro::camera::Binning(optarg));
 			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
@@ -539,7 +539,7 @@ int	main(int argc, char *argv[]) {
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
-			exposure.exposuretime = std::stod(optarg);
+			exposure.exposuretime(std::stod(optarg));
 			break;
 		case 'f':
 			filter = optarg;
@@ -555,12 +555,12 @@ int	main(int argc, char *argv[]) {
 			dryrun = true;
 			break;
 		case 'p':
-			exposure.purpose = astro::camera::Exposure::string2purpose(optarg);
+			exposure.purpose(astro::camera::Exposure::string2purpose(optarg));
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "purpose: %s -> %d",
-				optarg, exposure.purpose);
+				optarg, exposure.purpose());
 			break;
 		case 'r':
-			exposure.frame = astro::image::ImageRectangle(optarg);
+			exposure.frame(astro::image::ImageRectangle(optarg));
 			break;
 		case 's':
 			servername = astro::ServerName(optarg);

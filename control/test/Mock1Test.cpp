@@ -63,7 +63,7 @@ void	Mock1Test::testMock1() {
 		ImageRectangle	frame(ImagePoint(1,1),
 			ImageSize(ccd->getSize().width() - 2,
 			ccd->getSize().height() - 2));
-		exposure.frame = frame;
+		exposure.frame(frame);
 		ccd->startExposure(exposure);
 		while (ccd->exposureStatus() == Exposure::exposing) {
 			sleep(1);

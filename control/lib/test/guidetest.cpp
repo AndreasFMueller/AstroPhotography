@@ -186,9 +186,9 @@ int	guidetest_main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tracker constructed");
 
 	// set the rectangle
-	guider.exposure().frame = rectangle;
+	guider.exposure().frame(rectangle);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure rectangle: %s",
-		guider.exposure().frame.toString().c_str());
+		guider.exposure().frame().toString().c_str());
 
 	// calibrate the guider. This can either be done using the supplied
 	// calibration data, or by calling the calibration process

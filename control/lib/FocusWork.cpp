@@ -24,7 +24,7 @@ FocusWork::FocusWork(Focusing& focusing) : _focusing(focusing) {
 	_steps = 3;
 	_min = std::numeric_limits<unsigned short>::max();
 	_max = std::numeric_limits<unsigned short>::min();
-	_exposure.exposuretime = -1;
+	_exposure.exposuretime(-1);
 }
 
 /**
@@ -44,7 +44,7 @@ void	FocusWork::steps(unsigned short s) {
  * \brief Check that the focusing parameters are all set
  */
 bool	FocusWork::complete() {
-	if (_exposure.exposuretime < 0) {
+	if (_exposure.exposuretime() < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure time not set");
 		return false;
 	}

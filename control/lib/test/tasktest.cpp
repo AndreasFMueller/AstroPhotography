@@ -61,7 +61,7 @@ int	main(int argc, char *argv[]) {
 	while (--taskcounter) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"new task with exposure time %d", taskcounter);
-		exposure.exposuretime = taskcounter;
+		exposure.exposuretime(taskcounter);
 		task.exposure(exposure);
 		int queueid = queue.submit(task);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "id %d submitted", queueid);
@@ -75,7 +75,7 @@ int	main(int argc, char *argv[]) {
 	sleep(1);
 
 	// submit another task
-	exposure.exposuretime = 2;
+	exposure.exposuretime(2);
 	task.exposure(exposure);
 	queue.start();
 	queue.submit(task);

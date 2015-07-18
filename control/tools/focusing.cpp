@@ -139,11 +139,11 @@ int	main(int argc, char *argv[]) {
 
 	// prepare the exposure 
 	astro::camera::Exposure	exposure;
-	exposure.exposuretime = exposuretime;
-	exposure.frame = ImageRectangle(
+	exposure.exposuretime(exposuretime);
+	exposure.frame(ImageRectangle(
 		ImagePoint(x - width / 2, y - height / 2),
-		ImageSize(width, height));
-	exposure.shutter = astro::camera::Shutter::OPEN;
+		ImageSize(width, height)));
+	exposure.shutter(astro::camera::Shutter::OPEN);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure: %s",
 		exposure.toString().c_str());
 

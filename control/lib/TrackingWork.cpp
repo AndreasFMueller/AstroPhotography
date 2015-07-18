@@ -144,7 +144,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		guider().startExposure();
 
 		// until the image is exposed
-		Timer::sleep(guider().exposure().exposuretime);
+		Timer::sleep(guider().exposure().exposuretime());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retrieve the image

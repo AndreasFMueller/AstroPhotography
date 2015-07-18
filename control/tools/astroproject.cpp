@@ -231,27 +231,27 @@ int	command_partlist(const std::string& projectname,
 		astro::camera::Exposure	e = (*ptr)->exposure();
 		if (verbose) {
 			std::cout << stringprintf("%-18.18s ",
-				e.frame.toString().c_str());
+				e.frame().toString().c_str());
 			std::cout << stringprintf(" %-5.5s",
-					e.mode.toString().c_str());
-			int	lt = floor(log10(e.exposuretime));
+					e.mode().toString().c_str());
+			int	lt = floor(log10(e.exposuretime()));
 			if (lt < 0) { lt = 0; }
 			lt = 3 - lt;
 			if (lt < 0) { lt = 0; }
-			std::cout << stringprintf("%7.*f", lt, e.exposuretime);
-			lt = ceil(2 - log10(e.gain));
+			std::cout << stringprintf("%7.*f", lt, e.exposuretime());
+			lt = ceil(2 - log10(e.gain()));
 			if (lt < 0) { lt = 0; }
-			std::cout << stringprintf("%6.*f", lt, e.gain);
-			std::cout << stringprintf("%6.0f", e.limit);
+			std::cout << stringprintf("%6.*f", lt, e.gain());
+			std::cout << stringprintf("%6.0f", e.limit());
 			std::cout << stringprintf("%7.1f", (*ptr)->temperature());
 		} else {
 			std::cout << stringprintf("%-10.10s",
-				e.frame.size().toString().c_str());
-			std::cout << stringprintf("%5.0f", e.exposuretime);
+				e.frame().size().toString().c_str());
+			std::cout << stringprintf("%5.0f", e.exposuretime());
 			std::cout << stringprintf("%6.1f", (*ptr)->temperature());
 		}
 		std::cout << stringprintf(" %-7.7s",
-			astro::camera::Exposure::purpose2string(e.purpose).c_str());
+			astro::camera::Exposure::purpose2string(e.purpose()).c_str());
 		if (verbose) {
 			std::cout << stringprintf(" %-10.10s",
 				(*ptr)->filtername().c_str());
@@ -315,31 +315,31 @@ int	command_partadd(const std::string& projectname, long partno,
 	astro::camera::Exposure	exposure;
 
 	if (av.has("frame")) {
-		exposure.frame = astro::image::ImageRectangle(av("frame"));
+		exposure.frame(astro::image::ImageRectangle(av("frame")));
 		av.erase("frame");
 	}
 	if (av.has("exposuretime")) {
-		exposure.exposuretime = std::stod(av("exposuretime"));
+		exposure.exposuretime(std::stod(av("exposuretime")));
 		av.erase("exposuretime");
 	}
 	if (av.has("gain")) {
-		exposure.gain = std::stod(av("gain"));
+		exposure.gain(std::stod(av("gain")));
 		av.erase("gain");
 	}
 	if (av.has("limit")) {
-		exposure.limit = std::stod(av("limit"));
+		exposure.limit(std::stod(av("limit")));
 		av.erase("limit");
 	}
 	if (av.has("binning")) {
-		exposure.mode = astro::camera::Binning(av("binning"));
+		exposure.mode(astro::camera::Binning(av("binning")));
 		av.erase("binning");
 	}
 	if (av.has("shutter")) {
-		exposure.shutter = astro::camera::Shutter::string2state(av("shutter"));
+		exposure.shutter(astro::camera::Shutter::string2state(av("shutter")));
 		av.erase("shutter");
 	}
 	if (av.has("purpose")) {
-		exposure.purpose = astro::camera::Exposure::string2purpose(av("purpose"));
+		exposure.purpose(astro::camera::Exposure::string2purpose(av("purpose")));
 		av.erase("purpose");
 	}
 

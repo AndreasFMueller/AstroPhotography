@@ -42,7 +42,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	starttime = simtime();
 	state = Exposure::exposing;
-	shutter = exposure.shutter;
+	shutter = exposure.shutter();
 }
 
 /**
@@ -59,7 +59,7 @@ Exposure::State	SimCcd::exposureStatus() {
 	case Exposure::cancelling:
 		return state;
 	case Exposure::exposing:
-		if (timepast > exposure.exposuretime) {
+		if (timepast > exposure.exposuretime()) {
 			state = Exposure::exposed;
 		}
 		return state;
@@ -96,7 +96,7 @@ bool    SimCcd::wait() {
 		return true;
 	}
 	// compute the remaining exposure time
-	double	remaining = exposure.exposuretime
+	double	remaining = exposure.exposuretime()
 			- (simtime() - starttime);
 	if (remaining > 0) {
 		unsigned int	remainingus = 1000000 * remaining;
@@ -121,16 +121,16 @@ void    SimCcd::setShuterState(const Shutter::state& state) {
  */
 ImagePtr  SimCcd::getRawImage() {
 	// we need a camera to convert the starfield into an image
-	starcamera.rectangle(exposure.frame);
+	starcamera.rectangle(exposure.frame());
 
 	// exposure influence
-	starcamera.stretch(exposure.exposuretime);
-	starcamera.light(exposure.shutter == Shutter::OPEN);
+	starcamera.stretch(exposure.exposuretime());
+	starcamera.light(exposure.shutter() == Shutter::OPEN);
 
 	// flat images need special treatment
-	if (exposure.purpose == Exposure::flat) {
+	if (exposure.purpose() == Exposure::flat) {
 		starcamera.light(false);
-		starcamera.dark(20000. * exposure.exposuretime);
+		starcamera.dark(20000. * exposure.exposuretime());
 	}
 
 	// geometric distortion (guiderport)
@@ -149,7 +149,7 @@ ImagePtr  SimCcd::getRawImage() {
 	starcamera.innerradius(0.4 * radius);
 
 	// binning mode
-	starcamera.binning(exposure.mode);
+	starcamera.binning(exposure.mode());
 
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
@@ -157,7 +157,7 @@ ImagePtr  SimCcd::getRawImage() {
 	state = Exposure::idle;
 
 	// origin
-	image->setOrigin(exposure.frame.origin());
+	image->setOrigin(exposure.frame().origin());
 	return image;
 }
 

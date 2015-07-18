@@ -59,7 +59,7 @@ void	SimCcdTest::testConfig() {
 void	SimCcdTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start image test");
 	Exposure	exposure;
-	exposure.exposuretime = 1;
+	exposure.exposuretime(1);
 	ccd->startExposure(exposure);
 	ccd->wait();
 	ImagePtr	image = ccd->getImage();
