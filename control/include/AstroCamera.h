@@ -121,7 +121,7 @@ private:
 	float	_limit;
 public:
 	float	limit() const { return _limit; }
-	void	limit(float l) { l = _limit; }
+	void	limit(float l) { _limit = l; }
 private:
 	Binning	_mode;
 public:
