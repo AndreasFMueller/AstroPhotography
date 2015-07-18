@@ -44,12 +44,12 @@ void	Exposure::addToImage(ImageBase& image) const {
 
 	// X binning
 	long	binning;
-	binning = _mode.getX();
+	binning = _mode.x();
 	image.setMetadata(
 		FITSKeywords::meta(std::string("XBINNING"), binning));
 
 	// Y binning
-	binning = _mode.getY();
+	binning = _mode.y();
 	image.setMetadata(
 		FITSKeywords::meta(std::string("YBINNING"), binning));
 

@@ -3,6 +3,7 @@ ChangeLog for the Astro project.
 20150718:
 	* convert astro::camera::Exposure class to the more common conventions
 	  in this project, in particular, make all members private
+	* convert accessors in Binning class to our conventions
 
 20150717:
 	* Move DeviceNicer and Denicer to astro::device::nice and to the

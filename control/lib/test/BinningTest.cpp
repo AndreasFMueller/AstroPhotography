@@ -53,11 +53,11 @@ void	BinningTest::testPermits() {
 void	BinningTest::testParse() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testParse() begin");
 	Binning	b1("(4x3)");
-	CPPUNIT_ASSERT(b1.getX() == 4);
-	CPPUNIT_ASSERT(b1.getY() == 3);
+	CPPUNIT_ASSERT(b1.x() == 4);
+	CPPUNIT_ASSERT(b1.y() == 3);
 	Binning	b2("(2,7)");
-	CPPUNIT_ASSERT(b2.getX() == 2);
-	CPPUNIT_ASSERT(b2.getY() == 7);
+	CPPUNIT_ASSERT(b2.x() == 2);
+	CPPUNIT_ASSERT(b2.y() == 7);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testParse() end");
 }
 

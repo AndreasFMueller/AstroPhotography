@@ -278,8 +278,8 @@ PartInfo::PartInfo(const Part& part) {
 	exposuretime = part.exposure().exposuretime();
 	gain	 = part.exposure().gain();
 	limit = part.exposure().limit();
-	binx = part.exposure().mode().getX();
-	biny = part.exposure().mode().getY();
+	binx = part.exposure().mode().x();
+	biny = part.exposure().mode().y();
 	switch (part.exposure().shutter()) {
 	case astro::camera::Shutter::OPEN:
 		shutter = 1;

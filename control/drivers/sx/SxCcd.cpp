@@ -140,8 +140,8 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		- (exposure.height() + exposure.y());
 	rpd.width = exposure.width();
 	rpd.height = exposure.height();
-	rpd.x_bin = exposure.mode().getX();
-	rpd.y_bin = exposure.mode().getY();
+	rpd.x_bin = exposure.mode().x();
+	rpd.y_bin = exposure.mode().y();
 	rpd.delay = 1000 * exposure.exposuretime();
 
 	// build a control request

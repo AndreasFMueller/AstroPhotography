@@ -41,7 +41,7 @@ Exposure	SxCcdM26C::m26cExposure() {
 	// adapt the size suitable for the M26C chip
 	unsigned int	height = exposure.width() / 4;
 	unsigned int	width = exposure.height() * 2;
-	if (m26c.mode().getX() > 1) {
+	if (m26c.mode().x() > 1) {
 		height -=  height % 2;
 	}
 	ImageSize	m26c_size(width, height);
@@ -55,7 +55,7 @@ Exposure	SxCcdM26C::m26cExposure() {
 	// adapt the top left corner
 	unsigned int	originy = exposure.frame().origin().x() / 4;
 	unsigned int	originx = exposure.frame().origin().y() * 2;
-	if (m26c.mode().getY() > 1) {
+	if (m26c.mode().y() > 1) {
 		originy -= originy % 2;
 	}
 	ImagePoint	m26c_origin(originx, originy);
@@ -134,8 +134,8 @@ void	SxCcdM26C::exposeField(int field) {
 	rpd.height = m26c.height();
 	rpd.x_offset = m26c.x();
 	rpd.y_offset = m26c.y();
-	rpd.x_bin = m26c.mode().getX();
-	rpd.y_bin = m26c.mode().getY();
+	rpd.x_bin = m26c.mode().x();
+	rpd.y_bin = m26c.mode().y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"request: %hux%hu@(%hu,%hu)/(%d,%d), t=%ums",
 		rpd.width, rpd.height, rpd.x_offset, rpd.y_offset,
@@ -175,8 +175,8 @@ void	SxCcdM26C::requestField(int field) {
 	rp.height = m26c.height();
 	rp.x_offset = m26c.x();
 	rp.y_offset = m26c.y();
-	rp.x_bin = m26c.mode().getX();
-	rp.y_bin = m26c.mode().getY();
+	rp.x_bin = m26c.mode().x();
+	rp.y_bin = m26c.mode().y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request: %hux%hu@(%hu,%hu)/(%d,%d)",
 		rp.width, rp.height, rp.x_offset, rp.y_offset,
 		rp.x_bin, rp.y_bin);
@@ -201,8 +201,8 @@ void	SxCcdM26C::requestField(int field) {
 	rpd.height = m26c.frame.size.height();
 	rpd.x_offset = m26c.frame.origin.x();
 	rpd.y_offset = m26c.frame.origin.y();
-	rpd.x_bin = m26c.mode.getX();
-	rpd.y_bin = m26c.mode.getY();
+	rpd.x_bin = m26c.mode.x();
+	rpd.y_bin = m26c.mode.y();
 	rpd.delay = 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"request: %hux%hu@(%hu,%hu)/(%d,%d), delay = %ul",
@@ -385,7 +385,7 @@ void	SxCcdM26C::getImage0() {
 
 	// now we have to demultiplex the two fields
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "demultiplex the fields");
-	if (1 == exposure.mode().getX()) {
+	if (1 == exposure.mode().x()) {
 		DemuxerUnbinned	demuxer;
 		demuxer(*_image, *field0, *field1);
 	} else {

@@ -267,8 +267,8 @@ public:
 		// fill in the data
 		unsigned int	width = size.width();
 		unsigned int	height = size.height();
-		unsigned int	deltax = binning().getX();
-		unsigned int	deltay = binning().getY();
+		unsigned int	deltax = binning().x();
+		unsigned int	deltay = binning().y();
 		for (unsigned int x = 0; x < width; x++) {
 			for (unsigned int y = 0; y < height; y++) {
 				image->pixel(x, y)

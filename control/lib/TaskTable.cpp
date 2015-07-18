@@ -113,8 +113,8 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 		factory.get((double)exposure.exposuretime())));
 	spec.insert(Field("gain", factory.get((double)exposure.gain())));
 	spec.insert(Field("vlimit", factory.get((double)exposure.limit())));
-	spec.insert(Field("binx", factory.get((int)exposure.mode().getX())));
-	spec.insert(Field("biny", factory.get((int)exposure.mode().getY())));
+	spec.insert(Field("binx", factory.get((int)exposure.mode().x())));
+	spec.insert(Field("biny", factory.get((int)exposure.mode().y())));
 	spec.insert(Field("shutteropen",
 		factory.get((exposure.shutter() == Shutter::OPEN) ? 1 : 0)));
 	spec.insert(Field("purpose", factory.get((int)exposure.purpose())));

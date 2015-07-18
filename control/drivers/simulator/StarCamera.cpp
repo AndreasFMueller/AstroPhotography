@@ -261,12 +261,12 @@ double	StarCameraBase::bin0(Image<double>& image,
 	// find out whether we are at the edge of the image, where we may not
 	// be able to bin a full image
 	unsigned int	maxx = image.getFrame().size().width() - x;
-	if (maxx > binning().getX()) {
-		maxx = binning().getX();
+	if (maxx > binning().x()) {
+		maxx = binning().x();
 	}
 	unsigned int	maxy = image.getFrame().size().height() - y;
-	if (maxy > binning().getY()) {
-		maxy = binning().getY();
+	if (maxy > binning().y()) {
+		maxy = binning().y();
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "maxx = %d, maxy = %d", maxx, maxy);
 	double	value = 0;
@@ -284,8 +284,8 @@ double	StarCameraBase::bin0(Image<double>& image,
 void	StarCameraBase::bin(Image<double>& image) const {
 	unsigned int	width = image.size().width();
 	unsigned int	height = image.size().height();
-	unsigned int	deltax = binning().getX();
-	unsigned int	deltay = binning().getY();
+	unsigned int	deltax = binning().x();
+	unsigned int	deltay = binning().y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%dx%d-binning of %dx%d image",
 		deltax, deltay, width, height);
 	for (unsigned int x = 0; x < width; x += deltax) {
@@ -301,8 +301,8 @@ void	StarCameraBase::bin(Image<double>& image) const {
 void	StarCameraBase::fill0(Image<double>& image, const ImagePoint& point,
 		double fillvalue) const {
 	ImagePoint	corner = (point / binning()) * binning();
-	for (unsigned int x = 0; x < binning().getX(); x++) {
-		for (unsigned int y = 0; y < binning().getY(); y++) {
+	for (unsigned int x = 0; x < binning().x(); x++) {
+		for (unsigned int y = 0; y < binning().y(); y++) {
 			image.pixel(corner.x() + x, corner.y() + y)
 				= fillvalue;
 		}

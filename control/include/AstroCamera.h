@@ -41,19 +41,20 @@ static state	string2state(const std::string& s);
  * Binning objects.
  */
 class	Binning {
-	unsigned int	x;
-	unsigned int	y;
+	unsigned int	_x;
+	unsigned int	_y;
 public:
-	Binning(unsigned int _x = 1, unsigned int _y = 1);
-	Binning(const Binning& other) : x(other.x), y(other.y) { }
+	unsigned int	x() const { return _x; }
+	void	x(unsigned int v) { _x = v; }
+	unsigned int	y() const { return _y; }
+	void	y(unsigned int v) { _y = v; }
+public:
+	Binning(unsigned int x = 1, unsigned int y = 1);
+	Binning(const Binning& other) : _x(other._x), _y(other._y) { }
 	Binning(const std::string& binning);
 	bool	operator==(const Binning& other) const;
 	bool	operator!=(const Binning& other) const;
 	bool	operator<(const Binning& other) const;
-	unsigned int	getX() const { return x; }
-	unsigned int	getY() const { return y; }
-	void	setX(unsigned int _x) { x = _x; }
-	void	setY(unsigned int _y) { y = _y; }
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Binning& binning);

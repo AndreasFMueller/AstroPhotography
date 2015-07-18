@@ -33,8 +33,8 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
 	// set the binning mode
-	_camera.camera().put_BinX(exposure.mode().getX());
-	_camera.camera().put_BinY(exposure.mode().getY());
+	_camera.camera().put_BinX(exposure.mode().x());
+	_camera.camera().put_BinY(exposure.mode().y());
 
 	// compute the frame size in binned pixels, as this is what
 	// the QSI camera expects

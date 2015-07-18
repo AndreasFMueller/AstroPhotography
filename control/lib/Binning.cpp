@@ -18,9 +18,9 @@ namespace camera {
 /**
  * \brief Construct a binning object
  */
-Binning::Binning(unsigned int _x, unsigned int _y) : x(_x), y(_y) {
-	if (x == 0) { x = 1; }
-	if (y == 0) { y = 1; }
+Binning::Binning(unsigned int x, unsigned int y) : _x(x), _y(y) {
+	if (_x == 0) { _x = 1; }
+	if (_y == 0) { _y = 1; }
 }
 
 /**
@@ -38,8 +38,8 @@ Binning::Binning(const std::string& binningspec) {
 		throw std::runtime_error(msg);
 	}
 
-	x = std::stoi(matches[1]);
-	y = std::stoi(matches[2]);
+	_x = std::stoi(matches[1]);
+	_y = std::stoi(matches[2]);
 }
 
 /**
@@ -50,7 +50,7 @@ Binning::Binning(const std::string& binningspec) {
  * one at the same point
  */
 bool	Binning::operator==(const Binning& other) const {
-	return (x == other.x) && (y == other.y);
+	return (_x == other._x) && (_y == other._y);
 }
 
 bool	Binning::operator!=(const Binning& other) const {
@@ -64,12 +64,12 @@ bool	Binning::operator!=(const Binning& other) const {
  * wild card binning modes.
  */
 bool	Binning::operator<(const Binning& other) const {
-	if (x < other.x) { return true; }
-	if (x > other.x) { return false; }
-	// x == other.x
-	if (y < other.y) { return true; }
-	if (y > other.y) { return false; }
-	// y == other.y
+	if (_x < other._x) { return true; }
+	if (_x > other._x) { return false; }
+	// _x == other._x
+	if (_y < other._y) { return true; }
+	if (_y > other._y) { return false; }
+	// _y == other._y
 	return false;
 }
 
@@ -77,7 +77,7 @@ bool	Binning::operator<(const Binning& other) const {
  * \brief Convert a Binning object into something printable
  */
 std::string	Binning::toString() const {
-	return stringprintf("(%ux%u)", x, y);
+	return stringprintf("(%ux%u)", _x, _y);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
@@ -88,8 +88,8 @@ std::istream&	operator>>(std::istream& in, Binning& binning) {
 	char	c;
 	unsigned int	x, y;
 	in >> x >> c >> y;
-	binning.setX(x);
-	binning.setY(y);
+	binning.x(x);
+	binning.y(y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "binning mode parsed: %s",
 		binning.toString().c_str());
 	return in;
@@ -151,23 +151,23 @@ std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset) {
 }
 
 ImageSize       operator*(const ImageSize& size, const Binning& binning) {
-	return ImageSize(size.width() * binning.getX(),
-			size.height() * binning.getY());
+	return ImageSize(size.width() * binning.x(),
+			size.height() * binning.y());
 }
 
 ImageSize       operator/(const ImageSize& size, const Binning& binning) {
-	return ImageSize(size.width() / binning.getX(),
-			size.height() / binning.getY());
+	return ImageSize(size.width() / binning.x(),
+			size.height() / binning.y());
 }
 
 ImagePoint	operator*(const ImagePoint& point, const Binning& binning) {
-	return ImagePoint(point.x() * binning.getX(),
-			point.y() * binning.getY());
+	return ImagePoint(point.x() * binning.x(),
+			point.y() * binning.y());
 }
 
 ImagePoint	operator/(const ImagePoint& point, const Binning& binning) {
-	return ImagePoint(point.x() / binning.getX(),
-			point.y() / binning.getY());
+	return ImagePoint(point.x() / binning.x(),
+			point.y() / binning.y());
 }
 
 
