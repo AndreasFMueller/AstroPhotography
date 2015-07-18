@@ -105,11 +105,11 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure on ccd %d", id);
 	StartExposureParams2	params;
 	params.ccd = id;
-	params.exposureTime = 100 * exposure.exposuretime;
+	params.exposureTime = 100 * exposure.exposuretime();
 	params.abgState = ABG_LOW7; // XXX should be able to set via property
 
 	// use the shutter info 
-	switch (exposure.shutter) {
+	switch (exposure.shutter()) {
 	case Shutter::OPEN:
 		params.openShutter = ((id == 2)
 					? SC_OPEN_EXT_SHUTTER
@@ -127,15 +127,15 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 	}
 
 	// set the appropriate binning mode
-	params.readoutMode = SbigBinning2Mode(exposure.mode);
+	params.readoutMode = SbigBinning2Mode(exposure.mode());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s binning -> readout mode: %04hx",
-		exposure.mode.toString().c_str(), params.readoutMode);
+		exposure.mode().toString().c_str(), params.readoutMode);
 
 	// get the subframe
-	params.top = exposure.frame.origin().y();
-	params.left = exposure.frame.origin().x();
-	params.width = exposure.frame.size().width();
-	params.height = exposure.frame.size().height();
+	params.top = exposure.y();
+	params.left = exposure.x();
+	params.width = exposure.width();
+	params.height = exposure.height();
 	short	e = SBIGUnivDrvCommand(CC_START_EXPOSURE2, &params, NULL);
 	if (e != CE_NO_ERROR) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start exposure: %s",
@@ -170,8 +170,8 @@ ImagePtr	SbigCcd::getRawImage() {
 
 	// compute the size of the resulting image, if we get one
 	ImageSize	resultsize(
-		exposure.frame.size().width() / exposure.mode.getX(),
-		exposure.frame.size().height() / exposure.mode.getY());
+		exposure.width() / exposure.mode().getX(),
+		exposure.height() / exposure.mode().getY());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting an %s image",
 		resultsize.toString().c_str());
 
@@ -195,12 +195,12 @@ ImagePtr	SbigCcd::getRawImage() {
 		// start the readout
 		StartReadoutParams	readparams;
 		readparams.ccd = id;
-		readparams.readoutMode = SbigBinning2Mode(exposure.mode);
+		readparams.readoutMode = SbigBinning2Mode(exposure.mode());
 
-		readparams.top = exposure.frame.origin().y();
-		readparams.left = exposure.frame.origin().x();
-		readparams.width = exposure.frame.size().width();
-		readparams.height = exposure.frame.size().height();
+		readparams.top = exposure.y();
+		readparams.left = exposure.x();
+		readparams.width = exposure.width();
+		readparams.height = exposure.height();
 
 		e = SBIGUnivDrvCommand(CC_START_READOUT, &readparams, NULL);
 		if (e != CE_NO_ERROR) {
@@ -212,10 +212,10 @@ ImagePtr	SbigCcd::getRawImage() {
 		// read the data lines we really are interested in
 		ReadoutLineParams	readlineparams;
 		readlineparams.ccd = id;
-		readlineparams.pixelStart = exposure.frame.origin().x()
-						/ exposure.mode.getX();
-		readlineparams.pixelLength = exposure.frame.size().width()
-						/ exposure.mode.getX();
+		readlineparams.pixelStart = exposure.x()
+						/ exposure.mode().getX();
+		readlineparams.pixelLength = exposure.width()
+						/ exposure.mode().getX();
 		readlineparams.readoutMode = readparams.readoutMode;
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"pixelStart = %d, pixelLength = %d", 
@@ -245,8 +245,8 @@ ImagePtr	SbigCcd::getRawImage() {
 		dumplines.ccd = id;
 		dumplines.readoutMode = readparams.readoutMode;
 		dumplines.lineLength = info.size().height()
-			- exposure.frame.size().height()
-			- exposure.frame.origin().y();
+			- exposure.height()
+			- exposure.y();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "dumping %d remaining lines",
 			dumplines.lineLength);
 		e = SBIGUnivDrvCommand(CC_DUMP_LINES, &dumplines, NULL);
@@ -269,7 +269,7 @@ ImagePtr	SbigCcd::getRawImage() {
 	// convert the image data into an image
 	Image<unsigned short>	*image
 		= new Image<unsigned short>(resultsize, data);
-	image->setOrigin(exposure.frame.origin());
+	image->setOrigin(exposure.origin());
 
 	// flip image vertically
 	FlipOperator<unsigned short>    f;
