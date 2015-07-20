@@ -405,7 +405,12 @@ case `uname` in
 esac
 AC_SUBST(SHLIB_EXT)
 
-AC_CONFIG_FILES([Makefile include/Makefile lib/Makefile lib/image/Makefile lib/test/Makefile
+AC_CONFIG_FILES([Makefile include/Makefile
+	lib/Makefile
+	lib/utils/Makefile lib/utils/test/Makefile
+	lib/image/Makefile lib/image/test/Makefile
+	lib/usb/Makefile lib/usb/test/Makefile
+	lib/test/Makefile
 	corba/Makefile corba/idl/Makefile corba/include/Makefile
 	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
 	corba/client/Makefile corba/client/trackingmonitor/Makefile

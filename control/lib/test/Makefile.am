@@ -17,24 +17,14 @@ unicap_tests =
 unicap_cmds =
 endif
 
-# files needed for the UVC driver tests
-if ENABLE_UVC
-uvc_tests = uvctests.cpp UVCDescriptorTest.cpp UVCCameraTest.cpp
-uvc_cmds = uvctests
-else
-uvc_tests =
-uvc_cmds =
-endif
-
 # stuff related to testing
 noinst_PROGRAMS = tests processtests catalogtests singletest \
-	usbtests calimggen caltests simtest \
-	guidetest tasktest aotest phasecorr $(uvc_cmds) $(unicap_cmds)
+	calimggen caltests simtest \
+	guidetest tasktest aotest phasecorr
 
 ## general tests
 tests_SOURCES = tests.cpp \
-	StacktraceTest.cpp TrimTest.cpp PathTest.cpp \
-	PixelTest.cpp ConcatenatorTest.cpp SplitterTest.cpp URLTest.cpp \
+	URLTest.cpp \
 	DeviceNameTest.cpp NiceTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
 	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
@@ -93,12 +83,6 @@ catalogtests_DEPENDENCIES = ../libastro.la
 tests_LDADD = -lcppunit -L.. -lastro 
 tests_DEPENDENCIES = ../libastro.la 
 
-# tests for USB library
-usbtests_SOURCES = usbtests.cpp \
-	USBContextTest.cpp USBDescriptorTest.cpp
-usbtests_LDADD = -lcppunit -L.. -lastro
-usbtests_DEPENDENCIES = ../libastro.la
-
 calimggen_SOURCES = calimggen.cpp
 calimggen_LDADD = -L.. -lastro
 calimggen_DEPENDENCIES = ../libastro.la
@@ -129,13 +113,6 @@ aotest_DEPENDENCIES = ../libastro.la
 phasecorr_SOURCES = phasecorr.cpp
 phasecorr_LDADD = -L.. -lastro
 phasecorr_DEPENDENCIES = ../libastro.la
-
-# tests for UVC cameras
-if ENABLE_UVC
-uvctests_SOURCES = $(uvc_tests)
-uvctests_LDADD = -lcppunit -L.. -lastro
-uvctests_DEPENDENCIES = ../libastro.la
-endif
 
 # tests for Unicap driver
 if ENABLE_UNICAP

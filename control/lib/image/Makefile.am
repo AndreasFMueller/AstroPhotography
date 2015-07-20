@@ -3,6 +3,8 @@
 #
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+SUBDIRS = test
+
 noinst_HEADERS = Miniball.hpp
 
 noinst_LTLIBRARIES = libastroimage.la libastrofits.la
@@ -59,5 +61,6 @@ libastrofits_la_SOURCES = 						\
 
 libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+
 libastrofits_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

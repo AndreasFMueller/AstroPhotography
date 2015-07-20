@@ -1,6 +1,10 @@
 /*
  * ServerName.cpp -- server name parsing class
  *
+ * Note: this class is located in the top level name space, but it uses
+ *       the dynamic service discovery interface, so it must for the moment
+ *       stay in the top level library
+ *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUtils.h>

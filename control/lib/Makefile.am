@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = image . test
+SUBDIRS = utils image usb . test
 
 lib_LTLIBRARIES = libastro.la
 
@@ -12,16 +12,6 @@ if ENABLE_UNICAP
 unicap_flies = UnicapDevice.cpp
 else
 unicap_flies =
-endif
-
-if ENABLE_UVC
-uvc_files = \
-	UVCDescriptors.cpp UVCVideoControl.cpp UVCVideoStreaming.cpp \
-	UVCFactory.cpp \
-	UVCFormat.cpp UVCUncompressed.cpp UVCMJPEG.cpp UVCFrameBased.cpp \
-	UVCCamera.cpp UVCTransfer.cpp UVCFrameFactory.cpp 
-else
-uvc_files =
 endif
 
 if ENABLE_AVAHI
@@ -32,10 +22,9 @@ if ENABLE_BONJOUR
 bonjour_files = BonjourResolver.cpp BonjourDiscovery.cpp BonjourPublisher.cpp
 endif
 
-libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
-	Format.cpp Timer.cpp Concatenator.cpp Exceptions.cpp \
-	AttributeValuePairs.cpp UUID.cpp Path.cpp demangle.cpp ServerName.cpp \
-	URL.cpp DeviceName.cpp DeviceNicer.cpp DeviceDenicer.cpp \
+libastro_la_SOURCES = \
+	Exceptions.cpp URL.cpp ServerName.cpp \
+	DeviceName.cpp DeviceNicer.cpp DeviceDenicer.cpp \
 	Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
 	Coordinates.cpp Vector.cpp \
@@ -67,11 +56,6 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	FocusWork.cpp VCurveFocusWork.cpp FocusCompute.cpp \
 	MeasureFocusWork.cpp \
-	USBContextHolder.cpp USBContext.cpp \
-	USBDevice.cpp USBDeviceDescriptor.cpp \
-	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
-	USBFrame.cpp USBInterface.cpp USBRawDescriptors.cpp \
-	USBRequests.cpp USBTransfer.cpp USBIsoTransfer.cpp \
 	Persistence.cpp Backend.cpp Testtable.cpp \
 	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
 	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
@@ -95,9 +79,10 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	$(avahi_files) $(bonjour_files) \
 	InstrumentComponent.cpp ServiceInstrument.cpp \
 	InstrumentComponentTable.cpp \
-	$(uvc_files) \
 	$(unicap_flies)
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
-libastro_la_LIBADD = image/libastroimage.la image/libastrofits.la
+libastro_la_LIBADD = utils/libastroutils.la \
+	usb/libastrousb.la \
+	image/libastroimage.la image/libastrofits.la
 
