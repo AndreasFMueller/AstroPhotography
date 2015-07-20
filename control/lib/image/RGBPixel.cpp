@@ -4,6 +4,7 @@
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
  */
+#include <AstroPixel.h>
 #include <AstroImage.h>
 
 namespace astro {

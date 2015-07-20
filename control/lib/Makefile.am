@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = . test
+SUBDIRS = image . test
 
 lib_LTLIBRARIES = libastro.la
 
@@ -38,17 +38,8 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	URL.cpp DeviceName.cpp DeviceNicer.cpp DeviceDenicer.cpp \
 	Device.cpp Properties.cpp timeformat.cpp \
 	Point.cpp Size.cpp Rectangle.cpp \
-	Pixel.cpp MosaicType.cpp Coordinates.cpp Vector.cpp \
-	ImagePoint.cpp ImageSize.cpp ImageRectangle.cpp ImageBase.cpp \
-	ImageIteratorBase.cpp ImageLine.cpp Image.cpp ImageProperties.cpp \
-	ImageDirectory.cpp ImageDatabaseDirectory.cpp \
-	FITSdate.cpp Metavalue.cpp ImageMetadata.cpp \
-	Sun.cpp ViewerPipeline.cpp Viewer.cpp \
-	Functions.cpp Background.cpp \
-	Histogram.cpp Radon.cpp \
-	Subgrid.cpp Adapters.cpp DisplayConverter.cpp \
-	Transform.cpp Projection.cpp Residual.cpp ProjectionCorrector.cpp \
-	PhaseCorrelator.cpp Analyzer.cpp TransformAnalyzer.cpp Stacker.cpp \
+	Coordinates.cpp Vector.cpp \
+	Sun.cpp \
 	Tracker.cpp Guide.cpp Guider.cpp ThreadBase.cpp \
 	GuidingProcess.cpp GuiderStateMachine.cpp \
 	GuiderProcess.cpp CalibrationProcess.cpp \
@@ -65,19 +56,17 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	Mount.cpp \
 	Serial.cpp \
 	BasicGuiderport.cpp \
-	Imager.cpp FITS.cpp FITSout.cpp FITSin.cpp FITSdirectory.cpp \
-	FITSKeywords.cpp ImageRepoTables.cpp ImageReposTable.cpp \
+	Imager.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
 	RepoReplicator.cpp \
 	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
 	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
 	InstrumentTables.cpp ServerTable.cpp \
-	Demosaic.cpp Filters.cpp Masks.cpp Clamper.cpp Interpolation.cpp \
-	LevelMaskExtractor.cpp ConnectedComponent.cpp MinRadius.cpp \
+	Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
 	FocusWork.cpp VCurveFocusWork.cpp FocusCompute.cpp \
-	MeasureFocusWork.cpp FocusFilterfunc.cpp \
+	MeasureFocusWork.cpp \
 	USBContextHolder.cpp USBContext.cpp \
 	USBDevice.cpp USBDeviceDescriptor.cpp \
 	USBDescriptors.cpp USBEndpoint.cpp USBConfiguration.cpp \
@@ -89,13 +78,13 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	CancellableWork.cpp ExposureWork.cpp \
 	TrackingPersistence.cpp CalibrationPersistence.cpp \
 	CalibrationStore.cpp TrackingStore.cpp \
-	ImagePersistence.cpp \
 	SkyWindow.cpp \
 	Catalog.cpp MappedFile.cpp Ucac4.cpp Tycho2.cpp BSC.cpp Hipparcos.cpp \
 	NGCIC.cpp \
 	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
-	ImageGeometry.cpp SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
-	StereographicProjection.cpp StereographicChart.cpp \
+	ImageGeometry.cpp \
+	SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
+	StereographicChart.cpp \
 	PreviewAdapter.cpp ImageProcessing.cpp \
 	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
 	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
@@ -110,3 +99,5 @@ libastro_la_SOURCES = debug.cpp utils.cpp stacktrace.cpp Typename.cpp Trim.cpp \
 	$(unicap_flies)
 
 libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastro_la_LIBADD = image/libastroimage.la image/libastrofits.la
+

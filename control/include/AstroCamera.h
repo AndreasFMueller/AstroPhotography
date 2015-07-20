@@ -107,26 +107,31 @@ public:
 	unsigned int	height() const { return size().height(); }
 	unsigned int	x() const { return origin().x(); }
 	unsigned int	y() const { return origin().y(); }
+
 private:
 	float	_exposuretime;
 public:
 	float	exposuretime() const { return _exposuretime; }
 	void	exposuretime(float e) { _exposuretime = e; }
+
 private:
 	float	_gain;
 public:
 	float	gain() const { return _gain; }
 	void	gain(float g) { _gain = g; }
+
 private:
 	float	_limit;
 public:
 	float	limit() const { return _limit; }
 	void	limit(float l) { _limit = l; }
+
 private:
 	Binning	_mode;
 public:
 	const Binning&	mode() const { return _mode; }
 	void	mode(const Binning& m) { _mode = m; }
+
 private:
 	Shutter::state	_shutter;
 public:
@@ -144,16 +149,18 @@ public:
 static std::string	purpose2string(purpose_t p);
 static purpose_t	string2purpose(const std::string& p);
 
+	// Constructors
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
 		float _exposuretime = 1);
 
-	// state related methods
+	// state related methods (is this really a part of the exposure class?)
 	typedef enum state_e {
 		idle = 0, exposing = 1, exposed = 2, cancelling = 3
 	} State;
 static std::string	state2string(State s);
 static State	string2state(const std::string& s);
+
 	virtual std::string	toString() const;
 
 	void	addToImage(astro::image::ImageBase& image) const;
@@ -195,6 +202,7 @@ public:
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
 	const DeviceName&	name() const { return _name; }
+
 	// CCD size
 private:
 	astro::image::ImageSize	_size;
@@ -206,6 +214,7 @@ private:
 	int	ccdid;
 public:
 	int	getId() const { return ccdid; }
+
 	// binning modes
 private:
 	BinningSet	binningmodes;
@@ -213,12 +222,15 @@ public:
 	const BinningSet&	modes() const { return binningmodes; }
 	void	addMode(const Binning& mode);
 	void	addModes(const BinningSet& modes);
+
 	// shutter related methods
 private:
 	bool	_shutter;
 public:
 	void	setShutter(bool shutter) { _shutter = shutter; }
 	bool	shutter() const { return _shutter; }
+
+	// pixel dimensions (in meters)
 private:
 	float	_pixelwidth;	// pixel width in meters
 	float	_pixelheight;	// pixel height in meters
@@ -227,7 +239,9 @@ public:
 	float	pixelheight() const { return _pixelheight; }
 	void	pixelwidth(float pixelwidth) { _pixelwidth = pixelwidth; }
 	void	pixelheight(float pixelheight) { _pixelheight = pixelheight; }
+
 public:
+	// constructors
 	CcdInfo(const std::string& name, const astro::image::ImageSize& size,
 		int ccdid = 0);
 	CcdInfo(const CcdInfo& other);
@@ -271,11 +285,15 @@ public:
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
+
+	// constructor
 	Ccd(const CcdInfo& _info)
 		: astro::device::Device(_info.name(), DeviceName::Ccd),
 		info(_info), state(Exposure::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
+
+	// accessors
 	const astro::image::ImageSize&	getSize() const { return info.size(); }
 
 	// methods to start/stop exposures

@@ -1,0 +1,63 @@
+#
+# Makefile.am -- subdirectory of image processing related classes
+#
+# (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+noinst_HEADERS = Miniball.hpp
+
+noinst_LTLIBRARIES = libastroimage.la libastrofits.la
+
+libastroimage_la_SOURCES = 						\
+	Adapters.cpp							\
+	Analyzer.cpp							\
+	Background.cpp							\
+	ConnectedComponent.cpp						\
+	Demosaic.cpp							\
+	DisplayConverter.cpp						\
+	FITSdate.cpp							\
+	Filters.cpp							\
+	FocusFilterfunc.cpp						\
+	Functions.cpp							\
+	Histogram.cpp							\
+	Image.cpp							\
+	ImageBase.cpp							\
+	ImageDatabaseDirectory.cpp					\
+	ImageDirectory.cpp						\
+	ImageIteratorBase.cpp						\
+	ImageLine.cpp							\
+	ImageMetadata.cpp						\
+	ImagePersistence.cpp						\
+	ImagePoint.cpp							\
+	ImageProperties.cpp						\
+	ImageRectangle.cpp						\
+	ImageSize.cpp							\
+	LevelMaskExtractor.cpp						\
+	Masks.cpp							\
+	Metavalue.cpp							\
+	MinRadius.cpp							\
+	MosaicType.cpp							\
+	PhaseCorrelator.cpp						\
+	Pixel.cpp							\
+	Projection.cpp							\
+	ProjectionCorrector.cpp						\
+	Radon.cpp							\
+	Residual.cpp							\
+	Stacker.cpp							\
+	StereographicProjection.cpp					\
+	Subgrid.cpp							\
+	Transform.cpp							\
+	TransformAnalyzer.cpp						\
+	Viewer.cpp							\
+	ViewerPipeline.cpp
+
+libastrofits_la_SOURCES = 						\
+	FITS.cpp							\
+	FITSKeywords.cpp						\
+	FITSdirectory.cpp						\
+	FITSin.cpp							\
+	FITSout.cpp
+
+libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastrofits_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
