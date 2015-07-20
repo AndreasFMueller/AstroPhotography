@@ -8,15 +8,17 @@ noinst_HEADERS =
 
 task_ldadd = -lcppunit 							\
 	-L$(top_builddir)/lib/task -lastrotask				\
-	-L$(top_builddir)/lib/persistence -lastropersistence		\
 	-L$(top_builddir)/lib/device -lastrodevice			\
-	-L$(top_builddir)/lib/image -lastroimage -lastrofits 		\
+	-L$(top_builddir)/lib/image -lastroimage 			\
+	-L$(top_builddir)/lib/discovery -lastrodiscovery		\
+	-L$(top_builddir)/lib/persistence -lastropersistence		\
 	-L$(top_builddir)/lib/utils -lastroutils
 task_dependencies = 							\
 	$(top_builddir)/lib/utils/libastroutils.la  			\
 	$(top_builddir)/lib/task/libastrotask.la  			\
 	$(top_builddir)/lib/device/libastrodevice.la  			\
 	$(top_builddir)/lib/persistence/libastropersistence.la  	\
+	$(top_builddir)/lib/discovery/libastrodiscovery.la  		\
 	$(top_builddir)/lib/image/libastroimage.la  			\
 	$(top_builddir)/lib/image/libastrofits.la
 

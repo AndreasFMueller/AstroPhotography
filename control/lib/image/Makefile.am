@@ -7,7 +7,7 @@ SUBDIRS = . test
 
 noinst_HEADERS = Miniball.hpp
 
-noinst_LTLIBRARIES = libastroimage.la libastrofits.la
+noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
@@ -16,8 +16,13 @@ libastroimage_la_SOURCES = 						\
 	ConnectedComponent.cpp						\
 	Demosaic.cpp							\
 	DisplayConverter.cpp						\
-	FITSdate.cpp							\
 	Filters.cpp							\
+	FITS.cpp							\
+	FITSdate.cpp							\
+	FITSdirectory.cpp						\
+	FITSin.cpp							\
+	FITSKeywords.cpp						\
+	FITSout.cpp							\
 	FocusFilterfunc.cpp						\
 	Functions.cpp							\
 	Histogram.cpp							\
@@ -52,12 +57,6 @@ libastroimage_la_SOURCES = 						\
 	Viewer.cpp							\
 	ViewerPipeline.cpp
 
-libastrofits_la_SOURCES = 						\
-	FITS.cpp							\
-	FITSKeywords.cpp						\
-	FITSdirectory.cpp						\
-	FITSin.cpp							\
-	FITSout.cpp
 
 libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

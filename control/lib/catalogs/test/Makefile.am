@@ -7,12 +7,10 @@
 catalogs_ldadd = -lcppunit						\
 	-L$(top_builddir)/lib/catalogs -lastrocatalogs			\
 	-L$(top_builddir)/lib/image -lastroimage			\
-	-L$(top_builddir)/lib/image -lastrofits				\
 	-L$(top_builddir)/lib/utils -lastroutils
 catalogs_dependencies =							\
 	$(top_builddir)/lib/utils/libastroutils.la			\
 	$(top_builddir)/lib/image/libastroimage.la			\
-	$(top_builddir)/lib/image/libastrofits.la			\
 	$(top_builddir)/lib/catalogs/libastrocatalogs.la
 
 if ENABLE_UNITTESTS

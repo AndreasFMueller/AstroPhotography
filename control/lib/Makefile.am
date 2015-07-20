@@ -41,7 +41,7 @@ libastro_la_LIBADD =							\
 	utils/libastroutils.la 						\
 	persistence/libastropersistence.la 				\
 	discovery/libastrodiscovery.la 					\
-	image/libastroimage.la image/libastrofits.la 			\
+	image/libastroimage.la						\
 	device/libastrodevice.la 					\
 	catalogs/libastrocatalogs.la 					\
 	task/libastrotask.la 						\

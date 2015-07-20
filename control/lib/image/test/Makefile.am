@@ -7,12 +7,11 @@
 noinst_HEADERS = 
 
 test_ldadd = -lcppunit 							\
-	-L$(top_builddir)/lib/image -lastroimage -lastrofits 		\
+	-L$(top_builddir)/lib/image -lastroimage			\
 	-L$(top_builddir)/lib/utils -lastroutils
 test_dependencies = 							\
 	$(top_builddir)/lib/utils/libastroutils.la  			\
-	$(top_builddir)/lib/image/libastroimage.la  			\
-	$(top_builddir)/lib/image/libastrofits.la
+	$(top_builddir)/lib/image/libastroimage.la  
 
 if ENABLE_UNITTESTS
 
