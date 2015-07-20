@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = utils image usb . test
+SUBDIRS = utils persistence discovery image device catalogs task guiding usb . test
 
 lib_LTLIBRARIES = libastro.la
 
@@ -14,37 +14,10 @@ else
 unicap_flies =
 endif
 
-if ENABLE_AVAHI
-avahi_files = AvahiBase.cpp AvahiServiceSubset.cpp AvahiThread.cpp \
-	AvahiResolver.cpp AvahiDiscovery.cpp AvahiPublisher.cpp
-endif
-if ENABLE_BONJOUR
-bonjour_files = BonjourResolver.cpp BonjourDiscovery.cpp BonjourPublisher.cpp
-endif
-
 libastro_la_SOURCES = \
-	Exceptions.cpp URL.cpp ServerName.cpp \
-	DeviceName.cpp DeviceNicer.cpp DeviceDenicer.cpp \
-	Device.cpp Properties.cpp timeformat.cpp \
-	Point.cpp Size.cpp Rectangle.cpp \
-	Coordinates.cpp Vector.cpp \
-	Sun.cpp \
-	Tracker.cpp Guide.cpp Guider.cpp ThreadBase.cpp \
-	GuidingProcess.cpp GuiderStateMachine.cpp \
-	GuiderProcess.cpp CalibrationProcess.cpp \
-	TrackingWork.cpp DrivingWork.cpp \
-	GuiderCalibrator.cpp GuiderCalibration.cpp \
-	GuiderFactory.cpp \
+	ThreadBase.cpp \
 	Simulator.cpp \
-	Exposure.cpp Binning.cpp ExposureTimer.cpp Loop.cpp \
-	ImageProgramCallback.cpp SaveImageCallback.cpp \
-	ModuleDescriptor.cpp Module.cpp DeviceLocator.cpp Repository.cpp \
-	DeviceAccessor.cpp Devices.cpp Shutter.cpp \
-	Camera.cpp Ccd.cpp Cooler.cpp FilterWheel.cpp GuiderPort.cpp \
-	AdaptiveOptics.cpp \
-	Mount.cpp \
-	Serial.cpp \
-	BasicGuiderport.cpp \
+	ImageProgramCallback.cpp \
 	Imager.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
 	RepoReplicator.cpp \
@@ -53,36 +26,26 @@ libastro_la_SOURCES = \
 	InstrumentTables.cpp ServerTable.cpp \
 	Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
-	CalibrationFactory.cpp Focuser.cpp Focusing.cpp \
-	FocusWork.cpp VCurveFocusWork.cpp FocusCompute.cpp \
-	MeasureFocusWork.cpp \
-	Persistence.cpp Backend.cpp Testtable.cpp \
-	TaskParameters.cpp TaskInfo.cpp TaskQueueEntry.cpp \
-	TaskExecutor.cpp TaskQueue.cpp TaskTable.cpp \
-	CancellableWork.cpp ExposureWork.cpp \
-	TrackingPersistence.cpp CalibrationPersistence.cpp \
-	CalibrationStore.cpp TrackingStore.cpp \
-	SkyWindow.cpp \
-	Catalog.cpp MappedFile.cpp Ucac4.cpp Tycho2.cpp BSC.cpp Hipparcos.cpp \
-	NGCIC.cpp \
-	CatalogBackend.cpp FileBackend.cpp DatabaseBackend.cpp \
-	ImageGeometry.cpp \
-	SkyRectangle.cpp Chart.cpp ImageNormalizer.cpp \
-	StereographicChart.cpp \
+	CalibrationFactory.cpp \
 	PreviewAdapter.cpp ImageProcessing.cpp \
 	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
 	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
 	ImageCalibrationStep.cpp CalibrationImageStep.cpp ImageBufferStep.cpp \
 	CalibrationProcessorStep.cpp InterpolationStep.cpp \
-	ServiceKey.cpp ServiceSubset.cpp ServiceObject.cpp \
-	ServiceResolver.cpp ServiceDiscovery.cpp ServicePublisher.cpp \
-	$(avahi_files) $(bonjour_files) \
-	InstrumentComponent.cpp ServiceInstrument.cpp \
-	InstrumentComponentTable.cpp \
 	$(unicap_flies)
 
-libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
-libastro_la_LIBADD = utils/libastroutils.la \
-	usb/libastrousb.la \
-	image/libastroimage.la image/libastrofits.la
+libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+
+libastro_la_LIBADD =							\
+	utils/libastroutils.la 						\
+	persistence/libastropersistence.la 				\
+	discovery/libastrodiscovery.la 					\
+	image/libastroimage.la image/libastrofits.la 			\
+	device/libastrodevice.la 					\
+	catalogs/libastrocatalogs.la 					\
+	task/libastrotask.la 						\
+	guiding/libastroguiding.la 					\
+	usb/libastrousb.la 
+	
 

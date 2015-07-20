@@ -3,7 +3,7 @@
 #
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-SUBDIRS = test
+SUBDIRS = . test
 
 noinst_HEADERS = Miniball.hpp
 

@@ -18,42 +18,26 @@ unicap_cmds =
 endif
 
 # stuff related to testing
-noinst_PROGRAMS = tests processtests catalogtests singletest \
+noinst_PROGRAMS = tests processtests singletest \
 	calimggen caltests simtest \
-	guidetest tasktest aotest phasecorr
+	phasecorr
 
 ## general tests
 tests_SOURCES = tests.cpp \
-	URLTest.cpp \
-	DeviceNameTest.cpp NiceTest.cpp PropertiesTest.cpp FITSdateTest.cpp \
-	FITSKeywordTest.cpp ImageRepoTablesTest.cpp ImageRepoTest.cpp \
-	ImagePointTest.cpp ImageSizeTest.cpp ImageRectangleTest.cpp \
-	ImageBaseTest.cpp ImageIteratorBaseTest.cpp ImageLineTest.cpp \
-	ImageTest.cpp RGBTest.cpp MosaicTest.cpp RadonTest.cpp \
-	OperatorTest.cpp FilterTest.cpp TransformTest.cpp \
-	TranslationTest.cpp FWHMTest.cpp \
-	WindowAdapterTest.cpp ConvertingAdapterTest.cpp \
+	ImageRepoTablesTest.cpp ImageRepoTest.cpp \
 	PreviewAdapterTest.cpp \
 	RawImageFileStepTest.cpp \
 	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
-	PhaseCorrelatorTest.cpp StarDetectorTest.cpp \
-	FITSwriteTest.cpp FITSreadTest.cpp MultiplaneTest.cpp \
-	BinningTest.cpp \
-	ModuleDescriptorTest.cpp ModuleTest.cpp RepositoryTest.cpp \
-	LinearFunctionTest.cpp QuadraticFunctionTest.cpp BackgroundTest.cpp \
-	TableTest.cpp UpdateSpecTest.cpp DatabaseTest.cpp \
 	ProjectTableTest.cpp GlobalTableTest.cpp ConfigurationTest.cpp \
 	DeviceMapTableTest.cpp DeviceMapperTest.cpp \
-	FocusComputeTest.cpp MinRadiusTest.cpp \
-	AnalyzerTest.cpp CorrectorTest.cpp \
-	GuiderFactoryTest.cpp \
+	CorrectorTest.cpp \
 	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
-	InterpolationStepTest.cpp AngleTest.cpp \
+	InterpolationStepTest.cpp \
 	InstrumentComponentTest.cpp
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	NiceTest.cpp 
+	ConfigurationTest.cpp 
 #	InstrumentComponentTest.cpp
 #	InstrumentTest.cpp
 singletest_LDADD = -lcppunit -L.. -lastro 
@@ -68,16 +52,6 @@ processtests_SOURCES = processtests.cpp \
 	ProcessingControllerTest.cpp
 processtests_LDADD = -lcppunit -L.. -lastro 
 processtests_DEPENDENCIES = ../libastro.la 
-
-# tests related to star catalogs and charting
-catalogtests_SOURCES = catalogtests.cpp \
-	ProjectionTest.cpp StereographicProjectionTest.cpp \
-	SkyWindowTest.cpp \
-	Ucac4Test.cpp Tycho2Test.cpp BSCTest.cpp HipparcosTest.cpp \
-	NGCICTest.cpp ChartTest.cpp StereographicChartTest.cpp \
-	ImageNormalizerTest.cpp SkyRectangleTest.cpp
-catalogtests_LDADD = -lcppunit -L.. -lastro 
-catalogtests_DEPENDENCIES = ../libastro.la 
 
 # test for the image processing stuff (takes time)
 tests_LDADD = -lcppunit -L.. -lastro 
@@ -94,20 +68,6 @@ caltests_DEPENDENCIES = ../libastro.la
 simtest_SOURCES = simtest.cpp
 simtest_LDADD = -L.. -lastro
 simtest_DEPENDENCIES = ../libastro.la
-
-guidetest_SOURCES = guidetest.cpp
-guidetest_LDADD = -L.. -lastro
-guidetest_DEPENDENCIES = ../libastro.la
-
-# test program for the task queue
-tasktest_SOURCES = tasktest.cpp
-tasktest_LDADD = -L.. -lastro
-tasktest_DEPENDENCIES = ../libastro.la
-
-# test program for AO units
-aotest_SOURCES = aotest.cpp
-aotest_LDADD = -L.. -lastro
-aotest_DEPENDENCIES = ../libastro.la
 
 # test program for phase correlation of images
 phasecorr_SOURCES = phasecorr.cpp

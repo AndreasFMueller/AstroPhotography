@@ -408,7 +408,14 @@ AC_SUBST(SHLIB_EXT)
 AC_CONFIG_FILES([Makefile include/Makefile
 	lib/Makefile
 	lib/utils/Makefile lib/utils/test/Makefile
+	lib/persistence/Makefile lib/persistence/test/Makefile
+	lib/discovery/Makefile lib/discovery/test/Makefile
 	lib/image/Makefile lib/image/test/Makefile
+	lib/device/Makefile lib/device/test/Makefile
+	lib/catalogs/Makefile lib/catalogs/test/Makefile
+	lib/task/Makefile lib/task/test/Makefile
+	lib/guiding/Makefile lib/guiding/test/Makefile
+	lib/focusing/Makefile lib/focusing/test/Makefile
 	lib/usb/Makefile lib/usb/test/Makefile
 	lib/test/Makefile
 	corba/Makefile corba/idl/Makefile corba/include/Makefile
