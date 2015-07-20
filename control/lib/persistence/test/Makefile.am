@@ -4,9 +4,10 @@
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-persistence_ldadd = -lcppunit -L$(top_builddir)/lib/utils -lastroutils \
-	-L$(top_builddir)/lib/persistence -lastropersistence
-persistence_dependencies =  $(top_builddir)/lib/utils/libastroutils.la \
+persistence_ldadd = -lcppunit						\
+	-L$(top_builddir)/lib/persistence -lastropersistence		\
+	-L$(top_builddir)/lib/utils -lastroutils
+persistence_dependencies =  $(top_builddir)/lib/utils/libastroutils.la	\
 	$(top_builddir)/lib/persistence/libastropersistence.la
 
 if ENABLE_UNITTESTS

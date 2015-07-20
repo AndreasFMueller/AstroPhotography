@@ -12,9 +12,9 @@ endif
 noinst_PROGRAMS = $(test_programs) sdiscover spublish
 
 discover_ldadd = 							\
-	-L$(top_builddir)/lib/utils -lastroutils 			\
+	-L$(top_builddir)/lib/discovery -lastrodiscovery		\
 	-L$(top_builddir)/lib/persistence -lastropersistence		\
-	-L$(top_builddir)/lib/discovery -lastrodiscovery
+	-L$(top_builddir)/lib/utils -lastroutils 
 discover_dependencies =  						\
 	$(top_builddir)/lib/utils/libastroutils.la 			\
 	$(top_builddir)/lib/persistence/libastropersistence.la 		\
