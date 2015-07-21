@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroConfig.h>
-#include <InstrumentTables.h>
+#include "InstrumentTables.h"
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <sstream>

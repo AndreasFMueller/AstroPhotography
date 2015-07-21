@@ -39,7 +39,7 @@ static UpdateSpec object_to_updatespec(const ImageRepoRecord& imageserver);
  */
 class ImageRepoTable : public Table<ImageRepoRecord, ImageRepoTableAdapter> {
 public:
-	ImageRepoTable(Database& database)
+	ImageRepoTable(Database database)
 		: Table<ImageRepoRecord, ImageRepoTableAdapter>(database) {
 	}
 	ImageRepo	get(const std::string& name);

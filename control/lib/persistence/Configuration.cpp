@@ -9,11 +9,6 @@
 #include <AstroFormat.h>
 #include <cstdlib>
 #include <GlobalTable.h>
-#include <ImageReposTable.h>
-#include <AstroProject.h>
-#include <ProjectTable.h>
-#include <InstrumentTables.h>
-#include <ServerTable.h>
 
 using namespace astro::persistence;
 using namespace astro::project;

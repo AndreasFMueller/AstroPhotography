@@ -73,7 +73,7 @@ static UpdateSpec	object_to_updatespec(const PartRecord& part);
  */
 class PartTable : public Table<PartRecord, PartTableAdapter> {
 public:
-	PartTable(Database& database)
+	PartTable(Database database)
 		: Table<PartRecord, PartTableAdapter>(database) {
 	}
 	virtual long	id(long projectid, long partno);
@@ -129,7 +129,7 @@ static UpdateSpec	object_to_updatespec(const ProjectRecord& project);
 class ProjectTable : public Table<ProjectRecord, ProjectTableAdapter> {
 	PartTable	parttable;
 public:
-	ProjectTable(Database& database)
+	ProjectTable(Database database)
 		: Table<ProjectRecord, ProjectTableAdapter>(database),
 		  parttable(database) {
 	}

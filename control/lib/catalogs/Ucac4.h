@@ -11,7 +11,7 @@
 #include <set>
 #include <limits.h>
 #include <string>
-#include <MappedFile.h>
+#include "MappedFile.h"
 
 namespace astro {
 namespace catalog {

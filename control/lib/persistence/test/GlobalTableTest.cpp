@@ -9,7 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <includes.h>
-#include <GlobalTable.h>
+#include "../GlobalTable.h"
 
 using namespace astro::persistence;
 using namespace astro::config;

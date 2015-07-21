@@ -6,6 +6,11 @@
 #
 SUBDIRS = . test
 
+noinst_HEADERS =							\
+	AvahiDiscovery.h						\
+	BonjourDiscovery.h						\
+	InstrumentComponentTable.h
+
 noinst_LTLIBRARIES = libastrodiscovery.la
 
 if ENABLE_AVAHI

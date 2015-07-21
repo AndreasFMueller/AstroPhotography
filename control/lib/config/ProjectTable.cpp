@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ProjectTable.h>
+#include "ProjectTable.h"
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>

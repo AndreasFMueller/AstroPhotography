@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Hipparcos.h>
+#include "Hipparcos.h"
 #include <AstroDebug.h>
 #include <includes.h>
 #include <AstroFormat.h>

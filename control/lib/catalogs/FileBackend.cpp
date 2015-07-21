@@ -3,13 +3,13 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil 
  */
-#include <CatalogBackend.h>
+#include "CatalogBackend.h"
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <Hipparcos.h>
-#include <Tycho2.h>
-#include <Ucac4.h>
+#include "Tycho2.h"
+#include "Ucac4.h"
 
 namespace astro {
 namespace catalog {

@@ -3,8 +3,8 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ImageReposTable.h>
-#include <ImageRepoTables.h>
+#include "ImageReposTable.h"
+#include "ImageRepoTables.h"
 #include <AstroFormat.h>
 #include <cassert>
 

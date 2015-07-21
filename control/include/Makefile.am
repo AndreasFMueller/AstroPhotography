@@ -17,17 +17,16 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroCatalog.h AstroChart.h AstroProjection.h AstroProcess.h \
 	AstroConfig.h
 
-noinst_HEADERS = PixelValue.h Simulator.h Sun.h Thread.h \
+noinst_HEADERS = PixelValue.h Sun.h Thread.h \
 	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
-	ViewerPipeline.h Testtable.h Radon.h \
+	ViewerPipeline.h Radon.h \
+	ConnectedComponent.h \
 	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \
 	CancellableWork.h ExposureWork.h \
 	TrackingPersistence.h CalibrationPersistence.h \
 	TrackingStore.h CalibrationStore.h ImagePersistence.h \
 	FocusWork.h FocusCompute.h Serial.h \
-	MappedFile.h Ucac4.h Tycho2.h BSC.h Hipparcos.h NGCIC.h \
-	CatalogBackend.h ImageRepoTables.h ImageReposTable.h \
-	ProjectTable.h GlobalTable.h BasicGuiderport.h \
+	BasicGuiderport.h \
 	FieldPersistence.h astroregex.h \
 	ServiceDiscovery.h AvahiDiscovery.h BonjourDiscovery.h \
 	InstrumentComponentTable.h Nice.h

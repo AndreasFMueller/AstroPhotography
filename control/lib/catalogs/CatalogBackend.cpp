@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller
  */
-#include <CatalogBackend.h>
+#include "CatalogBackend.h"
 #include <stdexcept>
 
 namespace astro {

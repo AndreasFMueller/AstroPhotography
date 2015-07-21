@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andraes Mueller, Hochschule Rapperswil
  */
-#include <InstrumentTables.h>
+#include "InstrumentTables.h"
 #include <AstroFormat.h>
 
 namespace astro {

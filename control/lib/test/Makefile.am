@@ -24,16 +24,13 @@ noinst_PROGRAMS = tests processtests singletest \
 
 ## general tests
 tests_SOURCES = tests.cpp \
-	ImageRepoTablesTest.cpp ImageRepoTest.cpp \
+	ImageRepoTest.cpp \
 	PreviewAdapterTest.cpp \
 	RawImageFileStepTest.cpp \
 	WriteImageFileStepTest.cpp ImageBufferStepTest.cpp \
-	ProjectTableTest.cpp GlobalTableTest.cpp ConfigurationTest.cpp \
-	DeviceMapTableTest.cpp DeviceMapperTest.cpp \
 	CorrectorTest.cpp \
 	ImageCalibrationStepTest.cpp CalibrationProcessorStepTest.cpp \
-	InterpolationStepTest.cpp \
-	InstrumentComponentTest.cpp
+	InterpolationStepTest.cpp
 
 # single test
 singletest_SOURCES = singletest.cpp \

@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <BSC.h>
+#include "BSC.h"
 #include <fstream>
 #include <AstroDebug.h>
 #include <includes.h>

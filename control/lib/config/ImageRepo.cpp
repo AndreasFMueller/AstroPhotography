@@ -7,7 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroIO.h>
 #include <includes.h>
-#include <ImageRepoTables.h>
+#include "ImageRepoTables.h"
 #include <numeric>
 
 using namespace astro::persistence;

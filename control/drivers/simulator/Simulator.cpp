@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Simulator.h>
+#include "Simulator.h"
 #include <AstroAdapter.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>

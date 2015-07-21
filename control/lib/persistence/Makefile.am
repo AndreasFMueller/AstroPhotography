@@ -6,6 +6,10 @@
 #
 SUBDIRS = . test
 
+noinst_HEADERS =							\
+	Testtable.h							\
+	GlobalTable.h
+
 noinst_LTLIBRARIES = libastropersistence.la
 
 libastropersistence_la_SOURCES = 					\

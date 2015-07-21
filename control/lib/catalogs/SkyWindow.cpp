@@ -8,7 +8,7 @@
 #include <AstroDebug.h>
 #include <includes.h>
 #include <AstroIO.h>
-#include <CatalogBackend.h>
+#include "CatalogBackend.h"
 
 using namespace astro::io;
 

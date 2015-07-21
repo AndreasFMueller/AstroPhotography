@@ -4,7 +4,8 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = utils persistence discovery image device catalogs task guiding usb . test
+SUBDIRS = utils persistence discovery image device config \
+	catalogs task guiding usb unicap . test
 
 lib_LTLIBRARIES = libastro.la
 
@@ -16,14 +17,10 @@ endif
 
 libastro_la_SOURCES = \
 	ThreadBase.cpp \
-	Simulator.cpp \
 	ImageProgramCallback.cpp \
-	Imager.cpp ImageRepoTables.cpp ImageReposTable.cpp \
+	Imager.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
 	RepoReplicator.cpp \
-	GlobalTable.cpp ProjectTable.cpp Project.cpp \
-	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
-	InstrumentTables.cpp ServerTable.cpp \
 	Clamper.cpp Interpolation.cpp \
 	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
 	CalibrationFactory.cpp \

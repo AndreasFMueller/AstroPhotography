@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Testtable.h>
+#include "Testtable.h"
 #include <AstroDebug.h>
 
 namespace astro {

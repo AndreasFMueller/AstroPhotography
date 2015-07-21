@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <NGCIC.h>
+#include "../NGCIC.h"
 #include <AstroDebug.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>

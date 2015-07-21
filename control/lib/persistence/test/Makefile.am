@@ -21,6 +21,7 @@ noinst_PROGRAMS = tests singletest
 ## general tests
 tests_SOURCES = tests.cpp 						\
 	ConfigurationTest.cpp						\
+	GlobalTableTest.cpp						\
 	TableTest.cpp							\
 	DatabaseTest.cpp 						\
 	UpdateSpecTest.cpp

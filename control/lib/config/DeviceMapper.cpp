@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroConfig.h>
-#include <DeviceMapTable.h>
+#include "DeviceMapTable.h"
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 

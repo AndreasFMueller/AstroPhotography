@@ -5,6 +5,15 @@
 #
 SUBDIRS = . test
 
+noinst_HEADERS =							\
+	BSC.h								\
+	CatalogBackend.h						\
+	Hipparcos.h							\
+	MappedFile.h							\
+	NGCIC.h								\
+	Tycho2.h							\
+	Ucac4.h
+
 noinst_LTLIBRARIES = libastrocatalogs.la
 
 libastrocatalogs_la_SOURCES =						\

@@ -105,7 +105,7 @@ static InstrumentComponent::component_t	component_type(const std::string& s);
  */
 class InstrumentComponentTable : public Table<InstrumentComponentRecord, InstrumentComponentTableAdapter> {
 public:
-	InstrumentComponentTable(Database& database)
+	InstrumentComponentTable(Database database)
 		: Table<InstrumentComponentRecord,
 			InstrumentComponentTableAdapter>(database) {
 	}

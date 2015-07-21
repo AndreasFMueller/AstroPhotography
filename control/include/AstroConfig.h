@@ -416,8 +416,12 @@ static void	set_default(const std::string& filename);
 	virtual persistence::Database	database() = 0;
 };
 
+class ServerConfiguration;
+typedef std::shared_ptr<ServerConfiguration>	ServerConfigurationPtr;
 class ServerConfiguration {
 public:	
+static ServerConfigurationPtr	get();
+static ServerConfigurationPtr	get(ConfigurationPtr config);
 	// server access
 	virtual	ServerInfo	server(const std::string& name) = 0;
 	virtual void	addserver(const ServerInfo& server) = 0;
@@ -425,8 +429,12 @@ public:
 	virtual std::list<ServerInfo>	listservers() = 0;
 };
 
+class ImageRepoConfiguration;
+typedef std::shared_ptr<ImageRepoConfiguration>	ImageRepoConfigurationPtr;
 class ImageRepoConfiguration {
 public:	
+static ImageRepoConfigurationPtr	get();
+static ImageRepoConfigurationPtr	get(ConfigurationPtr config);
 	// image repository access
 	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;
 	virtual void	addrepo(const std::string& name,
@@ -435,8 +443,13 @@ public:
 	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
 };
 
+class ProjectConfiguration;
+typedef std::shared_ptr<ProjectConfiguration>	ProjectConfigurationPtr;
 class ProjectConfiguration {
 public:
+static ProjectConfigurationPtr	get();
+static ProjectConfigurationPtr	get(ConfigurationPtr config);
+
 	// project definition
 	virtual project::Project	project(const std::string& name) = 0;
 	virtual void	addproject(const project::Project& project) = 0;
@@ -457,10 +470,23 @@ public:
 				int repoid) = 0;
 };
 
-class InstrumentConfiguration {
+class DeviceMapperConfiguration;
+typedef std::shared_ptr<DeviceMapperConfiguration>	DeviceMapperConfigurationPtr;
+class DeviceMapperConfiguration {
 public:
+static DeviceMapperConfigurationPtr	get();
+static DeviceMapperConfigurationPtr	get(ConfigurationPtr config);
+
 	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;
+};
+
+class InstrumentConfiguration;
+typedef std::shared_ptr<InstrumentConfiguration>	InstrumentConfigurationPtr;
+class InstrumentConfiguration {
+public:
+static InstrumentConfigurationPtr	get();
+static InstrumentConfigurationPtr	get(ConfigurationPtr config);
 
 	// instrument access
 	virtual InstrumentPtr	instrument(const std::string& name) = 0;

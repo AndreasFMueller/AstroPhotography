@@ -5,7 +5,8 @@
 #
 SUBDIRS = . test
 
-noinst_HEADERS = Miniball.hpp
+noinst_HEADERS =							\
+	Miniball.hpp
 
 noinst_LTLIBRARIES = libastroimage.la
 

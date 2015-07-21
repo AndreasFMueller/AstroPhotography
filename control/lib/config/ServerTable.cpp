@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ServerTable.h>
+#include "ServerTable.h"
 #include <AstroFormat.h>
 
 using namespace astro::persistence;

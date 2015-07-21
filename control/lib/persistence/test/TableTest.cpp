@@ -15,7 +15,7 @@
 #include <iostream>
 #include <AstroPersistence.h>
 #include <math.h>
-#include <Testtable.h>
+#include "../Testtable.h"
 
 using namespace astro::persistence;
 

@@ -9,7 +9,7 @@
 #include <AstroDebug.h>
 #include <includes.h>
 #include <AstroPersistence.h>
-#include <ImageReposTable.h>
+#include "../ImageReposTable.h"
 
 using namespace astro::persistence;
 using namespace astro::project;

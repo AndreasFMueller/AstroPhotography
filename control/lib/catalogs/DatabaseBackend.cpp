@@ -3,9 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <CatalogBackend.h>
+#include "CatalogBackend.h"
 #include <AstroFormat.h>
-#include <Ucac4.h>
+#include "Ucac4.h"
 
 namespace astro {
 namespace catalog {

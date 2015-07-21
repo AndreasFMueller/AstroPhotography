@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <MappedFile.h>
+#include "MappedFile.h"
 
 namespace astro {
 namespace catalog {

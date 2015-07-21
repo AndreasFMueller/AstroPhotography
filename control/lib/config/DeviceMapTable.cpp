@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <DeviceMapTable.h>
+#include "DeviceMapTable.h"
 
 namespace astro {
 namespace config {
