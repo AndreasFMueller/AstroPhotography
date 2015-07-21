@@ -236,7 +236,7 @@ void	MosaicTest::testMosaic(MosaicType::mosaic_type mosaic) {
 
 	Mosaic<unsigned char>	mosaicer(mosaic);
 	Image<unsigned char>	*mosaiced = mosaicer(image);
-	std::string	filename = stringprintf("mosaic%d.fits", mosaic);
+	std::string	filename = stringprintf("tmp/mosaic%d.fits", mosaic);
 	unlink(filename.c_str());
 	FITSoutfile<unsigned char>	*outfile
 		= new FITSoutfile<unsigned char>(filename.c_str());
@@ -362,16 +362,16 @@ void	MosaicTest::testDemosaicBilinear() {
 	Mosaic<unsigned char>	mosaicer(MosaicType::BAYER_GRBG);
 	Image<unsigned char>	*mosaiced = mosaicer(*image);
 	ImagePtr	mosaicimage(mosaiced);
-	unlink("rgbmosaic.fits");
-	FITSout	mosaicfile("rgbmosaic.fits");
+	unlink("tmp/rgbmosaic.fits");
+	FITSout	mosaicfile("tmp/rgbmosaic.fits");
 	mosaicfile.write(mosaicimage);
 
 	/* demosaic */
 	DemosaicBilinear<unsigned char>	demosaicer;
 	Image<RGB<unsigned char> >	*rgb = demosaicer(*mosaiced);
 	ImagePtr	rgbptr(rgb);
-	unlink("rgb.fits");
-	FITSout	file("rgb.fits");
+	unlink("tmp/rgb.fits");
+	FITSout	file("tmp/rgb.fits");
 	file.write(rgbptr);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDemosaicBilinear() end");
 }

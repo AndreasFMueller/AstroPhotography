@@ -20,6 +20,7 @@ libastroimage_la_SOURCES = 						\
 	FITS.cpp							\
 	FITSdate.cpp							\
 	FITSdirectory.cpp						\
+	FITSexception.cpp						\
 	FITSin.cpp							\
 	FITSKeywords.cpp						\
 	FITSout.cpp							\

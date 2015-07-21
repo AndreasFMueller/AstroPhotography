@@ -49,7 +49,7 @@ void	MultiplaneTest::testWrite() {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image filled with values");
-	const char	*filename = "multiplane.fits";
+	const char	*filename = "tmp/multiplane.fits";
 	unlink(filename);
 	FITSout	out(filename);
 	out.write(image);
@@ -58,7 +58,7 @@ void	MultiplaneTest::testWrite() {
 
 void	MultiplaneTest::testRead() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRead() begin");
-	FITSin	in("multiplane.fits");
+	FITSin	in("tmp/multiplane.fits");
 	ImagePtr	image = in.read();
 	Image<Multiplane<unsigned char, 2> >	*imagep
 		= dynamic_cast<Image<Multiplane<unsigned char, 2> > *>(&*image);

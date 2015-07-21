@@ -42,12 +42,12 @@ void	AnalyzerTest::tearDown() {
 void	AnalyzerTest::testResiduals() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testResiduals() begin");
 	// read the chart image
-	FITSinfile<float>	chart("deneb-chart.fits");
+	FITSinfile<float>	chart("testimages/deneb-chart.fits");
 	Image<float>	*image1 = chart.read();
 	TypeReductionAdapter<double, float>	base(*image1);
 
 	// read the projected image
-	FITSinfile<double>	projected("deneb-projected.fits");
+	FITSinfile<double>	projected("testimages/deneb-projected.fits");
 	Image<double>	*image2 = projected.read();
 
 	// compute the residuals

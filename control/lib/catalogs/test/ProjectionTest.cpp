@@ -44,7 +44,7 @@ void	ProjectionTest::tearDown() {
 void	ProjectionTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
 	// read the deneb image
-	FITSin	in("deneb-transform.fits");
+	FITSin	in("testimages/deneb-transform.fits");
 	ImagePtr	imageptr = in.read();
 	Image<unsigned char>	*image
 		= dynamic_cast<Image<unsigned char> *>(&*imageptr);
@@ -64,7 +64,7 @@ void	ProjectionTest::testConstructor() {
 	Image<double>	result(projected);
 
 	// write the image
-	FITSoutfile<double>	out("deneb-projected.fits");
+	FITSoutfile<double>	out("tmp/deneb-projected.fits");
 	out.setPrecious(false);
 	out.write(result);
 
@@ -75,7 +75,7 @@ void	ProjectionTest::testConstructor() {
 void	ProjectionTest::testAndromeda() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAndromeda() begin");
 	// read the deneb image
-	FITSin	in("andromeda-base.fits");
+	FITSin	in("testimages/andromeda-base.fits");
 	ImagePtr	imageptr = in.read();
 	Image<unsigned char>	*image
 		= dynamic_cast<Image<unsigned char> *>(&*imageptr);
@@ -95,7 +95,7 @@ void	ProjectionTest::testAndromeda() {
 	Image<double>	result(projected);
 
 	// write the image
-	FITSoutfile<double>	out("andromeda-projected.fits");
+	FITSoutfile<double>	out("tmp/andromeda-projected.fits");
 	out.setPrecious(false);
 	out.write(result);
 

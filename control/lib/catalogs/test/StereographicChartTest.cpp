@@ -66,7 +66,7 @@ void	StereographicChartTest::testImage() {
 		center.ra().degrees(h);
 		astro::image::ImagePtr	image = chart.image();
 		std::string	filename
-			= stringprintf("stereochart-%03u.fits", h);
+			= stringprintf("tmp/stereochart-%03u.fits", h);
 		astro::io::FITSout	out(filename);
 		out.setPrecious(false);
 		out.write(image);

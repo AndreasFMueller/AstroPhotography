@@ -5,7 +5,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastrocatalogs.la
+noinst_LTLIBRARIES = libastrocatalogs.la
 
 libastrocatalogs_la_SOURCES =						\
 	BSC.cpp								\
@@ -25,4 +25,5 @@ libastrocatalogs_la_SOURCES =						\
 	Tycho2.cpp							\
 	Ucac4.cpp
 
-libastrocatalogs_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastrocatalogs_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

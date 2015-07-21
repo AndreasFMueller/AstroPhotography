@@ -412,19 +412,31 @@ static void	set_default(const std::string& filename);
 				const std::string& name) = 0;
 	virtual std::list<ConfigurationEntry>	globallist() = 0;
 
+	// access to the raw database
+	virtual persistence::Database	database() = 0;
+};
+
+class ServerConfiguration {
+public:	
 	// server access
 	virtual	ServerInfo	server(const std::string& name) = 0;
 	virtual void	addserver(const ServerInfo& server) = 0;
 	virtual void	removeserver(const std::string& name) = 0;
 	virtual std::list<ServerInfo>	listservers() = 0;
+};
 
+class ImageRepoConfiguration {
+public:	
 	// image repository access
 	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory) = 0;
 	virtual void	removerepo(const std::string& name) = 0;
 	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
+};
 
+class ProjectConfiguration {
+public:
 	// project definition
 	virtual project::Project	project(const std::string& name) = 0;
 	virtual void	addproject(const project::Project& project) = 0;
@@ -443,7 +455,10 @@ static void	set_default(const std::string& filename);
 				int taskid) = 0;
 	virtual void	partrepo(const std::string& projectname, long partno,
 				int repoid) = 0;
+};
 
+class InstrumentConfiguration {
+public:
 	// device mapper stuff
 	virtual DeviceMapperPtr	devicemapper() = 0;
 
@@ -452,9 +467,6 @@ static void	set_default(const std::string& filename);
 	virtual void	addInstrument(InstrumentPtr instrument) = 0;
 	virtual void	removeInstrument(const std::string& name) = 0;
 	virtual std::list<InstrumentPtr>	listinstruments() = 0;
-
-	// access to the raw database
-	virtual persistence::Database	database() = 0;
 };
 
 } // namespace config

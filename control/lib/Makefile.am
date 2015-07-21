@@ -21,7 +21,7 @@ libastro_la_SOURCES = \
 	Imager.cpp ImageRepoTables.cpp ImageReposTable.cpp \
 	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
 	RepoReplicator.cpp \
-	Configuration.cpp GlobalTable.cpp ProjectTable.cpp Project.cpp \
+	GlobalTable.cpp ProjectTable.cpp Project.cpp \
 	DeviceMapTable.cpp DeviceMapper.cpp Instrument.cpp \
 	InstrumentTables.cpp ServerTable.cpp \
 	Clamper.cpp Interpolation.cpp \

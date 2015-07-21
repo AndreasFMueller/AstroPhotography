@@ -67,10 +67,12 @@ ServiceSubset::ServiceSubset() {
 }
 
 ServiceSubset::ServiceSubset(const std::list<std::string>& names) {
+	_services = 0;
 	set(names);
 }
 
 ServiceSubset::ServiceSubset(const std::string& txt) {
+	_services = 0;
 	set(txtparse(txt));
 }
 

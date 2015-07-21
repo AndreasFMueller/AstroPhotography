@@ -3,8 +3,11 @@ configuration system:
       -	configuration system should use only one table for all domains
       - configurations should be ICE accessible
 
-Avahi:
-      -	race condition in AvahiThread
+Image:
+      - FITS write operation has setPrecious/precious accessors that should
+	be unified
+      - Bug in attribute read routines: if headers are in a second hdu, then
+	they are ignored
 
 URLs:
       - give every component an URL by which it can be identified

@@ -6,7 +6,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastrotask.la
+noinst_LTLIBRARIES = libastrotask.la
 
 libastrotask_la_SOURCES = 						\
 	CancellableWork.cpp						\

@@ -40,7 +40,8 @@ test:	tests
 	./tests -d 2>&1 | tee test.log
 
 # single test
-singletest_SOURCES = singletest.cpp 
+singletest_SOURCES = singletest.cpp 					\
+	ImageNormalizerTest.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 

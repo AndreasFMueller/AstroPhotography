@@ -6,7 +6,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastrodiscovery.la
+noinst_LTLIBRARIES = libastrodiscovery.la
 
 if ENABLE_AVAHI
 avahi_files = 								\

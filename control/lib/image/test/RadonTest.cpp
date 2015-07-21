@@ -69,7 +69,7 @@ void	RadonTest::testCircleTransform() {
 	}
 
 	// save this image
-	io::FITSout	out("circle.fits");
+	io::FITSout	out("tmp/circle.fits");
 	out.setPrecious(false);
         out.write(imageptr);
 
@@ -79,7 +79,7 @@ void	RadonTest::testCircleTransform() {
 	ImagePtr	ctransformptr(ctransform);
 
 	// write the circle transform
-	io::FITSout	outt("circletransform.fits");
+	io::FITSout	outt("tmp/circletransform.fits");
 	outt.setPrecious(false);
         outt.write(ctransformptr);
 

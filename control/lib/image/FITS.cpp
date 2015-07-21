@@ -126,7 +126,7 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 	: FITSfile(filename, 0, 0, 0) {
 	int	status = 0;
 	if (fits_open_file(&fptr, filename.c_str(), READONLY, &status)) {
-		throw FITSexception(errormsg(status));
+		throw FITSexception(errormsg(status), filename);
 	}
 
 	/* read the dimensions of the image from the file */
@@ -382,7 +382,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 
 	status = 0;
 	if (fits_create_img(fptr, imgtype, naxis, naxes, &status)) {
-		throw FITSexception(errormsg(status));
+		throw FITSexception(errormsg(status), filename);
 	}
 
 	// write all the additional headers we would like to have in
@@ -499,7 +499,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 	
 	writedone:
 		if (rc) {
-			throw FITSexception(errormsg(status));
+			throw FITSexception(errormsg(status), filename);
 		}
 	}
 }
@@ -520,7 +520,7 @@ void	FITSoutfileBase::postwrite() throw (FITSexception) {
 		std::string	msg = stringprintf("cannot stat %s: %s",
 			filename.c_str(), strerror(errno));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw FITSexception(msg);
+		throw FITSexception(msg, filename);
 	}
 
 	// compute and set new permissions
@@ -528,7 +528,7 @@ void	FITSoutfileBase::postwrite() throw (FITSexception) {
 		std::string	msg = stringprintf("cannot chmod %s: %s",
 			filename.c_str(), strerror(errno));
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw FITSexception(msg);
+		throw FITSexception(msg, filename);
 	}
 }
 

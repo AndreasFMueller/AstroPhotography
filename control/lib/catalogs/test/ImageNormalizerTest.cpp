@@ -55,7 +55,7 @@ void	ImageNormalizerTest::testImageNormalizer() {
 		projection.toString().c_str());
 
 	// get the image from the input file
-	FITSin  in("andromeda-base.fits");
+	FITSin  in("testimages/andromeda-base.fits");
 	ImagePtr	imageptr = in.read();
 	Image<unsigned char>	*image
 		= dynamic_cast<Image<unsigned char> *>(&*imageptr);

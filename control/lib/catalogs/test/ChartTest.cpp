@@ -95,7 +95,7 @@ void	ChartTest::testImage() {
 	// create the image
 	Chart	chart = factory.chart(center, geometry);
 	astro::image::ImagePtr	image = chart.image();
-	astro::io::FITSout	out("chart.fits");
+	astro::io::FITSout	out("tmp/chart.fits");
 	out.setPrecious(false);
 	out.write(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testImage() end");

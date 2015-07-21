@@ -38,6 +38,10 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
+static int	remove(const std::string& filename) {
+	return ::remove(filename.c_str());
+}
+
 static const char	*uchar_filename = "uchar_test.fits";
 
 void	FITSwriteTest::testWriteUChar() {
@@ -53,7 +57,8 @@ void	FITSwriteTest::testWriteUChar() {
 		}
 	}
 	FITSoutfile<unsigned char>	*outfile
-		= new FITSoutfile<unsigned char>(uchar_filename);
+		= new FITSoutfile<unsigned char>(std::string("tmp/") + uchar_filename);
+	outfile->setPrecious(false);
 	outfile->write(*image);
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUChar() end");
@@ -74,7 +79,8 @@ void	FITSwriteTest::testWriteUShort() {
 		}
 	}
 	FITSoutfile<unsigned short>	*outfile
-		= new FITSoutfile<unsigned short>(ushort_filename);
+		= new FITSoutfile<unsigned short>(std::string("tmp/") +ushort_filename);
+	outfile->setPrecious(false);
 	outfile->write(*image);
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteUShort() end");
@@ -85,7 +91,7 @@ static const char	*yuyv_filename = "yuyv_test.fits";
 void	FITSwriteTest::testWriteYUYV() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteYUYV() begin");
 	// find out whether the file already exists, and destroy it
-	remove(yuyv_filename);
+	remove(std::string("tmp/") + yuyv_filename);
 
 	// create an image
 	Image<YUYV<unsigned char> >	*image
@@ -110,7 +116,8 @@ void	FITSwriteTest::testWriteYUYV() {
 		}
 	}
 	FITSoutfile<YUYV<unsigned char> >	*outfile
-		= new FITSoutfile<YUYV<unsigned char> >(yuyv_filename);
+		= new FITSoutfile<YUYV<unsigned char> >(std::string("tmp/") + yuyv_filename);
+	outfile->setPrecious(false);
 	outfile->write(*image);
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteYUYV() end");
@@ -121,7 +128,7 @@ static const char	*rgb_filename = "rgb_test.fits";
 void	FITSwriteTest::testWriteRGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGB() begin");
 	// find out whether the file already exists, and destroy it
-	remove(rgb_filename);
+	remove(std::string("tmp/") + rgb_filename);
 
 	// create an image
 	Image<RGB<unsigned char> >	*image
@@ -134,7 +141,8 @@ void	FITSwriteTest::testWriteRGB() {
 		}
 	}
 	FITSoutfile<RGB<unsigned char> >	*outfile
-		= new FITSoutfile<RGB<unsigned char> >(rgb_filename);
+		= new FITSoutfile<RGB<unsigned char> >(std::string("tmp/") + rgb_filename);
+	outfile->setPrecious(false);
 	outfile->write(*image);
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGB() end");
@@ -145,7 +153,7 @@ static const char	*rgbushort_filename = "rgbushort_test.fits";
 void	FITSwriteTest::testWriteRGBUShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGBUShort() begin");
 	// find out whether the file already exists, and destroy it
-	remove(rgbushort_filename);
+	remove(std::string("tmp/") + rgbushort_filename);
 
 	// create an image
 	Image<RGB<unsigned short> >	*image
@@ -158,7 +166,8 @@ void	FITSwriteTest::testWriteRGBUShort() {
 		}
 	}
 	FITSoutfile<RGB<unsigned short> >	*outfile
-		= new FITSoutfile<RGB<unsigned short> >(rgbushort_filename);
+		= new FITSoutfile<RGB<unsigned short> >(std::string("tmp/") + rgbushort_filename);
+	outfile->setPrecious(false);
 	outfile->write(*image);
 	delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWriteRGBUShort() end");

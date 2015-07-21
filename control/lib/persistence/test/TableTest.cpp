@@ -1,6 +1,10 @@
 /*
  * TableTest.cpp -- tests for the Table class
  *
+ * This test must run before the DatabaseTest.cpp tests, because it ensures
+ * that the test table is created, on which the DatabaseTest.cpp also
+ * operates.
+ *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUtils.h>

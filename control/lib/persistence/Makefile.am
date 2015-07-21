@@ -6,12 +6,16 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastropersistence.la
+noinst_LTLIBRARIES = libastropersistence.la
 
 libastropersistence_la_SOURCES = 					\
 	Backend.cpp							\
+	Configuration.cpp						\
+	GlobalTable.cpp							\
+	NoSuchEntry.cpp							\
 	Persistence.cpp							\
 	Testtable.cpp	
 
-libastropersistence_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastropersistence_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
+	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
 

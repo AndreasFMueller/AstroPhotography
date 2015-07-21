@@ -55,12 +55,12 @@ void	FITSKeywordTest::testHistory() {
 	image.setMetadata(value1);
 
 	// write the image to a file
-	FITSoutfile<unsigned char>	out("history.fits");
+	FITSoutfile<unsigned char>	out("tmp/history.fits");
 	out.setPrecious(false);
 	out.write(image);
 
 	// read the image
-	FITSinfile<unsigned char>	in("history.fits");
+	FITSinfile<unsigned char>	in("tmp/history.fits");
 	Image<unsigned char>	*image2 = in.read();
 	Metavalue	value3 = image2->getMetadata("HISTORY");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s(%s): %s|%s",
@@ -93,12 +93,12 @@ void	FITSKeywordTest::testComment() {
 	image.setMetadata(value2);
 
 	// write the image to a file
-	FITSoutfile<unsigned char>	out("comment.fits");
+	FITSoutfile<unsigned char>	out("tmp/comment.fits");
 	out.setPrecious(false);
 	out.write(image);
 
 	// read the image
-	FITSinfile<unsigned char>	in("comment.fits");
+	FITSinfile<unsigned char>	in("tmp/comment.fits");
 	Image<unsigned char>	*image2 = in.read();
 	image2->dump_metadata();
 

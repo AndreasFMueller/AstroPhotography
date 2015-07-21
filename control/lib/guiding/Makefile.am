@@ -5,7 +5,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastroguiding.la
+noinst_LTLIBRARIES = libastroguiding.la
 
 libastroguiding_la_SOURCES = 						\
 	CalibrationPersistence.cpp					\

@@ -33,8 +33,8 @@ tests_SOURCES = tests.cpp 						\
 	ConvertingAdapterTest.cpp					\
 	FITSKeywordTest.cpp						\
 	FITSdateTest.cpp						\
-	FITSreadTest.cpp						\
 	FITSwriteTest.cpp						\
+	FITSreadTest.cpp						\
 	FilterTest.cpp							\
 	FWHMTest.cpp							\
 	ImageBaseTest.cpp						\

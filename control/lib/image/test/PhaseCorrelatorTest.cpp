@@ -153,13 +153,13 @@ void	PhaseCorrelatorTest::testHalf() {
 void	PhaseCorrelatorTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "beginImage test");
 
-	FITSin	imagefile("./test-image.fits");
+	FITSin	imagefile("testimages/test-image.fits");
 	ImagePtr	imageptr = imagefile.read();
 	Image<unsigned char>	*image = dynamic_cast<Image<unsigned char> *>(&*imageptr);
 	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
-	FITSin	chartfile("./test-chart.fits");
+	FITSin	chartfile("testimages/test-chart.fits");
 	ImagePtr	chartptr = chartfile.read();
 	Image<unsigned char>	*chart = dynamic_cast<Image<unsigned char> *>(&*chartptr);
 	TypeReductionAdapter<double, unsigned char>	doublechart(*chart);

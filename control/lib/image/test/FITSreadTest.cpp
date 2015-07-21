@@ -42,7 +42,7 @@ const char	*uchar_filename = "uchar_test.fits";
 
 void	FITSreadTest::testReadUChar() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadUChar() begin");
-	FITSinfile<unsigned char>	infile(uchar_filename);
+	FITSinfile<unsigned char>	infile(std::string("tmp/") + uchar_filename);
 	Image<unsigned char>	*i = infile.read();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size. %d x %d",
@@ -50,7 +50,7 @@ void	FITSreadTest::testReadUChar() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	delete	i;
 	Image<unsigned char>	*image = infile.read();
-	std::string	newfilename = std::string("copy-") + uchar_filename;
+	std::string	newfilename = std::string("tmp/copy-") + uchar_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<unsigned char>	*outfile
 		= new FITSoutfile<unsigned char>(newfilename);
@@ -64,7 +64,7 @@ const char	*ushort_filename = "ushort_test.fits";
 
 void	FITSreadTest::testReadUShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadUShort() begin");
-	FITSinfile<unsigned short>	infile(ushort_filename);
+	FITSinfile<unsigned short>	infile(std::string("tmp/") + ushort_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width(),
 		infile.getSize().height());
@@ -73,7 +73,7 @@ void	FITSreadTest::testReadUShort() {
 	Image<unsigned short>	*image = infile.read();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image read");
 
-	std::string	newfilename = std::string("copy-") + ushort_filename;
+	std::string	newfilename = std::string("tmp/copy-") + ushort_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<unsigned short>	*outfile
 		= new FITSoutfile<unsigned short>(newfilename);
@@ -87,14 +87,14 @@ const char	*yuyv_filename = "yuyv_test.fits";
 
 void	FITSreadTest::testReadYUYV() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadYUYV() begin");
-	FITSinfile<YUYV<unsigned char> >	infile(yuyv_filename);
+	FITSinfile<YUYV<unsigned char> >	infile(std::string("tmp/") + yuyv_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width(),
 		infile.getSize().height());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<YUYV<unsigned char> >	*image = infile.read();
 
-	std::string	newfilename = std::string("copy-") + yuyv_filename;
+	std::string	newfilename = std::string("tmp/copy-") + yuyv_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<YUYV<unsigned char> >	*outfile
 		= new FITSoutfile<YUYV<unsigned char> >(newfilename);
@@ -108,13 +108,13 @@ const char	*rgb_filename = "rgb_test.fits";
 
 void	FITSreadTest::testReadRGB() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadRGB() begin");
-	FITSinfile<RGB<unsigned char> >	infile(rgb_filename);
+	FITSinfile<RGB<unsigned char> >	infile(std::string("tmp/") + rgb_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: %d", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width(),
 		infile.getSize().height());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<RGB<unsigned char> >	*image = infile.read();
-	std::string	newfilename = std::string("copy-") + rgb_filename;
+	std::string	newfilename = std::string("tmp/copy-") + rgb_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<RGB<unsigned char> >	*outfile
 		= new FITSoutfile<RGB<unsigned char> >(newfilename);
@@ -128,13 +128,13 @@ const char	*rgbushort_filename = "rgbushort_test.fits";
 
 void	FITSreadTest::testReadRGBUShort() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testReadRGBUShort() begin");
-	FITSinfile<RGB<unsigned short> >	infile(rgbushort_filename);
+	FITSinfile<RGB<unsigned short> >	infile(std::string("tmp/") + rgbushort_filename);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image type: ", infile.getImgtype());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d x %d", infile.getSize().width(),
 		infile.getSize().height());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", infile.getPlanes());
 	Image<RGB<unsigned short> >	*image = infile.read();
-	std::string	newfilename = std::string("copy-") + rgbushort_filename;
+	std::string	newfilename = std::string("tmp/copy-") + rgbushort_filename;
 	remove(newfilename.c_str());
 	FITSoutfile<RGB<unsigned short> >	*outfile
 		= new FITSoutfile<RGB<unsigned short> >(newfilename);

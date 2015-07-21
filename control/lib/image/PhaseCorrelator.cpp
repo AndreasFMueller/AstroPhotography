@@ -265,19 +265,19 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 try {
 	if ((result.x() == result.x()) && (result.y() == result.y())) {
 		{
-		FITSoutfile<double>	out(stringprintf("corr-from-%u.fits",
+		FITSoutfile<double>	out(stringprintf("tmp/corr-from-%u.fits",
 						correlation_counter));
 		out.setPrecious(false);
 		out.write(Image<double>(*windowedfrom));
 		}
 		{
-		FITSoutfile<double>	out(stringprintf("corr-to-%u.fits",
+		FITSoutfile<double>	out(stringprintf("tmp/corr-to-%u.fits",
 						correlation_counter));
 		out.setPrecious(false);
 		out.write(Image<double>(*windowedto));
 		}
 		{
-		FITSoutfile<double>	out(stringprintf("corr-%u.fits",
+		FITSoutfile<double>	out(stringprintf("tmp/corr-%u.fits",
 						correlation_counter));
 		out.setPrecious(false);
 		Image<double>	correlation(size);

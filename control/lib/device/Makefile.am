@@ -6,7 +6,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastrodevice.la
+noinst_LTLIBRARIES = libastrodevice.la
 
 libastrodevice_la_SOURCES =						\
 	AdaptiveOptics.cpp						\

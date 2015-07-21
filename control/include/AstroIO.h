@@ -28,6 +28,9 @@ namespace io {
 class FITSexception : public std::runtime_error {
 public:
 	FITSexception(const std::string& cause) : std::runtime_error(cause) { }
+	FITSexception(const std::string& cause, const std::string& filename);
+	FITSexception(const std::string& cause, const std::string& filename,
+		int errno);
 };
 
 /**

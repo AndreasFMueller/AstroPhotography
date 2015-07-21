@@ -23,6 +23,8 @@ discover_dependencies =  						\
 if ENABLE_UNITTESTS
 
 tests_SOURCES = tests.cpp 						\
+	ServiceKeyTest.cpp						\
+	ServiceSubsetTest.cpp						\
 	URLTest.cpp
 
 tests_DEPENDENCIES = $(discovery_dependencies)
