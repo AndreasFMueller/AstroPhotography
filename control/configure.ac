@@ -411,6 +411,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/persistence/Makefile lib/persistence/test/Makefile
 	lib/discovery/Makefile lib/discovery/test/Makefile
 	lib/image/Makefile lib/image/test/Makefile
+	lib/processing/Makefile lib/processing/test/Makefile
 	lib/device/Makefile lib/device/test/Makefile
 	lib/config/Makefile lib/config/test/Makefile
 	lib/catalogs/Makefile lib/catalogs/test/Makefile

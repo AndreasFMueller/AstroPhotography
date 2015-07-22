@@ -8,7 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
-#include <ImageRepoTables.h>
+#include "../ImageRepoTables.h"
 #include <includes.h>
 #include <AstroUtils.h>
 

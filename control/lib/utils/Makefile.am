@@ -22,6 +22,7 @@ libastroutils_la_SOURCES = 						\
 	Sun.cpp								\
 	Timer.cpp							\
 	timeformat.cpp							\
+	ThreadBase.cpp							\
 	Trim.cpp							\
 	Typename.cpp							\
 	utils.cpp							\

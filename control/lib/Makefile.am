@@ -4,45 +4,26 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = utils persistence discovery image device config \
+SUBDIRS = utils persistence discovery image processing device config \
 	catalogs task guiding usb unicap . test
+
+noinst_HEADERS = Version.h
 
 lib_LTLIBRARIES = libastro.la
 
-if ENABLE_UNICAP
-unicap_flies = UnicapDevice.cpp
-else
-unicap_flies =
-endif
-
-libastro_la_SOURCES = \
-	ThreadBase.cpp \
-	ImageProgramCallback.cpp \
-	Imager.cpp \
-	ImageSpec.cpp ImageEnvelope.cpp ImageRepo.cpp \
-	RepoReplicator.cpp \
-	Clamper.cpp Interpolation.cpp \
-	Corrector.cpp DarkCorrector.cpp FlatCorrector.cpp \
-	CalibrationFactory.cpp \
-	PreviewAdapter.cpp ImageProcessing.cpp \
-	ProcessingStep.cpp ProcessingController.cpp ProcessingThread.cpp \
-	ImageStep.cpp RawImageFileStep.cpp WriteImageStep.cpp \
-	ImageCalibrationStep.cpp CalibrationImageStep.cpp ImageBufferStep.cpp \
-	CalibrationProcessorStep.cpp InterpolationStep.cpp \
-	$(unicap_flies)
-
-libastro_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 
-	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
+libastro_la_SOURCES = Version.cpp
 
 libastro_la_LIBADD =							\
-	utils/libastroutils.la 						\
-	persistence/libastropersistence.la 				\
-	discovery/libastrodiscovery.la 					\
+	catalogs/libastrocatalogs.la					\
+	config/libastroconfig.la					\
+	device/libastrodevice.la					\
+	discovery/libastrodiscovery.la					\
+	focusing/libastrofocusing.la					\
+	guiding/libastroguiding.la					\
 	image/libastroimage.la						\
-	device/libastrodevice.la 					\
-	catalogs/libastrocatalogs.la 					\
-	task/libastrotask.la 						\
-	guiding/libastroguiding.la 					\
-	usb/libastrousb.la 
-	
-
+	persistence/libastropersistence.la				\
+	processing/libastroprocessing.la				\
+	task/libastrotask.la						\
+	unicap/libastrounicap.la					\
+	usb/libastrousb.la						\
+	utils/libastroutils.la

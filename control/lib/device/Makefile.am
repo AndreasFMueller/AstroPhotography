@@ -26,6 +26,7 @@ libastrodevice_la_SOURCES =						\
 	FilterWheel.cpp							\
 	Focuser.cpp							\
 	GuiderPort.cpp							\
+	Imager.cpp							\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\

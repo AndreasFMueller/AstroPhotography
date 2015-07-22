@@ -8,7 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <includes.h>
-#include <ProjectTable.h>
+#include "../ProjectTable.h"
 
 using namespace astro::persistence;
 using namespace astro::project;

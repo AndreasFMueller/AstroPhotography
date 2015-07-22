@@ -14,17 +14,22 @@ libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
 	Analyzer.cpp							\
 	Background.cpp							\
+	CalibrationFactory.cpp						\
+	Clamper.cpp							\
 	ConnectedComponent.cpp						\
+	Corrector.cpp							\
+	DarkCorrector.cpp						\
 	Demosaic.cpp							\
 	DisplayConverter.cpp						\
-	Filters.cpp							\
 	FITS.cpp							\
+	FITSKeywords.cpp						\
 	FITSdate.cpp							\
 	FITSdirectory.cpp						\
 	FITSexception.cpp						\
 	FITSin.cpp							\
-	FITSKeywords.cpp						\
 	FITSout.cpp							\
+	Filters.cpp							\
+	FlatCorrector.cpp						\
 	FocusFilterfunc.cpp						\
 	Functions.cpp							\
 	Histogram.cpp							\
@@ -37,9 +42,11 @@ libastroimage_la_SOURCES = 						\
 	ImageMetadata.cpp						\
 	ImagePersistence.cpp						\
 	ImagePoint.cpp							\
+	ImageProgramCallback.cpp					\
 	ImageProperties.cpp						\
 	ImageRectangle.cpp						\
 	ImageSize.cpp							\
+	Interpolation.cpp						\
 	LevelMaskExtractor.cpp						\
 	Masks.cpp							\
 	Metavalue.cpp							\
@@ -59,9 +66,6 @@ libastroimage_la_SOURCES = 						\
 	Viewer.cpp							\
 	ViewerPipeline.cpp
 
-
 libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
 
-libastrofits_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
-	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"
