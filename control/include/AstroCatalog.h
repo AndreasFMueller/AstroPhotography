@@ -12,6 +12,7 @@
 #include <string>
 #include <AstroImage.h>
 #include <AstroTypes.h>
+#include <typeinfo>
 
 namespace astro {
 namespace catalog {
@@ -52,12 +53,13 @@ protected:
 public:
 	const RaDec&	pm() const { return _pm; }
 	RaDec&	pm() { return _pm; }
+
 	RaDec	position(const double epoch) const;
 protected:
 	float	_mag;
 public:
 	const float&	mag() const { return _mag; }
-	float&	mag() { return _mag; }
+	void	mag(float m) { _mag = m; }
 };
 
 /**
@@ -67,12 +69,38 @@ public:
  */
 class Star : public CelestialObject {
 	std::string	_name;
+	std::string	_longname;
 public:
-	char	catalog;
-	uint32_t	catalognumber;
-	Star(const std::string& name) : _name(name) { _mag = 0; }
-	const std::string	name() const { return _name; }
-	std::string	toString() const;
+	const std::string&	name() const { return _name; }
+	const std::string&	longname() const { return _longname; }
+	void	longname(const std::string& l) { _longname = l; }
+private:
+	char	_catalog;
+public:
+	char	catalog() const { return _catalog; }
+	void	catalog(const char c) { _catalog = c; }
+private:
+	uint64_t	_catalognumber;
+public:
+	uint64_t	catalognumber() const { return _catalognumber; }
+	void	catalognumber(uint64_t c) { _catalognumber = c; }
+
+private:
+	char	_duplicate;
+	std::string	_duplicatename;
+public:
+	bool	isDuplicate() const;
+	char	duplicateCatalog() const;
+	const std::string& duplicatename() const;
+	void	setDuplicate(char catalog, const std::string& name);
+
+	// constructors
+	Star(const std::string& name) : _name(name) {
+		_longname = name;
+		_mag = 0;
+		_duplicate = '\0';
+	}
+	virtual std::string	toString() const;
 };
 
 /**
@@ -91,9 +119,6 @@ public:
 	Angle	size;
 	std::string	toString() const;
 };
-
-class CatalogBackend;
-typedef std::shared_ptr<CatalogBackend>	CatalogBackendPtr;
 
 /**
  * \brief A class to encode a magnitude range
@@ -114,18 +139,80 @@ public:
 	std::string	toString() const;
 };
 
+
+class IteratorImplementation;
+typedef std::shared_ptr<IteratorImplementation>	IteratorImplementationPtr;
+
+/**
+ * \brief Catalog Iterator
+ *
+ * The CatalogIterator class is a wrapper that hides implementation details
+ * from users of the catalogs
+ */
+class CatalogIterator {
+	IteratorImplementationPtr	_implementation;
+	void	check() const;
+public:
+	CatalogIterator(IteratorImplementationPtr implementation);
+	CatalogIterator();
+	CatalogIterator(const CatalogIterator& other);
+	CatalogIterator&	operator=(const CatalogIterator& other);
+	Star	operator*();
+	bool	operator==(const CatalogIterator& other) const;
+	bool	operator!=(const CatalogIterator& other) const;
+	CatalogIterator	operator++();
+	std::string	toString() const;
+};
+
+class Catalog;
+typedef std::shared_ptr<Catalog>	CatalogPtr;
+
 /**
  * \brief A collection of star catalogs
  */
 class Catalog {
-	CatalogBackendPtr	backend;
+	// prevent copying of Catalog objects
+	Catalog(const Catalog& other);
+	Catalog&	operator=(const Catalog& other);
 public:
-	Catalog(const std::string& filename);
+	// constructors
+	Catalog() { }
+	virtual ~Catalog();
+
+	// find and add individual stars
+	virtual Star	find(const std::string& name) = 0;
+	virtual void	add(int id, const Star& star);
+
+	// types for search results
 	typedef	std::set<Star>	starset;
 	typedef std::shared_ptr<starset>	starsetptr;
-	starsetptr	find(const SkyWindow& window,
-				const MagnitudeRange& magrange);
-	Star	find(const std::string& name);
+
+	// start to find the all stars in an a sky window
+	virtual starsetptr	find(const SkyWindow& window,
+					const MagnitudeRange& magrange) = 0;
+	// some information about the size of the catalog
+	virtual unsigned long	numberOfStars() = 0;
+
+	// iterator interface for traversing the catalog
+	virtual CatalogIterator	begin();
+	virtual CatalogIterator	end();
+};
+
+/**
+ * \brief Factory class to retrieve a Catalog
+ */
+class CatalogFactory {
+public:
+	typedef enum {
+		BSC = 0,
+		Tycho2 = 1,
+		Hipparcos = 2,
+		Ucac4 = 3,
+		Combined = 4,
+		Database = 5
+	} BackendType;
+	static CatalogPtr	get(BackendType type,
+					const std::string& parameter);
 };
 
 } // namespace catalog

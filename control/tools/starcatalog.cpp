@@ -25,18 +25,18 @@ Angle	decheight(1 * M_PI / 180);
 /**
  * \brief Read a star by name from the database and show some info about it
  */
-void	starmain(Catalog& catalog, const std::string& starname) {
-	Star	star = catalog.find(starname);
+void	starmain(CatalogPtr catalog, const std::string& starname) {
+	Star	star = catalog->find(starname);
 	std::cout << star.toString() << std::endl;
 }
 
-void	areamain(Catalog& catalog, double minmag) {
+void	areamain(CatalogPtr catalog, double minmag) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"list stars in area centered at %s/%s, w=%.3f, h=%.3f",
 		center.ra().hms().c_str(), center.dec().dms().c_str(),
 		rawidth.hours(), decheight.degrees());
 	MagnitudeRange	magrange(-30, minmag);
-	Catalog::starsetptr	stars = catalog.find(SkyWindow(center,
+	Catalog::starsetptr	stars = catalog->find(SkyWindow(center,
 					rawidth, decheight), magrange);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars returned: %d", stars->size());
 	Catalog::starset::const_iterator	s;
@@ -79,7 +79,8 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// open the star catalog
-	Catalog	catalog(path);
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
+					path);
 
 	// next argument is what we want to see
 	if (argc <= optind) {

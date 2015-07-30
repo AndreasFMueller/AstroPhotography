@@ -19,8 +19,7 @@ task_dependencies = 							\
 	$(top_builddir)/lib/device/libastrodevice.la  			\
 	$(top_builddir)/lib/persistence/libastropersistence.la  	\
 	$(top_builddir)/lib/discovery/libastrodiscovery.la  		\
-	$(top_builddir)/lib/image/libastroimage.la  			\
-	$(top_builddir)/lib/image/libastrofits.la
+	$(top_builddir)/lib/image/libastroimage.la  
 
 if ENABLE_UNITTESTS
 

@@ -227,7 +227,7 @@ public:
 private:
 	bool	_shutter;
 public:
-	void	setShutter(bool shutter) { _shutter = shutter; }
+	void	shutter(bool shutter) { _shutter = shutter; }
 	bool	shutter() const { return _shutter; }
 
 	// pixel dimensions (in meters)

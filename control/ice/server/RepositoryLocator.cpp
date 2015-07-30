@@ -45,8 +45,10 @@ Ice::ObjectPtr	RepositoryLocator::locate(const Ice::Current& current,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new repo servant");
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
 	Ice::ObjectPtr	repositoryptr = new RepositoryI(
-		*config->repo(repositoryname));
+		*imagerepos->repo(repositoryname));
 	add(repositoryname, repositoryptr);
 	return repositoryptr;
 }

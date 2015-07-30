@@ -27,7 +27,7 @@
 #include <repository.h>
 #include <RepositoriesI.h>
 #include <RepositoryLocator.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroFormat.h>
 #include <InstrumentLocator.h>
 #include <InstrumentsI.h>

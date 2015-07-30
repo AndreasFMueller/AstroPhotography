@@ -7,7 +7,8 @@
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
-#include <Hipparcos.h>
+#include "BSC.h"
+#include "Hipparcos.h"
 #include "Tycho2.h"
 #include "Ucac4.h"
 
@@ -34,12 +35,10 @@ static void	require(const std::string& filename) {
  */
 FileBackend::FileBackend(const std::string& basedir) : _basedir(basedir) {
 	// ensure that the files for the file backend exist
-	hipparcosfile = _basedir + "/hipparcos/hip_main.dat";
-	require(hipparcosfile);
-	tycho2file = _basedir + "/tycho2/tyc2.dat";
-	require(tycho2file);
-	ucac4dir = _basedir + "/u4";
-	require(ucac4dir);
+	bsc_catalog = CatalogPtr(new BSC(_basedir));
+	hipparcos_catalog = CatalogPtr(new Hipparcos(_basedir));
+	tycho2_catalog = CatalogPtr(new Tycho2(_basedir));
+	ucac4_catalog = CatalogPtr(new Ucac4(_basedir));
 }
 
 /**
@@ -71,8 +70,8 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// if any there are stars requested from the Hipparcos catalog, get them
 	{
 		// get brightest stars from Hipparcos catalog
-		Hipparcos	catalog(hipparcosfile);
-		Hipparcos::starsetptr	stars = catalog.find(window, magrange);
+		Hipparcos::starsetptr	stars
+			= hipparcos_catalog->find(window, magrange);
 		Hipparcos::starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			Star	star = *s;
@@ -92,14 +91,14 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	// get the intermediate stars from the Tycho2 catalog, but skip the
 	// stars already retrieved from the Hipparcos catalog
 	{
-		Tycho2	catalog(tycho2file);
-		Tycho2::starsetptr	stars = catalog.find(window, magrange);
+		Tycho2::starsetptr	stars
+			= tycho2_catalog->find(window, magrange);
 		Tycho2::starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
 			// only take stars not in the Hipparcos catalog and
 			// brighter than magnitude 10, as we will get the
 			// fainter stars from Ucac4
-			if (!s->isHipparcosStar()) {
+			if (!s->isDuplicate()) {
 				Star	star = *s;
 				result->insert(star);
 			}
@@ -116,11 +115,11 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 
 	// get all matching stars from the UCAC4 catalog
 	{
-		Ucac4	catalog(ucac4dir);
-		Ucac4::starsetptr	stars = catalog.find(window, magrange);
+		Ucac4::starsetptr	stars
+			= ucac4_catalog->find(window, magrange);
 		Ucac4::starset::const_iterator	s;
 		for (s = stars->begin(); s != stars->end(); s++) {
-			if (!s->hiptyc2) {
+			if (!s->isDuplicate()) {
 				Star	star = *s;
 				result->insert(star);
 			}
@@ -136,28 +135,31 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 Star	FileBackend::find(const std::string& name) {
 	// check for Hipparcos stars
 	if (name.substr(0, 3) == "HIP") {
-		Hipparcos	catalog(hipparcosfile);
-		HipparcosStar	hstar = catalog.find(std::stoi(name.substr(3)));
-		Star	star = hstar;
+		Star	star = hipparcos_catalog->find(name);
 		return star;
 	}
 
 	// check for Tycho2 star
 	if (name.substr(0, 1) == "T") {
-		Tycho2	catalog(tycho2file);
-		Tycho2Star	tstar = catalog.find(std::stoi(name.substr(1)));
-		Star	star = tstar;
+		Star	star = tycho2_catalog->find(name);
 		return star;
 	}
 
 	// check for Ucac4 star
 	if (name.substr(0, 5) == "UCAC4") {
-		Ucac4	catalog(ucac4dir);
-		Ucac4Star	ustar = catalog.find(name);
-		Star	star = ustar;
+		Star	star = ucac4_catalog->find(name);
 		return star;
 	}
 	throw std::runtime_error("unkonwn star name");
+}
+
+unsigned long	FileBackend::numberOfStars() {
+	unsigned long	result = 0;
+	result += bsc_catalog->numberOfStars();
+	result += hipparcos_catalog->numberOfStars();
+	result += tycho2_catalog->numberOfStars();
+	result += ucac4_catalog->numberOfStars();
+	return result;
 }
 
 } // namespace catalog

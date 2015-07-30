@@ -27,7 +27,8 @@ int	main(int argc, char *argv[]) {
 		}
 
 	// create a Chart factory
-	Catalog catalog("/usr/local/starcatalogs");
+	CatalogPtr 	catalog = CatalogFactory::get(CatalogFactory::Combined,
+					"/usr/local/starcatalogs");
 	TurbulencePointSpreadFunction   psf(2);
 	ChartFactory    factory(catalog, psf, 14, 100);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "chart factory created");

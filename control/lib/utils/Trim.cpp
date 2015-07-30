@@ -23,6 +23,9 @@ std::string	trim(const std::string& s) {
  */
 std::string	rtrim(const std::string& s) {
 	size_t	end = s.find_last_not_of(" \t\n");
+	if (end == std::string::npos) {
+		return std::string();
+	}
 	return s.substr(0, end + 1);
 }
 
@@ -31,6 +34,9 @@ std::string	rtrim(const std::string& s) {
  */
 std::string	ltrim(const std::string& s) {
 	size_t	start = s.find_first_not_of(" \t\n");
+	if (start == std::string::npos) {
+		return std::string();
+	}
 	return s.substr(start);
 }
 

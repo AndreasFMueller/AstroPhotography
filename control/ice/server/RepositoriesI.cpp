@@ -20,8 +20,10 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 	// retrieve a list of repository names from the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
 	std::list<astro::project::ImageRepoInfo>	repolist
-		= config->listrepo();
+		= imagerepos->listrepo();
 	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
 		result.push_back(ptr->reponame);
 	}

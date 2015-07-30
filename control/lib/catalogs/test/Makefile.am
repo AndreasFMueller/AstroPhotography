@@ -41,7 +41,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	ImageNormalizerTest.cpp
+	Ucac4Test.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 

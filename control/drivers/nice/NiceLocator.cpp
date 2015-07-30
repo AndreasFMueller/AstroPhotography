@@ -16,7 +16,6 @@
 #include <NiceAdaptiveOptics.h>
 #include <NiceFilterWheel.h>
 #include <NiceCooler.h>
-#include <ServiceDiscovery.h>
 
 namespace astro {
 namespace camera {

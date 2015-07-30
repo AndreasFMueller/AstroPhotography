@@ -3,7 +3,6 @@
 #
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-if ENABLE_CORBA
 
 pkglib_LTLIBRARIES = net.la
 noinst_HEADERS = NetLocator.h NetCamera.h NetCcd.h \
@@ -37,4 +36,3 @@ net_la_LDFLAGS = -module
 net_la_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 net_la_LIBADD = $(top_builddir)/lib/libastro.la
 
-endif

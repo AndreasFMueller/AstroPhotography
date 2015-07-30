@@ -11,7 +11,7 @@
 #include <AstroFormat.h>
 #include <includes.h>
 #include <AstroDebug.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 
 using namespace astro::discover;
 

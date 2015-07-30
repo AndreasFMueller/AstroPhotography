@@ -186,14 +186,18 @@ int	main(int argc, char *argv[]) {
 	if (0 == instrumentname.size()) {
 		throw std::runtime_error("instrument name not set");
 	}
-	InstrumentPtr	instrument = config->instrument(instrumentname);
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
+	InstrumentPtr	instrument = instruments->instrument(instrumentname);
 
 	// make sure we have a repository, because we would not know
 	// where to store the images otherwise
 	if (0 == reponame.size()) {
 		throw std::runtime_error("repository name not set");
 	}
-	ImageRepoPtr	repo = config->repo(reponame);
+	ImageRepoConfigurationPtr	imagerepos
+		= ImageRepoConfiguration::get(config);
+	ImageRepoPtr	repo = imagerepos->repo(reponame);
 
 	// get the devices
 	CameraPtr	camera = instrument->camera();

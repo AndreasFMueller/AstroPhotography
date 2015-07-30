@@ -25,5 +25,9 @@ Star	CatalogBackend::find(const std::string& /* name */) {
 	throw std::runtime_error("find method must be overridden");
 }
 
+void	CatalogBackend::add(int id, const Star& star) {
+	throw std::runtime_error("add not possible in this typo of backend");
+}
+
 } // namespace catalog
 } // namespace astro

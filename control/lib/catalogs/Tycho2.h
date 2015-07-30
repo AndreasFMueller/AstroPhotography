@@ -9,6 +9,7 @@
 #include <AstroCatalog.h>
 #include <string>
 #include "MappedFile.h"
+#include "CatalogIterator.h"
 
 namespace astro {
 namespace catalog {
@@ -18,27 +19,57 @@ namespace catalog {
  */
 class Tycho2Star : public Star {
 	void	setup(const std::string& line);
-	int	_hip;
 public:
-	bool	isHipparcosStar() const { return _hip >= 0; }
-	int	hip() const { return _hip; }
-	Tycho2Star(int number, const std::string& line);
+	Tycho2Star(const std::string& line);
 };
 
 /**
  * \brief Tycho2 catalog 
  */
-class Tycho2 : public MappedFile {
+class Tycho2 : public MappedFile, public Catalog {
 	std::string	_filename;
 public:
 	unsigned int	nstars() const { return nrecords(); }
+
+	typedef std::map<std::string, int>	namemap_t;
+private:
+	namemap_t	names;
+	std::string	key(int index) const;
+	int	index(const std::string& name);
 public:
-	typedef std::set<Tycho2Star>	starset;
-	typedef std::shared_ptr<starset>	starsetptr;
 	Tycho2(const std::string& filename);
+	virtual ~Tycho2();
+
+	// find star by index number
 	Tycho2Star	find(unsigned int index) const;
-	starsetptr	find(const SkyWindow& window,
-				const MagnitudeRange& magrange) const;
+
+	// standard find interface
+	virtual Star	find(const std::string& name);
+	virtual starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
+	// catalog size
+	virtual unsigned long	numberOfStars();
+
+	// iterators
+	CatalogIterator	begin();
+	CatalogIterator end();
+};
+
+/**
+ * \brief Tycho2 iterator
+ */
+class Tycho2Iterator : public IteratorImplementation {
+	unsigned int	_index;
+	Tycho2&	_catalog;
+public:
+	Tycho2Iterator(unsigned int index, Tycho2& catalog);
+	virtual ~Tycho2Iterator();
+	virtual Star	operator*();
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	bool	operator==(const Tycho2Iterator& other) const;
+	virtual std::string	toString() const;
+private:
+	virtual void	increment();
 };
 
 } // namespace catalog

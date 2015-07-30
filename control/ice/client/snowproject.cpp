@@ -75,8 +75,10 @@ int	command_submit(const std::string& projectname,
 	// get configuration information
 	astro::config::ConfigurationPtr config
 		= astro::config::Configuration::get();
+	astro::config::InstrumentConfigurationPtr	instruments
+		= astro::config::InstrumentConfiguration::get(config);
 	astro::config::InstrumentPtr    instrument
-		= config->instrument(part->instrument());
+		= instruments->instrument(part->instrument());
 
 	// prepare the parameters 
 	TaskParameters  parameters;
@@ -109,7 +111,9 @@ int	command_submit(const std::string& projectname,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d", taskid);
 
 	// add the task id to the part
-	config->parttask(projectname, part->partno(), taskid);
+	astro::config::ProjectConfigurationPtr	projects
+		= astro::config::ProjectConfiguration::get(config);
+	projects->parttask(projectname, part->partno(), taskid);
 	return EXIT_SUCCESS;
 }
 
@@ -150,7 +154,9 @@ int	command_image(const astro::project::Project& project,
 	std::string	reponame = project.repository();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image repository: %s",
 		reponame.c_str());
-	astro::project::ImageRepoPtr	repository = config->repo(reponame);
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+	astro::project::ImageRepoPtr	repository = imagerepos->repo(reponame);
 
 	// get the parameters for the part
 	astro::ServerName	servername(partptr->taskserver());
@@ -186,7 +192,9 @@ int	command_image(const astro::project::Project& project,
 	long	repoid = repository->save(imageptr);
 
 	// store the repository id in the project description
-	config->partrepo(project.name(), partptr->partno(), repoid);
+	astro::config::ProjectConfigurationPtr	projects
+		= astro::config::ProjectConfiguration::get(config);
+	projects->partrepo(project.name(), partptr->partno(), repoid);
 	
 	return EXIT_SUCCESS;
 }
@@ -267,8 +275,11 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// the the Project
-	astro::project::Project	project
-		= astro::config::Configuration::get()->project(projectname);
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	astro::config::ProjectConfigurationPtr	projects
+		= astro::config::ProjectConfiguration::get(config);
+	astro::project::Project	project = projects->project(projectname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "project has %d parts, repo %s",
 		project.parts.size(), project.repository().c_str());
 

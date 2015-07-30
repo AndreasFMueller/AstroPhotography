@@ -111,7 +111,7 @@ Chart	ChartFactory::chart(const RaDec& center, const ImageGeometry& geometry) co
 
 	// next find a window to get all the stars in the window
 	SkyWindow	window = rectangle.containedin();
-	Catalog::starsetptr	stars = _catalog.find(window,
+	Catalog::starsetptr	stars = _catalog->find(window,
                                         MagnitudeRange(-30, limit_magnitude()));
 
 	// add the stars to the image

@@ -6,7 +6,7 @@
 #ifndef _InstrumentComponentTable_h
 #define _InstrumentComponentTable_h
 
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroPersistence.h>
 
 using namespace astro::persistence;

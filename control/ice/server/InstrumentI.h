@@ -7,7 +7,7 @@
 #define _InstrumentI_h
 
 #include <instruments.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 
 namespace snowstar {
 

@@ -30,7 +30,7 @@ StereographicChart	StereographicChartFactory::chart(const RaDec& center,
 
 	// get all stars from the catalog (you better don't have the 
 	// limiting magnitude too large)
-	Catalog::starsetptr	stars = _catalog.find(SkyWindow::all,
+	Catalog::starsetptr	stars = _catalog->find(SkyWindow::all,
 					MagnitudeRange(-30, limit_magnitude()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %u stars", stars->size());
 

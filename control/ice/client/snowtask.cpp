@@ -332,8 +332,10 @@ int	command_submit(TaskQueuePrx tasks) {
 	// get the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
+	astro::config::InstrumentConfigurationPtr	instruments
+		= astro::config::InstrumentConfiguration::get(config);
 	astro::config::InstrumentPtr	instrument
-		= config->instrument(instrumentname);
+		= instruments->instrument(instrumentname);
 
 	// prepare the parameters 
 	TaskParameters	parameters;
@@ -431,8 +433,11 @@ int	command_repository(TaskQueuePrx tasks, int id,
 	astro::image::ImagePtr	imageptr = convertfile(imagefile);
 
 	// get the image repository
-	astro::project::ImageRepoPtr    repo
-		= astro::config::Configuration::get()->repo(reponame);
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+	astro::project::ImageRepoPtr    repo = imagerepos->repo(reponame);
 	repo->save(imageptr);
 
 	// that's it, return ok

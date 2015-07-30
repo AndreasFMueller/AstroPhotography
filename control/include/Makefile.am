@@ -15,7 +15,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h \
 	AstroPersistence.h AstroTask.h AstroInterpolation.h \
 	AstroCatalog.h AstroChart.h AstroProjection.h AstroProcess.h \
-	AstroConfig.h
+	AstroConfig.h AstroDiscovery.h
 
 noinst_HEADERS = PixelValue.h Sun.h Thread.h \
 	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
@@ -28,6 +28,5 @@ noinst_HEADERS = PixelValue.h Sun.h Thread.h \
 	FocusWork.h FocusCompute.h Serial.h \
 	BasicGuiderport.h \
 	FieldPersistence.h astroregex.h \
-	ServiceDiscovery.h AvahiDiscovery.h BonjourDiscovery.h \
-	InstrumentComponentTable.h Nice.h
+	Nice.h
 

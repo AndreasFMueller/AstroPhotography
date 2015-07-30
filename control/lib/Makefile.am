@@ -5,7 +5,7 @@
 # $Id$
 #
 SUBDIRS = utils persistence discovery image processing device config \
-	catalogs task guiding usb unicap . test
+	catalogs task guiding focusing usb unicap . test
 
 noinst_HEADERS = Version.h
 

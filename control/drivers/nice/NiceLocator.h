@@ -9,7 +9,7 @@
 #include <includes.h>
 #include <AstroLocator.h>
 #include <AstroCamera.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <device.h>
 
 namespace astro {

@@ -1,10 +1,10 @@
 /*
- * ServiceDiscovery.h -- classes to encapsulate dns service discover
+ * AstroDiscovery.h -- classes to encapsulate dns service discover
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _ServiceDiscovery_h
-#define _ServiceDiscovery_h
+#ifndef _AstroDiscovery_h
+#define _AstroDiscovery_h
 
 #include <string>
 #include <memory>
@@ -225,7 +225,7 @@ typedef std::shared_ptr<ServicePublisher>	ServicePublisherPtr;
 /**
  * \brief A class encapsulating service publishing on different plattforms
  *
- * The same remarks apply as for the ServiceDiscovery class.
+ * The same remarks apply as for the AstroDiscovery class.
  */
 class ServicePublisher : public ServiceSubset {
 	std::string	_servername;
@@ -371,4 +371,4 @@ public:
 } // namespace discover
 } // namespace astro
 
-#endif /* _ServiceDiscovery_h */
+#endif /* _AstroDiscovery_h */

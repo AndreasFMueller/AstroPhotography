@@ -4,7 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <InstrumentLocator.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <InstrumentI.h>
 
 namespace snowstar {

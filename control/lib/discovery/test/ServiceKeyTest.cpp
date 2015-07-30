@@ -5,7 +5,7 @@
  */
 #include <AstroUtils.h>
 #include <AstroDebug.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>

@@ -157,7 +157,9 @@ LocalRepoReplicator::LocalRepoReplicator(const std::string& localreponame,
 	: BaseRepoReplicator(remoteurl, project) {
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
-	localrepository = config->repo(localreponame);
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+	localrepository = imagerepos->repo(localreponame);
 	localuuids = getUUIDs(*localrepository);
 }
 

@@ -8,13 +8,12 @@ noinst_HEADERS =
 focusing_ldadd = -lcppunit 						\
 	-L$(top_builddir)/lib/focusing -lastrofocusing 			\
 	-L$(top_builddir)/lib/device -lastrodevice 			\
-	-L$(top_builddir)/lib/image -lastroimage -lastrofits 		\
+	-L$(top_builddir)/lib/image -lastroimage 			\
 	-L$(top_builddir)/lib/persistence -lastropersistence		\
 	-L$(top_builddir)/lib/utils -lastroutils
 focusing_dependencies = 						\
 	$(top_builddir)/lib/utils/libastroutils.la  			\
 	$(top_builddir)/lib/image/libastroimage.la  			\
-	$(top_builddir)/lib/image/libastrofits.la			\
 	$(top_builddir)/lib/persistence/libastropersistence.la		\
 	$(top_builddir)/lib/device/libastrodevice.la  			\
 	$(top_builddir)/lib/focusing/libastrofocusing.la 

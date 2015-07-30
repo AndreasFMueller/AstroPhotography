@@ -29,11 +29,11 @@
 
 #include <pthread.h>
 
-int	debuglevel = LOG_ERR;
+extern "C" int	debuglevel = LOG_ERR;
 
-int	debugtimeprecision = 0;
+extern "C" int	debugtimeprecision = 0;
 
-int	debugthreads = 0;
+extern "C" int	debugthreads = 0;
 
 extern "C" void	debug(int loglevel, const char *file, int line,
 	int flags, const char *format, ...) {

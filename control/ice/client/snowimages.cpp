@@ -194,7 +194,9 @@ int	main(int argc, char *argv[]) {
 	if (0 == reponame.size()) {
 		throw std::runtime_error("repository name not set");
 	}
-	ImageRepoPtr	repo = config->repo(reponame);
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+	ImageRepoPtr	repo = imagerepos->repo(reponame);
 
 	// get the devices
 	snowstar::CameraPrx	camera = instrument.camera_proxy();

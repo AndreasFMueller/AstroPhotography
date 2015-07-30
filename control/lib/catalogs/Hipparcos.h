@@ -11,12 +11,13 @@
 #include <vector>
 #include <map>
 #include "MappedFile.h"
+#include "CatalogIterator.h"
 
 namespace astro {
 namespace catalog {
 
 /**
- * \brief Bright star catalog star
+ * \brief Hipparcos star catalog star
  */
 class HipparcosStar : public Star {
 public:
@@ -30,18 +31,39 @@ public:
 };
 
 /**
- * \brief Bright Star catalog
+ * \brief Hipparcos Star catalog
  */
-class Hipparcos : public MappedFile,
-		public std::map<unsigned int, HipparcosStar> {
+class Hipparcos : public MappedFile, public Catalog {
 	std::string	_filename;
 public:
-	typedef std::set<HipparcosStar>	starset;
-	typedef std::shared_ptr<starset>	starsetptr;
+	typedef std::map<unsigned int, HipparcosStar>	starmap_t;
+private:
+	starmap_t	stars;
+public:
 	Hipparcos(const std::string& filename);
+	virtual ~Hipparcos();
 	HipparcosStar	find(unsigned int hip) const;
-	starsetptr	find(const SkyWindow& window,
-			const MagnitudeRange& magrange) const;
+	virtual Star	find(const std::string& name);
+	virtual starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
+	virtual unsigned long	numberOfStars();
+	virtual CatalogIterator	begin();
+	virtual CatalogIterator	end();
+};
+
+/**
+ * \brief Iterator for the Hipparcos catalog
+ */
+class HipparcosIterator : public IteratorImplementation {
+	Hipparcos::starmap_t::iterator	_i;
+public:
+	HipparcosIterator(Hipparcos::starmap_t::iterator i);
+	virtual Star	operator*();
+	bool	operator==(const HipparcosIterator& other) const;
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual std::string	toString() const;
+private:
+	virtual void	increment();
 };
 
 } // namespace catalog 

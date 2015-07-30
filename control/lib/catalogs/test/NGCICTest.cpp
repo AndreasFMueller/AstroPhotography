@@ -49,7 +49,7 @@ void	NGCICTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
 	NGCIC	catalog("/usr/local/starcatalogs/ngcic/ngc2000.dat");
 	DeepSkyObject	object = catalog.find("NGC7000");
-	std::cout << object.toString() << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", object.toString().c_str());
 	CPPUNIT_ASSERT(object.constellation == "Cyg");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
@@ -68,7 +68,7 @@ void	NGCICTest::testWindow() {
 	CPPUNIT_ASSERT(objects->size() == 27);
 	NGCIC::objectset::const_iterator	o;
 	for (o = objects->begin(); o != objects->end(); o++) {
-		std::cout << o->toString() << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", o->toString().c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }

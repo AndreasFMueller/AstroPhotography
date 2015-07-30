@@ -7,6 +7,7 @@
 #define _BSC_h
 
 #include <AstroCatalog.h>
+#include "CatalogIterator.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -20,31 +21,51 @@ namespace catalog {
 class BSCStar : public Star {
 public:
 	BSCStar(const char *line);
-	unsigned short	number;
-	std::string	name;
+	unsigned short	number;	// BSC object number
 	unsigned int	sao;
 	std::vector<std::string>	notes;
 	bool	operator<(const BSCStar& other) const;
 	bool	operator>(const BSCStar& other) const;
 	bool	operator<=(const BSCStar& other) const;
 	bool	operator>=(const BSCStar& other) const;
-	virtual std::string	toString() const;
 };
 
 /**
  * \brief Bright Star catalog
  */
-class BSC {
+class BSC : public Catalog {
 	std::string	_filename;
 	std::string	_notesfile;
-	std::map<unsigned short, BSCStar>	stars;
 public:
-	typedef std::set<BSCStar>	starset;
-	typedef std::shared_ptr<starset>	starsetptr;
+	typedef std::map<unsigned short, BSCStar>	starmap_t;
+private:
+	starmap_t	stars;
+	void	setup();
+public:
 	BSC(const std::string& filename, const std::string& notesfile);
-	const BSCStar&	find(int number) const;
-	starsetptr	find(const SkyWindow& window,
-				const MagnitudeRange& magrange) const;
+	BSC(const std::string& basedir);
+	virtual ~BSC();
+
+	BSCStar	find(int number);
+	virtual Star	find(const std::string& name);
+	virtual starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
+	virtual unsigned long	numberOfStars();
+
+	virtual CatalogIterator	begin();
+	virtual CatalogIterator	end();
+};
+
+class BSCIterator : public IteratorImplementation {
+	BSC::starmap_t::iterator	_i;
+public:
+	BSCIterator(BSC::starmap_t::iterator i);
+	virtual Star	operator*();
+	bool	operator==(const BSCIterator& other) const;
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual std::string	toString() const;
+private:
+	virtual void	increment();
 };
 
 } // namespace catalog 

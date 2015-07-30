@@ -123,7 +123,7 @@ public:
 class ChartFactoryBase {
 // parameters valid for all images
 protected:
-	Catalog&	_catalog;
+	CatalogPtr	_catalog;
 	PointSpreadFunction&	pointspreadfunction;
 private:
 	double	_limit_magnitude;
@@ -147,7 +147,7 @@ public:
 	void	logarithmic(bool l) { _logarithmic = l; }
 public:
 	// constructors
-	ChartFactoryBase(Catalog& catalog, PointSpreadFunction& psf,
+	ChartFactoryBase(CatalogPtr catalog, PointSpreadFunction& psf,
 		double limit_magnitude = 16,
 		double scale = 1, double maxradius = 7,
 		bool logarithmic = false)
@@ -171,7 +171,7 @@ protected:
 class ChartFactory : public ChartFactoryBase {
 public:
 	// constructors
-	ChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+	ChartFactory(CatalogPtr catalog, PointSpreadFunction& psf,
 		double limit_magnitude = 16,
 		double scale = 1, double maxradius = 7,
 		bool logarithmic = false)
@@ -222,7 +222,7 @@ friend class StereographicChartFactory;
  */
 class StereographicChartFactory : public ChartFactoryBase {
 public:
-	StereographicChartFactory(Catalog& catalog, PointSpreadFunction& psf,
+	StereographicChartFactory(CatalogPtr catalog, PointSpreadFunction& psf,
 		double limit_magnitude = 16,
 		double scale = 1, double maxradius = 7,
 		bool logarithmic = false)

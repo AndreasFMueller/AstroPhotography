@@ -22,11 +22,13 @@ public:
 	void	setUp();
 	void	tearDown();
 	void	testAccess();
+	void	testIterator();
 	void	testWindow();
 	void	testAll();
 
 	CPPUNIT_TEST_SUITE(HipparcosTest);
 	CPPUNIT_TEST(testAccess);
+	CPPUNIT_TEST(testIterator);
 	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST(testAll);
 	CPPUNIT_TEST_SUITE_END();
@@ -44,11 +46,46 @@ void	HipparcosTest::tearDown() {
 
 void	HipparcosTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
+
 	HipparcosStar	firststar = catalog->find(1);
-	std::cout << firststar.toString() << std::endl;
-	HipparcosStar	laststar = catalog->find(9110);
-	std::cout << laststar.toString() << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", firststar.toString().c_str());
+	CPPUNIT_ASSERT(fabs(firststar.ra().hours()
+				- 0.22/3600) < 1e-7);
+	CPPUNIT_ASSERT(fabs(firststar.dec().degrees()
+				- (1 + 5./60 + 20.4/3600)) < 1e-6);
+
+	HipparcosStar	laststar = catalog->find(4711);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", laststar.toString().c_str());
+	CPPUNIT_ASSERT(fabs(laststar.ra().hours()
+				- (1 + 31.63/3600)) < 1e-6);
+	CPPUNIT_ASSERT(fabs(laststar.dec().degrees()
+				- (-(17 + 4./60 + 36.3/3600))) < 1e-6);
+
+	Star	star = catalog->find(std::string("HIP118322"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star.toString().c_str());
+	CPPUNIT_ASSERT(fabs(star.ra().hours()
+				- (23 + 59./60 + 54.91/3600)) < 1e-7);
+	CPPUNIT_ASSERT(fabs(star.dec().degrees()
+				- (-(65 + 34./60 + 37.5/3600))) < 1e-7);
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
+}
+
+void	HipparcosTest::testIterator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
+	CatalogIterator	i;
+	int	counter = 0;
+	for (i = catalog->begin(); i != catalog->end(); ++i) {
+		counter++;
+		if (counter == 4711) {
+			Star	s = *i;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "star name: %s",
+				s.longname().c_str());
+			CPPUNIT_ASSERT(s.longname() == std::string("HIP004721"));
+		}
+	}
+	CPPUNIT_ASSERT(counter == catalog->numberOfStars());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }
 
 void	HipparcosTest::testWindow() {
@@ -59,13 +96,13 @@ void	HipparcosTest::testWindow() {
 	Angle	width; width.hours(1);
 	Angle	height; height.degrees(15);
 	SkyWindow	window(center, width, height);
-	Hipparcos::starsetptr	stars = catalog->find(window,
+	Catalog::starsetptr	stars = catalog->find(window,
 					MagnitudeRange(-30, 4.5));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
 	CPPUNIT_ASSERT(stars->size() == 10);
-	std::set<HipparcosStar>::const_iterator	s;
+	Catalog::starset::const_iterator	s;
 	for (s = stars->begin(); s != stars->end(); s++) {
-		std::cout << s->toString().c_str() << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s->toString().c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }

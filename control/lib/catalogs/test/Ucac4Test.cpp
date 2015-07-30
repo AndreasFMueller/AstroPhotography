@@ -9,6 +9,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
+#include <unistd.h>
 
 using namespace astro::catalog;
 
@@ -23,11 +24,13 @@ public:
 	void	testConstructor();
 	void	testNumber();
 	void	testAccess();
+	void	testIterator();
 
 	CPPUNIT_TEST_SUITE(Ucac4Test);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testNumber);
 	CPPUNIT_TEST(testAccess);
+	CPPUNIT_TEST(testIterator);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -63,7 +66,36 @@ void	Ucac4Test::testAccess() {
 	Ucac4StarNumber	name(47, 11);
 	Ucac4Star	star = catalog.find(name);
 	CPPUNIT_ASSERT(star.number == name);
+	Star	star1 = catalog.find("UCAC4-391-012345");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star1.toString().c_str());
+	CPPUNIT_ASSERT(star1.longname() == std::string("UCAC4-391-012345"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
+}
+
+void	Ucac4Test::testIterator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
+	Ucac4	catalog("/usr/local/starcatalogs/u4");
+	CatalogIterator	i;
+	unsigned long long	counter = 0;
+	try {
+		for (i = catalog.begin(); i != catalog.end(); ++i) {
+			counter++;
+			if (0 == (counter % 1000000)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"number of stars at %s: %llu",
+					i.toString().c_str(), counter);
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "final position: %s", 
+			i.toString().c_str());
+	} catch (const std::exception &x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception: %s", x.what());
+	}
+	unsigned long long	n = catalog.numberOfStars();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %llu, stars: %llu",
+		counter, n);
+	CPPUNIT_ASSERT(counter == catalog.numberOfStars());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }
 
 } // namespace test

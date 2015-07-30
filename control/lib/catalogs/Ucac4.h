@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <string>
 #include "MappedFile.h"
+#include "CatalogIterator.h"
 
 namespace astro {
 namespace catalog {
@@ -100,31 +101,58 @@ public:
 				const MagnitudeRange& magrange);
 	starsetptr	add(starsetptr set, const SkyWindow& window,
 				const MagnitudeRange& magrange);
+	unsigned long	numberOfStars();
+
+	CatalogIterator	begin();
+	CatalogIterator	end();
 };
 typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
+
+class Ucac4Iterator;
 
 /**
  * \brief UC4 Catalog
  */
-class Ucac4 {
+class Ucac4 : public Catalog {
 	std::string	_directory;
 	Ucac4Star	find(uint16_t zone, uint32_t number);
 	std::string	zonefilename(uint16_t zone) const;
 	std::string	indexfilename() const;
 	Ucac4ZonePtr	cachedzone;
 	Ucac4ZonePtr	getzone(uint16_t zone);
+friend class Ucac4Iterator;
 public:
-	typedef std::set<Ucac4Star>	starset;
-	typedef std::shared_ptr<starset>	starsetptr;
 	Ucac4(const std::string& directory);
+	virtual ~Ucac4();
 	Ucac4ZonePtr	zone(uint16_t zone) const;
 	Ucac4Star	find(const RaDec& position);
-	Ucac4Star	find(const std::string& ucacnumber);
 	Ucac4Star	find(const Ucac4StarNumber& number);
-	starsetptr	find(const SkyWindow& window,
+	virtual Star	find(const std::string& ucacnumber);
+	virtual starsetptr	find(const SkyWindow& window,
 				const MagnitudeRange& magrange);
+	virtual unsigned long	numberOfStars();
+	CatalogIterator	begin();
+	CatalogIterator	end();
 };
 typedef std::shared_ptr<Ucac4>	Ucac4Ptr;
+
+/**
+ * \brief UC4 Catalog iterator
+ */
+class Ucac4Iterator : public IteratorImplementation {
+	uint16_t	_zone;
+	uint32_t	_index;
+	Ucac4&	_catalog;
+public:
+	Ucac4Iterator(uint16_t zone, uint32_t index, Ucac4& catalog);
+	virtual ~Ucac4Iterator();
+	virtual Star	operator*();
+	bool	operator==(const Ucac4Iterator& other) const;
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	std::string	toString() const;
+private:
+	virtual void	increment();
+};
 
 } // namespace catalog
 } // namespace astro

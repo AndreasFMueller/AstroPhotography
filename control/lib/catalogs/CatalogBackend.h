@@ -26,33 +26,36 @@ public:
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
 	virtual Star	find(const std::string& name);
+	virtual void	add(int id, const Star& star);
 };
 
 /**
  * \brief Backend combining existing catalogs
  */
-class FileBackend : public CatalogBackend {
+class FileBackend : public Catalog {
 	std::string	_basedir;
-	std::string	hipparcosfile;
-	std::string	tycho2file;
-	std::string	ucac4dir;
+	CatalogPtr	bsc_catalog;
+	CatalogPtr	hipparcos_catalog;
+	CatalogPtr	tycho2_catalog;
+	CatalogPtr	ucac4_catalog;
 public:
 	FileBackend(const std::string& basedir);
-	~FileBackend();
+	virtual ~FileBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
 	virtual Star	find(const std::string& name);
+	virtual unsigned long	numberOfStars();
 };
 
 /**
  * \brief Catalog of stars in a database
  */
-class DatabaseBackend : public CatalogBackend {
+class DatabaseBackend : public Catalog {
 	sqlite3	*db;
 	sqlite3_stmt	*stmt;
 public:
 	DatabaseBackend(const std::string& dbfilename);
-	~DatabaseBackend();
+	virtual ~DatabaseBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
 	void	prepare();
@@ -61,6 +64,7 @@ public:
 	void	clear();
 	virtual Star	find(const std::string& name);
 	void	createindex();
+	virtual  unsigned long	numberOfStars();
 };
 
 } // namespace catalog

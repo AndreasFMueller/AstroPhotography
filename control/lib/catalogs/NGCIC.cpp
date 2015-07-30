@@ -32,7 +32,7 @@ static DeepSkyObject	Object_from_Record(const std::string& record) {
 
 	// magnitude
 	try {
-		result.mag() = std::stod(record.substr(40, 4));
+		result.mag(std::stod(record.substr(40, 4)));
 	} catch (...) {
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "no magnitude for %s",
 		//	result.name.c_str());

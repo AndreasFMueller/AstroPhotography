@@ -48,7 +48,8 @@ void	StereographicChartTest::testImage() {
 	center.dec().degrees(44.);
 
 	// star catalog
-	Catalog	catalog("/usr/local/starcatalogs");
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
+					"/usr/local/starcatalogs");
 
 	// point spread function
 	TurbulencePointSpreadFunction	psf(1.5);

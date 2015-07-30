@@ -13,7 +13,7 @@
 #include <AstroFocus.h>
 #include <AstroProject.h>
 #include <TrackingPersistence.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <types.h>
 #include <device.h>
 #include <camera.h>

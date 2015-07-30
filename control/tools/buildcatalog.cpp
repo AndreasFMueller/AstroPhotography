@@ -114,6 +114,8 @@ int	main(int argc, char *argv[]) {
 
 #if 1
 	// open UCAC4 catalog
+	CatalogPtr	ucac4 = CatalogFactory::get(CatalogFactory::Ucac4,
+				ucac4dir);
 	Ucac4	ucac4(ucac4dir);
 	counter = 0;
 	for (uint16_t zonenumber = 1; zonenumber <= 900; zonenumber++) {

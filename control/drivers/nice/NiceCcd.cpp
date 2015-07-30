@@ -17,7 +17,7 @@ static CcdInfo	ccd_rename(const CcdInfo info, const DeviceName& devicename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "renamed to: %s",
 		result.name().toString().c_str());
 	result.addModes(info.modes());
-	result.setShutter(info.shutter());
+	result.shutter(info.shutter());
 	return result;
 }
 

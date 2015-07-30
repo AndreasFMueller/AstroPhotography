@@ -55,7 +55,7 @@ CcdInfo	convert(const astro::camera::CcdInfo& info) {
 
 astro::camera::CcdInfo	convert(const CcdInfo& info) {
 	astro::camera::CcdInfo	result(info.name, convert(info.size), info.id);
-	result.setShutter(info.shutter);
+	result.shutter(info.shutter);
 	result.pixelwidth(info.pixelwidth);
 	result.pixelheight(info.pixelheight);
 	result.addModes(convert(info.binningmodes));

@@ -100,7 +100,10 @@ int	show_imagefile(const std::string& filename) {
  */
 int	show_imagerepo(const std::string& argument) {
 	try {
-		ImageRepoPtr	repo = Configuration::get()->repo(reponame);
+		ConfigurationPtr	config = Configuration::get();
+		ImageRepoConfigurationPtr	imagerepos
+			= ImageRepoConfiguration::get(config);
+		ImageRepoPtr	repo = imagerepos->repo(reponame);
 		long	imageid = std::stol(argument);
 		std::cout << imageid << ": ";
 		ImagePtr	image = repo->getImage(imageid);

@@ -15,7 +15,7 @@
 #include <AstroConfig.h>
 #include <AstroProject.h>
 #include <AstroIO.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <iostream>
 #include <algorithm>
 

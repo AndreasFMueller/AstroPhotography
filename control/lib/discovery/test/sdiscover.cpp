@@ -5,7 +5,7 @@
  */
 #include <AstroUtils.h>
 #include <AstroDebug.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <getopt.h>
 #include <includes.h>
 #include <thread>

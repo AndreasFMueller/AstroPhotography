@@ -82,7 +82,8 @@ void	ChartTest::testImage() {
 	//ImageGeometry	geometry(ImageSize(4096, 4096), 2.800, 0.000015);
 
 	// star catalog
-	Catalog	catalog("/usr/local/starcatalogs");
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
+				std::string("/usr/local/starcatalogs"));
 
 	// point spread function
 	TurbulencePointSpreadFunction	psf(2);

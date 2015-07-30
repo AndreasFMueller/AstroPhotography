@@ -22,11 +22,13 @@ public:
 	void	tearDown();
 	void	testConstructor();
 	void	testAccess();
+	void	testIterator();
 	void	testWindow();
 
 	CPPUNIT_TEST_SUITE(BSCTest);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testAccess);
+	CPPUNIT_TEST(testIterator);
 	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -43,6 +45,11 @@ void	BSCTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
 	BSC	catalog("/usr/local/starcatalogs/bsc/catalog",
 			"/usr/local/starcatalogs/bsc/notes");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stars in BSC: %u",
+		catalog.numberOfStars());
+	CPPUNIT_ASSERT(catalog.numberOfStars() == 9096);
+	BSC	catalog2("/usr/local/starcatalogs/bsc");
+	CPPUNIT_ASSERT(catalog2.numberOfStars() == 9096);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
@@ -50,11 +57,41 @@ void	BSCTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
 	BSC	catalog("/usr/local/starcatalogs/bsc/catalog",
 			"/usr/local/starcatalogs/bsc/notes");
-	BSCStar	firststar = catalog.find(1);
-	std::cout << firststar.toString() << std::endl;
-	BSCStar	laststar = catalog.find(9110);
-	std::cout << laststar.toString() << std::endl;
+
+	BSCStar	star1 = catalog.find(3);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has long name '%s'",
+		star1.name().c_str(), star1.longname().c_str());
+	CPPUNIT_ASSERT(star1.longname() == "33    Psc");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star1.toString().c_str());
+
+	BSCStar	star2 = catalog.find(9103);
+	CPPUNIT_ASSERT(star2.longname() == " 3    Cet");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star2.toString().c_str());
+
+	Star	star3 = catalog.find(std::string("BSC4450"));
+	CPPUNIT_ASSERT(star3.longname() == "  Xi  Hya");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star3.toString().c_str());
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
+}
+
+void	BSCTest::testIterator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
+	BSC	catalog("/usr/local/starcatalogs/bsc/catalog",
+			"/usr/local/starcatalogs/bsc/notes");
+	int	counter = 0;
+	CatalogIterator	i;
+	for (i = catalog.begin(); i != catalog.end(); ++i) {
+		counter++;
+		if (counter == 15) {
+			Star	s = *i;
+			CPPUNIT_ASSERT(s.longname() == std::string("21Alp And"));
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %d", counter);
+	CPPUNIT_ASSERT(counter == catalog.numberOfStars());
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }
 
 void	BSCTest::testWindow() {
@@ -71,9 +108,9 @@ void	BSCTest::testWindow() {
 					MagnitudeRange(-30, 4.5));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
 	CPPUNIT_ASSERT(stars->size() == 10);
-	std::set<BSCStar>::const_iterator	s;
+	std::set<Star>::const_iterator	s;
 	for (s = stars->begin(); s != stars->end(); s++) {
-		std::cout << s->toString().c_str() << std::endl;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s->toString().c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }

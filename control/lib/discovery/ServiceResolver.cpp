@@ -3,7 +3,7 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 
 namespace astro {
 namespace discover {

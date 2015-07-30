@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 
 namespace astro {
 

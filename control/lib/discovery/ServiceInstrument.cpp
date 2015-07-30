@@ -3,7 +3,7 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroPersistence.h>
 #include <AstroConfig.h>
 #include <AstroDebug.h>

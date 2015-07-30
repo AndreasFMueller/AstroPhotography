@@ -46,6 +46,12 @@ void	TrimTest::testRtrim() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRtrim() begin");
 	std::string	s("\n\t blubber \t\n");
 	CPPUNIT_ASSERT(rtrim(s) == "\n\t blubber");
+	std::string	s2("test");
+	CPPUNIT_ASSERT(rtrim(s2) == "test");
+	std::string	s3(" test");
+	CPPUNIT_ASSERT(rtrim(s3) == s3);
+	std::string	s4("    ");
+	CPPUNIT_ASSERT(ltrim(s4) == "");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRtrim() end");
 }
 
@@ -53,6 +59,12 @@ void	TrimTest::testLtrim() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLtrim() begin");
 	std::string	s("\n\t blubber \t\n");
 	CPPUNIT_ASSERT(ltrim(s) == "blubber \t\n");
+	std::string	s2("test");
+	CPPUNIT_ASSERT(ltrim(s2) == s2);
+	std::string	s3("test ");
+	CPPUNIT_ASSERT(ltrim(s3) == s3);
+	std::string	s4("    ");
+	CPPUNIT_ASSERT(ltrim(s4) == "");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testLtrim() end");
 }
 

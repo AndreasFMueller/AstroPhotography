@@ -6,7 +6,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>

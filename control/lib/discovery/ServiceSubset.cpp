@@ -4,7 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroDebug.h>
 #include <sstream>
 

@@ -6,7 +6,7 @@
 #ifndef _BonjourDiscovery_h
 #define _BonjourDiscovery_h
 
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <dns_sd.h>
 #include <future>
 

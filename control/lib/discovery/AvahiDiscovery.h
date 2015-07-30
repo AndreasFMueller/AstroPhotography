@@ -6,7 +6,7 @@
 #ifndef _AvahiDiscovery_h
 #define _AvahiDiscovery_h
 
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <thread>
 #include <avahi-common/simple-watch.h>
 #include <avahi-client/client.h>

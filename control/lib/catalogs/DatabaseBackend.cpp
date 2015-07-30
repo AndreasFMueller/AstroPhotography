@@ -149,7 +149,7 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 		double	pmdec = sqlite3_column_double(stmt, 3);
 		star.pm().dec().degrees(pmdec);
 		double	mag = sqlite3_column_double(stmt, 4);
-		star.mag() = mag;
+		star.mag(mag);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding star %s to result",
 			star.toString().c_str());
 		stars->insert(star);
@@ -204,7 +204,7 @@ Star	DatabaseBackend::find(const std::string& name) {
 	double	pmdec = sqlite3_column_double(stmt, 3);
 	star.pm().dec().degrees(pmdec);
 	double	mag = sqlite3_column_double(stmt, 4);
-	star.mag() = mag;
+	star.mag(mag);
 
 	sqlite3_finalize(stmt);
 	return star;
@@ -279,10 +279,10 @@ void	DatabaseBackend::add(int id, const Star& star) {
 	ADD_BIND_ERROR;
 	rc = sqlite3_bind_double(stmt, 6, star.mag());
 	ADD_BIND_ERROR;
-	char	catalog = star.catalog;
+	char	catalog = star.catalog();
 	rc = sqlite3_bind_text(stmt, 7, &catalog, 1, SQLITE_STATIC);
 	ADD_BIND_ERROR;
-	rc = sqlite3_bind_int(stmt, 8, star.catalognumber);
+	rc = sqlite3_bind_int(stmt, 8, star.catalognumber());
 	
 	rc = sqlite3_step(stmt);
 
@@ -325,6 +325,38 @@ void	DatabaseBackend::createindex() {
 			errmsg);
 		throw std::runtime_error("cannot create index ");
 	}
+}
+
+unsigned long	DatabaseBackend::numberOfStars() {
+	std::string	query("select count(*) from star");
+	sqlite3_stmt	*stmt2;
+	const char	*tail;
+
+	int	rc;
+	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
+                query.size(), &stmt2, &tail))) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot query for number of stars: %d", rc);
+		sqlite3_close(db);
+		throw std::runtime_error("cannot prepare star table query");
+        }
+
+        // execute the query
+	if (SQLITE_ROW != (rc = sqlite3_step(stmt2))) {
+		sqlite3_close(db);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot execute: %d", rc);
+		throw std::runtime_error("cannot execute star table query");
+	}
+
+        // retrieve the results
+	int	count = sqlite3_column_int(stmt2, 0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of star tables: %d", count);
+
+	// cleanup the prepared statement
+	sqlite3_finalize(stmt2);
+
+	// return the number of records in the database
+	return count;
 }
 
 } // namespace catalog

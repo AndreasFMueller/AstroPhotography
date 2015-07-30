@@ -5,7 +5,7 @@
  */
 #include <InstrumentsI.h>
 #include <ProxyCreator.h>
-#include <ServiceDiscovery.h>
+#include <AstroDiscovery.h>
 #include <AstroDebug.h>
 #include <IceConversions.h>
 

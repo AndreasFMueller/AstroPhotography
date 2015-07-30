@@ -26,7 +26,7 @@ SimCamera::SimCamera(SimLocator& locator)
 	CcdInfo	ccdi(ccdname, ImageSize(640, 480), 0);
 	ccdi.addMode(Binning(1,1));
 	ccdi.addMode(Binning(2,2));
-	ccdi.setShutter(true);
+	ccdi.shutter(true);
 	ccdi.pixelwidth(0.00001);
 	ccdi.pixelheight(0.00001);
 	ccdinfo.push_back(ccdi);

@@ -98,6 +98,17 @@ Ucac4::Ucac4(const std::string& directory) : _directory(directory) {
 	cachedzone = NULL;
 }
 
+Ucac4::~Ucac4() {
+}
+
+unsigned long	Ucac4::numberOfStars() {
+	unsigned long	result = 0;
+	for (uint16_t zone = 1; zone <= 900; zone++) {
+		result += getzone(zone)->numberOfStars();
+	}
+	return result;
+}
+
 #pragma pack(push, 1)
 #define UCAC4_STAR struct ucac4_star
 
@@ -138,8 +149,8 @@ UCAC4_STAR
 static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 				const UCAC4_STAR *star) {
 	Ucac4Star	result(zone, number);
-	result.catalog = 'U';
-	result.catalognumber = zone * 100000000 + number;
+	result.catalog('U');
+	result.catalognumber(zone * 100000000 + number);
 	result.id_number = star->id_number;
 	result.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;
@@ -148,7 +159,7 @@ static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
 	result.pm().dec() = MARCSEC_to_RADIANS * star->pm_dec;
 
 	// magnitude
-	result.mag() = star->mag1 * 0.001;
+	result.mag(star->mag1 * 0.001);
 	result.mag2 = star->mag2 * 0.001;
 
 	result.magsigma = star->mag_sigma * 0.001;
@@ -177,9 +188,8 @@ Ucac4ZonePtr	Ucac4::zone(uint16_t zone) const {
  * \brief Get a particular zone in the cache
  */
 Ucac4ZonePtr	Ucac4::getzone(uint16_t z) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving zone %hu", z);
 	if ((cachedzone == NULL) || (cachedzone->zone() != z)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "opening zone");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "opening zone %hd", z);
 		cachedzone = zone(z);
 	} 
 	return cachedzone;
@@ -188,14 +198,16 @@ Ucac4ZonePtr	Ucac4::getzone(uint16_t z) {
 /**
  * \brief find a particular star
  */
-Ucac4Star	Ucac4::find(const RaDec& position) {
+Ucac4Star	Ucac4::find(const RaDec& /* position */) {
 	// XXX imlementation missing
+	Ucac4Star	result("unknown");
+	return result;
 }
 
 /**
  * \brief find a star based on the UCAC4 number
  */
-Ucac4Star	Ucac4::find(const std::string& ucacnumber) {
+Star	Ucac4::find(const std::string& ucacnumber) {
 	return find(Ucac4StarNumber(ucacnumber));
 }
 
@@ -220,11 +232,10 @@ Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
 /**
  * \brief Retrieve all stars in a window
  */
-Ucac4::starsetptr	Ucac4::find(const SkyWindow& window,
+Catalog::starsetptr	Ucac4::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
 	// prepare the empty result set
-	starset	*result = new starset();
-	starsetptr	resultptr(result);
+	Ucac4Zone::starsetptr	resultptr(new Ucac4Zone::starset());
 
 	// find minimum an maximum zone numbers
 	std::pair<double, double>	interval = window.decinterval();
@@ -241,10 +252,28 @@ Ucac4::starsetptr	Ucac4::find(const SkyWindow& window,
 		z->add(resultptr, window, magrange);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars found, %u in set", counter,
-		result->size());
+		resultptr->size());
+
+	// now copy everything into a set of normal stars
+	Catalog::starsetptr	starresult
+		= Catalog::starsetptr(new Catalog::starset());
+	Ucac4Zone::starset::const_iterator	i;
+	for (i = resultptr->begin(); i != resultptr->end(); i++) {
+		starresult->insert(*i);
+	}
 
 	// thats it
-	return resultptr;
+	return starresult;
+}
+
+CatalogIterator	Ucac4::begin() {
+	IteratorImplementationPtr	impl(new Ucac4Iterator(1, 0, *this));
+	return CatalogIterator(impl);
+}
+
+CatalogIterator	Ucac4::end() {
+	IteratorImplementationPtr	impl(new Ucac4Iterator(901, 0, *this));
+	return CatalogIterator(impl);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -309,7 +338,7 @@ Ucac4Zone::starsetptr	Ucac4Zone::find(const SkyWindow& window,
 	return add(resultptr, window, magrange);
 }
 
-Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4::starsetptr set,
+Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4Zone::starsetptr set,
 		const SkyWindow& window, const MagnitudeRange& magrange) {
 
 	// get the maximum and minimum RA
@@ -342,6 +371,47 @@ Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4::starsetptr set,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars from zone %hu", set->size(),
 		_zone);
 	return set;
+}
+
+unsigned long	Ucac4Zone::numberOfStars() {
+	return nrecords();
+}
+
+//////////////////////////////////////////////////////////////////////
+// Ucac4Iterator implementation
+//////////////////////////////////////////////////////////////////////
+Ucac4Iterator::Ucac4Iterator(uint16_t zone, uint32_t index, Ucac4& catalog)
+	: _zone(zone), _index(index), _catalog(catalog) {
+}
+
+Ucac4Iterator::~Ucac4Iterator() {
+}
+
+Star	Ucac4Iterator::operator*() {
+	return _catalog.find(Ucac4StarNumber(_zone, _index));
+}
+
+bool	Ucac4Iterator::operator==(const Ucac4Iterator& other) const {
+	return (_zone == other._zone) && (_index == other._index);
+}
+
+bool	Ucac4Iterator::operator==(const IteratorImplementation& other) const {
+	return equal_implementation(this, other);
+}
+
+void	Ucac4Iterator::increment() {
+	++_index;
+	if (_index >= _catalog.getzone(_zone)->numberOfStars()) {
+		++_zone;
+		if (_zone > 900) {
+			_zone = 901;
+		}
+		_index = 0;
+	}
+}
+
+std::string	Ucac4Iterator::toString() const {
+	return Ucac4StarNumber(_zone, _index).toString();
 }
 
 } // namespace catalog

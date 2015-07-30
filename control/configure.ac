@@ -77,35 +77,35 @@ esac
 AM_CONDITIONAL(ENABLE_AVAHI, test x$servicediscovery = xavahi)
 AM_CONDITIONAL(ENABLE_BONJOUR, test x$servicediscovery = xbonjour)
 
-## CORBA #############################################################
+## CORBA # no longer supported #######################################
 # use pkg-config to find out about the flags to use for omniorb
-if pkg-config --exists omniORB4
-then
-	has_omniorb=yes
-fi
-AC_ARG_ENABLE(corba,
-[AS_HELP_STRING([--enable-corba], [also build the CORBA components])],
-[
-	if test x$has_omniorb = xyes
-	then
-		LIBS="${LIBS} `pkg-config --libs omniORB4`"
-		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
-		if pkg-config --exists omniCOS4
-		then
-			LIBS="${LIBS} `pkg-config --libs omniCOS4`"
-			CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
-		fi
-		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
-		# add the idl include directory to the cflags
-		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
-	else
-		AC_MSG_ERROR([omniORB not available])
-		AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
-	fi
-],[
-	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
-])
-AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
+# if pkg-config --exists omniORB4
+# then
+# 	has_omniorb=yes
+# fi
+# AC_ARG_ENABLE(corba,
+# [AS_HELP_STRING([--enable-corba], [also build the CORBA components])],
+# [
+# 	if test x$has_omniorb = xyes
+# 	then
+# 		LIBS="${LIBS} `pkg-config --libs omniORB4`"
+# 		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
+# 		if pkg-config --exists omniCOS4
+# 		then
+# 			LIBS="${LIBS} `pkg-config --libs omniCOS4`"
+# 			CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
+# 		fi
+# 		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
+# 		# add the idl include directory to the cflags
+# 		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
+# 	else
+# 		AC_MSG_ERROR([omniORB not available])
+# 		AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+# 	fi
+# ],[
+# 	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
+# ])
+# AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
 
 ## ICE ###############################################################
 # detect ICE support (www.zeroc.com)
@@ -421,10 +421,6 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/usb/Makefile lib/usb/test/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
 	lib/test/Makefile
-	corba/Makefile corba/idl/Makefile corba/include/Makefile
-	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
-	corba/client/Makefile corba/client/trackingmonitor/Makefile
-	corba/client/calibrationmonitor/Makefile
 	ice/Makefile ice/slice/Makefile ice/include/Makefile
 	ice/lib/Makefile ice/client/Makefile ice/server/Makefile
 	tools/Makefile
@@ -437,4 +433,10 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	man/Makefile doc/Makefile
 	test/Makefile])
 AC_OUTPUT
+
+dnl The corba stuff is no longer supported
+dnl	corba/Makefile corba/idl/Makefile corba/include/Makefile
+dnl	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
+dnl	corba/client/Makefile corba/client/trackingmonitor/Makefile
+dnl	corba/client/calibrationmonitor/Makefile
 

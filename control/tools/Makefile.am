@@ -27,134 +27,124 @@ bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 noinst_PROGRAMS = guiderport sdiscover spublish
 
 imageloop_SOURCES = imageloop.cpp
-imageloop_DEPENDENCIES = ../lib/libastro.la
-imageloop_LDADD = -L../lib -lastro 
+imageloop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+imageloop_LDADD = -L$(top_builddir)/lib -lastro 
 
 getimages_SOURCES = getimages.cpp
-if ENABLE_CORBA
-getimages_DEPENDENCIES = ../lib/libastro.la ../corba/lib/libcorbastro.la
-getimages_LDADD = -L../lib -lastro -L../corba/lib -lcorbastro @SBIGLIBRARY@ 
-else
-getimages_DEPENDENCIES = ../lib/libastro.la 
-getimages_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
-endif
+getimages_DEPENDENCIES = $(top_builddir)/lib/libastro.la 
+getimages_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 imageinfo_SOURCES = imageinfo.cpp
-imageinfo_DEPENDENCIES = ../lib/libastro.la
-imageinfo_LDADD = -L../lib -lastro 
+imageinfo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+imageinfo_LDADD = -L$(top_builddir)/lib -lastro 
 
 makedark_SOURCES = makedark.cpp
-makedark_DEPENDENCIES = ../lib/libastro.la
-makedark_LDADD = -L../lib -lastro 
+makedark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+makedark_LDADD = -L$(top_builddir)/lib -lastro 
 
 dark_SOURCES = dark.cpp
-dark_DEPENDENCIES = ../lib/libastro.la
-dark_LDADD = -L../lib -lastro 
+dark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+dark_LDADD = -L$(top_builddir)/lib -lastro 
 
 flat_SOURCES = flat.cpp
-flat_DEPENDENCIES = ../lib/libastro.la
-flat_LDADD = -L../lib -lastro 
+flat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+flat_LDADD = -L$(top_builddir)/lib -lastro 
 
 makeflat_SOURCES = makeflat.cpp
-makeflat_DEPENDENCIES = ../lib/libastro.la
-makeflat_LDADD = -L../lib -lastro 
+makeflat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+makeflat_LDADD = -L$(top_builddir)/lib -lastro 
 
 calibrate_SOURCES = calibrate.cpp
-calibrate_DEPENDENCIES = ../lib/libastro.la
-calibrate_LDADD = -L../lib -lastro 
+calibrate_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+calibrate_LDADD = -L$(top_builddir)/lib -lastro 
 
 transform_SOURCES = transform.cpp
-transform_DEPENDENCIES = ../lib/libastro.la
-transform_LDADD = -L../lib -lastro 
+transform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+transform_LDADD = -L$(top_builddir)/lib -lastro 
 
 focus_SOURCES = focus.cpp
-focus_DEPENDENCIES = ../lib/libastro.la
-focus_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+focus_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+focus_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 focustest_SOURCES = focustest.cpp
-if ENABLE_CORBA
-focustest_DEPENDENCIES = ../lib/libastro.la ../corba/lib/libcorbastro.la
-focustest_LDADD = -L../lib -lastro -L../corba/lib -lcorbastro @SBIGLIBRARY@ 
-else
-focustest_DEPENDENCIES = ../lib/libastro.la
-focustest_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
-endif
+focustest_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+focustest_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 guider_SOURCES = guider.cpp
-guider_DEPENDENCIES = ../lib/libastro.la
-guider_LDADD = -L../lib -lastro @SBIGLIBRARY@ 
+guider_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+guider_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 stack_SOURCES = stack.cpp
-stack_DEPENDENCIES = ../lib/libastro.la
-stack_LDADD = -L../lib -lastro 
+stack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+stack_LDADD = -L$(top_builddir)/lib -lastro 
 
 clamp_SOURCES = clamp.cpp
-clamp_DEPENDENCIES = ../lib/libastro.la
-clamp_LDADD = -L../lib -lastro 
+clamp_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+clamp_LDADD = -L$(top_builddir)/lib -lastro 
 
 rescale_SOURCES = rescale.cpp
-rescale_DEPENDENCIES = ../lib/libastro.la
-rescale_LDADD = -L../lib -lastro 
+rescale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+rescale_LDADD = -L$(top_builddir)/lib -lastro 
 
 logscale_SOURCES = logscale.cpp
-logscale_DEPENDENCIES = ../lib/libastro.la
-logscale_LDADD = -L../lib -lastro 
+logscale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+logscale_LDADD = -L$(top_builddir)/lib -lastro 
 
 gammacorrect_SOURCES = gammacorrect.cpp
-gammacorrect_DEPENDENCIES = ../lib/libastro.la
-gammacorrect_LDADD = -L../lib -lastro 
+gammacorrect_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+gammacorrect_LDADD = -L$(top_builddir)/lib -lastro 
 
 focusing_SOURCES = focusing.cpp
-focusing_DEPENDENCIES = ../lib/libastro.la
-focusing_LDADD = -L../lib -lastro 
+focusing_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+focusing_LDADD = -L$(top_builddir)/lib -lastro 
 
 starcatalog_SOURCES = starcatalog.cpp
-starcatalog_DEPENDENCIES = ../lib/libastro.la
-starcatalog_LDADD = -L../lib -lastro 
+starcatalog_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+starcatalog_LDADD = -L$(top_builddir)/lib -lastro 
 
 buildcatalog_SOURCES = buildcatalog.cpp
-buildcatalog_DEPENDENCIES = ../lib/libastro.la
-buildcatalog_LDADD = -L../lib -lastro 
+buildcatalog_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+buildcatalog_LDADD = -L$(top_builddir)/lib -lastro 
 
 fitsheader_SOURCES = fitsheader.cpp
-fitsheader_DEPENDENCIES = ../lib/libastro.la
-fitsheader_LDADD = -L../lib -lastro 
+fitsheader_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+fitsheader_LDADD = -L$(top_builddir)/lib -lastro 
 
 astroconfig_SOURCES = astroconfig.cpp
-astroconfig_DEPENDENCIES = ../lib/libastro.la
-astroconfig_LDADD = -L../lib -lastro
+astroconfig_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astroconfig_LDADD = -L$(top_builddir)/lib -lastro
 
 astroproject_SOURCES = astroproject.cpp
-astroproject_DEPENDENCIES = ../lib/libastro.la
-astroproject_LDADD = -L../lib -lastro
+astroproject_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astroproject_LDADD = -L$(top_builddir)/lib -lastro
 
 imagerepo_SOURCES = imagerepo.cpp
-imagerepo_DEPENDENCIES = ../lib/libastro.la
-imagerepo_LDADD = -L../lib -lastro
+imagerepo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+imagerepo_LDADD = -L$(top_builddir)/lib -lastro
 
 devicemapper_SOURCES = devicemapper.cpp
-devicemapper_DEPENDENCIES = ../lib/libastro.la
-devicemapper_LDADD = -L../lib -lastro
+devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+devicemapper_LDADD = -L$(top_builddir)/lib -lastro
 
 astroinstrument_SOURCES = astroinstrument.cpp
-astroinstrument_DEPENDENCIES = ../lib/libastro.la
-astroinstrument_LDADD = -L../lib -lastro
+astroinstrument_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astroinstrument_LDADD = -L$(top_builddir)/lib -lastro
 
 astromount_SOURCES = astromount.cpp
-astromount_DEPENDENCIES = ../lib/libastro.la
-astromount_LDADD = -L../lib -lastro
+astromount_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astromount_LDADD = -L$(top_builddir)/lib -lastro
 
 guiderport_SOURCES = guiderport.cpp
-guiderport_DEPENDENCIES = ../lib/libastro.la
-guiderport_LDADD = -L../lib -lastro
+guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+guiderport_LDADD = -L$(top_builddir)/lib -lastro
 
 sdiscover_SOURCES = sdiscover.cpp
-sdiscover_DEPENDENCIES = ../lib/libastro.la
-sdiscover_LDADD = -L../lib -lastro
+sdiscover_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+sdiscover_LDADD = -L$(top_builddir)/lib -lastro
 
 spublish_SOURCES = spublish.cpp
-spublish_DEPENDENCIES = ../lib/libastro.la
-spublish_LDADD = -L../lib -lastro
+spublish_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+spublish_LDADD = -L$(top_builddir)/lib -lastro
 
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.
