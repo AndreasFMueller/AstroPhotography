@@ -5,6 +5,18 @@
 #
 SUBDIRS = . test
 
+catalogs_ldadd = -lcppunit						\
+	-L$(top_builddir)/lib/catalogs -lastrocatalogs			\
+	-L$(top_builddir)/lib/image -lastroimage			\
+	-L$(top_builddir)/lib/utils -lastroutils
+catalogs_dependencies =							\
+	$(top_builddir)/lib/utils/libastroutils.la			\
+	$(top_builddir)/lib/image/libastroimage.la			\
+	$(top_builddir)/lib/catalogs/libastrocatalogs.la
+
+
+noinst_PROGRAMS = listcatalog
+
 noinst_HEADERS =							\
 	BSC.h								\
 	CatalogBackend.h						\
@@ -17,6 +29,10 @@ noinst_HEADERS =							\
 
 noinst_LTLIBRARIES = libastrocatalogs.la
 
+listcatalog_SOURCES = listcatalog.cpp
+listcatalog_DEPENDENCIES = $(catalogs_dependencies)
+listcatalog_LDADD = $(catalogs_ldadd)
+
 libastrocatalogs_la_SOURCES =						\
 	BSC.cpp								\
 	Catalog.cpp							\
@@ -25,6 +41,8 @@ libastrocatalogs_la_SOURCES =						\
 	CatalogIterator.cpp						\
 	Chart.cpp							\
 	DatabaseBackend.cpp						\
+	DatabaseBackendCreator.cpp					\
+	DatabaseBackendIterator.cpp					\
 	FileBackend.cpp							\
 	FileBackendIterator.cpp						\
 	Hipparcos.cpp							\

@@ -18,9 +18,9 @@ namespace catalog {
  * \brief Tycho2 Star
  */
 class Tycho2Star : public Star {
-	void	setup(const std::string& line);
+	void	setup(unsigned int index, const std::string& line);
 public:
-	Tycho2Star(const std::string& line);
+	Tycho2Star(const std::string& line, unsigned int index = 0);
 };
 
 /**

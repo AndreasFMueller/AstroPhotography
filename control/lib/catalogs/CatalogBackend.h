@@ -78,19 +78,53 @@ private:
  */
 class DatabaseBackend : public Catalog {
 	sqlite3	*db;
-	sqlite3_stmt	*stmt;
 public:
 	DatabaseBackend(const std::string& dbfilename);
 	virtual ~DatabaseBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
-	void	prepare();
-	void	add(int id, const Star& star);
-	void	finalize();
-	void	clear();
 	virtual Star	find(const std::string& name);
-	void	createindex();
 	virtual  unsigned long	numberOfStars();
+	CatalogIterator	begin();
+	CatalogIterator	end();
+};
+
+/**
+ * \brief Class to create a backend database
+ */
+class DatabaseBackendCreator {
+	sqlite3	*db;
+	sqlite3_stmt	*stmt;
+	int	id;
+	// private copy and assignment constructors
+	DatabaseBackendCreator(const DatabaseBackendCreator& other);
+	DatabaseBackendCreator&	operator=(const DatabaseBackendCreator& other);
+public:
+	DatabaseBackendCreator(const std::string& dbfilename);
+	~DatabaseBackendCreator();
+	void	prepare();
+	void	finalize();
+	void	createindex();
+	void	clear();
+	void	add(const Star& star);
+};
+
+/**
+ * \brief Iterator for the database
+ */
+class DatabaseBackendIterator : public IteratorImplementation {
+	sqlite3_stmt	*stmt;
+	StarPtr	current_star;
+	int	id;
+public:
+	DatabaseBackendIterator(sqlite3 *db, bool begin_or_end);
+	virtual ~DatabaseBackendIterator();
+	virtual Star	operator*();
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual bool	operator==(const DatabaseBackendIterator& other) const;
+	virtual std::string	toString() const;
+private:
+	virtual void	increment();
 };
 
 } // namespace catalog

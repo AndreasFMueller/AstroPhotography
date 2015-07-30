@@ -56,13 +56,6 @@ std::string	MagnitudeRange::toString() const {
 Catalog::~Catalog() {
 }
 
-/**
- * \brief forward adding a star to the backend
- */
-void	Catalog::add(int id, const Star& star) {
-	throw std::runtime_error("this catalog type cannot add stars");
-}
-
 CatalogIterator	Catalog::begin() {
 	std::string	msg = stringprintf("%s::begin() not implemented",
 				typeid(*this).name());

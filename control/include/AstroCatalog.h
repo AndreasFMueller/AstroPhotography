@@ -62,6 +62,9 @@ public:
 	void	mag(float m) { _mag = m; }
 };
 
+class Star;
+typedef std::shared_ptr<Star>	StarPtr;
+
 /**
  * \brief Star base class
  *
@@ -181,7 +184,6 @@ public:
 
 	// find and add individual stars
 	virtual Star	find(const std::string& name) = 0;
-	virtual void	add(int id, const Star& star);
 
 	// types for search results
 	typedef	std::set<Star>	starset;

@@ -5,10 +5,7 @@
  */
 #include <AstroCatalog.h>
 #include <AstroFormat.h>
-#include <CatalogBackend.h>
-#include <Hipparcos.h>
-#include <Tycho2.h>
-#include <Ucac4.h>
+#include "../lib/catalogs/CatalogBackend.h"
 #include <includes.h>
 #include <iostream>
 #include <typeinfo>
@@ -21,32 +18,59 @@ namespace app {
 namespace buildcatalog {
 
 static struct option	longopts[] = {
-{ "debug",	no_argument,		NULL,		'd' }, /* 0 */
-{ "hipparchos", required_argument,	NULL,		'h' }, /* 1 */
-{ "tycho2",	required_argument,	NULL,		't' }, /* 2 */
-{ "ucac4",	required_argument,	NULL,		'u' }, /* 3 */
+{ "bsc",	required_argument,	NULL,		'B' }, /* 0 */
+{ "debug",	no_argument,		NULL,		'd' }, /* 1 */
+{ "help",	required_argument,	NULL,		'h' }, /* 2 */
+{ "hipparcos",	required_argument,	NULL,		'H' }, /* 3 */
+{ "tycho2",	required_argument,	NULL,		'T' }, /* 4 */
+{ "ucac4",	required_argument,	NULL,		'U' }, /* 5 */
 { NULL,		0,			NULL,		0   }
 };
+
+void	usage(const char *progname) {
+	std::cout << "usage: " << std::endl;
+	std::cout << "    " << progname << " [ options ] dbfile" << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " --debug,-d            increase debug level" << std::endl;
+	std::cout << " --help,-h,-?          display this help message";
+	std::cout << std::endl;
+	std::cout << " -B,--bsc=dir          Bright Star Catalog directory";
+	std::cout << std::endl;
+	std::cout << " -H,--hipparcos=dir    Hipparcos catalog directory";
+	std::cout << std::endl;
+	std::cout << " -T,--tycho2=dir       Tycho2 catalog directory";
+	std::cout << std::endl;
+	std::cout << " -U,--ucac4=dir        Ucacu4 catalog directory";
+	std::cout << std::endl;
+}
 
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	std::string	hipfile;
+	std::string	bscfile;
+	std::string	hipparcosfile;
 	std::string	tycho2file;
 	std::string	ucac4dir;
-	while (EOF != (c = getopt_long(argc, argv, "dh:t:u:", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "B:dhH:T:U:?", longopts,
 		&longindex)))
 		switch (c) {
+		case 'B':
+			bscfile = std::string(optarg);
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
 		case 'h':
-			hipfile = std::string(optarg);
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
+		case 'H':
+			hipparcosfile = std::string(optarg);
 			break;
-		case 't':
+		case 'T':
 			tycho2file = std::string(optarg);
 			break;
-		case 'u':
+		case 'U':
 			ucac4dir = std::string(optarg);
 			break;
 		}
@@ -58,91 +82,101 @@ int	main(int argc, char *argv[]) {
 	std::string	databasefilename(argv[optind++]);
 
 	// open the database catalog
-	DatabaseBackend	database(databasefilename);
-	database.clear();
+	DatabaseBackendCreator	database(databasefilename);
 	database.prepare();
-	int	id = 0;
-	int	counter = 0;
+
+	// open the Bright star catalog
+	if (bscfile.size()) {
+		CatalogPtr	catalog
+			= CatalogFactory::get(CatalogFactory::BSC, bscfile);
+		CatalogIterator	i;
+		for (i = catalog->begin(); i != catalog->end(); ++i) {
+			Star	s = *i;
+			database.add(s);
+		}
+	}
 
 	// open the hipparcos catalog
-#if 0
-	Hipparcos	hipparcos(hipfile);
-	Hipparcos::const_iterator	s;
-	for (s = hipparcos.begin(); s != hipparcos.end(); s++) {
-		Star	star = s->second;
-		database.add(id++, star);
-		counter++;
-		if (0 == (counter % 10000)) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from "
-				"Hipparcos so far", counter);
+	if (hipparcosfile.size()) {
+		int	counter = 0;
+		CatalogPtr	catalog
+			= CatalogFactory::get(CatalogFactory::Hipparcos,
+				hipparcosfile);
+		CatalogIterator	i;
+		for (i = catalog->begin(); i != catalog->end(); ++i) {
+			Star	s = *i;
+			database.add(s);
+			counter++;
+			if (0 == (counter % 10000)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%d Hipparcos stars added", counter);
+			}
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "total %d Hipparcos stars added",
+			counter);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Hipparcos catalog disabled");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Hipparcos", counter);
-#else
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Hipparcos catalog disabled");
-#endif
 
 	// open the Tycho2 catalog
-#if 0
-	Tycho2	tycho2(tycho2file);
-	unsigned int	index;
-	counter = 0;
-	for (index = 0; index < tycho2.nstars(); index++) {
-		try {
-			Tycho2Star	tycho2star = tycho2.find(index);
-			if (!tycho2star.isHipparcosStar()) {
-				Star	star = tycho2star;
-				std::string	name = stringprintf("T%u",
-							index);
-				database.add(id++, star);
+	if (tycho2file.size()) {
+		int	counter = 0;
+		CatalogPtr	catalog
+			= CatalogFactory::get(CatalogFactory::Tycho2,
+				tycho2file);
+		CatalogIterator	i;
+		for (i = catalog->begin(); i != catalog->end(); ++i) {
+			try {
+				Star	s = *i;
+				database.add(s);
 				counter++;
-				if (0 == (counter % 10000)) {
+				if (0 == (counter % 100000)) {
 					debug(LOG_DEBUG, DEBUG_LOG, 0,
-						"%d stars added from "
-						"Tycho2 so far", counter);
-				}
-			}
-		} catch (const std::exception& x) {
-			//debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping index %u: %s",
-			//	index, x.what());
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Tycho2", counter);
-#else
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Tycho-2 catalog disabled");
-#endif
-
-#if 1
-	// open UCAC4 catalog
-	CatalogPtr	ucac4 = CatalogFactory::get(CatalogFactory::Ucac4,
-				ucac4dir);
-	Ucac4	ucac4(ucac4dir);
-	counter = 0;
-	for (uint16_t zonenumber = 1; zonenumber <= 900; zonenumber++) {
-		Ucac4ZonePtr	zone = ucac4.zone(zonenumber);
-		for (uint32_t number = 1; number <= zone->nstars(); number++) {
-			Ucac4Star	ucac4star = zone->get(number);
-			if (!ucac4star.hiptyc2) {
-				Star	star = ucac4star;
-				database.add(id++, star);
-				counter++;
-				if (0 == (counter % 10000)) {
-					debug(LOG_DEBUG, DEBUG_LOG, 0,
-						"%d stars added from Ucac4 so far",
+						"%d Tycho2 stars added",
 						counter);
 				}
+			} catch (const std::exception x) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"tycho2 catalog error at %d: %s",
+					counter, x.what());
 			}
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "total %d Tycho2 stars added",
+			counter);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Tycho2 catalog disabled");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars added from Ucac4", counter);
-#else
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "UCAC4 catalog disabled");
-#endif
 
+	// open the Ucac4 catalog
+	if (ucac4dir.size()) {
+		int	counter = 0;
+		CatalogPtr	catalog
+			= CatalogFactory::get(CatalogFactory::Ucac4,
+				ucac4dir);
+		CatalogIterator	i;
+		for (i = catalog->begin(); i != catalog->end(); ++i) {
+			Star	s = *i;
+			database.add(s);
+			counter++;
+			if (0 == (counter % 1000000)) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"%d Ucac4 stars added", counter);
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "total %d Ucac4 stars added",
+			counter);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "UCAC4 catalog disabled");
+	}
+
+	// cleanup
 	database.finalize();
 
+	// create an index for RA/DEC
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating index");
 		database.createindex();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "index created");
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "error while creating index: %s",
 			x.what());

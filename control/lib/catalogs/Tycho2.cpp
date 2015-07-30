@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <limits>
 
 namespace astro {
 namespace catalog {
@@ -16,17 +17,19 @@ namespace catalog {
 //////////////////////////////////////////////////////////////////////
 // Tycho2 star class implementation
 //////////////////////////////////////////////////////////////////////
-void	Tycho2Star::setup(const std::string& line) {
+void	Tycho2Star::setup(unsigned int index, const std::string& line) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "creating star from line '%s'",
 	//	line.c_str());
 
 	// check position flag
 	if ('X' == line[13]) {
-		throw std::runtime_error("record has no position");
+		std::string	msg = stringprintf("record %u, no position",
+					index);
+		throw std::runtime_error(msg);
 	}
 	if (line.size() != TYCHO2_RECORD_LENGTH) {
-		std::string	msg = stringprintf("bad record length %d",
-					line.size());
+		std::string	msg = stringprintf("bad record[%u] length %d",
+					index, line.size());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -38,11 +41,22 @@ void	Tycho2Star::setup(const std::string& line) {
 	catalognumber(std::stoull(number));
 
 	// get magnitude
-	float	vt = std::stod(line.substr(123, 6));
+	float	vt = std::numeric_limits<float>::infinity();
+	try {
+		vt = std::stod(line.substr(123, 6));
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot parse magnitude: %s",
+			line.substr(123, 6).c_str());
+		throw std::runtime_error(msg);
+	}
 	float	bt = vt;
 	try {
 		bt = std::stod(line.substr(110, 6));
-	} catch (...) { }
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("cannot parse magnitude: %s",
+			line.substr(110, 6).c_str());
+		throw std::runtime_error(msg);
+	}
 	mag(vt - 0.090 * (bt - vt));
 
 	// RA and DEC
@@ -50,8 +64,8 @@ void	Tycho2Star::setup(const std::string& line) {
 		ra().degrees(std::stod(line.substr(15, 12)));
 		dec().degrees(std::stod(line.substr(28, 12)));
 	} catch (const std::exception& x) {
-		std::string	msg = stringprintf("cannot parse position: %s",
-					x.what());
+		std::string	msg = stringprintf("record[%u] cannot parse "
+					"position: %s", index, x.what());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -61,8 +75,8 @@ void	Tycho2Star::setup(const std::string& line) {
 		pm().ra().degrees(std::stod(line.substr(41, 7)) / 3600000);
 		pm().dec().degrees(std::stod(line.substr(49, 7)) / 3600000);
 	} catch (const std::exception& x) {
-		std::string	msg = stringprintf("cannot parse proper motion:"
-					" %s", x.what());
+		std::string	msg = stringprintf("cannot parse proper motion "
+					"in record[%u]: %s", index, x.what());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -76,9 +90,9 @@ void	Tycho2Star::setup(const std::string& line) {
 	}
 }
 
-Tycho2Star::Tycho2Star(const std::string& line)
+Tycho2Star::Tycho2Star(const std::string& line, unsigned int index)
 	: Star(std::string("T") + line.substr(0, 12)) {
-	setup(line);
+	setup(index, line);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -129,7 +143,7 @@ Tycho2Star	Tycho2::find(unsigned int index) const {
 	if (index >= nstars()) {
 		throw std::runtime_error("not that many stars in Tycho2");
 	}
-	return Tycho2Star(get(index));
+	return Tycho2Star(get(index), index);
 }
 
 /**
