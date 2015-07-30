@@ -65,11 +65,11 @@ void	BSCTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star1.toString().c_str());
 
 	BSCStar	star2 = catalog.find(9103);
-	CPPUNIT_ASSERT(star2.longname() == " 3    Cet");
+	CPPUNIT_ASSERT(star2.longname() == "3    Cet");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star2.toString().c_str());
 
 	Star	star3 = catalog.find(std::string("BSC4450"));
-	CPPUNIT_ASSERT(star3.longname() == "  Xi  Hya");
+	CPPUNIT_ASSERT(star3.longname() == "Xi  Hya");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star3.toString().c_str());
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
@@ -85,6 +85,8 @@ void	BSCTest::testIterator() {
 		counter++;
 		if (counter == 15) {
 			Star	s = *i;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "star[15] = %s",
+				s.toString().c_str());
 			CPPUNIT_ASSERT(s.longname() == std::string("21Alp And"));
 		}
 	}

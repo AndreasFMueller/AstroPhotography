@@ -55,13 +55,13 @@ void	FileBackendTest::testConstructor() {
 void	FileBackendTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
 
-	astro::catalog::Star	star1 = catalog->find("BSC1234");
+	astro::catalog::Star	star1 = catalog->find("BSC1231");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star1 = '%s'",
 		star1.longname().c_str());
 	CPPUNIT_ASSERT(star1.catalog() == 'B');
-	CPPUNIT_ASSERT(star1.longname() == std::string("BSC1234"));
+	CPPUNIT_ASSERT(star1.longname() == std::string("34Gam Eri"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%llu", star1.catalognumber());
-	CPPUNIT_ASSERT(star1.catalognumber() == 1234);
+	CPPUNIT_ASSERT(star1.catalognumber() == 1231);
 
 	astro::catalog::Star	star2 = catalog->find("HIP004711");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star2 = '%s'",

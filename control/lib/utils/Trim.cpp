@@ -13,8 +13,6 @@ namespace astro {
  */
 std::string	trim(const std::string& s) {
 	std::string	ss = rtrim(ltrim(s));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "trim('%s') = '%s'",
-		s.c_str(), ss.c_str());
 	return ss;
 }
 

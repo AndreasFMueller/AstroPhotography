@@ -39,7 +39,7 @@ BSCStar::BSCStar(const char *l) : Star(BSCname(l)) {
 	}
 
 	try {
-		longname(stringprintf("BSC%04u", number));
+		longname(trim(line.substr(5, 9)));
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot extract name: %s",
 			line.substr(4, 10).c_str());
