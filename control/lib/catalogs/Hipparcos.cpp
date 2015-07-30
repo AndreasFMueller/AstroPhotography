@@ -100,8 +100,8 @@ static std::string	hipparcos_filename(const std::string filename) {
  * \param filename	the Hipparcos main database file, usually called
  *			hip_main.dat
  */
-Hipparcos::Hipparcos(const std::string& filename) : MappedFile(filename, 451),
-	_filename(filename) {
+Hipparcos::Hipparcos(const std::string& filename)
+	: MappedFile(hipparcos_filename(filename), 451) {
 	int	skipped = 0;
 	for (size_t recno = 0; recno < nrecords(); recno++) {
 		std::string	record = get(recno);

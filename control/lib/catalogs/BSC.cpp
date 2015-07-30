@@ -27,21 +27,25 @@ static std::string	BSCname(const char *line) {
 }
 
 BSCStar::BSCStar(const char *l) : Star(BSCname(l)) {
+	catalog('B');
 	std::string	line(l);
 	try {
 		number = std::stoi(line.substr(0, 4));
+		catalognumber(number);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot parse number: %s",
 			line.substr(0, 4).c_str());
 		throw std::runtime_error("cannot parse object number");
 	}
+
 	try {
-		longname(rtrim(line.substr(5, 9)));
+		longname(stringprintf("BSC%04u", number));
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot extract name: %s",
 			line.substr(4, 10).c_str());
 		throw std::runtime_error("cannot set long name");
 	}
+
 	try {
 		sao = std::stoi(line.substr(31,6));
 	} catch (...) {

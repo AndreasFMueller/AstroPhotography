@@ -116,7 +116,7 @@ static std::string	Tycho2filename(const std::string& filename) {
 }
 
 Tycho2::Tycho2(const std::string& filename)
-	: MappedFile(filename, TYCHO2_RECORD_LENGTH), _filename(filename) {
+	: MappedFile(Tycho2filename(filename), TYCHO2_RECORD_LENGTH) {
 }
 
 Tycho2::~Tycho2() {

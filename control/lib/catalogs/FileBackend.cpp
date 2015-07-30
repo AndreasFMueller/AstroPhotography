@@ -1,5 +1,5 @@
 /*
- * FileBAckend.cpp
+ * FileBackend.cpp
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil 
  */
@@ -35,10 +35,14 @@ static void	require(const std::string& filename) {
  */
 FileBackend::FileBackend(const std::string& basedir) : _basedir(basedir) {
 	// ensure that the files for the file backend exist
-	bsc_catalog = CatalogPtr(new BSC(_basedir));
-	hipparcos_catalog = CatalogPtr(new Hipparcos(_basedir));
-	tycho2_catalog = CatalogPtr(new Tycho2(_basedir));
-	ucac4_catalog = CatalogPtr(new Ucac4(_basedir));
+	bsc_catalog = CatalogPtr(new BSC(_basedir
+					+ std::string("/bsc")));
+	hipparcos_catalog = CatalogPtr(new Hipparcos(_basedir
+					+ std::string("/hipparcos")));
+	tycho2_catalog = CatalogPtr(new Tycho2(_basedir
+					+ std::string("/tycho2")));
+	ucac4_catalog = CatalogPtr(new Ucac4(_basedir
+					+ std::string("/u4")));
 }
 
 /**
@@ -133,6 +137,12 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
  * \brief Get a star from the unified catalogs by name
  */
 Star	FileBackend::find(const std::string& name) {
+	// check for BSC stars
+	if (name.substr(0, 3) == "BSC") {
+		Star	star = bsc_catalog->find(name);
+		return star;
+	}
+
 	// check for Hipparcos stars
 	if (name.substr(0, 3) == "HIP") {
 		Star	star = hipparcos_catalog->find(name);
@@ -160,6 +170,16 @@ unsigned long	FileBackend::numberOfStars() {
 	result += tycho2_catalog->numberOfStars();
 	result += ucac4_catalog->numberOfStars();
 	return result;
+}
+
+CatalogIterator	FileBackend::begin() {
+	IteratorImplementationPtr	impl(new FileBackendIterator(*this, true));
+	return CatalogIterator(impl);
+}
+
+CatalogIterator	FileBackend::end() {
+	IteratorImplementationPtr	impl(new FileBackendIterator(*this, false));
+	return CatalogIterator(impl);
 }
 
 } // namespace catalog

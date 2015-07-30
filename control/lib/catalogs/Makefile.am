@@ -26,6 +26,7 @@ libastrocatalogs_la_SOURCES =						\
 	Chart.cpp							\
 	DatabaseBackend.cpp						\
 	FileBackend.cpp							\
+	FileBackendIterator.cpp						\
 	Hipparcos.cpp							\
 	ImageGeometry.cpp						\
 	ImageNormalizer.cpp						\

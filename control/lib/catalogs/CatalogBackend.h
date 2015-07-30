@@ -8,6 +8,7 @@
 
 #include <AstroCatalog.h>
 #include <sqlite3.h>
+#include "CatalogIterator.h"
 
 namespace astro {
 namespace catalog {
@@ -29,6 +30,8 @@ public:
 	virtual void	add(int id, const Star& star);
 };
 
+class FileBackendIterator;
+
 /**
  * \brief Backend combining existing catalogs
  */
@@ -38,6 +41,7 @@ class FileBackend : public Catalog {
 	CatalogPtr	hipparcos_catalog;
 	CatalogPtr	tycho2_catalog;
 	CatalogPtr	ucac4_catalog;
+friend class FileBackendIterator;
 public:
 	FileBackend(const std::string& basedir);
 	virtual ~FileBackend();
@@ -45,6 +49,28 @@ public:
 						const MagnitudeRange& magrange);
 	virtual Star	find(const std::string& name);
 	virtual unsigned long	numberOfStars();
+	virtual CatalogIterator	begin();
+	virtual CatalogIterator	end();
+};
+
+/*
+ * \brief Iterator class for the FileBackend
+ */
+class FileBackendIterator : public IteratorImplementation {
+	FileBackend&	_filebackend;
+	CatalogFactory::BackendType	current_backend;
+	CatalogPtr	current_catalog;
+	CatalogIterator	current_iterator;
+	bool	endreached;
+public:
+	FileBackendIterator(FileBackend& filebackend, bool begin_or_end);
+	virtual ~FileBackendIterator();
+	virtual Star	operator*();
+	bool	operator==(const FileBackendIterator& other) const;
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual std::string	toString() const;
+private:
+	virtual	void	increment();
 };
 
 /**

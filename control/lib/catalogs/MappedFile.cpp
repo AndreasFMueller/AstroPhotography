@@ -16,7 +16,7 @@ namespace catalog {
  * \brief Construct a Mapped file
  */
 MappedFile::MappedFile(const std::string& filename, size_t recordlength)
-	: _recordlength(recordlength) {
+	: _filename(filename), _recordlength(recordlength) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mapping file '%s'", filename.c_str());
 	// stat the file
 	struct stat	sb;

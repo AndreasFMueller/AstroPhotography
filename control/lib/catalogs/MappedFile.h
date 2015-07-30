@@ -15,6 +15,9 @@ namespace catalog {
  * \brief Abstraction for files mapped into the address space
  */
 class MappedFile {
+	std::string	_filename;
+public:
+	const std::string&	filename() const { return _filename; }
 	size_t	_recordlength;
 	void	*data_ptr;
 	size_t	data_len;

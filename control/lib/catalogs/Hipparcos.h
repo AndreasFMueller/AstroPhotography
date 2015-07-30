@@ -34,7 +34,6 @@ public:
  * \brief Hipparcos Star catalog
  */
 class Hipparcos : public MappedFile, public Catalog {
-	std::string	_filename;
 public:
 	typedef std::map<unsigned int, HipparcosStar>	starmap_t;
 private:

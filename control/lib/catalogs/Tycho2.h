@@ -27,7 +27,6 @@ public:
  * \brief Tycho2 catalog 
  */
 class Tycho2 : public MappedFile, public Catalog {
-	std::string	_filename;
 public:
 	unsigned int	nstars() const { return nrecords(); }
 
