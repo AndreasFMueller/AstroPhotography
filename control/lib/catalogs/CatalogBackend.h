@@ -61,7 +61,6 @@ class FileBackendIterator : public IteratorImplementation {
 	CatalogFactory::BackendType	current_backend;
 	CatalogPtr	current_catalog;
 	CatalogIterator	current_iterator;
-	bool	endreached;
 public:
 	FileBackendIterator(FileBackend& filebackend, bool begin_or_end);
 	virtual ~FileBackendIterator();
@@ -69,7 +68,6 @@ public:
 	bool	operator==(const FileBackendIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	virtual std::string	toString() const;
-private:
 	virtual	void	increment();
 };
 
@@ -123,7 +121,6 @@ public:
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	virtual bool	operator==(const DatabaseBackendIterator& other) const;
 	virtual std::string	toString() const;
-private:
 	virtual void	increment();
 };
 

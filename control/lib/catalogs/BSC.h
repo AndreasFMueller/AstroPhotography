@@ -49,22 +49,25 @@ public:
 	BSCStar	find(int number);
 	virtual Star	find(const std::string& name);
 	virtual starsetptr	find(const SkyWindow& window,
-				const MagnitudeRange& magrange);
+					const MagnitudeRange& magrange);
 	virtual unsigned long	numberOfStars();
 
 	virtual CatalogIterator	begin();
 	virtual CatalogIterator	end();
 };
 
+/**
+ * \brief Iterator for BSC catalog
+ */
 class BSCIterator : public IteratorImplementation {
+	BSC::starmap_t&	_stars;
 	BSC::starmap_t::iterator	_i;
 public:
-	BSCIterator(BSC::starmap_t::iterator i);
+	BSCIterator(BSC::starmap_t& stars, bool begin_or_end);
 	virtual Star	operator*();
 	bool	operator==(const BSCIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	virtual std::string	toString() const;
-private:
 	virtual void	increment();
 };
 

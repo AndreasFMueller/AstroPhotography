@@ -9,17 +9,17 @@ namespace astro {
 namespace catalog {
 
 FileBackendIterator::FileBackendIterator(FileBackend& filebackend,
-	bool begin_or_end) : _filebackend(filebackend) {
+	bool begin_or_end)
+		: IteratorImplementation(begin_or_end),
+		  _filebackend(filebackend) {
 	if (begin_or_end) {
 		current_backend = CatalogFactory::BSC;
 		current_catalog = filebackend.bsc_catalog;
 		current_iterator = current_catalog->begin();
-		endreached = false;
 	} else {
 		current_backend = CatalogFactory::Ucac4;
 		current_catalog = filebackend.ucac4_catalog;
 		current_iterator = current_catalog->end();
-		endreached = true;
 	}
 }
 
@@ -27,7 +27,7 @@ FileBackendIterator::~FileBackendIterator() {
 }
 
 bool	FileBackendIterator::operator==(const FileBackendIterator& other) const {
-	if (endreached == other.endreached) {
+	if (isEnd() == other.isEnd()) {
 		return true;
 	}
 	if (current_backend != other.current_backend) {
@@ -45,7 +45,7 @@ bool	FileBackendIterator::operator==(const IteratorImplementation& other) const 
 
 void	FileBackendIterator::increment() {
 	// make sure we are not at the end of the last catalog
-	if (endreached) {
+	if (isEnd()) {
 		return;
 	}
 
@@ -70,7 +70,7 @@ void	FileBackendIterator::increment() {
 		current_catalog = _filebackend.ucac4_catalog;
 		break;
 	case CatalogFactory::Ucac4:
-		endreached = true;
+		_isEnd = true;
 		return;
 	}
 	current_iterator = current_catalog->begin();

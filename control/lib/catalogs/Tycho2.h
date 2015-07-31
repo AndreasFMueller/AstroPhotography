@@ -67,7 +67,6 @@ public:
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	bool	operator==(const Tycho2Iterator& other) const;
 	virtual std::string	toString() const;
-private:
 	virtual void	increment();
 };
 

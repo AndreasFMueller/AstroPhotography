@@ -13,6 +13,10 @@
 namespace astro {
 namespace catalog {
 
+IteratorImplementation::IteratorImplementation(bool begin_or_end)
+	: _isEnd(!begin_or_end) {
+}
+
 IteratorImplementation::~IteratorImplementation() {
 }
 

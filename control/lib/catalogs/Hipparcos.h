@@ -54,14 +54,14 @@ public:
  * \brief Iterator for the Hipparcos catalog
  */
 class HipparcosIterator : public IteratorImplementation {
+	Hipparcos::starmap_t&	_stars;
 	Hipparcos::starmap_t::iterator	_i;
 public:
-	HipparcosIterator(Hipparcos::starmap_t::iterator i);
+	HipparcosIterator(Hipparcos::starmap_t& stars, bool begin_or_end);
 	virtual Star	operator*();
 	bool	operator==(const HipparcosIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	virtual std::string	toString() const;
-private:
 	virtual void	increment();
 };
 

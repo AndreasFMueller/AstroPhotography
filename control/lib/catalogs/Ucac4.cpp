@@ -381,7 +381,11 @@ unsigned long	Ucac4Zone::numberOfStars() {
 // Ucac4Iterator implementation
 //////////////////////////////////////////////////////////////////////
 Ucac4Iterator::Ucac4Iterator(uint16_t zone, uint32_t index, Ucac4& catalog)
-	: _zone(zone), _index(index), _catalog(catalog) {
+	: IteratorImplementation(zone > 900),
+	  _zone(zone), _index(index), _catalog(catalog) {
+	if (_zone > 900) {
+		_index = 0;
+	}
 }
 
 Ucac4Iterator::~Ucac4Iterator() {
@@ -400,11 +404,15 @@ bool	Ucac4Iterator::operator==(const IteratorImplementation& other) const {
 }
 
 void	Ucac4Iterator::increment() {
+	if (isEnd()) {
+		return;
+	}
 	++_index;
 	if (_index >= _catalog.getzone(_zone)->numberOfStars()) {
 		++_zone;
 		if (_zone > 900) {
 			_zone = 901;
+			_isEnd = true;
 		}
 		_index = 0;
 	}

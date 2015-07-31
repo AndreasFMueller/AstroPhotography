@@ -231,19 +231,25 @@ unsigned long	BSC::numberOfStars() {
 }
 
 CatalogIterator	BSC::begin() {
-	IteratorImplementationPtr	impl(new BSCIterator(stars.begin()));
+	IteratorImplementationPtr	impl(new BSCIterator(stars, true));
 	return CatalogIterator(impl);
 }
 
 CatalogIterator	BSC::end() {
-	IteratorImplementationPtr	impl(new BSCIterator(stars.end()));
+	IteratorImplementationPtr	impl(new BSCIterator(stars, false));
 	return CatalogIterator(impl);
 }
 
 //////////////////////////////////////////////////////////////////////
 // BSCIterator implemenation
 //////////////////////////////////////////////////////////////////////
-BSCIterator::BSCIterator(BSC::starmap_t::iterator i) : _i(i) {
+BSCIterator::BSCIterator(BSC::starmap_t& stars, bool begin_or_end)
+	: IteratorImplementation(begin_or_end), _stars(stars) {
+	if (begin_or_end) {
+		_i = _stars.begin();
+	} else {
+		_i = _stars.end();
+	}
 }
 
 Star	BSCIterator::operator*() {
@@ -259,7 +265,11 @@ bool	BSCIterator::operator==(const IteratorImplementation& other) const {
 }
 
 void	BSCIterator::increment() {
+	if (_isEnd) {
+		return;
+	}
 	++_i;
+	_isEnd = _i == _stars.end();
 }
 
 std::string	BSCIterator::toString() const {

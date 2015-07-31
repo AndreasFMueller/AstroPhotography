@@ -164,20 +164,26 @@ unsigned long	Hipparcos::numberOfStars() {
 }
 
 CatalogIterator	Hipparcos::begin() {
-	IteratorImplementationPtr impl(new HipparcosIterator(stars.begin()));
+	IteratorImplementationPtr impl(new HipparcosIterator(stars, true));
 	return CatalogIterator(impl);
 }
 
 CatalogIterator	Hipparcos::end() {
-	IteratorImplementationPtr impl(new HipparcosIterator(stars.end()));
+	IteratorImplementationPtr impl(new HipparcosIterator(stars, false));
 	return CatalogIterator(impl);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Hipparcos Iterator implementation
 //////////////////////////////////////////////////////////////////////
-HipparcosIterator::HipparcosIterator(Hipparcos::starmap_t::iterator i)
-	: _i(i) {
+HipparcosIterator::HipparcosIterator(Hipparcos::starmap_t& stars,
+	bool begin_or_end)
+	: IteratorImplementation(begin_or_end), _stars(stars) {
+	if (begin_or_end) {
+		_i = _stars.begin();
+	} else {
+		_i = _stars.end();
+	}
 }
 
 Star	HipparcosIterator::operator*() {
@@ -193,7 +199,11 @@ bool	HipparcosIterator::operator==(const IteratorImplementation& other) const {
 }
 
 void	HipparcosIterator::increment() {
+	if (isEnd()) {
+		return;
+	}
 	++_i;
+	_isEnd = (_i == _stars.end());
 }
 
 std::string	HipparcosIterator::toString() const {

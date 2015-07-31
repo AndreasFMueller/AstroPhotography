@@ -40,6 +40,7 @@ libastrocatalogs_la_SOURCES =						\
 	CatalogFactory.cpp						\
 	CatalogIterator.cpp						\
 	Chart.cpp							\
+	ConditionIterator.cpp						\
 	DatabaseBackend.cpp						\
 	DatabaseBackendCreator.cpp					\
 	DatabaseBackendIterator.cpp					\
@@ -56,7 +57,8 @@ libastrocatalogs_la_SOURCES =						\
 	Star.cpp							\
 	StereographicChart.cpp						\
 	Tycho2.cpp							\
-	Ucac4.cpp
+	Ucac4.cpp							\
+	WindowPredicate.cpp
 
 libastrocatalogs_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

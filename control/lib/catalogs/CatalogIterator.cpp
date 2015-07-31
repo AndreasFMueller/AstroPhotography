@@ -57,5 +57,9 @@ std::string	CatalogIterator::toString() const {
 	return _implementation->toString();
 }
 
+bool	CatalogIterator::isEnd() const {
+	return _implementation->isEnd();
+}
+
 } // namespace catalog
 } // namespace astro

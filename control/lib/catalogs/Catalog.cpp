@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <includes.h>
 #include "CatalogBackend.h"
+#include "CatalogIterator.h"
 #include <typeinfo>
 
 namespace astro {
@@ -54,6 +55,22 @@ std::string	MagnitudeRange::toString() const {
  * \brief Destructor
  */
 Catalog::~Catalog() {
+}
+
+/**
+ * \brief Default window selection iterator
+ *
+ * This implementation uses a condition iterator on the standard iterator
+ * with a WindowPredicate. This will always work, but will be very inefficient
+ * with large catalogs.
+ */
+CatalogIterator	Catalog::findIter(const SkyWindow& window,
+		const MagnitudeRange& magrange) {
+	IteratorPredicatePtr	predicate(
+		new WindowPredicate(window, magrange));
+	IteratorImplementationPtr       impl(new ConditionIterator(
+		begin().implementation(), predicate, true));
+	return CatalogIterator(impl);
 }
 
 CatalogIterator	Catalog::begin() {

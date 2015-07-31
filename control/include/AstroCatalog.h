@@ -154,6 +154,11 @@ typedef std::shared_ptr<IteratorImplementation>	IteratorImplementationPtr;
  */
 class CatalogIterator {
 	IteratorImplementationPtr	_implementation;
+public:
+	IteratorImplementationPtr	implementation() const {
+		return _implementation;
+	}
+private:
 	void	check() const;
 public:
 	CatalogIterator(IteratorImplementationPtr implementation);
@@ -165,6 +170,7 @@ public:
 	bool	operator!=(const CatalogIterator& other) const;
 	CatalogIterator	operator++();
 	std::string	toString() const;
+	bool	isEnd() const;
 };
 
 class Catalog;
@@ -192,6 +198,8 @@ public:
 	// start to find the all stars in an a sky window
 	virtual starsetptr	find(const SkyWindow& window,
 					const MagnitudeRange& magrange) = 0;
+	virtual CatalogIterator	findIter(const SkyWindow& window,
+					const MagnitudeRange& magrange);
 	// some information about the size of the catalog
 	virtual unsigned long	numberOfStars() = 0;
 

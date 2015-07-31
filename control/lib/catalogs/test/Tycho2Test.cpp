@@ -24,12 +24,14 @@ public:
 	void	testAccess();
 	void	testIterator();
 	void	testWindow();
+	void	testWindowIterator();
 
 	CPPUNIT_TEST_SUITE(Tycho2Test);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testAccess);
 	CPPUNIT_TEST(testIterator);
 	CPPUNIT_TEST(testWindow);
+	CPPUNIT_TEST(testWindowIterator);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -106,12 +108,33 @@ void	Tycho2Test::testWindow() {
 	SkyWindow	window(center, width, height);
 	Tycho2::starsetptr	stars = catalog.find(window,
 					MagnitudeRange(-30., 4.5));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
 	Tycho2::starset::const_iterator	s;
 	for (s = stars->begin(); s != stars->end(); s++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s->toString().c_str());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d stars", stars->size());
+	CPPUNIT_ASSERT(stars->size() == 7);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
+}
+
+void	Tycho2Test::testWindowIterator() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindowIterator() begin");
+	Tycho2	catalog("/usr/local/starcatalogs/tycho2/tyc2.dat");
+	RaDec	center(0, 0);
+	center.ra().hours(6.75247702777777777777);
+	center.dec().degrees(-16.71611583333333333333);
+	Angle	width; width.hours(1);
+	Angle	height; height.degrees(15);
+	SkyWindow	window(center, width, height);
+	CatalogIterator	i = catalog.findIter(window, MagnitudeRange(-30., 4.5));
+	unsigned long long	counter = 0;
+	for (; !i.isEnd(); ++i) {
+		counter++;
+		Star	s = *i;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s.toString().c_str());
+	}
+	CPPUNIT_ASSERT(counter == 7);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindowIterator() end");
 }
 
 } // namespace test

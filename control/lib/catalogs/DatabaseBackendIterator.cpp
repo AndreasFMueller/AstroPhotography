@@ -8,7 +8,8 @@
 namespace astro {
 namespace catalog {
 
-DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db, bool begin_or_end) {
+DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
+	bool begin_or_end) : IteratorImplementation(begin_or_end) {
 	id = 0;
 	if (!begin_or_end) {
 		stmt = NULL;
@@ -52,7 +53,7 @@ bool	DatabaseBackendIterator::operator==(const DatabaseBackendIterator& other) c
 	}
 
 	// comparison of end iterators
-	if ((stmt == NULL) && (other.stmt == NULL)) {
+	if (isEnd() && other.isEnd()) {
 		return true;
 	}
 
@@ -70,6 +71,7 @@ void	DatabaseBackendIterator::increment() {
 	if (rc != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		stmt = NULL;
+		_isEnd = false;
 		return;
 	}
 

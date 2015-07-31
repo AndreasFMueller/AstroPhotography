@@ -150,7 +150,6 @@ public:
 	bool	operator==(const Ucac4Iterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	std::string	toString() const;
-private:
 	virtual void	increment();
 };
 

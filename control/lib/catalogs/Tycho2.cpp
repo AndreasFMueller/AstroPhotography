@@ -256,18 +256,25 @@ CatalogIterator	Tycho2::end() {
 // Tycho2 iterator implementation
 //////////////////////////////////////////////////////////////////////
 
-Tycho2Iterator::Tycho2Iterator(unsigned int index, Tycho2& catalog)
-	: _index(index), _catalog(catalog) {
+Tycho2Iterator::Tycho2Iterator(unsigned int index, Tycho2& catalog) 
+	: IteratorImplementation(true), _index(index), _catalog(catalog) {
+	_isEnd = (_index >= _catalog.numberOfStars());
 }
 
 Tycho2Iterator::~Tycho2Iterator() {
 }
 
 Star 	Tycho2Iterator::operator*() {
+	if (isEnd()) {
+		throw std::logic_error("cannot dereference end iterator");
+	}
 	return _catalog.find(_index);
 }
 
 bool	Tycho2Iterator::operator==(const Tycho2Iterator& other) const {
+	if (isEnd() != other.isEnd()) {
+		return false;
+	}
 	return (_index == other._index);
 }
 
@@ -276,9 +283,13 @@ bool	Tycho2Iterator::operator==(const IteratorImplementation& other) const {
 }
 
 void	Tycho2Iterator::increment() {
+	if (isEnd()) {
+		return;
+	}
 	++_index;
-	if (_index > _catalog.numberOfStars()) {
+	if (_index >= _catalog.numberOfStars()) {
 		_index = _catalog.numberOfStars();
+		_isEnd = true;
 	}
 }
 
