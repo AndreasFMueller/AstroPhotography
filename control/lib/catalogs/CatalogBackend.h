@@ -133,6 +133,8 @@ class DatabaseBackendIterator : public IteratorImplementation {
 	int	id;
 public:
 	DatabaseBackendIterator(sqlite3 *db, bool begin_or_end);
+	DatabaseBackendIterator(sqlite3 *db, const SkyWindow& window,
+		const MagnitudeRange& magrange);
 	virtual ~DatabaseBackendIterator();
 	virtual Star	operator*();
 	virtual bool	operator==(const IteratorImplementation& other) const;
@@ -140,6 +142,14 @@ public:
 	virtual std::string	toString() const;
 	virtual void	increment();
 };
+
+// we will need the following macro to respond to bind errors
+#define	ADD_BIND_ERROR							\
+	if (rc != SQLITE_OK) {						\
+		std::string	msg = stringprintf("cannot bind: %d", rc);\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());	\
+		throw std::runtime_error(msg);				\
+	}
 
 } // namespace catalog
 } // namespace astro

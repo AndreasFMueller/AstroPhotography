@@ -32,6 +32,57 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 	increment();
 }
 
+DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
+	const SkyWindow& window, const MagnitudeRange& magrange)
+	: IteratorImplementation(true) {
+	id = 0;
+	double	left = window.leftra().hours();
+	double	right = window.rightra().hours();
+
+	char	query[1024];
+	strcpy(query,
+		"select id, ra, dec, pmra, pmdec, mag, catalog, catalognumber, "
+		"       name, longname "
+		"from star "
+		"where ? <= mag and mag <= ? "
+		"and ? <= dec and dec <= ? ");
+	if (left < right) {
+		strcat(query, "and ? <= ra and ra <= ? ");
+	} else {
+		strcat(query, "and (ra <= ? or ? <= ra)");
+	}
+	strcat(query, "order by id");
+
+	// prepare the statement
+	const char	*tail = NULL;
+	int	rc;
+	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query, strlen(query),
+		&stmt, &tail))) {
+		throw std::runtime_error("cannot prepare star lookup");
+	}
+
+	// bind the variables
+	rc = sqlite3_bind_double(stmt, 1, magrange.brightest());
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 2, magrange.faintest());
+	ADD_BIND_ERROR;
+	std::pair<double, double>	decs = window.decinterval();
+	rc = sqlite3_bind_double(stmt, 3, decs.first);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 4, decs.second);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 5, left);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 6, right);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 7, left);
+	ADD_BIND_ERROR;
+	rc = sqlite3_bind_double(stmt, 8, right);
+	ADD_BIND_ERROR;
+
+	increment();
+}
+
 DatabaseBackendIterator::~DatabaseBackendIterator() {
 	if (stmt) {
 		sqlite3_finalize(stmt);

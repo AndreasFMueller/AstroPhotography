@@ -151,12 +151,6 @@ void	DatabaseBackendCreator::add(const Star& star) {
 	}
 
 	// bind the values from the star
-#define	ADD_BIND_ERROR							\
-	if (rc != SQLITE_OK) {						\
-		std::string	msg = stringprintf("cannot bind: %d", rc);\
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());	\
-		throw std::runtime_error(msg);				\
-	}
 	rc = sqlite3_bind_int(stmt, 1, ++id);
 	ADD_BIND_ERROR;
 	rc = sqlite3_bind_double(stmt, 2, star.ra().hours());

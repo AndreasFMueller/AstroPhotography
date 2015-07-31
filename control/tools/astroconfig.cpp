@@ -212,8 +212,10 @@ int	command_list_global(const std::vector<std::string>& /* arguments */) {
  * \brief List all repositories
  */
 int	list_repo() {
-	std::list<ImageRepoInfo>	repoinfolist
-		= Configuration::get()->listrepo();
+	ConfigurationPtr	config = Configuration::get();
+	ImageRepoConfigurationPtr	imagerepos
+		= ImageRepoConfiguration::get(config);
+	std::list<ImageRepoInfo>	repoinfolist = imagerepos->listrepo();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d ImageRepoInfo objects",
 		repoinfolist.size());
 	std::for_each(repoinfolist.begin(), repoinfolist.end(),
@@ -236,6 +238,8 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		return EXIT_FAILURE;
 	}
 	ConfigurationPtr	configuration = Configuration::get();
+	ImageRepoConfigurationPtr	imagerepos
+		= ImageRepoConfiguration::get(configuration);
 	if (arguments[1] == "add") {
 		if (arguments.size() < 4) {
 			std::cerr << "not enough arguments for add command";
@@ -253,14 +257,14 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 				throw std::runtime_error(msg);
 			}
 		}
-		configuration->addrepo(reponame, directory);
+		imagerepos->addrepo(reponame, directory);
 		return EXIT_SUCCESS;
 	}
 	if (arguments[1] == "list") {
 		return list_repo();
 	}
 	if (arguments[1] == "remove") {
-		configuration->removerepo(arguments[2]);
+		imagerepos->removerepo(arguments[2]);
 		return EXIT_SUCCESS;
 	}
 	std::cerr << "unknown subcommand " << arguments[1] << std::endl;
@@ -277,8 +281,10 @@ int	command_server(const std::vector<std::string>& arguments) {
 	}
 	std::string	subcommand = arguments[1];
 	ConfigurationPtr	configuration = Configuration::get();
+	ServerConfigurationPtr	servers
+		= ServerConfiguration::get(configuration);
 	if (subcommand == "list") {
-		std::list<ServerInfo>	l = configuration->listservers();
+		std::list<ServerInfo>	l = servers->listservers();
 		std::for_each(l.begin(), l.end(),
 			[](const ServerInfo& s) {
 				std::cout << s.name() << std::endl;
@@ -292,7 +298,7 @@ int	command_server(const std::vector<std::string>& arguments) {
 	}
 	std::string	name = arguments[2];
 	if (subcommand == "show") {
-		ServerInfo	s = configuration->server(name);
+		ServerInfo	s = servers->server(name);
 		std::cout << "Name: " << s.name() << std::endl;
 		std::cout << "URL:  " << (std::string)s.servername()
 			<< std::endl;
@@ -300,7 +306,7 @@ int	command_server(const std::vector<std::string>& arguments) {
 		return EXIT_SUCCESS;
 	}
 	if (subcommand == "remove") {
-		configuration->removeserver(name);
+		servers->removeserver(name);
 		return EXIT_SUCCESS;
 	}
 	if (subcommand == "add") {
@@ -313,7 +319,7 @@ int	command_server(const std::vector<std::string>& arguments) {
 		if (arguments.size() >= 5) {
 			si.info(arguments[4]);
 		}
-		configuration->addserver(si);
+		servers->addserver(si);
 		return EXIT_SUCCESS;
 	}
 	return EXIT_FAILURE;

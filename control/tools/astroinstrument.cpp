@@ -11,7 +11,7 @@
 #include <AstroConfig.h>
 #include <AstroUtils.h>
 #include <AstroPersistence.h>
-#include <InstrumentTables.h>
+//#include <InstrumentTables.h>
 #include <algorithm>
 
 using namespace astro;
@@ -89,8 +89,11 @@ int	cmd_help() {
  * \brief List all known instruments
  */
 int	cmd_list() {
+	ConfigurationPtr	configuration = Configuration::get();
+	InstrumentConfigurationPtr	instrumentconfig
+		= InstrumentConfiguration::get(configuration);
 	std::list<InstrumentPtr>	instruments
-		= Configuration::get()->listinstruments();
+		= instrumentconfig->listinstruments();
 	std::for_each(instruments.begin(), instruments.end(),
 		[](InstrumentPtr instrument) {
 			std::cout << instrument->toString() << std::endl;
@@ -121,8 +124,11 @@ int	cmd_add(const std::string& instrumentname,
  */
 int	cmd_show(const std::string& instrumentname,
 		const std::vector<std::string>& /* arguments */) {
+	ConfigurationPtr	config = Configuration::get();
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
 	InstrumentPtr	instrument
-		= Configuration::get()->instrument(instrumentname);
+		= instruments->instrument(instrumentname);
 	std::cout << instrument->name();
 	std::list<DeviceName::device_type>	types
 		= instrument->component_types();
@@ -139,7 +145,10 @@ int	cmd_show(const std::string& instrumentname,
  */
 int	cmd_remove(const std::string& instrumentname,
 		const std::vector<std::string>& /* arguments */) {
-	Configuration::get()->removeInstrument(instrumentname);
+	ConfigurationPtr	config = Configuration::get();
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
+	instruments->removeInstrument(instrumentname);
 	return EXIT_SUCCESS;
 }
 
@@ -161,7 +170,9 @@ int	cmd_component_add(const std::string& instrumentname,
 		const std::vector<std::string>& arguments) {
 	// get the instrument to be changed
 	ConfigurationPtr	config = Configuration::get();
-	InstrumentPtr	instrument = config->instrument(instrumentname);
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
+	InstrumentPtr	instrument = instruments->instrument(instrumentname);
 
 	// interpret the component type
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "component type: %s",
@@ -224,8 +235,10 @@ int	cmd_component_add(const std::string& instrumentname,
 	// persist in the database
 	config->database()->begin("addcomponent");
 	try {
-		config->removeInstrument(instrumentname);
-		config->addInstrument(instrument);
+		InstrumentConfigurationPtr	instruments
+			= InstrumentConfiguration::get(config);
+		instruments->removeInstrument(instrumentname);
+		instruments->addInstrument(instrument);
 		config->database()->commit("addcomponent");
 	} catch (...) {
 		config->database()->rollback("addcomponent");
@@ -241,7 +254,9 @@ int	cmd_component_update(const std::string& instrumentname,
 		const std::vector<std::string>& arguments) {
 	// get the component to change
 	ConfigurationPtr	config = Configuration::get();
-	InstrumentPtr	instrument = config->instrument(instrumentname);
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
+	InstrumentPtr	instrument = instruments->instrument(instrumentname);
 	InstrumentComponentPtr	component = instrument->component(
 		InstrumentComponentTableAdapter::type(componenttype));
 
@@ -290,8 +305,8 @@ int	cmd_component_update(const std::string& instrumentname,
 	// persist in the database
 	config->database()->begin("updatecomponent");
 	try {
-		config->removeInstrument(instrumentname);
-		config->addInstrument(instrument);
+		instruments->removeInstrument(instrumentname);
+		instruments->addInstrument(instrument);
 		config->database()->commit("updatecomponent");
 	} catch (...) {
 		config->database()->rollback("updatecomponent");
@@ -306,8 +321,11 @@ int	cmd_component_update(const std::string& instrumentname,
 int	cmd_component_show(const std::string& instrumentname,
 		const std::string& componenttype,
 		const std::vector<std::string>& /* arguments */) {
+	ConfigurationPtr	config = Configuration::get();
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
 	InstrumentPtr	instrument
-		= Configuration::get()->instrument(instrumentname);
+		= instruments->instrument(instrumentname);
 	InstrumentComponentPtr	component = instrument->component(
 		InstrumentComponentTableAdapter::type(componenttype));
 	std::cout << componenttype << " component of instrument ";
@@ -323,14 +341,16 @@ int	cmd_component_remove(const std::string& instrumentname,
 		const std::string& componenttype,
 		const std::vector<std::string>& /* arguments */) {
 	ConfigurationPtr	config = Configuration::get();
+	InstrumentConfigurationPtr	instruments
+		= InstrumentConfiguration::get(config);
 	InstrumentPtr	instrument
-		= config->instrument(instrumentname);
+		= instruments->instrument(instrumentname);
 	instrument->remove(
 		InstrumentComponentTableAdapter::type(componenttype));
 	config->database()->begin("removecomponent");
 	try {
-		config->removeInstrument(instrumentname);
-		config->addInstrument(instrument);
+		instruments->removeInstrument(instrumentname);
+		instruments->addInstrument(instrument);
 		config->database()->commit("removecomponent");
 	} catch (...) {
 		config->database()->rollback("removecomponent");

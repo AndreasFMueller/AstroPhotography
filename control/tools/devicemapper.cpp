@@ -29,7 +29,10 @@ std::string	type("camera");
  * \brief list of device mappingslist of device mappings
  */
 int	list_cmd(const std::vector<std::string>& /* arguments */) {
-	DeviceMapperPtr	devicemapper = Configuration::get()->devicemapper();
+	ConfigurationPtr	configuration = Configuration::get();
+	DeviceMapperConfigurationPtr	devicemappers
+		= DeviceMapperConfiguration::get(configuration);
+	DeviceMapperPtr	devicemapper = devicemappers->devicemapper();
 	std::list<DeviceMap>	devices = devicemapper->select();
 	std::cout << "name     devicename                       unit server";
 	if (verbose) {
@@ -118,7 +121,9 @@ int	map_cmd(const std::vector<std::string> arguments) {
 
 	// get the current mapping entry
 	ConfigurationPtr	config = Configuration::get();
-	DeviceMapperPtr	devicemapper = config->devicemapper();
+	DeviceMapperConfigurationPtr	devicemappers
+		= DeviceMapperConfiguration::get(config);
+	DeviceMapperPtr	devicemapper = devicemappers->devicemapper();
 	DeviceMap	devmap(devname);
 	devmap.name(mapname);
 	bool	newmapping = false;
@@ -158,7 +163,10 @@ int	remove_cmd(const std::vector<std::string>& arguments) {
 		throw std::runtime_error("missing map name");
 	}
 	std::string	mapname = arguments[1];
-	Configuration::get()->devicemapper()->remove(mapname);
+	ConfigurationPtr	configuration = Configuration::get();
+	DeviceMapperConfigurationPtr	devicemappers
+		= DeviceMapperConfiguration::get(configuration);
+	devicemappers->devicemapper()->remove(mapname);
 	return EXIT_SUCCESS;
 }
 
