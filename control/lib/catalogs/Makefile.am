@@ -57,6 +57,12 @@ libastrocatalogs_la_SOURCES =						\
 	Star.cpp							\
 	StereographicChart.cpp						\
 	Tycho2.cpp							\
+	Ucac4Iterator.cpp						\
+	Ucac4Star.cpp							\
+	Ucac4StarNumber.cpp						\
+	Ucac4WindowIterator.cpp						\
+	Ucac4ZoneIterator.cpp						\
+	Ucac4Zone.cpp							\
 	Ucac4.cpp							\
 	WindowPredicate.cpp
 

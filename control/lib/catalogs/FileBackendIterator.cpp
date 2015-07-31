@@ -58,18 +58,22 @@ void	FileBackendIterator::increment() {
 	// now to the catalog specific stuff
 	switch (current_backend) {
 	case CatalogFactory::BSC:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "switching to Hipparcos");
 		current_backend = CatalogFactory::Hipparcos;
 		current_catalog = _filebackend.hipparcos_catalog;
 		break;
 	case CatalogFactory::Hipparcos:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "switching to Tycho2");
 		current_backend = CatalogFactory::Tycho2;
 		current_catalog = _filebackend.tycho2_catalog;
 		break;
 	case CatalogFactory::Tycho2:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "switching to Ucac4");
 		current_backend = CatalogFactory::Ucac4;
 		current_catalog = _filebackend.ucac4_catalog;
 		break;
 	case CatalogFactory::Ucac4:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot go beyond Ucac4");
 		_isEnd = true;
 		return;
 	}

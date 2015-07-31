@@ -25,12 +25,14 @@ public:
 	void	testNumber();
 	void	testAccess();
 	void	testIterator();
+	void	testWindow();
 
 	CPPUNIT_TEST_SUITE(Ucac4Test);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testNumber);
 	CPPUNIT_TEST(testAccess);
 	CPPUNIT_TEST(testIterator);
+	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -96,6 +98,27 @@ void	Ucac4Test::testIterator() {
 		counter, n);
 	CPPUNIT_ASSERT(counter == catalog.numberOfStars());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
+}
+
+void	Ucac4Test::testWindow() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
+	Ucac4	catalog("/usr/local/starcatalogs/u4");
+	RaDec   center(0, 0);
+	center.ra().hours(6.75247702777777777777);
+	center.dec().degrees(-16.71611583333333333333);
+	Angle	width; width.hours(1);
+	Angle	height; height.degrees(15);
+	SkyWindow	window(center, width, height);
+	CatalogIterator	i = catalog.findIter(window, MagnitudeRange(-30., 7.5));
+	unsigned long long	counter = 0;
+	for (; !i.isEnd(); ++i) {
+		counter++;
+		Star	s = *i;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s.toString().c_str());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%llu stars", counter);
+	CPPUNIT_ASSERT(counter == 88);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }
 
 } // namespace test

@@ -69,18 +69,13 @@ public:
 	bool	hiptyc2;
 
 	// constructor
-	Ucac4Star(const std::string& starnumber)
-		: Star(starnumber), number(starnumber) { }
-	Ucac4Star(uint16_t zone, uint32_t _number)
-		: Star(Ucac4StarNumber(zone, _number).toString()),
-		  number(zone, _number) { }
+	Ucac4Star(const std::string& starnumber);
+	Ucac4Star(uint16_t zone, uint32_t _number);
 
 	// additional methods
 	std::string	toString() const;
 
-	bool	operator<(const Ucac4Star& other) const {
-		return number < other.number;
-	}
+	bool	operator<(const Ucac4Star& other) const;
 };
 
 /**
@@ -95,9 +90,12 @@ public:
 	typedef std::set<Ucac4Star>	starset;
 	typedef std::shared_ptr<starset>	starsetptr;
 	Ucac4Zone(uint16_t zone, const std::string& zonefilename);
+	bool	touches(const SkyWindow& window) const;
 	Ucac4Star	get(uint32_t number) const;
 	uint32_t	first(const Angle& ra) const;
 	starsetptr	find(const SkyWindow& window,
+				const MagnitudeRange& magrange);
+	CatalogIterator	findIter(const SkyWindow& window,
 				const MagnitudeRange& magrange);
 	starsetptr	add(starsetptr set, const SkyWindow& window,
 				const MagnitudeRange& magrange);
@@ -108,7 +106,35 @@ public:
 };
 typedef std::shared_ptr<Ucac4Zone>	Ucac4ZonePtr;
 
+/**
+ * \brief An iterator that returns only the items inside a window 
+ */
+class Ucac4ZoneIterator : public IteratorImplementation {
+	Ucac4ZonePtr	_zone;
+public:
+	uint16_t	zone() const { return _zone->zone(); }
+private:
+	uint32_t	_index;
+	SkyWindow	_window;
+	MagnitudeRange	_magrange;
+	WindowPredicate	_predicate;
+	uint32_t	minindex;
+	uint32_t	maxindex;
+	StarPtr	current_star;
+public:
+	Ucac4ZoneIterator(Ucac4ZonePtr zone, const SkyWindow& window,
+		const MagnitudeRange& magrange);
+	~Ucac4ZoneIterator();
+	virtual Star	operator*();
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual bool	operator==(const Ucac4ZoneIterator& other) const;
+	virtual std::string	toString() const;
+	virtual void	increment();
+};
+typedef std::shared_ptr<Ucac4ZoneIterator>	Ucac4ZoneIteratorPtr;
+
 class Ucac4Iterator;
+class Ucac4WindowIterator;
 
 /**
  * \brief UC4 Catalog
@@ -121,15 +147,21 @@ class Ucac4 : public Catalog {
 	Ucac4ZonePtr	cachedzone;
 	Ucac4ZonePtr	getzone(uint16_t zone);
 friend class Ucac4Iterator;
+friend class Ucac4WindowIterator;
 public:
 	Ucac4(const std::string& directory);
 	virtual ~Ucac4();
+
 	Ucac4ZonePtr	zone(uint16_t zone) const;
+	static std::pair<uint16_t, uint16_t>	zoneinterval(const SkyWindow& window);
+	static bool	touches(uint16_t zone, const SkyWindow& window);
 	Ucac4Star	find(const RaDec& position);
 	Ucac4Star	find(const Ucac4StarNumber& number);
 	virtual Star	find(const std::string& ucacnumber);
 	virtual starsetptr	find(const SkyWindow& window,
-				const MagnitudeRange& magrange);
+					const MagnitudeRange& magrange);
+	virtual CatalogIterator	findIter(const SkyWindow& window,
+					const MagnitudeRange& magrange);
 	virtual unsigned long	numberOfStars();
 	CatalogIterator	begin();
 	CatalogIterator	end();
@@ -149,7 +181,27 @@ public:
 	virtual Star	operator*();
 	bool	operator==(const Ucac4Iterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
-	std::string	toString() const;
+	virtual std::string	toString() const;
+	virtual void	increment();
+};
+
+/**
+ * \brief Window iterator for the Ucac4 catalog
+ */
+class Ucac4WindowIterator : public IteratorImplementation {
+	Ucac4&	_catalog;
+	SkyWindow	_window;
+	MagnitudeRange	_magrange;
+	std::pair<uint16_t, uint16_t>	zoneinterval;
+	Ucac4ZoneIteratorPtr	zoneiterator;
+public:
+	Ucac4WindowIterator(Ucac4& catalog, const SkyWindow& window,
+		const MagnitudeRange magrange);
+	~Ucac4WindowIterator();
+	virtual Star	operator*();
+	bool	operator==(const Ucac4WindowIterator& other) const;
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	virtual std::string	toString() const;
 	virtual void	increment();
 };
 
