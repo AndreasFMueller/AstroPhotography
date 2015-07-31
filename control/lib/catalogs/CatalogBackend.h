@@ -47,6 +47,8 @@ public:
 	virtual ~FileBackend();
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
+	virtual CatalogIterator	findIter(const SkyWindow& window,
+						const MagnitudeRange& magrange);
 	virtual Star	find(const std::string& name);
 	virtual unsigned long	numberOfStars();
 	virtual CatalogIterator	begin();
@@ -58,9 +60,11 @@ public:
  */
 class FileBackendIterator : public IteratorImplementation {
 	FileBackend&	_filebackend;
+protected:
 	CatalogFactory::BackendType	current_backend;
-	CatalogPtr	current_catalog;
+	CatalogPtr	current_catalog();
 	CatalogIterator	current_iterator;
+	void	nextcatalog();
 public:
 	FileBackendIterator(FileBackend& filebackend, bool begin_or_end);
 	virtual ~FileBackendIterator();
@@ -68,6 +72,19 @@ public:
 	bool	operator==(const FileBackendIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;
 	virtual std::string	toString() const;
+	virtual	void	increment();
+};
+
+class FileBackendWindowIterator : public FileBackendIterator {
+	SkyWindow	_window;
+	MagnitudeRange	_magrange;
+	void	advance();
+public:
+	FileBackendWindowIterator(FileBackend& filebackend,
+		const SkyWindow& window, const MagnitudeRange& magrange);
+	virtual ~FileBackendWindowIterator();
+	virtual	bool	operator==(const IteratorImplementation& other) const;
+	bool	operator==(const FileBackendWindowIterator& other) const;
 	virtual	void	increment();
 };
 

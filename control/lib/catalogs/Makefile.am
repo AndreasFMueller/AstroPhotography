@@ -46,6 +46,7 @@ libastrocatalogs_la_SOURCES =						\
 	DatabaseBackendIterator.cpp					\
 	FileBackend.cpp							\
 	FileBackendIterator.cpp						\
+	FileBackendWindowIterator.cpp					\
 	Hipparcos.cpp							\
 	ImageGeometry.cpp						\
 	ImageNormalizer.cpp						\

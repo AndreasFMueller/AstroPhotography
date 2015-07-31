@@ -133,6 +133,14 @@ Catalog::starsetptr	FileBackend::find(const SkyWindow& window,
 	return resultptr;
 }
 
+CatalogIterator	FileBackend::findIter(const SkyWindow& window,
+			const MagnitudeRange& magrange) {
+	IteratorImplementationPtr	impl(
+		new FileBackendWindowIterator(*this, window, magrange)
+	);
+	return CatalogIterator(impl);
+}
+
 /**
  * \brief Get a star from the unified catalogs by name
  */

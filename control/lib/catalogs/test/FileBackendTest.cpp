@@ -30,8 +30,8 @@ public:
 	CPPUNIT_TEST_SUITE(FileBackendTest);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testAccess);
-	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST(testIterator);
+	CPPUNIT_TEST(testWindow);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -133,7 +133,7 @@ void	FileBackendTest::testWindow() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", s.toString().c_str());
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%llu stars", counter);
-        CPPUNIT_ASSERT(counter == 7);
+        CPPUNIT_ASSERT(counter == 27);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() end");
 }
 
