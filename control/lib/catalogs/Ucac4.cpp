@@ -43,6 +43,9 @@ Ucac4::Ucac4(const std::string& directory) : _directory(directory) {
 		checkfile(zonefilename(zone));
 	}
 
+	// remember the name
+	backendname = stringprintf("UCAC4(%s)", directory.c_str());
+
 	// make sure the zone is empty
 	cachedzone = NULL;
 }
@@ -173,12 +176,7 @@ CatalogIterator	Ucac4::findIter(const SkyWindow& window,
 }
 
 CatalogIterator	Ucac4::begin() {
-	IteratorImplementationPtr	impl(new Ucac4Iterator(1, 0, *this));
-	return CatalogIterator(impl);
-}
-
-CatalogIterator	Ucac4::end() {
-	IteratorImplementationPtr	impl(new Ucac4Iterator(901, 0, *this));
+	IteratorImplementationPtr	impl(new Ucac4Iterator(1, 1, *this));
 	return CatalogIterator(impl);
 }
 

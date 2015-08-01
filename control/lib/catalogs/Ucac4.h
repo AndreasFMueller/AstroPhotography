@@ -35,9 +35,7 @@ public:
 	bool	operator==(const Ucac4StarNumber& other) const;
 	bool	operator!=(const Ucac4StarNumber& other) const;
 	bool	operator<(const Ucac4StarNumber& other) const;
-	uint32_t	catalognumber() const {
-		return _zone * 1000000 + _number;
-	}
+	uint64_t	catalognumber() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star);
 
@@ -163,8 +161,7 @@ public:
 	virtual CatalogIterator	findIter(const SkyWindow& window,
 					const MagnitudeRange& magrange);
 	virtual unsigned long	numberOfStars();
-	CatalogIterator	begin();
-	CatalogIterator	end();
+	virtual CatalogIterator	begin();
 };
 typedef std::shared_ptr<Ucac4>	Ucac4Ptr;
 
@@ -175,6 +172,7 @@ class Ucac4Iterator : public IteratorImplementation {
 	uint16_t	_zone;
 	uint32_t	_index;
 	Ucac4&	_catalog;
+	unsigned long	number_of_stars;
 public:
 	Ucac4Iterator(uint16_t zone, uint32_t index, Ucac4& catalog);
 	virtual ~Ucac4Iterator();

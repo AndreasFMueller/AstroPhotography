@@ -140,6 +140,8 @@ void	BSC::setup() {
 		throw std::runtime_error(msg);
 	}
 
+	backendname = stringprintf("BSC(%s)", _filename.c_str());
+
 	// open the catalog file
 	std::ifstream	in(_filename);
 
@@ -231,25 +233,16 @@ unsigned long	BSC::numberOfStars() {
 }
 
 CatalogIterator	BSC::begin() {
-	IteratorImplementationPtr	impl(new BSCIterator(stars, true));
-	return CatalogIterator(impl);
-}
-
-CatalogIterator	BSC::end() {
-	IteratorImplementationPtr	impl(new BSCIterator(stars, false));
+	IteratorImplementationPtr	impl(new BSCIterator(stars));
 	return CatalogIterator(impl);
 }
 
 //////////////////////////////////////////////////////////////////////
 // BSCIterator implemenation
 //////////////////////////////////////////////////////////////////////
-BSCIterator::BSCIterator(BSC::starmap_t& stars, bool begin_or_end)
-	: IteratorImplementation(begin_or_end), _stars(stars) {
-	if (begin_or_end) {
-		_i = _stars.begin();
-	} else {
-		_i = _stars.end();
-	}
+BSCIterator::BSCIterator(BSC::starmap_t& stars)
+	: IteratorImplementation(true), _stars(stars) {
+	_i = _stars.begin();
 }
 
 Star	BSCIterator::operator*() {
@@ -269,7 +262,7 @@ void	BSCIterator::increment() {
 		return;
 	}
 	++_i;
-	_isEnd = _i == _stars.end();
+	_isEnd = (_i == _stars.end());
 }
 
 std::string	BSCIterator::toString() const {

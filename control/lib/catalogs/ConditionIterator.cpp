@@ -12,8 +12,8 @@ namespace catalog {
  * \brief Construct a condition iterator
  */
 ConditionIterator::ConditionIterator(IteratorImplementationPtr iterator,
-	IteratorPredicatePtr predicate, bool begin_or_end)
-	: IteratorImplementation(begin_or_end),
+	IteratorPredicatePtr predicate)
+	: IteratorImplementation(true),
 	  _iterator(iterator), _predicate(predicate) {
 	// ensure we have seen the first star
 	increment();

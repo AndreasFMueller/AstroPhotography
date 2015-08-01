@@ -3,7 +3,7 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <AvahiDiscovery.h>
+#include "AvahiDiscovery.h"
 #include <list>
 
 namespace astro {

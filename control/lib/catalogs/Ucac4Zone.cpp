@@ -48,11 +48,10 @@ UCAC4_STAR
 
 #define	MARCSEC_to_RADIANS	(M_PI / (180 * 60 * 60 * 1000))
 
-static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t number,
+static Ucac4Star	UCAC4_to_Ucac4Star(uint16_t zone, uint32_t index,
 				const UCAC4_STAR *star) {
-	Ucac4Star	result(zone, number);
+	Ucac4Star	result(zone, index);
 	result.catalog('U');
-	result.catalognumber(zone * 100000000 + number);
 	result.id_number = star->id_number;
 	result.ra() = MARCSEC_to_RADIANS * star->ra;
 	result.dec() = MARCSEC_to_RADIANS * star->spd - M_PI / 2;

@@ -42,7 +42,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	DatabaseBackendTest.cpp
+	FileBackendTest.cpp
 singletest_LDADD = $(catalogs_ldadd)
 singletest_DEPENDENCIES = $(catalogs_dependencies)
 

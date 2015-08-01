@@ -48,5 +48,12 @@ std::ostream&	operator<<(std::ostream& out, const Ucac4StarNumber& star) {
 	return out;
 }
 
+uint64_t	Ucac4StarNumber::catalognumber() const {
+	uint64_t	result = _zone;
+	result = (1000000L * result) + _number;
+	return result;
+}
+
+
 } // namespace catalog
 } // namespace astro

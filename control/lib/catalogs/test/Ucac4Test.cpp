@@ -70,7 +70,7 @@ void	Ucac4Test::testAccess() {
 	CPPUNIT_ASSERT(star.number == name);
 	Star	star1 = catalog.find("UCAC4-391-012345");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star1.toString().c_str());
-	CPPUNIT_ASSERT(star1.longname() == std::string("UCAC4-391-012345"));
+	CPPUNIT_ASSERT(star1.name() == std::string("UCAC4-391-012345"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
 

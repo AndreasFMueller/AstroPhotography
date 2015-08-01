@@ -102,6 +102,7 @@ static std::string	hipparcos_filename(const std::string filename) {
  */
 Hipparcos::Hipparcos(const std::string& filename)
 	: MappedFile(hipparcos_filename(filename), 451) {
+	backendname = stringprintf("Hipparcos(%s)", filename.c_str());
 	int	skipped = 0;
 	for (size_t recno = 0; recno < nrecords(); recno++) {
 		std::string	record = get(recno);
@@ -164,26 +165,16 @@ unsigned long	Hipparcos::numberOfStars() {
 }
 
 CatalogIterator	Hipparcos::begin() {
-	IteratorImplementationPtr impl(new HipparcosIterator(stars, true));
-	return CatalogIterator(impl);
-}
-
-CatalogIterator	Hipparcos::end() {
-	IteratorImplementationPtr impl(new HipparcosIterator(stars, false));
+	IteratorImplementationPtr impl(new HipparcosIterator(stars));
 	return CatalogIterator(impl);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Hipparcos Iterator implementation
 //////////////////////////////////////////////////////////////////////
-HipparcosIterator::HipparcosIterator(Hipparcos::starmap_t& stars,
-	bool begin_or_end)
-	: IteratorImplementation(begin_or_end), _stars(stars) {
-	if (begin_or_end) {
-		_i = _stars.begin();
-	} else {
-		_i = _stars.end();
-	}
+HipparcosIterator::HipparcosIterator(Hipparcos::starmap_t& stars)
+	: IteratorImplementation(true), _stars(stars) {
+	_i = _stars.begin();
 }
 
 Star	HipparcosIterator::operator*() {

@@ -9,6 +9,7 @@
 #include <AstroCatalog.h>
 #include <sqlite3.h>
 #include "CatalogIterator.h"
+#include "CutoverConditions.h"
 
 namespace astro {
 namespace catalog {
@@ -27,7 +28,6 @@ public:
 	virtual Catalog::starsetptr	find(const SkyWindow& window,
 						const MagnitudeRange& magrange);
 	virtual Star	find(const std::string& name);
-	virtual void	add(int id, const Star& star);
 };
 
 class FileBackendIterator;
@@ -41,6 +41,7 @@ class FileBackend : public Catalog {
 	CatalogPtr	hipparcos_catalog;
 	CatalogPtr	tycho2_catalog;
 	CatalogPtr	ucac4_catalog;
+	StarPtr		current_star;
 friend class FileBackendIterator;
 public:
 	FileBackend(const std::string& basedir);
@@ -52,7 +53,6 @@ public:
 	virtual Star	find(const std::string& name);
 	virtual unsigned long	numberOfStars();
 	virtual CatalogIterator	begin();
-	virtual CatalogIterator	end();
 };
 
 /*
@@ -60,13 +60,16 @@ public:
  */
 class FileBackendIterator : public IteratorImplementation {
 	FileBackend&	_filebackend;
+	CutoverConditionPtr	condition;
+	void	advance();
 protected:
 	CatalogFactory::BackendType	current_backend;
 	CatalogPtr	current_catalog();
 	CatalogIterator	current_iterator;
+	StarPtr	current_star;
 	void	nextcatalog();
 public:
-	FileBackendIterator(FileBackend& filebackend, bool begin_or_end);
+	FileBackendIterator(FileBackend& filebackend);
 	virtual ~FileBackendIterator();
 	virtual Star	operator*();
 	bool	operator==(const FileBackendIterator& other) const;
@@ -75,6 +78,9 @@ public:
 	virtual	void	increment();
 };
 
+/**
+ * \brief Window Iterator for the FileBackend
+ */
 class FileBackendWindowIterator : public FileBackendIterator {
 	SkyWindow	_window;
 	MagnitudeRange	_magrange;
@@ -101,7 +107,6 @@ public:
 	virtual Star	find(const std::string& name);
 	virtual  unsigned long	numberOfStars();
 	CatalogIterator	begin();
-	CatalogIterator	end();
 };
 
 /**
@@ -110,13 +115,15 @@ public:
 class DatabaseBackendCreator {
 	sqlite3	*db;
 	sqlite3_stmt	*stmt;
-	int	id;
+	int64_t	id;
 	// private copy and assignment constructors
 	DatabaseBackendCreator(const DatabaseBackendCreator& other);
 	DatabaseBackendCreator&	operator=(const DatabaseBackendCreator& other);
+	void	create();
 public:
 	DatabaseBackendCreator(const std::string& dbfilename);
 	~DatabaseBackendCreator();
+	uint64_t	count();
 	void	prepare();
 	void	finalize();
 	void	createindex();
@@ -132,7 +139,7 @@ class DatabaseBackendIterator : public IteratorImplementation {
 	StarPtr	current_star;
 	int	id;
 public:
-	DatabaseBackendIterator(sqlite3 *db, bool begin_or_end);
+	DatabaseBackendIterator(sqlite3 *db);
 	DatabaseBackendIterator(sqlite3 *db, const SkyWindow& window,
 		const MagnitudeRange& magrange);
 	virtual ~DatabaseBackendIterator();

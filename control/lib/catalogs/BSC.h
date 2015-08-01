@@ -53,7 +53,6 @@ public:
 	virtual unsigned long	numberOfStars();
 
 	virtual CatalogIterator	begin();
-	virtual CatalogIterator	end();
 };
 
 /**
@@ -63,7 +62,7 @@ class BSCIterator : public IteratorImplementation {
 	BSC::starmap_t&	_stars;
 	BSC::starmap_t::iterator	_i;
 public:
-	BSCIterator(BSC::starmap_t& stars, bool begin_or_end);
+	BSCIterator(BSC::starmap_t& stars);
 	virtual Star	operator*();
 	bool	operator==(const BSCIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;

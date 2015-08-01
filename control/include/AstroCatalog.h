@@ -99,7 +99,6 @@ public:
 
 	// constructors
 	Star(const std::string& name) : _name(name) {
-		_longname = name;
 		_mag = 0;
 		_duplicate = '\0';
 	}
@@ -183,10 +182,15 @@ class Catalog {
 	// prevent copying of Catalog objects
 	Catalog(const Catalog& other);
 	Catalog&	operator=(const Catalog& other);
+protected:
+	std::string	backendname;
 public:
 	// constructors
 	Catalog() { }
 	virtual ~Catalog();
+
+	// naming the catalog
+	const std::string&	name() const { return backendname; }
 
 	// find and add individual stars
 	virtual Star	find(const std::string& name) = 0;
@@ -205,7 +209,7 @@ public:
 
 	// iterator interface for traversing the catalog
 	virtual CatalogIterator	begin();
-	virtual CatalogIterator	end();
+	CatalogIterator	end();
 };
 
 /**

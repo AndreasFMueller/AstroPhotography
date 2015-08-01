@@ -131,6 +131,7 @@ static std::string	Tycho2filename(const std::string& filename) {
 
 Tycho2::Tycho2(const std::string& filename)
 	: MappedFile(Tycho2filename(filename), TYCHO2_RECORD_LENGTH) {
+	backendname = stringprintf("Tycho2(%s)", filename.c_str());
 }
 
 Tycho2::~Tycho2() {
@@ -243,12 +244,6 @@ unsigned long	Tycho2::numberOfStars() {
 
 CatalogIterator	Tycho2::begin() {
 	IteratorImplementationPtr	impl(new Tycho2Iterator(0, *this));
-	return CatalogIterator(impl);
-}
-
-CatalogIterator	Tycho2::end() {
-	IteratorImplementationPtr	impl(new Tycho2Iterator(numberOfStars(),
-						*this));
 	return CatalogIterator(impl);
 }
 

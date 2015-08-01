@@ -57,6 +57,24 @@ public:
 };
 
 /**
+ * \brief BlockStopWatch class
+ *
+ * This is intended to be used for performance measurements only, and only
+ * during debugging. It measures the elased and CPU time between creation and
+ * distruction and displays a debug message with the results when it is
+ * destroyed. This allows for a simple way to measure the time spent in a
+ * block.
+ */
+class BlockStopWatch {
+	std::string	_message;
+	struct timeval	start_time;
+	struct rusage	start_usage;
+public:
+	BlockStopWatch(const std::string& message);
+	~BlockStopWatch();
+};
+
+/**
  * \brief Concatenator functor class
  *
  * quite often, a vector or set of strings need to be concatenated to a

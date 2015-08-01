@@ -1,5 +1,5 @@
 /*
- * FileBackendTest.cpp -- tests for the UCAC4 catalog 
+ * DatabaseBackendTest.cpp -- tests for the UCAC4 catalog 
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -16,9 +16,9 @@ using namespace astro::catalog;
 namespace astro {
 namespace test {
 
-class FileBackendTest : public CppUnit::TestFixture {
+class DatabaseBackendTest : public CppUnit::TestFixture {
 private:
-	astro::catalog::FileBackend	*catalog;
+	astro::catalog::DatabaseBackend	*catalog;
 public:
 	void	setUp();
 	void	tearDown();
@@ -27,7 +27,7 @@ public:
 	void	testIterator();
 	void	testWindow();
 
-	CPPUNIT_TEST_SUITE(FileBackendTest);
+	CPPUNIT_TEST_SUITE(DatabaseBackendTest);
 	CPPUNIT_TEST(testConstructor);
 	CPPUNIT_TEST(testAccess);
 	CPPUNIT_TEST(testIterator);
@@ -35,26 +35,27 @@ public:
 	CPPUNIT_TEST_SUITE_END();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(FileBackendTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(DatabaseBackendTest);
 
-void	FileBackendTest::setUp() {
-	catalog = new astro::catalog::FileBackend("/usr/local/starcatalogs");	
+void	DatabaseBackendTest::setUp() {
+	catalog = new astro::catalog::DatabaseBackend("stars.db");	
 }
 
-void	FileBackendTest::tearDown() {
+void	DatabaseBackendTest::tearDown() {
 	delete catalog;
 	catalog = NULL;
 }
 
-void	FileBackendTest::testConstructor() {
+void	DatabaseBackendTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
 	unsigned long long	n = catalog->numberOfStars();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "catalog has %llu stars", n);
-	CPPUNIT_ASSERT(n == 116447057);
+	//CPPUNIT_ASSERT(n == 116447057);
+	CPPUNIT_ASSERT(n == 2557499);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() end");
 }
 
-void	FileBackendTest::testAccess() {
+void	DatabaseBackendTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() begin");
 
 	astro::catalog::Star	star1 = catalog->find("BSC1231");
@@ -67,9 +68,9 @@ void	FileBackendTest::testAccess() {
 
 	astro::catalog::Star	star2 = catalog->find("HIP004711");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star2 = '%s'",
-		star2.name().c_str());
+		star2.longname().c_str());
 	CPPUNIT_ASSERT(star2.catalog() == 'H');
-	CPPUNIT_ASSERT(star2.name() == std::string("HIP004711"));
+	CPPUNIT_ASSERT(star2.longname() == std::string("HIP004711"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star2 = %llu", star2.catalognumber());
 	CPPUNIT_ASSERT(star2.catalognumber() == 4711);
 
@@ -77,7 +78,7 @@ void	FileBackendTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star3 = '%s'",
 		star3.longname().c_str());
 	CPPUNIT_ASSERT(star3.catalog() == 'T');
-	CPPUNIT_ASSERT(star3.name() == std::string("T4711 01111 1"));
+	CPPUNIT_ASSERT(star3.longname() == std::string("T4711 01111 1"));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star3 = %llu", star3.catalognumber());
 	CPPUNIT_ASSERT(star3.catalognumber() == 4711011111);
 
@@ -85,14 +86,13 @@ void	FileBackendTest::testAccess() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star4 = '%s'",
 		star4.longname().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", star4.toString().c_str());
-	CPPUNIT_ASSERT(star4.name() == std::string("UCAC4-391-012345"));
-	unsigned long long	c = star4.catalognumber();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "star4 = %llu", c);
-	CPPUNIT_ASSERT(star4.catalognumber() == 391012345);
+	CPPUNIT_ASSERT(star4.longname() == std::string("UCAC4-391-012345"));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "star4 = %llu", star4.catalognumber());
+	CPPUNIT_ASSERT(star4.catalognumber() == 445306681);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAccess() end");
 }
 
-void	FileBackendTest::testIterator() {
+void	DatabaseBackendTest::testIterator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
 	CatalogIterator	i;
 	unsigned long long	counter = 0;
@@ -113,11 +113,11 @@ void	FileBackendTest::testIterator() {
 	unsigned long long	n = catalog->numberOfStars();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %llu, stars: %llu",
 		counter, n);
-	CPPUNIT_ASSERT(counter == 80972465);
+	CPPUNIT_ASSERT(counter == catalog->numberOfStars());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }
 
-void	FileBackendTest::testWindow() {
+void	DatabaseBackendTest::testWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testWindow() begin");
 	RaDec	center(0, 0);
 	center.ra().hours(6.75247702777777777777);

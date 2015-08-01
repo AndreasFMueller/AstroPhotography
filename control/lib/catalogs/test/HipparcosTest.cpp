@@ -83,7 +83,7 @@ void	HipparcosTest::testIterator() {
 			Star	s = *i;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "star name: %s",
 				s.longname().c_str());
-			CPPUNIT_ASSERT(s.longname() == std::string("HIP004721"));
+			CPPUNIT_ASSERT(s.name() == std::string("HIP004721"));
 		}
 	}
 	CPPUNIT_ASSERT(counter == catalog->numberOfStars());

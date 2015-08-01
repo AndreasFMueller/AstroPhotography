@@ -5,12 +5,20 @@
  */
 #include "CatalogBackend.h"
 #include <AstroFormat.h>
+#include <AstroUtils.h>
 #include "Ucac4.h"
 
 namespace astro {
 namespace catalog {
 
+/**
+ * \brief Constructor for the database backend creator
+ *
+ * The constructor checks whether the star table already exists, and creates
+ * it if necessary.
+ */
 DatabaseBackendCreator::DatabaseBackendCreator(const std::string& dbfilename) {
+	BlockStopWatch("DatabaseBackendCreator(" + dbfilename + ") timing");
 	// open the database
 	if (sqlite3_open(dbfilename.c_str(), &db)) {
 		throw std::runtime_error("cannot open/create database");
@@ -27,7 +35,8 @@ DatabaseBackendCreator::DatabaseBackendCreator(const std::string& dbfilename) {
 		table_query.c_str());
 	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, table_query.c_str(),
 		table_query.size(), &stmt, &tail))) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot query for star table: %d", rc);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot query for star table: %d", rc);
 		sqlite3_close(db);
 		throw std::runtime_error("cannot prepare star table query");
 	}
@@ -50,9 +59,56 @@ DatabaseBackendCreator::DatabaseBackendCreator(const std::string& dbfilename) {
 	// check whether table exists
 	if (count == 1) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "star table already exists");
-		return;
+	} else {
+		// need to create the table
+		create();
 	}
 
+	// get the maximum id from the star table
+	const char	*idquery = "select max(id) from star";
+	rc = sqlite3_prepare_v2(db, idquery, strlen(idquery), &stmt, &tail);
+	if (SQLITE_OK != rc) {
+		std::string	msg = stringprintf("cannot prepare id query "
+			"'%s': %d", idquery, rc);
+		sqlite3_close(db);
+		throw std::runtime_error(msg);
+	}
+	sqlite3_step(stmt);
+	id = sqlite3_column_int64(stmt, 0);
+	sqlite3_finalize(stmt);
+	stmt = NULL;
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial id: %lld", id);
+}
+
+/**
+ * \brief Count the number of records already in the database
+ */
+uint64_t	DatabaseBackendCreator::count() {
+	BlockStopWatch("DatabaseBackendCreator::count() timing");
+	uint64_t	result = 0;
+	sqlite3_stmt	*countstmt = NULL;
+	const char	*query = "select count(*) from star";
+	const char	*tail = NULL;
+	int	rc;
+	rc = sqlite3_prepare_v2(db, query, strlen(query), &countstmt, &tail);
+	if (SQLITE_OK != rc) {
+		std::logic_error("cannot prepare count query");
+	}
+	rc = sqlite3_step(stmt);
+	result = sqlite3_column_int64(stmt, 0);
+	if (stmt) {
+		sqlite3_finalize(stmt);
+		stmt = NULL;
+	}
+	return result;
+}
+
+/**
+ * \brief Create the table
+ */
+void	DatabaseBackendCreator::create() {
+	int	rc;
 	// create the table if necessary
 	char	*errmsg;
 	std::string	create_query(	"create table star ( "
@@ -78,25 +134,16 @@ DatabaseBackendCreator::DatabaseBackendCreator(const std::string& dbfilename) {
 
 /**
  * \brief close the database
+ *
+ * If an instance of the class is not finalized properly, a statement instance
+ * would be leaked, so this destructor also finalizes the statement.
  */
 DatabaseBackendCreator::~DatabaseBackendCreator() {
-	sqlite3_close(db);
-}
-
-static std::string	starname(char catalog, uint64_t catalognumber) {
-	switch (catalog) {
-	case 'B':
-		return stringprintf("BSC%04u", catalognumber);
-	case 'H':
-		return stringprintf("HIP%u", catalognumber);
-	case 'T':
-		return stringprintf("T%u", catalognumber);
-	case 'U':
-		return stringprintf("UCAC4-%u-%u",
-			catalognumber / 1000000,
-			catalognumber % 1000000);
+	if (NULL != stmt) {
+		sqlite3_finalize(stmt);
+		stmt = NULL;
 	}
-	throw std::runtime_error("unkonwn catalog");
+	sqlite3_close(db);
 }
 
 /**
@@ -123,7 +170,6 @@ void	DatabaseBackendCreator::prepare() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "insert query '%s' prepared",
 		insert_query.c_str());
-	id = 0;
 }
 
 /**
@@ -151,7 +197,7 @@ void	DatabaseBackendCreator::add(const Star& star) {
 	}
 
 	// bind the values from the star
-	rc = sqlite3_bind_int(stmt, 1, ++id);
+	rc = sqlite3_bind_int64(stmt, 1, ++id);
 	ADD_BIND_ERROR;
 	rc = sqlite3_bind_double(stmt, 2, star.ra().hours());
 	ADD_BIND_ERROR;
@@ -166,7 +212,7 @@ void	DatabaseBackendCreator::add(const Star& star) {
 	char	catalog = star.catalog();
 	rc = sqlite3_bind_text(stmt, 7, &catalog, 1, SQLITE_STATIC);
 	ADD_BIND_ERROR;
-	rc = sqlite3_bind_int(stmt, 8, star.catalognumber());
+	rc = sqlite3_bind_int64(stmt, 8, star.catalognumber());
 	ADD_BIND_ERROR;
 	rc = sqlite3_bind_text(stmt, 9, star.name().c_str(),
 			star.name().size(), SQLITE_STATIC);
@@ -194,11 +240,21 @@ void	DatabaseBackendCreator::add(const Star& star) {
  * \brief Clear the database
  */
 void	DatabaseBackendCreator::clear() {
+	BlockStopWatch("DatabaseBackendCreator::clear() timing");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "clearing database");
 	char	*errmsg;
-	int	rc = sqlite3_exec(db, "delete from star;", NULL, NULL, &errmsg);
+	// drop the index
+	int	rc = sqlite3_exec(db, "drop index staridx1 from star;",
+			NULL, NULL, &errmsg);
 	if (rc != SQLITE_OK) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot clear: %s", errmsg);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"drop index failed: %s (%d) (ignored)", errmsg, rc);
+	}
+	// clean the table
+	rc = sqlite3_exec(db, "delete from star;", NULL, NULL, &errmsg);
+	if (rc != SQLITE_OK) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot clear: %s (%d)",
+			errmsg, rc);
 		throw std::runtime_error("clear failed");
 	}
 }
@@ -207,13 +263,14 @@ void	DatabaseBackendCreator::clear() {
  * \brief Create an Index on RA/DEC to bring performance to an acceptable level
  */
 void	DatabaseBackendCreator::createindex() {
-	// create the table if necessary
+	BlockStopWatch("DatabaseBackendCreator::createindex() timing");
+	// create the index if necessary
 	char	*errmsg;
 	std::string	query("create index staridx1 on star (dec, ra);");
 	int	rc = sqlite3_exec(db, query.c_str(), NULL, NULL, &errmsg);
 	if (rc != SQLITE_OK) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create index: %s",
-			errmsg);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot create index: %s (%d) (ignored)", errmsg, rc);
 		throw std::runtime_error("cannot create index ");
 	}
 }

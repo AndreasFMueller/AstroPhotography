@@ -3,7 +3,7 @@
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <BonjourDiscovery.h>
+#include "BonjourDiscovery.h"
 #include <AstroDebug.h>
 
 namespace astro {

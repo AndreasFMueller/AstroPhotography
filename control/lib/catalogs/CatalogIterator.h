@@ -33,6 +33,23 @@ friend class CatalogIterator;
 };
 
 /**
+ * \brief Generic end iterator
+ *
+ * End iterators should always be created with this implemenation, because
+ * it is set up so that comparisions will always succeed if iterators
+ * are at the end.
+ */
+class GenericEndIteratorImplementation : public IteratorImplementation {
+public:
+	GenericEndIteratorImplementation();
+	virtual Star	operator*();
+	virtual bool	operator==(const IteratorImplementation& other) const;
+	bool	operator==(const GenericEndIteratorImplementation& other) const;
+	virtual std::string	toString() const;
+	virtual void	increment();
+};
+
+/**
  * \brief Comparison function template for iterator comparisons
  *
  * The main work this comparison function does is to ensure that the other
@@ -41,6 +58,15 @@ friend class CatalogIterator;
 template<class iterimpl>
 bool	equal_implementation(const iterimpl *me,
 		const IteratorImplementation& other) {
+	// cases where one of the iterators is not at the end
+	if (me->isEnd() != other.isEnd()) {
+		return false;
+	}
+	if (me->isEnd() && other.isEnd()) {
+		return true;
+	}
+	// for more complicated comparisons, iterators have to be if
+	// the same type
 	const iterimpl	*otherp = dynamic_cast<const iterimpl *>(&other);
 	if (NULL == otherp) {
 		std::string	msg = stringprintf("wrong iterator type %s, "
@@ -83,7 +109,7 @@ class ConditionIterator : public IteratorImplementation {
 	StarPtr	current_star;
 public:
 	ConditionIterator(IteratorImplementationPtr iterator,
-		IteratorPredicatePtr predicate, bool begin_or_end);
+		IteratorPredicatePtr predicate);
 	virtual ~ConditionIterator();
 	virtual Star	operator*();
 	virtual bool	operator==(const IteratorImplementation& other) const;

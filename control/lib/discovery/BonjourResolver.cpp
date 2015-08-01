@@ -4,7 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroDebug.h>
-#include <BonjourDiscovery.h>
+#include "BonjourDiscovery.h"
 #include <dns_sd.h>
 #include <includes.h>
 #include <sys/select.h>

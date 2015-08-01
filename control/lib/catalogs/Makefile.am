@@ -21,6 +21,7 @@ noinst_HEADERS =							\
 	BSC.h								\
 	CatalogBackend.h						\
 	CatalogIterator.h						\
+	CutoverConditions.h						\
 	Hipparcos.h							\
 	MappedFile.h							\
 	NGCIC.h								\
@@ -41,9 +42,11 @@ libastrocatalogs_la_SOURCES =						\
 	CatalogIterator.cpp						\
 	Chart.cpp							\
 	ConditionIterator.cpp						\
+	CutoverConditions.cpp						\
 	DatabaseBackend.cpp						\
 	DatabaseBackendCreator.cpp					\
 	DatabaseBackendIterator.cpp					\
+	EndIterator.cpp							\
 	FileBackend.cpp							\
 	FileBackendIterator.cpp						\
 	FileBackendWindowIterator.cpp					\

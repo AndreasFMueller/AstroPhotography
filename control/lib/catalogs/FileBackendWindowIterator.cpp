@@ -24,7 +24,7 @@ void	FileBackendWindowIterator::advance() {
 
 FileBackendWindowIterator::FileBackendWindowIterator(FileBackend& filebackend,
 	const SkyWindow& window, const MagnitudeRange& magrange)
-	: FileBackendIterator(filebackend, true), 
+	: FileBackendIterator(filebackend), 
 	  _window(window), _magrange(magrange) {
 	current_backend = CatalogFactory::BSC;
 	advance();

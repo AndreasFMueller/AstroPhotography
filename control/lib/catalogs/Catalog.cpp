@@ -58,6 +58,15 @@ Catalog::~Catalog() {
 }
 
 /**
+ * \brief All end iterators use the same GenericEndIteratorImplementation
+ */
+CatalogIterator	Catalog::end() {
+	IteratorImplementationPtr	impl(
+		new GenericEndIteratorImplementation());
+	return CatalogIterator(impl);
+}
+
+/**
  * \brief Default window selection iterator
  *
  * This implementation uses a condition iterator on the standard iterator
@@ -69,18 +78,14 @@ CatalogIterator	Catalog::findIter(const SkyWindow& window,
 	IteratorPredicatePtr	predicate(
 		new WindowPredicate(window, magrange));
 	IteratorImplementationPtr       impl(new ConditionIterator(
-		begin().implementation(), predicate, true));
+		begin().implementation(), predicate));
 	return CatalogIterator(impl);
 }
 
+/**
+ * \brief Dummy implementation of begin()
+ */
 CatalogIterator	Catalog::begin() {
-	std::string	msg = stringprintf("%s::begin() not implemented",
-				typeid(*this).name());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::logic_error(msg);
-}
-
-CatalogIterator	Catalog::end() {
 	std::string	msg = stringprintf("%s::begin() not implemented",
 				typeid(*this).name());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());

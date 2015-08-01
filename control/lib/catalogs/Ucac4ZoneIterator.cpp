@@ -27,7 +27,7 @@ Ucac4ZoneIterator::Ucac4ZoneIterator(Ucac4ZonePtr zone, const SkyWindow& window,
 	if (minindex < maxindex) {
 		_index = minindex;
 	} else {
-		_index = 0;
+		_index = 1;
 	}
 
 	// call increment to ensure that the iterator points to the first star

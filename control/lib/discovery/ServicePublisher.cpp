@@ -13,11 +13,11 @@
 #include <algorithm>
 
 #ifdef USE_SD_AVAHI
-#include <AvahiDiscovery.h>
+#include "AvahiDiscovery.h"
 #endif /* USE_SD_AVAHI */
 
 #if USE_SD_BONJOUR
-#include <BonjourDiscovery.h>
+#include "BonjourDiscovery.h"
 #endif /* USE_SD_BONJOUR */
 
 namespace astro {

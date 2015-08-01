@@ -4,20 +4,24 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochscule Rapperswil
  */
 #include "CatalogBackend.h"
+#include <AstroUtils.h>
 
 namespace astro {
 namespace catalog {
 
-DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
-	bool begin_or_end) : IteratorImplementation(begin_or_end) {
+/**
+ * \brief Constructor for iterator for all stars
+ *
+ * This constructor sets the statement up with a query that retrieves all
+ * stars from the database
+ */
+DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db)
+	: IteratorImplementation(true) {
 	id = 0;
-	if (!begin_or_end) {
-		stmt = NULL;
-		return;
-	}
+	stmt = NULL;
 	const char	*query =
 		"select id, ra, dec, pmra, pmdec, mag, catalog, catalognumber, "
-		"       name, longname "
+		       "name, longname "
 		"from star "
 		"order by id";
 
@@ -29,9 +33,17 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 		throw std::runtime_error("cannot prepare star lookup");
 	}
 
+	// the increment method advances to the first entry in the query result
 	increment();
 }
 
+/**
+ * \brief Constructor for a window iterator
+ *
+ * This constructor sets the statement up with a query that retrieves
+ * stars that are contained in a sky window and have magnitude in a an
+ * allowed range of magnitudes.
+ */
 DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 	const SkyWindow& window, const MagnitudeRange& magrange)
 	: IteratorImplementation(true) {
@@ -42,7 +54,7 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 	char	query[1024];
 	strcpy(query,
 		"select id, ra, dec, pmra, pmdec, mag, catalog, catalognumber, "
-		"       name, longname "
+		       "name, longname "
 		"from star "
 		"where ? <= mag and mag <= ? "
 		"and ? <= dec and dec <= ? ");
@@ -52,6 +64,7 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 		strcat(query, "and (ra <= ? or ? <= ra)");
 	}
 	strcat(query, "order by id");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Window iterator query: %s", query);
 
 	// prepare the statement
 	const char	*tail = NULL;
@@ -83,6 +96,9 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db,
 	increment();
 }
 
+/**
+ * \brief Destructor finalizes the prepared statement
+ */
 DatabaseBackendIterator::~DatabaseBackendIterator() {
 	if (stmt) {
 		sqlite3_finalize(stmt);
@@ -90,14 +106,26 @@ DatabaseBackendIterator::~DatabaseBackendIterator() {
 	}
 }
 
+/**
+ * \brief Retrieve the current star from the iterator
+ */
 Star	DatabaseBackendIterator::operator*() {
+	if (isEnd()) {
+		throw std::logic_error("cannot retrieve when iterator is at end");
+	}
 	return *current_star;
 }
 
+/**
+ * \brief Comparison with iterators of any implementation type
+ */
 bool	DatabaseBackendIterator::operator==(const IteratorImplementation& other) const {
 	return equal_implementation(this, other);
 }
 
+/**
+ * \brief Comparison with iterators of the same type
+ */
 bool	DatabaseBackendIterator::operator==(const DatabaseBackendIterator& other) const {
 	if (stmt != other.stmt) {
 		return false;
@@ -112,11 +140,24 @@ bool	DatabaseBackendIterator::operator==(const DatabaseBackendIterator& other) c
 	return (id == other.id);
 }
 
+/**
+ * \brief Convert the current iterator state to a string for logging
+ */
 std::string	DatabaseBackendIterator::toString() const {
 	return stringprintf("[%d] %s", id, current_star->toString().c_str());
 }
 
+/**
+ * \brief Advance the statement to the next (or first) star
+ *
+ * The constructor prepares the statement and, in the case of the window
+ * iterator query, binds the variables, but doing the steps and retrieving
+ * result records is left to this method. At the end of this method,
+ * the current_star member variable is set to the next (or first) star
+ * retreived from the database.
+ */
 void	DatabaseBackendIterator::increment() {
+	//BlockStopWatch("DatabaseBackendIterator::increment() timing");
 	// perform step
 	int	rc = sqlite3_step(stmt);
 	if (rc != SQLITE_OK) {

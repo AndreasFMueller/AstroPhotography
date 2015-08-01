@@ -34,6 +34,7 @@ static void	require(const std::string& filename) {
  * the Ucac4 catalog) are present
  */
 FileBackend::FileBackend(const std::string& basedir) : _basedir(basedir) {
+	backendname = stringprintf("Files(%s)", basedir.c_str());
 	// ensure that the files for the file backend exist
 	bsc_catalog = CatalogPtr(new BSC(_basedir
 					+ std::string("/bsc")));
@@ -181,12 +182,7 @@ unsigned long	FileBackend::numberOfStars() {
 }
 
 CatalogIterator	FileBackend::begin() {
-	IteratorImplementationPtr	impl(new FileBackendIterator(*this, true));
-	return CatalogIterator(impl);
-}
-
-CatalogIterator	FileBackend::end() {
-	IteratorImplementationPtr	impl(new FileBackendIterator(*this, false));
+	IteratorImplementationPtr	impl(new FileBackendIterator(*this));
 	return CatalogIterator(impl);
 }
 

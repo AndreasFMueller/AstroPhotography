@@ -18,11 +18,13 @@ std::string	Ucac4Star::toString() const {
 
 Ucac4Star::Ucac4Star(const std::string& starnumber)
 	: Star(starnumber), number(starnumber) {
+	catalognumber(number.catalognumber());
 }
 
 Ucac4Star::Ucac4Star(uint16_t zone, uint32_t _number)
 	: Star(Ucac4StarNumber(zone, _number).toString()),
 	  number(zone, _number) {
+	catalognumber(number.catalognumber());
 }
 
 bool	Ucac4Star::operator<(const Ucac4Star& other) const {

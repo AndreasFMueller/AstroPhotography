@@ -4,7 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <includes.h>
-#include <AvahiDiscovery.h>
+#include "AvahiDiscovery.h"
 #include <AstroDebug.h>
 #include <unistd.h>
 #include <chrono>

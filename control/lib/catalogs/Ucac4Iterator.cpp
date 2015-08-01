@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <cassert>
 
 namespace astro {
 namespace catalog {
@@ -15,7 +16,19 @@ Ucac4Iterator::Ucac4Iterator(uint16_t zone, uint32_t index, Ucac4& catalog)
 	: IteratorImplementation(!(zone > 900)),
 	  _zone(zone), _index(index), _catalog(catalog) {
 	if (_zone > 900) {
-		_index = 0;
+		_zone = 901;
+		_index = 1;
+		_isEnd = true;
+		number_of_stars = 0;
+	} else {
+		number_of_stars = _catalog.getzone(_zone)->numberOfStars();
+	}
+	// ensure correctness of _zone and _index number values
+	assert(_zone > 0);
+	assert(_zone <= 901);
+	assert(_index > 0);
+	if (_zone <= 900) {
+		assert(_index <= number_of_stars);
 	}
 }
 
@@ -39,13 +52,23 @@ void	Ucac4Iterator::increment() {
 		return;
 	}
 	++_index;
-	if (_index >= _catalog.getzone(_zone)->numberOfStars()) {
+	if (_index > number_of_stars) {
 		++_zone;
 		if (_zone > 900) {
 			_zone = 901;
 			_isEnd = true;
+			number_of_stars = 0;
+		} else {
+			number_of_stars
+				= _catalog.getzone(_zone)->numberOfStars();
 		}
-		_index = 0;
+		_index = 1;
+	}
+	assert(_zone > 0);
+	assert(_zone <= 901);
+	assert(_index > 0);
+	if (_zone <= 900) {
+		assert(_index <= number_of_stars);
 	}
 }
 

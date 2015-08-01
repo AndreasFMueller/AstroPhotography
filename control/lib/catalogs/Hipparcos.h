@@ -47,7 +47,6 @@ public:
 				const MagnitudeRange& magrange);
 	virtual unsigned long	numberOfStars();
 	virtual CatalogIterator	begin();
-	virtual CatalogIterator	end();
 };
 
 /**
@@ -57,7 +56,7 @@ class HipparcosIterator : public IteratorImplementation {
 	Hipparcos::starmap_t&	_stars;
 	Hipparcos::starmap_t::iterator	_i;
 public:
-	HipparcosIterator(Hipparcos::starmap_t& stars, bool begin_or_end);
+	HipparcosIterator(Hipparcos::starmap_t& stars);
 	virtual Star	operator*();
 	bool	operator==(const HipparcosIterator& other) const;
 	virtual bool	operator==(const IteratorImplementation& other) const;

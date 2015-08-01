@@ -67,12 +67,12 @@ void	Tycho2Test::testAccess() {
 		laststar.name().c_str());
 
 	Star	star1 = catalog.find("T9522 00134 1");
-	CPPUNIT_ASSERT(star1.longname() == std::string("T9522 00134 1"));
+	CPPUNIT_ASSERT(star1.name() == std::string("T9522 00134 1"));
 	CPPUNIT_ASSERT(fabs(star1.ra().degrees() - 244.18369114) < 1e-7);
 	CPPUNIT_ASSERT(fabs(star1.dec().degrees() - (-82.77286513)) < 1e-7);
 
 	Star	star2 = catalog.find("T4711 00015 1");
-	CPPUNIT_ASSERT(star2.longname() == std::string("T4711 00015 1"));
+	CPPUNIT_ASSERT(star2.name() == std::string("T4711 00015 1"));
 	CPPUNIT_ASSERT(fabs(star2.ra().degrees() - 47.70148132) < 1e-7);
 	CPPUNIT_ASSERT(fabs(star2.dec().degrees() - (-2.70543639)) < 1e-7);
 
@@ -83,16 +83,16 @@ void	Tycho2Test::testIterator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
 	Tycho2	catalog("/usr/local/starcatalogs/tycho2/tyc2.dat");
 	CatalogIterator	i;
-	int	counter = 0;
+	unsigned long	counter = 0;
 	for (i = catalog.begin(); i != catalog.end(); ++i) {
 		counter++;
 		if (counter == 100) {
 			Star	s = *i;
-			CPPUNIT_ASSERT(s.longname()
+			CPPUNIT_ASSERT(s.name()
 				== std::string("T0001 00779 1"));
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %d", counter);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %ld", counter);
 	CPPUNIT_ASSERT(counter == catalog.numberOfStars());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
 }

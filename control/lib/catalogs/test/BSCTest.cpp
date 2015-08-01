@@ -81,7 +81,7 @@ void	BSCTest::testIterator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() begin");
 	BSC	catalog("/usr/local/starcatalogs/bsc/catalog",
 			"/usr/local/starcatalogs/bsc/notes");
-	int	counter = 0;
+	unsigned long	counter = 0;
 	CatalogIterator	i;
 	for (i = catalog.begin(); i != catalog.end(); ++i) {
 		counter++;
@@ -92,7 +92,7 @@ void	BSCTest::testIterator() {
 			CPPUNIT_ASSERT(s.longname() == std::string("21Alp And"));
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %d", counter);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iterations: %ld", counter);
 	CPPUNIT_ASSERT(counter == catalog.numberOfStars());
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");

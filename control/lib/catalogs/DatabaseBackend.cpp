@@ -6,11 +6,14 @@
 #include "CatalogBackend.h"
 #include <AstroFormat.h>
 #include "Ucac4.h"
+#include <cassert>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace catalog {
 
 DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
+	backendname = stringprintf("Database(%s)", dbfilename.c_str());
 	// open the database
 	if (sqlite3_open(dbfilename.c_str(), &db)) {
 		throw std::runtime_error("cannot open/create database");
@@ -50,12 +53,15 @@ DatabaseBackend::DatabaseBackend(const std::string& dbfilename) {
 
 	// check whether table exists
 	if (count == 1) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "star table already exists");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "star table exists: fine");
 		return;
 	}
 
 	sqlite3_close(db);
-	throw std::runtime_error("star table does not exist");
+	std::string	msg = stringprintf("star table does not exist in %s",
+		dbfilename.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**
@@ -65,32 +71,20 @@ DatabaseBackend::~DatabaseBackend() {
 	sqlite3_close(db);
 }
 
-static std::string	starname(char catalog, uint32_t catalognumber) {
-	switch (catalog) {
-	case 'H':
-		return stringprintf("HIP%u", catalognumber);
-	case 'T':
-		return stringprintf("T%u", catalognumber);
-	case 'U':
-		return stringprintf("UCAC4-%u-%u",
-			catalognumber / 1000000,
-			catalognumber % 1000000);
-	}
-	throw std::runtime_error("unkonwn catalog");
-}
-
 /**
  * \brief Retrieve stars in a window up to a given magnitude
  */
 Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
+	BlockStopWatch("DatabaseBackend::find(const SkyWindow&, "
+		"const MagnitudeRange&) timing");
 	std::set<Star>	*stars = new std::set<Star>;
 	Catalog::starsetptr	result(stars);
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
 	std::string	query(	"select ra, dec, pmra, pmdec, mag, catalog, "
-				"       catalognumber "
+				"       catalognumber, name, longname "
 				"from star "
 				"where mag <= ? and mag >= ? "
 				"  and ? <= ra and ra <= ? "
@@ -106,6 +100,8 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	// bind the values
 	sqlite3_bind_double(stmt, 1, magrange.faintest());
 	sqlite3_bind_double(stmt, 2, magrange.brightest());
+	// XXX ramin might become negative, this case requires a different
+	//     query!
 	double	ramax = (window.center().ra() + window.rawidth() * 0.5).hours();
 	double	ramin = (window.center().ra() - window.rawidth() * 0.5).hours();
 	sqlite3_bind_double(stmt, 3, ramin);
@@ -120,20 +116,33 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 	// execute the query
 	rc = sqlite3_step(stmt);
 	while (rc == SQLITE_OK) {
-		char	catalog = sqlite3_column_text(stmt, 5)[0];
-		uint32_t	catalognumber = sqlite3_column_int(stmt, 6);
-		Star	star(starname(catalog, catalognumber));
+		std::string	name((char *)sqlite3_column_text(stmt, 7));
+		Star	star(name);
+
 		double	ra = sqlite3_column_double(stmt, 0);
 		star.ra().hours(ra);
+
 		double	dec = sqlite3_column_double(stmt, 1);
 		star.dec().degrees(dec);
+
 		RaDec	pm;
 		double	pmra = sqlite3_column_double(stmt, 2);
 		star.pm().ra().hours(pmra);
 		double	pmdec = sqlite3_column_double(stmt, 3);
 		star.pm().dec().degrees(pmdec);
+
 		double	mag = sqlite3_column_double(stmt, 4);
 		star.mag(mag);
+
+		char	catalog = sqlite3_column_text(stmt, 5)[0];
+		star.catalog(catalog);
+
+		uint64_t	catalognumber = sqlite3_column_int64(stmt, 6);
+		star.catalognumber(catalognumber);
+
+		std::string	longname((char *)sqlite3_column_text(stmt, 8));
+		star.longname(longname);
+
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding star %s to result",
 			star.toString().c_str());
 		stars->insert(star);
@@ -145,22 +154,17 @@ Catalog::starsetptr	DatabaseBackend::find(const SkyWindow& window,
 }
 
 Star	DatabaseBackend::find(const std::string& name) {
+	//BlockStopWatch("DatabaseBackend::find(const std::string&) timing");
 	int	rc;
 	sqlite3_stmt	*stmt;
 	const char	*tail;
 
 	char	catalog = name[0];
-	uint32_t	catalognumber;
-	switch (catalog) {
-	case 'H':	catalognumber = std::stoi(name.substr(3)); break;
-	case 'T':	catalognumber = std::stoi(name.substr(1)); break;
-	case 'U':	catalognumber = Ucac4StarNumber(name).catalognumber();
-			break;
-	}
 
-	std::string	query(	"select ra, dec, pmra, pmdec, mag "
+	std::string	query(	"select id, ra, dec, pmra, pmdec, mag, "
+				"       catalog, catalognumber, name, longname "
 				"from star where catalog = ? "
-				" and catalognumber = ?");
+				" and name = ?");
 	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
 		query.size(), &stmt, &tail))) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -171,24 +175,37 @@ Star	DatabaseBackend::find(const std::string& name) {
 
 	// bind the values
 	sqlite3_bind_text(stmt, 1, &catalog, 1, SQLITE_STATIC);
-	sqlite3_bind_int(stmt, 2, catalognumber);
+	sqlite3_bind_text(stmt, 2, name.c_str(), name.size(), SQLITE_STATIC);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "bound name %s", name.c_str());
 
 	// execute the query
 	rc = sqlite3_step(stmt);
 
-	Star	star(starname(catalog, catalognumber));
+	Star	star(name);
 
-	double	ra = sqlite3_column_double(stmt, 0);
+	int	id = sqlite3_column_int(stmt, 0);
+	double	ra = sqlite3_column_double(stmt, 1);
 	star.ra().hours(ra);
-	double	dec = sqlite3_column_double(stmt, 1);
+	double	dec = sqlite3_column_double(stmt, 2);
 	star.dec().degrees(dec);
 	RaDec	pm;
-	double	pmra = sqlite3_column_double(stmt, 2);
+	double	pmra = sqlite3_column_double(stmt, 3);
 	star.pm().ra().hours(pmra);
-	double	pmdec = sqlite3_column_double(stmt, 3);
+	double	pmdec = sqlite3_column_double(stmt, 4);
 	star.pm().dec().degrees(pmdec);
-	double	mag = sqlite3_column_double(stmt, 4);
+	double	mag = sqlite3_column_double(stmt, 5);
 	star.mag(mag);
+	assert(catalog == sqlite3_column_text(stmt, 6)[0]);
+	star.catalog(catalog);
+	uint64_t	catalognumber = sqlite3_column_int64(stmt, 7);
+	star.catalognumber(catalognumber);
+	std::string	name_from_db((char *)sqlite3_column_text(stmt, 8));
+	assert(name_from_db == name);
+	std::string	longname((char *)sqlite3_column_text(stmt, 9));
+	star.longname(longname);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "star[%d] found: %s, longname='%s'", id,
+		star.toString().c_str(), star.longname().c_str());
 
 	sqlite3_finalize(stmt);
 	return star;
@@ -227,11 +244,6 @@ unsigned long	DatabaseBackend::numberOfStars() {
 }
 
 CatalogIterator	DatabaseBackend::begin() {
-	IteratorImplementationPtr	impl;
-	return CatalogIterator(impl);
-}
-
-CatalogIterator DatabaseBackend::end() {
 	IteratorImplementationPtr	impl;
 	return CatalogIterator(impl);
 }

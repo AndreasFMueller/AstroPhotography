@@ -50,8 +50,7 @@ public:
 	virtual unsigned long	numberOfStars();
 
 	// iterators
-	CatalogIterator	begin();
-	CatalogIterator end();
+	virtual CatalogIterator	begin();
 };
 
 /**

@@ -8,6 +8,7 @@ noinst_LTLIBRARIES = libastroutils.la
 
 libastroutils_la_SOURCES = 						\
 	AttributeValuePairs.cpp						\
+	BlockStopWatch.cpp						\
 	Concatenator.cpp						\
 	Coordinates.cpp							\
 	debug.cpp							\
