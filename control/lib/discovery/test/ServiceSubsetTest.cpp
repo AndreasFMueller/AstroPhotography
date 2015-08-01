@@ -3,6 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <includes.h>
 #include <AstroUtils.h>
 #include <AstroDebug.h>
 #include <AstroDiscovery.h>

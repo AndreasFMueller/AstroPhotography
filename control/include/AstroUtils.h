@@ -18,6 +18,8 @@
 #include <syslog.h>
 #include <cstdio>
 #include <signal.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #ifdef __cplusplus
 extern "C" {
