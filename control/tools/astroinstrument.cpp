@@ -12,6 +12,7 @@
 #include <AstroUtils.h>
 #include <AstroPersistence.h>
 //#include <InstrumentTables.h>
+#include "../lib/config/InstrumentTables.h"
 #include <algorithm>
 
 using namespace astro;

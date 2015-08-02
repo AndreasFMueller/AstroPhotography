@@ -112,7 +112,9 @@ int	command_help(const std::list<std::string>& /* arguments */) {
  */
 int	command_list() {
 	// list projects
-	std::list<Project>	projects = Configuration::get()->listprojects();
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projectconfig = ProjectConfiguration::get(config);
+	std::list<Project>	projects = projectconfig->listprojects();
 	if (projects.size() == 0) {
 		return EXIT_SUCCESS;
 	}
@@ -165,7 +167,9 @@ int	command_add(const std::string& projectname,
 		);
 		return EXIT_FAILURE;
 	}
-	Configuration::get()->addproject(project);
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	projects->addproject(project);
 	return EXIT_SUCCESS;
 }
 
@@ -176,7 +180,9 @@ int	command_show(const std::string& projectname,
 		const std::list<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show project '%s'",
 		projectname.c_str());
-	Project	project = Configuration::get()->project(projectname);
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	Project	project = projects->project(projectname);
 	std::cout << "name:         ";
 	std::cout << project.name() << std::endl;
 	std::cout << "description:  ";
@@ -198,7 +204,9 @@ int	command_remove(const std::string& projectname,
 		const std::list<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "project name = %s",
 		projectname.c_str());
-	Configuration::get()->removeproject(projectname);
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	projects->removeproject(projectname);
 	return EXIT_SUCCESS;
 }
 
@@ -209,8 +217,10 @@ int	command_partlist(const std::string& projectname,
 		const std::list<std::string>& /* arguments */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list parts of project %s",
 		projectname.c_str());
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
 	std::list<astro::project::PartPtr>	parts
-		= Configuration::get()->listparts(projectname);
+		= projects->listparts(projectname);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "project has %d parts", parts.size());
 	if (parts.size() == 0) {
 		std::cerr << "no parts" << std::endl;
@@ -359,7 +369,9 @@ int	command_partadd(const std::string& projectname, long partno,
 	}
 
 	// add the project part to the database
-	Configuration::get()->addpart(projectname, part);
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	projects->addpart(projectname, part);
 	return EXIT_SUCCESS;
 }
 
@@ -369,7 +381,9 @@ int	command_partadd(const std::string& projectname, long partno,
 int	command_partshow(const std::string& projectname, long partno) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show part %ld to project %s", partno,
 		projectname.c_str());
-	PartPtr	part = Configuration::get()->part(projectname, partno);
+	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	PartPtr	part = projects->part(projectname, partno);
 	std::cout << "No:           " << part->partno() << std::endl;
 	std::cout << "Filtername:   " << part->filtername() << std::endl;
 	return EXIT_SUCCESS;
@@ -385,11 +399,12 @@ int	command_partcopy(const std::string& projectname, long partno,
 		return EXIT_FAILURE;
 	}
 	ConfigurationPtr	config = Configuration::get();
-	PartPtr	part = config->part(projectname, partno);
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
+	PartPtr	part = projects->part(projectname, partno);
 	for (auto ptr = partnos.begin(); ptr != partnos.end(); ptr++) {
 		long	newpartno = *ptr;
 		part->partno(newpartno);
-		config->addpart(projectname, *part);
+		projects->addpart(projectname, *part);
 	}
 	return EXIT_SUCCESS;
 }
@@ -400,11 +415,12 @@ int	command_partcopy(const std::string& projectname, long partno,
 int	command_partremove(const std::string& projectname,
 		const std::list<long>& partnos) {
 	ConfigurationPtr	config = Configuration::get();
+	ProjectConfigurationPtr	projects = ProjectConfiguration::get(config);
 	for (auto ptr = partnos.begin(); ptr != partnos.end(); ptr++) {
 		long	partno = *ptr;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove part %ld to project %s",
 			partno, projectname.c_str());
-		config->removepart(projectname, partno);
+		projects->removepart(projectname, partno);
 	}
 	return EXIT_SUCCESS;
 }

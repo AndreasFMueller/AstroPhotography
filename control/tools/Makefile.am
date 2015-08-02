@@ -24,7 +24,7 @@ bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	devicemapper astroinstrument astromount astroproject rescale \
 	gammacorrect
 
-noinst_PROGRAMS = guiderport sdiscover spublish
+noinst_PROGRAMS = guiderport 
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -137,14 +137,6 @@ astromount_LDADD = -L$(top_builddir)/lib -lastro
 guiderport_SOURCES = guiderport.cpp
 guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 guiderport_LDADD = -L$(top_builddir)/lib -lastro
-
-sdiscover_SOURCES = sdiscover.cpp
-sdiscover_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-sdiscover_LDADD = -L$(top_builddir)/lib -lastro
-
-spublish_SOURCES = spublish.cpp
-spublish_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-spublish_LDADD = -L$(top_builddir)/lib -lastro
 
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.
