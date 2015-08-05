@@ -7,6 +7,7 @@
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 #include "Ucac4.h"
+#include <includes.h>
 
 namespace astro {
 namespace catalog {

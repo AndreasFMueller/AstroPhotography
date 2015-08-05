@@ -17,7 +17,7 @@ Star	GenericEndIteratorImplementation::operator*() {
 }
 
 bool	GenericEndIteratorImplementation::operator==(
-		const GenericEndIteratorImplementation& other) const {
+		const GenericEndIteratorImplementation& /* other */) const {
 	return true;
 }
 

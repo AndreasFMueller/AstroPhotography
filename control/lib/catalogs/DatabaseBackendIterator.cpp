@@ -5,6 +5,7 @@
  */
 #include "CatalogBackend.h"
 #include <AstroUtils.h>
+#include <includes.h>
 
 namespace astro {
 namespace catalog {
@@ -19,17 +20,17 @@ DatabaseBackendIterator::DatabaseBackendIterator(sqlite3 *db)
 	: IteratorImplementation(true) {
 	id = 0;
 	stmt = NULL;
-	const char	*query =
+	std::string	query(
 		"select id, ra, dec, pmra, pmdec, mag, catalog, catalognumber, "
 		       "name, longname "
 		"from star "
-		"order by id";
+		"order by id");
 
 	// prepare the statement
 	const char	*tail = NULL;
 	int	rc;
-	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query, strlen(query),
-		&stmt, &tail))) {
+	if (SQLITE_OK != (rc = sqlite3_prepare_v2(db, query.c_str(),
+		query.size(), &stmt, &tail))) {
 		throw std::runtime_error("cannot prepare star lookup");
 	}
 
