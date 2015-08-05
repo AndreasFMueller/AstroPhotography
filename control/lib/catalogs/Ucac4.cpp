@@ -119,11 +119,11 @@ Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
  */
 std::pair<uint16_t, uint16_t>	Ucac4::zoneinterval(const SkyWindow& window) {
 	std::pair<double, double>	interval = window.decinterval();
-	uint16_t	minzone = 1 + floor((interval.first + M_PI / 2) / (0.2 * M_PI / 180));
+	int	minzone = 1 + floor((interval.first + M_PI / 2) / (0.2 * M_PI / 180));
 	if (minzone < 0) { minzone = 0; }
-	uint16_t	maxzone = 1 + floor((interval.second + M_PI / 2) / (0.2 * M_PI / 180));
+	int	maxzone = 1 + floor((interval.second + M_PI / 2) / (0.2 * M_PI / 180));
 	if (maxzone > 900) { maxzone = 900; }
-	return std::make_pair(minzone, maxzone);
+	return std::make_pair((uint16_t)minzone, (uint16_t)maxzone);
 }
 
 /**
