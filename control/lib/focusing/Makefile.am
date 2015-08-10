@@ -5,7 +5,7 @@
 #
 SUBDIRS = . test
 
-lib_LTLIBRARIES = libastrofocusing.la
+noinst_LTLIBRARIES = libastrofocusing.la
 
 libastrofocusing_la_SOURCES =						\
 	FocusCompute.cpp						\
