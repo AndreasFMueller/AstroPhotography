@@ -30,6 +30,7 @@ libastrodevice_la_SOURCES =						\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\
+	ParameterDescription.cpp					\
 	Properties.cpp							\
 	Repository.cpp							\
 	Serial.cpp							\

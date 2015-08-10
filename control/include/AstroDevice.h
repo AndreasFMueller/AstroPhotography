@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include <set>
 #include <AstroCoordinates.h>
 #include <memory>
 
@@ -142,6 +143,48 @@ public:
 std::ostream&	operator<<(std::ostream& out, const DeviceName& name);
 
 namespace device {
+
+class ParameterDescriptionImpl;
+typedef std::shared_ptr<ParameterDescriptionImpl> ParameterDescriptionImplPtr;
+
+/**
+ * \brief Parameterdescription
+ */
+class ParameterDescription {
+	ParameterDescriptionImplPtr	_impl;
+	std::string	_name;
+public:
+	const std::string	name() const { return _name; }
+	typedef enum { boolean, range, sequence, set } value_type;
+private:
+	value_type	_type;
+public:
+	value_type	type() const { return _type; }
+	// check type
+	bool	is_type(value_type t) const { return (t == _type); }
+	bool	is_boolean() const { return is_type(boolean); }
+	bool	is_range() const { return is_type(range); }
+	bool	is_sequence() const { return is_type(sequence); }
+	bool	is_set() const { return is_type(set); }
+
+	// constructors
+	ParameterDescription(const std::string& name);
+	ParameterDescription(const std::string& name, float from, float to);
+	ParameterDescription(const std::string& name,
+		float from, float to, float step);
+	ParameterDescription(const std::string& name,
+		const std::set<float>& values);
+	ParameterDescription(const std::string& name,
+		const std::set<std::string>& values);
+
+	// check parameter values
+	bool	isvalid(const std::string& value) const;
+	bool	isvalid(const float& value) const;
+
+	// add more values
+	void	add(const std::string& value);
+	void	add(const float& value);
+};
 
 /**
  * \brief Base class for all devices, handles device names

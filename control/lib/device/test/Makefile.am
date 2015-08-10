@@ -29,7 +29,7 @@ tests_SOURCES = tests.cpp						\
 	ModuleDescriptorTest.cpp					\
 	ModuleTest.cpp							\
 	NiceTest.cpp							\
-	PropertiesTest.cpp						\
+	ParameterDescriptionTest.cpp					\
 	RepositoryTest.cpp
 tests_LDADD = $(device_ldadd)
 tests_DEPENDENCIES = $(device_dependencies)
@@ -39,7 +39,7 @@ test:	tests
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	BinningTest.cpp	
+	ParameterDescriptionTest.cpp	
 singletest_LDADD = $(device_ldadd)
 singletest_DEPENDENCIES = $(device_dependencies)
 
