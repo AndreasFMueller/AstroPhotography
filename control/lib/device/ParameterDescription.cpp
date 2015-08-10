@@ -109,6 +109,10 @@ protected:
 public:
 	ParameterDescriptionImplSet(const std::set<T>& values)
 		: _values(values) { }
+	ParameterDescriptionImplSet(const std::vector<T>& values) {
+		copy(values.begin(), values.end(),
+			std::inserter(_values, _values.begin()));
+	}
 	virtual bool	isvalid(const T& value) const {
 		return (_values.end() != _values.find(value));
 	}
@@ -121,6 +125,8 @@ class ParameterDescriptionImplSetFloat
 	: public ParameterDescriptionImplSet<float> {
 public:
 	ParameterDescriptionImplSetFloat(const std::set<float> values)
+		: ParameterDescriptionImplSet<float>(values) { }
+	ParameterDescriptionImplSetFloat(const std::vector<float> values)
 		: ParameterDescriptionImplSet<float>(values) { }
 	virtual void	add(const std::string& value) {
 		ParameterDescriptionImplSet<float>::add(std::stod(value));
@@ -216,6 +222,8 @@ class ParameterDescriptionImplSetString
 public:
 	ParameterDescriptionImplSetString(const std::set<std::string> values)
 		: ParameterDescriptionImplSet<std::string>(values) { }
+	ParameterDescriptionImplSetString(const std::vector<std::string> values)
+		: ParameterDescriptionImplSet<std::string>(values) { }
 	virtual bool	isvalid(const float& value) const {
 		std::string	s = convert(value);
 		return ParameterDescriptionImplSet<std::string>::isvalid(s);
@@ -261,7 +269,21 @@ ParameterDescription::ParameterDescription(const std::string& name,
 }
 
 ParameterDescription::ParameterDescription(const std::string& name,
+	const std::vector<float>& values)
+	: _name(name), _type(ParameterDescription::floatset) {
+	_impl = ParameterDescriptionImplPtr(
+			new ParameterDescriptionImplSetFloat(values));
+}
+
+ParameterDescription::ParameterDescription(const std::string& name,
 	const std::set<std::string>& values)
+	: _name(name), _type(ParameterDescription::stringset) {
+	_impl = ParameterDescriptionImplPtr(
+			new ParameterDescriptionImplSetString(values));
+}
+
+ParameterDescription::ParameterDescription(const std::string& name,
+	const std::vector<std::string>& values)
 	: _name(name), _type(ParameterDescription::stringset) {
 	_impl = ParameterDescriptionImplPtr(
 			new ParameterDescriptionImplSetString(values));
