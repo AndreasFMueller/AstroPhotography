@@ -11,8 +11,7 @@ catalogs_ldadd = -lcppunit						\
 	-L$(top_builddir)/lib/utils -lastroutils
 catalogs_dependencies =							\
 	$(top_builddir)/lib/utils/libastroutils.la			\
-	$(top_builddir)/lib/image/libastroimage.la			\
-	$(top_builddir)/lib/catalogs/libastrocatalogs.la
+	$(top_builddir)/lib/image/libastroimage.la
 
 
 noinst_PROGRAMS = listcatalog
@@ -31,8 +30,8 @@ noinst_HEADERS =							\
 noinst_LTLIBRARIES = libastrocatalogs.la
 
 listcatalog_SOURCES = listcatalog.cpp
-listcatalog_DEPENDENCIES = $(catalogs_dependencies)
-listcatalog_LDADD = $(catalogs_ldadd)
+listcatalog_DEPENDENCIES = $(catalogs_dependencies) libastrocatalogs.la
+listcatalog_LDADD = $(catalogs_ldadd) 
 
 libastrocatalogs_la_SOURCES =						\
 	BSC.cpp								\

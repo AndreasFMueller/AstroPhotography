@@ -16,18 +16,6 @@ namespace astro {
 namespace catalog {
 
 /**
- * \brief auxiliary function to check existence of files/directories
- */
-static void	require(const std::string& filename) {
-	struct stat	sb;
-	if (stat(filename.c_str(), &sb) < 0) {
-		std::string	msg = stringprintf("cannot stat '%s': %s",
-			filename.c_str(), strerror(errno));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-	}
-}
-
-/**
  * \brief Create a file based catalog backend
  *
  * The constructor ensures that all the files or directories (in the case of

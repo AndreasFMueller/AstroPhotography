@@ -53,9 +53,15 @@ static void	writefile(const std::string& filename, ImagePtr image) {
 	out.write(*imagep);
 }
 
-static void	reporting(int iterations, const Chart& chart, ConstImageAdapter<double>& projected) {
-	writefile(stringprintf("foo-%d-chart.fits", iterations), chart.image());
-	writefile(stringprintf("foo-%d-projected.fits", iterations), projected);
+/**
+ * \brief Reporting function for the image normalizer
+ */
+static void	reporting(int iterations, const Chart& chart,
+			ConstImageAdapter<double>& projected) {
+	writefile(stringprintf("foo-%d-chart.fits", iterations),
+		chart.image());
+	writefile(stringprintf("foo-%d-projected.fits", iterations),
+		projected);
 }
 
 /**
