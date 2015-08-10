@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include <list>
 #include <set>
 #include <AstroCoordinates.h>
 #include <memory>
@@ -204,6 +205,21 @@ public:
 	Device(const DeviceName& name, DeviceName::device_type type);
 	virtual ~Device();
 	const DeviceName&	name() const { return _name; }
+
+	typedef std::map<std::string, ParameterDescription>	parametermap_t;
+protected:
+	parametermap_t	_parameters;
+	void	add(ParameterDescription parameter);
+private:
+	parametermap_t::const_iterator	findParameter(const std::string& name) const;
+public:
+	std::list<std::string>	parameterNames() const;
+	bool	hasParameter(const std::string& name) const;
+	ParameterDescription	parameter(const std::string& name) const;
+	virtual void	parameter(const std::string& name, float value);
+	virtual void	parameter(const std::string& name, const std::string& value);
+	virtual float	parameterValueFloat(const std::string& name) const;
+	virtual std::string	parameterValueString(const std::string& name) const;
 };
 
 class Mount;
