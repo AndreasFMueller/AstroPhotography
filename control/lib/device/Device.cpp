@@ -113,5 +113,9 @@ std::string	Device::parameterValueString(const std::string& /* name */) const {
 	throw std::logic_error("Device class has no parameters");
 }
 
+void	Device::add(ParameterDescription parameter) {
+	_parameters.insert(std::make_pair(parameter.name(), parameter));
+}
+
 } // namespace device
 } // namespace astro

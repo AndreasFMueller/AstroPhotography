@@ -15,6 +15,8 @@ namespace simulator {
 
 class SimMount : public astro::device::Mount {
 	SimLocator&	_locator;
+	LongLat	_position;
+	RaDec	_direction;
 public:
 	astro::device::Mount::state_type	state();
 	SimMount(SimLocator &locator);
@@ -23,6 +25,8 @@ public:
 	void	Goto(const RaDec& radec);
 	void	Goto(const AzmAlt& azmalt);
 	void	cancel();
+	virtual void    parameter(const std::string& name, float value);
+	virtual float	parameterValueFloat(const std::string& name) const;
 };
 
 } // namespace simulator
