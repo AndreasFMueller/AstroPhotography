@@ -10,7 +10,7 @@
 
 namespace snowstar {
 
-class RepositoriesI : public Repositories {
+class RepositoriesI : virtual public Repositories {
 public:
 	RepositoriesI();
 	virtual ~RepositoriesI();

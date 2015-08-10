@@ -32,6 +32,21 @@ public:
 	virtual void	add(const float& /* value */) {
 		throw std::logic_error("cannot add to this type of parameter");
 	}
+	virtual float	from() const {
+		throw std::logic_error("cannot get from()");
+	}
+	virtual float	to() const {
+		throw std::logic_error("cannot get to()");
+	}
+	virtual float	step() const {
+		throw std::logic_error("cannot get step()");
+	}
+	virtual std::set<float>	floatValues() const {
+		throw std::logic_error("cannot get floatValues()");
+	}
+	virtual std::set<std::string>	stringValues() const {
+		throw std::logic_error("cannot get stringValues()");
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -61,6 +76,8 @@ public:
 	virtual bool	isvalid(const float& value) const {
 		return (_from <= value) && (value <= _to);
 	}
+	virtual float	from() const { return _from; }
+	virtual float	to() const { return _to; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -79,6 +96,7 @@ public:
 		float	v = (value - _from) / _step;
 		return (fabs(v - round(v)) < 0.01);
 	}
+	virtual float	step() const { return _step; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -108,6 +126,7 @@ public:
 		ParameterDescriptionImplSet<float>::add(std::stod(value));
 	}
 	virtual bool	isvalid(const float& value) const;
+	virtual std::set<float>	floatValues() const { return _values; }
 };
 
 class ClosestValues {
@@ -205,6 +224,9 @@ public:
 		std::string	s = convert(value);
 		ParameterDescriptionImplSet<std::string>::add(s);
 	}
+	virtual std::set<std::string>	stringValues() const {
+		return _values;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -233,14 +255,14 @@ ParameterDescription::ParameterDescription(const std::string& name,
 
 ParameterDescription::ParameterDescription(const std::string& name,
 	const std::set<float>& values)
-	: _name(name), _type(ParameterDescription::set) {
+	: _name(name), _type(ParameterDescription::floatset) {
 	_impl = ParameterDescriptionImplPtr(
 			new ParameterDescriptionImplSetFloat(values));
 }
 
 ParameterDescription::ParameterDescription(const std::string& name,
 	const std::set<std::string>& values)
-	: _name(name), _type(ParameterDescription::set) {
+	: _name(name), _type(ParameterDescription::stringset) {
 	_impl = ParameterDescriptionImplPtr(
 			new ParameterDescriptionImplSetString(values));
 }
@@ -259,6 +281,26 @@ void	ParameterDescription::add(const std::string& value) {
 
 void	ParameterDescription::add(const float& value) {
 	_impl->add(value);
+}
+
+float	ParameterDescription::from() const {
+	return _impl->from();
+}
+
+float	ParameterDescription::to() const {
+	return _impl->to();
+}
+
+float	ParameterDescription::step() const {
+	return _impl->step();
+}
+
+std::set<float>	ParameterDescription::floatValues() const {
+	return _impl->floatValues();
+}
+
+std::set<std::string>	ParameterDescription::stringValues() const {
+	return _impl->stringValues();
 }
 
 } // namespace device

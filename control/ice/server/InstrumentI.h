@@ -11,7 +11,7 @@
 
 namespace snowstar {
 
-class InstrumentI : public Instrument {
+class InstrumentI : virtual public Instrument {
 	astro::discover::InstrumentPtr	_instrument;
 public:
 	InstrumentI(astro::discover::InstrumentPtr instrument);

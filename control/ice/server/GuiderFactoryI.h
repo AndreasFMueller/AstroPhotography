@@ -20,7 +20,7 @@ namespace snowstar {
  * It is essentially a wrapper around the original guiderfactory object,
  * but it needs some support structure, e.g. the database for persistence.
  */
-class GuiderFactoryI : public GuiderFactory {
+class GuiderFactoryI : virtual public GuiderFactory {
 	astro::persistence::Database	database;
 	astro::guiding::GuiderFactory&	guiderfactory;
 	GuiderLocator	*locator;

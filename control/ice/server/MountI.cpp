@@ -8,7 +8,7 @@
 
 namespace snowstar {
 
-MountI::MountI(astro::device::MountPtr mount) : _mount(mount) {
+MountI::MountI(astro::device::MountPtr mount) : DeviceI(*mount), _mount(mount) {
 }
 
 MountI::~MountI() {

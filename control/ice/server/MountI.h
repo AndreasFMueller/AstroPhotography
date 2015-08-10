@@ -8,10 +8,11 @@
 
 #include <device.h>
 #include <AstroDevice.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class MountI : public Mount {
+class MountI : virtual public Mount, virtual public DeviceI {
 	astro::device::MountPtr	_mount;
 public:
 	MountI(astro::device::MountPtr mount);

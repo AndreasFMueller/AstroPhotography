@@ -8,16 +8,15 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class FilterWheelI : public FilterWheel {
+class FilterWheelI : virtual public FilterWheel, virtual public DeviceI {
 	astro::camera::FilterWheelPtr	_filterwheel;
 public:
-	FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
-		: _filterwheel(filterwheel) { }
+	FilterWheelI(astro::camera::FilterWheelPtr filterwheel);
 	virtual	~FilterWheelI();
-	virtual std::string	getName(const Ice::Current& current);
 	virtual int	nFilters(const Ice::Current& current);
 	virtual int	currentPosition(const Ice::Current& current);
 	virtual void	select(int, const Ice::Current& current);

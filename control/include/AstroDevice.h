@@ -150,13 +150,17 @@ typedef std::shared_ptr<ParameterDescriptionImpl> ParameterDescriptionImplPtr;
 
 /**
  * \brief Parameterdescription
+ *
+ * Devices can have parameters in addition to the parameters set in the
+ * exposure struture. The ParameterDescription class contains all information
+ * for a client to be able to set correct values for a parameter.
  */
 class ParameterDescription {
 	ParameterDescriptionImplPtr	_impl;
 	std::string	_name;
 public:
 	const std::string	name() const { return _name; }
-	typedef enum { boolean, range, sequence, set } value_type;
+	typedef enum { boolean, range, sequence, floatset, stringset } value_type;
 private:
 	value_type	_type;
 public:
@@ -166,7 +170,8 @@ public:
 	bool	is_boolean() const { return is_type(boolean); }
 	bool	is_range() const { return is_type(range); }
 	bool	is_sequence() const { return is_type(sequence); }
-	bool	is_set() const { return is_type(set); }
+	bool	is_stringset() const { return is_type(stringset); }
+	bool	is_floatset() const { return is_type(floatset); }
 
 	// constructors
 	ParameterDescription(const std::string& name);
@@ -176,7 +181,11 @@ public:
 	ParameterDescription(const std::string& name,
 		const std::set<float>& values);
 	ParameterDescription(const std::string& name,
+		const std::vector<float>& values);
+	ParameterDescription(const std::string& name,
 		const std::set<std::string>& values);
+	ParameterDescription(const std::string& name,
+		const std::vector<std::string>& values);
 
 	// check parameter values
 	bool	isvalid(const std::string& value) const;
@@ -185,6 +194,13 @@ public:
 	// add more values
 	void	add(const std::string& value);
 	void	add(const float& value);
+
+	// data accessors
+	float	from() const;
+	float	to() const;
+	float	step() const;
+	std::set<float>	floatValues() const;
+	std::set<std::string>	stringValues() const;
 };
 
 /**

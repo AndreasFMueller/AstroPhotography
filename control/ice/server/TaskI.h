@@ -11,7 +11,7 @@
 
 namespace snowstar {
 
-class TaskI : public Task {
+class TaskI : virtual public Task {
 	astro::persistence::Database	database;
 	long	queueid;
 	astro::task::TaskQueueEntry	entry();

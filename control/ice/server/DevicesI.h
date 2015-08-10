@@ -11,7 +11,7 @@
 
 namespace snowstar {
 
-class DevicesI : public Devices {
+class DevicesI : virtual public Devices {
 	astro::module::Devices&	_devices;
 public:
 	// constructors

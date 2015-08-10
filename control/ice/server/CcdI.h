@@ -9,24 +9,23 @@
 #include <camera.h>
 #include <AstroCamera.h>
 #include <ImageDirectory.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class CcdI : public Ccd {
+class CcdI : virtual public Ccd, virtual public DeviceI {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImageDirectory	_imagedirectory;
 	time_t	laststart;
 	astro::image::ImagePtr	image;
 public:
 	CcdI(astro::camera::CcdPtr ccd,
-		astro::image::ImageDirectory& imagedirectory)
-			: _ccd(ccd), _imagedirectory(imagedirectory) { }
+		astro::image::ImageDirectory& imagedirectory);
 	virtual	~CcdI();
 
 static	CcdPrx	createProxy(const std::string& ccdname, const Ice::Current& current);
 
 	// interface methods
-	std::string	getName(const Ice::Current& current);
 	CcdInfo	getInfo(const Ice::Current& current);
 	void	startExposure(const Exposure&, const Ice::Current& current);
 	ExposureState	exposureStatus(const Ice::Current& current);

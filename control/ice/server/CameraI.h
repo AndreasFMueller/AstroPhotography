@@ -8,15 +8,15 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class CameraI : public Camera {
+class CameraI : virtual public Camera, virtual public DeviceI {
 	astro::camera::CameraPtr	_camera;
 public:
 	CameraI(astro::camera::CameraPtr camera);
 	virtual	~CameraI();
-	std::string	getName(const Ice::Current& current);
 	int	nCcds(const Ice::Current& current);
 	CcdInfo	getCcdinfo(int ccdid, const Ice::Current& current);
 	CcdPrx	getCcd(int ccdid, const Ice::Current& current);

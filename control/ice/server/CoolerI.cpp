@@ -9,7 +9,8 @@
 
 namespace snowstar {
 
-CoolerI::CoolerI(astro::camera::CoolerPtr cooler) : _cooler(cooler) {
+CoolerI::CoolerI(astro::camera::CoolerPtr cooler)
+	: DeviceI(*cooler), _cooler(cooler) {
 }
 
 CoolerI::~CoolerI() {
@@ -33,10 +34,6 @@ bool	CoolerI::isOn(const Ice::Current& /* current */) {
 
 void	CoolerI::setOn(bool onoff, const Ice::Current& /* current */) {
 	_cooler->setOn(onoff);
-}
-
-std::string	CoolerI::getName(const Ice::Current& /* current */) {
-	return _cooler->name();
 }
 
 CoolerPrx	CoolerI::createProxy(const std::string& coolername,

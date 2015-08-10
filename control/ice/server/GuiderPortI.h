@@ -8,17 +8,16 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class GuiderPortI : public GuiderPort {
+class GuiderPortI : virtual public GuiderPort, virtual public DeviceI {
 	astro::camera::GuiderPortPtr	_guiderport;
 public:
-	GuiderPortI(astro::camera::GuiderPortPtr guiderport)
-		: _guiderport(guiderport) { }
-	virtual	~GuiderPortI() { }
+	GuiderPortI(astro::camera::GuiderPortPtr guiderport);
+	virtual	~GuiderPortI();
 
-	virtual std::string	getName(const Ice::Current& current);
 	virtual Ice::Byte	active(const Ice::Current& current);
 	virtual void	activate(float, float, const Ice::Current& current);
 static	GuiderPortPrx	createProxy(const std::string& name,

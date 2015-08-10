@@ -17,7 +17,7 @@ template<>
 void	callback_adapter<TaskMonitorPrx>(TaskMonitorPrx& p,
 		const astro::callback::CallbackDataPtr d);
 
-class TaskQueueI : public TaskQueue {
+class TaskQueueI : virtual public TaskQueue {
 	astro::task::TaskQueue&	taskqueue;
 private:
 	TaskQueueI(const TaskQueueI& other);

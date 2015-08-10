@@ -35,7 +35,7 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
  * GuiderITrackingCallback etc and used to persist the data and to send
  * it to callbacks via ICE.
  */
-class GuiderI : public Guider {
+class GuiderI : virtual public Guider {
 	astro::guiding::GuiderPtr	guider;
 	astro::image::ImageDirectory	imagedirectory;
 	astro::persistence::Database	database;

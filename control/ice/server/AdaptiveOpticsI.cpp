@@ -10,14 +10,11 @@
 
 namespace snowstar {
 
-AdaptiveOpticsI::AdaptiveOpticsI(astro::camera::AdaptiveOpticsPtr ao) : _ao(ao) {
+AdaptiveOpticsI::AdaptiveOpticsI(astro::camera::AdaptiveOpticsPtr ao)
+	: DeviceI(*ao), _ao(ao) {
 }
 
 AdaptiveOpticsI::~AdaptiveOpticsI() {
-}
-
-std::string	AdaptiveOpticsI::getName(const Ice::Current& /* current */) {
-	return _ao->name().toString();
 }
 
 void	AdaptiveOpticsI::set(const Point& position, const Ice::Current& /* current */) {

@@ -10,11 +10,11 @@
 
 namespace snowstar {
 
-FilterWheelI::~FilterWheelI() {
+FilterWheelI::FilterWheelI(astro::camera::FilterWheelPtr filterwheel)
+		: DeviceI(*filterwheel), _filterwheel(filterwheel) {
 }
 
-std::string	FilterWheelI::getName(const Ice::Current& /* current */) {
-	return _filterwheel->name().toString();
+FilterWheelI::~FilterWheelI() {
 }
 
 int	FilterWheelI::nFilters(const Ice::Current& /* current */) {

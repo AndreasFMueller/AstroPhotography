@@ -8,10 +8,11 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class CoolerI : public Cooler {
+class CoolerI : virtual public Cooler, virtual public DeviceI {
 	astro::camera::CoolerPtr	_cooler;
 public:
 	CoolerI(astro::camera::CoolerPtr cooler);
@@ -21,7 +22,6 @@ public:
 	void	setTemperature(float temperature, const Ice::Current& current);
 	bool	isOn(const Ice::Current& current);
 	void	setOn(bool onoff, const Ice::Current& current);
-	std::string	getName(const Ice::Current& current);
 static	CoolerPrx	createProxy(const std::string& coolername,
 				const Ice::Current& current);
 };

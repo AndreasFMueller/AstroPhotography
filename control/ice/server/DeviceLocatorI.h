@@ -11,7 +11,7 @@
 
 namespace snowstar {
 
-class DeviceLocatorI : public DeviceLocator {
+class DeviceLocatorI : virtual public DeviceLocator {
 	astro::device::DeviceLocatorPtr	_locator;
 public:
 	DeviceLocatorI(astro::device::DeviceLocatorPtr locator);

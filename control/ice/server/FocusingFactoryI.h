@@ -62,7 +62,7 @@ static FocusingContext	get(int id);
  * is found, creates a new one. The id in the FocusingContext is then used
  * to create a string identifier for the Ice proxy.
  */
-class FocusingFactoryI : public FocusingFactory {
+class FocusingFactoryI : virtual public FocusingFactory {
 public:
 	FocusingFactoryI();
 	virtual ~FocusingFactoryI();

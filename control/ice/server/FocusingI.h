@@ -19,7 +19,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& p,
 /**
  * \brief Focusing servant implementation
  */
-class FocusingI : public Focusing {
+class FocusingI : virtual public Focusing {
 	astro::focusing::FocusingPtr	_focusingptr;
 	FocusHistory	_history;
 public:

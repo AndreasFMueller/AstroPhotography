@@ -55,6 +55,10 @@ astro::AzmAlt	convert(const AzmAlt& azmalt);
 Interval	convert(const std::pair<float, float>& interval);
 std::pair<float, float>	convert(const Interval& interval);
 
+// Parameters
+struct ParameterDescription	convert(const astro::device::ParameterDescription& parameter);
+astro::device::ParameterDescription	convert(const struct ParameterDescription& parameter);
+
 // Device conversions
 DeviceNameList  convert(const astro::module::Devices::devicelist& list);
 astro::module::Devices::devicelist	convert(const DeviceNameList& list);

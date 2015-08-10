@@ -12,7 +12,7 @@
 
 namespace snowstar {
 
-class RepositoryI : public Repository {
+class RepositoryI : virtual public Repository {
 	astro::project::ImageRepo	_repo;
 public:
 	RepositoryI(astro::project::ImageRepo repo);

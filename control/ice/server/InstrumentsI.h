@@ -7,7 +7,7 @@
 
 namespace snowstar {
 
-class InstrumentsI : public Instruments {
+class InstrumentsI : virtual public Instruments {
 public:
 	InstrumentsI();
 	virtual ~InstrumentsI();

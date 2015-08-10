@@ -83,4 +83,44 @@ module snowstar {
 		int	x;
 		int	y;
 	};
+
+	/**
+	 * \brief parameter value types
+	 */
+	enum ParameterType {	ParameterBoolean, ParameterRange,
+		ParameterSequence, ParameterSetFloat, ParameterSetString };
+
+	sequence<float>	floatlist;
+	sequence<string>	stringlist;
+
+	/**
+	 * \brief A parameter description structure
+	 *
+	 * some parameters are not needed, but we will hide them when we
+	 * convert the object into an astro::device::ParameterDescription
+	 * object.
+	 */
+	struct ParameterDescription {
+		ParameterType	type;
+		string	name;
+		float	from;
+		float	to;
+		float	step;
+		floatlist	floatvalues;
+		stringlist	stringvalues;
+	};
+
+	/**
+	 * \brief An object having parameters that can be set
+	 */
+	interface Device {
+		string	getName();
+		stringlist	parameterNames();
+		bool	hasParameter(string name);
+		ParameterDescription	parameter(string name);
+		void	setParameterFloat(string name, double value);
+		void	setParameterString(string name, string value);
+		float	parameterValueFloat(string name);
+		string	parameterValueString(string name);
+	};
 };

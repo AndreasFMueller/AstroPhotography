@@ -9,8 +9,11 @@
 
 namespace snowstar {
 
-std::string	GuiderPortI::getName(const Ice::Current& /* current */) {
-	return _guiderport->name();
+GuiderPortI::GuiderPortI(astro::camera::GuiderPortPtr guiderport)
+		: DeviceI(*guiderport), _guiderport(guiderport) {
+}
+
+GuiderPortI::~GuiderPortI() {
 }
 
 Ice::Byte	GuiderPortI::active(const Ice::Current& /* current */) {

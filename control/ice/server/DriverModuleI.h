@@ -11,7 +11,7 @@
 
 namespace snowstar {
 
-class DriverModuleI : public DriverModule {
+class DriverModuleI : virtual public DriverModule {
 	astro::module::ModulePtr	_module;
 public:
 	DriverModuleI(astro::module::ModulePtr module);

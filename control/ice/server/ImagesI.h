@@ -17,7 +17,7 @@ ImagePrx	getImage(const std::string& name,
 			astro::image::ImageDirectory& imagedirectory,
 			const Ice::Current& current);
 
-class ImagesI : public Images {
+class ImagesI : virtual public Images {
 	astro::image::ImageDirectory&	imagedirectory;
 public:
 	ImagesI(astro::image::ImageDirectory& imagedirectory);

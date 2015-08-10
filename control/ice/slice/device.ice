@@ -16,7 +16,7 @@ module snowstar {
 	/**
 	 * \brief Interface to a telescope mount
 	 */
-	interface Mount {
+	interface Mount extends Device {
 		mountstate	state();
 		RaDec	getRaDec();
 		AzmAlt	getAzmAlt();

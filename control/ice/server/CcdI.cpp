@@ -15,11 +15,12 @@
 
 namespace snowstar {
 
-CcdI::~CcdI() {
+CcdI::CcdI(astro::camera::CcdPtr ccd,
+                astro::image::ImageDirectory& imagedirectory)
+		: DeviceI(*ccd), _ccd(ccd), _imagedirectory(imagedirectory) {
 }
 
-std::string	CcdI::getName(const Ice::Current& /* current */) {
-	return _ccd->name();
+CcdI::~CcdI() {
 }
 
 CcdInfo	CcdI::getInfo(const Ice::Current& /* current */) {

@@ -104,11 +104,7 @@ module snowstar {
 	 * CCD (e.g. with self guiding cameras, if the guiging CCD is
 	 * behind the shutter.
 	 */
-	interface Ccd {
-		/**	
-		 * \brief get the name of the ccd
-		 */
-		string	getName();
+	interface Ccd extends Device {
 		/**
  		 * \brief get the CcdInfo from the ccd
 		 */
@@ -185,11 +181,7 @@ module snowstar {
 	 * Some CCDs have thermoelectric coolers. This interface allows
 	 * to control their temperature.
 	 */
-	interface Cooler {
-		/**
-		 * \brief get the name of the cooler
-		 */
-		string	getName();
+	interface Cooler extends Device {
 		/**
 		 * \brief Get temperature at which the cooler is set
 		 */
@@ -235,12 +227,7 @@ module snowstar {
 	const byte	DECPLUS = 2;
 	const byte	RAMINUS = 4;
 	const byte	RAPLUS = 8;
-	interface GuiderPort {
-		/**
-		 * \brief get the name of the guiderport
-		 */
-		string	getName();
-
+	interface GuiderPort extends Device {
 		/**
 		 * \brief Retrieve active ports
 		 *
@@ -278,11 +265,7 @@ module snowstar {
 	 * A Filterwheel is a device that can position a certain number
 	 * of filters into the light path of the camera.
 	 */
-	interface FilterWheel {
-		/**
- 		 * \brief get the name of the filter wheel
-		 */
-		string	getName();
+	interface FilterWheel extends Device {
 		/**
 		 * \brief Number of available filter positions.
 		 *
@@ -314,8 +297,7 @@ module snowstar {
 	/**
 	 * \brief Focuser abstraction
 	 */
-	interface Focuser {
-		string	getName();
+	interface Focuser extends Device {
 		int	min();
 		int	max();
 		int	current();
@@ -330,11 +312,7 @@ module snowstar {
 	 * individually. It can also have Filterwheels attached, and many
 	 * cameras have a guider port.
 	 */
-	interface Camera {
-		/**
-		 * \brief Get the camera name.
-		 */
-		string	getName();
+	interface Camera extends Device {
 		// CcdInfo info;
 		/**
 		 * \brief Find out how many CCDs the camera has
@@ -375,11 +353,7 @@ module snowstar {
 	/**
 	 * \brief AdaptiveOptics abstraction
 	 */
-	interface AdaptiveOptics {
-		/**
- 		 * \brief Get the name of the adaptive optics unit
-		 */
-		string	getName();
+	interface AdaptiveOptics extends Device {
 		/**
  		 * \brief Set a position offset
 		 */

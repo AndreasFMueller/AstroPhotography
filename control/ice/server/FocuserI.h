@@ -8,15 +8,15 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class FocuserI : public Focuser {
+class FocuserI : virtual public Focuser, virtual public DeviceI {
 	astro::camera::FocuserPtr	_focuser;
 public:
 	FocuserI(astro::camera::FocuserPtr focuser);
 	virtual ~FocuserI();
-	virtual std::string	getName(const Ice::Current& current);
 	virtual int	min(const Ice::Current& current);
 	virtual int	max(const Ice::Current& current);
 	virtual int	backlash(const Ice::Current& current);

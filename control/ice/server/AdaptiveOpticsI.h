@@ -8,15 +8,15 @@
 
 #include <device.h>
 #include <AstroCamera.h>
+#include <DeviceI.h>
 
 namespace snowstar {
 
-class AdaptiveOpticsI : public AdaptiveOptics {
+class AdaptiveOpticsI : virtual public AdaptiveOptics, virtual public DeviceI {
 	astro::camera::AdaptiveOpticsPtr	_ao;
 public:
 	AdaptiveOpticsI(astro::camera::AdaptiveOpticsPtr ao);
 	virtual ~AdaptiveOpticsI();
-	virtual std::string	getName(const Ice::Current& current);
 	virtual void	set(const Point& position, const Ice::Current& current);
 	virtual Point	get(const Ice::Current& current);
 	virtual bool	hasGuiderPort(const Ice::Current& current);
