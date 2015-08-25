@@ -8,6 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <AstroDebug.h>
 #include <AstroConvolve.h>
+#include <AstroAdapter.h>
 #include <AstroIO.h>
 
 using namespace astro::image;
@@ -193,8 +194,8 @@ void	ConvolveTest::testConvolutionResult() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolutionResult() begin");
 	Image<unsigned char>	in(47, 53);
 	Image<unsigned char>	op(47, 53);
-	for (int x = 0; x < in.getSize().width(); x++) {
-		for (int y = 0; y < in.getSize().height(); y++) {
+	for (int x = 0; x < 47; x++) {
+		for (int y = 0; y < 53; y++) {
 			unsigned char	v = (x + y) % 256;
 			in.pixel(x, y) = v;
 			op.pixel(x, y) = 0;
@@ -203,6 +204,18 @@ void	ConvolveTest::testConvolutionResult() {
 	op.pixel(20, 30) = 1;
 	ConvolutionResult	a(in, Point(0, 0));
 	ConvolutionResult	b(op, Point(0, 0));
+	ConvolutionResultPtr	c = a * b;
+	ImagePtr	imageptr = c->image();
+	Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+	adapter::RollAdapter<unsigned char>	roll(in, ImagePoint(20, 30));
+	for (int x = 0; x < 47; x++) {
+		for (int y = 0; y < 53; y++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d %f %d %c",
+				x, y, imagep->pixel(x, y), roll.pixel(x, y),
+				(fabs(imagep->pixel(x, y) - roll.pixel(x, y)) > 0.01) ?  '*' : ' ');
+			//CPPUNIT_ASSERT(fabs(imagep->pixel(x, y) - roll.pixel(x, y)) < 0.01);
+		}
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolutionResult() end");
 }
 

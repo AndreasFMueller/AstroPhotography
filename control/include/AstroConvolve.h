@@ -63,6 +63,8 @@ public:
 	ImagePtr	image() const;
 };
 
+ConvolutionResultPtr	operator*(const ConvolutionResult& a,
+				const ConvolutionResult& b);
 ConvolutionResultPtr	operator*(const ConvolutionResultPtr a,
 				const ConvolutionResultPtr b);
 
