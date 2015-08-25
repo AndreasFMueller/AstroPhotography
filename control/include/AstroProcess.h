@@ -53,10 +53,8 @@ public:
 	double	max() const { return _max; }
 	void	max(double m) { _max = m; }
 	virtual ImageSize	size() const = 0;
-	virtual unsigned char	monochrome_pixel(unsigned int x,
-					unsigned int y) const = 0;
-	virtual RGB<unsigned char>	color_pixel(unsigned int x,
-						unsigned int y) const = 0;
+	virtual unsigned char	monochrome_pixel(int x, int y) const = 0;
+	virtual RGB<unsigned char>	color_pixel(int x, int y) const = 0;
 private:
 	PreviewAdapter(const PreviewAdapter& other);
 	PreviewAdapter&	operator=(const PreviewAdapter& other);
@@ -76,7 +74,7 @@ public:
 	PreviewMonochromeAdapter(const PreviewAdapterPtr _previewadapter)
 		: ConstImageAdapter<unsigned char>(_previewadapter->size()),
 		  previewadapter(_previewadapter) { }
-	virtual unsigned char	pixel(unsigned int x, unsigned int y) const {
+	virtual unsigned char	pixel(int x, int y) const {
 		return previewadapter->monochrome_pixel(x, y);
 	}
 };
@@ -90,8 +88,7 @@ public:
 	PreviewColorAdapter(const PreviewAdapterPtr _previewadapter)
 		: ConstImageAdapter<RGB<unsigned char> >(_previewadapter->size()),
 		  previewadapter(_previewadapter) { }
-	virtual RGB<unsigned char>	pixel(unsigned int x,
-						unsigned int y) const {
+	virtual RGB<unsigned char>	pixel(int x, int y) const {
 		return previewadapter->color_pixel(x, y);
 	}
 };
@@ -573,7 +570,7 @@ protected:
 private:
 	aggregates	tile(int x, int y);
 	void	filltile(short x, short y);
-	aggregates	aggr(unsigned int x, unsigned int y) const;
+	aggregates	aggr(int x, int y) const;
 public:
 	CalibrationProcessorStep(CalibrationImageStep::caltype t);
 	~CalibrationProcessorStep();

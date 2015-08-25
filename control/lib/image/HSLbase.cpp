@@ -9,13 +9,13 @@
 namespace astro {
 namespace image {
 
-static inline double	l(double s) {
+static inline double	limit(double s) {
 	if (s < 0) { return 0; }
 	if (s > 1) { return 1; }
 	return s;
 }
 
-static double	mod2(double x) {
+static inline double	mod2(double x) {
 	while (x < 0) {
 		x += 2;
 	}
@@ -25,8 +25,14 @@ static double	mod2(double x) {
 	return x;
 }
 
+/**
+ * \brief convert HSL color to RGB
+ *
+ * This conversion routine es based on the Wikipedia article
+ * https://en.wikipedia.org/wiki/HSL_and_HSV
+ */
 HSLBase::HSLBase(double hue, double saturation, double luminance)
-	: H(hue), S(saturation), L(luminance) {
+	: _h(hue), _s(saturation), _l(luminance) {
 	if (saturation == 0) {
 		_r = _g = _b = luminance;
 		return;
@@ -48,9 +54,9 @@ HSLBase::HSLBase(double hue, double saturation, double luminance)
 				_r = chroma; _g = 0;      _b = x;
 	}
 	double m = luminance - chroma / 2;
-	_r = l(_r + m);
-	_g = l(_g + m);
-	_b = l(_b + m);
+	_r = limit(_r + m);
+	_g = limit(_g + m);
+	_b = limit(_b + m);
 }
 
 template<>

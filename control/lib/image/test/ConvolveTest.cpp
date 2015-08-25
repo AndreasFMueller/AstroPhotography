@@ -25,6 +25,7 @@ public:
 	void	testAbs();
 	void	testPhase();
 	void	testColor();
+	void	testConvolutionResult();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(ConvolveTest);
@@ -34,6 +35,7 @@ public:
 	CPPUNIT_TEST(testAbs);
 	CPPUNIT_TEST(testPhase);
 	CPPUNIT_TEST(testColor);
+	CPPUNIT_TEST(testConvolutionResult);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -93,8 +95,11 @@ void	ConvolveTest::testConvolution() {
 	Image<double>	*image = dynamic_cast<Image<double>*>(&*img);
 	for (int x = 0; x < 100; x++) {
 		for (int y = 0; y < 101; y++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d %f", x, y,
+				image->pixel(x,y));
 			if (((49 <= x) && (x <= 51) && (49 <= y) && (y <= 51))
 				|| ((79 <= x) && (x <= 81) && (28 <= y) && (y <= 30))) {
+
 				CPPUNIT_ASSERT(fabs(image->pixel(x, y) - 1) < 0.1);
 			} else {
 				CPPUNIT_ASSERT(fabs(image->pixel(x, y)) < 0.1);
@@ -182,6 +187,23 @@ void	ConvolveTest::testColor() {
 	out.setPrecious(false);
         out.write(b);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testColor() end");
+}
+
+void	ConvolveTest::testConvolutionResult() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolutionResult() begin");
+	Image<unsigned char>	in(47, 53);
+	Image<unsigned char>	op(47, 53);
+	for (int x = 0; x < in.getSize().width(); x++) {
+		for (int y = 0; y < in.getSize().height(); y++) {
+			unsigned char	v = (x + y) % 256;
+			in.pixel(x, y) = v;
+			op.pixel(x, y) = 0;
+		}
+	}
+	op.pixel(20, 30) = 1;
+	ConvolutionResult	a(in, Point(0, 0));
+	ConvolutionResult	b(op, Point(0, 0));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolutionResult() end");
 }
 
 #if 0

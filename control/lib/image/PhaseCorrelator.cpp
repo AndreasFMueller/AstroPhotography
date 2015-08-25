@@ -106,7 +106,7 @@ public:
 		delete hh;
 		delete hv;
 	}
-	double	pixel(unsigned int x, unsigned int y) const {
+	double	pixel(int x, int y) const {
 		double	hanning = hh[x] * hv[y];
 		return hanning * _base.pixel(x, y);
 	}
@@ -114,8 +114,8 @@ public:
 
 class RectangleWindow : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_base;
-	unsigned int	wmin, wmax;
-	unsigned int	hmin, hmax;
+	int	wmin, wmax;
+	int	hmin, hmax;
 public:
 	RectangleWindow(const ConstImageAdapter<double>& base)
 		: ConstImageAdapter<double>(base.getSize()), _base(base) {
@@ -124,7 +124,7 @@ public:
 		hmin = getSize().height() / 4;
 		hmax = 3 * hmin;
 	}
-	virtual double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(int x, int y) const {
 		if ((x <= wmin) || (x >= wmax)) {
 			return 0;
 		}
@@ -203,8 +203,8 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 
 	// now copy the data into the arrays, applying the hanning window
 	// at the same time
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			a[size.offset(x, y)] = windowedfrom->pixel(x, y);
 			b[size.offset(x, y)] = windowedto->pixel(x, y);
 		}
@@ -281,10 +281,10 @@ try {
 						correlation_counter));
 		out.setPrecious(false);
 		Image<double>	correlation(size);
-		unsigned int	w = size.width();
-		unsigned int	h = size.height();
-		for (unsigned int x = 0; x < w; x++) {
-			for (unsigned int y = 0; y < h; y++) {
+		int	w = size.width();
+		int	h = size.height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
 				correlation.writablepixel(x, y)
 					= value(a, size, x, y);
 			}

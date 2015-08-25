@@ -21,7 +21,7 @@ namespace sx {
  * \param l	length of the data block (should be size.with * size.height / 2)
  */
 Field::Field(ImageSize _size, size_t l) : size(_size), length(l) {
-	if (size.width() * size.height() != 2 * l) {
+	if (size.width() * size.height() != (int)(2 * l)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%dx%d image expects length %d, "
 			"%d found", size.width(), size.height(),
 			size.width() * size.height() / 2, length);
@@ -68,9 +68,9 @@ std::ostream&	operator<<(std::ostream& out, const Field& field) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "writing length %d field from "
 		"%d x %d image", field.length,
 		field.size.width(), field.size.height());
-	unsigned int	width = field.size.width();
+	int	width = field.size.width();
 	out.write((const char *)&width, sizeof(width));
-	unsigned int	height = field.size.height();
+	int	height = field.size.height();
 	out.write((const char *)&height, sizeof(height));
 	out.write((const char *)&field.length, sizeof(field.length));
 	out.write((const char *)field.data, 2 * field.length);
@@ -81,10 +81,10 @@ std::ostream&	operator<<(std::ostream& out, const Field& field) {
  * \brief Input of fields (mainly for testing)
  */
 std::istream&	operator>>(std::istream& in, Field& field) {
-	unsigned int	width;
+	int	width;
 	in.read((char *)&width, sizeof(width));
 	field.size.setWidth(width);
-	unsigned int	height;
+	int	height;
 	in.read((char *)&height, sizeof(height));
 	field.size.setHeight(height);
 	in.read((char *)&field.length, sizeof(field.length));
@@ -304,7 +304,7 @@ void	DemuxerUnbinned::operator()(Image<unsigned short>& image,
 	}
 #else
 	/* copy without demultiplexing, just for debugging */
-	unsigned int	length = field1.getLength() * sizeof(unsigned short);
+	int	length = field1.getLength() * sizeof(unsigned short);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "length: %u", length);
 	memcpy(image.pixels, field1.data, length);
 	memcpy(length + (unsigned char *)image.pixels, field2.data, length);

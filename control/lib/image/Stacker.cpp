@@ -32,8 +32,8 @@ void	Accumulator<Pixel>::accumulate(const ConstImageAdapter<Pixel>& add) {
 	}
 
 	// add new pixels
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y)
 				= image.pixel(x, y) + add.pixel(x, y);
 		}

@@ -154,7 +154,7 @@ class StarCameraBase {
 	 * \brief Binning mode to apply when exposing
 	 */
 	astro::camera::Binning	_binning;
-	double	bin0(Image<double>& image, unsigned int x, unsigned int y) const;
+	double	bin0(Image<double>& image, int x, int y) const;
 	void	fill0(Image<double>& image, const ImagePoint& point,
 			double fillvalue) const;
 protected:
@@ -265,12 +265,12 @@ public:
 		Image<P>	*image = new Image<P>(size);
 
 		// fill in the data
-		unsigned int	width = size.width();
-		unsigned int	height = size.height();
-		unsigned int	deltax = binning().x();
-		unsigned int	deltay = binning().y();
-		for (unsigned int x = 0; x < width; x++) {
-			for (unsigned int y = 0; y < height; y++) {
+		int	width = size.width();
+		int	height = size.height();
+		int	deltax = binning().x();
+		int	deltay = binning().y();
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				image->pixel(x, y)
 					= rawimage->pixel(x * deltax, y * deltay);
 			}

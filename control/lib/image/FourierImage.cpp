@@ -70,6 +70,15 @@ void	FourierImage::fourier(const Image<double>& image) {
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	fftw_cleanup();
+
+#if 0
+	// renormalize
+	double	v = 1 / sqrt(n0 *n1);
+	size_t	m = size().getPixels();
+	for (size_t o = 0; o < m; o++) {
+		pixels[o] *= v;
+	}
+#endif
 }
 
 /**

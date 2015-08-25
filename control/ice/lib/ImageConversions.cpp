@@ -90,7 +90,7 @@ class UnsignedShortAdapter
 public:
 	UnsignedShortAdapter(const astro::image::ConstImageAdapter<Pixel>&
 		_image);
-	virtual unsigned short	pixel(unsigned int x, unsigned int y) const;
+	virtual unsigned short	pixel(int x, int y) const;
 };
 
 /**
@@ -108,8 +108,7 @@ UnsignedShortAdapter<Pixel>::UnsignedShortAdapter(
  *
  */
 template<typename Pixel>
-unsigned short	UnsignedShortAdapter<Pixel>::pixel(unsigned int x,
-		unsigned int y) const {
+unsigned short	UnsignedShortAdapter<Pixel>::pixel(int x, int y) const {
 	unsigned short	value;
 	// code to be compiled for floating point pixel types
 	if (std::is_floating_point<Pixel>()) {

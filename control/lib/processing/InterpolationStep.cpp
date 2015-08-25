@@ -18,10 +18,10 @@ namespace process {
  */
 class InterpolationAdapter : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_image;
-	unsigned int	_spacing;
+	int	_spacing;
 public:
 	InterpolationAdapter(const ConstImageAdapter<double>& image,
-		unsigned int spacing)
+		int spacing)
 		: ConstImageAdapter<double>(image.getSize()), _image(image),
 		  _spacing(spacing) {
 	}
@@ -29,7 +29,7 @@ public:
 	/**
 	 * \brief Interpolate a particular pixel
 	 */
-	double	pixel(unsigned int x, unsigned int y) const {
+	double	pixel(int x, int y) const {
 		double	v = _image.pixel(x, y);
 		if (v == v) {
 			return v;

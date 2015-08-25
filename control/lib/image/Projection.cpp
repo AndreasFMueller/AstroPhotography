@@ -68,7 +68,7 @@ Point	CenteredProjection::operator()(const Point& p) const {
 	return u * w(u.abs()) + targetcenter;
 }
 
-Point	CenteredProjection::operator()(unsigned int x, unsigned int y) const {
+Point	CenteredProjection::operator()(int x, int y) const {
 	return (*this)(Point(x, y));
 }
 

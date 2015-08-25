@@ -8,6 +8,7 @@
 #define _AstroConvolve_h
 
 #include <AstroImage.h>
+#include <AstroTypes.h>
 #include <fftw3.h>
 
 namespace astro {
@@ -43,6 +44,41 @@ static ImageSize	fsize(const ImageSize&);
  */
 FourierImagePtr	operator*(const FourierImage& a, const FourierImage& b);
 FourierImagePtr	operator*(const FourierImagePtr a, const FourierImagePtr b);
+
+class ConvolutionResult;
+typedef std::shared_ptr<ConvolutionResult>	ConvolutionResultPtr;
+
+/**
+ * \brief class to encode convolution results
+ */
+class ConvolutionResult : public FourierImage {
+	Point	_center;
+public:
+	const Point	center() const { return _center; }
+	void	center(const Point& c) { _center = c; }
+public:
+	ConvolutionResult(const ImageSize& size, const Point& center);
+	ConvolutionResult(const Image<double>& image, const Point& center);
+	ConvolutionResult(const ImagePtr image, const Point& center);
+	ImagePtr	image() const;
+};
+
+ConvolutionResultPtr	operator*(const ConvolutionResultPtr a,
+				const ConvolutionResultPtr b);
+
+/**
+ * \brief Base class for convolution operators
+ */
+class ConvolutionOperator {
+	Point	_center;
+	ConvolutionResultPtr	_psf;
+public:
+	const Point	center() const { return _center; }
+	void	center(const Point& c) { _center = c; }
+public:
+	FourierImagePtr	operator()(ImagePtr image) const;
+	FourierImagePtr	operator()(FourierImagePtr fourier) const;
+};
 
 } // namespace image
 } // namespace astro

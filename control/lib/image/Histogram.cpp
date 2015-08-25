@@ -185,7 +185,7 @@ public:
 		: ConstImageAdapter<T>(image.getSize()),
 		  _image(image), _channel(channel) {
 	}
-	virtual T	pixel(unsigned int x, unsigned int y) const {
+	virtual T	pixel(int x, int y) const {
 		RGB<P>	v = _image.pixel(x, y);
 		switch (_channel) {
 		case histogram::LUMINANCE:

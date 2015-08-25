@@ -243,7 +243,7 @@ CircleAdapter::~CircleAdapter() {
 /**
  * \brief compute circular average
  */
-double	CircleAdapter::pixel(unsigned int x, unsigned int y) const {
+double	CircleAdapter::pixel(int x, int y) const {
 	return _circ.value(_image, x, y);
 }
 

@@ -9,13 +9,79 @@
 #include <AstroTypes.h>
 #include <AstroImage.h>
 #include <AstroFormat.h>
+#include <AstroAdapter.h>
 
 namespace astro {
 namespace image {
 namespace transform {
 
 /**
- * \brief A translation adapter applies a trnslation to an image
+ * \brief Base class for the Adapters that move and interpolate images
+ */
+template<typename Pixel>
+class OffsetAdapter : public ConstImageAdapter<Pixel> {
+protected:
+	const ConstImageAdapter<Pixel>& _image;
+	const ConstImageAdapter<Pixel>	*_raw;
+	Point	_translation;
+	ImagePoint	_t;
+	double	_weights[4];
+public:
+	OffsetAdapter(const ConstImageAdapter<Pixel>& image,
+		const ConstImageAdapter<Pixel> *raw, const Point& translation);
+	virtual ~OffsetAdapter() {
+		delete _raw;
+	}
+	virtual Pixel	pixel(int x, int y) const;
+};
+
+template<typename Pixel>
+OffsetAdapter<Pixel>::OffsetAdapter(const ConstImageAdapter<Pixel>& image,
+	const ConstImageAdapter<Pixel> *raw, const Point& translation)
+	: ConstImageAdapter<Pixel>(image.getSize()),
+	  _image(image), _raw(raw), _translation(translation),
+	  _t(translation.x(), translation.y()) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %d, ty = %d", _t.x(), _t.y());
+	double	wx = _translation.x() - _t.x();
+	double	wy = _translation.y() - _t.y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wx = %f, wy = %f", wx, wy);
+	// compute the weights
+	_weights[0] = wx * wy;
+	_weights[1] = (1 - wx) * wy;
+	_weights[2] = wx * (1 - wy);
+	_weights[3] = (1 - wx) * (1 - wy);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"w[0] = %f, w[1] = %f, w[2] = %f, w[3] = %f",
+		_weights[0], _weights[1], _weights[2], _weights[3]);
+}
+
+template<typename Pixel>
+Pixel	OffsetAdapter<Pixel>::pixel(int x, int y) const {
+	Pixel	a[4];
+	a[0] = _raw->pixel(-_t.x() + x - 1, -_t.y() + y - 1);
+	a[1] = _raw->pixel(-_t.x() + x    , -_t.y() + y - 1);
+	a[2] = _raw->pixel(-_t.x() + x - 1, -_t.y() + y    );
+	a[3] = _raw->pixel(-_t.x() + x    , -_t.y() + y    );
+	return weighted_sum(4, _weights, a);
+}
+
+/**
+ * \brief Adapter that rolls an image
+ */
+template<typename Pixel>
+class RollAdapter : public OffsetAdapter<Pixel> {
+public:
+	RollAdapter(const ConstImageAdapter<Pixel>& image,
+		const Point& translation)
+		: OffsetAdapter<Pixel>(image,
+			new adapter::RollAdapter<Pixel>(image,
+				ImagePoint(translation.x(), translation.y())),
+			translation) {
+	}
+};
+
+/**
+ * \brief A translation adapter applies a translation to an image
  */
 template<typename Pixel>
 class TranslationAdapter : public ConstImageAdapter<Pixel> {
@@ -26,7 +92,7 @@ class TranslationAdapter : public ConstImageAdapter<Pixel> {
 public:
 	TranslationAdapter(const ConstImageAdapter<Pixel>& image,
 		const Point& translation);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -51,7 +117,7 @@ TranslationAdapter<Pixel>::TranslationAdapter(
 }
 
 template<typename Pixel>
-Pixel	TranslationAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	TranslationAdapter<Pixel>::pixel(int x, int y) const {
 	Pixel	a[4];
 	ImageSize	size = ConstImageAdapter<Pixel>::getSize();
 	// lower left corner
@@ -103,6 +169,9 @@ public:
 			defaultpixel = Pixel(0);
 		}
 	}
+	virtual Pixel	pixel(int x, int y) const {
+		return image.pixel(x, y);
+	}
 	Pixel	pixel(const astro::Point& t) const {
 		// find out in which pixel this is located
 		int     tx = floor(t.x());
@@ -148,9 +217,6 @@ public:
 			a[3] = defaultpixel;
 		}
 		return weighted_sum(4, weights, a);
-	}
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const {
-		return image.pixel(x, y);
 	}
 };
 
@@ -244,7 +310,7 @@ public:
 		const Transform& transform);
 	TransformAdapter(const ConstImageAdapter<Pixel>& image,
 		const Transform& transform);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -264,7 +330,7 @@ TransformAdapter<Pixel>::TransformAdapter(
 }
 
 template<typename Pixel>
-Pixel	TransformAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	TransformAdapter<Pixel>::pixel(int x, int y) const {
 	// compute the image if the point x, y under the inverse transform
 	Point	t = inverse(Point(x, y));
 	return image.pixel(t);
@@ -297,16 +363,13 @@ public:
  */
 class Analyzer {
 	const ConstImageAdapter<double>& baseimage;
-	unsigned int	spacing;
-	unsigned int	patchsize;
+	int	spacing;
+	int	patchsize;
 public:
 	Analyzer(const ConstImageAdapter<double>& _baseimage,
-		unsigned int _spacing = 128, unsigned int _patchsize = 128)
-                : baseimage(_baseimage),
-                  spacing(_spacing), patchsize(_patchsize)  {
-	}
+		int _spacing = 128, int _patchsize = 128);
 	Residual	translation(const ConstImageAdapter<double>& image,
-		const ImagePoint& where, unsigned int _patchsize) const;
+		const ImagePoint& where, int _patchsize) const;
         std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
 };
 
@@ -316,7 +379,7 @@ public:
 class TransformAnalyzer : public Analyzer {
 public:
 	TransformAnalyzer(const ConstImageAdapter<double>& _baseimage,
-		unsigned int _spacing = 128, unsigned int _patchsize = 128)
+		int _spacing = 128, int _patchsize = 128)
 		: Analyzer(_baseimage, _spacing, _patchsize) { }
 	Transform	transform(const ConstImageAdapter<double>& image) const;
 };

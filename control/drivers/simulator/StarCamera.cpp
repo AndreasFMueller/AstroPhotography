@@ -148,8 +148,8 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
 	Image<double>	image(size);
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			// apply the transform to the current point
 			Point   where(origin.x() - offset.x() + x,
 					origin.y() - offset.y() + y);
@@ -204,10 +204,10 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
  * \brief Add noise to the image
  */
 void	StarCameraBase::addnoise(Image<double>& image) const {
-	unsigned int	width = image.size().width();
-	unsigned int	height = image.size().height();
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
+	int	width = image.size().width();
+	int	height = image.size().height();
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			image.pixel(x, y) += noisevalue();
 		}
 	}
@@ -220,11 +220,11 @@ void	StarCameraBase::addnoise(Image<double>& image) const {
  * scale argument
  */
 void	StarCameraBase::rescale(Image<double>& image, double scale) const {
-	unsigned int	width = image.size().width();
-	unsigned int	height = image.size().height();
+	int	width = image.size().width();
+	int	height = image.size().height();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rescaling %dx%d image", width, height);
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			double	value = scale * image.pixel(x, y);
 			if (value > scale) {
 				value = scale;
@@ -256,22 +256,21 @@ void	StarCameraBase::addhot(Image<double>& image, double hotvalue) const {
 /**
  * \brief Computed binned pixel values
  */
-double	StarCameraBase::bin0(Image<double>& image,
-		unsigned int x, unsigned int y) const {
+double	StarCameraBase::bin0(Image<double>& image, int x, int y) const {
 	// find out whether we are at the edge of the image, where we may not
 	// be able to bin a full image
-	unsigned int	maxx = image.getFrame().size().width() - x;
+	int	maxx = image.getFrame().size().width() - x;
 	if (maxx > binning().x()) {
 		maxx = binning().x();
 	}
-	unsigned int	maxy = image.getFrame().size().height() - y;
+	int	maxy = image.getFrame().size().height() - y;
 	if (maxy > binning().y()) {
 		maxy = binning().y();
 	}
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "maxx = %d, maxy = %d", maxx, maxy);
 	double	value = 0;
-	for (unsigned int xoffset = 0; xoffset < maxx; xoffset++) {
-		for (unsigned int yoffset = 0; yoffset < maxy; yoffset++) {
+	for (int xoffset = 0; xoffset < maxx; xoffset++) {
+		for (int yoffset = 0; yoffset < maxy; yoffset++) {
 			value += image.pixel(x + xoffset, y + yoffset);
 		}
 	}
@@ -282,14 +281,14 @@ double	StarCameraBase::bin0(Image<double>& image,
  * \brief Perform binning
  */
 void	StarCameraBase::bin(Image<double>& image) const {
-	unsigned int	width = image.size().width();
-	unsigned int	height = image.size().height();
+	int	width = image.size().width();
+	int	height = image.size().height();
 	unsigned int	deltax = binning().x();
 	unsigned int	deltay = binning().y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%dx%d-binning of %dx%d image",
 		deltax, deltay, width, height);
-	for (unsigned int x = 0; x < width; x += deltax) {
-		for (unsigned int y = 0; y < height; y += deltay) {
+	for (int x = 0; x < width; x += deltax) {
+		for (int y = 0; y < height; y += deltay) {
 			image.pixel(x, y) = bin0(image, x, y);
 		}
 	}
@@ -301,8 +300,8 @@ void	StarCameraBase::bin(Image<double>& image) const {
 void	StarCameraBase::fill0(Image<double>& image, const ImagePoint& point,
 		double fillvalue) const {
 	ImagePoint	corner = (point / binning()) * binning();
-	for (unsigned int x = 0; x < binning().x(); x++) {
-		for (unsigned int y = 0; y < binning().y(); y++) {
+	for (int x = 0; x < binning().x(); x++) {
+		for (int y = 0; y < binning().y(); y++) {
 			image.pixel(corner.x() + x, corner.y() + y)
 				= fillvalue;
 		}

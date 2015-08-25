@@ -46,7 +46,7 @@ ImageSize::~ImageSize() {
 /**
  * \brief Width accessor
  */
-void	ImageSize::setWidth(unsigned int width) {
+void	ImageSize::setWidth(int width) {
 	_width = width;
 	pixels = _width * _height;
 }
@@ -54,7 +54,7 @@ void	ImageSize::setWidth(unsigned int width) {
 /**
  * \brief Height accessor
  */
-void	ImageSize::setHeight(unsigned int height) {
+void	ImageSize::setHeight(int height) {
 	_height = height;
 	pixels = _width * _height;
 }
@@ -204,6 +204,25 @@ std::istream&	operator>>(std::istream& in, ImageSize& size) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image size: %s",
 		size.toString().c_str());
 	return in;
+}
+
+/**
+ * \brief Reduce a point to point insed the image
+ */
+ImagePoint	ImageSize::operator()(const int x, const int y) const {
+	int	xr = x;
+	while (xr < 0) { xr += _width; }
+	xr = xr % _width;
+	int	yr = y;
+	while (yr < 0) { yr += _height; }
+	yr = yr % _height;
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "reduce (%d,%d) to (%d,%d)",
+	//	x, y, xr, yr);
+	return ImagePoint(xr, yr);
+}
+ImagePoint	ImageSize::operator()(const ImagePoint& p) const {
+	ImagePoint	result = (*this)(p.x(), p.y());
+	return result;
 }
 
 } // namespace image

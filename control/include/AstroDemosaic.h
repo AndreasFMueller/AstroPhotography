@@ -45,8 +45,8 @@ Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 	b = image.getMosaicType().blue();
 
 	// set the image to black
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			result->pixel(x, y).R = 0;
 			result->pixel(x, y).G = 0;
 			result->pixel(x, y).B = 0;
@@ -55,8 +55,8 @@ Image<RGB<T> >	*Demosaic<T>::separate(const Image<T>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image initialized to black");
 
 	// now set the pixels from the mosaic
-	for (unsigned int x = 0; x < image.size().width(); x += 2) {
-		for (unsigned int y = 0; y < image.size().height(); y += 2) {
+	for (int x = 0; x < image.size().width(); x += 2) {
+		for (int y = 0; y < image.size().height(); y += 2) {
 			result->pixel(x + r.x(), y + r.y()).R
 				= image.pixel(x + r.x(), y + r.y());
 			result->pixel(x + b.x(), y + b.y()).B
@@ -97,17 +97,17 @@ class DemosaicBilinear : public Demosaic<T> {
 	void	red(Image<RGB<T> > *result, const Image<T>& image);
 	void	blue(Image<RGB<T> > *result, const Image<T>& image);
 
-	T	quadt(unsigned int x, unsigned int y, const Image<T>& image);
-	T	quadx(unsigned int x, unsigned int y, const Image<T>& image);
-	T	pairh(unsigned int x, unsigned int y, const Image<T>& image);
-	T	pairv(unsigned int x, unsigned int y, const Image<T>& image);
+	T	quadt(int x, int y, const Image<T>& image);
+	T	quadx(int x, int y, const Image<T>& image);
+	T	pairh(int x, int y, const Image<T>& image);
+	T	pairv(int x, int y, const Image<T>& image);
 public:
 	DemosaicBilinear() { }
 	Image<RGB<T> >	*operator()(const Image<T>& image);
 };
 
 template<typename T>
-T	DemosaicBilinear<T>::quadt(unsigned int x, unsigned int y,
+T	DemosaicBilinear<T>::quadt(int x, int y,
 		const Image<T>& image) {
 	double	result = 0;
 	int	n = 0;
@@ -128,7 +128,7 @@ T	DemosaicBilinear<T>::quadt(unsigned int x, unsigned int y,
 }
 
 template<typename T>
-T	DemosaicBilinear<T>::quadx(unsigned int x, unsigned int y,
+T	DemosaicBilinear<T>::quadx(int x, int y,
 		const Image<T>& image) {
 	double	result = 0;
 	int	n = 0;
@@ -149,7 +149,7 @@ T	DemosaicBilinear<T>::quadx(unsigned int x, unsigned int y,
 }
 
 template<typename T>
-T	DemosaicBilinear<T>::pairh(unsigned int x, unsigned int y,
+T	DemosaicBilinear<T>::pairh(int x, int y,
 		const Image<T>& image) {
 	double	result = 0;
 	int	n = 0;
@@ -164,7 +164,7 @@ T	DemosaicBilinear<T>::pairh(unsigned int x, unsigned int y,
 }
 
 template<typename T>
-T	DemosaicBilinear<T>::pairv(unsigned int x, unsigned int y,
+T	DemosaicBilinear<T>::pairv(int x, int y,
 		const Image<T>& image) {
 	double	result = 0;
 	int	n = 0;
@@ -184,8 +184,8 @@ T	DemosaicBilinear<T>::pairv(unsigned int x, unsigned int y,
 template<typename T>
 void	DemosaicBilinear<T>::green(Image<RGB<T> > *result,
 		const Image<T>& image) {
-	for (unsigned int x = 0; x < image.size().width(); x += 2) {
-		for (unsigned int y = 0; y < image.size().height(); y += 2) {
+	for (int x = 0; x < image.size().width(); x += 2) {
+		for (int y = 0; y < image.size().height(); y += 2) {
 			result->pixel(x + r.x(), y + r.y()).G
 				= quadt(x + r.x(), y + r.y(), image);
 			result->pixel(x + b.x(), y + b.y()).G
@@ -197,8 +197,8 @@ void	DemosaicBilinear<T>::green(Image<RGB<T> > *result,
 template<typename T>
 void	DemosaicBilinear<T>::red(Image<RGB<T> > *result,
 		const Image<T>& image) {
-	for (unsigned int x = 0; x < image.size().width(); x += 2) {
-		for (unsigned int y = 0; y < image.size().height(); y += 2) {
+	for (int x = 0; x < image.size().width(); x += 2) {
+		for (int y = 0; y < image.size().height(); y += 2) {
 			result->pixel(x + b.x(), y + b.y()).R
 				= quadx(x + b.x(), y + b.y(), image);
 			result->pixel(x + r.x(), y + b.y()).R
@@ -212,8 +212,8 @@ void	DemosaicBilinear<T>::red(Image<RGB<T> > *result,
 template<typename T>
 void	DemosaicBilinear<T>::blue(Image<RGB<T> > *result,
 		const Image<T>& image) {
-	for (unsigned int x = 0; x < image.size().width(); x += 2) {
-		for (unsigned int y = 0; y < image.size().height(); y += 2) {
+	for (int x = 0; x < image.size().width(); x += 2) {
+		for (int y = 0; y < image.size().height(); y += 2) {
 			result->pixel(x + r.x(), y + r.y()).B
 				= quadx(x + r.x(), y + r.y(), image);
 			result->pixel(x + r.x(), y + b.y()).B

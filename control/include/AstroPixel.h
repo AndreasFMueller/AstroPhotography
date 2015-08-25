@@ -412,9 +412,14 @@ public:
  * \brief Conversion class from HSL to RGB
  */
 class HSLBase {
-	double	H;
-	double	S;
-	double	L;
+	double	_h;
+	double	_s;
+	double	_l;
+public:
+	double	h() const { return _h; }
+	double	s() const { return _s; }
+	double	l() const { return _l; }
+private:
 	double	_r, _g, _b;
 public:
 	HSLBase(double hue, double saturation, double luminance);

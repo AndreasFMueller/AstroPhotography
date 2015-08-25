@@ -78,8 +78,8 @@ void	ChartFactoryBase::draw(Image<double>& image, const Point& p,
 }
 
 void	ChartFactoryBase::limit(Image<double>& image, double limit) const {
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			if (image.pixel(x, y) > limit) {
 				image.pixel(x, y) = limit;
 			}

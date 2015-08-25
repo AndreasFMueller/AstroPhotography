@@ -5,12 +5,32 @@
  */
 #include <AstroTransform.h>
 #include <AstroAdapter.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 
 using namespace astro::adapter;
 
 namespace astro {
 namespace image {
 namespace transform {
+
+Analyzer::Analyzer(const ConstImageAdapter<double>& _baseimage,
+	int _spacing, int _patchsize)
+	: baseimage(_baseimage), spacing(_spacing), patchsize(_patchsize)  {
+	if (_spacing < 0) {
+		std::string	msg = stringprintf("invalid spacing %d",
+			_spacing);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
+	}
+	if (_patchsize < 0) {
+		std::string	msg = stringprintf("invalid patchsize %d",
+			_patchsize);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::range_error(msg);
+	}
+}
+
 
 std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& image) const {
 	// first find out whether the patch size fits inside the image
@@ -56,7 +76,7 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 }
 
 Residual	Analyzer::translation(const ConstImageAdapter<double>&image,
-	const ImagePoint& where, unsigned int _patchsize) const {
+	const ImagePoint& where, int _patchsize) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get translation at %s",
 		std::string(where).c_str());
 	// create the subwindow we want to lock at

@@ -47,8 +47,8 @@ void	QuadraticFunctionTest::testSymmetric() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic function: %s",
 		l.toString().c_str());
 	std::vector<FunctionBase::doublevaluepair>	values;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			float	e = -0.5 + random() / (double)2147483647;
 			ImagePoint	p(x, y);
 			float	value = l(p) + e;
@@ -59,8 +59,8 @@ void	QuadraticFunctionTest::testSymmetric() {
 	MinimumEstimator<QuadraticFunction>	me(lfa, 100);
 	FunctionPtr	l2 = me(size.center(), true);
 	
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			ImagePoint	p(x, y);
 			double	delta = fabs(l(p) - l2->evaluate(p));
 			CPPUNIT_ASSERT(delta < 2);
@@ -82,8 +82,8 @@ void	QuadraticFunctionTest::testAsymmetric() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "quadratic function to find: %s",
 		l.toString().c_str());
 	std::vector<FunctionBase::doublevaluepair>	values;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			float	e = -0.5 + random() / (double)2147483647;
 			ImagePoint	p(x, y);
 			float	value = l(p) + e;
@@ -94,8 +94,8 @@ void	QuadraticFunctionTest::testAsymmetric() {
 	MinimumEstimator<QuadraticFunction>	me(lfa, 100);
 	FunctionPtr	l2 = me(size.center(), false);
 	
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			ImagePoint	p(x, y);
 			double	delta = fabs(l(p) - l2->evaluate(p));
 			CPPUNIT_ASSERT(delta < 2);

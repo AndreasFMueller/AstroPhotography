@@ -65,14 +65,14 @@ ImagePoint	ImagePoint::operator-(const ImagePoint& other) const {
  * \brief String representation
  */
 std::string	ImagePoint::toString() const {
-	return stringprintf("(%u,%u)", _x, _y);
+	return stringprintf("(%d,%d)", _x, _y);
 }
 
 /**
  * \brief Cast to string
  */
 ImagePoint::operator	std::string() const {
-	return stringprintf("(%u,%u)", _x, _y);
+	return stringprintf("(%d,%d)", _x, _y);
 }
 
 /**
@@ -83,14 +83,14 @@ std::ostream&	operator<<(std::ostream& out, const ImagePoint& point) {
 }
 
 std::istream&	operator>>(std::istream& in, ImagePoint& point) {
-	unsigned int	x, y;
+	int	x, y;
 	char	p1, c, p2;
 	in >> p1 >> x >> c >> y >> p2;
 	if ((p1 != '(') || (c != ',') || (p2 != ')')) {
 		throw std::runtime_error("not a point specification");
 	}
-	point.setX(x);
-	point.setY(y);
+	point.x(x);
+	point.y(y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsed image point: %s",
 		point.toString().c_str());
 	return in;
@@ -113,8 +113,7 @@ bool	ImagePoint::operator<(const ImagePoint& other) const {
  * \brief Compute distances
  */
 float	ImagePoint::distance(const ImagePoint& p) const {
-	return hypot((_x < p.x()) ? (p.x() - _x) : (_x - p.x()),
-			(_y < p.y()) ? (p.y() - _y) : (_y - p.y()));
+	return hypot(_x - p.x(), _y - p.y());
 }
 
 } // namespace image

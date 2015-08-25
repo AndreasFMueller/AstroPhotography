@@ -102,7 +102,7 @@ public:
 
 private:
 	void	setup_images(const ImageSequence& images);
-	void	compute(unsigned int x, unsigned int y, T darkvalue);
+	void	compute(int x, int y, T darkvalue);
 
 public:
 	ImageMean(const ImageSequence& images, bool _enableVariance = false);
@@ -164,7 +164,7 @@ void	ImageMean<T>::setup_pv(const ImageSequence& images) {
  * \param y	y-coordinate of pixel
  */
 template<typename T>
-void	ImageMean<T>::compute(unsigned int x, unsigned int y, T darkvalue) {
+void	ImageMean<T>::compute(int x, int y, T darkvalue) {
 	// if the dark value is invalid, then the computed value
 	// is also invalid
 	if (darkvalue != darkvalue) {
@@ -269,8 +269,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, bool _enableVariance)
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			compute(x, y, 0);
 		}
 	}
@@ -297,8 +297,8 @@ ImageMean<T>::ImageMean(const ImageSequence& images, const Image<T>& dark,
 	setup_images(images);
 
 	// now compute mean and variance for every pixel
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	darkvalue = dark.pixel(x, y);
 			compute(x, y, darkvalue);
 		}
@@ -376,8 +376,8 @@ size_t	subdark(const ImageSequence&, ImageMean<T>& im,
 	size_t	badpixelcount = 0;
 	SubgridAdapter<T>	sga(*im.image, grid);
 	ImageSize	size = sga.getSize();
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = sga.pixel(x, y);
 			// skip NaNs
 			if (v != v) {
@@ -484,8 +484,8 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 
 	// device the image by that value, so that the new maximum value
 	// is 1
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
 			image->pixel(x, y) /= maxvalue;
 		}
 	}
@@ -540,8 +540,8 @@ template<typename T>
 ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 	ConstPixelValueAdapter<T>	im(image);
 	Image<T>	*result = new Image<T>(image->size());
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
 			T	darkvalue = dark.pixel(x, y);
 			// if the pixel is bad give 
 			if (darkvalue != darkvalue) {

@@ -32,7 +32,7 @@ public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
 	Point	operator()(
 		const image::ImageRectangle& rectangle,
-		unsigned int k) const;
+		int k) const;
 }; 
 
 /**
@@ -53,16 +53,16 @@ StarDetector<Pixel>::StarDetector(
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
 		const image::ImageRectangle& rectangle,
-		unsigned int k) const {
+		int k) const {
 	// work only in the rectangle
 	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
 	// determine the brightest pixel within the rectangle
 	image::ImageSize	size = adapter.getSize();
-	unsigned	maxx = -1, maxy = -1;
+	int	maxx = -1, maxy = -1;
 	double	maxvalue = 0;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			double	value = luminance(adapter.pixel(x, y));
 			if (value > maxvalue) {
 				maxx = x; maxy = y; maxvalue = value;
@@ -75,8 +75,8 @@ Point	StarDetector<Pixel>::operator()(
 	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
 	// square around the maximum pixel.
 	double	xsum = 0, ysum = 0, weightsum = 0;
-	for (unsigned int x = maxx - k; x <= maxx + k; x++) {
-		for (unsigned int y = maxy - k; y <= maxy + k; y++) {
+	for (int x = maxx - k; x <= maxx + k; x++) {
+		for (int y = maxy - k; y <= maxy + k; y++) {
 			double	value = luminance(adapter.pixel(x, y));
 			if (value == value) {
 				weightsum += value;
@@ -95,7 +95,7 @@ Point	StarDetector<Pixel>::operator()(
 }
 
 Point	findstar(image::ImagePtr image,
-	const image::ImageRectangle& rectangle, unsigned int k);
+	const image::ImageRectangle& rectangle, int k);
 
 /**
  * \brief Tracker class
@@ -119,12 +119,12 @@ typedef std::shared_ptr<Tracker>	TrackerPtr;
 class StarTracker : public Tracker {
 	Point	_point;
 	image::ImageRectangle _rectangle;
-	unsigned int	_k;
+	int	_k;
 public:
 	// constructor
 	StarTracker(const Point& point,
 		const image::ImageRectangle& rectangle,
-		unsigned int k);
+		int k);
 
 	// find the displacement
 	virtual Point	operator()(
@@ -143,8 +143,8 @@ public:
 	Point&	point() { return _point; }
 	void	point(const Point& p) { _point = p; }
 
-	unsigned int	k() const { return _k; }
-	void	k(const unsigned int k) { _k = k; }
+	int	k() const { return _k; }
+	void	k(const int k) { _k = k; }
 	
 	// find a string representation
 	virtual std::string	toString() const;

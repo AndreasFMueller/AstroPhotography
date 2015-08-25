@@ -41,15 +41,15 @@ static state	string2state(const std::string& s);
  * Binning objects.
  */
 class	Binning {
-	unsigned int	_x;
-	unsigned int	_y;
+	int	_x;
+	int	_y;
 public:
-	unsigned int	x() const { return _x; }
-	void	x(unsigned int v) { _x = v; }
-	unsigned int	y() const { return _y; }
-	void	y(unsigned int v) { _y = v; }
+	int	x() const { return _x; }
+	void	x(int v) { _x = v; }
+	int	y() const { return _y; }
+	void	y(int v) { _y = v; }
 public:
-	Binning(unsigned int x = 1, unsigned int y = 1);
+	Binning(int x = 1, int y = 1);
 	Binning(const Binning& other) : _x(other._x), _y(other._y) { }
 	Binning(const std::string& binning);
 	bool	operator==(const Binning& other) const;

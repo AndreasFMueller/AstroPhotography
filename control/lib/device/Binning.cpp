@@ -18,7 +18,13 @@ namespace camera {
 /**
  * \brief Construct a binning object
  */
-Binning::Binning(unsigned int x, unsigned int y) : _x(x), _y(y) {
+Binning::Binning(int x, int y) : _x(x), _y(y) {
+	if (x < 0) {
+		throw std::range_error("x binning cannot be negative");
+	}
+	if (y < 0) {
+		throw std::range_error("y binning cannot be negative");
+	}
 	if (_x == 0) { _x = 1; }
 	if (_y == 0) { _y = 1; }
 }
@@ -86,7 +92,7 @@ std::ostream&	operator<<(std::ostream& out, const Binning& binning) {
 
 std::istream&	operator>>(std::istream& in, Binning& binning) {
 	char	c;
-	unsigned int	x, y;
+	int	x, y;
 	in >> x >> c >> y;
 	binning.x(x);
 	binning.y(y);

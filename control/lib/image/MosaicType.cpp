@@ -92,27 +92,27 @@ bool	MosaicType::isGb(unsigned int x, unsigned int y) const {
 }
 
 ImagePoint	MosaicType::red() const {
-	unsigned int	redx =  mosaic       & 0x1;
-	unsigned int	redy = (mosaic >> 1) & 0x1;
+	int	redx =  mosaic       & 0x1;
+	int	redy = (mosaic >> 1) & 0x1;
 	return ImagePoint(redx, redy);
 }
 
 ImagePoint	MosaicType::blue() const {
 	ImagePoint	r = red();
-	unsigned int	bluex = 0x1 ^ r.x();
-	unsigned int	bluey = 0x1 ^ r.y();
+	int	bluex = 0x1 ^ r.x();
+	int	bluey = 0x1 ^ r.y();
 	return ImagePoint(bluex, bluey);
 }
 
 ImagePoint	MosaicType::greenr() const {
 	ImagePoint	r = red();
-	unsigned int	bluex = 0x1 ^ r.x();
+	int	bluex = 0x1 ^ r.x();
 	return ImagePoint(bluex, r.y());
 }
 
 ImagePoint	MosaicType::greenb() const {
 	ImagePoint	r = red();
-	unsigned int	bluey = 0x1 ^ r.y();
+	int	bluey = 0x1 ^ r.y();
 	return ImagePoint(r.x(), bluey);
 }
 

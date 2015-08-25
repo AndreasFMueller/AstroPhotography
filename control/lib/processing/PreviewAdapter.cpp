@@ -59,16 +59,14 @@ public:
 	/**
 	 * \brief map monochrome pixels to unsigned char range
 	 */
-	virtual unsigned char	monochrome_pixel(unsigned int x,
-					unsigned int y) const {
+	virtual unsigned char	monochrome_pixel(int x, int y) const {
 		return map_pixel_value(_min, _max, _image->pixel(x, y));
 	}
 
 	/**
  	 * \brief map monochrome RGB pixels with unsigned char range
 	 */
-	virtual RGB<unsigned char>	color_pixel(unsigned int x,
-						unsigned int y) const {
+	virtual RGB<unsigned char>	color_pixel(int x, int y) const {
 		return RGB<unsigned char>(monochrome_pixel(x, y));
 	}
 };
@@ -94,8 +92,7 @@ public:
 	/**
 	 * \brief Create monochrome pixels from luminance
 	 */
-	virtual unsigned char	monochrome_pixel(unsigned int x,
-					unsigned int y) const {
+	virtual unsigned char	monochrome_pixel(int x, int y) const {
 		Pixel	p = _image->pixel(x, y).luminance();
 		return map_pixel_value(_min, _max, p);
 	}
@@ -103,8 +100,7 @@ public:
 	/**
 	 * \brief limit a color pixel to unsigned char range
 	 */
-	virtual RGB<unsigned char>	color_pixel(unsigned int x,
-						unsigned int y) const {
+	virtual RGB<unsigned char>	color_pixel(int x, int y) const {
 		RGB<Pixel>	p = _image->pixel(x, y);
 		return RGB<unsigned char>(
 			map_pixel_value(_min, _max, p.R),

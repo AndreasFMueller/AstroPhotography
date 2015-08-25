@@ -40,8 +40,8 @@ void	MultiplaneTest::testWrite() {
 	ImagePtr	image(imagep);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %ux%u image",
 		image->size().width(), image->size().height());
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
 			Multiplane<unsigned char, 2>	v;
 			v.p[0] = 2 * x * y;
 			v.p[1] = 2 * x * y + 1;
@@ -63,8 +63,8 @@ void	MultiplaneTest::testRead() {
 	Image<Multiplane<unsigned char, 2> >	*imagep
 		= dynamic_cast<Image<Multiplane<unsigned char, 2> > *>(&*image);
 	CPPUNIT_ASSERT(imagep != NULL);
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
 			Multiplane<unsigned char, 2>	v;
 			v.p[0] = 2 * x * y;
 			v.p[1] = 2 * x * y + 1;

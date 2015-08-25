@@ -47,7 +47,7 @@ RectangleFunction::RectangleFunction(const ImageRectangle& _rectangle,
  * \param x	x coordinate of point
  * \param y	y coordinate of point
  */
-double	RectangleFunction::operator()(size_t x, size_t y) const {
+double	RectangleFunction::operator()(int x, int y) const {
 	ImagePoint	point(x, y);
 	if (!rectangle.contains(point)) {
 		return 0;
@@ -90,7 +90,7 @@ CircleFunction::CircleFunction(const ImagePoint& _center, double _radius,
 /**
  * \brief Masking function for a circular Hanning window
  */
-double	CircleFunction::operator()(size_t x, size_t y) const {
+double	CircleFunction::operator()(int x, int y) const {
 	double	l = hypot((int)x - (int)center.x(), (int)y - (int)center.y()) / radius;
 	if (l >= 1) {
 		return 0;

@@ -47,8 +47,8 @@ void	LinearFunctionTest::testBase() {
 	l[1] = 0.2;
 	l[2] = 0.3;
 	std::vector<FunctionBase::doublevaluepair>	values;
-	for (unsigned int x = 0; x < 1000; x += 10) {
-		for (unsigned int y = 0; y < 1000; y += 10) {
+	for (int x = 0; x < 1000; x += 10) {
+		for (int y = 0; y < 1000; y += 10) {
 			double	e = -0.5 + random() / (double)2147483647;
 			ImagePoint	p(x, y);
 			double	value = l.evaluate(Point(p)) + e;
@@ -56,8 +56,8 @@ void	LinearFunctionTest::testBase() {
 		}
 	}
 	LinearFunction	l2(ImagePoint(500, 500), false, values);
-	for (unsigned int x = 0; x < 1000; x += 50) {
-		for (unsigned int y = 0; y < 1000; y += 50) {
+	for (int x = 0; x < 1000; x += 50) {
+		for (int y = 0; y < 1000; y += 50) {
 			ImagePoint	p(x, y);
 			double	delta = fabs(l.evaluate(Point(p)) - l2.evaluate(Point(p)));
 			CPPUNIT_ASSERT(delta < 2);
@@ -73,8 +73,8 @@ void	LinearFunctionTest::testSymmetric() {
 	LinearFunction	l(size.center(), true);
 	l[2] = 47;
 	std::vector<FunctionBase::doublevaluepair>	values;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			float	e = -0.5 + random() / (double)2147483647;
 			ImagePoint	p(x, y);
 			float	value = l(p) + e;
@@ -85,8 +85,8 @@ void	LinearFunctionTest::testSymmetric() {
 	MinimumEstimator<LinearFunction>	me(lfa, 100);
 	FunctionPtr	l2 = me(size.center(), true);
 	
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			ImagePoint	p(x, y);
 			double	delta = fabs(l(p) - l2->evaluate(p));
 			CPPUNIT_ASSERT(delta < 2);
@@ -103,8 +103,8 @@ void	LinearFunctionTest::testAsymmetric() {
 	l[1] = 0.2;
 	l[2] = 200;
 	std::vector<FunctionBase::doublevaluepair>	values;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			float	e = -0.5 + random() / (double)2147483647;
 			ImagePoint	p(x, y);
 			float	value = l(p) + e;
@@ -115,8 +115,8 @@ void	LinearFunctionTest::testAsymmetric() {
 	MinimumEstimator<LinearFunction>	me(lfa, 100);
 	FunctionPtr	l2 = me(size.center(), false);
 	
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			ImagePoint	p(x, y);
 			double	delta = fabs(l(p) - l2->evaluate(p));
 			CPPUNIT_ASSERT(delta < 2);

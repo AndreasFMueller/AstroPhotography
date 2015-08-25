@@ -48,8 +48,8 @@ template<typename T, typename S>
 S	CountNaNs<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	result = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 		
 			if ((std::numeric_limits<T>::has_quiet_NaN) && (v != v)) {
@@ -89,8 +89,8 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	maxx = 0;
 	maxy = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if (v != v) continue; // skip NaNs
 			if (v > result) {
@@ -108,7 +108,7 @@ T	Max<T, S>::operator()(const ConstImageAdapter<T>& image) {
  */
 template<typename T, typename S>
 class Min : public PixelTypeFilter<T, S> {
-	unsigned int	minx, miny;
+	int	minx, miny;
 public:
 	Min() { }
 	virtual	S	filter(const ConstImageAdapter<T>& image);
@@ -127,8 +127,8 @@ T	Min<T, S>::operator()(const ConstImageAdapter<T>& image) {
 	minx = 0;
 	miny = 0;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if ((std::numeric_limits<T>::has_quiet_NaN) && (v != v)) continue; // skip NaNs
 			if (v < result) {
@@ -160,8 +160,8 @@ S	Mean<T, S>::filter(const ConstImageAdapter<T>& image) {
 	S	sum = 0;
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			if ((check_nan) && (v != v))
 				continue;
@@ -199,8 +199,8 @@ S	Variance<T, S>::filter(const ConstImageAdapter<T>& image) {
 	size_t	counter = 0;
 	bool	check_nan = std::numeric_limits<T>::has_quiet_NaN;
 	ImageSize	size = image.getSize();
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			// skip NaNs
 			if ((check_nan) && (v != v))
@@ -350,8 +350,8 @@ std::cout << "left: " << (unsigned int)left << ", right: "
 	}
 
 	// count the number of values 
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			T	v = image.pixel(x, y);
 			for (unsigned int i = 0; i < N + 1; i++) {
 				if (v <= limits[i]) {
@@ -420,8 +420,8 @@ public:
 		astro::adapter::FocusFOMAdapter<Pixel>	foa(image, diagonal);
 		ImageSize	size = foa.getSize();
 		double	result = 0;
-		for (size_t x = 0; x < size.width(); x++) {
-			for (size_t y = 0; y < size.height(); y++) {
+		for (int x = 0; x < size.width(); x++) {
+			for (int y = 0; y < size.height(); y++) {
 				double	l = foa.pixel(x, y);
 				// skip NaNs
 				if (l == l) {
@@ -457,8 +457,8 @@ public:
 
 template<typename Pixel>
 void    Mask<Pixel>::operator()(Image<Pixel>& image) {
-	for (size_t x = 0; x < image.size().width(); x++) {
-		for (size_t y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			Pixel   v = image.pixel(x, y);
 			v = maskingfunction(x, y) * v;
 			image.pixel(x, y) = v;
@@ -472,9 +472,9 @@ void    Mask<Pixel>::operator()(Image<Pixel>& image) {
 template<typename Pixel>
 class FWHM : PixelTypeFilter<Pixel, double> {
 	ImagePoint	point;
-	unsigned int	r;
+	int	r;
 public:
-	FWHM(const ImagePoint& _point, unsigned int _r) : point(_point), r(_r) {
+	FWHM(const ImagePoint& _point, int _r) : point(_point), r(_r) {
 	}
 	virtual Pixel	operator()(const ConstImageAdapter<Pixel>& image) {
 		return this->filter(image);
@@ -505,8 +505,8 @@ double	FWHM<Pixel>::filter(const ConstImageAdapter<Pixel>& image) {
 	for (unsigned int k = 0; k < maxradius; k++) {
 		rhist[k] = 0;
 	}
-	for (unsigned int x = 0; x < wa.getSize().width(); x++) {
-		for (unsigned int y = 0; y < wa.getSize().height(); y++) {
+	for (int x = 0; x < wa.getSize().width(); x++) {
+		for (int y = 0; y < wa.getSize().height(); y++) {
 			if (wa.pixel(x, y) > halfmax) {
 				unsigned int	k
 					= trunc(hypot(x - target.x(), y - target.y()));
@@ -595,12 +595,12 @@ FWHMInfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 	if (!image.getSize().contains(point)) {
 		throw std::runtime_error("point is outside image");
 	}
-	unsigned int	width = image.getSize().width();
-	unsigned int	height = image.getSize().height();
+	int	width = image.getSize().width();
+	int	height = image.getSize().height();
 
 	// first ensure that we take a radius small enough to fit inside
 	// the image rectangle
-	unsigned int	radius = r;
+	int	radius = r;
 	if (point.x() < radius) {
 		radius = point.x();
 	}
@@ -658,8 +658,8 @@ FWHMInfo	FWHM2<Pixel>::filter_extended(const ConstImageAdapter<Pixel>& image) {
 
 	// add points in connected component to the list
 	std::list<ImagePoint>	points;
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			if (conn->pixel(x, y)) {
 				points.push_back(ImagePoint(x, y));
 			}
@@ -695,10 +695,10 @@ RGB<double>	WhiteBalance<Pixel>::filter(
 	double	G = 0;
 	double	B = 0;
 	unsigned int	m = 0;
-	unsigned int	width = image.getSize().width();
-	unsigned int	height = image.getSize().height();
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
+	int	width = image.getSize().width();
+	int	height = image.getSize().height();
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			RGB<Pixel>	v = image.pixel(x, y);
 			double	l = v.luminance();
 			L += l * l;
@@ -734,11 +734,11 @@ public:
 template<typename Pixel>
 double	Sum<Pixel>::filter(const ConstImageAdapter<Pixel>& image) const {
 	double	sum = 0;
-	unsigned int	width = image.getSize().width();
-	unsigned int	height = image.getSize().height();
+	int	width = image.getSize().width();
+	int	height = image.getSize().height();
 	bool	check_nan = std::numeric_limits<Pixel>::has_quiet_NaN;
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
 			Pixel	v = image.pixel(x, y);
 			if ((check_nan) && (v != v))
 				continue;

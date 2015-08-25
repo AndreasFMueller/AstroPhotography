@@ -40,7 +40,7 @@ double	FunctionBase::evaluate(const ImagePoint& point) const {
 	return evaluate(Point(point.x(), point.y()));
 }
 
-double	FunctionBase::evaluate(unsigned int x, unsigned int y) const {
+double	FunctionBase::evaluate(int x, int y) const {
 	return evaluate(Point(x, y));
 }
 
@@ -52,7 +52,7 @@ double	FunctionBase::operator()(const ImagePoint& point) const {
 	return evaluate(point);
 }
 
-double	FunctionBase::operator()(unsigned int x, unsigned int y) const {
+double	FunctionBase::operator()(int x, int y) const {
 	return evaluate(x, y);
 }
 

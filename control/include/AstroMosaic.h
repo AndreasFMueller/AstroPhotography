@@ -44,8 +44,8 @@ Image<T>	*Mosaic<T>::operator()(const Image<RGB<T> >& image) const {
 	result->setMosaicType(mosaic.getMosaicType());
 	ImagePoint	r = mosaic.red();
 	ImagePoint	b = mosaic.blue();
-	for (unsigned int x = 0; x < image.getFrame().size().width(); x += 2) {
-		for (unsigned int y = 0; y < image.getFrame().size().height(); y += 2) {
+	for (int x = 0; x < image.getFrame().size().width(); x += 2) {
+		for (int y = 0; y < image.getFrame().size().height(); y += 2) {
 			// red pixels
 			result->pixel(x + r.x(), y + r.y())
 				= image.pixel(x + r.x(), y + r.y()).R;

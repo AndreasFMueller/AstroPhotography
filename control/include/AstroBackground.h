@@ -122,11 +122,11 @@ public:
 	 */
 	virtual double	evaluate(const Point& point) const = 0;
 	double	evaluate(const ImagePoint& point) const;
-	double	evaluate(unsigned int x, unsigned int y) const;
+	double	evaluate(int x, int y) const;
 
 	double	operator()(const Point& point) const;
 	double	operator()(const ImagePoint& point) const;
-	double	operator()(unsigned int x, unsigned int y) const;
+	double	operator()(int x, int y) const;
 
 	/**
 	 * \brief The norm encodes how close to zero the function is
@@ -142,7 +142,7 @@ public:
 	FunctionBaseAdapter(const ImageSize& size, const FunctionBase *funcp)
 		: ConstImageAdapter<float>(size), _funcp(funcp) {
 	}
-	float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(int x, int y) const {
 		return (*_funcp)(x, y);
 	}
 };
@@ -166,7 +166,7 @@ public:
 		  _origin(origin) {
 	}
 
-	float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(int x, int y) const {
 		return _function->evaluate(_origin.x() + x, _origin.y() + y);
 	}
 };
@@ -179,7 +179,7 @@ public:
 		: FunctionPtrAdapter(image.getSize(), function, origin),
 		  _image(image) {
 	}
-	float	pixel(unsigned int x, unsigned int y) const {
+	float	pixel(int x, int y) const {
 //debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d = %f - %f",
 //	x, y, _image.pixel(x, y), FunctionPtrAdapter::pixel(x, y));
 		return _image.pixel(x, y) - FunctionPtrAdapter::pixel(x, y);
@@ -284,7 +284,7 @@ public:
 		return operator()(Point(point));
 	}
 
-	virtual Pixel	operator()(unsigned int x, unsigned int y) const {
+	virtual Pixel	operator()(int x, int y) const {
 		return operator()(Point(x, y));
 	}
 };
@@ -306,7 +306,7 @@ public:
 		ConstImageAdapter<float>(size), _func(func), _origin(origin) {
 	}
 
-	virtual float	pixel(unsigned int x, unsigned int y) const {
+	virtual float	pixel(int x, int y) const {
 		return _func(_origin.x() + x, _origin.y() + y);
 	}
 };
@@ -327,7 +327,7 @@ public:
 		  _func(func), _origin(origin) {
 	}
 
-	virtual float	pixel(unsigned int x, unsigned int y) const {
+	virtual float	pixel(int x, int y) const {
 		return _image.pixel(x, y)
 				- _func(_origin.x() + x, _origin.y() + y);
 	}
@@ -362,7 +362,7 @@ public:
 	virtual void	scalefactor(double scalefactor) = 0;
 	virtual	RGB<Pixel>	operator()(const Point& point) const = 0;
 	virtual RGB<Pixel>	operator()(const ImagePoint& point) const = 0;
-	virtual RGB<Pixel>	operator()(unsigned int x, unsigned int y) const = 0;
+	virtual RGB<Pixel>	operator()(int x, int y) const = 0;
 };
 
 typedef std::shared_ptr<BackgroundBase<float> >	BackgroundPtr;
@@ -429,7 +429,7 @@ public:
 	virtual RGB<Pixel>	operator()(const ImagePoint& point) const {
 		return this->operator()(Point(point.x(), point.y()));
 	}
-	virtual RGB<Pixel>	operator()(unsigned int x, unsigned int y) const {
+	virtual RGB<Pixel>	operator()(int x, int y) const {
 		return this->operator()(Point(x, y));
 	}
 };
@@ -478,7 +478,7 @@ public:
 		: ConstImageAdapter<RGB<float> >(image.getSize()),
 		  _image(image) {
 	}
-	virtual RGB<float>	pixel(unsigned int x, unsigned int y) const {
+	virtual RGB<float>	pixel(int x, int y) const {
 		return _image.pixel(x, y) - _background(x, y);
 	}
 	const Background<float>&	background() const { return _background; }
@@ -527,7 +527,7 @@ public:
 		}
 		min = RGB<Pixel>(minvalue);
 	}
-	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const {
+	virtual RGB<Pixel>	pixel(int x, int y) const {
 		return (_background(ImagePoint(x, y)) - min) * scale;
 	}
 };

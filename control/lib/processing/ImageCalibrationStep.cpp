@@ -79,10 +79,10 @@ protected:
 	const CalibrationImageStep *_dark;
 	const CalibrationImageStep *_flat;
 	const ConstImageAdapter<double>& _image;
-	virtual double	darkpixel(unsigned int x, unsigned int y) const {
+	virtual double	darkpixel(int x, int y) const {
 		return _dark->out().pixel(x, y);
 	}
-	virtual double	flatpixel(unsigned int x, unsigned int y) const {
+	virtual double	flatpixel(int x, int y) const {
 		return _flat->out().pixel(x, y);
 	}
 public:
@@ -93,7 +93,7 @@ public:
 		: ConstImageAdapter<double>(image.getSize()),
 		  _dark(dark), _flat(flat), _image(image) { }
 
-	virtual double	pixel(unsigned int x, unsigned int y) const {
+	virtual double	pixel(int x, int y) const {
 		double	value = _image.pixel(x, y);
 		if (_dark) {
 			value -= darkpixel(x, y);
@@ -113,11 +113,11 @@ public:
  */
 class WindowedCalibrationAdapter : public CalibrationAdapter {
 	ImageRectangle	_window;
-	virtual double	darkpixel(unsigned int x, unsigned int y) const {
+	virtual double	darkpixel(int x, int y) const {
 		return _dark->out().pixel(_window.origin().x() + x,
 			_window.origin().y() + y);
 	}
-	virtual double	flatpixel(unsigned int x, unsigned int y) const {
+	virtual double	flatpixel(int x, int y) const {
 		return _flat->out().pixel(_window.origin().x() + x,
 			_window.origin().y() + y);
 	}

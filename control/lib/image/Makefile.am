@@ -18,6 +18,8 @@ libastroimage_la_SOURCES = 						\
 	CalibrationFactory.cpp						\
 	Clamper.cpp							\
 	ConnectedComponent.cpp						\
+	ConvolutionOperator.cpp						\
+	ConvolutionResult.cpp						\
 	Corrector.cpp							\
 	DarkCorrector.cpp						\
 	Demosaic.cpp							\

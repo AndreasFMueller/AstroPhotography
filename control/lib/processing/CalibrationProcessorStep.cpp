@@ -489,8 +489,8 @@ ProcessingStep::state	CalibrationProcessorStep::common_work() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "statistics images ready");
 
 	// Doing the pixel specific work.
-	for (unsigned int x = 0; x < image->size().width(); x++) {
-		for (unsigned int y = 0; y < image->size().height(); y++) {
+	for (int x = 0; x < image->size().width(); x++) {
+		for (int y = 0; y < image->size().height(); y++) {
 			value_constructor	c(aggr(x, y), _tolerance);
 			for (unsigned int i = 0; i < nrawimages; i++) {
 				double	v = rawimages[i]->out().pixel(x, y);
@@ -663,7 +663,7 @@ const ConstImageAdapter<double>&	CalibrationProcessorStep::out() const {
  * tile,
  */
 CalibrationProcessorStep::aggregates	CalibrationProcessorStep::aggr(
-		unsigned int x, unsigned int y) const {
+		int x, int y) const {
 	// we need to know the tile coordinates for these pixel coordinates
 	short	tilex = xt(x);
 	short	tiley = yt(y);
@@ -801,10 +801,10 @@ ProcessingStep::state	FlatProcessorStep::do_work() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "dividing by %f", m);
 
 	// ensure that the average value is 1
-	unsigned int	w = image->size().width();
-	unsigned int	h = image->size().height();
-	for (unsigned int x = 0; x < w; x++) {
-		for (unsigned int y = 0; y < h; y++) {
+	int	w = image->size().width();
+	int	h = image->size().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
 			image->writablepixel(x, y) = image->pixel(x, y) / m;
 		}
 	}

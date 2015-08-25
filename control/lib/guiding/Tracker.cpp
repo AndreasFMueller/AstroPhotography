@@ -26,8 +26,7 @@ namespace guiding {
 	}								\
 }
 
-Point	findstar(ImagePtr image, const ImageRectangle& rectangle,
-		unsigned int k) {
+Point	findstar(ImagePtr image, const ImageRectangle& rectangle, int k) {
 	findstar_typed(unsigned char);
 	findstar_typed(unsigned short);
 	findstar_typed(unsigned int);
@@ -50,7 +49,7 @@ Point	findstar(ImagePtr image, const ImageRectangle& rectangle,
 }
 
 StarTracker::StarTracker(const Point& point,
-	const ImageRectangle& rectangle, unsigned int k)
+	const ImageRectangle& rectangle, int k)
 	: _point(point), _rectangle(rectangle), _k(k) {
 }
 

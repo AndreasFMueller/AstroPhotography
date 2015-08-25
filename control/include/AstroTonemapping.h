@@ -19,7 +19,7 @@ class GammaAdapter : public ConstImageAdapter<Pixel> {
 	float	_gamma;
 public:
 	GammaAdapter(const ConstImageAdapter<Pixel>& image, const float gamma = 1);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 	float	gamma() const { return _gamma; }
 	void	gamma(float gamma) { _gamma = gamma; }
 };
@@ -32,7 +32,7 @@ GammaAdapter<Pixel>::GammaAdapter(const ConstImageAdapter<Pixel>& _image,
 }
 
 template<typename Pixel>
-Pixel	GammaAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+Pixel	GammaAdapter<Pixel>::pixel(int x, int y)
 			const {
 	Pixel	v = image.pixel(x, y);
 	if (v < 0) {
@@ -50,7 +50,7 @@ class CauchyAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
 public:
 	CauchyAdapter(const ConstImageAdapter<Pixel>& image);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -59,7 +59,7 @@ CauchyAdapter<Pixel>::CauchyAdapter(const ConstImageAdapter<Pixel>& _image)
 }
 
 template<typename Pixel>
-Pixel	CauchyAdapter<Pixel>::pixel(unsigned int x, unsigned int y)
+Pixel	CauchyAdapter<Pixel>::pixel(int x, int y)
 	const {
 	double	l = image.pixel(x, y);
 	return l / (l + 1.);
@@ -73,7 +73,7 @@ class LogAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	image;
 public:
 	LogAdapter(const ConstImageAdapter<Pixel>& image);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -82,7 +82,7 @@ LogAdapter<Pixel>::LogAdapter(const ConstImageAdapter<Pixel>& _image)
 }
 
 template<typename Pixel>
-Pixel	LogAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	LogAdapter<Pixel>::pixel(int x, int y) const {
 	return log10(image.pixel(x, y));
 }
 
@@ -96,7 +96,7 @@ class LuminanceScalingAdapter : public ConstImageAdapter<Pixel> {
 public:
 	LuminanceScalingAdapter(const ConstImageAdapter<Pixel>& image,
 		double scalefactor = 1);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 	double	scalefactor() const { return _scalefactor; }
 	void	scalefactor(double scalefactor) { _scalefactor = scalefactor; }
 };
@@ -109,7 +109,7 @@ LuminanceScalingAdapter<Pixel>::LuminanceScalingAdapter(
 }
 
 template<typename Pixel>
-Pixel	LuminanceScalingAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	LuminanceScalingAdapter<Pixel>::pixel(int x, int y) const {
 	return image.pixel(x, y) * _scalefactor;
 }
 
@@ -121,7 +121,7 @@ class LuminanceExtractionAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<RGB<Pixel> >&	_image;
 public:
 	LuminanceExtractionAdapter(const ConstImageAdapter<RGB<Pixel> >& image);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -131,8 +131,7 @@ LuminanceExtractionAdapter<Pixel>::LuminanceExtractionAdapter(
 }
 
 template<typename Pixel>
-Pixel	LuminanceExtractionAdapter<Pixel>::pixel(unsigned int x,
-			unsigned int y) const {
+Pixel	LuminanceExtractionAdapter<Pixel>::pixel(int x, int y) const {
 	return _image.pixel(x, y).luminance();
 }
 
@@ -145,7 +144,7 @@ class ColorExtractionAdapter : public ConstImageAdapter<RGB<Pixel> > {
 	double	_saturation;
 public:
 	ColorExtractionAdapter(const ConstImageAdapter<RGB<Pixel> >& image);
-	virtual RGB<Pixel> pixel(unsigned int x, unsigned int y) const;
+	virtual RGB<Pixel> pixel(int x, int y) const;
 	double	saturation() const { return _saturation; }
 	void	saturation(double saturation) { _saturation = saturation; }
 };
@@ -158,8 +157,7 @@ ColorExtractionAdapter<Pixel>::ColorExtractionAdapter(
 }
 
 template<typename Pixel>
-RGB<Pixel>	ColorExtractionAdapter<Pixel>::pixel(
-				unsigned int x, unsigned int y) const {
+RGB<Pixel>	ColorExtractionAdapter<Pixel>::pixel(int x, int y) const {
 	RGB<Pixel>	v = _image.pixel(x, y);
 	float	l = v.luminance();
 	RGB<Pixel>	c = v * l;
@@ -180,7 +178,7 @@ public:
 	LuminanceColorAdapter(
 		const ConstImageAdapter<Pixel>& luminanceimage,
 		const ConstImageAdapter<RGB<Pixel> >& colorimage);
-	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const;
+	virtual RGB<Pixel>	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -192,8 +190,7 @@ LuminanceColorAdapter<Pixel>::LuminanceColorAdapter(
 }
 
 template<typename Pixel>
-RGB<Pixel>	LuminanceColorAdapter<Pixel>::pixel(
-				unsigned int x, unsigned int y) const {
+RGB<Pixel>	LuminanceColorAdapter<Pixel>::pixel(int x, int y) const {
 	return colorimage.pixel(x, y) * luminanceimage.pixel(x, y);
 }
 
@@ -210,7 +207,7 @@ public:
 	ColorCorrectionAdapter<Pixel>(
 		const ConstImageAdapter<RGB<Pixel> >& image,
 		const RGB<float>& rgb);
-	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const;
+	virtual RGB<Pixel>	pixel(int x, int y) const;
 	RGB<float>	rgb() const { return _rgb; }
 	void	rgb(const RGB<float>& rgb) { _rgb = rgb; }
 };
@@ -231,7 +228,7 @@ ColorCorrectionAdapter<Pixel>::ColorCorrectionAdapter(
 }
 
 template<typename Pixel>
-RGB<Pixel>	ColorCorrectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+RGB<Pixel>	ColorCorrectionAdapter<Pixel>::pixel(int x, int y) const {
 	RGB<Pixel>	v = image.pixel(x, y);
 	return RGB<Pixel>(v.R * _rgb.R, v.G * _rgb.G, v.B * _rgb.B);
 }
@@ -247,7 +244,7 @@ public:
 	BackgroundAdapter(
 		const ConstImageAdapter<RGB<Pixel> >& image,
 		const RGB<Pixel>& background);
-	virtual RGB<Pixel>	pixel(unsigned int x, unsigned int y) const;
+	virtual RGB<Pixel>	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -259,8 +256,7 @@ BackgroundAdapter<Pixel>::BackgroundAdapter(
 }
 
 template<typename Pixel>
-RGB<Pixel>	BackgroundAdapter<Pixel>::pixel(
-	unsigned int x, unsigned int y) const {
+RGB<Pixel>	BackgroundAdapter<Pixel>::pixel(int x, int y) const {
 	RGB<Pixel>	v = image.pixel(x, y);
 	return RGB<Pixel>(v.R - background.R, v.G - background.G,
 		v.B - background.B);
@@ -277,7 +273,7 @@ class RangeAdapter : public ConstImageAdapter<Pixel> {
 public:
 	RangeAdapter(const ConstImageAdapter<Pixel>& image,
 		float min = 0, float max = 1);
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 	double	min() const { return -b; }
 	double	max() const { return 1/m - b; }
 	void	setRange(float min = 0, float max = 1);
@@ -297,7 +293,7 @@ void	RangeAdapter<Pixel>::setRange(float min, float max) {
 }
 
 template<typename Pixel>
-Pixel RangeAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel RangeAdapter<Pixel>::pixel(int x, int y) const {
 	return m * (_image.pixel(x, y) + b);
 }
 
@@ -327,7 +323,7 @@ class RGB32Adapter : public ConstImageAdapter<unsigned int> {
 	}
 public:
 	RGB32Adapter(const ConstImageAdapter<RGB<Pixel> >& image);
-	virtual unsigned int	pixel(unsigned int x, unsigned int y) const;
+	virtual unsigned int	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
@@ -336,8 +332,7 @@ RGB32Adapter<Pixel>::RGB32Adapter(const ConstImageAdapter<RGB<Pixel> >& image)
 }
 
 template<typename Pixel>
-unsigned int	RGB32Adapter<Pixel>::pixel(unsigned int x,
-	unsigned int y) const {
+unsigned int	RGB32Adapter<Pixel>::pixel(int x, int y) const {
 	return reduce(_image.pixel(x, y));
 }
 

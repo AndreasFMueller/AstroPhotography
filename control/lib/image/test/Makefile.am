@@ -28,6 +28,7 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp 						\
+	AdapterTest.cpp							\
 	AnalyzerTest.cpp						\
 	BackgroundTest.cpp						\
 	ConvertingAdapterTest.cpp					\

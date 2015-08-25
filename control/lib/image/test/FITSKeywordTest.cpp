@@ -46,8 +46,8 @@ void	FITSKeywordTest::testHistory() {
 	// create an image
 	ImageSize	size(120,80);
 	Image<unsigned char>	image(size);
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			image.writablepixel(x, y) = (x + y) % 256;
 		}
 	}
@@ -81,8 +81,8 @@ void	FITSKeywordTest::testComment() {
 	// create an image
 	ImageSize	size(120,80);
 	Image<unsigned char>	image(size);
-	for (unsigned int x = 0; x < size.width(); x++) {
-		for (unsigned int y = 0; y < size.height(); y++) {
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
 			image.writablepixel(x, y) = (x + y) % 256;
 		}
 	}

@@ -21,7 +21,7 @@ namespace image {
  */
 class MaskingFunction {
 public:
-	virtual double	operator()(size_t x, size_t y) const = 0;
+	virtual double	operator()(int x, int y) const = 0;
 };
 
 /**
@@ -46,7 +46,7 @@ class RectangleFunction : public HanningMaskingFunction {
 public:
 	RectangleFunction(const ImageRectangle& rectangle,
 		double hanningradius = 0);
-	virtual double	operator()(size_t x, size_t y) const;
+	virtual double	operator()(int x, int y) const;
 }; 
 
 /**
@@ -59,7 +59,7 @@ protected:
 public:
 	CircleFunction(const ImagePoint& center, double radius,
 		double hanningradius = 0);
-	virtual double	operator()(size_t x, size_t y) const;
+	virtual double	operator()(int x, int y) const;
 };
 
 } // namespace image

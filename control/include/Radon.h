@@ -48,7 +48,7 @@ public:
 	CircleAdapter(const ConstImageAdapter<double>& image,
 		const circle& circ);
 	~CircleAdapter();
-	virtual double	pixel(unsigned int x, unsigned int y) const;
+	virtual double	pixel(int x, int y) const;
 };
 
 } // namespace radon

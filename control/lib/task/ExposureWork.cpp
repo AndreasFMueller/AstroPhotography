@@ -54,7 +54,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 		_task.filter().c_str(), _task.filterwheel().c_str());
 	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
 		df(repository);
-	if ((_task.filterwheel().size() > 0) && (_task.filter().size() >= 0)) {
+	if ((_task.filterwheel().size() > 0) && (_task.filter().size() > 0)) {
 		filterwheel = df.get(_task.filterwheel());
 	}
 

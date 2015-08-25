@@ -43,15 +43,15 @@ void	OperatorTest::tearDown() {
 void	OperatorTest::testFlip() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testFlip() begin");
 	Image<unsigned char>	image(10, 10);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
 	FlipOperator<unsigned char>	f;
 	f(image);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			CPPUNIT_ASSERT(image.pixel(x, image.size().height() - y - 1)
 				== 7 + x + y);
 		}

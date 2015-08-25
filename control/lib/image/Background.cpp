@@ -65,11 +65,11 @@ TileSet	TileFactory::operator()(const ConstImageAdapter<float>& image) const {
 
 	// compute the tile sizes
 	ImageSize	imagesize = image.getSize();
-	unsigned int	htiles = imagesize.width() / _tilesize.width();
+	int	htiles = imagesize.width() / _tilesize.width();
 	if ((imagesize.width() - htiles * _tilesize.width()) < 20) {
 		htiles -= 1;
 	}
-	unsigned int	vtiles = imagesize.height() / _tilesize.height();
+	int	vtiles = imagesize.height() / _tilesize.height();
 	if ((imagesize.height() - vtiles * _tilesize.height()) < 20) {
 		vtiles -= 1;
 	}
@@ -82,8 +82,8 @@ TileSet	TileFactory::operator()(const ConstImageAdapter<float>& image) const {
 		originx, originy);
 
 	// compute all tiles
-	for (unsigned int x = 0; x < htiles; x++) {
-		for (unsigned int y = 0; y < vtiles; y++) {
+	for (int x = 0; x < htiles; x++) {
+		for (int y = 0; y < vtiles; y++) {
 			ImagePoint	origin(
 				originx + x * _tilesize.width(),
 				originy + y * _tilesize.height());

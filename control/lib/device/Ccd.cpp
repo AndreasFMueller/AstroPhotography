@@ -122,11 +122,11 @@ ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
 	if (_size.height() < rectangle.origin().y()) {
 		throw std::runtime_error("image rectangle outside ccd");
 	}
-	unsigned int	w = rectangle.size().width();
+	int	w = rectangle.size().width();
 	if ((rectangle.size().width() + rectangle.origin().x()) > _size.width()) {
 		w = _size.width() - rectangle.origin().x();
 	}
-	unsigned int	h = rectangle.size().height();
+	int	h = rectangle.size().height();
 	if ((rectangle.size().height() + rectangle.origin().y()) > _size.height()) {
 		h = _size.height() - rectangle.origin().y();
 	}
@@ -139,16 +139,16 @@ ImageRectangle	CcdInfo::clipRectangle(const ImageRectangle& rectangle) const {
  * \param s	size for the rectangled to be computed
  */
 ImageRectangle	CcdInfo::centeredRectangle(const ImageSize& s) const {
-	unsigned int	w = s.width();
-	unsigned int	h = s.height();
+	int	w = s.width();
+	int	h = s.height();
 	if (w > _size.width()) {
 		w = _size.width();
 	}
 	if (h > _size.height()) {
 		h = _size.height();
 	}
-	unsigned int	xoffset = (_size.width() - w) / 2;
-	unsigned int	yoffset = (_size.height() - h) / 2;
+	int	xoffset = (_size.width() - w) / 2;
+	int	yoffset = (_size.height() - h) / 2;
 	return ImageRectangle(ImagePoint(xoffset, yoffset), ImageSize(w, h));
 }
 

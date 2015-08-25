@@ -51,8 +51,8 @@ void	FilterTest::tearDown() {
 void	FilterTest::testMin() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMin() begin");
 	Image<unsigned char>	image(10, 10);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -64,8 +64,8 @@ void	FilterTest::testMin() {
 void	FilterTest::testMax() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMax() begin");
 	Image<unsigned char>	image(10, 10);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -77,8 +77,8 @@ void	FilterTest::testMax() {
 void	FilterTest::testMean() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMean() begin");
 	Image<unsigned char>	image(10, 10);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
@@ -90,8 +90,8 @@ void	FilterTest::testMean() {
 void	FilterTest::testMedian() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedian() begin");
 	Image<unsigned short>	image(100, 100);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 7 * x * y;
 		}
 	}
@@ -103,8 +103,8 @@ void	FilterTest::testMedian() {
 void	FilterTest::testMedian0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedian0() begin");
 	Image<unsigned short>	image(100, 100);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = 0;
 		}
 	}
@@ -117,8 +117,8 @@ void	FilterTest::testMedian0() {
 void	FilterTest::testMedianLarge() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedianLarge() begin");
 	Image<unsigned int>	image(8000, 8000);
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 			image.pixel(x, y) = x * y;
 		}
 	}

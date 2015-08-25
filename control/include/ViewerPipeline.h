@@ -30,7 +30,7 @@ class ViewerPipeline : public ConstImageAdapter<unsigned int> {
 public:
 	ViewerPipeline(const Image<RGB<float> > *_imagep);
 
-	virtual unsigned int	pixel(unsigned int x, unsigned int y) const {
+	virtual unsigned int	pixel(int x, int y) const {
 		return (unsigned int)rgb32.pixel(x, y);
 	}
 

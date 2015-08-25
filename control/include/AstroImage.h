@@ -20,6 +20,7 @@
 #include <AstroUtils.h>
 #include <typeinfo>
 #include <typeindex>
+#include <cmath>
 
 namespace astro {
 namespace image {
@@ -35,15 +36,14 @@ namespace image {
  * convention.
  */
 class ImagePoint {
-	unsigned int	_x, _y;
+	int	_x, _y;
 public:
-	unsigned int	x() const { return _x; }
-	unsigned int	y() const { return _y; }
-	void	x(unsigned int x) { _x = x; }
-	void	y(unsigned int y) { _y = y; }
-	void	setX(unsigned int x) { _x = x; }
-	void	setY(unsigned int y) { _y = y; }
-	ImagePoint(unsigned int x = 0, unsigned int y = 0) : _x(x), _y(y) { }
+	int	x() const { return _x; }
+	int	y() const { return _y; }
+	void	x(int x) { _x = x; }
+	void	y(int y) { _y = y; }
+	ImagePoint(int x = 0, int y = 0) : _x(x), _y(y) { }
+	ImagePoint(double x, double y) : _x(floor(x)), _y(floor(y)) { }
 	ImagePoint(const std::string& pointspec);
 	bool	operator==(const ImagePoint& other) const;
 	ImagePoint	operator+(const ImagePoint& other) const;
@@ -67,15 +67,17 @@ class ImageRectangle;
  * number of pixels and width/height.
  */
 class ImageSize {
-	unsigned int	_width, _height;
-	unsigned int	pixels;
+	int	_width, _height;
 public:
 	// the accessors are defined inline so that a clever compiler can
 	// still make them just asf ast as directly accessible members
-	unsigned int	width() const { return _width; }
-	void	setWidth(unsigned int width);
-	unsigned int	height() const { return _height; }
-	void	setHeight(unsigned int height);
+	int	width() const { return _width; }
+	void	setWidth(int width);
+	int	height() const { return _height; }
+	void	setHeight(int height);
+private:
+	unsigned int	pixels;
+public:
 	unsigned int	getPixels() const { return pixels; }
 	// constructors
 	ImageSize(unsigned int width = 0, unsigned int height = 0);
@@ -104,6 +106,9 @@ public:
 	ImagePoint	center() const;
 	// scaling
 	ImageSize	operator*(const double l) const;
+	// reduction 
+	ImagePoint	operator()(const int x, const int y) const;
+	ImagePoint	operator()(const ImagePoint& p) const;
 	// find out whether the rectangle is uninitialized
 	bool	isEmpty() const { return (_width == 0) && (_height == 0); }
 };
@@ -160,7 +165,7 @@ public:
 	bool	isEmpty() const { return _size.isEmpty(); }
 	// subimage
 	ImagePoint	subimage(const ImagePoint& point) const;
-	ImagePoint	subimage(unsigned int x, unsigned int y) const;
+	ImagePoint	subimage(int x, int y) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);
@@ -519,7 +524,7 @@ public:
 	virtual ~ConstImageAdapter() { }
 
 	ImageSize	getSize() const { return adaptersize; }
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const = 0;
+	virtual Pixel	pixel(int x, int y) const = 0;
 	Pixel	pixel(ImagePoint p) const {
 		return pixel(p.x(), p.y());
 	}
@@ -533,7 +538,7 @@ template<typename Pixel>
 class ImageAdapter : public ConstImageAdapter<Pixel> {
 public:
 	ImageAdapter(const ImageSize& size) : ConstImageAdapter<Pixel>(size) {}
-	virtual Pixel&	writablepixel(unsigned int x, unsigned int y) = 0;
+	virtual Pixel&	writablepixel(int x, int y) = 0;
 };
 
 
@@ -619,8 +624,8 @@ public:
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
 		pixels = new Pixel[frame.size().getPixels()];
-		for (unsigned int x = 0; x < frame.size().width(); x++) {
-			for (unsigned int y = 0; y < frame.size().height(); y++) {
+		for (int x = 0; x < frame.size().width(); x++) {
+			for (int y = 0; y < frame.size().height(); y++) {
 				pixel(x, y) = adapter.pixel(x, y);
 			}
 		}
@@ -709,7 +714,7 @@ public:
 	 * \brief Read only access to pixel values specified by image
 	 *        coordinates
 	 */
-	Pixel	pixel(unsigned int x, unsigned int y) const {
+	Pixel	pixel(int x, int y) const {
 		return pixels[pixeloffset(x, y)];
 	}
 
@@ -720,7 +725,7 @@ public:
 	/**
 	 * \brief Read/write access to pixels specified by image coordinates
  	 */
-	Pixel&	pixel(unsigned int x, unsigned int y) {
+	Pixel&	pixel(int x, int y) {
 		return pixels[pixeloffset(x, y)];
 	}
 
@@ -728,7 +733,7 @@ public:
 		return pixel(p.x(), p.y());
 	}
 
-	Pixel&	writablepixel(unsigned int x, unsigned int y) {
+	Pixel&	writablepixel(int x, int y) {
 		return pixels[pixeloffset(x, y)];
 	}
 
@@ -749,7 +754,7 @@ public:
 		/**
 		 * \param _y y coordinate of the row to be constructed
 		 */
-		row(Image<Pixel> &_image, unsigned int _y)
+		row(Image<Pixel> &_image, int _y)
 			: ImageRow(_image.frame.size(), _y), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
@@ -766,7 +771,7 @@ public:
 		/**
 		 * \param _x x coordinate of the column to be constructed
  		 */
-		column(Image<Pixel> &_image, unsigned int _x)
+		column(Image<Pixel> &_image, int _x)
 			: ImageColumn(_image.size(), _x), image(_image) { }
 		iterator	begin();
 		const_iterator	begin() const;
@@ -838,7 +843,7 @@ public:
 	 * \brief Fill a rectangle of an image with a certain value
 	 */
 	void	fill(const ImageRectangle& subframe, const Pixel& value) {
-		for (unsigned int y = 0; y < subframe.size().height(); y++) {
+		for (int y = 0; y < subframe.size().height(); y++) {
 			ImageRow	r(frame.size(), subframe.origin().y() + y);
 			std::fill(pixels + r.firstoffset + subframe.origin().x(),
 				pixels + r.firstoffset + subframe.origin().x()
@@ -920,7 +925,7 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 		throw std::range_error("subimage frame too large");
 	}
 	pixels = new Pixel[subframe.size().getPixels()];
-	for (unsigned int y = 0; y < subframe.size().height(); y++) {
+	for (int y = 0; y < subframe.size().height(); y++) {
 		ImageRow	srcrow(src.frame.size(), subframe.origin().y() + y);
 		ImageRow	destrow(frame.size(), y);
 		std::copy(src.pixels + srcrow.firstoffset + subframe.origin().x(),
@@ -1031,6 +1036,23 @@ void	convertImage(Image<destPixel>& dest, const Image<srcPixel>&  src) {
 		throw std::runtime_error("convertImage: image sizes don't match");
 	}
 	convertPixelArray(dest.pixels, src.pixels, dest.size().getPixels());
+}
+
+/**
+ * \brief Copy the contents of an adapter into an image
+ */
+template<typename destPixel, typename srcPixel>
+void	copy(Image<destPixel>& dest, const ConstImageAdapter<srcPixel>& src) {
+	if (dest.getSize() != src.getSize()) {
+		throw std::range_error("cannot copy images of different size");
+	}
+	int	w = src.getSize().width();
+	int	h = src.getSize().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			dest.pixel(x, y) = src.pixel(x, y);
+		}
+	}
 }
 
 /**

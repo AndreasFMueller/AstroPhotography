@@ -39,8 +39,8 @@ void	dark_correct(Image<ImagePixelType>& image,
 	}
 
 	// correct all pixels
-	for (unsigned int x = 0; x < image.size().width(); x++) {
-		for (unsigned int y = 0; y < image.size().height(); y++) {
+	for (int x = 0; x < image.size().width(); x++) {
+		for (int y = 0; y < image.size().height(); y++) {
 
 			ImagePixelType	ip = image.pixel(x, y);
 			// skip NaN pixels

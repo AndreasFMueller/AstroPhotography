@@ -47,7 +47,7 @@ public:
 			targetcenter(_targetcenter), center(_center) {
 	}
 	virtual Point	operator()(const Point& p) const;
-	virtual Point	operator()(unsigned int x, unsigned int y) const;
+	virtual Point	operator()(int x, int y) const;
 };
 
 /**
@@ -67,11 +67,11 @@ public:
 			targetsize.center(),
 			_projection) {
 	}
-	virtual Pixel	pixel(unsigned int x, unsigned int y) const;
+	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
-Pixel	ProjectionAdapter<Pixel>::pixel(unsigned int x, unsigned int y) const {
+Pixel	ProjectionAdapter<Pixel>::pixel(int x, int y) const {
 	return image.pixel(centeredprojection(x, y));
 }
 

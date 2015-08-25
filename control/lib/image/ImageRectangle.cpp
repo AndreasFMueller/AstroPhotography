@@ -186,7 +186,7 @@ ImagePoint	ImageRectangle::center() const {
 	return _origin + _size.center();
 }
 
-ImagePoint	ImageRectangle::subimage(unsigned int x, unsigned int y) const {
+ImagePoint	ImageRectangle::subimage(int x, int y) const {
 	if (!_size.contains(x, y)) {
 		throw std::runtime_error("outside image");
 	}

@@ -97,7 +97,7 @@ std::vector<std::string>	QhyCameraLocator::getDevicelist(DeviceName::device_type
  * \param name		Name of the camera
  * \return Camera with that name
  */
-CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& name) {
+CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& /* name */) {
 	// XXX implementation incomplete
 	return CameraPtr();
 	//return CameraPtr(new QhyCamera(name));

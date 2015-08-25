@@ -22,8 +22,8 @@ template<typename DarkPixelType, typename Pixel>
 class TypedInterpolator {
 protected:
 	const ConstImageAdapter<DarkPixelType>&	dark;
-	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
-	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+	virtual DarkPixelType	darkpixel(int x, int y) const;
+	virtual void	interpolatePixel(int x, int y,
 				ImageAdapter<Pixel>& image) = 0;
 	DarkPixelType	nan;
 public:
@@ -34,7 +34,7 @@ public:
 
 template<typename DarkPixelType, typename Pixel>
 DarkPixelType TypedInterpolator<DarkPixelType, Pixel>::darkpixel(
-	unsigned int x, unsigned int y) const {
+	int x, int y) const {
 	return dark.pixel(x, y);
 }
 
@@ -51,8 +51,8 @@ void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
 	if (image.getSize() != dark.getSize()) {
 		throw std::range_error("image sizes don't match");
 	}
-	for (unsigned int x = 0; x < dark.getSize().width(); x++) {
-		for (unsigned int y = 0; y < dark.getSize().height(); y++) {
+	for (int x = 0; x < dark.getSize().width(); x++) {
+		for (int y = 0; y < dark.getSize().height(); y++) {
 			DarkPixelType	darkpixel = dark.pixel(x, y);
 			if (darkpixel != darkpixel) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -69,8 +69,8 @@ void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
 template<typename DarkPixelType, typename Pixel>
 class MonochromeInterpolator : public TypedInterpolator<DarkPixelType, Pixel> {
 protected:
-	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
-	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+	virtual DarkPixelType	darkpixel(int x, int y) const;
+	virtual void	interpolatePixel(int x, int y,
 				ImageAdapter<Pixel>& image);
 public:
 	MonochromeInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
@@ -78,7 +78,7 @@ public:
 
 template<typename DarkPixelType, typename Pixel>
 DarkPixelType	MonochromeInterpolator<DarkPixelType, Pixel>::darkpixel(
-	unsigned int x, unsigned int y) const {
+	int x, int y) const {
 	return TypedInterpolator<DarkPixelType, Pixel>::darkpixel(x, y);
 }
 
@@ -100,7 +100,7 @@ MonochromeInterpolator<DarkPixelType, Pixel>::MonochromeInterpolator(
  */
 template<typename DarkPixelType, typename Pixel>
 void	MonochromeInterpolator<DarkPixelType, Pixel>::interpolatePixel(
-	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	int x, int y, ImageAdapter<Pixel>& image) {
 	unsigned int	counter = 0;
 	double	sum = 0;
 	// for each image, we have to make sure the pixels are inside the
@@ -143,12 +143,12 @@ void	MonochromeInterpolator<DarkPixelType, Pixel>::interpolatePixel(
 template<typename DarkPixelType, typename Pixel>
 class MosaicInterpolator : public TypedInterpolator<DarkPixelType, Pixel> {
 protected:
-	virtual DarkPixelType	darkpixel(unsigned int x, unsigned int y) const;
-	virtual void	interpolatePixel(unsigned int x, unsigned int y,
+	virtual DarkPixelType	darkpixel(int x, int y) const;
+	virtual void	interpolatePixel(int x, int y,
 				ImageAdapter<Pixel>& image);
-	virtual void	interpolateGreen(unsigned int x, unsigned int y,
+	virtual void	interpolateGreen(int x, int y,
 				ImageAdapter<Pixel>& image);
-	virtual void	interpolateRedBlue(unsigned int x, unsigned int y,
+	virtual void	interpolateRedBlue(int x, int y,
 				ImageAdapter<Pixel>& image);
 	MosaicType	mosaic;
 public:
@@ -158,7 +158,7 @@ public:
 
 template<typename DarkPixelType, typename Pixel>
 DarkPixelType	MosaicInterpolator<DarkPixelType, Pixel>::darkpixel(
-	unsigned int x, unsigned int y) const {
+	int x, int y) const {
 	return TypedInterpolator<DarkPixelType, Pixel>::darkpixel(x, y);
 }
 
@@ -180,7 +180,7 @@ MosaicInterpolator<DarkPixelType, Pixel>::MosaicInterpolator(
  */
 template<typename DarkPixelType, typename Pixel>
 void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateGreen(
-	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	int x, int y, ImageAdapter<Pixel>& image) {
 	unsigned int	counter = 0;
 	double	sum = 0;
 
@@ -221,7 +221,7 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateGreen(
 
 template<typename DarkPixelType, typename Pixel>
 void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateRedBlue(
-	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	int x, int y, ImageAdapter<Pixel>& image) {
 	unsigned int	counter = 0;
 	double	sum = 0;
 	// for each image, we have to make sure the pixels are inside the
@@ -260,7 +260,7 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolateRedBlue(
 
 template<typename DarkPixelType, typename Pixel>
 void	MosaicInterpolator<DarkPixelType, Pixel>::interpolatePixel(
-	unsigned int x, unsigned int y, ImageAdapter<Pixel>& image) {
+	int x, int y, ImageAdapter<Pixel>& image) {
 	if (mosaic.isG(x, y)) {
 		interpolateGreen(x, y, image);
 	} else {

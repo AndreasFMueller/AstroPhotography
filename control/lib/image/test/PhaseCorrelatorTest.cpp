@@ -54,8 +54,8 @@ void	PhaseCorrelatorTest::testInteger() {
 	int	N = 256;
 	Image<double>	fromimage(N, N);
 	Image<double>	toimage(N, N);
-	for (unsigned int x = 0; x < fromimage.size().width(); x++) {
-		for (unsigned int y = 0; y < fromimage.size().height(); y++) {
+	for (int x = 0; x < fromimage.size().width(); x++) {
+		for (int y = 0; y < fromimage.size().height(); y++) {
 			double	r = hypot(x - 60, y - 70);
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
@@ -88,8 +88,8 @@ void	PhaseCorrelatorTest::testIntegerNegative() {
 	int	N = 256;
 	Image<double>	fromimage(N, N);
 	Image<double>	toimage(N, N);
-	for (unsigned int x = 0; x < fromimage.size().width(); x++) {
-		for (unsigned int y = 0; y < fromimage.size().height(); y++) {
+	for (int x = 0; x < fromimage.size().width(); x++) {
+		for (int y = 0; y < fromimage.size().height(); y++) {
 			double	r = hypot(x - 60, y - 70);
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
@@ -122,8 +122,8 @@ void	PhaseCorrelatorTest::testHalf() {
 	int	N = 256;
 	Image<double>	fromimage(N, N);
 	Image<double>	toimage(N, N);
-	for (unsigned int x = 0; x < fromimage.size().width(); x++) {
-		for (unsigned int y = 0; y < fromimage.size().height(); y++) {
+	for (int x = 0; x < fromimage.size().width(); x++) {
+		for (int y = 0; y < fromimage.size().height(); y++) {
 			double	r = hypot(x - 60, y - 70);
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
