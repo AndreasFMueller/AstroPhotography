@@ -1,5 +1,5 @@
 /*
- * AstroTransform.h -- transformation of images
+ * AstroTransform.h -- geometric transformation of images
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

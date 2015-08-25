@@ -407,6 +407,55 @@ public:
 	}
 };
 
+
+/**
+ * \brief Conversion class from HSL to RGB
+ */
+class HSLBase {
+	double	H;
+	double	S;
+	double	L;
+	double	_r, _g, _b;
+public:
+	HSLBase(double hue, double saturation, double luminance);
+	double	r() const { return _r; };
+	double	g() const { return _g; };
+	double	b() const { return _b; };
+};
+
+/**
+ * \brief Template class for HSL color with arbitrary pixel types
+ */
+template<typename P>
+class HSL : public HSLBase {
+public:
+	HSL(double hue, double saturation, P luminance)
+		: HSLBase(hue, saturation,
+			luminance / std::numeric_limits<P>::max()) {
+	}
+	P	R() const { return std::numeric_limits<P>::max() * r(); }
+	P	G() const { return std::numeric_limits<P>::max() * g(); }
+	P	B() const { return std::numeric_limits<P>::max() * b(); }
+};
+
+template<>
+HSL<double>::HSL(double hue, double saturation, double luminance);
+template<>
+double	HSL<double>::R() const;
+template<>
+double	HSL<double>::G() const;
+template<>
+double	HSL<double>::B() const;
+
+template<>
+HSL<float>::HSL(double hue, double saturation, float luminance);
+template<>
+float	HSL<float>::R() const;
+template<>
+float	HSL<float>::G() const;
+template<>
+float	HSL<float>::B() const;
+
 /**
  * \brief RGB pixels of any type
  *
@@ -421,6 +470,7 @@ public:
 	RGB() { }
 	RGB(P w) : R(w), G(w), B(w) { }
 	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
+	RGB(const HSL<P>& h) : R(h.R()), G(h.G()), B(h.B()) { }
 	virtual ~RGB() { }
 
 	template<typename Q>

@@ -14,6 +14,7 @@ libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
 	Analyzer.cpp							\
 	Background.cpp							\
+	Blurr.cpp							\
 	CalibrationFactory.cpp						\
 	Clamper.cpp							\
 	ConnectedComponent.cpp						\
@@ -31,8 +32,10 @@ libastroimage_la_SOURCES = 						\
 	Filters.cpp							\
 	FlatCorrector.cpp						\
 	FocusFilterfunc.cpp						\
+	FourierImage.cpp						\
 	Functions.cpp							\
 	Histogram.cpp							\
+	HSLBase.cpp							\
 	Image.cpp							\
 	ImageBase.cpp							\
 	ImageDatabaseDirectory.cpp					\

@@ -6,12 +6,12 @@
 pkglib_LTLIBRARIES = simulator.la
 noinst_HEADERS = SimUtil.cpp SimLocator.h SimCamera.h SimCcd.h \
 	SimGuiderPort.h SimFilterWheel.h SimCooler.h \
-	SimFocuser.h SimMount.h Stars.h Blurr.h Simulator.h
+	SimFocuser.h SimMount.h Stars.h Simulator.h
 
 SRCFILES = SimUtil.cpp SimLocator.cpp SimCamera.cpp SimCcd.cpp \
 	SimGuiderPort.cpp SimFilterWheel.cpp SimCooler.cpp \
 	SimFocuser.cpp SimMount.cpp \
-	Stars.cpp Starfield.cpp StarCamera.cpp Blurr.cpp Simulator.cpp
+	Stars.cpp Starfield.cpp StarCamera.cpp Simulator.cpp
 
 if ENABLE_UNITTESTS
 

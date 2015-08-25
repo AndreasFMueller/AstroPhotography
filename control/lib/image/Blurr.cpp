@@ -71,7 +71,7 @@ double	Blurr::aperture(double r) const {
  * This method takes as point spread function of the telescope the
  * diffraction pattern of the 
  */
-void	Blurr::operator()(const Image<double>& image) {
+Image<double>	Blurr::operator()(const Image<double>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing the convolution for blurr");
 	// how large is the pixel array that we should use for the
 	// computation
@@ -91,13 +91,11 @@ void	Blurr::operator()(const Image<double>& image) {
 					sizeof(fftw_complex) * nc);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transform memory allocated");
 
-	// plan the fourier transform
+	// plan the fourier transform for the forward transform
 	fftw_plan	p = fftw_plan_dft_r2c_2d(n0, n1, 
 				image.pixels, af, FFTW_ESTIMATE);
 	fftw_plan	q = fftw_plan_dft_r2c_2d(n0, n1, 
 				blurr.pixels, bf, FFTW_ESTIMATE);
-	fftw_plan	r = fftw_plan_dft_c2r_2d(n0, n1,
-				af, image.pixels, FFTW_ESTIMATE);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transforms planned");
 
 	// compute the values of the blurring function
@@ -130,7 +128,12 @@ void	Blurr::operator()(const Image<double>& image) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product computed");
 
+	// prepare a pixel which will contain the blurred pixels
+	Image<double>	blurred(n0, n1);
+
 	// compute the inverse fourier transform
+	fftw_plan	r = fftw_plan_dft_c2r_2d(n0, n1,
+				af, blurred.pixels, FFTW_ESTIMATE);
 	fftw_execute(r);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse transform computed");
 
@@ -142,6 +145,9 @@ void	Blurr::operator()(const Image<double>& image) {
 	fftw_free(bf);
 	fftw_cleanup();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "blurr computation complete");
+
+	// return the blurred image
+	return blurred;
 }
 
 } // namespace image

@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	PixelTest.cpp 
+	ConvolveTest.cpp 
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
@@ -31,12 +31,14 @@ tests_SOURCES = tests.cpp 						\
 	AnalyzerTest.cpp						\
 	BackgroundTest.cpp						\
 	ConvertingAdapterTest.cpp					\
+	ConvolveTest.cpp						\
 	FITSKeywordTest.cpp						\
 	FITSdateTest.cpp						\
 	FITSwriteTest.cpp						\
 	FITSreadTest.cpp						\
 	FilterTest.cpp							\
 	FWHMTest.cpp							\
+	HSLTest.cpp							\
 	ImageBaseTest.cpp						\
 	ImageIteratorBaseTest.cpp					\
 	ImageLineTest.cpp						\
