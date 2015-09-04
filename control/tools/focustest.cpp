@@ -158,7 +158,7 @@ int	main(int argc, char *argv[]) {
 
 	// get the brightest point in the image
 	Point	centerd = findstar(image, image->getFrame(), 8);
-	ImagePoint	center(lround(centerd.x()), lround(centerd.y()));
+	ImagePoint	center((int)lround(centerd.x()), (int)lround(centerd.y()));
 	double	radius = 20;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "brightest star at %s",
 		center.toString().c_str());

@@ -53,8 +53,8 @@ Exposure	SxCcdM26C::m26cExposure() {
 					m26c_size.width() / 2);
 
 	// adapt the top left corner
-	unsigned int	originy = exposure.frame().origin().x() / 4;
-	unsigned int	originx = exposure.frame().origin().y() * 2;
+	int	originy = exposure.frame().origin().x() / 4;
+	int	originx = exposure.frame().origin().y() * 2;
 	if (m26c.mode().y() > 1) {
 		originy -= originy % 2;
 	}

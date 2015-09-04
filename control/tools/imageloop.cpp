@@ -250,8 +250,8 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	unsigned int	width = 0;
 	unsigned int	height = 0;
-	unsigned int	xoffset = 0;
-	unsigned int	yoffset = 0;
+	int	xoffset = 0;
+	int	yoffset = 0;
 	unsigned int	cameraid = 0;
 	unsigned int	ccdid = 0;
 	double	exposuretime = 0.1;
