@@ -76,7 +76,16 @@ ConvolutionResultPtr	operator*(const ConvolutionResult& a,
 	ComplexMultiplyAdapter	multi(a, b);
 	copy(*result, multi);
 	return ConvolutionResultPtr(result);
-	
+}
+
+ConvolutionResultPtr    operator*(const ConvolutionResultPtr a,
+                                const ConvolutionResult b) {
+	return (*a) * b;
+}
+
+ConvolutionResultPtr    operator*(const ConvolutionResult a,
+                                const ConvolutionResultPtr b) {
+	return a * (*b);
 }
 
 } // namespace image

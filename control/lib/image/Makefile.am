@@ -12,6 +12,7 @@ noinst_LTLIBRARIES = libastroimage.la
 
 libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
+	AiryImage.cpp							\
 	Analyzer.cpp							\
 	Background.cpp							\
 	Blurr.cpp							\
@@ -23,6 +24,7 @@ libastroimage_la_SOURCES = 						\
 	Corrector.cpp							\
 	DarkCorrector.cpp						\
 	Demosaic.cpp							\
+	DiskImage.cpp							\
 	DisplayConverter.cpp						\
 	FITS.cpp							\
 	FITSKeywords.cpp						\
@@ -36,6 +38,7 @@ libastroimage_la_SOURCES = 						\
 	FocusFilterfunc.cpp						\
 	FourierImage.cpp						\
 	Functions.cpp							\
+	GaussImage.cpp							\
 	Histogram.cpp							\
 	HSLBase.cpp							\
 	Image.cpp							\

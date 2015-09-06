@@ -27,6 +27,10 @@ public:
 	void	testPhase();
 	void	testColor();
 	void	testConvolutionResult();
+	void	testAiry();
+	void	testGauss();
+	void	testDisk();
+	void	testUranus();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(ConvolveTest);
@@ -37,6 +41,10 @@ public:
 	CPPUNIT_TEST(testPhase);
 	CPPUNIT_TEST(testColor);
 	CPPUNIT_TEST(testConvolutionResult);
+	CPPUNIT_TEST(testAiry);
+	CPPUNIT_TEST(testGauss);
+	CPPUNIT_TEST(testDisk);
+	CPPUNIT_TEST(testUranus);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -217,6 +225,179 @@ void	ConvolveTest::testConvolutionResult() {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolutionResult() end");
+}
+
+void	ConvolveTest::testAiry() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAiry() begin");
+	AiryImage	a(ImageSize(2048,2048), ImagePoint(1024,1024), 0.044,
+		0.01 * 6.5e-6 / 2.800);
+	Image<double>	*b = new Image<double>(a);
+	ImagePtr	c(b);
+	io::FITSout	out("tmp/airy.fits");
+	out.setPrecious(false);
+	out.write(c);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAiry() end");
+}
+
+void	ConvolveTest::testGauss() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGauss() begin");
+	GaussImage	g(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 18.4 / 3600, 
+				6.5e-6 / 2.800);
+	Image<double>	*b = new Image<double>(g);
+	ImagePtr	c(b);
+	io::FITSout	out("tmp/gauss.fits");
+	out.setPrecious(false);
+	out.write(c);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGauss() end");
+}
+
+static double	scale = 0.1;
+
+void	ConvolveTest::testDisk() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDisk() begin");
+
+	DiskImage	mars(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 25.1 / 3600,
+				scale * 6.5e-6 / 2.800);
+	ImagePtr	marsptr(new Image<double>(mars));
+
+	io::FITSout	marsout("tmp/mars.fits");
+	marsout.setPrecious(false);
+	marsout.write(marsptr);
+		
+	DiskImage	uranus(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 4.1 / 3600,
+				scale * 6.5e-6 / 2.800);
+	ImagePtr	uranusptr(new Image<double>(uranus));
+
+	io::FITSout	uranusout("tmp/uranus.fits");
+	uranusout.setPrecious(false);
+	uranusout.write(uranusptr);
+		
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testDisk() end");
+}
+
+void	ConvolveTest::testUranus() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testUranus() begin");
+	double	resolution = 0.2 * (M_PI / 180) * 18.4 / 3600;
+	double	herschel_improvement = 0.25;
+
+	AiryImage	airy(ImageSize(2048,2048), ImagePoint(1024,1024), 0.075,
+				scale * 6.5e-6 / 2.800);
+	ConvolutionResult	ai(airy, Point(1024, 1024));
+	GaussImage	gauss(ImageSize(2048,2048), ImagePoint(1024,1024),
+				resolution,
+				scale * 6.5e-6 / 2.800);
+	GaussImage	herschel(ImageSize(2048,2048), ImagePoint(1024,1024),
+				herschel_improvement * resolution, 
+				scale * 6.5e-6 / 2.800);
+	DiskImage	mars(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 25.1 / 3600,
+				scale * 6.5e-6 / 2.800);
+	ImagePtr	marsptr(new Image<double>(mars));
+
+	DiskImage	uranus(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 4.1 / 3600,
+				scale * 6.5e-6 / 2.800);
+	ImagePtr	uranusptr(new Image<double>(uranus));
+
+	{
+		ImagePtr	ptr(new Image<double>(airy));
+		io::FITSout	out("tmp/star-airy.fits");
+		out.setPrecious(false);
+		out.write(ptr);
+	}
+	{
+		ConvolutionResult	b(gauss, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * b;
+		ImagePtr	ptr(new Image<double>(gauss));
+		ImagePtr	imageptr = c->image();
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled(new Image<double>(roll));
+		io::FITSout	out("tmp/star-gauss.fits");
+		out.setPrecious(false);
+		out.write(rolled);
+	}
+	{
+		ConvolutionResult	b(herschel, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * b;
+		ImagePtr	ptr(new Image<double>(gauss));
+		ImagePtr	imageptr = c->image();
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled(new Image<double>(roll));
+		io::FITSout	out("tmp/star-herschel.fits");
+		out.setPrecious(false);
+		out.write(rolled);
+	}
+	{
+		ConvolutionResult	a(mars, Point(1024, 1024));
+		ConvolutionResult	b(gauss, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * a * b;
+		ImagePtr	imageptr = c->image();
+#if 0
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled = ImagePtr(new Image<double>(roll));
+#endif
+
+		io::FITSout	out("tmp/mars-gauss.fits");
+		out.setPrecious(false);
+		out.write(imageptr);
+	}
+	{
+		ConvolutionResult	a(mars, Point(1024, 1024));
+		ConvolutionResult	b(herschel, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * a * b;
+		ImagePtr	imageptr = c->image();
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled = ImagePtr(new Image<double>(roll));
+
+		io::FITSout	out("tmp/mars-herschel.fits");
+		out.setPrecious(false);
+		out.write(imageptr);
+	}
+	{
+		ConvolutionResult	a(uranus, Point(1024, 1024));
+		ConvolutionResult	b(gauss, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * a * b;
+		ImagePtr	imageptr = c->image();
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled = ImagePtr(new Image<double>(roll));
+
+		io::FITSout	out("tmp/uranus-gauss.fits");
+		out.setPrecious(false);
+		out.write(imageptr);
+	}
+	{
+		ConvolutionResult	a(uranus, Point(1024, 1024));
+		ConvolutionResult	b(herschel, Point(1024, 1024));
+		ConvolutionResultPtr	c = ai * a * b;
+		ImagePtr	imageptr = c->image();
+		Image<double>	*imagep = dynamic_cast<Image<double>*>(&*imageptr);
+		adapter::RollAdapter<double>	roll(*imagep, ImagePoint(1024, 1024));
+		ImagePtr	rolled = ImagePtr(new Image<double>(roll));
+
+		io::FITSout	out("tmp/uranus-herschel.fits");
+		out.setPrecious(false);
+		out.write(imageptr);
+	}
+		
+#if 0
+	DiskImage	uranus(ImageSize(2048,2048), ImagePoint(1024,1024),
+				(M_PI / 180) * 4.1 / 3600, 6.5e-6 / 2.800);
+	ImagePtr	uranusptr(new Image<double>(uranus));
+
+	io::FITSout	uranusout("tmp/uranus.fits");
+	uranusout.setPrecious(false);
+	uranusout.write(uranusptr);
+#endif
+		
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testUranus() end");
 }
 
 #if 0

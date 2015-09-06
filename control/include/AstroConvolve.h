@@ -67,6 +67,10 @@ ConvolutionResultPtr	operator*(const ConvolutionResult& a,
 				const ConvolutionResult& b);
 ConvolutionResultPtr	operator*(const ConvolutionResultPtr a,
 				const ConvolutionResultPtr b);
+ConvolutionResultPtr	operator*(const ConvolutionResultPtr a,
+				const ConvolutionResult b);
+ConvolutionResultPtr	operator*(const ConvolutionResult a,
+				const ConvolutionResultPtr b);
 
 /**
  * \brief Base class for convolution operators
@@ -80,6 +84,64 @@ public:
 public:
 	FourierImagePtr	operator()(ImagePtr image) const;
 	FourierImagePtr	operator()(FourierImagePtr fourier) const;
+};
+
+/**
+ * \brief Airy disk image
+ */
+class AiryImage : public ConstImageAdapter<double> {
+	ImagePoint	_center;
+	double	_a;
+	double	_k;
+	double	_angularpixelsize; //
+public:
+	AiryImage(const ImageSize& size, const ImagePoint& center, double a,
+		double angularpixelsize,
+		double lambda = 550e-9 /* wavelength in meters */);
+	virtual double	pixel(int x, int y) const;
+};
+
+/**
+ * \brief Gauss disk image
+ */
+class GaussImage : public ConstImageAdapter<double> {
+	ImagePoint	_center;
+	double	_sigma;
+	double	_angularpixelsize; 
+	double	_n;
+public:
+	GaussImage(const ImageSize& size, const ImagePoint& center,
+		double sigma, double angularpixelsize);
+	virtual double	pixel(int x, int y) const;
+};
+ 
+/**
+ * \brief circular disk image
+ */
+class DiskImage : public ConstImageAdapter<double> {
+	ImagePoint	_center;
+	double	_angularpixelsize; 
+	double	_r;
+	double	_interiorvalue;
+public:
+	DiskImage(const ImageSize& size, const ImagePoint& center,
+		double r, double angularpixelsize);
+	virtual double	pixel(int x, int y) const;
+};
+
+/**
+ * \brief ring image
+ */
+class RingImage : public ConstImageAdapter<double> {
+	ImagePoint	_center;
+	double	_angularpixelsize; 
+	double	_r1;
+	double	_r2;
+	double	_interiorvalue;
+public:
+	RingImage(const ImageSize& size, const ImagePoint& center,
+		double r1, double r2, double angularpixelsize);
+	virtual double	pixel(int x, int y) const;
 };
 
 } // namespace image
