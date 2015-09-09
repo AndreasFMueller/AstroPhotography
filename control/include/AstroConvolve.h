@@ -102,9 +102,11 @@ private:
 	double	_weight;
 public:
 	double	weight() const { return _weight; }
+	void	weight(double w) { _weight = w; }
 	double	r(int x, int y) const;
 	CircularImage(const ImageSize& size, const ImagePoint& center,
 		double angularpixelsize, double weight);
+	virtual double	totalweight() const;
 };
 
 /**
@@ -129,7 +131,7 @@ class GaussImage : public CircularImage {
 public:
 	GaussImage(const ImageSize& size, const ImagePoint& center,
 		double sigma, double angularpixelsize,
-		double totalweight = 1.0);
+		double weight = 1.0);
 	virtual double	pixel(int x, int y) const;
 };
  
@@ -141,8 +143,9 @@ class DiskImage : public CircularImage {
 	double	_interiorvalue;
 public:
 	DiskImage(const ImageSize& size, const ImagePoint& center,
-		double r, double angularpixelsize, double totalweight = 1.0);
+		double r, double angularpixelsize, double weight = 1.0);
 	virtual double	pixel(int x, int y) const;
+	virtual double	totalweight() const;
 };
 
 /**
@@ -155,8 +158,9 @@ class RingImage : public CircularImage {
 public:
 	RingImage(const ImageSize& size, const ImagePoint& center,
 		double r_inner, double r_outer, double angularpixelsize,
-		double totalweight = 1.0);
+		double weight = 1.0);
 	virtual double	pixel(int x, int y) const;
+	virtual double	totalweight() const;
 };
 
 } // namespace image

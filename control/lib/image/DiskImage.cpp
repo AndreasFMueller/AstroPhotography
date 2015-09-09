@@ -21,10 +21,10 @@ static inline double	sqr(double x) { return x * x; }
  * \param angularpixelsize	size of a pixel in radians per pixel
  */
 DiskImage::DiskImage(const ImageSize& size, const ImagePoint& center,
-	double r, double angularpixelsize, double totalweight)
-	: CircularImage(size, center, angularpixelsize, totalweight),
+	double r, double angularpixelsize, double weight)
+	: CircularImage(size, center, angularpixelsize, weight),
 	  _r(r) {
-	_interiorvalue = weight() / (M_PI * sqr(r));
+	_interiorvalue = CircularImage::weight() / totalweight();
 }
 
 
@@ -37,6 +37,10 @@ double	DiskImage::pixel(int x, int y) const {
 		return 0;
 	}
 	return _interiorvalue;
+}
+
+double	DiskImage::totalweight() const {
+	return M_PI * sqr(_r);
 }
 
 } // namespace image

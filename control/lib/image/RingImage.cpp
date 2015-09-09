@@ -22,15 +22,18 @@ static inline double	sqr(double x) { return x * x; }
  */
 RingImage::RingImage(const ImageSize& size, const ImagePoint& center,
 	double r_inner, double r_outer, double angularpixelsize,
-	double totalweight)
-	: CircularImage(size, center, angularpixelsize, totalweight),
+	double weight)
+	: CircularImage(size, center, angularpixelsize, weight),
 	  _r_inner(r_inner), _r_outer(r_outer) {
 	if (r_inner >= r_outer) {
 		throw std::range_error("inner radius may not exceed outer radius");
 	}
-	_interiorvalue = weight() / (M_PI * (sqr(r_outer) - sqr(r_inner)));
+	_interiorvalue = CircularImage::weight() / totalweight();
 }
 
+double	RingImage::totalweight() const {
+	return M_PI * (sqr(_r_outer) - sqr(_r_inner));
+}
 
 /**
  * \brief Compute the value of a airy disk pixel
