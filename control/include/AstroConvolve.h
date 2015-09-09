@@ -87,13 +87,32 @@ public:
 };
 
 /**
+ * \brief Base class for rotationally symmetric images
+ */
+class CircularImage : public ConstImageAdapter<double> {
+private:
+	ImagePoint	_center;
+public:
+	const ImagePoint&	center() const { return _center; }
+private:
+	double	_angularpixelsize;
+public:
+	double	angularpixelsize() const { return _angularpixelsize; }
+private:
+	double	_weight;
+public:
+	double	weight() const { return _weight; }
+	double	r(int x, int y) const;
+	CircularImage(const ImageSize& size, const ImagePoint& center,
+		double angularpixelsize, double weight);
+};
+
+/**
  * \brief Airy disk image
  */
-class AiryImage : public ConstImageAdapter<double> {
-	ImagePoint	_center;
+class AiryImage : public CircularImage {
 	double	_a;
 	double	_k;
-	double	_angularpixelsize; //
 public:
 	AiryImage(const ImageSize& size, const ImagePoint& center, double a,
 		double angularpixelsize,
@@ -104,43 +123,39 @@ public:
 /**
  * \brief Gauss disk image
  */
-class GaussImage : public ConstImageAdapter<double> {
-	ImagePoint	_center;
+class GaussImage : public CircularImage {
 	double	_sigma;
-	double	_angularpixelsize; 
 	double	_n;
 public:
 	GaussImage(const ImageSize& size, const ImagePoint& center,
-		double sigma, double angularpixelsize);
+		double sigma, double angularpixelsize,
+		double totalweight = 1.0);
 	virtual double	pixel(int x, int y) const;
 };
  
 /**
  * \brief circular disk image
  */
-class DiskImage : public ConstImageAdapter<double> {
-	ImagePoint	_center;
-	double	_angularpixelsize; 
+class DiskImage : public CircularImage {
 	double	_r;
 	double	_interiorvalue;
 public:
 	DiskImage(const ImageSize& size, const ImagePoint& center,
-		double r, double angularpixelsize);
+		double r, double angularpixelsize, double totalweight = 1.0);
 	virtual double	pixel(int x, int y) const;
 };
 
 /**
  * \brief ring image
  */
-class RingImage : public ConstImageAdapter<double> {
-	ImagePoint	_center;
-	double	_angularpixelsize; 
-	double	_r1;
-	double	_r2;
+class RingImage : public CircularImage {
+	double	_r_inner;
+	double	_r_outer;
 	double	_interiorvalue;
 public:
 	RingImage(const ImageSize& size, const ImagePoint& center,
-		double r1, double r2, double angularpixelsize);
+		double r_inner, double r_outer, double angularpixelsize,
+		double totalweight = 1.0);
 	virtual double	pixel(int x, int y) const;
 };
 

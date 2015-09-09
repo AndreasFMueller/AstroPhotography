@@ -19,10 +19,10 @@ namespace image {
  * \param angularpixelsize	size of a pixel in radians per pixel
  */
 GaussImage::GaussImage(const ImageSize& size, const ImagePoint& center,
-	double sigma, double angularpixelsize)
-	: ConstImageAdapter<double>(size), _center(center), _sigma(sigma),
-	   _angularpixelsize(angularpixelsize) {
-	_n = 1 / (2 * M_PI * (_sigma / _angularpixelsize));
+	double sigma, double angularpixelsize, double totalweight)
+	: CircularImage(size, center, angularpixelsize, totalweight),
+	  _sigma(sigma) {
+	_n = 1 / (2 * M_PI * (_sigma / CircularImage::angularpixelsize()));
 }
 
 static inline double	sqr(double x) { return x * x; }
@@ -31,9 +31,8 @@ static inline double	sqr(double x) { return x * x; }
  * \brief Compute the value of a airy disk pixel
  */
 double	GaussImage::pixel(int x, int y) const {
-	double	r = hypot(x - _center.x(), y - _center.y());
-	r = r * _angularpixelsize / _sigma;
-	return exp(-sqr(r)) * _n;
+	double	rr = r(x, y) * angularpixelsize() / _sigma;
+	return weight() * exp(-sqr(rr)) * _n;
 }
 
 } // namespace image
