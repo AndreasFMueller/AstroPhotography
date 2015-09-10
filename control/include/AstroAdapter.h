@@ -1512,6 +1512,48 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+// Various noise adapters
+//////////////////////////////////////////////////////////////////////
+class NoiseAdapter : public ConstImageAdapter<double> {
+public:
+	NoiseAdapter(const ImageSize& size);
+};
+
+class DarkNoiseAdapter : public NoiseAdapter {
+private:
+	int	_electrons_per_pixel;
+private:
+	double	_lambda;
+	int	poisson() const;
+	int	poisson2() const;
+	double	*levels;
+	int	nlevels;
+	void	setup();
+public:
+	/*
+	 * \param darkcurrent	If the dark current is known in electrons
+	 *			per pixel and second, multiply by the exposure
+	 *			time
+	 */
+	DarkNoiseAdapter(const ImageSize& size, double temperature,
+		double darkcurrent, int electrons_per_pixel);
+	DarkNoiseAdapter(const ImageSize& size, double lambda,
+		int electrons_per_pixel);
+	virtual ~DarkNoiseAdapter();
+	virtual double	pixel(int x, int y) const;
+};
+
+class GaussNoiseAdapter : public NoiseAdapter {
+	double	_mu;
+	double	_sigma;
+	double	_limit;
+public:
+	GaussNoiseAdapter(const ImageSize& size, double mu, double sigma,
+		double limit = 1);
+	virtual double	pixel(int x, int y) const;
+};
+
 #if 0
 //////////////////////////////////////////////////////////////////////
 // Pixel interpolation adapter

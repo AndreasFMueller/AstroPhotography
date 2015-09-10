@@ -163,6 +163,17 @@ public:
 	virtual double	totalweight() const;
 };
 
+/**
+ * \brief amplifier glow image
+ */
+class AmplifierGlowImage : public CircularImage {
+	double	_r;
+public:
+	AmplifierGlowImage(const ImageSize& size, const ImagePoint& center,
+		double angularpixelsize, double weight, double r);
+	virtual double	pixel(int x, int y) const;
+};
+
 } // namespace image
 } // namespace astro
 

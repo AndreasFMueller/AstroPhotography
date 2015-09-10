@@ -4,10 +4,12 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroAdapter.h>
+#include <AstroConvolve.h>
 #include <AstroTransform.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <AstroIO.h>
 #include <AstroDebug.h>
 #include <iostream>
 
@@ -28,6 +30,7 @@ public:
 	void	testShift();
 	void	testRoll();
 	void	testRollAdapter();
+	void	testAmplifier();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(AdapterTest);
@@ -37,6 +40,7 @@ public:
 	CPPUNIT_TEST(testShift);
 	CPPUNIT_TEST(testRoll);
 	CPPUNIT_TEST(testRollAdapter);
+	CPPUNIT_TEST(testAmplifier);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -191,6 +195,18 @@ void	AdapterTest::testRollAdapter() {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRollAdapter() end");
+}
+
+void	AdapterTest::testAmplifier() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAmplifier() begin");
+	ImageSize	size(640, 480);
+	ImagePoint	center(-20, 400);
+	AmplifierGlowImage	amplifier(size, center, 6.5e-6, 1, 0.002);
+	ImagePtr	image(new Image<double>(amplifier));
+	io::FITSout	out("tmp/amplifier.fits");
+	out.setPrecious("false");
+	out.write(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testAmplifier() end");
 }
 
 #if 0

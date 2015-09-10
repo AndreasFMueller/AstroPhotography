@@ -13,6 +13,7 @@ noinst_LTLIBRARIES = libastroimage.la
 libastroimage_la_SOURCES = 						\
 	Adapters.cpp							\
 	AiryImage.cpp							\
+	AmplifierGlowImage.cpp						\
 	Analyzer.cpp							\
 	Background.cpp							\
 	Blurr.cpp							\
@@ -24,6 +25,7 @@ libastroimage_la_SOURCES = 						\
 	ConvolutionResult.cpp						\
 	Corrector.cpp							\
 	DarkCorrector.cpp						\
+	DarkNoiseAdapter.cpp						\
 	Demosaic.cpp							\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
@@ -40,6 +42,7 @@ libastroimage_la_SOURCES = 						\
 	FourierImage.cpp						\
 	Functions.cpp							\
 	GaussImage.cpp							\
+	GaussNoiseAdapter.cpp						\
 	Histogram.cpp							\
 	HSLBase.cpp							\
 	Image.cpp							\
@@ -61,6 +64,7 @@ libastroimage_la_SOURCES = 						\
 	Metavalue.cpp							\
 	MinRadius.cpp							\
 	MosaicType.cpp							\
+	NoiseAdapter.cpp						\
 	PhaseCorrelator.cpp						\
 	Pixel.cpp							\
 	Projection.cpp							\
