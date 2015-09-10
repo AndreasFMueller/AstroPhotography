@@ -10,6 +10,14 @@ namespace adapter {
 
 NoiseAdapter::NoiseAdapter(const ImageSize& size)
 	: ConstImageAdapter(size) {
+	_background = NULL;
+}
+
+double	NoiseAdapter::pixel(int x, int y) const {
+	if (_background) {
+		return _background->pixel(x, y);
+	}
+	return 0.;
 }
 
 } // namespace adapter

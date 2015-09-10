@@ -45,8 +45,8 @@ void	DarkNoiseAdapter::setup() {
 	while (k < nlevels) {
 		s += p;
 		levels[k] = norm * s;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "levels[%d] = %.16f",
-			k, levels[k]);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "levels[%d] = %.16f",
+		//	k, levels[k]);
 		if (k > 1) {
 			if (levels[k] >= 1.0) {
 				nlevels = k + 1;
@@ -107,8 +107,9 @@ int	DarkNoiseAdapter::poisson() const {
 	return k;
 }
 
-double	DarkNoiseAdapter::pixel(int /* x */, int /* y */) const {
-	return poisson2() / (double)_electrons_per_pixel;
+double	DarkNoiseAdapter::pixel(int x, int y) const {
+	return poisson2() / (double)_electrons_per_pixel
+		+ NoiseAdapter::pixel(x, y);
 }
 
 } // namespace adapter

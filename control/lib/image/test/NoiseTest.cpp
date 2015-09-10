@@ -24,12 +24,14 @@ public:
 	void	testAverage();
 	void	testSBIG16803();
 	void	testGaussNoise();
+	void	testBackground();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(NoiseTest);
 	CPPUNIT_TEST(testAverage);
 	CPPUNIT_TEST(testSBIG16803);
 	CPPUNIT_TEST(testGaussNoise);
+	CPPUNIT_TEST(testBackground);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -89,6 +91,29 @@ void	NoiseTest::testGaussNoise() {
 	out.setPrecious(false);
 	out.write(gauss);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testGaussNoise() end");
+}
+
+void	NoiseTest::testBackground() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBackground() begin");
+
+	ImageSize	size(2000, 2000);
+
+	DarkNoiseAdapter	darknoise(size, 273.13, 100, 1000);
+
+	double	mu = 0.1;
+	double	sigma = 0.001;
+	GaussNoiseAdapter	gaussnoise(size, mu, sigma);
+	gaussnoise.background(&darknoise);
+
+	ImagePtr	background(new Image<double>(gaussnoise));
+	double	m = astro::image::filter::mean(background);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mean: %f", m);
+	CPPUNIT_ASSERT(fabs(m - 0.2) < 0.01);
+	io::FITSout	out("tmp/backgroundnoise.fits");
+	out.setPrecious(false);
+	out.write(background);
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testBackground() end");
 }
 
 #if 0

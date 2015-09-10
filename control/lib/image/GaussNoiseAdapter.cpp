@@ -49,16 +49,17 @@ static double	ierf(double y) {
 	return x;
 }
 
-double	GaussNoiseAdapter::pixel(int /* x */, int /* y */) const {
+double	GaussNoiseAdapter::pixel(int x, int y) const {
+	double	v = NoiseAdapter::pixel(x, y);
 	double	value = 2 * (random() / (double)2147483647) - 1;
-	double	x = _mu  + _sigma * ierf(value);
-	if (x < 0) {
-		return x;
+	v += _mu  + _sigma * ierf(value);
+	if (v < 0) {
+		return v;
 	}
-	if (x > _limit) {
+	if (v > _limit) {
 		return _limit;
 	}
-	return x;
+	return v;
 }
 
 } // namespace adapter

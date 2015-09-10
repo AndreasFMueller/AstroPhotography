@@ -1516,8 +1516,12 @@ public:
 // Various noise adapters
 //////////////////////////////////////////////////////////////////////
 class NoiseAdapter : public ConstImageAdapter<double> {
+	NoiseAdapter	*_background;
+public:
+	void	background(NoiseAdapter *b) { _background = b; }
 public:
 	NoiseAdapter(const ImageSize& size);
+	double	pixel(int x, int y) const;
 };
 
 class DarkNoiseAdapter : public NoiseAdapter {
