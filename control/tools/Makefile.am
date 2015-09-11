@@ -22,7 +22,7 @@ bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
 	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
 	devicemapper astroinstrument astromount astroproject rescale \
-	gammacorrect
+	gammacorrect convolve
 
 noinst_PROGRAMS = guiderport 
 
@@ -137,6 +137,10 @@ astromount_LDADD = -L$(top_builddir)/lib -lastro
 guiderport_SOURCES = guiderport.cpp
 guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 guiderport_LDADD = -L$(top_builddir)/lib -lastro
+
+convolve_SOURCES = convolve.cpp
+convolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+convolve_LDADD = -L$(top_builddir)/lib -lastro
 
 # The looptest shows how to call imageloop to create a video for a
 # full night with the Starlight Express Oculus all sky camera.

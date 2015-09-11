@@ -18,6 +18,7 @@ libastroimage_la_SOURCES = 						\
 	Background.cpp							\
 	Blurr.cpp							\
 	CalibrationFactory.cpp						\
+	CentralProjection.cpp						\
 	CircularImage.cpp						\
 	Clamper.cpp							\
 	ConnectedComponent.cpp						\
@@ -72,6 +73,7 @@ libastroimage_la_SOURCES = 						\
 	Radon.cpp							\
 	Residual.cpp							\
 	RingImage.cpp							\
+	SphereProjection.cpp						\
 	Stacker.cpp							\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\

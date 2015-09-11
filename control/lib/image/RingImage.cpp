@@ -39,7 +39,7 @@ double	RingImage::totalweight() const {
  * \brief Compute the value of a airy disk pixel
  */
 double	RingImage::pixel(int x, int y) const {
-	double	rr = angularpixelsize() * r(x, y);
+	double	rr = r(x, y);
 	if ((rr > _r_outer) || (rr < _r_inner)) {
 		return 0;
 	}

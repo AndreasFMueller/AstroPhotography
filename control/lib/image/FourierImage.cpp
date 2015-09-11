@@ -32,15 +32,17 @@ namespace image {
  * All this is unimportant as long as we don't look at the fourier transform
  * as an image in its own right. Only then does it become important how we
  * interpret the coordinates.
+ *
+ * \param size	size of the image to be fourier transformed
  */
-ImageSize	FourierImage::fsize(const ImageSize& s) {
-	int	w = s.width();
-	int	h = s.height();
+ImageSize	FourierImage::fsize(const ImageSize& size) {
+	int	w = size.width();
+	int	h = size.height();
 	int	n0 = h;
 	int	n1 = w;
 	ImageSize	result(2 * (1 + n1 / 2), n0);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "fourier image size %s -> %s",
-		s.toString().c_str(), result.toString().c_str());
+		size.toString().c_str(), result.toString().c_str());
 	return result;
 }
 
@@ -63,6 +65,8 @@ void	FourierImage::fourier(const Image<double>& image) {
 	// used in fftw3 and in our image class)
 	int	n0 = image.size().height();
 	int	n1 = image.size().width();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fourier transform dimensions: %d x %d",
+		n0, n1);
 
 	// compute the fourier transform
 	fftw_plan	p = fftw_plan_dft_r2c_2d(n0, n1, image.pixels,
@@ -70,6 +74,7 @@ void	FourierImage::fourier(const Image<double>& image) {
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	fftw_cleanup();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "fourier transform completed");
 
 #if 0
 	// renormalize
@@ -99,6 +104,16 @@ FourierImage::FourierImage(const Image<double>& image)
 	: Image<double>(FourierImage::fsize(image.size())),
 	  _orig(image.size()) {
 	fourier(image);
+}
+
+/**
+ * \brief Construct a FourierTransform from an image adapter
+ */
+FourierImage::FourierImage(const ConstImageAdapter<double>& image)
+	: Image<double>(FourierImage::fsize(image.getSize())),
+	  _orig(image.getSize()) {
+	Image<double>	i(image);
+	fourier(i);
 }
 
 /**
@@ -133,12 +148,14 @@ ImagePtr	FourierImage::inverse() const {
 	Image<double>	*image = new Image<double>(_orig);
 	int	n0 = _orig.height();
 	int	n1 = _orig.width();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse transform, (%d,%d)", n0, n1);
 	// compute the fourier transform
 	fftw_plan	p = fftw_plan_dft_c2r_2d(n0, n1, (fftw_complex *)pixels,
 				image->pixels, FFTW_ESTIMATE);
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	fftw_cleanup();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "inverse fourier transform complete");
 
 	// normalize to the dimensions of the domain
 	double	value = 1. / (n0 * n1);

@@ -90,18 +90,41 @@ public:
 };
 
 /**
+ * \brief SphereProjection base class
+ */
+class SphereProjection {
+protected:
+	UnitVector	_center;
+	UnitVector	_right;
+	UnitVector	_up;
+public:
+	const UnitVector&	center() const { return _center; }
+	const UnitVector&	right() const { return _right; }
+	const UnitVector&	up() const { return _up; }
+public:
+	SphereProjection(const RaDec& center);
+	virtual Point	operator()(const RaDec& p) const = 0;
+};
+
+/**
  * \brief Stereographic projection map
  */
-class StereographicProjection {
-	UnitVector	center;
-	UnitVector	right;
-	UnitVector	up;
+class StereographicProjection : public SphereProjection {
 public:
 	StereographicProjection(const RaDec& _center);
 	virtual Point	operator()(const RaDec& p) const;
 };
 
-} // namespace project
+/**
+ * \brief Central projection map
+ */
+class CentralProjection : public SphereProjection {
+public:
+	CentralProjection(const RaDec& center);
+	virtual Point	operator()(const RaDec& p) const;
+};
+
+} // namespace transform
 } // namespace image
 } // namespace astro
 

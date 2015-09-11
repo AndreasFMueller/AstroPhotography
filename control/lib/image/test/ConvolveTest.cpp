@@ -59,9 +59,9 @@ void	ConvolveTest::tearDown() {
 
 void	ConvolveTest::testConstructor() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConstructor() begin");
-	Image<double>	in(100, 101);
+	Image<double>	in(100, 161);
 	for (int x = 0; x < 100; x++) {
-		for (int y = 0; y < 101; y++) {
+		for (int y = 0; y < 161; y++) {
 			in.pixel(x,y) = (x + y) % 256;
 		}
 	}
@@ -69,7 +69,7 @@ void	ConvolveTest::testConstructor() {
 	ImagePtr	img = fimage.inverse();
 	Image<double>	*inverse = dynamic_cast<Image<double>*>(&*img);
 	for (int x = 0; x < 100; x++) {
-		for (int y = 0; y < 101; y++) {
+		for (int y = 0; y < 161; y++) {
 #if 0
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d: %f %f %f",
 				x, y, in.pixel(x,y), inverse->pixel(x,y),
@@ -84,8 +84,8 @@ void	ConvolveTest::testConstructor() {
 
 void	ConvolveTest::testConvolution() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolution() begin");
-	Image<double>	in(100, 101);
-	Image<double>	psf(100, 101);
+	Image<double>	in(100, 161);
+	Image<double>	psf(100, 161);
 	for (size_t i = 0; i < in.size().getPixels(); i++) {
 		in.pixels[i] = 0.;
 		psf.pixels[i] = 0.;
@@ -103,11 +103,11 @@ void	ConvolveTest::testConvolution() {
 	ImagePtr	img = result->inverse();
 	Image<double>	*image = dynamic_cast<Image<double>*>(&*img);
 	for (int x = 0; x < 100; x++) {
-		for (int y = 0; y < 101; y++) {
+		for (int y = 0; y < 161; y++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d %f", x, y,
 				image->pixel(x,y));
 			if (((49 <= x) && (x <= 51) && (49 <= y) && (y <= 51))
-				|| ((79 <= x) && (x <= 81) && (28 <= y) && (y <= 30))) {
+				|| ((79 <= x) && (x <= 81) && (129 <= y) && (y <= 131))) {
 
 				CPPUNIT_ASSERT(fabs(image->pixel(x, y) - 1) < 0.1);
 			} else {

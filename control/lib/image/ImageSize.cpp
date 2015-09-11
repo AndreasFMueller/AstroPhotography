@@ -35,6 +35,10 @@ ImageSize::ImageSize(const std::string& sizespec) {
 	}
 	_width = std::stoi(sizespec.substr(0, offset));
 	_height = std::stoi(sizespec.substr(offset + 1));
+	if ((_width < 0) || (_height < 0)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "negative image dimensions");
+		throw std::runtime_error("negative image dimensions");
+	}
 }
 
 /**

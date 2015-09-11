@@ -15,6 +15,27 @@ namespace astro {
 namespace catalog {
 
 /**
+ * \brief Default constructor for the ImageGeometry
+ */
+ImageGeometry::ImageGeometry() : ImageSize(640, 480) {
+	_focallength = 0.100;
+	_pixelsize = 0.000010;
+	_aperture = 0.010;
+}
+
+/**
+ * \brief General Constructor 
+ *
+ * This constructor constructs a f/10 lens geometry, if that is not
+ * correct, then set the aperture to correct
+ */
+ImageGeometry::ImageGeometry(const ImageSize& size, double focallength,
+	double pixelsize)
+	: ImageSize(size), _pixelsize(pixelsize), _focallength(focallength)  {
+	_aperture = _focallength / 10;
+}
+
+/**
  * \brief Add geometry information to an image
  *
  * \param image		image to add the meta data to
@@ -58,14 +79,14 @@ ImageGeometry::ImageGeometry(const ImageBase& image)
  * \brief Get the angular width of the rectangle belonging to this geometry
  */
 Angle	ImageGeometry::rawidth() const {
-        return Angle(width() * _pixelsize / _focallength);
+        return Angle(width() * angularpixelsize());
 }
 
 /**
  * \brief Get the angular height of the rectangle belonging to this geometry
  */
 Angle	ImageGeometry::decheight() const {
-        return Angle(height() * _pixelsize / _focallength);
+        return Angle(height() * angularpixelsize());
 }
 
 /**
@@ -82,6 +103,13 @@ std::string	ImageGeometry::toString() const {
 Point	ImageGeometry::coordinates(const Point& a) const {
 	Point	relative = (a - center());
 	return Point(2 * relative.x() / width(), 2 * relative.y() / height());
+}
+
+/**
+ * \brief compute angular dimensions of a pixel
+ */
+double	ImageGeometry::angularpixelsize() const {
+	return _pixelsize / _focallength;
 }
 
 } // namespace catalog

@@ -15,7 +15,7 @@ AmplifierGlowImage::AmplifierGlowImage(const ImageSize& size,
 }
 
 double	AmplifierGlowImage::pixel(int x, int y) const {
-	double	value = 0.5 * weight() * _r / (angularpixelsize() * r(x, y));
+	double	value = 0.5 * weight() * _r / r(x, y);
 	if (value > weight()) {
 		return weight();
 	}

@@ -14,13 +14,7 @@ namespace transform {
  * \brief Construct a stereographic projection object
  */
 StereographicProjection::StereographicProjection(const RaDec& _center)
-	: center(_center) {
-	UnitVector	north(RaDec::north_pole);
-	right = center.cross(north);
-	up = right.cross(center);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "center: %s", center.toString().c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "right: %s", right.toString().c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "up: %s", up.toString().c_str());
+	: SphereProjection(_center) {
 }
 
 /**
@@ -28,12 +22,12 @@ StereographicProjection::StereographicProjection(const RaDec& _center)
  */
 Point	StereographicProjection::operator()(const RaDec& x) const {
 	UnitVector	X(x);
-	double	lambda = 1. / (1 + X * center);
+	double	lambda = 1. / (1 + X * center());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "lambda = %f", lambda);
-	Vector	v =  X * lambda + center * (lambda - 1);
-	return Point(v * right, v * up);
+	Vector	v =  X * lambda + center() * (lambda - 1);
+	return Point(v * right(), v * up());
 }
 
-} // namespace project
+} // namespace transform
 } // namespace image
 } // namespace astro

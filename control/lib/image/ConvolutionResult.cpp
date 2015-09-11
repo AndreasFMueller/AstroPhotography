@@ -19,6 +19,11 @@ ConvolutionResult::ConvolutionResult(const Image<double>& image,
 	: FourierImage(image), _center(center) {
 }
 
+ConvolutionResult::ConvolutionResult(const ConstImageAdapter<double>& image,
+	const Point& center)
+	: FourierImage(image), _center(center) {
+}
+
 ConvolutionResult::ConvolutionResult(const ImagePtr image,
 	const Point& center)
 	: FourierImage(image), _center(center) {

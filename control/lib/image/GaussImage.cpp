@@ -31,7 +31,7 @@ static inline double	sqr(double x) { return x * x; }
  * \brief Compute the value of a airy disk pixel
  */
 double	GaussImage::pixel(int x, int y) const {
-	double	rr = r(x, y) * angularpixelsize() / _sigma;
+	double	rr = r(x, y) / _sigma;
 	return weight() * exp(-sqr(rr)) * _n;
 }
 

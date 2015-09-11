@@ -40,6 +40,8 @@ libastrocatalogs_la_SOURCES =						\
 	CatalogFactory.cpp						\
 	CatalogIterator.cpp						\
 	Chart.cpp							\
+	ChartFactory.cpp						\
+	ChartFactoryBase.cpp						\
 	ConditionIterator.cpp						\
 	CutoverConditions.cpp						\
 	DatabaseBackend.cpp						\
@@ -55,6 +57,8 @@ libastrocatalogs_la_SOURCES =						\
 	IteratorImplementation.cpp					\
 	MappedFile.cpp							\
 	NGCIC.cpp							\
+	PointSpreadFunctionAdapter.cpp					\
+	PointSpreadFunction.cpp						\
 	SkyRectangle.cpp						\
 	SkyWindow.cpp							\
 	Star.cpp							\

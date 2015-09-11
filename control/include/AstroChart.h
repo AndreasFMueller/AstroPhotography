@@ -9,6 +9,7 @@
 #include <AstroCoordinates.h>
 #include <AstroCatalog.h>
 #include <AstroProjection.h>
+#include <AstroConvolve.h>
 
 namespace astro {
 namespace catalog {
@@ -18,19 +19,32 @@ namespace catalog {
  */
 class ImageGeometry : public ImageSize {
 	double	_pixelsize;
+public:
+	double	pixelsize() const { return _pixelsize; }
+	void	pixelsize(double p) { _pixelsize = p; }
+private:
 	double	_focallength;
 public:
-	ImageGeometry(const ImageSize& size, double focallength,
-		double pixelsize) : ImageSize(size), _pixelsize(pixelsize),
-			_focallength(focallength)  { }
-	ImageGeometry(const ImageBase& image);
-	double	pixelsize() const { return _pixelsize; }
 	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
+private:
+	double	_aperture;
+public:
+	double	aperture() const { return _aperture; }
+	void	aperture(double o) { _aperture = o; }
+public:
+	ImageGeometry();
+	ImageGeometry(const ImageSize& size, double focallength,
+		double pixelsize);
+	ImageGeometry(const ImageBase& image);
 	void	addMetadata(ImageBase& image) const;
 	Angle	rawidth() const;
 	Angle	decheight() const;
 	virtual std::string	toString() const;
 	Point	coordinates(const Point& a) const;
+	double	angularpixelsize() const;
+	double	resolutionangle() const;
+	double	f() const { return _aperture / _focallength; }
 };
 
 /**
@@ -83,7 +97,22 @@ friend class ChartFactory;
  */
 class PointSpreadFunction {
 public:
-	virtual double	operator()(double r, double mag) const = 0;
+	virtual double	operator()(double r) const = 0;
+};
+
+/**
+ * \brief Dirac Point spread function
+ */
+class DiracPointSpreadFunction : public PointSpreadFunction {
+public:
+	DiracPointSpreadFunction() { }
+	/**
+	 * \brief Point spread function
+	 *
+	 * The point spread function is the probability distribution
+	 * of the light depending on the angular distance from the point
+	 */
+	virtual double operator()(double r) const;
 };
 
 /**
@@ -93,38 +122,44 @@ class CirclePointSpreadFunction : public PointSpreadFunction {
 	double	_maxradius;
 public:
 	CirclePointSpreadFunction(double maxradius) : _maxradius(maxradius) { }
-	virtual double	operator()(double r, double mag) const;
+	virtual double	operator()(double r) const;
 };
 
 /**
  * \brief The point spread function for an image dominated by diffraction
  */
 class DiffractionPointSpreadFunction : public PointSpreadFunction {
-	double	_aperture;
 	double	_xfactor;
 public:
-	DiffractionPointSpreadFunction(const ImageGeometry& geometry,
-		double aperture);
-	virtual double	operator()(double r, double mag) const;
+	DiffractionPointSpreadFunction(const ImageGeometry& geometry);
+	virtual double	operator()(double r) const;
 };
 
 /**
  * \brief The point spread function for an image dominated by turbulence
  */
 class TurbulencePointSpreadFunction : public PointSpreadFunction {
+	double	_norm;
 	double	_turbulence;
 public:
-	TurbulencePointSpreadFunction(double turbulence = 2.)
-		: _turbulence(turbulence) {
-	}
-	virtual double	operator()(double r, double mag) const;
+	TurbulencePointSpreadFunction(double turbulence = 2.);
+	virtual double	operator()(double r) const;
+};
+
+class PointSpreadFunctionAdapter : public CircularImage {
+	const PointSpreadFunction&	_pointspreadfunction;
+public:
+	PointSpreadFunctionAdapter(const ImageSize& size,
+		const ImagePoint& center, double angularpixelsize,
+		const PointSpreadFunction& pointspreadfunction);
+	virtual double	pixel(int x, int y) const;
 };
 
 class ChartFactoryBase {
 // parameters valid for all images
 protected:
 	CatalogPtr	_catalog;
-	PointSpreadFunction&	pointspreadfunction;
+	const PointSpreadFunction&	pointspreadfunction;
 private:
 	double	_limit_magnitude;
 public:
@@ -136,24 +171,18 @@ public:
 	double	scale() const { return _scale; }
 	void	scale(double s) { _scale = s; }
 private:
-	double	_maxradius;
-public:
-	unsigned int	maxradius() const { return _maxradius; }
-	void	maxradius(unsigned int m) { _maxradius = m; }
-private:
 	bool	_logarithmic;
 public:
 	bool	logarithmic() const { return _logarithmic; }
 	void	logarithmic(bool l) { _logarithmic = l; }
 public:
 	// constructors
-	ChartFactoryBase(CatalogPtr catalog, PointSpreadFunction& psf,
-		double limit_magnitude = 16,
-		double scale = 1, double maxradius = 7,
+	ChartFactoryBase(CatalogPtr catalog, const PointSpreadFunction& psf,
+		double limit_magnitude = 16, double scale = 1,
 		bool logarithmic = false)
 		: _catalog(catalog), pointspreadfunction(psf),
 		  _limit_magnitude(limit_magnitude),
-		  _scale(scale), _maxradius(maxradius),
+		  _scale(scale),
 		  _logarithmic(logarithmic) {
 	}
 
@@ -161,6 +190,8 @@ protected:
 	void	draw(Image<double>& image, const Point& p,
 			const Star& star) const;
 	void	limit(Image<double>& image, double limit) const;
+	void	spread(Image<double>& image, int morepixels,
+			const ImageGeometry& geometry) const;
 };
 
 /**
@@ -171,12 +202,11 @@ protected:
 class ChartFactory : public ChartFactoryBase {
 public:
 	// constructors
-	ChartFactory(CatalogPtr catalog, PointSpreadFunction& psf,
-		double limit_magnitude = 16,
-		double scale = 1, double maxradius = 7,
+	ChartFactory(CatalogPtr catalog, const PointSpreadFunction& psf,
+		double limit_magnitude = 16, double scale = 1,
 		bool logarithmic = false)
 		: ChartFactoryBase(catalog, psf, limit_magnitude, scale,
-		  maxradius, logarithmic) {
+		  logarithmic) {
 	}
 
 	// functions needed to produce a chart
@@ -222,12 +252,12 @@ friend class StereographicChartFactory;
  */
 class StereographicChartFactory : public ChartFactoryBase {
 public:
-	StereographicChartFactory(CatalogPtr catalog, PointSpreadFunction& psf,
-		double limit_magnitude = 16,
-		double scale = 1, double maxradius = 7,
+	StereographicChartFactory(CatalogPtr catalog,
+		const PointSpreadFunction& psf, double limit_magnitude = 16,
+		double scale = 1,
 		bool logarithmic = false)
 		: ChartFactoryBase(catalog, psf, limit_magnitude, scale,
-		  maxradius, logarithmic) {
+		  logarithmic) {
 	}
 
 	StereographicChart	chart(const RaDec& center,

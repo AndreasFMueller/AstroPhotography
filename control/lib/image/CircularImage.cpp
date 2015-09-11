@@ -16,7 +16,7 @@ CircularImage::CircularImage(const ImageSize& size, const ImagePoint& center,
 }
 
 double	CircularImage::r(int x, int y) const {
-	return hypot(x - _center.x(), y - _center.y());
+	return hypot(x - _center.x(), y - _center.y()) * angularpixelsize();
 }
 
 double	CircularImage::totalweight() const {

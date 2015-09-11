@@ -36,9 +36,8 @@ static inline double	sqr(double x) { return x * x; }
 double	AiryImage::pixel(int x, int y) const {
 	double	rr = r(x, y);
 	if (rr == 0) {
-		rr = 0.1;
+		rr = 0.0001;
 	}
-	rr *= angularpixelsize();
 	double	X = _k * _a * rr;
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d -> %f", x, y, X);
 	return weight() * sqr(j1(X) / X);

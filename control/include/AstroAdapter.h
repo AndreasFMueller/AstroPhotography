@@ -132,6 +132,9 @@ WindowAdapter<Pixel>::WindowAdapter(const ConstImageAdapter<Pixel>& _image,
 	const ImageRectangle& _frame)
 	: ConstImageAdapter<Pixel>(_frame.size()),
 	  image(_image), frame(_frame) {
+	if (!_frame.fits(_image.getSize())) {
+		throw std::range_error("window extends beyond image boundary");
+	}
 }
 
 /**
@@ -202,7 +205,7 @@ public:
 		if (y < _offset.y()) {
 			return _outer.pixel(x, y);
 		}
-		ImageSize&	size = ConstImageAdapter<Pixel>::getSize();
+		const ImageSize& size = ConstImageAdapter<Pixel>::getSize();
 		if (x >= (size.width() + _offset.x())) {
 			return _outer.pixel(x, y);
 		}
@@ -226,14 +229,15 @@ public:
 		: ConstImageAdapter<Pixel>(size), _offset(offset),
 		  _image(image) {
 	}
-	const Pixel	pixel(int x, int y) const {
+	Pixel	pixel(int x, int y) const {
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%d,%d", x, y);
 		if (x < _offset.x()) {
 			return Pixel(0);
 		}
 		if (y < _offset.y()) {
 			return Pixel(0);
 		}
-		ImageSize&	size = ConstImageAdapter<Pixel>::getSize();
+		const ImageSize& size = _image.getSize();
 		if (x >= size.width() + _offset.x()) {
 			return Pixel(0);
 		}

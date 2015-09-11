@@ -37,6 +37,15 @@ StereographicChart	StereographicChartFactory::chart(const RaDec& center,
 	// draw all the stars
 	draw(*(chart._image), projection, stars);
 
+	// apply point spread function
+	// XXX for the spread function we need the geometry, but we don't have
+	//     that in this case, so we must compute the geometry from
+	//     from the data we have first
+	//spread(*chart._image, 100, geometry)
+
+	// limit
+	limit(*chart._image, 1.);
+
 	// give the chart back
 	return chart;
 }
@@ -60,7 +69,6 @@ void	StereographicChartFactory::draw(Image<double>& image,
 	for (s = stars.begin(); s != stars.end(); s++) {
 		draw(image, projection, *s);
 	}
-	limit(image, 1.);
 }
 
 void	StereographicChartFactory::draw(Image<double>& image,

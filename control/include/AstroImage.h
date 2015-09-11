@@ -146,6 +146,7 @@ public:
 	// oeprators
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
+	bool	fits(const ImageSize& size) const;
 	bool	operator==(const ImageRectangle& other) const;
 	const ImagePoint&	lowerLeftCorner() const;
 	ImagePoint	lowerRightCorner() const;
@@ -581,10 +582,16 @@ public:
 		: ImageBase(_w, _h), ImageAdapter<Pixel>(ImageSize(_w, _h)) {
 		if (p) {
 			pixels = p;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "taking ownership of "
+				"%d pixels for image %s at %p",
+				frame.size().getPixels(),
+				frame.size().toString().c_str(), pixels);
 		} else {
 			pixels = new Pixel[frame.size().getPixels()];
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				frame.size().getPixels(), pixels);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"alloc %d pixels for image %s at %p",
+				frame.size().getPixels(),
+				frame.size().toString().c_str(), pixels);
 		}
 	}
 
@@ -605,10 +612,16 @@ public:
 		: ImageBase(size), ImageAdapter<Pixel>(size) {
 		if (p) {
 			pixels = p;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "taking ownership of "
+				"%d pixels for image %s at %p",
+				frame.size().getPixels(),
+				frame.size().toString().c_str(), pixels);
 		} else {
 			pixels = new Pixel[size.getPixels()];
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d pixels at %p",
-				size.getPixels(), pixels);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"alloc %d pixels for image %s at %p",
+				size.getPixels(),
+				size.toString().c_str(), pixels);
 		}
 	}
 
@@ -624,6 +637,9 @@ public:
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
 		pixels = new Pixel[frame.size().getPixels()];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
+			frame.size().toString().c_str(),
+			frame.size().getPixels(), pixels);
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
 				pixel(x, y) = adapter.pixel(x, y);
@@ -634,16 +650,18 @@ public:
 	/**
 	 * \brief	Copy an image from a different pixel type
 	 *
-	 * \param
+	 * \param other	image to copy
  	 */
 	template<typename srcPixel>
 	Image<Pixel>(const Image<srcPixel>& other)
 		: ImageBase(other.size()),
 		  ImageAdapter<Pixel>(other.size()) {
 		pixels = new Pixel[frame.size().getPixels()];
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
+			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
-		convertPixelArray(pixels, other.pixels, frame.size().getPixels());
+		convertPixelArray(pixels, other.pixels,
+			frame.size().getPixels());
 	}
 
 	/**
@@ -658,11 +676,14 @@ public:
 	 * but copying a complete image can be implemented more efficiently,
 	 * because the whole pixel array and not only some rows of  it
 	 * need to be copied.
+	 *
+	 * \param p	image to copy
 	 */
 	Image<Pixel>(const Image<Pixel>& p) : ImageBase(p),
 		ImageAdapter<Pixel>(p.frame.size()) {
 		pixels = new Pixel[frame.size().getPixels()];
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy alloc %d pixels at %p",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
+			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
 		std::copy(p.pixels, p.pixels + frame.size().getPixels(), pixels);
 	}
@@ -680,6 +701,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
 			other.pixels, pixels);
 		std::copy(other.pixels, other.pixels + other.frame.size().getPixels(), pixels);
+		return *this;
 	}
 
 	/**
@@ -925,6 +947,9 @@ Image<Pixel>::Image(const Image<Pixel>& src,
 		throw std::range_error("subimage frame too large");
 	}
 	pixels = new Pixel[subframe.size().getPixels()];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "alloc %d bytes for subframe %s at %p",
+		subframe.size().getPixels(), subframe.size().toString().c_str(),
+		pixels);
 	for (int y = 0; y < subframe.size().height(); y++) {
 		ImageRow	srcrow(src.frame.size(), subframe.origin().y() + y);
 		ImageRow	destrow(frame.size(), y);

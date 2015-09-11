@@ -32,6 +32,7 @@ public:
 static ImageSize	fsize(const ImageSize&);
 	FourierImage(const ImageSize& size);
 	FourierImage(const Image<double>& image);
+	FourierImage(const ConstImageAdapter<double>& image);
 	FourierImage(const ImagePtr image);
 	ImagePtr	inverse() const;
 	ImagePtr	abs() const;
@@ -59,6 +60,8 @@ public:
 public:
 	ConvolutionResult(const ImageSize& size, const Point& center);
 	ConvolutionResult(const Image<double>& image, const Point& center);
+	ConvolutionResult(const ConstImageAdapter<double>& image,
+		const Point& center);
 	ConvolutionResult(const ImagePtr image, const Point& center);
 	ImagePtr	image() const;
 };

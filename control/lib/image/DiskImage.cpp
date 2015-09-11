@@ -32,7 +32,7 @@ DiskImage::DiskImage(const ImageSize& size, const ImagePoint& center,
  * \brief Compute the value of a airy disk pixel
  */
 double	DiskImage::pixel(int x, int y) const {
-	double	rr = r(x, y) * angularpixelsize();
+	double	rr = r(x, y);
 	if (rr > _r) {
 		return 0;
 	}

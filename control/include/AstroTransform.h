@@ -41,7 +41,9 @@ OffsetAdapter<Pixel>::OffsetAdapter(const ConstImageAdapter<Pixel>& image,
 	: ConstImageAdapter<Pixel>(image.getSize()),
 	  _image(image), _raw(raw), _translation(translation),
 	  _t(translation.x(), translation.y()) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %d, ty = %d", _t.x(), _t.y());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"create offset adapter with offset tx = %f/%d, ty = %f/%d",
+		_translation.x(), _t.x(), _translation.y(), _t.y());
 	double	wx = _translation.x() - _t.x();
 	double	wy = _translation.y() - _t.y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wx = %f, wy = %f", wx, wy);

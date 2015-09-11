@@ -97,6 +97,23 @@ bool	ImageRectangle::contains(const ImageRectangle& other) const {
 		(_origin.y() + _size.height() >= other.origin().y() + other.size().height());
 }
 
+bool	ImageRectangle::fits(const ImageSize& size) const {
+	if ((_origin.x() < 0) || (_origin.y() < 0)) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"lower left corner %s outside image of size %s",
+			_origin.toString().c_str(), size.toString().c_str());
+		return false;
+	}
+	ImagePoint	ur = upperRightCorner();
+	if (!size.contains(ur)) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"upper right corner %s outside image of size %s",
+			ur.toString().c_str(), size.toString().c_str());
+		return false;
+	}
+	return true;
+}
+
 /**
  * \brief Extract the lower left corner (the origin) of a rectangle
  */

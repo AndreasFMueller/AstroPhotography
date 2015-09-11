@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	NoiseTest.cpp 
+	ConvolveTest.cpp 
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
