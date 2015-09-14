@@ -145,6 +145,8 @@ Star	Hipparcos::find(const std::string& name) {
  */
 Hipparcos::starsetptr	Hipparcos::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrive stars in range %s",
+		magrange.toString().c_str());
 	starset	*result = new starset();
 	starsetptr	resultptr(result);
 	starmap_t::const_iterator	s;
@@ -154,6 +156,8 @@ Hipparcos::starsetptr	Hipparcos::find(const SkyWindow& window,
 			result->insert(s->second);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d Hipparcos stars",
+		resultptr->size());
 	return resultptr;
 }
 

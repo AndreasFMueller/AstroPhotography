@@ -44,15 +44,16 @@ void	ChartTest::tearDown() {
 #define CENTER_DENEB		4
 #define CENTER_36UMA		5
 #define CENTER_M31		6
+#define CENTER_POLARIS		7
 
-static int	centerpoint = CENTER_M13;
+static int	centerpoint = CENTER_POLARIS;
 
 #define CAMERA_SXMC26C_50MM	0
 #define CAMERA_SXMC26C_135MM	1
 #define CAMERA_SXMC26C_560MM	2
 #define CAMERA_SBIG_2800MM	3
 
-static int	camera = CAMERA_SXMC26C_560MM;
+static int	camera = CAMERA_SBIG_2800MM;
 
 #define PSF_TURBULENCE	0
 #define PSF_DIFFRACTION	1
@@ -105,6 +106,23 @@ void	ChartTest::testImage() {
 		center.ra().hours(0. + 42./60 + 44.3/3600);
 		center.dec().degrees(41 + 16./60 + 9./3600);
 		break;
+	case CENTER_POLARIS:
+		// Polaris. This exposes bugs in common star catalogs:
+		// UCAC4:
+		//   Polaris   present as 897-000295, but with incorrect
+		//             magniture 4.55
+		//   Polaris B seems to be missing from the catalog
+		// Hipparcos
+		//   Polaris   present as HIP 11767
+		//   Polaris B seems to be missing from the catalog
+		// Tycho2
+		//   Polaris   present as 4628 00237 1, but with X flag.
+		//   Polaris B seems to be missing from the catalog
+		center.ra().hours(2. + 31./60 + 49.09/3600);
+		center.dec().degrees(89 + 15./60 + 50.8/3600);
+		limit_mag = 10;
+		scale = 0.001;
+		break;
 	}
 
 	// create chart object
@@ -138,13 +156,21 @@ void	ChartTest::testImage() {
 	}
 
 	// star catalog
+#if 0
 	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Combined,
 				std::string("/usr/local/starcatalogs"));
+#endif
+#if 0
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Hipparcos,
+				std::string("/usr/local/starcatalogs/hipparcos"));
+#endif
+	CatalogPtr	catalog = CatalogFactory::get(CatalogFactory::Ucac4,
+				std::string("/usr/local/starcatalogs/u4"));
 
 	// point spread function, 1 arc second of seeing
 #define	ARCSECOND_IN_RADIANS	(M_PI / (180 * 60 * 60))
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "sigma = %f", ARCSECOND_IN_RADIANS);
-	TurbulencePointSpreadFunction	psf(2 * ARCSECOND_IN_RADIANS);
+	TurbulencePointSpreadFunction	psf(1 * ARCSECOND_IN_RADIANS);
 	//DiracPointSpreadFunction	psf;
 
 	// build the factory

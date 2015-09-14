@@ -49,7 +49,7 @@ void	ChartFactoryBase::draw(Image<double>& image, const Point& p,
 		image.pixel(x + 1, y + 1) += I *      wx  *      wy ;
 		havedrawnsomething = true;
 	}
-	if (star.mag() > 6) {
+	if (star.mag() > 10) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "star %s at %s %s, value = %f",

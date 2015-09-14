@@ -1,5 +1,5 @@
 /*
- * convolve.cpp --
+ * convolve.cpp -- command line tool to compute convolution of tw images
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */

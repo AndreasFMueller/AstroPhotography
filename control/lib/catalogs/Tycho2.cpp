@@ -215,6 +215,8 @@ int	Tycho2::index(const std::string& name) {
  */
 Tycho2::starsetptr	Tycho2::find(const SkyWindow& window,
 				const MagnitudeRange& magrange) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve stars in range %s",
+		magrange.toString().c_str());
 	starset	*result = new starset();
 	starsetptr	resultptr(result);
 	for (unsigned int index = 0; index < nstars(); index++) {

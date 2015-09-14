@@ -149,6 +149,7 @@ Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4Zone::starsetptr set,
 		for (uint32_t number = minindex; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
+				//debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s", star.toString().c_str());
 				set->insert(star);
 			}
 		}
@@ -157,12 +158,14 @@ Ucac4Zone::starsetptr	Ucac4Zone::add(Ucac4Zone::starsetptr set,
 		for (uint32_t number = 1; number < maxindex; number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
+				//debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s", star.toString().c_str());
 				set->insert(star);
 			}
 		}
 		for (uint32_t number = minindex; number < nstars(); number++) {
 			Ucac4Star	star = get(number);
 			if (magrange.contains(star.mag())) {
+				//debug(LOG_DEBUG, DEBUG_LOG, 0, "adding %s", star.toString().c_str());
 				set->insert(star);
 			}
 		}
