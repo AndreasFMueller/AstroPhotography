@@ -31,6 +31,14 @@ featurearrow := 0;
 numeric positionarrow;
 positionarrow := 0;
 
+color darkblue, brightblue;
+darkblue := (0, 0, 0.6);
+brightblue := (0.4, 0.4, 1);
+
+
+color positionarrowcolor;
+positionarrowcolor = (0, 0, 1);
+
 def stern(expr z, m, a, mlimit) =
 	if m < mlimit:
 		pickup pencircle scaled (1 + (7-m)/2);
@@ -66,7 +74,7 @@ def drawfeature(expr sa, sb, sc, a, c, name) =
 		drawarrow ((sa rotated a)--
 			guard intersectionpoint
 				((sa rotated a)--centerpoint))
-					withcolor blue;
+					withcolor positionarrowcolor;
 	fi;
 	pickup pencircle scaled 4.5pt;
 	draw (sa rotated a) withcolor white;
@@ -137,11 +145,11 @@ draw border;
 color featurecolor;
 featurecolor := (1,0.8,0);
 
-features(triangleoffset + 1, 0, featurecolor, "1");
-features(triangleoffset + 2, 0, featurecolor, "2");
-features(triangleoffset + 3, 0, featurecolor, "3");
-features(triangleoffset + 4, 0, featurecolor, "4");
-features(triangleoffset + 5, 0, featurecolor, "5");
+features(triangleoffset + 1, 0, featurecolor, ""); % 1
+features(triangleoffset + 2, 0, featurecolor, ""); % 2
+features(triangleoffset + 3, 0, featurecolor, ""); % 3
+features(triangleoffset + 4, 0, featurecolor, ""); % 4
+features(triangleoffset + 5, 0, featurecolor, ""); % 5
 
 endfig;
 
@@ -160,13 +168,34 @@ cross((30,20), -20);
 color featurecolor;
 featurecolor := (1,0.8,0);
 
+pickup pencircle scaled 0.5pt;
+positionarrowcolor := darkblue;
+drawarrow ( 61.495,-64.949)--( 22.184,-34.517) withcolor darkblue;
+drawarrow (-88.856, 10.226)--(-31.136,-39.686) withcolor darkblue;
+drawarrow (-14.142, 14.142)--( 32.982, 19.582) withcolor darkblue;
+drawarrow ( 60.000,-20.000)--( 88.646,  3.674) withcolor darkblue;
+
+pickup pencircle scaled 0.5pt;
+positionarrowcolor := brightblue;
+drawarrow ( 61.495,-64.949)--(  0.550,-65.542) withcolor brightblue;
+drawarrow (-88.856, 10.226)--(-68.447, 27.147) withcolor brightblue;
+drawarrow (-15.321,-12.856)--(-32.079, 12.661) withcolor brightblue;
+drawarrow (-14.142, 14.142)--(-20.450, 55.757) withcolor brightblue;
+
+%pickup pencircle scaled 10pt;
+%draw (35.031,8.533) withcolor red;
+%draw (-15.3209,-12.8558) withcolor red;
+%draw (60,-20) withcolor red;
+
 positionarrow := 0;
-features(triangleoffset + 1, 0, featurecolor, "1");
-features(triangleoffset + 2, 0, featurecolor, "2");
-features(triangleoffset + 4, 0, featurecolor, "4");
+features(triangleoffset + 1, 0, featurecolor, ""); % 1
+features(triangleoffset + 2, 0, featurecolor, ""); % 2
+features(triangleoffset + 4, 0, featurecolor, ""); % 4
 positionarrow := 1;
-features(triangleoffset + 3, 0, featurecolor, "3");
-features(triangleoffset + 5, 0, featurecolor, "5");
+positionarrowcolor := darkblue;
+features(triangleoffset + 3, 0, featurecolor, ""); % 3
+positionarrowcolor := brightblue;
+features(triangleoffset + 5, 0, featurecolor, ""); % 5
 
 endfig;
 
@@ -191,8 +220,8 @@ draw border;
 
 positionarrow := 0;
 
-features(triangleoffset + 3, 20, darkgreen, "3");
-features(triangleoffset + 5, 20, brightgreen, "5");
+features(triangleoffset + 3, 20, darkgreen,   "");   % 3
+features(triangleoffset + 5, 20, brightgreen, ""); % 5
 
 endfig;
 
@@ -213,8 +242,10 @@ draw border;
 cross((30,20), 0);
 
 positionarrow := 1;
-features(triangleoffset + 3, 20, darkgreen, "3");
-features(triangleoffset + 5, 20, brightgreen, "5");
+positionarrowcolor := darkblue;
+features(triangleoffset + 3, 20, darkgreen,   "");  % 3
+positionarrowcolor := brightblue;
+features(triangleoffset + 5, 20, brightgreen, "");  % 5
 
 endfig;
 
