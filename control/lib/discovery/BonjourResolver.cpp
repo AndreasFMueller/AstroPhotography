@@ -66,8 +66,12 @@ void	BonjourResolver::resolvereply_callback(
 		uint16_t txtLen,
 		const unsigned char *txtRecord) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolvereply: %d", flags);
+	// XXX there seems to be an error here
 	if (!(flags & kDNSServiceFlagsAdd)) {
-		return;
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"XXX FlagsAdd not set, skipping XXX");
+		// XXX
+		//return;
 	}
 	if (port) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "have port: %d", ntohs(port));

@@ -96,6 +96,7 @@ BonjourDiscovery::BonjourDiscovery() : ServiceDiscovery() {
 }
 
 void	BonjourDiscovery::start() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start discovery thread");
 	// start a thread
 	thread = new std::thread(discover::main, this);
 }

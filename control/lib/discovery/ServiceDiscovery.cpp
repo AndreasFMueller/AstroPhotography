@@ -56,12 +56,13 @@ ServiceDiscovery::~ServiceDiscovery() {
  * plattform.
  */
 ServiceDiscoveryPtr	ServiceDiscovery::get() {
+	ServiceDiscoveryPtr	sd;
 	// if we are on linux, we should create an instance of the
 	// AvahiDiscovery class
 #ifdef USE_SD_AVAHI
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"creating Avahi based service discovery");
-	return ServiceDiscoveryPtr(new AvahiDiscovery());
+	sd = ServiceDiscoveryPtr(new AvahiDiscovery());
 #endif /* USE_SD_AVAHI */
 
 	// on the Mac, we us an implementation that uses Apples Bonjour
@@ -69,8 +70,9 @@ ServiceDiscoveryPtr	ServiceDiscovery::get() {
 #ifdef USE_SD_BONJOUR
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"creating Bonjour based service discovery");
-	return ServiceDiscoveryPtr(new BonjourDiscovery());
+	sd = ServiceDiscoveryPtr(new BonjourDiscovery());
 #endif /* USE_SD_BONJOUR */
+	return sd;
 }
 
 /**
