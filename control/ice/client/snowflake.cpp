@@ -10,6 +10,7 @@
 #include <AstroDebug.h>
 #include <tasks.h>
 #include <AstroUtils.h>
+#include <AstroDiscovery.h>
 #include <CommonClientTasks.h>
 #include <CommunicatorSingleton.h>
 #include <includes.h>
@@ -22,17 +23,21 @@ namespace snowflake {
 
 static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /* 0 */
-{ "server",		required_argument,	NULL,	's' }, /* 1 */
+{ "help",		no_argument,		NULL,	'h' }, /* 1 */
+{ "server",		required_argument,	NULL,	's' }, /* 2 */
 };
 
+/**
+ * \brief Display a help message
+ */
 static void	usage(const char *progname) {
 	astro::Path	path(progname);
-	std::cout << "usage: " << path.basename() << " [ options ]"
+	std::cout << "usage: " << path.basename() << " [ options ] server "
+		<< std::endl;
+	std::cout << "retrieve a list of tasks from the servier <server>"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -d,--debug          enable debug output" << std::endl;
-	std::cout << " -s,--server=name    check for server named <name>"
-		<< std::endl;
 }
 
 int	main(int argc, char *argv[]) {
@@ -42,20 +47,36 @@ int	main(int argc, char *argv[]) {
 	// parse command line
 	int	c;
 	int	longindex;
-	astro::ServerName	servername("localhost");
-	while (EOF != (c = getopt_long(argc, argv, "ds:",
+	while (EOF != (c = getopt_long(argc, argv, "dhs:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 's':
-			servername = astro::ServerName(optarg);
-			break;
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
+	// next argument is mandatory
+	if (optind >= argc) {
+		std::cerr << "missing service name argument" << std::endl;
+		return EXIT_FAILURE;
+	}
+	std::string	name = argv[optind++];
+
+	// resolve server name
+	astro::discover::ServiceDiscoveryPtr	discovery
+		= astro::discover::ServiceDiscovery::get();
+	discovery->start();
+	astro::discover::ServiceKey	key = discovery->waitfor(name);
+	astro::discover::ServiceObject	serviceobject = discovery->find(key);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "host: %s, port: %d",
+		serviceobject.host().c_str(), serviceobject.port());
+
+	// now contact the service
 	Ice::ObjectPrx	base
-		= ic->stringToProxy(servername.connect("Tasks"));
+		= ic->stringToProxy(serviceobject.connect("Tasks"));
 	snowstar::TaskQueuePrx	tasks = TaskQueuePrx::checkedCast(base);
 	if (!tasks) {
 		throw "invalid proxy";
