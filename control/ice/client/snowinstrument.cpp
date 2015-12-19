@@ -10,6 +10,7 @@
 #include <AstroConfig.h>
 #include <tasks.h>
 #include <IceConversions.h>
+#include <IceDiscovery.h>
 #include <CommonClientTasks.h>
 #include <AstroFormat.h>
 #include <AstroConfig.h>
@@ -287,14 +288,8 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// resolve service name
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "service: %s", name.c_str());
-	astro::discover::ServiceDiscoveryPtr	discovery
-		= astro::discover::ServiceDiscovery::get();
-	discovery->start();
-	astro::discover::ServiceKey	key = discovery->waitfor(name);
-	astro::discover::ServiceObject	serviceobject = discovery->find(key);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "host: %s, port: %d",
-		serviceobject.host().c_str(), serviceobject.port());
+	astro::discover::ServiceObject	serviceobject
+		= IceDiscovery::discover(name);
 
 	// connect to the server
 	Ice::ObjectPrx	base = ic->stringToProxy(
