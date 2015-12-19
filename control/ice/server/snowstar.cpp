@@ -39,10 +39,34 @@ static struct option	longopts[] = {
 { "config",		required_argument,	NULL,	'c' }, /* 1 */
 { "debug",		no_argument,		NULL,	'd' }, /* 2 */
 { "database",		required_argument,	NULL,	'q' }, /* 3 */
-{ "sslport",		required_argument,	NULL,	's' }, /* 4 */
-{ "name",		required_argument,	NULL,	'n' }, /* 5 */
-{ NULL,			0,			NULL,	 0  }, /* 6 */
+{ "help",		no_argument,		NULL,	'h' }, /* 4 */
+{ "port",		required_argument,	NULL,	'r' }, /* 5 */
+{ "sslport",		required_argument,	NULL,	's' }, /* 6 */
+{ "name",		required_argument,	NULL,	'n' }, /* 7 */
+{ NULL,			0,			NULL,	 0  }, /* 8 */
 };
+
+void	usage(const char *progname) {
+	astro::Path	path(progname);
+	std::cout << "usage: " << path.basename() << " [ options ]"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " -d,--debug          enable debug mode" << std::endl;
+	std::cout << " -h,--help           display this help message and exit"
+		<< std::endl;
+	std::cout << " -b,--base=imagedir  directory for images" << std::endl;
+	std::cout << " -c,--config=configdb  use alternative configuration "
+		"database from file" << std::endl;
+	std::cout << "                       configdb" << std::endl;
+	std::cout << " -q,-database=taskdb   task manager database"
+		<< std::endl;
+	std::cout << " -p,--port=<port>      port to offer the service on"
+		<< std::endl;
+	std::cout << " -s,--sslport=<port>   use SSL enable port <port>"
+		<< std::endl;
+	std::cout << " -n,--name=<name>      define zeroconf name to use"
+		<< std::endl;
+}
 
 class service_location {
 public:
@@ -136,6 +160,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		case 'q':
 			databasefile = std::string(optarg);
 			break;
