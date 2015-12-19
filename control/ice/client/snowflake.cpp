@@ -12,6 +12,7 @@
 #include <AstroUtils.h>
 #include <CommonClientTasks.h>
 #include <CommunicatorSingleton.h>
+#include <includes.h>
 
 using namespace snowstar;
 
@@ -19,14 +20,31 @@ namespace snowstar {
 namespace app {
 namespace snowflake {
 
+static struct option	longopts[] = {
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "server",		required_argument,	NULL,	's' }, /* 1 */
+};
+
+static void	usage(const char *progname) {
+	astro::Path	path(progname);
+	std::cout << "usage: " << path.basename() << " [ options ]"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " -d,--debug          enable debug output" << std::endl;
+	std::cout << " -s,--server=name    check for server named <name>"
+		<< std::endl;
+}
+
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
 
 	// parse command line
 	int	c;
+	int	longindex;
 	astro::ServerName	servername("localhost");
-	while (EOF != (c = getopt(argc, argv, "ds:")))
+	while (EOF != (c = getopt_long(argc, argv, "ds:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;

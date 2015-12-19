@@ -31,7 +31,7 @@ static struct option	longopts[] = {
 /**
  * \brief Usage display method
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "Usage:" << std::endl;
