@@ -25,6 +25,9 @@ namespace snowinstrument {
 
 bool	verbose = false;
 
+/**
+ * \brief Convert component type strings to constants representing the type
+ */
 static InstrumentComponentType	string2type(const std::string& componenttype) {
 	if (componenttype == "CCD") {
 		return InstrumentCCD;
@@ -50,6 +53,9 @@ static InstrumentComponentType	string2type(const std::string& componenttype) {
 	throw std::runtime_error("unknown component type");
 }
 
+/**
+ * \brief Convert component type constant to a string representation
+ */
 static std::string	type2string(InstrumentComponentType type) {
 	switch (type) {
 		case InstrumentCCD:
@@ -70,6 +76,9 @@ static std::string	type2string(InstrumentComponentType type) {
 	throw std::runtime_error("invalid type code");
 }
 
+/**
+ * \brief Auxiliary functor class to display the list of instrument names
+ */
 class list_display {
 	std::ostream&	_out;
 public:
@@ -79,6 +88,9 @@ public:
 	}
 };
 
+/**
+ * \brief Auxiliary operator to output the instrument components
+ */
 std::ostream&	operator<<(std::ostream& out,
 			const InstrumentComponent& component) {
 	out << type2string(component.type) << "[";
@@ -88,6 +100,9 @@ std::ostream&	operator<<(std::ostream& out,
 	return out;
 }
 
+/**
+ * \brief Auxiliary functor class to display the components of an instrument
+ */
 class list_component_display {
 	std::string	_instrumentname;
 	std::ostream&	_out;
@@ -101,6 +116,12 @@ public:
 	}
 };
 
+/**
+ * \brief Auxiliary class to display the the components of a list of instruments
+ *
+ * This operator class queries the instrument proxy for the list of components
+ * of the instrument named in the argument, and displays all the components.
+ */
 class list_instrument_display {
 	std::ostream&	_out;
 	InstrumentsPrx	_instruments;
@@ -116,13 +137,26 @@ public:
 	}
 };
 
+/**
+ * \brief Command to list instruments and components
+ *
+ * This command has optional arguments. Without arguments, it simply lists
+ * all the names of instruments available on the server. If names of
+ * instruments are given as arguments, the components of these instruments
+ * are retrieved and displayed.
+ */
 static int	list_command(InstrumentsPrx instruments,
 			const std::vector<std::string>& arguments) {
+	// if there are additional arguments, display the data for each
+	// instrument with name given by the argument
 	if (arguments.size() > 0) {
 		std::for_each(arguments.begin(), arguments.end(),
 			list_instrument_display(std::cout, instruments));
 		return EXIT_SUCCESS;
 	}
+
+	// get a list of all available instruments of the server, and
+	// display the names
 	InstrumentList	list = instruments->list();
 	if (list.size() == 0) {
 		std::cerr << "no instruments found" << std::endl;
@@ -132,6 +166,12 @@ static int	list_command(InstrumentsPrx instruments,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief command to add an instrument component 
+ * 
+ * This command requires four arguments: the instrument name, the type of
+ * the component, the zeroconf service name and the device url on that server.
+ */
 static int	add_command(InstrumentsPrx instruments,
 			const std::vector<std::string>& arguments) {
 	InstrumentComponent	component;
@@ -148,6 +188,12 @@ static int	add_command(InstrumentsPrx instruments,
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Command to remove an instrument component
+ *
+ * This command requires three arguments: the name of the instrument,
+ * the type of the component and the index of the component of this type
+ */
 static int	remove_command(InstrumentsPrx instruments,
 			const std::vector<std::string>& arguments) {
 	if (arguments.size() < 3) {
@@ -164,14 +210,26 @@ static int	remove_command(InstrumentsPrx instruments,
 /**
  * \brief Usage function for the snowtask program
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
-	std::cout << "    " << p << " [options] servicename" << std::endl;
-	std::cout << " -d,--debug         increase debug level" << std::endl;
-	std::cout << " -h,--help          show this help and exit" << std::endl;
-	std::cout << " -v,--verbose       verbose mode" << std::endl;
+	std::cout << "    " << p << " [options] servicename [ command ]"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "  -d,--debug    increase debug level" << std::endl;
+	std::cout << "  -h,--help     show this help and exit" << std::endl;
+	std::cout << "  -v,--verbose  verbose mode" << std::endl;
+	std::cout << "commands:" << std::endl;
+	std::cout << "  list              list instrument names" << std::endl;
+	std::cout << "  list INSTR        list components of instrument INSTR"
+		<< std::endl;
+	std::cout << "  add INSTR type service deviceurl" << std::endl;
+	std::cout << "                    add an instrument component"
+		<< std::endl;
+	std::cout << "  remove INSTR type" << std::endl;
+	std::cout << "                    remove an instrument component"
+		<< std::endl;
 }
 
 /**
@@ -239,7 +297,8 @@ int	main(int argc, char *argv[]) {
 		serviceobject.host().c_str(), serviceobject.port());
 
 	// connect to the server
-	Ice::ObjectPrx	base = ic->stringToProxy(serviceobject.connect("Instruments"));
+	Ice::ObjectPrx	base = ic->stringToProxy(
+				serviceobject.connect("Instruments"));
 	InstrumentsPrx	instruments = InstrumentsPrx::checkedCast(base);
 
 	// execute command
