@@ -365,6 +365,7 @@ public:
 	// static methods to get information about available 
 	static InstrumentList	names();
 	static InstrumentPtr	get(const std::string& name);
+	static bool	has(const std::string& name);
 	static void	remove(const std::string& name);
 };
 

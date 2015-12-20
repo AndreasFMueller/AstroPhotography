@@ -86,6 +86,7 @@ public:
 			InstrumentComponent::Type type, int index);
 	int	nComponentsOfType(const std::string& name,
 			InstrumentComponent::Type type);
+	bool	has(const std::string& instrumentname);
 	int	add(const InstrumentComponent& component);
 	void	update(const InstrumentComponent& component);
 	void	remove(const std::string& name,
@@ -197,6 +198,19 @@ std::list<std::string>	InstrumentBackendImpl::names() {
 }
 
 /**
+ * \brief find out whether we have an instrument of this name in the database
+ */
+bool	InstrumentBackendImpl::has(const std::string& name) {
+	std::string	query(	"select count(*) "
+				"from instrumentcomponents "
+				"where name = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, name);
+	Result	res = statement->result();
+	return (std::stoi(res.front()[0]->stringValue()) > 0) ? true : false;
+}
+
+/**
  * \brief Get the ide of an object from a key
  */
 long	InstrumentBackendImpl::idfromkey(const InstrumentComponentKey& key) {
@@ -294,6 +308,11 @@ InstrumentBackend::InstrumentBackend(persistence::Database database) {
 InstrumentList	InstrumentBackend::names() {
 	InstrumentBackendImpl	backend;
 	return backend.names();
+}
+
+bool	InstrumentBackend::has(const std::string& name) {
+	InstrumentBackendImpl	backend;
+	return backend.has(name);
 }
 
 InstrumentPtr	InstrumentBackend::get(const std::string& name) {
