@@ -220,7 +220,6 @@ int	main(int argc, char *argv[]) {
 
 	// Create a remote instrument
 	RemoteInstrument	ri(instruments, instrumentname);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "got remote instrument");
 
 	// get the Ccd
 	snowstar::CcdPrx	ccd = ri.ccd(ccd_index);
