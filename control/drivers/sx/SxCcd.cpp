@@ -149,7 +149,14 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, ccdindex,
 		(uint8_t)SX_CMD_READ_PIXELS_DELAYED, (uint16_t)0, &rpd);
-	camera.controlRequest(&request);
+	try {
+		camera.controlRequest(&request);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf("%s usb error: %s",
+			name().toString().c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 
 	// we are now in exposing state
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera now exposing");
@@ -183,7 +190,14 @@ void	SxCcd::getImage0() {
 	transfer.setTimeout(timeout);
 
 	// submit the transfer
-	camera.getDevicePtr()->submit(&transfer);
+	try {
+		camera.getDevicePtr()->submit(&transfer);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf("%s usb error: %s",
+			name().toString().c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received %d pixels", size);
 
 	// when the transfer completes, one can use the data for the image

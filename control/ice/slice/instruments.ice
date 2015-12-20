@@ -15,13 +15,15 @@ module snowstar {
 	 * to talk about CCDs and their coolers or guider ports.
 	 */
 	enum InstrumentComponentType {
-		InstrumentCCD = 0,
-		InstrumentGuiderCCD = 1,
-		InstrumentCooler = 2,
-		InstrumentGuiderPort = 3,
-		InstrumentFocuser = 4,
-		InstrumentAdaptiveOptics = 5,
-		InstrumentFilterWheel = 6
+		InstrumentAdaptiveOptics = 0,
+		InstrumentCamera = 1,
+		InstrumentCCD = 2,
+		InstrumentCooler = 3,
+		InstrumentGuiderCCD = 4,
+		InstrumentGuiderPort = 5,
+		InstrumentFilterWheel = 6,
+		InstrumentFocuser = 7,
+		InstrumentMount = 8
 	};
 
 	/**
@@ -112,6 +114,7 @@ module snowstar {
 		InstrumentList	list();
 		Instrument	*get(string name) throws NotFound;
 		void	remove(string name) throws NotFound;
+		bool	has(string name);
 	};
 
 };

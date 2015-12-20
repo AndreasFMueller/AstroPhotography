@@ -60,6 +60,35 @@ public:
 	BadParameter(const std::string& cause) : std::runtime_error(cause) { }
 };
 
+/**
+ * \brief Parent exception class for device exceptions
+ */
+class DeviceException : public std::runtime_error {
+public:
+	DeviceException(const char *cause) : std::runtime_error(cause) { }
+	DeviceException(const std::string& cause) : std::runtime_error(cause) { }
+};
+
+/**
+ * \brief Exception thrown when a device times out
+ */
+class DeviceTimeout : public DeviceException {
+public:
+	DeviceTimeout(const char *cause) : DeviceException(cause) { }
+	DeviceTimeout(const std::string& cause) : DeviceException(cause) { }
+};
+
+/**
+ * \brief Exception thrown when a protocol error with a device is encountered
+ */
+class DeviceProtocolException : public DeviceException {
+public:
+	DeviceProtocolException(const char *cause)
+		: DeviceException(cause) { }
+	DeviceProtocolException(const std::string& cause)
+		: DeviceException(cause) { }
+};
+
 namespace camera {
 
 /**
@@ -69,10 +98,10 @@ namespace camera {
  * exposure was started, or if the image of the previous exposure has already
  * been retrieved.
  */
-class BadState : public std::runtime_error {
+class BadState : public DeviceException {
 public:
-	BadState(const char *cause) : std::runtime_error(cause) { }
-	BadState(const std::string& cause) : std::runtime_error(cause) { }
+	BadState(const char *cause) : DeviceException(cause) { }
+	BadState(const std::string& cause) : DeviceException(cause) { }
 };
 	
 } // namespace camera

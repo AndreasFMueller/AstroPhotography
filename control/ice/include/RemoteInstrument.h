@@ -7,6 +7,7 @@
 #define _RemoteInstrument_h
 
 #include <AstroConfig.h>
+#include <instruments.h>
 #include <device.h>
 #include <camera.h>
 
@@ -19,20 +20,28 @@ namespace snowstar {
  * adds a method that allows to find out whether a device is remote. It also
  * provides methods that return proxies for the remote devices.
  */
-class RemoteInstrument : public astro::config::Instrument {
+class RemoteInstrument {
 	DevicesPrx	devices(const astro::ServerName& servername);
+	InstrumentPrx	_instrument;
+	std::string	_name;
+	unsigned int	componentCount(InstrumentComponentType type);
 public:
-	RemoteInstrument(astro::persistence::Database database,
+	RemoteInstrument(InstrumentsPrx instruments,
 		const std::string& name);
-
-	AdaptiveOpticsPrx	adaptiveoptics_proxy();
-	CameraPrx		camera_proxy();
-	CcdPrx			ccd_proxy();
-	CoolerPrx		cooler_proxy();
-	FilterWheelPrx		filterwheel_proxy();
-	FocuserPrx		focuser_proxy();
-	GuiderPortPrx		guiderport_proxy();
-	MountPrx		mount_proxy();
+	bool	has(InstrumentComponentType type, unsigned int index = 0);
+	InstrumentComponent	getComponent(InstrumentComponentType type,
+					unsigned int index);
+	astro::ServerName	servername(InstrumentComponentType type,
+				unsigned int index = 0);
+	AdaptiveOpticsPrx	adaptiveoptics(unsigned int index = 0);
+	CameraPrx		camera(unsigned int index = 0);
+	CcdPrx			ccd(unsigned int index = 0);
+	CcdPrx			guiderccd(unsigned int index = 0);
+	CoolerPrx		cooler(unsigned int index = 0);
+	FilterWheelPrx		filterwheel(unsigned int index = 0);
+	FocuserPrx		focuser(unsigned int index = 0);
+	GuiderPortPrx		guiderport(unsigned int index = 0);
+	MountPrx		mount(unsigned int index = 0);
 };
 
 } // namespace snowstar

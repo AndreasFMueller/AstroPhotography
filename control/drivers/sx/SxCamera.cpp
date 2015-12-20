@@ -391,7 +391,14 @@ void	SxCamera::controlRequest(RequestBase *request) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
 			request->payloadHex().c_str());
 	}
-	deviceptr->submit(&out);
+	try {
+		deviceptr->submit(&out);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf(
+			"SX OUT(%d) transfer error: %s", sendlength, x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "OUT transfer complete");
 
 	// if there is no IN data phase, we are done
@@ -403,7 +410,14 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing IN transfer");
 	BulkTransfer	in(inendpoint, receivelength, request->payload());
 	in.setTimeout(10000);
-	deviceptr->submit(&in);
+	try {
+		deviceptr->submit(&in);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf(
+			"SX IN(%d) transfer error: %s", receivelength, x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "IN transfer complete:\n%s",
 		request->payloadHex().c_str());
 }

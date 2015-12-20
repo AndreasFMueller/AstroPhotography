@@ -30,14 +30,17 @@ bool	verbose = false;
  * \brief Convert component type strings to constants representing the type
  */
 static InstrumentComponentType	string2type(const std::string& componenttype) {
+	if (componenttype == "Camera") {
+		return InstrumentCamera;
+	}
 	if (componenttype == "CCD") {
 		return InstrumentCCD;
 	}
-	if (componenttype == "GuiderCCD") {
-		return InstrumentGuiderCCD;
-	}
 	if (componenttype == "Cooler") {
 		return InstrumentCooler;
+	}
+	if (componenttype == "GuiderCCD") {
+		return InstrumentGuiderCCD;
 	}
 	if (componenttype == "GuiderPort") {
 		return InstrumentGuiderPort;
@@ -51,6 +54,9 @@ static InstrumentComponentType	string2type(const std::string& componenttype) {
 	if (componenttype == "FilterWheel") {
 		return InstrumentFilterWheel;
 	}
+	if (componenttype == "Mount") {
+		return InstrumentMount;
+	}
 	throw std::runtime_error("unknown component type");
 }
 
@@ -59,12 +65,14 @@ static InstrumentComponentType	string2type(const std::string& componenttype) {
  */
 static std::string	type2string(InstrumentComponentType type) {
 	switch (type) {
+		case InstrumentCamera:
+			return std::string("Camera");
 		case InstrumentCCD:
 			return std::string("CCD");
-		case InstrumentGuiderCCD:
-			return std::string("GuiderCCD");
 		case InstrumentCooler:
 			return std::string("Cooler");
+		case InstrumentGuiderCCD:
+			return std::string("GuiderCCD");
 		case InstrumentGuiderPort:
 			return std::string("GuiderPort");
 		case InstrumentFocuser:
@@ -73,6 +81,8 @@ static std::string	type2string(InstrumentComponentType type) {
 			return std::string("AdaptiveOptics");
 		case InstrumentFilterWheel:
 			return std::string("FilterWheel");
+		case InstrumentMount:
+			return std::string("Mount");
 	}
 	throw std::runtime_error("invalid type code");
 }
@@ -197,12 +207,15 @@ static int	add_command(InstrumentsPrx instruments,
  */
 static int	remove_command(InstrumentsPrx instruments,
 			const std::vector<std::string>& arguments) {
-	if (arguments.size() < 3) {
+	if (arguments.size() < 2) {
 		return EXIT_FAILURE;
 	}
 	std::string	instrumentname = arguments[0];
 	InstrumentComponentType	type = string2type(arguments[1]);
-	int	index = std::stoi(arguments[2]);
+	unsigned int	index = 0;
+	if (arguments.size() > 2) {
+		index = std::stoi(arguments[2]);
+	}
 	InstrumentPrx	instrument = instruments->get(instrumentname);
 	instrument->remove(type, index);
 	return EXIT_SUCCESS;
@@ -215,7 +228,7 @@ static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
-	std::cout << "    " << p << " [options] servicename [ command ]"
+	std::cout << "    " << p << " [options] servicename <command>"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << "  -d,--debug    increase debug level" << std::endl;
@@ -223,14 +236,17 @@ static void	usage(const char *progname) {
 	std::cout << "  -v,--verbose  verbose mode" << std::endl;
 	std::cout << "commands:" << std::endl;
 	std::cout << "  list              list instrument names" << std::endl;
-	std::cout << "  list INSTR        list components of instrument INSTR"
+	std::cout << "  list <INSTR>      list components of instrument INSTR"
 		<< std::endl;
-	std::cout << "  add INSTR type service deviceurl" << std::endl;
+	std::cout << "  add <INSTR> <type> <service> <deviceurl>" << std::endl;
 	std::cout << "                    add an instrument component"
 		<< std::endl;
-	std::cout << "  remove INSTR type" << std::endl;
+	std::cout << "  remove <INSTR> <type> <index>" << std::endl;
 	std::cout << "                    remove an instrument component"
 		<< std::endl;
+        std::cout << "Valid component types are: Camera, CCD, GuiderCCD, "
+		"Cooler, GuiderPort," << std::endl;
+	std::cout << "Focuser, AdaptiveOptics, FilterWheel" << std::endl;
 }
 
 /**
@@ -306,6 +322,7 @@ int	main(int argc, char *argv[]) {
 	if (command == "remove") {
 		return remove_command(instruments, arguments);
 	}
+	std::cerr << "unknown command '" << command << "'" << std::endl;
 
 	return EXIT_FAILURE;
 }

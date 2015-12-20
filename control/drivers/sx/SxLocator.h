@@ -34,7 +34,9 @@ public:
 	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
+	virtual CcdPtr	getCcd0(const DeviceName& name);
 	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual AdaptiveOpticsPtr	getAdaptiveOptics0(const DeviceName& name);
 };
 

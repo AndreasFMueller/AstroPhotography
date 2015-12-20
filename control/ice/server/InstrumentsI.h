@@ -16,6 +16,8 @@ public:
 					const Ice::Current& current);
 	virtual void	remove(const std::string& name,
 					const Ice::Current& current);
+	virtual bool	has(const std::string& name,
+					const Ice::Current& current);
 };
 
 } // namespace snowstar

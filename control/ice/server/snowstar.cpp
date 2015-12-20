@@ -46,7 +46,7 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,	 0  }, /* 8 */
 };
 
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::cout << "usage: " << path.basename() << " [ options ]"
 		<< std::endl;

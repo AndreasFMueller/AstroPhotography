@@ -108,12 +108,12 @@ module snowstar {
 		/**
  		 * \brief get the CcdInfo from the ccd
 		 */
-		CcdInfo	getInfo();
+		CcdInfo	getInfo() throws DeviceException;
 		/**
 		 * \brief Start an exposure
 		 */
 		void	startExposure(Exposure exp)
-				throws BadState, BadParameter;
+				throws BadState, BadParameter, DeviceException;
 		/**
 		 * \brief Find the state of the exposure
 		 */
@@ -127,7 +127,8 @@ module snowstar {
 		/**
 		 * \brief Cancel an exposure
 		 */
-		void	cancelExposure() throws BadState, NotImplemented;
+		void	cancelExposure() throws BadState, NotImplemented,
+						DeviceException;
 		/**
 		 * \brief Get information about the exposure
 		 *
@@ -233,7 +234,7 @@ module snowstar {
 		 *
 		 * Which ports are currently active
 		 */
-		byte	active();
+		byte	active() throws DeviceException;
 		/**
 		 * \brief Activate Guider Port outputs.
 		 *
@@ -243,7 +244,7 @@ module snowstar {
 		 * \param ra	Time in seconds to activate the RA outputs
 		 * \param dec	Time in seconds to activate the DEC outputs
 	 	 */
-		void	activate(float ra, float dec);
+		void	activate(float ra, float dec) throws DeviceException;
 	};
 
 
@@ -279,11 +280,11 @@ module snowstar {
 		/**
 		 * \brief Move the filter wheel to a given position
 		 */
-		void	select(int position) throws NotFound;
+		void	select(int position) throws NotFound, DeviceException;
 		/**
 		 * \brief Move the filter wheel to a given filter name
 		 */
-		void	selectName(string filtername) throws NotFound;
+		void	selectName(string filtername) throws NotFound, DeviceException;
 		/**
 		 * \brief Get the name of the filter
 		 */
@@ -302,7 +303,7 @@ module snowstar {
 		int	max();
 		int	current();
 		int	backlash();
-		void	set(int value);
+		void	set(int value) throws DeviceException;
 	};
 
 	/**
@@ -325,11 +326,11 @@ module snowstar {
 		 * typically only information available without accessing
 		 * the CCD. It should be sufficient to plan an exposure.
 		 */
-		CcdInfo	getCcdinfo(int ccdid) throws NotFound;
+		CcdInfo	getCcdinfo(int ccdid) throws NotFound, DeviceException;
 		/**
 		 * \brief Retrieve a CCD.
 		 */
-		Ccd*	getCcd(int ccdid) throws NotFound;
+		Ccd*	getCcd(int ccdid) throws NotFound, DeviceException;
 		// FilterWheel
 		/**
 		 * \brief Find out whether the camera has FilterWheel
@@ -338,7 +339,7 @@ module snowstar {
 		/**
 		 * \brief Get the FilterWheel
 		 */
-		FilterWheel*	getFilterWheel() throws NotImplemented;
+		FilterWheel*	getFilterWheel() throws NotImplemented, DeviceException;
 		// Guider Port
 		/**
 		 * \brief Find out whether the camera has a guider port.
@@ -347,7 +348,7 @@ module snowstar {
 		/**
 		 * \brief Get the Guider Port
 		 */
-		GuiderPort*	getGuiderPort() throws NotImplemented;
+		GuiderPort*	getGuiderPort() throws NotImplemented, DeviceException;
 	};
 
 	/**

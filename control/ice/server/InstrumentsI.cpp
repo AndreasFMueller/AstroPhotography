@@ -34,4 +34,10 @@ InstrumentList	InstrumentsI::list(const Ice::Current& /* current */) {
 	return convert(astro::discover::InstrumentBackend::names());
 }
 
+bool	InstrumentsI::has(const std::string& name,
+		const Ice::Current& /* current */) {
+	return astro::discover::InstrumentBackend::has(name);
+}
+
+
 } // namespace snowstar

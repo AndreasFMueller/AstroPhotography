@@ -9,6 +9,7 @@
 #include <IceConversions.h>
 #include <AstroDebug.h>
 #include <NameConverter.h>
+#include <AstroDebug.h>
 
 namespace snowstar {
 
@@ -28,41 +29,49 @@ DeviceNameList DevicesI::getDevicelist(devicetype type,
 
 AdaptiveOpticsPrx	DevicesI::getAdaptiveOptics(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO %s", name.c_str());
 	return createProxy<AdaptiveOpticsPrx>(name, current);
 }
 
 CameraPrx	DevicesI::getCamera(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Camera %s", name.c_str());
 	return createProxy<CameraPrx>(name, current);
 }
 
 CcdPrx		DevicesI::getCcd(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve CCD %s", name.c_str());
 	return createProxy<CcdPrx>(name, current);
 }
 
 GuiderPortPrx	DevicesI::getGuiderPort(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve GuiderPort %s", name.c_str());
 	return createProxy<GuiderPortPrx>(name, current);
 }
 
 FilterWheelPrx	DevicesI::getFilterWheel(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve FilterWheel %s", name.c_str());
 	return createProxy<FilterWheelPrx>(name, current);
 }
 
 CoolerPrx	DevicesI::getCooler(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Cooler %s", name.c_str());
 	return createProxy<CoolerPrx>(name, current);
 }
 
 FocuserPrx	DevicesI::getFocuser(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Focuser %s", name.c_str());
 	return createProxy<FocuserPrx>(name, current);
 }
 
 MountPrx	DevicesI::getMount(const std::string& name,
 					const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve Mount %s", name.c_str());
 	return createProxy<MountPrx>(name, current);
 }
 

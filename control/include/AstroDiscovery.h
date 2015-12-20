@@ -260,13 +260,15 @@ class Instrument;
 class	InstrumentComponentKey {
 public:
 	typedef enum { 
-		CCD = 0,
-		GuiderCCD = 1,
-		Cooler = 2,
-		GuiderPort = 3,
-		Focuser = 4,
-		AdaptiveOptics = 5,
-		FilterWheel = 6
+		AdaptiveOptics = 0,
+		Camera = 1,
+		CCD = 2,
+		Cooler = 3,
+		GuiderCCD = 4,
+		GuiderPort = 5,
+		FilterWheel = 6,
+		Focuser = 7,
+		Mount = 8
 	} Type;
 	std::string	_name;
 	Type	_type;

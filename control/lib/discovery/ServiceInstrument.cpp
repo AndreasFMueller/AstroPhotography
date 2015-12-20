@@ -32,13 +32,14 @@ void	Instrument::add(std::list<InstrumentComponent>& l,
  */
 std::list<InstrumentComponent>	Instrument::list() {
 	std::list<InstrumentComponent>	result;
-	add(result, InstrumentComponent::CCD);
-	add(result, InstrumentComponent::GuiderCCD);
-	add(result, InstrumentComponent::Cooler);
-	add(result, InstrumentComponent::GuiderPort);
-	add(result, InstrumentComponent::Focuser);
 	add(result, InstrumentComponent::AdaptiveOptics);
+	add(result, InstrumentComponent::Camera);
+	add(result, InstrumentComponent::CCD);
+	add(result, InstrumentComponent::Cooler);
+	add(result, InstrumentComponent::GuiderCCD);
+	add(result, InstrumentComponent::GuiderPort);
 	add(result, InstrumentComponent::FilterWheel);
+	add(result, InstrumentComponent::Focuser);
 	return result;
 }
 
@@ -63,7 +64,7 @@ class InstrumentBackendImpl {
 		astro::config::ConfigurationPtr	config
 			= astro::config::Configuration::get();
 		database = config->database();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "create table");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get handle to table");
 		table = InstrumentComponentTablePtr(
 				new InstrumentComponentTable(database));
 	}
@@ -222,6 +223,9 @@ long	InstrumentBackendImpl::idfromkey(const InstrumentComponentKey& key) {
  */
 long	InstrumentBackendImpl::idfromkey(const std::string& name,
 		InstrumentComponent::Type type, int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"request instrument %s, type=%d, index=%u",
+		name.c_str(), type, index);
 	std::string	query(	"select id "
 				"from instrumentcomponents "
 				"where name = ? "

@@ -71,6 +71,43 @@ SxCameraLocator::SxCameraLocator() {
 SxCameraLocator::~SxCameraLocator() {
 }
 
+typedef struct sx_hascooler_s {
+	unsigned short	product;
+	bool	has_cooler;
+} sx_hascooler_t;
+
+#define sx_hascooler_size	20
+static sx_hascooler_t	models[sx_hascooler_size] {
+	{ 0x0000, false },
+	{ 0x0100, true },
+	{ 0x0105, true },
+	{ 0x0107, true },
+	{ 0x0119, true },
+	{ 0x0126, true },
+	{ 0x0128, true },
+	{ 0x0135, true },
+	{ 0x0136, true },
+	{ 0x0200, false },
+	{ 0x0305, true },
+	{ 0x0307, true },
+	{ 0x0308, true },
+	{ 0x0309, true },
+	{ 0x0319, true },
+	{ 0x0325, true },
+	{ 0x0326, true },
+	{ 0x0507, false }, // Lodestar
+	{ 0x0509, false }, // Oculus
+	{ 0x0517, false }, // Costar
+};
+static bool	has_cooler(unsigned short product) {
+	for (int i = 0; i < sx_hascooler_size; i++) {
+		if (models[i].product == product) {
+			return models[i].has_cooler;
+		}
+	}
+	return false;
+}
+
 /**
  * \brief Get module name.
  */
@@ -105,10 +142,27 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 			devptr->open();
 			try {
 				if (device == DeviceName::Camera) {
-					names.push_back("camera:sx/" + sxname(devptr));
+					names.push_back("camera:sx/"
+						+ sxname(devptr));
+				}
+				if (device == DeviceName::Ccd) {
+					// all devices have an imaging ccd
+					names.push_back("ccd:sx/"
+						+ sxname(devptr));
 				}
 				if (device == DeviceName::Guiderport) {
-					names.push_back("guiderport:sx/" + sxname(devptr) + "/guiderport");
+					// we assume that all devices have an
+					// Imaging CCD
+					names.push_back("guiderport:sx/"
+						+ sxname(devptr));
+				}
+				if (device == DeviceName::Cooler) {
+					// guide cams and the all sky cam do
+					// not have a cooler, all others do
+					if (has_cooler(devptr->descriptor()->idProduct())) {
+						names.push_back("cooler:sx/"
+							+ sxname(devptr));
+					}
 				}
 			} catch (std::runtime_error& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found a non"
@@ -131,6 +185,8 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
  * \return Camera with that name
  */
 CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing camera '%s'",
+		name.toString().c_str());
 	std::string	sname = name.unitname();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyzing '%s'", sname.c_str());
 	// parse the name string
@@ -145,6 +201,8 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		DevicePtr	dptr = (*i);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found bus=%d, deviceaddr=%d",
+			dptr->getBusNumber(), dptr->getDeviceAddress());
 		if ((dptr->getBusNumber() == busnumber) &&
 			(dptr->getDeviceAddress() == deviceaddress)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "found matching device");
@@ -152,7 +210,42 @@ CameraPtr	SxCameraLocator::getCamera0(const DeviceName& name) {
 			return CameraPtr(new SxCamera(dptr));
 		}
 	}
-	throw SxError("cannot create a camera from a name");
+	std::string	msg = stringprintf("cannot create camera from '%s'",
+		name.toString().c_str());
+	throw SxError(msg.c_str());
+}
+
+/**
+ * \brief Get a Cooler based on the cooler name
+ *
+ * \param name  name of the cooler
+ */
+CoolerPtr	SxCameraLocator::getCooler0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing cooler '%s'",
+		name.toString().c_str());
+	// get the camera with the same name
+	DeviceName	cameraname(DeviceName::Camera, name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
+		cameraname.toString().c_str());
+	CameraPtr	camera = this->getCamera(cameraname);
+	CcdPtr	ccd = camera->getCcd(0);
+	if (!ccd->hasCooler()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "ccd has no cooler");
+		throw NotFound("cooler not found");
+	}
+	return ccd->getCooler();
+}
+
+CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing CCD '%s'",
+		name.toString().c_str());
+	// get the camera with the same name
+	DeviceName	cameraname(DeviceName::Camera, name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s",
+		cameraname.toString().c_str());
+	CameraPtr	camera = this->getCamera(cameraname);
+	CcdPtr	ccd = camera->getCcd(0);
+	return ccd;
 }
 
 /**

@@ -102,4 +102,12 @@ bool	ServerName::isDefaultPort() const {
 	return _port == default_port;
 }
 
+bool	ServerName::operator==(const ServerName& other) const {
+	return (host() == other.host()) && (port() == other.port());
+}
+
+bool	ServerName::operator!=(const ServerName& other) const {
+	return (host() != other.host()) || (port() != other.port());
+}
+
 } // namespace astro

@@ -38,7 +38,7 @@ void	SxGuiderPort::do_activate(uint8_t active) {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0,
 		(uint8_t)SX_CMD_SET_STAR2K, (uint16_t)newstate);
-	camera.controlRequest(&request);
+		camera.controlRequest(&request);
 }
 
 } // namespace sx

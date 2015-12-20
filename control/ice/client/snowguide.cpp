@@ -43,15 +43,24 @@ static void	usage(const char *progname) {
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] help" << std::endl;
-	std::cout << p << " [ options ] calibrate" << std::endl;
-	std::cout << p << " [ options ] monitor" << std::endl;
-	std::cout << p << " [ options ] images" << std::endl;
-	std::cout << p << " [ options ] guide [ <calibrationid> ] " << std::endl;
-	std::cout << p << " [ options ] cancel" << std::endl;
-	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] tracks" << std::endl;
-	std::cout << p << " [ options ] history [ trackid ]" << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> help"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> calibrate"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> monitor"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> images"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> guide"
+		" [ <calibrationid> ] " << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> cancel"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> list"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> tracks"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> history"
+		" [ trackid ]" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Operations related to guiding, i.e. calibrating a "
 		"guider, starting and";
@@ -70,8 +79,6 @@ static void	usage(const char *progname) {
 		"instrument";
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
-	std::cout << std::endl;
-	std::cout << " -i,--instrument=<INS> use instrument named INS";
 	std::cout << std::endl;
 	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
 		"specified by <rec>.";
@@ -386,7 +393,6 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /*  2 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  3 */
 { "help",		no_argument,		NULL,	'h' }, /*  4 */
-{ "instrument",		required_argument,	NULL,	'i' }, /*  5 */
 { "rectangle",		required_argument,	NULL,	'r' }, /*  6 */
 { "prefix",		required_argument,	NULL,	'p' }, /*  7 */
 { "star",		required_argument,	NULL,	's' }, /*  8 */
@@ -401,7 +407,6 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	communicator(argc, argv);
 
-	std::string	instrumentname;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
 	std::string	binning;
 	std::string	frame;
@@ -432,9 +437,6 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'i':
-			instrumentname = optarg;
-			break;
 		case 'p':
 			prefix = std::string(optarg);
 			break;
@@ -454,6 +456,14 @@ int	main(int argc, char *argv[]) {
 
 	// next argument is the command
 	if (argc <= optind) {
+		throw std::runtime_error("missing service argument");
+	}
+	astro::ServerName	servername(argv[optind++]);
+	if (argc <= optind) {
+		throw std::runtime_error("missing instrument name argument");
+	}
+	std::string	instrumentname(argv[optind++]);
+	if (argc <= optind) {
 		throw std::runtime_error("missing command argument");
 	}
 	std::string	command = argv[optind++];
@@ -472,20 +482,33 @@ int	main(int argc, char *argv[]) {
 	if (0 == instrumentname.size()) {
 		throw std::runtime_error("instrument name not set");
 	}
-	RemoteInstrument	instrument(config->database(),
-						instrumentname);
+
+	// get the instruments proxy and retrieve the instruments
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+        Ice::ObjectPrx  base
+		= ic->stringToProxy(servername.connect("Instrments"));
+	InstrumentsPrx	instruments = InstrumentsPrx::checkedCast(base);
+
+	// build the remote instrument
+	RemoteInstrument	instrument(instruments, instrumentname);
+
+	// get the server names for guiderccd and guiderport
+	astro::ServerName	target
+		= instrument.servername(InstrumentGuiderCCD);
+	if (target != instrument.servername(InstrumentGuiderPort)) {
+		throw std::runtime_error("ccd and guiderport on different "
+			"servers");
+	}
 
 	// server of the camera
-	astro::ServerName	servername(instrument.servername(
-					astro::DeviceName::Camera));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument on server %s",
 		std::string(servername).c_str());
 
 	// get camera, ccd and proxy
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the device from the instrument");
-	CameraPrx	camera = instrument.camera_proxy();
-	CcdPrx		ccd = instrument.ccd_proxy();
-	GuiderPortPrx	guiderport = instrument.guiderport_proxy();
+	CameraPrx	camera = instrument.camera();
+	CcdPrx		ccd = instrument.guiderccd();
+	GuiderPortPrx	guiderport = instrument.guiderport();
 
 	// build the guider descriptor
 	GuiderDescriptor	descriptor;
@@ -499,10 +522,10 @@ int	main(int argc, char *argv[]) {
 		descriptor.guiderportname.c_str());
 
 	// connect to the guider factory of a remote server
-	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-        Ice::ObjectPrx  base = ic->stringToProxy(servername.connect("Guiders"));
+        Ice::ObjectPrx  gbase
+		= ic->stringToProxy(servername.connect("Guiders"));
 	GuiderFactoryPrx	guiderfactory
-		= GuiderFactoryPrx::checkedCast(base);
+		= GuiderFactoryPrx::checkedCast(gbase);
 
 	// the next action depends on the command to execute. This first
 	// group of commands does not need a guider
