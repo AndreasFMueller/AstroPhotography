@@ -86,9 +86,8 @@ int	main(int argc, char *argv[]) {
 		= dynamic_cast<Image<RGB<double> > *>(&*image);
 	LuminanceAdapter<RGB<double> >	la(*imageptr);
 #endif
-	Image<double >	*imageptr
-		= dynamic_cast<Image<double > *>(&*image);
-	LuminanceAdapter<double, double>	la(*imageptr);
+	DoubleAdapter	doubleadapter(image);
+	LuminanceAdapter<double, double>	la(doubleadapter);
 
 	// create image from log adapter
 	FunctionAdapter<double>	fa(la, log2);
