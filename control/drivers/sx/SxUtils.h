@@ -20,8 +20,6 @@ public:
 	SxError(const char *cause);
 };
 
-#define	SX_VENDOR_ID	0x1278
-
 class SxName : public device::DeviceNameUSB {
 public:
 	SxName(usb::DevicePtr deviceptr);
