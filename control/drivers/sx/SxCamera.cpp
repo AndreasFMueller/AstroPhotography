@@ -81,22 +81,6 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 };
 
 /**
- * \brief Auxiliary function to generate the camera name from the deviceptr
- */
-static astro::DeviceName	cameraname(DevicePtr& deviceptr) {
-	DeviceName	modulename("module:sx");
-debug(LOG_DEBUG, DEBUG_LOG, 0, "current unit name: %s",
-		modulename.unitname().c_str());
-	std::string	unitname = sxname(deviceptr);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "appending unit name '%s'", unitname.c_str());
-	DeviceName	cname(modulename, DeviceName::Camera, unitname);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "cname created");
-	std::string	c = (std::string)cname;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s", c.c_str());
-	return	cname;
-}
-
-/**
  * \brief Create a new Camera from a USB device pointer
  *
  * The constructor has the side effect of claiming the data interface of
@@ -111,7 +95,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "cname created");
  * \param _deviceptr	USB device pointer
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr)
-	: Camera(cameraname(_deviceptr)), deviceptr(_deviceptr) {
+	: Camera(SxName(_deviceptr).cameraname()), deviceptr(_deviceptr) {
 	// the default is to use the 
 	useControlRequests = false;
 

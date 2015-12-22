@@ -6,6 +6,7 @@
 #include <SxUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <DeviceNameUSB.h>
 
 using namespace astro::usb;
 
@@ -16,6 +17,22 @@ namespace sx {
 SxError::SxError(const char *cause) : std::runtime_error(cause) {
 }
 
+
+#define SX_MODULE_NAME	"sx"
+#define SX_VENDOR_ID	0x1278
+
+/**
+ * \brief Construct an SxName
+ */
+SxName::SxName(usb::DevicePtr deviceptr)
+	: DeviceNameUSB(SX_MODULE_NAME, SX_VENDOR_ID, deviceptr) {
+}
+
+SxName::SxName(const DeviceName& devicename)
+	: DeviceNameUSB(SX_MODULE_NAME, SX_VENDOR_ID, devicename) {
+}
+
+#if 0
 /**
  * \brief Auxiliary function to generate the camera name from the deviceptr
  *
@@ -61,6 +78,7 @@ void	sxparse(const std::string& name, int& busnumber, int& deviceaddress) {
         debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d", name.c_str(),
                 busnumber, deviceaddress);
 }
+#endif
 
 } // namespace sx
 } // namespace camera

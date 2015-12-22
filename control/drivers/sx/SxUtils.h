@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <AstroUSB.h>
+#include <DeviceNameUSB.h>
 
 namespace astro {
 namespace camera {
@@ -21,12 +22,20 @@ public:
 
 #define	SX_VENDOR_ID	0x1278
 
+class SxName : public device::DeviceNameUSB {
+public:
+	SxName(usb::DevicePtr deviceptr);
+	SxName(const DeviceName& devicename);
+};
+
+#if 0
 /**
  * \brief Auxiliary function to generate the camera name from the deviceptr
  */
 extern std::string	sxname(astro::usb::DevicePtr& deviceptr);
 extern void	sxparse(const std::string& name, int& busnumber,
 			int& deviceaddress);
+#endif
 
 } // namespace sx
 } // namespace camera

@@ -44,27 +44,27 @@ void	DeviceNameUSB::parse(const std::string& name) {
 	// human readable product name
 	std::string	w = name.substr(8);
 	size_t	o = w.find('-');
-	iproduct = w.substr(0, o);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "iproduct = %s", iproduct.c_str());
+	_iproduct = w.substr(0, o);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "iproduct = %s", _iproduct.c_str());
 	// get the rest of the name
 	w = w.substr(o + 1);
 	// idvendor
-	idvendor = stoi(w.substr(0, 4), 0, 16);
+	_idvendor = stoi(w.substr(0, 4), 0, 16);
 	// idproduct
-	idproduct = stoi(w.substr(5, 4), 0, 16);
+	_idproduct = stoi(w.substr(5, 4), 0, 16);
 	// check for the serial number
 	o = w.find('-', 10);
 	if (std::string::npos != o) {
-		serial = w.substr(o + 1);
+		_serial = w.substr(o + 1);
 	} else {
-		serial = "";
+		_serial = "";
 	}
 	
 	// find the next dash to extract idvendor and idproduct
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d, iprod=%s, "
 		"idvendor=%04x, idproduct=%04x, serial=%s", name.c_str(),
-		_busnumber, _deviceaddress, iproduct.c_str(),
-		idvendor, idproduct, serial.c_str());
+		_busnumber, _deviceaddress, _iproduct.c_str(),
+		_idvendor, _idproduct, _serial.c_str());
 }
 
 /**
@@ -86,12 +86,12 @@ DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 	}
 	_busnumber = deviceptr->getBusNumber();
 	_deviceaddress = deviceptr->getDeviceAddress();
-	iproduct = remove_dashes(trim(descriptor->iProduct()));
+	_iproduct = remove_dashes(trim(descriptor->iProduct()));
 	if (descriptor->iSerialNumber().size() > 0) {
-		serial = trim(descriptor->iSerialNumber());
+		_serial = trim(descriptor->iSerialNumber());
 	}
-	idvendor = descriptor->idVendor();
-	idproduct = descriptor->idProduct();
+	_idvendor = descriptor->idVendor();
+	_idproduct = descriptor->idProduct();
 }
 
 /**
@@ -115,12 +115,12 @@ DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 std::string	DeviceNameUSB::unparse() const {
 	std::string	name = stringprintf(
 		"%03d-%03d-%s-%04x-%04x",
-		_busnumber, _deviceaddress, iproduct.c_str(),
-		idvendor, idproduct);
+		_busnumber, _deviceaddress, _iproduct.c_str(),
+		_idvendor, _idproduct);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", name.c_str());
-	if (serial.size() > 0) {
+	if (_serial.size() > 0) {
 		name.append("-");
-		name.append(serial);
+		name.append(_serial);
 	}
 	return name;
 }

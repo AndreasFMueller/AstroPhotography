@@ -151,6 +151,7 @@ CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& name) {
 	if (!qhyname.isCamera(name)) {
 		std::string	msg = stringprintf("%s is not a Camera name",
 			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
@@ -186,6 +187,7 @@ CoolerPtr	QhyCameraLocator::getCooler0(const DeviceName& name) {
 	if (!qhyname.isCooler(name)) {
 		std::string	msg = stringprintf("%s is not a Cooler name",
 			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	DeviceName	cameraname = qhyname.cameraname();
@@ -213,6 +215,7 @@ CcdPtr	QhyCameraLocator::getCcd0(const DeviceName& name) {
 	if (!qhyname.isCcd(name)) {
 		std::string	msg = stringprintf("%s is not a CCD name",
 			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 
@@ -231,6 +234,7 @@ GuiderPortPtr	QhyCameraLocator::getGuiderPort0(const DeviceName& name) {
 	if (!qhyname.isGuiderport(name)) {
 		std::string	msg = stringprintf("%s is not a Guiderport name",
 			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	DeviceName	cameraname = qhyname.cameraname();

@@ -29,11 +29,16 @@ public:
 	int	busnumber() const { return _busnumber; }
 	int	deviceaddress() const { return _deviceaddress; }
 protected:
-	std::string	iproduct;
-	unsigned short	idvendor;
-	unsigned short	idproduct;
-	std::string	serial;
-
+	std::string	_iproduct;
+	unsigned short	_idvendor;
+	unsigned short	_idproduct;
+	std::string	_serial;
+public:
+	const std::string&	iproduct() const { return _iproduct; }
+	unsigned short	idvendor() const { return _idvendor; }
+	unsigned short	idproduct() const { return _idproduct; }
+	const std::string&	serial() const { return _serial; }
+protected:
 	void	parse(const std::string& name);
 	std::string	unparse() const;
 	bool	matches(const DeviceName& other, DeviceName::device_type type);
