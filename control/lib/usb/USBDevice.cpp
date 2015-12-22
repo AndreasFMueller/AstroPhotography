@@ -442,5 +442,12 @@ bool	Device::isVideoDevice() {
 	}
 }
 
+/**
+ * \brief Find the bus number and device address as a string
+ */
+std::string	Device::getBusAndAddress() {
+	return stringprintf("%d-%d", getBusNumber(), getDeviceAddress());
+}
+
 } // namespace usb
 } // namespace astro

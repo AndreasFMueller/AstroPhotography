@@ -18,11 +18,8 @@ namespace qhy {
  * \brief Auxiliary function generate the camera name from the deviceptr
  */
 static astro::DeviceName	cameraname(usb::DevicePtr& deviceptr) {
-	DeviceName	modulename("module:qhy");
-	std::string	unitname = qhyname(deviceptr);
-	DeviceName	cname(modulename, DeviceName::Camera, unitname);
-	std::string	c = (std::string)cname;
-	return cname;
+	QhyName	qhyname(deviceptr);
+	return qhyname.name(DeviceName::Camera);
 }
 
 /**

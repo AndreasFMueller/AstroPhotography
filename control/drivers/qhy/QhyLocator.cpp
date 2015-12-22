@@ -81,10 +81,33 @@ std::string	QhyCameraLocator::getVersion() const {
 	return astro::module::qhy::qhy_version;
 }
 
+static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
+	DeviceName::device_type device) {
+	QhyName	qhyname(devptr);
+	switch (device) {
+	case DeviceName::Camera:
+		names.push_back(qhyname.cameraname());
+		break;
+	case DeviceName::Ccd:
+		names.push_back(qhyname.ccdname());
+		break;
+	case DeviceName::Cooler:
+		names.push_back(qhyname.coolername());
+		break;
+	case DeviceName::Guiderport:
+		names.push_back(qhyname.guiderportname());
+		break;
+	default:
+		// unknown components
+		break;
+	}
+}
+
 /**
  * \brief Get a list of Starlight Express cameras.
  *
- * \return a vector of strings that uniquely descript devices
+ * \param device	the type of devices we want to have listed
+ * \return 		a vector of strings that uniquely descript devices
  */
 std::vector<std::string>	QhyCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
@@ -93,42 +116,27 @@ std::vector<std::string>	QhyCameraLocator::getDevicelist(DeviceName::device_type
 	std::vector<usb::DevicePtr>	d = context.devices();
 	std::vector<usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
+		usb::DevicePtr	devptr = *i;
 		// try to open all devices, and check whether they have
 		// the right vendor id
 		try {
-			usb::DevicePtr	devptr = *i;
 			devptr->open();
 			try {
-				std::string	n = qhyname(devptr);
-				if (device == DeviceName::Camera) {
-					names.push_back("camera:qhy/" + n);
-				}
-				if (device == DeviceName::Ccd) {
-					names.push_back("ccd:qhy/" + n
-						+ "/Imaging");
-				}
-				if (device == DeviceName::Cooler) {
-					names.push_back("cooler:qhy/" + n
-						+ "/Imaging/cooler");
-				}
-				if (device == DeviceName::Guiderport) {
-					names.push_back("guiderport:qhy/" + n
-						+ "/guiderport");
-				}
+				addname(names, devptr, device);
 			} catch (std::runtime_error& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found a non "
 					"QHY device: %s", x.what());
 			}
 		} catch (std::exception& x) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "cannot work with device");
+			std::string	msg = stringprintf("cannot work with "
+				"device at bus=%d and addr=%d",
+				devptr->getBusNumber(),
+				devptr->getDeviceAddress());
+			debug(LOG_ERR, DEBUG_LOG, 0, msg.c_str());
 		}
 	}
 
-	// return empty list, QSI only has camera devices from the locator
-	if (DeviceName::Camera != device) {
-		return names;
-	}
-
+	// return the list of devices
 	return names;
 }
 
@@ -136,23 +144,25 @@ std::vector<std::string>	QhyCameraLocator::getDevicelist(DeviceName::device_type
  * \brief Construct a camera from a camera description
  *
  * \param name		Name of the camera
- * \return Camera with that name
+ * \return 		Camera with that name
  */
 CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& name) {
-	std::string	qname = name.unitname();
-	int	busnumber = 0, deviceaddress = 0;
-	qhyparse(qname, busnumber, deviceaddress);
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"constructing camera from %s with bus=%d, addr=%d",
-		name.toString().c_str(), busnumber, deviceaddress);
+	QhyName	qhyname(name);
+	if (!qhyname.isCamera(name)) {
+		std::string	msg = stringprintf("%s is not a Camera name",
+			name.toString().c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// scan the devices and get 
 	std::vector<usb::DevicePtr>	d = context.devices();
 	std::vector<usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		usb::DevicePtr	dptr = *i;
-		if ((dptr->getBusNumber() == busnumber) &&
-			(dptr->getDeviceAddress() == deviceaddress)) {
+		int	busnumber = dptr->getBusNumber();
+		int	deviceaddress = dptr->getDeviceAddress();
+		if ((busnumber == qhyname.busnumber()) &&
+			(deviceaddress == qhyname.deviceaddress())) {
 			dptr->open();
 			return CameraPtr(new QhyCamera(dptr));
 		}
@@ -166,10 +176,18 @@ CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& name) {
 
 /**
  * \brief Get a cooler from the camera
+ *
+ * \param name	devicename for a cooler
  */
 CoolerPtr	QhyCameraLocator::getCooler0(const DeviceName& name) {
-	DeviceName	cameraname(DeviceName::Camera, name);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
+	QhyName	qhyname(name);
+	if (!qhyname.isCooler(name)) {
+		std::string	msg = stringprintf("%s is not a Cooler name",
+			name.toString().c_str());
+		throw std::runtime_error(msg);
+	}
+	DeviceName	cameraname = qhyname.coolername();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for cooler of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
 	CcdPtr	ccd = camera->getCcd(0);
@@ -184,8 +202,15 @@ CoolerPtr	QhyCameraLocator::getCooler0(const DeviceName& name) {
  * \brief Get a CCD device for a camera
  */
 CcdPtr	QhyCameraLocator::getCcd0(const DeviceName& name) {
-	DeviceName	cameraname(DeviceName::Camera, name);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
+	QhyName	qhyname(name);
+	if (!qhyname.isCcd(name)) {
+		std::string	msg = stringprintf("%s is not a CCD name",
+			name.toString().c_str());
+		throw std::runtime_error(msg);
+	}
+
+	DeviceName	cameraname = qhyname.cameraname();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for CCD of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
 	return camera->getCcd(0);
@@ -195,7 +220,13 @@ CcdPtr	QhyCameraLocator::getCcd0(const DeviceName& name) {
  * \brief Get a guider port by name
  */
 GuiderPortPtr	QhyCameraLocator::getGuiderPort0(const DeviceName& name) {
-	DeviceName	cameraname(DeviceName::Camera, name);
+	QhyName	qhyname(name);
+	if (!qhyname.isGuiderport(name)) {
+		std::string	msg = stringprintf("%s is not a Guiderport name",
+			name.toString().c_str());
+		throw std::runtime_error(msg);
+	}
+	DeviceName	cameraname = qhyname.cameraname();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
