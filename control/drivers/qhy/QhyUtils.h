@@ -23,45 +23,9 @@ namespace qhy {
  * driver
  */
 class QhyName : public device::DeviceNameUSB {
-#if 0
-	int	_busnumber;
-	int	_deviceaddress;
-public:
-	int	busnumber() const { return _busnumber; }
-	int	deviceaddress() const { return _deviceaddress; }
-private:
-	std::string	iproduct;
-	unsigned short	idvendor;
-	unsigned short	idproduct;
-	std::string	serial;
-
-	void	parse(const std::string& name);
-	std::string	unparse() const;
-	bool	matches(const DeviceName& other, DeviceName::device_type type);
-#endif
 public:
 	QhyName(astro::usb::DevicePtr deviceptr);
 	QhyName(const astro::DeviceName& devicename);
-#if 0
-	DeviceName	name(DeviceName::device_type type) const;
-	DeviceName	name(DeviceName::device_type type,
-				const std::string& path) const;
-	DeviceName	name(DeviceName::device_type type,
-				const std::vector<std::string>& path) const;
-	std::string	stringname(DeviceName::device_type type) const;
-	std::string	stringname(DeviceName::device_type type,
-				const std::string& path) const;
-	std::string	stringname(DeviceName::device_type type,
-				const std::vector<std::string>& path) const;
-	DeviceName	cameraname() const;
-	DeviceName	ccdname() const;
-	DeviceName	coolername() const;
-	DeviceName	guiderportname() const;
-	bool	isCamera(const DeviceName& other);
-	bool	isCcd(const DeviceName& other);
-	bool	isCooler(const DeviceName& other);
-	bool	isGuiderport(const DeviceName& other);
-#endif
 };
 
 } // namespace qhy

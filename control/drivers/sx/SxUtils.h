@@ -28,15 +28,6 @@ public:
 	SxName(const DeviceName& devicename);
 };
 
-#if 0
-/**
- * \brief Auxiliary function to generate the camera name from the deviceptr
- */
-extern std::string	sxname(astro::usb::DevicePtr& deviceptr);
-extern void	sxparse(const std::string& name, int& busnumber,
-			int& deviceaddress);
-#endif
-
 } // namespace sx
 } // namespace camera
 } // namespace astro
