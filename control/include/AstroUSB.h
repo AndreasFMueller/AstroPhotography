@@ -200,9 +200,6 @@ public:
 	// Context is a friend class, it acts as a factory for Devices
 	friend class Context;
 	friend std::ostream&	operator<<(std::ostream& out, const Device& device);
-
-	// get a string representation of the bus address
-	std::string	getBusAndAddress();
 };
 
 std::ostream&	operator<<(std::ostream& out, const Device& device);

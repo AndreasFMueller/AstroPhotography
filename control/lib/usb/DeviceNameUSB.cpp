@@ -1,32 +1,39 @@
 /*
- * QhyUtils.cpp -- utility functions for QHY cameras
+ * DeviceNameUSB.cpp -- implementation of device naming for USB devices
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <QhyUtils.h>
+#include <DeviceNameUSB.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroUtils.h>
 
-using namespace astro::usb;
-
 namespace astro {
-namespace camera {
-namespace qhy {
+namespace device {
 
-#define QHY_VENDOR_ID	0x1618
-#define QHY_VENDOR_NAME	"qhy"
+/**
+ * \brief Auxiliary function that removes dashes and blanks from a name
+ */
+static std::string	remove_dashes(const std::string& s) {
+	std::string	result;
+	for (size_t i = 0; i < s.size(); i++) {
+		char	c = s[i];
+		if (('-' != c) || (' ' != c)) {
+			result.append(1, c);
+		}
+	}
+	return result;
+}
 
-#if 0
 /**
  * \brief Parse the name into libusb bus number and device address
  *
- * Parse the QHY name into the individual fields of the name. These are:
+ * Parse the USB name into the individual fields of the name. These are:
  * the USB bus number, the USB device address, human readable product name,
  * USB vendor id in hex, USB product id in hex, and if present a serial
  * number.
  */
-void	QhyName::parse(const std::string& name) {
+void	DeviceNameUSB::parse(const std::string& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing name '%s'", name.c_str());
 	// USB bus number
 	std::string	busnumberstring = name.substr(0, 3);
@@ -36,7 +43,7 @@ void	QhyName::parse(const std::string& name) {
 	_deviceaddress = stoi(deviceaddressstring);
 	// human readable product name
 	std::string	w = name.substr(8);
-	size_t	o = w.find('-', 4);
+	size_t	o = w.find('-');
 	iproduct = w.substr(0, o);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "iproduct = %s", iproduct.c_str());
 	// get the rest of the name
@@ -59,53 +66,53 @@ void	QhyName::parse(const std::string& name) {
 		_busnumber, _deviceaddress, iproduct.c_str(),
 		idvendor, idproduct, serial.c_str());
 }
-#endif
 
 /**
- * \brief Construct a QHY name based on the USB device ptr
+ * \brief Construct a USB name based on the USB device ptr
  *
  * \param deviceptr	USB device ptr to construct the 
  */
-QhyName::QhyName(astro::usb::DevicePtr deviceptr)
-	: DeviceNameUSB(QHY_VENDOR_NAME, QHY_VENDOR_ID, deviceptr) {
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "QhyName constructor on USB: %s",
+DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
+	unsigned short modulevendor, astro::usb::DevicePtr deviceptr)
+	: _modulename(modulename), _modulevendor(modulevendor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "DeviceNameUSB constructor on USB: %s",
 		deviceptr->getDeviceName().c_str());
 	usb::DeviceDescriptorPtr	descriptor = deviceptr->descriptor();
-	if (QHY_VENDOR_ID != descriptor->idVendor()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device is not a QHY device");
-		throw std::runtime_error("not an QHY device");
+	if (_modulevendor != descriptor->idVendor()) {
+		std::string	msg = stringprintf("device is not a %s device",
+			_modulename.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	_busnumber = deviceptr->getBusNumber();
 	_deviceaddress = deviceptr->getDeviceAddress();
-	iproduct = trim(descriptor->iProduct());
+	iproduct = remove_dashes(trim(descriptor->iProduct()));
 	if (descriptor->iSerialNumber().size() > 0) {
 		serial = trim(descriptor->iSerialNumber());
 	}
-	idvendor = descriptor->idVendor(),
+	idvendor = descriptor->idVendor();
 	idproduct = descriptor->idProduct();
-#endif
 }
 
 /**
- * \brief Construct a QHY name basd on the device name
+ * \brief Construct a USB name basd on the device name
  */
-QhyName::QhyName(const DeviceName& devicename)
-	: DeviceNameUSB(QHY_VENDOR_NAME, QHY_VENDOR_ID, devicename) {
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "QhyName constructor on DeviceName: %s",
+DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
+	unsigned short modulevendor, const DeviceName& devicename)
+	: _modulename(modulename), _modulevendor(modulevendor) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"DeviceNameUSB constructor on DeviceName: %s",
 		devicename.toString().c_str());
-	if (devicename[0] != "qhy") {
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s ist not a QHY device",
-			devicename.toString().c_str());
-		throw std::runtime_error("not a QHY device");
+	if (devicename[0] != _modulename) {
+		std::string	msg = stringprintf("%s ist not a %s device",
+			devicename.toString().c_str(), _modulename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	parse(devicename[1]);
-#endif
 }
 
-#if 0
-std::string	QhyName::unparse() const {
+std::string	DeviceNameUSB::unparse() const {
 	std::string	name = stringprintf(
 		"%03d-%03d-%s-%04x-%04x",
 		_busnumber, _deviceaddress, iproduct.c_str(),
@@ -118,18 +125,18 @@ std::string	QhyName::unparse() const {
 	return name;
 }
 
-DeviceName	QhyName::name(DeviceName::device_type type) const {
+DeviceName	DeviceNameUSB::name(DeviceName::device_type type) const {
 	std::vector<std::string>	components;
-	components.push_back("qhy");
+	components.push_back(_modulename);
 	components.push_back(unparse());
 	return DeviceName(type, components);
 }
 
-std::string	QhyName::stringname(DeviceName::device_type type) const {
+std::string	DeviceNameUSB::stringname(DeviceName::device_type type) const {
 	return name(type).toString();
 }
 
-DeviceName	QhyName::name(DeviceName::device_type type,
+DeviceName	DeviceNameUSB::name(DeviceName::device_type type,
 			const std::string& path) const {
 	std::vector<std::string>	components;
 	std::string	work = path;
@@ -153,15 +160,15 @@ DeviceName	QhyName::name(DeviceName::device_type type,
 	return name(type, components);
 }
 
-std::string	QhyName::stringname(DeviceName::device_type type,
+std::string	DeviceNameUSB::stringname(DeviceName::device_type type,
 			const std::string& path) const {
 	return name(type, path).toString();
 }
 
-DeviceName	QhyName::name(DeviceName::device_type type,
+DeviceName	DeviceNameUSB::name(DeviceName::device_type type,
 			const std::vector<std::string>& path) const {
 	std::vector<std::string>	components;
-	components.push_back("qhy");
+	components.push_back(_modulename);
 	components.push_back(unparse());
 	std::vector<std::string>::const_iterator	i;
 	for (i = path.begin(); i != path.end(); i++) {
@@ -170,29 +177,29 @@ DeviceName	QhyName::name(DeviceName::device_type type,
 	return DeviceName(type, components);
 }
 
-std::string	QhyName::stringname(DeviceName::device_type type,
+std::string	DeviceNameUSB::stringname(DeviceName::device_type type,
 			const std::vector<std::string>& path) const {
 	return name(type, path).toString();
 }
 
-DeviceName	QhyName::cameraname() const {
+DeviceName	DeviceNameUSB::cameraname() const {
 	return name(DeviceName::Camera);
 }
 
-DeviceName	QhyName::ccdname() const {
+DeviceName	DeviceNameUSB::ccdname() const {
 	return name(DeviceName::Ccd, "Imaging");
 }
 
-DeviceName	QhyName::coolername() const {
+DeviceName	DeviceNameUSB::coolername() const {
 	return name(DeviceName::Cooler, "Imaging/cooler");
 }
 
-DeviceName	QhyName::guiderportname() const {
+DeviceName	DeviceNameUSB::guiderportname() const {
 	return name(DeviceName::Guiderport, "guiderport");
 }
 
-bool	QhyName::matches(const DeviceName& other, DeviceName::device_type type) {
-	if (other[0] != "qhy") {
+bool	DeviceNameUSB::matches(const DeviceName& other, DeviceName::device_type type) {
+	if (other[0] != _modulename) {
 		return false;
 	}
 	if (unparse() != other[1]) {
@@ -204,7 +211,7 @@ bool	QhyName::matches(const DeviceName& other, DeviceName::device_type type) {
 	return true;
 }
 
-bool	QhyName::isCamera(const DeviceName& other) {
+bool	DeviceNameUSB::isCamera(const DeviceName& other) {
 	if (!matches(other, DeviceName::Camera)) {
 		return false;
 	}
@@ -214,7 +221,7 @@ bool	QhyName::isCamera(const DeviceName& other) {
 	return true;
 }
 
-bool	QhyName::isCcd(const DeviceName& other) {
+bool	DeviceNameUSB::isCcd(const DeviceName& other) {
 	if (!matches(other, DeviceName::Ccd)) {
 		return false;
 	}
@@ -224,7 +231,7 @@ bool	QhyName::isCcd(const DeviceName& other) {
 	return (other[2] == "Imaging");
 }
 
-bool	QhyName::isCooler(const DeviceName& other) {
+bool	DeviceNameUSB::isCooler(const DeviceName& other) {
 	if (!matches(other, DeviceName::Cooler)) {
 		return false;
 	}
@@ -234,7 +241,7 @@ bool	QhyName::isCooler(const DeviceName& other) {
 	return ((other[2] == "Imaging") && (other[3] == "cooler"));
 }
 
-bool	QhyName::isGuiderport(const DeviceName& other) {
+bool	DeviceNameUSB::isGuiderport(const DeviceName& other) {
 	if (!matches(other, DeviceName::Guiderport)) {
 		return false;
 	}
@@ -243,8 +250,7 @@ bool	QhyName::isGuiderport(const DeviceName& other) {
 	}
 	return (other[2] == "guiderport");
 }
-#endif
 
-} // namespace qhy
-} // namespace camera
+} // namespace device
 } // namespace astro
+

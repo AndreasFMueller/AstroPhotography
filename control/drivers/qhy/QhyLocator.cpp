@@ -180,13 +180,15 @@ CameraPtr	QhyCameraLocator::getCamera0(const DeviceName& name) {
  * \param name	devicename for a cooler
  */
 CoolerPtr	QhyCameraLocator::getCooler0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY cooler named: %s",
+		name.toString().c_str());
 	QhyName	qhyname(name);
 	if (!qhyname.isCooler(name)) {
 		std::string	msg = stringprintf("%s is not a Cooler name",
 			name.toString().c_str());
 		throw std::runtime_error(msg);
 	}
-	DeviceName	cameraname = qhyname.coolername();
+	DeviceName	cameraname = qhyname.cameraname();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for cooler of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
@@ -195,13 +197,18 @@ CoolerPtr	QhyCameraLocator::getCooler0(const DeviceName& name) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no cooler");
 		throw NotFound("camera does not have a cooler");
 	}
-	return ccd->getCooler();
+	CoolerPtr	result = ccd->getCooler();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got cooler named '%s'",
+		result->name().toString().c_str());
+	return result;
 }
 
 /**
  * \brief Get a CCD device for a camera
  */
 CcdPtr	QhyCameraLocator::getCcd0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get QHY ccd named: %s",
+		name.toString().c_str());
 	QhyName	qhyname(name);
 	if (!qhyname.isCcd(name)) {
 		std::string	msg = stringprintf("%s is not a CCD name",

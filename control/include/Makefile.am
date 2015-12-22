@@ -28,5 +28,5 @@ noinst_HEADERS = PixelValue.h Sun.h Thread.h \
 	FocusWork.h FocusCompute.h Serial.h \
 	BasicGuiderport.h \
 	FieldPersistence.h astroregex.h \
-	Nice.h Blurr.h
+	Nice.h Blurr.h DeviceNameUSB.h
 

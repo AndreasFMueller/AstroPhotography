@@ -4,6 +4,7 @@
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <QhyCooler.h>
+#include <QhyUtils.h>
 #include <qhylib.h>
 #include <AstroDebug.h>
 
@@ -15,9 +16,8 @@ namespace qhy {
  * \brief Compute the name of the cooler
  */
 static DeviceName	qhy_coolername(const DeviceName& cameraname) {
-	DeviceName	ccdname(cameraname, DeviceName::Ccd, "Imaging");
-	DeviceName	coolername(ccdname, DeviceName::Cooler, "cooler");
-	return coolername;
+	QhyName	qhyname(cameraname);
+	return qhyname.coolername();
 }
 
 /**

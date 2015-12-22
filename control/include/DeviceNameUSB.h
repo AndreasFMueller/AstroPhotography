@@ -1,35 +1,34 @@
 /*
- * QhyUtils.h -- utilities for QHY cameras
+ * DeviceNameUSB.h -- common device naming scheme for USB devices, currently
+ *                    used by QHY and SX devices
  *
  * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _QhyUtils_h
-#define _QhyUtils_h
+#ifndef _DeviceNameUSB_h
+#define _DeviceNameUSB_h
 
 #include <AstroUSB.h>
 #include <AstroDevice.h>
-#include <DeviceNameUSB.h>
 
 namespace astro {
-namespace camera {
-namespace qhy {
-
-#define QHY_VENDOR_ID	0x1618
+namespace device {
 
 /**
- * \brief Class to encapsulate all the nameing logic
- *
- * This class encapsulates all the name related functions used in the QHY
- * driver
+ * \brief Class to encapsulate all the naming logic
  */
-class QhyName : public device::DeviceNameUSB {
-#if 0
+class DeviceNameUSB {
+	std::string	_modulename;
+	unsigned short	_modulevendor;
+public:
+	const std::string& modulename() const { return _modulename; }
+	unsigned short	modulevendor() const { return _modulevendor; }
+protected:
 	int	_busnumber;
 	int	_deviceaddress;
 public:
 	int	busnumber() const { return _busnumber; }
 	int	deviceaddress() const { return _deviceaddress; }
-private:
+protected:
 	std::string	iproduct;
 	unsigned short	idvendor;
 	unsigned short	idproduct;
@@ -38,11 +37,12 @@ private:
 	void	parse(const std::string& name);
 	std::string	unparse() const;
 	bool	matches(const DeviceName& other, DeviceName::device_type type);
-#endif
 public:
-	QhyName(astro::usb::DevicePtr deviceptr);
-	QhyName(const astro::DeviceName& devicename);
-#if 0
+	DeviceNameUSB(const std::string& modulename,
+		unsigned short modulevendor, astro::usb::DevicePtr deviceptr);
+	DeviceNameUSB(const std::string& modulename,
+		unsigned short modulevendor,
+		const astro::DeviceName& devicename);
 	DeviceName	name(DeviceName::device_type type) const;
 	DeviceName	name(DeviceName::device_type type,
 				const std::string& path) const;
@@ -61,11 +61,9 @@ public:
 	bool	isCcd(const DeviceName& other);
 	bool	isCooler(const DeviceName& other);
 	bool	isGuiderport(const DeviceName& other);
-#endif
 };
 
-} // namespace qhy
-} // namespace camera
+} // namespace device
 } // namespace astro
 
-#endif /* _QhyUtils_h */
+#endif /* _DeviceNameUSB_h */
