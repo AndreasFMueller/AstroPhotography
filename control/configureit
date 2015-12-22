@@ -26,7 +26,7 @@ commonflags="${commonflags} --enable-sx"
 
 # check whether the libqhyccd library is installed, and build the qhy
 # driver if it is
-if [ -d /usr/local/include/libqhyccd ]
+if [ -f /usr/local/include/qhylib.h ]
 then
 	commonflags="${commonflags} --enable-qhy"
 fi

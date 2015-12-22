@@ -8,6 +8,7 @@
 
 #include <AstroLocator.h>
 #include <AstroCamera.h>
+#include <AstroUSB.h>
 
 using namespace astro::device;
 
@@ -21,6 +22,7 @@ namespace qhy {
  * This is essentially a wrapper about the QSI repository functions
  */
 class QhyCameraLocator : public DeviceLocator {
+	usb::Context	context;
 public:
 	QhyCameraLocator();
 	virtual ~QhyCameraLocator();
@@ -29,6 +31,9 @@ public:
 	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
+	virtual CoolerPtr	getCooler0(const DeviceName& name);
+	virtual CcdPtr	getCcd0(const DeviceName& name);
+	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
 };
 
 } // namespace qhy

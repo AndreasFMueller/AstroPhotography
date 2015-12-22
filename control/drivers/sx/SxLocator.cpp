@@ -141,27 +141,25 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 			DevicePtr	devptr = *i;
 			devptr->open();
 			try {
+				std::string	n = sxname(devptr);
 				if (device == DeviceName::Camera) {
-					names.push_back("camera:sx/"
-						+ sxname(devptr));
+					names.push_back("camera:sx/" + n);
 				}
 				if (device == DeviceName::Ccd) {
 					// all devices have an imaging ccd
-					names.push_back("ccd:sx/"
-						+ sxname(devptr));
+					names.push_back("ccd:sx/" + n);
 				}
 				if (device == DeviceName::Guiderport) {
 					// we assume that all devices have an
 					// Imaging CCD
-					names.push_back("guiderport:sx/"
-						+ sxname(devptr));
+					names.push_back("guiderport:sx/" + n);
 				}
 				if (device == DeviceName::Cooler) {
 					// guide cams and the all sky cam do
 					// not have a cooler, all others do
 					if (has_cooler(devptr->descriptor()->idProduct())) {
 						names.push_back("cooler:sx/"
-							+ sxname(devptr));
+							+ n);
 					}
 				}
 			} catch (std::runtime_error& x) {
