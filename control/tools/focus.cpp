@@ -31,30 +31,67 @@ namespace astro {
 namespace app {
 namespace focus {
 
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Take an image and compute a focus figure of merit"
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    -C,--camera=<cameraid>   select camera id"
+		<< std::endl;
+	std::cout << "    -c,--ccd=<ccdid>         select ccd id"
+		<< std::endl;
+	std::cout << "    -d,--debug               increase debug level"
+		<< std::endl;
+	std::cout << "    -e,--exposure=<time>     use exposure time <time>"
+		<< std::endl;
+	std::cout << "    -l,--length=<l>          size of the crop used for "
+		"focus" << std::endl;
+	std::cout << "    -m,--module<module>      use module named <module>"
+		<< std::endl;
+	std::cout << "    -h,-?,--help             show this help message and "
+		"exit" << std::endl;
+}
+
+static struct option	longopts[] = {
+{ "camera",	required_argument,	NULL,	'C' }, /* 0 */
+{ "ccd",	required_argument,	NULL,	'c' }, /* 1 */
+{ "debug",	no_argument,		NULL,	'd' }, /* 2 */
+{ "exposure",	required_argument,	NULL,	'e' }, /* 3 */
+{ "length",	required_argument,	NULL,	'l' }, /* 4 */
+{ "module",	required_argument,	NULL,	'm' }, /* 5 */
+{ "help",	no_argument,		NULL,	'h' }, /* 5 */
+{ NULL,		0,			NULL,	 0  }, /* 6 */
+};
+
 /**
  * \brief main function for the focus program
  */
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	double	exposuretime = 0.1;
 	unsigned int	cameraid = 0;
 	unsigned int	ccdid = 0;
 	int	length = 512;
 	std::string	cameratype("uvc");
 
-	while (EOF != (c = getopt(argc, argv, "de:m:c:C:l:")))
+	while (EOF != (c = getopt_long(argc, argv, "de:m:c:C:l:",
+		longopts, &longindex)))
 		switch (c) {
-		case 'd':
-			debuglevel = LOG_DEBUG;
-			break;
-		case 'm':
-			cameratype = std::string(optarg);
-			break;
 		case 'C':
 			cameraid = atoi(optarg);
 			break;
 		case 'c':
 			ccdid = atoi(optarg);
+			break;
+		case 'd':
+			debuglevel = LOG_DEBUG;
 			break;
 		case 'e':
 			exposuretime = atof(optarg);
@@ -62,6 +99,12 @@ int	main(int argc, char *argv[]) {
 		case 'l':
 			length = atoi(optarg);
 			break;
+		case 'm':
+			cameratype = std::string(optarg);
+			break;
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// get the camera
