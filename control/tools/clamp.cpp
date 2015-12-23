@@ -24,9 +24,10 @@ namespace clamp {
 static struct option	longopts[] = {
 /* name		argument?		int*		int */
 { "debug",	no_argument,		NULL,		'd' }, /* 0 */
-{ "min",	required_argument,	NULL,		'm' }, /* 1 */
-{ "max",	required_argument,	NULL,		'M' }, /* 2 */
-{ "help",	no_argument,		NULL,		'h' }, /* 3 */
+{ "force",	no_argument,		NULL,		'f' }, /* 1 */
+{ "min",	required_argument,	NULL,		'm' }, /* 2 */
+{ "max",	required_argument,	NULL,		'M' }, /* 3 */
+{ "help",	no_argument,		NULL,		'h' }, /* 4 */
 { NULL,		0,			NULL,		 0  }
 };
 
@@ -39,6 +40,8 @@ void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << std::endl;
+	std::cout << "  -f,--force    force overwriting of output file"
+		<< std::endl;
 	std::cout << "  -m,--min=min  clamp the image values to at least <min>"
 		<< std::endl;
 	std::cout << "  -M,--max=max  clamp the image values to at most <max>"
@@ -54,6 +57,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	double	minvalue = -1;
 	double	maxvalue = -1;
+	bool	force = false;
 
 	// parse the command line
 	int	longindex;
@@ -62,6 +66,9 @@ int	main(int argc, char *argv[]) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'f':
+			force = true;
 			break;
 		case 'm':
 			minvalue = atof(optarg);
@@ -106,6 +113,7 @@ int	main(int argc, char *argv[]) {
 	// after all the calibrations have been performed, write the output
 	// file
 	FITSout	outfile(outfilename);
+	outfile.setPrecious(!force);
 	outfile.write(image);
 
 	// that's it
