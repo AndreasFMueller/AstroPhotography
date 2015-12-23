@@ -36,7 +36,7 @@ namespace imageloop {
 /**
  * \brief Usage of the imageloop program
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	p(progname);
 	std::cout << "usage: " << std::endl;
 	std::cout << "    " << std::endl;

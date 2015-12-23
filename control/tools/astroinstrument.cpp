@@ -37,7 +37,7 @@ static struct option	longopts[] = {
 /**
  * \brief Usage function for the 
  */
-void	usage(const std::string& progname) {
+static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;

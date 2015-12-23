@@ -33,7 +33,7 @@ namespace astro {
 namespace app {
 namespace getimages {
 
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ]" << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"

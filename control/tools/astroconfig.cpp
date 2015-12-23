@@ -36,7 +36,7 @@ static struct option	longopts[] = {
 /**
  * \brief usage message
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cerr << "usage:" << std::endl;

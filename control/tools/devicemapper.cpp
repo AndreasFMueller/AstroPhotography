@@ -173,7 +173,7 @@ int	remove_cmd(const std::vector<std::string>& arguments) {
 /**
  * \brief Display commands 
  */
-void	usage(const std::string& progname) {
+static void	usage(const std::string& progname) {
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
 	std::string	p = "    " + Path(progname).basename();

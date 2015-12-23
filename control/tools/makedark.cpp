@@ -24,7 +24,7 @@ namespace makedark {
  *
  * \brief progname	Path to the program (likek argv[0])
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	p(progname);
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;

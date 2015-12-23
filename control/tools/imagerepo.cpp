@@ -273,7 +273,7 @@ int	command_show(const std::string& reponame,
 /**
  * \brief Usage function in 
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	path(progname);
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;

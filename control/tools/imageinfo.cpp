@@ -119,7 +119,7 @@ int	show_imagerepo(const std::string& argument) {
 /**
  * \brief usage function for the imageinfo program
  */
-void	usage(const std::string& progname) {
+static void	usage(const std::string& progname) {
 	std::cout << "Usage:" << std::endl;
 	Path	path(progname);
 	std::cout << path.basename() << " [ options ] images ..." << std::endl;

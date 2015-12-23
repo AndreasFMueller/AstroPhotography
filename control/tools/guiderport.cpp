@@ -17,7 +17,7 @@ namespace astro {
 namespace app {
 namespace guiderport {
 
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	std::string	p = "    " + Path(progname).basename();
 	std::cout << p << " <guiderportname> <prognumber>" << std::endl;
 	std::cout << std::endl;

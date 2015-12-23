@@ -35,7 +35,7 @@ static struct option	longopts[] = {
 /**
  * \brief usage
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] infile outfile"
 		<< std::endl;
 	std::cout << std::endl;
