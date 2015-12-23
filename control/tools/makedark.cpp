@@ -19,17 +19,34 @@ namespace astro {
 namespace app {
 namespace makedark {
 
+/**
+ * \brief Display usage help for the makedark program
+ *
+ * \brief progname	Path to the program (likek argv[0])
+ */
 void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ] darkimages"
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ] darkimages"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout <<"Computes a consolidated dark image from a set of images"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -d             increase debug level" << std::endl;
-	std::cout << "  -h, -?         show this help message" << std::endl;
-	std::cout << "  -o outfile     filename of the output dark image"
+	std::cout << "    -d,--debug                    increase debug level" << std::endl;
+	std::cout << "    -h,-?,--help                  show this help message" << std::endl;
+	std::cout << "    -o,--outfile=<outfile.fits>   filename of the output dark image"
 		<< std::endl;
 }
+
+static struct option	longopts[] = {
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "help",		no_argument,		NULL,	'h' }, /* 1 */
+{ "outfile",		required_argument,	NULL,	'o' }, /* 2 */
+{ NULL,			0,			NULL,	 0  }, /* 3 */
+};
 
 /**
  * \brief Main function for makedark tool 
@@ -40,7 +57,9 @@ void	usage(const char *progname) {
 int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "do:")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "do:h?",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
