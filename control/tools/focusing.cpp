@@ -53,8 +53,51 @@ public:
 	}
 };
 
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Focus using the given CCD and focuser" << std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    -a,--algorithm=<method>  select focusing method (FWHM,FOM)" << std::endl;
+	std::cout << "    -d,--debug               increase debug level" << std::endl;
+	std::cout << "    -m,--min=<min>           minimum focuser position" << std::endl;
+	std::cout << "    -M,--max=<max>           maximum focuser position" << std::endl;
+	std::cout << "    -C,--ccd=<ccdname>       CCD to use for focusing" << std::endl;
+	std::cout << "    -s,--steps=<steps>       number of steps to take during focusing" << std::endl;
+	std::cout << "    -e,--exposure=<time>     exposure time" << std::endl;
+	std::cout << "    -F,--focuser=<name>      focuser name to use" << std::endl;
+	std::cout << "    -x,--x=<x>               x coordinate of focusing area" << std::endl;
+	std::cout << "    -y,--y=<y>               y coordinate of focusing area" << std::endl;
+	std::cout << "    -h,--height=<height>     height of focusing area" << std::endl;
+	std::cout << "    -w,--width=<width>       width of focusing area" << std::endl;
+	std::cout << std::endl;
+}
+
+static struct option	longopts[] = {
+{ "algorithm",	required_argument,	NULL,	'a' }, /*  0 */
+{ "debug",	required_argument,	NULL,	'd' }, /*  1 */
+{ "min",	required_argument,	NULL,	'm' }, /*  2 */
+{ "max",	required_argument,	NULL,	'M' }, /*  3 */
+{ "ccd",	required_argument,	NULL,	'C' }, /*  4 */
+{ "steps",	required_argument,	NULL,	's' }, /*  5 */
+{ "exposure",	required_argument,	NULL,	'e' }, /*  6 */
+{ "focuser",	required_argument,	NULL,	'F' }, /*  7 */
+{ "x",		required_argument,	NULL,	'x' }, /*  8 */
+{ "y",		required_argument,	NULL,	'y' }, /*  9 */
+{ "height",	required_argument,	NULL,	'h' }, /* 10 */
+{ "width",	required_argument,	NULL,	'w' }, /* 11 */
+{ "help",	required_argument,	NULL,	'?' }, /* 12 */
+{ NULL,		0,			NULL,	 0  },
+};
+
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	unsigned short	min = 24000;
 	unsigned short	max = 40000;
 	int	steps = 10;
@@ -66,7 +109,8 @@ int	main(int argc, char *argv[]) {
 	int	width = -1;
 	int	height = -1;
 	Focusing::method_type	method = Focusing::FWHM;
-	while (EOF != (c = getopt(argc, argv, "dm:M:C:F:s:e:x:y:w:h:a:")))
+	while (EOF != (c = getopt_long(argc, argv, "dm:M:C:F:s:e:x:y:w:h:a:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -105,6 +149,9 @@ int	main(int argc, char *argv[]) {
 		case 'a':
 			method = Focusing::string2method(optarg);
 			break;
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing process");
