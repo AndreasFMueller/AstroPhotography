@@ -1,4 +1,4 @@
-/**
+/*
  * calibrate images using darks and flats
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
@@ -26,31 +26,49 @@ namespace app {
 namespace calibrate {
 
 /**
- * \brief usage
+ * \brief usage function to display command help
  */
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ] infile outfile"
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ] infile outfile"
 		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -D dark   use image file <dark> for dark correction"
+	std::cout << std::endl;
+	std::cout << "  -D,--dark=<dark.fits>   use image file <dark> for dark correction"
 		<< std::endl;
-	std::cout << "  -F flat   use image file <flat> for flat correction"
+	std::cout << "  -F,--flat=<flat.fits>   use image file <flat> for flat correction"
 		<< std::endl;
-	std::cout << "  -m min    clamp the image values to at least <min>"
+	std::cout << "  -m,--min=<min>          clamp the image values to at least <min>"
 		<< std::endl;
-	std::cout << "  -M max    clamp the image values to at most <max>"
+	std::cout << "  -M,--max=<max>          clamp the image values to at most <max>"
 		<< std::endl;
-	std::cout << "  -b        demosaic bayer images" << std::endl;
-	std::cout << "  -i        interpolate bad pixels" << std::endl;
-	std::cout << "  -d        increase debug level" << std::endl;
-	std::cout << "  -h, -?    show this help message" << std::endl;
+	std::cout << "  -b,--bayer              demosaic bayer images" << std::endl;
+	std::cout << "  -i,--interpolate        interpolate bad pixels" << std::endl;
+	std::cout << "  -d,--debug              increase debug level" << std::endl;
+	std::cout << "  -h,-?,--help            show this help message" << std::endl;
 }
+
+static struct option	longopts[] = {
+{ "bayer",		no_argument,		NULL,	'b' }, /* 0 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 1 */
+{ "dark",		required_argument,	NULL,	'D' }, /* 2 */
+{ "flat",		required_argument,	NULL,	'F' }, /* 3 */
+{ "help",		no_argument,		NULL,	'h' }, /* 4 */
+{ "min",		required_argument,	NULL,	'm' }, /* 5 */
+{ "max",		required_argument,	NULL,	'M' }, /* 6 */
+{ "interpolate",	no_argument,		NULL,	'i' }, /* 7 */
+{ NULL,			0,			NULL,	 0  }, /* 8 */
+};
 
 /**
  * \brief Main function in astro namespace
  */
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	const char	*darkfilename = NULL;
 	const char	*flatfilename = NULL;
 	double	minvalue = -1;
@@ -59,8 +77,12 @@ int	main(int argc, char *argv[]) {
 	bool	interpolate = false;
 
 	// parse the command line
-	while (EOF != (c = getopt(argc, argv, "dD:F:?hm:M:bi")))
+	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hm:M:bi",
+		longopts, &longindex)))
 		switch (c) {
+		case 'b':
+			demosaic = true;
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
@@ -70,22 +92,18 @@ int	main(int argc, char *argv[]) {
 		case 'F':
 			flatfilename = optarg;
 			break;
+		case '?':
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
+		case 'i':
+			interpolate = true;
+			break;
 		case 'm':
 			minvalue = atof(optarg);
 			break;
 		case 'M':
 			maxvalue = atof(optarg);
-			break;
-		case 'b':
-			demosaic = true;
-			break;
-		case 'i':
-			interpolate = true;
-			break;
-		case '?':
-		case 'h':
-			usage(argv[0]);
-			return EXIT_SUCCESS;
 			break;
 		}
 
