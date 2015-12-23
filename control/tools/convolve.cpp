@@ -16,14 +16,50 @@ namespace astro {
 namespace app {
 namespace convolve {
 
+/**
+ * \brief display a help message
+ */
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename()
+		<< " [ options ] <in1.fits> <in2.fits> <out.fits>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Compute the convolution of the two images in files "
+		"<in1.fits> and <in2.fits>" << std::endl;
+	std::cout << "and store the result in the faile <out.fits>."
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    -d,--debug    increase debug level" << std::endl;
+	std::cout << "    -h,--help    increase debug level" << std::endl;
+}
+
+static struct option	longopts[] = {
+{ "debug",	no_argument,	NULL,	'd' }, /* 0 */
+{ "help",	no_argument,	NULL,	'h' }, /* 1 */
+{ NULL,		0,		NULL,	 0  }, /* 2 */
+};
+
+/**
+ * \brief main function for the convolve program
+ */
 int	main(int argc, char *argv[]) {
 	// parse command line
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "d")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "dh?",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// next two arguments must be filenames
