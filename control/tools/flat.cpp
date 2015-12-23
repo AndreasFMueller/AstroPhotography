@@ -23,22 +23,48 @@ namespace astro {
 namespace app {
 namespace flat {
 
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ]" << std::endl;
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ]" << std::endl;
+	std::cout << std::endl;
 	std::cout << "Computes a consolidated flat image from a set of images"
 		<< std::endl;
 	std::cout << "recorded by this program" << std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -d             increase debug level" << std::endl;
-	std::cout << "  -e <time>      set exposure time to <time>" << std::endl;
-	std::cout << "  -n <nimages>   build dark composed of <nimages> individual images" << std::endl;
-	std::cout << "  -t <temp>      cool CCD to temperature <temp>" << std::endl;
-	std::cout << "  -D <dark>      use the dark frame from file <dark> to correct all" << std::endl;
-	std::cout << "                 prior to inclusion into the flat frame computation" << std::endl;
-	std::cout << "  -h, -?         show this help message" << std::endl;
-	std::cout << "  -o outfile     filename of the output dark image"
+	std::cout << std::endl;
+	std::cout << "    -d,--debug               increase debug level"
 		<< std::endl;
+	std::cout << "    -e,--exposure=<time>     set exposure time to <time>"
+		<< std::endl;
+	std::cout << "    -n,--number=<nimages>    build dark composed of "
+		"<nimages> individual images" << std::endl;
+	std::cout << "    -t,--temperature <temp>  cool CCD to temperature "
+		"<temp>" << std::endl;
+	std::cout << "    -D,--dark=<dark>         use the dark frame from file"
+		" <dark> to correct all" << std::endl;
+	std::cout << "                             prior to inclusion into the "
+		"flat frame computation" << std::endl;
+	std::cout << "    -h,-?,--help             show this help message"
+		<< std::endl;
+	std::cout << "    -o,--outfile=<outfile>   filename of the output dark "
+		"image" << std::endl;
 }
+
+static struct option	longopts[] = {
+{ "camera",		required_argument,	NULL,	'C' }, /* 0 */
+{ "ccd",		required_argument,	NULL,	'c' }, /* 1 */
+{ "dark",		required_argument,	NULL,	'D' }, /* 2 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 3 */
+{ "exposure",		required_argument,	NULL,	'e' }, /* 4 */
+{ "module",		required_argument,	NULL,	'm' }, /* 5 */
+{ "number",		required_argument,	NULL,	'n' }, /* 6 */
+{ "outfile",		required_argument,	NULL,	'd' }, /* 7 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 8 */
+{ "help",		no_argument,		NULL,	'h' }, /* 9 */
+};
 
 /**
  * \brief Main function for makedark tool 
@@ -53,11 +79,13 @@ int	main(int argc, char *argv[]) {
 	float	temperature = 0;
 	const char	*outfilename = NULL;
 	int	c;
+	int	longindex;
 	int	cameranumber = 0;
 	int	ccdid = 0;
 	const char	*modulename = "uvc";
 	const char	*darkfilename = NULL;
-	while (EOF != (c = getopt(argc, argv, "do:t:n:h?m:C:c:e:D:")))
+	while (EOF != (c = getopt_long(argc, argv, "do:t:n:h?m:C:c:e:D:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
