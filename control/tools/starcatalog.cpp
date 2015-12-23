@@ -50,13 +50,61 @@ void	areamain(CatalogPtr catalog, double minmag) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%u stars found", counter);
 }
 
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ] star <starname>"
+		<< std::endl;
+	std::cout << "    " << p.basename() << " [ options ] area <minag>"
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "extract a star by name from the catalog (first syntax) "
+		"or extract stars" << std::endl;
+	std::cout << "in an area determined by the RA and DEC options "
+		"(second syntax). In the " << std::endl;
+	std::cout << "latter case, only display stars brighter than <minmag>."
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    -d,--debug             increase debug level"
+		<< std::endl;
+	std::cout << "    -p,--path=<path>       path to the star catalogs"
+		<< std::endl;
+	std::cout << "    -R,--ra=<ra>           right ascension of center"
+		<< std::endl;
+	std::cout << "    -D,--dec=<dec>         declination of center"
+		<< std::endl;
+	std::cout << "    -H,--height=<height>   angular height of image"
+		<< std::endl;
+	std::cout << "    -W,--width=<width>     angular width of image"
+		<< std::endl;
+	std::cout << "    -h,-?,--help           display this help emssage"
+		<< std::endl;
+	std::cout << std::endl;
+}
+
+static struct option	longopts[] = {
+{ "debug",	no_argument,		NULL,	'd' }, /* 0 */
+{ "path",	required_argument,	NULL,	'p' }, /* 1 */
+{ "ra",		required_argument,	NULL,	'R' }, /* 2 */
+{ "dec",	required_argument,	NULL,	'D' }, /* 3 */
+{ "height",	required_argument,	NULL,	'H' }, /* 4 */
+{ "width",	required_argument,	NULL,	'W' }, /* 5 */
+{ "help",	required_argument,	NULL,	'h' }, /* 6 */
+{ NULL,		0,			NULL,	 0  }, /* 7 */
+};
+
 /**
  * \brief Main function for the starcatalog program
  */
 int	main(int argc, char *argv[]) {
 	int	c;
+	int	longindex;
 	std::string	path("/usr/local/starcatalogs");
-	while (EOF != (c = getopt(argc, argv, "dp:m:R:D:H:W:")))
+	while (EOF != (c = getopt_long(argc, argv, "dp:R:D:H:W:h?",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -76,6 +124,10 @@ int	main(int argc, char *argv[]) {
 		case 'W':
 			rawidth.degrees(atof(optarg));
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// open the star catalog
