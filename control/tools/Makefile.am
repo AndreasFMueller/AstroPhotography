@@ -22,7 +22,7 @@ bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
 	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
 	devicemapper astroinstrument astromount astroproject rescale \
-	gammacorrect convolve background
+	gammacorrect convolve background crop
 
 noinst_PROGRAMS = guiderport 
 
@@ -81,6 +81,10 @@ stack_LDADD = -L$(top_builddir)/lib -lastro
 clamp_SOURCES = clamp.cpp
 clamp_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 clamp_LDADD = -L$(top_builddir)/lib -lastro 
+
+crop_SOURCES = crop.cpp
+crop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+crop_LDADD = -L$(top_builddir)/lib -lastro 
 
 rescale_SOURCES = rescale.cpp
 rescale_DEPENDENCIES = $(top_builddir)/lib/libastro.la

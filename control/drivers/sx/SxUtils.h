@@ -14,6 +14,7 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+extern std::string	command_name(int command);
 
 class SxError : public std::runtime_error {
 public:

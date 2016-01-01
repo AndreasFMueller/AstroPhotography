@@ -301,7 +301,11 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd: %s",
 		ccdinfo[ccdindex].toString().c_str());
-	return CcdPtr(new SxCcd(ccdinfo[ccdindex], *this, ccdindex));
+	SxCcd	*ccd = new SxCcd(ccdinfo[ccdindex], *this, ccdindex);
+	if ((product == 0x0126) || (model == 0x0010)) {
+		ccd->needs_read_pixels(true);
+	}
+	return CcdPtr(ccd);
 }
 
 /**
@@ -346,12 +350,14 @@ void	SxCamera::controlRequest(RequestBase *request) {
 		deviceptr->controlRequest(request);
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request %p on data interface, "
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"control request for command '%s' on data interface, "
 		"request = %02x, requesttype = %02x,  wValue = %04x, "
 		"wIndex = %04x, wLength = %04x",
-		request,
+		command_name(request->bRequest()).c_str(),
 		request->bRequest(), request->bmRequestType(),
 		request->wValue(), request->wIndex(), request->wLength());
+	request->setTimeout(10000);
 
 	// we first analyse whether this is a control request with a
 	// in data phase, because then the packet size to send is just
@@ -372,8 +378,12 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	BulkTransfer	out(outendpoint, sendlength,
 		(unsigned char *)request->getPacket());
 	if (0 == receivelength) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
-			request->payloadHex().c_str());
+		if (request->wLength() > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
+				request->payloadHex().c_str());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no request payload");
+		}
 	}
 	try {
 		deviceptr->submit(&out);

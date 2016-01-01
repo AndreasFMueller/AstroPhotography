@@ -109,7 +109,8 @@ int	main(int argc, char *argv[]) {
 
 	// two more arguments are required: infile and outfile
 	if (2 != argc - optind) {
-		std::string	msg("wrong number of arguments");
+		std::string	msg = stringprintf("wrong number of arguments: "
+			"%d instead of 2", argc - optind);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}

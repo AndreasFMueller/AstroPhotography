@@ -107,14 +107,12 @@ bool	Cooler::isOn() {
  */
 void	Cooler::addTemperatureMetadata(ImageBase& image) {
 	// if the cooler is not on, then there is nothing to add to the image
-	if (!isOn()) {
-		return;
+	if (isOn()) {
+		// add set temperature information to the image (SET-TEMP)
+		image.setMetadata(
+			FITSKeywords::meta(std::string("SET-TEMP"),
+				this->getSetTemperature() - 273.1));
 	}
-
-	// add set temperature information to the image (SET-TEMP)
-	image.setMetadata(
-		FITSKeywords::meta(std::string("SET-TEMP"),
-			this->getSetTemperature() - 273.1));
 	
 	// add actual temperature info to the image (CCD-TEMP)
 	try {

@@ -66,6 +66,8 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "                       or flat";
 	std::cout << std::endl;
+	std::cout << " -P,--project=<proj>   Project name to store with the "
+		"image" << std::endl;
 	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
 		"specified by <rec>.";
 	std::cout << std::endl;
@@ -94,6 +96,7 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /*  6 */
 { "number",		required_argument,	NULL,	'n' }, /*  8 */
 { "purpose",		required_argument,	NULL,	'p' }, /*  9 */
+{ "project",		required_argument,	NULL,	'P' }, /*  9 */
 { "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
 { "repo",		required_argument,	NULL,	'r' }, /* 11 */
 { "temperature",	required_argument,	NULL,	't' }, /* 12 */
@@ -119,6 +122,9 @@ int	main(int argc, char *argv[]) {
 	astro::camera::Exposure::purpose_t	purpose
 		= astro::camera::Exposure::light;
 
+	// project
+	std::string	project;
+
 	// focus position
 	unsigned short	focusposition = 0;
 
@@ -128,7 +134,7 @@ int	main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:C:c:de:f:F:hn:p:r:t:",
+	while (EOF != (c = getopt_long(argc, argv, "b:C:c:de:f:F:hn:p:P:r:t:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
@@ -160,6 +166,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'p':
 			purpose = astro::camera::Exposure::string2purpose(optarg);
+			break;
+		case 'P':
+			project = std::string(optarg);
 			break;
 		case 'r':
 			reponame = optarg;
@@ -293,6 +302,12 @@ int	main(int argc, char *argv[]) {
 		if (!imageptr->hasMetadata(std::string("INSTRUME"))) {
 			imageptr->setMetadata(astro::io::FITSKeywords::meta(
 				std::string("INSTRUME"), instrumentname));
+		}
+
+		// add the project information to the 
+		if (project.size() > 0) {
+			imageptr->setMetadata(astro::io::FITSKeywords::meta(
+				std::string("PROJECT"), project));
 		}
 
 		// write the image to the repository

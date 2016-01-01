@@ -45,15 +45,16 @@ void	ChartTest::tearDown() {
 #define CENTER_36UMA		5
 #define CENTER_M31		6
 #define CENTER_POLARIS		7
+#define CENTER_PLEJADEN		8
 
-static int	centerpoint = CENTER_POLARIS;
+static int	centerpoint = CENTER_PLEJADEN;
 
 #define CAMERA_SXMC26C_50MM	0
 #define CAMERA_SXMC26C_135MM	1
 #define CAMERA_SXMC26C_560MM	2
 #define CAMERA_SBIG_2800MM	3
 
-static int	camera = CAMERA_SBIG_2800MM;
+static int	camera = CAMERA_SXMC26C_560MM;
 
 #define PSF_TURBULENCE	0
 #define PSF_DIFFRACTION	1
@@ -122,6 +123,11 @@ void	ChartTest::testImage() {
 		center.dec().degrees(89 + 15./60 + 50.8/3600);
 		limit_mag = 10;
 		scale = 0.001;
+		break;
+	case CENTER_PLEJADEN:
+		// M45
+		center.ra().hours(3. + 47.4/60);
+		center.dec().degrees(24 + 7./60);
 		break;
 	}
 

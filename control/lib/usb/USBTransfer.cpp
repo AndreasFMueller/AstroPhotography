@@ -76,6 +76,29 @@ unsigned char	*BulkTransfer::getData() const {
 }
 
 /**
+ * \brief convert the status to a string
+ */
+static const char	*usb_status_name(int status) {
+	switch (status) {
+	case LIBUSB_TRANSFER_ERROR:
+		return "transfer error";
+	case LIBUSB_TRANSFER_TIMED_OUT:
+		return "transfer timed out";
+	case LIBUSB_TRANSFER_CANCELLED:
+		return "transfer cancelled";
+	case LIBUSB_TRANSFER_STALL:
+		return "transfer stall";
+	case LIBUSB_TRANSFER_NO_DEVICE:
+		return "transfer no device";
+	case LIBUSB_TRANSFER_OVERFLOW:
+		return "transfer overflow";
+	case LIBUSB_TRANSFER_COMPLETED:
+		return NULL;
+	}
+	return "UNKNOWN";
+}
+
+/**
  * \brief Submit a bulk transfer to the device.
  *
  * This method allocates and fills the bulk transfer, and submits it to
@@ -93,6 +116,8 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 		length, bulktransfer_callback, this, timeout);
 
 	// submit the transfer
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting bulk transfer, timeout = %d",
+		timeout);
 	int	rc = libusb_submit_transfer(transfer);
 	if (rc != LIBUSB_SUCCESS) {
 		throw USBError(libusb_error_name(rc));
@@ -106,29 +131,7 @@ void	BulkTransfer::submit(libusb_device_handle *dev_handle) throw(USBError) {
 
 	// at this point, the transfer has somehow completed, but we
 	// don't know yet what happened.
-	const char	*cause = NULL;
-	switch (transfer->status) {
-	case LIBUSB_TRANSFER_ERROR:
-		cause = "transfer error";
-		break;
-	case LIBUSB_TRANSFER_TIMED_OUT:
-		cause = "transfer timed out";
-		break;
-	case LIBUSB_TRANSFER_CANCELLED:
-		cause = "transfer cancelled";
-		break;
-	case LIBUSB_TRANSFER_STALL:
-		cause = "transfer stall";
-		break;
-	case LIBUSB_TRANSFER_NO_DEVICE:
-		cause = "transfer no device";
-		break;
-	case LIBUSB_TRANSFER_OVERFLOW:
-		cause = "transfer overflow";
-		break;
-	case LIBUSB_TRANSFER_COMPLETED:
-		break;
-	}
+	const char	*cause = usb_status_name(transfer->status);
 	if (NULL != cause) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "transfer failed: %s", cause);
 		throw USBError(cause);
@@ -163,7 +166,8 @@ BulkTransfer::~BulkTransfer() {
  * method overridden.
  */
 void	BulkTransfer::callback(libusb_transfer *transfer) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "transfer status: %d, %s %d bytes",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"callback: transfer status: %d, %s %d bytes",
 		transfer->status,
 		(endpoint->bEndpointAddress() & 0x80) ? "got" : "sent",
 		transfer->actual_length);
