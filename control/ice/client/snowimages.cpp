@@ -62,9 +62,9 @@ static void	usage(const char *progname) {
 			"settings";
 	std::cout << std::endl;
 	std::cout << " -p,--purpose=<p>      images have purpose <p>, i.e. one "
-		"of light, dark";
+		"of light, dark, flat,";
 	std::cout << std::endl;
-	std::cout << "                       or flat";
+	std::cout << "                       bias or test";
 	std::cout << std::endl;
 	std::cout << " -P,--project=<proj>   Project name to store with the "
 		"image" << std::endl;
@@ -261,11 +261,13 @@ int	main(int argc, char *argv[]) {
 	if (ri.has(InstrumentCooler)) {
 		cooler = ri.cooler();
 	}
+	CoolerTaskPtr	coolertask;
+	typedef std::shared_ptr<CoolerTask>	CoolerTaskPtr;
 	if (temperature == temperature) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting temperature to %.1f",
 			temperature);
-		CoolerTask	coolertask(cooler, temperature);
-		coolertask.wait();
+		coolertask = CoolerTaskPtr(new CoolerTask(cooler, temperature));
+		coolertask->wait();
 	}
 
 	// prepare an exposure object

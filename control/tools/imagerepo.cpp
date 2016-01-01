@@ -59,9 +59,9 @@ int	command_list(const std::string& reponame) {
 		return EXIT_SUCCESS;
 	}
 	std::cout << "id   instrument size       purpose bin   exp  temp "
-		"observation    project  ";
+		"observation    project       ";
 	if (verbose) {
-		std::cout << "UUID                                ";
+		std::cout << " UUID                                 ";
 		std::cout << "filename";
 	}
 	std::cout << std::endl;
@@ -77,16 +77,27 @@ int	command_list(const std::string& reponame) {
 				Exposure::purpose2string(image.purpose()).c_str());
 			std::cout << stringprintf("%-3.3s ",
 				image.binning().toString().substr(1,3).c_str());
-			std::cout << stringprintf("%5.0f",
-				image.exposuretime());
+			if (image.exposuretime() < 10) {
+				std::cout << stringprintf("%5.3f",
+					image.exposuretime());
+			} else if (image.exposuretime() < 100) {
+				std::cout << stringprintf("%5.2f",
+					image.exposuretime());
+			} else if (image.exposuretime() < 1000) {
+				std::cout << stringprintf("%5.1f",
+					image.exposuretime());
+			} else {
+				std::cout << stringprintf("%5.0f",
+					image.exposuretime());
+			}
 			std::cout << stringprintf("%6.1f ",
 				image.temperature());
 			std::cout << timeformat("%d.%m.%y %H:%M ",
 				image.observation());
-			std::cout << stringprintf("%-8.8s ",
+			std::cout << stringprintf("%-14.14s",
 				image.project().c_str());
 			if (verbose) {
-				std::cout << stringprintf("%-36.36s ",
+				std::cout << stringprintf(" %-36.36s ",
 					((std::string)image.uuid()).c_str());
 				std::cout << image.filename();
 			}

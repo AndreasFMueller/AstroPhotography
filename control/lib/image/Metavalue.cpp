@@ -24,7 +24,8 @@ void	Metavalue::standardize() {
 			value.c_str());
 		value = trim(value);
 		if ((value != "dark") && (value != "flat")
-			&& (value != "light")) {
+			&& (value != "light") && (value != "bias")
+			&& (value != "test")) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "illegal purpose: [%s]",
 				value.c_str());
 			throw std::runtime_error("illegal value for PURPOSE");

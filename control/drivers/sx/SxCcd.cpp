@@ -52,6 +52,7 @@ void	start_routine(SxCcd *ccd) {
  * that performs the getImage0 method which will retrieve the image. 
  */
 void	SxCcd::startExposure(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "SxCcd::startExposure called");
 	Ccd::startExposure(exposure);
 
 	// create a new thread
