@@ -162,10 +162,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		// read the data from the data endpoint
 		BulkTransfer	transfer(camera.getEndpoint(),
 			sizeof(unsigned short) * size, (unsigned char *)data);
-
-		// timeout depends on the actual data size we want to transfer
-		int	timeout = 1100 * exposure.exposuretime() + 30000;
-		transfer.setTimeout(timeout);
+		transfer.setTimeout(10000);
 
 		// submit the transfer
 		try {

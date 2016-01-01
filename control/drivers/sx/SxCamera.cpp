@@ -345,6 +345,9 @@ InterfacePtr	SxCamera::getInterface() {
  * rather reimplement control request handling via the bulk endpoints.
  */
 void	SxCamera::controlRequest(RequestBase *request) {
+	if (request->getTimeout() <= 1000) {
+		request->setTimeout(10000);
+	}
 	if (useControlRequests) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface");
 		deviceptr->controlRequest(request);
@@ -377,6 +380,7 @@ void	SxCamera::controlRequest(RequestBase *request) {
 		request->getPacket());
 	BulkTransfer	out(outendpoint, sendlength,
 		(unsigned char *)request->getPacket());
+	out.setTimeout(request->getTimeout());
 	if (0 == receivelength) {
 		if (request->wLength() > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
@@ -403,7 +407,7 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	// optional receive phase of the control request
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing IN transfer");
 	BulkTransfer	in(inendpoint, receivelength, request->payload());
-	in.setTimeout(10000);
+	in.setTimeout(request->getTimeout());
 	try {
 		deviceptr->submit(&in);
 	} catch (USBError& x) {
