@@ -123,7 +123,11 @@ void	ConfigurationBackend::setglobal(const std::string& section,
 	GlobalTable	globals(_database);
 	try {
 		GlobalRecord	record = getglobal(section, name);
+		// update the value
+		record.value = value;
+		globals.update(record.id(), record);
 	} catch (...) {
+		// create a new record and add it to the globals
 		GlobalRecord	record;
 		record.section = section;
 		record.name = name;
