@@ -282,6 +282,9 @@ public:
 	Type&	type() { return _type; }
 	void	type(Type t) { _type = t; }
 
+	static std::string	type2string(Type t);
+	static Type	string2type(const std::string& tn);
+
 	int	index() const { return _index; }
 	int&	index() { return _index; }
 	void	index(int i) { _index = i; }
@@ -322,6 +325,7 @@ public:
 		const std::string& servicename, const std::string& deviceurl);
 	InstrumentComponent(const InstrumentComponentKey& key,
 		const std::string& servicename, const std::string& deviceurl);
+	std::string	toString() const;
 };
 
 class Instrument;

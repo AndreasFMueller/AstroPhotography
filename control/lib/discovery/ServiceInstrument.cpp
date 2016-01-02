@@ -224,8 +224,9 @@ long	InstrumentBackendImpl::idfromkey(const InstrumentComponentKey& key) {
 long	InstrumentBackendImpl::idfromkey(const std::string& name,
 		InstrumentComponent::Type type, int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"request instrument %s, type=%d, index=%u",
-		name.c_str(), type, index);
+		"request instrument %s, type=%d(%s), index=%d",
+		name.c_str(), type,
+		InstrumentComponentKey::type2string(type).c_str(), index);
 	std::string	query(	"select id "
 				"from instrumentcomponents "
 				"where name = ? "
@@ -236,13 +237,15 @@ long	InstrumentBackendImpl::idfromkey(const std::string& name,
 	statement->bind(1, type);
 	statement->bind(2, index);
 	Result	res = statement->result();
-	long	objectid = res.front()[0]->intValue();
-	if (objectid < 0) {
+	if (res.size() == 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "instrument %s: no matching "
-			"component type=%d, index=%d",
-			name.c_str(), type, index);
+			"component type=%d(%s), index=%d",
+			name.c_str(), type,
+			InstrumentComponentKey::type2string(type).c_str(),
+			index);
 		throw std::runtime_error("no matching instrument component");
 	}
+	long	objectid = res.front()[0]->intValue();
 	return objectid;
 }
 
@@ -251,7 +254,18 @@ long	InstrumentBackendImpl::idfromkey(const std::string& name,
  */
 InstrumentComponent	InstrumentBackendImpl::get(const std::string& name, 
 				InstrumentComponent::Type type, int index) {
-	long	i = idfromkey(name, type, index);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"try to get instrument %s, component=%d(%s), index=%d", 
+		name.c_str(), type,
+		InstrumentComponentKey::type2string(type).c_str(), index);
+	long	i;
+	try {
+		i = idfromkey(name, type, index);
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception");
+		throw;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "id = %d", i);
 	InstrumentComponentInfo	info = table->byid(i);
 	InstrumentComponent	component(info, info.servicename(),
 					info.deviceurl());

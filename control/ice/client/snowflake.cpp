@@ -83,7 +83,7 @@ int	main(int argc, char *argv[]) {
 
 		TaskParameters	parm = tasks->parameters(*i);
 		std::cout << "camera: " << parm.camera << std::endl;
-		std::cout << "ccd:    " << parm.ccdid << std::endl;
+		std::cout << "ccd:    " << parm.ccd << std::endl;
 		std::cout << "temp:   " << parm.ccdtemperature << std::endl;
 		std::cout << "fw:     " << parm.filterwheel << std::endl;
 		std::cout << "filter: " << parm.filter << std::endl;

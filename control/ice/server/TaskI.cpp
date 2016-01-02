@@ -11,6 +11,7 @@
 #include <TaskTable.h>
 #include <ImageI.h>
 #include <IceConversions.h>
+#include <AstroUtils.h>
 
 namespace snowstar {
 
@@ -47,7 +48,14 @@ std::string	TaskI::imagename(const Ice::Current& /* current */) {
 }
 
 ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
+	// find out whether the file exists
 	std::string	filename = entry().filename();
+	astro::image::ImageDatabaseDirectory	imagedir;
+	if (!imagedir.isFile(filename)) {
+		std::string	cause = astro::stringprintf(
+			"image %s not found", filename.c_str());
+		throw NotFound(cause);
+	}
 	//return ImageI::createProxy(filename, current);
 	return NULL;
 }

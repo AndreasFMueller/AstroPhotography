@@ -22,6 +22,7 @@ class ExposureWork : public CancellableWork {
 	astro::camera::CcdPtr           ccd;
 	astro::camera::CoolerPtr        cooler;
 	astro::camera::FilterWheelPtr   filterwheel;
+	astro::device::MountPtr   	mount;
 	TaskQueueEntry& _task;
 public:
 	ExposureWork(TaskQueueEntry& task);

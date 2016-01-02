@@ -10,7 +10,6 @@ namespace astro {
 namespace task {
 
 TaskParameters::TaskParameters() {
-	_ccdid = 0;
 	_ccdtemperature = -1;
 }
 

@@ -11,16 +11,26 @@ module snowstar {
 	 * \brief Task Parameters
 	 */
 	struct TaskParameters {
+		// instrument
+		string	instrument;
+
 		// camera
 		string	camera;
-		int	ccdid;
+		string	ccd;
 
 		// cooler stuff
+		string	cooler;
 		float	ccdtemperature;
 
 		// filterwheel parameters
 		string	filterwheel;
 		string	filter;
+
+		// information about the mount
+		string	mount;
+
+		// project
+		string	project;
 
 		// exposure stuff
 		Exposure	exp;
@@ -108,12 +118,12 @@ module snowstar {
 		/**
 		 * \brief start the queue
 		 */
-		void	start();
+		void	start() throws BadState;
 
 		/**
 		 * \brief stop the queue
 		 */
-		void	stop();
+		void	stop() throws BadState;
 
 		/**
 		 * \brief submit a new task

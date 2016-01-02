@@ -73,11 +73,15 @@ astro::task::TaskInfo	convert(const TaskInfo& info) {
 
 TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	TaskParameters	result;
+	result.instrument = parameters.instrument();
 	result.camera = parameters.camera();
-	result.ccdid = parameters.ccdid();
+	result.ccd = parameters.ccd();
+	result.cooler = parameters.cooler();
 	result.ccdtemperature = parameters.ccdtemperature();
 	result.filterwheel = parameters.filterwheel();
 	result.filter = parameters.filter();
+	result.mount = parameters.mount();
+	result.project = parameters.project();
 	result.exp = convert(parameters.exposure());
 	return result;
 }
@@ -85,11 +89,15 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	astro::task::TaskParameters	result;
 	result.exposure(convert(parameters.exp));
+	result.instrument(parameters.instrument);
 	result.camera(parameters.camera);
-	result.ccdid(parameters.ccdid);
+	result.ccd(parameters.ccd);
+	result.cooler(parameters.cooler);
 	result.ccdtemperature(parameters.ccdtemperature);
 	result.filterwheel(parameters.filterwheel);
 	result.filter(parameters.filter);
+	result.mount(parameters.mount);
+	result.project(parameters.project);
 	return result;
 }
 

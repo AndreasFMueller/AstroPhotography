@@ -5,6 +5,7 @@
  */
 #include <AstroTask.h>
 #include <stdexcept>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace task {
@@ -55,6 +56,14 @@ TaskInfo::taskstate        TaskInfo::string2state(const std::string& s) {
 		return complete;
 	}
 	throw std::runtime_error("unknown task state name");
+}
+
+std::string	TaskInfo::toString() const {
+	std::string	s = stringprintf("task[%d] %s %s %s %s",
+		id(), state2string(state()).c_str(),
+		frame().toString().c_str(), filename().c_str(),
+		cause().c_str());
+	return s;
 }
 
 } // namespace task

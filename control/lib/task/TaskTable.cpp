@@ -21,11 +21,14 @@ std::string	TaskTableAdapter::createstatement() {
 	return std::string(
 	"create table taskqueue (\n"
 	"    id integer not null,\n"
+	"    instrument varchar(32) not null,\n"
 	"    camera varchar(256) not null,\n"
-	"    ccdid integer not null default 0,\n"
+	"    ccd varchar(256) not null,\n"
+	"    cooler varchar(256) not null,\n"
 	"    temperature float not null default -1,\n"
 	"    filterwheel varchar(256) not null default '',\n"
 	"    filter varchar(32) not null default '',\n"
+	"    mount varchar(256) not null default '',\n"
 	"    originx integer not null default 0,\n"
 	"    originy integer not null default 0,\n"
 	"    width integer not null default 0,\n"
@@ -45,6 +48,7 @@ std::string	TaskTableAdapter::createstatement() {
 	"    imagey integer not null default 0,\n"
 	"    imagewidth integer not null default 0,\n"
 	"    imageheight integer not null default 0,\n"
+	"    project varchar(32) not null default '',\n"
 	"    primary key(id)\n"
 	")");
 }
@@ -52,11 +56,15 @@ std::string	TaskTableAdapter::createstatement() {
 TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert object %d", objectid);
 	TaskParameters	parameters;
+	parameters.instrument(row["instrument"]->stringValue());
 	parameters.camera(row["camera"]->stringValue());
-	parameters.ccdid(row["ccdid"]->intValue());
+	parameters.ccd(row["ccd"]->stringValue());
+	parameters.cooler(row["cooler"]->stringValue());
 	parameters.ccdtemperature(row["temperature"]->doubleValue());
 	parameters.filterwheel(row["filterwheel"]->stringValue());
 	parameters.filter(row["filter"]->stringValue());
+	parameters.mount(row["mount"]->stringValue());
+	parameters.project(row["project"]->stringValue());
 	ImagePoint	origin(row["originx"]->intValue(),
 				row["originy"]->intValue());
 	ImageSize	size(row["width"]->intValue(),
@@ -97,11 +105,18 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert entry %d", entry.id());
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("instrument", factory.get(entry.instrument())));
 	spec.insert(Field("camera", factory.get(entry.camera())));
-	spec.insert(Field("ccdid", factory.get((int)entry.ccdid())));
+	spec.insert(Field("ccd", factory.get(entry.ccd())));
+
+	spec.insert(Field("cooler", factory.get(entry.cooler())));
 	spec.insert(Field("temperature", factory.get(entry.ccdtemperature())));
+
 	spec.insert(Field("filterwheel", factory.get(entry.filterwheel())));
 	spec.insert(Field("filter", factory.get(entry.filter())));
+
+	spec.insert(Field("mount", factory.get(entry.mount())));
+
 	Exposure	exposure = entry.exposure();
 	ImageRectangle	frame = exposure.frame();
 	spec.insert(Field("originx", factory.get((int)frame.origin().x())));
@@ -127,6 +142,9 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("imagey", factory.get((int)entry.origin().y())));
 	spec.insert(Field("imagewidth", factory.get((int)entry.size().width())));
 	spec.insert(Field("imageheight", factory.get((int)entry.size().height())));
+
+	spec.insert(Field("project", factory.get(entry.project())));
+
 	return spec;
 }
 

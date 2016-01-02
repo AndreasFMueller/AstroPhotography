@@ -26,6 +26,7 @@ namespace snowinstrument {
 
 bool	verbose = false;
 
+#if 0
 /**
  * \brief Convert component type strings to constants representing the type
  */
@@ -86,6 +87,7 @@ static std::string	type2string(InstrumentComponentType type) {
 	}
 	throw std::runtime_error("invalid type code");
 }
+#endif
 
 /**
  * \brief Auxiliary functor class to display the list of instrument names
@@ -104,7 +106,7 @@ public:
  */
 std::ostream&	operator<<(std::ostream& out,
 			const InstrumentComponent& component) {
-	out << type2string(component.type) << "[";
+	out << instrumentcomponent2name(component.type) << "[";
 	out << component.index << "] ";
 	out << component.servicename << " ";
 	out << component.deviceurl << " ";
@@ -190,7 +192,7 @@ static int	add_command(InstrumentsPrx instruments,
 		throw std::runtime_error("not enough arguments to add command");
 	}
 	component.instrumentname = arguments[0];
-	component.type = string2type(arguments[1]);
+	component.type = name2instrumentcomponent(arguments[1]);
 	component.servicename = arguments[2];
 	component.deviceurl = arguments[3];
 	InstrumentPrx	instrument = instruments->get(component.instrumentname);
@@ -211,7 +213,7 @@ static int	remove_command(InstrumentsPrx instruments,
 		return EXIT_FAILURE;
 	}
 	std::string	instrumentname = arguments[0];
-	InstrumentComponentType	type = string2type(arguments[1]);
+	InstrumentComponentType	type = name2instrumentcomponent(arguments[1]);
 	unsigned int	index = 0;
 	if (arguments.size() > 2) {
 		index = std::stoi(arguments[2]);

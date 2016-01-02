@@ -87,19 +87,19 @@ static void	usage(const char *progname) {
 static struct option	longopts[] = {
 /* name			argument?		int*	int */
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
-{ "ccd",		required_argument,	NULL,	'C' }, /*  . */
-{ "config",		required_argument,	NULL,	'c' }, /*  1 */
-{ "debug",		no_argument,		NULL,	'd' }, /*  2 */
-{ "exposure",		required_argument,	NULL,	'e' }, /*  3 */
-{ "filter",		required_argument,	NULL,	'f' }, /*  4 */
-{ "focus",		required_argument,	NULL,	'F' }, /*  5 */
-{ "help",		no_argument,		NULL,	'h' }, /*  6 */
+{ "ccd",		required_argument,	NULL,	'C' }, /*  1 */
+{ "config",		required_argument,	NULL,	'c' }, /*  2 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  3 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  4 */
+{ "filter",		required_argument,	NULL,	'f' }, /*  5 */
+{ "focus",		required_argument,	NULL,	'F' }, /*  6 */
+{ "help",		no_argument,		NULL,	'h' }, /*  7 */
 { "number",		required_argument,	NULL,	'n' }, /*  8 */
 { "purpose",		required_argument,	NULL,	'p' }, /*  9 */
-{ "project",		required_argument,	NULL,	'P' }, /*  9 */
-{ "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
-{ "repo",		required_argument,	NULL,	'r' }, /* 11 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 12 */
+{ "project",		required_argument,	NULL,	'P' }, /* 10 */
+{ "rectangle",		required_argument,	NULL,	 1  }, /* 11 */
+{ "repo",		required_argument,	NULL,	'r' }, /* 12 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 13 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -178,7 +178,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 1:
 			switch (longindex) {
-			case 10:
+			case 11:
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"rectangle: %s", optarg);
 				frame = astro::image::ImageRectangle(optarg);
@@ -225,7 +225,6 @@ int	main(int argc, char *argv[]) {
 	}
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(config);
-	ImageRepoPtr	repo = imagerepos->repo(reponame);
 
 	// Create a remote instrument
 	RemoteInstrument	ri(instruments, instrumentname);
@@ -234,7 +233,6 @@ int	main(int argc, char *argv[]) {
 	snowstar::CcdPrx	ccd = ri.ccd(ccd_index);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd");
 
-	// get the image repository
 	CcdTask	ccdtask(ccd);
 	ccdtask.frame(frame);
 
@@ -313,7 +311,14 @@ int	main(int argc, char *argv[]) {
 		}
 
 		// write the image to the repository
-		repo->save(imageptr);
+		try {
+			ImageRepoPtr	repo = imagerepos->repo(reponame);
+			repo->save(imageptr);
+		} catch (std::exception& x) {
+			std::string	msg = stringprintf("cannot save "
+				"image: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		}
 
 		// get rid of the image on the server side
 		image->remove();

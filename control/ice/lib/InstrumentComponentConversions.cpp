@@ -64,4 +64,61 @@ discover::InstrumentList	convertInstrumentList(const InstrumentList& list) {
 	return copy<InstrumentList, discover::InstrumentList>(list);
 }
 
+std::string	instrumentcomponent2name(const InstrumentComponentType type) {
+	switch (type) {
+	case InstrumentAdaptiveOptics:
+                return std::string("AdaptiveOptics");
+	case InstrumentCamera:
+                return std::string("Camera");
+	case InstrumentCCD:
+                return std::string("CCD");
+	case InstrumentCooler:
+                return std::string("Cooler");
+	case InstrumentGuiderCCD:
+                return std::string("GuiderCCD");
+	case InstrumentGuiderPort:
+                return std::string("GuiderPort");
+	case InstrumentFilterWheel:
+                return std::string("FilterWheel");
+	case InstrumentFocuser:
+                return std::string("Focuser");
+	case InstrumentMount:
+                return std::string("Mount");
+	}
+	throw std::runtime_error("bad type");
+}
+
+InstrumentComponentType	name2instrumentcomponent(const std::string& name) {
+	if (std::string("AdaptiveOptics") == name) {
+		return InstrumentAdaptiveOptics;
+	}
+	if (std::string("Camera") == name) {
+		return InstrumentCamera;
+	}
+	if (std::string("CCD") == name) {
+		return InstrumentCCD;
+	}
+	if (std::string("Cooler") == name) {
+		return InstrumentCooler;
+	}
+	if (std::string("GuiderCCD") == name) {
+		return InstrumentGuiderCCD;
+	}
+	if (std::string("GuiderPort") == name) {
+		return InstrumentGuiderPort;
+	}
+	if (std::string("FilterWheel") == name) {
+		return InstrumentFilterWheel;
+	}
+	if (std::string("Focuser") == name) {
+		return InstrumentFocuser;
+	}
+	if (std::string("Mount") == name) {
+		return InstrumentMount;
+	}
+	std::string	msg = astro::stringprintf("unknown instrument "
+		"component name: %s", name.c_str());
+	throw std::runtime_error(msg);
+}
+
 } // namespace snowstar

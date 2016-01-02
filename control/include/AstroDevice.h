@@ -1,5 +1,4 @@
-/*
- * AstroDevice.h -- Device manager
+/* * AstroDevice.h -- Device manager
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -14,6 +13,7 @@
 #include <set>
 #include <AstroCoordinates.h>
 #include <memory>
+#include <AstroImage.h>
 
 namespace astro {
 
@@ -273,6 +273,9 @@ public:
 	virtual void	Goto(const RaDec& radec);
 	virtual void	Goto(const AzmAlt& azmalt);
 	virtual void	cancel();
+
+	// add position metadata to an image
+	void	addPositionMetadata(astro::image::ImageBase& image);
 };
 
 } // namespace device

@@ -180,6 +180,9 @@ astro::discover::Instrument::ComponentList	convert(const InstrumentComponentList
 InstrumentList	convert(const astro::discover::InstrumentList &list);
 astro::discover::InstrumentList	convertInstrumentList(const InstrumentList& list);
 
+InstrumentComponentType	name2instrumentcomponent(const std::string& name);
+std::string	instrumentcomponent2name(const InstrumentComponentType type);
+
 } // namespace snowstar
 
 #endif /* _IceConversions_h */

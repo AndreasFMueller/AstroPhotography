@@ -32,6 +32,7 @@ endif
 
 libastrodiscovery_la_SOURCES = 						\
 	InstrumentComponent.cpp						\
+	InstrumentComponentKey.cpp					\
 	InstrumentComponentTable.cpp					\
 	ServerName.cpp							\
 	ServiceDiscovery.cpp						\

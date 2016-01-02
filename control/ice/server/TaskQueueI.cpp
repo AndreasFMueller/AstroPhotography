@@ -59,39 +59,108 @@ QueueState TaskQueueI::state(const Ice::Current& /* current */) {
 
 void TaskQueueI::start(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start request");
-	taskqueue.start();
+	try {
+		taskqueue.start();
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot start: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw BadState(cause);
+	}
 }
 
 void TaskQueueI::stop(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request");
-	taskqueue.stop();
+	try {
+		taskqueue.stop();
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot stop: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw BadState(cause);
+	}
 }
 
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purp = %d",
 		parameters.camera.c_str(), parameters.exp.purpose);
-	return taskqueue.submit(snowstar::convert(parameters));
+	try {
+		return taskqueue.submit(snowstar::convert(parameters));
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot submit: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw BadParameter(cause);
+	}
 }
 
 TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query parameters of task %d", taskid);
-	return snowstar::convert(taskqueue.parameters(taskid));
+	if (!taskqueue.exists(taskid)) {
+		std::string	cause = astro::stringprintf(
+			"task %d does not exist", taskid);
+		throw NotFound(cause);
+	}
+	try {
+		return snowstar::convert(taskqueue.parameters(taskid));
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot get parameters for task %d: %s %s", taskid,
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw NotFound(cause);
+	}
 }
 
 TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "query info of task %d", taskid);
-	return snowstar::convert(taskqueue.info(taskid));
+	if (!taskqueue.exists(taskid)) {
+		std::string	cause = astro::stringprintf(
+			"task %d does not exist", taskid);
+		throw NotFound(cause);
+	}
+	try {
+		return snowstar::convert(taskqueue.info(taskid));
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot get info for task %d: %s %s", taskid,
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw NotFound(cause);
+	}
 }
 
 void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for %d", taskid);
-	taskqueue.cancel(taskid);
+	if (!taskqueue.exists(taskid)) {
+		std::string	cause = astro::stringprintf(
+			"task %d does not exist", taskid);
+		throw NotFound(cause);
+	}
+	try {
+		taskqueue.cancel(taskid);
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot cancel task %d: %s %s", taskid,
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw BadParameter(cause);
+	}
 }
 
 void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove request for %d", taskid);
-	taskqueue.remove(taskid);
+	if (!taskqueue.exists(taskid)) {
+		std::string	cause = astro::stringprintf(
+			"task %d does not exist", taskid);
+		throw NotFound(cause);
+	}
+	try {
+		taskqueue.remove(taskid);
+	} catch (const std::exception& x) {
+		std::string	 cause = astro::stringprintf(
+			"cannot cancel task %d: %s %s", taskid,
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		throw BadParameter(cause);
+	}
 }
 
 taskidsequence TaskQueueI::tasklist(TaskState state,
@@ -124,18 +193,42 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 void	TaskQueueI::registerMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register a new monitor callback");
-	callbacks.registerCallback(callback, current);
+	try {
+		callbacks.registerCallback(callback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register callback for unknown reason");
+	}
 }
 
 void	TaskQueueI::unregisterMonitor(const Ice::Identity& callback,
 		const Ice::Current& current) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregistering a monitor callback");
-	callbacks.unregisterCallback(callback, current);
+	try {
+		callbacks.unregisterCallback(callback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register callback for unknown reason");
+	}
 }
 
 void	TaskQueueI::taskUpdate(const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskQueueI::taskUpdate called");
-	callbacks(data);
+	try {
+		callbacks(data);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot send callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot send callback for unknown reason");
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskQueueI::taskUpdate completed");
 }
 

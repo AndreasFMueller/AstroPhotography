@@ -35,27 +35,37 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	astro::module::Repository	repository;
 	
 	// get camera and ccd
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %d",
-		_task.camera().c_str(), _task.ccdid());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %s",
+		_task.camera().c_str(), _task.ccd().c_str());
 	astro::device::DeviceAccessor<astro::camera::CameraPtr>
 		dc(repository);
 	camera = dc.get(_task.camera());
-	ccd = camera->getCcd(_task.ccdid());
+	ccd = camera->getCcd(_task.ccd());
 
 	// turn on the cooler
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set cooler to %f",
-		_task.ccdtemperature());
-	if ((ccd->hasCooler()) && (_task.ccdtemperature() > 0)) {
-		cooler = ccd->getCooler();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler '%s', temperature %.2f ",
+		_task.cooler().c_str(), _task.ccdtemperature());
+	if ((_task.cooler().size() > 0) && (_task.ccdtemperature() > 0)) {
+		astro::device::DeviceAccessor<astro::camera::CoolerPtr>
+			df(repository);
+		cooler = df.get(_task.cooler());
 	}
 
 	// get the filterwheel
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter '%s' of wheel '%s'",
 		_task.filter().c_str(), _task.filterwheel().c_str());
-	astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
-		df(repository);
 	if ((_task.filterwheel().size() > 0) && (_task.filter().size() > 0)) {
+		astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
+			df(repository);
 		filterwheel = df.get(_task.filterwheel());
+	}
+
+	// get the mount
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get mount %s", _task.mount().c_str());
+	if (_task.mount().size() > 0) {
+		astro::device::DeviceAccessor<astro::device::MountPtr>
+			df(repository);
+		mount = df.get(_task.mount());
 	}
 
 	// if the task does not have a frame size, then take the one from the
@@ -115,8 +125,10 @@ public:
  * cancel is recognized.
  */
 void	ExposureWork::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start ExposureWork");
 	// set the cooler
 	if (cooler) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "turning on cooler");
 		cooler->setTemperature(_task.ccdtemperature());
 		cooler->setOn(true);
 	}
@@ -124,6 +136,7 @@ void	ExposureWork::run() {
 	// set the filterwheel position
 	std::string	filtername("NONE");
 	if (filterwheel) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "selecting filter");
 		// make sure filter wheel is ready
 		FilterwheelCondition	condition(filterwheel,
 			camera::FilterWheel::idle);
@@ -140,7 +153,7 @@ void	ExposureWork::run() {
 	if (cooler) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for cooler");
 		CoolerCondition	coolercondition(cooler);
-		if (wait(30., coolercondition)) {
+		if (!wait(30., coolercondition)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"cannot stabilize temperature");
 			// XXX what do we do when the cooler cannot stabilize?
@@ -209,11 +222,24 @@ void	ExposureWork::run() {
 		image->getFrame().toString().c_str());
 
 	// add filter information to the image, if present
-	image->setMetadata(FITSKeywords::meta("FILTER", filtername));
+	if ((filterwheel) && (filtername.size() > 0)) {
+		image->setMetadata(FITSKeywords::meta("FILTER", filtername));
+	}
 
 	// add temperature metadata
 	if (cooler) {
 		cooler->addTemperatureMetadata(*image);
+	}
+
+	// position information from the mount
+	if (mount) {
+		mount->addPositionMetadata(*image);
+	}
+
+	// project inforamtion
+	if (_task.project().size() > 0) {
+		image->setMetadata(astro::io::FITSKeywords::meta(
+			std::string("PROJECT"), _task.project()));
 	}
 
 	// add to the ImageDirectory
