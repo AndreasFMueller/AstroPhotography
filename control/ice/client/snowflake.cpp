@@ -82,10 +82,11 @@ int	main(int argc, char *argv[]) {
 		std::cout << "file:   " << info.filename << std::endl;
 
 		TaskParameters	parm = tasks->parameters(*i);
-		std::cout << "camera: " << parm.camera << std::endl;
-		std::cout << "ccd:    " << parm.ccd << std::endl;
+		std::cout << "camera: " << info.camera << std::endl;
+		std::cout << "ccd:    " << info.ccd << std::endl;
+		std::cout << "cooler: " << info.cooler << std::endl;
 		std::cout << "temp:   " << parm.ccdtemperature << std::endl;
-		std::cout << "fw:     " << parm.filterwheel << std::endl;
+		std::cout << "fw:     " << info.filterwheel << std::endl;
 		std::cout << "filter: " << parm.filter << std::endl;
 
 		TaskPrx	task = tasks->getTask(*i);

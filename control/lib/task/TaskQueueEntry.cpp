@@ -19,13 +19,14 @@ TaskQueueEntry::TaskQueueEntry(taskid_t queueid, const TaskParameters& task)
 TaskParameters	TaskQueueEntry::parameters() const {
 	TaskParameters	parameters;
 	parameters.exposure(exposure());
-	parameters.camera(camera());
-	parameters.ccd(ccd());
-	parameters.cooler(cooler());
+	parameters.cameraindex(cameraindex());
+	parameters.ccdindex(ccdindex());
+	parameters.coolerindex(coolerindex());
 	parameters.ccdtemperature(ccdtemperature());
-	parameters.filterwheel(filterwheel());
+	parameters.filterwheelindex(filterwheelindex());
 	parameters.filter(filter());
-	parameters.mount(mount());
+	parameters.instrument(instrument());
+	parameters.mountindex(mountindex());
 	parameters.project(project());
 	return parameters;
 }
@@ -37,6 +38,11 @@ TaskInfo	TaskQueueEntry::info() const {
 	info.cause(cause());
 	info.filename(filename());
 	info.frame(frame());
+	info.camera(camera());
+	info.ccd(ccd());
+	info.cooler(cooler());
+	info.filterwheel(filterwheel());
+	info.mount(mount());
 	return info;
 }
 

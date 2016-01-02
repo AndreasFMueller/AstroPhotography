@@ -15,19 +15,19 @@ module snowstar {
 		string	instrument;
 
 		// camera
-		string	camera;
-		string	ccd;
+		int	cameraIndex;
+		int	ccdIndex;
 
 		// cooler stuff
-		string	cooler;
+		int	coolerIndex;
 		float	ccdtemperature;
 
 		// filterwheel parameters
-		string	filterwheel;
+		int	filterwheelIndex;
 		string	filter;
 
 		// information about the mount
-		string	mount;
+		int	mountIndex;
 
 		// project
 		string	project;
@@ -69,6 +69,12 @@ module snowstar {
 		// where the produced image is storead
 		string		filename;
 		ImageRectangle	frame;
+		// names for the devices
+		string	camera;
+		string	ccd;
+		string	cooler;
+		string	filterwheel;
+		string	mount;
 	};
 
 	/**

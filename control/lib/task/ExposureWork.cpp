@@ -37,10 +37,16 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	// get camera and ccd
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera '%s' and ccd %s",
 		_task.camera().c_str(), _task.ccd().c_str());
-	astro::device::DeviceAccessor<astro::camera::CameraPtr>
-		dc(repository);
-	camera = dc.get(_task.camera());
-	ccd = camera->getCcd(_task.ccd());
+	{
+		astro::device::DeviceAccessor<astro::camera::CameraPtr>
+			dc(repository);
+		camera = dc.get(_task.camera());
+	}
+	{
+		astro::device::DeviceAccessor<astro::camera::CcdPtr>
+			dc(repository);
+		ccd = camera->getCcd(_task.ccd());
+	}
 
 	// turn on the cooler
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get cooler '%s', temperature %.2f ",

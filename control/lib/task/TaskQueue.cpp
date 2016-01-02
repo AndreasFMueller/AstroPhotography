@@ -348,8 +348,10 @@ void	TaskQueue::launch() {
  * This method creates a new entry in the database. It then calls launch,
  * which will launch all possible tasks.
  */
-taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task LOCK: %s", parameters.project().c_str());
+taskid_t	TaskQueue::submit(const TaskParameters& parameters,
+			const TaskInfo& info) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task LOCK: %s",
+		parameters.project().c_str());
 	std::unique_lock<std::recursive_mutex>	l(lock);
 
 	// add the entry to the task table
@@ -357,6 +359,11 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters) {
 	TaskQueueEntry	entry(0, parameters);
 	entry.state(TaskQueueEntry::pending);
 	entry.now();
+	entry.camera(info.camera());
+	entry.ccd(info.ccd());
+	entry.cooler(info.cooler());
+	entry.filterwheel(info.filterwheel());
+	entry.mount(info.mount());
 	long taskqueueid = tasktable.add(entry);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task with id %d added to table",
 		taskqueueid);

@@ -50,8 +50,10 @@ int	main(int argc, char *argv[]) {
 
 	// submit a job to the task queue
 	TaskParameters	task;
+/*
 	task.camera("camera:simulator/camera");
 	task.filterwheel("filterwheel:simulator/filterwheel");
+*/
 	task.filter("0");
 	task.ccdtemperature(260);
 	camera::Exposure	exposure = task.exposure();
@@ -63,8 +65,8 @@ int	main(int argc, char *argv[]) {
 			"new task with exposure time %d", taskcounter);
 		exposure.exposuretime(taskcounter);
 		task.exposure(exposure);
-		int queueid = queue.submit(task);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "id %d submitted", queueid);
+		//int queueid = queue.submit(task);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "id %d submitted", queueid);
 	}
 	sleep(60);
 
@@ -78,7 +80,7 @@ int	main(int argc, char *argv[]) {
 	exposure.exposuretime(2);
 	task.exposure(exposure);
 	queue.start();
-	queue.submit(task);
+	//queue.submit(task);
 	sleep(1);
 
 	// immediately cancel everything

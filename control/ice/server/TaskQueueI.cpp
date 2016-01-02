@@ -84,9 +84,64 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purp = %d",
-		parameters.camera.c_str(), parameters.exp.purpose);
+		parameters.instrument.c_str(), parameters.exp.purpose);
+	// get information about the parameters
+	astro::discover::InstrumentPtr  instrument
+                = astro::discover::InstrumentBackend::get(
+			parameters.instrument);
+	astro::task::TaskInfo	info(-1);
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Camera) > 0) {
+		astro::discover::InstrumentComponent	camera = instrument->get(
+			astro::discover::InstrumentComponentKey::Camera,
+				parameters.cameraIndex);
+		info.camera(camera.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found camera %s",
+			info.camera().c_str());
+	}
+
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::CCD) > 0) {
+		astro::discover::InstrumentComponent	ccd = instrument->get(
+			astro::discover::InstrumentComponentKey::CCD,
+				parameters.ccdIndex);
+		info.ccd(ccd.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd %s",
+			info.ccd().c_str());
+	}
+
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Cooler) > 0) {
+		astro::discover::InstrumentComponent	cooler = instrument->get(
+			astro::discover::InstrumentComponentKey::Cooler,
+				parameters.coolerIndex);
+		info.cooler(cooler.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found cooler %s",
+			info.cooler().c_str());
+	}
+
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::FilterWheel) > 0) {
+		astro::discover::InstrumentComponent	filterwheel = instrument->get(
+			astro::discover::InstrumentComponentKey::FilterWheel,
+				parameters.filterwheelIndex);
+		info.filterwheel(filterwheel.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found filterwheel %s",
+			info.filterwheel().c_str());
+	}
+
+	if (instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Mount) > 0) {
+		astro::discover::InstrumentComponent	mount = instrument->get(
+			astro::discover::InstrumentComponentKey::Mount,
+				parameters.mountIndex);
+		info.mount(mount.deviceurl());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found mount %s",
+			info.mount().c_str());
+	}
+
 	try {
-		return taskqueue.submit(snowstar::convert(parameters));
+		return taskqueue.submit(snowstar::convert(parameters), info);
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
 			"cannot submit: %s %s",

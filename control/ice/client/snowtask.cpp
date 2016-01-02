@@ -26,9 +26,14 @@ bool	dryrun = false;
 astro::camera::Exposure	exposure;
 std::string	instrumentname;
 std::string	filter;
-double	temperature = 273.15;
+double	temperature = -1;
 int	repeats = 1;
 std::string	project;
+int	cameraIndex = 0;
+int	ccdIndex = 0;
+int	coolerIndex = 0;
+int	filterwheelIndex = 0;
+int	mountIndex = 0;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -152,13 +157,16 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 		std::cout << astro::stringprintf("%5.*f", l,
 				parameters.exp.exposuretime);
 		if (parameters.ccdtemperature < 10) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "temperature %f",
+				parameters.ccdtemperature);
 			std::cout << "      ";
 		} else {
 			std::cout << astro::stringprintf(" %5.1f",
 				parameters.ccdtemperature - 273.15);
 		}
 		std::cout << astro::stringprintf(" %-7.7s",
-			astro::camera::Exposure::purpose2string(convert(parameters.exp.purpose)).c_str());
+			astro::camera::Exposure::purpose2string(
+				convert(parameters.exp.purpose)).c_str());
 		if (verbose) {
 			std::cout << astro::stringprintf(" %-8.8s",
 				parameters.filter.c_str());
@@ -358,69 +366,19 @@ int	command_submit(TaskQueuePrx tasks, InstrumentsPrx instruments) {
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 
-	// get the information about the instrument
-	InstrumentPrx	instrument = instruments->get(instrumentname);
-
 	// prepare the parameters 
 	TaskParameters	parameters;
 	parameters.project = project;
 	parameters.instrument = instrumentname;
 
-	// get the device information from the instrument
-	{
-		InstrumentComponent	component
-			= instrument->getComponent(InstrumentCamera, 0);
-		parameters.camera = component.deviceurl;
-	}
-	{
-		InstrumentComponent	component
-			= instrument->getComponent(InstrumentCCD, 0);
-		parameters.ccd = component.deviceurl;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %s",
-		parameters.camera.c_str(), parameters.ccd.c_str());
-
-	// get the temperature from the 
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for cooler");
-		if (instrument->nComponentsOfType(InstrumentCooler) > 0) {
-			InstrumentComponent	component
-				= instrument->getComponent(InstrumentCooler, 0);
-			parameters.cooler = component.deviceurl;
-			parameters.ccdtemperature = temperature;
-		}
-	} catch (const NotFound& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cooler not found: %s",
-			x.cause.c_str());
-	}
-
-	// filterwheel parameters
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for filterwheel");
-		if (instrument->nComponentsOfType(InstrumentFilterWheel) > 0) {
-			InstrumentComponent	component
-				= instrument->getComponent(
-					InstrumentFilterWheel, 0);
-			parameters.filterwheel = component.deviceurl;
-			parameters.filter = filter;
-		}
-	} catch (const NotFound& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel not found: %s",
-			x.cause.c_str());
-	}
-
-	// mount parameters
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking for mount");
-		if (instrument->nComponentsOfType(InstrumentMount) > 0) {
-			InstrumentComponent	component
-				= instrument->getComponent( InstrumentMount, 0);
-			parameters.mount = component.deviceurl;
-		}
-	} catch (const NotFound& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel not found: %s",
-			x.cause.c_str());
-	}
+	// copy the device information
+	parameters.cameraIndex = cameraIndex;
+	parameters.ccdIndex = ccdIndex;
+	parameters.coolerIndex = coolerIndex;
+	parameters.ccdtemperature = temperature;
+	parameters.filterwheelIndex = filterwheelIndex;
+	parameters.filter = filter;
+	parameters.mountIndex = mountIndex;
 
 	// exposure parameters
 	parameters.exp = convert(exposure);

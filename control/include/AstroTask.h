@@ -38,30 +38,30 @@ public:
 	}
 
 private:
+	int	_cameraindex;
+	int	_ccdindex;
+	int	_coolerindex;
+	int	_filterwheelindex;
+	int	_mountindex;
+public:
+	int	cameraindex() const { return _cameraindex; }
+	void	cameraindex(int i) { _cameraindex = i; }
+	int	ccdindex() const { return _ccdindex; }
+	void	ccdindex(int i) { _ccdindex = i; }
+	int	coolerindex() const { return _coolerindex; }
+	void	coolerindex(int i) { _coolerindex = i; }
+	int	filterwheelindex() const { return _filterwheelindex; }
+	void	filterwheelindex(int i) { _filterwheelindex = i; }
+	int	mountindex() const { return _mountindex; }
+	void	mountindex(int i) { _mountindex = i; }
+
+private:
 	std::string	_instrument;
 public:
 	const std::string&	instrument() const { return _instrument; }
 	void	instrument(const std::string& instrument) {
 		_instrument = instrument;
 	}
-
-private:
-	std::string	_camera;
-public:
-	const std::string&	camera() const { return _camera; }
-	void	camera(const std::string& camera) { _camera = camera; }
-
-private:
-	std::string	_ccd;
-public:
-	const std::string&	ccd() const { return _ccd; }
-	void	ccd(const std::string& ccd) { _ccd = ccd; }
-
-private:
-	std::string	_cooler;
-public:
-	const std::string&	cooler() const { return _cooler; }
-	void	cooler(const std::string& cooler) { _cooler = cooler; }
 
 private:
 	float	_ccdtemperature;
@@ -72,30 +72,16 @@ public:
 	}
 
 private:
-	std::string	_filterwheel;
-public:
-	const std::string&	filterwheel() const { return _filterwheel; }
-	void	filterwheel(const std::string& filterwheel) {
-			_filterwheel = filterwheel;
-	}
-
-private:
 	std::string	_filter;
 public:
-	std::string	filter() const { return _filter; }
-	void	filter(std::string filter) { _filter = filter; }
+	const std::string&	filter() const { return _filter; }
+	void	filter(const std::string filter) { _filter = filter; }
 
 private:
 	std::string	_project;
 public:
 	const std::string&	project() const { return _project; }
 	void	project(const std::string& p) { _project = p; }
-
-private:
-	std::string	_mount;
-public:
-	std::string	mount() const { return _mount; }
-	void	mount(std::string mount) { _mount = mount; }
 
 	TaskParameters();
 };
@@ -131,6 +117,26 @@ public:
 
 	const std::string&	cause() const { return _cause; }
 	void	cause(const std::string& c) { _cause = c; }
+
+private:
+	std::string	_camera;
+	std::string	_ccd;
+	std::string	_cooler;
+	std::string	_filterwheel;
+	std::string	_mount;
+public:
+	const std::string&	camera() const { return _camera; }
+	void	camera(const std::string& camera) { _camera = camera; }
+	const std::string&	ccd() const { return _ccd; }
+	void	ccd(const std::string& ccd) { _ccd = ccd; }
+	const std::string&	cooler() const { return _cooler; }
+	void	cooler(const std::string& cooler) { _cooler = cooler; }
+	const std::string&	filterwheel() const { return _filterwheel; }
+	void	filterwheel(const std::string& filterwheel) {
+			_filterwheel = filterwheel;
+	}
+	const std::string&	mount() const { return _mount; }
+	void	mount(const std::string& mount) { _mount = mount; }
 
 private:
 	std::string	_filename;
@@ -297,7 +303,8 @@ public:
 	void	cancel(taskid_t queueid);
 
 	// submit a new task entry
-	taskid_t	submit(const TaskParameters& parameters);
+	taskid_t	submit(const TaskParameters& parameters,
+				const TaskInfo& info);
 
 	// information about the queue content
 	taskid_t	nexecutors() const { return executors.size(); }
