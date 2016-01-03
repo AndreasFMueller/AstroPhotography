@@ -120,6 +120,7 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
  */
 Calibration	GuiderFactoryI::getCalibration(int id,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d", id);
 	// use the database to retrieve the complete calibration data
 	Calibration	calibration;
 	try {
@@ -127,9 +128,13 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
 		calibration.id = r.id();
 		calibration.timeago = converttime(r.when);
-		calibration.guider.cameraname = r.camera;
-		calibration.guider.ccdid = r.ccdid;
-		calibration.guider.guiderportname = r.guiderport;
+		calibration.guider.instrumentname = r.instrument;
+		calibration.guider.ccdIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderCCD, r.ccd);
+		calibration.guider.guiderportIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderPort, r.guiderport);
 		for (int i = 0; i < 6; i++) {
 			calibration.coefficients.push_back(r.a[i]);
 		}
@@ -193,9 +198,17 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		astro::guiding::GuidingRunTable	gt(database);
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
 		history.timeago = converttime(r.whenstarted);
-		history.guider.cameraname = r.camera;
-		history.guider.ccdid = r.ccdid;
-		history.guider.guiderportname = r.guiderport;
+		history.guider.instrumentname = r.instrument;
+		history.guider.ccdIndex = instrumentName2index(r.instrument,
+			InstrumentGuiderCCD, r.ccd);
+		history.guider.guiderportIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderPort, r.guiderport);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s/%d/%d",
+			id, history.timeago,
+			history.guider.instrumentname.c_str(),
+			history.guider.ccdIndex,
+			history.guider.guiderportIndex);
 
 		// tracking points
 		astro::guiding::TrackingStore	store(database);

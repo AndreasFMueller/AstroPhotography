@@ -30,9 +30,9 @@ std::list<long>	TrackingStore::getTrackings(
 			const GuiderDescriptor& guider) {
 	GuidingRunTable	table(_database);
 	std::ostringstream	out;
-	out << "camera = '" << guider.cameraname() << "' and ";
-	out << "ccdid = " << guider.ccdid() << " and ";
-	out << "guiderport = '" << guider.guiderportname() << "' ";
+	out << "instrument = '" << guider.instrument() << "' and ";
+	out << "ccd = '" << guider.ccd() << "' and ";
+	out << "guiderport = '" << guider.guiderport() << "' ";
 	out << "order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());

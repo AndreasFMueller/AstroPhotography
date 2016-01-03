@@ -22,7 +22,9 @@ namespace guiding {
 GuidingProcess::GuidingProcess(Guider& guider, TrackerPtr tracker,
 	persistence::Database database)
 	: _guider(guider), _tracker(tracker), _database(database) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a guiding process: exposure %s", _guider.exposure().toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"construct a guiding process: exposure %s",
+		_guider.exposure().toString().c_str());
 }
 
 /**

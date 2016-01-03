@@ -64,7 +64,8 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(*drivingwork));
 
 	// create the tracking process
-	trackingwork = new TrackingWork(guider, _tracker, *drivingwork);
+	trackingwork = new TrackingWork(guider, _tracker, *drivingwork,
+		database);
 	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(*trackingwork));
 
 	// start both processes

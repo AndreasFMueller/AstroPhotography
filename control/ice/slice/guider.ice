@@ -8,15 +8,15 @@
 
 module snowstar {
 	/**
-	 * \brief guiders are described by camera, ccdid and guider port
+	 * \brief guiders are described by an Instrument name and indices
 	 *
-	 * Camera name and guiderport name are standard device URLs, the 
-	 * ccdid is the number of the ccd.
+	 * A guider is defined by the instrument name and the indices of the
+	 * guider ccd and the guider port.
 	 */
 	struct GuiderDescriptor {
-		string	cameraname;
-		int	ccdid;
-		string	guiderportname;
+		string	instrumentname;
+		int	ccdIndex;
+		int	guiderportIndex;
 	};
 
 	/**
@@ -125,11 +125,6 @@ module snowstar {
 	 */
 	interface Guider {
 		GuiderState	getState();
-
-		/**
-		 * \brief Get the camera that was chosen for the guider
-		 */
-		Camera*	getCamera() throws BadState;
 
 		/**
 		 * \brief Get the CCD that was chosen for the guider

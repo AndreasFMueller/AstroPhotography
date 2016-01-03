@@ -57,7 +57,6 @@ public:
 	virtual GuiderState getState(const Ice::Current& current);
 
 	// devices making up the guider
-	virtual CameraPrx getCamera(const Ice::Current& current);
 	virtual CcdPrx getCcd(const Ice::Current& current);
 	virtual GuiderPortPrx getGuiderPort(const Ice::Current& current);
 	virtual GuiderDescriptor getDescriptor(const Ice::Current& current);

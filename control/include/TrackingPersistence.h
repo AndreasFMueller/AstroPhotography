@@ -19,13 +19,13 @@ namespace guiding {
 class GuidingRun {
 public:
 	time_t	whenstarted;
-	std::string	camera;
-	int	ccdid;
+	std::string	instrument;
+	std::string	ccd;
 	std::string	guiderport;
 	GuidingRun() { }
-	GuidingRun(time_t _whenstarted, const std::string& _camera,
-		int _ccdid, const std::string& _guiderport)
-		: whenstarted(_whenstarted), camera(_camera), ccdid(_ccdid),
+	GuidingRun(time_t _whenstarted, const std::string& _instrument,
+		const std::string& _ccd, const std::string& _guiderport)
+		: whenstarted(_whenstarted), instrument(_instrument), ccd(_ccd),
 		  guiderport(_guiderport) {
 	}
 };

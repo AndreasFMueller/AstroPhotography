@@ -37,6 +37,8 @@ void	CcdI::startExposure(const Exposure& exposure,
 	try {
 		_ccd->startExposure(convert(exposure));
 	} catch (astro::DeviceException& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "startExposure error: %s",
+			x.what());
 		throw DeviceException(x.what());
 	}
 	laststart = time(NULL);
@@ -50,8 +52,12 @@ void	CcdI::cancelExposure(const Ice::Current& /* current */) {
 	try {
 		_ccd->cancelExposure();
 	} catch (const astro::DeviceException& deviceexception) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cancelExposure error: %s",
+			deviceexception.what());
 		throw DeviceException(deviceexception.what());
 	} catch (const astro::camera::BadState& badstate) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cancelExposure bad state: %s",
+			badstate.what());
 		throw BadState(badstate.what());
 	}
 }
@@ -60,8 +66,12 @@ Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
 	try {
 		return convert(_ccd->getExposure());
 	} catch (const astro::DeviceException& deviceexception) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "getExposure error: %s",
+			deviceexception.what());
 		throw DeviceException(deviceexception.what());
 	} catch (const astro::camera::BadState& badstate) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "getExposure bad state: %s",
+			badstate.what());
 		throw BadState(badstate.what());
 	}
 }
@@ -72,8 +82,14 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 		try {
 			image = _ccd->getImage();
 		} catch (const astro::DeviceException& deviceexception) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"device exception in getImage: %s",
+				deviceexception.what());
 			throw DeviceException(deviceexception.what());
 		} catch (astro::camera::BadState& bsx) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"bad state in getImage: %s",
+				bsx.what());
 			throw BadState("no image");
 		}
 	}

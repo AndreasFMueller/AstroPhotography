@@ -19,6 +19,7 @@
 #include <RemoteInstrument.h>
 #include <IceConversions.h>
 #include <CommonClientTasks.h>
+#include <stdexcept>
 
 using namespace astro;
 using namespace astro::module;
@@ -246,11 +247,25 @@ int	main(int argc, char *argv[]) {
 
 	// if the filter name is specified, get the filterwheel from the
 	// instrument and set the filter
-	if ((filtername.size() > 0)
-		&& (ri.has(InstrumentFilterWheel))) {
+	if (ri.has(InstrumentFilterWheel)) {
 		snowstar::FilterWheelPrx	filterwheel = ri.filterwheel();
-		FilterwheelTask	filterwheeltask(filterwheel, filtername);
-		filterwheeltask.wait();
+		if (filtername.size() > 0) {
+			FilterwheelTask	filterwheeltask(filterwheel,
+						filtername);
+			filterwheeltask.wait();
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"waiting for filterwheel to settle");
+			int	counter = 30;
+			while ((filterwheel->getState() != FwIDLE)
+				&& (counter > 0)) {
+				sleep(1);
+				counter++;
+			}
+			if (filterwheel->getState() != FwIDLE) {
+				throw std::runtime_error("filterwheel not idle");
+			}
+		}
 	}
 
 	// if the temperature is set, and the ccd has a cooler, lets
@@ -289,10 +304,35 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure initiated, waiting");
 
 		// wait for the exposure to complete
-		ccdtask.wait();
+		try {
+			ccdtask.wait();
+		} catch (const BadState& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "badstate wait: %s",
+				x.what());
+			throw std::runtime_error(x.what());
+		} catch (const DeviceException& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"device exception wait: %s", x.what());
+			throw std::runtime_error(x.what());
+		}
 
 		// get the image data
-		ImagePrx	image = ccd->getImage();
+		ImagePrx	image;
+		try {
+			image = ccd->getImage();
+		} catch (const BadState& x) {
+			std::string	msg = stringprintf(
+				"bad state in getImage: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			std::cerr << msg << std::endl;
+			throw std::runtime_error(msg);
+		} catch (const DeviceException& x) {
+			std::string	msg = stringprintf(
+				"device exception in getImage: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			std::cerr << msg << std::endl;
+			throw std::runtime_error(msg);
+		}
 
 		// convert image to an astro::image::imagePtr
 		astro::image::ImagePtr	imageptr = convert(image);

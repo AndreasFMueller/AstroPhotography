@@ -30,6 +30,8 @@ float	focallength = 0;
 Exposure	exposure;
 std::string	prefix("p");
 volatile bool	completed = false;
+float	guideinterval = 10;
+bool	csv = false;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -47,12 +49,18 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> calibrate"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> calibration"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> state"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> stop"
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> monitor"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> images"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> guide"
-		" [ <calibrationid> ] " << std::endl;
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> cancel"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> list"
@@ -80,20 +88,25 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
 	std::cout << std::endl;
-	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
-		"specified by <rec>.";
-	std::cout << std::endl;
+	std::cout << " -r,--rectangle=<rec>  expose only a subrectangle as "
+		"specified by <rec>." << std::endl;
 	std::cout << "                       <rec> must be of the form";
 	std::cout << std::endl;
 	std::cout << "                       widthxheight@(xoffset,yoffset)";
 	std::cout << std::endl;
+	std::cout << "                       if -s and -w are specified, the "
+		"subrectangle is";
+	std::cout << std::endl;
+	std::cout << "                       computed from these." << std::endl;
+	std::cout << " -s,--star=<pos>       position of the star to calibrate "
+		"or guide on in the" << std::endl;
+	std::cout << "                       syntax (x,y), the parentheses are "
+		"optional" << std::endl;
 	std::cout << " -t,--temperature=<t>  cool ccd to temperature <t>, "
-		"ignored if the instrument";
-	std::cout << std::endl;
-	std::cout << "                       has no cooler";
-	std::cout << std::endl;
-	std::cout << " -v,--verbose          enable verbose mode";
-	std::cout << std::endl;
+		"ignored if the instrument" << std::endl;
+	std::cout << "                       has no cooler" << std::endl;
+	std::cout << " -v,--verbose          enable verbose mode" << std::endl;
+	std::cout << " -w,--width=<w>        set the width and height of the area to expose" << std::endl;
 }
 
 /**
@@ -118,15 +131,22 @@ int	help_command() {
 "calibrate [ calibrationid ]" << std::endl <<
 "    Use the calibration run specified by <calibrationid> or, if" << std::endl<<
 "    <calibrationid> is not specified, start a new calibration" << std::endl <<
-"    run. In the latter case the focallength must be specified" << std::endl <<
-"    via the -f option." << std::endl
+"    run. In the latter case a star to perform the calibration" << std::endl <<
+"    on must be specified with the -s option as well as the " << std::endl <<
+"    focallength must be specified via the -f option." << std::endl
+<< std::endl << 
+"calibration" << std::endl <<
+"    display the current calibration"
 << std::endl << 
 "monitor" << std::endl <<
 "    Monitor the guiding process. This subcommand reports all" << std::endl <<
 "    state changes and all commands sent to the telescope mount" << std::endl
 << std::endl << 
 "guide" << std::endl <<
-"    Start guiding with the current calibration id." << std::endl
+"    Start guiding with the current calibration id." << std::endl <<
+"    the --star option is required." << std::endl << 
+"stop" << std::endl <<
+"    stop the guiding process" << std::endl
 << std::endl << 
 "cancel" << std::endl <<
 "    Cancel the current calibration or guiding process." << std::endl
@@ -137,12 +157,47 @@ int	help_command() {
 "    to bring the guider into the calibrated state, a prerequi-" << std::endl <<
 "    sitefor guiding" << std::endl
 << std::endl << 
+"tracks"  << std::endl <<
+"    list all guiding tracks recorded in the database" << std::endl
+<< std::endl << 
 "history" << std::endl <<
 "    Display the tracking history of the current guiding run." << std::endl
 << std::endl <<
 "For a summary of the options available to all subcommands," << std::endl <<
 "run the astroguide command with the --help option."
 << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Get the state of a guider
+ *
+ * This command retrieves the current state of the guider
+ */
+int	state_command(GuiderPrx guider) {
+	GuiderState	state = guider->getState();
+	std::cout << guiderstate2string(state);
+	switch (state) {
+	case GuiderCALIBRATING:
+		std::cout << guider->calibrationProgress();
+		break;
+	default:
+		break;
+	}
+	std::cout << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Stop the guider 
+ */
+int	stop_command(GuiderPrx guider) {
+	GuiderState	state = guider->getState();
+	if (state != GuiderGUIDING) {
+		std::cerr << "not guiding" << std::endl;
+		return EXIT_FAILURE;
+	}
+	guider->stopGuiding();
 	return EXIT_SUCCESS;
 }
 
@@ -255,6 +310,20 @@ void	Calibration_display::operator()(const Calibration& cal) {
 }
 
 /**
+ * \brief Display calibration
+ *
+ * This command retrieves the calibration information from the guider
+ * and displays it
+ */
+int	calibration_command(GuiderPrx guider) {
+	Calibration	cal = guider->getCalibration();
+	Calibration_display	cd(std::cout);
+	cd(cal);
+	std::cout << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Implementation of the list command
  */
 int	list_command(GuiderFactoryPrx guiderfactory,
@@ -278,12 +347,13 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 	if (calibrationid > 0) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
+	} else {
+		if ((star.x == 0) && (star.y == 0)) {
+			throw std::runtime_error("calibration star not set");
+		}
 	}
 	if (focallength < 0) {
 		throw std::runtime_error("focal length not set");
-	}
-	if ((star.x == 0) && (star.y == 0)) {
-		throw std::runtime_error("calibration star not set");
 	}
 	guider->startCalibration(focallength);
 	return EXIT_SUCCESS;
@@ -292,8 +362,22 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 /**
  * \brief Implementation of the guide command
  */
-int	guide_command() {
-	throw std::runtime_error("guide command not implemented");
+int	guide_command(GuiderPrx guider) {
+	if ((star.x == 0) && (star.y == 0)) {
+		throw std::runtime_error("calibration star not set");
+	}
+	// make sure we have all the information we need
+	if ((guideinterval < 0) || (guideinterval > 60)) {
+		std::string	cause = astro::stringprintf(
+			"bad guideinterval: %.3f", guideinterval);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	
+	// get the guider
+	guider->startGuiding(guideinterval);
+
+	// we are done
 	return EXIT_SUCCESS;
 }
 
@@ -344,22 +428,34 @@ int	tracks_command(GuiderFactoryPrx guiderfactory,
 class TrackingPoint_display {
 	std::ostream&	_out;
 	int	counter;
+	double	_starttime;
+	bool	_csv;
 public:
-	TrackingPoint_display(std::ostream& out) : _out(out) {
+	TrackingPoint_display(std::ostream& out, double starttime, bool csv)
+		: _out(out), _starttime(starttime), _csv(csv) {
 		counter = 1;
 	}
 	void	operator()(const TrackingPoint& point);
 };
 
 void	TrackingPoint_display::operator()(const TrackingPoint& point) {
-	_out << astro::stringprintf("[%04d] ", ++counter);
-	_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
-		converttime(point.timeago));
-	_out << astro::stringprintf(".%03.0f ",
-		1000 * (point.timeago - trunc(point.timeago)));
-	_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
-			point.trackingoffset.x, point.trackingoffset.y,
-			point.activation.x, point.activation.y);
+	if (_csv) {
+		_out << astro::stringprintf("%6d,", ++counter);
+		_out << astro::stringprintf("%8.1f,",
+			_starttime - point.timeago);
+		_out << astro::stringprintf("%10.4f,%10.4f,%10.4f,%10.4f",
+				point.trackingoffset.x, point.trackingoffset.y,
+				point.activation.x, point.activation.y);
+	} else {
+		_out << astro::stringprintf("[%04d] ", ++counter);
+		_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
+			converttime(point.timeago));
+		_out << astro::stringprintf(".%03.0f ",
+			1000 * (point.timeago - trunc(point.timeago)));
+		_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
+				point.trackingoffset.x, point.trackingoffset.y,
+				point.activation.x, point.activation.y);
+	}
 	_out << std::endl;
 }
 
@@ -371,13 +467,19 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
  */
 int	history_command(GuiderFactoryPrx guiderfactory, long id) {
 	TrackingHistory	history = guiderfactory->getTrackingHistory(id);
-	std::cout << history.guiderunid << ": ";
-	std::cout << astro::timeformat("%Y-%m-%d %H:%M",
-		converttime((double)history.timeago));
-	std::cout << std::endl;
+	verbose = csv;
+	if (csv) {
+		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr" << std::endl;
+	} else {
+		std::cout << history.guiderunid << ": ";
+		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+			converttime((double)history.timeago));
+		std::cout << std::endl;
+	}
 	if (verbose) {
+		double	starttime = history.points.begin()->timeago;
 		std::for_each(history.points.begin(), history.points.end(),
-			TrackingPoint_display(std::cout)
+			TrackingPoint_display(std::cout, starttime, csv)
 		);
 	}
 
@@ -389,16 +491,22 @@ int	history_command(GuiderFactoryPrx guiderfactory, long id) {
  */
 static struct option	longopts[] = {
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
-{ "config",		required_argument,	NULL,	'c' }, /*  1 */
-{ "debug",		no_argument,		NULL,	'd' }, /*  2 */
-{ "exposure",		required_argument,	NULL,	'e' }, /*  3 */
-{ "help",		no_argument,		NULL,	'h' }, /*  4 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /*  6 */
-{ "prefix",		required_argument,	NULL,	'p' }, /*  7 */
-{ "star",		required_argument,	NULL,	's' }, /*  8 */
-{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 10 */
-{ NULL,			0,			NULL,    0  }  /* 11 */
+{ "ccd",		required_argument,	NULL,	'C' }, /*  1 */
+{ "config",		required_argument,	NULL,	'c' }, /*  2 */
+{ "csv",		no_argument,		NULL,	 1  }, /*  3 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  4 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  5 */
+{ "focallength",	required_argument,	NULL,	'f' }, /*  6 */
+{ "guiderport",		required_argument,	NULL,	'G' }, /*  7 */
+{ "help",		no_argument,		NULL,	'h' }, /*  8 */
+{ "interval",		required_argument,	NULL,	'i' }, /*  9 */
+{ "prefix",		required_argument,	NULL,	'p' }, /* 10 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /* 11 */
+{ "star",		required_argument,	NULL,	's' }, /* 12 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 13 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 14 */
+{ "width",		required_argument,	NULL,	'w' }, /* 15 */
+{ NULL,			0,			NULL,    0  }  /* 16 */
 };
 
 /**
@@ -413,10 +521,14 @@ int	main(int argc, char *argv[]) {
 
 	int	c;
 	int	longindex;
+	int	ccdIndex = 0;
+	int	guiderportIndex = 0;
+	int	width = -1;
+	float	focallength = 0.1;
 
 	exposure.exposuretime = 1.;
 
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:r:s:t:v",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:C:de:f:G:hi:r:s:t:vw:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -424,6 +536,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
+			break;
+		case 'C':
+			ccdIndex = std::stoi(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -434,9 +549,15 @@ int	main(int argc, char *argv[]) {
 		case 'f':
 			focallength = std::stod(optarg);
 			break;
+		case 'G':
+			guiderportIndex = std::stoi(optarg);
+			break;
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'i':
+			guideinterval = std::stod(optarg);
+			break;
 		case 'p':
 			prefix = std::string(optarg);
 			break;
@@ -451,6 +572,12 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'v':
 			verbose = true;
+			break;
+		case 'w':
+			width = std::stoi(optarg);
+			break;
+		case 1:
+			csv = true;
 			break;
 		}
 
@@ -474,54 +601,34 @@ int	main(int argc, char *argv[]) {
 		return help_command();
 	}
 
+#if 0
 	// get the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
+#endif
 
 	// check whether we have an instrument
 	if (0 == instrumentname.size()) {
 		throw std::runtime_error("instrument name not set");
 	}
 
-	// get the instruments proxy and retrieve the instruments
-	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-        Ice::ObjectPrx  base
-		= ic->stringToProxy(servername.connect("Instrments"));
-	InstrumentsPrx	instruments = InstrumentsPrx::checkedCast(base);
-
-	// build the remote instrument
-	RemoteInstrument	instrument(instruments, instrumentname);
-
-	// get the server names for guiderccd and guiderport
-	astro::ServerName	target
-		= instrument.servername(InstrumentGuiderCCD);
-	if (target != instrument.servername(InstrumentGuiderPort)) {
-		throw std::runtime_error("ccd and guiderport on different "
-			"servers");
-	}
-
-	// server of the camera
+	// server of the instrument
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument on server %s",
-		std::string(servername).c_str());
-
-	// get camera, ccd and proxy
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the device from the instrument");
-	CameraPrx	camera = instrument.camera();
-	CcdPrx		ccd = instrument.guiderccd();
-	GuiderPortPrx	guiderport = instrument.guiderport();
+		std::string(instrumentname).c_str());
 
 	// build the guider descriptor
 	GuiderDescriptor	descriptor;
-	descriptor.cameraname = camera->getName();
-	descriptor.ccdid = ccd->getInfo().id;
-	descriptor.guiderportname = guiderport->getName();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s",
-		descriptor.cameraname.c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port: %s",
-		descriptor.guiderportname.c_str());
+	descriptor.instrumentname = instrumentname;
+	descriptor.ccdIndex = ccdIndex;
+	descriptor.guiderportIndex = guiderportIndex;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
+		descriptor.instrumentname.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdIndex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port: %d",
+		descriptor.guiderportIndex);
 
 	// connect to the guider factory of a remote server
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
         Ice::ObjectPrx  gbase
 		= ic->stringToProxy(servername.connect("Guiders"));
 	GuiderFactoryPrx	guiderfactory
@@ -550,6 +657,15 @@ int	main(int argc, char *argv[]) {
 		guiderstate2string(state).c_str());
 
 	// commands needing a guider
+	if (command == "state") {
+		return state_command(guider);
+	}
+	if (command == "stop") {
+		return stop_command(guider);
+	}
+	if (command == "calibration") {
+		return calibration_command(guider);
+	}
 	if (command == "cancel") {
 		return cancel_command(guider);
 	}
@@ -562,35 +678,45 @@ int	main(int argc, char *argv[]) {
 	if (command == "monitor") {
 		return monitor_command(guider);
 	}
-	if (command == "calibrate") {
-		// next argument must be the calibration id, if it is present
-		if (argc <= optind) {
-			throw std::runtime_error("no calibration id specified");
-		}
-		int calibrationid = std::stoi(argv[optind++]);
-		return calibrate_command(guider, calibrationid);
-	}
 
 	// the guide and calibrate commands need an exposure
 	exposure.gain = 1;
 	exposure.limit = 0;
 	exposure.shutter = ShOPEN;
-	exposure.purpose = ExLIGHT;
+	exposure.purpose = ExGUIDE;
 	if (binning.size() > 0) {
 		exposure.mode = convert(astro::camera::Binning(binning));
 	} else {
 		exposure.mode.x = 1;
 		exposure.mode.y = 1;
 	}
+	if (frame.size() > 0) {
+		exposure.frame = convert(astro::image::ImageRectangle(frame));
+	} else {
+		exposure.frame.origin.x = star.x - width / 2;
+		exposure.frame.origin.y = star.y - width / 2;
+		exposure.frame.size.width = width;
+		exposure.frame.size.height = width;
+	}
 	guider->setExposure(exposure);
+
+	// make sure we have the guide star set
+	Point	starpoint;
+	starpoint.x = star.x;
+	starpoint.y = star.y;
+	guider->setStar(starpoint);
 
 	// implement the guide and calibrate commands
 	if (command == "guide") {
-		return guide_command();
+		return guide_command(guider);
 	}
 	if (command == "calibrate") {
 		// next argument must be the calibration id, if it is present
-		return calibrate_command(guider, -1);
+		int	calibrationid = -1;
+		if (argc > optind) {
+			calibrationid = std::stoi(argv[optind++]);
+		}
+		return calibrate_command(guider, calibrationid);
 	}
 
 	throw std::runtime_error("unknown command");

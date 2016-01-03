@@ -64,6 +64,56 @@ discover::InstrumentList	convertInstrumentList(const InstrumentList& list) {
 	return copy<InstrumentList, discover::InstrumentList>(list);
 }
 
+astro::discover::InstrumentComponentKey::Type	convertInstrumentType(
+	const InstrumentComponentType type) {
+	switch (type) {
+	case InstrumentAdaptiveOptics:
+		return astro::discover::InstrumentComponentKey::AdaptiveOptics;
+	case InstrumentCamera:
+		return astro::discover::InstrumentComponentKey::Camera;
+	case InstrumentCCD:
+		return astro::discover::InstrumentComponentKey::CCD;
+	case InstrumentCooler:
+		return astro::discover::InstrumentComponentKey::Cooler;
+	case InstrumentGuiderCCD:
+		return astro::discover::InstrumentComponentKey::GuiderCCD;
+	case InstrumentGuiderPort:
+		return astro::discover::InstrumentComponentKey::GuiderPort;
+	case InstrumentFilterWheel:
+		return astro::discover::InstrumentComponentKey::FilterWheel;
+	case InstrumentFocuser:
+		return astro::discover::InstrumentComponentKey::Focuser;
+	case InstrumentMount:
+		return astro::discover::InstrumentComponentKey::Mount;
+	}
+	throw std::runtime_error("bad type");
+}
+
+InstrumentComponentType	convertInstrumentType(
+	const astro::discover::InstrumentComponentKey::Type type) {
+	switch (type) {
+	case astro::discover::InstrumentComponentKey::AdaptiveOptics:
+		return InstrumentAdaptiveOptics;
+	case astro::discover::InstrumentComponentKey::Camera:
+		return InstrumentCamera;
+	case astro::discover::InstrumentComponentKey::CCD:
+		return InstrumentCCD;
+	case astro::discover::InstrumentComponentKey::Cooler:
+		return InstrumentCooler;
+	case astro::discover::InstrumentComponentKey::GuiderCCD:
+		return InstrumentGuiderCCD;
+	case astro::discover::InstrumentComponentKey::GuiderPort:
+		return InstrumentGuiderPort;
+	case astro::discover::InstrumentComponentKey::FilterWheel:
+		return InstrumentFilterWheel;
+	case astro::discover::InstrumentComponentKey::Focuser:
+		return InstrumentFocuser;
+	case astro::discover::InstrumentComponentKey::Mount:
+		return InstrumentMount;
+	}
+	throw std::runtime_error("bad type");
+}
+
 std::string	instrumentcomponent2name(const InstrumentComponentType type) {
 	switch (type) {
 	case InstrumentAdaptiveOptics:
@@ -119,6 +169,82 @@ InstrumentComponentType	name2instrumentcomponent(const std::string& name) {
 	std::string	msg = astro::stringprintf("unknown instrument "
 		"component name: %s", name.c_str());
 	throw std::runtime_error(msg);
+}
+
+
+std::string	instrumentIndex2name(const std::string& instrumentname,
+			InstrumentComponentType type, int index) {
+	// first try to look up the device in the instrument database
+	try {
+		// get an instrument for the instrument name
+		astro::discover::InstrumentPtr  instrument
+			= astro::discover::InstrumentBackend::get(
+				instrumentname);
+		return instrument->get(convertInstrumentType(type),
+			index).deviceurl();
+	} catch (...) {
+	}
+	// build an unknown name from the index
+	std::string	devicename;
+	switch (type) {
+	case astro::discover::InstrumentComponentKey::AdaptiveOptics:
+		devicename = "adaptiveoptics";
+		break;
+	case astro::discover::InstrumentComponentKey::Camera:
+		devicename = "camera";
+		break;
+	case astro::discover::InstrumentComponentKey::CCD:
+	case astro::discover::InstrumentComponentKey::GuiderCCD:
+		devicename = "ccd";
+		break;
+	case astro::discover::InstrumentComponentKey::Cooler:
+		devicename = "camera";
+		break;
+	case astro::discover::InstrumentComponentKey::GuiderPort:
+		devicename = "guiderport";
+		break;
+	case astro::discover::InstrumentComponentKey::FilterWheel:
+		devicename = "filterwheel";
+		break;
+	case astro::discover::InstrumentComponentKey::Focuser:
+		devicename = "focuser";
+		break;
+	case astro::discover::InstrumentComponentKey::Mount:
+		devicename = "mount";
+		break;
+	default:
+		throw std::runtime_error("unknown device type");
+		break;
+	}
+	std::string deviceurl = astro::stringprintf("%s:unknown/%d",
+		devicename.c_str(), index);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown device: %s", deviceurl.c_str());
+	return deviceurl;
+}
+
+int	instrumentName2index(const std::string& instrumentname,
+			InstrumentComponentType type,
+			const std::string& deviceurl) {
+	// handle the case where the device url comes from the "unknown" module
+	astro::DeviceName	devname(deviceurl);
+	if (devname.modulename() == "unknown") {
+		try {
+			return std::stoi(devname.unitname());
+		} catch (...) {
+			return 0;
+		}
+	}
+	// handle all other device names, try to convert them into an index
+	try {
+		astro::discover::InstrumentPtr  instrument
+			= astro::discover::InstrumentBackend::get(instrumentname);
+		int	index = instrument->indexOf(convertInstrumentType(type),
+					deviceurl);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has index %d in %s",
+			deviceurl.c_str(), index, instrumentname.c_str());
+	} catch (...) { }
+	// return 0 if this is unknown
+	return 0;
 }
 
 } // namespace snowstar

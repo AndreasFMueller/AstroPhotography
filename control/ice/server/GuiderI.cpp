@@ -120,18 +120,13 @@ GuiderState GuiderI::getState(const Ice::Current& /* current */) {
 	return convert(guider->state());
 }
 
-CameraPrx GuiderI::getCamera(const Ice::Current& current) {
-	std::string	name = guider->getDescriptor().cameraname();
-	return CameraI::createProxy(name, current);
-}
-
 CcdPrx GuiderI::getCcd(const Ice::Current& current) {
-	std::string	ccdname = guider->ccd()->name().toString();
+	std::string	ccdname = guider->getDescriptor().ccd();
 	return CcdI::createProxy(ccdname, current);
 }
 
 GuiderPortPrx GuiderI::getGuiderPort(const Ice::Current& current) {
-	std::string	name = guider->getDescriptor().guiderportname();
+	std::string	name = guider->getDescriptor().guiderport();
 	return GuiderPortI::createProxy(name, current);
 }
 
@@ -158,12 +153,18 @@ Point GuiderI::getStar(const Ice::Current& /* current */) {
 	return _point;
 }
 
-void GuiderI::useCalibration(Ice::Int calibrationid,
+void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
 	astro::guiding::CalibrationStore	store(database);
 	astro::guiding::GuiderCalibration	calibration
-		= store.getCalibration(calibrationid);
+		= store.getCalibration(calid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"calibration %d: [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
+		calibrationid,
+		calibration.a[0], calibration.a[1], calibration.a[2],
+		calibration.a[3], calibration.a[4], calibration.a[5]);
+	calibrationid = calid;
 
 	// install calibration data in the guider
 	guider->calibration(calibration);
@@ -172,16 +173,23 @@ void GuiderI::useCalibration(Ice::Int calibrationid,
 Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	Calibration	result;
 	result.id = calibrationid;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d",
+		calibrationid);
 
 	// get the calibration record from the database
 	astro::guiding::CalibrationTable	t(database);
 	astro::guiding::CalibrationRecord	cal = t.byid(calibrationid);
 	result.timeago = converttime(cal.when);
-	result.guider.cameraname = cal.camera;
-	result.guider.ccdid = cal.ccdid;
-	result.guider.guiderportname = cal.guiderport;
+	result.guider.instrumentname = cal.instrument;
+	result.guider.ccdIndex = instrumentName2index(cal.instrument,
+		InstrumentGuiderCCD, cal.ccd);
+	result.guider.guiderportIndex = instrumentName2index(cal.instrument,
+		InstrumentGuiderPort, cal.guiderport);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"copy coefficients from [%.3f, %.3f, %3f; %.3f, %.3f, %.3f ]",
+		cal.a[0], cal.a[1], cal.a[2], cal.a[3], cal.a[4], cal.a[5]);
 	for (int i = 0; i < 6; i++) {
-		result.coefficients[i] = cal.a[i];
+		result.coefficients.push_back(cal.a[i]);
 	}
 
 	// use database to retrieve calibration, containing coefficients
@@ -209,14 +217,10 @@ void GuiderI::startCalibration(Ice::Float focallength,
 
 	// prepare a calibration record
 	astro::guiding::Calibration	calibration;
-	calibration.camera = guider->cameraname();
-	calibration.ccdid = guider->ccdid();
+	calibration.instrument = guider->instrument();
+	calibration.ccd = guider->ccdname();
 	calibration.guiderport = guider->guiderportname();
 
-	// create an entry in the calibration table
-	astro::guiding::CalibrationStore	store(database);
-	calibrationid = store.addCalibration(calibration);
-	
 	// callback stuff
 	GuiderICalibrationCallback	*callback
 		= new GuiderICalibrationCallback(*this);
@@ -274,8 +278,10 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
  */
 void GuiderI::startGuiding(Ice::Float guidinginterval,
 		const Ice::Current& /* current */) {
-	// build a tracker
-	astro::guiding::TrackerPtr	tracker = getTracker();
+	// construct a tracker
+	astro::guiding::TrackerPtr	tracker
+		= guider->getTracker(convert(_point));
+
 
 	// start guiding
 	guider->startGuiding(tracker, guidinginterval);

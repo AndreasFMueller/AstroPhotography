@@ -12,7 +12,7 @@ module snowstar {
 	sequence<BinningMode>	BinningSet;
 
 	enum ShutterState { ShCLOSED, ShOPEN };
-	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT, ExBIAS, ExTEST };
+	enum ExposurePurpose { ExLIGHT, ExDARK, ExFLAT, ExBIAS, ExTEST, ExGUIDE };
 
 	/**
 	 * \brief Exposure request structure
@@ -143,7 +143,7 @@ module snowstar {
 		 * For this method to work the Ccd must be in state exposed.
 		 * Retreiving the image will update the state to idle.
 		 */
-		Image*	getImage() throws BadState;
+		Image*	getImage() throws BadState, DeviceException;
 
 		/**
 		 * \brief Find out whether this CCD has a gain setting.

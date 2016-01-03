@@ -7,6 +7,7 @@
 #include <AstroPersistence.h>
 #include <AstroConfig.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <InstrumentComponentTable.h>
 
 namespace astro {
@@ -98,6 +99,9 @@ public:
 	InstrumentPtr	get(const std::string& name);
 	InstrumentComponent	get(const std::string& name, 
 			InstrumentComponent::Type type, int index);
+	int	indexOf(const std::string& instrumentname,
+			InstrumentComponent::Type type,
+			const std::string& devicename);
 };
 
 astro::persistence::Database	InstrumentBackendImpl::database;
@@ -272,6 +276,41 @@ InstrumentComponent	InstrumentBackendImpl::get(const std::string& name,
 	return component;
 }
 
+/**
+ * \brief Find the index of an instrument component by name
+ */
+int	InstrumentBackendImpl::indexOf(const std::string& instrumentname,
+			InstrumentComponent::Type type,
+			const std::string& deviceurl) {
+	int	index;
+	std::string	query(	"select idx "
+				"from instrumentcomponents "
+				"where name = ? "
+				"  and type = ? "
+				"  and deviceurl = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	statement->bind(1, type);
+	statement->bind(2, deviceurl);
+	Result	res = statement->result();
+	if (0 == res.size()) {
+		std::string	cause = stringprintf("no instrument='%s' "
+			"component='%s(%d)' deviceurl='%s'",
+			instrumentname.c_str(),
+			InstrumentComponentKey::type2string(type).c_str(),
+			type, deviceurl.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	index = res.front()[0]->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"instrumentcomponent %s/%s(%d)/%s has index %d",
+		instrumentname.c_str(),
+		InstrumentComponentKey::type2string(type).c_str(), type,
+		deviceurl.c_str(), index);
+	return index;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Instrument implementation
 //////////////////////////////////////////////////////////////////////
@@ -295,6 +334,10 @@ public:
 	virtual InstrumentComponent	get(InstrumentComponent::Type type,
 		int index) {
 		return backend.get(name(), type, index);
+	}
+	virtual int	indexOf(InstrumentComponent::Type type,
+				const std::string& deviceurl) {
+		return backend.indexOf(name(), type, deviceurl);
 	}
 };
 

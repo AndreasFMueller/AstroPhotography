@@ -18,8 +18,8 @@ namespace guiding {
 class Calibration {
 public:
 	time_t	when;
-	std::string	camera;
-	int	ccdid;
+	std::string	instrument;
+	std::string	ccd;
 	std::string	guiderport;
 	double	a[6];
 	Calibration();

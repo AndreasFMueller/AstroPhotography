@@ -174,6 +174,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();
 	//cal.rescale(1. / grid);
+	guider().saveCalibration(cal);
 	guider().calibration(cal);
 
 	// inform the callback that calibration is complete

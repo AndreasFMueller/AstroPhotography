@@ -21,33 +21,33 @@ namespace guiding {
  * \brief Equality operator for GuiderDescriptor objects
  */
 bool	GuiderDescriptor::operator==(const GuiderDescriptor& other) const {
-	return (cameraname() == other.cameraname())
-		&& (ccdid() == other.ccdid())
-		&& (guiderportname() == other.guiderportname());
+	return (instrument() == other.instrument())
+		&& (ccd() == other.ccd())
+		&& (guiderport() == other.guiderport());
 }
 
 /**
  * \brief Comparison operator for GuiderDescriptor objects
  */
 bool	GuiderDescriptor::operator<(const GuiderDescriptor& other) const {
-	if (cameraname() < other.cameraname()) {
+	if (instrument() < other.instrument()) {
 		return true;
 	}
-	if (cameraname() > other.cameraname()) {
+	if (instrument() > other.instrument()) {
 		return false;
 	}
-	if (ccdid() < other.ccdid()) {
+	if (ccd() < other.ccd()) {
 		return true;
 	}
-	if (ccdid() > other.ccdid()) {
+	if (ccd() > other.ccd()) {
 		return false;
 	}
-	return guiderportname() < other.guiderportname();
+	return guiderport() < other.guiderport();
 }
 
 std::string	GuiderDescriptor::toString() const {
-	return stringprintf("%s|%d|%s", cameraname().c_str(), ccdid(),
-		guiderportname().c_str());
+	return stringprintf("%s|%s|%s", instrument().c_str(), ccd().c_str(),
+		guiderport().c_str());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -77,33 +77,34 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	}
 
 	// use the information in the descriptor to build a new guider
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get camera %s",
-		guiderdescriptor.cameraname().c_str());
-	CameraPtr	camera = cameraFromName(guiderdescriptor.cameraname());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructed");
-	CcdPtr	ccd = camera->getCcd(guiderdescriptor.ccdid());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
-	GuiderPortPtr	guiderport;
-	if (guiderdescriptor.guiderportname().size() == 0) {
-		guiderport = camera->getGuiderPort();
-	} else {
-		guiderport = guiderportFromName(
-			guiderdescriptor.guiderportname());
+	Repository	repository;
+	CcdPtr	ccd;
+	{
+		DeviceAccessor<CcdPtr>	da(repository);
+		ccd = da.get(DeviceName(guiderdescriptor.ccd()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "components constructed");
+	GuiderPortPtr	guiderport;
+	{
+		DeviceAccessor<GuiderPortPtr>	da(repository);
+		guiderport = da.get(DeviceName(guiderdescriptor.guiderport()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "components constructed");
+	}
 
 	// with all these components we can now build a new guider
-	GuiderPtr	guider(new Guider(camera, ccd, guiderport, database));
+	GuiderPtr	guider(new Guider(guiderdescriptor.instrument(),
+				ccd, guiderport, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	return guider;
 }
 
+#if 0
 /**
  * \brief Get a camera from a repository based on the name
  */
-CameraPtr	GuiderFactory::cameraFromName(const std::string& name) {
+CcdPtr	GuiderFactory::ccdFromName(const std::string& name) {
 	Repository	repository;
-	DeviceAccessor<CameraPtr>	da(repository);
+	DeviceAccessor<CcdPtr>	da(repository);
 	return da.get(DeviceName(name));
 }
 
@@ -115,6 +116,7 @@ GuiderPortPtr	GuiderFactory::guiderportFromName(const std::string& name) {
 	DeviceAccessor<GuiderPortPtr>	da(repository);
 	return da.get(DeviceName(name));
 }
+#endif
 
 } // namespace guiding
 } // namespace astro

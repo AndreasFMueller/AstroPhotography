@@ -30,9 +30,9 @@ std::list<long>	CalibrationStore::getAllCalibrations() {
 std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider) {
 	std::ostringstream	out;
-	out << " camera = '" << guider.cameraname() << "' and ";
-	out << " ccdid = " << guider.ccdid() << " and ";
-	out << " guiderport = '" << guider.guiderportname() << "'";
+	out << " instrument = '" << guider.instrument() << "' and ";
+	out << " ccd = '" << guider.ccd() << "' and ";
+	out << " guiderport = '" << guider.guiderport() << "'";
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -58,11 +58,14 @@ std::list<CalibrationPointRecord>	CalibrationStore::getCalibrationPoints(long id
  * \param id of the calibration to retrieve
  */
 GuiderCalibration	CalibrationStore::getCalibration(long id) {
-	GuiderCalibration	calibration;
 
 	// get the calibration table
 	CalibrationTable	ct(_database);
 	CalibrationRecord	r = ct.byid(id);
+	GuiderCalibration	calibration;
+	for (int i = 0; i < 6; i++) {
+		calibration.a[i] = r.a[i];
+	}
 
 	// add the points
 	std::list<CalibrationPointRecord>	points

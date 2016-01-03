@@ -343,9 +343,12 @@ private:
 			InstrumentComponent::Type type);
 public:
 	// get a component
-	virtual InstrumentComponent	get(InstrumentComponent::Type type, int index) = 0;
+	virtual InstrumentComponent	get(InstrumentComponent::Type type,
+						int index) = 0;
 
 	virtual int	nComponentsOfType(InstrumentComponentKey::Type type) = 0;
+	virtual int	indexOf(InstrumentComponentKey::Type type,
+				const std::string& deviceurl) = 0;
 	virtual int	add(const InstrumentComponent& component) = 0;
 	virtual void	update(const InstrumentComponent& component) = 0;
 	virtual void	remove(InstrumentComponentKey::Type type, int index) = 0;

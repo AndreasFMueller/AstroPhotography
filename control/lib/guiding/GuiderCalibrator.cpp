@@ -116,6 +116,10 @@ GuiderCalibration	GuiderCalibrator::calibrate() {
 	for (unsigned int i = 0; i < 6; i++) {
 		_calibration.a[i] = b[i];
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"calibration: [ %.5f, %.5f, %.5f; %.5f, %.5f, %.5f ]",
+		_calibration.a[0], _calibration.a[1], _calibration.a[2],
+		_calibration.a[3], _calibration.a[4], _calibration.a[5]);
 
 	// The last two variables are not needed for the calibration, we
 	// throw them away but it might be interesting to at least note them

@@ -166,6 +166,8 @@ ExposurePurpose convert(const astro::camera::Exposure::purpose_t& purpose) {
 		return snowstar::ExBIAS;
 	case astro::camera::Exposure::test:
 		return snowstar::ExTEST;
+	case astro::camera::Exposure::guide:
+		return snowstar::ExGUIDE;
 	}
 	throw std::runtime_error("unknown exposure purpose");
 }
@@ -182,6 +184,8 @@ astro::camera::Exposure::purpose_t      convert(const ExposurePurpose& purpose) 
 		return astro::camera::Exposure::bias;
 	case snowstar::ExTEST:
 		return astro::camera::Exposure::test;
+	case snowstar::ExGUIDE:
+		return astro::camera::Exposure::guide;
 	}
 	throw std::runtime_error("unknown exposure purpose");
 }

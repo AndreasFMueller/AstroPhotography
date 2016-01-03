@@ -129,31 +129,38 @@ std::vector<std::string>	SimLocator::getDevicelist(
 	std::vector<std::string>	names;
 	switch (device) {
 	case DeviceName::AdaptiveOptics:
+		debug(LOG_ERR, DEBUG_LOG, 0, "AO not implemented");
 		throw std::runtime_error("SimAO not implemented");
 	case DeviceName::Camera:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Camera not implemented");
 		names.push_back(std::string("camera:simulator/camera"));
 		break;
 	case DeviceName::Ccd:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Ccd not implemented");
 		names.push_back(std::string("ccd:simulator/camera/ccd"));
 		break;
 	case DeviceName::Guiderport:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Guiderport not implemented");
 		names.push_back(std::string("guiderport:simulator/guiderport"));
-		names.push_back(std::string("guiderport:simulator/camera"));
 		break;
 	case DeviceName::Filterwheel:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Filterwheel not implemented");
 		names.push_back(std::string("filterwheel:simulator/filterwheel"));
-		names.push_back(std::string("filterwheel:simulator/camera"));
 		break;
 	case DeviceName::Focuser:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Focuser not implemented");
 		names.push_back(std::string("focuser:simulator/focuser"));
 		break;
 	case DeviceName::Cooler:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Cooler not implemented");
 		names.push_back(std::string("cooler:simulator/cooler"));
 		break;
 	case DeviceName::Module:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Module not implemented");
 		names.push_back(std::string("module:simulator"));
 		break;
 	case DeviceName::Mount:
+		debug(LOG_ERR, DEBUG_LOG, 0, "Mount not implemented");
 		names.push_back(std::string("mount:simulator/mount"));
 		break;
 	}

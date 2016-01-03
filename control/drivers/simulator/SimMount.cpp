@@ -31,6 +31,7 @@ RaDec	SimMount::getRaDec() {
 }
 
 AzmAlt	SimMount::getAzmAlt() {
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot get AzmAlt");
 	throw std::runtime_error("XXX cannot get AzmAlt");
 }
 
@@ -39,6 +40,7 @@ void	SimMount::Goto(const RaDec& radec) {
 }
 
 void	SimMount::Goto(const AzmAlt& /* azmalt */) {
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot get AzmAlt");
 	throw std::runtime_error("XXX cannot goto AzmAlt");
 }
 
@@ -55,6 +57,8 @@ void	SimMount::parameter(const std::string& name, float angle) {
 		_position.latitude().degrees(angle);
 		return;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "no parameter %s, %f",
+		name.c_str(), angle);
 	throw std::logic_error("no such parameter");
 }
 
@@ -65,6 +69,7 @@ float	SimMount::parameterValueFloat(const std::string& name) const {
 	if (name == std::string("latitude")) {
 		return _position.latitude().degrees();
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "no parameter named '%s'", name.c_str());
 	throw std::logic_error("no such parameter");
 }
 

@@ -250,24 +250,27 @@ public:
 		: t(actiontime), trackingoffset(offset),
 		  correction(activation) {
 	}
+	std::string	toString() const;
 };
 
 /**
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
  */
 class GuiderDescriptor {
-	std::string	_cameraname;
-	unsigned int	_ccdid;
-	std::string	_guiderportname;
+	std::string	_instrument;
+	std::string	_ccd;
+	std::string	_guiderport;
 public:
-	GuiderDescriptor(const std::string& cameraname, unsigned int ccdid,
-		const std::string& guiderportname) : _cameraname(cameraname),
-		_ccdid(ccdid), _guiderportname(guiderportname) { }
+	GuiderDescriptor(const std::string& instrument,
+		const std::string& ccd,
+		const std::string& guiderport)
+		: _instrument(instrument), _ccd(ccd),
+		  _guiderport(guiderport) { }
 	bool	operator==(const GuiderDescriptor& other) const;
 	bool	operator<(const GuiderDescriptor& other) const;
-	std::string	cameraname() const { return _cameraname; }
-	unsigned int	ccdid() const { return _ccdid; }
-	std::string	guiderportname() const { return _guiderportname; }
+	std::string	instrument() const { return _instrument; }
+	std::string	ccd() const { return _ccd; }
+	std::string	guiderport() const { return _guiderport; }
 	std::string	toString() const;
 };
 
@@ -344,13 +347,13 @@ public:
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
-	camera::CameraPtr	_camera;
+	std::string	_instrument;
 	camera::GuiderPortPtr	_guiderport;
 public:
-	camera::CameraPtr	camera() { return _camera; }
-	std::string	cameraname() { return _camera->name(); }
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i) { _instrument = i; }
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }
-	std::string	guiderportname() { return _guiderport->name(); }
+	std::string	guiderportname() const { return _guiderport->name().toString(); }
 private:
 	/*
 	 * \brief Image for guiding
@@ -365,7 +368,8 @@ private:
 public:
 	const camera::Imager&	imager() const { return _imager; }
 	camera::Imager&	imager() { return _imager; }
-	camera::CcdPtr		ccd() { return _imager.ccd(); }
+	camera::CcdPtr	ccd() const { return _imager.ccd(); }
+	std::string	ccdname() const { return ccd()->name().toString(); }
 	camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
 	int	ccdid() const { return getCcdInfo().getId(); }
 
@@ -398,8 +402,8 @@ public:
 	 * the image to take into consideration when looking for a guide star,
 	 * or even how to expose an image.
 	 */
-	Guider(camera::CameraPtr camera, camera::CcdPtr ccd,
-		camera::GuiderPortPtr guiderport,
+	Guider(const std::string& instrument,
+		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
 		persistence::Database database = NULL);
 
 	// We should be able to get images through the imager, using the
@@ -450,6 +454,8 @@ public:
 	 */
 	int	startCalibration(TrackerPtr tracker,
 			double focallength = 0, double pixelsize = 0);
+	void	saveCalibration(const GuiderCalibration& calibration);
+
 	/**
 	 * \brief query the progress of the calibration process
 	 */
@@ -545,9 +551,11 @@ class GuiderFactory {
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
 	// auxiliary functions to simplify the 
+#if 0
 	camera::CameraPtr	cameraFromName(const std::string& name);
 	camera::GuiderPortPtr	guiderportFromName(
 						const std::string& name);
+#endif
 public:
 	GuiderFactory() { }
 	GuiderFactory(module::Repository _repository,
