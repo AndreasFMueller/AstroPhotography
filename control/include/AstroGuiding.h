@@ -49,6 +49,14 @@ StarDetector<Pixel>::StarDetector(
  * By summing the coordinates weighted by luminance around the maximum pixel
  * value in a rectangle, we get the centroid coordinates of the star's
  * response. This is the best estimate for the star coordinates.
+ *
+ * XXX problem with stars near border of rectangle 
+ *
+ * We should add a window function here. The problem is that when the
+ * image moves, additional stars may get into view. This happens oftion
+ * when calibrating. So stars at the border of the image should have much
+ * less weight than stars near the center, or stars near the expected
+ * position.
  */
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(

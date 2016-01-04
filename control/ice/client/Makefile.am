@@ -70,10 +70,10 @@ test:	snowflake
 	./snowflake -d -m simulator
 
 calibrate:	snowguide
-	./snowguide --debug --focallength=0.1 --star=345,251 --width=40 \
+	./snowguide --debug --focallength=0.1 --star=349,252 --width=60 \
 		--exposure=1 server GUIDESIM calibrate
 guide:	snowguide
-	./snowguide --debug --star=345,251 --width=40 \
+	./snowguide --debug --star=349,252 --width=60 \
 		--exposure=1 server GUIDESIM guide
 
 endif

@@ -8,6 +8,8 @@ Guiding:
       - Positionsdaten aus Mount in den Kalibrierdaten speichern
       -	pixelgrösse und brennweite in tracking history speichern, damit
 	der Fehler in arcsec berechnet werden kann.
+      - Problem beim StarTracker für helle Sterne, die im Laufe der Kalibrierung
+	im Bildfeld auftauchen.
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
