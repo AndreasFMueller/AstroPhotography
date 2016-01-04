@@ -355,7 +355,9 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 	if (focallength < 0) {
 		throw std::runtime_error("focal length not set");
 	}
-	guider->startCalibration(focallength);
+	calibrationid = guider->startCalibration(focallength);
+	std::cout << "new calibration " << calibrationid << " in progress";
+	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -467,9 +469,9 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
  */
 int	history_command(GuiderFactoryPrx guiderfactory, long id) {
 	TrackingHistory	history = guiderfactory->getTrackingHistory(id);
-	verbose = csv;
 	if (csv) {
 		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr" << std::endl;
+		verbose = csv;
 	} else {
 		std::cout << history.guiderunid << ": ";
 		std::cout << astro::timeformat("%Y-%m-%d %H:%M",

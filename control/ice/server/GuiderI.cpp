@@ -211,7 +211,7 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
  * The focal length is the only piece of information that we can not
  * get from anywhere else, so it has to be specified
  */
-void GuiderI::startCalibration(Ice::Float focallength,
+Ice::Int GuiderI::startCalibration(Ice::Float focallength,
 	const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration");
 
@@ -231,7 +231,7 @@ void GuiderI::startCalibration(Ice::Float focallength,
 		= guider->getTracker(convert(_point));
 
 	// start the calibration
-	guider->startCalibration(tracker, focallength);
+	return guider->startCalibration(tracker, focallength);
 }
 
 /**
