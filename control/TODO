@@ -5,6 +5,9 @@ configuration system:
 
 Guiding:
       -	get focal length from instrument
+      - Positionsdaten aus Mount in den Kalibrierdaten speichern
+      -	pixelgrösse und brennweite in tracking history speichern, damit
+	der Fehler in arcsec berechnet werden kann.
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
