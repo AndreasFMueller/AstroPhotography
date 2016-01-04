@@ -98,8 +98,8 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-int	Guider::startCalibration(TrackerPtr tracker, double focallength,
-		double pixelsize) {
+int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
+	double	pixelsize = getPixelsize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
 		"focallength = %.3fmm, pixelsize = %.2fum)",
 		tracker->toString().c_str(), 1000 * focallength,
@@ -232,7 +232,8 @@ void	Guider::callbackImage(ImagePtr image) {
  */
 double	Guider::getPixelsize() {
 	astro::camera::CcdInfo  info = ccd()->getInfo();
-	float	_pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
+	float	_pixelsize = (info.pixelwidth() + _exposure.mode().x()
+			+ info.pixelheight() + _exposure.mode().y()) / 2.;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %.2fum",
 		1000000 * _pixelsize);
 	return _pixelsize;

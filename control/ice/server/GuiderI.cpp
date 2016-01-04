@@ -226,15 +226,12 @@ void GuiderI::startCalibration(Ice::Float focallength,
 		= new GuiderICalibrationCallback(*this);
 	guider->calibrationcallback = astro::callback::CallbackPtr(callback);
 
-	// get the pixel size from the 
-	double	pixelsize = guider->getPixelsize();
-
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker
 		= guider->getTracker(convert(_point));
 
 	// start the calibration
-	guider->startCalibration(tracker, focallength, pixelsize);
+	guider->startCalibration(tracker, focallength);
 }
 
 /**

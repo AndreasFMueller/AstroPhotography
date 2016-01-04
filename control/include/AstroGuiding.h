@@ -441,19 +441,14 @@ public:
 	 * The calibration coefficients depend on the speed of the mount,
 	 * the focal length and the pixel size. Currently, the software
 	 * only knows about the angular speed for the CGEM mount. 
-	 * The focallength and the pixelsize allow to compute reasonable
+	 * The focallength allows to compute reasonable
 	 * values for the calibration displacements.
 	 * \param tracker	The tracker used for tracking. 
 	 * \param focallength	Focallength of the optics used for guiding,
 	 *			in m.
-	 * \param pixelsize	Pixel size of the CCD chip used for guiding.
-	 *			If binning different from 1x1 is used, the
-	 *			pixel size must reflect the size of the binned
-	 *			pixel. Unit: meters.
 	 * \return		the id of the calibration run
 	 */
-	int	startCalibration(TrackerPtr tracker,
-			double focallength = 0, double pixelsize = 0);
+	int	startCalibration(TrackerPtr tracker, double focallength = 0);
 	void	saveCalibration(const GuiderCalibration& calibration);
 
 	/**

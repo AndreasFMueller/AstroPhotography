@@ -3,6 +3,9 @@ configuration system:
       -	configuration system should use only one table for all domains
       - configurations should be ICE accessible
 
+Guiding:
+      -	get focal length from instrument and pixel size from ccd
+
 Image:
       - FITS write operation has setPrecious/precious accessors that should
 	be unified
@@ -18,6 +21,8 @@ URLs:
 
 Instruments:
       - add instrument implementation to the ICE server
+      -	add properties to instruments, e.g. for focal length of camera and
+	guider
 
 Drivers:
       - SX driver is rather unstable with the Trius SX-16 camera. There are
