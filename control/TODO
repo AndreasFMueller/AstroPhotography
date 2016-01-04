@@ -11,6 +11,7 @@ Guiding:
       - Problem beim StarTracker für helle Sterne, die im Laufe der Kalibrierung
 	im Bildfeld auftauchen.
       - ./snowguide .... calibration crashes (wrong number of rows)
+      - Qualitätskontrolle der kalibrierung
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
