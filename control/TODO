@@ -37,6 +37,7 @@ Drivers:
 	the camera and retry the operation. It should not be necessary to
 	disconnect and reconnect the camera to reset it.
 
-ICE server:
+ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout
 	exception sent back to the client and hopefully handled there
+      -	shutter option für snowtask.cpp
