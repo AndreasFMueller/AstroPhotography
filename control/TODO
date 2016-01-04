@@ -4,7 +4,7 @@ configuration system:
       - configurations should be ICE accessible
 
 Guiding:
-      -	get focal length from instrument and pixel size from ccd
+      -	get focal length from instrument
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
