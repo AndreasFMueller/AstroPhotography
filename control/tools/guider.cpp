@@ -87,6 +87,7 @@ static struct option	longopts[] = {
 { "module",	required_argument,	NULL,	'm' }, /* 1 */
 { "camera",	required_argument,	NULL,	'C' }, /* 2 */
 { "exposure",	required_argument,	NULL,	'e' }, /* 3 */
+{ "instrument",	required_argument,	NULL,	'i' }, /* 3 */
 { "width",	required_argument,	NULL,	'k' }, /* 4 */
 { "x",		required_argument,	NULL,	'x' }, /* 5 */
 { "y",		required_argument,	NULL,	'y' }, /* 6 */
@@ -108,7 +109,8 @@ int	main(int argc, char *argv[]) {
 	int	y = -1;
 	int	r = 32;
 	const char	*path = NULL;
-	while (EOF != (c = getopt_long(argc, argv, "dm:C:c:e:k:x:y:r:p:h?",
+	std::string	instrument;
+	while (EOF != (c = getopt_long(argc, argv, "dm:C:c:e:i:k:x:y:r:p:h?",
 		longopts, &longindex)))
 		switch (c) {
 		case 'd':
@@ -125,6 +127,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'e':
 			exposuretime = atof(optarg);
+			break;
+		case 'i':
+			instrument = std::string(optarg);
 			break;
 		case 'k':
 			k = atoi(optarg);
@@ -208,7 +213,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// create a guider
-	Guider	guider(camera, ccd, guiderport);
+	Guider	guider(instrument, ccd, guiderport);
 
 	// if the path is set, we also install a callback
 	if (path) {

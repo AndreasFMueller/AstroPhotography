@@ -355,7 +355,9 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 	if (focallength < 0) {
 		throw std::runtime_error("focal length not set");
 	}
-	guider->startCalibration(focallength);
+	calibrationid = guider->startCalibration(focallength);
+	std::cout << "new calibration " << calibrationid << " in progress";
+	std::cout << std::endl;
 	return EXIT_SUCCESS;
 }
 

@@ -75,8 +75,19 @@ Point	StarDetector<Pixel>::operator()(
 	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
 	// square around the maximum pixel.
 	double	xsum = 0, ysum = 0, weightsum = 0;
-	for (int x = maxx - k; x <= maxx + k; x++) {
-		for (int y = maxy - k; y <= maxy + k; y++) {
+
+	int	xleft = maxx - k;
+	if (xleft < 0) { xleft = 0; }
+	int	xright = maxx + k;
+	if (xright > size.width()) { xright = size.width(); }
+
+	int	ybottom = maxy - k;
+	if (ybottom < 0) { ybottom = 0; }
+	int	ytop = maxy + k;
+	if (ytop > size.height()) { ytop = size.height(); }
+
+	for (int x = xleft; x < xright; x++) {
+		for (int y = ybottom; y < ytop; y++) {
 			double	value = luminance(adapter.pixel(x, y));
 			if (value == value) {
 				weightsum += value;

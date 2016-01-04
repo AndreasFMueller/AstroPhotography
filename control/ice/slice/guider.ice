@@ -167,7 +167,7 @@ module snowstar {
 		Calibration	getCalibration() throws BadState;
 
 		// methods to perform a calibration asynchronously
-		void	startCalibration(float focallength);
+		int	startCalibration(float focallength);
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
