@@ -88,6 +88,8 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
 	std::cout << std::endl;
+	std::cout << " -i,--interval=<i>     perform an update ever i seconds when guiding";
+	std::cout << std::endl;
 	std::cout << " -r,--rectangle=<rec>  expose only a subrectangle as "
 		"specified by <rec>." << std::endl;
 	std::cout << "                       <rec> must be of the form";
@@ -402,6 +404,8 @@ int	guide_command(GuiderPrx guider) {
 	}
 	
 	// get the guider
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
+		guideinterval);
 	guider->startGuiding(guideinterval);
 
 	// we are done

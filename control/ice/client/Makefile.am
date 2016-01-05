@@ -74,6 +74,6 @@ calibrate:	snowguide
 		--exposure=1 server GUIDESIM calibrate
 guide:	snowguide
 	./snowguide --debug --star=349,252 --width=60 \
-		--exposure=1 server GUIDESIM guide
+		--exposure=1 --interval=3 server GUIDESIM guide
 
 endif

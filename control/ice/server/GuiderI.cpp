@@ -284,6 +284,8 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
  */
 void GuiderI::startGuiding(Ice::Float guidinginterval,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
+		guidinginterval);
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker
 		= guider->getTracker(convert(_point));
