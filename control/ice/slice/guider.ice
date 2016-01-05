@@ -43,6 +43,7 @@ module snowstar {
 	struct TrackingHistory {
 		int	guiderunid;
 		double	timeago;
+		int	calibrationid;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
 	};
@@ -84,6 +85,11 @@ module snowstar {
 		double	timeago;
 		GuiderDescriptor	guider;
 		calibrationcoefficients	coefficients;
+		double	quality;
+		double	det;
+		bool	complete;
+		double	focallength;
+		double	masPerPixel;
 		CalibrationSequence	points;
 	};
 

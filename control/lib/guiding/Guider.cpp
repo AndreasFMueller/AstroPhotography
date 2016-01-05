@@ -135,6 +135,9 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
 		calibration.guiderport = guiderportname();
+		calibration.focallength = focallength;
+		calibration.masPerPixel
+			= (pixelsize / focallength) * (180*3600*1000 / M_PI);
 		time(&calibration.when);
 		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 
@@ -142,6 +145,9 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
 		CalibrationRecord	record(0, calibration);
 		CalibrationTable	calibrationtable(_database);
 		_calibrationid = calibrationtable.add(record);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"saved calibration record id = %d, masPerPixel = %.3f",
+			_calibrationid, calibration.masPerPixel);
 	}
 	return _calibrationid;
 }
@@ -151,7 +157,14 @@ void	Guider::saveCalibration(const GuiderCalibration& cal) {
 		return;
 	}
 	CalibrationStore	calstore(_database);
-	calstore.updateCalibration(_calibrationid, cal);
+	GuiderCalibration	c = calstore.getCalibration(_calibrationid);
+	c.complete = true;
+	for (int i = 0; i < 6; i++) {
+		c.a[i] = cal.a[i];
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update %d, focallength = %.3f",
+		c.focallength);
+	calstore.updateCalibration(_calibrationid, c);
 	for (int i = 0; i < cal.size(); i++) {
 		CalibrationPoint	point = cal[i];
 		calstore.addPoint(_calibrationid, point);
@@ -232,8 +245,8 @@ void	Guider::callbackImage(ImagePtr image) {
  */
 double	Guider::getPixelsize() {
 	astro::camera::CcdInfo  info = ccd()->getInfo();
-	float	_pixelsize = (info.pixelwidth() + _exposure.mode().x()
-			+ info.pixelheight() + _exposure.mode().y()) / 2.;
+	float	_pixelsize = (info.pixelwidth() * _exposure.mode().x()
+			+ info.pixelheight() * _exposure.mode().y()) / 2.;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %.2fum",
 		1000000 * _pixelsize);
 	return _pixelsize;

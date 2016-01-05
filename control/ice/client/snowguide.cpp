@@ -26,7 +26,7 @@ namespace snowguide {
 
 bool	verbose = false;
 snowstar::ImagePoint	star;
-float	focallength = 0;
+float	focallength = 0.1;
 Exposure	exposure;
 std::string	prefix("p");
 volatile bool	completed = false;
@@ -289,7 +289,10 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << astro::stringprintf("%4d: ", cal.id);
 	_out << astro::timeformat("%Y-%m-%d %H:%M, ",
 		converttime(cal.timeago));
-	_out << cal.points.size() << " points" << std::endl;
+	_out << cal.points.size() << " points, ";
+	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
+	_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
+	_out << std::endl;
 
 	// calibration coefficients
 	_out << std::string("     ");
@@ -315,8 +318,29 @@ void	Calibration_display::operator()(const Calibration& cal) {
  * This command retrieves the calibration information from the guider
  * and displays it
  */
-int	calibration_command(GuiderPrx guider) {
-	Calibration	cal = guider->getCalibration();
+int	calibration_command(GuiderFactoryPrx guiderfactory, GuiderPrx guider,
+		int calibrationid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d",
+		calibrationid);
+	Calibration	cal;
+	if (calibrationid < 0) {
+		switch (guider->getState()) {
+		case GuiderUNCONFIGURED:
+		case GuiderIDLE:
+		case GuiderCALIBRATING:
+			std::cerr << "not calibrated, specify calibration id";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+			break;
+		case GuiderCALIBRATED:
+		case GuiderGUIDING:
+			cal = guider->getCalibration();
+			break;
+		}
+	} else {
+		cal = guiderfactory->getCalibration(calibrationid);
+	}
+
 	Calibration_display	cd(std::cout);
 	cd(cal);
 	std::cout << std::endl;
@@ -343,7 +367,8 @@ int	list_command(GuiderFactoryPrx guiderfactory,
  * \brief Implementation of calibrate command
  */
 int	calibrate_command(GuiderPrx guider, int calibrationid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d", calibrationid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d, focallength = %.3f",
+		calibrationid, focallength);
 	if (calibrationid > 0) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
@@ -433,8 +458,16 @@ class TrackingPoint_display {
 	double	_starttime;
 	bool	_csv;
 public:
-	TrackingPoint_display(std::ostream& out, double starttime, bool csv)
-		: _out(out), _starttime(starttime), _csv(csv) {
+	bool	csv() const { return _csv; }
+	void	csv(bool c) { _csv = c; }
+private:
+	double	_masperpixel;
+public:
+	double	masperpixel() const { return _masperpixel; }
+	void	masperpixel(double m) { _masperpixel = m; }
+public:
+	TrackingPoint_display(std::ostream& out, double starttime)
+		: _out(out), _starttime(starttime) {
 		counter = 1;
 	}
 	void	operator()(const TrackingPoint& point);
@@ -448,6 +481,9 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 		_out << astro::stringprintf("%10.4f,%10.4f,%10.4f,%10.4f",
 				point.trackingoffset.x, point.trackingoffset.y,
 				point.activation.x, point.activation.y);
+		double	p = hypot(point.trackingoffset.x,
+			point.trackingoffset.y) * masperpixel();
+		_out << astro::stringprintf(",%8.0f", p);
 	} else {
 		_out << astro::stringprintf("[%04d] ", ++counter);
 		_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
@@ -467,10 +503,13 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
  * The tracking history is identified by the id. If the verbose flag is set,
  * then all the points of the tracking history are displayed.
  */
-int	history_command(GuiderFactoryPrx guiderfactory, long id) {
-	TrackingHistory	history = guiderfactory->getTrackingHistory(id);
+int	history_command(GuiderFactoryPrx guiderfactory, long historyid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving history %d", historyid);
+	TrackingHistory	history = guiderfactory->getTrackingHistory(historyid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "track uses calibration %d",
+		history.calibrationid);
 	if (csv) {
-		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr" << std::endl;
+		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
 		verbose = csv;
 	} else {
 		std::cout << history.guiderunid << ": ";
@@ -479,10 +518,14 @@ int	history_command(GuiderFactoryPrx guiderfactory, long id) {
 		std::cout << std::endl;
 	}
 	if (verbose) {
+		Calibration	cal = guiderfactory->getCalibration(
+					history.calibrationid);
 		double	starttime = history.points.begin()->timeago;
+		TrackingPoint_display	display(std::cout, starttime);
+		display.csv(csv);
+		display.masperpixel(cal.masPerPixel);
 		std::for_each(history.points.begin(), history.points.end(),
-			TrackingPoint_display(std::cout, starttime, csv)
-		);
+			display);
 	}
 
 	return EXIT_SUCCESS;
@@ -526,7 +569,6 @@ int	main(int argc, char *argv[]) {
 	int	ccdIndex = 0;
 	int	guiderportIndex = 0;
 	int	width = -1;
-	float	focallength = 0.1;
 
 	exposure.exposuretime = 1.;
 
@@ -550,6 +592,8 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'f':
 			focallength = std::stod(optarg);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
+				focallength);
 			break;
 		case 'G':
 			guiderportIndex = std::stoi(optarg);
@@ -666,7 +710,13 @@ int	main(int argc, char *argv[]) {
 		return stop_command(guider);
 	}
 	if (command == "calibration") {
-		return calibration_command(guider);
+		int	calibrationid = -1;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "argc = %d, optind = %d",
+			argc, optind);
+		if (argc > optind) {
+			calibrationid = std::stoi(argv[optind++]);
+		}
+		return calibration_command(guiderfactory, guider, calibrationid);
 	}
 	if (command == "cancel") {
 		return cancel_command(guider);

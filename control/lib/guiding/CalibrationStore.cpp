@@ -58,6 +58,7 @@ std::list<CalibrationPointRecord>	CalibrationStore::getCalibrationPoints(long id
  * \param id of the calibration to retrieve
  */
 GuiderCalibration	CalibrationStore::getCalibration(long id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d", id);
 
 	// get the calibration table
 	CalibrationTable	ct(_database);
@@ -66,6 +67,11 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 	for (int i = 0; i < 6; i++) {
 		calibration.a[i] = r.a[i];
 	}
+	calibration.focallength = r.focallength;
+	calibration.complete = (r.complete) ? true : false;
+	calibration.masPerPixel = r.masPerPixel;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"found calibration with masPerPixel=%.3f", r.masPerPixel);
 
 	// add the points
 	std::list<CalibrationPointRecord>	points
@@ -97,6 +103,11 @@ void	CalibrationStore::updateCalibration(long id,
 	for (int i = 0; i < 6; i++) {
 		record.a[i] = calibration.a[i];
 	}
+	record.focallength = calibration.focallength;
+	record.det = calibration.det();
+	record.quality = calibration.quality();
+	record.complete = (calibration.complete) ? 1 : 0;
+	record.masPerPixel = calibration.masPerPixel;
 	t.update(id, record);
 }
 

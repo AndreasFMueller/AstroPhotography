@@ -22,6 +22,11 @@ public:
 	std::string	ccd;
 	std::string	guiderport;
 	double	a[6];
+	double	focallength;
+	double	quality;
+	double	det;
+	int	complete;
+	double	masPerPixel;
 	Calibration();
 };
 

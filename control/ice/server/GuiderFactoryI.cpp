@@ -135,6 +135,11 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		calibration.guider.guiderportIndex
 			= instrumentName2index(r.instrument,
 				InstrumentGuiderPort, r.guiderport);
+		calibration.focallength = r.focallength;
+		calibration.masPerPixel = r.masPerPixel;
+		calibration.complete = (r.complete) ? true : false;
+		calibration.det = r.det;
+		calibration.quality = r.quality;
 		for (int i = 0; i < 6; i++) {
 			calibration.coefficients.push_back(r.a[i]);
 		}
@@ -189,6 +194,7 @@ idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
  */
 TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	astro::guiding::TrackingStore	store(database);
 	TrackingHistory	history;
 	history.guiderunid = id;
@@ -198,9 +204,11 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		astro::guiding::GuidingRunTable	gt(database);
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
 		history.timeago = converttime(r.whenstarted);
+		history.calibrationid = r.calibrationid;
 		history.guider.instrumentname = r.instrument;
 		history.guider.ccdIndex = instrumentName2index(r.instrument,
 			InstrumentGuiderCCD, r.ccd);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport= %s", r.guiderport.c_str());
 		history.guider.guiderportIndex
 			= instrumentName2index(r.instrument,
 				InstrumentGuiderPort, r.guiderport);

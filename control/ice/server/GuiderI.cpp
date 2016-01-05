@@ -168,6 +168,7 @@ void GuiderI::useCalibration(Ice::Int calid,
 
 	// install calibration data in the guider
 	guider->calibration(calibration);
+	guider->calibrationid(calid);
 }
 
 Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
@@ -191,6 +192,9 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	for (int i = 0; i < 6; i++) {
 		result.coefficients.push_back(cal.a[i]);
 	}
+	result.complete = cal.complete;
+	result.focallength = cal.focallength;
+	result.masPerPixel = cal.masPerPixel;
 
 	// use database to retrieve calibration, containing coefficients
 	// and points
@@ -200,6 +204,8 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	for (auto ptr = calibration.begin(); ptr != calibration.end(); ptr++) {
 		result.points.push_back(convert(*ptr));
 	}
+	result.quality = calibration.quality();
+	result.det = calibration.det();
 
 	// everything copied, return it
 	return result;
@@ -213,13 +219,16 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
  */
 Ice::Int GuiderI::startCalibration(Ice::Float focallength,
 	const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, focallength = %.3f",
+		focallength);
 
+#if 0
 	// prepare a calibration record
 	astro::guiding::Calibration	calibration;
 	calibration.instrument = guider->instrument();
 	calibration.ccd = guider->ccdname();
 	calibration.guiderport = guider->guiderportname();
+#endif
 
 	// callback stuff
 	GuiderICalibrationCallback	*callback
@@ -338,6 +347,7 @@ TrackingPoint GuiderI::mostRecentTrackingPoint(const Ice::Current& /* current */
 
 TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
 	astro::guiding::TrackingStore	store(database);
 	return convert(store.get(id));
 }

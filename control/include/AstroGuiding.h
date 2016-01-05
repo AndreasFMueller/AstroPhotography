@@ -211,6 +211,10 @@ public:
 class GuiderCalibration : public std::vector<CalibrationPoint> {
 public:
 	double	a[6];
+	double	focallength;
+	double	masPerPixel;
+	bool	complete;
+	double	quality() const;
 	double	det() const;
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
@@ -483,6 +487,7 @@ public:
 	 */
 	bool	waitCalibration(double timeout);
 	int	calibrationid() { return _calibrationid; }
+	void	calibrationid(int calid) { _calibrationid = calid; }
 private:
 	int	_calibrationid;
 	CalibrationProcessPtr	calibrationprocess;

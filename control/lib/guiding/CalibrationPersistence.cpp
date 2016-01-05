@@ -39,6 +39,11 @@ std::string	CalibrationTableAdapter::createstatement() {
 	"    a3 double not null default 0,\n"
 	"    a4 double not null default 0,\n"
 	"    a5 double not null default 0,\n"
+	"    quality double not null default 0,\n"
+	"    det double not null default 0,\n"
+	"    complete int not null default 0,\n"
+	"    focallength double not null default 0,\n"
+	"    masperpixel double not null default 1,\n"
 	"    primary key(id)\n"
 	")\n"
 	);
@@ -56,6 +61,11 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row
 	result.a[3] = row["a3"]->doubleValue();
 	result.a[4] = row["a4"]->doubleValue();
 	result.a[5] = row["a5"]->doubleValue();
+	result.det = row["det"]->doubleValue();
+	result.quality = row["quality"]->doubleValue();
+	result.complete = row["complete"]->intValue();
+	result.focallength = row["focallength"]->doubleValue();
+	result.masPerPixel = row["masperpixel"]->doubleValue();
 	return result;
 }
 
@@ -72,6 +82,11 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 	spec.insert(Field("a3", factory.get(calibration.a[3])));
 	spec.insert(Field("a4", factory.get(calibration.a[4])));
 	spec.insert(Field("a5", factory.get(calibration.a[5])));
+	spec.insert(Field("quality", factory.get(calibration.quality)));
+	spec.insert(Field("det", factory.get(calibration.det)));
+	spec.insert(Field("complete", factory.get(calibration.complete)));
+	spec.insert(Field("focallength", factory.get(calibration.focallength)));
+	spec.insert(Field("masperpixel", factory.get(calibration.masPerPixel)));
 	return spec;
 }
 

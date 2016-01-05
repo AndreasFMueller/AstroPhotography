@@ -79,6 +79,7 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 		guidingrun.instrument = guider().instrument();
 		guidingrun.ccd = guider().ccdname();
 		guidingrun.guiderport = guider().guiderportname();
+		guidingrun.calibrationid = guider().calibrationid();
 		time(&guidingrun.whenstarted);
 
 		// add guiding run record to the database
