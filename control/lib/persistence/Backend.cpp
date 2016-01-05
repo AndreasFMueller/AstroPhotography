@@ -8,6 +8,7 @@
 #include <sqlite3.h>
 #include <stdexcept>
 #include <AstroDebug.h>
+#include <includes.h>
 
 namespace astro {
 namespace persistence {
