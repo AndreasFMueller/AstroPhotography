@@ -26,9 +26,11 @@ public:
 	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
 
 	// access to calibrations
+	bool	contains(long id);
 	GuiderCalibration	getCalibration(long id);
 	long	addCalibration(const Calibration& calibration);
 	void	updateCalibration(long id, const GuiderCalibration& calibration);
+	void	deleteCalibration(long id);
 
 	// guider points
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);

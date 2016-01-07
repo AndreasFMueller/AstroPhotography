@@ -214,5 +214,15 @@ ImagePoint	ImageRectangle::subimage(const ImagePoint& point) const {
 	return subimage(point.x(), point.y());
 }
 
+int	ImageRectangle::borderDistance(const ImagePoint& point) const {
+	ImagePoint	upper = upperright();
+	int	m, n;
+	n = point.x() - _origin.x();		m = n;
+	n = point.y() - _origin.y();		if (n < m) { m = n; }
+	n = upper.x() - point.x();		if (n < m) { m = n; }
+	n = upper.y() - point.y();		if (n < m) { m = n; }
+	return m;
+}
+
 } // namespace image
 } // namespace astro

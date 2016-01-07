@@ -21,6 +21,7 @@ libastroguiding_la_SOURCES = 						\
 	GuiderStateMachine.cpp						\
 	GuidingProcess.cpp						\
 	SaveImageCallback.cpp						\
+	StarDetectorBase.cpp						\
 	Tracker.cpp							\
 	TrackingPersistence.cpp						\
 	TrackingPoint.cpp						\

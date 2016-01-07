@@ -22,11 +22,11 @@ namespace guiding {
 		= dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
 		StarDetector<Pixel >	sd(*imagep);			\
-		return sd(rectangle, k);				\
+		return sd(rectangle);					\
 	}								\
 }
 
-Point	findstar(ImagePtr image, const ImageRectangle& rectangle, int k) {
+Point	findstar(ImagePtr image, const ImageRectangle& rectangle, int /* k */) {
 	findstar_typed(unsigned char);
 	findstar_typed(unsigned short);
 	findstar_typed(unsigned int);

@@ -405,6 +405,9 @@ public:
 	P	luminance() const {
 		return y;
 	}
+	operator double() {
+		return (double)luminance();
+	}
 };
 
 
@@ -542,6 +545,9 @@ public:
 		}
 		return result;
 	}
+	RGB<P>	operator*(const float value) const {
+		return (*this) * (double)value;
+	}
 
 	virtual unsigned int	bitsPerPixel() const {
 		return 2 * std::numeric_limits<P>::digits;
@@ -549,6 +555,10 @@ public:
 
 	P	luminance() const {
 		return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+	}
+
+	operator double() {
+		return (double)luminance();
 	}
 
 	RGB<P>	operator/(const P value) const {

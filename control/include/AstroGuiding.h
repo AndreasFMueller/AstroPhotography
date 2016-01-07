@@ -20,19 +20,40 @@ namespace astro {
 namespace guiding {
 
 /**
+ * \brief Start Detector base class
+ *
+ * This is the base class for the star detector. It contains all the relevant
+ * functionality that is independent of the Pixel type.
+ */
+class StarDetectorBase {
+	typedef struct findResult_s {
+		ImagePoint	point;
+		double	background;
+	} findResult;
+	findResult	findStar(const image::ConstImageAdapter<double>& _image,
+				const ImageRectangle& areaOfInterest) const;
+	double	radius(const image::ConstImageAdapter<double>& _image,
+				const ImagePoint& where) const;
+public:
+	StarDetectorBase() { }
+	Point	operator()(const image::ConstImageAdapter<double>& _image,
+			const image::ImageRectangle& rectangle) const;
+};
+
+/**
  * \brief Detector class to determine coordinates if a star
  *
  * Star images are not points, they have a distribution. For guiding,
  * we need to determine the coordinates of the star with subpixel accuracy.
  */
 template<typename Pixel>
-class StarDetector {
+class StarDetector : public StarDetectorBase {
 	const image::ConstImageAdapter<Pixel>&	image;
+	adapter::TypeConversionAdapter<Pixel>	tca;
 public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
 	Point	operator()(
-		const image::ImageRectangle& rectangle,
-		int k) const;
+		const image::ImageRectangle& rectangle) const;
 }; 
 
 /**
@@ -40,7 +61,8 @@ public:
  */
 template<typename Pixel>
 StarDetector<Pixel>::StarDetector(
-	const image::ConstImageAdapter<Pixel>& _image) : image(_image) {
+	const image::ConstImageAdapter<Pixel>& _image)
+		: image(_image), tca(image) {
 }
 
 /**
@@ -60,8 +82,8 @@ StarDetector<Pixel>::StarDetector(
  */
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
-		const image::ImageRectangle& rectangle,
-		int k) const {
+		const image::ImageRectangle& rectangle) const {
+#if 0
 	// work only in the rectangle
 	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
@@ -111,6 +133,8 @@ Point	StarDetector<Pixel>::operator()(
 	// add the offset of the rectangle to get real coordinates
 	return Point(rectangle.origin().x() + xsum,
 		rectangle.origin().y() + ysum);
+#endif
+	return StarDetectorBase::operator()(tca, rectangle);
 }
 
 Point	findstar(image::ImagePtr image,

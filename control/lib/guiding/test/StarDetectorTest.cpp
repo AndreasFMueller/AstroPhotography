@@ -60,7 +60,7 @@ void	StarDetectorTest::testDetector() {
 	out.write(imageptr);
 	StarDetector<unsigned short>	detector(*imagep);
 	ImageRectangle	rectangle(ImagePoint(400,200), ImageSize(100, 100));
-	Point	p2 = detector(rectangle, 8);
+	Point	p2 = detector(rectangle);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "detected at: %s",
 		p2.toString().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Detector test");

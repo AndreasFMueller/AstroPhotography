@@ -80,7 +80,8 @@ libastroimage_la_SOURCES = 						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
 	Viewer.cpp							\
-	ViewerPipeline.cpp
+	ViewerPipeline.cpp						\
+	WeightingAdapter.cpp
 
 libastroimage_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

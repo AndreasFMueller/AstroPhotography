@@ -13,6 +13,7 @@
 #include <list>
 #include <ConnectedComponent.h>
 #include <AstroFormat.h>
+#include <AstroFilter.h>
 
 namespace astro {
 namespace image {
@@ -747,6 +748,61 @@ double	Sum<Pixel>::filter(const ConstImageAdapter<Pixel>& image) const {
 	}
 	return sum;
 }
+
+/**
+ * \brief Base class for general filter
+ */
+template<typename T, typename S>
+class GeneralFilter {
+public:
+	virtual S	operator()(const ConstImageAdapter<T>& image) = 0;
+};
+
+/**
+ * \brief Filter to compute the centroid of a group of pixels
+ *
+ * This filter requires that the Pixel type T can be converted to double
+ * (all scalar pixels as well as the RGB and YUYV pixels have this property)
+ */
+template<typename T>
+class CentroidFilter : public GeneralFilter<T, Point> {
+	ImagePoint	_approximate;
+	double		_r;
+public:
+	CentroidFilter(ImagePoint approximate, double r)
+		: _approximate(approximate), _r(r) {
+	}
+	virtual Point	operator()(const ConstImageAdapter<T>& image) {
+		unsigned int	w, h;
+		int	R = ceil(_r);
+		// rectangle to search for the centroid
+		ImagePoint	center(R, R);
+		w = 2 * R + 1;
+		ImageSize	square(w);
+		ImageRectangle	centrect(_approximate - center, square);
+		adapter::WindowAdapter<T>	wa(image, centrect);
+
+		// now compute the centroid coordinates
+		Point	sum;
+		double	totalweight = 0;
+		w = image.getSize().width();
+		h = image.getSize().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				double	l = hypot(x - R, y - R);
+				if (l > _r) {
+					continue;
+				}
+				double weight = wa.pixel(x, y);
+				sum = sum + Point(x, y) * weight;
+				totalweight += weight;
+			}
+		}
+		Point	centroid = sum * (1 / totalweight);
+		centroid = centroid + Point(centrect.lowerleft());
+		return centroid;
+	}
+};
 
 } // namespace filter
 } // namespace image

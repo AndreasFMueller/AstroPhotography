@@ -85,6 +85,22 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 }
 
 /**
+ * \brief remove a calibration together with the points
+ */
+void	CalibrationStore::deleteCalibration(long id) {
+	CalibrationTable	ct(_database);
+	if (!ct.exists(id)) {
+		return;
+	}
+	ct.remove(id);
+	std::string	query(  "delete from calibrationpoint "
+                                "where calibration = ?");
+        persistence::StatementPtr    statement = _database->statement(query);
+        statement->bind(0, (int)id);
+        statement->execute();
+}
+
+/**
  * \brief Add a calibration to the database
  */
 long	CalibrationStore::addCalibration(const Calibration& calibration) {
@@ -120,6 +136,13 @@ void	CalibrationStore::addPoint(long id, const CalibrationPoint& point) {
 	t.add(record);
 }
 
+/**
+ * \brief Find out whether a calibration exists in the store
+ */
+bool	CalibrationStore::contains(long id) {
+	CalibrationTable	ct(_database);
+	return ct.exists(id);
+}
 
 } // namespace guiding
 } // namespace astro

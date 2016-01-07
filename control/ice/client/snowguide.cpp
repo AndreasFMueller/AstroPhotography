@@ -51,6 +51,8 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> calibration"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> trash <calid>"
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> state"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> stop"
@@ -69,6 +71,7 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> history"
 		" [ trackid ]" << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> forget <trackid> ...";
 	std::cout << std::endl;
 	std::cout << "Operations related to guiding, i.e. calibrating a "
 		"guider, starting and";
@@ -366,6 +369,23 @@ int	list_command(GuiderFactoryPrx guiderfactory,
 }
 
 /**
+ * \brief Remove calibrations
+ */
+int	trash_command(GuiderFactoryPrx guiderfactory, std::list<int> ids) {
+	std::list<int>::const_iterator	i;
+	for (i = ids.begin(); i != ids.end(); i++) {
+		try {
+			guiderfactory->deleteCalibration(*i);
+		} catch (const NotFound& x) {
+			std::cerr << "cannot delete calibration " << *i << ": ";
+			std::cerr << x.cause << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Implementation of calibrate command
  */
 int	calibrate_command(GuiderPrx guider, int calibrationid) {
@@ -536,6 +556,25 @@ int	history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 }
 
 /**
+ * \brief Forget tracking histories
+ */
+int	forget_command(GuiderFactoryPrx guiderfactory,
+		const std::list<int>& ids) {
+	std::list<int>::const_iterator	i;
+	for (i = ids.begin(); i != ids.end(); i++) {
+		try {
+			guiderfactory->deleteTrackingHistory(*i);
+		} catch (const NotFound& x) {
+			std::cerr << "cannot delete tracking history ";
+			std::cerr << *i << ": ";
+			std::cerr << x.cause << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief long options for the snow guiding program
  */
 static struct option	longopts[] = {
@@ -692,12 +731,26 @@ int	main(int argc, char *argv[]) {
 	if (command == "tracks") {
 		return tracks_command(guiderfactory, descriptor);
 	}
+	if (command == "forget") {
+		std::list<int>	ids;
+		while (optind < argc) {
+			ids.push_back(std::stoi(argv[optind++]));
+		}
+		return forget_command(guiderfactory, ids);
+	}
 	if (command == "history") {
 		if (argc <= optind) {
 			throw std::runtime_error("missing history id");
 		}
 		long	historyid = std::stoi(argv[optind++]);
 		return history_command(guiderfactory, historyid);
+	}
+	if (command == "trash") {
+		std::list<int>	ids;
+		while (optind < argc) {
+			ids.push_back(std::stoi(argv[optind++]));
+		}
+		return trash_command(guiderfactory, ids);
 	}
 
 	// retrieve a guider

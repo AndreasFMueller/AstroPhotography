@@ -67,5 +67,29 @@ TrackingHistory	TrackingStore::get(long id) {
 	return history;
 }
 
+/**
+ * \brief Delete the tracking history
+ */
+void	TrackingStore::deleteTrackingHistory(long id) {
+	GuidingRunTable	table(_database);
+	if (!table.exists(id)) {
+		return;
+	}
+	table.remove(id);
+	std::string	query(	"delete from tracking "
+				"where guidingrun = ?");
+	persistence::StatementPtr	statement = _database->statement(query);
+        statement->bind(0, (int)id);
+        statement->execute();
+}
+
+/**
+ * \brief Find out whether a tracking history is contained in the table
+ */
+bool	TrackingStore::contains(long id) {
+	GuidingRunTable	table(_database);
+	return table.exists(id);
+}
+
 } // namespace guiding
 } // namespace astro

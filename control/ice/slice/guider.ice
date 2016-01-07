@@ -260,7 +260,12 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Calibration by id
 		 */
-		Calibration	getCalibration(int id);
+		Calibration	getCalibration(int id) throws NotFound;
+
+		/**
+		 * \brief Remove a calibration by id
+		 */
+		void	deleteCalibration(int id) throws NotFound;
 
 		/**
 		 * \brief Retrieve a list of all valid guide run ids
@@ -275,6 +280,11 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Tracking history by id
 		 */
-		TrackingHistory	getTrackingHistory(int id);
+		TrackingHistory	getTrackingHistory(int id) throws NotFound;
+
+		/**
+		 * \brief Remove a tracking history
+		 */
+		void	deleteTrackingHistory(int id) throws NotFound;
 	};
 };
