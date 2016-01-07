@@ -42,6 +42,7 @@ std::list<InstrumentComponent>	Instrument::list() {
 	add(result, InstrumentComponent::GuiderPort);
 	add(result, InstrumentComponent::FilterWheel);
 	add(result, InstrumentComponent::Focuser);
+	add(result, InstrumentComponent::Mount);
 	return result;
 }
 

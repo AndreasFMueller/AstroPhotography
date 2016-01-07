@@ -60,7 +60,7 @@ ExposureWork::ExposureWork(TaskQueueEntry& task) : _task(task) {
 	// get the filterwheel
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get filter '%s' of wheel '%s'",
 		_task.filter().c_str(), _task.filterwheel().c_str());
-	if ((_task.filterwheel().size() > 0) && (_task.filter().size() > 0)) {
+	if (_task.filterwheel().size() > 0) {
 		astro::device::DeviceAccessor<astro::camera::FilterWheelPtr>
 			df(repository);
 		filterwheel = df.get(_task.filterwheel());
@@ -151,8 +151,10 @@ void	ExposureWork::run() {
 		}
 
 		// select the new filter
-		filterwheel->select(_task.filter());
-		filtername = _task.filter();
+		if (_task.filter().size() > 0) {
+			filterwheel->select(_task.filter());
+			filtername = _task.filter();
+		}
 	}
 
 	// wait for the cooler, if present, but at most 30 seconds
@@ -226,6 +228,12 @@ void	ExposureWork::run() {
 	astro::image::ImagePtr	image = ccd->getImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 		image->getFrame().toString().c_str());
+
+	// add instrument info
+	if (_task.instrument().size() > 0) {
+		image->setMetadata(FITSKeywords::meta("INSTRUME",
+			_task.instrument()));
+	}
 
 	// add filter information to the image, if present
 	if ((filterwheel) && (filtername.size() > 0)) {

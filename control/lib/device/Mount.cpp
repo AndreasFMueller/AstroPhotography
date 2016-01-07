@@ -91,6 +91,18 @@ void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
 		position.ra().degrees()));
 	image.setMetadata(astro::io::FITSKeywords::meta("DECCENTR", 
 		position.dec().degrees()));
+	try {
+		AzmAlt	direction = getAzmAlt();
+		image.setMetadata(astro::io::FITSKeywords::meta("TELALT",
+			direction.alt().degrees()));
+		image.setMetadata(astro::io::FITSKeywords::meta("TELAZ",
+			direction.azm().degrees()));
+	} catch (...) {
+	}
+	if (hasParameter("latitude")) {
+		image.setMetadata(astro::io::FITSKeywords::meta("LATITUDE",
+			parameterValueFloat("latitude")));
+	}
 }
 
 } // namespace device

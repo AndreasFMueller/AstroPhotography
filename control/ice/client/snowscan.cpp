@@ -118,6 +118,8 @@ int	command_scan(snowstar::ModulesPrx& modules,
 	devicelist(devicelocator, snowstar::DevFOCUSER);
 	std::cout << "guiderport:   ";
 	devicelist(devicelocator, snowstar::DevGUIDERPORT);
+	std::cout << "mount:        ";
+	devicelist(devicelocator, snowstar::DevMOUNT);
 	
 	return EXIT_SUCCESS;
 }
