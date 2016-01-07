@@ -75,6 +75,19 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	// get an GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
 
+	// get the focallength from the instrument properties
+	try {
+		astro::discover::InstrumentPtr	instrument
+				= astro::discover::InstrumentBackend::get(
+					descriptor.instrumentname);
+		double	focallength
+			= instrument->getDouble("guiderfocallength");
+		guider->focallength(focallength);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' property "
+			"found, using default %f", guider->focallength());
+	}
+
 	// create a GuiderI object
 	Ice::ObjectPtr	guiderptr = new GuiderI(guider, imagedirectory,
 		database);

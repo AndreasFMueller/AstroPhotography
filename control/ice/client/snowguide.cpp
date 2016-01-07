@@ -26,7 +26,6 @@ namespace snowguide {
 
 bool	verbose = false;
 snowstar::ImagePoint	star;
-float	focallength = 0.1;
 Exposure	exposure;
 std::string	prefix("p");
 volatile bool	completed = false;
@@ -86,9 +85,6 @@ static void	usage(const char *progname) {
 	std::cout << " -d,--debug            increase debug level" << std::endl;
 	std::cout << " -e,--exposure=<e>     set exposure time to <e>";
 	std::cout << std::endl;
-	std::cout << " -f,--focallength=<f>  set the focal length of the "
-		"instrument";
-	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
 	std::cout << std::endl;
 	std::cout << " -i,--interval=<i>     perform an update ever i seconds when guiding";
@@ -137,8 +133,7 @@ int	help_command() {
 "    Use the calibration run specified by <calibrationid> or, if" << std::endl<<
 "    <calibrationid> is not specified, start a new calibration" << std::endl <<
 "    run. In the latter case a star to perform the calibration" << std::endl <<
-"    on must be specified with the -s option as well as the " << std::endl <<
-"    focallength must be specified via the -f option." << std::endl
+"    on must be specified with the -s option." << std::endl
 << std::endl << 
 "calibration" << std::endl <<
 "    display the current calibration"
@@ -389,8 +384,8 @@ int	trash_command(GuiderFactoryPrx guiderfactory, std::list<int> ids) {
  * \brief Implementation of calibrate command
  */
 int	calibrate_command(GuiderPrx guider, int calibrationid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d, focallength = %.3f",
-		calibrationid, focallength);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "use calibrationid = %d",
+		calibrationid);
 	if (calibrationid > 0) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
@@ -399,10 +394,7 @@ int	calibrate_command(GuiderPrx guider, int calibrationid) {
 			throw std::runtime_error("calibration star not set");
 		}
 	}
-	if (focallength < 0) {
-		throw std::runtime_error("focal length not set");
-	}
-	calibrationid = guider->startCalibration(focallength);
+	calibrationid = guider->startCalibration();
 	std::cout << "new calibration " << calibrationid << " in progress";
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
@@ -584,7 +576,6 @@ static struct option	longopts[] = {
 { "csv",		no_argument,		NULL,	 1  }, /*  3 */
 { "debug",		no_argument,		NULL,	'd' }, /*  4 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  5 */
-{ "focallength",	required_argument,	NULL,	'f' }, /*  6 */
 { "guiderport",		required_argument,	NULL,	'G' }, /*  7 */
 { "help",		no_argument,		NULL,	'h' }, /*  8 */
 { "interval",		required_argument,	NULL,	'i' }, /*  9 */
@@ -632,11 +623,6 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'e':
 			exposure.exposuretime = std::stod(optarg);
-			break;
-		case 'f':
-			focallength = std::stod(optarg);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
-				focallength);
 			break;
 		case 'G':
 			guiderportIndex = std::stoi(optarg);

@@ -42,6 +42,9 @@ Guider::Guider(const std::string& instrument,
 	exposure().exposuretime(1.);
 	exposure().frame(ccd->getInfo().getFrame());
 
+	// default focallength
+	_focallength = 1;
+
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not optimal
 	_state.configure();
@@ -98,11 +101,11 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
+int	Guider::startCalibration(TrackerPtr tracker) {
 	double	pixelsize = getPixelsize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
 		"focallength = %.3fmm, pixelsize = %.2fum)",
-		tracker->toString().c_str(), 1000 * focallength,
+		tracker->toString().c_str(), 1000 * _focallength,
 		1000000 * pixelsize);
 
 	// cleanup any old calibration process
@@ -125,7 +128,7 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
 		new CalibrationProcess(*this, tracker, _database));
 
 	// start the calibration. This will launch the separate 
-	calibrationprocess->calibrate(focallength, pixelsize);
+	calibrationprocess->calibrate(_focallength, pixelsize);
 
 	// register the new calibration in the database
 	_calibrationid = 0;
@@ -135,9 +138,9 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength) {
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
 		calibration.guiderport = guiderportname();
-		calibration.focallength = focallength;
+		calibration.focallength = _focallength;
 		calibration.masPerPixel
-			= (pixelsize / focallength) * (180*3600*1000 / M_PI);
+			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
 		time(&calibration.when);
 		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 

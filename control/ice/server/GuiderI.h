@@ -72,7 +72,7 @@ public:
 	virtual Calibration getCalibration(const Ice::Current& current);
 
 	// control calibration process
-	virtual Ice::Int startCalibration(Ice::Float, const Ice::Current& current);
+	virtual Ice::Int startCalibration(const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);

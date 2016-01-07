@@ -51,81 +51,6 @@ std::string	guiderstate2string(GuiderState state) {
 	return astro::guiding::Guide::state2string(convert(state));
 }
 
-#if 0
-static std::string	index2name(const std::string& instrumentname, int index,
-			astro::discover::InstrumentComponentKey::Type type) {
-	// first try to look up the device in the instrument database
-	try {
-		// get an instrument for the instrument name
-		astro::discover::InstrumentPtr  instrument
-			= astro::discover::InstrumentBackend::get(
-				instrumentname);
-		return instrument->get(type, index).deviceurl();
-	} catch (...) {
-	}
-	// build an unknown name from the index
-	std::string	devicename;
-	switch (type) {
-	case astro::discover::InstrumentComponentKey::AdaptiveOptics:
-		devicename = "adaptiveoptics";
-		break;
-	case astro::discover::InstrumentComponentKey::Camera:
-		devicename = "camera";
-		break;
-	case astro::discover::InstrumentComponentKey::CCD:
-	case astro::discover::InstrumentComponentKey::GuiderCCD:
-		devicename = "ccd";
-		break;
-	case astro::discover::InstrumentComponentKey::Cooler:
-		devicename = "camera";
-		break;
-	case astro::discover::InstrumentComponentKey::GuiderPort:
-		devicename = "guiderport";
-		break;
-	case astro::discover::InstrumentComponentKey::FilterWheel:
-		devicename = "filterwheel";
-		break;
-	case astro::discover::InstrumentComponentKey::Focuser:
-		devicename = "focuser";
-		break;
-	case astro::discover::InstrumentComponentKey::Mount:
-		devicename = "mount";
-		break;
-	default:
-		throw std::runtime_error("unknown device type");
-		break;
-	}
-	std::string deviceurl = astro::stringprintf("%s:unknown/%d",
-		devicename.c_str(), index);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown device: %s", deviceurl.c_str());
-	return deviceurl;
-}
-
-static int	name2index(const std::string& instrumentname,
-			const std::string& deviceurl,
-			astro::discover::InstrumentComponentKey::Type type) {
-	// handle the case where the device url comes from the "unknown" module
-	astro::DeviceName	devname(deviceurl);
-	if (devname.modulename() == "unknown") {
-		try {
-			return std::stoi(devname.unitname());
-		} catch (...) {
-			return 0;
-		}
-	}
-	// handle all other device names, try to convert them into an index
-	try {
-		astro::discover::InstrumentPtr  instrument
-			= astro::discover::InstrumentBackend::get(instrumentname);
-		int	index = instrument->indexOf(type, deviceurl);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has index %d in %s",
-			deviceurl.c_str(), index, instrumentname.c_str());
-	} catch (...) { }
-	// return 0 if this is unknown
-	return 0;
-}
-#endif
-
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	GuiderDescriptor	result;
 	result.instrumentname = gd.instrument();
@@ -163,13 +88,6 @@ astro::guiding::TrackingPoint   convert(const TrackingPoint& trackingpoint) {
 	result.correction = convert(trackingpoint.activation);
 	return result;
 }
-
-/*
-int     instrumentName2index(const std::string& instrument,
-                const InstrumentComponentType type, const std::string& deviceurl);
-std::string     instrumentIndex2name(const std::string& instrument,
-                const InstrumentComponentType type, int index);
-*/
 
 astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 	astro::guiding::TrackingHistory	result;

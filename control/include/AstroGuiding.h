@@ -422,6 +422,12 @@ public:
 
 	GuiderDescriptor	getDescriptor() const;
 
+private:
+	double	_focallength;
+public:
+	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
+
 	/**
 	 * \brief Exposure information for guiding images
  	 *
@@ -495,7 +501,7 @@ public:
 	 *			in m.
 	 * \return		the id of the calibration run
 	 */
-	int	startCalibration(TrackerPtr tracker, double focallength = 0);
+	int	startCalibration(TrackerPtr tracker);
 	void	saveCalibration(const GuiderCalibration& calibration);
 
 	/**
