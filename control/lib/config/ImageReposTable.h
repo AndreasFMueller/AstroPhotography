@@ -42,6 +42,7 @@ public:
 	ImageRepoTable(Database database)
 		: Table<ImageRepoRecord, ImageRepoTableAdapter>(database) {
 	}
+	bool	contains(const std::string& name);
 	ImageRepo	get(const std::string& name);
 	void	remove(const std::string& name);
 };

@@ -245,6 +245,7 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 	ImageRepoConfigurationPtr	imagerepos
 		= ImageRepoConfiguration::get(configuration);
 	if (arguments[1] == "add") {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add repo command");
 		if (arguments.size() < 4) {
 			std::cerr << "not enough arguments for add command";
 			std::cerr << std::endl;
@@ -252,8 +253,12 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		}
 		std::string	reponame = arguments[2];
 		std::string	directory = arguments[3];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add repo '%s' in '%s'",
+			reponame.c_str(), directory.c_str());
 		struct stat	sb;
-		if (stat(reponame.c_str(), &sb) < 0) {
+		if (stat(directory.c_str(), &sb) < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding directory %s",
+				directory.c_str());
 			if (mkdir(directory.c_str(), 0777) < 0) {
 				std::string	msg = astro::stringprintf(
 					"cannot create directory %s: %s",
