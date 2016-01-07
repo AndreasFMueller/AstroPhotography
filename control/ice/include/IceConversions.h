@@ -201,6 +201,15 @@ int	instrumentName2index(const std::string& instrument,
 std::string	instrumentIndex2name(const std::string& instrument,
 		const InstrumentComponentType type, int index);
 
+astro::discover::InstrumentProperty	convert(const InstrumentProperty& p);
+InstrumentProperty	convert(const astro::discover::InstrumentProperty& p);
+
+astro::discover::Instrument::PropertyNames	convertPropertyNames(const InstrumentPropertyNames& names);
+InstrumentPropertyNames	convertPropertyNames(const astro::discover::Instrument::PropertyNames& names);
+
+astro::discover::InstrumentPropertyList	convert(const InstrumentPropertyList& properties);
+InstrumentPropertyList	convert(const astro::discover::InstrumentPropertyList& properties);
+
 } // namespace snowstar
 
 #endif /* _IceConversions_h */

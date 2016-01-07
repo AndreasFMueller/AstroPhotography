@@ -247,4 +247,59 @@ int	instrumentName2index(const std::string& instrumentname,
 	return 0;
 }
 
+InstrumentProperty	convert(const astro::discover::InstrumentProperty& p) {
+	InstrumentProperty	result;
+	result.instrumentname = p.instrument();
+	result.property = p.property();
+	result.value = p.value();
+	result.description = p.description();
+	return result;
+}
+
+astro::discover::InstrumentProperty	convert(const InstrumentProperty& p) {
+	astro::discover::InstrumentProperty	result;
+	result.instrument(p.instrumentname);
+	result.property(p.property);
+	result.value(p.value);
+	result.description(p.description);
+	return result;
+}
+
+astro::discover::Instrument::PropertyNames	convertPropertyNames(const InstrumentPropertyNames& names) {
+	astro::discover::Instrument::PropertyNames	result;
+	InstrumentPropertyNames::const_iterator	i;
+	for (i = names.begin(); i != names.end(); i++) {
+		result.push_back(*i);
+	}
+	return result;
+}
+
+InstrumentPropertyNames	convertPropertyNames(const astro::discover::Instrument::PropertyNames& names) {
+	InstrumentPropertyNames	result;
+	astro::discover::Instrument::PropertyNames::const_iterator	i;
+	for (i = names.begin(); i != names.end(); i++) {
+		result.push_back(*i);
+	}
+	return result;
+}
+
+InstrumentPropertyList	convert(const astro::discover::InstrumentPropertyList& properties) {
+	InstrumentPropertyList	result;
+	astro::discover::InstrumentPropertyList::const_iterator	i;
+	for (i = properties.begin(); i != properties.end(); i++) {
+		result.push_back(convert(*i));
+	}
+	return result;
+}
+
+discover::InstrumentPropertyList	convert(const InstrumentPropertyList& properties) {
+	astro::discover::InstrumentPropertyList	result;
+	InstrumentPropertyList::const_iterator	i;
+	for (i = properties.begin(); i != properties.end(); i++) {
+		result.push_back(convert(*i));
+	}
+	return result;
+}
+
+
 } // namespace snowstar

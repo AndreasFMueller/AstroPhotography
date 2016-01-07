@@ -828,7 +828,9 @@ int	main(int argc, char *argv[]) {
 		return calibrate_command(guider, calibrationid);
 	}
 
-	throw std::runtime_error("unknown command");
+	std::string	msg = astro::stringprintf("unknown command '%s'",
+		command.c_str());
+	throw std::runtime_error(msg);
 }
 
 } // namespace snowguide

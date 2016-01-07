@@ -45,6 +45,15 @@ module snowstar {
 
 	sequence<InstrumentComponent>	InstrumentComponentList;
 
+	struct InstrumentProperty {
+		string instrumentname;
+		string property;
+		string value;
+		string description;
+	};
+	sequence<string>	InstrumentPropertyNames;
+	sequence<InstrumentProperty>	InstrumentPropertyList;
+
 	/**
 	 * \brief Instrument interface
 	 */
@@ -100,6 +109,16 @@ module snowstar {
 		 * round-trips that would be necessary with the other methods.
 		 */
 		InstrumentComponentList	list();
+
+		// methods related to properties
+		void	addProperty(InstrumentProperty property);
+		InstrumentProperty	getProperty(string property)
+						throws NotFound;
+		void	removeProperty(string property) throws NotFound;
+		void	updateProperty(InstrumentProperty property)
+						throws NotFound;
+		InstrumentPropertyNames	getPropertyNames();
+		InstrumentPropertyList	getProperties();
 	};
 
 	sequence<string>		InstrumentList;

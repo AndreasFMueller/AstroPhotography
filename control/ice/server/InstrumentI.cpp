@@ -65,4 +65,43 @@ InstrumentComponentList	InstrumentI::list(const Ice::Current& /* current */) {
 	return convert(_instrument->list());
 }
 
+void	InstrumentI::addProperty(const InstrumentProperty& property,
+		const Ice::Current& /* current */) {
+	astro::discover::InstrumentProperty	p = convert(property);
+	_instrument->addProperty(p);
+}
+
+InstrumentProperty	InstrumentI::getProperty(const std::string& property,
+		const Ice::Current& /* current */) {
+	try {
+		astro::discover::InstrumentProperty	p = _instrument->getProperty(property);
+		return convert(p);
+	} catch (...) {
+		NotFound	exception;
+		exception.cause = astro::stringprintf("property '%s' not found");
+		throw exception;
+	}
+}
+
+void	InstrumentI::removeProperty(const std::string& property,
+		const Ice::Current& /* current */) {
+	_instrument->removeProperty(property);
+}
+
+void	InstrumentI::updateProperty(const InstrumentProperty& property,
+		const Ice::Current& /* current */) {
+	_instrument->updateProperty(convert(property));
+}
+
+InstrumentPropertyNames	InstrumentI::getPropertyNames(
+	const Ice::Current& /* current */) {
+	return convert(_instrument->getPropertyNames());
+}
+
+InstrumentPropertyList	InstrumentI::getProperties(const Ice::Current& /* current */) {
+	return convert(_instrument->getProperties());
+}
+
+
+
 } // namespace snowstar
