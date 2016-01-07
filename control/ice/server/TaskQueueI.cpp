@@ -242,7 +242,7 @@ TaskPrx TaskQueueI::getTask(int taskid, const Ice::Current& current) {
 		identity.c_str());
 
 	// create the proxy
-	return createProxy<TaskPrx>(identity, current);
+	return createProxy<TaskPrx>(identity, current, false);
 }
 
 void	TaskQueueI::registerMonitor(const Ice::Identity& callback,

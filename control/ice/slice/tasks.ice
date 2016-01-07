@@ -88,6 +88,8 @@ module snowstar {
 		TaskInfo	info();
 		string		imagename();
 		Image*		getImage() throws NotFound;
+		// save an image in a repository
+		int	imageToRepo(string reponame) throws NotFound;
 	};
 
 	/**

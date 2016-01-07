@@ -361,7 +361,7 @@ int	command_cancel(TaskQueuePrx tasks, std::list<int> ids) {
 /**
  * \brief Implementation of the submit command
  */
-int	command_submit(TaskQueuePrx tasks, InstrumentsPrx instruments) {
+int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */) {
 	// get the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
@@ -435,6 +435,16 @@ int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 }
 
 /**
+ * \brief Command to save an image in the remote repo
+ */
+int	command_remoterepo(TaskQueuePrx tasks, int id,
+		const std::string& reponame) {
+	TaskPrx	task = tasks->getTask(id);
+	task->imageToRepo(reponame);
+	return EXIT_SUCCESS;
+}
+
+/**
  * \brief Implementation of the repository command
  */
 int	command_repository(TaskQueuePrx tasks, int id,
@@ -484,11 +494,12 @@ static void	usage(const char *progname) {
 	std::cout << p << " [ options ] start" << std::endl;
 	std::cout << p << " [ options ] stop" << std::endl;
 	std::cout << p << " [ options ] state" << std::endl;
-	std::cout << p << " [ options ] cancel id ..." << std::endl;
-	std::cout << p << " [ options ] remove id ..." << std::endl;
+	std::cout << p << " [ options ] cancel <id> ..." << std::endl;
+	std::cout << p << " [ options ] remove <id> ..." << std::endl;
 	std::cout << p << " [ options ] submit" << std::endl;
-	std::cout << p << " [ options ] project projectname partno" << std::endl;
-	std::cout << p << " [ options ] image id filename" << std::endl;
+	std::cout << p << " [ options ] project <projectname> <partno>" << std::endl;
+	std::cout << p << " [ options ] image <id> <filename>" << std::endl;
+	std::cout << p << " [ options ] remote <id> <imagerepo>" << std::endl;
 	std::cout << std::endl;
 	std::cout << "possible task states:" << std::endl;
 	std::cout << "    pending    " << std::endl;
@@ -680,6 +691,17 @@ int	main(int argc, char *argv[]) {
 		}
 		std::string	filename = argv[optind++];
 		return command_image(tasks, id, filename);
+	}
+	if (command == "remote") {
+		if (argc <= optind) {
+			throw std::runtime_error("no id argument specified");
+		}
+		int	id = std::stoi(argv[optind++]);
+		if (argc <= optind) {
+			throw std::runtime_error("no image file name");
+		}
+		std::string	reponame = argv[optind++];
+		return command_remoterepo(tasks, id, reponame);
 	}
 	if (command == "repository") {
 		if (argc <= optind) {

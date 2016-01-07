@@ -23,6 +23,8 @@ public:
 	TaskInfo	info(const Ice::Current& current);
 	std::string	imagename(const Ice::Current& current);
 	ImagePrx	getImage(const Ice::Current& current);
+	int	imageToRepo(const std::string& reponame,
+			const Ice::Current& current);
 };
 
 } // namespace snowstar

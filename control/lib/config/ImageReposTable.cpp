@@ -66,7 +66,9 @@ bool	ImageRepoTable::contains(const std::string& name) {
 	std::string	condition = stringprintf("reponame = '%s'",
 				name.c_str());
 	std::list<ImageRepoRecord>	records = select(condition);
-	return (0 == records.size()) ? false : true;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d records for '%s'",
+		records.size(), name.c_str());
+	return (records.size() > 0);
 }
 
 ImageRepo	ImageRepoTable::get(const std::string& name) {
