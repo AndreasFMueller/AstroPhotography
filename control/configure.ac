@@ -424,7 +424,8 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
 	lib/test/Makefile
 	ice/Makefile ice/slice/Makefile ice/include/Makefile
-	ice/lib/Makefile ice/client/Makefile ice/server/Makefile
+	ice/lib/Makefile ice/client/Makefile ice/client/guide/Makefile
+	ice/server/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile

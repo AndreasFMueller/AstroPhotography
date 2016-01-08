@@ -29,7 +29,7 @@ endif
 qhy_la_SOURCES = $(SRCFILES)
 qhy_la_LDFLAGS = -module
 qhy_la_DEPENDENCIES = ../../lib/libastro.la
-qhy_la_LIBADD = ../../lib/libastro.la /usr/local/lib64/libqhyccd.la
+qhy_la_LIBADD = ../../lib/libastro.la /usr/local/lib/libqhyccd.la
 
 endif
 

@@ -110,4 +110,11 @@ bool	ServerName::operator!=(const ServerName& other) const {
 	return (host() != other.host()) || (port() != other.port());
 }
 
+std::string	ServerName::toString() const {
+	if (default_port != port()) {
+		return stringprintf("%s:%d", host().c_str(), port());
+	}
+	return host();
+}
+
 } // namespace astro
