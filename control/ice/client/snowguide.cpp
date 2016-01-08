@@ -247,12 +247,32 @@ int	images_command(GuiderPrx guider, const std::string& path) {
 	return EXIT_SUCCESS;
 }
 
+int	monitor_calibration(GuiderPrx guider) {
+	debug(LOG_INFO, DEBUG_LOG, 0, "monitoring calibration");
+	return EXIT_SUCCESS;
+}
+
+int	monitor_guiding(GuiderPrx guider) {
+	debug(LOG_INFO, DEBUG_LOG, 0, "monitoring guiding");
+	return EXIT_SUCCESS;
+}
+
 /**
  * \brief Implementation of the monitor command
  */
-int	monitor_command(GuiderPrx /* guider */) {
+int	monitor_command(GuiderPrx guider) {
 	// The type of callback to install depends on the current guider state
-	return EXIT_SUCCESS;
+	switch (guider->getState()) {
+	case GuiderUNCONFIGURED:
+	case GuiderIDLE:
+	case GuiderCALIBRATED:
+		std::cout << "not in monitorable state" << std::endl;
+	case GuiderCALIBRATING:
+		return monitor_calibration(guider);
+	case GuiderGUIDING:
+		return monitor_guiding(guider);
+	}
+	return EXIT_FAILURE;
 }
 
 /**
