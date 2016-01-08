@@ -45,9 +45,7 @@ public:
  */
 class Callback {
 public:
-	virtual CallbackDataPtr	operator()(CallbackDataPtr data) {
-		return data;
-	}
+	virtual CallbackDataPtr	operator()(CallbackDataPtr data) = 0;
 };
 
 typedef	std::shared_ptr<Callback>	CallbackPtr;

@@ -28,6 +28,7 @@ void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
 
 	// leave immediately, if there is not Tracking info
 	if (NULL == trackinginfo) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not a tracking info object");
 		return;
 	}
 
@@ -77,7 +78,7 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 }
 
 /**
- * \brief calback adapter for Tracking monitor
+ * \brief calback adapter for Calibration monitor
  */
 template<>
 void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
@@ -221,14 +222,6 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, focallength = %.3f",
 		guider->focallength());
 
-#if 0
-	// prepare a calibration record
-	astro::guiding::Calibration	calibration;
-	calibration.instrument = guider->instrument();
-	calibration.ccd = guider->ccdname();
-	calibration.guiderport = guider->guiderportname();
-#endif
-
 	// callback stuff
 	GuiderICalibrationCallback	*callback
 		= new GuiderICalibrationCallback(*this);
@@ -357,13 +350,24 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
  * \brief Register a callback for the calibration process
  */
 void	GuiderI::registerCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
-	calibrationcallbacks.registerCallback(calibrationcallback, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback registered");
+	try {
+		calibrationcallbacks.registerCallback(calibrationcallback,
+			current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register calibration callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register calibration callback for unknown reason");
+	}
 }
 
 /**
  * \brief Unregister a callback for the calibration process
  */
 void	GuiderI::unregisterCalibrationMonitor(const Ice::Identity& calibrationcallback, const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback unregistered");
 	calibrationcallbacks.unregisterCallback(calibrationcallback, current);
 }
 
@@ -388,7 +392,16 @@ void    GuiderI::unregisterImageMonitor(const Ice::Identity& imagecallback,
  */
 void    GuiderI::registerTrackingMonitor(const Ice::Identity& trackingcallback,
 		const Ice::Current& current) {
-	trackingcallbacks.registerCallback(trackingcallback, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register tracking callback");
+	try {
+		trackingcallbacks.registerCallback(trackingcallback, current);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot register tracking callback: %s %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot register tracking callback for unknown reason");
+	}
 }
 
 /**
@@ -405,16 +418,6 @@ void    GuiderI::unregisterTrackingMonitor(const Ice::Identity& trackingcallback
  * This method needs to be called by the callback installed in the guider
  */
 void	GuiderI::trackingUpdate(const astro::callback::CallbackDataPtr data) {
-	astro::guiding::TrackingPoint	*trackinginfo
-		= dynamic_cast<astro::guiding::TrackingPoint *>(&*data);
-	if (NULL != trackinginfo) {
-		// write tracking update to the database
-		astro::guiding::TrackingTable	tracking(database);
-		astro::guiding::TrackingPointRecord	tp(-1, guidingrunid,
-			*trackinginfo);
-		tracking.add(tp);
-	}
-
 	// tell the clients that data has changed
 	trackingcallbacks(data);
 }
@@ -430,21 +433,6 @@ void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
  * \brief Handle an update from the calibration process
  */
 void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
-	// handle various information from the calibration process
-	astro::guiding::CalibrationPointCallbackData	*calibrationpoint
-		= dynamic_cast<astro::guiding::CalibrationPointCallbackData *>(&*data);
-	if (NULL != calibrationpoint) {
-		// add the point to the calibration run
-		astro::guiding::CalibrationStore	store(database);
-		store.addPoint(calibrationid, calibrationpoint->data());
-	}
-	astro::guiding::GuiderCalibrationCallbackData	*calibration
-		= dynamic_cast<astro::guiding::GuiderCalibrationCallbackData *>(&*data);
-	if (NULL != calibration) {
-		// add the calibration result to the database
-		astro::guiding::CalibrationStore	store(database);
-		store.updateCalibration(calibrationid, calibration->data());
-	}
 
 	// send calibration callbacks to the registered callbacks
 	calibrationcallbacks(data);

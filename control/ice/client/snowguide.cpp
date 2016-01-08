@@ -170,6 +170,115 @@ int	help_command() {
 }
 
 /**
+ * \brief A class to display calibration points
+ */
+class CalibrationPoint_display {
+	std::ostream&	_out;
+public:
+	CalibrationPoint_display(std::ostream& out) : _out(out) { }
+	void	operator()(const CalibrationPoint& calpoint);
+};
+
+void	CalibrationPoint_display::operator()(const CalibrationPoint& calpoint) {
+	_out << "         ";
+	_out << astro::stringprintf("%.1f: ", calpoint.t);
+	_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
+			calpoint.offset.x, calpoint.offset.y,
+			calpoint.star.x, calpoint.star.y);
+	_out << std::endl;
+}
+
+/**
+ * \brief A class to display a calibration
+ */
+class Calibration_display {
+	std::ostream&	_out;
+public:
+	Calibration_display(std::ostream& out) : _out(out) { }
+	void	operator()(const Calibration& cal);
+};
+
+void	Calibration_display::operator()(const Calibration& cal) {
+	// id and timestamp
+	_out << astro::stringprintf("%4d: ", cal.id);
+	_out << astro::timeformat("%Y-%m-%d %H:%M, ",
+		converttime(cal.timeago));
+	_out << cal.points.size() << " points, ";
+	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
+	_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
+	_out << std::endl;
+
+	// calibration coefficients
+	_out << std::string("     ");
+	for (int k = 0; k < 3; k++) {
+		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
+	}
+	_out << std::endl << std::string("     ");
+	for (int k = 3; k < 6; k++) {
+		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
+	}
+	_out << std::endl;
+
+	// calibration points if verbose
+	if (verbose) {
+		std::for_each(cal.points.begin(), cal.points.end(),
+			CalibrationPoint_display(_out));
+	}
+}
+
+/**
+ * \brief Tracking point display class
+ *
+ * This class is a functor class used to display a tracking point. It also
+ * keeps track of the index of the point being displayed.
+ */
+class TrackingPoint_display {
+	std::ostream&	_out;
+	int	counter;
+	double	_starttime;
+	bool	_csv;
+public:
+	bool	csv() const { return _csv; }
+	void	csv(bool c) { _csv = c; }
+private:
+	double	_masperpixel;
+public:
+	double	masperpixel() const { return _masperpixel; }
+	void	masperpixel(double m) { _masperpixel = m; }
+public:
+	TrackingPoint_display(std::ostream& out, double starttime)
+		: _out(out), _starttime(starttime) {
+		counter = 1;
+	}
+	void	operator()(const TrackingPoint& point);
+};
+
+void	TrackingPoint_display::operator()(const TrackingPoint& point) {
+	if (_csv) {
+		_out << astro::stringprintf("%6d,", ++counter);
+		_out << astro::stringprintf("%8.1f,",
+			_starttime - point.timeago);
+		_out << astro::stringprintf("%10.4f,%10.4f,%10.4f,%10.4f",
+				point.trackingoffset.x, point.trackingoffset.y,
+				point.activation.x, point.activation.y);
+		double	p = hypot(point.trackingoffset.x,
+			point.trackingoffset.y) * masperpixel();
+		_out << astro::stringprintf(",%8.0f", p);
+	} else {
+		_out << astro::stringprintf("[%04d] ", ++counter);
+		_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
+			converttime(point.timeago));
+		_out << astro::stringprintf(".%03.0f ",
+			1000 * (point.timeago - trunc(point.timeago)));
+		_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
+				point.trackingoffset.x, point.trackingoffset.y,
+				point.activation.x, point.activation.y);
+	}
+	_out << std::endl;
+}
+
+
+/**
  * \brief Get the state of a guider
  *
  * This command retrieves the current state of the guider
@@ -247,13 +356,108 @@ int	images_command(GuiderPrx guider, const std::string& path) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief Common infrastructure for monitor classes
+ */
+class CommonMonitor {
+	std::mutex	mtx;
+	std::condition_variable	cond;
+	bool	_complete;
+public:
+	bool	complete() const { return _complete; }
+	void	complete(bool c) {
+		_complete = c;
+		if (_complete) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibraition complete");
+			std::unique_lock<std::mutex>	lock(mtx);
+			cond.notify_one();
+		}
+	}
+	CommonMonitor() : _complete(false) {
+	}
+	void	wait() {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for completion");
+		std::unique_lock<std::mutex>	lock(mtx);
+		cond.wait(lock);
+	}
+};
+
+/**
+ * \brief Calibration monitor class
+ */
+class CalibrationMonitorI : public CalibrationMonitor, public CommonMonitor {
+	CalibrationPoint_display	display;
+public:
+	CalibrationMonitorI() : display(std::cout) {
+	}
+	void	update(const CalibrationPoint& point,
+		const Ice::Current& /* current */) {
+		display(point);
+	}
+	void	stop(const Ice::Current& /* current */) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
+		complete(true);
+	}
+};
+
 int	monitor_calibration(GuiderPrx guider) {
 	debug(LOG_INFO, DEBUG_LOG, 0, "monitoring calibration");
+	// create a new calibration monitor
+	CalibrationMonitorI	*monitor = new CalibrationMonitorI();
+
+	// register the monitor with the guider server
+	Ice::ObjectPtr	callback = monitor;
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	CallbackAdapter	adapter(ic);
+	Ice::Identity	ident = adapter.add(callback);
+	guider->ice_getConnection()->setAdapter(adapter.adapter());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register calibration monitor");
+	guider->registerCalibrationMonitor(ident);
+
+	// wait for termination of the monitor
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for calibration completion");
+	monitor->wait();
+
+	// unregister the monitor
+	guider->unregisterCalibrationMonitor(ident);
 	return EXIT_SUCCESS;
 }
 
+class TrackingMonitorI : public TrackingMonitor, public CommonMonitor {
+	TrackingPoint_display	display;
+public:
+	TrackingMonitorI() : display(std::cout, 0) {
+	}
+	void	update(const TrackingPoint& point,
+		const Ice::Current& /* current */) {
+		display(point);
+	}
+	void	stop(const Ice::Current& /* current */) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
+		complete(true);
+	}
+};
+
 int	monitor_guiding(GuiderPrx guider) {
 	debug(LOG_INFO, DEBUG_LOG, 0, "monitoring guiding");
+	// create a new calibration monitor
+	TrackingMonitorI	*monitor = new TrackingMonitorI();
+
+	// register the monitor with the guider server
+	Ice::ObjectPtr	callback = monitor;
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	CallbackAdapter	adapter(ic);
+	Ice::Identity	ident = adapter.add(callback);
+	guider->ice_getConnection()->setAdapter(adapter.adapter());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "register tracking monitor");
+	guider->registerTrackingMonitor(ident);
+
+	// wait for termination of the monitor
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for guiding completion");
+	monitor->wait();
+
+	// unregister the monitor
+	guider->unregisterTrackingMonitor(ident);
 	return EXIT_SUCCESS;
 }
 
@@ -273,63 +477,6 @@ int	monitor_command(GuiderPrx guider) {
 		return monitor_guiding(guider);
 	}
 	return EXIT_FAILURE;
-}
-
-/**
- * \brief A class to display calibration points
- */
-class CalibrationPoint_display {
-	std::ostream&	_out;
-public:
-	CalibrationPoint_display(std::ostream& out) : _out(out) { }
-	void	operator()(const CalibrationPoint& calpoint);
-};
-
-void	CalibrationPoint_display::operator()(const CalibrationPoint& calpoint) {
-	_out << "         ";
-	_out << astro::stringprintf("%.1f: ", calpoint.t);
-	_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
-			calpoint.offset.x, calpoint.offset.y,
-			calpoint.star.x, calpoint.star.y);
-	_out << std::endl;
-}
-
-/**
- * \brief A class to display a calibration
- */
-class Calibration_display {
-	std::ostream&	_out;
-public:
-	Calibration_display(std::ostream& out) : _out(out) { }
-	void	operator()(const Calibration& cal);
-};
-
-void	Calibration_display::operator()(const Calibration& cal) {
-	// id and timestamp
-	_out << astro::stringprintf("%4d: ", cal.id);
-	_out << astro::timeformat("%Y-%m-%d %H:%M, ",
-		converttime(cal.timeago));
-	_out << cal.points.size() << " points, ";
-	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
-	_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
-	_out << std::endl;
-
-	// calibration coefficients
-	_out << std::string("     ");
-	for (int k = 0; k < 3; k++) {
-		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
-	}
-	_out << std::endl << std::string("     ");
-	for (int k = 3; k < 6; k++) {
-		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
-	}
-	_out << std::endl;
-
-	// calibration points if verbose
-	if (verbose) {
-		std::for_each(cal.points.begin(), cal.points.end(),
-			CalibrationPoint_display(_out));
-	}
 }
 
 /**
@@ -480,57 +627,6 @@ int	tracks_command(GuiderFactoryPrx guiderfactory,
 		std::cout << std::endl;
 	}
 	return EXIT_SUCCESS;
-}
-
-/**
- * \brief Tracking point display class
- *
- * This class is a functor class used to display a tracking point. It also
- * keeps track of the index of the point being displayed.
- */
-class TrackingPoint_display {
-	std::ostream&	_out;
-	int	counter;
-	double	_starttime;
-	bool	_csv;
-public:
-	bool	csv() const { return _csv; }
-	void	csv(bool c) { _csv = c; }
-private:
-	double	_masperpixel;
-public:
-	double	masperpixel() const { return _masperpixel; }
-	void	masperpixel(double m) { _masperpixel = m; }
-public:
-	TrackingPoint_display(std::ostream& out, double starttime)
-		: _out(out), _starttime(starttime) {
-		counter = 1;
-	}
-	void	operator()(const TrackingPoint& point);
-};
-
-void	TrackingPoint_display::operator()(const TrackingPoint& point) {
-	if (_csv) {
-		_out << astro::stringprintf("%6d,", ++counter);
-		_out << astro::stringprintf("%8.1f,",
-			_starttime - point.timeago);
-		_out << astro::stringprintf("%10.4f,%10.4f,%10.4f,%10.4f",
-				point.trackingoffset.x, point.trackingoffset.y,
-				point.activation.x, point.activation.y);
-		double	p = hypot(point.trackingoffset.x,
-			point.trackingoffset.y) * masperpixel();
-		_out << astro::stringprintf(",%8.0f", p);
-	} else {
-		_out << astro::stringprintf("[%04d] ", ++counter);
-		_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
-			converttime(point.timeago));
-		_out << astro::stringprintf(".%03.0f ",
-			1000 * (point.timeago - trunc(point.timeago)));
-		_out << astro::stringprintf("(%f,%f) -> (%f,%f)",
-				point.trackingoffset.x, point.trackingoffset.y,
-				point.activation.x, point.activation.y);
-	}
-	_out << std::endl;
 }
 
 /**
