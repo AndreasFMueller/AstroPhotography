@@ -170,8 +170,8 @@ ImagePtr	SbigCcd::getRawImage() {
 
 	// compute the size of the resulting image, if we get one
 	ImageSize	resultsize(
-		exposure.width() / exposure.mode().getX(),
-		exposure.height() / exposure.mode().getY());
+		exposure.width() / exposure.mode().x(),
+		exposure.height() / exposure.mode().y());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "expecting an %s image",
 		resultsize.toString().c_str());
 
@@ -213,9 +213,9 @@ ImagePtr	SbigCcd::getRawImage() {
 		ReadoutLineParams	readlineparams;
 		readlineparams.ccd = id;
 		readlineparams.pixelStart = exposure.x()
-						/ exposure.mode().getX();
+						/ exposure.mode().x();
 		readlineparams.pixelLength = exposure.width()
-						/ exposure.mode().getX();
+						/ exposure.mode().x();
 		readlineparams.readoutMode = readparams.readoutMode;
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"pixelStart = %d, pixelLength = %d", 

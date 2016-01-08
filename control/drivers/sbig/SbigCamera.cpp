@@ -166,7 +166,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
 		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
 		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
-		ccd.setShutter(true);
+		ccd.shutter(true);
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
@@ -179,7 +179,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 				ccdinforesult.readoutInfo[i].height,
 				ccdinforesult.readoutInfo[i].mode);
 		}
-		ccd.setShutter(true);
+		ccd.shutter(true);
 		ccdinfo.push_back(ccd);
 	}
 
@@ -227,7 +227,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
 			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 		}
-		ccd.setShutter(true);
+		ccd.shutter(true);
 		ccdinfo.push_back(ccd);
 	}
 
