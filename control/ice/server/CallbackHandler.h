@@ -28,6 +28,7 @@ void	callback_adapter(proxy& /* p */,
 	std::string	msg
 		= std::string("specialization for callback_adapter needed: ")
 			+ std::string(typeid(proxy).name());;
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }
 
@@ -107,6 +108,8 @@ void	SnowCallback<proxy>::clear() {
 template<typename proxy>
 astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 	astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback data received, %d clients",
+		callbacks.size());
 	// the todelete array is used to keep track of all the identities
 	// that have failed
 	std::list<Ice::Identity>	todelete;
@@ -114,8 +117,12 @@ astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 	// go through all callbacks, and try to send them the data
 	for (auto ptr = callbacks.begin(); ptr != callbacks.end(); ptr++) {
 		try {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"calling callback_adapter<proxy>");
 			callback_adapter<proxy>(ptr->second, data);
 		} catch (...) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"callback failed, removing");
 			// callback has failed, keep its identity in order to
 			// delete it later
 			todelete.push_back(ptr->first);

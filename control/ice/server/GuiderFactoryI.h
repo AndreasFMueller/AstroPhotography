@@ -41,10 +41,12 @@ public:
 				const Ice::Current& current);
 	Calibration	getCalibration(int id,
 				const Ice::Current& current);
+	void	deleteCalibration(int id, const Ice::Current& current);
 	idlist	getAllGuideruns(const Ice::Current& current);
 	idlist	getGuideruns(const GuiderDescriptor& guider,
 				const Ice::Current& current);
 	TrackingHistory	getTrackingHistory(int id, const Ice::Current& current);
+	void	deleteTrackingHistory(int id, const Ice::Current& current);
 };
 
 } // namespace snowstar

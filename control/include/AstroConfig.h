@@ -436,6 +436,7 @@ public:
 static ImageRepoConfigurationPtr	get();
 static ImageRepoConfigurationPtr	get(ConfigurationPtr config);
 	// image repository access
+	virtual bool	exists(const std::string& name) = 0;
 	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory) = 0;

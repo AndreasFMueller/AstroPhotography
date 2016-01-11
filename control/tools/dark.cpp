@@ -24,26 +24,60 @@ namespace astro {
 namespace app {
 namespace dark {
 
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ] darkimages"
-		<< std::endl;
-	std::cout <<"Computes a consolidated dark image from a set of images"
-		<< std::endl;
+/**
+ * \brief display a help message for the dark program
+ */
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Get a number of images from a CCD and consolidate them "
+		"into a dark image" << std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -d             increase debug level" << std::endl;
-	std::cout << "  -e <time>      set exposure time to <time>" << std::endl;
-	std::cout << "  -n <nimages>   build dark composed of <nimages> individual images" << std::endl;
-	std::cout << "  -t <temp>      cool CCD to temperature <temp>" << std::endl;
-	std::cout << "  -h, -?         show this help message" << std::endl;
-	std::cout << "  -o outfile     filename of the output dark image"
+	std::cout << std::endl;
+	std::cout << "    -C,--camera=<cameraid>    "
+		"use camera with id <cameraid>" << std::endl;
+	std::cout << "    -c,--ccd=<ccdid>          "
+		"use ccd with id <ccdid>" << std::endl;
+	std::cout << "    -d,--debug                "
+		"increase debug level" << std::endl;
+	std::cout << "    -e,--exposure=<time>      "
+		"set exposure time to <time>" << std::endl;
+	std::cout << "    -m,--module=<module>      use module <module>"
 		<< std::endl;
+	std::cout << "    -n,--number=<nimages>     "
+		"build dark composed of <nimages> individual images"
+		<< std::endl;
+	std::cout << "    -o,--outfile=<outfile>    "
+		"filename of the output dark image" << std::endl;
+	std::cout << "    -t,--temperature=<temp>   "
+		"cool CCD to temperature <temp>" << std::endl;
+	std::cout << "    -h,-?,--help              "
+		"show this help message" << std::endl;
+	std::cout << std::endl;
 }
+
+static struct option	longopts[] = {
+{ "camera",		required_argument,	NULL,	'C' }, /* 0 */
+{ "ccd",		required_argument,	NULL,	'c' }, /* 1 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 2 */
+{ "exposure",		required_argument,	NULL,	'e' }, /* 3 */
+{ "module",		required_argument,	NULL,	'm' }, /* 4 */
+{ "number",		required_argument,	NULL,	'n' }, /* 5 */
+{ "outfile",		required_argument,	NULL,	'o' }, /* 6 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 7 */
+{ "help",		no_argument,		NULL,	'h' }, /* 8 */
+{ NULL,			0,			NULL,	 0  }, /* 9 */
+};
 
 /**
  * \brief Main function for makedark tool 
  *
- * This tool takes a list of image names on the command line, reads them,
- * and produces a dark image from them.
+ * This tool takes a number of images from a CCD and produces a dark image
+ * from them.
  */
 int	main(int argc, char *argv[]) {
 	Exposure	exposure;
@@ -52,10 +86,12 @@ int	main(int argc, char *argv[]) {
 	float	temperature = 0;
 	const char	*outfilename = NULL;
 	int	c;
+	int	longindex;
 	int	cameranumber = 0;
 	int	ccdid = 0;
 	const char	*modulename = "uvc";
-	while (EOF != (c = getopt(argc, argv, "do:t:n:h?m:C:c:e:")))
+	while (EOF != (c = getopt_long(argc, argv, "do:t:n:h?m:C:c:e:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'C':
 			cameranumber = atoi(optarg);

@@ -165,7 +165,7 @@ static struct option    longopts[] = {
 { NULL,		0,			NULL,		0   }
 };
 
-void	usage(const std::string& progname) {
+static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;

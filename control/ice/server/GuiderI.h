@@ -11,6 +11,7 @@
 #include <ImageDirectory.h>
 #include <AstroPersistence.h>
 #include <CallbackHandler.h>
+#include <AstroDebug.h>
 
 namespace snowstar {
 
@@ -42,7 +43,6 @@ class GuiderI : virtual public Guider {
 	// some infrastructure members we need 
 	Point	_point;
 	int	calibrationid;
-	int	guidingrunid;
 	astro::guiding::TrackerPtr	getTracker();
 
 	// public interface starts here
@@ -57,7 +57,6 @@ public:
 	virtual GuiderState getState(const Ice::Current& current);
 
 	// devices making up the guider
-	virtual CameraPrx getCamera(const Ice::Current& current);
 	virtual CcdPrx getCcd(const Ice::Current& current);
 	virtual GuiderPortPrx getGuiderPort(const Ice::Current& current);
 	virtual GuiderDescriptor getDescriptor(const Ice::Current& current);
@@ -73,7 +72,7 @@ public:
 	virtual Calibration getCalibration(const Ice::Current& current);
 
 	// control calibration process
-	virtual void startCalibration(Ice::Float, const Ice::Current& current);
+	virtual Ice::Int startCalibration(const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);
@@ -93,7 +92,7 @@ public:
 	// callback handlers
 private:
 	SnowCallback<ImageMonitorPrx>	imagecallbacks;
-	SnowCallback<ImageMonitorPrx>	trackingcallbacks;
+	SnowCallback<TrackingMonitorPrx>	trackingcallbacks;
 	SnowCallback<CalibrationMonitorPrx>	calibrationcallbacks;
 
 	// methods for registration and unregistration of callbacks
@@ -129,9 +128,13 @@ public:
 class GuiderICalibrationCallback : public astro::callback::Callback {
 	GuiderI&	_guider;
 public:
-	GuiderICalibrationCallback(GuiderI& guider) : _guider(guider) { }
+	GuiderICalibrationCallback(GuiderI& guider) : _guider(guider) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"calibration callback %p created", this);
+	}
 	virtual astro::callback::CallbackDataPtr	operator()(
-		astro::callback::CallbackDataPtr& data) {
+		astro::callback::CallbackDataPtr data) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration callback called");
 		_guider.calibrationUpdate(data);
 		return data;
 	}
@@ -145,7 +148,7 @@ class GuiderITrackingCallback : public astro::callback::Callback {
 public:
 	GuiderITrackingCallback(GuiderI& guider) : _guider(guider) { }
 	virtual astro::callback::CallbackDataPtr	operator()(
-		astro::callback::CallbackDataPtr& data) {
+		astro::callback::CallbackDataPtr data) {
 		_guider.trackingUpdate(data);
 		return data;
 	}
@@ -159,7 +162,7 @@ class GuiderIImageCallback : public astro::callback::Callback {
 public:
 	GuiderIImageCallback(GuiderI& guider) : _guider(guider) { }
 	virtual astro::callback::CallbackDataPtr	operator()(
-		astro::callback::CallbackDataPtr& data) {
+		astro::callback::CallbackDataPtr data) {
 		_guider.trackingImageUpdate(data);
 		return data;
 	}

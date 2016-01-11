@@ -20,19 +20,40 @@ namespace astro {
 namespace guiding {
 
 /**
+ * \brief Start Detector base class
+ *
+ * This is the base class for the star detector. It contains all the relevant
+ * functionality that is independent of the Pixel type.
+ */
+class StarDetectorBase {
+	typedef struct findResult_s {
+		ImagePoint	point;
+		double	background;
+	} findResult;
+	findResult	findStar(const image::ConstImageAdapter<double>& _image,
+				const ImageRectangle& areaOfInterest) const;
+	double	radius(const image::ConstImageAdapter<double>& _image,
+				const ImagePoint& where) const;
+public:
+	StarDetectorBase() { }
+	Point	operator()(const image::ConstImageAdapter<double>& _image,
+			const image::ImageRectangle& rectangle) const;
+};
+
+/**
  * \brief Detector class to determine coordinates if a star
  *
  * Star images are not points, they have a distribution. For guiding,
  * we need to determine the coordinates of the star with subpixel accuracy.
  */
 template<typename Pixel>
-class StarDetector {
+class StarDetector : public StarDetectorBase {
 	const image::ConstImageAdapter<Pixel>&	image;
+	adapter::TypeConversionAdapter<Pixel>	tca;
 public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
 	Point	operator()(
-		const image::ImageRectangle& rectangle,
-		int k) const;
+		const image::ImageRectangle& rectangle) const;
 }; 
 
 /**
@@ -40,7 +61,8 @@ public:
  */
 template<typename Pixel>
 StarDetector<Pixel>::StarDetector(
-	const image::ConstImageAdapter<Pixel>& _image) : image(_image) {
+	const image::ConstImageAdapter<Pixel>& _image)
+		: image(_image), tca(image) {
 }
 
 /**
@@ -49,11 +71,19 @@ StarDetector<Pixel>::StarDetector(
  * By summing the coordinates weighted by luminance around the maximum pixel
  * value in a rectangle, we get the centroid coordinates of the star's
  * response. This is the best estimate for the star coordinates.
+ *
+ * XXX problem with stars near border of rectangle 
+ *
+ * We should add a window function here. The problem is that when the
+ * image moves, additional stars may get into view. This happens oftion
+ * when calibrating. So stars at the border of the image should have much
+ * less weight than stars near the center, or stars near the expected
+ * position.
  */
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
-		const image::ImageRectangle& rectangle,
-		int k) const {
+		const image::ImageRectangle& rectangle) const {
+#if 0
 	// work only in the rectangle
 	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
 
@@ -75,8 +105,19 @@ Point	StarDetector<Pixel>::operator()(
 	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
 	// square around the maximum pixel.
 	double	xsum = 0, ysum = 0, weightsum = 0;
-	for (int x = maxx - k; x <= maxx + k; x++) {
-		for (int y = maxy - k; y <= maxy + k; y++) {
+
+	int	xleft = maxx - k;
+	if (xleft < 0) { xleft = 0; }
+	int	xright = maxx + k;
+	if (xright > size.width()) { xright = size.width(); }
+
+	int	ybottom = maxy - k;
+	if (ybottom < 0) { ybottom = 0; }
+	int	ytop = maxy + k;
+	if (ytop > size.height()) { ytop = size.height(); }
+
+	for (int x = xleft; x < xright; x++) {
+		for (int y = ybottom; y < ytop; y++) {
 			double	value = luminance(adapter.pixel(x, y));
 			if (value == value) {
 				weightsum += value;
@@ -92,6 +133,8 @@ Point	StarDetector<Pixel>::operator()(
 	// add the offset of the rectangle to get real coordinates
 	return Point(rectangle.origin().x() + xsum,
 		rectangle.origin().y() + ysum);
+#endif
+	return StarDetectorBase::operator()(tca, rectangle);
 }
 
 Point	findstar(image::ImagePtr image,
@@ -192,6 +235,10 @@ public:
 class GuiderCalibration : public std::vector<CalibrationPoint> {
 public:
 	double	a[6];
+	double	focallength;
+	double	masPerPixel;
+	bool	complete;
+	double	quality() const;
 	double	det() const;
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
@@ -250,24 +297,27 @@ public:
 		: t(actiontime), trackingoffset(offset),
 		  correction(activation) {
 	}
+	std::string	toString() const;
 };
 
 /**
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
  */
 class GuiderDescriptor {
-	std::string	_cameraname;
-	unsigned int	_ccdid;
-	std::string	_guiderportname;
+	std::string	_instrument;
+	std::string	_ccd;
+	std::string	_guiderport;
 public:
-	GuiderDescriptor(const std::string& cameraname, unsigned int ccdid,
-		const std::string& guiderportname) : _cameraname(cameraname),
-		_ccdid(ccdid), _guiderportname(guiderportname) { }
+	GuiderDescriptor(const std::string& instrument,
+		const std::string& ccd,
+		const std::string& guiderport)
+		: _instrument(instrument), _ccd(ccd),
+		  _guiderport(guiderport) { }
 	bool	operator==(const GuiderDescriptor& other) const;
 	bool	operator<(const GuiderDescriptor& other) const;
-	std::string	cameraname() const { return _cameraname; }
-	unsigned int	ccdid() const { return _ccdid; }
-	std::string	guiderportname() const { return _guiderportname; }
+	std::string	instrument() const { return _instrument; }
+	std::string	ccd() const { return _ccd; }
+	std::string	guiderport() const { return _guiderport; }
 	std::string	toString() const;
 };
 
@@ -344,13 +394,13 @@ public:
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
-	camera::CameraPtr	_camera;
+	std::string	_instrument;
 	camera::GuiderPortPtr	_guiderport;
 public:
-	camera::CameraPtr	camera() { return _camera; }
-	std::string	cameraname() { return _camera->name(); }
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i) { _instrument = i; }
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }
-	std::string	guiderportname() { return _guiderport->name(); }
+	std::string	guiderportname() const { return _guiderport->name().toString(); }
 private:
 	/*
 	 * \brief Image for guiding
@@ -365,11 +415,18 @@ private:
 public:
 	const camera::Imager&	imager() const { return _imager; }
 	camera::Imager&	imager() { return _imager; }
-	camera::CcdPtr		ccd() { return _imager.ccd(); }
+	camera::CcdPtr	ccd() const { return _imager.ccd(); }
+	std::string	ccdname() const { return ccd()->name().toString(); }
 	camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
 	int	ccdid() const { return getCcdInfo().getId(); }
 
 	GuiderDescriptor	getDescriptor() const;
+
+private:
+	double	_focallength;
+public:
+	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
 
 	/**
 	 * \brief Exposure information for guiding images
@@ -398,8 +455,8 @@ public:
 	 * the image to take into consideration when looking for a guide star,
 	 * or even how to expose an image.
 	 */
-	Guider(camera::CameraPtr camera, camera::CcdPtr ccd,
-		camera::GuiderPortPtr guiderport,
+	Guider(const std::string& instrument,
+		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
 		persistence::Database database = NULL);
 
 	// We should be able to get images through the imager, using the
@@ -437,19 +494,16 @@ public:
 	 * The calibration coefficients depend on the speed of the mount,
 	 * the focal length and the pixel size. Currently, the software
 	 * only knows about the angular speed for the CGEM mount. 
-	 * The focallength and the pixelsize allow to compute reasonable
+	 * The focallength allows to compute reasonable
 	 * values for the calibration displacements.
 	 * \param tracker	The tracker used for tracking. 
 	 * \param focallength	Focallength of the optics used for guiding,
 	 *			in m.
-	 * \param pixelsize	Pixel size of the CCD chip used for guiding.
-	 *			If binning different from 1x1 is used, the
-	 *			pixel size must reflect the size of the binned
-	 *			pixel. Unit: meters.
 	 * \return		the id of the calibration run
 	 */
-	int	startCalibration(TrackerPtr tracker,
-			double focallength = 0, double pixelsize = 0);
+	int	startCalibration(TrackerPtr tracker);
+	void	saveCalibration(const GuiderCalibration& calibration);
+
 	/**
 	 * \brief query the progress of the calibration process
 	 */
@@ -463,6 +517,7 @@ public:
 	 */
 	bool	waitCalibration(double timeout);
 	int	calibrationid() { return _calibrationid; }
+	void	calibrationid(int calid) { _calibrationid = calid; }
 private:
 	int	_calibrationid;
 	CalibrationProcessPtr	calibrationprocess;
@@ -545,9 +600,11 @@ class GuiderFactory {
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
 	// auxiliary functions to simplify the 
+#if 0
 	camera::CameraPtr	cameraFromName(const std::string& name);
 	camera::GuiderPortPtr	guiderportFromName(
 						const std::string& name);
+#endif
 public:
 	GuiderFactory() { }
 	GuiderFactory(module::Repository _repository,

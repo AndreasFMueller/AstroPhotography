@@ -6,6 +6,8 @@
 #include <SxUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <DeviceNameUSB.h>
+#include <sx.h>
 
 using namespace astro::usb;
 
@@ -16,50 +18,67 @@ namespace sx {
 SxError::SxError(const char *cause) : std::runtime_error(cause) {
 }
 
+#define SX_MODULE_NAME	"sx"
+#define SX_VENDOR_ID	0x1278
+
 /**
- * \brief Auxiliary function to generate the camera name from the deviceptr
- *
- * When this function is called, the device the argument deviceptr points
- * to must be open.
+ * \brief Construct an SxName from a USB device ptr
  */
-std::string	sxname(DevicePtr& deviceptr) {
-debug(LOG_DEBUG, DEBUG_LOG, 0, "sxname call: %p", &*deviceptr);
-	DeviceDescriptorPtr     descriptor = deviceptr->descriptor();
-	if (SX_VENDOR_ID != descriptor->idVendor()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "device is not an SX camera");
-		throw std::runtime_error("not an SX device");
-	}
-	std::string     name = stringprintf(
-		"%03d-%03d-%s-%04x-%04x",
-		deviceptr->getBusNumber(),
-		deviceptr->getDeviceAddress(),
-		descriptor->iProduct().c_str(),
-		descriptor->idVendor(),
-		descriptor->idProduct());
-debug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", name.c_str());
-	if (descriptor->iSerialNumber().size() > 0) {
-		name.append("-");
-		name.append(descriptor->iSerialNumber());
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "SX device %s found", name.c_str());
-	return name;
+SxName::SxName(usb::DevicePtr deviceptr)
+	: DeviceNameUSB(SX_MODULE_NAME, SX_VENDOR_ID, deviceptr) {
 }
 
 /**
- * \brief parse a device name into bus number and device address
- *
- * This method assumes that the string was formatted using the sxname
- * function. It therefore extracts substrings for busnumber and
- * device address at the position and length where sxname would but
- * these numbers, and converts them into integers.
+ * \brief Construct an SxName from a DeviceName
  */
-void	sxparse(const std::string& name, int& busnumber, int& deviceaddress) {
-	std::string	busnumberstring = name.substr(0, 3);	
-	std::string	deviceaddressstring = name.substr(4,3);
-	busnumber = stoi(busnumberstring);
-	deviceaddress = stoi(deviceaddressstring);
-        debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has bus=%d, addr=%d", name.c_str(),
-                busnumber, deviceaddress);
+SxName::SxName(const DeviceName& devicename)
+	: DeviceNameUSB(SX_MODULE_NAME, SX_VENDOR_ID, devicename) {
+}
+
+/**
+ * \brief convert the command code into a printable name
+ */
+std::string	command_name(int command) {
+	switch (command) {
+	case SX_CMD_GET_FIRMWARE_VERSION:
+		return std::string("get firmware");
+	case SX_CMD_ECHO:
+		return std::string("echo");
+	case SX_CMD_CLEAR_PIXELS:
+		return std::string("clear pixels");
+	case SX_CMD_READ_PIXELS_DELAYED:
+		return std::string("read pixels delayed");
+	case SX_CMD_READ_PIXELS:
+		return std::string("read pixels");
+	case SX_CMD_SET_TIMER:
+		return std::string("set timer");
+	case SX_CMD_GET_TIMER:
+		return std::string("get timer");
+	case SX_CMD_RESET:
+		return std::string("reset");
+	case SX_CMD_SET_CCD_PARAMS:
+		return std::string("set ccd params");
+	case SX_CMD_GET_CCD_PARAMS:
+		return std::string("get ccd params");
+	case SX_CMD_SET_STAR2K:
+		return std::string("set star2k");
+	case SX_CMD_WRITE_SERIAL_PORT:
+		return std::string("write serial port");
+	case SX_CMD_READ_SERIAL_PORT:
+		return std::string("read serial port");
+	case SX_CMD_SET_SERIAL:
+		return std::string("set serial");
+	case SX_CMD_GET_SERIAL:
+		return std::string("get serial");
+	case SX_CMD_CAMERA_MODEL:
+		return std::string("camera model");
+	case SX_CMD_LOAD_EEPROM:
+		return std::string("load eeprom");
+	case SX_CMD_COOLER:
+		return std::string("cooler");
+	}
+	std::string	cmd = stringprintf("UNKNOWN CMD %d");
+	return cmd;
 }
 
 } // namespace sx

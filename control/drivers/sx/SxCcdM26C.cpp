@@ -9,6 +9,8 @@
 #include <AstroImage.h>
 #include <sx.h>
 #include <AstroDebug.h>
+#include <AstroExceptions.h>
+#include <AstroFormat.h>
 #include <SxDemux.h>
 #include <fstream>
 
@@ -151,9 +153,10 @@ void	SxCcdM26C::exposeField(int field) {
 			(uint16_t)(1 << field), &rpd);
 		camera.controlRequest(&request);
 	} catch (std::exception &x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
-			x.what());
-		throw x;
+		std::string	msg = stringprintf("cannot request field: %s",
+						x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceProtocolException(msg);
 	}
 }
 
@@ -191,9 +194,10 @@ void	SxCcdM26C::requestField(int field) {
 			&rp);
 		camera.controlRequest(&request);
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
-			x.what());
-		throw x;
+		std::string	msg = stringprintf("cannot request field: %s",
+					x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceProtocolException(msg);
 	}
 #else
 	sx_read_pixels_delayed_t	rpd;
@@ -220,9 +224,10 @@ void	SxCcdM26C::requestField(int field) {
 			&rpd);
 		camera.controlRequest(&request);
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot request field: %s",
-			x.what());
-		throw x;
+		std::string	msg = stringprintf("cannot request field: %s",
+					x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceProtocolException(msg);
 	}
 #endif
 }
@@ -302,12 +307,14 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 void	SxCcdM26C::startExposure0(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure %s requested",
 		exposure.toString().c_str());
-	// remember the exposre, we need it for the second field for the
+	// remember the exposure, we need it for the second field for the
 	// case where we do two fields one after the other
 	this->exposure = symmetrize(exposure);
-	m26c = m26cExposure();
 
 	// compute a better request for the M26C camera
+	m26c = m26cExposure();
+
+	// start the exposure
 	exposeField(0);
 	timer.start();
 
@@ -327,6 +334,9 @@ void	SxCcdM26C::startExposure0(const Exposure& exposure) {
  */
 void	SxCcdM26C::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
+	// start the exposure
+	state = Exposure::exposing;
+	this->startExposure0(exposure);
 
 	// read the right number of pixels from the IN endpoint
 	Field	*field0 = readField();

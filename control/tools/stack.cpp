@@ -26,7 +26,7 @@ static struct option	longopts[] = {
 { NULL,		0,			NULL,		 0  }
 };
 
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	path(progname);
 	std::cout << "usage: " << std::endl;
 	std::cout << std::endl;
@@ -42,9 +42,9 @@ void	usage(const char *progname) {
 	std::cout << "output to the output file." << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -d               increase debug level" << std::endl;
-	std::cout << " -o outfile       filename of output file" << std::endl;
-	std::cout << " -h,-?            display this help" << std::endl;
+	std::cout << " -d,--debug             increase debug level" << std::endl;
+	std::cout << " -o,--output=<outfile>  filename of output file" << std::endl;
+	std::cout << " -h,-?,--help           display this help" << std::endl;
 }
 
 /**

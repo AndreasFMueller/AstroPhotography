@@ -100,28 +100,28 @@ unsigned short	SbigBinning2Mode(const Binning& mode) {
 	if (mode == Binning(9, 9)) {
 		return RM_9X9;
 	}
-	if (mode.getX() == 1) {
+	if (mode.x() == 1) {
 		result = RM_NX1;
-		if (mode.getX() > 255) {
+		if (mode.x() > 255) {
 			throw std::range_error("X binning range too large");
 		}
-		result |= mode.getY() << 8;
+		result |= mode.y() << 8;
 		return result;
 	}
-	if (mode.getX() == 2) {
+	if (mode.x() == 2) {
 		result = RM_NX2;
-		if (mode.getX() > 255) {
+		if (mode.x() > 255) {
 			throw std::range_error("X binning range too large");
 		}
-		result |= mode.getY() << 8;
+		result |= mode.y() << 8;
 		return result;
 	}
-	if (mode.getX() == 3) {
+	if (mode.x() == 3) {
 		result = RM_NX3;
-		if (mode.getX() > 255) {
+		if (mode.x() > 255) {
 			throw std::range_error("X binning range too large");
 		}
-		result |= mode.getY() << 8;
+		result |= mode.y() << 8;
 		return result;
 	}
 	throw std::range_error("unknown binning mode");

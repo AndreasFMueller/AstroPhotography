@@ -20,15 +20,35 @@ namespace astro {
 namespace app {
 namespace makeflat {
 
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -d?h ] [ -o outfile ] [ -D dark ] [ -o outfile ] files ..." << std::endl;
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ] files ..."
+		<< std::endl;
+	std::cout << std::endl;
 	std::cout << "compute flat frame from <files>..." << std::endl;
+	std::cout << std::endl;
 	std::cout << "options: " << std::endl;
-	std::cout << " -d           increase debug level" << std::endl;
-	std::cout << " -o outfile   write the computed flat file to <outfile>" << std::endl;
-	std::cout << " -h, -?        show this help message" << std::endl;
-	std::cout << " -D dark       use <dark> as the bias for flat computation" << std::endl;
+	std::cout << std::endl;
+	std::cout << " -d,--debug               increase debug level"
+		<< std::endl;
+	std::cout << " -o,--outfile=<outfile>   write the computed flat file "
+		"to <outfile>" << std::endl;
+	std::cout << " -h,-?,--help             show this help message"
+		<< std::endl;
+	std::cout << " -D,--dark=<dark>         use <dark> as the bias for "
+		"flat computation" << std::endl;
+	std::cout << std::endl;
 }
+
+static struct option	longopts[] = {
+{ "debug",	no_argument,		NULL,	'd' }, /* 0 */
+{ "outfile",	required_argument,	NULL,	'o' }, /* 0 */
+{ "help",	no_argument,		NULL,	'h' }, /* 0 */
+{ "dark",	required_argument,	NULL,	'D' }, /* 0 */
+{ NULL,		0,			NULL,	 0  }, /* 0 */
+};
 
 /**
  * \brief Main function for makeflat tool 
@@ -40,7 +60,9 @@ int	main(int argc, char *argv[]) {
 	char	*outfilename = NULL;
 	const char	*darkfilename = NULL;
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "do:D:?h")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "do:D:?h",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;

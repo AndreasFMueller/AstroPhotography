@@ -48,4 +48,12 @@ module snowstar {
 	exception IOException {
 		string cause;
 	};
+
+	/**
+ 	 * \brief DeviceException
+	 */
+	exception DeviceException {
+		string cause;
+	};
+
 };

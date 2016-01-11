@@ -11,6 +11,8 @@
 #include <TaskTable.h>
 #include <ImageI.h>
 #include <IceConversions.h>
+#include <AstroUtils.h>
+#include <AstroConfig.h>
 
 namespace snowstar {
 
@@ -47,9 +49,52 @@ std::string	TaskI::imagename(const Ice::Current& /* current */) {
 }
 
 ImagePrx	TaskI::getImage(const Ice::Current& /* current */) {
+	// find out whether the file exists
 	std::string	filename = entry().filename();
+	astro::image::ImageDatabaseDirectory	imagedir;
+	if (!imagedir.isFile(filename)) {
+		NotFound	exception;
+		exception.cause = astro::stringprintf(
+			"image %s not found", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+		throw exception;
+	}
 	//return ImageI::createProxy(filename, current);
 	return NULL;
+}
+
+int	TaskI::imageToRepo(const std::string& reponame,
+		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageToRepo(%s)", reponame.c_str());
+	// first make sure the file really exist
+	std::string	filename = entry().filename();
+	astro::image::ImageDatabaseDirectory	imagedir;
+	if (!imagedir.isFile(filename)) {
+		NotFound	exception;
+		exception.cause = astro::stringprintf(
+			"image %s not found", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+		throw exception;
+	}
+	astro::image::ImagePtr	image = imagedir.getImagePtr(filename);
+
+	// now get the named image repository configuration
+	astro::config::ConfigurationPtr	configuration
+		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(configuration);
+	if (!imagerepos->exists(reponame)) {
+		NotFound	exception;
+		exception.cause
+			= astro::stringprintf("image repo '%s' not found",
+				reponame.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+		throw exception;
+	}
+	astro::project::ImageRepoPtr	repo = imagerepos->repo(reponame);
+
+	// save the image
+	return repo->save(image);
 }
 
 } // namespace snowstar

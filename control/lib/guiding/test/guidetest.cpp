@@ -132,17 +132,16 @@ int	guidetest_main(int argc, char *argv[]) {
 	DeviceLocatorPtr	devicelocator = module->getDeviceLocator();
 
 	// now get the simulator camera
-	CameraPtr	camera
-		= devicelocator->getCamera("camera:simulator/camera");
-	CcdPtr	ccd = camera->getCcd(0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %s",
-		camera->name().name().c_str(),
-		ccd->name().name().c_str());
+	std::string	instrument("SIM");
+	CcdPtr	ccd = devicelocator->getCcd("ccd:simulator/camera/0");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s, ccd: %s",
+		instrument.c_str(), ccd->name().toString().c_str());
 
 	// if the temperature is set, get the cooler and wait for the
 	// chip to cool down
 	if (temperature > 0) {
-		CoolerPtr	cooler = devicelocator->getCooler("cooler:simulator/cooler");
+		CoolerPtr	cooler = devicelocator->getCooler(
+					"cooler:simulator/cooler");
 		cooler->setTemperature(temperature);
 		cooler->setOn(true);
 		cooler->wait(1000);
@@ -166,10 +165,11 @@ int	guidetest_main(int argc, char *argv[]) {
 		rectangle.toString().c_str(), star.toString().c_str());
 
 	// get the guider port
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	GuiderPortPtr	guiderport = devicelocator->getGuiderPort(
+				"guiderport:simulator/guiderport");
 
 	// create a Guider object
-	Guider	guider(camera, ccd, guiderport);
+	Guider	guider(instrument, ccd, guiderport);
 
 	// if we have an image directory configuration, we add the 
 	// callback

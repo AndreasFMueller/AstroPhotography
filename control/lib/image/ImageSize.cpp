@@ -42,6 +42,14 @@ ImageSize::ImageSize(const std::string& sizespec) {
 }
 
 /**
+ * \brief Construct a square size
+ */
+ImageSize::ImageSize(unsigned int width_and_height)
+	: _width(width_and_height), _height(width_and_height),
+	  pixels(width_and_height * width_and_height) {
+}
+
+/**
  * \brief Destructor
  */
 ImageSize::~ImageSize() {
@@ -166,11 +174,11 @@ std::string	ImageSize::toString() const {
 }
 
 ImagePoint      ImageSize::upperright() const {
-	return ImagePoint(_width, _height);
+	return ImagePoint(_width - 1, _height - 1);
 }
 
 ImagePoint      ImageSize::upperleft() const {
-	return ImagePoint(0, _height);
+	return ImagePoint(0, _height - 1);
 }
 
 ImagePoint      ImageSize::lowerleft() const {
@@ -178,7 +186,7 @@ ImagePoint      ImageSize::lowerleft() const {
 }
 
 ImagePoint      ImageSize::lowerright() const {
-	return ImagePoint(_width, 0);
+	return ImagePoint(_width - 1, 0);
 }
 
 ImagePoint	ImageSize::center() const {
@@ -227,6 +235,21 @@ ImagePoint	ImageSize::operator()(const int x, const int y) const {
 ImagePoint	ImageSize::operator()(const ImagePoint& p) const {
 	ImagePoint	result = (*this)(p.x(), p.y());
 	return result;
+}
+
+/**
+ * \brief Find the number of pixels to the border
+ *
+ * This function returns negative values if the point is outside the
+ * range defined by the size.
+ */
+int	ImageSize::borderDistance(const ImagePoint& point) const {
+	int	m, n;
+	n = point.x(); 			m = n;
+	n = _width - 1 - point.x();	if (n < m) { m = n; }
+	n = point.y();			if (n < m) { m = n; }
+	n = _height - 1 - point.y();	if (n < m) { m = n; }
+	return m;
 }
 
 } // namespace image

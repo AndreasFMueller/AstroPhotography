@@ -9,6 +9,7 @@
 #include <AstroFormat.h>
 #include <cstdlib>
 #include "ImageReposTable.h"
+#include <includes.h>
 
 using namespace astro::persistence;
 using namespace astro::project;
@@ -29,6 +30,7 @@ public:
 		: _config(config) { }
 
 	// access to repositories
+	virtual bool	exists(const std::string& name);
 	virtual ImageRepoPtr	repo(const std::string& name);
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory);
@@ -54,6 +56,14 @@ ImageRepoConfigurationPtr	ImageRepoConfiguration::get(
 // repository access
 //////////////////////////////////////////////////////////////////////
 /**
+ * \brief Find out whether a repo exists
+ */
+bool	ImageRepoConfigurationBackend::exists(const std::string& name) {
+	ImageRepoTable	repos(_config->database());
+	return repos.contains(name);
+}
+
+/**
  * \brief get a repository
  */
 ImageRepoPtr	ImageRepoConfigurationBackend::repo(const std::string& name) {
@@ -70,28 +80,33 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 		name.c_str(), directory.c_str());
 
 	// first find out whether the repository already exists
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "test whether repo '%s' exists",
-			name.c_str());
-		repo(name);
+	if (exists(name)) {
 		return;
-	} catch (...) { }
+	}
 
 	// prepare the entry for the database
 	ImageRepoRecord	imagerepoinfo;
+
 	imagerepoinfo.reponame = name;
 	imagerepoinfo.database = directory + std::string("/.astro.db");
 	imagerepoinfo.directory = directory;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using database name %s",
 		imagerepoinfo.database.c_str());
 
-	// create a new repository
-	Database	db = DatabaseFactory::get(imagerepoinfo.database);
-	ImageRepo	imagerepo(name, db, directory, false);
-
 	// add the repository info to the database
 	ImageRepoTable	repos(_config->database());
 	repos.add(imagerepoinfo);
+
+	// find out whether the repository directory exists
+	struct stat	sb;
+	if (0 != stat(imagerepoinfo.database.c_str(), &sb)) {
+		// file already exists, nothing needs to be done
+		return;
+	}
+
+	// create a new repository
+	Database	db = DatabaseFactory::get(imagerepoinfo.database);
+	ImageRepo(name, db, directory, false);
 }
 
 /**

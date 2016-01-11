@@ -121,8 +121,11 @@ ImageMetadata	FITSfile::getAllMetadata() const {
 
 /**
  * \brief Open a FITS file for reading
+ *
+ * \param filename	name of the file to read the image from
  */
-FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception)
+FITSinfileBase::FITSinfileBase(const std::string& filename)
+	throw (FITSexception)
 	: FITSfile(filename, 0, 0, 0) {
 	int	status = 0;
 	if (fits_open_file(&fptr, filename.c_str(), READONLY, &status)) {
@@ -149,7 +152,8 @@ FITSinfileBase::FITSinfileBase(const std::string& filename) throw (FITSexception
 		planes = naxes[2];
 		break;
 	default:
-		throw FITSexception("don't know what to do with image of dimension != 2 or 3");
+		throw FITSexception("don't know what to do with image of "
+			"dimension != 2 or 3");
 	}
 	size = ImageSize(naxes[0], naxes[1]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "planes: %d", planes);

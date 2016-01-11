@@ -36,43 +36,47 @@ namespace imageloop {
 /**
  * \brief Usage of the imageloop program
  */
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -adNF? ] [ -m module ] [ -C cameraid ] [ -c ccdid ] [ -n nimages ] [ -p period ] [ -E targetmean ] [ -e exposuretime ] [ -w width ] [ -h height ] [ -x xoffset ] [ -y yoffset ] [ -L longitude ] [ -l latitude ] [ -o directory ]" << std::endl;
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage: " << std::endl;
+	std::cout << "    " << std::endl;
+	std::cout << p.basename() << " [ options ]" << std::endl;
+	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << "  -d           increase deug level" << std::endl;
-	std::cout << "  -m module    load camera module" << std::endl;
-	std::cout << "  -C cameraid  which camera to use, default 0" << std::endl;
-	std::cout << "  -c ccdid     which ccd to use, default 0" << std::endl;
-	std::cout << "  -n nimages   number of images to retrieve" << std::endl;
-	std::cout << "  -p period    image period" << std::endl;
-	std::cout << "  -w width     width of image rectangle" << std::endl;
-	std::cout << "  -h height    height of image rectangle" << std::endl;
-	std::cout << "  -x xoffset   horizontal offset of image rectangle"
+	std::cout << "  -d,--debug                 increase deug level" << std::endl;
+	std::cout << "  -m,--module=<module>       load camera module" << std::endl;
+	std::cout << "  -C,--camera=<cameraid>     which camera to use, default 0" << std::endl;
+	std::cout << "  -c,--ccd=<ccdid>           which ccd to use, default 0" << std::endl;
+	std::cout << "  -n,--number=<nimages>      number of images to retrieve, 0 means never stop" << std::endl;
+	std::cout << "  -p,--period=<period>       image period" << std::endl;
+	std::cout << "  -w,--width=<width>         width of image rectangle" << std::endl;
+	std::cout << "  -h,--height=<height>       height of image rectangle" << std::endl;
+	std::cout << "  -x,--x-offset=<xoffset>    horizontal offset of image rectangle"
 		<< std::endl;
-	std::cout << "  -y yoffset   vertical offset of image rectangle"
+	std::cout << "  -y,--y-offset=<yoffset>    vertical offset of image rectangle"
 		<< std::endl;
-	std::cout << "  -L longitude logitude of the camera location"
+	std::cout << "  -L,--longitude=<longitude> logitude of the camera location"
 		<< std::endl;
-	std::cout << "  -l latitude  latitude of the camera location"
+	std::cout << "  -l,--latitude=<latitude>   latitude of the camera location"
 		<< std::endl;
-	std::cout << "  -N           take images during the night only"
+	std::cout << "  -N,--night                 take images during the night only"
 		<< std::endl;
-	std::cout << "  -n images    number of images, 0 means never stop"
+	std::cout << "  -o,--outdir=<outdir>       directory where files should be placed"
 		<< std::endl;
-	std::cout << "  -o outdir    directory where files should be placed"
-		<< std::endl;
-	std::cout << "  -t           use timestamps as filenames" << std::endl;
-	std::cout << "  -e time      (initial) exposure time, modified later if target mean set" << std::endl;
-	std::cout << "  -E mean      attempt to vary the exposure time in such a way that" << std::endl;
-	std::cout << "               that the mean pixel value stays close to <mean>" << std::endl;
-	std::cout << "  -M median    attemtp to vary the exposure time in such a way that" << std::endl;
-	std::cout << "               that the median pixel value stays close to the <median>" << std::endl;
-	std::cout << "  -F           stay in the foreground" << std::endl;
-	std::cout << "  -P prog      processing script for individual images, e.g. convert" << std::endl;
-	std::cout << "               FITS to JPEG" << std::endl;
-	std::cout << "  -Q prog      processing script called at the end of a loop, e.g. convert" << std::endl;
-	std::cout << "               image sequence to MPEG movie" << std::endl;
-	std::cout << "  -?           display this help message" << std::endl;
+	std::cout << "  -t,--timestamp             use timestamps as filenames" << std::endl;
+	std::cout << "  -e,--exposure-time=<time>  (initial) exposure time, modified later if target" << std::endl;
+	std::cout << "                             mean set" << std::endl;
+	std::cout << "  -E,--mean=<mean>           attempt to vary the exposure time in such a way" << std::endl;
+	std::cout << "                             that the mean pixel value stays close to <mean>" << std::endl;
+	std::cout << "  -M,--median=<median>       attemtp to vary the exposure time in such a way" << std::endl;
+	std::cout << "                             that the median pixel value stays close to the" << std::endl;
+	std::cout << "                             <median>" << std::endl;
+	std::cout << "  -F,--foreground            stay in the foreground" << std::endl;
+	std::cout << "  -P,--image-callback=<prog> processing script for individual images," << std::endl;
+	std::cout << "                             e.g. convert FITS to JPEG" << std::endl;
+	std::cout << "  -Q,--loop-callback=<prog>  processing script called at the end of a loop," << std::endl;
+	std::cout << "                             e.g. convert image sequence to MPEG movie" << std::endl;
+	std::cout << "  -?,--help                  display this help message" << std::endl;
 }
 
 static unsigned int	nImages = 1;
@@ -240,6 +244,33 @@ void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 	}
 }
 
+static struct option	longopts[] = {
+{ "align",		no_argument,		NULL,	'a' }, /*  0 */
+{ "ccd",		required_argument,	NULL,	'c' }, /*  1 */
+{ "cameraid",		required_argument,	NULL,	'C' }, /*  2 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  3 */
+{ "mean",		required_argument,	NULL,	'E' }, /*  4 */
+{ "exposuretime",	required_argument,	NULL,	'e' }, /*  5 */
+{ "foreground",		no_argument,		NULL,	'F' }, /*  6 */
+{ "height",		required_argument,	NULL,	'h' }, /*  7 */
+{ "longitude",		required_argument,	NULL,	'L' }, /*  8 */
+{ "latitude",		required_argument, 	NULL,	'l' }, /*  9 */
+{ "median",		required_argument,	NULL,	'M' }, /* 10 */
+{ "module",		required_argument,	NULL,	'm' }, /* 11 */
+{ "night",		no_argument,		NULL,	'N' }, /* 12 */
+{ "number",		required_argument,	NULL,	'n' }, /* 13 */
+{ "outdir",		required_argument,	NULL,	'o' }, /* 14 */
+{ "image-callback",	required_argument,	NULL,	'P' }, /* 15 */
+{ "period",		required_argument,	NULL,	'p' }, /* 16 */
+{ "loop-callback",	required_argument,	NULL,	'Q' }, /* 17 */
+{ "timestamp",		no_argument,		NULL,	't' }, /* 18 */
+{ "width",		required_argument,	NULL,	'w' }, /* 19 */
+{ "x-offset",		required_argument,	NULL,	'x' }, /* 20 */
+{ "y-offset",		required_argument,	NULL,	'y' }, /* 21 */
+{ "help",		no_argument,		NULL,	'?' }, /* 22 */
+{ NULL,			0,			NULL,	 0  }  /* 23 */
+};
+
 
 /**
  * \brief Main function for the imageloop program
@@ -248,6 +279,7 @@ int	main(int argc, char *argv[]) {
 	debugtimeprecision = 3;
 	debugthreads = 1;
 	int	c;
+	int	longindex;
 	unsigned int	width = 0;
 	unsigned int	height = 0;
 	int	xoffset = 0;
@@ -258,20 +290,68 @@ int	main(int argc, char *argv[]) {
 	const char	*modulename = "uvc";
 	bool	night = false;
 	bool	daemonize = true;
-	while (EOF != (c = getopt(argc, argv,
-			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:Q:"))) {
+	while (EOF != (c = getopt_long(argc, argv,
+			"adw:x:y:w:h:o:C:c:n:e:E:m:p:t?L:l:NFM:P:Q:",
+			longopts, &longindex))) {
 		switch (c) {
 		case 'a':
 			align = true;
 			break;
+		case 'C':
+			cameraid = atoi(optarg);
+			break;
+		case 'c':
+			ccdid = atoi(optarg);
+			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case '?':
-			usage(argv[0]);
-			return EXIT_SUCCESS;
+		case 'E':
+			targetmean = atof(optarg);
+			break;
+		case 'e':
+			exposuretime = atof(optarg);
+			break;
+		case 'F':
+			daemonize = false;
+			break;
 		case 'h':
 			height = atoi(optarg);
+			break;
+		case 'L':
+			longitude = atof(optarg);
+			break;
+		case 'l':
+			latitude = atof(optarg);
+			break;
+		case 'M':
+			targetmedian = atof(optarg);
+			break;
+		case 'm':
+			modulename = optarg;
+			break;
+		case 'N':
+			night = true;
+			break;
+		case 'n':
+			nImages = atoi(optarg);
+			break;
+		case 'o':
+			outpath = optarg;
+			break;
+		case 'P':
+			imagecallback = CallbackPtr(
+				new ImageProgramCallback(std::string(optarg)));
+			break;
+		case 'p':
+			period = atoi(optarg);
+			break;
+		case 'Q':
+			loopcallback = CallbackPtr(
+				new ImageProgramCallback(std::string(optarg)));
+			break;
+		case 't':
+			timestamped = true;
 			break;
 		case 'w':
 			width = atoi(optarg);
@@ -282,56 +362,9 @@ int	main(int argc, char *argv[]) {
 		case 'y':
 			yoffset = atoi(optarg);
 			break;
-		case 'o':
-			outpath = optarg;
-			break;
-		case 'C':
-			cameraid = atoi(optarg);
-			break;
-		case 'c':
-			ccdid = atoi(optarg);
-			break;
-		case 'n':
-			nImages = atoi(optarg);
-			break;
-		case 'e':
-			exposuretime = atof(optarg);
-			break;
-		case 'm':
-			modulename = optarg;
-			break;
-		case 'E':
-			targetmean = atof(optarg);
-			break;
-		case 'M':
-			targetmedian = atof(optarg);
-			break;
-		case 'p':
-			period = atoi(optarg);
-			break;
-		case 't':
-			timestamped = true;
-			break;
-		case 'l':
-			latitude = atof(optarg);
-			break;
-		case 'L':
-			longitude = atof(optarg);
-			break;
-		case 'N':
-			night = true;
-			break;
-		case 'F':
-			daemonize = false;
-			break;
-		case 'P':
-			imagecallback = CallbackPtr(
-				new ImageProgramCallback(std::string(optarg)));
-			break;
-		case 'Q':
-			loopcallback = CallbackPtr(
-				new ImageProgramCallback(std::string(optarg)));
-			break;
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 	}
 

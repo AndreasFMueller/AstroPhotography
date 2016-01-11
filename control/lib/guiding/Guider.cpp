@@ -12,6 +12,7 @@
 #include <AstroCallback.h>
 #include <AstroUtils.h>
 #include <CalibrationPersistence.h>
+#include <CalibrationStore.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -32,13 +33,17 @@ namespace guiding {
  * to some default values. The default exposure time is 1 and the
  * default frame is the entire CCD area.
  */
-Guider::Guider(CameraPtr camera, CcdPtr ccd, GuiderPortPtr guiderport,
+Guider::Guider(const std::string& instrument,
+	CcdPtr ccd, GuiderPortPtr guiderport,
 	Database database)
-	: _camera(camera), _guiderport(guiderport), _imager(ccd),
+	: _instrument(instrument), _guiderport(guiderport), _imager(ccd),
 	  _database(database) {
 	// default exposure settings
 	exposure().exposuretime(1.);
 	exposure().frame(ccd->getInfo().getFrame());
+
+	// default focallength
+	_focallength = 1;
 
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not optimal
@@ -96,11 +101,12 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-int	Guider::startCalibration(TrackerPtr tracker, double focallength,
-		double pixelsize) {
+int	Guider::startCalibration(TrackerPtr tracker) {
+	double	pixelsize = getPixelsize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
-		"focallength = %f, pixelsize = %f)",
-		tracker->toString().c_str(), focallength, pixelsize);
+		"focallength = %.3fmm, pixelsize = %.2fum)",
+		tracker->toString().c_str(), 1000 * _focallength,
+		1000000 * pixelsize);
 
 	// cleanup any old calibration process
 	calibrationCleanup();
@@ -112,7 +118,7 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength,
 	// running
 	if (calibrationprocess) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"calibration already in progress: %f",
+			"calibration already in progress: %.3f",
 			calibrationProgress());
 		throw std::runtime_error("calibration already in progress");
 	}
@@ -122,16 +128,19 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength,
 		new CalibrationProcess(*this, tracker, _database));
 
 	// start the calibration. This will launch the separate 
-	calibrationprocess->calibrate(focallength, pixelsize);
+	calibrationprocess->calibrate(_focallength, pixelsize);
 
 	// register the new calibration in the database
 	_calibrationid = 0;
 	if (_database) {
 		// prepare data for the calibration recrod
 		Calibration	calibration;
-		calibration.camera = cameraname();
-		calibration.ccdid = ccdid();
+		calibration.instrument = instrument();
+		calibration.ccd = ccdname();
 		calibration.guiderport = guiderportname();
+		calibration.focallength = _focallength;
+		calibration.masPerPixel
+			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
 		time(&calibration.when);
 		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 
@@ -139,8 +148,30 @@ int	Guider::startCalibration(TrackerPtr tracker, double focallength,
 		CalibrationRecord	record(0, calibration);
 		CalibrationTable	calibrationtable(_database);
 		_calibrationid = calibrationtable.add(record);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"saved calibration record id = %d, masPerPixel = %.3f",
+			_calibrationid, calibration.masPerPixel);
 	}
 	return _calibrationid;
+}
+
+void	Guider::saveCalibration(const GuiderCalibration& cal) {
+	if (!_database) {
+		return;
+	}
+	CalibrationStore	calstore(_database);
+	GuiderCalibration	c = calstore.getCalibration(_calibrationid);
+	c.complete = true;
+	for (int i = 0; i < 6; i++) {
+		c.a[i] = cal.a[i];
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update %d, focallength = %.3f",
+		c.focallength);
+	calstore.updateCalibration(_calibrationid, c);
+	for (int i = 0; i < cal.size(); i++) {
+		CalibrationPoint	point = cal[i];
+		calstore.addPoint(_calibrationid, point);
+	}
 }
 
 /**
@@ -217,8 +248,10 @@ void	Guider::callbackImage(ImagePtr image) {
  */
 double	Guider::getPixelsize() {
 	astro::camera::CcdInfo  info = ccd()->getInfo();
-	float	_pixelsize = (info.pixelwidth() + info.pixelheight()) / 2.;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %fum", 1000000 * _pixelsize);
+	float	_pixelsize = (info.pixelwidth() * _exposure.mode().x()
+			+ info.pixelheight() * _exposure.mode().y()) / 2.;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %.2fum",
+		1000000 * _pixelsize);
 	return _pixelsize;
 }
 
@@ -251,7 +284,8 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
-	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval));
+	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval,
+		_database));
 	guiderprocess->start(tracker);
 }
 
@@ -332,10 +366,7 @@ void Guider::lastAction(double& actiontime, Point& offset,
  * \brief Retrieve a descriptor
  */
 GuiderDescriptor	Guider::getDescriptor() const {
-	std::string	cameraname = _camera->name().toString();
-	std::string	guidername = _guiderport->name().toString();
-	int	ccdid = getCcdInfo().getId();
-	return GuiderDescriptor(cameraname, ccdid, guidername);
+	return GuiderDescriptor(instrument(), ccdname(), guiderportname());
 }
 
 } // namespace guiding

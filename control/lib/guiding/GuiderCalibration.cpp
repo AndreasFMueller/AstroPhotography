@@ -38,6 +38,8 @@ std::string	GuiderCalibration::toString() const {
  */
 GuiderCalibration::GuiderCalibration() {
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
+	complete = false;
+	focallength = 0;
 }
 
 /**
@@ -54,6 +56,8 @@ GuiderCalibration::GuiderCalibration(const double coefficients[6]) {
 	for (int i = 0; i < 6; i++) {
 		a[i] = coefficients[i];
 	}
+	complete = false;
+	focallength = 0;
 }
 
 /**
@@ -63,6 +67,8 @@ GuiderCalibration::GuiderCalibration(const float coefficients[6]) {
 	for (int i = 0; i < 6; i++) {
 		a[i] = coefficients[i];
 	}
+	complete = false;
+	focallength = 0;
 }
 
 /**
@@ -141,6 +147,17 @@ std::istream&	operator>>(std::istream& in, GuiderCalibration& cal) {
 	// was successfully read, and can copy it to the target calibration
 	for (int i = 0; i < 6; i++) { cal.a[i] = a[i]; }
 	return in;
+}
+
+/*
+ * \brief Compute guider quality figure of merit
+ *
+ */
+double	GuiderCalibration::quality() const {
+	double	l1 = hypot(a[0], a[3]);
+	double	l2 = hypot(a[1], a[4]);
+	double	cosalpha = (a[0] * a[1] + a[3] * a[4]) / (l1 * l2);
+	return 1 - (cosalpha * cosalpha);
 }
 
 } // namespace guiding

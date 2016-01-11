@@ -80,8 +80,9 @@ private:
 public:
 	unsigned int	getPixels() const { return pixels; }
 	// constructors
-	ImageSize(unsigned int width = 0, unsigned int height = 0);
+	ImageSize(unsigned int width, unsigned int height);
 	ImageSize(const std::string& sizespec);
+	ImageSize(unsigned int width_and_height = 0);
 	virtual ~ImageSize();
 	// comparision
 	bool	operator==(const ImageSize& other) const;
@@ -111,6 +112,8 @@ public:
 	ImagePoint	operator()(const ImagePoint& p) const;
 	// find out whether the rectangle is uninitialized
 	bool	isEmpty() const { return (_width == 0) && (_height == 0); }
+	// border distance
+	int	borderDistance(const ImagePoint& point) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageSize& size);
@@ -167,6 +170,8 @@ public:
 	// subimage
 	ImagePoint	subimage(const ImagePoint& point) const;
 	ImagePoint	subimage(int x, int y) const;
+	// border distance
+	int	borderDistance(const ImagePoint& point) const;
 };
 
 std::ostream&	operator<<(std::ostream& out, const ImageRectangle& rectangle);

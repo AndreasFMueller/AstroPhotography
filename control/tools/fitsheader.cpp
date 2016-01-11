@@ -102,13 +102,43 @@ void	add_header(fitsfile *fits, const char *key, const char *value,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "header '%s' added", key);
 }
 
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename();
+	std::cout << " [ options ] display <file.fits>" << std::endl;
+	std::cout << "    " << p.basename();
+	std::cout << " [ options ] add <file.fits> <key> <value> ..."
+		<< std::endl;
+	std::cout << "    " << p.basename();
+	std::cout << " [ options ] delete <file.fits> <key> <value>"
+		<< std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    -d,--debug       increase debug level" << std::endl;
+	std::cout << "    -h,-?,--help     display this help message" << std::endl;
+}
+
+static struct option	longopts[] = {
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "help",		no_argument,		NULL,	'h' }, /* 1 */
+{ NULL,			0,			NULL,	 0  },
+};
+
 int	main(int argc, char *argv[]) {
 	int	c;
-	while (EOF != (c = getopt(argc, argv, "d")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "d", longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
 	// next argument must be the command

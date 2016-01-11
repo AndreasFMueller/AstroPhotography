@@ -81,8 +81,11 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	_name = stringprintf("sbig:%s/%s", results.usbInfo[usbno].serialNumber,
+	_name = stringprintf("camera:sbig/%s/%s",
+		results.usbInfo[usbno].serialNumber,
 		results.usbInfo[usbno].name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "device name: %s",
+		_name.toString().c_str());
 
 	// open the device
 	OpenDeviceParams	openparams;
@@ -166,7 +169,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		CcdInfo	ccd(ccdname, ccdsize, ccdidcounter++);
 		ccd.pixelwidth(pixelsize(ccdinforesult.readoutInfo[0].pixelWidth));
 		ccd.pixelheight(pixelsize(ccdinforesult.readoutInfo[0].pixelHeight));
-		ccd.setShutter(true);
+		ccd.shutter(true);
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found imageing ccd: %s",
 			ccd.toString().c_str());
@@ -179,7 +182,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 				ccdinforesult.readoutInfo[i].height,
 				ccdinforesult.readoutInfo[i].mode);
 		}
-		ccd.setShutter(true);
+		ccd.shutter(true);
 		ccdinfo.push_back(ccd);
 	}
 
@@ -227,7 +230,7 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		for (int i = 0; i < ccdinforesult.readoutModes; i++) {
 			SbigBinningAdd(ccd, ccdinforesult.readoutInfo[i].mode);
 		}
-		ccd.setShutter(true);
+		ccd.shutter(true);
 		ccdinfo.push_back(ccd);
 	}
 

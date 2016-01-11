@@ -85,7 +85,7 @@ private:
 	TrackingWork&	operator=(const TrackingWork& other);
 public:
 	TrackingWork(Guider& _guider, TrackerPtr _tracker,
-		DrivingWork& driving);
+		DrivingWork& driving, persistence::Database& _database);
 	~TrackingWork();
 
 	void	main(astro::thread::Thread<TrackingWork>& thread);

@@ -11,16 +11,26 @@ module snowstar {
 	 * \brief Task Parameters
 	 */
 	struct TaskParameters {
+		// instrument
+		string	instrument;
+
 		// camera
-		string	camera;
-		int	ccdid;
+		int	cameraIndex;
+		int	ccdIndex;
 
 		// cooler stuff
+		int	coolerIndex;
 		float	ccdtemperature;
 
 		// filterwheel parameters
-		string	filterwheel;
+		int	filterwheelIndex;
 		string	filter;
+
+		// information about the mount
+		int	mountIndex;
+
+		// project
+		string	project;
 
 		// exposure stuff
 		Exposure	exp;
@@ -59,6 +69,12 @@ module snowstar {
 		// where the produced image is storead
 		string		filename;
 		ImageRectangle	frame;
+		// names for the devices
+		string	camera;
+		string	ccd;
+		string	cooler;
+		string	filterwheel;
+		string	mount;
 	};
 
 	/**
@@ -72,6 +88,8 @@ module snowstar {
 		TaskInfo	info();
 		string		imagename();
 		Image*		getImage() throws NotFound;
+		// save an image in a repository
+		int	imageToRepo(string reponame) throws NotFound;
 	};
 
 	/**
@@ -108,12 +126,12 @@ module snowstar {
 		/**
 		 * \brief start the queue
 		 */
-		void	start();
+		void	start() throws BadState;
 
 		/**
 		 * \brief stop the queue
 		 */
-		void	stop();
+		void	stop() throws BadState;
 
 		/**
 		 * \brief submit a new task

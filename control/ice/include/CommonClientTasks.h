@@ -33,6 +33,7 @@ public:
 	void	wait(int timeout = 60);
 	void	available(int timeout = 60);
 };
+typedef std::shared_ptr<CcdTask>	CcdTaskPtr;
 
 /**
  * \brief tasks related to the cooler
@@ -48,6 +49,7 @@ public:
 	void	wait(int timeout = 300);
 	~CoolerTask();
 };
+typedef std::shared_ptr<CoolerTask>	CoolerTaskPtr;
 
 /**
  * \brief Task realted to the focuser
@@ -63,6 +65,7 @@ public:
 	FocuserTask(FocuserPrx& focuser, int position);
 	void	wait(int timeout = 60);
 };
+typedef std::shared_ptr<FocuserTask>	FocuserTaskPtr;
 
 /**
  * \brief Task related to the filterwheel
@@ -78,6 +81,7 @@ public:
 		const std::string& filtername);
 	void	wait(int timeout = 60);
 };
+typedef std::shared_ptr<FilterwheelTask>	FilterwheelTaskPtr;
 
 /**
  * \brief Callback adapter

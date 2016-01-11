@@ -14,7 +14,8 @@ additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
 	FilterwheelConversions.cpp GuiderConversions.cpp TaskConversions.cpp \
 	MountConversions.cpp FocusingConversions.cpp RepositoryConversions.cpp \
 	InstrumentComponentConversions.cpp ImageConversions.cpp \
-	CommonClientTasks.cpp ImageCallbackI.cpp ParameterConversions.cpp
+	CommonClientTasks.cpp ImageCallbackI.cpp ParameterConversions.cpp \
+	IceDiscovery.cpp
 
 if ENABLE_ICE
 

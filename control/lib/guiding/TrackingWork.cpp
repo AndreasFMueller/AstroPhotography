@@ -43,8 +43,8 @@ std::string	toString(const trackinghistoryentry& entry) {
  * corrected even when no tracking is active. 
  */
 TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
-	DrivingWork& driving)
-	: GuidingProcess(_guider, _tracker), _driving(driving) {
+	DrivingWork& driving, persistence::Database& _database)
+	: GuidingProcess(_guider, _tracker, _database), _driving(driving) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
@@ -76,9 +76,10 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// if we have a database, then we should create a new record
 	if (database()) {
 		GuidingRun	guidingrun;
-		guidingrun.camera = guider().cameraname();
-		guidingrun.ccdid = guider().ccdid();
+		guidingrun.instrument = guider().instrument();
+		guidingrun.ccd = guider().ccdname();
 		guidingrun.guiderport = guider().guiderportname();
+		guidingrun.calibrationid = guider().calibrationid();
 		time(&guidingrun.whenstarted);
 
 		// add guiding run record to the database
@@ -210,6 +211,8 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 
 		// if we have a database, add the point to the tracking table
 		if (database()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: store point %s",
+				_last.toString().c_str());
 			// add point to table
 			TrackingPointRecord	tracking(0, _id, _last);
 			TrackingTable	trackingtable(database());
@@ -238,6 +241,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 			Timer::sleep(sleeptime);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: Terminaten signal received");
 }
 
 /**

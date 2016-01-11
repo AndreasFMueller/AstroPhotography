@@ -75,6 +75,19 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	// get an GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
 
+	// get the focallength from the instrument properties
+	try {
+		astro::discover::InstrumentPtr	instrument
+				= astro::discover::InstrumentBackend::get(
+					descriptor.instrumentname);
+		double	focallength
+			= instrument->getDouble("guiderfocallength");
+		guider->focallength(focallength);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' property "
+			"found, using default %f", guider->focallength());
+	}
+
 	// create a GuiderI object
 	Ice::ObjectPtr	guiderptr = new GuiderI(guider, imagedirectory,
 		database);
@@ -120,16 +133,32 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
  */
 Calibration	GuiderFactoryI::getCalibration(int id,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d", id);
 	// use the database to retrieve the complete calibration data
 	Calibration	calibration;
 	try {
 		astro::guiding::CalibrationTable	ct(database);
+		if (!ct.exists(id)) {
+			NotFound	exception;
+			exception.cause = astro::stringprintf("calibration %d does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+			throw exception;
+		}
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
 		calibration.id = r.id();
 		calibration.timeago = converttime(r.when);
-		calibration.guider.cameraname = r.camera;
-		calibration.guider.ccdid = r.ccdid;
-		calibration.guider.guiderportname = r.guiderport;
+		calibration.guider.instrumentname = r.instrument;
+		calibration.guider.ccdIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderCCD, r.ccd);
+		calibration.guider.guiderportIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderPort, r.guiderport);
+		calibration.focallength = r.focallength;
+		calibration.masPerPixel = r.masPerPixel;
+		calibration.complete = (r.complete) ? true : false;
+		calibration.det = r.det;
+		calibration.quality = r.quality;
 		for (int i = 0; i < 6; i++) {
 			calibration.coefficients.push_back(r.a[i]);
 		}
@@ -149,6 +178,18 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
 	}
+}
+
+void	GuiderFactoryI::deleteCalibration(int id,
+			const Ice::Current& /* current */) {
+	astro::guiding::CalibrationStore	store(database);
+	if (!store.contains(id)) {
+		NotFound	exception;
+		exception.cause = astro::stringprintf("calibration %d not found", id);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s", exception.cause.c_str());
+		throw exception;
+	}
+	store.deleteCalibration(id);
 }
 
 /**
@@ -184,6 +225,7 @@ idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
  */
 TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	astro::guiding::TrackingStore	store(database);
 	TrackingHistory	history;
 	history.guiderunid = id;
@@ -192,10 +234,26 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 	try {
 		astro::guiding::GuidingRunTable	gt(database);
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
+		if (!gt.exists(id)) {
+			NotFound	exception;
+			exception.cause = astro::stringprintf("tracking history %d does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+			throw exception;
+		}
 		history.timeago = converttime(r.whenstarted);
-		history.guider.cameraname = r.camera;
-		history.guider.ccdid = r.ccdid;
-		history.guider.guiderportname = r.guiderport;
+		history.calibrationid = r.calibrationid;
+		history.guider.instrumentname = r.instrument;
+		history.guider.ccdIndex = instrumentName2index(r.instrument,
+			InstrumentGuiderCCD, r.ccd);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport= %s", r.guiderport.c_str());
+		history.guider.guiderportIndex
+			= instrumentName2index(r.instrument,
+				InstrumentGuiderPort, r.guiderport);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s/%d/%d",
+			id, history.timeago,
+			history.guider.instrumentname.c_str(),
+			history.guider.ccdIndex,
+			history.guider.guiderportIndex);
 
 		// tracking points
 		astro::guiding::TrackingStore	store(database);
@@ -214,6 +272,18 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
 	}
+}
+
+void	GuiderFactoryI::deleteTrackingHistory(int id,
+		const Ice::Current& /* current */) {
+	astro::guiding::TrackingStore	store(database);
+	if (!store.contains(id)) {
+		NotFound	exception;
+		exception.cause = astro::stringprintf("tracking history %d not found", id);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s", exception.cause.c_str());
+		throw exception;
+	}
+	store.deleteTrackingHistory(id);
 }
 
 } // namespace snowstar

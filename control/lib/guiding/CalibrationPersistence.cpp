@@ -29,9 +29,9 @@ std::string	CalibrationTableAdapter::createstatement() {
 	return std::string(
 	"create table calibration (\n"
 	"    id integer not null,\n"
-	"    camera varchar(128) not null,\n"
-	"    ccdid integer not null,\n"
-	"    guiderport integer not null,\n"
+	"    instrument varchar(32) not null,\n"
+	"    ccd varchar(256) not null,\n"
+	"    guiderport varchar(256) not null,\n"
 	"    whenstarted datettime not null,\n"
 	"    a0 double not null default 0,\n"
 	"    a1 double not null default 0,\n"
@@ -39,6 +39,11 @@ std::string	CalibrationTableAdapter::createstatement() {
 	"    a3 double not null default 0,\n"
 	"    a4 double not null default 0,\n"
 	"    a5 double not null default 0,\n"
+	"    quality double not null default 0,\n"
+	"    det double not null default 0,\n"
+	"    complete int not null default 0,\n"
+	"    focallength double not null default 0,\n"
+	"    masperpixel double not null default 1,\n"
 	"    primary key(id)\n"
 	")\n"
 	);
@@ -46,8 +51,8 @@ std::string	CalibrationTableAdapter::createstatement() {
 
 CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row& row) {
 	Persistent<Calibration>	result(objectid);
-	result.camera = row["camera"]->stringValue();
-	result.ccdid = row["ccdid"]->intValue();
+	result.instrument = row["instrument"]->stringValue();
+	result.ccd = row["ccd"]->stringValue();
 	result.guiderport = row["guiderport"]->stringValue();
 	result.when = row["whenstarted"]->timeValue();
 	result.a[0] = row["a0"]->doubleValue();
@@ -56,14 +61,19 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row
 	result.a[3] = row["a3"]->doubleValue();
 	result.a[4] = row["a4"]->doubleValue();
 	result.a[5] = row["a5"]->doubleValue();
+	result.det = row["det"]->doubleValue();
+	result.quality = row["quality"]->doubleValue();
+	result.complete = row["complete"]->intValue();
+	result.focallength = row["focallength"]->doubleValue();
+	result.masPerPixel = row["masperpixel"]->doubleValue();
 	return result;
 }
 
 UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord& calibration) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
-	spec.insert(Field("camera", factory.get(calibration.camera)));
-	spec.insert(Field("ccdid", factory.get(calibration.ccdid)));
+	spec.insert(Field("instrument", factory.get(calibration.instrument)));
+	spec.insert(Field("ccd", factory.get(calibration.ccd)));
 	spec.insert(Field("guiderport", factory.get(calibration.guiderport)));
 	spec.insert(Field("whenstarted", factory.getTime(calibration.when)));
 	spec.insert(Field("a0", factory.get(calibration.a[0])));
@@ -72,6 +82,11 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 	spec.insert(Field("a3", factory.get(calibration.a[3])));
 	spec.insert(Field("a4", factory.get(calibration.a[4])));
 	spec.insert(Field("a5", factory.get(calibration.a[5])));
+	spec.insert(Field("quality", factory.get(calibration.quality)));
+	spec.insert(Field("det", factory.get(calibration.det)));
+	spec.insert(Field("complete", factory.get(calibration.complete)));
+	spec.insert(Field("focallength", factory.get(calibration.focallength)));
+	spec.insert(Field("masperpixel", factory.get(calibration.masPerPixel)));
 	return spec;
 }
 
@@ -88,11 +103,11 @@ CalibrationTable::CalibrationTable(Database& database)
 std::list<long>	CalibrationTable::selectids(
 	const GuiderDescriptor& guiderdescriptor) {
 	std::string	condition = stringprintf(
-		"camera = '%s' and ccdid = %d and guiderport = '%s' "
+		"instrument = '%s' and ccd = '%s' and guiderport = '%s' "
 		"order by whenstarted",
-		guiderdescriptor.cameraname().c_str(),
-		guiderdescriptor.ccdid(),
-		guiderdescriptor.guiderportname().c_str());
+		guiderdescriptor.instrument().c_str(),
+		guiderdescriptor.ccd().c_str(),
+		guiderdescriptor.guiderport().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition for calibrations: %s",
 		condition.c_str());	
 	return selectids(condition);

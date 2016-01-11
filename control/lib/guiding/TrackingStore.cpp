@@ -30,9 +30,9 @@ std::list<long>	TrackingStore::getTrackings(
 			const GuiderDescriptor& guider) {
 	GuidingRunTable	table(_database);
 	std::ostringstream	out;
-	out << "camera = '" << guider.cameraname() << "' and ";
-	out << "ccdid = " << guider.ccdid() << " and ";
-	out << "guiderport = '" << guider.guiderportname() << "' ";
+	out << "instrument = '" << guider.instrument() << "' and ";
+	out << "ccd = '" << guider.ccd() << "' and ";
+	out << "guiderport = '" << guider.guiderport() << "' ";
 	out << "order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -65,6 +65,30 @@ TrackingHistory	TrackingStore::get(long id) {
 		history.points.push_back(*ptr);
 	}
 	return history;
+}
+
+/**
+ * \brief Delete the tracking history
+ */
+void	TrackingStore::deleteTrackingHistory(long id) {
+	GuidingRunTable	table(_database);
+	if (!table.exists(id)) {
+		return;
+	}
+	table.remove(id);
+	std::string	query(	"delete from tracking "
+				"where guidingrun = ?");
+	persistence::StatementPtr	statement = _database->statement(query);
+        statement->bind(0, (int)id);
+        statement->execute();
+}
+
+/**
+ * \brief Find out whether a tracking history is contained in the table
+ */
+bool	TrackingStore::contains(long id) {
+	GuidingRunTable	table(_database);
+	return table.exists(id);
 }
 
 } // namespace guiding

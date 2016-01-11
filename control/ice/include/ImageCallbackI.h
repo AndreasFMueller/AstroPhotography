@@ -3,6 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _ImageCallbackI_h
+#define _ImageCallbackI_h
+
 #include <image.h>
 #include <Ice/Ice.h>
 
@@ -22,3 +25,5 @@ public:
 };
 
 } // namespace snowstar
+
+#endif /* _ImageCallback_h */

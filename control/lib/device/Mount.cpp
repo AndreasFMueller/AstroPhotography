@@ -4,6 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroDevice.h>
+#include <AstroIO.h>
 #include <stdexcept>
 
 namespace astro {
@@ -79,6 +80,29 @@ Mount::state_type	Mount::string2state(const std::string& s) {
 		return GOTO;
 	}
 	throw std::runtime_error("undefined mount state name");
+}
+
+/**
+ * \brief Add the current position information to the image
+ */
+void	Mount::addPositionMetadata(astro::image::ImageBase& image) {
+	RaDec   position = getRaDec();
+	image.setMetadata(astro::io::FITSKeywords::meta("RACENTR", 
+		position.ra().degrees()));
+	image.setMetadata(astro::io::FITSKeywords::meta("DECCENTR", 
+		position.dec().degrees()));
+	try {
+		AzmAlt	direction = getAzmAlt();
+		image.setMetadata(astro::io::FITSKeywords::meta("TELALT",
+			direction.alt().degrees()));
+		image.setMetadata(astro::io::FITSKeywords::meta("TELAZ",
+			direction.azm().degrees()));
+	} catch (...) {
+	}
+	if (hasParameter("latitude")) {
+		image.setMetadata(astro::io::FITSKeywords::meta("LATITUDE",
+			parameterValueFloat("latitude")));
+	}
 }
 
 } // namespace device

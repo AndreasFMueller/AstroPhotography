@@ -3,6 +3,14 @@
 #
 # (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+
+ICELIBS = @ICELIBS@
+ICELDADD = -L$(top_builddir)/lib -lastro \
+	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
+ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
+	$(top_builddir)/ice/lib/libiceastro.la
+
 if ENABLE_ICE
 
 pkglib_LTLIBRARIES = nice.la
@@ -15,13 +23,6 @@ SRCFILES = NiceDevice.cpp \
 	NiceLocator.cpp NiceCamera.cpp NiceGuiderPort.cpp NiceCcd.cpp \
 	NiceFilterWheel.cpp NiceCooler.cpp NiceAdaptiveOptics.cpp \
 	NiceFocuser.cpp
-
-ICELIBS = @ICELIBS@
-ICELDADD = -L$(top_builddir)/lib -lastro \
-	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
-ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
-ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
-	$(top_builddir)/ice/lib/libiceastro.la
 
 if ENABLE_UNITTESTS
 

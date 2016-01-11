@@ -7,9 +7,9 @@
 if ENABLE_QHY
 
 pkglib_LTLIBRARIES = qhy.la 
-noinst_HEADERS = QhyLocator.h
+noinst_HEADERS = QhyLocator.h QhyUtils.h QhyCamera.h QhyCcd.h QhyCooler.h
 
-SRCFILES = QhyLocator.cpp
+SRCFILES = QhyLocator.cpp QhyUtils.cpp QhyCamera.cpp QhyCcd.cpp QhyCooler.cpp
 
 if ENABLE_UNITTESTS
 
@@ -21,15 +21,15 @@ libqhy_la_LIBADD = ../../lib/libastro.la
 
 noinst_PROGRAMS = qhytests
 qhytests_SOURCES = qhytests.cpp qhytest.cpp
-qhytests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqhy
-qhytests_DEPENDENCIES = ../../lib/libastro.la libqhy.la
+qhytests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqhy -lqhyccd
+qhytests_DEPENDENCIES = ../../lib/libastro.la @QHYLIB@
 
 endif
 
 qhy_la_SOURCES = $(SRCFILES)
 qhy_la_LDFLAGS = -module
 qhy_la_DEPENDENCIES = ../../lib/libastro.la
-qhy_la_LIBADD = ../../lib/libastro.la
+qhy_la_LIBADD = ../../lib/libastro.la @QHYLIB@
 
 endif
 

@@ -24,7 +24,7 @@ bool	decimal = false;
 /**
  * \brief Usage function for the snowmount function
  */
-void	usage(const std::string& progname) {
+static void	usage(const std::string& progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") +  path.basename();
 	std::cout << "Usage:" << std::endl;

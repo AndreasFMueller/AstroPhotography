@@ -8,6 +8,7 @@
 #include <sqlite3.h>
 #include <stdexcept>
 #include <AstroDebug.h>
+#include <includes.h>
 
 namespace astro {
 namespace persistence {
@@ -170,12 +171,26 @@ std::string	Sqlite3Statement::stringColumn(int colno) {
  * \brief Execute a statement
  */
 void	Sqlite3Statement::execute() {
-	int	rc = sqlite3_step(stmt);
-	if ((SQLITE_OK == rc) || (SQLITE_DONE == rc)) {
-		return;
+	int	retry = 0;
+	int	rc;
+	while (retry < 10) {
+		rc = sqlite3_step(stmt);
+		switch (rc) {
+		case SQLITE_OK:
+		case SQLITE_DONE:
+			return;
+		case SQLITE_BUSY:
+			retry++;
+			usleep(10000);
+			break;
+		default:
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"sqlite3_step return code: %d", rc);
+			throw Sqlite3Exception(_backend, "execute query");
+		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqlite3_step return code: %d", rc);
-	throw Sqlite3Exception(_backend, "execute query");
+	// step failed after 10 retries
+	throw Sqlite3Exception(_backend, "execute query: after 10 retries");
 }
 
 Field	Sqlite3Statement::field(int colno) {
@@ -245,6 +260,9 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 		throw std::runtime_error("cannot open/create database");
 	}
 
+	// wait 10 seconds on locked databases
+	sqlite3_busy_timeout(_database, 10000);
+
 	// some pragmas
 	char	*errmesg = NULL;
 	if (sqlite3_exec(_database, "PRAGMA temp_store = MEMORY;", NULL, NULL,
@@ -258,6 +276,13 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 		&errmesg)) {
 		std::string	msg = stringprintf("'PRAGMA foreign_keys = "
 			"ON' failed: %s", errmesg);
+		sqlite3_free(errmesg);
+		throw std::runtime_error(msg);
+	}
+	if (sqlite3_exec(_database, "PRAGMA locking_mode = NORMAL;", NULL, NULL,
+		&errmesg)) {
+		std::string	msg = stringprintf("'PRAGMA locking_mode = "
+			"NORMAL' failed: %s", errmesg);
 		sqlite3_free(errmesg);
 		throw std::runtime_error(msg);
 	}

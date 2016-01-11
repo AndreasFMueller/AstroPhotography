@@ -3,11 +3,22 @@ configuration system:
       -	configuration system should use only one table for all domains
       - configurations should be ICE accessible
 
+Guiding:
+      -	get focal length from instrument
+      - Positionsdaten aus Mount in den Kalibrierdaten speichern
+      -	pixelgrösse und brennweite in tracking history speichern, damit
+	der Fehler in arcsec berechnet werden kann.
+      - Problem beim StarTracker für helle Sterne, die im Laufe der Kalibrierung
+	im Bildfeld auftauchen.
+      - ./snowguide .... calibration crashes (wrong number of rows)
+      - Qualitätskontrolle der kalibrierung
+
 Image:
       - FITS write operation has setPrecious/precious accessors that should
 	be unified
       - Bug in attribute read routines: if headers are in a second hdu, then
 	they are ignored
+      - logic of precious is flawed
 
 URLs:
       - give every component an URL by which it can be identified
@@ -17,3 +28,20 @@ URLs:
 
 Instruments:
       - add instrument implementation to the ICE server
+      -	add properties to instruments, e.g. for focal length of camera and
+	guider
+
+Drivers:
+      - SX driver is rather unstable with the Trius SX-16 camera. There are
+	often timeouts, may be race conditions with the cooler?
+      -	SX driver should never crash the ICE server (which it seems to do in
+	some cases with the Trius SX-16)
+      -	Are the timeouts always set in the USB calls with the SX cameras?
+      - When there is a problem with the SX camera, we should try to reset
+	the camera and retry the operation. It should not be necessary to
+	disconnect and reconnect the camera to reset it.
+
+ICE client/server:
+      - USB Timeout in a driver should always be converted to a decent timeout
+	exception sent back to the client and hopefully handled there
+      -	shutter option für snowtask.cpp

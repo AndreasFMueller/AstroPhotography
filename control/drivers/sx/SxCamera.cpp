@@ -81,22 +81,6 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
 };
 
 /**
- * \brief Auxiliary function to generate the camera name from the deviceptr
- */
-static astro::DeviceName	cameraname(DevicePtr& deviceptr) {
-	DeviceName	modulename("module:sx");
-debug(LOG_DEBUG, DEBUG_LOG, 0, "current unit name: %s",
-		modulename.unitname().c_str());
-	std::string	unitname = sxname(deviceptr);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "appending unit name '%s'", unitname.c_str());
-	DeviceName	cname(modulename, DeviceName::Camera, unitname);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "cname created");
-	std::string	c = (std::string)cname;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera name: %s", c.c_str());
-	return	cname;
-}
-
-/**
  * \brief Create a new Camera from a USB device pointer
  *
  * The constructor has the side effect of claiming the data interface of
@@ -111,7 +95,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "cname created");
  * \param _deviceptr	USB device pointer
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr)
-	: Camera(cameraname(_deviceptr)), deviceptr(_deviceptr) {
+	: Camera(SxName(_deviceptr).cameraname()), deviceptr(_deviceptr) {
 	// the default is to use the 
 	useControlRequests = false;
 
@@ -317,7 +301,11 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd: %s",
 		ccdinfo[ccdindex].toString().c_str());
-	return CcdPtr(new SxCcd(ccdinfo[ccdindex], *this, ccdindex));
+	SxCcd	*ccd = new SxCcd(ccdinfo[ccdindex], *this, ccdindex);
+	if ((product == 0x0126) || (model == 0x0010)) {
+		ccd->needs_read_pixels(true);
+	}
+	return CcdPtr(ccd);
 }
 
 /**
@@ -357,17 +345,22 @@ InterfacePtr	SxCamera::getInterface() {
  * rather reimplement control request handling via the bulk endpoints.
  */
 void	SxCamera::controlRequest(RequestBase *request) {
+	if (request->getTimeout() <= 1000) {
+		request->setTimeout(10000);
+	}
 	if (useControlRequests) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface");
 		deviceptr->controlRequest(request);
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "control request %p on data interface, "
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"control request for command '%s' on data interface, "
 		"request = %02x, requesttype = %02x,  wValue = %04x, "
 		"wIndex = %04x, wLength = %04x",
-		request,
+		command_name(request->bRequest()).c_str(),
 		request->bRequest(), request->bmRequestType(),
 		request->wValue(), request->wIndex(), request->wLength());
+	request->setTimeout(10000);
 
 	// we first analyse whether this is a control request with a
 	// in data phase, because then the packet size to send is just
@@ -387,11 +380,23 @@ void	SxCamera::controlRequest(RequestBase *request) {
 		request->getPacket());
 	BulkTransfer	out(outendpoint, sendlength,
 		(unsigned char *)request->getPacket());
+	out.setTimeout(request->getTimeout());
 	if (0 == receivelength) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
-			request->payloadHex().c_str());
+		if (request->wLength() > 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "request payload:\n%s",
+				request->payloadHex().c_str());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no request payload");
+		}
 	}
-	deviceptr->submit(&out);
+	try {
+		deviceptr->submit(&out);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf(
+			"SX OUT(%d) transfer error: %s", sendlength, x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "OUT transfer complete");
 
 	// if there is no IN data phase, we are done
@@ -402,8 +407,15 @@ void	SxCamera::controlRequest(RequestBase *request) {
 	// optional receive phase of the control request
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing IN transfer");
 	BulkTransfer	in(inendpoint, receivelength, request->payload());
-	in.setTimeout(10000);
-	deviceptr->submit(&in);
+	in.setTimeout(request->getTimeout());
+	try {
+		deviceptr->submit(&in);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf(
+			"SX IN(%d) transfer error: %s", receivelength, x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "IN transfer complete:\n%s",
 		request->payloadHex().c_str());
 }

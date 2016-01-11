@@ -7,6 +7,7 @@
 #include <includes.h>
 #include <AstroIO.h>
 #include <AstroUtils.h>
+#include <AstroFormat.h>
 
 namespace snowstar {
 
@@ -52,15 +53,23 @@ std::string	guiderstate2string(GuiderState state) {
 
 GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	GuiderDescriptor	result;
-	result.cameraname = gd.cameraname();
-	result.ccdid = gd.ccdid();
-	result.guiderportname = gd.guiderportname();
+	result.instrumentname = gd.instrument();
+	result.ccdIndex = instrumentName2index(gd.instrument(),
+				InstrumentGuiderCCD, gd.ccd());
+	result.guiderportIndex = instrumentName2index(gd.instrument(),
+				InstrumentGuiderPort, gd.guiderport());
 	return result;
 }
 
 astro::guiding::GuiderDescriptor        convert(const GuiderDescriptor& gd) {
-	astro::guiding::GuiderDescriptor	result(gd.cameraname,
-					gd.ccdid, gd.guiderportname);
+	// convert ccd index into a name
+	std::string	ccdname = instrumentIndex2name(gd.instrumentname,
+				InstrumentGuiderCCD, gd.ccdIndex);
+	// convert guiderport index into a name
+	std::string	guiderportname = instrumentIndex2name(gd.instrumentname,
+				InstrumentGuiderPort, gd.ccdIndex);
+	astro::guiding::GuiderDescriptor	result(gd.instrumentname,
+					ccdname, guiderportname);
 	return result;
 }
 
@@ -82,9 +91,12 @@ astro::guiding::TrackingPoint   convert(const TrackingPoint& trackingpoint) {
 
 astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 	astro::guiding::TrackingHistory	result;
-	result.camera = history.guider.cameraname;
-	result.ccdid = history.guider.ccdid;
-	result.guiderport = history.guider.guiderportname;
+	result.instrument = history.guider.instrumentname;
+	result.ccd = instrumentIndex2name(result.instrument,
+		InstrumentGuiderCCD, history.guider.ccdIndex);
+	result.guiderport = instrumentIndex2name(result.instrument,
+		InstrumentGuiderPort,
+		history.guider.guiderportIndex);
 	result.whenstarted = converttime(history.timeago);
 	for (auto ptr = history.points.begin(); ptr != history.points.end();
 		ptr++) {
@@ -95,9 +107,11 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 
 TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 	TrackingHistory	result;
-	result.guider.cameraname = history.camera;
-	result.guider.ccdid = history.ccdid;
-	result.guider.guiderportname = history.guiderport;
+	result.guider.instrumentname = history.instrument;
+	result.guider.ccdIndex = instrumentName2index(history.instrument,
+		InstrumentGuiderCCD, history.ccd);
+	result.guider.guiderportIndex = instrumentName2index(history.instrument,
+		InstrumentGuiderPort, history.guiderport);
 	result.timeago = converttime(history.whenstarted);
 	for (auto ptr = history.points.begin(); ptr != history.points.end();
 		ptr++) {

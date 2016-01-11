@@ -58,6 +58,11 @@ TaskInfo	convert(const astro::task::TaskInfo& info) {
 	result.cause = info.cause();
 	result.filename = info.filename();
 	result.frame = snowstar::convert(info.frame());
+	result.camera = info.camera();
+	result.ccd = info.ccd();
+	result.cooler = info.cooler();
+	result.filterwheel = info.filterwheel();
+	result.mount = info.mount();
 	return result;
 }
 
@@ -68,16 +73,25 @@ astro::task::TaskInfo	convert(const TaskInfo& info) {
 	result.cause(info.cause);
 	result.filename(info.filename);
 	result.frame(snowstar::convert(info.frame));
+	result.camera(info.camera);
+	result.ccd(info.ccd);
+	result.cooler(info.cooler);
+	result.filterwheel(info.filterwheel);
+	result.mount(info.mount);
 	return result;
 }
 
 TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	TaskParameters	result;
-	result.camera = parameters.camera();
-	result.ccdid = parameters.ccdid();
+	result.instrument = parameters.instrument();
+	result.cameraIndex = parameters.cameraindex();
+	result.ccdIndex = parameters.ccdindex();
+	result.coolerIndex = parameters.coolerindex();
 	result.ccdtemperature = parameters.ccdtemperature();
-	result.filterwheel = parameters.filterwheel();
+	result.filterwheelIndex = parameters.filterwheelindex();
 	result.filter = parameters.filter();
+	result.mountIndex = parameters.mountindex();
+	result.project = parameters.project();
 	result.exp = convert(parameters.exposure());
 	return result;
 }
@@ -85,11 +99,15 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	astro::task::TaskParameters	result;
 	result.exposure(convert(parameters.exp));
-	result.camera(parameters.camera);
-	result.ccdid(parameters.ccdid);
+	result.instrument(parameters.instrument);
+	result.cameraindex(parameters.cameraIndex);
+	result.ccdindex(parameters.ccdIndex);
+	result.coolerindex(parameters.coolerIndex);
 	result.ccdtemperature(parameters.ccdtemperature);
-	result.filterwheel(parameters.filterwheel);
+	result.filterwheelindex(parameters.filterwheelIndex);
 	result.filter(parameters.filter);
+	result.mountindex(parameters.mountIndex);
+	result.project(parameters.project);
 	return result;
 }
 

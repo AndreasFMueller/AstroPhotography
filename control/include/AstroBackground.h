@@ -381,47 +381,51 @@ typedef std::shared_ptr<BackgroundBase<float> >	BackgroundPtr;
  */
 template<typename Pixel>
 class Background : public BackgroundBase<Pixel> {
-	FunctionPtr	R;
-	FunctionPtr	G;
-	FunctionPtr	B;
+	FunctionPtr	_R;
+	FunctionPtr	_G;
+	FunctionPtr	_B;
+public:
+	FunctionPtr	R() const { return _R; }
+	FunctionPtr	G() const { return _G; }
+	FunctionPtr	B() const { return _B; }
+private:
 	double	r(const Point& point) const {
-		return R->evaluate(point);
+		return _R->evaluate(point);
 	}
 	double	g(const Point& point) const {
-		return G->evaluate(point);
+		return _G->evaluate(point);
 	}
 	double	b(const Point& point) const {
-		return B->evaluate(point);
+		return _B->evaluate(point);
 	}
 public:
 	Background() { }
-	Background(const FunctionPtr _R,
-		const FunctionPtr _G,
-		const FunctionPtr _B) : R(_R), G(_G), B(_B) {
+	Background(const FunctionPtr R, const FunctionPtr G,
+		const FunctionPtr B) : _R(R), _G(G), _B(B) {
 	}
 	virtual bool	gradient() const {
-		return R->gradient();
+		return _R->gradient();
 	}
 	virtual void	gradient(bool gradient) {
-		R->gradient(gradient);
-		G->gradient(gradient);
-		B->gradient(gradient);
+		_R->gradient(gradient);
+		_G->gradient(gradient);
+		_B->gradient(gradient);
 	}
 	virtual bool	symmetric() const {
-		return R->symmetric();
+		return _R->symmetric();
 	}
 	virtual void	symmetric(bool symmetric) {
-		R->symmetric(symmetric);
-		G->symmetric(symmetric);
-		B->symmetric(symmetric);
+		_R->symmetric(symmetric);
+		_G->symmetric(symmetric);
+		_B->symmetric(symmetric);
 	}
 	virtual double	scalefactor() const {
-		return R->scalefactor();
+		return _R->scalefactor();
 	}
 	virtual void	scalefactor(double scalefactor) {
-		R->scalefactor(scalefactor);
-		G->scalefactor(scalefactor);
-		B->scalefactor(scalefactor);
+		_R->scalefactor(scalefactor);
+		_G->scalefactor(scalefactor);
+		_B->scalefactor(scalefactor);
 	}
 	virtual RGB<Pixel>	operator()(const Point& point) const {
 		return RGB<Pixel>((Pixel)r(point), (Pixel)g(point), (Pixel)b(point));
@@ -431,6 +435,27 @@ public:
 	}
 	virtual RGB<Pixel>	operator()(int x, int y) const {
 		return this->operator()(Point(x, y));
+	}
+};
+
+/**
+ * \brief Adapters for the green channel 
+ */
+class BackgroundFunctionAdapter : public ConstImageAdapter<float> {
+	const ConstImageAdapter<float>&	_image;
+	FunctionPtr			_function;
+public:
+	BackgroundFunctionAdapter(const ConstImageAdapter<float>& image,
+		FunctionPtr function)
+		: ConstImageAdapter<float>(image.getSize()), _image(image),
+		  _function(function) {
+	}
+	virtual float	pixel(int x, int y) const {
+		float	v =  _image.pixel(x, y) - (*_function)(x, y);
+		if (v < 0) {
+			return 0;
+		}
+		return v;
 	}
 };
 

@@ -416,6 +416,7 @@ void	Ccd::addTemperatureMetadata(ImageBase& image) {
  * \brief add metadata
  */
 void	Ccd::addMetadata(ImageBase& image) {
+	info.addMetadata(image);
 	this->addExposureMetadata(image);
 	this->addTemperatureMetadata(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding DATE-OBS and UUID");

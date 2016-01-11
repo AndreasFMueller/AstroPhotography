@@ -4,11 +4,13 @@
 AC_PREREQ(2.57)
 AC_REVISION([1.0])
 AC_INIT([astro], [1.0], [andreas.mueller@hsr.ch])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 AC_CONFIG_SRCDIR([include/AstroImage.h])
 AC_CANONICAL_TARGET([])
 AM_INIT_AUTOMAKE([-Wall])
 AC_CONFIG_HEADERS(include/config.h)
+
 
 # some configuration directives
 
@@ -184,7 +186,7 @@ AC_ARG_WITH([slice],
 AC_SUBST(SLICEDIR)
 
 # enable ICE
-AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
+#AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
 
 AC_ARG_ENABLE(ice,
 [AS_HELP_STRING([--enable-ice], [also bulid the ZeroC ICE components])],
@@ -355,6 +357,34 @@ AC_ARG_ENABLE(qhy,
 ],[
 	enable_qhy=no
 ])
+# try various possible locations for the QHY library
+tryqhylibs () {
+	if test -r /usr/local/lib64/libqhyccd.la
+	then
+		QHYLIB=/usr/local/lib64/libqhyccd.la
+		return
+	fi
+	if test -r /usr/local/lib/libqhyccd.la
+	then
+		QHYLIB=/usr/local/lib/libqhyccd.la
+		return
+	fi
+	if test -r /usr/lib64/libqhyccd.la
+	then
+		QHYLIB=/usr/lib64/libqhyccd.la
+		return
+	fi
+	if test -r /usr/lib/libqhyccd.la
+	then
+		QHYLIB=/usr/lib/libqhyccd.la
+		return
+	fi
+}
+if test ${enable_qhy} = yes
+then
+	tryqhylibs
+fi
+AC_SUBST(QHYLIB)
 AM_CONDITIONAL(ENABLE_QHY, test x$enable_qhy = xyes)
 
 ## UNICAP ############################################################
@@ -422,7 +452,8 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
 	lib/test/Makefile
 	ice/Makefile ice/slice/Makefile ice/include/Makefile
-	ice/lib/Makefile ice/client/Makefile ice/server/Makefile
+	ice/lib/Makefile ice/client/Makefile ice/client/guide/Makefile
+	ice/server/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile

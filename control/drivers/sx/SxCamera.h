@@ -17,6 +17,11 @@ namespace astro {
 namespace camera {
 namespace sx {
 
+/**
+ * \brief Starlight Xpress camera class
+ *
+ * The starlight express camera class 
+ */
 class SxCamera : public Camera {
 	DevicePtr	deviceptr;
 	uint16_t	model;

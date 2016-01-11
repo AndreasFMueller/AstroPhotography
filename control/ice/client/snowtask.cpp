@@ -26,7 +26,14 @@ bool	dryrun = false;
 astro::camera::Exposure	exposure;
 std::string	instrumentname;
 std::string	filter;
-double	temperature = 273.15;
+double	temperature = -1;
+int	repeats = 1;
+std::string	project;
+int	cameraIndex = 0;
+int	ccdIndex = 0;
+int	coolerIndex = 0;
+int	filterwheelIndex = 0;
+int	mountIndex = 0;
 
 void	signal_handler(int /* sig */) {
 	completed = true;
@@ -105,9 +112,14 @@ std::string	when(double timeago) {
 int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "listing %d tasks", ids.size());
 	std::set<int>::const_iterator	i;
-	std::cout << "task S size      bin  time  temp purpose filter   when     ";
+	std::cout << "task S size      bin  time  temp purpose ";
 	if (verbose) {
-		std::cout << astro::stringprintf("%-40.40s", "camera");
+		std::cout << "filter   ";
+	}
+	std::cout << "when     instrument ";
+	if (verbose) {
+		std::cout << astro::stringprintf("%-16.16s",
+			"project");
 	}
 	std::cout << "info" << std::endl;
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
@@ -144,17 +156,28 @@ int	common_list(TaskQueuePrx tasks, const std::set<int> ids) {
 		if (l < 0) { l = 0; }
 		std::cout << astro::stringprintf("%5.*f", l,
 				parameters.exp.exposuretime);
-		std::cout << astro::stringprintf(" %5.1f",
-			parameters.ccdtemperature - 273.15);
+		if (parameters.ccdtemperature < 10) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "temperature %f",
+				parameters.ccdtemperature);
+			std::cout << "      ";
+		} else {
+			std::cout << astro::stringprintf(" %5.1f",
+				parameters.ccdtemperature - 273.15);
+		}
 		std::cout << astro::stringprintf(" %-7.7s",
-			astro::camera::Exposure::purpose2string(convert(parameters.exp.purpose)).c_str());
-		std::cout << astro::stringprintf(" %-8.8s",
-			parameters.filter.c_str());
+			astro::camera::Exposure::purpose2string(
+				convert(parameters.exp.purpose)).c_str());
+		if (verbose) {
+			std::cout << astro::stringprintf(" %-8.8s",
+				parameters.filter.c_str());
+		}
 		std::cout << astro::stringprintf(" %-8.8s ",
 			when(info.lastchange).c_str());
+		std::cout << astro::stringprintf("%-10.10s ",
+				parameters.instrument.c_str());
 		if (verbose) {
-			std::cout << astro::stringprintf("%-40.40s",
-				parameters.camera.c_str());
+			std::cout << astro::stringprintf("%-16.16s",
+				parameters.project.c_str());
 		}
 		switch (info.state) {
 		case TskPENDING:
@@ -244,16 +267,26 @@ int	command_list(TaskQueuePrx tasks) {
  * \brief Implementation of the start command
  */
 int	command_start(TaskQueuePrx tasks) {
-	tasks->start();
-	return EXIT_SUCCESS;
+	try {
+		tasks->start();
+		return EXIT_SUCCESS;
+	} catch (const BadState& x) {
+		std::cerr << "bad state: " << x.cause << std::endl;
+		return EXIT_FAILURE;
+	}
 }
 
 /**
  * \brief Implementation of the stop command
  */
 int	command_stop(TaskQueuePrx tasks) {
-	tasks->stop();
-	return EXIT_SUCCESS;
+	try {
+		tasks->stop();
+		return EXIT_SUCCESS;
+	} catch (const BadState& x) {
+		std::cerr << "bad state: " << x.cause << std::endl;
+		return EXIT_FAILURE;
+	}
 }
 
 /**
@@ -328,37 +361,24 @@ int	command_cancel(TaskQueuePrx tasks, std::list<int> ids) {
 /**
  * \brief Implementation of the submit command
  */
-int	command_submit(TaskQueuePrx tasks) {
+int	command_submit(TaskQueuePrx tasks, InstrumentsPrx /* instruments */) {
 	// get the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
-	astro::config::InstrumentConfigurationPtr	instruments
-		= astro::config::InstrumentConfiguration::get(config);
-	astro::config::InstrumentPtr	instrument
-		= instruments->instrument(instrumentname);
 
 	// prepare the parameters 
 	TaskParameters	parameters;
+	parameters.project = project;
+	parameters.instrument = instrumentname;
 
-	// get the device information from the instrument
-	parameters.camera = instrument->component(
-		astro::DeviceName::Camera)->name();
-	parameters.ccdid = instrument->component(
-		astro::DeviceName::Ccd)->unit();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %d",
-		parameters.camera.c_str(), parameters.ccdid);
-
-	// get the temperature from the 
+	// copy the device information
+	parameters.cameraIndex = cameraIndex;
+	parameters.ccdIndex = ccdIndex;
+	parameters.coolerIndex = coolerIndex;
 	parameters.ccdtemperature = temperature;
-
-	// filterwheel parameters
-	parameters.filterwheel = "";
-	try {
-		parameters.filterwheel = instrument->component(
-			astro::DeviceName::Filterwheel)->name();
-	} catch (...) {
-	}
+	parameters.filterwheelIndex = filterwheelIndex;
 	parameters.filter = filter;
+	parameters.mountIndex = mountIndex;
 
 	// exposure parameters
 	parameters.exp = convert(exposure);
@@ -366,8 +386,16 @@ int	command_submit(TaskQueuePrx tasks) {
 		exposure.toString().c_str());
 
 	// everything is ready now, submit the task
-	int	taskid = tasks->submit(parameters);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d", taskid);
+	try {
+		for (int counter = 0; counter < repeats; counter++) {
+			int	taskid = tasks->submit(parameters);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d",
+				taskid);
+		}
+	} catch (const BadParameter& x) {
+		std::cerr << "bad parameter: " << x.cause << std::endl;
+		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -403,9 +431,17 @@ int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 		throw std::runtime_error(msg);
 	}
 	close(fd);
+	return EXIT_SUCCESS;
+}
 
-	throw std::runtime_error("image command not implemented");
-	return EXIT_FAILURE;
+/**
+ * \brief Command to save an image in the remote repo
+ */
+int	command_remoterepo(TaskQueuePrx tasks, int id,
+		const std::string& reponame) {
+	TaskPrx	task = tasks->getTask(id);
+	task->imageToRepo(reponame);
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -447,7 +483,7 @@ int	command_repository(TaskQueuePrx tasks, int id,
 /**
  * \brief Usage function for the snowtask program
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
@@ -458,11 +494,12 @@ void	usage(const char *progname) {
 	std::cout << p << " [ options ] start" << std::endl;
 	std::cout << p << " [ options ] stop" << std::endl;
 	std::cout << p << " [ options ] state" << std::endl;
-	std::cout << p << " [ options ] cancel id ..." << std::endl;
-	std::cout << p << " [ options ] remove id ..." << std::endl;
+	std::cout << p << " [ options ] cancel <id> ..." << std::endl;
+	std::cout << p << " [ options ] remove <id> ..." << std::endl;
 	std::cout << p << " [ options ] submit" << std::endl;
-	std::cout << p << " [ options ] project projectname partno" << std::endl;
-	std::cout << p << " [ options ] image id filename" << std::endl;
+	std::cout << p << " [ options ] project <projectname> <partno>" << std::endl;
+	std::cout << p << " [ options ] image <id> <filename>" << std::endl;
+	std::cout << p << " [ options ] remote <id> <imagerepo>" << std::endl;
 	std::cout << std::endl;
 	std::cout << "possible task states:" << std::endl;
 	std::cout << "    pending    " << std::endl;
@@ -510,14 +547,16 @@ static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' }, /*  2 */
 { "dryrun",	no_argument,		NULL,		'n' }, /*  3 */
 { "exposure",	required_argument,	NULL,		'e' }, /*  4 */
-{ "filter",	required_argument,	NULL,		'f' }, /*  5 */
-{ "help",	no_argument,		NULL,		'h' }, /*  6 */
-{ "instrument",	required_argument,	NULL,		'i' }, /*  7 */
-{ "purpose",	required_argument,	NULL,		'p' }, /*  8 */
-{ "rectangle",	required_argument,	NULL,		'r' }, /*  9 */
-{ "server",	required_argument,	NULL,		's' }, /* 10 */
-{ "temperature",required_argument,	NULL,		't' }, /* 11 */
-{ "verbose",	no_argument,		NULL,		'v' }, /* 12 */
+{ "filter",	required_argument,	NULL,		'F' }, /*  5 */
+{ "frame",	required_argument,	NULL,		'f' }, /*  6 */
+{ "help",	no_argument,		NULL,		'h' }, /*  7 */
+{ "instrument",	required_argument,	NULL,		'i' }, /*  8 */
+{ "purpose",	required_argument,	NULL,		'p' }, /*  9 */
+{ "project",	required_argument,	NULL,		'P' }, /* 10 */
+{ "repeat",	required_argument,	NULL,		'r' }, /* 11 */
+{ "server",	required_argument,	NULL,		's' }, /* 12 */
+{ "temperature",required_argument,	NULL,		't' }, /* 13 */
+{ "verbose",	no_argument,		NULL,		'v' }, /* 14 */
 { NULL,		0,			NULL,		0   }
 };
 
@@ -527,11 +566,12 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	InstrumentsPrx	instruments;
 
 	// parse command line options
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:h?i:p:r:s:t:v",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:F:f:h?i:p:P:r:s:t:v",
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -546,8 +586,11 @@ int	main(int argc, char *argv[]) {
 		case 'e':
 			exposure.exposuretime(std::stod(optarg));
 			break;
-		case 'f':
+		case 'F':
 			filter = optarg;
+			break;
+		case 'f':
+			exposure.frame(astro::image::ImageRectangle(optarg));
 			break;
 		case 'h':
 		case '?':
@@ -555,6 +598,11 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'i':
 			instrumentname = optarg;
+			{
+				Ice::ObjectPrx  base = ic->stringToProxy(
+					servername.connect("Instruments"));
+				instruments = InstrumentsPrx::checkedCast(base);
+			}
 			break;
 		case 'n':
 			dryrun = true;
@@ -564,8 +612,11 @@ int	main(int argc, char *argv[]) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "purpose: %s -> %d",
 				optarg, exposure.purpose());
 			break;
+		case 'P':
+			project = std::string(optarg);
+			break;
 		case 'r':
-			exposure.frame(astro::image::ImageRectangle(optarg));
+			repeats = std::stoi(optarg);
 			break;
 		case 's':
 			servername = astro::ServerName(optarg);
@@ -628,7 +679,7 @@ int	main(int argc, char *argv[]) {
 		return command_cancel(tasks, ids);
 	}
 	if (command == "submit") {
-		return command_submit(tasks);
+		return command_submit(tasks, instruments);
 	}
 	if (command == "image") {
 		if (argc <= optind) {
@@ -640,6 +691,17 @@ int	main(int argc, char *argv[]) {
 		}
 		std::string	filename = argv[optind++];
 		return command_image(tasks, id, filename);
+	}
+	if (command == "remote") {
+		if (argc <= optind) {
+			throw std::runtime_error("no id argument specified");
+		}
+		int	id = std::stoi(argv[optind++]);
+		if (argc <= optind) {
+			throw std::runtime_error("no image file name");
+		}
+		std::string	reponame = argv[optind++];
+		return command_remoterepo(tasks, id, reponame);
 	}
 	if (command == "repository") {
 		if (argc <= optind) {

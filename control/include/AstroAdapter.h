@@ -435,6 +435,25 @@ double	MultiplyAdapter<Pixel>::pixel(int x, int y) const {
 	return result;
 }
 
+/**
+ * \brief Adapter to add a constant
+ */
+template<typename Pixel, typename OffsetType>
+class AddConstantAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	OffsetType	_offset;
+public:
+	AddConstantAdapter(const ConstImageAdapter<Pixel>& image,
+		OffsetType offset)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _offset(offset) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		Pixel	result = _image.pixel(x, y) + _offset;
+		return result;
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Adapter to compute the Laplacian of an image
 //////////////////////////////////////////////////////////////////////
@@ -1559,6 +1578,30 @@ class GaussNoiseAdapter : public NoiseAdapter {
 public:
 	GaussNoiseAdapter(const ImageSize& size, double mu, double sigma,
 		double limit = 1);
+	virtual double	pixel(int x, int y) const;
+};
+
+//////////////////////////////////////////////////////////////////////
+// Weighting adapter
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Adapter that weighs pixels 
+ *
+ * This adapter is used in the StarDetector class. Because the pixels closer
+ * to the border have lower weight, it is less likely that the star detector
+ * jumps to a different star that enters the field, especially during
+ * calibration.
+ */
+class WeightingAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	_image;
+	double	_hvr;
+	ImagePoint	_center;
+public:
+	WeightingAdapter(const ConstImageAdapter<double>& image,
+		const ImagePoint& center, double hvr);
+	WeightingAdapter(const ConstImageAdapter<double>& image, double hvr);
+	WeightingAdapter(const ConstImageAdapter<double>& image,
+		const ImageRectangle& rectangle);
 	virtual double	pixel(int x, int y) const;
 };
 

@@ -30,6 +30,7 @@ static unsigned short	icestar_port() {
 
 static ServiceObject	resolve(const std::string& name) {
 	ServiceDiscoveryPtr	discovery = ServiceDiscovery::get();
+	discovery->start();
 	ServiceKey	key = discovery->waitfor(name);
 	return discovery->find(key);
 }
@@ -99,6 +100,21 @@ bool	ServerName::isDefault() const {
 
 bool	ServerName::isDefaultPort() const {
 	return _port == default_port;
+}
+
+bool	ServerName::operator==(const ServerName& other) const {
+	return (host() == other.host()) && (port() == other.port());
+}
+
+bool	ServerName::operator!=(const ServerName& other) const {
+	return (host() != other.host()) || (port() != other.port());
+}
+
+std::string	ServerName::toString() const {
+	if (default_port != port()) {
+		return stringprintf("%s:%d", host().c_str(), port());
+	}
+	return host();
 }
 
 } // namespace astro

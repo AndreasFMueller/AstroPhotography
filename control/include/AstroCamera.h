@@ -139,7 +139,9 @@ public:
 	void	shutter(Shutter::state s) { _shutter = s; }
 
 	// fields related tot he exposure purpose
-	typedef	enum { light = 0, dark = 1, flat = 2 } purpose_t;
+	typedef	enum {
+		light = 0, dark = 1, flat = 2, bias = 3, test = 4, guide = 5
+	} purpose_t;
 private:
 	purpose_t	_purpose;
 public:

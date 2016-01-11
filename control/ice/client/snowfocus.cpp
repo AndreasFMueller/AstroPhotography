@@ -64,17 +64,20 @@ public:
 /**
  * \brief Usage method
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] start <min> <max>" << std::endl;
-	std::cout << p << " [ options ] monitor" << std::endl;
-	std::cout << p << " [ options ] cancel" << std::endl;
-	std::cout << p << " [ options ] status" << std::endl;
-	std::cout << p << " [ options ] history" << std::endl;
-	std::cout << p << " [ options ] help" << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> start <min> <max>" << std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> monitor"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> cancel"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> status"
+		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> history"
+		<< std::endl;
 
 	std::cout << "start, monitor, cancel or report the status of a "
 		"focusing operation";
@@ -95,8 +98,6 @@ void	usage(const char *progname) {
 	std::cout << "                       no filter wheel";
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
-	std::cout << std::endl;
-	std::cout << " -i,--instrument=<INS> use instrument named INS";
 	std::cout << std::endl;
 	std::cout << " -m,--method=<m>       method to use to estimate focus "
 		"quality: either";
@@ -130,11 +131,10 @@ static struct option	longopts[] = {
 { "exposure",		required_argument,	NULL,	'e' }, /*  3 */
 { "filter",		required_argument,	NULL,	'f' }, /*  4 */
 { "help",		no_argument,		NULL,	'h' }, /*  5 */
-{ "instrument",		required_argument,	NULL,	'i' }, /*  6 */
-{ "method",		required_argument,	NULL,	'm' }, /*  7 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /*  8 */
-{ "steps",		required_argument,	NULL,	's' }, /*  9 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 10 */
+{ "method",		required_argument,	NULL,	'm' }, /*  6 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /*  7 */
+{ "steps",		required_argument,	NULL,	's' }, /*  8 */
+{ "temperature",	required_argument,	NULL,	't' }, /*  9 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -160,8 +160,8 @@ void	handler(int /* sig */) {
  */
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
+	Ice::CommunicatorPtr	ic = cs.get();
 
-	std::string	instrumentname;
 	int	steps = 10;
 	double	exposuretime = 1.0;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
@@ -194,9 +194,6 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'i':
-			instrumentname = optarg;
-			break;
 		case 'm':
 			method = astro::focusing::Focusing::string2method(optarg);
 			break;
@@ -213,15 +210,23 @@ int	main(int argc, char *argv[]) {
 
 	// the next argument is the command
 	if (argc <= optind) {
-		throw std::runtime_error("not enough arguments");
+		throw std::runtime_error("missing service argument");
+	}
+	astro::ServerName	servername(argv[optind++]);
+	if (argc <= optind) {
+		throw std::runtime_error("missing instrument name argument");
+	}
+	std::string	instrumentname(argv[optind++]);
+	if (argc <= optind) {
+		throw std::runtime_error("missing command argument");
 	}
 	std::string	command = argv[optind++];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: %s", command.c_str()); 
-	if (command == "help") {
-		usage(argv[0]);
-		return EXIT_SUCCESS;
-	}
 
+	// get a proxy for the instruments
+	Ice::ObjectPrx	base = ic->stringToProxy(
+				servername.connect("Instruments"));
+	InstrumentsPrx	instruments = InstrumentsPrx::checkedCast(base);
 
 	// get the configuration
 	ConfigurationPtr	config = Configuration::get();
@@ -230,24 +235,29 @@ int	main(int argc, char *argv[]) {
 	if (0 == instrumentname.size()) {
 		throw std::runtime_error("instrument name not set");
 	}
-	RemoteInstrument	instrument(config->database(),
-						instrumentname);
+	RemoteInstrument	instrument(instruments, instrumentname);
+
+	// make sure the server names for focuser and ccd are identical
+	astro::ServerName	targetserver
+					= instrument.servername(InstrumentCCD);
+	if (targetserver != instrument.servername(InstrumentFocuser)) {
+		throw std::runtime_error("ccd and focuser are on different "
+			"servers");
+	}
+
 	// get the device names
-	CcdPrx	ccdprx = instrument.ccd_proxy();
+	CcdPrx	ccdprx = instrument.ccd();
 	std::string	ccdname = ccdprx->getName();
-	FocuserPrx	focuserprx = instrument.focuser_proxy();
+	FocuserPrx	focuserprx = instrument.focuser();
 	std::string	focusername = focuserprx->getName();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s focuser: %s", ccdname.c_str(),
 		focusername.c_str());
 
 	// first get a connection to the server
-	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
-	astro::ServerName	servername
-		= instrument.servername(astro::DeviceName::Ccd);
-	Ice::ObjectPrx	base = ic->stringToProxy(
-				servername.connect("FocusingFactory"));
+	Ice::ObjectPrx	fbase = ic->stringToProxy(
+				targetserver.connect("FocusingFactory"));
 	FocusingFactoryPrx	focusingfactory
-		= FocusingFactoryPrx::checkedCast(base);
+		= FocusingFactoryPrx::checkedCast(fbase);
 
 	// get the focusing interface
 	FocusingPrx	focusing = focusingfactory->get(ccdname, focusername);
@@ -296,8 +306,8 @@ int	main(int argc, char *argv[]) {
 
 	// make sure temperature is set
 	CoolerPrx	cooler;
-	if (instrument.has(DeviceName::Cooler)) {
-		cooler = instrument.cooler_proxy();
+	if (instrument.has(InstrumentCooler)) {
+		cooler = instrument.cooler();
 	}
 	CoolerTask      coolertask(cooler, temperature);
 	coolertask.wait();

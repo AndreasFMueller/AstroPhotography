@@ -56,8 +56,10 @@ Interval	convert(const std::pair<float, float>& interval);
 std::pair<float, float>	convert(const Interval& interval);
 
 // Parameters
-struct ParameterDescription	convert(const astro::device::ParameterDescription& parameter);
-astro::device::ParameterDescription	convert(const struct ParameterDescription& parameter);
+struct ParameterDescription	convert(
+	const astro::device::ParameterDescription& parameter);
+astro::device::ParameterDescription	convert(
+	const struct ParameterDescription& parameter);
 
 // Device conversions
 DeviceNameList  convert(const astro::module::Devices::devicelist& list);
@@ -171,14 +173,42 @@ ImageInfo	convert(const astro::project::ImageEnvelope& envelope);
 astro::project::ImageEnvelope	convert(const ImageInfo& info);
 
 // Instrument related conversions
-InstrumentComponent	convert(const astro::discover::InstrumentComponent& component);
-astro::discover::InstrumentComponent	convert(const struct InstrumentComponent& component);
+InstrumentComponent	convert(
+	const astro::discover::InstrumentComponent& component);
+astro::discover::InstrumentComponent	convert(
+	const struct InstrumentComponent& component);
 
-InstrumentComponentList	convert(const astro::discover::Instrument::ComponentList& list);
-astro::discover::Instrument::ComponentList	convert(const InstrumentComponentList& list);
+InstrumentComponentList	convert(
+	const astro::discover::Instrument::ComponentList& list);
+astro::discover::Instrument::ComponentList	convert(
+	const InstrumentComponentList& list);
 
 InstrumentList	convert(const astro::discover::InstrumentList &list);
-astro::discover::InstrumentList	convertInstrumentList(const InstrumentList& list);
+astro::discover::InstrumentList	convertInstrumentList(
+	const InstrumentList& list);
+
+InstrumentComponentType	name2instrumentcomponent(const std::string& name);
+std::string	instrumentcomponent2name(const InstrumentComponentType type);
+
+InstrumentComponentType	convertInstrumentType(
+	astro::discover::InstrumentComponentKey::Type type);
+astro::discover::InstrumentComponentKey::Type	convertInstrumentType(
+	InstrumentComponentType type);
+
+int	instrumentName2index(const std::string& instrument,
+		const InstrumentComponentType type,
+		const std::string& deviceurl);
+std::string	instrumentIndex2name(const std::string& instrument,
+		const InstrumentComponentType type, int index);
+
+astro::discover::InstrumentProperty	convert(const InstrumentProperty& p);
+InstrumentProperty	convert(const astro::discover::InstrumentProperty& p);
+
+astro::discover::Instrument::PropertyNames	convertPropertyNames(const InstrumentPropertyNames& names);
+InstrumentPropertyNames	convertPropertyNames(const astro::discover::Instrument::PropertyNames& names);
+
+astro::discover::InstrumentPropertyList	convert(const InstrumentPropertyList& properties);
+InstrumentPropertyList	convert(const astro::discover::InstrumentPropertyList& properties);
 
 } // namespace snowstar
 

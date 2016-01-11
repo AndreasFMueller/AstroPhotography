@@ -6,6 +6,8 @@
 #include <SxCcd.h>
 #include <AstroUSB.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 namespace camera {
@@ -46,7 +48,14 @@ void	SxCooler::cmd() {
 		RequestBase::device_recipient,
 		(uint16_t)((cooler_on) ? 1 : 0),
 		(uint8_t)SX_CMD_COOLER, temp);
-	camera.controlRequest(&request);
+	try {
+		camera.controlRequest(&request);
+	} catch (USBError& x) {
+		std::string	msg = stringprintf("%s usb error: %s",
+					name().toString().c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw DeviceTimeout(msg);
+	}
 	actualtemperature = request.data()->temperature / 10.;
 	cooler_on = (request.data()->status) ? true : false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1f",

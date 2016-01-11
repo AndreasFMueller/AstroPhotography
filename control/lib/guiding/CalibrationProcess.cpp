@@ -43,11 +43,16 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
  * \brief Send a calibration point to the callback
  */
 void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send calibration point to callback");
 	if (guider().calibrationcallback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"send calibration point to callback %p",
+			(&*guider().calibrationcallback));
 		astro::callback::CallbackDataPtr	data(
 			new CalibrationPointCallbackData(calpoint));
-		(*guider().calibrationcallback)(data);
+		//(*guider().calibrationcallback)(data);
+		guider().calibrationcallback->operator()(data);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for points");
 	}
 }
 
@@ -55,11 +60,13 @@ void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
  * \brief Send the completed calibration data to the callback
  */
 void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "send guider calibration data");
 	if (guider().calibrationcallback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send guider calibration data");
 		astro::callback::CallbackDataPtr	data(
 			new GuiderCalibrationCallbackData(calibration));
 		(*guider().calibrationcallback)(data);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for calibration");
 	}
 }
 
@@ -174,6 +181,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();
 	//cal.rescale(1. / grid);
+	guider().saveCalibration(cal);
 	guider().calibration(cal);
 
 	// inform the callback that calibration is complete

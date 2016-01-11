@@ -23,6 +23,8 @@ public:
 	std::list<long>	getTrackings(const GuiderDescriptor& guider);
 	std::list<TrackingPointRecord>	getHistory(long id);
 	TrackingHistory	get(long id);
+	void	deleteTrackingHistory(long id);
+	bool	contains(long id);
 };
 
 } // namespace guiding

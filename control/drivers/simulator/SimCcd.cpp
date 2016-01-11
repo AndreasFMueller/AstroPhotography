@@ -35,6 +35,11 @@ SimCcd::SimCcd(const CcdInfo& _info, SimLocator& locator)
  */
 void    SimCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting exposure");
+
+	// find the current position, this ensures that the filter wheel
+	// has settled
+	_locator.filterwheel()->currentPosition();
+
 	// ensure that the guideport ist updated before we start exposing
 	_locator.simguiderport()->update();
 
@@ -66,7 +71,8 @@ Exposure::State	SimCcd::exposureStatus() {
 	}
 	// this exception is mainly thrown to silence the compiler, it should
 	// never happen
-	throw std::runtime_error("illegal state");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown status");
+	throw std::runtime_error("unknown state");
 }
 
 /**
@@ -74,6 +80,7 @@ Exposure::State	SimCcd::exposureStatus() {
  */
 void    SimCcd::cancelExposure() {
 	if (Exposure::idle == state) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
 	state = Exposure::idle;
@@ -90,6 +97,7 @@ void    SimCcd::cancelExposure() {
  */
 bool    SimCcd::wait() {
 	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
 	if (Exposure::exposed == state) {

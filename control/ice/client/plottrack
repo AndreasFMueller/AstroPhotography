@@ -1,0 +1,25 @@
+#! /bin/bash
+#
+# plottrack -- extract a track to a temporary file and plot it using R
+#
+# (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+tmp=/tmp/track$$.csv
+trap "rm -f ${tmp}" 0 1 2 3 15
+
+./snowguide --csv server GUIDESIM history ${1} > ${tmp}
+R --quiet --vanilla >/dev/null 2>/dev/null <<EOF
+pdf("track$$.pdf", 11, 8)
+d <- read.csv("$tmp")
+
+plot(d\$time, d\$offset, t = "l", main = "Tracking offset",
+	xlim = c(0,max(d\$time)), ylim = c(0, max(d\$offset)),
+	xlab = "Time [seconds]", ylab = "Offset [mas]")
+EOF
+
+if type open > /dev/null
+then
+	open track$$.pdf
+else
+	okular track$$.pdf &
+fi

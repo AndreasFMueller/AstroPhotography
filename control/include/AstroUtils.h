@@ -299,6 +299,10 @@ public:
 	bool	isDefault() const;
 	bool	isDefaultPort() const;
 	operator	std::string() const;
+	bool	operator==(const ServerName& other) const;
+	bool	operator!=(const ServerName& other) const;
+
+	std::string	toString() const;
 };
 
 /**

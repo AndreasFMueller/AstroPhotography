@@ -9,11 +9,11 @@
 namespace astro {
 
 void	Size::setup(const Point& lowerleft, const Point& upperright) {
-	_width = upperright.x() - lowerleft.x();
+	_width = upperright.x() - lowerleft.x() + 1;
 	if (_width <= 0) {
 		throw std::runtime_error("negative horizontal size");
 	}
-	_height = upperright.y() - lowerleft.y();
+	_height = upperright.y() - lowerleft.y() + 1;
 	if (_height <= 0) {
 		throw std::runtime_error("negative vertical size");
 	}

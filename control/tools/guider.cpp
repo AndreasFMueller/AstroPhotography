@@ -50,34 +50,56 @@ CallbackDataPtr	NewImageCallback::operator()(CallbackDataPtr data) {
 	return data;
 }
 
-void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ -d ] [ -m drivermodule ] [ -C cameraid ] cmd time { cmd time ... }" << std::endl;
+static void	usage(const char *progname) {
+	Path	p(progname);
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << "    " << p.basename() << " [ options ] cmd time { cmd time ... }" << std::endl;
+	std::cout << std::endl;
 	std::cout << "commands are: R+, R-, D+, D-. They modify the speed of "
 		"the telescope drive," << std::endl;
 	std::cout << "in right ascension and declination for a given time "
 		"in ms." << std::endl;
+	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
-	std::cout << " -d             enable debug mode" << std::endl;
-	std::cout << " -m <modulde>   load driver module named <module>"
+	std::cout << " -d,--debug              enable debug mode" << std::endl;
+	std::cout << " -m,--module=<modulde>   load driver module named <module>"
 		<< std::endl;
-	std::cout << " -C <cameraid>  select camera number <cameraid>"
+	std::cout << " -C,--camera=<cameraid>  select camera number <cameraid>"
 		<< std::endl;
-	std::cout << " -e <time>      exposure time" << std::endl;
-	std::cout << " -k <k>         half side length of square of pixels to include in" << std::endl;
-	std::cout << "                centroid computation" << std::endl;
-	std::cout << " -x <x>         approx. x coordinate of guide star"
+	std::cout << " -e,--exposure=<time>    exposure time" << std::endl;
+	std::cout << " -k,--width=<k>          half side length of square of "
+		"pixels to include in" << std::endl;
+	std::cout << "                         centroid computation"
 		<< std::endl;
-	std::cout << " -y <y>         approx. y coordinate of guide star"
+	std::cout << " -x,--x=<x>              approx. x coordinate of guide "
+		"star" << std::endl;
+	std::cout << " -y,--y=<y>              approx. y coordinate of guide "
+		"star" << std::endl;
+	std::cout << " -r,--radius=<radius>    search radius for guide star"
 		<< std::endl;
-	std::cout << " -r <radius>    search radius for guide star"
-		<< std::endl;
-	std::cout << " -p <path>      path where images should be written"
-		<< std::endl;
+	std::cout << " -p,--path=<path>        path where images should be "
+		"written" << std::endl;
 }
+
+static struct option	longopts[] = {
+{ "debug",	no_argument,		NULL,	'd' }, /* 0 */
+{ "module",	required_argument,	NULL,	'm' }, /* 1 */
+{ "camera",	required_argument,	NULL,	'C' }, /* 2 */
+{ "exposure",	required_argument,	NULL,	'e' }, /* 3 */
+{ "instrument",	required_argument,	NULL,	'i' }, /* 3 */
+{ "width",	required_argument,	NULL,	'k' }, /* 4 */
+{ "x",		required_argument,	NULL,	'x' }, /* 5 */
+{ "y",		required_argument,	NULL,	'y' }, /* 6 */
+{ "radius",	required_argument,	NULL,	'r' }, /* 7 */
+{ "path",	required_argument,	NULL,	'p' }, /* 8 */
+{ NULL,		0,			NULL,	 0  }, /* 9 */
+};
 
 int	main(int argc, char *argv[]) {
 	// parse command line arguments
 	int	c;
+	int	longindex;
 	unsigned int	cameraid = 0;
 	unsigned int	ccdid = 0;
 	const char	*modulename = "uvc";
@@ -87,7 +109,9 @@ int	main(int argc, char *argv[]) {
 	int	y = -1;
 	int	r = 32;
 	const char	*path = NULL;
-	while (EOF != (c = getopt(argc, argv, "dm:C:c:e:k:x:y:r:p:")))
+	std::string	instrument;
+	while (EOF != (c = getopt_long(argc, argv, "dm:C:c:e:i:k:x:y:r:p:h?",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -104,6 +128,9 @@ int	main(int argc, char *argv[]) {
 		case 'e':
 			exposuretime = atof(optarg);
 			break;
+		case 'i':
+			instrument = std::string(optarg);
+			break;
 		case 'k':
 			k = atoi(optarg);
 			break;
@@ -119,6 +146,10 @@ int	main(int argc, char *argv[]) {
 		case 'p':
 			path = optarg;
 			break;
+		case 'h':
+		case '?':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		default:
 			usage(argv[0]);
 			return EXIT_FAILURE;
@@ -182,7 +213,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// create a guider
-	Guider	guider(camera, ccd, guiderport);
+	Guider	guider(instrument, ccd, guiderport);
 
 	// if the path is set, we also install a callback
 	if (path) {

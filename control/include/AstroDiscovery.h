@@ -260,13 +260,15 @@ class Instrument;
 class	InstrumentComponentKey {
 public:
 	typedef enum { 
-		CCD = 0,
-		GuiderCCD = 1,
-		Cooler = 2,
-		GuiderPort = 3,
-		Focuser = 4,
-		AdaptiveOptics = 5,
-		FilterWheel = 6
+		AdaptiveOptics = 0,
+		Camera = 1,
+		CCD = 2,
+		Cooler = 3,
+		GuiderCCD = 4,
+		GuiderPort = 5,
+		FilterWheel = 6,
+		Focuser = 7,
+		Mount = 8
 	} Type;
 	std::string	_name;
 	Type	_type;
@@ -279,6 +281,9 @@ public:
 	Type	type() const { return _type; }
 	Type&	type() { return _type; }
 	void	type(Type t) { _type = t; }
+
+	static std::string	type2string(Type t);
+	static Type	string2type(const std::string& tn);
 
 	int	index() const { return _index; }
 	int&	index() { return _index; }
@@ -320,7 +325,29 @@ public:
 		const std::string& servicename, const std::string& deviceurl);
 	InstrumentComponent(const InstrumentComponentKey& key,
 		const std::string& servicename, const std::string& deviceurl);
+	std::string	toString() const;
 };
+
+/**
+ * \brief Instrument Property 
+ */
+class InstrumentProperty {
+	std::string	_instrument;
+	std::string	_property;
+	std::string	_value;
+	std::string	_description;
+public:
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i) { _instrument = i; }
+	const std::string&	property() const { return _property; }
+	void	property(const std::string& p) { _property = p; }
+	const std::string&	value() const { return _value; }
+	void	value(const std::string& v) { _value = v; }
+	const std::string&	description() const { return _description; }
+	void	description(const std::string& d) { _description = d; }
+	std::string	toString() const;
+};
+typedef std::list<InstrumentProperty>	InstrumentPropertyList;
 
 class Instrument;
 typedef std::shared_ptr<Instrument>	InstrumentPtr;
@@ -337,9 +364,12 @@ private:
 			InstrumentComponent::Type type);
 public:
 	// get a component
-	virtual InstrumentComponent	get(InstrumentComponent::Type type, int index) = 0;
+	virtual InstrumentComponent	get(InstrumentComponent::Type type,
+						int index) = 0;
 
 	virtual int	nComponentsOfType(InstrumentComponentKey::Type type) = 0;
+	virtual int	indexOf(InstrumentComponentKey::Type type,
+				const std::string& deviceurl) = 0;
 	virtual int	add(const InstrumentComponent& component) = 0;
 	virtual void	update(const InstrumentComponent& component) = 0;
 	virtual void	remove(InstrumentComponentKey::Type type, int index) = 0;
@@ -347,6 +377,19 @@ public:
 	ComponentList	list(InstrumentComponentKey::Type type);
 	ComponentList	list();
 
+	// get properties
+	virtual int	addProperty(const InstrumentProperty& property) = 0;
+	virtual InstrumentProperty	getProperty(const std::string& property) = 0;
+	virtual void	updateProperty(const InstrumentProperty& property) = 0;
+	virtual void	removeProperty(const std::string& property) = 0;
+	typedef std::list<std::string>	PropertyNames;
+	virtual PropertyNames	getPropertyNames() = 0;
+	virtual InstrumentPropertyList	getProperties() = 0;
+
+	// simplified property value access
+	int	getInt(const std::string& name);
+	double	getDouble(const std::string& name);
+	std::string	getString(const std::string& name);
 };
 
 class InstrumentList : public std::list<std::string> {
@@ -365,6 +408,7 @@ public:
 	// static methods to get information about available 
 	static InstrumentList	names();
 	static InstrumentPtr	get(const std::string& name);
+	static bool	has(const std::string& name);
 	static void	remove(const std::string& name);
 };
 

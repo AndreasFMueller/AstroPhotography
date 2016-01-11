@@ -39,6 +39,7 @@ libastrousb_la_SOURCES = 						\
 	USBRawDescriptors.cpp						\
 	USBRequests.cpp							\
 	USBTransfer.cpp							\
+	DeviceNameUSB.cpp						\
 	$(uvc_files)
 
 libastrousb_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

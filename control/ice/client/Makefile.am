@@ -3,11 +3,7 @@
 #
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
-if ENABLE_ICE
-
-bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount snowrepo \
-	snowtask snowproject snowinstrument
-noinst_PROGRAMS = snowflake 
+SUBDIRS = guide 
 
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
@@ -15,6 +11,12 @@ ICELIBS = @ICELIBS@
 ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
 ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+
+if ENABLE_ICE
+
+bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
+	snowtask snowproject snowinstrument
+noinst_PROGRAMS = snowflake 
 
 snowflake_SOURCES = snowflake.cpp
 snowflake_DEPENDENCIES = $(ICEDEPENDENCIES)
@@ -40,11 +42,6 @@ snowmount_SOURCES = snowmount.cpp
 snowmount_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowmount_LDADD = $(ICELDADD)
 snowmount_CPPFLAGS = $(ICECPPFLAGS)
-
-snowguide_SOURCES = snowguide.cpp
-snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
-snowguide_LDADD = $(ICELDADD)
-snowguide_CPPFLAGS = $(ICECPPFLAGS)
 
 snowrepo_SOURCES = snowrepo.cpp RepoReplicators.cpp
 snowrepo_DEPENDENCIES = $(ICEDEPENDENCIES)

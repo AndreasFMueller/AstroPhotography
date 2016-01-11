@@ -38,16 +38,30 @@ public:
 	}
 
 private:
-	std::string	_camera;
+	int	_cameraindex;
+	int	_ccdindex;
+	int	_coolerindex;
+	int	_filterwheelindex;
+	int	_mountindex;
 public:
-	const std::string&	camera() const { return _camera; }
-	void	camera(const std::string& camera) { _camera = camera; }
+	int	cameraindex() const { return _cameraindex; }
+	void	cameraindex(int i) { _cameraindex = i; }
+	int	ccdindex() const { return _ccdindex; }
+	void	ccdindex(int i) { _ccdindex = i; }
+	int	coolerindex() const { return _coolerindex; }
+	void	coolerindex(int i) { _coolerindex = i; }
+	int	filterwheelindex() const { return _filterwheelindex; }
+	void	filterwheelindex(int i) { _filterwheelindex = i; }
+	int	mountindex() const { return _mountindex; }
+	void	mountindex(int i) { _mountindex = i; }
 
 private:
-	long	_ccdid;
+	std::string	_instrument;
 public:
-	long	ccdid() const { return _ccdid; }
-	void	ccdid(long ccdid) { _ccdid = ccdid; }
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& instrument) {
+		_instrument = instrument;
+	}
 
 private:
 	float	_ccdtemperature;
@@ -58,18 +72,16 @@ public:
 	}
 
 private:
-	std::string	_filterwheel;
-public:
-	const std::string&	filterwheel() const { return _filterwheel; }
-	void	filterwheel(const std::string& filterwheel) {
-			_filterwheel = filterwheel;
-	}
-
-private:
 	std::string	_filter;
 public:
-	std::string	filter() const { return _filter; }
-	void	filter(std::string filter) { _filter = filter; }
+	const std::string&	filter() const { return _filter; }
+	void	filter(const std::string filter) { _filter = filter; }
+
+private:
+	std::string	_project;
+public:
+	const std::string&	project() const { return _project; }
+	void	project(const std::string& p) { _project = p; }
 
 	TaskParameters();
 };
@@ -107,6 +119,26 @@ public:
 	void	cause(const std::string& c) { _cause = c; }
 
 private:
+	std::string	_camera;
+	std::string	_ccd;
+	std::string	_cooler;
+	std::string	_filterwheel;
+	std::string	_mount;
+public:
+	const std::string&	camera() const { return _camera; }
+	void	camera(const std::string& camera) { _camera = camera; }
+	const std::string&	ccd() const { return _ccd; }
+	void	ccd(const std::string& ccd) { _ccd = ccd; }
+	const std::string&	cooler() const { return _cooler; }
+	void	cooler(const std::string& cooler) { _cooler = cooler; }
+	const std::string&	filterwheel() const { return _filterwheel; }
+	void	filterwheel(const std::string& filterwheel) {
+			_filterwheel = filterwheel;
+	}
+	const std::string&	mount() const { return _mount; }
+	void	mount(const std::string& mount) { _mount = mount; }
+
+private:
 	std::string	_filename;
 public:
 	const std::string& filename() const { return _filename; }
@@ -125,6 +157,8 @@ public:
 	void	size(const astro::image::ImageSize& s) { _frame.setSize(s); }
 
 	TaskInfo(taskid_t id);
+
+	std::string	toString() const;
 };
 
 class TaskMonitorInfo;
@@ -185,7 +219,7 @@ class TaskQueue {
 public:
 	// the task queue implements the following state diagram
 	//
-	//      +------+                              +-----------+
+	//      +------+           start()            +-----------+
 	// ---> | idle | -----start_work_thread-----> | launching |
 	//      +------+        [ restart() ]         +-----------+
 	//         ^                              ^    |         ^
@@ -215,6 +249,15 @@ private:
 	state_type	_state;
 public:
 	const state_type&	state() const { return _state; }
+
+public:
+	// public interface to change the state of the queue
+	void	start();		// start queue processing
+	void	stop();			// stop launching new executors
+	void	shutdown();		// shutdown the queue
+	void	wait();			// wait for alle executors to terminate
+	void	cancel();		// cancel all active executors
+
 private:
 	// the idqueue contains the task ids of the task executors that
 	// need a status update
@@ -244,28 +287,31 @@ private:
 	void	update(taskid_t queueid);
 	void	cleanup(taskid_t queueid);
 	bool	blocks(const TaskQueueEntry& entry);
-public:
+
+private:
 	void	post(taskid_t queueid);	// signal state change for queueid
+	friend class TaskExecutor;	// this allows the task executor to post
+					// state changes to the queue
 	bool	running(taskid_t queueid);
 
-	// start and stop queue processing
-	void	start();		// start queue processing
-	void	stop();			// stop launching new executors
-	void	cancel();		// cancel all active executors
+	// private interface to the task queue
 	void	wait(taskid_t queueid);	// wait for an executor to terminate
-	void	wait();			// wait for alle executors to terminate
-	void	shutdown();		// shutdown the queue
-	void	restart(state_type newstate = stopped);		// restart the queue
+	void	restart(state_type newstate = stopped);	 // restart the queue
+
+public:
 	void	remove(taskid_t queueid);
 	void	cancel(taskid_t queueid);
 
 	// submit a new task entry
-	taskid_t	submit(const TaskParameters& parameters);
+	taskid_t	submit(const TaskParameters& parameters,
+				const TaskInfo& info);
 
 	// information about the queue content
 	taskid_t	nexecutors() const { return executors.size(); }
+private:
 	TaskExecutorPtr	executor(taskid_t queueid);
 	TaskQueueEntry	entry(taskid_t queueid);
+public:
 	TaskInfo	info(taskid_t queueid);
 	TaskParameters	parameters(taskid_t queueid);
 

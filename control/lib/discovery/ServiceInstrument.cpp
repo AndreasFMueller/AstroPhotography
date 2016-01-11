@@ -7,7 +7,9 @@
 #include <AstroPersistence.h>
 #include <AstroConfig.h>
 #include <AstroDebug.h>
+#include <AstroFormat.h>
 #include <InstrumentComponentTable.h>
+#include <InstrumentPropertyTable.h>
 
 namespace astro {
 namespace discover {
@@ -32,14 +34,28 @@ void	Instrument::add(std::list<InstrumentComponent>& l,
  */
 std::list<InstrumentComponent>	Instrument::list() {
 	std::list<InstrumentComponent>	result;
-	add(result, InstrumentComponent::CCD);
-	add(result, InstrumentComponent::GuiderCCD);
-	add(result, InstrumentComponent::Cooler);
-	add(result, InstrumentComponent::GuiderPort);
-	add(result, InstrumentComponent::Focuser);
 	add(result, InstrumentComponent::AdaptiveOptics);
+	add(result, InstrumentComponent::Camera);
+	add(result, InstrumentComponent::CCD);
+	add(result, InstrumentComponent::Cooler);
+	add(result, InstrumentComponent::GuiderCCD);
+	add(result, InstrumentComponent::GuiderPort);
 	add(result, InstrumentComponent::FilterWheel);
+	add(result, InstrumentComponent::Focuser);
+	add(result, InstrumentComponent::Mount);
 	return result;
+}
+
+int	Instrument::getInt(const std::string& name) {
+	return std::stoi(getProperty(name).value());
+}
+
+double	Instrument::getDouble(const std::string& name) {
+	return std::stod(getProperty(name).value());
+}
+
+std::string	Instrument::getString(const std::string& name) {
+	return getProperty(name).value();
 }
 
 /**
@@ -57,21 +73,26 @@ std::list<InstrumentComponent>	Instrument::list(InstrumentComponent::Type type) 
 class InstrumentBackendImpl {
 	// shared database connection
 	static astro::persistence::Database	database;
-	static InstrumentComponentTablePtr	table;
+	static InstrumentComponentTablePtr	components;
+	static InstrumentPropertyTablePtr	properties;
 	static void	setup() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setup of with default db");
 		astro::config::ConfigurationPtr	config
 			= astro::config::Configuration::get();
 		database = config->database();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "create table");
-		table = InstrumentComponentTablePtr(
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get handle to table");
+		components = InstrumentComponentTablePtr(
 				new InstrumentComponentTable(database));
+		properties = InstrumentPropertyTablePtr(
+				new InstrumentPropertyTable(database));
 	}
 	static void	setupdb(Database db) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "setup with separate db");
 		database = db;
-		table = InstrumentComponentTablePtr(
+		components = InstrumentComponentTablePtr(
 				new InstrumentComponentTable(database));
+		properties = InstrumentPropertyTablePtr(
+				new InstrumentPropertyTable(database));
 	}
 	static std::once_flag	ready;
 public:
@@ -81,11 +102,13 @@ public:
 	InstrumentBackendImpl(persistence::Database database) {
 		std::call_once(ready, setupdb, database);
 	}
+	// instrument component methods
 	long	idfromkey(const InstrumentComponentKey& key);
 	long	idfromkey(const std::string& name,
 			InstrumentComponent::Type type, int index);
 	int	nComponentsOfType(const std::string& name,
 			InstrumentComponent::Type type);
+	bool	has(const std::string& instrumentname);
 	int	add(const InstrumentComponent& component);
 	void	update(const InstrumentComponent& component);
 	void	remove(const std::string& name,
@@ -96,10 +119,27 @@ public:
 	InstrumentPtr	get(const std::string& name);
 	InstrumentComponent	get(const std::string& name, 
 			InstrumentComponent::Type type, int index);
+	int	indexOf(const std::string& instrumentname,
+			InstrumentComponent::Type type,
+			const std::string& devicename);
+	// property methods
+private:
+	long	propertyid(const std::string& instrumentname,
+				const std::string& property);
+public:
+	long	addProperty(const InstrumentProperty& property);
+	InstrumentProperty	getProperty(const std::string& instrumentname,
+				const std::string& property);
+	void	removeProperty(const std::string& instrumentname,
+				const std::string& property);
+	void	updateProperty(const InstrumentProperty& property);
+	Instrument::PropertyNames	getPropertyNames(const std::string& instrumentname);
+	InstrumentPropertyList	getProperties(const std::string& instrumentname);
 };
 
 astro::persistence::Database	InstrumentBackendImpl::database;
-InstrumentComponentTablePtr	InstrumentBackendImpl::table;
+InstrumentComponentTablePtr	InstrumentBackendImpl::components;
+InstrumentPropertyTablePtr	InstrumentBackendImpl::properties;
 std::once_flag	InstrumentBackendImpl::ready;
 
 /**
@@ -124,7 +164,7 @@ int	InstrumentBackendImpl::add(const InstrumentComponent& component) {
 	InstrumentComponentRecord	record(component);
 	record.name(component.name());
 	record.index(nComponentsOfType(component.name(), component.type()));
-	long	id = table->add(record);
+	long	id = components->add(record);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new entry with id = %ld", id);
 	return record.index();;
 }
@@ -136,7 +176,7 @@ void	InstrumentBackendImpl::update(const InstrumentComponent& component) {
 	long	objectid = idfromkey(component.name(), component.type(),
 				component.index());
 	InstrumentComponentInfo	info(component);
-	table->update(objectid, info);
+	components->update(objectid, info);
 }
 
 /**
@@ -148,7 +188,7 @@ void	InstrumentBackendImpl::remove(const std::string& name,
 
 	// remove the component
 	long	objectid = idfromkey(name, type, index);
-	table->remove(objectid);
+	components->remove(objectid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "object %d with index=%d removed",
 		objectid, index);
 
@@ -168,10 +208,18 @@ void	InstrumentBackendImpl::remove(const std::string& name,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "renumber comleted");
 }
 
+/**
+ * \brief Remove an instrument
+ */
 void	InstrumentBackendImpl::remove(const std::string& name) {
 	std::string	query(	"delete from instrumentcomponents "
 				"where name = ?");
 	StatementPtr	statement = database->statement(query);
+	statement->bind(0, name);
+	statement->execute();
+	query = std::string(	"delete from instrumentproperties "
+				"where instrument = ?");
+	statement = database->statement(query);
 	statement->bind(0, name);
 	statement->execute();
 }
@@ -183,7 +231,9 @@ std::list<std::string>	InstrumentBackendImpl::names() {
 	std::list<std::string>	result;
 	std::string	query(	"select distinct name "
 				"from instrumentcomponents "
-				"order by 1 asc;");
+				"union "
+				"select distinct instrument "
+				"from instrumentproperties");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name query: %s", query.c_str());
 	astro::persistence::Result	r = database->query(query);
 	astro::persistence::Result::iterator	i;
@@ -194,6 +244,19 @@ std::list<std::string>	InstrumentBackendImpl::names() {
 		result.push_back(nm);
 	}
 	return result;
+}
+
+/**
+ * \brief find out whether we have an instrument of this name in the database
+ */
+bool	InstrumentBackendImpl::has(const std::string& name) {
+	std::string	query(	"select count(*) "
+				"from instrumentcomponents "
+				"where name = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, name);
+	Result	res = statement->result();
+	return (std::stoi(res.front()[0]->stringValue()) > 0) ? true : false;
 }
 
 /**
@@ -208,6 +271,10 @@ long	InstrumentBackendImpl::idfromkey(const InstrumentComponentKey& key) {
  */
 long	InstrumentBackendImpl::idfromkey(const std::string& name,
 		InstrumentComponent::Type type, int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"request instrument %s, type=%d(%s), index=%d",
+		name.c_str(), type,
+		InstrumentComponentKey::type2string(type).c_str(), index);
 	std::string	query(	"select id "
 				"from instrumentcomponents "
 				"where name = ? "
@@ -218,13 +285,15 @@ long	InstrumentBackendImpl::idfromkey(const std::string& name,
 	statement->bind(1, type);
 	statement->bind(2, index);
 	Result	res = statement->result();
-	long	objectid = res.front()[0]->intValue();
-	if (objectid < 0) {
+	if (res.size() == 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "instrument %s: no matching "
-			"component type=%d, index=%d",
-			name.c_str(), type, index);
+			"component type=%d(%s), index=%d",
+			name.c_str(), type,
+			InstrumentComponentKey::type2string(type).c_str(),
+			index);
 		throw std::runtime_error("no matching instrument component");
 	}
+	long	objectid = res.front()[0]->intValue();
 	return objectid;
 }
 
@@ -233,11 +302,177 @@ long	InstrumentBackendImpl::idfromkey(const std::string& name,
  */
 InstrumentComponent	InstrumentBackendImpl::get(const std::string& name, 
 				InstrumentComponent::Type type, int index) {
-	long	i = idfromkey(name, type, index);
-	InstrumentComponentInfo	info = table->byid(i);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"try to get instrument %s, component=%d(%s), index=%d", 
+		name.c_str(), type,
+		InstrumentComponentKey::type2string(type).c_str(), index);
+	long	i;
+	try {
+		i = idfromkey(name, type, index);
+	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "exception");
+		throw;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "id = %d", i);
+	InstrumentComponentInfo	info = components->byid(i);
 	InstrumentComponent	component(info, info.servicename(),
 					info.deviceurl());
 	return component;
+}
+
+/**
+ * \brief Find the index of an instrument component by name
+ */
+int	InstrumentBackendImpl::indexOf(const std::string& instrumentname,
+			InstrumentComponent::Type type,
+			const std::string& deviceurl) {
+	int	index;
+	std::string	query(	"select idx "
+				"from instrumentcomponents "
+				"where name = ? "
+				"  and type = ? "
+				"  and deviceurl = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	statement->bind(1, type);
+	statement->bind(2, deviceurl);
+	Result	res = statement->result();
+	if (0 == res.size()) {
+		std::string	cause = stringprintf("no instrument='%s' "
+			"component='%s(%d)' deviceurl='%s'",
+			instrumentname.c_str(),
+			InstrumentComponentKey::type2string(type).c_str(),
+			type, deviceurl.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	index = res.front()[0]->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"instrumentcomponent %s/%s(%d)/%s has index %d",
+		instrumentname.c_str(),
+		InstrumentComponentKey::type2string(type).c_str(), type,
+		deviceurl.c_str(), index);
+	return index;
+}
+
+/**
+ * \brief Add a property to the database
+ */
+long	InstrumentBackendImpl::addProperty(const InstrumentProperty& property) {
+	InstrumentPropertyRecord	record(property);
+	long	id = properties->add(record);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new property with id = %ld", id);
+	return id;
+}
+
+/**
+ * \brief Common method to get the id of a property
+ */
+long	InstrumentBackendImpl::propertyid(const std::string& instrumentname,
+		const std::string& property) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query instrument=%s, property=%s",
+		instrumentname.c_str(), property.c_str());
+	std::string	query(	"select id "
+				"from instrumentproperties "
+				"where instrument = ? "
+				"  and property = ? ");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	statement->bind(1, property);
+	Result	res = statement->result();
+	if (0 == res.size()) {
+		std::string	cause = stringprintf(
+			"no property instrument='%s' property='%s'",
+			instrumentname.c_str(), property.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "property not found: %s",
+			cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	int	_propertyid = res.front()[0]->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "property %s/%s has id %d",
+		instrumentname.c_str(), property.c_str(), _propertyid);
+	return _propertyid;
+}
+
+/**
+ * \brief Retrieve a property object from the database
+ */
+InstrumentProperty	InstrumentBackendImpl::getProperty(
+				const std::string& instrumentname,
+				const std::string& property) {
+	int	_propertyid = propertyid(instrumentname, property);
+	InstrumentProperty	p = properties->byid(_propertyid);
+	return p;
+}
+
+void	InstrumentBackendImpl::removeProperty(
+				const std::string& instrumentname,
+				const std::string& property) {
+	std::string	query(	"delete from instrumentproperties "
+				"where instrument = ? "
+				"  and property = ?");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	statement->bind(1, property);
+	Result	res = statement->result();
+	if (0 == res.size()) {
+		std::string	cause = stringprintf(
+			"no property instrument='%s' property='%s'",
+			instrumentname.c_str(), property.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "property not found: %s",
+			cause.c_str());
+		throw std::runtime_error(cause);
+	}
+}
+
+void	InstrumentBackendImpl::updateProperty(
+		const InstrumentProperty& property) {
+	int	_propertyid = propertyid(property.instrument(),
+			property.property());
+	InstrumentProperty	p = properties->byid(_propertyid);
+	p.value(property.value());
+	p.description(property.description());
+	properties->update(_propertyid, p);
+}
+
+InstrumentPropertyList	InstrumentBackendImpl::getProperties(
+					const std::string& instrumentname) {
+	InstrumentPropertyList	properties;
+	std::string	query(	"select property "
+				"from instrumentproperties "
+				"where instrument = ? "
+				"order by 1");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	Result	res = statement->result();
+	Result::const_iterator	i;
+	for (i = res.begin(); i != res.end(); i++) {
+		std::string	property = (*i)[0]->stringValue();
+		properties.push_back(getProperty(instrumentname, property));
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d property names",
+		properties.size());
+	return properties;
+}
+
+Instrument::PropertyNames	InstrumentBackendImpl::getPropertyNames(
+					const std::string& instrumentname) {
+	Instrument::PropertyNames	names;
+	std::string	query(	"select property "
+				"from instrumentproperties "
+				"where instrument = ? "
+				"order by 1");
+	StatementPtr	statement = database->statement(query);
+	statement->bind(0, instrumentname);
+	Result	res = statement->result();
+	Result::const_iterator	i;
+	for (i = res.begin(); i != res.end(); i++) {
+		std::string	name = (*i)[0]->stringValue();
+		names.push_back(name);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d property names",
+		names.size());
+	return names;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -264,10 +499,34 @@ public:
 		int index) {
 		return backend.get(name(), type, index);
 	}
+	virtual int	indexOf(InstrumentComponent::Type type,
+				const std::string& deviceurl) {
+		return backend.indexOf(name(), type, deviceurl);
+	}
+	// property methods
+	virtual int	addProperty(const InstrumentProperty& property) {
+		return backend.addProperty(property);
+	}
+	virtual InstrumentProperty	getProperty(const std::string& property) {
+		return backend.getProperty(name(), property);
+	}
+	virtual void	removeProperty(const std::string& property) {
+		backend.removeProperty(name(), property);
+	}
+	virtual void	updateProperty(const InstrumentProperty& property) {
+		backend.updateProperty(property);
+	}
+	virtual PropertyNames	getPropertyNames() {
+		return backend.getPropertyNames(name());
+	}
+	virtual InstrumentPropertyList	getProperties() {
+		return backend.getProperties(name());
+	}
 };
 
 InstrumentPtr	InstrumentBackendImpl::get(const std::string& name) {
-	return InstrumentPtr(new InstrumentImpl(name));
+	InstrumentImpl	*instrument = new InstrumentImpl(name);
+	return InstrumentPtr(instrument);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -294,6 +553,11 @@ InstrumentBackend::InstrumentBackend(persistence::Database database) {
 InstrumentList	InstrumentBackend::names() {
 	InstrumentBackendImpl	backend;
 	return backend.names();
+}
+
+bool	InstrumentBackend::has(const std::string& name) {
+	InstrumentBackendImpl	backend;
+	return backend.has(name);
 }
 
 InstrumentPtr	InstrumentBackend::get(const std::string& name) {

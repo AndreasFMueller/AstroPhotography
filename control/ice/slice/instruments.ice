@@ -15,13 +15,15 @@ module snowstar {
 	 * to talk about CCDs and their coolers or guider ports.
 	 */
 	enum InstrumentComponentType {
-		InstrumentCCD = 0,
-		InstrumentGuiderCCD = 1,
-		InstrumentCooler = 2,
-		InstrumentGuiderPort = 3,
-		InstrumentFocuser = 4,
-		InstrumentAdaptiveOptics = 5,
-		InstrumentFilterWheel = 6
+		InstrumentAdaptiveOptics = 0,
+		InstrumentCamera = 1,
+		InstrumentCCD = 2,
+		InstrumentCooler = 3,
+		InstrumentGuiderCCD = 4,
+		InstrumentGuiderPort = 5,
+		InstrumentFilterWheel = 6,
+		InstrumentFocuser = 7,
+		InstrumentMount = 8
 	};
 
 	/**
@@ -42,6 +44,15 @@ module snowstar {
 	};
 
 	sequence<InstrumentComponent>	InstrumentComponentList;
+
+	struct InstrumentProperty {
+		string instrumentname;
+		string property;
+		string value;
+		string description;
+	};
+	sequence<string>	InstrumentPropertyNames;
+	sequence<InstrumentProperty>	InstrumentPropertyList;
 
 	/**
 	 * \brief Instrument interface
@@ -98,6 +109,16 @@ module snowstar {
 		 * round-trips that would be necessary with the other methods.
 		 */
 		InstrumentComponentList	list();
+
+		// methods related to properties
+		void	addProperty(InstrumentProperty property);
+		InstrumentProperty	getProperty(string property)
+						throws NotFound;
+		void	removeProperty(string property) throws NotFound;
+		void	updateProperty(InstrumentProperty property)
+						throws NotFound;
+		InstrumentPropertyNames	getPropertyNames();
+		InstrumentPropertyList	getProperties();
 	};
 
 	sequence<string>		InstrumentList;
@@ -112,6 +133,7 @@ module snowstar {
 		InstrumentList	list();
 		Instrument	*get(string name) throws NotFound;
 		void	remove(string name) throws NotFound;
+		bool	has(string name);
 	};
 
 };

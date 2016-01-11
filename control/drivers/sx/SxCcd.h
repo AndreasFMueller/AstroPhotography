@@ -55,6 +55,9 @@ protected:
 	ImagePtr	image;
 	SxCamera&	camera;
 	int	ccdindex;
+	bool	_needs_read_pixels;
+public:
+	void	needs_read_pixels(bool n) { _needs_read_pixels = n; }
 public:
 	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();

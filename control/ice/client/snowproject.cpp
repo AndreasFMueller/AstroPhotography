@@ -25,7 +25,7 @@ bool	verbose = false;
 /**
  * \brief Usage function for the snowtask program
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "usage:" << std::endl;
@@ -72,6 +72,7 @@ int	command_submit(const std::string& projectname,
 		}
 	}
 
+#if 0
 	// get configuration information
 	astro::config::ConfigurationPtr config
 		= astro::config::Configuration::get();
@@ -86,7 +87,7 @@ int	command_submit(const std::string& projectname,
 	// get the device information from the instrument
 	parameters.camera = instrument->component(
 		astro::DeviceName::Camera)->name();
-	parameters.ccdid = instrument->component(
+	parameters.ccd = instrument->component(
 		astro::DeviceName::Ccd)->unit();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %d",
 		parameters.camera.c_str(), parameters.ccdid);
@@ -115,6 +116,8 @@ int	command_submit(const std::string& projectname,
 		= astro::config::ProjectConfiguration::get(config);
 	projects->parttask(projectname, part->partno(), taskid);
 	return EXIT_SUCCESS;
+#endif
+	return EXIT_FAILURE;
 }
 
 /**

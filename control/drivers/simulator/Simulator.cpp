@@ -54,6 +54,7 @@ SimCamera::~SimCamera() {
 
 CcdPtr	SimCamera::getCcd0(size_t id) {
 	if (id > 0) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no ccd %d available", id);
 		throw std::runtime_error("only ccd0 available");
 	}
 	return CcdPtr(new SimCcd(ccdinfo[0], *this));
@@ -198,6 +199,7 @@ ImagePtr	SimCamera::getImage() {
 	// check whether the image is ready
 	switch (exposureStatus()) {
 	case Exposure::idle:
+		debug(LOG_ERR, DEBUG_LOG, 0, "camera idle, cannot get image");
 		throw std::runtime_error("camera idle");
 		break;
 	case Exposure::exposed:
@@ -206,6 +208,7 @@ ImagePtr	SimCamera::getImage() {
 		await_exposure();
 		break;
 	case Exposure::cancelling:
+		debug(LOG_ERR, DEBUG_LOG, 0, "cancelling is impossible");
 		throw std::runtime_error("cannot happen");
 		break;
 	}

@@ -12,6 +12,7 @@
 #include <AstroUtils.h>
 #include <CommonClientTasks.h>
 #include <CommunicatorSingleton.h>
+#include <includes.h>
 
 using namespace snowstar;
 
@@ -19,23 +20,50 @@ namespace snowstar {
 namespace app {
 namespace snowflake {
 
+static struct option	longopts[] = {
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "help",		no_argument,		NULL,	'h' }, /* 1 */
+};
+
+/**
+ * \brief Display a help message
+ */
+static void	usage(const char *progname) {
+	astro::Path	path(progname);
+	std::cout << "usage: " << path.basename() << " [ options ] server "
+		<< std::endl;
+	std::cout << "retrieve a list of tasks from the servier <server>"
+		<< std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << " -d,--debug          enable debug output" << std::endl;
+}
+
 int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
 
 	// parse command line
 	int	c;
-	astro::ServerName	servername("localhost");
-	while (EOF != (c = getopt(argc, argv, "ds:")))
+	int	longindex;
+	while (EOF != (c = getopt_long(argc, argv, "dh",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
-		case 's':
-			servername = astro::ServerName(optarg);
-			break;
+		case 'h':
+			usage(argv[0]);
+			return EXIT_SUCCESS;
 		}
 
+	// next argument is mandatory
+	if (optind >= argc) {
+		std::cerr << "missing service name argument" << std::endl;
+		return EXIT_FAILURE;
+	}
+	astro::ServerName	servername(argv[optind++]);
+
+	// now contact the service
 	Ice::ObjectPrx	base
 		= ic->stringToProxy(servername.connect("Tasks"));
 	snowstar::TaskQueuePrx	tasks = TaskQueuePrx::checkedCast(base);
@@ -54,10 +82,11 @@ int	main(int argc, char *argv[]) {
 		std::cout << "file:   " << info.filename << std::endl;
 
 		TaskParameters	parm = tasks->parameters(*i);
-		std::cout << "camera: " << parm.camera << std::endl;
-		std::cout << "ccd:    " << parm.ccdid << std::endl;
+		std::cout << "camera: " << info.camera << std::endl;
+		std::cout << "ccd:    " << info.ccd << std::endl;
+		std::cout << "cooler: " << info.cooler << std::endl;
 		std::cout << "temp:   " << parm.ccdtemperature << std::endl;
-		std::cout << "fw:     " << parm.filterwheel << std::endl;
+		std::cout << "fw:     " << info.filterwheel << std::endl;
 		std::cout << "filter: " << parm.filter << std::endl;
 
 		TaskPrx	task = tasks->getTask(*i);

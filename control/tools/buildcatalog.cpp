@@ -61,7 +61,7 @@ static struct option	longopts[] = {
 { NULL,		0,			NULL,		0   }
 };
 
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	std::cout << "adds stars from the specified catalogs to a database catalog" << std::endl;
 	std::cout << "usage: " << std::endl;
 	std::cout << "    " << progname << " [ options ] dbfile" << std::endl;

@@ -19,11 +19,15 @@ TaskQueueEntry::TaskQueueEntry(taskid_t queueid, const TaskParameters& task)
 TaskParameters	TaskQueueEntry::parameters() const {
 	TaskParameters	parameters;
 	parameters.exposure(exposure());
-	parameters.camera(camera());
-	parameters.ccdid(ccdid());
+	parameters.cameraindex(cameraindex());
+	parameters.ccdindex(ccdindex());
+	parameters.coolerindex(coolerindex());
 	parameters.ccdtemperature(ccdtemperature());
-	parameters.filterwheel(filterwheel());
+	parameters.filterwheelindex(filterwheelindex());
 	parameters.filter(filter());
+	parameters.instrument(instrument());
+	parameters.mountindex(mountindex());
+	parameters.project(project());
 	return parameters;
 }
 
@@ -34,6 +38,11 @@ TaskInfo	TaskQueueEntry::info() const {
 	info.cause(cause());
 	info.filename(filename());
 	info.frame(frame());
+	info.camera(camera());
+	info.ccd(ccd());
+	info.cooler(cooler());
+	info.filterwheel(filterwheel());
+	info.mount(mount());
 	return info;
 }
 
@@ -51,19 +60,22 @@ bool	TaskQueueEntry::blocks(const TaskQueueEntry& other) const {
 
 	// This task blocks some other task if there is some resource
 	// that both use, e.g. if both use the same camera and ccd
-	if ((camera() == other.camera()) && (ccdid() == other.ccdid())) {
+	if ((camera() == other.camera()) || (ccd() == other.ccd())) {
 		return true;
 	}
 
+	// if we use the same coolers, we also block
+	if (0 != cooler().size()) {
+		if (cooler() == other.cooler()) {
+			return true;
+		}
+	}
+
 	// we also have a problem if a filter wheel is in use
-	if (0 == filterwheel().size()) {
-		return false;
-	}
-	if (0 == other.filterwheel().size()) {
-		return false;
-	}
-	if (filterwheel() == other.filterwheel()) {
-		return true;
+	if (0 != filterwheel().size()) {
+		if (filterwheel() == other.filterwheel()) {
+			return true;
+		}
 	}
 
 	// If none of the conditions above happens 

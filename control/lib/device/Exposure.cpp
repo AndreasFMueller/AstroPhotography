@@ -26,11 +26,12 @@ Exposure::Exposure(const ImageRectangle& frame,
 }
 
 std::string	Exposure::toString() const {
-	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs %s g=%.1f, l=%.0f",
+	return stringprintf("%dx%d@(%d,%d)/%s for %.3fs %s %s g=%.1f, l=%.0f",
 		_frame.size().width(), _frame.size().height(),
 		_frame.origin().x(), _frame.origin().y(),
 		_mode.toString().c_str(), _exposuretime,
-		(_shutter == Shutter::OPEN) ? "light" : "dark", _gain, _limit);
+		(_shutter == Shutter::OPEN) ? "open" : "closed",
+		purpose2string(_purpose).c_str(), _gain, _limit);
 }
 
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {
@@ -81,6 +82,12 @@ std::string	Exposure::purpose2string(purpose_t p) {
 		return std::string("flat");
 	case light:
 		return std::string("light");
+	case bias:
+		return std::string("bias");
+	case test:
+		return std::string("test");
+	case guide:
+		return std::string("guide");
 	}
 	std::string	msg = stringprintf("unknown purpose %d", p);
 	throw std::runtime_error(msg);
@@ -95,6 +102,15 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 	}
 	if (p == "light") {
 		return light;
+	}
+	if (p == "bias") {
+		return bias;
+	}
+	if (p == "test") {
+		return test;
+	}
+	if (p == "guide") {
+		return guide;
 	}
 	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
 	throw std::runtime_error(msg);

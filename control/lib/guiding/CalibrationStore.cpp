@@ -30,9 +30,9 @@ std::list<long>	CalibrationStore::getAllCalibrations() {
 std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider) {
 	std::ostringstream	out;
-	out << " camera = '" << guider.cameraname() << "' and ";
-	out << " ccdid = " << guider.ccdid() << " and ";
-	out << " guiderport = '" << guider.guiderportname() << "'";
+	out << " instrument = '" << guider.instrument() << "' and ";
+	out << " ccd = '" << guider.ccd() << "' and ";
+	out << " guiderport = '" << guider.guiderport() << "'";
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -58,11 +58,20 @@ std::list<CalibrationPointRecord>	CalibrationStore::getCalibrationPoints(long id
  * \param id of the calibration to retrieve
  */
 GuiderCalibration	CalibrationStore::getCalibration(long id) {
-	GuiderCalibration	calibration;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d", id);
 
 	// get the calibration table
 	CalibrationTable	ct(_database);
 	CalibrationRecord	r = ct.byid(id);
+	GuiderCalibration	calibration;
+	for (int i = 0; i < 6; i++) {
+		calibration.a[i] = r.a[i];
+	}
+	calibration.focallength = r.focallength;
+	calibration.complete = (r.complete) ? true : false;
+	calibration.masPerPixel = r.masPerPixel;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"found calibration with masPerPixel=%.3f", r.masPerPixel);
 
 	// add the points
 	std::list<CalibrationPointRecord>	points
@@ -73,6 +82,22 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 		calibration.push_back(p);
 	}
 	return calibration;
+}
+
+/**
+ * \brief remove a calibration together with the points
+ */
+void	CalibrationStore::deleteCalibration(long id) {
+	CalibrationTable	ct(_database);
+	if (!ct.exists(id)) {
+		return;
+	}
+	ct.remove(id);
+	std::string	query(  "delete from calibrationpoint "
+                                "where calibration = ?");
+        persistence::StatementPtr    statement = _database->statement(query);
+        statement->bind(0, (int)id);
+        statement->execute();
 }
 
 /**
@@ -94,6 +119,11 @@ void	CalibrationStore::updateCalibration(long id,
 	for (int i = 0; i < 6; i++) {
 		record.a[i] = calibration.a[i];
 	}
+	record.focallength = calibration.focallength;
+	record.det = calibration.det();
+	record.quality = calibration.quality();
+	record.complete = (calibration.complete) ? 1 : 0;
+	record.masPerPixel = calibration.masPerPixel;
 	t.update(id, record);
 }
 
@@ -106,6 +136,13 @@ void	CalibrationStore::addPoint(long id, const CalibrationPoint& point) {
 	t.add(record);
 }
 
+/**
+ * \brief Find out whether a calibration exists in the store
+ */
+bool	CalibrationStore::contains(long id) {
+	CalibrationTable	ct(_database);
+	return ct.exists(id);
+}
 
 } // namespace guiding
 } // namespace astro

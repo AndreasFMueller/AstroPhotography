@@ -18,6 +18,8 @@ public:
 	virtual ~InstrumentI();
 
 	std::string	name(const Ice::Current& current);
+
+	// component interface
 	int	nComponentsOfType(InstrumentComponentType type,
 			const Ice::Current& current);
 	InstrumentComponent	getComponent(InstrumentComponentType cmoponent,
@@ -29,6 +31,20 @@ public:
 	void	remove(InstrumentComponentType type, int index,
 			const Ice::Current& current);
 	InstrumentComponentList	list(const Ice::Current& current);
+
+	// property interface
+	void	addProperty(const InstrumentProperty& property,
+			const Ice::Current& current);
+	InstrumentProperty	getProperty(const std::string& property,
+			const Ice::Current& current);
+	void	removeProperty(const std::string& property,
+			const Ice::Current& current);
+	void	updateProperty(const InstrumentProperty& property,
+			const Ice::Current& current);
+	InstrumentPropertyNames	getPropertyNames(const Ice::Current& current);
+	InstrumentPropertyList	getProperties(const Ice::Current& current);
+
+	// other stuff
 static	InstrumentPrx	createProxy(const std::string& name,
 				const Ice::Current& current);
 };

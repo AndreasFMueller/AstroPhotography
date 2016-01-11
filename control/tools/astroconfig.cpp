@@ -36,44 +36,45 @@ static struct option	longopts[] = {
 /**
  * \brief usage message
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
-	std::cerr << "usage:" << std::endl;
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] help" << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "display a help message about the astrconfig command";
-	std::cerr << std::endl;
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "Get, set or delete configuration variables in domain "
+	std::cout << "usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
+	std::cout << std::endl;
+	std::cout << "display a help message about the astrconfig command";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
+	std::cout << p << " [ options ] { list } domain [ section [ name ]]" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Get, set or delete configuration variables in domain "
 		"(currently only" << std::endl;
-	std::cerr << "'global' is valid), identified by the section and "
+	std::cout << "'global' is valid), identified by the section and "
 		"the name." << std::endl;
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] server list" << std::endl;
-	std::cerr << p << " [ options ] server add <name> <url> <info>" << std::endl;
-	std::cerr << p << " [ options ] server remove <name>" << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "list, add or remove information about available servers"
+	std::cout << std::endl;
+	std::cout << p << " [ options ] server list" << std::endl;
+	std::cout << p << " [ options ] server add <name> <url> <info>" << std::endl;
+	std::cout << p << " [ options ] server remove <name>" << std::endl;
+	std::cout << std::endl;
+	std::cout << "list, add or remove information about available servers"
 		<< std::endl;
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] imagerepo list" << std::endl;
-	std::cerr << p << " [ options ] imagerepo add <reponame> <directory>";
-	std::cerr << std::endl;
-	std::cerr << p << " [ options ] imagerepo remove <reponame>";
-	std::cerr << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "list, add or delete image repositores" << std::endl;
-	std::cerr << std::endl;
-	std::cerr << "options:" << std::endl;
-	std::cerr << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
-	std::cerr << "  -d,--debug                   increase debug level";
-	std::cerr << std::endl;
-	std::cerr << "  -h,--help                    show this help message";
-	std::cerr << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] imagerepo list" << std::endl;
+	std::cout << p << " [ options ] imagerepo add <reponame> <directory>";
+	std::cout << std::endl;
+	std::cout << p << " [ options ] imagerepo remove <reponame>";
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "list, add or delete image repositores" << std::endl;
+	std::cout << std::endl;
+	std::cout << "options:" << std::endl;
+	std::cout << "  -c,--config=<configfile>     use configuration from <configfile>" << std::endl;
+	std::cout << "  -d,--debug                   increase debug level";
+	std::cout << std::endl;
+	std::cout << "  -h,--help                    show this help message";
+	std::cout << std::endl;
 }
 
 /**
@@ -94,6 +95,8 @@ int	command_set_global(const std::vector<std::string>& arguments) {
 		return EXIT_FAILURE;
 	}
 	ConfigurationPtr	configuration = Configuration::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting value %s",
+		arguments[4].c_str());
 	configuration->setglobal(arguments[2], arguments[3], arguments[4]);
 	return EXIT_SUCCESS;
 }
@@ -102,6 +105,7 @@ int	command_set_global(const std::vector<std::string>& arguments) {
  * \brief Implementation of the set command
  */
 int	command_set(const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set command");
 	if (arguments.size() < 2) {
 		std::cerr << "not enough arguments for get command";
 		std::cerr << std::endl;
@@ -241,6 +245,7 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 	ImageRepoConfigurationPtr	imagerepos
 		= ImageRepoConfiguration::get(configuration);
 	if (arguments[1] == "add") {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add repo command");
 		if (arguments.size() < 4) {
 			std::cerr << "not enough arguments for add command";
 			std::cerr << std::endl;
@@ -248,8 +253,12 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		}
 		std::string	reponame = arguments[2];
 		std::string	directory = arguments[3];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add repo '%s' in '%s'",
+			reponame.c_str(), directory.c_str());
 		struct stat	sb;
-		if (stat(reponame.c_str(), &sb) < 0) {
+		if (stat(directory.c_str(), &sb) < 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding directory %s",
+				directory.c_str());
 			if (mkdir(directory.c_str(), 0777) < 0) {
 				std::string	msg = astro::stringprintf(
 					"cannot create directory %s: %s",

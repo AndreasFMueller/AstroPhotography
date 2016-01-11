@@ -35,7 +35,7 @@ static struct option	longopts[] = {
 /**
  * \brief usage
  */
-void	usage(const char *progname) {
+static void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] infile outfile"
 		<< std::endl;
 	std::cout << std::endl;
@@ -86,9 +86,8 @@ int	main(int argc, char *argv[]) {
 		= dynamic_cast<Image<RGB<double> > *>(&*image);
 	LuminanceAdapter<RGB<double> >	la(*imageptr);
 #endif
-	Image<double >	*imageptr
-		= dynamic_cast<Image<double > *>(&*image);
-	LuminanceAdapter<double, double>	la(*imageptr);
+	DoubleAdapter	doubleadapter(image);
+	LuminanceAdapter<double, double>	la(doubleadapter);
 
 	// create image from log adapter
 	FunctionAdapter<double>	fa(la, log2);
