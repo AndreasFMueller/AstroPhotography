@@ -81,15 +81,20 @@ Linux)	if [ -r /etc/debian_version ]
 		fi
 	fi
 	# find out whether we should try to build the sbig driver
-	if [ -r /usr/local/lib64/libsbigudrv.so -a \
+	if [ \( -r /usr/local/lib64/libsbigudrv.so -o \
+		-r /usr/local/lib/libsbigudrv.so \) -a \
 		-r /usr/local/include/sbigudrv.h ]
 	then
+		echo "attempt building SBIG driver"
 		sbigoption=--enable-sbig
 	else
+		echo "SBIG libraries not present"
 		sbigoption=
 	fi
 	;;
 esac
+
+set -x
 
 # now that we have all the information, run the configure script
 case ${systemtype} in
@@ -102,7 +107,8 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-ice 
+	./configure --prefix=`pwd`/root ${commonflags} --enable-ice \
+		${sbigoption}
 	;;
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"

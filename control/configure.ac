@@ -186,7 +186,7 @@ AC_ARG_WITH([slice],
 AC_SUBST(SLICEDIR)
 
 # enable ICE
-AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
+#AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
 
 AC_ARG_ENABLE(ice,
 [AS_HELP_STRING([--enable-ice], [also bulid the ZeroC ICE components])],
