@@ -43,6 +43,7 @@ void	callback_adapter<TrackingMonitorPrx>(TrackingMonitorPrx& p,
 template<>
 void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 		const astro::callback::CallbackDataPtr data) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback called");
 	// first check whether we really got an image
 	astro::callback::ImageCallbackData	*imageptr
 		= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
@@ -54,8 +55,12 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 	// ImageMonitor proxy
 	SimpleImage	image;
 	image.size = convert(imageptr->image()->size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback image has size %s",
+		imageptr->image()->size().toString().c_str());
 
-	// create an adapter to a shor timage
+	// XXX here we should allow more image formats, not only unsigned short
+	// XXX we may want to use one of the existing adapters to do this
+	// create an adapter to a short image
 	astro::image::Image<unsigned short>	*im
 		= dynamic_cast<astro::image::Image<unsigned short> *>(
 			&*imageptr->image());
@@ -66,8 +71,8 @@ void	callback_adapter<ImageMonitorPrx>(ImageMonitorPrx& p,
 	}
 
 	// copy all the bytes
-	for (int x = 0; x < image.size.width; x++) {
-		for (int y = 0; y < image.size.height; y++) {
+	for (int y = 0; y < image.size.height; y++) {
+		for (int x = 0; x < image.size.width; x++) {
 			unsigned short	value = im->pixel(x, y);
 			image.imagedata.push_back(value);
 		}
@@ -289,6 +294,7 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	// install a callback in the guider
 	GuiderITrackingCallback	*callback = new GuiderITrackingCallback(*this);
 	guider->trackingcallback = astro::callback::CallbackPtr(callback);
+	guider->newimagecallback = astro::callback::CallbackPtr(callback);
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
