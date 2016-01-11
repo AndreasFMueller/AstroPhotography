@@ -7,6 +7,7 @@
 #define _monitor_h
 
 #include <mutex>
+#include <condition_variable>
 #include <guider.h>
 #include "display.h"
 #include <ImageCallbackI.h>
