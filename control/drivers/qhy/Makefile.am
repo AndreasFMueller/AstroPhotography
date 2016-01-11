@@ -22,14 +22,14 @@ libqhy_la_LIBADD = ../../lib/libastro.la
 noinst_PROGRAMS = qhytests
 qhytests_SOURCES = qhytests.cpp qhytest.cpp
 qhytests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqhy -lqhyccd
-qhytests_DEPENDENCIES = ../../lib/libastro.la libqhy.la
+qhytests_DEPENDENCIES = ../../lib/libastro.la @QHYLIB@
 
 endif
 
 qhy_la_SOURCES = $(SRCFILES)
 qhy_la_LDFLAGS = -module
 qhy_la_DEPENDENCIES = ../../lib/libastro.la
-qhy_la_LIBADD = ../../lib/libastro.la /usr/local/lib64/libqhyccd.la
+qhy_la_LIBADD = ../../lib/libastro.la @QHYLIB@
 
 endif
 

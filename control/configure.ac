@@ -357,6 +357,34 @@ AC_ARG_ENABLE(qhy,
 ],[
 	enable_qhy=no
 ])
+# try various possible locations for the QHY library
+tryqhylibs () {
+	if test -r /usr/local/lib64/libqhyccd.la
+	then
+		QHYLIB=/usr/local/lib64/libqhyccd.la
+		return
+	fi
+	if test -r /usr/local/lib/libqhyccd.la
+	then
+		QHYLIB=/usr/local/lib/libqhyccd.la
+		return
+	fi
+	if test -r /usr/lib64/libqhyccd.la
+	then
+		QHYLIB=/usr/lib64/libqhyccd.la
+		return
+	fi
+	if test -r /usr/lib/libqhyccd.la
+	then
+		QHYLIB=/usr/lib/libqhyccd.la
+		return
+	fi
+}
+if test ${enable_qhy} = yes
+then
+	tryqhylibs
+fi
+AC_SUBST(QHYLIB)
 AM_CONDITIONAL(ENABLE_QHY, test x$enable_qhy = xyes)
 
 ## UNICAP ############################################################
