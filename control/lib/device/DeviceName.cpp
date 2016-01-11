@@ -16,13 +16,14 @@
 namespace astro {
 
 DeviceName::DeviceName(const std::string& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "parsing name '%s'", name.c_str());
 	// parse the device URL
 	std::string::size_type	pos = name.find(":");
 	_type = string2type(name.substr(0, pos));
 	std::string	path = name.substr(pos + 1);
-//	debug(LOG_DEBUG, DEBUG_LOG, 0, "path: %s", path.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "path: %s", path.c_str());
 	split<DeviceName>(path, "/", *this);
-//	debug(LOG_DEBUG, DEBUG_LOG, 0, "have %d components", size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "have %d components", size());
 }
 
 DeviceName::DeviceName(const std::string& modulename,
