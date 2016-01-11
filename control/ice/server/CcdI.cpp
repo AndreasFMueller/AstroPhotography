@@ -51,28 +51,28 @@ int	CcdI::lastExposureStart(const Ice::Current& /* current */) {
 void	CcdI::cancelExposure(const Ice::Current& /* current */) {
 	try {
 		_ccd->cancelExposure();
-	} catch (const astro::DeviceException& deviceexception) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cancelExposure error: %s",
-			deviceexception.what());
-		throw DeviceException(deviceexception.what());
 	} catch (const astro::camera::BadState& badstate) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cancelExposure bad state: %s",
 			badstate.what());
 		throw BadState(badstate.what());
+	} catch (const astro::DeviceException& deviceexception) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cancelExposure error: %s",
+			deviceexception.what());
+		throw DeviceException(deviceexception.what());
 	}
 }
 
 Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
 	try {
 		return convert(_ccd->getExposure());
-	} catch (const astro::DeviceException& deviceexception) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "getExposure error: %s",
-			deviceexception.what());
-		throw DeviceException(deviceexception.what());
 	} catch (const astro::camera::BadState& badstate) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "getExposure bad state: %s",
 			badstate.what());
 		throw BadState(badstate.what());
+	} catch (const astro::DeviceException& deviceexception) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "getExposure error: %s",
+			deviceexception.what());
+		throw DeviceException(deviceexception.what());
 	}
 }
 
@@ -81,16 +81,16 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	if (!image) {
 		try {
 			image = _ccd->getImage();
-		} catch (const astro::DeviceException& deviceexception) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"device exception in getImage: %s",
-				deviceexception.what());
-			throw DeviceException(deviceexception.what());
 		} catch (astro::camera::BadState& bsx) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"bad state in getImage: %s",
 				bsx.what());
 			throw BadState("no image");
+		} catch (const astro::DeviceException& deviceexception) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"device exception in getImage: %s",
+				deviceexception.what());
+			throw DeviceException(deviceexception.what());
 		}
 	}
 
