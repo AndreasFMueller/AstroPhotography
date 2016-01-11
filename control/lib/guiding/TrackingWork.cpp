@@ -148,22 +148,13 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		Timer::sleep(guider().exposure().exposuretime());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
-		// now retrieve the image
+		// now retrieve the image. This method has as a side
+		// effect that the image is sent to the image callback
 		ImagePtr	image = guider().getImage();
 		timer.end();
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"TRACK: new image received, elapsed = %f",
 			timer.elapsed());
-
-		// send the new image to the callback
-		// inform the callback, if there is one
-		if (guider().newimagecallback) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"sending tracking image to callback");
-			callback::CallbackDataPtr	trackingimage(
-				new callback::ImageCallbackData(image));
-			(*(guider().newimagecallback))(trackingimage);
-		}
 
 		// use the tracker to find the tracking offset
 		Point	offset = tracker()->operator()(image);

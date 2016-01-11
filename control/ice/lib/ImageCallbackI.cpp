@@ -26,10 +26,12 @@ void	ImageCallbackI::stop(const Ice::Current& /* current */) {
 }
 
 /**
- * \brief Handle the upate method of the ImageCallback interface
+ * \brief Handle the update method of the ImageCallback interface
  */
 void	ImageCallbackI::update(const SimpleImage& image,
 		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image callback update: %d x %d",
+		image.size.width, image.size.height);
 	std::string	filename = astro::stringprintf("%s/%s%05d.fits",
 				_path.c_str(), _prefix.c_str(), imagecount++);
 	astro::io::FITSout	out(filename);

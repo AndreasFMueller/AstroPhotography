@@ -49,9 +49,10 @@ private:
 	Point	starAt(double ra, double dec);
 	void	moveto(double ra, double dec);
 	void	measure(GuiderCalibrator& calibrator,
-			double deltara, double deltadec);
+			int deltara, int deltadec);
 	void	callback(const CalibrationPoint& calpoint);
 	void	callback(const GuiderCalibration& calibration);
+	void	callback(const ImagePtr& image);
 private:
 	CalibrationProcess(const CalibrationProcess& other);
 	CalibrationProcess&	operator=(const CalibrationProcess& other);

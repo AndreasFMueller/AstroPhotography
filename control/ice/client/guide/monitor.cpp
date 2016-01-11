@@ -173,6 +173,7 @@ int	Guide::images_command(GuiderPrx guider, const std::string& path) {
 	guider->ice_getConnection()->setAdapter(adapter.adapter());
 
 	// register the image callback with the server
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering image callback");
 	guider->registerImageMonitor(ident);
 
 	monitor = guidemonitor;
@@ -180,7 +181,9 @@ int	Guide::images_command(GuiderPrx guider, const std::string& path) {
 	
 	// wait until the callback gets the information that the process
 	// completed
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for monitor to complete");
 	guidemonitor->wait();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "monitor completed");
 
 	guide = NULL;
 	monitor = NULL;

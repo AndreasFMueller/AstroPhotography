@@ -71,13 +71,34 @@ void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
 }
 
 /**
+ * \brief Send the image to the callback
+ */
+void	CalibrationProcess::callback(const ImagePtr& image) {
+	if (guider().newimagecallback) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send image to callback");
+		astro::callback::CallbackDataPtr	data(
+			new callback::ImageCallbackData(image));
+		(*guider().newimagecallback)(data);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image callback");
+	}
+}
+
+/**
  * \brief Measure a given grid point
  *
  * Moves to a grid point, measures the offset seen by the tracker, then
  * returns to the original point and measures that again.
  */
 void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
-		double ra, double dec) {
+		int ra, int dec) {
+	// skip the point ra=0, dec=0
+	if ((0 == ra) && (0 == dec)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping origin");
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "processing grid point %d/%d", ra, dec);
+
 	// move the telescope to the grid point corresponding to ra/dec
 	Point	star = starAt(ra, dec);
 	double	t = Timer::gettime() - starttime;
