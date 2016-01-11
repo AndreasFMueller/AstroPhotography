@@ -301,6 +301,8 @@ public:
 	operator	std::string() const;
 	bool	operator==(const ServerName& other) const;
 	bool	operator!=(const ServerName& other) const;
+
+	std::string	toString() const;
 };
 
 /**

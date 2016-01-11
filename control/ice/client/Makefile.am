@@ -3,6 +3,8 @@
 #
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+SUBDIRS = guide 
+
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 ICELIBS = @ICELIBS@
@@ -12,7 +14,7 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 if ENABLE_ICE
 
-bin_PROGRAMS = snowscan snowimages snowfocus snowguide snowmount snowrepo \
+bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument
 noinst_PROGRAMS = snowflake 
 
@@ -41,11 +43,6 @@ snowmount_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowmount_LDADD = $(ICELDADD)
 snowmount_CPPFLAGS = $(ICECPPFLAGS)
 
-snowguide_SOURCES = snowguide.cpp
-snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
-snowguide_LDADD = $(ICELDADD)
-snowguide_CPPFLAGS = $(ICECPPFLAGS)
-
 snowrepo_SOURCES = snowrepo.cpp RepoReplicators.cpp
 snowrepo_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowrepo_LDADD = $(ICELDADD)
@@ -68,12 +65,5 @@ snowinstrument_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator
-
-calibrate:	snowguide
-	./snowguide --debug --star=349,252 --width=60 \
-		--exposure=1 server GUIDESIM calibrate
-guide:	snowguide
-	./snowguide --debug --star=349,252 --width=60 \
-		--exposure=1 --interval=3 server GUIDESIM guide
 
 endif
