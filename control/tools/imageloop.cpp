@@ -64,7 +64,7 @@ static void	usage(const char *progname) {
 	std::cout << "  -o,--outdir=<outdir>       directory where files should be placed"
 		<< std::endl;
 	std::cout << "  -t,--timestamp             use timestamps as filenames" << std::endl;
-	std::cout << "  -e,--exposure-time=<time>  (initial) exposure time, modified later if target" << std::endl;
+	std::cout << "  -e,--exposure=<time>       (initial) exposure time, modified later if target" << std::endl;
 	std::cout << "                             mean set" << std::endl;
 	std::cout << "  -E,--mean=<mean>           attempt to vary the exposure time in such a way" << std::endl;
 	std::cout << "                             that the mean pixel value stays close to <mean>" << std::endl;
@@ -129,7 +129,7 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 		// 2. night before midnight
 		// 3. night after midnight
 		int	nightimages = 0;
-		time_t	dirtimestamp;
+		time_t	dirtimestamp = 0;
 		if ((sunrise <= now) && (now < sunset)) {
 			int	sleeptime = sunset - now;
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -214,6 +214,8 @@ void	nightloop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
 }
 
 void	loop(CcdPtr ccd, Exposure& exposure, ExposureTimer& timer) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure: %.3f",
+		exposure.exposuretime());
 	// make sure the target directory exists
 	FITSdirectory	directory(outpath, format);
 	if (timestamped) {
@@ -250,7 +252,7 @@ static struct option	longopts[] = {
 { "cameraid",		required_argument,	NULL,	'C' }, /*  2 */
 { "debug",		no_argument,		NULL,	'd' }, /*  3 */
 { "mean",		required_argument,	NULL,	'E' }, /*  4 */
-{ "exposuretime",	required_argument,	NULL,	'e' }, /*  5 */
+{ "exposure",		required_argument,	NULL,	'e' }, /*  5 */
 { "foreground",		no_argument,		NULL,	'F' }, /*  6 */
 { "height",		required_argument,	NULL,	'h' }, /*  7 */
 { "longitude",		required_argument,	NULL,	'L' }, /*  8 */
@@ -437,6 +439,7 @@ int	main(int argc, char *argv[]) {
                 ImageRectangle(ImagePoint(xoffset, yoffset),
                         ImageSize(width, height)));
 	Exposure	exposure(imagerectangle, exposuretime);
+	exposure.shutter(Shutter::CLOSED);
 
 	// depending on the target values, construct a timer
 	ExposureTimer	timer;
@@ -447,6 +450,8 @@ int	main(int argc, char *argv[]) {
 		timer = ExposureTimer(exposure.exposuretime(),
 			targetmedian, ExposureTimer::MEDIAN);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure time: %.3f",
+		exposure.exposuretime());
 
 	// if night only was requested, then we need a Sun object, and
 	// we have to find out 

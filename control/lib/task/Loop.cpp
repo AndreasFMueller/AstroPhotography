@@ -59,8 +59,10 @@ void	Loop::execute() {
 		while (next <= now) {
 			next += _period;
 		}
-		if (exposuretime > (next - now)) {
-			exposuretime = next - now;
+		if (_nImages > 1) {
+			if (exposuretime > (next - now)) {
+				exposuretime = next - now;
+			}
 		}
 
 		// get an exposure

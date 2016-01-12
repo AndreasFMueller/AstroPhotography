@@ -374,7 +374,7 @@ FITSKeyword	keywors[Nkeywors] = {
 },
 { // 58
 	std::string("PXLHIGHT"),
-	std::string("hight of pixel in microns"),
+	std::string("height of pixel in microns"),
 	std::type_index(typeid(double)),
 	true
 },
