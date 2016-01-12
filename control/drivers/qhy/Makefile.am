@@ -22,7 +22,7 @@ libqhy_la_LIBADD = ../../lib/libastro.la
 noinst_PROGRAMS = qhytests
 qhytests_SOURCES = qhytests.cpp qhytest.cpp
 qhytests_LDADD = -lcppunit ../../lib/libastro.la -L. -lqhy -lqhyccd
-qhytests_DEPENDENCIES = ../../lib/libastro.la @QHYLIB@
+qhytests_DEPENDENCIES = ../../lib/libastro.la libqhy.la
 
 endif
 
