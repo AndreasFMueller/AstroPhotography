@@ -332,8 +332,12 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
  */
 bool	SbigCamera::hasFilterWheel() const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "does this camera have a filter wheel?");
+	switch (cameraType) {
+	case STX_CAMERA:
+		return true;
+	}
 	// XXX that's not quite correct ;-)
-	return true;
+	return false;
 }
 
 /**
