@@ -71,6 +71,8 @@ ThreadBase::ThreadBase() {
 ThreadBase::~ThreadBase() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy ThreadBase");
 	if (!isrunning()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"not running, no action required");
 		return;
 	}
 	// during the following try block we should not lock anything,
@@ -128,8 +130,10 @@ void	ThreadBase::start() {
  * This works by setting the _terminate variable
  */
 void	ThreadBase::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping thread");
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p", thread.get_id());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p",
+		thread.get_id());
 
 	// signal the thread that it should terminate
 	_terminate = true;

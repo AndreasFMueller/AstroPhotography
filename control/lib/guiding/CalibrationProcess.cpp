@@ -264,7 +264,7 @@ CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker,
 	calibrated = false;
 	_progress = 0;
 	// create the thread
-	thread(ThreadPtr(new astro::thread::Thread<CalibrationProcess>(*this)));
+	thread(ThreadPtr(new astro::thread::Thread<CalibrationProcess>(this)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");
 }
 

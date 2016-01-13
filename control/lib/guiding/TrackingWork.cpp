@@ -242,7 +242,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 			Timer::sleep(sleeptime);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: Terminaten signal received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: Termination signal received");
 }
 
 /**

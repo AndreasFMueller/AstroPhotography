@@ -290,8 +290,10 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
 	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval,
 		_database));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
 	guiderprocess->start(tracker);
 }
 

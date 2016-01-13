@@ -75,7 +75,7 @@ void	Focusing::start(int min, int max) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting a thread");
 	typedef astro::thread::ThreadPtr	ThreadPtr;
 
-	thread = ThreadPtr(new astro::thread::Thread<FocusWork>(*work));
+	thread = ThreadPtr(new astro::thread::Thread<FocusWork>(work));
 	thread->start();
 
 	// that's it

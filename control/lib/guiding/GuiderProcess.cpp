@@ -27,7 +27,6 @@ GuiderProcess::GuiderProcess(Guider& _guider, double interval,
 	: guider(_guider), _interval(interval), database(_database)  {
 	// set a default gain
 	_gain = 1.;
-
 }
 
 /**
@@ -37,19 +36,26 @@ GuiderProcess::GuiderProcess(Guider& _guider, double interval,
  * up the resources allocated by them.
  */
 GuiderProcess::~GuiderProcess() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the guider process");
 	// stop the thread specific data
 	if (tracking) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping tracking thread");
 		tracking->stop();
 		tracking->wait(_interval);
-		tracking = NULL;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "tracking thread stopped");
 	}
 	if (driving) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping guiding thread");
 		driving->stop();
 		driving->wait(_interval);
-		driving = NULL;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiding thread stopped");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying the work");
 	delete trackingwork;
+	trackingwork = NULL;
 	delete drivingwork;
+	drivingwork = NULL;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderProcess destructor complete");
 }
 
 /**
@@ -61,13 +67,13 @@ bool	GuiderProcess::start(TrackerPtr _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching guiding threads");
 	// create the driving process
 	drivingwork = new DrivingWork(guider);
-	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(*drivingwork));
+	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(drivingwork));
 
 	// create the tracking process
 	trackingwork = new TrackingWork(guider, _tracker, *drivingwork,
 		database);
 	trackingwork->interval(_interval);
-	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(*trackingwork));
+	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(trackingwork));
 
 	// start both processes
 	driving->start();

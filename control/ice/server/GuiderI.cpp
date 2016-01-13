@@ -311,9 +311,11 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 		= guider->getTracker(convert(_point));
 
 	// start guiding
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, guidinginterval);
 
 	// install a callback in the guider
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callbacks");
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
 	guider->trackingcallback = astro::callback::CallbackPtr(tcallback);
 
