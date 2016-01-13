@@ -13,6 +13,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <AstroDebug.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace thread {
@@ -67,7 +69,7 @@ private:	// prevent copying of this object
 	ThreadBase&	operator=(ThreadBase& other);
 public:
 	ThreadBase();
-	~ThreadBase();
+	virtual ~ThreadBase();
 	void	start();
 	void	stop();
 	bool	wait(double timeout);
@@ -85,12 +87,19 @@ typedef std::shared_ptr<ThreadBase>	ThreadPtr;
  */
 template<typename Work>
 class Thread : public ThreadBase {
-	Work&	_work;
+	Work	*_work;
 public:
-	Thread(Work& work) : _work(work) { }
+	Thread(Work *work) : _work(work) { }
 protected:
 	virtual void	main() {
-		_work.main(*this);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread work starts");
+		_work->main(*this);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread work completes");
+	}
+public:
+	virtual ~Thread() {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy thread for %s",
+			demangle(typeid(Work).name()).c_str());
 	}
 };
 

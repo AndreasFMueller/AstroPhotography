@@ -216,6 +216,9 @@ void	Guider::startExposure() {
 
 /**
  * \brief get the image
+ *
+ * Retrieve an image from the imager. Each image is also sent to the
+ * newimagecallback, if set
  */
 ImagePtr	Guider::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
@@ -227,6 +230,9 @@ ImagePtr	Guider::getImage() {
 
 /**
  * \brief send the image to the callback
+ *
+ * This function wraps an image in a ImageCallbackData object and sends
+ * it to the newimagecallback, if it is set.
  */
 void	Guider::callbackImage(ImagePtr image) {
 	if (newimagecallback) {
@@ -284,8 +290,10 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
 	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval,
 		_database));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
 	guiderprocess->start(tracker);
 }
 

@@ -72,7 +72,9 @@ std::string	InstrumentComponentTableAdapter::type(DeviceName::device_type t) {
 	case DeviceName::Mount:
 		return std::string("mount");
 	}
-	throw std::runtime_error("unknown type");
+	std::string	msg = stringprintf("type '%d' unknown", t);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 DeviceName::device_type	InstrumentComponentTableAdapter::type(const std::string& t) {
@@ -103,7 +105,9 @@ DeviceName::device_type	InstrumentComponentTableAdapter::type(const std::string&
 	if (t == "mount") {
 		return DeviceName::Mount;
 	}
-	throw std::runtime_error("unknown type");
+	std::string	msg = stringprintf("type '%s' unknown", t.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 std::string	InstrumentComponentTableAdapter::component_type(InstrumentComponent::component_t c) {
@@ -115,7 +119,9 @@ std::string	InstrumentComponentTableAdapter::component_type(InstrumentComponent:
 	case InstrumentComponent::derived:
 		return std::string("derived");
 	}
-	throw std::runtime_error("unknown component type");
+	std::string	msg = stringprintf("unknown component type '%d'", c);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 InstrumentComponent::component_t	InstrumentComponentTableAdapter::component_type(const std::string& c) {
@@ -128,7 +134,9 @@ InstrumentComponent::component_t	InstrumentComponentTableAdapter::component_type
 	if (c == "derived") {
 		return InstrumentComponent::derived;
 	}
-	throw std::runtime_error("unknown component type");
+	std::string	msg = stringprintf("component type '%s'", c.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 std::string	InstrumentComponentTableAdapter::tablename() {

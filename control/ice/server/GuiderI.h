@@ -103,12 +103,14 @@ public:
 	virtual void	unregisterCalibrationMonitor(
 				const Ice::Identity& calibrationcallback,
 				const Ice::Current& current);
+
 	virtual void	registerImageMonitor(
 				const Ice::Identity& imagecallback,
 				const Ice::Current& current);
 	virtual void	unregisterImageMonitor(
 				const Ice::Identity& imagecallback,
 				const Ice::Current& current);
+
 	virtual void	registerTrackingMonitor(
 				const Ice::Identity& trackingcallback,
 				const Ice::Current& current);

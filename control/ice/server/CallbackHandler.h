@@ -10,6 +10,7 @@
 #include <typeinfo>
 #include <Ice/Connection.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 
 namespace snowstar {
 
@@ -69,6 +70,8 @@ void	SnowCallback<proxy>::registerCallback(const Ice::Identity& identity,
 		= current.con->createProxy(identity)->ice_oneway();
 	proxy	callback = proxy::uncheckedCast(oneway);
 	callbacks.insert(std::make_pair(identity, callback));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback installed, %d clients", 
+		astro::demangle(typeid(proxy).name()).c_str(), callbacks.size());
 }
 
 /**
@@ -78,6 +81,8 @@ template<typename proxy>
 void	SnowCallback<proxy>::unregisterCallback(const Ice::Identity& identity,
 		const Ice::Current& /* current */) {
 	callbacks.erase(identity);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback uninstalled, %d clients", 
+		astro::demangle(typeid(proxy).name()).c_str(), callbacks.size());
 }
 
 /**
@@ -108,7 +113,8 @@ void	SnowCallback<proxy>::clear() {
 template<typename proxy>
 astro::callback::CallbackDataPtr	SnowCallback<proxy>::operator()(
 	astro::callback::CallbackDataPtr data) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback data received, %d clients",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s callback data received, %d clients",
+		astro::demangle(typeid(proxy).name()).c_str(),
 		callbacks.size());
 	// the todelete array is used to keep track of all the identities
 	// that have failed

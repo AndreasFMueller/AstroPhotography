@@ -21,6 +21,7 @@
 #include <AstroFormat.h>
 #include <SbigCamera.h>
 #include <includes.h>
+#include <SbigFilterWheel.h>
 
 //////////////////////////////////////////////////////////////////////
 // Implementation of the SBIG Express Module Descriptor
@@ -143,8 +144,14 @@ SbigCameraLocator::~SbigCameraLocator() {
 std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_type device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list");
 	std::vector<std::string>	names;
-	if (device != DeviceName::Camera) {
+	switch (device) {
+	case DeviceName::AdaptiveOptics:
+	case DeviceName::Focuser:
+	case DeviceName::Module:
+	case DeviceName::Mount:
 		return names;
+	default:
+		break;
 	}
 	QueryUSBResults	results;
 	SbigLock	lock;
@@ -154,18 +161,107 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_typ
 			sbig_error(e).c_str());
 		throw SbigError(e);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras",
-		results.camerasFound);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d cameras, looking for %s",
+		results.camerasFound, DeviceName::type2string(device).c_str());
 	for (int i = 0; i < results.camerasFound; i++) {
 		if (results.usbInfo[i].cameraFound) {
-			std::string	name = stringprintf("%s-%s",
-				results.usbInfo[i].serialNumber,
-				results.usbInfo[i].name);
+			std::string	name(results.usbInfo[i].serialNumber);
 			DeviceName	camname("sbig", name);
-			camname.type(DeviceName::Camera);
+			switch (device) {
+			case DeviceName::Camera:
+				camname.type(device);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"adding camera %s",
+					camname.toString().c_str());
+				names.push_back(camname);
+				break;
+			case DeviceName::Guiderport:
+				camname.type(device);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"adding guiderport %s",
+					camname.toString().c_str());
+				names.push_back(camname);
+				break;
+			case DeviceName::Ccd: {
+				DeviceName	ccd(camname, device, "Imaging");
+				names.push_back(ccd);
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"adding imaging ccd %s",
+					ccd.toString().c_str());
+				}
+				switch (results.usbInfo[i].cameraType) {
+				case ST7_CAMERA:
+				case ST8_CAMERA:
+				case ST5C_CAMERA:
+				case TCE_CONTROLLER:
+				case ST9_CAMERA:
+				case ST10_CAMERA:
+				case ST1K_CAMERA:
+				case ST2K_CAMERA:
+				case STL_CAMERA:
+				case ST402_CAMERA:
+				case STX_CAMERA:
+				case ST4K_CAMERA:
+				case STT_CAMERA:
+				case STF_CAMERA: {
+					DeviceName	gccd(camname, device,
+						"Tracking");
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"adding guiding ccd %s",
+						gccd.toString().c_str());
+					names.push_back(gccd);
+					}
+					break;
+				default:
+					break;
+				}
+				break;
+			case DeviceName::Cooler:
+				switch (results.usbInfo[i].cameraType) {
+				case ST7_CAMERA:
+				case ST8_CAMERA:
+				case ST5C_CAMERA:
+				case TCE_CONTROLLER:
+				case ST9_CAMERA:
+				case ST10_CAMERA:
+				case ST1K_CAMERA:
+				case ST2K_CAMERA:
+				case STL_CAMERA:
+				case ST402_CAMERA:
+				case STX_CAMERA:
+				case ST4K_CAMERA:
+				case STT_CAMERA:
+				case STF_CAMERA: {
+					DeviceName	cooler(camname, device,
+						"Imaging");
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"adding cooler %s",
+						cooler.toString().c_str());
+					names.push_back(camname);
+					}
+					break;
+				default:
+					break;
+				}
+				break;
+			case DeviceName::Filterwheel:
+				switch (results.usbInfo[i].cameraType) {
+				case STX_CAMERA:
+					camname.type(device);
+					debug(LOG_DEBUG, DEBUG_LOG, 0,
+						"adding filterwheel %s",
+						camname.toString().c_str());
+					names.push_back(camname);
+					break;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "device found: %s",
-				name.c_str());
-			names.push_back(camname);
+				camname.toString().c_str());
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning list with %d members",
@@ -192,6 +288,36 @@ CameraPtr	SbigCameraLocator::getCamera0(const DeviceName& name) {
 		}
 	}
 	std::string	msg = stringprintf("camera %s not found", sname.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
+ * \brief Get a filterwheel by name
+ *
+ * This function retrieves the filterwheel attached to a camera.
+ *
+ * \param name	name of the filterwheel
+ */
+FilterWheelPtr	SbigCameraLocator::getFilterWheel0(const DeviceName& name) {
+	// get the corresponding camera name
+	DeviceName	cameraname = name;
+	cameraname.type(DeviceName::Camera);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for camera %s",
+		cameraname.toString().c_str());
+
+	// get the list of cameras
+	std::vector<std::string>	cameras = getDevicelist();
+	std::vector<std::string>::const_iterator	i;
+	for (i = cameras.begin(); i != cameras.end(); i++) {
+		if (cameraname == *i) {
+			CameraPtr	camera = getCamera(cameraname);
+			SbigCamera	*sbigcam = dynamic_cast<SbigCamera *>(&*camera);
+			return FilterWheelPtr(new SbigFilterWheel(*sbigcam));
+		}
+	}
+	std::string	msg = stringprintf("filterhweel %s not found",
+				name.toString().c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }

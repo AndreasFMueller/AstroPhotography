@@ -214,13 +214,13 @@ module snowstar {
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
 
-
-		// callbacks for monitoring
-		void	registerImageMonitor(Ice::Identity imagemonitor);
-		void	unregisterImageMonitor(Ice::Identity imagemonitor);
-
+		// monitor for tracking points
 		void	registerTrackingMonitor(Ice::Identity trackingmonitor);
 		void	unregisterTrackingMonitor(Ice::Identity trackingmonitor);
+
+		// callbacks for images during guiding _and_ calibration
+		void	registerImageMonitor(Ice::Identity imagemonitor);
+		void	unregisterImageMonitor(Ice::Identity imagemonitor);
 	};
 
 	/**

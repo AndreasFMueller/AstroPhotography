@@ -14,7 +14,7 @@ namespace astro {
 /**
  * \brief Angle abstraction
  *
- * ANgles are measured in different units of measure, and this class takes
+ * Angles are measured in different units of measure, and this class takes
  * care of these units by providing accessor functions that perform the
  * conversions. Internally, the angle is always kept in radians.
  */

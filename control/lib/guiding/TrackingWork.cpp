@@ -148,7 +148,8 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		Timer::sleep(guider().exposure().exposuretime());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
-		// now retrieve the image
+		// now retrieve the image. This method has as a side
+		// effect that the image is sent to the image callback
 		ImagePtr	image = guider().getImage();
 		timer.end();
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -241,7 +242,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 			Timer::sleep(sleeptime);
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: Terminaten signal received");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: Termination signal received");
 }
 
 /**

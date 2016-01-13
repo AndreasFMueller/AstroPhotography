@@ -8,6 +8,7 @@
 
 #include <AstroImage.h>
 #include <ImageDirectory.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace callback {

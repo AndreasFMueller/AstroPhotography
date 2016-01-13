@@ -65,6 +65,11 @@ fi
 systemtype=`uname`
 case ${systemtype} in
 Darwin)	echo "configuring for Mac OS X"
+	if [ -d /Library/Frameworks/SBIGUDrv.framework ]
+	then
+		echo "configureing with SBIG driver"
+		sbigoption=--enable-sbig
+	fi
 	;;
 Linux)	if [ -r /etc/debian_version ]
 	then
@@ -133,7 +138,8 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
-	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc
+	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
+		${sbigoption}
 	;;
 esac
 

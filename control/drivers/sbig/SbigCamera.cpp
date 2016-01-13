@@ -81,9 +81,8 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	_name = stringprintf("camera:sbig/%s/%s",
-		results.usbInfo[usbno].serialNumber,
-		results.usbInfo[usbno].name);
+	_name = stringprintf("camera:sbig/%s",
+		results.usbInfo[usbno].serialNumber);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "device name: %s",
 		_name.toString().c_str());
 
@@ -122,7 +121,8 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 		throw SbigError(e);
 	}
 	handle = driverhandle.handle;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver handle");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got driver handle %d",
+		driverhandle.handle);
 
 	// query the driver info
 	GetDriverInfoParams	driverinfoparams;
@@ -332,8 +332,12 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "test");
  */
 bool	SbigCamera::hasFilterWheel() const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "does this camera have a filter wheel?");
+	switch (cameraType) {
+	case STX_CAMERA:
+		return true;
+	}
 	// XXX that's not quite correct ;-)
-	return true;
+	return false;
 }
 
 /**
