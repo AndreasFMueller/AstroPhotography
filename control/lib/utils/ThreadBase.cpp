@@ -41,9 +41,7 @@ public:
  */
 static void	springboard_main(void *threadbase) {
 	ThreadBase	*g = (ThreadBase *)threadbase;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function starts");
 	RunAccess(*g).main();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "main function terminates");
 }
 
 /**
@@ -52,7 +50,6 @@ static void	springboard_main(void *threadbase) {
  * This mostly means setting up the mutex and condition variables 
  */
 ThreadBase::ThreadBase() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create new ThreadBase");
 	// mutex initialization
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 
@@ -69,19 +66,16 @@ ThreadBase::ThreadBase() {
  * derived classes may alreay have stopped the thread
  */
 ThreadBase::~ThreadBase() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy ThreadBase");
-	if (!isrunning()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"not running, no action required");
-		return;
-	}
-	// during the following try block we should not lock anything,
-	// because the thread may want to do it's own locking
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop running thread");
+	// stop the thread if it is running
+	if (isrunning()) {
 		stop();
+	}
+
+	// wait for the thread to exit
+	try {
 		thread.join();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread has terminated");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread %p has been joined",
+			thread.get_id());
 	} catch (const std::exception& x) {
 		std::string	msg = stringprintf(
 			"error in ThreadBase destructor: %s", x.what());
@@ -105,20 +99,29 @@ void	ThreadBase::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start thread");
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 
+	// make sure the thread is not already running before starting a
+	// new thread
 	if (isrunning()) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "thread already running");
-		throw std::runtime_error("thread already running");
+		std::string	cause = stringprintf("thread %p is running",
+			thread.get_id());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	if (thread.joinable()) {
+		std::string	cause = stringprintf("thread %p is joinable, "
+			"cannot start new thread", thread.get_id());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
 	}
 
+	// initialize fields
 	_terminate = false;
-	_isrunning = false;
+	_isrunning = true;	// not quite yet, but soon
 
-	// start the thread
+	// start a new thread
 	thread = std::thread(springboard_main, this);
-
-	// now that the thread is running, we should remember this in the
-	// variable _running variable
-	_isrunning = true;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread %p constructed",
+		thread.get_id());
 
 	// leaving the start method unlocks the releases the lock, so
 	// the thread can start running
@@ -130,10 +133,8 @@ void	ThreadBase::start() {
  * This works by setting the _terminate variable
  */
 void	ThreadBase::stop() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping thread");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping thread %p", thread.get_id());
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request to thread %p",
-		thread.get_id());
 
 	// signal the thread that it should terminate
 	_terminate = true;
@@ -144,19 +145,35 @@ void	ThreadBase::stop() {
  *
  * Termination of the thread is signaled through the cond variable, so we
  * just have to wait until it is signalled.
+ *
+ * \return 	true if the thread has been stopped
  */
 bool	ThreadBase::wait(double timeout) {
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
-	if (!isrunning()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"thread has terminated already, no wait needed");
+	// make sure there really is something to wait for
+	if (!thread.joinable()) {
+		std::string	cause = stringprintf("thread %p not joinable, "
+			"no need to wait", thread.get_id());
 		return true;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop", thread.get_id());
+	if (!isrunning()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"thread %p has terminated already, no wait needed",
+			thread.get_id());
+		return true;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for thread %p to stop",
+		thread.get_id());
 
 	long long	ns = 1000000000 * timeout;
-	return std::cv_status::no_timeout
-		== waitcond.wait_for(lock, std::chrono::nanoseconds(ns));
+	if (std::cv_status::no_timeout != waitcond.wait_for(lock,
+		std::chrono::nanoseconds(ns))) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "timeout happened");
+		return false;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "joining thread %p", thread.get_id());
+	thread.join();
+	return true;
 }
 
 /**
@@ -171,14 +188,18 @@ void	ThreadBase::run() {
 	try {
 		this->main();
 	} catch (std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "exception in thread: %s",
-			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s exception in thread %p: %s",
+			demangle(typeid(x).name()).c_str(),
+			std::this_thread::get_id(), x.what());
 	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception in thread");
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception in thread %p",
+			std::this_thread::get_id());
 	}
 	
 	// when the main function terminates, we signal this to all
 	// waiting clients
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "signal that thread %p has terminated",
+		std::this_thread::get_id());
 	waitcond.notify_all();
 
 	// and we remember that we are not running

@@ -92,9 +92,7 @@ public:
 	Thread(Work *work) : _work(work) { }
 protected:
 	virtual void	main() {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread work starts");
 		_work->main(*this);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread work completes");
 	}
 public:
 	virtual ~Thread() {
