@@ -35,7 +35,8 @@ InstrumentComponent	InstrumentI::getComponent(InstrumentComponentType type,
 			index);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found component: %s",
 			component.toString().c_str());
-		return convert(component);
+		InstrumentComponent	converted = convert(component);
+		return converted;
 	} catch (const std::exception& x) {
 		std::string	cause = astro::stringprintf(
 			"cannot find %s[%d]: %s",
@@ -78,7 +79,8 @@ InstrumentProperty	InstrumentI::getProperty(const std::string& property,
 		return convert(p);
 	} catch (...) {
 		NotFound	exception;
-		exception.cause = astro::stringprintf("property '%s' not found");
+		exception.cause = astro::stringprintf("property '%s' not found",
+			property.c_str());
 		throw exception;
 	}
 }

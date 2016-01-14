@@ -205,6 +205,11 @@ DeviceName	DeviceName::parent(const DeviceName::device_type& devicetype) const {
 	return result;
 }
 
+DeviceName	DeviceName::child(const DeviceName::device_type& devicetype,
+			const std::string& unitname) const {
+	return DeviceName(*this, devicetype, unitname);
+}
+
 bool	DeviceName::isNetworkDevice() const {
 	return (modulename() == "nice");
 }

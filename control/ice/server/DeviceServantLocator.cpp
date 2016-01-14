@@ -16,6 +16,7 @@
 #include <AstroDevice.h>
 #include <AstroDevaccess.h>
 #include <NameConverter.h>
+#include <AstroFormat.h>
 
 using namespace astro::device;
 using namespace astro::camera;
@@ -59,18 +60,21 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 	// get the device
 	switch (devicename.type()) {
 	case astro::DeviceName::AdaptiveOptics:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting an AO unit");
 		ptr = new AdaptiveOpticsI(
 			DeviceAccessor<astro::camera::AdaptiveOpticsPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Camera:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a camera");
 		ptr = new CameraI(
 			DeviceAccessor<astro::camera::CameraPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Ccd:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a CCD");
 		ptr = new CcdI(
 			DeviceAccessor<astro::camera::CcdPtr>(
 				_repository).get(devicename),
@@ -78,39 +82,55 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 		break;
 
 	case astro::DeviceName::Cooler:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Cooler");
 		ptr = new CoolerI(
 			DeviceAccessor<astro::camera::CoolerPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Filterwheel:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Filterwheel");
 		ptr = new FilterWheelI(
 			DeviceAccessor<astro::camera::FilterWheelPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Focuser:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Focuser");
 		ptr = new FocuserI(
 			DeviceAccessor<astro::camera::FocuserPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Guiderport:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Guiderport");
 		ptr = new GuiderPortI(
 			DeviceAccessor<astro::camera::GuiderPortPtr>(
 				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Module:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a module");
 		throw NotImplemented("no module access through devices");
 
 	case astro::DeviceName::Mount:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a mount");
 		ptr = new MountI(
 			DeviceAccessor<astro::device::MountPtr>(
 				_repository).get(devicename));
 		break;
 	};
 
+	// handle the case where we have no servant for the device
+	if (!ptr) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "device %s not found",
+			name.c_str());
+		return ptr;
+	}
+
+	// inform the debugger that we have in fact found a matching device
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "have found device for %s",
+		name.c_str());
 	devices.insert(std::make_pair(name, ptr));
 	return ptr;
 }

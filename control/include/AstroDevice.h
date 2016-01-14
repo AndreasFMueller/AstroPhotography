@@ -121,6 +121,8 @@ public:
 
 	// get the parent of a certain type
 	DeviceName	parent(const device_type& devicetype) const;
+	DeviceName	child(const device_type& devicetype,
+				const std::string& unitname) const;
 
 	// comparison operators (for containers)
 	bool	operator==(const DeviceName& other) const;
