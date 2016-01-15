@@ -9,6 +9,7 @@
 #include <SimGuiderPort.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
+#include <SimAdaptiveOptics.h>
 #include <includes.h>
 
 using namespace astro::image;
@@ -142,7 +143,8 @@ ImagePtr  SimCcd::getRawImage() {
 	}
 
 	// geometric distortion (guiderport)
-	starcamera.translation(_locator.simguiderport()->offset());
+	starcamera.translation(_locator.simguiderport()->offset()
+		+ _locator.simadaptiveoptics()->offset());
 	starcamera.alpha(_locator.simguiderport()->alpha());
 
 	// color (filterwheel)

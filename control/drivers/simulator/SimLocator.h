@@ -13,6 +13,7 @@ namespace astro {
 namespace camera {
 namespace simulator {
 
+class SimAdaptiveOptics;
 class SimCamera;
 class SimCcd;
 class SimFilterWheel;
@@ -28,6 +29,7 @@ class SimMount;
  * to these devices.
  */
 class SimLocator : public astro::device::DeviceLocator {
+	AdaptiveOpticsPtr	_adaptiveoptics;
 	CameraPtr	_camera;
 	CcdPtr		_ccd;
 	GuiderPortPtr	_guiderport;
@@ -42,6 +44,7 @@ public:
 	SimLocator();
 	virtual ~SimLocator();
 
+	AdaptiveOpticsPtr	adaptiveoptics() { return _adaptiveoptics; }
 	CameraPtr	camera() { return _camera; }
 	CcdPtr	ccd() { return _ccd; }
 	GuiderPortPtr	guiderport() { return _guiderport; }
@@ -50,6 +53,7 @@ public:
 	FocuserPtr	focuser() { return _focuser; }
 	astro::device::MountPtr	mount() { return _mount; }
 
+	SimAdaptiveOptics	*simadaptiveoptics();
 	SimCamera	*simcamera();
 	SimCcd		*simccd();
 	SimGuiderPort	*simguiderport();
@@ -63,6 +67,7 @@ public:
 	virtual std::vector<std::string>	getDevicelist(
 		DeviceName::device_type device = DeviceName::Camera);
 protected:
+	virtual AdaptiveOpticsPtr	getAdaptiveOptics0(const DeviceName& name);
 	virtual CameraPtr	getCamera0(const DeviceName& name);
 	virtual CcdPtr		getCcd0(const DeviceName& name);
 	virtual FilterWheelPtr	getFilterWheel0(const DeviceName& name);

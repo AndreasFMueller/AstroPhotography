@@ -106,19 +106,21 @@ int	command_scan(snowstar::ModulesPrx& modules,
 	snowstar::DeviceLocatorPrx	devicelocator
 		= module->getDeviceLocator();
 	snowstar::DeviceNameList	devicenames;
-	std::cout << "cameras:      ";
+	std::cout << "cameras:          ";
 	devicelist(devicelocator, snowstar::DevCAMERA);
-	std::cout << "ccds:         ";
+	std::cout << "ccds:             ";
 	devicelist(devicelocator, snowstar::DevCCD);
-	std::cout << "coolers:      ";
+	std::cout << "coolers:          ";
 	devicelist(devicelocator, snowstar::DevCOOLER);
-	std::cout << "filterwheels: ";
+	std::cout << "filterwheels:     ";
 	devicelist(devicelocator, snowstar::DevFILTERWHEEL);
-	std::cout << "focuser:      ";
+	std::cout << "focuser:          ";
 	devicelist(devicelocator, snowstar::DevFOCUSER);
-	std::cout << "guiderport:   ";
+	std::cout << "guiderport:       ";
 	devicelist(devicelocator, snowstar::DevGUIDERPORT);
-	std::cout << "mount:        ";
+	std::cout << "adaptive optics:  ";
+	devicelist(devicelocator, snowstar::DevAO);
+	std::cout << "mount:            ";
 	devicelist(devicelocator, snowstar::DevMOUNT);
 	
 	return EXIT_SUCCESS;
