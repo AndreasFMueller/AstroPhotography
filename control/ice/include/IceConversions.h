@@ -118,6 +118,9 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history);
 CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
 astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
 
+TrackingSummary	convert(const astro::guiding::TrackingSummary& summary);
+astro::guiding::TrackingSummary	convert(const TrackingSummary& summary);
+
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);

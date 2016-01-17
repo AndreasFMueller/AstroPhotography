@@ -472,4 +472,19 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 	calibrationcallbacks(data);
 }
 
+/**
+ * \brief Handle the summary retrieval method
+ */
+TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calling for tracking summary");
+	if (astro::guiding::Guide::guiding != guider->state()) {
+		BadState	exception;
+		exception.cause = astro::stringprintf("guider is not wrong "
+			"state %s", astro::guiding::Guide::state2string(
+			guider->state()).c_str());
+		throw exception;
+	}
+	return convert(guider->summary());
+}
+
 } // namespace snowstar

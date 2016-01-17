@@ -68,7 +68,7 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 		calibration.a[i] = r.a[i];
 	}
 	calibration.focallength = r.focallength;
-	calibration.complete = (r.complete) ? true : false;
+	calibration.complete((r.complete) ? true : false);
 	calibration.masPerPixel = r.masPerPixel;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found calibration with masPerPixel=%.3f", r.masPerPixel);
@@ -93,17 +93,13 @@ void	CalibrationStore::deleteCalibration(long id) {
 		return;
 	}
 	ct.remove(id);
-	std::string	query(  "delete from calibrationpoint "
-                                "where calibration = ?");
-        persistence::StatementPtr    statement = _database->statement(query);
-        statement->bind(0, (int)id);
-        statement->execute();
+	removePoints(id);
 }
 
 /**
  * \brief Add a calibration to the database
  */
-long	CalibrationStore::addCalibration(const Calibration& calibration) {
+long	CalibrationStore::addCalibration(const PersistentCalibration& calibration) {
 	CalibrationTable	t(_database);
 	CalibrationRecord	record(0, calibration);
 	return t.add(record);
@@ -122,7 +118,7 @@ void	CalibrationStore::updateCalibration(long id,
 	record.focallength = calibration.focallength;
 	record.det = calibration.det();
 	record.quality = calibration.quality();
-	record.complete = (calibration.complete) ? 1 : 0;
+	record.complete = (calibration.complete()) ? 1 : 0;
 	record.masPerPixel = calibration.masPerPixel;
 	t.update(id, record);
 }
@@ -137,11 +133,40 @@ void	CalibrationStore::addPoint(long id, const CalibrationPoint& point) {
 }
 
 /**
+ * \brief remove all points that belong to a calibration identified by an id
+ */
+void	CalibrationStore::removePoints(long id) {
+	std::string	query(  "delete from calibrationpoint "
+                                "where calibration = ?");
+        persistence::StatementPtr    statement = _database->statement(query);
+        statement->bind(0, (int)id);
+        statement->execute();
+}
+
+/**
  * \brief Find out whether a calibration exists in the store
  */
 bool	CalibrationStore::contains(long id) {
 	CalibrationTable	ct(_database);
 	return ct.exists(id);
+}
+
+/**
+ * \brief Save a basic calibration in the database
+ *
+ * This method adds the calibration data to an already existing calibration
+ * record in the database
+ */
+void	CalibrationStore::saveCalibration(long id, const BasicCalibration& cal) {
+	GuiderCalibration	c = getCalibration(id);
+	c.complete(true);
+	c = cal;
+	updateCalibration(id, c);
+	removePoints(id);
+	for (unsigned int i = 0; i < cal.size(); i++) {
+		CalibrationPoint	point = cal[i];
+		addPoint(id, point);
+	}
 }
 
 } // namespace guiding

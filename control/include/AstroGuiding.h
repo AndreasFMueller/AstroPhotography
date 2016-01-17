@@ -52,8 +52,7 @@ class StarDetector : public StarDetectorBase {
 	adapter::TypeConversionAdapter<Pixel>	tca;
 public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
-	Point	operator()(
-		const image::ImageRectangle& rectangle) const;
+	Point	operator()(const image::ImageRectangle& rectangle) const;
 }; 
 
 /**
@@ -72,8 +71,6 @@ StarDetector<Pixel>::StarDetector(
  * value in a rectangle, we get the centroid coordinates of the star's
  * response. This is the best estimate for the star coordinates.
  *
- * XXX problem with stars near border of rectangle 
- *
  * We should add a window function here. The problem is that when the
  * image moves, additional stars may get into view. This happens oftion
  * when calibrating. So stars at the border of the image should have much
@@ -83,57 +80,6 @@ StarDetector<Pixel>::StarDetector(
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
 		const image::ImageRectangle& rectangle) const {
-#if 0
-	// work only in the rectangle
-	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
-
-	// determine the brightest pixel within the rectangle
-	image::ImageSize	size = adapter.getSize();
-	int	maxx = -1, maxy = -1;
-	double	maxvalue = 0;
-	for (int x = 0; x < size.width(); x++) {
-		for (int y = 0; y < size.height(); y++) {
-			double	value = luminance(adapter.pixel(x, y));
-			if (value > maxvalue) {
-				maxx = x; maxy = y; maxvalue = value;
-			}
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum at (%d,%d), value = %f",
-		maxx, maxy, maxvalue);
-
-	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
-	// square around the maximum pixel.
-	double	xsum = 0, ysum = 0, weightsum = 0;
-
-	int	xleft = maxx - k;
-	if (xleft < 0) { xleft = 0; }
-	int	xright = maxx + k;
-	if (xright > size.width()) { xright = size.width(); }
-
-	int	ybottom = maxy - k;
-	if (ybottom < 0) { ybottom = 0; }
-	int	ytop = maxy + k;
-	if (ytop > size.height()) { ytop = size.height(); }
-
-	for (int x = xleft; x < xright; x++) {
-		for (int y = ybottom; y < ytop; y++) {
-			double	value = luminance(adapter.pixel(x, y));
-			if (value == value) {
-				weightsum += value;
-				xsum += x * value;
-				ysum += y * value;
-			}
-		}
-	}
-	xsum /= weightsum;
-	ysum /= weightsum;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "centroid coordinates: %f,%f", xsum, ysum);
-
-	// add the offset of the rectangle to get real coordinates
-	return Point(rectangle.origin().x() + xsum,
-		rectangle.origin().y() + ysum);
-#endif
 	return StarDetectorBase::operator()(tca, rectangle);
 }
 
@@ -210,7 +156,7 @@ public:
 	virtual std::string	toString() const;
 };
 
-class GuiderCalibrator;
+//class GuiderCalibrator;
 
 /**
  * \brief CalibrationPoint
@@ -226,34 +172,59 @@ public:
 };
 
 /**
+ * \brief Base class for all the calibrations for guiders
+ *
+ * This is the common ground for calibraiton of guiders using guider ports
+ * and tip-tilt adaptive optics units.
+ */
+class BasicCalibration : public std::vector<CalibrationPoint> {
+public:
+	double	a[6];
+private:
+	bool	_complete;
+public:
+	bool	complete() const { return _complete; }
+	void	complete(bool c) { _complete = c; }
+	BasicCalibration();
+	BasicCalibration(const double coefficients[6]);
+
+	double	quality() const;
+	double	det() const;
+
+	// string representation of the baseic 
+	std::string	toString() const;
+
+	// corrections
+	Point	defaultcorrection() const;
+	Point	operator()(const Point& offset, double Deltat) const;
+
+	// modifying the calibration
+	void	rescale(double scalefactor);
+	bool	iscalibrated() const { return 0. != det(); }
+
+	// add a calibration point
+	void	add(const CalibrationPoint& p) { push_back(p); }
+};
+
+std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal);
+std::istream&	operator>>(std::istream& in, BasicCalibration& cal);
+
+/**
  * \brief GuiderCalibration
  *
  * The Calibration data. The coefficients in the array a correspond to
  * a matrix that describes how the control commands on the guider port
  * translate into displacements of the guider image.
  */
-class GuiderCalibration : public std::vector<CalibrationPoint> {
+class GuiderCalibration : public BasicCalibration {
 public:
-	double	a[6];
 	double	focallength;
 	double	masPerPixel;
-	bool	complete;
-	double	quality() const;
-	double	det() const;
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
-	GuiderCalibration(const float coefficients[6]); // needed for CORBA
-	std::string	toString() const;
-	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset, double Deltat) const;
-
-	void	rescale(double scalefactor);
-	bool	iscalibrated() const { return 0. != det(); }
-	void	add(const CalibrationPoint& p) { push_back(p); }
+	GuiderCalibration(const BasicCalibration& other);
+	GuiderCalibration&	operator=(const BasicCalibration& other);
 };
-
-std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
-std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
 
 /**
  * \brief Encapsulation of the calibration as callback argument
@@ -267,6 +238,23 @@ std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
  */
 typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
+/**
+ * \brief BasicCalibrator
+ *
+ * The BasicCalibrator collects a set of points and computes the calibration
+ * data from this. The BasicCalibrator is used by the CalibrationProcess,
+ * it adds points during the calibration using the add method, the calibrate
+ * method then computes the calibration data.
+ */
+class BasicCalibrator {
+	BasicCalibration	_calibration;
+public:
+	BasicCalibrator();
+	void	add(const CalibrationPoint& calibrationpoint);
+	BasicCalibration	calibrate();
+};
+
+#if 0
 /**
  * \brief GuiderCalibrator
  *
@@ -282,6 +270,7 @@ public:
 	void	add(const CalibrationPoint& calibrationpoint);
 	GuiderCalibration	calibrate();
 };
+#endif
 
 /**
  * \brief Class to report data 
@@ -319,6 +308,35 @@ public:
 	std::string	ccd() const { return _ccd; }
 	std::string	guiderport() const { return _guiderport; }
 	std::string	toString() const;
+};
+
+/**
+ * \brief summary information about 
+ */
+class BasicSummary {
+	double	_alpha;
+	Point	_average;
+	Point	average2;
+public:
+	time_t	starttime;
+	Point	lastoffset;
+	Point	averageoffset() const;
+	void	average(const Point& a) { _average = a; }
+	Point	variance() const;
+	void	variance(const Point& v);
+	BasicSummary(double alpha = 0.1);
+	void	addPoint(const Point& offset);
+};
+
+/**
+ * \brief Holder class for summary data about tracking
+ */
+class TrackingSummary : public BasicSummary {
+public:
+	int	calibrationid;
+	GuiderDescriptor	descriptor;
+	TrackingSummary(const std::string& instrument,
+		const std::string& ccd, const std::string& guiderport);
 };
 
 // we will need the GuiderProcess class, but as we want to keep the 
@@ -549,6 +567,7 @@ public:
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	double	getInterval();
+	const TrackingSummary&	summary();
 	
 	friend class GuiderProcess;
 

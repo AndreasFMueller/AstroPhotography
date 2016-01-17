@@ -90,7 +90,7 @@ void	CalibrationProcess::callback(const ImagePtr& image) {
  * Moves to a grid point, measures the offset seen by the tracker, then
  * returns to the original point and measures that again.
  */
-void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
+void	CalibrationProcess::measure(BasicCalibrator& calibrator,
 		int ra, int dec) {
 	// skip the point ra=0, dec=0
 	if ((0 == ra) && (0 == dec)) {
@@ -174,7 +174,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	grid = gridconstant(_focallength, _pixelsize);
 
 	// prepare a GuiderCalibrator class that does the actual computation
-	GuiderCalibrator	calibrator;
+	BasicCalibrator	calibrator;
 
 	// measure the initial point
 	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));

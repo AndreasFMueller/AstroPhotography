@@ -134,7 +134,7 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 	_calibrationid = 0;
 	if (_database) {
 		// prepare data for the calibration recrod
-		Calibration	calibration;
+		PersistentCalibration	calibration;
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
 		calibration.guiderport = guiderportname();
@@ -155,13 +155,18 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 	return _calibrationid;
 }
 
+/**
+ * \brief save a guider calibration
+ */
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
 	if (!_database) {
 		return;
 	}
 	CalibrationStore	calstore(_database);
+	calstore.saveCalibration(_calibrationid, cal);
+#if 0
 	GuiderCalibration	c = calstore.getCalibration(_calibrationid);
-	c.complete = true;
+	c.complete(true);
 	for (int i = 0; i < 6; i++) {
 		c.a[i] = cal.a[i];
 	}
@@ -172,6 +177,7 @@ void	Guider::saveCalibration(const GuiderCalibration& cal) {
 		CalibrationPoint	point = cal[i];
 		calstore.addPoint(_calibrationid, point);
 	}
+#endif
 }
 
 /**
@@ -317,6 +323,19 @@ bool	Guider::waitGuiding(double timeout) {
  */
 double	Guider::getInterval() {
 	return guiderprocess->interval();
+}
+
+/**
+ * \brief retrieve the tracking summary from the 
+ */
+const TrackingSummary&	Guider::summary() {
+	if (!guiderprocess) {
+		std::string	cause = stringprintf("wrong state for summary: "
+			"%s", Guide::state2string(_state).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw BadState(cause);
+	}
+	return guiderprocess->summary();
 }
 
 /**

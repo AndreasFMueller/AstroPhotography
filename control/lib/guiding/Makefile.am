@@ -8,6 +8,9 @@ SUBDIRS = . test
 noinst_LTLIBRARIES = libastroguiding.la
 
 libastroguiding_la_SOURCES = 						\
+	BasicCalibration.cpp						\
+	BasicCalibrator.cpp						\
+	BasicSummary.cpp						\
 	CalibrationPersistence.cpp					\
 	CalibrationProcess.cpp						\
 	CalibrationStore.cpp						\
@@ -15,7 +18,6 @@ libastroguiding_la_SOURCES = 						\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderCalibration.cpp						\
-	GuiderCalibrator.cpp						\
 	GuiderFactory.cpp						\
 	GuiderProcess.cpp						\
 	GuiderStateMachine.cpp						\
@@ -26,6 +28,7 @@ libastroguiding_la_SOURCES = 						\
 	TrackingPersistence.cpp						\
 	TrackingPoint.cpp						\
 	TrackingStore.cpp						\
+	TrackingSummary.cpp						\
 	TrackingWork.cpp
 
 libastroguiding_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 

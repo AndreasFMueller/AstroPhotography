@@ -200,7 +200,23 @@ int	Guide::state_command(GuiderPrx guider) {
 	std::cout << guiderstate2string(state);
 	switch (state) {
 	case GuiderCALIBRATING:
-		std::cout << guider->calibrationProgress();
+		std::cout << ": " << guider->calibrationProgress();
+		break;
+	case GuiderGUIDING: {
+		std::cout << ": ";
+		TrackingSummary	summary = guider->getTrackingSummary();
+		std::cout << astro::stringprintf("duration=%.0f, ",
+			summary.since);
+		std::cout << astro::stringprintf("last=(%.2f,%.2f), ",
+			summary.lastoffset.x,
+			summary.lastoffset.y);
+		std::cout << astro::stringprintf("avg=(%.2f,%.2f), ",
+			summary.averageoffset.x,
+			summary.averageoffset.y);
+		std::cout << astro::stringprintf("var=(%.2f,%.2f)",
+			sqrt(summary.variance.x),
+			sqrt(summary.variance.y));
+		}
 		break;
 	default:
 		break;

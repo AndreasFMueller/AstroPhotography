@@ -44,7 +44,9 @@ std::string	toString(const trackinghistoryentry& entry) {
  */
 TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	DrivingWork& driving, persistence::Database& _database)
-	: GuidingProcess(_guider, _tracker, _database), _driving(driving) {
+	: GuidingProcess(_guider, _tracker, _database), _driving(driving),
+	  _summary(_guider.instrument(), _guider.ccdname(),
+		_guider.guiderportname()) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
@@ -161,6 +163,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"TRACK: current tracker offset: %s",
 			offset.toString().c_str());
+		_summary.addPoint(offset);
 
 		// find out whether the tracker can still track, terminate
 		// if not

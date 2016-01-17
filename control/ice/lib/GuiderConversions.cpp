@@ -136,4 +136,37 @@ astro::guiding::CalibrationPoint        convert(const CalibrationPoint& cp) {
 	return result;
 }
 
+struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {
+	struct TrackingSummary	result;
+	result.guider.instrumentname = summary.descriptor.instrument();
+	result.guider.ccdIndex = instrumentName2index(
+		summary.descriptor.instrument(), InstrumentGuiderCCD,
+		summary.descriptor.ccd());
+	result.guider.guiderportIndex = instrumentName2index(
+		summary.descriptor.instrument(), InstrumentGuiderPort,
+		summary.descriptor.guiderport());
+	result.since = converttime(summary.starttime);
+	result.lastoffset = convert(summary.lastoffset);
+	result.averageoffset = convert(summary.averageoffset());
+	result.variance = convert(summary.variance());
+	return result;
+}
+
+astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
+	std::string	ccdname = instrumentIndex2name(
+		summary.guider.instrumentname, InstrumentGuiderCCD,
+		summary.guider.ccdIndex);
+	std::string	guiderportname = instrumentIndex2name(
+		summary.guider.instrumentname, InstrumentGuiderPort,
+		summary.guider.guiderportIndex);
+	astro::guiding::TrackingSummary	result(summary.guider.instrumentname,
+		ccdname, guiderportname);
+	result.starttime = converttime(summary.since);
+	result.calibrationid = summary.calibrationid;
+	result.lastoffset = convert(summary.lastoffset);
+	result.average(convert(summary.averageoffset));
+	result.variance(convert(summary.variance));
+	return result;
+}
+
 } // namespace snowstar

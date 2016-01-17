@@ -49,6 +49,20 @@ module snowstar {
 	};
 
 	/**
+	 * \brief A summary of the tracking
+	 *
+	 * The tracking 
+	 */
+	struct TrackingSummary {
+		double	since;
+		int	calibrationid;
+		GuiderDescriptor	guider;
+		Point	lastoffset;
+		Point	averageoffset;
+		Point	variance;
+	};
+
+	/**
 	 * \brief Interface to a tracking monitor
 	 *
 	 * A tracking monitor processes new points
@@ -213,6 +227,11 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+
+		/**
+		 * \brief get some statistics information about tracking
+		 */
+		TrackingSummary	getTrackingSummary() throws BadState;
 
 		// monitor for tracking points
 		void	registerTrackingMonitor(Ice::Identity trackingmonitor);

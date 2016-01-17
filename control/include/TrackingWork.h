@@ -97,6 +97,10 @@ public:
 
 public:
 	astro::callback::CallbackPtr	trackingcallback;
+private:
+	TrackingSummary	_summary;
+public:
+	const TrackingSummary&	summary() { return _summary; }
 };
 
 } // namespace guiding

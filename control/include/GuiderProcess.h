@@ -63,6 +63,7 @@ public:
 
 public:
 	void lastAction(double& actiontime, Point& offset, Point& activation);
+	const TrackingSummary&	summary();
 };
 
 } // namespace guiding

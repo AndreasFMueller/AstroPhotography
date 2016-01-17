@@ -24,7 +24,7 @@ namespace guiding {
  */
 GuiderProcess::GuiderProcess(Guider& _guider, double interval,
 	persistence::Database _database)
-	: guider(_guider), _interval(interval), database(_database)  {
+	: guider(_guider), _interval(interval), database(_database) {
 	// set a default gain
 	_gain = 1.;
 }
@@ -123,6 +123,9 @@ void	GuiderProcess::lastAction(double& actiontime, Point& offset,
 	}
 }
 
+const TrackingSummary&	GuiderProcess::summary() {
+	return trackingwork->summary();
+}
 
 } // namespace guiding
 } // namespace astro

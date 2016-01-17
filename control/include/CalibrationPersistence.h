@@ -15,7 +15,7 @@ namespace guiding {
 /**
  * \brief Calibration class 
  */
-class Calibration {
+class PersistentCalibration {
 public:
 	time_t	when;
 	std::string	instrument;
@@ -27,10 +27,10 @@ public:
 	double	det;
 	int	complete;
 	double	masPerPixel;
-	Calibration();
+	PersistentCalibration();
 };
 
-typedef persistence::Persistent<Calibration>	CalibrationRecord;
+typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;
 
 /**
  * \brief Table adapter for the Calibration

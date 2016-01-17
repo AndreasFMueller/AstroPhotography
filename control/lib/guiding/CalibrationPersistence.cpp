@@ -13,7 +13,7 @@ namespace guiding {
 //////////////////////////////////////////////////////////////////////
 // Calibration constructor
 //////////////////////////////////////////////////////////////////////
-Calibration::Calibration() {
+PersistentCalibration::PersistentCalibration() {
 	time(&when);
 	for (int i = 0; i < 6; i++) { a[i] = 0.; }
 }
@@ -50,7 +50,7 @@ std::string	CalibrationTableAdapter::createstatement() {
 }
 
 CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row& row) {
-	Persistent<Calibration>	result(objectid);
+	Persistent<PersistentCalibration>	result(objectid);
 	result.instrument = row["instrument"]->stringValue();
 	result.ccd = row["ccd"]->stringValue();
 	result.guiderport = row["guiderport"]->stringValue();

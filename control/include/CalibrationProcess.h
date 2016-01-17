@@ -48,7 +48,7 @@ private:
 	double	gridconstant(double focallength, double pixelsize) const;
 	Point	starAt(double ra, double dec);
 	void	moveto(double ra, double dec);
-	void	measure(GuiderCalibrator& calibrator,
+	void	measure(BasicCalibrator& calibrator,
 			int deltara, int deltadec);
 	void	callback(const CalibrationPoint& calpoint);
 	void	callback(const GuiderCalibration& calibration);

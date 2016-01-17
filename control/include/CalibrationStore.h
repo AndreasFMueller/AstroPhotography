@@ -28,13 +28,18 @@ public:
 	// access to calibrations
 	bool	contains(long id);
 	GuiderCalibration	getCalibration(long id);
-	long	addCalibration(const Calibration& calibration);
+	long	addCalibration(const PersistentCalibration& calibration);
 	void	updateCalibration(long id, const GuiderCalibration& calibration);
 	void	deleteCalibration(long id);
 
 	// guider points
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);
 	void	addPoint(long id, const CalibrationPoint& point);
+	void	removePoints(long id);
+
+	// storing basic calibrations, i.e. just the raw calibration data
+	// without all the attributes
+	void	saveCalibration(long id, const BasicCalibration& cal);
 };
 
 } // namespace guiding
