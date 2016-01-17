@@ -179,6 +179,16 @@ public:
  */
 class BasicCalibration : public std::vector<CalibrationPoint> {
 public:
+	typedef enum { GP, AO } CalibrationType;
+static std::string	type2string(CalibrationType caltype);
+static CalibrationType	string2type(const std::string& calname);
+private:
+	CalibrationType	_calibrationtype;
+public:
+	CalibrationType	calibrationtype() const { return _calibrationtype; }
+	void	calibrationtype(CalibrationType ct) { _calibrationtype = ct; }
+
+public:
 	double	a[6];
 private:
 	bool	_complete;
@@ -227,6 +237,17 @@ public:
 };
 
 /**
+ * \brief class for calibrations of adaptive optics
+ */
+class AdaptiveOpticsCalibration : public BasicCalibration {
+public:
+	AdaptiveOpticsCalibration();
+	AdaptiveOpticsCalibration(const double coefficients[6]);
+	AdaptiveOpticsCalibration(const BasicCalibration& other);
+	AdaptiveOpticsCalibration&	operator=(const BasicCalibration& other);
+};
+
+/**
  * \brief Encapsulation of the calibration as callback argument
  */
 typedef callback::CallbackDataEnvelope<GuiderCalibration>	GuiderCalibrationCallbackData;
@@ -253,24 +274,6 @@ public:
 	void	add(const CalibrationPoint& calibrationpoint);
 	BasicCalibration	calibrate();
 };
-
-#if 0
-/**
- * \brief GuiderCalibrator
- *
- * The GuiderCalibrator collects a set of points and computes the calibration
- * data from this. The GuiderCalibrator is used by the CalibrationProcess,
- * it adds points during the calibration using the add method, the calibrate
- * method then computes the calibration data.
- */
-class GuiderCalibrator {
-	GuiderCalibration	_calibration;
-public:
-	GuiderCalibrator();
-	void	add(const CalibrationPoint& calibrationpoint);
-	GuiderCalibration	calibrate();
-};
-#endif
 
 /**
  * \brief Class to report data 
@@ -346,6 +349,83 @@ class GuiderProcess;
 typedef std::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 class CalibrationProcess;
 typedef std::shared_ptr<CalibrationProcess>	CalibrationProcessPtr;
+class BasicProcess;
+typedef std::shared_ptr<BasicProcess>	BasicProcessPtr;
+class PersistentCalibration;
+
+/**
+ * \brief Class handling a control device
+ *
+ * Control devices are guider ports or adaptive optics units
+ */
+class ControlDeviceBase {
+	std::string		_instrument;
+	camera::Imager&		_imager;
+	int			_calibrationid;
+	camera::Exposure	_exposure;
+	double			_focallength;
+protected:
+	persistence::Database	_database;
+	PersistentCalibration	*pcal;
+public:
+	const std::string&	instrument() const { return _instrument; }
+	camera::Imager&		imager() { return _imager; }
+	std::string	ccdname() const { return _imager.ccd()->name(); }
+	virtual std::string	devicename() const = 0;
+	int	calibrationid() const { return _calibrationid; }
+	const camera::Exposure&	exposure() const { return _exposure; }
+	void	exposure(const camera::Exposure& e) { _exposure = e; }
+	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
+private:
+	ControlDeviceBase(const ControlDeviceBase& other);
+	ControlDeviceBase&	operator=(const ControlDeviceBase& other);
+public:
+	ControlDeviceBase(const std::string& instrument, camera::Imager& imager,
+		persistence::Database database = NULL);
+	virtual ~ControlDeviceBase();
+
+	virtual int	startCalibration(TrackerPtr tracker);
+	void	cancelCalibration();
+	bool	waitCalibration(double timeout);
+	virtual void	saveCalibration(const BasicCalibration& calibration);
+protected:
+	BasicProcessPtr	process;
+public:
+
+};
+
+/**
+ * \brief template 
+ */
+template<typename device, typename devicecalibration>
+class ControlDevice : public ControlDeviceBase {
+public:
+	typedef std::shared_ptr<device>	deviceptr;
+private:
+	deviceptr	_device;
+	devicecalibration	_calibration;
+public:
+	ControlDevice(const std::string& instrument, camera::Imager& imager,
+		deviceptr dev, persistence::Database database = NULL)
+		: ControlDeviceBase(instrument, imager, database), _device(dev) {
+		
+	}
+	virtual std::string	devicename() const { return _device->name(); }
+	virtual int	startCalibration(TrackerPtr /* tracker */) { }
+	virtual void	saveCalibration(const BasicCalibration& calibration) {
+		_calibration = calibration;
+		ControlDeviceBase::saveCalibration(calibration);
+	}
+};
+
+// specializations
+template<>
+int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
+		TrackerPtr tracker);
+template<>
+int	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::startCalibration(
+		TrackerPtr tracker);
 
 /**
  * \brief enumeration type for the state of the guider

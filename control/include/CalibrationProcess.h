@@ -10,7 +10,7 @@
 #define _CalibrationProcess_h
 
 #include <AstroGuiding.h>
-#include <GuidingProcess.h>
+#include <BasicProcess.h>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -23,7 +23,7 @@ namespace guiding {
  *
  * This class contains the work function for guider calibration.
  */
-class CalibrationProcess : public GuidingProcess {
+class CalibrationProcess : public GuiderPortProcess {
 	// parameters for the calibration process
 	/**
 	 * \brief focal length of guide scope in mm
@@ -57,10 +57,12 @@ private:
 	CalibrationProcess(const CalibrationProcess& other);
 	CalibrationProcess&	operator=(const CalibrationProcess& other);
 public:
-	CalibrationProcess(Guider& guider, TrackerPtr tracker,
+	CalibrationProcess(Guider *guider, TrackerPtr tracker,
 		persistence::Database database);
 	~CalibrationProcess();
-	void	calibrate(double focallength, double pixelsize);
+	void	focallength(double f) { _focallength = f; }
+	void	pixelsize(double s) { _pixelsize = s; }
+	virtual void	start();
 	// the main function of the process
 	void	main(astro::thread::Thread<CalibrationProcess>& thread);
 };

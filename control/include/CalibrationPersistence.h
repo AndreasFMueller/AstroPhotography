@@ -20,14 +20,16 @@ public:
 	time_t	when;
 	std::string	instrument;
 	std::string	ccd;
-	std::string	guiderport;
+	std::string	controldevice;
 	double	a[6];
 	double	focallength;
 	double	quality;
 	double	det;
 	int	complete;
 	double	masPerPixel;
+	int	controltype;
 	PersistentCalibration();
+	PersistentCalibration&	operator=(const BasicCalibration& other);
 };
 
 typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;

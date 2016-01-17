@@ -85,6 +85,11 @@ module snowstar {
 	};
 	sequence<CalibrationPoint>	CalibrationSequence;
 
+	enum CalibrationType {
+		CalibrationTypeGuiderPort,
+		CalibrationTypeAdaptiveOptics
+	};
+
 	/**
 	 * \brief Calibration object
 	 *
@@ -104,6 +109,7 @@ module snowstar {
 		bool	complete;
 		double	focallength;
 		double	masPerPixel;
+		CalibrationType	controltype;
 		CalibrationSequence	points;
 	};
 

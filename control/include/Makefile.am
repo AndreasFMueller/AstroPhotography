@@ -18,7 +18,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroConfig.h AstroDiscovery.h AstroConvolve.h
 
 noinst_HEADERS = PixelValue.h Sun.h Thread.h \
-	GuidingProcess.h CalibrationProcess.h GuiderProcess.h \
+	BasicProcess.h CalibrationProcess.h GuiderProcess.h \
 	ViewerPipeline.h Radon.h \
 	ConnectedComponent.h \
 	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \

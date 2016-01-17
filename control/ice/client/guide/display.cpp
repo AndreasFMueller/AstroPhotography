@@ -45,7 +45,15 @@ void	Calibration_display::operator()(const Calibration& cal) {
 		converttime(cal.timeago));
 	_out << cal.points.size() << " points, ";
 	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
-	_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
+	switch (cal.controltype) {
+	case CalibrationTypeGuiderPort:
+		_out << "GP, ";
+		_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
+		break;
+	case CalibrationTypeAdaptiveOptics:
+		_out << "AO";
+		break;
+	}
 	_out << std::endl;
 
 	// calibration coefficients

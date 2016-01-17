@@ -95,7 +95,6 @@ bool	CancellableWork::wait(float t, Condition& condition) {
 		}
 
 		// wait for one second, then try again
-		long long       ns = 1000000000;
 		bool    timedout = (std::cv_status::no_timeout !=
 			wait_cond.wait_until(lock, next));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %s",

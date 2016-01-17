@@ -42,11 +42,11 @@ std::string	toString(const trackinghistoryentry& entry) {
  * The initialization ensures that the normal drift of the mount is
  * corrected even when no tracking is active. 
  */
-TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
+TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
 	DrivingWork& driving, persistence::Database& _database)
-	: GuidingProcess(_guider, _tracker, _database), _driving(driving),
-	  _summary(_guider.instrument(), _guider.ccdname(),
-		_guider.guiderportname()) {
+	: BasicProcess(_guider, _tracker, _database), _driving(driving),
+	  _summary(_guider->instrument(), _guider->ccdname(),
+		_guider->guiderportname()) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
@@ -54,7 +54,7 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
 	// using the 
-	const GuiderCalibration&	calibration = guider().calibration();
+	const GuiderCalibration&	calibration = guider()->calibration();
 
 	// the default correction only neutralizes the drift
 	Point	correction = calibration.defaultcorrection();
@@ -78,10 +78,10 @@ TrackingWork::TrackingWork(Guider& _guider, TrackerPtr _tracker,
 	// if we have a database, then we should create a new record
 	if (database()) {
 		GuidingRun	guidingrun;
-		guidingrun.instrument = guider().instrument();
-		guidingrun.ccd = guider().ccdname();
-		guidingrun.guiderport = guider().guiderportname();
-		guidingrun.calibrationid = guider().calibrationid();
+		guidingrun.instrument = guider()->instrument();
+		guidingrun.ccd = guider()->ccdname();
+		guidingrun.guiderport = guider()->guiderportname();
+		guidingrun.calibrationid = guider()->calibrationid();
 		time(&guidingrun.whenstarted);
 
 		// add guiding run record to the database
@@ -144,15 +144,15 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: start new exposure");
 		// initiate an exposure
-		guider().startExposure();
+		guider()->startExposure();
 
 		// until the image is exposed
-		Timer::sleep(guider().exposure().exposuretime());
+		Timer::sleep(guider()->exposure().exposuretime());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retrieve the image. This method has as a side
 		// effect that the image is sent to the image callback
-		ImagePtr	image = guider().getImage();
+		ImagePtr	image = guider()->getImage();
 		timer.end();
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"TRACK: new image received, elapsed = %f",
@@ -189,7 +189,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = gain() * guider().calibration()(offset,
+		Point	correction = gain() * guider()->calibration()(offset,
 				correctiontime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"TRACK: offset = %s, correction = %s",
@@ -224,10 +224,10 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		}
 
 		// inform the callback, if there is one
-		if (guider().trackingcallback) {
+		if (guider()->trackingcallback) {
 			callback::CallbackDataPtr	trackinginfo(
 				new TrackingPoint(_last));
-			(*(guider().trackingcallback))(trackinginfo);
+			(*(guider()->trackingcallback))(trackinginfo);
 		}
 
 		// this is a possible cancellation point

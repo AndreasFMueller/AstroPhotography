@@ -212,7 +212,7 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	result.guider.ccdIndex = instrumentName2index(cal.instrument,
 		InstrumentGuiderCCD, cal.ccd);
 	result.guider.guiderportIndex = instrumentName2index(cal.instrument,
-		InstrumentGuiderPort, cal.guiderport);
+		InstrumentGuiderPort, cal.controldevice);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"copy coefficients from [%.3f, %.3f, %3f; %.3f, %.3f, %.3f ]",
 		cal.a[0], cal.a[1], cal.a[2], cal.a[3], cal.a[4], cal.a[5]);

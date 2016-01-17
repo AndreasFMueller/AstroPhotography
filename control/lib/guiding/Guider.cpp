@@ -125,10 +125,12 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 
 	// now create a new calibration process
 	calibrationprocess = CalibrationProcessPtr(
-		new CalibrationProcess(*this, tracker, _database));
+		new CalibrationProcess(this, tracker, _database));
 
 	// start the calibration. This will launch the separate 
-	calibrationprocess->calibrate(_focallength, pixelsize);
+	calibrationprocess->focallength(_focallength);
+	calibrationprocess->pixelsize(pixelsize);
+	calibrationprocess->start();
 
 	// register the new calibration in the database
 	_calibrationid = 0;
@@ -137,7 +139,7 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 		PersistentCalibration	calibration;
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
-		calibration.guiderport = guiderportname();
+		calibration.controldevice = guiderportname();
 		calibration.focallength = _focallength;
 		calibration.masPerPixel
 			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
@@ -164,20 +166,6 @@ void	Guider::saveCalibration(const GuiderCalibration& cal) {
 	}
 	CalibrationStore	calstore(_database);
 	calstore.saveCalibration(_calibrationid, cal);
-#if 0
-	GuiderCalibration	c = calstore.getCalibration(_calibrationid);
-	c.complete(true);
-	for (int i = 0; i < 6; i++) {
-		c.a[i] = cal.a[i];
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update %d, focallength = %.3f",
-		c.focallength);
-	calstore.updateCalibration(_calibrationid, c);
-	for (int i = 0; i < cal.size(); i++) {
-		CalibrationPoint	point = cal[i];
-		calstore.addPoint(_calibrationid, point);
-	}
-#endif
 }
 
 /**
@@ -297,7 +285,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
-	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval,
+	guiderprocess = GuiderProcessPtr(new GuiderProcess(this, interval,
 		_database));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
 	guiderprocess->start(tracker);

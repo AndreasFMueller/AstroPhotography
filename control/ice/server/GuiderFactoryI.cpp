@@ -11,6 +11,7 @@
 #include <GuiderI.h>
 #include <ProxyCreator.h>
 #include <IceConversions.h>
+#include <AstroGuiding.h>
 
 namespace snowstar {
 
@@ -140,8 +141,10 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		astro::guiding::CalibrationTable	ct(database);
 		if (!ct.exists(id)) {
 			NotFound	exception;
-			exception.cause = astro::stringprintf("calibration %d does not exist", id);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+			exception.cause = astro::stringprintf("calibration %d "
+				"does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				exception.cause.c_str());
 			throw exception;
 		}
 		astro::guiding::CalibrationRecord	r = ct.byid(id);
@@ -153,7 +156,7 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 				InstrumentGuiderCCD, r.ccd);
 		calibration.guider.guiderportIndex
 			= instrumentName2index(r.instrument,
-				InstrumentGuiderPort, r.guiderport);
+				InstrumentGuiderPort, r.controldevice);
 		calibration.focallength = r.focallength;
 		calibration.masPerPixel = r.masPerPixel;
 		calibration.complete = (r.complete) ? true : false;
@@ -161,6 +164,14 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 		calibration.quality = r.quality;
 		for (int i = 0; i < 6; i++) {
 			calibration.coefficients.push_back(r.a[i]);
+		}
+		switch (r.controltype) {
+		case astro::guiding::BasicCalibration::GP:
+			calibration.controltype = CalibrationTypeGuiderPort;
+			break;
+		case astro::guiding::BasicCalibration::AO:
+			calibration.controltype = CalibrationTypeAdaptiveOptics;
+			break;
 		}
 
 		// add calibration points
@@ -236,8 +247,10 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
 		if (!gt.exists(id)) {
 			NotFound	exception;
-			exception.cause = astro::stringprintf("tracking history %d does not exist", id);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+			exception.cause = astro::stringprintf("tracking history"
+				" %d does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				exception.cause.c_str());
 			throw exception;
 		}
 		history.timeago = converttime(r.whenstarted);
@@ -279,8 +292,10 @@ void	GuiderFactoryI::deleteTrackingHistory(int id,
 	astro::guiding::TrackingStore	store(database);
 	if (!store.contains(id)) {
 		NotFound	exception;
-		exception.cause = astro::stringprintf("tracking history %d not found", id);
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s", exception.cause.c_str());
+		exception.cause = astro::stringprintf("tracking history %d not "
+			"found", id);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s",
+			exception.cause.c_str());
 		throw exception;
 	}
 	store.deleteTrackingHistory(id);

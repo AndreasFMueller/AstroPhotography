@@ -18,8 +18,8 @@ namespace guiding {
  * on the main function. This will be done by the super class' start
  * method.
  */
-DrivingWork::DrivingWork(Guider& _guider)
-	: GuidingProcess(_guider, TrackerPtr()) {
+DrivingWork::DrivingWork(Guider *_guider)
+	: GuiderPortProcess(_guider, TrackerPtr()) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingWork");
 	defaultx = 0;
 	defaulty = 0;
@@ -141,7 +141,7 @@ void	DrivingWork::main(astro::thread::Thread<DrivingWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"GUIDE: activate(%.3f, %.3f, %.3f, %.3f)",
 			raplus, raminus, decplus, decminus);
-		guider().guiderport()->activate(raplus, raminus,
+		guiderport()->activate(raplus, raminus,
 			decplus, decminus);
 
 		// wait for one second.

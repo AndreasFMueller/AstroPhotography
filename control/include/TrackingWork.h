@@ -6,7 +6,7 @@
 #ifndef _TrackingWork_h
 #define _TrackingWork_h
 
-#include <GuidingProcess.h>
+#include <BasicProcess.h>
 #include <DrivingWork.h>
 #include <deque>
 
@@ -40,7 +40,7 @@ std::string	toString(const trackinghistoryentry& entry);
  * the threads that are designed to be independent actually become 
  * synchronized.
  */
-class TrackingWork : public GuidingProcess {
+class TrackingWork : public BasicProcess {
 private:
 	/**
 	 * \brief 
@@ -84,9 +84,9 @@ private:
 	TrackingWork(const TrackingWork& other);
 	TrackingWork&	operator=(const TrackingWork& other);
 public:
-	TrackingWork(Guider& _guider, TrackerPtr _tracker,
+	TrackingWork(Guider *_guider, TrackerPtr _tracker,
 		DrivingWork& driving, persistence::Database& _database);
-	~TrackingWork();
+	virtual ~TrackingWork();
 
 	void	main(astro::thread::Thread<TrackingWork>& thread);
 private:

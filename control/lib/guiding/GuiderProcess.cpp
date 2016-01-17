@@ -22,7 +22,7 @@ namespace guiding {
  * This also initializes the values for guider port activation to values that
  * compensate the drift to first order.
  */
-GuiderProcess::GuiderProcess(Guider& _guider, double interval,
+GuiderProcess::GuiderProcess(Guider *_guider, double interval,
 	persistence::Database _database)
 	: guider(_guider), _interval(interval), database(_database) {
 	// set a default gain

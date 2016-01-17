@@ -56,6 +56,7 @@ BasicCalibration::BasicCalibration(const double coefficients[6]) {
 		a[i] = coefficients[i];
 	}
 	_complete = false;
+	_calibrationtype = GP;
 }
 
 /**
@@ -145,6 +146,36 @@ double	BasicCalibration::quality() const {
 	double	l2 = hypot(a[1], a[4]);
 	double	cosalpha = (a[0] * a[1] + a[3] * a[4]) / (l1 * l2);
 	return 1 - (cosalpha * cosalpha);
+}
+
+std::string	BasicCalibration::type2string(CalibrationType caltype) {
+	switch (caltype) {
+	case GP:
+		return std::string("GuiderPort");
+	case AO:
+		return std::string("AdaptiveOptics");
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "unknown calibration type %d", caltype);
+	throw std::runtime_error("unknown calibration type");
+}
+
+BasicCalibration::CalibrationType	BasicCalibration::string2type(const std::string& calname) {
+	if (calname == std::string("GuiderPort")) {
+		return GP;
+	}
+	if (calname == std::string("GP")) {
+		return GP;
+	}
+	if (calname == std::string("AdaptiveOptics")) {
+		return AO;
+	}
+	if (calname == std::string("AO")) {
+		return AO;
+	}
+	std::string	msg = stringprintf("unknown calibration type: %s",
+		calname.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 } // namespace guiding

@@ -19,7 +19,7 @@ namespace snowstar {
  */
 std::string	NameConverter::urlencode(const std::string& name) {
 	std::ostringstream	out;
-	for (int i = 0; i < name.size(); i++) {
+	for (unsigned int i = 0; i < name.size(); i++) {
 		char	c = name[i];
 		if (isalnum(c)) {
 			out << c;
@@ -41,7 +41,7 @@ std::string	NameConverter::urlencode(const std::string& name) {
  */
 std::string	NameConverter::urldecode(const std::string& name) {
 	std::ostringstream	out;
-	int i = 0;
+	unsigned int i = 0;
 	while (i < name.size()) {
 		if (name[i] == '%') {
 			i++;
