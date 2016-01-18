@@ -549,6 +549,9 @@ public:
 private:
 	persistence::Database	_database;
 
+	// prevent copying
+	Guider(const Guider& other);
+	Guider&	operator=(const Guider& other);
 public:
 	/**
 	 * \brief Construct a guider from camera, ccd, and guiderport

@@ -45,6 +45,9 @@ Guider::Guider(const std::string& instrument,
 	// default focallength
 	_focallength = 1;
 
+	// calibration id
+	_calibrationid = 0;
+
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not optimal
 	_state.configure();
@@ -143,6 +146,7 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 		calibration.focallength = _focallength;
 		calibration.masPerPixel
 			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
+		calibration.controltype = BasicCalibration::GP;
 		time(&calibration.when);
 		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 
@@ -161,6 +165,8 @@ int	Guider::startCalibration(TrackerPtr tracker) {
  * \brief save a guider calibration
  */
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
+		_calibrationid);
 	if (!_database) {
 		return;
 	}

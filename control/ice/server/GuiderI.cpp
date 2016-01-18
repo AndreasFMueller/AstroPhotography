@@ -189,10 +189,9 @@ void GuiderI::useCalibration(Ice::Int calid,
 		= store.getCalibration(calid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"calibration %d: [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
-		calibrationid,
+		calid,
 		calibration.a[0], calibration.a[1], calibration.a[2],
 		calibration.a[3], calibration.a[4], calibration.a[5]);
-	calibrationid = calid;
 
 	// install calibration data in the guider
 	guider->calibration(calibration);
@@ -201,7 +200,7 @@ void GuiderI::useCalibration(Ice::Int calid,
 
 Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
 	CalibrationSource	source(database);
-	return source.get(calibrationid);
+	return source.get(guider->calibrationid());
 }
 
 /**

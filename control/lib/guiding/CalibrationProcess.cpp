@@ -207,6 +207,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration interrupted");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration measurements complete");
 	
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();

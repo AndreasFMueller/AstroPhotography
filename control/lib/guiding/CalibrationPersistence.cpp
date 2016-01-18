@@ -16,6 +16,12 @@ namespace guiding {
 PersistentCalibration::PersistentCalibration() {
 	time(&when);
 	for (int i = 0; i < 6; i++) { a[i] = 0.; }
+	focallength = 0;
+	quality = 0;
+	det = 0;
+	complete = 0;
+	masPerPixel = 0;
+	controltype = 0;
 }
 
 PersistentCalibration&	PersistentCalibration::operator=(

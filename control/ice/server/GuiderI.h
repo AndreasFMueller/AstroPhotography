@@ -42,7 +42,6 @@ class GuiderI : virtual public Guider {
 	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
-	int	calibrationid;
 	astro::guiding::TrackerPtr	getTracker();
 
 	// public interface starts here
