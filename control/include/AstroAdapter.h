@@ -1708,17 +1708,17 @@ public:
 };
 
 template<typename Pixel>
-class DerivativeNormAdapter : public ConstImageAdapter<double>,
-	DerivativeXAdapter<Pixel>, DerivativeYAdapter<Pixel> {
+class DerivativeNormAdapter : public ConstImageAdapter<double> {
+	DerivativeXAdapter<Pixel>	_xdiff;
+	DerivativeYAdapter<Pixel>	_ydiff;
 public:
 	DerivativeNormAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<double>(image.getSize()),
-		  DerivativeXAdapter<Pixel>(image),
-		  DerivativeYAdapter<Pixel>(image) {
+		  _xdiff(image), _ydiff(image) {
 	}
 	virtual double	pixel(int x, int y) const {
-		double	dx = DerivativeXAdapter<Pixel>::pixel(x, y);
-		double	dy = DerivativeYAdapter<Pixel>::pixel(x, y);
+		double	dx = _xdiff.pixel(x, y);
+		double	dy = _ydiff.pixel(x, y);
 		return hypot(dx, dy);
 	}
 };

@@ -24,6 +24,7 @@ public:
 	volatile bool	completed;
 	float	guideinterval;
 	bool	csv;
+	TrackerMethod	method;
 private:
 	CommonMonitor	*monitor;
 public:
@@ -35,6 +36,7 @@ public:
 		guideinterval = 10;
 		csv = false;
 		monitor = NULL;
+		method = TrackerUNDEFINED;
 	}
 
 	// general commands

@@ -33,6 +33,9 @@ int	Guide::guide_command(GuiderPrx guider) {
 	// get the guider
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
 		guideinterval);
+	if (method != TrackerUNDEFINED) {
+		guider->setTrackerMethod(method);
+	}
 	guider->startGuiding(guideinterval);
 
 	// we are done

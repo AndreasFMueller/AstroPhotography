@@ -170,15 +170,18 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
-	ImagePoint	center = size.center();
+
+	ImagePoint	body(320,240);
+
 	Image<double>	image(size);
+
 	for (int x = 0; x < size.width(); x++) {
 		for (int y = 0; y < size.height(); y++) {
 			// apply the transform to the current point
 			Point   where(origin.x() - offset.x() + x,
 					origin.y() - offset.y() + y);
 			Point   p = transform(where);
-			float  value = 0;
+			double  value = 0;
 
 			switch (_content) {
 			case STARS:
@@ -202,14 +205,26 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 					}
 				}
 				break;
-			case SUN:
-				if ((p - center).abs() < 100) {
+			case SUN: {
+				double	r = (p - body).abs();
+				if (r < 100) {
 					value = 1.;
+				} else if (r > 12) {
+					value = 0;
+				} else {
+					value = (12 - r) / 2;
+				}
 				}
 				break;
-			case PLANET:
-				if ((p - center).abs() < 10) {
+			case PLANET: {
+				double	r = (p - body).abs();
+				if (r < 10) {
 					value = 1.;
+				} else if (r > 12) {
+					value = 0;
+				} else {
+					value = (12 - r) / 2;
+				}
 				}
 				break;
 			}

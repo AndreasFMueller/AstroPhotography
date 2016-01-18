@@ -142,6 +142,13 @@ module snowstar {
 		// The calibrated guider can be used for guiding
 		GuiderGUIDING
 	};
+
+	enum TrackerMethod {
+		TrackerUNDEFINED,
+		TrackerSTAR,
+		TrackerPHASE,
+		TrackerDIFFPHASE
+	};
 	/**
 	 * \brief Interface for guiders
 	 *
@@ -176,6 +183,10 @@ module snowstar {
 		void	setExposure(Exposure expo)
 				throws BadParameter, BadState;
 		Exposure	getExposure();
+
+		// set/get the tracker method
+		void	setTrackerMethod(TrackerMethod method);
+		TrackerMethod	getTrackerMethod();
 
 		// This is the position of the star we want to track.
 		// It does not have to be exact at the beginning, and

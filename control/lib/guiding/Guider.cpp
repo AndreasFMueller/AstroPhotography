@@ -105,6 +105,10 @@ void	Guider::calibrationCleanup() {
  * and if so, starts a new thread.
  */
 int	Guider::startCalibration(TrackerPtr tracker) {
+	if (!tracker) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
+		throw std::runtime_error("tracker not set");
+	}
 	double	pixelsize = getPixelsize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
 		"focallength = %.3fmm, pixelsize = %.2fum)",
@@ -282,6 +286,16 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));
 	return tracker;
+}
+
+TrackerPtr	Guider::getPhaseTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a standard phase tracker");
+	return TrackerPtr(new PhaseTracker());
+}
+
+TrackerPtr	Guider::getDiffPhaseTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a differential phase tracker");
+	return TrackerPtr(new DifferentialPhaseTracker());
 }
 
 /**

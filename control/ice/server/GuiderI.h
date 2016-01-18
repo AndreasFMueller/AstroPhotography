@@ -42,6 +42,7 @@ class GuiderI : virtual public Guider {
 	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
+	TrackerMethod	_method;
 	astro::guiding::TrackerPtr	getTracker();
 
 	// public interface starts here
@@ -65,6 +66,9 @@ public:
 	virtual Exposure getExposure(const Ice::Current& current);
 	virtual void setStar(const Point&, const Ice::Current& current);
 	virtual Point getStar(const Ice::Current& current);
+	virtual void setTrackerMethod(const TrackerMethod,
+			const Ice::Current& current);
+	virtual TrackerMethod	getTrackerMethod(const Ice::Current& current);
 
 	// choose calibration
 	virtual void useCalibration(Ice::Int, const Ice::Current& current);

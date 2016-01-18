@@ -114,6 +114,9 @@ int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 			throw std::runtime_error("calibration star not set");
 		}
 	}
+	if (method != TrackerUNDEFINED) {
+		guider->setTrackerMethod(method);
+	}
 	calibrationid = guider->startCalibration();
 	std::cout << "new calibration " << calibrationid << " in progress";
 	std::cout << std::endl;

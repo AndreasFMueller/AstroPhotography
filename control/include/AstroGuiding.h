@@ -94,7 +94,7 @@ Point	findstar(image::ImagePtr image,
  */
 class Tracker {
 public:
-	virtual Point	operator()(image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(image::ImagePtr newimage) = 0;
 	virtual	std::string	toString() const = 0;
 };
 
@@ -116,8 +116,7 @@ public:
 		int k);
 
 	// find the displacement
-	virtual Point	operator()(
-			image::ImagePtr newimage) const;
+	virtual Point	operator()(image::ImagePtr newimage);
 
 	// accessors for teh tracker configuration data
 	const image::ImageRectangle&	rectangle() const {
@@ -149,10 +148,26 @@ std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
  * where there is no good guide star.
  */
 class PhaseTracker : public Tracker {
-	image::ImagePtr	image;
+	image::ImagePtr	imageptr;
+	Image<double>	*image;
 public:
-	PhaseTracker(image::ImagePtr image);
-	virtual Point	operator()(image::ImagePtr newimage) const;
+	PhaseTracker();
+	virtual Point	operator()(image::ImagePtr newimage);
+	virtual std::string	toString() const;
+};
+
+/**
+ * \brief Phase correlator based tracker using the differential
+ *
+ * This tracker uses the phase correlator, but it uses the differential
+ * adapter before it does the correlation.
+ */
+class DifferentialPhaseTracker : public Tracker {
+	image::ImagePtr	imageptr;
+	Image<double>	*image;
+public:
+	DifferentialPhaseTracker();
+	virtual Point	operator()(image::ImagePtr newimage);
 	virtual std::string	toString() const;
 };
 
@@ -648,6 +663,8 @@ public:
 	// methods involved with creating a tracker
 	double	getPixelsize();
 	TrackerPtr	getTracker(const Point& point);
+	TrackerPtr	getPhaseTracker();
+	TrackerPtr	getDiffPhaseTracker();
 
 public:
 	// tracking

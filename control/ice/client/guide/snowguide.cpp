@@ -32,13 +32,14 @@ static struct option	longopts[] = {
 { "guiderport",		required_argument,	NULL,	'G' }, /*  7 */
 { "help",		no_argument,		NULL,	'h' }, /*  8 */
 { "interval",		required_argument,	NULL,	'i' }, /*  9 */
-{ "prefix",		required_argument,	NULL,	'p' }, /* 10 */
-{ "rectangle",		required_argument,	NULL,	'r' }, /* 11 */
-{ "star",		required_argument,	NULL,	's' }, /* 12 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 13 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 14 */
-{ "width",		required_argument,	NULL,	'w' }, /* 15 */
-{ NULL,			0,			NULL,    0  }  /* 16 */
+{ "method",		required_argument,	NULL,	'm' }, /* 10 */
+{ "prefix",		required_argument,	NULL,	'p' }, /* 11 */
+{ "rectangle",		required_argument,	NULL,	'r' }, /* 12 */
+{ "star",		required_argument,	NULL,	's' }, /* 13 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 14 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 15 */
+{ "width",		required_argument,	NULL,	'w' }, /* 16 */
+{ NULL,			0,			NULL,    0  }  /* 17 */
 };
 
 /**
@@ -60,8 +61,8 @@ int	main(int argc, char *argv[]) {
 
 	guide.exposure.exposuretime = 1.;
 
-	while (EOF != (c = getopt_long(argc, argv, "b:c:C:de:f:G:hi:r:s:t:vw:",
-		longopts, &longindex)))
+	while (EOF != (c = getopt_long(argc, argv,
+		"b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
 		switch (c) {
 		case 'b':
 			binning = optarg;
@@ -86,6 +87,22 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'i':
 			guide.guideinterval = std::stod(optarg);
+			break;
+		case 'm': {
+			std::string	m(optarg);
+			if (m == "star") {
+				guide.method = TrackerSTAR;
+			} else if (m == "phase") {
+				guide.method = TrackerPHASE;
+			} else if (m == "diff") {
+				guide.method = TrackerDIFFPHASE;
+			} else {
+				std::string	msg = astro::stringprintf(
+					"unkown tracker method: %s", m.c_str());
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+				throw std::runtime_error(msg);
+			}
+			}
 			break;
 		case 'p':
 			guide.prefix = std::string(optarg);

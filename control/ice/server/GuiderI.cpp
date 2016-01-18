@@ -139,6 +139,7 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	astro::persistence::Database _database)
 	: guider(_guider), imagedirectory(_imagedirectory),
 	  database(_database) {
+	_method = TrackerSTAR;
 }
 
 GuiderI::~GuiderI() {
@@ -181,6 +182,18 @@ Point GuiderI::getStar(const Ice::Current& /* current */) {
 	return _point;
 }
 
+TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& /* current */) {
+	return _method;
+}
+
+void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using method: %s",
+		(method == TrackerUNDEFINED) ? "undefined" : (
+			(method == TrackerSTAR) ? "star" : (
+				(method == TrackerPHASE) ? "phase" : "diff")));
+	_method = method;
+}
+
 void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
@@ -221,8 +234,7 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 	guider->newimagecallback = astro::callback::CallbackPtr(icallback);
 
 	// construct a tracker
-	astro::guiding::TrackerPtr	tracker
-		= guider->getTracker(convert(_point));
+	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start the calibration
 	return guider->startCalibration(tracker);
@@ -254,6 +266,7 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
  * \brief build a tracker
  */
 astro::guiding::TrackerPtr	 GuiderI::getTracker() {
+#if 0
 	astro::camera::Exposure	exposure = guider->exposure();
 	astro::Point	d = convert(_point) - exposure.frame().origin();
 	astro::image::ImagePoint	trackerstar(d.x(), d.y());
@@ -262,6 +275,22 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));
 	return tracker;
+#endif
+	switch (_method) {
+	case TrackerUNDEFINED:
+	case TrackerSTAR:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a star tracker");
+		return guider->getTracker(convert(_point));
+		break;
+	case TrackerPHASE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a phase tracker");
+		return guider->getPhaseTracker();
+		break;
+	case TrackerDIFFPHASE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a diff tracker");
+		return guider->getDiffPhaseTracker();
+		break;
+	}
 }
 
 /**
@@ -272,8 +301,7 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
 		guidinginterval);
 	// construct a tracker
-	astro::guiding::TrackerPtr	tracker
-		= guider->getTracker(convert(_point));
+	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
