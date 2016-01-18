@@ -396,7 +396,10 @@ public:
 };
 
 /**
- * \brief template 
+ * \brief template for control devices
+ *
+ * The template implements different devices: guider ports or adaptive
+ * optics units
  */
 template<typename device, typename devicecalibration>
 class ControlDevice : public ControlDeviceBase {
@@ -408,11 +411,13 @@ private:
 public:
 	ControlDevice(const std::string& instrument, camera::Imager& imager,
 		deviceptr dev, persistence::Database database = NULL)
-		: ControlDeviceBase(instrument, imager, database), _device(dev) {
-		
+		: ControlDeviceBase(instrument, imager, database),
+		  _device(dev) {
 	}
 	virtual std::string	devicename() const { return _device->name(); }
-	virtual int	startCalibration(TrackerPtr /* tracker */) { }
+	virtual int	startCalibration(TrackerPtr /* tracker */) {
+		return -1; // suppress warning
+	}
 	virtual void	saveCalibration(const BasicCalibration& calibration) {
 		_calibration = calibration;
 		ControlDeviceBase::saveCalibration(calibration);

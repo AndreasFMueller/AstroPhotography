@@ -13,6 +13,7 @@
 #include <AstroGuiding.h>
 #include <TrackingPersistence.h>
 #include <TrackingStore.h>
+#include "CalibrationSource.h"
 
 namespace snowstar {
 
@@ -199,43 +200,8 @@ void GuiderI::useCalibration(Ice::Int calid,
 }
 
 Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
-	Calibration	result;
-	result.id = calibrationid;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d",
-		calibrationid);
-
-	// get the calibration record from the database
-	astro::guiding::CalibrationTable	t(database);
-	astro::guiding::CalibrationRecord	cal = t.byid(calibrationid);
-	result.timeago = converttime(cal.when);
-	result.guider.instrumentname = cal.instrument;
-	result.guider.ccdIndex = instrumentName2index(cal.instrument,
-		InstrumentGuiderCCD, cal.ccd);
-	result.guider.guiderportIndex = instrumentName2index(cal.instrument,
-		InstrumentGuiderPort, cal.controldevice);
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"copy coefficients from [%.3f, %.3f, %3f; %.3f, %.3f, %.3f ]",
-		cal.a[0], cal.a[1], cal.a[2], cal.a[3], cal.a[4], cal.a[5]);
-	for (int i = 0; i < 6; i++) {
-		result.coefficients.push_back(cal.a[i]);
-	}
-	result.complete = cal.complete;
-	result.focallength = cal.focallength;
-	result.masPerPixel = cal.masPerPixel;
-
-	// use database to retrieve calibration, containing coefficients
-	// and points
-	astro::guiding::CalibrationStore	store(database);
-	astro::guiding::GuiderCalibration	calibration
-		= store.getCalibration(calibrationid);
-	for (auto ptr = calibration.begin(); ptr != calibration.end(); ptr++) {
-		result.points.push_back(convert(*ptr));
-	}
-	result.quality = calibration.quality();
-	result.det = calibration.det();
-
-	// everything copied, return it
-	return result;
+	CalibrationSource	source(database);
+	return source.get(calibrationid);
 }
 
 /**
