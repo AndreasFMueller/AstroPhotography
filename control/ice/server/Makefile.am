@@ -53,4 +53,10 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 test:	snowstar
 	./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
 
+testsun:	snowstar
+	STARCONTENT=SUN ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+
+testplanet:	snowstar
+	STARCONTENT=PLANET ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+
 endif

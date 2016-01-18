@@ -107,6 +107,14 @@ public:
  * in this base class.
  */
 class StarCameraBase {
+public:
+	typedef enum { STARS, PLANET, SUN } content_type;
+protected:
+	content_type	_content;
+public:
+	content_type	content() const { return _content; }
+	void	content(content_type c) { _content = c; }
+private:
 	ImageRectangle	_rectangle;
 	/**
 	 * \brief Translation to be applied to the star field
@@ -165,10 +173,7 @@ protected:
 	double	noisevalue() const;
 	std::set<ImagePoint>	hotpixels;
 public:
-	StarCameraBase(const ImageRectangle& rectangle)
-		: _rectangle(rectangle), _alpha(0), _stretch(1),
-		  _dark(0), _noise(0), _light(true), _color(0), _radius(0),
-		  _innerradius(0) { }
+	StarCameraBase(const ImageRectangle& rectangle);
 
 	void	addHotPixels(unsigned int npixels);
 
