@@ -1666,6 +1666,63 @@ public:
 };
 #endif
 
+//////////////////////////////////////////////////////////////////////
+// Adapters that compute derivatives 
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class DerivativeXAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	DerivativeXAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (0 == x) {
+			return _image.pixel(1, y) -_image.pixel(0, y);
+		}
+		int	w = _image.getSize().width() - 1;
+		if (w == x) {
+			return _image.pixel(w, y) - _image.pixel(w - 1, y);
+		}
+		return 0.5 * (_image.pixel(x + 1, y) - _image.pixel(x - 1, y));
+	}
+};
+
+template<typename Pixel>
+class DerivativeYAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	DerivativeYAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (0 == y) {
+			return _image.pixel(x, 1) -_image.pixel(x, 0);
+		}
+		int	h = _image.getSize().height() - 1;
+		if (h == y) {
+			return _image.pixel(x, h) - _image.pixel(x, h - 1);
+		}
+		return 0.5 * (_image.pixel(x, y + 1) - _image.pixel(x, y - 1));
+	}
+};
+
+template<typename Pixel>
+class DerivativeNormAdapter : public ConstImageAdapter<double>,
+	DerivativeXAdapter<Pixel>, DerivativeYAdapter<Pixel> {
+public:
+	DerivativeNormAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<double>(image.getSize()),
+		  DerivativeXAdapter<Pixel>(image),
+		  DerivativeYAdapter<Pixel>(image) {
+	}
+	virtual double	pixel(int x, int y) const {
+		double	dx = DerivativeXAdapter<Pixel>::pixel(x, y);
+		double	dy = DerivativeYAdapter<Pixel>::pixel(x, y);
+		return hypot(dx, dy);
+	}
+};
+	
 } // namespace adapter
 } // namespace astro
 
