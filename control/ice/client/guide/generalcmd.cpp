@@ -202,6 +202,12 @@ int	Guide::state_command(GuiderPrx guider) {
 	case GuiderCALIBRATING:
 		std::cout << ": " << guider->calibrationProgress();
 		break;
+	case GuiderCALIBRATED: {
+		std::cout << ": ";
+		Calibration	cal = guider->getCalibration();
+		std::cout << cal.id;
+		}
+		break;
 	case GuiderGUIDING: {
 		std::cout << ": ";
 		TrackingSummary	summary = guider->getTrackingSummary();
