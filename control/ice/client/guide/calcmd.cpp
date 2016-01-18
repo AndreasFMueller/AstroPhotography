@@ -43,7 +43,7 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d",
 		calibrationid);
 	Calibration	cal;
-	if (calibrationid < 0) {
+	if (calibrationid <= 0) {
 		switch (guider->getState()) {
 		case GuiderUNCONFIGURED:
 		case GuiderIDLE:
