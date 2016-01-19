@@ -34,6 +34,8 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> state"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> repository [ <repo> ]"
+		<< std::endl;
 
 	std::cout << std::endl;
 	std::cout << "  Calibration:" << std::endl;

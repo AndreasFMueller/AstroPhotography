@@ -91,6 +91,7 @@ TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
 	} else {
 		_id = 0;
 	}
+	_summary.trackingid = _id;
 }
 
 /**
@@ -224,11 +225,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		}
 
 		// inform the callback, if there is one
-		if (guider()->trackingcallback) {
-			callback::CallbackDataPtr	trackinginfo(
-				new TrackingPoint(_last));
-			(*(guider()->trackingcallback))(trackinginfo);
-		}
+		guider()->callbackTrackingPoint(_last);
 
 		// this is a possible cancellation point
 		if (thread.terminate()) {

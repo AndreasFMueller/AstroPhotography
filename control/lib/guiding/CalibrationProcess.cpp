@@ -83,14 +83,7 @@ void	CalibrationProcess::callback(const ImagePtr& image) {
 	if (!hasGuider()) {
 		return;
 	}
-	if (guider()->newimagecallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "send image to callback");
-		astro::callback::CallbackDataPtr	data(
-			new callback::ImageCallbackData(image));
-		(*guider()->newimagecallback)(data);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image callback");
-	}
+	guider()->callbackImage(image);
 }
 
 /**

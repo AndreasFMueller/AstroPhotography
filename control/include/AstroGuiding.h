@@ -351,6 +351,7 @@ public:
  */
 class TrackingSummary : public BasicSummary {
 public:
+	int	trackingid;
 	int	calibrationid;
 	GuiderDescriptor	descriptor;
 	TrackingSummary(const std::string& instrument,
@@ -676,6 +677,7 @@ public:
 	
 	friend class GuiderProcess;
 
+private:
 	/**
 	 * \brief Callback for new images
 	 *
@@ -686,8 +688,11 @@ public:
 	 * gets a new image, it calls this callback with an argument of type
 	 * ImageCallbackData.
 	 */
-	callback::CallbackPtr	newimagecallback;
+	callback::CallbackPtr	_newimagecallback;
 public:
+	void	newimagecallback(callback::CallbackPtr n) {
+		_newimagecallback = n;
+	}
 	image::ImagePtr	mostRecentImage;
 	void	callbackImage(ImagePtr image);
 
@@ -700,9 +705,14 @@ public:
 	 * information is encapsulated into a callback data structure
 	 * and the callback is called with the update information
 	 */
-	callback::CallbackPtr	trackingcallback;
+private:
+	callback::CallbackPtr	_trackingcallback;
 	
 public:
+	void	trackingcallback(callback::CallbackPtr t) {
+		_trackingcallback = t;
+	}
+	void	callbackTrackingPoint(const TrackingPoint& trackingpoint);
 	/**
 	 * \brief Information about the most recent update
 	 *

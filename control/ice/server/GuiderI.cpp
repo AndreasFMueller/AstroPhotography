@@ -236,7 +236,7 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 		= new GuiderICalibrationCallback(*this);
 	guider->calibrationcallback = astro::callback::CallbackPtr(ccallback);
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback = astro::callback::CallbackPtr(icallback);
+	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
 
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -332,10 +332,10 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	// install a callback in the guider
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callbacks");
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
-	guider->trackingcallback = astro::callback::CallbackPtr(tcallback);
+	guider->trackingcallback(astro::callback::CallbackPtr(tcallback));
 
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback = astro::callback::CallbackPtr(icallback);
+	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
@@ -350,7 +350,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	//imagecallbacks.stop();
 
 	// remove the callback
-	guider->trackingcallback.reset();
+	guider->trackingcallback(NULL);
 }
 
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {

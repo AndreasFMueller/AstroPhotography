@@ -146,6 +146,8 @@ struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {
 		summary.descriptor.instrument(), InstrumentGuiderPort,
 		summary.descriptor.guiderport());
 	result.since = converttime(summary.starttime);
+	result.calibrationid = summary.calibrationid;
+	result.guiderunid = summary.trackingid;
 	result.lastoffset = convert(summary.lastoffset);
 	result.averageoffset = convert(summary.averageoffset());
 	result.variance = convert(summary.variance());
@@ -162,6 +164,7 @@ astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
 	astro::guiding::TrackingSummary	result(summary.guider.instrumentname,
 		ccdname, guiderportname);
 	result.starttime = converttime(summary.since);
+	result.trackingid = summary.guiderunid;
 	result.calibrationid = summary.calibrationid;
 	result.lastoffset = convert(summary.lastoffset);
 	result.average(convert(summary.averageoffset));

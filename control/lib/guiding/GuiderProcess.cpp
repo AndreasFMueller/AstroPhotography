@@ -124,7 +124,10 @@ void	GuiderProcess::lastAction(double& actiontime, Point& offset,
 }
 
 const TrackingSummary&	GuiderProcess::summary() {
-	return trackingwork->summary();
+	if (trackingwork) {
+		return trackingwork->summary();
+	}
+	throw std::runtime_error("no tracking summary available");
 }
 
 } // namespace guiding

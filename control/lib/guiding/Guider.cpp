@@ -227,6 +227,10 @@ void	Guider::startExposure() {
 ImagePtr	Guider::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
 	ImagePtr	image = imager().getImage();
+	if (!image->hasMetadata(std::string("INSTRUME"))) {
+		image->setMetadata(astro::io::FITSKeywords::meta(
+			std::string("INSTRUME"), instrument()));
+	}
 	callbackImage(image);
 	mostRecentImage = image;
 	return image;
@@ -239,14 +243,23 @@ ImagePtr	Guider::getImage() {
  * it to the newimagecallback, if it is set.
  */
 void	Guider::callbackImage(ImagePtr image) {
-	if (newimagecallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
-		ImageCallbackData	*argp = 
-			new ImageCallbackData(image);
-		CallbackDataPtr	arg(argp);
-		newimagecallback->operator()(arg);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
+	if (!_newimagecallback) {
+		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
+	ImageCallbackData	*argp = new ImageCallbackData(image);
+	CallbackDataPtr	arg(argp);
+	_newimagecallback->operator()(arg);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
+}
+
+void	Guider::callbackTrackingPoint(const TrackingPoint& trackingpoint) {
+	if (!_trackingcallback) {
+		return;
+	}
+	callback::CallbackDataPtr       trackinginfo(
+		new TrackingPoint(trackingpoint));
+	_trackingcallback->operator()(trackinginfo);
 }
 
 /**
