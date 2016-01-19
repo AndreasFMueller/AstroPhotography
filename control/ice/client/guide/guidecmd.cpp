@@ -20,7 +20,8 @@ namespace snowguide {
  */
 int	Guide::guide_command(GuiderPrx guider) {
 	if ((star.x == 0) && (star.y == 0)) {
-		throw std::runtime_error("calibration star not set");
+		debug(LOG_WARNING, DEBUG_LOG, 0,
+			"warning: calibration star not set");
 	}
 	// make sure we have all the information we need
 	if ((guideinterval < 0) || (guideinterval > 60)) {
@@ -33,6 +34,9 @@ int	Guide::guide_command(GuiderPrx guider) {
 	// get the guider
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
 		guideinterval);
+	if (method != TrackerUNDEFINED) {
+		guider->setTrackerMethod(method);
+	}
 	guider->startGuiding(guideinterval);
 
 	// we are done

@@ -14,6 +14,29 @@ using namespace astro::adapter;
 namespace astro {
 
 /**
+ * \brief Constructor for the StarCameraBase
+ *
+ * sets the _content variable depending on the environment variable STARCONTENT
+ */
+StarCameraBase::StarCameraBase(const ImageRectangle& rectangle)
+	: _content(STARS), _rectangle(rectangle), _alpha(0), _stretch(1),
+	  _dark(0), _noise(0), _light(true), _color(0), _radius(0),
+	  _innerradius(0) {
+	// check environement variable
+	char	*v = getenv("STARCONTENT");
+	if (NULL == v) {
+		return;
+	}
+	std::string	contentvar(v);
+	if (contentvar == "SUN") {
+		_content = SUN;
+	}
+	if (contentvar == "PLANET") {
+		_content = PLANET;
+	}
+}
+
+/**
  * \brief compute a random point and add it as a hot pixel position
  */
 void	StarCameraBase::addHotPixel() {
@@ -147,36 +170,65 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
+
+	ImagePoint	body(320,240);
+
 	Image<double>	image(size);
+
 	for (int x = 0; x < size.width(); x++) {
 		for (int y = 0; y < size.height(); y++) {
 			// apply the transform to the current point
 			Point   where(origin.x() - offset.x() + x,
 					origin.y() - offset.y() + y);
 			Point   p = transform(where);
+			double  value = 0;
 
-			// compute the intensity
-			float  value = 0;
-			if (light()) {
-				switch (color()) {
-				case 0:
-					value = field.intensity(p);
-					break;
-				case 1:
-					value = field.intensityR(p);
-					break;
-				case 2:
-					value = field.intensityG(p);
-					break;
-				case 3:
-					value = field.intensityB(p);
-					break;
-				default:
-					break;
+			switch (_content) {
+			case STARS:
+				// compute the intensity
+				if (light()) {
+					switch (color()) {
+					case 0:
+						value = field.intensity(p);
+						break;
+					case 1:
+						value = field.intensityR(p);
+						break;
+					case 2:
+						value = field.intensityG(p);
+						break;
+					case 3:
+						value = field.intensityB(p);
+						break;
+					default:
+						break;
+					}
 				}
-				value *= multiplier;
+				break;
+			case SUN: {
+				double	r = (p - body).abs();
+				if (r < 100) {
+					value = 1.;
+				} else if (r > 102) {
+					value = 0;
+				} else {
+					value = (102 - r) / 2;
+				}
+				}
+				break;
+			case PLANET: {
+				double	r = (p - body).abs();
+				if (r < 10) {
+					value = 1.;
+				} else if (r > 12) {
+					value = 0;
+				} else {
+					value = (12 - r) / 2;
+				}
+				}
+				break;
 			}
-
+			value *= multiplier;
 			image.pixel(x, y) = value;
 		}
 	}

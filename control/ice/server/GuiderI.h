@@ -12,6 +12,7 @@
 #include <AstroPersistence.h>
 #include <CallbackHandler.h>
 #include <AstroDebug.h>
+#include <AstroProject.h>
 
 namespace snowstar {
 
@@ -42,8 +43,10 @@ class GuiderI : virtual public Guider {
 	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
-	int	calibrationid;
+	TrackerMethod	_method;
 	astro::guiding::TrackerPtr	getTracker();
+	std::string	_repositoryname;
+	astro::project::ImageRepoPtr	imagerepo;
 
 	// public interface starts here
 public:
@@ -66,6 +69,15 @@ public:
 	virtual Exposure getExposure(const Ice::Current& current);
 	virtual void setStar(const Point&, const Ice::Current& current);
 	virtual Point getStar(const Ice::Current& current);
+	virtual void setTrackerMethod(const TrackerMethod,
+			const Ice::Current& current);
+	virtual TrackerMethod	getTrackerMethod(const Ice::Current& current);
+
+	// define the repository name to store images captured during
+	// calibration or guiding
+	virtual void	setRepositoryName(const std::string& reponame,
+				const Ice::Current& current);
+	virtual std::string	getRepositoryName(const Ice::Current& current);
 
 	// choose calibration
 	virtual void useCalibration(Ice::Int, const Ice::Current& current);
@@ -88,6 +100,7 @@ public:
 			const Ice::Current& current);
 	virtual TrackingHistory getTrackingHistory(Ice::Int,
 			const Ice::Current& current);
+	virtual TrackingSummary	getTrackingSummary(const Ice::Current& current);
 
 	// callback handlers
 private:

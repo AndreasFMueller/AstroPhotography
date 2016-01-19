@@ -52,8 +52,7 @@ class StarDetector : public StarDetectorBase {
 	adapter::TypeConversionAdapter<Pixel>	tca;
 public:
 	StarDetector(const image::ConstImageAdapter<Pixel>& _image);
-	Point	operator()(
-		const image::ImageRectangle& rectangle) const;
+	Point	operator()(const image::ImageRectangle& rectangle) const;
 }; 
 
 /**
@@ -72,8 +71,6 @@ StarDetector<Pixel>::StarDetector(
  * value in a rectangle, we get the centroid coordinates of the star's
  * response. This is the best estimate for the star coordinates.
  *
- * XXX problem with stars near border of rectangle 
- *
  * We should add a window function here. The problem is that when the
  * image moves, additional stars may get into view. This happens oftion
  * when calibrating. So stars at the border of the image should have much
@@ -83,57 +80,6 @@ StarDetector<Pixel>::StarDetector(
 template<typename Pixel>
 Point	StarDetector<Pixel>::operator()(
 		const image::ImageRectangle& rectangle) const {
-#if 0
-	// work only in the rectangle
-	adapter::WindowAdapter<Pixel>	adapter(image, rectangle);
-
-	// determine the brightest pixel within the rectangle
-	image::ImageSize	size = adapter.getSize();
-	int	maxx = -1, maxy = -1;
-	double	maxvalue = 0;
-	for (int x = 0; x < size.width(); x++) {
-		for (int y = 0; y < size.height(); y++) {
-			double	value = luminance(adapter.pixel(x, y));
-			if (value > maxvalue) {
-				maxx = x; maxy = y; maxvalue = value;
-			}
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found maximum at (%d,%d), value = %f",
-		maxx, maxy, maxvalue);
-
-	// compute the weighted sum of the pixel coordinates in a (2k+1)^2
-	// square around the maximum pixel.
-	double	xsum = 0, ysum = 0, weightsum = 0;
-
-	int	xleft = maxx - k;
-	if (xleft < 0) { xleft = 0; }
-	int	xright = maxx + k;
-	if (xright > size.width()) { xright = size.width(); }
-
-	int	ybottom = maxy - k;
-	if (ybottom < 0) { ybottom = 0; }
-	int	ytop = maxy + k;
-	if (ytop > size.height()) { ytop = size.height(); }
-
-	for (int x = xleft; x < xright; x++) {
-		for (int y = ybottom; y < ytop; y++) {
-			double	value = luminance(adapter.pixel(x, y));
-			if (value == value) {
-				weightsum += value;
-				xsum += x * value;
-				ysum += y * value;
-			}
-		}
-	}
-	xsum /= weightsum;
-	ysum /= weightsum;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "centroid coordinates: %f,%f", xsum, ysum);
-
-	// add the offset of the rectangle to get real coordinates
-	return Point(rectangle.origin().x() + xsum,
-		rectangle.origin().y() + ysum);
-#endif
 	return StarDetectorBase::operator()(tca, rectangle);
 }
 
@@ -148,7 +94,7 @@ Point	findstar(image::ImagePtr image,
  */
 class Tracker {
 public:
-	virtual Point	operator()(image::ImagePtr newimage) const = 0;
+	virtual Point	operator()(image::ImagePtr newimage) = 0;
 	virtual	std::string	toString() const = 0;
 };
 
@@ -170,8 +116,7 @@ public:
 		int k);
 
 	// find the displacement
-	virtual Point	operator()(
-			image::ImagePtr newimage) const;
+	virtual Point	operator()(image::ImagePtr newimage);
 
 	// accessors for teh tracker configuration data
 	const image::ImageRectangle&	rectangle() const {
@@ -203,14 +148,30 @@ std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
  * where there is no good guide star.
  */
 class PhaseTracker : public Tracker {
-	image::ImagePtr	image;
+	image::ImagePtr	imageptr;
+	Image<double>	*image;
 public:
-	PhaseTracker(image::ImagePtr image);
-	virtual Point	operator()(image::ImagePtr newimage) const;
+	PhaseTracker();
+	virtual Point	operator()(image::ImagePtr newimage);
 	virtual std::string	toString() const;
 };
 
-class GuiderCalibrator;
+/**
+ * \brief Phase correlator based tracker using the differential
+ *
+ * This tracker uses the phase correlator, but it uses the differential
+ * adapter before it does the correlation.
+ */
+class DifferentialPhaseTracker : public Tracker {
+	image::ImagePtr	imageptr;
+	Image<double>	*image;
+public:
+	DifferentialPhaseTracker();
+	virtual Point	operator()(image::ImagePtr newimage);
+	virtual std::string	toString() const;
+};
+
+//class GuiderCalibrator;
 
 /**
  * \brief CalibrationPoint
@@ -226,34 +187,80 @@ public:
 };
 
 /**
+ * \brief Base class for all the calibrations for guiders
+ *
+ * This is the common ground for calibraiton of guiders using guider ports
+ * and tip-tilt adaptive optics units.
+ */
+class BasicCalibration : public std::vector<CalibrationPoint> {
+public:
+	typedef enum { GP, AO } CalibrationType;
+static std::string	type2string(CalibrationType caltype);
+static CalibrationType	string2type(const std::string& calname);
+private:
+	CalibrationType	_calibrationtype;
+public:
+	CalibrationType	calibrationtype() const { return _calibrationtype; }
+	void	calibrationtype(CalibrationType ct) { _calibrationtype = ct; }
+
+public:
+	double	a[6];
+private:
+	bool	_complete;
+public:
+	bool	complete() const { return _complete; }
+	void	complete(bool c) { _complete = c; }
+	BasicCalibration();
+	BasicCalibration(const double coefficients[6]);
+
+	double	quality() const;
+	double	det() const;
+
+	// string representation of the baseic 
+	std::string	toString() const;
+
+	// corrections
+	Point	defaultcorrection() const;
+	Point	operator()(const Point& offset, double Deltat) const;
+
+	// modifying the calibration
+	void	rescale(double scalefactor);
+	bool	iscalibrated() const { return 0. != det(); }
+
+	// add a calibration point
+	void	add(const CalibrationPoint& p) { push_back(p); }
+};
+
+std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal);
+std::istream&	operator>>(std::istream& in, BasicCalibration& cal);
+
+/**
  * \brief GuiderCalibration
  *
  * The Calibration data. The coefficients in the array a correspond to
  * a matrix that describes how the control commands on the guider port
  * translate into displacements of the guider image.
  */
-class GuiderCalibration : public std::vector<CalibrationPoint> {
+class GuiderCalibration : public BasicCalibration {
 public:
-	double	a[6];
 	double	focallength;
 	double	masPerPixel;
-	bool	complete;
-	double	quality() const;
-	double	det() const;
 	GuiderCalibration();
 	GuiderCalibration(const double coefficients[6]);
-	GuiderCalibration(const float coefficients[6]); // needed for CORBA
-	std::string	toString() const;
-	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset, double Deltat) const;
-
-	void	rescale(double scalefactor);
-	bool	iscalibrated() const { return 0. != det(); }
-	void	add(const CalibrationPoint& p) { push_back(p); }
+	GuiderCalibration(const BasicCalibration& other);
+	GuiderCalibration&	operator=(const BasicCalibration& other);
 };
 
-std::ostream&	operator<<(std::ostream& out, const GuiderCalibration& cal);
-std::istream&	operator>>(std::istream& in, GuiderCalibration& cal);
+/**
+ * \brief class for calibrations of adaptive optics
+ */
+class AdaptiveOpticsCalibration : public BasicCalibration {
+public:
+	AdaptiveOpticsCalibration();
+	AdaptiveOpticsCalibration(const double coefficients[6]);
+	AdaptiveOpticsCalibration(const BasicCalibration& other);
+	AdaptiveOpticsCalibration&	operator=(const BasicCalibration& other);
+};
 
 /**
  * \brief Encapsulation of the calibration as callback argument
@@ -268,19 +275,19 @@ std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
 typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
 /**
- * \brief GuiderCalibrator
+ * \brief BasicCalibrator
  *
- * The GuiderCalibrator collects a set of points and computes the calibration
- * data from this. The GuiderCalibrator is used by the CalibrationProcess,
+ * The BasicCalibrator collects a set of points and computes the calibration
+ * data from this. The BasicCalibrator is used by the CalibrationProcess,
  * it adds points during the calibration using the add method, the calibrate
  * method then computes the calibration data.
  */
-class GuiderCalibrator {
-	GuiderCalibration	_calibration;
+class BasicCalibrator {
+	BasicCalibration	_calibration;
 public:
-	GuiderCalibrator();
+	BasicCalibrator();
 	void	add(const CalibrationPoint& calibrationpoint);
-	GuiderCalibration	calibrate();
+	BasicCalibration	calibrate();
 };
 
 /**
@@ -321,6 +328,36 @@ public:
 	std::string	toString() const;
 };
 
+/**
+ * \brief summary information about 
+ */
+class BasicSummary {
+	double	_alpha;
+	Point	_average;
+	Point	average2;
+public:
+	time_t	starttime;
+	Point	lastoffset;
+	Point	averageoffset() const;
+	void	average(const Point& a) { _average = a; }
+	Point	variance() const;
+	void	variance(const Point& v);
+	BasicSummary(double alpha = 0.1);
+	void	addPoint(const Point& offset);
+};
+
+/**
+ * \brief Holder class for summary data about tracking
+ */
+class TrackingSummary : public BasicSummary {
+public:
+	int	trackingid;
+	int	calibrationid;
+	GuiderDescriptor	descriptor;
+	TrackingSummary(const std::string& instrument,
+		const std::string& ccd, const std::string& guiderport);
+};
+
 // we will need the GuiderProcess class, but as we want to keep the 
 // implementation (using low level threads and other nasty things) hidden,
 // we only define it in the implementation
@@ -328,6 +365,88 @@ class GuiderProcess;
 typedef std::shared_ptr<GuiderProcess>	GuiderProcessPtr;
 class CalibrationProcess;
 typedef std::shared_ptr<CalibrationProcess>	CalibrationProcessPtr;
+class BasicProcess;
+typedef std::shared_ptr<BasicProcess>	BasicProcessPtr;
+class PersistentCalibration;
+
+/**
+ * \brief Class handling a control device
+ *
+ * Control devices are guider ports or adaptive optics units
+ */
+class ControlDeviceBase {
+	std::string		_instrument;
+	camera::Imager&		_imager;
+	int			_calibrationid;
+	camera::Exposure	_exposure;
+	double			_focallength;
+protected:
+	persistence::Database	_database;
+	PersistentCalibration	*pcal;
+public:
+	const std::string&	instrument() const { return _instrument; }
+	camera::Imager&		imager() { return _imager; }
+	std::string	ccdname() const { return _imager.ccd()->name(); }
+	virtual std::string	devicename() const = 0;
+	int	calibrationid() const { return _calibrationid; }
+	const camera::Exposure&	exposure() const { return _exposure; }
+	void	exposure(const camera::Exposure& e) { _exposure = e; }
+	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
+private:
+	ControlDeviceBase(const ControlDeviceBase& other);
+	ControlDeviceBase&	operator=(const ControlDeviceBase& other);
+public:
+	ControlDeviceBase(const std::string& instrument, camera::Imager& imager,
+		persistence::Database database = NULL);
+	virtual ~ControlDeviceBase();
+
+	virtual int	startCalibration(TrackerPtr tracker);
+	void	cancelCalibration();
+	bool	waitCalibration(double timeout);
+	virtual void	saveCalibration(const BasicCalibration& calibration);
+protected:
+	BasicProcessPtr	process;
+public:
+
+};
+
+/**
+ * \brief template for control devices
+ *
+ * The template implements different devices: guider ports or adaptive
+ * optics units
+ */
+template<typename device, typename devicecalibration>
+class ControlDevice : public ControlDeviceBase {
+public:
+	typedef std::shared_ptr<device>	deviceptr;
+private:
+	deviceptr	_device;
+	devicecalibration	_calibration;
+public:
+	ControlDevice(const std::string& instrument, camera::Imager& imager,
+		deviceptr dev, persistence::Database database = NULL)
+		: ControlDeviceBase(instrument, imager, database),
+		  _device(dev) {
+	}
+	virtual std::string	devicename() const { return _device->name(); }
+	virtual int	startCalibration(TrackerPtr /* tracker */) {
+		return -1; // suppress warning
+	}
+	virtual void	saveCalibration(const BasicCalibration& calibration) {
+		_calibration = calibration;
+		ControlDeviceBase::saveCalibration(calibration);
+	}
+};
+
+// specializations
+template<>
+int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
+		TrackerPtr tracker);
+template<>
+int	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::startCalibration(
+		TrackerPtr tracker);
 
 /**
  * \brief enumeration type for the state of the guider
@@ -446,6 +565,9 @@ public:
 private:
 	persistence::Database	_database;
 
+	// prevent copying
+	Guider(const Guider& other);
+	Guider&	operator=(const Guider& other);
 public:
 	/**
 	 * \brief Construct a guider from camera, ccd, and guiderport
@@ -542,6 +664,8 @@ public:
 	// methods involved with creating a tracker
 	double	getPixelsize();
 	TrackerPtr	getTracker(const Point& point);
+	TrackerPtr	getPhaseTracker();
+	TrackerPtr	getDiffPhaseTracker();
 
 public:
 	// tracking
@@ -549,9 +673,11 @@ public:
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	double	getInterval();
+	const TrackingSummary&	summary();
 	
 	friend class GuiderProcess;
 
+private:
 	/**
 	 * \brief Callback for new images
 	 *
@@ -562,8 +688,11 @@ public:
 	 * gets a new image, it calls this callback with an argument of type
 	 * ImageCallbackData.
 	 */
-	callback::CallbackPtr	newimagecallback;
+	callback::CallbackPtr	_newimagecallback;
 public:
+	void	newimagecallback(callback::CallbackPtr n) {
+		_newimagecallback = n;
+	}
 	image::ImagePtr	mostRecentImage;
 	void	callbackImage(ImagePtr image);
 
@@ -576,9 +705,14 @@ public:
 	 * information is encapsulated into a callback data structure
 	 * and the callback is called with the update information
 	 */
-	callback::CallbackPtr	trackingcallback;
+private:
+	callback::CallbackPtr	_trackingcallback;
 	
 public:
+	void	trackingcallback(callback::CallbackPtr t) {
+		_trackingcallback = t;
+	}
+	void	callbackTrackingPoint(const TrackingPoint& trackingpoint);
 	/**
 	 * \brief Information about the most recent update
 	 *

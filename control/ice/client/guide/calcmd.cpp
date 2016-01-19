@@ -43,7 +43,7 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d",
 		calibrationid);
 	Calibration	cal;
-	if (calibrationid < 0) {
+	if (calibrationid <= 0) {
 		switch (guider->getState()) {
 		case GuiderUNCONFIGURED:
 		case GuiderIDLE:
@@ -111,8 +111,12 @@ int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 		return EXIT_SUCCESS;
 	} else {
 		if ((star.x == 0) && (star.y == 0)) {
-			throw std::runtime_error("calibration star not set");
+			debug(LOG_WARNING, DEBUG_LOG, 0,
+				"warning: calibration star not set");
 		}
+	}
+	if (method != TrackerUNDEFINED) {
+		guider->setTrackerMethod(method);
 	}
 	calibrationid = guider->startCalibration();
 	std::cout << "new calibration " << calibrationid << " in progress";

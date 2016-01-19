@@ -31,12 +31,14 @@ public:
 	void	testIntegerNegative();
 	void	testHalf();
 	void	testImage();
+	void	testDisks();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
 	CPPUNIT_TEST(testInteger);
 	CPPUNIT_TEST(testIntegerNegative);
 	CPPUNIT_TEST(testHalf);
 	CPPUNIT_TEST(testImage);
+	CPPUNIT_TEST(testDisks);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -179,6 +181,41 @@ void	PhaseCorrelatorTest::testImage() {
 	CPPUNIT_ASSERT(target == effective);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "endImage test");
+}
+
+void	PhaseCorrelatorTest::testDisks() {
+	int	N = 64;
+	Image<double>	fromimage(N, N);
+	Image<double>	toimage(N, N);
+	for (int x = 0; x < fromimage.size().width(); x++) {
+		for (int y = 0; y < fromimage.size().height(); y++) {
+			double	r = hypot(x - 32, y - 32);
+			if (r < 10) {
+				fromimage.pixel(x, y) = 100;
+			} else if (r > 12) {
+				fromimage.pixel(x, y) = 0;
+			} else {
+				fromimage.pixel(x, y) = 100 * (12 - r) / 2;
+			}
+			r = hypot(x - 40, y - 48);
+			if (r < 10) {
+				toimage.pixel(x, y) = 100;
+			} else if (r > 12) {
+				toimage.pixel(x, y) = 0;
+			} else {
+				toimage.pixel(x, y) = 100 * (12 - r) / 2;
+			}
+		}
+	}
+	DerivativeNormAdapter<double>	from(fromimage);
+	DerivativeNormAdapter<double>	to(toimage);
+
+	// create a differential phase correlator
+	PhaseCorrelator	pc(false);
+	std::pair<Point, double>	result = pc(from, to);
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
 }
 
 } // namespace test

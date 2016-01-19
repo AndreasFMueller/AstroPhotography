@@ -11,6 +11,8 @@
 #include <GuiderI.h>
 #include <ProxyCreator.h>
 #include <IceConversions.h>
+#include <AstroGuiding.h>
+#include <CalibrationSource.h>
 
 namespace snowstar {
 
@@ -134,50 +136,8 @@ idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
 Calibration	GuiderFactoryI::getCalibration(int id,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d", id);
-	// use the database to retrieve the complete calibration data
-	Calibration	calibration;
-	try {
-		astro::guiding::CalibrationTable	ct(database);
-		if (!ct.exists(id)) {
-			NotFound	exception;
-			exception.cause = astro::stringprintf("calibration %d does not exist", id);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
-			throw exception;
-		}
-		astro::guiding::CalibrationRecord	r = ct.byid(id);
-		calibration.id = r.id();
-		calibration.timeago = converttime(r.when);
-		calibration.guider.instrumentname = r.instrument;
-		calibration.guider.ccdIndex
-			= instrumentName2index(r.instrument,
-				InstrumentGuiderCCD, r.ccd);
-		calibration.guider.guiderportIndex
-			= instrumentName2index(r.instrument,
-				InstrumentGuiderPort, r.guiderport);
-		calibration.focallength = r.focallength;
-		calibration.masPerPixel = r.masPerPixel;
-		calibration.complete = (r.complete) ? true : false;
-		calibration.det = r.det;
-		calibration.quality = r.quality;
-		for (int i = 0; i < 6; i++) {
-			calibration.coefficients.push_back(r.a[i]);
-		}
-
-		// add calibration points
-		astro::guiding::CalibrationStore	store(database);
-		std::list<astro::guiding::CalibrationPointRecord>	points
-			= store.getCalibrationPoints(id);
-		std::list<astro::guiding::CalibrationPointRecord>::iterator i;
-		for (i = points.begin(); i != points.end(); i++) {
-			calibration.points.push_back(convert(*i));
-		}
-		return calibration;
-	} catch (std::exception& ex) {
-		std::string	msg = astro::stringprintf("calibrationd run %d "
-			"not found: %s", id, ex.what());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw NotFound(msg);
-	}
+	CalibrationSource	source(database);
+	return source.get(id);
 }
 
 void	GuiderFactoryI::deleteCalibration(int id,
@@ -236,8 +196,10 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		astro::guiding::GuidingRunRecord	r = gt.byid(id);
 		if (!gt.exists(id)) {
 			NotFound	exception;
-			exception.cause = astro::stringprintf("tracking history %d does not exist", id);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+			exception.cause = astro::stringprintf("tracking history"
+				" %d does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
+				exception.cause.c_str());
 			throw exception;
 		}
 		history.timeago = converttime(r.whenstarted);
@@ -279,8 +241,10 @@ void	GuiderFactoryI::deleteTrackingHistory(int id,
 	astro::guiding::TrackingStore	store(database);
 	if (!store.contains(id)) {
 		NotFound	exception;
-		exception.cause = astro::stringprintf("tracking history %d not found", id);
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s", exception.cause.c_str());
+		exception.cause = astro::stringprintf("tracking history %d not "
+			"found", id);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete: %s",
+			exception.cause.c_str());
 		throw exception;
 	}
 	store.deleteTrackingHistory(id);

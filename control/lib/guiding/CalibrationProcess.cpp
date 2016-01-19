@@ -28,9 +28,14 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
 	moveto(grid * ra, grid * dec);
 
 	// take an image at that position
-	imager().startExposure(exposure());
-	usleep(1000000 * exposure().exposuretime());
-	ImagePtr	image = guider().getImage();
+	ImagePtr	image;
+	if (hasGuider()) {
+		image = guider()->getImage();
+	} else {
+		imager().startExposure(exposure());
+		usleep(1000000 * exposure().exposuretime());
+		image = imager().getImage();
+	}
 
 	// analze the image
 	Point	star = (*tracker())(image);
@@ -43,14 +48,17 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
  * \brief Send a calibration point to the callback
  */
 void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
-	if (guider().calibrationcallback) {
+	if (!hasGuider()) {
+		return;
+	}
+	if (guider()->calibrationcallback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"send calibration point to callback %p",
-			(&*guider().calibrationcallback));
+			(&*guider()->calibrationcallback));
 		astro::callback::CallbackDataPtr	data(
 			new CalibrationPointCallbackData(calpoint));
 		//(*guider().calibrationcallback)(data);
-		guider().calibrationcallback->operator()(data);
+		guider()->calibrationcallback->operator()(data);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for points");
 	}
@@ -60,11 +68,14 @@ void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
  * \brief Send the completed calibration data to the callback
  */
 void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
-	if (guider().calibrationcallback) {
+	if (!hasGuider()) {
+		return;
+	}
+	if (guider()->calibrationcallback) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "send guider calibration data");
 		astro::callback::CallbackDataPtr	data(
 			new GuiderCalibrationCallbackData(calibration));
-		(*guider().calibrationcallback)(data);
+		(*guider()->calibrationcallback)(data);
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for calibration");
 	}
@@ -74,14 +85,10 @@ void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
  * \brief Send the image to the callback
  */
 void	CalibrationProcess::callback(const ImagePtr& image) {
-	if (guider().newimagecallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "send image to callback");
-		astro::callback::CallbackDataPtr	data(
-			new callback::ImageCallbackData(image));
-		(*guider().newimagecallback)(data);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no image callback");
+	if (!hasGuider()) {
+		return;
 	}
+	guider()->callbackImage(image);
 }
 
 /**
@@ -90,7 +97,7 @@ void	CalibrationProcess::callback(const ImagePtr& image) {
  * Moves to a grid point, measures the offset seen by the tracker, then
  * returns to the original point and measures that again.
  */
-void	CalibrationProcess::measure(GuiderCalibrator& calibrator,
+void	CalibrationProcess::measure(BasicCalibrator& calibrator,
 		int ra, int dec) {
 	// skip the point ra=0, dec=0
 	if ((0 == ra) && (0 == dec)) {
@@ -174,7 +181,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	grid = gridconstant(_focallength, _pixelsize);
 
 	// prepare a GuiderCalibrator class that does the actual computation
-	GuiderCalibrator	calibrator;
+	BasicCalibrator	calibrator;
 
 	// measure the initial point
 	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));
@@ -198,19 +205,22 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration interrupted");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration measurements complete");
 	
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();
 	//cal.rescale(1. / grid);
-	guider().saveCalibration(cal);
-	guider().calibration(cal);
+	if (hasGuider()) {
+		guider()->saveCalibration(cal);
+		guider()->calibration(cal);
+	}
 
 	// inform the callback that calibration is complete
 	callback(cal);
 
 	// the guider is now calibrated
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
-		guider().calibration().toString().c_str());
+		guider()->calibration().toString().c_str());
 	calibrated = true;
 
 	// signal other threads that we are done
@@ -255,9 +265,9 @@ double	CalibrationProcess::gridconstant(double focallength,
 /**
  * \brief Construct a guider from 
  */
-CalibrationProcess::CalibrationProcess(Guider& _guider, TrackerPtr _tracker,
+CalibrationProcess::CalibrationProcess(Guider *_guider, TrackerPtr _tracker,
 	persistence::Database _database)
-	: GuidingProcess(_guider, _tracker, _database) {
+	: GuiderPortProcess(_guider, _tracker, _database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	_focallength = 0.600;
 	_pixelsize = 0.000010;
@@ -301,13 +311,9 @@ CalibrationProcess::~CalibrationProcess() {
  * \param focallength    focallength of guide scope in mm
  * \param pixelsize      size of pixels in um
  */
-void	CalibrationProcess::calibrate(double focallength, double pixelsize) {
-	// remember the grid constants
-	_focallength = focallength;
-	_pixelsize = pixelsize;
-
+void	CalibrationProcess::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the calibration thread");
-	start();
+	GuiderPortProcess::start();
 }
 
 /**

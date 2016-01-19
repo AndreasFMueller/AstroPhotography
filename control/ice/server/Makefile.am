@@ -23,7 +23,8 @@ noinst_HEADERS = DevicesI.h \
 	CallbackHandler.h \
 	RepositoriesI.h RepositoryI.h RepositoryLocator.h \
 	InstrumentI.h InstrumentLocator.h InstrumentsI.h \
-	DeviceI.h
+	DeviceI.h \
+	CalibrationSource.h
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \
@@ -40,7 +41,8 @@ snowstar_SOURCES = snowstar.cpp \
 	FocusingFactoryI.cpp FocusingI.cpp FocusingLocator.cpp \
 	RepositoriesI.cpp RepositoryI.cpp RepositoryLocator.cpp \
 	InstrumentI.cpp InstrumentLocator.cpp InstrumentsI.cpp \
-	DeviceI.cpp
+	DeviceI.cpp \
+	CalibrationSource.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
@@ -50,5 +52,11 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
 test:	snowstar
 	./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+
+testsun:	snowstar
+	STARCONTENT=SUN ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+
+testplanet:	snowstar
+	STARCONTENT=PLANET ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
 
 endif

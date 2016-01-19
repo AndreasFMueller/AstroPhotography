@@ -6,7 +6,7 @@
 #ifndef _DrivingWork_h
 #define _DrivingWork_h
 
-#include <GuidingProcess.h>
+#include <BasicProcess.h>
 #include <mutex>
 
 namespace astro {
@@ -16,11 +16,11 @@ namespace guiding {
  * \brief Driving process class
  *
  * The driving process is responsible for applying the the correction to
- * the guider port. As a derived class of GuidingProcess, it always has
+ * the guider port. As a derived class of BasicProcess, it always has
  * a GuiderPort reference available. The correction is applied using the
  * setCorrection method.
  */
-class DrivingWork : public GuidingProcess {
+class DrivingWork : public GuiderPortProcess {
 	std::mutex	mutex;
 	/**
  	 * \brief Control interval for the port driving process
@@ -67,8 +67,8 @@ private:
 	DrivingWork(const DrivingWork& other);
 	DrivingWork&	operator=(const DrivingWork& other);
 public:
-	DrivingWork(Guider& _guider);
-	~DrivingWork();
+	DrivingWork(Guider *_guider);
+	virtual ~DrivingWork();
 
 	void	main(astro::thread::Thread<DrivingWork>& thread);
 };

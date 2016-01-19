@@ -45,6 +45,9 @@ Guider::Guider(const std::string& instrument,
 	// default focallength
 	_focallength = 1;
 
+	// calibration id
+	_calibrationid = 0;
+
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not optimal
 	_state.configure();
@@ -102,6 +105,10 @@ void	Guider::calibrationCleanup() {
  * and if so, starts a new thread.
  */
 int	Guider::startCalibration(TrackerPtr tracker) {
+	if (!tracker) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
+		throw std::runtime_error("tracker not set");
+	}
 	double	pixelsize = getPixelsize();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
 		"focallength = %.3fmm, pixelsize = %.2fum)",
@@ -125,22 +132,25 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 
 	// now create a new calibration process
 	calibrationprocess = CalibrationProcessPtr(
-		new CalibrationProcess(*this, tracker, _database));
+		new CalibrationProcess(this, tracker, _database));
 
 	// start the calibration. This will launch the separate 
-	calibrationprocess->calibrate(_focallength, pixelsize);
+	calibrationprocess->focallength(_focallength);
+	calibrationprocess->pixelsize(pixelsize);
+	calibrationprocess->start();
 
 	// register the new calibration in the database
 	_calibrationid = 0;
 	if (_database) {
 		// prepare data for the calibration recrod
-		Calibration	calibration;
+		PersistentCalibration	calibration;
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
-		calibration.guiderport = guiderportname();
+		calibration.controldevice = guiderportname();
 		calibration.focallength = _focallength;
 		calibration.masPerPixel
 			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
+		calibration.controltype = BasicCalibration::GP;
 		time(&calibration.when);
 		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
 
@@ -155,23 +165,17 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 	return _calibrationid;
 }
 
+/**
+ * \brief save a guider calibration
+ */
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
+		_calibrationid);
 	if (!_database) {
 		return;
 	}
 	CalibrationStore	calstore(_database);
-	GuiderCalibration	c = calstore.getCalibration(_calibrationid);
-	c.complete = true;
-	for (int i = 0; i < 6; i++) {
-		c.a[i] = cal.a[i];
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update %d, focallength = %.3f",
-		c.focallength);
-	calstore.updateCalibration(_calibrationid, c);
-	for (int i = 0; i < cal.size(); i++) {
-		CalibrationPoint	point = cal[i];
-		calstore.addPoint(_calibrationid, point);
-	}
+	calstore.saveCalibration(_calibrationid, cal);
 }
 
 /**
@@ -222,7 +226,13 @@ void	Guider::startExposure() {
  */
 ImagePtr	Guider::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
+	imager().startExposure(exposure());
+	Timer::sleep(exposure().exposuretime());
 	ImagePtr	image = imager().getImage();
+	if (!image->hasMetadata(std::string("INSTRUME"))) {
+		image->setMetadata(astro::io::FITSKeywords::meta(
+			std::string("INSTRUME"), instrument()));
+	}
 	callbackImage(image);
 	mostRecentImage = image;
 	return image;
@@ -235,14 +245,23 @@ ImagePtr	Guider::getImage() {
  * it to the newimagecallback, if it is set.
  */
 void	Guider::callbackImage(ImagePtr image) {
-	if (newimagecallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
-		ImageCallbackData	*argp = 
-			new ImageCallbackData(image);
-		CallbackDataPtr	arg(argp);
-		newimagecallback->operator()(arg);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
+	if (!_newimagecallback) {
+		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
+	ImageCallbackData	*argp = new ImageCallbackData(image);
+	CallbackDataPtr	arg(argp);
+	_newimagecallback->operator()(arg);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
+}
+
+void	Guider::callbackTrackingPoint(const TrackingPoint& trackingpoint) {
+	if (!_trackingcallback) {
+		return;
+	}
+	callback::CallbackDataPtr       trackinginfo(
+		new TrackingPoint(trackingpoint));
+	_trackingcallback->operator()(trackinginfo);
 }
 
 /**
@@ -284,6 +303,16 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 	return tracker;
 }
 
+TrackerPtr	Guider::getPhaseTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a standard phase tracker");
+	return TrackerPtr(new PhaseTracker());
+}
+
+TrackerPtr	Guider::getDiffPhaseTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a differential phase tracker");
+	return TrackerPtr(new DifferentialPhaseTracker());
+}
+
 /**
  * \brief start tracking
  */
@@ -291,7 +320,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
-	guiderprocess = GuiderProcessPtr(new GuiderProcess(*this, interval,
+	guiderprocess = GuiderProcessPtr(new GuiderProcess(this, interval,
 		_database));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
 	guiderprocess->start(tracker);
@@ -317,6 +346,19 @@ bool	Guider::waitGuiding(double timeout) {
  */
 double	Guider::getInterval() {
 	return guiderprocess->interval();
+}
+
+/**
+ * \brief retrieve the tracking summary from the 
+ */
+const TrackingSummary&	Guider::summary() {
+	if (!guiderprocess) {
+		std::string	cause = stringprintf("wrong state for summary: "
+			"%s", Guide::state2string(_state).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw BadState(cause);
+	}
+	return guiderprocess->summary();
 }
 
 /**

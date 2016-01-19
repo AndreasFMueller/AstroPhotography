@@ -1666,6 +1666,94 @@ public:
 };
 #endif
 
+//////////////////////////////////////////////////////////////////////
+// Adapters that compute derivatives 
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class DerivativeXAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	DerivativeXAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (0 == x) {
+			return _image.pixel(1, y) -_image.pixel(0, y);
+		}
+		int	w = _image.getSize().width() - 1;
+		if (w == x) {
+			return _image.pixel(w, y) - _image.pixel(w - 1, y);
+		}
+		return 0.5 * (_image.pixel(x + 1, y) - _image.pixel(x - 1, y));
+	}
+};
+
+template<typename Pixel>
+class DerivativeYAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	DerivativeYAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (0 == y) {
+			return _image.pixel(x, 1) -_image.pixel(x, 0);
+		}
+		int	h = _image.getSize().height() - 1;
+		if (h == y) {
+			return _image.pixel(x, h) - _image.pixel(x, h - 1);
+		}
+		return 0.5 * (_image.pixel(x, y + 1) - _image.pixel(x, y - 1));
+	}
+};
+
+template<typename Pixel>
+class DerivativeNormAdapter : public ConstImageAdapter<double> {
+	DerivativeXAdapter<Pixel>	_xdiff;
+	DerivativeYAdapter<Pixel>	_ydiff;
+public:
+	DerivativeNormAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<double>(image.getSize()),
+		  _xdiff(image), _ydiff(image) {
+	}
+	virtual double	pixel(int x, int y) const {
+		double	dx = _xdiff.pixel(x, y);
+		double	dy = _ydiff.pixel(x, y);
+		return hypot(dx, dy);
+	}
+};
+	
+//////////////////////////////////////////////////////////////////////
+// Normalization to 1
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class NormalizationAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<double>&	_image;
+	double	_normalizer;
+public:
+	NormalizationAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _normalizer(1) {
+		double	maximum = 0;
+		int	w = _image.getSize().width();
+		int	h = _image.getSize().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				double	v = _image.pixel(x, y);
+				if (v > maximum) {
+					maximum = v;
+				}
+			}
+		}
+		if (maximum > 0) {
+			_normalizer = 1 / maximum;
+		}
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(x, y) * _normalizer;
+	}
+};
+
 } // namespace adapter
 } // namespace astro
 

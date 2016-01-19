@@ -787,8 +787,8 @@ public:
 		double	totalweight = 0;
 		w = image.getSize().width();
 		h = image.getSize().height();
-		for (int x = 0; x < w; x++) {
-			for (int y = 0; y < h; y++) {
+		for (unsigned int x = 0; x < w; x++) {
+			for (unsigned int y = 0; y < h; y++) {
 				double	l = hypot(x - R, y - R);
 				if (l > _r) {
 					continue;

@@ -347,14 +347,31 @@ ImagePtr	transform(ImagePtr image, const Transform& transform);
  * (necessarily small) translation with subpixel accuracy.
  */
 class PhaseCorrelator {
+	void	write(const Image<double>& image);
+
 	double	value(const double *a, const astro::image::ImageSize& size,
 			int x, int y) const;
 	Point	centroid(const double *a, const astro::image::ImageSize& size,
 			const astro::Point& center,
 			unsigned int k = 2) const;
-	bool	hanning;
+	bool	_hanning;
 public:
-	PhaseCorrelator(bool _hanning = true) : hanning(_hanning) { }
+	bool	hanning() const { return _hanning; }
+	void	hanning(bool h) { _hanning = h; }
+private:
+	std::string	_imagedir;
+public:
+	const std::string&	imagedir() const { return _imagedir; }
+	void	imagedir(const std::string& i) { _imagedir = i; }
+private:
+	std::string	_prefix;
+public:
+	const std::string&	prefix() const { return _prefix; }
+	void	prefix(const std::string& p) { _prefix = p; }
+public:
+	PhaseCorrelator(bool hanning = true) : _hanning(hanning),
+		_imagedir("tmp"), _prefix("corr") {
+	}
 	std::pair<Point, double>	operator()(
 		const ConstImageAdapter<double>& fromimage,
 		const ConstImageAdapter<double>& toimage);

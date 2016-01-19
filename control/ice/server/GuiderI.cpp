@@ -11,8 +11,10 @@
 #include <ImagesI.h>
 #include <CalibrationStore.h>
 #include <AstroGuiding.h>
+#include <AstroConfig.h>
 #include <TrackingPersistence.h>
 #include <TrackingStore.h>
+#include "CalibrationSource.h"
 
 namespace snowstar {
 
@@ -138,6 +140,11 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	astro::persistence::Database _database)
 	: guider(_guider), imagedirectory(_imagedirectory),
 	  database(_database) {
+	// set point to an invalid value to allows to detect that it has not been set
+	_point.x = -1;
+	_point.y = -1;
+	// default tracker is star
+	_method = TrackerSTAR;
 }
 
 GuiderI::~GuiderI() {
@@ -180,6 +187,18 @@ Point GuiderI::getStar(const Ice::Current& /* current */) {
 	return _point;
 }
 
+TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& /* current */) {
+	return _method;
+}
+
+void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using method: %s",
+		(method == TrackerUNDEFINED) ? "undefined" : (
+			(method == TrackerSTAR) ? "star" : (
+				(method == TrackerPHASE) ? "phase" : "diff")));
+	_method = method;
+}
+
 void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
@@ -188,10 +207,9 @@ void GuiderI::useCalibration(Ice::Int calid,
 		= store.getCalibration(calid);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"calibration %d: [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
-		calibrationid,
+		calid,
 		calibration.a[0], calibration.a[1], calibration.a[2],
 		calibration.a[3], calibration.a[4], calibration.a[5]);
-	calibrationid = calid;
 
 	// install calibration data in the guider
 	guider->calibration(calibration);
@@ -199,43 +217,8 @@ void GuiderI::useCalibration(Ice::Int calid,
 }
 
 Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
-	Calibration	result;
-	result.id = calibrationid;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve calibration %d",
-		calibrationid);
-
-	// get the calibration record from the database
-	astro::guiding::CalibrationTable	t(database);
-	astro::guiding::CalibrationRecord	cal = t.byid(calibrationid);
-	result.timeago = converttime(cal.when);
-	result.guider.instrumentname = cal.instrument;
-	result.guider.ccdIndex = instrumentName2index(cal.instrument,
-		InstrumentGuiderCCD, cal.ccd);
-	result.guider.guiderportIndex = instrumentName2index(cal.instrument,
-		InstrumentGuiderPort, cal.guiderport);
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"copy coefficients from [%.3f, %.3f, %3f; %.3f, %.3f, %.3f ]",
-		cal.a[0], cal.a[1], cal.a[2], cal.a[3], cal.a[4], cal.a[5]);
-	for (int i = 0; i < 6; i++) {
-		result.coefficients.push_back(cal.a[i]);
-	}
-	result.complete = cal.complete;
-	result.focallength = cal.focallength;
-	result.masPerPixel = cal.masPerPixel;
-
-	// use database to retrieve calibration, containing coefficients
-	// and points
-	astro::guiding::CalibrationStore	store(database);
-	astro::guiding::GuiderCalibration	calibration
-		= store.getCalibration(calibrationid);
-	for (auto ptr = calibration.begin(); ptr != calibration.end(); ptr++) {
-		result.points.push_back(convert(*ptr));
-	}
-	result.quality = calibration.quality();
-	result.det = calibration.det();
-
-	// everything copied, return it
-	return result;
+	CalibrationSource	source(database);
+	return source.get(guider->calibrationid());
 }
 
 /**
@@ -249,15 +232,16 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 		guider->focallength());
 
 	// callback stuff
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing calibration callbacks");
 	GuiderICalibrationCallback	*ccallback
 		= new GuiderICalibrationCallback(*this);
 	guider->calibrationcallback = astro::callback::CallbackPtr(ccallback);
+
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback = astro::callback::CallbackPtr(icallback);
+	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
 
 	// construct a tracker
-	astro::guiding::TrackerPtr	tracker
-		= guider->getTracker(convert(_point));
+	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start the calibration
 	return guider->startCalibration(tracker);
@@ -289,6 +273,7 @@ bool GuiderI::waitCalibration(Ice::Double timeout,
  * \brief build a tracker
  */
 astro::guiding::TrackerPtr	 GuiderI::getTracker() {
+#if 0
 	astro::camera::Exposure	exposure = guider->exposure();
 	astro::Point	d = convert(_point) - exposure.frame().origin();
 	astro::image::ImagePoint	trackerstar(d.x(), d.y());
@@ -297,6 +282,39 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 		new astro::guiding::StarTracker(trackerstar,
 			trackerrectangle, 10));
 	return tracker;
+#endif
+	// first we must make sure the data we have is consistent
+	astro::camera::Exposure	exposure = guider->exposure();
+	if ((exposure.frame().size().width() <= 0) ||
+		(exposure.frame().size().height() <= 0)) {
+		// get the frame from the ccd
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using ccd frame");
+		exposure.frame(guider->imager().ccd()->getInfo().getFrame());
+		guider->exposure(exposure);
+	}
+	if ((_point.x < 0) || (_point.y < 0)) {
+		astro::image::ImagePoint	c = exposure.frame().center();
+		_point.x = c.x();
+		_point.y = c.y();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using ccd center (%.1f,%.1f) as star",
+			_point.x, _point.y);
+	}
+
+	switch (_method) {
+	case TrackerUNDEFINED:
+	case TrackerSTAR:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a star tracker");
+		return guider->getTracker(convert(_point));
+		break;
+	case TrackerPHASE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a phase tracker");
+		return guider->getPhaseTracker();
+		break;
+	case TrackerDIFFPHASE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a diff tracker");
+		return guider->getDiffPhaseTracker();
+		break;
+	}
 }
 
 /**
@@ -307,20 +325,19 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
 		guidinginterval);
 	// construct a tracker
-	astro::guiding::TrackerPtr	tracker
-		= guider->getTracker(convert(_point));
+	astro::guiding::TrackerPtr	tracker = getTracker();
+
+	// install a callback in the guider
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing tracking callbacks");
+	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
+	guider->trackingcallback(astro::callback::CallbackPtr(tcallback));
+
+	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
+	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, guidinginterval);
-
-	// install a callback in the guider
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callbacks");
-	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
-	guider->trackingcallback = astro::callback::CallbackPtr(tcallback);
-
-	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback = astro::callback::CallbackPtr(icallback);
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
@@ -335,7 +352,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	//imagecallbacks.stop();
 
 	// remove the callback
-	guider->trackingcallback.reset();
+	guider->trackingcallback(NULL);
 }
 
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
@@ -460,6 +477,21 @@ void	GuiderI::trackingUpdate(const astro::callback::CallbackDataPtr data) {
  */
 void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "trackingImageUpdate called");
+
+	if (imagerepo) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "send image to repository %s",
+			_repositoryname.c_str());
+		astro::callback::ImageCallbackData	*imageptr
+			= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
+		if (NULL == imageptr) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"ignoring non-ImageCallbackData");
+		} else {
+			// save the image in the repository
+			imagerepo->save(imageptr->image());
+		}
+	}
+
 	imagecallbacks(data);
 }
 
@@ -470,6 +502,60 @@ void	GuiderI::calibrationUpdate(const astro::callback::CallbackDataPtr data) {
 
 	// send calibration callbacks to the registered callbacks
 	calibrationcallbacks(data);
+}
+
+/**
+ * \brief Handle the summary retrieval method
+ */
+TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calling for tracking summary");
+	if (astro::guiding::Guide::guiding != guider->state()) {
+		BadState	exception;
+		exception.cause = astro::stringprintf("guider is not wrong "
+			"state %s", astro::guiding::Guide::state2string(
+			guider->state()).c_str());
+		throw exception;
+	}
+	return convert(guider->summary());
+}
+
+/**
+ * \brief retrieve the name of the current repository
+ */
+std::string	GuiderI::getRepositoryName(const Ice::Current& /* current */) {
+	return _repositoryname;
+}
+
+/**
+ * \brief activate sending images to the repository
+ */
+void	GuiderI::setRepositoryName(const std::string& reponame,
+		const Ice::Current& /* current */) {
+	// special case: zero length repo name means turn of storing images
+	// in the repository
+	if (0 == reponame.size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing repository '%s'",
+			_repositoryname.c_str());
+		_repositoryname = reponame;
+		imagerepo.reset();
+		return;
+	}
+
+	// check that this repository actually exists
+	astro::config::ImageRepoConfigurationPtr	config
+		= astro::config::ImageRepoConfiguration::get();
+	if (!config->exists(reponame)) {
+		// throw an error
+		NotFound	exception;
+		exception.cause = astro::stringprintf("repository %s not found",
+			reponame.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
+		throw exception;
+	}
+	imagerepo = config->repo(reponame);
+	_repositoryname = reponame;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using repository %s",
+		_repositoryname.c_str());
 }
 
 } // namespace snowstar

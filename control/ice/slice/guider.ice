@@ -49,6 +49,21 @@ module snowstar {
 	};
 
 	/**
+	 * \brief A summary of the tracking
+	 *
+	 * The tracking 
+	 */
+	struct TrackingSummary {
+		int	guiderunid;
+		double	since;
+		int	calibrationid;
+		GuiderDescriptor	guider;
+		Point	lastoffset;
+		Point	averageoffset;
+		Point	variance;
+	};
+
+	/**
 	 * \brief Interface to a tracking monitor
 	 *
 	 * A tracking monitor processes new points
@@ -71,6 +86,11 @@ module snowstar {
 	};
 	sequence<CalibrationPoint>	CalibrationSequence;
 
+	enum CalibrationType {
+		CalibrationTypeGuiderPort,
+		CalibrationTypeAdaptiveOptics
+	};
+
 	/**
 	 * \brief Calibration object
 	 *
@@ -90,6 +110,7 @@ module snowstar {
 		bool	complete;
 		double	focallength;
 		double	masPerPixel;
+		CalibrationType	controltype;
 		CalibrationSequence	points;
 	};
 
@@ -121,6 +142,13 @@ module snowstar {
 		GuiderCALIBRATED,
 		// The calibrated guider can be used for guiding
 		GuiderGUIDING
+	};
+
+	enum TrackerMethod {
+		TrackerUNDEFINED,
+		TrackerSTAR,
+		TrackerPHASE,
+		TrackerDIFFPHASE
 	};
 	/**
 	 * \brief Interface for guiders
@@ -157,6 +185,10 @@ module snowstar {
 				throws BadParameter, BadState;
 		Exposure	getExposure();
 
+		// set/get the tracker method
+		void	setTrackerMethod(TrackerMethod method);
+		TrackerMethod	getTrackerMethod();
+
 		// This is the position of the star we want to track.
 		// It does not have to be exact at the beginning, and
 		// the position is only used as a reference point during 
@@ -165,6 +197,11 @@ module snowstar {
 		void	setStar(Point star)
 				throws BadParameter, BadState;
 		Point	getStar() throws BadState;
+
+		// if the repository name is set, then all images sent to the
+		// callback will be added to the repository
+		void	setRepositoryName(string reponame) throws NotFound;
+		string	getRepositoryName();
 
 		/**
 		 * \brief Methods related to calibration
@@ -213,6 +250,11 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+
+		/**
+		 * \brief get some statistics information about tracking
+		 */
+		TrackingSummary	getTrackingSummary() throws BadState;
 
 		// monitor for tracking points
 		void	registerTrackingMonitor(Ice::Identity trackingmonitor);

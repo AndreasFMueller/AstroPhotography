@@ -174,8 +174,8 @@ int	guidetest_main(int argc, char *argv[]) {
 	// if we have an image directory configuration, we add the 
 	// callback
 	if (imagedir) {
-		guider.newimagecallback = callback::CallbackPtr(
-			new callback::SaveImageCallback(imagedir));
+		guider.newimagecallback(callback::CallbackPtr(
+			new callback::SaveImageCallback(imagedir)));
 	}
 
 	// create a suitable tracker

@@ -1,5 +1,5 @@
 /*
- * GuiderCalibration.cpp -- guider calibration
+ * AdaptiveOpticsCalibration.cpp -- guider calibration
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -14,38 +14,35 @@ namespace astro {
 namespace guiding {
 
 /**
- * \brief Construct a new GuiderCalibration object
+ * \brief Construct a new AdaptiveOpticsCalibration object
  *
  * The default calibration has all members set to zero, in particular,
  * it cannot be inverted, and it is not possible to compute corrections.
  */
-GuiderCalibration::GuiderCalibration() {
-	focallength = 0;
-	masPerPixel = 0;
+AdaptiveOpticsCalibration::AdaptiveOpticsCalibration() {
+	calibrationtype(AO);
 }
 
 /**
- * \brief Construct a GuiderCalibration object from coefficient array
+ * \brief Construct a AdaptiveOpticsCalibration object from coefficient array
  */
-GuiderCalibration::GuiderCalibration(const double coefficients[6])
+AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const double coefficients[6])
 	: BasicCalibration(coefficients) {
-	focallength = 0;
-	masPerPixel = 0;
+	calibrationtype(AO);
 }
 
 /**
- * \brief Construct a GuiderCalibration object from a basic calibration
+ * \brief Construct a AdaptiveOpticsCalibration object from a basic calibration
  */
-GuiderCalibration::GuiderCalibration(const BasicCalibration& other)
+AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const BasicCalibration& other)
 	: BasicCalibration(other) {
-	focallength = 0;
-	masPerPixel = 0;
+	calibrationtype(AO);
 }
 
 /**
  * \brief Assign the common fields from a Basic calibration
  */
-GuiderCalibration&	GuiderCalibration::operator=(
+AdaptiveOpticsCalibration&	AdaptiveOpticsCalibration::operator=(
 				const BasicCalibration& other) {
 	// copy the coefficients
 	for (int i = 0; i < 6; i++) {

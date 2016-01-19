@@ -34,6 +34,8 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> state"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> repository [ <repo> ]"
+		<< std::endl;
 
 	std::cout << std::endl;
 	std::cout << "  Calibration:" << std::endl;
@@ -89,6 +91,10 @@ void	Guide::usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "  -i,--interval=<i>     perform an update ever i seconds when guiding";
 	std::cout << std::endl;
+	std::cout << "  -m,--method=<m>       use tracking method <m>. Available methods are 'star'" << std::endl;
+	std::cout << "                        (centroid of a star), 'phase' (uses cross correlation" << std::endl;
+	std::cout << "                        to find image offsets), 'diff' (uses cross correlation" << std::endl;
+	std::cout << "                        on edges in the image to find image offsets)" << std::endl;
 	std::cout << "  -r,--rectangle=<rec>  expose only a subrectangle as "
 		"specified by <rec>." << std::endl;
 	std::cout << "                        <rec> must be of the form";
@@ -200,12 +206,56 @@ int	Guide::state_command(GuiderPrx guider) {
 	std::cout << guiderstate2string(state);
 	switch (state) {
 	case GuiderCALIBRATING:
-		std::cout << guider->calibrationProgress();
+		std::cout << ": " << guider->calibrationProgress();
+		break;
+	case GuiderCALIBRATED: {
+		std::cout << ": ";
+		Calibration	cal = guider->getCalibration();
+		std::cout << cal.id;
+		}
+		break;
+	case GuiderGUIDING: {
+		std::cout << ": ";
+		TrackingSummary	summary = guider->getTrackingSummary();
+		std::cout << astro::stringprintf("%d duration=%.0f, ",
+			summary.guiderunid, summary.since);
+		std::cout << astro::stringprintf("last=(%.2f,%.2f), ",
+			summary.lastoffset.x,
+			summary.lastoffset.y);
+		std::cout << astro::stringprintf("avg=(%.2f,%.2f), ",
+			summary.averageoffset.x,
+			summary.averageoffset.y);
+		std::cout << astro::stringprintf("var=(%.2f,%.2f)",
+			sqrt(summary.variance.x),
+			sqrt(summary.variance.y));
+		}
 		break;
 	default:
 		break;
 	}
 	std::cout << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief get the repository name from the guider
+ */
+int	Guide::repository_command(GuiderPrx guider) {
+	std::string	reponame = guider->getRepositoryName();
+	if (0 == reponame.size()) {
+		std::cout << "repository name not set" << std::endl;
+	} else {
+		std::cout << reponame << std::endl;
+	}
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief set the remote repository name
+ */
+int	Guide::repository_command(GuiderPrx guider,
+		const std::string& repositoryname) {
+	guider->setRepositoryName(repositoryname);
 	return EXIT_SUCCESS;
 }
 

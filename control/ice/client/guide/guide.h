@@ -24,6 +24,7 @@ public:
 	volatile bool	completed;
 	float	guideinterval;
 	bool	csv;
+	TrackerMethod	method;
 private:
 	CommonMonitor	*monitor;
 public:
@@ -35,12 +36,16 @@ public:
 		guideinterval = 10;
 		csv = false;
 		monitor = NULL;
+		method = TrackerUNDEFINED;
 	}
 
 	// general commands
 	void	usage(const char *progname);
 	int	help_command(const char *progname);
 	int	state_command(GuiderPrx guider);
+	int	repository_command(GuiderPrx guider);
+	int	repository_command(GuiderPrx guider,
+			const std::string& repository);
 
 	// monitoring
 public:

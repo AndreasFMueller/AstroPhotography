@@ -41,6 +41,7 @@ public:
 	Point(double x, double y) : _x(x), _y(y) { }
 	Point(const astro::image::ImagePoint& point)
 		: _x(point.x()), _y(point.y()) {}
+	Point(double angle) : _x(cos(angle)), _y(sin(angle)) { }
 	double	x() const { return _x; }
 	double	y() const { return _y; }
 	double	abs() const;
