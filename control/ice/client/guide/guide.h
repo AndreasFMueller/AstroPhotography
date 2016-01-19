@@ -43,6 +43,9 @@ public:
 	void	usage(const char *progname);
 	int	help_command(const char *progname);
 	int	state_command(GuiderPrx guider);
+	int	repository_command(GuiderPrx guider);
+	int	repository_command(GuiderPrx guider,
+			const std::string& repository);
 
 	// monitoring
 public:

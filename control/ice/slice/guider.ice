@@ -54,6 +54,7 @@ module snowstar {
 	 * The tracking 
 	 */
 	struct TrackingSummary {
+		int	guiderunid;
 		double	since;
 		int	calibrationid;
 		GuiderDescriptor	guider;
@@ -196,6 +197,11 @@ module snowstar {
 		void	setStar(Point star)
 				throws BadParameter, BadState;
 		Point	getStar() throws BadState;
+
+		// if the repository name is set, then all images sent to the
+		// callback will be added to the repository
+		void	setRepositoryName(string reponame) throws NotFound;
+		string	getRepositoryName();
 
 		/**
 		 * \brief Methods related to calibration

@@ -235,6 +235,28 @@ int	Guide::state_command(GuiderPrx guider) {
 	return EXIT_SUCCESS;
 }
 
+/**
+ * \brief get the repository name from the guider
+ */
+int	Guide::repository_command(GuiderPrx guider) {
+	std::string	reponame = guider->getRepositoryName();
+	if (0 == reponame.size()) {
+		std::cout << "repository name not set" << std::endl;
+	} else {
+		std::cout << reponame << std::endl;
+	}
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief set the remote repository name
+ */
+int	Guide::repository_command(GuiderPrx guider,
+		const std::string& repositoryname) {
+	guider->setRepositoryName(repositoryname);
+	return EXIT_SUCCESS;
+}
+
 } // namespace snowguide
 } // namespace app
 } // namespace snowstar

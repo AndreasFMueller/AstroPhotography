@@ -224,6 +224,21 @@ int	main(int argc, char *argv[]) {
 	if (command == "stop") {
 		return guide.stop_command(guider);
 	}
+	if (command == "repository") {
+		if (argc > optind) {
+			try {
+				std::string	reponame(argv[optind++]);
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "repo name: %s",
+					reponame.c_str());
+				return guide.repository_command(guider, reponame);
+			} catch (const NotFound& x) {
+				std::cerr << x.cause << std::endl;
+				return EXIT_FAILURE;
+			}
+		} else {
+			return guide.repository_command(guider);
+		}
+	}
 	if (command == "calibration") {
 		int	calibrationid = -1;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "argc = %d, optind = %d",
