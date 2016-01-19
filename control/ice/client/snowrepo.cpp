@@ -32,34 +32,32 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] list [ reponame ]" << std::endl;
+	std::cout << p << " [ options ] <server> list" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> list" << std::endl;
 	std::cout << std::endl;
 	std::cout << "List names of repositories known on a repository server, "
 		"list contents of a " << std::endl;
 	std::cout << "remote repo." << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] { push | pull | synchronize } "
-		"<localrepo> <remoterepo>" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> { push | pull | synchronize } "
+		"<localrepo>" << std::endl;
 	std::cout << std::endl;
-	std::cout << "replicate files from a local repository to a remote "
-		"repository" << std::endl;
+	std::cout << "replicate files from a local repository to a remote repository or in the" << std::endl;
+	std::cout << "other direction" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] add reponame images ..." << std::endl;
-	std::cout << p << " [ options ] get reponame id filename" << std::endl;
-	std::cout << p << " [ options ] remove reponame id ..." << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> add <images> ..." << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> get <id> <filename>" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> remove <id> ..." << std::endl;
 	std::cout << std::endl;
-	std::cout << "Add images to a remote repository, retrieve an image or "
-		"delete images from a" << std::endl;
-	std::cout << "remote repository." << std::endl;
+	std::cout << "Add images from the file names <images> to a remote repository, retrieve the" << std::endl;
+	std::cout << "image <id> from the remote repository and write it to the file <filename> or " << std::endl;
+	std::cout << "delete images identified by <id> from a remote repository." << std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -c,--config=<cfg>       use configuration <cfg>" << std::endl;
 	std::cout << " -d,--debug              increase debug level" << std::endl;
 	std::cout << " -n,--dry-run            don't do anything, just report on what would be done" << std::endl;
 	std::cout << " -p,--project=<project>  only replicate images of some project" << std::endl;
-	std::cout << " -s,--server=<server>    connect to repositories on server <server>, which" << std::endl;
-	std::cout << "                         can either be a simple server name or a string" << std::endl;
-	std::cout << "                         of the form <host>:<port>" << std::endl;
 	std::cout << " -h,--help               display this help and exit" << std::endl;
 	std::cout << " -v,--verbose            give more information about what is being done" << std::endl;
 	std::cout << std::endl;
@@ -256,7 +254,6 @@ static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,	'd' }, /* 1 */
 { "help",	no_argument,		NULL,	'h' }, /* 2 */
 { "dry-run",	no_argument,		NULL,	'n' }, /* 3 */
-{ "server",	required_argument,	NULL,	's' }, /* 4 */
 { "verbose",	no_argument,		NULL,	'v' }, /* 5 */
 { NULL,		0,			NULL,	0   }
 };
@@ -287,9 +284,6 @@ int	main(int argc, char *argv[]) {
 		case 'p':
 			project = optarg;
 			break;
-		case 's':
-			server = optarg;
-			break;
 		case 'v':
 			verbose = true;
 			break;
@@ -297,7 +291,7 @@ int	main(int argc, char *argv[]) {
 
 	// next argument must be the command
 	if (argc <= optind) {
-		throw std::runtime_error("command argument missing");
+		throw std::runtime_error("not enough arguments");
 	}
 	std::string	command = argv[optind++];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "command: %s", command.c_str());
@@ -306,6 +300,14 @@ int	main(int argc, char *argv[]) {
 	if (command == "help") {
 		return command_help(argv[0]);
 	}
+
+	// for any other commands, we need the server name, which must
+	// be the first argument, which we have already read as the 
+	std::string	server = command;
+	if (argc <= optind) {
+		throw std::runtime_error("command argument missing");
+	}
+	command = std::string(argv[optind++]);
 
 	// all other commands need a remote Repositories reference
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
@@ -316,15 +318,18 @@ int	main(int argc, char *argv[]) {
 		if (argc <= optind) {
 			return command_list(servername);
 		}
-		std::string	reponame = argv[optind++];
-		return command_list(servername, reponame);
+		return command_list(servername);
 	}
 
-	// remaining commands need at least a local repository name
+	// get the repository name
 	if (argc <= optind) {
-		throw std::runtime_error("local repository name missing");
+		throw std::runtime_error("not enough arguments");
 	}
-	std::string	localreponame = argv[optind++];
+	std::string	reponame = command;
+	command = argv[optind++];
+	if (command == "list") {
+		return command_list(servername, reponame);
+	}
 
 	// add command uses remaining arguments as file names
 	if (command == "add") {
@@ -332,7 +337,7 @@ int	main(int argc, char *argv[]) {
 		while (optind < argc) {
 			filenames.push_back(argv[optind++]);
 		}
-		return command_add(servername, localreponame, filenames);
+		return command_add(servername, reponame, filenames);
 	}
 
 	// get command uses two more arguments: 
@@ -345,7 +350,7 @@ int	main(int argc, char *argv[]) {
 			throw std::runtime_error("file name argument missing");
 		}
 		std::string	filename(argv[optind++]);
-		return command_get(servername, localreponame, id, filename);
+		return command_get(servername, reponame, id, filename);
 	}
 
 	// the remove command uses the remaining arguments as ids
@@ -354,28 +359,17 @@ int	main(int argc, char *argv[]) {
 		while (optind < argc) {
 			ids.push_back(std::stoi(argv[optind++]));
 		}
-		return command_remove(servername, localreponame, ids);
+		return command_remove(servername, reponame, ids);
 	}
 
-	// get the remote repository name
+	// remaining commands need at least a local repository name
 	if (argc <= optind) {
-		throw std::runtime_error("remote repository name missing");
+		throw std::runtime_error("local repository name missing");
 	}
-	std::string	remotereponame = argv[optind++];
-
-	// if the remote repository is a URL, then we use it to set the
-	// server name (instead of the --server option
-	astro::URL	remoteurl("repo:");
-	try {
-		astro::URL	u(remotereponame);
-		remoteurl = u;
-	} catch (...) {
-		remoteurl.host(servername.host());
-		remoteurl.port(servername.port());
-		remoteurl[0] = remotereponame;
-	}
+	std::string	localreponame = argv[optind++];
 
 	// create the replicator
+	astro::URL	remoteurl("repo:" + server + "/" + reponame);
 	try {
 		astro::URL	localurl(localreponame);
 		RemoteRepoReplicator	replicator(localreponame, remoteurl,
