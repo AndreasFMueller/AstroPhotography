@@ -162,7 +162,7 @@ void	PhaseCorrelator::write(const Image<double>& image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image directory not found");
 		return;
 	}
-	std::string	filename = stringprintf("%s/%s-%d.fits",
+	std::string	filename = stringprintf("%s/%s-%05d.fits",
 		_imagedir.c_str(), _prefix.c_str(),
 		correlation_counter);
 	try {
