@@ -45,7 +45,7 @@ fprintf(fid, "\tendfor\n");
 fprintf(fid, "\t\t..cycle) shifted z\n");
 fprintf(fid, "enddef;\n");
 
-fprintf(fid, "beginfig(1)\n");
+fprintf(fid, "def points = \n");
 fprintf(fid, "pickup pencircle scaled 1pt;\n");
 fprintf(fid, "path q;\n");
 fprintf(fid, "q := circle((120,50), 8);\n");
@@ -54,15 +54,39 @@ fprintf(fid, "q := circle((-10,30), 5);\n");
 fprintf(fid, "draw q withcolor red;\n");
 fprintf(fid, "q := circle((50,-20), 12);\n");
 fprintf(fid, "draw q withcolor red;\n");
-fprintf(fid, "pickup pencircle scaled 1.5pt;\n");
 for i = (1:N)
-	fprintf(fid, "draw (%.2f, %.2f);\n", results(i, 1), results(i, 2));
+	fprintf(fid, "pickup pencircle scaled 2.0pt;\n");
+	fprintf(fid, "draw (%.2f, %.2f) withcolor blue;\n", results(i, 1), results(i, 2));
+	fprintf(fid, "pickup pencircle scaled 1.0pt;\n");
+	fprintf(fid, "draw (%.2f, %.2f) withcolor white;\n", results(i, 1), results(i, 2));
 endfor
 fprintf(fid, "path p;\n");
 fprintf(fid, "p = (-70,-100)--(180,-100)--(180,100)--(-70,100)--cycle;\n");
 fprintf(fid, "clip currentpicture to p;\n");
 fprintf(fid, "pickup pencircle scaled 1pt;\n");
 fprintf(fid, "draw p;\n");
+fprintf(fid, "enddef;\n");
+
+fprintf(fid, "color starcolor;\n");
+fprintf(fid, "starcolor = (0.7,0.7,0.7);\n");
+
+fprintf(fid, "def stern(expr z, m, a, mlimit) =\n");
+fprintf(fid, "        if m < mlimit:\n");
+fprintf(fid, "                pickup pencircle scaled (1 + (7-m)/2);\n");
+fprintf(fid, "                draw z rotated a withcolor starcolor;\n");
+fprintf(fid, "        fi;\n");
+fprintf(fid, "enddef;\n");
+
+fprintf(fid, "input stars.mp;\n");
+
+fprintf(fid, "beginfig(1)\n");
+fprintf(fid, "points;\n");
 fprintf(fid, "endfig;\n");
+
+fprintf(fid, "beginfig(2)\n");
+fprintf(fid, "starbackground(0, 6);\n")
+fprintf(fid, "points;\n");
+fprintf(fid, "endfig;\n");
+
 fprintf(fid, "end\n");
 fclose(fid);
