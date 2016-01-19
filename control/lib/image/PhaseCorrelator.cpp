@@ -9,6 +9,7 @@
 #include <AstroAdapter.h>
 #include <AstroIO.h>
 #include <fftw3.h>
+#include <includes.h>
 
 using namespace astro::adapter;
 using namespace astro::io;
@@ -85,6 +86,9 @@ Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
 class HanningWindow : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_base;
 	double	*hh, *hv;
+	// prevent copying
+	HanningWindow(const HanningWindow& other);
+	HanningWindow&	operator=(const HanningWindow& other);
 public:
 	HanningWindow(const ConstImageAdapter<double>& base)
 		: ConstImageAdapter<double>(base.getSize()), _base(base) {
@@ -98,7 +102,7 @@ public:
 		unsigned int	height = getSize().height();
 		hv = new double[height];
 		h = M_PI / height;
-		for (unsigned int y = 0; y < width; y++) {
+		for (unsigned int y = 0; y < height; y++) {
 			hv[y] = sqr(sin(y * h));
 		}
 	}
@@ -135,6 +139,46 @@ public:
 	}
 };
 
+/**
+ * \brief auxiliary function to write phase correlation images 
+ *
+ * This method is only used when debugging, in fact it returns very quickly
+ * if debugging is not on. It it runs, it creates a unique filename
+ * and writes the contents of the image to it.
+ */
+void	PhaseCorrelator::write(const Image<double>& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write request for %s image",
+		image.size().toString().c_str());
+	if (debuglevel < LOG_DEBUG) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not debugging");
+		return;
+	}
+	if (_imagedir.size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image directory not set");
+		return;
+	}
+	struct stat	sb;
+	if (stat(_imagedir.c_str(), &sb) < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image directory not found");
+		return;
+	}
+	std::string	filename = stringprintf("%s/%s-%d.fits",
+		_imagedir.c_str(), _prefix.c_str(),
+		correlation_counter);
+	try {
+		FITSoutfile<double>	out(filename);
+		out.setPrecious(false);
+		out.write(image);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"exception %s while writing %s: %s",
+			demangle(typeid(x).name()).c_str(), filename.c_str(),
+			 x.what());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s written, counter = %d",
+		filename.c_str(), correlation_counter);
+	correlation_counter++;
+}
 
 /**
  * \brief Find displacement between two images using phase correlation.
@@ -167,12 +211,11 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 	// allocate memory for the images
 	double	*a = new double[n];
 	double	*b = new double[n];
-debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 
 	// allocate memory for the fourier transforms
 	size_t	nc = size.width() * (1 + size.height() / 2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel count: %lu, "
-		"fourier transform: %lu", n, nc);
+		"fourier transform pixel count: %lu", n, nc);
 	fftw_complex	*af = (fftw_complex *)fftw_malloc(
 					sizeof(fftw_complex) * nc);
 	fftw_complex	*bf = (fftw_complex *)fftw_malloc(
@@ -191,7 +234,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 	// compute the values for the hanning windows
 	const ConstImageAdapter<double>	*windowedfrom = NULL;
 	const ConstImageAdapter<double>	*windowedto = NULL;
-	if (hanning) {
+	if (_hanning) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using Hanning windows");
 		windowedfrom = new HanningWindow(fromimage);
 		windowedto = new HanningWindow(toimage);
@@ -227,17 +270,8 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 	// perform the reverse Fourier transform
 	fftw_execute(r);
 
-#if 0
-	// write the correlation image for debugging
-	//Image<double>	correlation(*windowedto);
-	Image<double>	correlation(size);
-	memcpy(correlation.pixels, a, n * sizeof(double));
-	FITSoutfile<double>	out("correlation.fits");
-	out.setPrecious(false);
-	out.write(correlation);
-#endif
-
 	// find the maximum 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum");
 	double	max = 0;
 	int maxx = 0;
 	int maxy = 0;
@@ -260,50 +294,43 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "allocated pixel data on stack");
 	// build the 5x5 centroid to get the best possible Point value
 	Point	result = centroid(a, size, Point(maxx, maxy));
 
-#if 1
 	// if required, write everything into a single image
-try {
 	if ((result.x() == result.x()) && (result.y() == result.y())) {
-		{
-		FITSoutfile<double>	out(stringprintf("tmp/corr-from-%u.fits",
-						correlation_counter));
-		out.setPrecious(false);
-		out.write(Image<double>(*windowedfrom));
-		}
-		{
-		FITSoutfile<double>	out(stringprintf("tmp/corr-to-%u.fits",
-						correlation_counter));
-		out.setPrecious(false);
-		out.write(Image<double>(*windowedto));
-		}
-		{
-		FITSoutfile<double>	out(stringprintf("tmp/corr-%u.fits",
-						correlation_counter));
-		out.setPrecious(false);
-		Image<double>	correlation(size);
+		Image<double>	composite(3 * size.width(), size.height());
+
+		// copy the from image into a subimage at left
+		SubimageAdapter<double>	fromsubimage(composite,
+			ImageRectangle(ImagePoint(0,0), size));
+		NormalizationAdapter<double>	fromnorm(*windowedfrom);
+		copy(fromsubimage, fromnorm);
+
+		// copy the from image into a subimage at center
+		SubimageAdapter<double>	tosubimage(composite,
+			ImageRectangle(ImagePoint(size.width(),0), size));
+		NormalizationAdapter<double>	tonorm(*windowedto);
+		copy(tosubimage, tonorm);
+
+		// copy the correlation image into a subimage at right
+		SubimageAdapter<double>	corrsubimage(composite,
+			ImageRectangle(ImagePoint(2 * size.width(),0), size));
 		int	w = size.width();
 		int	h = size.height();
 		for (int x = 0; x < w; x++) {
 			for (int y = 0; y < h; y++) {
-				correlation.writablepixel(x, y)
-					= value(a, size, x, y);
+				int	xx = (x + (w / 2)) % w;
+				int	yy = (y + (h / 2)) % h;
+				corrsubimage.writablepixel(xx, yy)
+					= value(a, size, x, y) / max;
 			}
 		}
-		correlation.setMetadata(
+
+		// add metadata about the offset
+		composite.setMetadata(
 			FITSKeywords::meta(std::string("XOFFSET"), result.x()));
-		correlation.setMetadata(
+		composite.setMetadata(
 			FITSKeywords::meta(std::string("YOFFSET"), result.y()));
-		out.write(correlation);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "file %d written",
-			correlation_counter);
-		correlation_counter++;
+		write(composite);
 	}
-} catch (std::exception& x) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exception while writing images: %s",
-		x.what());
-}
-#endif
 	
 	// clean up the memory allocated
 	fftw_destroy_plan(r);
@@ -312,6 +339,10 @@ try {
 	fftw_free(af);
 	fftw_free(bf);
 	fftw_cleanup();
+
+	// we should now remove the window adapters
+	if (windowedfrom) { delete windowedfrom; windowedfrom = NULL; }
+	if (windowedto)   { delete windowedto;   windowedto = NULL;   }
 
 	// at this point we no longer need the a and b arrays, so we free
 	// them in order not to forget this later

@@ -38,4 +38,11 @@ planetguide:	snowguide
 	./snowguide --debug --exposure=1 --star=320,240 --width=64 \
 		--method=diff --interval=3 server GUIDESIM guide
 
+suncalibrate:	snowguide
+	./snowguide --debug --exposure=1 \
+		--method=diff server GUIDESIM calibrate
+sunguide:	snowguide
+	./snowguide --debug --exposure=1 \
+		--method=diff --interval=3 server GUIDESIM guide
+
 endif

@@ -206,7 +206,7 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		DerivativeNormAdapter<double>	da(la);			\
-		PhaseCorrelator	pc(false);				\
+		PhaseCorrelator	pc(true);				\
 		return pc(*image, da).first;				\
 	}								\
 }

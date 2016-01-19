@@ -111,7 +111,8 @@ int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 		return EXIT_SUCCESS;
 	} else {
 		if ((star.x == 0) && (star.y == 0)) {
-			throw std::runtime_error("calibration star not set");
+			debug(LOG_WARNING, DEBUG_LOG, 0,
+				"warning: calibration star not set");
 		}
 	}
 	if (method != TrackerUNDEFINED) {

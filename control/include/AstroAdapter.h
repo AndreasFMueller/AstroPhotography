@@ -1723,6 +1723,37 @@ public:
 	}
 };
 	
+//////////////////////////////////////////////////////////////////////
+// Normalization to 1
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class NormalizationAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<double>&	_image;
+	double	_normalizer;
+public:
+	NormalizationAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _normalizer(1) {
+		double	maximum = 0;
+		int	w = _image.getSize().width();
+		int	h = _image.getSize().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				double	v = _image.pixel(x, y);
+				if (v > maximum) {
+					maximum = v;
+				}
+			}
+		}
+		if (maximum > 0) {
+			_normalizer = 1 / maximum;
+		}
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image.pixel(x, y) * _normalizer;
+	}
+};
+
 } // namespace adapter
 } // namespace astro
 

@@ -139,6 +139,10 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	astro::persistence::Database _database)
 	: guider(_guider), imagedirectory(_imagedirectory),
 	  database(_database) {
+	// set point to an invalid value to allows to detect that it has not been set
+	_point.x = -1;
+	_point.y = -1;
+	// default tracker is star
 	_method = TrackerSTAR;
 }
 
@@ -276,6 +280,23 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 			trackerrectangle, 10));
 	return tracker;
 #endif
+	// first we must make sure the data we have is consistent
+	astro::camera::Exposure	exposure = guider->exposure();
+	if ((exposure.frame().size().width() <= 0) ||
+		(exposure.frame().size().height() <= 0)) {
+		// get the frame from the ccd
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using ccd frame");
+		exposure.frame(guider->imager().ccd()->getInfo().getFrame());
+		guider->exposure(exposure);
+	}
+	if ((_point.x < 0) || (_point.y < 0)) {
+		astro::image::ImagePoint	c = exposure.frame().center();
+		_point.x = c.x();
+		_point.y = c.y();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using ccd center (%.1f,%.1f) as star",
+			_point.x, _point.y);
+	}
+
 	switch (_method) {
 	case TrackerUNDEFINED:
 	case TrackerSTAR:

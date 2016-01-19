@@ -209,10 +209,10 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 				double	r = (p - body).abs();
 				if (r < 100) {
 					value = 1.;
-				} else if (r > 12) {
+				} else if (r > 102) {
 					value = 0;
 				} else {
-					value = (12 - r) / 2;
+					value = (102 - r) / 2;
 				}
 				}
 				break;
