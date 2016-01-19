@@ -226,6 +226,8 @@ void	Guider::startExposure() {
  */
 ImagePtr	Guider::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
+	imager().startExposure(exposure());
+	Timer::sleep(exposure().exposuretime());
 	ImagePtr	image = imager().getImage();
 	if (!image->hasMetadata(std::string("INSTRUME"))) {
 		image->setMetadata(astro::io::FITSKeywords::meta(

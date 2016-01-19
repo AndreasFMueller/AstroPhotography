@@ -217,8 +217,8 @@ int	Guide::state_command(GuiderPrx guider) {
 	case GuiderGUIDING: {
 		std::cout << ": ";
 		TrackingSummary	summary = guider->getTrackingSummary();
-		std::cout << astro::stringprintf("duration=%.0f, ",
-			summary.since);
+		std::cout << astro::stringprintf("%d duration=%.0f, ",
+			summary.guiderunid, summary.since);
 		std::cout << astro::stringprintf("last=(%.2f,%.2f), ",
 			summary.lastoffset.x,
 			summary.lastoffset.y);

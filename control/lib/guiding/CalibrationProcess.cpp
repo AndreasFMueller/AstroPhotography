@@ -28,9 +28,14 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
 	moveto(grid * ra, grid * dec);
 
 	// take an image at that position
-	imager().startExposure(exposure());
-	usleep(1000000 * exposure().exposuretime());
-	ImagePtr	image = imager().getImage();
+	ImagePtr	image;
+	if (hasGuider()) {
+		image = guider()->getImage();
+	} else {
+		imager().startExposure(exposure());
+		usleep(1000000 * exposure().exposuretime());
+		image = imager().getImage();
+	}
 
 	// analze the image
 	Point	star = (*tracker())(image);

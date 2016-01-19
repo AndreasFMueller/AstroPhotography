@@ -144,12 +144,6 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		timer.start();
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: start new exposure");
-		// initiate an exposure
-		guider()->startExposure();
-
-		// until the image is exposed
-		Timer::sleep(guider()->exposure().exposuretime());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: exposure complete");
 
 		// now retrieve the image. This method has as a side
 		// effect that the image is sent to the image callback

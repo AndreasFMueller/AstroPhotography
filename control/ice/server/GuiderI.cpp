@@ -232,9 +232,11 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 		guider->focallength());
 
 	// callback stuff
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing calibration callbacks");
 	GuiderICalibrationCallback	*ccallback
 		= new GuiderICalibrationCallback(*this);
 	guider->calibrationcallback = astro::callback::CallbackPtr(ccallback);
+
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
 	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
 
@@ -325,17 +327,17 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
 
-	// start guiding
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
-	guider->startGuiding(tracker, guidinginterval);
-
 	// install a callback in the guider
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callbacks");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing tracking callbacks");
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
 	guider->trackingcallback(astro::callback::CallbackPtr(tcallback));
 
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
 	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
+
+	// start guiding
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
+	guider->startGuiding(tracker, guidinginterval);
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
