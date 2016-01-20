@@ -41,6 +41,7 @@ libastrodiscovery_la_SOURCES = 						\
 	ServiceDiscovery.cpp						\
 	ServiceInstrument.cpp						\
 	ServiceKey.cpp							\
+	ServiceLocation.cpp						\
 	ServiceObject.cpp						\
 	ServicePublisher.cpp						\
 	ServiceResolver.cpp						\

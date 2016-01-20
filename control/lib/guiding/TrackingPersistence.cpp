@@ -18,9 +18,11 @@ std::string	GuidingRunTableAdapter::createstatement() {
 	return std::string(
 	"create table guidingrun (\n"
 	"    id integer not null,\n"
+	"    name varchar(32) not null,\n"
 	"    instrument varchar(32) not null,\n"
 	"    ccd varchar(256) not null default 0,\n"
 	"    guiderport varchar(256) not null,\n"
+	"    adaptiveoptics varchar(256) not null,\n"
 	"    whenstarted datetime not null,\n"
 	"    calibration integer not null,\n"
 	"    primary key(id)\n"
@@ -32,9 +34,11 @@ GuidingRunRecord	GuidingRunTableAdapter::row_to_object(int objectid,
 			const Row& row) {
 	Persistent<GuidingRun>	result(objectid);
 	result.whenstarted = row["whenstarted"]->timeValue();
+	result.name = row["name"]->stringValue();
 	result.instrument = row["instrument"]->stringValue();
 	result.ccd = row["ccd"]->stringValue();
 	result.guiderport = row["guiderport"]->stringValue();
+	result.adaptiveoptics = row["adaptiveoptics"]->stringValue();
 	result.calibrationid = row["calibration"]->intValue();
 	return result;
 }
@@ -42,9 +46,11 @@ GuidingRunRecord	GuidingRunTableAdapter::row_to_object(int objectid,
 UpdateSpec	GuidingRunTableAdapter::object_to_updatespec(const GuidingRunRecord& guidingrun) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("name", factory.get(guidingrun.name)));
 	spec.insert(Field("instrument", factory.get(guidingrun.instrument)));
 	spec.insert(Field("ccd", factory.get(guidingrun.ccd)));
 	spec.insert(Field("guiderport", factory.get(guidingrun.guiderport)));
+	spec.insert(Field("adaptiveoptics", factory.get(guidingrun.adaptiveoptics)));
 	spec.insert(Field("whenstarted", factory.getTime(guidingrun.whenstarted)));
 	spec.insert(Field("calibration", factory.get(guidingrun.calibrationid)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update spec has %d entries", spec.size());

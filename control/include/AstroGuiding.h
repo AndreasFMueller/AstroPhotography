@@ -311,20 +311,24 @@ public:
  * \brief The GuiderDescriptor is the key to Guiders in the GuiderFactory
  */
 class GuiderDescriptor {
+	std::string	_name;
 	std::string	_instrument;
 	std::string	_ccd;
 	std::string	_guiderport;
+	std::string	_adaptiveoptics;
 public:
-	GuiderDescriptor(const std::string& instrument,
-		const std::string& ccd,
-		const std::string& guiderport)
-		: _instrument(instrument), _ccd(ccd),
-		  _guiderport(guiderport) { }
+	GuiderDescriptor(const std::string& name, const std::string& instrument,
+		const std::string& ccd, const std::string& guiderport,
+		const std::string& adaptiveoptics)
+		: _name(name), _instrument(instrument), _ccd(ccd),
+		  _guiderport(guiderport), _adaptiveoptics(adaptiveoptics) { }
 	bool	operator==(const GuiderDescriptor& other) const;
 	bool	operator<(const GuiderDescriptor& other) const;
+	std::string	name() const { return _name; }
 	std::string	instrument() const { return _instrument; }
 	std::string	ccd() const { return _ccd; }
 	std::string	guiderport() const { return _guiderport; }
+	std::string	adaptiveoptics() const { return _adaptiveoptics; }
 	std::string	toString() const;
 };
 
@@ -354,8 +358,9 @@ public:
 	int	trackingid;
 	int	calibrationid;
 	GuiderDescriptor	descriptor;
-	TrackingSummary(const std::string& instrument,
-		const std::string& ccd, const std::string& guiderport);
+	TrackingSummary(const std::string& name, const std::string& instrument,
+		const std::string& ccd, const std::string& guiderport,
+		const std::string& adaptiveoptics);
 };
 
 // we will need the GuiderProcess class, but as we want to keep the 
@@ -513,13 +518,17 @@ public:
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
+	std::string	_name;
 	std::string	_instrument;
 	camera::GuiderPortPtr	_guiderport;
 public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n) { _name = n; }
 	const std::string&	instrument() const { return _instrument; }
 	void	instrument(const std::string& i) { _instrument = i; }
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }
 	std::string	guiderportname() const { return _guiderport->name().toString(); }
+	std::string	adaptiveopticsname() const { return std::string(""); }
 private:
 	/*
 	 * \brief Image for guiding
@@ -733,12 +742,6 @@ class GuiderFactory {
 	persistence::Database	database;
 	typedef	std::map<GuiderDescriptor, GuiderPtr>	guidermap_t;
 	guidermap_t	guiders;
-	// auxiliary functions to simplify the 
-#if 0
-	camera::CameraPtr	cameraFromName(const std::string& name);
-	camera::GuiderPortPtr	guiderportFromName(
-						const std::string& name);
-#endif
 public:
 	GuiderFactory() { }
 	GuiderFactory(module::Repository _repository,

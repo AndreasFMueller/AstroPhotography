@@ -45,8 +45,8 @@ std::string	toString(const trackinghistoryentry& entry) {
 TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
 	DrivingWork& driving, persistence::Database& _database)
 	: BasicProcess(_guider, _tracker, _database), _driving(driving),
-	  _summary(_guider->instrument(), _guider->ccdname(),
-		_guider->guiderportname()) {
+	  _summary(_guider->name(), _guider->instrument(), _guider->ccdname(),
+		_guider->guiderportname(), _guider->adaptiveopticsname()) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
@@ -78,9 +78,11 @@ TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
 	// if we have a database, then we should create a new record
 	if (database()) {
 		GuidingRun	guidingrun;
+		guidingrun.name = guider()->name();
 		guidingrun.instrument = guider()->instrument();
 		guidingrun.ccd = guider()->ccdname();
 		guidingrun.guiderport = guider()->guiderportname();
+		guidingrun.adaptiveoptics = guider()->adaptiveopticsname();
 		guidingrun.calibrationid = guider()->calibrationid();
 		time(&guidingrun.whenstarted);
 

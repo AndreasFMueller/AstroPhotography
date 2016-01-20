@@ -45,6 +45,7 @@ std::string	CalibrationTableAdapter::createstatement() {
 	return std::string(
 	"create table calibration (\n"
 	"    id integer not null,\n"
+	"    name varchar(32) not null,\n"
 	"    instrument varchar(32) not null,\n"
 	"    ccd varchar(256) not null,\n"
 	"    controldevice varchar(256) not null,\n"
@@ -66,8 +67,10 @@ std::string	CalibrationTableAdapter::createstatement() {
 	);
 }
 
-CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row& row) {
+CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid,
+				const Row& row) {
 	Persistent<PersistentCalibration>	result(objectid);
+	result.name = row["name"]->stringValue();
 	result.instrument = row["instrument"]->stringValue();
 	result.ccd = row["ccd"]->stringValue();
 	result.controldevice = row["controldevice"]->stringValue();
@@ -90,6 +93,7 @@ CalibrationRecord	CalibrationTableAdapter::row_to_object(int objectid, const Row
 UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord& calibration) {
 	UpdateSpec	spec;
 	FieldValueFactory	factory;
+	spec.insert(Field("name", factory.get(calibration.name)));
 	spec.insert(Field("instrument", factory.get(calibration.instrument)));
 	spec.insert(Field("ccd", factory.get(calibration.ccd)));
 	spec.insert(Field("controldevice", factory.get(calibration.controldevice)));

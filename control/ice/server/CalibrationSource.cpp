@@ -43,9 +43,23 @@ Calibration	CalibrationSource::get(int id) {
 		calibration.guider.ccdIndex
 			= instrumentName2index(r.instrument,
 				InstrumentGuiderCCD, r.ccd);
-		calibration.guider.guiderportIndex
-			= instrumentName2index(r.instrument,
-				InstrumentGuiderPort, r.controldevice);
+		calibration.guider.guiderportIndex = -1;
+		calibration.guider.adaptiveopticsIndex = -1;
+		switch (r.controltype) {
+		case astro::guiding::BasicCalibration::GP:
+			calibration.controltype = CalibrationTypeGuiderPort;
+			calibration.guider.guiderportIndex
+				= instrumentName2index(r.instrument,
+					InstrumentGuiderPort, r.controldevice);
+			break;
+		case astro::guiding::BasicCalibration::AO:
+			calibration.controltype = CalibrationTypeAdaptiveOptics;
+			calibration.guider.adaptiveopticsIndex
+				= instrumentName2index(r.instrument,
+					InstrumentAdaptiveOptics,
+						r.controldevice);
+			break;
+		}
 		calibration.focallength = r.focallength;
 		calibration.masPerPixel = r.masPerPixel;
 		calibration.complete = (r.complete) ? true : false;
@@ -53,14 +67,6 @@ Calibration	CalibrationSource::get(int id) {
 		calibration.quality = r.quality;
 		for (int i = 0; i < 6; i++) {
 			calibration.coefficients.push_back(r.a[i]);
-		}
-		switch (r.controltype) {
-		case astro::guiding::BasicCalibration::GP:
-			calibration.controltype = CalibrationTypeGuiderPort;
-			break;
-		case astro::guiding::BasicCalibration::AO:
-			calibration.controltype = CalibrationTypeAdaptiveOptics;
-			break;
 		}
 
 		// add calibration points

@@ -38,8 +38,8 @@ void	GuiderFactoryTest::tearDown() {
 void	GuiderFactoryTest::test() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test() begin");
 	GuiderFactory	guiderfactory;
-	GuiderDescriptor	guiderdescriptor("camera:simulator/camera", 0,
-					"guiderport:simulator/guiderport");
+	GuiderDescriptor	guiderdescriptor("test", "TEST",
+		"ccd:simulator/Imaging", "guiderport:simulator/guiderport", "");
 	GuiderPtr	guider = guiderfactory.get(guiderdescriptor);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider constructed");
 	std::vector<GuiderDescriptor>	guiders = guiderfactory.list();

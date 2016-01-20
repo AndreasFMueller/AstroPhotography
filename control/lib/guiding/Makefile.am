@@ -22,6 +22,7 @@ libastroguiding_la_SOURCES = 						\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderCalibration.cpp						\
+	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
 	GuiderPortProcess.cpp						\
 	GuiderProcess.cpp						\

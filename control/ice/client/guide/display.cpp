@@ -55,17 +55,22 @@ void	Calibration_display::operator()(const Calibration& cal) {
 		break;
 	}
 	_out << std::endl;
+	if (_verbose) {
+		_out << std::string("      guider: ");
+		_out << guiderdescriptor2name(cal.guider);
+		_out << std::endl;
+	}
 
 	// calibration coefficients
-	_out << std::string("     ");
-	for (int k = 0; k < 3; k++) {
-		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
-	}
-	_out << std::endl << std::string("     ");
-	for (int k = 3; k < 6; k++) {
-		_out << astro::stringprintf("%12.8f", cal.coefficients[k]);
-	}
-	_out << std::endl;
+	_out << "      coef = [ ";
+	_out << astro::stringprintf("%12.8f,", cal.coefficients[0]);
+	_out << astro::stringprintf("%12.8f,", cal.coefficients[1]);
+	_out << astro::stringprintf("%12.8f;", cal.coefficients[2]);
+	_out << std::endl << "               ";
+	_out << astro::stringprintf("%12.8f,", cal.coefficients[3]);
+	_out << astro::stringprintf("%12.8f,", cal.coefficients[4]);
+	_out << astro::stringprintf("%12.8f",  cal.coefficients[5]);
+	_out << "  ]" << std::endl;
 
 	// calibration points if verbose
 	if (_verbose) {
