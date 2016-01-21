@@ -74,11 +74,18 @@ int	Guide::tracks_command(GuiderFactoryPrx guiderfactory,
 	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
 		int	id = *ptr;
 		if (verbose) {
+			// id
 			std::cout << astro::stringprintf("%4d: ", id);
 			TrackingHistory	history
 				= guiderfactory->getTrackingHistory(id);
-			std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+
+			// start time
+			std::cout << astro::timeformat("%Y-%m-%d %H:%M ",
 				converttime((double)history.timeago));
+			// guider used
+			std::cout << guiderdescriptor2name(history.guider);
+
+			// points/duration
 			if (history.points.size() > 1) {
 				std::cout << astro::stringprintf(" %6d pts",
 					history.points.size());

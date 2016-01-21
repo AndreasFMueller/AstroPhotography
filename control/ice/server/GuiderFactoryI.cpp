@@ -212,7 +212,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport= %s", r.guiderport.c_str());
 		history.guider.guiderportIndex
 			= instrumentName2index(r.instrument,
 				InstrumentGuiderPort, r.guiderport);
-		history.guider.guiderportIndex
+		history.guider.adaptiveopticsIndex
 			= instrumentName2index(r.instrument,
 				InstrumentAdaptiveOptics, r.adaptiveoptics);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s|%d|%d|%d",
