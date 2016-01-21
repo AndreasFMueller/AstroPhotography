@@ -59,6 +59,7 @@ public:
 
 	// camera interface
 	void	startExposure(const Exposure& exposure);
+	bool	wait();
 	ImagePtr	getImage();
 };
 

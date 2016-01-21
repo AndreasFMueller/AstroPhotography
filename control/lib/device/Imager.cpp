@@ -66,5 +66,9 @@ ImagePtr	Imager::getImage() {
 	return image;
 }
 
+bool	Imager::wait() {
+	return ccd()->wait();
+}
+
 } // namespace camera
 } // namespace astro
