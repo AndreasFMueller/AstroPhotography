@@ -81,10 +81,11 @@ public:
 
 	// choose calibration
 	virtual void useCalibration(Ice::Int, const Ice::Current& current);
-	virtual Calibration getCalibration(const Ice::Current& current);
+	virtual Calibration getCalibration(CalibrationType,
+				const Ice::Current& current);
 
 	// control calibration process
-	virtual Ice::Int startCalibration(const Ice::Current& current);
+	virtual Ice::Int startCalibration(CalibrationType caltype, const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);

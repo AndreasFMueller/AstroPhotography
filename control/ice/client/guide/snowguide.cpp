@@ -58,7 +58,7 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	int	ccdIndex = 0;
 	int	guiderportIndex = 0;
-	int	adaptiveopticsIndex = -1;
+	int	adaptiveopticsIndex = 0;
 	int	width = -1;
 
 	guide.exposure.exposuretime = 1.;
@@ -248,14 +248,13 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 	if (command == "calibration") {
-		int	calibrationid = -1;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "argc = %d, optind = %d",
 			argc, optind);
 		if (argc > optind) {
-			calibrationid = std::stoi(argv[optind++]);
+			return guide.calibration_command(guiderfactory,
+				guider, std::string(argv[optind++]));
 		}
-		return guide.calibration_command(guiderfactory, guider,
-			calibrationid);
+		return guide.calibration_command(guiderfactory, guider);
 	}
 	if (command == "cancel") {
 		return guide.cancel_command(guider);
@@ -305,11 +304,11 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "calibrate") {
 		// next argument must be the calibration id, if it is present
-		int	calibrationid = -1;
 		if (argc > optind) {
-			calibrationid = std::stoi(argv[optind++]);
+			return guide.calibrate_command(guider,
+				std::string(argv[optind++]));
 		}
-		return guide.calibrate_command(guider, calibrationid);
+		return guide.calibrate_command(guider, -1);
 	}
 
 	std::string	msg = astro::stringprintf("unknown command '%s'",

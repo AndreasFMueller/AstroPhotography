@@ -11,7 +11,7 @@ module snowstar {
 	 * \brief guiders are described by an Instrument name and indices
 	 *
 	 * A guider is defined by the instrument name and the indices of the
-	 * guider ccd and the guider port.
+	 * guider ccd, guider port and adaptive optics unit.
 	 */
 	struct GuiderDescriptor {
 		string	instrumentname;
@@ -208,10 +208,10 @@ module snowstar {
 		 * \brief Methods related to calibration
 		 */
 		void	useCalibration(int id);
-		Calibration	getCalibration() throws BadState;
+		Calibration	getCalibration(CalibrationType caltype) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		int	startCalibration();
+		int	startCalibration(CalibrationType caltype) throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;

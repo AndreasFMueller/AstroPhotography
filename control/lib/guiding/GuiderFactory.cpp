@@ -56,7 +56,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	AdaptiveOpticsPtr	adaptiveoptics;
 	if (guiderdescriptor.adaptiveoptics().size()) {
 		DeviceAccessor<AdaptiveOpticsPtr>	da(repository);
-		adaptiveoptics = da.get(DeviceName(guiderdescriptor.ccd()));
+		adaptiveoptics = da.get(DeviceName(guiderdescriptor.adaptiveoptics()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics constructed");
 	}
 

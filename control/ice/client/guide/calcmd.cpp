@@ -9,6 +9,7 @@
 #include <iostream>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <IceConversions.h>
 
 namespace snowstar {
 namespace app {
@@ -39,33 +40,61 @@ int	Guide::cancel_command(GuiderPrx guider) {
  * and displays it
  */
 int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
-		GuiderPrx guider, int calibrationid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d",
-		calibrationid);
-	Calibration	cal;
-	if (calibrationid <= 0) {
-		switch (guider->getState()) {
-		case GuiderUNCONFIGURED:
-		case GuiderIDLE:
-		case GuiderCALIBRATING:
-			std::cerr << "not calibrated, specify calibration id";
-			std::cerr << std::endl;
-			return EXIT_FAILURE;
-			break;
-		case GuiderCALIBRATED:
-		case GuiderGUIDING:
-			cal = guider->getCalibration();
-			break;
-		}
-	} else {
-		cal = guiderfactory->getCalibration(calibrationid);
-	}
+		GuiderPrx guider) {
+	return calibration_command(guiderfactory, guider, std::string("GP"));
+}
 
+int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
+		GuiderPrx guider, const std::string& calarg) {
+	// try to interpret the calarg as a calibration type
+	CalibrationType	caltype;
+	try {
+		caltype = string2calibrationtype(calarg);
+	} catch (const std::exception& x) {
+		goto numericcalibration;
+	}
+	// we were successful in interpreting the calibration type, but
+	// this only makes sens in certain states
+	switch (guider->getState()) {
+	case GuiderUNCONFIGURED:
+	case GuiderIDLE:
+	case GuiderCALIBRATING:
+		std::cerr << "not calibrated, specify calibration id";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+		break;
+	case GuiderCALIBRATED:
+	case GuiderGUIDING:
+		calibration_show(guider->getCalibration(caltype));
+		break;
+	}
+	return EXIT_SUCCESS;
+
+numericcalibration:
+	// handle the case where we assume that the argument is a numeric
+	// calibration id
+	try {
+		int	calid = std::stoi(calarg);
+		return calibration_command(guiderfactory, calid);
+	} catch (const std::exception& x) {
+		std::cerr << "cannot retrieve calibration '" << calarg << "': ";
+		std::cerr << x.what() << std::endl;
+	}
+	return EXIT_FAILURE;
+}
+
+int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
+		int calibrationid) {
+	Calibration	cal = guiderfactory->getCalibration(calibrationid);
+	calibration_show(cal);
+	return EXIT_SUCCESS;
+}
+
+void	Guide::calibration_show(const Calibration& cal) {
 	Calibration_display	cd(std::cout);
 	cd.verbose(verbose);
 	cd(cal);
 	std::cout << std::endl;
-	return EXIT_SUCCESS;
 }
 
 /**
@@ -106,6 +135,10 @@ int	Guide::trash_command(GuiderFactoryPrx guiderfactory, std::list<int> ids) {
 /**
  * \brief Implementation of calibrate command
  */
+int	Guide::calibrate_command(GuiderPrx guider) {
+	return calibrate_command(guider, std::string("GP"));
+}
+
 int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "use calibrationid = %d",
 		calibrationid);
@@ -113,18 +146,50 @@ int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 		guider->useCalibration(calibrationid);
 		return EXIT_SUCCESS;
 	} else {
+		return calibrate_command(guider);
+	}
+}
+
+int	Guide::calibrate_command(GuiderPrx guider, const std::string& calarg) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrate with arg '%s'",
+		calarg.c_str());
+	// make sure the tracker is configured
+	if (method != TrackerUNDEFINED) {
+		guider->setTrackerMethod(method);
+	}
+	if (method == TrackerSTAR) {
 		if ((star.x == 0) && (star.y == 0)) {
 			debug(LOG_WARNING, DEBUG_LOG, 0,
 				"warning: calibration star not set");
 		}
 	}
-	if (method != TrackerUNDEFINED) {
-		guider->setTrackerMethod(method);
+
+	// try to interpret the argument as a number
+	int	calibrationid;
+	try {
+		calibrationid = std::stoi(calarg);
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "argument is not an id");
+		goto newcalibration;
 	}
-	calibrationid = guider->startCalibration();
-	std::cout << "new calibration " << calibrationid << " in progress";
-	std::cout << std::endl;
+	guider->useCalibration(calibrationid);
 	return EXIT_SUCCESS;
+
+newcalibration:
+	// try to interpret the argument as a calibration type
+	try {
+		CalibrationType	caltype = string2calibrationtype(calarg);
+		calibrationid = guider->startCalibration(caltype);
+		std::cout << "new calibration " << calibrationid;
+		std::cout << " in progress" << std::endl;
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"calibration failed for type %s: %s",
+			calarg.c_str(), x.what());
+	}
+	std::cerr << "calibration failed" << std::endl;
+	return EXIT_FAILURE;
 }
 
 } // namespace snowguide

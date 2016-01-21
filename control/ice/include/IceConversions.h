@@ -124,6 +124,9 @@ astro::guiding::TrackingSummary	convert(const TrackingSummary& summary);
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor);
 GuiderDescriptor	guiderdescriptorParse(const std::string &name);
 
+std::string	calibrationtype2string(CalibrationType caltype);
+CalibrationType	string2calibrationtype(const std::string& caltype);
+
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);
 astro::task::TaskInfo::taskstate	convert(const TaskState& state);

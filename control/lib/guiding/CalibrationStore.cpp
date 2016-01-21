@@ -72,6 +72,12 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 	calibration.masPerPixel = r.masPerPixel;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found calibration with masPerPixel=%.3f", r.masPerPixel);
+	switch (r.controltype) {
+	case 0:	calibration.calibrationtype(BasicCalibration::GP);
+		break;
+	case 1:	calibration.calibrationtype(BasicCalibration::AO);
+		break;
+	}
 
 	// add the points
 	std::list<CalibrationPointRecord>	points

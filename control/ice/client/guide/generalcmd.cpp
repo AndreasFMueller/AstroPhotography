@@ -41,7 +41,7 @@ void	Guide::usage(const char *progname) {
 	std::cout << "  Calibration:" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << p << " [ options ] <service> <INSTRUMENT> calibrate"
+	std::cout << p << " [ options ] <service> <INSTRUMENT> calibrate [ <id> | <type> ]"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> calibration"
 		<< std::endl;
@@ -134,12 +134,18 @@ int	Guide::help_command(const char *progname) {
 "    star in the same position on the guider CCD)." << std::endl
 
 << std::endl << 
-"calibrate [ <calibrationid> ]" << std::endl <<
+"calibrate [ <calibrationid> | <calibrationtype> ]" << std::endl <<
 "    use <calibrationid> to calibrate the guider, if <calibrationid> is"
 << std::endl <<
-"    is specified. Without the <calibrationid> argument, start a new"
+"    is specified. Without an argument, start a new calibration run for the"
 << std::endl <<
-"    calibration run. The --star argument ist required for this function."
+"    guider port control device. The <calibrationtype> specifies the control"
+<< std::endl <<
+"    device to calibrate, it can be 'GP' for guider port or 'AO' for adaptive"
+<< std::endl <<
+"    optics. If no argument is given, 'GP' is assumed. Depending on the "
+<< std::endl <<
+"   tracker method, The --star argument may be required for this function."
 << std::endl
 
 << std::endl << 
@@ -208,11 +214,18 @@ int	Guide::state_command(GuiderPrx guider) {
 	case GuiderCALIBRATING:
 		std::cout << ": " << guider->calibrationProgress();
 		break;
-	case GuiderCALIBRATED: {
+	case GuiderCALIBRATED:
 		std::cout << ": ";
-		Calibration	cal = guider->getCalibration();
-		std::cout << cal.id;
-		}
+		try {
+			Calibration	cal = guider->getCalibration(
+						CalibrationTypeGuiderPort);
+			std::cout << "GP=" << cal.id;
+		} catch (...) { }
+		try {
+			Calibration	cal = guider->getCalibration(
+						CalibrationTypeAdaptiveOptics);
+			std::cout << "AO=" << cal.id;
+		} catch (...) { }
 		break;
 	case GuiderGUIDING: {
 		std::cout << ": ";

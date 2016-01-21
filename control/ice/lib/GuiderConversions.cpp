@@ -304,4 +304,30 @@ astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
 	return result;
 }
 
+std::string	calibrationtype2string(CalibrationType caltype) {
+	switch (caltype) {
+	case CalibrationTypeGuiderPort:
+		return std::string("GP");
+	case CalibrationTypeAdaptiveOptics:
+		return std::string("AO");
+	}
+	std::string	cause = astro::stringprintf("unknown cal type %d",
+				caltype);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	throw std::runtime_error(cause);
+}
+
+CalibrationType	string2calibrationtype(const std::string& caltype) {
+	if ((caltype == "GP") || (caltype == "GuiderPort")) {
+		return CalibrationTypeGuiderPort;
+	}
+	if ((caltype == "AO") || (caltype == "AdaptiveOptics")) {
+		return CalibrationTypeAdaptiveOptics;
+	}
+	std::string	cause = astro::stringprintf("unknown cal type '%s'",
+		caltype.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	throw std::runtime_error(cause);
+}
+
 } // namespace snowstar

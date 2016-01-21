@@ -211,14 +211,33 @@ void GuiderI::useCalibration(Ice::Int calid,
 		calibration.a[0], calibration.a[1], calibration.a[2],
 		calibration.a[3], calibration.a[4], calibration.a[5]);
 
-	// install calibration data in the guider
-	guider->calibration(calibration);
-	guider->calibrationid(calid);
+	// test the type of the calibration
+	switch (calibration.calibrationtype()) {
+	case astro::guiding::BasicCalibration::GP:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting GP calibration");
+		// install calibration data in the guider
+		guider->calibration(calibration);
+		guider->calibrationid(calid);
+		break;
+	case astro::guiding::BasicCalibration::AO:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting AO calibration");
+		// XXX this is not implemented yet
+		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration setting not implemented yet");
+		throw std::runtime_error("setting AO calibration not implemented");
+		break;
+	}
 }
 
-Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
+Calibration GuiderI::getCalibration(CalibrationType calibrationtype, const Ice::Current& /* current */) {
 	CalibrationSource	source(database);
-	return source.get(guider->calibrationid());
+	switch (calibrationtype) {
+	case CalibrationTypeGuiderPort:
+		return source.get(guider->calibrationid());
+	case CalibrationTypeAdaptiveOptics:
+		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration request not implemented");
+		throw std::runtime_error("AO calibration request not supported yet");
+		break;
+	}
 }
 
 /**
@@ -227,9 +246,9 @@ Calibration GuiderI::getCalibration(const Ice::Current& /* current */) {
  * The focal length is the only piece of information that we can not
  * get from anywhere else, so it has to be specified
  */
-Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, focallength = %.3f",
-		guider->focallength());
+Ice::Int GuiderI::startCalibration(CalibrationType caltype, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
+		calibrationtype2string(caltype).c_str());
 
 	// callback stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing calibration callbacks");
@@ -244,7 +263,14 @@ Ice::Int GuiderI::startCalibration(const Ice::Current& /* current */) {
 	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start the calibration
-	return guider->startCalibration(tracker);
+	switch (caltype) {
+	case CalibrationTypeGuiderPort:
+		return guider->startCalibration(tracker);
+	case CalibrationTypeAdaptiveOptics:
+		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration requested, but not implemented");
+		throw std::runtime_error("AO calibration not supported yet");
+		break;
+	}
 }
 
 /**

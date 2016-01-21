@@ -58,8 +58,17 @@ public:
 
 	// commands related to calibration
 	int	calibration_command(GuiderFactoryPrx guiderfactory,
-			GuiderPrx guider, int calibrationid);
+			GuiderPrx guider);
+	int	calibration_command(GuiderFactoryPrx guiderfactory,
+			int calibrationid);
+	int	calibration_command(GuiderFactoryPrx guiderfactory,
+			GuiderPrx guider, const std::string& calarg);
+	void	calibration_show(const Calibration& cal);
+
+	int	calibrate_command(GuiderPrx guider);
 	int	calibrate_command(GuiderPrx guider, int calibrationid);
+	int	calibrate_command(GuiderPrx guider, const std::string& calarg);
+
 	int	cancel_command(GuiderPrx guider);
 	int	list_command(GuiderFactoryPrx guiderfactory,
 			GuiderDescriptor descriptor);
