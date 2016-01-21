@@ -342,7 +342,7 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 
 	// we should now remove the window adapters
 	if (windowedfrom) { delete windowedfrom; windowedfrom = NULL; }
-	if (windowedto)   { delete windowedto;   windowedto = NULL;   }
+	if (windowedto)   { delete windowedto;   windowedto = NULL;   }
 
 	// at this point we no longer need the a and b arrays, so we free
 	// them in order not to forget this later
