@@ -17,6 +17,7 @@ module snowstar {
 		string	instrumentname;
 		int	ccdIndex;
 		int	guiderportIndex;
+		int	adaptiveopticsIndex;
 	};
 
 	/**

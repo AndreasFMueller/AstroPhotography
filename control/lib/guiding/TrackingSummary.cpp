@@ -12,14 +12,12 @@ namespace guiding {
 /**
  * \brief Construct a new Tracking summary object
  */
-TrackingSummary::TrackingSummary(const std::string& instrument,
-		const std::string& ccd, const std::string& guiderport)
-	: descriptor(instrument, ccd, guiderport) {
+TrackingSummary::TrackingSummary(const std::string& name,
+		const std::string& instrument, const std::string& ccd,
+		const std::string& guiderport,
+		const std::string& adaptiveoptics)
+	: descriptor(name, instrument, ccd, guiderport, adaptiveoptics) {
 }
-
-/**
- * \brief 
- */
 
 } // namespace guiding
 } // namespace astro

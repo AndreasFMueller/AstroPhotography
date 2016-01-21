@@ -68,6 +68,7 @@ static void	usage(const char *progname) {
 		<< std::endl;
 }
 
+#if 0
 class service_location {
 public:
 	std::string	servicename;
@@ -112,6 +113,7 @@ void	service_location::locate() {
 	}
 	ssl = (sslport > 0);
 }
+#endif
 
 /**
  * \brief Main function for the Snowstar server
@@ -142,9 +144,6 @@ int	snowstar_main(int argc, char *argv[]) {
 	std::string	databasefile("testdb.db");
 	std::string	servicename("");
 
-	// port numbers
-	service_location	location;
-
 	// parse the command line
 	int	c;
 	int	longindex;
@@ -167,25 +166,25 @@ int	snowstar_main(int argc, char *argv[]) {
 			databasefile = std::string(optarg);
 			break;
 		case 'p':
-			location.port = std::stoi(optarg);
+			astro::discover::ServiceLocation::get().port(std::stoi(optarg));
 			break;
 		case 's':
-			location.sslport = std::stoi(optarg);
+			astro::discover::ServiceLocation::get().sslport(std::stoi(optarg));
 			break;
 		case 'n':
-			location.servicename = std::string(optarg);
+			astro::discover::ServiceLocation::get().servicename(std::string(optarg));
 			break;
 		}
 
 	// determine which service name to use
-	location.locate();
+	astro::discover::ServiceLocation&	location = astro::discover::ServiceLocation::get();
 	astro::discover::ServicePublisherPtr	sp
-		= astro::discover::ServicePublisher::get(location.servicename,
-			location.port);
+		= astro::discover::ServicePublisher::get(location.servicename(),
+			location.port());
 	astro::discover::ServicePublisherPtr	sps;
-	if (location.ssl) {
+	if (location.ssl()) {
 		sps = astro::discover::ServicePublisher::get(
-			location.servicename + "-ssl", location.sslport);
+			location.servicename() + "-ssl", location.sslport());
 	}
 
 	// set up the repository
@@ -221,10 +220,10 @@ int	snowstar_main(int argc, char *argv[]) {
 	try {
 		// create the adapter
 		std::string	connectstring = astro::stringprintf(
-			"default -p %hu", location.port);
-		if (location.sslport > 0) {
+			"default -p %hu", location.port());
+		if (location.sslport() > 0) {
 			connectstring += astro::stringprintf(" -p %hu:ssl",
-				location.sslport);
+				location.sslport());
 		}
 		Ice::ObjectAdapterPtr	adapter
 			= ic->createObjectAdapterWithEndpoints("Astro",

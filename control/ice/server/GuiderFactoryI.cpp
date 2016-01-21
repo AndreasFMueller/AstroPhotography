@@ -13,6 +13,7 @@
 #include <IceConversions.h>
 #include <AstroGuiding.h>
 #include <CalibrationSource.h>
+#include <AstroUtils.h>
 
 namespace snowstar {
 
@@ -72,7 +73,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 			const Ice::Current& current) {
 	// name of the guider
 	astro::guiding::GuiderDescriptor	d = convert(descriptor);
-	std::string	guidername = d.toString();
+	std::string	gn = guiderdescriptor2name(descriptor);
 
 	// get an GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
@@ -95,10 +96,10 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 		database);
 
 	// add the guider we have constructed to the D
-	locator->add(guidername, guiderptr);
+	locator->add(gn, guiderptr);
 
 	// create a proxy
-	std::string	ename = NameConverter::urlencode(guidername);
+	std::string	ename = NameConverter::urlencode(gn);
 	return createProxy<GuiderPrx>("guider/" + ename, current, false);
 }
 
@@ -211,11 +212,15 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport= %s", r.guiderport.c_str());
 		history.guider.guiderportIndex
 			= instrumentName2index(r.instrument,
 				InstrumentGuiderPort, r.guiderport);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s/%d/%d",
+		history.guider.guiderportIndex
+			= instrumentName2index(r.instrument,
+				InstrumentAdaptiveOptics, r.adaptiveoptics);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s|%d|%d|%d",
 			id, history.timeago,
 			history.guider.instrumentname.c_str(),
 			history.guider.ccdIndex,
-			history.guider.guiderportIndex);
+			history.guider.guiderportIndex,
+			history.guider.adaptiveopticsIndex);
 
 		// tracking points
 		astro::guiding::TrackingStore	store(database);

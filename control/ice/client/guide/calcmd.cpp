@@ -62,6 +62,7 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 	}
 
 	Calibration_display	cd(std::cout);
+	cd.verbose(verbose);
 	cd(cal);
 	std::cout << std::endl;
 	return EXIT_SUCCESS;
@@ -78,7 +79,9 @@ int	Guide::list_command(GuiderFactoryPrx guiderfactory,
 	idlist::iterator	i;
 	for (i = l.begin(); i != l.end(); i++) {
 		Calibration	cal = guiderfactory->getCalibration(*i);
-		(Calibration_display(std::cout))(cal);
+		Calibration_display	cd(std::cout);
+		cd.verbose(verbose);
+		cd(cal);
 	}
 	return EXIT_SUCCESS;
 }

@@ -18,6 +18,7 @@ namespace guiding {
 class PersistentCalibration {
 public:
 	time_t	when;
+	std::string	name;
 	std::string	instrument;
 	std::string	ccd;
 	std::string	controldevice;

@@ -15,9 +15,41 @@
 #include <AstroPersistence.h>
 #include <mutex>
 #include <condition_variable>
+#include <AstroDevice.h>
 
 namespace astro {
 namespace discover {
+
+/**
+ * \brief Class to locate the service
+ */
+class ServiceLocation {
+	std::string	_servicename;
+	unsigned short	_port;
+	unsigned short	_sslport;
+	bool	_ssl;
+private:
+	// prevent copying
+	ServiceLocation(const ServiceLocation& other);
+	ServiceLocation&	operator=(const ServiceLocation& other);
+public:
+	const std::string&	servicename() const { return _servicename; }
+	void	servicename(const std::string& s) { _servicename = s; }
+
+	unsigned short	port() const { return _port; }
+	void	port(unsigned short p) { _port = p; }
+
+	unsigned short	sslport() const { return _sslport; }
+	void	sslport(unsigned short s) { _sslport = s; }
+
+	bool	ssl() const { return _ssl; }
+	void	ssl(bool s) { _ssl = s; }
+
+	ServiceLocation() : _port(0), _sslport(0), _ssl(false) { }
+	void	locate();
+public:
+static ServiceLocation&	get();
+};
 
 /**
  * \brief Key for identifying services
@@ -326,6 +358,7 @@ public:
 	InstrumentComponent(const InstrumentComponentKey& key,
 		const std::string& servicename, const std::string& deviceurl);
 	std::string	toString() const;
+	DeviceName	localizedName() const;
 };
 
 /**
@@ -377,7 +410,7 @@ public:
 	ComponentList	list(InstrumentComponentKey::Type type);
 	ComponentList	list();
 
-	// get properties
+	// properties
 	virtual int	addProperty(const InstrumentProperty& property) = 0;
 	virtual InstrumentProperty	getProperty(const std::string& property) = 0;
 	virtual void	updateProperty(const InstrumentProperty& property) = 0;

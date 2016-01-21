@@ -23,6 +23,7 @@ namespace snowguide {
  * \brief long options for the snow guiding program
  */
 static struct option	longopts[] = {
+{ "adaptiveoptics",	required_argument,	NULL,	'a' }, /*  0 */
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
 { "ccd",		required_argument,	NULL,	'C' }, /*  1 */
 { "config",		required_argument,	NULL,	'c' }, /*  2 */
@@ -57,13 +58,17 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	int	ccdIndex = 0;
 	int	guiderportIndex = 0;
+	int	adaptiveopticsIndex = -1;
 	int	width = -1;
 
 	guide.exposure.exposuretime = 1.;
 
 	while (EOF != (c = getopt_long(argc, argv,
-		"b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
+		"a:b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
 		switch (c) {
+		case 'a':
+			adaptiveopticsIndex = std::stoi(optarg);
+			break;
 		case 'b':
 			binning = optarg;
 			break;
@@ -168,11 +173,14 @@ int	main(int argc, char *argv[]) {
 	descriptor.instrumentname = instrumentname;
 	descriptor.ccdIndex = ccdIndex;
 	descriptor.guiderportIndex = guiderportIndex;
+	descriptor.adaptiveopticsIndex = adaptiveopticsIndex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
 		descriptor.instrumentname.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdIndex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port: %d",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport: %d",
 		descriptor.guiderportIndex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics: %d",
+		descriptor.adaptiveopticsIndex);
 
 	// connect to the guider factory of a remote server
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();

@@ -144,6 +144,7 @@ int	Guider::startCalibration(TrackerPtr tracker) {
 	if (_database) {
 		// prepare data for the calibration recrod
 		PersistentCalibration	calibration;
+		calibration.name = name();
 		calibration.instrument = instrument();
 		calibration.ccd = ccdname();
 		calibration.controldevice = guiderportname();
@@ -416,7 +417,8 @@ void Guider::lastAction(double& actiontime, Point& offset,
  * \brief Retrieve a descriptor
  */
 GuiderDescriptor	Guider::getDescriptor() const {
-	return GuiderDescriptor(instrument(), ccdname(), guiderportname());
+	return GuiderDescriptor(name(), instrument(), ccdname(),
+		guiderportname(), adaptiveopticsname());
 }
 
 } // namespace guiding

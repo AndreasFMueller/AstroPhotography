@@ -184,6 +184,7 @@ std::string	instrumentIndex2name(const std::string& instrumentname,
 			index).deviceurl();
 	} catch (...) {
 	}
+#if 0
 	// build an unknown name from the index
 	std::string	devicename;
 	switch (type) {
@@ -220,11 +221,17 @@ std::string	instrumentIndex2name(const std::string& instrumentname,
 		devicename.c_str(), index);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown device: %s", deviceurl.c_str());
 	return deviceurl;
+#endif
+	return std::string("");
 }
 
 int	instrumentName2index(const std::string& instrumentname,
 			InstrumentComponentType type,
 			const std::string& deviceurl) {
+	// handle names with zero length
+	if (deviceurl.size() == 0) {
+		return -1;
+	}
 	// handle the case where the device url comes from the "unknown" module
 	astro::DeviceName	devname(deviceurl);
 	if (devname.modulename() == "unknown") {
