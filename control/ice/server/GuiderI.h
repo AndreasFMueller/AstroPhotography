@@ -48,6 +48,11 @@ class GuiderI : virtual public Guider {
 	std::string	_repositoryname;
 	astro::project::ImageRepoPtr	imagerepo;
 
+	// callbacks that we need to remove when this object is destroyed
+	astro::callback::CallbackPtr	_imagecallback;
+	astro::callback::CallbackPtr	_calibrationcallback;
+	astro::callback::CallbackPtr	_trackingcallback;
+
 	// public interface starts here
 public:
 	// construction and destruction

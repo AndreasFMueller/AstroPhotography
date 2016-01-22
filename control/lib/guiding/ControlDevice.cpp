@@ -189,6 +189,12 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		record.controldevice = devicename();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "quality: %f", record.quality);
 
+		// add specific attributes
+		GuiderCalibration	*gcal
+			= dynamic_cast<GuiderCalibration *>(_calibration);
+		record.focallength = gcal->focallength;
+		record.masPerPixel = gcal->masPerPixel;
+
 		// record der Tabelle zufügen
 		CalibrationTable	calibrationtable(_database);
 		_calibration->calibrationid(calibrationtable.add(record));

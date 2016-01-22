@@ -147,21 +147,27 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	_method = TrackerSTAR;
 
 	// callback stuff
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing calibration callbacks");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing  callbacks");
 	GuiderICalibrationCallback	*ccallback
 		= new GuiderICalibrationCallback(*this);
-	guider->addCalibrationCallback(astro::callback::CallbackPtr(ccallback));
-	guider->addGuidercalibrationCallback(astro::callback::CallbackPtr(ccallback));
+	_calibrationcallback = astro::callback::CallbackPtr(ccallback);
+	guider->addCalibrationCallback(_calibrationcallback);
+	guider->addGuidercalibrationCallback(_calibrationcallback);
 
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->addImageCallback(astro::callback::CallbackPtr(icallback));
+	_imagecallback = astro::callback::CallbackPtr(icallback);
+	guider->addImageCallback(_imagecallback);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing tracking callbacks");
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
-	guider->addTrackingCallback(astro::callback::CallbackPtr(tcallback));
+	_trackingcallback = astro::callback::CallbackPtr(tcallback);
+	guider->addTrackingCallback(_trackingcallback);
 }
 
 GuiderI::~GuiderI() {
+	guider->removeCalibrationCallback(_calibrationcallback);
+	guider->removeGuidercalibrationCallback(_calibrationcallback);
+	guider->removeImageCallback(_imagecallback);
+	guider->removeTrackingCallback(_trackingcallback);
 }
 
 GuiderState GuiderI::getState(const Ice::Current& /* current */) {
@@ -327,11 +333,6 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 		guidinginterval);
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
-
-	// install a callback in the guider
-
-	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->addImageCallback(astro::callback::CallbackPtr(icallback));
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
