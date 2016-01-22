@@ -23,14 +23,23 @@ public:
 	CalibrationStore(astro::persistence::Database& database)
 		: _database(database) { }
 	std::list<long>	getAllCalibrations();
+	std::list<long>	getAllCalibrations(BasicCalibration::CalibrationType);
 	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
 
 	// access to calibrations
 	bool	contains(long id);
-	GuiderCalibration	getCalibration(long id);
+	bool	contains(long id, BasicCalibration::CalibrationType type);
 	long	addCalibration(const PersistentCalibration& calibration);
-	void	updateCalibration(long id, const GuiderCalibration& calibration);
 	void	deleteCalibration(long id);
+	void	updateCalibration(const BasicCalibration& calibration);
+
+	// guider calibration
+	GuiderCalibration	getGuiderCalibration(long id);
+	void	updateCalibration(const GuiderCalibration& calibration);
+
+	// adaptive optics calibration
+	AdaptiveOpticsCalibration	getAdaptiveOpticsCalibration(long id);
+	void	updateCalibration(const AdaptiveOpticsCalibration& calibration);
 
 	// guider points
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);
@@ -39,7 +48,7 @@ public:
 
 	// storing basic calibrations, i.e. just the raw calibration data
 	// without all the attributes
-	void	saveCalibration(long id, const BasicCalibration& cal);
+	void	saveCalibration(const BasicCalibration& cal);
 };
 
 } // namespace guiding

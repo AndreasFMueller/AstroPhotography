@@ -19,5 +19,10 @@ TrackingSummary::TrackingSummary(const std::string& name,
 	: descriptor(name, instrument, ccd, guiderport, adaptiveoptics) {
 }
 
+TrackingSummary::TrackingSummary(const std::string& name,
+		const std::string& instrument, const std::string& ccd)
+	: descriptor(name, instrument, ccd, std::string(""), std::string("")) {
+}
+
 } // namespace guiding
 } // namespace astro

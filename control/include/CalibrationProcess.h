@@ -32,18 +32,14 @@ class CalibrationProcess : public GuiderPortProcess {
 	/**
 	 * \brief Pixel size in um
  	 */
-	double	_pixelsize;
 	double	grid;
 	bool	calibrated;
-	double	_progress;
 	int	range;
 	double	currentprogress(int ra, int dec) const;
 	/**
 	 * \brief start time
 	 */
 	double	starttime;
-public:
-	double	progress() const { return _progress; }
 private:
 	double	gridconstant(double focallength, double pixelsize) const;
 	Point	starAt(double ra, double dec);
@@ -51,17 +47,17 @@ private:
 	void	measure(BasicCalibrator& calibrator,
 			int deltara, int deltadec);
 	void	callback(const CalibrationPoint& calpoint);
+	void	callback(const ProgressInfo& progressinfo);
 	void	callback(const GuiderCalibration& calibration);
 	void	callback(const ImagePtr& image);
 private:
 	CalibrationProcess(const CalibrationProcess& other);
 	CalibrationProcess&	operator=(const CalibrationProcess& other);
 public:
-	CalibrationProcess(Guider *guider, TrackerPtr tracker,
-		persistence::Database database);
+	CalibrationProcess(GuiderBase *guider, camera::GuiderPortPtr guiderport,
+		TrackerPtr tracker, persistence::Database database = NULL);
 	~CalibrationProcess();
 	void	focallength(double f) { _focallength = f; }
-	void	pixelsize(double s) { _pixelsize = s; }
 	virtual void	start();
 	// the main function of the process
 	void	main(astro::thread::Thread<CalibrationProcess>& thread);

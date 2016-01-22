@@ -25,7 +25,7 @@ namespace guiding {
  */
 class GuiderProcess {
 	// common members
-	Guider	*guider;
+	GuiderBase	*guider;
 	TrackerPtr	tracker;
 
 	// processes for tracking and driving
@@ -48,7 +48,8 @@ private:
 	GuiderProcess(const GuiderProcess& other);
 	GuiderProcess&	operator=(const GuiderProcess& other);
 public:
-	GuiderProcess(Guider *guider, double interval = 10,
+	GuiderProcess(GuiderBase *guider, GuiderPortPtr guiderport,
+		TrackerPtr tracker, double interval = 10,
 		persistence::Database database = NULL);
 	~GuiderProcess();
 	bool	start(TrackerPtr tracker);

@@ -67,7 +67,8 @@ private:
 	DrivingWork(const DrivingWork& other);
 	DrivingWork&	operator=(const DrivingWork& other);
 public:
-	DrivingWork(Guider *_guider);
+	DrivingWork(GuiderBase *_guider, camera::GuiderPortPtr guiderport,
+		TrackerPtr tracker, persistence::Database database = NULL);
 	virtual ~DrivingWork();
 
 	void	main(astro::thread::Thread<DrivingWork>& thread);

@@ -84,7 +84,7 @@ private:
 	TrackingWork(const TrackingWork& other);
 	TrackingWork&	operator=(const TrackingWork& other);
 public:
-	TrackingWork(Guider *_guider, TrackerPtr _tracker,
+	TrackingWork(GuiderBase *_guider, TrackerPtr _tracker,
 		DrivingWork& driving, persistence::Database& _database);
 	virtual ~TrackingWork();
 
@@ -101,6 +101,12 @@ private:
 	TrackingSummary	_summary;
 public:
 	const TrackingSummary&	summary() { return _summary; }
+
+private:
+	GuiderCalibration	_calibration;
+public:
+	const GuiderCalibration&	calibration() const { return _calibration; }
+	void	calibration(const GuiderCalibration& cal) { _calibration = cal; }
 };
 
 } // namespace guiding

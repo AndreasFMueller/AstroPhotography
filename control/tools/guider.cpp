@@ -220,7 +220,7 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "installing callback to write "
 			"images to directory %s", path);
 		NewImageCallback	*callback = new NewImageCallback(path);
-		guider.newimagecallback(CallbackPtr(callback));
+		guider.addImageCallback(CallbackPtr(callback));
 	}
 
 	// get a first image from the ccd, which we use to find the brightest

@@ -18,8 +18,9 @@ namespace guiding {
  * on the main function. This will be done by the super class' start
  * method.
  */
-DrivingWork::DrivingWork(Guider *_guider)
-	: GuiderPortProcess(_guider, TrackerPtr()) {
+DrivingWork::DrivingWork(GuiderBase *_guider, camera::GuiderPortPtr guiderport,
+	TrackerPtr tracker, persistence::Database database)
+	: GuiderPortProcess(_guider, guiderport, tracker, database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new DrivingWork");
 	defaultx = 0;
 	defaulty = 0;

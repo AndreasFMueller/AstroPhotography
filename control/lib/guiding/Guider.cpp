@@ -22,6 +22,41 @@ using namespace astro::persistence;
 namespace astro {
 namespace guiding {
 
+/**
+ * \brief Auxiliary class to ensure calibrations found are sent to the guider
+ */
+class GuiderCalibrationRedirector : public Callback {
+	Guider	*_guider;
+public:
+	GuiderCalibrationRedirector(Guider *guider) : _guider(guider) { }
+	CallbackDataPtr	operator()(CallbackDataPtr data);
+};
+
+
+CallbackDataPtr	GuiderCalibrationRedirector::operator()(CallbackDataPtr data) {
+	// handle the calibration
+	{
+		GuiderCalibrationCallbackData	*cal
+			= dynamic_cast<GuiderCalibrationCallbackData *>(&*data);
+		if (NULL != cal) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration update");
+			_guider->saveCalibration(cal->data());
+		}
+	}
+
+	// handle progress updates
+	{
+		ProgressInfoCallbackData	*cal
+			= dynamic_cast<ProgressInfoCallbackData *>(&*data);
+		if (NULL != cal) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "progress update");
+			_guider->calibrationProgress(cal->data().progress);
+		}
+	}
+
+	return data;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Guider implementation
 //////////////////////////////////////////////////////////////////////
@@ -36,8 +71,7 @@ namespace guiding {
 Guider::Guider(const std::string& instrument,
 	CcdPtr ccd, GuiderPortPtr guiderport,
 	Database database)
-	: _instrument(instrument), _guiderport(guiderport), _imager(ccd),
-	  _database(database) {
+	: GuiderBase(instrument, ccd, database), _guiderport(guiderport) {
 	// default exposure settings
 	exposure().exposuretime(1.);
 	exposure().frame(ccd->getInfo().getFrame());
@@ -48,9 +82,31 @@ Guider::Guider(const std::string& instrument,
 	// calibration id
 	_calibrationid = 0;
 
+	// We have to install a callback for calibrations
+	CallbackPtr	calcallback(new GuiderCalibrationRedirector(this));
+	addGuidercalibrationCallback(calcallback);
+	addProgressCallback(calcallback);
+
+	// create control devices
+	if (guiderport) {
+		guiderPortDevice = ControlDevicePtr(
+			new ControlDevice<GuiderPort, GuiderCalibration>(this,
+				guiderport, database));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port control device");
+	}
+	// XXX must also create an adaptive optics device
+
 	// at this point the guider is sufficiently configured, although
-	// this configuration is not optimal
+	// this configuration is not sufficient for guiding
 	_state.configure();
+}
+
+/**
+ * \brief update progress value
+ */
+void	Guider::calibrationProgress(double p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "PROGRESS %f", p);
+	_progress = p;
 }
 
 /**
@@ -104,66 +160,34 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-int	Guider::startCalibration(TrackerPtr tracker) {
+int	Guider::startCalibration(BasicCalibration::CalibrationType type,
+		TrackerPtr tracker) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration");
+	// make sure we have a tracker
 	if (!tracker) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
 		throw std::runtime_error("tracker not set");
 	}
-	double	pixelsize = getPixelsize();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "startCalibration(tracker = %s, "
-		"focallength = %.3fmm, pixelsize = %.2fum)",
-		tracker->toString().c_str(), 1000 * _focallength,
-		1000000 * pixelsize);
 
-	// cleanup any old calibration process
-	calibrationCleanup();
-
-	// go into the calibrating state
-	_state.startCalibrating();
-	
-	// first check whether there already is a calibration process
-	// running
-	if (calibrationprocess) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"calibration already in progress: %.3f",
-			calibrationProgress());
-		throw std::runtime_error("calibration already in progress");
+	// are we in the correct state
+	if (!_state.canStartCalibrating()) {
+		throw std::runtime_error("wrong state");
 	}
+	_progress = 0;
 
-	// now create a new calibration process
-	calibrationprocess = CalibrationProcessPtr(
-		new CalibrationProcess(this, tracker, _database));
-
-	// start the calibration. This will launch the separate 
-	calibrationprocess->focallength(_focallength);
-	calibrationprocess->pixelsize(pixelsize);
-	calibrationprocess->start();
-
-	// register the new calibration in the database
-	_calibrationid = 0;
-	if (_database) {
-		// prepare data for the calibration recrod
-		PersistentCalibration	calibration;
-		calibration.name = name();
-		calibration.instrument = instrument();
-		calibration.ccd = ccdname();
-		calibration.controldevice = guiderportname();
-		calibration.focallength = _focallength;
-		calibration.masPerPixel
-			= (pixelsize / _focallength) * (180*3600*1000 / M_PI);
-		calibration.controltype = BasicCalibration::GP;
-		time(&calibration.when);
-		for (int i = 0; i < 6; i++) { calibration.a[i] = 0; }
-
-		// add the record to the database
-		CalibrationRecord	record(0, calibration);
-		CalibrationTable	calibrationtable(_database);
-		_calibrationid = calibrationtable.add(record);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"saved calibration record id = %d, masPerPixel = %.3f",
-			_calibrationid, calibration.masPerPixel);
+	if ((type == BasicCalibration::GP) && guiderPortDevice) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuiderPort calibration");
+		_state.startCalibrating();
+		guiderPortDevice->parameter("focallength", focallength());
+		return guiderPortDevice->startCalibration(tracker);
 	}
-	return _calibrationid;
+	if ((type == BasicCalibration::AO) && adaptiveOpticsDevice) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start AO calibration");
+		_state.startCalibrating();
+		return adaptiveOpticsDevice->startCalibration(tracker);
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot calibrate");
+	throw std::runtime_error("bad state");
 }
 
 /**
@@ -171,24 +195,8 @@ int	Guider::startCalibration(TrackerPtr tracker) {
  */
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
-		_calibrationid);
-	if (!_database) {
-		return;
-	}
-	CalibrationStore	calstore(_database);
-	calstore.saveCalibration(_calibrationid, cal);
-}
-
-/**
- * \brief inquire about the current state of the calibration process
- *
- * Find out how far along the calibraition process we are. This 
- */
-double	Guider::calibrationProgress() {
-	if (_state != Guide::calibrating) {
-		throw std::runtime_error("not currently calibrating");
-	}
-	return calibrationprocess->progress();
+		cal.calibrationid());
+	_state.addCalibration();
 }
 
 /**
@@ -211,60 +219,6 @@ bool	Guider::waitCalibration(double timeout) {
 	return calibrationprocess->wait(timeout);
 }
 
-
-/**
- * \brief start an exposure
- */
-void	Guider::startExposure() {
-	imager().startExposure(exposure());
-}
-
-/**
- * \brief get the image
- *
- * Retrieve an image from the imager. Each image is also sent to the
- * newimagecallback, if set
- */
-ImagePtr	Guider::getImage() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage() called");
-	imager().startExposure(exposure());
-	imager().wait();
-	ImagePtr	image = imager().getImage();
-	if (!image->hasMetadata(std::string("INSTRUME"))) {
-		image->setMetadata(astro::io::FITSKeywords::meta(
-			std::string("INSTRUME"), instrument()));
-	}
-	callbackImage(image);
-	mostRecentImage = image;
-	return image;
-}
-
-/**
- * \brief send the image to the callback
- *
- * This function wraps an image in a ImageCallbackData object and sends
- * it to the newimagecallback, if it is set.
- */
-void	Guider::callbackImage(ImagePtr image) {
-	if (!_newimagecallback) {
-		return;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sending new image to callback");
-	ImageCallbackData	*argp = new ImageCallbackData(image);
-	CallbackDataPtr	arg(argp);
-	_newimagecallback->operator()(arg);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback return");
-}
-
-void	Guider::callbackTrackingPoint(const TrackingPoint& trackingpoint) {
-	if (!_trackingcallback) {
-		return;
-	}
-	callback::CallbackDataPtr       trackinginfo(
-		new TrackingPoint(trackingpoint));
-	_trackingcallback->operator()(trackinginfo);
-}
-
 /**
  * \brief get a good measure for the pixel size of the CCD
  *
@@ -274,8 +228,8 @@ void	Guider::callbackTrackingPoint(const TrackingPoint& trackingpoint) {
  */
 double	Guider::getPixelsize() {
 	astro::camera::CcdInfo  info = ccd()->getInfo();
-	float	_pixelsize = (info.pixelwidth() * _exposure.mode().x()
-			+ info.pixelheight() * _exposure.mode().y()) / 2.;
+	float	_pixelsize = (info.pixelwidth() * exposure().mode().x()
+			+ info.pixelheight() * exposure().mode().y()) / 2.;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %.2fum",
 		1000000 * _pixelsize);
 	return _pixelsize;
@@ -321,8 +275,8 @@ void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	// create a GuiderProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
-	guiderprocess = GuiderProcessPtr(new GuiderProcess(this, interval,
-		_database));
+	guiderprocess = GuiderProcessPtr(new GuiderProcess(this, guiderport(),
+		tracker, interval, database()));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
 	guiderprocess->start(tracker);
 }

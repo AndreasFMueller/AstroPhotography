@@ -9,6 +9,7 @@
 #include <AstroImage.h>
 #include <ImageDirectory.h>
 #include <AstroUtils.h>
+#include <set>
 
 namespace astro {
 namespace callback {
@@ -50,6 +51,14 @@ public:
 };
 
 typedef	std::shared_ptr<Callback>	CallbackPtr;
+
+/**
+ * \brief a class to fan out callbacks to many receivers
+ */
+class CallbackSet : public std::set<CallbackPtr> {
+public:
+	CallbackDataPtr	operator()(CallbackDataPtr data);
+};
 
 /**
  * \brief Image callback argument

@@ -22,11 +22,22 @@ namespace guiding {
  * This also initializes the values for guider port activation to values that
  * compensate the drift to first order.
  */
-GuiderProcess::GuiderProcess(Guider *_guider, double interval,
-	persistence::Database _database)
-	: guider(_guider), _interval(interval), database(_database) {
+GuiderProcess::GuiderProcess(GuiderBase *_guider, GuiderPortPtr guiderport,
+	TrackerPtr _tracker, double interval, persistence::Database _database)
+	: guider(_guider), tracker(_tracker), _interval(interval),
+	  database(_database) {
 	// set a default gain
 	_gain = 1.;
+
+	// create the processes
+	drivingwork = new DrivingWork(guider, guiderport, tracker, _database);
+	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(drivingwork));
+
+	// create the tracking process
+	trackingwork = new TrackingWork(guider, tracker,
+		*drivingwork, database);
+	trackingwork->interval(_interval);
+	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(trackingwork));
 }
 
 /**
@@ -65,16 +76,6 @@ GuiderProcess::~GuiderProcess() {
  */
 bool	GuiderProcess::start(TrackerPtr _tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching guiding threads");
-	// create the driving process
-	drivingwork = new DrivingWork(guider);
-	driving = ThreadPtr(new astro::thread::Thread<DrivingWork>(drivingwork));
-
-	// create the tracking process
-	trackingwork = new TrackingWork(guider, _tracker, *drivingwork,
-		database);
-	trackingwork->interval(_interval);
-	tracking = ThreadPtr(new astro::thread::Thread<TrackingWork>(trackingwork));
-
 	// start both processes
 	driving->start();
 	tracking->start();

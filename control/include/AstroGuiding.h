@@ -15,6 +15,8 @@
 #include <AstroImager.h>
 #include <AstroCallback.h>
 #include <AstroLoader.h>
+#include <typeinfo>
+#include <typeindex>
 
 namespace astro {
 namespace guiding {
@@ -193,6 +195,10 @@ public:
  * and tip-tilt adaptive optics units.
  */
 class BasicCalibration : public std::vector<CalibrationPoint> {
+	int	_calibrationid;
+public:
+	int	calibrationid() const { return _calibrationid; }
+	void	calibrationid(int c) { _calibrationid = c; }
 public:
 	typedef enum { GP, AO } CalibrationType;
 static std::string	type2string(CalibrationType caltype);
@@ -212,6 +218,8 @@ public:
 	void	complete(bool c) { _complete = c; }
 	BasicCalibration();
 	BasicCalibration(const double coefficients[6]);
+	virtual ~BasicCalibration() { }
+	BasicCalibration&	operator=(const BasicCalibration& other);
 
 	double	quality() const;
 	double	det() const;
@@ -229,6 +237,9 @@ public:
 
 	// add a calibration point
 	void	add(const CalibrationPoint& p) { push_back(p); }
+
+	// reset
+	void	reset();
 };
 
 std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal);
@@ -266,6 +277,16 @@ public:
  * \brief Encapsulation of the calibration as callback argument
  */
 typedef callback::CallbackDataEnvelope<GuiderCalibration>	GuiderCalibrationCallbackData;
+
+/**
+ * \brief Progress indicator
+ */
+class ProgressInfo {
+public:
+	double	t;
+	double	progress;
+};
+typedef callback::CallbackDataEnvelope<ProgressInfo>	ProgressInfoCallbackData;
 
 std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
 
@@ -361,6 +382,8 @@ public:
 	TrackingSummary(const std::string& name, const std::string& instrument,
 		const std::string& ccd, const std::string& guiderport,
 		const std::string& adaptiveoptics);
+	TrackingSummary(const std::string& name, const std::string& instrument,
+		const std::string& ccd);
 };
 
 // we will need the GuiderProcess class, but as we want to keep the 
@@ -375,46 +398,159 @@ typedef std::shared_ptr<BasicProcess>	BasicProcessPtr;
 class PersistentCalibration;
 
 /**
+ * \brief Base class for the guider
+ *
+ * This class provides everything that the a calibration or guiding process
+ * needs, but does not add all the burden of the full guider class, which
+ * also is able to controll the various types of processes for calibration
+ * and guiding. It is essentially a data holder class.
+ * It also includes all the callbacks and methods the send data to them.
+ */
+class GuiderBase {
+	// identification of the guider
+	std::string	_name;
+	std::string	_instrument;
+public:
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n) { _name = n; }
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i) { _instrument = i; }
+	// stuff related to the imager
+private:
+	camera::Imager	_imager;
+public:
+	camera::Imager&	imager() { return _imager; }
+	camera::CcdPtr	ccd() const { return _imager.ccd(); }
+	std::string	ccdname() const { return ccd()->name(); }
+	camera::CcdInfo	getCcdInfo() const { return ccd()->getInfo(); }
+	int	ccdid() const { return getCcdInfo().getId(); }
+	double	pixelsize() const;
+	// everything related to exposure
+private:
+	camera::Exposure	_exposure;
+public:
+	const camera::Exposure&	exposure() const { return _exposure; }
+	camera::Exposure&	exposure() { return _exposure; }
+	void	exposure(const camera::Exposure& exposure) {
+		_exposure = exposure;
+	}
+
+	// We should be able to get images through the imager, using the
+	// previously defined exposure structure.
+	void	startExposure();
+	ImagePtr	getImage();
+private:
+	// remember the most recent image
+	ImagePtr	_mostRecentImage;
+public:
+	image::ImagePtr	mostRecentImage() { return _mostRecentImage; }
+
+	// persistence
+private:
+	persistence::Database	_database;
+public:
+	persistence::Database&	database() { return _database; }
+
+	// callbacks
+private:
+	callback::CallbackSet	_imagecallback;
+	callback::CallbackSet	_calibrationcallback;
+	callback::CallbackSet	_progresscallback;
+	callback::CallbackSet	_guidercalibrationcallback;
+	callback::CallbackSet	_trackingcallback;
+public:
+	void	addImageCallback(callback::CallbackPtr i);
+	void	addCalibrationCallback(callback::CallbackPtr c);
+	void	addProgressCallback(callback::CallbackPtr c);
+	void	addGuidercalibrationCallback(callback::CallbackPtr c);
+	void	addTrackingCallback(callback::CallbackPtr t);
+
+	void	removeImageCallback(callback::CallbackPtr i);
+	void	removeCalibrationCallback(callback::CallbackPtr c);
+	void	removeProgressCallback(callback::CallbackPtr c);
+	void	removeGuidercalibrationCallback(callback::CallbackPtr c);
+	void	removeTrackingCallback(callback::CallbackPtr t);
+	
+	void	callback(image::ImagePtr image);
+	void	callback(const CalibrationPoint& point);
+	void	callback(const ProgressInfo& point);
+	void	callback(const GuiderCalibration& cal);
+	void	callback(const TrackingPoint& point);
+
+	// constructor
+	GuiderBase(const std::string& instrument, camera::CcdPtr ccd,
+		persistence::Database database = NULL);
+};
+
+/**
  * \brief Class handling a control device
  *
  * Control devices are guider ports or adaptive optics units
  */
 class ControlDeviceBase {
-	std::string		_instrument;
-	camera::Imager&		_imager;
-	int			_calibrationid;
-	camera::Exposure	_exposure;
-	double			_focallength;
+protected:
+	callback::CallbackPtr	_callback;
+	// the guider gives access to everything needed from calibration
+protected:
+	GuiderBase	*_guider;
+public:
+	const std::string&	name() const;
+	const std::string&	instrument() const;
+	camera::Imager&		imager();
+	std::string	ccdname() const;
+	const camera::Exposure&	exposure() const;
+	void	exposure(const camera::Exposure& e);
+
+	// persistence and calibration data
 protected:
 	persistence::Database	_database;
-	PersistentCalibration	*pcal;
+	BasicCalibration	*_calibration;
 public:
-	const std::string&	instrument() const { return _instrument; }
-	camera::Imager&		imager() { return _imager; }
-	std::string	ccdname() const { return _imager.ccd()->name(); }
+	int	calibrationid() const { return _calibration->calibrationid(); }
+	virtual void	calibrationid(int calid);
+
+	// parameters about the calibration
+private:
+	std::map<std::string, double>	parameters;
+public:
+	bool	hasParameter(const std::string& name) const;
+	double	parameter(const std::string& name) const;
+	double	parameter(const std::string& name, double value) const;
+	void	setParameter(const std::string& name, double value);
+
+	// here comes the device specific stuff, which is of course virtual
 	virtual std::string	devicename() const = 0;
-	int	calibrationid() const { return _calibrationid; }
-	const camera::Exposure&	exposure() const { return _exposure; }
-	void	exposure(const camera::Exposure& e) { _exposure = e; }
-	double	focallength() const { return _focallength; }
-	void	focallength(double f) { _focallength = f; }
+	virtual std::type_index	deviceType() const = 0;
+	virtual std::type_index	configurationType() const = 0;
+
+	// prevent copying
 private:
 	ControlDeviceBase(const ControlDeviceBase& other);
 	ControlDeviceBase&	operator=(const ControlDeviceBase& other);
+
+	// constructors and destructors
 public:
-	ControlDeviceBase(const std::string& instrument, camera::Imager& imager,
+	ControlDeviceBase(GuiderBase *guider,
 		persistence::Database database = NULL);
 	virtual ~ControlDeviceBase();
 
+	// methods to control calibration
 	virtual int	startCalibration(TrackerPtr tracker);
 	void	cancelCalibration();
 	bool	waitCalibration(double timeout);
 	virtual void	saveCalibration(const BasicCalibration& calibration);
 protected:
+	bool	_calibrating;
+public:
+	bool	calibrating() const { return _calibrating; }
+
+protected:
 	BasicProcessPtr	process;
 public:
-
+	
 };
+
+typedef std::shared_ptr<ControlDeviceBase>	ControlDevicePtr;
 
 /**
  * \brief template for control devices
@@ -428,30 +564,47 @@ public:
 	typedef std::shared_ptr<device>	deviceptr;
 private:
 	deviceptr	_device;
-	devicecalibration	_calibration;
+	devicecalibration	_devicecalibration;
 public:
-	ControlDevice(const std::string& instrument, camera::Imager& imager,
-		deviceptr dev, persistence::Database database = NULL)
-		: ControlDeviceBase(instrument, imager, database),
-		  _device(dev) {
+	ControlDevice(GuiderBase *guider, deviceptr dev,
+		persistence::Database database = NULL)
+		: ControlDeviceBase(guider, database), _device(dev) {
+		_calibration = &_devicecalibration;
+	}
+	~ControlDevice() {
 	}
 	virtual std::string	devicename() const { return _device->name(); }
 	virtual int	startCalibration(TrackerPtr /* tracker */) {
 		return -1; // suppress warning
 	}
 	virtual void	saveCalibration(const BasicCalibration& calibration) {
-		_calibration = calibration;
+		*_calibration = calibration;
 		ControlDeviceBase::saveCalibration(calibration);
+	}
+	virtual void	calibrationid(int /* calid */) { }
+	virtual std::type_index	deviceType() const {
+		return typeid(device);
+	}
+	virtual std::type_index	configurationType() const {
+		return typeid(devicecalibration);
 	}
 };
 
-// specializations
+// specializations for GuiderPort
 template<>
 int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
 		TrackerPtr tracker);
+
+template<>
+void	ControlDevice<camera::GuiderPort, GuiderCalibration>::calibrationid(int calid);
+
+// specializatiobs for adaptive optics
 template<>
 int	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::startCalibration(
 		TrackerPtr tracker);
+
+template<>
+void	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::calibrationid(int calid);
 
 /**
  * \brief enumeration type for the state of the guider
@@ -508,7 +661,7 @@ public:
  * a process that performs the calibration. This is controlled by the
  * guider calibration commands.
  */
-class Guider {
+class Guider : public GuiderBase {
 	void	checkstate();
 private:
 	GuiderStateMachine	_state;
@@ -518,35 +671,11 @@ public:
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
-	std::string	_name;
-	std::string	_instrument;
 	camera::GuiderPortPtr	_guiderport;
 public:
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& n) { _name = n; }
-	const std::string&	instrument() const { return _instrument; }
-	void	instrument(const std::string& i) { _instrument = i; }
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }
 	std::string	guiderportname() const { return _guiderport->name().toString(); }
 	std::string	adaptiveopticsname() const { return std::string(""); }
-private:
-	/*
-	 * \brief Image for guiding
-	 *
-	 * Imaging is performed via the imager, but the imager is built from
-	 * from the ccd and the some additional data like darks and flats.
-	 * The imager is exposed so that the client can change the imager
-	 * parameters, e. g. can add a dark image, or enable pixel
-	 * interpolation
-	 */
-	camera::Imager	_imager;
-public:
-	const camera::Imager&	imager() const { return _imager; }
-	camera::Imager&	imager() { return _imager; }
-	camera::CcdPtr	ccd() const { return _imager.ccd(); }
-	std::string	ccdname() const { return ccd()->name().toString(); }
-	camera::CcdInfo	getCcdInfo() const { return _imager.ccd()->getInfo(); }
-	int	ccdid() const { return getCcdInfo().getId(); }
 
 	GuiderDescriptor	getDescriptor() const;
 
@@ -556,23 +685,7 @@ public:
 	double	focallength() const { return _focallength; }
 	void	focallength(double f) { _focallength = f; }
 
-	/**
-	 * \brief Exposure information for guiding images
- 	 *
-	 * Controlling the exposure parameters includes changing the rectangle
-	 * to use during exposure. Since we don't want to implement methods
-	 * for all these details, we just expose the exposure structure
-	 */
 private:
-	camera::Exposure	_exposure;
-public:
-	const camera::Exposure&	exposure() const { return _exposure; }
-	camera::Exposure&	exposure() { return _exposure; }
-	void	exposure(const camera::Exposure& exposure) {
-		_exposure = exposure;
-	}
-private:
-	persistence::Database	_database;
 
 	// prevent copying
 	Guider(const Guider& other);
@@ -589,12 +702,6 @@ public:
 	Guider(const std::string& instrument,
 		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
 		persistence::Database database = NULL);
-
-	// We should be able to get images through the imager, using the
-	// previously defined exposure structure.
-public:
-	void	startExposure();
-	ImagePtr	getImage();
 
 	/**
 	 * \brief Calibration of the guider
@@ -627,18 +734,22 @@ public:
 	 * only knows about the angular speed for the CGEM mount. 
 	 * The focallength allows to compute reasonable
 	 * values for the calibration displacements.
+	 * \param type 		the type of the device to calibrate
 	 * \param tracker	The tracker used for tracking. 
-	 * \param focallength	Focallength of the optics used for guiding,
-	 *			in m.
 	 * \return		the id of the calibration run
 	 */
-	int	startCalibration(TrackerPtr tracker);
+	int	startCalibration(BasicCalibration::CalibrationType type,
+			TrackerPtr tracker);
 	void	saveCalibration(const GuiderCalibration& calibration);
 
 	/**
 	 * \brief query the progress of the calibration process
 	 */
-	double	calibrationProgress();
+private:
+	double	_progress;
+public:
+	double	calibrationProgress() { return _progress; }
+	void	calibrationProgress(double p);
 	/**
 	 * \brief cancel the calibratio process
 	 */
@@ -656,14 +767,8 @@ private:
 	void	calibrationCleanup();
 
 public:
-	/**
-	 * \brief calibration update callback
-	 *
-	 * This callback is called with a CalibrationPointCallbackData
-	 * argument for each calibration point that was measured by the
-	 * calibration process.
-	 */
-	callback::CallbackPtr	calibrationcallback;
+	ControlDevicePtr	guiderPortDevice;
+	ControlDevicePtr	adaptiveOpticsDevice;
 
 	// the following methods manage the guiding thread
 private:
@@ -686,42 +791,7 @@ public:
 	
 	friend class GuiderProcess;
 
-private:
-	/**
-	 * \brief Callback for new images
-	 *
-	 * When the guider operates, it retrieves a new image from the camera
-	 * every now and then. To get access to these images, e. g. to allow
-	 * a user to monitor the guiding process, this callback can be set
-	 * to a callback of type ImageProgramCallback. Every time the guider
-	 * gets a new image, it calls this callback with an argument of type
-	 * ImageCallbackData.
-	 */
-	callback::CallbackPtr	_newimagecallback;
 public:
-	void	newimagecallback(callback::CallbackPtr n) {
-		_newimagecallback = n;
-	}
-	image::ImagePtr	mostRecentImage;
-	void	callbackImage(ImagePtr image);
-
-	/**
-	 * \brief Callback for tracking information updates
-	 *
-	 * Whenever the guider process gets a new tracking information,
-	 * it uses the lastAction method to inform the guider about
-	 * that action. If a callback for last actions is installed, this
-	 * information is encapsulated into a callback data structure
-	 * and the callback is called with the update information
-	 */
-private:
-	callback::CallbackPtr	_trackingcallback;
-	
-public:
-	void	trackingcallback(callback::CallbackPtr t) {
-		_trackingcallback = t;
-	}
-	void	callbackTrackingPoint(const TrackingPoint& trackingpoint);
 	/**
 	 * \brief Information about the most recent update
 	 *

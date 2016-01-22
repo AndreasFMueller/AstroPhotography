@@ -19,10 +19,10 @@ namespace guiding {
  * \brief Guiding Process base class
  */
 class BasicProcess {
-	Guider	*_guider;
+	GuiderBase	*_guider;
 public:
 	bool	hasGuider() const;
-	Guider	*guider();
+	GuiderBase	*guider();
 
 	// everything needed for all processes, i.e. exposure parameters,
 	// imager object (which encapsulates the ccd), 
@@ -61,7 +61,7 @@ public:
 
 	// constructors for the basic process
 public:
-	BasicProcess(Guider *guider, TrackerPtr tracker,
+	BasicProcess(GuiderBase *guider, TrackerPtr tracker,
 		persistence::Database database = NULL);
 	BasicProcess(const camera::Exposure& exposure, camera::Imager& imager,
 		TrackerPtr tracker, persistence::Database database = NULL);
@@ -75,7 +75,8 @@ class GuiderPortProcess : public BasicProcess {
 public:
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }
 
-	GuiderPortProcess(Guider *guider, TrackerPtr tracker,
+	GuiderPortProcess(GuiderBase *guider,
+		camera::GuiderPortPtr guiderport, TrackerPtr tracker,
 		persistence::Database database = NULL);
 	GuiderPortProcess(const camera::Exposure& exposure,
 		camera::Imager& imager, camera::GuiderPortPtr guiderport,

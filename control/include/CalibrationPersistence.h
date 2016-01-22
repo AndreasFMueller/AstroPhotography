@@ -30,10 +30,14 @@ public:
 	double	masPerPixel;
 	int	controltype;
 	PersistentCalibration();
+	PersistentCalibration(const BasicCalibration& other);
+	PersistentCalibration(const GuiderCalibration& other);
 	PersistentCalibration&	operator=(const BasicCalibration& other);
+	PersistentCalibration&	operator=(const GuiderCalibration& other);
 };
 
 typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;
+typedef std::shared_ptr<CalibrationRecord>	CalibrationRecordPtr;
 
 /**
  * \brief Table adapter for the Calibration

@@ -203,28 +203,12 @@ void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
 	astro::guiding::CalibrationStore	store(database);
-	astro::guiding::GuiderCalibration	calibration
-		= store.getCalibration(calid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"calibration %d: [ %.3f, %.3f, %.3f; %.3f, %.3f, %.3f ]",
-		calid,
-		calibration.a[0], calibration.a[1], calibration.a[2],
-		calibration.a[3], calibration.a[4], calibration.a[5]);
+	if (store.contains(calid, astro::guiding::BasicCalibration::GP)) {
+		guider->guiderPortDevice->calibrationid(calid);
+	}
 
-	// test the type of the calibration
-	switch (calibration.calibrationtype()) {
-	case astro::guiding::BasicCalibration::GP:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting GP calibration");
-		// install calibration data in the guider
-		guider->calibration(calibration);
-		guider->calibrationid(calid);
-		break;
-	case astro::guiding::BasicCalibration::AO:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting AO calibration");
-		// XXX this is not implemented yet
-		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration setting not implemented yet");
-		throw std::runtime_error("setting AO calibration not implemented");
-		break;
+	if (store.contains(calid, astro::guiding::BasicCalibration::AO)) {
+		guider->adaptiveOpticsDevice->calibrationid(calid);
 	}
 }
 
@@ -232,7 +216,7 @@ Calibration GuiderI::getCalibration(CalibrationType calibrationtype, const Ice::
 	CalibrationSource	source(database);
 	switch (calibrationtype) {
 	case CalibrationTypeGuiderPort:
-		return source.get(guider->calibrationid());
+		return source.get(guider->guiderPortDevice->calibrationid());
 	case CalibrationTypeAdaptiveOptics:
 		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration request not implemented");
 		throw std::runtime_error("AO calibration request not supported yet");
@@ -254,10 +238,11 @@ Ice::Int GuiderI::startCalibration(CalibrationType caltype, const Ice::Current& 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing calibration callbacks");
 	GuiderICalibrationCallback	*ccallback
 		= new GuiderICalibrationCallback(*this);
-	guider->calibrationcallback = astro::callback::CallbackPtr(ccallback);
+	guider->addCalibrationCallback(astro::callback::CallbackPtr(ccallback));
+	guider->addGuidercalibrationCallback(astro::callback::CallbackPtr(ccallback));
 
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
+	guider->addImageCallback(astro::callback::CallbackPtr(icallback));
 
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
@@ -265,11 +250,9 @@ Ice::Int GuiderI::startCalibration(CalibrationType caltype, const Ice::Current& 
 	// start the calibration
 	switch (caltype) {
 	case CalibrationTypeGuiderPort:
-		return guider->startCalibration(tracker);
+		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
 	case CalibrationTypeAdaptiveOptics:
-		debug(LOG_ERR, DEBUG_LOG, 0, "AO calibration requested, but not implemented");
-		throw std::runtime_error("AO calibration not supported yet");
-		break;
+		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
 	}
 }
 
@@ -284,7 +267,7 @@ Ice::Double GuiderI::calibrationProgress(const Ice::Current& /* current */) {
  * \brief cancel the current calibration process
  */
 void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
-	guider->cancelCalibration();
+	guider->guiderPortDevice->cancelCalibration();
 }
 
 /**
@@ -292,23 +275,13 @@ void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
  */
 bool GuiderI::waitCalibration(Ice::Double timeout,
 	const Ice::Current& /* current */) {
-	return guider->waitCalibration(timeout);
+	return guider->guiderPortDevice->waitCalibration(timeout);
 }
 
 /**
  * \brief build a tracker
  */
 astro::guiding::TrackerPtr	 GuiderI::getTracker() {
-#if 0
-	astro::camera::Exposure	exposure = guider->exposure();
-	astro::Point	d = convert(_point) - exposure.frame().origin();
-	astro::image::ImagePoint	trackerstar(d.x(), d.y());
-	astro::image::ImageRectangle	trackerrectangle(exposure.frame().size());
-	astro::guiding::TrackerPtr	tracker(
-		new astro::guiding::StarTracker(trackerstar,
-			trackerrectangle, 10));
-	return tracker;
-#endif
 	// first we must make sure the data we have is consistent
 	astro::camera::Exposure	exposure = guider->exposure();
 	if ((exposure.frame().size().width() <= 0) ||
@@ -356,10 +329,10 @@ void GuiderI::startGuiding(Ice::Float guidinginterval,
 	// install a callback in the guider
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing tracking callbacks");
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
-	guider->trackingcallback(astro::callback::CallbackPtr(tcallback));
+	guider->addTrackingCallback(astro::callback::CallbackPtr(tcallback));
 
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
-	guider->newimagecallback(astro::callback::CallbackPtr(icallback));
+	guider->addImageCallback(astro::callback::CallbackPtr(icallback));
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
@@ -378,12 +351,12 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 	//imagecallbacks.stop();
 
 	// remove the callback
-	guider->trackingcallback(NULL);
+	//guider->trackingcallback(NULL);
 }
 
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	// retrieve image
-	astro::image::ImagePtr	image = guider->mostRecentImage;
+	astro::image::ImagePtr	image = guider->mostRecentImage();
 	if (!image) {
 		throw NotFound("no image available");
 	}

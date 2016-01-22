@@ -21,6 +21,19 @@ std::list<long>	CalibrationStore::getAllCalibrations() {
 	return table.selectids(std::string("order by whenstarted"));
 }
 
+std::list<long>	CalibrationStore::getAllCalibrations(
+	BasicCalibration::CalibrationType type) {
+	CalibrationTable	table(_database);
+	switch (type) {
+	case BasicCalibration::GP:
+		return table.selectids(std::string("where controltype = 0 "
+						   "order by whenstarted"));
+	case BasicCalibration::AO:
+		return table.selectids(std::string("where controltype = 1 "
+						   "order by whenstarted"));
+	}
+}
+
 /**
  * \brief Get a list of all calibrations of a certain guider
  *
@@ -57,13 +70,17 @@ std::list<CalibrationPointRecord>	CalibrationStore::getCalibrationPoints(long id
  *
  * \param id of the calibration to retrieve
  */
-GuiderCalibration	CalibrationStore::getCalibration(long id) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving calibration %d", id);
+GuiderCalibration	CalibrationStore::getGuiderCalibration(long id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving GP calibration %d", id);
 
 	// get the calibration table
 	CalibrationTable	ct(_database);
 	CalibrationRecord	r = ct.byid(id);
+	if (0 != r.controltype) {
+		throw std::runtime_error("not a guider calibration");
+	}
 	GuiderCalibration	calibration;
+	calibration.calibrationid(id);
 	for (int i = 0; i < 6; i++) {
 		calibration.a[i] = r.a[i];
 	}
@@ -72,12 +89,40 @@ GuiderCalibration	CalibrationStore::getCalibration(long id) {
 	calibration.masPerPixel = r.masPerPixel;
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found calibration with masPerPixel=%.3f", r.masPerPixel);
-	switch (r.controltype) {
-	case 0:	calibration.calibrationtype(BasicCalibration::GP);
-		break;
-	case 1:	calibration.calibrationtype(BasicCalibration::AO);
-		break;
+
+	// add the points
+	std::list<CalibrationPointRecord>	points
+		= getCalibrationPoints(id);
+	std::list<CalibrationPointRecord>::const_iterator	i;
+	for (i = points.begin(); i != points.end(); i++) {
+		CalibrationPoint	p = *i;
+		calibration.push_back(p);
 	}
+	return calibration;
+}
+
+/**
+ * \brief Get the complete calibration
+ *
+ * \param id of the calibration to retrieve
+ */
+AdaptiveOpticsCalibration	CalibrationStore::getAdaptiveOpticsCalibration(long id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving AO calibration %d", id);
+
+	// get the calibration table
+	CalibrationTable	ct(_database);
+	CalibrationRecord	r = ct.byid(id);
+	if (1 != r.controltype) {
+		throw std::runtime_error("not a guider calibration");
+	}
+	AdaptiveOpticsCalibration	calibration;
+	calibration.calibrationid(id);
+	for (int i = 0; i < 6; i++) {
+		calibration.a[i] = r.a[i];
+	}
+	calibration.complete((r.complete) ? true : false);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"found calibration with masPerPixel=%.3f", r.masPerPixel);
 
 	// add the points
 	std::list<CalibrationPointRecord>	points
@@ -114,19 +159,39 @@ long	CalibrationStore::addCalibration(const PersistentCalibration& calibration) 
 /**
  * \brief update a calibration record in the database
  */
-void	CalibrationStore::updateCalibration(long id,
-		const GuiderCalibration& calibration) {
+void	CalibrationStore::updateCalibration(
+		const BasicCalibration& calibration) {
 	CalibrationTable	t(_database);
-	CalibrationRecord	record = t.byid(id);
+	CalibrationRecord	record = t.byid(calibration.calibrationid());
 	for (int i = 0; i < 6; i++) {
 		record.a[i] = calibration.a[i];
 	}
-	record.focallength = calibration.focallength;
 	record.det = calibration.det();
 	record.quality = calibration.quality();
 	record.complete = (calibration.complete()) ? 1 : 0;
+	t.update(calibration.calibrationid(), record);
+}
+
+/**
+ * \brief update a calibration record in the database
+ */
+void	CalibrationStore::updateCalibration(
+		const GuiderCalibration& calibration) {
+	updateCalibration((BasicCalibration&)calibration);
+
+	CalibrationTable	t(_database);
+	CalibrationRecord	record = t.byid(calibration.calibrationid());
+	record.focallength = calibration.focallength;
 	record.masPerPixel = calibration.masPerPixel;
-	t.update(id, record);
+	t.update(calibration.calibrationid(), record);
+}
+
+/**
+ * \brief update a calibration record in the database
+ */
+void	CalibrationStore::updateCalibration(
+		const AdaptiveOpticsCalibration& calibration) {
+	updateCalibration((BasicCalibration&)calibration);
 }
 
 /**
@@ -158,20 +223,54 @@ bool	CalibrationStore::contains(long id) {
 }
 
 /**
+ * \brief Find out whether a calibration exists in the store
+ */
+bool	CalibrationStore::contains(long id,
+		BasicCalibration::CalibrationType type) {
+	CalibrationTable	ct(_database);
+	std::string	condition;
+	switch (type) {
+	case BasicCalibration::GP:
+		condition = stringprintf("controltype = 0 and id = %d", id);
+		break;
+	case BasicCalibration::AO:
+		condition = stringprintf("controltype = 1 and id = %d", id);
+		break;
+	}
+	return (ct.selectids(condition).size() > 0);
+}
+
+/**
  * \brief Save a basic calibration in the database
  *
  * This method adds the calibration data to an already existing calibration
  * record in the database
  */
-void	CalibrationStore::saveCalibration(long id, const BasicCalibration& cal) {
-	GuiderCalibration	c = getCalibration(id);
-	c.complete(true);
-	c = cal;
-	updateCalibration(id, c);
+void	CalibrationStore::saveCalibration(const BasicCalibration& cal) {
+	int	id = cal.calibrationid();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving calibration %d", id);
+	switch (cal.calibrationtype()) {
+	case BasicCalibration::GP: {
+		GuiderCalibration	c = getGuiderCalibration(id);
+		c.complete(true);
+		c = cal;
+		updateCalibration(c);
+		}
+		break;
+	case BasicCalibration::AO: {
+		AdaptiveOpticsCalibration c = getAdaptiveOpticsCalibration(id);
+		c.complete(true);
+		c = cal;
+		updateCalibration(c);
+		}
+		break;
+	}
+
+	// add the points
 	removePoints(id);
 	for (unsigned int i = 0; i < cal.size(); i++) {
 		CalibrationPoint	point = cal[i];
-		addPoint(id, point);
+		addPoint(cal.calibrationid(), point);
 	}
 }
 

@@ -174,7 +174,7 @@ int	guidetest_main(int argc, char *argv[]) {
 	// if we have an image directory configuration, we add the 
 	// callback
 	if (imagedir) {
-		guider.newimagecallback(callback::CallbackPtr(
+		guider.addImageCallback(callback::CallbackPtr(
 			new callback::SaveImageCallback(imagedir)));
 	}
 
@@ -193,7 +193,7 @@ int	guidetest_main(int argc, char *argv[]) {
 	// calibrate the guider. This can either be done using the supplied
 	// calibration data, or by calling the calibration process
 	if (docalibrate) {
-		guider.startCalibration(tracker);
+		guider.startCalibration(BasicCalibration::GP, tracker);
 		if (!guider.waitCalibration(40 * 9)) {
 			std::string	msg = stringprintf("tracker failed to calibrate");
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

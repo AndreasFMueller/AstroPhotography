@@ -12,7 +12,7 @@
 namespace astro {
 namespace guiding {
 
-static Guider	*nonnull(Guider *guider) {
+static GuiderBase	*nonnull(GuiderBase *guider) {
 	if (NULL == guider) {
 		throw std::runtime_error("missing Guider ptr");
 	}
@@ -32,7 +32,7 @@ bool	BasicProcess::hasGuider() const {
  * This method throws an exception when the guider is not configured, this
  * prevents segmentation faults.
  */
-Guider	*BasicProcess::guider() {
+GuiderBase	*BasicProcess::guider() {
 	if (NULL == _guider) {
 		throw std::runtime_error("guider not set");
 	}
@@ -47,7 +47,7 @@ Guider	*BasicProcess::guider() {
  * only the derived class knows the work function that must be executed
  * by the thread.
  */
-BasicProcess::BasicProcess(Guider *guider, TrackerPtr tracker,
+BasicProcess::BasicProcess(GuiderBase *guider, TrackerPtr tracker,
 	persistence::Database database)
 	: _guider(nonnull(guider)),
 	  _exposure(guider->exposure()), _imager(guider->imager()),

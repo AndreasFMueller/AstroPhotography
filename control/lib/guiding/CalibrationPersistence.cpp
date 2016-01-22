@@ -24,6 +24,56 @@ PersistentCalibration::PersistentCalibration() {
 	controltype = 0;
 }
 
+PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
+	// initialize fields that don't come from the basic calibration
+	time(&when);
+
+	// data from the basic calibration
+	for (int i = 0; i < 6; i++) {
+		a[i] = other.a[i];
+	}
+	complete = other.complete() ? 1 : 0;
+	switch (other.calibrationtype()) {
+	case BasicCalibration::GP:
+		controltype = 0;
+		break;
+	case BasicCalibration::AO:
+		controltype = 1;
+		break;
+	}
+	quality = other.quality();
+	det = other.det();
+
+	// only available in the guidercalibration
+	focallength = 0;
+	masPerPixel = 0;
+}
+
+PersistentCalibration::PersistentCalibration(const GuiderCalibration& other) {
+	// initialize fields that don't come from the basic calibration
+	time(&when);
+
+	// data from the basic calibration
+	for (int i = 0; i < 6; i++) {
+		a[i] = other.a[i];
+	}
+	complete = other.complete() ? 1 : 0;
+	switch (other.calibrationtype()) {
+	case BasicCalibration::GP:
+		controltype = 0;
+		break;
+	case BasicCalibration::AO:
+		controltype = 1;
+		break;
+	}
+	quality = other.quality();
+	det = other.det();
+
+	// only available in the guidercalibration
+	focallength = other.focallength;
+	masPerPixel = other.masPerPixel;
+}
+
 PersistentCalibration&	PersistentCalibration::operator=(
 	const BasicCalibration& other) {
 	quality = other.quality();
@@ -31,6 +81,18 @@ PersistentCalibration&	PersistentCalibration::operator=(
 	for (int i = 0; i < 6; i++) {
 		a[i] = other.a[i];
 	}
+	return *this;
+}
+
+PersistentCalibration&	PersistentCalibration::operator=(
+	const GuiderCalibration& other) {
+	quality = other.quality();
+	det = other.det();
+	for (int i = 0; i < 6; i++) {
+		a[i] = other.a[i];
+	}
+	focallength = other.focallength;
+	masPerPixel = other.masPerPixel;
 	return *this;
 }
 

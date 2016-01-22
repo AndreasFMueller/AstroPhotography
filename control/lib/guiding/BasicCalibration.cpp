@@ -37,6 +37,7 @@ std::string	BasicCalibration::toString() const {
  * it cannot be inverted, and it is not possible to compute corrections.
  */
 BasicCalibration::BasicCalibration() {
+	_calibrationid = -1;
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
 	_complete = false;
 }
@@ -52,6 +53,7 @@ double	BasicCalibration::det() const {
  * \brief Construct a BasicCalibration object from coefficient array
  */
 BasicCalibration::BasicCalibration(const double coefficients[6]) {
+	_calibrationid = -1;
 	for (int i = 0; i < 6; i++) {
 		a[i] = coefficients[i];
 	}
@@ -145,7 +147,11 @@ double	BasicCalibration::quality() const {
 	double	l1 = hypot(a[0], a[3]);
 	double	l2 = hypot(a[1], a[4]);
 	double	cosalpha = (a[0] * a[1] + a[3] * a[4]) / (l1 * l2);
-	return 1 - (cosalpha * cosalpha);
+	double	result =  1 - (cosalpha * cosalpha);
+	if (result != result) {
+		result = 0;
+	}
+	return result;
 }
 
 std::string	BasicCalibration::type2string(CalibrationType caltype) {
@@ -176,6 +182,37 @@ BasicCalibration::CalibrationType	BasicCalibration::string2type(const std::strin
 		calname.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
+}
+
+void	BasicCalibration::reset() {
+	_calibrationid = 0;
+	_calibrationtype = BasicCalibration::GP;
+	for (int i = 0; i < 6; i++) { a[i] = 0; }
+	_complete = false;
+	clear();
+}
+
+BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
+	// carefully copy calibration id, don't overwrite an id if it it
+	// is already > 0
+	if (_calibrationid <= 0) {
+		_calibrationid = other.calibrationid();
+	}
+
+	// copy common fields
+	_calibrationtype = other._calibrationtype;
+	for (int i = 0; i < 6; i++) { a[i] = other.a[i]; }
+	_complete = other._complete;
+
+	// copy points
+	clear();
+	BasicCalibration	*bc = this;
+	for_each(begin(), end(), [bc](CalibrationPoint point) {
+			bc->add(point);
+		}
+	);
+
+	return *this;
 }
 
 } // namespace guiding

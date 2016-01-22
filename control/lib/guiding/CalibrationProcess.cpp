@@ -51,17 +51,17 @@ void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
 	if (!hasGuider()) {
 		return;
 	}
-	if (guider()->calibrationcallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"send calibration point to callback %p",
-			(&*guider()->calibrationcallback));
-		astro::callback::CallbackDataPtr	data(
-			new CalibrationPointCallbackData(calpoint));
-		//(*guider().calibrationcallback)(data);
-		guider()->calibrationcallback->operator()(data);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for points");
+	guider()->callback(calpoint);
+}
+
+/**
+ * \brief Send progress info to the callback
+ */
+void	CalibrationProcess::callback(const ProgressInfo& progressinfo) {
+	if (!hasGuider()) {
+		return;
 	}
+	guider()->callback(progressinfo);
 }
 
 /**
@@ -71,14 +71,7 @@ void	CalibrationProcess::callback(const GuiderCalibration& calibration) {
 	if (!hasGuider()) {
 		return;
 	}
-	if (guider()->calibrationcallback) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "send guider calibration data");
-		astro::callback::CallbackDataPtr	data(
-			new GuiderCalibrationCallbackData(calibration));
-		(*guider()->calibrationcallback)(data);
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no callback for calibration");
-	}
+	guider()->callback(calibration);
 }
 
 /**
@@ -88,7 +81,7 @@ void	CalibrationProcess::callback(const ImagePtr& image) {
 	if (!hasGuider()) {
 		return;
 	}
-	guider()->callbackImage(image);
+	guider()->callback(image);
 }
 
 /**
@@ -109,7 +102,8 @@ void	CalibrationProcess::measure(BasicCalibrator& calibrator,
 	// move the telescope to the grid point corresponding to ra/dec
 	Point	star = starAt(ra, dec);
 	double	t = Timer::gettime() - starttime;
-	CalibrationPoint	calibrationpoint(t, Point(grid * ra, grid * dec), star);
+	CalibrationPoint	calibrationpoint(t,
+					Point(grid * ra, grid * dec), star);
 
 	// add the calibration point to the calibrator
 	calibrator.add(calibrationpoint);
@@ -137,8 +131,9 @@ void	CalibrationProcess::measure(BasicCalibrator& calibrator,
  * This esimates the progress based on the number of points already scanned
  */
 double	CalibrationProcess::currentprogress(int ra, int dec) const {
-	double	maxpoints = (2 * range + 1) * (2 + range + 1);
-	return ((2 * range + 1) * (ra + range) + (dec + range)) / maxpoints;
+	int	l = 2 * range + 1;
+	double	maxpoints = l * l;
+	return (l * (ra + range) + (dec + range) + 1) / maxpoints;
 }
 
 /**
@@ -165,10 +160,17 @@ public:
  *
  */
 void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibrating: terminate = %s",
-		_thread.terminate() ? "YES" : "NO");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"start calibrating: terminate = %s, guider = %s",
+		_thread.terminate() ? "YES" : "NO", hasGuider() ? "YES" : "NO");
 	// set the start time
 	starttime = Timer::gettime();
+
+	// send progress update for value 0
+	ProgressInfo	pi;
+	pi.t = 0;
+	pi.progress = 0;
+	callback(pi);
 
 	// grid range we want to scan
 	range = 1;
@@ -178,7 +180,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	// use a smaller grid constant. The default value of 10 is a good
 	// choice for a 100mm guide scope and 7u pixels as for the SBIG
 	// ST-i guider kit
-	grid = gridconstant(_focallength, _pixelsize);
+	grid = gridconstant(_focallength, guider()->pixelsize());
 
 	// prepare a GuiderCalibrator class that does the actual computation
 	BasicCalibrator	calibrator;
@@ -198,7 +200,10 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 						"terminate signal received");
 					throw calibration_interrupted();
 				}
-				_progress = currentprogress(ra, dec);
+				// update progress indicators
+				pi.t = Timer::gettime() - starttime;
+				pi.progress = currentprogress(ra, dec);
+				callback(pi);
 			}
 		}
 	} catch (calibration_interrupted&) {
@@ -210,22 +215,23 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	// now compute the calibration data, and fix the time constant
 	GuiderCalibration	cal = calibrator.calibrate();
 	//cal.rescale(1. / grid);
-	if (hasGuider()) {
-		guider()->saveCalibration(cal);
-		guider()->calibration(cal);
-	}
 
-	// inform the callback that calibration is complete
+	// send the progress indicator to the end
+	pi.t = Timer::gettime() - starttime;
+	pi.progress = 1.0;
+	callback(pi);
+
+	// inform the callback that calibration is complete, this also
+	// ensures that the guider saves the calibration
 	callback(cal);
 
 	// the guider is now calibrated
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
-		guider()->calibration().toString().c_str());
+		cal.toString().c_str());
 	calibrated = true;
 
 	// signal other threads that we are done
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration complete");
-	_progress = 1.0;
 }
 
 /**
@@ -265,14 +271,13 @@ double	CalibrationProcess::gridconstant(double focallength,
 /**
  * \brief Construct a guider from 
  */
-CalibrationProcess::CalibrationProcess(Guider *_guider, TrackerPtr _tracker,
+CalibrationProcess::CalibrationProcess(GuiderBase *_guider,
+	camera::GuiderPortPtr guiderport, TrackerPtr _tracker,
 	persistence::Database _database)
-	: GuiderPortProcess(_guider, _tracker, _database) {
+	: GuiderPortProcess(_guider, guiderport, _tracker, _database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	_focallength = 0.600;
-	_pixelsize = 0.000010;
 	calibrated = false;
-	_progress = 0;
 	// create the thread
 	thread(ThreadPtr(new astro::thread::Thread<CalibrationProcess>(this)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread constructed");
@@ -306,10 +311,6 @@ CalibrationProcess::~CalibrationProcess() {
  * by speeing up (down for negative values) the right ascension/declination
  * motors for ra resp. dec seconds. After each measurement, we return to the
  * central position.
- *
- * This method may require additional parameters to be completely useful.
- * \param focallength    focallength of guide scope in mm
- * \param pixelsize      size of pixels in um
  */
 void	CalibrationProcess::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the calibration thread");

@@ -42,22 +42,20 @@ std::string	toString(const trackinghistoryentry& entry) {
  * The initialization ensures that the normal drift of the mount is
  * corrected even when no tracking is active. 
  */
-TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
+TrackingWork::TrackingWork(GuiderBase *_guider, TrackerPtr _tracker,
 	DrivingWork& driving, persistence::Database& _database)
 	: BasicProcess(_guider, _tracker, _database), _driving(driving),
-	  _summary(_guider->name(), _guider->instrument(), _guider->ccdname(),
-		_guider->guiderportname(), _guider->adaptiveopticsname()) {
+	  _summary(_guider->name(), _guider->instrument(), _guider->ccdname()) {
 	// set a default gain
 	_gain = 1;
 	_interval = 10;
 
 	// compute the ra/dec duty cycle to compensate the drift
 	// (the vx, vy speed found in the calibration). We determine these
-	// using the 
-	const GuiderCalibration&	calibration = guider()->calibration();
+	// using the calibration
 
 	// the default correction only neutralizes the drift
-	Point	correction = calibration.defaultcorrection();
+	Point	correction = _calibration.defaultcorrection();
 	double	tx = -correction.x();
 	double	ty = -correction.y();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "tx = %.3fs, ty = %.3fs", tx, ty);
@@ -81,9 +79,14 @@ TrackingWork::TrackingWork(Guider *_guider, TrackerPtr _tracker,
 		guidingrun.name = guider()->name();
 		guidingrun.instrument = guider()->instrument();
 		guidingrun.ccd = guider()->ccdname();
+#if 0
 		guidingrun.guiderport = guider()->guiderportname();
 		guidingrun.adaptiveoptics = guider()->adaptiveopticsname();
+#endif
+#if 0
 		guidingrun.calibrationid = guider()->calibrationid();
+#endif
+		guidingrun.calibrationid = -1;
 		time(&guidingrun.whenstarted);
 
 		// add guiding run record to the database
@@ -186,7 +189,7 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 			correctiontime);
 
 		// compute the correction to tx and ty
-		Point	correction = gain() * guider()->calibration()(offset,
+		Point	correction = gain() * _calibration(offset,
 				correctiontime);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"TRACK: offset = %s, correction = %s",
@@ -221,7 +224,8 @@ void	TrackingWork::main(Thread<TrackingWork>& thread) {
 		}
 
 		// inform the callback, if there is one
-		guider()->callbackTrackingPoint(_last);
+		//guider()->callbackTrackingPoint(_last);
+		guider()->callback(_last);
 
 		// this is a possible cancellation point
 		if (thread.terminate()) {

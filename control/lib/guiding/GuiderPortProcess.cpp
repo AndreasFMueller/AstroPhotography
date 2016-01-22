@@ -8,10 +8,11 @@
 namespace astro {
 namespace guiding {
 
-GuiderPortProcess::GuiderPortProcess(Guider *guider, TrackerPtr tracker,
+GuiderPortProcess::GuiderPortProcess(GuiderBase *guider,
+	camera::GuiderPortPtr guiderport, TrackerPtr tracker,
 	persistence::Database database)
 	: BasicProcess(guider, tracker, database),
-	  _guiderport(guider->guiderport()) {
+	  _guiderport(guiderport) {
 }
 
 GuiderPortProcess::GuiderPortProcess(const camera::Exposure& exposure, 

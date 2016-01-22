@@ -21,6 +21,7 @@ libastroguiding_la_SOURCES = 						\
 	DrivingWork.cpp							\
 	Guide.cpp							\
 	Guider.cpp							\
+	GuiderBase.cpp							\
 	GuiderCalibration.cpp						\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
