@@ -219,7 +219,7 @@ int	Guide::state_command(GuiderPrx guider) {
 		try {
 			Calibration	cal = guider->getCalibration(
 						CalibrationTypeGuiderPort);
-			std::cout << "GP=" << cal.id;
+			std::cout << "GP=" << cal.id << " ";
 		} catch (...) { }
 		try {
 			Calibration	cal = guider->getCalibration(

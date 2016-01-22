@@ -201,7 +201,7 @@ int	guidetest_main(int argc, char *argv[]) {
 		}
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "use configured calibration");
-		guider.calibration(calibration);
+		//guider.calibration(calibration);
 	}
 
 	// now simulate tracking

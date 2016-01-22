@@ -222,14 +222,7 @@ void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* curr
 void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
 	// retrieve guider data from the database
-	astro::guiding::CalibrationStore	store(database);
-	if (store.contains(calid, astro::guiding::BasicCalibration::GP)) {
-		guider->guiderPortDevice->calibrationid(calid);
-	}
-
-	if (store.contains(calid, astro::guiding::BasicCalibration::AO)) {
-		guider->adaptiveOpticsDevice->calibrationid(calid);
-	}
+	guider->useCalibration(calid);
 }
 
 Calibration GuiderI::getCalibration(CalibrationType calibrationtype, const Ice::Current& /* current */) {

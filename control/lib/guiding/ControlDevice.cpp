@@ -97,13 +97,16 @@ ControlDeviceBase::~ControlDeviceBase() {
  * \brief Retrieve the calibration
  */
 void	ControlDeviceBase::calibrationid(int calid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set calibration: %d", calid);
 	CalibrationStore	store(_database);
 	
 	// get the type of the calibration
 	std::type_index	type = typeid(*_calibration);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration type: %s", type.name());
 
 	// check for guider calibration
 	if (type == typeid(GuiderCalibration)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration %d", calid);
 		if (!store.contains(calid, BasicCalibration::GP)) {
 			throw std::runtime_error("no such calibration id");
 		}
@@ -113,11 +116,13 @@ void	ControlDeviceBase::calibrationid(int calid) {
 			return;
 		}
 		*gcal = store.getGuiderCalibration(calid);
+		gcal->calibrationid(calid);
 		return;
 	}
 
 	// check for adaptive optics calibration
 	if (type == typeid(AdaptiveOpticsCalibration)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO calibration %d", calid);
 		if (!store.contains(calid, BasicCalibration::AO)) {
 			throw std::runtime_error("no such calibration id");
 		}
@@ -127,6 +132,8 @@ void	ControlDeviceBase::calibrationid(int calid) {
 			return;
 		}
 		*acal = store.getAdaptiveOpticsCalibration(calid);
+		acal->calibrationid(calid);
+		return;
 	}
 }
 
@@ -192,8 +199,10 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		// add specific attributes
 		GuiderCalibration	*gcal
 			= dynamic_cast<GuiderCalibration *>(_calibration);
-		record.focallength = gcal->focallength;
-		record.masPerPixel = gcal->masPerPixel;
+		if (NULL != gcal) {
+			record.focallength = gcal->focallength;
+			record.masPerPixel = gcal->masPerPixel;
+		}
 
 		// record der Tabelle zufügen
 		CalibrationTable	calibrationtable(_database);
@@ -243,11 +252,10 @@ void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
 	}
 	// update the calibration in the database
 	BasicCalibration	calcopy = cal;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration id = %d",
-		calcopy.calibrationid());
 	calcopy.calibrationid(_calibration->calibrationid());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration id = %d",
-		calcopy.calibrationid());
+	if (calcopy.calibrationid() <= 0) {
+		return;
+	}
 	CalibrationStore	calstore(_database);
 	calstore.updateCalibration(calcopy);
 }
@@ -317,6 +325,7 @@ int	ControlDevice<camera::GuiderPort,
 	GuiderCalibration	*gcal
 		= dynamic_cast<GuiderCalibration *>(_calibration);
 	gcal->focallength = parameter(std::string("focallength"), 1.0);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f", gcal->focallength);
 
 	// create the calibration process
 	CalibrationProcess	*calibrationprocess

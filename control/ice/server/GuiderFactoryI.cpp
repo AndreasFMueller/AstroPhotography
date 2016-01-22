@@ -86,6 +86,8 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 		double	focallength
 			= instrument->getDouble("guiderfocallength");
 		guider->focallength(focallength);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength: %.3f",
+			focallength);
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' property "
 			"found, using default %f", guider->focallength());

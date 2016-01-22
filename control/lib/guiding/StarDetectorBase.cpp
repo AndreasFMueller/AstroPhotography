@@ -141,34 +141,6 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 
 	// now use the CentroidFilter to get the centroid
 	image::filter::CentroidFilter<double>	cf(approximate, r);
-
-#if 0
-	// find the rectangular region of points to consider
-	ImageRectangle	avgrect(approximate - ImagePoint(r, r),
-				ImageSize(2 * r + 1));
-	adapter::WindowAdapter<double>	wa(image, avgrect);
-
-	// now compute the average
-	Point	sum;
-	double	totalweight = 0;
-	for (int x = 0; x < wa.getSize().width(); x++) {
-		for (int y = 0; y < wa.getSize().height(); y++) {
-			// only consider points that are at most radius r away
-			double	l = hypot(x - r, y - r);
-			if (l <= r) {
-				double	weight = wa.pixel(x,y)
-					- location.background;
-				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"add point %s with weight %f",
-					Point(x,y).toString().c_str(), weight);
-				sum = sum + Point(x, y) * weight;
-				totalweight += weight;
-			}
-		}
-	}
-	Point	centroid = sum * (1 / totalweight);
-	centroid = centroid + Point(approximate);
-#endif
 	Point	centroid = cf(bgimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "centeroid found: %s",
 		centroid.toString().c_str());

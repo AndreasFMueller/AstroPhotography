@@ -7,9 +7,12 @@ SUBDIRS = . test
 
 noinst_LTLIBRARIES = libastroguiding.la
 
+noinst_HEADERS = AsynchronousAction.h
+
 libastroguiding_la_SOURCES = 						\
 	AdaptiveOpticsCalibration.cpp					\
 	AOCalibrationProcess.cpp					\
+	AsynchronousAction.cpp						\
 	BasicCalibration.cpp						\
 	BasicCalibrator.cpp						\
 	BasicProcess.cpp						\

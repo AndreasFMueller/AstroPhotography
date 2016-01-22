@@ -83,9 +83,6 @@ Guider::Guider(const std::string& instrument,
 	// default focallength
 	_focallength = 1;
 
-	// calibration id
-	_calibrationid = 0;
-
 	// We have to install a callback for calibrations
 	CallbackPtr	calcallback(new GuiderCalibrationRedirector(this));
 	addGuidercalibrationCallback(calcallback);
@@ -132,18 +129,6 @@ Guide::state	Guider::state() const {
 }
 
 /**
- * \brief Set a calibration
- *
- * If the calibration data is already known, then we can immediately set
- * the calibration without going through the calibration process each time
- * we build the guider.
- */
-void	Guider::calibration(const GuiderCalibration& calibration) {
-	_state.addCalibration();
-	_calibration = calibration;
-}
-
-/**
  * \brief Cleanup for calibration processes
  *
  * If nobody waits for a calibration process, e.g. when the calibration
@@ -157,11 +142,6 @@ void	Guider::calibrationCleanup() {
 	if (state() == Guide::calibrating) {
 		return;
 	}
-
-	// This will implicitely cleanup the calibration process,
-	// if there is one. If there is none, this operation will
-	// do nothing
-	calibrationprocess = NULL;
 }
 
 /**
@@ -187,12 +167,14 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 	}
 	_progress = 0;
 
+	// start calibration
 	if ((type == BasicCalibration::GP) && guiderPortDevice) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuiderPort calibration");
 		_state.startCalibrating();
-		guiderPortDevice->parameter("focallength", focallength());
+		guiderPortDevice->setParameter("focallength", focallength());
 		return guiderPortDevice->startCalibration(tracker);
 	}
+
 	if ((type == BasicCalibration::AO) && adaptiveOpticsDevice) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start AO calibration");
 		_state.startCalibrating();
@@ -218,6 +200,21 @@ void	Guider::forgetCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "forgetting incomplete calibration");
 	if (_state.canFailCalibration()) {
 		_state.failCalibration();
+	}
+}
+
+void	Guider::useCalibration(int calid) {
+	if (!_state.canAcceptCalibration()) {
+		throw std::runtime_error("cannot accept calibration now");
+	}
+	CalibrationStore	store(database());
+	if (store.contains(calid, BasicCalibration::GP)) {
+		_state.addCalibration();
+		guiderPortDevice->calibrationid(calid);
+	}
+	if (store.contains(calid, BasicCalibration::AO)) {
+		_state.addCalibration();
+		adaptiveOpticsDevice->calibrationid(calid);
 	}
 }
 
@@ -357,6 +354,7 @@ void	Guider::checkstate() {
 	case Guide::idle:
 		break;
 	case Guide::calibrating:
+#if 0
 		if (calibrationprocess) {
 			if (!calibrationprocess->isrunning()) {
 				if (iscalibrated()) {
@@ -367,6 +365,7 @@ void	Guider::checkstate() {
 				calibrationprocess = NULL;
 			}
 		}
+#endif
 		break;
 	case Guide::calibrated:
 		break;

@@ -510,7 +510,7 @@ protected:
 	BasicCalibration	*_calibration;
 public:
 	int	calibrationid() const { return _calibration->calibrationid(); }
-	virtual void	calibrationid(int calid);
+	void	calibrationid(int calid);
 
 	// parameters about the calibration
 private:
@@ -727,21 +727,6 @@ public:
 		persistence::Database database = NULL);
 
 	/**
-	 * \brief Calibration of the guider
- 	 *
-	 * Guiding is only possible after the Guider has been calibrated.
-	 * The calibration information is stored in the _calibration
-	 * member variable, and is accessible through a set of accessors.
-	 */
-private:
-	GuiderCalibration	_calibration;
-public:
-	const GuiderCalibration&	calibration() const { return _calibration; }
-	GuiderCalibration&	calibration() { return _calibration; }
-	void	calibration(const GuiderCalibration& calibration);
-	bool	iscalibrated() const { return _calibration.iscalibrated(); }
-
-	/**
 	 * \brief Launch the calibration process
 	 *
 	 * The calibration process needs information where to lock for the
@@ -764,6 +749,8 @@ public:
 	int	startCalibration(BasicCalibration::CalibrationType type,
 			TrackerPtr tracker);
 	void	saveCalibration(const GuiderCalibration& calibration);
+	void	forgetCalibration();
+	void	useCalibration(int calid);
 
 	/**
 	 * \brief query the progress of the calibration process
@@ -781,13 +768,7 @@ public:
 	 * \brief wait for the calibration process to complete
 	 */
 	bool	waitCalibration(double timeout);
-	int	calibrationid() { return _calibrationid; }
-	void	calibrationid(int calid) { _calibrationid = calid; }
-	void	forgetCalibration();
 private:
-	int	_calibrationid;
-	CalibrationProcessPtr	calibrationprocess;
-	friend class CalibrationProcess;
 	void	calibrationCleanup();
 
 public:

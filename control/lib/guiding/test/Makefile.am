@@ -25,7 +25,8 @@ if ENABLE_UNITTESTS
 noinst_PROGRAMS = tests singletest guidetest
 
 # single test
-singletest_SOURCES = singletest.cpp
+singletest_SOURCES = singletest.cpp					\
+	AsynchronousActionTest.cpp
 singletest_LDADD = $(guiding_ldadd)
 singletest_DEPENDENCIES = $(guiding_dependencies)
 
@@ -34,6 +35,7 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp						\
+	AsynchronousActionTest.cpp					\
 	GuiderFactoryTest.cpp						\
 	StarDetectorTest.cpp
 tests_LDADD = $(guiding_ldadd)
