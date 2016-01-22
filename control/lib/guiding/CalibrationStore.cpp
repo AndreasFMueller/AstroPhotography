@@ -32,6 +32,7 @@ std::list<long>	CalibrationStore::getAllCalibrations(
 		return table.selectids(std::string("where controltype = 1 "
 						   "order by whenstarted"));
 	}
+	return std::list<long>();
 }
 
 /**
@@ -53,7 +54,7 @@ std::list<long>	CalibrationStore::getCalibrations(
 	out << " or ";
 	if (guider.adaptiveoptics().size()) {
 		out << "controldevice = '" << guider.adaptiveoptics() << "'";
-	} else {
+	} else {
 		out << "0 = 1";
 	}
 	out << ")";
