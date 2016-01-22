@@ -23,14 +23,18 @@ public:
 
 	// constructors
 public:
-	AOCalibrationProcess(Guider *guider, TrackerPtr tracker,
-		persistence::Database database = NULL);
-	AOCalibrationProcess(const camera::Exposure& exposure,
-		camera::Imager& imager, TrackerPtr tracker,
-		camera::AdaptiveOpticsPtr adaptiveoptics,
+	AOCalibrationProcess(GuiderBase *guider,
+		camera::AdaptiveOpticsPtr adaptiveoptics, TrackerPtr tracker,
 		persistence::Database database = NULL);
 
 	void	main(astro::thread::Thread<AOCalibrationProcess>& thread);
+
+	// callbacks
+	void	callback(const CalibrationPoint& calpoint);
+        void	callback(const ProgressInfo& progressinfo);
+        void	callback(const GuiderCalibration& calibration);
+        void	callback(const ImagePtr& image);
+
 };
 
 } // namespace guiding

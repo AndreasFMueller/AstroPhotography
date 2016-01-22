@@ -51,6 +51,9 @@ CallbackDataPtr	GuiderCalibrationRedirector::operator()(CallbackDataPtr data) {
 		if (NULL != cal) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "progress update");
 			_guider->calibrationProgress(cal->data().progress);
+			if (cal->data().aborted) {
+				_guider->forgetCalibration();
+			}
 		}
 	}
 
@@ -69,9 +72,10 @@ CallbackDataPtr	GuiderCalibrationRedirector::operator()(CallbackDataPtr data) {
  * default frame is the entire CCD area.
  */
 Guider::Guider(const std::string& instrument,
-	CcdPtr ccd, GuiderPortPtr guiderport,
+	CcdPtr ccd, GuiderPortPtr guiderport, AdaptiveOpticsPtr adaptiveoptics,
 	Database database)
-	: GuiderBase(instrument, ccd, database), _guiderport(guiderport) {
+	: GuiderBase(instrument, ccd, database), _guiderport(guiderport),
+	  _adaptiveoptics(adaptiveoptics) {
 	// default exposure settings
 	exposure().exposuretime(1.);
 	exposure().frame(ccd->getInfo().getFrame());
@@ -94,7 +98,13 @@ Guider::Guider(const std::string& instrument,
 				guiderport, database));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port control device");
 	}
-	// XXX must also create an adaptive optics device
+	if (adaptiveoptics) {
+		adaptiveOpticsDevice = ControlDevicePtr(
+			new ControlDevice<AdaptiveOptics,
+				AdaptiveOpticsCalibration>(this,
+					adaptiveoptics, database));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO control device");
+	}
 
 	// at this point the guider is sufficiently configured, although
 	// this configuration is not sufficient for guiding
@@ -162,7 +172,8 @@ void	Guider::calibrationCleanup() {
  */
 int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 		TrackerPtr tracker) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for %s",
+		BasicCalibration::type2string(type).c_str());
 	// make sure we have a tracker
 	if (!tracker) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
@@ -171,6 +182,7 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 
 	// are we in the correct state
 	if (!_state.canStartCalibrating()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start calibrating");
 		throw std::runtime_error("wrong state");
 	}
 	_progress = 0;
@@ -186,7 +198,7 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 		_state.startCalibrating();
 		return adaptiveOpticsDevice->startCalibration(tracker);
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "cannot calibrate");
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot calibrate, no device");
 	throw std::runtime_error("bad state");
 }
 
@@ -196,7 +208,17 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
 		cal.calibrationid());
+	if (!_state.canAcceptCalibration()) {
+		return;
+	}
 	_state.addCalibration();
+}
+
+void	Guider::forgetCalibration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "forgetting incomplete calibration");
+	if (_state.canFailCalibration()) {
+		_state.failCalibration();
+	}
 }
 
 /**
@@ -206,7 +228,16 @@ void	Guider::cancelCalibration() {
 	if (_state != Guide::calibrating) {
 		throw std::runtime_error("not currently calibrating");
 	}
-	calibrationprocess->stop();
+	if (guiderPortDevice) {
+		if (guiderPortDevice->calibrating()) {
+			guiderPortDevice->cancelCalibration();
+		}
+	}
+	if (adaptiveOpticsDevice) {
+		if (adaptiveOpticsDevice->calibrating()) {
+			adaptiveOpticsDevice->cancelCalibration();
+		}
+	}
 }
 
 /**
@@ -216,23 +247,17 @@ bool	Guider::waitCalibration(double timeout) {
 	if (_state != Guide::calibrating) {
 		throw std::runtime_error("not currently calibrating");
 	}
-	return calibrationprocess->wait(timeout);
-}
-
-/**
- * \brief get a good measure for the pixel size of the CCD
- *
- * This method returns the average of the pixel dimensions, this will
- * give strange values for binned cameras. Binning looks like a strange
- * idea for a guide camera anyway.
- */
-double	Guider::getPixelsize() {
-	astro::camera::CcdInfo  info = ccd()->getInfo();
-	float	_pixelsize = (info.pixelwidth() * exposure().mode().x()
-			+ info.pixelheight() * exposure().mode().y()) / 2.;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelsize: %.2fum",
-		1000000 * _pixelsize);
-	return _pixelsize;
+	if (guiderPortDevice) {
+		if (guiderPortDevice->calibrating()) {
+			return guiderPortDevice->waitCalibration(timeout);
+		}
+	}
+	if (adaptiveOpticsDevice) {
+		if (adaptiveOpticsDevice->calibrating()) {
+			return adaptiveOpticsDevice->waitCalibration(timeout);
+		}
+	}
+	return true;
 }
 
 /**

@@ -169,7 +169,7 @@ int	guidetest_main(int argc, char *argv[]) {
 				"guiderport:simulator/guiderport");
 
 	// create a Guider object
-	Guider	guider(instrument, ccd, guiderport);
+	Guider	guider(instrument, ccd, guiderport, NULL);
 
 	// if we have an image directory configuration, we add the 
 	// callback

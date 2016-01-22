@@ -127,6 +127,7 @@ void	GuiderBase::callback(const TrackingPoint& point) {
  * \brief Callback for calibration points
  */
 void	GuiderBase::callback(const CalibrationPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point callback");
 	callback::CallbackDataPtr	data(
 		new CalibrationPointCallbackData(point));
 	_calibrationcallback(data);

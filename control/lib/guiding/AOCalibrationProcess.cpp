@@ -14,23 +14,12 @@ namespace guiding {
  * This constructor is based on a guider class, which also means that 
  * the calibration can be written back to the guider
  */
-AOCalibrationProcess::AOCalibrationProcess(Guider *guider, TrackerPtr tracker,
-	persistence::Database database)
-	: BasicProcess(guider, tracker, database) {
-}
-
-/**
- * \brief Create a clibration process
- *
- * Create a calibration process that does not depend on a guider class
- * instance.
- */
-AOCalibrationProcess::AOCalibrationProcess(const camera::Exposure& exposure, 
-	camera::Imager& imager, TrackerPtr tracker,
+AOCalibrationProcess::AOCalibrationProcess(GuiderBase *guider,
 	camera::AdaptiveOpticsPtr adaptiveoptics,
-	persistence::Database database)
-	: BasicProcess(exposure, imager, tracker, database),
+	TrackerPtr tracker, persistence::Database database)
+	: BasicProcess(guider, tracker, database),
 	  _adaptiveoptics(adaptiveoptics) {
+	thread(thread::ThreadPtr(new thread::Thread<AOCalibrationProcess>(this)));
 }
 
 /**
@@ -53,6 +42,13 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 	BasicCalibrator	calibrator;
 	double	starttime = Timer::gettime();
 
+	// Progress indicator data
+	ProgressInfo	pi;
+	pi.aborted = false;
+	pi.progress = 0;
+	pi.t = Timer::gettime() - starttime;
+	callback(pi);
+
 	// go to a number of points and measure the offset
 	try {
 		const int	npoints = 17;
@@ -68,7 +64,7 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 			// compute the point
 			double	angle = ((i * delta) % npoints) * dangle;
 			Point	offset = Point(angle) * 0.5;
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "point %d: %s",
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "new point %d: %s", i,
 				offset.toString().c_str());
 			
 			// position the adaptive optics unit
@@ -81,18 +77,41 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 			}
 
 			// take an image
-			ImagePtr	image = imager().getImage();
+			ImagePtr	image = guider()->getImage();
 			Point	star = (*tracker())(image);
 
 			// add the calibration point
 			double	t = Timer::gettime() - starttime;
 			CalibrationPoint	calpoint(t, offset, star);
 			calibrator.add(calpoint);
+			callback(calpoint);
+
+			// update the progress indicator
+			pi.t = Timer::gettime() - starttime;
+			pi.progress = (i + 1.0) / npoints;
+			callback(pi);
 		}
 	} catch (const aocalibration_interrupted& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "termination requested");
 		_adaptiveoptics->set(Point());
 		usleep(100000); // allow the AO unit to settle
+		pi.t = Timer::gettime() - starttime;
+		pi.progress = 1;
+		pi.aborted = true;
+		callback(pi);
+		return;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "exception caused abort: %s",
+			x.what());
+		pi.t = Timer::gettime() - starttime;
+		pi.aborted = true;
+		callback(pi);
+		return;
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception cased abort");
+		pi.t = Timer::gettime() - starttime;
+		pi.aborted = true;
+		callback(pi);
 		return;
 	}
 
@@ -100,7 +119,50 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 	BasicCalibration	cal = calibrator.calibrate();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
 		cal.toString().c_str());
+	callback(cal);
+}
+
+/**
+ * \brief Send a calibration point to the callback
+ */
+void	AOCalibrationProcess::callback(const CalibrationPoint& calpoint) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point callback");
+	if (!hasGuider()) {
+		return;
+	}
+	guider()->callback(calpoint);
+}
+
+/**
+ * \brief Send progress info to the callback
+ */
+void	AOCalibrationProcess::callback(const ProgressInfo& progressinfo) {
+	if (!hasGuider()) {
+		return;
+	}
+	guider()->callback(progressinfo);
+}
+
+/**
+ * \brief Send the completed calibration data to the callback
+ */
+void	AOCalibrationProcess::callback(const GuiderCalibration& calibration) {
+	if (!hasGuider()) {
+		return;
+	}
+	guider()->callback(calibration);
+}
+
+/**
+ * \brief Send the image to the callback
+ */
+void	AOCalibrationProcess::callback(const ImagePtr& image) {
+	if (!hasGuider()) {
+		return;
+	}
+	guider()->callback(image);
 }
 
 } // namespace guiding
 } // namespace astro
+

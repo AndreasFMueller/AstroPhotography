@@ -62,7 +62,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 
 	// with all these components we can now build a new guider
 	GuiderPtr	guider(new Guider(guiderdescriptor.instrument(),
-				ccd, guiderport, database));
+				ccd, guiderport, adaptiveoptics, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	return guider;
 }

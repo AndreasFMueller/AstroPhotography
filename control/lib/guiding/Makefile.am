@@ -15,6 +15,7 @@ libastroguiding_la_SOURCES = 						\
 	BasicProcess.cpp						\
 	BasicSummary.cpp						\
 	CalibrationPersistence.cpp					\
+	CalibrationPoint.cpp						\
 	CalibrationProcess.cpp						\
 	CalibrationStore.cpp						\
 	ControlDevice.cpp						\

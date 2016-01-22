@@ -7,6 +7,7 @@
 #include <BasicProcess.h>
 #include <CalibrationStore.h>
 #include <CalibrationProcess.h>
+#include <AOCalibrationProcess.h>
 
 using namespace astro::callback;
 
@@ -30,14 +31,38 @@ public:
  */
 CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"callback for calibration completion called");
-	// handle the calibration
+		"control device callback called");
+	// handle calibration point upates
+	{
+		CalibrationPointCallbackData	*cal
+			= dynamic_cast<CalibrationPointCallbackData *>(&*data);
+		if (NULL != cal) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point: %s",
+				cal->data().toString().c_str());
+			_controldevice->addCalibrationPoint(cal->data());
+			return data;
+		}
+	}
+	// handle the calibration when it completes
 	{
 		GuiderCalibrationCallbackData   *cal
 			= dynamic_cast<GuiderCalibrationCallbackData *>(&*data);
 		if (NULL != cal) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration update");
 			_controldevice->saveCalibration(cal->data());
+			return data;
+		}
+	}
+	// handle progress information
+	{
+		ProgressInfoCallbackData	*cal
+			= dynamic_cast<ProgressInfoCallbackData *>(&*data);
+		if (NULL != cal) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "progress update");
+			if (cal->data().aborted) {
+				_controldevice->calibrating(false);
+			}
+			return data;
 		}
 	}
 
@@ -54,6 +79,7 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
 	ControlDeviceCallback	*cb = new ControlDeviceCallback(this);
 	_callback = CallbackPtr(cb);
 	_guider->addGuidercalibrationCallback(_callback);
+	_guider->addCalibrationCallback(_callback);
 }
 
 /**
@@ -61,11 +87,11 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
  */
 ControlDeviceBase::~ControlDeviceBase() {
 	_guider->removeGuidercalibrationCallback(_callback);
+	_guider->removeCalibrationCallback(_callback);
+
 	delete _calibration;
 	_calibration = NULL;
 }
-
-
 
 /**
  * \brief Retrieve the calibration
@@ -102,6 +128,18 @@ void	ControlDeviceBase::calibrationid(int calid) {
 		}
 		*acal = store.getAdaptiveOpticsCalibration(calid);
 	}
+}
+
+void	ControlDeviceBase::addCalibrationPoint(const CalibrationPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ADD CALIBRATION POINT %d %s",
+		_calibration->calibrationid(), point.toString().c_str());
+	if (!_calibrating) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not calibrating!");
+		return;
+	}
+	_calibration->add(point);
+	CalibrationStore	store(_database);
+	store.addPoint(_calibration->calibrationid(), point);
 }
 
 const std::string&	ControlDeviceBase::name() const {
@@ -164,6 +202,7 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	// start the process
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting process");
 	process->start();
+	_calibrating = true;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d started", 
 		_calibration->calibrationid());
@@ -188,14 +227,23 @@ bool	ControlDeviceBase::waitCalibration(double timeout) {
  * \brief save a guider calibration
  */
 void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "received calibration to save as %d",
-		_calibration->calibrationid());
-	*_calibration = cal;
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"received calibration %s to save as %d, %d points",
+		cal.toString().c_str(), _calibration->calibrationid(),
+		cal.size());
+	_calibrating = false;
 	if (!_database) {
 		return;
 	}
+	// update the calibration in the database
+	BasicCalibration	calcopy = cal;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration id = %d",
+		calcopy.calibrationid());
+	calcopy.calibrationid(_calibration->calibrationid());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration id = %d",
+		calcopy.calibrationid());
 	CalibrationStore	calstore(_database);
-	calstore.saveCalibration(*_calibration);
+	calstore.updateCalibration(calcopy);
 }
 
 /**
@@ -241,12 +289,19 @@ void	ControlDeviceBase::setParameter(const std::string& name, double value) {
 	parameters.insert(std::make_pair(name, value));
 }
 
+/**
+ * \brief Computing the correction for the base: no correction
+ */
+Point	ControlDeviceBase::correct(const Point& point, double /* Deltat */) {
+	return point;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Specialization to GuiderPort
 //////////////////////////////////////////////////////////////////////
 template<>
-int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
-		TrackerPtr tracker) {
+int	ControlDevice<camera::GuiderPort,
+		GuiderCalibration>::startCalibration(TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration start");
 	// reset the current calibration, just to make sure we don't confuse
 	// it with the previous
@@ -273,30 +328,67 @@ int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
 	return ControlDeviceBase::startCalibration(tracker);
 }
 
+/**
+ * \brief apply a correction and send it to the GuiderPort
+ */
 template<>
-void	ControlDevice<camera::GuiderPort, GuiderCalibration>::calibrationid(int calid) {
-	// get the callibration from the database
-	this->calibrationid(calid);
+Point	ControlDevice<camera::GuiderPort,
+		GuiderCalibration>::correct(const Point& point, double Deltat) {
+	// give up if not configured
+	if (!_calibration->complete()) {
+		return point;
+	}
+
+	// now compute the calibration
+	Point	correction = _calibration->operator()(point, Deltat);
+
+	// XXX apply the correction to the guider port
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply correction: %s",
+		correction.toString().c_str());
+
+	// no remaining error after a guider port correction ;-)
+	return Point(0, 0);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Specialization to AdaptiveOptics
 //////////////////////////////////////////////////////////////////////
 template<>
-int	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::startCalibration(
-		TrackerPtr tracker) {
+int	ControlDevice<camera::AdaptiveOptics,
+		AdaptiveOpticsCalibration>::startCalibration(
+			TrackerPtr tracker) {
 	_calibration->calibrationtype(BasicCalibration::AO);
 
-	// XXX Missing implementation
-#if 0
 	// create a new calibraiton process
-	AOCalibrationProcess	aocalibrationprocess
-		= new AOCalibrationProcess();
+	AOCalibrationProcess	*aocalibrationprocess
+		= new AOCalibrationProcess(_guider, _device, tracker,
+			_database);
 	process = BasicProcessPtr(aocalibrationprocess);
-#endif
 
 	// start the calibration
 	return ControlDeviceBase::startCalibration(tracker);
+}
+
+/**
+ * \brief Apply correction to adaptive optics device
+ */
+template<>
+Point	ControlDevice<camera::AdaptiveOptics,
+		AdaptiveOpticsCalibration>::correct(const Point& point,
+			double Deltat) {
+	// give up if not configured
+	if (!_calibration->complete()) {
+		return point;
+	}
+
+	// now compute the calibration
+	Point	correction = _calibration->operator()(point, Deltat);
+
+	// get the current correction
+	_device->set(_device->get() - correction);
+
+	// get the remaining correction
+	return _calibration->offset(_device->get());
 }
 
 } // namespace guiding

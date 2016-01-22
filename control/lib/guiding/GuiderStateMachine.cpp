@@ -18,24 +18,28 @@ const char	*GuiderStateMachine::statename() const {
 }
 
 bool	GuiderStateMachine::canConfigure() const {
-	return (_state == astro::guiding::Guide::unconfigured);
+	return (_state == Guide::unconfigured);
 }
 
 bool	GuiderStateMachine::canStartGuiding() const {
-	return (_state == astro::guiding::Guide::calibrated);
+	return (_state == Guide::calibrated);
 }
 
 bool	GuiderStateMachine::canAcceptCalibration() const {
-	return (_state != astro::guiding::Guide::guiding);
+	return (_state != Guide::guiding);
+}
+
+bool	GuiderStateMachine::canFailCalibration() const {
+	return (_state != Guide::guiding);
 }
 
 bool	GuiderStateMachine::canStopGuiding() const {
-	return (_state == astro::guiding::Guide::guiding);
+	return (_state == Guide::guiding);
 }
 
 bool	GuiderStateMachine::canStartCalibrating() const {
-	return (_state == astro::guiding::Guide::calibrated)
-		|| (_state == astro::guiding::Guide::idle);
+	return (_state == Guide::calibrated)
+		|| (_state == Guide::idle);
 }
 
 void	GuiderStateMachine::configure() {
@@ -44,7 +48,7 @@ void	GuiderStateMachine::configure() {
 			statename());
 		throw std::runtime_error("cannot start calibration");
 	}
-	_state = astro::guiding::Guide::idle;
+	_state = Guide::idle;
 }
 
 void	GuiderStateMachine::startCalibrating() {
@@ -54,7 +58,7 @@ void	GuiderStateMachine::startCalibrating() {
 			"cannot start calibrating in state %s", statename());
 		throw std::runtime_error("cannot start calibration");
 	}
-	_state = astro::guiding::Guide::calibrating;
+	_state = Guide::calibrating;
 }
 
 void	GuiderStateMachine::addCalibration() {
@@ -63,7 +67,16 @@ void	GuiderStateMachine::addCalibration() {
 			"cannot accept calibration in state %s", statename());
 		throw std::runtime_error("cannot accept calibration in this state");
 	}
-	_state = astro::guiding::Guide::calibrated;
+	_state = Guide::calibrated;
+}
+
+void	GuiderStateMachine::failCalibration() {
+	if (!canFailCalibration()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot fail calibration in state %s",
+			statename());
+		throw std::runtime_error("cannot fail calibration in this state");
+	}
+	_state = Guide::idle;
 }
 
 void	GuiderStateMachine::startGuiding() {
@@ -72,7 +85,7 @@ void	GuiderStateMachine::startGuiding() {
 			statename());
 		throw std::runtime_error("cannot start guiding in this state");
 	}
-	_state = astro::guiding::Guide::guiding;
+	_state = Guide::guiding;
 }
 
 void	GuiderStateMachine::stopGuiding() {
@@ -81,7 +94,7 @@ void	GuiderStateMachine::stopGuiding() {
 			statename());
 		throw std::runtime_error("cannot stop guiding in this state");
 	}
-	_state = astro::guiding::Guide::calibrated;
+	_state = Guide::calibrated;
 }
 
 } // namespace guiding

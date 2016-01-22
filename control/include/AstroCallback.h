@@ -47,6 +47,7 @@ public:
  */
 class Callback {
 public:
+	virtual ~Callback() { }
 	virtual CallbackDataPtr	operator()(CallbackDataPtr data) = 0;
 };
 

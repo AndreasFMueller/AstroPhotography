@@ -213,7 +213,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// create a guider
-	Guider	guider(instrument, ccd, guiderport);
+	Guider	guider(instrument, ccd, guiderport, NULL);
 
 	// if the path is set, we also install a callback
 	if (path) {
@@ -242,7 +242,7 @@ int	main(int argc, char *argv[]) {
 
 	// now perform the calibration
 	guider.exposure(exposure);
-	guider.startCalibration(tracker);
+	guider.startCalibration(BasicCalibration::GP, tracker);
 	double	timeout = 120;
 	if (!guider.waitCalibration(timeout)) {
 		std::string	msg = stringprintf("tracker failed to calibrate");

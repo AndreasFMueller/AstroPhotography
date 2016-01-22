@@ -44,8 +44,19 @@ std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider) {
 	std::ostringstream	out;
 	out << " instrument = '" << guider.instrument() << "' and ";
-	out << " ccd = '" << guider.ccd() << "' and ";
-	out << " controldevice = '" << guider.guiderport() << "'";
+	out << " ccd = '" << guider.ccd() << "' and (";
+	if (guider.guiderport().size()) {
+		out << "controldevice = '" << guider.guiderport() << "'";
+	} else {
+		out << "0 = 1";
+	}
+	out << " or ";
+	if (guider.adaptiveoptics().size()) {
+		out << "controldevice = '" << guider.adaptiveoptics() << "'";
+	} else {
+		out << "0 = 1";
+	}
+	out << ")";
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -161,6 +172,8 @@ long	CalibrationStore::addCalibration(const PersistentCalibration& calibration) 
  */
 void	CalibrationStore::updateCalibration(
 		const BasicCalibration& calibration) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "update calibration %d",
+		calibration.calibrationid());
 	CalibrationTable	t(_database);
 	CalibrationRecord	record = t.byid(calibration.calibrationid());
 	for (int i = 0; i < 6; i++) {
@@ -169,6 +182,7 @@ void	CalibrationStore::updateCalibration(
 	record.det = calibration.det();
 	record.quality = calibration.quality();
 	record.complete = (calibration.complete()) ? 1 : 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "quality = %f", record.quality);
 	t.update(calibration.calibrationid(), record);
 }
 
@@ -198,6 +212,8 @@ void	CalibrationStore::updateCalibration(
  * \brief Add a point to an existing calibration process
  */
 void	CalibrationStore::addPoint(long id, const CalibrationPoint& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add %s to %d",
+		point.toString().c_str(), id);
 	CalibrationPointRecord	record(0, id, point);
 	CalibrationPointTable	t(_database);
 	t.add(record);

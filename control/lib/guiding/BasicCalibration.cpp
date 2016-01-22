@@ -97,6 +97,18 @@ Point	BasicCalibration::operator()(const Point& offset, double Deltat) const {
 }
 
 /**
+ * \brief Compute the pixel offset that we would see after a correction
+ */
+Point	BasicCalibration::offset(const Point& point, double Deltat) const {
+	double	x = a[0] * point.x() + a[1] * point.y() + a[2] * Deltat;
+	double	y = a[3] * point.x() + a[4] * point.y() + a[5] * Deltat;
+	Point	result(x, y);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset %s for correction %s, t=%.1f",
+		result.toString().c_str(), point.toString().c_str(), Deltat);
+	return result;
+}
+
+/**
  * \brief Rescale the grid dependent part of the calibration
  */
 void	BasicCalibration::rescale(double scalefactor) {
@@ -193,11 +205,13 @@ void	BasicCalibration::reset() {
 }
 
 BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
-	// carefully copy calibration id, don't overwrite an id if it it
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "copying basic calibration");
+	// carefully copy calibration id, don't overwrite an id if it
 	// is already > 0
 	if (_calibrationid <= 0) {
 		_calibrationid = other.calibrationid();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d", _calibrationid);
 
 	// copy common fields
 	_calibrationtype = other._calibrationtype;

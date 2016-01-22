@@ -27,6 +27,9 @@ snowguide_CPPFLAGS = $(ICECPPFLAGS)
 calibrate:	snowguide
 	./snowguide --debug --star=349,252 --width=60 \
 		--exposure=1 server GUIDESIM calibrate GP
+aocalibrate:	snowguide
+	./snowguide --debug --star=349,252 --width=60 \
+		--exposure=1 server GUIDESIM calibrate AO
 guide:	snowguide
 	./snowguide --debug --star=349,252 --width=60 \
 		--exposure=1 --interval=3 server GUIDESIM guide

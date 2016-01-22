@@ -48,6 +48,7 @@ Point	CalibrationProcess::starAt(double ra, double dec) {
  * \brief Send a calibration point to the callback
  */
 void	CalibrationProcess::callback(const CalibrationPoint& calpoint) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point callback");
 	if (!hasGuider()) {
 		return;
 	}
@@ -170,6 +171,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	ProgressInfo	pi;
 	pi.t = 0;
 	pi.progress = 0;
+	pi.aborted = false;
 	callback(pi);
 
 	// grid range we want to scan
@@ -208,6 +210,10 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 		}
 	} catch (calibration_interrupted&) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration interrupted");
+		pi.t = Timer::gettime() - starttime;
+		pi.progress = 1;
+		pi.aborted = true;
+		callback(pi);
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration measurements complete");

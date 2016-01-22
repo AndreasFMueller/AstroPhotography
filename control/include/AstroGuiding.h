@@ -186,6 +186,7 @@ public:
 	CalibrationPoint() { }
 	CalibrationPoint(double _t, const Point& _offset, const Point& _star)
 		: t(_t), offset(_offset), star(_star) { }
+	std::string	toString() const;
 };
 
 /**
@@ -229,7 +230,8 @@ public:
 
 	// corrections
 	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset, double Deltat) const;
+	Point	operator()(const Point& offset, double Deltat = 0) const;
+	Point	offset(const Point& point, double Deltat = 0) const;
 
 	// modifying the calibration
 	void	rescale(double scalefactor);
@@ -285,6 +287,7 @@ class ProgressInfo {
 public:
 	double	t;
 	double	progress;
+	bool	aborted;
 };
 typedef callback::CallbackDataEnvelope<ProgressInfo>	ProgressInfoCallbackData;
 
@@ -539,15 +542,18 @@ public:
 	void	cancelCalibration();
 	bool	waitCalibration(double timeout);
 	virtual void	saveCalibration(const BasicCalibration& calibration);
+	void	addCalibrationPoint(const CalibrationPoint& point);
 protected:
 	bool	_calibrating;
 public:
 	bool	calibrating() const { return _calibrating; }
+	void	calibrating(bool c) { _calibrating = c; }
 
 protected:
 	BasicProcessPtr	process;
 public:
-	
+	// apply a correction
+	virtual Point	correct(const Point& point, double Deltat);
 };
 
 typedef std::shared_ptr<ControlDeviceBase>	ControlDevicePtr;
@@ -588,23 +594,27 @@ public:
 	virtual std::type_index	configurationType() const {
 		return typeid(devicecalibration);
 	}
+	virtual Point	correct(const Point& point, double Deltat);
 };
 
 // specializations for GuiderPort
 template<>
-int	ControlDevice<camera::GuiderPort, GuiderCalibration>::startCalibration(
-		TrackerPtr tracker);
+int	ControlDevice<camera::GuiderPort,
+		GuiderCalibration>::startCalibration(TrackerPtr tracker);
 
 template<>
-void	ControlDevice<camera::GuiderPort, GuiderCalibration>::calibrationid(int calid);
+Point	ControlDevice<camera::GuiderPort,
+		GuiderCalibration>::correct(const Point& point, double Deltat);
 
 // specializatiobs for adaptive optics
 template<>
-int	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::startCalibration(
-		TrackerPtr tracker);
+int	ControlDevice<camera::AdaptiveOptics,
+		AdaptiveOpticsCalibration>::startCalibration(TrackerPtr tracker);
 
 template<>
-void	ControlDevice<camera::AdaptiveOptics, AdaptiveOpticsCalibration>::calibrationid(int calid);
+Point	ControlDevice<camera::AdaptiveOptics,
+		AdaptiveOpticsCalibration>::correct(const Point& point,
+			double Deltat);
 
 /**
  * \brief enumeration type for the state of the guider
@@ -648,6 +658,7 @@ public:
 	void	configure();
 	void	startCalibrating();
 	void	addCalibration();
+	void	failCalibration();
 	void	startGuiding();
 	void	stopGuiding();
 };
@@ -672,10 +683,21 @@ public:
 	// loose the reference to it either, so we keep it handy here
 private:
 	camera::GuiderPortPtr	_guiderport;
+	camera::AdaptiveOpticsPtr	_adaptiveoptics;
 public:
-	camera::GuiderPortPtr	guiderport() { return _guiderport; }
-	std::string	guiderportname() const { return _guiderport->name().toString(); }
-	std::string	adaptiveopticsname() const { return std::string(""); }
+	camera::GuiderPortPtr	guiderport() {
+		return _guiderport;
+	}
+	std::string	guiderportname() const {
+		return _guiderport->name();
+	}
+
+	camera::AdaptiveOpticsPtr	adaptiveoptics() {
+		return _adaptiveoptics;
+	}
+	std::string	adaptiveopticsname() const {
+		return _adaptiveoptics->name();
+	}
 
 	GuiderDescriptor	getDescriptor() const;
 
@@ -701,6 +723,7 @@ public:
 	 */
 	Guider(const std::string& instrument,
 		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
+		camera::AdaptiveOpticsPtr adaptiveoptics,
 		persistence::Database database = NULL);
 
 	/**
@@ -760,6 +783,7 @@ public:
 	bool	waitCalibration(double timeout);
 	int	calibrationid() { return _calibrationid; }
 	void	calibrationid(int calid) { _calibrationid = calid; }
+	void	forgetCalibration();
 private:
 	int	_calibrationid;
 	CalibrationProcessPtr	calibrationprocess;
