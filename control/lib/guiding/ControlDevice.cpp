@@ -404,10 +404,20 @@ void	GuiderPortAction::execute() {
 		_guiderport->activate(0, 0, decplus, decminus);
 		Timer::sleep(fabs(ty));
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC %.2f/%.2f", tx, ty);
-		_guiderport->activate(raplus, raminus, decplus, decminus);
-		if (limit > 0) {
-			Timer::sleep(limit);
+		// find the number of seconds, and split the correction
+		// into this many single steps. This makes the 
+		int	steps = floor(_deltat);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC %.2f/%.2f in %d steps",
+			tx, ty, steps);
+		raplus /= steps;
+		raminus /= steps;
+		decplus /= steps;
+		decminus /= steps;
+		int	step = 0;
+		while (step++ < steps) {
+			_guiderport->activate(raplus, raminus,
+					decplus, decminus);
+			Timer::sleep(1);
 		}
 	}
 	
@@ -520,29 +530,29 @@ Point	ControlDevice<camera::AdaptiveOptics,
 	Point	correction = _calibration->correction(point, Deltat);
 
 	// get the current correction
-	Point	aocorrection = _device->get() + correction;
+	Point	newposition = _device->get() + correction;
 	try {
-		_device->set(aocorrection);
+		_device->set(newposition);
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set correction %s: %s",
-			aocorrection.toString().c_str(), x.what());
-		aocorrection = Point(0, 0);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set new position %s: %s",
+			newposition.toString().c_str(), x.what());
+		correction = Point(0, 0);
 	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set correction %s",
-			aocorrection.toString().c_str());
-		aocorrection = Point(0, 0);
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set new position %s",
+			newposition.toString().c_str());
+		correction = Point(0, 0);
 	}
 
 	// log the information to the callback
 	TrackingPoint	ti;
 	ti.t = Timer::gettime();
 	ti.trackingoffset = point;
-	ti.correction = aocorrection;
+	ti.correction = correction;
 	ti.type = BasicCalibration::AO;
 	_guider->callback(ti);
 
 	// get the remaining correction
-	return _calibration->offset(_device->get());
+	return _calibration->offset(_device->get() * -1.);
 }
 
 } // namespace guiding

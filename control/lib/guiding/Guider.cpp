@@ -301,8 +301,10 @@ void	Guider::startGuiding(TrackerPtr tracker, double interval) {
 	TrackingProcess	*tp = new TrackingProcess(this, tracker,
 		guiderPortDevice, adaptiveOpticsDevice, database());
 	tp->guiderportInterval(interval);
+#if 0
 	// XXX temporary, for debugging
 	tp->adaptiveopticsInterval(interval + 1);
+#endif
 	trackingprocess = BasicProcessPtr(tp);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "now start tracking");

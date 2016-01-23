@@ -20,7 +20,6 @@ SimAdaptiveOptics::SimAdaptiveOptics()
 	: AdaptiveOptics("adaptiveoptics:simulator/adaptiveoptics") {
 	starttime = simtime();
 	_amplitude = 5;
-	_amplitude = 0;
 	_activated = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "AdaptiveOptics %s created at %f",
 		name().toString().c_str(), starttime);
@@ -55,10 +54,13 @@ Point	SimAdaptiveOptics::offset() const {
 	if (!_activated) {
 		return Point();
 	}
+#if 0
 	double	phi = 0.05 * (simtime() - starttime);
 	Point	v(_amplitude * cos(3 * phi), 0.9 * _amplitude * sin(4 * phi));
-	//v = v + get() * 5.;
-	v = v + get() * 0.;
+#else
+	Point	v;
+#endif
+	v = v + get() * 5.;
 	Point	offset(
 		cos(alpha) * v.x() - sin(alpha) * v.y(),
 		sin(alpha) * v.x() + cos(alpha) * v.y()

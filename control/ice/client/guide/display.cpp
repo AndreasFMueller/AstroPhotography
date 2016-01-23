@@ -109,6 +109,14 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 			converttime(point.timeago));
 		_out << astro::stringprintf(".%03.0f ",
 			1000 * (point.timeago - trunc(point.timeago)));
+		switch (point.type) {
+		case CalibrationTypeGuiderPort:
+			_out << "GP ";
+			break;
+		case CalibrationTypeAdaptiveOptics:
+			_out << "AO ";
+			break;
+		}
 		_out << astro::stringprintf("(%6.2f,%6.2f) -> (%6.2f,%6.2f)",
 				point.trackingoffset.x, point.trackingoffset.y,
 				point.activation.x, point.activation.y);
