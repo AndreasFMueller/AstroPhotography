@@ -184,7 +184,7 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
 	// ST-i guider kit
 	grid = gridconstant(_focallength, guider()->pixelsize());
 
-	// prepare a GuiderCalibrator class that does the actual computation
+	// prepare a BasicCalibrator class that does the actual computation
 	BasicCalibrator	calibrator;
 
 	// measure the initial point

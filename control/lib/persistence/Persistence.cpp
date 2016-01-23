@@ -419,6 +419,24 @@ std::list<long>	TableBase::selectids(const std::string& condition) {
 }
 
 /**
+ * \brief Retrieve with a given id
+ */
+Result	TableBase::selectrows(const std::string& condition) {
+	std::ostringstream	out;
+	out << "select id, ";
+	out << std::for_each(_fieldnames.begin(), _fieldnames.end(),
+		columnnamelist());
+	out << " from " << _tablename;
+	out << " where " << condition;
+	std::string	query = out.str();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "select query: %s", query.c_str());
+	StatementPtr	stmt = _database->statement(query);
+	Result	result = stmt->result();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "result has %d rows", result.size());
+	return result;
+}
+
+/**
  * \brief Find the record id the satisfies some uniqueness constraint
  */
 long	TableBase::id(const std::string& condition) {

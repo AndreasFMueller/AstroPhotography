@@ -257,6 +257,23 @@ bool	CalibrationStore::contains(long id,
 	return (ct.selectids(condition).size() > 0);
 }
 
+bool	CalibrationStore::containscomplete(long id,
+		BasicCalibration::CalibrationType type) {
+	CalibrationTable	ct(_database);
+	std::ostringstream	str;
+	str << " complete = 1 ";
+	switch (type) {
+	case BasicCalibration::GP:
+		str << "and controltype = 0 and id = " << id;
+		break;
+	case BasicCalibration::AO:
+		str << "and controltype = 1 and id = " << id;
+		break;
+	}
+	std::string	condition = str.str();
+	return (ct.selectids(condition).size() > 0);
+}
+
 /**
  * \brief Save a basic calibration in the database
  *

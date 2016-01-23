@@ -24,7 +24,8 @@ public:
 	std::string	ccd;
 	std::string	guiderport;
 	std::string	adaptiveoptics;
-	int	calibrationid;
+	int	guiderportcalid;
+	int	adaptiveopticscalid;
 	GuidingRun() { }
 	GuidingRun(time_t _whenstarted, const std::string& _name,
 		const std::string& _instrument, const std::string& _ccd,
@@ -33,7 +34,8 @@ public:
 		: whenstarted(_whenstarted), name(_name),
 		  instrument(_instrument), ccd(_ccd), guiderport(_guiderport),
 		  adaptiveoptics(_adaptiveoptics) {
-		calibrationid = -1;
+		guiderportcalid = -1;
+		adaptiveopticscalid = -1;
 	}
 };
 

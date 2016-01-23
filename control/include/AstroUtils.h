@@ -20,6 +20,8 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <memory>
+#include <thread>
 
 #ifdef __cplusplus
 extern "C" {
@@ -342,6 +344,39 @@ int	main_function(int argc, char *argv[]) {
 	}
 	return EXIT_FAILURE;
 }
+
+/**
+ * \brief Interface class for actions
+ */
+class Action {
+public:
+	virtual void	execute() = 0;
+};
+typedef std::shared_ptr<Action>	ActionPtr;
+
+/**
+ * \brief Asynchronous action class
+ *
+ * This class asynchronously executes an action unless there already is
+ * an action executing.
+ */
+class AsynchronousAction {
+	std::thread	worker;
+	ActionPtr	_action;
+	bool		_busy;
+	std::mutex	mtx;
+
+	AsynchronousAction(const AsynchronousAction& other);
+	AsynchronousAction&	operator=(const AsynchronousAction& other);
+
+	void	busy(bool b);
+public:
+	AsynchronousAction();
+	~AsynchronousAction();
+	bool	execute(ActionPtr action);
+	void	execute();
+	
+};
 
 } // namespace astro
 

@@ -189,51 +189,9 @@ idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
 TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 			const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
-	astro::guiding::TrackingStore	store(database);
-	TrackingHistory	history;
-	history.guiderunid = id;
-
-	// get other attributes
 	try {
-		astro::guiding::GuidingRunTable	gt(database);
-		astro::guiding::GuidingRunRecord	r = gt.byid(id);
-		if (!gt.exists(id)) {
-			NotFound	exception;
-			exception.cause = astro::stringprintf("tracking history"
-				" %d does not exist", id);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s",
-				exception.cause.c_str());
-			throw exception;
-		}
-		history.timeago = converttime(r.whenstarted);
-		history.calibrationid = r.calibrationid;
-		history.guider.instrumentname = r.instrument;
-		history.guider.ccdIndex = instrumentName2index(r.instrument,
-			InstrumentGuiderCCD, r.ccd);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport= %s", r.guiderport.c_str());
-		history.guider.guiderportIndex
-			= instrumentName2index(r.instrument,
-				InstrumentGuiderPort, r.guiderport);
-		history.guider.adaptiveopticsIndex
-			= instrumentName2index(r.instrument,
-				InstrumentAdaptiveOptics, r.adaptiveoptics);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "history[%d]: %.1f %s|%d|%d|%d",
-			id, history.timeago,
-			history.guider.instrumentname.c_str(),
-			history.guider.ccdIndex,
-			history.guider.guiderportIndex,
-			history.guider.adaptiveopticsIndex);
-
-		// tracking points
 		astro::guiding::TrackingStore	store(database);
-		std::list<astro::guiding::TrackingPointRecord>	points
-			= store.getHistory(id);
-		std::list<astro::guiding::TrackingPointRecord>::iterator i;
-		for (i = points.begin(); i != points.end(); i++) {
-			history.points.push_back(convert(*i));
-		}
-
-		// done
+		TrackingHistory	history = convert(store.get(id));
 		return history;
 	} catch (const std::exception& ex) {
 		std::string	msg = astro::stringprintf("tracking history %d "

@@ -7,12 +7,9 @@ SUBDIRS = . test
 
 noinst_LTLIBRARIES = libastroguiding.la
 
-noinst_HEADERS = AsynchronousAction.h
-
 libastroguiding_la_SOURCES = 						\
 	AdaptiveOpticsCalibration.cpp					\
 	AOCalibrationProcess.cpp					\
-	AsynchronousAction.cpp						\
 	BasicCalibration.cpp						\
 	BasicCalibrator.cpp						\
 	BasicProcess.cpp						\
@@ -22,7 +19,6 @@ libastroguiding_la_SOURCES = 						\
 	CalibrationProcess.cpp						\
 	CalibrationStore.cpp						\
 	ControlDevice.cpp						\
-	DrivingWork.cpp							\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderBase.cpp							\
@@ -30,16 +26,15 @@ libastroguiding_la_SOURCES = 						\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
 	GuiderPortProcess.cpp						\
-	GuiderProcess.cpp						\
 	GuiderStateMachine.cpp						\
 	SaveImageCallback.cpp						\
 	StarDetectorBase.cpp						\
 	Tracker.cpp							\
 	TrackingPersistence.cpp						\
 	TrackingPoint.cpp						\
+	TrackingProcess.cpp						\
 	TrackingStore.cpp						\
-	TrackingSummary.cpp						\
-	TrackingWork.cpp
+	TrackingSummary.cpp						
 
 libastroguiding_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

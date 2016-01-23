@@ -29,6 +29,7 @@ public:
 	// access to calibrations
 	bool	contains(long id);
 	bool	contains(long id, BasicCalibration::CalibrationType type);
+	bool	containscomplete(long id, BasicCalibration::CalibrationType type);
 	long	addCalibration(const PersistentCalibration& calibration);
 	void	deleteCalibration(long id);
 	void	updateCalibration(const BasicCalibration& calibration);

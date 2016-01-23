@@ -216,6 +216,7 @@ public:
 	void	remove(long objectid);
 	void	remove(const std::list<long>& objectids);
 	std::list<long>	selectids(const std::string& condition);
+	Result	selectrows(const std::string& condition);
 };
 
 /**
@@ -282,10 +283,11 @@ public:
 
 	std::list<object>	select(const std::string& condition) {
 		std::list<object>	result;
-		std::list<long>	ids = selectids(condition);
-		std::list<long>::iterator	i;
-		for (i = ids.begin(); i != ids.end(); i++) {
-			result.push_back(byid(*i));
+		Result	rows = selectrows(condition);
+		Result::const_iterator	i;
+		for (i = rows.begin(); i != rows.end(); i++) {
+			int	id = i->operator[]("id")->intValue();
+			result.push_back(dbadapter::row_to_object(id, *i));
 		}
 		return result;
 	}

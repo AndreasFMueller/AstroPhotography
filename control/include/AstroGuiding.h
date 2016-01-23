@@ -15,6 +15,7 @@
 #include <AstroImager.h>
 #include <AstroCallback.h>
 #include <AstroLoader.h>
+#include <AstroUtils.h>
 #include <typeinfo>
 #include <typeindex>
 
@@ -230,7 +231,7 @@ public:
 
 	// corrections
 	Point	defaultcorrection() const;
-	Point	operator()(const Point& offset, double Deltat = 0) const;
+	Point	correction(const Point& offset, double Deltat = 0) const;
 	Point	offset(const Point& point, double Deltat = 0) const;
 
 	// modifying the calibration
@@ -322,11 +323,15 @@ public:
 	double	t;
 	Point	trackingoffset;
 	Point	correction;
-	TrackingPoint() : t(0) { }
+	BasicCalibration::CalibrationType	type;
+	TrackingPoint() : t(0) {
+		type = BasicCalibration::GP;
+	}
 	TrackingPoint(const double& actiontime,
 		const Point& offset, const Point& activation)
 		: t(actiontime), trackingoffset(offset),
 		  correction(activation) {
+		type = BasicCalibration::GP;
 	}
 	std::string	toString() const;
 };
@@ -352,7 +357,11 @@ public:
 	std::string	instrument() const { return _instrument; }
 	std::string	ccd() const { return _ccd; }
 	std::string	guiderport() const { return _guiderport; }
+	void	guiderport(const std::string& g) { _guiderport = g; }
 	std::string	adaptiveoptics() const { return _adaptiveoptics; }
+	void	adaptiveoptics(const std::string& a) {
+		_adaptiveoptics = a;
+	}
 	std::string	toString() const;
 };
 
@@ -380,7 +389,8 @@ public:
 class TrackingSummary : public BasicSummary {
 public:
 	int	trackingid;
-	int	calibrationid;
+	int	guiderportcalid;
+	int	adaptiveopticscalid;
 	GuiderDescriptor	descriptor;
 	TrackingSummary(const std::string& name, const std::string& instrument,
 		const std::string& ccd, const std::string& guiderport,
@@ -554,6 +564,8 @@ protected:
 public:
 	// apply a correction
 	virtual Point	correct(const Point& point, double Deltat);
+protected:
+	AsynchronousAction	asynchronousaction;
 };
 
 typedef std::shared_ptr<ControlDeviceBase>	ControlDevicePtr;
@@ -775,16 +787,15 @@ public:
 	ControlDevicePtr	guiderPortDevice;
 	ControlDevicePtr	adaptiveOpticsDevice;
 
-	// the following methods manage the guiding thread
-private:
-	GuiderProcessPtr	guiderprocess;
-
 public:
 	// methods involved with creating a tracker
 	double	getPixelsize();
 	TrackerPtr	getTracker(const Point& point);
 	TrackerPtr	getPhaseTracker();
 	TrackerPtr	getDiffPhaseTracker();
+
+private:
+	BasicProcessPtr	trackingprocess;
 
 public:
 	// tracking
@@ -794,8 +805,6 @@ public:
 	double	getInterval();
 	const TrackingSummary&	summary();
 	
-	friend class GuiderProcess;
-
 public:
 	/**
 	 * \brief Information about the most recent update

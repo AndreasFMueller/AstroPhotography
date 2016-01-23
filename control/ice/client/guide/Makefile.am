@@ -24,6 +24,8 @@ snowguide_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowguide_LDADD = $(ICELDADD)
 snowguide_CPPFLAGS = $(ICECPPFLAGS)
 
+INTERVAL = 10
+
 calibrate:	snowguide
 	./snowguide --debug --star=349,252 --width=60 \
 		--exposure=1 server GUIDESIM calibrate GP
@@ -32,20 +34,20 @@ aocalibrate:	snowguide
 		--exposure=1 server GUIDESIM calibrate AO
 guide:	snowguide
 	./snowguide --debug --star=349,252 --width=60 \
-		--exposure=1 --interval=3 server GUIDESIM guide
+		--exposure=1 --interval=$(INTERVAL) server GUIDESIM guide
 
 planetcalibrate:	snowguide
 	./snowguide --debug --exposure=1 --star=320,240 --width=64 \
 		--method=diff server GUIDESIM calibrate
 planetguide:	snowguide
 	./snowguide --debug --exposure=1 --star=320,240 --width=64 \
-		--method=diff --interval=3 server GUIDESIM guide
+		--method=diff --interval=$(INTERVAL) server GUIDESIM guide
 
 suncalibrate:	snowguide
 	./snowguide --debug --exposure=1 \
 		--method=diff server GUIDESIM calibrate
 sunguide:	snowguide
 	./snowguide --debug --exposure=1 \
-		--method=diff --interval=3 server GUIDESIM guide
+		--method=diff --interval=$(INTERVAL) server GUIDESIM guide
 
 endif

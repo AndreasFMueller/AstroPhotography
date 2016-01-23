@@ -45,6 +45,7 @@ void	Calibration_display::operator()(const Calibration& cal) {
 		converttime(cal.timeago));
 	_out << cal.points.size() << " points, ";
 	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
+	_out << ((cal.complete) ? "complete, " : "incomplete, ");
 	switch (cal.controltype) {
 	case CalibrationTypeGuiderPort:
 		_out << "GP, ";

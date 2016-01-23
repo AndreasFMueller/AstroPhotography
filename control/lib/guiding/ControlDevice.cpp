@@ -8,6 +8,7 @@
 #include <CalibrationStore.h>
 #include <CalibrationProcess.h>
 #include <AOCalibrationProcess.h>
+#include <algorithm>
 
 using namespace astro::callback;
 
@@ -107,7 +108,7 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	// check for guider calibration
 	if (type == typeid(GuiderCalibration)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration %d", calid);
-		if (!store.contains(calid, BasicCalibration::GP)) {
+		if (!store.containscomplete(calid, BasicCalibration::GP)) {
 			throw std::runtime_error("no such calibration id");
 		}
 		GuiderCalibration	*gcal
@@ -123,7 +124,7 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	// check for adaptive optics calibration
 	if (type == typeid(AdaptiveOpticsCalibration)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO calibration %d", calid);
-		if (!store.contains(calid, BasicCalibration::AO)) {
+		if (!store.containscomplete(calid, BasicCalibration::AO)) {
 			throw std::runtime_error("no such calibration id");
 		}
 		AdaptiveOpticsCalibration	*acal
@@ -253,6 +254,7 @@ void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
 	// update the calibration in the database
 	BasicCalibration	calcopy = cal;
 	calcopy.calibrationid(_calibration->calibrationid());
+	calcopy.complete(true);
 	if (calcopy.calibrationid() <= 0) {
 		return;
 	}
@@ -311,6 +313,109 @@ Point	ControlDeviceBase::correct(const Point& point, double /* Deltat */) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// asynchronouos action for the guiderport
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * \brief action class for asynchronous guider port actions
+ */
+class GuiderPortAction : public Action {
+	GuiderPortPtr	_guiderport;
+	Point	_correction;
+	double	_deltat;
+	bool	_sequential;
+public:
+	bool	sequential() const { return _sequential; }
+	void	sequential(bool s) { _sequential = s; }
+	
+	GuiderPortAction(GuiderPortPtr guiderport, const Point& correction,
+		double deltat)
+		: _guiderport(guiderport), _correction(correction),
+		  _deltat(deltat) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderPortAction %s",
+			correction.toString().c_str());
+		_sequential = false;
+	}
+	void	execute();
+};
+
+/**
+ * \brief execute the guiderport action
+ */
+void	GuiderPortAction::execute() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port action started %s",
+		_correction.toString().c_str());
+
+	if (!((_correction.x() == _correction.x()) &&
+		(_correction.y() == _correction.y()))) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "nan correction, giving up");
+		return;
+	}
+
+	double	tx = 0;
+	double	ty = 0;
+
+	if (fabs(_correction.x()) > _deltat) {
+		tx = (_correction.x() > 0) ? _deltat : -_deltat;
+	} else {
+		tx = _correction.x();
+	}
+	if (fabs(_correction.y()) > _deltat) {
+		ty = (_correction.y() > 0) ? _deltat : -_deltat;
+	} else {
+		ty = _correction.y();
+	}
+
+	// make sure the time fits into the allotted time
+	double	limit = 0;
+	if (_sequential) {
+		limit = fabs(tx) + fabs(ty);
+	} else {
+		limit = std::max(fabs(tx), fabs(ty));
+	}
+	if (limit > _deltat) {
+		tx *= _deltat / limit;
+		ty *= _deltat / limit;
+		limit = _deltat;
+	}
+
+	// compute the activation times for the guiderport
+	double	raplus = 0;
+	double	raminus = 0;
+	double	decplus = 0;
+	double	decminus = 0;
+	
+	if (tx > 0) {
+		raplus = tx;
+	} else {
+		raminus = -tx;
+	}
+	if (ty > 0) {
+		decplus = ty;
+	} else {
+		decminus = -ty;
+	}
+
+	if (_sequential) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA movement: %.2f", tx);
+		_guiderport->activate(raplus, raminus, 0, 0);
+		Timer::sleep(fabs(tx));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC movement: %.2f", ty);
+		_guiderport->activate(0, 0, decplus, decminus);
+		Timer::sleep(fabs(ty));
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC %.2f/%.2f", tx, ty);
+		_guiderport->activate(raplus, raminus, decplus, decminus);
+		if (limit > 0) {
+			Timer::sleep(limit);
+		}
+	}
+	
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port action complete");
+}
+
+
+//////////////////////////////////////////////////////////////////////
 // Specialization to GuiderPort
 //////////////////////////////////////////////////////////////////////
 template<>
@@ -349,17 +454,32 @@ int	ControlDevice<camera::GuiderPort,
 template<>
 Point	ControlDevice<camera::GuiderPort,
 		GuiderCalibration>::correct(const Point& point, double Deltat) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport correction %s, %.2f",
+		point.toString().c_str(), Deltat);
 	// give up if not configured
 	if (!_calibration->complete()) {
 		return point;
 	}
 
-	// now compute the calibration
-	Point	correction = _calibration->operator()(point, Deltat);
+	// now compute the correction based on the calibration
+	Point	correction = _calibration->correction(point, Deltat);
 
-	// XXX apply the correction to the guider port
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply correction: %s",
+	// apply the correction to the guider port
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply GP correction: %s",
 		correction.toString().c_str());
+	double	dt = (Deltat > 0.5) ? (Deltat - 0.5) : 0;
+	GuiderPortAction	*action = new GuiderPortAction(_device,
+					correction, dt);
+	ActionPtr	aptr(action);
+	asynchronousaction.execute(aptr);
+
+	// log the information to the callback
+	TrackingPoint	ti;
+	ti.t = Timer::gettime();
+	ti.trackingoffset = point;
+	ti.correction = correction;
+	ti.type = BasicCalibration::GP;
+	_guider->callback(ti);
 
 	// no remaining error after a guider port correction ;-)
 	return Point(0, 0);
@@ -397,10 +517,29 @@ Point	ControlDevice<camera::AdaptiveOptics,
 	}
 
 	// now compute the calibration
-	Point	correction = _calibration->operator()(point, Deltat);
+	Point	correction = _calibration->correction(point, Deltat);
 
 	// get the current correction
-	_device->set(_device->get() - correction);
+	Point	aocorrection = _device->get() + correction;
+	try {
+		_device->set(aocorrection);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set correction %s: %s",
+			aocorrection.toString().c_str(), x.what());
+		aocorrection = Point(0, 0);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set correction %s",
+			aocorrection.toString().c_str());
+		aocorrection = Point(0, 0);
+	}
+
+	// log the information to the callback
+	TrackingPoint	ti;
+	ti.t = Timer::gettime();
+	ti.trackingoffset = point;
+	ti.correction = aocorrection;
+	ti.type = BasicCalibration::AO;
+	_guider->callback(ti);
 
 	// get the remaining correction
 	return _calibration->offset(_device->get());

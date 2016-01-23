@@ -4,14 +4,12 @@
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
  * $Id$
  */
-#include "../AsynchronousAction.h"
+#include <AstroUtils.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <config.h>
 #include <AstroDebug.h>
-
-using namespace astro::guiding;
 
 namespace astro {
 namespace test {

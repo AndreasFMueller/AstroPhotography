@@ -13,6 +13,7 @@
 #include <AstroUtils.h>
 #include <CalibrationPersistence.h>
 #include <CalibrationStore.h>
+#include <TrackingProcess.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -294,20 +295,25 @@ TrackerPtr	Guider::getDiffPhaseTracker() {
  * \brief start tracking
  */
 void	Guider::startGuiding(TrackerPtr tracker, double interval) {
-	// create a GuiderProcess instance
+	// create a TrackingProcess instance
 	_state.startGuiding();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new guider process");
-	guiderprocess = GuiderProcessPtr(new GuiderProcess(this, guiderport(),
-		tracker, interval, database()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new guider process created");
-	guiderprocess->start(tracker);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
+	TrackingProcess	*tp = new TrackingProcess(this, tracker,
+		guiderPortDevice, adaptiveOpticsDevice, database());
+	tp->guiderportInterval(interval);
+	// XXX temporary, for debugging
+	tp->adaptiveopticsInterval(interval + 1);
+	trackingprocess = BasicProcessPtr(tp);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "now start tracking");
+	trackingprocess->start();
 }
 
 /**
  * \brief stop the guiding process
  */
 void	Guider::stopGuiding() {
-	guiderprocess->stop();
+	trackingprocess->stop();
 	_state.stopGuiding();
 }
 
@@ -315,27 +321,34 @@ void	Guider::stopGuiding() {
  * \brief wait for the guiding process to terminate
  */
 bool	Guider::waitGuiding(double timeout) {
-	return guiderprocess->wait(timeout);
+	return trackingprocess->wait(timeout);
 }
 
 /**
  * \brief retrieve the interval from the guider process
  */
 double	Guider::getInterval() {
-	return guiderprocess->interval();
+	TrackingProcess	*tp
+		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
+	if (NULL == tp) {
+		return 10;
+	}
+	return tp->guiderportInterval();
 }
 
 /**
  * \brief retrieve the tracking summary from the 
  */
 const TrackingSummary&	Guider::summary() {
-	if (!guiderprocess) {
+	TrackingProcess	*tp
+		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
+	if (NULL == tp) {
 		std::string	cause = stringprintf("wrong state for summary: "
 			"%s", Guide::state2string(_state).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
-	return guiderprocess->summary();
+	return tp->summary();
 }
 
 /**
@@ -370,12 +383,14 @@ void	Guider::checkstate() {
 	case Guide::calibrated:
 		break;
 	case Guide::guiding:
+#if 0
 		if (guiderprocess) {
 			if (!guiderprocess->isrunning()) {
 				_state.addCalibration();
 				guiderprocess = NULL;
 			}
 		}
+#endif
 		break;
 	}
 }
@@ -385,10 +400,15 @@ void	Guider::checkstate() {
  */
 void Guider::lastAction(double& actiontime, Point& offset,
 		Point& activation) {
-	if (!guiderprocess) {
+	TrackingProcess	*tp
+		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
+	if (NULL == tp) {
 		throw std::runtime_error("not currently guiding");
 	}
-	guiderprocess->lastAction(actiontime, offset, activation);
+	TrackingPoint	last = tp->last();
+	actiontime = last.t;
+	offset = last.trackingoffset;
+	activation = last.correction;
 }
 
 /**

@@ -7,6 +7,7 @@
 noinst_LTLIBRARIES = libastroutils.la
 
 libastroutils_la_SOURCES = 						\
+	AsynchronousAction.cpp						\
 	AttributeValuePairs.cpp						\
 	BlockStopWatch.cpp						\
 	CallbackSet.cpp							\

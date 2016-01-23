@@ -24,7 +24,8 @@ std::string	GuidingRunTableAdapter::createstatement() {
 	"    guiderport varchar(256) not null,\n"
 	"    adaptiveoptics varchar(256) not null,\n"
 	"    whenstarted datetime not null,\n"
-	"    calibration integer not null,\n"
+	"    guiderportcalid integer not null,\n"
+	"    adaptiveopticscalid integer not null,\n"
 	"    primary key(id)\n"
 	")\n"
 	);
@@ -39,7 +40,8 @@ GuidingRunRecord	GuidingRunTableAdapter::row_to_object(int objectid,
 	result.ccd = row["ccd"]->stringValue();
 	result.guiderport = row["guiderport"]->stringValue();
 	result.adaptiveoptics = row["adaptiveoptics"]->stringValue();
-	result.calibrationid = row["calibration"]->intValue();
+	result.guiderportcalid = row["guiderportcalid"]->intValue();
+	result.adaptiveopticscalid = row["adaptiveopticscalid"]->intValue();
 	return result;
 }
 
@@ -52,7 +54,8 @@ UpdateSpec	GuidingRunTableAdapter::object_to_updatespec(const GuidingRunRecord& 
 	spec.insert(Field("guiderport", factory.get(guidingrun.guiderport)));
 	spec.insert(Field("adaptiveoptics", factory.get(guidingrun.adaptiveoptics)));
 	spec.insert(Field("whenstarted", factory.getTime(guidingrun.whenstarted)));
-	spec.insert(Field("calibration", factory.get(guidingrun.calibrationid)));
+	spec.insert(Field("guiderportcalid", factory.get(guidingrun.guiderportcalid)));
+	spec.insert(Field("adaptiveopticscalid", factory.get(guidingrun.adaptiveopticscalid)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update spec has %d entries", spec.size());
 	return spec;
 }
@@ -72,6 +75,7 @@ std::string	TrackingTableAdapter::createstatement() {
 	"    yoffset double not null,\n"
 	"    racorrection double not null,\n"
 	"    deccorrection double not null,\n"
+	"    controltype int not null default 0,\n"
 	"    primary key(id)\n"
 	")\n"
 	);
@@ -85,7 +89,12 @@ TrackingPointRecord	TrackingTableAdapter::row_to_object(int objectid,
 	Point	correction(row["racorrection"]->doubleValue(),
 			row["deccorrection"]->doubleValue());
 	TrackingPoint	ti(when, offset, correction);
-	
+	switch (row["controltype"]->intValue()) {
+	case 0: ti.type = BasicCalibration::GP;
+		break;
+	case 1:	ti.type = BasicCalibration::AO;
+		break;
+	}
 	TrackingPointRecord	tracking(objectid,
 		row["guidingrun"]->intValue(), ti);
 	return tracking;
@@ -100,6 +109,14 @@ UpdateSpec	TrackingTableAdapter::object_to_updatespec(const TrackingPointRecord&
 	spec.insert(Field("yoffset", factory.get(tracking.trackingoffset.y())));
 	spec.insert(Field("racorrection", factory.get(tracking.correction.x())));
 	spec.insert(Field("deccorrection", factory.get(tracking.correction.y())));
+	switch (tracking.type) {
+	case BasicCalibration::GP:
+		spec.insert(Field("controltype", factory.get((int)0)));
+		break;
+	case BasicCalibration::AO:
+		spec.insert(Field("controltype", factory.get((int)1)));
+		break;
+	}
 	return spec;
 }
 

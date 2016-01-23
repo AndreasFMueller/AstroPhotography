@@ -110,8 +110,12 @@ int	Guide::tracks_command(GuiderFactoryPrx guiderfactory,
 int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving history %d", historyid);
 	TrackingHistory	history = guiderfactory->getTrackingHistory(historyid);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "track uses calibration %d",
-		history.calibrationid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "track uses calibrations GP=%d AO=%d",
+		history.guiderportcalid, history.adaptiveopticscalid);
+	if (history.points.size() == 0) {
+		std::cout << "no tracking points found" << std::endl;
+		return EXIT_SUCCESS;
+	}
 	if (csv) {
 		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
 		verbose = csv;
@@ -122,8 +126,10 @@ int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 		std::cout << std::endl;
 	}
 	if (verbose) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
+			history.points.size());
 		Calibration	cal = guiderfactory->getCalibration(
-					history.calibrationid);
+					history.guiderportcalid);
 		double	starttime = history.points.begin()->timeago;
 		TrackingPoint_display	display(std::cout, starttime);
 		display.csv(csv);

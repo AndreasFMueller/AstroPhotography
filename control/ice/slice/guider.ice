@@ -20,6 +20,11 @@ module snowstar {
 		int	adaptiveopticsIndex;
 	};
 
+	enum CalibrationType {
+		CalibrationTypeGuiderPort,
+		CalibrationTypeAdaptiveOptics
+	};
+
 	/**
 	 * \brief Information about recent tracking activities
 	 *
@@ -31,6 +36,7 @@ module snowstar {
 		double	timeago;
 		Point	trackingoffset;
 		Point	activation;
+		CalibrationType	type;
 	};
 	sequence<TrackingPoint> TrackingPoints;
 
@@ -44,7 +50,8 @@ module snowstar {
 	struct TrackingHistory {
 		int	guiderunid;
 		double	timeago;
-		int	calibrationid;
+		int	guiderportcalid;
+		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
 	};
@@ -57,7 +64,8 @@ module snowstar {
 	struct TrackingSummary {
 		int	guiderunid;
 		double	since;
-		int	calibrationid;
+		int	guiderportcalid;
+		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
 		Point	lastoffset;
 		Point	averageoffset;
@@ -86,11 +94,6 @@ module snowstar {
 		Point	star;
 	};
 	sequence<CalibrationPoint>	CalibrationSequence;
-
-	enum CalibrationType {
-		CalibrationTypeGuiderPort,
-		CalibrationTypeAdaptiveOptics
-	};
 
 	/**
 	 * \brief Calibration object

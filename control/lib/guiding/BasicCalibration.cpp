@@ -44,20 +44,29 @@ BasicCalibration::BasicCalibration() {
 
 /**
  * \brief Determinant of the calibration
+ *
+ * The determinant is the area of the first two column vectors of the a-matrix.
+ * If this area is small, then a large control activation only leads to
+ * small changes, which makes it impossible to compute good corrections.
+ * The inverse matrix will have large entries in this case. Ideally, the
+ * determinant should be around 1.
  */
 double	BasicCalibration::det() const {
 	return a[0] * a[4] - a[1] * a[3];
 }
 
 /**
- * \brief Construct a BasicCalibration object from coefficient array
+ * \brief Construct a BasicCalibration object from the coefficient array
+ *
+ * This also sets the complete value, because we want that this 
+ * calibration becomes usable after setting the coefficients.
  */
 BasicCalibration::BasicCalibration(const double coefficients[6]) {
 	_calibrationid = -1;
 	for (int i = 0; i < 6; i++) {
 		a[i] = coefficients[i];
 	}
-	_complete = false;
+	_complete = true;
 	_calibrationtype = GP;
 }
 
@@ -68,7 +77,7 @@ BasicCalibration::BasicCalibration(const double coefficients[6]) {
  * the correction should be done, 
  */
 Point	BasicCalibration::defaultcorrection() const {
-	return this->operator()(Point(0, 0), 1);
+	return this->correction(Point(0, 0), 1);
 }
 
 /**
@@ -81,15 +90,15 @@ Point	BasicCalibration::defaultcorrection() const {
  * be distributed over the seconds of the Deltat-interval.  This distribution,
  * however, has to be calculated by the caller.
  */
-Point	BasicCalibration::operator()(const Point& offset, double Deltat) const {
+Point	BasicCalibration::correction(const Point& offset, double Deltat) const {
         double	determinant = det();
 	if (0 == det()) {
 		throw std::runtime_error("no calibration");
 	}
-	double	Deltax = offset.x() - Deltat * a[2];
-	double	Deltay = offset.y() - Deltat * a[5];
-        double	x = (Deltax * a[4] - Deltay * a[1]) / determinant;
-        double	y = (a[0] * Deltay - a[3] * Deltax) / determinant;
+	double	Deltax = -offset.x() - Deltat * a[2];
+	double	Deltay = -offset.y() - Deltat * a[5];
+        double	x = ( a[4] * Deltax - a[1] * Deltay) / determinant;
+        double	y = (-a[3] * Deltax + a[0] * Deltay) / determinant;
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "correction for offset %s: %s",
 		offset.toString().c_str(), result.toString().c_str());
@@ -123,7 +132,7 @@ void	BasicCalibration::rescale(double scalefactor) {
  */
 std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal) {
 	out << "[" << cal[0] << "," << cal[1] << "," << cal[2] << ";";
-	out << cal[3] << "," << cal[4] << "," << cal[5] << "]";
+	out <<        cal[3] << "," << cal[4] << "," << cal[5] << "]";
 	return out;
 }
 
@@ -154,6 +163,12 @@ std::istream&	operator>>(std::istream& in, BasicCalibration& cal) {
 /*
  * \brief Compute guider quality figure of merit
  *
+ * This quality measure is essentially the sin^2 of the angle between
+ * the to two vectors of the a-matrix. If the vectors are orthogonal,
+ * then this number will be close to 1, but will never exceed it. If
+ * the vectors are too short, then the angle will be more or less random,
+ * and the quality will often be low. In these cases, the determinant
+ * should also be used, which will then be too small.
  */
 double	BasicCalibration::quality() const {
 	double	l1 = hypot(a[0], a[3]);

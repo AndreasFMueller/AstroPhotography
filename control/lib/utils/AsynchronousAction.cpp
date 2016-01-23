@@ -3,13 +3,11 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "AsynchronousAction.h"
+#include <AstroUtils.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
-#include <AstroUtils.h>
 
 namespace astro {
-namespace guiding {
 
 AsynchronousAction::AsynchronousAction() {
 	_busy = false;
@@ -59,5 +57,4 @@ void	AsynchronousAction::execute() {
 	busy(false);
 }
 
-} // namespace guiding
 } // namespace astro
