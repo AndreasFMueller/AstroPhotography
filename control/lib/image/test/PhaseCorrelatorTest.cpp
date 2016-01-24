@@ -31,6 +31,9 @@ public:
 	void	testIntegerNegative();
 	void	testHalf();
 	void	testImage();
+	void	testSun();
+	void	testJupiter();
+	void	testJupiterSequence();
 	void	testDisks();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
@@ -38,6 +41,9 @@ public:
 	CPPUNIT_TEST(testIntegerNegative);
 	CPPUNIT_TEST(testHalf);
 	CPPUNIT_TEST(testImage);
+	CPPUNIT_TEST(testSun);
+	CPPUNIT_TEST(testJupiter);
+	CPPUNIT_TEST(testJupiterSequence);
 	CPPUNIT_TEST(testDisks);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -183,7 +189,98 @@ void	PhaseCorrelatorTest::testImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "endImage test");
 }
 
+void	PhaseCorrelatorTest::testSun() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin testSun()");
+
+	FITSin	imagefile("testimages/sun.fits");
+	ImagePtr	imageptr = imagefile.read();
+	Image<RGB<unsigned char> >	*image
+		= dynamic_cast<Image<RGB<unsigned char> > *>(&*imageptr);
+	LuminanceAdapter<RGB<unsigned char>, double>	doubleimage(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	FITSin	translatedfile("testimages/sun-translated.fits");
+	ImagePtr	translatedptr = translatedfile.read();
+	Image<RGB<unsigned char> >	*translated
+		= dynamic_cast<Image<RGB<unsigned char> > *>(&*translatedptr);
+	LuminanceAdapter<RGB<unsigned char>, double>	doubletranslated(*translated);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
+
+	// create a phase correlator
+	PhaseCorrelator	pc(false);
+	std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
+
+	// expected result: (15.7,47.1)
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sun offset %s (should be (15.7,47.1))",
+		result.first.toString().c_str());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testSun()");
+}
+
+void	PhaseCorrelatorTest::testJupiter() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin testJupiter()");
+
+	FITSin	imagefile("testimages/jupiter.fits");
+	ImagePtr	imageptr = imagefile.read();
+	Image<RGB<unsigned char> >	*image
+		= dynamic_cast<Image<RGB<unsigned char> > *>(&*imageptr);
+	LuminanceAdapter<RGB<unsigned char>, double>	doubleimage(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	FITSin	translatedfile("testimages/jupiter-translated.fits");
+	ImagePtr	translatedptr = translatedfile.read();
+	Image<RGB<unsigned char> >	*translated
+		= dynamic_cast<Image<RGB<unsigned char> > *>(&*translatedptr);
+	LuminanceAdapter<RGB<unsigned char>, double>	doubletranslated(*translated);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
+
+	// create a phase correlator
+	PhaseCorrelator	pc(false);
+	std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
+
+	// expected result: (15.7,47.1)
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Jupiter offset %s (should be (27.1,-15.9))",
+		result.first.toString().c_str());
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testJupiter()");
+}
+
+void	PhaseCorrelatorTest::testJupiterSequence() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin testJupiterSequence()");
+
+	FITSin	imagefile("testimages/jupiter-00.fits");
+	ImagePtr	imageptr = imagefile.read();
+	Image<unsigned char>	*image
+		= dynamic_cast<Image<unsigned char> *>(&*imageptr);
+	LuminanceAdapter<unsigned char, double>	doubleimage(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	for (int i = 0; i < 73; i++) {
+		std::string	f = stringprintf("testimages/jupiter-%02d.fits",
+					i);
+
+		FITSin	translatedfile(f);
+		ImagePtr	translatedptr = translatedfile.read();
+		Image<unsigned char>	*translated
+		= dynamic_cast<Image<unsigned char> *>(&*translatedptr);
+		LuminanceAdapter<unsigned char, double>	doubletranslated(*translated);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
+
+		// create a phase correlator
+		PhaseCorrelator	pc(false);
+		std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+			result.first.toString().c_str(), result.second);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testJupiterSequence()");
+}
+
 void	PhaseCorrelatorTest::testDisks() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin testDisks()");
 	int	N = 64;
 	Image<double>	fromimage(N, N);
 	Image<double>	toimage(N, N);
@@ -214,8 +311,10 @@ void	PhaseCorrelatorTest::testDisks() {
 	PhaseCorrelator	pc(false);
 	std::pair<Point, double>	result = pc(from, to);
 	
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s (should be (8,16)), weight = %f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"offset = %s (should be (8,16)), weight = %f",
 		result.first.toString().c_str(), result.second);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testDisks()");
 }
 
 } // namespace test

@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+# convert all images from the jupiter sequence
+#
+# (c) 2016 Prof Dr Andreas Mueller
+#
+convert jupiter.gif -coalesce jupiter.png
+for i in 0 1 2 3 4 5 6 7 8 9
+do
+	mv jupiter-${i}.png jupiter-0${i}.png
+done
+
+for f in jupiter-*.png
+do
+	echo $f
+	target=`basename $f .png`.fits
+	convert ${f} -background black -extent 600x600 test-1.png
+	convert test-1.png -roll +150+150 -level 8%,100% test-2.png
+	convert test-2.png -blur 1 -type Grayscale ${target}
+done
+
+rm -f test-1.png test-2.png
+

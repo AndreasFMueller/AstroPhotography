@@ -105,10 +105,10 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 		}
 		switch (point.type) {
 		case ControlGuiderPort:
-			_out << ",  GP";
+			_out << ",    GP";
 			break;
 		case ControlAdaptiveOptics:
-			_out << ",  AO";
+			_out << ",    AO";
 			break;
 		}
 	} else {
@@ -135,7 +135,7 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 
 void	TrackingHistory_display::operator()(const TrackingHistory history) {
 	if (_csv) {
-		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
+		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset,  type" << std::endl;
 		_verbose = _csv;
 	} else {
 		std::cout << history.guiderunid << ": ";

@@ -34,7 +34,7 @@ PeakFinder::PeakFinder(const ImagePoint& approximate, int radius)
  * \brief Count the number of pixels above v
  */
 int	PeakFinder::above(const ConstImageAdapter<double>& image, double v) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "count pixels above %f", v);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "count pixels above %g", v);
 	int	counter = 0;
 	for (int x = -_radius; x <= _radius; x++) {
 		for (int y = -_radius; y <= _radius; y++) {
@@ -47,7 +47,7 @@ int	PeakFinder::above(const ConstImageAdapter<double>& image, double v) {
 			}
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d pixels > %f", counter, v);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d pixels > %g", counter, v);
 	return counter;
 }
 
@@ -77,7 +77,7 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 		int	pixels = above(image, v);
 		if ((pixels > minpixelcount) && (pixels < maxpixelcount)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"FINAL threshold %f gives %d pixels (%d)",
+				"FINAL threshold %g gives %d pixels (%d)",
 				v, pixels, 32 - iterations);
 			return v;
 		}

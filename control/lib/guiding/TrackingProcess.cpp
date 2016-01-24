@@ -114,10 +114,10 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 	// get the interval for images
 	double	imageInterval = _guiderportInterval;
-	if (!_adaptiveOpticsDevice->iscalibrated()) {
+	if (_adaptiveOpticsDevice->iscalibrated()) {
 		imageInterval = _adaptiveopticsInterval;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image interval: %s.3f", imageInterval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image interval: %.3fs", imageInterval);
 
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop
@@ -181,7 +181,8 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 			Point	d = _guiderPortDevice->correct(remainder,
 				_guiderportInterval);
 			guiderportTime = Timer::gettime();
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: guiderport %s",
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"TRACK %d: guiderport %s",
 				_id, d.toString().c_str());
 		}
 
