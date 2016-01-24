@@ -216,12 +216,9 @@ int	main(int argc, char *argv[]) {
 		if (argc > optind) {
 			ControlType	type = ControlGuiderPort;
 			std::string	typestring(argv[optind++]);
-			if (typestring == "GP") {
-				type = ControlGuiderPort;
-			}
-			if (typestring == "AO") {
-				type = ControlAdaptiveOptics;
-			}
+			try {
+				type = Guide::string2type(typestring);
+			} catch (...) { }
 			return guide.history_command(guiderfactory,
 				historyid, type);
 		}
@@ -284,6 +281,14 @@ int	main(int argc, char *argv[]) {
 	}
 	if (command == "monitor") {
 		return guide.monitor_command(guider);
+	}
+	if (command == "uncalibrate") {
+		if (argc <= optind) {
+			throw std::runtime_error("missing type argument");
+		}
+		std::string	type(argv[optind++]);
+		return guide.uncalibrate_command(guider,
+			Guide::string2type(type));
 	}
 
 	// the guide and calibrate commands need an exposure

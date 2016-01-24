@@ -43,6 +43,8 @@ void	Guide::usage(const char *progname) {
 
 	std::cout << p << " [ options ] <service> <INSTRUMENT> calibrate [ <id> | <type> ]"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> uncalibrate [ GP | AO ]"
+		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> calibration"
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> cancel"
@@ -146,6 +148,13 @@ int	Guide::help_command(const char *progname) {
 "    optics. If no argument is given, 'GP' is assumed. Depending on the "
 << std::endl <<
 "   tracker method, The --star argument may be required for this function."
+<< std::endl
+
+<< std::endl << 
+"uncalibrate { GP | AO }" << std::endl <<
+"    remove the calibration from the indicated device, making it unavailable"
+<< std::endl <<
+"    for guiding."
 << std::endl
 
 << std::endl << 

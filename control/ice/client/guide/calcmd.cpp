@@ -192,6 +192,19 @@ newcalibration:
 	return EXIT_FAILURE;
 }
 
+int	Guide::uncalibrate_command(GuiderPrx guider, ControlType type) {
+	try {
+		guider->unCalibrate(type);
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate");
+	}
+	return EXIT_FAILURE;
+}
+
 } // namespace snowguide
 } // namespace app
 } // namespace snowstar

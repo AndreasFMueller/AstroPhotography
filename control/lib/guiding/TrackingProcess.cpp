@@ -112,6 +112,13 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start TRACK %d", _id);
 	}
 
+	// get the interval for images
+	double	imageInterval = _guiderportInterval;
+	if (!_adaptiveOpticsDevice->iscalibrated()) {
+		imageInterval = _adaptiveopticsInterval;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image interval: %s.3f", imageInterval);
+
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop
 	double	guiderportTime = 0;
@@ -124,10 +131,10 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start new exposure",
 			_id);
-		double	adaptiveopticsTime = Timer::gettime();
 
 		// now retrieve the image. This method has as a side
 		// effect that the image is sent to the image callback
+		double	imageTime = Timer::gettime();
 		ImagePtr	image = guider()->getImage();
 		timer.end();
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -179,8 +186,7 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		}
 
 		// time we want to sleep until the next AO action is waranted
-		double	dt = adaptiveopticsTime + _adaptiveopticsInterval
-				- Timer::gettime();
+		double	dt = imageTime + imageInterval - Timer::gettime();
 		if (dt > 0) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: sleep %.2f",
 				_id, dt);

@@ -70,6 +70,7 @@ public:
 	int	calibrate_command(GuiderPrx guider);
 	int	calibrate_command(GuiderPrx guider, int calibrationid);
 	int	calibrate_command(GuiderPrx guider, const std::string& calarg);
+	int	uncalibrate_command(GuiderPrx guider, ControlType type);
 
 	int	cancel_command(GuiderPrx guider);
 	int	list_command(GuiderFactoryPrx guiderfactory,
@@ -87,6 +88,9 @@ public:
 			ControlType type);
 	int	forget_command(GuiderFactoryPrx guiderfactory,
 			const std::list<int>& ids);
+
+	// utility functions
+static	ControlType	string2type(const std::string& type);
 };
 
 } // namespace snowguide
