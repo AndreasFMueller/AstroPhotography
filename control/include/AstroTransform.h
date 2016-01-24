@@ -348,14 +348,6 @@ ImagePtr	transform(ImagePtr image, const Transform& transform);
  */
 class PhaseCorrelator {
 	void	write(const Image<double>& image);
-
-#if 0
-	double	value(const double *a, const astro::image::ImageSize& size,
-			int x, int y) const;
-	Point	centroid(const double *a, const astro::image::ImageSize& size,
-			const astro::Point& center,
-			unsigned int k = 2) const;
-#endif
 	bool	_hanning;
 public:
 	bool	hanning() const { return _hanning; }
@@ -374,7 +366,23 @@ public:
 	PhaseCorrelator(bool hanning = true) : _hanning(hanning),
 		_imagedir("tmp"), _prefix("corr") {
 	}
-	std::pair<Point, double>	operator()(
+	virtual std::pair<Point, double>	operator()(
+		const ConstImageAdapter<double>& fromimage,
+		const ConstImageAdapter<double>& toimage);
+};
+
+/**
+ * \brief Phase correlator using the derivative of an image
+ *
+ * Correlation is not precise if there are no features. Taking the
+ * derivative of an image creates such features, but also increases
+ * the noise level.
+ */
+class DerivativePhaseCorrelator : public PhaseCorrelator {
+public:
+	DerivativePhaseCorrelator(bool hanning = true)
+		: PhaseCorrelator(hanning) { }
+	virtual std::pair<Point, double>	operator()(
 		const ConstImageAdapter<double>& fromimage,
 		const ConstImageAdapter<double>& toimage);
 };

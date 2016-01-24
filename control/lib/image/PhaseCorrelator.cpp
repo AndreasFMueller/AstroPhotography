@@ -25,6 +25,9 @@ static inline double	sqr(double x) {
 	return x * x;
 }
 
+/**
+ * \brief Adapter class to extract the image in a hanning window 
+ */
 class HanningWindow : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_base;
 	double	*hh, *hv;
@@ -58,6 +61,9 @@ public:
 	}
 };
 
+/**
+ * \brief Adapter class to extract a rectangle
+ */
 class RectangleWindow : public ConstImageAdapter<double> {
 	const ConstImageAdapter<double>&	_base;
 	int	wmin, wmax;
@@ -285,6 +291,19 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d] translation: %s",
 		correlation_counter - 1, result.toString().c_str());
 	return std::make_pair(result, max);
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// derivative phase correlator implementation
+//////////////////////////////////////////////////////////////////////
+
+std::pair<Point, double>	DerivativePhaseCorrelator::operator()(
+	const ConstImageAdapter<double>& fromimage,
+	const ConstImageAdapter<double>& toimage) {
+	DerivativeNormAdapter<double>	i1(fromimage);
+	DerivativeNormAdapter<double>	i2(toimage);
+	return PhaseCorrelator::operator()(i1, i2);
 }
 
 } // namespace transform
