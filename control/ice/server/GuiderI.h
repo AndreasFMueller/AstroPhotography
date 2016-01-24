@@ -106,6 +106,8 @@ public:
 			const Ice::Current& current);
 	virtual TrackingHistory getTrackingHistory(Ice::Int,
 			const Ice::Current& current);
+	virtual TrackingHistory getTrackingHistoryType(Ice::Int,
+			CalibrationType type, const Ice::Current& current);
 	virtual TrackingSummary	getTrackingSummary(const Ice::Current& current);
 
 	// callback handlers

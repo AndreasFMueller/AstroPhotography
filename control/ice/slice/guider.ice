@@ -254,6 +254,8 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+		TrackingHistory	getTrackingHistoryType(int guiderunid,
+			CalibrationType type) throws BadState;
 
 		/**
 		 * \brief get some statistics information about tracking
@@ -327,6 +329,8 @@ module snowstar {
 		 * \brief Retrieve the Tracking history by id
 		 */
 		TrackingHistory	getTrackingHistory(int id) throws NotFound;
+		TrackingHistory	getTrackingHistoryType(int id,
+			CalibrationType type) throws NotFound;
 
 		/**
 		 * \brief Remove a tracking history

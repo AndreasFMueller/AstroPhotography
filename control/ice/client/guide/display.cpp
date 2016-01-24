@@ -103,6 +103,14 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 				point.trackingoffset.y) * masperpixel();
 			_out << astro::stringprintf(",%8.0f", p);
 		}
+		switch (point.type) {
+		case CalibrationTypeGuiderPort:
+			_out << ",  GP";
+			break;
+		case CalibrationTypeAdaptiveOptics:
+			_out << ",  AO";
+			break;
+		}
 	} else {
 		_out << astro::stringprintf("[%04d] ", ++counter);
 		_out << astro::timeformat("%Y-%m-%d %H:%M:%S",
@@ -122,6 +130,31 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 				point.activation.x, point.activation.y);
 	}
 	_out << std::endl;
+}
+
+
+void	TrackingHistory_display::operator()(const TrackingHistory history) {
+	if (_csv) {
+		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
+		_verbose = _csv;
+	} else {
+		std::cout << history.guiderunid << ": ";
+		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+			converttime((double)history.timeago));
+		std::cout << std::endl;
+	}
+	if (_verbose) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
+			history.points.size());
+		Calibration     cal = _guiderfactory->getCalibration(
+					history.guiderportcalid);
+		double  starttime = history.points.begin()->timeago;
+		TrackingPoint_display   display(std::cout, starttime);
+		display.csv(_csv);
+		display.masperpixel(cal.masPerPixel);
+		std::for_each(history.points.begin(), history.points.end(),
+			display);
+	}
 }
 
 } // namespace snowguide

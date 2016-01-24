@@ -209,6 +209,18 @@ int	main(int argc, char *argv[]) {
 			throw std::runtime_error("missing history id");
 		}
 		long	historyid = std::stoi(argv[optind++]);
+		if (argc > optind) {
+			CalibrationType	type = CalibrationTypeGuiderPort;
+			std::string	typestring(argv[optind++]);
+			if (typestring == "GP") {
+				type = CalibrationTypeGuiderPort;
+			}
+			if (typestring == "AO") {
+				type = CalibrationTypeAdaptiveOptics;
+			}
+			return guide.history_command(guiderfactory,
+				historyid, type);
+		}
 		return guide.history_command(guiderfactory, historyid);
 	}
 	if (command == "trash") {

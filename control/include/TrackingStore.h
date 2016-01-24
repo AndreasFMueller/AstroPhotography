@@ -22,7 +22,11 @@ public:
 	std::list<long>	getAllTrackings();
 	std::list<long>	getTrackings(const GuiderDescriptor& guider);
 	std::list<TrackingPointRecord>	getHistory(long id);
+	std::list<TrackingPointRecord>	getHistory(long id,
+		BasicCalibration::CalibrationType type);
 	TrackingHistory	get(long id);
+	TrackingHistory	get(long id,
+		BasicCalibration::CalibrationType type);
 	void	deleteTrackingHistory(long id);
 	bool	contains(long id);
 };

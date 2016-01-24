@@ -81,6 +81,8 @@ public:
 	int	tracks_command(GuiderFactoryPrx guiderfactory,
 			GuiderDescriptor descriptor);
 	int	history_command(GuiderFactoryPrx guiderfactory, long historyid);
+	int	history_command(GuiderFactoryPrx guiderfactory, long historyid,
+			CalibrationType type);
 	int	forget_command(GuiderFactoryPrx guiderfactory,
 			const std::list<int>& ids);
 };

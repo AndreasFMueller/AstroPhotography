@@ -387,6 +387,20 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 	return convert(store.get(id));
 }
 
+TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
+	CalibrationType type, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
+	astro::guiding::TrackingStore	store(database);
+	switch (type) {
+	case CalibrationTypeGuiderPort:
+		return convert(store.get(id,
+			astro::guiding::BasicCalibration::GP));
+	case CalibrationTypeAdaptiveOptics:
+		return convert(store.get(id,
+			astro::guiding::BasicCalibration::AO));
+	}
+}
+
 /**
  * \brief Register a callback for the calibration process
  */

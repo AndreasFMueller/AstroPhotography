@@ -201,6 +201,32 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 	}
 }
 
+TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
+	CalibrationType type, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
+	try {
+		astro::guiding::TrackingStore	store(database);
+		switch (type) {
+		case CalibrationTypeGuiderPort: {
+			TrackingHistory	history = convert(store.get(id,
+				astro::guiding::BasicCalibration::GP));
+			return history;
+			}
+		case CalibrationTypeAdaptiveOptics: {
+			TrackingHistory	history = convert(store.get(id,
+				astro::guiding::BasicCalibration::AO));
+			return history;
+			}
+		}
+	} catch (const std::exception& ex) {
+		std::string	msg = astro::stringprintf("tracking history %d "
+			"not found: %s", id, ex.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
+	}
+}
+
+
 void	GuiderFactoryI::deleteTrackingHistory(int id,
 		const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);

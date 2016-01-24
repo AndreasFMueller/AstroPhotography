@@ -116,6 +116,9 @@ int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 		std::cout << "no tracking points found" << std::endl;
 		return EXIT_SUCCESS;
 	}
+	TrackingHistory_display	display(guiderfactory, verbose, csv);
+	display(history);
+#if 0
 	if (csv) {
 		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
 		verbose = csv;
@@ -137,6 +140,47 @@ int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 		std::for_each(history.points.begin(), history.points.end(),
 			display);
 	}
+#endif
+
+	return EXIT_SUCCESS;
+}
+
+int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid,
+		CalibrationType type) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving history %d", historyid);
+	TrackingHistory	history
+		= guiderfactory->getTrackingHistoryType(historyid, type);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "track uses calibrations GP=%d AO=%d",
+		history.guiderportcalid, history.adaptiveopticscalid);
+	if (history.points.size() == 0) {
+		std::cout << "no tracking points found" << std::endl;
+		return EXIT_SUCCESS;
+	}
+	TrackingHistory_display	display(guiderfactory, verbose, csv);
+	display(history);
+#if 0
+	if (csv) {
+		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
+		verbose = csv;
+	} else {
+		std::cout << history.guiderunid << ": ";
+		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
+			converttime((double)history.timeago));
+		std::cout << std::endl;
+	}
+	if (verbose) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
+			history.points.size());
+		Calibration	cal = guiderfactory->getCalibration(
+					history.guiderportcalid);
+		double	starttime = history.points.begin()->timeago;
+		TrackingPoint_display	display(std::cout, starttime);
+		display.csv(csv);
+		display.masperpixel(cal.masPerPixel);
+		std::for_each(history.points.begin(), history.points.end(),
+			display);
+	}
+#endif
 
 	return EXIT_SUCCESS;
 }

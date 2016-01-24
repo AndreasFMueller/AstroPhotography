@@ -52,6 +52,28 @@ std::list<TrackingPointRecord>	TrackingStore::getHistory(long id) {
 }
 
 /**
+ * \brief Retrieve a list of all TrackingPoints
+ *
+ * The tracking points are sorted by the tracking time attribute
+ */
+std::list<TrackingPointRecord>	TrackingStore::getHistory(long id,
+		BasicCalibration::CalibrationType type) {
+	std::ostringstream	out;
+	out << "guidingrun = " << id;
+	switch (type) {
+	case BasicCalibration::GP:
+		out << " and controltype = 0";
+		break;
+	case BasicCalibration::AO:
+		out << " and controltype = 1";
+		break;
+	}
+	out << " order by trackingtime";
+	TrackingTable	table(_database);
+	return table.select(out.str());
+}
+
+/**
  * \brief Get the complete history
  *
  * The tracking history contains the information in both the guiding record
@@ -61,6 +83,23 @@ TrackingHistory	TrackingStore::get(long id) {
 	GuidingRunTable	table(_database);
 	TrackingHistory	history(table.byid(id));
 	std::list<TrackingPointRecord>	track = getHistory(id);
+	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
+		history.points.push_back(*ptr);
+	}
+	return history;
+}
+
+/**
+ * \brief Get the complete history
+ *
+ * The tracking history contains the information in both the guiding record
+ * as well as all the tracking points.
+ */
+TrackingHistory	TrackingStore::get(long id,
+	BasicCalibration::CalibrationType type) {
+	GuidingRunTable	table(_database);
+	TrackingHistory	history(table.byid(id));
+	std::list<TrackingPointRecord>	track = getHistory(id, type);
 	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
 		history.points.push_back(*ptr);
 	}

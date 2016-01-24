@@ -61,6 +61,21 @@ public:
 	void	operator()(const TrackingPoint& point);
 };
 
+/**
+ * \brief Display of a tracking history
+ */
+class TrackingHistory_display {
+	GuiderFactoryPrx	_guiderfactory;
+	bool	_verbose;
+	bool	_csv;
+public:
+	TrackingHistory_display(GuiderFactoryPrx guiderfactory,
+		bool verbose, bool csv)
+		: _guiderfactory(guiderfactory), _verbose(verbose), _csv(csv) {
+	}
+	void	operator()(const TrackingHistory history);
+};
+
 } // namespace snowguide
 } // namespace app
 } // namespace snowstar
