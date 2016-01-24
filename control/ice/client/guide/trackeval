@@ -1,0 +1,33 @@
+#! /bin/bash
+#
+# trackeval -- evaulation of a track identified by number
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+track=${1:-31}
+mas=10.313240
+server=server
+instrument=GUIDESIM
+
+./snowguide --csv ${server} ${instrument} history ${track} AO > ao.csv
+./snowguide --csv ${server} ${instrument} history ${track} GP > gp.csv
+
+R --vanilla --quiet <<EOF
+
+ao <- read.csv("ao.csv")
+gp <- read.csv("gp.csv")
+
+pdf("aogp.pdf", 12, 8)
+
+mas = ${mas}
+l = sqrt(2) * sqrt(var(gp\$xoffset) + var(gp\$yoffset)) * mas
+
+plot(gp\$time, gp\$xoffset * mas, type = "l", col = "red",
+	main = "Tracking error (simulation)",
+	xlab = "time [seconds]", ylab = "point offset [arcsec]",
+	ylim = c(-l,l))
+lines(gp\$time, gp\$yoffset * mas, col = "blue")
+points(ao\$time, ao\$xoffset * mas, col = "green", cex = 0.5)
+points(ao\$time, ao\$yoffset * mas, col = "yellow", cex = 0.5)
+
+EOF
