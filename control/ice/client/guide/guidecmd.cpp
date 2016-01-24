@@ -32,12 +32,13 @@ int	Guide::guide_command(GuiderPrx guider) {
 	}
 	
 	// get the guider
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
-		guideinterval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"start guiding with intervals gp=%.1f ao=%.1f",
+		guideinterval, aointerval);
 	if (method != TrackerUNDEFINED) {
 		guider->setTrackerMethod(method);
 	}
-	guider->startGuiding(guideinterval);
+	guider->startGuiding(guideinterval, aointerval);
 
 	// we are done
 	return EXIT_SUCCESS;
@@ -118,35 +119,12 @@ int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid) {
 	}
 	TrackingHistory_display	display(guiderfactory, verbose, csv);
 	display(history);
-#if 0
-	if (csv) {
-		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
-		verbose = csv;
-	} else {
-		std::cout << history.guiderunid << ": ";
-		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
-			converttime((double)history.timeago));
-		std::cout << std::endl;
-	}
-	if (verbose) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
-			history.points.size());
-		Calibration	cal = guiderfactory->getCalibration(
-					history.guiderportcalid);
-		double	starttime = history.points.begin()->timeago;
-		TrackingPoint_display	display(std::cout, starttime);
-		display.csv(csv);
-		display.masperpixel(cal.masPerPixel);
-		std::for_each(history.points.begin(), history.points.end(),
-			display);
-	}
-#endif
 
 	return EXIT_SUCCESS;
 }
 
 int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid,
-		CalibrationType type) {
+		ControlType type) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving history %d", historyid);
 	TrackingHistory	history
 		= guiderfactory->getTrackingHistoryType(historyid, type);
@@ -158,29 +136,6 @@ int	Guide::history_command(GuiderFactoryPrx guiderfactory, long historyid,
 	}
 	TrackingHistory_display	display(guiderfactory, verbose, csv);
 	display(history);
-#if 0
-	if (csv) {
-		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset" << std::endl;
-		verbose = csv;
-	} else {
-		std::cout << history.guiderunid << ": ";
-		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
-			converttime((double)history.timeago));
-		std::cout << std::endl;
-	}
-	if (verbose) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
-			history.points.size());
-		Calibration	cal = guiderfactory->getCalibration(
-					history.guiderportcalid);
-		double	starttime = history.points.begin()->timeago;
-		TrackingPoint_display	display(std::cout, starttime);
-		display.csv(csv);
-		display.masperpixel(cal.masPerPixel);
-		std::for_each(history.points.begin(), history.points.end(),
-			display);
-	}
-#endif
 
 	return EXIT_SUCCESS;
 }

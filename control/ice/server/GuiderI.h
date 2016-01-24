@@ -86,17 +86,19 @@ public:
 
 	// choose calibration
 	virtual void useCalibration(Ice::Int, const Ice::Current& current);
-	virtual Calibration getCalibration(CalibrationType,
+	virtual Calibration getCalibration(ControlType,
 				const Ice::Current& current);
+	virtual void unCalibrate(ControlType, const Ice::Current& current);
 
 	// control calibration process
-	virtual Ice::Int startCalibration(CalibrationType caltype, const Ice::Current& current);
+	virtual Ice::Int startCalibration(ControlType caltype,
+				const Ice::Current& current);
 	virtual Ice::Double calibrationProgress(const Ice::Current& current);
 	virtual void cancelCalibration(const Ice::Current& current);
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);
 
 	// control guiding process
-	virtual void startGuiding(Ice::Float, const Ice::Current& current);
+	virtual void startGuiding(Ice::Float, Ice::Float, const Ice::Current& current);
 	virtual Ice::Float getGuidingInterval(const Ice::Current& current);
 	virtual void stopGuiding(const Ice::Current& current);
 
@@ -107,7 +109,7 @@ public:
 	virtual TrackingHistory getTrackingHistory(Ice::Int,
 			const Ice::Current& current);
 	virtual TrackingHistory getTrackingHistoryType(Ice::Int,
-			CalibrationType type, const Ice::Current& current);
+			ControlType type, const Ice::Current& current);
 	virtual TrackingSummary	getTrackingSummary(const Ice::Current& current);
 
 	// callback handlers

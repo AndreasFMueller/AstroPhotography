@@ -172,10 +172,10 @@ TrackingPoint   convert(const astro::guiding::TrackingPoint& trackingpoint) {
 	result.activation = convert(trackingpoint.correction);
 	switch (trackingpoint.type) {
 	case astro::guiding::BasicCalibration::GP:
-		result.type = CalibrationTypeGuiderPort;
+		result.type = ControlGuiderPort;
 		break;
 	case astro::guiding::BasicCalibration::AO:
-		result.type = CalibrationTypeAdaptiveOptics;
+		result.type = ControlAdaptiveOptics;
 		break;
 	}
 	return result;
@@ -187,10 +187,10 @@ astro::guiding::TrackingPoint   convert(const TrackingPoint& trackingpoint) {
 	result.trackingoffset = convert(trackingpoint.trackingoffset);
 	result.correction = convert(trackingpoint.activation);
 	switch (trackingpoint.type) {
-	case CalibrationTypeGuiderPort:
+	case ControlGuiderPort:
 		result.type = astro::guiding::BasicCalibration::GP;
 		break;
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
 		result.type = astro::guiding::BasicCalibration::AO;
 		break;
 	}
@@ -327,11 +327,11 @@ astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
 	return result;
 }
 
-std::string	calibrationtype2string(CalibrationType caltype) {
+std::string	calibrationtype2string(ControlType caltype) {
 	switch (caltype) {
-	case CalibrationTypeGuiderPort:
+	case ControlGuiderPort:
 		return std::string("GP");
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
 		return std::string("AO");
 	}
 	std::string	cause = astro::stringprintf("unknown cal type %d",
@@ -340,12 +340,12 @@ std::string	calibrationtype2string(CalibrationType caltype) {
 	throw std::runtime_error(cause);
 }
 
-CalibrationType	string2calibrationtype(const std::string& caltype) {
+ControlType	string2calibrationtype(const std::string& caltype) {
 	if ((caltype == "GP") || (caltype == "GuiderPort")) {
-		return CalibrationTypeGuiderPort;
+		return ControlGuiderPort;
 	}
 	if ((caltype == "AO") || (caltype == "AdaptiveOptics")) {
-		return CalibrationTypeAdaptiveOptics;
+		return ControlAdaptiveOptics;
 	}
 	std::string	cause = astro::stringprintf("unknown cal type '%s'",
 		caltype.c_str());

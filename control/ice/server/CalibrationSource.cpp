@@ -47,13 +47,13 @@ Calibration	CalibrationSource::get(int id) {
 		calibration.guider.adaptiveopticsIndex = -1;
 		switch (r.controltype) {
 		case astro::guiding::BasicCalibration::GP:
-			calibration.controltype = CalibrationTypeGuiderPort;
+			calibration.type = ControlGuiderPort;
 			calibration.guider.guiderportIndex
 				= instrumentName2index(r.instrument,
 					InstrumentGuiderPort, r.controldevice);
 			break;
 		case astro::guiding::BasicCalibration::AO:
-			calibration.controltype = CalibrationTypeAdaptiveOptics;
+			calibration.type = ControlAdaptiveOptics;
 			calibration.guider.adaptiveopticsIndex
 				= instrumentName2index(r.instrument,
 					InstrumentAdaptiveOptics,

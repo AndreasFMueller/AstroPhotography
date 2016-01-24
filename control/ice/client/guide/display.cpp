@@ -46,12 +46,12 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << cal.points.size() << " points, ";
 	_out << astro::stringprintf("quality=%.1f%%, ", 100 * cal.quality);
 	_out << ((cal.complete) ? "complete, " : "incomplete, ");
-	switch (cal.controltype) {
-	case CalibrationTypeGuiderPort:
+	switch (cal.type) {
+	case ControlGuiderPort:
 		_out << "GP, ";
 		_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
 		break;
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
 		_out << "AO";
 		break;
 	}
@@ -104,10 +104,10 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 			_out << astro::stringprintf(",%8.0f", p);
 		}
 		switch (point.type) {
-		case CalibrationTypeGuiderPort:
+		case ControlGuiderPort:
 			_out << ",  GP";
 			break;
-		case CalibrationTypeAdaptiveOptics:
+		case ControlAdaptiveOptics:
 			_out << ",  AO";
 			break;
 		}
@@ -118,10 +118,10 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 		_out << astro::stringprintf(".%03.0f ",
 			1000 * (point.timeago - trunc(point.timeago)));
 		switch (point.type) {
-		case CalibrationTypeGuiderPort:
+		case ControlGuiderPort:
 			_out << "GP ";
 			break;
-		case CalibrationTypeAdaptiveOptics:
+		case ControlAdaptiveOptics:
 			_out << "AO ";
 			break;
 		}

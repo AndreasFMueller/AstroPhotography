@@ -20,9 +20,16 @@ module snowstar {
 		int	adaptiveopticsIndex;
 	};
 
-	enum CalibrationType {
-		CalibrationTypeGuiderPort,
-		CalibrationTypeAdaptiveOptics
+	/**
+	 * \brief Control device type selection 
+	 *
+	 * The guider can use guider ports or tip-tilt adaptive optics units.
+	 * This means that when requesting calibration, we have to be able
+	 * to distinguish the two, by using the ControlType enumeration.
+	 */
+	enum ControlType {
+		ControlGuiderPort,
+		ControlAdaptiveOptics
 	};
 
 	/**
@@ -36,7 +43,7 @@ module snowstar {
 		double	timeago;
 		Point	trackingoffset;
 		Point	activation;
-		CalibrationType	type;
+		ControlType	type;
 	};
 	sequence<TrackingPoint> TrackingPoints;
 
@@ -114,7 +121,7 @@ module snowstar {
 		bool	complete;
 		double	focallength;
 		double	masPerPixel;
-		CalibrationType	controltype;
+		ControlType	type;
 		CalibrationSequence	points;
 	};
 
@@ -210,11 +217,14 @@ module snowstar {
 		/**
 		 * \brief Methods related to calibration
 		 */
-		void	useCalibration(int id);
-		Calibration	getCalibration(CalibrationType caltype) throws BadState;
+		void	useCalibration(int id) throws BadState, NotFound;
+		Calibration	getCalibration(ControlType caltype)
+					throws BadState;
+		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		int	startCalibration(CalibrationType caltype) throws BadState;
+		int	startCalibration(ControlType caltype)
+					throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
@@ -227,7 +237,8 @@ module snowstar {
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
 		// out and where to look for the star and where to lock it
-		void	startGuiding(float guidinginterval) throws BadState;
+		void	startGuiding(float gpinterval, float aointerval)
+				throws BadState;
 		float	getGuidingInterval() throws BadState;
 		void	stopGuiding() throws BadState;
 
@@ -255,7 +266,7 @@ module snowstar {
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
 		TrackingHistory	getTrackingHistoryType(int guiderunid,
-			CalibrationType type) throws BadState;
+			ControlType type) throws BadState;
 
 		/**
 		 * \brief get some statistics information about tracking
@@ -330,7 +341,7 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int id) throws NotFound;
 		TrackingHistory	getTrackingHistoryType(int id,
-			CalibrationType type) throws NotFound;
+			ControlType type) throws NotFound;
 
 		/**
 		 * \brief Remove a tracking history

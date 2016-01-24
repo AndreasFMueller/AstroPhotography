@@ -24,6 +24,7 @@ namespace snowguide {
  */
 static struct option	longopts[] = {
 { "adaptiveoptics",	required_argument,	NULL,	'a' }, /*  0 */
+{ "aointerval",		required_argument,	NULL,	'A' },
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
 { "ccd",		required_argument,	NULL,	'C' }, /*  1 */
 { "config",		required_argument,	NULL,	'c' }, /*  2 */
@@ -64,10 +65,13 @@ int	main(int argc, char *argv[]) {
 	guide.exposure.exposuretime = 1.;
 
 	while (EOF != (c = getopt_long(argc, argv,
-		"a:b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
+		"A:a:b:c:C:de:f:G:hi:m:r:s:t:vw:", longopts, &longindex)))
 		switch (c) {
 		case 'a':
 			adaptiveopticsIndex = std::stoi(optarg);
+			break;
+		case 'A':
+			guide.aointerval = std::stod(optarg);
 			break;
 		case 'b':
 			binning = optarg;
@@ -210,13 +214,13 @@ int	main(int argc, char *argv[]) {
 		}
 		long	historyid = std::stoi(argv[optind++]);
 		if (argc > optind) {
-			CalibrationType	type = CalibrationTypeGuiderPort;
+			ControlType	type = ControlGuiderPort;
 			std::string	typestring(argv[optind++]);
 			if (typestring == "GP") {
-				type = CalibrationTypeGuiderPort;
+				type = ControlGuiderPort;
 			}
 			if (typestring == "AO") {
-				type = CalibrationTypeAdaptiveOptics;
+				type = ControlAdaptiveOptics;
 			}
 			return guide.history_command(guiderfactory,
 				historyid, type);

@@ -158,13 +158,13 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 	// make sure we have a tracker
 	if (!tracker) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
-		throw std::runtime_error("tracker not set");
+		throw BadState("tracker not set");
 	}
 
 	// are we in the correct state
 	if (!_state.canStartCalibrating()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start calibrating");
-		throw std::runtime_error("wrong state");
+		throw BadState("wrong state");
 	}
 	_progress = 0;
 
@@ -182,11 +182,15 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 		return adaptiveOpticsDevice->startCalibration(tracker);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "cannot calibrate, no device");
-	throw std::runtime_error("bad state");
+	throw BadState("bad state");
 }
 
 /**
  * \brief save a guider calibration
+ *
+ * This method is called at the end of a calibration run. Since the 
+ * control device already has saved the calibration data in the database,
+ * this method only needs to update the guider state.
  */
 void	Guider::saveCalibration(const GuiderCalibration& cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
@@ -201,21 +205,74 @@ void	Guider::forgetCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "forgetting incomplete calibration");
 	if (_state.canFailCalibration()) {
 		_state.failCalibration();
+		return;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "cannot fail calibration");
+	throw BadState("cannot forget failed calibration");
 }
 
+/**
+ * \brief use a calibration from the database
+ *
+ * This method retrieves a calibration from the database by its id, and 
+ * applies it to the appropriate control device depending on the type found
+ * in the database.
+ */
 void	Guider::useCalibration(int calid) {
 	if (!_state.canAcceptCalibration()) {
-		throw std::runtime_error("cannot accept calibration now");
+		throw BadState("cannot accept calibration now");
 	}
 	CalibrationStore	store(database());
 	if (store.contains(calid, BasicCalibration::GP)) {
 		_state.addCalibration();
 		guiderPortDevice->calibrationid(calid);
+		return;
 	}
 	if (store.contains(calid, BasicCalibration::AO)) {
 		_state.addCalibration();
 		adaptiveOpticsDevice->calibrationid(calid);
+		return;
+	}
+	std::string	cause = stringprintf("calibration %d not found", calid);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	throw NotFound(cause);
+}
+
+/**
+ * \brief Uncalibrate a control device
+ *
+ * When guiding is started, all the calibrated control devices are used
+ * for guiding. But in some cases one may no longer want to use a device,
+ * e.g. an adaptive optics device. To turn such a device off, one needs
+ * to uncalibrate it. We don't loose anything by uncalibrating, as we can
+ * always recover the calibration from the database and calibrate again.
+ * If both devices are uncalibrated after this operation, then the guider
+ * goes into the state 'idle' which means that no guiding is possible.
+ */
+void	Guider::unCalibrate(BasicCalibration::CalibrationType type) {
+	// make sure we are not guiding or calibrating
+	if ((_state == Guide::calibrating) || (_state == Guide::guiding)) {
+		std::string	cause
+			= astro::stringprintf("cannot uncalibrate while %s",
+				BasicCalibration::type2string(type).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw BadState(cause);
+	}
+
+	// now uncalibrate the selected device
+	switch (type) {
+	case BasicCalibration::GP:
+		guiderPortDevice->calibrationid(-1);
+		break;
+	case BasicCalibration::AO:
+		adaptiveOpticsDevice->calibrationid(-1);
+		break;
+	}
+
+	// if neither device is no calibrated, go into the idle state
+	if ((!guiderPortDevice->iscalibrated())
+		&& (!adaptiveOpticsDevice->iscalibrated())) {
+		_state.configure();
 	}
 }
 
@@ -224,7 +281,7 @@ void	Guider::useCalibration(int calid) {
  */
 void	Guider::cancelCalibration() {
 	if (_state != Guide::calibrating) {
-		throw std::runtime_error("not currently calibrating");
+		throw BadState("not currently calibrating");
 	}
 	if (guiderPortDevice) {
 		if (guiderPortDevice->calibrating()) {
@@ -243,8 +300,9 @@ void	Guider::cancelCalibration() {
  */
 bool	Guider::waitCalibration(double timeout) {
 	if (_state != Guide::calibrating) {
-		throw std::runtime_error("not currently calibrating");
+		throw BadState("not currently calibrating");
 	}
+	// only one device can be calibrating at a time, so we try them in turn
 	if (guiderPortDevice) {
 		if (guiderPortDevice->calibrating()) {
 			return guiderPortDevice->waitCalibration(timeout);
@@ -255,6 +313,9 @@ bool	Guider::waitCalibration(double timeout) {
 			return adaptiveOpticsDevice->waitCalibration(timeout);
 		}
 	}
+	// if no device is calibrating, we immediately return with true
+	// since we checked for the state at the beginning, we shouldn't
+	// ever arrive at this point
 	return true;
 }
 
@@ -262,7 +323,7 @@ bool	Guider::waitCalibration(double timeout) {
  * \brief get a default tracker
  *
  * This is not the only possible tracker to use with the guiding process,
- * but it works currently quite well
+ * but it works currently quite well.
  */
 TrackerPtr	Guider::getTracker(const Point& point) {
 	astro::camera::Exposure exp = exposure();
@@ -293,19 +354,44 @@ TrackerPtr	Guider::getDiffPhaseTracker() {
 
 /**
  * \brief start tracking
+ *
+ * Guiding uses all configured devices. If the adaptive optics unit is not
+ * configured, only the guider port is used. Two intervals need to be
+ * provided. The gpinterval is the time between guider port actions. It is
+ * assumed that the guider port reacts very slowly, so gpinterval is usually
+ * about an order of magnitude larger than the aointerval, that controls the
+ * update interval for the adaptive optics unit. If the aointerval is zero,
+ * then the adaptive optics process updates as quickly as possible, essentially
+ * limited by the exposure time and the time it takes to download an imge from
+ * the camera.
+ * \param tracker	the tracker to use the determine the position of
+ *			the guide star. Phase correlation trackers can be
+ *			used when there is no suitable guide star
+ * \param gpinterval	the interval for guiding actions by the guider port
+ * \param aointerval	the interval for actions by the adaptive optics unit
  */
-void	Guider::startGuiding(TrackerPtr tracker, double interval) {
+void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
+		double aointerval) {
 	// create a TrackingProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
 	TrackingProcess	*tp = new TrackingProcess(this, tracker,
 		guiderPortDevice, adaptiveOpticsDevice, database());
-	tp->guiderportInterval(interval);
-#if 0
-	// XXX temporary, for debugging
-	tp->adaptiveopticsInterval(interval + 1);
-#endif
 	trackingprocess = BasicProcessPtr(tp);
+
+	// set the guiding intervals
+	if (gpinterval < aointerval) {
+		gpinterval = aointerval;
+	}
+	if (gpinterval < 5) {
+		debug(LOG_WARNING, DEBUG_LOG, 0,
+			"GP interval is very short: %.3fs, are you sure?",
+			gpinterval);
+	}
+	tp->guiderportInterval(gpinterval);
+	tp->adaptiveopticsInterval(aointerval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using gp=%.3fs, ao=%.3fs interval",
+		gpinterval, aointerval);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "now start tracking");
 	trackingprocess->start();
@@ -405,7 +491,7 @@ void Guider::lastAction(double& actiontime, Point& offset,
 	TrackingProcess	*tp
 		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
 	if (NULL == tp) {
-		throw std::runtime_error("not currently guiding");
+		throw BadState("not currently guiding");
 	}
 	TrackingPoint	last = tp->last();
 	actiontime = last.t;

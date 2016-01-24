@@ -99,6 +99,17 @@ ControlDeviceBase::~ControlDeviceBase() {
  */
 void	ControlDeviceBase::calibrationid(int calid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set calibration: %d", calid);
+
+	// handle special case: calid < 0 indicates that we want to remove
+	// the calibration
+	if (calid <= 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "uncalibrating %s",
+			deviceType().name());
+		_calibration->reset();
+		return;
+	}
+
+	// we need a calibration from the store
 	CalibrationStore	store(_database);
 	
 	// get the type of the calibration
@@ -136,6 +147,10 @@ void	ControlDeviceBase::calibrationid(int calid) {
 		acal->calibrationid(calid);
 		return;
 	}
+}
+
+bool	ControlDeviceBase::iscalibrated() const {
+	return (calibrationid() > 0) ? true : false;
 }
 
 void	ControlDeviceBase::addCalibrationPoint(const CalibrationPoint& point) {

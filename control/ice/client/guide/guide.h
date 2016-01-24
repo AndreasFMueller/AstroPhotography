@@ -22,7 +22,8 @@ public:
 	Exposure	exposure;
 	std::string	prefix;
 	volatile bool	completed;
-	float	guideinterval;
+	double	guideinterval;
+	double	aointerval;
 	bool	csv;
 	TrackerMethod	method;
 private:
@@ -34,6 +35,7 @@ public:
 		prefix = std::string("p");
 		completed = false;
 		guideinterval = 10;
+		aointerval = 0;
 		csv = false;
 		monitor = NULL;
 		method = TrackerUNDEFINED;
@@ -82,7 +84,7 @@ public:
 			GuiderDescriptor descriptor);
 	int	history_command(GuiderFactoryPrx guiderfactory, long historyid);
 	int	history_command(GuiderFactoryPrx guiderfactory, long historyid,
-			CalibrationType type);
+			ControlType type);
 	int	forget_command(GuiderFactoryPrx guiderfactory,
 			const std::list<int>& ids);
 };

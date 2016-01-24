@@ -46,7 +46,7 @@ void	GuiderStateMachine::configure() {
 	if (!canConfigure()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot configured in state %s",
 			statename());
-		throw std::runtime_error("cannot start calibration");
+		throw BadState("cannot start calibration");
 	}
 	_state = Guide::idle;
 }
@@ -56,7 +56,7 @@ void	GuiderStateMachine::startCalibrating() {
 	if (!canStartCalibrating()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot start calibrating in state %s", statename());
-		throw std::runtime_error("cannot start calibration");
+		throw BadState("cannot start calibration");
 	}
 	_state = Guide::calibrating;
 }
@@ -65,7 +65,7 @@ void	GuiderStateMachine::addCalibration() {
 	if (!canAcceptCalibration()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot accept calibration in state %s", statename());
-		throw std::runtime_error("cannot accept calibration in this state");
+		throw BadState("cannot accept calibration in this state");
 	}
 	_state = Guide::calibrated;
 }
@@ -74,7 +74,7 @@ void	GuiderStateMachine::failCalibration() {
 	if (!canFailCalibration()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot fail calibration in state %s",
 			statename());
-		throw std::runtime_error("cannot fail calibration in this state");
+		throw BadState("cannot fail calibration in this state");
 	}
 	_state = Guide::idle;
 }
@@ -83,7 +83,7 @@ void	GuiderStateMachine::startGuiding() {
 	if (!canStartGuiding()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start guiding in state %s",
 			statename());
-		throw std::runtime_error("cannot start guiding in this state");
+		throw BadState("cannot start guiding in this state");
 	}
 	_state = Guide::guiding;
 }
@@ -92,7 +92,7 @@ void	GuiderStateMachine::stopGuiding() {
 	if (!canStopGuiding()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop guiding in state %s",
 			statename());
-		throw std::runtime_error("cannot stop guiding in this state");
+		throw BadState("cannot stop guiding in this state");
 	}
 	_state = Guide::calibrated;
 }

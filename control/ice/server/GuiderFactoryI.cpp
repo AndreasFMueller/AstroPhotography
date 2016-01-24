@@ -202,17 +202,17 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 }
 
 TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
-	CalibrationType type, const Ice::Current& /* current */) {
+	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
 	try {
 		astro::guiding::TrackingStore	store(database);
 		switch (type) {
-		case CalibrationTypeGuiderPort: {
+		case ControlGuiderPort: {
 			TrackingHistory	history = convert(store.get(id,
 				astro::guiding::BasicCalibration::GP));
 			return history;
 			}
-		case CalibrationTypeAdaptiveOptics: {
+		case ControlAdaptiveOptics: {
 			TrackingHistory	history = convert(store.get(id,
 				astro::guiding::BasicCalibration::AO));
 			return history;

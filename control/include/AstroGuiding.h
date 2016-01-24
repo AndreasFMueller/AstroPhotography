@@ -23,6 +23,30 @@ namespace astro {
 namespace guiding {
 
 /**
+ * \brief Bad state exception
+ *
+ * This exception is used to indicate when guider is not in an appropriate
+ * state.
+ */
+class BadState : public std::runtime_error {
+public:
+	BadState(const std::string& cause) : std::runtime_error(cause) { }
+	BadState(const char *cause) : std::runtime_error(cause) { }
+};
+
+/**
+ * \brief Not found exception
+ *
+ * This exception is thrown to indicate whether a calibration, tracking
+ * history or a device is not available.
+ */
+class NotFound : public std::runtime_error {
+public:
+	NotFound(const std::string& cause) : std::runtime_error(cause) { }
+	NotFound(const char *cause) : std::runtime_error(cause) { }
+};
+
+/**
  * \brief Start Detector base class
  *
  * This is the base class for the star detector. It contains all the relevant
@@ -521,6 +545,7 @@ protected:
 public:
 	int	calibrationid() const { return _calibration->calibrationid(); }
 	void	calibrationid(int calid);
+	bool	iscalibrated() const;
 
 	// parameters about the calibration
 private:
@@ -763,6 +788,7 @@ public:
 	void	saveCalibration(const GuiderCalibration& calibration);
 	void	forgetCalibration();
 	void	useCalibration(int calid);
+	void	unCalibrate(BasicCalibration::CalibrationType type);
 
 	/**
 	 * \brief query the progress of the calibration process
@@ -799,7 +825,8 @@ private:
 
 public:
 	// tracking
-	void	startGuiding(TrackerPtr tracker, double interval);
+	void	startGuiding(TrackerPtr tracker, double interval,
+			double aointerval = 0);
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	double	getInterval();

@@ -148,21 +148,34 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 
 	// callback stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "installing  callbacks");
+
+	// guider calibration callback, called for calibration points and
+	// completed calibrations
 	GuiderICalibrationCallback	*ccallback
 		= new GuiderICalibrationCallback(*this);
 	_calibrationcallback = astro::callback::CallbackPtr(ccallback);
 	guider->addCalibrationCallback(_calibrationcallback);
 	guider->addGuidercalibrationCallback(_calibrationcallback);
 
+	// image callback, called for every image taken by the imager of
+	// the guider
 	GuiderIImageCallback	*icallback = new GuiderIImageCallback(*this);
 	_imagecallback = astro::callback::CallbackPtr(icallback);
 	guider->addImageCallback(_imagecallback);
 
+	// tracking callback, called for every tracking point processed by
+	// either of the control devices of the guider
 	GuiderITrackingCallback	*tcallback = new GuiderITrackingCallback(*this);
 	_trackingcallback = astro::callback::CallbackPtr(tcallback);
 	guider->addTrackingCallback(_trackingcallback);
 }
 
+/**
+ * \brief Guider destructor
+ *
+ * The main purpose of the destructor is to unregister the callbacks
+ * that were registered during construction.
+ */
 GuiderI::~GuiderI() {
 	guider->removeCalibrationCallback(_calibrationcallback);
 	guider->removeGuidercalibrationCallback(_calibrationcallback);
@@ -219,18 +232,68 @@ void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* curr
 	_method = method;
 }
 
+/**
+ * \brief Use a calibration
+ *
+ * This method directs the guider to use a specific calibration from the 
+ * database.
+ */
 void GuiderI::useCalibration(Ice::Int calid,
 	const Ice::Current& /* current */) {
+	if (calid <= 0) {
+		throw BadParameter("not a valid calibration id");
+	}
 	// retrieve guider data from the database
-	guider->useCalibration(calid);
+	try {
+		guider->useCalibration(calid);
+	} catch (const astro::guiding::BadState x) {
+		throw BadState(x.what());
+	} catch (const astro::guiding::NotFound x) {
+		throw NotFound(x.what());
+	}
 }
 
-Calibration GuiderI::getCalibration(CalibrationType calibrationtype, const Ice::Current& /* current */) {
+/**
+ * \brief Uncalibrate a device
+ *
+ * Since all configured devices are used for guiding, there must be a method
+ * to uncalibrate a device so that it is no longer used for guiding.
+ */
+void	GuiderI::unCalibrate(ControlType calibrationtype,
+	const Ice::Current& /* current */) {
+	// retrieve guider data from the database
+	try {
+		switch (calibrationtype) {
+		case ControlGuiderPort:
+			guider->unCalibrate(astro::guiding::BasicCalibration::GP);
+			break;
+		case ControlAdaptiveOptics:
+			guider->unCalibrate(astro::guiding::BasicCalibration::AO);
+			break;
+		}
+	} catch (const astro::guiding::BadState& exception) {
+		throw BadState(exception.what());
+	}
+}
+
+/**
+ * \brief Retrieve the calibration of a device
+ *
+ * This method retrieves the configuration of a device. If the device is unconfigured,
+ * it throws the BadState exception.
+ */
+Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Current& /* current */) {
 	CalibrationSource	source(database);
 	switch (calibrationtype) {
-	case CalibrationTypeGuiderPort:
+	case ControlGuiderPort:
+		if (!guider->guiderPortDevice->iscalibrated()) {
+			throw BadState("GP not calibrated");
+		}
 		return source.get(guider->guiderPortDevice->calibrationid());
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
+		if (!guider->adaptiveOpticsDevice->iscalibrated()) {
+			throw BadState("GP not calibrated");
+		}
 		return source.get(guider->adaptiveOpticsDevice->calibrationid());
 	}
 }
@@ -241,7 +304,7 @@ Calibration GuiderI::getCalibration(CalibrationType calibrationtype, const Ice::
  * The focal length is the only piece of information that we can not
  * get from anywhere else, so it has to be specified
  */
-Ice::Int GuiderI::startCalibration(CalibrationType caltype, const Ice::Current& /* current */) {
+Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
 
@@ -250,9 +313,9 @@ Ice::Int GuiderI::startCalibration(CalibrationType caltype, const Ice::Current& 
 
 	// start the calibration
 	switch (caltype) {
-	case CalibrationTypeGuiderPort:
+	case ControlGuiderPort:
 		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
 		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
 	}
 }
@@ -320,16 +383,16 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 /**
  * \brief Start guiding
  */
-void GuiderI::startGuiding(Ice::Float guidinginterval,
+void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval %.1f",
-		guidinginterval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval gp=%.1f, ao=%.1f",
+		gpinterval, aointerval);
 	// construct a tracker
 	astro::guiding::TrackerPtr	tracker = getTracker();
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
-	guider->startGuiding(tracker, guidinginterval);
+	guider->startGuiding(tracker, gpinterval, aointerval);
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
@@ -388,14 +451,14 @@ TrackingHistory GuiderI::getTrackingHistory(Ice::Int id,
 }
 
 TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
-	CalibrationType type, const Ice::Current& /* current */) {
+	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
 	astro::guiding::TrackingStore	store(database);
 	switch (type) {
-	case CalibrationTypeGuiderPort:
+	case ControlGuiderPort:
 		return convert(store.get(id,
 			astro::guiding::BasicCalibration::GP));
-	case CalibrationTypeAdaptiveOptics:
+	case ControlAdaptiveOptics:
 		return convert(store.get(id,
 			astro::guiding::BasicCalibration::AO));
 	}

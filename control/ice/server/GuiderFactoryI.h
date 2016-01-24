@@ -46,7 +46,7 @@ public:
 	idlist	getGuideruns(const GuiderDescriptor& guider,
 				const Ice::Current& current);
 	TrackingHistory	getTrackingHistory(int id, const Ice::Current& current);
-	TrackingHistory	getTrackingHistoryType(int id, CalibrationType type,
+	TrackingHistory	getTrackingHistoryType(int id, ControlType type,
 		const Ice::Current& current);
 	void	deleteTrackingHistory(int id, const Ice::Current& current);
 };

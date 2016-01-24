@@ -47,7 +47,7 @@ int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 int	Guide::calibration_command(GuiderFactoryPrx guiderfactory,
 		GuiderPrx guider, const std::string& calarg) {
 	// try to interpret the calarg as a calibration type
-	CalibrationType	caltype;
+	ControlType	caltype;
 	try {
 		caltype = string2calibrationtype(calarg);
 	} catch (const std::exception& x) {
@@ -178,7 +178,7 @@ int	Guide::calibrate_command(GuiderPrx guider, const std::string& calarg) {
 newcalibration:
 	// try to interpret the argument as a calibration type
 	try {
-		CalibrationType	caltype = string2calibrationtype(calarg);
+		ControlType	caltype = string2calibrationtype(calarg);
 		calibrationid = guider->startCalibration(caltype);
 		std::cout << "new calibration " << calibrationid;
 		std::cout << " in progress" << std::endl;
