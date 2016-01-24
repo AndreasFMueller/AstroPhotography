@@ -15,7 +15,7 @@ do
 	echo $f
 	target=`basename $f .png`.fits
 	convert ${f} -background black -extent 600x600 test-1.png
-	convert test-1.png -roll +150+150 -level 8%,100% test-2.png
+	convert test-1.png -roll +150+150 -level 10%,100% test-2.png
 	convert test-2.png -blur 1 -type Grayscale ${target}
 done
 

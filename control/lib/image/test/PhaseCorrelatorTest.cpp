@@ -197,6 +197,7 @@ void	PhaseCorrelatorTest::testSun() {
 	Image<RGB<unsigned char> >	*image
 		= dynamic_cast<Image<RGB<unsigned char> > *>(&*imageptr);
 	LuminanceAdapter<RGB<unsigned char>, double>	doubleimage(*image);
+	DerivativeNormAdapter<double>	i1(doubleimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
 	FITSin	translatedfile("testimages/sun-translated.fits");
@@ -204,11 +205,12 @@ void	PhaseCorrelatorTest::testSun() {
 	Image<RGB<unsigned char> >	*translated
 		= dynamic_cast<Image<RGB<unsigned char> > *>(&*translatedptr);
 	LuminanceAdapter<RGB<unsigned char>, double>	doubletranslated(*translated);
+	DerivativeNormAdapter<double>	i2(doubleimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
 
 	// create a phase correlator
 	PhaseCorrelator	pc(false);
-	std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+	std::pair<Point, double>	result = pc(i1, i2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
 		result.first.toString().c_str(), result.second);
 
@@ -227,6 +229,7 @@ void	PhaseCorrelatorTest::testJupiter() {
 	Image<RGB<unsigned char> >	*image
 		= dynamic_cast<Image<RGB<unsigned char> > *>(&*imageptr);
 	LuminanceAdapter<RGB<unsigned char>, double>	doubleimage(*image);
+	DerivativeNormAdapter<double>	i1(doubleimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
 	FITSin	translatedfile("testimages/jupiter-translated.fits");
@@ -234,11 +237,12 @@ void	PhaseCorrelatorTest::testJupiter() {
 	Image<RGB<unsigned char> >	*translated
 		= dynamic_cast<Image<RGB<unsigned char> > *>(&*translatedptr);
 	LuminanceAdapter<RGB<unsigned char>, double>	doubletranslated(*translated);
+	DerivativeNormAdapter<double>	i2(doubletranslated);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
 
 	// create a phase correlator
 	PhaseCorrelator	pc(false);
-	std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+	std::pair<Point, double>	result = pc(i1, i2);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
 		result.first.toString().c_str(), result.second);
 
@@ -257,6 +261,7 @@ void	PhaseCorrelatorTest::testJupiterSequence() {
 	Image<unsigned char>	*image
 		= dynamic_cast<Image<unsigned char> *>(&*imageptr);
 	LuminanceAdapter<unsigned char, double>	doubleimage(*image);
+	DerivativeNormAdapter<double>	i1(doubleimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
 	for (int i = 0; i < 73; i++) {
@@ -268,11 +273,12 @@ void	PhaseCorrelatorTest::testJupiterSequence() {
 		Image<unsigned char>	*translated
 		= dynamic_cast<Image<unsigned char> *>(&*translatedptr);
 		LuminanceAdapter<unsigned char, double>	doubletranslated(*translated);
+		DerivativeNormAdapter<double>	i2(doubletranslated);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
 
 		// create a phase correlator
 		PhaseCorrelator	pc(false);
-		std::pair<Point, double>	result = pc(doubleimage, doubletranslated);
+		std::pair<Point, double>	result = pc(i1, i2);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
 			result.first.toString().c_str(), result.second);
 	}
