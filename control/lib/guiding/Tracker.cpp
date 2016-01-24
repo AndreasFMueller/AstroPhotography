@@ -192,8 +192,7 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		DerivativeNormAdapter<double>	da(la);			\
-		image = new Image<double>(da);				\
+		image = new Image<double>(la);				\
 		imageptr = ImagePtr(image);				\
 		return Point(0, 0);					\
 	}								\
@@ -205,9 +204,8 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		DerivativeNormAdapter<double>	da(la);			\
-		PhaseCorrelator	pc(true);				\
-		return pc(*image, da).first;				\
+		DerivativePhaseCorrelator	pc(true);		\
+		return pc(*image, la).first;				\
 	}								\
 }
 
