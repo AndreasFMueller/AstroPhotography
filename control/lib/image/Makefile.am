@@ -16,6 +16,7 @@ libastroimage_la_SOURCES = 						\
 	AmplifierGlowImage.cpp						\
 	Analyzer.cpp							\
 	Background.cpp							\
+	Binning.cpp							\
 	Blurr.cpp							\
 	CalibrationFactory.cpp						\
 	CentralProjection.cpp						\
@@ -67,6 +68,7 @@ libastroimage_la_SOURCES = 						\
 	MosaicType.cpp							\
 	NoiseAdapter.cpp						\
 	PhaseCorrelator.cpp						\
+	PeakFinder.cpp							\
 	Pixel.cpp							\
 	Projection.cpp							\
 	ProjectionCorrector.cpp						\

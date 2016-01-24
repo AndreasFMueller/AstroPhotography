@@ -341,7 +341,7 @@ int	command_partadd(const std::string& projectname, long partno,
 		av.erase("limit");
 	}
 	if (av.has("binning")) {
-		exposure.mode(astro::camera::Binning(av("binning")));
+		exposure.mode(astro::image::Binning(av("binning")));
 		av.erase("binning");
 	}
 	if (av.has("shutter")) {

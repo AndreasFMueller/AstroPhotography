@@ -22,7 +22,7 @@ public:
 	CcdTask(CcdPrx& ccd);
 	void	frame(const astro::image::ImageRectangle& frame);
 	void	frame(const std::string& framespec);
-	void	binning(const astro::camera::Binning& binning);
+	void	binning(const astro::image::Binning& binning);
 	void	binning(const std::string& binning);
 	void	exposuretime(double exposuretime);
 	void	purpose(const astro::camera::Exposure::purpose_t purpose);

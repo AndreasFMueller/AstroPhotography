@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	PhaseCorrelatorTest.cpp 
+	PeakFinderTest.cpp 
+#	PhaseCorrelatorTest.cpp 
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
@@ -55,6 +56,7 @@ tests_SOURCES = tests.cpp 						\
 	OperatorTest.cpp						\
 	PhaseCorrelatorTest.cpp						\
 	PixelTest.cpp							\
+	PeakFinderTest.cpp						\
 	QuadraticFunctionTest.cpp					\
 	RGBTest.cpp							\
 	RadonTest.cpp							\

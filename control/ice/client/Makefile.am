@@ -15,7 +15,7 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 if ENABLE_ICE
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
-	snowtask snowproject snowinstrument snowao
+	snowtask snowproject snowinstrument snowao snowservers
 noinst_PROGRAMS = snowflake 
 
 snowflake_SOURCES = snowflake.cpp
@@ -67,6 +67,11 @@ snowao_SOURCES = snowao.cpp
 snowao_DEPENDENCIES = $(ICEDEPENDENCIES)
 snowao_LDADD = $(ICELDADD)
 snowao_CPPFLAGS = $(ICECPPFLAGS)
+
+snowservers_SOURCES = snowservers.cpp
+snowservers_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowservers_LDADD = $(ICELDADD)
+snowservers_CPPFLAGS = $(ICECPPFLAGS)
 
 test:	snowflake
 	./snowflake -d -m simulator

@@ -11,15 +11,15 @@
 namespace snowstar {
 
 // CCD related
-BinningMode	convert(const astro::camera::Binning& binning) {
+BinningMode	convert(const astro::image::Binning& binning) {
 	BinningMode	result;
 	result.x = binning.x();
 	result.y = binning.y();
 	return result;
 }
 
-astro::camera::Binning	convert(const BinningMode& mode) {
-	return astro::camera::Binning(mode.x, mode.y);
+astro::image::Binning	convert(const BinningMode& mode) {
+	return astro::image::Binning(mode.x, mode.y);
 }
 
 BinningSet	convert(const astro::camera::BinningSet& binningset) {

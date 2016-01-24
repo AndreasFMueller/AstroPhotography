@@ -1132,6 +1132,40 @@ public:
 	ImagePtr	edges;
 };
 
+/**
+ * \brief Binning mode specification
+ *
+ * many astrophotography cameras support binning, i.e. combining adjacent pixels
+ * to form larger pixels. The coordinate values in a binning object
+ * can also be set to -1, which means that any positive number would
+ * be valid. This simplifies specifying the acceptable binning modes as a list
+ * Binning objects.
+ */
+class	Binning {
+	int	_x;
+	int	_y;
+public:
+	int	x() const { return _x; }
+	void	x(int v) { _x = v; }
+	int	y() const { return _y; }
+	void	y(int v) { _y = v; }
+public:
+	Binning(int x = 1, int y = 1);
+	Binning(const Binning& other) : _x(other._x), _y(other._y) { }
+	Binning(const std::string& binning);
+	bool	operator==(const Binning& other) const;
+	bool	operator!=(const Binning& other) const;
+	bool	operator<(const Binning& other) const;
+	virtual std::string	toString() const;
+};
+std::ostream&	operator<<(std::ostream& out, const Binning& binning);
+std::istream&	operator>>(std::istream& out, Binning& binning);
+
+ImagePoint	operator*(const ImagePoint& point, const Binning& mode);
+ImagePoint	operator/(const ImagePoint& point, const Binning& mode);
+ImageSize	operator*(const ImageSize& size, const Binning& mode);
+ImageSize	operator/(const ImageSize& size, const Binning& mode);
+
 } // namespace image
 } // namespace astro
 

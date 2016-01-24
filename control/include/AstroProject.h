@@ -118,10 +118,10 @@ public:
 
 	// binning
 private:
-	astro::camera::Binning	_binning;
+	astro::image::Binning	_binning;
 public:
-	const astro::camera::Binning	binning() const { return _binning; }
-	void	binning(const astro::camera::Binning& b) { _binning = b; }
+	const astro::image::Binning	binning() const { return _binning; }
+	void	binning(const astro::image::Binning& b) { _binning = b; }
 
 	// exposuretime
 private:

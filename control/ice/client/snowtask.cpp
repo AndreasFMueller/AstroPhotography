@@ -575,7 +575,7 @@ int	main(int argc, char *argv[]) {
 			longopts, &longindex)))
 		switch (c) {
 		case 'b':
-			exposure.mode(astro::camera::Binning(optarg));
+			exposure.mode(astro::image::Binning(optarg));
 			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);

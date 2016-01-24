@@ -292,7 +292,7 @@ int	main(int argc, char *argv[]) {
 	guide.exposure.shutter = ShOPEN;
 	guide.exposure.purpose = ExGUIDE;
 	if (binning.size() > 0) {
-		guide.exposure.mode = convert(astro::camera::Binning(binning));
+		guide.exposure.mode = convert(astro::image::Binning(binning));
 	} else {
 		guide.exposure.mode.x = 1;
 		guide.exposure.mode.y = 1;

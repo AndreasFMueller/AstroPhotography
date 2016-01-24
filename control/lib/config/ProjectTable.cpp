@@ -252,7 +252,7 @@ PartInfo::operator	Part() const {
 	exposure.exposuretime(exposuretime);
 	exposure.gain(gain);
 	exposure.limit(limit);
-	exposure.mode(astro::camera::Binning(binx, biny));
+	exposure.mode(astro::image::Binning(binx, biny));
 	exposure.shutter((shutter)	? astro::camera::Shutter::OPEN
 					: astro::camera::Shutter::CLOSED);
 	exposure.purpose((astro::camera::Exposure::purpose_t)purpose);

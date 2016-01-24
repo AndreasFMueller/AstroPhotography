@@ -275,6 +275,7 @@ void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
 	}
 	CalibrationStore	calstore(_database);
 	calstore.updateCalibration(calcopy);
+	*_calibration = calcopy;
 }
 
 /**
@@ -538,6 +539,7 @@ Point	ControlDevice<camera::AdaptiveOptics,
 			double Deltat) {
 	// give up if not configured
 	if (!_calibration->complete()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO not calibrated");
 		return point;
 	}
 

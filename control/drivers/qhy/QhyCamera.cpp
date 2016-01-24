@@ -49,9 +49,9 @@ QhyCamera::QhyCamera(usb::DevicePtr& devptr)
 			CcdInfo	info(ccdname, ImageSize(3040, 2024), 0);
 			info.pixelwidth(7.8e-6);
 			info.pixelheight(7.8e-6);
-			info.addMode(camera::Binning(1,1));
-			info.addMode(camera::Binning(2,2));
-			info.addMode(camera::Binning(4,4));
+			info.addMode(image::Binning(1,1));
+			info.addMode(image::Binning(2,2));
+			info.addMode(image::Binning(4,4));
 			ccdinfo.push_back(info);
 		}
 		break;

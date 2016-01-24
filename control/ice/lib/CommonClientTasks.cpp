@@ -33,13 +33,13 @@ void	CcdTask::frame(const std::string& framespec) {
 	}
 }
 
-void	CcdTask::binning(const astro::camera::Binning& binning) {
+void	CcdTask::binning(const astro::image::Binning& binning) {
 	_exposure.mode(binning);
 }
 
 void	CcdTask::binning(const std::string& binning) {
 	if (binning.size() > 0) {
-		_exposure.mode(astro::camera::Binning(binning));
+		_exposure.mode(astro::image::Binning(binning));
 	}
 }
 

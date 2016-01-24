@@ -32,6 +32,21 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+// 
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ArrayAdapter : public ConstImageAdapter<Pixel> {
+	Pixel		*_a;
+	ImageSize	_size;
+public:
+	ArrayAdapter(Pixel *a, const ImageSize size)
+		: ConstImageAdapter<Pixel>(size), _a(a), _size(size) { }
+	virtual Pixel	pixel(int x, int y) const {
+		return _a[_size.offset(x, y)];
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
 // Tiling the plane
 //////////////////////////////////////////////////////////////////////
 /**
@@ -40,12 +55,15 @@ public:
 template<typename Pixel>
 class TilingAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<Pixel>&	_image;
+	ImagePoint	_center;
 public:
-	TilingAdapter(const ConstImageAdapter<Pixel>& image)
-		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	TilingAdapter(const ConstImageAdapter<Pixel>& image,
+		ImagePoint center = ImagePoint())
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
+		  _center(center) {
 	}
 	virtual Pixel	pixel(int x, int y) const {
-		return _image.pixel(_image.getSize()(x, y));
+		return _image.pixel(_image.getSize()(_center.x() + x, _center.y() + y));
 	}
 };
 
@@ -1756,5 +1774,40 @@ public:
 
 } // namespace adapter
 } // namespace astro
+
+//////////////////////////////////////////////////////////////////////
+// Binning
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class BinningAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>	_image;
+	Binning	_mode;
+public:
+	BinningAdapter(const ConstImageAdapter<Pixel>& image,
+		const Binning& mode)
+		: ConstImageAdapter<Pixel>(image.getSize() / mode),
+		  _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) {
+		int	minx = _mode.x() * x;
+		int	miny = _mode.y() * y;
+		int	maxx = minx + _mode.x();
+		int	maxy = miny + _mode.y();
+		if (maxx > _image.size().width()) {
+			maxx = _image.size().width();
+		}
+		if (maxy > _image.size().width()) {
+			maxy = _image.size().width();
+		}
+		Pixel	sum;
+		for (int ix = minx; ix < maxx; ix++) {
+			for (int iy = miny; iy < maxy; iy++) {
+				Pixel	v = _image.pixel(ix, iy);
+				sum = sum + v;
+			}
+		}
+		return sum;
+	}
+};
 
 #endif /* _AstroAdapter_h */

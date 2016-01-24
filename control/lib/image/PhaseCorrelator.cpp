@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroAdapter.h>
+#include <AstroFilter.h>
 #include <AstroIO.h>
 #include <fftw3.h>
 #include <includes.h>
@@ -22,65 +23,6 @@ static unsigned int	correlation_counter = 1;
 
 static inline double	sqr(double x) {
 	return x * x;
-}
-
-/**
- * \brief Auxiliary function to retrieve array values
- *
- * When computing the centroid, we often work near the boundary of the domain,
- * this accessor wraps the indices around according to the array size.
- */
-double	PhaseCorrelator::value(const double *a, const ImageSize& size,
-		int x, int y) const {
-	while (x < 0) {
-		x += size.width();
-	}
-	while (x > (int)size.width()) { // cast to make compiler happy
-		x -= size.width();
-	}
-	while (y < 0) {
-		y += size.height();
-	}
-	while (y > (int)size.height()) { // cast to make compiler happy
-		y -= size.height();
-	}
-	return a[size.offset(x, y)];
-}
-
-/**
- * \brief Compute 2k+1 x 2k+1 centroid around the center point
- */
-Point	PhaseCorrelator::centroid(const double *a, const ImageSize& size,
-		const Point& center, unsigned int k) const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "computing %d-centroid at %s",
-		2 * k + 1, center.toString().c_str());
-
-	// compute the centroid
-	double	s = 0;
-	double	xs = 0;
-	double	ys = 0;
-	int	xmin = center.x() - k;
-	int	xmax = xmin + 2 * k;
-	int	ymin = center.y() - k;
-	int	ymax = ymin + 2 * k;
-	for (int x = xmin; x <= xmax; x++) {
-		for (int y = ymin; y <= ymax; y++) {
-			double	v = value(a, size, x, y);
-//debug(LOG_DEBUG, DEBUG_LOG, 0, "v(%d, %d) = %f", x, y, v);
-			s += v;
-			xs += v * x;
-			ys += v * y;
-		}
-	}
-	xs /= s;
-	ys /= s;
-	if (xs > size.width() / 2) {
-		xs -= size.width();
-	}
-	if (ys > size.width() / 2) {
-		ys -= size.width();
-	}
-	return Point(xs, ys);
 }
 
 class HanningWindow : public ConstImageAdapter<double> {
@@ -270,29 +212,27 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 	// perform the reverse Fourier transform
 	fftw_execute(r);
 
-	// find the maximum 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for maximum");
-	double	max = 0;
-	int maxx = 0;
-	int maxy = 0;
-	int	w4 = size.width() / 4;
-	int	h4 = size.height() / 4;
-	for (int x = -w4; x < w4; x++) {
-		for (int y = -h4; y < h4; y++) {
-			//double	v = a[size.offset(x, y)];
-			double	v = value(a, size, x, y);
-			if (v > max) {
-				max = v;
-				maxx = x;
-				maxy = y;
-			}
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d] maximum at Pixel %d,%d",
-		correlation_counter,  maxx, maxy);
+	// construct an adapter tothe array containing the fourier transform
+	ArrayAdapter<double>	aa(a, size);
+	ImagePoint	center(size.width() / 2, size.height() / 2);
+	TilingAdapter<double>	ta(aa, center);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "center of %s image: %s",
+		size.toString().c_str(), center.toString().c_str());
 
-	// build the 5x5 centroid to get the best possible Point value
-	Point	result = centroid(a, size, Point(maxx, maxy));
+	// search for the maximum in a rectangle
+	ImagePoint	lowerleft(size.width() / 4, size.height() / 4);
+	ImageRectangle	frame(lowerleft,
+				ImageSize(size.width() / 2, size.height() / 2));
+	WindowAdapter<double>	wa(ta, frame);
+	filter::Max<double, double>	maxfilter;
+	double	max = maxfilter(wa);
+	ImagePoint	maxcandidate = maxfilter.getPoint() + lowerleft;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum candidate: %s",
+		(maxcandidate - center).toString().c_str());
+
+	// construct a peak finder 
+	filter::PeakFinder	pf(maxcandidate, 20);
+	Point	result = pf(ta) - center;
 
 	// if required, write everything into a single image
 	if ((result.x() == result.x()) && (result.y() == result.y())) {
@@ -313,17 +253,9 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 		// copy the correlation image into a subimage at right
 		SubimageAdapter<double>	corrsubimage(composite,
 			ImageRectangle(ImagePoint(2 * size.width(),0), size));
-		int	w = size.width();
-		int	h = size.height();
-		for (int x = 0; x < w; x++) {
-			for (int y = 0; y < h; y++) {
-				int	xx = (x + (w / 2)) % w;
-				int	yy = (y + (h / 2)) % h;
-				corrsubimage.writablepixel(xx, yy)
-					= value(a, size, x, y) / max;
-			}
-		}
-
+		NormalizationAdapter<double>	corrnorm(ta);
+		copy(corrsubimage, corrnorm);
+		
 		// add metadata about the offset
 		composite.setMetadata(
 			FITSKeywords::meta(std::string("XOFFSET"), result.x()));

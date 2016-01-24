@@ -11,7 +11,7 @@ noinst_LTLIBRARIES = libastrodevice.la
 libastrodevice_la_SOURCES =						\
 	AdaptiveOptics.cpp						\
 	BasicGuiderport.cpp						\
-	Binning.cpp							\
+	BinningSet.cpp							\
 	Camera.cpp							\
 	Ccd.cpp								\
 	Cooler.cpp							\

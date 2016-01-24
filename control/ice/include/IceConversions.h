@@ -69,8 +69,8 @@ devicetype       convert(const astro::DeviceName::device_type& type);
 astro::DeviceName::device_type   convert(const devicetype& type);
 
 // CCD related
-BinningMode	convert(const astro::camera::Binning& binning);
-astro::camera::Binning	convert(const BinningMode& mode);
+BinningMode	convert(const astro::image::Binning& binning);
+astro::image::Binning	convert(const BinningMode& mode);
 
 BinningSet	convert(const astro::camera::BinningSet& binningset);
 astro::camera::BinningSet	convet(const BinningSet& binningset);

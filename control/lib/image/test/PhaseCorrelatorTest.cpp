@@ -62,13 +62,13 @@ void	PhaseCorrelatorTest::testInteger() {
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
 			} else {
-				fromimage.pixel(x, y) = 100 * cos(r / 10) / r;
+				fromimage.pixel(x, y) = 100 * (1 + cos(r / 10)) / r;
 			}
 			r = hypot(x - 63, y - 74);
 			if (r == 0) {
 				toimage.pixel(x, y) = 100;
 			} else {
-				toimage.pixel(x, y) = 100 * cos(r / 10) / r;
+				toimage.pixel(x, y) = 100 * (1 + cos(r / 10)) / r;
 			}
 		}
 	}
@@ -80,7 +80,7 @@ void	PhaseCorrelatorTest::testInteger() {
 	// display result
 	std::ostringstream	out;
 	out << translation;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s, should be (3,4)", out.str().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Integer test");
 }
 
@@ -96,13 +96,13 @@ void	PhaseCorrelatorTest::testIntegerNegative() {
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
 			} else {
-				fromimage.pixel(x, y) = 100 * cos(r / 10) / r;
+				fromimage.pixel(x, y) = 100 * (1 + cos(r / 10)) / r;
 			}
 			r = hypot(x - 57, y - 66);
 			if (r == 0) {
 				toimage.pixel(x, y) = 100;
 			} else {
-				toimage.pixel(x, y) = 100 * cos(r / 10) / r;
+				toimage.pixel(x, y) = 100 * (1 + cos(r / 10)) / r;
 			}
 		}
 	}
@@ -114,7 +114,7 @@ void	PhaseCorrelatorTest::testIntegerNegative() {
 	// display result
 	std::ostringstream	out;
 	out << translation;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s, should be (-3,-4)", out.str().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end IntegerNegative test");
 }
 
@@ -130,13 +130,13 @@ void	PhaseCorrelatorTest::testHalf() {
 			if (r == 0) {
 				fromimage.pixel(x, y) = 100;
 			} else {
-				fromimage.pixel(x, y) = 100 * cos(r / 8) / r;
+				fromimage.pixel(x, y) = 100 * (1 + cos(r / 8)) / r;
 			}
 			r = hypot(x - 62.5, y - 66.5);
 			if (r == 0) {
 				toimage.pixel(x, y) = 100;
 			} else {
-				toimage.pixel(x, y) = 100 * cos(r / 8) / r;
+				toimage.pixel(x, y) = 100 * (1 + cos(r / 8)) / r;
 			}
 		}
 	}
@@ -148,7 +148,7 @@ void	PhaseCorrelatorTest::testHalf() {
 	// display result
 	std::ostringstream	out;
 	out << translation;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s", out.str().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "translation = %s, should be (2.5,-0.5)", out.str().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end Half test");
 }
 
@@ -214,7 +214,7 @@ void	PhaseCorrelatorTest::testDisks() {
 	PhaseCorrelator	pc(false);
 	std::pair<Point, double>	result = pc(from, to);
 	
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s (should be (8,16)), weight = %f",
 		result.first.toString().c_str(), result.second);
 }
 

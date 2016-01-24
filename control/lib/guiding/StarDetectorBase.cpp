@@ -138,6 +138,10 @@ Point	StarDetectorBase::operator()(const ConstImageAdapter<double>& image,
 	r = radius_multiplier * r;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "averaging radius %.2f around %s", r,
 		approximate.toString().c_str());
+	// make the radius large engough for the PeakFinder to work
+	if (r < 5) {
+		r = 5;
+	}
 
 	// now use the CentroidFilter to get the centroid
 	image::filter::CentroidFilter<double>	cf(approximate, r);

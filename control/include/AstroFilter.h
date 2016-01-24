@@ -759,6 +759,22 @@ public:
 };
 
 /**
+ * \brief Find the peak in an image
+ */
+class PeakFinder : public GeneralFilter<double, Point> {
+	ImagePoint	_approximate;
+	int	_radius;
+	int	above(const ConstImageAdapter<double>& image, double v);
+	double	threshold(const ConstImageAdapter<double>& image,
+			double minvalue, double maxvalue);
+	Point	centroid(const ConstImageAdapter<double>& image,
+			double threshold);
+public:
+	PeakFinder(const ImagePoint& approximate, int radius);
+	virtual Point	operator()(const ConstImageAdapter<double>& image);
+};
+
+/**
  * \brief Filter to compute the centroid of a group of pixels
  *
  * This filter requires that the Pixel type T can be converted to double
@@ -773,6 +789,10 @@ public:
 		: _approximate(approximate), _r(r) {
 	}
 	virtual Point	operator()(const ConstImageAdapter<T>& image) {
+		adapter::TypeConversionAdapter<T>	da(image);
+		PeakFinder	pf(_approximate, ceil(_r));
+		return pf(da);
+#if 0
 		unsigned int	w, h;
 		int	R = ceil(_r);
 		// rectangle to search for the centroid
@@ -801,6 +821,7 @@ public:
 		Point	centroid = sum * (1 / totalweight);
 		centroid = centroid + Point(centrect.lowerleft());
 		return centroid;
+#endif
 	}
 };
 

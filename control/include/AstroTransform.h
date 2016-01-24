@@ -349,11 +349,13 @@ ImagePtr	transform(ImagePtr image, const Transform& transform);
 class PhaseCorrelator {
 	void	write(const Image<double>& image);
 
+#if 0
 	double	value(const double *a, const astro::image::ImageSize& size,
 			int x, int y) const;
 	Point	centroid(const double *a, const astro::image::ImageSize& size,
 			const astro::Point& center,
 			unsigned int k = 2) const;
+#endif
 	bool	_hanning;
 public:
 	bool	hanning() const { return _hanning; }

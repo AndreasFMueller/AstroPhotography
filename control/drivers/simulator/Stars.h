@@ -161,7 +161,7 @@ private:
 	/**
 	 * \brief Binning mode to apply when exposing
 	 */
-	astro::camera::Binning	_binning;
+	astro::image::Binning	_binning;
 	double	bin0(Image<double>& image, int x, int y) const;
 	void	fill0(Image<double>& image, const ImagePoint& point,
 			double fillvalue) const;
@@ -224,8 +224,8 @@ public:
 	}
 
 	// accessor for the binning mode
-	const astro::camera::Binning&	binning() const { return _binning; }
-	void	binning(const astro::camera::Binning& binning) { _binning = binning; }
+	const astro::image::Binning&	binning() const { return _binning; }
+	void	binning(const astro::image::Binning& binning) { _binning = binning; }
 
 	// imaging operator
 	Image<double>	*operator()(const StarField& field) const;
@@ -252,7 +252,7 @@ public:
 		Image<double>	*rawimage = StarCameraBase::operator()(field);
 
 		// bin the image,
-		if (binning() != astro::camera::Binning()) {
+		if (binning() != astro::image::Binning()) {
 			bin(*rawimage);
 		}
 
