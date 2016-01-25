@@ -46,7 +46,8 @@ snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 snowstar_LDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro @ICELIBS@
-snowstar_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
+	@ICEINCLUDE@
 
 test:	snowstar
 	./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log

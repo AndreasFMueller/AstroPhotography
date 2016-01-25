@@ -9,7 +9,8 @@ ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 ICELIBS = @ICELIBS@
 ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
-ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
+	@ICEINCLUDE@
 
 bin_PROGRAMS = snowguide 
 

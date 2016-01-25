@@ -7,7 +7,8 @@
 ICELIBS = @ICELIBS@
 ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
-ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
+ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
+	@ICEINCLUDE@
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 
