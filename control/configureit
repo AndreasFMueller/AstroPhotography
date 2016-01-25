@@ -58,7 +58,7 @@ then
 	then
 		PATH="${ICEDIR}/bin/c++11:${PATH}"
 	fi
-	commonflags="${commonflags} --with-ice=${ICEDIR} --enable-ice"
+	commonflags="${commonflags} --with-ice=${ICEDIR}"
 fi
 
 # first find out what type of system we are
@@ -112,7 +112,7 @@ Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-ice \
+	./configure --prefix=`pwd`/root ${commonflags} \
 		${sbigoption}
 	;;
 SuSE)
