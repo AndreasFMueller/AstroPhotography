@@ -7,6 +7,8 @@
 SOURCES = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
 	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp
 
+BUILT_SOURCES = $(SOURCES)
+
 noinst_LTLIBRARIES = libcommon.la 
 
 libcommon_la_SOURCES = $(SOURCES)
