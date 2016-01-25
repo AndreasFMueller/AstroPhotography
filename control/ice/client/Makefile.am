@@ -10,9 +10,8 @@ ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 ICELIBS = @ICELIBS@
 ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
-ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
-
-if ENABLE_ICE
+ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
+	@ICEINCLUDE@
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers
@@ -76,4 +75,3 @@ snowservers_CPPFLAGS = $(ICECPPFLAGS)
 test:	snowflake
 	./snowflake -d -m simulator
 
-endif

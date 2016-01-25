@@ -3,26 +3,16 @@
 #
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
+SUBDIRS = common conversion client server .
 
-slice_sources = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
-	device.cpp tasks.cpp types.cpp repository.cpp instruments.cpp
+noinst_HEADERS = IceVersion.h
 
-BUILT_SOURCES = $(slice_sources)
+lib_LTLIBRARIES = libiceastro.la 
 
-additional_sources = RemoteInstrument.cpp CommunicatorSingleton.cpp \
-	TypesConversions.cpp DeviceConversions.cpp CcdConversions.cpp \
-	FilterwheelConversions.cpp GuiderConversions.cpp TaskConversions.cpp \
-	MountConversions.cpp FocusingConversions.cpp RepositoryConversions.cpp \
-	InstrumentComponentConversions.cpp ImageConversions.cpp \
-	CommonClientTasks.cpp ImageCallbackI.cpp ParameterConversions.cpp \
-	IceDiscovery.cpp
+libiceastro_la_SOURCES = IceVersion.cpp
+libiceastro_la_LIBADD = 					\
+	common/libcommon.la					\
+	conversion/libconversion.la				\
+	server/libserver.la					\
+	client/libclient.la
 
-if ENABLE_ICE
-
-lib_LTLIBRARIES = libiceastro.la
-
-libiceastro_la_SOURCES = \
-	$(slice_sources) $(additional_sources)
-libiceastro_la_CPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
-
-endif

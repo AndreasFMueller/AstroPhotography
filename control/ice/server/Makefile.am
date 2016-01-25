@@ -4,8 +4,6 @@
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-if ENABLE_ICE
-
 sbin_PROGRAMS = snowstar
 
 noinst_HEADERS = DevicesI.h \
@@ -59,4 +57,3 @@ testsun:	snowstar
 testplanet:	snowstar
 	STARCONTENT=PLANET ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
 
-endif

@@ -11,8 +11,6 @@ ICELDADD = -L$(top_builddir)/lib -lastro \
 	-L$(top_builddir)/ice/lib -liceastro $(ICELIBS)
 ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 
-if ENABLE_ICE
-
 bin_PROGRAMS = snowguide 
 
 noinst_HEADERS = display.h monitor.h guide.h
@@ -50,4 +48,3 @@ sunguide:	snowguide
 	./snowguide --debug --exposure=1 \
 		--method=diff --interval=$(INTERVAL) server GUIDESIM guide
 
-endif

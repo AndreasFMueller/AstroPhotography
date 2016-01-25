@@ -11,8 +11,6 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include @ICEINCLUDE@
 ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la
 
-if ENABLE_ICE
-
 pkglib_LTLIBRARIES = nice.la
 
 noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuiderPort.h \
@@ -50,4 +48,3 @@ nice_la_DEPENDENCIES = $(ICEDEPENDENCIES)
 nice_la_LIBADD = $(ICELDADD)
 nice_la_CPPFLAGS = $(ICECPPFLAGS)
 
-endif

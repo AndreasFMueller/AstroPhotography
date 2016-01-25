@@ -9,3 +9,9 @@ SUBDIRS = include lib ice drivers tools test man doc
 documentation:
 	cd doc; make doc
 
+size:
+	find drivers guider ice include lib tools \
+		-name slice -prune -o \
+		-name \*.h -print -o \
+		-name \*.c -print -o \
+		-name \*.cpp -print | xargs wc -l

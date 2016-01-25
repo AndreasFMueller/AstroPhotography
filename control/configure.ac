@@ -79,36 +79,6 @@ esac
 AM_CONDITIONAL(ENABLE_AVAHI, test x$servicediscovery = xavahi)
 AM_CONDITIONAL(ENABLE_BONJOUR, test x$servicediscovery = xbonjour)
 
-## CORBA # no longer supported #######################################
-# use pkg-config to find out about the flags to use for omniorb
-# if pkg-config --exists omniORB4
-# then
-# 	has_omniorb=yes
-# fi
-# AC_ARG_ENABLE(corba,
-# [AS_HELP_STRING([--enable-corba], [also build the CORBA components])],
-# [
-# 	if test x$has_omniorb = xyes
-# 	then
-# 		LIBS="${LIBS} `pkg-config --libs omniORB4`"
-# 		CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniORB4`"
-# 		if pkg-config --exists omniCOS4
-# 		then
-# 			LIBS="${LIBS} `pkg-config --libs omniCOS4`"
-# 			CXXFLAGS="${CXXFLAGS} `pkg-config --cflags omniCOS4`"
-# 		fi
-# 		AC_DEFINE([ENABLE_CORBA], [1], [Define to 1 if CORBA is enabled.])
-# 		# add the idl include directory to the cflags
-# 		CPPFLAGS="${CPPFLAGS} -I\$(top_srcdir)/corba/include"
-# 	else
-# 		AC_MSG_ERROR([omniORB not available])
-# 		AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
-# 	fi
-# ],[
-# 	AC_DEFINE([ENABLE_CORBA], [0], [Define to 1 if CORBA is enabled.])
-# ])
-# AM_CONDITIONAL(ENABLE_CORBA, test x$enable_corba = xyes)
-
 ## ICE ###############################################################
 # detect ICE support (www.zeroc.com)
 #
@@ -184,21 +154,6 @@ AC_ARG_WITH([slice],
 	fi
 ])
 AC_SUBST(SLICEDIR)
-
-# enable ICE
-#AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
-
-AC_ARG_ENABLE(ice,
-[AS_HELP_STRING([--enable-ice], [also bulid the ZeroC ICE components])],
-[
-	enable_ice=yes
-	AC_DEFINE([ENABLE_ICE], [1], [Define to 1 if ICE is enabled.])
-],[
-	enable_ice=no
-	AC_DEFINE([ENABLE_ICE], [0], [Define to 1 if ICE is enabled.])
-])
-
-AM_CONDITIONAL(ENABLE_ICE, test x$enable_ice = xyes)
 
 # with the path including the slice directory, the slice2cpp command
 # should be found now
@@ -452,7 +407,9 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/unicap/Makefile lib/unicap/test/Makefile
 	lib/test/Makefile
 	ice/Makefile ice/slice/Makefile ice/include/Makefile
-	ice/lib/Makefile ice/client/Makefile ice/client/guide/Makefile
+	ice/lib/Makefile ice/lib/common/Makefile ice/lib/client/Makefile
+	ice/lib/conversion/Makefile ice/lib/server/Makefile
+	ice/client/Makefile ice/client/guide/Makefile
 	ice/server/Makefile
 	tools/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile

@@ -6,7 +6,7 @@
 #
 SUBDIRS = 
 
-lib_LTLIBRARIES = libastrousb.la
+noinst_LTLIBRARIES = libastrousb.la
 
 if ENABLE_UVC
 uvc_files = 								\

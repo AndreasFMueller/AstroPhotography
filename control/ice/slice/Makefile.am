@@ -11,10 +11,8 @@ EXTRA_DIST = $(SLICES)
 
 SLICEHEADERS = camera.h exceptions.h focusing.h guider.h image.h device.h \
 	tasks.h types.h repository.h instruments.h
-SLICESOURCE = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
+SLICESOURCES = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
 	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp
-
-if ENABLE_ICE
 
 all-am:	copytimestamp
 
@@ -48,18 +46,14 @@ repository.h repository.cpp:	repository.ice
 instruments.h instruments.cpp:	instruments.ice
 	@SLICE2CPP@ -I. -I@SLICEDIR@ instruments.ice
 
-
 #
 # We should automatically add the slice directory of the Ice installation
 # to the slic2cpp command
 #
-copytimestamp:	$(SLICEHEADERS) $(SLICESOURCE)
+copytimestamp:  $(SLICEHEADERS) $(SLICESOURCE)
 	for h in camera exceptions focusing guider image device tasks types \
 		repository instruments; \
 	do \
-		cp $${h}.h ../include; \
-		cp $${h}.cpp ../lib; \
+		cp $${h}.cpp ../lib/common; \
 	done
-	touch copytimestamp	
-
-endif
+	touch copytimestamp     
