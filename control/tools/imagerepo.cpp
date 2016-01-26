@@ -307,7 +307,11 @@ static void	usage(const char *progname) {
 	std::cout << "    " << path.basename() << " [ options ] <repo> { show | remove } <ids>";
 	std::cout << std::endl;
 	std::cout << std::endl;
-	std::cout << "add, list, retrieve and delete images in image repository <repo>";
+	std::cout << "add, list, retrieve and delete images in image repository <repo>. The get ";
+	std::cout << std::endl;
+	std::cout << "command understands 'last' as the last, i.e. usually the most recent id of";
+	std::cout << std::endl;
+	std::cout << "the repository";
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << "    " << path.basename() << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
