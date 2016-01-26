@@ -213,7 +213,7 @@ AC_ARG_ENABLE(sx,
 AM_CONDITIONAL(ENABLE_SX, test x$enable_sx = xyes)
 
 ## OTHELLO ###########################################################
-# decide whether to build the SX driver
+# decide whether to build the OTHELLO driver
 AC_ARG_ENABLE(othello,
 [AS_HELP_STRING([--enable-othello], [build the Othello driver])],
 [
