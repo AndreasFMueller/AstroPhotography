@@ -18,6 +18,7 @@ libastroutils_la_SOURCES = 						\
 	Exceptions.cpp							\
 	Format.cpp							\
 	Path.cpp							\
+	Pidfile.cpp							\
 	Point.cpp							\
 	Rectangle.cpp							\
 	stacktrace.cpp							\

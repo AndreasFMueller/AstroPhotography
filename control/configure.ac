@@ -379,6 +379,10 @@ AC_CHECK_FUNCS([memset strdup strerror trunc])
 DEVICEPROPERTIES=${sysconfdir}/device.properties
 AC_SUBST(DEVICEPROPERTIES)
 
+# default pid file location
+PIDDIR=${localstatedir}/run
+AC_SUBST(PIDDIR)
+
 # definitions for the extension for shared libraries
 case `uname` in
 	Darwin*)

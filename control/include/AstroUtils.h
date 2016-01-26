@@ -346,6 +346,19 @@ int	main_function(int argc, char *argv[]) {
 }
 
 /**
+ * \brief Pidfile class, creates a pid file, writes the pid to it
+ *
+ * when an instance of this class goes out of scope, the pid file is
+ * removed.
+ */
+class PidFile {
+	std::string	_filename;
+public:
+	PidFile(const std::string& filename);
+	~PidFile();
+};
+
+/**
  * \brief Interface class for actions
  */
 class Action {

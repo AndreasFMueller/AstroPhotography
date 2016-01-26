@@ -39,8 +39,10 @@ static struct option	longopts[] = {
 { "config",		required_argument,	NULL,	'c' }, /* 1 */
 { "debug",		no_argument,		NULL,	'd' }, /* 2 */
 { "database",		required_argument,	NULL,	'q' }, /* 3 */
+{ "foreground",		no_argument,		NULL,	'f' }, /* 4 */
 { "help",		no_argument,		NULL,	'h' }, /* 4 */
-{ "port",		required_argument,	NULL,	'r' }, /* 5 */
+{ "port",		required_argument,	NULL,	'p' }, /* 5 */
+{ "pidfile",		required_argument,	NULL,	'P' }, /* 5 */
 { "sslport",		required_argument,	NULL,	's' }, /* 6 */
 { "name",		required_argument,	NULL,	'n' }, /* 7 */
 { NULL,			0,			NULL,	 0  }, /* 8 */
@@ -58,62 +60,17 @@ static void	usage(const char *progname) {
 	std::cout << " -c,--config=configdb  use alternative configuration "
 		"database from file" << std::endl;
 	std::cout << "                       configdb" << std::endl;
+	std::cout << " -f,--foreground       stay in foreground" << std::endl;
 	std::cout << " -q,-database=taskdb   task manager database"
 		<< std::endl;
 	std::cout << " -p,--port=<port>      port to offer the service on"
 		<< std::endl;
+	std::cout << " -P,--pidfile=<file>   write the process id to <file>, and remove when exiting" << std::endl;
 	std::cout << " -s,--sslport=<port>   use SSL enable port <port>"
 		<< std::endl;
 	std::cout << " -n,--name=<name>      define zeroconf name to use"
 		<< std::endl;
 }
-
-#if 0
-class service_location {
-public:
-	std::string	servicename;
-	unsigned short	port;
-	unsigned short	sslport;
-	bool	ssl;
-	service_location() : port(0), sslport(0), ssl(false) { }
-	void	locate();
-};
-
-void	service_location::locate() {
-	astro::config::ConfigurationPtr	config
-		= astro::config::Configuration::get();
-	if (servicename.size() == 0) {
-		if (config->hasglobal("service", "name")) {
-			servicename = config->global("service", "name");
-		} else {
-			char	h[1024];
-			if (gethostname(h, sizeof(h)) < 0) {
-				std::string	msg = astro::stringprintf(
-					"cannot figure out host name: %s",
-					strerror(errno));
-				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-				throw std::runtime_error(msg);
-			}
-			servicename = std::string(h);
-		}
-	}
-	if (port == 0) {
-		if (config->hasglobal("service", "port")) {
-			std::string	s = config->global("service", "port");
-			port = std::stoi(s);
-		} else {
-			port = 10000;
-		}
-	}
-	if (sslport == 0) {
-		if (config->hasglobal("service", "sslport")) {
-			std::string s = config->global("service", "sslport");
-			sslport = std::stoi(s);
-		}
-	}
-	ssl = (sslport > 0);
-}
-#endif
 
 /**
  * \brief Main function for the Snowstar server
@@ -122,6 +79,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	// default debug settings
 	debugtimeprecision = 3;
 	debugthreads = true;
+	bool	foreground = false;
 
 	// resturn status
 	int	status = EXIT_SUCCESS;
@@ -142,12 +100,13 @@ int	snowstar_main(int argc, char *argv[]) {
 
 	// default configuration
 	std::string	databasefile("testdb.db");
-	std::string	servicename("");
+	std::string	servicename("server");
+	std::string	pidfile(PIDDIR "/snowstar.pid");
 
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dn:p:q:s:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dfn:p:q:s:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -159,6 +118,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'f':
+			foreground = true;
+			break;
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
@@ -168,6 +130,9 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'p':
 			astro::discover::ServiceLocation::get().port(std::stoi(optarg));
 			break;
+		case 'P':
+			pidfile = std::string(optarg);
+			break;
 		case 's':
 			astro::discover::ServiceLocation::get().sslport(std::stoi(optarg));
 			break;
@@ -175,6 +140,24 @@ int	snowstar_main(int argc, char *argv[]) {
 			astro::discover::ServiceLocation::get().servicename(std::string(optarg));
 			break;
 		}
+
+	// go inter the background
+	if (!foreground) {
+		pid_t	pid = fork();
+		if (pid < 0) {
+			std::cerr << "fork failed: " << strerror(errno);
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+		if (pid > 0) {
+			// parent process, just exit
+			return EXIT_SUCCESS;
+		}
+		// if get here, we are in the child process
+		setsid();
+		chdir("/");
+		umask(027);
+	}
 
 	// determine which service name to use
 	astro::discover::ServiceLocation&	location = astro::discover::ServiceLocation::get();
