@@ -4,6 +4,8 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroPersistence.h>
+#include <AstroFormat.h>
+#include <AstroDebug.h>
 #include <FieldPersistence.h>
 #include <sstream>
 #include <AstroDebug.h>
@@ -308,6 +310,8 @@ std::string	TableBase::selectquery() const {
 
 /**
  * \brief Find the id for the next row to be inserted
+ *
+ * This method generates the id 1 if there are now rows in the table
  */
 long	TableBase::nextid() {
 	std::ostringstream	out;
@@ -320,6 +324,29 @@ long	TableBase::nextid() {
 	const FieldValuePtr&	field = row[0];
 	long	id = field->intValue();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "next id: %ld", id);
+	return id;
+}
+
+/**
+ * \brief Find the id of the last row
+ *
+ * In contrast to the nextid() method, this method throws an exception if
+ * there are no rows in the table
+ */
+long	TableBase::lastid() {
+	std::ostringstream	out;
+	out << "select max(id) as 'lastid' from " << _tablename;
+	Result	result = _database->query(out.str());
+	if (result.size() != 1) {
+		std::string	cause = stringprintf("no rows in table %s",
+			_tablename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+	Row	row = result.front();
+	const FieldValuePtr&	field = row[0];
+	long	id = field->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "last id: %ld", id);
 	return id;
 }
 

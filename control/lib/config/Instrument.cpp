@@ -328,6 +328,7 @@ AdaptiveOpticsPtr	Instrument::adaptiveoptics() {
 	case InstrumentComponent::derived:
 		throw std::runtime_error("don't know how to derive AO");
 	}
+	throw std::runtime_error("appease compiler");
 }
 
 /**
@@ -344,8 +345,11 @@ CameraPtr	Instrument::camera() {
 	InstrumentComponentPtr	cameraptr = component(DeviceName::Camera);
 	switch (cameraptr->component_type()) {
 	case InstrumentComponent::direct:
-	case InstrumentComponent::mapped:
-		return devices.getCamera(cameraptr->devicename());
+	case InstrumentComponent::mapped: {
+		DeviceName	name = cameraptr->devicename();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s", name.toString().c_str());
+		return devices.getCamera(name);
+		}
 	case InstrumentComponent::derived:
 		throw std::runtime_error("don't know how to derive camera");
 	}

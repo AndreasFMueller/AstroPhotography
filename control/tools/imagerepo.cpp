@@ -115,7 +115,18 @@ int	command_get(const std::string& reponame,
 	if (arguments.size() < 4) {
 		throw std::runtime_error("not enough arguments for 'get'");
 	}
-	int	id = std::stol(arguments[2]);
+	int	id = -1;
+	try {
+		id = std::stol(arguments[2]);
+	} catch (const std::exception& x) {
+		if ("last" != arguments[2]) {
+			std::string	cause = stringprintf("argument '%s' "
+				"not a number (%s) and not 'last'",
+				arguments[2].c_str(), x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+			return EXIT_FAILURE;
+		}
+	}
 	std::string	filename = arguments[3];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "extract image to %s", filename.c_str());
 	ConfigurationPtr	configuration = Configuration::get();

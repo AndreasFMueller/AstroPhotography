@@ -192,6 +192,10 @@ void	ImageRepo::scan_directory(bool recurse) {
  * \brief Retrieve an image
  */
 std::string	ImageRepo::filename(long id) {
+	ImageTable	table(_database);
+	if (id < 0) {
+		id = table.lastid();
+	}
 	return ImageTable(_database).byid(id).filename;
 }
 

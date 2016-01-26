@@ -208,6 +208,7 @@ public:
 	TableBase(Database database, const std::string& tablename,
 		const std::string& createstatement = std::string());
 	Row	rowbyid(long objectid);
+	long	lastid();
 	long	nextid();
 	long	addrow(const UpdateSpec& updatespec);
 	virtual long	id(const std::string& condition);

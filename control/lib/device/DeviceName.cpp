@@ -215,7 +215,7 @@ bool	DeviceName::isNetworkDevice() const {
 }
 
 bool	DeviceName::isLocalDevice() const {
-	return !isLocalDevice();
+	return !isNetworkDevice();
 }
 
 bool	DeviceName::isServedByUs() const {
