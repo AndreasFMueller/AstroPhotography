@@ -15,8 +15,12 @@ namespace astro {
  */
 PidFile::PidFile(const std::string& filename)
 	: _filename(filename) {
-	int	fd = open(filename.c_str(), O_TRUNC | O_CREAT, 0644);
+	int	fd = open(filename.c_str(), O_RDWR | O_TRUNC | O_CREAT, 0644);
 	if (fd < 0) {
+		std::string	cause = stringprintf("cannot create pid file: "
+			"%s: %s", filename.c_str(), strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
 	}
 	char	buffer[32];
 	snprintf(buffer, sizeof(buffer), "%d\n", getpid());

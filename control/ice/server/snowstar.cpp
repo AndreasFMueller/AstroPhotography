@@ -101,7 +101,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	// default configuration
 	std::string	databasefile("testdb.db");
 	std::string	servicename("server");
-	std::string	pidfile(PIDDIR "/snowstar.pid");
+	std::string	pidfilename(PIDDIR "/snowstar.pid");
 
 	// parse the command line
 	int	c;
@@ -131,7 +131,7 @@ int	snowstar_main(int argc, char *argv[]) {
 			astro::discover::ServiceLocation::get().port(std::stoi(optarg));
 			break;
 		case 'P':
-			pidfile = std::string(optarg);
+			pidfilename = std::string(optarg);
 			break;
 		case 's':
 			astro::discover::ServiceLocation::get().sslport(std::stoi(optarg));
@@ -158,6 +158,7 @@ int	snowstar_main(int argc, char *argv[]) {
 		chdir("/");
 		umask(027);
 	}
+	astro::PidFile	pidfile(pidfilename);
 
 	// determine which service name to use
 	astro::discover::ServiceLocation&	location = astro::discover::ServiceLocation::get();

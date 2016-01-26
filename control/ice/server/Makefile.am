@@ -50,11 +50,17 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\"
 
 test:	snowstar
-	./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+	./snowstar --debug --base=`pwd`/images --database=`pwd`/testdb.db \
+		--condig=`pwd`/testdb.db --name=server --foreground \
+		2>&1 | tee test.log
 
 testsun:	snowstar
-	STARCONTENT=SUN ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+	STARCONTENT=SUN ./snowstar --debug --base=`pwd`/images \
+		--database=`pwd`/testdb.db --config=testdb.db \
+		--name=server --foreground 2>&1 | tee test.log
 
 testplanet:	snowstar
-	STARCONTENT=PLANET ./snowstar -d -b images -q testdb.db -c testdb.db -n server 2>&1 | tee test.log
+	STARCONTENT=PLANET ./snowstar --debug --base=`pwd`/images \
+		--database=`pwd`/testdb.db --config=testdb.db \
+		--name=server --foreground 2>&1 | tee test.log
 
