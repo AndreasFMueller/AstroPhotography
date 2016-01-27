@@ -71,7 +71,7 @@ std::vector<std::string>	CelestronLocator::getDevicelist(
 	// no check whether we have properties for celestron devices
 	for (int unit = 0; unit < 4; unit++) {
 		std::string	devicename
-			= stringprintf("mount:celestrong/%d", unit);
+			= stringprintf("mount:celestron/%d", unit);
 		Properties	properties(devicename);
 		if (properties.hasProperty("device")) {
 			names.push_back(devicename);
