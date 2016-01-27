@@ -32,8 +32,6 @@ PhaseTracker::PhaseTracker() {
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		Image<double>	*i = new Image<double>(la);		\
-		ImagePtr	iptr = ImagePtr(i);			\
 		refresh(la);						\
 		return Point(0, 0);					\
 	}								\
@@ -46,11 +44,7 @@ PhaseTracker::PhaseTracker() {
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		PhaseCorrelator	pc;					\
-		Point	o = pc(*_image, la).first;			\
-		if (refreshNeeded()) {					\
-			refresh(la, o);					\
-		}							\
-		return _offset + o;					\
+		return correlate(la, pc);				\
 	}								\
 }
 
@@ -132,11 +126,7 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		DerivativePhaseCorrelator	pc(true);		\
-		Point	o = pc(*_image, la).first;			\
-		if (refreshNeeded()) {					\
-			refresh(la, o);					\
-		}							\
-		return o + _offset;					\
+		return correlate(la, pc);				\
 	}								\
 }
 

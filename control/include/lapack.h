@@ -12,6 +12,9 @@
 extern "C" {
 #endif 
 
+void	dgesv_(int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b,
+		int *ldb, int *info);
+
 void	dgels_(char *trans, int *m, int *n, int *nrhs, double *a, int *lda,
 		double *b, int *ldb, double *work, int *lwork, int *info);
 

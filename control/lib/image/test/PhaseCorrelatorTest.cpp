@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include <includes.h>
+#include <AstroCoordinates.h>
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -35,16 +36,18 @@ public:
 	void	testJupiter();
 	void	testJupiterSequence();
 	void	testDisks();
+	void	testTriangle();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
-	CPPUNIT_TEST(testInteger);
-	CPPUNIT_TEST(testIntegerNegative);
-	CPPUNIT_TEST(testHalf);
-	CPPUNIT_TEST(testImage);
-	CPPUNIT_TEST(testSun);
-	CPPUNIT_TEST(testJupiter);
-	CPPUNIT_TEST(testJupiterSequence);
-	CPPUNIT_TEST(testDisks);
+//	CPPUNIT_TEST(testInteger);
+//	CPPUNIT_TEST(testIntegerNegative);
+//	CPPUNIT_TEST(testHalf);
+//	CPPUNIT_TEST(testImage);
+//	CPPUNIT_TEST(testSun);
+//	CPPUNIT_TEST(testJupiter);
+//	CPPUNIT_TEST(testJupiterSequence);
+//	CPPUNIT_TEST(testDisks);
+	CPPUNIT_TEST(testTriangle);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -321,6 +324,41 @@ void	PhaseCorrelatorTest::testDisks() {
 		"offset = %s (should be (8,16)), weight = %f",
 		result.first.toString().c_str(), result.second);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testDisks()");
+}
+
+void	PhaseCorrelatorTest::testTriangle() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin testTriangle()");
+	int	N = 200;
+	Image<double>	fromimage(N, N);
+	Image<double>	toimage(N, N);
+
+	BarycentricCoordinates	bcfrom(Point(70,70), Point(130,80),
+					Point(80,130));
+	BarycentricCoordinates	bcto(Point(75,77), Point(135,87),
+					Point(85,137));
+
+	for (int x = 0; x < fromimage.size().width(); x++) {
+		for (int y = 0; y < fromimage.size().height(); y++) {
+			if (bcfrom(Point(x, y)).inside()) {
+				fromimage.pixel(x, y) = 1;
+			} else {
+				fromimage.pixel(x, y) = 0;
+			}
+			if (bcto(Point(x, y)).inside()) {
+				toimage.pixel(x, y) = 1;
+			} else {
+				toimage.pixel(x, y) = 0;
+			}
+		}
+	}
+
+	DerivativePhaseCorrelator	pc(true);
+	std::pair<Point, double>	result = pc(fromimage, toimage);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"offset = %s (should be (8,16)), weight = %f",
+		result.first.toString().c_str(), result.second);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testTriangle()");
 }
 
 } // namespace test

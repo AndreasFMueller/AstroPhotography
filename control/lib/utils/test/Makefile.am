@@ -15,7 +15,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp 					\
-	AsynchronousActionTest.cpp 
+	BarycentricTest.cpp
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 

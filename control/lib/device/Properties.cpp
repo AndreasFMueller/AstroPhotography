@@ -21,17 +21,17 @@ Properties::Properties(const std::string& devicename) {
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying system file: %s",
 			DEVICEPROPERTIES);
-		setup(name, DEVICEPROPERTIES);
+		setup(devicename, DEVICEPROPERTIES);
 	} catch (...) { }
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"trying local file: device.properties");
-		setup(name, "device.properties");
+		setup(devicename, "device.properties");
 	} catch (...) { }
 	try {
 		char	*filename = getenv("DEVICEPROPERTIES");
 		if (NULL != filename) {
-			setup(name, filename);
+			setup(devicename, filename);
 		}
 	} catch (...) { }
 }

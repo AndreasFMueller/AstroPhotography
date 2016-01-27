@@ -6,6 +6,8 @@
 #ifndef _AstroCoordinates_h
 #define _AstroCoordinates_h
 
+#include <AstroTypes.h>
+
 #include <math.h>
 #include <string>
 
@@ -164,6 +166,34 @@ public:
 	Angle&	longitude() { return a1(); }
 	const Angle&	latitude() const { return a2(); }
 	Angle&	latitude() { return a2(); }
+};
+
+/**
+ * \brief Baryzentric coordinate points
+ */
+class BarycentricPoint : public Point {
+public:
+	BarycentricPoint(double _w1, double _w2, double _w3);
+	double	w1() const { return x(); }
+	double	w2() const { return y(); }
+	double	w3() const { return 1 - w1() - w2(); }
+	std::string	toString() const;
+	bool	inside() const;
+};
+
+class BarycentricCoordinates {
+	Point	_p1, _p2, _p3;
+	double	b[9];
+public:
+	const Point&	p1() const { return _p1; }
+	const Point&	p2() const { return _p2; }
+	const Point&	p3() const { return _p3; }
+	BarycentricCoordinates(const Point& p1, const Point& p2,
+		const Point& p3);
+	BarycentricPoint	operator()(const Point& point) const;
+	Point	operator()(const BarycentricPoint& barycentricpoint) const;
+	std::string	toString() const;
+	bool	inside(const Point& point) const;
 };
 
 } // namespace astro

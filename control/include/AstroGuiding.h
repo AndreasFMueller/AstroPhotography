@@ -178,18 +178,20 @@ std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
  * keep track of the offset too, and add it to the new offset.
  */
 class RefreshingTracker : public Tracker {
-	double	_refreshinterval;
+	long	_refreshinterval;
 public:
-	double	refreshinterval() const { return _refreshinterval; }
-	void	refreshinterval(double r) { _refreshinterval = r; }
+	long	refreshinterval() const { return _refreshinterval; }
+	void	refreshinterval(long r) { _refreshinterval = r; }
 protected:
 	image::ImagePtr	_imageptr;
 	Image<double>	*_image;
 	double	_lastimagetime;
 	Point	_offset;
 	bool	refreshNeeded();
-	void	refresh(const ConstImageAdapter<double>& ia,
+	void	refresh(const ConstImageAdapter<double>& adapter,
 			const Point offset = Point());
+	Point	correlate(const ConstImageAdapter<double>& adapter,
+			image::transform::PhaseCorrelator& correlator);
 public:
 	image::ImagePtr	imageptr() const { return _imageptr; }
 
