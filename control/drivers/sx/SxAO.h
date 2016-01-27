@@ -20,6 +20,7 @@ namespace sx {
  * not directly.
  */
 class SxAO : public AdaptiveOptics {
+	std::string	device;
 	int	serial;
 	void	initialize(const std::string& serialdevice);
 	bool	move(char d, int steps = 1);
@@ -36,7 +37,7 @@ private:	// prevent copy
 	SxAO(const SxAO& other);
 	SxAO&	operator=(const SxAO& other);
 public:
-	SxAO(const std::string& name);
+	SxAO(const DeviceName& devicename);
 	~SxAO();
 protected:
 	virtual void	set0(const Point& position);

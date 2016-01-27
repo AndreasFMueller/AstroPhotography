@@ -5,21 +5,30 @@
  */
 #include <SxAO.h>
 #include <includes.h>
+#include <AstroFormat.h>
+#include <AstroExceptions.h>
 
 namespace astro {
 namespace camera {
 namespace sx {
 
-static astro::DeviceName	aoname(const std::string& name) {
-	DeviceName	modulename("module:sx");
-	DeviceName	a(modulename, DeviceName::AdaptiveOptics, name);
-	return a;
-}
-
-SxAO::SxAO(const std::string& name) : AdaptiveOptics(aoname(name)) {
+SxAO::SxAO(const DeviceName& name) : AdaptiveOptics(name) {
 	_hasguiderport = false;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AO on device %s", name.c_str());
-	initialize(name.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AO on device %s",
+		name.toString().c_str());
+
+	Properties	properties(name);
+	if (!properties.hasProperty("device")) {
+		std::string	cause = stringprintf(
+			"serial device for %s not defined",
+			name.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw NotFound(cause);
+	}
+	device = properties.getProperty("device");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "using serial device %s",
+		device.c_str());
+	initialize(device);
 	center();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "AO unit created");
 }

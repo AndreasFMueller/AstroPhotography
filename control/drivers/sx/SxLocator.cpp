@@ -158,6 +158,17 @@ std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type 
 	// are not discoverable, so their names must be retrieved from
 	// the properties file
 	if (device == DeviceName::AdaptiveOptics) {
+		for (int unit = 0; unit < 4; unit++) {
+			std::string	devicename
+				= stringprintf("adaptiveoptics:sx/%d", unit);
+			Properties	properties(devicename);
+			if (properties.hasProperty("device")) {
+				names.push_back(devicename);
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d adaptiveoptics units",
+			names.size());
+		return names;
 	}
 
 	// list all devices from the context
@@ -272,9 +283,7 @@ CcdPtr	SxCameraLocator::getCcd0(const DeviceName& name) {
  * \brief Get an AO object
  */
 AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(const DeviceName& name) {
-	std::string	sname = URL::decode(name.unitname());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "AO unit device name: %s", sname.c_str());
-	return AdaptiveOpticsPtr(new SxAO(sname));
+	return AdaptiveOpticsPtr(new SxAO(name));
 }
 
 /**

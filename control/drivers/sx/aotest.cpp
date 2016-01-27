@@ -80,7 +80,9 @@ int	aotest_main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptive optics test started");
 
 	// create the object
-	SxAO	ao("/dev/tty.KeySerial1");
+	std::string	sname("adaptiveoptics:sx/0");
+	DeviceName	devicename(sname);
+	SxAO	ao(devicename);
 
 	// try positioning on a grid
 	double	elapsed = 0;
