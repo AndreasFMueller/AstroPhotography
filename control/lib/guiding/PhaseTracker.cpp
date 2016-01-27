@@ -17,90 +17,13 @@ using namespace astro::adapter;
 namespace astro {
 namespace guiding {
 
-#define	findstar_typed(Pixel)						\
-{									\
-	Image<Pixel >	*imagep						\
-		= dynamic_cast<Image<Pixel > *>(&*image);		\
-	if (NULL != imagep) {						\
-		StarDetector<Pixel >	sd(*imagep);			\
-		return sd(rectangle);					\
-	}								\
-}
-
-Point	findstar(ImagePtr image, const ImageRectangle& rectangle, int /* k */) {
-	findstar_typed(unsigned char);
-	findstar_typed(unsigned short);
-	findstar_typed(unsigned int);
-	findstar_typed(unsigned long);
-	findstar_typed(float);
-	findstar_typed(double);
-	findstar_typed(RGB<unsigned char>);
-	findstar_typed(RGB<unsigned short>);
-	findstar_typed(RGB<unsigned int>);
-	findstar_typed(RGB<unsigned long>);
-	findstar_typed(RGB<float>);
-	findstar_typed(RGB<double>);
-	findstar_typed(YUYV<unsigned char>);
-	findstar_typed(YUYV<unsigned short>);
-	findstar_typed(YUYV<unsigned int>);
-	findstar_typed(YUYV<unsigned long>);
-	findstar_typed(YUYV<float>);
-	findstar_typed(YUYV<double>);
-	throw std::runtime_error("cannot find star in this image type");
-}
-
-StarTracker::StarTracker(const Point& point,
-	const ImageRectangle& rectangle, int k)
-	: _point(point), _rectangle(rectangle), _k(k) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing a star tracker %s, %s, %d",
-		point.toString().c_str(), rectangle.toString().c_str(), k);
-}
-
-Point	StarTracker::operator()(ImagePtr newimage) {
-	// find the star on the new image
-	Point	newpoint = findstar(newimage, _rectangle, _k);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s, tracking point: %s",
-		newpoint.toString().c_str(), _point.toString().c_str());
-	return newpoint - _point;
-}
-
-std::string	StarTracker::toString() const {
-	std::ostringstream	out;
-	out << *this;
-	return out.str();
-}
-
-std::ostream&	operator<<(std::ostream& out, const StarTracker& tracker) {
-	out << tracker.point();
-	out << "/";
-	out << tracker.rectangle();
-	out << "/";
-	out << tracker.k();
-	return out;
-}
-
-std::istream&	operator>>(std::istream& in, StarTracker& tracker) {
-	Point	p;
-	astro::image::ImageRectangle	r;
-	int	k;
-	in >> p;
-	absorb(in, '/');
-	in >> r;
-	absorb(in, '/');
-	in >> k;
-	tracker.point(p);
-	tracker.rectangle(r);
-	tracker.k(k);
-	return in;
-}
-
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Phase Tracker
 //////////////////////////////////////////////////////////////////////
 
 PhaseTracker::PhaseTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "constructing a phase tracker");
-	image = NULL;
+	_image = NULL;
 }
 
 #define	phasetracker_construct(Pixel)					\
@@ -109,8 +32,9 @@ PhaseTracker::PhaseTracker() {
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		image = new Image<double>(la);				\
-		imageptr = ImagePtr(image);				\
+		Image<double>	*i = new Image<double>(la);		\
+		ImagePtr	iptr = ImagePtr(i);			\
+		refresh(la);						\
 		return Point(0, 0);					\
 	}								\
 }
@@ -122,12 +46,16 @@ PhaseTracker::PhaseTracker() {
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		PhaseCorrelator	pc;					\
-		return pc(*image, la).first;				\
+		Point	o = pc(*_image, la).first;			\
+		if (refreshNeeded()) {					\
+			refresh(la, o);					\
+		}							\
+		return _offset + o;					\
 	}								\
 }
 
 Point	PhaseTracker::operator()(ImagePtr newimage) {
-	if (!imageptr) {
+	if (!_imageptr) {
 		phasetracker_construct(unsigned char);
 		phasetracker_construct(unsigned short);
 		phasetracker_construct(unsigned int);
@@ -171,7 +99,7 @@ Point	PhaseTracker::operator()(ImagePtr newimage) {
 
 std::string	PhaseTracker::toString() const {
 	std::string	info = stringprintf("PhaseTracker on %s image",
-			(image) ? image->size().toString().c_str()
+			(_image) ? _image->size().toString().c_str()
 				: "(undefined)");
 	return info;
 }
@@ -183,7 +111,7 @@ std::string	PhaseTracker::toString() const {
 DifferentialPhaseTracker::DifferentialPhaseTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"constructing a differential phase tracker");
-	image = NULL;
+	_image = NULL;
 }
 
 #define	diffphasetracker_construct(Pixel)				\
@@ -192,8 +120,7 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		image = new Image<double>(la);				\
-		imageptr = ImagePtr(image);				\
+		refresh(la);						\
 		return Point(0, 0);					\
 	}								\
 }
@@ -205,14 +132,18 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 	if (NULL != imagep) {						\
 		LuminanceAdapter<Pixel, double>	la(*imagep);		\
 		DerivativePhaseCorrelator	pc(true);		\
-		return pc(*image, la).first;				\
+		Point	o = pc(*_image, la).first;			\
+		if (refreshNeeded()) {					\
+			refresh(la, o);					\
+		}							\
+		return o + _offset;					\
 	}								\
 }
 
 Point	DifferentialPhaseTracker::operator()(ImagePtr newimage) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting offset from %s image",
 		newimage->size().toString().c_str());
-	if (!imageptr) {
+	if (!_imageptr) {
 		diffphasetracker_construct(unsigned char);
 		diffphasetracker_construct(unsigned short);
 		diffphasetracker_construct(unsigned int);
@@ -257,7 +188,7 @@ Point	DifferentialPhaseTracker::operator()(ImagePtr newimage) {
 std::string	DifferentialPhaseTracker::toString() const {
 	std::string	info
 		= stringprintf("DifferentialPhaseTracker on %s image",
-			(image) ? image->size().toString().c_str()
+			(_image) ? _image->size().toString().c_str()
 				: "(undefined)");
 	return info;
 }

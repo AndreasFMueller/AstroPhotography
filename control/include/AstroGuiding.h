@@ -169,14 +169,43 @@ std::ostream&	operator<<(std::ostream& out, const StarTracker& tracker);
 std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
 
 /**
+ * \brief Refreshing functionailty for phase correlation tracking
+ *
+ * Because an image may slightly change over time, the phase correlation
+ * tracker becomes worse over time. This can be compensated for by
+ * refreshing the first image from time to time. But the new image may
+ * have an offset with respect to the original image, so we have to
+ * keep track of the offset too, and add it to the new offset.
+ */
+class RefreshingTracker : public Tracker {
+	double	_refreshinterval;
+public:
+	double	refreshinterval() const { return _refreshinterval; }
+	void	refreshinterval(double r) { _refreshinterval = r; }
+protected:
+	image::ImagePtr	_imageptr;
+	Image<double>	*_image;
+	double	_lastimagetime;
+	Point	_offset;
+	bool	refreshNeeded();
+	void	refresh(const ConstImageAdapter<double>& ia,
+			const Point offset = Point());
+public:
+	image::ImagePtr	imageptr() const { return _imageptr; }
+
+	RefreshingTracker();
+	virtual ~RefreshingTracker();
+	virtual Point	operator()(image::ImagePtr newimage) = 0;
+	virtual std::string	toString() const;
+};
+
+/**
  * \brief PhaseCorrelator based Tracker
  *
  * This Tracker uses the PhaseCorrelator class. It is to be used in case
  * where there is no good guide star.
  */
-class PhaseTracker : public Tracker {
-	image::ImagePtr	imageptr;
-	Image<double>	*image;
+class PhaseTracker : public RefreshingTracker {
 public:
 	PhaseTracker();
 	virtual Point	operator()(image::ImagePtr newimage);
@@ -189,9 +218,7 @@ public:
  * This tracker uses the phase correlator, but it uses the differential
  * adapter before it does the correlation.
  */
-class DifferentialPhaseTracker : public Tracker {
-	image::ImagePtr	imageptr;
-	Image<double>	*image;
+class DifferentialPhaseTracker : public RefreshingTracker {
 public:
 	DifferentialPhaseTracker();
 	virtual Point	operator()(image::ImagePtr newimage);
