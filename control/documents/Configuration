@@ -1,0 +1,54 @@
+Global configuration
+--------------------
+
+The library has a number of configuration settings it can read from
+the configuration database (for tools and servers) or from the properties
+file (for drivers)
+
+repository.basedir	
+	when new repositories are created, they should be added to this
+	directory
+
+repository.default
+	The default repository where to place images taken during guiding
+
+service.name
+	The service name the snowstar server shoul use
+
+service.port
+	The port on which the snowstar server is supposed to listen
+
+service.sslport
+	The TLS port on which the snowstar server is supposed to listen
+
+
+Device properties
+-----------------
+
+Device properties provide additional information to the drivers. For devices
+with a serial port, they map the device name to the serial port to use
+to communicate with the device. The format of these properties is alwas
+
+    <devicename>.<propertyname> = <value>
+
+The following properties are used in some of the drivers:
+
+Celestron driver:
+
+The Celestron driver needs a serial device for communication. The device
+name is not in any way discoverable, so it needs to be configured in the
+properties file. The mount with the device URL mount:celestron/<unit> looks
+for the serial device path in preoprty "mount:celestron/<unit>.device"
+
+
+Starlight Express driver:
+
+Starlight Express adaptive optics units use a serial port for communication.
+The units are named "adaptiveoptics:sx/<unit>", where <unit> is the
+unit number (0 to 3). The serial device to use is found in the property
+named "device", i.e. an entry of the form
+
+	adaptiveoptics:sx/0.device = /dev/tty.KeySerial1
+
+is needed.
+
