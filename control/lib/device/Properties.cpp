@@ -15,9 +15,9 @@ namespace astro {
 /**
  * \brief Properties Constructor
  */
-Properties::Properties(const std::string& name) {
+Properties::Properties(const std::string& devicename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create properties for device '%s'",
-		name.c_str());
+		devicename.c_str());
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "trying system file: %s",
 			DEVICEPROPERTIES);

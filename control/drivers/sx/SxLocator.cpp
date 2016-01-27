@@ -154,13 +154,19 @@ static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
 std::vector<std::string>	SxCameraLocator::getDevicelist(DeviceName::device_type device) {
 	std::vector<std::string>	names;
 
+	// special treatment for adaptive optics devices. These devices
+	// are not discoverable, so their names must be retrieved from
+	// the properties file
+	if (device == DeviceName::AdaptiveOptics) {
+	}
+
 	// list all devices from the context
 	std::vector<DevicePtr>	d = context.devices();
 	std::vector<DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		// try to open the device. On Mac OS X, opening doesn't fail
 		// ever, but on Linux, we may not have permission to open
-		// all devices
+		// all devices. We ignore devices that we cannot open
 		try {
 			DevicePtr	devptr = *i;
 			devptr->open();

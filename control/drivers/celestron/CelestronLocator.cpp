@@ -10,6 +10,7 @@
 #include <AstroLoader.h>
 #include <config.h>
 #include <CelestronMount.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace module {
@@ -67,7 +68,15 @@ std::vector<std::string>	CelestronLocator::getDevicelist(
 	if (DeviceName::Mount != device) {
 		return names;
 	}
-	names.push_back(std::string("mount:celestron/0"));
+	// no check whether we have properties for celestron devices
+	for (int unit = 0; unit < 4; unit++) {
+		std::string	devicename
+			= stringprintf("mount:celestrong/%d", unit);
+		Properties	properties(devicename);
+		if (properties.hasProperty("device")) {
+			names.push_back(devicename);
+		}
+	}
 	return names;
 }
 
