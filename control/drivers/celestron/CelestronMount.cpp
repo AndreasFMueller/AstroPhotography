@@ -22,7 +22,8 @@ static std::string	getserialname(const std::string& devicename) {
 	try {
 		int	unit = std::stod(dev.unitname());
 		Properties	properties(devicename);
-		std::string	propertyname = stringprintf("device", unit);
+		std::string	propertyname
+			= stringprintf("celestron.device.%d", unit);
 		std::string	serialname
 			= properties.getProperty(propertyname);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found serial name: %s",
