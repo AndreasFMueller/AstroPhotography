@@ -102,17 +102,23 @@ esac
 set -x
 
 # now that we have all the information, run the configure script
+if [ -d /usr/local/astro ]
+then
+	prefix=/usr/local/astro
+else
+	prefix=`pwd`/root
+fi
 case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CXXFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} --enable-boostregex
+	./configure --prefix=${prefix} ${commonflags} --enable-boostregex
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
-	./configure --prefix=`pwd`/root ${commonflags} \
+	./configure --prefix=${prefix} ${commonflags} \
 		${sbigoption}
 	;;
 SuSE)
@@ -130,7 +136,7 @@ SuSE)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export LDFLAGS CFLAGS CXXFLAGS
 
-	./configure --prefix=`pwd`/root ${commonflags} --enable-unicap \
+	./configure --prefix=${prefix} ${commonflags} --enable-unicap \
 		${sbigoption} --enable-boostregex
 	;;
 Darwin)
@@ -138,7 +144,7 @@ Darwin)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS
 	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
-	./configure --prefix=`pwd`/root ${commonflags} --enable-uvc \
+	./configure --prefix=${prefix} ${commonflags} --enable-uvc \
 		${sbigoption}
 	;;
 esac
