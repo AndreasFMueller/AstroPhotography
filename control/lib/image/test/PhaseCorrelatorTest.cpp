@@ -37,6 +37,7 @@ public:
 	void	testJupiterSequence();
 	void	testDisks();
 	void	testTriangle();
+	void	testMoon();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
 //	CPPUNIT_TEST(testInteger);
@@ -47,7 +48,8 @@ public:
 //	CPPUNIT_TEST(testJupiter);
 //	CPPUNIT_TEST(testJupiterSequence);
 //	CPPUNIT_TEST(testDisks);
-	CPPUNIT_TEST(testTriangle);
+//	CPPUNIT_TEST(testTriangle);
+	CPPUNIT_TEST(testMoon);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -361,5 +363,31 @@ void	PhaseCorrelatorTest::testTriangle() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "end testTriangle()");
 }
 
+void	PhaseCorrelatorTest::testMoon() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "beginMoon test");
+
+	FITSin	imagefile("testimages/moon-small.fits");
+	ImagePtr	imageptr = imagefile.read();
+	Image<unsigned char>	*image = dynamic_cast<Image<unsigned char> *>(&*imageptr);
+	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	Point	t(50,16);
+	TranslationAdapter<double>	ta(doubleimage, t);
+
+	// create a phase correlator
+	DerivativePhaseCorrelator	pc(true);
+	std::pair<Point, double>	result = pc(doubleimage, ta);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
+
+	// expected result: (-15,26)
+	Point	effective(round(result.first.x()), round(result.first.y()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s ?= %s",
+		t.toString().c_str(), effective.toString().c_str());
+	CPPUNIT_ASSERT(t == effective);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "endMoon test");
+}
 } // namespace test
 } // namespace astro
