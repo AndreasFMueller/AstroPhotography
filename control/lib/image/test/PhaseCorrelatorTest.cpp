@@ -38,6 +38,7 @@ public:
 	void	testDisks();
 	void	testTriangle();
 	void	testMoon();
+	void	testOrion();
 
 	CPPUNIT_TEST_SUITE(PhaseCorrelatorTest);
 //	CPPUNIT_TEST(testInteger);
@@ -49,7 +50,8 @@ public:
 //	CPPUNIT_TEST(testJupiterSequence);
 //	CPPUNIT_TEST(testDisks);
 //	CPPUNIT_TEST(testTriangle);
-	CPPUNIT_TEST(testMoon);
+//	CPPUNIT_TEST(testMoon);
+	CPPUNIT_TEST(testOrion);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -372,9 +374,12 @@ void	PhaseCorrelatorTest::testMoon() {
 	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
-	for (int dx = -10; dx <= 10; dx++) {
-		for (int dy = -10; dy <= 10; dy++) {
-			Point	t(dx,dy);
+	int	from = 10;
+	int	to = 10;
+
+	for (int dx = from; dx <= to; dx++) {
+		for (int dy = from; dy <= to; dy++) {
+			Point	t(dx + 0.7,dy + 0.1);
 			TranslationAdapter<double>	ta(doubleimage, t);
 		
 
@@ -392,6 +397,36 @@ void	PhaseCorrelatorTest::testMoon() {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "endMoon test");
+}
+
+void	PhaseCorrelatorTest::testOrion() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "beginOrion test");
+
+	FITSin	image1file("testimages/orion1.fits");
+	ImagePtr	image1ptr = image1file.read();
+	Image<unsigned short>	*image1 = dynamic_cast<Image<unsigned short> *>(&*image1ptr);
+	if (NULL == image1) {
+		throw std::runtime_error("image1: wrong type");
+	}
+	TypeReductionAdapter<double, unsigned short>	from(*image1);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
+
+	FITSin	image2file("testimages/orion2.fits");
+	ImagePtr	image2ptr = image2file.read();
+	Image<unsigned short>	*image2 = dynamic_cast<Image<unsigned short> *>(&*image2ptr);
+	if (NULL == image2) {
+		throw std::runtime_error("image2: wrong type");
+	}
+	TypeReductionAdapter<double, unsigned short>	to(*image2);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "test chart read");
+
+	// create a phase correlator
+	PhaseCorrelator	pc(false);
+	std::pair<Point, double>	result = pc(from, to);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+		result.first.toString().c_str(), result.second);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "endOrion test");
 }
 } // namespace test
 } // namespace astro
