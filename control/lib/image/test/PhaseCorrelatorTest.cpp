@@ -372,20 +372,24 @@ void	PhaseCorrelatorTest::testMoon() {
 	TypeReductionAdapter<double, unsigned char>	doubleimage(*image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test image read");
 
-	Point	t(50,16);
-	TranslationAdapter<double>	ta(doubleimage, t);
+	for (int dx = -10; dx <= 10; dx++) {
+		for (int dy = -10; dy <= 10; dy++) {
+			Point	t(dx,dy);
+			TranslationAdapter<double>	ta(doubleimage, t);
+		
 
-	// create a phase correlator
-	DerivativePhaseCorrelator	pc(true);
-	std::pair<Point, double>	result = pc(doubleimage, ta);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
-		result.first.toString().c_str(), result.second);
+			// create a phase correlator
+			DerivedPhaseCorrelator<AbsoluteLaplaceAdapter<double> >	pc(true);
+			std::pair<Point, double>	result = pc(doubleimage, ta);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "offset = %s, weight = %f",
+				result.first.toString().c_str(), result.second);
 
-	// expected result: (-15,26)
-	Point	effective(round(result.first.x()), round(result.first.y()));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s ?= %s",
-		t.toString().c_str(), effective.toString().c_str());
-	CPPUNIT_ASSERT(t == effective);
+			// expected result: (dx, dy)
+			Point	delta = result.first - t;
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %s",
+				delta.toString().c_str());
+		}
+	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "endMoon test");
 }

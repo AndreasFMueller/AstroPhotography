@@ -1794,7 +1794,17 @@ public:
 		return _d2x.pixel(x, y) + _d2y.pixel(x, y);
 	}
 };
-	
+
+template<typename Pixel>
+class AbsoluteLaplaceAdapter : public LaplaceAdapter<Pixel> {
+public:
+	AbsoluteLaplaceAdapter(const ConstImageAdapter<Pixel>& image)
+		: LaplaceAdapter<Pixel>(image) { }
+	virtual double	pixel(int x, int y) const {
+		return fabs(LaplaceAdapter<Pixel>::pixel(x, y));
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Normalization to 1
 //////////////////////////////////////////////////////////////////////
