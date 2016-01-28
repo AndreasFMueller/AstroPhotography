@@ -157,9 +157,11 @@ module snowstar {
 
 	enum TrackerMethod {
 		TrackerUNDEFINED,
+		TrackerNULL,
 		TrackerSTAR,
 		TrackerPHASE,
-		TrackerDIFFPHASE
+		TrackerDIFFPHASE,
+		TrackerLAPLACE
 	};
 	/**
 	 * \brief Interface for guiders

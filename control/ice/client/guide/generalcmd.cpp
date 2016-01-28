@@ -96,7 +96,9 @@ void	Guide::usage(const char *progname) {
 	std::cout << "  -m,--method=<m>       use tracking method <m>. Available methods are 'star'" << std::endl;
 	std::cout << "                        (centroid of a star), 'phase' (uses cross correlation" << std::endl;
 	std::cout << "                        to find image offsets), 'diff' (uses cross correlation" << std::endl;
-	std::cout << "                        on edges in the image to find image offsets)" << std::endl;
+	std::cout << "                        on edges in the image to find image offsets)," << std::endl;
+	std::cout << "                        'laplace' (take laplace operator on image)," << std::endl;
+	std::cout << "                        'null' (always return offset 0)" << std::endl;
 	std::cout << "  -r,--rectangle=<rec>  expose only a subrectangle as "
 		"specified by <rec>." << std::endl;
 	std::cout << "                        <rec> must be of the form";

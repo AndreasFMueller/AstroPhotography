@@ -1740,6 +1740,60 @@ public:
 		return hypot(dx, dy);
 	}
 };
+
+template<typename Pixel>
+class Derivative2XAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	Derivative2XAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (x == 0) {
+			x = 1;
+		}
+		int	w = _image.getSize().width() - 1;
+		if (x == w) {
+			x = w - 1;
+		}
+		return _image.pixel(x - 1, y) - 2 * _image.pixel(x, y)
+			+ _image.pixel(x + 1, y);
+	}
+};
+
+template<typename Pixel>
+class Derivative2YAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	_image;
+public:
+	Derivative2YAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		if (y == 0) {
+			y = 1;
+		}
+		int	h = _image.getSize().height() - 1;
+		if (y == h) {
+			y = h - 1;
+		}
+		return _image.pixel(x, y - 1) - 2 * _image.pixel(x, y)
+			+ _image.pixel(x, y + 1);
+	}
+};
+
+template<typename Pixel>
+class LaplaceAdapter : public ConstImageAdapter<double> {
+	Derivative2XAdapter<Pixel>	_d2x;
+	Derivative2YAdapter<Pixel>	_d2y;
+public:
+	LaplaceAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<double>(image.getSize()), 
+		  _d2x(image), _d2y(image) {
+	}
+	virtual double	pixel(int x, int y) const {
+		return _d2x.pixel(x, y) + _d2y.pixel(x, y);
+	}
+};
 	
 //////////////////////////////////////////////////////////////////////
 // Normalization to 1

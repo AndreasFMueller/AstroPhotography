@@ -294,6 +294,7 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 }
 
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // derivative phase correlator implementation
 //////////////////////////////////////////////////////////////////////
@@ -305,6 +306,7 @@ std::pair<Point, double>	DerivativePhaseCorrelator::operator()(
 	DerivativeNormAdapter<double>	i2(toimage);
 	return PhaseCorrelator::operator()(i1, i2);
 }
+#endif
 
 } // namespace transform
 } // namespace image

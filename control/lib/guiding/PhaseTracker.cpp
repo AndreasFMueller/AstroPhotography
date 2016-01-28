@@ -17,6 +17,7 @@ using namespace astro::adapter;
 namespace astro {
 namespace guiding {
 
+#if 0
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Phase Tracker
 //////////////////////////////////////////////////////////////////////
@@ -26,69 +27,18 @@ PhaseTracker::PhaseTracker() {
 	_image = NULL;
 }
 
-#define	phasetracker_construct(Pixel)					\
-{									\
-	Image<Pixel>	*imagep						\
-		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
-	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		refresh(la);						\
-		return Point(0, 0);					\
-	}								\
-}
-
-#define	phasetracker_typed(Pixel)					\
-{									\
-	Image<Pixel>	*imagep						\
-		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
-	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		PhaseCorrelator	pc;					\
-		return correlate(la, pc);				\
-	}								\
-}
-
 Point	PhaseTracker::operator()(ImagePtr newimage) {
 	if (!_imageptr) {
-		phasetracker_construct(unsigned char);
-		phasetracker_construct(unsigned short);
-		phasetracker_construct(unsigned int);
-		phasetracker_construct(unsigned long);
-		phasetracker_construct(float);
-		phasetracker_construct(double);
-		phasetracker_construct(RGB<unsigned char>);
-		phasetracker_construct(RGB<unsigned short>);
-		phasetracker_construct(RGB<unsigned int>);
-		phasetracker_construct(RGB<unsigned long>);
-		phasetracker_construct(RGB<float>);
-		phasetracker_construct(RGB<double>);
-		phasetracker_construct(YUYV<unsigned char>);
-		phasetracker_construct(YUYV<unsigned short>);
-		phasetracker_construct(YUYV<unsigned int>);
-		phasetracker_construct(YUYV<unsigned long>);
-		phasetracker_construct(YUYV<float>);
-		phasetracker_construct(YUYV<double>);
-		throw std::runtime_error("cannot track this image type");
+		ConstImageAdapter<double>	*a = adapter(newimage);
+		refresh(*a);
+		delete a;
+		return Point(0,0);
 	}
-	phasetracker_typed(unsigned char);
-	phasetracker_typed(unsigned short);
-	phasetracker_typed(unsigned int);
-	phasetracker_typed(unsigned long);
-	phasetracker_typed(float);
-	phasetracker_typed(double);
-	phasetracker_typed(RGB<unsigned char>);
-	phasetracker_typed(RGB<unsigned short>);
-	phasetracker_typed(RGB<unsigned int>);
-	phasetracker_typed(RGB<unsigned long>);
-	phasetracker_typed(RGB<float>);
-	phasetracker_typed(RGB<double>);
-	phasetracker_typed(YUYV<unsigned char>);
-	phasetracker_typed(YUYV<unsigned short>);
-	phasetracker_typed(YUYV<unsigned int>);
-	phasetracker_typed(YUYV<unsigned long>);
-	phasetracker_typed(YUYV<float>);
-	phasetracker_typed(YUYV<double>);
-	throw std::runtime_error("cannot track this image type");
+	ConstImageAdapter<double>	*a = adapter(newimage);
+	PhaseCorrelator	pc;
+	Point	result = correlate(*a, pc);
+	delete a;
+	return result;
 }
 
 std::string	PhaseTracker::toString() const {
@@ -108,71 +58,20 @@ DifferentialPhaseTracker::DifferentialPhaseTracker() {
 	_image = NULL;
 }
 
-#define	diffphasetracker_construct(Pixel)				\
-{									\
-	Image<Pixel>	*imagep						\
-		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
-	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		refresh(la);						\
-		return Point(0, 0);					\
-	}								\
-}
-
-#define	diffphasetracker_typed(Pixel)					\
-{									\
-	Image<Pixel>	*imagep						\
-		= dynamic_cast<Image<Pixel > *>(&*newimage);		\
-	if (NULL != imagep) {						\
-		LuminanceAdapter<Pixel, double>	la(*imagep);		\
-		DerivativePhaseCorrelator	pc(true);		\
-		return correlate(la, pc);				\
-	}								\
-}
-
 Point	DifferentialPhaseTracker::operator()(ImagePtr newimage) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting offset from %s image",
 		newimage->size().toString().c_str());
 	if (!_imageptr) {
-		diffphasetracker_construct(unsigned char);
-		diffphasetracker_construct(unsigned short);
-		diffphasetracker_construct(unsigned int);
-		diffphasetracker_construct(unsigned long);
-		diffphasetracker_construct(float);
-		diffphasetracker_construct(double);
-		diffphasetracker_construct(RGB<unsigned char>);
-		diffphasetracker_construct(RGB<unsigned short>);
-		diffphasetracker_construct(RGB<unsigned int>);
-		diffphasetracker_construct(RGB<unsigned long>);
-		diffphasetracker_construct(RGB<float>);
-		diffphasetracker_construct(RGB<double>);
-		diffphasetracker_construct(YUYV<unsigned char>);
-		diffphasetracker_construct(YUYV<unsigned short>);
-		diffphasetracker_construct(YUYV<unsigned int>);
-		diffphasetracker_construct(YUYV<unsigned long>);
-		diffphasetracker_construct(YUYV<float>);
-		diffphasetracker_construct(YUYV<double>);
-		throw std::runtime_error("cannot track this image type");
+		ConstImageAdapter<double>	*a = adapter(newimage);
+		refresh(*a);
+		delete a;
+		return Point(0,0);
 	}
-	diffphasetracker_typed(unsigned char);
-	diffphasetracker_typed(unsigned short);
-	diffphasetracker_typed(unsigned int);
-	diffphasetracker_typed(unsigned long);
-	diffphasetracker_typed(float);
-	diffphasetracker_typed(double);
-	diffphasetracker_typed(RGB<unsigned char>);
-	diffphasetracker_typed(RGB<unsigned short>);
-	diffphasetracker_typed(RGB<unsigned int>);
-	diffphasetracker_typed(RGB<unsigned long>);
-	diffphasetracker_typed(RGB<float>);
-	diffphasetracker_typed(RGB<double>);
-	diffphasetracker_typed(YUYV<unsigned char>);
-	diffphasetracker_typed(YUYV<unsigned short>);
-	diffphasetracker_typed(YUYV<unsigned int>);
-	diffphasetracker_typed(YUYV<unsigned long>);
-	diffphasetracker_typed(YUYV<float>);
-	diffphasetracker_typed(YUYV<double>);
-	throw std::runtime_error("cannot track this image type");
+	ConstImageAdapter<double>	*a = adapter(newimage);
+	DerivativePhaseCorrelator	pc;
+	Point	result = correlate(*a, pc);
+	delete a;
+	return result;
 }
 
 std::string	DifferentialPhaseTracker::toString() const {
@@ -183,6 +82,7 @@ std::string	DifferentialPhaseTracker::toString() const {
 	return info;
 }
 
+#endif
 
 } // namespace guiding
 } // namespace astro

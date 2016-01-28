@@ -27,11 +27,13 @@ libastroguiding_la_SOURCES = 						\
 	GuiderFactory.cpp						\
 	GuiderPortProcess.cpp						\
 	GuiderStateMachine.cpp						\
+	NullTracker.cpp							\
 	RefreshingTracker.cpp						\
 	SaveImageCallback.cpp						\
 	StarDetectorBase.cpp						\
 	StarTracker.cpp							\
 	PhaseTracker.cpp						\
+	Tracker.cpp							\
 	TrackingPersistence.cpp						\
 	TrackingPoint.cpp						\
 	TrackingProcess.cpp						\

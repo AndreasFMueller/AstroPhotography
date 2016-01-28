@@ -378,13 +378,18 @@ public:
  * derivative of an image creates such features, but also increases
  * the noise level.
  */
-class DerivativePhaseCorrelator : public PhaseCorrelator {
+template<typename Adapter>
+class DerivedPhaseCorrelator : public PhaseCorrelator {
 public:
-	DerivativePhaseCorrelator(bool hanning = true)
+	DerivedPhaseCorrelator(bool hanning = true)
 		: PhaseCorrelator(hanning) { }
 	virtual std::pair<Point, double>	operator()(
 		const ConstImageAdapter<double>& fromimage,
-		const ConstImageAdapter<double>& toimage);
+		const ConstImageAdapter<double>& toimage) {
+		Adapter	from(fromimage);
+		Adapter	to(toimage);
+		return PhaseCorrelator::operator()(from, to);
+	}
 };
 
 /**

@@ -352,7 +352,7 @@ void	PhaseCorrelatorTest::testTriangle() {
 		}
 	}
 
-	DerivativePhaseCorrelator	pc(true);
+	DerivedPhaseCorrelator<DerivativeNormAdapter<double> >	pc(true);
 	std::pair<Point, double>	result = pc(fromimage, toimage);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0,

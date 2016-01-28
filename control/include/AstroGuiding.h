@@ -122,10 +122,22 @@ Point	findstar(image::ImagePtr image,
 class Tracker {
 public:
 	virtual Point	operator()(image::ImagePtr newimage) = 0;
-	virtual	std::string	toString() const = 0;
+	virtual	std::string	toString() const;
 };
 
 typedef std::shared_ptr<Tracker>	TrackerPtr;
+
+/**
+ * \brief A Tracker class that always returns 0 offset
+ *
+ * This tracker can be used to track blindly, i.e. only applying the
+ * constant drift measured in the calibration.
+ */
+class NullTracker : public Tracker {
+public:
+	NullTracker() { }
+	virtual Point	operator()(image::ImagePtr newimage);
+};
 
 /**
  * \brief StarDetector based Tracker
@@ -190,8 +202,10 @@ protected:
 	bool	refreshNeeded();
 	void	refresh(const ConstImageAdapter<double>& adapter,
 			const Point offset = Point());
+	Point	correlate(const ConstImageAdapter<double>& adapter);
 	Point	correlate(const ConstImageAdapter<double>& adapter,
 			image::transform::PhaseCorrelator& correlator);
+	static ConstImageAdapter<double>	*adapter(ImagePtr image);
 public:
 	image::ImagePtr	imageptr() const { return _imageptr; }
 
@@ -207,13 +221,26 @@ public:
  * This Tracker uses the PhaseCorrelator class. It is to be used in case
  * where there is no good guide star.
  */
+template<typename Adapter>
 class PhaseTracker : public RefreshingTracker {
 public:
-	PhaseTracker();
-	virtual Point	operator()(image::ImagePtr newimage);
-	virtual std::string	toString() const;
+	PhaseTracker() { }
+	virtual Point	operator()(image::ImagePtr newimage) {
+		ConstImageAdapter<double>	*a = adapter(newimage);
+		if (!_imageptr) {
+			Adapter	from(*a);
+			refresh(from);
+			delete a;
+			return Point(0,0);
+		}
+		Adapter	to(*a);
+		Point	result = correlate(to);
+		delete a;
+		return result;
+	}
 };
 
+#if 0
 /**
  * \brief Phase correlator based tracker using the differential
  *
@@ -226,6 +253,7 @@ public:
 	virtual Point	operator()(image::ImagePtr newimage);
 	virtual std::string	toString() const;
 };
+#endif
 
 //class GuiderCalibrator;
 
@@ -846,8 +874,10 @@ public:
 	// methods involved with creating a tracker
 	double	getPixelsize();
 	TrackerPtr	getTracker(const Point& point);
+	TrackerPtr	getNullTracker();
 	TrackerPtr	getPhaseTracker();
 	TrackerPtr	getDiffPhaseTracker();
+	TrackerPtr	getLaplaceTracker();
 
 private:
 	BasicProcessPtr	trackingprocess;

@@ -14,6 +14,7 @@
 #include <CalibrationPersistence.h>
 #include <CalibrationStore.h>
 #include <TrackingProcess.h>
+#include <AstroAdapter.h>
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -342,14 +343,23 @@ TrackerPtr	Guider::getTracker(const Point& point) {
 	return tracker;
 }
 
+TrackerPtr	Guider::getNullTracker() {
+	return TrackerPtr(new NullTracker());
+}
+
 TrackerPtr	Guider::getPhaseTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a standard phase tracker");
-	return TrackerPtr(new PhaseTracker());
+	return TrackerPtr(new PhaseTracker<adapter::IdentityAdapter<double> >());
 }
 
 TrackerPtr	Guider::getDiffPhaseTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a differential phase tracker");
-	return TrackerPtr(new DifferentialPhaseTracker());
+	return TrackerPtr(new PhaseTracker<adapter::DerivativeNormAdapter<double> >());
+}
+
+TrackerPtr	Guider::getLaplaceTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a laplace tracker");
+	return TrackerPtr(new PhaseTracker<adapter::LaplaceAdapter<double> >());
 }
 
 /**

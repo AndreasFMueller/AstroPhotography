@@ -365,6 +365,10 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 
 	switch (_method) {
 	case TrackerUNDEFINED:
+	case TrackerNULL:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a NULL tracker");
+		return guider->getNullTracker();
+		break;
 	case TrackerSTAR:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a star tracker");
 		return guider->getTracker(convert(_point));
@@ -376,6 +380,10 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 	case TrackerDIFFPHASE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a diff tracker");
 		return guider->getDiffPhaseTracker();
+		break;
+	case TrackerLAPLACE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a laplace tracker");
+		return guider->getLaplaceTracker();
 		break;
 	}
 }
