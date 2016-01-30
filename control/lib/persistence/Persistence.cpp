@@ -362,7 +362,8 @@ Row	TableBase::rowbyid(long objectid) {
 	//debug(LOG_DEBUG, DEBUG_LOG, 0, "object id: %d", objectid);
 	Result	result = stmt->result();
 	if (result.size() != 1) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "internal error: objectid");
+		debug(LOG_ERR, DEBUG_LOG, 0, "internal error: objectid %s",
+			sq.c_str());
 		throw std::runtime_error("wrong number of rows");
 	}
 	return result.front();
@@ -427,6 +428,16 @@ void	TableBase::remove(const std::list<long>& objectids) {
 	for (i = objectids.begin(); i != objectids.end(); i++) {
 		remove(*i);
 	}
+}
+
+/**
+ * /brief Remove all rows that match a condition
+ */
+void	TableBase::remove(const std::string& condition) {
+	std::ostringstream	out;
+	out << "delete from " << _tablename << " where " << condition;
+	StatementPtr	stmt = _database->statement(out.str());
+	stmt->execute();
 }
 
 /**

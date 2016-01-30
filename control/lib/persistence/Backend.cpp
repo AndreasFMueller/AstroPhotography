@@ -350,7 +350,8 @@ Result	Sqlite3Backend::query(const std::string& query) {
 	if (SQLITE_OK == rc) {
 		return collector.result;
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "query fails: %s", errmsg);
+	debug(LOG_ERR, DEBUG_LOG, 0, "query '%s' fails: %s",
+		query.c_str(), errmsg);
 	throw Sqlite3Exception(*this, std::string(errmsg));
 }
 

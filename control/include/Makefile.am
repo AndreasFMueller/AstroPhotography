@@ -5,7 +5,7 @@
 # $Id$
 #
 include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
-	AstroLoader.h AstroDisplay.h AstroImager.h \
+	AstroLoader.h AstroDisplay.h AstroEvent.h AstroImager.h \
 	AstroIO.h AstroPixel.h AstroUSB.h AstroUVC.h AstroUnicap.h \
 	AstroUtils.h AstroMosaic.h AstroDemosaic.h AstroAdapter.h \
 	AstroFilter.h AstroFilterfunc.h AstroCalibration.h \

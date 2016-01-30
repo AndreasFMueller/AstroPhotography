@@ -243,6 +243,7 @@ public:
 	bool	exists(long objectid);
 	void	remove(long objectid);
 	void	remove(const std::list<long>& objectids);
+	void	remove(const std::string& condition);
 	std::list<long>	selectids(const std::string& condition);
 	Result	selectrows(const std::string& condition);
 };

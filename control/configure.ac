@@ -399,6 +399,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	lib/utils/Makefile lib/utils/test/Makefile
 	lib/persistence/Makefile lib/persistence/test/Makefile
 	lib/discovery/Makefile lib/discovery/test/Makefile
+	lib/event/Makefile lib/event/test/Makefile
 	lib/image/Makefile lib/image/test/Makefile
 	lib/processing/Makefile lib/processing/test/Makefile
 	lib/device/Makefile lib/device/test/Makefile
