@@ -32,6 +32,7 @@
 #include <InstrumentLocator.h>
 #include <InstrumentsI.h>
 #include <CommunicatorSingleton.h>
+#include <AstroEvent.h>
 
 namespace snowstar {
 
@@ -196,6 +197,9 @@ int	snowstar_main(int argc, char *argv[]) {
 	astro::task::TaskQueue	taskqueue(database);
 	sp->set(astro::discover::ServiceSubset::TASKS);
 	if (sps) { sps->set(astro::discover::ServiceSubset::TASKS); }
+
+	// activate the event log
+	astro::event::EventHandler::active(true);
 
 	// create guider factory
 	astro::guiding::GuiderFactory	guiderfactory(repository, database);

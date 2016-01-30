@@ -57,7 +57,7 @@ test:	snowstar
 		servername=server; \
 	fi; \
 	./snowstar --debug --base=`pwd`/images --database=`pwd`/testdb.db \
-		--condig=`pwd`/testdb.db --name=$${servername} --foreground \
+		--config=`pwd`/testdb.db --name=$${servername} --foreground \
 		2>&1 | tee test.log
 
 testsun:	snowstar

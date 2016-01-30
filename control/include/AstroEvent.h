@@ -68,7 +68,7 @@ private:
 } // namespace astro
 } // namespace event
 
-#define	EVENT_LOG	__FILE__, __LINE__, demangle(typeid(*this).name())
+#define	EVENT_LOG	__FILE__, __LINE__, astro::demangle(typeid(*this).name())
 
 extern void	event(const char *file, int line, const std::string& object,
 			const astro::event::Event::Subsystem subsystem,

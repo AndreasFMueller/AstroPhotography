@@ -14,6 +14,7 @@
 #include <AstroGuiding.h>
 #include <CalibrationSource.h>
 #include <AstroUtils.h>
+#include <AstroEvent.h>
 
 namespace snowstar {
 
@@ -99,6 +100,8 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 
 	// add the guider we have constructed to the D
 	locator->add(gn, guiderptr);
+	::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::stringprintf("new guider: %s", gn.c_str()));
 
 	// create a proxy
 	std::string	ename = NameConverter::urlencode(gn);

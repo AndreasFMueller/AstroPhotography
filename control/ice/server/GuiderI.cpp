@@ -15,6 +15,7 @@
 #include <TrackingPersistence.h>
 #include <TrackingStore.h>
 #include "CalibrationSource.h"
+#include <AstroEvent.h>
 
 namespace snowstar {
 
@@ -248,6 +249,9 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 	// retrieve guider data from the database
 	try {
 		guider->useCalibration(calid);
+		::event(EVENT_LOG, astro::event::Event::GUIDE,
+			astro::stringprintf("%s now uses calibration %d",
+			guider->name().c_str(), calid));
 	} catch (const astro::guiding::BadState x) {
 		throw BadState(x.what());
 	} catch (const astro::guiding::NotFound x) {
@@ -283,9 +287,15 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 	try {
 		switch (calibrationtype) {
 		case ControlGuiderPort:
+			::event(EVENT_LOG, astro::event::Event::GUIDE,
+				astro::stringprintf("GP %s uncalibrated",
+				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::GP);
 			break;
 		case ControlAdaptiveOptics:
+			::event(EVENT_LOG, astro::event::Event::GUIDE,
+				astro::stringprintf("AO %s uncalibrated",
+				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::AO);
 			break;
 		}
@@ -340,8 +350,14 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 	// start the calibration
 	switch (caltype) {
 	case ControlGuiderPort:
+		::event(EVENT_LOG, astro::event::Event::GUIDE,
+			astro::stringprintf("start GP %s calibration",
+			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
 	case ControlAdaptiveOptics:
+		::event(EVENT_LOG, astro::event::Event::GUIDE,
+			astro::stringprintf("start AO %s calibration",
+			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
@@ -433,6 +449,9 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, gpinterval, aointerval);
+	::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::stringprintf("start guiding %s",
+		guider->name().c_str()));
 }
 
 Ice::Float GuiderI::getGuidingInterval(const Ice::Current& /* current */) {
@@ -448,6 +467,9 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 
 	// remove the callback
 	//guider->trackingcallback(NULL);
+	::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::stringprintf("stop guiding %s",
+		guider->name().c_str()));
 }
 
 ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
