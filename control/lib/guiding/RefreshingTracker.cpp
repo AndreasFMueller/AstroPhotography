@@ -59,9 +59,9 @@ std::string	RefreshingTracker::toString() const {
  */
 void	RefreshingTracker::refresh(const ConstImageAdapter<double>& adapter,
 		const Point offset) {
+	_image = new Image<double>(adapter);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "refreshing with image %s",
 		_image->size().toString().c_str());
-	_image = new Image<double>(adapter);
 	_imageptr = ImagePtr(_image);
 	_offset = _offset + offset;
 	_lastimagetime = Timer::gettime();
