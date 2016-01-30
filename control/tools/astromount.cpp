@@ -10,6 +10,7 @@
 #include <AstroConfig.h>
 #include <AstroLoader.h>
 #include <AstroDevice.h>
+#include <AstroFormat.h>
 
 using namespace astro;
 using namespace astro::config;
@@ -86,6 +87,10 @@ static std::string	state2string(Mount::state_type state) {
 	case Mount::GOTO:
 		return std::string("goto");
 	}
+	std::string	cause = stringprintf("unknown mount state: %d",
+		(int)state);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	throw std::runtime_error(cause);
 }
 
 /**
@@ -201,7 +206,7 @@ int main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "mount utility");
 	int	c;
 	int	longindex;
-	putenv("POSIXLY_CORRECT=1");
+	putenv((char *)"POSIXLY_CORRECT=1");	// cast to silence compiler
 	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
 		&longindex))) {
 		switch (c) {
