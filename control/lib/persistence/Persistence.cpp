@@ -270,7 +270,8 @@ TableBase::TableBase(Database database, const std::string& tablename,
 	const std::string& createstatement)
 	: _database(database), _tablename(tablename) {
 	if (NULL == _database) {
-		throw std::runtime_error("no database persent");
+		debug(LOG_ERR, DEBUG_LOG, 0, "no database");
+		throw BadDatabase("no database persent");
 	}
 	// test whether the database contains the table
 	if (!_database->hastable(tablename)) {
@@ -341,7 +342,7 @@ long	TableBase::lastid() {
 		std::string	cause = stringprintf("no rows in table %s",
 			_tablename.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
-		throw std::runtime_error(cause);
+		throw persistence::NotFound(cause);
 	}
 	Row	row = result.front();
 	const FieldValuePtr&	field = row[0];
@@ -471,7 +472,11 @@ long	TableBase::id(const std::string& condition) {
 	out << "select id from " << _tablename << " where " << condition;
 	Result	result = _database->query(out.str());
 	if (1 != result.size()) {
-		throw std::runtime_error("not found");
+		std::string	cause
+			= stringprintf("no row for condition '%s'",
+			condition.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw NotFound(cause);
 	}
 	return (*result.begin())[0]->intValue();
 }

@@ -193,12 +193,22 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 		astro::guiding::TrackingStore	store(database);
 		TrackingHistory	history = convert(store.get(id));
 		return history;
-	} catch (const std::exception& ex) {
+	} catch (const astro::persistence::NotFound& ex) {
 		std::string	msg = astro::stringprintf("tracking history %d "
 			"not found: %s", id, ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
+	} catch (const std::exception& ex) {
+		std::string	cause = astro::stringprintf(
+			"tracking history %d not found: %s (%s)",
+			astro::demangle(typeid(ex).name()).c_str(), ex.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s");
+		throw NotFound(cause);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no history (unknown reason)");
+		throw NotFound("(unknown reason)");
 	}
+	throw std::runtime_error("internal error");
 }
 
 TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
@@ -218,12 +228,23 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 			return history;
 			}
 		}
-	} catch (const std::exception& ex) {
+	} catch (const astro::persistence::NotFound& ex) {
 		std::string	msg = astro::stringprintf("tracking history %d "
 			"not found: %s", id, ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);
+	} catch (const std::exception& ex) {
+		std::string	cause
+			= astro::stringprintf("no history: %s(%s)",
+				astro::demangle(typeid(ex).name()).c_str(),
+					ex.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw NotFound(cause);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no history (unknown reason)");
+		throw NotFound("(unknown reason)");
 	}
+	throw std::runtime_error("internal error");
 }
 
 

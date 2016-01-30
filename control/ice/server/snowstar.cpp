@@ -155,7 +155,11 @@ int	snowstar_main(int argc, char *argv[]) {
 		}
 		// if get here, we are in the child process
 		setsid();
-		chdir("/");
+		if (chdir("/") < 0) {
+			std::cerr << "cannot chdir to /: " << strerror(errno);
+			std::cerr<< std::endl;
+			return EXIT_FAILURE;
+		}
 		umask(027);
 	}
 	astro::PidFile	pidfile(pidfilename);

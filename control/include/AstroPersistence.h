@@ -27,6 +27,33 @@ namespace astro {
 namespace persistence {
 
 /**
+ * \brief Exception thrown when no rows are found
+ */
+class NotFound : public std::runtime_error {
+public:
+	NotFound(const std::string& cause) : std::runtime_error(cause) { }
+	NotFound(const char *cause) : std::runtime_error(cause) { }
+};
+
+/**
+ * \brief Exception thrown when there is no usable database
+ */
+class BadDatabase : public std::runtime_error {
+public:
+	BadDatabase(const std::string& cause) : std::runtime_error(cause) { }
+	BadDatabase(const char *cause) : std::runtime_error(cause) { }
+};
+
+/**
+ * \brief Exception thrown when there is a problem with the SQL syntax
+ */
+class BadQuery : public std::runtime_error {
+public:
+	BadQuery(const std::string& cause) : std::runtime_error(cause) { }
+	BadQuery(const char *cause) : std::runtime_error(cause) { }
+};
+
+/**
  * \brief abstraction field field values
  */
 class FieldValue {
@@ -88,7 +115,7 @@ public:
 		std::vector<Field>::const_iterator	i
 			= std::find(begin(), end(), fieldname);
 		if (i == end()) {
-			throw std::runtime_error("column name not found");
+			throw NotFound("column name not found");
 		}
 		return i->second;
 	}

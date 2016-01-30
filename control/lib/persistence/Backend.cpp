@@ -95,9 +95,11 @@ Sqlite3Statement::Sqlite3Statement(Sqlite3Backend& backend,
 	if (SQLITE_OK == (rc = sqlite3_prepare_v2(_backend.database(),
 		query.c_str(), query.size(), &stmt, &tail))) {
 		if (NULL == stmt) {
-			debug(LOG_ERR, DEBUG_LOG, 0, "no sql query: '%s'",
-				query.c_str());
-			throw std::runtime_error("no SQL query");
+			std::string	cause
+				= stringprintf("not an sql query: '%s'",
+					query.c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+			throw BadQuery(cause);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "statement prepared");
 		return;
@@ -257,7 +259,11 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	// open the database
 	_database = NULL;
 	if (sqlite3_open(_filename.c_str(), &_database)) {
-		throw std::runtime_error("cannot open/create database");
+		std::string	cause
+			= stringprintf("cannot open/create db on file '%s': %s",
+				filename.c_str(), sqlite3_errcode(_database));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw BadDatabase(cause);
 	}
 
 	// wait 10 seconds on locked databases
@@ -270,21 +276,21 @@ Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 		std::string	msg = stringprintf("'PRAGMA temp_store = "
 			"MEMORY' failed: %s", errmesg);
 		sqlite3_free(errmesg);
-		throw std::runtime_error(msg);
+		throw BadDatabase(msg);
 	}
 	if (sqlite3_exec(_database, "PRAGMA foreign_keys = ON;", NULL, NULL,
 		&errmesg)) {
 		std::string	msg = stringprintf("'PRAGMA foreign_keys = "
 			"ON' failed: %s", errmesg);
 		sqlite3_free(errmesg);
-		throw std::runtime_error(msg);
+		throw BadDatabase(msg);
 	}
 	if (sqlite3_exec(_database, "PRAGMA locking_mode = NORMAL;", NULL, NULL,
 		&errmesg)) {
 		std::string	msg = stringprintf("'PRAGMA locking_mode = "
 			"NORMAL' failed: %s", errmesg);
 		sqlite3_free(errmesg);
-		throw std::runtime_error(msg);
+		throw BadDatabase(msg);
 	}
 }
 

@@ -296,6 +296,9 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		}
 		return source.get(guider->adaptiveOpticsDevice->calibrationid());
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0,
+		"control type is invalid (should not happen)");
+	throw BadState("not a valid control type");
 }
 
 /**
@@ -318,6 +321,9 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 	case ControlAdaptiveOptics:
 		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0,
+		"control type is invalid (should not happen)");
+	throw BadState("not a valid control type");
 }
 
 /**
@@ -386,6 +392,9 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 		return guider->getLaplaceTracker();
 		break;
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "tracking method is invalid "
+		"(should not happen)");
+	throw BadState("tracking method");
 }
 
 /**
@@ -470,6 +479,9 @@ TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 		return convert(store.get(id,
 			astro::guiding::BasicCalibration::AO));
 	}
+	debug(LOG_ERR, DEBUG_LOG, 0,
+		"control type is invalid (should not happen)");
+	throw BadState("not a valid control type");
 }
 
 /**
