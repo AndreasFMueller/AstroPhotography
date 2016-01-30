@@ -24,6 +24,7 @@ class SimGuiderPort : public GuiderPort {
 	double	_omega;
 	double	lastactivation;
 	double	ra, dec;
+	double	pixelspeed;
 	Point	_ravector, _decvector;
 	SimGuiderPort(const SimGuiderPort& other);
 	SimGuiderPort&	operator=(const SimGuiderPort& other);

@@ -32,6 +32,11 @@ SimGuiderPort::SimGuiderPort(SimLocator& locator)
 	_decvector = Point(-0.5, sqrt(3) / 2);
 	ra = 0;
 	dec = 0;
+	// compute the speed at which a star image would move over the
+	// CCD at standard guide rate. We assume a focal length of 0.6m
+	//              15"/sec   * radians/degree/  radians per pixel
+	pixelspeed = ((15 / 3600) * (M_PI / 180)) / (0.0000010 / 0.6);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixelspeed = %f", pixelspeed);
 }
 
 /**
@@ -51,6 +56,10 @@ static double	sign(double x) {
  * cased since the last activation, and applies them to the offset.
  * It then computes the remaining activation that has not been applied
  * yet.
+ *
+ * The corrections applied by the update method amount to one pixel per
+ * second. The CcdInfo publishes a pixel size of 10um, which means that
+ * 10um corresponds to 15 arc seconds. 
  */
 void	SimGuiderPort::update() {
 	// if this is the first 
@@ -83,7 +92,7 @@ void	SimGuiderPort::update() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance RA by %f", rachange);
 	ra -= rachange;
-	_offset = _offset + rachange * _ravector;
+	_offset = _offset + rachange * pixelspeed * _ravector;
 
 	// update the dec variable, again this depends on the time since the
 	// last call to update
@@ -98,7 +107,7 @@ void	SimGuiderPort::update() {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: advance DEC by %f", decchange);
 	dec -= decchange;
-	_offset = _offset + decchange * _decvector;
+	_offset = _offset + decchange * pixelspeed * _decvector;
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update: new offset: %s",
 		_offset.toString().c_str());
