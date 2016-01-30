@@ -1812,6 +1812,20 @@ template<typename Pixel>
 class NormalizationAdapter : public ConstImageAdapter<Pixel> {
 	const ConstImageAdapter<double>&	_image;
 	double	_normalizer;
+	double	max(double v, double m) {
+		// ignore nans
+		if (v != v) {
+			return m;
+		}
+		// ignore infinity
+		if (v == std::numeric_limits<double>::infinity()) {
+			return m;
+		}
+		if (v > m) {
+			return v;
+		}
+		return m;
+	}
 public:
 	NormalizationAdapter(const ConstImageAdapter<Pixel>& image)
 		: ConstImageAdapter<Pixel>(image.getSize()), _image(image),
@@ -1821,10 +1835,7 @@ public:
 		int	h = _image.getSize().height();
 		for (int x = 0; x < w; x++) {
 			for (int y = 0; y < h; y++) {
-				double	v = _image.pixel(x, y);
-				if (v > maximum) {
-					maximum = v;
-				}
+				maximum = max(fabs(_image.pixel(x, y)));
 			}
 		}
 		if (maximum > 0) {
@@ -1836,8 +1847,66 @@ public:
 	}
 };
 
-} // namespace adapter
-} // namespace astro
+template<typename Pixel>
+class RangeNormalizationAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<double>&	_image;
+	double	_min;
+	double	_max;
+	double	_normalizer;
+	double	max(double v, double m) {
+		// ignore nans
+		if (v != v) {
+			return m;
+		}
+		// ignore infinity
+		if (v == std::numeric_limits<double>::infinity()) {
+			return m;
+		}
+		if (v > m) {
+			return v;
+		}
+		return m;
+	}
+	double	min(double v, double m) {
+		// ignore nans
+		if (v != v) {
+			return m;
+		}
+		// ignore infinity
+		if (v == -std::numeric_limits<double>::infinity()) {
+			return m;
+		}
+		if (v < m) {
+			return v;
+		}
+		return m;
+	}
+public:
+	RangeNormalizationAdapter(const ConstImageAdapter<Pixel>& image)
+		: ConstImageAdapter<Pixel>(image.getSize()), _image(image) {
+		_min = std::numeric_limits<double>::infinity();
+		_max = -std::numeric_limits<double>::infinity();
+		int	w = _image.getSize().width();
+		int	h = _image.getSize().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				double	v = _image.pixel(x, y);
+				_max = max(v, _max);
+				_min = min(v, _min);
+			}
+		}
+		if ((_max - _min) > 0) {
+			_normalizer = 1 / (_max - _min);
+		} else {
+			_min = 0;
+			_max = 1;
+			_normalizer = 1;
+		}
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return (_image.pixel(x, y) - _min) * _normalizer;
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 // Binning
@@ -1873,5 +1942,46 @@ public:
 		return sum;
 	}
 };
+
+//////////////////////////////////////////////////////////////////////
+// Convolution without Fourier transform
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class ConvolutionAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<double>&	_psf;
+	FundamentalAdapter<Pixel>	_embedded;
+	ImagePoint	_offset;
+public:
+	ConvolutionAdapter(const ConstImageAdapter<Pixel>& image,
+		const ConstImageAdapter<double>& psf);
+	virtual Pixel	pixel(int x, int y) const;
+};
+
+template<typename Pixel>
+ConvolutionAdapter<Pixel>::ConvolutionAdapter(
+	const ConstImageAdapter<Pixel>& image,
+	const ConstImageAdapter<double>& psf)
+	: ConstImageAdapter<Pixel>(image.getSize()), _psf(psf),
+	  _embedded(image),
+	  _offset(psf.getSize().width() / 2, psf.getSize().height() / 2) {
+}
+
+template<typename Pixel>
+Pixel	ConvolutionAdapter<Pixel>::pixel(int x, int y) const {
+	Pixel	result = 0;
+	for (int xx = 0; xx < _psf.getSize().width(); xx++) {
+		for (int yy = 0; yy < _psf.getSize().height(); yy++) {
+			int	xi = x + xx - _offset.x();
+			int	yi = y + yy - _offset.y();
+			result = result
+				+ _embedded.pixel(xi, yi) * _psf.pixel(xx, yy);
+		}
+	}
+	return result;
+}
+
+} // namespace adapter
+} // namespace astro
+
 
 #endif /* _AstroAdapter_h */

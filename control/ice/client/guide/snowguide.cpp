@@ -31,6 +31,7 @@ static struct option	longopts[] = {
 { "csv",		no_argument,		NULL,	 1  }, /*  3 */
 { "debug",		no_argument,		NULL,	'd' }, /*  4 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  5 */
+{ "flipped",		no_argument,		NULL,	'f' },
 { "guiderport",		required_argument,	NULL,	'G' }, /*  7 */
 { "help",		no_argument,		NULL,	'h' }, /*  8 */
 { "interval",		required_argument,	NULL,	'i' }, /*  9 */
@@ -87,6 +88,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'e':
 			guide.exposure.exposuretime = std::stod(optarg);
+			break;
+		case 'f':
+			guide.flipped = true;
 			break;
 		case 'G':
 			guiderportIndex = std::stoi(optarg);
@@ -292,6 +296,14 @@ int	main(int argc, char *argv[]) {
 		}
 		std::string	type(argv[optind++]);
 		return guide.uncalibrate_command(guider,
+			Guide::string2type(type));
+	}
+	if (command == "flip") {
+		if (argc <= optind) {
+			return guide.flip_command(guider);
+		}
+		std::string	type(argv[optind++]);
+		return guide.flip_command(guider,
 			Guide::string2type(type));
 	}
 

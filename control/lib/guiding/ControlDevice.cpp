@@ -153,6 +153,19 @@ bool	ControlDeviceBase::iscalibrated() const {
 	return (calibrationid() > 0) ? true : false;
 }
 
+bool	ControlDeviceBase::flipped() const {
+	if (_calibration) {
+		return _calibration->flipped();
+	}
+	return false;
+}
+
+void	ControlDeviceBase::flip() {
+	if (_calibration) {
+		return _calibration->flip();
+	}
+}
+
 void	ControlDeviceBase::addCalibrationPoint(const CalibrationPoint& point) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ADD CALIBRATION POINT %d %s",
 		_calibration->calibrationid(), point.toString().c_str());

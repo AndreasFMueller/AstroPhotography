@@ -25,6 +25,7 @@ public:
 	double	guideinterval;
 	double	aointerval;
 	bool	csv;
+	bool	flipped;
 	TrackerMethod	method;
 private:
 	CommonMonitor	*monitor;
@@ -39,6 +40,7 @@ public:
 		csv = false;
 		monitor = NULL;
 		method = TrackerUNDEFINED;
+		flipped = false;
 	}
 
 	// general commands
@@ -71,6 +73,8 @@ public:
 	int	calibrate_command(GuiderPrx guider, int calibrationid);
 	int	calibrate_command(GuiderPrx guider, const std::string& calarg);
 	int	uncalibrate_command(GuiderPrx guider, ControlType type);
+	int	flip_command(GuiderPrx guider);
+	int	flip_command(GuiderPrx guider, ControlType type);
 
 	int	cancel_command(GuiderPrx guider);
 	int	list_command(GuiderFactoryPrx guiderfactory,

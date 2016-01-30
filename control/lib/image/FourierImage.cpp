@@ -288,10 +288,51 @@ FourierImagePtr	operator*(const FourierImage& a, const FourierImage& b) {
 }
 
 /**
+ * \brief Compute the quotient of two fourier transforms
+ *
+ * Upon reverse transform, this becomes the deconvolution of the
+ * original functions
+ */
+FourierImagePtr	operator/(const FourierImage& a, const FourierImage& b) {
+	if (a.size() != b.size()) {
+		std::string	msg = stringprintf(
+			"image size mismatch: %s != %s",
+			a.orig().toString().c_str(),
+			b.orig().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// construct the result image
+	FourierImage	*result = new FourierImage(a.orig());
+
+	// compute the product
+	fftw_complex	*af = (fftw_complex *)a.pixels;
+	fftw_complex	*bf = (fftw_complex *)b.pixels;
+	fftw_complex	*cf = (fftw_complex *)result->pixels;
+	size_t	nc = result->size().getPixels() / 2;
+	for (unsigned int i = 0; i < nc; i++) {
+		double	d = bf[i][0] * bf[i][0] + bf[i][1] * bf[i][1];
+		cf[i][0] = (af[i][0] * bf[i][0] + af[i][1] * bf[i][1]) / d;
+                cf[i][1] = (af[i][1] * bf[i][0] - af[i][0] * bf[i][1]) / d;
+	}
+
+	// return the new image
+	return FourierImagePtr(result);
+}
+
+/**
  * \brief Compute the product of two fourier transforms (ptr version)
  */
 FourierImagePtr	operator*(const FourierImagePtr a, const FourierImagePtr b) {
 	return (*a) * (*b);
+}
+
+/**
+ * \brief Compute the quotient of two fourier transforms (ptr version)
+ */
+FourierImagePtr	operator/(const FourierImagePtr a, const FourierImagePtr b) {
+	return (*a) / (*b);
 }
 
 } // namespace image

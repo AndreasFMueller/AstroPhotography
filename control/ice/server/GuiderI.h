@@ -88,7 +88,7 @@ public:
 	virtual void useCalibration(Ice::Int, bool, const Ice::Current& current);
 	virtual Calibration getCalibration(ControlType,
 				const Ice::Current& current);
-	virtual void flipCalibration(const Ice::Current& current);
+	virtual void flipCalibration(ControlType, const Ice::Current& current);
 	virtual void unCalibrate(ControlType, const Ice::Current& current);
 
 	// control calibration process

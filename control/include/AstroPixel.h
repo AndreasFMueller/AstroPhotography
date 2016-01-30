@@ -369,6 +369,7 @@ public:
 	P	uv;
 	YUYV() { }
 	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
+	YUYV(const P& _y) : y(_y), uv(0) { }
 
 	template<typename Q>
 	YUYV(const Q& _y, const Q& _uv) {

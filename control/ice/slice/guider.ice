@@ -122,6 +122,7 @@ module snowstar {
 		double	focallength;
 		double	masPerPixel;
 		ControlType	type;
+		bool	flipped;
 		CalibrationSequence	points;
 	};
 
@@ -223,7 +224,7 @@ module snowstar {
 					throws BadState, NotFound;
 		Calibration	getCalibration(ControlType caltype)
 					throws BadState;
-		void	flipCalibration() throws BadState;
+		void	flipCalibration(ControlType caltype) throws BadState;
 		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously

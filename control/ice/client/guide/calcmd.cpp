@@ -143,7 +143,7 @@ int	Guide::calibrate_command(GuiderPrx guider, int calibrationid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "use calibrationid = %d",
 		calibrationid);
 	if (calibrationid > 0) {
-		guider->useCalibration(calibrationid);
+		guider->useCalibration(calibrationid, flipped);
 		return EXIT_SUCCESS;
 	} else {
 		return calibrate_command(guider);
@@ -172,7 +172,7 @@ int	Guide::calibrate_command(GuiderPrx guider, const std::string& calarg) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "argument is not an id");
 		goto newcalibration;
 	}
-	guider->useCalibration(calibrationid);
+	guider->useCalibration(calibrationid, flipped);
 	return EXIT_SUCCESS;
 
 newcalibration:
@@ -203,6 +203,27 @@ int	Guide::uncalibrate_command(GuiderPrx guider, ControlType type) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate");
 	}
 	return EXIT_FAILURE;
+}
+
+int	Guide::flip_command(GuiderPrx guider, ControlType type) {
+	try {
+		guider->flipCalibration(type);
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot uncalibrate");
+	}
+	return EXIT_FAILURE;
+}
+
+int	Guide::flip_command(GuiderPrx guider) {
+	int rc = flip_command(guider, ControlGuiderPort);
+	if (rc != EXIT_SUCCESS) {
+		return rc;
+	}
+	return flip_command(guider, ControlAdaptiveOptics);
 }
 
 } // namespace snowguide

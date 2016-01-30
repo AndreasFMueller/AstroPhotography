@@ -257,8 +257,16 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 /**
  * \brief Merian flip requires that we need to flip the calibration too
  */
-void GuiderI::flipCalibration(const Ice::Current& /* current */) {
-	// XXX implementation needed
+void GuiderI::flipCalibration(ControlType type,
+	const Ice::Current& /* current */) {
+	switch (type) {
+	case ControlGuiderPort:
+		guider->guiderPortDevice->flip();
+		break;
+	case ControlAdaptiveOptics:
+		guider->adaptiveOpticsDevice->flip();
+		break;
+	}
 	throw std::runtime_error("flipCalibratoin not implemented");
 }
 
@@ -288,22 +296,27 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 /**
  * \brief Retrieve the calibration of a device
  *
- * This method retrieves the configuration of a device. If the device is unconfigured,
- * it throws the BadState exception.
+ * This method retrieves the configuration of a device. If the device is
+ * unconfigured, it throws the BadState exception.
  */
 Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Current& /* current */) {
 	CalibrationSource	source(database);
+	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuiderPort:
 		if (!guider->guiderPortDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
-		return source.get(guider->guiderPortDevice->calibrationid());
+		calibration = source.get(guider->guiderPortDevice->calibrationid());
+		calibration.flipped = guider->guiderPortDevice->flipped();
+		return calibration;
 	case ControlAdaptiveOptics:
 		if (!guider->adaptiveOpticsDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
-		return source.get(guider->adaptiveOpticsDevice->calibrationid());
+		calibration = source.get(guider->adaptiveOpticsDevice->calibrationid());
+		calibration.flipped = guider->adaptiveOpticsDevice->flipped();
+		return calibration;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");

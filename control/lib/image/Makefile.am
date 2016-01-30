@@ -16,6 +16,7 @@ libastroimage_la_SOURCES = 						\
 	AmplifierGlowImage.cpp						\
 	Analyzer.cpp							\
 	Background.cpp							\
+	BasicDeconvolutionOperator.cpp					\
 	Binning.cpp							\
 	Blurr.cpp							\
 	CalibrationFactory.cpp						\
@@ -28,6 +29,7 @@ libastroimage_la_SOURCES = 						\
 	Corrector.cpp							\
 	DarkCorrector.cpp						\
 	DarkNoiseAdapter.cpp						\
+	DeconvolutionOperator.cpp					\
 	Demosaic.cpp							\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
@@ -79,8 +81,10 @@ libastroimage_la_SOURCES = 						\
 	Stacker.cpp							\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\
+	SmallConvolve.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
+	VanCittertOperator.cpp						\
 	Viewer.cpp							\
 	ViewerPipeline.cpp						\
 	WeightingAdapter.cpp

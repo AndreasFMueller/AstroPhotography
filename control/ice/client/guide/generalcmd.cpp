@@ -53,6 +53,8 @@ void	Guide::usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> trash <calid>"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> flip"
+		<< std::endl;
 
 	std::cout << std::endl;
 	std::cout << "  Guiding:" << std::endl;
@@ -150,6 +152,13 @@ int	Guide::help_command(const char *progname) {
 "    optics. If no argument is given, 'GP' is assumed. Depending on the "
 << std::endl <<
 "   tracker method, The --star argument may be required for this function."
+<< std::endl
+
+<< std::endl << 
+"flip { GP | AO }" << std::endl <<
+"    flip the calibration currently in use by the guider port, the adaptive"
+<< std::endl << 
+"    optics unit or both (if no type argument is given)"
 << std::endl
 
 << std::endl << 

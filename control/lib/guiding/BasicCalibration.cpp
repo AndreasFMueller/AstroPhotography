@@ -40,6 +40,7 @@ BasicCalibration::BasicCalibration() {
 	_calibrationid = -1;
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
 	_complete = false;
+	_flipped = false;
 }
 
 /**
@@ -68,6 +69,7 @@ BasicCalibration::BasicCalibration(const double coefficients[6]) {
 	}
 	_complete = true;
 	_calibrationtype = GP;
+	_flipped = false;
 }
 
 /**
@@ -95,8 +97,9 @@ Point	BasicCalibration::correction(const Point& offset, double Deltat) const {
 	if (0 == det()) {
 		throw std::runtime_error("no calibration");
 	}
-	double	Deltax = -offset.x() - Deltat * a[2];
-	double	Deltay = -offset.y() - Deltat * a[5];
+	double	s = (flipped()) ? -1 : 1;
+	double	Deltax = -(s * offset.x()) - Deltat * a[2];
+	double	Deltay = -(s * offset.y()) - Deltat * a[5];
         double	x = ( a[4] * Deltax - a[1] * Deltay) / determinant;
         double	y = (-a[3] * Deltax + a[0] * Deltay) / determinant;
 	Point	result(x, y);
@@ -109,8 +112,9 @@ Point	BasicCalibration::correction(const Point& offset, double Deltat) const {
  * \brief Compute the pixel offset that we would see after a correction
  */
 Point	BasicCalibration::offset(const Point& point, double Deltat) const {
-	double	x = a[0] * point.x() + a[1] * point.y() + a[2] * Deltat;
-	double	y = a[3] * point.x() + a[4] * point.y() + a[5] * Deltat;
+	double	s = (flipped()) ? -1 : 1;
+	double	x = s * (a[0] * point.x() + a[1] * point.y() + a[2] * Deltat);
+	double	y = s * (a[3] * point.x() + a[4] * point.y() + a[5] * Deltat);
 	Point	result(x, y);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "offset %s for correction %s, t=%.1f",
 		result.toString().c_str(), point.toString().c_str(), Deltat);
@@ -131,8 +135,11 @@ void	BasicCalibration::rescale(double scalefactor) {
  * \brief Output of guider calibration data
  */
 std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal) {
-	out << "[" << cal[0] << "," << cal[1] << "," << cal[2] << ";";
-	out <<        cal[3] << "," << cal[4] << "," << cal[5] << "]";
+	double	s = (cal.flipped()) ? -1 : 1;
+	out << "[" << (s * cal.a[0]) << "," << (s * cal.a[1])
+			<< "," << cal.a[2] << ";";
+	out <<        (s * cal.a[3]) << "," << (s * cal.a[4])
+			<< "," << cal.a[5] << "]";
 	return out;
 }
 

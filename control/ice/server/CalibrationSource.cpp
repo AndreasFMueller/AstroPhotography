@@ -63,6 +63,7 @@ Calibration	CalibrationSource::get(int id) {
 		calibration.focallength = r.focallength;
 		calibration.masPerPixel = r.masPerPixel;
 		calibration.complete = (r.complete) ? true : false;
+		calibration.flipped = false;
 		calibration.det = r.det;
 		calibration.quality = r.quality;
 		for (int i = 0; i < 6; i++) {

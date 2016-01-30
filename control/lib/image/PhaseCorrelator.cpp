@@ -247,19 +247,19 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 		// copy the from image into a subimage at left
 		SubimageAdapter<double>	fromsubimage(composite,
 			ImageRectangle(ImagePoint(0,0), size));
-		NormalizationAdapter<double>	fromnorm(*windowedfrom);
+		RangeNormalizationAdapter<double>	fromnorm(*windowedfrom);
 		copy(fromsubimage, fromnorm);
 
 		// copy the from image into a subimage at center
 		SubimageAdapter<double>	tosubimage(composite,
 			ImageRectangle(ImagePoint(size.width(),0), size));
-		NormalizationAdapter<double>	tonorm(*windowedto);
+		RangeNormalizationAdapter<double>	tonorm(*windowedto);
 		copy(tosubimage, tonorm);
 
 		// copy the correlation image into a subimage at right
 		SubimageAdapter<double>	corrsubimage(composite,
 			ImageRectangle(ImagePoint(2 * size.width(),0), size));
-		NormalizationAdapter<double>	corrnorm(ta);
+		RangeNormalizationAdapter<double>	corrnorm(ta);
 		copy(corrsubimage, corrnorm);
 		
 		// add metadata about the offset
@@ -293,20 +293,6 @@ std::pair<Point, double> PhaseCorrelator::operator()(
 	return std::make_pair(result, max);
 }
 
-
-#if 0
-//////////////////////////////////////////////////////////////////////
-// derivative phase correlator implementation
-//////////////////////////////////////////////////////////////////////
-
-std::pair<Point, double>	DerivativePhaseCorrelator::operator()(
-	const ConstImageAdapter<double>& fromimage,
-	const ConstImageAdapter<double>& toimage) {
-	DerivativeNormAdapter<double>	i1(fromimage);
-	DerivativeNormAdapter<double>	i2(toimage);
-	return PhaseCorrelator::operator()(i1, i2);
-}
-#endif
 
 } // namespace transform
 } // namespace image

@@ -19,7 +19,9 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	PhaseCorrelatorTest.cpp 
+	ConvolutionAdapterTest.cpp
+#	DeconvolveTest.cpp
+#	PhaseCorrelatorTest.cpp 
 #	PeakFinderTest.cpp 
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
@@ -34,7 +36,9 @@ tests_SOURCES = tests.cpp 						\
 	BackgroundTest.cpp						\
 	ConvertingAdapterTest.cpp					\
 	ConvolveTest.cpp						\
-	NoiseTest.cpp						\
+	ConvolutionAdapterTest.cpp					\
+	DeconvolveTest.cpp						\
+	NoiseTest.cpp							\
 	FITSKeywordTest.cpp						\
 	FITSdateTest.cpp						\
 	FITSwriteTest.cpp						\

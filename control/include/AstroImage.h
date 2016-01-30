@@ -710,6 +710,23 @@ public:
 	}
 
 	/**
+ 	 * \brief Copy an image from an image adapter
+	 *
+	 * This is less efficient than the image copy operation above
+	 */
+	Image<Pixel>&	operator=(ConstImageAdapter<Pixel>& other) {
+		if (!(other.getSize() == frame.size())) {
+			throw std::length_error("image frame mismatch");
+		}
+		for (int x = 0; x < other.getSize().width(); x++) {
+			for (int y = 0; y < other.getSize().height(); y++) {
+				pixel(x, y) = other.pixel(x, y);
+			}
+		}
+		return *this;
+	}
+
+	/**
 	 * \brief Destroy the image, deallocating the pixel array
 	 */
 	virtual	~Image() {

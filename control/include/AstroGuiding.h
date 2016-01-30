@@ -299,6 +299,13 @@ private:
 public:
 	bool	complete() const { return _complete; }
 	void	complete(bool c) { _complete = c; }
+private:
+	bool	_flipped;
+public:
+	bool	flipped() const { return _flipped; }
+	void	flipped(bool f) { _flipped = f; }
+	void	flip() { _flipped = !_flipped; }
+
 	BasicCalibration();
 	BasicCalibration(const double coefficients[6]);
 	virtual ~BasicCalibration() { }
@@ -603,6 +610,8 @@ public:
 	int	calibrationid() const { return _calibration->calibrationid(); }
 	void	calibrationid(int calid);
 	bool	iscalibrated() const;
+	bool	flipped() const;
+	void	flip();
 
 	// parameters about the calibration
 private:

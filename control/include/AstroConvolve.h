@@ -45,6 +45,8 @@ static ImageSize	fsize(const ImageSize&);
  */
 FourierImagePtr	operator*(const FourierImage& a, const FourierImage& b);
 FourierImagePtr	operator*(const FourierImagePtr a, const FourierImagePtr b);
+FourierImagePtr	operator/(const FourierImage& a, const FourierImage& b);
+FourierImagePtr	operator/(const FourierImagePtr a, const FourierImagePtr b);
 
 class ConvolutionResult;
 typedef std::shared_ptr<ConvolutionResult>	ConvolutionResultPtr;
@@ -87,6 +89,44 @@ public:
 public:
 	FourierImagePtr	operator()(ImagePtr image) const;
 	FourierImagePtr	operator()(FourierImagePtr fourier) const;
+};
+
+/**
+ * \brief Deconvolution algorithms all use the same base class
+ */
+class DeconvolutionOperator {
+public:
+	virtual ImagePtr	operator()(ImagePtr image) const;
+	virtual ImagePtr	operator()(FourierImagePtr image) const;
+};
+
+/**
+ * \brief Basic deconvolution algorithm
+ *
+ * This algorithm works for any point spread function, but it requires lots
+ * of Fourier transforms and thus is rather expensive.
+ */
+class BasicDeconvolutionOperator {
+	FourierImagePtr	_psf;
+private:
+	BasicDeconvolutionOperator(const BasicDeconvolutionOperator& other);
+	BasicDeconvolutionOperator&	operator=(const BasicDeconvolutionOperator& other);
+public:
+	BasicDeconvolutionOperator(ImagePtr psf);
+	BasicDeconvolutionOperator(const ConstImageAdapter<double>& image);
+	virtual ImagePtr	operator()(ImagePtr image) const;
+};
+
+ImagePtr	smallConvolve(const ConstImageAdapter<double>& small, ImagePtr image);
+
+class VanCittertOperator {
+	Image<double>	_psf;
+	int	_iterations;
+public:
+	int	iterations() const { return _iterations; }
+	void	iterations(int i) { _iterations = i; }
+	VanCittertOperator(ImagePtr psf);
+	virtual ImagePtr	operator()(ImagePtr image) const;
 };
 
 /**
