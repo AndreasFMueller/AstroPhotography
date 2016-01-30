@@ -93,6 +93,7 @@ snowstar::ModulesPrx	NiceLocator::getModules(const std::string& servicename) {
 	}
 
 	// get a proxy to Modules
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get service '%s'", servicename.c_str());
 	ServiceKey	key = discovery->find(servicename);
 	return getModules(key);
 }
@@ -136,6 +137,8 @@ snowstar::DriverModulePrx	NiceLocator::getDriverModule(
  */
 snowstar::DeviceLocatorPrx	NiceLocator::getLocator(
 	const std::string& servicename, const std::string& modulename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for %s@%s", modulename.c_str(),
+		servicename.c_str());
 	snowstar::DriverModulePrx	drivermodule
 		= getDriverModule(servicename, modulename);
 	if (!drivermodule->hasLocator()) {
@@ -248,7 +251,7 @@ std::vector<std::string>	NiceLocator::getDevicelist(
 void	NiceLocator::check(const DeviceName& name,
 		DeviceName::device_type type) {
 	if (!name.hasType(type)) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a camera",
+		debug(LOG_ERR, DEBUG_LOG, 0, "name %s is not a %s",
 			name.toString().c_str(),
 			DeviceName::type2string(type).c_str());
 		throw std::runtime_error("name is not a camera");
@@ -289,6 +292,8 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 
 GuiderPortPtr	NiceLocator::getGuiderPort0(const DeviceName& name) {
 	check(name, DeviceName::Guiderport);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving nice device %s",
+		name.toString().c_str());
 
 	astro::DeviceName	remotename = name.localdevice();
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),

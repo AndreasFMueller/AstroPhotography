@@ -17,11 +17,13 @@ TrackingSummary::TrackingSummary(const std::string& name,
 		const std::string& guiderport,
 		const std::string& adaptiveoptics)
 	: descriptor(name, instrument, ccd, guiderport, adaptiveoptics) {
+	trackingid = -1;
 }
 
 TrackingSummary::TrackingSummary(const std::string& name,
 		const std::string& instrument, const std::string& ccd)
 	: descriptor(name, instrument, ccd, std::string(""), std::string("")) {
+	trackingid = -1;
 }
 
 } // namespace guiding

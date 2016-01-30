@@ -50,8 +50,14 @@ snowstar_CPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 	@ICEINCLUDE@ -DPIDDIR=\"@PIDDIR@\"
 
 test:	snowstar
+	if [ -r servername ]; \
+	then \
+		servername=`cat servername`; \
+	else \
+		servername=server; \
+	fi; \
 	./snowstar --debug --base=`pwd`/images --database=`pwd`/testdb.db \
-		--condig=`pwd`/testdb.db --name=server --foreground \
+		--condig=`pwd`/testdb.db --name=$${servername} --foreground \
 		2>&1 | tee test.log
 
 testsun:	snowstar

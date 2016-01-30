@@ -358,7 +358,7 @@ public:
 	InstrumentComponent(const InstrumentComponentKey& key,
 		const std::string& servicename, const std::string& deviceurl);
 	std::string	toString() const;
-	DeviceName	localizedName() const;
+	DeviceName	remoteName() const;
 };
 
 /**

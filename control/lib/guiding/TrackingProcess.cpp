@@ -80,7 +80,7 @@ void	TrackingProcess::callback(const TrackingPoint& trackingpoint) {
 	if (!database()) {
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: store point %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: store point %s", _id,
 			trackingpoint.toString().c_str());
 	// add point to table
 	TrackingPointRecord	tracking(0, _id, trackingpoint);
@@ -109,7 +109,8 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		GuidingRunRecord        record(0, guidingrun);
 		GuidingRunTable guidingruntable(database());
 		_id = guidingruntable.add(record);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start TRACK %d", _id);
+		_summary.trackingid = _id;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start", _id);
 	}
 
 	// get the interval for images
@@ -117,7 +118,8 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	if (_adaptiveOpticsDevice->iscalibrated()) {
 		imageInterval = _adaptiveopticsInterval;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image interval: %.3fs", imageInterval);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: image interval: %.3fs", _id,
+		imageInterval);
 
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop
@@ -172,17 +174,22 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		Point	remainder = _adaptiveOpticsDevice->correct(offset,
 				_adaptiveopticsInterval);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"TRACK %d: remaining after AO: %s", _id,
+			"TRACK %d: offset remaining after AO: %s", _id,
 			remainder.toString().c_str());
 
 		// check whether enough time has passed for a guider port
-		// action
-		if (Timer::gettime() > guiderportTime + _guiderportInterval) {
+		// action. Because there may be some variance in image 
+		// acquisition, we subtract half the elapsed time of the last
+		// image acquisition from the interval to ensure that there
+		// really will be a guider port update within each guide
+		// interval
+		if (Timer::gettime() > guiderportTime + _guiderportInterval
+			- timer.elapsed() / 2) {
 			Point	d = _guiderPortDevice->correct(remainder,
 				_guiderportInterval);
 			guiderportTime = Timer::gettime();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: guiderport %s",
+				"TRACK %d: guiderport remaining offset %s",
 				_id, d.toString().c_str());
 		}
 

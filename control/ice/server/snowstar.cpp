@@ -31,6 +31,7 @@
 #include <AstroFormat.h>
 #include <InstrumentLocator.h>
 #include <InstrumentsI.h>
+#include <CommunicatorSingleton.h>
 
 namespace snowstar {
 
@@ -76,6 +77,7 @@ static void	usage(const char *progname) {
  * \brief Main function for the Snowstar server
  */
 int	snowstar_main(int argc, char *argv[]) {
+	CommunicatorSingleton	communicator(argc, argv);
 	// default debug settings
 	debugtimeprecision = 3;
 	debugthreads = true;

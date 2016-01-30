@@ -180,48 +180,19 @@ std::string	instrumentIndex2name(const std::string& instrumentname,
 		astro::discover::InstrumentPtr  instrument
 			= astro::discover::InstrumentBackend::get(
 				instrumentname);
-		return instrument->get(convertInstrumentType(type),
-			index).deviceurl();
+		astro::discover::InstrumentComponent	comp = instrument->get(
+			convertInstrumentType(type), index);
+		
+		// find out whether the server name is local
+		std::string	servicename
+			= astro::discover::ServiceLocation::get().servicename();
+		if (servicename == comp.servicename()) {
+			return comp.deviceurl();
+		} else {
+			return comp.remoteName();
+		}
 	} catch (...) {
 	}
-#if 0
-	// build an unknown name from the index
-	std::string	devicename;
-	switch (type) {
-	case astro::discover::InstrumentComponentKey::AdaptiveOptics:
-		devicename = "adaptiveoptics";
-		break;
-	case astro::discover::InstrumentComponentKey::Camera:
-		devicename = "camera";
-		break;
-	case astro::discover::InstrumentComponentKey::CCD:
-	case astro::discover::InstrumentComponentKey::GuiderCCD:
-		devicename = "ccd";
-		break;
-	case astro::discover::InstrumentComponentKey::Cooler:
-		devicename = "camera";
-		break;
-	case astro::discover::InstrumentComponentKey::GuiderPort:
-		devicename = "guiderport";
-		break;
-	case astro::discover::InstrumentComponentKey::FilterWheel:
-		devicename = "filterwheel";
-		break;
-	case astro::discover::InstrumentComponentKey::Focuser:
-		devicename = "focuser";
-		break;
-	case astro::discover::InstrumentComponentKey::Mount:
-		devicename = "mount";
-		break;
-	default:
-		throw std::runtime_error("unknown device type");
-		break;
-	}
-	std::string deviceurl = astro::stringprintf("%s:unknown/%d",
-		devicename.c_str(), index);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "unknown device: %s", deviceurl.c_str());
-	return deviceurl;
-#endif
 	return std::string("");
 }
 
@@ -246,7 +217,7 @@ int	instrumentName2index(const std::string& instrumentname,
 		astro::discover::InstrumentPtr  instrument
 			= astro::discover::InstrumentBackend::get(instrumentname);
 		int	index = instrument->indexOf(convertInstrumentType(type),
-					deviceurl);
+				DeviceName(deviceurl).localdevice());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s has index %d in %s",
 			deviceurl.c_str(), index, instrumentname.c_str());
 	} catch (...) { }

@@ -32,7 +32,7 @@ std::string	InstrumentComponent::toString() const {
 		servicename().c_str(), deviceurl().c_str());
 }
 
-DeviceName	InstrumentComponent::localizedName() const {
+DeviceName	InstrumentComponent::remoteName() const {
 	// find out whether the name is local or uses the nice module
 	bool	useNice = true;
 

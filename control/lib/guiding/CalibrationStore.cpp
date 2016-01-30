@@ -44,20 +44,7 @@ std::list<long>	CalibrationStore::getAllCalibrations(
 std::list<long>	CalibrationStore::getCalibrations(
 			const GuiderDescriptor& guider) {
 	std::ostringstream	out;
-	out << " instrument = '" << guider.instrument() << "' and ";
-	out << " ccd = '" << guider.ccd() << "' and (";
-	if (guider.guiderport().size()) {
-		out << "controldevice = '" << guider.guiderport() << "'";
-	} else {
-		out << "0 = 1";
-	}
-	out << " or ";
-	if (guider.adaptiveoptics().size()) {
-		out << "controldevice = '" << guider.adaptiveoptics() << "'";
-	} else {
-		out << "0 = 1";
-	}
-	out << ")";
+	out << " name = '" << guider.name() << "'";
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());

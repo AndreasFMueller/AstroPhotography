@@ -140,10 +140,11 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 	astro::persistence::Database _database)
 	: guider(_guider), imagedirectory(_imagedirectory),
 	  database(_database) {
-	// set point to an invalid value to allows to detect that it has not been set
+	// set point to an invalid value to allow us to detect that it 
+	// has not been set
 	_point.x = -1;
 	_point.y = -1;
-	// default tracker is star
+	// default tracking method is star
 	_method = TrackerSTAR;
 
 	// callback stuff

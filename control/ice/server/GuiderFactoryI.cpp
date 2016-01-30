@@ -76,7 +76,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	std::string	gn = guiderdescriptor2name(descriptor);
 
 	// get an GuiderPtr from the original factory
-	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
+	astro::guiding::GuiderPtr	guider = guiderfactory.get(d, gn);
 
 	// get the focallength from the instrument properties
 	try {
@@ -211,6 +211,13 @@ TrackingHistory	GuiderFactoryI::getTrackingHistory(int id,
 	throw std::runtime_error("internal error");
 }
 
+/**
+ * \brief Get a tracking history by id and type
+ *
+ * The tracking history usually contains tracking points measured by the
+ * AO unit as well as the guider port. By specifying the type, we select
+ * only the tracking points of that particular type.
+ */
 TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 	ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve history %d", id);
@@ -248,6 +255,9 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 }
 
 
+/**
+ * \brief Delete a tracking history from the database
+ */
 void	GuiderFactoryI::deleteTrackingHistory(int id,
 		const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);

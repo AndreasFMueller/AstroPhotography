@@ -67,5 +67,12 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	return guider;
 }
 
+GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor,
+			const std::string& name) {
+	GuiderPtr	guider = get(guiderdescriptor);
+	guider->name(name);
+	return guider;
+}
+
 } // namespace guiding
 } // namespace astro

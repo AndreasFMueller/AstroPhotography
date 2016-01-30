@@ -928,6 +928,8 @@ public:
 		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
+	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor,
+				const std::string& name);
 };
 typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 

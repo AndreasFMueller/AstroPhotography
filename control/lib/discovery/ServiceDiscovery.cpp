@@ -119,7 +119,10 @@ ServiceKey	ServiceDiscovery::find(const std::string& name) {
 		= find_if(servicekeys.begin(), servicekeys.end(),
 			HasNamePredicate(name));
 	if (i == servicekeys.end()) {
-		throw std::runtime_error("service not found");
+		std::string	cause = stringprintf("service '%s' not found",
+			name.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %s", i->toString().c_str());
 	return *i;
@@ -132,9 +135,15 @@ void	ServiceDiscovery::add(const ServiceKey& key) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add new key: %s",
 		key.toString().c_str());
 	std::unique_lock<std::recursive_mutex>	lock(servicelock);
-	remove(key);
+	if (has(key)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "key %s exists, remove",
+			key.toString().c_str());
+		remove(key);
+	}
 	servicekeys.insert(key);
 	servicecondition.notify_all();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "key '%s' added",
+		key.toString().c_str());
 }
 
 /**

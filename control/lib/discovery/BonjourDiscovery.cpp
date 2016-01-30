@@ -42,14 +42,16 @@ void    BonjourDiscovery::browsereply_callback(DNSServiceRef /* sdRef */,
 			const char *serviceName,
 			const char *regtype,
 			const char *replyDomain) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d found service %s/%s@%s", flags,
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "flags=%d found service %s/%s@%s", flags,
 		serviceName, regtype, replyDomain);
 	
 	if (flags && kDNSServiceFlagsAdd) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "add service");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "add service '%s'",
+			serviceName);
 		add(ServiceKey(serviceName, regtype, replyDomain));
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove service");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "remove service '%s'",
+			serviceName);
 		remove(ServiceKey(serviceName, regtype, replyDomain));
 	}
 }

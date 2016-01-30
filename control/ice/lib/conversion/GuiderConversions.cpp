@@ -141,6 +141,9 @@ GuiderDescriptor        convert(const astro::guiding::GuiderDescriptor& gd) {
 	return result;
 }
 
+/**
+ * \brief Convert a guider descriptor into a locally useful guider name
+ */
 astro::guiding::GuiderDescriptor        convert(const GuiderDescriptor& gd) {
 	// convert ccd index into a name
 	std::string	ccdname = instrumentIndex2name(gd.instrumentname,
