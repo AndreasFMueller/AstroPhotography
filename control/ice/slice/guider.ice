@@ -219,9 +219,11 @@ module snowstar {
 		/**
 		 * \brief Methods related to calibration
 		 */
-		void	useCalibration(int id) throws BadState, NotFound;
+		void	useCalibration(int id, bool flipped)
+					throws BadState, NotFound;
 		Calibration	getCalibration(ControlType caltype)
 					throws BadState;
+		void	flipCalibration() throws BadState;
 		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously

@@ -236,9 +236,10 @@ void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* curr
  * \brief Use a calibration
  *
  * This method directs the guider to use a specific calibration from the 
- * database.
+ * database. The flipped argument allows to use the calibration if it was
+ * computed on the other side of the meridian.
  */
-void GuiderI::useCalibration(Ice::Int calid,
+void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 	const Ice::Current& /* current */) {
 	if (calid <= 0) {
 		throw BadParameter("not a valid calibration id");
@@ -251,6 +252,14 @@ void GuiderI::useCalibration(Ice::Int calid,
 	} catch (const astro::guiding::NotFound x) {
 		throw NotFound(x.what());
 	}
+}
+
+/**
+ * \brief Merian flip requires that we need to flip the calibration too
+ */
+void GuiderI::flipCalibration(const Ice::Current& /* current */) {
+	// XXX implementation needed
+	throw std::runtime_error("flipCalibratoin not implemented");
 }
 
 /**

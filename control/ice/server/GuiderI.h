@@ -85,9 +85,10 @@ public:
 	virtual std::string	getRepositoryName(const Ice::Current& current);
 
 	// choose calibration
-	virtual void useCalibration(Ice::Int, const Ice::Current& current);
+	virtual void useCalibration(Ice::Int, bool, const Ice::Current& current);
 	virtual Calibration getCalibration(ControlType,
 				const Ice::Current& current);
+	virtual void flipCalibration(const Ice::Current& current);
 	virtual void unCalibrate(ControlType, const Ice::Current& current);
 
 	// control calibration process
