@@ -22,6 +22,7 @@ libastroutils_la_SOURCES = 						\
 	Pidfile.cpp							\
 	Point.cpp							\
 	Rectangle.cpp							\
+	Rotation.cpp							\
 	stacktrace.cpp							\
 	Size.cpp							\
 	Sun.cpp								\

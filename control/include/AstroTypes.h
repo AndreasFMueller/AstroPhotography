@@ -101,6 +101,16 @@ public:
 };
 std::ostream&	operator<<(std::ostream& out, const Rectangle& rectangle);
 
+/**
+ * \brief Rotation operation on points
+ */
+class Rotation {
+	double	_alpha;
+public:
+	Rotation(double alpha) : _alpha(alpha) { }
+	Point	operator()(const Point& p) const;
+};
+
 } // namespace astro
 
 #endif /* _AstroTypes_h */

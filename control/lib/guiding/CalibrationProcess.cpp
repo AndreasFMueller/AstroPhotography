@@ -245,9 +245,11 @@ void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread
  *
  * the grid constant normally depends on the focallength and the
  * pixels size. Smaller pixels are larger focallength allow to
- * use a smaller grid constant. The default value of 10 seems to be
- * a good  choice for a 100mm guide scope and 7u pixels as for the
- * SBIG ST-i guider kit
+ * use a smaller grid constant.
+ *
+ * The grid constant is chosen so as to generate an offset of about 5
+ * pixels on the guide CCD. It is assumed that standard guider rate
+ * of 15"/second are used.
  */
 double	CalibrationProcess::gridconstant(double focallength,
 	double pixelsize) const {
@@ -256,19 +258,19 @@ double	CalibrationProcess::gridconstant(double focallength,
 		1000 * focallength, 1000000 * pixelsize);
 	double	gridconstant = 10;
 	if ((focallength > 0) && (pixelsize > 0)) {
-		// the angular_default is the angular resolution (in radians)
-		// that is suitable for 10 second drives to calibrate. If 
-		// the pixels are smaller or the focal length is larger,
-		// then a shorter time is ok
-		double	angular_default = 0.0000074 / 0.100;
+		//                           radians/pixel
 		double	angular_resolution = pixelsize / focallength;
+		//     radians/sec     15" / sec    * radians/degree
+		double	guide_rate = ((15. / 3600.) * (M_PI / 180.));
+		//      pixel/sec
+		double 	pixel_rate = guide_rate / angular_resolution;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel rate: %f", pixel_rate);
 
 		// never make the grid constant smaller than 2 (2 second
-		// drives)
-		gridconstant = std::max(2.,
-			10. * angular_resolution / angular_default);
+		// drives), and we ant at least 5 pixels
+		gridconstant = std::max(2., ceil(5 / pixel_rate));
 		gridconstant = std::min(gridconstant, 10.);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid constant %.3f",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using grid time constant %.3fs",
 			gridconstant);
 	}
 	return gridconstant;

@@ -45,6 +45,9 @@ planetguide:	snowguide
 suncalibrate:	snowguide
 	./snowguide --debug --exposure=1 \
 		--method=diff server GUIDESIM calibrate
+sunaocalibrate:	snowguide
+	./snowguide --debug --exposure=1 \
+		--method=diff server GUIDESIM calibrate AO
 sunguide:	snowguide
 	./snowguide --debug --exposure=1 \
 		--method=diff --interval=$(INTERVAL) server GUIDESIM guide

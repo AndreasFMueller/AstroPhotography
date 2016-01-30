@@ -19,6 +19,7 @@ class SimAdaptiveOptics : public AdaptiveOptics {
 	double	starttime;
 	double	_amplitude;
 	bool	_activated;
+	const double	pixels_fullrange;
 public:
 	double	amplitude() const { return _amplitude; }
 	void	amplitude(double a) { _amplitude = a; }
