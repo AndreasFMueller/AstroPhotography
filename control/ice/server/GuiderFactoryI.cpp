@@ -100,7 +100,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 
 	// add the guider we have constructed to the D
 	locator->add(gn, guiderptr);
-	::event(EVENT_LOG, astro::event::Event::GUIDE,
+	astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 		astro::stringprintf("new guider: %s", gn.c_str()));
 
 	// create a proxy

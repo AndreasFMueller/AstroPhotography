@@ -249,7 +249,7 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 	// retrieve guider data from the database
 	try {
 		guider->useCalibration(calid);
-		::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 			astro::stringprintf("%s now uses calibration %d",
 			guider->name().c_str(), calid));
 	} catch (const astro::guiding::BadState x) {
@@ -287,13 +287,13 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 	try {
 		switch (calibrationtype) {
 		case ControlGuiderPort:
-			::event(EVENT_LOG, astro::event::Event::GUIDE,
+			astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 				astro::stringprintf("GP %s uncalibrated",
 				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::GP);
 			break;
 		case ControlAdaptiveOptics:
-			::event(EVENT_LOG, astro::event::Event::GUIDE,
+			astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 				astro::stringprintf("AO %s uncalibrated",
 				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::AO);
@@ -350,12 +350,12 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 	// start the calibration
 	switch (caltype) {
 	case ControlGuiderPort:
-		::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
 			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
 	case ControlAdaptiveOptics:
-		::event(EVENT_LOG, astro::event::Event::GUIDE,
+		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
@@ -430,6 +430,10 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a laplace tracker");
 		return guider->getLaplaceTracker();
 		break;
+	case TrackerLARGE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a large tracker");
+		return guider->getLargeTracker();
+		break;
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0, "tracking method is invalid "
 		"(should not happen)");
@@ -449,7 +453,7 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, gpinterval, aointerval);
-	::event(EVENT_LOG, astro::event::Event::GUIDE,
+	astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
 		guider->name().c_str()));
 }
@@ -467,7 +471,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 
 	// remove the callback
 	//guider->trackingcallback(NULL);
-	::event(EVENT_LOG, astro::event::Event::GUIDE,
+	astro::event(EVENT_LOG, astro::events::Event::GUIDE,
 		astro::stringprintf("stop guiding %s",
 		guider->name().c_str()));
 }

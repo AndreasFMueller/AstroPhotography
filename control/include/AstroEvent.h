@@ -7,7 +7,7 @@
 #include <AstroUtils.h>
 
 namespace astro {
-namespace event {
+namespace events {
 
 /**
  * \brief Event class, encapsulates complete event info
@@ -65,13 +65,13 @@ private:
 			const std::string& message);
 };
 
-} // namespace astro
-} // namespace event
+} // namespace events
 
 #define	EVENT_LOG	__FILE__, __LINE__, astro::demangle(typeid(*this).name())
 
 extern void	event(const char *file, int line, const std::string& object,
-			const astro::event::Event::Subsystem subsystem,
+			const events::Event::Subsystem subsystem,
 			const std::string& message);
 
+} // namespace astro
 

@@ -1980,6 +1980,29 @@ Pixel	ConvolutionAdapter<Pixel>::pixel(int x, int y) const {
 	return result;
 }
 
+//////////////////////////////////////////////////////////////////////
+// Adapter that smoothes out an image at the border
+//////////////////////////////////////////////////////////////////////
+template<typename Pixel>
+class BorderFeatherAdapter : public ConstImageAdapter<Pixel> {
+	const ConstImageAdapter<Pixel>&	_image;
+	double	_borderwidth;
+	ImageSize	_size;
+public:
+	BorderFeatherAdapter(const ConstImageAdapter<Pixel>& image,
+		double borderwidth)
+		: ConstImageAdapter<Pixel>(image), _image(image),
+		  _borderwidth(borderwidth), _size(image.getSize()) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		double	d = _size.borderDistance(ImagePoint(x, y));
+		if ((d >= _borderwidth) || (d < 0)) {
+			return _image.pixel(x, y);
+		}
+		return _image.pixel(x, y) * (d / _borderwidth);
+	}
+};
+
 } // namespace adapter
 } // namespace astro
 

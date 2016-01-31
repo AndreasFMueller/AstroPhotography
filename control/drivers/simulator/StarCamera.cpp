@@ -171,7 +171,7 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// fill in the points. 
 	ImagePoint	origin = rectangle().origin();
 
-	ImagePoint	body(320,240);
+	ImagePoint	body(340,220);
 
 	Image<double>	image(size);
 

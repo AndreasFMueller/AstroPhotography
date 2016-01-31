@@ -120,6 +120,8 @@ Point	findstar(image::ImagePtr image,
  * base class that just defines the interface
  */
 class Tracker {
+protected:
+static ConstImageAdapter<double>	*adapter(image::ImagePtr newimage);
 public:
 	virtual Point	operator()(image::ImagePtr newimage) = 0;
 	virtual	std::string	toString() const;
@@ -205,7 +207,6 @@ protected:
 	Point	correlate(const ConstImageAdapter<double>& adapter);
 	Point	correlate(const ConstImageAdapter<double>& adapter,
 			image::transform::PhaseCorrelator& correlator);
-	static ConstImageAdapter<double>	*adapter(ImagePtr image);
 public:
 	image::ImagePtr	imageptr() const { return _imageptr; }
 
@@ -238,6 +239,18 @@ public:
 		delete a;
 		return result;
 	}
+};
+
+/**
+ * \brief Large Object Tracker
+ *
+ * This tracker tries to keep a large object in the center of the image
+ * by computing the offset of the center of gravity of the objects
+ */
+class LargeTracker : public Tracker {
+public:
+	LargeTracker() { }
+	virtual Point	operator()(image::ImagePtr newimage);
 };
 
 #if 0
@@ -887,6 +900,7 @@ public:
 	TrackerPtr	getPhaseTracker();
 	TrackerPtr	getDiffPhaseTracker();
 	TrackerPtr	getLaplaceTracker();
+	TrackerPtr	getLargeTracker();
 
 private:
 	BasicProcessPtr	trackingprocess;

@@ -11,7 +11,7 @@ using namespace astro::config;
 using namespace astro::discover;
 
 namespace astro {
-namespace event {
+namespace events {
 
 static EventHandler	handler;
 
@@ -80,12 +80,13 @@ void	EventHandler::process(const std::string& file, int line,
 	table.add(record);
 }
 
-} // namespace event
-} // namespace astro
+} // namespace events
 
 void	event(const char *file, int line, const std::string& object,
-		const astro::event::Event::Subsystem subsystem,
+		const events::Event::Subsystem subsystem,
 		const std::string& message) {
-	return astro::event::EventHandler::consume(file, line, object,
+	return events::EventHandler::consume(file, line, object,
 		subsystem, message);
 }
+
+} // namespace astro

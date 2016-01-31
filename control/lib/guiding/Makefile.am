@@ -27,6 +27,7 @@ libastroguiding_la_SOURCES = 						\
 	GuiderFactory.cpp						\
 	GuiderPortProcess.cpp						\
 	GuiderStateMachine.cpp						\
+	LargeTracker.cpp						\
 	NullTracker.cpp							\
 	RefreshingTracker.cpp						\
 	SaveImageCallback.cpp						\

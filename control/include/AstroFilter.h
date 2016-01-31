@@ -792,37 +792,17 @@ public:
 		adapter::TypeConversionAdapter<T>	da(image);
 		PeakFinder	pf(_approximate, ceil(_r));
 		return pf(da);
-#if 0
-		unsigned int	w, h;
-		int	R = ceil(_r);
-		// rectangle to search for the centroid
-		ImagePoint	center(R, R);
-		w = 2 * R + 1;
-		ImageSize	square(w);
-		ImageRectangle	centrect(_approximate - center, square);
-		adapter::WindowAdapter<T>	wa(image, centrect);
-
-		// now compute the centroid coordinates
-		Point	sum;
-		double	totalweight = 0;
-		w = image.getSize().width();
-		h = image.getSize().height();
-		for (unsigned int x = 0; x < w; x++) {
-			for (unsigned int y = 0; y < h; y++) {
-				double	l = hypot(x - R, y - R);
-				if (l > _r) {
-					continue;
-				}
-				double weight = wa.pixel(x, y);
-				sum = sum + Point(x, y) * weight;
-				totalweight += weight;
-			}
-		}
-		Point	centroid = sum * (1 / totalweight);
-		centroid = centroid + Point(centrect.lowerleft());
-		return centroid;
-#endif
 	}
+};
+
+/**
+ * \brief Find center of gravity
+ */
+class CGFilter : public GeneralFilter<double, Point> {
+	double	_radius;
+public:
+	CGFilter(double radius) : _radius(radius) { }
+	virtual Point	operator()(const ConstImageAdapter<double>& image);
 };
 
 } // namespace filter

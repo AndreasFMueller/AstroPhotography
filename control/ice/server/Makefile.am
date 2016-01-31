@@ -61,12 +61,24 @@ test:	snowstar
 		2>&1 | tee test.log
 
 testsun:	snowstar
+	if [ -r servername ]; \
+	then \
+		servername=`cat servername`; \
+	else \
+		servername=server; \
+	fi; \
 	STARCONTENT=SUN ./snowstar --debug --base=`pwd`/images \
 		--database=`pwd`/testdb.db --config=testdb.db \
-		--name=server --foreground 2>&1 | tee test.log
+		--name=$${servername} --foreground 2>&1 | tee test.log
 
 testplanet:	snowstar
+	if [ -r servername ]; \
+	then \
+		servername=`cat servername`; \
+	else \
+		servername=server; \
+	fi; \
 	STARCONTENT=PLANET ./snowstar --debug --base=`pwd`/images \
 		--database=`pwd`/testdb.db --config=testdb.db \
-		--name=server --foreground 2>&1 | tee test.log
+		--name=$${servername} --foreground 2>&1 | tee test.log
 

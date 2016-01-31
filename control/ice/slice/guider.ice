@@ -162,7 +162,8 @@ module snowstar {
 		TrackerSTAR,
 		TrackerPHASE,
 		TrackerDIFFPHASE,
-		TrackerLAPLACE
+		TrackerLAPLACE,
+		TrackerLARGE
 	};
 	/**
 	 * \brief Interface for guiders

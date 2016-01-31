@@ -113,6 +113,8 @@ int	main(int argc, char *argv[]) {
 				guide.method = TrackerDIFFPHASE;
 			} else if (m == "laplace") {
 				guide.method = TrackerLAPLACE;
+			} else if (m == "large") {
+				guide.method = TrackerLARGE;
 			} else {
 				std::string	msg = astro::stringprintf(
 					"unkown tracker method: %s", m.c_str());

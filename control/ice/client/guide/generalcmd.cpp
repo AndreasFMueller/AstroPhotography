@@ -100,6 +100,8 @@ void	Guide::usage(const char *progname) {
 	std::cout << "                        to find image offsets), 'diff' (uses cross correlation" << std::endl;
 	std::cout << "                        on edges in the image to find image offsets)," << std::endl;
 	std::cout << "                        'laplace' (take laplace operator on image)," << std::endl;
+	std::cout << "                        'large' (keeps center of gravity of a large object in" << std::endl;
+	std::cout << "                        the center of the rectangle)," << std::endl;
 	std::cout << "                        'null' (always return offset 0)" << std::endl;
 	std::cout << "  -r,--rectangle=<rec>  expose only a subrectangle as "
 		"specified by <rec>." << std::endl;
@@ -151,7 +153,7 @@ int	Guide::help_command(const char *progname) {
 << std::endl <<
 "    optics. If no argument is given, 'GP' is assumed. Depending on the "
 << std::endl <<
-"   tracker method, The --star argument may be required for this function."
+"    tracker method, The --star argument may be required for this function."
 << std::endl
 
 << std::endl << 

@@ -34,8 +34,12 @@ void	ImageCallbackI::update(const SimpleImage& image,
 		image.size.width, image.size.height);
 	std::string	filename = astro::stringprintf("%s/%s%05d.fits",
 				_path.c_str(), _prefix.c_str(), imagecount++);
-	astro::io::FITSout	out(filename);
 	astro::image::ImagePtr	imageptr = convertsimple(image);
+
+	// write the image. These images are incomplete, they have no
+	// useful FITS headers, so they are certainly not precious
+	astro::io::FITSout	out(filename);
+	out.setPrecious(false);
 	out.write(imageptr);
 }
 

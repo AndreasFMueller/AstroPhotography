@@ -8,7 +8,7 @@
 using namespace astro::persistence;
 
 namespace astro {
-namespace event {
+namespace events {
 
 std::string	EventTableAdapter::tablename() {
 	return std::string("events");
@@ -58,5 +58,5 @@ UpdateSpec	EventTableAdapter::object_to_updatespec(const EventRecord& event) {
 	return spec;
 }
 
-} // namespace event
+} // namespace events
 } // namespace astro

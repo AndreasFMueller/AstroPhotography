@@ -362,6 +362,11 @@ TrackerPtr	Guider::getLaplaceTracker() {
 	return TrackerPtr(new PhaseTracker<adapter::LaplaceAdapter<double> >());
 }
 
+TrackerPtr	Guider::getLargeTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a large tracker");
+	return TrackerPtr(new LargeTracker());
+}
+
 /**
  * \brief start tracking
  *
