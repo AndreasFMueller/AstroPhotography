@@ -7,7 +7,7 @@
 
 #include <AstroGuiding.h>
 #include <AstroIO.h>
-#include <GuiderProcess.h>
+//#include <GuiderProcess.h>
 #include <CalibrationProcess.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
@@ -470,30 +470,10 @@ void	Guider::checkstate() {
 	case Guide::idle:
 		break;
 	case Guide::calibrating:
-#if 0
-		if (calibrationprocess) {
-			if (!calibrationprocess->isrunning()) {
-				if (iscalibrated()) {
-					_state.addCalibration();
-				} else {
-					_state.configure();
-				}
-				calibrationprocess = NULL;
-			}
-		}
-#endif
 		break;
 	case Guide::calibrated:
 		break;
 	case Guide::guiding:
-#if 0
-		if (guiderprocess) {
-			if (!guiderprocess->isrunning()) {
-				_state.addCalibration();
-				guiderprocess = NULL;
-			}
-		}
-#endif
 		break;
 	}
 }

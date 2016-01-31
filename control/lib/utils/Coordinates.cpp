@@ -186,14 +186,6 @@ angle_parser::angle_parser(const std::string& xms) {
 		throw std::runtime_error(msg);
 	}
 
-#if 0
-	for (int i = 0; i < 12; i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "matches[%d]: %d %d '%s'",
-			i, matches.position(i), matches.length(i),
-			std::string(matches[i]).c_str());
-	}
-#endif
-
 	// initialization
 	_value = 0;
 

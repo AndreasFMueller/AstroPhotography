@@ -25,35 +25,6 @@ segment::segment(int x, int y, double w) : _x(x), _y(y), _w(w) {
 
 typedef enum { LEFT, UP } direction_t;
 
-#if 0
-/**
- * \brief find the entry point into a 
- */
-static direction_t	entrypoint(int nx, int ny, double r,
-		double& inx, double& iny) {
-	inx = nx + 0.5;
-	iny = ny - 0.5;
-	// try to compute the incoming point as one from below
-	double	ix2 = r * r - iny * iny;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqrt(ix2) = %f", sqrt(ix2));
-	if (((nx - 0.5) * (nx - 0.5) < ix2) && (ix2 < (inx * inx))) {
-		// incomping point comes from below		
-		inx = sqrt(ix2);
-		return UP;
-	}
-	// try the compute the incoming point as one from the right
-	double	iy2 = r * r - inx * inx;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqrt(iy2) = %f", sqrt(iy2));
-	if ((iny * iny < iy2) && (iy2 < (ny + 0.5) * (ny + 0.5))) {
-		iny = sqrt(iy2);
-		return LEFT;
-	}
-
-	// if we get to this point, then 
-	throw std::runtime_error("cannot compute entry point");
-}
-#endif
-
 /**
  * \brief find the entry point into a 
  */

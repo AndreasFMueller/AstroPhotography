@@ -83,16 +83,6 @@ CcdPtr	QhyCamera::getCcd0(size_t ccdindex) {
 	return CcdPtr(new QhyCcd(ccdinfo[0], qhydeviceptr, *this));
 }
 
-#if 0
-/**
- * \brief get the GuiderPort 
- */
-GuiderPortPtr	QhyCamera::getGuiderPort0() {
-	// XXX implementation missing
-	return GuiderPortPtr();
-}
-#endif
-
 } // namespace qhy
 } // namespace camera
 } // namespace astro

@@ -135,15 +135,6 @@ void	EventHandlerI::unregisterMonitor(const Ice::Identity& eventmonitor,
 void	EventHandlerI::update(astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got event callback");
 	eventcallbacks(data);
-#if 0
-	astro::events::EventCallbackData	*cbd 
-		= dynamic_cast<astro::events::EventCallbackData *>(&*data);
-	if (NULL == cbd) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "not event callback data");
-	}
-	// now send the payload to the registerd clients
-	Event	event = convert(cbd->data());
-#endif
 }
 
 } // namespace snowstar

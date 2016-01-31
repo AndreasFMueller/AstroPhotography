@@ -137,7 +137,12 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
 	// create a temporary file name in the base directory
 	char	buffer[1024];
 	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", basedir().c_str());
-	mkstemps(buffer, 5);
+	if (mkstemps(buffer, 5) < 0) {
+		std::string	cause = stringprintf("cannot create a tmp "
+			"image file: %s", strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
 	unlink(buffer);
 

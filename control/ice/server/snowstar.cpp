@@ -231,11 +231,6 @@ int	snowstar_main(int argc, char *argv[]) {
 		// add a servant for events to the adapter
 		Ice::ObjectPtr	object = new EventHandlerI();
 		adapter->add(object, ic->stringToIdentity("Events"));
-#if 0
-		EventServantLocator	*eventservantlocator
-			= new EventServantLocator();
-		adapter->addServantLocator(eventservantlocator, "");
-#endif
 		astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
 			"Event server added");
 

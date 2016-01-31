@@ -235,13 +235,6 @@ SbigCamera::SbigCamera(int usbno) : Camera(cameraname(usbno)) {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera constructor complete");
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %d", ccdinfo.size());
-	CcdInfo	c = ccdinfo[0];
-	c.toString();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "c");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s", c.toString().c_str());
-#endif
 }
 
 /**

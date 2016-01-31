@@ -158,24 +158,6 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	// find out whether this is a model with an interline CCD
 	_has_interline_ccd = (0x10 == (0x7f & model));
 
-#if 0
-	// from product id and model number, try to infer the product name
-	for (unsigned int m = 0; m < NUMBER_SX_MODELS; m++) {
-		if (
-		((models[m].product == 0) || (models[m].product == product)) &&
-		((models[m].model == 0) || (models[m].model == model))
-		) {
-			std::string	un = _name.unitname();
-			un.append("-");
-			un.append(models[m].name);
-			_name.unitname(un);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "new unit name: %s",
-				un.c_str());
-			break;
-		}
-	}
-#endif
-
 	// get information about this CCD from the camera
         Request<sx_ccd_params_t>        ccd0request(
                 RequestBase::vendor_specific_type,

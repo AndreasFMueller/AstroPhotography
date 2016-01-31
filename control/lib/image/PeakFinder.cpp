@@ -90,6 +90,8 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 			vlow = vnew;
 			nlow = pixels;
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "values %f:%f pixelcount: %d:%d",
+			vlow, vhigh, nlow, nhigh);
 	} while (iterations--);
 	std::string	cause = stringprintf("no suitable level found");
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());

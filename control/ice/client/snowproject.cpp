@@ -72,51 +72,6 @@ int	command_submit(const std::string& projectname,
 		}
 	}
 
-#if 0
-	// get configuration information
-	astro::config::ConfigurationPtr config
-		= astro::config::Configuration::get();
-	astro::config::InstrumentConfigurationPtr	instruments
-		= astro::config::InstrumentConfiguration::get(config);
-	astro::config::InstrumentPtr    instrument
-		= instruments->instrument(part->instrument());
-
-	// prepare the parameters 
-	TaskParameters  parameters;
-
-	// get the device information from the instrument
-	parameters.camera = instrument->component(
-		astro::DeviceName::Camera)->name();
-	parameters.ccd = instrument->component(
-		astro::DeviceName::Ccd)->unit();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera: %s, ccd: %d",
-		parameters.camera.c_str(), parameters.ccdid);
-
-	// get the temperature from the 
-	parameters.ccdtemperature = part->temperature() + 273.15;
-
-	// filterwheel parameters
-	parameters.filterwheel = "";
-	try {
-		parameters.filterwheel = instrument->devicename(
-			astro::DeviceName::Filterwheel).toString();
-	} catch (...) {
-	}
-	parameters.filter = part->filtername();
-
-	// exposure parameters
-	parameters.exp = convert(part->exposure());
-
-	// everything is ready now, submit the task
-	int     taskid = tasks->submit(parameters);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new task %d", taskid);
-
-	// add the task id to the part
-	astro::config::ProjectConfigurationPtr	projects
-		= astro::config::ProjectConfiguration::get(config);
-	projects->parttask(projectname, part->partno(), taskid);
-	return EXIT_SUCCESS;
-#endif
 	return EXIT_FAILURE;
 }
 

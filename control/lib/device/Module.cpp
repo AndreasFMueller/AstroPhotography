@@ -192,12 +192,6 @@ void	*Module::getSymbol(const std::string& symbolname) {
 	// make sure the module is already loaded
 	if (!isloaded()) {
 		this->open();
-#if 0
-		std::string	msg = stringprintf("module %s not open",
-			_modulename.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-#endif
 	}
 
 	// find the symbol for the getDescriptor function

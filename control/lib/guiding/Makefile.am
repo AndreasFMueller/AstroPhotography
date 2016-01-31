@@ -33,7 +33,6 @@ libastroguiding_la_SOURCES = 						\
 	SaveImageCallback.cpp						\
 	StarDetectorBase.cpp						\
 	StarTracker.cpp							\
-	PhaseTracker.cpp						\
 	Tracker.cpp							\
 	TrackingPersistence.cpp						\
 	TrackingPoint.cpp						\

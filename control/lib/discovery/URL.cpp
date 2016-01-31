@@ -29,23 +29,6 @@ URL::URL(const std::string& urlstring) {
 		throw std::runtime_error(msg);
 	}
 
-#if 0
-	// the string matched, so we should be able to get the match results
-	// from the expression
-	int	i;
-	astro::smatch::iterator	ptr;
-	for (i = 0, ptr = matchresults.begin(); ptr != matchresults.end();
-		ptr++, i++) {
-		std::cout << "[" << i << "] ";
-		if (matchresults.position(i) >= 0) {
-			std::cout << *ptr
-				<< ", position=" << matchresults.position(i)
-				<< " length=" << matchresults.position(i);
-		}
-		std::cout << std::endl;
-	}
-#endif
-
 	// method
 	_method = matchresults[1];
 

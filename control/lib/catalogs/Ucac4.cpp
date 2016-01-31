@@ -104,12 +104,6 @@ Ucac4Star	Ucac4::find(const Ucac4StarNumber& number) {
  * \brief Find a star based on zone and number
  */
 Ucac4Star	Ucac4::find(uint16_t zone, uint32_t number) {
-#if 0
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"getting star from zone %hu, number %u",
-		zone, number);
-#endif
-
 	// open the zone file
 	return getzone(zone)->get(number);
 }
