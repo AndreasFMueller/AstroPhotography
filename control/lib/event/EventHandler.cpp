@@ -6,6 +6,7 @@
 #include <AstroEvent.h>
 #include <AstroConfig.h>
 #include <AstroDiscovery.h>
+#include <includes.h>
 
 using namespace astro::config;
 using namespace astro::discover;
