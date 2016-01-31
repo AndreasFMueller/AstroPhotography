@@ -10,6 +10,8 @@
 #include <camera.h>
 #include <AstroCamera.h>
 #include <Ice/Ice.h>
+#include <mutex>
+#include <condition_variable>
 
 namespace snowstar {
 
