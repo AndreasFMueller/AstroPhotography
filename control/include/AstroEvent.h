@@ -3,8 +3,12 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _AstroEvent_h
+#define _AstroEvent_h
+
 #include <AstroPersistence.h>
 #include <AstroUtils.h>
+#include <AstroCallback.h>
 
 namespace astro {
 namespace events {
@@ -16,15 +20,34 @@ class Event {
 public:
 	int		pid;
 	std::string	service;
-	double		eventtime;
+	struct timeval	eventtime;
 	std::string	subsystem;
 	std::string	message;
-	std::string	object;
+	std::string	classname;
 	std::string	file;
-	std::string	line;
-	typedef enum { DEBUG, FOCUS, GUIDE, IMAGE, MODULE, TASK } Subsystem;
+	int	line;
+	typedef enum {
+		DEBUG,
+		DEVICE,
+		FOCUS,
+		GUIDE,
+		IMAGE,
+		INSTRUMENT,
+		MODULE,
+		REPOSITORY,
+		SERVER,
+		TASK
+	} Subsystem;
 };
 
+/**
+ * \brief Interface to callbacks
+ */
+typedef callback::CallbackDataEnvelope<Event>	EventCallbackData;
+
+/**
+ * \brief Persistence of Events
+ */
 typedef astro::persistence::Persistent<Event>	EventRecord;
 
 /**
@@ -42,12 +65,17 @@ static astro::persistence::UpdateSpec
 
 typedef astro::persistence::Table<EventRecord, EventTableAdapter> EventTable;
 
+/**
+ * \brief Handler for callbacks
+ */
 class EventHandler {
 	bool	_active;
-	astro::persistence::Database	database;
+	persistence::Database	database;
+	callback::CallbackPtr	_callback;
 public:
 static bool	active();
 static void	active(bool a);
+static void	callback(callback::CallbackPtr);
 private:
 	EventHandler(const EventHandler& other);
 	EventHandler&	operator=(const EventHandler& other);
@@ -55,23 +83,26 @@ public:
 	EventHandler() { }
 static EventHandler&	get();
 static void	consume(const std::string& file, int line,
-			const std::string& object,
+			const std::string& classname,
 			const Event::Subsystem subsystem,
 			const std::string& message);
 private:
 	void	process(const std::string& file, int line,
-			const std::string& object,
+			const std::string& classname,
 			const Event::Subsystem subsystem,
 			const std::string& message);
 };
 
+
 } // namespace events
 
-#define	EVENT_LOG	__FILE__, __LINE__, astro::demangle(typeid(*this).name())
+#define	EVENT_CLASS	__FILE__, __LINE__, astro::demangle(typeid(*this).name())
+#define	EVENT_GLOBAL	__FILE__, __LINE__, ""
 
-extern void	event(const char *file, int line, const std::string& object,
+extern void	event(const char *file, int line, const std::string& classname,
 			const events::Event::Subsystem subsystem,
 			const std::string& message);
 
 } // namespace astro
 
+#endif /* _AstroEvent_h */

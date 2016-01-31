@@ -13,8 +13,6 @@ namespace astro {
 namespace image {
 namespace filter {
 
-static long imagecounter = 0;
-
 /**
  * \brief Compute the center of gravity of all pixels
  */

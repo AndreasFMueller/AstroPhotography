@@ -6,6 +6,7 @@
 #include <AstroPersistence.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 #include <FieldPersistence.h>
 #include <sstream>
 #include <AstroDebug.h>
@@ -50,6 +51,41 @@ std::string	TimeField::stringValue() const {
 }
 
 //////////////////////////////////////////////////////////////////////
+// TimevalField implementation
+//////////////////////////////////////////////////////////////////////
+struct timeval	TimevalField::string2timeval(const std::string& s) {
+	double	d = std::stod(s);
+	struct timeval	t;
+	t.tv_sec = floor(d);
+	t.tv_usec = floor(1000000 * (d - t.tv_sec));
+	return t;
+}
+
+std::string	TimevalField::timeval2string(const struct timeval& t) {
+	std::string	s = TimeField::time2string(t.tv_sec);
+	return stringprintf("%d.%06d", t.tv_sec, t.tv_usec);
+}
+
+TimevalField::TimevalField(const std::string& value) {
+	_value = string2timeval(value);
+}
+
+TimevalField::TimevalField(double value) {
+	_value.tv_sec = floor(value);
+	_value.tv_usec = floor(1000000 * (value - _value.tv_sec));
+}
+
+std::string	TimevalField::stringValue() const {
+	return timeval2string(_value);
+}
+
+double	TimevalField::doubleValue() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "time value: %d.%08d", _value.tv_sec,
+		_value.tv_usec);
+	return _value.tv_sec + 0.000001 * _value.tv_usec;
+}
+
+//////////////////////////////////////////////////////////////////////
 // FieldValueFactory implementation
 //////////////////////////////////////////////////////////////////////
 FieldValuePtr	FieldValueFactory::get(int value) const {
@@ -71,12 +107,26 @@ FieldValuePtr	FieldValueFactory::get(const char *value) const {
 	return FieldValuePtr(new StringField(std::string(value)));
 }
 
+
 FieldValuePtr	FieldValueFactory::getTime(const time_t t) const {
 	return FieldValuePtr(new TimeField(t));
 }
 
 FieldValuePtr	FieldValueFactory::getTime(const std::string& value) const {
 	return FieldValuePtr(new TimeField(value));
+}
+
+
+FieldValuePtr	FieldValueFactory::getTimeval(const struct timeval& t) const {
+	return FieldValuePtr(new TimevalField(t));
+}
+
+FieldValuePtr	FieldValueFactory::getTimeval(const std::string& value) const {
+	return FieldValuePtr(new TimevalField(value));
+}
+
+FieldValuePtr	FieldValueFactory::getTimeval(double value) const {
+	return FieldValuePtr(new TimevalField(value));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -161,6 +211,18 @@ void	Statement::bind(int colno, const FieldValuePtr& value) {
 		//	value->stringValue().c_str(), colno);
 		return;
 	}
+	TimevalField	*tv = dynamic_cast<TimevalField *>(&*value);
+	if (tv) {
+		this->bind(colno, value->doubleValue());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"bound time value '%s' to column %d",
+		//	value->stringValue().c_str(), colno);
+		return;
+	}
+	std::string	msg = stringprintf("type %s of value unknown, "
+		"cannot bind", demangle(typeid(&*value).name()).c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 //////////////////////////////////////////////////////////////////////

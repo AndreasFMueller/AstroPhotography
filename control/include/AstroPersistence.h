@@ -64,6 +64,7 @@ public:
 	virtual bool	isnull() const { return false; }
 	virtual std::string	toString() const { return stringValue(); }
 	virtual time_t	timeValue() const = 0;
+	virtual struct timeval	timevalValue() const = 0;
 };
 
 typedef std::shared_ptr<FieldValue>	FieldValuePtr;
@@ -79,6 +80,9 @@ public:
 	FieldValuePtr	get(const char *value) const;
 	FieldValuePtr	getTime(const time_t t) const;
 	FieldValuePtr	getTime(const std::string& value) const;
+	FieldValuePtr	getTimeval(const struct timeval& value) const;
+	FieldValuePtr	getTimeval(const std::string& value) const;
+	FieldValuePtr	getTimeval(double value) const;
 };
 
 /**
@@ -92,6 +96,7 @@ public:
 	double	doubleValue() const { return second->doubleValue(); }
 	std::string	stringValue() const { return second->stringValue(); }
 	time_t	timeValue() const { return second->timeValue(); }
+	struct timeval	timevalValue() const { return second->timevalValue(); }
 	bool	operator==(const std::string& othername) const {
 		return first == othername;
 	}
@@ -208,7 +213,7 @@ static Database	get(const std::string& name);
  * \brief Update Specification used for the database independent interface
  */
 class UpdateSpec : public std::map<std::string, FieldValuePtr> {
-private:
+public:
 	std::string	columnlist() const;
 	std::string	values() const;
 	std::string	update() const;

@@ -12,6 +12,7 @@
 #include <AstroDevice.h>
 #include <AstroFocus.h>
 #include <AstroProject.h>
+#include <AstroEvent.h>
 #include <TrackingPersistence.h>
 #include <AstroDiscovery.h>
 #include <types.h>
@@ -218,6 +219,10 @@ InstrumentPropertyNames	convertPropertyNames(const astro::discover::Instrument::
 
 astro::discover::InstrumentPropertyList	convert(const InstrumentPropertyList& properties);
 InstrumentPropertyList	convert(const astro::discover::InstrumentPropertyList& properties);
+
+// Events
+snowstar::Event	convert(const astro::events::Event& e);
+astro::events::Event	convert(const snowstar::Event& e);
 
 } // namespace snowstar
 

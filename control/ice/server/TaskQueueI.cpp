@@ -48,7 +48,7 @@ TaskQueueI::TaskQueueI(astro::task::TaskQueue& _taskqueue)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue callback installed %p",
 		taskqueuecallback);
 
-	astro::event(EVENT_LOG, astro::events::Event::TASK,
+	astro::event(EVENT_CLASS, astro::events::Event::TASK,
 		"task queue initialized");
 }
 
@@ -65,7 +65,7 @@ void TaskQueueI::start(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start request");
 	try {
 		taskqueue.start();
-		astro::event(EVENT_LOG, astro::events::Event::TASK,
+		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			"task queue started");
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
@@ -79,7 +79,7 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop request");
 	try {
 		taskqueue.stop();
-		astro::event(EVENT_LOG, astro::events::Event::TASK,
+		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			"task queue stopped");
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
@@ -150,7 +150,7 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 
 	try {
 		int	id = taskqueue.submit(snowstar::convert(parameters), info);
-		astro::event(EVENT_LOG, astro::events::Event::TASK,
+		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			astro::stringprintf("task %d submitted", id));
 		return id;
 	} catch (const std::exception& x) {
@@ -204,7 +204,7 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	}
 	try {
 		taskqueue.cancel(taskid);
-		astro::event(EVENT_LOG, astro::events::Event::TASK,
+		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			astro::stringprintf("task %d cancelled", taskid));
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(
@@ -223,7 +223,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 	}
 	try {
 		taskqueue.remove(taskid);
-		astro::event(EVENT_LOG, astro::events::Event::TASK,
+		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			astro::stringprintf("task %d removed", taskid));
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(

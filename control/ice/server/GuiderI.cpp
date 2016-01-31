@@ -249,7 +249,7 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 	// retrieve guider data from the database
 	try {
 		guider->useCalibration(calid);
-		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("%s now uses calibration %d",
 			guider->name().c_str(), calid));
 	} catch (const astro::guiding::BadState x) {
@@ -287,13 +287,13 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 	try {
 		switch (calibrationtype) {
 		case ControlGuiderPort:
-			astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+			astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 				astro::stringprintf("GP %s uncalibrated",
 				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::GP);
 			break;
 		case ControlAdaptiveOptics:
-			astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+			astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 				astro::stringprintf("AO %s uncalibrated",
 				guider->name().c_str()));
 			guider->unCalibrate(astro::guiding::BasicCalibration::AO);
@@ -350,12 +350,12 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 	// start the calibration
 	switch (caltype) {
 	case ControlGuiderPort:
-		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
 			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
 	case ControlAdaptiveOptics:
-		astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->name().c_str()));
 		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
@@ -453,7 +453,7 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
 	guider->startGuiding(tracker, gpinterval, aointerval);
-	astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
 		guider->name().c_str()));
 }
@@ -471,7 +471,7 @@ void GuiderI::stopGuiding(const Ice::Current& /* current */) {
 
 	// remove the callback
 	//guider->trackingcallback(NULL);
-	astro::event(EVENT_LOG, astro::events::Event::GUIDE,
+	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 		astro::stringprintf("stop guiding %s",
 		guider->name().c_str()));
 }

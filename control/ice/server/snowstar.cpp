@@ -33,6 +33,8 @@
 #include <InstrumentsI.h>
 #include <CommunicatorSingleton.h>
 #include <AstroEvent.h>
+#include <EventHandlerI.h>
+#include <EventServantLocator.h>
 
 namespace snowstar {
 
@@ -169,6 +171,8 @@ int	snowstar_main(int argc, char *argv[]) {
 
 	// activate the event log
 	astro::events::EventHandler::active(true);
+	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
+		"snowstar server startup");
 
 	// determine which service name to use
 	astro::discover::ServiceLocation&	location = astro::discover::ServiceLocation::get();
@@ -224,13 +228,26 @@ int	snowstar_main(int argc, char *argv[]) {
 				connectstring);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adapters created");
 
+		// add a servant for events to the adapter
+		Ice::ObjectPtr	object = new EventHandlerI();
+		adapter->add(object, ic->stringToIdentity("Events"));
+#if 0
+		EventServantLocator	*eventservantlocator
+			= new EventServantLocator();
+		adapter->addServantLocator(eventservantlocator, "");
+#endif
+		astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
+			"Event server added");
+
 		// add a servant for devices to the device adapter
-		Ice::ObjectPtr	object = new DevicesI(devices);
+		object = new DevicesI(devices);
 		adapter->add(object, ic->stringToIdentity("Devices"));
 		DeviceServantLocator	*deviceservantlocator
 			= new DeviceServantLocator(repository, imagedirectory);
 		adapter->addServantLocator(deviceservantlocator, "");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "devices servant added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::DEVICE,
+			"Device server ready");
 
 		// add a servant for images to the adapter
 		object = new ImagesI(imagedirectory);
@@ -239,6 +256,8 @@ int	snowstar_main(int argc, char *argv[]) {
 			= new ImageLocator(imagedirectory);
 		adapter->addServantLocator(imagelocator, "image");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::IMAGE,
+			"Image server ready");
 
 		// add a servant for taskqueue to the adapter
 		object = new TaskQueueI(taskqueue);
@@ -246,6 +265,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		TaskLocator	*tasklocator = new TaskLocator(database);
 		adapter->addServantLocator(tasklocator, "task");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::TASK,
+			"Task server ready");
 
 		// add a servant for the guider factory
 		GuiderLocator	*guiderlocator = new GuiderLocator();
@@ -253,6 +274,8 @@ int	snowstar_main(int argc, char *argv[]) {
 			guiderlocator, imagedirectory);
 		adapter->add(object, ic->stringToIdentity("Guiders"));
 		adapter->addServantLocator(guiderlocator, "guider");
+		astro::event(EVENT_GLOBAL, astro::events::Event::GUIDE,
+			"Guider server ready");
 
 		// add a servant for the modules
 		object = new ModulesI();
@@ -267,6 +290,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		adapter->addServantLocator(devicelocatorlocator,
 				"devicelocator");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::MODULE,
+			"Module server ready");
 
 		// add a servant for Focusing
 		object = new FocusingFactoryI();
@@ -274,6 +299,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		FocusingLocator	*focusinglocator = new FocusingLocator();
 		adapter->addServantLocator(focusinglocator, "focusing");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::FOCUS,
+			"Focusing server ready");
 
 		// add a servant for Repositories
 		object = new RepositoriesI();
@@ -282,6 +309,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		RepositoryLocator	*repolocator = new RepositoryLocator();
 		adapter->addServantLocator(repolocator, "repository");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Repository servant added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::REPOSITORY,
+			"Repository server ready");
 
 		// add a servant for Instruments
 		object = new InstrumentsI();
@@ -290,6 +319,8 @@ int	snowstar_main(int argc, char *argv[]) {
 		InstrumentLocator	*instrumentlocator = new InstrumentLocator();
 		adapter->addServantLocator(instrumentlocator, "instrument");
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "Instrument servant added");
+		astro::event(EVENT_GLOBAL, astro::events::Event::INSTRUMENT,
+			"Instrument server ready");
 
 		// activate the adapter
 		adapter->activate();
@@ -306,6 +337,8 @@ int	snowstar_main(int argc, char *argv[]) {
 	if (ic) {
 		ic->destroy();
 	}
+	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
+		"snowstar server shutdown");
 	return status;
 }
 

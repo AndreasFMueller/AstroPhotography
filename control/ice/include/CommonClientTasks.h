@@ -1,8 +1,11 @@
 /*
- * CommonClientTasks.h --
+ * CommonClientTasks.h -- common stuff used in multiple ICE clients
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _CommonClientTasks_h
+#define _CommonClientTasks_h
+
 #include <AstroFormat.h>
 #include <camera.h>
 #include <AstroCamera.h>
@@ -95,4 +98,20 @@ public:
 	void	connect(IceProxy::Ice::Object& proxy);
 };
 
+/**
+ * \brief Common infrastructure for monitor classes
+ */
+class CommonMonitor {
+	std::mutex	mtx;
+	std::condition_variable	cond;
+	bool	_complete;
+public:
+	bool	complete() const { return _complete; }
+	void	complete(bool c);
+	CommonMonitor();
+	void	wait();
+};
+
 } // namespace snowstar
+
+#endif /* _CommonClientTasks_h */

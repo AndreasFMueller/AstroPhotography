@@ -5,7 +5,7 @@
 #
 
 SOURCES = RemoteInstrument.cpp CommunicatorSingleton.cpp \
-	CommonClientTasks.cpp IceDiscovery.cpp
+	CommonClientTasks.cpp IceDiscovery.cpp CommonMonitor.cpp
 
 noinst_LTLIBRARIES = libclient.la 
 

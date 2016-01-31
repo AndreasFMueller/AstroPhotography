@@ -10,6 +10,7 @@
 #include <sstream>
 #include <AstroDebug.h>
 #include <stdexcept>
+#include <math.h>
 
 namespace astro {
 namespace persistence {
@@ -24,6 +25,12 @@ public:
 	double	doubleValue() const { return _value; }
 	int	intValue() const { return _value; }
 	time_t	timeValue() const { return _value; }
+	struct timeval	timevalValue() const {
+		struct timeval	t;
+		t.tv_sec = _value;
+		t.tv_usec = 0;
+		return t;
+	}
 	std::string	stringValue() const {
 		std::ostringstream	out;
 		out << _value;
@@ -46,6 +53,12 @@ public:
 		return out.str();
 	}
 	time_t	timeValue() const { return _value; }
+	struct timeval	timevalValue() const {
+		struct timeval	t;
+		t.tv_sec = floor(_value);
+		t.tv_usec = floor(1000000 * (_value - t.tv_sec));
+		return t;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -65,6 +78,33 @@ public:
 		return "'" + stringValue() + "'";
 	}
 	time_t	timeValue() const { return _value; }
+	struct timeval	timevalValue() const {
+		struct timeval	t;
+		t.tv_sec = _value;
+		t.tv_usec = 0;
+		return t;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+// fields with unix time type
+//////////////////////////////////////////////////////////////////////
+class TimevalField : public FieldValue {
+	struct timeval	_value;
+public:
+	static	struct timeval	string2timeval(const std::string& value);
+	static	std::string	timeval2string(const struct timeval& t);
+	TimevalField(const std::string& value);
+	TimevalField(const struct timeval& t) : _value(t) { }
+	TimevalField(double value);
+	std::string	stringValue() const;
+	int	intValue() const { return _value.tv_sec; }
+	double	doubleValue() const;
+	virtual std::string	toString() const {
+		return "'" + stringValue() + "'";
+	}
+	time_t	timeValue() const { return _value.tv_sec; }
+	struct timeval	timevalValue() const { return _value; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -82,6 +122,9 @@ public:
 	}
 	time_t	timeValue() const {
 		return TimeField::string2time(_value);
+	}
+	struct timeval	timevalValue() const {
+		return TimevalField::string2timeval(_value);
 	}
 };
 
@@ -103,6 +146,9 @@ public:
 		throw std::runtime_error("cannot convert NULL to time_t");
 	}
 	virtual bool	isnull() const { return true; }
+	virtual struct timeval	timevalValue() const {
+		throw std::runtime_error("cannot convert NULL to struct timeval");
+	}
 };
 
 } // namespace persistence

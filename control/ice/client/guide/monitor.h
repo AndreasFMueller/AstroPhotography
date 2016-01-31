@@ -11,11 +11,13 @@
 #include <guider.h>
 #include "display.h"
 #include <ImageCallbackI.h>
+#include <CommonClientTasks.h>
 
 namespace snowstar {
 namespace app {
 namespace snowguide {
 
+#if 0
 /**
  * \brief Common infrastructure for monitor classes
  */
@@ -29,6 +31,7 @@ public:
 	CommonMonitor();
 	void	wait();
 };
+#endif
 
 /**
  * \brief Calibration monitor class

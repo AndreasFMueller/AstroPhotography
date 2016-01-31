@@ -3,6 +3,7 @@
 //
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
+#include <Ice/Identity.ice>
 
 /**
  * \brief snowstar module captures all interfaces
@@ -122,5 +123,31 @@ module snowstar {
 		void	setParameterString(string name, string value);
 		float	parameterValueFloat(string name);
 		string	parameterValueString(string name);
+	};
+
+	/**
+ 	 * \brief An event record
+	 */
+	struct Event {
+		int	pid;
+		string	service;
+		double	timeago;
+		string	subsystem;
+		string	message;
+		string	classname;
+		string	file;
+		int	line;
+	};
+	sequence<Event>	eventlist;
+
+	interface EventMonitor extends Callback {
+		void	update(Event eventinfo);
+	};
+
+	interface EventHandler {
+		eventlist	eventsBetween(double fromago, double toago);
+		eventlist	eventsCondition(string condition);
+		void	registerMonitor(Ice::Identity eventmonitor);
+                void	unregisterMonitor(Ice::Identity eventmonitor);
 	};
 };

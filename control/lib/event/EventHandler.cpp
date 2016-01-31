@@ -9,6 +9,7 @@
 
 using namespace astro::config;
 using namespace astro::discover;
+using namespace astro::callback;
 
 namespace astro {
 namespace events {
@@ -23,18 +24,25 @@ void	EventHandler::active(bool a) {
 	handler._active = a;
 }
 
+void	EventHandler::callback(CallbackPtr c) {
+	handler._callback = c;
+}
+
 EventHandler&	EventHandler::get() {
 	return handler;
 }
 
 void	EventHandler::consume(const std::string& file, int line,
-		const std::string& object, const Event::Subsystem subsystem,
+		const std::string& classname, const Event::Subsystem subsystem,
 		const std::string& message) {
-	return handler.process(file, line, object, subsystem, message);
+	return handler.process(file, line, classname, subsystem, message);
 }
 
+/**
+ * \brief Main event processing method
+ */
 void	EventHandler::process(const std::string& file, int line,
-		const std::string& object, const Event::Subsystem subsystem,
+		const std::string& classname, const Event::Subsystem subsystem,
 		const std::string& message) {
 	if (!_active) {
 		return;
@@ -50,10 +58,13 @@ void	EventHandler::process(const std::string& file, int line,
 	EventRecord	record(-1);
 	record.pid = getpid();
 	record.service = discover::ServiceLocation::get().servicename();
-	record.eventtime = Timer::gettime();
+	gettimeofday(&record.eventtime, NULL);
 	switch (subsystem) {
 	case Event::DEBUG:
 		record.subsystem = "debug";
+		break;
+	case Event::DEVICE:
+		record.subsystem = "device";
 		break;
 	case Event::FOCUS:
 		record.subsystem = "focus";
@@ -64,29 +75,54 @@ void	EventHandler::process(const std::string& file, int line,
 	case Event::IMAGE:
 		record.subsystem = "image";
 		break;
+	case Event::INSTRUMENT:
+		record.subsystem = "instrument";
+		break;
 	case Event::MODULE:
 		record.subsystem = "module";
+		break;
+	case Event::REPOSITORY:
+		record.subsystem = "repository";
+		break;
+	case Event::SERVER:
+		record.subsystem = "server";
 		break;
 	case Event::TASK:
 		record.subsystem = "task";
 		break;
 	}
 	record.message = message;
-	record.object = object;
+	record.classname = classname;
 	record.file = file;
 	record.line = line;
 
+	// save the record in the database table
 	EventTable	table(database);
 	table.add(record);
+
+	// if a callback is installed, send the event to the callback
+	if (!_callback) {
+		return;
+	}
+	EventCallbackData	*ecd = new EventCallbackData(record);
+	CallbackDataPtr	cd = CallbackDataPtr(ecd);
+	_callback->operator()(cd);
 }
 
 } // namespace events
 
-void	event(const char *file, int line, const std::string& object,
+void	event(const char *file, int line, const std::string& classname,
 		const events::Event::Subsystem subsystem,
 		const std::string& message) {
-	return events::EventHandler::consume(file, line, object,
-		subsystem, message);
+	try {
+		events::EventHandler::consume(file, line, classname,
+			subsystem, message);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write event: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot write event");
+	}
 }
 
 } // namespace astro
