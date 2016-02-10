@@ -14,14 +14,16 @@ namespace astro {
 namespace camera {
 namespace othello {
 
+#if 0
 #define	OTHELLO_RAPLUS_BIT	1
 #define OTHELLO_DECPLUS_BIT	2
 #define OTHELLO_DECMINUS_BIT	4
 #define	OTHELLO_RAMINUS_BIT	8
+#endif
 
-#define OTHELLO_SET		1
-#define OTHELLO_SET_ALL_TIMES	3
-#define OTHELLO_GET		4
+#define GUIDERPORT_SET		1
+#define GUIDERPORT_SET_ALL_TIMES	3
+#define GUIDERPORT_GET		4
 
 OthelloGuiderPort::OthelloGuiderPort(astro::usb::DevicePtr _deviceptr)
 	: GuiderPort(othellodevname(_deviceptr)),
@@ -57,7 +59,7 @@ void	OthelloGuiderPort::activate(float raplus, float raminus,
 	
 	Request<othello_set_all_times_t> r(
 		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, 0, OTHELLO_SET_ALL_TIMES,
+		RequestBase::device_recipient, 0, GUIDERPORT_SET_ALL_TIMES,
 		0, &payload);
 	deviceptr->controlRequest(&r);
 }
@@ -68,7 +70,7 @@ uint8_t	OthelloGuiderPort::active() {
 	Request<active_t>	request(
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0xf,
-		(uint8_t)OTHELLO_GET, 0);
+		(uint8_t)GUIDERPORT_GET, 0);
 	deviceptr->controlRequest(&request);
 	return *request.data();
 }

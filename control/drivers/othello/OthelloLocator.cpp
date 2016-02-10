@@ -6,6 +6,7 @@
 #include <OthelloLocator.h>
 #include <OthelloUtil.h>
 #include <OthelloGuiderPort.h>
+#include <OthelloFocuser.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
@@ -101,8 +102,22 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 			DevicePtr	devptr = *i;
 			devptr->open();
 			try {
-				if (device == DeviceName::Guiderport) {
+				DeviceDescriptorPtr	descriptor
+					= devptr->descriptor();
+				if (descriptor->idVendor()
+					!= OTHELLO_VENDOR_ID) continue;
+				// handle guider port devices
+				if ((descriptor->idProduct()
+					== OTHELLO_GUIDERPORT_ID)
+					&& (device == DeviceName::Guiderport)) {
 					names.push_back("guiderport:othello/"
+						+ othelloname(devptr));
+				}
+				// handle focuser devices
+				if ((descriptor->idProduct()
+					== OTHELLO_FOCUSER_ID)
+					&& (device == DeviceName::Focuser)) {
+					names.push_back("focuser:othello/"
 						+ othelloname(devptr));
 				}
 			} catch (std::runtime_error& x) {
@@ -135,11 +150,14 @@ GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
 	std::vector<astro::usb::DevicePtr>::const_iterator	i;
 	for (i = d.begin(); i != d.end(); i++) {
 		astro::usb::DevicePtr	dptr = (*i);
-		uint16_t	vendor = dptr->descriptor()->idVendor();
+		DeviceDescriptorPtr	descriptor = dptr->descriptor();
+		uint16_t	vendor = descriptor->idVendor();
 		if (vendor != OTHELLO_VENDOR_ID) {
 			break;
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device vendor: %04x", vendor);
+		if (descriptor->idProduct() != OTHELLO_GUIDERPORT_ID) {
+			break;
+		}
 		bool	needsclosing = true;
 		if (dptr->isOpen()) {
 			needsclosing = false;
@@ -152,6 +170,52 @@ GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
 		if (devserial == serial) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching guider port");
 			return GuiderPortPtr(new OthelloGuiderPort(dptr));
+		}
+		if (needsclosing) {
+			dptr->close();
+		}
+	}
+	debug(LOG_ERR, DEBUG_LOG, 0, "coult no find device %s",
+		name.toString().c_str());
+	throw std::runtime_error("device not found");
+}
+
+/**
+ * \brief Create a focuser from the name
+ */
+FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device %s",
+		name.toString().c_str());
+	// extract the serial number from the name
+	std::string	serial = name.unitname();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device unit %s",
+		serial.c_str());
+
+	// find the device with this serial number
+	std::vector<astro::usb::DevicePtr>	d = context.devices();
+	std::vector<astro::usb::DevicePtr>::const_iterator	i;
+	for (i = d.begin(); i != d.end(); i++) {
+		astro::usb::DevicePtr	dptr = (*i);
+		DeviceDescriptorPtr	descriptor = dptr->descriptor();
+		uint16_t	vendor = descriptor->idVendor();
+		if (vendor != OTHELLO_VENDOR_ID) {
+			break;
+		}
+		if (descriptor->idProduct() != OTHELLO_FOCUSER_ID) {
+			break;
+		}
+		bool	needsclosing = true;
+		if (dptr->isOpen()) {
+			needsclosing = false;
+		} else {
+			dptr->open();
+		}
+		std::string	devserial = descriptor->iSerialNumber();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
+			devserial.c_str());
+		if (devserial == serial) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching focuser");
+			return FocuserPtr(new OthelloFocuser(dptr));
 		}
 		if (needsclosing) {
 			dptr->close();

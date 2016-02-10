@@ -34,6 +34,7 @@ public:
 	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
 	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual FocuserPtr	getFocuser0(const DeviceName& name);
 };
 
 } // namespace othello

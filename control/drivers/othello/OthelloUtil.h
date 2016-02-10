@@ -12,6 +12,9 @@
 
 #define OTHELLO_VENDOR_ID	0xF055
 
+#define OTHELLO_GUIDERPORT_ID	0x1234
+#define OTHELLO_FOCUSER_ID	0x1235
+
 namespace astro {
 namespace camera {
 namespace othello {
