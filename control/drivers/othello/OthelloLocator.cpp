@@ -153,10 +153,10 @@ GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
 		DeviceDescriptorPtr	descriptor = dptr->descriptor();
 		uint16_t	vendor = descriptor->idVendor();
 		if (vendor != OTHELLO_VENDOR_ID) {
-			break;
+			continue;
 		}
 		if (descriptor->idProduct() != OTHELLO_GUIDERPORT_ID) {
-			break;
+			continue;
 		}
 		bool	needsclosing = true;
 		if (dptr->isOpen()) {
@@ -199,10 +199,10 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 		DeviceDescriptorPtr	descriptor = dptr->descriptor();
 		uint16_t	vendor = descriptor->idVendor();
 		if (vendor != OTHELLO_VENDOR_ID) {
-			break;
+			continue;
 		}
 		if (descriptor->idProduct() != OTHELLO_FOCUSER_ID) {
-			break;
+			continue;
 		}
 		bool	needsclosing = true;
 		if (dptr->isOpen()) {
