@@ -64,6 +64,7 @@ libastroimage_la_SOURCES = 						\
 	ImageRectangle.cpp						\
 	ImageSize.cpp							\
 	Interpolation.cpp						\
+	Layer.cpp							\
 	LevelMaskExtractor.cpp						\
 	Masks.cpp							\
 	Metavalue.cpp							\
@@ -79,6 +80,7 @@ libastroimage_la_SOURCES = 						\
 	Residual.cpp							\
 	RingImage.cpp							\
 	SphereProjection.cpp						\
+	Stack.cpp							\
 	Stacker.cpp							\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\
