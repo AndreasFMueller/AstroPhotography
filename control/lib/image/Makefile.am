@@ -35,6 +35,7 @@ libastroimage_la_SOURCES = 						\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
 	EuclideanDisplacement.cpp					\
+	EuclideanDisplacementConvolve.cpp				\
 	FITS.cpp							\
 	FITSKeywords.cpp						\
 	FITSdate.cpp							\

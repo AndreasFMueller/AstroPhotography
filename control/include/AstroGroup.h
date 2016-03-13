@@ -68,7 +68,6 @@ public:
 		Point	where = _displacement(Point(x, y));
 		ImagePoint	w2(where.x(), where.y());
 		if (_image.getSize().contains(w2)) {
-			//debug(LOG_DEBUG, DEBUG_LOG, 0, "get pixel @ %s", w2.toString().c_str());
 			return _image.pixel(w2);
 		}
 		return _defaultpixel;
@@ -101,6 +100,31 @@ public:
 		return _image.pixel(where);
 	}
 };
+
+/**
+ * \brief Interface class for functions defined on the group
+ */
+class EuclideanDisplacementFunction {
+public:
+	virtual double	operator()(const EuclideanDisplacement& g) const = 0;
+};
+
+template<typename Pixel>
+class EuclideanDisplacementConvolve {
+	const EuclideanDisplacementFunction&	_f;
+	int	_angleresolution;
+public:
+	EuclideanDisplacementConvolve(const EuclideanDisplacementFunction& f,
+		int angleresolution)
+		: _f(f), _angleresolution(angleresolution) { }
+	Image<Pixel>	*operator()(const ConstImageAdapter<Pixel>& image)
+				const;
+};
+
+// specialization for double
+template<>
+Image<double>	*EuclideanDisplacementConvolve<double>::operator()(
+			const ConstImageAdapter<double>& image) const;
 
 } // namespace transform
 } // namespace image

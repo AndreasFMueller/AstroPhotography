@@ -6,6 +6,7 @@
 
 #include <AstroIO.h>
 #include <AstroGroup.h>
+#include <AstroImage.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -25,10 +26,12 @@ public:
 	void	tearDown() { }
 	void	testDisplace();
 	void	testInterpolate();
+	void	testConvolve();
 
 	CPPUNIT_TEST_SUITE(EuclideanDisplacementTest);
 	CPPUNIT_TEST(testDisplace);
 	CPPUNIT_TEST(testInterpolate);
+	CPPUNIT_TEST(testConvolve);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -86,6 +89,53 @@ void	EuclideanDisplacementTest::testInterpolate() {
         outfile->write(*t);
         delete outfile;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testInterpolate() end");
+}
+
+class simpleconvolution : public transform::EuclideanDisplacementFunction {
+	ImageSize size;
+public:
+	simpleconvolution() : size(20, 20) {
+	}
+	virtual double	operator()(const transform::EuclideanDisplacement& d)
+		const {
+		if ((d.angle() < -0.1) || (d.angle() > 0.1)) {
+			return 0;
+		}
+		if (!size.contains(floor(d.translation().x()),
+			floor(d.translation().y()))) {
+			return 0;
+		}
+		return 1;
+	}
+};
+
+void	EuclideanDisplacementTest::testConvolve() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolve() begin");
+
+	// read testimages/sun.fits
+	std::string	name("testimages/orion1.fits");
+	FITSinfile<unsigned short>	infile(name);
+        Image<unsigned short>	*i = infile.read();
+	ImagePtr	image(i);
+
+	// create an adapter so that we see double values
+	adapter::TypeConversionAdapter<unsigned short>	tconv(*i);
+
+	// apply the convolution
+	simpleconvolution	f;
+
+	// create an image from the transform
+	transform::EuclideanDisplacementConvolve<double>	ta(f, 1000);
+	Image<double>	*result = ta(tconv);
+	ImagePtr	r(result);
+
+	// write the transformed image back to tmp/sun-displace.fits
+	std::string	outname("tmp/orion-convolve.fits");
+	FITSoutfile<double>       *outfile = new FITSoutfile<double>(outname);
+        outfile->setPrecious(false);
+        outfile->write(*result);
+        delete outfile;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConvolve() end");
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EuclideanDisplacementTest);
