@@ -34,6 +34,7 @@ libastroimage_la_SOURCES = 						\
 	Demosaic.cpp							\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
+	EuclideanDisplacement.cpp					\
 	FITS.cpp							\
 	FITSKeywords.cpp						\
 	FITSdate.cpp							\

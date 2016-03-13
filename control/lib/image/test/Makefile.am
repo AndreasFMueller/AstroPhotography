@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	ConvolutionAdapterTest.cpp
+	EuclideanDisplacementTest.cpp
+#	ConvolutionAdapterTest.cpp
 #	DeconvolveTest.cpp
 #	PhaseCorrelatorTest.cpp 
 #	PeakFinderTest.cpp 
@@ -39,6 +40,7 @@ tests_SOURCES = tests.cpp 						\
 	ConvolutionAdapterTest.cpp					\
 	DeconvolveTest.cpp						\
 	NoiseTest.cpp							\
+	EuclideanDisplacementTest.cpp					\
 	FITSKeywordTest.cpp						\
 	FITSdateTest.cpp						\
 	FITSwriteTest.cpp						\
