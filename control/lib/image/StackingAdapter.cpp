@@ -20,15 +20,16 @@ namespace adapter {
 template<typename Pixel>
 class StackingAdapterTyped : public StackingAdapter {
 	const Image<Pixel>	*_image;
-	StackingAdapterTyped(const StackedAdapterTyped& other);
-	StackingAdapterTyped&	operator=(const StackedAdapterTyped& other);
+	StackingAdapterTyped(const StackingAdapterTyped& other);
+	StackingAdapterTyped&	operator=(const StackingAdapterTyped& other);
 public:
-	StackingAdapterTyped(comst ImagePtr imageptr, const Image<Pixel> *image)
-		: ConstImageAdapter<double>(image->size()),
-		  StackingAdapter(imageptr), _image(image) {
+	StackingAdapterTyped(const ImagePtr imageptr, const Image<Pixel> *image)
+		: StackingAdapter(imageptr), _image(image) {
+	}
+	virtual ~StackingAdapterTyped() {
 	}
 	double	pixel(int x, int y) const {
-		double	value = _image->luminance(_image->pixel(x, y));
+		double	value = 0 /*_image->pixel(x, y).luminance()*/;
 		return value;
 	}
 };
@@ -38,9 +39,9 @@ public:
 //////////////////////////////////////////////////////////////////////
 #define buildadapter(imageptr, Pixel)					\
 {									\
-	Image<Pixel>	*image = dynamic_cast(Image<Pixel > *)(&*imageptr); \
+	Image<Pixel>	*image = dynamic_cast<Image<Pixel > *>(&*imageptr); \
 	if (NULL != image) {						\
-		return new StackingAdapter<Pixel >(imageptr, image)	\
+		return new StackingAdapterTyped<Pixel >(imageptr, image);\
 	}								\
 }
 

@@ -83,6 +83,7 @@ libastroimage_la_SOURCES = 						\
 	RingImage.cpp							\
 	SphereProjection.cpp						\
 	Stack.cpp							\
+	StackingAdapter.cpp						\
 	Stacker.cpp							\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\

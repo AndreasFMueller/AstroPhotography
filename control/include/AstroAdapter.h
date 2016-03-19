@@ -759,10 +759,13 @@ T	LuminanceAdapter<Pixel, T>::pixel(int x, int y) const {
 //////////////////////////////////////////////////////////////////////
 class StackingAdapter : public ConstImageAdapter<double> {
 	ImagePtr	_image;
-	StackingAdapter(ImagePtr image);
+protected:
+	StackingAdapter(ImagePtr image)
+		: ConstImageAdapter<double>(image->size()), _image(image) {
+	}
 public:
-	virtual ~StackingAdapter();
-	virtual double	pixel(int x, int y) const = 0;
+	virtual ~StackingAdapter() { }
+	virtual double	pixel(int /* x */, int /* y */) const { return 0.; };
 static	StackingAdapter	*get(ImagePtr image);
 };
 
