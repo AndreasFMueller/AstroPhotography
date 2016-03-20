@@ -4,6 +4,7 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroAdapter.h>
+#include <AstroPixel.h>
 
 namespace astro {
 namespace adapter {
@@ -29,7 +30,7 @@ public:
 	virtual ~StackingAdapterTyped() {
 	}
 	double	pixel(int x, int y) const {
-		double	value = 0 /*_image->pixel(x, y).luminance()*/;
+		double	value = image::luminance<Pixel>(_image->pixel(x, y));
 		return value;
 	}
 };
@@ -58,6 +59,12 @@ StackingAdapter	*StackingAdapter::get(ImagePtr imageptr) {
 	buildadapter(imageptr, RGB<unsigned long>);
 	buildadapter(imageptr, RGB<float>);
 	buildadapter(imageptr, RGB<double>);
+	buildadapter(imageptr, YUYV<unsigned char>);
+	buildadapter(imageptr, YUYV<unsigned short>);
+	buildadapter(imageptr, YUYV<unsigned int>);
+	buildadapter(imageptr, YUYV<unsigned long>);
+	buildadapter(imageptr, YUYV<float>);
+	buildadapter(imageptr, YUYV<double>);
 	throw std::runtime_error("unknown pixel type");
 }
 
