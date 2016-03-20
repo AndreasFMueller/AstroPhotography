@@ -35,7 +35,7 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	long	xsize, ysize;
 	camera().get_CameraXSize(&xsize);
 	camera().get_CameraYSize(&ysize);
-	DeviceName	ccdname(name(), DeviceName::Ccd, "0");
+	DeviceName	ccdname(name(), DeviceName::Ccd, "ccd");
 	CcdInfo	info(ccdname, astro::image::ImageSize(xsize, ysize), 0);
 
 	// get pixel dimensions

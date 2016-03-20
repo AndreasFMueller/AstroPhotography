@@ -9,9 +9,14 @@ namespace astro {
 namespace camera {
 namespace qsi {
 
+DeviceName	coolername(const DeviceName& cameraname) {
+	return cameraname
+			.child(DeviceName::Ccd, "ccd")
+			.child(DeviceName::Cooler, "cooler");
+}
+
 QsiCooler::QsiCooler(QsiCamera& camera)
-	: Cooler(DeviceName(camera.name(), DeviceName::Cooler, "cooler")),
-	  _camera(camera) {
+	: Cooler(coolername(camera.name())), _camera(camera) {
 }
 
 float	QsiCooler::getSetTemperature() {
