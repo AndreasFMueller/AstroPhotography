@@ -36,6 +36,9 @@ void	CcdI::startExposure(const Exposure& exposure,
 	image.reset();
 	try {
 		_ccd->startExposure(convert(exposure));
+	} catch (astro::BadParameter& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "bad parameter: %s", x.what());
+		throw BadParameter(x.what());
 	} catch (astro::DeviceException& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "startExposure error: %s",
 			x.what());

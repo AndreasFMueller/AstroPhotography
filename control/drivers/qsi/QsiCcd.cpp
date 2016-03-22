@@ -7,6 +7,7 @@
 #include <QsiCcd.h>
 #include <QsiCooler.h>
 #include <AstroDebug.h>
+#include <AstroExceptions.h>
 #include <includes.h>
 
 using namespace astro::image;
@@ -32,29 +33,36 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
-	// set the binning mode
-	_camera.camera().put_BinX(exposure.mode().x());
-	_camera.camera().put_BinY(exposure.mode().y());
+	try {
+		// set the binning mode
+		_camera.camera().put_BinX(exposure.mode().x());
+		_camera.camera().put_BinY(exposure.mode().y());
 
-	// compute the frame size in binned pixels, as this is what
-	// the QSI camera expects
-	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
-	ImageSize	size = exposure.frame().size() / exposure.mode();
-	ImageRectangle	frame(origin, size);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting %s image",
-		frame.toString().c_str());
+		// compute the frame size in binned pixels, as this is what
+		// the QSI camera expects
+		ImagePoint origin = exposure.frame().origin() / exposure.mode();
+		ImageSize  size = exposure.frame().size() / exposure.mode();
+		ImageRectangle	frame(origin, size);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting %s image",
+			frame.toString().c_str());
 
-	// set the subframe
-	_camera.camera().put_NumX(size.width());
-	_camera.camera().put_NumY(size.height());
-	_camera.camera().put_StartX(origin.x());
-	_camera.camera().put_StartY(origin.y());
+		// set the subframe
+		_camera.camera().put_NumX(size.width());
+		_camera.camera().put_NumY(size.height());
+		_camera.camera().put_StartX(origin.x());
+		_camera.camera().put_StartY(origin.y());
 
-	// get shutter info
-	bool	light = (exposure.shutter() == Shutter::OPEN);
-	_camera.camera().StartExposure(exposure.exposuretime(), light);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
-		exposure.exposuretime(), (light) ? "light" : "dark");
+		// get shutter info
+		bool	light = (exposure.shutter() == Shutter::OPEN);
+		_camera.camera().StartExposure(exposure.exposuretime(), light);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%fsec %s exposure started",
+			exposure.exposuretime(), (light) ? "light" : "dark");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "bad exposure parameters: %s",
+			x.what());
+		cancelExposure();
+		throw BadParameter(x.what());
+	}
 
 	// check the current state of the camera
 	exposureStatus();
