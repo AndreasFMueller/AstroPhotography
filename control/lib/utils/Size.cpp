@@ -35,4 +35,9 @@ std::ostream&	operator<<(std::ostream& out, const Size& size) {
 	return out;
 }
 
+bool	Size::contains(const Point& point) const {
+	return (0 <= point.x()) && (point.x() <= _width - 1) &&
+		(0 <= point.y()) && (point.y() <= _height - 1);
+}
+
 } // namespace astro

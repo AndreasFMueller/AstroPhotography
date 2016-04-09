@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <Radon.h>
 #include <AstroIO.h>
+#include <math.h>
 
 using namespace astro::image::radon;
 using namespace astro::image;
@@ -20,13 +21,15 @@ class RadonTest: public CppUnit::TestFixture {
 public:
 	void	setUp();
 	void	tearDown();
+	void	testRadon();
 	void	testCircle();
 	void	testCircleTransform();
 	//void	testXXX();
 
 	CPPUNIT_TEST_SUITE(RadonTest);
-	CPPUNIT_TEST(testCircle);
-	CPPUNIT_TEST(testCircleTransform);
+	CPPUNIT_TEST(testRadon);
+//	CPPUNIT_TEST(testCircle);
+//	CPPUNIT_TEST(testCircleTransform);
 	//CPPUNIT_TEST(testXXX);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -37,6 +40,68 @@ void	RadonTest::setUp() {
 }
 
 void	RadonTest::tearDown() {
+}
+
+class Circle {
+	ImagePoint	_center;
+	int	_radius;
+public:
+	Circle(const ImagePoint& center, int radius) : _center(center), _radius(radius) { }
+	bool	contains(const ImagePoint& p) const {
+		return (_center.distance(p) <= _radius);
+	}
+};
+
+void	RadonTest::testRadon() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRadon() begin");
+	int	width = 1280;
+	int	height = 1024;
+	Image<double>	image(width, height);
+	ImageRectangle	rectangle(ImagePoint(60, 20), ImageSize(10,15));
+	std::list<ImageRectangle>	rectangles;
+	std::list<Circle>	circles;
+	for (int counter = 0; counter < 30; counter++) {
+		int	w = random() % (width - 100);
+		int	h = random() % (height - 100);
+		ImagePoint	origin(w, h);
+		int	x = 10 + random() % 90;
+		int	y = 10 + random() % 90;
+		ImageSize	size(x, y);
+		rectangles.push_back(ImageRectangle(origin, size));
+		x = 50 + random() % (width - 100);
+		y = 50 + random() % (height - 100);
+		ImagePoint	center(x, y);
+		int	radius = 10 + random() % 90;
+		circles.push_back(Circle(center, radius));
+	}
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			double	sum = 1;
+			ImagePoint	p(x, y);
+			std::list<ImageRectangle>::const_iterator	i;
+			for (i = rectangles.begin(); i != rectangles.end(); i++) {
+				if (i->contains(p)) {
+					sum += 1;
+				}
+			}
+			std::list<Circle>::const_iterator	j;
+			for (j = circles.begin(); j != circles.end(); j++) {
+				if (j->contains(p)) {
+					sum += 1;
+				}
+			}
+			image.pixel(x, y) = sum;
+		}
+	}
+	astro::io::FITSoutfile<double>	outimage("image.fits");
+	outimage.setPrecious(false);
+	outimage.write(image);
+	RadonAdapter	radon(ImageSize(1600,800), image);
+	Image<double>	r(radon);
+	astro::io::FITSoutfile<double>	out("radon.fits");
+	out.setPrecious(false);
+	out.write(r);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRadon() end");
 }
 
 void	RadonTest::testCircle() {

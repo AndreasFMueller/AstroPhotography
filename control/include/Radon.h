@@ -9,6 +9,31 @@ namespace astro {
 namespace image {
 namespace radon {
 
+/*
+ * \brief Radon transform
+ */
+class RadonTransform : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	_image;
+	Image<double>	_radon;
+public:
+	RadonTransform(const ImageSize& size,
+		const ConstImageAdapter<double>& image);
+	virtual double	pixel(int x, int y) const {
+		return _radon.pixel(x, y);
+	}
+};
+
+/**
+ * \brief Adapter class that allows access for arbitratry y-arguments
+ */
+class RadonAdapter : public ConstImageAdapter<double> {
+	RadonTransform	_radon;
+public:
+	RadonAdapter(const ImageSize& size,
+		const ConstImageAdapter<double>& image);
+	virtual double	pixel(int x, int y) const;
+};
+
 /**
  * \brief Class representing a segment of a curve
  */

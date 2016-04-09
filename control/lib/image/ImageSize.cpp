@@ -94,7 +94,7 @@ bool	ImageSize::operator!=(const ImageSize& other) const {
  *        defined by a size object
  */
 bool	ImageSize::bounds(const ImagePoint& p) const {
-	return	(p.x() < _width) && (p.y() < _height);
+	return	(0 <= p.x()) && (p.x() < _width) && (0 <= p.y()) && (p.y() < _height);
 }
 
 /**

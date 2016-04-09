@@ -1,221 +1,461 @@
 /*
- * Radon.cpp -- classes and structures for radon related transforms
+ * Radon.cpp -- Radon transform implementation
  *
- * (c) 2015 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2016 Prof Dr Andreas Mueller, HOchschule Rapperswil
  */
 #include <Radon.h>
 #include <AstroDebug.h>
-#include <stdexcept>
+#include <limits>
+#include <AstroFormat.h>
+#include <AstroTypes.h>
 
 namespace astro {
 namespace image {
 namespace radon {
 
-//////////////////////////////////////////////////////////////////////
-// segment implementation
-//////////////////////////////////////////////////////////////////////
-segment::segment(int x, int y, double w) : _x(x), _y(y), _w(w) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create segment (%d,%d) w=%f",
-		_x, _y, _w);
-	if (_w < 0) {
-		throw std::runtime_error("cannot create segment with "
-			"negative weight");
-	}
-}
-
-typedef enum { LEFT, UP } direction_t;
-
 /**
- * \brief find the entry point into a 
- */
-static direction_t	exitpoint(int& nx, int& ny, double r,
-		double& inx, double& iny) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "process new point %d,%d", nx, ny);
-	iny = ny + 0.5;
-
-	// try to compute the incoming point as one from below
-	double	ix2 = r * r - iny * iny;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqrt(ix2) = %f", sqrt(ix2));
-	inx = nx - 0.5;
-	if (inx < 0) { inx = 0; }
-	if (((inx * inx) < ix2) && (ix2 < ((nx + 0.5) * (nx + 0.5)))) {
-		// incomping point comes from below		
-		inx = sqrt(ix2);
-		return UP;
-	}
-
-	// try the compute the incoming point as one from the right
-	double	iy2 = r * r - inx * inx;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqrt(iy2) = %f", sqrt(iy2));
-	if (((ny - 0.5) * (ny - 0.5) < iy2) && (iy2 < iny * iny)) {
-		iny = sqrt(iy2);
-		return LEFT;
-	}
-
-	// if we get to this point, then 
-	throw std::runtime_error("cannot compute entry point");
-}
-
-
-
-//////////////////////////////////////////////////////////////////////
-// circle class implementation
-//////////////////////////////////////////////////////////////////////
-void	circle::add_segments(const segment& s) {
-	_segments->push_back(s);
-	if (s.x() > 0) {
-		_segments->push_back(segment(-s.x(),  s.y(), s.w()));
-	}
-	if (s.y() > 0) {
-		_segments->push_back(segment( s.x(), -s.y(), s.w()));
-	}
-	if ((s.x() > 0) && (s.y() > 0)) {
-		_segments->push_back(segment(-s.x(), -s.y(), s.w()));
-	}
-}
-
-/**
- * \brief Build a circle
+ * \brief Auxiliary class to handle normal vectors for the lines
  *
- * This constructor uses an algorithm similar to the Breesenham algorithm
- * to find the 
+ * The Radon transform computes integrals along lines in an image, 
+ * this class implements all the computations needed for this integration
  */
-circle::circle(double r) {
-	// create the _segments
-	_segments = segment_ptr(new segments_t());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "building circle of radius %f", r);
-	int	x = lround(r), y = 0;
-	int	finaly = x;
-
-	// if the only point is the origin, then the segments array
-	// has only one point
-	if (x == 0) {
-		_segments->push_back(segment(0, 0, 1));
-		return;
-	}
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial point (%d,%d)", x, y);
-
-	// compute the first point, and the coordinates of the second point
-	double	entryx = x - 0.5, entryy = -0.5;
-	double	exitx = x - 0.5, exity = 0.5;
-	direction_t	direction = UP;
-	if (hypot(x - 0.5, 0.5) < r) {
-		direction = UP;
-		exitx = entryx = sqrt(r * r - 0.25);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "vertical segment: x = %f",
-			exitx);
-	} else {
-		direction = LEFT;
-		exity = sqrt(r * r - (x - 0.5) * (x - 0.5));
-		entryy = -exity;
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %f, y = %f", entryx, entryy);
-	
-	double	w = 2 * (-entryy);
-	add_segments(segment(x, y, w));
-	//add_segments(segment(y, x, w));
-
-	// report on work to do
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "finaly = %d", finaly);
-
-	// now compute entry points until you reach the vertical axis
-	while ((y != finaly) || (x > 0)) {
-		// go to the next point
-		switch (direction) {
-		case LEFT:
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "direction = LEFT");
-			x--;
-			break;
-		case UP:
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "direction = UP");
-			y++;
-			break;
+class Normal {
+	double	_nx;
+	double	_ny;
+public:
+	typedef enum { DIRECTIONX, DIRECTIONY } direction_type;
+private:
+	direction_type	_direction;
+public:
+	direction_type	direction() const { return _direction; }
+	typedef enum { RIGHT, UP, LEFT, DOWN } walk_direction;
+private:
+	walk_direction	_walk;
+public:
+	walk_direction	walk() const { return _walk; }
+	Normal(double angle) {
+		_nx = cos(angle);
+		_ny = sin(angle);
+		if (fabs(_nx) < fabs(_ny)) {
+			_direction = DIRECTIONX;
+		} else {
+			_direction = DIRECTIONY;
 		}
-		entryx = exitx;
-		entryy = exity;
-
-		// compute the next point
-		direction = exitpoint(x, y, r, exitx, exity);
-
-		// compute the segment length
-		double	w = hypot(entryx - exitx, entryy - exity);
-
-		// add a new segment
-		add_segments(segment(x, y, w));
-
-		// exit point protocol
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exit: (%.3f,%.3f), r = %f",
-			exitx, exity, hypot(exitx, exity));
 	}
+	std::string	toString() const {
+		return stringprintf("(%.4f,%.4f)", _nx, _ny);
+	}
+	double	tan() const { return _ny / _nx; }
+	double	cot() const { return _nx / _ny; }
+	double	csc() const { return 1. / _ny; }
+	double	sec() const { return 1. / _nx; }
+	double	scalar(int x, int y) const {
+		return _nx * x + _ny * y;
+	}
+	double	scalar(double x, double y) const {
+		return _nx * x + _ny * y;
+	}
+	double	scalar(const ImageSize& size) const {
+		return scalar(size.width(), size.height());
+	}
+	double	scalar(const ImagePoint& point) const {
+		return scalar(point.x(), point.y());
+	}
+	double	scalar(const Point& point) const {
+		return scalar(point.x(), point.y());
+	}
+	bool	xdirection() const {
+		return fabs(_nx) <= fabs(_ny);
+	}
+	bool	ydirection() const {
+		return fabs(_nx) > fabs(_ny);
+	}
+private:
+	bool	samesign(double a, double b) const {
+		if (((a > 0) && (b > 0)) || ((a < 0) && (b < 0))) {
+			return true;
+		}
+		return false;
+	}
+	int	closest(double s, double increment) const {
+		int	direction = (samesign(s, increment)) ? -1 : 1;
+		double	alternative = s + increment * direction;
+		if (fabs(alternative) < fabs(s)) {
+			return direction;
+		}
+		return 0;
+	}
+public:
+	ImagePoint	nextPoint(const ImagePoint& point,
+				double& deltas) const {
+		int	d;
+		switch (_direction) {
+		case DIRECTIONX:
+			d = closest(deltas + _nx, _ny);
+			deltas += scalar(1, d);
+			return ImagePoint(point.x() + 1, point.y() + d);
+		case DIRECTIONY:
+			d = closest(deltas + _ny, _nx);
+			deltas += scalar(d, 1);
+			return ImagePoint(point.x() + d, point.y() + 1);
+		}
+	}
+	typedef std::pair<ImagePoint, ImagePoint>	pointpair;
+	pointpair	endpoints(double s, const ImageSize& size) const;
+	pointpair	roundpoints(const Point& p1, const Point& p2) const;
+};
 
-	// 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d segments added", _segments->size());
+Normal::pointpair	Normal::roundpoints(const Point& p1,
+				const Point& p2) const {
+	ImagePoint	point1(p1.x(), p1.y());
+	ImagePoint	point2(p2.x(), p2.y());
+	switch (_direction) {
+	case DIRECTIONX:
+		if (point1.x() < point2.x()) {
+			return pointpair(point1, point2);
+		} else {
+			return pointpair(point2, point1);
+		}
+		break;
+	case DIRECTIONY:
+		if (point1.y() < point2.y()) {
+			return pointpair(point1, point2);
+		} else {
+			return pointpair(point2, point1);
+		}
+		break;
+	}
 }
 
 /**
- * \brief evaluate pixels along a circle
- */ 
-double	circle::value(const ConstImageAdapter<double>& image, int x, int y)
-	const {
-	segments_t::const_iterator	i;
-	double	sum = 0;
-	double	weightsum = 0;
-	int	wx = image.getSize().width();
-	int	wy = image.getSize().height();
-	for (i = _segments->begin(); i != _segments->end(); i++) {
-		const segment&	s = *i;
-		int	ix = x + s.x();
-		int	iy = y + s.y();
-		if (ix < 0)
-			continue;
-		if (iy < 0)
-			continue;
-		if (ix >= wx)
-			continue;
-		if (iy >= wy)
-			continue;
-		weightsum += s.w();
-		sum += s.w() * image.pixel(ix, iy);
+ * \brief Compute the start and end points of a line through the image
+ *
+ * This method computes the start and end points of a line that 
+ * crosses the borders of the two 
+ */
+Normal::pointpair	Normal::endpoints(double s, const ImageSize& size) const {
+	Size	r(size.width(), size.height());
+	// find points on edges
+	double	lefty = std::numeric_limits<double>::infinity();
+	double	righty = std::numeric_limits<double>::infinity();
+	if (_ny != 0) {
+		lefty = s / _ny;
+		righty = (s - _nx * (size.width() - 1)) / _ny;
 	}
-	if (0 == weightsum) {
-		return std::numeric_limits<double>::quiet_NaN();
+	Point	left(0, lefty);
+	Point	right(r.width() - 1, righty);
+	double	topx = std::numeric_limits<double>::infinity();
+	double	bottomx = std::numeric_limits<int>::infinity();
+	if (_nx != 0) {
+		topx = (s - _ny * (r.height() - 1)) / _nx;
+		bottomx = s / _nx;
 	}
-	return sum / weightsum;
+	Point	bottom(bottomx, 0);
+	Point	top(topx, r.height() - 1);
+
+/*
+debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal left = %s", left.toString().c_str());
+debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal right = %s", right.toString().c_str());
+debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal top = %s", top.toString().c_str());
+debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal bottom = %s", bottom.toString().c_str());
+ */
+	
+	// now return the pairs in such a way that we can always step up
+	// one coordinate
+	switch (_direction) {
+	case DIRECTIONX:
+// debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal X");
+		if (r.contains(left)) {
+			if (r.contains(top)) {
+				return roundpoints(left, top);
+			}
+			if (r.contains(bottom)) {
+				return roundpoints(left, bottom);
+			}
+			if (r.contains(right)) {
+				return roundpoints(left, right);
+			}
+		}
+		if (r.contains(bottom)) {
+			if (r.contains(top)) {
+				return roundpoints(bottom, top);
+			}
+			if (r.contains(right)) {
+				return roundpoints(bottom, right);
+			}
+		}
+		if (r.contains(top) && r.contains(right)) {
+			return roundpoints(top, right);
+		}
+		break;
+	case DIRECTIONY:
+// debug(LOG_DEBUG, DEBUG_LOG, 0, "Normal Y");
+		if (r.contains(bottom)) {
+			if (r.contains(top)) {
+				return roundpoints(bottom, top);
+			}
+			if (r.contains(left)) {
+				return roundpoints(bottom, left);
+			}
+			if (r.contains(right)) {
+				return roundpoints(bottom, right);
+			}
+		}
+		if (r.contains(left)) {
+			if (r.contains(top)) {
+				return roundpoints(left, top);
+			}
+			if (r.contains(right)) {
+				return roundpoints(left, right);
+			}
+		}
+		if (r.contains(right) && r.contains(top)) {
+			return roundpoints(right, top);
+		}
+		break;
+	}
+	throw std::runtime_error("no intersection");
 }
 
-double	circle::length() const {
-	segments_t::const_iterator	i;
-	double	sum = 0;
-	for (i = _segments->begin(); i != _segments->end(); i++) {
-		sum += i->w();
+/**
+ * \brief An implementation class for the radon transform
+ */
+class RadonImplementation {
+	/**
+	 * \brief Scale of the pixel in the Radon transform
+	 *
+	 * Each pixel in the radon transform stands for a lane of with
+	 * <scale> through the image.
+	 */
+	double	_scale;
+public:
+	RadonImplementation(double scale = 1) : _scale(scale) { }
+	// Radon transform driver
+	void	transform(ImageAdapter<double>& radon,
+		const ConstImageAdapter<double>& image) const;
+	// iteration along the direction of the normal
+	void	iterate(ImageAdapter<double>& radon, 
+		const ConstImageAdapter<double>& image, int y, double angle)
+		const;
+	// integral along a line orthogonal the normal
+	double	integral(const ConstImageAdapter<double>& image,
+		const Normal& normal, double s) const;
+	double	xintegral(const ConstImageAdapter<double>& image,
+		const Normal& normal, const ImagePoint& start, double s) const;
+	double	yintegral(const ConstImageAdapter<double>& image,
+		const Normal& normal, const ImagePoint& start, double s) const;
+};
+
+/**
+ * \brief Radon transform driver operation
+ *
+ * This method controls the angle, so it creates vertical lines of the
+ * radon transform in each iteration.
+ */
+void	RadonImplementation::transform(ImageAdapter<double>& radon,
+		const ConstImageAdapter<double>& image) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "perform Radon transform on %s image",
+		image.getSize().toString().c_str());
+	// get the image dimensions
+	int	height = radon.getSize().height();
+	//int	width = radon.getSize().width();
+	double	anglestep = M_PI / height;
+
+	// iterate over the angles
+	for (int y = 0; y < height; y++) {
+		// now go through the image at this angle 
+		double	angle = y * anglestep;
+		iterate(radon, image, y, angle);
 	}
-	return sum;
+}
+
+/**
+ * \brief Iteration along 
+ *
+ * This method iterates along the normal direction. It computes the start
+ * and end points of the line through the image along which the pixel
+ * values should be accumulated.
+ */
+void	RadonImplementation::iterate(ImageAdapter<double>& radon,
+		const ConstImageAdapter<double>& image, int y, double angle)
+		const {
+	// compute the normal vector
+	Normal	normal(angle);
+
+	// s value for the center of the image
+	Point	center(image.getSize().center());
+	double	scenter = normal.scalar(center - Point(0.5,0.5));
+	
+	// compute the range along the normal affected by image
+	// image pixels
+	int	imageWidth = image.getSize().width();
+	int	imageHeight = image.getSize().height();
+	double	smax = fabs(scenter);
+	smax = fmax(smax,
+		fabs(normal.scalar(imageWidth, 0) - scenter)
+	);
+	smax = fmax(smax,
+		fabs(normal.scalar(imageWidth, imageHeight) - scenter)
+	);
+	smax = fmax(smax,
+		fabs(normal.scalar(0, imageHeight) - scenter)
+	);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"angle = %.3f, normal = %s, scenter = %.3f, srange = %.2f",
+		180 * angle / M_PI, normal.toString().c_str(), scenter, smax);
+		
+	// compute the range of s values for which we have there is space
+	// in the Radon transform image
+	int	w = radon.getSize().width();
+	int	w2 = w / 2;
+	for (int si = 0; si < w; si++) {
+		// compute the s-value for which we have to compute the
+		// integral
+		double	s = _scale * (si - w2);
+		if ((s < -smax) || (s > smax)) {
+			radon.writablepixel(si, y) = 0.;
+			continue;
+		}
+
+		// handle the case where we are inside the image,
+		double	radonvalue = integral(image, normal, s + scenter);
+		radon.writablepixel(si, y) = radonvalue;
+		//debug(LOG_DEBUG, DEBUG_LOG, 0,
+		//	"normal = %s, s = %.3f, value = %f", 
+		//	normal.toString().c_str(), s, radonvalue);
+	}
+}
+
+/**
+ * \brief Compute the integral along a line
+ *
+ * This method computes the integral along a line through the image
+ */
+double	RadonImplementation::integral(const ConstImageAdapter<double>& image,
+		const Normal& normal, double s) const {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "integral with offset s = %f", s);
+	// find the start point of the line 
+	ImagePoint	start;
+	ImagePoint	end;
+	try {
+		Normal::pointpair	points = normal.endpoints(s,
+							image.getSize());
+		start = points.first;
+		end = points.second;
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "integral from %s to %s",
+		//	start.toString().c_str(), end.toString().c_str());
+	} catch (const std::exception& x) {
+		return 0;
+	}
+	double	deltas = normal.scalar(start) - s;
+
+	// find out whether the angle of the line is closer to the x-
+	// or the y-axis
+	if (normal.xdirection()) {
+		return xintegral(image, normal, start, deltas);
+	} else {
+		return yintegral(image, normal, start, deltas);
+	}
+	return 0;
+}
+
+/**
+ * \brief Compute the integral along a line closer to the x axis
+ */
+double	RadonImplementation::xintegral(const ConstImageAdapter<double>& image,
+		const Normal& normal, const ImagePoint& start, double deltas)
+		const {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "xintegral from %s, deltas = %.3f",
+	//	start.toString().c_str(), deltas);
+	ImageSize	size = image.getSize();
+	double	sum = 0;
+	int	counter	= 0;
+	ImagePoint	point = start;
+	while (size.contains(point)) {
+		// add the pixel value at that point
+		double	value = image.pixel(point);
+		sum += value;
+		counter++;
+
+		point = normal.nextPoint(point, deltas);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "next point: %s, deltas = %.3f",
+		//	point.toString().c_str(), deltas);
+	}
+	double	value = sum * fabs(normal.csc());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "normal = %s, start = %s, "
+	//	"s = %.3f completed, %d points, value = %.1f",
+	//	normal.toString().c_str(), start.toString().c_str(),
+	//	deltas, counter, value);
+	return value;
+}
+
+/**
+ * \brief Compute the integral along a line closer to the y axis
+ */
+double	RadonImplementation::yintegral(const ConstImageAdapter<double>& image,
+		const Normal& normal, const ImagePoint& start, double deltas)
+		const {
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "yintegral from %s, deltas = %.3f",
+	//	start.toString().c_str(), deltas);
+	ImageSize	size = image.getSize();
+	double	sum = 0;
+	int	counter	= 0;
+	ImagePoint	point = start;
+	while (size.contains(point)) {
+		// add the pixel value at that point
+		double	value = image.pixel(point);
+		sum += value;
+		counter++;
+
+		point = normal.nextPoint(point, deltas);
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "next point: %s, deltas = %.3f",
+		//	point.toString().c_str(), deltas);
+	}
+	double	value = sum * fabs(normal.sec());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "normal = %s, start = %s, "
+	//	"s = %.3f completed, %d points, value = %.1f",
+	//	normal.toString().c_str(), start.toString().c_str(),
+	//	deltas, counter, value);
+	return value;
+
+}
+
+/**
+ * \brief Construct a radon transform for a given image
+ */
+RadonTransform::RadonTransform(const ImageSize& size,
+	const ConstImageAdapter<double>& image) 
+	: ConstImageAdapter<double>(size), _image(image), _radon(size) {
+	RadonImplementation	ri;
+	ri.transform(_radon, _image);
 }
 
 //////////////////////////////////////////////////////////////////////
-// CircleAdapter implementation
+// implementation of the RadonAdapter class
 //////////////////////////////////////////////////////////////////////
-
-/**
- * \brief Construct a Circle Adapter
- */
-CircleAdapter::CircleAdapter(const ConstImageAdapter<double>& image,
-	const circle& circ) : ConstImageAdapter<double>(image.getSize()),
-				_circ(circ), _image(image) {
+RadonAdapter::RadonAdapter(const ImageSize& size,
+                const ConstImageAdapter<double>& image)
+	: ConstImageAdapter<double>(ImageSize(size.width(), 2 * size.height())),
+	  _radon(size, image) {
 }
 
 /**
- * \brief Destructor for the Circle Adapter
+ * \brief access Radon transform pixels
  */
-CircleAdapter::~CircleAdapter() {
-}
-
-/**
- * \brief compute circular average
- */
-double	CircleAdapter::pixel(int x, int y) const {
-	return _circ.value(_image, x, y);
+double	RadonAdapter::pixel(int x, int y) const {
+	ImageSize	s = getSize();
+	int	w = s.width();
+	if ((x < 0) || (x >= w)) {
+		return 0.;
+	}
+	int	h = s.height();
+	y = y % h;
+	h = h / 2;
+	if (y >= h) {
+		return _radon.pixel(w - x, y - h);
+	} else {
+		return _radon.pixel(x, y);
+	}
 }
 
 } // namespace radon

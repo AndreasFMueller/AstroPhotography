@@ -22,4 +22,11 @@ std::ostream&	operator<<(std::ostream& out, const Rectangle& rectangle) {
 	return out;
 }
 
+bool    Rectangle::contains(const Point& point) const {
+        return ((origin().x() <= point.x())
+			&& (point.x() <= origin().x() + size().width() - 1) &&
+		(origin().y() <= point.y())
+			&& (point.y() <= origin().y() + size().height() - 1));
+}
+
 } // namespace astro

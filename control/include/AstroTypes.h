@@ -84,6 +84,7 @@ public:
 	void	width(double w) { _width = w; }
 	double height() const { return _height; }
 	void	height(double h) { _height = h; }
+	bool	contains(const Point& point) const;
 	std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Size& size);
@@ -97,6 +98,7 @@ public:
 	Rectangle(const std::set<Point>& points);
 	Point	origin() const { return Point(*this); }
 	Size	size() const { return Size(*this); }
+	bool	contains(const Point& point) const;
 	std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const Rectangle& rectangle);

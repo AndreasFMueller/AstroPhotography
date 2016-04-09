@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	EuclideanDisplacementTest.cpp
+	RadonTest.cpp
+#	EuclideanDisplacementTest.cpp
 #	ConvolutionAdapterTest.cpp
 #	DeconvolveTest.cpp
 #	PhaseCorrelatorTest.cpp 
@@ -27,6 +28,7 @@ singletest_SOURCES = singletest.cpp \
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
+.PHONY:	single
 single:	singletest
 	./singletest -d 2>&1 | tee single.log
 

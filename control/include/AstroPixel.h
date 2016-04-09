@@ -224,6 +224,7 @@ void	convertPixelValue(destValue& dest, const srcValue& src) {
  * for every other pixel. We use the color_traits traits class to pack
  * that information into the pixel type.
  */
+struct yuv_color_tag { };
 struct yuyv_color_tag { };
 struct rgb_color_tag { };
 struct multiplane_color_tag { };
@@ -411,6 +412,40 @@ public:
 	}
 };
 
+/**
+ * \brief YUV pixels
+ *
+ * In contrast to the YUYV pixels, this pixel type combines u and v in 
+ * one pixel.
+ */
+template<typename P>
+class YUV : public Color<P> {
+public:
+	P	y;
+	P	u;
+	P	v;
+	YUV() { }
+	YUV(const P& _y, const P& _u, const P& _v) : y(_y), u(_u), v(_v) { }
+	YUV(const P& _y) : y(_y), u(0), v(0) { }
+	virtual ~YUV() { }
+
+	bool	operator==(const YUV<P>& other) const {
+		return (y == other.y) && (u == other.u) && (v == other.v);
+	}
+	bool	operator!=(const YUV<P>& other) const {
+		return (y != other.y) || (u != other.u) || (v != other.v);
+	}
+	typedef yuv_color_tag color_category;
+	virtual unsigned int	bitsPerPixel() const {
+		return 3 * std::numeric_limits<P>::digits;
+	}
+	P	luminance() const {
+		return y;
+	}
+	operator	double() {
+		return (double)luminance();
+	}
+};
 
 /**
  * \brief Conversion class from HSL to RGB
@@ -1046,6 +1081,53 @@ double pixel_maximum() {
 			typename color_traits<Pixel>::color_category());
 }
 
+/**
+ * \brief Find the red/green/blue values
+ */
+template<typename Pixel>
+double	red_typed(const Pixel& pixel, const monochrome_color_tag&) {
+	return pixel;
+}
+
+template<typename Pixel>
+double	red_typed(const Pixel& pixel, const rgb_color_tag&) {
+	return pixel.R();
+}
+
+template<typename Pixel>
+double	red(const Pixel& pixel) {
+	return red_typed(pixel, typename color_traits<Pixel>::color_category());
+}
+
+template<typename Pixel>
+double	green_typed(const Pixel& pixel, const monochrome_color_tag&) {
+	return pixel;
+}
+
+template<typename Pixel>
+double	green_typed(const Pixel& pixel, const rgb_color_tag&) {
+	return pixel.G();
+}
+
+template<typename Pixel>
+double	green(const Pixel& pixel) {
+	return green_typed(pixel, typename color_traits<Pixel>::color_category());
+}
+
+template<typename Pixel>
+double	blue_typed(const Pixel& pixel, const monochrome_color_tag&) {
+	return pixel;
+}
+
+template<typename Pixel>
+double	blue_typed(const Pixel& pixel, const rgb_color_tag&) {
+	return pixel.G();
+}
+
+template<typename Pixel>
+double	blue(const Pixel& pixel) {
+	return blue_typed(pixel, typename color_traits<Pixel>::color_category());
+}
 
 } // namespace image
 } // namespace astro

@@ -1,7 +1,7 @@
 /*
  * AstroStacking.h -- primitive stacking function
  * 
- * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #ifndef _AstroStacking_h
 #define _AstroStacking_h
