@@ -113,16 +113,11 @@ int	main(int argc, char *argv[]) {
 	Image<double>	*radonimage = NULL;
 	if (full) {
 		RadonTransform	radon(radonsize, rawimage);
-		std::cout << "transform complete: " << radon.getSize()
-			<< std::endl;
 		radonimage = new Image<double>(radon);
 	} else {
 		RadonAdapter	radon(radonsize, rawimage);
-		std::cout << "transform complete: " << radon.getSize()
-			<< std::endl;
 		radonimage = new Image<double>(radon);
 	}
-	std::cout << "copy complete" << std::endl;
 
 	// write the result
 	io::FITSoutfile<double>	out(outfile);
