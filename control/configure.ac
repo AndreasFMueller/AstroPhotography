@@ -159,6 +159,13 @@ AC_SUBST(SLICEDIR)
 # should be found now
 AC_PATH_TOOL(SLICE2CPP, slice2cpp)
 
+case `uname` in
+Linux)	CFLAGS="${CFLAGS} -fopenmp"
+	CXXFLAGS="${CXXFLAGS} -fopenmp"
+	;;
+esac
+
+
 ## BOOSTREGEX ########################################################
 # use boost regex
 AC_ARG_ENABLE(boostregex,
@@ -252,7 +259,7 @@ AC_ARG_ENABLE(sbig,
 		AC_CHECK_HEADERS(SBIGUDrv/lpardrv.h, , [AC_MSG_ERROR([SBIG header not found])])
 		echo "Mac OS X: header was found, so library will work"
 		SBIGLIBRARY="-framework SBIGUDrv"
-		CFLAGS="${CPPFLAGS} ${SBIGLIBRARY}"
+		CFLAGS="${CFLAGS} ${SBIGLIBRARY}"
 		;;
 	esac
 	AC_SUBST(SBIGLIBRARY)

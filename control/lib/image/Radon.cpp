@@ -308,6 +308,7 @@ void	RadonImplementation::iterate(ImageAdapter<double>& radon,
 	// in the Radon transform image
 	int	w = radon.getSize().width();
 	int	w2 = w / 2;
+#pragma omp parallel for
 	for (int si = 0; si < w; si++) {
 		// compute the s-value for which we have to compute the
 		// integral
@@ -374,8 +375,10 @@ double	RadonImplementation::xintegral(const ConstImageAdapter<double>& image,
 	while (size.contains(point)) {
 		// add the pixel value at that point
 		double	value = image.pixel(point);
-		sum += value;
-		counter++;
+		if (value == value) {
+			sum += value;
+			counter++;
+		}
 
 		point = normal.nextPoint(point, deltas);
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "next point: %s, deltas = %.3f",
@@ -404,8 +407,10 @@ double	RadonImplementation::yintegral(const ConstImageAdapter<double>& image,
 	while (size.contains(point)) {
 		// add the pixel value at that point
 		double	value = image.pixel(point);
-		sum += value;
-		counter++;
+		if (value == value) {
+			sum += value;
+			counter++;
+		}
 
 		point = normal.nextPoint(point, deltas);
 		//debug(LOG_DEBUG, DEBUG_LOG, 0, "next point: %s, deltas = %.3f",
@@ -452,10 +457,13 @@ double	RadonAdapter::pixel(int x, int y) const {
 	y = y % h;
 	h = h / 2;
 	if (y >= h) {
-		return _radon.pixel(w - x, y - h);
-	} else {
-		return _radon.pixel(x, y);
+		x = w - x;
+		y = y - h;
+		if (x >= w) {
+			return 0.;
+		}
 	}
+	return _radon.pixel(x, y);
 }
 
 } // namespace radon

@@ -8,10 +8,13 @@
 #include <AstroImage.h>
 #include <AstroIO.h>
 #include <Radon.h>
+#include <AstroAdapter.h>
 
 using namespace astro;
 using namespace astro::io;
 using namespace astro::image;
+using namespace astro::image::radon;
+using namespace astro::adapter;
 
 namespace astro {
 namespace app {
@@ -58,9 +61,11 @@ static struct option	longopts[] = {
  * from them.
  */
 int	main(int argc, char *argv[]) {
-	int	width = 1000;
-	int	height = 1000;
+	int	width = 1024;
+	int	height = 512;
 	bool	full = false;
+	int	c;
+	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dw:h:f?",
 		longopts, &longindex)))
 		switch (c) {
@@ -85,13 +90,20 @@ int	main(int argc, char *argv[]) {
 	// next two arguments must be given: infile outfile
 	if ((argc - optind) != 2) {
 		std::cerr << "wrong number of arguments" << std::endl;
+		usage(argv[0]);
 		return EXIT_FAILURE;
 	}
 	std::string	infile = argv[optind++];
 	std::string	outfile = argv[optind++];
 
 	// read the input image
-	Image<double>	image;
+	FITSin	in(infile);
+	ImagePtr	imageptr = in.read();
+	DoubleAdapter	image(imageptr);
+	Image<double>	rawimage(image);
+	FITSoutfile<double>	outimage("radonimage.fits");
+	outimage.setPrecious(false);
+	outimage.write(rawimage);
 
 	// perform the radon transform
 	if (full) {
@@ -100,15 +112,20 @@ int	main(int argc, char *argv[]) {
 	ImageSize	radonsize(width, height);
 	Image<double>	*radonimage = NULL;
 	if (full) {
-		RadonTransform	radon(radonsize, image);
+		RadonTransform	radon(radonsize, rawimage);
+		std::cout << "transform complete: " << radon.getSize()
+			<< std::endl;
 		radonimage = new Image<double>(radon);
 	} else {
-		RadonAdapter	radon(radonsize, image);
+		RadonAdapter	radon(radonsize, rawimage);
+		std::cout << "transform complete: " << radon.getSize()
+			<< std::endl;
 		radonimage = new Image<double>(radon);
 	}
+	std::cout << "copy complete" << std::endl;
 
 	// write the result
-	io::FITSoutfile	out(outfile);
+	io::FITSoutfile<double>	out(outfile);
 	out.setPrecious(false);
 	out.write(*radonimage);
 	delete radonimage;
