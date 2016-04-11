@@ -112,10 +112,10 @@ int	main(int argc, char *argv[]) {
 	ImageSize	radonsize(width, height);
 	Image<double>	*radonimage = NULL;
 	if (full) {
-		RadonTransform	radon(radonsize, rawimage);
+		RadonAdapter	radon(radonsize, rawimage);
 		radonimage = new Image<double>(radon);
 	} else {
-		RadonAdapter	radon(radonsize, rawimage);
+		RadonTransform	radon(radonsize, rawimage);
 		radonimage = new Image<double>(radon);
 	}
 
