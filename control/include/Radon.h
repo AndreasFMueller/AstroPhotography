@@ -35,6 +35,19 @@ public:
 };
 
 /**
+ * \brief BackProjection used to invert the Radon transform
+ */
+class BackProjection : public ConstImageAdapter<double> {
+	const ConstImageAdapter<double>&	_radon;
+	Image<double>	_backprojection;
+	void	anglesum(int angleindex);
+public:
+	BackProjection(const ImageSize& size,
+		const ConstImageAdapter<double>& radon);
+	virtual double	pixel(int x, int y) const;
+};
+
+/**
  * \brief Class representing a segment of a curve
  */
 class segment {
