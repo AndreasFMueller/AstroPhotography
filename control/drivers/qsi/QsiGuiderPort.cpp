@@ -52,7 +52,6 @@ void	QsiGuiderPort::activate(float raplus, float raminus,
 		_camera.camera().PulseGuide(QSICamera::guideSouth,
 			milliseconds(decminus));
 	}
-	throw std::runtime_error("not implemented yet");
 }
 
 } // namespace qsi
