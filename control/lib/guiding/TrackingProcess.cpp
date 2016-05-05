@@ -93,17 +93,25 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 	// create a new record in the database
 	if (database()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: have database");
 		GuidingRun      guidingrun;
 		guidingrun.name = guider()->name();
 		guidingrun.instrument = guider()->instrument();
 		guidingrun.ccd = guider()->ccdname();
                 guidingrun.guiderport = _guiderPortDevice->devicename();
-                guidingrun.adaptiveoptics = _adaptiveOpticsDevice->devicename();
                 guidingrun.guiderportcalid
 			= _guiderPortDevice->calibrationid();
-                guidingrun.adaptiveopticscalid
-			= _adaptiveOpticsDevice->calibrationid();
+debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: adaptive optics?");
+		if (_adaptiveOpticsDevice) {
+			guidingrun.adaptiveoptics
+				= _adaptiveOpticsDevice->devicename();
+			guidingrun.adaptiveopticscalid
+				= _adaptiveOpticsDevice->calibrationid();
+		} else {
+			guidingrun.adaptiveopticscalid = -1;
+		}
 		time(&guidingrun.whenstarted);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: writing record");
 
                 // add guiding run record to the database
 		GuidingRunRecord        record(0, guidingrun);
@@ -115,8 +123,10 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 	// get the interval for images
 	double	imageInterval = _guiderportInterval;
-	if (_adaptiveOpticsDevice->iscalibrated()) {
-		imageInterval = _adaptiveopticsInterval;
+	if (_adaptiveOpticsDevice) {
+		if (_adaptiveOpticsDevice->iscalibrated()) {
+			imageInterval = _adaptiveopticsInterval;
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: image interval: %.3fs", _id,
 		imageInterval);
@@ -167,15 +177,23 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		// we modify the correction, which allows us to make
 		// the correction more stable
 		offset = offset * gain();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: correct by AO: %s",
-			_id, offset.toString().c_str());
+		Point	remainder  = offset;
+		if (_adaptiveOpticsDevice) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"TRACK %d: correct by AO: %s",
+				_id, offset.toString().c_str());
 
-		// do the correction using the adaptive optics device
-		Point	remainder = _adaptiveOpticsDevice->correct(offset,
+			// do the correction using the adaptive optics device
+			remainder = _adaptiveOpticsDevice->correct(offset,
 				_adaptiveopticsInterval);
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"TRACK %d: offset remaining after AO: %s", _id,
-			remainder.toString().c_str());
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"TRACK %d: offset remaining after AO: %s", _id,
+				remainder.toString().c_str());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"TRACK %d: correct by GP: %s",
+				_id, remainder.toString().c_str());
+		}
 
 		// check whether enough time has passed for a guider port
 		// action. Because there may be some variance in image 
