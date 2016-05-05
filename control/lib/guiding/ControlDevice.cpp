@@ -337,7 +337,8 @@ void	ControlDeviceBase::setParameter(const std::string& name, double value) {
 /**
  * \brief Computing the correction for the base: no correction
  */
-Point	ControlDeviceBase::correct(const Point& point, double /* Deltat */) {
+Point	ControlDeviceBase::correct(const Point& point, double /* Deltat */,
+		bool /* stepping */) {
 	return point;
 }
 
@@ -356,6 +357,11 @@ class GuiderPortAction : public Action {
 public:
 	bool	sequential() const { return _sequential; }
 	void	sequential(bool s) { _sequential = s; }
+private:
+	bool	_stepping;
+public:
+	bool	stepping() const { return _stepping; }
+	void	stepping(bool s) { _stepping = s; }
 	
 	GuiderPortAction(GuiderPortPtr guiderport, const Point& correction,
 		double deltat)
@@ -364,6 +370,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderPortAction %s",
 			correction.toString().c_str());
 		_sequential = false;
+		_stepping = false;
 	}
 	void	execute();
 };
@@ -413,6 +420,7 @@ void	GuiderPortAction::execute() {
 	double	raminus = 0;
 	double	decplus = 0;
 	double	decminus = 0;
+	double	correctiontime = std::max(fabs(tx), fabs(ty));
 	
 	if (tx > 0) {
 		raplus = tx;
@@ -435,7 +443,10 @@ void	GuiderPortAction::execute() {
 	} else {
 		// find the number of seconds, and split the correction
 		// into this many single steps. This makes the 
-		int	steps = floor(_deltat);
+		int	steps = 1;
+		if (_stepping) {
+			steps = floor(_deltat);
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "RA/DEC %.2f/%.2f in %d steps",
 			tx, ty, steps);
 		raplus /= steps;
@@ -446,7 +457,7 @@ void	GuiderPortAction::execute() {
 		while (step++ < steps) {
 			_guiderport->activate(raplus, raminus,
 					decplus, decminus);
-			Timer::sleep(1);
+			Timer::sleep(correctiontime);
 		}
 	}
 	
@@ -492,7 +503,8 @@ int	ControlDevice<camera::GuiderPort,
  */
 template<>
 Point	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::correct(const Point& point, double Deltat) {
+		GuiderCalibration>::correct(const Point& point, double Deltat,
+			bool stepping) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport correction %s, %.2f",
 		point.toString().c_str(), Deltat);
 	// give up if not configured
@@ -509,6 +521,7 @@ Point	ControlDevice<camera::GuiderPort,
 	double	dt = (Deltat > 0.5) ? (Deltat - 0.5) : 0;
 	GuiderPortAction	*action = new GuiderPortAction(_device,
 					correction, dt);
+	action->stepping(stepping);
 	ActionPtr	aptr(action);
 	asynchronousaction.execute(aptr);
 
@@ -549,7 +562,7 @@ int	ControlDevice<camera::AdaptiveOptics,
 template<>
 Point	ControlDevice<camera::AdaptiveOptics,
 		AdaptiveOpticsCalibration>::correct(const Point& point,
-			double Deltat) {
+			double Deltat, bool /* stepping */) {
 	// give up if not configured
 	if (!_calibration->complete()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO not calibrated");

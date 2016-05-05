@@ -26,6 +26,7 @@ public:
 	double	aointerval;
 	bool	csv;
 	bool	flipped;
+	bool	stepping;
 	TrackerMethod	method;
 private:
 	CommonMonitor	*monitor;
@@ -41,6 +42,7 @@ public:
 		monitor = NULL;
 		method = TrackerUNDEFINED;
 		flipped = false;
+		stepping = false;
 	}
 
 	// general commands

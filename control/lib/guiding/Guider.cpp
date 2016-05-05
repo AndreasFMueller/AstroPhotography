@@ -386,7 +386,7 @@ TrackerPtr	Guider::getLargeTracker() {
  * \param aointerval	the interval for actions by the adaptive optics unit
  */
 void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
-		double aointerval) {
+		double aointerval, bool stepping) {
 	// create a TrackingProcess instance
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
@@ -405,6 +405,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 	}
 	tp->guiderportInterval(gpinterval);
 	tp->adaptiveopticsInterval(aointerval);
+	tp->stepping(stepping);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using gp=%.3fs, ao=%.3fs interval",
 		gpinterval, aointerval);
 

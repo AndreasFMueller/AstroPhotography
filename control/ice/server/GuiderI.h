@@ -99,7 +99,8 @@ public:
 	virtual bool waitCalibration(Ice::Double, const Ice::Current& current);
 
 	// control guiding process
-	virtual void startGuiding(Ice::Float, Ice::Float, const Ice::Current& current);
+	virtual void startGuiding(Ice::Float, Ice::Float, bool stepping,
+			const Ice::Current& current);
 	virtual Ice::Float getGuidingInterval(const Ice::Current& current);
 	virtual void stopGuiding(const Ice::Current& current);
 

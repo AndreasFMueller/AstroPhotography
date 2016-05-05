@@ -53,6 +53,10 @@ void	QsiCcd::startExposure(const Exposure& exposure) {
 		_camera.camera().put_StartX(origin.x());
 		_camera.camera().put_StartY(origin.y());
 
+		// turn off the led
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED off");
+		_camera.camera().put_LEDEnabled(false);
+
 		// get shutter info
 		bool	light = (exposure.shutter() == Shutter::OPEN);
 		_camera.camera().StartExposure(exposure.exposuretime(), light);
@@ -105,6 +109,8 @@ Exposure::State	QsiCcd::exposureStatus() {
 			break;
 		case QSICamera::CameraReading:
 		case QSICamera::CameraDownload:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+			_camera.camera().put_LEDEnabled(true);
 			state = Exposure::exposed;
 			break;
 		case QSICamera::CameraError:
@@ -122,6 +128,8 @@ Exposure::State	QsiCcd::exposureStatus() {
 			break;
 		case QSICamera::CameraReading:
 		case QSICamera::CameraDownload:
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+			_camera.camera().put_LEDEnabled(true);
 			state = Exposure::exposed;
 			break;
 		case QSICamera::CameraError:
@@ -163,6 +171,9 @@ Exposure::State	QsiCcd::exposureStatus() {
 void	QsiCcd::cancelExposure() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	_camera.camera().AbortExposure();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+	_camera.camera().put_LEDEnabled(true);
+	_camera.camera().AbortExposure();
 	state = Exposure::idle;
 }
 
@@ -177,6 +188,8 @@ void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
 ImagePtr	QsiCcd::getRawImage() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	int	x, y, z;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
+	_camera.camera().put_LEDEnabled(true);
 	_camera.camera().get_ImageArraySize(x, y, z);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %d, y = %d, z = %d", x, y, z);
 	if (z != 2) {

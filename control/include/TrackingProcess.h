@@ -41,6 +41,12 @@ public:
 	}
 
 private:
+	bool	_stepping;
+public:
+	bool	stepping() const { return _stepping; }
+	void	stepping(bool s) { _stepping = s; }
+
+private:
 	callback::CallbackPtr	_callback;
 	TrackingPoint	_last;
 public:

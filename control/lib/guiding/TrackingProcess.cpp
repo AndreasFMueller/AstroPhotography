@@ -101,7 +101,6 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
                 guidingrun.guiderport = _guiderPortDevice->devicename();
                 guidingrun.guiderportcalid
 			= _guiderPortDevice->calibrationid();
-debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: adaptive optics?");
 		if (_adaptiveOpticsDevice) {
 			guidingrun.adaptiveoptics
 				= _adaptiveOpticsDevice->devicename();
@@ -111,7 +110,6 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: adaptive optics?");
 			guidingrun.adaptiveopticscalid = -1;
 		}
 		time(&guidingrun.whenstarted);
-debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: writing record");
 
                 // add guiding run record to the database
 		GuidingRunRecord        record(0, guidingrun);
@@ -185,7 +183,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: writing record");
 
 			// do the correction using the adaptive optics device
 			remainder = _adaptiveOpticsDevice->correct(offset,
-				_adaptiveopticsInterval);
+				_adaptiveopticsInterval, _stepping);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"TRACK %d: offset remaining after AO: %s", _id,
 				remainder.toString().c_str());
@@ -204,7 +202,7 @@ debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: writing record");
 		if (Timer::gettime() > guiderportTime + _guiderportInterval
 			- timer.elapsed() / 2) {
 			Point	d = _guiderPortDevice->correct(remainder,
-				_guiderportInterval);
+				_guiderportInterval, _stepping);
 			guiderportTime = Timer::gettime();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"TRACK %d: guiderport remaining offset %s",

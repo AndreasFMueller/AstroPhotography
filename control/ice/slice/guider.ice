@@ -243,8 +243,8 @@ module snowstar {
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
 		// out and where to look for the star and where to lock it
-		void	startGuiding(float gpinterval, float aointerval)
-				throws BadState;
+		void	startGuiding(float gpinterval, float aointerval,
+				bool stepping) throws BadState;
 		float	getGuidingInterval() throws BadState;
 		void	stopGuiding() throws BadState;
 

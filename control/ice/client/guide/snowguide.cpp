@@ -39,10 +39,11 @@ static struct option	longopts[] = {
 { "prefix",		required_argument,	NULL,	'p' }, /* 11 */
 { "rectangle",		required_argument,	NULL,	'r' }, /* 12 */
 { "star",		required_argument,	NULL,	's' }, /* 13 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 14 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 15 */
-{ "width",		required_argument,	NULL,	'w' }, /* 16 */
-{ NULL,			0,			NULL,    0  }  /* 17 */
+{ "stepping",		no_argument,		NULL,	'S' }, /* 14 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 15 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 16 */
+{ "width",		required_argument,	NULL,	'w' }, /* 17 */
+{ NULL,			0,			NULL,    0  }  /* 18 */
 };
 
 /**
@@ -131,6 +132,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 's':
 			guide.star = convert(astro::image::ImagePoint(optarg));
+			break;
+		case 'S':
+			guide.stepping = true;
 			break;
 		case 't':
 			temperature = std::stod(optarg);

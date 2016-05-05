@@ -117,6 +117,8 @@ void	Guide::usage(const char *progname) {
 		"or guide on in the" << std::endl;
 	std::cout << "                        syntax (x,y), the parentheses are "
 		"optional" << std::endl;
+	std::cout << "  -S,--stepping         guide using one second steps instead of a single long" << std::endl;
+	std::cout << "                        correction" << std::endl;
 	std::cout << "  -t,--temperature=<t>  cool ccd to temperature <t>, "
 		"ignored if the instrument" << std::endl;
 	std::cout << "                        has no cooler" << std::endl;

@@ -667,7 +667,8 @@ protected:
 	BasicProcessPtr	process;
 public:
 	// apply a correction
-	virtual Point	correct(const Point& point, double Deltat);
+	virtual Point	correct(const Point& point, double Deltat,
+				bool stepping = false);
 protected:
 	AsynchronousAction	asynchronousaction;
 };
@@ -710,7 +711,8 @@ public:
 	virtual std::type_index	configurationType() const {
 		return typeid(devicecalibration);
 	}
-	virtual Point	correct(const Point& point, double Deltat);
+	virtual Point	correct(const Point& point, double Deltat,
+				bool stepping = false);
 };
 
 // specializations for GuiderPort
@@ -720,7 +722,8 @@ int	ControlDevice<camera::GuiderPort,
 
 template<>
 Point	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::correct(const Point& point, double Deltat);
+		GuiderCalibration>::correct(const Point& point, double Deltat,
+			bool stepping);
 
 // specializatiobs for adaptive optics
 template<>
@@ -730,7 +733,7 @@ int	ControlDevice<camera::AdaptiveOptics,
 template<>
 Point	ControlDevice<camera::AdaptiveOptics,
 		AdaptiveOpticsCalibration>::correct(const Point& point,
-			double Deltat);
+			double Deltat, bool stepping);
 
 /**
  * \brief enumeration type for the state of the guider
@@ -908,7 +911,7 @@ private:
 public:
 	// tracking
 	void	startGuiding(TrackerPtr tracker, double interval,
-			double aointerval = 0);
+			double aointerval = 0, bool stepping = false);
 	void	stopGuiding();
 	bool	waitGuiding(double timeout);
 	double	getInterval();

@@ -38,7 +38,7 @@ int	Guide::guide_command(GuiderPrx guider) {
 	if (method != TrackerUNDEFINED) {
 		guider->setTrackerMethod(method);
 	}
-	guider->startGuiding(guideinterval, aointerval);
+	guider->startGuiding(guideinterval, aointerval, stepping);
 
 	// we are done
 	return EXIT_SUCCESS;

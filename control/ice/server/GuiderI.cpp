@@ -444,6 +444,7 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
  * \brief Start guiding
  */
 void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
+		bool stepping,
 		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding with interval gp=%.1f, ao=%.1f",
 		gpinterval, aointerval);
@@ -452,7 +453,7 @@ void GuiderI::startGuiding(Ice::Float gpinterval, Ice::Float aointerval,
 
 	// start guiding
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start guiding");
-	guider->startGuiding(tracker, gpinterval, aointerval);
+	guider->startGuiding(tracker, gpinterval, aointerval, stepping);
 	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 		astro::stringprintf("start guiding %s",
 		guider->name().c_str()));
