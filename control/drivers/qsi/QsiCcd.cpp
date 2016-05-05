@@ -30,6 +30,7 @@ QsiCcd::~QsiCcd() {
 }
 
 void	QsiCcd::startExposure(const Exposure& exposure) {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	Ccd::startExposure(exposure);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start QSI exposure");
@@ -87,6 +88,7 @@ std::string	state2string(QSICamera::CameraState qsistate) {
 }
 
 Exposure::State	QsiCcd::exposureStatus() {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
 	QSICamera::CameraState	qsistate;
 	_camera.camera().get_CameraState(&qsistate);
@@ -159,6 +161,7 @@ Exposure::State	QsiCcd::exposureStatus() {
 }
 
 void	QsiCcd::cancelExposure() {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	_camera.camera().AbortExposure();
 	state = Exposure::idle;
 }
@@ -172,6 +175,7 @@ void	QsiCcd::setShutterState(const Shutter::state& /* state */) {
 }
 
 ImagePtr	QsiCcd::getRawImage() {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	int	x, y, z;
 	_camera.camera().get_ImageArraySize(x, y, z);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %d, y = %d, z = %d", x, y, z);

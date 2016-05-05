@@ -16,6 +16,7 @@ QsiFilterWheel::QsiFilterWheel(QsiCamera& camera)
 	: FilterWheel(DeviceName(camera.name(), DeviceName::Filterwheel,
 		"filterwheel")),
 	  _camera(camera) {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	int	filtercount = 0;
 	_camera.camera().get_FilterCount(filtercount);
 	nfilters = filtercount;
@@ -36,6 +37,7 @@ unsigned int	QsiFilterWheel::nFilters() {
 }
 
 unsigned int	QsiFilterWheel::currentPosition() {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	short	position = 0;
 	_camera.camera().get_Position(&position);
 	if (position < 0) {
@@ -45,6 +47,7 @@ unsigned int	QsiFilterWheel::currentPosition() {
 }
 
 void	QsiFilterWheel::select(size_t filterindex) {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	if (filterindex >= nfilters) {
 		throw std::invalid_argument("filter index too large");
 	}
@@ -77,6 +80,7 @@ std::string	QsiFilterWheel::filterName(size_t filterindex) {
 }
 
 FilterWheel::State	QsiFilterWheel::getState() {
+	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	short	position = 0;
 	_camera.camera().get_Position(&position);
 	if (position < 0) {

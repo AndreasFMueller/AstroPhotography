@@ -16,6 +16,7 @@ namespace qsi {
  * \brief Construct a QSI camera object
  */
 QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	try {
 		DeviceName	devname(name());
 		camera().put_UseStructuredExceptions(true);
@@ -70,6 +71,11 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 			}
 		}
 	}
+
+	// find out whether the camera has a shutter
+	bool	hasshutter = false;
+	camera().get_HasShutter(&hasshutter);
+	info.shutter(hasshutter);
 
 	// add the ccdinfo to the 
 	ccdinfo.push_back(info);

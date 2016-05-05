@@ -20,6 +20,7 @@ class QsiFilterWheel;
 class QsiGuiderPort;
 
 class QsiCamera : public Camera {
+	std::recursive_mutex	mutex;
 	QSICamera	_camera;
 	QSICamera&	camera() { return _camera; }
 friend class QsiCcd; // allow the CCD to get the QSICamera
