@@ -54,13 +54,6 @@ static void	usage(const char *progname) {
 	std::cout << "'global' is valid), identified by the section and "
 		"the name." << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] server list" << std::endl;
-	std::cout << p << " [ options ] server add <name> <url> <info>" << std::endl;
-	std::cout << p << " [ options ] server remove <name>" << std::endl;
-	std::cout << std::endl;
-	std::cout << "list, add or remove information about available servers"
-		<< std::endl;
-	std::cout << std::endl;
 	std::cout << p << " [ options ] imagerepo list" << std::endl;
 	std::cout << p << " [ options ] imagerepo add <reponame> <directory>";
 	std::cout << std::endl;
@@ -281,60 +274,6 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 }
 
 /**
- * \brief Implementation of the server commands
- */
-int	command_server(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 2) {
-		std::cerr << "no server sub command" << std::endl;
-		return EXIT_FAILURE;
-	}
-	std::string	subcommand = arguments[1];
-	ConfigurationPtr	configuration = Configuration::get();
-	ServerConfigurationPtr	servers
-		= ServerConfiguration::get(configuration);
-	if (subcommand == "list") {
-		std::list<ServerInfo>	l = servers->listservers();
-		std::for_each(l.begin(), l.end(),
-			[](const ServerInfo& s) {
-				std::cout << s.name() << std::endl;
-			}
-		);
-		return EXIT_SUCCESS;
-	}
-	if (arguments.size() < 3) {
-		std::cerr << "missing server name" << std::endl;
-		return EXIT_FAILURE;
-	}
-	std::string	name = arguments[2];
-	if (subcommand == "show") {
-		ServerInfo	s = servers->server(name);
-		std::cout << "Name: " << s.name() << std::endl;
-		std::cout << "URL:  " << (std::string)s.servername()
-			<< std::endl;
-		std::cout << "Info: " << s.info() << std::endl;
-		return EXIT_SUCCESS;
-	}
-	if (subcommand == "remove") {
-		servers->removeserver(name);
-		return EXIT_SUCCESS;
-	}
-	if (subcommand == "add") {
-		if (arguments.size() < 4) {
-			std::cerr << "mandatory arguments missing" << std::endl;
-			return EXIT_FAILURE;
-		}
-		std::string	url = arguments[3];
-		ServerInfo	si(name, ServerName(url));
-		if (arguments.size() >= 5) {
-			si.info(arguments[4]);
-		}
-		servers->addserver(si);
-		return EXIT_SUCCESS;
-	}
-	return EXIT_FAILURE;
-}
-
-/**
  * \brief 
  */
 int	command_list(const std::vector<std::string>& arguments) {
@@ -407,9 +346,6 @@ int	main(int argc, char *argv[]) {
 	}
 	if (verb == "imagerepo") {
 		return command_imagerepo(arguments);
-	}
-	if (verb == "server") {
-		return command_server(arguments);
 	}
 	
 	std::cerr << "command " << verb << " not implemented" << std::endl;

@@ -61,13 +61,15 @@ static void	usage(const char *progname) {
  * \brief Main function in astro namespace
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("rescale");
 	int	c;
 	double	minimum = -1;
 	double	maximum = -1;
 
 	// parse the command line
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "d?hm:M:", longopts, &longindex)))
+	while (EOF != (c = getopt_long(argc, argv, "d?hm:M:",
+		longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
