@@ -147,6 +147,8 @@ int	snowstar_main(int argc, char *argv[]) {
 					"group %s not found", optarg);
 				return EXIT_FAILURE;
 			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "set gid to %d",
+				grp->gr_gid);
 			if (grp->gr_gid != getgid()) {
 				if (setgid(grp->gr_gid)) {
 					debug(LOG_ERR, DEBUG_LOG, errno,
@@ -160,14 +162,14 @@ int	snowstar_main(int argc, char *argv[]) {
 						grp->gr_gid);
 					return EXIT_FAILURE;
 				}
-				struct group	*grp = getgrgid(getgid());
+				grp = getgrgid(getgid());
 				if (NULL == grp) {
 					debug(LOG_ERR, DEBUG_LOG, errno,
 						"cannot get group info");
 					return EXIT_FAILURE;
 				}
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
-					"group set to %s", grp->gr_gid);
+					"group set to %s", grp->gr_name);
 			}
 			}
 			break;
@@ -197,6 +199,8 @@ int	snowstar_main(int argc, char *argv[]) {
 					"user %s not found", optarg);
 				return EXIT_FAILURE;
 			}
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "set uid to %d",
+				pwp->pw_uid);
 			if (getuid() != pwp->pw_uid) {
 				if (setuid(pwp->pw_uid)) {
 					debug(LOG_ERR, DEBUG_LOG, errno,
@@ -210,14 +214,14 @@ int	snowstar_main(int argc, char *argv[]) {
 						pwp->pw_uid);
 					return EXIT_FAILURE;
 				}
-				struct passwd	*pwp = getpwuid(getuid());
+				pwp = getpwuid(getuid());
 				if (NULL == pwp) {
 					debug(LOG_ERR, DEBUG_LOG, errno,
 						"cannot get user info");
 					return EXIT_FAILURE;
 				}
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s",
-					pwp->pw_uid);
+					pwp->pw_name);
 			}
 			}
 			break;
