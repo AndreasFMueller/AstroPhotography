@@ -110,8 +110,11 @@ int	snowstar_main(int argc, char *argv[]) {
 		id.properties = props;
 		ic = Ice::initialize(id);
 	} catch (...) {
+		std::cerr << "cannot initialize ICE" << std::endl;
 		throw;
 	}
+
+	debuglevel = LOG_DEBUG;
 
 	// default configuration
 	std::string	databasefile("testdb.db");
@@ -121,6 +124,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	// group id and user id for the runtime user
 	uid_t	uid = getuid();
 	gid_t	gid = getgid();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "uid = %d, gid = %d", uid, gid);
 
 	// parse the command line
 	int	c;
@@ -211,6 +215,7 @@ int	snowstar_main(int argc, char *argv[]) {
 		struct passwd	*pwp = getpwuid(uid);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s", pwp->pw_uid);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "user and group set");
 
 	// go inter the background
 	if (!foreground) {
