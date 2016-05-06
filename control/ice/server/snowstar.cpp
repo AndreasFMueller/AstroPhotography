@@ -44,7 +44,7 @@ static struct option	longopts[] = {
 { "base",		required_argument,	NULL,	'b' }, /*  0 */
 { "config",		required_argument,	NULL,	'c' }, /*  1 */
 { "debug",		no_argument,		NULL,	'd' }, /*  2 */
-{ "taskdb",		required_argument,	NULL,	't' }, /*  3 */
+{ "database",		required_argument,	NULL,	'D' }, /*  3 */
 { "foreground",		no_argument,		NULL,	'f' }, /*  4 */
 { "group",		required_argument,	NULL,	'g' }, /*  5 */
 { "help",		no_argument,		NULL,	'h' }, /*  6 */
@@ -61,26 +61,27 @@ static void	usage(const char *progname) {
 	std::cout << "usage: " << path.basename() << " [ options ]"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -d,--debug                enable debug mode" << std::endl;
-	std::cout << " -h,--help                 display this help message and exit"
-		<< std::endl;
 	std::cout << " -b,--base=<imagedir>      directory for images"
 		<< std::endl;
 	std::cout << " -c,--config=<configdb>    use alternative configuration "
 		"database from file" << std::endl;
 	std::cout << "                           configdb"
 		<< std::endl;
+	std::cout << " -d,--debug                enable debug mode"
+		<< std::endl;
+	std::cout << " -D,--database=<database>  task manager database"
+		<< std::endl;
+	std::cout << " -h,--help                 display this help message and exit"
+		<< std::endl;
 	std::cout << " -f,--foreground           stay in foreground"
 		<< std::endl;
 	std::cout << " -g,--group=<group>        group to run as" << std::endl;
-	std::cout << " -d,--database=<database>  task manager database"
+	std::cout << " -n,--name=<name>          define zeroconf name to use"
 		<< std::endl;
 	std::cout << " -p,--port=<port>          port to offer the service on"
 		<< std::endl;
 	std::cout << " -P,--pidfile=<file>       write the process id to <file>, and remove when exiting" << std::endl;
 	std::cout << " -s,--sslport=<port>       use SSL enable port <port>"
-		<< std::endl;
-	std::cout << " -n,--name=<name>          define zeroconf name to use"
 		<< std::endl;
 	std::cout << " -u,--user=<user>          user to run as" << std::endl;
 }
@@ -124,7 +125,7 @@ int	snowstar_main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:dfn:p:q:s:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:dfgn:p:q:s:u",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -153,7 +154,7 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 't':
+		case 'D':
 			databasefile = std::string(optarg);
 			break;
 		case 'p':
