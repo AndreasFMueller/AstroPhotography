@@ -54,6 +54,11 @@ This option must be given before the database options to ensure
 that the process runs under the right group id when accessing the
 databases.
 \item
+\texttt{-l,--logfile=}\textit{logfile}
+\\
+Write log messages to a log file named \textit{logfile} instead of
+standard error.
+\item
 \texttt{-p,--port=}\textit{port}
 \\
 Run the service on this port.
@@ -76,6 +81,10 @@ The network clients will use this service name to locate the service.
 Run the SSL service on a separate port.
 As for the unencrypted port, there is a configuration option to set the
 SSL port which is usually preferred.
+\item
+\texttt{-L,--syslog}
+\\
+Send log to syslog instead of standard error.
 \item
 \texttt{-u,--user=}\textit{user}
 \\

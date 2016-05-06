@@ -26,6 +26,12 @@ extern void	debug(int loglevel, const char *filename, int line,
 extern void	vdebug(int loglevel, const char *filename, int line,
 			int flags, const char *format, va_list ap);
 
+extern void	debug_set_ident(const char *ident);
+extern void	debug_syslog(int facility);
+extern void	debug_stderr();
+extern void	debug_fd(int fd);
+extern int	debug_file(const char *filename);
+
 #ifdef __cplusplus
 }
 #endif

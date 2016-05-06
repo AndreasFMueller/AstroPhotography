@@ -14,6 +14,10 @@
 #include <cstdarg>
 #include <cstring>
 #include <ctime>
+#include <cstdlib>
+#include <mutex>
+
+#include <iostream>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -27,6 +31,14 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif /* HAVE_FCNTL_H */
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+
 #include <pthread.h>
 
 extern "C" int	debuglevel = LOG_ERR;
@@ -34,6 +46,15 @@ extern "C" int	debuglevel = LOG_ERR;
 extern "C" int	debugtimeprecision = 0;
 
 extern "C" int	debugthreads = 0;
+
+#define DEBUG_STDERR	0
+#define DEBUG_FD	1
+#define	DEBUG_SYSLOG	2
+
+static int	debug_destination = DEBUG_STDERR;
+static char	*debug_ident = NULL;
+
+#define	DEBUG_IDENT	((debug_ident) ? debug_ident : "astro")
 
 extern "C" void	debug(int loglevel, const char *file, int line,
 	int flags, const char *format, ...) {
@@ -44,7 +65,49 @@ extern "C" void	debug(int loglevel, const char *file, int line,
 	va_end(ap);
 }
 
+extern "C" void debug_set_ident(const char *ident) {
+	if (NULL == ident) {
+		return;
+	}
+	if (debug_ident) {
+		free(debug_ident);
+		debug_ident = NULL;
+	}
+	debug_ident = strdup(ident);
+}
+
+extern "C" void	debug_syslog(int facility) {
+	openlog(DEBUG_IDENT, LOG_NDELAY, facility);
+	debug_destination = DEBUG_SYSLOG;
+}
+
+extern "C" void	debug_stderr() {
+	debug_destination = DEBUG_STDERR;
+}
+
+static int	debug_filedescriptor = -1;
+
+extern "C" void debug_fd(int fd) {
+	if (debug_filedescriptor >= 0) {
+		close(debug_filedescriptor);
+		debug_filedescriptor = -1;
+	}
+	debug_filedescriptor = fd;
+	debug_destination = DEBUG_FD;
+}
+
+extern "C" int debug_file(const char *filename) {
+	int	fd = open(filename, O_CREAT | O_WRONLY, 0666);
+	if (fd < 0) {
+		return -1;
+	}
+	debug_fd(fd);
+	return 0;
+}
+
 #define	MSGSIZE	1024
+
+static std::mutex	mtx;
 
 extern "C" void vdebug(int loglevel, const char *file, int line,
 	int flags, const char *format, va_list ap) {
@@ -93,15 +156,43 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 		threadid[0] = '\0';
 	}
 
+	// handle syslog case, where we have a much simpler 
+	if (debug_destination == DEBUG_SYSLOG) {
+		if (flags & DEBUG_NOFILELINE) {
+			snprintf(prefix, sizeof(prefix), "%s", threadid);
+		} else {
+			snprintf(prefix, sizeof(prefix), "%s %s:%03d:",
+				threadid, file, line);
+		}
+		syslog(loglevel, "%s %s", prefix, msgbuffer);
+		return;
+	}
+
 	// get prefix
 	if (flags & DEBUG_NOFILELINE) {
 		snprintf(prefix, sizeof(prefix), "%s %s[%d%s]:",
-			tstp, "astro", getpid(), threadid);
+			tstp, DEBUG_IDENT, getpid(), threadid);
 	} else {
 		snprintf(prefix, sizeof(prefix), "%s %s[%d%s] %s:%03d:",
-			tstp, "astro", getpid(), threadid, file, line);
+			tstp, DEBUG_IDENT, getpid(), threadid, file, line);
 	}
 
 	// format log message
-	fprintf(stderr, "%s %s\n", prefix, msgbuffer);
+	if (debug_destination == DEBUG_STDERR) {
+		fprintf(stderr, "%s %s\n", prefix, msgbuffer);
+		fflush(stderr);
+		return;
+	}
+
+	// last case is FD, where we first have to create the message
+	// buffer
+	snprintf(msgbuffer2, sizeof(msgbuffer2), "%s %s",
+		prefix, msgbuffer);
+	{
+		std::unique_lock<std::mutex>	lock(mtx);
+		lseek(debug_filedescriptor, 0, SEEK_END);
+		write(debug_filedescriptor, msgbuffer2, strlen(msgbuffer2));
+		write(debug_filedescriptor, "\n", 1);
+	}
+	return;
 }
