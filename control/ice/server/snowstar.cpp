@@ -121,11 +121,6 @@ int	snowstar_main(int argc, char *argv[]) {
 	std::string	servicename("server");
 	std::string	pidfilename(PIDDIR "/snowstar.pid");
 
-	// group id and user id for the runtime user
-	uid_t	uid = getuid();
-	gid_t	gid = getgid();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "uid = %d, gid = %d", uid, gid);
-
 	// parse the command line
 	int	c;
 	int	longindex;
@@ -152,7 +147,23 @@ int	snowstar_main(int argc, char *argv[]) {
 					"group %s not found", optarg);
 				return EXIT_FAILURE;
 			}
-			gid = grp->gr_gid;
+			if (grp->gr_gid != getgid()) {
+				if (setgid(grp->gr_gid)) {
+					debug(LOG_ERR, DEBUG_LOG, errno,
+						"cannot set gid to %d",
+						grp->gr_gid);
+					return EXIT_FAILURE;
+				}
+				if (grp->gr_gid != getgid()) {
+					debug(LOG_ERR, DEBUG_LOG, 0,
+						"failed to switch gid to %d",
+						grp->gr_gid);
+					return EXIT_FAILURE;
+				}
+				struct group	*grp = getgrgid(getgid());
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"group set to %s", grp->gr_gid);
+			}
 			}
 			break;
 		case 'h':
@@ -181,41 +192,26 @@ int	snowstar_main(int argc, char *argv[]) {
 					"user %s not found", optarg);
 				return EXIT_FAILURE;
 			}
-			uid = pwp->pw_uid;
+			if (getuid() != pwp->pw_uid) {
+				if (setuid(pwp->pw_uid)) {
+					debug(LOG_ERR, DEBUG_LOG, errno,
+						"cannot set uid to %d",
+						pwp->pw_uid);
+					return EXIT_FAILURE;
+				}
+				if (pwp->pw_uid != getuid()) {
+					debug(LOG_ERR, DEBUG_LOG, 0,
+						"failed to switch uid to %d",
+						pwp->pw_uid);
+					return EXIT_FAILURE;
+				}
+				struct passwd	*pwp = getpwuid(getuid());
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s",
+					pwp->pw_uid);
+			}
 			}
 			break;
 		}
-
-	if (gid != getgid()) {
-		if (setgid(gid)) {
-			debug(LOG_ERR, DEBUG_LOG, errno, "cannot set gid to %d",
-				gid);
-			return EXIT_FAILURE;
-		}
-		if (gid != getgid()) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"failed to switch gid to %d", gid);
-			return EXIT_FAILURE;
-		}
-		struct group	*grp = getgrgid(gid);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "group set to %s", grp->gr_gid);
-	}
-
-	if (uid != getuid()) {
-		if (setuid(uid)) {
-			debug(LOG_ERR, DEBUG_LOG, errno, "cannot set uid to %d",
-				uid);
-			return EXIT_FAILURE;
-		}
-		if (uid != getuid()) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"failed to switch uid to %d", uid);
-			return EXIT_FAILURE;
-		}
-		struct passwd	*pwp = getpwuid(uid);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s", pwp->pw_uid);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "user and group set");
 
 	// go inter the background
 	if (!foreground) {
