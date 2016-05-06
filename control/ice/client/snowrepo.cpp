@@ -262,6 +262,7 @@ static struct option	longopts[] = {
  * \brief Main function for the snowrepo program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowrepo");
 	CommunicatorSingleton	communicator(argc, argv);
 
 	int	c;

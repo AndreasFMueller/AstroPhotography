@@ -157,6 +157,7 @@ int	command_set(MountPrx mount, RaDec radec) {
  * \brief main function 
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowmount");
 	CommunicatorSingleton	communicator(argc, argv);
 	
 	int	c;

@@ -159,6 +159,7 @@ void	handler(int /* sig */) {
  * \brief Main function for the snowfocus program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowfocus");
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = cs.get();
 

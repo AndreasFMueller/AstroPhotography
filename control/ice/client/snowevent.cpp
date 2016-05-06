@@ -140,6 +140,7 @@ int	monitor_command(EventHandlerPrx events) {
  * \brief Main function for the snowinstrument program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowevent");
 	CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	debugthreads = true;

@@ -334,6 +334,7 @@ static struct option	longopts[] = {
  * \brief Main function for the snowinstrument program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowinstrument");
 	CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	debugthreads = true;

@@ -43,7 +43,7 @@ static struct option	longopts[] = {
 };
 
 int	main(int argc, char *argv[]) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "snowao main has %d arguments", argc);
+	debug_set_ident("snowao");
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 

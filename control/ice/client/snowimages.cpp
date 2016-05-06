@@ -105,6 +105,7 @@ static struct option	longopts[] = {
 };
 
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowimages");
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 

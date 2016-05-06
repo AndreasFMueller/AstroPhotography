@@ -37,6 +37,7 @@ static void	usage(const char *progname) {
 }
 
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowservers");
 	int	c;
 	int	longindex;
 	while (EOF != (c = getopt_long(argc, argv, "dh", longopts,

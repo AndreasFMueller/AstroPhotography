@@ -564,6 +564,7 @@ static struct option	longopts[] = {
  * \brief Main function for the snowtask program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowtask");
 	CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	InstrumentsPrx	instruments;

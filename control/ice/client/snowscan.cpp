@@ -130,6 +130,7 @@ int	command_scan(snowstar::ModulesPrx& modules,
  * \brief Main function for the snowcan program
  */
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowscan");
 	CommunicatorSingleton cs(argc, argv);
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 

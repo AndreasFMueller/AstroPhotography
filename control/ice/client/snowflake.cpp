@@ -39,6 +39,7 @@ static void	usage(const char *progname) {
 }
 
 int	main(int argc, char *argv[]) {
+	debug_set_ident("snowflake");
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
 
