@@ -1,0 +1,87 @@
+%
+% manual.tex -- Manual for the AstroPhotography system
+%
+% (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+%
+\documentclass{book}
+\usepackage{etex}
+\usepackage{geometry}
+\geometry{papersize={170mm,240mm},total={140mm,200mm},top=21mm,bindingoffset=10mm}
+\usepackage[english]{babel}
+\usepackage{times}
+\usepackage{amsmath,amscd}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage[all]{xy}
+\usepackage{txfonts}
+\usepackage{alltt}
+\usepackage{verbatim}
+\usepackage{paralist}
+\usepackage{makeidx}
+\usepackage{array}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[autostyle=false,english=american]{csquotes}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{environ}
+\usepackage{appendix}
+\begin{document}
+\pagestyle{fancy}
+\frontmatter
+\newcommand\HRule{\noindent\rule{\linewidth}{1.5pt}}
+\begin{titlepage}
+\vspace*{\stretch{1}}
+\HRule
+\vspace*{5pt}
+\begin{flushright}
+{
+\LARGE
+User Manual\\
+\vspace*{20pt}
+\Huge
+AstroPhotography%
+}
+\vspace*{5pt}
+\end{flushright}
+\HRule
+\begin{flushright}
+\vspace{60pt}
+\Large
+Andreas M\"uller\\
+\vspace{40pt}
+\end{flushright}
+\vspace*{\stretch{2}}
+\begin{center}
+Hochschule f\"ur Technik, Rapperswil, 2016
+\end{center}
+\end{titlepage}
+\hypersetup{
+    linktoc=all,
+    linkcolor=blue
+}
+
+\allowdisplaybreaks
+\lhead{Contents}
+\rhead{}
+\tableofcontents
+\renewcommand{\floatpagefraction}{0.75}
+\mainmatter
+
+\input{snowstar.tex}
+
+\vfill
+\pagebreak
+\ifodd\value{page}\else\null\clearpage\fi
+\lhead{Index}
+\rhead{}
+\input{manual.ind}
+
+\end{document}
+
+\renewcommand{\qedsymbol}{}
+
+

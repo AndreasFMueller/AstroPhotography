@@ -1,0 +1,95 @@
+%
+% snowstar.tex -- 
+%
+% (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil 2016
+%
+\chapter{Snowstar: the network daemon\label{chapter:snowstar}}
+The \texttt{snowstar} daemon is designed to be run on a small
+computer mounted directly on the telescope or the mount, and to
+control cameras and other devices.
+Clients then don't need any knowledge of the intricacies of controlling
+hardware devices.
+
+\section{Running the daemon}
+The daemon understands the following options:
+\begin{itemize}
+\item
+\texttt{-b,--base=}\textit{imagedir}
+\\
+The daemon needs a directory where it can temporarily store images until
+a client retrieves them and removes them from the daemon's scope.
+\item
+\texttt{-c,--config}\textit{configdb}
+\\
+The daemon uses a database for configuration information.
+\item
+\texttt{-d,--debug}
+Increase the debug level.
+The debug messages are written to standard output.
+\item
+\texttt{-D,--database=}\textit{databasefile}
+\\
+The daemon uses a database to persist data for temporary objects
+like tasks in the task queue, instrument configuration, guider
+calibrations and guide protocols.
+In most cases, the same database is used for configuration and
+for persistence.
+\item
+\texttt{-h,--help}
+\\
+Display a help message and exist.
+\item
+\texttt{-f,--foreground}
+\\
+In normal operation, the daemon goes into the background.
+For debugging, it is sometimes more convenient to have it run in the
+foreground, which can be forced with this option.
+\item
+\texttt{-g,--group=}\textit{group}
+\\
+Change group id to the one of~\textit{group} at run time.
+This is most useful when starting the daemon from a start script
+that runs as \texttt{root}.
+This option must be given before the database options to ensure
+that the process runs under the right group id when accessing the
+databases.
+\item
+\texttt{-p,--port=}\textit{port}
+\\
+Run the service on this port.
+There also is a configuration option to configure the TCP port to use
+for the service, but this option might be handy during debugging.
+\item
+\texttt{-P,--pidfile=}\textit{pidfile}
+\\
+Full path name to the pid file to create when starting up.
+The pid file can be used by stop-scripts to get the process id
+to of the currently running process.
+\item
+\texttt{-n,--name=}\textit{servicename}
+\\
+Run the service with the Zeroconf name \textit{servicename}.
+The network clients will use this service name to locate the service.
+\item
+\texttt{-s,--sslport=}\texttt{sslport}
+\\
+Run the SSL service on a separate port.
+As for the unencrypted port, there is a configuration option to set the
+SSL port which is usually preferred.
+\item
+\texttt{-u,--user=}\textit{user}
+\\
+Change user id to the one of~\textit{user} at run time.
+This is most useful when starting the daemon from a start script
+that runs as \texttt{root}.
+This option must be given before the database options to ensure
+that the process runs under the right group id when accessing the
+databases.
+
+\end{itemize}
+
+\section{Configuration}
+
+
+
+

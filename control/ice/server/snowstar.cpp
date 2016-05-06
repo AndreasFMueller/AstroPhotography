@@ -71,8 +71,8 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -D,--database=<database>  task manager database"
 		<< std::endl;
-	std::cout << " -h,--help                 display this help message and exit"
-		<< std::endl;
+	std::cout << " -h,--help                 display this help message and "
+		"exit" << std::endl;
 	std::cout << " -f,--foreground           stay in foreground"
 		<< std::endl;
 	std::cout << " -g,--group=<group>        group to run as" << std::endl;
@@ -80,7 +80,8 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << " -p,--port=<port>          port to offer the service on"
 		<< std::endl;
-	std::cout << " -P,--pidfile=<file>       write the process id to <file>, and remove when exiting" << std::endl;
+	std::cout << " -P,--pidfile=<file>       write the process id to "
+		"<file>, and remove when exiting" << std::endl;
 	std::cout << " -s,--sslport=<port>       use SSL enable port <port>"
 		<< std::endl;
 	std::cout << " -u,--user=<user>          user to run as" << std::endl;

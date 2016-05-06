@@ -20,6 +20,11 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_CHECK_TOOL(FLEX, flex)
 AC_CHECK_TOOL(BISON, bison)
+AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+if test -z "$PDFLATEX"; then
+	AC_MSG_WARN([Unabel to create PDF version of the user manual.])
+fi
+AM_CONDITIONAL([HAVE_PDFLATEX], test -n "$PDFLATEX")
 
 # Checks for header files
 AC_HEADER_STDC
@@ -430,7 +435,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile drivers/nice/Makefile
-	man/Makefile doc/Makefile
+	man/Makefile doc/Makefile doc/manual/Makefile
 	test/Makefile])
 AC_OUTPUT
 
