@@ -57,15 +57,15 @@ static void	usage(const char *progname) {
 	std::cout << "usage: " << path.basename() << " [ options ]"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -d,--debug          enable debug mode" << std::endl;
-	std::cout << " -h,--help           display this help message and exit"
+	std::cout << " -d,--debug            enable debug mode" << std::endl;
+	std::cout << " -h,--help             display this help message and exit"
 		<< std::endl;
-	std::cout << " -b,--base=imagedir  directory for images" << std::endl;
+	std::cout << " -b,--base=imagedir    directory for images" << std::endl;
 	std::cout << " -c,--config=configdb  use alternative configuration "
 		"database from file" << std::endl;
 	std::cout << "                       configdb" << std::endl;
 	std::cout << " -f,--foreground       stay in foreground" << std::endl;
-	std::cout << " -q,-database=taskdb   task manager database"
+	std::cout << " -q,--database=taskdb  task manager database"
 		<< std::endl;
 	std::cout << " -p,--port=<port>      port to offer the service on"
 		<< std::endl;
