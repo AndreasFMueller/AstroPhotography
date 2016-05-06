@@ -161,6 +161,11 @@ int	snowstar_main(int argc, char *argv[]) {
 					return EXIT_FAILURE;
 				}
 				struct group	*grp = getgrgid(getgid());
+				if (NULL == grp) {
+					debug(LOG_ERR, DEBUG_LOG, errno,
+						"cannot get group info");
+					return EXIT_FAILURE;
+				}
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"group set to %s", grp->gr_gid);
 			}
@@ -206,6 +211,11 @@ int	snowstar_main(int argc, char *argv[]) {
 					return EXIT_FAILURE;
 				}
 				struct passwd	*pwp = getpwuid(getuid());
+				if (NULL == pwp) {
+					debug(LOG_ERR, DEBUG_LOG, errno,
+						"cannot get user info");
+					return EXIT_FAILURE;
+				}
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s",
 					pwp->pw_uid);
 			}
