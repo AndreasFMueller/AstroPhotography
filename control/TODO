@@ -27,9 +27,11 @@ URLs:
 	driver, e.g. called nice ;-)
 
 Instruments:
-      - add instrument implementation to the ICE server
       -	add properties to instruments, e.g. for focal length of camera and
 	guider
+      - If an ICE instrument changes, but the guider derived from it has
+	already been used, the changes become effective only after a restart
+	of the server
 
 Drivers:
       - SX driver is rather unstable with the Trius SX-16 camera. There are

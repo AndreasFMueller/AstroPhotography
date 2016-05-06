@@ -35,21 +35,25 @@
 #include <AstroEvent.h>
 #include <EventHandlerI.h>
 #include <EventServantLocator.h>
+#include <grp.h>
+#include <pwd.h>
 
 namespace snowstar {
 
 static struct option	longopts[] = {
-{ "base",		required_argument,	NULL,	'b' }, /* 0 */
-{ "config",		required_argument,	NULL,	'c' }, /* 1 */
-{ "debug",		no_argument,		NULL,	'd' }, /* 2 */
-{ "database",		required_argument,	NULL,	'q' }, /* 3 */
-{ "foreground",		no_argument,		NULL,	'f' }, /* 4 */
-{ "help",		no_argument,		NULL,	'h' }, /* 4 */
-{ "port",		required_argument,	NULL,	'p' }, /* 5 */
-{ "pidfile",		required_argument,	NULL,	'P' }, /* 5 */
-{ "sslport",		required_argument,	NULL,	's' }, /* 6 */
-{ "name",		required_argument,	NULL,	'n' }, /* 7 */
-{ NULL,			0,			NULL,	 0  }, /* 8 */
+{ "base",		required_argument,	NULL,	'b' }, /*  0 */
+{ "config",		required_argument,	NULL,	'c' }, /*  1 */
+{ "debug",		no_argument,		NULL,	'd' }, /*  2 */
+{ "taskdb",		required_argument,	NULL,	't' }, /*  3 */
+{ "foreground",		no_argument,		NULL,	'f' }, /*  4 */
+{ "group",		required_argument,	NULL,	'g' }, /*  5 */
+{ "help",		no_argument,		NULL,	'h' }, /*  6 */
+{ "port",		required_argument,	NULL,	'p' }, /*  7 */
+{ "pidfile",		required_argument,	NULL,	'P' }, /*  8 */
+{ "sslport",		required_argument,	NULL,	's' }, /*  9 */
+{ "name",		required_argument,	NULL,	'n' }, /* 10 */
+{ "user",		required_argument,	NULL,	'u' }, /* 11 */
+{ NULL,			0,			NULL,	 0  }, /* 12 */
 };
 
 static void	usage(const char *progname) {
@@ -57,23 +61,28 @@ static void	usage(const char *progname) {
 	std::cout << "usage: " << path.basename() << " [ options ]"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
-	std::cout << " -d,--debug            enable debug mode" << std::endl;
-	std::cout << " -h,--help             display this help message and exit"
+	std::cout << " -d,--debug                enable debug mode" << std::endl;
+	std::cout << " -h,--help                 display this help message and exit"
 		<< std::endl;
-	std::cout << " -b,--base=imagedir    directory for images" << std::endl;
-	std::cout << " -c,--config=configdb  use alternative configuration "
+	std::cout << " -b,--base=<imagedir>      directory for images"
+		<< std::endl;
+	std::cout << " -c,--config=<configdb>    use alternative configuration "
 		"database from file" << std::endl;
-	std::cout << "                       configdb" << std::endl;
-	std::cout << " -f,--foreground       stay in foreground" << std::endl;
-	std::cout << " -q,--database=taskdb  task manager database"
+	std::cout << "                           configdb"
 		<< std::endl;
-	std::cout << " -p,--port=<port>      port to offer the service on"
+	std::cout << " -f,--foreground           stay in foreground"
 		<< std::endl;
-	std::cout << " -P,--pidfile=<file>   write the process id to <file>, and remove when exiting" << std::endl;
-	std::cout << " -s,--sslport=<port>   use SSL enable port <port>"
+	std::cout << " -g,--group=<group>        group to run as" << std::endl;
+	std::cout << " -d,--database=<database>  task manager database"
 		<< std::endl;
-	std::cout << " -n,--name=<name>      define zeroconf name to use"
+	std::cout << " -p,--port=<port>          port to offer the service on"
 		<< std::endl;
+	std::cout << " -P,--pidfile=<file>       write the process id to <file>, and remove when exiting" << std::endl;
+	std::cout << " -s,--sslport=<port>       use SSL enable port <port>"
+		<< std::endl;
+	std::cout << " -n,--name=<name>          define zeroconf name to use"
+		<< std::endl;
+	std::cout << " -u,--user=<user>          user to run as" << std::endl;
 }
 
 /**
@@ -108,6 +117,10 @@ int	snowstar_main(int argc, char *argv[]) {
 	std::string	servicename("server");
 	std::string	pidfilename(PIDDIR "/snowstar.pid");
 
+	// group id and user id for the runtime user
+	uid_t	uid = getuid();
+	gid_t	gid = getgid();
+
 	// parse the command line
 	int	c;
 	int	longindex;
@@ -126,10 +139,21 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'f':
 			foreground = true;
 			break;
+		case 'g':
+			{
+			struct group	*grp = getgrnam(optarg);
+			if (NULL == grp) {
+				debug(LOG_ERR, DEBUG_LOG, errno,
+					"group %s not found", optarg);
+				return EXIT_FAILURE;
+			}
+			gid = grp->gr_gid;
+			}
+			break;
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'q':
+		case 't':
 			databasefile = std::string(optarg);
 			break;
 		case 'p':
@@ -144,7 +168,48 @@ int	snowstar_main(int argc, char *argv[]) {
 		case 'n':
 			astro::discover::ServiceLocation::get().servicename(std::string(optarg));
 			break;
+		case 'u':
+			{
+			struct passwd	*pwp = getpwnam(optarg);
+			if (NULL == pwp) {
+				debug(LOG_ERR, DEBUG_LOG, errno,
+					"user %s not found", optarg);
+				return EXIT_FAILURE;
+			}
+			uid = pwp->pw_uid;
+			}
+			break;
 		}
+
+	if (gid != getgid()) {
+		if (setgid(gid)) {
+			debug(LOG_ERR, DEBUG_LOG, errno, "cannot set gid to %d",
+				gid);
+			return EXIT_FAILURE;
+		}
+		if (gid != getgid()) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to switch gid to %d", gid);
+			return EXIT_FAILURE;
+		}
+		struct group	*grp = getgrgid(gid);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "group set to %s", grp->gr_gid);
+	}
+
+	if (uid != getuid()) {
+		if (setuid(uid)) {
+			debug(LOG_ERR, DEBUG_LOG, errno, "cannot set uid to %d",
+				uid);
+			return EXIT_FAILURE;
+		}
+		if (uid != getuid()) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"failed to switch uid to %d", uid);
+			return EXIT_FAILURE;
+		}
+		struct passwd	*pwp = getpwuid(uid);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "user set to %s", pwp->pw_uid);
+	}
 
 	// go inter the background
 	if (!foreground) {
