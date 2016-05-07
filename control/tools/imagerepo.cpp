@@ -311,11 +311,15 @@ static void	usage(const char *progname) {
 	std::cout << "    " << path.basename() << " [ options ] <repo> { show | remove } <ids>";
 	std::cout << std::endl;
 	std::cout << std::endl;
-	std::cout << "add, list, retrieve and delete images in image repository <repo>. The get ";
+	std::cout << "add, list, retrieve and delete images in image repository <repo>.";
+	std::cout<< std::endl;
+	std::cout << "The name \"default\" can be used to refer to the default repository name";
 	std::cout << std::endl;
-	std::cout << "command understands 'last' as the last, i.e. usually the most recent id of";
+	std::cout << "defined the repository.default configuration variable. The get command";
 	std::cout << std::endl;
-	std::cout << "the repository";
+	std::cout << "understands 'last' as the last, i.e. usually the most recent id of the";
+	std::cout << std::endl;
+	std::cout << "repository";
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << "    " << path.basename() << " [ options ] <srcrepo> { copy | move } <id> <targetrepo>";
@@ -391,6 +395,18 @@ int	main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	std::string	reponame = arguments[0];
+	if (reponame == "default") {
+		ConfigurationPtr	configuration = Configuration::get();
+		if (configuration->hasglobal("repository", "default")) {
+			reponame = configuration->global("repository",
+				"default");
+		} else {
+			std::cerr << "default repository not set" << std::endl;
+			return EXIT_FAILURE;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using repository '%s'",
+			reponame.c_str());
+	}
 	std::string	command = arguments[1];
 	if (command == "add") {
 		return command_add(reponame, arguments);

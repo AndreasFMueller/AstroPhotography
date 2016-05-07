@@ -346,6 +346,13 @@ int	main(int argc, char *argv[]) {
 		}
 
 		// add the project information to the 
+		if (0 == project.size()) {
+			// try to get the default projec name from the 
+			// config database
+			if (config->hasglobal("project", "default")) {
+				project = config->global("project", "default");
+			}
+		}
 		if (project.size() > 0) {
 			imageptr->setMetadata(astro::io::FITSKeywords::meta(
 				std::string("PROJECT"), project));
