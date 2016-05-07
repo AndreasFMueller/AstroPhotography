@@ -6,9 +6,7 @@
 #
 
 bin_PROGRAMS = astroscan devicemapper getimages imageloop focus focustest \
-	guider guiderport dark flat focusing
-
-noinst_PROGRAMS = guiderport
+	dark flat focusing
 
 astroscan_SOURCES = astroscan.cpp
 astroscan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -38,17 +36,9 @@ focustest_SOURCES = focustest.cpp
 focustest_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 focustest_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
-guider_SOURCES = guider.cpp
-guider_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-guider_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
-
 focusing_SOURCES = focusing.cpp
 focusing_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 focusing_LDADD = -L$(top_builddir)/lib -lastro 
-
-guiderport_SOURCES = guiderport.cpp
-guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-guiderport_LDADD = -L$(top_builddir)/lib -lastro
 
 devicemapper_SOURCES = devicemapper.cpp
 devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la

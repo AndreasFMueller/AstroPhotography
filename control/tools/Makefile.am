@@ -1,100 +1,84 @@
 #
-# Makefile.am -- build the tools
+# Makefile.am -- build the image processing tools
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = config mount catalog devices
+SUBDIRS = config mount catalog devices image
 
-if ENABLE_UNICAP
-unicap_flies = UnicapDevice.cpp
-else
-unicap_flies =
-endif
+bin_PROGRAMS = astroproject 
 
-if ENABLE_MICROTOUCH
-microtouch_files = MicroTouch.cpp
-else
-microtouch_files =
-endif
-
-bin_PROGRAMS = imageinfo makedark makeflat calibrate \
-	transform clamp logscale stack \
-	fitsheader imagerepo \
-	astroproject rescale \
-	gammacorrect convolve background crop radon backprojection
-
-imageinfo_SOURCES = imageinfo.cpp
-imageinfo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-imageinfo_LDADD = -L$(top_builddir)/lib -lastro 
-
-makedark_SOURCES = makedark.cpp
-makedark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-makedark_LDADD = -L$(top_builddir)/lib -lastro 
-
-makeflat_SOURCES = makeflat.cpp
-makeflat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-makeflat_LDADD = -L$(top_builddir)/lib -lastro 
-
-calibrate_SOURCES = calibrate.cpp
-calibrate_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-calibrate_LDADD = -L$(top_builddir)/lib -lastro 
-
-transform_SOURCES = transform.cpp
-transform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-transform_LDADD = -L$(top_builddir)/lib -lastro 
-
-stack_SOURCES = stack.cpp
-stack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-stack_LDADD = -L$(top_builddir)/lib -lastro 
-
-clamp_SOURCES = clamp.cpp
-clamp_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-clamp_LDADD = -L$(top_builddir)/lib -lastro 
-
-crop_SOURCES = crop.cpp
-crop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-crop_LDADD = -L$(top_builddir)/lib -lastro 
-
-rescale_SOURCES = rescale.cpp
-rescale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-rescale_LDADD = -L$(top_builddir)/lib -lastro 
-
-logscale_SOURCES = logscale.cpp
-logscale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-logscale_LDADD = -L$(top_builddir)/lib -lastro 
-
-gammacorrect_SOURCES = gammacorrect.cpp
-gammacorrect_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-gammacorrect_LDADD = -L$(top_builddir)/lib -lastro 
-
-fitsheader_SOURCES = fitsheader.cpp
-fitsheader_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-fitsheader_LDADD = -L$(top_builddir)/lib -lastro 
+#imageinfo_SOURCES = imageinfo.cpp
+#imageinfo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#imageinfo_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#makedark_SOURCES = makedark.cpp
+#makedark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#makedark_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#makeflat_SOURCES = makeflat.cpp
+#makeflat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#makeflat_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#calibrate_SOURCES = calibrate.cpp
+#calibrate_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#calibrate_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#transform_SOURCES = transform.cpp
+#transform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#transform_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#stack_SOURCES = stack.cpp
+#stack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#stack_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#clamp_SOURCES = clamp.cpp
+#clamp_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#clamp_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#crop_SOURCES = crop.cpp
+#crop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#crop_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#rescale_SOURCES = rescale.cpp
+#rescale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#rescale_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#logscale_SOURCES = logscale.cpp
+#logscale_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#logscale_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#gammacorrect_SOURCES = gammacorrect.cpp
+#gammacorrect_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#gammacorrect_LDADD = -L$(top_builddir)/lib -lastro 
+#
+#fitsheader_SOURCES = fitsheader.cpp
+#fitsheader_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#fitsheader_LDADD = -L$(top_builddir)/lib -lastro 
 
 astroproject_SOURCES = astroproject.cpp
 astroproject_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astroproject_LDADD = -L$(top_builddir)/lib -lastro
 
-imagerepo_SOURCES = imagerepo.cpp
-imagerepo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-imagerepo_LDADD = -L$(top_builddir)/lib -lastro
+#imagerepo_SOURCES = imagerepo.cpp
+#magerepo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#magerepo_LDADD = -L$(top_builddir)/lib -lastro
 
-convolve_SOURCES = convolve.cpp
-convolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-convolve_LDADD = -L$(top_builddir)/lib -lastro
-
-background_SOURCES = background.cpp
-background_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-background_LDADD = -L$(top_builddir)/lib -lastro
-
-radon_SOURCES = radon.cpp
-radon_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-radon_LDADD = -L$(top_builddir)/lib -lastro
-
-backprojection_SOURCES = backprojection.cpp
-backprojection_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-backprojection_LDADD = -L$(top_builddir)/lib -lastro
+#convolve_SOURCES = convolve.cpp
+#convolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#convolve_LDADD = -L$(top_builddir)/lib -lastro
+#
+#background_SOURCES = background.cpp
+#background_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#background_LDADD = -L$(top_builddir)/lib -lastro
+#
+#radon_SOURCES = radon.cpp
+#radon_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#radon_LDADD = -L$(top_builddir)/lib -lastro
+#
+#backprojection_SOURCES = backprojection.cpp
+#backprojection_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+#backprojection_LDADD = -L$(top_builddir)/lib -lastro
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits

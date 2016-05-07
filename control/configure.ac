@@ -429,7 +429,8 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	ice/client/Makefile ice/client/guide/Makefile
 	ice/server/Makefile
 	tools/Makefile tools/config/Makefile tools/mount/Makefile
-	tools/catalog/Makefile tools/devices/Makefile
+	tools/devices/Makefile tools/image/Makefile tools/guiding/Makefile
+	tools/catalog/Makefile
 	drivers/Makefile drivers/mock1/Makefile drivers/mock2/Makefile
 	drivers/simulator/Makefile drivers/net/Makefile
 	drivers/sx/Makefile drivers/sbig/Makefile drivers/othello/Makefile
