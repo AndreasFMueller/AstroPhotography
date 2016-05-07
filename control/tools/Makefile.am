@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-#SUBDIRS = . test
+SUBDIRS = config mount catalog
 
 if ENABLE_UNICAP
 unicap_flies = UnicapDevice.cpp
@@ -20,8 +20,8 @@ endif
 
 bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
 	focus focustest transform guider dark flat clamp logscale stack \
-	focusing starcatalog buildcatalog fitsheader astroconfig imagerepo \
-	devicemapper astroinstrument astromount astroproject rescale \
+	focusing fitsheader imagerepo \
+	astroproject rescale \
 	gammacorrect convolve background crop radon backprojection
 
 noinst_PROGRAMS = guiderport 
@@ -102,21 +102,9 @@ focusing_SOURCES = focusing.cpp
 focusing_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 focusing_LDADD = -L$(top_builddir)/lib -lastro 
 
-starcatalog_SOURCES = starcatalog.cpp
-starcatalog_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-starcatalog_LDADD = -L$(top_builddir)/lib -lastro 
-
-buildcatalog_SOURCES = buildcatalog.cpp
-buildcatalog_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-buildcatalog_LDADD = -L$(top_builddir)/lib -lastro 
-
 fitsheader_SOURCES = fitsheader.cpp
 fitsheader_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 fitsheader_LDADD = -L$(top_builddir)/lib -lastro 
-
-astroconfig_SOURCES = astroconfig.cpp
-astroconfig_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-astroconfig_LDADD = -L$(top_builddir)/lib -lastro
 
 astroproject_SOURCES = astroproject.cpp
 astroproject_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -125,18 +113,6 @@ astroproject_LDADD = -L$(top_builddir)/lib -lastro
 imagerepo_SOURCES = imagerepo.cpp
 imagerepo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 imagerepo_LDADD = -L$(top_builddir)/lib -lastro
-
-devicemapper_SOURCES = devicemapper.cpp
-devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-devicemapper_LDADD = -L$(top_builddir)/lib -lastro
-
-astroinstrument_SOURCES = astroinstrument.cpp
-astroinstrument_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-astroinstrument_LDADD = -L$(top_builddir)/lib -lastro
-
-astromount_SOURCES = astromount.cpp
-astromount_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-astromount_LDADD = -L$(top_builddir)/lib -lastro
 
 guiderport_SOURCES = guiderport.cpp
 guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -187,14 +163,6 @@ testfocus3:	focustest
 
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
-
-catalogtest:	buildcatalog
-	./buildcatalog -d \
-		-h /usr/local/starcatalogs/hipparcos/hip_main.dat \
-		-t /usr/local/starcatalogs/tycho2/tyc2.dat \
-		-u /usr/local/starcatalogs/u4 \
-		/usr/local/starcatalogs/database/stars.db
-	
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
