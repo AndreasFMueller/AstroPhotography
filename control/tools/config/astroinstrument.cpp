@@ -11,13 +11,12 @@
 #include <AstroConfig.h>
 #include <AstroUtils.h>
 #include <AstroPersistence.h>
-//#include <InstrumentTables.h>
-#include "../lib/config/InstrumentTables.h"
+#include <AstroDiscovery.h>
 #include <algorithm>
 
 using namespace astro;
 using namespace astro::config;
-using namespace astro::persistence;
+using namespace astro::discover;
 
 namespace astro {
 namespace app {
@@ -41,33 +40,32 @@ static void	usage(const std::string& progname) {
 	std::string	prg = std::string("    ") + Path(progname).basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << prg << " [ options ] list" << std::endl;
-	std::cout << prg << " [ options ] { add | show | remove } <name>";
-	std::cout << std::endl;
-	std::cout << prg << " [ options ] <name> add <cname> [ attr=value ]";
-	std::cout << std::endl;
-	std::cout << prg << " [ options ] <name> { show | remove } <type>";
-	std::cout << std::endl;
-	std::cout << prg << " [ options ] <name> update <type> "
-		"[ attr=value ]";
-	std::cout << std::endl;
 	std::cout << prg << " [ options ] help" << std::endl;
+	std::cout << prg << " [ options ] list" << std::endl;
+	std::cout << prg << " [ options ] <INSTR> <command>..." << std::endl;
 	std::cout << std::endl;
-	std::cout << "The following attributes are known (in brackets the "
-		"kinds of components" << std::endl;
-	std::cout << "supporting this attribute, the letters mean: d=derived, "
-		"m=mapped, r=derived):" << std::endl;
-	std::cout << "  unit=<u>      unit number of a device [all]";
+	std::cout << "The following commands are available:" << std::endl;
 	std::cout << std::endl;
-	std::cout << "  device=<d>    device name of a direct component [d]";
+	std::cout << "list" << std::endl;
+	std::cout << "   list all the components defined for an instrument";
 	std::cout << std::endl;
-	std::cout << "  name=<n>      name of a mapped component [m]" << std::endl;
-	std::cout << "  kind=<k>      component kind (direct, mapped, derived) [all]";
 	std::cout << std::endl;
-	std::cout << "  from=<f>      the device type from which this component"
-		" is derived" << std::endl;
-	std::cout << "  server=<s>    component is accessible on server <s>";
+	std::cout << "add <type> <service> <deviceurl>" << std::endl;
+	std::cout << "    Add a component to an instrument, this also creates the instrument." << std::endl;
+	std::cout << "    The following component types are available: Camera, CCD, GuiderCCD, Cooler," << std::endl;
+	std::cout << "    GuiderPort, Focuser, AdaptiveOptics, FilterWheel" << std::endl;
 	std::cout << std::endl;
+	std::cout << "remove <type> <index>" << std::endl;
+	std::cout << "    remove a component" << std::endl;
+	std::cout << std::endl;
+	std::cout << "property <name> <value>" << std::endl;
+	std::cout << "    add property value" << std::endl;
+	std::cout << std::endl;
+	std::cout << "remove <name> <value>" << std::endl;
+	std::cout << "    remove a property" << std::endl;
+	std::cout << std::endl;
+	std::cout << "destroy" << std::endl;
+	std::cout << "    destroy an instrument" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << " -c,--config=<cfg>   use configuraton file <cfg> instead "
@@ -81,7 +79,7 @@ static void	usage(const std::string& progname) {
 /**
  * \brief display a help message
  */
-int	cmd_help() {
+static int	cmd_help() {
 	usage("astroinstrument");
 	return EXIT_SUCCESS;
 }
@@ -89,334 +87,251 @@ int	cmd_help() {
 /**
  * \brief List all known instruments
  */
-int	cmd_list() {
-	ConfigurationPtr	configuration = Configuration::get();
-	InstrumentConfigurationPtr	instrumentconfig
-		= InstrumentConfiguration::get(configuration);
-	std::list<InstrumentPtr>	instruments
-		= instrumentconfig->listinstruments();
-	std::for_each(instruments.begin(), instruments.end(),
-		[](InstrumentPtr instrument) {
-			std::cout << instrument->toString() << std::endl;
+static int	cmd_list(InstrumentBackend& instrumentbackend) {
+	InstrumentList	list = instrumentbackend.names();
+	for_each(list.begin(), list.end(),
+		[](const std::string& name) {
+			std::cout << name << std::endl;
 		}
 	);
 	return EXIT_SUCCESS;
 }
 
 /**
- * \brief add an instrument
- *
- * Adding an instrument needs only the name of the instrument
+ * \brief display the components of an instrument
  */
-int	cmd_add(const std::string& instrumentname,
-		const std::vector<std::string>& /* arguments */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding instrument '%s'",
-		instrumentname.c_str());
-	ConfigurationPtr	config = Configuration::get();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new instrument");
-	InstrumentPtr	instrument(new Instrument(config->database(),
-				instrumentname));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument created");
+static int	cmd_list_instrument(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname) {
+	if (!instrumentbackend.has(instrumentname)) {
+		std::cerr << "instrument " << instrumentname;
+		std::cerr << " does not exist" << std::endl;
+		return EXIT_FAILURE;
+	}
+	discover::InstrumentPtr	instrument
+		= instrumentbackend.get(instrumentname);
+	// list components
+	discover::Instrument::ComponentList	components = instrument->list();
+	for_each(components.begin(), components.end(),
+		[](const discover::InstrumentComponent& component) {
+			std::cout << component.name();
+			std::cout << " ";
+			std::cout << InstrumentComponentKey::type2string(
+					component.type());
+			std::cout << "[" << component.index() << "] ";
+			std::cout << component.servicename();
+			std::cout << " ";
+			std::cout << component.deviceurl() << std::endl;
+		}
+	);
+
+	// list properties
+	discover::InstrumentPropertyList	proplist
+		= instrument->getProperties();
+	for_each(proplist.begin(), proplist.end(),
+		[](const InstrumentProperty& property) {
+			std::cout << property.instrument();
+			std::cout << ".";
+			std::cout << property.property();
+			std::cout << " = ";
+			std::cout << property.value();
+			if (property.description().size() > 0) {
+				std::cout << " // ";
+				std::cout << property.description();
+			}
+			std::cout << std::endl;
+		}
+	);
 	return EXIT_SUCCESS;
 }
 
 /**
- * \brief show an instrument
+ * \brief add component command implementation
  */
-int	cmd_show(const std::string& instrumentname,
-		const std::vector<std::string>& /* arguments */) {
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument
-		= instruments->instrument(instrumentname);
-	std::cout << instrument->name();
-	std::list<DeviceName::device_type>	types
-		= instrument->component_types();
-	std::cout << " has " << types.size() << " components" << std::endl;
-	for (auto ptr = types.begin(); ptr != types.end(); ptr++) {
-		InstrumentComponentPtr	component = instrument->component(*ptr);
-		std::cout << component->toString() << std::endl;
+static int	cmd_add(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname,
+		const std::vector<std::string>& args) {
+	if (args.size() < 3) {
+		std::cerr << "not enough arguments for add command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
 	}
-	return EXIT_SUCCESS;
-}
-
-/**
- * \brief Remove an instrument
- */
-int	cmd_remove(const std::string& instrumentname,
-		const std::vector<std::string>& /* arguments */) {
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	instruments->removeInstrument(instrumentname);
-	return EXIT_SUCCESS;
-}
-
-/**
- * \brief add a component to an instrument
- *
- * Adding an instrument uses the command format
- *
- *     INSTR add cname attr=value
- *
- * INSTR is the name of the instrument, cname is the device type of the
- * component to be added. Some of the valid device types are camera,
- * ccd, adaptiveoptics, cooler, filterwheel, ... 
- * The following attribute value pairs are unit=<u>, kind=<t> (required),
- * device=<d>, name=<n>, from=<f>
- */
-int	cmd_component_add(const std::string& instrumentname,
-		const std::string& componenttype,
-		const std::vector<std::string>& arguments) {
-	// get the instrument to be changed
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument = instruments->instrument(instrumentname);
-
-	// interpret the component type
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "component type: %s",
-		componenttype.c_str());
-	DeviceName::device_type	type
-		= InstrumentComponentTableAdapter::type(componenttype);
-
-	// build the component
-	InstrumentComponentPtr	component(NULL);
-
-	// parse the arguments
-	AttributeValuePairs	av(arguments, 3);
-
-	// check for the type
-	InstrumentComponent::component_t 	ctype
-		= InstrumentComponent::direct;
-	if (av.has("kind")) {
-		std::string	t = av("kind");
-		ctype = InstrumentComponentTableAdapter::component_type(t);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "the component type is %s", 
-		InstrumentComponentTableAdapter::component_type(ctype).c_str());;
-
-	// get the unit number, as all types of components have this attribute
-	int	unit = 0;
-	if (av.has("unit")) {
-		unit = std::stoi(av("unit"));
-	}
-	std::string	servername;
-	if (av.has("server")) {
-		servername = av("server");
-	}
-
-	// now use different code for the various types of component classes
-	switch (ctype) {
-	case InstrumentComponent::direct:
-		component = InstrumentComponentPtr(
-			new InstrumentComponentDirect(type,
-				DeviceName(av("device")), unit, servername));
-		break;
-	case InstrumentComponent::mapped:
-		// construct a mapped component
-		component = InstrumentComponentPtr(
-			new InstrumentComponentMapped(type,
-				config->database(), av("name")));
-		break;
-	case InstrumentComponent::derived:
-		// construct a derived compont, where from attribute contains
-		// the type of the component this component is derived from
-		component = InstrumentComponentPtr(
-			new InstrumentComponentDerived(type, *instrument,
-				InstrumentComponentTableAdapter::type(av("from")),
-				unit));
-		break;
-	}
-
-	// add the component to the instrument
+	discover::InstrumentComponentKey::Type	type
+		= discover::InstrumentComponentKey::string2type(args[0]);
+	discover::InstrumentComponent	component(instrumentname, type,
+		args[1], args[2]);
+	discover::InstrumentPtr	instrument
+		= instrumentbackend.get(instrumentname);
 	instrument->add(component);
+	return EXIT_SUCCESS;
+}
 
-	// persist in the database
-	config->database()->begin("addcomponent");
-	try {
-		InstrumentConfigurationPtr	instruments
-			= InstrumentConfiguration::get(config);
-		instruments->removeInstrument(instrumentname);
-		instruments->addInstrument(instrument);
-		config->database()->commit("addcomponent");
-	} catch (...) {
-		config->database()->rollback("addcomponent");
+/**
+ * \brief remove component command implementation
+ */
+static int	cmd_remove(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname,
+		const std::vector<std::string>& args) {
+	if (args.size() < 2) {
+		std::cerr << "not enough arguments for remove command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+	}
+	discover::InstrumentComponentKey::Type	type
+		= discover::InstrumentComponentKey::string2type(args[0]);
+	int	index = std::stoi(args[1]);
+	discover::InstrumentPtr	instrument
+		= instrumentbackend.get(instrumentname);
+	instrument->remove(type, index);
+	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief add a property 
+ */
+static int	cmd_property(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname,
+		const std::vector<std::string>& args) {
+	if (args.size() < 1) {
+		std::cerr << "not enough arguments for remove command";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
+	}
+	discover::InstrumentPtr	instrument
+		= instrumentbackend.get(instrumentname);
+	std::string	propertyname = args[0];
+	if (args.size() == 1) {
+		discover::InstrumentProperty	property
+			= instrument->getProperty(propertyname);
+		std::cout << property.instrument();
+		std::cout << ".";
+		std::cout << property.property();
+		std::cout << " = ";
+		std::cout << property.value();
+		if (property.description().size() > 0) {
+			std::cout << " // ";
+			std::cout << property.description();
+		}
+		std::cout << std::endl;
+		return EXIT_SUCCESS;
+	}
+	std::string	value;
+	if (args.size() > 1) {
+		value = args[1];
+	}
+	std::string	description;
+	if (args.size() > 2) {
+		description = args[2];
+	}
+	if (instrument->hasProperty(propertyname)) {
+		discover::InstrumentProperty	property
+			= instrument->getProperty(propertyname);
+		property.value(value);
+		property.description(description);
+		instrument->updateProperty(property);
+	} else {
+		discover::InstrumentProperty	property;
+		property.instrument(instrumentname);
+		property.property(propertyname);
+		property.value(value);
+		property.description(description);
+		instrument->addProperty(property);
 	}
 	return EXIT_SUCCESS;
 }
 
 /**
- * \brief Update a component of an instrument
+ * \brief Remove a property
  */
-int	cmd_component_update(const std::string& instrumentname,
-		const std::string& componenttype,
-		const std::vector<std::string>& arguments) {
-	// get the component to change
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument = instruments->instrument(instrumentname);
-	InstrumentComponentPtr	component = instrument->component(
-		InstrumentComponentTableAdapter::type(componenttype));
-
-	// get the attribute value types from the remaining arguments
-	AttributeValuePairs	av(arguments, 3);
-
-	// check for the type
-	if (av.has("kind")) {
-		InstrumentComponent::component_t	ctype
-			= InstrumentComponentTableAdapter::component_type(
-				av("kind"));
-		if (ctype != component->component_type()) {
-			throw std::runtime_error("cannot change type, delete "
-				"and add component of new type");
-		}
+static int	cmd_remove_property(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname,
+		const std::string& propertyname) {
+	if (!instrumentbackend.has(instrumentname)) {
+		std::cerr << "instrument " << instrumentname;
+		std::cerr << " does not exist" << std::endl;
+		return EXIT_FAILURE;
 	}
-
-	// XXX modify the component
-	if (av.has("unit")) {
-		component->unit(std::stoi(av("unit")));
+	discover::InstrumentPtr	instrument
+		= instrumentbackend.get(instrumentname);
+	if (!instrument->hasProperty(propertyname)) {
+		std::cerr << "property " << propertyname;
+		std::cerr << " does not exist" << std::endl;
+		return EXIT_FAILURE;
 	}
-	switch (component->component_type()) {
-	case InstrumentComponent::direct:
-		if (av.has("device")) {
-			component->name(av("device"));
-		}
-		if (av.has("server")) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "update servername to"
-				" '%s'", av("server").c_str());
-			dynamic_cast<InstrumentComponentDirect *>(&*component)
-				->servername(av("server"));
-		}
-		break;
-	case InstrumentComponent::mapped:
-		if (av.has("name")) {
-			component->name(av("name"));
-		}
-		break;
-	case InstrumentComponent::derived:
-		if (av.has("from")) {
-			component->name(av("from"));
-		}
-		break;
-	}
-
-	// persist in the database
-	config->database()->begin("updatecomponent");
-	try {
-		instruments->removeInstrument(instrumentname);
-		instruments->addInstrument(instrument);
-		config->database()->commit("updatecomponent");
-	} catch (...) {
-		config->database()->rollback("updatecomponent");
-		throw;
-	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "removing property %s.%s",
+		instrumentname.c_str(), propertyname.c_str());
+	instrument->removeProperty(propertyname);
 	return EXIT_SUCCESS;
 }
 
 /**
- * \brief Show the details of a component
+ * \brief Destroy an instrument
  */
-int	cmd_component_show(const std::string& instrumentname,
-		const std::string& componenttype,
-		const std::vector<std::string>& /* arguments */) {
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument
-		= instruments->instrument(instrumentname);
-	InstrumentComponentPtr	component = instrument->component(
-		InstrumentComponentTableAdapter::type(componenttype));
-	std::cout << componenttype << " component of instrument ";
-	std::cout << instrumentname  << ":" << std::endl;
-	std::cout << component->toString() << std::endl;
-	return EXIT_SUCCESS;
-}
-
-/**
- * \brief Remove a component from from an instrument
- */
-int	cmd_component_remove(const std::string& instrumentname,
-		const std::string& componenttype,
-		const std::vector<std::string>& /* arguments */) {
-	ConfigurationPtr	config = Configuration::get();
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument
-		= instruments->instrument(instrumentname);
-	instrument->remove(
-		InstrumentComponentTableAdapter::type(componenttype));
-	config->database()->begin("removecomponent");
-	try {
-		instruments->removeInstrument(instrumentname);
-		instruments->addInstrument(instrument);
-		config->database()->commit("removecomponent");
-	} catch (...) {
-		config->database()->rollback("removecomponent");
-		throw;
+static int	cmd_destroy(InstrumentBackend& instrumentbackend,
+		const std::string& instrumentname) {
+	if (!instrumentbackend.has(instrumentname)) {
+		std::cerr << "instrument " << instrumentname;
+		std::cerr << " does not exist" << std::endl;
+		return EXIT_FAILURE;
 	}
+	instrumentbackend.remove(instrumentname);
 	return EXIT_SUCCESS;
 }
 
 /**
  * \brief Interpret the various subcommands that astroinstrument implements
  */
-int	commands(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 1) {
+static int	commands(const std::vector<std::string>& arguments) {
+	std::vector<std::string>	args = arguments;
+	if (args.size() < 1) {
 		throw std::runtime_error("not enought arguments");
 	}
-	// generic list command
-	if (arguments[0] == "list") {
-		return cmd_list();
-	}
-	if (arguments[0] == "help") {
+	std::string	command = arguments[0];
+	if (command == "help") {
 		return cmd_help();
 	}
 
-	// instrument specific commands
-	if (arguments.size() < 2) {
-		throw std::runtime_error("not enough arguments");
+	ConfigurationPtr	configuration = Configuration::get();
+	InstrumentBackend	instrumentbackend(configuration->database());
+
+	// generic list command
+	if (command == "list") {
+		return cmd_list(instrumentbackend);
 	}
-	std::string	instrumentname = arguments[1];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrumentname = %s",
-		instrumentname.c_str());
-	if (arguments[0] == "add") {
-		return cmd_add(instrumentname, arguments);
+
+	// all other commands need an instrument name
+	std::string	instrumentname = command;
+	args.erase(args.begin());
+	command = args[0];
+	args.erase(args.begin());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "command now %s", command.c_str());
+
+	// now call the individual commands
+	if (command == "list") {
+		return cmd_list_instrument(instrumentbackend, instrumentname);
 	}
-	if (arguments[0] == "show") {
-		return cmd_show(instrumentname, arguments);
+	if (command == "add") {
+		return cmd_add(instrumentbackend, instrumentname, args);
 	}
-	if (arguments[0] == "remove") {
-		return cmd_remove(instrumentname, arguments);
+	if (command == "property") {
+		return cmd_property(instrumentbackend, instrumentname, args);
 	}
-	// component commands start here
-	instrumentname = arguments[0];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrumentname = %s",
-		instrumentname.c_str());
-	if (arguments.size() < 3) {
-		throw std::runtime_error("not enough arguments");
+	if (command == "remove") {
+		switch (args.size()) {
+		case 1:
+			return cmd_remove_property(instrumentbackend,
+				instrumentname, args[0]);
+		case 2:
+			return cmd_remove(instrumentbackend,
+				instrumentname, args);
+		default:
+			std::cerr << "wroong number of arguments" << std::endl;
+			return EXIT_FAILURE;
+		}
 	}
-	std::string	componenttype = arguments[2];
-	std::string	cmd = arguments[1];
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "command = %s", cmd.c_str());
-	if (cmd == "add") {
-		return cmd_component_add(instrumentname, componenttype,
-			arguments);
+	if (command == "destroy") {
+		return cmd_destroy(instrumentbackend, instrumentname);
 	}
-	if (cmd == "update") {
-		return cmd_component_update(instrumentname, componenttype,
-			arguments);
-	}
-	if (cmd == "remove") {
-		return cmd_component_remove(instrumentname, componenttype,
-			arguments);
-	}
-	if (cmd == "show") {
-		return cmd_component_show(instrumentname, componenttype,
-			arguments);
-	}
+
 	throw std::runtime_error("unknown command");
 }
 

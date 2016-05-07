@@ -128,6 +128,8 @@ private:
 				const std::string& property);
 public:
 	long	addProperty(const InstrumentProperty& property);
+	bool	hasProperty(const std::string& instrumentname,
+			const std::string& property);
 	InstrumentProperty	getProperty(const std::string& instrumentname,
 				const std::string& property);
 	void	removeProperty(const std::string& instrumentname,
@@ -384,7 +386,7 @@ long	InstrumentBackendImpl::propertyid(const std::string& instrumentname,
 		std::string	cause = stringprintf(
 			"no property instrument='%s' property='%s'",
 			instrumentname.c_str(), property.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "property not found: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "property not found: %s",
 			cause.c_str());
 		throw std::runtime_error(cause);
 	}
@@ -405,24 +407,28 @@ InstrumentProperty	InstrumentBackendImpl::getProperty(
 	return p;
 }
 
+bool	InstrumentBackendImpl::hasProperty(const std::string& instrumentname,
+		const std::string& property) {
+	try {
+		propertyid(instrumentname, property);
+		return true;
+	} catch (const std::exception& x) {
+	}
+	return false;
+}
+
 void	InstrumentBackendImpl::removeProperty(
 				const std::string& instrumentname,
 				const std::string& property) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove property %s from instrument %s",
+		property.c_str(), instrumentname.c_str());
 	std::string	query(	"delete from instrumentproperties "
 				"where instrument = ? "
 				"  and property = ?");
 	StatementPtr	statement = database->statement(query);
 	statement->bind(0, instrumentname);
 	statement->bind(1, property);
-	Result	res = statement->result();
-	if (0 == res.size()) {
-		std::string	cause = stringprintf(
-			"no property instrument='%s' property='%s'",
-			instrumentname.c_str(), property.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "property not found: %s",
-			cause.c_str());
-		throw std::runtime_error(cause);
-	}
+	statement->execute();
 }
 
 void	InstrumentBackendImpl::updateProperty(
@@ -509,6 +515,9 @@ public:
 	}
 	virtual InstrumentProperty	getProperty(const std::string& property) {
 		return backend.getProperty(name(), property);
+	}
+	virtual bool	hasProperty(const std::string& property) {
+		return backend.hasProperty(name(), property);
 	}
 	virtual void	removeProperty(const std::string& property) {
 		backend.removeProperty(name(), property);

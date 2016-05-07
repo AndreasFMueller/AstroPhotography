@@ -412,6 +412,7 @@ public:
 
 	// properties
 	virtual int	addProperty(const InstrumentProperty& property) = 0;
+	virtual bool	hasProperty(const std::string& property) = 0;
 	virtual InstrumentProperty	getProperty(const std::string& property) = 0;
 	virtual void	updateProperty(const InstrumentProperty& property) = 0;
 	virtual void	removeProperty(const std::string& property) = 0;

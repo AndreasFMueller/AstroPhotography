@@ -81,10 +81,6 @@ static int	scan_command(const std::string& modulename, bool verbose) {
 	showlist(devloc->getDevicelist(DeviceName::AdaptiveOptics));
 	std::cout << std::endl;
 
-	std::cout << "focuser:          ";
-	showlist(devloc->getDevicelist(DeviceName::Focuser));
-	std::cout << std::endl;
-
 	std::cout << "camera:           ";
 	showlist(devloc->getDevicelist(DeviceName::Camera));
 	std::cout << std::endl;
@@ -103,6 +99,10 @@ static int	scan_command(const std::string& modulename, bool verbose) {
 
 	std::cout << "filterwheel:      ";
 	showlist(devloc->getDevicelist(DeviceName::Filterwheel));
+	std::cout << std::endl;
+
+	std::cout << "focuser:          ";
+	showlist(devloc->getDevicelist(DeviceName::Focuser));
 	std::cout << std::endl;
 
 	std::cout << "mount:            ";
