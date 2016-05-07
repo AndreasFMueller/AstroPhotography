@@ -5,7 +5,8 @@
 #
 docfiles = 
 
-TEXSOURCES = snowstar.tex imageprocessing.tex imagerepo.tex
+TEXSOURCES = snowstar.tex imageprocessing.tex imagerepo.tex \
+	configuration.tex architecture.tex
 
 EXTRA_DIST = manual.tex $(TEXSOURCES)
 

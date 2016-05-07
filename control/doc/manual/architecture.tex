@@ -1,0 +1,37 @@
+%
+% architectures.tex
+%
+% (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
+%
+\chapter{Architecture\label{chapter:architecture}}
+\section{Scope}
+The AstroPhotography project serves as a test bed to try new algorithms
+and architectural ideas in astrophotography software.
+It does not attempt to replicate any commonly available functionality
+for its own sake, but it provides quite a bit of basic astrophotography
+functionalty for new experiments to base on.
+E.~g.~almost any code dealing with images will need to be able to
+manipulate images, read and write images from files.
+
+The project concentrates on the following areas of interest:
+\begin{itemize}
+\item Image processing: Algorithms for dark and light frame extraction,
+bad pixel interpolation, debayering, image transformation and stacking,
+autofocus and background extraction.
+\item Guiding: Algorithms for guiding, comprising image analysis, 
+calibration of guider port interface, separation of adaptive optics
+and mount guiding corrections.
+\item Automation: control cameras to automatically perform an series of
+exposures.
+Automated and maximally parallel image processing.
+\item Networking: most modern astrophotograhy software uses a single
+computer to control the devices.
+This project encourrages use of modern ARM-based single board computers
+with WLAN mounted directly on the telescope and mount, complitely eliminating
+all cables except power.
+To connect them, some network protocol is necessary, and the
+AstroPhotography project uses ZeroC Internet Communcation Engine (ICE)
+as its networking middleware.
+\end{itemize}
+
+

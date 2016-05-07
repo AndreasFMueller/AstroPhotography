@@ -1,0 +1,76 @@
+\chapter{Configuration}
+The AstroPhotography software has a number of configuration facilities
+to be discussed in this chapter.
+The main configuration method is the configuration database, most
+tools have a command line option ths specify the configuration database
+file.
+For low level configuration, mostly for device drivers, there is a
+system of properties stored in propery files.
+
+\section{Configuration database}
+The configuration database contains attribute value pairs that can be
+manipulated with the \texttt{astroconfig} utility.
+The configruation values are organized into a three-level hierarchy
+of \texttt{domain}, \texttt{section} and \texttt{name}, but currently
+only the \texttt{global} domain is implemented.
+
+The \texttt{astroconfig} program operates on a configuration database
+that can be specified via the \texttt{--config}-command line option.
+Other available options of the \texttt{astroconfig} program can be
+displayed with the \texttt{--help}-option.
+
+The following subcommands of the \texttt{astroconfig} program all have
+a \textit{domain} argument, please not that this currently always has to be 
+\texttt{global}.
+Here are the commands:
+\begin{itemize}
+\item
+\texttt{get} \textit{domain} \textit{section} \textit{name}
+\\
+Retrieve the value of the specified configuration variable.
+\item
+\texttt{set} \textit{domain} \textit{section} \textit{name} \textit{value}
+\\
+Set the value of the specified configuration variable.
+If the variable already exists, it is overwritten.
+\item
+\texttt{delete} \textit{domain} \textit{section} \textit{name}
+\\
+Delete the configuration variable from the database.
+\item
+\texttt{list} \textit{domain} [ \textit{section} [ \textit{name} ] ]
+\\
+List all variables that match the specified criteria.
+If \textit{name} or \textit{section} are not specified, all variables
+matching the \textit{domain} or \textit{spection} is displayed.
+\end{itemize}
+
+\section{Well-known configuration variables}
+This section documents some well known configuration variables from 
+various subsystms.
+\subsection{Service Location}
+The ICE network services use a common service location class that
+understands the following global configuration variables
+\begin{itemize}
+\item
+\texttt{service.name}:
+The service name to use for the network service.
+This name is used in ZeroConf to locate the service.
+\item
+\texttt{service.port}:
+The port to use for the unencrypted service front end.
+The default port is 10000.
+\item
+\texttt{service.sslport}:
+The port to use for the TLS-protected service front end.
+There is no default for this variable.
+\end{itemize}
+
+\subsection{Default repository}
+The \texttt{snowimages} program stores images retrieved from a server
+in the repository specified by the \texttt{--repository} option.
+To simplify usage, it is possible to define default repository
+for these operations with the \texttt{repository.default} variable.
+
+
+
