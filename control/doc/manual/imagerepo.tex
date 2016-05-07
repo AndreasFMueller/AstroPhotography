@@ -9,9 +9,121 @@ images in image repositories.
 This chapter describes how repositories are created, how images
 are added, retrieved and removed from a repository.
 
+A repository is essentially a directory containing FITS images and
+a database containing the metadata for all the images.
+The database allows easier access to the images in the repository.
+To ensure consistency between database and image files, repositories
+should only be manipulated using the image repository utilities
+described below.
+
 \section{Creating and deleting repositories}
+The definition of image repositories is considered part of the
+configuration of the system, and is therefore implemented in the
+\texttt{astroconfig} program.
+The program can list repositories, create a repository definition
+in the configuration database,
+or delete a repository from the configuration database.
+It does not manipulate the contents of the image repository directory,
+so in particular it does not remove the directory when the repository
+is removed.
 
-\section{Inspecting repositories}
+The \texttt{astroconfig} program accepts the following subcommands:
+\begin{itemize}
+\item
+\texttt{astroconfig imagerepo list}
+\\
+List all image repositories known to the configuration database.
+\item
+\texttt{astroconfig imagerepo add} \textit{reponame} \textit{directory}
+\\
+Create a new repository in directory \textit{directory}.
+The information about the repository location is stored in the
+configuration database and if necessary, the directory is created.
+The database file \texttt{.astro.db} is not created immediately, it will
+be created when the repository is first accessed.
+\item
+\texttt{astroconfig imagerepo remove} \textit{reponame}
+\\
+This command removes the repository definition from configuration
+database.
+It does not remove the images, the metadata database or the directory.
+\end{itemize}
 
-\section{Manipulating images}
+\section{Working within repositories}
+The \texttt{imagerepo} program is used to manipulate the contents of
+an image repository.
+
+\begin{itemize}
+\item
+List the contents of the repository:
+\\
+\texttt{imagerepo} \textit{reponame} \texttt{list}
+\item
+Add an image to the repository:
+\\
+\texttt{imagerepo} \textit{reponame} \texttt{add} \textit{image.fits}
+\\
+This command copies the image file \textit{image.fits} to the
+image repository directory, extracts the metadata from the image and
+adds it to the repository.
+If the image did not contain a UUID yet, a UUID will be added to the
+copy.
+\item
+Show information about an image in the repository:
+\\
+\texttt{imagerepo} \textit{reponame} \texttt{show}
+\item
+Retrieve an image from the repository:
+\\
+\texttt{imagerepo} \textit{reponame} \texttt{get} \textit{imageid} \textit{image.fits}
+\\
+This command extracts the image with id \textit{imageid} and write it to
+the file \textit{image.fits}.
+\item
+Remove an image from the repository:
+\\
+\texttt{imagerepo} \textit{reponame} \texttt{remove} \textit{imageid}
+\end{itemize}
+
+\section{Working with two repositories}
+The \texttt{imagerepo} program also allows to move images between
+two repositories.
+The main idea is that it should be possible to move images in a consistent
+way between images on a removable medium and a local hard drive.
+To accomplish this, there are low level commands to copy or move images
+from one repository to the other.
+These commands are
+\begin{itemize}
+\item
+\texttt{imagerepo} \textit{srcrepo} \texttt{copy} \textit{imageid} \textit{targetrepo}
+\\
+Copy image with id \textit{imageid} from the image repository named
+\texttt{srcrepo} to the image repository named \textit{targetrepo}.
+The image will have a new image id in the target repository, but all
+other metadata is conserved, in particular the UUID of the image is
+unchanged.
+\item
+\texttt{imagerepo} \textit{srcrepo} \texttt{move} \textit{imageid} \textit{targetrepo}
+\\
+Like the copy command, but after a successful move, the image is deleted
+in the source image repository.
+\end{itemize}
+In most cases, an imaging session creates a large number of new images
+in a repository, and it can be quite tedious to copy the right images
+to the target repository. 
+This is where the replication and synchronization commands come in:
+\begin{itemize}
+\item
+\texttt{imagerepo} \textit{srcrepo} \texttt{replicate} \textit{targetrepo}
+\\
+Replicate all images from \textit{srcrepo} that are not already present
+in the \textit{targetrepo} into the target repository.
+\item
+\texttt{imagerepo} \textit{srcrepo} \texttt{synchronize} \textit{targetrepo}
+\\
+Synchronize all images between two repositories.
+This is essentially a two-way replication command.
+\end{itemize}
+The synchronization command can be used to keep a central, e.~g.~NAS-based
+image repository of images in sync with a local repository.
 
