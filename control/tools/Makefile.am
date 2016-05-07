@@ -4,7 +4,7 @@
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
 # $Id$
 #
-SUBDIRS = config mount catalog
+SUBDIRS = config mount catalog devices
 
 if ENABLE_UNICAP
 unicap_flies = UnicapDevice.cpp
@@ -18,21 +18,11 @@ else
 microtouch_files =
 endif
 
-bin_PROGRAMS = getimages imageloop imageinfo makedark makeflat calibrate \
-	focus focustest transform guider dark flat clamp logscale stack \
-	focusing fitsheader imagerepo \
+bin_PROGRAMS = imageinfo makedark makeflat calibrate \
+	transform clamp logscale stack \
+	fitsheader imagerepo \
 	astroproject rescale \
 	gammacorrect convolve background crop radon backprojection
-
-noinst_PROGRAMS = guiderport 
-
-imageloop_SOURCES = imageloop.cpp
-imageloop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-imageloop_LDADD = -L$(top_builddir)/lib -lastro 
-
-getimages_SOURCES = getimages.cpp
-getimages_DEPENDENCIES = $(top_builddir)/lib/libastro.la 
-getimages_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -41,14 +31,6 @@ imageinfo_LDADD = -L$(top_builddir)/lib -lastro
 makedark_SOURCES = makedark.cpp
 makedark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 makedark_LDADD = -L$(top_builddir)/lib -lastro 
-
-dark_SOURCES = dark.cpp
-dark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-dark_LDADD = -L$(top_builddir)/lib -lastro 
-
-flat_SOURCES = flat.cpp
-flat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-flat_LDADD = -L$(top_builddir)/lib -lastro 
 
 makeflat_SOURCES = makeflat.cpp
 makeflat_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -61,18 +43,6 @@ calibrate_LDADD = -L$(top_builddir)/lib -lastro
 transform_SOURCES = transform.cpp
 transform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 transform_LDADD = -L$(top_builddir)/lib -lastro 
-
-focus_SOURCES = focus.cpp
-focus_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-focus_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
-
-focustest_SOURCES = focustest.cpp
-focustest_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-focustest_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
-
-guider_SOURCES = guider.cpp
-guider_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-guider_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
 
 stack_SOURCES = stack.cpp
 stack_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -98,10 +68,6 @@ gammacorrect_SOURCES = gammacorrect.cpp
 gammacorrect_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 gammacorrect_LDADD = -L$(top_builddir)/lib -lastro 
 
-focusing_SOURCES = focusing.cpp
-focusing_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-focusing_LDADD = -L$(top_builddir)/lib -lastro 
-
 fitsheader_SOURCES = fitsheader.cpp
 fitsheader_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 fitsheader_LDADD = -L$(top_builddir)/lib -lastro 
@@ -113,10 +79,6 @@ astroproject_LDADD = -L$(top_builddir)/lib -lastro
 imagerepo_SOURCES = imagerepo.cpp
 imagerepo_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 imagerepo_LDADD = -L$(top_builddir)/lib -lastro
-
-guiderport_SOURCES = guiderport.cpp
-guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-guiderport_LDADD = -L$(top_builddir)/lib -lastro
 
 convolve_SOURCES = convolve.cpp
 convolve_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -133,36 +95,6 @@ radon_LDADD = -L$(top_builddir)/lib -lastro
 backprojection_SOURCES = backprojection.cpp
 backprojection_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 backprojection_LDADD = -L$(top_builddir)/lib -lastro
-
-# The looptest shows how to call imageloop to create a video for a
-# full night with the Starlight Express Oculus all sky camera.
-looptest:	imageloop
-	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
-		-L 8.494 -l 46.318 -N -F -w 1040 -x 176 \
-		-P ./convertimage.sh -Q ./makemovie.sh
-
-test:	getimages
-	./getimages -d -ORBInitRef NameService=corbaname::localhost \
-		-m net -C 10 -e 1 -o net -p net \
-		-F net:simulator/sim-focuser -f 25000
-
-testfocus:	focustest
-	./focustest -d -ORBInitRef NameService=corbaname::localhost \
-		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
-		-b 16000 -e 48000 -s 100 | tee focus.csv
-
-testfocus2:	focustest
-	./focustest -d -ORBInitRef NameService=corbaname::localhost \
-		-m simulator -C 0 -c 0 -E 1 -F simulator -f sim-focuser \
-		-b 26000 -e 40000 -s 20 | tee focus2.csv
-
-testfocus3:	focustest
-	./focustest -d -ORBInitRef NameService=corbaname::localhost \
-		-m simulator -C 0 -c 0 -E 4 -F simulator -f sim-focuser \
-		-p 32768 -b 28000 -e 38001 -s 4 | tee focus3.csv
-
-focusingtest:	focusing
-	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits
