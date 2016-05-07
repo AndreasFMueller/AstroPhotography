@@ -39,11 +39,13 @@ module snowstar {
 	interface Repository {
 		uuidlist	getUUIDs();
 		uuidlist	getUUIDsCondition(string condition);
-		int		getId(string uuid);
-		ImageFile	getImage(int id);
-		ImageInfo	getInfo(int id);
-		int	save(ImageFile image);
-		void	remove(int id);
+		bool		has(int id);
+		bool		hasUUID(string uuid);
+		int		getId(string uuid) throws NotFound;
+		ImageFile	getImage(int id) throws NotFound;
+		ImageInfo	getInfo(int id) throws NotFound;
+		int	save(ImageFile image) throws Exists;
+		void	remove(int id) throws NotFound;
 	};
 
 	sequence<string>	reponamelist;
@@ -56,6 +58,11 @@ module snowstar {
 	 */
 	interface Repositories {
 		reponamelist	list();
-		Repository*	get(string reponame);
+		bool	has(string reponame);
+		Repository*	get(string reponame) throws NotFound;
+		void	add(string reponame, string repodirectory)
+				throws Exists, BadParameter;
+		void	remove(string reponame, bool removecontents)
+				throws NotFound, IOException;
 	};
 };

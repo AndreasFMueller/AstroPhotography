@@ -56,4 +56,10 @@ module snowstar {
 		string cause;
 	};
 
+	/**
+	 * \brief Exception thrown when an object already exists
+ 	 */
+	exception Exists {
+		string cause;
+	};
 };

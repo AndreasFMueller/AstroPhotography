@@ -32,14 +32,33 @@ uuidlist	RepositoryI::getUUIDsCondition(const std::string& condition,
 	return result;
 }
 
+bool	RepositoryI::has(int id, const Ice::Current& /* current */) {
+	return _repo.has(id);
+}
+
+bool	RepositoryI::hasUUID(const std::string& uuid,
+		const Ice::Current& /* current */) {
+	return _repo.has(astro::UUID(uuid));
+}
+
 int    RepositoryI::getId(const std::string& uuid,
 			const Ice::Current& /* current */) {
+	if (!_repo.has(astro::UUID(uuid))) {
+		std::string	msg = astro::stringprintf("repo does not have "
+			"%s", uuid.c_str());
+		throw NotFound(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get id of uuid %s", uuid.c_str());
 	return _repo.getId(astro::UUID(uuid));
 }
 
 ImageFile       RepositoryI::getImage(int id,
 		const Ice::Current& /* current */) {
+	if (!_repo.has(id)) {
+		std::string	msg = astro::stringprintf("repo does not have "
+			"%d", id);
+		throw NotFound(msg);
+	}
 	astro::image::ImagePtr	imageptr = _repo.getImage(id);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found image %d: %d x %d", id,
 		imageptr->size().width(), imageptr->size().height());
@@ -48,6 +67,11 @@ ImageFile       RepositoryI::getImage(int id,
 
 ImageInfo	RepositoryI::getInfo(int id,
 			const Ice::Current& /* current */) {
+	if (!_repo.has(id)) {
+		std::string	msg = astro::stringprintf("repo does not have "
+			"%d", id);
+		throw NotFound(msg);
+	}
 	return convert(_repo.getEnvelope(id));
 }
 
@@ -56,11 +80,20 @@ int    RepositoryI::save(const ImageFile& image,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request to save image of size %d",
 		image.size());
 	astro::image::ImagePtr	imageptr = convertfile(image);
-	return _repo.save(imageptr);
+	try {
+		return _repo.save(imageptr);
+	} catch (...) {
+		throw Exists("Image already exists");
+	}
 }
 
 void    RepositoryI::remove(int id, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request to remvoe %d", id);
+	if (!_repo.has(id)) {
+		std::string	msg = astro::stringprintf("repo does not have "
+			"%d", id);
+		throw NotFound(msg);
+	}
 	_repo.remove(id);
 }
 

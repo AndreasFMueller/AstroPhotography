@@ -183,6 +183,8 @@ public:
 		astro::persistence::Database database,
 		const std::string& directory, bool scan = false);
 	const std::string&	name() const { return _name; }
+	bool	has(long id);
+	bool	has(const UUID& uuid);
 	std::string	filename(long id);
 	std::string	pathname(long id);
 	long	getId(const UUID& uuid);

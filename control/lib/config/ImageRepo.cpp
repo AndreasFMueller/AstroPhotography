@@ -24,6 +24,8 @@ namespace project {
 ImageRepo::ImageRepo(const std::string& name, Database database,
 	const std::string& directory, bool scan)
 	: _name(name), _database(database), _directory(directory) {
+	// 
+
 	// scan the directory for 
 	if (scan) {
 		scan_directory();
@@ -201,6 +203,25 @@ std::string	ImageRepo::filename(long id) {
 
 std::string	ImageRepo::pathname(long id) {
 	return _directory + "/" + filename(id);
+}
+
+/**
+ * \brief Find out whether a given id is in the table
+ */
+bool    ImageRepo::has(long id) {
+	ImageTable	images(_database);
+	return images.exists(id);
+}
+
+/**
+ * \brief Find out whether a given UUID exists in the table
+ */
+bool    ImageRepo::has(const UUID& uuid) {
+	ImageTable	images(_database);
+	std::string	condition = stringprintf("uuid = '%s'",
+				((std::string)(uuid)).c_str());
+	std::list<ImageRecord>	records = images.select(condition);
+	return (records.size() > 0);
 }
 
 /**

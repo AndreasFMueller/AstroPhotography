@@ -20,6 +20,9 @@ public:
 	virtual uuidlist	getUUIDs(const Ice::Current& current);
 	virtual uuidlist	getUUIDsCondition(const std::string& condition,
 					const Ice::Current& current);
+	virtual bool	has(int id, const Ice::Current& current);
+	virtual bool	hasUUID(const std::string& uuid,
+				const Ice::Current& current);
 	virtual int	getId(const std::string& uuid,
 				const Ice::Current& current);
 	virtual ImageFile	getImage(int id, const Ice::Current& current);

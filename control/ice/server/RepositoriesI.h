@@ -15,8 +15,16 @@ public:
 	RepositoriesI();
 	virtual ~RepositoriesI();
 	virtual reponamelist	list(const Ice::Current& current);
+	virtual bool	has(const std::string& reponame,
+				const Ice::Current& current);
 	virtual RepositoryPrx	get(const std::string& reponame,
 					const Ice::Current& current);
+	virtual void	add(const std::string& reponame,
+				const std::string& directory,
+				const Ice::Current& current);
+	virtual void	remove(const std::string& reponame,
+				bool removecontents,
+				const Ice::Current& current);
 };
 
 } // namespace snowstar

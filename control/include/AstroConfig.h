@@ -404,7 +404,8 @@ static ImageRepoConfigurationPtr	get(ConfigurationPtr config);
 	virtual astro::project::ImageRepoPtr	repo(const std::string& name) = 0;
 	virtual void	addrepo(const std::string& name,
 				const std::string& directory) = 0;
-	virtual void	removerepo(const std::string& name) = 0;
+	virtual void	removerepo(const std::string& name,
+				bool removecontents = false) = 0;
 	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
 };
 

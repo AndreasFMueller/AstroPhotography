@@ -22,15 +22,18 @@ namespace astro {
 namespace app {
 namespace config {
 
+static bool	removecontents = false;
+
 /**
  * \brief Table of options
  */
 static struct option	longopts[] = {
 /* name         argument?               int*    	int */
-{ "config",	required_argument,	NULL,		'c' }, /* 0 */
-{ "debug",	no_argument,		NULL,		'd' }, /* 1 */
-{ "help",	no_argument,		NULL,		'h' }, /* 2 */
-{ NULL,		0,			NULL,		0   }
+{ "config",		required_argument,	NULL,		'c' }, /* 0 */
+{ "debug",		no_argument,		NULL,		'd' }, /* 1 */
+{ "help",		no_argument,		NULL,		'h' }, /* 2 */
+{ "remove-contents",	no_argument,		NULL,		'r' }, /* 3 */
+{ NULL,		0,				NULL,		0   }
 };
 
 /**
@@ -67,6 +70,9 @@ static void	usage(const char *progname) {
 	std::cout << "  -d,--debug                   increase debug level";
 	std::cout << std::endl;
 	std::cout << "  -h,--help                    show this help message";
+	std::cout << std::endl;
+	std::cout << "  -r,--remove-contents         remove the contents of "
+		"the repository when removing it";
 	std::cout << std::endl;
 }
 
@@ -266,7 +272,7 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		return list_repo();
 	}
 	if (arguments[1] == "remove") {
-		imagerepos->removerepo(arguments[2]);
+		imagerepos->removerepo(arguments[2], removecontents);
 		return EXIT_SUCCESS;
 	}
 	std::cerr << "unknown subcommand " << arguments[1] << std::endl;
@@ -296,7 +302,7 @@ int	command_list(const std::vector<std::string>& arguments) {
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dh", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "c:dhr", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'c':
@@ -307,6 +313,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'h':
 			usage(argv[0]);
+			break;
+		case 'r':
+			removecontents = true;
 			break;
 		case 1:
 			switch (longindex) {

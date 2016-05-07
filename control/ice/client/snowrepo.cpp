@@ -33,6 +33,10 @@ static void	usage(const char *progname) {
 	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] <server> list" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> create <directory>"
+		<< std::endl;
+	std::cout << p << " [ options ] <server> <reponame> destroy"
+		<< std::endl;
 	std::cout << p << " [ options ] <server> <reponame> list" << std::endl;
 	std::cout << std::endl;
 	std::cout << "List names of repositories known on a repository server, "
@@ -58,6 +62,7 @@ static void	usage(const char *progname) {
 	std::cout << " -d,--debug              increase debug level" << std::endl;
 	std::cout << " -n,--dry-run            don't do anything, just report on what would be done" << std::endl;
 	std::cout << " -p,--project=<project>  only replicate images of some project" << std::endl;
+	std::cout << " -r,--remove-contents    remove the contents of a repository when destroying it" << std::endl;
 	std::cout << " -h,--help               display this help and exit" << std::endl;
 	std::cout << " -v,--verbose            give more information about what is being done" << std::endl;
 	std::cout << std::endl;
@@ -132,7 +137,13 @@ static RepositoryPrx	getRemoteRepo(const astro::ServerName& servername,
 	if (!remoterepositories) {
 		throw std::runtime_error("no repositories proxy");
 	}
+	if (!remoterepositories->has(reponame)) {
+		std::cerr << "repo " << reponame << " does not exist";
+		std::cerr << std::endl;
+		throw std::runtime_error("repo does not exist");
+	}
 	RepositoryPrx	repository;
+
 	repository = remoterepositories->get(reponame);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got remote repository %s",
 		reponame.c_str());
@@ -188,6 +199,60 @@ int	command_list(const astro::ServerName& servername,
 	}
 	
 	return EXIT_SUCCESS;
+}
+
+/**
+ * \brief Implementation of the repository creation command
+ */
+int	command_create(const astro::ServerName& servername,
+		const std::string& reponame, const std::string& directoryname) {
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(
+					servername.connect("Repositories"));
+	RepositoriesPrx	repositories = RepositoriesPrx::checkedCast(base);
+	if (!repositories) {
+		throw std::runtime_error("cannot connect to remote server");
+	}
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "create repo '%s' in %s",
+			reponame.c_str(), directoryname.c_str());
+		repositories->add(reponame, directoryname);
+		return EXIT_SUCCESS;
+	} catch (const Exists& x) {
+		std::cerr << "repository '" << reponame << "'already exists: ";
+		std::cerr  << x.what() << std::endl;
+	} catch (const BadParameter& x) {
+		std::cerr << "cannot create repository: " << x.what();
+		std::cerr << std::endl;
+	}
+	return EXIT_FAILURE;
+}
+
+/**
+ * \brief Implementation of the repository destroy command
+ */
+int	command_destroy(const astro::ServerName& servername,
+		const std::string& reponame, bool removecontents) {
+	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
+	Ice::ObjectPrx	base = ic->stringToProxy(
+					servername.connect("Repositories"));
+	RepositoriesPrx	repositories = RepositoriesPrx::checkedCast(base);
+	if (!repositories) {
+		throw std::runtime_error("cannot connect to remote server");
+	}
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing %s with%s content",
+			reponame.c_str(), (removecontents) ? "out" : "");
+		repositories->remove(reponame, removecontents);
+		return EXIT_SUCCESS;
+	} catch (const NotFound& x) {
+		std::cerr << "repository " << reponame << " not found: ";
+		std::cerr << x.what() << std::endl;
+	} catch (const IOException& x) {
+		std::cerr << "cannot remove contents: " << x.what();
+		std::cerr << std::endl;
+	}
+	return EXIT_FAILURE;
 }
 
 /**
@@ -250,12 +315,13 @@ int	command_remove(const astro::ServerName& servername,
 }
 
 static struct option	longopts[] = {
-{ "config",	required_argument,	NULL,	'c' }, /* 0 */
-{ "debug",	no_argument,		NULL,	'd' }, /* 1 */
-{ "help",	no_argument,		NULL,	'h' }, /* 2 */
-{ "dry-run",	no_argument,		NULL,	'n' }, /* 3 */
-{ "verbose",	no_argument,		NULL,	'v' }, /* 5 */
-{ NULL,		0,			NULL,	0   }
+{ "config",		required_argument,	NULL,	'c' }, /* 0 */
+{ "debug",		no_argument,		NULL,	'd' }, /* 1 */
+{ "help",		no_argument,		NULL,	'h' }, /* 2 */
+{ "dry-run",		no_argument,		NULL,	'n' }, /* 3 */
+{ "remove-contents",	no_argument,		NULL,	'r' }, /* 4 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 5 */
+{ NULL,			0,			NULL,	0   }
 };
 
 /**
@@ -264,6 +330,8 @@ static struct option	longopts[] = {
 int	main(int argc, char *argv[]) {
 	debug_set_ident("snowrepo");
 	CommunicatorSingleton	communicator(argc, argv);
+
+	bool	removecontents = false;
 
 	int	c;
 	int	longindex;
@@ -284,6 +352,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'p':
 			project = optarg;
+			break;
+		case 'r':
+			removecontents = true;
 			break;
 		case 'v':
 			verbose = true;
@@ -339,6 +410,20 @@ int	main(int argc, char *argv[]) {
 			filenames.push_back(argv[optind++]);
 		}
 		return command_add(servername, reponame, filenames);
+	}
+
+	// create command needs exactly one additional argument
+	if (command == "create") {
+		if (optind >= argc) {
+			throw std::runtime_error("directory argument missing");
+		}
+		std::string	directory = argv[optind++];
+		return command_create(servername, reponame, directory);
+	}
+
+	// destroy command needs no additional arguments
+	if (command == "destroy") {
+		return command_destroy(servername, reponame, removecontents);
 	}
 
 	// get command uses two more arguments: 

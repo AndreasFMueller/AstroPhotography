@@ -36,13 +36,17 @@ int	command_add(const std::string& reponame,
 	if (arguments.size() < 3) {
 		throw std::runtime_error("no image to add specified");
 	}
-	std::string	imagefilename = arguments[2];
-	FITSin	in(imagefilename);
-	ImagePtr	image = in.read();
-	ConfigurationPtr	configuration = Configuration::get();
-	ImageRepoConfigurationPtr	imagerepos
-		= ImageRepoConfiguration::get(configuration);
-	imagerepos->repo(reponame)->save(image);
+	for (size_t imageno = 2; imageno < arguments.size(); imageno++) {
+		std::string	imagefilename = arguments[imageno];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image '%s'",
+			imagefilename.c_str());
+		FITSin	in(imagefilename);
+		ImagePtr	image = in.read();
+		ConfigurationPtr	configuration = Configuration::get();
+		ImageRepoConfigurationPtr	imagerepos
+			= ImageRepoConfiguration::get(configuration);
+		imagerepos->repo(reponame)->save(image);
+	}
 	return EXIT_SUCCESS;
 }	
 
@@ -299,7 +303,7 @@ static void	usage(const char *progname) {
 	Path	path(progname);
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << "    " << path.basename() << " [ options ] <repo> add <image.fits>";
+	std::cout << "    " << path.basename() << " [ options ] <repo> add <image.fits> ...";
 	std::cout << std::endl;
 	std::cout << "    " << path.basename() << " [ options ] <repo> list" << std::endl;
 	std::cout << "    " << path.basename() << " [ options ] <repo> get <id> <image.fits>";
