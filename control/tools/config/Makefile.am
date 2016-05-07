@@ -5,15 +5,11 @@
 # $Id$
 #
 
-bin_PROGRAMS = astroconfig devicemapper astroinstrument
+bin_PROGRAMS = astroconfig astroinstrument
 
 astroconfig_SOURCES = astroconfig.cpp
 astroconfig_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 astroconfig_LDADD = -L$(top_builddir)/lib -lastro
-
-devicemapper_SOURCES = devicemapper.cpp
-devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-devicemapper_LDADD = -L$(top_builddir)/lib -lastro
 
 astroinstrument_SOURCES = astroinstrument.cpp
 astroinstrument_DEPENDENCIES = $(top_builddir)/lib/libastro.la

@@ -5,10 +5,14 @@
 # $Id$
 #
 
-bin_PROGRAMS = getimages imageloop focus focustest guider guiderport \
-	dark flat focusing
+bin_PROGRAMS = astroscan devicemapper getimages imageloop focus focustest \
+	guider guiderport dark flat focusing
 
 noinst_PROGRAMS = guiderport
+
+astroscan_SOURCES = astroscan.cpp
+astroscan_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+astroscan_LDADD = -L$(top_builddir)/lib -lastro 
 
 imageloop_SOURCES = imageloop.cpp
 imageloop_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -46,6 +50,10 @@ guiderport_SOURCES = guiderport.cpp
 guiderport_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 guiderport_LDADD = -L$(top_builddir)/lib -lastro
 
+devicemapper_SOURCES = devicemapper.cpp
+devicemapper_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+devicemapper_LDADD = -L$(top_builddir)/lib -lastro
+
 # full night with the Starlight Express Oculus all sky camera.
 looptest:	imageloop
 	./imageloop -d -p 60 -t -m sx -n 0 -e 0.01 -M 20000 -o cat -a \
@@ -54,3 +62,4 @@ looptest:	imageloop
 
 focusingtest:	focusing
 	./focusing -d -w 64 -h 64 -x 350 -y 255 -e 2 2>&1 | tee focusing.log
+
