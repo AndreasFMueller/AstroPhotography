@@ -26,7 +26,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp					\
-	FocusComputeTest.cpp
+	FocusableImageConverterTest.cpp
 singletest_LDADD = $(focusing_ldadd)
 singletest_DEPENDENCIES = $(focusing_dependencies)
 
@@ -35,7 +35,7 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp						\
-	FocusComputeTest.cpp
+	FocusComputeTest.cpp FocusableImageConverterTest.cpp
 tests_LDADD = $(focusing_ldadd)
 tests_DEPENDENCIES = $(focusing_dependencies)
 

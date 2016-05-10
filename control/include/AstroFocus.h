@@ -28,6 +28,7 @@ typedef std::shared_ptr<Image<float> >	FocusableImage;
  */
 class FocusableImageConverter {
 public:
+	FocusableImageConverter() { }
 	static FocusableImageConverterPtr	get();	
 	virtual FocusableImage	operator()(ImagePtr image) = 0;
 };

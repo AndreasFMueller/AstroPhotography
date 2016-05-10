@@ -369,7 +369,7 @@ public:
 protected:
 	MosaicType	mosaic;
 public:
-	// accessors for metadata
+	// accessors for mosaic type
 	MosaicType	getMosaicType() const { return mosaic; }
 	void	setMosaicType(MosaicType::mosaic_type mosaic);
 	void	setMosaicType(const std::string& mosaic_name);

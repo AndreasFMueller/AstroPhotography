@@ -3,6 +3,7 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#include <typeinfo>
 #include <AstroFocus.h>
 #include <AstroAdapter.h>
 #include <AstroUtils.h>
@@ -33,7 +34,7 @@ class FocusableImageConverterImpl : public FocusableImageConverter {
 	FocusableImage	get_yuv(ImagePtr image);
 	FocusableImage	get_rgb(ImagePtr image);
 public:
-	FocusableImageConverterImpl();
+	FocusableImageConverterImpl() { }
 	FocusableImage	operator()(ImagePtr image);
 };
 
@@ -41,6 +42,8 @@ public:
 {									\
 	Image<pixel >	*img = dynamic_cast<Image<pixel > *>(&*image);	\
 	if (NULL != img) {						\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "raw %s",		\
+			demangle(typeid(*img).name()).c_str());		\
 		adapter::ConvertingAdapter<float, pixel > ca(*img);	\
 		return FocusableImage(new Image<float>(ca));		\
 	}								\
@@ -51,6 +54,7 @@ FocusableImage	FocusableImageConverterImpl::get_raw(ImagePtr image) {
 	raw_to_focusable(image, unsigned short);
 	raw_to_focusable(image, unsigned int);
 	raw_to_focusable(image, unsigned long);
+	raw_to_focusable(image, float);
 	raw_to_focusable(image, double);
 	throw WrongImageType();
 }
@@ -59,6 +63,8 @@ FocusableImage	FocusableImageConverterImpl::get_raw(ImagePtr image) {
 {									\
 	Image<pixel>	*img = dynamic_cast<Image<pixel>*>(&*image);	\
 	if ((NULL != img) && (img->getMosaicType().isMosaic())) {	\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayer %s",		\
+			demangle(typeid(*img).name()).c_str());		\
 		adapter::BayerGAdapter<pixel, float>	bga(img);	\
 		return FocusableImage(new Image<float>(bga));		\
 	}								\
@@ -79,6 +85,8 @@ FocusableImage	FocusableImageConverterImpl::get_bayer(ImagePtr image) {
 	Image<YUV<pixel> >	*img					\
 		= dynamic_cast<Image<YUV<pixel> >*>(&*image);		\
 	if (NULL != img) {						\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "yuv Image<YUV<%s>>",	\
+			demangle(typeid(pixel).name()).c_str());	\
 		adapter::YAdapter<pixel, float>	la(*img);		\
 		return FocusableImage(new Image<float>(la));		\
 	}								\
@@ -97,6 +105,8 @@ FocusableImage	FocusableImageConverterImpl::get_yuv(ImagePtr image) {
 	Image<RGB<pixel> >	*img					\
 		= dynamic_cast<Image<RGB<pixel> >*>(&*image);		\
 	if (NULL != img) {						\
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "rgb %s",		\
+			demangle(typeid(*img).name()).c_str());		\
 		adapter::LuminanceAdapter<RGB<pixel>, float>	la(*img);	\
 		return FocusableImage(new Image<float>(la));		\
 	}								\
@@ -113,15 +123,15 @@ FocusableImage	FocusableImageConverterImpl::get_rgb(ImagePtr image) {
 }
 
 FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
-	// handle raw images
-	try {
-		return get_raw(image);
-	} catch (const WrongImageType& x) {
-	}
-
 	// handle Bayer images
 	try {
 		return get_bayer(image);
+	} catch (const WrongImageType& x) {
+	}
+
+	// handle raw images
+	try {
+		return get_raw(image);
 	} catch (const WrongImageType& x) {
 	}
 
