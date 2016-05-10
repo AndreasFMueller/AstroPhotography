@@ -13,6 +13,25 @@
 namespace astro {
 namespace focusing {
 
+class FocusableImageConverter;
+typedef std::shared_ptr<FocusableImageConverter> FocusableImageConverterPtr;
+typedef std::shared_ptr<Image<float> >	FocusableImage;
+
+/**
+ * \brief Extracting images suitable for focusing
+ *
+ * The camera may produce images that are not really suitable for
+ * focusing. Bayer-Images e.g. have mixed color pixels that can
+ * interfere with properly judging the focus quality. Images may also
+ * have different pixel types, so this class serves to extract the version
+ * of an image most suitable for focusing.
+ */
+class FocusableImageConverter {
+public:
+	static FocusableImageConverterPtr	get();	
+	virtual FocusableImage	operator()(ImagePtr image) = 0;
+};
+
 /**
  * \brief FocusEvaluator class to evaluate the focus of an image
  *

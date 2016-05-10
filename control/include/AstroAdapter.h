@@ -755,6 +755,29 @@ T	LuminanceAdapter<Pixel, T>::pixel(int x, int y) const {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Y-Adapter for YUV images
+//////////////////////////////////////////////////////////////////////
+template<typename S, typename T>
+class YAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<YUV<S> >&	image;
+public:
+	YAdapter(const ConstImageAdapter<YUV<S> >& _image);
+	T	pixel(int x, int y) const;
+};
+
+template<typename S, typename T>
+YAdapter<S,T>::YAdapter(const ConstImageAdapter<YUV<S> >& _image)
+	: ConstImageAdapter<T>(_image.getSize()), image(_image) {
+}
+
+template<typename S, typename T>
+T	YAdapter<S,T>::pixel(int x, int y) const {
+	T	value;
+	value = image.pixel(x,y).luminance();
+	return value;
+}
+
+//////////////////////////////////////////////////////////////////////
 // Adapter for Stacking
 //////////////////////////////////////////////////////////////////////
 class StackingAdapter : public ConstImageAdapter<double> {
@@ -2017,6 +2040,63 @@ public:
 		return _image.pixel(x, y) * (d / _borderwidth);
 	}
 };
+
+//////////////////////////////////////////////////////////////////////
+// Adapter to interpolate the green pixels for Bayer images
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Bayer G-channel adapter
+ *
+ * This adapter extracts the G channel from an image
+ */
+template<typename S, typename T>
+class BayerGAdapter : public ConstImageAdapter<T> {
+	const Image<S>	*_image;
+	MosaicType	_mosaictype;
+public:
+	BayerGAdapter(const Image<S> *image);
+	virtual T	pixel(int x, int y) const;
+};
+
+template<typename S, typename T>
+BayerGAdapter<S,T>::BayerGAdapter(const Image<S> *image)
+	: ConstImageAdapter<T>(image->getSize()), _image(image),
+	  _mosaictype(image->getMosaicType()) {
+	if (!_mosaictype.isMosaic()) {
+		throw std::runtime_error("image is not BAYER mosaic");
+	}
+}
+
+template<typename S, typename T>
+T	BayerGAdapter<S,T>::pixel(int x, int y) const {
+	T	value = _image->pixel(x, y);
+	if (_mosaictype.isG(x, y)) {
+		return value;
+	}
+	int	count = 0;
+	double	accumulator = 0;
+	if (x > 0) {
+		accumulator += (double)(_image->pixel(x - 1, y));
+		count++;
+	}
+	if (y > 0) {
+		accumulator += (double)(_image->pixel(x, y - 1));
+		count++;
+	}
+	if (x < _image->getSize().width() - 1) {
+		accumulator += (double)(_image->pixel(x + 1, y));
+		count++;
+	}
+	if (y < _image->getSize().height() - 1) {
+		accumulator += (double)(_image->pixel(x, y + 1));
+		count++;
+	}
+	if (0 == count) {
+		throw std::runtime_error("internal error: no pixels");
+	}
+	value = accumulator / count;
+	return value;
+}
 
 } // namespace adapter
 } // namespace astro

@@ -8,6 +8,7 @@ SUBDIRS = . test
 noinst_LTLIBRARIES = libastrofocusing.la
 
 libastrofocusing_la_SOURCES =						\
+	FocusableImageConverter.cpp					\
 	FocusCompute.cpp						\
 	FocusWork.cpp							\
 	Focusing.cpp							\

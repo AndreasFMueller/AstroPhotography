@@ -61,6 +61,14 @@ then
 	commonflags="${commonflags} --with-ice=${ICEDIR}"
 fi
 
+# make sure pdflatex is found even on Mac OS X where pdflatex is not on
+# the standard path
+if [ -d /usr/local/texlive/2013 ]
+then
+	PATH=${PATH}:/usr/local/texlive/2013/bin/x86_64-darwin
+	export PATH
+fi
+
 # first find out what type of system we are
 systemtype=`uname`
 case ${systemtype} in
