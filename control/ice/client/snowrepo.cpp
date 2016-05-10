@@ -218,7 +218,7 @@ int	command_create(const astro::ServerName& servername,
 			reponame.c_str(), directoryname.c_str());
 		repositories->add(reponame, directoryname);
 		return EXIT_SUCCESS;
-	} catch (const Exists& x) {
+	} catch (const Exists& x) {
 		std::cerr << "repository '" << reponame << "'already exists: ";
 		std::cerr  << x.what() << std::endl;
 	} catch (const BadParameter& x) {
