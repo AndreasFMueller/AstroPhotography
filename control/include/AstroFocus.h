@@ -48,6 +48,18 @@ public:
 };
 typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 
+/**
+ * \brief Factory class to build FocusEvaluators
+ *
+ * Most focus evaluators implemented in the library have a region of
+ * interest defined.
+ */
+class FocusEvaluatorFactory {
+public:
+	typedef enum { BrennerHorizontal, BrennerVertical } FocusEvaluatorType;
+static FocusEvaluatorPtr	get(FocusEvaluatorType type);
+}
+
 // we need the FocusWork forward declaration in the next class
 class FocusWork;
 
