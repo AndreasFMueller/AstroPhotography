@@ -58,7 +58,9 @@ class FocusEvaluatorFactory {
 public:
 	typedef enum { BrennerHorizontal, BrennerVertical } FocusEvaluatorType;
 static FocusEvaluatorPtr	get(FocusEvaluatorType type);
-}
+static FocusEvaluatorPtr	get(FocusEvaluatorType type,
+					const ImageRectangle& roi);
+};
 
 // we need the FocusWork forward declaration in the next class
 class FocusWork;

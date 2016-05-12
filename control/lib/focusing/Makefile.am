@@ -10,6 +10,7 @@ noinst_LTLIBRARIES = libastrofocusing.la
 libastrofocusing_la_SOURCES =						\
 	FocusableImageConverter.cpp					\
 	FocusCompute.cpp						\
+	FocusEvaluator.cpp						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	MeasureFocusWork.cpp						\
