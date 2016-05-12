@@ -28,19 +28,20 @@ FocusableImage	FocusEvaluatorImplementation::extractimage(const ImagePtr image) 
 	return (*converter)(image);
 }
 
-static float sqr(float x) {
-	return x * x;
-}
-
 /**
  * \brief Base class for Brenner type focus image adapters
  */
 class BrennerAdapter : public ConstImageAdapter<float> {
 protected:
 	FocusableImage	_fim;
+	int	_exponent;
+	float	p(float x) const {
+		return powf(fabsf(x), (float)_exponent);
+	}
 public:
-	BrennerAdapter(FocusableImage fim)
-		: ConstImageAdapter<float>(fim->size()), _fim(fim) {
+	BrennerAdapter(FocusableImage fim, int exponent = 2)
+		: ConstImageAdapter<float>(fim->size()), _fim(fim),
+		  _exponent(exponent) {
 	}
 };
 
@@ -50,12 +51,12 @@ typedef std::shared_ptr<BrennerAdapter>	BrennerAdapterPtr;
  * \brief Horizontal Brenner focus image adapter
  */
 class BrennerHorizontalAdapter : public BrennerAdapter {
-	FocusableImage	_fim;
 public:
-	BrennerHorizontalAdapter(FocusableImage _fim) : BrennerAdapter(_fim) { }
+	BrennerHorizontalAdapter(FocusableImage fim, int exponent = 2)
+		: BrennerAdapter(fim, exponent) { }
 	virtual float	pixel(int x, int y) const {
 		if ((x > 0) && (x < getSize().width() - 1)) {
-			return sqr(_fim->pixel(x+1, y) - _fim->pixel(x-1,y));
+			return p(_fim->pixel(x+1, y) - _fim->pixel(x-1,y));
 		}
 		return 0;
 	}
@@ -65,69 +66,115 @@ public:
  * \brief Vertical Brenner focus image adapter
  */
 class BrennerVerticalAdapter : public BrennerAdapter {
-	FocusableImage	_fim;
 public:
-	BrennerVerticalAdapter(FocusableImage _fim) : BrennerAdapter(_fim) { }
+	BrennerVerticalAdapter(FocusableImage fim, int exponent)
+		: BrennerAdapter(fim, exponent) { }
 	virtual float	pixel(int x, int y) const {
 		if ((y > 0) && (y < getSize().height() - 1)) {
-			return sqr(_fim->pixel(x,y+1) - _fim->pixel(x,y-1));
+			return p(_fim->pixel(x,y+1) - _fim->pixel(x,y-1));
 		}
 		return 0;
 	}
 };
 
 /**
- * \brief Brenner Focus evaluators
+ * \brief Brenner omnidirectional adapter
+ */
+class BrennerOmniAdapter : public BrennerAdapter {
+public:
+	BrennerOmniAdapter(FocusableImage fim, int exponent)
+		: BrennerAdapter(fim, exponent = 2) { }
+	virtual float	pixel(int x, int y) const {
+		if ((y > 0) && (y < getSize().height() - 1)) {
+			return p(_fim->pixel(x+1, y) - _fim->pixel(x-1,y))
+				+ p(_fim->pixel(x,y+1) - _fim->pixel(x,y-1));
+		}
+		return 0;
+	}
+};
+
+/**
+ * \brief Brenner Focus evaluator base class
  *
  * These evaluators use Brenner adapters to extract the image and sum the
- * brenner focus values.
+ * brenner focus values. The sum over the pixel values is done in the base
+ * class.
  */
-class BrennerEvaluator : public FocusEvaluatorImplementation {
+class BrennerEvaluatorBase : public FocusEvaluatorImplementation {
 protected:
-	virtual BrennerAdapterPtr	adapter(FocusableImage fim) = 0;
+	virtual BrennerAdapterPtr	adapter(FocusableImage fim,
+						int exponent) = 0;
+private:
+	int	_exponent;
 public:
-	BrennerEvaluator(const ImageRectangle& rectangle)
-		: FocusEvaluatorImplementation(rectangle) {
+	BrennerEvaluatorBase(const ImageRectangle& rectangle, int exponent)
+		: FocusEvaluatorImplementation(rectangle), _exponent(exponent) {
 	}
 	virtual double	operator()(const ImagePtr image);
 }; 
 
-double	BrennerEvaluator::operator()(const ImagePtr image) {
+double	BrennerEvaluatorBase::operator()(const ImagePtr image) {
 	FocusableImage	fim = extractimage(image);
-	BrennerAdapterPtr	a = adapter(fim);
+	BrennerAdapterPtr	a = adapter(fim, _exponent);
 	double	sum = 0;
-	for (int x = 0; x < image->size().width() - 1; x++) {
-		for (int y = 0; y < image->size().width() - 1; y++) {
+	for (int x = 1; x < image->size().width() - 1; x++) {
+		for (int y = 1; y < image->size().width() - 1; y++) {
 			sum += a->pixel(x, y);
 		}
 	}
 	return sum;
 }
 
-class BrennerHorizontalEvaluator : public BrennerEvaluator {
+/**
+ * \brief Focus Evaluator for horizontal Brenner measure
+ */
+template<typename Adapter>
+class BrennerEvaluator : public BrennerEvaluatorBase {
 protected:
-	virtual BrennerAdapterPtr	adapter(FocusableImage fim);
+	virtual BrennerAdapterPtr	adapter(FocusableImage fim, int exponent);
 public:
-	BrennerHorizontalEvaluator(const ImageRectangle& rectangle)
-		: BrennerEvaluator(rectangle) { }
+	BrennerEvaluator(const ImageRectangle& rectangle, int exponent = 2)
+		: BrennerEvaluatorBase(rectangle, exponent) { }
 };
 
-BrennerAdapterPtr	BrennerHorizontalAdapter::adapter(FocusableImage fim) {
-	return BrennerAdapterPtr(new BrennerHorizontalAdapter(fim));
+template<typename Adapter>
+BrennerAdapterPtr	BrennerEvaluator<Adapter>::adapter(FocusableImage fim, int exponent) {
+	return BrennerAdapterPtr(new Adapter(fim, exponent));
 }
 
-class BrennerVerticalEvaluator : public BrennerEvaluator {
-protected:
-	virtual BrennerAdapterPtr	adapter(FocusableImage fim);
-public:
-	BrennerVerticalEvaluator(const ImageRectangle& rectangle)
-		: BrennerEvaluator(rectangle) { }
-};
+typedef BrennerEvaluator<BrennerVerticalAdapter>	BrennerVerticalEvaluator;
+typedef BrennerEvaluator<BrennerHorizontalAdapter>	BrennerHorizontalEvaluator;
+typedef BrennerEvaluator<BrennerOmniAdapter>	BrennerOmniEvaluator;
 
-BrennerAdapterPtr	BrennerVerticalAdapter::adapter(FocusableImage fim) {
-	return BrennerAdapterPtr(new BrennerVerticalAdapter(fim));
+//////////////////////////////////////////////////////////////////////
+// FocusEvaluatorFactory Implementation
+//////////////////////////////////////////////////////////////////////
+FocusEvaluatorPtr	FocusEvaluatorFactory::get(FocusEvaluatorType type) {
+	ImageRectangle	rectangle;
+	return get(type, rectangle);
 }
 
+FocusEvaluatorPtr	FocusEvaluatorFactory::get(FocusEvaluatorType type,
+				const ImageRectangle& rectangle) {
+	FocusEvaluator	*evaluator = NULL;
+	switch (type) {
+	case BrennerHorizontal:
+		evaluator = new BrennerHorizontalEvaluator(rectangle);
+		break;
+	case BrennerVertical:
+		evaluator = new BrennerVerticalEvaluator(rectangle);
+		break;
+	case BrennerOmni:
+		evaluator = new BrennerOmniEvaluator(rectangle);
+		break;
+	}
+	if (NULL == evaluator) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unknown evaluator type %d", type);
+		throw std::runtime_error("unknown evaluator type");
+	}
+	return FocusEvaluatorPtr(evaluator);
+}
 
 } // namespace focusing
 } // namespace astro
+

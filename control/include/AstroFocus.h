@@ -56,7 +56,7 @@ typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
  */
 class FocusEvaluatorFactory {
 public:
-	typedef enum { BrennerHorizontal, BrennerVertical } FocusEvaluatorType;
+	typedef enum { BrennerHorizontal, BrennerVertical, BrennerOmni } FocusEvaluatorType;
 static FocusEvaluatorPtr	get(FocusEvaluatorType type);
 static FocusEvaluatorPtr	get(FocusEvaluatorType type,
 					const ImageRectangle& roi);
