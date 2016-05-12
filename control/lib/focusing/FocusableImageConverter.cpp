@@ -29,12 +29,20 @@ public:
  * This class actually implements the image conversion
  */
 class FocusableImageConverterImpl : public FocusableImageConverter {
+	ImageRectangle	_rectangle;
+	bool	_userectangle;
 	FocusableImage	get_raw(ImagePtr image);
 	FocusableImage	get_bayer(ImagePtr image);
 	FocusableImage	get_yuv(ImagePtr image);
 	FocusableImage	get_rgb(ImagePtr image);
 public:
-	FocusableImageConverterImpl() { }
+	FocusableImageConverterImpl() {
+		_userectangle = false;
+	}
+	FocusableImageConverterImpl(const ImageRectangle& rectangle)
+		: _rectangle(rectangle) {
+		_userectangle = true;
+	}
 	FocusableImage	operator()(ImagePtr image);
 };
 
@@ -45,7 +53,8 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "raw %s",		\
 			demangle(typeid(*img).name()).c_str());		\
 		adapter::ConvertingAdapter<float, pixel > ca(*img);	\
-		return FocusableImage(new Image<float>(ca));		\
+		adapter::WindowAdapter<float>	wa(ca, _rectangle);	\
+		return FocusableImage(new Image<float>(wa));		\
 	}								\
 }
 
@@ -66,7 +75,8 @@ FocusableImage	FocusableImageConverterImpl::get_raw(ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayer %s",		\
 			demangle(typeid(*img).name()).c_str());		\
 		adapter::BayerGAdapter<pixel, float>	bga(img);	\
-		return FocusableImage(new Image<float>(bga));		\
+		adapter::WindowAdapter<float>	wa(bga, _rectangle);	\
+		return FocusableImage(new Image<float>(wa));		\
 	}								\
 }
 
@@ -88,7 +98,8 @@ FocusableImage	FocusableImageConverterImpl::get_bayer(ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "yuv Image<YUV<%s>>",	\
 			demangle(typeid(pixel).name()).c_str());	\
 		adapter::YAdapter<pixel, float>	la(*img);		\
-		return FocusableImage(new Image<float>(la));		\
+		adapter::WindowAdapter<float>	wa(la, _rectangle);	\
+		return FocusableImage(new Image<float>(wa));		\
 	}								\
 }
 
@@ -108,7 +119,8 @@ FocusableImage	FocusableImageConverterImpl::get_yuv(ImagePtr image) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "rgb %s",		\
 			demangle(typeid(*img).name()).c_str());		\
 		adapter::LuminanceAdapter<RGB<pixel>, float>	la(*img);	\
-		return FocusableImage(new Image<float>(la));		\
+		adapter::WindowAdapter<float>	wa(la, _rectangle);	\
+		return FocusableImage(new Image<float>(wa));		\
 	}								\
 }
 
@@ -123,6 +135,9 @@ FocusableImage	FocusableImageConverterImpl::get_rgb(ImagePtr image) {
 }
 
 FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
+	if (!_userectangle) {
+		_rectangle = ImageRectangle(image->size());
+	}
 	// handle Bayer images
 	try {
 		return get_bayer(image);
@@ -159,6 +174,11 @@ FocusableImage	FocusableImageConverterImpl::operator()(const ImagePtr image) {
 //////////////////////////////////////////////////////////////////////
 FocusableImageConverterPtr	FocusableImageConverter::get() {
 	return FocusableImageConverterPtr(new FocusableImageConverterImpl());
+}
+FocusableImageConverterPtr	FocusableImageConverter::get(
+					const ImageRectangle& rectangle) {
+	return FocusableImageConverterPtr(
+		new FocusableImageConverterImpl(rectangle));
 }
 
 } // namespace focusing
