@@ -129,6 +129,7 @@ void    SimCcd::setShuterState(const Shutter::state& state) {
  * \brief Retrieve an image
  */
 ImagePtr  SimCcd::getRawImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get image from simulator");
 	// we need a camera to convert the starfield into an image
 	starcamera.rectangle(exposure.frame());
 
@@ -155,6 +156,8 @@ ImagePtr  SimCcd::getRawImage() {
 
 	// focuser effect
 	double	radius = _locator.simfocuser()->radius();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", radius);
+std::cerr << __FILE__ << ":" << __LINE__ << ": radius = " << radius << std::endl;
 	starcamera.radius(radius);
 	starcamera.innerradius(0.4 * radius);
 

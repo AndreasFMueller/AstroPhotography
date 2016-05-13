@@ -236,7 +236,8 @@ Image<double>	*StarCameraBase::operator()(const StarField& field) const {
 	// compute the blurr if necessary
 	if (radius() > 1) {
 		Blurr	blurr(radius(), innerradius());
-		blurr(image);
+		Image<double>	blurredimage = blurr(image);
+		image = blurredimage;
 	}
 
 	// extract the rectangle 

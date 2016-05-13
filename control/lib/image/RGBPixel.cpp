@@ -79,7 +79,12 @@ void    YUYV2RGB(const YUYVPixel yuyv[2], RGBPixel rgb[2]) {
 template<>
 void	imageConvert(Image<RGBPixel>& dest, const Image<YUYVPixel>& src) {
 	if (dest.size != src.size) {
-		throw std::length_error("image size mismatch");
+		std::string	msg = stringprintf(
+			"mismatch: copying image size %s to %s",
+			src.size().toString().c_str(),
+			dest.size().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::length_error(msg);
 	}
 	for (int offset = 0; offset < src.size.pixels; offset += 2) {
 		YUYV2RGB(&src.pixels[offset], &dest.pixels[offset]);
@@ -120,7 +125,12 @@ void    RGB2YUYV(const RGBPixel rgb[2], YUYVPixel yuyv[2]) {
 template<>
 void	imageConvert(Image<YUYVPixel>& dest, const Image<RGBPixel>& src) {
 	if (dest.size != src.size) {
-		throw std::length_error("image size mismatch");
+		std::string	msg = stringprintf(
+			"mismatch: copying image size %s to %s",
+			src.size().toString().c_str(),
+			dest.size().toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::length_error(msg);
 	}
 	for (int offset = 0; offset < src.size.pixels; offset += 2) {
 		RGB2YUYV(&src.pixels[offset], &dest.pixels[offset]);

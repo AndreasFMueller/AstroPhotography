@@ -21,6 +21,8 @@
 #include <typeinfo>
 #include <typeindex>
 #include <cmath>
+#include <AstroDebug.h>
+#include <AstroFormat.h>
 
 namespace astro {
 namespace image {
@@ -701,7 +703,12 @@ public:
 	 */
 	Image<Pixel>&	operator=(Image<Pixel>& other) {
 		if (!(other.frame.size() == frame.size())) {
-			throw std::length_error("image frame mismatch");
+			std::string	msg = astro::stringprintf(
+				"mismatch: copy %s to %s",
+				other.frame.size().toString().c_str(),
+				frame.size().toString().c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::length_error(msg);
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy pixels %p -> %p",
 			other.pixels, pixels);
@@ -716,7 +723,12 @@ public:
 	 */
 	Image<Pixel>&	operator=(ConstImageAdapter<Pixel>& other) {
 		if (!(other.getSize() == frame.size())) {
-			throw std::length_error("image frame mismatch");
+			std::string	msg = astro::stringprintf(
+				"mismatch: copy %s to %s",
+				other.getSize().toString().c_str(),
+				frame.size().toString().c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::length_error(msg);
 		}
 		for (int x = 0; x < other.getSize().width(); x++) {
 			for (int y = 0; y < other.getSize().height(); y++) {

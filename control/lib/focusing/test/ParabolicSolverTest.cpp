@@ -68,8 +68,6 @@ void	ParabolicSolverTest::testBasic() {
 
 void	ParabolicSolverTest::testRandom() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRandom() begin");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "a0 = %.6f, a1 = %.6f, a2 = %.6f",
-		a[0], a[1], a[2]);
 	FocusItems	focusitems;
 	double	noiselimit = frandom() * p(20000);
 	for (int position = 16000; position < 24000; position += 1000) {

@@ -26,7 +26,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp					\
-	ParabolicSolverTest.cpp
+	BrennerTest.cpp
 singletest_LDADD = $(focusing_ldadd)
 singletest_DEPENDENCIES = $(focusing_dependencies)
 
@@ -36,8 +36,11 @@ single:	singletest
 ## general tests
 tests_SOURCES = tests.cpp						\
 	FocusComputeTest.cpp						\
+	FocusEvaluatorTest.cpp						\
 	FocusableImageConverterTest.cpp					\
-	ParabolicSolverTest.cpp
+	ParabolicSolverTest.cpp						\
+	AbsoluteValueSolverTest.cpp					\
+	BrennerTest.cpp
 tests_LDADD = $(focusing_ldadd)
 tests_DEPENDENCIES = $(focusing_dependencies)
 

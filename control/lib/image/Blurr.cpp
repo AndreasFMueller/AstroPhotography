@@ -129,7 +129,7 @@ Image<double>	Blurr::operator()(const Image<double>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product computed");
 
 	// prepare a pixel which will contain the blurred pixels
-	Image<double>	blurred(n0, n1);
+	Image<double>	blurred(n1, n0);
 
 	// compute the inverse fourier transform
 	fftw_plan	r = fftw_plan_dft_c2r_2d(n0, n1,

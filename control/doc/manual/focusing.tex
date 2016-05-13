@@ -81,8 +81,76 @@ x_{\text{min}}
 }.
 \]
 
+\subsection{Bresser focus measure}
+The Bresser focus measures use differences between pixels to measure
+the focus quality of an image:
+\[
+B(f)
+=
+\sum_{x,y\in \Omega}
+\bigl((f(x+1,y)-f(x-1,y))^2
++
+(f(x,y+1)-f(x,y-1))^2\bigr),
+\]
+where $\Omega$ is the image rectangle and $f(x,y)$ is the flux measure
+at position $(x,y)$ of the image.
+Focus is achieved when $B(f)$ is maximized.
 
+If noise is present in the different images $f_n$ image, then also the
+values $B(f_n)$ will be noise, and it can become difficult to find the
+maximum.
+For this we need a model on how $B(f)$ may depend on the focus position.
+To develop such a model, we assume that the out of focus image of a star
+is a circle of radius $r$. 
+Since the area of the circle is $\pi r^2$, we can model the image by
+a function
+\[
+f_r(x,y)
+=
+\begin{cases}
+\frac1{r^2}&\qquad x^2+y^2\le r^2\\
+0          &\qquad\text{otherwise}
+\end{cases}
+\]
+We now estimate the Bresser focus measure $B(f_r)$.
+Only points close to the boundary contribute to $B(f_r)$.
+There are exactly $4r$ points where $f_r(x-1,y)\ne f_r(x+1,y)$, and
+as many points where $f_r(x,y-1)\ne f_r(x,y+1)$.
+Also the difference is $1/r^2$, so the Bresser focus measure is
+\[
+B(f_r)\simeq 8r \frac1{r^4}=\frac8{r^3}.
+\]
+So we try to fit the values of $B(f_n)$ to a function of the form
+\[
+b(x)=\frac{a}{|x-c|^3}+d.
+\]
+Given a set of points $(x_i,y_i)$, we ask for parameter values
+$a$, $c$ and $d$ such that
+\[
+L=\sum_{i=1}^n(b(x_i)-y_i)^2
+\]
+is minimized.
 
+Computing the derivative 
+\begin{align*}
+\frac{\partial L}{\partial a}
+&=
+\sum_{i=1}^n 2(b(x_i)-y_i) \frac{\partial b(x_i)}{\partial a}
+=
+\sum_{i=1}^n 2(b(x_i)-y_i)\frac{1}{|x_i-c|^3}
+\\
+\frac{\partial L}{\partial c}
+&=
+\sum_{i=1}^n 2(b(x_i)-y_i) \frac{\partial b(x_i)}{\partial c}
+=
+\sum_{i=1}^n 2(b(x_i)-y_i) \frac{3a}{(x_i-c)^4}\operatorname{sign}(x_i-c)
+\\
+\frac{\partial L}{\partial d}
+&=
+\sum_{i=1}^n 2(b(x_i)-y_i) \frac{\partial b(x_i)}{\partial d}
+=
+\sum_{i=1}^n 2(b(x_i)-y_i)
+\end{align*}
 
 
 

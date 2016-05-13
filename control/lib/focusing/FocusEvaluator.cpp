@@ -5,6 +5,7 @@
  */
 #include <AstroTypes.h>
 #include <AstroFocus.h>
+#include <AstroDebug.h>
 
 namespace astro {
 namespace focusing {
@@ -25,6 +26,9 @@ public:
 FocusableImage	FocusEvaluatorImplementation::extractimage(const ImagePtr image) {
 	FocusableImageConverterPtr	converter
 		= FocusableImageConverter::get();
+	if (!converter) {
+		throw std::runtime_error("cannot get an image converter");
+	}
 	return (*converter)(image);
 }
 
@@ -85,7 +89,8 @@ public:
 	BrennerOmniAdapter(FocusableImage fim, int exponent)
 		: BrennerAdapter(fim, exponent = 2) { }
 	virtual float	pixel(int x, int y) const {
-		if ((y > 0) && (y < getSize().height() - 1)) {
+		if ((x > 0) && (x < getSize().width() - 1) 
+			&& (y > 0) && (y < getSize().height() - 1)) {
 			return p(_fim->pixel(x+1, y) - _fim->pixel(x-1,y))
 				+ p(_fim->pixel(x,y+1) - _fim->pixel(x,y-1));
 		}
@@ -115,10 +120,15 @@ public:
 
 double	BrennerEvaluatorBase::operator()(const ImagePtr image) {
 	FocusableImage	fim = extractimage(image);
-	BrennerAdapterPtr	a = adapter(fim, _exponent);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found image of size %s",
+		fim->size().toString().c_str());
+	BrennerAdapterPtr	a = this->adapter(fim, _exponent);
+	if (!a) {
+		throw std::runtime_error("cannot get an adapter");
+	}
 	double	sum = 0;
-	for (int x = 1; x < image->size().width() - 1; x++) {
-		for (int y = 1; y < image->size().width() - 1; y++) {
+	for (int x = 1; x < fim->size().width() - 1; x++) {
+		for (int y = 1; y < fim->size().height() - 1; y++) {
 			sum += a->pixel(x, y);
 		}
 	}

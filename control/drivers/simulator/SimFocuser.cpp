@@ -51,7 +51,7 @@ unsigned short	SimFocuser::current() {
 	double	now = simtime();
 	double	timepast = now - lastset;
 	double	delta = (double)_value - (double)target;
-//debug(LOG_DEBUG, DEBUG_LOG, 0, "delta: %f, timepast: %f", delta, timepast);
+debug(LOG_DEBUG, DEBUG_LOG, 0, "delta: %f, timepast: %f", delta, timepast);
 	if (fabs(delta / 1000.) > timepast) {
 		_value -= timepast * delta;
 		lastset = now;
@@ -79,6 +79,8 @@ void	SimFocuser::set(unsigned short value) {
 
 double	SimFocuser::radius() {
 	double	r = fabs((reference() - current()) / (double)variance());
+std::cerr << "radius = " << (MAXRADIUS * r) << std::endl;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "radius = %f", MAXRADIUS * r);
 	return MAXRADIUS * r;
 }
 

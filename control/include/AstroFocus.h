@@ -56,7 +56,9 @@ typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
  */
 class FocusEvaluatorFactory {
 public:
-	typedef enum { BrennerHorizontal, BrennerVertical, BrennerOmni } FocusEvaluatorType;
+	typedef enum {
+		BrennerHorizontal, BrennerVertical, BrennerOmni
+	} FocusEvaluatorType;
 static FocusEvaluatorPtr	get(FocusEvaluatorType type);
 static FocusEvaluatorPtr	get(FocusEvaluatorType type,
 					const ImageRectangle& roi);
@@ -103,7 +105,13 @@ public:
 class ParabolicSolver : public FocusSolver {
 public:
 	ParabolicSolver() { }
-	int	position(const FocusItems& focusitems) const;
+	virtual int	position(const FocusItems& focusitems) const;
+};
+
+class AbsoluteValueSolver : public ParabolicSolver {
+public:
+	AbsoluteValueSolver() { }
+	virtual int	position(const FocusItems& focusitems) const;
 };
 
 // we need the FocusWork forward declaration in the next class
