@@ -6,7 +6,7 @@
 docfiles = 
 
 TEXSOURCES = snowstar.tex imageprocessing.tex imagerepo.tex \
-	configuration.tex architecture.tex
+	configuration.tex architecture.tex focusing.tex
 
 EXTRA_DIST = manual.tex $(TEXSOURCES)
 

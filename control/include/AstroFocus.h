@@ -62,6 +62,50 @@ static FocusEvaluatorPtr	get(FocusEvaluatorType type,
 					const ImageRectangle& roi);
 };
 
+/**
+ * \brief Container class that contains focus position and value
+ *
+ * Any focusing algorithm does this by first measuring the focus
+ * measure for a couple of focus positions and then finds the best
+ * focus position.
+ */
+class FocusItem {
+	int	_position;
+	float	_value;
+public:
+	int	position() const { return _position; }
+	float	value() const { return _value; }
+	FocusItem(int position, float value)
+		: _position(position), _value(value) { }
+	bool	operator<(const FocusItem& other) const {
+		return _position < other.position();
+	}
+	bool	operator==(const FocusItem& other) const {
+		return _position == other.position();
+	}
+	bool	operator!=(const FocusItem& other) const {
+		return _position != other.position();
+	}
+};
+
+typedef std::set<FocusItem>	FocusItems;
+
+/**
+ * \brief Solver class to compute the solution of the focusing problem
+ *
+ * This base class defines the interface for focus solver classes
+ */
+class FocusSolver {
+public:
+	virtual int	position(const FocusItems& focusitems) const = 0;
+};
+
+class ParabolicSolver : public FocusSolver {
+public:
+	ParabolicSolver() { }
+	int	position(const FocusItems& focusitems) const;
+};
+
 // we need the FocusWork forward declaration in the next class
 class FocusWork;
 

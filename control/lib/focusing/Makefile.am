@@ -14,6 +14,7 @@ libastrofocusing_la_SOURCES =						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	MeasureFocusWork.cpp						\
+	ParabolicFocusSolver.cpp					\
 	VCurveFocusWork.cpp
 
 libastrofocusing_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" 

@@ -1,0 +1,88 @@
+%
+% focusing.tex
+%
+\chapter{Focusing\label{chapter:focusing}}
+
+\section{Focusing solutions}
+All focusing algorithms work by acquiring a number of images at different
+focuser positions, compute focus measures for those images and then
+find maxima or minima.
+Such an algorithm has to be somewhat insensitive to noise in the image,
+which can be achieved using some variant of least squares algorithms.
+
+\subsection{Quadratic maximum}
+We want to approximate the focus values by a parabola of the form
+\[
+y=f(x)=a_2x^2+a_1x+a_0,
+\]
+where $a<0$.
+The data points $(x_i,y_i)$ are first selected so that we only work
+with a few points close to the maximum, we assume that we have $N$
+different points.
+For these points we set up the least squares equations
+\[
+L
+=
+\sum_{i}(f(x_i)-y_i)^2\to\min.
+\]
+Differentiating with respect to the parameters $a_k$, we get
+\begin{align*}
+\frac{\partial L}{\partial a_k}
+=
+\sum_{i}2(f(x_i) - y_i)\frac{\partial f}{\partial a_k}(x_i)
+=
+\sum_{i}2(f(x_i)-y_i)x_i^k=0
+\end{align*}
+This leads to the equations
+\begin{align*}
+\sum_{i}f(x_i)x_i^k
+&=
+\sum_{i} y_ix_i^k&& 0\le k\le 2
+\\
+\sum_{l=0}^2 a_l\sum_{i}x_i^{k+l}
+&=
+\sum_{i}y_ix_i^k
+\end{align*}
+Writing the equations for the $a_l$ explicitely, we get the system of
+linear equations
+\[
+\begin{linsys}{3}
+(\sum_{i=1}^N 1)a_0&+&
+(\sum_{i=1}^N x_i)a_1&+&
+(\sum_{i=1}^N x_i^2) a_2 &=& \sum_{i=1}^N y_i
+\\
+(\sum_{i=1}^Nx_i)a_0&+&
+(\sum_{i=1}^N x_i^2)a_1&+&
+(\sum_{i=1}^N x_i^3)a_2 &=& \sum_{i=1}^N x_iy_i
+\\
+(\sum_{i=1}^Nx_i^2)a_0&+&
+(\sum_{i=1}^N x_i^3)a_1&+&
+(\sum_{i=1}^Nx_i^4)a_2 &=& \sum_{i=1}^N x_i^2y_i
+\\
+\end{linsys}
+\]
+The vertex of the parabola is at $x_\text{min}=-a_1/2a_2$, which we might
+find using Cramer's rule:
+\[
+x_{\text{min}}
+=
+-\frac{
+\left|\begin{matrix}
+           N       & \sum_{i=1}^N      y_i & \sum_{i=1}^N x_i^2 \\
+\sum_{i=1}^N x_i   & \sum_{i=1}^N x_i  y_i & \sum_{i=1}^N x_i^3 \\
+\sum_{i=1}^N x_i^2 & \sum_{i=1}^N x_i^2y_i & \sum_{i=1}^N x_i^4 
+\end{matrix}\right|
+}{
+2\left|\begin{matrix}
+           N       & \sum_{i=1}^N x_i   & \sum_{i=1}^N      y_i \\
+\sum_{i=1}^N x_i   & \sum_{i=1}^N x_i^2 & \sum_{i=1}^N x_i  y_i \\
+\sum_{i=1}^N x_i^2 & \sum_{i=1}^N x_i^3 & \sum_{i=1}^N x_i^2y_i 
+\end{matrix}\right|
+}.
+\]
+
+
+
+
+
+
