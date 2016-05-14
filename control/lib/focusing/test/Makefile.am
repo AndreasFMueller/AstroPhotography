@@ -35,6 +35,8 @@ single:	singletest
 
 ## general tests
 tests_SOURCES = tests.cpp						\
+	BrennerSolverTest.cpp						\
+	CentroidSolverTest.cpp						\
 	FocusComputeTest.cpp						\
 	FocusEvaluatorTest.cpp						\
 	FocusableImageConverterTest.cpp					\

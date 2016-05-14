@@ -72,27 +72,39 @@ void	BrennerTest::setUp() {
 
 	// now compute the images
 	int	center = (std::numeric_limits<unsigned short>::min()
-		+ std::numeric_limits<unsigned short>::max()) / 2;
+			+ std::numeric_limits<unsigned short>::max()) / 2;
 	unsigned short	first = center - (2 * N / 3) * stepsize;
 	unsigned short	last = center + (N / 3) * stepsize;
 	int	count = 0;
 	for (unsigned short position = first; position <= last;
 		position += stepsize) {
-		// move to this focus position
-		focuser->moveto(position, 60);
-
-		// get an exposure
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "exposing image %d", ++count);
-		ccd->startExposure(exposure);
-		ccd->wait();
-		ImagePtr	image = ccd->getImage();
-
-		// write the image to a file to able to
+		ImagePtr	image;
+		// first find out whether there already there is such 
 		std::string	filename = stringprintf("tmp/brenner%05hu.fits",
 			position);
-		io::FITSout	out(filename);
-		out.setPrecious(false);
-		out.write(image);
+		struct stat	sb;
+		if (0 == stat(filename.c_str(), &sb)) {
+			// read the existing file
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "read file %s",
+				filename.c_str());
+			io::FITSin	in(filename);
+			image = in.read();
+		} else {
+			// move to this focus position
+			focuser->moveto(position, 60);
+
+			// get an exposure
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "exposing image %d",
+				++count);
+			ccd->startExposure(exposure);
+			ccd->wait();
+			image = ccd->getImage();
+
+			// write the image to a file to able to
+			io::FITSout	out(filename);
+			out.setPrecious(false);
+			out.write(image);
+		}
 
 		// add the image to the list of images
 		images.push_back(imagepair(position, image));

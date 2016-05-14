@@ -81,8 +81,8 @@ x_{\text{min}}
 }.
 \]
 
-\subsection{Bresser focus measure}
-The Bresser focus measures use differences between pixels to measure
+\subsection{Brenner focus measure}
+The Brenner focus measures use differences between pixels to measure
 the focus quality of an image:
 \[
 B(f)
@@ -112,11 +112,11 @@ f_r(x,y)
 0          &\qquad\text{otherwise}
 \end{cases}
 \]
-We now estimate the Bresser focus measure $B(f_r)$.
+We now estimate the Brenner focus measure $B(f_r)$.
 Only points close to the boundary contribute to $B(f_r)$.
 There are exactly $4r$ points where $f_r(x-1,y)\ne f_r(x+1,y)$, and
 as many points where $f_r(x,y-1)\ne f_r(x,y+1)$.
-Also the difference is $1/r^2$, so the Bresser focus measure is
+Also the difference is $1/r^2$, so the Brenner focus measure is
 \[
 B(f_r)\simeq 8r \frac1{r^4}=\frac8{r^3}.
 \]

@@ -9,6 +9,8 @@ noinst_LTLIBRARIES = libastrofocusing.la
 
 libastrofocusing_la_SOURCES =						\
 	AbsoluteValueSolver.cpp						\
+	BrennerSolver.cpp						\
+	CentroidSolver.cpp						\
 	FocusableImageConverter.cpp					\
 	FocusCompute.cpp						\
 	FocusEvaluator.cpp						\

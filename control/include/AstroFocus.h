@@ -102,6 +102,12 @@ public:
 	virtual int	position(const FocusItems& focusitems) const = 0;
 };
 
+class CentroidSolver : public FocusSolver {
+public:
+	CentroidSolver() { }
+	virtual int	position(const FocusItems& focusitems) const;
+};
+
 class ParabolicSolver : public FocusSolver {
 public:
 	ParabolicSolver() { }
@@ -111,6 +117,12 @@ public:
 class AbsoluteValueSolver : public ParabolicSolver {
 public:
 	AbsoluteValueSolver() { }
+	virtual int	position(const FocusItems& focusitems) const;
+};
+
+class BrennerSolver : public FocusSolver {
+public:
+	BrennerSolver() { }
 	virtual int	position(const FocusItems& focusitems) const;
 };
 
