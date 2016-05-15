@@ -11,24 +11,13 @@
 #include <AstroFilterfunc.h>
 #include <AstroFilter.h>
 #include <AstroAdapter.h>
+#include "FWHM2Evaluator.h"
 
 using namespace astro::image::filter;
 using namespace astro::adapter;
 
 namespace astro {
 namespace focusing {
-
-class FWHM2Evaluator : public FocusEvaluator {
-	ImagePoint	_center;
-	double	_radius;
-public:
-	FWHM2Evaluator(const ImagePoint& center, double radius = 20)
-		: _center(center), _radius(radius) { }
-	virtual double	operator()(const ImagePtr image) {
-		double  fwhm = focusFWHM2(image, _center, _radius);
-		return fwhm;
-	}
-};
 
 /**
  * \brief Main function of the Focusing process
@@ -73,13 +62,13 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 		// turn the image into a value
 		FWHMInfo	fwhminfo = focusFWHM2_extended(image,
 					size.center(), radius);
-		double	value = fwhminfo.radius;
+		double	value = evaluator(image);
 
 		// add the new value 
 		fc.insert(std::pair<unsigned short, double>(position, value));
 
 		// send the callback data
-		callback(combine(image, fwhminfo), position, value);
+		callback(evaluator.evaluated_image(), position, value);
 	}
 
 	// compute the best focus position
@@ -107,36 +96,6 @@ void	VCurveFocusWork::main(astro::thread::Thread<FocusWork>& /* thread */) {
 	moveto(targetposition);
 	focusingstatus(Focusing::FOCUSED);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "target position reached");
-}
-
-/**
- * \brief Combine image, mask and center into a color image
- */
-ImagePtr	VCurveFocusWork::combine(ImagePtr image, FWHMInfo& fwhminfo) {
-	// first build the red channel from the mask
-	Image<unsigned char>	*red
-		= dynamic_cast<Image<unsigned char> *>(&*fwhminfo.mask);
-	if (NULL == red) {
-		throw std::logic_error("internal error, mask has not 8bit pixel type");
-	}
-
-	// then build the green channel from the original image
-	Image<unsigned char>	*green = FocusWork::green(image);
-	ImagePtr	greenptr(green);
-
-	// create the blue image
-	CrosshairAdapter<unsigned char>	crosshair(image->size(), fwhminfo.maxpoint, 20);
-	CircleAdapter<unsigned char>	circle(image->size(), fwhminfo.center,
-						fwhminfo.radius);
-	MaxAdapter<unsigned char>	blue(crosshair, circle);
-
-	// now use a combination adapter to put all these images together
-	// into a single color image
-	CombinationAdapter<unsigned char>	combinator(*red, *green, blue);
-	Image<RGB<unsigned char> >	*result
-		= new Image<RGB<unsigned char> >(combinator);
-
-	return ImagePtr(result);
 }
 
 } // namespace focusing

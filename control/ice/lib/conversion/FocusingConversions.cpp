@@ -52,6 +52,8 @@ FocusState	focusingstring2state(const std::string& s) {
 
 FocusMethod	convert(astro::focusing::Focusing::method_type m) {
 	switch (m) {
+	case astro::focusing::Focusing::BRENNER:
+		return FocusBrenner;
 	case astro::focusing::Focusing::FWHM:
 		return FocusFWHM;
 	case astro::focusing::Focusing::MEASURE:
@@ -62,6 +64,8 @@ FocusMethod	convert(astro::focusing::Focusing::method_type m) {
 
 astro::focusing::Focusing::method_type	convert(FocusMethod m) {
 	switch (m) {
+	case FocusBrenner:
+		return astro::focusing::Focusing::BRENNER;
 	case FocusFWHM:
 		return astro::focusing::Focusing::FWHM;
 	case FocusMEASURE:

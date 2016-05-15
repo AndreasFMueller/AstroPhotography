@@ -1405,6 +1405,30 @@ public:
 	}
 };
 
+template<typename Pixel>
+class CombinationAdapterPtr : public ConstImageAdapter<RGB<Pixel> > {
+	const ConstImageAdapter<Pixel>	*_red;
+	const ConstImageAdapter<Pixel>	*_green;
+	const ConstImageAdapter<Pixel>	*_blue;
+public:
+	CombinationAdapterPtr(const ConstImageAdapter<Pixel> *red,
+		const ConstImageAdapter<Pixel> *green,
+		const ConstImageAdapter<Pixel> *blue)
+		: ConstImageAdapter<RGB<Pixel> >(red->getSize()),
+		  _red(red), _green(green), _blue(blue) {
+		if ((red->getSize() != green->getSize())
+			|| (red->getSize() != blue->getSize())) {
+			throw std::runtime_error("image sizes don't match");
+		}
+	}
+	virtual RGB<Pixel>	pixel(int x, int y) const {
+		Pixel	r = (_red) ? _red->pixel(x, y) : 0;
+		Pixel	g = (_green) ? _green->pixel(x, y) : 0;
+		Pixel	b = (_blue) ? _blue->pixel(x, y) : 0;
+		return RGB<Pixel>(r, g, b);
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Adapter to draw crosshairs at a point
 //////////////////////////////////////////////////////////////////////

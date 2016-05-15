@@ -23,41 +23,34 @@ namespace focusing {
 class FocusWork {
 	unsigned short	_min;
 public:
-	const unsigned short&	min() const { return _min; }
+	unsigned short	min() const { return _min; }
 	void	min(unsigned short m) { _min = m; }
 private:
 	unsigned short	_max;
 public:
-	const unsigned short&	max() const { return _max; }
+	unsigned short	max() const { return _max; }
 	void	max(unsigned short m) { _max = m; }
-private:
-	unsigned short	_steps;
-public:
-	const unsigned short&	steps() const { return _steps; }
-	void	steps(unsigned short s);
-public:
+	unsigned short	steps() const { return _focusing.steps(); }
 	unsigned short	backlash();
 	void	moveto(unsigned short position);
-private:
-	astro::camera::CcdPtr	_ccd;
-public:
-	astro::camera::CcdPtr	ccd() { return _ccd; }
-	void	ccd(astro::camera::CcdPtr c) { _ccd = c; }
-private:
-	astro::camera::FocuserPtr	_focuser;
-public:
-	astro::camera::FocuserPtr	focuser() { return _focuser; }
-	void	focuser(astro::camera::FocuserPtr f) { _focuser = f; }
-private:
-	astro::camera::Exposure	_exposure;
-public:
-	const astro::camera::Exposure&	exposure() { return _exposure; }
-	void	exposure(const astro::camera::Exposure& e) { _exposure = e; }
-private:
-	astro::callback::CallbackPtr	_callback;
-public:	
-	astro::callback::CallbackPtr	callback() { return _callback; }
-	void	callback(astro::callback::CallbackPtr c) { _callback = c; }
+	astro::camera::CcdPtr	ccd() {
+		return _focusing.ccd();
+	}
+	astro::camera::FocuserPtr	focuser() {
+		return _focusing.focuser();
+	}
+	astro::camera::Exposure	exposure() {
+		return _focusing.exposure();
+	}
+	FocusEvaluatorPtr	evaluator() const {
+		return _focusing.evaluator();
+	}
+	FocusSolverPtr	solver() const {
+		return _focusing.solver();
+	}
+	astro::callback::CallbackPtr	callback() {
+		return _focusing.callback();
+	}
 	void	callback(ImagePtr image, int position, double value);
 	void	callback(Focusing::state_type state);
 protected:
@@ -68,7 +61,7 @@ protected:
 public:
 	FocusWork(Focusing& focusing);
 	virtual ~FocusWork() { }
-	virtual void	main(astro::thread::Thread<FocusWork>& thread) = 0;
+	virtual void	main(astro::thread::Thread<FocusWork>& thread);
 
 	// forbid copying by declaring copy constructor and assignment
 	// operator private
@@ -87,7 +80,6 @@ protected:
  * FWHM measures obtained, it infers the optimal focus position.
  */
 class VCurveFocusWork : public FocusWork {
-	ImagePtr	combine(ImagePtr image, FWHMInfo& fwhminfo);
 public:
 	VCurveFocusWork(Focusing& focusing) : FocusWork(focusing) { }
 	virtual ~VCurveFocusWork() { }

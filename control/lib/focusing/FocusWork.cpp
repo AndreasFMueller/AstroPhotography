@@ -21,30 +21,15 @@ namespace focusing {
  * \brief Construct a FocusWork controller
  */
 FocusWork::FocusWork(Focusing& focusing) : _focusing(focusing) {
-	_steps = 3;
 	_min = std::numeric_limits<unsigned short>::max();
 	_max = std::numeric_limits<unsigned short>::min();
-	_exposure.exposuretime(-1);
-}
-
-/**
- * \brief Set the number of steps
- */
-void	FocusWork::steps(unsigned short s) {
-	if (s < 3) {
-		throw std::invalid_argument("at least three steps needed");
-	}
-	if (s > 100) {
-		throw std::invalid_argument("more than 100 steps no reasonable");
-	}
-	_steps = s;
 }
 
 /**
  * \brief Check that the focusing parameters are all set
  */
 bool	FocusWork::complete() {
-	if (_exposure.exposuretime() < 0) {
+	if (exposure().exposuretime() < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "exposure time not set");
 		return false;
 	}
@@ -60,12 +45,24 @@ bool	FocusWork::complete() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "maximum < minimum");
 		return false;
 	}
-	if (!ccd()) {
+	if (steps() < 3) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "focusing needs at least 3 points");
+		return false;
+	}
+	if (!_focusing.ccd()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "ccd not set");
 		return false;
 	}
-	if (!focuser()) {
+	if (!_focusing.focuser()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "focuser not set");
+		return false;
+	}
+	if (!_focusing.evaluator()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "evaluator not set");
+		return false;
+	}
+	if (!_focusing.solver()) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "solver not set");
 		return false;
 	}
 	return true;
@@ -104,15 +101,56 @@ void	FocusWork::callback(Focusing::state_type state) {
 }
 
 /**
- * \brief Convert the image to unsigned char pixel type
+ * \brief default main function for focusing
  */
+void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting focus process");
 
-#define	convert_to_unsigned_char(image, Pixel, green)			\
-if (NULL == green) {							\
-	Image<Pixel>	*imagep = dynamic_cast<Image<Pixel> *>(&*image);	\
-	if (NULL != imagep) {						\
-		green = new Image<unsigned char>(*imagep);		\
-	}								\
+	// prepare the set of focus items to base the focus computation on
+	FocusItems	focusitems;
+
+	// prepare 
+	for (int step = 0; step < steps(); step++) {
+		// find position
+		unsigned short	position
+			= (step * (max() - min())) / (steps() - 1);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "next position: %hu", position);
+
+		// move to this position
+		focusingstatus(Focusing::MOVING);
+		moveto(position);
+
+		// get an image
+		focusingstatus(Focusing::MEASURING);
+		ccd()->startExposure(exposure());
+		usleep(1000000 * exposure().exposuretime());
+		ccd()->wait();
+		ImagePtr	image = ccd()->getImage();
+
+		// evaluate the image
+		double	value = (*evaluator())(image);
+
+		// callback with the evaluated image
+		callback(evaluator()->evaluated_image(), position, value);
+
+		// add the information to a set
+		focusitems.insert(FocusItem(position, value));
+	}
+
+	// now solve we need a suitable solver for the method
+	int	targetposition = solver()->position(focusitems);
+	if ((targetposition < min()) || (targetposition > max())) {
+		std::string	msg = stringprintf(
+			"could not find a focus position: %d", targetposition);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		focusingstatus(Focusing::FAILED);
+		return;
+	}
+
+	// move to the final focus position
+	focusingstatus(Focusing::MOVING);
+	moveto(targetposition);
+	focusingstatus(Focusing::FOCUSED);
 }
 
 /**
@@ -123,32 +161,7 @@ if (NULL == green) {							\
  * camera.
  */
 Image<unsigned char>	*FocusWork::green(ImagePtr image) {
-	Image<unsigned char>	*result = NULL;
-	convert_to_unsigned_char(image, unsigned char, result);
-	convert_to_unsigned_char(image, unsigned short, result);
-	convert_to_unsigned_char(image, unsigned int, result);
-	convert_to_unsigned_char(image, unsigned long, result);
-	if (NULL == result) {
-		throw std::runtime_error("cannot convert image to 8bit");
-	}
-
-	// get the maximum value of the image
-	double	maxvalue = Max<unsigned char, double>().filter(*result);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value of image: %f", maxvalue);
-
-	// new rescale all pixels
-	double	multiplier = 255 / maxvalue;
-	unsigned int	width = image->size().width();
-	unsigned int	height = image->size().height();
-	for (unsigned int x = 0; x < width; x++) {
-		for (unsigned int y = 0; y < height; y++) {
-			result->writablepixel(x, y) = 
-				result->pixel(x, y) * multiplier;
-		}
-	}
-
-	// return the converted result
-	return result;
+	return UnsignedCharImage(image);
 }
 
 /**

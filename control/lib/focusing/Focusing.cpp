@@ -5,6 +5,8 @@
  */
 #include <AstroFocus.h>
 #include <FocusWork.h>
+#include "MeasureEvaluator.h"
+#include "FWHM2Evaluator.h"
 
 using namespace astro::camera;
 
@@ -56,6 +58,9 @@ void	Focusing::start(int min, int max) {
 	// create the focus work
 	FocusWork	*work;
 	switch (method()) {
+	case Focusing::BRENNER:
+		work = new FocusWork(*this);
+		break;
 	case Focusing::FWHM:
 		work = new VCurveFocusWork(*this);
 		break;
@@ -63,13 +68,8 @@ void	Focusing::start(int min, int max) {
 		work = new MeasureFocusWork(*this);
 		break;
 	}
-	work->ccd(ccd());
-	work->focuser(focuser());
-	work->exposure(exposure());
 	work->min(min);
 	work->max(max);
-	work->steps(steps());
-	work->callback(callback());
 
 	// start a thread with this work
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting a thread");
@@ -93,6 +93,8 @@ void	Focusing::cancel() {
 
 std::string	Focusing::method2string(method_type m) {
 	switch (m) {
+	case BRENNER:
+		return std::string("brenner");
 	case FWHM:
 		return std::string("fwhm");
 	case MEASURE:
@@ -145,6 +147,9 @@ Focusing::method_type	Focusing::string2method(const std::string& name) {
 	int	l = name.size();
 	if (l == 0) {
 		throw std::runtime_error("unknown method");
+	}
+	if (name == std::string("brenner").substr(0, l)) {
+		return Focusing::BRENNER;
 	}
 	if (name == std::string("fwhm").substr(0, l)) {
 		return Focusing::FWHM;

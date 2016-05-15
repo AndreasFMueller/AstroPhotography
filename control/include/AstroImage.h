@@ -77,6 +77,8 @@ public:
 	void	setWidth(int width);
 	int	height() const { return _height; }
 	void	setHeight(int height);
+	int	smallerSide() const { return std::min(_width, _height); }
+	int	largerSide() const { return std::max(_width, _height); }
 private:
 	unsigned int	pixels;
 public:
@@ -640,7 +642,9 @@ public:
 	 * to be stored in a file, a concrete image has to be instantiated
 	 * from the adapter
  	 */ 
-	Image<Pixel>(const ConstImageAdapter<Pixel>& adapter)
+	template<typename srcPixel>
+	Image<Pixel>(const ConstImageAdapter<srcPixel>& adapter,
+		double scalefactor = 1)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
 		pixels = new Pixel[frame.size().getPixels()];
@@ -649,7 +653,7 @@ public:
 			frame.size().getPixels(), pixels);
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
-				pixel(x, y) = adapter.pixel(x, y);
+				pixel(x, y) = scalefactor * adapter.pixel(x, y);
 			}
 		}
 	}
@@ -693,6 +697,27 @@ public:
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
 		std::copy(p.pixels, p.pixels + frame.size().getPixels(), pixels);
+	}
+
+	/**
+	 * \brief Copy and rescale an image
+	 *
+	 * This constructor copies an image and rescales it on the fly
+	 *
+	 * \param p		image to copy
+	 * \param scalefactor	factor by which to scale the image
+	 */
+	template<typename srcPixel>
+	Image<Pixel>(const Image<srcPixel>& p, double scalefactor)
+		: ImageBase(p), ImageAdapter<Pixel>(p.getFrame().size()) {
+		long	number_of_pixels = frame.size().getPixels();
+		pixels = new Pixel[number_of_pixels];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
+			frame.size().toString().c_str(),
+			frame.size().getPixels(), pixels);
+		for (long i = 0; i < number_of_pixels; i++) {
+			pixels[i] = p.pixels[i] * scalefactor;
+		}
 	}
 
 	/**

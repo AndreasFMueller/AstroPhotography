@@ -33,6 +33,8 @@ public:
 	virtual FocusableImage	operator()(ImagePtr image) = 0;
 };
 
+Image<unsigned char>	*UnsignedCharImage(ImagePtr image);
+
 /**
  * \brief FocusEvaluator class to evaluate the focus of an image
  *
@@ -43,8 +45,11 @@ public:
  * the focus position.
  */
 class FocusEvaluator {
+protected:
+	ImagePtr	_evaluated_image;
 public:
 	virtual double	operator()(const ImagePtr image) = 0;
+	ImagePtr	evaluated_image() const { return _evaluated_image; }
 };
 typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 
@@ -57,7 +62,7 @@ typedef std::shared_ptr<FocusEvaluator>	FocusEvaluatorPtr;
 class FocusEvaluatorFactory {
 public:
 	typedef enum {
-		BrennerHorizontal, BrennerVertical, BrennerOmni
+		BrennerHorizontal, BrennerVertical, BrennerOmni, FWHM, MEASURE
 	} FocusEvaluatorType;
 static FocusEvaluatorPtr	get(FocusEvaluatorType type);
 static FocusEvaluatorPtr	get(FocusEvaluatorType type,
@@ -101,6 +106,8 @@ class FocusSolver {
 public:
 	virtual int	position(const FocusItems& focusitems) const = 0;
 };
+
+typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
 
 class CentroidSolver : public FocusSolver {
 public:
@@ -155,7 +162,7 @@ public:
 	state_type	status() const { return _status; }
 
 	// method for focusing
-	typedef enum { FWHM, MEASURE } method_type;
+	typedef enum { BRENNER, FWHM, MEASURE } method_type;
 static std::string	method2string(method_type);
 static method_type	string2method(const std::string& name);
 private:
@@ -163,6 +170,20 @@ private:
 public:
 	method_type	method() const { return _method; }
 	void	method(method_type m) { _method = m; }
+
+	// matching the method, we have an evaluator
+private:
+	FocusEvaluatorPtr	_evaluator;
+public:
+	FocusEvaluatorPtr	evaluator() const { return _evaluator; }
+	void	evaluator(FocusEvaluatorPtr e) { _evaluator = e; }
+
+	// matching focus solver that works with the evaluator
+private:
+	FocusSolverPtr	_solver;
+public:
+	FocusSolverPtr	solver() const { return _solver; }
+	void	solver(FocusSolverPtr s) { _solver = s; }
 
 	// CCD to be used to get images
 private:

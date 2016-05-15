@@ -31,6 +31,8 @@ enum FocusState {
  * \brief Focus measuing method
  */
 enum FocusMethod {
+	// use Brenner focus measure
+	FocusBrenner,
 	// use FWHM as the method to estimate how far away from focus we are
 	FocusFWHM,
 	// use a special measure based on the laplacian to estimate 

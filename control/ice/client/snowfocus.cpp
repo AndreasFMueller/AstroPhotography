@@ -102,7 +102,7 @@ static void	usage(const char *progname) {
 	std::cout << " -m,--method=<m>       method to use to estimate focus "
 		"quality: either";
 	std::cout << std::endl;
-	std::cout << "                       fwhm or measure, default is fwhm";
+	std::cout << "                       brenner, fwhm, measure, default is brenner";
 	std::cout << std::endl;
 	std::cout << " --rectangle=<rec>     expose only a subrectangle as "
 		"specified by <rec>.";
@@ -170,7 +170,7 @@ int	main(int argc, char *argv[]) {
 	std::string	frame;
 	std::string	filtername;
 	astro::focusing::Focusing::method_type	method
-		= astro::focusing::Focusing::FWHM;
+		= astro::focusing::Focusing::BRENNER;
 
 	int	c;
 	int	longindex;
