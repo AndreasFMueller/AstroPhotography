@@ -1414,17 +1414,30 @@ public:
 	CombinationAdapterPtr(const ConstImageAdapter<Pixel> *red,
 		const ConstImageAdapter<Pixel> *green,
 		const ConstImageAdapter<Pixel> *blue)
-		: ConstImageAdapter<RGB<Pixel> >(red->getSize()),
+		: ConstImageAdapter<RGB<Pixel> >(
+			(red) ? red->getSize() : (
+				(green) ? green->getSize() : (
+					(blue) ? blue->getSize() : ImageSize()
+				)
+			)),
 		  _red(red), _green(green), _blue(blue) {
-		if ((red->getSize() != green->getSize())
-			|| (red->getSize() != blue->getSize())) {
+		if ((NULL != red) && (NULL != green)
+			&& (red->getSize() != green->getSize())) {
+			throw std::runtime_error("image sizes don't match");
+		}
+		if ((NULL != red) && (NULL != blue)
+			&& (red->getSize() != blue->getSize())) {
+			throw std::runtime_error("image sizes don't match");
+		}
+		if ((NULL != green) && (NULL != blue)
+			&& (green->getSize() != blue->getSize())) {
 			throw std::runtime_error("image sizes don't match");
 		}
 	}
 	virtual RGB<Pixel>	pixel(int x, int y) const {
-		Pixel	r = (_red) ? _red->pixel(x, y) : 0;
-		Pixel	g = (_green) ? _green->pixel(x, y) : 0;
-		Pixel	b = (_blue) ? _blue->pixel(x, y) : 0;
+		Pixel	r = (NULL != _red  ) ? (_red  ->pixel(x, y)) : 0;
+		Pixel	g = (NULL != _green) ? (_green->pixel(x, y)) : 0;
+		Pixel	b = (NULL != _blue ) ? (_blue ->pixel(x, y)) : 0;
 		return RGB<Pixel>(r, g, b);
 	}
 };

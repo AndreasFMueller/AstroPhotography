@@ -80,6 +80,8 @@ BrennerEvaluatorBase::BrennerEvaluatorBase(const ImageRectangle& rectangle,
 
 double	BrennerEvaluatorBase::BrennerEvaluatorBase::operator()(
 	const ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluating an image of size %s",
+		image->size().toString().c_str());
 	FocusableImage	fim = extractimage(image);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found image of size %s",
 		fim->size().toString().c_str());
@@ -101,6 +103,7 @@ double	BrennerEvaluatorBase::BrennerEvaluatorBase::operator()(
 			}
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "maximum value found: %f", max);
 
 	// combine images into a loggable image
 	Image<unsigned char>	*green = UnsignedCharImage(image);

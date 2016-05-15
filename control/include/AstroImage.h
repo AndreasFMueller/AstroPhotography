@@ -643,17 +643,43 @@ public:
 	 * from the adapter
  	 */ 
 	template<typename srcPixel>
-	Image<Pixel>(const ConstImageAdapter<srcPixel>& adapter,
-		double scalefactor = 1)
+	Image<Pixel>(const ConstImageAdapter<srcPixel>& adapter)
 		: ImageBase(adapter.getSize()),
 		  ImageAdapter<Pixel>(adapter.getSize()) {
-		pixels = new Pixel[frame.size().getPixels()];
+		long	number_of_pixels = frame.size().getPixels();
+		pixels = new Pixel[number_of_pixels];
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
-				pixel(x, y) = scalefactor * adapter.pixel(x, y);
+				pixel(x, y) = adapter.pixel(x, y);
+			}
+		}
+	}
+
+	/**
+	 * \brief Create an image from an adapter
+	 *
+	 * Usually, adapters are only "virtual" images, the pixels are
+	 * computed only when needed. In some cases, like when an image is
+	 * to be stored in a file, a concrete image has to be instantiated
+	 * from the adapter
+ 	 */ 
+	template<typename srcPixel>
+	Image<Pixel>(const ConstImageAdapter<srcPixel>& adapter,
+		double scalefactor)
+		: ImageBase(adapter.getSize()),
+		  ImageAdapter<Pixel>(adapter.getSize()) {
+		long	number_of_pixels = frame.size().getPixels();
+		pixels = new Pixel[number_of_pixels];
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
+			frame.size().toString().c_str(),
+			frame.size().getPixels(), pixels);
+		for (int x = 0; x < frame.size().width(); x++) {
+			for (int y = 0; y < frame.size().height(); y++) {
+//debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %4d, y = %4d, scalefactor = %f", x, y, scalefactor);
+				pixel(x, y) = adapter.pixel(x, y) * scalefactor;
 			}
 		}
 	}

@@ -27,7 +27,8 @@ private:
 	typedef std::pair<int, ImagePtr>	imagepair;
 	typedef std::list<imagepair>		imagelist;
 	imagelist	images;
-	void	testCommon(FocusEvaluatorPtr evaluator);
+	void	testCommon(FocusEvaluatorPtr evaluator,
+			const std::string& prefix);
 public:
 	void	setUp();
 	void	tearDown();
@@ -115,13 +116,21 @@ void	BrennerTest::setUp() {
 void	BrennerTest::tearDown() {
 }
 
-void	BrennerTest::testCommon(FocusEvaluatorPtr evaluator) {
+void	BrennerTest::testCommon(FocusEvaluatorPtr evaluator,
+		const std::string& prefix) {
 	FocusItems	focusitems;
 	imagelist::const_iterator	i;
 	for (i = images.begin(); i != images.end(); i++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluate image %s",
 			i->second->size().toString().c_str());
-		FocusItem	focusitem(i->first, (*evaluator)(i->second));
+		double	value = (*evaluator)(i->second);
+		std::string	filename = stringprintf("tmp/%s%05hu.fits",
+			prefix.c_str(), i->first);
+		io::FITSout	out(filename);
+		out.setPrecious(false);
+		out.write(evaluator->evaluated_image());
+		
+		FocusItem	focusitem(i->first, value);
 		focusitems.insert(focusitem);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d FocusItems",
@@ -146,7 +155,7 @@ void	BrennerTest::testHorizontal() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHorizontal() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
 				FocusEvaluatorFactory::BrennerHorizontal);
-	testCommon(evaluator);
+	testCommon(evaluator, "horizontal");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testHorizontal() end");
 }
 
@@ -154,7 +163,7 @@ void	BrennerTest::testVertical() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVertical() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
 				FocusEvaluatorFactory::BrennerVertical);
-	testCommon(evaluator);
+	testCommon(evaluator, "vertical");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testVertical() end");
 }
 
@@ -162,7 +171,7 @@ void	BrennerTest::testOmni() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOmni() begin");
 	FocusEvaluatorPtr	evaluator = FocusEvaluatorFactory::get(
 				FocusEvaluatorFactory::BrennerOmni);
-	testCommon(evaluator);
+	testCommon(evaluator, "omni");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testOmni() end");
 }
 
