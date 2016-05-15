@@ -19,7 +19,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	RadonTest.cpp
+	ImageTest.cpp
 #	EuclideanDisplacementTest.cpp
 #	ConvolutionAdapterTest.cpp
 #	DeconvolveTest.cpp

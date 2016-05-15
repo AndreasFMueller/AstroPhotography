@@ -10,6 +10,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
 #include <AstroDebug.h>
+#include <AstroIO.h>
 
 using namespace astro::image;
 
@@ -28,6 +29,7 @@ public:
 	void	testShortImage();
 	void	testSubimage();
 	void	testIterator();
+	void	testScale();
 
 	CPPUNIT_TEST_SUITE(ImageTest);
 	CPPUNIT_TEST(testByteImage);
@@ -36,6 +38,7 @@ public:
 	CPPUNIT_TEST(testShortImage);
 	CPPUNIT_TEST(testSubimage);
 	CPPUNIT_TEST(testIterator);
+	CPPUNIT_TEST(testScale);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -141,6 +144,34 @@ void	ImageTest::testIterator() {
 	}
 	CPPUNIT_ASSERT(counter == 640);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testIterator() end");
+}
+
+void	ImageTest::testScale() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScale() begin");
+	ImageSize	size(256,256);
+	Image<RGB<unsigned char> >	from(size);
+	for (int x = 0; x < size.width(); x++) {
+		for (int y = 0; y < size.height(); y++) {
+			unsigned char	r = x;
+			unsigned char	g = y;
+			unsigned char	b = (x + y) / 2;
+			RGB<unsigned char>	rgb(r, g, b);
+			from.pixel(x, y) = rgb;
+		}
+	}
+
+	io::FITSoutfile<RGB<unsigned char> >	out("tmp/rgb.fits");
+	out.setPrecious(false);
+	out.write(from);
+
+	Image<RGB<unsigned char> >	*to
+		= new Image<RGB<unsigned char> >(from, 0.125);
+
+	io::FITSoutfile<RGB<unsigned char> >	scaledout("tmp/scaledrgb.fits");
+	scaledout.setPrecious(false);
+	scaledout.write(*to);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "testScale() end");
 }
 
 } // namespace test
