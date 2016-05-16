@@ -474,10 +474,10 @@ public:
 	BackgroundExtractor(unsigned int _alpha) : alpha(_alpha) { }
 	Background<float>	operator()(const ImagePoint& center,
 				bool symmetric, functiontype f,
-				const Image<RGB<float> >& image) const;
+				const ConstImageAdapter<RGB<float> >& image) const;
 	Background<float>	operator()(const ImagePoint& center,
 				bool symmetric, functiontype f,
-				const Image<float>& image) const;
+				const ConstImageAdapter<float>& image) const;
 };
 
 /**

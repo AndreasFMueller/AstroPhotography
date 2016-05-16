@@ -494,11 +494,10 @@ template class MinimumEstimator<QuadraticFunction>;
 
 template<typename f>
 Background<float>	getBackground(const ImagePoint& center,
-				bool symmetric,
-				const Image<RGB<float> >& image,
+				bool symmetric, unsigned int alpha,
+				const ConstImageAdapter<RGB<float> >& image,
 				const f& /* t */) {
 	// compute the lower bound for each color 
-	unsigned int	alpha = 100;
 	ColorRedAdapter<float>		redimage(image);
 	MinimumEstimator<typename f::FunctionType>	rme(redimage, alpha);
 	ColorGreenAdapter<float>	greenimage(image);
@@ -516,7 +515,7 @@ Background<float>	getBackground(const ImagePoint& center,
 template<typename f>
 Background<float>	getBackground(const ImagePoint& center,
 				bool symmetric, unsigned int alpha,
-				const Image<float>& image,
+				const ConstImageAdapter<float>& image,
 				const f& /* t */) {
 	// compute the lower bound for each color 
 	MinimumEstimator<typename f::FunctionType>	me(image, alpha);
@@ -530,7 +529,7 @@ Background<float>	getBackground(const ImagePoint& center,
  */
 Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 			bool symmetric, functiontype f,
-			const Image<RGB<float> >& image) const {
+			const ConstImageAdapter<RGB<float> >& image) const {
 	switch (f) {
 	case CONSTANT:
 		symmetric = true;
@@ -546,15 +545,15 @@ Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 
 Background<float> BackgroundExtractor::operator()(const ImagePoint& center,
 			bool symmetric, functiontype f,
-			const Image<float>& image) const {
+			const ConstImageAdapter<float>& image) const {
 	switch (f) {
 	case CONSTANT:
 		symmetric = true;
 	case LINEAR:
-		return getBackground(center, symmetric, image,
+		return getBackground(center, symmetric, alpha, image,
 			function_tag<LinearFunction>());
 	case QUADRATIC:
-		return getBackground(center, symmetric, image,
+		return getBackground(center, symmetric, alpha, image,
 			function_tag<QuadraticFunction>());
 	}
 	throw std::runtime_error("unknown function type");
