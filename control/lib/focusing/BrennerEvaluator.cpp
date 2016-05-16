@@ -110,6 +110,12 @@ double	BrennerEvaluatorBase::BrennerEvaluatorBase::operator()(
 	Image<unsigned char>	*red = new Image<unsigned char>(*a, 255. / max);
 	adapter::CombinationAdapterPtr<unsigned char>	ca(red, green, NULL);
 	_evaluated_image = ImagePtr(new Image<RGB<unsigned char> >(ca));
+
+	// add metadata to the image
+	ImageMetadata::const_iterator	i;
+	for (i = image->begin(); i != image->end(); i++) {
+		_evaluated_image->setMetadata(i->second);
+	}
 	
 	// return the evaluated image
 	return sum;

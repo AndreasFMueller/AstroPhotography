@@ -13,6 +13,7 @@
 #include <CallbackHandler.h>
 #include <AstroDebug.h>
 #include <AstroProject.h>
+#include "RepositoryUser.h"
 
 namespace snowstar {
 
@@ -37,7 +38,7 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
  * GuiderITrackingCallback etc and used to persist the data and to send
  * it to callbacks via ICE.
  */
-class GuiderI : virtual public Guider {
+class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::guiding::GuiderPtr	guider;
 	astro::image::ImageDirectory	imagedirectory;
 	astro::persistence::Database	database;
@@ -45,8 +46,6 @@ class GuiderI : virtual public Guider {
 	Point	_point;
 	TrackerMethod	_method;
 	astro::guiding::TrackerPtr	getTracker();
-	std::string	_repositoryname;
-	astro::project::ImageRepoPtr	imagerepo;
 
 	// callbacks that we need to remove when this object is destroyed
 	astro::callback::CallbackPtr	_imagecallback;
@@ -78,12 +77,6 @@ public:
 			const Ice::Current& current);
 	virtual TrackerMethod	getTrackerMethod(const Ice::Current& current);
 
-	// define the repository name to store images captured during
-	// calibration or guiding
-	virtual void	setRepositoryName(const std::string& reponame,
-				const Ice::Current& current);
-	virtual std::string	getRepositoryName(const Ice::Current& current);
-
 	// choose calibration
 	virtual void useCalibration(Ice::Int, bool, const Ice::Current& current);
 	virtual Calibration getCalibration(ControlType,
@@ -113,6 +106,11 @@ public:
 	virtual TrackingHistory getTrackingHistoryType(Ice::Int,
 			ControlType type, const Ice::Current& current);
 	virtual TrackingSummary	getTrackingSummary(const Ice::Current& current);
+
+	// repository
+	virtual void	setRepositoryName(const std::string& reponame,
+				const Ice::Current& current);
+	virtual std::string	getRepositoryName(const Ice::Current& current);
 
 	// callback handlers
 private:

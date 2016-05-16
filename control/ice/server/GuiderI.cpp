@@ -617,9 +617,9 @@ void	GuiderI::trackingUpdate(const astro::callback::CallbackDataPtr data) {
 void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "trackingImageUpdate called");
 
-	if (imagerepo) {
+	if (imagerepo()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "send image to repository %s",
-			_repositoryname.c_str());
+			repositoryname().c_str());
 		astro::callback::ImageCallbackData	*imageptr
 			= dynamic_cast<astro::callback::ImageCallbackData *>(&*data);
 		if (NULL == imageptr) {
@@ -627,7 +627,7 @@ void	GuiderI::trackingImageUpdate(const astro::callback::CallbackDataPtr data) {
 				"ignoring non-ImageCallbackData");
 		} else {
 			// save the image in the repository
-			imagerepo->save(imageptr->image());
+			imagerepo()->save(imageptr->image());
 		}
 	}
 
@@ -660,42 +660,18 @@ TrackingSummary	GuiderI::getTrackingSummary(const Ice::Current& /* current */) {
 }
 
 /**
- * \brief retrieve the name of the current repository
+ * \brief Set the repository name
  */
-std::string	GuiderI::getRepositoryName(const Ice::Current& /* current */) {
-	return _repositoryname;
+void    GuiderI::setRepositoryName(const std::string& reponame,
+                                const Ice::Current& current) {
+	RepositoryUser::setRepositoryName(reponame, current);
 }
 
 /**
- * \brief activate sending images to the repository
+ * \brief Get the repository name
  */
-void	GuiderI::setRepositoryName(const std::string& reponame,
-		const Ice::Current& /* current */) {
-	// special case: zero length repo name means turn of storing images
-	// in the repository
-	if (0 == reponame.size()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "removing repository '%s'",
-			_repositoryname.c_str());
-		_repositoryname = reponame;
-		imagerepo.reset();
-		return;
-	}
-
-	// check that this repository actually exists
-	astro::config::ImageRepoConfigurationPtr	config
-		= astro::config::ImageRepoConfiguration::get();
-	if (!config->exists(reponame)) {
-		// throw an error
-		NotFound	exception;
-		exception.cause = astro::stringprintf("repository %s not found",
-			reponame.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", exception.cause.c_str());
-		throw exception;
-	}
-	imagerepo = config->repo(reponame);
-	_repositoryname = reponame;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "using repository %s",
-		_repositoryname.c_str());
+std::string     GuiderI::getRepositoryName(const Ice::Current& current) {
+	return RepositoryUser::getRepositoryName(current);
 }
 
 } // namespace snowstar

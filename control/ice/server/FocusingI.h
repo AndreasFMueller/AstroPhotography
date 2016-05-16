@@ -9,6 +9,7 @@
 #include <focusing.h>
 #include <AstroFocus.h>
 #include <CallbackHandler.h>
+#include <RepositoryUser.h>
 
 namespace snowstar {
 
@@ -19,7 +20,7 @@ void	callback_adapter<FocusCallbackPrx>(FocusCallbackPrx& p,
 /**
  * \brief Focusing servant implementation
  */
-class FocusingI : virtual public Focusing {
+class FocusingI : virtual public Focusing, virtual public RepositoryUser {
 	astro::focusing::FocusingPtr	_focusingptr;
 	FocusHistory	_history;
 public:
@@ -46,6 +47,11 @@ public:
 
 	FocusHistory	history(const Ice::Current& current);
 	void	addPoint(const FocusPoint& point);
+
+	virtual void	setRepositoryName(const std::string& reponame,
+				const Ice::Current& current);
+	virtual std::string	getRepositoryName(const Ice::Current& current);
+
 	// callback stuff
 private:
 	SnowCallback<FocusCallbackPrx>	callbacks;

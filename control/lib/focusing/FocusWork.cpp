@@ -124,7 +124,6 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "next position: %hu", position);
 
 		// move to this position
-		focusingstatus(Focusing::MOVING);
 		moveto(position);
 
 		// get an image

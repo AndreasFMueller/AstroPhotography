@@ -75,6 +75,8 @@ static void	short_usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> history"
 		<< std::endl;
+	std::cout << p << " [ options ] <service> <INSTRUMENT> repository [ <repo> ]"
+		<< std::endl;
 }
 
 /**
@@ -287,16 +289,28 @@ int	main(int argc, char *argv[]) {
 		short_usage(argv[0]);
 		return EXIT_SUCCESS;
 	}
+
 	if (command == "status") {
 		std::cout << "status: ";
-		std::cout << focusingstate2string(focusing->status());
+		FocusState	state = focusing->status();
+		std::cout << focusingstate2string(state);
+		switch (state) {
+		case FocusFOCUSED:
+			std::cout << " ";
+			std::cout << focusing->getFocuser()->current();
+			break;
+		default:
+			break;
+		}
 		std::cout << std::endl;
 		return EXIT_SUCCESS;
 	}
+
 	if (command == "history") {
 		show_history(focusing->history());
 		return EXIT_SUCCESS;
 	}
+
 	if (command == "monitor") {
 		std::cout << "current status: ";
 		std::cout << focusingstate2string(focusing->status());
@@ -313,6 +327,23 @@ int	main(int argc, char *argv[]) {
 	if (command == "cancel") {
 		focusing->cancel();
 		std::cout << "cancel command sent" << std::endl;
+		return EXIT_SUCCESS;
+	}
+
+	if (command == "repository") {
+		if (optind < argc) {
+			std::string	reponame(argv[optind]);
+			focusing->setRepositoryName(reponame);
+		} else {
+			std::string	reponame
+				= focusing->getRepositoryName();
+			if (reponame.size() > 0) {
+				std::cout << "repository: " << reponame;
+				std::cout << std::endl;
+			} else {
+				std::cout << "repository not set" << std::endl;
+			}
+		}
 		return EXIT_SUCCESS;
 	}
 

@@ -167,9 +167,28 @@ void	FocusingI::updateFocusing(astro::callback::CallbackDataPtr data) {
 		p.position = focusdata->position();
 		p.value = focusdata->value();
 		addPoint(p);
+		if (focusdata->image() && imagerepo()) {
+			imagerepo()->save(focusdata->image());
+		}
 	}
 	callbacks(data);
 }
+
+/**
+ * \brief set the repository name
+ */
+void    FocusingI::setRepositoryName(const std::string& reponame,
+                                const Ice::Current& current) {
+	RepositoryUser::setRepositoryName(reponame, current);
+}
+
+/**
+ * \brief get the repository name
+ */
+std::string     FocusingI::getRepositoryName(const Ice::Current& current) {
+	return RepositoryUser::getRepositoryName(current);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // focusing callback

@@ -25,6 +25,24 @@ std::string	project("");
 bool	dryrun = false;
 bool	verbose = false;
 
+static void	short_usage(const char *progname) {
+	astro::Path	path(progname);
+	std::string	p = std::string("    ") + path.basename();
+	std::cout << "usage:" << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
+	std::cout << p << " [ options ] <server> list" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> create <directory>"
+		<< std::endl;
+	std::cout << p << " [ options ] <server> <reponame> destroy"
+		<< std::endl;
+	std::cout << p << " [ options ] <server> <reponame> list" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> { push | pull | synchronize } "
+		"<localrepo>" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> add <images> ..." << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> get <id> <filename>" << std::endl;
+	std::cout << p << " [ options ] <server> <reponame> remove <id> ..." << std::endl;
+}
+
 static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
@@ -363,6 +381,7 @@ int	main(int argc, char *argv[]) {
 
 	// next argument must be the command
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("not enough arguments");
 	}
 	std::string	command = argv[optind++];
@@ -377,6 +396,7 @@ int	main(int argc, char *argv[]) {
 	// be the first argument, which we have already read as the 
 	std::string	server = command;
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("command argument missing");
 	}
 	command = std::string(argv[optind++]);
@@ -395,6 +415,7 @@ int	main(int argc, char *argv[]) {
 
 	// get the repository name
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("not enough arguments");
 	}
 	std::string	reponame = command;
@@ -415,6 +436,7 @@ int	main(int argc, char *argv[]) {
 	// create command needs exactly one additional argument
 	if (command == "create") {
 		if (optind >= argc) {
+			short_usage(argv[0]);
 			throw std::runtime_error("directory argument missing");
 		}
 		std::string	directory = argv[optind++];

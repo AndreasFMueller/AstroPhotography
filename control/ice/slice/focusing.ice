@@ -125,6 +125,11 @@ interface Focusing {
 	 */
 	FocusHistory	history();
 
+	// if the repository name is set, then all images sent to the
+	// callback will be added to the repository
+	void	setRepositoryName(string reponame) throws NotFound;
+	string	getRepositoryName();
+
 	/**
 	 * \brief add a callback to the server
 	 */
