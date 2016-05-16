@@ -280,6 +280,7 @@ int	main(int argc, char *argv[]) {
 	CallbackAdapter	adapter(ic);
 	Ice::Identity	ident = adapter.add(callback);
 	focusing->ice_getConnection()->setAdapter(adapter.adapter());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "callback installed");
 
 	// handle the simple commands
 	if (command == "help") {
@@ -317,45 +318,67 @@ int	main(int argc, char *argv[]) {
 
 	// throw exception for unknown commands
 	if (command != "start") {
+		short_usage(argv[0]);
 		throw std::runtime_error("unknown command");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "executing start command");
 
 	// make sure temperature is set
-	CoolerPrx	cooler;
-	if (instrument.has(InstrumentCooler)) {
-		cooler = instrument.cooler();
+	if (temperature == temperature) {
+		CoolerPrx	cooler;
+		if (instrument.has(InstrumentCooler)) {
+			cooler = instrument.cooler();
+		}
+		CoolerTask      coolertask(cooler, temperature);
+		coolertask.wait();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "temperature set");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no temperature set");
 	}
-	CoolerTask      coolertask(cooler, temperature);
-	coolertask.wait();
 
 	// next two arguments are the interval boundaries
 	if ((argc - optind) < 2) {
-		throw std::runtime_error("missing intervale arguments");
+		short_usage(argv[0]);
+		throw std::runtime_error("missing interval arguments");
 	}
 	int	min = std::stoi(argv[optind++]);
 	int	max = std::stoi(argv[optind++]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "interval [%d,%d]", min, max);
 	if (min >= max) {
+		short_usage(argv[0]);
 		throw std::runtime_error("not an interval");
 	}
-
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing in interval [%d,%d]",
+		min, max);
 
 	// ensure that focuser is ready
 	FocusState	state = focusing->status();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "current state = %d", state);
 	if ((state == FocusMOVING) && (state == FocusMEASURING)) {
+		short_usage(argv[0]);
 		throw std::runtime_error("already focusing");
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser available");
 
 	// set up the exposure
-	CcdTask	ccdtask(ccdprx);
-	ccdtask.frame(frame);
-	ccdtask.binning(binning);
-	ccdtask.exposuretime(exposuretime);
+	astro::camera::Exposure	exposure;
+	exposure.purpose(astro::camera::Exposure::focus);
+	exposure.exposuretime(exposuretime);
+	if (binning.size() > 0) {
+		exposure.mode(astro::image::Binning(binning));
+	}
+	exposure.shutter(astro::camera::Shutter::OPEN);
+	if (frame.size() > 0) {
+		exposure.frame(astro::image::ImageRectangle(frame));
+	}
 
 	// set up the focusing
 	focusing->setSteps(steps);
 	focusing->setMethod(convert(method));
+	focusing->setExposure(convert(exposure));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing set up %d steps, method %s",
+		steps,
+		astro::focusing::Focusing::method2string(method).c_str());
 
 	// start the focusing process
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting between %d and %d", min, max);

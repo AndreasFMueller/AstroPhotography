@@ -458,7 +458,7 @@ FITSKeyword	keywors[Nkeywors] = {
 },
 { // 72
 	std::string("PURPOSE"),
-	std::string("Purpose of an image: dark, flat or light"),
+	std::string("Purpose of an image: light, dark, flat, bias, test, guide, focus"),
 	std::type_index(typeid(std::string)),
 	true
 },

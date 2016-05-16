@@ -59,6 +59,9 @@ void	Focusing::start(int min, int max) {
 	FocusWork	*work;
 	switch (method()) {
 	case Focusing::BRENNER:
+		evaluator(FocusEvaluatorFactory::get(
+			FocusEvaluatorFactory::BrennerOmni));
+		solver(FocusSolverPtr(new BrennerSolver()));
 		work = new FocusWork(*this);
 		break;
 	case Focusing::FWHM:
@@ -70,6 +73,8 @@ void	Focusing::start(int min, int max) {
 	}
 	work->min(min);
 	work->max(max);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "focusing interval: [%d,%d]",
+		work->min(), work->max());
 
 	// start a thread with this work
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting a thread");

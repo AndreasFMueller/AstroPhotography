@@ -21,6 +21,10 @@ int	AbsoluteValueSolver::position(const FocusItems& focusitems) const {
 	return ParabolicSolver::position(squareditems);
 }
 
+AbsoluteValueSolver::AbsoluteValueSolver() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating AbsoluteValueSolver");
+}
+
 } // namespace focusing
 } // namespace astro
 

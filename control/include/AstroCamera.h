@@ -102,13 +102,15 @@ public:
 
 	// fields related tot he exposure purpose
 	typedef	enum {
-		light = 0, dark = 1, flat = 2, bias = 3, test = 4, guide = 5
+		light = 0, dark = 1, flat = 2, bias = 3, test = 4, guide = 5,
+		focus = 6
 	} purpose_t;
 private:
 	purpose_t	_purpose;
 public:
 	purpose_t	purpose() const { return _purpose; }
 	void	purpose(purpose_t p) { _purpose = p; }
+	bool	needsshutteropen() const;
 
 static std::string	purpose2string(purpose_t p);
 static purpose_t	string2purpose(const std::string& p);

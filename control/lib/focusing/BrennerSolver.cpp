@@ -217,5 +217,9 @@ int	BrennerSolver::position(const FocusItems& focusitems) const {
 	return a[0];
 }
 
+BrennerSolver::BrennerSolver() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a new BrennerSolver");
+}
+
 } // namespace focusing
 } // namespace astro

@@ -11,6 +11,10 @@
 namespace astro {
 namespace focusing {
 
+ParabolicSolver::ParabolicSolver() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating parabolic solver");
+}
+
 /**
  * \brief Compute the minumum position of a set of focus items
  */

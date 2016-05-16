@@ -104,7 +104,14 @@ void	FocusWork::callback(Focusing::state_type state) {
  * \brief default main function for focusing
  */
 void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting focus process");
+	if (!complete()) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"FocusWork is not completely configured");
+		focusingstatus(Focusing::FAILED);
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting focus process in [%d,%d]",
+		min(), max());
 
 	// prepare the set of focus items to base the focus computation on
 	FocusItems	focusitems;
@@ -113,7 +120,7 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 	for (int step = 0; step < steps(); step++) {
 		// find position
 		unsigned short	position
-			= (step * (max() - min())) / (steps() - 1);
+			= min() + (step * (max() - min())) / (steps() - 1);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "next position: %hu", position);
 
 		// move to this position
@@ -126,9 +133,12 @@ void	FocusWork::main(astro::thread::Thread<FocusWork>& thread) {
 		usleep(1000000 * exposure().exposuretime());
 		ccd()->wait();
 		ImagePtr	image = ccd()->getImage();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got an image of size %s",
+			image->size().toString().c_str());
 
 		// evaluate the image
 		double	value = (*evaluator())(image);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "evaluated to %f", value);
 
 		// callback with the evaluated image
 		callback(evaluator()->evaluated_image(), position, value);

@@ -74,6 +74,20 @@ void	Exposure::addToImage(ImageBase& image) const {
 		purpose2string(_purpose)));
 }
 
+bool	Exposure::needsshutteropen() const {
+	switch (_purpose) {
+	case flat:
+	case light:
+	case test:
+	case guide:
+	case focus:
+		return true;
+	case dark:
+	case bias:
+		return false;
+	}
+}
+
 std::string	Exposure::purpose2string(purpose_t p) {
 	switch (p) {
 	case dark:
@@ -88,6 +102,8 @@ std::string	Exposure::purpose2string(purpose_t p) {
 		return std::string("test");
 	case guide:
 		return std::string("guide");
+	case focus:
+		return std::string("focus");
 	}
 	std::string	msg = stringprintf("unknown purpose %d", p);
 	throw std::runtime_error(msg);
@@ -111,6 +127,9 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 	}
 	if (p == "guide") {
 		return guide;
+	}
+	if (p == "focus") {
+		return focus;
 	}
 	std::string	msg = stringprintf("unknown purpose %s", p.c_str());
 	throw std::runtime_error(msg);

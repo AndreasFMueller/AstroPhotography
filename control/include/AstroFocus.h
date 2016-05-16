@@ -111,25 +111,25 @@ typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
 
 class CentroidSolver : public FocusSolver {
 public:
-	CentroidSolver() { }
+	CentroidSolver();
 	virtual int	position(const FocusItems& focusitems) const;
 };
 
 class ParabolicSolver : public FocusSolver {
 public:
-	ParabolicSolver() { }
+	ParabolicSolver();
 	virtual int	position(const FocusItems& focusitems) const;
 };
 
 class AbsoluteValueSolver : public ParabolicSolver {
 public:
-	AbsoluteValueSolver() { }
+	AbsoluteValueSolver();
 	virtual int	position(const FocusItems& focusitems) const;
 };
 
 class BrennerSolver : public FocusSolver {
 public:
-	BrennerSolver() { }
+	BrennerSolver();
 	virtual int	position(const FocusItems& focusitems) const;
 };
 
