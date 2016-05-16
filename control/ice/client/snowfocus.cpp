@@ -61,14 +61,11 @@ public:
 	}
 };
 
-/**
- * \brief Usage method
- */
-static void	usage(const char *progname) {
+static void	short_usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
-	std::cout << "usage:" << std::endl;
-	std::cout << std::endl;
+	std::cout << "Usage:" << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> start <min> <max>" << std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> monitor"
 		<< std::endl;
@@ -78,7 +75,13 @@ static void	usage(const char *progname) {
 		<< std::endl;
 	std::cout << p << " [ options ] <service> <INSTRUMENT> history"
 		<< std::endl;
+}
 
+/**
+ * \brief Usage method
+ */
+static void	usage(const char *progname) {
+	short_usage(progname);
 	std::cout << "start, monitor, cancel or report the status of a "
 		"focusing operation";
 	std::cout << std::endl;
@@ -211,14 +214,22 @@ int	main(int argc, char *argv[]) {
 
 	// the next argument is the command
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("missing service argument");
 	}
-	astro::ServerName	servername(argv[optind++]);
+	std::string	argument(argv[optind++]);
+	if ("help" == argument) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
+	astro::ServerName	servername(argument);
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("missing instrument name argument");
 	}
 	std::string	instrumentname(argv[optind++]);
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("missing command argument");
 	}
 	std::string	command = argv[optind++];
@@ -271,6 +282,10 @@ int	main(int argc, char *argv[]) {
 	focusing->ice_getConnection()->setAdapter(adapter.adapter());
 
 	// handle the simple commands
+	if (command == "help") {
+		short_usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
 	if (command == "status") {
 		std::cout << "status: ";
 		std::cout << focusingstate2string(focusing->status());

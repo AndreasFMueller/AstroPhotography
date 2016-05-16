@@ -212,6 +212,22 @@ static int	destroy_command(InstrumentsPrx instruments,
 }
 
 /**
+ * \brief 
+ */
+static void	short_usage(const char *progname) {
+	astro::Path	path(progname);
+	std::string	p = std::string("    ") + path.basename();
+	std::cout << "usage:" << std::endl;
+	std::cout << p << " [options] help" << std::endl;
+	std::cout << p << " [options] <server> list" << std::endl;
+	std::cout << p << " [options] <server> <INSTR> list" << std::endl;
+	std::cout << p << " [options] <server> <INSTR> add <type> <service> <deviceurl>" << std::endl;
+	std::cout << p << " [options] <server> <INSTR> remove <type> <index>" << std::endl;
+	std::cout << p << " [options] <server> <INSTR> property <name> <value> <description>" << std::endl;
+	std::cout << p << " [options] <server> <INSTR> remove <property>" << std::endl;
+}
+
+/**
  * \brief Usage function for the snowinstrument program
  */
 static void	usage(const char *progname) {
@@ -259,8 +275,8 @@ static void	usage(const char *progname) {
 /**
  * \brief help command implementation
  */
-static int	help_command() {
-	usage("snowinstrument");
+static int	help_command(const char *progname) {
+	usage(progname);
 	return EXIT_SUCCESS;
 }
 
@@ -360,11 +376,12 @@ int	main(int argc, char *argv[]) {
 	// the next argument is the name of the service
 	if (optind >= argc) {
 		std::cerr << "missing argument" << std::endl;
+		short_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
 	std::string	command = argv[optind++];
 	if ("help" == command) {
-		return help_command();
+		return help_command(argv[0]);
 	}
 
 	// if this was not the help command, then the string really was
@@ -383,6 +400,7 @@ int	main(int argc, char *argv[]) {
 	// we need another argument, which we expect to be the service name
 	if (optind >= argc) {
 		std::cerr << "missing argument" << std::endl;
+		short_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
 	command = argv[optind++];
@@ -396,6 +414,7 @@ int	main(int argc, char *argv[]) {
 	// and we need onther string, namely the command
 	if (optind >= argc) {
 		std::cerr << "no command" << std::endl;
+		short_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
 	command = argv[optind++];
@@ -426,6 +445,7 @@ int	main(int argc, char *argv[]) {
 	std::string	cause = astro::stringprintf("unknown command '%s'",
 		command.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+	short_usage(argv[0]);
 
 	return EXIT_FAILURE;
 }
