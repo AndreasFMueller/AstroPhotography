@@ -27,6 +27,16 @@ static struct option	longopts[] = {
 { NULL,		0,			NULL,		0   }
 };
 
+static void	short_usage(const char *progname) {
+	astro::Path	path(progname);
+	std::string	p = std::string("    ") + path.basename();
+	std::cout << "Usage:" << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
+	std::cout << p << " [ options ] <service> help" << std::endl;
+	std::cout << p << " [ options ] <service> modules" << std::endl;
+	std::cout << p << " [ options ] <service> scan <modulename>" << std::endl;
+}
+
 /**
  * \brief Usage display method
  */
@@ -34,6 +44,11 @@ static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "Usage:" << std::endl;
+	std::cout << std::endl;
+	std::cout << p << " [ options ] help" << std::endl;
+	std::cout << p << " [ options ] <service> help" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Display this help message and exit" << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] <service> modules" << std::endl;
 	std::cout << std::endl;
@@ -151,10 +166,17 @@ int	main(int argc, char *argv[]) {
 
 	// next argument is the module
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("service name argument missing");
 	}
-	astro::ServerName	servername(argv[optind++]);
+	std::string	argument(argv[optind++]);
+	if ("help" == argument) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
+	astro::ServerName	servername(argument);
 	if (argc <= optind) {
+		short_usage(argv[0]);
 		throw std::runtime_error("command argument missing");
 	}
 	std::string	commandname = argv[optind++];
@@ -167,17 +189,24 @@ int	main(int argc, char *argv[]) {
 		throw std::runtime_error("no modules proxy");
 	}
 
+	if ("help" == commandname) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
+
 	if ("modules" == commandname) {
 		return command_modules(modules);
 	}
 
 	if ("scan" == commandname) {
 		if (optind >= argc) {
+			short_usage(argv[0]);
 			throw std::string("missing module name");
 		}
 		std::string	modulename = argv[optind++];
 		return command_scan(modules, modulename);
 	}
+
 	return EXIT_FAILURE;
 }
 	
