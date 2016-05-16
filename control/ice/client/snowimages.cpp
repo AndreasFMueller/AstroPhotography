@@ -34,6 +34,14 @@ namespace snowstar {
 namespace app {
 namespace snowimages {
 
+static void	short_usage(const char *progname) {
+	std::cout << "Usage:" << std::endl;
+	astro::Path	path(progname);
+	std::string	p = std::string("    ") + path.basename();
+	std::cout << p << " [ options ] <service> <INSTRUMENT>" << std::endl;
+	std::cout << p << " --help     for more information" << std::endl;
+}
+
 static void	usage(const char *progname) {
 	std::cout << "usage: " << progname << " [ options ] <service> <INSTRUMENT>"
 		<< std::endl;
@@ -195,10 +203,12 @@ int	main(int argc, char *argv[]) {
 
 	// server and instrument name
 	if (optind >= argc) {
+		short_usage(argv[0]);
 		throw std::runtime_error("service name missing");
 	}
 	astro::ServerName	servername(argv[optind++]);
 	if (optind >= argc) {
+		short_usage(argv[0]);
 		throw std::runtime_error("instrument name missing");
 	}
 	std::string	instrumentname(argv[optind++]);
@@ -208,6 +218,7 @@ int	main(int argc, char *argv[]) {
 
 	// check whether we have an instrument
 	if (0 == instrumentname.size()) {
+		short_usage(argv[0]);
 		throw std::runtime_error("instrument name not set");
 	}
 	Ice::ObjectPrx  base = ic->stringToProxy(
@@ -222,6 +233,7 @@ int	main(int argc, char *argv[]) {
 		if (config->hasglobal("repository", "default")) {
 			reponame = config->global("repository", "default");
 		} else {
+			short_usage(argv[0]);
 			throw std::runtime_error("repository name not set");
 		}
 	}
