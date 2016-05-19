@@ -4,7 +4,10 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroUtils.h>
+#include <AstroDiscovery.h>
 #include <includes.h>
+
+using namespace astro::discover;
 
 namespace snowstar {
 namespace app {
@@ -52,6 +55,49 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	// create a service discover object
+	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
+	sd->start();
+
+	// find the service keys
+	ServiceDiscovery::ServiceKeySet	keys;
+	do {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying the list");
+		ServiceDiscovery::ServiceKeySet	sks = sd->list();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d keys", sks.size());
+
+		ServiceDiscovery::ServiceKeySet	removedkeys;
+		std::set_difference(keys.begin(), keys.end(),
+			sks.begin(), sks.end(),
+			inserter(removedkeys, removedkeys.begin()));
+
+		std::for_each(removedkeys.begin(), removedkeys.end(),
+			[sd](const ServiceKey& k) {
+				std::cout << "deleted: ";
+				std::cout << k.toString();
+				std::cout << std::endl;
+			}
+		);
+
+		ServiceDiscovery::ServiceKeySet	newkeys;
+		std::set_difference(sks.begin(), sks.end(),
+			keys.begin(), keys.end(),
+			inserter(newkeys, newkeys.begin()));
+		
+		std::for_each(newkeys.begin(), newkeys.end(),
+			[sd](const ServiceKey& k) {
+				ServiceObject	so = sd->find(k);
+				std::cout << so.toString();
+				std::cout << " ";
+				std::cout << so.ServiceSubset::toString();
+				std::cout << std::endl;
+			}
+		);
+
+		keys = sks;
+
+		sleep(1);
+	} while (1);
 
 	return EXIT_SUCCESS;
 }

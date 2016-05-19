@@ -73,11 +73,12 @@ int	main(int argc, char *argv[]) {
 	sd->start();
 
 	// if we have a name to wait for, we use this
-	ServiceKey	key;
 	if (waitfor.size() > 0) {
-		key = sd->waitfor(waitfor);
+		ServiceKey	key = sd->waitfor(waitfor);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete: %s",
 			key.toString().c_str());
+		ServiceObject	object = sd->find(key);
+		std::cout << object.toString() << std::endl;
 	} else {
 		std::this_thread::sleep_for(std::chrono::seconds(timeout));
 
@@ -90,12 +91,16 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		}
 		// select the first service
-		key = *(sd->list().begin());
+		ServiceDiscovery::ServiceKeySet	l = sd->list();
+		std::for_each(l.begin(), l.end(),
+			[sd](const ServiceKey& k) {
+				ServiceObject	so = sd->find(k);
+				std::cout << so.toString() << std::endl;
+			}
+		);
 	}
 
 	// resolve the key
-	ServiceObject	object = sd->find(key);
-	std::cout << object.toString() << std::endl;
 
 	return EXIT_SUCCESS;
 }

@@ -71,6 +71,10 @@ public:
 	ServiceKey(const std::string& name, const std::string& type,
 		const std::string& domain);
 	ServiceKey() { }
+#if 0
+	ServiceKey(const ServiceKey& other);
+	ServiceKey&	operator=(const ServiceKey& other);
+#endif
 
 	int	interface() const { return _interface; }
 	void	interface(int i) { _interface = i; }
