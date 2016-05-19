@@ -176,7 +176,7 @@ void	BrennerFunction::correct(double *a, double *v) const {
 	}
 }
 
-int	BrennerSolver::position(const FocusItems& focusitems) const {
+int	BrennerSolver::position(const FocusItems& focusitems) {
 	BrennerFunction	b(focusitems);
 
 	// find initial values for Brenner function coefficients

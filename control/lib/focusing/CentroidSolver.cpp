@@ -8,7 +8,7 @@
 namespace astro {
 namespace focusing {
 
-int	CentroidSolver::position(const FocusItems& /* focusitems */) const {
+int	CentroidSolver::position(const FocusItems& /* focusitems */) {
 	
 };
 

@@ -18,7 +18,7 @@ ParabolicSolver::ParabolicSolver() {
 /**
  * \brief Compute the minumum position of a set of focus items
  */
-int	ParabolicSolver::position(const FocusItems& focusitems) const {
+int	ParabolicSolver::position(const FocusItems& focusitems) {
 	// allocate memory for the equation
 	int	m = focusitems.size();
 	if (m < 3) {

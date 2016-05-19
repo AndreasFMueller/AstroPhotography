@@ -12,7 +12,7 @@ static inline float	sqr(float x) {
 	return x * x;
 }
 
-int	AbsoluteValueSolver::position(const FocusItems& focusitems) const {
+int	AbsoluteValueSolver::position(const FocusItems& focusitems) {
 	FocusItems	squareditems;
 	FocusItems::const_iterator	i;
 	for (i = focusitems.begin(); i != focusitems.end(); i++) {

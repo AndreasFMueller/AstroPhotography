@@ -104,7 +104,7 @@ typedef std::set<FocusItem>	FocusItems;
  */
 class FocusSolver {
 public:
-	virtual int	position(const FocusItems& focusitems) const = 0;
+	virtual int	position(const FocusItems& focusitems) = 0;
 };
 
 typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
@@ -112,25 +112,35 @@ typedef std::shared_ptr<FocusSolver>	FocusSolverPtr;
 class CentroidSolver : public FocusSolver {
 public:
 	CentroidSolver();
-	virtual int	position(const FocusItems& focusitems) const;
+	virtual int	position(const FocusItems& focusitems);
 };
 
 class ParabolicSolver : public FocusSolver {
 public:
 	ParabolicSolver();
-	virtual int	position(const FocusItems& focusitems) const;
+	virtual int	position(const FocusItems& focusitems);
 };
 
 class AbsoluteValueSolver : public ParabolicSolver {
 public:
 	AbsoluteValueSolver();
-	virtual int	position(const FocusItems& focusitems) const;
+	virtual int	position(const FocusItems& focusitems);
 };
 
-class BrennerSolver : public FocusSolver {
+class MaximumSolver : public FocusSolver {
+protected:
+	float	maximum;
+	float	minimum;
+	int	maximumposition;
+public:
+	MaximumSolver();
+	virtual int	position(const FocusItems& focusitems);
+};
+
+class BrennerSolver : public MaximumSolver {
 public:
 	BrennerSolver();
-	virtual int	position(const FocusItems& focusitems) const;
+	virtual int	position(const FocusItems& focusitems);
 };
 
 // we need the FocusWork forward declaration in the next class

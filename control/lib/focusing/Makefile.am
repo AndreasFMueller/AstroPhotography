@@ -22,6 +22,7 @@ libastrofocusing_la_SOURCES =						\
 	FocusWork.cpp							\
 	Focusing.cpp							\
 	FWHM2Evaluator.cpp						\
+	MaximumSolver.cpp						\
 	MeasureEvaluator.cpp						\
 	MeasureFocusWork.cpp						\
 	ParabolicFocusSolver.cpp					\
