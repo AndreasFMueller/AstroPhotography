@@ -183,7 +183,7 @@ std::ostream&	operator<<(std::ostream& out, const StarTracker& tracker);
 std::istream&	operator>>(std::ostream& in, StarTracker& tracker);
 
 /**
- * \brief Refreshing functionailty for phase correlation tracking
+ * \brief Refreshing functionality for phase correlation tracking
  *
  * Because an image may slightly change over time, the phase correlation
  * tracker becomes worse over time. This can be compensated for by

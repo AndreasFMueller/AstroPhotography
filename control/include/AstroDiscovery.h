@@ -93,21 +93,36 @@ public:
 		 * that make up an instrument, i.e. cameras, CCDs, coolers,
 		 * guider ports, etc. 
 		 */
-		INSTRUMENTS = 1,
+		INSTRUMENTS = 1 << 0,
 		/**
 		 * A task server can be used to control a camera to take
 		 * exposures. 
 		 */
-		TASKS = 2,
+		TASKS = 1 << 1,
+		/**
+		 * A device server gives access to hardware components
+		 * connected to it
+		 */
+		DEVICES = 1 << 2,
 		/**
 		 * a guiding server can use a and a guiderport to guide a
 		 * telescope.
 		 */
-		GUIDING = 4,
+		GUIDING = 1 << 3,
+		/**
+		 * a focusing server can control a CCD and a focuser device
+		 * to ensure images are in focus
+		 */
+		FOCUSING = 1 << 4,
 		/**
 		 * a images service makes images available to clients
 		 */
-		IMAGES = 8
+		IMAGES = 1 << 5,
+		/**
+		 * the repository service provides a project oriented database
+		 * of images on the server
+		 */
+		REPOSITORY = 1 << 6
 	} service_type;
 private:
 	int	_services;

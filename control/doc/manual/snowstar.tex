@@ -97,7 +97,68 @@ databases.
 
 \end{itemize}
 
+\section{Services offered by the \texttt{snowstar} server}
+The \texttt{snowstar} server offers all services needed for an
+astrophotography workflow.
+In most cases, not all services will be needed on all systems.
+One will usually restrict the database of instruments to a single
+host, and image repositories to a host that actually has enough
+storage to provide the image repository service.
+
+The services are identified by a TXT record in ZeroConf multicast DNS.
+Here is what the services offer:
+\begin{itemize}
+\item \texttt{devices}: Access to hardware components attached to the
+machine offering the service.
+\item \texttt{images}: CCD devices allow taking images, and which a 
+client may want to inspect.
+The client has to use the \texttt{images} service for this purpose.
+If a service is activated that may require the use of the \texttt{images}
+service, the service will be available, but it will not be published in
+ZeroConf.
+\item \texttt{instruments}: The \texttt{instruments} service is merely
+a database service to inform other services of the available instruments,
+their components and some parameters of interest.
+\item \texttt{tasks}: The \texttt{tasks} service runs preprogrammed
+sequences of observations. It should normally be run on the machine that
+controls the camera used for the images.
+\item \texttt{guiding}: The \texttt{guiding} service performs guiding,
+it is preferably run on the machine managing the guide camera, but
+it can in principle be run on any machine.
+\item \texttt{focusing}: This service allows to automatically focus a
+camera/focuser combination.
+\item \texttt{repository}: This service makes the content of image
+repositories available.
+Note that it is possible to use image repositories e.~g.~to store images
+taken by the \texttt{guiding} and \texttt{focusing} services, even if
+the this service is not enabled.
+The server will store the images in the repositories, but it will not
+be possible to access the image via the network.
+\end{itemize}
+
+
 \section{Configuration}
+The server can be configured to publish only a subset of the available
+services, by setting the following global configuration variables according
+to table~\ref{snowstar:configuration:table}.
+\begin{table}
+\centering
+\begin{tabular}{lll}
+section         &servicename         &default     \\
+\hline
+\texttt{service}&\texttt{devices}    &\texttt{yes}\\
+\texttt{service}&\texttt{images}     &\texttt{yes}\\
+\texttt{service}&\texttt{instruments}&\texttt{no} \\
+\texttt{service}&\texttt{tasks}      &\texttt{no} \\
+\texttt{service}&\texttt{guiding}    &\texttt{no} \\
+\texttt{service}&\texttt{focusing}   &\texttt{no} \\
+\texttt{service}&\texttt{repository} &\texttt{no} \\
+\hline
+\end{tabular}
+\caption{The configuration variables used to configure the services
+offered by the snowstar server.
+\label{snowstar:configuration:table}}
+\end{table}
 
 
 

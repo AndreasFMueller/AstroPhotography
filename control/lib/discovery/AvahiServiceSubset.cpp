@@ -27,6 +27,15 @@ AvahiStringList	*AvahiServiceSubset::stringlist(const ServiceSubset& s) {
 	if (s.has(ServiceSubset::IMAGES)) {
 		strlist = avahi_string_list_add(strlist, "images");
 	}
+	if (s.has(ServiceSubset::DEVICES)) {
+		strlist = avahi_string_list_add(strlist, "devices");
+	}
+	if (s.has(ServiceSubset::FOCUSING)) {
+		strlist = avahi_string_list_add(strlist, "focusing");
+	}
+	if (s.has(ServiceSubset::REPOSITORY)) {
+		strlist = avahi_string_list_add(strlist, "repository");
+	}
 	return strlist;
 }
 

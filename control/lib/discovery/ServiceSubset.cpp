@@ -16,18 +16,31 @@ ServiceSubset::service_type	ServiceSubset::string2type(
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "decode: '%s'", name.c_str());
 	if (name == "instruments") return INSTRUMENTS;
 	if (name == "tasks")       return TASKS;
+	if (name == "devices")	   return DEVICES;
 	if (name == "guiding")     return GUIDING;
+	if (name == "focusing")    return FOCUSING;
 	if (name == "images")      return IMAGES;
-	throw std::runtime_error("invalid string type name");
+	if (name == "repository")  return REPOSITORY;
+	std::string	msg = stringprintf("invalid service name: %s",
+		name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 std::string	ServiceSubset::type2string(service_type type) {
 	switch (type) {
 	case INSTRUMENTS:	return std::string("instruments");
 	case TASKS:		return std::string("tasks");
+	case DEVICES:		return std::string("devices");
 	case GUIDING:		return std::string("guiding");
+	case FOCUSING:		return std::string("focusing");
 	case IMAGES:		return std::string("images");
-	default:	throw std::runtime_error("invalid type code");
+	case REPOSITORY:	return std::string("repository");
+	default:
+		std::string	msg = stringprintf("invalid service code: %d",
+			(int)type);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
@@ -78,9 +91,12 @@ ServiceSubset::ServiceSubset(const std::string& txt) {
 
 bool	ServiceSubset::validtype(service_type s) const {
 	if (INSTRUMENTS == s) return true;
+	if (DEVICES     == s) return true;
 	if (TASKS       == s) return true;
 	if (GUIDING     == s) return true;
+	if (FOCUSING    == s) return true;
 	if (IMAGES      == s) return true;
+	if (REPOSITORY  == s) return true;
 	return false;
 }
 
@@ -88,56 +104,76 @@ bool	ServiceSubset::validtype(service_type s) const {
 std::list<std::string>	ServiceSubset::types() const {
 	std::list<std::string>	result;
 	if (has(INSTRUMENTS)) result.push_back(std::string("instruments"));
+	if (has(DEVICES)    ) result.push_back(std::string("devices"));
 	if (has(TASKS)      ) result.push_back(std::string("tasks"));
 	if (has(GUIDING)    ) result.push_back(std::string("guiding"));
+	if (has(FOCUSING)   ) result.push_back(std::string("focusing"));
 	if (has(IMAGES)     ) result.push_back(std::string("images"));
+	if (has(REPOSITORY) ) result.push_back(std::string("repository"));
 	return result;
 }
 
 void	ServiceSubset::set(service_type s) {
 	if (!validtype(s)) {
-		throw std::runtime_error("invalid service code");
+		std::string	msg = stringprintf("cannot set invalid "
+			"service code %d", (int)s);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	_services |= s;
 }
 
 void	ServiceSubset::unset(service_type s) {
 	if (!validtype(s)) {
-		throw std::runtime_error("invalid service code");
+		std::string	msg = stringprintf("cannot unset invalid "
+			"service code %d", (int)s);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	_services &= ~s;
 }
 
 bool	ServiceSubset::has(service_type s) const {
 	if (!validtype(s)) {
-		throw std::runtime_error("invalid service code");
+		std::string	msg = stringprintf("cannot check for invalid "
+			"service code %d", (int)s);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	return (_services & s) ? true : false;
 }
+
+#define	append_to_txt_record(txtbuffer, currentindex, newstring)	\
+	txtbuffer[currentindex++] = strlen(newstring);			\
+	strcpy(txtbuffer + currentindex, newstring);			\
+	currentindex += strlen(newstring);
+
 
 std::string	ServiceSubset::txtrecord() const {
 	char    buffer[100];
 	int     l = 0;
 	if (has(ServiceSubset::IMAGES)) {
-		buffer[l] = 6;
-		strcpy(buffer + l + 1, "images");
-		l += 7;
+		append_to_txt_record(buffer, l, "images");
+	}
+	if (has(ServiceSubset::DEVICES)) {
+		append_to_txt_record(buffer, l, "devices");
 	}
 	if (has(ServiceSubset::TASKS)) {
-		buffer[l] = 5;
-		strcpy(buffer + l + 1, "tasks");
-		l += 6;
+		append_to_txt_record(buffer, l, "tasks");
 	}
 	if (has(ServiceSubset::INSTRUMENTS)) {
-		buffer[l] = 11;
-		strcpy(buffer + l + 1, "instruments");
-		l += 12;
+		append_to_txt_record(buffer, l, "instruments");
 	}
 	if (has(ServiceSubset::GUIDING)) {
-		buffer[l] = 7;
-		strcpy(buffer + l + 1, "guiding");
-		l += 8;
+		append_to_txt_record(buffer, l, "guiding");
 	}
+	if (has(ServiceSubset::FOCUSING)) {
+		append_to_txt_record(buffer, l, "focusing");
+	}
+	if (has(ServiceSubset::REPOSITORY)) {
+		append_to_txt_record(buffer, l, "repository");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "txt record has length %d", l);
 	return std::string(buffer, l);
 }
 

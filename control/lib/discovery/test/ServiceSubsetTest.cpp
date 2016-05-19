@@ -70,6 +70,7 @@ void	ServiceSubsetTest::testConstructor() {
 void	ServiceSubsetTest::testTxt() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTxt() begin");
 	discover::ServiceSubset	s;
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "seting instruments");
 	s.set(discover::ServiceSubset::INSTRUMENTS);
 	CPPUNIT_ASSERT((s.toString() == "['instruments']"));
 	char	t[12];
@@ -90,6 +91,8 @@ void	ServiceSubsetTest::testTxt() {
 	CPPUNIT_ASSERT( s2.has(discover::ServiceSubset::TASKS));
 	CPPUNIT_ASSERT(!s2.has(discover::ServiceSubset::GUIDING));
 	CPPUNIT_ASSERT(!s2.has(discover::ServiceSubset::IMAGES));
+	CPPUNIT_ASSERT(!s2.has(discover::ServiceSubset::FOCUSING));
+	CPPUNIT_ASSERT(!s2.has(discover::ServiceSubset::DEVICES));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testTxt() end");
 }
 
