@@ -4,6 +4,7 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
 #include <Ice/Identity.ice>
+#include <exceptions.ice>
 
 /**
  * \brief snowstar module captures all interfaces
@@ -75,6 +76,36 @@ module snowstar {
 	 */
 	interface Callback {
 		void	stop();
+	};
+
+	/**
+	 * \brief Configuration data structures
+	 */
+	struct ConfigurationKey {
+		string	domain;
+		string	section;
+		string	name;
+	};
+	struct ConfigurationItem {
+		string	domain;
+		string	section;
+		string	name;
+		string	value;
+	};
+	sequence<ConfigurationItem>	ConfigurationList;
+
+	/**
+ 	 * \brief Configuration interface
+	 */
+	interface Configuration {
+		bool	has(ConfigurationKey key);
+		ConfigurationItem	get(ConfigurationKey key)
+						throws NotFound;
+		void	set(ConfigurationItem item) throws BadParameter;
+		ConfigurationList	list();
+		ConfigurationList	listDomain(string domain);
+		ConfigurationList	listSection(string domain,
+						string section);
 	};
 
 	/**

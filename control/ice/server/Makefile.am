@@ -23,7 +23,7 @@ noinst_HEADERS = DevicesI.h \
 	InstrumentI.h InstrumentLocator.h InstrumentsI.h \
 	DeviceI.h \
 	CalibrationSource.h \
-	EventHandlerI.h \
+	EventHandlerI.h ConfigurationI.h \
 	RepositoryUser.h
 	
 snowstar_SOURCES = snowstar.cpp \
@@ -43,7 +43,7 @@ snowstar_SOURCES = snowstar.cpp \
 	InstrumentI.cpp InstrumentLocator.cpp InstrumentsI.cpp \
 	DeviceI.cpp \
 	CalibrationSource.cpp \
-	EventHandlerI.cpp \
+	EventHandlerI.cpp ConfigurationI.cpp \
 	RepositoryUser.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \

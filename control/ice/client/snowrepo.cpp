@@ -337,8 +337,9 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /* 1 */
 { "help",		no_argument,		NULL,	'h' }, /* 2 */
 { "dry-run",		no_argument,		NULL,	'n' }, /* 3 */
-{ "remove-contents",	no_argument,		NULL,	'r' }, /* 4 */
-{ "verbose",		no_argument,		NULL,	'v' }, /* 5 */
+{ "remote",		no_argument,		NULL,	'R' }, /* 4 */
+{ "remove-contents",	no_argument,		NULL,	'r' }, /* 5 */
+{ "verbose",		no_argument,		NULL,	'v' }, /* 6 */
 { NULL,			0,			NULL,	0   }
 };
 
@@ -350,10 +351,11 @@ int	main(int argc, char *argv[]) {
 	CommunicatorSingleton	communicator(argc, argv);
 
 	bool	removecontents = false;
+	bool	remote = false;
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:dhp:s:v",
+	while (EOF != (c = getopt_long(argc, argv, "c:dhp:rRv",
 		longopts, &longindex)))
 		switch (c) {
 		case 'c':
@@ -373,6 +375,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'r':
 			removecontents = true;
+			break;
+		case 'R':
+			remote = true;
 			break;
 		case 'v':
 			verbose = true;
@@ -404,6 +409,21 @@ int	main(int argc, char *argv[]) {
 	// all other commands need a remote Repositories reference
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 	astro::ServerName	servername(server);
+
+	// check whether the server offers the repository functionality
+	if (!remote) {
+		astro::discover::ServiceDiscoveryPtr     sd
+			= astro::discover::ServiceDiscovery::get();
+		sd->start();
+		astro::discover::ServiceObject	so
+			= sd->find(sd->waitfor(server));
+		if (!so.has(astro::discover::ServiceSubset::REPOSITORY)) {
+			std::cerr << "service '" << server;
+			std::cerr << "' does not offer repository service";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
 
 	// list command needs nothing more
 	if (command == "list") {

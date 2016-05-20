@@ -154,7 +154,7 @@ int	main(int argc, char *argv[]) {
 			ccd_index = std::stoi(optarg);
 			break;
 		case 'c':
-			Configuration::set_default(optarg);
+			astro::config::Configuration::set_default(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;

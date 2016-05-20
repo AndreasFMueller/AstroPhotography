@@ -15,8 +15,13 @@ ICECPPFLAGS = -I$(top_builddir)/ice/include -I$(top_builddir)/ice/slice \
 
 bin_PROGRAMS = snowscan snowimages snowfocus snowmount snowrepo \
 	snowtask snowproject snowinstrument snowao snowservers \
-	snowevent
+	snowevent snowconfig
 noinst_PROGRAMS = snowflake 
+
+snowconfig_SOURCES = snowconfig.cpp
+snowconfig_DEPENDENCIES = $(ICEDEPENDENCIES)
+snowconfig_LDADD = $(ICELDADD)
+snowconfig_CPPFLAGS = $(ICECPPFLAGS)
 
 snowflake_SOURCES = snowflake.cpp
 snowflake_DEPENDENCIES = $(ICEDEPENDENCIES)

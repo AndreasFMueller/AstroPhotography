@@ -33,8 +33,6 @@ static void	usage(const char *progname) {
 	std::cout << " -d,--debug         increase debug level" << std::endl;
 	std::cout << " -h,--help          display help message and exit"
 		<< std::endl;
-	std::cout << " -s,--server=<s>    connect to server named <s>, default "
-		"is localhost" << std::endl;
 	std::cout << std::endl;
 
 }
@@ -55,6 +53,20 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
+	// remaining arguments are the service classes that we want to see
+	std::set<ServiceSubset::service_type>	servicetypes;
+	while (optind < argc) {
+		std::string	servicetype(argv[optind++]);
+		try {
+			servicetypes.insert(ServiceSubset::string2type(
+				servicetype));
+		} catch (...) {
+			std::cerr << "unknown service type: " << servicetype;
+			std::cerr << ", ignored" << std::endl;
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "only looking for %d services");
+
 	// create a service discover object
 	ServiceDiscoveryPtr	sd = ServiceDiscovery::get();
 	sd->start();
@@ -65,6 +77,9 @@ int	main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying the list");
 		ServiceDiscovery::ServiceKeySet	sks = sd->list();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d keys", sks.size());
+
+		// find out which keys don't offer any of the services
+		
 
 		ServiceDiscovery::ServiceKeySet	removedkeys;
 		std::set_difference(keys.begin(), keys.end(),

@@ -35,6 +35,7 @@
 #include <AstroEvent.h>
 #include <EventHandlerI.h>
 #include <EventServantLocator.h>
+#include <ConfigurationI.h>
 #include <grp.h>
 #include <pwd.h>
 
@@ -158,6 +159,24 @@ static void	add_devices_servant(Ice::CommunicatorPtr ic,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
 	astro::event(EVENT_GLOBAL, astro::events::Event::MODULE,
 		"Module server ready");
+}
+
+static void	add_event_servant(Ice::CommunicatorPtr ic,
+			Ice::ObjectAdapterPtr adapter) {
+	Ice::ObjectPtr	object = new EventHandlerI();
+	adapter->add(object, ic->stringToIdentity("Events"));
+	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
+		"Event server added");
+}
+
+static void	add_configuration_servant(Ice::CommunicatorPtr ic,
+			Ice::ObjectAdapterPtr adapter) {
+	astro::config::ConfigurationPtr	configuration
+		= astro::config::Configuration::get();
+	Ice::ObjectPtr	object = new ConfigurationI(configuration);
+	adapter->add(object, ic->stringToIdentity("Configuration"));
+	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
+		"Configuration server added");
 }
 
 static void	add_images_servant(Ice::CommunicatorPtr ic,
@@ -465,10 +484,10 @@ int	snowstar_main(int argc, char *argv[]) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adapters created");
 
 		// add a servant for events to the adapter
-		Ice::ObjectPtr	object = new EventHandlerI();
-		adapter->add(object, ic->stringToIdentity("Events"));
-		astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
-			"Event server added");
+		add_event_servant(ic, adapter);
+
+		// add a servant for configuration data
+		add_configuration_servant(ic, adapter);
 
 		// add a servant for devices to the device adapter
 		if (sp->has(astro::discover::ServiceSubset::DEVICES)) {
