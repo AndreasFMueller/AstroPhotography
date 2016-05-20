@@ -214,7 +214,7 @@ int	main(int argc, char *argv[]) {
 	std::string	instrumentname(argv[optind++]);
 
 	// get the configuration
-	ConfigurationPtr	config = Configuration::get();
+	astro::config::ConfigurationPtr	config = astro::config::Configuration::get();
 
 	// check whether we have an instrument
 	if (0 == instrumentname.size()) {

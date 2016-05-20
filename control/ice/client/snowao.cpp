@@ -54,7 +54,7 @@ int	main(int argc, char *argv[]) {
 		longopts, &longindex))) {
 		switch (c) {
 		case 'c':
-			Configuration::set_default(optarg);
+			astro::config::Configuration::set_default(optarg);
 			break;
 		case 'd':
 			debuglevel = LOG_DEBUG;
@@ -76,7 +76,7 @@ int	main(int argc, char *argv[]) {
 	std::string	instrumentname(argv[optind++]);
 
 	// get the configuration
-	ConfigurationPtr	config = Configuration::get();
+	astro::config::ConfigurationPtr	config = astro::config::Configuration::get();
 
 	// get a proxy for instruments
 	Ice::ObjectPrx	base = ic->stringToProxy(
