@@ -96,6 +96,32 @@ bool	ServiceDiscovery::has(const ServiceKey& key) {
 	return false;
 }
 
+ServiceDiscovery::ServiceKeySet	ServiceDiscovery::list(
+	const ServiceSubset::service_type t) {
+	ServiceKeySet	result;
+	std::for_each(servicekeys.begin(), servicekeys.end(),
+		[&result,this,t](const ServiceKey& key) {
+			if (this->find(key).has(t)) {
+				result.insert(key);
+			}
+		}
+	);
+	return result;
+}
+
+ServiceDiscovery::ServiceKeySet	ServiceDiscovery::list(
+	const std::list<ServiceSubset::service_type>& l) {
+	ServiceKeySet	result;
+	std::for_each(servicekeys.begin(), servicekeys.end(),
+		[&result,this,&l](const ServiceKey& key) {
+			if (this->find(key).has_any_of(l)) {
+				result.insert(key);
+			}
+		}
+	);
+	return result;
+}
+
 /**
  * \brief wait for a name to arrive
  */

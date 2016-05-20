@@ -29,12 +29,12 @@ static void	usage(const std::string& progname) {
 	std::string	p = std::string("    ") +  path.basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] help" << std::endl;
-	std::cout << p << " [ options ] list" << std::endl;
-	std::cout << p << " [ options ] get MOUNT" << std::endl;
-	std::cout << p << " [ options ] set MOUNT RA DEC" << std::endl;
-	std::cout << p << " [ options ] cancel MOUNT" << std::endl;
-	std::cout << p << " [ options ] wait MOUNT" << std::endl;
+	std::cout << p << " [ options ] [ <server> ] help" << std::endl;
+	std::cout << p << " [ options ] <server> list" << std::endl;
+	std::cout << p << " [ options ] <server> get MOUNT" << std::endl;
+	std::cout << p << " [ options ] <server> set MOUNT RA DEC" << std::endl;
+	std::cout << p << " [ options ] <server> cancel MOUNT" << std::endl;
+	std::cout << p << " [ options ] <server> wait MOUNT" << std::endl;
 	std::cout << std::endl;
 	std::cout << "get help about the snowmount command, list mounts, get "
 		"right ascension from" << std::endl;
@@ -61,7 +61,6 @@ static struct option    longopts[] = {
 { "debug",	no_argument,			NULL,	'd' }, /* 1 */
 { "decimal",	no_argument,			NULL,	'f' }, /* 2 */
 { "help",	no_argument,			NULL,	'h' }, /* 3 */
-{ "server",	required_argument,		NULL,	's' }, /* 4 */
 { "wait",	no_argument,			NULL,	'w' }, /* 5 */
 { NULL,		0,				NULL,	0   }
 };
@@ -69,7 +68,8 @@ static struct option    longopts[] = {
 /**
  * \brief Help command implementation
  */
-int	command_help() {
+int	command_help(const char *progname) {
+	usage(progname);
 	std::cout << "The snowmount command understands the ollowing "
 		"subcommands:" << std::endl;
 	std::cout << std::endl;
@@ -176,9 +176,6 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 's':
-			servername = astro::ServerName(optarg);
-			break;
 		case 'w':
 			await_completion = true;
 			break;
@@ -192,7 +189,19 @@ int	main(int argc, char *argv[]) {
 
 	// handle the help command
 	if (command == "help") {
-		return command_help();
+		return command_help(argv[0]);
+	}
+
+	servername = astro::ServerName(command);
+
+	// next argument must be the command
+	if (argc <= optind) {
+		throw std::runtime_error("command missing");
+	}
+	command = std::string(argv[optind++]);
+
+	if (command == "help") {
+		return command_help(argv[0]);
 	}
 
 	// we need a remote device proxy for all other commands

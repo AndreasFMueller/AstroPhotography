@@ -147,6 +147,7 @@ public:
 	bool	has(const std::string& type) const {
 			return has(string2type(type));
 	}
+	bool	has_any_of(const std::list<service_type>& types) const;
 
 	void	clear() { _services = 0; }
 
@@ -159,7 +160,6 @@ public:
 	ServiceSubset();
 	ServiceSubset(const std::list<std::string>& names);
 	ServiceSubset(const std::string& txt);
-
 };
 
 /**
@@ -253,6 +253,8 @@ private:
 	ServiceKeySet	servicekeys;
 public:
 	const ServiceKeySet&	list() const { return servicekeys; }
+	ServiceKeySet	list(ServiceSubset::service_type t);
+	ServiceKeySet	list(const std::list<ServiceSubset::service_type>& l);
 protected:
 	void	add(const ServiceKey& key);
 	void	remove(const ServiceKey& key);

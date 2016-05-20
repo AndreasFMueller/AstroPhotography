@@ -143,6 +143,18 @@ bool	ServiceSubset::has(service_type s) const {
 	return (_services & s) ? true : false;
 }
 
+bool	ServiceSubset::has_any_of(const std::list<service_type>& types) const {
+	bool	result = false;
+	std::for_each(types.begin(), types.end(),
+		[&result,this](const service_type& t) {
+			if (this->has(t)) {
+				result = true;
+			}
+		}
+	);
+	return result;
+}
+
 #define	append_to_txt_record(txtbuffer, currentindex, newstring)	\
 	txtbuffer[currentindex++] = strlen(newstring);			\
 	strcpy(txtbuffer + currentindex, newstring);			\

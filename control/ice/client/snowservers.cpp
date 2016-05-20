@@ -19,14 +19,21 @@ static struct option	longopts[] = {
 { NULL,		0,			NULL,		0   }
 };
 
+/**
+ * \brief usage information of the snowservers program
+ *
+ * \param progname	name of the program
+ */
 static void	usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
 	std::cout << "Usage:" << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] " << std::endl;
+	std::cout << p << " [ options ] [ servictypes ... ] " << std::endl;
 	std::cout << std::endl;
-	std::cout << "list all servers that offer astro photo services";
+	std::cout << "list all servers that offer astro photo services, or all servers that list";
+	std::cout << std::endl;
+	std::cout << "any of the service types specified as arguments";
 	std::cout << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
@@ -37,6 +44,9 @@ static void	usage(const char *progname) {
 
 }
 
+/**
+ * \brief Main function of the snowservers program
+ */
 int	main(int argc, char *argv[]) {
 	debug_set_ident("snowservers");
 	int	c;
@@ -54,11 +64,11 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// remaining arguments are the service classes that we want to see
-	std::set<ServiceSubset::service_type>	servicetypes;
+	std::list<ServiceSubset::service_type>	servicetypes;
 	while (optind < argc) {
 		std::string	servicetype(argv[optind++]);
 		try {
-			servicetypes.insert(ServiceSubset::string2type(
+			servicetypes.push_back(ServiceSubset::string2type(
 				servicetype));
 		} catch (...) {
 			std::cerr << "unknown service type: " << servicetype;
@@ -75,11 +85,13 @@ int	main(int argc, char *argv[]) {
 	ServiceDiscovery::ServiceKeySet	keys;
 	do {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "displaying the list");
-		ServiceDiscovery::ServiceKeySet	sks = sd->list();
+		ServiceDiscovery::ServiceKeySet	sks;
+		if (servicetypes.size() > 0) {
+			sks = sd->list(servicetypes);
+		} else {
+			sks = sd->list();
+		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%d keys", sks.size());
-
-		// find out which keys don't offer any of the services
-		
 
 		ServiceDiscovery::ServiceKeySet	removedkeys;
 		std::set_difference(keys.begin(), keys.end(),

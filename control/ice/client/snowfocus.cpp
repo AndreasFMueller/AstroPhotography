@@ -116,6 +116,8 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "                       widthxheight@(xoffset,yoffset)";
 	std::cout << std::endl;
+	std::cout << " -R,--remote           assume that the server name describes a service that" << std::endl;
+	std::cout << "                       cannot be discovered via ZeroConf" << std::endl;
 	std::cout << " -s,--steps=<s>        subdivide the interval in <s> "
 		"steps";
 	std::cout << std::endl;
@@ -138,6 +140,7 @@ static struct option	longopts[] = {
 { "help",		no_argument,		NULL,	'h' }, /*  5 */
 { "method",		required_argument,	NULL,	'm' }, /*  6 */
 { "rectangle",		required_argument,	NULL,	'r' }, /*  7 */
+{ "remote",		no_argument,		NULL,	'R' }, /*  5 */
 { "steps",		required_argument,	NULL,	's' }, /*  8 */
 { "temperature",	required_argument,	NULL,	't' }, /*  9 */
 { NULL,			0,			NULL,    0  }
@@ -168,6 +171,7 @@ int	main(int argc, char *argv[]) {
 	snowstar::CommunicatorSingleton	cs(argc, argv);
 	Ice::CommunicatorPtr	ic = cs.get();
 
+	bool	remote = false;
 	int	steps = 10;
 	double	exposuretime = 1.0;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
@@ -179,7 +183,7 @@ int	main(int argc, char *argv[]) {
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:m:r:t:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:hi:m:r:Rt:",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -206,6 +210,9 @@ int	main(int argc, char *argv[]) {
 		case 'r':
 			frame = optarg;
 			break;
+		case 'R':
+			remote = true;
+			break;
 		case 's':
 			steps = std::stoi(optarg);
 			break;
@@ -229,6 +236,28 @@ int	main(int argc, char *argv[]) {
 		short_usage(argv[0]);
 		throw std::runtime_error("missing instrument name argument");
 	}
+
+	// make sure the server offers instruments and guiding
+	if (!remote) {
+		astro::discover::ServiceDiscoveryPtr     sd
+			= astro::discover::ServiceDiscovery::get();
+		sd->start();
+		astro::discover::ServiceObject  so
+			= sd->find(sd->waitfor(argument));
+		if (!so.has(astro::discover::ServiceSubset::INSTRUMENTS)) {
+			std::cerr << "service '" << argument;
+			std::cerr << "' does not offer focusing service";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+		if (!so.has(astro::discover::ServiceSubset::FOCUSING)) {
+			std::cerr << "service '" << argument;
+			std::cerr << "' does not offer focusing service";
+			std::cerr << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+
 	std::string	instrumentname(argv[optind++]);
 	if (argc <= optind) {
 		short_usage(argv[0]);
@@ -243,7 +272,8 @@ int	main(int argc, char *argv[]) {
 	InstrumentsPrx	instruments = InstrumentsPrx::checkedCast(base);
 
 	// get the configuration
-	astro::config::ConfigurationPtr	config = astro::config::Configuration::get();
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
 
 	// check whether we have an instrument
 	if (0 == instrumentname.size()) {
