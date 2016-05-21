@@ -8,16 +8,21 @@ SUBDIRS = . test
 
 noinst_HEADERS =							\
 	Testtable.h							\
-	GlobalTable.h
+	ConfigurationTable.h						\
+	ConfigurationBackend.h
 
 noinst_LTLIBRARIES = libastropersistence.la
 
 libastropersistence_la_SOURCES = 					\
 	Backend.cpp							\
 	Configuration.cpp						\
-	GlobalTable.cpp							\
+	ConfigurationBackend.cpp					\
+	ConfigurationEntry.cpp						\
+	ConfigurationKey.cpp						\
+	ConfigurationTable.cpp						\
 	NoSuchEntry.cpp							\
 	Persistence.cpp							\
+	TableBase.cpp							\
 	Testtable.cpp	
 
 libastropersistence_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \

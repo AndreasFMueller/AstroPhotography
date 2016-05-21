@@ -251,6 +251,7 @@ public:
 	void	remove(const std::string& condition);
 	std::list<long>	selectids(const std::string& condition);
 	Result	selectrows(const std::string& condition);
+	bool	has(const std::string& condition);
 };
 
 /**
@@ -270,6 +271,13 @@ public:
 	Persistent(const object& _object, int i = -1)
 		: object(_object), _id(i) { }
 };
+
+template<typename target, typename source>
+std::list<target>	ObjectList(const std::list<source>& l) {
+	std::list<target>	result;
+	std::copy(l.begin(), l.end(), back_inserter(result));
+	return result;
+}
 
 /**
  * \brief Template to create a persistent version of an object with reference
@@ -314,7 +322,6 @@ public:
 	object	byid(long objectid);
 	long	add(const object&);
 	void	update(long objectid, const object& o);
-
 	std::list<object>	select(const std::string& condition) {
 		std::list<object>	result;
 		Result	rows = selectrows(condition);

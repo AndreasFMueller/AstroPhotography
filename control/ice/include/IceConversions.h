@@ -13,6 +13,7 @@
 #include <AstroFocus.h>
 #include <AstroProject.h>
 #include <AstroEvent.h>
+#include <AstroConfig.h>
 #include <TrackingPersistence.h>
 #include <AstroDiscovery.h>
 #include <types.h>
@@ -61,6 +62,12 @@ struct ParameterDescription	convert(
 	const astro::device::ParameterDescription& parameter);
 astro::device::ParameterDescription	convert(
 	const struct ParameterDescription& parameter);
+
+struct ConfigurationKey	convert(const astro::config::ConfigurationKey& key);
+astro::config::ConfigurationKey	convert(const struct ConfigurationKey& key);
+
+struct ConfigurationItem	convert(const astro::config::ConfigurationEntry& entry);
+astro::config::ConfigurationEntry	convert(const struct ConfigurationItem& entry);
 
 // Device conversions
 DeviceNameList  convert(const astro::module::Devices::devicelist& list);

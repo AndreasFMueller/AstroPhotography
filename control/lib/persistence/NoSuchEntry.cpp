@@ -8,7 +8,6 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <cstdlib>
-#include <GlobalTable.h>
 
 namespace astro {
 namespace config {

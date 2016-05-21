@@ -291,15 +291,40 @@ public:
 };
 
 /**
+ * \brief Key class for configuration entries
+ */
+class ConfigurationKey {
+public:
+	std::string	domain;
+	std::string	section;
+	std::string	name;
+	ConfigurationKey();
+	ConfigurationKey(const std::string& _domain,
+		const std::string& _section, const std::string& _name);
+	ConfigurationKey(const ConfigurationKey& other);
+	ConfigurationKey&	operator=(const ConfigurationKey& other);
+	bool	operator==(const ConfigurationKey& other) const;
+	bool	operator<(const ConfigurationKey& other) const;
+	std::string	condition() const;
+	std::string	toString() const;
+};
+
+/**
  * \brief Configuration database entry
  *
  * This is a holder class for configuration data.
  */
-class ConfigurationEntry {
+class ConfigurationEntry : public ConfigurationKey {
 public:
-	std::string	section;
-	std::string	name;
 	std::string	value;
+	ConfigurationEntry();
+	ConfigurationEntry(const std::string& _domain,
+		const std::string& _section,
+		const std::string& _name, const std::string& _value);
+	ConfigurationEntry(const ConfigurationKey& key,
+		const std::string& _value);
+	bool	operator==(const ConfigurationEntry& other) const;
+	bool	operator<(const ConfigurationEntry& other) const;
 };
 
 /**
@@ -388,6 +413,31 @@ static void	set_default(const std::string& filename);
 	virtual void	removeglobal(const std::string& section,
 				const std::string& name) = 0;
 	virtual std::list<ConfigurationEntry>	globallist() = 0;
+
+	// all configuration variables
+	virtual bool	has(const ConfigurationKey& key) = 0;
+	virtual bool	has(const std::string& domain,
+				const std::string& section,
+				const std::string& name) = 0;
+	virtual std::string	get(const ConfigurationKey& key) = 0;
+	virtual std::string	get(const std::string& domain,
+					const std::string& section,
+					const std::string& name) = 0;
+	virtual std::string	get(const std::string& domain,
+					const std::string& section,
+					const std::string& name,
+					const std::string& def) = 0;
+	virtual void	set(const std::string& domain,
+				const std::string& section,
+				const std::string& name,
+				const std::string& value) = 0;
+	virtual void	remove(const std::string& domain,
+				const std::string& section,
+				const std::string& name) = 0;
+	virtual std::list<ConfigurationEntry>	list() = 0;
+	virtual std::list<ConfigurationEntry>	list(const std::string& domain) = 0;
+	virtual std::list<ConfigurationEntry>	list(const std::string& domain,
+		const std::string& section) = 0;
 
 	// access to the raw database
 	virtual persistence::Database	database() = 0;
