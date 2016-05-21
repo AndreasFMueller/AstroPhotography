@@ -28,19 +28,6 @@ class ConfigurationBackend : public Configuration {
 public:
 	// constructor
 	ConfigurationBackend(const std::string& filename);
-	// global configuratoin variables
-	virtual bool	hasglobal(const std::string& section,
-				const std::string& name);
-	virtual std::string	global(const std::string& section,
-					const std::string& name);
-	virtual std::string	global(const std::string& section,
-					const std::string& name,
-					const std::string& def);
-	virtual void	setglobal(const std::string& section,
-			const std::string& name, const std::string& value);
-	virtual void	removeglobal(const std::string& name,
-				const std::string& value);
-	virtual std::list<ConfigurationEntry>	globallist();
 
 public:
 	// all configuration variables

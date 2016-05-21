@@ -397,8 +397,8 @@ int	main(int argc, char *argv[]) {
 	std::string	reponame = arguments[0];
 	if (reponame == "default") {
 		ConfigurationPtr	configuration = Configuration::get();
-		if (configuration->hasglobal("repository", "default")) {
-			reponame = configuration->global("repository",
+		if (configuration->has("global", "repository", "default")) {
+			reponame = configuration->get("global", "repository",
 				"default");
 		} else {
 			std::cerr << "default repository not set" << std::endl;

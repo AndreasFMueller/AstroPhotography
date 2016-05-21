@@ -23,59 +23,6 @@ ConfigurationBackend::ConfigurationBackend(const std::string& filename)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", _dbfilename.c_str());
 }
 
-/**
- * \brief Find out whether a given configuration value exists
- */
-bool	ConfigurationBackend::hasglobal(const std::string& section,
-		const std::string& name) {
-	return has("global", section, name);
-}
-
-/**
- * \brief retrieve a global configuration variable
- */ 
-std::string	ConfigurationBackend::global(const std::string& section,
-			const std::string& name) {
-	return get("global", section, name);
-}
-
-/**
- * \brief retrieve a global configuration value, with a default
- *
- * If there is no configuration value for this section and name, then return
- * the default value
- */
-std::string	ConfigurationBackend::global(const std::string& section,
-			const std::string& name, const std::string& def) {
-	return get("global", section, name, def);
-}
-
-/*
- * \brief set a global configuration variable
- */
-void	ConfigurationBackend::setglobal(const std::string& section,
-		const std::string& name, const std::string& value) {
-	set("global", section, name, value);
-}
-
-/**
- * \brief remove a global configuration variable
- */
-void	ConfigurationBackend::removeglobal(const std::string& section,
-		const std::string& name) {
-	remove("global", section, name);
-}
-
-/**
- * \brief 
- */
-std::list<ConfigurationEntry>	ConfigurationBackend::globallist() {
-	return list("global");
-}
-
-//////////////////////////////////////////////////////////////////////
-//  generic variable access
-//////////////////////////////////////////////////////////////////////
 bool    ConfigurationBackend::has(const ConfigurationKey& key) {
 	return _configurationtable.has(key.condition());
 }

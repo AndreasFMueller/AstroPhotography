@@ -19,8 +19,8 @@ void	ServiceLocation::locate() {
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
 	if (_servicename.size() == 0) {
-		if (config->hasglobal("service", "name")) {
-			_servicename = config->global("service", "name");
+		if (config->has("global", "service", "name")) {
+			_servicename = config->get("global", "service", "name");
 		} else {
 			char	h[1024];
 			if (gethostname(h, sizeof(h)) < 0) {
@@ -34,16 +34,16 @@ void	ServiceLocation::locate() {
 		}
 	}
 	if (_port == 0) {
-		if (config->hasglobal("service", "port")) {
-			std::string	s = config->global("service", "port");
+		if (config->has("global", "service", "port")) {
+			std::string	s = config->get("global", "service", "port");
 			_port = std::stoi(s);
 		} else {
 			_port = 10000;
 		}
 	}
 	if (_sslport == 0) {
-		if (config->hasglobal("service", "sslport")) {
-			std::string s = config->global("service", "sslport");
+		if (config->has("global", "service", "sslport")) {
+			std::string s = config->get("global", "service", "sslport");
 			_sslport = std::stoi(s);
 		}
 	}

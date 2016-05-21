@@ -43,8 +43,8 @@ void	ConfigurationTest::testConfiguration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConfiguration() begin");
 	ConfigurationPtr	configuration
 		= Configuration::get("configtest.db");
-	configuration->setglobal(".", "name1", "value1");
-	configuration->setglobal(".", "name2", "value2");
+	configuration->set("global", ".", "name1", "value1");
+	configuration->set("global", ".", "name2", "value2");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testConfiguration() end");
 }
 
@@ -52,9 +52,9 @@ void	ConfigurationTest::testRecall() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRecall() begin");
 	ConfigurationPtr	configuration
 		= Configuration::get("configtest.db");
-	CPPUNIT_ASSERT(configuration->global(".", "name1") == "value1");
-	CPPUNIT_ASSERT(configuration->global(".", "name2") == "value2");
-	CPPUNIT_ASSERT(configuration->global(".", "name3", "value3")
+	CPPUNIT_ASSERT(configuration->get("global", ".", "name1") == "value1");
+	CPPUNIT_ASSERT(configuration->get("global", ".", "name2") == "value2");
+	CPPUNIT_ASSERT(configuration->get("global", ".", "name3", "value3")
 		== "value3");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRecall() end");
 }
@@ -63,8 +63,8 @@ void	ConfigurationTest::testRemove() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRemove() begin");
 	ConfigurationPtr	configuration
 		= Configuration::get("configtest.db");
-	configuration->removeglobal(".", "name1");
-	CPPUNIT_ASSERT(configuration->global(".", "name1", "value3")
+	configuration->remove("global", ".", "name1");
+	CPPUNIT_ASSERT(configuration->get("global", ".", "name1", "value3")
 		== "value3");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testRemove() end");
 }

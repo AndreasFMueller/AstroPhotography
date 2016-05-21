@@ -49,13 +49,12 @@ static void	usage(const char *progname) {
 	std::cout << "display a help message about the astrconfig command";
 	std::cout << std::endl;
 	std::cout << std::endl;
-	std::cout << p << " [ options ] { get | set | delete } domain section name [ value ]" << std::endl;
-	std::cout << p << " [ options ] { list } domain [ section [ name ]]" << std::endl;
+	std::cout << p << " [ options ] { get | set | delete } <domain> <section> <name> [ <value> ]" << std::endl;
+	std::cout << p << " [ options ] { list } <domain> [ <section> [ <name> ]]" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Get, set or delete configuration variables in domain "
-		"(currently only" << std::endl;
-	std::cout << "'global' is valid), identified by the section and "
-		"the name." << std::endl;
+	std::cout << "Get, set or delete configuration variables in domain <domain>, "
+		<< std::endl;
+	std::cout << "identified by <section> and <name>." << std::endl;
 	std::cout << std::endl;
 	std::cout << p << " [ options ] imagerepo list" << std::endl;
 	std::cout << p << " [ options ] imagerepo add <reponame> <directory>";
@@ -85,9 +84,10 @@ int	command_help(const std::vector<std::string>& /* arguments */) {
 }
 
 /**
- * \brief set a global configuration variable
+ * \brief Implementation of the set command
  */
-int	command_set_global(const std::vector<std::string>& arguments) {
+int	command_set(const std::vector<std::string>& arguments) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set command");
 	if (arguments.size() < 5) {
 		std::cerr << "not enough arguments for set command";
 		std::cerr << std::endl;
@@ -96,78 +96,25 @@ int	command_set_global(const std::vector<std::string>& arguments) {
 	ConfigurationPtr	configuration = Configuration::get();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting value %s",
 		arguments[4].c_str());
-	configuration->setglobal(arguments[2], arguments[3], arguments[4]);
+	configuration->set(arguments[1], arguments[2], arguments[3],
+		arguments[4]);
 	return EXIT_SUCCESS;
-}
-
-/**
- * \brief Implementation of the set command
- */
-int	command_set(const std::vector<std::string>& arguments) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set command");
-	if (arguments.size() < 2) {
-		std::cerr << "not enough arguments for get command";
-		std::cerr << std::endl;
-		return EXIT_FAILURE;
-	}
-	std::string	domain = arguments[1];
-	if (domain == "global") {
-		return command_set_global(arguments);
-	}
-	std::cerr << "domain " << domain << "  not implemented" << std::endl;
-	return EXIT_FAILURE;
-}
-
-/**
- * \brief Implementation of the get global command
- */
-int	command_get_global(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 4) {
-		std::cerr << "not enough arguments for get command";
-		std::cerr << std::endl;
-		return EXIT_FAILURE;
-	}
-	try {
-		ConfigurationPtr	configuration = Configuration::get();
-		std::cout << configuration->global(arguments[2],
-					arguments[3]); 
-		std::cout << std::endl;
-		return EXIT_SUCCESS;
-	} catch (const std::exception& x) {
-		std::cerr << "not found: "  << x.what() << std::endl;
-	}
-	return EXIT_FAILURE;
 }
 
 /**
  * \brief Implementation of the get command
  */
 int	command_get(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 2) {
-		std::cerr << "not enough arguments for get command";
-		std::cerr << std::endl;
-		return EXIT_FAILURE;
-	}
-	std::string	domain = arguments[1];
-	if (domain == "global") {
-		return command_get_global(arguments);
-	}
-	std::cerr << "domain " << domain << " not implemented" << std::endl;
-	return EXIT_FAILURE;
-}
-
-/**
- * \brief Implementation of the global delete command
- */
-int	command_delete_global(const std::vector<std::string>& arguments) {
 	if (arguments.size() < 4) {
-		std::cerr << "not enough arguments for delete command";
+		std::cerr << "not enough arguments for get command";
 		std::cerr << std::endl;
 		return EXIT_FAILURE;
 	}
 	try {
 		ConfigurationPtr	configuration = Configuration::get();
-		configuration->removeglobal(arguments[2], arguments[3]); 
+		std::cout << configuration->get(arguments[1], arguments[2],
+					arguments[3]); 
+		std::cout << std::endl;
 		return EXIT_SUCCESS;
 	} catch (const std::exception& x) {
 		std::cerr << "not found: "  << x.what() << std::endl;
@@ -179,30 +126,47 @@ int	command_delete_global(const std::vector<std::string>& arguments) {
  * \brief Implementation of the delete command
  */
 int	command_delete(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 2) {
-		std::cerr << "not enough arguments for get command";
+	if (arguments.size() < 4) {
+		std::cerr << "not enough arguments for delete command";
 		std::cerr << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::string	domain = arguments[1];
-	if (domain == "global") {
-		return command_delete_global(arguments);
+	try {
+		ConfigurationPtr	config = Configuration::get();
+		config->remove(arguments[1], arguments[2], arguments[3]); 
+		return EXIT_SUCCESS;
+	} catch (const std::exception& x) {
+		std::cerr << "not found: "  << x.what() << std::endl;
 	}
-	std::cerr << "domain " << domain << " not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 
 /**
  * \brief Implementation of the list global command
  */
-int	command_list_global(const std::vector<std::string>& /* arguments */) {
-	std::list<ConfigurationEntry>	entries
-		= Configuration::get()->globallist();
+int	command_list(const std::vector<std::string>& arguments) {
+	std::list<ConfigurationEntry>	entries;
+	ConfigurationPtr	config = Configuration::get();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "list command with %d arguments",
+		arguments.size());
+	switch (arguments.size()) {
+	case 0:
+		throw std::runtime_error("command missing");
+	case 1:
+		entries = config->list();
+		break;
+	case 2:
+		entries = config->list(arguments[1]);
+		break;
+	case 3:
+	default:
+		entries = config->list(arguments[1], arguments[2]);
+		break;
+	}
+
 	std::for_each(entries.begin(), entries.end(),
-		[](ConfigurationEntry entry) {
-			std::cout << entry.section;
-			std::cout << "\t";
-			std::cout << entry.name;
+		[](const ConfigurationEntry& entry) {
+			std::cout << entry.toString();
 			std::cout << "\t";
 			std::cout << entry.value;
 			std::cout << "\n";
@@ -276,23 +240,6 @@ int	command_imagerepo(const std::vector<std::string>& arguments) {
 		return EXIT_SUCCESS;
 	}
 	std::cerr << "unknown subcommand " << arguments[1] << std::endl;
-	return EXIT_FAILURE;
-}
-
-/**
- * \brief 
- */
-int	command_list(const std::vector<std::string>& arguments) {
-	if (arguments.size() < 2) {
-		std::cerr << "not enough arguments for get command";
-		std::cerr << std::endl;
-		return EXIT_FAILURE;
-	}
-	std::string	domain = arguments[1];
-	if (domain == "global") {
-		return command_list_global(arguments);
-	}
-	std::cerr << "domain " << domain << " not implemented" << std::endl;
 	return EXIT_FAILURE;
 }
 

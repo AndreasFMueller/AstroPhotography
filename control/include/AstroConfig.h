@@ -400,20 +400,6 @@ static ConfigurationPtr	get(const std::string& filename);
 static std::string	get_default();
 static void	set_default(const std::string& filename);
 
-	// global configuration variables
-	virtual bool	hasglobal(const std::string& section,
-				const std::string& name) = 0;
-	virtual std::string	global(const std::string& section,
-				const std::string& name) = 0;
-	virtual std::string	global(const std::string& section,
-				const std::string& name,
-				const std::string& def) = 0;
-	virtual void	setglobal(const std::string& section,
-			const std::string& name, const std::string& value) = 0;
-	virtual void	removeglobal(const std::string& section,
-				const std::string& name) = 0;
-	virtual std::list<ConfigurationEntry>	globallist() = 0;
-
 	// all configuration variables
 	virtual bool	has(const ConfigurationKey& key) = 0;
 	virtual bool	has(const std::string& domain,

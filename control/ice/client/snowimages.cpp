@@ -230,8 +230,8 @@ int	main(int argc, char *argv[]) {
 	// where to store the images otherwise
 	if (0 == reponame.size()) {
 		// try to get the default repo name from the config database
-		if (config->hasglobal("repository", "default")) {
-			reponame = config->global("repository", "default");
+		if (config->has("global", "repository", "default")) {
+			reponame = config->get("global", "repository", "default");
 		} else {
 			short_usage(argv[0]);
 			throw std::runtime_error("repository name not set");
@@ -361,8 +361,8 @@ int	main(int argc, char *argv[]) {
 		if (0 == project.size()) {
 			// try to get the default projec name from the 
 			// config database
-			if (config->hasglobal("project", "default")) {
-				project = config->global("project", "default");
+			if (config->has("global", "project", "default")) {
+				project = config->get("global", "project", "default");
 			}
 		}
 		if (project.size() > 0) {

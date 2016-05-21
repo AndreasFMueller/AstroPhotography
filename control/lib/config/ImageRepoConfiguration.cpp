@@ -91,12 +91,12 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 	// find out whether the name contains any slashes
 	std::string	_directory = directory;
 	if (directory.find('/') == std::string::npos) {
-		if (!_config->hasglobal("repository", "topdir")) {
+		if (!_config->has("global", "repository", "topdir")) {
 			debug(LOG_ERR, DEBUG_LOG, 0,
 				"repository.topdir not set");
 			throw BadParameter("repository.topdir not set");
 		}
-		_directory = _config->global("repository", "topdir")
+		_directory = _config->get("global", "repository", "topdir")
 			+ "/" + directory;
 	}
 
