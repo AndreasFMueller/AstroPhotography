@@ -16,7 +16,7 @@
     if (self = [super init]) {
         // create connection preferences
         NSUserDefaults  *defaults = [NSUserDefaults standardUserDefaults];
-        int port = [defaults integerForKey: @"port_preference"];
+        long port = [defaults integerForKey: @"port_preference"];
         if (0 == port) {
             port = 10000;
         }
@@ -35,7 +35,7 @@
         communicator = [ICEUtil createCommunicator: initializationdata];
         
         // build the name for the remote device
-        NSString    *name = [NSString stringWithFormat: @"Devices:default -h %@ -p %d", host, port];
+        NSString    *name = [NSString stringWithFormat: @"Devices:default -h %@ -p %ld", host, port];
         NSLog(@"connecting to %@", name);
         
         // get the remote object

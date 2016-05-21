@@ -4,22 +4,33 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 	/**
 	 * \brief Task Parameters
 	 */
 	struct TaskParameters {
+		// instrument
+		string	instrument;
+
 		// camera
-		string	camera;
-		int	ccdid;
+		int	cameraIndex;
+		int	ccdIndex;
 
 		// cooler stuff
+		int	coolerIndex;
 		float	ccdtemperature;
 
 		// filterwheel parameters
-		string	filterwheel;
-		int	filterposition;
+		int	filterwheelIndex;
+		string	filter;
+
+		// information about the mount
+		int	mountIndex;
+
+		// project
+		string	project;
 
 		// exposure stuff
 		Exposure	exp;
@@ -36,7 +47,7 @@ module snowstar {
 	 * is in the cancelled state.
 	 */
 	enum TaskState	{ TskPENDING, TskEXECUTING, TskFAILED,
-			TskCANCELLED, TskCOMPLETED };
+			TskCANCELLED, TskCOMPLETE };
 
 	/**
 	 * \brief Information about a task
@@ -53,11 +64,17 @@ module snowstar {
 		int		taskid;
 		// the current state of the task, and when it last changed
 		TaskState	state;
-		int		lastchange;
+		double		lastchange;
 		string		cause;
 		// where the produced image is storead
 		string		filename;
 		ImageRectangle	frame;
+		// names for the devices
+		string	camera;
+		string	ccd;
+		string	cooler;
+		string	filterwheel;
+		string	mount;
 	};
 
 	/**
@@ -70,7 +87,9 @@ module snowstar {
 		TaskParameters	parameters();
 		TaskInfo	info();
 		string		imagename();
-		Image		getImage() throws NotFound;
+		Image*		getImage() throws NotFound;
+		// save an image in a repository
+		int	imageToRepo(string reponame) throws NotFound;
 	};
 
 	/**
@@ -83,22 +102,16 @@ module snowstar {
 	};
 
 	/**
-	 * \brief Monitor for Task queues
+	 * \brief Interface to monitor a task
 	 */
-	interface TaskMonitor {
-		/**
-		 * \break method called when a task changes state
-		 */
-		void	update(TaskMonitorInfo taskinfo);
-		/**
-		 * \brief called when the task queue is destroyed
-		 */
-		void	stop();
+	interface TaskMonitor extends Callback {
+		void	update(TaskMonitorInfo info);
 	};
 
 	sequence<int> taskidsequence;
 
-	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING, QueueSTOPPED };
+	enum QueueState { QueueIDLE, QueueLAUNCHING, QueueSTOPPING,
+		QueueSTOPPED };
 	/**
 	 * \brief Task queue
 	 *
@@ -113,12 +126,12 @@ module snowstar {
 		/**
 		 * \brief start the queue
 		 */
-		void	start();
+		void	start() throws BadState;
 
 		/**
 		 * \brief stop the queue
 		 */
-		void	stop();
+		void	stop() throws BadState;
 
 		/**
 		 * \brief submit a new task
@@ -155,16 +168,12 @@ module snowstar {
 		/**
 		 * \brief retrieve a task reference
 		 */
-		Task	getTask(int taskid) throws NotFound;
+		Task*	getTask(int taskid) throws NotFound;
 
 		/**
-		 * \brief register a task monitor
+		 * \brief register a callback
 		 */
-		int	registerMonitor(TaskMonitor monitor);
-
-		/**
-		 * \brief unregister a task monitor
-		 */
-		void	unregisterMonitor(int monitorid);
+		void	registerMonitor(Ice::Identity taskmonitor);
+		void	unregisterMonitor(Ice::Identity taskmonitor);
 	};
 };

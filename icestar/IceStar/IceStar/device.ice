@@ -9,12 +9,28 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
+
+	// state of mount
+	enum mountstate { MountIDLE, MountALIGNED, MountTRACKING, MountGOTO };
+
+	/**
+	 * \brief Interface to a telescope mount
+	 */
+	interface Mount extends Device {
+		mountstate	state();
+		RaDec	getRaDec();
+		AzmAlt	getAzmAlt();
+		void	GotoRaDec(RaDec radecposition);
+		void	GotoAzmAlt(AzmAlt azmaltposition);
+		void	cancel();
+	};
+
 	// device related stuff
 	sequence<string>	DeviceNameList;
 
 	enum devicetype { DevAO, DevCAMERA, DevCCD,
 		DevCOOLER, DevFILTERWHEEL, DevFOCUSER,
-		DevGUIDERPORT, DevMODULE };
+		DevGUIDERPORT, DevMODULE, DevMOUNT };
 	/**
 	 * \brief Device Locator interface within a module
 	 */
@@ -33,12 +49,52 @@ module snowstar {
 		/**
 		 * \brief Retrieve a device of a certain type
 		 */
+		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
 		Camera*		getCamera(string name) throws NotFound;
 		Ccd*		getCcd(string name) throws NotFound;
 		GuiderPort*	getGuiderPort(string name) throws NotFound;
 		FilterWheel*	getFilterWheel(string name) throws NotFound;
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;
+		Mount*		getMount(string name) throws NotFound;
+	};
+
+	/**
+	 * \brief Device Locator interface, locates devices in a module
+	 */
+	interface DeviceLocator {
+		string	getName();
+		string	getVersion();
+		DeviceNameList	getDevicelist(devicetype type);
+		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
+		Camera*		getCamera(string name) throws NotFound;
+		Ccd*		getCcd(string name) throws NotFound;
+		GuiderPort*	getGuiderPort(string name) throws NotFound;
+		FilterWheel*	getFilterWheel(string name) throws NotFound;
+		Cooler*		getCooler(string name) throws NotFound;
+		Focuser*	getFocuser(string name) throws NotFound;
+		Mount*		getMount(string name) throws NotFound;
+	};
+
+	/**
+	 * \brief interface to a driver module
+ 	 */
+	interface DriverModule {
+		string	getName();
+		string	getVersion();
+		bool	hasLocator();
+		DeviceLocator*	getDeviceLocator() throws NotFound;
+	};
+
+	sequence<string>	ModuleNameList;
+
+	/**
+	 * \brief get access to modules
+	 */
+	interface Modules {
+		int	numberOfModules();
+		ModuleNameList	getModuleNames();
+		DriverModule*	getModule(string name) throws NotFound;
 	};
 };
 

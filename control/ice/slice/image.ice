@@ -4,7 +4,6 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 //
 #include <types.ice>
-#include <exceptions.ice>
 
 /**
  * \brief snowstar module captures all interfaces

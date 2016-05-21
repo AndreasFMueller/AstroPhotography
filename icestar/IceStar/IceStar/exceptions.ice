@@ -48,4 +48,18 @@ module snowstar {
 	exception IOException {
 		string cause;
 	};
+
+	/**
+ 	 * \brief DeviceException
+	 */
+	exception DeviceException {
+		string cause;
+	};
+
+	/**
+	 * \brief Exception thrown when an object already exists
+ 	 */
+	exception Exists {
+		string cause;
+	};
 };

@@ -4,18 +4,32 @@
 // (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil 2013
 //
 #include <camera.ice>
+#include <Ice/Identity.ice>
 
 module snowstar {
 	/**
-	 * \brief guiders are described by camera, ccdid and guider port
+	 * \brief guiders are described by an Instrument name and indices
 	 *
-	 * Camera name and guiderport name are standard device URLs, the 
-	 * ccdid is the number of the ccd.
+	 * A guider is defined by the instrument name and the indices of the
+	 * guider ccd, guider port and adaptive optics unit.
 	 */
 	struct GuiderDescriptor {
-		string	cameraname;
-		int	ccdid;
-		string	guiderportname;
+		string	instrumentname;
+		int	ccdIndex;
+		int	guiderportIndex;
+		int	adaptiveopticsIndex;
+	};
+
+	/**
+	 * \brief Control device type selection 
+	 *
+	 * The guider can use guider ports or tip-tilt adaptive optics units.
+	 * This means that when requesting calibration, we have to be able
+	 * to distinguish the two, by using the ControlType enumeration.
+	 */
+	enum ControlType {
+		ControlGuiderPort,
+		ControlAdaptiveOptics
 	};
 
 	/**
@@ -29,6 +43,7 @@ module snowstar {
 		double	timeago;
 		Point	trackingoffset;
 		Point	activation;
+		ControlType	type;
 	};
 	sequence<TrackingPoint> TrackingPoints;
 
@@ -41,9 +56,27 @@ module snowstar {
 	 */
 	struct TrackingHistory {
 		int	guiderunid;
-		int	timeago;
+		double	timeago;
+		int	guiderportcalid;
+		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
+	};
+
+	/**
+	 * \brief A summary of the tracking
+	 *
+	 * The tracking 
+	 */
+	struct TrackingSummary {
+		int	guiderunid;
+		double	since;
+		int	guiderportcalid;
+		int	adaptiveopticscalid;
+		GuiderDescriptor	guider;
+		Point	lastoffset;
+		Point	averageoffset;
+		Point	variance;
 	};
 
 	/**
@@ -51,30 +84,8 @@ module snowstar {
 	 *
 	 * A tracking monitor processes new points
 	 */
-	interface TrackingMonitor {
+	interface TrackingMonitor extends Callback {
 		void	update(TrackingPoint ti);
-		void	stop();
-	};
-
-	/**
-	 * \brief Tracking Image structure
-	 *
-	 * The tracking image contains the size of the image and a sequence
-	 * containing the short pixels. 
-	 */
-	struct TrackingImage {
-		ImageSize	size;
-		ShortSequence	imagedata;
-	};
-
-	/**
-	 * \brief Interface for tracking image updates
-	 *
-	 * The image monitor interface receives new tracking images
-	 */
-	interface TrackingImageMonitor {
-		void	update(TrackingImage ti);
-		void	stop();
 	};
 
 	/**
@@ -105,6 +116,13 @@ module snowstar {
 		double	timeago;
 		GuiderDescriptor	guider;
 		calibrationcoefficients	coefficients;
+		double	quality;
+		double	det;
+		bool	complete;
+		double	focallength;
+		double	masPerPixel;
+		ControlType	type;
+		bool	flipped;
 		CalibrationSequence	points;
 	};
 
@@ -114,9 +132,8 @@ module snowstar {
 	 * The calibration monitor processes updates for new calibration
 	 * points.
 	 */
-	interface CalibrationMonitor {
+	interface CalibrationMonitor extends Callback {
 		void	update(CalibrationPoint point);
-		void	stop();
 	};
 
 	/**
@@ -138,6 +155,16 @@ module snowstar {
 		// The calibrated guider can be used for guiding
 		GuiderGUIDING
 	};
+
+	enum TrackerMethod {
+		TrackerUNDEFINED,
+		TrackerNULL,
+		TrackerSTAR,
+		TrackerPHASE,
+		TrackerDIFFPHASE,
+		TrackerLAPLACE,
+		TrackerLARGE
+	};
 	/**
 	 * \brief Interface for guiders
 	 *
@@ -149,14 +176,9 @@ module snowstar {
 		GuiderState	getState();
 
 		/**
-		 * \brief Get the camera that was chosen for the guider
-		 */
-		Camera	getCamera() throws BadState;
-
-		/**
 		 * \brief Get the CCD that was chosen for the guider
 		 */
-		Ccd	getCcd() throws BadState;
+		Ccd*	getCcd() throws BadState;
 		
 		/**
 		 * \brief Choose a guider port for the guider
@@ -165,7 +187,7 @@ module snowstar {
 		 * it is assumed that the guider port of the chosen
 		 * camera should be used
 		 */
-		GuiderPort	getGuiderPort() throws BadState;
+		GuiderPort*	getGuiderPort() throws BadState;
 
 		/**
 		 * \brief return the descriptor that created the guider
@@ -178,6 +200,10 @@ module snowstar {
 				throws BadParameter, BadState;
 		Exposure	getExposure();
 
+		// set/get the tracker method
+		void	setTrackerMethod(TrackerMethod method);
+		TrackerMethod	getTrackerMethod();
+
 		// This is the position of the star we want to track.
 		// It does not have to be exact at the beginning, and
 		// the position is only used as a reference point during 
@@ -187,27 +213,38 @@ module snowstar {
 				throws BadParameter, BadState;
 		Point	getStar() throws BadState;
 
+		// if the repository name is set, then all images sent to the
+		// callback will be added to the repository
+		void	setRepositoryName(string reponame) throws NotFound;
+		string	getRepositoryName();
+
 		/**
 		 * \brief Methods related to calibration
 		 */
-		void	useCalibration(int id);
-		Calibration	getCalibration() throws BadState;
+		void	useCalibration(int id, bool flipped)
+					throws BadState, NotFound;
+		Calibration	getCalibration(ControlType caltype)
+					throws BadState;
+		void	flipCalibration(ControlType caltype) throws BadState;
+		void	unCalibrate(ControlType type) throws BadState;
 
 		// methods to perform a calibration asynchronously
-		void	startCalibration(float focallength);
+		int	startCalibration(ControlType caltype)
+					throws BadState;
 		double	calibrationProgress() throws BadState;
 		void	cancelCalibration() throws BadState;
 		bool	waitCalibration(double timeout) throws BadState;
 
-		// callback stuff for 
-		int	registerCalibrationMonitor(CalibrationMonitor monitor);
-		void	unregisterCalibrationMonitor(int monitorid);
+		// methods for monitoring of the calibration process
+		void	registerCalibrationMonitor(Ice::Identity calibrationmonitor);
+		void	unregisterCalibrationMonitor(Ice::Identity calibrationmonitor);
 
 		// Start and stop the guding process.
 		// Before this can be done, the exposure parameters must be
 		// specified, as the determine which are of the CCD to read
 		// out and where to look for the star and where to lock it
-		void	startGuiding(float guidinginterval) throws BadState;
+		void	startGuiding(float gpinterval, float aointerval,
+				bool stepping) throws BadState;
 		float	getGuidingInterval() throws BadState;
 		void	stopGuiding() throws BadState;
 
@@ -218,15 +255,7 @@ module snowstar {
 		/**
 		 * \brief 
 		 */
-		Image	mostRecentImage() throws BadState;
-
-		/**
-		 * \brief Callback interface for Image updates
-		 *
-		 * \param monitor	an image monitor reference
-		 */
-		int	registerImageMonitor(TrackingImageMonitor imagemonitor);
-		void	unregisterImageMonitor(int imagemonitorid);
+		Image*	mostRecentImage() throws BadState;
 
 		/**
 		 * \brief Polling interface to tracking information
@@ -242,29 +271,21 @@ module snowstar {
 		 */
 		TrackingHistory	getTrackingHistory(int guiderunid)
 						throws BadState;
+		TrackingHistory	getTrackingHistoryType(int guiderunid,
+			ControlType type) throws BadState;
 
 		/**
-		 * \brief Callback interface for tracking monitoring
-		 *
-		 * A client interested in updates about tracking activities
-		 * creates a TrackingMonitor service and registeres
-		 * \param monitor	The TrackingMonitor to register.
-		 *			As soon as successfully registered,
-		 *			tracking updates will be sent to
-		 *			monitor.
-		 * \return	The id of the monitor. This id should be
-		 *		used to unregister the service when tracking
-		 *		information is no longer required
+		 * \brief get some statistics information about tracking
 		 */
-		int	registerMonitor(TrackingMonitor monitor);
+		TrackingSummary	getTrackingSummary() throws BadState;
 
-		/**
-		 * \brief Unregister a monitor client
-		 *
-		 * \param monitorid	Id of the monitor returned with the
-		 *			register call
-		 */
-		void	unregisterMonitor(int monitorid);
+		// monitor for tracking points
+		void	registerTrackingMonitor(Ice::Identity trackingmonitor);
+		void	unregisterTrackingMonitor(Ice::Identity trackingmonitor);
+
+		// callbacks for images during guiding _and_ calibration
+		void	registerImageMonitor(Ice::Identity imagemonitor);
+		void	unregisterImageMonitor(Ice::Identity imagemonitor);
 	};
 
 	/**
@@ -282,14 +303,13 @@ module snowstar {
 	 * to the server, but the data should still be accessible.
 	 */
 	sequence<GuiderDescriptor> GuiderList;
-	sequence<int>	idlist;
 	interface GuiderFactory {
 		GuiderList	list();
 
 		/**
 		 * \brief Get a guider based on a guider descriptor
 		 */
-		Guider	get(GuiderDescriptor descriptor) throws NotFound;
+		Guider*	get(GuiderDescriptor descriptor) throws NotFound;
 
 
 		/**
@@ -305,7 +325,12 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Calibration by id
 		 */
-		Calibration	getCalibration(int id);
+		Calibration	getCalibration(int id) throws NotFound;
+
+		/**
+		 * \brief Remove a calibration by id
+		 */
+		void	deleteCalibration(int id) throws NotFound;
 
 		/**
 		 * \brief Retrieve a list of all valid guide run ids
@@ -320,6 +345,13 @@ module snowstar {
 		/**
 		 * \brief Retrieve the Tracking history by id
 		 */
-		TrackingHistory	getTrackingHistory(int id);
+		TrackingHistory	getTrackingHistory(int id) throws NotFound;
+		TrackingHistory	getTrackingHistoryType(int id,
+			ControlType type) throws NotFound;
+
+		/**
+		 * \brief Remove a tracking history
+		 */
+		void	deleteTrackingHistory(int id) throws NotFound;
 	};
 };

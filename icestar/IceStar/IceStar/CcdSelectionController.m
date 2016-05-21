@@ -69,8 +69,8 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     // Configure the cell...
-    NSLog(@"ccdid: %d", indexPath.row);
-    snowstarCcdInfo *ccdinfo = [camera getCcdinfo: indexPath.row];
+    NSLog(@"ccdid: %ld", (long)indexPath.row);
+    snowstarCcdInfo *ccdinfo = [camera getCcdinfo: (int)indexPath.row];
     NSLog(@"ccdname: %@", ccdinfo.name);
     cell.textLabel.text = [[ccdinfo.name stringByRemovingPercentEncoding] lastPathComponent];
     

@@ -33,6 +33,6 @@ endif
 
 net_la_SOURCES = $(SRCFILES)
 net_la_LDFLAGS = -module
-net_la_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-net_la_LIBADD = $(top_builddir)/lib/libastro.la
+net_la_DEPENDENCIES = $(top_builddir)/lib/libastro.la $(top_builddir)/ice/lib/libiceastro.la
+net_la_LIBADD = $(top_builddir)/lib/libastro.la $(top_builddir)/ice/lib/libiceastro.la
 
