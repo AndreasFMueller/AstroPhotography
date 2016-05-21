@@ -46,7 +46,9 @@ class ImageDatabaseDirectory : public ImageDirectory {
 	static astro::persistence::Database	_database;
 public:
 	static astro::persistence::Database	database() { return _database; }
-	static void	database(astro::persistence::Database db) { _database = db; }
+	static void	database(astro::persistence::Database db) {
+		_database = db;
+	}
 public:
 	ImageDatabaseDirectory() { }
 	virtual void	remove(const std::string& filename);

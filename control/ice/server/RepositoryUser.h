@@ -13,8 +13,13 @@ namespace snowstar {
 
 class RepositoryUser {
 	std::string	_repositoryname;
+	void	repositoryname(const std::string& repositoryname);
 	astro::project::ImageRepoPtr	_imagerepo;
 public:
+	RepositoryUser();
+	RepositoryUser(const std::string& repositoryname);
+	virtual ~RepositoryUser();
+
 	const std::string	repositoryname() const {
 		return _repositoryname;
 	}

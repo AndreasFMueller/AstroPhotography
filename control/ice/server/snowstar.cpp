@@ -8,36 +8,16 @@
 #include <Ice/Initialize.h>
 #include <cstdlib>
 #include <iostream>
-#include <DevicesI.h>
-#include <ImagesI.h>
+#include <includes.h>
 #include <AstroDebug.h>
 #include <DeviceServantLocator.h>
 #include <ImageLocator.h>
-#include <AstroTask.h>
-#include <TaskQueueI.h>
-#include <TaskLocator.h>
-#include <GuiderFactoryI.h>
-#include <GuiderLocator.h>
-#include <ModulesI.h>
-#include <DriverModuleLocator.h>
-#include <DeviceLocatorLocator.h>
-#include <FocusingFactoryI.h>
-#include <FocusingLocator.h>
 #include <AstroConfig.h>
-#include <repository.h>
-#include <RepositoriesI.h>
-#include <RepositoryLocator.h>
-#include <AstroDiscovery.h>
-#include <AstroFormat.h>
-#include <InstrumentLocator.h>
-#include <InstrumentsI.h>
 #include <CommunicatorSingleton.h>
 #include <AstroEvent.h>
-#include <EventHandlerI.h>
-#include <EventServantLocator.h>
-#include <ConfigurationI.h>
 #include <grp.h>
 #include <pwd.h>
+#include "Server.h"
 
 namespace snowstar {
 
@@ -92,165 +72,6 @@ static void	usage(const char *progname) {
 	std::cout << " -s,--sslport=<port>       use SSL enable port <port>"
 		<< std::endl;
 	std::cout << " -u,--user=<user>          user to run as" << std::endl;
-}
-
-/**
- * \brief Get the services to be activated from the configuration
- */
-static void	get_configured_services(astro::discover::ServicePublisherPtr sp) {
-	if (!sp) {
-		return;
-	}
-	astro::config::ConfigurationPtr configuration
-		= astro::config::Configuration::get();
-	if (configuration->get("global", "service", "instruments", "no") == "yes") {
-		sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
-	}
-	if (configuration->get("global", "service", "devices", "yes") == "yes") {
-		sp->set(astro::discover::ServiceSubset::DEVICES);
-	}
-	if (configuration->get("global", "service", "tasks", "no") == "yes") {
-		sp->set(astro::discover::ServiceSubset::TASKS);
-	}
-	if (configuration->get("global", "service", "guiding", "no") == "yes") {
-		sp->set(astro::discover::ServiceSubset::GUIDING);
-	}
-	if (configuration->get("global", "service", "focusing", "no") == "yes") {
-		sp->set(astro::discover::ServiceSubset::FOCUSING);
-	}
-	if (configuration->get("global", "service", "images", "yes") == "yes") {
-		sp->set(astro::discover::ServiceSubset::IMAGES);
-	}
-	if (configuration->get("global", "service", "repository", "no") == "yes") {
-		sp->set(astro::discover::ServiceSubset::REPOSITORY);
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "configured services: %s",
-		sp->toString().c_str());
-}
-
-/**
- * \brief Add devices servant
- */
-static void	add_devices_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter,
-			astro::module::Repository& repository,
-			astro::module::Devices& devices,
-			astro::image::ImageDirectory& imagedirectory) {
-	Ice::ObjectPtr	object = new DevicesI(devices);
-	adapter->add(object, ic->stringToIdentity("Devices"));
-	DeviceServantLocator	*deviceservantlocator
-		= new DeviceServantLocator(repository, imagedirectory);
-	adapter->addServantLocator(deviceservantlocator, "");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEVICE,
-		"Device server ready");
-
-	// add a servant for the modules
-	object = new ModulesI();
-	adapter->add(object, ic->stringToIdentity("Modules"));
-	DriverModuleLocator	*drivermodulelocator
-		= new DriverModuleLocator(repository);
-	adapter->addServantLocator(drivermodulelocator, "drivermodule");
-
-	// add servant locator for device locator
-	DeviceLocatorLocator	*devicelocatorlocator
-		= new DeviceLocatorLocator(repository);
-	adapter->addServantLocator(devicelocatorlocator, "devicelocator");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Modules servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::MODULE,
-		"Module server ready");
-}
-
-static void	add_event_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter) {
-	Ice::ObjectPtr	object = new EventHandlerI();
-	adapter->add(object, ic->stringToIdentity("Events"));
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
-		"Event server added");
-}
-
-static void	add_configuration_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter) {
-	astro::config::ConfigurationPtr	configuration
-		= astro::config::Configuration::get();
-	Ice::ObjectPtr	object = new ConfigurationI(configuration);
-	adapter->add(object, ic->stringToIdentity("Configuration"));
-	astro::event(EVENT_GLOBAL, astro::events::Event::DEBUG,
-		"Configuration server added");
-}
-
-static void	add_images_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter,
-			astro::image::ImageDirectory& imagedirectory) {
-	Ice::ObjectPtr	object = new ImagesI(imagedirectory);
-	adapter->add(object, ic->stringToIdentity("Images"));
-	ImageLocator	*imagelocator = new ImageLocator(imagedirectory);
-	adapter->addServantLocator(imagelocator, "image");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::IMAGE,
-		"Image server ready");
-}
-
-static void	add_tasks_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter,
-			astro::persistence::Database database,
-			astro::task::TaskQueue& taskqueue) {
-	Ice::ObjectPtr	object = new TaskQueueI(taskqueue);
-	adapter->add(object, ic->stringToIdentity("Tasks"));
-	TaskLocator	*tasklocator = new TaskLocator(database);
-	adapter->addServantLocator(tasklocator, "task");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "task locator added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::TASK,
-		"Task server ready");
-}
-
-static void	add_instruments_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter) {
-	Ice::ObjectPtr	object = new InstrumentsI();
-	adapter->add(object, ic->stringToIdentity("Instruments"));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Instruments servant added");
-	InstrumentLocator	*instrumentlocator = new InstrumentLocator();
-	adapter->addServantLocator(instrumentlocator, "instrument");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Instrument servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::INSTRUMENT,
-		"Instrument server ready");
-}
-
-static void	add_repository_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter) {
-	Ice::ObjectPtr	object = new RepositoriesI();
-	adapter->add(object, ic->stringToIdentity("Repositories"));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Repositories servant added");
-	RepositoryLocator	*repolocator = new RepositoryLocator();
-	adapter->addServantLocator(repolocator, "repository");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Repository servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::REPOSITORY,
-		"Repository server ready");
-}
-
-static void	add_guiding_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter,
-			astro::persistence::Database database,
-			astro::guiding::GuiderFactory& guiderfactory,
-			astro::image::ImageDirectory& imagedirectory) {
-	GuiderLocator	*guiderlocator = new GuiderLocator();
-	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderfactory,
-		guiderlocator, imagedirectory);
-	adapter->add(object, ic->stringToIdentity("Guiders"));
-	adapter->addServantLocator(guiderlocator, "guider");
-	astro::event(EVENT_GLOBAL, astro::events::Event::GUIDE,
-		"Guider server ready");
-}
-
-static void	add_focusing_servant(Ice::CommunicatorPtr ic,
-			Ice::ObjectAdapterPtr adapter) {
-	Ice::ObjectPtr	object = new FocusingFactoryI();
-	adapter->add(object, ic->stringToIdentity("FocusingFactory"));
-	FocusingLocator	*focusinglocator = new FocusingLocator();
-	adapter->addServantLocator(focusinglocator, "focusing");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Focusing servant added");
-	astro::event(EVENT_GLOBAL, astro::events::Event::FOCUS,
-		"Focusing server ready");
 }
 
 /**
@@ -428,109 +249,9 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 	astro::PidFile	pidfile(pidfilename);
 
-	// activate the event log
-	astro::events::EventHandler::active(true);
-	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
-		"snowstar server startup");
-
-	// determine which service name to use
-	astro::discover::ServiceLocation&	location
-		= astro::discover::ServiceLocation::get();
-	astro::discover::ServicePublisherPtr	sp
-		= astro::discover::ServicePublisher::get(location.servicename(),
-			location.port());
-	astro::discover::ServicePublisherPtr	sps;
-	if (location.ssl()) {
-		sps = astro::discover::ServicePublisher::get(
-			location.servicename() + "-ssl", location.sslport());
-	}
-
-	// find out which services are configured
-	get_configured_services(sp);
-	get_configured_services(sps);
-	// publish the service name
-	sp->publish();
-	if (sps) { sps->publish(); }
-
-	// set up the repository
-	astro::module::Repository	repository;
-	astro::module::Devices	devices(repository);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices set up");
-
-	// create image directory
-	astro::image::ImageDirectory	imagedirectory;
-
-	// create database and task queue
-	astro::persistence::DatabaseFactory	dbfactory;
-	astro::persistence::Database	database
-		= dbfactory.get(databasefile);
-	astro::task::TaskQueue	taskqueue(database);
-
-	// create guider factory
-	astro::guiding::GuiderFactory	guiderfactory(repository, database);
-
-	// initialize servant
 	try {
-		// create the adapter
-		std::string	connectstring = astro::stringprintf(
-			"default -p %hu", location.port());
-		if (location.sslport() > 0) {
-			connectstring += astro::stringprintf(" -p %hu:ssl",
-				location.sslport());
-		}
-		Ice::ObjectAdapterPtr	adapter
-			= ic->createObjectAdapterWithEndpoints("Astro",
-				connectstring);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "adapters created");
-
-		// add a servant for events to the adapter
-		add_event_servant(ic, adapter);
-
-		// add a servant for configuration data
-		add_configuration_servant(ic, adapter);
-
-		// add a servant for devices to the device adapter
-		if (sp->has(astro::discover::ServiceSubset::DEVICES)) {
-			add_devices_servant(ic, adapter, repository, devices,
-				imagedirectory);
-		}
-
-		// add a servant for images to the adapter
-		if (sp->has(astro::discover::ServiceSubset::IMAGES) ||
-			sp->has(astro::discover::ServiceSubset::GUIDING) ||
-			sp->has(astro::discover::ServiceSubset::FOCUSING)) {
-			add_images_servant(ic, adapter, imagedirectory);
-		}
-
-		// add a servant for taskqueue to the adapter
-		if (sp->has(astro::discover::ServiceSubset::TASKS)) {
-			add_tasks_servant(ic, adapter, database, taskqueue);
-		}
-
-		// add a servant for the guider factory
-		if (sp->has(astro::discover::ServiceSubset::GUIDING)) {
-			add_guiding_servant(ic, adapter, database,
-				guiderfactory, imagedirectory);
-		}
-
-		// add a servant for Focusing
-		if (sp->has(astro::discover::ServiceSubset::FOCUSING)) {
-			add_focusing_servant(ic, adapter);
-		}
-
-		// add a servant for Repositories
-		if (sp->has(astro::discover::ServiceSubset::REPOSITORY)) {
-			add_repository_servant(ic, adapter);
-		}
-
-		// add a servant for Instruments
-		if (sp->has(astro::discover::ServiceSubset::INSTRUMENTS)) {
-			add_instruments_servant(ic, adapter);
-		}
-
-		// activate the adapter
-		adapter->activate();
-		ic->waitForShutdown();
+		Server	server(ic, databasefile);
+		server.waitForShutdown();
 	} catch (const Ice::Exception& ex) {
 		std::cerr << "ICE exception: " << ex.what() << std::endl;
 		status = EXIT_FAILURE;

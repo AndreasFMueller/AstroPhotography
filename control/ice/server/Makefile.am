@@ -24,7 +24,8 @@ noinst_HEADERS = DevicesI.h \
 	DeviceI.h \
 	CalibrationSource.h \
 	EventHandlerI.h ConfigurationI.h \
-	RepositoryUser.h
+	RepositoryUser.h \
+	Server.h
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \
@@ -44,7 +45,8 @@ snowstar_SOURCES = snowstar.cpp \
 	DeviceI.cpp \
 	CalibrationSource.cpp \
 	EventHandlerI.cpp ConfigurationI.cpp \
-	RepositoryUser.cpp
+	RepositoryUser.cpp \
+	Server.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

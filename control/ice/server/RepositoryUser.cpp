@@ -7,6 +7,16 @@
 
 namespace snowstar {
 
+RepositoryUser::RepositoryUser() {
+}
+
+RepositoryUser::~RepositoryUser() {
+}
+
+RepositoryUser::RepositoryUser(const std::string& reponame) {
+	repositoryname(reponame);
+}
+
 /**
  * \brief retrieve the name of the current repository
  */
@@ -20,6 +30,10 @@ std::string	RepositoryUser::getRepositoryName(
  */
 void	RepositoryUser::setRepositoryName(const std::string& reponame,
 		const Ice::Current& /* current */) {
+	repositoryname(reponame);
+}
+
+void	RepositoryUser::repositoryname(const std::string& reponame) {
 	// special case: zero length repo name means turn of storing images
 	// in the repository
 	if (0 == reponame.size()) {

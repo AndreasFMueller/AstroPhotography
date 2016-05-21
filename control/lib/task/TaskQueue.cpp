@@ -153,8 +153,10 @@ void	TaskQueue::restart(state_type newstate) {
 
 	// make sure we don't try to start when there already is a thread
 	if (idle != _state ) {
-		throw std::runtime_error(
-			"cannot restart except from idle state");
+		std::string	msg = stringprintf("cannot restart from idle "
+			"state to %s", state2string(newstate).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 
 	// the new state cannot be the idle state
@@ -219,6 +221,7 @@ void	TaskQueue::shutdown() {
  * method start() should be called, which then 
  */
 TaskQueue::TaskQueue(Database database) : _database(database) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating task queue in state idle");
 	// initialize state variables
 	_state = idle;
 
@@ -237,17 +240,20 @@ TaskQueue::~TaskQueue() {
 	// ensure we are the only ones accessing the data structures
 	std::unique_lock<std::recursive_mutex>	l(lock);
 
-	// stop everything
-	stop();
+	try {
+		// stop everything
+		stop();
 
-	// cancel all currently running executors
-	cancel();
+		// cancel all currently running executors
+		cancel();
 
-	// wait for all executors to stop
-	wait();
+		// wait for all executors to stop
+		wait();
 
-	// shutdown the work thread
-	shutdown();
+		// shutdown the work thread
+		shutdown();
+	} catch (...) {
+	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed UNLOCK");
 }
@@ -510,9 +516,10 @@ void	TaskQueue::cleanup(taskid_t queueid) {
 void	TaskQueue::remove(taskid_t queueid) {
 	executormap::iterator	i = executors.find(queueid);
 	if (i != executors.end()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "executor for %d present",
+		std::string	msg = stringprintf("executor for id %d present",
 			queueid);
-		throw std::runtime_error("process still executing");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 
 	// remove task from teh database
@@ -524,6 +531,7 @@ void	TaskQueue::remove(taskid_t queueid) {
 	if (TaskInfo::executing == taskinfo.state()) {
 		std::string	msg = stringprintf("task %d is still executing",
 			queueid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "remove task %s",
@@ -682,7 +690,9 @@ void	TaskQueue::wait() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for all executors LOCK");
 	std::unique_lock<std::recursive_mutex>	l(lock);
 	if ((state() == idle) || (state() == launching)) {
-		throw std::runtime_error("cannot wait in idle/launching state");
+		std::string	msg = stringprintf("cannot wait in idle/launching state");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "queue is %sstopping",
 		(state() == stopping) ? "" : "NOT ");
@@ -700,8 +710,10 @@ void	TaskQueue::wait() {
 TaskExecutorPtr	TaskQueue::executor(taskid_t queueid) {
 	executormap::iterator	i = executors.find(queueid);
 	if (executors.end() == i) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no executor with id %d", queueid);
-		throw std::runtime_error("no executor with that id");
+		std::string	msg = stringprintf("no executor with id %d",
+			queueid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 	return i->second;
 }
