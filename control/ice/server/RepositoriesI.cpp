@@ -38,7 +38,7 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
  * \brief Find out whether an image repository of a given name exists
  */
 bool	RepositoriesI::has(const std::string& reponame,
-			const Ice::Current& current) {
+			const Ice::Current& /* current */) {
 	// retrieve a list of repository names from the configuration
 	astro::config::ConfigurationPtr	config
 		= astro::config::Configuration::get();
