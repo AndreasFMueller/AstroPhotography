@@ -252,7 +252,7 @@ TaskQueue::~TaskQueue() {
 
 		// shutdown the work thread
 		shutdown();
-	} catch (...) {
+	} catch (...) {
 	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed UNLOCK");
