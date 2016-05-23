@@ -201,7 +201,7 @@ void	doConvertFITSpixels(Pixel *pixels, const srctype *srcpixels,
 		int pixelcount, const yuyv_color_tag) {
 	int	size1 = pixelcount;
 	int	size2 = pixelcount << 1;
-	RGB<srctype>	rgb[2];
+	RGB<srctype>	rgb[2] = { 0, 0 };
 	for (int offset = 0; offset < pixelcount; offset += 2) {
 		rgb[0].R = srcpixels[offset];
 		rgb[0].G = srcpixels[offset + size1],
