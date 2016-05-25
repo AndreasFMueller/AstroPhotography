@@ -423,9 +423,10 @@ int	command_image(TaskQueuePrx tasks, int id, const std::string& filename) {
 	if (fd < 0) {
 		throw std::runtime_error("cannot create file");
 	}
-	if (imagefile.size() != write(fd, imagefile.data(), imagefile.size())) {
-		std::string	msg = astro::stringprintf("cannot write data: %s",
-			strerror(errno));
+	size_t	bytes = write(fd, imagefile.data(), imagefile.size());
+	if (imagefile.size() != bytes) {
+		std::string	msg = astro::stringprintf(
+			"cannot write data: %s", strerror(errno));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write data");
 		close(fd);
 		throw std::runtime_error(msg);

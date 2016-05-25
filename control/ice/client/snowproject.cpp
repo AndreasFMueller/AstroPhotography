@@ -53,7 +53,7 @@ int	command_help(const char *progname) {
 /**
  * \brief implementation of the submit command, part specific version
  */
-int	command_submit(const std::string& projectname,
+int	command_submit(const std::string& /* projectname */,
 		astro::project::PartPtr part) {
 	// get the parameters for the part
 	astro::ServerName	servername(part->taskserver());
