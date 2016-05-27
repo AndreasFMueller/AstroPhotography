@@ -10,6 +10,10 @@
 		90341E79189E83290078FFDB /* DeviceListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90341E78189E83290078FFDB /* DeviceListController.m */; };
 		904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FC8189E93E200C6F1FB /* BinningController.m */; };
 		904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */; };
+		904E80D21CF61B63001CAF16 /* ServerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 904E80D11CF61B63001CAF16 /* ServerInfo.m */; };
+		904E80D51CF61E5B001CAF16 /* ServerDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 904E80D41CF61E5B001CAF16 /* ServerDataSource.m */; };
+		904E80D81CF62931001CAF16 /* Discover.m in Sources */ = {isa = PBXBuildFile; fileRef = 904E80D71CF62931001CAF16 /* Discover.m */; };
+		905C17541CF8FCB0006E272F /* ServerTableViewDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 905C17531CF8FCB0006E272F /* ServerTableViewDataSource.m */; };
 		90751B1D189BFCC700031C9D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B1C189BFCC700031C9D /* Foundation.framework */; };
 		90751B1F189BFCC700031C9D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B1E189BFCC700031C9D /* CoreGraphics.framework */; };
 		90751B21189BFCC700031C9D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90751B20189BFCC700031C9D /* UIKit.framework */; };
@@ -57,6 +61,14 @@
 		904A8FC8189E93E200C6F1FB /* BinningController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BinningController.m; sourceTree = "<group>"; };
 		904A8FCA189EA40300C6F1FB /* CcdSelectionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CcdSelectionController.h; sourceTree = "<group>"; };
 		904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CcdSelectionController.m; sourceTree = "<group>"; };
+		904E80D01CF61B63001CAF16 /* ServerInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerInfo.h; sourceTree = "<group>"; };
+		904E80D11CF61B63001CAF16 /* ServerInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServerInfo.m; sourceTree = "<group>"; };
+		904E80D31CF61E5B001CAF16 /* ServerDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerDataSource.h; sourceTree = "<group>"; };
+		904E80D41CF61E5B001CAF16 /* ServerDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServerDataSource.m; sourceTree = "<group>"; };
+		904E80D61CF62931001CAF16 /* Discover.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Discover.h; sourceTree = "<group>"; };
+		904E80D71CF62931001CAF16 /* Discover.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Discover.m; sourceTree = "<group>"; };
+		905C17521CF8FCB0006E272F /* ServerTableViewDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerTableViewDataSource.h; path = ../ServerTableViewDataSource.h; sourceTree = "<group>"; };
+		905C17531CF8FCB0006E272F /* ServerTableViewDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerTableViewDataSource.m; path = ../ServerTableViewDataSource.m; sourceTree = "<group>"; };
 		90751B19189BFCC700031C9D /* IceStar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IceStar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90751B1C189BFCC700031C9D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		90751B1E189BFCC700031C9D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -120,6 +132,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		904E80CF1CF61ACA001CAF16 /* Discovery */ = {
+			isa = PBXGroup;
+			children = (
+				904E80D01CF61B63001CAF16 /* ServerInfo.h */,
+				904E80D11CF61B63001CAF16 /* ServerInfo.m */,
+				904E80D31CF61E5B001CAF16 /* ServerDataSource.h */,
+				904E80D41CF61E5B001CAF16 /* ServerDataSource.m */,
+				905C17521CF8FCB0006E272F /* ServerTableViewDataSource.h */,
+				905C17531CF8FCB0006E272F /* ServerTableViewDataSource.m */,
+				904E80D61CF62931001CAF16 /* Discover.h */,
+				904E80D71CF62931001CAF16 /* Discover.m */,
+			);
+			name = Discovery;
+			sourceTree = "<group>";
+		};
 		90751B10189BFCC700031C9D = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +185,7 @@
 		90751B22189BFCC700031C9D /* IceStar */ = {
 			isa = PBXGroup;
 			children = (
+				904E80CF1CF61ACA001CAF16 /* Discovery */,
 				90751B2B189BFCC800031C9D /* AppDelegate.h */,
 				90751B2C189BFCC800031C9D /* AppDelegate.m */,
 				90751B54189C000400031C9D /* camera.ice */,
@@ -323,11 +351,15 @@
 				90751B5E189C000400031C9D /* image.ice in Sources */,
 				904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */,
 				90751B2D189BFCC800031C9D /* AppDelegate.m in Sources */,
+				904E80D21CF61B63001CAF16 /* ServerInfo.m in Sources */,
 				904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */,
 				90751B33189BFCC800031C9D /* FirstViewController.m in Sources */,
 				90751B29189BFCC800031C9D /* main.m in Sources */,
+				904E80D51CF61E5B001CAF16 /* ServerDataSource.m in Sources */,
 				90751B5B189C000400031C9D /* camera.ice in Sources */,
+				904E80D81CF62931001CAF16 /* Discover.m in Sources */,
 				90751B6C189E739F00031C9D /* Connection.m in Sources */,
+				905C17541CF8FCB0006E272F /* ServerTableViewDataSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "Connection.h"
+#import "Discover.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate> {
     Connection *connection;
+    NSNetServiceBrowser *servicebrowser;
+    Discover    *discover;
 }
 
 @property (strong, nonatomic) UIWindow *window;

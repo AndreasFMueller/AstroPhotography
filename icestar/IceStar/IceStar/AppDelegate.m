@@ -15,6 +15,14 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // create a browser
+    NSLog(@"starting the service browser");
+    servicebrowser = [[NSNetServiceBrowser alloc] init];
+    discover = [[Discover alloc] init];
+    servicebrowser.delegate = discover;
+    [servicebrowser searchForServicesOfType: @"_astro._tcp" inDomain:@""];
+    NSLog(@"service browser initialized");
+    
     // Override point for customization after application launch.
     connection = [[Connection alloc] init];
     return YES;

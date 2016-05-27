@@ -82,7 +82,7 @@
         return;
     }
     UIButton    *button = (UIButton *)sender;
-    NSLog(@"create a binning selection with %d selections", [ccdinfo.binningmodes count]);
+    NSLog(@"create a binning selection with %lu selections", (unsigned long)[ccdinfo.binningmodes count]);
     BinningController    *list = [[BinningController alloc] initWithBinningSet: ccdinfo.binningmodes];
     list.tableView.delegate = self;
     popover = [[UIPopoverController alloc] initWithContentViewController: list];
@@ -107,7 +107,7 @@
         return;
     }
     if ([content isMemberOfClass: [BinningController class]]) {
-        NSLog(@"select binning mode %d", indexPath.row);
+        NSLog(@"select binning mode %ld", indexPath.row);
         [self selectBinning: [ccdinfo.binningmodes objectAtIndex: indexPath.row]];
         [popover dismissPopoverAnimated:YES];
         return;
@@ -298,7 +298,7 @@
         NSLog(@"time to retrieve the image");
         snowstarImagePrx    *image = [ccd getImage];
         snowstarMutableImageFile    *file = [image file];
-        NSLog(@"file size: %d, bytes received: %d", [image filesize], [file length]);
+        NSLog(@"file size: %d, bytes received: %ld", [image filesize], [file length]);
         snowstarShortImagePrx   *shortimage = [snowstarShortImagePrx checkedCast: image];
         if (nil == shortimage) {
             NSLog(@"image is not a short image");
