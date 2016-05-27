@@ -1,0 +1,38 @@
+
+The MicroTouch focuser motor product uses a unipolar stepper motor
+PFC25-24D1G from Nippon Pulse (NPM). The designation means that the
+motor has a diameter of 25mm, and performs 24 steps for a turn.
+The coil resistance is 16 ohms, and it is to be driven with a coil
+current of about 300mA.
+
+The MicroTouch focuser driving hardware drives the motor as a unipolar
+motor, but our own hardware uses a bipolar Pololu driver. Unfortunately,
+the two center terminals of the motor coils are connected inside the
+motor housing, which makes it necessary to open the housing and cut a
+trace on the board that connects the connector to the motor.
+
+
+   +---------------------------+
+   |                           |
+   |    +---------+            |
+   |    |         |1           | NC
+   |  +-+         |2---------+ | Common
+   |  |           |3-------+ | |
+   |  |   +-------|4       | | |
+   |  +-+ |       |5-----+ | | |
+   |    | |  +----|6     | | | |
+   |    +-|--|----+      | | | |
+   |      |  |           | | | |
+   |      |  |           | | | |
+   |      |  o     o     o | | |
+   |      |  2   / 4     6 | | |
+   |      o     o     o----+ | |
+   |      1     3\    5      | |
+   |              -----------+ |
+   +---------------------------+
+
+For bipolar operation, it is necessary to cut the trace between 3 and 4.
+Then 1-5 and 2-6 can be used as bipolar coils. These are the pairs 3-4
+and 5-6 on the modular jack.
+
+
