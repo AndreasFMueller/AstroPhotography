@@ -47,6 +47,13 @@
 
 - (void)processTXTRecordData: (NSData *)data {
     NSLog(@"processing TXT record");
+    _devices = NO;
+    _instruments = NO;
+    _tasks = NO;
+    _guiding = NO;
+    _focusing = NO;
+    _images = NO;
+    _repository = NO;
     NSDictionary<NSString *, NSData *>  *dict = [NSNetService dictionaryFromTXTRecordData: data];
     NSMutableArray  *allKey = [[dict allKeys] mutableCopy];
     for (NSString *key in allKey) {
@@ -72,7 +79,6 @@
         if ([key isEqualToString: @"repository"]) {
             _repository = YES;
         }
-
     }
 }
 

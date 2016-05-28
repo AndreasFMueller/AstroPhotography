@@ -31,7 +31,7 @@
         UIColor *bg = [UIColor lightGrayColor];
         
         int hoffset = 160;
-        int hcapawidth = 40;
+        int hcapawidth = 50;
         int hoffsetstep = hcapawidth + 5;
         int voffset_lower = 26;
         int voffset_upper = 9;
@@ -55,7 +55,7 @@
         instrumentsLabel.font = [UIFont systemFontOfSize: 7];
         instrumentsLabel.text = @"instruments";
         instrumentsLabel.textAlignment = NSTextAlignmentCenter;
-        [self addSubview: guidingLabel];
+        [self addSubview: instrumentsLabel];
 
         hoffset += hoffsetstep;
         guidingLabel = [[UILabel alloc] initWithFrame: CGRectMake(hoffset, voffset_upper, hcapawidth, 10)];

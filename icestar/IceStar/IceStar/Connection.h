@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <Ice/Ice.h>
 #import <device.h>
+#import <instruments.h>
+#import "ServerInfo.h"
 
 @interface Connection : NSObject {
     id<ICECommunicator> communicator;
@@ -18,5 +20,9 @@
 @property (readonly) id<snowstarDevicesPrx> devices;
 
 - (id)init;
+
++ (snowstarDevicesPrx *)devicesProxy: (ServerInfo *)serverinfo;
++ (snowstarInstrumentsPrx *)instrumentsProxy: (ServerInfo *)serverinfo;
+
 
 @end

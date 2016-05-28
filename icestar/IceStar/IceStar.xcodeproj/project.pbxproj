@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		90341E79189E83290078FFDB /* DeviceListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90341E78189E83290078FFDB /* DeviceListController.m */; };
+		9041D7EF1CF9E79D008AB9DA /* InstrumentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7EE1CF9E79D008AB9DA /* InstrumentsViewController.m */; };
+		9041D7F21CF9EDA9008AB9DA /* instruments.ice in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7F11CF9EDA9008AB9DA /* instruments.ice */; };
+		9041D7F41CF9EDBD008AB9DA /* focusing.ice in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7F31CF9EDBD008AB9DA /* focusing.ice */; };
+		9041D7F61CF9EDC7008AB9DA /* repository.ice in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7F51CF9EDC7008AB9DA /* repository.ice */; };
 		904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FC8189E93E200C6F1FB /* BinningController.m */; };
 		904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 904A8FCB189EA40300C6F1FB /* CcdSelectionController.m */; };
 		904E80D21CF61B63001CAF16 /* ServerInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 904E80D11CF61B63001CAF16 /* ServerInfo.m */; };
@@ -43,6 +47,7 @@
 		90751B70189E7D5500031C9D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 90751B6F189E7D5500031C9D /* Settings.bundle */; };
 		90DA240C1CF9AA7300EE3AAB /* ServiceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 90DA240B1CF9AA7300EE3AAB /* ServiceCell.m */; };
 		90DA240F1CF9B9CF00EE3AAB /* ServiceTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90DA240E1CF9B9CF00EE3AAB /* ServiceTableViewController.m */; };
+		90F22F341CFA221E00C1270A /* InstrumentsServiceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90F22F331CFA221E00C1270A /* InstrumentsServiceController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +63,11 @@
 /* Begin PBXFileReference section */
 		90341E77189E83290078FFDB /* DeviceListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceListController.h; sourceTree = "<group>"; };
 		90341E78189E83290078FFDB /* DeviceListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceListController.m; sourceTree = "<group>"; };
+		9041D7ED1CF9E79D008AB9DA /* InstrumentsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InstrumentsViewController.h; sourceTree = "<group>"; };
+		9041D7EE1CF9E79D008AB9DA /* InstrumentsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InstrumentsViewController.m; sourceTree = "<group>"; };
+		9041D7F11CF9EDA9008AB9DA /* instruments.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = instruments.ice; sourceTree = "<group>"; };
+		9041D7F31CF9EDBD008AB9DA /* focusing.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = focusing.ice; sourceTree = "<group>"; };
+		9041D7F51CF9EDC7008AB9DA /* repository.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = repository.ice; sourceTree = "<group>"; };
 		904786461CF0DC3A00961105 /* iphoneos.sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; name = iphoneos.sdk; path = "../../../../../../Library/Developer/IceTouch-1.3.2/SDKs/ObjC/iphoneos.sdk"; sourceTree = "<group>"; };
 		904A8FC7189E93E200C6F1FB /* BinningController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BinningController.h; sourceTree = "<group>"; };
 		904A8FC8189E93E200C6F1FB /* BinningController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BinningController.m; sourceTree = "<group>"; };
@@ -101,7 +111,7 @@
 		90751B62189C02C100031C9D /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		90751B64189C02D000031C9D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		90751B66189C02E100031C9D /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
-		90751B68189E695D00031C9D /* device.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = device.ice; path = IceStar/device.ice; sourceTree = "<group>"; };
+		90751B68189E695D00031C9D /* device.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = device.ice; sourceTree = "<group>"; };
 		90751B6A189E739F00031C9D /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		90751B6B189E739F00031C9D /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
 		90751B6F189E7D5500031C9D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
@@ -109,6 +119,8 @@
 		90DA240B1CF9AA7300EE3AAB /* ServiceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceCell.m; sourceTree = "<group>"; };
 		90DA240D1CF9B9CF00EE3AAB /* ServiceTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceTableViewController.h; sourceTree = "<group>"; };
 		90DA240E1CF9B9CF00EE3AAB /* ServiceTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceTableViewController.m; sourceTree = "<group>"; };
+		90F22F321CFA221E00C1270A /* InstrumentsServiceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InstrumentsServiceController.h; sourceTree = "<group>"; };
+		90F22F331CFA221E00C1270A /* InstrumentsServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InstrumentsServiceController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +150,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9041D7EC1CF9E67A008AB9DA /* Instruments */ = {
+			isa = PBXGroup;
+			children = (
+				9041D7ED1CF9E79D008AB9DA /* InstrumentsViewController.h */,
+				9041D7EE1CF9E79D008AB9DA /* InstrumentsViewController.m */,
+				90F22F321CFA221E00C1270A /* InstrumentsServiceController.h */,
+				90F22F331CFA221E00C1270A /* InstrumentsServiceController.m */,
+			);
+			name = Instruments;
+			sourceTree = "<group>";
+		};
+		9041D7F01CF9ECA1008AB9DA /* ICE Interface */ = {
+			isa = PBXGroup;
+			children = (
+				9041D7F51CF9EDC7008AB9DA /* repository.ice */,
+				9041D7F31CF9EDBD008AB9DA /* focusing.ice */,
+				9041D7F11CF9EDA9008AB9DA /* instruments.ice */,
+				90751B68189E695D00031C9D /* device.ice */,
+				90751B54189C000400031C9D /* camera.ice */,
+				90751B55189C000400031C9D /* exceptions.ice */,
+				90751B56189C000400031C9D /* guider.ice */,
+				90751B57189C000400031C9D /* image.ice */,
+				90751B59189C000400031C9D /* tasks.ice */,
+				90751B5A189C000400031C9D /* types.ice */,
+			);
+			name = "ICE Interface";
+			sourceTree = "<group>";
+		};
 		904E80CF1CF61ACA001CAF16 /* Discovery */ = {
 			isa = PBXGroup;
 			children = (
@@ -160,7 +200,6 @@
 		90751B10189BFCC700031C9D = {
 			isa = PBXGroup;
 			children = (
-				90751B68189E695D00031C9D /* device.ice */,
 				90751B22189BFCC700031C9D /* IceStar */,
 				90751B44189BFCC800031C9D /* IceStarTests */,
 				90751B1B189BFCC700031C9D /* Frameworks */,
@@ -195,15 +234,11 @@
 		90751B22189BFCC700031C9D /* IceStar */ = {
 			isa = PBXGroup;
 			children = (
+				9041D7F01CF9ECA1008AB9DA /* ICE Interface */,
+				9041D7EC1CF9E67A008AB9DA /* Instruments */,
 				904E80CF1CF61ACA001CAF16 /* Discovery */,
 				90751B2B189BFCC800031C9D /* AppDelegate.h */,
 				90751B2C189BFCC800031C9D /* AppDelegate.m */,
-				90751B54189C000400031C9D /* camera.ice */,
-				90751B55189C000400031C9D /* exceptions.ice */,
-				90751B56189C000400031C9D /* guider.ice */,
-				90751B57189C000400031C9D /* image.ice */,
-				90751B59189C000400031C9D /* tasks.ice */,
-				90751B5A189C000400031C9D /* types.ice */,
 				90751B2E189BFCC800031C9D /* Main.storyboard */,
 				90751B31189BFCC800031C9D /* FirstViewController.h */,
 				90751B32189BFCC800031C9D /* FirstViewController.m */,
@@ -351,15 +386,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9041D7F61CF9EDC7008AB9DA /* repository.ice in Sources */,
 				90751B61189C000400031C9D /* types.ice in Sources */,
+				90F22F341CFA221E00C1270A /* InstrumentsServiceController.m in Sources */,
 				90341E79189E83290078FFDB /* DeviceListController.m in Sources */,
+				9041D7F21CF9EDA9008AB9DA /* instruments.ice in Sources */,
 				90751B60189C000400031C9D /* tasks.ice in Sources */,
 				90751B69189E695D00031C9D /* device.ice in Sources */,
 				90751B36189BFCC800031C9D /* SecondViewController.m in Sources */,
 				90DA240C1CF9AA7300EE3AAB /* ServiceCell.m in Sources */,
 				90751B5C189C000400031C9D /* exceptions.ice in Sources */,
 				90751B5D189C000400031C9D /* guider.ice in Sources */,
+				9041D7F41CF9EDBD008AB9DA /* focusing.ice in Sources */,
 				90DA240F1CF9B9CF00EE3AAB /* ServiceTableViewController.m in Sources */,
+				9041D7EF1CF9E79D008AB9DA /* InstrumentsViewController.m in Sources */,
 				90751B5E189C000400031C9D /* image.ice in Sources */,
 				904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */,
 				90751B2D189BFCC800031C9D /* AppDelegate.m in Sources */,

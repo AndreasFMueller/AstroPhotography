@@ -9,15 +9,18 @@
 #import <UIKit/UIKit.h>
 #import "Connection.h"
 #import "ServerTableViewDataSource.h"
+#import <Ice/Ice.h>
+#import <device.h>
+
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate> {
     Connection *connection;
     NSNetServiceBrowser *servicebrowser;
-//    ServerTableViewDataSource    *discover;
 }
 
 @property (strong,nonatomic) UIWindow *window;
 @property (strong,readwrite) Connection *connection;
+@property (strong,readwrite) id<ICECommunicator> communicator;
 @property (strong,readwrite) ServerTableViewDataSource *discover;
 
 @end
