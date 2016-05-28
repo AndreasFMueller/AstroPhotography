@@ -7,6 +7,7 @@
 //
 
 #import "Connection.h"
+#import "AppDelegate.h"
 
 @implementation Connection
 
@@ -25,24 +26,43 @@
             host = @"localhost";
         }
         
-        // create properties
-        id<ICEProperties>   props = [ICEUtil createProperties];
-        [props setProperty: @"Ice.MessageSizeMax" value: @"65536"];
-        ICEInitializationData *initializationdata = [ICEInitializationData initializationData];
-        initializationdata.properties = props;
-        
         // get the remote host and portnumber from the default settings
-        communicator = [ICEUtil createCommunicator: initializationdata];
+        AppDelegate     *appdelegate = [[UIApplication sharedApplication] delegate];
         
         // build the name for the remote device
         NSString    *name = [NSString stringWithFormat: @"Devices:default -h %@ -p %ld", host, port];
         NSLog(@"connecting to %@", name);
         
         // get the remote object
-        id<ICEObjectPrx>    base = [communicator stringToProxy: name];
+        id<ICEObjectPrx>    base = [appdelegate.communicator stringToProxy: name];
         devices = [snowstarDevicesPrx checkedCast: base];
     }
     return self;
 }
+
++ (snowstarDevicesPrx *)devicesProxy: (ServerInfo *)serverinfo {
+    NSString    *name = [NSString stringWithFormat: @"Devices:default -h %@ -p %ld", serverinfo.hostname, (long)serverinfo.port];
+    AppDelegate     *appdelegate = [[UIApplication sharedApplication] delegate];
+
+    id<ICEObjectPrx>    base = [appdelegate.communicator stringToProxy: name];
+
+    return [snowstarDevicesPrx checkedCast: base];
+}
+
++ (snowstarInstrumentsPrx *)instrumentsProxy: (ServerInfo *)serverinfo {
+    if (!serverinfo.instruments) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle: @"Not supported" message: @"The server does not support the Instruments service" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        return nil;
+    }
+    NSString    *name = [NSString stringWithFormat: @"Instruments:default -h %@ -p %ld", serverinfo.hostname, (long)serverinfo.port];
+    NSLog(@"connection string: %@", name);
+    AppDelegate     *appdelegate = [[UIApplication sharedApplication] delegate];
+    
+    id<ICEObjectPrx>    base = [appdelegate.communicator stringToProxy: name];
+    
+    return [snowstarInstrumentsPrx checkedCast: base];
+}
+
 
 @end

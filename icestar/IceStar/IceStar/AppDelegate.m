@@ -15,6 +15,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // create a browser
+    NSLog(@"starting the service browser");
+    servicebrowser = [[NSNetServiceBrowser alloc] init];
+    _discover = [[ServerTableViewDataSource alloc] init];
+    servicebrowser.delegate = _discover;
+    [servicebrowser searchForServicesOfType: @"_astro._tcp" inDomain:@""];
+    NSLog(@"service browser initialized");
+    
+    // create the communicator
+    id<ICEProperties>   props = [ICEUtil createProperties];
+    [props setProperty: @"Ice.MessageSizeMax" value: @"65536"];
+    ICEInitializationData *initializationdata = [ICEInitializationData initializationData];
+    initializationdata.properties = props;
+    
+    // get the remote host and portnumber from the default settings
+    _communicator = [ICEUtil createCommunicator: initializationdata];
+    
     // Override point for customization after application launch.
     connection = [[Connection alloc] init];
     return YES;

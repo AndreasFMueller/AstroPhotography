@@ -49,25 +49,25 @@ void	Server::get_configured_services(astro::discover::ServicePublisherPtr sp) {
 	}
 	astro::config::ConfigurationPtr configuration
 		= astro::config::Configuration::get();
-	if (configuration->get("global", "service", "instruments", "no") == "yes") {
+	if (configuration->get("snowstar", "service", "instruments", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::INSTRUMENTS);
 	}
-	if (configuration->get("global", "service", "devices", "yes") == "yes") {
+	if (configuration->get("snowstar", "service", "devices", "yes") == "yes") {
 		sp->set(astro::discover::ServiceSubset::DEVICES);
 	}
-	if (configuration->get("global", "service", "tasks", "no") == "yes") {
+	if (configuration->get("snowstar", "service", "tasks", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::TASKS);
 	}
-	if (configuration->get("global", "service", "guiding", "no") == "yes") {
+	if (configuration->get("snowstar", "service", "guiding", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::GUIDING);
 	}
-	if (configuration->get("global", "service", "focusing", "no") == "yes") {
+	if (configuration->get("snowstar", "service", "focusing", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::FOCUSING);
 	}
-	if (configuration->get("global", "service", "images", "yes") == "yes") {
+	if (configuration->get("snowstar", "service", "images", "yes") == "yes") {
 		sp->set(astro::discover::ServiceSubset::IMAGES);
 	}
-	if (configuration->get("global", "service", "repository", "no") == "yes") {
+	if (configuration->get("snowstar", "service", "repository", "no") == "yes") {
 		sp->set(astro::discover::ServiceSubset::REPOSITORY);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "configured services: %s",
