@@ -8,15 +8,16 @@
 
 #import <UIKit/UIKit.h>
 #import "Connection.h"
-#import "Discover.h"
+#import "ServerTableViewDataSource.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate> {
     Connection *connection;
     NSNetServiceBrowser *servicebrowser;
-    Discover    *discover;
+//    ServerTableViewDataSource    *discover;
 }
 
-@property (strong, nonatomic) UIWindow *window;
-@property (readwrite) Connection *connection;
+@property (strong,nonatomic) UIWindow *window;
+@property (strong,readwrite) Connection *connection;
+@property (strong,readwrite) ServerTableViewDataSource *discover;
 
 @end

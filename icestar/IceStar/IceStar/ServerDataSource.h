@@ -11,7 +11,7 @@
 
 @interface ServerDataSource : NSObject
 
-- (NSInteger)count;
+- (NSInteger)numberOfServices;
 - (void)addServer: (ServerInfo *)server;
 
 - (ServerInfo *)serverAtIndex:(NSInteger)index;

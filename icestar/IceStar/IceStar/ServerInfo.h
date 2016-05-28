@@ -23,7 +23,7 @@
 @property (readonly) BOOL   guiding;
 @property (readonly) BOOL   focusing;
 @property (readonly) BOOL   images;
-@property BOOL        repository;
+@property (readonly) BOOL   repository;
 @property (nonatomic,strong)    NSNetService    *netservice;
 
 - (void)netServiceWillResolve:(NSNetService *)sender;

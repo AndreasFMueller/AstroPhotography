@@ -22,6 +22,7 @@
     if ([a count] == 0) {
         return;
     }
+    self.hostname = sender.hostName;
     [self processAddress: [a objectAtIndex: 0]];
     [self processTXTRecordData: sender.TXTRecordData];
 }
@@ -68,6 +69,10 @@
         if ([key isEqualToString: @"images"]) {
             _images = YES;
         }
+        if ([key isEqualToString: @"repository"]) {
+            _repository = YES;
+        }
+
     }
 }
 

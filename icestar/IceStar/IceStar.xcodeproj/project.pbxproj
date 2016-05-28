@@ -41,6 +41,8 @@
 		90751B69189E695D00031C9D /* device.ice in Sources */ = {isa = PBXBuildFile; fileRef = 90751B68189E695D00031C9D /* device.ice */; };
 		90751B6C189E739F00031C9D /* Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 90751B6B189E739F00031C9D /* Connection.m */; };
 		90751B70189E7D5500031C9D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 90751B6F189E7D5500031C9D /* Settings.bundle */; };
+		90DA240C1CF9AA7300EE3AAB /* ServiceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 90DA240B1CF9AA7300EE3AAB /* ServiceCell.m */; };
+		90DA240F1CF9B9CF00EE3AAB /* ServiceTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90DA240E1CF9B9CF00EE3AAB /* ServiceTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +105,10 @@
 		90751B6A189E739F00031C9D /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		90751B6B189E739F00031C9D /* Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Connection.m; sourceTree = "<group>"; };
 		90751B6F189E7D5500031C9D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		90DA240A1CF9AA7300EE3AAB /* ServiceCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceCell.h; sourceTree = "<group>"; };
+		90DA240B1CF9AA7300EE3AAB /* ServiceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceCell.m; sourceTree = "<group>"; };
+		90DA240D1CF9B9CF00EE3AAB /* ServiceTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceTableViewController.h; sourceTree = "<group>"; };
+		90DA240E1CF9B9CF00EE3AAB /* ServiceTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,10 +145,14 @@
 				904E80D11CF61B63001CAF16 /* ServerInfo.m */,
 				904E80D31CF61E5B001CAF16 /* ServerDataSource.h */,
 				904E80D41CF61E5B001CAF16 /* ServerDataSource.m */,
-				905C17521CF8FCB0006E272F /* ServerTableViewDataSource.h */,
-				905C17531CF8FCB0006E272F /* ServerTableViewDataSource.m */,
 				904E80D61CF62931001CAF16 /* Discover.h */,
 				904E80D71CF62931001CAF16 /* Discover.m */,
+				905C17521CF8FCB0006E272F /* ServerTableViewDataSource.h */,
+				905C17531CF8FCB0006E272F /* ServerTableViewDataSource.m */,
+				90DA240A1CF9AA7300EE3AAB /* ServiceCell.h */,
+				90DA240B1CF9AA7300EE3AAB /* ServiceCell.m */,
+				90DA240D1CF9B9CF00EE3AAB /* ServiceTableViewController.h */,
+				90DA240E1CF9B9CF00EE3AAB /* ServiceTableViewController.m */,
 			);
 			name = Discovery;
 			sourceTree = "<group>";
@@ -346,8 +356,10 @@
 				90751B60189C000400031C9D /* tasks.ice in Sources */,
 				90751B69189E695D00031C9D /* device.ice in Sources */,
 				90751B36189BFCC800031C9D /* SecondViewController.m in Sources */,
+				90DA240C1CF9AA7300EE3AAB /* ServiceCell.m in Sources */,
 				90751B5C189C000400031C9D /* exceptions.ice in Sources */,
 				90751B5D189C000400031C9D /* guider.ice in Sources */,
+				90DA240F1CF9B9CF00EE3AAB /* ServiceTableViewController.m in Sources */,
 				90751B5E189C000400031C9D /* image.ice in Sources */,
 				904A8FCC189EA40300C6F1FB /* CcdSelectionController.m in Sources */,
 				90751B2D189BFCC800031C9D /* AppDelegate.m in Sources */,

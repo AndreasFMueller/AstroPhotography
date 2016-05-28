@@ -21,16 +21,16 @@
     return self;
 }
 
-- (NSInteger)count {
-    return _servers.count;
+- (NSInteger)numberOfServices {
+    return [_servers count];
 }
 
 - (void)addServer: (ServerInfo *)server {
-    if (self.count == 0) {
+    if ([self numberOfServices] == 0) {
         [_servers addObject: server];
         return;
     }
-    for (int i = 0; i < self.count; i++) {
+    for (int i = 0; i < [_servers count]; i++) {
         ServerInfo  *current = [self serverAtIndex: i];
         NSLog(@"comparing %@ with %@", current.servicename, server.servicename);
         if (NSOrderedDescending == [current.servicename compare: server.servicename]) {
@@ -61,7 +61,7 @@
 }
 
 - (ServerInfo *)serverWithName:(NSString *)servicename {
-    for (int i = 0; i < self.count; i++) {
+    for (int i = 0; i < [self numberOfServices]; i++) {
         ServerInfo  *server = [self serverAtIndex: i];
         if ([server.servicename isEqualToString: servicename]) {
             return server;
@@ -71,7 +71,7 @@
 }
 
 - (NSIndexPath *)indexPathForServer: (ServerInfo *)server {
-    for (int i = 0; i < self.count; i++) {
+    for (int i = 0; i < [self numberOfServices]; i++) {
         if ([self serverAtIndex:i] == server) {
             return [[NSIndexPath alloc] initWithIndex: i];
         }
@@ -80,7 +80,7 @@
 }
 
 - (BOOL)hasServerName:(NSString *)servicename {
-    for (int i = 0; i < self.count; i++) {
+    for (int i = 0; i < [self numberOfServices]; i++) {
         if ([[self serverAtIndex:i].servicename isEqualToString: servicename]) {
             return YES;
         }
@@ -89,7 +89,7 @@
 }
 
 - (NSInteger)indexForServerNamed: (NSString *)servicename {
-    for (int i = 0; i < self.count; i++) {
+    for (int i = 0; i < [self numberOfServices]; i++) {
         if ([[self serverAtIndex:i].servicename isEqualToString: servicename]) {
             return i;
         }

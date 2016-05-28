@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SecondViewController : UIViewController
+@interface SecondViewController : UIViewController {
+
+    IBOutlet UITableView *serviceTableView;
+    IBOutlet UITableViewController  *serviceController;
+}
 
 @end
