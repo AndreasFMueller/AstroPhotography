@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9015A2BC1D0DE03D00AC728E /* DriverModuleInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 9015A2BB1D0DE03D00AC728E /* DriverModuleInfo.m */; };
+		9015A2BF1D0DE32600AC728E /* DriverModuleDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 9015A2BE1D0DE32600AC728E /* DriverModuleDataSource.m */; };
+		9015A2C21D0DE69700AC728E /* DevicesDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 9015A2C11D0DE69700AC728E /* DevicesDataSource.m */; };
+		9015A2C51D0DED2B00AC728E /* DevicesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9015A2C41D0DED2B00AC728E /* DevicesTableViewController.m */; };
 		90341E79189E83290078FFDB /* DeviceListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90341E78189E83290078FFDB /* DeviceListController.m */; };
 		9041D7EF1CF9E79D008AB9DA /* InstrumentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7EE1CF9E79D008AB9DA /* InstrumentsViewController.m */; };
 		9041D7F21CF9EDA9008AB9DA /* instruments.ice in Sources */ = {isa = PBXBuildFile; fileRef = 9041D7F11CF9EDA9008AB9DA /* instruments.ice */; };
@@ -61,6 +65,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9015A2BA1D0DE03D00AC728E /* DriverModuleInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DriverModuleInfo.h; sourceTree = "<group>"; };
+		9015A2BB1D0DE03D00AC728E /* DriverModuleInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DriverModuleInfo.m; sourceTree = "<group>"; };
+		9015A2BD1D0DE32600AC728E /* DriverModuleDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DriverModuleDataSource.h; sourceTree = "<group>"; };
+		9015A2BE1D0DE32600AC728E /* DriverModuleDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DriverModuleDataSource.m; sourceTree = "<group>"; };
+		9015A2C01D0DE69700AC728E /* DevicesDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DevicesDataSource.h; sourceTree = "<group>"; };
+		9015A2C11D0DE69700AC728E /* DevicesDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DevicesDataSource.m; sourceTree = "<group>"; };
+		9015A2C31D0DED2B00AC728E /* DevicesTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DevicesTableViewController.h; sourceTree = "<group>"; };
+		9015A2C41D0DED2B00AC728E /* DevicesTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DevicesTableViewController.m; sourceTree = "<group>"; };
 		90341E77189E83290078FFDB /* DeviceListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceListController.h; sourceTree = "<group>"; };
 		90341E78189E83290078FFDB /* DeviceListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceListController.m; sourceTree = "<group>"; };
 		9041D7ED1CF9E79D008AB9DA /* InstrumentsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InstrumentsViewController.h; sourceTree = "<group>"; };
@@ -150,6 +162,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9015A2B91D0DDF2C00AC728E /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				9015A2BA1D0DE03D00AC728E /* DriverModuleInfo.h */,
+				9015A2BB1D0DE03D00AC728E /* DriverModuleInfo.m */,
+				9015A2BD1D0DE32600AC728E /* DriverModuleDataSource.h */,
+				9015A2BE1D0DE32600AC728E /* DriverModuleDataSource.m */,
+				9015A2C01D0DE69700AC728E /* DevicesDataSource.h */,
+				9015A2C11D0DE69700AC728E /* DevicesDataSource.m */,
+				9015A2C31D0DED2B00AC728E /* DevicesTableViewController.h */,
+				9015A2C41D0DED2B00AC728E /* DevicesTableViewController.m */,
+			);
+			name = Modules;
+			sourceTree = "<group>";
+		};
 		9041D7EC1CF9E67A008AB9DA /* Instruments */ = {
 			isa = PBXGroup;
 			children = (
@@ -234,6 +261,7 @@
 		90751B22189BFCC700031C9D /* IceStar */ = {
 			isa = PBXGroup;
 			children = (
+				9015A2B91D0DDF2C00AC728E /* Modules */,
 				9041D7F01CF9ECA1008AB9DA /* ICE Interface */,
 				9041D7EC1CF9E67A008AB9DA /* Instruments */,
 				904E80CF1CF61ACA001CAF16 /* Discovery */,
@@ -391,8 +419,11 @@
 				90F22F341CFA221E00C1270A /* InstrumentsServiceController.m in Sources */,
 				90341E79189E83290078FFDB /* DeviceListController.m in Sources */,
 				9041D7F21CF9EDA9008AB9DA /* instruments.ice in Sources */,
+				9015A2C51D0DED2B00AC728E /* DevicesTableViewController.m in Sources */,
+				9015A2BC1D0DE03D00AC728E /* DriverModuleInfo.m in Sources */,
 				90751B60189C000400031C9D /* tasks.ice in Sources */,
 				90751B69189E695D00031C9D /* device.ice in Sources */,
+				9015A2C21D0DE69700AC728E /* DevicesDataSource.m in Sources */,
 				90751B36189BFCC800031C9D /* SecondViewController.m in Sources */,
 				90DA240C1CF9AA7300EE3AAB /* ServiceCell.m in Sources */,
 				90751B5C189C000400031C9D /* exceptions.ice in Sources */,
@@ -405,6 +436,7 @@
 				90751B2D189BFCC800031C9D /* AppDelegate.m in Sources */,
 				904E80D21CF61B63001CAF16 /* ServerInfo.m in Sources */,
 				904A8FC9189E93E200C6F1FB /* BinningController.m in Sources */,
+				9015A2BF1D0DE32600AC728E /* DriverModuleDataSource.m in Sources */,
 				90751B33189BFCC800031C9D /* FirstViewController.m in Sources */,
 				90751B29189BFCC800031C9D /* main.m in Sources */,
 				904E80D51CF61E5B001CAF16 /* ServerDataSource.m in Sources */,
