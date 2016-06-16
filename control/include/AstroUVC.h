@@ -83,6 +83,8 @@
 #define CT_ROLL_ABSOLUTE_CONTROL		0x0f
 #define CT_ROLL_RELATIVE_CONTROL		0x10
 #define CT_PRIVACY_CONTROL			0x11
+#define CT_DIGITAL_WINDOW_CONTROL		0x12
+#define CT_REGION_OF_INTEREST_CONTROL		0x13
 
 #define PU_CONTROL_UNDEFINED				0x00
 #define PU_BACKLIGHT_COMPENSATION_CONTROL		0x01
@@ -760,6 +762,24 @@ struct camera_terminal_control_tag {
 			bit = 18
 		} bit_type;
 	};
+	struct digital_window_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_DIGITAL_WINDOW_CONTROL
+		} CS_Type;
+		typedef enum bit_enum {
+			bit = 20
+		} bit_type;
+	};
+	struct region_of_interest_control_tag
+		: public camera_terminal_control_tag {
+		typedef enum CS_enum {
+			CS = CT_REGION_OF_INTEREST_CONTROL
+		} CS_Type;
+		typedef enum bit_enum {
+			bit = 21
+		} bit_type;
+	};
 
 struct selection_unit_control_tag {
 };
@@ -1040,6 +1060,25 @@ typedef struct privacy_shutter_control_s {
 	typedef privacy_shutter_control_tag	control_type;
 	uint8_t	bPrivacy;
 } __attribute__((packed)) privacy_shutter_control_t;
+
+typedef struct digital_window_control_s {
+	typedef digital_window_control_tag	control_type;
+	uint16_t	wWindow_Top;
+	uint16_t	wWindow_Left;
+	uint16_t	wWindow_Bottom;
+	uint16_t	wWindow_Right;
+	uint16_t	wNumSteps;
+	uint16_t	bmNumStepsUnits;
+} __attribute__((packed)) digital_window_control_t;
+
+typedef struct region_of_interest_control_s {
+	typedef region_of_interest_control_tag	control_type;
+	uint16_t	wROI_Top;
+	uint16_t	wROI_Left;
+	uint16_t	wROI_Bottom;
+	uint16_t	wROI_Right;
+	uint16_t	bmAutoControls;
+} __attribute__((packed)) region_of_interst_control_t;
 
 typedef struct input_selector_control_s {
 	typedef input_selector_control_tag	control_type;
