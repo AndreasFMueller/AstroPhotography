@@ -1,0 +1,8 @@
+When testing The Imaging Source cameras, it can be useful to force 
+the uvc driver to use it. This can be accomplished by explicitely telling
+the driver to accept the VID:PID of the camera:
+
+    echo 199e 8101 > /sys/bus/usb/drivers/uvcvideo/new_id
+
+It should then be recognized as a video camera and vlc can use it 
+
