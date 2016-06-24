@@ -5,4 +5,4 @@
 # $Id$
 #
 SUBDIRS = mock1 mock2 sx sbig uvc simulator microtouch qsi qhy celestron \
-	gpio othello nice
+	gpio othello nice asi

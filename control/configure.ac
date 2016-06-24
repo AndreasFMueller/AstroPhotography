@@ -235,6 +235,22 @@ AC_ARG_ENABLE(othello,
 ])
 AM_CONDITIONAL(ENABLE_OTHELLO, test x$enable_othello = xyes)
 
+## ASI ###############################################################
+# check for the ASI library
+AC_ARG_ENABLE(asi,
+[AS_HELP_STRING([--enable-asi], [build the proprietary ASI driver])],
+[
+	enable_asi=yes
+	AC_CHECK_HEADERS(ASICamera.h, ,
+		[AC_MSG_ERROR([ASICamera header not found])])
+	AC_CHECK_HEADERS(ASICamera2.h, ,
+		[AC_MSG_ERROR([ASICamera2 header not found])])
+],[
+enable_asi=no
+]
+)
+AM_CONDITIONAL(ENABLE_ASI, test x$enable_asi = xyes)
+
 ## SBIG ##############################################################
 # check for SBIG library
 AC_ARG_ENABLE(sbig,
