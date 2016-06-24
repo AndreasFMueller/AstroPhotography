@@ -82,7 +82,7 @@ public:
 			float decplus, float decminus);
 	// ccd functions
 	void	startExposure(const Exposure& exposure);
-	Exposure::State	exposureStatus();
+	CcdState::State	exposureStatus();
 	ImagePtr	getImage();
 };
 
@@ -96,7 +96,7 @@ public:
 		: Ccd(info), camera(_camera) { }
 	virtual ~SimCcd() { }
 	virtual void	startExposure(const Exposure& exposure);
-	virtual Exposure::State	exposureStatus();
+	virtual CcdState::State	exposureStatus();
 	virtual ImagePtr	getImage();
 };
 

@@ -54,7 +54,7 @@ SbigCcd::~SbigCcd() {
  * Since the camera interface is closely modelled on the SBIG driver library,
  * this is essentially a call to the corresponding dirver library function.
  */
-Exposure::State	SbigCcd::exposureStatus() {
+CcdState::State	SbigCcd::exposureStatus() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking exposure status");
 	SbigLock	lock;
 	QueryCommandStatusParams	params;
@@ -73,12 +73,12 @@ Exposure::State	SbigCcd::exposureStatus() {
 		s = 0x3 & (results.status >> 2);
 	}
 	switch (s) {
-	case 0:	state = Exposure::idle;
+	case 0:	state = CcdState::idle;
 		break;
 	case 1: // this is an undefined state, we treat it as exposing
-	case 2: state = Exposure::exposing;
+	case 2: state = CcdState::exposing;
 		break;
-	case 3: state = Exposure::exposed;
+	case 3: state = CcdState::exposed;
 		break;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure status ccd %d: %d:", id,
@@ -145,7 +145,7 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d exposing", id);
 
 	// now we are exposing
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 }
 
 /**
@@ -157,14 +157,14 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 ImagePtr	SbigCcd::getRawImage() {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
-	if (state == Exposure::idle) {
+	if (state == CcdState::idle) {
 		throw BadState("camera is idle");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image from ccd %d", id);
 
 	// wait until the exposure is complete
 	exposureStatus();
-	if (Exposure::exposed != state) {
+	if (CcdState::exposed != state) {
 		throw BadState("no exposed image available");
 	}
 
@@ -280,7 +280,7 @@ ImagePtr	SbigCcd::getRawImage() {
 
 	// convert the data read to a short image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve image complete");
-        state = Exposure::idle;
+        state = CcdState::idle;
 
 	return ImagePtr(image);
 }

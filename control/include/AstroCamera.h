@@ -12,6 +12,7 @@
 #include <AstroTypes.h>
 #include <vector>
 #include <set>
+#include <deque>
 #include <cstdint>
 
 namespace astro {
@@ -47,6 +48,21 @@ public:
 	virtual std::string	toString() const;
 };
 std::ostream&	operator<<(std::ostream& out, const BinningSet& binningset);
+
+/**
+ * \brief CCD state code
+ *
+ * This was previously in the Exposure class, but it really doesn't belong
+ * there.
+ */
+class CcdState {
+public:
+	typedef enum state_e {
+		idle = 0, exposing = 1, exposed = 2, cancelling = 3
+	} State;
+static std::string	state2string(State s);
+static State	string2state(const std::string& s);
+};
 
 /**
  * \brief Specification of an exposure request
@@ -119,13 +135,6 @@ static purpose_t	string2purpose(const std::string& p);
 	Exposure();
 	Exposure(const astro::image::ImageRectangle& _frame,
 		float _exposuretime = 1);
-
-	// state related methods (is this really a part of the exposure class?)
-	typedef enum state_e {
-		idle = 0, exposing = 1, exposed = 2, cancelling = 3
-	} State;
-static std::string	state2string(State s);
-static State	string2state(const std::string& s);
 
 	virtual std::string	toString() const;
 
@@ -226,6 +235,56 @@ public:
 std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 
 /**
+ * \brief Queue entry element for image queues
+ *
+ * The CCD object contains a queue of images, 
+ */
+class ImageQueueEntry {
+public:
+	Exposure	exposure;
+	long		sequence;
+	ImagePtr	image;
+	ImageQueueEntry(const Exposure& _exposure);
+	ImageQueueEntry(const ImageQueueEntry& other);
+	ImageQueueEntry&	operator=(const ImageQueueEntry& other);
+};
+
+/**
+ * \brief Exception thrown when the queue is empty
+ */
+class EmptyQueue : public std::exception {
+public:
+	EmptyQueue() { }
+};
+
+/**
+ * \brief Interface to retrieve multiple images from a Ccd
+ *
+ * The Basic CCD interface can retrieve single images, but the real 
+ */
+class ImageQueue {
+	std::mutex	mutex;
+	std::condition_variable	condition;
+	std::deque<ImageQueueEntry>	queue;
+	unsigned long	_maxqueuelength;
+	long	_processed;
+	long	_dropped;
+	long	_sequence;
+private:
+	ImageQueue(const ImageQueue& other);
+	ImageQueue&	operator=(const ImageQueue& other);
+public:
+	long	processed() const { return _processed; }
+	long	dropped() const { return _dropped; }
+public:
+	ImageQueue(unsigned long maxqueuelength = 10);
+	bool	hasImage();
+	ImageQueueEntry	get(bool block) throw (EmptyQueue);
+	ImagePtr	getImage(bool block);
+	void	add(const Exposure& exposure, ImagePtr image);
+};
+
+/**
  * \brief Abstraction for a CCD chip
  *
  * This class is necessary because a camera can have several imaging
@@ -241,7 +300,7 @@ std::ostream&	operator<<(std::ostream& out, const CcdInfo& ccdinfo);
 class	Ccd : public astro::device::Device {
 protected:
 	CcdInfo	info;
-	volatile Exposure::State	state;
+	volatile CcdState::State	state;
 	float		setTemperature;
 	Exposure	exposure;
 	void	addBinning(const Binning& binning);
@@ -255,7 +314,7 @@ public:
 	// constructor
 	Ccd(const CcdInfo& _info)
 		: astro::device::Device(_info.name(), DeviceName::Ccd),
-		info(_info), state(Exposure::idle) { }
+		info(_info), state(CcdState::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
 
@@ -264,7 +323,7 @@ public:
 
 	// methods to start/stop exposures
 	virtual void	startExposure(const Exposure& exposure);
-	virtual Exposure::State	exposureStatus();
+	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
 	const Exposure&	getExposure() const { return exposure; }
 	virtual bool	wait();

@@ -24,7 +24,7 @@ class SbigCcd : public Ccd {
 public:
 	SbigCcd(const CcdInfo& info, int id, SbigCamera& camera);
 	virtual ~SbigCcd();
-	virtual Exposure::State	exposureStatus();
+	virtual CcdState::State	exposureStatus();
 	virtual void	startExposure(const Exposure& exposure);
 
 	// shutter interface

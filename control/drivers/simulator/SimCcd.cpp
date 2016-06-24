@@ -47,7 +47,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	// start the exposure
 	Ccd::startExposure(exposure);
 	starttime = simtime();
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 	shutter = exposure.shutter();
 }
 
@@ -56,17 +56,17 @@ void    SimCcd::startExposure(const Exposure& exposure) {
  *
  * This also changes the value of the state member
  */
-Exposure::State	SimCcd::exposureStatus() {
+CcdState::State	SimCcd::exposureStatus() {
 	double	now = simtime();
 	double	timepast = now - starttime;
 	switch (state) {
-	case Exposure::idle:
-	case Exposure::exposed:
-	case Exposure::cancelling:
+	case CcdState::idle:
+	case CcdState::exposed:
+	case CcdState::cancelling:
 		return state;
-	case Exposure::exposing:
+	case CcdState::exposing:
 		if (timepast > exposure.exposuretime()) {
-			state = Exposure::exposed;
+			state = CcdState::exposed;
 		}
 		return state;
 	}
@@ -80,11 +80,11 @@ Exposure::State	SimCcd::exposureStatus() {
  * \brief cancel the exposure
  */
 void    SimCcd::cancelExposure() {
-	if (Exposure::idle == state) {
+	if (CcdState::idle == state) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
-	state = Exposure::idle;
+	state = CcdState::idle;
 }
 
 /**
@@ -97,11 +97,11 @@ void    SimCcd::cancelExposure() {
  * that).
  */
 bool    SimCcd::wait() {
-	if ((Exposure::idle == state) || (Exposure::cancelling == state)) {
+	if ((CcdState::idle == state) || (CcdState::cancelling == state)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
-	if (Exposure::exposed == state) {
+	if (CcdState::exposed == state) {
 		return true;
 	}
 	// compute the remaining exposure time
@@ -114,7 +114,7 @@ bool    SimCcd::wait() {
 	}
 
 	// exposure is now complete
-	state = Exposure::exposed;
+	state = CcdState::exposed;
 	return true;
 }
 
@@ -167,7 +167,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << ": radius = " << radius << std::endl
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
 		image->getFrame().toString().c_str());
-	state = Exposure::idle;
+	state = CcdState::idle;
 
 	// origin
 	image->setOrigin(exposure.frame().origin());

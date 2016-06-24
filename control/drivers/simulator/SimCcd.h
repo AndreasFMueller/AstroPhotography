@@ -24,7 +24,7 @@ public:
 	SimCcd(const CcdInfo& _info, SimLocator& locator);
 
 	virtual void	startExposure(const Exposure& exposure);
-	virtual Exposure::State	exposureStatus();
+	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
 	virtual bool	wait();
 

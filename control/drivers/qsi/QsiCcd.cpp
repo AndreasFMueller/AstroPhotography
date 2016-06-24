@@ -91,7 +91,7 @@ std::string	state2string(QSICamera::CameraState qsistate) {
 	return std::string("unknonw");
 }
 
-Exposure::State	QsiCcd::exposureStatus() {
+CcdState::State	QsiCcd::exposureStatus() {
 	std::unique_lock<std::recursive_mutex>	lock(_camera.mutex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "checking camera state");
 	QSICamera::CameraState	qsistate;
@@ -99,44 +99,44 @@ Exposure::State	QsiCcd::exposureStatus() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "qsistate = %s",
 		state2string(qsistate).c_str());
 	switch (state) {
-	case Exposure::idle:
+	case CcdState::idle:
 		switch (qsistate) {
 		case QSICamera::CameraIdle:
 			break;
 		case QSICamera::CameraWaiting:
 		case QSICamera::CameraExposing:
-			state = Exposure::exposing;
+			state = CcdState::exposing;
 			break;
 		case QSICamera::CameraReading:
 		case QSICamera::CameraDownload:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 			_camera.camera().put_LEDEnabled(true);
-			state = Exposure::exposed;
+			state = CcdState::exposed;
 			break;
 		case QSICamera::CameraError:
 			break;
 		}
 		break;
-	case Exposure::exposing:
+	case CcdState::exposing:
 		switch (qsistate) {
 		case QSICamera::CameraIdle:
 		case QSICamera::CameraWaiting:
-			state = Exposure::exposed;
+			state = CcdState::exposed;
 			break;
 		case QSICamera::CameraExposing:
-			state = Exposure::exposing;
+			state = CcdState::exposing;
 			break;
 		case QSICamera::CameraReading:
 		case QSICamera::CameraDownload:
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 			_camera.camera().put_LEDEnabled(true);
-			state = Exposure::exposed;
+			state = CcdState::exposed;
 			break;
 		case QSICamera::CameraError:
 			break;
 		}
 		break;
-	case Exposure::exposed:
+	case CcdState::exposed:
 		switch (qsistate) {
 		case QSICamera::CameraIdle:
 		case QSICamera::CameraWaiting:
@@ -147,17 +147,17 @@ Exposure::State	QsiCcd::exposureStatus() {
 			break;
 		}
 		break;
-	case Exposure::cancelling:
+	case CcdState::cancelling:
 		switch (qsistate) {
 		case QSICamera::CameraIdle:
-			state = Exposure::idle;
+			state = CcdState::idle;
 			break;
 		case QSICamera::CameraWaiting:
 			break;
 		case QSICamera::CameraExposing:
 		case QSICamera::CameraReading:
 		case QSICamera::CameraDownload:
-			state = Exposure::exposing;
+			state = CcdState::exposing;
 			break;
 		case QSICamera::CameraError:
 			break;
@@ -174,7 +174,7 @@ void	QsiCcd::cancelExposure() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn LED on");
 	_camera.camera().put_LEDEnabled(true);
 	_camera.camera().AbortExposure();
-	state = Exposure::idle;
+	state = CcdState::idle;
 }
 
 Shutter::state	QsiCcd::getShutterState() {

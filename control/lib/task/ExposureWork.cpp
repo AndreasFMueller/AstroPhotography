@@ -115,9 +115,9 @@ public:
  */
 class CcdCondition : public Condition {
 	camera::CcdPtr	_ccd;
-	camera::Exposure::State	_state;
+	camera::CcdState::State	_state;
 public:
-	CcdCondition(camera::CcdPtr ccd, camera::Exposure::State state)
+	CcdCondition(camera::CcdPtr ccd, camera::CcdState::State state)
 		: _ccd(ccd), _state(state) { }
 	virtual bool	operator()() {
 		return (_ccd->exposureStatus() == _state);
@@ -194,7 +194,7 @@ void	ExposureWork::run() {
 	// wait for completion of exposure
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for %.3f seconds",
 		_task.exposure().exposuretime());
-	CcdCondition	ccdcondition(ccd, camera::Exposure::exposed);
+	CcdCondition	ccdcondition(ccd, camera::CcdState::exposed);
 
 	// if waiting is cancelled, then we have to cancel the exposure
 	// also
@@ -214,8 +214,8 @@ void	ExposureWork::run() {
 		do {
 			sleep(1);
 			
-		} while ((ccd->exposureStatus() == camera::Exposure::cancelling)
-			|| (ccd->exposureStatus() == camera::Exposure::exposing));
+		} while ((ccd->exposureStatus() == camera::CcdState::cancelling)
+			|| (ccd->exposureStatus() == camera::CcdState::exposing));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait comlete");
 
 		// now throw again to signal the work process that the process

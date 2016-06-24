@@ -14,6 +14,7 @@ libastrodevice_la_SOURCES =						\
 	BinningSet.cpp							\
 	Camera.cpp							\
 	Ccd.cpp								\
+	CcdState.cpp							\
 	Cooler.cpp							\
 	Device.cpp							\
 	DeviceAccessor.cpp						\
@@ -27,6 +28,8 @@ libastrodevice_la_SOURCES =						\
 	Focuser.cpp							\
 	GuiderPort.cpp							\
 	Imager.cpp							\
+	ImageQueue.cpp							\
+	ImageQueueEntry.cpp						\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\
