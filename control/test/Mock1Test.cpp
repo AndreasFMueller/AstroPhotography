@@ -65,10 +65,10 @@ void	Mock1Test::testMock1() {
 			ccd->getSize().height() - 2));
 		exposure.frame(frame);
 		ccd->startExposure(exposure);
-		while (ccd->exposureStatus() == Exposure::exposing) {
+		while (ccd->exposureStatus() == CcdState::exposing) {
 			sleep(1);
 		}
-		if (ccd->exposureStatus() == Exposure::exposed) {
+		if (ccd->exposureStatus() == CcdState::exposed) {
 			ImagePtr	image = ccd->getImage();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"result image size: %d x %d",

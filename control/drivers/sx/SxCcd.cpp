@@ -67,11 +67,11 @@ void	SxCcd::startExposure(const Exposure& exposure) {
  * already been exposed.
  */
 ImagePtr	SxCcd::getRawImage() {
-	if (state != Exposure::exposed) {
+	if (state != CcdState::exposed) {
 		throw BadState("no exposure available");
 	}
 	thread.join();
-	state = Exposure::idle;
+	state = CcdState::idle;
 	return image;
 }
 
@@ -211,7 +211,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 
 	// we are now in exposing state
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera now exposing");
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 }
 
 /**
@@ -222,7 +222,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
  */
 void	SxCcd::getImage0() {
 	// start the exposure
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 	this->startExposure0(exposure);
 
 	// compute the target image size, using the binning mode
@@ -290,7 +290,7 @@ void	SxCcd::getImage0() {
 	addMetadata(*_image);
 
 	image = ImagePtr(_image);
-	state = Exposure::exposed;
+	state = CcdState::exposed;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "status set to exposed");
 }
 

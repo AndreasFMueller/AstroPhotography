@@ -33,7 +33,7 @@ void	NiceCcd::startExposure(const Exposure& exposure) {
 	_ccd->startExposure(snowstar::convert(exposure));
 }
 
-Exposure::State	NiceCcd::exposureStatus() {
+CcdState::State	NiceCcd::exposureStatus() {
 	state = snowstar::convert(_ccd->exposureStatus());
 	return state;
 }

@@ -187,7 +187,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	// in that state. This is important because if we change the
 	// exposure member while an exposure is in progress, we may run into
 	// trouble while doing the readout. 
-	if (Exposure::idle != state) {
+	if (CcdState::idle != state) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"start exposure only in idle state");
 		throw BadState("start exposure only in idle state");
@@ -216,7 +216,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	time(&lastexposurestart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 }
 
 /**
@@ -224,7 +224,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
  *
  * Find out whether an exposure is in progress. Optional method.
  */
-Exposure::State Ccd::exposureStatus() {
+CcdState::State Ccd::exposureStatus() {
 	return state;
 }
 
@@ -247,14 +247,14 @@ void    Ccd::cancelExposure() {
  */
 bool	Ccd::wait() {
 	switch (exposureStatus()) {
-	case Exposure::idle:
-	case Exposure::cancelling:
+	case CcdState::idle:
+	case CcdState::cancelling:
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"cannot wait: no exposure in progress");
 		throw BadState("cannot wait: no exposure requested");
-	case Exposure::exposed:
+	case CcdState::exposed:
 		return true;
-	case Exposure::exposing:
+	case CcdState::exposing:
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"waiting for exposure to complete");
 		// has the exposure time already expired? If so, we wait at
@@ -278,7 +278,7 @@ bool	Ccd::wait() {
 		// completes or we have waited for 30 seconds
 		double	step = 0.1;
 		int	counter = 300;
-		while ((counter-- > 0) && (Exposure::exposing == this->exposureStatus())) {
+		while ((counter-- > 0) && (CcdState::exposing == this->exposureStatus())) {
 			usleep(step * 1000000);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %d", counter);
 		}
@@ -289,7 +289,7 @@ bool	Ccd::wait() {
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %d", state);
-	return (Exposure::exposed == state);
+	return (CcdState::exposed == state);
 }
 
 /**
@@ -308,7 +308,7 @@ astro::image::ImagePtr	Ccd::getRawImage() {
  */
 astro::image::ImagePtr	Ccd::getImage() {
 	// must have an exposed image to call this method
-	if (Exposure::exposed != state) {
+	if (CcdState::exposed != state) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %d", state);
 		throw BadState("no exposed image to retrieve");
 	}
@@ -323,7 +323,7 @@ astro::image::ImagePtr	Ccd::getImage() {
 	//     also be added
 
 	// set state to idle
-	state = Exposure::idle;
+	state = CcdState::idle;
 
 	// that's it, return the image
 	return image;

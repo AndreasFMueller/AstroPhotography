@@ -89,8 +89,8 @@ astro::camera::CcdInfo convert(const CcdInfo& info);
 Exposure	convert(const astro::camera::Exposure& exp);
 astro::camera::Exposure convert(const Exposure& exp);
 
-ExposureState	convert(const astro::camera::Exposure::State& state);
-astro::camera::Exposure::State  convert(const ExposureState& state);
+ExposureState	convert(const astro::camera::CcdState::State& state);
+astro::camera::CcdState::State  convert(const ExposureState& state);
 
 ShutterState	convert(const astro::camera::Shutter::state& state);
 astro::camera::Shutter::state	convert(const ShutterState& state);

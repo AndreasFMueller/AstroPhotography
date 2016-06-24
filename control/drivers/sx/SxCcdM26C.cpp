@@ -319,7 +319,7 @@ void	SxCcdM26C::startExposure0(const Exposure& exposure) {
 	timer.start();
 
 	// we are now in exposing state
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 }
 
 /**
@@ -335,7 +335,7 @@ void	SxCcdM26C::startExposure0(const Exposure& exposure) {
 void	SxCcdM26C::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get an image from the camera");
 	// start the exposure
-	state = Exposure::exposing;
+	state = CcdState::exposing;
 	this->startExposure0(exposure);
 
 	// read the right number of pixels from the IN endpoint
@@ -409,7 +409,7 @@ void	SxCcdM26C::getImage0() {
 
 	// return the demultiplexed image
 	image = ImagePtr(_image);
-	state = Exposure::exposed;
+	state = CcdState::exposed;
 }
 
 /**

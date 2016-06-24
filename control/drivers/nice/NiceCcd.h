@@ -23,7 +23,7 @@ public:
 	virtual ~NiceCcd();
 
 	virtual void	startExposure(const Exposure& exposure);
-	virtual Exposure::State	exposureStatus();
+	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
 
 	virtual Shutter::state	getShutterState();

@@ -86,30 +86,30 @@ astro::camera::Exposure	convert(const Exposure& exposure) {
 	return exp;
 }
 
-ExposureState	convert(const astro::camera::Exposure::State& s) {
+ExposureState	convert(const astro::camera::CcdState::State& s) {
 	switch (s) {
-	case astro::camera::Exposure::idle:
+	case astro::camera::CcdState::idle:
 		return IDLE;
-	case astro::camera::Exposure::exposing:
+	case astro::camera::CcdState::exposing:
 		return EXPOSING;
-	case astro::camera::Exposure::cancelling:
+	case astro::camera::CcdState::cancelling:
 		return CANCELLING;
-	case astro::camera::Exposure::exposed:
+	case astro::camera::CcdState::exposed:
 		return EXPOSED;
 	}
 	throw std::runtime_error("unknown exposure state");
 }
 
-astro::camera::Exposure::State	convert(const ExposureState& s) {
+astro::camera::CcdState::State	convert(const ExposureState& s) {
 	switch (s) {
 	case IDLE:
-		return astro::camera::Exposure::idle;
+		return astro::camera::CcdState::idle;
 	case EXPOSING:
-		return astro::camera::Exposure::exposing;
+		return astro::camera::CcdState::exposing;
 	case CANCELLING:
-		return astro::camera::Exposure::cancelling;
+		return astro::camera::CcdState::cancelling;
 	case EXPOSED:
-		return astro::camera::Exposure::exposed;
+		return astro::camera::CcdState::exposed;
 	}
 	throw std::runtime_error("unknown exposure state");
 }

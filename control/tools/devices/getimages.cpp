@@ -271,9 +271,9 @@ int	main(int argc, char *argv[]) {
 
 	// check whether the remote camera already has an exposed image,
 	// in which case we want to cancel it
-	if (Exposure::exposed == ccd->exposureStatus()) {
+	if (CcdState::exposed == ccd->exposureStatus()) {
 		ccd->cancelExposure();
-		while (Exposure::idle != ccd->exposureStatus()) {
+		while (CcdState::idle != ccd->exposureStatus()) {
 			usleep(100000);
 		}
 	}

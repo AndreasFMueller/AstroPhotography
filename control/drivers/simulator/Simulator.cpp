@@ -169,15 +169,15 @@ void	SimCamera::startExposure(const Exposure& _exposure) {
 	exposurestart = Timer::gettime();
 }
 
-Exposure::State	SimCamera::exposureStatus() {
+CcdState::State	SimCamera::exposureStatus() {
 	if (exposurestart < 0) {
-		return Exposure::idle;
+		return CcdState::idle;
 	}
 	double	nowtime = Timer::gettime();
 	if (nowtime < exposurestart + exposure.exposuretime()) {
-		return Exposure::exposing;
+		return CcdState::exposing;
 	}
-	return Exposure::exposed;
+	return CcdState::exposed;
 }
 
 void	SimCamera::await_exposure() {
@@ -198,16 +198,16 @@ ImagePtr	SimCamera::getImage() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image");
 	// check whether the image is ready
 	switch (exposureStatus()) {
-	case Exposure::idle:
+	case CcdState::idle:
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera idle, cannot get image");
 		throw std::runtime_error("camera idle");
 		break;
-	case Exposure::exposed:
+	case CcdState::exposed:
 		break;
-	case Exposure::exposing:
+	case CcdState::exposing:
 		await_exposure();
 		break;
-	case Exposure::cancelling:
+	case CcdState::cancelling:
 		debug(LOG_ERR, DEBUG_LOG, 0, "cancelling is impossible");
 		throw std::runtime_error("cannot happen");
 		break;
@@ -253,7 +253,7 @@ void	SimCcd::startExposure(const Exposure& exposure) {
 	camera.startExposure(exposure);
 }
 
-Exposure::State	SimCcd::exposureStatus() {
+CcdState::State	SimCcd::exposureStatus() {
 	return camera.exposureStatus();
 }
 

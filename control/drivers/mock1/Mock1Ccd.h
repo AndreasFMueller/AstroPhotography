@@ -24,7 +24,7 @@ public:
 		: Ccd(info), cameraid(_cameraid), ccd(_ccd) { }
 	virtual ~Mock1Ccd() { }
 	virtual void    startExposure(const Exposure& exposure);
-	virtual Exposure::State exposureStatus();
+	virtual CcdState::State exposureStatus();
 	virtual void    cancelExposure();
 	virtual ImagePtr    getRawImage();
 }; 
