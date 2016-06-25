@@ -237,18 +237,34 @@ AM_CONDITIONAL(ENABLE_OTHELLO, test x$enable_othello = xyes)
 
 ## ASI ###############################################################
 # check for the ASI library
-AC_ARG_ENABLE(asi,
-[AS_HELP_STRING([--enable-asi], [build the proprietary ASI driver])],
+enable_asi=yes
+ASIINCLUDE=
+ASILIBPATH=
+ASILIBS=
+AC_ARG_WITH(asi,
+[AS_HELP_STRING([--with-asi], [location of ASI header/library])],
 [
-	enable_asi=yes
-	AC_CHECK_HEADERS(ASICamera.h, ,
-		[AC_MSG_ERROR([ASICamera header not found])])
-	AC_CHECK_HEADERS(ASICamera2.h, ,
-		[AC_MSG_ERROR([ASICamera2 header not found])])
-],[
-enable_asi=no
-]
+	ASIINCLUDE=-I${with_lib}/include
+	ASILIBPATH="-L${with_asi}/lib -L${with_asi}/lib64"
+	ASILIBS="-lASICamera -lASICamera2"
+],
 )
+if test ${enable_asi} = .yes
+then
+	AC_CHECK_HEADERS(ASICamera.h, enable_asi=yes, enable_asi=no)
+fi
+if test ${enable_asi} = .yes
+then
+	AC_CHECK_HEADERS(ASICamera2.h, enable_asi=yes, enable_asi=no)
+fi
+if test ${enable_asi} = .yes
+then
+	AC_CHECK_LIB(ASICamera, getNumberOfConnectedCameras)
+	AC_CHECK_LIB(ASICamera2, ASIGetNumOfConnectedCameras)
+fi
+AC_SUBST(ASIINCLUDE)
+AC_SUBST(ASILIBPATH)
+AC_SUBST(ASILIBS)
 AM_CONDITIONAL(ENABLE_ASI, test x$enable_asi = xyes)
 
 ## SBIG ##############################################################
@@ -453,6 +469,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile drivers/nice/Makefile
+	drivers/asi/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	test/Makefile])
 AC_OUTPUT
