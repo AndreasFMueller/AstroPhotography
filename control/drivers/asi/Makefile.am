@@ -20,7 +20,7 @@ libasi_la_DEPENDENCIES = ../../lib/libastro.la
 libasi_la_LIBADD = ../../lib/libastro.la
 
 noinst_PROGRAMS = asitests 
-asitests_SOURCES = asitests.cpp 
+asitests_SOURCES = asitests.cpp asitest.cpp
 asitests_LDADD = -lcppunit ../../lib/libastro.la -L. -lasi @ASILIBPATH@ @ASILIBS@
 asitests_DEPENDENCIES = ../../lib/libastro.la libasi.la
 

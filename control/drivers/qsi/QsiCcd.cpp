@@ -26,7 +26,7 @@ QsiCcd::~QsiCcd() {
 		cancelExposure();
 	} catch (...) {
 	}
-	// XXX turn of the cooler
+	// XXX turn off the cooler
 }
 
 void	QsiCcd::startExposure(const Exposure& exposure) {

@@ -1,5 +1,5 @@
 /*
- * AsiLocator.cpp -- camera locator for SBIG driver cameras
+ * AsiLocator.cpp -- camera locator for ASI driver cameras
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -17,7 +17,7 @@
 #include <utils.h>
 
 //////////////////////////////////////////////////////////////////////
-// Implementation of the SBIG Express Module Descriptor
+// Implementation of the ASI Express Module Descriptor
 //////////////////////////////////////////////////////////////////////
 
 namespace astro {
@@ -29,7 +29,7 @@ static std::string      asi_version(VERSION);
 static astro::camera::asi::AsiCameraLocator	*asi_locator = NULL;
 
 /**
- * \brief Module descriptor for the SBIG module
+ * \brief Module descriptor for the ASI module
  */
 class AsiDescriptor : public ModuleDescriptor {
 public:
@@ -113,14 +113,14 @@ void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
 }
 
 /**
- * \brief Get a list of SBIG cameras
+ * \brief Get a list of ASI cameras
  *
  * The cameras on the USB bus are number, that's the order in which the
  * locator returns the identifying string of the camera. A camera is
  * identified by its serial number an name.
  */
 std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type device) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get SBIG device list");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ASI device list");
 	std::vector<std::string>	names;
 	switch (device) {
 	case DeviceName::AdaptiveOptics:

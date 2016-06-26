@@ -240,27 +240,31 @@ AM_CONDITIONAL(ENABLE_OTHELLO, test x$enable_othello = xyes)
 enable_asi=yes
 ASIINCLUDE=
 ASILIBPATH=
-ASILIBS=
+ASILIBS="-lASICamera2"
 AC_ARG_WITH(asi,
 [AS_HELP_STRING([--with-asi], [location of ASI header/library])],
 [
-	ASIINCLUDE=-I${with_lib}/include
+	ASIINCLUDE="-I${with_asi}/include"
 	ASILIBPATH="-L${with_asi}/lib -L${with_asi}/lib64"
-	ASILIBS="-lASICamera -lASICamera2"
 ],
 )
-if test ${enable_asi} = .yes
+if test .${enable_asi} = .yes
 then
-	AC_CHECK_HEADERS(ASICamera.h, enable_asi=yes, enable_asi=no)
-fi
-if test ${enable_asi} = .yes
-then
+	OLDINCLUDE=${CPPFLAGS}
+	CPPFLAGS="${CPPFLAGS} ${ASIINCLUDE}"
 	AC_CHECK_HEADERS(ASICamera2.h, enable_asi=yes, enable_asi=no)
 fi
-if test ${enable_asi} = .yes
+if test .${enable_asi} = .yes
 then
-	AC_CHECK_LIB(ASICamera, getNumberOfConnectedCameras)
+	OLDLDFLAGS="${LDFLAGS}"
+	OLDLIBS="${LIBS}"
+	LDFLAGS="${LDFLAGS} ${ASILIBPATH}"
+	LIBS="${LIBS} ${ASILIBS}"
 	AC_CHECK_LIB(ASICamera2, ASIGetNumOfConnectedCameras)
+	LDFLAGS="${OLDLDFLAGS}"
+	LIBS="${OLDLIBS}"
+else
+	CPPFLAGS="${OLDINCLUDE}"
 fi
 AC_SUBST(ASIINCLUDE)
 AC_SUBST(ASILIBPATH)
@@ -328,9 +332,9 @@ AC_ARG_ENABLE(qsi,
 	AC_LANG_PUSH([C++])
 	AC_CHECK_HEADERS([qsiapi.h])
 	AC_CHECK_HEADER([qsiapi.h],
-                     [AC_DEFINE([HAVE_QSIAPI_H], [1],
-                        [Define to 1 if you have <qsiapi.h>.])],
-                     [AC_MSG_ERROR([QSI header not available, install or disable QSI driver])])
+		[AC_DEFINE([HAVE_QSIAPI_H], [1],
+		[Define to 1 if you have <qsiapi.h>.])],
+		[AC_MSG_ERROR([QSI header not available, install or disable QSI driver])])
 	AC_LANG_POP([C++])
 
 	QSICFLAGS="`${LIBQSIAPICONFIG} --cflags`"

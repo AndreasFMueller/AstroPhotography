@@ -14,6 +14,8 @@ namespace astro {
 namespace camera {
 namespace asi {
 
+std::vector<bool>	AsiCameraLocator::cameraopen;
+
 /**
  * \brief Construct an AsiCamera
  *
