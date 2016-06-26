@@ -42,7 +42,12 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 
 	// get information about the CCD
 	ASI_CAMERA_INFO camerainfo;
-        ASIGetCameraProperty(&camerainfo, _index);
+        if (ASI_SUCCESS != (rc = ASIGetCameraProperty(&camerainfo, _index))) {
+		std::string	msg = stringprintf("%s: cannot get props: %s",
+			name().toString().c_str(), error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// set common variables depending on the camera info
 	_hasGuiderPort = (camerainfo.ST4Port) ? true : false;
@@ -84,7 +89,13 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
  * \brief Destroy the AsiCamera
  */
 AsiCamera::~AsiCamera() {
-	ASICloseCamera(_id);
+	int	rc;
+	if (ASI_SUCCESS != (rc = ASICloseCamera(_id))) {
+		std::string	msg = stringprintf("%s cannot close camera: %s",
+			name().toString().c_str(), error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 	AsiCameraLocator::setopen(_index, false);
 }
 

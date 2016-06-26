@@ -234,11 +234,23 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 		throw std::runtime_error(msg);
 	}
 	std::vector<std::string>	result;
+	int	rc;
 	if (!isopen(index)) {
-		ASIOpenCamera(index);
+	int	rc = ASIOpenCamera(index);
+		if (ASI_SUCCESS != rc) {
+			std::string	msg = stringprintf("%d cannot open: %s",
+				index, AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
 	}
 	ASI_CAMERA_INFO	camerainfo;
-	ASIGetCameraProperty(&camerainfo, index);
+	if (ASI_SUCCESS != (rc = ASIGetCameraProperty(&camerainfo, index))) {
+		std::string	msg = stringprintf("%d cannot get props: %s",
+			index, AsiCamera::error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
         int     imgtypeidx = 0;
         while (camerainfo.SupportedVideoFormat[imgtypeidx] != -1) {
                 std::string     it = AsiCcd::imgtype2string(
@@ -246,7 +258,13 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 		result.push_back(it);
 	}
 	if (!isopen(index)) {
-		ASICloseCamera(index);
+		rc = ASICloseCamera(index);
+		if (ASI_SUCCESS != rc) {
+			std::string	msg = stringprintf("%d cannot close: %s",
+				index, AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
 	}
 	return result;
 }

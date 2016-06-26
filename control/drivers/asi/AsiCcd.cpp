@@ -86,9 +86,21 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 		if (ASI_SUCCESS != (rc = ASISetROIFormat(_camera.id(),
 			frame.size().width(), frame.size().height(),
 			bin, string2imgtype(imgtypename())))) {
+			std::string	msg = stringprintf("%s cannot set "
+				"ROI: %s",
+				_camera.name().toString().c_str(),
+				AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
 		}
 		if (ASI_SUCCESS != (rc = ASISetStartPos(_camera.id(),
 			origin.x(), origin.y()))) {
+			std::string	msg = stringprintf("%s cannot set "
+				"start position %s",
+				_camera.name().toString().c_str(),
+				AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
 		}
 	
 		// set the exposure time
@@ -103,7 +115,15 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 		// start the exposure
 		ASI_BOOL	isdark = (exposure.shutter() == Shutter::OPEN)
 						? ASI_FALSE : ASI_TRUE;
-		ASIStartExposure(_camera.id(), isdark);
+		if (ASI_SUCCESS != (rc = ASIStartExposure(_camera.id(),
+			isdark))) {
+			std::string	msg = stringprintf("%s cannot start "
+				"exposure: %s",
+				_camera.name().toString().c_str(),
+				AsiCamera::error(rc).c_str());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
 	} catch (const std::exception& x) {
 		Ccd::cancelExposure();
 	}
@@ -143,6 +163,7 @@ CcdState::State	AsiCcd::exposureStatus() {
  * \brief get an Image from the camera
  */
 astro::image::ImagePtr	AsiCcd::getRawImage() {
+	int	rc;
 	ASI_IMG_TYPE	imgtype = string2imgtype(imgtypename());
 	int	pixelsize = 1;
 	switch (imgtype) {
@@ -161,7 +182,14 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	ImageRectangle	frame(origin, size);
 	long	buffersize = size.getPixels() * pixelsize;
 	unsigned char	*buffer = (unsigned char *)alloca(buffersize);
-	ASIGetDataAfterExp(_camera.id(), buffer, buffersize);
+	if (ASI_SUCCESS != (rc = ASIGetDataAfterExp(_camera.id(), buffer,
+		buffersize))) {
+		std::string	msg = stringprintf("%s cannot get data: %s",
+			_camera.name().toString().c_str(),
+			AsiCamera::error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// convert this into an Image of the appropriate type
 	switch (imgtype) {
@@ -215,6 +243,9 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	return astro::image::ImagePtr(NULL);
 }
 
+/**
+ * \brief Get a cooler for this CCD
+ */
 CoolerPtr	AsiCcd::getCooler0() {
 	return CoolerPtr(new AsiCooler(_camera, *this));
 }
