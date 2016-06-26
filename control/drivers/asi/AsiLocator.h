@@ -16,6 +16,8 @@ namespace astro {
 namespace camera {
 namespace asi {
 
+class AsiCamera;
+
 /**
  * \brief The SBIG CameraLocator class.
  *
@@ -23,7 +25,7 @@ namespace asi {
  * an adapter class to the CameraLocator class.
  */
 class AsiCameraLocator : public DeviceLocator {
-	static int	driveropen;
+	static std::vector<bool>	cameraopen;
 public:
 	AsiCameraLocator();
 	virtual ~AsiCameraLocator();
@@ -32,6 +34,15 @@ public:
 	virtual	std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
+public:
+	// stuff that is available to open cameras
+	static std::vector<std::string>	imgtypes(int index);
+	static bool	isopen(int index);
+	friend class AsiCamera;
+private:
+	void	addCameraNames(std::vector<std::string>& names);
+	void	addCcdNames(std::vector<std::string>& names);
+	void	addGuiderportNames(std::vector<std::string>& names);
 };
 
 } // namespace asi

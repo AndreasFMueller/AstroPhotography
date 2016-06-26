@@ -11,6 +11,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AsiCamera.hh>
+#include <AsiCcd.h>
 #include <includes.h>
 #include <ASICamera2.h>
 #include <utils.h>
@@ -65,9 +66,6 @@ namespace asi {
 // AsiLocator implementation
 //////////////////////////////////////////////////////////////////////
 
-
-int	AsiCameraLocator::driveropen = 0;
-
 std::string	AsiCameraLocator::getName() const {
 	return std::string("asi");
 }
@@ -77,12 +75,16 @@ std::string	AsiCameraLocator::getVersion() const {
 }
 
 AsiCameraLocator::AsiCameraLocator() {
+	int	n = ASIGetNumOfConnectedCameras();
+	for (int i = 0; i < n; i++) {
+		cameraopen[i] = false;
+	}
 }
 
 AsiCameraLocator::~AsiCameraLocator() {
 }
 
-static void	asiAddCameraNames(std::vector<std::string>& names) {
+void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
 		DeviceName	cameraname = asiCameraName(index);
@@ -90,15 +92,19 @@ static void	asiAddCameraNames(std::vector<std::string>& names) {
 	}
 }
 
-static void	asiAddCcdNames(std::vector<std::string>& names ) {
+void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
-		DeviceName	ccdname = asiCcdName(index);
-		names.push_back(ccdname);
+		std::vector<std::string>	it = imgtypes(index);
+		std::vector<std::string>::const_iterator	i;
+		for (i = it.begin(); i != it.end(); i++) {
+			DeviceName	ccdname = asiCcdName(index, *i);
+			names.push_back(ccdname);
+		}
 	}
 }
 
-static void	asiAddGuiderportNames(std::vector<std::string>& names) {
+void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
 		DeviceName	guiderportname = asiGuiderportName(index);
@@ -124,18 +130,56 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
 	case DeviceName::Filterwheel:
 		return names;
 	case DeviceName::Guiderport:
-		asiAddGuiderportNames(names);
+		addGuiderportNames(names);
 		return names;
 	case DeviceName::Camera:
-		asiAddCameraNames(names);
+		addCameraNames(names);
 		return names;
 	case DeviceName::Ccd:
-		asiAddCcdNames(names);
+		addCcdNames(names);
 		return names;
 	default:
 		break;
 	}
 	return names;
+}
+
+/**
+ * \brief Find out whether a camera is already open
+ */
+bool	AsiCameraLocator::isopen(int index) {
+	if (index >= cameraopen.size()) {
+		return true;
+	}
+	return cameraopen[index];
+}
+
+/**
+ * \brief Retrieve a list of image types
+ */
+std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
+	// make sure the index is valid
+	if (index >= ASIGetNumOfConnectedCameras()) {
+		std::string	msg = stringprintf("");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	std::vector<std::string>	result;
+	if (!isopen(index)) {
+		ASIOpenCamera(index);
+	}
+	ASI_CAMERA_INFO	camerainfo;
+	ASIGetCameraProperty(&camerainfo, index);
+        int     imgtypeidx = 0;
+        while (camerainfo.SupportedVideoFormat[imgtypeidx] != -1) {
+                std::string     it = AsiCcd::imgtype2string(
+                        camerainfo.SupportedVideoFormat[imgtypeidx]);
+		result.push_back(it);
+	}
+	if (!isopen(index)) {
+		ASICloseCamera(index);
+	}
+	return result;
 }
 
 /**
@@ -153,10 +197,12 @@ CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
 	size_t	index = 0;
 	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
 		if (name == *i) {
-//			return CameraPtr(new AsiCamera(index));
+			cameraopen[index] = true;
+			return CameraPtr(new AsiCamera(index));
 		}
 	}
-	std::string	msg = stringprintf("camera %s not found", sname.c_str());
+	std::string	msg = stringprintf("camera %s not found",
+		sname.c_str());
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 	throw std::runtime_error(msg);
 }

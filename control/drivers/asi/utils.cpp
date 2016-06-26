@@ -39,10 +39,17 @@ DeviceName	asiCameraName(int index) {
  * getGuiderport0 function in the base DeviceLocator class, so that no
  * ASI-specific implementation of this function is required.
  */
-DeviceName	asiCcdName(int index) {
+DeviceName	asiCcdName(int index, const std::string& imgtype) {
 	DeviceName	cameraname = asiCameraName(index);
-	DeviceName	ccdname = cameraname.child(DeviceName::Ccd, "ccd");
+	DeviceName	ccdname = cameraname.child(DeviceName::Ccd, imgtype);
 	return ccdname;
+}
+
+/**
+ * \brief Generate the name of a cooler for an ASI Cooler camera
+ */
+DeviceName	asiCoolerName(int index, const std::string& imgtype) {
+	return asiCcdName(index, imgtype).child(DeviceName::Cooler, "cooler");
 }
 
 /**

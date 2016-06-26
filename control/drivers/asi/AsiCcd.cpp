@@ -6,6 +6,7 @@
 
 #include <AsiCcd.h>
 #include <ASICamera2.h>
+#include <AsiCooler.h>
 
 namespace astro {
 namespace camera {
@@ -76,7 +77,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 }
 
 CoolerPtr	AsiCcd::getCooler0() {
-	return CoolerPtr(NULL);
+	return CoolerPtr(new AsiCooler(_camera, *this));
 }
 
 } // namespace asi

@@ -13,7 +13,8 @@ namespace camera {
 namespace asi {
 
 DeviceName	asiCameraName(int index);
-DeviceName	asiCcdName(int index);
+DeviceName	asiCcdName(int index, const std::string& imgtype);
+DeviceName	asiCoolerName(int index, const std::string& imgtype);
 DeviceName	asiGuiderportName(int index);
 
 } // namespace asi

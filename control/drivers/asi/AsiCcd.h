@@ -1,5 +1,5 @@
 /*
- * AsiCcd.h --
+ * AsiCcd.h -- ASI camera CCD driver class declaration
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -13,6 +13,9 @@ namespace astro {
 namespace camera {
 namespace asi {
 
+/**
+ * \brief Implementation class for the CCD of an ASI camera
+ */
 class AsiCcd : public Ccd {
 	AsiCamera&	_camera;
 	bool	_hasCooler;
