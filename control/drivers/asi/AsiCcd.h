@@ -19,9 +19,9 @@ namespace asi {
 class AsiCcd : public Ccd {
 	AsiCamera&	_camera;
 	bool	_hasCooler;
+	std::string	imgtypename();
 public:
 	static std::string	imgtype2string(int imgtype);
-	static int	string2imgtype(const std::string& name);
 public:
 	AsiCcd(const CcdInfo&, AsiCamera& camera);
 	virtual ~AsiCcd();

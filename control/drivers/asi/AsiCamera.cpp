@@ -48,6 +48,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	_hasGuiderPort = (camerainfo.ST4Port) ? true : false;
 	_isColor = (camerainfo.IsColorCam) ? true : false;
 	_hasCooler = (camerainfo.IsCoolerCam) ? true : false;
+	_id = camerainfo.CameraID;
 	ImageSize	size(camerainfo.MaxWidth, camerainfo.MaxHeight);
 
 	// construct a CcdInfo object for each image format
@@ -83,7 +84,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
  * \brief Destroy the AsiCamera
  */
 AsiCamera::~AsiCamera() {
-	ASICloseCamera(_index);
+	ASICloseCamera(_id);
 	AsiCameraLocator::cameraopen[_index] = false;
 }
 
@@ -133,7 +134,7 @@ bool	AsiCamera::isColor() const {
 int	AsiCamera::controlIndex(const std::string& controlname) {
 	int	n;
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetNumOfControls(_index, &n))) {
+	if (ASI_SUCCESS != (rc = ASIGetNumOfControls(_id, &n))) {
 		std::string	msg = stringprintf("%s cannot get controls: %s",
 			name().toString().c_str(),
 			AsiCamera::error(rc).c_str());
@@ -143,7 +144,7 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 	for (int i = 0; i < n; i++) {
 		ASI_CONTROL_CAPS	caps;
 		int	rc;
-		if (ASI_SUCCESS != (rc = ASIGetControlCaps(_index, i, &caps))) {
+		if (ASI_SUCCESS != (rc = ASIGetControlCaps(_id, i, &caps))) {
 			std::string	msg = stringprintf("%s: cannot get "
 				"capability %d: %s", name().toString().c_str(),
 				i, AsiCamera::error(rc).c_str());
@@ -160,10 +161,13 @@ int	AsiCamera::controlIndex(const std::string& controlname) {
 	throw std::runtime_error(msg);
 }
 
-static void	getControlCapabilities(int index, int control_index,
+/**
+ * \brief Common function to retrieve camera capabilities
+ */
+static void	getControlCapabilities(int id, int control_index,
 	ASI_CONTROL_CAPS *caps) {
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetControlCaps(index, control_index,
+	if (ASI_SUCCESS != (rc = ASIGetControlCaps(id, control_index,
 		caps))) {
 		std::string	msg = stringprintf("%d cannot get caps: %s",
 			index, AsiCamera::error(rc).c_str());
@@ -172,66 +176,105 @@ static void	getControlCapabilities(int index, int control_index,
 	}
 }
 
+/**
+ * \brief get the maximum value of a control by index
+ */
 long    AsiCamera::controlMax(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return caps.MaxValue;
 }
 
-long    AsiCamera::proeprtyMax(const std::string& controlname) {
+/**
+ * \brief get the maximum value of a control by name
+ */
+long    AsiCamera::controlMax(const std::string& controlname) {
 	return controlMin(controlIndex(controlname));
 }
 
+/**
+ * \brief get the minimum value of a control by index
+ */
 long    AsiCamera::controlMin(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return caps.MinValue;
 }
 
+/**
+ * \brief get the minimum value of a control by name
+ */
 long    AsiCamera::controlMin(const std::string& controlname) {
 	return controlMin(controlIndex(controlname));
 }
 
+/**
+ * \brief get the default value of a control by index
+ */
 long    AsiCamera::controlDefault(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return caps.DefaultValue;
 }
 
+/**
+ * \brief get the default value of a control by name
+ */
 long    AsiCamera::controlDefault(const std::string& controlname) {
 	return controlDefault(controlIndex(controlname));
 }
 
+/**
+ * \brief Get the name of a control by index
+ */
 std::string     AsiCamera::controlName(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return std::string(caps.Name);
 }
 
+/**
+ * \brief Get the name of a control by name
+ */
 std::string     AsiCamera::controlName(const std::string& controlname) {
 	return controlName(controlIndex(controlname));
 }
 
+/**
+ * \brief Get the description of a control by index
+ */
 std::string     AsiCamera::controlDescription(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return std::string(caps.Description);
 }
 
+/**
+ * \brief Get the description of a control by name
+ */
 std::string     AsiCamera::controlDescription(const std::string& controlname) {
 	return controlDescription(controlIndex(controlname));
 }
 
+/**
+ * \brief get whether a control is writabl by index
+ */
 bool    AsiCamera::controlWritable(int control_index) {
 	ASI_CONTROL_CAPS	caps;
-	getControlCapabilities(_index, control_index, &caps);
+	getControlCapabilities(_id, control_index, &caps);
 	return (caps.IsWritable) ? true : false;
 }
 
+/**
+ * \brief get whether a control is writabl by name
+ */
 bool    AsiCamera::controlWritable(const std::string& controlname) {
 	return controlWritable(controlIndex(controlname));
 }
 
+/**
+ * \brief convert from C++ asi control types to the ASI API constants
+ */
 static ASI_CONTROL_TYPE	type2asitype(AsiControlType type) {
 	switch (type) {
 	case AsiGain:			return ASI_GAIN;
@@ -256,6 +299,7 @@ static ASI_CONTROL_TYPE	type2asitype(AsiControlType type) {
 	}
 }
 
+#if 0
 static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
 	switch (asitype) {
 	case ASI_GAIN:			return AsiGain;
@@ -279,13 +323,17 @@ static AsiControlType	asitype2type(ASI_CONTROL_TYPE asitype) {
 	case ASI_MONO_BIN:		return AsiMonoBin;
 	}
 }
+#endif
 
+/**
+ * \brief Get the value of a control
+ */
 AsiControlValue	AsiCamera::getControlValue(AsiControlType type) {
 	long		value;
 	ASI_BOOL	pbauto;
 	ASI_CONTROL_TYPE	asitype = type2asitype(type);
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASIGetControlValue(_index, asitype,
+	if (ASI_SUCCESS != (rc = ASIGetControlValue(_id, asitype,
 		&value, &pbauto))) {
 		std::string	msg = stringprintf("%s cannot get control "
 			"%d: %s", name().toString().c_str(), type,
@@ -300,12 +348,15 @@ AsiControlValue	AsiCamera::getControlValue(AsiControlType type) {
 	return result;
 }
 
+/**
+ * \brief Set the value of a control
+ */
 void	AsiCamera::setControlValue(const AsiControlValue& controlvalue) {
 	ASI_CONTROL_TYPE	type = type2asitype(controlvalue.type);
 	long		value = controlvalue.value;
 	ASI_BOOL	pbauto = (controlvalue.isauto) ? ASI_TRUE : ASI_FALSE;
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASISetControlValue(_index, type, value,
+	if (ASI_SUCCESS != (rc = ASISetControlValue(_id, type, value,
 		pbauto))) {
 		std::string	msg = stringprintf("%s cannot set control %d:"
 			" %s", name().toString().c_str(), type,

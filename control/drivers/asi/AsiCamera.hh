@@ -47,8 +47,10 @@ public:
  * \brief AsiCamera class
  */
 class AsiCamera : public Camera {
+	int	_id;
 	int	_index;
 public:
+	int	id() const { return _id; }
 	int	index() const { return _index; }
 private:
 	bool	_hasCooler;
@@ -80,7 +82,7 @@ public:
 	// properties
 	int	controlIndex(const std::string& controlname);
 	long	controlMax(int control_index);
-	long	proeprtyMax(const std::string& controlname);
+	long	controlMax(const std::string& controlname);
 	long	controlMin(int control_index);
 	long	controlMin(const std::string& controlname);
 	long	controlDefault(int control_index);
