@@ -66,6 +66,8 @@ namespace asi {
 // AsiLocator implementation
 //////////////////////////////////////////////////////////////////////
 
+std::vector<bool>	AsiCameraLocator::cameraopen;
+
 std::string	AsiCameraLocator::getName() const {
 	return std::string("asi");
 }
@@ -74,16 +76,34 @@ std::string	AsiCameraLocator::getVersion() const {
 	return VERSION;
 }
 
-AsiCameraLocator::AsiCameraLocator() {
+void	AsiCameraLocator::initialize_cameraopen() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int i = 0; i < n; i++) {
-		cameraopen[i] = false;
+		AsiCameraLocator::cameraopen[i] = false;
 	}
 }
 
+std::once_flag	cameraopen_flag;
+
+/**
+ * \brief Create a new ASI camera locator
+ */
+AsiCameraLocator::AsiCameraLocator() {
+	std::call_once(cameraopen_flag, initialize_cameraopen);
+}
+
+/**
+ * \brief Destroy a new ASI camera locator
+ */
 AsiCameraLocator::~AsiCameraLocator() {
 }
 
+/**
+ * \brief add the names of all cameras to a name vector
+ *
+ * \param names		list of names to which camera names should be added
+ */
 void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
@@ -92,6 +112,11 @@ void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
 	}
 }
 
+/**
+ * \brief add the names of all CCDs to a name vector
+ *
+ * \param names		list of names to which CCD names should be added
+ */
 void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
@@ -104,6 +129,11 @@ void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
 	}
 }
 
+/**
+ * \brief add the names of all guiderport to a name vector
+ *
+ * \param names		list of names to which guider port names should be added
+ */
 void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
@@ -113,11 +143,31 @@ void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
 }
 
 /**
+ * \brief add the names of all cooler to a name vector
+ *
+ * \param names		list of names to which cooler names should be added
+ */
+void	AsiCameraLocator::addCoolerNames(std::vector<std::string>& names) {
+	int	n = ASIGetNumOfConnectedCameras();
+	for (int index = 0; index < n; index++) {
+		std::vector<std::string>	it = imgtypes(index);
+		std::vector<std::string>::const_iterator	i;
+		for (i = it.begin(); i != it.end(); i++) {
+			DeviceName	ccdname = asiCcdName(index, *i);
+			names.push_back(ccdname.child(DeviceName::Cooler,
+				"cooler"));
+		}
+	}
+}
+
+/**
  * \brief Get a list of ASI cameras
  *
  * The cameras on the USB bus are number, that's the order in which the
  * locator returns the identifying string of the camera. A camera is
  * identified by its serial number an name.
+ *
+ * \param device	type of the devices to list
  */
 std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get ASI device list");
@@ -138,6 +188,9 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
 	case DeviceName::Ccd:
 		addCcdNames(names);
 		return names;
+	case DeviceName::Cooler:
+		addCoolerNames(names);
+		return names;
 	default:
 		break;
 	}
@@ -146,16 +199,32 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
 
 /**
  * \brief Find out whether a camera is already open
+ *
+ * \param index		index of the camera
  */
 bool	AsiCameraLocator::isopen(int index) {
-	if (index >= cameraopen.size()) {
+	std::call_once(cameraopen_flag, initialize_cameraopen);
+	if (index >= AsiCameraLocator::cameraopen.size()) {
 		return true;
 	}
 	return cameraopen[index];
 }
 
 /**
- * \brief Retrieve a list of image types
+ * \brief register that a camera is open
+ *
+ * \param index		index of the camera
+ * \param o		whether or not the camera is open
+ */
+void	AsiCameraLocator::setopen(int index, bool o) {
+	std::call_once(cameraopen_flag, initialize_cameraopen);
+	cameraopen[index] = o;
+}
+
+/**
+ * \brief Retrieve a list of image types 
+ *
+ * \param index		index of the camera 
  */
 std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 	// make sure the index is valid
@@ -188,6 +257,7 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
  * This works by retrieving a list of cameras and the checking which number
  * has the right name. This index is then used to retreive the camera object
  * by number.
+ * \param name	name of the camera
  */
 CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
 	std::string	sname = name;

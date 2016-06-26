@@ -14,8 +14,6 @@ namespace astro {
 namespace camera {
 namespace asi {
 
-std::vector<bool>	AsiCameraLocator::cameraopen;
-
 /**
  * \brief Construct an AsiCamera
  *
@@ -40,7 +38,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	AsiCameraLocator::cameraopen[_index] = true;
+	AsiCameraLocator::setopen(_index, true);
 
 	// get information about the CCD
 	ASI_CAMERA_INFO camerainfo;
@@ -87,7 +85,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
  */
 AsiCamera::~AsiCamera() {
 	ASICloseCamera(_id);
-	AsiCameraLocator::cameraopen[_index] = false;
+	AsiCameraLocator::setopen(_index, false);
 }
 
 /**

@@ -39,9 +39,12 @@ public:
 	static std::vector<std::string>	imgtypes(int index);
 	static bool	isopen(int index);
 	friend class AsiCamera;
+	static void	initialize_cameraopen();
 private:
+	static void	setopen(int index, bool o);
 	void	addCameraNames(std::vector<std::string>& names);
 	void	addCcdNames(std::vector<std::string>& names);
+	void	addCoolerNames(std::vector<std::string>& names);
 	void	addGuiderportNames(std::vector<std::string>& names);
 };
 
