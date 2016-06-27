@@ -49,6 +49,8 @@ public:
 				const std::string& section,
 				const std::string& name,
 				const std::string& value);
+	virtual void	set(const ConfigurationKey& key,
+				const std::string& value);
 	virtual void	remove(const ConfigurationKey& key);
 	virtual void    remove(const std::string& domain,
 				const std::string& section,

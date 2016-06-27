@@ -30,8 +30,10 @@
 /* constants identifying broken cameras */
 #define	BROKEN_NONE			0
 #define BROKEN_THE_IMAGING_SOURCE	1
+#define BROKEN_ZWO			0
 
 #define	VENDOR_THE_IMAGING_SOURCE	0x199e
+#define VENDOR_ZWO			0x03c3
 
 namespace astro {
 namespace usb {

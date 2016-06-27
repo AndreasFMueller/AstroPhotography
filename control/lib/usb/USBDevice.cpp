@@ -84,6 +84,11 @@ Device::Device(ContextHolderPtr _context, libusb_device *_dev,
 			"broken camera: The Imaging Source");
 		broken = BROKEN_THE_IMAGING_SOURCE;
 	}
+	if (d->idVendor() == VENDOR_ZWO) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"broken camera: ZWO ASI");
+		broken = BROKEN_ZWO;
+	}
 }
 
 Device::~Device() {

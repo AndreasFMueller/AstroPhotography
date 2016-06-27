@@ -32,7 +32,7 @@ AsiCooler::AsiCooler(AsiCamera& camera, AsiCcd& ccd)
 AsiCooler::~AsiCooler() {
 	try {
 		setOn(false);
-	} catch (const std::exception& x) {
+	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot turn off: %s", x.what());
 	}
 }

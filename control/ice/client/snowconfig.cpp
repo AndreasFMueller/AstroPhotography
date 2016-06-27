@@ -23,6 +23,7 @@ static void	short_usage(const char *progname) {
 	std::cout << p << " [ options ] help" << std::endl;
 	std::cout << p << " [ options ] <server> get <domain> <section> <name>" << std::endl;
 	std::cout << p << " [ options ] <server> set <domain> <section> <name> <value>" << std::endl;
+	std::cout << p << " [ options ] <server> remove <domain> <section> <name>" << std::endl;
 	std::cout << p << " [ options ] <server> list [ <domain> [ <section> ] ]" << std::endl;
 }
 
@@ -81,10 +82,31 @@ static int	set_command(ConfigurationPrx configuration,
 	entry.domain = *i++;
 	entry.section = *i++;
 	entry.name = *i++;
-	entry.value = *i;
+	entry.value = *i++;
 	configuration->set(entry);
 	return EXIT_SUCCESS;
 }
+
+static int	remove_command(ConfigurationPrx configuration,
+			const std::list<std::string>& arguments) {
+	if (arguments.size() != 3) {
+		std::cerr << "wrong number of arguments" << std::endl;
+		return EXIT_FAILURE;
+	}
+	ConfigurationKey	key;
+	std::list<std::string>::const_iterator	i = arguments.begin();
+	key.domain = *i++;
+	key.section = *i++;
+	key.name = *i++;
+	try {
+		configuration->remove(key);
+	} catch (const NotFound x) {
+		std::cerr << "not found: " << x.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
 
 void	show(ConfigurationList list) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "list %d entries", list.size());
@@ -199,6 +221,9 @@ int	main(int argc, char *argv[]) {
 	// now process the various commands
 	if ("get" == command) {
 		return get_command(configuration, arguments);
+	}
+	if ("remove" == command) {
+		return remove_command(configuration, arguments);
 	}
 	if ("set" == command) {
 		return set_command(configuration, arguments);

@@ -14,6 +14,8 @@
 #include <set>
 #include <deque>
 #include <cstdint>
+#include <condition_variable>
+#include <mutex>
 
 namespace astro {
 namespace camera {

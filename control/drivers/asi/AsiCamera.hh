@@ -7,7 +7,7 @@
 #define _AsiCamera_hh
 
 #include <AstroCamera.h>
-#include <AsiCamera2.h>
+#include <ASICamera2.h>
 
 namespace astro {
 namespace camera {

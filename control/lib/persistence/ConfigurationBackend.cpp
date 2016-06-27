@@ -74,6 +74,11 @@ void    ConfigurationBackend::set(const std::string& domain,
 	}
 }
 
+void	ConfigurationBackend::set(const ConfigurationKey& key,
+	const std::string& value) {
+	set(key.domain, key.section, key.name, value);
+}
+
 void    ConfigurationBackend::remove(const std::string& domain,
 		const std::string& section, const std::string& name) {
 	_configurationtable.remove(domain, section, name);

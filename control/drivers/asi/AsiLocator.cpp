@@ -80,8 +80,9 @@ void	AsiCameraLocator::initialize_cameraopen() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int i = 0; i < n; i++) {
-		AsiCameraLocator::cameraopen[i] = false;
+		AsiCameraLocator::cameraopen.push_back(false);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initalization complete");
 }
 
 std::once_flag	cameraopen_flag;
@@ -105,6 +106,7 @@ AsiCameraLocator::~AsiCameraLocator() {
  * \param names		list of names to which camera names should be added
  */
 void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera names");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
 		DeviceName	cameraname = asiCameraName(index);
@@ -118,7 +120,9 @@ void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
  * \param names		list of names to which CCD names should be added
  */
 void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving CCD names");
 	int	n = ASIGetNumOfConnectedCameras();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d cameras", n);
 	for (int index = 0; index < n; index++) {
 		std::vector<std::string>	it = imgtypes(index);
 		std::vector<std::string>::const_iterator	i;
@@ -135,6 +139,7 @@ void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
  * \param names		list of names to which guider port names should be added
  */
 void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving Guiderport names");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
 		DeviceName	guiderportname = asiGuiderportName(index);
@@ -148,6 +153,7 @@ void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
  * \param names		list of names to which cooler names should be added
  */
 void	AsiCameraLocator::addCoolerNames(std::vector<std::string>& names) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving Cooler names");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
 		std::vector<std::string>	it = imgtypes(index);
@@ -227,6 +233,7 @@ void	AsiCameraLocator::setopen(int index, bool o) {
  * \param index		index of the camera 
  */
 std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving image types for %d", index);
 	// make sure the index is valid
 	if (index >= ASIGetNumOfConnectedCameras()) {
 		std::string	msg = stringprintf("");
@@ -251,11 +258,13 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got camera info for %d", index);
         int     imgtypeidx = 0;
         while (camerainfo.SupportedVideoFormat[imgtypeidx] != -1) {
                 std::string     it = AsiCcd::imgtype2string(
                         camerainfo.SupportedVideoFormat[imgtypeidx]);
 		result.push_back(it);
+		imgtypeidx++;
 	}
 	if (!isopen(index)) {
 		rc = ASICloseCamera(index);

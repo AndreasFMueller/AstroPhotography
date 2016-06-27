@@ -181,7 +181,7 @@ static void	getControlCapabilities(int id, int control_index,
 	if (ASI_SUCCESS != (rc = ASIGetControlCaps(id, control_index,
 		caps))) {
 		std::string	msg = stringprintf("%d cannot get caps: %s",
-			index, AsiCamera::error(rc).c_str());
+			id, AsiCamera::error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -308,6 +308,9 @@ static ASI_CONTROL_TYPE	type2asitype(AsiControlType type) {
         case AsiCoolerOn:		return ASI_COOLER_ON;
         case AsiMonoBin:		return ASI_MONO_BIN;
 	}
+	std::string	msg = stringprintf("unknown control type %d", type);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 #if 0

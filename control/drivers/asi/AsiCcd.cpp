@@ -157,6 +157,9 @@ CcdState::State	AsiCcd::exposureStatus() {
 	case ASI_EXP_FAILED:
 		return CcdState::exposed;
 	}
+	std::string	msg = stringprintf("unknown ASI status: %d", status);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 /**

@@ -102,6 +102,7 @@ module snowstar {
 		ConfigurationItem	get(ConfigurationKey key)
 						throws NotFound;
 		void	set(ConfigurationItem item) throws BadParameter;
+		void	remove(ConfigurationKey key) throws NotFound;
 		ConfigurationList	list();
 		ConfigurationList	listDomain(string domain);
 		ConfigurationList	listSection(string domain,

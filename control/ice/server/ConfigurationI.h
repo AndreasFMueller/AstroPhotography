@@ -19,6 +19,8 @@ public:
 	bool	has(const ConfigurationKey& key, const Ice::Current& current);
 	ConfigurationItem	get(const ConfigurationKey& key,
 					const Ice::Current& current);
+	void	remove(const ConfigurationKey& key,
+			const Ice::Current& current);
 	void	set(const ConfigurationItem& item, const Ice::Current& current);
 	ConfigurationList	list(const Ice::Current& current);
 	ConfigurationList	listDomain(const std::string& domain,
