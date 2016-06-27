@@ -80,6 +80,8 @@ void	AsiCameraLocator::initialize_cameraopen() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initialize the cameraopen array");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int i = 0; i < n; i++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "camera %d (%d)", i,
+			cameraopen.size());
 		AsiCameraLocator::cameraopen.push_back(false);
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "initalization complete");
@@ -106,8 +108,8 @@ AsiCameraLocator::~AsiCameraLocator() {
  * \param names		list of names to which camera names should be added
  */
 void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving camera names");
 	int	n = ASIGetNumOfConnectedCameras();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving %d camera names", n);
 	for (int index = 0; index < n; index++) {
 		DeviceName	cameraname = asiCameraName(index);
 		names.push_back(cameraname);
@@ -120,9 +122,9 @@ void	AsiCameraLocator::addCameraNames(std::vector<std::string>& names) {
  * \param names		list of names to which CCD names should be added
  */
 void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving CCD names");
 	int	n = ASIGetNumOfConnectedCameras();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d cameras", n);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving CCD names for %d cameras",
+		n);
 	for (int index = 0; index < n; index++) {
 		std::vector<std::string>	it = imgtypes(index);
 		std::vector<std::string>::const_iterator	i;
@@ -210,9 +212,13 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
  */
 bool	AsiCameraLocator::isopen(int index) {
 	std::call_once(cameraopen_flag, initialize_cameraopen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "check camera %d", index);
 	if (index >= AsiCameraLocator::cameraopen.size()) {
-		return true;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "out of range");
+		return false;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d open: %s", index,
+		(cameraopen[index]) ? "yes" : "no");
 	return cameraopen[index];
 }
 
@@ -224,6 +230,8 @@ bool	AsiCameraLocator::isopen(int index) {
  */
 void	AsiCameraLocator::setopen(int index, bool o) {
 	std::call_once(cameraopen_flag, initialize_cameraopen);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "remember camera %d state %s", index,
+		(o) ? "open" : "closed");
 	cameraopen[index] = o;
 }
 
@@ -243,7 +251,8 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 	std::vector<std::string>	result;
 	int	rc;
 	if (!isopen(index)) {
-	int	rc = ASIOpenCamera(index);
+		int	rc = ASIOpenCamera(index);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "open camera %d: %d", index, rc);
 		if (ASI_SUCCESS != rc) {
 			std::string	msg = stringprintf("%d cannot open: %s",
 				index, AsiCamera::error(rc).c_str());
@@ -268,6 +277,8 @@ std::vector<std::string>	AsiCameraLocator::imgtypes(int index) {
 	}
 	if (!isopen(index)) {
 		rc = ASICloseCamera(index);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "close camera %d: %d",
+			index, rc);
 		if (ASI_SUCCESS != rc) {
 			std::string	msg = stringprintf("%d cannot close: %s",
 				index, AsiCamera::error(rc).c_str());
@@ -294,7 +305,6 @@ CameraPtr	AsiCameraLocator::getCamera0(const DeviceName& name) {
 	size_t	index = 0;
 	for (i = cameras.begin(); i != cameras.end(); i++, index++) {
 		if (name == *i) {
-			cameraopen[index] = true;
 			return CameraPtr(new AsiCamera(index));
 		}
 	}

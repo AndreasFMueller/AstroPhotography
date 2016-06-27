@@ -88,3 +88,15 @@ testplanet:	snowstar
 		--database=`pwd`/testdb.db --config=testdb.db \
 		--name=$${servername} --foreground 2>&1 | tee test.log
 
+valgrind:
+	if [ -r servername ]; \
+	then \
+		servername=`cat servername`; \
+	else \
+		servername=server; \
+	fi; \
+	valgrind --redzone-size=1024 --trace-children=yes --log-file=valgrind.log \
+		./snowstar --debug --base=`pwd`/images \
+		--database=`pwd`/testdb.db \
+		--config=`pwd`/testdb.db --name=$${servername} --foreground \
+		2>&1 | tee test.log

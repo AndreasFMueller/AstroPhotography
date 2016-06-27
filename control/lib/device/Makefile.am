@@ -14,6 +14,7 @@ libastrodevice_la_SOURCES =						\
 	BinningSet.cpp							\
 	Camera.cpp							\
 	Ccd.cpp								\
+	CcdInfo.cpp							\
 	CcdState.cpp							\
 	Cooler.cpp							\
 	Device.cpp							\

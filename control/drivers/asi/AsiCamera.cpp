@@ -31,6 +31,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	}
 
 	// open the camera
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open camera idx = %d", index);
 	int	rc = ASIOpenCamera(index);
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("%s: cannot open",
@@ -54,6 +55,8 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	_isColor = (camerainfo.IsColorCam) ? true : false;
 	_hasCooler = (camerainfo.IsCoolerCam) ? true : false;
 	_id = camerainfo.CameraID;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera idx = %d has id = %d",
+		_index, _id);
 	ImageSize	size(camerainfo.MaxWidth, camerainfo.MaxHeight);
 
 	// construct a CcdInfo object for each image format
@@ -63,6 +66,8 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	for (i = ccdnames.begin(); i != ccdnames.end(); i++) {
 		// construct the name for this 
 		DeviceName	ccdname = name().child(DeviceName::Ccd, *i);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding ccd %s",
+			ccdname.toString().c_str());
 		CcdInfo	info(ccdname, size, 0);
 
 		// pixel size
@@ -82,6 +87,8 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 
 		// add the ccdinfo object to the array
 		ccdinfo.push_back(info);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "have now %d infos",
+			ccdinfo.size());
 	}
 }
 
@@ -90,7 +97,8 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
  */
 AsiCamera::~AsiCamera() {
 	int	rc;
-	if (ASI_SUCCESS != (rc = ASICloseCamera(_id))) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "close camera %d (id = %d)", _index, _id);
+	if (ASI_SUCCESS != (rc = ASICloseCamera(_index))) {
 		std::string	msg = stringprintf("%s cannot close camera: %s",
 			name().toString().c_str(), error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());

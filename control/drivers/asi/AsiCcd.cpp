@@ -7,6 +7,8 @@
 #include <AsiCcd.h>
 #include <ASICamera2.h>
 #include <AsiCooler.h>
+#include <errno.h>
+#include <string.h>
 
 namespace astro {
 namespace camera {
@@ -72,6 +74,8 @@ static ASI_IMG_TYPE	string2imgtype(const std::string& imgname) {
  * \brief Start a single exposure
  */
 void	AsiCcd::startExposure(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
+		name().toString().c_str(), exposure.toString().c_str());
 	int	rc;
 	Ccd::startExposure(exposure);
 	// set binning mode
@@ -83,6 +87,8 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set ROI %s",
+			frame.toString().c_str());
 		if (ASI_SUCCESS != (rc = ASISetROIFormat(_camera.id(),
 			frame.size().width(), frame.size().height(),
 			bin, string2imgtype(imgtypename())))) {
@@ -93,6 +99,8 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set start: %s",
+			origin.toString().c_str());
 		if (ASI_SUCCESS != (rc = ASISetStartPos(_camera.id(),
 			origin.x(), origin.y()))) {
 			std::string	msg = stringprintf("%s cannot set "
@@ -104,9 +112,10 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 		}
 	
 		// set the exposure time
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time");
 		AsiControlValue	value;
 		value.type = AsiExposure;
-		value.value = 1000 * exposure.exposuretime();
+		value.value = 1000000 * exposure.exposuretime();
 		value.isauto = false;
 		_camera.setControlValue(value);
 
@@ -127,6 +136,7 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	} catch (const std::exception& x) {
 		Ccd::cancelExposure();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
 /**
@@ -149,12 +159,24 @@ CcdState::State	AsiCcd::exposureStatus() {
 	}
 	switch (status) {
 	case ASI_EXP_IDLE:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is IDLE/idle",
+			name().toString().c_str());
+		state = CcdState::idle;
 		return CcdState::idle;
 	case ASI_EXP_WORKING:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is WORKING/exposing",
+			name().toString().c_str());
+		state = CcdState::exposing;
 		return CcdState::exposing;
 	case ASI_EXP_SUCCESS:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is SUCCESS/exposed",
+			name().toString().c_str());
+		state = CcdState::exposed;
 		return CcdState::exposed;
 	case ASI_EXP_FAILED:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/exposed",
+			name().toString().c_str());
+		state = CcdState::exposed;
 		return CcdState::exposed;
 	}
 	std::string	msg = stringprintf("unknown ASI status: %d", status);
@@ -166,6 +188,7 @@ CcdState::State	AsiCcd::exposureStatus() {
  * \brief get an Image from the camera
  */
 astro::image::ImagePtr	AsiCcd::getRawImage() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a raw image");
 	int	rc;
 	ASI_IMG_TYPE	imgtype = string2imgtype(imgtypename());
 	int	pixelsize = 1;
@@ -180,57 +203,78 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	default:
 		break;
 	}
+
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
 	long	buffersize = size.getPixels() * pixelsize;
-	unsigned char	*buffer = (unsigned char *)alloca(buffersize);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "pixel size: %d, buffer size: %ld",
+		pixelsize, buffersize);
+	unsigned char	*buffer = (unsigned char *)malloc(buffersize);
+	if (NULL == buffer) {
+		std::string	msg = stringprintf("cannot allocate buffer: %s",
+			strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "buffer at %p", buffer);
 	if (ASI_SUCCESS != (rc = ASIGetDataAfterExp(_camera.id(), buffer,
 		buffersize))) {
+		free(buffer);
 		std::string	msg = stringprintf("%s cannot get data: %s",
 			_camera.name().toString().c_str(),
 			AsiCamera::error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the image data");
 
 	// convert this into an Image of the appropriate type
+	int	h = size.height();
+	ImagePtr	result;
 	switch (imgtype) {
 	case ASI_IMG_RAW8: // convert 8bit mono image to Image<unsigned char>
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RAW8 image");
 		{
 		Image<unsigned char>	*image = new Image<unsigned char>(size);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
-				image->pixel(x, y)
+				image->pixel(x, h - 1 - y)
 					= buffer[x + size.width() * y];
 			}
 		}
-		return ImagePtr(image);
+		result = ImagePtr(image);
 		}
+		break;
 	case ASI_IMG_RGB24: // convert 8bit color image to Image<RGB<unsigned char> >
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RGB24 image");
 		{
 		Image<RGB<unsigned char> >	*image
 			= new Image<RGB<unsigned char> >(size);
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				long	offset = (x + size.width() * y) * 3;
-				image->pixel(x, y) = RGB<unsigned char>(buffer[offset], buffer[offset + 1], buffer[offset + 2]);
+				image->pixel(x, h - 1 - y) = RGB<unsigned char>(buffer[offset], buffer[offset + 1], buffer[offset + 2]);
 			}
 		}
-		return ImagePtr(image);
+		result = ImagePtr(image);
 		}
+		break;
 	case ASI_IMG_RAW16: // convert 16bit mono image to Image<unsigned short>
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get RAW16 image");
 		{
 		Image<unsigned short>	*image
 			= new Image<unsigned short>(size);
 		unsigned short	*sb = (unsigned short *)buffer;
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
-				image->pixel(x, y) = sb[x + size.width() * y];
+				image->pixel(x, h - 1 - y)
+					= sb[x + size.width() * y];
 			}
 		}
-		return ImagePtr(image);
+		result = ImagePtr(image);
 		}
+		break;
 	case ASI_IMG_Y8: // convert 8bit YUYV image to Image<YUYV<unsigned char> >
 		debug(LOG_ERR, DEBUG_LOG, 0, "Y8 format not implemented");
 		throw std::runtime_error("Y8 format not implemented");
@@ -242,8 +286,8 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		throw std::runtime_error(msg);
 		}
 	}
-	
-	return astro::image::ImagePtr(NULL);
+	free(buffer);
+	return result;
 }
 
 /**

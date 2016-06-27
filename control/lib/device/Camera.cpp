@@ -66,8 +66,11 @@ unsigned int	Camera::nCcds() const {
  * \brief Get the info object for a CCD
  */
 const CcdInfo&	Camera::getCcdInfo(size_t ccdid) const {
-	if (ccdid > ccds.size()) {
-		throw NotFound("ccd id too large");
+	if (ccdid >= ccdinfo.size()) {
+		std::string	msg = stringprintf("ccd id %d too large (%d)",
+			ccdid, ccdinfo.size());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
 	}
 	return ccdinfo[ccdid];
 }
