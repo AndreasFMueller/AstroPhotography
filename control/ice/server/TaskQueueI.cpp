@@ -71,6 +71,7 @@ void TaskQueueI::start(const Ice::Current& /* current */) {
 		std::string	 cause = astro::stringprintf(
 			"cannot start: %s %s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
 }
@@ -85,6 +86,7 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 		std::string	 cause = astro::stringprintf(
 			"cannot stop: %s %s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
 }
@@ -157,6 +159,7 @@ int TaskQueueI::submit(const TaskParameters& parameters,
 		std::string	 cause = astro::stringprintf(
 			"cannot submit: %s %s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
 }
@@ -166,6 +169,7 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
 			"task %d does not exist", taskid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 	try {
@@ -174,6 +178,7 @@ TaskParameters TaskQueueI::parameters(int taskid, const Ice::Current& /* current
 		std::string	 cause = astro::stringprintf(
 			"cannot get parameters for task %d: %s %s", taskid,
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 }
@@ -183,6 +188,7 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
 			"task %d does not exist", taskid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 	try {
@@ -191,6 +197,7 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 		std::string	 cause = astro::stringprintf(
 			"cannot get info for task %d: %s %s", taskid,
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 }
@@ -200,6 +207,7 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
 			"task %d does not exist", taskid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 	try {
@@ -210,6 +218,7 @@ void TaskQueueI::cancel(int taskid, const Ice::Current& /* current */) {
 		std::string	 cause = astro::stringprintf(
 			"cannot cancel task %d: %s %s", taskid,
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
 }
@@ -219,6 +228,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 	if (!taskqueue.exists(taskid)) {
 		std::string	cause = astro::stringprintf(
 			"task %d does not exist", taskid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
 	try {
@@ -229,6 +239,7 @@ void TaskQueueI::remove(int taskid, const Ice::Current& /* current */) {
 		std::string	 cause = astro::stringprintf(
 			"cannot cancel task %d: %s %s", taskid,
 			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadParameter(cause);
 	}
 }

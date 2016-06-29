@@ -99,6 +99,28 @@ int	ImageDirectory::bytesPerPixel(const std::string& filename) const {
 	return 2;
 }
 
+int	ImageDirectory::bytesPerPlane(const std::string& filename) const {
+	std::string	f = fullname(filename);
+	io::FITSinfileBase	infile(f);
+
+	switch (infile.getImgtype()) {
+	case BYTE_IMG:
+	case SBYTE_IMG:
+		return sizeof(unsigned char);
+	case USHORT_IMG:
+	case SHORT_IMG:
+		return sizeof(unsigned short);
+	case ULONG_IMG:
+	case LONG_IMG:
+		return sizeof(unsigned long);
+	case FLOAT_IMG:
+		return sizeof(float);
+	case DOUBLE_IMG:
+		return sizeof(double);
+	}
+	return 1;
+}
+
 /**
  * \brief Get a list of file names
  */

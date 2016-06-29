@@ -328,11 +328,18 @@ int	main(int argc, char *argv[]) {
 				"device exception wait: %s", x.what());
 			throw std::runtime_error(x.what());
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image complete");
 
 		// get the image data
 		ImagePrx	image;
 		try {
 			image = ccd->getImage();
+		} catch (const BadParameter& x) {
+			std::string	msg = stringprintf(
+				"bad parameter in getImage: %s", x.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			std::cerr << msg << std::endl;
+			throw std::runtime_error(msg);
 		} catch (const BadState& x) {
 			std::string	msg = stringprintf(
 				"bad state in getImage: %s", x.what());
@@ -346,6 +353,8 @@ int	main(int argc, char *argv[]) {
 			std::cerr << msg << std::endl;
 			throw std::runtime_error(msg);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got image: %dx%d",
+			image->size().width, image->size().height);
 
 		// convert image to an astro::image::imagePtr
 		astro::image::ImagePtr	imageptr = convert(image);

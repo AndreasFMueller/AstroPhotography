@@ -5,6 +5,7 @@
  */
 #include <ImageI.h>
 #include <AstroFilterfunc.h>
+#include <AstroFormat.h>
 #include <cerrno>
 #include <cstring>
 #include <includes.h>
@@ -88,7 +89,10 @@ ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	// read the data
 	unsigned char	*buffer = new unsigned char[sb.st_size];
 	if (sb.st_size != read(fd, buffer, sb.st_size)) {
-		throw BadParameter("could not read file in full length");
+		std::string	msg = astro::stringprintf("could not read file %s "
+			"in full length %ld", fullname.c_str(), sb.st_size);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
 	}
 	close(fd);
 
@@ -146,8 +150,13 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 ByteImageI::ByteImageI(astro::image::ImageDirectory& imagedirectory,
 		astro::image::ImagePtr image, const std::string& filename)
 	: ImageI(imagedirectory, image, filename) {
-	if (1 != _bytesperpixel) {
-		throw BadParameter("cannot build byte image image");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image %d",
+		_bytespervalue);
+	if (1 != _bytespervalue) {
+		std::string	msg = astro::stringprintf("cannot build byte image "
+			"from %s", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
 	}
 }
 
@@ -166,8 +175,13 @@ ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 ShortImageI::ShortImageI(astro::image::ImageDirectory& imagedirectory,
 		astro::image::ImagePtr image, const std::string& filename)
 	: ImageI(imagedirectory, image, filename) {
-	if (2 != _bytesperpixel) {
-		throw BadParameter("cannot build byte image image");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
+		_bytespervalue);
+	if (2 != _bytespervalue) {
+		std::string	msg = astro::stringprintf("cannot build "
+			"short image from %s", filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
 	}
 }
 
@@ -185,7 +199,9 @@ ShortSequence	ShortImageI::getShorts(const Ice::Current& /* current */) {
 
 ImagePrx	ImageI::createProxy(const std::string& filename,
 			const Ice::Current& current) {
-	return getImage(filename, _bytesperpixel, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create proxy for %d-size pixelvalues",
+		_bytespervalue);
+	return getImage(filename, _bytespervalue, current);
 }
 
 } // namespace snowstar

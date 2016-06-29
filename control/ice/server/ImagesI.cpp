@@ -34,6 +34,9 @@ int	ImagesI::imageAge(const std::string& name,
 	return imagedirectory.fileAge(name);
 }
 
+/**
+ * \brief Get an image given the name an the pixel size
+ */
 ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 				const Ice::Current& current) {
 	// find the identity
@@ -48,17 +51,20 @@ ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 		return snowstar::createProxy<ShortImagePrx>(identity, current,
 			false);
 	}
-	throw BadParameter("pixel format not supported");
+	std::string	msg = astro::stringprintf("unsupported pixel size:"
+		" %d", bytesPerPixel);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw BadParameter(msg);
 }
 
 ImagePrx	getImage(const std::string& filename,
 			astro::image::ImageDirectory& imagedirectory,
 				const Ice::Current& current) {
 	// find the number bytes per pixel
-	int	bytesperpixel = imagedirectory.bytesPerPixel(filename);
+	int	bytesperplane = imagedirectory.bytesPerPlane(filename);
 
 	// create the proxy
-	return getImage(filename, bytesperpixel, current);
+	return getImage(filename, bytesperplane, current);
 }
 
 } // namespace snowtar

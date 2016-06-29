@@ -8,6 +8,7 @@
 #include <limits>
 #include <includes.h>
 #include <AstroIO.h>
+#include <AstroFormat.h>
 #include <typeinfo>
 
 namespace snowstar {
@@ -308,7 +309,9 @@ ImageFile       convertfile(astro::image::ImagePtr imageptr) {
 	if (sb.st_size != read(fd, buffer, sb.st_size)) {
 		delete[] buffer;
 		close(fd);
-		throw BadParameter("could not read file in full length");
+		std::string	msg = astro::stringprintf("cannt read file %s in full length %ld", filename.c_str(), sb.st_size);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
 	}
 	close(fd);
 

@@ -22,7 +22,6 @@ private:
 	ImageSize	_size;
 protected:
 	int	_bytesperpixel;
-private:
 	int	_bytespervalue;
 	int	_planes;
 public:

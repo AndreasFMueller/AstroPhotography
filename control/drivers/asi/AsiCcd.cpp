@@ -254,7 +254,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		for (int x = 0; x < size.width(); x++) {
 			for (int y = 0; y < size.height(); y++) {
 				long	offset = (x + size.width() * y) * 3;
-				image->pixel(x, h - 1 - y) = RGB<unsigned char>(buffer[offset], buffer[offset + 1], buffer[offset + 2]);
+				image->pixel(x, h - 1 - y) = RGB<unsigned char>(buffer[offset + 2], buffer[offset + 1], buffer[offset + 0]);
 			}
 		}
 		result = ImagePtr(image);

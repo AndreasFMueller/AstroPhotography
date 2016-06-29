@@ -33,7 +33,7 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	astro::image::ImagePtr	image = _imagedirectory.getImagePtr(name);
 
 	// find out how many bytes a pixel has
-	switch (astro::image::filter::bytesperpixel(image)) {
+	switch (astro::image::filter::bytespervalue(image)) {
 	case 1:	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating byte image servant");
 		ptr = new ByteImageI(_imagedirectory, image, name);
 		break;
