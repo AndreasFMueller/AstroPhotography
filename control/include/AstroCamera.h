@@ -247,6 +247,7 @@ public:
 	long		sequence;
 	ImagePtr	image;
 	ImageQueueEntry(const Exposure& _exposure);
+	ImageQueueEntry(const Exposure& _exposure, ImagePtr _image);
 	ImageQueueEntry(const ImageQueueEntry& other);
 	ImageQueueEntry&	operator=(const ImageQueueEntry& other);
 };
@@ -260,6 +261,14 @@ public:
 };
 
 /**
+ * \brief Exception thrown when the queue is full
+ */
+class ImageDropped : public std::exception {
+public:
+	ImageDropped() { }
+};
+
+/**
  * \brief Interface to retrieve multiple images from a Ccd
  *
  * The Basic CCD interface can retrieve single images, but the real 
@@ -269,21 +278,59 @@ class ImageQueue {
 	std::condition_variable	condition;
 	std::deque<ImageQueueEntry>	queue;
 	unsigned long	_maxqueuelength;
+public:
+	unsigned long	maxqueuelength() const { return _maxqueuelength; }
+	void	maxqueuelength(unsigned long m) { _maxqueuelength = m; }
+private:
 	long	_processed;
 	long	_dropped;
 	long	_sequence;
+public:
+	long	processed() const { return _processed; }
+	long	dropped() const { return _dropped; }
 private:
 	ImageQueue(const ImageQueue& other);
 	ImageQueue&	operator=(const ImageQueue& other);
 public:
-	long	processed() const { return _processed; }
-	long	dropped() const { return _dropped; }
-public:
 	ImageQueue(unsigned long maxqueuelength = 10);
-	bool	hasImage();
-	ImageQueueEntry	get(bool block) throw (EmptyQueue);
-	ImagePtr	getImage(bool block);
+	bool	hasEntry();
+	ImageQueueEntry	getEntry(bool block) throw (EmptyQueue);
 	void	add(const Exposure& exposure, ImagePtr image);
+	void	add(ImageQueueEntry& entry);
+};
+
+/**
+ * \brief Sink for images
+ */
+class ImageSink {
+public:
+	virtual void	operator()(const ImageQueueEntry& entry) = 0;
+};
+typedef std::shared_ptr<ImageSink>	ImageSinkPtr;
+
+/**
+ * \brief Exception thrown when streaming is requested from a camera that cannot
+ */
+class CannotStream : public std::exception {
+public:
+	CannotStream() { }
+};
+
+/**
+ * \brief Interface for Image Streams
+ */
+class ImageStream : public ImageQueue, public ImageSink {
+	ImageSinkPtr	_imagesink;
+	Exposure	_streamexposure;
+	void	*private_data;
+public:
+	void	imagesink(ImageSinkPtr i) { _imagesink = i; }
+	ImageStream(unsigned long _maxqueuelength = 0);
+	virtual ~ImageStream();
+	virtual void	startStream(const Exposure& exposure);
+	virtual void	stopStream();
+	virtual void	streamExposure(const Exposure& exposure);
+	virtual void	operator()(const ImageQueueEntry& entry);
 };
 
 /**

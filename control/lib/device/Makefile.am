@@ -31,6 +31,7 @@ libastrodevice_la_SOURCES =						\
 	Imager.cpp							\
 	ImageQueue.cpp							\
 	ImageQueueEntry.cpp						\
+	ImageStream.cpp							\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\
