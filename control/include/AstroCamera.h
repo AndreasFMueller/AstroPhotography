@@ -321,8 +321,12 @@ public:
  */
 class ImageStream : public ImageQueue, public ImageSink {
 	ImageSinkPtr	_imagesink;
+protected:
 	Exposure	_streamexposure;
+private:
 	void	*private_data;
+	ImageStream(const ImageStream& other);
+	ImageStream&	operator()(const ImageStream& other);
 public:
 	void	imagesink(ImageSinkPtr i) { _imagesink = i; }
 	ImageStream(unsigned long _maxqueuelength = 0);
@@ -330,6 +334,7 @@ public:
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
 	virtual void	streamExposure(const Exposure& exposure);
+	virtual const Exposure&	streamExposure() const;
 	virtual void	operator()(const ImageQueueEntry& entry);
 };
 
@@ -346,7 +351,7 @@ public:
  * the camera can return natively. For all other pixel formats, the
  * application should use the provided conversion functions.
  */
-class	Ccd : public astro::device::Device {
+class	Ccd : public astro::device::Device, public ImageStream {
 protected:
 	CcdInfo	info;
 	volatile CcdState::State	state;
