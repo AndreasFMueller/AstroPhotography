@@ -160,7 +160,7 @@ bool	Exposure::operator==(const Exposure& exposure) const {
 	return true;
 }
 
-bool	Exposure::operator!=(const Exposure& exposure) {
+bool	Exposure::operator!=(const Exposure& exposure) const {
 	return (!((*this) == exposure));
 }
 

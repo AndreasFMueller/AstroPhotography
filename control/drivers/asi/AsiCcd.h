@@ -13,6 +13,8 @@ namespace astro {
 namespace camera {
 namespace asi {
 
+class AsiStream;
+
 /**
  * \brief Implementation class for the CCD of an ASI camera
  */
@@ -40,6 +42,9 @@ public:
 	virtual bool	hasCooler() const { return _hasCooler; }
 
 	// stream interface
+private:
+	AsiStream	*stream;
+public:
 	virtual void	streamExposure(const Exposure& exposure);
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();

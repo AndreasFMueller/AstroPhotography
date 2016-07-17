@@ -7,6 +7,7 @@
 #include <AsiCcd.h>
 #include <ASICamera2.h>
 #include <AsiCooler.h>
+#include <AsiStream.h>
 #include <errno.h>
 #include <string.h>
 
@@ -317,12 +318,18 @@ void    AsiCcd::streamExposure(const Exposure& exposure) {
  * \brief Start streaming
  */
 void    AsiCcd::startStream(const Exposure& /* exposure */) {
+	if (NULL != stream) {
+		throw std::runtime_error("stream already running");
+	}
+	streamExposure(exposure);
+	stream = new AsiStream(this);
 }
 
 /**
  * \brief Stop streaming
  */
 void    AsiCcd::stopStream() {
+	delete stream;
 }
 
 } // namespace asi

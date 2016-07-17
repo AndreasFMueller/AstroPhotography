@@ -14,6 +14,9 @@ namespace astro {
 namespace camera {
 namespace asi {
 
+/**
+ * \brief Class implementing stream interface for the ASI camera
+ */
 class AsiStream {
 	AsiCcd	*_ccd;
 	bool	_running;

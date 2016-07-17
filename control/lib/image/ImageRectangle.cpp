@@ -77,7 +77,7 @@ bool	ImageRectangle::operator==(const ImageRectangle& other) const {
 	return (_origin == other.origin()) && (_size == other.size());
 }
 
-bool	ImageRectangle::operator!=(const ImageRecangle& other) {
+bool	ImageRectangle::operator!=(const ImageRectangle& other) const {
 	if (_origin == other._origin) {
 		return false;
 	}
