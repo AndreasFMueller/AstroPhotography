@@ -155,6 +155,7 @@ public:
 	bool	contains(const ImageRectangle& rectangle) const;
 	bool	fits(const ImageSize& size) const;
 	bool	operator==(const ImageRectangle& other) const;
+	bool	operator!=(const ImageRectangle& other) const;
 	const ImagePoint&	lowerLeftCorner() const;
 	ImagePoint	lowerRightCorner() const;
 	ImagePoint	upperRightCorner() const;

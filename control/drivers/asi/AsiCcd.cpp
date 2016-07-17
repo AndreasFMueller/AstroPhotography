@@ -71,13 +71,10 @@ static ASI_IMG_TYPE	string2imgtype(const std::string& imgname) {
 }
 
 /**
- * \brief Start a single exposure
+ * \brief Set the exposure data
  */
-void	AsiCcd::startExposure(const Exposure& exposure) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
-		name().toString().c_str(), exposure.toString().c_str());
+void	AsiCcd::setExposure(const Exposure& exposure) {
 	int	rc;
-	Ccd::startExposure(exposure);
 	// set binning mode
 	int	bin = exposure.mode().x();
 	ImageSize	sensorsize = info.size() / exposure.mode();
@@ -86,40 +83,52 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
-	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set ROI %s",
-			frame.toString().c_str());
-		if (ASI_SUCCESS != (rc = ASISetROIFormat(_camera.id(),
-			frame.size().width(), frame.size().height(),
-			bin, string2imgtype(imgtypename())))) {
-			std::string	msg = stringprintf("%s cannot set "
-				"ROI: %s",
-				_camera.name().toString().c_str(),
-				AsiCamera::error(rc).c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set start: %s",
-			origin.toString().c_str());
-		if (ASI_SUCCESS != (rc = ASISetStartPos(_camera.id(),
-			origin.x(), origin.y()))) {
-			std::string	msg = stringprintf("%s cannot set "
-				"start position %s",
-				_camera.name().toString().c_str(),
-				AsiCamera::error(rc).c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
-	
-		// set the exposure time
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time");
-		AsiControlValue	value;
-		value.type = AsiExposure;
-		value.value = 1000000 * exposure.exposuretime();
-		value.isauto = false;
-		_camera.setControlValue(value);
 
-		// XXX set the gain
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set ROI %s",
+		frame.toString().c_str());
+	if (ASI_SUCCESS != (rc = ASISetROIFormat(_camera.id(),
+		frame.size().width(), frame.size().height(),
+		bin, string2imgtype(imgtypename())))) {
+		std::string	msg = stringprintf("%s cannot set "
+			"ROI: %s",
+			_camera.name().toString().c_str(),
+			AsiCamera::error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set start: %s",
+		origin.toString().c_str());
+	if (ASI_SUCCESS != (rc = ASISetStartPos(_camera.id(),
+		origin.x(), origin.y()))) {
+		std::string	msg = stringprintf("%s cannot set "
+			"start position %s",
+			_camera.name().toString().c_str(),
+			AsiCamera::error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// set the exposure time
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time");
+	AsiControlValue	value;
+	value.type = AsiExposure;
+	value.value = 1000000 * exposure.exposuretime();
+	value.isauto = false;
+	_camera.setControlValue(value);
+
+	// XXX set the gain
+}
+
+/**
+ * \brief Start a single exposure
+ */
+void	AsiCcd::startExposure(const Exposure& exposure) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
+		name().toString().c_str(), exposure.toString().c_str());
+	int	rc;
+	Ccd::startExposure(exposure);
+	try {
+		setExposure(exposure);
 
 		// start the exposure
 		ASI_BOOL	isdark = (exposure.shutter() == Shutter::OPEN)
@@ -295,6 +304,25 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
  */
 CoolerPtr	AsiCcd::getCooler0() {
 	return CoolerPtr(new AsiCooler(_camera, *this));
+}
+
+/**
+ * \brief Set the exposure parameters for the stream
+ */
+void    AsiCcd::streamExposure(const Exposure& exposure) {
+	ImageStream::streamExposure(exposure);
+}
+
+/**
+ * \brief Start streaming
+ */
+void    AsiCcd::startStream(const Exposure& /* exposure */) {
+}
+
+/**
+ * \brief Stop streaming
+ */
+void    AsiCcd::stopStream() {
 }
 
 } // namespace asi

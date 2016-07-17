@@ -77,6 +77,16 @@ bool	ImageRectangle::operator==(const ImageRectangle& other) const {
 	return (_origin == other.origin()) && (_size == other.size());
 }
 
+bool	ImageRectangle::operator!=(const ImageRecangle& other) {
+	if (_origin == other._origin) {
+		return false;
+	}
+	if (_size == other._size) {
+		return false;
+	}
+	return true;
+}
+
 /**
  * \brief Test whether a point is contained within a rectangle
  */
@@ -223,6 +233,7 @@ int	ImageRectangle::borderDistance(const ImagePoint& point) const {
 	n = upper.y() - point.y();		if (n < m) { m = n; }
 	return m;
 }
+
 
 } // namespace image
 } // namespace astro

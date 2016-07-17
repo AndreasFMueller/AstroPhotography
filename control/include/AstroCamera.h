@@ -141,6 +141,9 @@ static purpose_t	string2purpose(const std::string& p);
 	virtual std::string	toString() const;
 
 	void	addToImage(astro::image::ImageBase& image) const;
+
+	bool	operator==(const Exposure& exposure) const;
+	bool	operator!=(const Exposure& exposure) const;
 };
 std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 
@@ -320,8 +323,8 @@ public:
  * \brief Interface for Image Streams
  */
 class ImageStream : public ImageQueue, public ImageSink {
-	ImageSinkPtr	_imagesink;
 protected:
+	ImageSinkPtr	_imagesink;
 	Exposure	_streamexposure;
 private:
 	void	*private_data;

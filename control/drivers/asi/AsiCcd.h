@@ -25,6 +25,7 @@ public:
 public:
 	AsiCcd(const CcdInfo&, AsiCamera& camera);
 	virtual ~AsiCcd();
+	void	setExposure(const Exposure& exposure);
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
@@ -37,6 +38,11 @@ protected:
 public:
 	void	hasCooler(bool hc) { _hasCooler = hc; }
 	virtual bool	hasCooler() const { return _hasCooler; }
+
+	// stream interface
+	virtual void	streamExposure(const Exposure& exposure);
+	virtual void	startStream(const Exposure& exposure);
+	virtual void	stopStream();
 };
 
 } // namespace asi

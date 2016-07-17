@@ -135,5 +135,34 @@ Exposure::purpose_t	Exposure::string2purpose(const std::string& p) {
 	throw std::runtime_error(msg);
 }
 
+bool	Exposure::operator==(const Exposure& exposure) const {
+	if (_frame != exposure._frame) {
+		return false;
+	}
+	if (_exposuretime != exposure._exposuretime) {
+		return false;
+	}
+	if (_gain != exposure._gain) {
+		return false;
+	}
+	if (_limit != exposure._limit) {
+		return false;
+	}
+	if (_mode != exposure._mode) {
+		return false;
+	}
+	if (_shutter != exposure._shutter) {
+		return false;
+	}
+	if (_purpose != exposure._purpose) {
+		return false;
+	}
+	return true;
+}
+
+bool	Exposure::operator!=(const Exposure& exposure) {
+	return (!((*this) == exposure));
+}
+
 } // namespace camera
 } // namespace astro
