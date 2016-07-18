@@ -137,6 +137,7 @@ int	main(int argc, char *argv[]) {
 	// make sure there is an additional argument
 	if (optind >= argc) {
 		std::cerr << "no command argument" << std::endl;
+		return EXIT_FAILURE;
 	}
 	std::string	command(argv[optind++]);
 
