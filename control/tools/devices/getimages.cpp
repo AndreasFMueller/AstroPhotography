@@ -241,7 +241,9 @@ int	main(int argc, char *argv[]) {
 		&& (instrument->has(DeviceName::Cooler))) {
 		double	absolute = 273.15 + temperature;
 		if (absolute < 0) {
-			throw std::runtime_error("bad temperature");
+			std::string	msg = stringprintf("illegal temperature: %f", temperature);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
 		}
 		cooler = instrument->cooler();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
@@ -255,7 +257,7 @@ int	main(int argc, char *argv[]) {
 			double	actual = cooler->getActualTemperature();
 			delta = fabs(absolute - actual);
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"set: %.1f, actual: %1.f, delta: %.1f",
+				"set: %.1f, actual: %.1f, delta: %.1f",
 				absolute, actual, delta);
 		} while (delta > 1);
 	}
