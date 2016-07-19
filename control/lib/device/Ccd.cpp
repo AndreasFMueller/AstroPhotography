@@ -2,7 +2,6 @@
  * Ccd.cpp -- Ccd implementation
  *
  * (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
- * $Id$
  */
 #include <AstroCamera.h>
 #include <AstroFormat.h>
@@ -12,6 +11,8 @@
 #include <AstroUtils.h>
 #include <includes.h>
 #include <sstream>
+#include <mutex>
+#include <condition_variable>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -20,6 +21,23 @@ namespace astro {
 namespace camera {
 
 DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
+
+/**
+ * \brief Get the state
+ */
+CcdState::State	Ccd::state() {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	return _state;
+}
+
+/**
+ * \brief Set the state, notify threads waiting for a state change
+ */
+void	Ccd::state(CcdState::State s) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+	_state = s;
+	_condition.notify_all();
+}
 
 /**
  * \brief Start an exposure
@@ -32,11 +50,12 @@ DeviceName::device_type	Ccd::devicetype = DeviceName::Ccd;
  * this method also sets up the infrastructure for the wait method.
  */
 void    Ccd::startExposure(const Exposure& _exposure) {
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
 	// make sure we are in the right state, and only accept new exposures
 	// in that state. This is important because if we change the
 	// exposure member while an exposure is in progress, we may run into
 	// trouble while doing the readout. 
-	if (CcdState::idle != state) {
+	if (CcdState::idle != state()) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
 			"start exposure only in idle state");
 		throw BadState("start exposure only in idle state");
@@ -65,7 +84,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
 	time(&lastexposurestart);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started at %d",
 		lastexposurestart);
-	state = CcdState::exposing;
+	state(CcdState::exposing);
 }
 
 /**
@@ -74,7 +93,7 @@ void    Ccd::startExposure(const Exposure& _exposure) {
  * Find out whether an exposure is in progress. Optional method.
  */
 CcdState::State Ccd::exposureStatus() {
-	return state;
+	return state();
 }
 
 /**
@@ -137,7 +156,8 @@ bool	Ccd::wait() {
 			// XXX bad things should happen
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %d", state);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %s",
+		CcdState::state2string(state()).c_str());
 	return (CcdState::exposed == this->exposureStatus());
 }
 
@@ -158,8 +178,11 @@ astro::image::ImagePtr	Ccd::getRawImage() {
 astro::image::ImagePtr	Ccd::getImage() {
 	// must have an exposed image to call this method
 	if (CcdState::exposed != this->exposureStatus()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %d", state);
-		throw BadState("no exposed image to retrieve");
+		std::string	msg = stringprintf("no exposed image to "
+			"retrieve, bad state: %s",
+			CcdState::state2string(state()).c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
 	}
 	ImagePtr	image = this->getRawImage();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a %d x %d image",
@@ -172,7 +195,7 @@ astro::image::ImagePtr	Ccd::getImage() {
 	//     also be added
 
 	// set state to idle
-	state = CcdState::idle;
+	state(CcdState::idle);
 
 	// that's it, return the image
 	return image;

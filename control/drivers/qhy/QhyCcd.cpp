@@ -50,7 +50,7 @@ void	QhyCcd::startExposure(const Exposure& exposure) {
  */
 void	QhyCcd::getImage0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting getImage0()");
-	state = CcdState::exposing;
+	state(CcdState::exposing);
 	this->exposure = exposure;
 	::qhy::BinningMode	mode(exposure.mode().x(), exposure.mode().y());
 	deviceptr->camera().mode(mode);
@@ -72,7 +72,7 @@ void	QhyCcd::getImage0() {
 	}
 
 	// that's it
-	state = CcdState::exposed;
+	state(CcdState::exposed);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage0() complete");
 }
 
@@ -80,11 +80,11 @@ void	QhyCcd::getImage0() {
  * \brief collect the image when exposure is done
  */
 ImagePtr	QhyCcd::getRawImage() {
-	if (state != CcdState::exposed) {
+	if (state() != CcdState::exposed) {
 		throw BadState("no exposure available");
 	}
 	thread.join();
-	state = CcdState::idle;
+	state(CcdState::idle);
 	return image;
 }
 

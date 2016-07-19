@@ -47,7 +47,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	// start the exposure
 	Ccd::startExposure(exposure);
 	starttime = simtime();
-	state = CcdState::exposing;
+	state(CcdState::exposing);
 	shutter = exposure.shutter();
 }
 
@@ -59,16 +59,16 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 CcdState::State	SimCcd::exposureStatus() {
 	double	now = simtime();
 	double	timepast = now - starttime;
-	switch (state) {
+	switch (state()) {
 	case CcdState::idle:
 	case CcdState::exposed:
 	case CcdState::cancelling:
-		return state;
+		return state();
 	case CcdState::exposing:
 		if (timepast > exposure.exposuretime()) {
-			state = CcdState::exposed;
+			state(CcdState::exposed);
 		}
-		return state;
+		return state();
 	}
 	// this exception is mainly thrown to silence the compiler, it should
 	// never happen
@@ -80,11 +80,11 @@ CcdState::State	SimCcd::exposureStatus() {
  * \brief cancel the exposure
  */
 void    SimCcd::cancelExposure() {
-	if (CcdState::idle == state) {
+	if (CcdState::idle == state()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
-	state = CcdState::idle;
+	state(CcdState::idle);
 }
 
 /**
@@ -97,11 +97,11 @@ void    SimCcd::cancelExposure() {
  * that).
  */
 bool    SimCcd::wait() {
-	if ((CcdState::idle == state) || (CcdState::cancelling == state)) {
+	if ((CcdState::idle == state()) || (CcdState::cancelling == state())) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no exposure in progress");
 		throw BadState("no exposure in progress");
 	}
-	if (CcdState::exposed == state) {
+	if (CcdState::exposed == state()) {
 		return true;
 	}
 	// compute the remaining exposure time
@@ -114,7 +114,7 @@ bool    SimCcd::wait() {
 	}
 
 	// exposure is now complete
-	state = CcdState::exposed;
+	state(CcdState::exposed);
 	return true;
 }
 
@@ -167,7 +167,7 @@ std::cerr << __FILE__ << ":" << __LINE__ << ": radius = " << radius << std::endl
 	ImagePtr	image = starcamera(starfield);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got an %s image",
 		image->getFrame().toString().c_str());
-	state = CcdState::idle;
+	state(CcdState::idle);
 
 	// origin
 	image->setOrigin(exposure.frame().origin());

@@ -37,7 +37,9 @@ public:
  * \brief Auxiliary function to lauch the thread
  */
 static void	imagestreammain(ImageStreamThread *ist) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagestreammain starting");
 	ist->run();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagestreammain terminates");
 }
 
 /**
@@ -66,6 +68,7 @@ void	ImageStreamThread::run() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start new exposure");
 		_stream.streamExposure(exposure());
 		_ccd->startExposure(_stream.streamExposure());
+		_ccd->wait();
 		ImagePtr	image = _ccd->getImage();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image retrieved");
 		_stream.add(_ccd->getExposure(), image);

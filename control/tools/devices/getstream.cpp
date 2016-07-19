@@ -56,9 +56,11 @@ static struct option	longopts[] = {
 };
 
 int	main(int argc, char *argv[]) {
+	debugthreads = 1;
 	Exposure	exposure;
 	unsigned int	nImages = 1;
 	std::string	reponame;
+	std::string	filtername;
 	int	c;
 	int	longindex;
 	double	temperature = std::numeric_limits<double>::quiet_NaN();
@@ -78,7 +80,7 @@ int	main(int argc, char *argv[]) {
 			exposure.exposuretime(atof(optarg));
 			break;
 		case 'f':
-			throw std::runtime_error("option --filter not implemented");
+			filtername = std::string(optarg);
 			break;
 		case 'h':
 		case '?':
@@ -153,6 +155,18 @@ int	main(int argc, char *argv[]) {
 				"set: %.1f, actual: %.1f, delta: %.1f",
 				absolute, actual, delta);
 		} while (delta > 1);
+	}
+
+	// if the instrument has a filter wheel, we get a pointer to it
+	// and try 
+	FilterWheelPtr	filterwheel(NULL);
+	if (instrument->has(DeviceName::Filterwheel)) {
+		filterwheel = instrument->filterwheel();
+		filterwheel->wait(20);
+		if (filtername.size() > 0) {
+			filterwheel->select(filtername);
+			filterwheel->wait(20);
+		}
 	}
 
 	// start the stream

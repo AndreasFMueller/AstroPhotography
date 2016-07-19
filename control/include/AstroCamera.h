@@ -64,6 +64,12 @@ public:
 	} State;
 static std::string	state2string(State s);
 static State	string2state(const std::string& s);
+private:
+	State	_s;
+public:
+	CcdState(State s = idle) : _s(s) { }
+	CcdState(const std::string s) : _s(string2state(s)) { }
+	std::string	toString() const { return state2string(_s); }
 };
 
 /**
@@ -332,7 +338,7 @@ private:
 	ImageStream&	operator()(const ImageStream& other);
 public:
 	void	imagesink(ImageSinkPtr i) { _imagesink = i; }
-	ImageStream(unsigned long _maxqueuelength = 0);
+	ImageStream(unsigned long _maxqueuelength = 10);
 	virtual ~ImageStream();
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
@@ -357,7 +363,15 @@ public:
 class	Ccd : public astro::device::Device, public ImageStream {
 protected:
 	CcdInfo	info;
-	volatile CcdState::State	state;
+private:
+	// lock/condition variable to protect the state
+	std::recursive_mutex		_mutex;
+	std::condition_variable		_condition;
+	volatile CcdState::State	_state;
+protected:
+	CcdState::State	state();
+	void	state(CcdState::State s);
+
 	float		setTemperature;
 	Exposure	exposure;
 	void	addBinning(const Binning& binning);
@@ -371,7 +385,7 @@ public:
 	// constructor
 	Ccd(const CcdInfo& _info)
 		: astro::device::Device(_info.name(), DeviceName::Ccd),
-		info(_info), state(CcdState::idle) { }
+		info(_info), _state(CcdState::idle) { }
 	virtual	~Ccd() { }
 	const CcdInfo&	getInfo() const { return info; }
 

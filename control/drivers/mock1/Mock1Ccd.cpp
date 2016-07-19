@@ -21,29 +21,29 @@ namespace mock1 {
 void    Mock1Ccd::startExposure(const Exposure& exposure) {
 	Ccd::startExposure(exposure);
 	frame = exposure.frame();
-	state = CcdState::exposing;
+	state(CcdState::exposing);
 	// XXX should start a thread that does nothing for exposuretime seconds
 	sleep(1);
-	state = CcdState::exposed;
+	state(CcdState::exposed);
 }
 
 /**
  * \brief Query exposure status
  */
 CcdState::State Mock1Ccd::exposureStatus() {
-	return state;
+	return state();
 }
 
 /**
  * \brief Cancel the exposure
  */
 void    Mock1Ccd::cancelExposure() {
-	if (state != CcdState::exposing) {
+	if (state() != CcdState::exposing) {
 		throw BadState("CCD not exposing");
 	}
-	state = CcdState::cancelling;
+	state(CcdState::cancelling);
 	sleep(1);
-	state = CcdState::idle;
+	state(CcdState::idle);
 }
 
 /**

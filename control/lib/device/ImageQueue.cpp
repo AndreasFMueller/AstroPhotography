@@ -82,8 +82,9 @@ void	ImageQueue::add(ImageQueueEntry& entry) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "add image, queue length now %d",
 			queue.size());
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "dropping image %s",
-			entry.image->size().toString().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "dropping image %s (%u/%d)",
+			entry.image->size().toString().c_str(),
+			queue.size(), _maxqueuelength);
 		_dropped++;
 		throw ImageDropped();
 	}

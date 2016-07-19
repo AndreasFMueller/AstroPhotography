@@ -34,13 +34,13 @@ void	NiceCcd::startExposure(const Exposure& exposure) {
 }
 
 CcdState::State	NiceCcd::exposureStatus() {
-	state = snowstar::convert(_ccd->exposureStatus());
-	return state;
+	state(snowstar::convert(_ccd->exposureStatus()));
+	return state();
 }
 
 void	NiceCcd::cancelExposure() {
 	_ccd->cancelExposure();
-	state = snowstar::convert(_ccd->exposureStatus());
+	state(snowstar::convert(_ccd->exposureStatus()));
 }
 
 Shutter::state	NiceCcd::getShutterState() {

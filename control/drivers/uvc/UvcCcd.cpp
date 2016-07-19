@@ -81,7 +81,7 @@ void	UvcCcd::startExposure(const Exposure& exposure) {
 	camera.setExposureTime(exposure.exposuretime());
 
 	// status
-	state = CcdState::exposed;
+	state(CcdState::exposed);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -156,7 +156,7 @@ ImageSequence	UvcCcd::getImageSequence(unsigned int imagecount) {
 	}
 
 	// set state back to not done
-	state = CcdState::idle;
+	state(CcdState::idle);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "returning sequence with %d images",
 		result.size());

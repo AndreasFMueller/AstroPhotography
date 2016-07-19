@@ -73,17 +73,17 @@ CcdState::State	SbigCcd::exposureStatus() {
 		s = 0x3 & (results.status >> 2);
 	}
 	switch (s) {
-	case 0:	state = CcdState::idle;
+	case 0:	state(CcdState::idle);
 		break;
 	case 1: // this is an undefined state, we treat it as exposing
-	case 2: state = CcdState::exposing;
+	case 2: state(CcdState::exposing);
 		break;
-	case 3: state = CcdState::exposed;
+	case 3: state(CcdState::exposed);
 		break;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure status ccd %d: %d:", id,
-		state);
-	return state;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure status ccd %d: %s:", id,
+		CcdState::state2string(state()).c_str());
+	return state();
 }
 
 /**
@@ -145,7 +145,7 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd %d exposing", id);
 
 	// now we are exposing
-	state = CcdState::exposing;
+	state(CcdState::exposing);
 }
 
 /**
@@ -157,14 +157,14 @@ void	SbigCcd::startExposure(const Exposure& exposure) {
 ImagePtr	SbigCcd::getRawImage() {
 	// we should be in state exposing or exposed. If we are in 
 	// state idle, we have a problem
-	if (state == CcdState::idle) {
+	if (state() == CcdState::idle) {
 		throw BadState("camera is idle");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving short image from ccd %d", id);
 
 	// wait until the exposure is complete
 	exposureStatus();
-	if (CcdState::exposed != state) {
+	if (CcdState::exposed != state()) {
 		throw BadState("no exposed image available");
 	}
 
@@ -280,7 +280,7 @@ ImagePtr	SbigCcd::getRawImage() {
 
 	// convert the data read to a short image
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve image complete");
-        state = CcdState::idle;
+        state(CcdState::idle);
 
 	return ImagePtr(image);
 }

@@ -171,22 +171,22 @@ CcdState::State	AsiCcd::exposureStatus() {
 	case ASI_EXP_IDLE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is IDLE/idle",
 			name().toString().c_str());
-		state = CcdState::idle;
+		state(CcdState::idle);
 		return CcdState::idle;
 	case ASI_EXP_WORKING:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is WORKING/exposing",
 			name().toString().c_str());
-		state = CcdState::exposing;
+		state(CcdState::exposing);
 		return CcdState::exposing;
 	case ASI_EXP_SUCCESS:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is SUCCESS/exposed",
 			name().toString().c_str());
-		state = CcdState::exposed;
+		state(CcdState::exposed);
 		return CcdState::exposed;
 	case ASI_EXP_FAILED:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/exposed",
 			name().toString().c_str());
-		state = CcdState::exposed;
+		state(CcdState::exposed);
 		return CcdState::exposed;
 	}
 	std::string	msg = stringprintf("unknown ASI status: %d", status);
