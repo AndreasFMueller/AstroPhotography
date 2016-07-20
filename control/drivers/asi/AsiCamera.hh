@@ -42,11 +42,20 @@ public:
 	bool	isauto;
 };
 
+class AsiApiException : public std::runtime_error {
+	ASI_ERROR_CODE	_e;
+public:
+	ASI_ERROR_CODE	error_code() const { return _e; }
+	AsiApiException(ASI_ERROR_CODE e, const std::string& cause)
+		: std::runtime_error(cause), _e(e) {
+	}
+};
 
 /**
  * \brief AsiCamera class
  */
 class AsiCamera : public Camera {
+	std::recursive_mutex	_api_mutex;
 	int	_id;
 	int	_index;
 public:
@@ -96,6 +105,50 @@ public:
 
 	AsiControlValue	getControlValue(AsiControlType type);
 	void	setControlValue(const AsiControlValue& value);
+
+	typedef enum asi_mode_e {
+		mode_idle, mode_exposure, mode_stream
+	} asi_mode_t;
+private:
+	std::recursive_mutex	_mode_lock;
+	asi_mode_t	asi_mode;
+public:
+
+	// get/set ROI
+	typedef struct roi_s {
+		ImageSize	size;
+		Binning		mode;
+		ASI_IMG_TYPE	img_type;
+	} roi_t;
+	void	setROIFormat(const roi_t roi);
+	roi_t	getROIFormat();
+
+	// get/set the start position
+	void	setStartPos(const ImagePoint& point);
+	ImagePoint	getStartPos();
+
+	// get dropped frames
+	unsigned long	getDroppedFrames();
+
+	// normal exposure
+	void	startExposure(bool isDark);
+	void	stopExposure();
+
+	// video capture
+	void	startVideoCapture();
+	void	stopVideoCapture();
+	ASI_EXPOSURE_STATUS	getExpStatus();
+	void	getDataAfterExp(unsigned char *pBuffer, long lBuffSize);
+
+	// guiding
+	typedef enum direction_e {
+		asi_guide_north = 0,
+		asi_guide_south,
+		asi_guide_east,
+		asi_guide_west
+	} direction_t;
+	void	pulseGuideOn(direction_t dir);
+	void	pulseGuideOff(direction_t dir);
 };
 
 } // namespace asi

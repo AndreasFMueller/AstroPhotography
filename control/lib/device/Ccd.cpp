@@ -110,55 +110,80 @@ void    Ccd::cancelExposure() {
 	throw NotImplemented("cancelExposure not implemented");
 }
 
+
+/**
+ * \brief Predicate class to detect CCD state changes
+ */
+class CcdStateChange {
+	Ccd	*_ccd;
+	CcdState::State	_s;
+public:
+	CcdStateChange(Ccd *ccd, CcdState::State s) : _ccd(ccd), _s(s) {
+	}
+	bool	operator()() {
+		return _s != _ccd->exposureStatus();
+	}
+};
+
 /**
  * \brief Waiting for completion is generic (except possibly for UVC cameras)
  */
 bool	Ccd::wait() {
-	switch (exposureStatus()) {
+	// lock the _mutex, so we are shure the state variable will not
+	// change between checks
+	std::unique_lock<std::recursive_mutex>	lock(_mutex);
+
+	// now check the state variable, and handle the simple cases
+	CcdState::State	s = exposureStatus();
+	switch (s) {
 	case CcdState::idle:
 	case CcdState::cancelling:
-		debug(LOG_ERR, DEBUG_LOG, 0,
-			"cannot wait: no exposure in progress");
-		throw BadState("cannot wait: no exposure requested");
+		{
+		std::string	msg("cannot wait: no exposure in progress, %s",
+			CcdState::state2string(s).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+		}
 	case CcdState::exposed:
 		return true;
-	case CcdState::exposing:
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"waiting for exposure to complete");
-		// has the exposure time already expired? If so, we wait at
-		// least as the exposure time indicates
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"lastexposurestart: %d, exposuretime: %f",
-			lastexposurestart, exposure.exposuretime());
-		double	endtime = lastexposurestart;
-		endtime += exposure.exposuretime();
-		time_t	now = time(NULL);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
-		int	delta = endtime - now;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %d", delta);
-		if (delta > 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for exposure time "
-				"to expire: %u", delta);
-			sleep(delta);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete");
-		}
-		// now wait in 0.1 second intervals until either the exposure
-		// completes or we have waited for 30 seconds
-		double	step = 0.1;
-		int	counter = 300;
-		while ((counter-- > 0) && (CcdState::exposing == this->exposureStatus())) {
-			usleep(step * 1000000);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait %d", counter);
-		}
-		if (counter == 0) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"timeout waiting for exposure");
-			// XXX bad things should happen
+	default:
+		// remainder of cases is handled outside this switch
+		break;
+	}
+	// case CcdState::exposing:
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"currently exposing, waiting for exposure to complete");
+	// has the exposure time already expired? If so, we wait at
+	// least as the exposure time indicates
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"lastexposurestart: %d, exposuretime: %f",
+		lastexposurestart, exposure.exposuretime());
+	double	endtime = lastexposurestart;
+	endtime += exposure.exposuretime();
+	endtime += 60; // additional time
+	time_t	now = time(NULL);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "now: %d", now);
+	int	delta = endtime - now;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "delta = %d", delta);
+
+	// remember the current state
+	CcdStateChange	statechange(this, s);
+
+	// wait for a state change. Whenever the condition variable is
+	// notified, check whether the state has changed, and retry if not
+	while (std::cv_status::no_timeout == _condition.wait_for(lock,
+		std::chrono::seconds(delta))) {
+		if (statechange()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %s",
+				CcdState::state2string(state()).c_str());
+			return (CcdState::exposed == this->state());
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "state has not changed, "
+				"try again");
 		}
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait complete %s",
-		CcdState::state2string(state()).c_str());
-	return (CcdState::exposed == this->exposureStatus());
+	debug(LOG_ERR, DEBUG_LOG, 0, "state change has timed out");
+	return false;
 }
 
 /**
