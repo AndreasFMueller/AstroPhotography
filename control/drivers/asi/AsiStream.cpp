@@ -57,6 +57,8 @@ void	AsiStream::run() {
 			_ccd->setExposure(exposure);
 		}
 
+		// 
+
 		// get image
 		ImagePtr	image = _ccd->getRawImage();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image",

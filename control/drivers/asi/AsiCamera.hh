@@ -111,8 +111,9 @@ public:
 	} asi_mode_t;
 private:
 	std::recursive_mutex	_mode_lock;
-	asi_mode_t	asi_mode;
+	asi_mode_t	_asi_mode;
 public:
+	asi_mode_t	asi_mode() const { return _asi_mode; }
 
 	// get/set ROI
 	typedef struct roi_s {
@@ -133,12 +134,14 @@ public:
 	// normal exposure
 	void	startExposure(bool isDark);
 	void	stopExposure();
+	ASI_EXPOSURE_STATUS	getExpStatus();
+	void	getDataAfterExp(unsigned char *pBuffer, long lBuffSize);
 
 	// video capture
 	void	startVideoCapture();
 	void	stopVideoCapture();
-	ASI_EXPOSURE_STATUS	getExpStatus();
-	void	getDataAfterExp(unsigned char *pBuffer, long lBuffSize);
+	void	getVideoData(unsigned char *pBuffer, long iBuffSize,
+			int iWaitms);
 
 	// guiding
 	typedef enum direction_e {

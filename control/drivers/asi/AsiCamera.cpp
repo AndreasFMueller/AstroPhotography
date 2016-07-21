@@ -533,9 +533,9 @@ unsigned long   AsiCamera::getDroppedFrames() {
 void	AsiCamera::startExposure(bool isdark) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is idle
-	if (asi_mode != mode_idle) {
+	if (_asi_mode != mode_idle) {
 		std::string	msg = stringprintf("camera not idle: %d",
-			asi_mode);
+			_asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -548,7 +548,7 @@ void	AsiCamera::startExposure(bool isdark) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
-	asi_mode = mode_exposure;
+	_asi_mode = mode_exposure;
 }
 
 /**
@@ -557,9 +557,9 @@ void	AsiCamera::startExposure(bool isdark) {
 void	AsiCamera::stopExposure() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is in stream mode
-	if (asi_mode != mode_stream) {
+	if (_asi_mode != mode_stream) {
 		std::string	msg = stringprintf("camera not in stream mode: %d",
-			asi_mode);
+			_asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -571,7 +571,7 @@ void	AsiCamera::stopExposure() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
-	asi_mode = mode_idle;
+	_asi_mode = mode_idle;
 }
 
 /**
@@ -580,13 +580,13 @@ void	AsiCamera::stopExposure() {
 ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// check that we are in the correct mode
-	switch (asi_mode) {
+	switch (_asi_mode) {
 	case mode_idle:
 		return ASI_EXP_IDLE;
 	case mode_stream:
 		{
 		std::string	msg = stringprintf("camera not in exposure "
-			"mode: %d", asi_mode);
+			"mode: %d", _asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 		}
@@ -604,7 +604,7 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 	}
 	// reset the mode if the exposure failed
 	if (ExpStatus == ASI_EXP_FAILED) {
-		asi_mode = mode_idle;
+		_asi_mode = mode_idle;
 	}
 	return ExpStatus;
 }
@@ -614,14 +614,14 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
  */
 void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
-	if (asi_mode != mode_exposure) {
+	if (_asi_mode != mode_exposure) {
 		std::string	msg = stringprintf("%s: not in exposure mode: %d",
-			name().toString().c_str(), asi_mode);
+			name().toString().c_str(), _asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
 	ASI_ERROR_CODE	rc = ASIGetDataAfterExp(_id, pBuffer, lBuffSize);
-	asi_mode = mode_idle;
+	_asi_mode = mode_idle;
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get exp data: %s",
 			error(rc).c_str());
@@ -636,9 +636,9 @@ void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
 void    AsiCamera::startVideoCapture() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is idle
-	if (asi_mode != mode_idle) {
+	if (_asi_mode != mode_idle) {
 		std::string	msg = stringprintf("camera not idle: %d",
-			asi_mode);
+			_asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -650,7 +650,7 @@ void    AsiCamera::startVideoCapture() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
-	asi_mode = mode_stream;
+	_asi_mode = mode_stream;
 }
 
 /**
@@ -659,9 +659,9 @@ void    AsiCamera::startVideoCapture() {
 void    AsiCamera::stopVideoCapture() {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	// make sure the camera is in stream mode
-	if (asi_mode != mode_stream) {
+	if (_asi_mode != mode_stream) {
 		std::string	msg = stringprintf("camera not in stream mode: %d",
-			asi_mode);
+			_asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -672,7 +672,29 @@ void    AsiCamera::stopVideoCapture() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
-	asi_mode = mode_idle;
+	_asi_mode = mode_idle;
+}
+
+/**
+ * \brief retrieve the video data
+ */
+void	AsiCamera::getVideoData(unsigned char *pBuffer, long lBuffSize,
+	int iWaitms) {
+	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
+	if (_asi_mode != mode_stream) {
+		std::string	msg = stringprintf("%s: not in stream mode: %d",
+			name().toString().c_str(), _asi_mode);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	ASI_ERROR_CODE	rc = ASIGetVideoData(_id, pBuffer, lBuffSize, iWaitms);
+	_asi_mode = mode_idle;
+	if (ASI_SUCCESS != rc) {
+		std::string	msg = stringprintf("cannot get video data: %s",
+			error(rc).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw AsiApiException(rc, msg);
+	}
 }
 
 /**

@@ -75,11 +75,6 @@ static ASI_IMG_TYPE	string2imgtype(const std::string& imgname) {
  * \brief Set the exposure data
  */
 void	AsiCcd::setExposure(const Exposure& exposure) {
-#if 0
-	int	rc;
-	// set binning mode
-	int	bin = exposure.mode().x();
-#endif
 	ImageSize	sensorsize = info.size() / exposure.mode();
 
 	// set ROI
@@ -94,32 +89,9 @@ void	AsiCcd::setExposure(const Exposure& exposure) {
 	roi.mode = exposure.mode();
 	roi.img_type = string2imgtype(imgtypename());
 	_camera.setROIFormat(roi);
-#if 0
-	if (ASI_SUCCESS != (rc = ASISetROIFormat(_camera.id(),
-		frame.size().width(), frame.size().height(),
-		bin, string2imgtype(imgtypename())))) {
-		std::string	msg = stringprintf("%s cannot set "
-			"ROI: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-#endif
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set start: %s",
 		origin.toString().c_str());
 	_camera.setStartPos(origin);
-#if 0
-	if (ASI_SUCCESS != (rc = ASISetStartPos(_camera.id(),
-		origin.x(), origin.y()))) {
-		std::string	msg = stringprintf("%s cannot set "
-			"start position %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-#endif
 
 	// set the exposure time
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time");
@@ -138,30 +110,12 @@ void	AsiCcd::setExposure(const Exposure& exposure) {
 void	AsiCcd::startExposure(const Exposure& exposure) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
 		name().toString().c_str(), exposure.toString().c_str());
-#if 0
-	int	rc;
-#endif
 	Ccd::startExposure(exposure);
 	try {
 		setExposure(exposure);
 
 		// start the exposure
-#if 0
-		ASI_BOOL	isdark = (exposure.shutter() == Shutter::OPEN)
-						? ASI_FALSE : ASI_TRUE;
-#endif
 		_camera.startExposure(exposure.shutter() == Shutter::OPEN);
-#if 0
-		if (ASI_SUCCESS != (rc = ASIStartExposure(_camera.id(),
-			isdark))) {
-			std::string	msg = stringprintf("%s cannot start "
-				"exposure: %s",
-				_camera.name().toString().c_str(),
-				AsiCamera::error(rc).c_str());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
-#endif
 	} catch (const std::exception& x) {
 		Ccd::cancelExposure();
 	}
@@ -173,9 +127,6 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
  */
 void	AsiCcd::cancelExposure() {
 	_camera.stopExposure();
-#if 0
-	ASIStopExposure(_camera.id());
-#endif
 }
 
 /**
@@ -183,14 +134,6 @@ void	AsiCcd::cancelExposure() {
  */
 CcdState::State	AsiCcd::exposureStatus() {
 	ASI_EXPOSURE_STATUS	status = _camera.getExpStatus();
-#if 0
-	if (ASI_SUCCESS != ASIGetExpStatus(_camera.id(), &status)) {
-		std::string	msg = stringprintf("cannot get exp status @ %d",
-			_camera.id());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-#endif
 	switch (status) {
 	case ASI_EXP_IDLE:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is IDLE/idle",
@@ -222,10 +165,15 @@ CcdState::State	AsiCcd::exposureStatus() {
  * \brief get an Image from the camera
  */
 astro::image::ImagePtr	AsiCcd::getRawImage() {
+	// make sure we are in the right mode
+	if (_camera.asi_mode() == AsiCamera::mode_idle) {
+		std::string	msg("camera is idle, cannot get raw");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
+	// get the pixel size
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get a raw image");
-#if 0
-	int	rc;
-#endif
 	ASI_IMG_TYPE	imgtype = string2imgtype(imgtypename());
 	int	pixelsize = 1;
 	switch (imgtype) {
@@ -240,6 +188,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		break;
 	}
 
+	// the the image size
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
@@ -253,8 +202,20 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+
+	// geth the image data
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "buffer at %p", buffer);
-	_camera.getDataAfterExp(buffer, buffersize);
+	switch (_camera.asi_mode()) {
+	case AsiCamera::mode_exposure:
+		_camera.getDataAfterExp(buffer, buffersize);
+		break;
+	case AsiCamera::mode_stream:
+		_camera.getVideoData(buffer, buffersize,
+			1000 * exposure.exposuretime() + 10);
+		break;
+	default:
+		break;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the image data");
 
 	// convert this into an Image of the appropriate type
