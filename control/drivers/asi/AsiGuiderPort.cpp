@@ -113,23 +113,8 @@ void	AsiGuiderPort::activate(float raplus, float raminus,
 void	AsiGuiderPort::north() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s north movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_SOUTH))) {
-		std::string	msg = stringprintf("%s cannot stop south: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOn(_camera.index(),
-		ASI_GUIDE_NORTH))) {
-		std::string	msg = stringprintf("%s cannot move north: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_south);
+	_camera.pulseGuideOn(AsiCamera::asi_guide_north);
 }
 
 /**
@@ -138,23 +123,8 @@ void	AsiGuiderPort::north() {
 void	AsiGuiderPort::south() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s south movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_NORTH))) {
-		std::string	msg = stringprintf("%s cannot stop north: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOn(_camera.index(),
-		ASI_GUIDE_SOUTH))) {
-		std::string	msg = stringprintf("%s cannot move south: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_south);
+	_camera.pulseGuideOn(AsiCamera::asi_guide_north);
 }
 
 /**
@@ -163,23 +133,8 @@ void	AsiGuiderPort::south() {
 void	AsiGuiderPort::east() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s east movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_WEST))) {
-		std::string	msg = stringprintf("%s cannot stop west: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOn(_camera.index(),
-		ASI_GUIDE_EAST))) {
-		std::string	msg = stringprintf("%s cannot move east: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_west);
+	_camera.pulseGuideOn(AsiCamera::asi_guide_east);
 }
 
 /**
@@ -188,23 +143,8 @@ void	AsiGuiderPort::east() {
 void	AsiGuiderPort::west() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s west movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_EAST))) {
-		std::string	msg = stringprintf("%s cannot stop east: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOn(_camera.index(),
-		ASI_GUIDE_WEST))) {
-		std::string	msg = stringprintf("%s cannot move west: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_east);
+	_camera.pulseGuideOn(AsiCamera::asi_guide_west);
 }
 
 /**
@@ -213,23 +153,8 @@ void	AsiGuiderPort::west() {
 void	AsiGuiderPort::rastop() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s stop RA movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_EAST))) {
-		std::string	msg = stringprintf("%s cannot stop east: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_WEST))) {
-		std::string	msg = stringprintf("%s cannot stop west: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_east);
+	_camera.pulseGuideOff(AsiCamera::asi_guide_west);
 }
 
 /**
@@ -238,23 +163,8 @@ void	AsiGuiderPort::rastop() {
 void	AsiGuiderPort::decstop() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s stop DEC movement",
 		name().toString().c_str());
-	int	rc;
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_NORTH))) {
-		std::string	msg = stringprintf("%s cannot stop north: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	if (ASI_SUCCESS != (rc = ASIPulseGuideOff(_camera.index(),
-		ASI_GUIDE_SOUTH))) {
-		std::string	msg = stringprintf("%s cannot stop south: %s",
-			_camera.name().toString().c_str(),
-			AsiCamera::error(rc).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
+	_camera.pulseGuideOff(AsiCamera::asi_guide_north);
+	_camera.pulseGuideOff(AsiCamera::asi_guide_south);
 }
 
 /**

@@ -615,8 +615,8 @@ ASI_EXPOSURE_STATUS	AsiCamera::getExpStatus() {
 void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	if (asi_mode != mode_exposure) {
-		std::string	msg = stringprintf("not in exposure mode: %d",
-			asi_mode);
+		std::string	msg = stringprintf("%s: not in exposure mode: %d",
+			name().toString().c_str(), asi_mode);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -676,17 +676,43 @@ void    AsiCamera::stopVideoCapture() {
 }
 
 /**
+ * \brief Convert AsiCamera direction to ASI direction
+ */
+static ASI_GUIDE_DIRECTION	dir2dir(AsiCamera::direction_t dir) {
+	switch (dir) {
+	case AsiCamera::asi_guide_north:return ASI_GUIDE_NORTH;
+	case AsiCamera::asi_guide_south:return ASI_GUIDE_SOUTH;
+	case AsiCamera::asi_guide_east:	return ASI_GUIDE_EAST;
+	case AsiCamera::asi_guide_west:	return ASI_GUIDE_WEST;
+	}
+	std::string	msg = stringprintf("unknown direction: %d", dir);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
+ * \brief Convert AsiCamera direction to string
+ */
+static std::string	dir2string(AsiCamera::direction_t dir) {
+	switch (dir) {
+	case AsiCamera::asi_guide_north:return std::string("north");
+	case AsiCamera::asi_guide_south:return std::string("south");
+	case AsiCamera::asi_guide_east:	return std::string("east");
+	case AsiCamera::asi_guide_west:	return std::string("west");
+	}
+	std::string	msg = stringprintf("unknown direction: %d", dir);
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
+}
+
+/**
  * \brief Turn pulse guide direction on
  */
 void    AsiCamera::pulseGuideOn(direction_t dir) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning on pulse dir %s",
+		dir2string(dir).c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
-	ASI_GUIDE_DIRECTION	direction;
-	switch (dir) {
-	case asi_guide_north:	direction = ASI_GUIDE_NORTH;	break;
-	case asi_guide_south:	direction = ASI_GUIDE_SOUTH;	break;
-	case asi_guide_east:	direction = ASI_GUIDE_EAST;	break;
-	case asi_guide_west:	direction = ASI_GUIDE_WEST;	break;
-	}
+	ASI_GUIDE_DIRECTION	direction = dir2dir(dir);
 	ASI_ERROR_CODE	rc = ASIPulseGuideOn(_id, direction);
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot pulse on: %s",
@@ -700,14 +726,10 @@ void    AsiCamera::pulseGuideOn(direction_t dir) {
  * \brief Turn pulse guide direction off
  */
 void    AsiCamera::pulseGuideOff(direction_t dir) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning off pulse dir %s",
+		dir2string(dir).c_str());
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
-	ASI_GUIDE_DIRECTION	direction;
-	switch (dir) {
-	case asi_guide_north:	direction = ASI_GUIDE_NORTH;	break;
-	case asi_guide_south:	direction = ASI_GUIDE_SOUTH;	break;
-	case asi_guide_east:	direction = ASI_GUIDE_EAST;	break;
-	case asi_guide_west:	direction = ASI_GUIDE_WEST;	break;
-	}
+	ASI_GUIDE_DIRECTION	direction = dir2dir(dir);
 	ASI_ERROR_CODE	rc = ASIPulseGuideOff(_id, direction);
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot pulse off: %s",
