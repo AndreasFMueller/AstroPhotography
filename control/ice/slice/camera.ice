@@ -200,7 +200,7 @@ module snowstar {
 		/**
 		 * \brief
 		 */
-		void	registerSink(Ice::Identity s) throws NotImplemented;
+		void	registerSink(Ice::Identity i) throws NotImplemented;
 		void	startStream(Exposure e) throws NotImplemented;
 		void	stopStream() throws NotImplemented;
 		void	unregisterSink() throws NotImplemented;

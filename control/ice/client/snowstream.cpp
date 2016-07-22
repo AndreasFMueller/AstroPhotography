@@ -9,11 +9,41 @@
 #include <AstroConfig.h>
 #include <RemoteInstrument.h>
 #include <IceConversions.h>
+#include <AstroDebug.h>
+#include <CommonClientTasks.h>
 
 namespace snowstar {
 namespace app {
 namespace snowstream {
 
+/**
+ * \brief Stream sink for this application
+ */
+class StreamSink : public ImageSink {
+	std::mutex		_mutex;
+	std::condition_variable	_condition;
+public:
+	StreamSink() {
+	}
+	void	stop(const Ice::Current& /* current */) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop");
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_condition.notify_all();
+	}
+	void	image(const ImageQueueEntry& entry,
+			const Ice::Current& /* current */) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "entry: %s",
+			convert(entry.exposure0).toString().c_str());
+	}
+	void	wait() {
+		std::unique_lock<std::mutex>	lock(_mutex);
+		_condition.wait(lock);
+	}
+};
+
+/**
+ * \brief short usage function for snowstream application
+ */
 static void	short_usage(const char *progname) {
 	std::cout << "Usage: " << std::endl;
 	astro::Path	path(progname);
@@ -40,10 +70,14 @@ static void	usage(const char *progname) {
 }
 
 static struct option	longopts[] = {
+{ "binning",		required_argument,	NULL,	'b' },
 { "config",		required_argument,	NULL,	'c' },
 { "ccd",		required_argument,	NULL,	'C' },
 { "debug",		no_argument,		NULL,	'd' },
+{ "exposuretime",	required_argument,	NULL,	'e' },
+{ "frame",		required_argument,	NULL,	 1  },
 { "help",		no_argument,		NULL,	'h' },
+{ "purpose",		required_argument,	NULL,	'p' },
 { NULL,			0,			NULL,	 0  }
 };
 
@@ -56,12 +90,16 @@ int	main(int argc, char *argv[]) {
 	Ice::CommunicatorPtr	ic = CommunicatorSingleton::get();
 
 	int	ccd_index = 0;
+	astro::camera::Exposure	exposure;
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "c:C:dh?",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:C:de:hp:?",
 		longopts, &longindex))) {
 		switch (c) {
+		case 'b':
+			exposure.mode(Binning(optarg));
+			break;
 		case 'c':
 			astro::config::Configuration::set_default(optarg);
 			break;
@@ -71,9 +109,18 @@ int	main(int argc, char *argv[]) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'e':
+			exposure.exposuretime(atof(optarg));
+			break;
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		case 'p':
+			exposure.purpose(astro::camera::Exposure::string2purpose(optarg));
+			break;
+		case 1:
+			exposure.frame(astro::image::ImageRectangle(optarg));
+			break;
 		}
 	}
 
@@ -110,6 +157,21 @@ int	main(int argc, char *argv[]) {
 	// get the Ccd
 	snowstar::CcdPrx	ccd = ri.ccd(ccd_index);
 
+	// ImageSink to catch the images
+	StreamSink	*sink = new StreamSink;
+	Ice::ObjectPtr	sinkptr = sink;
+	CallbackAdapter	adapter(ic);
+	Ice::Identity	ident = adapter.add(sinkptr);
+	ccd->ice_getConnection()->setAdapter(adapter.adapter());
+	ccd->registerSink(ident);
+
+	// start the stream
+	ccd->startStream(convert(exposure));
+
+	sink->wait();
+
+	ccd->stopStream();
+	ccd->unregisterSink();
 	return EXIT_FAILURE;
 }
 
