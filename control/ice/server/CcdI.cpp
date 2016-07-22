@@ -12,6 +12,8 @@
 #include <ProxyCreator.h>
 #include <AstroExceptions.h>
 #include <IceConversions.h>
+#include <Ice/Connection.h>
+
 
 namespace snowstar {
 
@@ -138,6 +140,37 @@ CoolerPrx	CcdI::getCooler(const Ice::Current& current) {
 CcdPrx	CcdI::createProxy(const std::string& ccdname,
 		const Ice::Current& current) {
 	return snowstar::createProxy<CcdPrx>(ccdname, current);
+}
+
+void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
+		const Ice::Current& current) {
+	if (_sink) {
+		_sink->stop();
+	}
+	CcdSink	*sink = new CcdSink(imagesinkidentity, current);
+	_ccd->imagesink(sink);
+	_sink = CcdSinkPtr(sink);
+}
+
+void	CcdI::startStream(const ::snowstar::Exposure& e,
+		const Ice::Current& /* current */) {
+	if (!_sink) {
+		throw BadState("no registered images ink");
+	}
+	_ccd->startStream(convert(e));
+}
+
+void	CcdI::stopStream(const ::Ice::Current& /* current */) {
+	_ccd->stopStream();
+	if (_sink) {
+		_sink->stop();
+	}
+	_sink = NULL;
+}
+
+void	CcdI::unregisterSink(const ::Ice::Current& current) {
+	stopStream(current);
+	_sink = NULL;
 }
 
 } // namespace snowstar

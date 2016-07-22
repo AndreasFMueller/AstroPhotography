@@ -101,6 +101,11 @@ ShutterState	string2shutterstate(const std::string& s);
 ExposurePurpose	convert(const astro::camera::Exposure::purpose_t& state);
 astro::camera::Exposure::purpose_t	convert(const ExposurePurpose& state);
 
+typedef std::shared_ptr<ImageQueueEntry>	ImageQueueEntryPtr;
+
+ImageQueueEntryPtr	convert(const astro::camera::ImageQueueEntry e);
+astro::camera::ImageQueueEntry	convert(ImageQueueEntryPtr e);
+
 // FilterWheel
 FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 astro::camera::FilterWheel::State convert(const FilterwheelState& s);

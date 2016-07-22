@@ -330,14 +330,14 @@ public:
  */
 class ImageStream : public ImageQueue, public ImageSink {
 protected:
-	ImageSinkPtr	_imagesink;
+	ImageSink	*_imagesink;
 	Exposure	_streamexposure;
 private:
 	void	*private_data;
 	ImageStream(const ImageStream& other);
 	ImageStream&	operator()(const ImageStream& other);
 public:
-	void	imagesink(ImageSinkPtr i) { _imagesink = i; }
+	void	imagesink(ImageSink *i) { _imagesink = i; }
 	ImageStream(unsigned long _maxqueuelength = 10);
 	virtual ~ImageStream();
 	virtual void	startStream(const Exposure& exposure);

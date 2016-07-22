@@ -95,6 +95,28 @@ module snowstar {
 	};
 
 	/**
+	 * \brief Unit of data returned in streaming mode
+	 *
+	 * Because the parameters can change during streaming, we have to
+	 * return more than just the image. This structure contains the
+	 * exposure data as a member.
+	 */
+	struct ImageQueueEntry {
+		Exposure	exposure0;
+		ImageFile	imagedata;
+	};
+
+	/**
+	 * \brief Callback interface used to stream images to the client
+	 *
+ 	 * A single callback can be registered with the server. The server
+	 * in turn uses 
+	 */
+	interface ImageSink extends Callback {
+		void	image(ImageQueueEntry entry);
+	};
+
+	/**
 	 * \brief Interface to a CCD chip of a camera.
 	 *
 	 * A camera can have multiple CCD chips (up to three, e.g. in the
@@ -174,6 +196,14 @@ module snowstar {
 		 * \brief Get the Cooler
 		 */
 		Cooler*	getCooler() throws NotImplemented;
+
+		/**
+		 * \brief
+		 */
+		void	registerSink(Ice::Identity s) throws NotImplemented;
+		void	startStream(Exposure e) throws NotImplemented;
+		void	stopStream() throws NotImplemented;
+		void	unregisterSink() throws NotImplemented;
 	};
 
 	/**

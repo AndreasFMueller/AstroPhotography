@@ -13,6 +13,21 @@
 
 namespace snowstar {
 
+/**
+ * \brief Sink class for the stream mode
+ */
+class CcdSink : public astro::camera::ImageSink {
+	ImageSinkPrx	sinkprx;
+public:
+	CcdSink(const Ice::Identity& identity, const Ice::Current& current);
+	void	operator()(const astro::camera::ImageQueueEntry& entry);
+	void	stop();
+};
+typedef std::shared_ptr<CcdSink>	CcdSinkPtr;
+
+/**
+ * \brief Ccd servant implementation
+ */
 class CcdI : virtual public Ccd, virtual public DeviceI {
 	astro::camera::CcdPtr	_ccd;
 	astro::image::ImageDirectory	_imagedirectory;
@@ -23,7 +38,8 @@ public:
 		astro::image::ImageDirectory& imagedirectory);
 	virtual	~CcdI();
 
-static	CcdPrx	createProxy(const std::string& ccdname, const Ice::Current& current);
+static	CcdPrx	createProxy(const std::string& ccdname,
+		const Ice::Current& current);
 
 	// interface methods
 	CcdInfo	getInfo(const Ice::Current& current);
@@ -38,8 +54,21 @@ static	CcdPrx	createProxy(const std::string& ccdname, const Ice::Current& curren
 	bool	hasShutter(const Ice::Current& current);
 	ShutterState	getShutterState(const Ice::Current& current);
 	void	setShutterState(ShutterState, const Ice::Current& current);
+
+	// cooler methods
 	bool	hasCooler(const Ice::Current& current);
 	CoolerPrx	getCooler(const Ice::Current& current);
+
+	// stream methods
+private:
+	CcdSinkPtr	_sink;
+public:
+	void	registerSink(const Ice::Identity& sinkidentity,
+			const Ice::Current& current);
+	void startStream(const ::snowstar::Exposure& e, 
+			const Ice::Current& current);
+	void	stopStream(const ::Ice::Current& current);
+	void	unregisterSink(const ::Ice::Current& current);
 };
 
 } // namespace snowstar

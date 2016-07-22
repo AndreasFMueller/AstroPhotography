@@ -29,7 +29,7 @@ noinst_HEADERS = DevicesI.h \
 	
 snowstar_SOURCES = snowstar.cpp \
 	DevicesI.cpp \
-	CoolerI.cpp CcdI.cpp CameraI.cpp \
+	CoolerI.cpp CcdI.cpp CcdSink.cpp CameraI.cpp \
 	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
 	AdaptiveOpticsI.cpp MountI.cpp \
 	DeviceServantLocator.cpp NameConverter.cpp \

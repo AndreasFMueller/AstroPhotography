@@ -205,4 +205,17 @@ Interval	convert(const std::pair<float, float>& interval) {
 	return result;
 }
 
+ImageQueueEntryPtr	convert(const astro::camera::ImageQueueEntry e) {
+	ImageQueueEntryPtr	result(new ImageQueueEntry());
+	result->exposure0 = convert(e.exposure);
+	result->imagedata = convertfile(e.image);
+	return result;
+}
+
+astro::camera::ImageQueueEntry	convert(ImageQueueEntryPtr e) {
+	astro::camera::ImageQueueEntry	result(convert(e->exposure0),
+		convertfile(e->imagedata));
+	return result;
+}
+
 } // namespace snowstar
