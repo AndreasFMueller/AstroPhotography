@@ -341,7 +341,10 @@ public:
 	ImageStream(unsigned long _maxqueuelength = 10);
 	virtual ~ImageStream();
 	virtual void	startStream(const Exposure& exposure);
+	// once the stopStream operation has completed, it is guaranteed that
+	// there will be no more calls to the sink operation (operator())
 	virtual void	stopStream();
+	virtual bool	streaming();
 	virtual void	streamExposure(const Exposure& exposure);
 	virtual const Exposure&	streamExposure() const;
 	virtual void	operator()(const ImageQueueEntry& entry);

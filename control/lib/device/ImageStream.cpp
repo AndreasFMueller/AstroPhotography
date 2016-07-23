@@ -1,10 +1,11 @@
 /*
- * ImageStream.cpp
+ * ImageStream.cpp -- Implementation of the ImageStream class
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroCamera.h>
 #include <AstroDebug.h>
+#include <AstroUtils.h>
 #include <mutex>
 #include <thread>
 
@@ -21,6 +22,9 @@ class ImageStreamThread {
 	ImageStream&	_stream;
 	Ccd	*_ccd;
 	bool	_running;
+public:
+	bool	running() const { return _running; }
+private:
 	std::thread	_thread;
 	std::mutex	_mutex; // mediate access to _exposure
 public:
@@ -38,7 +42,13 @@ public:
  */
 static void	imagestreammain(ImageStreamThread *ist) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagestreammain starting");
-	ist->run();
+	try {
+		ist->run();
+	} catch (const std::exception& x) {
+		std::string msg = stringprintf("thread terminated by %s: %s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imagestreammain terminates");
 }
 
@@ -55,7 +65,7 @@ ImageStreamThread::ImageStreamThread(const Exposure& exposure,
  * \brief Kill the thread
  */
 ImageStreamThread::~ImageStreamThread() {
-	_running = false;
+	stop();
 	_thread.join();
 }
 
@@ -96,6 +106,15 @@ void	ImageStreamThread::exposure(const Exposure& e) {
  * \brief Stop the thread
  */
 void	ImageStreamThread::stop() {
+	try {
+		_ccd->cancelExposure();
+	} catch (const std::exception& x) {
+		std::string	msg = stringprintf("stop cannot cancel "
+			"exposure: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		// no need to throw an exception here, because this is 
+		// expected to happen in the intervals between new exposures
+	}
 	_running = false;
 }
 
@@ -176,12 +195,30 @@ const Exposure&	ImageStream::streamExposure() const {
 }
 
 /**
+ * \brief Find out whether stream is still streaming
+ */
+bool	ImageStream::streaming() {
+	if (NULL == private_data) {
+		return false;
+	}
+	ImageStreamThread	*t = (ImageStreamThread *)private_data;
+	return t->running();
+}
+
+/**
  * \brief Process an image entry
  *
  * This method sends the entry to the queue if no sink is defined, but
  * if there is a sink, the image is sent there.
  */
 void	ImageStream::operator()(const ImageQueueEntry& entry) {
+	// check whether streaming is already turned off, in which case
+	// we should not process any images (we shouldn't even be called ;-)
+	if (!streaming()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s sent after stop, dropped",
+			entry.exposure.toString().c_str());
+		return;
+	}
 	if (_imagesink) {
 		(*_imagesink)(entry);
 	} else {

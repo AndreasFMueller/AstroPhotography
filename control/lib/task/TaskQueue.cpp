@@ -21,7 +21,12 @@ namespace task {
  * in the TaskQueue object.
  */
 static void	queuemain(TaskQueue *queue) {
+	if (NULL == queue) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no queue argument");
+		return;
+	}
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "starting task queue thread");
 		queue->main();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue thread ended");
 	} catch (const std::exception& x) {

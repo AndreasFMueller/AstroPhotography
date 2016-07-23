@@ -127,6 +127,9 @@ public:
 
 /**
  * \brief Waiting for completion is generic (except possibly for UVC cameras)
+ *
+ * This method returns true if exposure completes and an image is now 
+ * available. 
  */
 bool	Ccd::wait() {
 	// lock the _mutex, so we are shure the state variable will not
@@ -136,25 +139,26 @@ bool	Ccd::wait() {
 	// now check the state variable, and handle the simple cases
 	CcdState::State	s = exposureStatus();
 	switch (s) {
+		// not exposing, no need to wait, and no image is available
 	case CcdState::idle:
-	case CcdState::cancelling:
-		{
-		std::string	msg("cannot wait: no exposure in progress, %s",
-			CcdState::state2string(s).c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw BadState(msg);
-		}
+		return false;
 	case CcdState::exposed:
 		return true;
 	default:
 		// remainder of cases is handled outside this switch
 		break;
 	}
-	// case CcdState::exposing:
+
+	// case CcdState::exposing/cancelling
+	std::string	ss = CcdState::state2string(s);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"currently exposing, waiting for exposure to complete");
-	// has the exposure time already expired? If so, we wait at
-	// least as the exposure time indicates
+		"currently %s, waiting for operation to complete", ss.c_str());
+
+	// Has the exposure time already expired? If so, we wait at
+	// least as the exposure time indicates. We use the same timeout
+	// for the wait to the cancellation operation, because some cameras
+	// have no other way than to wait for the exposure to complete and
+	// then to throw away the image.
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"lastexposurestart: %d, exposuretime: %f",
 		lastexposurestart, exposure.exposuretime());
@@ -182,6 +186,9 @@ bool	Ccd::wait() {
 				"try again");
 		}
 	}
+
+	// this really should not happen, it indicates a serious problem
+	// with the camera. Should we rather throw an exception here?
 	debug(LOG_ERR, DEBUG_LOG, 0, "state change has timed out");
 	return false;
 }

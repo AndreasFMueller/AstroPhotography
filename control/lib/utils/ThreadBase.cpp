@@ -39,9 +39,28 @@ public:
  * This function uses the RunAccess class to get access to the run method
  * of the thread class handed in as the argument.
  */
-static void	springboard_main(void *threadbase) {
-	ThreadBase	*g = (ThreadBase *)threadbase;
-	RunAccess(*g).main();
+static void	springboard_main(ThreadBase *threadbase) {
+	// make sure we have a threadbase argument
+	if (NULL == threadbase) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "threadbase argument is NULL");
+		return;
+	}
+	// get the type of the threadbase for better logging
+	std::string	classname = demangle(typeid(*threadbase).name());
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "calling main of %s",
+			classname.c_str());
+		RunAccess(*threadbase).main();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "main of %s completed",
+			classname.c_str());
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "main of %s terminated by %s: %s",
+			classname.c_str(), demangle(typeid(x).name()).c_str(),
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "main of %s terminated (unknown)",
+			classname.c_str());
+	}
 }
 
 /**

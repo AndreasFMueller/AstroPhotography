@@ -25,16 +25,19 @@ class StreamSink : public ImageSink {
 public:
 	StreamSink() {
 	}
+
 	void	stop(const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop");
 		std::unique_lock<std::mutex>	lock(_mutex);
 		_condition.notify_all();
 	}
+
 	void	image(const ImageQueueEntry& entry,
 			const Ice::Current& /* current */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entry: %s",
 			convert(entry.exposure0).toString().c_str());
 	}
+
 	void	wait() {
 		std::unique_lock<std::mutex>	lock(_mutex);
 		_condition.wait(lock);

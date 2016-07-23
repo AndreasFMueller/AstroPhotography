@@ -53,7 +53,17 @@ void	BasicGuiderport::do_activate(uint8_t active) {
  * This function simply calls the run method of the guiderport
  */
 static void	basicguiderport_main(BasicGuiderport *guiderport) {
-	guiderport->run();
+	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread started");
+		guiderport->run();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "thread ended");
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport terminated by "
+			"%s: %s", demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport terminated by "
+			"unknown exception");
+	}
 }
 
 /**

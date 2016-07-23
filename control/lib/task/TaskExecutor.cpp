@@ -27,7 +27,15 @@ namespace task {
  * \brief Springboard function to start the main method of the Executor class
  */
 static void	taskmain(TaskExecutor *te) {
-	te->main();
+	try {
+		te->main();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "task->main() terminated by "
+			"%s: %s", demangle(typeid(x).name()).c_str(), x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "taskmain terminated by "
+			"unknown exception");
+	}
 }
 
 /**
