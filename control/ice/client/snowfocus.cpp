@@ -385,17 +385,9 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "executing start command");
 
 	// make sure temperature is set
-	if (temperature == temperature) {
-		CoolerPrx	cooler;
-		if (instrument.has(InstrumentCooler)) {
-			cooler = instrument.cooler();
-		}
-		CoolerTask      coolertask(cooler, temperature);
-		coolertask.wait();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "temperature set");
-	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no temperature set");
-	}
+	CoolerTask	coolertask(instrument, temperature);
+	coolertask.stop_on_exit(true);
+	coolertask.wait();
 
 	// next two arguments are the interval boundaries
 	if ((argc - optind) < 2) {

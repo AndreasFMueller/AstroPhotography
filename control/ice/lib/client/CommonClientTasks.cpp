@@ -118,13 +118,15 @@ void	CcdTask::wait(int timeout) {
 // CoolerTask implementation
 //////////////////////////////////////////////////////////////////////
 void	CoolerTask::setup(double temperature) {
+	// initialize member variables
+	_stop_on_exit = false;
+	we_turned_cooler_on = false;
+	_absolute = 273.15 + temperature;
+
+	// check whether there is something to do
 	if (_cooler) {
 		return;
 	}
-
-	// initialize member variables
-	we_turned_cooler_on = false;
-	_absolute = 273.15 + temperature;
 
 	// make sure we have a temperature at all
 	if (!(temperature == temperature)) {
@@ -208,11 +210,13 @@ CoolerTask::~CoolerTask() {
 	if (!we_turned_cooler_on) {
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler off");
-	_cooler->setOn(false);
+	if (_stop_on_exit) {
+		stop();
+	}
 }
 
 void	CoolerTask::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler off");
 	_cooler->setOn(false);
 }
 

@@ -51,7 +51,11 @@ class CoolerTask {
 	double	_absolute;
 	bool	we_turned_cooler_on;
 	void	setup(double temperature);
+	bool	_stop_on_exit;
 public:
+	bool	stop_on_exit() const { return _stop_on_exit; }
+	void	stop_on_exit(bool s) { _stop_on_exit = s; }
+	
 	CoolerTask(CoolerPrx cooler, double temperature);
 	CoolerTask(RemoteInstrument& ri, double temperature);
 	void	wait(int timeout = 300);

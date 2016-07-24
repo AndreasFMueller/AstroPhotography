@@ -187,6 +187,7 @@ int	main(int argc, char *argv[]) {
 
 	// check for cooler
 	CoolerTask	coolertask(ri, temperature);
+	coolertask.stop_on_exit(true);
 
 	// now wait for all tasks to complete
 	focusertask.wait();
