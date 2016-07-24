@@ -189,10 +189,11 @@ int	main(int argc, char *argv[]) {
 	CoolerTask	coolertask(ri, temperature);
 	coolertask.stop_on_exit(true);
 
-	// now wait for all tasks to complete
+	// now wait for all tasks to complete, this arrangement allows for
+	// all the tasks running in parallel
+	filterwheeltask.wait();	// usually the fastest
 	focusertask.wait();
-	filterwheeltask.wait();
-	coolertask.wait();
+	coolertask.wait();	// usually takes longest
 
 	// ImageSink to catch the images
 	StreamSink	*sink = new StreamSink();

@@ -45,13 +45,16 @@ typedef std::shared_ptr<CcdTask>	CcdTaskPtr;
  * \brief tasks related to the cooler
  *
  * This task sets up the cooler and waits for the temperature to be reached
+ * By setting the stop_on_exit flag to true, one can ensure that the 
+ * cooler is turned off when the task goes out of scope. Default is
+ * not to turn off the cooler.
  */
 class CoolerTask {
 	CoolerPrx	_cooler;
 	double	_absolute;
 	bool	we_turned_cooler_on;
-	void	setup(double temperature);
 	bool	_stop_on_exit;
+	void	setup(double temperature);
 public:
 	bool	stop_on_exit() const { return _stop_on_exit; }
 	void	stop_on_exit(bool s) { _stop_on_exit = s; }
