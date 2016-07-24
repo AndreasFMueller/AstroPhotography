@@ -12,6 +12,7 @@
 #include <Ice/Ice.h>
 #include <mutex>
 #include <condition_variable>
+#include <RemoteInstrument.h>
 
 namespace snowstar {
 
@@ -46,12 +47,15 @@ typedef std::shared_ptr<CcdTask>	CcdTaskPtr;
  * This task sets up the cooler and waits for the temperature to be reached
  */
 class CoolerTask {
-	CoolerPrx&	_cooler;
+	CoolerPrx	_cooler;
 	double	_absolute;
 	bool	we_turned_cooler_on;
+	void	setup(double temperature);
 public:
-	CoolerTask(CoolerPrx& cooler, double temperature);
+	CoolerTask(CoolerPrx cooler, double temperature);
+	CoolerTask(RemoteInstrument& ri, double temperature);
 	void	wait(int timeout = 300);
+	void	stop();
 	~CoolerTask();
 };
 typedef std::shared_ptr<CoolerTask>	CoolerTaskPtr;
@@ -63,11 +67,13 @@ typedef std::shared_ptr<CoolerTask>	CoolerTaskPtr;
  * waits for the movement to complete
  */
 class FocuserTask {
-	FocuserPrx&	_focuser;
+	FocuserPrx	_focuser;
 	int	_position;
 	bool	we_started_focuser;
+	void	setup();
 public:
-	FocuserTask(FocuserPrx& focuser, int position);
+	FocuserTask(FocuserPrx focuser, int position);
+	FocuserTask(RemoteInstrument& ri, int position);
 	void	wait(int timeout = 60);
 };
 typedef std::shared_ptr<FocuserTask>	FocuserTaskPtr;
@@ -78,12 +84,14 @@ typedef std::shared_ptr<FocuserTask>	FocuserTaskPtr;
  * The constructor of this task moves 
  */
 class FilterwheelTask {
-	FilterWheelPrx&	_filterwheel;
+	FilterWheelPrx	_filterwheel;
 	const std::string	_filtername;
 	bool	we_started_filterwheel;
+	void	setup();
 public:
-	FilterwheelTask(FilterWheelPrx& filterwheel,
+	FilterwheelTask(FilterWheelPrx filterwheel,
 		const std::string& filtername);
+	FilterwheelTask(RemoteInstrument& ri, const std::string& filtername);
 	void	wait(int timeout = 60);
 };
 typedef std::shared_ptr<FilterwheelTask>	FilterwheelTaskPtr;

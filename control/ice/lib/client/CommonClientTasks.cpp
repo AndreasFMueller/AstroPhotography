@@ -117,11 +117,11 @@ void	CcdTask::wait(int timeout) {
 //////////////////////////////////////////////////////////////////////
 // CoolerTask implementation
 //////////////////////////////////////////////////////////////////////
-/**
- * \brief start the cooler
- */
-CoolerTask::CoolerTask(CoolerPrx& cooler, double temperature)
-	: _cooler(cooler) {
+void	CoolerTask::setup(double temperature) {
+	if (_cooler) {
+		return;
+	}
+
 	// initialize member variables
 	we_turned_cooler_on = false;
 	_absolute = 273.15 + temperature;
@@ -151,9 +151,27 @@ CoolerTask::CoolerTask(CoolerPrx& cooler, double temperature)
 }
 
 /**
+ * \brief start the cooler
+ */
+CoolerTask::CoolerTask(CoolerPrx cooler, double temperature)
+	: _cooler(cooler) {
+	setup(temperature);
+}
+
+CoolerTask::CoolerTask(RemoteInstrument& ri, double temperature) {
+	if (ri.has(InstrumentCooler)) {
+		_cooler = ri.cooler();
+	}
+	setup(temperature);
+}
+
+/**
  * \brief Wait for the temperature to be reached
  */
 void	CoolerTask::wait(int timeout) {
+	if (!_cooler) {
+		return;
+	}
 	if (!_cooler->isOn()) {
 		throw std::runtime_error("cannot wait if not on");
 	}
@@ -181,6 +199,9 @@ void	CoolerTask::wait(int timeout) {
  * \brief Turn of the cooler
  */
 CoolerTask::~CoolerTask() {
+	if (!_cooler) {
+		return;
+	}
 	if (!(_absolute == _absolute)) {
 		return;
 	}
@@ -191,30 +212,54 @@ CoolerTask::~CoolerTask() {
 	_cooler->setOn(false);
 }
 
+void	CoolerTask::stop() {
+	_cooler->setOn(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 // FocuserTask implementation
 //////////////////////////////////////////////////////////////////////
-FocuserTask::FocuserTask(FocuserPrx& focuser, int position)
-	: _focuser(focuser), _position(position) {
+void	FocuserTask::setup() {
 	we_started_focuser = false;
+
+	// if there is no focuser, no need to worry
+	if (!_focuser) {
+		return;
+	}
+
 	// ensure that the position is a valid one for the focuser
 	int	min = _focuser->min();
 	int	max = _focuser->max();
-	if ((position < min) || (position > max)) {
-		std::string	msg = astro::stringprintf("position %d not "
-			"between %d and %d", position, min, max);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+	if ((_position < min) || (_position > max)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "position %d not "
+			"between %d and %d", _position, min, max);
+		return;
 	}
 
 	// set the focuser to the position
-	focuser->set(position);
+	_focuser->set(_position);
 	we_started_focuser = true;
 }
 
+FocuserTask::FocuserTask(FocuserPrx focuser, int position)
+	: _focuser(focuser), _position(position) {
+}
+
+FocuserTask::FocuserTask(RemoteInstrument& ri, int position)
+	: _position(position) {
+	if (ri.has(InstrumentFocuser)) {
+		_focuser = ri.focuser();
+	}
+	setup();
+}
+
 void	FocuserTask::wait(int timeout) {
+	if (!_focuser) {
+		return;
+	}
+	// if we did not start the focuser, then it is already at the right
+	// position, no need to wait
 	if (!we_started_focuser) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "focuser not started");
 		return;
 	}
 	// wait for the position to be reached
@@ -240,10 +285,13 @@ void	FocuserTask::wait(int timeout) {
 //////////////////////////////////////////////////////////////////////
 // FilterwheelTask implementation
 //////////////////////////////////////////////////////////////////////
-FilterwheelTask::FilterwheelTask(FilterWheelPrx& filterwheel,
-	const std::string& filtername)
-	: _filterwheel(filterwheel), _filtername(filtername) {
+void	FilterwheelTask::setup() {
 	we_started_filterwheel = false;
+	// if there is no filterwheel, we should return immediately
+	if (!_filterwheel) {
+		return;
+	}
+
 	// find out whether filter wheel position can be set
 	if (_filtername.size() == 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filter name, returning");
@@ -257,11 +305,34 @@ FilterwheelTask::FilterwheelTask(FilterWheelPrx& filterwheel,
 	we_started_filterwheel = true;
 }
 
+FilterwheelTask::FilterwheelTask(FilterWheelPrx filterwheel,
+	const std::string& filtername)
+	: _filterwheel(filterwheel), _filtername(filtername) {
+	setup();
+}
+
+FilterwheelTask::FilterwheelTask(RemoteInstrument& ri,
+	const std::string& filtername) : _filtername(filtername) {
+	if (ri.has(InstrumentFilterWheel)) {
+		_filterwheel = ri.filterwheel();
+	}
+	setup();
+}
+
 void	FilterwheelTask::wait(int timeout) {
-	if (!we_started_filterwheel) {
+	// if there is no filterwheel, we can return immediately
+	if (!_filterwheel) {
 		return;
 	}
-	// wait for filter wheel to stabilize
+
+	// in case we started the filterwheel, we should at least wait
+	// for one second to make sure the filter wheel has changed state
+	if (we_started_filterwheel) {
+		sleep(1);
+	}
+	we_started_filterwheel = false;
+
+	// wait for filter wheel to stabilize (i.e. get back to IDLE)
 	time_t	end;
 	time(&end);
 	end += timeout;

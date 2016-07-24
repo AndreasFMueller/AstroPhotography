@@ -34,11 +34,12 @@ public:
 
 	void	image(const ImageQueueEntry& entry,
 			const Ice::Current& /* current */) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "entry: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "new entry: %s",
 			convert(entry.exposure0).toString().c_str());
 	}
 
 	void	wait() {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for condition");
 		std::unique_lock<std::mutex>	lock(_mutex);
 		_condition.wait(lock);
 	}
@@ -72,15 +73,21 @@ static void	usage(const char *progname) {
 		<< std::endl;
 }
 
+/**
+ * \brief Long options for the snowstream program
+ */
 static struct option	longopts[] = {
 { "binning",		required_argument,	NULL,	'b' },
 { "config",		required_argument,	NULL,	'c' },
 { "ccd",		required_argument,	NULL,	'C' },
 { "debug",		no_argument,		NULL,	'd' },
 { "exposuretime",	required_argument,	NULL,	'e' },
+{ "filter",		required_argument,	NULL,	'f' },
 { "frame",		required_argument,	NULL,	 1  },
+{ "focus",		required_argument,	NULL,	'F' },
 { "help",		no_argument,		NULL,	'h' },
 { "purpose",		required_argument,	NULL,	'p' },
+{ "temperature",	required_argument,	NULL,	't' },
 { NULL,			0,			NULL,	 0  }
 };
 
@@ -94,10 +101,13 @@ int	main(int argc, char *argv[]) {
 
 	int	ccd_index = 0;
 	astro::camera::Exposure	exposure;
+	unsigned short	focusposition = 0;
+	std::string	filtername;
+	double	temperature = std::numeric_limits<double>::quiet_NaN();
 
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:C:de:hp:?",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:C:deF:f:hp:?t:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
@@ -120,6 +130,15 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'p':
 			exposure.purpose(astro::camera::Exposure::string2purpose(optarg));
+			break;
+		case 'F':
+			focusposition = std::stoi(optarg);
+			break;
+		case 'f':
+			filtername = std::string(optarg);
+			break;
+		case 't':
+			temperature = std::stod(optarg);
 			break;
 		case 1:
 			exposure.frame(astro::image::ImageRectangle(optarg));
@@ -160,19 +179,37 @@ int	main(int argc, char *argv[]) {
 	// get the Ccd
 	snowstar::CcdPrx	ccd = ri.ccd(ccd_index);
 
+	// check for focuser
+	FocuserTask	focusertask(ri, focusposition);
+
+	// check for filter wheel
+	FilterwheelTask	filterwheeltask(ri, filtername);
+
+	// check for cooler
+	CoolerTask	coolertask(ri, temperature);
+
+	// now wait for all tasks to complete
+	focusertask.wait();
+	filterwheeltask.wait();
+	coolertask.wait();
+
 	// ImageSink to catch the images
-	StreamSink	*sink = new StreamSink;
+	StreamSink	*sink = new StreamSink();
 	Ice::ObjectPtr	sinkptr = sink;
 	CallbackAdapter	adapter(ic);
 	Ice::Identity	ident = adapter.add(sinkptr);
+
+	// register the adapter with the server
 	ccd->ice_getConnection()->setAdapter(adapter.adapter());
 	ccd->registerSink(ident);
 
 	// start the stream
 	ccd->startStream(convert(exposure));
 
+	// wait for the sink to terminate (criterion not yet fixed
 	sink->wait();
 
+	// stop and unregister the stream
 	ccd->stopStream();
 	ccd->unregisterSink();
 	return EXIT_FAILURE;

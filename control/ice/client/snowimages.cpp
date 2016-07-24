@@ -34,6 +34,9 @@ namespace snowstar {
 namespace app {
 namespace snowimages {
 
+/**
+ * \brief Short usage function for the snowimages program
+ */
 static void	short_usage(const char *progname) {
 	std::cout << "Usage:" << std::endl;
 	astro::Path	path(progname);
@@ -42,8 +45,12 @@ static void	short_usage(const char *progname) {
 	std::cout << p << " --help     for more information" << std::endl;
 }
 
+/**
+ * \brief Usage function for the snoimages program
+ */
 static void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ] <service> <INSTRUMENT>"
+	astro::Path	path(progname);
+	std::cout << "usage: " << path.basename() << " [ options ] <service> <INSTRUMENT>"
 		<< std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"
@@ -93,6 +100,9 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 }
 
+/**
+ * \brief Long options for the snowimages program
+ */
 static struct option	longopts[] = {
 /* name			argument?		int*	int */
 { "binning",		required_argument,	NULL,	'b' }, /*  0 */
@@ -112,6 +122,9 @@ static struct option	longopts[] = {
 { NULL,			0,			NULL,    0  }
 };
 
+/**
+ * \brief Main function for the snowimages program
+ */
 int	main(int argc, char *argv[]) {
 	debug_set_ident("snowimages");
 	snowstar::CommunicatorSingleton	cs(argc, argv);
@@ -248,53 +261,23 @@ int	main(int argc, char *argv[]) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got a ccd");
 
 	CcdTask	ccdtask(ccd);
-	ccdtask.frame(frame);
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
-	if ((focusposition > 0) && (ri.has(InstrumentFocuser))) {
-		snowstar::FocuserPrx	focuser = ri.focuser();
-		FocuserTask	focusertask(focuser, focusposition);
-		focusertask.wait();
-	}
+	FocuserTask	focusertask(ri, focusposition);;
 
 	// if the filter name is specified, get the filterwheel from the
 	// instrument and set the filter
-	if (ri.has(InstrumentFilterWheel)) {
-		snowstar::FilterWheelPrx	filterwheel = ri.filterwheel();
-		if (filtername.size() > 0) {
-			FilterwheelTask	filterwheeltask(filterwheel,
-						filtername);
-			filterwheeltask.wait();
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"waiting for filterwheel to settle");
-			int	counter = 30;
-			while ((filterwheel->getState() != FwIDLE)
-				&& (counter > 0)) {
-				sleep(1);
-				counter++;
-			}
-			if (filterwheel->getState() != FwIDLE) {
-				throw std::runtime_error("filterwheel not idle");
-			}
-		}
-	}
+	FilterwheelTask	filterwheeltask(ri, filtername);
 
 	// if the temperature is set, and the ccd has a cooler, lets
 	// start the cooler
-	snowstar::CoolerPrx	cooler;
-	if (ri.has(InstrumentCooler)) {
-		cooler = ri.cooler();
-	}
-	CoolerTaskPtr	coolertask;
-	typedef std::shared_ptr<CoolerTask>	CoolerTaskPtr;
-	if (temperature == temperature) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting temperature to %.1f",
-			temperature);
-		coolertask = CoolerTaskPtr(new CoolerTask(cooler, temperature));
-		coolertask->wait();
-	}
+	CoolerTask	coolertask(ri, temperature);;
+
+	// now wait for all tasks to complete
+	focusertask.wait();
+	filterwheeltask.wait();
+	coolertask.wait();
 
 	// prepare an exposure object
 	ccdtask.frame(frame);
