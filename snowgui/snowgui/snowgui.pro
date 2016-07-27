@@ -1,23 +1,31 @@
-#-------------------------------------------------
 #
-# Project created by QtCreator 2014-11-25T13:33:09
+# snowgui.pro -- qt configuration file for the snowgui project
 #
-#-------------------------------------------------
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
 
 TARGET = snowgui
 TEMPLATE = app
 
+# Directories for ICE and the astrophotography library
+ICEDIR = /Library/Developer/Ice-3.5.1
+ASTROPATH = /Users/afm/Projects/AstroPhotography/snowgui/../control/root
 
-SOURCES += main.cpp\
+LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
+LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+
+SOURCES += main.cpp \
         mainwindow.cpp \
-    connectiondialog.cpp
+	connectiondialog.cpp
 
 HEADERS  += mainwindow.h \
-    connectiondialog.h
+	connectiondialog.h
 
 FORMS    += mainwindow.ui \
-    connectiondialog.ui
+	connectiondialog.ui
+

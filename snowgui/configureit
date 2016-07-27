@@ -1,0 +1,92 @@
+#
+# configuration used for development purposes on all development plattforms
+# (currently Mac OS X, OpenSuSE, Ubuntu)
+#
+# (c) 2014 Prof Dr Andreas Muelle, Hochschule Rapperswil
+#
+
+# set default compiler flags
+# the -fuse-cxa-atexit seems to be necessary for dynamically loaded 
+# C++ modules, but I'm not convinced. The tests still crash when
+# unloading the modules
+CFLAGS="-Wall -Wextra -g -O2"
+CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
+export CFLAGS CXXFLAGS
+
+# the next few sections are about whether or not to build the ICE components
+# add ICE PATH for Mac OS X
+if [ -d /Library/Developer/Ice-3.5.1 ]
+then
+	ICEDIR=/Library/Developer/Ice-3.5.1
+fi
+
+# add ICE PATH for an ICE that we compiled ourselves
+if [ -d /opt/Ice-3.5.1 ]
+then
+	ICEDIR=/opt/Ice-3.5.1
+fi
+
+if [ -n "${ICEDIR}" ]
+then
+	PATH=${ICEDIR}/bin:${PATH}
+	if [ -d ${ICEDIR}/bin/c++11 ]
+	then
+		PATH="${ICEDIR}/bin/c++11:${PATH}"
+	fi
+	commonflags="${commonflags} --with-ice=${ICEDIR}"
+fi
+
+# first find out what type of system we are
+systemtype=`uname`
+case ${systemtype} in
+Darwin)	echo "configuring for Mac OS X"
+	;;
+Linux)	if [ -r /etc/debian_version ]
+	then
+		echo "configuring for Debian"
+		systemtype=Debian
+		commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
+	else
+		if [ -r /etc/SuSE-release ]
+		then
+			echo "configuring for SuSE"
+			systemtype=SuSE
+		else
+			echo "configuring for unspecified Linux (cross your fingers)"
+		fi
+	fi
+	;;
+esac
+
+set -x
+
+# now that we have all the information, run the configure script
+case ${systemtype} in
+Linux)
+	CXXFLAGS="${CFLAGS} --std=c++11"
+	export CXXFLAGS
+	./configure ${commonflags}
+	;;
+Debian)
+	CXXFLAGS="${CXXFLAGS} --std=c++0x"
+	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
+	export CXXFLAGS LDFLAGS
+	./configure ${commonflags}
+	;;
+SuSE)
+	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
+	CXXFLAGS="${CFLAGS} --std=c++11"
+	export LDFLAGS CFLAGS CXXFLAGS
+
+	./configure ${commonflags}
+	;;
+Darwin)
+	LDFLAGS="-L/usr/local/lib -lusb-1.0"
+	CXXFLAGS="${CFLAGS} --std=c++11"
+	export CFLAGS CXXFLAGS LDFLAGS
+	CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
+	./configure ${commonflags}
+	;;
+esac
+
+
