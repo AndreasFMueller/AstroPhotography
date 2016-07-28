@@ -14,6 +14,8 @@ SLICEHEADERS = camera.h exceptions.h focusing.h guider.h image.h device.h \
 SLICESOURCES = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
 	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp
 
+include_HEADERS = $(SLICEHEADERS)
+
 all-am:	copytimestamp
 
 camera.h camera.cpp:	camera.ice

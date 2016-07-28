@@ -1,4 +1,10 @@
+/*
+ * main.cpp -- main function for the snowgui application
+ *
+ * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
+ */
 #include "mainwindow.h"
+#include "serverselectiondialog.h"
 #include <QApplication>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
@@ -76,6 +82,7 @@ int main(int argc, char *argv[]) {
 
 	// start the application
 	QApplication a(argc, argv);
+	a.setApplicationDisplayName(QString("SnowGUI"));
 
 	// get the service discovery object
 	astro::discover::ServiceDiscoveryPtr	servicediscovery
@@ -94,7 +101,11 @@ int main(int argc, char *argv[]) {
 		w.show();
 		return a.exec();
 	} else {
-		// XXX server dialog missing
+		ServerSelectionDialog	*s
+			= new ServerSelectionDialog(NULL, servicediscovery);
+		s->exec();
+		delete s;
+		return a.exec();
 	}
 	return EXIT_FAILURE;
 }

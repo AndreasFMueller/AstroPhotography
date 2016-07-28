@@ -21,11 +21,20 @@ INCLUDEPATH += $${ICEDIR}/include
 
 SOURCES += main.cpp \
         mainwindow.cpp \
-	connectiondialog.cpp
+	connectiondialog.cpp \
+	serverselectiondialog.cpp \
+	instrumentselectiondialog.cpp \
+	previewwindow.cpp
 
 HEADERS  += mainwindow.h \
-	connectiondialog.h
+	connectiondialog.h \
+	serverselectiondialog.h \
+	instrumentselectiondialog.h \
+	previewwindow.h
 
 FORMS    += mainwindow.ui \
-	connectiondialog.ui
+	connectiondialog.ui \
+	serverselectiondialog.ui \
+	instrumentselectiondialog.ui \
+	previewwindow.ui
 

@@ -7,11 +7,13 @@
 #include "ui_mainwindow.h"
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include "serverselectiondialog.h"
+#include "instrumentselectiondialog.h"
 
 using namespace astro::discover;
 
 MainWindow::MainWindow(QWidget *parent,
-	const astro::discover::ServiceObject& serviceobject)
+	const astro::discover::ServiceObject serviceobject)
 	: QMainWindow(parent), _serviceobject(serviceobject),
 	  ui(new Ui::MainWindow) {
 	// create user interface components
@@ -32,6 +34,40 @@ MainWindow::MainWindow(QWidget *parent,
 	setServiceLabelEnabled(ServiceSubset::REPOSITORY);
 
 	// decide which services to enable
+	ui->appPreviewButton->setEnabled(true);
+
+	// add menu
+	createActions();
+	createMenus();
+}
+
+void	MainWindow::launchPreview() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a preview subapplication");
+	InstrumentSelectionDialog	*is
+		= new InstrumentSelectionDialog(this, _serviceobject);
+	is->setWindowTitle(QString("Select instrument for Preview application"));
+	is->exec();
+	delete is;
+}
+
+void	MainWindow::connectFile() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "connect action invoked");
+
+	ServiceDiscoveryPtr	servicediscovery = ServiceDiscovery::get();
+	sleep(1);
+	ServerSelectionDialog	*sd = new ServerSelectionDialog(this,
+		servicediscovery);
+	sd->show();
+}
+
+void	MainWindow::createActions() {
+	connectAction = new QAction(QString("connect"), this);
+	connect(connectAction, &QAction::triggered, this, &MainWindow::connectFile);
+}
+
+void	MainWindow::createMenus() {
+	fileMenu = menuBar()->addMenu(QString("File"));
+	fileMenu->addAction(connectAction);
 }
 
 void	MainWindow::setServiceLabelEnabled(ServiceSubset::service_type t) {
