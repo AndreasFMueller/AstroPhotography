@@ -50,8 +50,7 @@ public:
 	}
 	virtual void	launch(const std::string& instrumentname) {
 		snowstar::RemoteInstrument	ri(instruments, instrumentname);
-		application	*a = new application(parent, _serviceobject,
-						ri);
+		application	*a = new application(NULL, _serviceobject, ri);
 		a->show();
 	}
 };

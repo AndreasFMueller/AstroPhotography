@@ -28,6 +28,7 @@ ServerSelectionDialog::ServerSelectionDialog(QWidget *parent,
 }
 
 ServerSelectionDialog::~ServerSelectionDialog() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "desotry ServerSelectionDialog");
 	delete ui;
 }
 

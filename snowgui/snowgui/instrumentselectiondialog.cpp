@@ -1,5 +1,5 @@
 /*
- * instrumentselectiondialgo.cpp -- 
+ * instrumentselectiondialgo.cpp -- instrument selection implementation
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -34,7 +34,7 @@ InstrumentSelectionDialog::InstrumentSelectionDialog(QWidget *parent,
 
 InstrumentSelectionDialog::~InstrumentSelectionDialog() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy dialog");
-    delete ui;
+	delete ui;
 }
 
 void	InstrumentSelectionDialog::accept() {
@@ -43,6 +43,7 @@ void	InstrumentSelectionDialog::accept() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "accept instrument %s",
 		instrumentname.c_str());
 	this->launch(instrumentname);
+	close();
 }
 
 void	InstrumentSelectionDialog::launch(const std::string& instrumentname) {

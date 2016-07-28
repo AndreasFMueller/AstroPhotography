@@ -1,5 +1,6 @@
 #include "connectiondialog.h"
 #include "ui_connectiondialog.h"
+#include <AstroDebug.h>
 
 ConnectionDialog::ConnectionDialog(QWidget *parent) :
     QDialog(parent),
@@ -8,7 +9,8 @@ ConnectionDialog::ConnectionDialog(QWidget *parent) :
     ui->setupUi(this);
 }
 
-ConnectionDialog::~ConnectionDialog()
+ConnectionDialog::~ConnectionDialog() 
 {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy connection dialog");
     delete ui;
 }

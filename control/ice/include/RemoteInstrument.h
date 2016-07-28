@@ -24,6 +24,9 @@ class RemoteInstrument {
 	DevicesPrx	devices(const astro::ServerName& servername);
 	InstrumentPrx	_instrument;
 	std::string	_name;
+public:
+	const std::string	name() const { return _name; }
+private:
 	unsigned int	componentCount(InstrumentComponentType type);
 public:
 	RemoteInstrument(InstrumentsPrx instruments,

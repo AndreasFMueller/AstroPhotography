@@ -9,6 +9,7 @@
 #include <AstroFormat.h>
 #include "serverselectiondialog.h"
 #include "instrumentselectiondialog.h"
+#include "previewwindow.h"
 
 using namespace astro::discover;
 
@@ -43,8 +44,8 @@ MainWindow::MainWindow(QWidget *parent,
 
 void	MainWindow::launchPreview() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a preview subapplication");
-	InstrumentSelectionDialog	*is
-		= new InstrumentSelectionDialog(this, _serviceobject);
+	InstrumentSelectionApplication<PreviewWindow>	*is
+		= new InstrumentSelectionApplication<PreviewWindow>(this, _serviceobject);
 	is->setWindowTitle(QString("Select instrument for Preview application"));
 	is->exec();
 	delete is;
@@ -100,5 +101,6 @@ QLabel	*MainWindow::serviceLabel(ServiceSubset::service_type t) {
 }
 
 MainWindow::~MainWindow() {
-    delete ui;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy MainWindow");
+	delete ui;
 }
