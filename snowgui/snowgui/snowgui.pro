@@ -19,22 +19,32 @@ LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 
-SOURCES += main.cpp \
-        mainwindow.cpp \
-	connectiondialog.cpp \
-	serverselectiondialog.cpp \
-	instrumentselectiondialog.cpp \
-	previewwindow.cpp
+ASTROGUISOURCES = 							\
+        mainwindow.cpp 							\
+	connectiondialog.cpp 						\
+	serverselectiondialog.cpp 					\
+	instrumentselectiondialog.cpp					\
+	previewwindow.cpp 
 
-HEADERS  += mainwindow.h \
-	connectiondialog.h \
-	serverselectiondialog.h \
-	instrumentselectiondialog.h \
+ASTROGUIHEADERS =							\
+	mainwindow.h							\
+	connectiondialog.h						\
+	serverselectiondialog.h						\
+	instrumentselectiondialog.h					\
 	previewwindow.h
 
-FORMS    += mainwindow.ui \
-	connectiondialog.ui \
-	serverselectiondialog.ui \
-	instrumentselectiondialog.ui \
+FORMS    +=								\
+	mainwindow.ui							\
+	connectiondialog.ui						\
+	serverselectiondialog.ui					\
+	instrumentselectiondialog.ui					\
 	previewwindow.ui
+
+SOURCES += main.cpp $${ASTROGUISOURCES} 				\
+	PreviewImageSink.cpp						\
+	Image2Pixmap.cpp
+
+HEADERS  += $${ASTROGUIHEADERS}						\
+	PreviewImageSink.h						\
+	Image2Pixmap.h
 

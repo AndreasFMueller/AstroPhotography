@@ -7,7 +7,6 @@
 #define _AstroCallback_h
 
 #include <AstroImage.h>
-#include <ImageDirectory.h>
 #include <AstroUtils.h>
 #include <set>
 
@@ -115,9 +114,7 @@ public:
  */
 class SaveImageCallback : public Callback {
 public:
-	SaveImageCallback(const std::string& basedir) {
-		image::ImageDirectory::basedir(basedir);
-	}
+	SaveImageCallback(const std::string& basedir);
 	CallbackDataPtr	operator()(CallbackDataPtr data);
 };
 

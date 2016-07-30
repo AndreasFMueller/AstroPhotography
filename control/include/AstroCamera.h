@@ -334,10 +334,11 @@ protected:
 	Exposure	_streamexposure;
 private:
 	void	*private_data;
+	void	cleanup();
 	ImageStream(const ImageStream& other);
 	ImageStream&	operator()(const ImageStream& other);
 public:
-	void	imagesink(ImageSink *i) { _imagesink = i; }
+	void	imagesink(ImageSink *i);
 	ImageStream(unsigned long _maxqueuelength = 10);
 	virtual ~ImageStream();
 	virtual void	startStream(const Exposure& exposure);

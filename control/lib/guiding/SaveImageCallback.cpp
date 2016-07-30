@@ -6,11 +6,19 @@
 #include <AstroCallback.h>
 #include <AstroGuiding.h>
 #include <AstroDebug.h>
+#include <ImageDirectory.h>
 
 using namespace astro::guiding;
 
 namespace astro {
 namespace callback {
+
+/**
+ * \brief Constructor for the SaveImageCallback
+ */
+SaveImageCallback::SaveImageCallback(const std::string& basedir) {
+	image::ImageDirectory::basedir(basedir);
+}
 
 /**
  * \brief Save an image to the image directory

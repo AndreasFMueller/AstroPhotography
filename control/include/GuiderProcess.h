@@ -13,7 +13,7 @@
 #include <TrackingWork.h>
 #include <DrivingWork.h>
 #include <AstroPersistence.h>
-#include <Thread.h>
+#include <AstroUtils.h>
 
 using namespace astro::camera;
 

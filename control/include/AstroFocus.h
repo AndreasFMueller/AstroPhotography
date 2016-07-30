@@ -8,7 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroCallback.h>
-#include <Thread.h>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace focusing {

@@ -202,6 +202,7 @@ module snowstar {
 		 */
 		void	registerSink(Ice::Identity i) throws NotImplemented;
 		void	startStream(Exposure e) throws NotImplemented;
+		void	updateStream(Exposure e) throws NotImplemented;
 		void	stopStream() throws NotImplemented;
 		void	unregisterSink() throws NotImplemented;
 	};

@@ -3,10 +3,10 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <Thread.h>
 #include <includes.h>
 #include <AstroDebug.h>
 #include <AstroUtils.h>
+#include <AstroFormat.h>
 #include <stdexcept>
 #include <chrono>
 

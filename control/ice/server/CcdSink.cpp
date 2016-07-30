@@ -6,6 +6,7 @@
 #include <CcdI.h>
 #include <Ice/Connection.h>
 #include <IceConversions.h>
+#include <AstroUtils.h>
 
 namespace snowstar {
 
@@ -16,10 +17,13 @@ namespace snowstar {
  * to the client
  */
 CcdSink::CcdSink(const Ice::Identity& identity, const Ice::Current& current) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a CcdSink");
+	std::string	is = identity.name + "@" + identity.category;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a CcdSink: %s", is.c_str());
 	Ice::ObjectPrx	oneway = current.con->createProxy(identity)
 					->ice_oneway();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "proxy created");
 	sinkprx = ImageSinkPrx::uncheckedCast(oneway);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "cast completed");
 }
 
 /**
@@ -30,11 +34,25 @@ CcdSink::CcdSink(const Ice::Identity& identity, const Ice::Current& current) {
  * to the client.
  */
 void	CcdSink::operator()(const astro::camera::ImageQueueEntry& entry) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "operator()(ImageQueueEntry&) called");
 	// don't do anything if we have no proxy (this should not happen,
 	// we play safe here)
 	if (sinkprx) {
 		ImageQueueEntryPtr	e = convert(entry);
-		sinkprx->image(*e);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image: %s, size = %ld",
+			entry.exposure.toString().c_str(),
+			e->imagedata.size());
+		try {
+			sinkprx->image(*e);
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"cannot send image: %s %s",
+				astro::demangle(typeid(x).name()).c_str(),
+				x.what());
+			sinkprx = NULL;
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ImageQueueEntry: sink stalled");
 	}
 }
 
@@ -45,8 +63,17 @@ void	CcdSink::operator()(const astro::camera::ImageQueueEntry& entry) {
  * and that it can remove the adapter
  */
 void	CcdSink::stop() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop() called");
 	if (sinkprx) {
-		sinkprx->stop();
+		try {
+			sinkprx->stop();
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot stop: %s %s",
+				astro::demangle(typeid(x).name()).c_str(),
+				x.what());
+		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop: sink stalled");
 	}
 }
 

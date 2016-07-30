@@ -8,6 +8,7 @@
 #define INSTRUMENTSELECTIONDIALOG_H
 
 #include <QDialog>
+#include <QApplication>
 #include <AstroDiscovery.h>
 #include <instruments.h>
 #include <RemoteInstrument.h>
@@ -52,6 +53,8 @@ public:
 		snowstar::RemoteInstrument	ri(instruments, instrumentname);
 		application	*a = new application(NULL, _serviceobject, ri);
 		a->show();
+		QApplication::setActiveWindow(a);
+		a->raise();
 	}
 };
 

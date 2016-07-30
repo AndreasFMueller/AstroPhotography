@@ -145,7 +145,13 @@ CcdPrx	CcdI::createProxy(const std::string& ccdname,
 void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 		const Ice::Current& current) {
 	if (_sink) {
-		_sink->stop();
+		try {
+			_sink->stop();
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sink failed: %s",
+				x.what());
+			_sink = NULL;
+		}
 	}
 	CcdSink	*sink = new CcdSink(imagesinkidentity, current);
 	_ccd->imagesink(sink);
@@ -160,10 +166,22 @@ void	CcdI::startStream(const ::snowstar::Exposure& e,
 	_ccd->startStream(convert(e));
 }
 
+void	CcdI::updateStream(const ::snowstar::Exposure& e,
+		const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new exposure time: %.1f",
+		e.exposuretime);
+	_ccd->streamExposure(convert(e));
+}
+
 void	CcdI::stopStream(const ::Ice::Current& /* current */) {
 	_ccd->stopStream();
 	if (_sink) {
-		_sink->stop();
+		try {
+			_sink->stop();
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "sink failed: %s",
+				x.what());
+		}
 	}
 	_sink = NULL;
 }

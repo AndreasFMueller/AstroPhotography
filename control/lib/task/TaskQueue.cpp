@@ -8,6 +8,7 @@
 #include <AstroFormat.h>
 #include <unistd.h>
 #include <TaskTable.h>
+#include <ImageDirectory.h>
 
 using namespace astro::persistence;
 

@@ -9,6 +9,10 @@
 #include <AstroFormat.h>
 #include <camera.h>
 #include <QTimer>
+#include "PreviewImageSink.h"
+#include <CommunicatorSingleton.h>
+#include <IceConversions.h>
+#include "Image2Pixmap.h"
 
 using namespace astro::discover;
 
@@ -108,6 +112,10 @@ PreviewWindow::PreviewWindow(QWidget *parent, ServiceObject serviceobject,
 	setupFocuser();
 	setupGuiderport();
 
+	// connect signals
+	connect(this, SIGNAL(imageUpdated()), this,
+                SLOT(processImage()), Qt::QueuedConnection);
+
 	// start the timer
 	statusTimer = new QTimer();
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
@@ -122,7 +130,33 @@ PreviewWindow::~PreviewWindow() {
 	delete ui;
 }
 
+void	PreviewWindow::setImage(astro::image::ImagePtr image) {
+	_image = image;
+	emit imageUpdated();
+}
+
+void	PreviewWindow::processImage() {
+	astro::image::ImageSize	size = _image->size();
+	// set the size of imageLabel
+	QLabel	*imageLabel = new QLabel;
+	imageLabel->setFixedSize(size.width(), size.height());
+	imageLabel->setMinimumSize(size.width(), size.height());
+
+	snowgui::Image2Pixmap	image2pixmap;
+	QPixmap	*pixmap = image2pixmap(_image);
+	imageLabel->setPixmap(*pixmap);
+
+	ui->scrollArea->setWidget(imageLabel);
+	ui->scrollArea->show();
+
+	//delete pixmap;
+}
+
 void	PreviewWindow::setupCcd() {
+	ui->binningBox->setEnabled(false);
+	while (ui->binningBox->count() > 0) {
+		ui->binningBox->removeItem(0);
+	}
 	if (_ccd) {
 		snowstar::CcdInfo	info = _ccd->getInfo();
 		QComboBox	*bBox = ui->binningBox;
@@ -134,16 +168,16 @@ void	PreviewWindow::setupCcd() {
 				bBox->addItem(QString(m.c_str()));
 			}
 		);
-	} else {
-		while (ui->binningBox->count()) {
-			ui->binningBox->removeItem(0);
-		}
+		ui->binningBox->setEnabled(true);
 	}
 }
 
 void	PreviewWindow::setupFilterwheel() {
+	ui->filternameBox->setEnabled(false);
+	while (ui->filternameBox->count()) {
+		ui->filternameBox->removeItem(0);
+	}
 	if (_filterwheel) {
-		ui->filternameBox->setEnabled(true);
 		int	nfilterwheels = _filterwheel->nFilters();
 		for (int i = 0; i < nfilterwheels; i++) {
 			std::string	n = _filterwheel->filterName(i);
@@ -151,20 +185,25 @@ void	PreviewWindow::setupFilterwheel() {
 				= astro::stringprintf("%d: %s", i+1, n.c_str());
 			ui->filternameBox->addItem(QString(item.c_str()));
 		}
-		ui->filternameBox->setCurrentIndex(
-			_filterwheel->currentPosition());
-		if (snowstar::FwMOVING == _filterwheel->getState()) {
-			ui->filterwheelStatus->setEnabled(true);
-			ui->filterwheelStatus->setValue(0);
-		} else {
-			ui->filterwheelStatus->setEnabled(false);
-			ui->filterwheelStatus->setValue(-1);
+		try {
+			switch (_filterwheel->getState()) {
+			case snowstar::FwIDLE:
+				ui->filternameBox->setCurrentIndex(
+					_filterwheel->currentPosition());
+			case snowstar::FwUNKNOWN:
+				ui->filterwheelStatus->setEnabled(false);
+				ui->filterwheelStatus->setValue(-1);
+				break;
+			case snowstar::FwMOVING:
+				ui->filterwheelStatus->setEnabled(true);
+				ui->filterwheelStatus->setValue(0);
+				break;
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"cannot get filterwheel status: %s", x.what());
 		}
-	} else {
-		ui->filternameBox->setEnabled(false);
-		while (ui->filternameBox->count()) {
-			ui->filternameBox->removeItem(0);
-		}
+		ui->filternameBox->setEnabled(true);
 	}
 }
 
@@ -229,14 +268,20 @@ void	PreviewWindow::statusUpdate() {
 		ui->coolerOnButton->setEnabled(true);
 	}
 	if (_filterwheel) {
-		if (snowstar::FwMOVING == _filterwheel->getState()) {
+		switch (_filterwheel->getState()) {
+		case snowstar::FwMOVING:
 			ui->filterwheelStatus->setEnabled(true);
 			ui->filterwheelStatus->setValue(0);
 			ui->filterwheelStatus->setVisible(true);
-		} else {
+			break;
+		case snowstar::FwIDLE:
+			ui->filternameBox->setCurrentIndex(
+				_filterwheel->currentPosition());
+		default:
 			ui->filterwheelStatus->setEnabled(false);
 			ui->filterwheelStatus->setValue(-1);
 			ui->filterwheelStatus->setVisible(false);
+			break;
 		}
 	}
 	if (_focuser) {
@@ -290,6 +335,75 @@ void	PreviewWindow::ccdChanged(int ccdindex) {
 	setupCcd();
 }
 
+void	PreviewWindow::startStream() {
+	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+
+	// create the image sink
+	snowstar::ImageSink	*imagesink = new PreviewImageSink(this);
+	_previewimagesink = imagesink;
+	Ice::ObjectPtr	callback = imagesink;
+	_adapter = snowstar::CallbackAdapterPtr(
+			new snowstar::CallbackAdapter(ic));
+	Ice::Identity	ident = _adapter->add(callback);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setAdapter");
+	_ccd->ice_getConnection()->setAdapter(_adapter->adapter());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setAdapter returns, sleeping for 60s");
+
+	// register the imagesink with the 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registering the sink");
+	_ccd->registerSink(ident);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "registration complete");
+
+	// get the Exposure structure
+	astro::camera::Exposure	exposure;
+	exposure.exposuretime(ui->exposureSpinBox->value());
+
+	// start the stream
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting the exposure");
+	_ccd->startStream(snowstar::convert(exposure));
+}
+
+void	PreviewWindow::stopStream() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stopping the stream");
+	_ccd->stopStream();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "unregistering the sink");
+	_ccd->unregisterSink();
+	// XXX should remove the sink here
+}
+
+void	PreviewWindow::toggleStream() {
+	if (!_ccd) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no ccd");
+		return;
+	}
+	if (QString("Start") == ui->startButton->text()) {
+		try {
+			startStream();
+			ui->startButton->setText(QString("Stop"));
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot start stream: %s",
+				x.what());
+		}
+	} else {
+		try {
+			stopStream();
+			ui->startButton->setText(QString("Start"));
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot stop stream: %s",
+				x.what());
+		}
+	}
+}
+
+void	PreviewWindow::exposureChanged() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure changed");
+	if (ui->exposureSpinBox == sender()) {
+		astro::camera::Exposure	exposure;
+		exposure.exposuretime(ui->exposureSpinBox->value());
+		_ccd->updateStream(snowstar::convert(exposure));
+	}
+}
+
 void	PreviewWindow::filterwheelChanged(int filterwheelindex) {
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentFilterWheel, index)) {
@@ -302,11 +416,16 @@ void	PreviewWindow::filterwheelChanged(int filterwheelindex) {
 }
 
 void	PreviewWindow::filterwheelFilterChanged(int filterindex) {
+	if (!_filterwheel) {
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "select filter %d", filterindex);
 	try {
 		_filterwheel->select(filterindex);
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot select: %s", x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
 	}
 }
 
@@ -323,19 +442,39 @@ void	PreviewWindow::coolerChanged(int coolerindex) {
 }
 
 void	PreviewWindow::coolerTemperatureChanged(double settemperature) {
+	if (!_cooler) {
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set temperature to %.1f",
 		settemperature);
-	_cooler->setTemperature(settemperature + 273.15);
+	try {
+		_cooler->setTemperature(settemperature + 273.15);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot change temperature: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
+	}
 }
 
 void	PreviewWindow::coolerOnOff() {
+	if (!_cooler) {
+		return;
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "toggle cooler");
-	if (_cooler->isOn()) {
-		_cooler->setOn(false);
-		ui->coolerOnButton->setText(QString("On"));
-	} else {
-		_cooler->setOn(true);
-		ui->coolerOnButton->setText(QString("Off"));
+	try {
+		if (_cooler->isOn()) {
+			_cooler->setOn(false);
+			ui->coolerOnButton->setText(QString("On"));
+		} else {
+			_cooler->setOn(true);
+			ui->coolerOnButton->setText(QString("Off"));
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot switch cooler: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
 	}
 }
 
@@ -351,7 +490,17 @@ void	PreviewWindow::focuserChanged(int focuserindex) {
 }
 
 void	PreviewWindow::focuserSetChanged(int focusposition) {
-	_focuser->set(focusposition);
+	if (!_focuser) {
+		return;
+	}
+	try {
+		_focuser->set(focusposition);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot move focuser: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
+	}
 }
 
 void	PreviewWindow::guiderportChanged(int guiderportindex) {
@@ -366,18 +515,28 @@ void	PreviewWindow::guiderportChanged(int guiderportindex) {
 }
 
 void	PreviewWindow::guiderportActivated() {
+	if (!_guiderport) {
+		return;
+	}
 	static const float	defaultactivation = 5;
-	if (sender() == ui->raplusButton) {
-		_guiderport->activate(defaultactivation, 0);
-	}
-	if (sender() == ui->raminusButton) {
-		_guiderport->activate(-defaultactivation, 0);
-	}
-	if (sender() == ui->decplusButton) {
-		_guiderport->activate(0, defaultactivation);
-	}
-	if (sender() == ui->decminusButton) {
-		_guiderport->activate(0, -defaultactivation);
+	try {
+		if (sender() == ui->raplusButton) {
+			_guiderport->activate(defaultactivation, 0);
+		}
+		if (sender() == ui->raminusButton) {
+			_guiderport->activate(-defaultactivation, 0);
+		}
+		if (sender() == ui->decplusButton) {
+			_guiderport->activate(0, defaultactivation);
+		}
+		if (sender() == ui->decminusButton) {
+			_guiderport->activate(0, -defaultactivation);
+		}
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate guiderport: %s",
+			x.what());
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");
 	}
 }
 

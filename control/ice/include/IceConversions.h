@@ -14,7 +14,6 @@
 #include <AstroProject.h>
 #include <AstroEvent.h>
 #include <AstroConfig.h>
-#include <TrackingPersistence.h>
 #include <AstroDiscovery.h>
 #include <types.h>
 #include <device.h>

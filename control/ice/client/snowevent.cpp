@@ -7,6 +7,7 @@
 #include <IceDiscovery.h>
 #include <CommunicatorSingleton.h>
 #include <CommonClientTasks.h>
+#include <includes.h>
 
 namespace snowstar {
 namespace app {

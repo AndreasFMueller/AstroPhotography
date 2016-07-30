@@ -6,7 +6,7 @@
 #ifndef _FocusWork_h
 #define _FocusWork_h
 
-#include <Thread.h>
+#include <AstroUtils.h>
 #include <AstroCamera.h>
 #include <AstroFocus.h>
 

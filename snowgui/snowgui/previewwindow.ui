@@ -16,16 +16,28 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
      <property name="widgetResizable">
-      <bool>true</bool>
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>782</width>
-        <height>742</height>
+        <width>767</width>
+        <height>727</height>
        </rect>
       </property>
      </widget>
@@ -103,6 +115,54 @@
          </property>
          <property name="text">
           <string>Binning mode:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>15</x>
+           <y>100</y>
+           <width>59</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Exposure:</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="exposureSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>95</y>
+           <width>100</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <double>3600.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="startButton">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>140</y>
+           <width>115</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Start</string>
          </property>
         </widget>
        </widget>
@@ -630,6 +690,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>startButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PreviewWindow</receiver>
+   <slot>toggleStream()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>945</x>
+     <y>162</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1017</x>
+     <y>162</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exposureSpinBox</sender>
+   <signal>editingFinished()</signal>
+   <receiver>PreviewWindow</receiver>
+   <slot>exposureChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>956</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1018</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>coolerOnOff()</slot>
@@ -642,5 +734,7 @@
   <slot>focuserSetChanged(int)</slot>
   <slot>guiderportChanged(int)</slot>
   <slot>guiderportActivated()</slot>
+  <slot>toggleStream()</slot>
+  <slot>exposureChanged()</slot>
  </slots>
 </ui>

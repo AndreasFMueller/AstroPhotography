@@ -114,6 +114,7 @@ public:
 	Ice::Identity	add(Ice::ObjectPtr callback);
 	void	connect(IceProxy::Ice::Object& proxy);
 };
+typedef std::shared_ptr<CallbackAdapter>	CallbackAdapterPtr;
 
 /**
  * \brief Common infrastructure for monitor classes

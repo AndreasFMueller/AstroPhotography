@@ -87,6 +87,7 @@ int	Guide::monitor_calibration(GuiderPrx guider) {
 	Ice::Identity	ident = adapter.add(callback);
 	guider->ice_getConnection()->setAdapter(adapter.adapter());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "register calibration monitor");
+	sleep(60);
 	guider->registerCalibrationMonitor(ident);
 
 	// monitor

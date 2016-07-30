@@ -10,7 +10,10 @@
 
 #include <QWidget>
 #include <AstroDiscovery.h>
+#include <AstroImage.h>
 #include <RemoteInstrument.h>
+#include <camera.h>
+#include <CommonClientTasks.h>
 
 namespace Ui {
 	class PreviewWindow;
@@ -26,11 +29,17 @@ class PreviewWindow : public QWidget {
 	snowstar::FocuserPrx		_focuser;
 	snowstar::GuiderPortPrx		_guiderport;
 
+	astro::image::ImagePtr		_image;
+	snowstar::CallbackAdapterPtr	_adapter;
+	snowstar::ImageSinkPtr		_previewimagesink;
+
 public:
 	explicit PreviewWindow(QWidget *parent,
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
 	~PreviewWindow();
+
+	void	setImage(astro::image::ImagePtr image);
 
 private:
 	void	setupCcd();
@@ -39,9 +48,19 @@ private:
 	void	setupFocuser();
 	void	setupGuiderport();
 
+	void	startStream();
+	void	stopStream();
+
+signals:
+	void	imageUpdated();
+
 public slots:
 
+	void	processImage();
+
 	void	ccdChanged(int ccdindex);
+	void	exposureChanged();
+	void	toggleStream();
 
 	void	filterwheelChanged(int filterwheelindex);
 	void	filterwheelFilterChanged(int filterindex);

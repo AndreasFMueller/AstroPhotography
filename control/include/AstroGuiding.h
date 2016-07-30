@@ -16,6 +16,7 @@
 #include <AstroCallback.h>
 #include <AstroLoader.h>
 #include <AstroUtils.h>
+#include <AstroPersistence.h>
 #include <typeinfo>
 #include <typeindex>
 
@@ -949,6 +950,44 @@ public:
 				const std::string& name);
 };
 typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
+
+/**
+ * \brief Encapsulation of the information about a guide run
+ */
+class GuidingRun {
+public:
+	time_t	whenstarted;
+	std::string	name;
+	std::string	instrument;
+	std::string	ccd;
+	std::string	guiderport;
+	std::string	adaptiveoptics;
+	int	guiderportcalid;
+	int	adaptiveopticscalid;
+	GuidingRun() { }
+	GuidingRun(time_t _whenstarted, const std::string& _name,
+		const std::string& _instrument, const std::string& _ccd,
+		const std::string& _guiderport,
+		const std::string& _adaptiveoptics)
+		: whenstarted(_whenstarted), name(_name),
+		  instrument(_instrument), ccd(_ccd), guiderport(_guiderport),
+		  adaptiveoptics(_adaptiveoptics) {
+		guiderportcalid = -1;
+		adaptiveopticscalid = -1;
+	}
+};
+
+/**
+ * \brief A class encapsulating a full history, including tracking points
+ */
+class TrackingHistory : public GuidingRun {
+public:
+	std::list<TrackingPoint>	points;
+	TrackingHistory() { }
+	TrackingHistory(const GuidingRun& guidingrun) 
+		: GuidingRun(guidingrun) {
+	}
+};
 
 } // namespace guiding
 } // namespace astro

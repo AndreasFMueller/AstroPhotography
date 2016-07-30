@@ -65,7 +65,9 @@ private:
 public:
 	void	registerSink(const Ice::Identity& sinkidentity,
 			const Ice::Current& current);
-	void startStream(const ::snowstar::Exposure& e, 
+	void	startStream(const ::snowstar::Exposure& e, 
+			const Ice::Current& current);
+	void	updateStream(const ::snowstar::Exposure& e,
 			const Ice::Current& current);
 	void	stopStream(const ::Ice::Current& current);
 	void	unregisterSink(const ::Ice::Current& current);

@@ -13,6 +13,7 @@
 #include <AstroIO.h>
 #include <cstdlib>
 #include <limits>
+#include <includes.h>
 
 using namespace astro::focusing;
 

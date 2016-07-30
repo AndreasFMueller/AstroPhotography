@@ -6,6 +6,8 @@
 #
 SUBDIRS = . test
 
+noinst_HEADERS = ImageStreamThread.h
+
 noinst_LTLIBRARIES = libastrodevice.la
 
 libastrodevice_la_SOURCES =						\
@@ -32,6 +34,7 @@ libastrodevice_la_SOURCES =						\
 	ImageQueue.cpp							\
 	ImageQueueEntry.cpp						\
 	ImageStream.cpp							\
+	ImageStreamThread.cpp						\
 	Module.cpp							\
 	ModuleDescriptor.cpp						\
 	Mount.cpp							\

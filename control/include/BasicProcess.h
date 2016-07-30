@@ -9,8 +9,8 @@
 #include <AstroGuiding.h>
 #include <AstroDebug.h>
 #include <AstroPersistence.h>
+#include <AstroUtils.h>
 #include <includes.h>
-#include <Thread.h>
 
 namespace astro {
 namespace guiding {
