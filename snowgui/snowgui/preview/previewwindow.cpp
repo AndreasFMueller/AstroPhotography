@@ -36,6 +36,7 @@ PreviewWindow::PreviewWindow(QWidget *parent, ServiceObject serviceobject,
 	// display the gain/brightness settings
 	displayGainSettings();
 	displayBrightnessSettings();
+	displayScaleSettings();
 
 	// read component names and initialize the combo boxes
 	int	index = 0;
@@ -151,10 +152,19 @@ void	PreviewWindow::processImage() {
 	imageLabel->setMinimumSize(size.width(), size.height());
 
 	QPixmap	*pixmap = image2pixmap(_image);
-	imageLabel->setPixmap(*pixmap);
+	if (NULL != pixmap) {
+		imageLabel->setPixmap(*pixmap);
+	}
 
 	ui->scrollArea->setWidget(imageLabel);
 	ui->scrollArea->show();
+
+	// update the histogram
+	QPixmap	*histogram = image2pixmap.histogram(ui->histogramLabel->width(),
+		ui->histogramLabel->height());
+	if (NULL != histogram) {
+		ui->histogramLabel->setPixmap(*histogram);
+	}
 
 	//delete pixmap;
 }
@@ -177,6 +187,12 @@ void	PreviewWindow::displayBrightnessSettings() {
 	ui->brightnessField->setText(QString(brightnessstring.c_str()));
 }
 
+void	PreviewWindow::displayScaleSettings() {
+	double	s = 100 * pow(2, ui->scaleSlider->value());
+	std::string	scalestring = astro::stringprintf("%.0f%%", s);
+	ui->scaleField->setText(QString(scalestring.c_str()));
+}
+
 void	PreviewWindow::imageSettingsChanged() {
 	bool	imagehaschanged = false;
 	if (sender() == ui->gainSlider) {
@@ -191,6 +207,9 @@ void	PreviewWindow::imageSettingsChanged() {
 		image2pixmap.brightness(b);
 		displayBrightnessSettings();
 		imagehaschanged = true;
+	}
+	if (sender() == ui->scaleSlider) {
+		displayScaleSettings();
 	}
 	if (imagehaschanged) {
 		processImage();

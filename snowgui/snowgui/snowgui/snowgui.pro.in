@@ -6,7 +6,7 @@
 
 QT       += core gui widgets
 
-TARGET = snowgui
+TARGET = ../snowgui
 TEMPLATE = app
 
 # Directories for ICE and the astrophotography library

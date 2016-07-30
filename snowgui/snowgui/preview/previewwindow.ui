@@ -28,7 +28,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>60</height>
+          <height>120</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>120</height>
          </size>
         </property>
         <property name="title">
@@ -37,7 +43,7 @@
         <widget class="QSlider" name="gainSlider">
          <property name="geometry">
           <rect>
-           <x>50</x>
+           <x>90</x>
            <y>27</y>
            <width>160</width>
            <height>22</height>
@@ -75,7 +81,7 @@
         <widget class="QLineEdit" name="gainField">
          <property name="geometry">
           <rect>
-           <x>220</x>
+           <x>260</x>
            <y>28</y>
            <width>60</width>
            <height>21</height>
@@ -88,8 +94,8 @@
         <widget class="QLabel" name="brightnessLabel">
          <property name="geometry">
           <rect>
-           <x>300</x>
-           <y>30</y>
+           <x>10</x>
+           <y>60</y>
            <width>71</width>
            <height>16</height>
           </rect>
@@ -101,8 +107,8 @@
         <widget class="QSlider" name="brightnessSlider">
          <property name="geometry">
           <rect>
-           <x>380</x>
-           <y>27</y>
+           <x>90</x>
+           <y>57</y>
            <width>160</width>
            <height>22</height>
           </rect>
@@ -120,11 +126,117 @@
         <widget class="QLineEdit" name="brightnessField">
          <property name="geometry">
           <rect>
-           <x>550</x>
-           <y>28</y>
-           <width>40</width>
+           <x>260</x>
+           <y>58</y>
+           <width>60</width>
            <height>21</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="autogainBox">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>30</y>
+           <width>89</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Auto gain</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="debayerBox">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>60</y>
+           <width>89</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>deBayer</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="histogramLabel">
+         <property name="geometry">
+          <rect>
+           <x>450</x>
+           <y>26</y>
+           <width>256</width>
+           <height>86</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+        <widget class="QLabel" name="scaleLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>90</y>
+           <width>59</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Scale:</string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="scaleSlider">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>87</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>-3</number>
+         </property>
+         <property name="maximum">
+          <number>3</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksBelow</enum>
+         </property>
+         <property name="tickInterval">
+          <number>1</number>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="scaleField">
+         <property name="geometry">
+          <rect>
+           <x>260</x>
+           <y>88</y>
+           <width>60</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="logarithmicBox">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>90</y>
+           <width>90</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>logarithmic</string>
          </property>
         </widget>
        </widget>
@@ -155,6 +267,7 @@
            <height>727</height>
           </rect>
          </property>
+         <zorder>imageOptions</zorder>
         </widget>
        </widget>
       </item>
@@ -879,12 +992,44 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>498</x>
-     <y>52</y>
+     <x>233</x>
+     <y>91</y>
     </hint>
     <hint type="destinationlabel">
      <x>492</x>
      <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scaleSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PreviewWindow</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>106</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logarithmicBox</sender>
+   <signal>clicked()</signal>
+   <receiver>PreviewWindow</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>397</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>409</x>
+     <y>9</y>
     </hint>
    </hints>
   </connection>

@@ -10,6 +10,18 @@ using namespace astro::image;
 
 namespace snowgui {
 
+Image2Pixmap::Image2Pixmap() {
+	_gain = 1;
+	_brightness = 0;
+	_histogram = NULL;
+}
+
+Image2Pixmap::~Image2Pixmap() {
+	if (_histogram != NULL) {
+		delete _histogram;
+	}
+}
+
 /**
  * \brief Convert an unsigned char value to a monochrome pixel
  */
@@ -111,8 +123,16 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	ImageSize	size = image->size();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Mono image of size %s",
 		size.toString().c_str());
+	Histogram<double>	*histo = new Histogram<double>(256);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_histogram = %p", _histogram);
+	if (_histogram) {
+		delete _histogram;
+		_histogram = NULL;
+	}
+	_histogram = histo;
 
 	// get a gain adaapter
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for gain adapter");
 	BasicGainAdapter	*gainadapter = NULL;
 	ga(gainadapter, unsigned char, image);
 	ga(gainadapter, unsigned short, image);
@@ -127,6 +147,8 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	gainadapter->brightness(_brightness);
 
 	// prepare the result
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing QImage(%d,%d)",
+		size.width(), size.height());
 	QImage	*qimage = new QImage(size.width(), size.height(),
 				QImage::Format_RGB32);
 
@@ -135,11 +157,13 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	int	h = size.height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-			unsigned long	value
-				= convert(gainadapter->pixel(x, y));
+			unsigned char	v = gainadapter->pixel(x, y);
+			histo->add((double)v);
+			unsigned long	value = convert(v);
 			qimage->setPixel(x, h - 1 - y, value);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image data set");
 
 	// cleanup
 	delete gainadapter;
@@ -210,7 +234,6 @@ public:
 		}							\
 	}
 
-
 /**
  * \brief Convert a RGB astro::image::ImagePtr to a QImage
  */
@@ -218,6 +241,12 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	ImageSize	size = image->size();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting RGB image of size %s",
 		size.toString().c_str());
+	Histogram<RGB<double> >	*histo = new Histogram<RGB<double> >(256);
+	if (_histogram) {
+		delete _histogram;
+		_histogram = NULL;
+	}
+	_histogram = histo;
 	
 	BasicGainRGBAdapter	*gainadapter = NULL;
 	gargb(gainadapter, unsigned char, image);
@@ -233,6 +262,8 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	gainadapter->brightness(_brightness);
 
 	// prepare result structuren
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QImage(%d, %d)",
+		size.width(), size.height());
 	QImage	*qimage = new QImage(size.width(), size.height(),
 				QImage::Format_RGB32);
 
@@ -240,12 +271,14 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	int	h = size.height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-			unsigned long	value
-				= convert(gainadapter->pixel(x, y));
+			RGB<unsigned char>	p = gainadapter->pixel(x, y);
+			histo->add(RGB<double>(p));
+			unsigned long	value = convert(p);
 			qimage->setPixel(x, h - 1 - y, value);
 		}
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "QImage complete");
 	return qimage;
 }
 
@@ -265,6 +298,13 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 	result->convertFromImage(*qimage);
 
 	return result;;
+}
+
+QPixmap	*Image2Pixmap::histogram(int width, int height) {
+	if (_histogram) {
+		return _histogram->pixmap(width, height);
+	}
+	return NULL;
 }
 
 } // namespace snowgui

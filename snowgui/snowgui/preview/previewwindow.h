@@ -57,6 +57,7 @@ private:
 
 	void	displayGainSettings();
 	void	displayBrightnessSettings();
+	void	displayScaleSettings();
 
 signals:
 	void	imageUpdated();
