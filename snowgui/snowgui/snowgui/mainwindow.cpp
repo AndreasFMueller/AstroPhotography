@@ -9,7 +9,7 @@
 #include <AstroFormat.h>
 #include "serverselectiondialog.h"
 #include "instrumentselectiondialog.h"
-#include "previewwindow.h"
+#include <previewwindow.h>
 
 using namespace astro::discover;
 

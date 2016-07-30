@@ -14,7 +14,7 @@
 #include <RemoteInstrument.h>
 #include <camera.h>
 #include <CommonClientTasks.h>
-#include "Image2Pixmap.h"
+#include <Image2Pixmap.h>
 
 namespace Ui {
 	class PreviewWindow;

@@ -1,0 +1,33 @@
+#
+# preview.pro.in -- qt configuration file for the preview subappliction
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TEMPLATE = lib
+CONFIG += staticlib
+
+# Directories for ICE and the astrophotography library
+ICEDIR = /Library/Developer/Ice-3.5.1
+ASTROPATH = /Users/afm/Projects/AstroPhotography/snowgui/../control/root
+
+LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
+LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../common
+
+FORMS    +=								\
+	previewwindow.ui
+
+SOURCES += 								\
+	previewwindow.cpp 						\
+	PreviewImageSink.cpp
+
+HEADERS  += 								\
+	previewwindow.h							\
+	PreviewImageSink.h				
+

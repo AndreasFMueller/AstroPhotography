@@ -136,6 +136,7 @@ else
 fi
 AC_SUBST(ASTROPATH)
 
-AC_CONFIG_FILES([Makefile snowgui/snowgui.pro])
+AC_CONFIG_FILES([Makefile snowgui/snowgui.pro snowgui/common/common.pro
+	snowgui/preview/preview.pro snowgui/snowgui/snowgui.pro])
 AC_OUTPUT
 

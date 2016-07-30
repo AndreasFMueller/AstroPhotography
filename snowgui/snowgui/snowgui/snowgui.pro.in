@@ -1,0 +1,45 @@
+#
+# snowgui.pro -- qt configuration file for user interface program
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = snowgui
+TEMPLATE = app
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ASTROPATH = @ASTROPATH@
+
+LIBS += -L../common -lcommon -L../preview -lpreview
+LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
+LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../common ../preview
+
+ASTROGUISOURCES = 							\
+        mainwindow.cpp 							\
+	connectiondialog.cpp 						\
+	serverselectiondialog.cpp 					\
+	instrumentselectiondialog.cpp
+
+ASTROGUIHEADERS =							\
+	mainwindow.h							\
+	connectiondialog.h						\
+	serverselectiondialog.h						\
+	instrumentselectiondialog.h
+
+FORMS    +=								\
+	mainwindow.ui							\
+	connectiondialog.ui						\
+	serverselectiondialog.ui					\
+	instrumentselectiondialog.ui
+
+SOURCES += main.cpp $${ASTROGUISOURCES} 				\
+
+HEADERS  += $${ASTROGUIHEADERS}						\
+
