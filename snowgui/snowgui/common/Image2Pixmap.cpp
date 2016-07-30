@@ -13,6 +13,7 @@ namespace snowgui {
 Image2Pixmap::Image2Pixmap() {
 	_gain = 1;
 	_brightness = 0;
+	_scale = 0;
 	_histogram = NULL;
 }
 
@@ -36,6 +37,18 @@ static unsigned long	convert(const RGB<unsigned char>& v) {
 	return 0xff000000 | (v.R << 16) | (v.G << 8) | v.B;
 }
 
+static ImageSize	scaledSize(int scale, const ImageSize& origsize) {
+	if (scale > 0) {
+		return ImageSize(origsize.width() << scale,
+				origsize.height() << scale);
+	}
+	if (scale < 0) {
+		return ImageSize(origsize.width() >> -scale,
+			origsize.height() >> -scale);
+	}
+	return origsize;
+}
+
 /**
  * \brief class to handle the gain/brightness settings
  *
@@ -45,10 +58,12 @@ class GainSettings {
 protected:
 	double	_gain;
 	double	_brightness;
+	int	_scale;
 public:
-	GainSettings() : _gain(1), _brightness(0) { }
-	GainSettings(double gain, double brightness)
-		: _gain(gain), _brightness(brightness) { }
+	GainSettings() : _gain(1), _brightness(0), _scale(0) { }
+	GainSettings(int scale) : _gain(1), _brightness(0), _scale(scale) { }
+	GainSettings(double gain, double brightness, int scale)
+		: _gain(gain), _brightness(brightness), _scale(scale) { }
 	void	gain(double g) { _gain = g; }
 	void	brightness(double b) { _brightness = b; }
 };
@@ -62,13 +77,14 @@ public:
 class BasicGainAdapter : public ConstImageAdapter<unsigned char>,
 			public GainSettings {
 public:
-	BasicGainAdapter(const ImageSize& imagesize)
-		: ConstImageAdapter<unsigned char>(imagesize) {
+	BasicGainAdapter(const ImageSize& imagesize, int scale)
+		: ConstImageAdapter<unsigned char>(imagesize),
+		  GainSettings(scale) {
 	}
 	BasicGainAdapter(const ImageSize& imagesize,
-		double gain, double brightness)
+		double gain, double brightness, int scale)
 		: ConstImageAdapter<unsigned char>(imagesize),
-		  GainSettings(gain, brightness) {
+		  GainSettings(gain, brightness, scale) {
 	}
 };
 
@@ -81,17 +97,7 @@ public:
 template<typename Pixel>
 class GainAdapter : public BasicGainAdapter {
 	const ConstImageAdapter<Pixel>&	_image;
-public:
-	GainAdapter(const ConstImageAdapter<Pixel>& image)
-		: BasicGainAdapter(image.getSize()), _image(image) {
-	}
-	GainAdapter(const ConstImageAdapter<Pixel>& image, double gain,
-		double brightness)
-		: BasicGainAdapter(image.getSize(), gain, brightness),
-		  _image(image) {
-	}
-	virtual unsigned char	pixel(int x, int y) const {
-		double	value = _image.pixel(x, y) * _gain + _brightness;
+	unsigned char	rescale(double value) const {
 		if (value > 255) {
 			value = 255;
 		}
@@ -101,13 +107,54 @@ public:
 		unsigned char	result = value;
 		return result;
 	}
+	unsigned char	normalPixel(int x, int y) const {
+		double	value = _image.pixel(x, y) * _gain + _brightness;
+		return rescale(value);
+	}
+	unsigned char	downscalePixel(int x, int y) const {
+		int	startx = x << -_scale;
+		int	starty = y << -_scale;
+		int	endx = startx + (1 << -_scale);
+		int	endy = starty + (1 << -_scale);
+		double	s = 0;
+		int	counter = 0;
+		for (int x = startx; x < endx; x++) {
+			for (int y = starty; y < endy; y++) {
+				s += _image.pixel(x, y) * _gain + _brightness;
+				counter++;
+			}
+		}
+		return rescale(s / counter);
+	}
+	unsigned char	upscalePixel(int x, int y) const {
+		return normalPixel(x >> _scale, y >> _scale);
+	}
+public:
+	GainAdapter(const ConstImageAdapter<Pixel>& image, int scale = 0)
+		: BasicGainAdapter(scaledSize(scale, image.getSize()), scale),
+		  _image(image) {
+	}
+	GainAdapter(const ConstImageAdapter<Pixel>& image, double gain,
+		double brightness, int scale = 0)
+		: BasicGainAdapter(scaledSize(scale, image.getSize()),
+		  gain, brightness, scale), _image(image) {
+	}
+	virtual unsigned char	pixel(int x, int y) const {
+		if (_scale > 0) {
+			return upscalePixel(x, y);
+		}
+		if (_scale < 0) {
+			return downscalePixel(x, y);
+		}
+		return normalPixel(x, y);
+	}
 };
 
 #define	ga(gainadapter, Pixel, image)					\
 	if (gainadapter == NULL) {					\
 		Image<Pixel>	*img = dynamic_cast<Image<Pixel> *>(&*image);\
 		if (NULL != img) {					\
-			gainadapter = new GainAdapter<Pixel>(*img);	\
+			gainadapter = new GainAdapter<Pixel>(*img, _scale);	\
 		}							\
 	}
 
@@ -124,6 +171,7 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Mono image of size %s",
 		size.toString().c_str());
 	Histogram<double>	*histo = new Histogram<double>(256);
+	histo->logarithmic(_logarithmic);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "_histogram = %p", _histogram);
 	if (_histogram) {
 		delete _histogram;
@@ -146,15 +194,15 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	gainadapter->gain(_gain);
 	gainadapter->brightness(_brightness);
 
+	// dimensions
+	int	w = gainadapter->getSize().width();
+	int	h = gainadapter->getSize().height();
+
 	// prepare the result
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing QImage(%d,%d)",
-		size.width(), size.height());
-	QImage	*qimage = new QImage(size.width(), size.height(),
-				QImage::Format_RGB32);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing QImage(%d,%d)", w, h);
+	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
 
 	// fill the image into the result
-	int	w = size.width();
-	int	h = size.height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			unsigned char	v = gainadapter->pixel(x, y);
@@ -179,13 +227,14 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
  */
 class BasicGainRGBAdapter : public ConstImageAdapter<RGB<unsigned char> >, public GainSettings {
 public:
-	BasicGainRGBAdapter(const ImageSize& imagesize)
-		: ConstImageAdapter<RGB<unsigned char> >(imagesize) {
+	BasicGainRGBAdapter(const ImageSize& imagesize, int scale)
+		: ConstImageAdapter<RGB<unsigned char> >(imagesize),
+		  GainSettings(scale) {
 	}
 	BasicGainRGBAdapter(const ImageSize& imagesize,
-		double gain, double brightness)
+		double gain, double brightness, int scale)
 		: ConstImageAdapter<RGB<unsigned char> >(imagesize),
-		  GainSettings(gain, brightness) {
+		  GainSettings(gain, brightness, scale) {
 	}
 };
 
@@ -209,17 +258,47 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 		return RGB<unsigned char>(rescale(i.R), rescale(i.G),
 			rescale(i.B));
 	}
+	RGB<unsigned char>	normalPixel(int x, int y) const {
+		return rescale(_image.pixel(x, y));
+	}
+	RGB<unsigned char>	upscalePixel(int x, int y) const {
+		return normalPixel(x >> _scale, y >> _scale);
+	}
+	RGB<unsigned char>	downscalePixel(int x, int y) const {
+		int	startx = x << -_scale;
+		int	starty = y << -_scale;
+		int	endx = startx + (1 << -_scale);
+		int	endy = starty + (1 << -_scale);
+		RGB<double>	s;
+		int	counter = 0;
+		for (int x = startx; x < endx; x++) {
+			for (int y = starty; y < endy; y++) {
+				s = s + _image.pixel(x, y);
+				counter++;
+			}
+		}
+		s = s * (1. / counter);
+		RGB<Pixel>	p(s);
+		return rescale(p);
+	}
 public:
-	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image)
-		: BasicGainRGBAdapter(image.getSize()), _image(image) {
+	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image, int scale)
+		: BasicGainRGBAdapter(scaledSize(scale, image.getSize()),
+		  scale), _image(image) {
 	}
 	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image, double gain,
-		double brightness)
-		: BasicGainRGBAdapter(image.getSize(), gain, brightness),
-		  _image(image) {
+		double brightness, int scale)
+		: BasicGainRGBAdapter(scaledSize(scale, image.getSize()),
+		  gain, brightness, scale), _image(image) {
 	}
 	virtual RGB<unsigned char>	pixel(int x, int y) const {
-		return rescale(_image.pixel(x, y));
+		if (_scale > 0) {
+			return upscalePixel(x, y);
+		}
+		if (_scale < 0) {
+			return downscalePixel(x, y);
+		}
+		return normalPixel(x, y);
 	}
 	void	gain(double g) { _gain = g; }
 	void	brightness(double b) { _brightness = b; }
@@ -230,7 +309,7 @@ public:
 		Image<RGB<Pixel> >	*img				\
 			= dynamic_cast<Image<RGB<Pixel> > *>(&*image);	\
 		if (NULL != img) {					\
-			gainadapter = new GainRGBAdapter<Pixel>(*img);	\
+			gainadapter = new GainRGBAdapter<Pixel>(*img, _scale);	\
 		}							\
 	}
 
@@ -242,6 +321,7 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting RGB image of size %s",
 		size.toString().c_str());
 	Histogram<RGB<double> >	*histo = new Histogram<RGB<double> >(256);
+	histo->logarithmic(_logarithmic);
 	if (_histogram) {
 		delete _histogram;
 		_histogram = NULL;

@@ -97,7 +97,6 @@ QPixmap	*Histogram<double>::pixmap(int width, int height) const {
 	for (int x = 0; x < width; x++) {
 		int	bi = bucketindex(width, x);
 		double	l = value(_buckets[bi]) * yscale;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "x=%d, bi=%d, l=%f", x, bi, l);
 		for (int y = 0; y < height; y++) {
 			if (y <= l) {
 				qimage.setPixel(x, height - 1 - y, 0xff000000);

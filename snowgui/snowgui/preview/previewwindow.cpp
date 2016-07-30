@@ -9,6 +9,7 @@
 #include <AstroFormat.h>
 #include <camera.h>
 #include <QTimer>
+#include <QScrollBar>
 #include "PreviewImageSink.h"
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
@@ -146,17 +147,32 @@ void	PreviewWindow::processImage() {
 		return;
 	}
 	astro::image::ImageSize	size = _image->size();
+
+	// remember the current position of the scroll area
+	int	hpos = ui->scrollArea->horizontalScrollBar()->value();
+	int	vpos = ui->scrollArea->verticalScrollBar()->value();
+	QSize	previoussize = ui->scrollArea->widget()->size();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"hpos = %d, vpos = %d, previous size=%d,%d",
+		hpos, vpos, previoussize.width(), previoussize.height());
+
 	// set the size of imageLabel
 	QLabel	*imageLabel = new QLabel;
-	imageLabel->setFixedSize(size.width(), size.height());
-	imageLabel->setMinimumSize(size.width(), size.height());
 
 	QPixmap	*pixmap = image2pixmap(_image);
 	if (NULL != pixmap) {
 		imageLabel->setPixmap(*pixmap);
 	}
+	imageLabel->setFixedSize(pixmap->width(), pixmap->height());
+	imageLabel->setMinimumSize(pixmap->width(), pixmap->height());
 
 	ui->scrollArea->setWidget(imageLabel);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %d/%d", hpos, vpos);
+	QSize	newsize = pixmap->size();
+	hpos = newsize.width() * hpos / previoussize.width();
+	vpos = newsize.height() * vpos / previoussize.height();
+	ui->scrollArea->horizontalScrollBar()->setValue(hpos);
+	ui->scrollArea->verticalScrollBar()->setValue(vpos);
 	ui->scrollArea->show();
 
 	// update the histogram
@@ -210,6 +226,14 @@ void	PreviewWindow::imageSettingsChanged() {
 	}
 	if (sender() == ui->scaleSlider) {
 		displayScaleSettings();
+	}
+	if (sender() == ui->logarithmicBox) {
+		image2pixmap.logarithmic(ui->logarithmicBox->isChecked());
+		imagehaschanged = true;
+	}
+	if (sender() == ui->scaleSlider) {
+		image2pixmap.scale(ui->scaleSlider->value());
+		imagehaschanged = true;
 	}
 	if (imagehaschanged) {
 		processImage();

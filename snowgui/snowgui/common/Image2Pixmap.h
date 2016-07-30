@@ -16,6 +16,8 @@ namespace snowgui {
 class	Image2Pixmap {
 	double	_brightness;
 	double	_gain;
+	bool	_logarithmic;
+	int	_scale;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -24,6 +26,10 @@ public:
 	void	brightness(double b) { _brightness = b; }
 	double	gain() const { return _gain; }
 	void	gain(double g) { _gain = g; }
+	bool	logarithmic() const { return _logarithmic; }
+	void	logarithmic(bool l) { _logarithmic = l; }
+	int	scale() const { return _scale; }
+	void	scale(int s) { _scale = s; }
 private:
 	HistogramBase	*_histogram;
 	QImage	*convertRGB(astro::image::ImagePtr image);
