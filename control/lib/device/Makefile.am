@@ -42,7 +42,8 @@ libastrodevice_la_SOURCES =						\
 	Properties.cpp							\
 	Repository.cpp							\
 	Serial.cpp							\
-	Shutter.cpp
+	Shutter.cpp							\
+	ThreadCcd.cpp
 
 libastrodevice_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

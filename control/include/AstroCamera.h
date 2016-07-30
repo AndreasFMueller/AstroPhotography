@@ -437,6 +437,26 @@ public:
 };
 
 /**
+ * \brief CCD class using a thread for the exposure
+ */
+class ThreadCcd : public Ccd {
+	// signaling from the 
+	std::recursive_mutex		_mutex;
+	std::condition_variable_any	_condition;
+	std::thread			_thread;
+protected:
+	bool	_running;
+public:
+	ThreadCcd(const CcdInfo& _info);
+	void	run0();
+	virtual void	run() = 0;
+	virtual void	startExposure(const Exposure& exposure);
+	virtual CcdState::State	exposureStatus();
+	virtual void	cancelExposure();
+	virtual bool	wait();
+};
+
+/**
  * \brief Abstraction for a astrophotographic CCD camera.
  *
  * A camera can have several CCDs, which are numbered sequentially starting

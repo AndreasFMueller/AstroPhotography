@@ -41,6 +41,9 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	}
 	AsiCameraLocator::setopen(_index, true);
 
+	// initialize the mode
+	_asi_mode = mode_idle;
+
 	// get information about the CCD
 	ASI_CAMERA_INFO camerainfo;
         if (ASI_SUCCESS != (rc = ASIGetCameraProperty(&camerainfo, _index))) {
@@ -451,7 +454,7 @@ void	AsiCamera::setROIFormat(const roi_t roi) {
 	ASI_ERROR_CODE	rc = ASISetROIFormat(_id, roi.size.width(),
 				roi.size.height(), iBin, roi.img_type);
 	if (ASI_SUCCESS != rc) {
-		std::string	msg = stringprintf("cannot set ROI %s, %d, %d",
+		std::string	msg = stringprintf("cannot set ROI %s, %s, %d",
 			roi.size.toString().c_str(),
 			roi.mode.toString().c_str(), roi.img_type);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -620,6 +623,8 @@ void	AsiCamera::getDataAfterExp(unsigned char *pBuffer, long lBuffSize) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image buffer[%ld]@%p", lBuffSize,
+		pBuffer);
 	ASI_ERROR_CODE	rc = ASIGetDataAfterExp(_id, pBuffer, lBuffSize);
 	_asi_mode = mode_idle;
 	if (ASI_SUCCESS != rc) {
@@ -651,6 +656,7 @@ void    AsiCamera::startVideoCapture() {
 		throw AsiApiException(rc, msg);
 	}
 	_asi_mode = mode_stream;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "video capture started");
 }
 
 /**
@@ -673,6 +679,7 @@ void    AsiCamera::stopVideoCapture() {
 		throw AsiApiException(rc, msg);
 	}
 	_asi_mode = mode_idle;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "video capture stopped");
 }
 
 /**
@@ -680,6 +687,8 @@ void    AsiCamera::stopVideoCapture() {
  */
 void	AsiCamera::getVideoData(unsigned char *pBuffer, long lBuffSize,
 	int iWaitms) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "getting video data, timeout=%dms",
+		iWaitms);
 	std::unique_lock<std::recursive_mutex>	lock(_api_mutex);
 	if (_asi_mode != mode_stream) {
 		std::string	msg = stringprintf("%s: not in stream mode: %d",
@@ -688,7 +697,6 @@ void	AsiCamera::getVideoData(unsigned char *pBuffer, long lBuffSize,
 		throw std::runtime_error(msg);
 	}
 	ASI_ERROR_CODE	rc = ASIGetVideoData(_id, pBuffer, lBuffSize, iWaitms);
-	_asi_mode = mode_idle;
 	if (ASI_SUCCESS != rc) {
 		std::string	msg = stringprintf("cannot get video data: %s",
 			error(rc).c_str());

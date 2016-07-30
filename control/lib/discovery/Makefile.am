@@ -32,14 +32,14 @@ bonjour_files = 							\
 endif
 
 libastrodiscovery_la_SOURCES = 						\
+	Instrument.cpp							\
 	InstrumentComponent.cpp						\
 	InstrumentComponentKey.cpp					\
 	InstrumentComponentTable.cpp					\
-	InstrumentPropertyTable.cpp					\
 	InstrumentProperty.cpp						\
+	InstrumentPropertyTable.cpp					\
 	ServerName.cpp							\
 	ServiceDiscovery.cpp						\
-	ServiceInstrument.cpp						\
 	ServiceKey.cpp							\
 	ServiceLocation.cpp						\
 	ServiceObject.cpp						\

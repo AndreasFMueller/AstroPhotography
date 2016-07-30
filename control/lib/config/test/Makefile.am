@@ -27,7 +27,7 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	InstrumentTest.cpp
+	DeviceMapperTest.cpp
 singletest_LDADD = $(test_ldadd)
 singletest_DEPENDENCIES = $(test_dependencies)
 
@@ -41,8 +41,9 @@ tests_SOURCES = tests.cpp 						\
 	ImageRepoTableTest.cpp						\
 	ImageRepoTablesTest.cpp						\
 	ImageRepoTest.cpp						\
-	InstrumentTest.cpp						\
 	ProjectTableTest.cpp
+
+#	InstrumentTest.cpp
 
 tests_LDADD = $(test_ldadd)
 tests_DEPENDENCIES = $(test_dependencies)

@@ -8,6 +8,7 @@
 #include <ASICamera2.h>
 #include <AsiCooler.h>
 #include <AsiStream.h>
+#include <AstroExceptions.h>
 #include <errno.h>
 #include <string.h>
 
@@ -20,12 +21,16 @@ namespace asi {
  */
 AsiCcd::AsiCcd(const CcdInfo& info, AsiCamera& camera)
 	: Ccd(info), _camera(camera) {
+	stream = NULL;
 }
 
 /**
  * \brief Destroy the CCD object
  */
 AsiCcd::~AsiCcd() {
+	if (stream) {
+		delete stream;
+	}
 }
 
 /**
@@ -74,7 +79,13 @@ static ASI_IMG_TYPE	string2imgtype(const std::string& imgname) {
 /**
  * \brief Set the exposure data
  */
-void	AsiCcd::setExposure(const Exposure& exposure) {
+void	AsiCcd::setExposure(const Exposure& e) {
+	exposure = e;
+	if (exposure.size() == ImageSize()) {
+		exposure.frame(info.size());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure %s",
+		exposure.toString().c_str());
 	ImageSize	sensorsize = info.size() / exposure.mode();
 
 	// set ROI
@@ -108,17 +119,22 @@ void	AsiCcd::setExposure(const Exposure& exposure) {
  * \brief Start a single exposure
  */
 void	AsiCcd::startExposure(const Exposure& exposure) {
+	if (streaming()) {
+		std::string	msg("camera is currently streaming");
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s start exposure %s",
 		name().toString().c_str(), exposure.toString().c_str());
-	Ccd::startExposure(exposure);
+	state(CcdState::exposing);
 	try {
 		setExposure(exposure);
 
 		// start the exposure
 		_camera.startExposure(exposure.shutter() == Shutter::OPEN);
-	} catch (const std::exception& x) {
-		Ccd::cancelExposure();
+	} catch (...) {
 	}
+	exposureStatus();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure started");
 }
 
@@ -127,6 +143,7 @@ void	AsiCcd::startExposure(const Exposure& exposure) {
  */
 void	AsiCcd::cancelExposure() {
 	_camera.stopExposure();
+	state(CcdState::cancelling);
 }
 
 /**
@@ -189,6 +206,8 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 	}
 
 	// the the image size
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get raw image from exposure %s",
+		exposure.toString().c_str());
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
@@ -211,7 +230,7 @@ astro::image::ImagePtr	AsiCcd::getRawImage() {
 		break;
 	case AsiCamera::mode_stream:
 		_camera.getVideoData(buffer, buffersize,
-			1000 * exposure.exposuretime() + 10);
+			1000 * exposure.exposuretime() + 1000);
 		break;
 	default:
 		break;
@@ -289,18 +308,20 @@ CoolerPtr	AsiCcd::getCooler0() {
 /**
  * \brief Set the exposure parameters for the stream
  */
-void    AsiCcd::streamExposure(const Exposure& exposure) {
-	ImageStream::streamExposure(exposure);
+void    AsiCcd::streamExposure(const Exposure& e) {
+	setExposure(e);
+	ImageStream::streamExposure(e);
 }
 
 /**
  * \brief Start streaming
  */
-void    AsiCcd::startStream(const Exposure& /* exposure */) {
+void    AsiCcd::startStream(const Exposure& exposure) {
 	if (NULL != stream) {
 		throw std::runtime_error("stream already running");
 	}
 	streamExposure(exposure);
+	_camera.startVideoCapture();
 	stream = new AsiStream(this);
 }
 
@@ -308,8 +329,34 @@ void    AsiCcd::startStream(const Exposure& /* exposure */) {
  * \brief Stop streaming
  */
 void    AsiCcd::stopStream() {
+	stream->stop();
 	delete stream;
+	_camera.stopVideoCapture();
+	stream = NULL;
 }
+
+bool	AsiCcd::streaming() {
+	return (NULL != stream);
+}
+
+/**
+ * \wait for the completion of 
+ */
+bool	AsiCcd::wait() {
+	do {
+		CcdState::State	s = exposureStatus();
+		switch (s) {
+		case CcdState::idle:
+		case CcdState::cancelling:
+			return false;
+		case CcdState::exposed:
+			return true;
+		case CcdState::exposing:
+			usleep(100000);
+			break;
+		}
+	} while (1);
+};
 
 } // namespace asi
 } // namespace camera

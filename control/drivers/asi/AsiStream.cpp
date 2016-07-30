@@ -57,16 +57,15 @@ void	AsiStream::run() {
 			_ccd->setExposure(exposure);
 		}
 
-		// 
-
 		// get image
 		ImagePtr	image = _ccd->getRawImage();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image",
 			image->size().toString().c_str());
 
 		// send image to stream
-		_ccd->ImageStream::add(_ccd->ImageStream::streamExposure(),
+		ImageQueueEntry	entry(_ccd->ImageStream::streamExposure(),
 			image);
+		(*_ccd)(entry);
 	}
 }
 

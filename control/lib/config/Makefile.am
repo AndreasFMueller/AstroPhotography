@@ -10,8 +10,9 @@ noinst_HEADERS = 							\
 	DeviceMapTable.h						\
 	ImageRepoTables.h						\
 	ImageReposTable.h						\
-	InstrumentTables.h						\
 	ProjectTable.h
+
+#	InstrumentTables.h
 
 noinst_LTLIBRARIES = libastroconfig.la
 
@@ -25,13 +26,14 @@ libastroconfig_la_SOURCES =						\
 	ImageReposTable.cpp						\
 	ImageRepoTables.cpp						\
 	ImageSpec.cpp							\
-	Instrument.cpp							\
-	InstrumentConfiguration.cpp					\
-	InstrumentTables.cpp						\
 	Project.cpp							\
 	ProjectConfiguration.cpp					\
 	ProjectTable.cpp						\
 	RepoReplicator.cpp
+
+#	Instrument.cpp
+#	InstrumentConfiguration.cpp
+#	InstrumentTables.cpp
 
 libastroconfig_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

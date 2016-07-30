@@ -13,6 +13,7 @@
 #include <AstroCamera.h>
 #include <AstroDevice.h>
 #include <AstroConfig.h>
+#include <AstroDiscovery.h>
 #include <AstroProject.h>
 #include <AstroIO.h>
 #if ENABLE_CORBA
@@ -28,13 +29,16 @@ using namespace astro::image;
 using namespace astro::io;
 using namespace astro::config;
 using namespace astro::project;
+using namespace astro::discover;
 
 namespace astro {
 namespace app {
 namespace getimages {
 
 static void	usage(const char *progname) {
-	std::cout << "usage: " << progname << " [ options ]" << std::endl;
+	astro::Path	path(progname);
+	std::cout << "usage: " << path.basename() << " [ options ] <INSTRUMENT>"
+		<< std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -b,--binning=XxY      select XxY binning mode (default 1x1)"
 		<< std::endl;
@@ -54,8 +58,6 @@ static void	usage(const char *progname) {
 	std::cout << "                       if th einstrument has no focuser";
 	std::cout << std::endl;
 	std::cout << " -h,--help             display this help message and exit";
-	std::cout << std::endl;
-	std::cout << " -i,--instrument=<INS> use instrument named INS";
 	std::cout << std::endl;
 	std::cout << " -n,--number=<n>       take <n> exposures with these "
 			"settings";
@@ -91,7 +93,6 @@ static struct option	longopts[] = {
 { "filter",		required_argument,	NULL,	'f' }, /*  4 */
 { "focus",		required_argument,	NULL,	'F' }, /*  5 */
 { "help",		no_argument,		NULL,	'h' }, /*  6 */
-{ "instrument",		required_argument,	NULL,	'i' }, /*  7 */
 { "number",		required_argument,	NULL,	'n' }, /*  8 */
 { "purpose",		required_argument,	NULL,	'p' }, /*  9 */
 { "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
@@ -125,7 +126,7 @@ int	main(int argc, char *argv[]) {
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:F:hi:n:p:r:t:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:F:hn:p:r:t:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
@@ -149,9 +150,6 @@ int	main(int argc, char *argv[]) {
 		case 'h':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
-		case 'i':
-			instrumentname = optarg;
-			break;
 		case 'n':
 			nImages = atoi(optarg);
 			break;
@@ -179,29 +177,45 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
-	// get the configuration
-	ConfigurationPtr	config = Configuration::get();
+	// next argument must be the instrument name
+	if (optind >= argc) {
+		throw std::runtime_error("missing instrument name");
+	}
+	instrumentname = std::string(argv[optind++]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument name: %s",
+		instrumentname.c_str());
 
 	// check whether we have an instrument
 	if (0 == instrumentname.size()) {
 		throw std::runtime_error("instrument name not set");
 	}
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument = instruments->instrument(instrumentname);
+
+	// get the configuration
+	ConfigurationPtr	config = Configuration::get();
+	InstrumentBackend	instrumentbackend(config->database());
+	InstrumentPtr	instrument = instrumentbackend.get(instrumentname);
 
 	// make sure we have a repository, because we would not know
 	// where to store the images otherwise
+	ImageRepoPtr	repo;
 	if (0 == reponame.size()) {
-		throw std::runtime_error("repository name not set");
+		std::cerr << "Warning: no repository set, images will be lost";
+		std::cerr << std::endl;;
+	} else {
+		ImageRepoConfigurationPtr	imagerepos
+			= ImageRepoConfiguration::get(config);
+		repo = imagerepos->repo(reponame);
 	}
-	ImageRepoConfigurationPtr	imagerepos
-		= ImageRepoConfiguration::get(config);
-	ImageRepoPtr	repo = imagerepos->repo(reponame);
+
+	// get the components
+	std::string	ccdurl = instrument->getCcd(0).deviceurl();
+	std::string	cameraurl = instrument->getCamera(0).deviceurl();
 
 	// get the devices
-	CameraPtr	camera = instrument->camera();
-	CcdPtr		ccd = instrument->ccd();
+	Repository	repository;
+	Devices		devices(repository);
+	CameraPtr	camera = devices.getCamera(cameraurl);
+	CcdPtr	ccd = devices.getCcd(ccdurl);
 
 	// get the image repository
 	if ((frame.size().width() == 0) || (frame.size().height() == 0)) {
@@ -214,8 +228,10 @@ int	main(int argc, char *argv[]) {
 
 	// if the focuser is specified, we try to get it and then set
 	// the focus value
-	if ((focusposition > 0) && (instrument->has(DeviceName::Focuser))) {
-		FocuserPtr	focuser = instrument->focuser();
+	if ((focusposition > 0) && (instrument->hasFocuser())) {
+		std::string	focuserurl
+			= instrument->getFocuser(0).deviceurl();
+		FocuserPtr	focuser = devices.getFocuser(focuserurl);
 		focuser->set(focusposition);
 		while (focuser->current() != focusposition) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -228,8 +244,11 @@ int	main(int argc, char *argv[]) {
 	// if the filter name is specified, get the filterwheel from the
 	// instrument and set the filter
 	if ((filtername.size() > 0)
-		&& (instrument->has(DeviceName::Filterwheel))) {
-		FilterWheelPtr	filterwheel = instrument->filterwheel();
+		&& (instrument->hasFilterWheel())) {
+		std::string	filterwheelurl
+			= instrument->getFilterWheel(0).deviceurl();
+		FilterWheelPtr	filterwheel
+			= devices.getFilterWheel(filterwheelurl);
 		filterwheel->select(filtername);
 		filterwheel->wait(20);
 	}
@@ -238,14 +257,14 @@ int	main(int argc, char *argv[]) {
 	// start the cooler
 	CoolerPtr	cooler(NULL);
 	if ((temperature == temperature)
-		&& (instrument->has(DeviceName::Cooler))) {
+		&& (instrument->hasCooler())) {
 		double	absolute = 273.15 + temperature;
 		if (absolute < 0) {
 			std::string	msg = stringprintf("illegal temperature: %f", temperature);
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}
-		cooler = instrument->cooler();
+		cooler = devices.getCooler(instrument->getCooler().deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "initializing the cooler");
 		cooler->setTemperature(absolute);
 		cooler->setOn(true);
@@ -305,7 +324,13 @@ int	main(int argc, char *argv[]) {
 		(*imageptr)->setMetadata(
 			FITSKeywords::meta(std::string("INSTRUME"),
 				instrument->name()));
-		repo->save(*imageptr);
+		if (repo) {
+			repo->save(*imageptr);
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "losing image of size %s",
+				(*imageptr)->size().toString().c_str());
+		
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
 

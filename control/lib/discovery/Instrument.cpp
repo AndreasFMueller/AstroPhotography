@@ -19,6 +19,85 @@ namespace discover {
 //////////////////////////////////////////////////////////////////////
 
 /**
+ * \brief Does the instrument have a component of this type
+ */
+bool	Instrument::has(InstrumentComponentKey::Type type) {
+	return this->nComponentsOfType(type) > 0;
+}
+
+InstrumentComponent     Instrument::getAdaptiveOptics(int index) {
+	return this->get(InstrumentComponentKey::AdaptiveOptics, index);
+}
+
+InstrumentComponent     Instrument::getCamera(int index) {
+	return this->get(InstrumentComponentKey::Camera, index);
+}
+
+InstrumentComponent     Instrument::getCcd(int index) {
+	return this->get(InstrumentComponentKey::CCD, index);
+}
+
+InstrumentComponent     Instrument::getCooler(int index) {
+	return this->get(InstrumentComponentKey::Cooler, index);
+}
+
+InstrumentComponent     Instrument::getGuiderCcd(int index) {
+	return this->get(InstrumentComponentKey::GuiderCCD, index);
+}
+
+InstrumentComponent     Instrument::getGuiderPort(int index) {
+	return this->get(InstrumentComponentKey::GuiderPort, index);
+}
+
+InstrumentComponent     Instrument::getFilterWheel(int index) {
+	return this->get(InstrumentComponentKey::FilterWheel, index);
+}
+
+InstrumentComponent     Instrument::getFocuser(int index) {
+	return this->get(InstrumentComponentKey::Focuser, index);
+}
+
+InstrumentComponent     Instrument::getMount(int index) {
+	return this->get(InstrumentComponentKey::Mount, index);
+}
+
+bool	Instrument::hasAdaptiveOptics() {
+	return this->has(InstrumentComponentKey::AdaptiveOptics);
+}
+
+bool	Instrument::hasCamera() {
+	return this->has(InstrumentComponentKey::Camera);
+}
+
+bool	Instrument::hasCcd() {
+	return this->has(InstrumentComponentKey::CCD);
+}
+
+bool	Instrument::hasCooler() {
+	return this->has(InstrumentComponentKey::Cooler);
+}
+
+bool	Instrument::hasGuiderCcd() {
+	return this->has(InstrumentComponentKey::GuiderCCD);
+}
+
+bool	Instrument::hasGuiderPort() {
+	return this->has(InstrumentComponentKey::GuiderPort);
+}
+
+bool	Instrument::hasFilterWheel() {
+	return this->has(InstrumentComponentKey::FilterWheel);
+}
+
+bool	Instrument::hasFocuser() {
+	return this->has(InstrumentComponentKey::Focuser);
+}
+
+bool	Instrument::hasMount() {
+	return this->has(InstrumentComponentKey::Mount);
+}
+
+/**
  * \brief Auxiliary function to add components to a list
  */
 void	Instrument::add(std::list<InstrumentComponent>& l,

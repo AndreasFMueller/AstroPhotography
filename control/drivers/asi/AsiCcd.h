@@ -27,10 +27,12 @@ public:
 public:
 	AsiCcd(const CcdInfo&, AsiCamera& camera);
 	virtual ~AsiCcd();
+
 	void	setExposure(const Exposure& exposure);
 	virtual void	startExposure(const Exposure& exposure);
 	virtual CcdState::State	exposureStatus();
 	virtual void	cancelExposure();
+	virtual bool	wait();
 
 	// image retrieval
 	virtual astro::image::ImagePtr	getRawImage();
@@ -48,6 +50,7 @@ public:
 	virtual void	streamExposure(const Exposure& exposure);
 	virtual void	startStream(const Exposure& exposure);
 	virtual void	stopStream();
+	virtual bool	streaming();
 };
 
 } // namespace asi

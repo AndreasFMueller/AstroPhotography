@@ -422,6 +422,16 @@ public:
 						int index) = 0;
 
 	virtual int	nComponentsOfType(InstrumentComponentKey::Type type) = 0;
+	bool	has(InstrumentComponentKey::Type type);
+	bool	hasAdaptiveOptics();
+	bool	hasCamera();
+	bool	hasCcd();
+	bool	hasCooler();
+	bool	hasGuiderCcd();
+	bool	hasGuiderPort();
+	bool	hasFilterWheel();
+	bool	hasFocuser();
+	bool	hasMount();
 	virtual int	indexOf(InstrumentComponentKey::Type type,
 				const std::string& deviceurl) = 0;
 	virtual int	add(const InstrumentComponent& component) = 0;
@@ -430,6 +440,17 @@ public:
 	typedef std::list<InstrumentComponent>	ComponentList;
 	ComponentList	list(InstrumentComponentKey::Type type);
 	ComponentList	list();
+
+	// simplified component access
+	InstrumentComponent	getAdaptiveOptics(int index = 0);
+	InstrumentComponent	getCamera(int index = 0);
+	InstrumentComponent	getCcd(int index = 0);
+	InstrumentComponent	getCooler(int index = 0);
+	InstrumentComponent	getGuiderCcd(int index = 0);
+	InstrumentComponent	getGuiderPort(int index = 0);
+	InstrumentComponent	getFilterWheel(int index = 0);
+	InstrumentComponent	getFocuser(int index = 0);
+	InstrumentComponent	getMount(int index = 0);
 
 	// properties
 	virtual int	addProperty(const InstrumentProperty& property) = 0;

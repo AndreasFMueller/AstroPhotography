@@ -107,6 +107,7 @@ static DeviceMapperPtr	get(astro::persistence::Database database);
 
 typedef std::shared_ptr<Configuration>	ConfigurationPtr;
 
+#if 0
 class Instrument;
 
 /**
@@ -289,6 +290,7 @@ public:
 	astro::camera::GuiderPortPtr		guiderport();
 	astro::device::MountPtr			mount();
 };
+#endif
 
 /**
  * \brief Key class for configuration entries
@@ -486,6 +488,7 @@ static DeviceMapperConfigurationPtr	get(ConfigurationPtr config);
 	virtual DeviceMapperPtr	devicemapper() = 0;
 };
 
+#if 0
 class InstrumentConfiguration;
 typedef std::shared_ptr<InstrumentConfiguration>	InstrumentConfigurationPtr;
 class InstrumentConfiguration {
@@ -499,6 +502,7 @@ static InstrumentConfigurationPtr	get(ConfigurationPtr config);
 	virtual void	removeInstrument(const std::string& name) = 0;
 	virtual std::list<InstrumentPtr>	listinstruments() = 0;
 };
+#endif
 
 } // namespace config
 } // namespace astro

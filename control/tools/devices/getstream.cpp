@@ -9,11 +9,15 @@
 #include <AstroCamera.h>
 #include <AstroConfig.h>
 #include <AstroIO.h>
+#include <AstroDiscovery.h>
+#include <AstroLoader.h>
 
 using namespace astro::camera;
 using namespace astro::config;
 using namespace astro::project;
 using namespace astro::io;
+using namespace astro::discover;
+using namespace astro::module;
 
 namespace astro {
 namespace app {
@@ -113,6 +117,10 @@ int	main(int argc, char *argv[]) {
 	// get the configuration
 	ConfigurationPtr	config = Configuration::get();
 
+	// backend for instruments
+	InstrumentBackend	instrumentbackend(config->database());
+        InstrumentPtr   instrument = instrumentbackend.get(instrumentname);
+
 	// get the image repository
 	ImageRepoPtr	repo(NULL);
 	if (reponame.size() > 0) {
@@ -121,20 +129,19 @@ int	main(int argc, char *argv[]) {
 		repo = imagerepos->repo(reponame);
 	}
 
-	// check for the instrumetn
-	InstrumentConfigurationPtr	instruments
-		= InstrumentConfiguration::get(config);
-	InstrumentPtr	instrument = instruments->instrument(instrumentname);
+	// prepare a repository from which we can extract the devices
+	Repository	repository;
+	Devices		devices(repository);
 
 	// get the devices
-	CameraPtr	camera = instrument->camera();
-	CcdPtr		ccd = instrument->ccd();
+	CameraPtr	camera = devices.getCamera(instrument->getCamera(0).deviceurl());
+	CcdPtr		ccd = devices.getCcd(instrument->getCcd(0).deviceurl());
 
 	// If temperature is set, and a cooler is present, initialize the
 	// cooler and wait until temperature is reached
 	CoolerPtr	cooler(NULL);
 	if ((temperature == temperature)
-		&& (instrument->has(DeviceName::Cooler))) {
+		&& (instrument->hasCooler())) {
 		double	absolute = 273.15 + temperature;
 		if (absolute < 0) {
 			std::string	msg
@@ -143,7 +150,7 @@ int	main(int argc, char *argv[]) {
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::runtime_error(msg);
 		}
-		cooler = instrument->cooler();
+		cooler = devices.getCooler(instrument->getCooler(0).deviceurl());
 		cooler->setTemperature(absolute);
 		cooler->setOn(true);
 
@@ -160,8 +167,9 @@ int	main(int argc, char *argv[]) {
 	// if the instrument has a filter wheel, we get a pointer to it
 	// and try 
 	FilterWheelPtr	filterwheel(NULL);
-	if (instrument->has(DeviceName::Filterwheel)) {
-		filterwheel = instrument->filterwheel();
+	if (instrument->hasFilterWheel()) {
+		filterwheel = devices.getFilterWheel(
+			instrument->getFilterWheel(0).deviceurl());
 		filterwheel->wait(20);
 		if (filtername.size() > 0) {
 			filterwheel->select(filtername);
