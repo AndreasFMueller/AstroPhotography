@@ -3,6 +3,9 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _Image2Pixmap_h
+#define _Image2Pixmap_h
+
 #include <QPixmap>
 #include <QImage>
 #include <AstroImage.h>
@@ -32,3 +35,5 @@ public:
 };
 
 } // namespace snowgui
+
+#endif /* _Image2Pixmap_h */

@@ -33,6 +33,10 @@ PreviewWindow::PreviewWindow(QWidget *parent, ServiceObject serviceobject,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview starting on instrument %s",
 		_instrument.name().c_str());
 
+	// display the gain/brightness settings
+	displayGainSettings();
+	displayBrightnessSettings();
+
 	// read component names and initialize the combo boxes
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentCCD, index)) {
@@ -136,13 +140,16 @@ void	PreviewWindow::setImage(astro::image::ImagePtr image) {
 }
 
 void	PreviewWindow::processImage() {
+	// don't do anything if there is no image
+	if (!_image) {
+		return;
+	}
 	astro::image::ImageSize	size = _image->size();
 	// set the size of imageLabel
 	QLabel	*imageLabel = new QLabel;
 	imageLabel->setFixedSize(size.width(), size.height());
 	imageLabel->setMinimumSize(size.width(), size.height());
 
-	snowgui::Image2Pixmap	image2pixmap;
 	QPixmap	*pixmap = image2pixmap(_image);
 	imageLabel->setPixmap(*pixmap);
 
@@ -150,6 +157,44 @@ void	PreviewWindow::processImage() {
 	ui->scrollArea->show();
 
 	//delete pixmap;
+}
+
+void	PreviewWindow::displayGainSettings() {
+	double	v = ui->gainSlider->value();
+	double	g = pow(2, (double)v / 32.);
+	std::string	gainstring;
+	if (g >= 1) {
+		gainstring = astro::stringprintf("%.1f", g);
+	} else {
+		gainstring = astro::stringprintf("1/%.1f", 1/g);
+	}
+	ui->gainField->setText(QString(gainstring.c_str()));
+}
+
+void	PreviewWindow::displayBrightnessSettings() {
+	double	b = ui->brightnessSlider->value();
+	std::string	brightnessstring = astro::stringprintf("%.0f", b);
+	ui->brightnessField->setText(QString(brightnessstring.c_str()));
+}
+
+void	PreviewWindow::imageSettingsChanged() {
+	bool	imagehaschanged = false;
+	if (sender() == ui->gainSlider) {
+		displayGainSettings();
+		double	v = ui->gainSlider->value();
+		double	g = pow(2, (double)v / 32.);
+		image2pixmap.gain(g);
+		imagehaschanged = true;
+	}
+	if (sender() == ui->brightnessSlider) {
+		double	b = ui->brightnessSlider->value();
+		image2pixmap.brightness(b);
+		displayBrightnessSettings();
+		imagehaschanged = true;
+	}
+	if (imagehaschanged) {
+		processImage();
+	}
 }
 
 astro::camera::Exposure	PreviewWindow::getExposure() {
@@ -425,6 +470,9 @@ void	PreviewWindow::filterwheelChanged(int filterwheelindex) {
 
 void	PreviewWindow::filterwheelFilterChanged(int filterindex) {
 	if (!_filterwheel) {
+		return;
+	}
+	if (filterindex < 0) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "select filter %d", filterindex);

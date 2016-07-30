@@ -14,6 +14,7 @@
 #include <RemoteInstrument.h>
 #include <camera.h>
 #include <CommonClientTasks.h>
+#include "Image2Pixmap.h"
 
 namespace Ui {
 	class PreviewWindow;
@@ -32,6 +33,7 @@ class PreviewWindow : public QWidget {
 	astro::image::ImagePtr		_image;
 	snowstar::CallbackAdapterPtr	_adapter;
 	snowstar::ImageSinkPtr		_previewimagesink;
+	snowgui::Image2Pixmap	image2pixmap;
 
 public:
 	explicit PreviewWindow(QWidget *parent,
@@ -53,12 +55,16 @@ private:
 
 	astro::camera::Exposure	getExposure();
 
+	void	displayGainSettings();
+	void	displayBrightnessSettings();
+
 signals:
 	void	imageUpdated();
 
 public slots:
 
 	void	processImage();
+	void	imageSettingsChanged();
 
 	void	ccdChanged(int ccdindex);
 	void	exposureChanged();
