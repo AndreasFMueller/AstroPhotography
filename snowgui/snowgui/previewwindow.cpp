@@ -152,6 +152,14 @@ void	PreviewWindow::processImage() {
 	//delete pixmap;
 }
 
+astro::camera::Exposure	PreviewWindow::getExposure() {
+	astro::camera::Exposure	exposure;
+	exposure.exposuretime(ui->exposureSpinBox->value());
+	std::string	binning(ui->binningBox->currentText().toLatin1().data());
+	exposure.mode(Binning(binning));
+	return exposure;
+}
+
 void	PreviewWindow::setupCcd() {
 	ui->binningBox->setEnabled(false);
 	while (ui->binningBox->count() > 0) {
@@ -289,8 +297,10 @@ void	PreviewWindow::statusUpdate() {
 		ui->focuserCurrentField->setText(
 			QString(astro::stringprintf("%d", s).c_str()));
 	}
-	static const char	*white = "QButton { background-color : white; }";
-	static const char	*transparent = "QButton { background-color : transparent; }";
+	static const char	*white
+		= "QButton { background-color : white; }";
+	static const char	*transparent
+		= "QButton { background-color : transparent; }";
 	if (_guiderport) {
 		unsigned char	a = _guiderport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activation: %01x", (int)a);
@@ -355,8 +365,7 @@ void	PreviewWindow::startStream() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "registration complete");
 
 	// get the Exposure structure
-	astro::camera::Exposure	exposure;
-	exposure.exposuretime(ui->exposureSpinBox->value());
+	astro::camera::Exposure	exposure = getExposure();
 
 	// start the stream
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting the exposure");
@@ -397,10 +406,9 @@ void	PreviewWindow::toggleStream() {
 
 void	PreviewWindow::exposureChanged() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure changed");
-	if (ui->exposureSpinBox == sender()) {
-		astro::camera::Exposure	exposure;
-		exposure.exposuretime(ui->exposureSpinBox->value());
-		_ccd->updateStream(snowstar::convert(exposure));
+	try {
+		_ccd->updateStream(snowstar::convert(getExposure()));
+	} catch (...) {
 	}
 }
 

@@ -34,8 +34,8 @@
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>0</y>
+        <x>8</x>
+        <y>8</y>
         <width>767</width>
         <height>727</height>
        </rect>
@@ -719,6 +719,22 @@
     <hint type="destinationlabel">
      <x>1018</x>
      <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>binningBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>PreviewWindow</receiver>
+   <slot>exposureChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>955</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1018</x>
+     <y>88</y>
     </hint>
    </hints>
   </connection>

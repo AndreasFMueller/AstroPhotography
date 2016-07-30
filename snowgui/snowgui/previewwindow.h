@@ -51,6 +51,8 @@ private:
 	void	startStream();
 	void	stopStream();
 
+	astro::camera::Exposure	getExposure();
+
 signals:
 	void	imageUpdated();
 
