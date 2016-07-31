@@ -30,6 +30,9 @@ public:
 private:
 	Ui::imagedisplaywidget *ui;
 
+	double	displayGainSetting();
+	double	displayBrightnessSetting();
+	double	displayScaleSetting();
 signals:
 	void	imageUpdated();
 

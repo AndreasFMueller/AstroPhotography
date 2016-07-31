@@ -106,7 +106,7 @@
      <widget class="QDial" name="scaleDial">
       <property name="geometry">
        <rect>
-        <x>710</x>
+        <x>550</x>
         <y>20</y>
         <width>50</width>
         <height>64</height>
@@ -151,6 +151,29 @@
        <string>debayer</string>
       </property>
      </widget>
+     <widget class="QLabel" name="scaleLabel">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>30</y>
+        <width>59</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scale:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="scaleField">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>60</y>
+        <width>60</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </item>
    <item>
@@ -164,11 +187,9 @@
         <x>0</x>
         <y>0</y>
         <width>876</width>
-        <height>431</height>
+        <height>444</height>
        </rect>
       </property>
-      <zorder>infoFrame</zorder>
-      <zorder>infoFrame</zorder>
      </widget>
     </widget>
    </item>
@@ -202,7 +223,7 @@
        <string/>
       </property>
      </widget>
-     <widget class="QTableWidget" name="tableWidget">
+     <widget class="QTableWidget" name="fitsinfoTable">
       <property name="geometry">
        <rect>
         <x>570</x>
@@ -211,6 +232,9 @@
         <height>140</height>
        </rect>
       </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
       <property name="columnCount">
        <number>3</number>
       </property>
@@ -218,7 +242,7 @@
       <column/>
       <column/>
      </widget>
-     <widget class="QCheckBox" name="checkBox">
+     <widget class="QCheckBox" name="logarithmicBox">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -288,12 +312,12 @@
        <rect>
         <x>280</x>
         <y>90</y>
-        <width>59</width>
+        <width>101</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Min:</string>
+       <string>min/mean/max:</string>
       </property>
      </widget>
      <widget class="QLabel" name="instrumentField">
@@ -361,10 +385,136 @@
        <string>47/245</string>
       </property>
      </widget>
+     <widget class="QLabel" name="bayerLabel">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>110</y>
+        <width>100</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bayer Pattern:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="bayerField">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>110</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>RGGB</string>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>logarithmicBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>701</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>105</x>
+     <y>723</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autogainBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>428</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>426</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>debayerBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>454</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gainSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>118</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brightnessSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>211</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scaleDial</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>592</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>750</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>imageSettingsChanged()</slot>
+ </slots>
 </ui>
