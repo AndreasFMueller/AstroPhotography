@@ -485,10 +485,51 @@ void	imagedisplaywidget::imageSettingsChanged() {
 	processNewSettings();
 }
 
+/**
+ * \brief
+ */
 void	imagedisplaywidget::rectangleSelected(QRect* rect) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle: %dx%d@(%d,%d)",
 		rect->size().width(), rect->size().height(),
 		rect->topLeft().x(), rect->topLeft().y());
+	// compute the rectangle 
+	int	x, y, width, height;
+	width = rect->size().width();
+	height = rect->size().height();
+	x = rect->topLeft().x();
+	y = selectable->size().height() - rect->topLeft().y() - height - 1;
+	delete rect;
+
+	// change scale
+	int	s = image2pixmap.scale();
+	if (s > 0) {
+		x >>= s;
+		y >>= s;
+		height >>= s;
+		width >>= s;
+	}
+	if (s < 0) {
+		x <<= -s;
+		y <<= -s;
+		height <<= -s;
+		width <<= -s;
+	}
+
+	// if we are currently displaying a subimage
+	if (ui->subframeBox->isChecked()) {
+		x += _rectangle.origin().x();
+		y += _rectangle.origin().y();
+	}
+
+	// create the rectangle
+	ImageRectangle	r(ImagePoint(x, y), ImageSize(width, height));
+	displayRectangle(r);
+	
+	_rectangle = r;
+	if (ui->subframeBox->isChecked()) {
+		image2pixmap.rectangle(r);
+	}
+	processNewSettings();
 }
 
 } // namespace snowgui
