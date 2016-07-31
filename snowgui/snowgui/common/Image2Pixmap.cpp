@@ -39,6 +39,9 @@ static unsigned long	convert(const RGB<unsigned char>& v) {
 	return 0xff000000 | (v.R << 16) | (v.G << 8) | v.B;
 }
 
+/**
+ * \brief Compute the scaled image size
+ */
 static ImageSize	scaledSize(int scale, const ImageSize& origsize) {
 	if (scale > 0) {
 		return ImageSize(origsize.width() << scale,
@@ -403,6 +406,12 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	return qimage;
 }
 
+/**
+ * \brief Convert an image
+ *
+ * This method distinguished between monochrome and color images and
+ * calls the approppriate methods
+ */
 QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 	// find the image size and allocate a buffer of appropriate size
 	ImageSize	size = image->size();
@@ -421,6 +430,9 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 	return result;;
 }
 
+/**
+ * \brief Convert the histogram data into a Pixmap
+ */
 QPixmap	*Image2Pixmap::histogram(int width, int height) {
 	if (_histogram) {
 		return _histogram->pixmap(width, height);

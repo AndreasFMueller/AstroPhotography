@@ -10,6 +10,8 @@
 #include <AstroImage.h>
 #include <Image2Pixmap.h>
 #include <AutoGain.h>
+#include <QRubberBand>
+#include <SelectableImage.h>
 
 namespace Ui {
 	class imagedisplaywidget;
@@ -30,6 +32,7 @@ class imagedisplaywidget : public QWidget
 	astro::image::ImagePtr		_image;
 	astro::image::ImageRectangle	_rectangle;
 	snowgui::Image2Pixmap		image2pixmap;
+	snowgui::SelectableImage	*selectable;
 
 public:
 	explicit imagedisplaywidget(QWidget *parent = 0);
@@ -67,6 +70,7 @@ public slots:
 	void	processNewImage();
 	void	processNewSettings();
 	void	imageSettingsChanged();
+	void	rectangleSelected(QRect*);
 };
 
 } // namespace snowgui

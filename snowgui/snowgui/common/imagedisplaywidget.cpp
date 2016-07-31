@@ -41,6 +41,9 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	displayGainSetting();
 	displayBrightnessSetting();
 	displayScaleSetting();
+
+	// initialize
+	selectable = NULL;
 }
 
 /**
@@ -344,16 +347,18 @@ void	imagedisplaywidget::processNewSettings() {
 		hpos, vpos, previoussize.width(), previoussize.height());
 
 	// create a new label and pixmap
-	QLabel  *imageLabel = new QLabel;
+	selectable = new SelectableImage();
 	QPixmap *pixmap = image2pixmap(_image);
 	if (NULL != pixmap) {
-		imageLabel->setPixmap(*pixmap);
+		selectable->setPixmap(*pixmap);
 	}
-	imageLabel->setFixedSize(pixmap->width(), pixmap->height());
-	imageLabel->setMinimumSize(pixmap->width(), pixmap->height());
+	selectable->setFixedSize(pixmap->width(), pixmap->height());
+	selectable->setMinimumSize(pixmap->width(), pixmap->height());
+	connect(selectable, SIGNAL(selectionCompleted(QRect*)),
+		this, SLOT(rectangleSelected(QRect*)));
 
 	// display the image
-	ui->imageArea->setWidget(imageLabel);
+	ui->imageArea->setWidget(selectable);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %d/%d", hpos, vpos);
 	QSize	newsize = pixmap->size();
 	hpos = newsize.width() * hpos / previoussize.width();
@@ -478,6 +483,12 @@ void	imagedisplaywidget::imageSettingsChanged() {
 		image2pixmap.rectangle(ImageRectangle());
 	}
 	processNewSettings();
+}
+
+void	imagedisplaywidget::rectangleSelected(QRect* rect) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle: %dx%d@(%d,%d)",
+		rect->size().width(), rect->size().height(),
+		rect->topLeft().x(), rect->topLeft().y());
 }
 
 } // namespace snowgui

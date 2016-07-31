@@ -26,6 +26,7 @@ SOURCES += 								\
 	Image2Pixmap.cpp						\
 	Histogram.cpp							\
 	AutoGain.cpp							\
+	SelectableImage.cpp						\
 	imagedisplaywidget.cpp						\
 
 
@@ -33,6 +34,7 @@ HEADERS  += 								\
 	Image2Pixmap.h							\
 	Histogram.h							\
 	AutoGain.h							\
+	SelectableImage.h						\
 	imagedisplaywidget.h						\
 
 
