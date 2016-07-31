@@ -126,8 +126,8 @@ Histogram<RGB<double> >::Histogram(int size) : HistogramBase(size) {
 
 template<>
 void	Histogram<RGB<double> >::add(const RGB<double>& p) {
-	_buckets[index(p.R)]++;
-	_buckets[index(p.G) + _size]++;
+	_buckets[index(p.R)               ]++;
+	_buckets[index(p.G) +  _size      ]++;
 	_buckets[index(p.B) + (_size << 1)]++;
 }
 
@@ -138,9 +138,10 @@ QPixmap	*Histogram<RGB<double> >::pixmap(int width, int height) const {
 	// find the maximum
 	double	ymax = 0;
 	for (int i = 1; i < _size - 1; i++) {
-		double	v = value(_buckets[i]);
+		double	v;
+		v = value(_buckets[i               ]);
 		if (v > ymax) { ymax = v; }
-		v = value(_buckets[i + _size]);
+		v = value(_buckets[i +  _size      ]);
 		if (v > ymax) { ymax = v; }
 		v = value(_buckets[i + (_size << 1)]);
 		if (v > ymax) { ymax = v; }
@@ -149,13 +150,13 @@ QPixmap	*Histogram<RGB<double> >::pixmap(int width, int height) const {
 	for (int x = 0; x < width; x++) {
 		int	bi = bucketindex(width, x);
 		double	lr = value(_buckets[bi]) * yscale;
-		double	lg = value(_buckets[bi] + _size) * yscale;
-		double	lb = value(_buckets[bi] + (_size << 1)) * yscale;
+		double	lg = value(_buckets[bi + _size]) * yscale;
+		double	lb = value(_buckets[bi + (_size << 1)]) * yscale;
 		for (int y = 0; y < height; y++) {
-			unsigned int	p = 0xff000000;
-			if (y <= lr) { p |= 0x00ff0000; }
-			if (y <= lg) { p |= 0x0000ff00; }
-			if (y <= lb) { p |= 0x000000ff; }
+			unsigned int	p = 0xffffffff;
+			if (y <= lr) { p -= 0x00003f3f; }
+			if (y <= lg) { p -= 0x003f003f; }
+			if (y <= lb) { p -= 0x003f3f00; }
 			qimage.setPixel(x, height - 1 - y, p);
 		}
 	}
@@ -164,6 +165,5 @@ QPixmap	*Histogram<RGB<double> >::pixmap(int width, int height) const {
 	pixmap->convertFromImage(qimage);
 	return pixmap;
 }
-
 
 } // namespace snowgui
