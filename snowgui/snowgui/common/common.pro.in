@@ -20,12 +20,18 @@ INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 
 FORMS    +=								\
+	imagedisplaywidget.ui
 
 SOURCES += 								\
 	Image2Pixmap.cpp						\
-	Histogram.cpp
+	Histogram.cpp							\
+	imagedisplaywidget.cpp						\
+
 
 HEADERS  += 								\
 	Image2Pixmap.h							\
-	Histogram.h
+	Histogram.h							\
+	imagedisplaywidget.h						\
+
+
 
