@@ -282,12 +282,12 @@ template<typename Pixel>
 class GainRGBAdapter : public BasicGainRGBAdapter {
 	const ConstImageAdapter<RGB<Pixel> >&	_image;
 	unsigned char	rescale(Pixel i) const {
-		double	v = i * _gain + _brightness;
+		double	v = trunc(i * _gain + _brightness);
 		if (v > 255) {
-			v = 255;
+			return 255;
 		}
 		if (v < 0) {
-			v = 0;
+			return 0;
 		}
 		return (unsigned char)v;
 	}
@@ -306,17 +306,20 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 		int	starty = y << -_scale;
 		int	endx = startx + (1 << -_scale);
 		int	endy = starty + (1 << -_scale);
+		double	r = 0, g = 0, b = 0;
 		RGB<double>	s;
 		int	counter = 0;
 		for (int x = startx; x < endx; x++) {
 			for (int y = starty; y < endy; y++) {
-				s = s + _image.pixel(x, y);
+				RGB<Pixel>	t = _image.pixel(x,y);
+				r += t.R;
+				g += t.G;
+				b += t.B;
 				counter++;
 			}
 		}
-		s = s * (1. / counter);
-		RGB<Pixel>	p(s);
-		return rescale(p);
+		return RGB<unsigned char>(trunc(r / counter),
+			trunc(g / counter), trunc(b / counter));
 	}
 public:
 	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image, int scale)

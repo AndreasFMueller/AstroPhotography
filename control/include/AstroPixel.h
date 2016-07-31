@@ -570,12 +570,12 @@ public:
 			result.R = R * value;
 		}
 		if ((G * value) > std::numeric_limits<P>::max()) {
-			result.R = std::numeric_limits<P>::max();
+			result.G = std::numeric_limits<P>::max();
 		} else {
 			result.G = G * value;
 		}
 		if ((B * value) > std::numeric_limits<P>::max()) {
-			result.R = std::numeric_limits<P>::max();
+			result.B = std::numeric_limits<P>::max();
 		} else {
 			result.B = B * value;
 		}
