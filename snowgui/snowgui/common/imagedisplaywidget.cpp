@@ -277,11 +277,29 @@ void	imagedisplaywidget::processNewImage() {
 	ui->pixeltypeField->setText(QString(pixeltype.c_str()));
 
 	// read pixel value statistics
-	double	maximum = astro::image::filter::max(_image);
-	double	minimum = astro::image::filter::min(_image);
-	double	mean = astro::image::filter::mean(_image);
-	std::string	minmax = astro::stringprintf("%f/%f/%f",
-		minimum, mean, maximum);
+	double	maximum = 0;
+	double	minimum = 0;
+	double	mean = 0;
+	if (3 == _image->planes()) {
+		maximum = astro::image::filter::max_luminance(_image);
+		minimum = astro::image::filter::min_luminance(_image);
+		mean = astro::image::filter::mean_luminance(_image);
+	} else {
+		maximum = astro::image::filter::max(_image);
+		minimum = astro::image::filter::min(_image);
+		mean = astro::image::filter::mean(_image);
+	}
+	std::string	minmax;
+	if (maximum > 100) {
+		minmax = astro::stringprintf("%.0f/%.0f/%.0f",
+			minimum, mean, maximum);
+	} else if (maximum > 1) {
+		minmax = astro::stringprintf("%.2f/%.2f/%.2f",
+			minimum, mean, maximum);
+	} else {
+		minmax = astro::stringprintf("%.3f/%.3f/%.3f",
+			minimum, mean, maximum);
+	}
 	ui->minmaxField->setText(QString(minmax.c_str()));
 
 	// query exposure time
@@ -486,7 +504,7 @@ void	imagedisplaywidget::imageSettingsChanged() {
 }
 
 /**
- * \brief
+ * \brief convert a selected rectangle 
  */
 void	imagedisplaywidget::rectangleSelected(QRect* rect) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle: %dx%d@(%d,%d)",

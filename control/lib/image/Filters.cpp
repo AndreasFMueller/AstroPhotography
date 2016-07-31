@@ -144,6 +144,16 @@ double	min_luminance(const ImagePtr& image) {
 	return min(image);
 }
 
+double	mean_luminance(const ImagePtr& image) {
+	filter_luminance_rgb(image, Mean, unsigned char);
+	filter_luminance_rgb(image, Mean, unsigned short);
+	filter_luminance_rgb(image, Mean, unsigned int);
+	filter_luminance_rgb(image, Mean, unsigned long);
+	filter_luminance_rgb(image, Mean, float);
+	filter_luminance_rgb(image, Mean, double);
+	return mean(image);
+}
+
 #define	filter_MaxRGB_rgb(image, pixel) 				\
 {									\
 	Image<RGB<pixel> >	*imagep					\
