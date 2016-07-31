@@ -38,6 +38,7 @@ if pkg-config --exists cfitsio
 then
 	LIBS="${LIBS} `pkg-config --libs cfitsio`"
 	CXXFLAGS="${CXXFLAGS} `pkg-config --cflags cfitsio`"
+	CFLAGS="${CFLAGS} `pkg-config --cflags cfitsio`"
 else
 AC_CHECK_LIB([cfitsio], [ftffrw_])
 fi
@@ -137,7 +138,7 @@ fi
 AC_SUBST(ASTROPATH)
 
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro snowgui/common/common.pro
-	snowgui/preview/preview.pro snowgui/guiding/guiding.pro
-	snowgui/snowgui/snowgui.pro])
+	snowgui/preview/preview.pro snowgui/test/test.pro
+	snowgui/guiding/guiding.pro snowgui/snowgui/snowgui.pro])
 AC_OUTPUT
 

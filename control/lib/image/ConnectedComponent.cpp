@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <ConnectedComponent.h>
+#include <AstroImage.h>
 #include <AstroDebug.h>
 
 namespace astro {

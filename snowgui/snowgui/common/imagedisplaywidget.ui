@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>902</width>
+    <width>910</width>
     <height>729</height>
    </rect>
   </property>
@@ -14,177 +14,470 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
    <item>
-    <widget class="QGroupBox" name="settingsGroup">
+    <widget class="QFrame" name="settingsFrame">
      <property name="minimumSize">
       <size>
        <width>0</width>
        <height>90</height>
       </size>
      </property>
-     <property name="title">
-      <string>Display settings</string>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
-     <widget class="QLabel" name="gainLabel">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>80</width>
-        <height>16</height>
-       </rect>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="settingsLayout">
+      <property name="spacing">
+       <number>-1</number>
       </property>
-      <property name="text">
-       <string>Gain:</string>
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-     </widget>
-     <widget class="QLabel" name="brightnessLabel">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>80</width>
-        <height>16</height>
-       </rect>
+      <property name="topMargin">
+       <number>0</number>
       </property>
-      <property name="text">
-       <string>Brightness:</string>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
-     </widget>
-     <widget class="QSlider" name="gainSlider">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>28</y>
-        <width>160</width>
-        <height>22</height>
-       </rect>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QSlider" name="brightnessSlider">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>58</y>
-        <width>160</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="gainField">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>29</y>
-        <width>60</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="brightnessField">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>59</y>
-        <width>60</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="QDial" name="scaleDial">
-      <property name="geometry">
-       <rect>
-        <x>550</x>
-        <y>20</y>
-        <width>50</width>
-        <height>64</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>-3</number>
-      </property>
-      <property name="maximum">
-       <number>3</number>
-      </property>
-      <property name="notchTarget">
-       <double>3.700000000000000</double>
-      </property>
-      <property name="notchesVisible">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="autogainBox">
-      <property name="geometry">
-       <rect>
-        <x>360</x>
-        <y>30</y>
-        <width>89</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Auto gain</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="debayerBox">
-      <property name="geometry">
-       <rect>
-        <x>360</x>
-        <y>60</y>
-        <width>89</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>debayer</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="scaleLabel">
-      <property name="geometry">
-       <rect>
-        <x>480</x>
-        <y>30</y>
-        <width>59</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Scale:</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="scaleField">
-      <property name="geometry">
-       <rect>
-        <x>480</x>
-        <y>60</y>
-        <width>60</width>
-        <height>21</height>
-       </rect>
-      </property>
-     </widget>
+      <item>
+       <widget class="QGroupBox" name="gainGroup">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>420</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>420</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Image data</string>
+        </property>
+        <widget class="QLabel" name="gainLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>25</y>
+           <width>80</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Gain:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="brightnessLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>55</y>
+           <width>80</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Brightness:</string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="gainSlider">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>20</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>-256</number>
+         </property>
+         <property name="maximum">
+          <number>256</number>
+         </property>
+         <property name="singleStep">
+          <number>8</number>
+         </property>
+         <property name="pageStep">
+          <number>64</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+         <property name="tickInterval">
+          <number>256</number>
+         </property>
+        </widget>
+        <widget class="QSlider" name="brightnessSlider">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>50</y>
+           <width>160</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>-256</number>
+         </property>
+         <property name="maximum">
+          <number>256</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+         <property name="tickInterval">
+          <number>256</number>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="gainField">
+         <property name="geometry">
+          <rect>
+           <x>260</x>
+           <y>25</y>
+           <width>60</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="brightnessField">
+         <property name="geometry">
+          <rect>
+           <x>260</x>
+           <y>55</y>
+           <width>60</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="comboBox">
+         <property name="geometry">
+          <rect>
+           <x>330</x>
+           <y>52</y>
+           <width>80</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <item>
+          <property name="text">
+           <string>none</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>RGGB</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>GRBG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>GBRG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>BGGR</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QPushButton" name="autogainButton">
+         <property name="geometry">
+          <rect>
+           <x>325</x>
+           <y>21</y>
+           <width>90</width>
+           <height>32</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Auto Gain</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="scaleGroup">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Scale</string>
+        </property>
+        <widget class="QDial" name="scaleDial">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>20</y>
+           <width>50</width>
+           <height>64</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>-3</number>
+         </property>
+         <property name="maximum">
+          <number>3</number>
+         </property>
+         <property name="notchTarget">
+          <double>3.700000000000000</double>
+         </property>
+         <property name="notchesVisible">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="scaleField">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>40</y>
+           <width>40</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="subframeGroup">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>260</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>260</width>
+          <height>85</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Subframe</string>
+        </property>
+        <widget class="QCheckBox" name="subframeBox">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>27</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>on</string>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="subframewidthBox">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>25</y>
+           <width>60</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="subframeheightBox">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>25</y>
+           <width>60</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="subframexBox">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>50</y>
+           <width>60</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="subframeyBox">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>50</y>
+           <width>60</width>
+           <height>24</height>
+          </rect>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+        </widget>
+        <widget class="QLabel" name="sizeLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>59</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Size:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="originLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>55</y>
+           <width>59</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Origin:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="subframefullButton">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>51</y>
+           <width>40</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>full</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
     <widget class="QScrollArea" name="imageArea">
      <property name="widgetResizable">
-      <bool>true</bool>
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
-        <x>0</x>
+        <x>4</x>
         <y>0</y>
         <width>876</width>
         <height>444</height>
@@ -201,216 +494,292 @@
        <height>150</height>
       </size>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>150</height>
+      </size>
+     </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="histogramLabel">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>256</width>
-        <height>100</height>
-       </rect>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
+      <property name="topMargin">
+       <number>0</number>
       </property>
-      <property name="text">
-       <string/>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
-     </widget>
-     <widget class="QTableWidget" name="fitsinfoTable">
-      <property name="geometry">
-       <rect>
-        <x>570</x>
-        <y>5</y>
-        <width>305</width>
-        <height>140</height>
-       </rect>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
-      <property name="sortingEnabled">
-       <bool>true</bool>
-      </property>
-      <property name="columnCount">
-       <number>3</number>
-      </property>
-      <column/>
-      <column/>
-      <column/>
-     </widget>
-     <widget class="QCheckBox" name="logarithmicBox">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>120</y>
-        <width>89</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>logarithmic</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="geometryLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>30</y>
-        <width>100</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Geometry:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="exposuretimeLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>50</y>
-        <width>100</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Exposure time:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="instrumentLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>10</y>
-        <width>100</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Instrument:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="pixeltypeLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>70</y>
-        <width>101</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Pixel type:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="minmaxLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>90</y>
-        <width>101</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>min/mean/max:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="instrumentField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>10</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>SIMGUIDE</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="geometryField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>30</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>100x200@(5,10)</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="exposuretimeField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>50</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>300s</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="pixeltypeField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>70</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>RGB&lt;double&gt;</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="minmaxField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>90</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>47/245</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="bayerLabel">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>110</y>
-        <width>100</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Bayer Pattern:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="bayerField">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>110</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>RGGB</string>
-      </property>
-     </widget>
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>260</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>260</width>
+          <height>150</height>
+         </size>
+        </property>
+        <widget class="QLabel" name="histogramLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>256</width>
+           <height>120</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="logarithmicBox">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>130</y>
+           <width>89</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>logarithmic</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>280</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>280</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QLabel" name="instrumentLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Instrument:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="geometryLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Geometry:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="exposuretimeLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>40</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Exposure time:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="pixeltypeLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>60</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Pixel type:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="minmaxLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>80</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>min/mean/max:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bayerLabel">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>100</y>
+           <width>100</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Bayer Pattern:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="instrumentField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>0</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>SIMGUIDE</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="geometryField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>20</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>100x200@(5,10)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="exposuretimeField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>40</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>300s</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="pixeltypeField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>60</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>RGB&lt;double&gt;</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="minmaxField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>80</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>47/245</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bayerField">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>100</y>
+           <width>170</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>RGGB</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="fitsinfoTable">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="dragDropOverwriteMode">
+         <bool>false</bool>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="columnCount">
+         <number>3</number>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <column/>
+        <column/>
+        <column/>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
@@ -424,44 +793,12 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
-     <y>701</y>
+     <x>83</x>
+     <y>711</y>
     </hint>
     <hint type="destinationlabel">
      <x>105</x>
      <y>723</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>autogainBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>428</x>
-     <y>38</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>426</x>
-     <y>98</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>debayerBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>440</x>
-     <y>75</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>454</x>
-     <y>99</y>
     </hint>
    </hints>
   </connection>
@@ -472,12 +809,12 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>134</x>
-     <y>35</y>
+     <x>207</x>
+     <y>42</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>97</y>
+     <x>143</x>
+     <y>5</y>
     </hint>
    </hints>
   </connection>
@@ -488,12 +825,44 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>212</x>
-     <y>72</y>
+     <x>190</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
-     <x>211</x>
-     <y>98</y>
+     <x>168</x>
+     <y>10</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autogainButton</sender>
+   <signal>clicked()</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>385</x>
+     <y>6</y>
     </hint>
    </hints>
   </connection>
@@ -504,12 +873,108 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>592</x>
+     <x>530</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>555</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframewidthBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>709</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>709</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframexBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>688</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>723</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframeheightBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>780</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>750</x>
-     <y>97</y>
+     <x>769</x>
+     <y>9</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframeyBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>754</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframeBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>800</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>841</x>
+     <y>3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>subframefullButton</sender>
+   <signal>clicked()</signal>
+   <receiver>imagedisplaywidget</receiver>
+   <slot>imageSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>823</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>903</x>
+     <y>66</y>
     </hint>
    </hints>
   </connection>

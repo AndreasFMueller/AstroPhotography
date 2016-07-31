@@ -11,7 +11,6 @@
 #include <limits>
 #include <AstroDebug.h>
 #include <list>
-#include <ConnectedComponent.h>
 #include <AstroFormat.h>
 #include <AstroFilter.h>
 

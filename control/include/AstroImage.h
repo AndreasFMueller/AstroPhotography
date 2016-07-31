@@ -150,7 +150,7 @@ public:
 	ImageRectangle(const ImageRectangle& rectangle,
 		const ImageRectangle& subrectangle);
 	ImageRectangle(const std::string& rectanglespec);
-	// oeprators
+	// operators
 	bool	contains(const ImagePoint& point) const;
 	bool	contains(const ImageRectangle& rectangle) const;
 	bool	fits(const ImageSize& size) const;
@@ -513,6 +513,23 @@ public:
 };
 
 /**
+ * \brief Common base class for all adapters
+ *
+ * This class simplifies resource management, because now all adapters
+ * can be reference by a shared pointer to this type, and will correctly
+ * be deallocated when the last reference goes out of scope
+ */
+class BasicAdapter {
+protected:
+	ImageSize	adaptersize;
+public:
+	BasicAdapter(const ImageSize& size);
+	virtual ~BasicAdapter();
+	const ImageSize&	getSize() const;
+};
+typedef std::shared_ptr<BasicAdapter>	BasicAdapterPtr;
+
+/**
  * \brief Read-only Access to the pixels of an image
  *
  * The Image class gives some basic access to the pixels of an image.
@@ -522,19 +539,16 @@ public:
  * it defines the pixel accessors. 
  */
 template<typename Pixel>
-class ConstImageAdapter {
-protected:
-	ImageSize	adaptersize;
+class ConstImageAdapter : public BasicAdapter {
 public:
 	/**
 	 * \brief A shorthand for the type of the individual pixels
 	 */
 	typedef	Pixel	pixel_type;
 
-	ConstImageAdapter(const ImageSize& _size) : adaptersize(_size) { }
+	ConstImageAdapter(const ImageSize& _size) : BasicAdapter(_size) { }
 	virtual ~ConstImageAdapter() { }
 
-	ImageSize	getSize() const { return adaptersize; }
 	virtual Pixel	pixel(int x, int y) const = 0;
 	Pixel	pixel(ImagePoint p) const {
 		return pixel(p.x(), p.y());
@@ -1246,6 +1260,19 @@ ImagePoint	operator*(const ImagePoint& point, const Binning& mode);
 ImagePoint	operator/(const ImagePoint& point, const Binning& mode);
 ImageSize	operator*(const ImageSize& size, const Binning& mode);
 ImageSize	operator/(const ImageSize& size, const Binning& mode);
+
+/**
+ * \brief Compute the connected component of a point
+ */
+class ConnectedComponent {
+	ImagePoint	_point;
+	unsigned char	growpixel(Image<unsigned char>& image,
+				unsigned int x, unsigned int y) const;
+	int	grow(Image<unsigned char>& image) const;
+public:
+	ConnectedComponent(const ImagePoint& point) : _point(point) { }
+	ImagePtr	operator()(const ImagePtr image) const;
+};
 
 } // namespace image
 } // namespace astro

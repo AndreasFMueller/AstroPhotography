@@ -18,6 +18,7 @@ class	Image2Pixmap {
 	double	_gain;
 	bool	_logarithmic;
 	int	_scale;
+	astro::image::ImageRectangle	_rectangle;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -30,8 +31,15 @@ public:
 	void	logarithmic(bool l) { _logarithmic = l; }
 	int	scale() const { return _scale; }
 	void	scale(int s) { _scale = s; }
+	const astro::image::ImageRectangle&	rectangle() const {
+		return _rectangle;
+	}
+	void	rectangle(const astro::image::ImageRectangle& r) {
+		_rectangle = r;
+	}
 private:
 	HistogramBase	*_histogram;
+	astro::image::ImageRectangle	rectangle(astro::image::ImagePtr image);
 	QImage	*convertRGB(astro::image::ImagePtr image);
 	QImage	*convertMono(astro::image::ImagePtr image);
 

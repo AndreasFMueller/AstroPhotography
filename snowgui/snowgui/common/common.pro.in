@@ -25,12 +25,14 @@ FORMS    +=								\
 SOURCES += 								\
 	Image2Pixmap.cpp						\
 	Histogram.cpp							\
+	AutoGain.cpp							\
 	imagedisplaywidget.cpp						\
 
 
 HEADERS  += 								\
 	Image2Pixmap.h							\
 	Histogram.h							\
+	AutoGain.h							\
 	imagedisplaywidget.h						\
 
 

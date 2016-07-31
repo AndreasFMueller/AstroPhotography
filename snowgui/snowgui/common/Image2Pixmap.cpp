@@ -5,8 +5,10 @@
  */
 #include "Image2Pixmap.h"
 #include <AstroDebug.h>
+#include <AstroAdapter.h>
 
 using namespace astro::image;
+using namespace astro::adapter;
 
 namespace snowgui {
 
@@ -133,11 +135,20 @@ public:
 	GainAdapter(const ConstImageAdapter<Pixel>& image, int scale = 0)
 		: BasicGainAdapter(scaledSize(scale, image.getSize()), scale),
 		  _image(image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s adapter Pixel type %s, "
+			"scale = %d",
+			getSize().toString().c_str(),
+			astro::demangle(typeid(Pixel).name()).c_str(), _scale);
 	}
 	GainAdapter(const ConstImageAdapter<Pixel>& image, double gain,
 		double brightness, int scale = 0)
 		: BasicGainAdapter(scaledSize(scale, image.getSize()),
 		  gain, brightness, scale), _image(image) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s adapter Pixel type %s, "
+			"gain = %f, brightness = %f, scale = %d",
+			getSize().toString().c_str(),
+			astro::demangle(typeid(Pixel).name()).c_str(),
+			_gain, _brightness, _scale);
 	}
 	virtual unsigned char	pixel(int x, int y) const {
 		if (_scale > 0) {
@@ -150,11 +161,28 @@ public:
 	}
 };
 
-#define	ga(gainadapter, Pixel, image)					\
+/**
+ * \brief Compute the rectangle to be used for the image
+ */
+ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle for image %s",
+		image->size().toString().c_str());
+	if (_rectangle.isEmpty()) {
+		return ImageRectangle(image->size());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle found: %s",
+		_rectangle.toString().c_str());
+	return _rectangle;
+}
+
+#define	ga(gainadapter, wa, Pixel, image, scale, rect)			\
 	if (gainadapter == NULL) {					\
 		Image<Pixel>	*img = dynamic_cast<Image<Pixel> *>(&*image);\
 		if (NULL != img) {					\
-			gainadapter = new GainAdapter<Pixel>(*img, _scale);	\
+			WindowAdapter<Pixel>	*windowadapter		\
+				 = new WindowAdapter<Pixel>(*img, rect);\
+			wa = BasicAdapterPtr(windowadapter);		\
+			gainadapter = new GainAdapter<Pixel>(*windowadapter, scale);\
 		}							\
 	}
 
@@ -179,14 +207,20 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	}
 	_histogram = histo;
 
+	// compute the rectangle 
+	ImageRectangle	r = rectangle(image);
+
 	// get a gain adaapter
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for gain adapter");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"looking for gain adapter, scale = %d, rectangle = %s",
+		_scale, r.toString().c_str());
 	BasicGainAdapter	*gainadapter = NULL;
-	ga(gainadapter, unsigned char, image);
-	ga(gainadapter, unsigned short, image);
-	ga(gainadapter, unsigned long, image);
-	ga(gainadapter, float, image);
-	ga(gainadapter, double, image);
+	BasicAdapterPtr		ba;
+	ga(gainadapter, ba, unsigned char, image, _scale, r);
+	ga(gainadapter, ba, unsigned short, image, _scale, r);
+	ga(gainadapter, ba, unsigned long, image, _scale, r);
+	ga(gainadapter, ba, float, image, _scale, r);
+	ga(gainadapter, ba, double, image, _scale, r);
 	if (NULL == gainadapter) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no suitable adapter found");
 		return NULL;
@@ -304,12 +338,15 @@ public:
 	void	brightness(double b) { _brightness = b; }
 };
 
-#define	gargb(gainadapter, Pixel, image)				\
+#define	gargb(gainadapter, wa, Pixel, image, scale, rect)		\
 	if (gainadapter == NULL) {					\
 		Image<RGB<Pixel> >	*img				\
 			= dynamic_cast<Image<RGB<Pixel> > *>(&*image);	\
 		if (NULL != img) {					\
-			gainadapter = new GainRGBAdapter<Pixel>(*img, _scale);	\
+			WindowAdapter<RGB<Pixel> >	*windowadapter	\
+				 = new WindowAdapter<RGB<Pixel> >(*img, rect);\
+			wa = BasicAdapterPtr(windowadapter);		\
+			gainadapter = new GainRGBAdapter<Pixel>(*windowadapter, scale);\
 		}							\
 	}
 
@@ -328,12 +365,16 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	}
 	_histogram = histo;
 	
+	// compute the rectangle 
+	ImageRectangle	r = rectangle(image);
+
 	BasicGainRGBAdapter	*gainadapter = NULL;
-	gargb(gainadapter, unsigned char, image);
-	gargb(gainadapter, unsigned short, image);
-	gargb(gainadapter, unsigned long, image);
-	gargb(gainadapter, double, image);
-	gargb(gainadapter, float, image);
+	BasicAdapterPtr		ba;
+	gargb(gainadapter, ba, unsigned char, image, _scale, r);
+	gargb(gainadapter, ba, unsigned short, image, _scale, r);
+	gargb(gainadapter, ba, unsigned long, image, _scale, r);
+	gargb(gainadapter, ba, double, image, _scale, r);
+	gargb(gainadapter, ba, float, image, _scale, r);
 	if (NULL == gainadapter) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no gain adapter found");
 		return NULL;
@@ -341,14 +382,14 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	gainadapter->gain(_gain);
 	gainadapter->brightness(_brightness);
 
-	// prepare result structuren
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QImage(%d, %d)",
-		size.width(), size.height());
-	QImage	*qimage = new QImage(size.width(), size.height(),
-				QImage::Format_RGB32);
+	// dimensions
+	int	w = gainadapter->getSize().width();
+	int	h = gainadapter->getSize().height();
 
-	int	w = size.width();
-	int	h = size.height();
+	// prepare result structuren
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QImage(%d, %d)", w, h);
+	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
+
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			RGB<unsigned char>	p = gainadapter->pixel(x, y);

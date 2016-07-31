@@ -17,6 +17,7 @@ libastroimage_la_SOURCES = 						\
 	Analyzer.cpp							\
 	Background.cpp							\
 	BackProjection.cpp						\
+	BasicAdapter.cpp						\
 	BasicDeconvolutionOperator.cpp					\
 	Binning.cpp							\
 	Blurr.cpp							\

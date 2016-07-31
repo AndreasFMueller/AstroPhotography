@@ -1,0 +1,34 @@
+#
+# test.pro -- qt configuration file for user interface test program
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = test
+TEMPLATE = app
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ASTROPATH = @ASTROPATH@
+
+LIBS += -L../common -lcommon 
+LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
+LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../common 
+
+ASTROGUISOURCES =
+
+ASTROGUIHEADERS =
+
+FORMS    +=								\
+
+SOURCES += imagedisplaytest.cpp $${ASTROGUISOURCES}
+
+HEADERS  += $${ASTROGUIHEADERS}
+
