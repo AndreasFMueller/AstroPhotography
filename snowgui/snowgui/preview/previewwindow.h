@@ -22,7 +22,7 @@ namespace Ui {
 
 class PreviewWindow : public QWidget {
 	Q_OBJECT
-	astro::discover::ServiceObject	_serviceobject;
+	astro::discover::ServiceKey	_servicekey;
 	snowstar::RemoteInstrument	_instrument;
 	snowstar::CcdPrx		_ccd;
 	snowstar::CoolerPrx		_cooler;
@@ -36,8 +36,8 @@ class PreviewWindow : public QWidget {
 	snowgui::Image2Pixmap	image2pixmap;
 
 public:
-	explicit PreviewWindow(QWidget *parent,
-		astro::discover::ServiceObject serviceobject,
+	explicit PreviewWindow(QWidget *parent);
+	void	instrumentSetup(astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
 	~PreviewWindow();
 

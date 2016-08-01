@@ -29,8 +29,10 @@ public:
 private:
 	unsigned int	componentCount(InstrumentComponentType type);
 public:
-	RemoteInstrument(InstrumentsPrx instruments,
-		const std::string& name);
+	RemoteInstrument(InstrumentsPrx instruments, const std::string& name);
+	RemoteInstrument();
+	RemoteInstrument(const RemoteInstrument& other);
+	RemoteInstrument&	operator=(const RemoteInstrument& other);
 	bool	has(InstrumentComponentType type, unsigned int index = 0);
 	InstrumentComponent	getComponent(InstrumentComponentType type,
 					unsigned int index);

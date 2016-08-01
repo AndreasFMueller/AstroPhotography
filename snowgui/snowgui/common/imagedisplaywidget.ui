@@ -14,7 +14,16 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
    <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -477,7 +486,7 @@
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
-        <x>4</x>
+        <x>16</x>
         <y>0</y>
         <width>876</width>
         <height>444</height>
@@ -889,8 +898,8 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>709</x>
-     <y>48</y>
+     <x>701</x>
+     <y>56</y>
     </hint>
     <hint type="destinationlabel">
      <x>709</x>
@@ -921,7 +930,7 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>780</x>
+     <x>771</x>
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
@@ -969,8 +978,8 @@
    <slot>imageSettingsChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>823</x>
-     <y>73</y>
+     <x>821</x>
+     <y>80</y>
     </hint>
     <hint type="destinationlabel">
      <x>903</x>

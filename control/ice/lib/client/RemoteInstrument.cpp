@@ -31,6 +31,22 @@ RemoteInstrument::RemoteInstrument(InstrumentsPrx instruments,
 }
 
 /**
+ * \brief uninitialized remote instrument
+ */
+RemoteInstrument::RemoteInstrument() {
+}
+
+RemoteInstrument::RemoteInstrument(const RemoteInstrument& other)
+	: _instrument(other._instrument), _name(other._name) {
+}
+
+RemoteInstrument&	RemoteInstrument::operator=(const RemoteInstrument& other) {
+	_instrument = other._instrument;
+	_name = other._name;
+	return *this;
+}
+
+/**
  * \brief get the number of components of a given type
  */
 unsigned int	RemoteInstrument::componentCount(InstrumentComponentType type) {

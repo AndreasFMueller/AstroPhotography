@@ -10,24 +10,37 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 # Directories for ICE and the astrophotography library
-ICEDIR = /Library/Developer/Ice-3.5.1
-ASTROPATH = /Users/afm/Projects/AstroPhotography/snowgui/../control/root
+ICEDIR = @ICEDIR@
+ASTROPATH = @ASTROPATH@
 
 LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
-LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 
 FORMS    +=								\
-	imagedisplaywidget.ui
+	imagedisplaywidget.ui						\
+	ccdcontrollerwidget.ui						\
+	focusercontrollerwidget.ui
+
+WIDGETSOURCES =								\
+	imagedisplaywidget.cpp						\
+	ccdcontrollerwidget.cpp						\
+	focusercontrollerwidget.cpp	
+
+WIDGETHEADERS =								\
+	ccdcontrollerwidget.h						\
+	imagedisplaywidget.h						\
+	focusercontrollerwidget.h
 
 SOURCES += 								\
 	Image2Pixmap.cpp						\
 	Histogram.cpp							\
 	AutoGain.cpp							\
 	SelectableImage.cpp						\
-	imagedisplaywidget.cpp						\
+	InstrumentWidget.cpp						\
+	$${WIDGETSOURCES}
 
 
 HEADERS  += 								\
@@ -35,7 +48,8 @@ HEADERS  += 								\
 	Histogram.h							\
 	AutoGain.h							\
 	SelectableImage.h						\
-	imagedisplaywidget.h						\
+	InstrumentWidget.h						\
+	$${WIDGETHEADERS}
 
 
 

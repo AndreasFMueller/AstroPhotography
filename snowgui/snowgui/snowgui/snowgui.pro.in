@@ -14,12 +14,13 @@ ICEDIR = @ICEDIR@
 ASTROPATH = @ASTROPATH@
 
 LIBS += -L../common -lcommon -L../preview -lpreview
+LIBS += -L../focusing -lfocusing
 LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
 LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common ../preview
+INCLUDEPATH += ../common ../preview ../focusing
 
 ASTROGUISOURCES = 							\
         mainwindow.cpp 							\

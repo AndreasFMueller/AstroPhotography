@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ccdcontrollerwidget</class>
+ <widget class="QWidget" name="ccdcontrollerwidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>262</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QComboBox" name="ccdSelectionBox"/>
+   </item>
+   <item>
+    <widget class="QWidget" name="ccdInfo" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>50</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="exposureSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>3600.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="sizeInfoField">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="shutterOpenBox">
+        <property name="text">
+         <string>open</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="shutterLabel">
+        <property name="text">
+         <string>Shutter:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="binningLabel">
+        <property name="text">
+         <string>Binning:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="purposeLabel">
+        <property name="text">
+         <string>Purpose:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="exposureLabel">
+        <property name="text">
+         <string>Exposure:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="purposeBox">
+        <item>
+         <property name="text">
+          <string>light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>dark</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>flat</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>bias</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>test</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>guide</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>focus</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="sizeLabel">
+        <property name="text">
+         <string>Size:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="binningSelectionBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="frameWidget" native="true">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="frameSizeHeight">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="frameSizeWidth">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="frameSizeLabel">
+        <property name="text">
+         <string>Subframe Size:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="frameOriginLabel">
+        <property name="text">
+         <string>Subframe Origin:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="frameOriginX">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="frameOriginY">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>binningSelectionBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>ccdcontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>261</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exposureSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>ccdcontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>205</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>260</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>purposeBox</sender>
+   <signal>currentTextChanged(QString)</signal>
+   <receiver>ccdcontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>261</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>shutterOpenBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ccdcontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>201</x>
+     <y>165</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ccdSelectionBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>ccdcontrollerwidget</receiver>
+   <slot>ccdChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>260</x>
+     <y>32</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>guiChanged()</slot>
+  <slot>ccdChanged(int)</slot>
+ </slots>
+</ui>

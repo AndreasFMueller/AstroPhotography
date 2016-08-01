@@ -51,7 +51,8 @@ public:
 	}
 	virtual void	launch(const std::string& instrumentname) {
 		snowstar::RemoteInstrument	ri(instruments, instrumentname);
-		application	*a = new application(NULL, _serviceobject, ri);
+		application	*a = new application(NULL);
+		a->instrumentSetup(_serviceobject, ri);
 		a->show();
 		QApplication::setActiveWindow(a);
 		a->raise();

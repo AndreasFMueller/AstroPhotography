@@ -22,6 +22,7 @@ public:
 
 public slots:
 	void	launchPreview();
+	void	launchFocusing();
 
 private:
 	Ui::MainWindow *ui;

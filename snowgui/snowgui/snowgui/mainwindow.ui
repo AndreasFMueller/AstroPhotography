@@ -206,6 +206,19 @@
      <string>Preview</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="appFocusingButton">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>40</y>
+      <width>130</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Focusing</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -246,8 +259,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>appFocusingButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>launchFocusing()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>96</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>launchPreview()</slot>
+  <slot>launchFocusing()</slot>
  </slots>
 </ui>

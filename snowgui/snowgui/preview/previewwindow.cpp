@@ -17,18 +17,21 @@
 
 using namespace astro::discover;
 
-PreviewWindow::PreviewWindow(QWidget *parent, ServiceObject serviceobject,
-	snowstar::RemoteInstrument instrument)
-	: QWidget(parent),
-	  _serviceobject(serviceobject), _instrument(instrument),
-    	  ui(new Ui::PreviewWindow) {
+PreviewWindow::PreviewWindow(QWidget *parent)
+	: QWidget(parent), ui(new Ui::PreviewWindow) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting PreviewWindow");
 	ui->setupUi(this);
+}
+
+void	PreviewWindow::instrumentSetup(ServiceObject serviceobject,
+		snowstar::RemoteInstrument instrument) {
+	_servicekey = serviceobject;
+	_instrument = instrument;
 
 	// get the instrument name into the title
 	std::string	title
 		= astro::stringprintf("Preview instrument %s @ %s",
-		_instrument.name().c_str(), _serviceobject.toString().c_str());
+		_instrument.name().c_str(), serviceobject.toString().c_str());
 	setWindowTitle(QString(title.c_str()));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview starting on instrument %s",
