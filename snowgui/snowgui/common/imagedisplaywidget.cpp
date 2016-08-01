@@ -34,7 +34,8 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	ui->fitsinfoTable->setHorizontalHeaderLabels(headerlist);
 	ui->fitsinfoTable->horizontalHeader()->setStretchLastSection(true);
 
-	// make sure the subframe is disabled
+	// make sure the subframe is disabled, it only becomes enabled
+	// when an image is added
 	ui->subframeGroup->setEnabled(false);
 
 	// display the current settings
@@ -90,7 +91,84 @@ bool	imagedisplaywidget::infoIsVisible() {
 }
 
 void	imagedisplaywidget::setInfoVisible(bool h) {
+	// if the info was previously invisble, we have to display it now
+	if ((!ui->infoFrame->isVisible()) && h) {
+		processNewImageInfo(_image);
+	}
 	ui->infoFrame->setVisible(h);
+}
+
+ImageRectangle	imagedisplaywidget::imageRectangle() {
+	return _rectangle;
+}
+
+/**
+ * \brief Set the rectangle to be displayed
+ */
+void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle) {
+	displayRectangle(imagerectangle);
+	if (imageRectangleEnabled()) {
+		processNewSettings();
+	}
+}
+
+/**
+ * \brief Set the QRect to be displayed
+ *
+ * The QRect is using current image coordinates, which may depend on the
+ * scaling applied.
+ */
+void	imagedisplaywidget::setImageRectangle(const QRect& rect) {
+	// compute the rectangle 
+	int	x, y, width, height;
+	width = rect.size().width();
+	height = rect.size().height();
+	x = rect.topLeft().x();
+	y = selectable->size().height() - rect.topLeft().y() - height - 1;
+
+	// change scale
+	int	s = image2pixmap.scale();
+	if (s > 0) {
+		x >>= s;
+		y >>= s;
+		height >>= s;
+		width >>= s;
+	}
+	if (s < 0) {
+		x <<= -s;
+		y <<= -s;
+		height <<= -s;
+		width <<= -s;
+	}
+
+	// if we are currently displaying a subimage
+	if (imageRectangleEnabled()) {
+		x += _rectangle.origin().x();
+		y += _rectangle.origin().y();
+	}
+
+	// create the rectangle
+	ImageRectangle	r(ImagePoint(x, y), ImageSize(width, height));
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"QRect=%dx%d@(%d,%d) -> ImageRectangle(%s)",
+		rect.size().width(), rect.size().height(),
+		rect.topLeft().x(), rect.topLeft().y(),
+		r.toString().c_str());
+	setImageRectangle(r);
+}
+
+/**
+ * \brief Show whether the rectangle is displayed or not
+ */
+bool	imagedisplaywidget::imageRectangleEnabled() {
+	return ui->subframeBox->isChecked();
+}
+
+/**
+ * \brief Set whether the rectangle is displayed
+ */
+void	imagedisplaywidget::setImageRectangleEnabled(bool y) {
+	ui->subframeBox->setChecked(y);
 }
 
 /**
@@ -133,6 +211,13 @@ int	imagedisplaywidget::displayScaleSetting() {
 	return b;
 }
 
+/**
+ * \brief Change the width
+ *
+ * This method changes the width of the subrectangle. If the new subrectangle
+ * does not fit into the image, the x coordinate is modified too, so that
+ * the new rectangle can still fit the image
+ */
 ImageRectangle	imagedisplaywidget::displayWidthSetting() {
 	ImageSize	s = _image->size();
 	int	newwidth = ui->subframewidthBox->value();
@@ -148,6 +233,13 @@ ImageRectangle	imagedisplaywidget::displayWidthSetting() {
 	return r;
 }
 
+/**
+ * \brief Change the height of the subrectangle
+ *
+ * This method changes th height of the subrectangle. If the new subrectangle
+ * does not fit into the iamge, the y coordinate is modified too, so that
+ * the new rectangle can still fit the image.
+ */
 ImageRectangle	imagedisplaywidget::displayHeightSetting() {
 	ImageSize	s = _image->size();
 	int	width = ui->subframewidthBox->value();
@@ -163,6 +255,13 @@ ImageRectangle	imagedisplaywidget::displayHeightSetting() {
 	return r;
 }
 
+/**
+ * \brief Change the X coordinate of the lower left corner of the image
+ *
+ * This method changes the x coordinate of the lower left cornder of the
+ * subrectangle. If the new subrectangle does not fit into the image, 
+ * the width is changed so that it can still fit the image.
+ */
 ImageRectangle	imagedisplaywidget::displayXSetting() {
 	ImageSize	s = _image->size();
 	int	width = ui->subframewidthBox->value();
@@ -176,6 +275,13 @@ ImageRectangle	imagedisplaywidget::displayXSetting() {
 	return r;
 }
 
+/**
+ * \brief Change the Y coordinate of the lower left corner of the image
+ *
+ * This method changes the y coordinate of the lower left corner of the
+ * subrectangle. If the new subrectangle does not fit into the image, 
+ * the height is changed so that it can still fit the image.
+ */
 ImageRectangle	imagedisplaywidget::displayYSetting() {
 	ImageSize	s = _image->size();
 	int	width = ui->subframewidthBox->value();
@@ -189,6 +295,18 @@ ImageRectangle	imagedisplaywidget::displayYSetting() {
 	return r;
 }
 
+/**
+ * \brief Change the rectangle without any signals being fired
+ *
+ * When we change the rectangle, e.g. when the new rectangle comes from
+ * an external source, we don't want any signals to be fired, because
+ * that would mess up redisplay of the image.
+ *
+ * As a side effect, thie method also always sets the _rectangle member,
+ * to make sure that _rectangle always reflects the current setting of
+ * the rectangle controls. This also allows to use subrectangles even
+ * if the subframe control area is not displayed.
+ */
 void	imagedisplaywidget::displayRectangle(const ImageRectangle& r) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting rectangle %s",
 		r.toString().c_str());
@@ -207,6 +325,8 @@ void	imagedisplaywidget::displayRectangle(const ImageRectangle& r) {
 	ui->subframeyBox->blockSignals(true);
 	ui->subframeyBox->setValue(r.origin().y());
 	ui->subframeyBox->blockSignals(false);
+
+	_rectangle = r;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle set");
 }
 
@@ -214,7 +334,8 @@ void	imagedisplaywidget::displayRectangle(const ImageRectangle& r) {
  * \brief set the new image
  *
  * This method just remembers the new image and emits the imageUpdated
- * signal. The main thread will then execute the 
+ * signal. The main thread will then execute the processNewImage
+ * method to actually display the image.
  */
 void	imagedisplaywidget::setImage(astro::image::ImagePtr image) {
 	_image = image;
@@ -222,46 +343,38 @@ void	imagedisplaywidget::setImage(astro::image::ImagePtr image) {
 }
 
 /**
- * \brief Processing done for a new image
+ * \brief Processing for image info of a new image
+ *
+ * This method is also called when the image info is enabled, as the current
+ * image info may not have any information in it, or information from a
+ * previous image.
  */
-void	imagedisplaywidget::processNewImage() {
-	if (!_image) {
+void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
+	if (!image) {
 		return;
 	}
-	ui->subframewidthBox->setMaximum(_image->size().width());
-	ui->subframeheightBox->setMaximum(_image->size().height());
-	ui->subframexBox->setMaximum(_image->size().width());
-	ui->subframeyBox->setMaximum(_image->size().height());
 
-	// check whether the current rectangle fits inside the new image
-	if (_rectangle.isEmpty()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "empty rectangle, use image size");
-		_rectangle = ImageRectangle(_image->size());
-	} else {
-		if (!_image->size().bounds(_rectangle)) {
-			// XXX find a rectangle that works
-			_rectangle = ImageRectangle(_image->size());
-		}
+	// there is no need to do anything if the info area is not visible
+	if (!ui->infoFrame->isVisible()) {
+		return;
 	}
-	displayRectangle(_rectangle);
-	ui->subframeGroup->setEnabled(true);
 
 	// retrieve image information and update the info field
-	if (_image->hasMetadata("INSTRUME")) {
-		std::string	instrument = _image->getMetadata("INSTRUME");
+	if (image->hasMetadata("INSTRUME")) {
+		std::string	instrument = image->getMetadata("INSTRUME");
 		ui->instrumentField->setText(QString(instrument.c_str()));
 	} else {
 		ui->instrumentField->setText(QString("(unknown)"));
 	}
 
 	// image size and binning
-	std::string	sizeinfo = _image->getFrame().toString();
+	std::string	sizeinfo = image->getFrame().toString();
 	int	xbin = 0, ybin = 0;
-	if (_image->hasMetadata("XBINNING")) {
-		xbin = _image->getMetadata("XBINNING");
+	if (image->hasMetadata("XBINNING")) {
+		xbin = image->getMetadata("XBINNING");
 	}
-	if (_image->hasMetadata("YBINNING")) {
-		ybin = _image->getMetadata("YBINNING");
+	if (image->hasMetadata("YBINNING")) {
+		ybin = image->getMetadata("YBINNING");
 	}
 	if ((xbin > 0) && (ybin > 0)) {
 		sizeinfo = sizeinfo + " / " + Binning(xbin, ybin).toString();
@@ -270,7 +383,7 @@ void	imagedisplaywidget::processNewImage() {
 
 	// pixel type
 	std::string	pixeltype
-		= astro::demangle(_image->pixel_type().name());
+		= astro::demangle(image->pixel_type().name());
 	if (0 == pixeltype.compare(0, 14, "astro::image::")) {
 		pixeltype = pixeltype.substr(14);
 	}
@@ -280,14 +393,14 @@ void	imagedisplaywidget::processNewImage() {
 	double	maximum = 0;
 	double	minimum = 0;
 	double	mean = 0;
-	if (3 == _image->planes()) {
-		maximum = astro::image::filter::max_luminance(_image);
-		minimum = astro::image::filter::min_luminance(_image);
-		mean = astro::image::filter::mean_luminance(_image);
+	if (3 == image->planes()) {
+		maximum = astro::image::filter::max_luminance(image);
+		minimum = astro::image::filter::min_luminance(image);
+		mean = astro::image::filter::mean_luminance(image);
 	} else {
-		maximum = astro::image::filter::max(_image);
-		minimum = astro::image::filter::min(_image);
-		mean = astro::image::filter::mean(_image);
+		maximum = astro::image::filter::max(image);
+		minimum = astro::image::filter::min(image);
+		mean = astro::image::filter::mean(image);
 	}
 	std::string	minmax;
 	if (maximum > 100) {
@@ -303,16 +416,16 @@ void	imagedisplaywidget::processNewImage() {
 	ui->minmaxField->setText(QString(minmax.c_str()));
 
 	// query exposure time
-	if (_image->hasMetadata("EXPTIME")) {
-		Metavalue	v = _image->getMetadata("EXPTIME");
+	if (image->hasMetadata("EXPTIME")) {
+		Metavalue	v = image->getMetadata("EXPTIME");
 		ui->exposuretimeField->setText(QString(v.getValue().c_str()));
 	} else {
 		ui->exposuretimeField->setText(QString("unknown"));
 	}
 
 	// query the bayer pattern
-	if (_image->hasMetadata("BAYER")) {
-		Metavalue	v = _image->getMetadata("EXPTIME");
+	if (image->hasMetadata("BAYER")) {
+		Metavalue	v = image->getMetadata("EXPTIME");
 		ui->bayerField->setText(QString(v.getValue().c_str()));
 	} else {
 		ui->bayerField->setText(QString("none"));
@@ -320,9 +433,9 @@ void	imagedisplaywidget::processNewImage() {
 
 	// read meta data from the image and display in the FITS info area
 	QTableWidget	*table = ui->fitsinfoTable;
-	table->setRowCount(_image->nMetadata());
+	table->setRowCount(image->nMetadata());
 	int	row = 0;
-	for_each(_image->begin(), _image->end(),
+	for_each(image->begin(), image->end(),
 		[table,row](const ImageMetadata::value_type& metadata) mutable {
 			Metavalue	v = metadata.second;
 			QTableWidgetItem	*i;
@@ -336,25 +449,59 @@ void	imagedisplaywidget::processNewImage() {
 		}
 	);
 	ui->fitsinfoTable->resizeColumnsToContents();
-
-	// do the processing that depends on the settings
-	processNewSettings();
 }
 
 /**
- * \brief process new image settings
- *
- * This slot is called to retrieve the new settings and to reprocess the
- * image for display.
+ * \brief Processing of a new image related to the rectangle
  */
-void	imagedisplaywidget::processNewSettings() {
-	// if there is no image, we don't need to do anything
-	if (!_image) {
+void	imagedisplaywidget::processNewImageRectangle(ImagePtr image) {
+	if (!image) {
+		return;
+	}
+
+	// ensure the maximum values the subframe controls can move 
+	// stays within the bounds of the image
+	ui->subframewidthBox->setMaximum(image->size().width());
+	ui->subframeheightBox->setMaximum(image->size().height());
+	ui->subframexBox->setMaximum(image->size().width() - 1);
+	ui->subframeyBox->setMaximum(image->size().height() - 1);
+
+	// check whether the current rectangle fits inside the new image
+	if (_rectangle.isEmpty()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"empty rectangle, use image size");
+		displayRectangle(image->size());
+	} else {
+		if (!image->size().bounds(_rectangle)) {
+			// XXX find a rectangle that works
+			displayRectangle(image->size());
+		}
+	}
+
+	// the subframe group was so far disabled, but now that we have an
+	// image, we enable it.
+	ui->subframeGroup->setEnabled(true);
+}
+
+/**
+ * \brief actually display the image after the settings have changed
+ */
+void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
+	if (!image) {
 		return;
 	}
 
 	// get information about the size, we'll need that throughout
-	ImageSize	size = _image->size();
+	ImageSize	size = image->size();
+
+	// if the subframe box button is checked, then we have to make
+	// sure the image2pixmap converter uses the current _rectangle 
+	// setting, otherwise it should use the full frame of the image
+	if (imageRectangleEnabled()) {
+		image2pixmap.rectangle(_rectangle);
+	} else {
+		image2pixmap.rectangle(ImageRectangle());
+	}
 
 	// remember the current position of the scroll area
 	int	hpos = ui->imageArea->horizontalScrollBar()->value();
@@ -364,10 +511,12 @@ void	imagedisplaywidget::processNewSettings() {
 		"hpos = %d, vpos = %d, previous size=%d,%d",
 		hpos, vpos, previoussize.width(), previoussize.height());
 
-	// create a new label and pixmap
+	// create a new selectable image and pixmap
 	selectable = new SelectableImage();
 	selectable->setRectangleSelectionEnabled(true);
-	QPixmap *pixmap = image2pixmap(_image);
+
+
+	QPixmap *pixmap = image2pixmap(image);
 	if (NULL != pixmap) {
 		selectable->setPixmap(*pixmap);
 	}
@@ -385,17 +534,68 @@ void	imagedisplaywidget::processNewSettings() {
 	ui->imageArea->horizontalScrollBar()->setValue(hpos);
 	ui->imageArea->verticalScrollBar()->setValue(vpos);
 	ui->imageArea->show();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image display complete");
+
+	// XXX possible memory leak
 	// delete pixmap;
 
-	// update the histogram
-	QPixmap *histogram = image2pixmap.histogram(ui->histogramLabel->width(),
-		ui->histogramLabel->height());
-	if (NULL != histogram) {
-		ui->histogramLabel->setPixmap(*histogram);
+	// update the histogram, if info is enabled
+	if (infoIsVisible()) {
+		QPixmap *histogram = image2pixmap.histogram(
+			ui->histogramLabel->width(),
+			ui->histogramLabel->height());
+		if (NULL != histogram) {
+			ui->histogramLabel->setPixmap(*histogram);
+		}
+		// XXX possible memory leak
+		// delete histogram;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "histogram display complete");
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no histogram display");
 	}
-	// delete histogram;
 }
 
+/**
+ * \brief Processing done for a new image 
+ */
+void	imagedisplaywidget::processNewImage() {
+	if (!_image) {
+		return;
+	}
+
+	// make sure we always use the same image during the processing,
+	// even if in the mean time a new image has arrived.
+	ImagePtr	image = _image;
+
+	// process rectangle information for the new image
+	processNewImageRectangle(image);
+
+	// process general image info for the new image
+	processNewImageInfo(image);
+
+	// do the processing that depends on the settings
+	processDisplayImage(image);
+}
+
+/**
+ * \brief process new image settings
+ *
+ * This slot is called to retrieve the new settings and to reprocess the
+ * image for display.
+ */
+void	imagedisplaywidget::processNewSettings() {
+	// if there is no image, we don't need to do anything
+	if (!_image) {
+		return;
+	}
+
+	// display the image
+	processDisplayImage(_image);
+}
+
+/**
+ * \brief Display the gain settings obtained from an autogain computation
+ */
 void	imagedisplaywidget::displayAutoGain(const AutoGain& autogain) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "gain=%f, brightness=%f",
 		autogain.gain(), autogain.brightness());
@@ -435,72 +635,73 @@ void	imagedisplaywidget::displayAutoGain(const AutoGain& autogain) {
  * display is updated;
  */
 void	imagedisplaywidget::imageSettingsChanged() {
-	// check which settings have changed
+	// check whether the gain slider has changed
 	if (sender() == ui->gainSlider) {
 		image2pixmap.gain(displayGainSetting());
 	}
+	// check whether the brightness slider has changed
 	if (sender() == ui->brightnessSlider) {
 		image2pixmap.brightness(displayBrightnessSetting());
 	}
+	// check whether the autogain button was clicked. This initiates
+	// computation of suitable gain settings.
 	if (sender() == ui->autogainButton) {
-		if (ui->subframeBox->isChecked()) {
-			AutoGain	autogain(_image,
-						image2pixmap.rectangle());
+		if (imageRectangleEnabled()) {
+			AutoGain	autogain(_image, _rectangle);
 			displayAutoGain(autogain);
 		} else {
 			AutoGain	autogain(_image);
 			displayAutoGain(autogain);
 		}
 	}
+	// check whether the scale setting has changed
 	if (sender() == ui->scaleDial) {
 		image2pixmap.scale(displayScaleSetting());
 	}
+	// check whether the logarithm box was toggled
 	if (sender() == ui->logarithmicBox) {
 		image2pixmap.logarithmic(ui->logarithmicBox->isChecked());
 	}
+	// check whether the width of the subframe was changed
 	if (sender() == ui->subframewidthBox) {
-		_rectangle = displayWidthSetting();
-		displayRectangle(_rectangle);
-		if (!ui->subframeBox->isChecked()) {
+		displayRectangle(displayWidthSetting());
+		if (!imageRectangleEnabled()) {
 			return;
 		}
 	}
+	// check whether the height of the subframe was changed
 	if (sender() == ui->subframeheightBox) {
-		_rectangle = displayHeightSetting();
-		displayRectangle(_rectangle);
-		if (!ui->subframeBox->isChecked()) {
+		displayRectangle(displayHeightSetting());
+		if (!imageRectangleEnabled()) {
 			return;
 		}
 	}
+	// check whether the x coordinate of the subframe was changed
 	if (sender() == ui->subframexBox) {
-		_rectangle = displayXSetting();
-		displayRectangle(_rectangle);
-		if (!ui->subframeBox->isChecked()) {
+		displayRectangle(displayXSetting());
+		if (!imageRectangleEnabled()) {
 			return;
 		}
 	}
+	// check whether the y coordinate of the subframe was changed
 	if (sender() == ui->subframeyBox) {
-		_rectangle = displayYSetting();
-		displayRectangle(_rectangle);
-		if (!ui->subframeBox->isChecked()) {
+		displayRectangle(displayYSetting());
+		if (!imageRectangleEnabled()) {
 			return;
 		}
 	}
+	// check whether the subframe yes/no button was clicked
 	if (sender() == ui->subframeBox) {
-		// nothing needs to be done
+		// nothing needs to be done, as we always check the
+		// button directly
 	}
 	if (sender() == ui->subframefullButton) {
-		_rectangle = ImageRectangle(_image->size());
-		displayRectangle(_rectangle);
-		if (!ui->subframeBox->isChecked()) {
+		displayRectangle(ImageRectangle(_image->size()));
+		if (!imageRectangleEnabled()) {
 			return;
 		}
 	}
-	if (ui->subframeBox->isChecked()) {
-		image2pixmap.rectangle(_rectangle);
-	} else {
-		image2pixmap.rectangle(ImageRectangle());
-	}
+	// with these new settings we should now display the image
 	processNewSettings();
 }
 
@@ -508,47 +709,7 @@ void	imagedisplaywidget::imageSettingsChanged() {
  * \brief convert a selected rectangle 
  */
 void	imagedisplaywidget::rectangleSelected(QRect* rect) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle: %dx%d@(%d,%d)",
-		rect->size().width(), rect->size().height(),
-		rect->topLeft().x(), rect->topLeft().y());
-	// compute the rectangle 
-	int	x, y, width, height;
-	width = rect->size().width();
-	height = rect->size().height();
-	x = rect->topLeft().x();
-	y = selectable->size().height() - rect->topLeft().y() - height - 1;
-	delete rect;
-
-	// change scale
-	int	s = image2pixmap.scale();
-	if (s > 0) {
-		x >>= s;
-		y >>= s;
-		height >>= s;
-		width >>= s;
-	}
-	if (s < 0) {
-		x <<= -s;
-		y <<= -s;
-		height <<= -s;
-		width <<= -s;
-	}
-
-	// if we are currently displaying a subimage
-	if (ui->subframeBox->isChecked()) {
-		x += _rectangle.origin().x();
-		y += _rectangle.origin().y();
-	}
-
-	// create the rectangle
-	ImageRectangle	r(ImagePoint(x, y), ImageSize(width, height));
-	displayRectangle(r);
-	
-	_rectangle = r;
-	if (ui->subframeBox->isChecked()) {
-		image2pixmap.rectangle(r);
-	}
-	processNewSettings();
+	setImageRectangle(*rect);
 }
 
 } // namespace snowgui
