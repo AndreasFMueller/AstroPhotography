@@ -23,18 +23,21 @@ FORMS    +=								\
 	imagedisplaywidget.ui						\
 	ccdcontrollerwidget.ui						\
 	focusercontrollerwidget.ui					\
+	filterwheelcontrollerwidget.ui					\
 	coolercontrollerwidget.ui
 
 WIDGETSOURCES =								\
 	imagedisplaywidget.cpp						\
 	ccdcontrollerwidget.cpp						\
 	focusercontrollerwidget.cpp					\
+	filterwheelcontrollerwidget.cpp					\
 	coolercontrollerwidget.cpp
 
 WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
 	imagedisplaywidget.h						\
 	focusercontrollerwidget.h					\
+	filterwheelcontrollerwidget.h					\
 	coolercontrollerwidget.h	
 
 SOURCES += 								\

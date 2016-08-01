@@ -30,6 +30,9 @@
        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true"/>
       </item>
       <item>
+       <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -37,7 +40,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>369</height>
+          <height>349</height>
          </size>
         </property>
        </spacer>
@@ -70,6 +73,12 @@
    <class>snowgui::coolercontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">coolercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::filterwheelcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">filterwheelcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

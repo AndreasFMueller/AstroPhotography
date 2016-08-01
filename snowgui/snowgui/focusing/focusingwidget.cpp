@@ -23,4 +23,5 @@ void	focusingwidget::instrumentSetup(
 	ui->ccdcontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
 }

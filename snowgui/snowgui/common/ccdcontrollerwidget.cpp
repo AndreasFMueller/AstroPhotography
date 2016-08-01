@@ -81,7 +81,8 @@ void	ccdcontrollerwidget::setupCcd() {
 		CcdInfo	ccdinfo(convert(_ccdinfo));
 		std::for_each(ccdinfo.modes().begin(), ccdinfo.modes().end(),
 			[binBox](const Binning& mode) {
-				std::string	m = mode.toString();
+				std::string	m = astro::stringprintf("%dx%d",
+					mode.x(), mode.y());
 				binBox->addItem(QString(m.c_str()));
 			}
 		);
