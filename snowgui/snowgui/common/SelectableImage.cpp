@@ -25,8 +25,7 @@ void	SelectableImage::mousePressEvent(QMouseEvent *e) {
 		return;
 	}
 	if (_pointSelectionEnabled) {
-		QPoint	*selected = new QPoint(e->pos());
-		emit pointSelected(selected);
+		emit pointSelected(e->pos());
 	}
 }
 
@@ -53,7 +52,7 @@ void	SelectableImage::mouseReleaseEvent(QMouseEvent *e) {
 	QSize	size(width, height);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle selected: %dx%d@(%d,%d)",
 		size.width(), size.height(), origin.x(), origin.y());
-	QRect	*rect = new QRect(origin, size);
+	QRect	rect(origin, size);
 	emit rectangleSelected(rect);
 }
 

@@ -24,8 +24,8 @@ public:
 	void	setRectangleSelectionEnabled(bool);
 	void	setPointSelectionEnabled(bool);
 signals:
-	void	rectangleSelected(QRect*);
-	void	pointSelected(QPoint*);
+	void	rectangleSelected(QRect);
+	void	pointSelected(QPoint);
 protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);

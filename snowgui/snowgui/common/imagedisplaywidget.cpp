@@ -110,6 +110,30 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	if (imageRectangleEnabled()) {
 		processNewSettings();
 	}
+	emit rectangleSelected(imagerectangle);
+}
+
+/**
+ * \brief Convert coordinates from a QPoint to astro::image coordinates
+ */
+ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
+	int	s = image2pixmap.scale();
+	if (s > 0) {
+		x >>= s;
+		y >>= s;
+	}
+	if (s < 0) {
+		x <<= -s;
+		y <<= -s;
+	}
+
+	// if we are currently displaying a subimage
+	if (imageRectangleEnabled()) {
+		x += _rectangle.origin().x();
+		y += _rectangle.origin().y();
+	}
+
+	return ImagePoint(x, y);
 }
 
 /**
@@ -129,26 +153,16 @@ void	imagedisplaywidget::setImageRectangle(const QRect& rect) {
 	// change scale
 	int	s = image2pixmap.scale();
 	if (s > 0) {
-		x >>= s;
-		y >>= s;
 		height >>= s;
 		width >>= s;
 	}
 	if (s < 0) {
-		x <<= -s;
-		y <<= -s;
 		height <<= -s;
 		width <<= -s;
 	}
 
-	// if we are currently displaying a subimage
-	if (imageRectangleEnabled()) {
-		x += _rectangle.origin().x();
-		y += _rectangle.origin().y();
-	}
-
 	// create the rectangle
-	ImageRectangle	r(ImagePoint(x, y), ImageSize(width, height));
+	ImageRectangle	r(convertPoint(x, y), ImageSize(width, height));
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"QRect=%dx%d@(%d,%d) -> ImageRectangle(%s)",
 		rect.size().width(), rect.size().height(),
@@ -522,8 +536,10 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
 	}
 	selectable->setFixedSize(pixmap->width(), pixmap->height());
 	selectable->setMinimumSize(pixmap->width(), pixmap->height());
-	connect(selectable, SIGNAL(rectangleSelected(QRect*)),
-		this, SLOT(rectangleSelected(QRect*)));
+	connect(selectable, SIGNAL(rectangleSelected(QRect)),
+		this, SLOT(selectRectangle(QRect)));
+	connect(selectable, SIGNAL(pointSelected(QPoint)),
+		this, SLOT(selectPoint(QPoint)));
 
 	// display the image
 	ui->imageArea->setWidget(selectable);
@@ -708,8 +724,16 @@ void	imagedisplaywidget::imageSettingsChanged() {
 /**
  * \brief convert a selected rectangle 
  */
-void	imagedisplaywidget::rectangleSelected(QRect* rect) {
-	setImageRectangle(*rect);
+void	imagedisplaywidget::selectRectangle(QRect rect) {
+	setImageRectangle(rect);
+}
+
+/**
+ * \brief convert a selection point into image coordinates
+ */
+void	imagedisplaywidget::selectPoint(QPoint qpoint) {
+	ImagePoint	p = convertPoint(qpoint.x(), qpoint.y());
+	emit pointSelected(p);
 }
 
 } // namespace snowgui

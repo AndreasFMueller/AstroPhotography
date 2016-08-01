@@ -93,6 +93,9 @@ private:
 	void	displayAutoGain(const AutoGain& autogain);
 	void	displayRectangle(const astro::image::ImageRectangle& rectangle);
 
+	// conversion functions for the image coordinate system
+	astro::image::ImagePoint	convertPoint(int x, int y);
+
 	// some methods to better structure the processing when a new image
 	// comes in
 	void	processNewImageInfo(astro::image::ImagePtr image);
@@ -100,12 +103,15 @@ private:
 	void	processDisplayImage(astro::image::ImagePtr image);
 signals:
 	void	imageUpdated();
+	void	rectangleSelected(astro::image::ImageRectangle);
+	void	pointSelected(astro::image::ImagePoint);
 
 public slots:
 	void	processNewImage();
 	void	processNewSettings();
 	void	imageSettingsChanged();
-	void	rectangleSelected(QRect*);
+	void	selectRectangle(QRect);
+	void	selectPoint(QPoint);
 };
 
 } // namespace snowgui
