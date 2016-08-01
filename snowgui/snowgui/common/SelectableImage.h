@@ -15,10 +15,17 @@ class SelectableImage : public QLabel {
 	Q_OBJECT
 	QRubberBand	*rubberband;
 	QPoint	origin;
+	bool	_rectangleSelectionEnabled;
+	bool	_pointSelectionEnabled;
 public:
 	SelectableImage(QWidget *parent = NULL);
+	bool	rectangleSelectionEnabled();
+	bool	pointSelectionEnabled();
+	void	setRectangleSelectionEnabled(bool);
+	void	setPointSelectionEnabled(bool);
 signals:
-	void	selectionCompleted(QRect*);
+	void	rectangleSelected(QRect*);
+	void	pointSelected(QPoint*);
 protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);

@@ -366,13 +366,14 @@ void	imagedisplaywidget::processNewSettings() {
 
 	// create a new label and pixmap
 	selectable = new SelectableImage();
+	selectable->setRectangleSelectionEnabled(true);
 	QPixmap *pixmap = image2pixmap(_image);
 	if (NULL != pixmap) {
 		selectable->setPixmap(*pixmap);
 	}
 	selectable->setFixedSize(pixmap->width(), pixmap->height());
 	selectable->setMinimumSize(pixmap->width(), pixmap->height());
-	connect(selectable, SIGNAL(selectionCompleted(QRect*)),
+	connect(selectable, SIGNAL(rectangleSelected(QRect*)),
 		this, SLOT(rectangleSelected(QRect*)));
 
 	// display the image

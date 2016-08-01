@@ -12,16 +12,28 @@ namespace snowgui {
 
 SelectableImage::SelectableImage(QWidget *parent) : QLabel(parent) {
 	rubberband = new QRubberBand(QRubberBand::Rectangle, this);
+	_rectangleSelectionEnabled = false;
+	_pointSelectionEnabled = false;
 }
 
 void	SelectableImage::mousePressEvent(QMouseEvent *e) {
-	rubberband->show();
-	origin = e->pos();
-	rubberband->move(origin);
-	rubberband->resize(0, 0);
+	if (_rectangleSelectionEnabled) {
+		rubberband->show();
+		origin = e->pos();
+		rubberband->move(origin);
+		rubberband->resize(0, 0);
+		return;
+	}
+	if (_pointSelectionEnabled) {
+		QPoint	*selected = new QPoint(e->pos());
+		emit pointSelected(selected);
+	}
 }
 
 void 	SelectableImage::mouseMoveEvent(QMouseEvent *e) {
+	if (!_rectangleSelectionEnabled) {
+		return;
+	}
 	int	width = e->pos().x() - origin.x();
 	int	height = e->pos().y() - origin.y();
 	if (width < 0) { width = 0; }
@@ -30,6 +42,9 @@ void 	SelectableImage::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void	SelectableImage::mouseReleaseEvent(QMouseEvent *e) {
+	if (!_rectangleSelectionEnabled) {
+		return;
+	}
 	int	width = e->pos().x() - origin.x();
 	int	height = e->pos().y() - origin.y();
 	rubberband->hide();
@@ -39,7 +54,32 @@ void	SelectableImage::mouseReleaseEvent(QMouseEvent *e) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle selected: %dx%d@(%d,%d)",
 		size.width(), size.height(), origin.x(), origin.y());
 	QRect	*rect = new QRect(origin, size);
-	emit selectionCompleted(rect);
+	emit rectangleSelected(rect);
+}
+
+bool	SelectableImage::rectangleSelectionEnabled() {
+	return _rectangleSelectionEnabled;
+}
+
+bool	SelectableImage::pointSelectionEnabled() {
+	return _pointSelectionEnabled;
+}
+
+void	SelectableImage::setRectangleSelectionEnabled(bool e) {
+	if (e) {
+		_pointSelectionEnabled = false;
+	} else {
+		rubberband->hide();
+	}
+	_rectangleSelectionEnabled = e;
+}
+
+void	SelectableImage::setPointSelectionEnabled(bool e) {
+	if (e) {
+		_rectangleSelectionEnabled = false;
+		rubberband->hide();
+	}
+	_pointSelectionEnabled = e;
 }
 
 } // namespace snowgui
