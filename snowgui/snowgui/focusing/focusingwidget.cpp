@@ -21,5 +21,6 @@ void	focusingwidget::instrumentSetup(
 		snowstar::RemoteInstrument instrument) {
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 	ui->ccdcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 }

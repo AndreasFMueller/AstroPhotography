@@ -16,12 +16,12 @@ focusercontrollerwidget::focusercontrollerwidget(QWidget *parent)
 }
 
 void	focusercontrollerwidget::instrumentSetup(
-	astro::discover::ServiceObject serviceobject,
-	snowstar::RemoteInstrument instrument) {
+		astro::discover::ServiceObject serviceobject,
+		snowstar::RemoteInstrument instrument) {
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
-	// read information about CCDs available on this instrument, and 
+	// read information about Focusers available on this instrument, and 
 	// remember the first ccd you can find
 	int     index = 0;
 	while (_instrument.has(snowstar::InstrumentFocuser, index)) {

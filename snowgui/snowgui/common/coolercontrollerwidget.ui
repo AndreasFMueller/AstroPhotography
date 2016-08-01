@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>coolercontrollerwidget</class>
+ <widget class="QWidget" name="coolercontrollerwidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>329</width>
+    <height>115</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QComboBox" name="coolerSelectionBox"/>
+   </item>
+   <item>
+    <widget class="QWidget" name="coolerInfo" native="true">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="setTemperatureLabel">
+        <property name="text">
+         <string>set temperature:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="setTemperatureSpinBox">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-50.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>50.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="actualTemperatureField">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="actualTemperatureLabel">
+        <property name="text">
+         <string>actual temperature:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="setTemperatureButton">
+        <property name="text">
+         <string>set</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="onoffBox">
+        <property name="text">
+         <string>on</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>setTemperatureSpinBox</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>coolercontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>207</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>109</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>onoffBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>coolercontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>328</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setTemperatureButton</sender>
+   <signal>clicked()</signal>
+   <receiver>coolercontrollerwidget</receiver>
+   <slot>guiChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>292</x>
+     <y>94</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>328</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setTemperatureSpinBox</sender>
+   <signal>editingFinished()</signal>
+   <receiver>coolercontrollerwidget</receiver>
+   <slot>editingFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>coolerSelectionBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>coolercontrollerwidget</receiver>
+   <slot>coolerChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>6</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>32</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>guiChanged()</slot>
+  <slot>editingFinished()</slot>
+  <slot>coolerChanged(int)</slot>
+ </slots>
+</ui>
