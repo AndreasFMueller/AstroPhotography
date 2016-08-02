@@ -6,44 +6,106 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>544</width>
-    <height>480</height>
+    <width>1024</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>12</number>
+   </property>
+   <property name="topMargin">
+    <number>12</number>
+   </property>
+   <property name="rightMargin">
+    <number>12</number>
+   </property>
+   <property name="bottomMargin">
+    <number>12</number>
+   </property>
    <item>
     <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
    </item>
    <item>
     <widget class="QWidget" name="deviceWidget" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>350</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
+       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true">
+        <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>349</height>
+          <width>325</width>
+          <height>300</height>
          </size>
         </property>
-       </spacer>
+        <property name="maximumSize">
+         <size>
+          <width>325</width>
+          <height>300</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>325</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>325</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="minimumSize">
+         <size>
+          <width>325</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>320</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
+         <attribute name="title">
+          <string>Cooler</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <attribute name="title">
+          <string>Filter</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="guideportcontrollerWidget">
+         <attribute name="title">
+          <string>Guide Port</string>
+         </attribute>
+        </widget>
+       </widget>
       </item>
      </layout>
     </widget>

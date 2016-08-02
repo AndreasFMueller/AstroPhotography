@@ -75,19 +75,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="sizeInfoField">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>26</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="1">
        <widget class="QCheckBox" name="shutterOpenBox">
         <property name="text">
@@ -105,17 +92,17 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="2">
        <widget class="QLabel" name="binningLabel">
         <property name="text">
          <string>Binning:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="purposeLabel">
+      <item row="0" column="0">
+       <widget class="QLabel" name="sizeLabel">
         <property name="text">
-         <string>Purpose:</string>
+         <string>Size:</string>
         </property>
        </widget>
       </item>
@@ -126,7 +113,17 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="3">
+       <widget class="QComboBox" name="binningSelectionBox"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="purposeLabel">
+        <property name="text">
+         <string>Purpose:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
        <widget class="QComboBox" name="purposeBox">
         <item>
          <property name="text">
@@ -165,15 +162,18 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="sizeLabel">
+      <item row="0" column="1" colspan="3">
+       <widget class="QLabel" name="sizeInfoField">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>26</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Size:</string>
+         <string/>
         </property>
        </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="binningSelectionBox"/>
       </item>
      </layout>
     </widget>
@@ -193,6 +193,13 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="frameOriginLabel">
+        <property name="text">
+         <string>Subframe Origin:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
        <widget class="QLineEdit" name="frameSizeHeight">
         <property name="alignment">
@@ -208,19 +215,8 @@
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="frameSizeLabel">
-        <property name="text">
-         <string>Subframe Size:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="frameOriginLabel">
-        <property name="text">
-         <string>Subframe Origin:</string>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -231,6 +227,13 @@
         </property>
         <property name="readOnly">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="frameSizeLabel">
+        <property name="text">
+         <string>Subframe Size:</string>
         </property>
        </widget>
       </item>
