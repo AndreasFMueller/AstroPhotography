@@ -59,6 +59,10 @@ extern double	focus_horizontalbrenner(const ImagePtr& image);
 extern double	focus_verticalbrenner(const ImagePtr& image);
 extern double	focus_squaredbrenner(const ImagePtr& image);
 
+extern double	l1norm(const ImagePtr& image);
+extern double	l2norm(const ImagePtr& image);
+extern double	lpnorm(const ImagePtr& image, double p);
+
 extern FocusInfo	focus_squaredbrenner_extended(const ImagePtr& image);
 extern FocusInfo	focus_squaredgradient_extended(const ImagePtr& image);
 

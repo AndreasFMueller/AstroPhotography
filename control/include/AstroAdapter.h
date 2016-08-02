@@ -1115,6 +1115,26 @@ public:
 };
 
 /**
+ * \brief Adapter to compute Lp norm of an image
+ *
+ * This could be implemented using a Function adapter, but this special
+ * case is probably more efficient.
+ */
+template<typename Pixel>
+class PowerAdapter : public ConstImageAdapter<double> {
+	const ConstImageAdapter<Pixel>&	image;
+	double	p;
+public:
+	PowerAdapter(const ConstImageAdapter<Pixel>& _image, double _p)
+		: ConstImageAdapter<double>(_image.getSize()),
+		  image(_image), p(_p) { }
+	virtual double	pixel(int x, int y) const {
+		double	v = image.pixel(x, y);
+		return pow(v, p);
+	}
+};
+
+/**
  * \brief Adapter to perform a mirror image
  */
 template<typename Pixel>
