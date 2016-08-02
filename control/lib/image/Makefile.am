@@ -76,6 +76,7 @@ libastroimage_la_SOURCES = 						\
 	MinRadius.cpp							\
 	MosaicType.cpp							\
 	NoiseAdapter.cpp						\
+	NormFilterfunc.cpp						\
 	PhaseCorrelator.cpp						\
 	PeakFinder.cpp							\
 	Pixel.cpp							\
