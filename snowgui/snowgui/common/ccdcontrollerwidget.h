@@ -54,7 +54,13 @@ private:
 	void	displayShutter(astro::camera::Shutter::state);
 	void	displayFrame(astro::image::ImageRectangle);
 
+	// retrieve an image
+	void	retrieveImage();
+
 	Ui::ccdcontrollerwidget *ui;
+	QTimer	*statusTimer;
+	snowstar::ExposureState	previousstate;
+	bool	ourexposure;
 
 public slots:
 	// changes taht come from the outside
@@ -64,13 +70,20 @@ public slots:
 	void	setPurpose(astro::camera::Exposure::purpose_t);
 	void	setShutter(astro::camera::Shutter::state);
 	void	setFrame(astro::image::ImageRectangle);
+	void	setSubframe(astro::image::ImageRectangle);
 	void	setImage(astro::image::ImagePtr);
 
 	// this slot is used by the GUI elements to update the settings 
 	// from the GUI
 	void	guiChanged();
+	void	captureClicked();
+	void	cancelClicked();
+	void	streamClicked();
 	void	ccdChanged(int);
-	
+
+	// needed internally for status udpates
+	void	statusUpdate();
+
 };
 
 } // namespace snowgui

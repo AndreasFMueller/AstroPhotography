@@ -5,6 +5,12 @@
  */
 #include "focusingwidget.h"
 #include "ui_focusingwidget.h"
+#include <AstroImage.h>
+#include <AstroCamera.h>
+#include <imagedisplaywidget.h>
+
+using namespace astro::image;
+using namespace astro::camera;
 
 focusingwidget::focusingwidget(QWidget *parent)
 	: snowgui::InstrumentWidget(parent), ui(new Ui::focusingwidget) {
@@ -24,4 +30,22 @@ void	focusingwidget::instrumentSetup(
 	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
+
+	connect(ui->imageWidget,
+		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+		this,
+		SLOT(rectangleSelected(astro::image::ImageRectangle)));
+}
+
+void	focusingwidget::imageReceived() {
+	ImagePtr	image = ui->ccdcontrollerWidget->image();
+	ui->imageWidget->setImage(image);
+	Exposure	imageexposure = ui->ccdcontrollerWidget->imageexposure();
+	ui->ccdcontrollerWidget->setExposure(imageexposure);
+}
+
+void	focusingwidget::rectangleSelected(ImageRectangle rectangle) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new rectangle: %s",
+		rectangle.toString().c_str());
+	ui->ccdcontrollerWidget->setSubframe(rectangle);
 }

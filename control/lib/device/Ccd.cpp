@@ -261,7 +261,56 @@ astro::image::ImageSequence	Ccd::getImageSequence(unsigned int imagecount) {
 }
 
 /**
- * \brief Retrieve Cooler, using the cache if retrieved befor
+ * \brief Start a stream with an ordinary camera
+ */
+void	Ccd::startStream(const Exposure& exposure) {
+	CcdState::State	s = exposureStatus();
+	if (CcdState::idle != exposureStatus()) {
+		std::string	msg
+			= stringprintf("cannot start stream in state %s",
+				CcdState::state2string(s).c_str());
+	}
+	ImageStream::startStream(exposure);
+}
+
+/**
+ * \brief Check whether we are currently streaming
+ */
+void	Ccd::checkStreaming() {
+	if (!streaming()) {
+		std::string	msg = stringprintf("not streaming, state %s",
+			CcdState::state2string(exposureStatus()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadState(msg);
+	}
+}
+
+/**
+ * \brief Stop a stream
+ */
+void	Ccd::stopStream() {
+	checkStreaming();
+	ImageStream::stopStream();
+}
+
+/**
+ * \brief Change the stream exposure
+ */
+void	Ccd::streamExposure(const Exposure& exposure) {
+	checkStreaming();
+	ImageStream::streamExposure(exposure);
+}
+
+/**
+ * \brief get the current stream exposure
+ */
+const Exposure& Ccd::streamExposure() {
+	checkStreaming();
+	return ImageStream::streamExposure();
+}
+
+/**
+ * \brief Retrieve Cooler, using the cache if retrieved before
  */
 CoolerPtr	Ccd::getCooler() {
 	if (!cooler) {

@@ -110,6 +110,8 @@ astro::camera::CcdState::State	convert(const ExposureState& s) {
 		return astro::camera::CcdState::cancelling;
 	case EXPOSED:
 		return astro::camera::CcdState::exposed;
+	case STREAMING:
+		return astro::camera::CcdState::exposing;
 	}
 	throw std::runtime_error("unknown exposure state");
 }

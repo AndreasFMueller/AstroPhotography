@@ -7,8 +7,11 @@
 #include "ui_ccdcontrollerwidget.h"
 #include <IceConversions.h>
 #include <algorithm>
+#include <QTimer>
+#include <AstroIO.h>
 
 using namespace astro::image;
+using namespace astro::io;
 using namespace astro::camera;
 
 namespace snowgui {
@@ -20,7 +23,10 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	InstrumentWidget(parent), ui(new Ui::ccdcontrollerwidget) {
 	// setup user interface components
 	ui->setupUi(this);
-
+	statusTimer = new QTimer();
+	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer->setInterval(100);
+	ourexposure = false;
 }
 
 void	ccdcontrollerwidget::instrumentSetup(
@@ -58,6 +64,8 @@ void	ccdcontrollerwidget::instrumentSetup(
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
+	statusTimer->stop();
+	delete statusTimer;
 	delete ui;
 }
 
@@ -78,7 +86,7 @@ void	ccdcontrollerwidget::setupCcd() {
 	if (_ccd) {
 		_ccdinfo = _ccd->getInfo();
 		QComboBox	*binBox = ui->binningSelectionBox;
-		CcdInfo	ccdinfo(convert(_ccdinfo));
+		CcdInfo	ccdinfo(snowstar::convert(_ccdinfo));
 		std::for_each(ccdinfo.modes().begin(), ccdinfo.modes().end(),
 			[binBox](const Binning& mode) {
 				std::string	m = astro::stringprintf("%dx%d",
@@ -97,6 +105,9 @@ void	ccdcontrollerwidget::setupCcd() {
 
 		// use the frame size as the default rectangle
 		displayFrame(ImageRectangle(ccdinfo.size()));
+
+		// start the timer
+		statusTimer->start();
 	}
 
 	// now reenable signals
@@ -138,7 +149,7 @@ void	ccdcontrollerwidget::setExposure(Exposure e) {
  */
 void	ccdcontrollerwidget::displayFrame(ImageRectangle r) {
 	// is the rectangle contained in the ccd
-	if (!convert(_ccdinfo).size().bounds(r)) {
+	if (!snowstar::convert(_ccdinfo).size().bounds(r)) {
 		return;
 	}
 	_exposure.frame(r);
@@ -173,6 +184,12 @@ void	ccdcontrollerwidget::setFrame(ImageRectangle r) {
 	emit exposureChanged(_exposure);
 }
 
+void	ccdcontrollerwidget::setSubframe(ImageRectangle r) {
+	ImagePoint	origin = r.origin() + _exposure.frame().origin();
+	ImageRectangle	newrectangle(origin, r.size());
+	setFrame(newrectangle);
+}
+
 /**
  * \brief Display the new binning mode
  *
@@ -180,7 +197,7 @@ void	ccdcontrollerwidget::setFrame(ImageRectangle r) {
  */
 void	ccdcontrollerwidget::displayBinning(Binning b) {
 	// is binning mode supported by this camera?
-	if (!convert(_ccdinfo).modes().permits(b)) {
+	if (!snowstar::convert(_ccdinfo).modes().permits(b)) {
 		// XXX should we send an exeption here?
 		return;
 	}
@@ -332,18 +349,21 @@ void	ccdcontrollerwidget::setShutter(Shutter::state s) {
  */
 void	ccdcontrollerwidget::guiChanged() {
 	if (sender() == ui->binningSelectionBox) {
-		_exposure.mode(getBinning(
+		displayBinning(getBinning(
 			ui->binningSelectionBox->currentIndex()));
 	}
 	if (sender() == ui->exposureSpinBox) {
-		_exposure.exposuretime(ui->exposureSpinBox->value());
+		displayExposureTime(ui->exposureSpinBox->value());
 	}
 	if (sender() == ui->purposeBox) {
-		_exposure.purpose(getPurpose(ui->purposeBox->currentIndex()));
+		displayPurpose(getPurpose(ui->purposeBox->currentIndex()));
 	}
 	if (sender() == ui->shutterOpenBox) {
-		_exposure.shutter(ui->shutterOpenBox->isChecked()
+		displayShutter(ui->shutterOpenBox->isChecked()
 			? Shutter::OPEN : Shutter::CLOSED);
+	}
+	if (sender() == ui->frameFullButton) {
+		displayFrame(ImageRectangle(snowstar::convert(_ccdinfo).size()));
 	}
 	emit exposureChanged(_exposure);
 }
@@ -361,8 +381,100 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
  * \brief Slot to handle a change of the selected CCD
  */
 void	ccdcontrollerwidget::ccdChanged(int index) {
+	statusTimer->stop();
 	_ccd = _instrument.ccd(index);
         setupCcd();
+}
+
+void	ccdcontrollerwidget::captureClicked() {
+	try {
+		_ccd->startExposure(snowstar::convert(_exposure));
+		ourexposure = true;
+		ui->captureButton->setEnabled(false);
+		ui->streamButton->setEnabled(false);
+		ui->streamButton->setEnabled(true);
+	} catch (const std::exception& x) {
+	}
+}
+
+void	ccdcontrollerwidget::cancelClicked() {
+	try {
+		_ccd->cancelExposure();
+	} catch (...) {
+	}
+}
+
+void	ccdcontrollerwidget::streamClicked() {
+	try {
+		_ccd->startStream(snowstar::convert(_exposure));
+	} catch (...) {
+	}
+}
+
+void	ccdcontrollerwidget::retrieveImage() {
+	if (!ourexposure) {
+		return;
+	}
+	ourexposure = false;
+	try {
+		snowstar::ImagePrx	imageprx;
+		imageprx = _ccd->getImage();
+		ImagePtr	image = snowstar::convert(imageprx);
+		if (!image->hasMetadata(std::string("INSTRUME"))) {
+			image->setMetadata(astro::io::FITSKeywords::meta(
+				std::string("INSTRUME"), instrumentname()));
+		}
+		_image = image;
+		_imageexposure = snowstar::convert(_ccd->getExposure());
+		imageprx->remove();
+		emit imageReceived();
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf("cannot retrieve "
+			"image: exception %s, cause=%s",
+			astro::demangle(typeid(x).name()).c_str(), x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+}
+
+void	ccdcontrollerwidget::statusUpdate() {
+	if (!_ccd) {
+		return;
+	}
+	snowstar::ExposureState	newstate = _ccd->exposureStatus();
+	if (newstate == previousstate) {
+		return;
+	}
+	switch (newstate) {
+	case snowstar::IDLE:
+		ui->captureButton->setEnabled(true);
+		ui->cancelButton->setEnabled(false);
+		ui->streamButton->setEnabled(true);
+		ui->streamButton->setText(QString("Stream"));
+		break;
+	case snowstar::EXPOSING:
+		ui->captureButton->setEnabled(false);
+		ui->cancelButton->setEnabled(true);
+		ui->streamButton->setEnabled(false);
+		break;
+	case snowstar::EXPOSED:
+		retrieveImage();
+		ui->captureButton->setEnabled(false);
+		ui->cancelButton->setEnabled(false);
+		ui->streamButton->setEnabled(false);
+		break;
+	case snowstar::CANCELLING:
+		ui->captureButton->setEnabled(false);
+		ui->cancelButton->setEnabled(false);
+		ui->streamButton->setEnabled(false);
+		break;
+	case snowstar::STREAMING:
+		ui->captureButton->setEnabled(false);
+		ui->cancelButton->setEnabled(false);
+		ui->streamButton->setEnabled(true);
+		ui->streamButton->setText(QString("Stop"));
+		break;
+	}
+	previousstate = newstate;
 }
 
 } // namespace snowgui

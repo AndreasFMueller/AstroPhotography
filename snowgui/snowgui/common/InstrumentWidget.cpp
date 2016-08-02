@@ -28,7 +28,11 @@ void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 	setWindowTitle(QString(title.c_str()));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview starting on instrument %s",
-		_instrument.name().c_str());
+		instrumentname().c_str());
+}
+
+std::string	InstrumentWidget::instrumentname() {
+	return _instrument.name();
 }
 
 } // namespace snowgui

@@ -71,7 +71,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QToolBox" name="toolBox">
         <property name="minimumSize">
          <size>
           <width>325</width>
@@ -84,24 +84,18 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="tabShape">
-         <enum>QTabWidget::Rounded</enum>
-        </property>
-        <property name="currentIndex">
-         <number>1</number>
-        </property>
-        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
-         <attribute name="title">
+        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true">
+         <attribute name="label">
           <string>Cooler</string>
          </attribute>
         </widget>
-        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
-         <attribute name="title">
-          <string>Filter</string>
+        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true">
+         <attribute name="label">
+          <string>Filterwheel</string>
          </attribute>
         </widget>
-        <widget class="QWidget" name="guideportcontrollerWidget">
-         <attribute name="title">
+        <widget class="QWidget" name="guiderportcontrollerWidget" native="true">
+         <attribute name="label">
           <string>Guide Port</string>
          </attribute>
         </widget>
@@ -124,6 +118,9 @@
    <extends>QWidget</extends>
    <header location="global">ccdcontrollerwidget.h</header>
    <container>1</container>
+   <slots>
+    <signal>imageReceived()</signal>
+   </slots>
   </customwidget>
   <customwidget>
    <class>snowgui::focusercontrollerwidget</class>
@@ -145,5 +142,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ccdcontrollerWidget</sender>
+   <signal>imageReceived()</signal>
+   <receiver>focusingwidget</receiver>
+   <slot>imageReceived()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>921</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>922</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>imageReceived()</slot>
+ </slots>
 </ui>

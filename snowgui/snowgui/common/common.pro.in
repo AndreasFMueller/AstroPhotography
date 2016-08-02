@@ -18,6 +18,7 @@ LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
 	imagedisplaywidget.ui						\

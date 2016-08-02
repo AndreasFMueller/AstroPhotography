@@ -347,7 +347,7 @@ public:
 	virtual void	stopStream();
 	virtual bool	streaming();
 	virtual void	streamExposure(const Exposure& exposure);
-	virtual const Exposure&	streamExposure() const;
+	virtual const Exposure&	streamExposure();
 	virtual void	operator()(const ImageQueueEntry& entry);
 };
 
@@ -421,6 +421,13 @@ public:
 	astro::image::ImagePtr	getImage();
 	virtual astro::image::ImageSequence	getImageSequence(unsigned int imagecount);
 
+	// methods to integrate the stream functions (status)
+	virtual void	startStream(const Exposure& exposure);
+	virtual void	stopStream();
+	virtual void	streamExposure(const Exposure& exposure);
+	virtual const Exposure&	streamExposure();
+private:
+	void	checkStreaming();
 	// handling the cooler
 private:
 	CoolerPtr	cooler;

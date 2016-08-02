@@ -24,6 +24,7 @@ public:
 	virtual void	instrumentSetup(
 				astro::discover::ServiceObject serviceobject,
 				snowstar::RemoteInstrument instrument);
+	std::string	instrumentname();
 };
 
 } // namespace snowgui

@@ -87,7 +87,7 @@ void	ImageStream::streamExposure(const Exposure& exposure) {
 /**
  * \brief get the current exposure settings
  */
-const Exposure&	ImageStream::streamExposure() const {
+const Exposure&	ImageStream::streamExposure() {
 	return _streamexposure;
 }
 

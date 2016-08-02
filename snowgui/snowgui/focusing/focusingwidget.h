@@ -24,6 +24,10 @@ public:
 
 private:
 	Ui::focusingwidget *ui;
+
+public slots:
+	void	imageReceived();
+	void	rectangleSelected(astro::image::ImageRectangle);
 };
 
 #endif // FOCUSINGWIDGET_H

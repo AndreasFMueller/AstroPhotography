@@ -110,6 +110,8 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 	if (imageRectangleEnabled()) {
 		processNewSettings();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting rectangledSelected(%s)",
+		imagerectangle.toString().c_str());
 	emit rectangleSelected(imagerectangle);
 }
 

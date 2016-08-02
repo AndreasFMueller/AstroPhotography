@@ -30,11 +30,17 @@ CcdInfo	CcdI::getInfo(const Ice::Current& /* current */) {
 }
 
 ExposureState	CcdI::exposureStatus(const Ice::Current& /* current */) {
+	if (_ccd->streaming()) {
+		return snowstar::STREAMING;
+	}
 	return convert(_ccd->exposureStatus());
 }
 
 void	CcdI::startExposure(const Exposure& exposure,
 		const Ice::Current& /* current */) {
+	if (_ccd->streaming()) {
+		throw BadState("cannot start exposure while streaming");
+	}
 	image.reset();
 	try {
 		_ccd->startExposure(convert(exposure));
@@ -54,6 +60,9 @@ int	CcdI::lastExposureStart(const Ice::Current& /* current */) {
 }
 
 void	CcdI::cancelExposure(const Ice::Current& /* current */) {
+	if (_ccd->streaming()) {
+		throw BadState("cannot cancel exposure while streaming");
+	}
 	try {
 		_ccd->cancelExposure();
 	} catch (const astro::camera::BadState& badstate) {
@@ -82,6 +91,9 @@ Exposure	CcdI::getExposure(const Ice::Current& /* current */) {
 }
 
 ImagePrx	CcdI::getImage(const Ice::Current& current) {
+	if (_ccd->streaming()) {
+		throw BadState("cannot get image while streaming");
+	}
 	// get the image and add it to the ImageDirectory
 	if (!image) {
 		try {
@@ -160,6 +172,9 @@ void	CcdI::registerSink(const Ice::Identity& imagesinkidentity,
 
 void	CcdI::startStream(const ::snowstar::Exposure& e,
 		const Ice::Current& /* current */) {
+	if (_ccd->streaming()) {
+		throw BadState("already streaming");
+	}
 	if (!_sink) {
 		throw BadState("no registered images ink");
 	}
@@ -174,6 +189,9 @@ void	CcdI::updateStream(const ::snowstar::Exposure& e,
 }
 
 void	CcdI::stopStream(const ::Ice::Current& /* current */) {
+	if (!_ccd->streaming()) {
+		throw BadState("cannot stop stream: not streaming");
+	}
 	_ccd->stopStream();
 	if (_sink) {
 		try {

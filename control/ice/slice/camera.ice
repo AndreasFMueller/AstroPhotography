@@ -87,7 +87,7 @@ module snowstar {
 
 	interface Cooler;
 
-	enum ExposureState { IDLE, EXPOSING, EXPOSED, CANCELLING };
+	enum ExposureState { IDLE, EXPOSING, EXPOSED, CANCELLING, STREAMING };
 
 	struct Interval {
 		float	min;
