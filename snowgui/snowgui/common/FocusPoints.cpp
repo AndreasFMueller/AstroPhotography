@@ -165,7 +165,6 @@ std::vector<FocusPoint>	FocusPoints::sortBySequence() const {
 }
 
 std::vector<FocusPoint>	FocusPoints::sortByPosition() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "sorting by position");
 	std::vector<FocusPoint>	result;
 	std::copy(begin(), end(), back_inserter(result));
 	std::sort(result.begin(), result.end(), positioncomparator());
