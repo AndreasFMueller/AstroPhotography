@@ -153,7 +153,7 @@ void	SxCcdM26C::exposeField(int field) {
 			(uint16_t)(1 << field), &rpd);
 		camera.controlRequest(&request);
 	} catch (std::exception &x) {
-		camera.release("exposur");
+		camera.release("exposure M26C");
 		std::string	msg = stringprintf("cannot request field: %s",
 						x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -195,7 +195,7 @@ void	SxCcdM26C::requestField(int field) {
 			&rp);
 		camera.controlRequest(&request);
 	} catch (std::exception& x) {
-		camera.release("exposur");
+		camera.release("exposure M26C");
 		std::string	msg = stringprintf("cannot request field: %s",
 					x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -226,7 +226,7 @@ void	SxCcdM26C::requestField(int field) {
 			&rpd);
 		camera.controlRequest(&request);
 	} catch (std::exception& x) {
-		camera.release("exposure");
+		camera.release("exposure M26C");
 		std::string	msg = stringprintf("cannot request field: %s",
 					x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -318,7 +318,7 @@ void	SxCcdM26C::startExposure0(const Exposure& exposure) {
 	m26c = m26cExposure();
 
 	// start the exposure
-	if (!camera.reserve("exposure", 1000)) {
+	if (!camera.reserve("exposure M26C", 1000)) {
 		std::string	msg("cannot reserve camera");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -396,7 +396,7 @@ void	SxCcdM26C::getImage0() {
 	}
 
 	// we are done transferring, release camera
-	camera.release("exposur");
+	camera.release("exposure M26C");
 
 	// prepare a new image, this now needs binned pixels
 	Image<unsigned short>	*_image = new Image<unsigned short>(
