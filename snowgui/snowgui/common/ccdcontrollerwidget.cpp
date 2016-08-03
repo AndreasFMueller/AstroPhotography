@@ -480,6 +480,7 @@ void	ccdcontrollerwidget::retrieveImage() {
 	// so we check whether this is our exposure. If not, we give up
 	// at this point
 	if (!ourexposure) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not our exposure, giving up");
 		return;
 	}
 	ourexposure = false;
@@ -494,6 +495,7 @@ void	ccdcontrollerwidget::retrieveImage() {
 		_image = image;
 		_imageexposure = snowstar::convert(_ccd->getExposure());
 		imageprx->remove();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
 		emit imageReceived();
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot retrieve "

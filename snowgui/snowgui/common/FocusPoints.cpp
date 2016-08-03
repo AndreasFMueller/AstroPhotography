@@ -22,7 +22,10 @@ FocusPoint::FocusPoint(astro::image::ImagePtr image, unsigned short position)
 		image->size().toString().c_str());
 	_sequence = -1;
 	_l1norm = filter::l1norm(image);
-	_focusvalue = filter::focus_squaredbrenner(image) / (_l1norm * _l1norm);
+	// XXX we would rather like to have the square of _l1norm in the 
+	// XXX denominator, but that makes the values too small.
+	// XXX So we need a more reasonable rescaling method
+	_focusvalue = filter::focus_squaredbrenner(image) / _l1norm;
 }
 
 std::string	FocusPoint::toString() const {
@@ -40,6 +43,8 @@ FocusPoints::FocusPoints() {
 void	FocusPoints::add(const FocusPoint& focuspoint) {
 	FocusPoint	f = focuspoint;
 	f._sequence = _sequence++;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add focus point %s",
+		f.toString().c_str());
 	push_back(f);
 }
 

@@ -8,6 +8,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Create a n ew focusing history widget
+ */
 focusinghistorywidget::focusinghistorywidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::focusinghistorywidget) {
 	ui->setupUi(this);
@@ -22,29 +25,50 @@ focusinghistorywidget::focusinghistorywidget(QWidget *parent)
 		this, SLOT(didSelectPosition(int)));
 }
 
+/**
+ * \brief Destroy the focusing history
+ */
 focusinghistorywidget::~focusinghistorywidget() {
 	delete ui;
 }
 
+/**
+ * \brief Add a new image and position
+ *
+ * This method hands the widget over to the focuspointsWidget, which does
+ * the actual computation and display
+ */
 void	focusinghistorywidget::add(astro::image::ImagePtr image,
 		unsigned short position) {
 	ui->focuspointsWidget->add(image, position);
 }
 
+/**
+ * \brief Remove all points from the history
+ */
 void	focusinghistorywidget::clear() {
 	ui->focuspointsWidget->clear();
 }
 
+/**
+ * \brief make sure the focuspointsWidget uses position to sort the points
+ */
 void	focusinghistorywidget::byPosition(bool b) {
 	if (!b) { return; }
 	ui->focuspointsWidget->setByPosition(true);
 }
 
+/**
+ * /brief Request that focuspointswidget use sequence to sort the points
+ */
 void	focusinghistorywidget::bySequence(bool b) {
 	if (!b) { return; }
 	ui->focuspointsWidget->setByPosition(false);
 }
 
+/**
+ * \brief Slot called when a position was selected in the focuspointsWidget
+ */
 void	focusinghistorywidget::didSelectPosition(int p) {
 	emit positionSelected(p);
 }

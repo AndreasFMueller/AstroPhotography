@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
+    <width>280</width>
     <height>115</height>
    </rect>
   </property>
@@ -121,72 +121,7 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>positionButton</sender>
-   <signal>clicked()</signal>
-   <receiver>focusercontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>302</x>
-     <y>63</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>335</x>
-     <y>114</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>positionSpinBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>focusercontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>162</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>335</x>
-     <y>114</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>focuserSelectionBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>focusercontrollerwidget</receiver>
-   <slot>focuserChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>296</x>
-     <y>12</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>329</x>
-     <y>30</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>positionSpinBox</sender>
-   <signal>editingFinished()</signal>
-   <receiver>focusercontrollerwidget</receiver>
-   <slot>editingFinished()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>217</x>
-     <y>94</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>236</x>
-     <y>30</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>guiChanged()</slot>
   <slot>focuserChanged(int)</slot>

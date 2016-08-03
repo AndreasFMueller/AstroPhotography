@@ -74,6 +74,8 @@ void	FocusPointsWidget::drawByPosition(QPainter& painter) {
 	scaler = Scaler(minposition, maxposition,
 			_focuspoints.minfocus(), _focuspoints.maxfocus(),
 			width(), height(), 20);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points, scaler: %s",
+		_focuspoints.size(), scaler.toString().c_str());
 	Scaler::pointlist	pl
 		= scaler.listWithPosition(_focuspoints.sortByPosition());
 	drawPoints(painter, pl);

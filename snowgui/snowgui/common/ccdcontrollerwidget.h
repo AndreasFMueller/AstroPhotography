@@ -15,6 +15,9 @@ namespace Ui {
 
 namespace snowgui {
 
+/**
+ * \brief A reusable component to control a CCD
+ */
 class ccdcontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 

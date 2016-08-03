@@ -273,24 +273,7 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>ccdcontrollerWidget</sender>
-   <signal>imageReceived()</signal>
-   <receiver>focusingwidget</receiver>
-   <slot>imageReceived()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>921</x>
-     <y>251</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>922</x>
-     <y>5</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>imageReceived()</slot>
   <slot>rectangleSelected(astro::image::ImageRectangle)</slot>

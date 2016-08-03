@@ -15,6 +15,9 @@ namespace Ui {
 
 namespace snowgui {
 
+/**
+ * \brief A reusable GUI component to control a focuser
+ */
 class focusercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
@@ -47,9 +50,9 @@ public slots:
 	void	setTarget(int position);
 	void	movetoPosition(int position);
 	void	statusUpdate();
-	void	guiChanged();
 	void	focuserChanged(int);
 	void	editingFinished();
+	void	guiChanged();
 };
 
 } // namespace snowgui
