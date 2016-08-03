@@ -26,9 +26,22 @@ std::string	othelloname(astro::usb::DevicePtr& deviceptr) {
 }
 
 DeviceName	othellodevname(astro::usb::DevicePtr& deviceptr) {
-	DeviceName	devname(DeviceName::Guiderport, std::string("othello"),
-		othelloname(deviceptr));
-	return devname;
+	astro::usb::DeviceDescriptorPtr     descriptor
+		= deviceptr->descriptor();
+	unsigned short	product = descriptor->idProduct();
+	switch (product) {
+	case OTHELLO_GUIDERPORT_ID:
+		return DeviceName(DeviceName::Guiderport,
+			std::string("othello"), othelloname(deviceptr));
+	case OTHELLO_FOCUSER_ID:
+		return DeviceName(DeviceName::Focuser,
+			std::string("othello"), othelloname(deviceptr));
+	default:
+		std::string	msg = stringprintf(
+			"unknown othello product id '%hx", product);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 }
 
 } // namespace othello

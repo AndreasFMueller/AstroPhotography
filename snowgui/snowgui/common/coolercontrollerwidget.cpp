@@ -35,9 +35,11 @@ void	coolercontrollerwidget::instrumentSetup(
 	}
 
 	// initialize the timer
+#if 0
 	statusTimer = new QTimer();
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer->setInterval(100);
+#endif
 
 	// set the cooler
 	setupCooler();

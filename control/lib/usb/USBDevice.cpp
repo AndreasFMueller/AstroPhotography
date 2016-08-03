@@ -34,6 +34,7 @@ void	Device::open() throw(USBError) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open the device");
 	// handle the case where the device has already been opened
 	if (isOpen()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device already open");
 		return;
 	}
 

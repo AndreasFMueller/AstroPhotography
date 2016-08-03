@@ -188,7 +188,7 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 		name.toString().c_str());
 	// extract the serial number from the name
 	std::string	serial = name.unitname();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device unit %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device with serial %s",
 		serial.c_str());
 
 	// find the device with this serial number
@@ -198,17 +198,28 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 		astro::usb::DevicePtr	dptr = (*i);
 		DeviceDescriptorPtr	descriptor = dptr->descriptor();
 		uint16_t	vendor = descriptor->idVendor();
+		uint16_t	product = descriptor->idProduct();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking %hx:%hx",
+			vendor, product);
 		if (vendor != OTHELLO_VENDOR_ID) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wrong vendor %hx",
+				vendor);
 			continue;
 		}
-		if (descriptor->idProduct() != OTHELLO_FOCUSER_ID) {
+		if (product != OTHELLO_FOCUSER_ID) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "wrong product %hx",
+				product);
 			continue;
 		}
 		bool	needsclosing = true;
 		if (dptr->isOpen()) {
 			needsclosing = false;
 		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "opening device");
 			dptr->open();
+			// reread the descriptor, as the serial number was not
+			// accessible during when the device was not open
+			descriptor = dptr->descriptor();
 		}
 		std::string	devserial = descriptor->iSerialNumber();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial: %s",
@@ -217,6 +228,7 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching focuser");
 			return FocuserPtr(new OthelloFocuser(dptr));
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial %s does not match", serial.c_str());
 		if (needsclosing) {
 			dptr->close();
 		}

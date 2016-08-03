@@ -17,7 +17,11 @@ namespace device {
 Device::Device(const std::string& devname, DeviceName::device_type type)
 	: Properties(devname), _name(devname) {
 	if (name().type() != type) {
-		throw std::runtime_error("name type does not match");
+		std::string	msg
+			= stringprintf("name '%s' does not match type %s",
+			devname.c_str(), DeviceName::type2string(type).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
@@ -27,7 +31,12 @@ Device::Device(const std::string& devname, DeviceName::device_type type)
 Device::Device(const DeviceName& devname, DeviceName::device_type type)
 	: Properties(devname), _name(devname) {
 	if (name().type() != type) {
-		throw std::runtime_error("name type does not match");
+		std::string	msg
+			= stringprintf("name '%s' does not match type %s",
+				devname.toString().c_str(),
+				DeviceName::type2string(type).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 }
 
@@ -102,15 +111,23 @@ void	Device::parameter(const std::string& name, const std::string& /* value */) 
 /**
  * \brief get the float value of a parameter
  */
-float	Device::parameterValueFloat(const std::string& /* name */) const {
-	throw std::logic_error("Device class has no parameters");
+float	Device::parameterValueFloat(const std::string& name) const {
+	std::string	msg
+		= stringprintf("Device class has not parameters for %s",
+			name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::logic_error(msg);
 }
 
 /**
  * \brief get the string value of a parameter
  */
-std::string	Device::parameterValueString(const std::string& /* name */) const {
-	throw std::logic_error("Device class has no parameters");
+std::string	Device::parameterValueString(const std::string& name) const {
+	std::string	msg
+		= stringprintf("Device class has not parameters for %s",
+			name.c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::logic_error(msg);
 }
 
 void	Device::add(ParameterDescription parameter) {
