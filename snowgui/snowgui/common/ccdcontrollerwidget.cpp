@@ -55,6 +55,13 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	previousstate = snowstar::IDLE;
 }
 
+/**
+ * \brief Common instrument setup
+ *
+ * This method is called to add instrument information. The default
+ * constructor called by the Designer generated code cannot include
+ * this information, so we supply it later..
+ */
 void	ccdcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
