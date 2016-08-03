@@ -1,5 +1,5 @@
 /*
- * filterwheelcontrollerwidget.cpp
+ * filterwheelcontrollerwidget.cpp -- Implementation of Filterwheel controller
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
@@ -10,20 +10,37 @@
 
 namespace snowgui {
 
+/**
+ * \brief Create a new filterwheelcontrollerwidget
+ */
 filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::filterwheelcontrollerwidget) {
 	    ui->setupUi(this);
-	statusTimer = NULL;
+
+	// connections of GUI components
+	connect(ui->filterwheelSelectionBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(filterwheelChanged(int)));
+	connect(ui->filterBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(setFilter(int)));
+
+	// initialize the timer
+	statusTimer = new QTimer();
+	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer->setInterval(100);
 }
 
+/**
+ * \brief Destroy the filterwheelcontrollerwidget
+ */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
-	if (statusTimer) {
-		statusTimer->stop();
-		delete statusTimer;
-	}
+	statusTimer->stop();
+	delete statusTimer;
 	delete ui;
 }
 
+/**
+ * \brief Common instrument setup
+ */
 void	filterwheelcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
@@ -44,23 +61,29 @@ void	filterwheelcontrollerwidget::instrumentSetup(
 		index++;
 	}
 
-	// initialize the timer
-	statusTimer = new QTimer();
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer->setInterval(100);
-
 	// set the filterwheel up
 	setupFilterwheel();
 }
 
+/**
+ * \brief Setup the filterwheel
+ *
+ * This method is called each time a new filterwheel is selected.
+ * It reads the relevant information about the filterwheeel from the
+ * remote server and initializes the GUI elements with it.
+ */
 void	filterwheelcontrollerwidget::setupFilterwheel() {
 	ui->filterBox->blockSignals(true);
+
+	// make sure the status timer does not fire
+	statusTimer->stop();
 
 	// remove previous content of the filterwheel
 	while (ui->filterBox->count() > 0) {
 		ui->filterBox->removeItem(0);
 	}
 
+	// get information about the filterwheel
 	if (_filterwheel) {
 		// add filter names
 		int	nfilters = _filterwheel->nFilters();
@@ -80,39 +103,46 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 		}
 
 		// start the timer
-		if (statusTimer) {
-			statusTimer->start();
-		}
+		statusTimer->start();
 	}
 	ui->filterBox->blockSignals(false);
 }
 
+/**
+ * \brief display the modified filter selection
+ *
+ * This method does not send any signals
+ */
 void	filterwheelcontrollerwidget::displayFilter(int index) {
 	ui->filterBox->blockSignals(true);
 	ui->filterBox->setCurrentIndex(index);
 	ui->filterBox->blockSignals(false);
 }
 
+/**
+ * \brief Slot to change the filter 
+ */
 void    filterwheelcontrollerwidget::setFilter(int index) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setFilter(%d)", index);
 	_filterwheel->select(index);
 }
 
-void    filterwheelcontrollerwidget::guiChanged() {
-	try {
-		_filterwheel->select(ui->filterBox->currentIndex());
-	} catch (...) {
-	}
-}
-
+/**
+ * \brief Change the filter wheel
+ *
+ * This slot is activate when the user chooses a different filter wheel.
+ */
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
-	if (statusTimer) {
-		statusTimer->stop();
-	}
+	statusTimer->stop();
 	_filterwheel = _instrument.filterwheel(index);
 	setupFilterwheel();
 }
 
+/**
+ * \brief Slot for timer status update
+ *
+ * This slot is connected to the timeout() signal of the status timer.
+ */
 void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;

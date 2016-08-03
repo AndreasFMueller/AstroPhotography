@@ -14,6 +14,9 @@ namespace Ui {
 
 namespace snowgui {
 
+/**
+ * \brief A reusable component to control a filter wheel
+ */
 class filterwheelcontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
@@ -38,7 +41,6 @@ private:
 
 public slots:
 	void	setFilter(int index);
-	void	guiChanged();
 	void	filterwheelChanged(int);
 	void	statusUpdate();
 };

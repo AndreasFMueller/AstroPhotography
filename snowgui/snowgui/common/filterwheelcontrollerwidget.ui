@@ -97,40 +97,7 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>filterBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>filterwheelcontrollerwidget</receiver>
-   <slot>setFilter(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>197</x>
-     <y>58</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>201</x>
-     <y>70</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>filterwheelSelectionBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>filterwheelcontrollerwidget</receiver>
-   <slot>filterwheelChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>307</x>
-     <y>10</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>341</x>
-     <y>27</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>setFilter(int)</slot>
   <slot>filterwheelChanged(int)</slot>

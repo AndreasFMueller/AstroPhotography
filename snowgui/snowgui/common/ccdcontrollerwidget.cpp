@@ -52,6 +52,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer->setInterval(100);
 	ourexposure = false;
+	previousstate = snowstar::IDLE;
 }
 
 void	ccdcontrollerwidget::instrumentSetup(
@@ -98,6 +99,13 @@ ccdcontrollerwidget::~ccdcontrollerwidget() {
  * \brief Read information from the ccd and show it
  */
 void	ccdcontrollerwidget::setupCcd() {
+	// we set the previous state to idle, but if that is not correct, then
+	// then the first status update will fix it.
+	previousstate = snowstar::IDLE;
+	ui->captureButton->setEnabled(true);
+	ui->cancelButton->setEnabled(false);
+	ui->streamButton->setEnabled(true);
+
 	// make sure no signals are sent while setting up the CCD
 	ui->binningSelectionBox->setEnabled(false);
 	ui->binningSelectionBox->blockSignals(true);
@@ -209,9 +217,17 @@ void	ccdcontrollerwidget::setFrame(ImageRectangle r) {
 	emit exposureChanged(_exposure);
 }
 
+/**
+ * \brief set the frame
+ *
+ * This method converts the rectangle to CCD coordinates. Note that
+ * only this controller knows about the binning mode, so it has to compute
+ * unbinned coordinates.
+ */
 void	ccdcontrollerwidget::setSubframe(ImageRectangle r) {
 	ImagePoint	origin = r.origin() + _exposure.frame().origin();
-	ImageRectangle	newrectangle(origin, r.size());
+	ImageRectangle	newrectangle
+		= ImageRectangle(origin, r.size()) * _exposure.mode();
 	setFrame(newrectangle);
 }
 
@@ -239,6 +255,7 @@ void	ccdcontrollerwidget::displayBinning(Binning b) {
 }
 
 /**
+ * \brief private mtethod to get the binning mode from the selected item index
  */
 Binning	ccdcontrollerwidget::getBinning(int index) {
 	if ((index >= ui->binningSelectionBox->count()) && (index < 0)) {
@@ -411,6 +428,9 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
         setupCcd();
 }
 
+/**
+ * \brief Slot to handle click on the "Capture" button
+ */
 void	ccdcontrollerwidget::captureClicked() {
 	try {
 		_ccd->startExposure(snowstar::convert(_exposure));
@@ -422,6 +442,9 @@ void	ccdcontrollerwidget::captureClicked() {
 	}
 }
 
+/**
+ * \brief Slot tohandle click on the "Cancel" button
+ */
 void	ccdcontrollerwidget::cancelClicked() {
 	try {
 		_ccd->cancelExposure();
@@ -429,6 +452,9 @@ void	ccdcontrollerwidget::cancelClicked() {
 	}
 }
 
+/**
+ * \brief Slto to handle click on the "Stream" button
+ */
 void	ccdcontrollerwidget::streamClicked() {
 	try {
 		_ccd->startStream(snowstar::convert(_exposure));
@@ -436,7 +462,16 @@ void	ccdcontrollerwidget::streamClicked() {
 	}
 }
 
+/**
+ * \brief Slot to handle new images
+ *
+ * This method retrieves an image from the remote server and then emits
+ * the imageReceived signal
+ */
 void	ccdcontrollerwidget::retrieveImage() {
+	// it may happen that some other program initiated the exposure,
+	// so we check whether this is our exposure. If not, we give up
+	// at this point
 	if (!ourexposure) {
 		return;
 	}
@@ -461,6 +496,11 @@ void	ccdcontrollerwidget::retrieveImage() {
 	}
 }
 
+/**
+ * \brief Status update slot
+ *
+ * This slot is called by the 
+ */
 void	ccdcontrollerwidget::statusUpdate() {
 	if (!_ccd) {
 		return;
@@ -482,6 +522,8 @@ void	ccdcontrollerwidget::statusUpdate() {
 		ui->streamButton->setEnabled(false);
 		break;
 	case snowstar::EXPOSED:
+		// if we get to this point, then an exposure just completed,
+		// and we we should retrieve the image
 		retrieveImage();
 		ui->captureButton->setEnabled(false);
 		ui->cancelButton->setEnabled(false);
