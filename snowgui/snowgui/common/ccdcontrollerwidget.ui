@@ -79,6 +79,9 @@
         <property name="maximum">
          <double>3600.000000000000000</double>
         </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
        </widget>
       </item>
       <item row="4" column="1">
@@ -348,152 +351,7 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>binningSelectionBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>75</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>261</x>
-     <y>76</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>exposureSpinBox</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>124</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>260</x>
-     <y>108</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>purposeBox</sender>
-   <signal>currentTextChanged(QString)</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>258</x>
-     <y>115</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>261</x>
-     <y>141</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>shutterOpenBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>133</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>169</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ccdSelectionBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>ccdChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>235</x>
-     <y>16</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>260</x>
-     <y>32</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>captureButton</sender>
-   <signal>clicked()</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>captureClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>38</x>
-     <y>222</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>9</x>
-     <y>190</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cancelButton</sender>
-   <signal>clicked()</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>cancelClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>142</x>
-     <y>217</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>125</x>
-     <y>193</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>streamButton</sender>
-   <signal>clicked()</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>streamClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>282</x>
-     <y>225</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>209</x>
-     <y>194</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>frameFullButton</sender>
-   <signal>clicked()</signal>
-   <receiver>ccdcontrollerwidget</receiver>
-   <slot>guiChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>319</x>
-     <y>155</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>193</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>guiChanged()</slot>
   <slot>ccdChanged(int)</slot>

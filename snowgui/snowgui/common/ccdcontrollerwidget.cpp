@@ -23,6 +23,31 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	InstrumentWidget(parent), ui(new Ui::ccdcontrollerwidget) {
 	// setup user interface components
 	ui->setupUi(this);
+
+	// install all internal connections
+	connect(ui->ccdSelectionBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(ccdChanged(int)));
+
+	connect(ui->exposureSpinBox, SIGNAL(valueChanged()),
+		this, SLOT(guiChanged()));
+	connect(ui->binningSelectionBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(guiChanged()));
+	connect(ui->shutterOpenBox, SIGNAL(toggled()),
+		this, SLOT(guiChanged()));
+	connect(ui->purposeBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(guiChanged()));
+
+	connect(ui->captureButton, SIGNAL(clicked()),
+		this, SLOT(captureClicked()));
+	connect(ui->cancelButton, SIGNAL(clicked()),
+		this, SLOT(cancelClicked()));
+	connect(ui->streamButton, SIGNAL(clicked()),
+		this, SLOT(streamClicked()));
+
+	connect(ui->frameFullButton, SIGNAL(clicked()),
+		this, SLOT(guiChanged()));
+
+	// setup and connect the timer
 	statusTimer = new QTimer();
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	statusTimer->setInterval(100);

@@ -88,7 +88,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>360</width>
+             <width>1000000</width>
              <height>204</height>
             </size>
            </property>
@@ -105,17 +105,30 @@
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="minimumSize">
             <size>
-             <width>0</width>
+             <width>320</width>
              <height>204</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>16777215</width>
+             <width>325</width>
              <height>204</height>
             </size>
            </property>
-           <widget class="snowgui::focusscancontroller" name="scanWidget"/>
+           <widget class="snowgui::focusscancontroller" name="scanWidget">
+            <property name="minimumSize">
+             <size>
+              <width>320</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>320</width>
+              <height>204</height>
+             </size>
+            </property>
+           </widget>
            <widget class="QWidget" name="autoWidget"/>
           </widget>
          </item>
