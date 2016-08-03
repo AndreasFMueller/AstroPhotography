@@ -73,6 +73,16 @@ void	focusercontrollerwidget::setupFocuser() {
 	ui->positionSpinBox->blockSignals(false);
 }
 
+int	focusercontrollerwidget::getCurrentPosition() {
+	try {
+		if (_focuser) {
+			return _focuser->current();
+		}
+	} catch (...) {
+	}
+	return 0;
+}
+
 void	focusercontrollerwidget::displayCurrent(int current) {
 	std::string	currentstring = astro::stringprintf("%d", current);
 	ui->currentField->setText(QString(currentstring.c_str()));
@@ -104,18 +114,30 @@ void	focusercontrollerwidget::setTarget(int target) {
 	displayTarget(target);
 }
 
+void	focusercontrollerwidget::movetoPosition(int target) {
+	displayTarget(target);
+	startMoving(target);
+}
+
+void	focusercontrollerwidget::startMoving(int target) {
+	delta = _focuser->current() - target;
+	_focuser->set(target);
+}
+
 void	focusercontrollerwidget::guiChanged() {
 	if (sender() == ui->positionSpinBox) {
 		int	current = _focuser->current();
 		ui->positionButton->setEnabled(current != ui->positionSpinBox->value());
 	}
 	if (sender() == ui->positionButton) {
-		_focuser->set(ui->positionSpinBox->value());
+		int	target = ui->positionSpinBox->value();
+		startMoving(target);
 	}
 }
 
 void	focusercontrollerwidget::editingFinished() {
-	_focuser->set(ui->positionSpinBox->value());
+	int	target = ui->positionSpinBox->value();
+	startMoving(target);
 }
 
 void	focusercontrollerwidget::statusUpdate() {
@@ -123,12 +145,14 @@ void	focusercontrollerwidget::statusUpdate() {
 		return;
 	}
 	int	current = _focuser->current();
-	bool	targetreached = current == ui->positionSpinBox->value();
+	int	target = ui->positionSpinBox->value();
+	bool	targetreached = current == target;
 	ui->positionButton->setEnabled(!targetreached);
 	displayCurrent(current);
-	if (targetreached) {
+	if ((targetreached) && (delta != 0)) {
 		emit targetPositionReached();
 	}
+	delta = current - target;
 }
 
 void	focusercontrollerwidget::focuserChanged(int index) {

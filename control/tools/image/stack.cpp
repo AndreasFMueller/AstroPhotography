@@ -23,6 +23,7 @@ static struct option	longopts[] = {
 { "debug",	no_argument,		NULL,		'd' }, /* 0 */
 { "help",	no_argument,		NULL,		'h' }, /* 1 */
 { "output",	required_argument,	NULL,		'o' }, /* 2 */
+{ "patchsize",	required_argument,	NULL,		'p' }, /* 3 */
 { NULL,		0,			NULL,		 0  }
 };
 
@@ -44,6 +45,7 @@ static void	usage(const char *progname) {
 	std::cout << "options:" << std::endl;
 	std::cout << " -d,--debug             increase debug level" << std::endl;
 	std::cout << " -o,--output=<outfile>  filename of output file" << std::endl;
+	std::cout << " -p,--patchsize=<s>     use patch size <s> for translation analysis" << std::endl;
 	std::cout << " -h,-?,--help           display this help" << std::endl;
 }
 
@@ -54,7 +56,8 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	const char	*outfilename = NULL;
-	while (EOF != (c = getopt_long(argc, argv, "dh?o:", longopts,
+	int	patchsize = 256;
+	while (EOF != (c = getopt_long(argc, argv, "dh?o:p:", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'd':
@@ -62,6 +65,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'o':
 			outfilename = optarg;
+			break;
+		case 'p':
+			patchsize = std::stoi(std::string(optarg));
 			break;
 		case 'h':
 		case '?':
@@ -81,7 +87,7 @@ int	main(int argc, char *argv[]) {
 		images.size());
 
 	// now do the stacking
-	astro::image::stacking::Stacker	stacker;
+	astro::image::stacking::Stacker	stacker(patchsize);
 	ImagePtr	stackedimage = stacker(images);
 
 	// write the result image

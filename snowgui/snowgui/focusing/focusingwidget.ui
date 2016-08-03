@@ -27,7 +27,103 @@
     <number>12</number>
    </property>
    <item>
-    <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
+    <widget class="QWidget" name="leftWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="focusinfoWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>204</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>204</height>
+         </size>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="snowgui::focusinghistorywidget" name="focusinghistoryWidget" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>360</width>
+             <height>204</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>360</width>
+             <height>204</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="stackedWidget">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>204</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>204</height>
+            </size>
+           </property>
+           <widget class="snowgui::focusscancontroller" name="scanWidget"/>
+           <widget class="QWidget" name="autoWidget"/>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QWidget" name="deviceWidget" native="true">
@@ -43,14 +139,21 @@
         <property name="minimumSize">
          <size>
           <width>325</width>
-          <height>300</height>
+          <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>325</width>
-          <height>300</height>
+          <height>261</height>
          </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="separatorLine">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -112,6 +215,9 @@
    <extends>QWidget</extends>
    <header location="global">imagedisplaywidget.h</header>
    <container>1</container>
+   <slots>
+    <slot>rectangleSelected(astro::image::ImageRectangle)</slot>
+   </slots>
   </customwidget>
   <customwidget>
    <class>snowgui::ccdcontrollerwidget</class>
@@ -140,6 +246,18 @@
    <header location="global">filterwheelcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>snowgui::focusscancontroller</class>
+   <extends>QWidget</extends>
+   <header>focusscancontroller.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::focusinghistorywidget</class>
+   <extends>QWidget</extends>
+   <header>focusinghistorywidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
@@ -151,7 +269,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>921</x>
-     <y>41</y>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
      <x>922</x>
@@ -162,5 +280,6 @@
  </connections>
  <slots>
   <slot>imageReceived()</slot>
+  <slot>rectangleSelected(astro::image::ImageRectangle)</slot>
  </slots>
 </ui>

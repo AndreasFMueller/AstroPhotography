@@ -29,7 +29,8 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 	} else {
 		strcpy(buffer, "/tmp/convert-XXXXXX.fits");
 	}
-	if (mkstemps(buffer, 5) < 0) {
+	int	fd = mkstemps(buffer, 5);
+	if (fd < 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot create temp file: %s",
 			strerror(errno));
 		throw std::runtime_error("cannot create tmp file name");
@@ -37,20 +38,13 @@ astro::image::ImagePtr	convert(ImagePrx image) {
 	std::string	filename(buffer);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "temporary image file: %s", buffer);
 
-	// write image data to a temporary file
-	int	out = open(buffer, O_CREAT | O_WRONLY, 0666);
-	if (out < 0) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create temporary file %s",
-			buffer);
-		throw std::runtime_error("cannot create temp file");
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "out fd = %d", out);
 	int	s = file.size();
-	if (s != write(out, file.data(), s)) {
+	if (s != write(fd, file.data(), s)) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "writing temp file failed: %s",
 			strerror(errno));
+		close(fd);
 	}
-	close(out);
+	close(fd);
 
 	// use FITS classes to read the temporary file
 	astro::io::FITSin	in(filename);
@@ -198,9 +192,10 @@ static std::string	tempfilename() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "temp an image");
 	char    buffer[1024];
 	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", tmpdir);
-	mkstemps(buffer, 5);
+	int	fd = mkstemps(buffer, 5);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
 	unlink(buffer);
+	close(fd);
 
 	return std::string(buffer);
 }
@@ -216,21 +211,23 @@ astro::image::ImagePtr  convertfile(ImageFile imagefile) {
 	astro::image::ImagePtr	result;
 
 	// generate a temporary file name
-	std::string	filename = tempfilename();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the filename: %s",
-		filename.c_str());
+	const char	*tmpdir = "/tmp";
+	if (NULL != getenv("TMPDIR")) {
+		tmpdir = getenv("TMPDIR");
+	}
+	char    buffer[1024];
+	snprintf(buffer, sizeof(buffer), "%s/XXXXXXXX.fits", tmpdir);
+	int	fd = mkstemps(buffer, 5);
+	if (fd < 0) {
+		std::string	msg = astro::stringprintf("cannot "
+			"create temporary file: %s", strerror(errno));
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
+	std::string	filename(buffer);
 
 	try {
-		// open the temporary file
-		int	fd = open(filename.c_str(),
-				O_CREAT | O_TRUNC | O_WRONLY, 0666);
-		if (fd < 0) {
-			std::string	msg = astro::stringprintf("cannot "
-				"create temporary file: %s", strerror(errno));
-			throw std::runtime_error(msg);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "fd: %d", fd);
-
 		// write the image data to a temporary file
 		ssize_t	l = write(fd, imagefile.data(), imagefile.size());
 		if (l < 0) {
@@ -239,11 +236,11 @@ astro::image::ImagePtr  convertfile(ImageFile imagefile) {
 			close(fd);
 			throw std::runtime_error(msg);
 		}
+		close(fd);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bytes written: %d", l);
 		if ((ssize_t)imagefile.size() != l) {
 			throw std::runtime_error("failed to write image");
 		}
-		close(fd);
 
 		// read the image
 		astro::io::FITSin	in(filename);

@@ -89,6 +89,7 @@ ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	// read the data
 	unsigned char	*buffer = new unsigned char[sb.st_size];
 	if (sb.st_size != read(fd, buffer, sb.st_size)) {
+		close(fd); // prevent resource leak
 		std::string	msg = astro::stringprintf("could not read file %s "
 			"in full length %ld", fullname.c_str(), sb.st_size);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -109,6 +110,7 @@ int     ImageI::filesize(const Ice::Current& /* current */) {
 }
 
 void    ImageI::remove(const Ice::Current& /* current */) {
+	_imagedirectory.remove(_filename);
 }
 
 #define	sequence_mono(pixel, size)					\

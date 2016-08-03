@@ -52,9 +52,11 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 void	ImageLocator::finished(const Ice::Current& /* current */,
 				const Ice::ObjectPtr& /* servant */,
 				const Ice::LocalObjectPtr& /* cookie */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "finished");
 }
 
-void	ImageLocator::deactivate(const std::string& /* category */) {
+void	ImageLocator::deactivate(const std::string& category) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "deactivate: %s", category.c_str());
 }
 
 } // namespace snowstar

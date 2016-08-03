@@ -134,9 +134,9 @@ ShutterState	convert(const astro::camera::Shutter::state& s) {
 		result = snowstar::ShCLOSED;
 		break;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
-		astro::camera::Shutter::state2string(s).c_str(),
-		state2string(result).c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
+	//	astro::camera::Shutter::state2string(s).c_str(),
+	//	state2string(result).c_str());
 	return result;
 }
 
@@ -150,9 +150,9 @@ astro::camera::Shutter::state	convert(const ShutterState& s) {
 		result = astro::camera::Shutter::CLOSED;
 		break;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
-		(s == ShOPEN) ? "open" : "closed",
-		astro::camera::Shutter::state2string(result).c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> %s",
+	//	(s == ShOPEN) ? "open" : "closed",
+	//	astro::camera::Shutter::state2string(result).c_str());
 	return result;
 }
 

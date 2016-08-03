@@ -52,12 +52,16 @@ FITSfile::FITSfile(const std::string& _filename,
  */
 FITSfile::~FITSfile() {
 	if (NULL == fptr) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: no FITS fptr to close",
+			filename.c_str());
 		return;
 	}
 	int	status = 0;
 	if (fits_close_file(fptr, &status)) {
 		throw FITSexception(errormsg(status));
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "close FITS file %s",
+		filename.c_str());
 	fptr = NULL;
 }
 
@@ -128,6 +132,8 @@ FITSinfileBase::FITSinfileBase(const std::string& filename)
 	throw (FITSexception)
 	: FITSfile(filename, 0, 0, 0) {
 	int	status = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open FITS file '%s'",
+		filename.c_str());
 	if (fits_open_file(&fptr, filename.c_str(), READONLY, &status)) {
 		throw FITSexception(errormsg(status), filename);
 	}
@@ -215,7 +221,7 @@ void	*FITSinfileBase::readdata() throw (FITSexception) {
 	/* now read the data */
 	int	status = 0;
 	long	firstpixel[3] = { 1, 1, 1 };
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS data: pixeltype = %f, "
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading FITS data: pixeltype = %d, "
 		"pixels = %d, planes = %d", pixeltype, size.getPixels(),
 		planes);
 	if (fits_read_pix(fptr, pixeltype, firstpixel, size.getPixels() * planes,
@@ -374,6 +380,7 @@ void	FITSoutfileBase::write(const ImageBase& image) throw (FITSexception) {
 
 	// create the file
 	int	status = 0;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "create FITS file %s", filename.c_str());
 	if (fits_create_file(&fptr, filename.c_str(), &status)) {
 		throw FITSexception(errormsg(status));
 	}

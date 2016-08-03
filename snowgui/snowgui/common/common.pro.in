@@ -47,6 +47,9 @@ SOURCES += 								\
 	AutoGain.cpp							\
 	SelectableImage.cpp						\
 	InstrumentWidget.cpp						\
+	FocusPoints.cpp							\
+	Scaler.cpp							\
+	FocusPointsWidget.cpp						\
 	$${WIDGETSOURCES}
 
 
@@ -56,6 +59,9 @@ HEADERS  += 								\
 	AutoGain.h							\
 	SelectableImage.h						\
 	InstrumentWidget.h						\
+	FocusPoints.h							\
+	Scaler.h							\
+	FocusPointsWidget.h						\
 	$${WIDGETHEADERS}
 
 

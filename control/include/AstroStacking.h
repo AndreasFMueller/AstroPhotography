@@ -48,7 +48,9 @@ public:
  * \brief Stacker class
  */
 class Stacker {
+	int	_patchsize;
 public:
+	Stacker(int patchsize = 256) : _patchsize(patchsize) { }
 	ImagePtr	operator()(ImageSequence images);
 };
 

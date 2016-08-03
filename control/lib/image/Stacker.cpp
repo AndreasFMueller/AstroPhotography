@@ -41,8 +41,9 @@ void	Accumulator<Pixel>::accumulate(const ConstImageAdapter<Pixel>& add) {
 }
 
 class MonochromeStacker {
+	int	_patchsize;
 public:
-	MonochromeStacker() { }
+	MonochromeStacker(int patchsize) : _patchsize(patchsize) { }
 	ImagePtr	operator()(ImageSequence images);
 };
 
@@ -62,7 +63,7 @@ ImagePtr	MonochromeStacker::operator()(ImageSequence images) {
 	for (imgp++; imgp != images.end(); imgp++) {
 		ImagePtr	imageptr = *imgp;
 		ConstPixelValueAdapter<double>	img(imageptr);
-		TransformAnalyzer	ta(base, 2048, 2048);
+		TransformAnalyzer	ta(base, _patchsize, _patchsize);
 		Transform	t = ta(img);
 		t = t.inverse();
 		transforms.push_back(t);
@@ -91,20 +92,21 @@ ImagePtr	MonochromeStacker::operator()(ImageSequence images) {
 	return result;
 }
 
-#define	stacker_monochrome(image, pixel, images)			\
+#define	stacker_monochrome(image, pixel, images, patchsize)		\
 	{								\
 		Image<pixel>	*imagep					\
 			= dynamic_cast<Image<pixel > *>(&*image);	\
 		if (NULL != imagep) {					\
-			MonochromeStacker	stacker;		\
+			MonochromeStacker	stacker(patchsize);	\
 			return stacker(images);				\
 		}							\
 	}
 
 template<typename Pixel>
 class RGBStacker {
+	int	_patchsize;
 public:
-	RGBStacker() { }
+	RGBStacker(int patchsize) : _patchsize(patchsize) { }
 	ImagePtr	operator()(ImageSequence images);
 };
 
@@ -118,7 +120,7 @@ ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
 		throw std::runtime_error("type inconsistency");
 	}
 	LuminanceAdapter<RGB<Pixel>, double>	base(*baseimagep);
-	TransformAnalyzer	ta(base);
+	TransformAnalyzer	ta(base, _patchsize, _patchsize);
 
 	// for each image in the sequence, find the transform relative to the
 	// base image
@@ -166,12 +168,12 @@ ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
 	return result;
 }
 
-#define	stacker_rgb(image, pixel, images)				\
+#define	stacker_rgb(image, pixel, images, patchsize)			\
 	{								\
 		Image<RGB<pixel > >	*imagep				\
 			= dynamic_cast<Image<RGB<pixel > > *>(&*image);	\
 		if (NULL != imagep) {					\
-			RGBStacker<pixel>	stacker;		\
+			RGBStacker<pixel>	stacker(patchsize);	\
 			return stacker(images);				\
 		}							\
 	}
@@ -185,20 +187,20 @@ ImagePtr	Stacker::operator()(ImageSequence images) {
 
 	// go through all possible types, and find an appropriately typed
 	// stacker
-	stacker_monochrome(baseimage, unsigned char, images);
-	stacker_monochrome(baseimage, unsigned short, images);
-	stacker_monochrome(baseimage, unsigned int, images);
-	stacker_monochrome(baseimage, unsigned long, images);
-	stacker_monochrome(baseimage, float, images);
-	stacker_monochrome(baseimage, double, images);
+	stacker_monochrome(baseimage, unsigned char, images, _patchsize);
+	stacker_monochrome(baseimage, unsigned short, images, _patchsize);
+	stacker_monochrome(baseimage, unsigned int, images, _patchsize);
+	stacker_monochrome(baseimage, unsigned long, images, _patchsize);
+	stacker_monochrome(baseimage, float, images, _patchsize);
+	stacker_monochrome(baseimage, double, images, _patchsize);
 
 	// color types
-	stacker_rgb(baseimage, unsigned char, images);
-	stacker_rgb(baseimage, unsigned short, images);
-	stacker_rgb(baseimage, unsigned int, images);
-	stacker_rgb(baseimage, unsigned long, images);
-	stacker_rgb(baseimage, float, images);
-	stacker_rgb(baseimage, double, images);
+	stacker_rgb(baseimage, unsigned char, images, _patchsize);
+	stacker_rgb(baseimage, unsigned short, images, _patchsize);
+	stacker_rgb(baseimage, unsigned int, images, _patchsize);
+	stacker_rgb(baseimage, unsigned long, images, _patchsize);
+	stacker_rgb(baseimage, float, images, _patchsize);
+	stacker_rgb(baseimage, double, images, _patchsize);
 
 	throw std::runtime_error("cannot stack images of this type");
 }

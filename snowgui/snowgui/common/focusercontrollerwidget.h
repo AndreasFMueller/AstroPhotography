@@ -25,6 +25,7 @@ public:
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
+	int	getCurrentPosition();
 
 signals:
 	void	targetPositionReached();
@@ -35,12 +36,16 @@ private:
 	void	displayCurrent(int current);
 	void	displayTarget(int target);
 
+	void	startMoving(int target);
+
 	Ui::focusercontrollerwidget *ui;
 	QTimer	*statusTimer;
+	int	delta;
 
 public slots:
 	void	setCurrent();
 	void	setTarget(int position);
+	void	movetoPosition(int position);
 	void	statusUpdate();
 	void	guiChanged();
 	void	focuserChanged(int);

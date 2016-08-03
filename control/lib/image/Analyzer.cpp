@@ -36,7 +36,9 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 	// first find out whether the patch size fits inside the image
 	if ((patchsize > image.getSize().width())
 		|| (patchsize > image.getSize().height())) {
-		throw std::runtime_error("patch size does not fit into image");
+		std::string	msg = stringprintf("patch size %d does not fit into image", patchsize);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
 
 	// build a set of patches
