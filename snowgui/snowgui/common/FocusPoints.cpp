@@ -22,7 +22,7 @@ FocusPoint::FocusPoint(astro::image::ImagePtr image, unsigned short position)
 		image->size().toString().c_str());
 	_sequence = -1;
 	_l1norm = filter::l1norm(image);
-	_focusvalue = filter::focus_squaredbrenner(image) / _l1norm;
+	_focusvalue = filter::focus_squaredbrenner(image) / (_l1norm * _l1norm);
 }
 
 std::string	FocusPoint::toString() const {
