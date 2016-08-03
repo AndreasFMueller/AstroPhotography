@@ -1260,6 +1260,8 @@ ImagePoint	operator*(const ImagePoint& point, const Binning& mode);
 ImagePoint	operator/(const ImagePoint& point, const Binning& mode);
 ImageSize	operator*(const ImageSize& size, const Binning& mode);
 ImageSize	operator/(const ImageSize& size, const Binning& mode);
+ImageRectangle	operator*(const ImageRectangle& rect, const Binning& mode);
+ImageRectangle	operator/(const ImageRectangle& rect, const Binning& mode);
 
 /**
  * \brief Compute the connected component of a point

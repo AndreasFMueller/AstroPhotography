@@ -119,5 +119,14 @@ ImagePoint	operator/(const ImagePoint& point, const Binning& binning) {
 			point.y() / binning.y());
 }
 
+ImageRectangle	operator*(const ImageRectangle& rect, const Binning& binning) {
+	return ImageRectangle(rect.origin() * binning, rect.size() * binning);
+}
+
+ImageRectangle	operator/(const ImageRectangle& rect, const Binning& binning) {
+	return ImageRectangle(rect.origin() / binning, rect.size() / binning);
+}
+
+
 } // namespace image
 } // namespace astro
