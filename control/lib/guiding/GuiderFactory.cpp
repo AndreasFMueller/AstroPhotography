@@ -46,18 +46,31 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 		DeviceAccessor<CcdPtr>	da(repository);
 		ccd = da.get(DeviceName(guiderdescriptor.ccd()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
+	} else {
+		std::string	msg = stringprintf("Guider %s has no CCD",
+			guiderdescriptor.toString().c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s");
+		throw std::runtime_error(msg);
 	}
 	GuiderPortPtr	guiderport;
 	if (guiderdescriptor.guiderport().size()) {
 		DeviceAccessor<GuiderPortPtr>	da(repository);
 		guiderport = da.get(DeviceName(guiderdescriptor.guiderport()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport constructed");
+	} else {
+		std::string	msg = stringprintf("Guider %s has no Port",
+			guiderdescriptor.toString().c_str());
+		debug(LOG_WARNING, DEBUG_LOG, 0, "%s");
 	}
 	AdaptiveOpticsPtr	adaptiveoptics;
 	if (guiderdescriptor.adaptiveoptics().size()) {
 		DeviceAccessor<AdaptiveOpticsPtr>	da(repository);
 		adaptiveoptics = da.get(DeviceName(guiderdescriptor.adaptiveoptics()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics constructed");
+	} else {
+		std::string	msg = stringprintf("Guider %s has no AO",
+			guiderdescriptor.toString().c_str());
+		debug(LOG_INFO, DEBUG_LOG, 0, "%s");
 	}
 
 	// with all these components we can now build a new guider

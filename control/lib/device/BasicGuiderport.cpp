@@ -133,6 +133,8 @@ void	BasicGuiderport::run() {
 BasicGuiderport::BasicGuiderport(const std::string& devicename)
 	: astro::camera::GuiderPort(devicename),
 	  thread(basicguiderport_main, this) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "BasicGuiderport %s constructed",
+		devicename.c_str());
 }
 
 /**
@@ -151,7 +153,7 @@ uint8_t	BasicGuiderport::active() {
 }
 
 /**
- * \brief Activate guider port poins for a given 
+ * \brief Activate guider port pins for a given set of times
  */
 void	BasicGuiderport::activate(float raplus, float raminus,
 		float decplus, float decminus) {
@@ -159,25 +161,29 @@ void	BasicGuiderport::activate(float raplus, float raminus,
 		= std::chrono::steady_clock::now();
 	long long	delta = (raplus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %lldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA+ for %lldms",
+			delta);
 	}
 	nextchange[0] = now + std::chrono::milliseconds(delta);
 
 	delta = (raminus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %lldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate RA- for %lldms",
+			delta);
 	}
 	nextchange[1] = now + std::chrono::milliseconds(delta);
 
 	delta = (decplus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %lldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC+ for %lldms",
+			delta);
 	}
 	nextchange[2] = now + std::chrono::milliseconds(delta);
 
 	delta = (decminus * 1000);
 	if (delta > 0) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %lldms", delta);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "activate DEC- for %lldms",
+			delta);
 	}
 	nextchange[3] = now + std::chrono::milliseconds(delta);
 
@@ -191,6 +197,7 @@ void	BasicGuiderport::activate(float raplus, float raminus,
  * This causes the thread to start processing activation commands
  */
 void	BasicGuiderport::start() {
+	std::unique_lock<std::mutex>	lock(mtx);
 	cond.notify_one();
 }
 
@@ -200,6 +207,7 @@ void	BasicGuiderport::start() {
  * The thread will exit when it has processed the notification
  */
 void	BasicGuiderport::stop() {
+	std::unique_lock<std::mutex>	lock(mtx);
 	_running = false;
 	cond.notify_one();
 }
