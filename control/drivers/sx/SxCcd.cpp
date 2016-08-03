@@ -128,7 +128,9 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 			RequestBase::vendor_specific_type,
 			RequestBase::device_recipient, (uint16_t)0,
 			(uint8_t)SX_CMD_CLEAR_PIXELS, (uint16_t)0);
+		camera.reserve("exposure", 1000);
 		camera.controlRequest(&resetrequest);
+		camera.release("exposure");
 	}
 
 	// some cameras may require that the we read out the pixels,
@@ -147,8 +149,14 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 			RequestBase::device_recipient, ccdindex,
 			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)0, &rp);
 		try {
+			if (!camera.reserve("exposure", 1000)) {
+				std::string	msg("cannot reserve camera");
+				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+				throw std::logic_error(msg);
+			}
 			camera.controlRequest(&readoutrequest);
 		} catch (USBError& x) {
+			camera.release("exposure");
 			std::string	msg = stringprintf("%s usb error: %s",
 				name().toString().c_str(), x.what());
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -169,6 +177,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		try {
 			camera.getDevicePtr()->submit(&transfer);
 		} catch (USBError& x) {
+			camera.release("exposure");
 			delete data;
 			std::string	msg = stringprintf("%s usb error: %s",
 				name().toString().c_str(), x.what());
@@ -203,6 +212,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 	try {
 		camera.controlRequest(&request);
 	} catch (USBError& x) {
+		camera.release("exposure");
 		std::string	msg = stringprintf("%s usb error: %s",
 			name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -244,11 +254,13 @@ void	SxCcd::getImage0() {
 	try {
 		camera.getDevicePtr()->submit(&transfer);
 	} catch (USBError& x) {
+		camera.release("exposure");
 		std::string	msg = stringprintf("%s usb error: %s",
 			name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
+	camera.release("exposure");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received %d pixels", size);
 
 	// when the transfer completes, one can use the data for the image

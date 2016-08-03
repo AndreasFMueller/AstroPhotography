@@ -49,13 +49,21 @@ void	SxCooler::cmd() {
 		(uint16_t)((cooler_on) ? 1 : 0),
 		(uint8_t)SX_CMD_COOLER, temp);
 	try {
-		camera.controlRequest(&request);
+		if (camera.reserve("cooler", 100)) {
+			camera.controlRequest(&request);
+		} else {
+			debug(LOG_WARNING, DEBUG_LOG, 0,
+				"Warning: cannot set cooler, camera reserved");
+			return;
+		}
 	} catch (USBError& x) {
+		camera.release("cooler");
 		std::string	msg = stringprintf("%s usb error: %s",
 					name().toString().c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw DeviceTimeout(msg);
 	}
+	camera.release("cooler");
 	actualtemperature = request.data()->temperature / 10.;
 	cooler_on = (request.data()->status) ? true : false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "actual temperature = %.1f",

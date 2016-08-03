@@ -99,6 +99,9 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 	// the default is to use the 
 	useControlRequests = false;
 
+	// make sure camera is not busy
+	_busy = false;
+
 	// find the product id
 	product = deviceptr->descriptor()->idProduct();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "product = %04x", product);
@@ -441,6 +444,76 @@ GuiderPortPtr	SxCamera::getGuiderPort0() {
  */
 bool	SxCamera::isColor() const {
 	return ((product & 0xf00) == 0x300) ? true : false;
+}
+
+/**
+ * \brief Find out whether the device is busy
+ */
+bool	SxCamera::busy() {
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	return _busy;
+}
+
+/**
+ * \brief Reserve the device
+ *
+ * Any method that does an USB operation must reserve the device before
+ * it initiates the operation, and release it when it completes.
+ */
+bool	SxCamera::reserve(const std::string& purpose, int timeout) {
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	if (_busy && (purpose == _purpose)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"RESERVE already reserved for %s", purpose.c_str());
+		return true;
+	}
+	if (!_busy) {
+		_busy = true;
+		_purpose = purpose;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: %s",
+			purpose.c_str());
+		return true;
+	}
+	std::cv_status	status
+		= condition.wait_for(lock, std::chrono::milliseconds(timeout));
+	if (status == std::cv_status::timeout) {
+		return false;
+	}
+	// we now own the lock and can change the busy flag
+	if (!_busy) {
+		_busy = true;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: %s",
+			purpose.c_str());
+		return true;
+	}
+	
+	// we should not get to this point, because that indicates a logic
+	// error. After we receive a signal, the device should be free
+	return false;
+}
+
+/**
+ * \brief Release the device
+ *
+ * This signals all waiting threads that the operation has completed and
+ * allows them to continue
+ */
+void	SxCamera::release(const std::string& purpose) {
+	std::unique_lock<std::recursive_mutex>	lock(mutex);
+	if (_busy == false) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"RESERVE cannot release %s, already released",
+			purpose.c_str());
+	}
+	if (purpose != _purpose) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "RESERVE wrong purpose: %s != %s",
+			purpose.c_str(), _purpose.c_str());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera released: %s",
+		_purpose.c_str());
+	_busy = false;
+	_purpose = "";
+	condition.notify_all();
 }
 
 } // namespace sx

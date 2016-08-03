@@ -228,7 +228,8 @@ FocuserPtr	OthelloLocator::getFocuser0(const DeviceName& name) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching focuser");
 			return FocuserPtr(new OthelloFocuser(dptr));
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device serial %s does not match", serial.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"device serial %s does not match", serial.c_str());
 		if (needsclosing) {
 			dptr->close();
 		}

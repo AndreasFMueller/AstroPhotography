@@ -9,6 +9,7 @@
 #include <AstroCamera.h>
 #include <AstroUSB.h>
 #include <sx.h>
+#include <mutex>
 
 using namespace astro::camera;
 using namespace astro::usb;
@@ -36,6 +37,20 @@ class SxCamera : public Camera {
 	bool	_has_interline_ccd;
 public:
 	bool	hasInterlineCcd() const { return _has_interline_ccd; }
+
+private:
+	// a lock to ensure that only one USB operation at a time goes to
+	// the camera
+	std::recursive_mutex		mutex;
+	std::condition_variable_any	condition;
+	bool	_busy;
+	std::string	_purpose;
+public:
+	bool	busy();
+	std::string	purpose();
+	bool	reserve(const std::string& purpose, int timeout = 1000);
+	void	release(const std::string& purpose);
+
 public:
 	// USB related methods
 	DevicePtr	getDevicePtr();
