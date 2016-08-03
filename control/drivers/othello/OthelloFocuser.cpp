@@ -66,7 +66,7 @@ unsigned short	OthelloFocuser::current() {
 void	OthelloFocuser::set(unsigned short value) {
 	EmptyRequest	request(
 		RequestBase::vendor_specific_type,
-		RequestBase::device_recipient, 0,
+		RequestBase::device_recipient, 1 /* fast move */,
 		(uint8_t)FOCUSER_SET, value);
 	deviceptr->controlRequest(&request);
 }
