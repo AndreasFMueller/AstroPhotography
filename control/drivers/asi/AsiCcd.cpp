@@ -83,6 +83,14 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	exposure = e;
 	if (exposure.size() == ImageSize()) {
 		exposure.frame(info.size());
+	} else {
+		// make sure window sizes are divisible by 4/2
+		int	w = exposure.width();
+		w = (w >> 2) << 2;
+		int	h = exposure.height();
+		h = (h >> 1) << 1;
+		exposure.frame(ImageRectangle(exposure.origin(),
+			ImageSize(w, h)));
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure %s",
 		exposure.toString().c_str());
@@ -100,12 +108,17 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	roi.mode = exposure.mode();
 	roi.img_type = string2imgtype(imgtypename());
 	_camera.setROIFormat(roi);
+
+	// set start position
+	int	y = (info.size().height() - 1) - (origin.y() + roi.size.height());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set start: %s",
 		origin.toString().c_str());
-	_camera.setStartPos(origin);
+	_camera.setStartPos(ImagePoint(origin.x(), y));
+	//_camera.setStartPos(origin);
 
 	// set the exposure time
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure time: %.3f",
+		exposure.exposuretime());
 	AsiControlValue	value;
 	value.type = AsiExposure;
 	value.value = 1000000 * exposure.exposuretime();
@@ -113,6 +126,7 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	_camera.setControlValue(value);
 
 	// XXX set the gain
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "exposure settings complete");
 }
 
 /**
@@ -153,23 +167,23 @@ CcdState::State	AsiCcd::exposureStatus() {
 	ASI_EXPOSURE_STATUS	status = _camera.getExpStatus();
 	switch (status) {
 	case ASI_EXP_IDLE:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is IDLE/idle",
-			name().toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is IDLE/idle",
+		//	name().toString().c_str());
 		state(CcdState::idle);
 		return CcdState::idle;
 	case ASI_EXP_WORKING:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is WORKING/exposing",
-			name().toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is WORKING/exposing",
+		//	name().toString().c_str());
 		state(CcdState::exposing);
 		return CcdState::exposing;
 	case ASI_EXP_SUCCESS:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is SUCCESS/exposed",
-			name().toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is SUCCESS/exposed",
+		//	name().toString().c_str());
 		state(CcdState::exposed);
 		return CcdState::exposed;
 	case ASI_EXP_FAILED:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/exposed",
-			name().toString().c_str());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "%s is FAILED/exposed",
+		//	name().toString().c_str());
 		state(CcdState::exposed);
 		return CcdState::exposed;
 	}

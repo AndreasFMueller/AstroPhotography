@@ -454,9 +454,10 @@ void	AsiCamera::setROIFormat(const roi_t roi) {
 	ASI_ERROR_CODE	rc = ASISetROIFormat(_id, roi.size.width(),
 				roi.size.height(), iBin, roi.img_type);
 	if (ASI_SUCCESS != rc) {
-		std::string	msg = stringprintf("cannot set ROI %s, %s, %d",
+		std::string	msg = stringprintf("cannot set ROI %s, %s, %d: %s",
 			roi.size.toString().c_str(),
-			roi.mode.toString().c_str(), roi.img_type);
+			roi.mode.toString().c_str(), roi.img_type,
+			error(rc).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
@@ -496,6 +497,8 @@ void    AsiCamera::setStartPos(const ImagePoint& point) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw AsiApiException(rc, msg);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start position set to %d,%d",
+		point.x(), point.y());
 }
 
 /**
