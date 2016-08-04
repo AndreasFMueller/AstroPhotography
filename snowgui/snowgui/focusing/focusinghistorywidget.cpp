@@ -19,6 +19,12 @@ focusinghistorywidget::focusinghistorywidget(QWidget *parent)
 		this, SLOT(byPosition(bool)));
 	connect(ui->sequenceRadioButton, SIGNAL(clicked(bool)),
 		this, SLOT(bySequence(bool)));
+
+	connect(ui->measureFWHMButton, SIGNAL(clicked(bool)),
+		this, SLOT(useFWHM(bool)));
+	connect(ui->measureBrennerButton, SIGNAL(clicked(bool)),
+		this, SLOT(useBrenner(bool)));
+
 	connect(ui->clearButton, SIGNAL(clicked()),
 		this, SLOT(clear()));
 	connect(ui->focuspointsWidget, SIGNAL(positionSelected(int)),
@@ -71,6 +77,22 @@ void	focusinghistorywidget::bySequence(bool b) {
  */
 void	focusinghistorywidget::didSelectPosition(int p) {
 	emit positionSelected(p);
+}
+
+/**
+ *\brief make sure the focuspointsWidgets uses Brenner measure
+ */
+void	focusinghistorywidget::useBrenner(bool b) {
+	if (!b) { return; }
+	ui->focuspointsWidget->setUseFWHM(true);
+}
+
+/**
+ *\brief make sure the focuspointsWidgets uses FWHM measure
+ */
+void	focusinghistorywidget::useFWHM(bool b) {
+	if (!b) { return; }
+	ui->focuspointsWidget->setUseFWHM(false);
 }
 
 } // namespace snowgui

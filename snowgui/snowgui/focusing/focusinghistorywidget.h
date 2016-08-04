@@ -32,8 +32,13 @@ private:
 
 public slots:
 	void	clear();
+
 	void	byPosition(bool);
 	void	bySequence(bool);
+
+	void	useBrenner(bool);
+	void	useFWHM(bool);
+
 	void	didSelectPosition(int);
 };
 
