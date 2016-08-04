@@ -25,6 +25,7 @@ FORMS    +=								\
 	ccdcontrollerwidget.ui						\
 	focusercontrollerwidget.ui					\
 	filterwheelcontrollerwidget.ui					\
+	guiderportcontrollerwidget.ui					\
 	coolercontrollerwidget.ui
 
 WIDGETSOURCES =								\
@@ -32,6 +33,7 @@ WIDGETSOURCES =								\
 	ccdcontrollerwidget.cpp						\
 	focusercontrollerwidget.cpp					\
 	filterwheelcontrollerwidget.cpp					\
+	guiderportcontrollerwidget.cpp					\
 	coolercontrollerwidget.cpp
 
 WIDGETHEADERS =								\
@@ -39,6 +41,7 @@ WIDGETHEADERS =								\
 	imagedisplaywidget.h						\
 	focusercontrollerwidget.h					\
 	filterwheelcontrollerwidget.h					\
+	guiderportcontrollerwidget.h					\
 	coolercontrollerwidget.h	
 
 SOURCES += 								\
