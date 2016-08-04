@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroFilterfunc.h>
 #include <AstroFormat.h>
+#include <AstroFWHM.h>
 
 using namespace astro::image;
 
@@ -26,8 +27,13 @@ FocusPoint::FocusPoint(astro::image::ImagePtr image, unsigned short position)
 	// XXX denominator, but that makes the values too small.
 	// XXX So we need a more reasonable rescaling method
 	_brenner = filter::focus_squaredbrenner(image) / _l1norm;
-	// XXX here we should add extracton of the FWHM
-	_fwhm = 100. * random() / 2147483647.;
+	// use the classes in AstroFWHM.h to compute the FWHM
+	if (image->size().getPixels() < 200 * 200) {
+		fwhm::ComponentDecomposer	decomposer(image, false);
+		_fwhm = 2 * decomposer.maxradius();
+	} else {
+		_fwhm = 0.;
+	}
 	// set the time
 	_when = astro::Timer::gettime();
 }

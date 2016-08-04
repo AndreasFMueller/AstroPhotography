@@ -9,7 +9,7 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroIO.h AstroPixel.h AstroUSB.h AstroUVC.h AstroUnicap.h \
 	AstroUtils.h AstroMosaic.h AstroDemosaic.h AstroAdapter.h \
 	AstroFilter.h AstroFilterfunc.h AstroCalibration.h \
-	AstroOperations.h AstroTransform.h \
+	AstroOperations.h AstroTransform.h AstroFWHM.h \
 	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
 	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h \
 	AstroFocus.h AstroViewer.h AstroTonemapping.h \

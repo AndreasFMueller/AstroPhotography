@@ -1276,6 +1276,11 @@ public:
 	ImagePtr	operator()(const ImagePtr image) const;
 };
 
+/**
+ * \brief Compute a list of all points where the pixel value is maximal
+ */
+std::list<ImagePoint>	Maxima(ImagePtr image, unsigned long limit = 10);
+
 } // namespace image
 } // namespace astro
 

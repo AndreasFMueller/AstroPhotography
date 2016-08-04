@@ -580,6 +580,7 @@ public:
 	FWHMInfo	filter_extended(const ConstImageAdapter<Pixel>& image);
 };
 
+extern double	MinRadius(const std::list<ImagePoint>& points, Point& center);
 extern double	MinRadius(const std::list<ImagePoint>& points, ImagePoint& center);
 extern double	MinRadius(const std::list<ImagePoint>& points);
 

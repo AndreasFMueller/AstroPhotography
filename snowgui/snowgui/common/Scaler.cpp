@@ -7,34 +7,37 @@
 
 namespace snowgui {
 
-void	Scaler::setup(double bottommargin) {
+void	Scaler::setup(double leftmargin, double bottommargin) {
 	if (_maxx == _minx) {
 		_maxx = _minx + 1;
 	}
 	if (_maxy == _miny) {
 		_maxy = _miny + 1;
 	}
-	_scalex = (_width - 6) / (_maxx - _minx);
+	_scalex = (_width - 6 - leftmargin) / (_maxx - _minx);
 	_scaley = (_height - 6 - bottommargin) / (_maxy - _miny);
+	_leftmargin = leftmargin;
 	_bottommargin = bottommargin;
 }
 
-Scaler::Scaler(double width, double height, double bottommargin) {
+Scaler::Scaler(double width, double height,
+	double leftmargin, double bottommargin) {
 	_minx = 0; _maxx = width;
 	_miny = 0; _maxy = height;
 	_width = width; _height = height;
-	setup(bottommargin);
+	setup(leftmargin, bottommargin);
 }
 
 Scaler::Scaler(double minx, double maxx, double miny, double maxy,
-	double width, double height, double bottommargin)
+	double width, double height,
+	double leftmargin, double bottommargin)
 	: _minx(minx), _maxx(maxx), _miny(miny), _maxy(maxy),
 	  _width(width), _height(height) {
-	setup(bottommargin);
+	setup(leftmargin, bottommargin);
 }
 
 double	Scaler::x(double _x) const {
-	return 3 + _scalex * (_x - _minx);
+	return 3 + _scalex * (_x - _minx) + _leftmargin;
 }
 
 double	Scaler::y(double _y) const {
@@ -50,7 +53,7 @@ QPoint	Scaler::operator()(const QPoint& p) const {
 }
 
 QPoint	Scaler::inverse(const QPoint& p) const {
-	double	x = _minx + (p.x() - 3.) / _scalex;
+	double	x = _minx + (p.x() - _leftmargin - 3.) / _scalex;
 	double	y = _miny + (_height - 4 - (p.y() - _bottommargin)) / _scaley;
 	return QPoint(x, y);
 }

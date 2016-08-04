@@ -51,6 +51,7 @@ libastroimage_la_SOURCES = 						\
 	FocusFilterfunc.cpp						\
 	FourierImage.cpp						\
 	Functions.cpp							\
+	FWHM.cpp							\
 	GaussImage.cpp							\
 	GaussNoiseAdapter.cpp						\
 	Histogram.cpp							\
@@ -72,6 +73,7 @@ libastroimage_la_SOURCES = 						\
 	Layer.cpp							\
 	LevelMaskExtractor.cpp						\
 	Masks.cpp							\
+	Maxima.cpp							\
 	Metavalue.cpp							\
 	MinRadius.cpp							\
 	MosaicType.cpp							\
