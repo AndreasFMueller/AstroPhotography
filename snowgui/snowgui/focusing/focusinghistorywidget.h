@@ -35,6 +35,7 @@ public slots:
 
 	void	byPosition(bool);
 	void	bySequence(bool);
+	void	byTime(bool);
 
 	void	useBrenner(bool);
 	void	useFWHM(bool);

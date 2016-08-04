@@ -56,13 +56,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>204</height>
+          <height>291</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>204</height>
+          <height>291</height>
          </size>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -83,13 +83,13 @@
            <property name="minimumSize">
             <size>
              <width>360</width>
-             <height>204</height>
+             <height>291</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>1000000</width>
-             <height>204</height>
+             <height>291</height>
             </size>
            </property>
           </widget>
@@ -106,13 +106,13 @@
            <property name="minimumSize">
             <size>
              <width>320</width>
-             <height>204</height>
+             <height>291</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>325</width>
-             <height>204</height>
+             <height>291</height>
             </size>
            </property>
            <widget class="snowgui::focusscancontroller" name="scanWidget">
@@ -210,7 +210,7 @@
           <string>Filterwheel</string>
          </attribute>
         </widget>
-        <widget class="QWidget" name="guiderportcontrollerWidget" native="true">
+        <widget class="snowgui::guiderportcontrollerwidget" name="guiderportcontrollerWidget" native="true">
          <attribute name="label">
           <string>Guide Port</string>
          </attribute>
@@ -269,6 +269,12 @@
    <class>snowgui::focusinghistorywidget</class>
    <extends>QWidget</extends>
    <header>focusinghistorywidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::guiderportcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">guiderportcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

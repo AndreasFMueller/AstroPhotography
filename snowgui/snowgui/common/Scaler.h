@@ -30,8 +30,7 @@ public:
 	QPoint	operator()(double _x, double _y) const;
 	QPoint	operator()(const QPoint& p) const;
 	QPoint	inverse(const QPoint& p) const;
-	pointlist	listWithPosition(const std::vector<FocusPoint>& fpv) const;
-	pointlist	listWithSequence(const std::vector<FocusPoint>& fpv);
+	pointlist	list(const std::vector<FocusRawPoint>& fpv) const;
 	double	bottommargin() const;
 	void	bottommargin(double b);
 	std::string	toString() const;

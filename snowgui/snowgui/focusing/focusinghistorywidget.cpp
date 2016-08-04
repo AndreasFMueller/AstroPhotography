@@ -19,6 +19,8 @@ focusinghistorywidget::focusinghistorywidget(QWidget *parent)
 		this, SLOT(byPosition(bool)));
 	connect(ui->sequenceRadioButton, SIGNAL(clicked(bool)),
 		this, SLOT(bySequence(bool)));
+	connect(ui->timeRadioButton, SIGNAL(clicked(bool)),
+		this, SLOT(byTime(bool)));
 
 	connect(ui->measureFWHMButton, SIGNAL(clicked(bool)),
 		this, SLOT(useFWHM(bool)));
@@ -61,7 +63,7 @@ void	focusinghistorywidget::clear() {
  */
 void	focusinghistorywidget::byPosition(bool b) {
 	if (!b) { return; }
-	ui->focuspointsWidget->setByPosition(true);
+	ui->focuspointsWidget->setOrder(FocusPointOrder::position);
 }
 
 /**
@@ -69,7 +71,12 @@ void	focusinghistorywidget::byPosition(bool b) {
  */
 void	focusinghistorywidget::bySequence(bool b) {
 	if (!b) { return; }
-	ui->focuspointsWidget->setByPosition(false);
+	ui->focuspointsWidget->setOrder(FocusPointOrder::sequence);
+}
+
+void	focusinghistorywidget::byTime(bool b) {
+	if (!b) { return; }
+	ui->focuspointsWidget->setOrder(FocusPointOrder::time);
 }
 
 /**
@@ -84,7 +91,7 @@ void	focusinghistorywidget::didSelectPosition(int p) {
  */
 void	focusinghistorywidget::useBrenner(bool b) {
 	if (!b) { return; }
-	ui->focuspointsWidget->setUseFWHM(true);
+	ui->focuspointsWidget->setMeasure(FocusPointMeasure::brenner);
 }
 
 /**
@@ -92,7 +99,7 @@ void	focusinghistorywidget::useBrenner(bool b) {
  */
 void	focusinghistorywidget::useFWHM(bool b) {
 	if (!b) { return; }
-	ui->focuspointsWidget->setUseFWHM(false);
+	ui->focuspointsWidget->setMeasure(FocusPointMeasure::fwhm);
 }
 
 } // namespace snowgui

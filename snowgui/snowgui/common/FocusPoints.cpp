@@ -25,12 +25,47 @@ FocusPoint::FocusPoint(astro::image::ImagePtr image, unsigned short position)
 	// XXX we would rather like to have the square of _l1norm in the 
 	// XXX denominator, but that makes the values too small.
 	// XXX So we need a more reasonable rescaling method
-	_focusvalue = filter::focus_squaredbrenner(image) / _l1norm;
+	_brenner = filter::focus_squaredbrenner(image) / _l1norm;
+	// XXX here we should add extracton of the FWHM
+	_fwhm = 100. * random() / 2147483647.;
+	// set the time
+	_when = astro::Timer::gettime();
 }
 
 std::string	FocusPoint::toString() const {
-	return astro::stringprintf("%d: l1=%f, f=%f, pos=%hu, when=%f",
-		_sequence, _l1norm, _focusvalue, _position, _when);
+	return astro::stringprintf("%d: l1=%f, fwhm=%f, brenner=%g, pos=%hu, when=%f",
+		_sequence, _l1norm, _fwhm, _brenner, _position, _when);
+}
+
+//////////////////////////////////////////////////////////////////////
+// FocusRawPointExtractor
+//////////////////////////////////////////////////////////////////////
+FocusRawPoint   FocusRawPointExtractor::operator()(const FocusPoint& p) const {
+	double	x, y;
+	switch (_order) {
+	case FocusPointOrder::position:
+		x = p.position();
+		break;
+	case FocusPointOrder::sequence:
+		x = p.sequence();
+		break;
+	case FocusPointOrder::time:
+		x = p.when();
+		break;
+	default:
+		throw std::logic_error("unknown order type");
+	}
+	switch (_measure) {
+	case FocusPointMeasure::fwhm:
+		y = p.fwhm();
+		break;
+	case FocusPointMeasure::brenner:
+		y = p.brenner();
+		break;
+	default:
+		throw std::logic_error("unknown measure type");
+	}
+	return FocusRawPoint(x, y);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -52,128 +87,105 @@ void	FocusPoints::add(ImagePtr image, unsigned short position) {
 	add(FocusPoint(image, position));
 }
 
-double	FocusPoints::minwhen() const {
-	double	t = std::numeric_limits<double>::max();
+bool	xcomparator(const FocusRawPoint& a, const FocusRawPoint& b) {
+	return a.x() < b.x();
+}
+
+std::vector<FocusRawPoint>	FocusPoints::sort(const FocusRawPointExtractor& extractor) const {
+	std::vector<FocusRawPoint>	result;
+	std::for_each(begin(), end(), 
+		[&extractor,&result](const FocusPoint& p) {
+			result.push_back(extractor(p));
+		}
+	);
+	std::sort(result.begin(), result.end(), xcomparator);
+	return result;
+}
+
+/*
+ * \brief Determineminimum x value of an Extractor
+ */
+double	FocusPoints::min(const FocusRawValueExtractor& extractor) const {
+	double	result = std::numeric_limits<double>::max();
 	std::for_each(begin(), end(),
-		[t](const FocusPoint& f) mutable {
-			if (f.when() < t) {
-				t = f.when();
+		[&extractor,&result](const FocusPoint& p) mutable {
+			double	v = extractor.value(p);
+			if (v < result) {
+				result = v;
 			}
 		}
 	);
-	return t;
+	return result;
+}
+
+double	FocusPoints::min(FocusPointOrder::order_t order) const {
+	FocusRawXValueExtractor	extractor(order);
+	return min(extractor);
+}
+
+double	FocusPoints::minwhen() const {
+	return min(FocusPointOrder::time);
+}
+double	FocusPoints::minposition() const {
+	return min(FocusPointOrder::position);
+}
+double	FocusPoints::minsequence() const {
+	return min(FocusPointOrder::sequence);
+}
+
+double	FocusPoints::min(FocusPointMeasure::measure_t measure) const {
+	FocusRawYValueExtractor	extractor(measure);
+	return min(extractor);
+}
+
+double	FocusPoints::minfwhm() const {
+	return min(FocusPointMeasure::fwhm);
+}
+double	FocusPoints::minbrenner() const {
+	return min(FocusPointMeasure::brenner);
+}
+
+/*
+ * \brief Determinemaximum x value of an Extractor
+ */
+double	FocusPoints::max(const FocusRawValueExtractor& extractor) const {
+	double	result = std::numeric_limits<double>::min();
+	std::for_each(begin(), end(),
+		[&extractor,&result](const FocusPoint& p) mutable {
+			double	v = extractor.value(p);
+			if (v > result) {
+				result = v;
+			}
+		}
+	);
+	return result;
+}
+
+double	FocusPoints::max(FocusPointOrder::order_t order) const {
+	FocusRawXValueExtractor	extractor(order);
+	return max(extractor);
 }
 
 double	FocusPoints::maxwhen() const {
-	double	t = 0;
-	std::for_each(begin(), end(),
-		[t](const FocusPoint& f) mutable {
-			if (f.when() > t) {
-				t = f.when();
-			}
-		}
-	);
-	return t;
+	return max(FocusPointOrder::time);
+}
+double	FocusPoints::maxposition() const {
+	return max(FocusPointOrder::position);
+}
+double	FocusPoints::maxsequence() const {
+	return max(FocusPointOrder::sequence);
 }
 
-unsigned short	FocusPoints::minposition() const {
-	unsigned short	m = std::numeric_limits<unsigned short>::max();
-	std::for_each(begin(), end(),
-		[&m](const FocusPoint& f) mutable {
-			if (f.position() < m) {
-				m = f.position();
-			}
-		}
-	);
-	return m;
+double	FocusPoints::max(FocusPointMeasure::measure_t measure) const {
+	FocusRawYValueExtractor	extractor(measure);
+	return max(extractor);
 }
 
-unsigned short	FocusPoints::maxposition() const {
-	unsigned short	m = std::numeric_limits<unsigned short>::min();
-	std::for_each(begin(), end(),
-		[&m](const FocusPoint& f) mutable {
-			if (f.position() > m) {
-				m = f.position();
-			}
-		}
-	);
-	return m;
+double	FocusPoints::maxfwhm() const {
+	return max(FocusPointMeasure::fwhm);
 }
-
-int	FocusPoints::minsequence() const {
-	int	s = std::numeric_limits<int>::max();
-	std::for_each(begin(), end(),
-		[&s](const FocusPoint& f) mutable {
-			if (f.sequence() < s) {
-				s = f.sequence();
-			}
-		}
-	);
-	return s;
-}
-
-int	FocusPoints::maxsequence() const {
-	int	s = std::numeric_limits<int>::min();
-	std::for_each(begin(), end(),
-		[&s](const FocusPoint& f) mutable {
-			if (f.sequence() > s) {
-				s = f.sequence();
-			}
-		}
-	);
-	return s;
-}
-
-double	FocusPoints::minfocus() const {
-	double	v = std::numeric_limits<double>::max();
-	std::for_each(begin(), end(),
-		[&v](const FocusPoint& f) mutable {
-			if (f.focusvalue() < v) {
-				v = f.focusvalue();
-			}
-		}
-	);
-	return v;
-}
-
-double	FocusPoints::maxfocus() const {
-	double	v = 0;
-	std::for_each(begin(), end(),
-		[&v](const FocusPoint& f) mutable {
-			if (f.focusvalue() > v) {
-				v = f.focusvalue();
-			}
-		}
-	);
-	return v;
-}
-
-class sequencecomparator {
-public:
-	bool operator()(const FocusPoint& a, const FocusPoint& b) {
-		return a.sequence() < b.sequence();
-	}
-};
-
-class positioncomparator {
-public:
-	bool operator()(const FocusPoint& a, const FocusPoint& b) {
-		return a.position() < b.position();
-	}
-};
-
-std::vector<FocusPoint>	FocusPoints::sortBySequence() const {
-	std::vector<FocusPoint>	result;
-	std::copy(begin(), end(), back_inserter(result));
-	std::sort(result.begin(), result.end(), sequencecomparator());
-	return result;
-}
-
-std::vector<FocusPoint>	FocusPoints::sortByPosition() const {
-	std::vector<FocusPoint>	result;
-	std::copy(begin(), end(), back_inserter(result));
-	std::sort(result.begin(), result.end(), positioncomparator());
-	return result;
+double	FocusPoints::maxbrenner() const {
+	return max(FocusPointMeasure::brenner);
 }
 
 } // namespace snowgui

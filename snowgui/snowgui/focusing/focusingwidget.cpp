@@ -62,6 +62,7 @@ void	focusingwidget::instrumentSetup(
 	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->guiderportcontrollerWidget->instrumentSetup(serviceobject, instrument);
 
 }
 

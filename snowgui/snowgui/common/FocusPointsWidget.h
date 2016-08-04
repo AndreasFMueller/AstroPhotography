@@ -17,8 +17,8 @@ class FocusPointsWidget : public QWidget {
 
 protected:
 	FocusPoints	_focuspoints;
-	bool	_byposition;
-	bool	_usefwhm;
+	FocusPointOrder::order_t	_order;
+	FocusPointMeasure::measure_t	_measure;
 
 private:
 	Scaler	scaler;
@@ -28,9 +28,10 @@ public:
 	~FocusPointsWidget();
 
 	void	add(astro::image::ImagePtr, unsigned short position);
-	bool	byposition() const { return _byposition; }
 
 	void	paintEvent(QPaintEvent *event);
+	void	setOrder(FocusPointOrder::order_t);
+	void	setMeasure(FocusPointMeasure::measure_t);
 
 protected:
 	int	showPositionAsTooltip(QMouseEvent *);
@@ -42,14 +43,10 @@ signals:
 
 private:
 	void	drawPoints(QPainter& painter, const Scaler::pointlist& pl);
-	void	drawBySequence(QPainter& painter);
-	void	drawByPosition(QPainter& painter);
 	void	draw();
 
 public slots:
 	void	clear();
-	void	setByPosition(bool b);
-	void	setUseFWHM(bool b);
 };
 
 } // namespace snowgui

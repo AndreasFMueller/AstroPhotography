@@ -55,31 +55,19 @@ QPoint	Scaler::inverse(const QPoint& p) const {
 	return QPoint(x, y);
 }
 
-Scaler::pointlist	Scaler::listWithPosition(
-				const std::vector<FocusPoint>& fpv) const {
+Scaler::pointlist	Scaler::list(const std::vector<FocusRawPoint>& fpv) const {
 	pointlist	result;
-	std::vector<FocusPoint>::const_iterator	i;
+	std::vector<FocusRawPoint>::const_iterator	i;
 	for (i = fpv.begin(); i != fpv.end(); i++) {
-		QPoint	p(i->position(), i->focusvalue());
-		result.push_back((*this)(p));
-	}
-	return result;
-}
-
-Scaler::pointlist	Scaler::listWithSequence(
-				const std::vector<FocusPoint>& fpv) {
-	pointlist	result;
-	std::vector<FocusPoint>::const_iterator	i;
-	for (i = fpv.begin(); i != fpv.end(); i++) {
-		QPoint	p(i->sequence(), i->focusvalue());
+		QPoint	p(i->x(), i->y());
 		result.push_back((*this)(p));
 	}
 	return result;
 }
 
 std::string	Scaler::toString() const {
-	return astro::stringprintf("minx = %f, maxx = %f, "
-		"miny = %f, maxy = %f, width = %f, height = %f",
+	return astro::stringprintf("minx = %g, maxx = %g, "
+		"miny = %g, maxy = %g, width = %g, height = %g",
 		_minx, _maxx, _miny, _maxy, _width, _height);
 }
 

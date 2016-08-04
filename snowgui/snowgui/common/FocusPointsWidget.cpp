@@ -18,8 +18,8 @@ namespace snowgui {
  * \brief Construct a widget
  */
 FocusPointsWidget::FocusPointsWidget(QWidget *parent) : QWidget(parent) {
-	_byposition = true;
-	_usefwhm = true;
+	_order = FocusPointOrder::position;
+	_measure = FocusPointMeasure::fwhm;
 	setMouseTracking(true);
 }
 
@@ -67,47 +67,6 @@ void	FocusPointsWidget::drawPoints(QPainter& painter,
 }
 
 /**
- * \brief Draw the focus points by position
- */
-void	FocusPointsWidget::drawByPosition(QPainter& painter) {
-	int	minposition = _focuspoints.minposition();
-	int	maxposition = _focuspoints.maxposition();
-	scaler = Scaler(minposition, maxposition,
-			_focuspoints.minfocus(), _focuspoints.maxfocus(),
-			width(), height(), 20);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points, scaler: %s",
-		_focuspoints.size(), scaler.toString().c_str());
-	Scaler::pointlist	pl
-		= scaler.listWithPosition(_focuspoints.sortByPosition());
-	drawPoints(painter, pl);
-
-	if (_focuspoints.size() < 2) {
-		return;
-	}
-	QRect	r(QPoint(3, height() - 15 - 3), QSize(width() - 6, 20));
-	QString	leftlabel = QString::number(minposition);
-	painter.drawText(r, Qt::AlignLeft, leftlabel);
-	QString	rightlabel = QString::number(maxposition);
-	painter.drawText(r, Qt::AlignRight, rightlabel);
-}
-
-/**
- * \brief Draw the focus points by sequence
- */
-void	FocusPointsWidget::drawBySequence(QPainter& painter) {
-	int	minsequence = _focuspoints.minsequence();
-	int	maxsequence = _focuspoints.maxsequence();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "range: %d - %d",
-		minsequence, maxsequence);
-	scaler = Scaler(minsequence, maxsequence,
-			_focuspoints.minfocus(), _focuspoints.maxfocus(),
-			width(), height(), 0);
-	Scaler::pointlist	pl
-		= scaler.listWithSequence(_focuspoints.sortBySequence());
-	drawPoints(painter, pl);
-}
-
-/**
  * \brief Common draw function
  */
 void	FocusPointsWidget::draw() {
@@ -118,10 +77,31 @@ void	FocusPointsWidget::draw() {
 	pen.setColor(QColor(0., 0., 255.));
 	painter.setPen(pen);
 
-	if (_byposition) {
-		drawByPosition(painter);
-	} else {
-		drawBySequence(painter);
+	double	bottommargin = 0;
+	if (_order == FocusPointOrder::position) {
+		bottommargin = 20;
+	}
+
+	int	minx = _focuspoints.min(_order);
+	int	maxx = _focuspoints.max(_order);
+	scaler = Scaler(minx, maxx,
+			_focuspoints.min(_measure), _focuspoints.max(_measure),
+			width(), height(), bottommargin);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points, scaler: %s",
+		_focuspoints.size(), scaler.toString().c_str());
+	FocusRawPointExtractor	extractor(_order, _measure);
+	Scaler::pointlist	pl = scaler.list(_focuspoints.sort(extractor));
+	drawPoints(painter, pl);
+
+	if (bottommargin > 0) {
+		if (_focuspoints.size() < 2) {
+			return;
+		}
+		QRect	r(QPoint(3, height() - 15 - 3), QSize(width() - 6, 20));
+		QString	leftlabel = QString::number(minx);
+		painter.drawText(r, Qt::AlignLeft, leftlabel);
+		QString	rightlabel = QString::number(maxx);
+		painter.drawText(r, Qt::AlignRight, rightlabel);
 	}
 }
 
@@ -151,7 +131,7 @@ int	FocusPointsWidget::showPositionAsTooltip(QMouseEvent *event) {
  * position in the image
  */
 void	FocusPointsWidget::mousePressEvent(QMouseEvent *event) {
-	if (!_byposition) {
+	if (_order != FocusPointOrder::position) {
 		return;
 	}
 	if (_focuspoints.size() < 2) {
@@ -169,7 +149,7 @@ void	FocusPointsWidget::mousePressEvent(QMouseEvent *event) {
  * showPositionAsTooltip method.
  */
 void	FocusPointsWidget::mouseMoveEvent(QMouseEvent *event) {
-	if (!_byposition) {
+	if (_order != FocusPointOrder::position) {
 		return;
 	}
 	if (_focuspoints.size() < 2) {
@@ -189,22 +169,22 @@ void	FocusPointsWidget::clear() {
 /**
  * \brief Switch between position/sequence display
  */
-void	FocusPointsWidget::setByPosition(bool b) {
-	if (b == _byposition) {
+void	FocusPointsWidget::setOrder(FocusPointOrder::order_t order) {
+	if (_order == order) {
 		return;
 	}
-	_byposition = b;
+	_order = order;
 	repaint();
 }
 
 /**
  * \brief Switch between using FWHM and Brenner measure
  */
-void	FocusPointsWidget::setUseFWHM(bool b) {
-	if (b == _usefwhm) {
+void	FocusPointsWidget::setMeasure(FocusPointMeasure::measure_t measure) {
+	if (_measure == measure) {
 		return;
 	}
-	_usefwhm = b;
+	_measure = measure;
 	repaint();
 }
 
