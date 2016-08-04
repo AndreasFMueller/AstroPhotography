@@ -31,7 +31,7 @@ guiderportcontrollerwidget::guiderportcontrollerwidget(QWidget *parent)
 		this, SLOT(changeActivationTime(double)));
 
 	// set default activation time
-	_activationtime = 0;
+	_activationtime = 5;
 }
 
 guiderportcontrollerwidget::~guiderportcontrollerwidget() {
