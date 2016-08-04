@@ -19,6 +19,7 @@ namespace snowgui {
  */
 FocusPointsWidget::FocusPointsWidget(QWidget *parent) : QWidget(parent) {
 	_byposition = true;
+	_usefwhm = true;
 	setMouseTracking(true);
 }
 
@@ -193,6 +194,17 @@ void	FocusPointsWidget::setByPosition(bool b) {
 		return;
 	}
 	_byposition = b;
+	repaint();
+}
+
+/**
+ * \brief Switch between using FWHM and Brenner measure
+ */
+void	FocusPointsWidget::setUseFWHM(bool b) {
+	if (b == _usefwhm) {
+		return;
+	}
+	_usefwhm = b;
 	repaint();
 }
 

@@ -18,6 +18,7 @@ class FocusPointsWidget : public QWidget {
 protected:
 	FocusPoints	_focuspoints;
 	bool	_byposition;
+	bool	_usefwhm;
 
 private:
 	Scaler	scaler;
@@ -48,6 +49,7 @@ private:
 public slots:
 	void	clear();
 	void	setByPosition(bool b);
+	void	setUseFWHM(bool b);
 };
 
 } // namespace snowgui
