@@ -3,16 +3,16 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _logspingbox_h
-#define _logspingbox_h
+#ifndef _LogSpinBox_h
+#define _LogSpinBox_h
 
 #include <QDoubleSpinBox>
+
+namespace snowgui {
 
 class LogSpinBox : public QDoubleSpinBox {
 	Q_OBJECT
 
-	int	exponent;
-	double	step;
 private:
 	double	upstep();
 	double	downstep();
@@ -21,4 +21,6 @@ public:
 	virtual void stepBy(int steps);
 };
 
-#endif /* _logspinbox_h */
+} // namespace snowgui
+
+#endif /* _LogSpinBox_h */

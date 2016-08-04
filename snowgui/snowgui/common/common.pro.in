@@ -45,6 +45,7 @@ SOURCES += 								\
 	Image2Pixmap.cpp						\
 	Histogram.cpp							\
 	AutoGain.cpp							\
+	LogSpinBox.cpp							\
 	SelectableImage.cpp						\
 	InstrumentWidget.cpp						\
 	FocusPoints.cpp							\
@@ -57,6 +58,7 @@ HEADERS  += 								\
 	Image2Pixmap.h							\
 	Histogram.h							\
 	AutoGain.h							\
+	LogSpinBox.h							\
 	SelectableImage.h						\
 	InstrumentWidget.h						\
 	FocusPoints.h							\

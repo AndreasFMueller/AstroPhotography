@@ -69,12 +69,15 @@
        <number>0</number>
       </property>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="exposureSpinBox">
+       <widget class="snowgui::LogSpinBox" name="exposureSpinBox">
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
         <property name="decimals">
          <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
         </property>
         <property name="maximum">
          <double>3600.000000000000000</double>
@@ -350,6 +353,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::LogSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header location="global">LogSpinBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <slots>

@@ -28,7 +28,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	connect(ui->ccdSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(ccdChanged(int)));
 
-	connect(ui->exposureSpinBox, SIGNAL(valueChanged()),
+	connect(ui->exposureSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(guiChanged()));
 	connect(ui->binningSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiChanged()));
@@ -302,6 +302,7 @@ void	ccdcontrollerwidget::setBinning(Binning b) {
  * This method does not send any signals
  */
 void	ccdcontrollerwidget::displayExposureTime(double t) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new exposure time: %.3f", t);
 	_exposure.exposuretime(t);
 	ui->exposureSpinBox->blockSignals(true);
 	ui->exposureSpinBox->setValue(t);
@@ -440,6 +441,8 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
  */
 void	ccdcontrollerwidget::captureClicked() {
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure with time=%.3f",
+			_exposure.exposuretime());
 		_ccd->startExposure(snowstar::convert(_exposure));
 		ourexposure = true;
 		ui->captureButton->setEnabled(false);
