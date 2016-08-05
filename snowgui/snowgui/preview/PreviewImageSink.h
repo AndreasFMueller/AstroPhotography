@@ -9,6 +9,8 @@
 #include <camera.h>
 #include <previewwindow.h>
 
+namespace snowgui {
+
 class PreviewImageSink : public snowstar::ImageSink {
 	PreviewWindow	*_preview;
 public:
@@ -18,5 +20,7 @@ public:
 			const Ice::Current& current);
 	void	stop(const Ice::Current& current);
 };
+
+} // namespace snowgui
 
 #endif  /* _PreviewImageSink_h */

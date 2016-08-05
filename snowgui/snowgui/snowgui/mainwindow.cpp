@@ -11,6 +11,8 @@
 #include "instrumentselectiondialog.h"
 #include <previewwindow.h>
 #include <focusingwindow.h>
+#include <guidingwindow.h>
+#include <QMessageBox>
 
 using namespace astro::discover;
 
@@ -20,6 +22,20 @@ MainWindow::MainWindow(QWidget *parent,
 	  ui(new Ui::MainWindow) {
 	// create user interface components
 	ui->setupUi(this);
+
+	// connect buttons
+	connect(ui->appPreviewButton, SIGNAL(clicked()),
+		this, SLOT(laucnhPreview()));
+	connect(ui->appFocusingButton, SIGNAL(clicked()),
+		this, SLOT(laucnhFocusing()));
+	connect(ui->appGuidingButton, SIGNAL(clicked()),
+		this, SLOT(launchGuiding()));
+	connect(ui->appInstrumentsButton, SIGNAL(clicked()),
+		this, SLOT(launchInstruments()));
+	connect(ui->appRepositoryButton, SIGNAL(clicked()),
+		this, SLOT(launchRepository()));
+	connect(ui->appRepositoryButton, SIGNAL(clicked()),
+		this, SLOT(launchTasks()));
 
 	// initialize application specific stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main window with server %s",
@@ -36,7 +52,22 @@ MainWindow::MainWindow(QWidget *parent,
 	setServiceLabelEnabled(ServiceSubset::REPOSITORY);
 
 	// decide which services to enable
-	ui->appPreviewButton->setEnabled(true);
+	if (_serviceobject.has(ServiceSubset::INSTRUMENTS)) {
+		ui->appInstrumentsButton->setEnabled(true);
+		if (_serviceobject.has(ServiceSubset::DEVICES)) {
+			ui->appPreviewButton->setEnabled(true);
+			ui->appFocusingButton->setEnabled(true);
+			if (_serviceobject.has(ServiceSubset::GUIDING)) {
+				ui->appGuidingButton->setEnabled(true);
+			}
+		}
+	}
+	if (_serviceobject.has(ServiceSubset::REPOSITORY)) {
+		ui->appRepositoryButton->setEnabled(true);
+	}
+	if (_serviceobject.has(ServiceSubset::TASKS)) {
+		ui->appTasksButton->setEnabled(true);
+	}
 
 	// add menu
 	createActions();
@@ -45,19 +76,51 @@ MainWindow::MainWindow(QWidget *parent,
 
 void	MainWindow::launchPreview() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a preview subapplication");
-	InstrumentSelectionApplication<PreviewWindow>	*is
-		= new InstrumentSelectionApplication<PreviewWindow>(this, _serviceobject);
+	InstrumentSelectionApplication<snowgui::PreviewWindow>	*is
+		= new InstrumentSelectionApplication<snowgui::PreviewWindow>(this, _serviceobject);
 	is->setWindowTitle(QString("Select instrument for Preview application"));
 	is->exec();
 	delete is;
 }
 
 void	MainWindow::launchFocusing() {
-	InstrumentSelectionApplication<focusingwindow>	*is
-		= new InstrumentSelectionApplication<focusingwindow>(this, _serviceobject);
+	InstrumentSelectionApplication<snowgui::focusingwindow>	*is
+		= new InstrumentSelectionApplication<snowgui::focusingwindow>(this, _serviceobject);
 	is->setWindowTitle(QString("Select instrument for Focusing application"));
 	is->exec();
 	delete is;
+}
+
+void	MainWindow::launchGuiding() {
+	InstrumentSelectionApplication<snowgui::guidingwindow>	*is
+		= new InstrumentSelectionApplication<snowgui::guidingwindow>(this, _serviceobject);
+	is->setWindowTitle(QString("Select instrument for Guiding application"));
+	is->exec();
+	delete is;
+}
+
+void	MainWindow::launchInstruments() {
+	QMessageBox	*messagebox = new QMessageBox(this);
+	messagebox->setText(QString("Application not implemented"));
+	messagebox->setInformativeText(QString("The Instruments application is not yet implemented"));
+	messagebox->exec();
+	delete messagebox;
+}
+
+void	MainWindow::launchRepository() {
+	QMessageBox	*messagebox = new QMessageBox(this);
+	messagebox->setText(QString("Application not implemented"));
+	messagebox->setInformativeText(QString("The Repository application is not yet implemented"));
+	messagebox->exec();
+	delete messagebox;
+}
+
+void	MainWindow::launchTasks() {
+	QMessageBox	*messagebox = new QMessageBox(this);
+	messagebox->setText(QString("Application not implemented"));
+	messagebox->setInformativeText(QString("The Tasks application is not yet implemented"));
+	messagebox->exec();
+	delete messagebox;
 }
 
 void	MainWindow::connectFile() {

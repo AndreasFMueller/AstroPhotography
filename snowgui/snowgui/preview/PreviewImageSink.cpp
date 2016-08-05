@@ -8,6 +8,8 @@
 #include <IceConversions.h>
 #include "Image2Pixmap.h"
 
+namespace snowgui {
+
 PreviewImageSink::PreviewImageSink(PreviewWindow *preview)
 	: _preview(preview) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "preview image sink created");
@@ -36,3 +38,5 @@ void	PreviewImageSink::image(const snowstar::ImageQueueEntry& entry,
 void	PreviewImageSink::stop(const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop called");
 }
+
+} // namespace snowgui

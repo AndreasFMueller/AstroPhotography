@@ -23,7 +23,7 @@ class focusercontrollerwidget : public InstrumentWidget {
 
 	snowstar::FocuserPrx	_focuser;
 public:
-	explicit focusercontrollerwidget(QWidget *parent);
+	explicit focusercontrollerwidget(QWidget *parent = NULL);
 	~focusercontrollerwidget();
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,

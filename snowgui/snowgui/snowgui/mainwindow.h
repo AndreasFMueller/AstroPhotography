@@ -23,6 +23,10 @@ public:
 public slots:
 	void	launchPreview();
 	void	launchFocusing();
+	void	launchGuiding();
+	void	launchRepository();
+	void	launchInstruments();
+	void	launchTasks();
 
 private:
 	Ui::MainWindow *ui;

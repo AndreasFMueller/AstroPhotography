@@ -20,6 +20,8 @@ namespace Ui {
 	class PreviewWindow;
 }
 
+namespace snowgui {
+
 class PreviewWindow : public QWidget {
 	Q_OBJECT
 	astro::discover::ServiceKey	_servicekey;
@@ -89,5 +91,7 @@ private:
 	Ui::PreviewWindow *ui;
 	QTimer	*statusTimer;
 };
+
+} // namespace snowgui
 
 #endif // PREVIEWWINDOW_H

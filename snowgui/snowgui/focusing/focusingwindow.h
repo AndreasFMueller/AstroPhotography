@@ -12,6 +12,8 @@ namespace Ui {
 	class focusingwindow;
 }
 
+namespace snowgui {
+
 class focusingwindow : public snowgui::InstrumentWidget {
 	Q_OBJECT
 
@@ -29,5 +31,7 @@ public slots:
 	void	imageReceived();
 	void	rectangleSelected(astro::image::ImageRectangle);
 };
+
+} // namespace snowgui
 
 #endif // FOCUSINGWIDGET_H

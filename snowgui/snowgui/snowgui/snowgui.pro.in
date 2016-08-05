@@ -13,14 +13,16 @@ TEMPLATE = app
 ICEDIR = @ICEDIR@
 ASTROPATH = @ASTROPATH@
 
-LIBS += -L../common -lcommon -L../preview -lpreview
+LIBS += -L../common -lcommon
+LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
+LIBS += -L../guiding -lguiding
 LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
 LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common ../preview ../focusing
+INCLUDEPATH += ../common ../preview ../focusing ../guiding
 
 ASTROGUISOURCES = 							\
         mainwindow.cpp 							\

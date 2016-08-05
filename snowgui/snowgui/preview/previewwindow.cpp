@@ -17,6 +17,8 @@
 
 using namespace astro::discover;
 
+namespace snowgui {
+
 PreviewWindow::PreviewWindow(QWidget *parent)
 	: QWidget(parent), ui(new Ui::PreviewWindow) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting PreviewWindow");
@@ -642,3 +644,4 @@ void	PreviewWindow::guiderportActivated() {
 	}
 }
 
+} // namespace snowgui

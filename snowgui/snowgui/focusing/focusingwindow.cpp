@@ -13,6 +13,8 @@
 using namespace astro::image;
 using namespace astro::camera;
 
+namespace snowgui {
+
 /**
  * \brief Create a new focusing widget
  */
@@ -98,3 +100,5 @@ void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
 		rectangle.toString().c_str());
 	ui->ccdcontrollerWidget->setSubframe(rectangle);
 }
+
+} // namespace snowgui

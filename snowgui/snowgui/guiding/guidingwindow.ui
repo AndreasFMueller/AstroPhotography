@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>guidingwindow</class>
+ <widget class="QWidget" name="guidingwindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>562</width>
+    <height>429</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QWidget" name="leftWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="controllersWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="snowgui::guiderportcontrollerwidget" name="guiderportcontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="QToolBox" name="toolBox">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>480</width>
+           <height>239</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Cooler</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <attribute name="label">
+          <string>Filterwheel</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>480</width>
+           <height>239</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Focuser</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::ccdcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ccdcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::guiderportcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">guiderportcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::coolercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">coolercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::focusercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::imagedisplaywidget</class>
+   <extends>QWidget</extends>
+   <header location="global">imagedisplaywidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::filterwheelcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
