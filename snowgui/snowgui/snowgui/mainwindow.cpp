@@ -10,7 +10,7 @@
 #include "serverselectiondialog.h"
 #include "instrumentselectiondialog.h"
 #include <previewwindow.h>
-#include <focusingwidget.h>
+#include <focusingwindow.h>
 
 using namespace astro::discover;
 
@@ -53,9 +53,9 @@ void	MainWindow::launchPreview() {
 }
 
 void	MainWindow::launchFocusing() {
-	InstrumentSelectionApplication<focusingwidget>	*is
-		= new InstrumentSelectionApplication<focusingwidget>(this, _serviceobject);
-	is->setWindowTitle(QString("Select instrument for Preview application"));
+	InstrumentSelectionApplication<focusingwindow>	*is
+		= new InstrumentSelectionApplication<focusingwindow>(this, _serviceobject);
+	is->setWindowTitle(QString("Select instrument for Focusing application"));
 	is->exec();
 	delete is;
 }

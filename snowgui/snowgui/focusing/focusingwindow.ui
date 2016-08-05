@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>focusingwidget</class>
- <widget class="QWidget" name="focusingwidget">
+ <class>focusingwindow</class>
+ <widget class="QWidget" name="focusingwindow">
   <property name="geometry">
    <rect>
     <x>0</x>

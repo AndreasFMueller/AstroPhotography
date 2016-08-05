@@ -23,15 +23,15 @@ INCLUDEPATH += ../common
 FORMS    +=								\
 	focusscancontroller.ui						\
 	focusinghistorywidget.ui					\
-	focusingwidget.ui
+	focusingwindow.ui
 
 SOURCES += 								\
 	focusscancontroller.cpp						\
 	focusinghistorywidget.cpp					\
-	focusingwidget.cpp 
+	focusingwindow.cpp 
 
 HEADERS  += 								\
 	focusscancontroller.h						\
 	focusinghistorywidget.h						\
-	focusingwidget.h
+	focusingwindow.h
 

@@ -1,10 +1,10 @@
 /*
- * focusingwidget.cpp -- implementation of the focusing widget
+ * focusingwindow.cpp -- implementation of the focusing widget
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "focusingwidget.h"
-#include "ui_focusingwidget.h"
+#include "focusingwindow.h"
+#include "ui_focusingwindow.h"
 #include <AstroImage.h>
 #include <AstroCamera.h>
 #include <imagedisplaywidget.h>
@@ -16,8 +16,8 @@ using namespace astro::camera;
 /**
  * \brief Create a new focusing widget
  */
-focusingwidget::focusingwidget(QWidget *parent)
-	: snowgui::InstrumentWidget(parent), ui(new Ui::focusingwidget) {
+focusingwindow::focusingwindow(QWidget *parent)
+	: snowgui::InstrumentWidget(parent), ui(new Ui::focusingwindow) {
 	ui->setupUi(this);
 	ui->imageWidget->setInfoVisible(false);
 
@@ -50,11 +50,11 @@ focusingwidget::focusingwidget(QWidget *parent)
 /**
  * \brief Destroy the focusing widget
  */
-focusingwidget::~focusingwidget() {
+focusingwindow::~focusingwindow() {
 	delete ui;
 }
 
-void	focusingwidget::instrumentSetup(
+void	focusingwindow::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
@@ -77,7 +77,7 @@ void	focusingwidget::instrumentSetup(
  * 
  * Furthermore it adds a focus point to the focusinghistoryWidget.
  */
-void	focusingwidget::imageReceived() {
+void	focusingwindow::imageReceived() {
 	ImagePtr	image = ui->ccdcontrollerWidget->image();
 	ui->imageWidget->setImage(image);
 	Exposure	imageexposure = ui->ccdcontrollerWidget->imageexposure();
@@ -93,7 +93,7 @@ void	focusingwidget::imageReceived() {
  *
  * This slot installs the rectangle as a sub frame of the CCD controller
  */
-void	focusingwidget::rectangleSelected(ImageRectangle rectangle) {
+void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new rectangle: %s",
 		rectangle.toString().c_str());
 	ui->ccdcontrollerWidget->setSubframe(rectangle);
