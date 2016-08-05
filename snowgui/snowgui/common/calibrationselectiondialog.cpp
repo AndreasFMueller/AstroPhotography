@@ -70,7 +70,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	for (i = ids.begin(); i != ids.end(); i++) {
 		snowstar::Calibration	cal
 			= _guiderfactory->getCalibration(*i);
-		if (cal.type == _controltype) {
+		if ((cal.type == _controltype) && (cal.complete)) {
 			_calibrations.push_back(cal);
 			std::string	label = formatlabel(cal);
 			ui->calibrationlistWidget->addItem(QString(label.c_str()));

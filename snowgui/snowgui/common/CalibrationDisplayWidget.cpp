@@ -12,6 +12,8 @@ namespace snowgui {
 
 CalibrationDisplayWidget::CalibrationDisplayWidget(QWidget *parent)
 	: QWidget(parent) {
+	_calibration.id = -1;
+	_calibration.complete = false;
 }
 
 CalibrationDisplayWidget::~CalibrationDisplayWidget() {
