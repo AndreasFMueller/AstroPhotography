@@ -62,12 +62,12 @@ void	guiderportcontrollerwidget::instrumentSetup(
 }
 
 void	guiderportcontrollerwidget::setupGuiderport() {
-	// nothing
 }
 
 void	guiderportcontrollerwidget::guiderportChanged(int index) {
 	_guiderport = _instrument.guiderport(index);
 	setupGuiderport();
+	emit guiderportSelected(index);
 }
 
 void	guiderportcontrollerwidget::activateRAplus() {

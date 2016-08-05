@@ -26,7 +26,9 @@ FORMS    +=								\
 	focusercontrollerwidget.ui					\
 	filterwheelcontrollerwidget.ui					\
 	guiderportcontrollerwidget.ui					\
-	coolercontrollerwidget.ui
+	coolercontrollerwidget.ui					\
+	calibrationwidget.ui						\
+	guidercontrollerwidget.ui
 
 WIDGETSOURCES =								\
 	imagedisplaywidget.cpp						\
@@ -34,7 +36,9 @@ WIDGETSOURCES =								\
 	focusercontrollerwidget.cpp					\
 	filterwheelcontrollerwidget.cpp					\
 	guiderportcontrollerwidget.cpp					\
-	coolercontrollerwidget.cpp
+	coolercontrollerwidget.cpp					\
+	calibrationwidget.cpp						\
+	guidercontrollerwidget.cpp
 
 WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
@@ -42,7 +46,9 @@ WIDGETHEADERS =								\
 	focusercontrollerwidget.h					\
 	filterwheelcontrollerwidget.h					\
 	guiderportcontrollerwidget.h					\
-	coolercontrollerwidget.h	
+	coolercontrollerwidget.h					\
+	calibrationwidget.h						\
+	guidercontrollerwidget.h
 
 SOURCES += 								\
 	Image2Pixmap.cpp						\

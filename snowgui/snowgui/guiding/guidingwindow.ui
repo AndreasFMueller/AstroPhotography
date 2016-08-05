@@ -18,6 +18,22 @@
     <widget class="QWidget" name="leftWidget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
+       <widget class="snowgui::guidercontrollerwidget" name="guidercontrollerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>300</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
       </item>
      </layout>
@@ -25,6 +41,12 @@
    </item>
    <item>
     <widget class="QWidget" name="controllersWidget" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>350</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
@@ -35,14 +57,14 @@
       <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>480</width>
+           <width>326</width>
            <height>239</height>
           </rect>
          </property>
@@ -60,7 +82,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>480</width>
+           <width>326</width>
            <height>239</height>
           </rect>
          </property>
@@ -110,6 +132,12 @@
    <class>snowgui::filterwheelcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::guidercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">guidercontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -14,7 +14,10 @@ namespace snowgui {
 
 class InstrumentWidget : public QWidget {
 	Q_OBJECT
-
+	std::string	_appname;
+public:
+	void	setAppname(const std::string& appname);
+	const std::string&	appname() const { return _appname; }
 protected:
 	astro::discover::ServiceKey	_servicekey;
 	snowstar::RemoteInstrument	_instrument;

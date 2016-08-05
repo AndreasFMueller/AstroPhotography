@@ -53,6 +53,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	statusTimer->setInterval(100);
 	ourexposure = false;
 	previousstate = snowstar::IDLE;
+	_guiderccdonly = false;
 }
 
 /**
@@ -71,15 +72,17 @@ void	ccdcontrollerwidget::instrumentSetup(
 	// read information about CCDs available on this instrument, and 
 	// remember the first ccd you can find
 	int	index = 0;
-	while (_instrument.has(snowstar::InstrumentCCD, index)) {
-		snowstar::CcdPrx	ccd = _instrument.ccd(index);
-		if (!_ccd) {
-			_ccd = ccd;
+	if (!_guiderccdonly) {
+		while (_instrument.has(snowstar::InstrumentCCD, index)) {
+			snowstar::CcdPrx	ccd = _instrument.ccd(index);
+			if (!_ccd) {
+				_ccd = ccd;
+			}
+			ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
+			index++;
 		}
-		ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-		index++;
+		index = 0;
 	}
-	index = 0;
 	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
 		snowstar::CcdPrx	ccd = _instrument.ccd(index);
 		if (!_ccd) {
@@ -432,8 +435,19 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
  */
 void	ccdcontrollerwidget::ccdChanged(int index) {
 	statusTimer->stop();
-	_ccd = _instrument.ccd(index);
+	if (_guiderccdonly) {
+		_ccd = _instrument.guiderccd(index);
+	} else {
+		int	nccds = _instrument.componentCount(
+					snowstar::InstrumentCCD);
+		if (index >= nccds) {
+			_ccd = _instrument.guiderccd(index - nccds);
+		} else {
+			_ccd = _instrument.ccd(index);
+		}
+	}
         setupCcd();
+	emit ccdSelected(index);
 }
 
 /**

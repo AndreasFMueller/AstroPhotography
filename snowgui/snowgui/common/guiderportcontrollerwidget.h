@@ -3,8 +3,8 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef GUIDERCONTROLLERWIDGET_H
-#define GUIDERCONTROLLERWIDGET_H
+#ifndef GUIDERPORTCONTROLLERWIDGET_H
+#define GUIDERPORTCONTROLLERWIDGET_H
 
 #include <InstrumentWidget.h>
 
@@ -28,6 +28,7 @@ public:
 
 signals:
 	void	activationTimeChanged();
+	void	guiderportSelected(int);
 
 private:
 	Ui::guiderportcontrollerwidget *ui;
@@ -46,4 +47,4 @@ public slots:
 
 } // namespace snowogui
 
-#endif // GUIDERCONTROLLERWIDGET_H
+#endif // GUIDERPORTCONTROLLERWIDGET_H

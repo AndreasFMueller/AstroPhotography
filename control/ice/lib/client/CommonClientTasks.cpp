@@ -124,13 +124,13 @@ void	CoolerTask::setup(double temperature) {
 	_absolute = 273.15 + temperature;
 
 	// check whether there is something to do
-	if (_cooler) {
+	if (!_cooler) {
 		return;
 	}
 
 	// make sure we have a temperature at all
 	if (!(temperature == temperature)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no temperature set");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no temperature set, leave cooler alone");
 		return;
 	}
 
@@ -147,6 +147,7 @@ void	CoolerTask::setup(double temperature) {
 
 	// start the cooler and remember we did so to later turn it off again
 	if (!_cooler->isOn()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "turning cooler on");
 		_cooler->setOn(true);
 		we_turned_cooler_on = true;
 	}
@@ -175,7 +176,10 @@ void	CoolerTask::wait(int timeout) {
 		return;
 	}
 	if (!_cooler->isOn()) {
-		throw std::runtime_error("cannot wait if not on");
+		std::string	msg = astro::stringprintf("cooler %s not on, "
+			"cannot wait for it", _cooler->getName().c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		return;
 	}
 	double	delta;
 	time_t	end;

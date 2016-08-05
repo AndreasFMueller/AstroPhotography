@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>guidercontrollerwidget</class>
+ <widget class="QWidget" name="guidercontrollerwidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>717</width>
+    <height>348</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QWidget" name="guidingWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>240</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>240</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="starxField"/>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="QPushButton" name="monitorButton">
+        <property name="text">
+         <string>Monitor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QPushButton" name="guideButton">
+        <property name="text">
+         <string>Guide</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="starLabel">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Star coordinates:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="staryField"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="methodLabel">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Tracking method:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QComboBox" name="methodBox"/>
+      </item>
+      <item row="4" column="0" colspan="3">
+       <widget class="QPushButton" name="databaseButton">
+        <property name="text">
+         <string>Database</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="calibrationLabel">
+        <property name="text">
+         <string>Calibration:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="calibrationsWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="snowgui::calibrationwidget" name="gpcalibrationWidget">
+         <attribute name="title">
+          <string>Guide Port</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::calibrationwidget" name="aocalibrationWidget">
+         <attribute name="title">
+          <string>AO</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="trackingWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>250</width>
+       <height>0</height>
+      </size>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="trackingLabel">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Tracking:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="raoffsetWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="QWidget" name="decoffsetWidget" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::calibrationwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">calibrationwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

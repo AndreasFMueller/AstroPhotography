@@ -23,7 +23,7 @@ void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 
 	// get the instrument name into the title
 	std::string     title
-		= astro::stringprintf("Preview instrument %s @ %s",
+		= astro::stringprintf("Instrument %s @ %s",
 		_instrument.name().c_str(), serviceobject.toString().c_str());
 	setWindowTitle(QString(title.c_str()));
 
@@ -33,6 +33,15 @@ void	InstrumentWidget::instrumentSetup(ServiceObject serviceobject,
 
 std::string	InstrumentWidget::instrumentname() {
 	return _instrument.name();
+}
+
+void	InstrumentWidget::setAppname(const std::string& a) {
+	_appname = a;
+	std::string     title
+		= astro::stringprintf("%s using instrument %s @ %s",
+			_appname.c_str(), _instrument.name().c_str(),
+			_servicekey.toString().c_str());
+	setWindowTitle(QString(title.c_str()));
 }
 
 } // namespace snowgui

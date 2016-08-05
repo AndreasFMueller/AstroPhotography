@@ -11,6 +11,7 @@ namespace snowgui {
 guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 	ui(new Ui::guidingwindow) {
 	ui->setupUi(this);
+	ui->imageWidget->setInfoVisible(false);
 }
 
 guidingwindow::~guidingwindow() {
@@ -27,6 +28,7 @@ void	guidingwindow::instrumentSetup(
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->guiderportcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	setAppname("Guiding");
 }
 
 } // namespace snowgui

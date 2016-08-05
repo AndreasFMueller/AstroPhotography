@@ -66,6 +66,7 @@ void	focusingwindow::instrumentSetup(
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->guiderportcontrollerWidget->instrumentSetup(serviceobject, instrument);
 
+	setAppname("Focusing");
 }
 
 /**

@@ -277,7 +277,11 @@ int	main(int argc, char *argv[]) {
 	// now wait for all tasks to complete
 	focusertask.wait();
 	filterwheeltask.wait();
-	coolertask.wait();
+	try {
+		coolertask.wait();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "ignoring exeption: %s", x.what());
+	}
 
 	// prepare an exposure object
 	ccdtask.frame(frame);

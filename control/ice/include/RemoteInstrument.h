@@ -26,9 +26,7 @@ class RemoteInstrument {
 	std::string	_name;
 public:
 	const std::string	name() const { return _name; }
-private:
 	unsigned int	componentCount(InstrumentComponentType type);
-public:
 	RemoteInstrument(InstrumentsPrx instruments, const std::string& name);
 	RemoteInstrument();
 	RemoteInstrument(const RemoteInstrument& other);

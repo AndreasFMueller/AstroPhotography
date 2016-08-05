@@ -27,6 +27,7 @@ class ccdcontrollerwidget : public InstrumentWidget {
 
 	astro::image::ImagePtr	_image;
 	astro::camera::Exposure	_imageexposure;
+	bool	_guiderccdonly;
 
 public:
 	explicit ccdcontrollerwidget(QWidget *parent);
@@ -42,6 +43,7 @@ public:
 signals:
 	void	exposureChanged(astro::camera::Exposure);
 	void	imageReceived();
+	void	ccdSelected(int);
 
 private:
 	void	setupCcd();
