@@ -28,6 +28,7 @@ void	guidingwindow::instrumentSetup(
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->guiderportcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->guidercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	setAppname("Guiding");
 }
 

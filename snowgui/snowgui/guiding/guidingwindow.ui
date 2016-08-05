@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>562</width>
-    <height>429</height>
+    <width>885</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
        <widget class="snowgui::guidercontrollerwidget" name="guidercontrollerWidget" native="true">
         <property name="minimumSize">
          <size>
-          <width>400</width>
+          <width>500</width>
           <height>300</height>
          </size>
         </property>
@@ -64,7 +64,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>326</width>
+           <width>80</width>
            <height>239</height>
           </rect>
          </property>
@@ -82,7 +82,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>326</width>
+           <width>80</width>
            <height>239</height>
           </rect>
          </property>

@@ -62,8 +62,22 @@ void	guidercontrollerwidget::instrumentSetup(
  * \brief Setup a guider
  */
 void	guidercontrollerwidget::setupGuider() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s|%d|%d|%d",
+		_guiderdescriptor.instrumentname.c_str(),
+		_guiderdescriptor.ccdIndex, _guiderdescriptor.guiderportIndex,
+		_guiderdescriptor.adaptiveopticsIndex);
 	statusTimer->stop();
+
+	// get the guider based on the descriptor
 	_guider = _guiderfactory->get(_guiderdescriptor);
+
+	// also propagate the information to the calibration widgets
+	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuiderPort,
+		_guiderdescriptor, _guider, _guiderfactory);
+	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
+		_guiderdescriptor, _guider, _guiderfactory);
+
+	// start the timer
 	statusTimer->start();
 }
 

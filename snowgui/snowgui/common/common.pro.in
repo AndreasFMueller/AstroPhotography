@@ -28,6 +28,7 @@ FORMS    +=								\
 	guiderportcontrollerwidget.ui					\
 	coolercontrollerwidget.ui					\
 	calibrationwidget.ui						\
+	calibrationselectiondialog.ui					\
 	guidercontrollerwidget.ui
 
 WIDGETSOURCES =								\
@@ -38,6 +39,7 @@ WIDGETSOURCES =								\
 	guiderportcontrollerwidget.cpp					\
 	coolercontrollerwidget.cpp					\
 	calibrationwidget.cpp						\
+	calibrationselectiondialog.cpp					\
 	guidercontrollerwidget.cpp
 
 WIDGETHEADERS =								\
@@ -48,6 +50,7 @@ WIDGETHEADERS =								\
 	guiderportcontrollerwidget.h					\
 	coolercontrollerwidget.h					\
 	calibrationwidget.h						\
+	calibrationselectiondialog.h					\
 	guidercontrollerwidget.h
 
 SOURCES += 								\
@@ -60,6 +63,7 @@ SOURCES += 								\
 	FocusPoints.cpp							\
 	Scaler.cpp							\
 	FocusPointsWidget.cpp						\
+	CalibrationDisplayWidget.cpp					\
 	$${WIDGETSOURCES}
 
 
@@ -73,6 +77,7 @@ HEADERS  += 								\
 	FocusPoints.h							\
 	Scaler.h							\
 	FocusPointsWidget.h						\
+	CalibrationDisplayWidget.h					\
 	$${WIDGETHEADERS}
 
 
