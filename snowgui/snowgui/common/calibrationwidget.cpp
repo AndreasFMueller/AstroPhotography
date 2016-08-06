@@ -8,6 +8,7 @@
 #include <calibrationselectiondialog.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <guidercontrollerwidget.h>
 
 namespace snowgui {
 
@@ -18,6 +19,8 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 		this, SLOT(databaseClicked()));
 	connect(ui->calibrateButton, SIGNAL(clicked()),
 		this, SLOT(calibrateClicked()));
+
+	_guidercontroller = NULL;
 }
 
 calibrationwidget::~calibrationwidget() {
@@ -30,7 +33,8 @@ calibrationwidget::~calibrationwidget() {
 void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 		snowstar::GuiderDescriptor guiderdescriptor,
 		snowstar::GuiderPrx guider,
-		snowstar::GuiderFactoryPrx guiderfactory) {
+		snowstar::GuiderFactoryPrx guiderfactory,
+		guidercontrollerwidget *guidercontroller) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s|%d|%d|%d",
 		_guiderdescriptor.instrumentname.c_str(),
 		_guiderdescriptor.ccdIndex,
@@ -40,6 +44,7 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 	_guiderdescriptor = guiderdescriptor;
 	_guider = guider;
 	_guiderfactory = guiderfactory;
+	_guidercontroller = guidercontroller;
 
 	// find out whether the guider is currently calibrated
 	try {
@@ -94,6 +99,9 @@ void	calibrationwidget::displayCalibration() {
 
 void	calibrationwidget::calibrateClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuiderPort");
+	if (_guidercontroller) {
+		_guidercontroller->setupTracker();
+	}
 	_guider->startCalibration(_controltype);
 }
 

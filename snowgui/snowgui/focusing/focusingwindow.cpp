@@ -48,8 +48,10 @@ focusingwindow::focusingwindow(QWidget *parent)
 		ui->scanWidget, SLOT(positionReached()));
 	connect(ui->scanWidget, SIGNAL(performCapture()),
 		ui->ccdcontrollerWidget, SLOT(captureClicked()));
-	connect(ui->ccdcontrollerWidget, SIGNAL(imageReceived(ImagePtr)),
-		ui->scanWidget, SLOT(imageReceived(ImagePtr)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(imageReceived(astro::image::ImagePtr)),
+		ui->scanWidget,
+		SLOT(imageReceived(astro::image::ImagePtr)));
 }
 
 /**

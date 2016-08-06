@@ -32,8 +32,8 @@ void	GuiderLocator::add(const std::string& name, Ice::ObjectPtr guiderptr) {
 Ice::ObjectPtr	GuiderLocator::locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& /* cookie */) {
 	std::string	guidername = NameConverter::urldecode(current.id.name);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider %s",
-		guidername.c_str());
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider %s",
+	//	guidername.c_str());
 	guidermap::iterator	i = guiders.find(guidername);
 	if (guiders.end() == i) {
 		std::string	msg = astro::stringprintf("guider '%s' not found",

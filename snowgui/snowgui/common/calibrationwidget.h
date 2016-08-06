@@ -15,6 +15,8 @@ namespace Ui {
 
 namespace snowgui {
 
+class guidercontrollerwidget;
+
 /**
  * \brief Widget to display and select a calibration for a guider
  */
@@ -27,11 +29,14 @@ class calibrationwidget : public QWidget {
 	snowstar::GuiderFactoryPrx	_guiderfactory;
 
 	snowstar::Calibration		_calibration;
+
+	guidercontrollerwidget		*_guidercontroller;
 public:
 	void	setGuider(snowstar::ControlType controltype,
 			snowstar::GuiderDescriptor guiderdescriptor,
 			snowstar::GuiderPrx guider,
-			snowstar::GuiderFactoryPrx guiderfactory);
+			snowstar::GuiderFactoryPrx guiderfactory,
+			guidercontrollerwidget *guidercontroller);
 	void	displayCalibration();
 public:
 	explicit calibrationwidget(QWidget *parent = 0);

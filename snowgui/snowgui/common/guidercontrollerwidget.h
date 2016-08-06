@@ -24,13 +24,15 @@ class guidercontrollerwidget : public InstrumentWidget {
 	snowstar::GuiderDescriptor	_guiderdescriptor;
 	snowstar::GuiderPrx		_guider;
 
-	double	_guiderportinterval;
-	double	_adaptiveopticsinterval;
+	double	_gpupdateinterval;
+	double	_aoupdateinterval;
 	bool	_stepping;
 
 	astro::camera::Exposure		_exposure;
 	astro::image::ImagePoint	_star;
+	double	_windowradius;
 
+	snowstar::GuiderState	_previousstate;
 	QTimer	*statusTimer;
 
 	void	setupGuider();
@@ -41,6 +43,10 @@ public:
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
 	~guidercontrollerwidget();
+	void	setupTracker();
+
+signals:
+	void	exposureChanged(astro::camera::Exposure);
 
 private:
 	Ui::guidercontrollerwidget *ui;
@@ -55,9 +61,14 @@ public slots:
 	void	startGuiding();
 	void	stopGuiding();
 
-	void	statusUpdate();
 	void	selectPoint(astro::image::ImagePoint);
 	void	methodChanged(int);
+
+	void	gpupdateintervalChanged(double);
+	void	aoupdateintervalChanged(double);
+	void	windowradiusChanged(double);
+
+	void	statusUpdate();
 };
 
 } // namespace snowgui

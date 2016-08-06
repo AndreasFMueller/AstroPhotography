@@ -85,8 +85,9 @@ void	focusscancontroller::positionReached() {
 	emit performCapture();
 }
 
-void	focusscancontroller::imageReceived(ImagePtr /* image */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received");
+void	focusscancontroller::imageReceived(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
+		image->size().toString().c_str());
 	if (!scanning) {
 		return;
 	}

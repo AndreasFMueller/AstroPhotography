@@ -8,6 +8,10 @@
 #include <QTimer>
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
+#include <AstroCamera.h>
+
+using namespace astro::camera;
+using namespace astro::image;
 
 namespace snowgui {
 
@@ -24,11 +28,26 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	connect(ui->methodBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(methodChanged(int)));
 
+	connect(ui->gpupdateintervalSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(gpupdateintervalChanged(double)));
+	connect(ui->aoupdateintervalSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(aoupdateintervalChanged(double)));
+	connect(ui->windowradiusSpinBox, SIGNAL(valueChanged(double)),
+		this, SLOT(windowradiusChanged(double)));
+	_windowradius = 32;
+
+	connect(ui->guideButton, SIGNAL(clicked()),
+		this, SLOT(startGuiding()));
+
 	// some other fields
+	_previousstate = snowstar::GuiderIDLE;
 	statusTimer = new QTimer;
 	statusTimer->setInterval(100);
+	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+#if 0
 	_guiderportinterval = 10;
 	_adaptiveopticsinterval = 1;
+#endif
 	_stepping = false;
 }
 
@@ -75,11 +94,32 @@ void	guidercontrollerwidget::setupGuider() {
 
 	// also propagate the information to the calibration widgets
 	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuiderPort,
-		_guiderdescriptor, _guider, _guiderfactory);
+		_guiderdescriptor, _guider, _guiderfactory, this);
 	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
-		_guiderdescriptor, _guider, _guiderfactory);
+		_guiderdescriptor, _guider, _guiderfactory, this);
 
 	// get the information from the guider
+	ui->methodBox->blockSignals(true);
+	switch (_guider->getTrackerMethod()) {
+	case snowstar::TrackerUNDEFINED:
+	case snowstar::TrackerNULL:
+	case snowstar::TrackerSTAR:
+		ui->methodBox->setCurrentIndex(0);
+		break;
+	case snowstar::TrackerPHASE:
+		ui->methodBox->setCurrentIndex(1);
+		break;
+	case snowstar::TrackerDIFFPHASE:
+		ui->methodBox->setCurrentIndex(2);
+		break;
+	case snowstar::TrackerLAPLACE:
+		ui->methodBox->setCurrentIndex(3);
+		break;
+	case snowstar::TrackerLARGE:
+		ui->methodBox->setCurrentIndex(4);
+		break;
+	}
+	ui->methodBox->blockSignals(false);
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
 	_star = ImagePoint((int)ps.x(), (int)ps.y());
@@ -103,6 +143,8 @@ void	guidercontrollerwidget::setExposure(astro::camera::Exposure exposure) {
 	_exposure = exposure;
 	try {
 		_guider->setExposure(snowstar::convert(_exposure));
+		// use the center point as the star
+		setStar(_exposure.frame().size().center());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "could not set exposure");
 	}
@@ -127,7 +169,9 @@ void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected",
 		p.toString().c_str());
 	// use the current frame from the exposure structure
-	astro::image::ImagePoint	ip = _exposure.frame().origin() + p;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_exposure.frame() = %s",
+		_exposure.frame().toString().c_str());
+	astro::image::ImagePoint	ip = p;
 	setStar(ip);
 	ui->starxField->setText(QString::number(ip.x()));
 	ui->staryField->setText(QString::number(ip.y()));
@@ -148,13 +192,39 @@ void	guidercontrollerwidget::setAdaptiveoptics(int index) {
 	setupGuider();
 }
 
+void	guidercontrollerwidget::setupTracker() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius: %f", _windowradius);
+	Exposure	exposure = snowstar::convert(_guider->getExposure());
+	ImagePoint	origin(_star.x() - _windowradius,
+				_star.y() - _windowradius);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s", origin.toString().c_str());
+	ImageSize	size(2 * _windowradius, 2 * _windowradius);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %s", size.toString().c_str());
+	exposure.frame(ImageRectangle(origin, size));
+	_guider->setExposure(snowstar::convert(exposure));
+	snowstar::Point	star;
+	star.x = _windowradius;
+	star.y = _windowradius;
+	_guider->setStar(star);
+}
+
 void	guidercontrollerwidget::startGuiding() {
 	if (!_guider) {
 		return;
 	}
+	// first handle the simple case that it is already guiding: stop
+	// it
 	try {
-		_guider->startGuiding(_guiderportinterval,
-			_adaptiveopticsinterval, _stepping);
+		if (snowstar::GuiderGUIDING == _guider->getState()) {
+			_guider->stopGuiding();
+			return;
+		}
+	} catch (...) {
+	}
+	try {
+		setupTracker();
+		_guider->startGuiding(_gpupdateinterval, _aoupdateinterval,
+			_stepping);
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start guiding");
 	}
@@ -179,7 +249,43 @@ void	guidercontrollerwidget::statusUpdate() {
 		return;
 	}
 	snowstar::GuiderState	state = _guider->getState();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state: %d", (int)state);
+	if (state == _previousstate) {
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state: %d", (int)state);
+	switch (state) {
+	case snowstar::GuiderIDLE:
+		ui->guideButton->setText(QString("Guidg"));
+		ui->guideButton->setEnabled(false);
+		ui->gpcalibrationWidget->setEnabled(true);
+		ui->aocalibrationWidget->setEnabled(true);
+		break;
+	case snowstar::GuiderUNCONFIGURED:
+		ui->guideButton->setText(QString("Guide"));
+		ui->guideButton->setEnabled(false);
+		ui->gpcalibrationWidget->setEnabled(true);
+		ui->aocalibrationWidget->setEnabled(true);
+		break;
+	case snowstar::GuiderCALIBRATING:
+		ui->guideButton->setText(QString("Guide"));
+		ui->guideButton->setEnabled(false);
+		ui->gpcalibrationWidget->setEnabled(false);
+		ui->aocalibrationWidget->setEnabled(false);
+		break;
+	case snowstar::GuiderCALIBRATED:
+		ui->guideButton->setText(QString("Guide"));
+		ui->guideButton->setEnabled(true);
+		ui->gpcalibrationWidget->setEnabled(true);
+		ui->aocalibrationWidget->setEnabled(true);
+		break;
+	case snowstar::GuiderGUIDING:
+		ui->guideButton->setText(QString("Stop Guiding"));
+		ui->guideButton->setEnabled(true);
+		ui->gpcalibrationWidget->setEnabled(false);
+		ui->aocalibrationWidget->setEnabled(false);
+		break;
+	}
+	_previousstate = state;
 }
 
 /**
@@ -198,6 +304,18 @@ void	guidercontrollerwidget::methodChanged(int index) {
 	case 4:	_guider->setTrackerMethod(snowstar::TrackerLARGE);
 		break;
 	}
+}
+
+void	guidercontrollerwidget::gpupdateintervalChanged(double r) {
+	_gpupdateinterval = r;
+}
+
+void	guidercontrollerwidget::aoupdateintervalChanged(double r) {
+	_aoupdateinterval = r;
+}
+
+void	guidercontrollerwidget::windowradiusChanged(double r) {
+	_windowradius = r;
 }
 
 } // namespade snowgui

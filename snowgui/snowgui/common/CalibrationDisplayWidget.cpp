@@ -43,6 +43,9 @@ void	CalibrationDisplayWidget::draw() {
 	painter.fillRect(width() / 2, 0, 1, height(), QColor(128., 128., 128.));
 	painter.fillRect(0, height() / 2, width(), 1, QColor(128., 128., 128.));
 
+	// get the first point as a reference
+	snowstar::Point	ref;
+
 	// determine the coordinate system scale, for this we first need
 	// some parameters
 	double	timeinterval = 0;
@@ -51,6 +54,8 @@ void	CalibrationDisplayWidget::draw() {
 	double	maxy = 1;
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
+		if (i == 0) { ref.x = p.star.x; ref.y = p.star.y; }
+
 		// compute the time interval used
 		if (p.offset.x != 0) {
 			timeinterval += fabs(p.offset.x); counter++;
@@ -60,8 +65,8 @@ void	CalibrationDisplayWidget::draw() {
 		}
 
 		// compute the maximum coordinates
-		double	x = fabs(p.star.x);
-		double	y = fabs(p.star.y);
+		double	x = fabs(p.star.x - ref.x);
+		double	y = fabs(p.star.y - ref.y);
 		if (x > maxx) { maxx = x; }
 		if (y > maxy) { maxy = y; }
 	}
@@ -108,7 +113,8 @@ void	CalibrationDisplayWidget::draw() {
 	painter.setPen(pen);
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
-		QPointF	pf(p.star.x * scale + cx, h - (p.star.y * scale + cy));
+		QPointF	pf((p.star.x - ref.x) * scale + cx,
+			h - ((p.star.y - ref.y) * scale + cy));
 		painter.drawPoint(pf);
 	}
 	

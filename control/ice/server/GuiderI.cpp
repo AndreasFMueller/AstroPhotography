@@ -205,9 +205,10 @@ GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
 
 void GuiderI::setExposure(const Exposure& exposure,
 	const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure: time=%f",
-		exposure.exposuretime);
-	guider->exposure(convert(exposure));
+	astro::camera::Exposure	e = convert(exposure);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure: %s",
+		e.toString().c_str());
+	guider->exposure(e);
 }
 
 Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
