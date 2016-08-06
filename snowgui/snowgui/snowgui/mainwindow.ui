@@ -264,40 +264,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections>
-  <connection>
-   <sender>appPreviewButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>launchPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>192</x>
-     <y>51</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>80</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>appFocusingButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>launchFocusing()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>173</x>
-     <y>93</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>258</x>
-     <y>96</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>launchPreview()</slot>
   <slot>launchFocusing()</slot>

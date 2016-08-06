@@ -52,12 +52,12 @@ public slots:
 	void	setGuiderport(int);
 	void	setAdaptiveoptics(int);
 
-	void	startCalibration();
-	void	cancelCalibration();
 	void	startGuiding();
 	void	stopGuiding();
 
 	void	statusUpdate();
+	void	selectPoint(astro::image::ImagePoint);
+	void	methodChanged(int);
 };
 
 } // namespace snowgui

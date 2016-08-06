@@ -15,12 +15,14 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
 
-	// adding items to the tracking metho
+	// adding items to the tracking method combo box
 	ui->methodBox->addItem(QString("Star"));
 	ui->methodBox->addItem(QString("Phase"));
 	ui->methodBox->addItem(QString("Gradient"));
 	ui->methodBox->addItem(QString("Laplace"));
 	ui->methodBox->addItem(QString("Large"));
+	connect(ui->methodBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(methodChanged(int)));
 
 	// some other fields
 	statusTimer = new QTimer;
@@ -77,6 +79,11 @@ void	guidercontrollerwidget::setupGuider() {
 	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
 		_guiderdescriptor, _guider, _guiderfactory);
 
+	// get the information from the guider
+	_exposure = snowstar::convert(_guider->getExposure());
+	astro::Point	ps = snowstar::convert(_guider->getStar());
+	_star = ImagePoint((int)ps.x(), (int)ps.y());
+
 	// start the timer
 	statusTimer->start();
 }
@@ -104,7 +111,7 @@ void	guidercontrollerwidget::setExposure(astro::camera::Exposure exposure) {
 /**
  * \brief Slot to change the star
  */
-void	guidercontrollerwidget::setStar(ImagePoint star) {
+void	guidercontrollerwidget::setStar(astro::image::ImagePoint star) {
 	_star = star;
 	try {
 		snowstar::Point	p;
@@ -114,6 +121,16 @@ void	guidercontrollerwidget::setStar(ImagePoint star) {
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot set star");
 	}
+}
+
+void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected",
+		p.toString().c_str());
+	// use the current frame from the exposure structure
+	astro::image::ImagePoint	ip = _exposure.frame().origin() + p;
+	setStar(ip);
+	ui->starxField->setText(QString::number(ip.x()));
+	ui->staryField->setText(QString::number(ip.y()));
 }
 
 void	guidercontrollerwidget::setCcd(int index) {
@@ -129,29 +146,6 @@ void	guidercontrollerwidget::setGuiderport(int index) {
 void	guidercontrollerwidget::setAdaptiveoptics(int index) {
 	_guiderdescriptor.adaptiveopticsIndex = index;
 	setupGuider();
-}
-
-void	guidercontrollerwidget::startCalibration() {
-	if (!_guider) {
-		return;
-	}
-	try {
-		// XXX we need to know which device to calibrate
-		_guider->startCalibration(snowstar::ControlGuiderPort);
-	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot start the calibration");
-	}
-}
-
-void	guidercontrollerwidget::cancelCalibration() {
-	if (!_guider) {
-		return;
-	}
-	try {
-		_guider->cancelCalibration();
-	} catch (...) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot cancel the calibration");
-	}
 }
 
 void	guidercontrollerwidget::startGuiding() {
@@ -186,6 +180,24 @@ void	guidercontrollerwidget::statusUpdate() {
 	}
 	snowstar::GuiderState	state = _guider->getState();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "state: %d", (int)state);
+}
+
+/**
+ * \brief Change the tracker method
+ */
+void	guidercontrollerwidget::methodChanged(int index) {
+	switch (index) {
+	case 0:	_guider->setTrackerMethod(snowstar::TrackerSTAR);
+		break;
+	case 1:	_guider->setTrackerMethod(snowstar::TrackerPHASE);
+		break;
+	case 2:	_guider->setTrackerMethod(snowstar::TrackerDIFFPHASE);
+		break;
+	case 3:	_guider->setTrackerMethod(snowstar::TrackerLAPLACE);
+		break;
+	case 4:	_guider->setTrackerMethod(snowstar::TrackerLARGE);
+		break;
+	}
 }
 
 } // namespade snowgui

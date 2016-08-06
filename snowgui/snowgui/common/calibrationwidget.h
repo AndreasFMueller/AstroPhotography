@@ -42,6 +42,7 @@ private:
 
 public slots:
 	void	databaseClicked();
+	void	calibrateClicked();
 	void	setCalibration(snowstar::Calibration);
 };
 

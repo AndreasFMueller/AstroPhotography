@@ -24,10 +24,13 @@ focusingwindow::focusingwindow(QWidget *parent)
 	ui->imageWidget->setInfoVisible(false);
 
 	// when the CCD controller receives a new image, we would like to know
-	connect(ui->ccdcontrollerWidget, SIGNAL(imageReceived()),
-		this, SLOT(imageReceived()));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(imageReceived(astro::image::ImagePtr)),
+		this,
+		SLOT(receiveImage(astro::image::ImagePtr)));
 
 	// when the image widget selects a rectangle, we would like to know
+	ui->imageWidget->setRectangleSelectionEnabled(true);
 	connect(ui->imageWidget,
 		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
 		this,
@@ -45,8 +48,8 @@ focusingwindow::focusingwindow(QWidget *parent)
 		ui->scanWidget, SLOT(positionReached()));
 	connect(ui->scanWidget, SIGNAL(performCapture()),
 		ui->ccdcontrollerWidget, SLOT(captureClicked()));
-	connect(ui->ccdcontrollerWidget, SIGNAL(imageReceived()),
-		ui->scanWidget, SLOT(imageReceived()));
+	connect(ui->ccdcontrollerWidget, SIGNAL(imageReceived(ImagePtr)),
+		ui->scanWidget, SLOT(imageReceived(ImagePtr)));
 }
 
 /**
@@ -80,10 +83,12 @@ void	focusingwindow::instrumentSetup(
  * 
  * Furthermore it adds a focus point to the focusinghistoryWidget.
  */
-void	focusingwindow::imageReceived() {
-	ImagePtr	image = ui->ccdcontrollerWidget->image();
+void	focusingwindow::receiveImage(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
+		image->size().toString().c_str());
 	ui->imageWidget->setImage(image);
-	Exposure	imageexposure = ui->ccdcontrollerWidget->imageexposure();
+	Exposure	imageexposure
+		= ui->ccdcontrollerWidget->imageexposure();
 	ui->ccdcontrollerWidget->setExposure(imageexposure);
 
 	// add the point to the focuspointwidgeth

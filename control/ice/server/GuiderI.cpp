@@ -215,6 +215,8 @@ Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
 }
 
 void GuiderI::setStar(const Point& point, const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new star set: %.1f,%.1f",
+		point.x, point.y);
 	_point = point;
 }
 

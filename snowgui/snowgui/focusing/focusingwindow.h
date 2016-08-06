@@ -28,7 +28,7 @@ private:
 	Ui::focusingwindow *ui;
 
 public slots:
-	void	imageReceived();
+	void	receiveImage(astro::image::ImagePtr image);
 	void	rectangleSelected(astro::image::ImageRectangle);
 };
 

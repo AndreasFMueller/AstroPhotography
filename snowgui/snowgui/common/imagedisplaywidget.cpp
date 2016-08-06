@@ -24,6 +24,14 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
     ui(new Ui::imagedisplaywidget) {
 	ui->setupUi(this);
 
+	// initialize the image
+	selectable = new SelectableImage();
+	connect(selectable, SIGNAL(rectangleSelected(QRect)),
+		this, SLOT(selectRectangle(QRect)));
+	connect(selectable, SIGNAL(pointSelected(QPoint)),
+		this, SLOT(selectPoint(QPoint)));
+	ui->imageArea->setWidget(selectable);
+
 	// connect the imageUpdated signal with the processNewImage slot
 	connect(this, SIGNAL(imageUpdated()), this,
 		SLOT(processNewImage()), Qt::QueuedConnection);
@@ -42,9 +50,6 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	displayGainSetting();
 	displayBrightnessSetting();
 	displayScaleSetting();
-
-	// initialize
-	selectable = NULL;
 }
 
 /**
@@ -117,8 +122,16 @@ void	imagedisplaywidget::setImageRectangle(const ImageRectangle& imagerectangle)
 
 /**
  * \brief Convert coordinates from a QPoint to astro::image coordinates
+ *
+ * Not the important distinction that astro::ImagePoint coordinates 
+ * have a y-axis that points upwards, while the usual Qt coordinates
+ * have increasing y coordinates point downwards
  */
 ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting point %d,%d to ...", x, y);
+	// make sure we are using "reversed" y-axis coordinates
+	y = selectable->height() - 1 - y;
+
 	int	s = image2pixmap.scale();
 	if (s > 0) {
 		x >>= s;
@@ -128,12 +141,16 @@ ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
 		x <<= -s;
 		y <<= -s;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "... scaled coordinates %d,%d ...",
+		x, y);
 
 	// if we are currently displaying a subimage
 	if (imageRectangleEnabled()) {
+		
 		x += _rectangle.origin().x();
 		y += _rectangle.origin().y();
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "... %d,%d", x, y);
 
 	return ImagePoint(x, y);
 }
@@ -142,17 +159,20 @@ ImagePoint	imagedisplaywidget::convertPoint(int x, int y) {
  * \brief Set the QRect to be displayed
  *
  * The QRect is using current image coordinates, which may depend on the
- * scaling applied.
+ * scaling applied. This is called from the selectRectangle slot, and converts
+ * the rectangle to an ImageRectangle, which it then sets.
  */
 void	imagedisplaywidget::setImageRectangle(const QRect& rect) {
-	// compute the rectangle 
 	int	x, y, width, height;
 	width = rect.size().width();
 	height = rect.size().height();
-	x = rect.topLeft().x();
-	y = selectable->size().height() - rect.topLeft().y() - height - 1;
 
-	// change scale
+	// compute the rectangle  corner
+	x = rect.topLeft().x();
+	y = rect.topLeft().y();
+	ImagePoint	topLeft = convertPoint(x, y);
+
+	// change image size according to current scale factor
 	int	s = image2pixmap.scale();
 	if (s > 0) {
 		height >>= s;
@@ -163,8 +183,11 @@ void	imagedisplaywidget::setImageRectangle(const QRect& rect) {
 		width <<= -s;
 	}
 
+	// in our coordinates we need the bottom left point
+	ImagePoint	lowerLeft(topLeft.x(), topLeft.y() - height);
+
 	// create the rectangle
-	ImageRectangle	r(convertPoint(x, y), ImageSize(width, height));
+	ImageRectangle	r(lowerLeft, ImageSize(width, height));
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"QRect=%dx%d@(%d,%d) -> ImageRectangle(%s)",
 		rect.size().width(), rect.size().height(),
@@ -354,9 +377,19 @@ void	imagedisplaywidget::displayRectangle(const ImageRectangle& r) {
  * method to actually display the image.
  */
 void	imagedisplaywidget::setImage(astro::image::ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new %s image received",
+		image->size().toString().c_str());
 	_image = image;
 	emit imageUpdated();
 }
+
+/**
+ * \brief Slot called to receive an new image
+ */
+void	imagedisplaywidget::receiveImage(ImagePtr image) {
+	setImage(image);
+}
+
 
 /**
  * \brief Processing for image info of a new image
@@ -527,24 +560,22 @@ void	imagedisplaywidget::processDisplayImage(ImagePtr image) {
 		"hpos = %d, vpos = %d, previous size=%d,%d",
 		hpos, vpos, previoussize.width(), previoussize.height());
 
-	// create a new selectable image and pixmap
-	selectable = new SelectableImage();
-	selectable->setRectangleSelectionEnabled(true);
-
-
+	// create a new pixmap and install it in the image
 	QPixmap *pixmap = image2pixmap(image);
 	if (NULL != pixmap) {
 		selectable->setPixmap(*pixmap);
 	}
 	selectable->setFixedSize(pixmap->width(), pixmap->height());
 	selectable->setMinimumSize(pixmap->width(), pixmap->height());
+#if 0
 	connect(selectable, SIGNAL(rectangleSelected(QRect)),
 		this, SLOT(selectRectangle(QRect)));
 	connect(selectable, SIGNAL(pointSelected(QPoint)),
 		this, SLOT(selectPoint(QPoint)));
+#endif
 
 	// display the image
-	ui->imageArea->setWidget(selectable);
+//	ui->imageArea->setWidget(selectable);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new position: %d/%d", hpos, vpos);
 	QSize	newsize = pixmap->size();
 	hpos = newsize.width() * hpos / previoussize.width();
@@ -724,7 +755,12 @@ void	imagedisplaywidget::imageSettingsChanged() {
 }
 
 /**
- * \brief convert a selected rectangle 
+ * \brief Select a QRect of the current image
+ *
+ * This slot is called by the rectangleSelected signal from the image content
+ * widget. It calls the setImageRectangle method that converts the
+ * rectangle from Qt to astro coordinates, and then uses this information
+ * to select an area for scaling.
  */
 void	imagedisplaywidget::selectRectangle(QRect rect) {
 	setImageRectangle(rect);
@@ -734,8 +770,51 @@ void	imagedisplaywidget::selectRectangle(QRect rect) {
  * \brief convert a selection point into image coordinates
  */
 void	imagedisplaywidget::selectPoint(QPoint qpoint) {
+	// convert a QPoint to an ImagePoint
 	ImagePoint	p = convertPoint(qpoint.x(), qpoint.y());
 	emit pointSelected(p);
+}
+
+/**
+ * \brief Tell whether the image area widget selects points
+ */
+bool	imagedisplaywidget::pointSelectionEnabled() {
+	if (selectable) {
+		return selectable->pointSelectionEnabled();
+	}
+	return false;
+}
+
+/**
+ * \brief Tell whether the image area widget selects rectangles
+ */
+bool	imagedisplaywidget::rectangleSelectionEnabled() {
+	if (selectable) {
+		return selectable->rectangleSelectionEnabled();
+	}
+	return false;
+}
+
+/**
+ * \brief Set whether the image area widget should select points
+ */
+void	imagedisplaywidget::setPointSelectionEnabled(bool b) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set point selection to %s",
+		(b) ? "yes" : "no");
+	if (selectable) {
+		selectable->setPointSelectionEnabled(b);
+	}
+}
+
+/**
+ * \brief Set whether the image area widget should select rectangles
+ */
+void	imagedisplaywidget::setRectangleSelectionEnabled(bool b) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set rectangle selection to %s",
+		(b) ? "yes" : "no");
+	if (selectable) {
+		selectable->setRectangleSelectionEnabled(b);
+	}
 }
 
 } // namespace snowgui

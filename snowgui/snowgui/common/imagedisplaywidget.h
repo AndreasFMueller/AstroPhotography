@@ -75,6 +75,12 @@ public:
 	bool	imageRectangleEnabled();
 	void	setImageRectangleEnabled(bool);
 
+	// whether or not to accept point or rectangle selections
+	bool	rectangleSelectionEnabled();
+	void	setRectangleSelectionEnabled(bool);
+	bool	pointSelectionEnabled();
+	void	setPointSelectionEnabled(bool);
+
 private:
 	Ui::imagedisplaywidget *ui;
 
@@ -112,6 +118,7 @@ public slots:
 	void	imageSettingsChanged();
 	void	selectRectangle(QRect);
 	void	selectPoint(QPoint);
+	void	receiveImage(astro::image::ImagePtr);
 };
 
 } // namespace snowgui

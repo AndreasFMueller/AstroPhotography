@@ -25,9 +25,9 @@ MainWindow::MainWindow(QWidget *parent,
 
 	// connect buttons
 	connect(ui->appPreviewButton, SIGNAL(clicked()),
-		this, SLOT(laucnhPreview()));
+		this, SLOT(launchPreview()));
 	connect(ui->appFocusingButton, SIGNAL(clicked()),
-		this, SLOT(laucnhFocusing()));
+		this, SLOT(launchFocusing()));
 	connect(ui->appGuidingButton, SIGNAL(clicked()),
 		this, SLOT(launchGuiding()));
 	connect(ui->appInstrumentsButton, SIGNAL(clicked()),

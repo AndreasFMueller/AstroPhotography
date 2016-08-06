@@ -7,6 +7,9 @@
 #include "ui_focusscancontroller.h"
 #include <AstroFormat.h>
 #include <AstroDebug.h>
+#include <AstroImage.h>
+
+using namespace astro::image;
 
 namespace snowgui {
 
@@ -82,7 +85,7 @@ void	focusscancontroller::positionReached() {
 	emit performCapture();
 }
 
-void	focusscancontroller::imageReceived() {
+void	focusscancontroller::imageReceived(ImagePtr /* image */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image received");
 	if (!scanning) {
 		return;

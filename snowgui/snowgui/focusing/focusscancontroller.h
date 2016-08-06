@@ -7,6 +7,7 @@
 #define FOCUSSCANCONTROLLER_H
 
 #include <QWidget>
+#include <AstroImage.h>
 
 namespace Ui {
 	class focusscancontroller;
@@ -41,7 +42,7 @@ public slots:
 	void	stopScan();
 	void	scanClicked();
 	void	positionReached();
-	void	imageReceived();
+	void	imageReceived(astro::image::ImagePtr);
 };
 
 } // namespace snowgui

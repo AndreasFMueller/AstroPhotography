@@ -42,7 +42,7 @@ public:
 
 signals:
 	void	exposureChanged(astro::camera::Exposure);
-	void	imageReceived();
+	void	imageReceived(astro::image::ImagePtr image);
 	void	ccdSelected(int);
 
 private:

@@ -427,7 +427,7 @@ void	ccdcontrollerwidget::guiChanged() {
  */
 void	ccdcontrollerwidget::setImage(ImagePtr image) {
 	_image = image;
-	emit imageReceived();
+	emit imageReceived(_image);
 }
 
 /**
@@ -513,7 +513,7 @@ void	ccdcontrollerwidget::retrieveImage() {
 		_imageexposure = snowstar::convert(_ccd->getExposure());
 		imageprx->remove();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
-		emit imageReceived();
+		emit imageReceived(_image);
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf("cannot retrieve "
 			"image: exception %s, cause=%s",

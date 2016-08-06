@@ -16,6 +16,8 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	ui->setupUi(this);
 	connect(ui->databaseButton, SIGNAL(clicked()),
 		this, SLOT(databaseClicked()));
+	connect(ui->calibrateButton, SIGNAL(clicked()),
+		this, SLOT(calibrateClicked()));
 }
 
 calibrationwidget::~calibrationwidget() {
@@ -88,6 +90,11 @@ void	calibrationwidget::displayCalibration() {
 		_calibration.quality * 100).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.0fmas/px",
 		_calibration.masPerPixel).c_str()));
+}
+
+void	calibrationwidget::calibrateClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuiderPort");
+	_guider->startCalibration(_controltype);
 }
 
 } // namespace snowgui
