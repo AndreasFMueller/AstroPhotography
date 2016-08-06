@@ -92,16 +92,14 @@ void	AsiCcd::setExposure(const Exposure& e) {
 		exposure.frame(ImageRectangle(exposure.origin(),
 			ImageSize(w, h)));
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure %s",
-		exposure.toString().c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set exposure %s -> %s",
+		e.toString().c_str(), exposure.toString().c_str());
 	ImageSize	sensorsize = info.size() / exposure.mode();
 
 	// set ROI
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
-
-	exposure.frame(frame);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set ROI %s",
 		frame.toString().c_str());

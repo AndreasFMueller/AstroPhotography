@@ -41,6 +41,18 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 	FITSinfileBase	infile(filename);
 	ImagePtr	result;
 
+	// if the file has X/YORGSUBF information, apply it
+	ImagePoint	origin;
+	if (infile.hasHeader(std::string("XORGSUBF")) &&
+		infile.hasHeader(std::string("YORGSUBF"))) {
+		int	xorgsubf, yorgsubf;
+		xorgsubf = std::stoi(infile.getHeader(std::string("XORGSUBF")));
+		yorgsubf = std::stoi(infile.getHeader(std::string("YORGSUBF")));
+		origin = ImagePoint(xorgsubf, yorgsubf);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got origin %s from headers",
+			origin.toString().c_str());
+	}
+
 	/* images with 3 planes have RGB pixels */
 	if (infile.getPlanes() == 3) {
 		switch (infile.getImgtype()) {
@@ -63,6 +75,7 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 			result = do_read<RGB<double> >(filename);
 			break;
 		}
+		result->setOrigin(origin);
 		return result;
 	}
 
@@ -89,6 +102,7 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 			result = do_read<Multiplane<double, n> >(filename);\
 			break;						\
 		}							\
+		result->setOrigin(origin);				\
 		return result;						\
 	}
 
@@ -122,16 +136,6 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 		}
 	}
 
-	// if the file has X/YORGSUBF information, apply it
-	if (infile.hasHeader(std::string("XORGSUBF")) &&
-		infile.hasHeader(std::string("YORGSUBF"))) {
-		int	xorgsubf, yorgsubf;
-		xorgsubf = std::stoi(infile.getHeader(std::string("XORGSUBF")));
-		yorgsubf = std::stoi(infile.getHeader(std::string("YORGSUBF")));
-		ImagePoint	origin(xorgsubf, yorgsubf);
-		result->setOrigin(origin);
-	}
-
 	// resolve mosaic information, check for the BAYER key:
 	if (infile.hasHeader(std::string("BAYER"))) {
 		std::string	bayervalue
@@ -152,7 +156,7 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 			result->setMosaicType(MosaicType::BAYER_BGGR);
                 }
         }
-
+	result->setOrigin(origin);
 	return result;
 }
 

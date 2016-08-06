@@ -39,6 +39,8 @@ std::ostream&	operator<<(std::ostream& out, const Exposure& exposure) {
 }
 
 void	Exposure::addToImage(ImageBase& image) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add exposure %s to the image",
+		toString().c_str());
 	// exposure time
 	image.setMetadata(
 		FITSKeywords::meta(std::string("EXPTIME"), _exposuretime));
