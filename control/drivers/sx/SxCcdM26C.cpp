@@ -235,8 +235,13 @@ void	SxCcdM26C::requestField(int field) {
 #endif
 }
 
+#if 0
 #define M26C_WIDTH	3906
 #define M26C_HEIGHT	2616
+#else
+#define M26C_WIDTH	3900
+#define M26C_HEIGHT	2616
+#endif
 
 /**
  * \brief Compute the maximum of l int values
@@ -276,6 +281,7 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "symmetrizing exposure %s",
 		exp.toString().c_str());
 	Exposure	symexp = exp;
+
 	int	x[4], y[4];
 	// compute all the possible corner coordinates
 	x[0] = exp.x();			y[0] = exp.y();
@@ -287,15 +293,23 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "y[] = %d %d %d %d",
 		y[0], y[1], y[2], y[3]);
 
+	// make the origin with the right divisibility
+	int	xmin = ((min(x, 4) >> 2) << 2) - 4;
+	if (xmin < 0) { xmin = 0; }
+	int	xmax = M26C_WIDTH - xmin;
+	int	ymin = ((min(y, 4) >> 2) << 2) - 4;
+	if (ymin < 0) { ymin = 0; }
+	int	ymax = M26C_HEIGHT - ymin;
+
 	// symmetrized origin
-	ImagePoint	origin(min(x, 4), min(y, 4));
-	
+	ImagePoint	origin(xmin, ymin);
+
 	// symmetrize size
-	unsigned int	sizex = max(x, 4) - min(x, 4);
+	unsigned int	sizex = xmax - xmin;
 	if (sizex > 3900) {
 		sizex = 3900;
 	}
-	unsigned int	sizey = max(y, 4) - min(y, 4);
+	unsigned int	sizey = ymax - ymin;
 	ImageSize	size(sizex, sizey);
 	ImageRectangle	frame(origin, size);
 	symexp.frame(frame);

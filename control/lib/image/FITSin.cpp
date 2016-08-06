@@ -122,6 +122,16 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 		}
 	}
 
+	// if the file has X/YORGSUBF information, apply it
+	if (infile.hasHeader(std::string("XORGSUBF")) &&
+		infile.hasHeader(std::string("YORGSUBF"))) {
+		int	xorgsubf, yorgsubf;
+		xorgsubf = std::stoi(infile.getHeader(std::string("XORGSUBF")));
+		yorgsubf = std::stoi(infile.getHeader(std::string("YORGSUBF")));
+		ImagePoint	origin(xorgsubf, yorgsubf);
+		result->setOrigin(origin);
+	}
+
 	// resolve mosaic information, check for the BAYER key:
 	if (infile.hasHeader(std::string("BAYER"))) {
 		std::string	bayervalue

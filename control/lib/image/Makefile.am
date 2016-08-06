@@ -31,6 +31,7 @@ libastroimage_la_SOURCES = 						\
 	ConvolutionOperator.cpp						\
 	ConvolutionResult.cpp						\
 	Corrector.cpp							\
+	Cut.cpp								\
 	DarkCorrector.cpp						\
 	DarkNoiseAdapter.cpp						\
 	DeconvolutionOperator.cpp					\

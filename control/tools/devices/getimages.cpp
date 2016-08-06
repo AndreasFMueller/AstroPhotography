@@ -93,11 +93,11 @@ static struct option	longopts[] = {
 { "filter",		required_argument,	NULL,	'f' }, /*  4 */
 { "focus",		required_argument,	NULL,	'F' }, /*  5 */
 { "help",		no_argument,		NULL,	'h' }, /*  6 */
-{ "number",		required_argument,	NULL,	'n' }, /*  8 */
-{ "purpose",		required_argument,	NULL,	'p' }, /*  9 */
-{ "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
-{ "repo",		required_argument,	NULL,	'r' }, /* 11 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 12 */
+{ "number",		required_argument,	NULL,	'n' }, /*  7 */
+{ "purpose",		required_argument,	NULL,	'p' }, /*  8 */
+{ "rectangle",		required_argument,	NULL,	 1  }, /*  9 */
+{ "repo",		required_argument,	NULL,	'r' }, /* 10 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 11 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -164,7 +164,7 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 1:
 			switch (longindex) {
-			case 10:
+			case 9:
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"rectangle %s", optarg);
 				frame = ImageRectangle(optarg);

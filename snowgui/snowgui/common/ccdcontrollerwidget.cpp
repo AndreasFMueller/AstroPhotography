@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <QTimer>
 #include <AstroIO.h>
+#include <AstroImageops.h>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -510,8 +511,21 @@ void	ccdcontrollerwidget::retrieveImage() {
 				std::string("INSTRUME"), instrumentname()));
 		}
 		_image = image;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
+			image->getFrame().toString().c_str());
 		_imageexposure = snowstar::convert(_ccd->getExposure());
 		imageprx->remove();
+
+		// if the image size does not match the size requested, get the
+		// subimage
+		if (_image->getFrame() != _exposure.frame()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cutting image to %s",
+				_exposure.frame().toString().c_str());
+			_image = astro::image::ops::cut(_image, _exposure.frame());
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "image dimensions now %s",
+			_image->getFrame().toString().c_str());
+
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image received, emit signal");
 		emit imageReceived(_image);
 	} catch (const std::exception& x) {
