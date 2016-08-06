@@ -238,9 +238,12 @@ void	SxCcdM26C::requestField(int field) {
 #define M26C_WIDTH	3906
 #define M26C_HEIGHT	2616
 
+/**
+ * \brief Compute the maximum of l int values
+ */
 static int	max(const int *v, int l) {
 	int	result = v[0];
-	for (int i = 0; i < l; i++) {
+	for (int i = 1; i < l; i++) {
 		if (v[i] > result) {
 			result = v[i];
 		}
@@ -248,6 +251,9 @@ static int	max(const int *v, int l) {
 	return result;
 }
 
+/**
+ * \brief Compute the minimum of l int values
+ */
 static int	min(const int *v, int l) {
 	int	result = v[0];
 	for (int i = 1; i < l; i++) {
@@ -271,14 +277,11 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 		exp.toString().c_str());
 	Exposure	symexp = exp;
 	int	x[4], y[4];
-	x[0] = exp.x();
-	y[0] = exp.y();
-	x[1] = M26C_WIDTH - x[0];
-	y[1] = M26C_HEIGHT - y[0];
-	x[2] = exp.x() + exp.width();
-	y[2] = exp.y() + exp.height();
-	x[3] = M26C_WIDTH - x[2];
-	y[3] = M26C_HEIGHT - y[2];
+	// compute all the possible corner coordinates
+	x[0] = exp.x();			y[0] = exp.y();
+	x[1] = M26C_WIDTH - x[0]; 	y[1] = M26C_HEIGHT - y[0];
+	x[2] = exp.x() + exp.width(); 	y[2] = exp.y() + exp.height();
+	x[3] = M26C_WIDTH - x[2]; 	y[3] = M26C_HEIGHT - y[2];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "x[] = %d %d %d %d",
 		x[0], x[1], x[2], x[3]);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "y[] = %d %d %d %d",
@@ -288,11 +291,11 @@ Exposure	SxCcdM26C::symmetrize(const Exposure& exp) const {
 	ImagePoint	origin(min(x, 4), min(y, 4));
 	
 	// symmetrize size
-	unsigned int	sizex = max(x, 4) - symexp.x();
+	unsigned int	sizex = max(x, 4) - min(x, 4);
 	if (sizex > 3900) {
 		sizex = 3900;
 	}
-	unsigned int	sizey = max(y, 4) - symexp.y();
+	unsigned int	sizey = max(y, 4) - min(y, 4);
 	ImageSize	size(sizex, sizey);
 	ImageRectangle	frame(origin, size);
 	symexp.frame(frame);
