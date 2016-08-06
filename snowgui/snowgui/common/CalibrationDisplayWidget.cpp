@@ -51,7 +51,6 @@ void	CalibrationDisplayWidget::draw() {
 	double	maxy = 1;
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "%ld: %f", i, p.t);
 		// compute the time interval used
 		if (p.offset.x != 0) {
 			timeinterval += fabs(p.offset.x); counter++;
@@ -72,8 +71,6 @@ void	CalibrationDisplayWidget::draw() {
 		timeinterval = 1;
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "analyze RA/DEC/DRIFT vectors, t=%f",
-		timeinterval);
 	double	rax, ray, decx, decy, driftx, drifty;
 	if (_calibration.complete) {
 		rax = _calibration.coefficients[0] * timeinterval;
@@ -110,7 +107,6 @@ void	CalibrationDisplayWidget::draw() {
 	pen.setColor(QColor(255., 0., 0.));
 	painter.setPen(pen);
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "draw point %d", i);
 		snowstar::CalibrationPoint	p = _calibration.points[i];
 		QPointF	pf(p.star.x * scale + cx, h - (p.star.y * scale + cy));
 		painter.drawPoint(pf);

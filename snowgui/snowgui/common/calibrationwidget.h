@@ -15,6 +15,9 @@ namespace Ui {
 
 namespace snowgui {
 
+/**
+ * \brief Widget to display and select a calibration for a guider
+ */
 class calibrationwidget : public QWidget {
 	Q_OBJECT
 

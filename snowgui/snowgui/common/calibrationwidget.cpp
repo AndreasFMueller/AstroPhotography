@@ -43,13 +43,17 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 	try {
 		_calibration = _guider->getCalibration(controltype);
 		ui->calibrationdisplayWidget->setCalibration(_calibration);
+		displayCalibration();
 	} catch (...) {
 
 	}
 }
 
 /**
- * \brief 
+ * \brief Slot called when the databas button is clicked
+ *
+ * It opens a calibrationselectiondialog to select a clibration appropriate
+ * for this device.
  */
 void	calibrationwidget::databaseClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create a calibration selection");
@@ -69,11 +73,20 @@ void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
 }
 
 void	calibrationwidget::displayCalibration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "display calibration %d",
+		_calibration.id);
+	if (_calibration.id <= 0) {
+		ui->calibrationIDField->setText(QString(""));
+		ui->numberField->setText(QString(""));
+		ui->qualityField->setText(QString(""));
+		ui->resolutionField->setText(QString(""));
+		return;
+	}
 	ui->calibrationIDField->setText(QString::number(_calibration.id));
 	ui->numberField->setText(QString::number(_calibration.points.size()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
-	ui->resolutionField->setText(QString(astro::stringprintf("%.3fmas/px",
+	ui->resolutionField->setText(QString(astro::stringprintf("%.0fmas/px",
 		_calibration.masPerPixel).c_str()));
 }
 
