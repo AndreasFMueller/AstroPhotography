@@ -32,6 +32,12 @@ ImagePtr	cut(ImagePtr source, const ImageRectangle& rectangle) {
 	cutit(source, rectangle, RGB<unsigned long>);
 	cutit(source, rectangle, RGB<float>);
 	cutit(source, rectangle, RGB<double>);
+	cutit(source, rectangle, YUYV<unsigned char>);
+	cutit(source, rectangle, YUYV<unsigned short>);
+	cutit(source, rectangle, YUYV<unsigned int>);
+	cutit(source, rectangle, YUYV<unsigned long>);
+	cutit(source, rectangle, YUYV<float>);
+	cutit(source, rectangle, YUYV<double>);
 	throw std::runtime_error("unknown pixel type for cut operation");
 }
 

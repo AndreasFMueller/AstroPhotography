@@ -86,9 +86,9 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	} else {
 		// make sure window sizes are divisible by 4/2
 		int	w = exposure.width();
-		w = (w >> 2) << 2;
+		w = ((w + 3) >> 2) << 2;
 		int	h = exposure.height();
-		h = (h >> 1) << 1;
+		h = ((h + 1) >> 1) << 1;
 		exposure.frame(ImageRectangle(exposure.origin(),
 			ImageSize(w, h)));
 	}
@@ -100,6 +100,8 @@ void	AsiCcd::setExposure(const Exposure& e) {
 	ImagePoint	origin = exposure.frame().origin() / exposure.mode();
 	ImageSize	size = exposure.frame().size() / exposure.mode();
 	ImageRectangle	frame(origin, size);
+
+	exposure.frame(frame);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set ROI %s",
 		frame.toString().c_str());

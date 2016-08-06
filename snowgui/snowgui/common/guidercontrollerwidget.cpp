@@ -19,6 +19,10 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
 
+	_guiderdescriptor.ccdIndex = 0;
+	_guiderdescriptor.guiderportIndex = 0;
+	_guiderdescriptor.adaptiveopticsIndex = 0;
+
 	// adding items to the tracking method combo box
 	ui->methodBox->addItem(QString("Star"));
 	ui->methodBox->addItem(QString("Phase"));
