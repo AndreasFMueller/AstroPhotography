@@ -271,6 +271,16 @@ AC_SUBST(ASILIBPATH)
 AC_SUBST(ASILIBS)
 AM_CONDITIONAL(ENABLE_ASI, test x$enable_asi = xyes)
 
+## ATIK ##############################################################
+# checks for ATIK libary, currently only dummy settings
+ATIKINCLUDEE=
+ATIKLIBPATH=
+ATIKLIBS=
+AC_SUBST(ATIKINCLUDE)
+AC_SUBST(ATIKLIBPATH)
+AC_SUBST(ATIKLIBS)
+AM_CONDITIONAL(ENABLE_ATIK, false)
+
 ## SBIG ##############################################################
 # check for SBIG library
 AC_ARG_ENABLE(sbig,
@@ -473,7 +483,7 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	drivers/uvc/Makefile drivers/unicap/Makefile 
 	drivers/microtouch/Makefile drivers/qsi/Makefile drivers/qhy/Makefile
 	drivers/celestron/Makefile drivers/gpio/Makefile drivers/nice/Makefile
-	drivers/asi/Makefile
+	drivers/asi/Makefile drivers/atik/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	test/Makefile])
 AC_OUTPUT
