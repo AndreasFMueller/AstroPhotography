@@ -273,13 +273,44 @@ AM_CONDITIONAL(ENABLE_ASI, test x$enable_asi = xyes)
 
 ## ATIK ##############################################################
 # checks for ATIK libary, currently only dummy settings
+enable_atik=yes
 ATIKINCLUDEE=
 ATIKLIBPATH=
 ATIKLIBS=
+AC_ARG_WITH(atik,
+[AS_HELP_STRING([--width-atik], [location of ATIK header/library])],
+[
+	ATIKINCLUDE="-I${with_atik}/include"
+	ATIKLIBPATH="-L${with_atik}/lib -L${with_atik}/lib64"
+],
+)
+if test .${enable_atik} = .yes
+then
+	OLDINCLUDE=${CPPFLAGS}
+	CPPFLAGS="${CPPFLAGS} ${ATIKINCLUDE}"
+	AC_LANG_PUSH([C++])
+	AC_CHECK_HEADERS(atikccdusb.h, enable_atik=yes, enable_atik=no)
+	AC_LANG_POP([C++])
+fi
+if test .${enable_atik} = .yes
+then
+	OLDLDFLAGS="${LDFLAGS}"
+	OLDLIBS="${LIBS}"
+	LDFLAGS="${LDFLAGS} ${ATIKLIBPATH}"
+	LIBS="${LIBS} ${ATIKLIBS}"
+	AC_LANG_PUSH([C++])
+	AC_CHECK_LIB(atikccd, AtikCamera_list)
+	ATIKLIBS=-latikccd
+	AC_LANG_POP([C++])
+	LDFLAGS="${OLDLDFLAGS}"
+	LIBS="${OLDLIBS}"
+else
+	CPPFLAGS="${OLDINCLUDE}"
+fi
 AC_SUBST(ATIKINCLUDE)
 AC_SUBST(ATIKLIBPATH)
 AC_SUBST(ATIKLIBS)
-AM_CONDITIONAL(ENABLE_ATIK, false)
+AM_CONDITIONAL(ENABLE_ATIK, test x$enable_atik = xyes)
 
 ## SBIG ##############################################################
 # check for SBIG library

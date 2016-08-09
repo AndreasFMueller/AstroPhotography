@@ -6,14 +6,14 @@
 
 if ENABLE_ATIK
 
-noinst_HEADERS = AtikLocator.h
+noinst_HEADERS = AtikLocator.h AtikUtils.h AtikCamera.h
 pkglib_LTLIBRARIES = atik.la 
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libatik.la
 
-libatik_la_SOURCES = AtikLocator.cpp
+libatik_la_SOURCES = AtikLocator.cpp AtikUtils.cpp AtikCamera.cpp
 libatik_la_DEPENDENCIES = ../../lib/libastro.la
 libatik_la_LIBADD = ../../lib/libastro.la
 
@@ -27,7 +27,7 @@ testcase_LDADD = @ATIKLIBRARY@
 
 endif
 
-atik_la_SOURCES = AtikLocator.cpp
+atik_la_SOURCES = AtikLocator.cpp AtikUtils.cpp AtikCamera.cpp
 atik_la_LDFLAGS = -module
 atik_la_DEPENDENCIES = ../../lib/libastro.la
 atik_la_LIBADD = ../../lib/libastro.la @ATIKLIBPATH@ @ATIKLIBS@

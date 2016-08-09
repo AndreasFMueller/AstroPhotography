@@ -91,3 +91,5 @@ snowstream_CPPFLAGS = $(ICECPPFLAGS)
 test:	snowflake
 	./snowflake -d -m simulator
 
+teststream:
+	./snowstream --debug --exposure=1 server SIM 

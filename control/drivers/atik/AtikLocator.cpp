@@ -7,10 +7,13 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <atikccdusb.h>
 #include <AtikLocator.h>
+#include <AtikUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <includes.h>
+#include <mutex>
 
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Atik Module Descriptor
@@ -62,8 +65,6 @@ namespace atik {
 // AtikLocator implementation
 //////////////////////////////////////////////////////////////////////
 
-std::vector<bool>	AtikCameraLocator::cameraopen;
-
 std::string	AtikCameraLocator::getName() const {
 	return std::string("atik");
 }
@@ -72,18 +73,31 @@ std::string	AtikCameraLocator::getVersion() const {
 	return VERSION;
 }
 
+#define MaxAtikCameraNumber	10
+static ::AtikCamera	*atik_camera[MaxAtikCameraNumber];
+static int	atik_camera_count;
+std::once_flag	atik_camera_flag;
+void	atik_list_cameras() {
+	atik_camera_count = ::AtikCamera::list((::AtikCamera**)atik_camera,
+		MaxAtikCameraNumber);
+	for (int i = 0; i < atik_camera_count; i++) {
+		atik_camera[i]->open();
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ATIK cameras",
+		atik_camera_count);
+}
+
 /**
  * \brief Create a new Atik camera locator
  */
 AtikCameraLocator::AtikCameraLocator() {
-	// XXX not implemented yet
+	std::call_once(atik_camera_flag,atik_list_cameras);
 }
 
 /**
  * \brief Destroy a new Atik camera locator
  */
 AtikCameraLocator::~AtikCameraLocator() {
-	// XXX not implemented yet
 }
 
 
@@ -100,15 +114,22 @@ std::vector<std::string>	AtikCameraLocator::getDevicelist(DeviceName::device_typ
 	case DeviceName::Focuser:
 	case DeviceName::Module:
 	case DeviceName::Mount:
+		return names;
 	case DeviceName::Filterwheel:
 		return names;
 	case DeviceName::Guiderport:
 		return names;
 	case DeviceName::Camera:
+		for (int i = 0; i < atik_camera_count; i++) {
+			names.push_back(cameraname(atik_camera[i]));
+		}
 		return names;
 	case DeviceName::Ccd:
 		return names;
 	case DeviceName::Cooler:
+		for (int i = 0; i < atik_camera_count; i++) {
+			
+		}
 		return names;
 	default:
 		break;
@@ -126,7 +147,13 @@ std::vector<std::string>	AtikCameraLocator::getDevicelist(DeviceName::device_typ
  */
 CameraPtr	AtikCameraLocator::getCamera0(const DeviceName& name) {
 	std::string	sname = name;
+	unsigned int	serial = std::stoi(name.unitname());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", sname.c_str());
+	for (int i = 0; i < atik_camera_count; i++) {
+		if (atik_camera[i]->getSerialNumber() == serial) {
+			// XXX create a new camera
+		}
+	}
 	throw std::runtime_error("not implemented yet");
 }
 
