@@ -14,6 +14,8 @@ namespace camera {
 namespace atik {
 
 DeviceName	cameraname(::AtikCamera *camera);
+DeviceName	filterwheelname(::AtikCamera *camera);
+DeviceName	guiderportname(::AtikCamera *camera);
 
 } // namespace atik
 } // namespace camera

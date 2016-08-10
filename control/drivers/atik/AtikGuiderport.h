@@ -1,10 +1,10 @@
 /*
- * AtikCamera.h -- Atik camera class
+ * AtikGuiderport.h -- class to control guide ports of ATIK cameras
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */
-#ifndef _AtikCamera_h
-#define _AtikCamera_h
+#ifndef _AtikGuiderport_h
+#define _AtikGuiderport_h
 
 #include <atikccdusb.h>
 #include <AstroCamera.h>
@@ -13,15 +13,14 @@ namespace astro {
 namespace camera {
 namespace atik {
 
-class AtikCamera : public Camera {
+class AtikGuiderport : public GuiderPort {
 	::AtikCamera	*_camera;
 public:
-	AtikCamera(::AtikCamera *camera);
-friend class AtikCcd;
+	AtikGuiderport(::AtikCamera*);
 };
 
 } // namespace atik
 } // namespace camera
 } // namespace astro
 
-#endif /* _AtikCamera_h */
+#endif /* _AtikGuiderport_h */
