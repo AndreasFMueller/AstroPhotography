@@ -52,6 +52,11 @@ public:
  *
  * This is the base class for the star detector. It contains all the relevant
  * functionality that is independent of the Pixel type.
+ * This class does not in any way take into account the frame defined
+ * in the class. So the coordinates returned in the findResult_s are
+ * with respect to the lower left corner of the actual image. This is
+ * necessary because an ConstImageAdapter does not have an interface to
+ * query the image rectangle.
  */
 class StarDetectorBase {
 	typedef struct findResult_s {
@@ -124,6 +129,12 @@ class Tracker {
 protected:
 static ConstImageAdapter<double>	*adapter(image::ImagePtr newimage);
 public:
+	/**
+ 	 * \brief tracker offset method
+	 *
+ 	 * This is the main method of any tracker. It returns the offset
+	 * the tracker has measured.
+	 */
 	virtual Point	operator()(image::ImagePtr newimage) = 0;
 	virtual	std::string	toString() const;
 };
@@ -591,6 +602,7 @@ public:
 	void	callback(const ProgressInfo& point);
 	void	callback(const GuiderCalibration& cal);
 	void	callback(const TrackingPoint& point);
+	virtual void	callback(const std::exception& ex) = 0;
 
 	// constructor
 	GuiderBase(const std::string& instrument, camera::CcdPtr ccd,
@@ -928,6 +940,8 @@ public:
 	 * \param activation	the activations computed for the next period
 	 */
 	void lastAction(double& actiontime, Point& offset, Point& activation);
+
+	void	callback(const std::exception& ex);
 };
 typedef std::shared_ptr<Guider>	GuiderPtr;
 

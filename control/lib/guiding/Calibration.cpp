@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <CalibrationPersistence.h>
+#include "CalibrationPersistence.h"
 #include <includes.h>
 
 namespace astro {

@@ -8,6 +8,11 @@
 namespace astro {
 namespace guiding {
 
+/**
+ * \brief Offset-Function of the Null-Tracker
+ *
+ * This method always returns 0 as the offset
+ */
 Point	NullTracker::operator()(image::ImagePtr /* newimage */) {
 	return Point(0,0);
 }

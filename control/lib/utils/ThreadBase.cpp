@@ -210,6 +210,9 @@ void	ThreadBase::run() {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s exception in thread %p: %s",
 			demangle(typeid(x).name()).c_str(),
 			std::this_thread::get_id(), x.what());
+		try {
+			this->callback(x);
+		} catch (...) { }
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "unknown exception in thread %p",
 			std::this_thread::get_id());
@@ -226,6 +229,14 @@ void	ThreadBase::run() {
 		std::unique_lock<std::recursive_mutex>	lock(mutex);
 		_isrunning = false;
 	}
+}
+
+/**
+ * \brief handle callback
+ */
+void	ThreadBase::callback(const std::exception& ex) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring excetion %s: %s",
+		demangle(typeid(ex).name()).c_str(), ex.what());
 }
 
 } // namespace thread

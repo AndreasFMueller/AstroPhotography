@@ -3,7 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <TrackingPersistence.h>
+#include "TrackingPersistence.h"
 
 using namespace astro::persistence;
 

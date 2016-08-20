@@ -4,8 +4,8 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroGuiding.h>
-#include <TrackingProcess.h>
-#include <TrackingPersistence.h>
+#include "TrackingProcess.h"
+#include "TrackingPersistence.h"
 
 using namespace astro::callback;
 using namespace astro::thread;

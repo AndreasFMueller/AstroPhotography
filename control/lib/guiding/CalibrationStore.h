@@ -9,7 +9,7 @@
 #include <list>
 #include <AstroGuiding.h>
 #include <AstroPersistence.h>
-#include <CalibrationPersistence.h>
+#include "CalibrationPersistence.h"
 
 namespace astro {
 namespace guiding {

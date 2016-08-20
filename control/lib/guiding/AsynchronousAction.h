@@ -4,6 +4,9 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
+#ifndef _AsynchronousAction_h
+#define _AsynchronousAction_h
+
 #include <memory>
 #include <thread>
 
@@ -35,3 +38,5 @@ public:
 
 } // namespace guiding
 } // namespace astro
+
+#endif /* _AsynchronousAction_h */

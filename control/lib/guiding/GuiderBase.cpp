@@ -151,7 +151,6 @@ void	GuiderBase::callback(const GuiderCalibration& cal) {
 	_guidercalibrationcallback(data);
 }
 
-
 /**
  * \brief get a good measure for the pixel size of the CCD
  *

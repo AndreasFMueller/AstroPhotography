@@ -1,5 +1,5 @@
 /*
- * Guider.cpp -- classes implementing guiding
+ * Guider.cpp -- Guider class implementation
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -7,14 +7,15 @@
 
 #include <AstroGuiding.h>
 #include <AstroIO.h>
-//#include <GuiderProcess.h>
-#include <CalibrationProcess.h>
 #include <AstroCallback.h>
 #include <AstroUtils.h>
-#include <CalibrationPersistence.h>
-#include <CalibrationStore.h>
-#include <TrackingProcess.h>
 #include <AstroAdapter.h>
+
+#include "CalibrationProcess.h"
+#include "CalibrationPersistence.h"
+#include "CalibrationStore.h"
+#include "GuiderCalibrationRedirector.h"
+#include "TrackingProcess.h"
 
 using namespace astro::image;
 using namespace astro::camera;
@@ -23,48 +24,6 @@ using namespace astro::persistence;
 
 namespace astro {
 namespace guiding {
-
-/**
- * \brief Auxiliary class to ensure calibrations found are sent to the guider
- */
-class GuiderCalibrationRedirector : public Callback {
-	Guider	*_guider;
-public:
-	GuiderCalibrationRedirector(Guider *guider) : _guider(guider) { }
-	CallbackDataPtr	operator()(CallbackDataPtr data);
-};
-
-
-CallbackDataPtr	GuiderCalibrationRedirector::operator()(CallbackDataPtr data) {
-	// handle the calibration
-	{
-		GuiderCalibrationCallbackData	*cal
-			= dynamic_cast<GuiderCalibrationCallbackData *>(&*data);
-		if (NULL != cal) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration update");
-			_guider->saveCalibration(cal->data());
-		}
-	}
-
-	// handle progress updates
-	{
-		ProgressInfoCallbackData	*cal
-			= dynamic_cast<ProgressInfoCallbackData *>(&*data);
-		if (NULL != cal) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "progress update");
-			_guider->calibrationProgress(cal->data().progress);
-			if (cal->data().aborted) {
-				_guider->forgetCalibration();
-			}
-		}
-	}
-
-	return data;
-}
-
-//////////////////////////////////////////////////////////////////////
-// Guider implementation
-//////////////////////////////////////////////////////////////////////
 
 /**
  * \brief Construct a guider from 
@@ -501,6 +460,30 @@ void Guider::lastAction(double& actiontime, Point& offset,
 GuiderDescriptor	Guider::getDescriptor() const {
 	return GuiderDescriptor(name(), instrument(), ccdname(),
 		guiderportname(), adaptiveopticsname());
+}
+
+/**
+ * \brief Handle exception callback
+ */
+void	Guider::callback(const std::exception& ex) {
+	Guide::state	s = _state;
+	switch (s) {
+	case Guide::unconfigured:
+	case Guide::idle:
+	case Guide::calibrated:
+		break;
+	case Guide::calibrating:
+		// calibraton failed, so we return to the calibrated state
+		// if there are calibrations, or to the idle state, if there
+		// aren't any calibrations
+		// XXX implementation needed
+		//_state.configure();
+		break;
+	case Guide::guiding:
+		// guiding failed, return to the configured state
+		//_state.stopGuiding();
+		break;
+	}
 }
 
 } // namespace guiding

@@ -10,7 +10,7 @@
 #define _CalibrationProcess_h
 
 #include <AstroGuiding.h>
-#include <BasicProcess.h>
+#include "GuiderPortProcess.h"
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -50,6 +50,7 @@ private:
 	void	callback(const ProgressInfo& progressinfo);
 	void	callback(const GuiderCalibration& calibration);
 	void	callback(const ImagePtr& image);
+	void	callback(const std::exception& ex);
 private:
 	CalibrationProcess(const CalibrationProcess& other);
 	CalibrationProcess&	operator=(const CalibrationProcess& other);
@@ -61,6 +62,8 @@ public:
 	virtual void	start();
 	// the main function of the process
 	void	main(astro::thread::Thread<CalibrationProcess>& thread);
+private:
+	void	main2(astro::thread::Thread<CalibrationProcess>& thread);
 };
 
 } // namespace guiding

@@ -432,6 +432,11 @@ protected:
 	 * initializations, e.g. the _isrunning and _terminate variables.
 	 */
 	virtual	void	main() = 0;
+
+	/**
+	 * \brief Callback to signal an exception if the main thread fails
+	 */
+	virtual void	callback(const std::exception& ex);
 private:
 	// The RunAccess adapter class allows to get access
 	// to the protected main function from a C function

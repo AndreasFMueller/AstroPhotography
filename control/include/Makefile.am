@@ -19,12 +19,11 @@ include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
 	AstroImageops.h
 
 noinst_HEADERS = PixelValue.h Sun.h \
-	BasicProcess.h CalibrationProcess.h GuiderProcess.h \
+	GuiderProcess.h \
 	ViewerPipeline.h Radon.h \
 	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \
 	CancellableWork.h ExposureWork.h \
-	TrackingPersistence.h CalibrationPersistence.h \
-	TrackingStore.h CalibrationStore.h ImagePersistence.h \
+	ImagePersistence.h \
 	FocusWork.h FocusCompute.h Serial.h \
 	BasicGuiderport.h \
 	FieldPersistence.h astroregex.h \

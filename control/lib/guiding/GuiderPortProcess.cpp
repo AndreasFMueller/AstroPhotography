@@ -3,7 +3,7 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <BasicProcess.h>
+#include "GuiderPortProcess.h"
 
 namespace astro {
 namespace guiding {

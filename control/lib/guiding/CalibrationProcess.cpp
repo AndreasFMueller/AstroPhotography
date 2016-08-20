@@ -6,7 +6,7 @@
 #include <includes.h>
 #include <AstroGuiding.h>
 #include <AstroIO.h>
-#include <CalibrationProcess.h>
+#include "CalibrationProcess.h"
 #include <AstroCallback.h>
 #include <AstroUtils.h>
 
@@ -86,6 +86,16 @@ void	CalibrationProcess::callback(const ImagePtr& image) {
 }
 
 /**
+ * \brief Send an exception to the callback
+ */
+void	CalibrationProcess::callback(const std::exception& ex) {
+	if (!hasGuider()) {
+		return;
+	}
+	guider()->callback(ex);
+}
+
+/**
  * \brief Measure a given grid point
  *
  * Moves to a grid point, measures the offset seen by the tracker, then
@@ -161,6 +171,27 @@ public:
  *
  */
 void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread) {
+	try {
+		main(_thread);
+		return;
+	} catch (std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
+			"by %s: %s", demangle(typeid(x).name()).c_str(),
+			x.what());
+		return;
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
+			"by unknown exception");
+	}
+	// if we get here, then the calibration process has failed, and
+	// we should go back to the idle state
+	// XXX
+}
+
+/**
+ * \brief private part of the main method
+ */
+void	CalibrationProcess::main2(astro::thread::Thread<CalibrationProcess>& _thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"start calibrating: terminate = %s, guider = %s",
 		_thread.terminate() ? "YES" : "NO", hasGuider() ? "YES" : "NO");
@@ -277,7 +308,7 @@ double	CalibrationProcess::gridconstant(double focallength,
 }
 
 /**
- * \brief Construct a guider from 
+ * \brief Construct a guider from guider, guiderport, tracker and a database
  */
 CalibrationProcess::CalibrationProcess(GuiderBase *_guider,
 	camera::GuiderPortPtr guiderport, TrackerPtr _tracker,

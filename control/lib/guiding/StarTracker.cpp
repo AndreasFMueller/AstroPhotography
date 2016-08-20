@@ -57,10 +57,20 @@ StarTracker::StarTracker(const Point& point,
 }
 
 Point	StarTracker::operator()(ImagePtr newimage) {
-	// find the star on the new image
+	// find the star on the new image, these coordinates are relative
+	// to the actual image
 	Point	newpoint = findstar(newimage, _rectangle, _k);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new point: %s, tracking point: %s",
 		newpoint.toString().c_str(), _point.toString().c_str());
+	// now we have to check whether the image is actually only a
+	// subframe, and correct newpoint for its offset. This way we
+	// get the star in absolute coordinates
+	newpoint = newpoint + newimage->getFrame().origin();
+	Point	offset = newpoint - _point;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "absolute: %s, offset: %s",
+		newpoint.toString().c_str(), offset.toString().c_str());
+
+	// new compute the offset
 	return newpoint - _point;
 }
 

@@ -7,6 +7,19 @@ SUBDIRS = . test
 
 noinst_LTLIBRARIES = libastroguiding.la
 
+noinst_HEADERS = 							\
+	AOCalibrationProcess.h						\
+	BasicProcess.h							\
+	CalibrationPersistence.h					\
+	CalibrationProcess.h						\
+	CalibrationStore.h						\
+	ControlDeviceCallback.h						\
+	GuiderCalibrationRedirector.h					\
+	GuiderPortAction.h						\
+	TrackingPersistence.h						\
+	TrackingProcess.h						\
+	TrackingStore.h
+
 libastroguiding_la_SOURCES = 						\
 	AdaptiveOpticsCalibration.cpp					\
 	AOCalibrationProcess.cpp					\
@@ -19,12 +32,16 @@ libastroguiding_la_SOURCES = 						\
 	CalibrationProcess.cpp						\
 	CalibrationStore.cpp						\
 	ControlDevice.cpp						\
+	ControlDeviceCallback.cpp					\
+	ControlDeviceBase.cpp						\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderBase.cpp							\
 	GuiderCalibration.cpp						\
+	GuiderCalibrationRedirector.cpp					\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
+	GuiderPortAction.cpp						\
 	GuiderPortProcess.cpp						\
 	GuiderStateMachine.cpp						\
 	LargeTracker.cpp						\
