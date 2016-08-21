@@ -11,6 +11,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a calibration selection dialog
+ */
 calibrationselectiondialog::calibrationselectiondialog(QWidget *parent) :
 	QDialog(parent), ui(new Ui::calibrationselectiondialog) {
 	ui->setupUi(this);
@@ -28,10 +31,16 @@ calibrationselectiondialog::calibrationselectiondialog(QWidget *parent) :
 	setWindowTitle(QString("Select Calibration"));
 }
 
+/**
+ * \brief Destroy the calibration selection dialog
+ */
 calibrationselectiondialog::~calibrationselectiondialog() {
 	delete ui;
 }
 
+/**
+ * \brief Create a label for the calibration
+ */
 static std::string	formatlabel(const snowstar::Calibration& cal) {
 	time_t	when = snowstar::converttime(cal.timeago);
 	struct tm	*tmp = localtime(&when);
@@ -41,10 +50,15 @@ static std::string	formatlabel(const snowstar::Calibration& cal) {
 		100 * cal.quality);
 }
 
+/**
+ * \brief Set the calibration selection for the guider
+ */
 void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		snowstar::GuiderDescriptor guiderdescriptor,
 		snowstar::GuiderFactoryPrx guiderfactory) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the calibration selection");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the calibration selection %s, %s",
+		guiderdescriptor.instrumentname.c_str(),
+		(controltype == snowstar::ControlGuiderPort) ? "GP" : "AO");
 	// remember the guider parameters
 	_controltype = controltype;
 	_guiderdescriptor = guiderdescriptor;
@@ -63,7 +77,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	// get all the calibration ids for this guider descriptor
 	snowstar::idlist	ids
 		= _guiderfactory->getCalibrations(_guiderdescriptor);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ids", ids.size());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider found %d ids", ids.size());
 
 	// now retrieve each calibration and decide whether to display it
 	snowstar::idlist::const_iterator	i;
@@ -80,13 +94,19 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration selection initialized");
 }
 
+/**
+ * \brief what to do when the row changes
+ */
 void	calibrationselectiondialog::currentRowChanged(int index) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "row selected: %d", index);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration row selected: %d", index);
 	_calibration = _calibrations[index];
 	ui->calibrationdisplayWidget->setCalibration(_calibration);
 	ui->calibrationdisplayWidget->setVisible(true);
 }
 
+/**
+ * \brief Accept the selected calibration
+ */
 void	calibrationselectiondialog::calibrationAccepted() {
 	emit calibrationSelected(_calibration);
 }

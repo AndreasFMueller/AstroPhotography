@@ -39,10 +39,16 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 		return i->second;
 	}
 
+	// construct the name of the guider
+	GuiderName	guidername(guiderdescriptor.name());
+
 	// use the information in the descriptor to build a new guider
 	Repository	repository;
 	CcdPtr	ccd;
 	if (guiderdescriptor.ccd().size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get CCD %s for guider %s",
+			guiderdescriptor.ccd().c_str(),
+			guidername.name().c_str());
 		DeviceAccessor<CcdPtr>	da(repository);
 		ccd = da.get(DeviceName(guiderdescriptor.ccd()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd constructed");
@@ -54,6 +60,9 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	}
 	GuiderPortPtr	guiderport;
 	if (guiderdescriptor.guiderport().size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get GuiderPort %s for guider %s",
+			guiderdescriptor.guiderport().c_str(),
+			guidername.name().c_str());
 		DeviceAccessor<GuiderPortPtr>	da(repository);
 		guiderport = da.get(DeviceName(guiderdescriptor.guiderport()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport constructed");
@@ -64,6 +73,9 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	}
 	AdaptiveOpticsPtr	adaptiveoptics;
 	if (guiderdescriptor.adaptiveoptics().size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get AO %s for guider %s",
+			guiderdescriptor.adaptiveoptics().c_str(),
+			guidername.name().c_str());
 		DeviceAccessor<AdaptiveOpticsPtr>	da(repository);
 		adaptiveoptics = da.get(DeviceName(guiderdescriptor.adaptiveoptics()));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics constructed");
@@ -74,16 +86,11 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 	}
 
 	// with all these components we can now build a new guider
-	GuiderPtr	guider(new Guider(guiderdescriptor.instrument(),
+	GuiderPtr	guider(new Guider(guidername,
 				ccd, guiderport, adaptiveoptics, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
-	return guider;
-}
-
-GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor,
-			const std::string& name) {
-	GuiderPtr	guider = get(guiderdescriptor);
-	guider->name(name);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "return guider '%s'",
+		guider->name().c_str());
 	return guider;
 }
 

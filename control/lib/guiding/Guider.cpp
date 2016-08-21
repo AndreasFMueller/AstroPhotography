@@ -83,9 +83,41 @@ void	Guider::calibrationProgress(double p) {
  * state machine, so we have to convert that to the Guider::state constants.
  * This is done by the cast operator of the GuiderStateMachine class.
  */
-Guide::state	Guider::state() const {
+Guide::state	Guider::state() {
 	Guide::state	result = _state;
-	return result;
+	// if the state is guiding or calibrating, we should check whether
+	// that process is still doing it
+	switch (result) {
+	case Guide::calibrating:
+		if ((guiderPortDevice) && (guiderPortDevice->calibrating())) {
+			return result;
+		}
+		if ((adaptiveOpticsDevice) && (adaptiveOpticsDevice->calibrating())) {
+			return result;
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparaently the calibration "
+			"process has gone away");
+		_state.failCalibration();
+		break;
+	case Guide::guiding:
+		if (trackingprocess) {
+			if (trackingprocess->isrunning()) {
+				return result;
+			}
+			trackingprocess.reset();
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "apparaently the guiding "
+			"process has gone away");
+		_state.stopGuiding();
+		break;
+	default:
+		return result;
+	}
+	Guide::state	resultnew = _state;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state has changed from %s to %s",
+		Guide::state2string(result).c_str(),
+		Guide::state2string(resultnew).c_str());
+	return resultnew;
 }
 
 /**
@@ -282,16 +314,26 @@ bool	Guider::waitCalibration(double timeout) {
  *
  * This is not the only possible tracker to use with the guiding process,
  * but it works currently quite well.
+ *
+ * \param point		start to track, in absolute coordinates
  */
 TrackerPtr	Guider::getTracker(const Point& point) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get Tracker for star at %s",
+		point.toString().c_str());
+	// get the image origin
 	astro::camera::Exposure exp = exposure();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s",
 		exp.origin().toString().c_str());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "point: %s",
-		point.toString().c_str());
+#if 0
 	astro::Point    difference = point - exp.origin();
 	int	x = difference.x();
 	int	y = difference.y();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "relative coordinates of star: (%d,%d)",
+		x, y);
+#else
+	int	x = point.x();
+	int	y = point.y();
+#endif
 	astro::image::ImagePoint        trackerstar(x, y);
 	astro::image::ImageRectangle    trackerrectangle(exp.size());
 	astro::guiding::TrackerPtr      tracker(
@@ -439,8 +481,7 @@ void	Guider::checkstate() {
 /**
  * \brief Retrieve information about last activation
  */
-void Guider::lastAction(double& actiontime, Point& offset,
-		Point& activation) {
+void Guider::lastAction(double& actiontime, Point& offset, Point& activation) {
 	TrackingProcess	*tp
 		= dynamic_cast<TrackingProcess *>(&*trackingprocess);
 	if (NULL == tp) {

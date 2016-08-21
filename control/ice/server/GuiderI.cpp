@@ -212,6 +212,11 @@ Exposure GuiderI::getExposure(const Ice::Current& /* current */) {
 	return convert(guider->exposure());
 }
 
+/**
+ * \brief Set the star to track
+ *
+ * \param point		star point in absolute coordinates
+ */
 void GuiderI::setStar(const Point& point, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new star set: %.1f,%.1f",
 		point.x, point.y);
@@ -407,6 +412,8 @@ astro::guiding::TrackerPtr	 GuiderI::getTracker() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using ccd center (%.1f,%.1f) as star",
 			_point.x, _point.y);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "current point is (%.1f, %.1f)",
+		_point.x, _point.y);
 
 	switch (_method) {
 	case TrackerUNDEFINED:

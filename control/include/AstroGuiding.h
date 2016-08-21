@@ -864,6 +864,7 @@ public:
 	void	failCalibration();
 	void	startGuiding();
 	void	stopGuiding();
+
 };
 
 /**
@@ -880,7 +881,7 @@ class Guider : public GuiderBase {
 private:
 	GuiderStateMachine	_state;
 public:
-	Guide::state	state() const;
+	Guide::state	state();
 	// The guider is essentially composed of a camera and a guiderport
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
@@ -1031,8 +1032,6 @@ public:
 		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
-	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor,
-				const std::string& name);
 };
 typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 

@@ -15,6 +15,9 @@ using namespace astro::image;
 
 namespace snowgui {
 
+/**
+ * \brief Constructor for the guidercontrollerwidget
+ */
 guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
@@ -32,6 +35,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	connect(ui->methodBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(methodChanged(int)));
 
+	// connections for other GUI elements
 	connect(ui->gpupdateintervalSpinBox, SIGNAL(valueChanged(double)),
 		this, SLOT(gpupdateintervalChanged(double)));
 	connect(ui->aoupdateintervalSpinBox, SIGNAL(valueChanged(double)),
@@ -133,9 +137,12 @@ void	guidercontrollerwidget::setupGuider() {
 }
 
 /**
- * \brief This 
+ * \brief Destructor for the guidercontrollerwidget
+ *
+ * The destructor also stops and destroys the timer
  */
 guidercontrollerwidget::~guidercontrollerwidget() {
+	statusTimer->stop();
 	delete statusTimer;
 	delete ui;
 }
@@ -147,8 +154,9 @@ void	guidercontrollerwidget::setExposure(astro::camera::Exposure exposure) {
 	_exposure = exposure;
 	try {
 		_guider->setExposure(snowstar::convert(_exposure));
+		// XXX star was already set
 		// use the center point as the star
-		setStar(_exposure.frame().size().center());
+		//setStar(_exposure.frame().size().center());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "could not set exposure");
 	}
@@ -160,6 +168,8 @@ void	guidercontrollerwidget::setExposure(astro::camera::Exposure exposure) {
 void	guidercontrollerwidget::setStar(astro::image::ImagePoint star) {
 	_star = star;
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting star (%d,%d)",
+			star.x(), star.y());
 		snowstar::Point	p;
 		p.x = star.x();
 		p.y = star.y();
@@ -169,6 +179,12 @@ void	guidercontrollerwidget::setStar(astro::image::ImagePoint star) {
 	}
 }
 
+/**
+ * \brief Select the point around which guiding operations will take place
+ *
+ * The precise point si only used by the star tracker, but the other methods
+ * also need a subwindow defined by the 
+ */
 void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "point %s selected",
 		p.toString().c_str());
@@ -181,24 +197,41 @@ void	guidercontrollerwidget::selectPoint(astro::image::ImagePoint p) {
 	ui->staryField->setText(QString::number(ip.y()));
 }
 
+/**
+ * \brief Select the CCD
+ *
+ * only GuiderCCD devices are considered
+ */
 void	guidercontrollerwidget::setCcd(int index) {
 	_guiderdescriptor.ccdIndex = index;
 	setupGuider();
 }
 
+/**
+ * \brief Select the Guiderport
+ */
 void	guidercontrollerwidget::setGuiderport(int index) {
 	_guiderdescriptor.guiderportIndex = index;
 	setupGuider();
 }
 
+/**
+ * \brief Select the adaptive optics 
+ */
 void	guidercontrollerwidget::setAdaptiveoptics(int index) {
 	_guiderdescriptor.adaptiveopticsIndex = index;
 	setupGuider();
 }
 
+/**
+ * \brief Set up the tracker
+ */
 void	guidercontrollerwidget::setupTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "window radius: %f", _windowradius);
+	// get the current exposure
 	Exposure	exposure = snowstar::convert(_guider->getExposure());
+
+	// compute the window for exposures
 	ImagePoint	origin(_star.x() - _windowradius,
 				_star.y() - _windowradius);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "origin: %s", origin.toString().c_str());
@@ -206,18 +239,24 @@ void	guidercontrollerwidget::setupTracker() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "size: %s", size.toString().c_str());
 	exposure.frame(ImageRectangle(origin, size));
 	_guider->setExposure(snowstar::convert(exposure));
+
+#if 0
+	// set the star for which tracking should take place
 	snowstar::Point	star;
 	star.x = _windowradius;
 	star.y = _windowradius;
 	_guider->setStar(star);
+#endif
 }
 
+/**
+ * \brief Start guiding
+ */
 void	guidercontrollerwidget::startGuiding() {
 	if (!_guider) {
 		return;
 	}
-	// first handle the simple case that it is already guiding: stop
-	// it
+	// first handle the simple case that it is already guiding: stop it
 	try {
 		if (snowstar::GuiderGUIDING == _guider->getState()) {
 			_guider->stopGuiding();
@@ -234,6 +273,9 @@ void	guidercontrollerwidget::startGuiding() {
 	}
 }
 
+/**
+ * \brief Stop guiding
+ */
 void	guidercontrollerwidget::stopGuiding() {
 	if (!_guider) {
 		return;
@@ -259,7 +301,7 @@ void	guidercontrollerwidget::statusUpdate() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state: %d", (int)state);
 	switch (state) {
 	case snowstar::GuiderIDLE:
-		ui->guideButton->setText(QString("Guidg"));
+		ui->guideButton->setText(QString("Guiding"));
 		ui->guideButton->setEnabled(false);
 		ui->gpcalibrationWidget->setEnabled(true);
 		ui->aocalibrationWidget->setEnabled(true);
@@ -310,14 +352,23 @@ void	guidercontrollerwidget::methodChanged(int index) {
 	}
 }
 
+/**
+ * \brief update the guiderport change interval
+ */
 void	guidercontrollerwidget::gpupdateintervalChanged(double r) {
 	_gpupdateinterval = r;
 }
 
+/**
+ * \brief Update the adaptive optics update interval
+ */
 void	guidercontrollerwidget::aoupdateintervalChanged(double r) {
 	_aoupdateinterval = r;
 }
 
+/**
+ * \brief update the window radius
+ */
 void	guidercontrollerwidget::windowradiusChanged(double r) {
 	_windowradius = r;
 }

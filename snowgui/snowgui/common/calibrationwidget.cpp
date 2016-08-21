@@ -12,6 +12,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct calibration widget
+ */
 calibrationwidget::calibrationwidget(QWidget *parent) :
 	QWidget(parent), ui(new Ui::calibrationwidget) {
 	ui->setupUi(this);
@@ -23,6 +26,9 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	_guidercontroller = NULL;
 }
 
+/**
+ * \brief Destroy the calibration widget
+ */
 calibrationwidget::~calibrationwidget() {
 	delete ui;
 }
@@ -73,12 +79,18 @@ void	calibrationwidget::databaseClicked() {
 	selection->exec();
 }
 
+/**
+ * \brief Set the calibration
+ */
 void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected", cal.id);
 	ui->calibrationdisplayWidget->setCalibration(cal);
 	_guider->useCalibration(cal.id, false);
 }
 
+/**
+* \brief display a calibration
+ */
 void	calibrationwidget::displayCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "display calibration %d",
 		_calibration.id);
@@ -97,6 +109,9 @@ void	calibrationwidget::displayCalibration() {
 		_calibration.masPerPixel).c_str()));
 }
 
+/**
+ * \brief handle when calibrate was clicked
+ */
 void	calibrationwidget::calibrateClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuiderPort");
 	if (_guidercontroller) {

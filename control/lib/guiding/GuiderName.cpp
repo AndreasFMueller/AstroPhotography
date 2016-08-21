@@ -15,12 +15,13 @@ namespace guiding {
  * \brief Parse a guider name
  */
 void	GuiderName::parse(const std::string& n) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", n.c_str());
 	// split the name at |, you should get 4 components
 	std::vector<std::string>	components;
 	split(n, "|", components);
 	if (4 != components.size()) {
-		std::string	msg = stringprintf("wrong number of components "
-			"(%d instead of 4 in name '%s'", components.size(),
+		std::string	msg = stringprintf("wrong number of components,"
+			" %d instead of 4 in name '%s'", components.size(),
 			n.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -86,9 +87,14 @@ std::string	GuiderName::buildname() const {
 GuiderName::GuiderName(const std::string& n, int ccdIndex,
 	int guiderportIndex, int adaptiveopticsIndex) {
 	if (ccdIndex < 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderName from name, %s",
+			n.c_str());
 		parse(n);
+		_name = buildname();
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "Guider: %s|%d|%d|%d",
+		n.c_str(), ccdIndex, guiderportIndex, adaptiveopticsIndex);
 	_instrument = n;
 	_ccdIndex = ccdIndex;
 	_guiderportIndex = guiderportIndex;

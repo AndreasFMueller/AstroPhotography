@@ -67,15 +67,19 @@ GuiderList	GuiderFactoryI::list(const Ice::Current& /* current */) {
  * stored in the guider locator, whick keeps track of all guiders created
  * by this factory, and allows ICE to retrieve the guider when the client
  * tries to connect to it.
+ *
+ * \param descriptor	descriptor giving the name of the guider
  */
 GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 			const Ice::Current& current) {
 	// name of the guider
 	astro::guiding::GuiderDescriptor	d = convert(descriptor);
 	std::string	gn = guiderdescriptor2name(descriptor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for guider named %s",
+		gn.c_str());
 
 	// get an GuiderPtr from the original factory
-	astro::guiding::GuiderPtr	guider = guiderfactory.get(d, gn);
+	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
 
 	// get the focallength from the instrument properties
 	try {
@@ -144,6 +148,9 @@ Calibration	GuiderFactoryI::getCalibration(int id,
 	return source.get(id);
 }
 
+/**
+ * \brief Delete a calibration
+ */
 void	GuiderFactoryI::deleteCalibration(int id,
 			const Ice::Current& /* current */) {
 	astro::guiding::CalibrationStore	store(database);

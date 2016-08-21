@@ -81,6 +81,16 @@ SuSE)
 	./configure ${commonflags}
 	;;
 Darwin)
+	if [ -d /Applications/Qt5/Qt5.7/5.7/clang_64/bin ]
+	then
+		PATH=${PATH}:/Applications/Qt5/Qt5.7/5.7/clang_64/bin
+		export PATH
+	fi
+	if [ -d /Applications/Qt/Qt5.7/5.7/clang_64/bin ]
+	then
+		PATH=${PATH}:/Applications/Qt/Qt5.7/5.7/clang_64/bin
+		export PATH
+	fi
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CFLAGS CXXFLAGS LDFLAGS

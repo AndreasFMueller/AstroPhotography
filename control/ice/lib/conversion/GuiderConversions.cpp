@@ -311,7 +311,9 @@ Calibration     convert(const astro::guiding::GuiderCalibration& cal) {
 	result.type = convertcontroltype(cal.calibrationtype());
 	result.focallength = cal.focallength;
 	result.masPerPixel = cal.masPerPixel;
-
+	for (int i = 0; i < 6; i++) {
+		result.coefficients.push_back(cal.a[i]);
+	}
 	result.complete = cal.complete();
 	result.flipped = cal.flipped();
 	result.det  = cal.det();

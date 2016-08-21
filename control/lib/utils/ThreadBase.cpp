@@ -229,6 +229,7 @@ void	ThreadBase::run() {
 		std::unique_lock<std::recursive_mutex>	lock(mutex);
 		_isrunning = false;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread run method terminates");
 }
 
 /**

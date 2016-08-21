@@ -171,8 +171,9 @@ public:
  *
  */
 void	CalibrationProcess::main(astro::thread::Thread<CalibrationProcess>& _thread) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the main function");
 	try {
-		main(_thread);
+		main2(_thread);
 		return;
 	} catch (std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "calibration thread terminated "
