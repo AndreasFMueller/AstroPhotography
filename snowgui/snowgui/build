@@ -1,0 +1,10 @@
+#
+# temporary workaround until we figure out how to tell qmake about
+# static library dependencies
+#
+# (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+rm -rf snowgui.app
+make -j 8
+./snowgui.app/Contents/MacOS/snowgui --debug --server=server 2>&1 \
+	| tee build.log
