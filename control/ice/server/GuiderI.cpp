@@ -9,11 +9,8 @@
 #include <CcdI.h>
 #include <GuiderPortI.h>
 #include <ImagesI.h>
-#include <CalibrationStore.h>
 #include <AstroGuiding.h>
 #include <AstroConfig.h>
-#include <TrackingPersistence.h>
-#include <TrackingStore.h>
 #include "CalibrationSource.h"
 #include <AstroEvent.h>
 
@@ -293,13 +290,13 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 			astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 				astro::stringprintf("GP %s uncalibrated",
 				guider->name().c_str()));
-			guider->unCalibrate(astro::guiding::BasicCalibration::GP);
+			guider->unCalibrate(astro::guiding::GP);
 			break;
 		case ControlAdaptiveOptics:
 			astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 				astro::stringprintf("AO %s uncalibrated",
 				guider->name().c_str()));
-			guider->unCalibrate(astro::guiding::BasicCalibration::AO);
+			guider->unCalibrate(astro::guiding::AO);
 			break;
 		}
 	} catch (const astro::guiding::BadState& exception) {
@@ -356,12 +353,12 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
 			guider->name().c_str()));
-		return guider->startCalibration(astro::guiding::BasicCalibration::GP, tracker);
+		return guider->startCalibration(astro::guiding::GP, tracker);
 	case ControlAdaptiveOptics:
 		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("start AO %s calibration",
 			guider->name().c_str()));
-		return guider->startCalibration(astro::guiding::BasicCalibration::AO, tracker);
+		return guider->startCalibration(astro::guiding::AO, tracker);
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");
@@ -527,10 +524,10 @@ TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 	switch (type) {
 	case ControlGuiderPort:
 		return convert(store.get(id,
-			astro::guiding::BasicCalibration::GP));
+			astro::guiding::GP));
 	case ControlAdaptiveOptics:
 		return convert(store.get(id,
-			astro::guiding::BasicCalibration::AO));
+			astro::guiding::AO));
 	}
 	debug(LOG_ERR, DEBUG_LOG, 0,
 		"control type is invalid (should not happen)");

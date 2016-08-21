@@ -20,7 +20,8 @@ namespace guiding {
 /**
  * \brief construct a BasicCalibration object
  */
-BasicCalibrator::BasicCalibrator() {
+BasicCalibrator::BasicCalibrator(const ControlDeviceName& name)
+	: _calibration(name) {
 }
 
 /**

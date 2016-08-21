@@ -3,9 +3,9 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "TrackingStore.h"
-#include <AstroPersistence.h>
+#include <AstroGuiding.h>
 #include <AstroDebug.h>
+#include <TrackingPersistence.h>
 #include <sstream>
 
 namespace astro {
@@ -17,7 +17,7 @@ namespace guiding {
  * This list is sorted by the start time
  */
 std::list<long>	TrackingStore::getAllTrackings() {
-	GuidingRunTable	table(_database);
+	TrackTable	table(_database);
 	return table.selectids("order by whenstarted");
 }
 
@@ -28,7 +28,7 @@ std::list<long>	TrackingStore::getAllTrackings() {
  */
 std::list<long>	TrackingStore::getTrackings(
 			const GuiderDescriptor& guider) {
-	GuidingRunTable	table(_database);
+	TrackTable	table(_database);
 	std::ostringstream	out;
 	out << "instrument = '" << guider.instrument() << "' and ";
 	out << "ccd = '" << guider.ccd() << "' and ";
@@ -46,7 +46,7 @@ std::list<long>	TrackingStore::getTrackings(
  */
 std::list<TrackingPointRecord>	TrackingStore::getHistory(long id) {
 	std::ostringstream	out;
-	out << "guidingrun = " << id << " order by trackingtime";
+	out << "track = " << id << " order by trackingtime";
 	TrackingTable	table(_database);
 	return table.select(out.str());
 }
@@ -57,14 +57,14 @@ std::list<TrackingPointRecord>	TrackingStore::getHistory(long id) {
  * The tracking points are sorted by the tracking time attribute
  */
 std::list<TrackingPointRecord>	TrackingStore::getHistory(long id,
-		BasicCalibration::CalibrationType type) {
+		ControlDeviceType type) {
 	std::ostringstream	out;
-	out << "guidingrun = " << id;
+	out << "track = " << id;
 	switch (type) {
-	case BasicCalibration::GP:
+	case GP:
 		out << " and controltype = 0";
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		out << " and controltype = 1";
 		break;
 	}
@@ -80,7 +80,7 @@ std::list<TrackingPointRecord>	TrackingStore::getHistory(long id,
  * as well as all the tracking points.
  */
 TrackingHistory	TrackingStore::get(long id) {
-	GuidingRunTable	table(_database);
+	TrackTable	table(_database);
 	TrackingHistory	history(table.byid(id));
 	std::list<TrackingPointRecord>	track = getHistory(id);
 	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
@@ -96,8 +96,8 @@ TrackingHistory	TrackingStore::get(long id) {
  * as well as all the tracking points.
  */
 TrackingHistory	TrackingStore::get(long id,
-	BasicCalibration::CalibrationType type) {
-	GuidingRunTable	table(_database);
+	ControlDeviceType type) {
+	TrackTable	table(_database);
 	TrackingHistory	history(table.byid(id));
 	std::list<TrackingPointRecord>	track = getHistory(id, type);
 	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
@@ -110,13 +110,13 @@ TrackingHistory	TrackingStore::get(long id,
  * \brief Delete the tracking history
  */
 void	TrackingStore::deleteTrackingHistory(long id) {
-	GuidingRunTable	table(_database);
+	TrackTable	table(_database);
 	if (!table.exists(id)) {
 		return;
 	}
 	table.remove(id);
 	std::string	query(	"delete from tracking "
-				"where guidingrun = ?");
+				"where track = ?");
 	persistence::StatementPtr	statement = _database->statement(query);
         statement->bind(0, (int)id);
         statement->execute();
@@ -126,7 +126,7 @@ void	TrackingStore::deleteTrackingHistory(long id) {
  * \brief Find out whether a tracking history is contained in the table
  */
 bool	TrackingStore::contains(long id) {
-	GuidingRunTable	table(_database);
+	TrackTable	table(_database);
 	return table.exists(id);
 }
 

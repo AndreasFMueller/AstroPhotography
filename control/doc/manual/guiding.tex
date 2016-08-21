@@ -1,0 +1,30 @@
+%
+% guiding.tex -- documentation of the architecture and workings of the
+%                Guider class
+%
+\chapter{Guiding\label{chapter:guiding}}
+The \texttt{Guider} class is by far the most complicated class in the
+system.
+It contains everything needed to perform guiding of a telescope 
+using a guide port or an adaptive optics unit, or both.
+
+\section{Naming}
+Each guider has a name that identifies the instrument and the instrument
+components the guider is built from.
+The format of the name is
+\[
+\langle\textit{instrumentname}\rangle
+\texttt{|}
+\langle\textit{ccdIndex}\rangle
+\texttt{|}
+\langle\textit{guiderportIndex}\rangle
+\texttt{|}
+\langle\textit{adaptiveopticsIndex}\rangle
+\]
+The index fields indicate the index of the components of the appropriate
+type in the instrument.
+If some component is unused, its place in the name string is left empty.
+The class \texttt{astro::guiding::GuiderName} encapsulates guider names,
+and internally sets unused components to $-1$.
+
+

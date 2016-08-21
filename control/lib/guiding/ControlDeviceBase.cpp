@@ -4,12 +4,12 @@
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroGuiding.h>
-#include <BasicProcess.h>
-#include <CalibrationStore.h>
-#include <CalibrationProcess.h>
-#include <AOCalibrationProcess.h>
+#include "BasicProcess.h"
+#include "CalibrationProcess.h"
+#include "AOCalibrationProcess.h"
 #include <algorithm>
 #include "ControlDeviceCallback.h"
+#include "CalibrationPersistence.h"
 
 using namespace astro::callback;
 
@@ -65,7 +65,7 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	// check for guider calibration
 	if (type == typeid(GuiderCalibration)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration %d", calid);
-		if (!store.containscomplete(calid, BasicCalibration::GP)) {
+		if (!store.containscomplete(calid, GP)) {
 			throw std::runtime_error("no such calibration id");
 		}
 		GuiderCalibration	*gcal
@@ -81,7 +81,7 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	// check for adaptive optics calibration
 	if (type == typeid(AdaptiveOpticsCalibration)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO calibration %d", calid);
-		if (!store.containscomplete(calid, BasicCalibration::AO)) {
+		if (!store.containscomplete(calid, AO)) {
 			throw std::runtime_error("no such calibration id");
 		}
 		AdaptiveOpticsCalibration	*acal
@@ -157,10 +157,10 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		// initialize the calibration as far as we can
 		_calibration->calibrationid(0);
 		if (configurationType() == typeid(GuiderCalibration)) {
-			_calibration->calibrationtype(BasicCalibration::GP);
+			_calibration->calibrationtype(GP);
 		}
 		if (configurationType() == typeid(AdaptiveOpticsCalibration)) {
-			_calibration->calibrationtype(BasicCalibration::AO);
+			_calibration->calibrationtype(AO);
 		}
 		CalibrationRecord	record(0, *_calibration);
 
@@ -184,8 +184,7 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		_calibration->calibrationid(calibrationtable.add(record));
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
 			"saved %s calibration record id = %d",
-			BasicCalibration::type2string(
-				_calibration->calibrationtype()).c_str(),
+			type2string(_calibration->calibrationtype()).c_str(),
 			_calibration->calibrationid());
 	}
 

@@ -4,8 +4,6 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <GuiderFactoryI.h>
-#include <CalibrationStore.h>
-#include <TrackingStore.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <GuiderI.h>
@@ -229,12 +227,12 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 		switch (type) {
 		case ControlGuiderPort: {
 			TrackingHistory	history = convert(store.get(id,
-				astro::guiding::BasicCalibration::GP));
+				astro::guiding::GP));
 			return history;
 			}
 		case ControlAdaptiveOptics: {
 			TrackingHistory	history = convert(store.get(id,
-				astro::guiding::BasicCalibration::AO));
+				astro::guiding::AO));
 			return history;
 			}
 		}

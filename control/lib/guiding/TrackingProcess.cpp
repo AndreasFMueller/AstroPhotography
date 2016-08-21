@@ -94,27 +94,27 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	// create a new record in the database
 	if (database()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: have database");
-		GuidingRun      guidingrun;
-		guidingrun.name = guider()->name();
-		guidingrun.instrument = guider()->instrument();
-		guidingrun.ccd = guider()->ccdname();
-                guidingrun.guiderport = _guiderPortDevice->devicename();
-                guidingrun.guiderportcalid
+		Track      track;
+		track.name = guider()->name();
+		track.instrument = guider()->instrument();
+		track.ccd = guider()->ccdname();
+                track.guiderport = _guiderPortDevice->devicename();
+                track.guiderportcalid
 			= _guiderPortDevice->calibrationid();
 		if (_adaptiveOpticsDevice) {
-			guidingrun.adaptiveoptics
+			track.adaptiveoptics
 				= _adaptiveOpticsDevice->devicename();
-			guidingrun.adaptiveopticscalid
+			track.adaptiveopticscalid
 				= _adaptiveOpticsDevice->calibrationid();
 		} else {
-			guidingrun.adaptiveopticscalid = -1;
+			track.adaptiveopticscalid = -1;
 		}
-		time(&guidingrun.whenstarted);
+		time(&track.whenstarted);
 
                 // add guiding run record to the database
-		GuidingRunRecord        record(0, guidingrun);
-		GuidingRunTable guidingruntable(database());
-		_id = guidingruntable.add(record);
+		TrackRecord	record(0, track);
+		TrackTable	tracktable(database());
+		_id = tracktable.add(record);
 		_summary.trackingid = _id;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start", _id);
 	}

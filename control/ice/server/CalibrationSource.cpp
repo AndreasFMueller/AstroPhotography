@@ -3,13 +3,11 @@
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "CalibrationSource.h"
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroGuiding.h>
-#include <CalibrationPersistence.h>
-#include <CalibrationStore.h>
 #include <IceConversions.h>
+#include "CalibrationSource.h"
 
 namespace snowstar {
 
@@ -27,6 +25,7 @@ Calibration	CalibrationSource::get(int id) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibration %d", id);
 	Calibration	calibration;
 	try {
+#if 0
 		astro::guiding::CalibrationTable	ct(_database);
 		if (!ct.exists(id)) {
 			NotFound	exception;
@@ -79,8 +78,31 @@ Calibration	CalibrationSource::get(int id) {
 			calibration.points.push_back(convert(*i));
 		}
 		return calibration;
+#endif
+		astro::guiding::CalibrationStore	store(_database);
+		// make sure the calibration actually exists
+		if (!store.contains(id)) {
+			std::string	msg = astro::stringprintf("calibration "
+				"%d does not exist", id);
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw std::runtime_error(msg);
+		}
+
+		// retrieve the calibration
+		calibration = convert(store.getGuiderCalibration(id));
+
+		// add the calibration points
+		std::list<astro::guiding::CalibrationPointRecord>	points
+			= store.getCalibrationPoints(id);
+		std::list<astro::guiding::CalibrationPointRecord>::iterator i;
+		for (i = points.begin(); i != points.end(); i++) {
+			calibration.points.push_back(convert(*i));
+		}
+
+		// we have the calibration now, just return it
+		return calibration;
 	} catch (std::exception& ex) {
-		std::string	msg = astro::stringprintf("calibrationd run %d "
+		std::string	msg = astro::stringprintf("calibration run %d "
 			"not found: %s", id, ex.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw NotFound(msg);

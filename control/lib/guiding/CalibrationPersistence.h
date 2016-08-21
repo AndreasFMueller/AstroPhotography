@@ -3,38 +3,14 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _Calibration_h
-#define _Calibration_h
+#ifndef _CalibrationPersistence_h
+#define _CalibrationPersistence_h
 
 #include <AstroPersistence.h>
 #include <AstroGuiding.h>
 
 namespace astro {
 namespace guiding {
-
-/**
- * \brief Calibration class 
- */
-class PersistentCalibration {
-public:
-	time_t	when;
-	std::string	name;
-	std::string	instrument;
-	std::string	ccd;
-	std::string	controldevice;
-	double	a[6];
-	double	focallength;
-	double	quality;
-	double	det;
-	int	complete;
-	double	masPerPixel;
-	int	controltype;
-	PersistentCalibration();
-	PersistentCalibration(const BasicCalibration& other);
-	PersistentCalibration(const GuiderCalibration& other);
-	PersistentCalibration&	operator=(const BasicCalibration& other);
-	PersistentCalibration&	operator=(const GuiderCalibration& other);
-};
 
 typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;
 typedef std::shared_ptr<CalibrationRecord>	CalibrationRecordPtr;
@@ -52,7 +28,11 @@ static astro::persistence::UpdateSpec
 	object_to_updatespec(const CalibrationRecord& calibration);
 };
 
-class CalibrationTable : public astro::persistence::Table<CalibrationRecord, CalibrationTableAdapter> {
+/**
+ * \brief Table for Calibration information
+ */
+class CalibrationTable : public astro::persistence::Table<CalibrationRecord,
+	CalibrationTableAdapter> {
 public:
 	CalibrationTable(astro::persistence::Database& database);
 	// select a list of calibrations based on a guider descriptor
@@ -62,8 +42,6 @@ public:
 	// our new selectids method
 	using Table<CalibrationRecord, CalibrationTableAdapter>::selectids;
 };
-
-typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
 
 /**
  * \brief Table adapter for the calibration points
@@ -78,9 +56,13 @@ static astro::persistence::UpdateSpec
 	object_to_updatespec(const CalibrationPointRecord& calibrationpoint);
 };
 
-typedef astro::persistence::Table<CalibrationPointRecord, CalibrationPointTableAdapter> CalibrationPointTable;
+/**
+ * \brief Table for Calibration points
+ */
+typedef astro::persistence::Table<CalibrationPointRecord,
+		CalibrationPointTableAdapter> CalibrationPointTable;
 
 } // namespace guiding
 } // namespace astro
 
-#endif /* _Calibration_h */
+#endif /* _CalibrationPersistence_h */

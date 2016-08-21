@@ -3,8 +3,7 @@
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <CalibrationStore.h>
-#include <CalibrationPersistence.h>
+#include "CalibrationPersistence.h"
 #include <sstream>
 #include <AstroDebug.h>
 
@@ -21,14 +20,19 @@ std::list<long>	CalibrationStore::getAllCalibrations() {
 	return table.selectids(std::string("order by whenstarted"));
 }
 
-std::list<long>	CalibrationStore::getAllCalibrations(
-	BasicCalibration::CalibrationType type) {
+/**
+ * \brief Get a list of all calibrations of a given type
+ *
+ * This method retrieves all the calibrations for devices of the type
+ * specified in the type argument, sorted by id
+ */
+std::list<long>	CalibrationStore::getAllCalibrations(ControlDeviceType type) {
 	CalibrationTable	table(_database);
 	switch (type) {
-	case BasicCalibration::GP:
+	case GP:
 		return table.selectids(std::string("where controltype = 0 "
 						   "order by whenstarted"));
-	case BasicCalibration::AO:
+	case AO:
 		return table.selectids(std::string("where controltype = 1 "
 						   "order by whenstarted"));
 	}
@@ -78,7 +82,12 @@ GuiderCalibration	CalibrationStore::getGuiderCalibration(long id) {
 	if (0 != r.controltype) {
 		throw std::runtime_error("not a guider calibration");
 	}
-	GuiderCalibration	calibration;
+
+	// construct the name from the calibration record retrived
+	ControlDeviceName	cdname = nameFromRecord(r, GP);
+
+	// construct the calibration object
+	GuiderCalibration	calibration(cdname);
 	calibration.calibrationid(id);
 	for (int i = 0; i < 6; i++) {
 		calibration.a[i] = r.a[i];
@@ -112,9 +121,13 @@ AdaptiveOpticsCalibration	CalibrationStore::getAdaptiveOpticsCalibration(long id
 	CalibrationTable	ct(_database);
 	CalibrationRecord	r = ct.byid(id);
 	if (1 != r.controltype) {
-		throw std::runtime_error("not a guider calibration");
+		throw std::runtime_error("not a AO calibration");
 	}
-	AdaptiveOpticsCalibration	calibration;
+
+	// get the control device name
+	ControlDeviceName	cdname = nameFromRecord(r, AO);
+
+	AdaptiveOpticsCalibration	calibration(cdname);
 	calibration.calibrationid(id);
 	for (int i = 0; i < 6; i++) {
 		calibration.a[i] = r.a[i];
@@ -229,31 +242,32 @@ bool	CalibrationStore::contains(long id) {
 /**
  * \brief Find out whether a calibration exists in the store
  */
-bool	CalibrationStore::contains(long id,
-		BasicCalibration::CalibrationType type) {
+bool	CalibrationStore::contains(long id, ControlDeviceType type) {
 	CalibrationTable	ct(_database);
 	std::string	condition;
 	switch (type) {
-	case BasicCalibration::GP:
+	case GP:
 		condition = stringprintf("controltype = 0 and id = %d", id);
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		condition = stringprintf("controltype = 1 and id = %d", id);
 		break;
 	}
 	return (ct.selectids(condition).size() > 0);
 }
 
-bool	CalibrationStore::containscomplete(long id,
-		BasicCalibration::CalibrationType type) {
+/**
+ * \brief Find out whether a calibration exists that in addition is complete
+ */
+bool	CalibrationStore::containscomplete(long id, ControlDeviceType type) {
 	CalibrationTable	ct(_database);
 	std::ostringstream	str;
-	str << " complete = 1 ";
+	str << " complete = 1 "; // ensure we only get complete calibrations
 	switch (type) {
-	case BasicCalibration::GP:
+	case GP:
 		str << "and controltype = 0 and id = " << id;
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		str << "and controltype = 1 and id = " << id;
 		break;
 	}
@@ -271,14 +285,14 @@ void	CalibrationStore::saveCalibration(const BasicCalibration& cal) {
 	int	id = cal.calibrationid();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving calibration %d", id);
 	switch (cal.calibrationtype()) {
-	case BasicCalibration::GP: {
+	case GP: {
 		GuiderCalibration	c = getGuiderCalibration(id);
 		c.complete(true);
 		c = cal;
 		updateCalibration(c);
 		}
 		break;
-	case BasicCalibration::AO: {
+	case AO: {
 		AdaptiveOpticsCalibration c = getAdaptiveOpticsCalibration(id);
 		c.complete(true);
 		c = cal;
@@ -293,6 +307,15 @@ void	CalibrationStore::saveCalibration(const BasicCalibration& cal) {
 		CalibrationPoint	point = cal[i];
 		addPoint(cal.calibrationid(), point);
 	}
+}
+
+/**
+ * \brief Get the name from 
+ */
+ControlDeviceName	CalibrationStore::nameFromRecord(
+		const CalibrationRecord& record, ControlDeviceType type) const {
+	GuiderName	guidername(record.name);
+	return ControlDeviceName(guidername, type);
 }
 
 } // namespace guiding

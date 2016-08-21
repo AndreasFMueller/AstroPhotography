@@ -40,13 +40,10 @@ ImagePtr	GuiderBase::getImage() {
 /**
  * \brief Constructor for the guider base
  */
-GuiderBase::GuiderBase(const std::string& instrument, camera::CcdPtr ccd,
+GuiderBase::GuiderBase(const GuiderName& guidername, camera::CcdPtr ccd,
 	persistence::Database database)
-	: _instrument(instrument), _imager(ccd), _database(database)  {
+	: GuiderName(guidername), _imager(ccd), _database(database)  {
 }
-
-
-
 
 void	GuiderBase::addImageCallback(callback::CallbackPtr callback) {
 	_imagecallback.insert(callback);

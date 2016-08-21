@@ -11,7 +11,7 @@ namespace guiding {
 
 std::string	TrackingPoint::toString() const {
 	return stringprintf("%.0f %s offset=%s correction=%s",
-		BasicCalibration::type2string(type).c_str(),
+		type2string(type).c_str(),
 		trackingoffset.toString().c_str(),
 		correction.toString().c_str());
 }

@@ -13,25 +13,29 @@
 namespace astro {
 namespace guiding {
 
-typedef persistence::Persistent<GuidingRun>	GuidingRunRecord;
+#if 0
+typedef persistence::Persistent<Track>	TrackRecord;
+#endif
 
 /**
- * \brief Adapter for GuidingRun table entries
+ * \brief Adapter for Track table entries
  */
-class GuidingRunTableAdapter {
+class TrackTableAdapter {
 public:
 static std::string	tablename();
 static std::string	createstatement();
-static GuidingRunRecord
+static TrackRecord
 	row_to_object(int objectid, const astro::persistence::Row& row);
 static astro::persistence::UpdateSpec
-	object_to_updatespec(const GuidingRunRecord& guidingrun);
+	object_to_updatespec(const TrackRecord& guidingrun);
 };
 
-typedef astro::persistence::Table<GuidingRunRecord, GuidingRunTableAdapter>	GuidingRunTable;
+typedef astro::persistence::Table<TrackRecord, TrackTableAdapter>	TrackTable;
 
 
+#if 0
 typedef	persistence::PersistentRef<TrackingPoint>	TrackingPointRecord;
+#endif
 
 /**
  * \brief Adapter for the Tracking table
