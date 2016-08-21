@@ -265,22 +265,80 @@ public:
 	virtual Point	operator()(image::ImagePtr newimage);
 };
 
-#if 0
-/**
- * \brief Phase correlator based tracker using the differential
- *
- * This tracker uses the phase correlator, but it uses the differential
- * adapter before it does the correlation.
- */
-class DifferentialPhaseTracker : public RefreshingTracker {
-public:
-	DifferentialPhaseTracker();
-	virtual Point	operator()(image::ImagePtr newimage);
-	virtual std::string	toString() const;
-};
-#endif
+// Naming of guider, calibration and control devices
+//
+// At the end, everything depends on an instrument and the guider
+// constructed from that instrument. This information is encapsulated
+// in a GuiderName. Since a guider name can have multiple control
+// devices, ControlDeviceNames are derived from it and have, in addition
+// the control type
 
-//class GuiderCalibrator;
+class ControlDeviceName;
+typedef std::shared_ptr<ControlDeviceName>	ControlDeviceNamePtr;
+
+/**
+ * \brief GuiderName
+ */
+class GuiderName {
+	// identification of the guider
+	std::string	_name;
+	std::string	_instrument;
+	int	_ccdIndex;
+	int	_guiderportIndex;
+	int	_adaptiveopticsIndex;
+	void	parse(const std::string&);
+	std::string	buildname() const;
+public:
+	GuiderName(const std::string& n, int ccdIndex = -1,
+		int guiderportIndex = -1, int adaptiveopticsIndex = -1);
+	GuiderName(const GuiderName& other);
+
+	const std::string&	name() const { return _name; }
+	void	name(const std::string& n);
+
+	const std::string&	instrument() const { return _instrument; }
+	void	instrument(const std::string& i);
+
+	int	ccdIndex() const { return _ccdIndex; }
+	void	ccdIndex(int c);
+
+	int	guiderportIndex() const { return _guiderportIndex; }
+	void	guiderportIndex(int g);
+
+	int	adaptiveopticsIndex() const { return _adaptiveopticsIndex; }
+	void	adaptiveopticsIndex(int a);
+
+	bool	hasGuiderPort() const { return _guiderportIndex >= 0; }
+	bool	hasAdaptiveOptics() const { return _adaptiveopticsIndex >= 0; }
+
+	ControlDeviceNamePtr	guiderPortDeviceName();
+	ControlDeviceNamePtr	adaptiveOpticsDeviceName();
+};
+
+/**
+ * \brief Control device type
+ */
+typedef enum { GP, AO } ControlDeviceType;
+std::string	type2string(ControlDeviceType caltype);
+ControlDeviceType	string2type(const std::string& calname);
+
+/**
+ * \brief Control device name
+ *
+ * In addition to the guider, the control device knows which one of the
+ * devices in the Guider it is actually controlling, so its name knows
+ * the type of device
+ */
+class	ControlDeviceName : public GuiderName {
+	ControlDeviceType	_type;
+public:
+	ControlDeviceName(const GuiderName& guidername,
+		ControlDeviceType type = GP);
+	ControlDeviceName(const ControlDeviceName& other);
+	ControlDeviceType	controldevicetype() const;
+	void	controldevicetype(ControlDeviceType t);
+	void	checktype(ControlDeviceType t);
+};
 
 /**
  * \brief CalibrationPoint
@@ -299,7 +357,7 @@ public:
 /**
  * \brief Base class for all the calibrations for guiders
  *
- * This is the common ground for calibraiton of guiders using guider ports
+ * This is the common ground for calibration of guiders using guider ports
  * and tip-tilt adaptive optics units.
  */
 class BasicCalibration : public std::vector<CalibrationPoint> {
@@ -307,16 +365,28 @@ class BasicCalibration : public std::vector<CalibrationPoint> {
 public:
 	int	calibrationid() const { return _calibrationid; }
 	void	calibrationid(int c) { _calibrationid = c; }
-public:
-	typedef enum { GP, AO } CalibrationType;
-static std::string	type2string(CalibrationType caltype);
-static CalibrationType	string2type(const std::string& calname);
-private:
-	CalibrationType	_calibrationtype;
-public:
-	CalibrationType	calibrationtype() const { return _calibrationtype; }
-	void	calibrationtype(CalibrationType ct) { _calibrationtype = ct; }
 
+	// name of the control device for which this calibration was 
+	// constructed
+private:
+	ControlDeviceName	_name;
+public:
+	const ControlDeviceName&	name() const { return _name; }
+	ControlDeviceType	calibrationtype() const {
+		return _name.controldevicetype();
+	}
+	void	calibrationtype(ControlDeviceType ct) {
+		_name.controldevicetype(ct);
+	}
+
+	// when the calibration was done
+private:
+	time_t	_when;
+public:
+	time_t	when() const { return _when; }
+	void	when(time_t w) { _when = w; }
+
+	// calibration coefficients
 public:
 	double	a[6];
 private:
@@ -331,8 +401,13 @@ public:
 	void	flipped(bool f) { _flipped = f; }
 	void	flip() { _flipped = !_flipped; }
 
-	BasicCalibration();
-	BasicCalibration(const double coefficients[6]);
+private:
+	void	copy(const BasicCalibration& other);
+public:
+	BasicCalibration(const ControlDeviceName& name);
+	BasicCalibration(const ControlDeviceName& name,
+		const double coefficients[6]);
+	BasicCalibration(const BasicCalibration& other);
 	virtual ~BasicCalibration() { }
 	BasicCalibration&	operator=(const BasicCalibration& other);
 
@@ -372,8 +447,9 @@ class GuiderCalibration : public BasicCalibration {
 public:
 	double	focallength;
 	double	masPerPixel;
-	GuiderCalibration();
-	GuiderCalibration(const double coefficients[6]);
+	GuiderCalibration(const ControlDeviceName& name);
+	GuiderCalibration(const ControlDeviceName& name,
+		const double coefficients[6]);
 	GuiderCalibration(const BasicCalibration& other);
 	GuiderCalibration&	operator=(const BasicCalibration& other);
 };
@@ -382,9 +458,11 @@ public:
  * \brief class for calibrations of adaptive optics
  */
 class AdaptiveOpticsCalibration : public BasicCalibration {
+	void	ensuretype();
 public:
-	AdaptiveOpticsCalibration();
-	AdaptiveOpticsCalibration(const double coefficients[6]);
+	AdaptiveOpticsCalibration(const ControlDeviceName& name);
+	AdaptiveOpticsCalibration(const ControlDeviceName& name,
+		const double coefficients[6]);
 	AdaptiveOpticsCalibration(const BasicCalibration& other);
 	AdaptiveOpticsCalibration&	operator=(const BasicCalibration& other);
 };
@@ -423,7 +501,7 @@ typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbac
 class BasicCalibrator {
 	BasicCalibration	_calibration;
 public:
-	BasicCalibrator();
+	BasicCalibrator(const ControlDeviceName& controldevicename);
 	void	add(const CalibrationPoint& calibrationpoint);
 	BasicCalibration	calibrate();
 };
@@ -436,15 +514,15 @@ public:
 	double	t;
 	Point	trackingoffset;
 	Point	correction;
-	BasicCalibration::CalibrationType	type;
+	ControlDeviceType	type;
 	TrackingPoint() : t(0) {
-		type = BasicCalibration::GP;
+		type = GP;
 	}
 	TrackingPoint(const double& actiontime,
 		const Point& offset, const Point& activation)
 		: t(actiontime), trackingoffset(offset),
 		  correction(activation) {
-		type = BasicCalibration::GP;
+		type = GP;
 	}
 	std::string	toString() const;
 };
@@ -532,15 +610,7 @@ class PersistentCalibration;
  * and guiding. It is essentially a data holder class.
  * It also includes all the callbacks and methods the send data to them.
  */
-class GuiderBase {
-	// identification of the guider
-	std::string	_name;
-	std::string	_instrument;
-public:
-	const std::string&	name() const { return _name; }
-	void	name(const std::string& n) { _name = n; }
-	const std::string&	instrument() const { return _instrument; }
-	void	instrument(const std::string& i) { _instrument = i; }
+class GuiderBase : public GuiderName {
 	// stuff related to the imager
 private:
 	camera::Imager	_imager;
@@ -605,7 +675,7 @@ public:
 	virtual void	callback(const std::exception& ex) = 0;
 
 	// constructor
-	GuiderBase(const std::string& instrument, camera::CcdPtr ccd,
+	GuiderBase(const GuiderName& guidername, camera::CcdPtr ccd,
 		persistence::Database database = NULL);
 };
 
@@ -694,7 +764,7 @@ typedef std::shared_ptr<ControlDeviceBase>	ControlDevicePtr;
  * The template implements different devices: guider ports or adaptive
  * optics units
  */
-template<typename device, typename devicecalibration>
+template<typename device, typename devicecalibration, ControlDeviceType type>
 class ControlDevice : public ControlDeviceBase {
 public:
 	typedef std::shared_ptr<device>	deviceptr;
@@ -704,7 +774,8 @@ private:
 public:
 	ControlDevice(GuiderBase *guider, deviceptr dev,
 		persistence::Database database = NULL)
-		: ControlDeviceBase(guider, database), _device(dev) {
+		: ControlDeviceBase(guider, database), _device(dev),
+		  _devicecalibration(ControlDeviceName(guider->name(), type)) {
 		_calibration = &_devicecalibration;
 	}
 	~ControlDevice() {
@@ -731,21 +802,21 @@ public:
 // specializations for GuiderPort
 template<>
 int	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::startCalibration(TrackerPtr tracker);
+		GuiderCalibration, GP>::startCalibration(TrackerPtr tracker);
 
 template<>
 Point	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::correct(const Point& point, double Deltat,
+		GuiderCalibration, GP>::correct(const Point& point, double Deltat,
 			bool stepping);
 
 // specializatiobs for adaptive optics
 template<>
 int	ControlDevice<camera::AdaptiveOptics,
-		AdaptiveOpticsCalibration>::startCalibration(TrackerPtr tracker);
+		AdaptiveOpticsCalibration, AO>::startCalibration(TrackerPtr tracker);
 
 template<>
 Point	ControlDevice<camera::AdaptiveOptics,
-		AdaptiveOpticsCalibration>::correct(const Point& point,
+		AdaptiveOpticsCalibration, AO>::correct(const Point& point,
 			double Deltat, bool stepping);
 
 /**
@@ -853,7 +924,7 @@ public:
 	 * the image to take into consideration when looking for a guide star,
 	 * or even how to expose an image.
 	 */
-	Guider(const std::string& instrument,
+	Guider(const GuiderName& guidername,
 		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
 		camera::AdaptiveOpticsPtr adaptiveoptics,
 		persistence::Database database = NULL);
@@ -878,12 +949,12 @@ public:
 	 * \param tracker	The tracker used for tracking. 
 	 * \return		the id of the calibration run
 	 */
-	int	startCalibration(BasicCalibration::CalibrationType type,
+	int	startCalibration(ControlDeviceType type,
 			TrackerPtr tracker);
 	void	saveCalibration(const GuiderCalibration& calibration);
 	void	forgetCalibration();
 	void	useCalibration(int calid);
-	void	unCalibrate(BasicCalibration::CalibrationType type);
+	void	unCalibrate(ControlDeviceType type);
 
 	/**
 	 * \brief query the progress of the calibration process
@@ -968,7 +1039,7 @@ typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
 /**
  * \brief Encapsulation of the information about a guide run
  */
-class GuidingRun {
+class Track {
 public:
 	time_t	whenstarted;
 	std::string	name;
@@ -978,8 +1049,8 @@ public:
 	std::string	adaptiveoptics;
 	int	guiderportcalid;
 	int	adaptiveopticscalid;
-	GuidingRun() { }
-	GuidingRun(time_t _whenstarted, const std::string& _name,
+	Track() { }
+	Track(time_t _whenstarted, const std::string& _name,
 		const std::string& _instrument, const std::string& _ccd,
 		const std::string& _guiderport,
 		const std::string& _adaptiveoptics)
@@ -994,13 +1065,106 @@ public:
 /**
  * \brief A class encapsulating a full history, including tracking points
  */
-class TrackingHistory : public GuidingRun {
+class TrackingHistory : public Track {
 public:
 	std::list<TrackingPoint>	points;
 	TrackingHistory() { }
-	TrackingHistory(const GuidingRun& guidingrun) 
-		: GuidingRun(guidingrun) {
+	TrackingHistory(const Track& track) 
+		: Track(track) {
 	}
+};
+
+/**
+ * \brief Calibration class 
+ */
+class PersistentCalibration {
+public:
+	time_t	when;
+	std::string	name;
+	std::string	instrument;
+	std::string	ccd;
+	std::string	controldevice;
+	double	a[6];
+	double	focallength;
+	double	quality;
+	double	det;
+	int	complete;
+	double	masPerPixel;
+	int	controltype;
+	PersistentCalibration();
+	PersistentCalibration(const BasicCalibration& other);
+	PersistentCalibration(const GuiderCalibration& other);
+	PersistentCalibration&	operator=(const BasicCalibration& other);
+	PersistentCalibration&	operator=(const GuiderCalibration& other);
+};
+
+typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;
+typedef std::shared_ptr<CalibrationRecord>	CalibrationRecordPtr;
+
+typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
+
+/**
+ * \brief a simplified interface to the calibration persistence  tables
+ */
+class CalibrationStore {
+	astro::persistence::Database&	_database;
+	ControlDeviceName	nameFromRecord(const CalibrationRecord& record,
+					ControlDeviceType type) const;
+public:
+	CalibrationStore(astro::persistence::Database& database)
+		: _database(database) { }
+	std::list<long>	getAllCalibrations();
+	std::list<long>	getAllCalibrations(ControlDeviceType);
+	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
+
+	// access to calibrations
+	bool	contains(long id);
+	bool	contains(long id, ControlDeviceType type);
+	bool	containscomplete(long id, ControlDeviceType type);
+	long	addCalibration(const PersistentCalibration& calibration);
+	void	deleteCalibration(long id);
+	void	updateCalibration(const BasicCalibration& calibration);
+
+	// guider calibration
+	GuiderCalibration	getGuiderCalibration(long id);
+	void	updateCalibration(const GuiderCalibration& calibration);
+
+	// adaptive optics calibration
+	AdaptiveOpticsCalibration	getAdaptiveOpticsCalibration(long id);
+	void	updateCalibration(const AdaptiveOpticsCalibration& calibration);
+
+	// guider points
+	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);
+	void	addPoint(long id, const CalibrationPoint& point);
+	void	removePoints(long id);
+
+	// storing basic calibrations, i.e. just the raw calibration data
+	// without all the attributes
+	void	saveCalibration(const BasicCalibration& cal);
+};
+
+// types used in the tracking store
+typedef persistence::Persistent<Track>	TrackRecord;
+typedef persistence::PersistentRef<TrackingPoint>	TrackingPointRecord;
+
+/**
+ * \brief Simplified interface to tracking history data
+ */
+class TrackingStore {
+	astro::persistence::Database&	_database;
+public:
+	TrackingStore(astro::persistence::Database& database)
+		: _database(database) { }
+	std::list<long>	getAllTrackings();
+	std::list<long>	getTrackings(const GuiderDescriptor& guider);
+	std::list<TrackingPointRecord>	getHistory(long id);
+	std::list<TrackingPointRecord>	getHistory(long id,
+		ControlDeviceType type);
+	TrackingHistory	get(long id);
+	TrackingHistory	get(long id,
+		ControlDeviceType type);
+	void	deleteTrackingHistory(long id);
+	bool	contains(long id);
 };
 
 } // namespace guiding

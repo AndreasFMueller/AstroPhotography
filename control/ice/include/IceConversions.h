@@ -109,8 +109,6 @@ astro::camera::ImageQueueEntry	convert(ImageQueueEntryPtr e);
 FilterwheelState convert(const astro::camera::FilterWheel::State& s);
 astro::camera::FilterWheel::State convert(const FilterwheelState& s);
 
-// tracking related
-
 // Guider related
 GuiderState     convert(const astro::guiding::Guide::state& state);
 astro::guiding::Guide::state     convert(const GuiderState& state);
@@ -121,23 +119,34 @@ GuiderState	string2guiderstate(const std::string& s);
 GuiderDescriptor	convert(const astro::guiding::GuiderDescriptor& gd);
 astro::guiding::GuiderDescriptor	convert(const GuiderDescriptor& gd);
 
+GuiderDescriptor	convertname(const astro::guiding::GuiderName& name);
+astro::guiding::GuiderName	convertname(const GuiderDescriptor& name);
+
+ControlType	convertcontroltype(const astro::guiding::ControlDeviceType& caltype);
+astro::guiding::ControlDeviceType	convertcontroltype(const ControlType& caltype);
+
+std::string	calibrationtype2string(ControlType caltype);
+ControlType	string2calibrationtype(const std::string& caltype);
+
+// tracking related
 TrackingPoint	convert(const astro::guiding::TrackingPoint& trackingpoint);
 astro::guiding::TrackingPoint	convert(const TrackingPoint& trackingpoint);
 
 TrackingHistory	convert(const astro::guiding::TrackingHistory& history);
 astro::guiding::TrackingHistory	convert(const TrackingHistory& history);
 
-CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
-astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
-
 TrackingSummary	convert(const astro::guiding::TrackingSummary& summary);
 astro::guiding::TrackingSummary	convert(const TrackingSummary& summary);
 
+// calibration related
+CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
+astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
+
+Calibration	convert(const astro::guiding::GuiderCalibration& cal);
+astro::guiding::GuiderCalibration	convert(const Calibration& cal);
+
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor);
 GuiderDescriptor	guiderdescriptorParse(const std::string &name);
-
-std::string	calibrationtype2string(ControlType caltype);
-ControlType	string2calibrationtype(const std::string& caltype);
 
 // TaskQueue
 TaskState	convert(const astro::task::TaskInfo::taskstate& state);

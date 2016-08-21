@@ -34,10 +34,10 @@ PersistentCalibration::PersistentCalibration(const BasicCalibration& other) {
 	}
 	complete = other.complete() ? 1 : 0;
 	switch (other.calibrationtype()) {
-	case BasicCalibration::GP:
+	case GP:
 		controltype = 0;
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		controltype = 1;
 		break;
 	}
@@ -59,10 +59,10 @@ PersistentCalibration::PersistentCalibration(const GuiderCalibration& other) {
 	}
 	complete = other.complete() ? 1 : 0;
 	switch (other.calibrationtype()) {
-	case BasicCalibration::GP:
+	case GP:
 		controltype = 0;
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		controltype = 1;
 		break;
 	}

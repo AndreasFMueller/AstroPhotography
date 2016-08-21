@@ -168,16 +168,30 @@ astro::guiding::GuiderDescriptor        convert(const GuiderDescriptor& gd) {
 	return result;
 }
 
+GuiderDescriptor        convertname(const astro::guiding::GuiderName& name) {
+	GuiderDescriptor	result;
+	result.instrumentname = name.instrument();
+	result.ccdIndex = name.ccdIndex();
+	result.guiderportIndex = name.guiderportIndex();
+	result.adaptiveopticsIndex = name.adaptiveopticsIndex();
+	return result;
+}
+
+astro::guiding::GuiderName      convertname(const GuiderDescriptor& name) {
+	return astro::guiding::GuiderName(name.instrumentname, name.ccdIndex,
+		name.guiderportIndex, name.adaptiveopticsIndex);
+}
+
 TrackingPoint   convert(const astro::guiding::TrackingPoint& trackingpoint) {
 	TrackingPoint	result;
 	result.timeago = converttime(trackingpoint.t);
 	result.trackingoffset = convert(trackingpoint.trackingoffset);
 	result.activation = convert(trackingpoint.correction);
 	switch (trackingpoint.type) {
-	case astro::guiding::BasicCalibration::GP:
+	case astro::guiding::GP:
 		result.type = ControlGuiderPort;
 		break;
-	case astro::guiding::BasicCalibration::AO:
+	case astro::guiding::AO:
 		result.type = ControlAdaptiveOptics;
 		break;
 	}
@@ -191,10 +205,10 @@ astro::guiding::TrackingPoint   convert(const TrackingPoint& trackingpoint) {
 	result.correction = convert(trackingpoint.activation);
 	switch (trackingpoint.type) {
 	case ControlGuiderPort:
-		result.type = astro::guiding::BasicCalibration::GP;
+		result.type = astro::guiding::GP;
 		break;
 	case ControlAdaptiveOptics:
-		result.type = astro::guiding::BasicCalibration::AO;
+		result.type = astro::guiding::AO;
 		break;
 	}
 	return result;
@@ -253,6 +267,26 @@ TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 	return result;
 }
 
+ControlType     convertcontroltype(
+	const astro::guiding::ControlDeviceType& caltype) {
+	switch (caltype) {
+	case astro::guiding::GP:
+		return ControlGuiderPort;
+	case astro::guiding::AO:
+		return ControlAdaptiveOptics;
+	}
+}
+
+astro::guiding::ControlDeviceType       convertcontroltype(
+	const ControlType& caltype) {
+	switch (caltype) {
+	case ControlGuiderPort:
+		return astro::guiding::GP;
+	case ControlAdaptiveOptics:
+		return astro::guiding::AO;
+	}
+}
+
 CalibrationPoint        convert(const astro::guiding::CalibrationPoint& cp) {
 	CalibrationPoint	result;
 	result.t = cp.t;
@@ -266,6 +300,41 @@ astro::guiding::CalibrationPoint        convert(const CalibrationPoint& cp) {
 	result.t = cp.t;
 	result.offset = convert(cp.offset);
 	result.star = convert(cp.star);
+	return result;
+}
+
+Calibration     convert(const astro::guiding::GuiderCalibration& cal) {
+	Calibration	result;
+	result.id = cal.calibrationid();
+	result.timeago = converttime(cal.when());
+	result.guider = convertname(cal.name());
+	result.type = convertcontroltype(cal.calibrationtype());
+	result.focallength = cal.focallength;
+	result.masPerPixel = cal.masPerPixel;
+
+	result.complete = cal.complete();
+	result.flipped = cal.flipped();
+	result.det  = cal.det();
+	result.quality = cal.quality();
+
+	return result;
+}
+
+astro::guiding::GuiderCalibration   convert(const Calibration& cal) {
+	astro::guiding::GuiderName	guidername = convertname(cal.guider);
+	astro::guiding::ControlDeviceName	cdname(guidername,
+		convertcontroltype(cal.type));
+	astro::guiding::GuiderCalibration	result(cdname);
+	result.calibrationid(cal.id);
+	result.when(converttime(cal.timeago));
+	result.calibrationtype(convertcontroltype(cal.type));
+
+	for (int i = 0; i < 6; i++) {
+		result.a[i] = cal.coefficients[i];
+	}
+	result.complete(cal.complete);
+	result.flipped(cal.flipped);
+	
 	return result;
 }
 

@@ -36,11 +36,13 @@ std::string	BasicCalibration::toString() const {
  * The default calibration has all members set to zero, in particular,
  * it cannot be inverted, and it is not possible to compute corrections.
  */
-BasicCalibration::BasicCalibration() {
+BasicCalibration::BasicCalibration(const ControlDeviceName& name)
+	: _name(name) {
 	_calibrationid = -1;
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
 	_complete = false;
 	_flipped = false;
+	time(&_when);
 }
 
 /**
@@ -62,14 +64,23 @@ double	BasicCalibration::det() const {
  * This also sets the complete value, because we want that this 
  * calibration becomes usable after setting the coefficients.
  */
-BasicCalibration::BasicCalibration(const double coefficients[6]) {
+BasicCalibration::BasicCalibration(const ControlDeviceName& name,
+	const double coefficients[6]) : _name(name) {
 	_calibrationid = -1;
 	for (int i = 0; i < 6; i++) {
 		a[i] = coefficients[i];
 	}
 	_complete = true;
-	_calibrationtype = GP;
 	_flipped = false;
+	time(&_when);
+}
+
+/**
+ * \brief Construct from another basic calibration
+ */
+BasicCalibration::BasicCalibration(const BasicCalibration& other)
+	: _name(other.name()) {
+	copy(other);
 }
 
 /**
@@ -188,46 +199,22 @@ double	BasicCalibration::quality() const {
 	return result;
 }
 
-std::string	BasicCalibration::type2string(CalibrationType caltype) {
-	switch (caltype) {
-	case GP:
-		return std::string("GuiderPort");
-	case AO:
-		return std::string("AdaptiveOptics");
-	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "unknown calibration type %d", caltype);
-	throw std::runtime_error("unknown calibration type");
-}
-
-BasicCalibration::CalibrationType	BasicCalibration::string2type(const std::string& calname) {
-	if (calname == std::string("GuiderPort")) {
-		return GP;
-	}
-	if (calname == std::string("GP")) {
-		return GP;
-	}
-	if (calname == std::string("AdaptiveOptics")) {
-		return AO;
-	}
-	if (calname == std::string("AO")) {
-		return AO;
-	}
-	std::string	msg = stringprintf("unknown calibration type: %s",
-		calname.c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
-}
-
 void	BasicCalibration::reset() {
 	_calibrationid = 0;
-	_calibrationtype = BasicCalibration::GP;
+	calibrationtype(GP);
 	for (int i = 0; i < 6; i++) { a[i] = 0; }
 	_complete = false;
 	clear();
 }
 
 BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
+	_name = other.name();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "copying basic calibration");
+	copy(other);
+	return *this;
+}
+
+void	BasicCalibration::copy(const BasicCalibration& other) {
 	// carefully copy calibration id, don't overwrite an id if it
 	// is already > 0
 	if (_calibrationid <= 0) {
@@ -236,7 +223,6 @@ BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d", _calibrationid);
 
 	// copy common fields
-	_calibrationtype = other._calibrationtype;
 	for (int i = 0; i < 6; i++) { a[i] = other.a[i]; }
 	_complete = other._complete;
 
@@ -247,8 +233,6 @@ BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
 			bc->add(point);
 		}
 	);
-
-	return *this;
 }
 
 } // namespace guiding

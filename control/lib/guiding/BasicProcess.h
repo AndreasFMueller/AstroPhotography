@@ -67,24 +67,6 @@ public:
 		TrackerPtr tracker, persistence::Database database = NULL);
 };
 
-#if 0
-/**
- * \brief base process class for all processes that need a guider port
- */
-class GuiderPortProcess : public BasicProcess {
-	camera::GuiderPortPtr	_guiderport;
-public:
-	camera::GuiderPortPtr	guiderport() { return _guiderport; }
-
-	GuiderPortProcess(GuiderBase *guider,
-		camera::GuiderPortPtr guiderport, TrackerPtr tracker,
-		persistence::Database database = NULL);
-	GuiderPortProcess(const camera::Exposure& exposure,
-		camera::Imager& imager, camera::GuiderPortPtr guiderport,
-		TrackerPtr tracker, persistence::Database database = NULL);
-};
-#endif
-
 } // namespace guiding
 } // namespace astro
 

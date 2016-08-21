@@ -19,7 +19,8 @@ namespace guiding {
  * The default calibration has all members set to zero, in particular,
  * it cannot be inverted, and it is not possible to compute corrections.
  */
-GuiderCalibration::GuiderCalibration() {
+GuiderCalibration::GuiderCalibration(const ControlDeviceName& name)
+	: BasicCalibration(name) {
 	focallength = 0;
 	masPerPixel = 0;
 }
@@ -27,8 +28,8 @@ GuiderCalibration::GuiderCalibration() {
 /**
  * \brief Construct a GuiderCalibration object from coefficient array
  */
-GuiderCalibration::GuiderCalibration(const double coefficients[6])
-	: BasicCalibration(coefficients) {
+GuiderCalibration::GuiderCalibration(const ControlDeviceName& name,
+	const double coefficients[6]) : BasicCalibration(name, coefficients) {
 	focallength = 0;
 	masPerPixel = 0;
 }

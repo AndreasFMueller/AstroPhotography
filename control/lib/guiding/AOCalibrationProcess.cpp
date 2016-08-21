@@ -39,7 +39,8 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 		_adaptiveoptics->name().toString().c_str());
 
 	// prepare the calibrator and the timer
-	BasicCalibrator	calibrator;
+	ControlDeviceNamePtr	cdname = guider()->adaptiveOpticsDeviceName();
+	BasicCalibrator	calibrator(*cdname);
 	double	starttime = Timer::gettime();
 
 	// Progress indicator data

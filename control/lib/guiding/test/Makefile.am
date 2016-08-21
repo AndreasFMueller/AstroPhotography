@@ -22,7 +22,7 @@ guiding_dependencies = 							\
 
 if ENABLE_UNITTESTS
 
-noinst_PROGRAMS = tests singletest guidetest
+noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp
@@ -41,14 +41,5 @@ tests_DEPENDENCIES = $(guiding_dependencies)
 
 test:	tests
 	./tests -d 2>&1 | tee test.log
-
-# guide test
-guidetest_SOURCES = guidetest.cpp
-guidetest_LDADD = $(guiding_ldadd)
-guidetest_DEPENDENCIES = $(guiding_dependencies)
-
-testguide:	guidetest
-	rm -f gt/*
-	./guidetest -d -s "(380,152)" -r "64x64@(348,120)" -t 200 -T 3600 -i gt -C 2>&1 | tee testguide.log
 
 endif

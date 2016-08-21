@@ -13,7 +13,6 @@
 
 #include "CalibrationProcess.h"
 #include "CalibrationPersistence.h"
-#include "CalibrationStore.h"
 #include "GuiderCalibrationRedirector.h"
 #include "TrackingProcess.h"
 
@@ -32,10 +31,10 @@ namespace guiding {
  * to some default values. The default exposure time is 1 and the
  * default frame is the entire CCD area.
  */
-Guider::Guider(const std::string& instrument,
+Guider::Guider(const GuiderName& guidername,
 	CcdPtr ccd, GuiderPortPtr guiderport, AdaptiveOpticsPtr adaptiveoptics,
 	Database database)
-	: GuiderBase(instrument, ccd, database), _guiderport(guiderport),
+	: GuiderBase(guidername, ccd, database), _guiderport(guiderport),
 	  _adaptiveoptics(adaptiveoptics) {
 	// default exposure settings
 	exposure().exposuretime(1.);
@@ -52,14 +51,14 @@ Guider::Guider(const std::string& instrument,
 	// create control devices
 	if (guiderport) {
 		guiderPortDevice = ControlDevicePtr(
-			new ControlDevice<GuiderPort, GuiderCalibration>(this,
+			new ControlDevice<GuiderPort, GuiderCalibration, GP>(this,
 				guiderport, database));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port control device");
 	}
 	if (adaptiveoptics) {
 		adaptiveOpticsDevice = ControlDevicePtr(
 			new ControlDevice<AdaptiveOptics,
-				AdaptiveOpticsCalibration>(this,
+				AdaptiveOpticsCalibration, AO>(this,
 					adaptiveoptics, database));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO control device");
 	}
@@ -111,10 +110,9 @@ void	Guider::calibrationCleanup() {
  * This method first checks that no other calibration thread is running,
  * and if so, starts a new thread.
  */
-int	Guider::startCalibration(BasicCalibration::CalibrationType type,
-		TrackerPtr tracker) {
+int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for %s",
-		BasicCalibration::type2string(type).c_str());
+		type2string(type).c_str());
 	// make sure we have a tracker
 	if (!tracker) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "tracker not defined");
@@ -129,14 +127,14 @@ int	Guider::startCalibration(BasicCalibration::CalibrationType type,
 	_progress = 0;
 
 	// start calibration
-	if ((type == BasicCalibration::GP) && guiderPortDevice) {
+	if ((type == GP) && guiderPortDevice) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuiderPort calibration");
 		_state.startCalibrating();
 		guiderPortDevice->setParameter("focallength", focallength());
 		return guiderPortDevice->startCalibration(tracker);
 	}
 
-	if ((type == BasicCalibration::AO) && adaptiveOpticsDevice) {
+	if ((type == AO) && adaptiveOpticsDevice) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start AO calibration");
 		_state.startCalibrating();
 		return adaptiveOpticsDevice->startCalibration(tracker);
@@ -183,12 +181,12 @@ void	Guider::useCalibration(int calid) {
 		throw BadState("cannot accept calibration now");
 	}
 	CalibrationStore	store(database());
-	if (store.contains(calid, BasicCalibration::GP)) {
+	if (store.contains(calid, GP)) {
 		_state.addCalibration();
 		guiderPortDevice->calibrationid(calid);
 		return;
 	}
-	if (store.contains(calid, BasicCalibration::AO)) {
+	if (store.contains(calid, AO)) {
 		_state.addCalibration();
 		adaptiveOpticsDevice->calibrationid(calid);
 		return;
@@ -209,22 +207,22 @@ void	Guider::useCalibration(int calid) {
  * If both devices are uncalibrated after this operation, then the guider
  * goes into the state 'idle' which means that no guiding is possible.
  */
-void	Guider::unCalibrate(BasicCalibration::CalibrationType type) {
+void	Guider::unCalibrate(ControlDeviceType type) {
 	// make sure we are not guiding or calibrating
 	if ((_state == Guide::calibrating) || (_state == Guide::guiding)) {
 		std::string	cause
 			= astro::stringprintf("cannot uncalibrate while %s",
-				BasicCalibration::type2string(type).c_str());
+				type2string(type).c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw BadState(cause);
 	}
 
 	// now uncalibrate the selected device
 	switch (type) {
-	case BasicCalibration::GP:
+	case GP:
 		guiderPortDevice->calibrationid(-1);
 		break;
-	case BasicCalibration::AO:
+	case AO:
 		adaptiveOpticsDevice->calibrationid(-1);
 		break;
 	}
@@ -465,7 +463,7 @@ GuiderDescriptor	Guider::getDescriptor() const {
 /**
  * \brief Handle exception callback
  */
-void	Guider::callback(const std::exception& ex) {
+void	Guider::callback(const std::exception& /* ex */) {
 	Guide::state	s = _state;
 	switch (s) {
 	case Guide::unconfigured:

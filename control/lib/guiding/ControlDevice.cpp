@@ -5,7 +5,6 @@
  */
 #include <AstroGuiding.h>
 #include <BasicProcess.h>
-#include <CalibrationStore.h>
 #include <CalibrationProcess.h>
 #include <AOCalibrationProcess.h>
 #include <algorithm>
@@ -21,7 +20,7 @@ namespace guiding {
 //////////////////////////////////////////////////////////////////////
 template<>
 int	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::startCalibration(TrackerPtr tracker) {
+		GuiderCalibration, GP>::startCalibration(TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration start");
 	// reset the current calibration, just to make sure we don't confuse
 	// it with the previous
@@ -54,7 +53,7 @@ int	ControlDevice<camera::GuiderPort,
  */
 template<>
 Point	ControlDevice<camera::GuiderPort,
-		GuiderCalibration>::correct(const Point& point, double Deltat,
+		GuiderCalibration, GP>::correct(const Point& point, double Deltat,
 			bool stepping) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport correction %s, %.2f",
 		point.toString().c_str(), Deltat);
@@ -81,7 +80,7 @@ Point	ControlDevice<camera::GuiderPort,
 	ti.t = Timer::gettime();
 	ti.trackingoffset = point;
 	ti.correction = correction;
-	ti.type = BasicCalibration::GP;
+	ti.type = GP;
 	_guider->callback(ti);
 
 	// no remaining error after a guider port correction ;-)
@@ -93,9 +92,9 @@ Point	ControlDevice<camera::GuiderPort,
 //////////////////////////////////////////////////////////////////////
 template<>
 int	ControlDevice<camera::AdaptiveOptics,
-		AdaptiveOpticsCalibration>::startCalibration(
+		AdaptiveOpticsCalibration, AO>::startCalibration(
 			TrackerPtr tracker) {
-	_calibration->calibrationtype(BasicCalibration::AO);
+	_calibration->calibrationtype(AO);
 
 	// create a new calibraiton process
 	AOCalibrationProcess	*aocalibrationprocess
@@ -112,7 +111,7 @@ int	ControlDevice<camera::AdaptiveOptics,
  */
 template<>
 Point	ControlDevice<camera::AdaptiveOptics,
-		AdaptiveOpticsCalibration>::correct(const Point& point,
+		AdaptiveOpticsCalibration, AO>::correct(const Point& point,
 			double Deltat, bool /* stepping */) {
 	// give up if not configured
 	if (!_calibration->complete()) {
@@ -142,7 +141,7 @@ Point	ControlDevice<camera::AdaptiveOptics,
 	ti.t = Timer::gettime();
 	ti.trackingoffset = point;
 	ti.correction = correction;
-	ti.type = BasicCalibration::AO;
+	ti.type = AO;
 	_guider->callback(ti);
 
 	// get the remaining correction

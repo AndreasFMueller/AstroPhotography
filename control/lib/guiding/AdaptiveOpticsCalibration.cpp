@@ -19,16 +19,14 @@ namespace guiding {
  * The default calibration has all members set to zero, in particular,
  * it cannot be inverted, and it is not possible to compute corrections.
  */
-AdaptiveOpticsCalibration::AdaptiveOpticsCalibration() {
-	calibrationtype(AO);
+AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const ControlDeviceName& name) : BasicCalibration(name) {
 }
 
 /**
  * \brief Construct a AdaptiveOpticsCalibration object from coefficient array
  */
-AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const double coefficients[6])
-	: BasicCalibration(coefficients) {
-	calibrationtype(AO);
+AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const ControlDeviceName& name, const double coefficients[6])
+	: BasicCalibration(name, coefficients) {
 }
 
 /**
@@ -36,7 +34,6 @@ AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const double coefficients[6
  */
 AdaptiveOpticsCalibration::AdaptiveOpticsCalibration(const BasicCalibration& other)
 	: BasicCalibration(other) {
-	calibrationtype(AO);
 }
 
 /**

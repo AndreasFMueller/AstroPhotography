@@ -216,7 +216,8 @@ void	CalibrationProcess::main2(astro::thread::Thread<CalibrationProcess>& _threa
 	grid = gridconstant(_focallength, guider()->pixelsize());
 
 	// prepare a BasicCalibrator class that does the actual computation
-	BasicCalibrator	calibrator;
+	ControlDeviceNamePtr	gpname = guider()->guiderPortDeviceName();
+	BasicCalibrator	calibrator(*gpname);
 
 	// measure the initial point
 	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));
