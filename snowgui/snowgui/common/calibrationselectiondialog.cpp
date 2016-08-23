@@ -8,6 +8,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <IceConversions.h>
+#include <QListWidgetItem>
 
 namespace snowgui {
 
@@ -80,6 +81,8 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider found %d ids", ids.size());
 
 	// now retrieve each calibration and decide whether to display it
+	QFont	font("Fixed");
+	font.setStyleHint(QFont::Monospace);
 	snowstar::idlist::const_iterator	i;
 	for (i = ids.begin(); i != ids.end(); i++) {
 		snowstar::Calibration	cal
@@ -87,9 +90,8 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		if ((cal.type == _controltype) && (cal.complete)) {
 			_calibrations.push_back(cal);
 			std::string	label = formatlabel(cal);
-			QListWidgetItem	*item = new QListWidgetItem(QString(label.c_str()));
-			QFont	font("Fixed");
-			font.setStyleHint(QFont::Monospace);
+			QString		ls(label.c_str());
+			QListWidgetItem	*item = new QListWidgetItem(ls);
 			item->setFont(font);
 			ui->calibrationlistWidget->addItem(item);
 		}
@@ -112,8 +114,6 @@ void	calibrationselectiondialog::currentRowChanged(int index) {
  * \brief Accept the selected calibration
  */
 void	calibrationselectiondialog::calibrationAccepted() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d accepted",
-		_calibration.id);
 	emit calibrationSelected(_calibration);
 }
 

@@ -10,6 +10,7 @@
 #include <IceConversions.h>
 #include <AstroCamera.h>
 #include <algorithm>
+#include "trackselectiondialog.h"
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -20,7 +21,7 @@ namespace snowgui {
  * \brief Constructor for the guidercontrollerwidget
  */
 guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
-	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
+	: InstrumentWidget(parent), ui(new ::Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
 
 	_guiderdescriptor.ccdIndex = 0;
@@ -47,6 +48,8 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 
 	connect(ui->guideButton, SIGNAL(clicked()),
 		this, SLOT(startGuiding()));
+	connect(ui->databaseButton, SIGNAL(clicked()),
+		this, SLOT(selectTrack()));
 
 	// some other fields
 	_previousstate = snowstar::GuiderIDLE;
@@ -378,6 +381,16 @@ void	guidercontrollerwidget::aoupdateintervalChanged(double r) {
  */
 void	guidercontrollerwidget::windowradiusChanged(double r) {
 	_windowradius = r;
+}
+
+
+/**
+ * \brief Open a track selection dialog
+ */
+void	guidercontrollerwidget::selectTrack() {
+	trackselectiondialog	*tsd = new trackselectiondialog(this);
+	tsd->setGuider(_guiderdescriptor, _guiderfactory);
+	tsd->show();
 }
 
 } // namespade snowgui

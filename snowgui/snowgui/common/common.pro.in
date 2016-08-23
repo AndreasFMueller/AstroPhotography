@@ -29,7 +29,8 @@ FORMS    +=								\
 	coolercontrollerwidget.ui					\
 	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
-	guidercontrollerwidget.ui
+	guidercontrollerwidget.ui					\
+	trackselectiondialog.ui
 
 WIDGETSOURCES =								\
 	imagedisplaywidget.cpp						\
@@ -40,7 +41,8 @@ WIDGETSOURCES =								\
 	coolercontrollerwidget.cpp					\
 	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
-	guidercontrollerwidget.cpp
+	guidercontrollerwidget.cpp					\
+	trackselectiondialog.cpp
 
 WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
@@ -51,7 +53,8 @@ WIDGETHEADERS =								\
 	coolercontrollerwidget.h					\
 	calibrationwidget.h						\
 	calibrationselectiondialog.h					\
-	guidercontrollerwidget.h
+	guidercontrollerwidget.h					\
+	trackselectiondialog.h
 
 SOURCES += 								\
 	Image2Pixmap.cpp						\
@@ -64,6 +67,7 @@ SOURCES += 								\
 	Scaler.cpp							\
 	FocusPointsWidget.cpp						\
 	CalibrationDisplayWidget.cpp					\
+	ChannelDisplayWidget.cpp					\
 	$${WIDGETSOURCES}
 
 
@@ -78,6 +82,7 @@ HEADERS  += 								\
 	Scaler.h							\
 	FocusPointsWidget.h						\
 	CalibrationDisplayWidget.h					\
+	ChannelDisplayWidget.h						\
 	$${WIDGETHEADERS}
 
 

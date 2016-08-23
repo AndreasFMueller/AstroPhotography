@@ -1,5 +1,5 @@
 /*
- * guidercontrollerwidget.h -- widget to control aguider
+ * guidercontrollerwidget.h -- widget to control a guider
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -49,7 +49,7 @@ signals:
 	void	exposureChanged(astro::camera::Exposure);
 
 private:
-	Ui::guidercontrollerwidget *ui;
+	::Ui::guidercontrollerwidget *ui;
 
 public slots:
 	void	setExposure(astro::camera::Exposure);
@@ -60,6 +60,7 @@ public slots:
 
 	void	startGuiding();
 	void	stopGuiding();
+	void	selectTrack();
 
 	void	selectPoint(astro::image::ImagePoint);
 	void	methodChanged(int);

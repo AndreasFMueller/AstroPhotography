@@ -16,7 +16,7 @@ namespace snowgui {
  * \brief Construct calibration widget
  */
 calibrationwidget::calibrationwidget(QWidget *parent) :
-	QWidget(parent), ui(new Ui::calibrationwidget) {
+	QWidget(parent), ui(new ::Ui::calibrationwidget) {
 	ui->setupUi(this);
 	connect(ui->databaseButton, SIGNAL(clicked()),
 		this, SLOT(databaseClicked()));
