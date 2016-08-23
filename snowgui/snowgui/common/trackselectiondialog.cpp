@@ -74,8 +74,11 @@ void	trackselectiondialog::setGuider(
 
 void	trackselectiondialog::trackAccepted() {
 	int	selected = ui->tracklistWidget->currentRow();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "track %d selected", selected);
-	emit trackSelected(_tracks[selected]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "track %d selected, id %d, %d points",
+		selected, _tracks[selected].guiderunid,
+		_tracks[selected].points.size());
+	snowstar::TrackingHistory	track = _tracks[selected];
+	emit trackSelected(track);
 }
 
 } // namespace snowgui

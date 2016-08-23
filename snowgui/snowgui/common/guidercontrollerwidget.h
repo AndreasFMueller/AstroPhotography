@@ -61,6 +61,7 @@ public slots:
 	void	startGuiding();
 	void	stopGuiding();
 	void	selectTrack();
+	void	trackSelected(snowstar::TrackingHistory track);
 
 	void	selectPoint(astro::image::ImagePoint);
 	void	methodChanged(int);

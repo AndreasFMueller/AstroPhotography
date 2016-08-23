@@ -241,6 +241,7 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 
 TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 	TrackingHistory	result;
+	result.guiderunid = history.trackid;
 	result.guider.instrumentname = history.instrument;
 	result.guiderportcalid = history.guiderportcalid;
 	result.adaptiveopticscalid = history.adaptiveopticscalid;

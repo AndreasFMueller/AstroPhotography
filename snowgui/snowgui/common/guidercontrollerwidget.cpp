@@ -11,6 +11,7 @@
 #include <AstroCamera.h>
 #include <algorithm>
 #include "trackselectiondialog.h"
+#include "trackviewdialog.h"
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -391,6 +392,22 @@ void	guidercontrollerwidget::selectTrack() {
 	trackselectiondialog	*tsd = new trackselectiondialog(this);
 	tsd->setGuider(_guiderdescriptor, _guiderfactory);
 	tsd->show();
+	connect(tsd, SIGNAL(trackSelected(snowstar::TrackingHistory)),
+		this, SLOT(trackSelected(snowstar::TrackingHistory)));
+}
+
+/**
+ * \brief Slot to accept the new track
+ */
+void	guidercontrollerwidget::trackSelected(snowstar::TrackingHistory track) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open view on track %d",
+		track.guiderunid);
+	trackviewdialog	*tvd = new trackviewdialog(this);
+	tvd->setGuiderFactory(_guiderfactory);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "set track");
+	tvd->setTrack(track);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "show dialog");
+	tvd->show();
 }
 
 } // namespade snowgui

@@ -51,6 +51,9 @@ void	ChannelDisplayWidget::add(std::vector<double> values) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::range_error(msg);
 	}
+	for (int i = 0; i < nvalues; i++) {
+		_channels[i].push_back(values[i]);
+	}
 }
 
 /**
@@ -108,8 +111,10 @@ void	ChannelDisplayWidget::draw() {
 	pen.setColor(QColor(180., 180., 180.));
 	painter.setPen(pen);
 	int	m = 1;
-	while (m < M) {
+	while ((m * yscale) < (height() / 2)) {
 		double	y = m * yscale + height() / 2.;
+		painter.drawLine(QPointF(0, y), QPointF(width() - 1, y));
+		y = -m * yscale + height() / 2.;
 		painter.drawLine(QPointF(0, y), QPointF(width() - 1, y));
 		m++;
 	}
@@ -125,7 +130,7 @@ void	ChannelDisplayWidget::draw() {
 		QPoint	p(width() - w, height() / 2 + yscale * *r);
 		r++; w++;
 		do {
-			QPoint	q(width() - w, height() / 2 + y * yscale * *r);
+			QPoint	q(width() - w, height() / 2 + yscale * *r);
 			painter.drawLine(p, q);
 			p = q;
 			r++; w++;
@@ -185,6 +190,14 @@ double	ChannelDisplayWidget::channelMax(int channelid) {
 		e = _channels[channelid].rend();
 	}
 	return *max_element(b, e);
+}
+
+void	ChannelDisplayWidget::clearData() {
+	std::for_each(_channels.begin(), _channels.end(),
+		[](std::deque<double>& channel) mutable {
+			channel.clear();
+		}
+	);
 }
 
 } // namespace snowgui

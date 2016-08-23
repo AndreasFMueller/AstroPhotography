@@ -1040,6 +1040,7 @@ typedef std::shared_ptr<GuiderFactory>	GuiderFactoryPtr;
  */
 class Track {
 public:
+	int	trackid;
 	time_t	whenstarted;
 	std::string	name;
 	std::string	instrument;
@@ -1056,6 +1057,7 @@ public:
 		: whenstarted(_whenstarted), name(_name),
 		  instrument(_instrument), ccd(_ccd), guiderport(_guiderport),
 		  adaptiveoptics(_adaptiveoptics) {
+		trackid = -1;
 		guiderportcalid = -1;
 		adaptiveopticscalid = -1;
 	}

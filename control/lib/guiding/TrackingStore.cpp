@@ -82,6 +82,7 @@ std::list<TrackingPointRecord>	TrackingStore::getHistory(long id,
 TrackingHistory	TrackingStore::get(long id) {
 	TrackTable	table(_database);
 	TrackingHistory	history(table.byid(id));
+	history.trackid = id;
 	std::list<TrackingPointRecord>	track = getHistory(id);
 	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
 		history.points.push_back(*ptr);
@@ -99,6 +100,7 @@ TrackingHistory	TrackingStore::get(long id,
 	ControlDeviceType type) {
 	TrackTable	table(_database);
 	TrackingHistory	history(table.byid(id));
+	history.trackid = id;
 	std::list<TrackingPointRecord>	track = getHistory(id, type);
 	for (auto ptr = track.begin(); ptr != track.end(); ptr++) {
 		history.points.push_back(*ptr);

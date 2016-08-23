@@ -37,6 +37,8 @@ public:
 
 	void	paintEvent(QPaintEvent *event);
 
+	void	clearData();
+
 public slots:
 	void	add(std::vector<double> values);
 

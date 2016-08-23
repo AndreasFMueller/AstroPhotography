@@ -30,7 +30,8 @@ FORMS    +=								\
 	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
 	guidercontrollerwidget.ui					\
-	trackselectiondialog.ui
+	trackselectiondialog.ui						\
+	trackviewdialog.ui
 
 WIDGETSOURCES =								\
 	imagedisplaywidget.cpp						\
@@ -42,7 +43,8 @@ WIDGETSOURCES =								\
 	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
 	guidercontrollerwidget.cpp					\
-	trackselectiondialog.cpp
+	trackselectiondialog.cpp					\
+	trackviewdialog.cpp
 
 WIDGETHEADERS =								\
 	ccdcontrollerwidget.h						\
@@ -54,7 +56,8 @@ WIDGETHEADERS =								\
 	calibrationwidget.h						\
 	calibrationselectiondialog.h					\
 	guidercontrollerwidget.h					\
-	trackselectiondialog.h
+	trackselectiondialog.h						\
+	trackviewdialog.h
 
 SOURCES += 								\
 	Image2Pixmap.cpp						\
