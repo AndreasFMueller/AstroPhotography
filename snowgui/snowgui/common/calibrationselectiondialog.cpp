@@ -46,7 +46,7 @@ static std::string	formatlabel(const snowstar::Calibration& cal) {
 	struct tm	*tmp = localtime(&when);
 	char	buffer[100];
 	strftime(buffer, sizeof(buffer), "%F %T", tmp);
-	return astro::stringprintf("%d: %s, %4.1f%%", cal.id, buffer,
+	return astro::stringprintf("%03d: %s, %4.1f%%", cal.id, buffer,
 		100 * cal.quality);
 }
 
@@ -87,7 +87,11 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		if ((cal.type == _controltype) && (cal.complete)) {
 			_calibrations.push_back(cal);
 			std::string	label = formatlabel(cal);
-			ui->calibrationlistWidget->addItem(QString(label.c_str()));
+			QListWidgetItem	*item = new QListWidgetItem(QString(label.c_str()));
+			QFont	font("Fixed");
+			font.setStyleHint(QFont::Monospace);
+			item->setFont(font);
+			ui->calibrationlistWidget->addItem(item);
 		}
 	}
 	
@@ -108,6 +112,8 @@ void	calibrationselectiondialog::currentRowChanged(int index) {
  * \brief Accept the selected calibration
  */
 void	calibrationselectiondialog::calibrationAccepted() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d accepted",
+		_calibration.id);
 	emit calibrationSelected(_calibration);
 }
 

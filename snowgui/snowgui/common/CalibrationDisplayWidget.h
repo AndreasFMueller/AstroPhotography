@@ -24,9 +24,15 @@ protected:
 
 private:
 	void	draw();
+	void	drawDisabled(QPainter&);
+	void	drawEnabled(QPainter&);
+	void	drawCommon(QPainter&, bool drawvectors, bool dim);
 
 public slots:
 	void	setCalibration(snowstar::Calibration);
+
+protected slots:
+	virtual void	changeEvent(QEvent *event);
 };
 
 } // namespace snowgui

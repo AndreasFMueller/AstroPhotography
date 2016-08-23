@@ -89,6 +89,7 @@ GuiderCalibration	CalibrationStore::getGuiderCalibration(long id) {
 	// construct the calibration object
 	GuiderCalibration	calibration(cdname);
 	calibration.calibrationid(id);
+	calibration.when(r.when);
 	for (int i = 0; i < 6; i++) {
 		calibration.a[i] = r.a[i];
 	}

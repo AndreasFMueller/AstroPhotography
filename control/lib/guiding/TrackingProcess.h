@@ -40,6 +40,9 @@ public:
 		_adaptiveopticsInterval = a;
 	}
 
+	bool	adaptiveOpticsUsable();
+	bool	guiderPortUsable();
+
 private:
 	bool	_stepping;
 public:
@@ -61,6 +64,9 @@ public:
 	~TrackingProcess();
 
 	void    main(astro::thread::Thread<TrackingProcess>& thread);
+private:
+	void	step(astro::thread::Thread<TrackingProcess>& thread,
+			double imageiInterval, double& guiderportTime);
 
 private:
 	TrackingSummary	_summary;

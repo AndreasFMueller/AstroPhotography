@@ -84,7 +84,9 @@ void	calibrationwidget::databaseClicked() {
  */
 void	calibrationwidget::setCalibration(snowstar::Calibration cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d selected", cal.id);
+	_calibration = cal;
 	ui->calibrationdisplayWidget->setCalibration(cal);
+	displayCalibration();
 	_guider->useCalibration(cal.id, false);
 }
 

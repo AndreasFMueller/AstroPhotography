@@ -5,6 +5,7 @@
  */
 #include <CalibrationDisplayWidget.h>
 #include <QPainter>
+#include <QEvent>
 #include <AstroDebug.h>
 #include <cmath>
 
@@ -43,21 +44,55 @@ void	CalibrationDisplayWidget::paintEvent(QPaintEvent * /* event */) {
 }
 
 /**
- * \brief Draw calibration points and vectors
+ * \brief Main draw method
+ *
+ * This method calls drawDisabled and drawEnabled depending on the current
+ * enable state of the widget.
  */
 void	CalibrationDisplayWidget::draw() {
+	QPainter	painter(this);
+	if (this->isEnabled()) {
+		drawEnabled(painter);
+	} else {
+		drawDisabled(painter);
+	}
+}
+
+/**
+ * \brief Draw disabled state of the widget
+ *
+ * In the disabled state, vectors are never drawn, and points are drawn only
+ * dimmly.
+ */
+void	CalibrationDisplayWidget::drawDisabled(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw disabled state");
+	drawCommon(painter, false, true);
+}
+
+/**
+ * \brief Draw enabled state of the widget
+ *
+ * In the enabled state, vectors are drawn if present, and everything is bright
+ */
+void	CalibrationDisplayWidget::drawEnabled(QPainter& painter) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw enabled state");
+	drawCommon(painter, _calibration.complete, false);
+}
+
+/**
+ * \brief Draw calibration points and vectors
+ */
+void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
+		bool drawvectors, bool dim) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing calibration %d, %d points",
 		_calibration.id, _calibration.points.size());
-	QPainter	painter(this);
-	painter.fillRect(0, 0, width(), height(), QColor(255., 255., 255.));
-	QPen	pen(Qt::SolidLine);
-	pen.setWidth(3);
-	pen.setColor(QColor(255., 0., 0.));
-	painter.setPen(pen);
+	double	gray = (dim) ? 204. : 255.;
+	painter.fillRect(0, 0, width(), height(), QColor(gray, gray, gray));
 
 	// draw the coorrdinate system
-	painter.fillRect(width() / 2, 0, 1, height(), QColor(128., 128., 128.));
-	painter.fillRect(0, height() / 2, width(), 1, QColor(128., 128., 128.));
+	gray = (dim) ? 128. : 102.;
+	painter.fillRect(width() / 2, 0, 1, height(), QColor(gray, gray, gray));
+	painter.fillRect(0, height() / 2, width(), 1, QColor(gray, gray, gray));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "coordinate system drawn");
 	if (_calibration.id < 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "stop drawing, no cal");
@@ -140,7 +175,9 @@ void	CalibrationDisplayWidget::draw() {
 
 	// draw the points
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw points");
-	pen.setColor(QColor(255., 0., 0.));
+	QPen	pen(Qt::SolidLine);
+	pen.setWidth(3);
+	pen.setColor((dim) ?  QColor(153., 102., 102.) : QColor(255., 0., 0.));
 	painter.setPen(pen);
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
@@ -149,7 +186,7 @@ void	CalibrationDisplayWidget::draw() {
 		painter.drawPoint(pf);
 	}
 	
-	if (!_calibration.complete) {
+	if (!drawvectors) {
 		return;
 	}
 
@@ -158,7 +195,7 @@ void	CalibrationDisplayWidget::draw() {
 	pen.setWidth(2);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw R vector");
-	pen.setColor(QColor(0., 0., 204.));
+	pen.setColor((dim) ? QColor(51., 51., 102.) : QColor(0., 0., 204.));
 	painter.setPen(pen);
 	QPointF	ra(rax * scale + cx, h - (ray * scale + cy));
 	painter.drawLine(center, ra);
@@ -168,7 +205,7 @@ void	CalibrationDisplayWidget::draw() {
 		Qt::AlignCenter, QString("R"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw D vector");
-	pen.setColor(QColor(0., 102., 51.));
+	pen.setColor((dim) ? QColor(102., 204., 153.) : QColor(0., 102., 51.));
 	painter.setPen(pen);
 	QPointF	dec(decx * scale + cx, h - (decy * scale + cy));
 	painter.drawLine(center, dec);
@@ -178,7 +215,7 @@ void	CalibrationDisplayWidget::draw() {
 		Qt::AlignCenter, QString("D"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw t vector");
-	pen.setColor(QColor(255., 153., 51.));
+	pen.setColor((dim) ? QColor(204., 153., 102.) : QColor(255., 153., 51.));
 	painter.setPen(pen);
 	QPointF	drift(driftx * scale + cx, h - (drifty * scale + cy));
 	painter.drawLine(center, drift);
@@ -188,6 +225,17 @@ void	CalibrationDisplayWidget::draw() {
 		20, 20, Qt::AlignCenter, QString("t"));
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "drawing complete");
+}
+
+/**
+ * \brief Slot to handle changes in hiddenness
+ */
+void	CalibrationDisplayWidget::changeEvent(QEvent *event) {
+	// check for events that 
+	if (event->type() == QEvent::EnabledChange) {
+		repaint();
+	}
+	QWidget::changeEvent(event);
 }
 
 } // namespace snowgui

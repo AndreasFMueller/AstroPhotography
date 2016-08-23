@@ -9,6 +9,7 @@
 #include <CommunicatorSingleton.h>
 #include <IceConversions.h>
 #include <AstroCamera.h>
+#include <algorithm>
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -52,10 +53,8 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	statusTimer = new QTimer;
 	statusTimer->setInterval(100);
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-#if 0
-	_guiderportinterval = 10;
-	_adaptiveopticsinterval = 1;
-#endif
+	_gpupdateinterval = 10;
+	_aoupdateinterval = 1;
 	_stepping = false;
 }
 
@@ -361,9 +360,17 @@ void	guidercontrollerwidget::gpupdateintervalChanged(double r) {
 
 /**
  * \brief Update the adaptive optics update interval
+ *
+ * Also makes shure that the minimum value that can be set for the GP
+ * update interval is always at least 1 second and also at least the 
+ * as large as the update interval for the adaptive optics unit.
  */
 void	guidercontrollerwidget::aoupdateintervalChanged(double r) {
 	_aoupdateinterval = r;
+	double	mingpinterval = std::max(_aoupdateinterval, 1.);
+	if (mingpinterval > ui->gpupdateintervalSpinBox->minimum()) {
+		ui->gpupdateintervalSpinBox->setMinimum(mingpinterval);
+	}
 }
 
 /**

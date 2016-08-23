@@ -70,12 +70,18 @@ TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
         thread(ThreadPtr(new astro::thread::Thread<TrackingProcess>(this)));
 }
 
+/**
+ * \brief Destroy the tracking process
+ */
 TrackingProcess::~TrackingProcess() {
 	if (_callback) {
 		guider()->removeTrackingCallback(_callback);
 	}
 }
 
+/**
+ * \brief Callback called when a new trackingpoint becomes available
+ */
 void	TrackingProcess::callback(const TrackingPoint& trackingpoint) {
 	if (!database()) {
 		return;
@@ -88,6 +94,45 @@ void	TrackingProcess::callback(const TrackingPoint& trackingpoint) {
 	trackingtable.add(tracking);
 }
 
+/**
+ * \brief Find out whether the adaptive optics device is usable
+ *
+ * For this the device has to be present and configured
+ */
+bool	TrackingProcess::adaptiveOpticsUsable() {
+	if (!_adaptiveOpticsDevice) {
+		return false;
+	}
+	return _adaptiveOpticsDevice->iscalibrated();
+}
+
+/**
+ * \brief Find out whether the guider port is usable
+ *
+ * Like for the adaptive optics device, for this the device has to be
+ * present and configured
+ */
+bool	TrackingProcess::guiderPortUsable() {
+	if (!_guiderPortDevice) {
+		return false;
+	}
+	return _guiderPortDevice->iscalibrated();
+}
+
+/**
+ * \brief Exception class used to signal termination
+ */
+class TrackingTerminationException : public std::exception {
+public:
+	TrackingTerminationException() { }
+	const char	*what() const throw() {
+		return "tracking termination request";
+	}
+};
+
+/**
+ * \brief Main function of the tracking process
+ */
 void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK: tracker main function started");
 
@@ -98,10 +143,14 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		track.name = guider()->name();
 		track.instrument = guider()->instrument();
 		track.ccd = guider()->ccdname();
-                track.guiderport = _guiderPortDevice->devicename();
-                track.guiderportcalid
-			= _guiderPortDevice->calibrationid();
-		if (_adaptiveOpticsDevice) {
+		if (guiderPortUsable()) {
+                	track.guiderport = _guiderPortDevice->devicename();
+			track.guiderportcalid
+				= _guiderPortDevice->calibrationid();
+		} else {
+			track.guiderportcalid = -1;
+		}
+		if (adaptiveOpticsUsable()) {
 			track.adaptiveoptics
 				= _adaptiveOpticsDevice->devicename();
 			track.adaptiveopticscalid
@@ -121,7 +170,7 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 	// get the interval for images
 	double	imageInterval = _guiderportInterval;
-	if (_adaptiveOpticsDevice) {
+	if (adaptiveOpticsUsable()) {
 		if (_adaptiveOpticsDevice->iscalibrated()) {
 			imageInterval = _adaptiveopticsInterval;
 		}
@@ -133,66 +182,101 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	// we also do this at appropriate points within the loop
 	double	guiderportTime = 0;
 	while (!thread.terminate()) {
-		// we measure the time it takes to get an exposure. This
-		// may be larger than the interval, so we need the time
-		// to protect from overcorrecting
-		Timer	timer;
-		timer.start();
-
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start new exposure",
-			_id);
-
-		// now retrieve the image. This method has as a side
-		// effect that the image is sent to the image callback
-		double	imageTime = Timer::gettime();
-		ImagePtr	image = guider()->getImage();
-		timer.end();
-		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"TRACK %d: new image received, elapsed = %f", _id,
-			timer.elapsed());
-
-		// we may have received the terminate signal since we
-		// started the image
-		if (thread.terminate()) {
+		try {
+			step(thread, imageInterval, guiderportTime);
+		} catch (const TrackingTerminationException& tte) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"TRACK %d terminated: %s", _id, tte.what());
 			goto cleanup;
+		} catch (const std::runtime_error& ex) {
+			std::string	msg = stringprintf(
+				"TRACK %d terminated by %s: %s", _id,
+				demangle(typeid(ex).name()).c_str(), ex.what());
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+			throw ex;
 		}
+	}
+cleanup:
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: Termination signal received",
+		_id);
+	_id = -1;
+}
 
-		// use the tracker to find the tracking offset
-		Point	offset = tracker()->operator()(image);
+/**
+ * \brief Perform a single tracking step
+ *
+ * Tracking happens in individual steps. Each step takes an image,
+ * computes the offset using the tracker, decides whether to use the
+ * adaptive optics unit, sends the offset there, receives what remains
+ * to be corrected, and sends that remainder to the guider port, but only
+ * if it alreay is time to update the guider port (the guider port cannot
+ * follow very fast update rates like the adaptive optics unit).
+ */
+void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
+		double imageInterval,
+		double& guiderportTime) {
+	// we measure the time it takes to get an exposure. This
+	// may be larger than the interval, so we need the time
+	// to protect from overcorrecting
+	Timer	timer;
+	timer.start();
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: start new exposure",
+		_id);
+
+	// now retrieve the image. This method has as a side
+	// effect that the image is sent to the image callback
+	double	imageTime = Timer::gettime();
+	ImagePtr	image = guider()->getImage();
+	timer.end();
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"TRACK %d: new image received, elapsed = %f", _id,
+		timer.elapsed());
+
+	// we may have received the terminate signal since we
+	// started the image
+	if (thread.terminate()) {
+		throw TrackingTerminationException();
+	}
+
+	// use the tracker to find the tracking offset
+	Point	offset = tracker()->operator()(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"TRACK %d: current tracker offset: %s", _id,
+		offset.toString().c_str());
+	_summary.addPoint(offset);
+
+	// find out whether the tracker can still track, terminate
+	// if not
+	if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {
+		std::string	cause = stringprintf("TRACK %d: loss of tracking, give up", _id);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+
+	// we modify the correction, which allows us to make
+	// the correction more stable
+	offset = offset * gain();
+	Point	remainder  = offset;
+	if (adaptiveOpticsUsable()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"TRACK %d: current tracker offset: %s", _id,
-			offset.toString().c_str());
-		_summary.addPoint(offset);
+			"TRACK %d: correct by AO: %s",
+			_id, offset.toString().c_str());
 
-		// find out whether the tracker can still track, terminate
-		// if not
-		if ((offset.x() != offset.x()) || (offset.y() != offset.y())) {
-			debug(LOG_ERR, DEBUG_LOG, 0,
-				"TRACK %d: loss of tracking, give up", _id);
-			goto cleanup;
-		}
+		// do the correction using the adaptive optics device
+		remainder = _adaptiveOpticsDevice->correct(offset,
+			_adaptiveopticsInterval, _stepping);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK %d: offset remaining after AO: %s", _id,
+			remainder.toString().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK %d: no AO, correct by GP: %s",
+			_id, remainder.toString().c_str());
+	}
 
-		// we modify the correction, which allows us to make
-		// the correction more stable
-		offset = offset * gain();
-		Point	remainder  = offset;
-		if (_adaptiveOpticsDevice) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: correct by AO: %s",
-				_id, offset.toString().c_str());
-
-			// do the correction using the adaptive optics device
-			remainder = _adaptiveOpticsDevice->correct(offset,
-				_adaptiveopticsInterval, _stepping);
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: offset remaining after AO: %s", _id,
-				remainder.toString().c_str());
-		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: correct by GP: %s",
-				_id, remainder.toString().c_str());
-		}
-
+	// if we have a usable guider port, give it the remaining correction
+	if (guiderPortUsable()) {
 		// check whether enough time has passed for a guider port
 		// action. Because there may be some variance in image 
 		// acquisition, we subtract half the elapsed time of the last
@@ -205,24 +289,22 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 				_guiderportInterval, _stepping);
 			guiderportTime = Timer::gettime();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: guiderport remaining offset %s",
+				"TRACK %d: guiderport leaves offset %s",
 				_id, d.toString().c_str());
 		}
-
-		// time we want to sleep until the next AO action is waranted
-		double	dt = imageTime + imageInterval - Timer::gettime();
-		if (dt > 0) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: sleep %.2f",
-				_id, dt);
-			Timer::sleep(dt);
-		}
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"TRACK %d: no usable guider port", _id);
 	}
-cleanup:
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: Termination signal received",
-		_id);
-	_id = -1;
+
+	// time we want to sleep until the next AO action is waranted
+	double	dt = imageTime + imageInterval - Timer::gettime();
+	if (dt > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "TRACK %d: sleep %.2f",
+			_id, dt);
+		Timer::sleep(dt);
+	}
 }
-	
 
 } // namespace guiding
 } // namespace astro
