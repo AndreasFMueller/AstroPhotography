@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include "ColorRectangles.h"
 
 namespace snowgui {
 
@@ -97,6 +98,42 @@ void	ChannelDisplayWidget::draw() {
 	// y coordinates are coputed as y * yscale + height() / 2
 	double	yscale = (height() - 2) / (2 * M);
 
+	// compute standard deviations and means
+	std::vector<double>	mean;
+	std::vector<double>	stddev;
+	for (int i = 0; i < channels(); i++) {
+		const std::deque<double>&	channel = _channels[i];
+		std::deque<double>::const_reverse_iterator	r;
+		r = channel.crbegin();
+		double	sum = 0;
+		double	sum2 = 0;
+		int	w = 1;
+		do {
+			double	y = *r;
+			sum += y;
+			sum2 += y * y;
+			r++;
+			w++;
+		} while ((w <= width()) && (r != channel.crend()));
+		double	m = sum / w;
+		mean.push_back(m);
+		double	s = sqrt((w / (w - 1.)) * (sum2 / w) - m * m);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"channel %d: mean = %.3f, stddev = %.3f", i, m, s);
+		stddev.push_back(s);
+	}
+
+	// construct color rectangles
+	ColorRectangles	rectangles;
+	for (size_t i = 0; i < mean.size(); i++) {
+		double	h  = height() / 2 - 1;
+		double	bottom = h - (mean[i] - stddev[i]) * yscale;
+		double	top = h - (mean[i] + stddev[i]) * yscale;
+		Color	color = Color(_colors[i]) * 0.1;
+		rectangles.addRange(top, bottom, color);
+	}
+	rectangles.draw(painter, width());
+
 	// prepare a pen
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(1);
@@ -127,14 +164,17 @@ void	ChannelDisplayWidget::draw() {
 		std::deque<double>::const_reverse_iterator	r;
 		r = channel.crbegin();
 		int	w = 1;
-		QPoint	p(width() - w, height() / 2 + yscale * *r);
+		double	y = *r;
+		QPoint	p(width() - w, height() / 2 - 1 - yscale * y);
 		r++; w++;
 		do {
-			QPoint	q(width() - w, height() / 2 + yscale * *r);
+			y = *r;
+			QPoint	q(width() - w, height() / 2 - 1 - yscale * y);
 			painter.drawLine(p, q);
 			p = q;
 			r++; w++;
 		} while ((w <= width()) && (r != channel.crend()));
+		// compute std deviation
 	}
 }
 
@@ -192,6 +232,9 @@ double	ChannelDisplayWidget::channelMax(int channelid) {
 	return *max_element(b, e);
 }
 
+/**
+ * \brief Clear the data
+ */
 void	ChannelDisplayWidget::clearData() {
 	std::for_each(_channels.begin(), _channels.end(),
 		[](std::deque<double>& channel) mutable {

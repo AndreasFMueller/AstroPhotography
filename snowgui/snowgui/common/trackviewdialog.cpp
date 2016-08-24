@@ -116,6 +116,7 @@ void	trackviewdialog::updateData() {
 		_track.guiderunid);
 	// copy the data to the channels
 	ChannelDisplayWidget	*cdw = ui->gpWidget;
+	cdw->clearData();
 	int	counter = 0;
 	double	scale = 1;
 	datatype_t	dt = _datatype;
