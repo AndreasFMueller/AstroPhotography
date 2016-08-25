@@ -9,11 +9,11 @@
 #include <QWidget>
 #include <AstroImage.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class focusinghistorywidget;
 }
-
-namespace snowgui {
 
 class focusinghistorywidget : public QWidget {
 	Q_OBJECT

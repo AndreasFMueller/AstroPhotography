@@ -6,5 +6,5 @@
 #
 rm -rf snowgui.app
 make -j 8
-./snowgui.app/Contents/MacOS/snowgui --debug --server=othello 2>&1 \
+./snowgui.app/Contents/MacOS/snowgui --debug --server=server 2>&1 \
 	| tee build.log

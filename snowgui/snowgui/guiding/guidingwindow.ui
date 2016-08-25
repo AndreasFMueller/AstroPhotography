@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>guidingwindow</class>
+ <class>snowgui::guidingwindow</class>
  <widget class="QWidget" name="guidingwindow">
   <property name="geometry">
    <rect>

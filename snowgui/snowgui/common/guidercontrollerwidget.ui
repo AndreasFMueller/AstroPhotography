@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>guidercontrollerwidget</class>
+ <class>snowgui::guidercontrollerwidget</class>
  <widget class="QWidget" name="guidercontrollerwidget">
   <property name="geometry">
    <rect>

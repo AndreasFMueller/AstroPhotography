@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PreviewWindow</class>
+ <class>snowgui::PreviewWindow</class>
  <widget class="QWidget" name="PreviewWindow">
   <property name="geometry">
    <rect>

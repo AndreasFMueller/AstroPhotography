@@ -2,6 +2,8 @@
 #include "ui_connectiondialog.h"
 #include <AstroDebug.h>
 
+namespace snowgui {
+
 ConnectionDialog::ConnectionDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConnectionDialog)
@@ -14,3 +16,5 @@ ConnectionDialog::~ConnectionDialog()
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy connection dialog");
     delete ui;
 }
+
+} // namespace snowgui

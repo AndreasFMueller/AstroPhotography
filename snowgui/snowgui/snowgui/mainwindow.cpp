@@ -16,6 +16,8 @@
 
 using namespace astro::discover;
 
+namespace snowgui {
+
 MainWindow::MainWindow(QWidget *parent,
 	const astro::discover::ServiceObject serviceobject)
 	: QMainWindow(parent), _serviceobject(serviceobject),
@@ -176,3 +178,5 @@ MainWindow::~MainWindow() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy MainWindow");
 	delete ui;
 }
+
+} // namespace snowgui

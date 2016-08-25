@@ -13,11 +13,11 @@
 #include <QRubberBand>
 #include <SelectableImage.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class imagedisplaywidget;
 }
-
-namespace snowgui {
 
 /**
  * \brief common image display widget

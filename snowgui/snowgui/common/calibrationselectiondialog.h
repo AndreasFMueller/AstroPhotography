@@ -9,11 +9,11 @@
 #include <QDialog>
 #include <guider.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class calibrationselectiondialog;
 }
-
-namespace snowgui {
 
 class calibrationselectiondialog : public QDialog
 {

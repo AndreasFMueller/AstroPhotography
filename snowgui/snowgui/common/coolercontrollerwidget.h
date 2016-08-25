@@ -8,11 +8,11 @@
 
 #include <InstrumentWidget.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class coolercontrollerwidget;
 }
-
-namespace snowgui {
 
 class coolercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT

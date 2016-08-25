@@ -22,7 +22,7 @@ namespace snowgui {
  * \brief Constructor for the guidercontrollerwidget
  */
 guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
-	: InstrumentWidget(parent), ui(new ::Ui::guidercontrollerwidget) {
+	: InstrumentWidget(parent), ui(new Ui::guidercontrollerwidget) {
 	ui->setupUi(this);
 
 	_guiderdescriptor.ccdIndex = 0;

@@ -9,6 +9,8 @@
 
 using namespace astro::discover;
 
+namespace snowgui {
+
 /**
  * \brief Constructor for the instrument selection dialog
  */
@@ -63,3 +65,5 @@ void	InstrumentSelectionDialog::launch(const std::string& instrumentname) {
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s: can only launch from derived class",
 		instrumentname.c_str());
 }
+
+} // namespace snowgui

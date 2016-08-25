@@ -9,11 +9,11 @@
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class focusercontrollerwidget;
 }
-
-namespace snowgui {
 
 /**
  * \brief A reusable GUI component to control a focuser

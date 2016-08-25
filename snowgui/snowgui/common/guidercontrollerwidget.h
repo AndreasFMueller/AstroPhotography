@@ -11,11 +11,11 @@
 #include <AstroCamera.h>
 #include <AstroImage.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class guidercontrollerwidget;
 }
-
-namespace snowgui {
 
 class guidercontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
@@ -49,7 +49,7 @@ signals:
 	void	exposureChanged(astro::camera::Exposure);
 
 private:
-	::Ui::guidercontrollerwidget *ui;
+	Ui::guidercontrollerwidget *ui;
 
 public slots:
 	void	setExposure(astro::camera::Exposure);

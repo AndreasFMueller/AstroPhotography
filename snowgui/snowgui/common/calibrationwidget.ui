@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>calibrationwidget</class>
+ <class>snowgui::calibrationwidget</class>
  <widget class="QWidget" name="calibrationwidget">
   <property name="geometry">
    <rect>

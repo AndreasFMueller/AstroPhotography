@@ -16,11 +16,11 @@
 #include <CommonClientTasks.h>
 #include <Image2Pixmap.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class PreviewWindow;
 }
-
-namespace snowgui {
 
 class PreviewWindow : public QWidget {
 	Q_OBJECT

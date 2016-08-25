@@ -8,11 +8,11 @@
 
 #include <InstrumentWidget.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class filterwheelcontrollerwidget;
 }
-
-namespace snowgui {
 
 /**
  * \brief A reusable component to control a filter wheel

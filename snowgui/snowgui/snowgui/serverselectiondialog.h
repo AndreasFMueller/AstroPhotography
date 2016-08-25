@@ -10,8 +10,10 @@
 #include <QDialog>
 #include <AstroDiscovery.h>
 
+namespace snowgui {
+
 namespace Ui {
-class ServerSelectionDialog;
+	class ServerSelectionDialog;
 }
 
 class ServerSelectionDialog : public QDialog {
@@ -29,5 +31,7 @@ public slots:
 private:
 	Ui::ServerSelectionDialog *ui;
 };
+
+} // namespace snowgui
 
 #endif // SERVERSELECTIONDIALOG_H

@@ -3,8 +3,10 @@
 
 #include <QDialog>
 
+namespace snowgui {
+
 namespace Ui {
-class ConnectionDialog;
+	class ConnectionDialog;
 }
 
 class ConnectionDialog : public QDialog
@@ -18,5 +20,7 @@ public:
 private:
     Ui::ConnectionDialog *ui;
 };
+
+} // namespace snowgui
 
 #endif // CONNECTIONDIALOG_H

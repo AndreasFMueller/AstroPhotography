@@ -5,8 +5,10 @@
 #include <AstroDiscovery.h>
 #include <QLabel>
 
+namespace snowgui {
+
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -39,5 +41,7 @@ private:
 	void	createActions();
 	void	createMenus();
 };
+
+} // namespace snowgui
 
 #endif // MAINWINDOW_H

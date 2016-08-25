@@ -13,6 +13,8 @@
 #include <instruments.h>
 #include <RemoteInstrument.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class InstrumentSelectionDialog;
 }
@@ -58,5 +60,7 @@ public:
 		a->raise();
 	}
 };
+
+} // namespace snowgui
 
 #endif // INSTRUMENTSELECTIONDIALOG_H

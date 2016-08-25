@@ -10,6 +10,8 @@
 
 using namespace astro::discover;
 
+namespace snowgui {
+
 ServerSelectionDialog::ServerSelectionDialog(QWidget *parent,
 	ServiceDiscoveryPtr servicediscovery)
 	: QDialog(parent), _servicediscovery(servicediscovery),
@@ -56,3 +58,5 @@ void	ServerSelectionDialog::accept() {
 	// close the window
 	close();
 }
+
+} // namespace snowgui

@@ -8,11 +8,11 @@
 
 #include <InstrumentWidget.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class guidingwindow;
 }
-
-namespace snowgui {
 
 class guidingwindow : public InstrumentWidget {
 	Q_OBJECT

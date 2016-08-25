@@ -8,11 +8,11 @@
 
 #include <InstrumentWidget.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class focusingwindow;
 }
-
-namespace snowgui {
 
 class focusingwindow : public snowgui::InstrumentWidget {
 	Q_OBJECT

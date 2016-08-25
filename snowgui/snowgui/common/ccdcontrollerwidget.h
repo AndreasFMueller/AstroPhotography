@@ -9,11 +9,11 @@
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class ccdcontrollerwidget;
 }
-
-namespace snowgui {
 
 /**
  * \brief A reusable component to control a CCD

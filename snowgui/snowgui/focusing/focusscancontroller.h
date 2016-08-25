@@ -9,11 +9,11 @@
 #include <QWidget>
 #include <AstroImage.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class focusscancontroller;
 }
-
-namespace snowgui {
 
 class focusscancontroller : public QWidget {
 	Q_OBJECT

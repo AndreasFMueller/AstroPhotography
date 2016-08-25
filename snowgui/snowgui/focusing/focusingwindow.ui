@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>focusingwindow</class>
+ <class>snowgui::focusingwindow</class>
  <widget class="QWidget" name="focusingwindow">
   <property name="geometry">
    <rect>

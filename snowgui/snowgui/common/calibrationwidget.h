@@ -9,11 +9,11 @@
 #include <QWidget>
 #include <guider.h>
 
+namespace snowgui {
+
 namespace Ui {
 	class calibrationwidget;
 }
-
-namespace snowgui {
 
 class guidercontrollerwidget;
 
