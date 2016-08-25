@@ -10,6 +10,7 @@
 #include <cstring>
 #include <includes.h>
 #include <AstroImage.h>
+#include <AstroConfig.h>
 #include <IceConversions.h>
 #include <Ice/ObjectAdapter.h>
 #include <Ice/Communicator.h>
@@ -107,6 +108,23 @@ ImageFile       ImageI::file(const Ice::Current& /* current */) {
 
 int     ImageI::filesize(const Ice::Current& /* current */) {
 	return _imagedirectory.fileSize(_filename);
+}
+
+void	ImageI::toRepository(const std::string& reponame,
+		const Ice::Current& /* current */) {
+	// get the repository
+	astro::config::ImageRepoConfigurationPtr	repoconf
+		= astro::config::ImageRepoConfiguration::get();
+	if (!repoconf->exists(reponame)) {
+		std::string	msg = astro::stringprintf("repo %s not found",
+			reponame.c_str());
+		throw NotFound(msg);
+	}
+	astro::project::ImageRepoPtr	repo = repoconf->repo(reponame);
+
+	// add the image to the repository;
+	repo->save(_image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image saved");
 }
 
 void    ImageI::remove(const Ice::Current& /* current */) {

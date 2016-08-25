@@ -80,8 +80,8 @@ void	FilterWheelBusy::draw() {
 		r = (radius - 4) / 2;
 	}
 	for (int i = 0; i < _nfilters; i++) {
-		double	a = _angle + i * delta;
-		QPointF	c(center.x() + (radius - r) * sin(a),
+		double	a = _angle - i * delta;
+		QPointF	c(center.x() - (radius - r) * sin(a),
 				center.y() - (radius - r) * cos(a));
 		QPainterPath	filter;
 		filter.addEllipse(c, r, r);

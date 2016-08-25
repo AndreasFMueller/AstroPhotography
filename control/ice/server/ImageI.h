@@ -35,6 +35,8 @@ public:
 	virtual int	bytesPerValue(const Ice::Current& current);
 	virtual ImageFile	file(const Ice::Current& current);
 	virtual int	filesize(const Ice::Current& current);
+	virtual void	toRepository(const std::string& reponame,
+				const Ice::Current& current);
 	virtual void	remove(const Ice::Current& current);
 	ImagePrx	createProxy(const std::string& filename,
 				const Ice::Current& current);

@@ -75,6 +75,14 @@ module snowstar {
 		int	filesize();
 
 		/**
+		 * \brief Save an image in a repository for later use
+		 *
+		 * This method tells the server to save the image in
+		 * the name repository
+		 */
+		void	toRepository(string reponame) throws NotFound;
+
+		/**
 		 * \brief Destroy a servant
 		 */
 		void	remove();
