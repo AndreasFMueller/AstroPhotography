@@ -42,11 +42,14 @@ public:
 	Calibration	getCalibration(int id,
 				const Ice::Current& current);
 	void	deleteCalibration(int id, const Ice::Current& current);
-	idlist	getAllGuideruns(const Ice::Current& current);
-	idlist	getGuideruns(const GuiderDescriptor& guider,
+	idlist	getAllTracks(const Ice::Current& current);
+	idlist	getTracks(const GuiderDescriptor& guider,
 				const Ice::Current& current);
 	TrackingHistory	getTrackingHistory(int id, const Ice::Current& current);
 	TrackingHistory	getTrackingHistoryType(int id, ControlType type,
+		const Ice::Current& current);
+	TrackingSummary	getTrackingSummary(int id, const Ice::Current& current);
+	TrackingSummary	getTrackingSummary(int id, ControlType type,
 		const Ice::Current& current);
 	void	deleteTrackingHistory(int id, const Ice::Current& current);
 };

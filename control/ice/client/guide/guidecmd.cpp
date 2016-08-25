@@ -70,7 +70,7 @@ int	Guide::stop_command(GuiderPrx guider) {
 int	Guide::tracks_command(GuiderFactoryPrx guiderfactory,
 		GuiderDescriptor descriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracks from remote server");
-	idlist	l = guiderfactory->getGuideruns(descriptor);
+	idlist	l = guiderfactory->getTracks(descriptor);
 	std::cout << l.size() << " tracks" << std::endl;
 	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
 		int	id = *ptr;

@@ -72,6 +72,7 @@ void	ChannelDisplayWidget::paintEvent(QPaintEvent * /* event */) {
 void	ChannelDisplayWidget::draw() {
 	// draw the white background
 	QPainter	painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
 	painter.fillRect(0, 0, width(), height(), QColor(255., 255., 255.));
 
 	// first check that we have enough data to reasonably draw something

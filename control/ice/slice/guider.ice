@@ -55,7 +55,7 @@ module snowstar {
 	 * and the time when the trackint started.
 	 */
 	struct TrackingHistory {
-		int	guiderunid;
+		int	trackid;
 		double	timeago;
 		int	guiderportcalid;
 		int	adaptiveopticscalid;
@@ -66,14 +66,18 @@ module snowstar {
 	/**
 	 * \brief A summary of the tracking
 	 *
-	 * The tracking 
+	 * The tracking summary only reports offsets actually seen on the
+	 * chip. In the tracking history, one can see all the offsets
+	 * individually seen by AO and by GP, but they are only interesting
+	 * to monitor mount performance, and not relevant for photography
 	 */
 	struct TrackingSummary {
-		int	guiderunid;
+		int	trackid;
 		double	since;
 		int	guiderportcalid;
 		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
+		int	points;
 		Point	lastoffset;
 		Point	averageoffset;
 		Point	variance;
@@ -265,13 +269,13 @@ module snowstar {
 		/**
 		 * \brief Get the complete tracking history
 		 *
-		 * \param guiderunid	ID of the guide run for which the
+		 * \param trackid	ID of the track for which the
 		 *			history is requested. -1 means the
 		 *			currently active guide run.
 		 */
-		TrackingHistory	getTrackingHistory(int guiderunid)
+		TrackingHistory	getTrackingHistory(int trackid)
 						throws BadState;
-		TrackingHistory	getTrackingHistoryType(int guiderunid,
+		TrackingHistory	getTrackingHistoryType(int trackid,
 			ControlType type) throws BadState;
 
 		/**
@@ -335,12 +339,17 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of all valid guide run ids
 		 */
-		idlist	getAllGuideruns();
+		idlist	getAllTracks();
 
 		/**
 		 * \brief Retrieve a list of valid guide run ids for a guider
 		 */
-		idlist	getGuideruns(GuiderDescriptor guider);
+		idlist	getTracks(GuiderDescriptor guider);
+
+		/**
+		 * \brief Retrieve a track summary
+		 */
+		TrackingSummary	getTrackingSummary(int id) throws NotFound;
 
 		/**
 		 * \brief Retrieve the Tracking history by id

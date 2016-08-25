@@ -8,6 +8,7 @@
 #include <QEvent>
 #include <AstroDebug.h>
 #include <cmath>
+#include "ColorArithmetic.h"
 
 namespace snowgui {
 
@@ -51,6 +52,7 @@ void	CalibrationDisplayWidget::paintEvent(QPaintEvent * /* event */) {
  */
 void	CalibrationDisplayWidget::draw() {
 	QPainter	painter(this);
+	painter.setRenderHint(QPainter::Antialiasing);
 	if (this->isEnabled()) {
 		drawEnabled(painter);
 	} else {
@@ -77,6 +79,29 @@ void	CalibrationDisplayWidget::drawDisabled(QPainter& painter) {
 void	CalibrationDisplayWidget::drawEnabled(QPainter& painter) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw enabled state");
 	drawCommon(painter, _calibration.complete, false);
+}
+
+/**
+ * \brief Compute the effect of the calibration on an offset/time
+ */
+snowstar::Point	operator*(const snowstar::Calibration& calibration,
+			const snowstar::CalibrationPoint& calibrationpoint) {
+	snowstar::Point	result;
+	if (!calibration.complete) {
+		result.x = 0;
+		result.y = 0;
+		return result;
+	}
+	result.x = calibration.coefficients[0] * calibrationpoint.offset.x +
+		calibration.coefficients[1] * calibrationpoint.offset.y +
+		calibration.coefficients[2] * calibrationpoint.t;
+	result.y = calibration.coefficients[3] * calibrationpoint.offset.x +
+		calibration.coefficients[4] * calibrationpoint.offset.y +
+		calibration.coefficients[5] * calibrationpoint.t;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "(%f,%f) -> (%f,%f)",
+		calibrationpoint.offset.x, calibrationpoint.offset.y,
+		result.x, result.y);
+	return result;
 }
 
 /**
@@ -177,12 +202,30 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw points");
 	QPen	pen(Qt::SolidLine);
 	pen.setWidth(3);
-	pen.setColor((dim) ?  QColor(153., 102., 102.) : QColor(255., 0., 0.));
+	QColor	pencolor = (dim) ? QColor(153., 102., 102.)
+				 : QColor(255., 0., 0.);
+	Color	red(pencolor);
+	pen.setColor(pencolor);
 	painter.setPen(pen);
+	if (drawvectors) {
+		for (unsigned long i = 0; i < _calibration.points.size(); i++) {
+			// actual point
+			snowstar::CalibrationPoint	p = _calibration.points[i];
+			QPointF	pf((p.star.x - ref.x) * scale + cx,
+					h - ((p.star.y - ref.y) * scale + cy));
+			snowstar::Point	q = _calibration * p;
+			QPointF	qf(q.x * scale + cx, h - (q.y * scale + cy));
+			double	r = hypot(qf.x() - pf.x(), qf.y() - pf.y()) + 2;
+			QPainterPath	path;
+			path.addEllipse(qf, r, r);
+			painter.fillPath(path, QBrush((red * 0.3).qcolor()));
+		}
+	}
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
+		// actual point
 		snowstar::CalibrationPoint	p = _calibration.points[i];
 		QPointF	pf((p.star.x - ref.x) * scale + cx,
-			h - ((p.star.y - ref.y) * scale + cy));
+				h - ((p.star.y - ref.y) * scale + cy));
 		painter.drawPoint(pf);
 	}
 	

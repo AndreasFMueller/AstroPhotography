@@ -563,6 +563,7 @@ class BasicSummary {
 	double	_alpha;
 	Point	_average;
 	Point	average2;
+	int	_count;
 public:
 	time_t	starttime;
 	Point	lastoffset;
@@ -570,6 +571,8 @@ public:
 	void	average(const Point& a) { _average = a; }
 	Point	variance() const;
 	void	variance(const Point& v);
+	int	count() const { return _count; }
+	void	count(int count) { _count = count; }
 	BasicSummary(double alpha = 0.1);
 	void	addPoint(const Point& offset);
 };
@@ -1166,6 +1169,7 @@ public:
 		ControlDeviceType type);
 	void	deleteTrackingHistory(long id);
 	bool	contains(long id);
+	TrackingSummary	getSummary(long id);
 };
 
 } // namespace guiding

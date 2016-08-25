@@ -6,25 +6,11 @@
 #ifndef _ColorRectangles_h
 #define _ColorRectangles_h
 
-#include <QColor>
+#include <ColorArithmetic.h>
 #include <QPainter>
 #include <set>
 
 namespace snowgui {
-
-class Color {
-	double	_r;
-	double	_g;
-	double	_b;
-public:
-	Color(double r, double g, double b);
-	Color();
-	Color(const QColor&);
-	Color	operator+(const Color& other) const;
-	Color	operator*(const double) const;
-	Color	operator-() const;
-	QColor	qcolor() const;
-};
 
 class ColorChange : public Color {
 	double	_y;
