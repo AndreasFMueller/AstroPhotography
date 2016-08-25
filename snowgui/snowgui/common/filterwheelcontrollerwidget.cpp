@@ -15,7 +15,8 @@ namespace snowgui {
  */
 filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::filterwheelcontrollerwidget) {
-	    ui->setupUi(this);
+	ui->setupUi(this);
+	ui->filterBox->setEnabled(false);
 
 	// connections of GUI components
 	connect(ui->filterwheelSelectionBox, SIGNAL(currentIndexChanged(int)),

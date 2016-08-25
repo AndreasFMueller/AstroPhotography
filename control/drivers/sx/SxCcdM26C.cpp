@@ -3,16 +3,16 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxCcd.h>
-#include <SxDemux.h>
+#include <fstream>
 #include <AstroCamera.h>
 #include <AstroImage.h>
-#include <sx.h>
 #include <AstroDebug.h>
 #include <AstroExceptions.h>
 #include <AstroFormat.h>
-#include <SxDemux.h>
-#include <fstream>
+#include "SxDemux.h"
+#include "sx.h"
+#include "SxCcd.h"
+#include "SxDemux.h"
 
 #define	EXPOSURE_FIELD_CUTOVER		10
 #define EXPOSURE_ADCONVERSION_TIME	30000

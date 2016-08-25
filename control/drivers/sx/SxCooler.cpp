@@ -3,11 +3,11 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxCcd.h>
 #include <AstroUSB.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
+#include "SxCooler.h"
 
 namespace astro {
 namespace camera {

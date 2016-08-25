@@ -7,7 +7,7 @@
 #define _SxGuiderPort_h
 
 #include <AstroCamera.h>
-#include <SxCamera.h>
+#include "SxCamera.h"
 #include <BasicGuiderport.h>
 
 namespace astro {
@@ -22,6 +22,8 @@ namespace sx {
  */
 class SxGuiderPort : public BasicGuiderport {
 	SxCamera&	camera;
+	SxGuiderPort(const SxGuiderPort&);
+	SxGuiderPort&	operator=(const SxGuiderPort&);
 public:
 	SxGuiderPort(SxCamera& camera);
 	virtual ~SxGuiderPort();

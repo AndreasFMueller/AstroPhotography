@@ -8,7 +8,7 @@ if ENABLE_SX
 pkglib_LTLIBRARIES = sx.la 
 
 noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
-	SxGuiderPort.h SxAO.h
+	SxGuiderPort.h SxAO.h SxCooler.h
 
 if ENABLE_UNITTESTS
 

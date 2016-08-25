@@ -3,8 +3,8 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperwil
  */
-#include <SxDemux.h>
 #include <AstroDebug.h>
+#include "SxDemux.h"
 
 namespace astro {
 namespace camera {

@@ -6,10 +6,10 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
-#include <AstroDebug.h>
 #include <includes.h>
-#include <SxAO.h>
+#include <AstroDebug.h>
 #include <AstroUtils.h>
+#include "SxAO.h"
 
 using namespace astro::camera::sx;
 

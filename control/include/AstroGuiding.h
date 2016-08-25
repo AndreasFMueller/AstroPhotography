@@ -706,7 +706,7 @@ protected:
 	persistence::Database	_database;
 	BasicCalibration	*_calibration;
 public:
-	int	calibrationid() const { return _calibration->calibrationid(); }
+	int	calibrationid() const;
 	void	calibrationid(int calid);
 	bool	iscalibrated() const;
 	bool	flipped() const;
@@ -779,6 +779,9 @@ public:
 		persistence::Database database = NULL)
 		: ControlDeviceBase(guider, database), _device(dev),
 		  _devicecalibration(ControlDeviceName(guider->name(), type)) {
+		// we set the pointer in the base class to the object
+		// in the derived class. This means that we have to be careful
+		// not to use _calibration in the destructor
 		_calibration = &_devicecalibration;
 	}
 	~ControlDevice() {
@@ -892,6 +895,7 @@ private:
 	camera::GuiderPortPtr	_guiderport;
 	camera::AdaptiveOpticsPtr	_adaptiveoptics;
 public:
+	bool	hasGuiderport() { return (_guiderport) ? true : false; }
 	camera::GuiderPortPtr	guiderport() {
 		return _guiderport;
 	}
@@ -899,6 +903,7 @@ public:
 		return _guiderport->name();
 	}
 
+	bool	hasAdaptiveoptics() { return (_adaptiveoptics) ? true : false; }
 	camera::AdaptiveOpticsPtr	adaptiveoptics() {
 		return _adaptiveoptics;
 	}

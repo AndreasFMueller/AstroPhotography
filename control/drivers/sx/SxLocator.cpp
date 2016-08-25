@@ -3,16 +3,16 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxLocator.h>
-#include <SxCamera.h>
-#include <SxUtils.h>
-#include <SxAO.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
 #include <AstroLoader.h>
 #include <AstroUtils.h>
 #include <includes.h>
 #include <AstroExceptions.h>
+#include "SxLocator.h"
+#include "SxCamera.h"
+#include "SxUtils.h"
+#include "SxAO.h"
 
 using namespace astro::usb;
 

@@ -3,15 +3,16 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxCamera.h>
-#include <SxCcd.h>
-#include <sx.h>
 //#include <AstroDevice.h>
 #include <AstroDebug.h>
-#include <SxGuiderPort.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
-#include <SxUtils.h>
+#include "SxCamera.h"
+#include "SxCcd.h"
+#include "sx.h"
+#include "SxGuiderPort.h"
+#include "SxUtils.h"
+#include "SxCooler.h"
 
 using namespace astro::image;
 

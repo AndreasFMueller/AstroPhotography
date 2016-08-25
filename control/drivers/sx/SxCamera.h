@@ -8,7 +8,7 @@
 
 #include <AstroCamera.h>
 #include <AstroUSB.h>
-#include <sx.h>
+#include "sx.h"
 #include <mutex>
 
 using namespace astro::camera;
@@ -57,6 +57,10 @@ public:
 	EndpointDescriptorPtr	getEndpoint();
 	InterfacePtr	getInterface();
 
+private:
+	SxCamera(const SxCamera& other);
+	SxCamera&	operator=(const SxCamera& other);
+public:
 	// constructors
 	SxCamera(DevicePtr& devptr);
 	virtual ~SxCamera();

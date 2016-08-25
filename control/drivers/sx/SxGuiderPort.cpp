@@ -3,10 +3,10 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxGuiderPort.h>
-#include <AstroDebug.h>
 #include <algorithm>
-#include <SxUtils.h>
+#include <AstroDebug.h>
+#include "SxGuiderPort.h"
+#include "SxUtils.h"
 
 namespace astro {
 namespace camera {

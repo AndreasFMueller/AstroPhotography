@@ -6,8 +6,8 @@
 #ifndef _SxCcd_h
 #define _SxCcd_h
 
-#include <SxCamera.h>
-#include <SxDemux.h>
+#include "SxCamera.h"
+#include "SxDemux.h"
 #include <AstroImage.h>
 #include <AstroUtils.h>
 #include <thread>
@@ -18,28 +18,6 @@ using namespace astro::image;
 namespace astro {
 namespace camera {
 namespace sx {
-
-/**
- * \brief Starlight Express Cooler abstraction
- *
- * The Starlight Express cameras do have a cooler and a proprietary API,
- * this class encapsulates that.
- */
-class SxCooler : public Cooler {
-	SxCamera&	camera;
-	bool	cooler_on;
-	float	settemperature;
-	float	actualtemperature;
-	void	cmd();
-public:
-	SxCooler(SxCamera& camera);
-	virtual	~SxCooler();
-	//virtual float	getSetTemperature();
-	virtual float	getActualTemperature();
-	virtual void	setTemperature(float temperature);
-	virtual bool	isOn();
-	virtual	void	setOn(bool onoff);
-};
 
 /**
  * \brief Basic Starlight Express class
@@ -58,6 +36,9 @@ protected:
 	bool	_needs_read_pixels;
 public:
 	void	needs_read_pixels(bool n) { _needs_read_pixels = n; }
+private:
+	SxCcd(const SxCcd&);
+	SxCcd&	operator=(const SxCcd&);
 public:
 	SxCcd(const CcdInfo& info, SxCamera& camera, int ccdindex);
 	virtual ~SxCcd();

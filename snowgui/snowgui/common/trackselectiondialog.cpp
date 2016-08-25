@@ -16,6 +16,7 @@ trackselectiondialog::trackselectiondialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::trackselectiondialog) {
 	ui->setupUi(this);
+	
 
 	connect(this, SIGNAL(accepted()),
 		this, SLOT(trackAccepted()));
@@ -102,6 +103,9 @@ void	trackselectiondialog::setGuider(
  */
 void	trackselectiondialog::trackAccepted() {
 	int	selected = ui->tracklistWidget->currentRow();
+	if ((selected < 0) || (selected >= _tracks.size())) {
+		return;
+	}
 	int	trackid = _tracks[selected].trackid;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "selected track id: %d", trackid);
 	snowstar::TrackingHistory	track
