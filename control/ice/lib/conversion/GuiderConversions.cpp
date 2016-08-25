@@ -241,7 +241,7 @@ astro::guiding::TrackingHistory	convert(const TrackingHistory& history) {
 
 TrackingHistory	convert(const astro::guiding::TrackingHistory& history) {
 	TrackingHistory	result;
-	result.guiderunid = history.trackid;
+	result.trackid = history.trackid;
 	result.guider.instrumentname = history.instrument;
 	result.guiderportcalid = history.guiderportcalid;
 	result.adaptiveopticscalid = history.adaptiveopticscalid;
@@ -365,7 +365,8 @@ struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {
 	result.since = converttime(summary.starttime);
 	result.guiderportcalid = summary.guiderportcalid;
 	result.adaptiveopticscalid = summary.adaptiveopticscalid;
-	result.guiderunid = summary.trackingid;
+	result.trackid = summary.trackingid;
+	result.points = summary.count();
 	result.lastoffset = convert(summary.lastoffset);
 	result.averageoffset = convert(summary.averageoffset());
 	result.variance = convert(summary.variance());
@@ -393,9 +394,10 @@ astro::guiding::TrackingSummary	convert(const struct TrackingSummary& summary) {
 		summary.guider.instrumentname,
 		ccdname, guiderportname, adaptiveopticsname);
 	result.starttime = converttime(summary.since);
-	result.trackingid = summary.guiderunid;
+	result.trackingid = summary.trackid;
 	result.guiderportcalid = summary.guiderportcalid;
 	result.adaptiveopticscalid = summary.adaptiveopticscalid;
+	result.count(summary.points);
 	result.lastoffset = convert(summary.lastoffset);
 	result.average(convert(summary.averageoffset));
 	result.variance(convert(summary.variance));

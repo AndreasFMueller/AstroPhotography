@@ -21,7 +21,7 @@ class trackselectiondialog : public QDialog {
 	snowstar::GuiderDescriptor      _guiderdescriptor;
 	snowstar::GuiderFactoryPrx      _guiderfactory;
 
-	std::vector<snowstar::TrackingHistory>	_tracks;
+	std::vector<snowstar::TrackingSummary>	_tracks;
 
 public:
         void    setGuider(snowstar::GuiderDescriptor guiderdescriptor,

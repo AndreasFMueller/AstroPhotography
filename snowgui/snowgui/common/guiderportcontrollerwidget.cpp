@@ -13,6 +13,8 @@ guiderportcontrollerwidget::guiderportcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent),
 	  ui(new Ui::guiderportcontrollerwidget) {
 	ui->setupUi(this);
+	ui->guideWidget->setEnabled(false);
+	ui->activationWidget->setEnabled(false);
 
 	// connect signals
 	connect(ui->guiderportSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -62,6 +64,13 @@ void	guiderportcontrollerwidget::instrumentSetup(
 }
 
 void	guiderportcontrollerwidget::setupGuiderport() {
+	if (_guiderport) {
+		ui->guideWidget->setEnabled(true);
+		ui->activationWidget->setEnabled(true);
+	} else {
+		ui->guideWidget->setEnabled(false);
+		ui->activationWidget->setEnabled(false);
+	}
 }
 
 void	guiderportcontrollerwidget::guiderportChanged(int index) {

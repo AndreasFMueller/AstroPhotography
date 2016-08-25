@@ -21,6 +21,7 @@ class filterwheelcontrollerwidget : public InstrumentWidget {
 	Q_OBJECT
 
 	snowstar::FilterWheelPrx	_filterwheel;
+	snowstar::FilterwheelState	_previousstate;
 public:
 	explicit filterwheelcontrollerwidget(QWidget *parent = 0);
 	~filterwheelcontrollerwidget();

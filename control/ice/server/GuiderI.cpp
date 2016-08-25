@@ -320,6 +320,9 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuiderPort:
+		if (!guider->hasGuiderport()) {
+			throw BadState("no guider port present");
+		}
 		if (!guider->guiderPortDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
@@ -327,6 +330,9 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		calibration.flipped = guider->guiderPortDevice->flipped();
 		return calibration;
 	case ControlAdaptiveOptics:
+		if (!guider->hasAdaptiveoptics()) {
+			throw BadState("no adaptive optics present");
+		}
 		if (!guider->adaptiveOpticsDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}

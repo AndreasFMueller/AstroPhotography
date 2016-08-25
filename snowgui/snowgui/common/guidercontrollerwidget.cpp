@@ -401,7 +401,7 @@ void	guidercontrollerwidget::selectTrack() {
  */
 void	guidercontrollerwidget::trackSelected(snowstar::TrackingHistory track) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "open view on track %d",
-		track.guiderunid);
+		track.trackid);
 	trackviewdialog	*tvd = new trackviewdialog(this);
 	tvd->setGuiderFactory(_guiderfactory);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set track");

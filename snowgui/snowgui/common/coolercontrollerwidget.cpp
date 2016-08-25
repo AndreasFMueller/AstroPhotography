@@ -12,6 +12,10 @@ namespace snowgui {
 coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	InstrumentWidget(parent), ui(new Ui::coolercontrollerwidget) {
 	ui->setupUi(this);
+	ui->actualTemperatureField->setEnabled(false);
+	ui->setTemperatureSpinBox->setEnabled(false);
+	ui->onoffBox->setEnabled(false);
+	ui->setTemperatureButton->setEnabled(false);
 	statusTimer = NULL;
 }
 
@@ -34,6 +38,18 @@ void	coolercontrollerwidget::instrumentSetup(
 		index++;
 	}
 
+	// connect signals
+	connect(ui->setTemperatureSpinBox, SIGNAL(valueChange(double)),
+		this, SLOT(guiChanged()));
+	connect(ui->onoffBox, SIGNAL(toggled(bool)),
+		this, SLOT(guiChanged()));
+	connect(ui->setTemperatureButton, SIGNAL(clicked()),
+		this, SLOT(guiChanged()));
+	connect(ui->setTemperatureSpinBox, SIGNAL(editingFinished()),
+		this, SLOT(editingFinished()));
+	connect(ui->coolerSelectionBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(coolerChanged(int)));
+
 	// initialize the timer
 	statusTimer = new QTimer();
 	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
@@ -55,6 +71,10 @@ void	coolercontrollerwidget::setupCooler() {
 	ui->setTemperatureSpinBox->blockSignals(true);
 	ui->onoffBox->blockSignals(true);
 	if (_cooler) {
+		ui->actualTemperatureField->setEnabled(true);
+		ui->setTemperatureSpinBox->setEnabled(true);
+		ui->onoffBox->setEnabled(true);
+		ui->setTemperatureButton->setEnabled(true);
 		float	actual = _cooler->getActualTemperature() - 273.15;
 		QString	actualstring(
 			astro::stringprintf("%.1f", actual).c_str());
@@ -78,7 +98,9 @@ void	coolercontrollerwidget::displayActualTemperature(float actual) {
 }
 
 void	coolercontrollerwidget::setActual() {
-	displayActualTemperature(_cooler->getActualTemperature() - 273.15);
+	if (_cooler) {
+		displayActualTemperature(_cooler->getActualTemperature() - 273.15);
+	}
 }
 
 void	coolercontrollerwidget::displaySetTemperature(float settemp) {
@@ -88,11 +110,13 @@ void	coolercontrollerwidget::displaySetTemperature(float settemp) {
 			settemp);
 		return;
 	}
-	float	actual = _cooler->getActualTemperature() - 273.15;
+	if (_cooler) {
+		float	actual = _cooler->getActualTemperature() - 273.15;
+		ui->setTemperatureButton->setChecked(actual != settemp);
+	}
 	ui->setTemperatureSpinBox->blockSignals(true);
 	ui->setTemperatureSpinBox->setValue(settemp + 273.15);
 	ui->setTemperatureSpinBox->blockSignals(false);
-	ui->setTemperatureButton->setChecked(actual != settemp);
 }
 
 void	coolercontrollerwidget::setSetTemperature(double t) {
@@ -114,7 +138,9 @@ void	coolercontrollerwidget::statusUpdate() {
 
 void	coolercontrollerwidget::guiChanged() {
 	if (sender() == ui->onoffBox) {
-		_cooler->setOn(ui->onoffBox->isChecked());
+		if (_cooler) {
+			_cooler->setOn(ui->onoffBox->isChecked());
+		}
 	}
 	if (sender() == ui->setTemperatureSpinBox) {
 	}

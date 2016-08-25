@@ -76,7 +76,7 @@ void	calibrationwidget::databaseClicked() {
 	selection->setGuider(_controltype, _guiderdescriptor, _guiderfactory);
 	connect(selection, SIGNAL(calibrationSelected(snowstar::Calibration)),
 		this, SLOT(setCalibration(snowstar::Calibration)));
-	selection->exec();
+	selection->show();
 }
 
 /**

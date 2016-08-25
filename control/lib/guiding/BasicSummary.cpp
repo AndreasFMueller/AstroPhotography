@@ -9,7 +9,7 @@
 namespace astro {
 namespace guiding {
 
-BasicSummary::BasicSummary(double alpha) : _alpha(alpha) {
+BasicSummary::BasicSummary(double alpha) : _alpha(alpha), _count(0) {
 	time(&starttime);
 }
 
@@ -42,6 +42,7 @@ void	BasicSummary::addPoint(const Point& offset) {
 	y = (1 - _alpha) * average2.y() + _alpha * sqr(offset.y());
 	average2.setX(x);
 	average2.setY(y);
+	_count++;
 }
 
 } // namespace guiding

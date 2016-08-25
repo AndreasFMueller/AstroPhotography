@@ -15,7 +15,8 @@ namespace snowgui {
  */
 filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::filterwheelcontrollerwidget) {
-	    ui->setupUi(this);
+	ui->setupUi(this);
+	ui->filterBox->setEnabled(false);
 
 	// connections of GUI components
 	connect(ui->filterwheelSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -95,12 +96,16 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 
 		// set the current position
 		try {
-			ui->filterBox->setCurrentIndex(
-				_filterwheel->currentPosition());
+			int	pos = _filterwheel->currentPosition();
+			ui->filterIndicator->position(pos);
+			ui->filterBox->setCurrentIndex(pos);
 			ui->filterBox->setEnabled(true);
 		} catch (...) {
 			ui->filterBox->setEnabled(false);
 		}
+
+		// store the current state
+		_previousstate = snowstar::FwUNKNOWN;
 
 		// start the timer
 		statusTimer->start();
@@ -147,7 +152,20 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	if (!_filterwheel) {
 		return;
 	}
-	switch (_filterwheel->getState()) {
+	snowstar::FilterwheelState	newstate = _filterwheel->getState();
+	if (newstate != _previousstate) {
+		_previousstate = newstate;
+		switch (newstate) {
+		case snowstar::FwMOVING:
+			ui->filterIndicator->start();
+			break;
+		case snowstar::FwIDLE:
+		case snowstar::FwUNKNOWN:
+			ui->filterIndicator->stop();
+			break;
+		}
+	}
+	switch (newstate) {
 	case snowstar::FwIDLE:
 		ui->filterBox->setEnabled(true);
 		try {

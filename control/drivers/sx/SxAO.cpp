@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxAO.h>
+#include "SxAO.h"
 #include <includes.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>

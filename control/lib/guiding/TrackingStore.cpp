@@ -8,6 +8,8 @@
 #include <TrackingPersistence.h>
 #include <sstream>
 
+using namespace astro::persistence;
+
 namespace astro {
 namespace guiding {
 
@@ -130,6 +132,84 @@ void	TrackingStore::deleteTrackingHistory(long id) {
 bool	TrackingStore::contains(long id) {
 	TrackTable	table(_database);
 	return table.exists(id);
+}
+
+/**
+ * \brief Retrive a tracking summary
+ */
+TrackingSummary	TrackingStore::getSummary(long id) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieveing track %ld summary", id);
+	TrackTable	table(_database);
+	TrackRecord	track = table.byid(id);
+	TrackingSummary	summary(track.name, track.instrument, track.ccd,
+		track.guiderport, track.adaptiveoptics);
+	summary.trackingid = id;
+	summary.starttime = track.whenstarted;
+	summary.guiderportcalid = track.guiderportcalid;
+	summary.adaptiveopticscalid = track.adaptiveopticscalid;
+	// get the summary information about the point data
+	std::ostringstream	qstr;
+	qstr << "select controltype, count(*), ";
+	qstr << "avg(xoffset) as xmean, ";
+	qstr << "avg(xoffset * xoffset) as x2mean, ";
+	qstr << "avg(yoffset) as ymean, ";
+	qstr << "avg(yoffset * yoffset) as y2mean ";
+	qstr << "from tracking ";
+	qstr << "where track = ? ";
+	qstr << "group by controltype ";
+	qstr << "order by controltype desc";
+	std::string	query = qstr.str();
+	persistence::StatementPtr	statement = _database->statement(query);
+	statement->bind(0, (int)id);
+	Result	result = statement->result();
+	if (0 == result.size()) {
+		// nothing to summarize
+		return summary;
+	}
+	// process the first row (which is the relevant one
+	Row	row = *result.begin();
+	int	type = row[0]->intValue(); // we use this later to select last
+	int	count = row[1]->intValue();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points found, type = %d",
+		count, type);
+	summary.count(count);
+	double	xmean = row[2]->doubleValue();
+	double	x2mean = row[3]->doubleValue();
+	double	ymean = row[4]->doubleValue();
+	double	y2mean = row[3]->doubleValue();
+	summary.average(Point(xmean, ymean));
+	if (count > 1) {
+		double	s = count / (count - 1.);
+		double	varx = s * (x2mean - xmean * xmean);
+		double	vary = s * (y2mean - ymean * ymean);
+		summary.variance(Point(varx, vary));
+	}
+
+	// now do a query to retrieve the last offset
+	query = std::string(
+		"select id, xoffset, yoffset "
+		"from tracking "
+		"where controltype = ? and track = ? "
+		"order by id desc "
+		"limit 1");
+	statement = _database->statement(query);
+	statement->bind(0, type);
+	statement->bind(1, (int)id);
+	result = statement->result();
+	if (0 == result.size()) {
+		return summary;
+	}
+	row = *result.begin();
+	double	xlast = row[1]->doubleValue();
+	double	ylast = row[2]->doubleValue();
+	summary.lastoffset = Point(xlast, ylast);
+
+	// Info about data retrieved
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "summary %d, points = %d", id,
+		summary.count());
+
+	// that's it
+	return summary;
 }
 
 } // namespace guiding

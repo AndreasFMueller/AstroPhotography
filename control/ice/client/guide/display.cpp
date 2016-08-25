@@ -139,7 +139,7 @@ void	TrackingHistory_display::operator()(const TrackingHistory history) {
 		std::cout << "number,    time,   xoffset,   yoffset,     xcorr,     ycorr,  offset,  type" << std::endl;
 		_verbose = _csv;
 	} else {
-		std::cout << history.guiderunid << ": ";
+		std::cout << history.trackid << ": ";
 		std::cout << astro::timeformat("%Y-%m-%d %H:%M",
 			converttime((double)history.timeago));
 		std::cout << std::endl;

@@ -3,11 +3,11 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <DeviceNameUSB.h>
-#include <sx.h>
+#include "SxUtils.h"
+#include "sx.h"
 
 using namespace astro::usb;
 

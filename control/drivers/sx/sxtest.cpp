@@ -3,7 +3,7 @@
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include <SxLocator.h>
+#include "SxLocator.h"
 #include <AstroIO.h>
 #include <AstroFilter.h>
 #include <cppunit/TestFixture.h>

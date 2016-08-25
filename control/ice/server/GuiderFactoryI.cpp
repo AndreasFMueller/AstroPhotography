@@ -166,7 +166,7 @@ void	GuiderFactoryI::deleteCalibration(int id,
 /**
  * \brief Get all guide run ids available in the database
  */
-idlist	GuiderFactoryI::getAllGuideruns(const Ice::Current& /* current */) {
+idlist	GuiderFactoryI::getAllTracks(const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);
 	std::list<long>	trackings = store.getAllTrackings();
 	idlist	result;
@@ -177,7 +177,7 @@ idlist	GuiderFactoryI::getAllGuideruns(const Ice::Current& /* current */) {
 /**
  * \brief Get the guide run ids for a specific guider
  */
-idlist	GuiderFactoryI::getGuideruns(const GuiderDescriptor& guider,
+idlist	GuiderFactoryI::getTracks(const GuiderDescriptor& guider,
 			const Ice::Current& /* current */) {
 	astro::guiding::TrackingStore	store(database);
 	std::list<long>	trackings = store.getTrackings(convert(guider));
@@ -262,6 +262,33 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 	throw std::runtime_error("internal error");
 }
 
+/**
+ * \brief Get a summary of the track
+ *
+ * The tracking history contains all the tracking points, which is often
+ * way too much information. This 
+ */
+TrackingSummary	GuiderFactoryI::getTrackingSummary(int id,
+			const Ice::Current& /* current */) {
+	try {
+		astro::guiding::TrackingStore	store(database);
+		return convert(store.getSummary(id));
+	} catch (const astro::persistence::NotFound& ex) {
+		std::string	msg = astro::stringprintf(
+			"track %d not found: %s", id, ex.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
+	} catch (const std::exception& ex) {
+		std::string	cause = astro::stringprintf(
+			"no summary %d: %s(%s)", id, 
+			astro::demangle(typeid(ex).name()).c_str(), ex.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw NotFound(cause);
+	} catch (...) {
+		throw NotFound("unknown reason");
+	}
+	throw std::runtime_error("not implemented yet");
+}
 
 /**
  * \brief Delete a tracking history from the database

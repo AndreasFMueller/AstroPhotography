@@ -71,6 +71,9 @@ SOURCES += 								\
 	FocusPointsWidget.cpp						\
 	CalibrationDisplayWidget.cpp					\
 	ChannelDisplayWidget.cpp					\
+	ColorArithmetic.cpp						\
+	ColorRectangles.cpp						\
+	FilterWheelBusy.cpp						\
 	$${WIDGETSOURCES}
 
 
@@ -86,6 +89,9 @@ HEADERS  += 								\
 	FocusPointsWidget.h						\
 	CalibrationDisplayWidget.h					\
 	ChannelDisplayWidget.h						\
+	ColorArithmetic.h						\
+	ColorRectangles.h						\
+	FilterWheelBusy.h						\
 	$${WIDGETHEADERS}
 
 

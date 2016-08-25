@@ -9,6 +9,7 @@
 #include <AstroFormat.h>
 #include <IceConversions.h>
 #include <QListWidgetItem>
+#include <QMessageBox>
 
 namespace snowgui {
 
@@ -18,6 +19,7 @@ namespace snowgui {
 calibrationselectiondialog::calibrationselectiondialog(QWidget *parent) :
 	QDialog(parent), ui(new Ui::calibrationselectiondialog) {
 	ui->setupUi(this);
+	_calibration.id = -1;
 
 	// create connections
 	connect(ui->calibrationlistWidget, SIGNAL(currentRowChanged(int)),
@@ -96,6 +98,20 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 			ui->calibrationlistWidget->addItem(item);
 		}
 	}
+
+	// if there are no calibrations, display a warning message
+	if (0 == ids.size()) {
+		QMessageBox	*messagebox = new QMessageBox(this);
+		messagebox->setWindowModality(Qt::WindowModal);
+		messagebox->setText(QString("no calibrations found"));
+		messagebox->setInformativeText(QString(
+			astro::stringprintf("searching for calibrations for %s for guider %s returned no calibrations",
+				(_controltype == snowstar::ControlGuiderPort)
+					? "Guide Port" : "Adaptive Optics",
+				_guiderdescriptor.instrumentname.c_str()).c_str()));
+		messagebox->exec();
+		delete messagebox;
+	}
 	
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration selection initialized");
 }
@@ -114,7 +130,9 @@ void	calibrationselectiondialog::currentRowChanged(int index) {
  * \brief Accept the selected calibration
  */
 void	calibrationselectiondialog::calibrationAccepted() {
-	emit calibrationSelected(_calibration);
+	if (_calibration.id > 0) {
+		emit calibrationSelected(_calibration);
+	}
 }
 
 } // namespace snowgui

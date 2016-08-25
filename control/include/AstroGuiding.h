@@ -563,6 +563,7 @@ class BasicSummary {
 	double	_alpha;
 	Point	_average;
 	Point	average2;
+	int	_count;
 public:
 	time_t	starttime;
 	Point	lastoffset;
@@ -570,6 +571,8 @@ public:
 	void	average(const Point& a) { _average = a; }
 	Point	variance() const;
 	void	variance(const Point& v);
+	int	count() const { return _count; }
+	void	count(int count) { _count = count; }
 	BasicSummary(double alpha = 0.1);
 	void	addPoint(const Point& offset);
 };
@@ -703,7 +706,7 @@ protected:
 	persistence::Database	_database;
 	BasicCalibration	*_calibration;
 public:
-	int	calibrationid() const { return _calibration->calibrationid(); }
+	int	calibrationid() const;
 	void	calibrationid(int calid);
 	bool	iscalibrated() const;
 	bool	flipped() const;
@@ -776,6 +779,9 @@ public:
 		persistence::Database database = NULL)
 		: ControlDeviceBase(guider, database), _device(dev),
 		  _devicecalibration(ControlDeviceName(guider->name(), type)) {
+		// we set the pointer in the base class to the object
+		// in the derived class. This means that we have to be careful
+		// not to use _calibration in the destructor
 		_calibration = &_devicecalibration;
 	}
 	~ControlDevice() {
@@ -889,6 +895,7 @@ private:
 	camera::GuiderPortPtr	_guiderport;
 	camera::AdaptiveOpticsPtr	_adaptiveoptics;
 public:
+	bool	hasGuiderport() { return (_guiderport) ? true : false; }
 	camera::GuiderPortPtr	guiderport() {
 		return _guiderport;
 	}
@@ -896,6 +903,7 @@ public:
 		return _guiderport->name();
 	}
 
+	bool	hasAdaptiveoptics() { return (_adaptiveoptics) ? true : false; }
 	camera::AdaptiveOpticsPtr	adaptiveoptics() {
 		return _adaptiveoptics;
 	}
@@ -1166,6 +1174,7 @@ public:
 		ControlDeviceType type);
 	void	deleteTrackingHistory(long id);
 	bool	contains(long id);
+	TrackingSummary	getSummary(long id);
 };
 
 } // namespace guiding

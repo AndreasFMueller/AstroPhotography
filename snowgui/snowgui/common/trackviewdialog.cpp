@@ -10,6 +10,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct a trackview dialog
+ */
 trackviewdialog::trackviewdialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::trackviewdialog) {
@@ -33,7 +36,7 @@ trackviewdialog::trackviewdialog(QWidget *parent) :
 	_aocalibration.guider.adaptiveopticsIndex = -1;
 
 	// make sure the track is clean
-	_track.guiderunid = -1;
+	_track.trackid = -1;
 	_track.guiderportcalid = -1;
 	_track.adaptiveopticscalid = -1;
 	_track.guider.ccdIndex = -1;
@@ -50,17 +53,28 @@ trackviewdialog::trackviewdialog(QWidget *parent) :
 
 }
 
+/**
+ * \brief Destroy a trackview dialog
+ */
 trackviewdialog::~trackviewdialog() {
 	delete ui;
 }
 
+/**
+ * \brief Give the trackviewdialog a guider factory proxy
+ */
 void	trackviewdialog::setGuiderFactory(snowstar::GuiderFactoryPrx guiderfactory) {
 	_guiderfactory = guiderfactory;
 }
 
+/**
+ * \brief Select a track
+ *
+ * This method gets the complete track history to display
+ */
 void	trackviewdialog::setTrack(snowstar::TrackingHistory track) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new track: %d", track.guiderunid);
-	if (track.guiderunid < 0) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got new track: %d", track.trackid);
+	if (track.trackid < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "bad track");
 		return;
 	}
@@ -68,7 +82,7 @@ void	trackviewdialog::setTrack(snowstar::TrackingHistory track) {
 
 	// set the title
 	std::string	title = astro::stringprintf("track: %d",
-		track.guiderunid);
+		track.trackid);
 	setWindowTitle(QString(title.c_str()));
 
 	// get the calibrations
@@ -108,14 +122,22 @@ void	trackviewdialog::setTrack(snowstar::TrackingHistory track) {
 	updateData();
 }
 
+/**
+ * \brief Method called when the data changes
+ *
+ * This needs to be called e.g. when one switches from showing the offset
+ * in pixels to arc seconds, or showing the correction instead of the
+ * offset.
+ */
 void	trackviewdialog::updateData() {
-	if (_track.guiderunid < 0) {
+	if (_track.trackid < 0) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating data track: %d",
-		_track.guiderunid);
+		_track.trackid);
 	// copy the data to the channels
 	ChannelDisplayWidget	*cdw = ui->gpWidget;
+	cdw->clearData();
 	int	counter = 0;
 	double	scale = 1;
 	datatype_t	dt = _datatype;
@@ -154,6 +176,12 @@ void	trackviewdialog::updateData() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "repaint complete");
 }
 
+/**
+ * \brief Slot called when a button is toggled
+ *
+ * The buttons select the type of data that is displayed. When that changes,
+ * the updateData() method needs to be called.
+ */
 void	trackviewdialog::buttonToggled(bool t) {
 	if (!t) {
 		return;

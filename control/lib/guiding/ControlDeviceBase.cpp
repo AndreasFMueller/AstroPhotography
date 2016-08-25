@@ -27,6 +27,7 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
 	_callback = CallbackPtr(cb);
 	_guider->addGuidercalibrationCallback(_callback);
 	_guider->addCalibrationCallback(_callback);
+	_calibration = NULL;
 }
 
 /**
@@ -35,9 +36,6 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
 ControlDeviceBase::~ControlDeviceBase() {
 	_guider->removeGuidercalibrationCallback(_callback);
 	_guider->removeCalibrationCallback(_callback);
-
-	delete _calibration;
-	_calibration = NULL;
 }
 
 /**
@@ -51,7 +49,9 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	if (calid <= 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "uncalibrating %s",
 			deviceType().name());
-		_calibration->reset();
+		if (_calibration) {
+			_calibration->reset();
+		}
 		return;
 	}
 
@@ -93,6 +93,14 @@ void	ControlDeviceBase::calibrationid(int calid) {
 		acal->calibrationid(calid);
 		return;
 	}
+}
+
+int	ControlDeviceBase::calibrationid() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "this = %p", this);
+	if (NULL == _calibration) {
+		return -1;
+	}
+	return _calibration->calibrationid();
 }
 
 bool	ControlDeviceBase::iscalibrated() const {
