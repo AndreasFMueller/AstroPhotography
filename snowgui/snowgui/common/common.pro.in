@@ -73,6 +73,7 @@ SOURCES += 								\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
+	FilterWheelBusy.cpp						\
 	$${WIDGETSOURCES}
 
 
@@ -90,6 +91,7 @@ HEADERS  += 								\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
+	FilterWheelBusy.h						\
 	$${WIDGETHEADERS}
 
 

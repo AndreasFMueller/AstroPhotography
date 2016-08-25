@@ -198,7 +198,7 @@ double	ChannelDisplayWidget::allMax() {
 	for (int i = 0; i < channels(); i++) {
 		maxima.push_back(channelMax(i));
 	}
-	return *min_element(maxima.begin(), maxima.end());
+	return *max_element(maxima.begin(), maxima.end());
 }
 
 /**

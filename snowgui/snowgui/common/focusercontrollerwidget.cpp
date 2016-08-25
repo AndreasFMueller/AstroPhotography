@@ -15,6 +15,9 @@ namespace snowgui {
 focusercontrollerwidget::focusercontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::focusercontrollerwidget) {
 	ui->setupUi(this);
+	ui->currentField->setEnabled(false);
+	ui->positionSpinBox->setEnabled(false);
+	ui->positionButton->setEnabled(false);
 
 	// GUI element connections
 	connect(ui->focuserSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -94,6 +97,13 @@ void	focusercontrollerwidget::setupFocuser() {
 		if (statusTimer) {
 			statusTimer->start();
 		}
+		ui->currentField->setEnabled(true);
+		ui->positionSpinBox->setEnabled(true);
+		ui->positionButton->setEnabled(true);
+	} else {
+		ui->currentField->setEnabled(false);
+		ui->positionSpinBox->setEnabled(false);
+		ui->positionButton->setEnabled(false);
 	}
 
 	// now we can release the signals again
