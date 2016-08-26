@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::guidingwindow</class>
- <widget class="QWidget" name="guidingwindow">
+ <widget class="QWidget" name="snowgui::guidingwindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -14,9 +14,33 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
    <item>
     <widget class="QWidget" name="leftWidget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="snowgui::guidercontrollerwidget" name="guidercontrollerWidget" native="true">
         <property name="minimumSize">
@@ -48,6 +72,18 @@
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
       </item>
@@ -64,8 +100,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>303</width>
-           <height>447</height>
+           <width>350</width>
+           <height>495</height>
           </rect>
          </property>
          <attribute name="label">
@@ -73,6 +109,14 @@
          </attribute>
         </widget>
         <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>350</width>
+           <height>485</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Filterwheel</string>
          </attribute>
@@ -82,8 +126,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>303</width>
-           <height>447</height>
+           <width>350</width>
+           <height>495</height>
           </rect>
          </property>
          <attribute name="label">

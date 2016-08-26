@@ -1,0 +1,77 @@
+/*
+ * TrackingMonitorController.cpp -- implementation of tracking monitor
+ *
+ * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+ */
+#include <TrackingMonitorController.h>
+#include <AstroDebug.h>
+#include <CommunicatorSingleton.h>
+#include <CommonClientTasks.h>
+
+namespace snowgui {
+
+/**
+ * \brief Construct a tracking monitor controller
+ */
+TrackingMonitorController::TrackingMonitorController(QObject *parent,
+	trackingmonitordialog *dialog) : QObject(parent), _dialog(dialog) {
+
+	// connect the signal
+	connect(this, SIGNAL(dataUpdated()), this, SLOT(refreshDisplay()),
+                Qt::QueuedConnection);
+}
+
+/**
+ * \brief Destroy the tracking monitor controller
+ */
+TrackingMonitorController::~TrackingMonitorController() {
+	if (_guider) {
+		_guider->unregisterTrackingMonitor(_myidentity);
+	}
+}
+
+/**
+ * \brief Register with the server
+ */
+void    TrackingMonitorController::setGuider(snowstar::GuiderPrx guider,
+                                Ice::ObjectPtr myself) {
+	_guider = guider;
+	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
+	snowstar::CallbackAdapter	adapter(ic);
+	_myidentity = adapter.add(myself);
+	guider->ice_getConnection()->setAdapter(adapter.adapter());
+	guider->registerTrackingMonitor(_myidentity);
+}
+
+/**
+ * \brief Callback method for stop
+ */
+void	TrackingMonitorController::stop(const Ice::Current&) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop received");
+	// XXX currently we do nothing, we should somehow indicate that
+	// XXX no more data will bi forthcoming
+}
+
+/**
+ * \brief Callback method for tracking point updates
+ *
+ * This method does all the processing that is allowed in a separate thread
+ * and then emits the signal to perform the display update
+ */
+void	TrackingMonitorController::update(const snowstar::TrackingPoint& point,
+		const Ice::Current&) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new tracking point received");
+	_dialog->add(point);
+	emit dataUpdated();
+}
+
+/**
+ * \brief Slot to refresh the display with the new data
+ */
+void	TrackingMonitorController::refreshDisplay() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "refresh slot called");
+	_dialog->updateData();
+}
+
+
+} // namespace snowgui

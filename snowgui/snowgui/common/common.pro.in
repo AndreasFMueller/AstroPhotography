@@ -30,6 +30,8 @@ FORMS    +=								\
 	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
 	guidercontrollerwidget.ui					\
+	singletrackwidget.ui						\
+	trackingmonitordialog.ui					\
 	trackselectiondialog.ui						\
 	trackviewdialog.ui
 
@@ -43,6 +45,8 @@ WIDGETSOURCES =								\
 	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
 	guidercontrollerwidget.cpp					\
+	singletrackwidget.cpp						\
+	trackingmonitordialog.cpp					\
 	trackselectiondialog.cpp					\
 	trackviewdialog.cpp
 
@@ -56,42 +60,50 @@ WIDGETHEADERS =								\
 	calibrationwidget.h						\
 	calibrationselectiondialog.h					\
 	guidercontrollerwidget.h					\
+	singletrackwidget.h						\
+	trackingmonitordialog.h						\
 	trackselectiondialog.h						\
 	trackviewdialog.h
 
 SOURCES += 								\
-	Image2Pixmap.cpp						\
-	Histogram.cpp							\
 	AutoGain.cpp							\
-	LogSpinBox.cpp							\
-	SelectableImage.cpp						\
-	InstrumentWidget.cpp						\
-	FocusPoints.cpp							\
-	Scaler.cpp							\
-	FocusPointsWidget.cpp						\
 	CalibrationDisplayWidget.cpp					\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
 	FilterWheelBusy.cpp						\
+	FocusPoints.cpp							\
+	FocusPointsWidget.cpp						\
+	Histogram.cpp							\
+	Image2Pixmap.cpp						\
+	InstrumentWidget.cpp						\
+	LogSpinBox.cpp							\
+	MonitorImage.cpp						\
+	Scaler.cpp							\
+	SelectableImage.cpp						\
+	TrackingMonitorImage.cpp					\
+	TrackingMonitorController.cpp					\
 	$${WIDGETSOURCES}
 
 
 HEADERS  += 								\
-	Image2Pixmap.h							\
-	Histogram.h							\
 	AutoGain.h							\
-	LogSpinBox.h							\
-	SelectableImage.h						\
-	InstrumentWidget.h						\
-	FocusPoints.h							\
-	Scaler.h							\
-	FocusPointsWidget.h						\
 	CalibrationDisplayWidget.h					\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
 	FilterWheelBusy.h						\
+	FocusPoints.h							\
+	FocusPointsWidget.h						\
+	Histogram.h							\
+	Image2Pixmap.h							\
+	InstrumentWidget.h						\
+	LogSpinBox.h							\
+	MonitorImage.h							\
+	Scaler.h							\
+	SelectableImage.h						\
+	TrackingMonitorImage.h						\
+	TrackingMonitorController.h					\
 	$${WIDGETHEADERS}
 
 

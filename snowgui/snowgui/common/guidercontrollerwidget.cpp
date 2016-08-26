@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "trackselectiondialog.h"
 #include "trackviewdialog.h"
+#include "trackingmonitordialog.h"
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -51,6 +52,25 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(startGuiding()));
 	connect(ui->databaseButton, SIGNAL(clicked()),
 		this, SLOT(selectTrack()));
+
+	// create the tracking monitor
+	_trackinglabel = new QLabel(NULL);
+	ui->trackingImageArea->setWidget(_trackinglabel);
+	_trackingmonitorimage = new TrackingMonitorImage(this, _trackinglabel);
+	_trackingmonitorimageptr = Ice::ObjectPtr(_trackingmonitorimage);
+
+	connect(ui->freezeButton, SIGNAL(toggled(bool)),
+		this, SLOT(toggleFreeze(bool)));
+	connect(ui->imageStepSpinBox, SIGNAL(valueChanged(int)),
+		_trackingmonitorimage, SLOT(setScale(int)));
+	connect(ui->monitorButton, SIGNAL(clicked()),
+		this, SLOT(launchMonitor()));
+
+	connect(_trackingmonitorimage, SIGNAL(imageUpdated()),
+		this, SLOT(imageUpdated()));
+
+	// ensure the trackingmonitor pointer is properly initialized
+	_trackingmonitor = NULL;
 
 	// some other fields
 	_previousstate = snowstar::GuiderIDLE;
@@ -134,6 +154,9 @@ void	guidercontrollerwidget::setupGuider() {
 	_exposure = snowstar::convert(_guider->getExposure());
 	astro::Point	ps = snowstar::convert(_guider->getStar());
 	_star = ImagePoint((int)ps.x(), (int)ps.y());
+
+	// do all the registration stuff
+	_trackingmonitorimage->setGuider(_guider, _trackingmonitorimageptr);
 
 	// start the timer
 	statusTimer->start();
@@ -409,5 +432,70 @@ void	guidercontrollerwidget::trackSelected(snowstar::TrackingHistory track) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "show dialog");
 	tvd->show();
 }
+
+/**
+ * \brief Toggle 
+ */
+void	guidercontrollerwidget::toggleFreeze(bool state) {
+	if (_trackingmonitorimage) {
+		_trackingmonitorimage->setFreeze(state);
+	}
+}
+
+/**
+ * \brief Launch tracking monitor
+ */
+void	guidercontrollerwidget::launchMonitor() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a tracking monitor");
+	if (!_guider) {
+		return;
+	}
+	trackingmonitordialog	*_trackingdialog
+		= new trackingmonitordialog(this);
+	_trackingmonitor = new TrackingMonitorController(NULL, _trackingdialog);
+	_trackingmonitorptr = Ice::ObjectPtr(_trackingmonitor);
+
+	// get the history of the track
+	snowstar::TrackingSummary	summary = _guider->getTrackingSummary();
+	snowstar::TrackingHistory	history
+		= _guider->getTrackingHistory(summary.trackid);
+	_trackingdialog->add(history);
+
+	// retrieve the calibrations
+	if (history.guiderportcalid > 0) {
+		snowstar::Calibration cal = _guiderfactory
+			->getCalibration(history.guiderportcalid);
+		_trackingdialog->gpMasperpixel(cal.masPerPixel);
+	}
+	if (history.adaptiveopticscalid > 0) {
+		snowstar::Calibration cal = _guiderfactory
+			->getCalibration(history.adaptiveopticscalid);
+		_trackingdialog->aoMasperpixel(cal.masPerPixel);
+	}
+
+	// now register the callback, to make sure we get new points only after
+	// we have added the history
+	_trackingmonitor->setGuider(_guider, _trackingmonitorptr);
+
+	// display the dialog
+	_trackingdialog->show();
+}
+
+/**
+ * \brief what to do when the image updates
+ *
+ * This slot updates the timestamp above the most recent tracking image
+ */
+void	guidercontrollerwidget::imageUpdated() {
+	time_t	now;
+	time(&now);
+	struct tm	*tmp = localtime(&now);
+        char	buffer[200];
+        strftime(buffer, sizeof(buffer), "%T", tmp);
+        std::string	label =  astro::stringprintf("Most recent image: %s",
+		buffer);
+	ui->trackingLabel->setText(QString(label.c_str()));
+}
+
 
 } // namespade snowgui

@@ -6,5 +6,11 @@
 #
 rm -rf snowgui.app
 make -j 8
-./snowgui.app/Contents/MacOS/snowgui --debug --server=server 2>&1 \
+if [ -r servername ]
+then
+	servername=`cat servername`
+else
+	servername=server
+fi
+./snowgui.app/Contents/MacOS/snowgui --debug --server=${servername} 2>&1 \
 	| tee build.log
