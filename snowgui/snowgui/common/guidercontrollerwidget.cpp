@@ -169,6 +169,10 @@ void	guidercontrollerwidget::setupGuider() {
  */
 guidercontrollerwidget::~guidercontrollerwidget() {
 	statusTimer->stop();
+	if (_trackingmonitorimage) {
+		Ice::Identity	identity = _trackingmonitor->identity();
+		snowstar::CommunicatorSingleton::remove(identity);
+	}
 	delete statusTimer;
 	delete ui;
 }

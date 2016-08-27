@@ -171,14 +171,16 @@ void	MonitorImage::rebuildImage() {
  * is actually displayed in the widget.
  */
 void	MonitorImage::refreshImage() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "refresh image slotcalled");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "refresh image slot called");
 	// take pixmap and display it in the label
 	if ((_label) && (_pixmap)) {
 		_label->setPixmap(*_pixmap);
 		_label->setFixedSize(_pixmap->width(), _pixmap->height());
 		_label->setMinimumSize(_pixmap->width(), _pixmap->height());
 	} else {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot set pixmap (%p) in label (%p)", _pixmap, _label);
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"cannot set pixmap (%p) in label (%p)",
+			_pixmap, _label);
 	}
 }
 
@@ -188,10 +190,13 @@ void	MonitorImage::refreshImage() {
  * The myself argument points to an image 
  */
 void	MonitorImage::do_register(Ice::ObjectPrx proxy, Ice::ObjectPtr myself) {
-	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
-	snowstar::CallbackAdapter	adapter(ic);
-	_myidentity = adapter.add(myself);
-	proxy->ice_getConnection()->setAdapter(adapter.adapter());
+        snowstar::CommunicatorSingleton::connect(proxy);
+        _myidentity = snowstar::CommunicatorSingleton::add(myself);
+	snowstar::CommunicatorSingleton::connect(proxy);
+}
+
+void	MonitorImage::do_unregister() {
+        snowstar::CommunicatorSingleton::remove(_myidentity);
 }
 
 } // namespace snowgui

@@ -22,6 +22,7 @@ class TrackingMonitorController : public QObject, public snowstar::TrackingMonit
 protected:
 	Ice::Identity	_myidentity;
 public:
+	const Ice::Identity&	identity() const { return _myidentity; }
 	TrackingMonitorController(QObject *parent, trackingmonitordialog *dialog);
 	virtual ~TrackingMonitorController();
 
