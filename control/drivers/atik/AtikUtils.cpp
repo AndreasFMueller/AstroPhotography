@@ -16,6 +16,11 @@ DeviceName	cameraname(::AtikCamera *camera) {
 		astro::stringprintf("%u", serial));
 }
 
+DeviceName	ccdname(::AtikCamera *camera, const std::string& name) {
+	DeviceName	cn = cameraname(camera);
+	return DeviceName(cn, DeviceName::Ccd, name);
+}
+
 DeviceName	filterwheelname(::AtikCamera *camera) {
 	unsigned int serial = camera->getSerialNumber();
 	return DeviceName(DeviceName::Filterwheel, "atik",
@@ -25,6 +30,12 @@ DeviceName	filterwheelname(::AtikCamera *camera) {
 DeviceName	guiderportname(::AtikCamera *camera) {
 	unsigned int serial = camera->getSerialNumber();
 	return DeviceName(DeviceName::Guiderport, "atik",
+		astro::stringprintf("%u", serial));
+}
+
+DeviceName	coolername(::AtikCamera *camera) {
+	unsigned int serial = camera->getSerialNumber();
+	return DeviceName(DeviceName::Cooler, "atik",
 		astro::stringprintf("%u", serial));
 }
 

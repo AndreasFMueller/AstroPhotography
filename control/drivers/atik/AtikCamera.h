@@ -15,8 +15,23 @@ namespace atik {
 
 class AtikCamera : public Camera {
 	::AtikCamera	*_camera;
+	struct AtikCapabilities	capa;
 public:
 	AtikCamera(::AtikCamera *camera);
+	virtual ~AtikCamera();
+	CcdPtr	getCcd0(size_t ccdid);
+	unsigned int	nCcds() const;
+
+protected:
+	virtual FilterWheelPtr	getFilterWheel0();
+public:
+	bool	hasFilterWheel() const;
+
+protected:
+	virtual GuiderPortPtr	getGuiderPort0();
+public:
+	bool	hasGuiderPort() const;
+
 friend class AtikCcd;
 };
 

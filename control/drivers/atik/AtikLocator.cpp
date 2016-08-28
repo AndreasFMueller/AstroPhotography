@@ -12,6 +12,7 @@
 #include <AtikUtils.h>
 #include <AstroDebug.h>
 #include <AstroFormat.h>
+#include <AtikCamera.h>
 #include <includes.h>
 #include <mutex>
 
@@ -81,7 +82,11 @@ void	atik_list_cameras() {
 	atik_camera_count = ::AtikCamera::list((::AtikCamera**)atik_camera,
 		MaxAtikCameraNumber);
 	for (int i = 0; i < atik_camera_count; i++) {
-		atik_camera[i]->open();
+		bool	rc = atik_camera[i]->open();
+		if (!rc) {
+			std::string	msg("cannot open camera");
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d ATIK cameras",
 		atik_camera_count);
@@ -109,30 +114,53 @@ AtikCameraLocator::~AtikCameraLocator() {
 std::vector<std::string>	AtikCameraLocator::getDevicelist(DeviceName::device_type device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get Atik device list");
 	std::vector<std::string>	names;
+	// return an empty list for all the device types that we don't support
 	switch (device) {
 	case DeviceName::AdaptiveOptics:
 	case DeviceName::Focuser:
 	case DeviceName::Module:
 	case DeviceName::Mount:
 		return names;
-	case DeviceName::Filterwheel:
-		return names;
-	case DeviceName::Guiderport:
-		return names;
-	case DeviceName::Camera:
-		for (int i = 0; i < atik_camera_count; i++) {
-			names.push_back(cameraname(atik_camera[i]));
-		}
-		return names;
-	case DeviceName::Ccd:
-		return names;
-	case DeviceName::Cooler:
-		for (int i = 0; i < atik_camera_count; i++) {
-			
-		}
-		return names;
 	default:
+		// default: all device types that the atik driver can handle
 		break;
+	}
+	// now go through the cameras and collect information about them
+	for (int i = 0; i < atik_camera_count; i++) {
+		// retrieve the capabilities
+		struct AtikCapabilities	capa;
+		const char	*name;
+		CAMERA_TYPE	type;
+		atik_camera[i]->getCapabilities(&name, &type, &capa);
+
+		switch (device) {
+		case DeviceName::Guiderport:
+			if (capa.hasGuidePort) {
+				names.push_back(guiderportname(atik_camera[i]));
+			}
+			break;
+		case DeviceName::Camera:
+			names.push_back(cameraname(atik_camera[i]));
+			break;
+		case DeviceName::Ccd:
+			names.push_back(ccdname(atik_camera[i], "Imaging"));
+			if (capa.has8BitMode) {
+				names.push_back(ccdname(atik_camera[i], "8bit"));
+			}
+			break;
+		case DeviceName::Cooler:
+			if (capa.cooler != COOLER_NONE) {
+				names.push_back(coolername(atik_camera[i]));
+			}
+			break;
+		case DeviceName::Filterwheel:
+			if (capa.hasFilterWheel) {
+				names.push_back(filterwheelname(atik_camera[i]));
+			}
+			break;
+		default:
+			break;
+		}
 	}
 	return names;
 }
@@ -151,10 +179,13 @@ CameraPtr	AtikCameraLocator::getCamera0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "locate camera %s", sname.c_str());
 	for (int i = 0; i < atik_camera_count; i++) {
 		if (atik_camera[i]->getSerialNumber() == serial) {
-			// XXX create a new camera
+			return CameraPtr(new AtikCamera(atik_camera[i]));
 		}
 	}
-	throw std::runtime_error("not implemented yet");
+	std::string	msg = stringprintf("ATIK camera %s not found",
+		name.toString().c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw NotFound(msg);
 }
 
 } // namespace atik

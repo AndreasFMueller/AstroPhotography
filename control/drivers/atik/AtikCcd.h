@@ -8,6 +8,7 @@
 
 #include <AstroCamera.h>
 #include <atikccdusb.h>
+#include <thread>
 
 namespace astro {
 namespace camera {
@@ -15,10 +16,26 @@ namespace atik {
 
 class AtikCcd : public Ccd {
 	::AtikCamera	*_camera;
+	struct AtikCapabilities	capa;
+	ImagePtr	_image;
+	std::shared_ptr<std::thread>	_thread;
 public:
 	AtikCcd(CcdInfo&, ::AtikCamera *);
 	~AtikCcd();
-	bool	hasCooler();
+	virtual void	startExposure(const Exposure& exposure);
+	virtual void	cancelExposure();
+
+private:
+	ImagePtr	getRawImage();
+	bool	hasShutter() const;
+
+protected:
+	CoolerPtr	getCooler0();
+public:
+	bool	hasCooler() const;
+
+public:
+	void	run();
 };
 
 } // namespace atik

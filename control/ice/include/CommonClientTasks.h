@@ -105,6 +105,9 @@ typedef std::shared_ptr<FilterwheelTask>	FilterwheelTaskPtr;
 
 /**
  * \brief Callback adapter
+ *
+ * Note: this is not a good architecture for the client side of the callbacks.
+ * Use CommunicatorSingleton instead
  */
 class CallbackAdapter {
 	Ice::ObjectAdapterPtr	_adapter;
