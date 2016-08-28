@@ -36,7 +36,10 @@ guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		ui->imageWidget,
 		SLOT(receiveImage(astro::image::ImagePtr)));
-
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(exposureChanged(astro::camera::Exposure)),
+		ui->guidercontrollerWidget,
+		SLOT(setExposure(astro::camera::Exposure)));
 }
 
 guidingwindow::~guidingwindow() {
