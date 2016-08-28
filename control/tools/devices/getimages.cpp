@@ -62,6 +62,12 @@ static void	usage(const char *progname) {
 	std::cout << " -n,--number=<n>       take <n> exposures with these "
 			"settings";
 	std::cout << std::endl;
+	std::cout << " -o,--out=<prefix>     write the image to a file created from the prefix";
+	std::cout << std::endl;
+	std::cout << "                       by appending a number and the suffix .fits";
+	std::cout << std::endl;
+	std::cout << "                       No output is written if the prefix is not given,";
+	std::cout << std::endl;
 	std::cout << " -p,--purpose=<p>      images have purpose <p>, i.e. one "
 		"of light, dark";
 	std::cout << std::endl;
@@ -94,10 +100,11 @@ static struct option	longopts[] = {
 { "focus",		required_argument,	NULL,	'F' }, /*  5 */
 { "help",		no_argument,		NULL,	'h' }, /*  6 */
 { "number",		required_argument,	NULL,	'n' }, /*  7 */
-{ "purpose",		required_argument,	NULL,	'p' }, /*  8 */
-{ "rectangle",		required_argument,	NULL,	 1  }, /*  9 */
-{ "repo",		required_argument,	NULL,	'r' }, /* 10 */
-{ "temperature",	required_argument,	NULL,	't' }, /* 11 */
+{ "out",		required_argument,	NULL,	'o' }, /*  8 */
+{ "purpose",		required_argument,	NULL,	'p' }, /*  9 */
+{ "rectangle",		required_argument,	NULL,	 1  }, /* 10 */
+{ "repo",		required_argument,	NULL,	'r' }, /* 11 */
+{ "temperature",	required_argument,	NULL,	't' }, /* 12 */
 { NULL,			0,			NULL,    0  }
 };
 
@@ -122,11 +129,12 @@ int	main(int argc, char *argv[]) {
 	ImageRectangle	frame;
 	Exposure::purpose_t	purpose = Exposure::light;
 	unsigned short	focusposition = 0;
+	std::string	prefix;
 
 	// parse the command line
 	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:F:hn:p:r:t:",
+	while (EOF != (c = getopt_long(argc, argv, "b:c:de:f:F:hn:o:p:r:t:",
 		longopts, &longindex))) {
 		switch (c) {
 		case 'b':
@@ -152,6 +160,9 @@ int	main(int argc, char *argv[]) {
 			return EXIT_SUCCESS;
 		case 'n':
 			nImages = atoi(optarg);
+			break;
+		case 'o':
+			prefix = std::string(optarg);
 			break;
 		case 'p':
 			purpose = Exposure::string2purpose(optarg);
@@ -327,9 +338,17 @@ int	main(int argc, char *argv[]) {
 		if (repo) {
 			repo->save(*imageptr);
 		} else {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "losing image of size %s",
-				(*imageptr)->size().toString().c_str());
-		
+			if (0 == prefix.size()) {
+				std::cerr << "no prefix, images lost"
+					<< std::endl;
+				return EXIT_FAILURE;
+			}
+			std::string	filename = stringprintf("%s%03d.fits",
+				prefix.c_str(), counter);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
+				filename.c_str());
+			FITSout	out(filename);
+			out.write(*imageptr);
 		}
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d images written", counter);
