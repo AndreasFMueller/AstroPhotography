@@ -1,5 +1,4 @@
 ccdcontrollerwidget:
-      -	allow for the subframe stuff to be disabled and hidden
       -	add gain and offset controls
       -	add controls for image quality and other special properties that
 	depend on the camera. They should only be visible for cameras that
