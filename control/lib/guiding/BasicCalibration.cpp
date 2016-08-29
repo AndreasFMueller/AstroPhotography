@@ -208,7 +208,6 @@ void	BasicCalibration::reset() {
 }
 
 BasicCalibration&	BasicCalibration::operator=(const BasicCalibration& other) {
-	_name = other.name();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "copying basic calibration");
 	copy(other);
 	return *this;
@@ -223,8 +222,11 @@ void	BasicCalibration::copy(const BasicCalibration& other) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrationid = %d", _calibrationid);
 
 	// copy common fields
+	_name = other._name;
+	_when = other._when;
 	for (int i = 0; i < 6; i++) { a[i] = other.a[i]; }
 	_complete = other._complete;
+	_flipped = other._flipped;
 
 	// copy points
 	clear();

@@ -24,6 +24,7 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 		this, SLOT(calibrateClicked()));
 
 	_guidercontroller = NULL;
+	_calibration.id = -1;
 }
 
 /**

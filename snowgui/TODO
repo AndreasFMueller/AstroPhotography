@@ -5,7 +5,6 @@ ccdcontrollerwidget:
 	have them
 
 guidercontrollerwidget:
-      -	read star point on startup, if the server already has one
       - Display calibration after calibration completes
       - Allow to view calibration details during guiding, e.g. by letting
 	the Points button enabled
