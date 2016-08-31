@@ -123,6 +123,20 @@ void	guidercontrollerwidget::setupGuider() {
 	// get the guider based on the descriptor
 	_guider = _guiderfactory->get(_guiderdescriptor);
 
+	// get the calibration star
+	try {
+		snowstar::Point	star = _guider->getStar();
+		int	x = star.x;
+		int	y = star.y;
+		if ((x >= 0) && (y >= 0)) {
+			ui->starxField->setText(QString(
+				astro::stringprintf("%d", x).c_str()));
+			ui->staryField->setText(QString(
+				astro::stringprintf("%d", y).c_str()));
+		}
+	} catch (snowstar::BadState& x) {
+	}
+
 	// also propagate the information to the calibration widgets
 	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuiderPort,
 		_guiderdescriptor, _guider, _guiderfactory, this);
@@ -169,6 +183,10 @@ void	guidercontrollerwidget::setupGuider() {
  */
 guidercontrollerwidget::~guidercontrollerwidget() {
 	statusTimer->stop();
+	if (_trackingmonitorimage) {
+		Ice::Identity	identity = _trackingmonitor->identity();
+		snowstar::CommunicatorSingleton::remove(identity);
+	}
 	delete statusTimer;
 	delete ui;
 }
@@ -457,21 +475,28 @@ void	guidercontrollerwidget::launchMonitor() {
 
 	// get the history of the track
 	snowstar::TrackingSummary	summary = _guider->getTrackingSummary();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get track %d", summary.trackid);
 	snowstar::TrackingHistory	history
 		= _guider->getTrackingHistory(summary.trackid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d points", history.points.size());
 	_trackingdialog->add(history);
 
 	// retrieve the calibrations
 	if (history.guiderportcalid > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cal %d",
+			history.guiderportcalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.guiderportcalid);
 		_trackingdialog->gpMasperpixel(cal.masPerPixel);
 	}
 	if (history.adaptiveopticscalid > 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve AO cal %d",
+			history.adaptiveopticscalid);
 		snowstar::Calibration cal = _guiderfactory
 			->getCalibration(history.adaptiveopticscalid);
 		_trackingdialog->aoMasperpixel(cal.masPerPixel);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrations installed");
 
 	// now register the callback, to make sure we get new points only after
 	// we have added the history

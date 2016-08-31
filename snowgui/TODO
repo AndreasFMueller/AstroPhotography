@@ -1,0 +1,53 @@
+ccdcontrollerwidget:
+      -	add gain and offset controls
+      -	add controls for image quality and other special properties that
+	depend on the camera. They should only be visible for cameras that
+	have them
+
+guidercontrollerwidget:
+      - Display calibration after calibration completes
+      - Allow to view calibration details during guiding, e.g. by letting
+	the Points button enabled
+      - "Points" -> "Details", create a dialog that shows the calibration
+	details and all the points
+      - the CalibrattionDisplayWidget should be able to optionally label
+	the points with numbers so that the calibration detail dialog
+	can refer to them from the list of points
+      -	Database button is not needed, we should create a separate subapp
+	designed to inspect tracks and their calibrations
+      - when guiding is in progress, the ccd, guiderport and filterwheel
+	controls should be completely disabled (cooler is OK, as it does
+	usually not interfere with the calibration/guiding
+      -	for large guide methods it should be possible to scale the image 
+	in the tracking monitor down, i.e. negative scale steps should be
+	possible (maybe the initial size should be such that the image
+	fits into the frame, and the user can then step up, but at large
+	scales, only the central part of the image will be displayed)
+
+trackingmonitorwindow:
+      - scrolling in long histories
+      -	synchronize AO and GP histories (currently the scale is steps, not
+	time, but AO usually has a much shorter time scale)
+
+guidingwindow:
+      -	adaptiveoptics tool missing
+
+adaptiveopticscontrollerwidget:
+      - missing
+
+coolercontrollerwidget:
+      -	add an indicator that shows whether the temperature is still changing
+	or has already been reached
+      - actual temperature should not allow selection
+      -	if the set temperature is changed, but no set, it should return
+	to the actual set temperature after a few seconds. Or there needs
+	to be a display for the actual set temperature, and the new set
+	temperature, or changeing the set temperature immediately sets it,
+	this would remove the need for the "set" button
+
+focusercontrollerwidget:
+      -	indicator for a moving focuser (the disable move button is just not
+	visible enough)
+      -	the allowed focuser range should be displayed
+
+

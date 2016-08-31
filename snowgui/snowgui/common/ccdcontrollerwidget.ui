@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::ccdcontrollerwidget</class>
- <widget class="QWidget" name="ccdcontrollerwidget">
+ <widget class="QWidget" name="snowgui::ccdcontrollerwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>261</height>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">

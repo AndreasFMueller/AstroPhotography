@@ -42,6 +42,7 @@ public:
 	// registering the callback with the adapter
 	virtual void	do_register(Ice::ObjectPrx proxy,
 				Ice::ObjectPtr myself);
+	virtual void	do_unregister();
 
 	// control image display
 	int	scale() const { return _scale; }

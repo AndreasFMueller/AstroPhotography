@@ -28,6 +28,7 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	astro::image::ImagePtr	_image;
 	astro::camera::Exposure	_imageexposure;
 	bool	_guiderccdonly;
+	bool	_nosubframe;
 
 public:
 	explicit ccdcontrollerwidget(QWidget *parent);
@@ -85,6 +86,7 @@ public slots:
 	void	cancelClicked();
 	void	streamClicked();
 	void	ccdChanged(int);
+	void	hideSubframe(bool);
 
 	// needed internally for status udpates
 	void	statusUpdate();

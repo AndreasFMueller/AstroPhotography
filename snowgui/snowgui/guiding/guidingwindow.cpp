@@ -21,6 +21,7 @@ guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 	ui->imageWidget->setInfoVisible(false);
 	ui->imageWidget->setRectangleSelectionEnabled(false);
 	ui->imageWidget->setPointSelectionEnabled(true);
+	ui->ccdcontrollerWidget->hideSubframe(true);
 
 	// when a point is selected in the image widget, then the guider
 	// controller should set it as the star, and it should create 
@@ -36,7 +37,10 @@ guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		ui->imageWidget,
 		SLOT(receiveImage(astro::image::ImagePtr)));
-
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(exposureChanged(astro::camera::Exposure)),
+		ui->guidercontrollerWidget,
+		SLOT(setExposure(astro::camera::Exposure)));
 }
 
 guidingwindow::~guidingwindow() {

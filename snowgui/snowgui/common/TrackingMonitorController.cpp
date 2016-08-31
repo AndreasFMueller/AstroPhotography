@@ -36,10 +36,10 @@ TrackingMonitorController::~TrackingMonitorController() {
 void    TrackingMonitorController::setGuider(snowstar::GuiderPrx guider,
                                 Ice::ObjectPtr myself) {
 	_guider = guider;
-	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
-	snowstar::CallbackAdapter	adapter(ic);
-	_myidentity = adapter.add(myself);
-	guider->ice_getConnection()->setAdapter(adapter.adapter());
+	snowstar::CommunicatorSingleton::connect(_guider);
+	_myidentity = snowstar::CommunicatorSingleton::add(myself);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "identity: %s",
+		_myidentity.name.c_str());
 	guider->registerTrackingMonitor(_myidentity);
 }
 
