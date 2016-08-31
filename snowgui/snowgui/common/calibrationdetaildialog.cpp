@@ -37,14 +37,26 @@ calibrationdetaildialog::~calibrationdetaildialog() {
     delete ui;
 }
 
+static double	angle(const snowstar::Calibration& c) {
+	double	a[6];
+	for (int i = 0; i < 6; i++) {
+		a[i] = c.coefficients[i];
+	}
+	double	l0 = hypot(a[0], a[3]);
+	double	l1 = hypot(a[1], a[4]);
+	return acos((a[0] * a[1] + a[3] * a[4]) / (l0 * l1));
+}
+
 void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) {
 	_calibration = calibration;
 
 	// update the window title
-	setWindowTitle(QString(astro::stringprintf("Calibration %d", _calibration.id).c_str()));
+	setWindowTitle(QString(astro::stringprintf("Calibration %d",
+		_calibration.id).c_str()));
 
 	// update fields
-	ui->instrumentField->setText(QString(_calibration.guider.instrumentname.c_str()));
+	ui->instrumentField->setText(QString(
+		_calibration.guider.instrumentname.c_str()));
 	ui->ccdField->setText(QString(astro::stringprintf("%d/%d/%d",
 		_calibration.guider.ccdIndex,
 		_calibration.guider.guiderportIndex,
@@ -57,10 +69,12 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 	strftime(buffer, sizeof(buffer), "%F", tmp);
 	ui->dateField->setText(QString(buffer));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
-		_calibration.quality).c_str()));
+		100 * _calibration.quality).c_str()));
 	ui->angleField->setText(QString(astro::stringprintf("XXX").c_str()));
 	ui->pointsField->setText(QString(astro::stringprintf("%d",
 		_calibration.points.size()).c_str()));
+	ui->angleField->setText(QString(astro::stringprintf("%.1f˚",
+		angle(_calibration) * 180 / M_PI).c_str()));
 
 	// give the data to the calibration display
 	ui->calibrationdisplayWidget->setCalibration(_calibration);
