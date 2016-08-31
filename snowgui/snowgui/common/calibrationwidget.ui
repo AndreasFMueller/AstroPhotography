@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::calibrationwidget</class>
- <widget class="QWidget" name="calibrationwidget">
+ <widget class="QWidget" name="snowgui::calibrationwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -155,9 +155,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pointsButton">
+       <widget class="QPushButton" name="detailButton">
         <property name="text">
-         <string>Points</string>
+         <string>Detail</string>
         </property>
        </widget>
       </item>

@@ -26,6 +26,7 @@ FORMS    +=								\
 	focusercontrollerwidget.ui					\
 	filterwheelcontrollerwidget.ui					\
 	guiderportcontrollerwidget.ui					\
+	calibrationdetaildialog.ui					\
 	coolercontrollerwidget.ui					\
 	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
@@ -41,6 +42,7 @@ WIDGETSOURCES =								\
 	focusercontrollerwidget.cpp					\
 	filterwheelcontrollerwidget.cpp					\
 	guiderportcontrollerwidget.cpp					\
+	calibrationdetaildialog.cpp					\
 	coolercontrollerwidget.cpp					\
 	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
@@ -56,6 +58,7 @@ WIDGETHEADERS =								\
 	focusercontrollerwidget.h					\
 	filterwheelcontrollerwidget.h					\
 	guiderportcontrollerwidget.h					\
+	calibrationdetaildialog.h					\
 	coolercontrollerwidget.h					\
 	calibrationwidget.h						\
 	calibrationselectiondialog.h					\

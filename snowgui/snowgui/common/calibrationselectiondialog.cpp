@@ -87,15 +87,20 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 	font.setStyleHint(QFont::Monospace);
 	snowstar::idlist::const_iterator	i;
 	for (i = ids.begin(); i != ids.end(); i++) {
-		snowstar::Calibration	cal
-			= _guiderfactory->getCalibration(*i);
-		if ((cal.type == _controltype) && (cal.complete)) {
-			_calibrations.push_back(cal);
-			std::string	label = formatlabel(cal);
-			QString		ls(label.c_str());
-			QListWidgetItem	*item = new QListWidgetItem(ls);
-			item->setFont(font);
-			ui->calibrationlistWidget->addItem(item);
+		try {
+			snowstar::Calibration	cal
+				= _guiderfactory->getCalibration(*i);
+			if ((cal.type == _controltype) && (cal.complete)) {
+				_calibrations.push_back(cal);
+				std::string	label = formatlabel(cal);
+				QString		ls(label.c_str());
+				QListWidgetItem	*item = new QListWidgetItem(ls);
+				item->setFont(font);
+				ui->calibrationlistWidget->addItem(item);
+			}
+		} catch (const std::exception& ex) {
+			debug(LOG_ERR, DEBUG_LOG, 0, "calibration %d not found",
+				*i);
 		}
 	}
 
