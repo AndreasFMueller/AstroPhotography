@@ -129,6 +129,7 @@ void	coolercontrollerwidget::statusUpdate() {
 	}
 	float	actual = _cooler->getActualTemperature() - 273.15;
 	float	settemp = _cooler->getSetTemperature() - 273.15;
+	ui->activeWidget->update(actual, settemp, _cooler->isOn());
 	bool	actualreached = (actual == settemp);
 	displayActualTemperature(actual);
 	if (actualreached) {

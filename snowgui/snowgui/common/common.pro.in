@@ -74,6 +74,7 @@ SOURCES += 								\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
+	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
@@ -95,6 +96,7 @@ HEADERS  += 								\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
+	CoolerActive.h							\
 	FilterWheelBusy.h						\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\

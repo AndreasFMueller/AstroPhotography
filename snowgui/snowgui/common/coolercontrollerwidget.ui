@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::coolercontrollerwidget</class>
- <widget class="QWidget" name="coolercontrollerwidget">
+ <widget class="QWidget" name="snowgui::coolercontrollerwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>325</width>
-    <height>102</height>
+    <width>335</width>
+    <height>105</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>102</height>
+    <height>105</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -107,14 +107,37 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3" rowspan="2">
+       <widget class="snowgui::CoolerActive" name="activeWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::CoolerActive</class>
+   <extends>QWidget</extends>
+   <header location="global">CoolerActive.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections>
- </connections>
+ <connections/>
  <slots>
   <slot>guiChanged()</slot>
   <slot>editingFinished()</slot>
