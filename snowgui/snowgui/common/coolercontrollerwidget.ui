@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>335</width>
+    <width>296</width>
     <height>105</height>
    </rect>
   </property>
@@ -59,7 +59,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="setTemperatureLabel">
         <property name="text">
-         <string>set temperature:</string>
+         <string>set temperature (°C):</string>
         </property>
        </widget>
       </item>
@@ -79,13 +79,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QCheckBox" name="onoffBox">
-        <property name="text">
-         <string>on</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="actualTemperatureField">
         <property name="alignment">
@@ -96,18 +89,11 @@
       <item row="0" column="0">
        <widget class="QLabel" name="actualTemperatureLabel">
         <property name="text">
-         <string>actual temperature:</string>
+         <string>actual temperature (°C):</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="setTemperatureButton">
-        <property name="text">
-         <string>set</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3" rowspan="2">
+      <item row="0" column="2" rowspan="2">
        <widget class="snowgui::CoolerActive" name="activeWidget" native="true">
         <property name="minimumSize">
          <size>

@@ -96,6 +96,12 @@ void	FilterWheelBusy::draw() {
 		case 6: color = QColor(89, 137, 121); break;
 		default: color = white; break;
 		}
+		if (!isEnabled()) {
+			// convert the color to an equivalent gray color
+			int	gray = (color.red() + color.green()
+					+ color.blue()) / 3;
+			color = QColor(gray, gray, gray);
+		}
 		painter.fillPath(filter, color);
 	}
 }

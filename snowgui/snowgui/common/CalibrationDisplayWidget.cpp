@@ -98,9 +98,9 @@ snowstar::Point	operator*(const snowstar::Calibration& calibration,
 	result.y = calibration.coefficients[3] * calibrationpoint.offset.x +
 		calibration.coefficients[4] * calibrationpoint.offset.y +
 		calibration.coefficients[5] * calibrationpoint.t;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "(%f,%f) -> (%f,%f)",
-		calibrationpoint.offset.x, calibrationpoint.offset.y,
-		result.x, result.y);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "(%f,%f) -> (%f,%f)",
+	//	calibrationpoint.offset.x, calibrationpoint.offset.y,
+	//	result.x, result.y);
 	return result;
 }
 

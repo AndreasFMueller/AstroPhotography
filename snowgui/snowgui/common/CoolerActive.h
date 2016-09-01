@@ -6,12 +6,12 @@
 #ifndef _CoolerActive_h
 #define _CoolerActive_h
 
-#include <QWidget>
+#include <QPushButton>
 #include <QEvent>
 
 namespace snowgui {
 
-class CoolerActive : public QWidget {
+class CoolerActive : public QPushButton {
 	Q_OBJECT
 
 	bool	_active;
@@ -28,8 +28,12 @@ public:
 	void	draw();
 	void    update(float actualtemp, float settemp, bool active);
 
+signals:
+	void	toggled(bool);
+
 public slots:
 	void	update();
+	void	buttonClicked();
 };
 
 } // namespace snowgui

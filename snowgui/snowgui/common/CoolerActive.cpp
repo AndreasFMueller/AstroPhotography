@@ -10,28 +10,41 @@
 
 namespace snowgui {
 
-CoolerActive::CoolerActive(QWidget *parent) : QWidget(parent) {
+/**
+ * \brief Create the CoolerActive widget
+ */
+CoolerActive::CoolerActive(QWidget *parent) : QPushButton(parent) {
 	_value = 0.0;
 	_active = false;
+	connect(this, SIGNAL(clicked()), this, SLOT(buttonClicked()));
 }
 
+/**
+ * \brief Destroy the widget
+ */
 CoolerActive::~CoolerActive() {
 }
 
+/**
+ * \brief set the active state
+ */
 void	CoolerActive::setActive(bool b) {
 	_active = b;
-	draw();
+	repaint();
 }
 
+/**
+ * \brief set the current value
+ */
 void	CoolerActive::setValue(double v) {
 	_value = v;
-	draw();
+	repaint();
 }
 
 static double	v = (2. / 30.);
 
 typedef struct point_s { double x; double y; } point_t;
-point_t	dir[6] = {
+static point_t	dir[6] = {
 /* 0 */	{  v,      v * 0           },
 /* 1 */	{  v / 2,  v * sqrt(3) / 2 },
 /* 2 */	{ -v / 2,  v * sqrt(3) / 2 },
@@ -40,7 +53,7 @@ point_t	dir[6] = {
 /* 5 */	{  v / 2, -v * sqrt(3) / 2 }
 };
 
-point_t	outline[16] = {
+static point_t	outline[16] = {
 /* 0 */	{ 1.                         , 0                                  },
 /* 1 */	{ 1.    + dir[2].x           , 0            + dir[2].y            },
 /* 2 */	{ 2./3. + dir[0].x + dir[1].x, 0            + dir[0].y + dir[1].y },
@@ -59,13 +72,16 @@ point_t	outline[16] = {
 /*15 */	{ 1./2. + dir[5].x           , sqrt(3) / 2 + dir[5].y             }
 };
 
-point_t	inside[4] = {
+static point_t	inside[4] = {
 	{ 1./3. + dir[2].x,            0           + dir[2].y               },
 	{ 1./2. + dir[3].x + dir[4].x, sqrt(3) / 6 + dir[3].y + dir[4].y    },
 	{ 1./6. + dir[4].x,            sqrt(3) / 6 + dir[4].y               },
 	{ 0     + dir[0].x + dir[1].x, 0           + dir[0].y + dir[1].y    }
 };
 
+/**
+ * \brief Draw the thermometer and the snowstar
+ */
 void	CoolerActive::draw() {
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -110,15 +126,28 @@ void	CoolerActive::draw() {
 	insidebottom.closeSubpath();
 	QColor	medium(_value * 255 + (1 - _value) * 90, (1 - _value) * 90,
 		(1 - _value) * 255);
+	if (!isEnabled()) {
+		medium = QColor(128, 128, 128);
+	}
 	painter.fillPath(insidebottom, medium);
+
+	// prepare a pen for drawing the ticks
+	QPen	pen(Qt::SolidLine);
+        pen.setWidth(2);
+        pen.setColor(QColor(0., 0., 0.));
+        painter.setPen(pen);
+	for (double v = 0; v < 1.1; v += 0.2) {
+		double	z = v * 2 * r + (1 - v) * (height() - 2 * R);
+		painter.drawLine(m + r + 4, z, m + r + 2 + 7, z);
+	}
 	
-	QColor	flakecolor(128, 128, (_active) ? 255 : 128);
+	QColor	flakecolor(128, 128, (_active && isEnabled()) ? 255 : 128);
 	double	fx, fy;
 	fx = width() * 1 / 3;
 	fy = height() * 2 / 3 - 5;
 	double	fr = height() / 4 + 5;
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "snowflake at %.2f, %.2f, r = %.2f",
-		fx, fy, fr);
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "snowflake at %.2f, %.2f, r = %.2f",
+	//	fx, fy, fr);
 
 	QPainterPath	flake;
 	double	angle = M_PI / 2;
@@ -131,8 +160,8 @@ void	CoolerActive::draw() {
 		for (int i = 0; i < 16; i++) {
 			x = fx + fr * (c * outline[i].x - s * outline[i].y);
 			y = fy + fr * (s * outline[i].x + c * outline[i].y);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d] %.2f, %.2f",
-				i, x, y);
+			//debug(LOG_DEBUG, DEBUG_LOG, 0, "[%d] %.2f, %.2f",
+			//	i, x, y);
 			flake.lineTo(x, y);
 		}
 		angle += M_PI /3;
@@ -167,22 +196,31 @@ void	CoolerActive::paintEvent(QPaintEvent * /* event */) {
 }
 
 void	CoolerActive::update() {
-	draw();
+	repaint();
 }
 
 static double	alpha = 0.1;
 
 void	CoolerActive::update(float actualtemp, float settemp, bool active) {
 	_active = active;
-	double	newvalue = (actualtemp - settemp) / 20.;
-	if (newvalue > 1) {
-		newvalue = 1;
-	}
-	if (newvalue < 0) {
-		newvalue = 0;
+	double	newvalue = 1;
+	if (_active) {
+		newvalue = (actualtemp - settemp) / 20.;
+		if (newvalue > 1) {
+			newvalue = 1;
+		}
+		if (newvalue < 0) {
+			newvalue = 0;
+		}
 	}
 	_value = alpha * newvalue + (1 - alpha) * _value;
 	repaint();
+}
+
+void	CoolerActive::buttonClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "button clicked");
+	setActive(!_active);
+	emit toggled(_active);
 }
 
 } // namespace snowgui

@@ -35,6 +35,8 @@ private:
 	Ui::coolercontrollerwidget *ui;
 	QTimer	*statusTimer;
 
+	void	sendSetTemperature(double temp);
+
 public slots:
 	void	setActual();
 	void	setSetTemperature(double t);
@@ -42,6 +44,7 @@ public slots:
 	void	guiChanged();
 	void	coolerChanged(int index);
 	void	editingFinished();
+	void	activeToggled(bool);
 };
 
 } // namespace snowgui

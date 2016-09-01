@@ -17,6 +17,7 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 	: InstrumentWidget(parent), ui(new Ui::filterwheelcontrollerwidget) {
 	ui->setupUi(this);
 	ui->filterBox->setEnabled(false);
+	ui->filterIndicator->setEnabled(false);
 
 	// connections of GUI components
 	connect(ui->filterwheelSelectionBox, SIGNAL(currentIndexChanged(int)),
@@ -100,8 +101,10 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 			ui->filterIndicator->position(pos);
 			ui->filterBox->setCurrentIndex(pos);
 			ui->filterBox->setEnabled(true);
+			ui->filterIndicator->setEnabled(true);
 		} catch (...) {
 			ui->filterBox->setEnabled(false);
+			ui->filterIndicator->setEnabled(false);
 		}
 
 		// store the current state
@@ -168,6 +171,7 @@ void    filterwheelcontrollerwidget::statusUpdate() {
 	switch (newstate) {
 	case snowstar::FwIDLE:
 		ui->filterBox->setEnabled(true);
+		ui->filterIndicator->setEnabled(true);
 		try {
 			displayFilter(_filterwheel->currentPosition());
 		} catch (...) { }
