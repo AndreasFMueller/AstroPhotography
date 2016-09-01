@@ -1,5 +1,5 @@
 #
-# snowgui.pro -- qt configuration file for user interface program
+# main.pro.in -- qt configuration file for user interface program
 #
 # (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
@@ -11,14 +11,16 @@ TEMPLATE = app
 
 # Directories for ICE and the astrophotography library
 ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../common -lcommon
 LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
 LIBS += -L../guiding -lguiding
-LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
-LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include

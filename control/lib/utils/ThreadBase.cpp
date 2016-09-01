@@ -99,7 +99,9 @@ ThreadBase::~ThreadBase() {
 		std::string	msg = stringprintf(
 			"error in ThreadBase destructor: %s", x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
+		// XXX we cannot throw here, because that will terminate the
+		// XXX program
+		//throw std::runtime_error(msg);
 	}
 }
 

@@ -257,7 +257,7 @@
   <customwidget>
    <class>snowgui::FocusPointsWidget</class>
    <extends>QWidget</extends>
-   <header location="global">focuspointswidget.h</header>
+   <header location="global">FocusPointsWidget.h</header>
    <container>1</container>
    <slots>
     <slot>positionSelected(int)</slot>

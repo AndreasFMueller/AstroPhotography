@@ -9,8 +9,7 @@
 #include <AsiCooler.h>
 #include <AsiStream.h>
 #include <AstroExceptions.h>
-#include <errno.h>
-#include <string.h>
+#include <includes.h>
 
 namespace astro {
 namespace camera {

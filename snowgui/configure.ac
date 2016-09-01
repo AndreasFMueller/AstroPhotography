@@ -129,13 +129,20 @@ AC_SUBST(ICEDIR)
 AC_SUBST(ICELIBS)
 AC_SUBST(ICEINCLUDE)
 
-if [ -d /usr/local/astro ]
+if test -d /usr/local/astro
 then
 	ASTROPATH=/usr/local/astro
 else
 	ASTROPATH=`pwd`/../control/root
 fi
 AC_SUBST(ASTROPATH)
+if test -d ${ASTROPATH}/lib64
+then
+	ASTROLIBDIR=${ASTROPATH}/lib64
+else 
+	ASTROLIBDIR=${ASTROPATH}/lib
+fi
+AC_SUBST(ASTROLIBDIR)
 
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/common/common.pro
@@ -143,6 +150,6 @@ AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/test/test.pro
 	snowgui/focusing/focusing.pro
 	snowgui/guiding/guiding.pro
-	snowgui/snowgui/snowgui.pro])
+	snowgui/main/main.pro])
 AC_OUTPUT
 

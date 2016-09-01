@@ -11,11 +11,13 @@ TEMPLATE = app
 
 # Directories for ICE and the astrophotography library
 ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../common -lcommon 
-LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
-LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $${ASTROPATH}/include

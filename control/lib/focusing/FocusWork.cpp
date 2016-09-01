@@ -10,6 +10,7 @@
 #include <FocusCompute.h>
 #include <AstroAdapter.h>
 #include <AstroFilter.h>
+#include <includes.h>
 
 using namespace astro::adapter;
 using namespace astro::image::filter;

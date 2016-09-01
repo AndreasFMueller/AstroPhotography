@@ -120,7 +120,7 @@ case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CXXFLAGS
-	./configure --prefix=${prefix} ${commonflags} --enable-boostregex
+	./configure --prefix=${prefix} ${commonflags}
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"
@@ -145,7 +145,7 @@ SuSE)
 	export LDFLAGS CFLAGS CXXFLAGS
 
 	./configure --prefix=${prefix} ${commonflags} --enable-unicap \
-		${sbigoption} --enable-boostregex
+		${sbigoption}
 	;;
 Darwin)
 	LDFLAGS="-L/usr/local/lib -lusb-1.0"

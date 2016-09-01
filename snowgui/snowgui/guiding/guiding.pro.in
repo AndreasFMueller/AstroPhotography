@@ -10,11 +10,13 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 # Directories for ICE and the astrophotography library
-ICEDIR = /Library/Developer/Ice-3.5.1
-ASTROPATH = /Users/afm/Projects/AstroPhotography/snowgui/../control/root
+ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
-LIBS +=	-L$${ICEDIR}/lib/c++11 -Wl,-rpath,$${ICEDIR}/lib/c++11 -lIce -lIceUtil
+LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include

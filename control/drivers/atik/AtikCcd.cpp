@@ -7,6 +7,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <AstroExceptions.h>
+#include <includes.h>
 
 namespace astro {
 namespace camera {

@@ -11,9 +11,11 @@ CONFIG += staticlib
 
 # Directories for ICE and the astrophotography library
 ICEDIR = @ICEDIR@
+ICDLIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L$${ASTROPATH}/lib -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
 LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include

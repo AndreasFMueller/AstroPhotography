@@ -17,7 +17,7 @@ private:
 	double	upstep();
 	double	downstep();
 public:
-	LogSpinBox(QWidget *parent = NULL);
+	explicit LogSpinBox(QWidget *parent = NULL);
 	virtual void stepBy(int steps);
 };
 

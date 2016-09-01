@@ -41,11 +41,9 @@
 
 #include <pthread.h>
 
-extern "C" int	debuglevel = LOG_ERR;
-
-extern "C" int	debugtimeprecision = 0;
-
-extern "C" int	debugthreads = 0;
+int	debuglevel = LOG_ERR;
+int	debugtimeprecision = 0;
+int	debugthreads = 0;
 
 #define DEBUG_STDERR	0
 #define DEBUG_FD	1

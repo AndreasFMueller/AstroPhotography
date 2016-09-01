@@ -18,7 +18,7 @@ class SelectableImage : public QLabel {
 	bool	_rectangleSelectionEnabled;
 	bool	_pointSelectionEnabled;
 public:
-	SelectableImage(QWidget *parent = NULL);
+	explicit SelectableImage(QWidget *parent = NULL);
 	bool	rectangleSelectionEnabled();
 	bool	pointSelectionEnabled();
 	void	setRectangleSelectionEnabled(bool);

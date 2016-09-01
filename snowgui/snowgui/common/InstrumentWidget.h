@@ -22,7 +22,7 @@ protected:
 	astro::discover::ServiceKey	_servicekey;
 	snowstar::RemoteInstrument	_instrument;
 public:
-	explicit InstrumentWidget(QWidget *parent);
+	explicit InstrumentWidget(QWidget *parent = NULL);
 	~InstrumentWidget();
 	virtual void	instrumentSetup(
 				astro::discover::ServiceObject serviceobject,

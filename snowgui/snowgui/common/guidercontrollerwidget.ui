@@ -392,7 +392,7 @@
   <customwidget>
    <class>snowgui::LogSpinBox</class>
    <extends>QDoubleSpinBox</extends>
-   <header location="global">logspinbox.h</header>
+   <header location="global">LogSpinBox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

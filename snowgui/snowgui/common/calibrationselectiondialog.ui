@@ -73,7 +73,7 @@
   <customwidget>
    <class>snowgui::CalibrationDisplayWidget</class>
    <extends>QWidget</extends>
-   <header location="global">calibrationdisplaywidget.h</header>
+   <header location="global">CalibrationDisplayWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

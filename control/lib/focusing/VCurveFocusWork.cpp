@@ -12,6 +12,7 @@
 #include <AstroFilter.h>
 #include <AstroAdapter.h>
 #include "FWHM2Evaluator.h"
+#include <includes.h>
 
 using namespace astro::image::filter;
 using namespace astro::adapter;

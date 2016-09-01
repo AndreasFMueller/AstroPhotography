@@ -30,7 +30,7 @@ class ccdcontrollerwidget : public InstrumentWidget {
 	bool	_guiderccdonly;
 
 public:
-	explicit ccdcontrollerwidget(QWidget *parent);
+	explicit ccdcontrollerwidget(QWidget *parent = NULL);
 	~ccdcontrollerwidget();
 	virtual void	instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
