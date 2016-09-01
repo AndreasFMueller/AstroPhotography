@@ -401,7 +401,7 @@ public:
 	void	flipped(bool f) { _flipped = f; }
 	void	flip() { _flipped = !_flipped; }
 
-private:
+protected:
 	void	copy(const BasicCalibration& other);
 public:
 	BasicCalibration(const ControlDeviceName& name);

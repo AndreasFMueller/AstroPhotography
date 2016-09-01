@@ -60,8 +60,10 @@ int	PeakFinder::above(const ConstImageAdapter<double>& image, double v) {
  */
 double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 		double minvalue, double maxvalue) {
-	// now start looking for a value so that between 25 and 100 pixels
+	// now start looking for a value so that between 25 and 49 pixels
 	// in the area defined by the radius
+	// XXX these fixed numbers are a problem, because large stars may need
+	// XXX more pixels for a reasonable centroid
 	const int maxpixelcount = 49;
 	const int minpixelcount = 25;
 	const int targetcount = (minpixelcount + maxpixelcount) / 2;
@@ -72,9 +74,13 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 	int	nlow = M_PI * _radius * _radius / 2;
 	int	nhigh = 1;
 	int	iterations = 32;
+	int	pixels = 0;
+	double	v = 0;
 	do {
-		double v = (vlow + vhigh) / 2;
-		int	pixels = above(image, v);
+		// subdivide the interval
+		v = (vlow + vhigh) / 2;
+		// count the number of pixels above this level
+		pixels = above(image, v);
 		if ((pixels > minpixelcount) && (pixels < maxpixelcount)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"FINAL threshold %g gives %d pixels (%d)",
@@ -93,6 +99,17 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "values %f:%f pixelcount: %d:%d",
 			vlow, vhigh, nlow, nhigh);
 	} while (iterations--);
+
+	// if we get to this point, then we did not find an optimal level,
+	// so we have to be content with a less optimal choice. If the number
+	// of pixels is positive and less than half the area of the image,
+	// we run with it anyway
+	if ((pixels > 0) && (pixels < image.getSize().getPixels() / 3)) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"working with suboptimal level %.3f", v);
+		return v;
+	}
+	// now if even that does not work, give up
 	std::string	cause = stringprintf("no suitable level found");
 	debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 	throw std::runtime_error(cause);

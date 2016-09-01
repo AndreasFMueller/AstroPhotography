@@ -55,6 +55,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	ourexposure = false;
 	previousstate = snowstar::IDLE;
 	_guiderccdonly = false;
+	_nosubframe = false;
 }
 
 /**
@@ -582,6 +583,11 @@ void	ccdcontrollerwidget::statusUpdate() {
 		break;
 	}
 	previousstate = newstate;
+}
+
+void	ccdcontrollerwidget::hideSubframe(bool sf) {
+	_nosubframe = sf;
+	ui->frameWidget->setHidden(_nosubframe);
 }
 
 } // namespace snowgui

@@ -9,6 +9,7 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <guidercontrollerwidget.h>
+#include <calibrationdetaildialog.h>
 
 namespace snowgui {
 
@@ -22,8 +23,11 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 		this, SLOT(databaseClicked()));
 	connect(ui->calibrateButton, SIGNAL(clicked()),
 		this, SLOT(calibrateClicked()));
+	connect(ui->detailButton, SIGNAL(clicked()),
+		this, SLOT(detailClicked()));
 
 	_guidercontroller = NULL;
+	_calibration.id = -1;
 }
 
 /**
@@ -120,6 +124,19 @@ void	calibrationwidget::calibrateClicked() {
 		_guidercontroller->setupTracker();
 	}
 	_guider->startCalibration(_controltype);
+}
+
+/**
+ * \brief Display a calibration detail dialog
+ */
+void	calibrationwidget::detailClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "detail display requested");
+	if (_calibration.id <= 0) {
+		return;
+	}
+	calibrationdetaildialog	*cdd = new calibrationdetaildialog(this);
+	cdd->setCalibration(_calibration);
+	cdd->show();
 }
 
 } // namespace snowgui

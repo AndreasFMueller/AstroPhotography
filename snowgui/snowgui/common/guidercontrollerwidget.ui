@@ -89,7 +89,11 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="starxField"/>
+       <widget class="QLineEdit" name="starxField">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
       <item row="3" column="1" colspan="2">
        <widget class="QDoubleSpinBox" name="gpupdateintervalSpinBox">
@@ -105,7 +109,11 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLineEdit" name="staryField"/>
+       <widget class="QLineEdit" name="staryField">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
       <item row="6" column="0" colspan="3">
        <widget class="QPushButton" name="guideButton">

@@ -29,6 +29,7 @@ FORMS    +=								\
 	focusercontrollerwidget.ui					\
 	filterwheelcontrollerwidget.ui					\
 	guiderportcontrollerwidget.ui					\
+	calibrationdetaildialog.ui					\
 	coolercontrollerwidget.ui					\
 	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
@@ -44,6 +45,7 @@ WIDGETSOURCES =								\
 	focusercontrollerwidget.cpp					\
 	filterwheelcontrollerwidget.cpp					\
 	guiderportcontrollerwidget.cpp					\
+	calibrationdetaildialog.cpp					\
 	coolercontrollerwidget.cpp					\
 	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
@@ -59,6 +61,7 @@ WIDGETHEADERS =								\
 	focusercontrollerwidget.h					\
 	filterwheelcontrollerwidget.h					\
 	guiderportcontrollerwidget.h					\
+	calibrationdetaildialog.h					\
 	coolercontrollerwidget.h					\
 	calibrationwidget.h						\
 	calibrationselectiondialog.h					\
@@ -74,6 +77,7 @@ SOURCES += 								\
 	ChannelDisplayWidget.cpp					\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
+	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
@@ -95,6 +99,7 @@ HEADERS  += 								\
 	ChannelDisplayWidget.h						\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
+	CoolerActive.h							\
 	FilterWheelBusy.h						\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\

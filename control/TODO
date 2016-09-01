@@ -1,15 +1,26 @@
 configuration system:
 
-      -	configuration system should use only one table for all domains
-      - configurations should be ICE accessible
+Devices:
+      -	GuiderPort -> GuidePort
+      -	reservation of devices to ensure that a CCD e.g. used for guiging
+	is not used for other exposures at the same time
+      -	query method to ask for the most recent problem with a device
+      -	Camera: query method to ask whether the most recent exposure was
+	successful
+      -	Warmup feature (for ATIK cameras)
+      - Some CCDs have different modes (download speed, image quality,
+	whether or not to turn of the amplifier to prevent amplifier bloom),
+	which should be made available through the CCD interface
 
 Guiding:
-      - Positionsdaten aus Mount in den Kalibrierdaten speichern
-      - Problem beim StarTracker für helle Sterne, die im Laufe der Kalibrierung
-	im Bildfeld auftauchen.
-      - Qualitätskontrolle der kalibrierung
-      - Crash während der Kamerainitialisierung (Filterwheel not idle) führt
-	zu nonrecoverable Fehler bei Kalibrierung und (?) Guiding.
+      -	Missing configuration itmes should result in useful error messages
+      -	transfer mount position data into the calibration
+      -	bright stars that appear in the field of view during calibration
+	lead to problems.
+      -	Crash during camera initialization cause nonrecoverable errors in
+	calibration and guiding. In general, failures in those threads should
+	be handled more gracefully
+      - reservation of relevant devices during calibraiton and guiding
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
@@ -21,18 +32,27 @@ Image:
 URLs:
 
 Instruments:
-      -	add properties to instruments, e.g. for focal length of camera and
-	guider
       - If an ICE instrument changes, but the guider derived from it has
 	already been used, the changes become effective only after a restart
 	of the server
+      - Query method to ask whether an instrument has sufficient configuration
+	for a purpose. E.g. calibration needs focal length and possibly
+	guide speed for calibration, but non of these for guiding.
 
 Drivers:
       - When there is a problem with the SX camera, we should try to reset
 	the camera and retry the operation. It should not be necessary to
 	disconnect and reconnect the camera to reset it.
+      -	It should be possible to reread the devices of a module, just in
+	case a new device was added during runtime.
 
 ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout
 	exception sent back to the client and hopefully handled there
       -	shutter option für snowtask.cpp
+
+General:
+      - Template class with variadic constructor for throwing exceptions
+	(doing the usual msg = stringprintf, debug(LOG_ERR,...) and throw
+	all at once by simply instatiating the template).
+
