@@ -11,20 +11,32 @@
 
 namespace snowgui {
 
+/**
+ * \brief Construct Filterwheel busy indicator
+ */
 FilterWheelBusy::FilterWheelBusy(QWidget *parent) : QWidget(parent) {
 	timer = NULL;
 	_nfilters = 5;
 	_angle = 0;
 }
 
+/**
+ * \brief Destroy the Filterwheel busy indicator
+ */
 FilterWheelBusy::~FilterWheelBusy() {
 	stop();
 }
 
+/**
+ * \brief Set the filter wheel to a certain position
+ */
 void	FilterWheelBusy::position(int n) {
 	_angle = n * 2 * M_PI / _nfilters;
 }
 
+/**
+ * \brief Start the filterwheel rotation
+ */
 void	FilterWheelBusy::start() {
 	_starttime = astro::Timer::gettime() - _angle;
 	timer = new QTimer();
@@ -33,6 +45,9 @@ void	FilterWheelBusy::start() {
 	timer->start();
 }
 
+/**
+ * \brief Stop the filter wheel rotation
+ */
 void	FilterWheelBusy::stop() {
 	if (timer) {
 		timer->stop();
@@ -41,15 +56,24 @@ void	FilterWheelBusy::stop() {
 	}
 }
 	
+/**
+ * \brief Update the angle and repaint the filterwheel
+ */
 void	FilterWheelBusy::update() {
 	_angle = astro::Timer::gettime() - _starttime;
 	repaint();
 }
 
+/**
+ * \brief Handle point events
+ */
 void	FilterWheelBusy::paintEvent(QPaintEvent * /* event */) {
 	draw();
 }
 
+/**
+ * \brief Draw the filterwheel
+ */
 void	FilterWheelBusy::draw() {
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);

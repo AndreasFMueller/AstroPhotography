@@ -11,6 +11,12 @@
 
 namespace snowgui {
 
+/**
+ * \brief cooler activity display widget
+ *
+ * This widget is essentially a pushbutton, but with a different type of
+ * display
+ */
 class CoolerActive : public QPushButton {
 	Q_OBJECT
 

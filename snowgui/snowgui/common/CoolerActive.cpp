@@ -1,5 +1,5 @@
 /*
- * CoolerActive.pp
+ * CoolerActive.cpp -- implementation of cooler activity display widget
  *
  * (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -191,16 +191,25 @@ void	CoolerActive::draw() {
 	painter.fillPath(flake, flakecolor);
 }
 
+/**
+ * \brief Handle paint events
+ */
 void	CoolerActive::paintEvent(QPaintEvent * /* event */) {
 	draw();
 }
 
+/**
+ * \brief slot to trigger a repaint action
+ */
 void	CoolerActive::update() {
 	repaint();
 }
 
 static double	alpha = 0.1;
 
+/**
+ * \brief update the activity display for new temperature values
+ */
 void	CoolerActive::update(float actualtemp, float settemp, bool active) {
 	_active = active;
 	double	newvalue = 1;
@@ -217,6 +226,9 @@ void	CoolerActive::update(float actualtemp, float settemp, bool active) {
 	repaint();
 }
 
+/**
+ * \brief
+ */
 void	CoolerActive::buttonClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "button clicked");
 	setActive(!_active);

@@ -11,6 +11,9 @@
 
 namespace snowgui {
 
+/**
+ * \brief Indicator class the shows how the filterwheel rotates
+ */
 class FilterWheelBusy : public QWidget {
 	Q_OBJECT
 
