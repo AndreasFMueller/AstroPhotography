@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>snowgui::adaptiveopticscontrollerwidget</class>
+ <widget class="QWidget" name="snowgui::adaptiveopticscontrollerwidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>230</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>230</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QComboBox" name="adaptiveopticsSelectionBox"/>
+   </item>
+   <item>
+    <widget class="snowgui::AdaptiveOpticsWidget" name="adaptiveopticsWidget">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::AdaptiveOpticsWidget</class>
+   <extends>QLabel</extends>
+   <header location="global">AdaptiveOpticsWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -38,6 +38,7 @@ public:
 				const Ice::Current& current);
 	idlist	getAllCalibrations(const Ice::Current& current);
 	idlist	getCalibrations(const GuiderDescriptor& guider,
+				ControlType type,
 				const Ice::Current& current);
 	Calibration	getCalibration(int id,
 				const Ice::Current& current);

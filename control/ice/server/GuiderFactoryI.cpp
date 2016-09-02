@@ -126,10 +126,11 @@ idlist	GuiderFactoryI::getAllCalibrations(const Ice::Current& /* current */) {
  * \brief Get all the calibrations for a specific guider
  */
 idlist	GuiderFactoryI::getCalibrations(const GuiderDescriptor& guider,
-			const Ice::Current& /* current */) {
+			ControlType type, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations");
 	astro::guiding::CalibrationStore	store(database);
-	std::list<long> calibrations = store.getCalibrations(convert(guider));
+	std::list<long> calibrations = store.getCalibrations(convert(guider),
+						convertcontroltype(type));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d calibrations",
 		calibrations.size());
 	idlist	result;

@@ -80,6 +80,7 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name,
  */
 BasicCalibration::BasicCalibration(const BasicCalibration& other)
 	: _name(other.name()) {
+	_calibrationid = -1;
 	copy(other);
 }
 

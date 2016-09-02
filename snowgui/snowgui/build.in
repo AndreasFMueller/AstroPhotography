@@ -6,10 +6,10 @@
 #
 case `uname` in
 	Linux)
-		rm -rf snowgui.app
+		rm snowgui
 		;;
 	Darwin)
-		rm snowgui
+		rm -rf snowgui.app
 		;;
 esac
 

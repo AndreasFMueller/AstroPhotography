@@ -79,7 +79,8 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 
 	// get all the calibration ids for this guider descriptor
 	snowstar::idlist	ids
-		= _guiderfactory->getCalibrations(_guiderdescriptor);
+		= _guiderfactory->getCalibrations(_guiderdescriptor,
+			controltype);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider found %d ids", ids.size());
 
 	// now retrieve each calibration and decide whether to display it
@@ -90,6 +91,8 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		try {
 			snowstar::Calibration	cal
 				= _guiderfactory->getCalibration(*i);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: type %d",
+				*i, cal.type);
 			if ((cal.type == _controltype) && (cal.complete)) {
 				_calibrations.push_back(cal);
 				std::string	label = formatlabel(cal);

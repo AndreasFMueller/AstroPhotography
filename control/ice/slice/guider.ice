@@ -324,7 +324,8 @@ module snowstar {
 		/**
 		 * \brief Retrieve a list of valid calibration ids for a guider
 		 */
-		idlist	getCalibrations(GuiderDescriptor guider);
+		idlist	getCalibrations(GuiderDescriptor guider,
+				ControlType type);
 
 		/**
 		 * \brief Retrieve the Calibration by id

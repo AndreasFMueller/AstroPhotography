@@ -91,6 +91,16 @@
        <widget class="snowgui::guiderportcontrollerwidget" name="guiderportcontrollerWidget" native="true"/>
       </item>
       <item>
+       <widget class="snowgui::adaptiveopticscontrollerwidget" name="adaptiveopticscontrollerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>230</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
          <number>1</number>
@@ -101,7 +111,7 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>495</height>
+           <height>465</height>
           </rect>
          </property>
          <attribute name="label">
@@ -114,7 +124,7 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>485</height>
+           <height>245</height>
           </rect>
          </property>
          <attribute name="label">
@@ -127,7 +137,7 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>495</height>
+           <height>465</height>
           </rect>
          </property>
          <attribute name="label">
@@ -182,6 +192,12 @@
    <class>snowgui::guidercontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">guidercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::adaptiveopticscontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">adaptiveopticscontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -64,6 +64,8 @@ void	guidingwindow::instrumentSetup(
 		instrument);
 	ui->guiderportcontrollerWidget->instrumentSetup(serviceobject,
 		instrument);
+	ui->adaptiveopticscontrollerWidget->instrumentSetup(serviceobject,
+		instrument);
 	ui->guidercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	setAppname("Guiding");
 }

@@ -1124,7 +1124,8 @@ public:
 		: _database(database) { }
 	std::list<long>	getAllCalibrations();
 	std::list<long>	getAllCalibrations(ControlDeviceType);
-	std::list<long>	getCalibrations(const GuiderDescriptor& guider);
+	std::list<long>	getCalibrations(const GuiderDescriptor& guider,
+				ControlDeviceType type);
 
 	// access to calibrations
 	bool	contains(long id);

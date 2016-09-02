@@ -24,6 +24,7 @@ INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
+	adaptiveopticscontrollerwidget.ui				\
 	imagedisplaywidget.ui						\
 	ccdcontrollerwidget.ui						\
 	focusercontrollerwidget.ui					\
@@ -40,6 +41,7 @@ FORMS    +=								\
 	trackviewdialog.ui
 
 WIDGETSOURCES =								\
+	adaptiveopticscontrollerwidget.cpp				\
 	imagedisplaywidget.cpp						\
 	ccdcontrollerwidget.cpp						\
 	focusercontrollerwidget.cpp					\
@@ -56,6 +58,7 @@ WIDGETSOURCES =								\
 	trackviewdialog.cpp
 
 WIDGETHEADERS =								\
+	adaptiveopticscontrollerwidget.h				\
 	ccdcontrollerwidget.h						\
 	imagedisplaywidget.h						\
 	focusercontrollerwidget.h					\
@@ -72,6 +75,7 @@ WIDGETHEADERS =								\
 	trackviewdialog.h
 
 SOURCES += 								\
+	AdaptiveOpticsWidget.cpp					\
 	AutoGain.cpp							\
 	CalibrationDisplayWidget.cpp					\
 	ChannelDisplayWidget.cpp					\
@@ -94,6 +98,7 @@ SOURCES += 								\
 
 
 HEADERS  += 								\
+	AdaptiveOpticsWidget.h						\
 	AutoGain.h							\
 	CalibrationDisplayWidget.h					\
 	ChannelDisplayWidget.h						\

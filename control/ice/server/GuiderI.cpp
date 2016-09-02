@@ -320,22 +320,28 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuiderPort:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for GP calibration");
 		if (!guider->hasGuiderport()) {
 			throw BadState("no guider port present");
 		}
 		if (!guider->guiderPortDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
+			guider->guiderPortDevice->calibrationid());
 		calibration = source.get(guider->guiderPortDevice->calibrationid());
 		calibration.flipped = guider->guiderPortDevice->flipped();
 		return calibration;
 	case ControlAdaptiveOptics:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for AO calibration");
 		if (!guider->hasAdaptiveoptics()) {
 			throw BadState("no adaptive optics present");
 		}
 		if (!guider->adaptiveOpticsDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
+			guider->adaptiveOpticsDevice->calibrationid());
 		calibration = source.get(guider->adaptiveOpticsDevice->calibrationid());
 		calibration.flipped = guider->adaptiveOpticsDevice->flipped();
 		return calibration;

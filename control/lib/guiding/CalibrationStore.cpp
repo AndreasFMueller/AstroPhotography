@@ -46,9 +46,15 @@ std::list<long>	CalibrationStore::getAllCalibrations(ControlDeviceType type) {
  * the guider descriptor, sorted by start time.
  */
 std::list<long>	CalibrationStore::getCalibrations(
-			const GuiderDescriptor& guider) {
+			const GuiderDescriptor& guider,
+			ControlDeviceType type) {
 	std::ostringstream	out;
 	out << " name = '" << guider.name() << "'";
+	out << " and controltype = ";
+	switch (type) {
+	case GP:	out << 0; break;
+	case AO:	out << 1; break;
+	}
 	out << " order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
