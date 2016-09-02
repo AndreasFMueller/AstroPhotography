@@ -15,10 +15,10 @@ ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L../common -lcommon
 LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
 LIBS += -L../guiding -lguiding
+LIBS += -L../common -lcommon
 LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
 LIBS +=	$${ICELIBS} -lIce -lIceUtil
 

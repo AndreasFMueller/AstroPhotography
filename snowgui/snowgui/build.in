@@ -1,0 +1,36 @@
+#
+# temporary workaround until we figure out how to tell qmake about
+# static library dependencies
+#
+# (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
+#
+case `uname` in
+	Linux)
+		rm -rf snowgui.app
+		;;
+	Darwin)
+		rm snowgui
+		;;
+esac
+
+# build the application
+make -j 8
+
+if [ -r servername ]
+then
+	servername=`cat servername`
+else
+	servername=server
+fi
+
+case `uname` in
+	Linux)
+		LD_LIBRARY_PATH=@ASTROLIBDIR@:$LD_LIBRARY_PATH
+		export LD_LIBRARY_PATH
+		./snowgui --debug --server=${servername} 2>&1 | tee build.log
+		;;
+	Darwin)
+		./snowgui.app/Contents/MacOS/snowgui --debug \
+			--server=${servername} 2>&1 | tee build.log
+		;;
+esac
