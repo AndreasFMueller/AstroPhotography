@@ -223,6 +223,11 @@ void	focusercontrollerwidget::statusUpdate() {
 		return;
 	}
 	int	current = _focuser->current();
+	if (current != _previousposition) {
+		double	f = current / 5000.;
+		ui->positionButton->update(f);
+		_previousposition = current;
+	}
 	int	target = ui->positionSpinBox->value();
 	bool	targetreached = current == target;
 	ui->positionButton->setEnabled(!targetreached);

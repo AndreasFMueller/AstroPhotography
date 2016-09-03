@@ -29,6 +29,7 @@ public:
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument);
 	int	getCurrentPosition();
+	int	_previousposition;
 
 signals:
 	void	targetPositionReached();

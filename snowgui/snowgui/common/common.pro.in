@@ -83,6 +83,7 @@ SOURCES += 								\
 	ColorRectangles.cpp						\
 	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
+	FocusButton.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
 	Histogram.cpp							\
@@ -106,6 +107,7 @@ HEADERS  += 								\
 	ColorRectangles.h						\
 	CoolerActive.h							\
 	FilterWheelBusy.h						\
+	FocusButton.h							\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\
 	Histogram.h							\

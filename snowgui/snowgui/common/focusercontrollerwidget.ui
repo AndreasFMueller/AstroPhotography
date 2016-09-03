@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::focusercontrollerwidget</class>
- <widget class="QWidget" name="focusercontrollerwidget">
+ <widget class="QWidget" name="snowgui::focusercontrollerwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -97,7 +97,7 @@
        </widget>
       </item>
       <item row="0" column="2" rowspan="2">
-       <widget class="QPushButton" name="positionButton">
+       <widget class="snowgui::FocusButton" name="positionButton">
         <property name="minimumSize">
          <size>
           <width>60</width>
@@ -120,6 +120,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::FocusButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">FocusButton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <slots>
