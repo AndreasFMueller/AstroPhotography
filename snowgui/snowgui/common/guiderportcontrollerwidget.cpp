@@ -20,13 +20,13 @@ guiderportcontrollerwidget::guiderportcontrollerwidget(QWidget *parent)
 	connect(ui->guiderportSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiderportChanged(int)));
 
-	connect(ui->raplusButton, SIGNAL(clicked()),
+	connect(ui->guiderButton, SIGNAL(westClicked()),
 		this, SLOT(activateRAplus()));
-	connect(ui->raminusButton, SIGNAL(clicked()),
+	connect(ui->guiderButton, SIGNAL(eastClicked()),
 		this, SLOT(activateRAminus()));
-	connect(ui->decplusButton, SIGNAL(clicked()),
+	connect(ui->guiderButton, SIGNAL(northClicked()),
 		this, SLOT(activateDECplus()));
-	connect(ui->decminusButton, SIGNAL(clicked()),
+	connect(ui->guiderButton, SIGNAL(southClicked()),
 		this, SLOT(activateDECminus()));
 
 	connect(ui->activationtimeSpinBox, SIGNAL(valueChanged(double)),

@@ -86,6 +86,7 @@ SOURCES += 								\
 	FocusButton.cpp							\
 	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
+	GuiderButton.cpp						\
 	Histogram.cpp							\
 	Image2Pixmap.cpp						\
 	InstrumentWidget.cpp						\
@@ -110,6 +111,7 @@ HEADERS  += 								\
 	FocusButton.h							\
 	FocusPoints.h							\
 	FocusPointsWidget.h						\
+	GuiderButton.h							\
 	Histogram.h							\
 	Image2Pixmap.h							\
 	InstrumentWidget.h						\
