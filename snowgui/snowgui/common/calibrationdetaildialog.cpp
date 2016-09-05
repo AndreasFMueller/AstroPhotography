@@ -31,6 +31,8 @@ calibrationdetaildialog::calibrationdetaildialog(QWidget *parent) :
 	ui->calibrationpointsTable->setColumnWidth(2, 55);
 	ui->calibrationpointsTable->setColumnWidth(3, 55);
 	ui->calibrationpointsTable->setColumnWidth(4, 55);
+
+	ui->calibrationdisplayWidget->pointlabels(true);
 }
 
 calibrationdetaildialog::~calibrationdetaildialog() {

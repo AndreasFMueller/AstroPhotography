@@ -18,9 +18,9 @@ using namespace astro::camera;
  */
 SimAdaptiveOptics::SimAdaptiveOptics()
 	: AdaptiveOptics("adaptiveoptics:simulator/adaptiveoptics"),
-	  pixels_fullrange(4.) {
+	  pixels_fullrange(16.) {
 	starttime = simtime();
-	_amplitude = pixels_fullrange / 2;
+	_amplitude = pixels_fullrange / 4;
 	_activated = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "AdaptiveOptics %s created at %f",
 		name().toString().c_str(), starttime);
@@ -36,6 +36,8 @@ SimAdaptiveOptics::~SimAdaptiveOptics() {
 
 /** 
  * \brief Set position of the adaptive optics unit
+ *
+ * \param position	position to set the simulated AO device to
  */
 void	SimAdaptiveOptics::set0(const Point& position) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set position of %s to %s",
@@ -57,6 +59,9 @@ Point	SimAdaptiveOptics::offset() const {
 	}
 	double	age = simtime() - starttime;
 	Point	v;
+	// during the first two minutes, done add the periodic error
+	// that we would later like to correct using the adaptive optics
+	// functionality
 	if (age > 120) {
 		double	phi = 0.05 * (simtime() - starttime);
 		v = Point(_amplitude * cos(3 * phi),

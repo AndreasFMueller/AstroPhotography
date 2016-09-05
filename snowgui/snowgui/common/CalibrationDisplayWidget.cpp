@@ -19,6 +19,7 @@ CalibrationDisplayWidget::CalibrationDisplayWidget(QWidget *parent)
 	: QWidget(parent) {
 	_calibration.id = -1;
 	_calibration.complete = false;
+	_pointlabels = false;
 }
 
 /**
@@ -126,6 +127,27 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 
 	// get the first point as a reference
 	snowstar::Point	ref;
+	switch (_calibration.type) {
+	case snowstar::ControlGuiderPort:
+		{
+		snowstar::CalibrationPoint	p = _calibration.points[0];
+		ref.x = p.star.x;
+		ref.y = p.star.y;
+		}
+		break;
+	case snowstar::ControlAdaptiveOptics:
+		{
+		ref.x = 0;
+		ref.y = 0;
+		for (unsigned int i = 0; i < _calibration.points.size(); i++) {
+			ref.x += _calibration.points[i].star.x;
+			ref.y += _calibration.points[i].star.y;
+		}
+		ref.x /= _calibration.points.size();
+		ref.y /= _calibration.points.size();
+		}
+		break;
+	}
 
 	// determine the coordinate system scale, for this we first need
 	// some parameters
@@ -135,7 +157,6 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	double	maxy = 1;
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
-		if (i == 0) { ref.x = p.star.x; ref.y = p.star.y; }
 
 		// compute the time interval used
 		if (p.offset.x != 0) {
@@ -221,12 +242,32 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 			painter.fillPath(path, QBrush((red * 0.3).qcolor()));
 		}
 	}
+	QFont	labelfont;
+	labelfont.setPointSize(12);
+	painter.setFont(labelfont);
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		// actual point
+		pen.setColor(pencolor);
+		painter.setPen(pen);
 		snowstar::CalibrationPoint	p = _calibration.points[i];
-		QPointF	pf((p.star.x - ref.x) * scale + cx,
-				h - ((p.star.y - ref.y) * scale + cy));
+		QPointF	relpoint((p.star.x - ref.x) * scale,
+				(p.star.y - ref.y) * scale);
+		QPointF	pf(relpoint.x() + cx, h - (relpoint.y() + cy));
 		painter.drawPoint(pf);
+
+		// display the label if the point is far enough away
+		double	d = hypot(relpoint.x(), relpoint.y());
+		double	s = (d + 10) / d;
+		if ((d > 15) && (_pointlabels)) {
+			pen.setColor(QColor(0, 0, 0));
+			painter.setPen(pen);
+			QPointF	labelpoint(s * relpoint.x() + cx - 10,
+					h - (s * relpoint.y() + cy) - 10);
+			char	l[10];
+			snprintf(l, sizeof(l), "%lu", i);
+			painter.drawText(labelpoint.x(), labelpoint.y(),
+				20, 20, Qt::AlignCenter, QString(l));
+		}
 	}
 	
 	if (!drawvectors) {
@@ -236,6 +277,8 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	// draw the vectors
 	QPointF	center(cx, cy);
 	pen.setWidth(2);
+	QFont	font;
+	painter.setFont(font);
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw R vector");
 	pen.setColor((dim) ? QColor(51., 51., 102.) : QColor(0., 0., 204.));

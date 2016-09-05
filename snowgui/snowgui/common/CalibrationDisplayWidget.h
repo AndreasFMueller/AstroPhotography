@@ -15,9 +15,13 @@ class CalibrationDisplayWidget : public QWidget {
 	Q_OBJECT
 
 	snowstar::Calibration	_calibration;
+	bool	_pointlabels;
 public:
 	explicit CalibrationDisplayWidget(QWidget *parent = 0);
 	virtual ~CalibrationDisplayWidget();
+
+	void	pointlabels(bool b) { _pointlabels = b; }
+	bool	pointlabels() const { return _pointlabels; }
 
 protected:
 	void    paintEvent(QPaintEvent *);
