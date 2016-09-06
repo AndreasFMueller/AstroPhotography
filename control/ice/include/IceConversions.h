@@ -142,8 +142,8 @@ astro::guiding::TrackingSummary	convert(const TrackingSummary& summary);
 CalibrationPoint	convert(const astro::guiding::CalibrationPoint& cp);
 astro::guiding::CalibrationPoint	convert(const CalibrationPoint& cp);
 
-Calibration	convert(const astro::guiding::GuiderCalibration& cal);
-astro::guiding::GuiderCalibration	convert(const Calibration& cal);
+Calibration	convert(const astro::guiding::BasicCalibration& cal);
+astro::guiding::BasicCalibration	*convert(const Calibration& cal);
 
 std::string	guiderdescriptor2name(const GuiderDescriptor& descriptor);
 GuiderDescriptor	guiderdescriptorParse(const std::string &name);

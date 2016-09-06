@@ -21,8 +21,6 @@ namespace guiding {
  */
 GuiderCalibration::GuiderCalibration(const ControlDeviceName& name)
 	: BasicCalibration(name) {
-	focallength = 0;
-	masPerPixel = 0;
 }
 
 /**
@@ -30,8 +28,6 @@ GuiderCalibration::GuiderCalibration(const ControlDeviceName& name)
  */
 GuiderCalibration::GuiderCalibration(const ControlDeviceName& name,
 	const double coefficients[6]) : BasicCalibration(name, coefficients) {
-	focallength = 0;
-	masPerPixel = 0;
 }
 
 /**
@@ -39,8 +35,6 @@ GuiderCalibration::GuiderCalibration(const ControlDeviceName& name,
  */
 GuiderCalibration::GuiderCalibration(const BasicCalibration& other)
 	: BasicCalibration(other) {
-	focallength = 0;
-	masPerPixel = 0;
 }
 
 /**

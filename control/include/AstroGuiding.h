@@ -414,6 +414,9 @@ public:
 	double	quality() const;
 	double	det() const;
 
+	double	focallength;
+	double	masPerPixel;
+
 	// string representation of the baseic 
 	std::string	toString() const;
 
@@ -432,6 +435,7 @@ public:
 	// reset
 	void	reset();
 };
+typedef std::shared_ptr<BasicCalibration>	CalibrationPtr;
 
 std::ostream&	operator<<(std::ostream& out, const BasicCalibration& cal);
 std::istream&	operator>>(std::istream& in, BasicCalibration& cal);
@@ -445,8 +449,6 @@ std::istream&	operator>>(std::istream& in, BasicCalibration& cal);
  */
 class GuiderCalibration : public BasicCalibration {
 public:
-	double	focallength;
-	double	masPerPixel;
 	GuiderCalibration(const ControlDeviceName& name);
 	GuiderCalibration(const ControlDeviceName& name,
 		const double coefficients[6]);
@@ -1102,9 +1104,7 @@ public:
 	int	controltype;
 	PersistentCalibration();
 	PersistentCalibration(const BasicCalibration& other);
-	PersistentCalibration(const GuiderCalibration& other);
 	PersistentCalibration&	operator=(const BasicCalibration& other);
-	PersistentCalibration&	operator=(const GuiderCalibration& other);
 };
 
 typedef persistence::Persistent<PersistentCalibration>	CalibrationRecord;
@@ -1117,8 +1117,8 @@ typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
  */
 class CalibrationStore {
 	astro::persistence::Database&	_database;
-	ControlDeviceName	nameFromRecord(const CalibrationRecord& record,
-					ControlDeviceType type) const;
+	ControlDeviceName	nameFromRecord(
+					const CalibrationRecord& record) const;
 public:
 	CalibrationStore(astro::persistence::Database& database)
 		: _database(database) { }
@@ -1136,12 +1136,7 @@ public:
 	void	updateCalibration(const BasicCalibration& calibration);
 
 	// guider calibration
-	GuiderCalibration	getGuiderCalibration(long id);
-	void	updateCalibration(const GuiderCalibration& calibration);
-
-	// adaptive optics calibration
-	AdaptiveOpticsCalibration	getAdaptiveOpticsCalibration(long id);
-	void	updateCalibration(const AdaptiveOpticsCalibration& calibration);
+	CalibrationPtr	getCalibration(long id);
 
 	// guider points
 	std::list<CalibrationPointRecord>	getCalibrationPoints(long id);

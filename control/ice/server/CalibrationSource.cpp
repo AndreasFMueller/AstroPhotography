@@ -35,14 +35,10 @@ Calibration	CalibrationSource::get(int id) {
 		}
 
 		// now try to get the calibration
-		Calibration	calibration;
-		try {
-			// try retrieve a guider calibration. If that fails ...
-			calibration = convert(store.getGuiderCalibration(id));
-		} catch (...) {
-			// try an adaptive optics calibration.
-			calibration = convert(store.getAdaptiveOpticsCalibration(id));
-		}
+		astro::guiding::CalibrationPtr	cal = store.getCalibration(id);
+		Calibration	calibration = convert(*cal);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d time %f",
+			calibration.id, calibration.timeago);
 
 		// add the calibration points, this is independent of the
 		// control device type

@@ -42,6 +42,8 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name)
 	a[0] = a[1] = a[2] = a[3] = a[4] = a[5] = 0.;
 	_complete = false;
 	_flipped = false;
+	masPerPixel = 0;
+	focallength = 0;
 	time(&_when);
 }
 
@@ -72,6 +74,8 @@ BasicCalibration::BasicCalibration(const ControlDeviceName& name,
 	}
 	_complete = true;
 	_flipped = false;
+	masPerPixel = 0;
+	focallength = 0;
 	time(&_when);
 }
 
@@ -228,6 +232,8 @@ void	BasicCalibration::copy(const BasicCalibration& other) {
 	for (int i = 0; i < 6; i++) { a[i] = other.a[i]; }
 	_complete = other._complete;
 	_flipped = other._flipped;
+	masPerPixel = other.masPerPixel;
+	focallength = other.focallength;
 
 	// copy points
 	clear();

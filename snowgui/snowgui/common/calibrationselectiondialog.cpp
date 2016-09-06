@@ -91,8 +91,8 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		try {
 			snowstar::Calibration	cal
 				= _guiderfactory->getCalibration(*i);
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: type %d",
-				*i, cal.type);
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d: type %d, time %.1f",
+				*i, cal.type, cal.timeago);
 			if ((cal.type == _controltype) && (cal.complete)) {
 				_calibrations.push_back(cal);
 				std::string	label = formatlabel(cal);

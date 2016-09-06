@@ -62,37 +62,20 @@ void	ControlDeviceBase::calibrationid(int calid) {
 	std::type_index	type = typeid(*_calibration);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration type: %s", type.name());
 
-	// check for guider calibration
-	if (type == typeid(GuiderCalibration)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration %d", calid);
-		if (!store.containscomplete(calid, GP)) {
-			throw std::runtime_error("no such calibration id");
-		}
-		GuiderCalibration	*gcal
-			= dynamic_cast<GuiderCalibration *>(_calibration);
-		if (NULL == gcal) {
-			return;
-		}
-		*gcal = store.getGuiderCalibration(calid);
-		gcal->calibrationid(calid);
-		return;
+	// get the calibration from the store
+	CalibrationPtr	storedcal = store.getCalibration(calid);
+	std::type_index	storedtype = typeid(*storedcal);
+
+	// we have a problem if they are different
+	if (type != storedtype) {
+		std::string	cause = stringprintf("calibration %d has "
+			"wrong type", calid);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
 	}
 
-	// check for adaptive optics calibration
-	if (type == typeid(AdaptiveOpticsCalibration)) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "AO calibration %d", calid);
-		if (!store.containscomplete(calid, AO)) {
-			throw std::runtime_error("no such calibration id");
-		}
-		AdaptiveOpticsCalibration	*acal
-			= dynamic_cast<AdaptiveOpticsCalibration *>(_calibration);
-		if (NULL == acal) {
-			return;
-		}
-		*acal = store.getAdaptiveOpticsCalibration(calid);
-		acal->calibrationid(calid);
-		return;
-	}
+	// now copy stuff over
+	*_calibration = *storedcal;
 }
 
 int	ControlDeviceBase::calibrationid() const {
