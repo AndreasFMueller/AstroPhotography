@@ -144,6 +144,32 @@ void	ControlDeviceBase::exposure(const camera::Exposure& e) {
  */
 int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "common calibration start");
+
+        // reset the current calibration, just to make sure we don't confuse
+        // it with the previous
+        _calibration->reset();
+
+        // set the focal length
+        _calibration->focallength = parameter(std::string("focallength"), 1.0);
+        debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
+		_calibration->focallength);
+
+#if 0
+        // create the calibration process
+        CalibrationProcess      *calibrationprocess
+                = new CalibrationProcess(_guider, _device, tracker, _database);
+        process = BasicProcessPtr(calibrationprocess);
+#endif
+
+	// set the device specific
+	process->focallength(_calibration->focallength);
+
+	// compute angular size of pixels
+	_calibration->masPerPixel
+		= (_guider->pixelsize() / _calibration->focallength)
+			* (180 * 3600 * 1000 / M_PI);
+
+	// database related stuff
 	if (_database) {
 		// initialize the calibration as far as we can
 		_calibration->calibrationid(0);

@@ -237,11 +237,15 @@ void	BasicCalibration::copy(const BasicCalibration& other) {
 
 	// copy points
 	clear();
+	std::copy(other.begin(), other.end(), back_inserter(*this));
+#if 0
+	clear();
 	BasicCalibration	*bc = this;
 	for_each(begin(), end(), [bc](CalibrationPoint point) {
 			bc->add(point);
 		}
 	);
+#endif
 }
 
 } // namespace guiding

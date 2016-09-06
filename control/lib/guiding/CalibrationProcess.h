@@ -26,10 +26,6 @@ namespace guiding {
 class CalibrationProcess : public GuiderPortProcess {
 	// parameters for the calibration process
 	/**
-	 * \brief focal length of guide scope in mm
-	 */
-	double	_focallength;
-	/**
 	 * \brief Pixel size in um
  	 */
 	double	grid;
