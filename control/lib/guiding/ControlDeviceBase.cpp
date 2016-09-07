@@ -168,6 +168,8 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 	_calibration->masPerPixel
 		= (_guider->pixelsize() / _calibration->focallength)
 			* (180 * 3600 * 1000 / M_PI);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "masPerPixel = %.1f",
+		_calibration->masPerPixel);
 
 	// database related stuff
 	if (_database) {
@@ -188,13 +190,11 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		record.controldevice = devicename();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "quality: %f", record.quality);
 
-		// add specific attributes
-		GuiderCalibration	*gcal
-			= dynamic_cast<GuiderCalibration *>(_calibration);
-		if (NULL != gcal) {
-			record.focallength = gcal->focallength;
-			record.masPerPixel = gcal->masPerPixel;
-		}
+		// resolution attributes
+		record.focallength = _calibration->focallength;
+		record.masPerPixel = _calibration->masPerPixel;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "record has masPerPixel = %.1f",
+			record.masPerPixel);
 
 		// record der Tabelle zufügen
 		CalibrationTable	calibrationtable(_database);
@@ -234,9 +234,9 @@ bool	ControlDeviceBase::waitCalibration(double timeout) {
  */
 void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"received calibration %s to save as %d, %d points",
+		"received calibration %s to save as %d, %d points, masPerPixel =%.1f",
 		cal.toString().c_str(), _calibration->calibrationid(),
-		cal.size());
+		cal.size(), cal.masPerPixel);
 	_calibrating = false;
 	if (!_database) {
 		return;
