@@ -11,14 +11,14 @@ namespace guiding {
 GuiderPortProcess::GuiderPortProcess(GuiderBase *guider,
 	camera::GuiderPortPtr guiderport, TrackerPtr tracker,
 	persistence::Database database)
-	: BasicProcess(guider, tracker, database),
+	: CalibrationProcess(guider, tracker, database),
 	  _guiderport(guiderport) {
 }
 
 GuiderPortProcess::GuiderPortProcess(const camera::Exposure& exposure, 
 	camera::Imager& imager, camera::GuiderPortPtr guiderport, 
 	TrackerPtr tracker, persistence::Database database)
-	: BasicProcess(exposure, imager, tracker, database),
+	: CalibrationProcess(exposure, imager, tracker, database),
 	  _guiderport(guiderport) {
 }
 

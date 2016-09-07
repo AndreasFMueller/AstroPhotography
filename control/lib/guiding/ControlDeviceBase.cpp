@@ -25,7 +25,6 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
 	_calibrating = false;
 	ControlDeviceCallback	*cb = new ControlDeviceCallback(this);
 	_callback = CallbackPtr(cb);
-	_guider->addGuidercalibrationCallback(_callback);
 	_guider->addCalibrationCallback(_callback);
 	_calibration = NULL;
 }
@@ -34,7 +33,6 @@ ControlDeviceBase::ControlDeviceBase(GuiderBase *guider,
  * \brief destroy the control device
  */
 ControlDeviceBase::~ControlDeviceBase() {
-	_guider->removeGuidercalibrationCallback(_callback);
 	_guider->removeCalibrationCallback(_callback);
 }
 
@@ -147,29 +145,30 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 
         // reset the current calibration, just to make sure we don't confuse
         // it with the previous
-        _calibration->reset();
+	CalibrationProcess	*calibrationprocess = dynamic_cast<CalibrationProcess *>(&*process);
+	if (NULL == calibrationprocess) {
+		std::string	cause = stringprintf("not a calibration "
+			"process: %s",
+			demangle(typeid(*process).name()).c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw std::runtime_error(cause);
+	}
+        _calibration = calibrationprocess->calibration();
 
         // set the focal length
-        _calibration->focallength = parameter(std::string("focallength"), 1.0);
+        _calibration->focallength(parameter(std::string("focallength"), 1.0));
         debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
-		_calibration->focallength);
-
-#if 0
-        // create the calibration process
-        CalibrationProcess      *calibrationprocess
-                = new CalibrationProcess(_guider, _device, tracker, _database);
-        process = BasicProcessPtr(calibrationprocess);
-#endif
+		_calibration->focallength());
 
 	// set the device specific
-	process->focallength(_calibration->focallength);
+	process->focallength(_calibration->focallength());
 
 	// compute angular size of pixels
-	_calibration->masPerPixel
-		= (_guider->pixelsize() / _calibration->focallength)
-			* (180 * 3600 * 1000 / M_PI);
+	_calibration->masPerPixel(
+		(_guider->pixelsize() / _calibration->focallength())
+			* (180 * 3600 * 1000 / M_PI));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "masPerPixel = %.1f",
-		_calibration->masPerPixel);
+		_calibration->masPerPixel());
 
 	// database related stuff
 	if (_database) {
@@ -191,8 +190,8 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "quality: %f", record.quality);
 
 		// resolution attributes
-		record.focallength = _calibration->focallength;
-		record.masPerPixel = _calibration->masPerPixel;
+		record.focallength = _calibration->focallength();
+		record.masPerPixel = _calibration->masPerPixel();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "record has masPerPixel = %.1f",
 			record.masPerPixel);
 
@@ -232,25 +231,18 @@ bool	ControlDeviceBase::waitCalibration(double timeout) {
 /**
  * \brief save a guider calibration
  */
-void	ControlDeviceBase::saveCalibration(const BasicCalibration& cal) {
+void	ControlDeviceBase::saveCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"received calibration %s to save as %d, %d points, masPerPixel =%.1f",
-		cal.toString().c_str(), _calibration->calibrationid(),
-		cal.size(), cal.masPerPixel);
+		_calibration->toString().c_str(), _calibration->calibrationid(),
+		_calibration->size(), _calibration->masPerPixel());
 	_calibrating = false;
 	if (!_database) {
 		return;
 	}
 	// update the calibration in the database
-	BasicCalibration	calcopy = cal;
-	calcopy.calibrationid(_calibration->calibrationid());
-	calcopy.complete(true);
-	if (calcopy.calibrationid() <= 0) {
-		return;
-	}
 	CalibrationStore	calstore(_database);
-	calstore.updateCalibration(calcopy);
-	*_calibration = calcopy;
+	calstore.updateCalibration(_calibration);
 }
 
 /**

@@ -20,15 +20,19 @@ namespace guiding {
 /**
  * \brief construct a BasicCalibration object
  */
-BasicCalibrator::BasicCalibrator(const ControlDeviceName& name)
-	: _calibration(name) {
+BasicCalibrator::BasicCalibrator(const ControlDeviceName& name) {
+	_calibration = CalibrationPtr(new BasicCalibration(name));
+}
+
+BasicCalibrator::BasicCalibrator(CalibrationPtr calibration) 
+	: _calibration(calibration) {
 }
 
 /**
  * \brief add another point to the calibration data
  */
 void	BasicCalibrator::add(const CalibrationPoint& calibrationpoint) {
-	_calibration.add(calibrationpoint);
+	_calibration->add(calibrationpoint);
 }
 
 /**
@@ -45,9 +49,9 @@ void	BasicCalibrator::add(const CalibrationPoint& calibrationpoint) {
  * origin_y, they are the best estimate of the origin at the beginning of the
  * calibration process (time origin).
  */
-BasicCalibration	BasicCalibrator::calibrate() {
+CalibrationPtr	BasicCalibrator::calibrate() {
 	// build the linear system of equations
-	int	m = 2 * _calibration.size(); // number of equations
+	int	m = 2 * _calibration->size(); // number of equations
 	int	n = 8; // number of unknowns
 	double	A[n * m];
 	double	b[m];
@@ -55,7 +59,7 @@ BasicCalibration	BasicCalibrator::calibrate() {
 	// fill in equations
 	std::vector<CalibrationPoint>::const_iterator	ci;
 	int	i = 0;
-	for (ci = _calibration.begin(); ci != _calibration.end(); ci++){
+	for (ci = _calibration->begin(); ci != _calibration->end(); ci++){
 		A[i        ] = ci->offset.x();	// vx_ra
 		A[i +     m] = ci->offset.y();	// vx_dec
 		A[i + 2 * m] = ci->t;		// drift_x
@@ -115,12 +119,12 @@ BasicCalibration	BasicCalibrator::calibrate() {
 
 	// store the results in the calibration data array
 	for (unsigned int i = 0; i < 6; i++) {
-		_calibration.a[i] = b[i];
+		_calibration->a[i] = b[i];
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"calibration: [ %.5f, %.5f, %.5f; %.5f, %.5f, %.5f ]",
-		_calibration.a[0], _calibration.a[1], _calibration.a[2],
-		_calibration.a[3], _calibration.a[4], _calibration.a[5]);
+		_calibration->a[0], _calibration->a[1], _calibration->a[2],
+		_calibration->a[3], _calibration->a[4], _calibration->a[5]);
 
 	// The last two variables are not needed for the calibration, we
 	// throw them away but it might be interesting to at least note them

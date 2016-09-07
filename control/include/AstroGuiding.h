@@ -414,8 +414,16 @@ public:
 	double	quality() const;
 	double	det() const;
 
-	double	focallength;
-	double	masPerPixel;
+private:
+	double	_focallength;
+public:
+	double	focallength() const { return _focallength; }
+	void	focallength(double f) { _focallength = f; }
+private:
+	double	_masPerPixel;
+public:
+	double	masPerPixel() const { return _masPerPixel; }
+	void	masPerPixel(double m) { _masPerPixel = m; }
 
 	// string representation of the baseic 
 	std::string	toString() const;
@@ -434,6 +442,9 @@ public:
 
 	// reset
 	void	reset();
+
+	// calibrate
+	void	calibrate();
 };
 typedef std::shared_ptr<BasicCalibration>	CalibrationPtr;
 
@@ -472,7 +483,7 @@ public:
 /**
  * \brief Encapsulation of the calibration as callback argument
  */
-typedef callback::CallbackDataEnvelope<GuiderCalibration>	GuiderCalibrationCallbackData;
+typedef callback::CallbackDataEnvelope<CalibrationPtr>	CalibrationCallbackData;
 
 /**
  * \brief Progress indicator
@@ -492,6 +503,7 @@ std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
  */
 typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
+#if 0
 /**
  * \brief BasicCalibrator
  *
@@ -501,12 +513,14 @@ typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbac
  * method then computes the calibration data.
  */
 class BasicCalibrator {
-	BasicCalibration	_calibration;
+	CalibrationPtr	_calibration;
 public:
 	BasicCalibrator(const ControlDeviceName& controldevicename);
+	BasicCalibrator(CalibrationPtr calibration);
 	void	add(const CalibrationPoint& calibrationpoint);
-	BasicCalibration	calibrate();
+	CalibrationPtr	calibrate();
 };
+#endif
 
 /**
  * \brief Class to report data 
@@ -657,7 +671,6 @@ private:
 	callback::CallbackSet	_imagecallback;
 	callback::CallbackSet	_calibrationcallback;
 	callback::CallbackSet	_progresscallback;
-	callback::CallbackSet	_guidercalibrationcallback;
 	callback::CallbackSet	_trackingcallback;
 public:
 	void	addImageCallback(callback::CallbackPtr i);
@@ -669,13 +682,12 @@ public:
 	void	removeImageCallback(callback::CallbackPtr i);
 	void	removeCalibrationCallback(callback::CallbackPtr c);
 	void	removeProgressCallback(callback::CallbackPtr c);
-	void	removeGuidercalibrationCallback(callback::CallbackPtr c);
 	void	removeTrackingCallback(callback::CallbackPtr t);
 	
 	void	callback(image::ImagePtr image);
 	void	callback(const CalibrationPoint& point);
 	void	callback(const ProgressInfo& point);
-	void	callback(const GuiderCalibration& cal);
+	void	callback(const CalibrationPtr cal);
 	void	callback(const TrackingPoint& point);
 	virtual void	callback(const std::exception& ex) = 0;
 
@@ -706,7 +718,7 @@ public:
 	// persistence and calibration data
 protected:
 	persistence::Database	_database;
-	BasicCalibration	*_calibration;
+	CalibrationPtr	_calibration;
 public:
 	int	calibrationid() const;
 	void	calibrationid(int calid);
@@ -743,7 +755,7 @@ public:
 	virtual int	startCalibration(TrackerPtr tracker);
 	void	cancelCalibration();
 	bool	waitCalibration(double timeout);
-	virtual void	saveCalibration(const BasicCalibration& calibration);
+	virtual void	saveCalibration();
 	void	addCalibrationPoint(const CalibrationPoint& point);
 protected:
 	bool	_calibrating;
@@ -775,26 +787,18 @@ public:
 	typedef std::shared_ptr<device>	deviceptr;
 private:
 	deviceptr	_device;
-	devicecalibration	_devicecalibration;
 public:
 	ControlDevice(GuiderBase *guider, deviceptr dev,
 		persistence::Database database = NULL)
-		: ControlDeviceBase(guider, database), _device(dev),
-		  _devicecalibration(ControlDeviceName(guider->name(), type)) {
-		// we set the pointer in the base class to the object
-		// in the derived class. This means that we have to be careful
-		// not to use _calibration in the destructor
-		_calibration = &_devicecalibration;
+		: ControlDeviceBase(guider, database), _device(dev) {
+		_calibration = CalibrationPtr(new devicecalibration(
+			ControlDeviceName(guider->name(), type)));
 	}
 	~ControlDevice() {
 	}
 	virtual std::string	devicename() const { return _device->name(); }
 	virtual int	startCalibration(TrackerPtr /* tracker */) {
 		return -1; // suppress warning
-	}
-	virtual void	saveCalibration(const BasicCalibration& calibration) {
-		*_calibration = calibration;
-		ControlDeviceBase::saveCalibration(calibration);
 	}
 	virtual void	calibrationid(int /* calid */) { }
 	virtual std::type_index	deviceType() const {
@@ -962,7 +966,7 @@ public:
 	 */
 	int	startCalibration(ControlDeviceType type,
 			TrackerPtr tracker);
-	void	saveCalibration(const GuiderCalibration& calibration);
+	void	saveCalibration();
 	void	forgetCalibration();
 	void	useCalibration(int calid);
 	void	unCalibrate(ControlDeviceType type);
@@ -1133,7 +1137,7 @@ public:
 	bool	containscomplete(long id, ControlDeviceType type);
 	long	addCalibration(const PersistentCalibration& calibration);
 	void	deleteCalibration(long id);
-	void	updateCalibration(const BasicCalibration& calibration);
+	void	updateCalibration(const CalibrationPtr calibration);
 
 	// guider calibration
 	CalibrationPtr	getCalibration(long id);
@@ -1145,7 +1149,7 @@ public:
 
 	// storing basic calibrations, i.e. just the raw calibration data
 	// without all the attributes
-	void	saveCalibration(const BasicCalibration& cal);
+	void	saveCalibration(const CalibrationPtr cal);
 };
 
 // types used in the tracking store

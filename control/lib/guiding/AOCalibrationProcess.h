@@ -6,7 +6,7 @@
 #ifndef _AOCalibrationProcess_h
 #define _AOCalibrationProcess_h
 
-#include <BasicProcess.h>
+#include <CalibrationProcess.h>
 
 namespace astro {
 namespace guiding {
@@ -14,7 +14,7 @@ namespace guiding {
 /**
  * \brief Calibration of an adaptive optics 
  */
-class AOCalibrationProcess : public BasicProcess {
+class AOCalibrationProcess : public CalibrationProcess {
 	camera::AdaptiveOpticsPtr	_adaptiveoptics;
 public:
 	camera::AdaptiveOpticsPtr	adaptiveoptics() {
@@ -32,7 +32,7 @@ public:
 	// callbacks
 	void	callback(const CalibrationPoint& calpoint);
         void	callback(const ProgressInfo& progressinfo);
-        void	callback(const GuiderCalibration& calibration);
+        void	callback(const CalibrationPtr calibration);
         void	callback(const ImagePtr& image);
 
 };

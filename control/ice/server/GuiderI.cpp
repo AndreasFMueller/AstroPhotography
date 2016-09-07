@@ -122,8 +122,8 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
 
 	// handle a completed calibration callback call, by sending the stop
 	// signal
-	astro::guiding::GuiderCalibrationCallbackData	*calibration
-		= dynamic_cast<astro::guiding::GuiderCalibrationCallbackData *>(&*data);
+	astro::guiding::CalibrationCallbackData	*calibration
+		= dynamic_cast<astro::guiding::CalibrationCallbackData *>(&*data);
 	if (NULL != calibration) {
 		p->stop();
 		return;
@@ -154,7 +154,6 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
 		= new GuiderICalibrationCallback(*this);
 	_calibrationcallback = astro::callback::CallbackPtr(ccallback);
 	guider->addCalibrationCallback(_calibrationcallback);
-	guider->addGuidercalibrationCallback(_calibrationcallback);
 
 	// image callback, called for every image taken by the imager of
 	// the guider
@@ -177,7 +176,6 @@ GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
  */
 GuiderI::~GuiderI() {
 	guider->removeCalibrationCallback(_calibrationcallback);
-	guider->removeGuidercalibrationCallback(_calibrationcallback);
 	guider->removeImageCallback(_imagecallback);
 	guider->removeTrackingCallback(_trackingcallback);
 }

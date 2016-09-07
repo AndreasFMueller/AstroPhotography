@@ -6,7 +6,7 @@
 #ifndef _GuiderPortProcess_h
 #define _GuiderPortProcess_h
 
-#include "BasicProcess.h"
+#include "CalibrationProcess.h"
 
 namespace astro {
 namespace guiding {
@@ -14,7 +14,7 @@ namespace guiding {
 /**
  * \brief base process class for all processes that need a guider port
  */
-class GuiderPortProcess : public BasicProcess {
+class GuiderPortProcess : public CalibrationProcess {
 	camera::GuiderPortPtr	_guiderport;
 public:
 	camera::GuiderPortPtr	guiderport() { return _guiderport; }

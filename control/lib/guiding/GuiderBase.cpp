@@ -63,12 +63,6 @@ void	GuiderBase::addProgressCallback(callback::CallbackPtr callback) {
 		_progresscallback.size());
 }
 
-void	GuiderBase::addGuidercalibrationCallback(callback::CallbackPtr callback) {
-	_guidercalibrationcallback.insert(callback);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "now %d guider calibration callbacks",
-		_guidercalibrationcallback.size());
-}
-
 void	GuiderBase::addTrackingCallback(callback::CallbackPtr callback) {
 	_trackingcallback.insert(callback);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "now %d tracking callbacks",
@@ -88,10 +82,6 @@ void	GuiderBase::removeCalibrationCallback(callback::CallbackPtr callback) {
 
 void	GuiderBase::removeProgressCallback(callback::CallbackPtr callback) {
 	_progresscallback.erase(callback);
-}
-
-void	GuiderBase::removeGuidercalibrationCallback(callback::CallbackPtr callback) {
-	_guidercalibrationcallback.erase(callback);
 }
 
 void	GuiderBase::removeTrackingCallback(callback::CallbackPtr callback) {
@@ -142,10 +132,10 @@ void	GuiderBase::callback(const ProgressInfo& info) {
 /**
  * \brief Callback for completed calibrations
  */
-void	GuiderBase::callback(const GuiderCalibration& cal) {
+void	GuiderBase::callback(const CalibrationPtr cal) {
 	astro::callback::CallbackDataPtr	data(
-                        new GuiderCalibrationCallbackData(cal));
-	_guidercalibrationcallback(data);
+                        new CalibrationCallbackData(cal));
+	_calibrationcallback(data);
 }
 
 /**

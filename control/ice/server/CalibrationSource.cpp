@@ -36,7 +36,7 @@ Calibration	CalibrationSource::get(int id) {
 
 		// now try to get the calibration
 		astro::guiding::CalibrationPtr	cal = store.getCalibration(id);
-		Calibration	calibration = convert(*cal);
+		Calibration	calibration = convert(cal);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d time %f",
 			calibration.id, calibration.timeago);
 

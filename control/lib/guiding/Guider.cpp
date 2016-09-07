@@ -13,7 +13,7 @@
 
 #include "CalibrationProcess.h"
 #include "CalibrationPersistence.h"
-#include "GuiderCalibrationRedirector.h"
+#include "CalibrationRedirector.h"
 #include "TrackingProcess.h"
 
 using namespace astro::image;
@@ -44,8 +44,7 @@ Guider::Guider(const GuiderName& guidername,
 	_focallength = 1;
 
 	// We have to install a callback for calibrations
-	CallbackPtr	calcallback(new GuiderCalibrationRedirector(this));
-	addGuidercalibrationCallback(calcallback);
+	CallbackPtr	calcallback(new CalibrationRedirector(this));
 	addProgressCallback(calcallback);
 
 	// create control devices
@@ -182,9 +181,8 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker) {
  * control device already has saved the calibration data in the database,
  * this method only needs to update the guider state.
  */
-void	Guider::saveCalibration(const GuiderCalibration& cal) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration %d",
-		cal.calibrationid());
+void	Guider::saveCalibration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration");
 	if (!_state.canAcceptCalibration()) {
 		return;
 	}

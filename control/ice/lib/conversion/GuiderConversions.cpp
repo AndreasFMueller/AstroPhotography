@@ -304,28 +304,28 @@ astro::guiding::CalibrationPoint        convert(const CalibrationPoint& cp) {
 	return result;
 }
 
-Calibration     convert(const astro::guiding::BasicCalibration& cal) {
+Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	Calibration	result;
-	result.id = cal.calibrationid();
-	result.timeago = converttime(cal.when());
+	result.id = cal->calibrationid();
+	result.timeago = converttime(cal->when());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert calibration %d time %d to %f",
-		cal.calibrationid(), cal.when(), result.timeago);
-	result.guider = convertname(cal.name());
-	result.type = convertcontroltype(cal.calibrationtype());
-	result.focallength = cal.focallength;
-	result.masPerPixel = cal.masPerPixel;
+		cal->calibrationid(), cal->when(), result.timeago);
+	result.guider = convertname(cal->name());
+	result.type = convertcontroltype(cal->calibrationtype());
+	result.focallength = cal->focallength();
+	result.masPerPixel = cal->masPerPixel();
 	for (int i = 0; i < 6; i++) {
-		result.coefficients.push_back(cal.a[i]);
+		result.coefficients.push_back(cal->a[i]);
 	}
-	result.complete = cal.complete();
-	result.flipped = cal.flipped();
-	result.det  = cal.det();
-	result.quality = cal.quality();
+	result.complete = cal->complete();
+	result.flipped = cal->flipped();
+	result.det  = cal->det();
+	result.quality = cal->quality();
 
 	return result;
 }
 
-astro::guiding::BasicCalibration   *convert(const Calibration& cal) {
+astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert calibration %d time %f",
 		cal.id, cal.timeago);
 	astro::guiding::GuiderName	guidername = convertname(cal.guider);
@@ -349,9 +349,9 @@ astro::guiding::BasicCalibration   *convert(const Calibration& cal) {
 	}
 	result->complete(cal.complete);
 	result->flipped(cal.flipped);
-	result->masPerPixel = cal.masPerPixel;
-	result->focallength = cal.focallength;
-	return result;
+	result->masPerPixel(cal.masPerPixel);
+	result->focallength(cal.focallength);
+	return astro::guiding::CalibrationPtr(result);
 }
 
 struct TrackingSummary	convert(const astro::guiding::TrackingSummary& summary) {

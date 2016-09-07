@@ -1,10 +1,10 @@
 /*
- * GuiderCalibrationRedirector.h -- Callback to redirect calibration
+ * CalibrationRedirector.h -- Callback to redirect calibration
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#ifndef _GuiderCalibrationRedirector_h
-#define _GuiderCalibrationRedirector_h
+#ifndef _CalibrationRedirector_h
+#define _CalibrationRedirector_h
 
 #include <AstroGuiding.h>
 #include <AstroCallback.h>
@@ -17,14 +17,14 @@ namespace guiding {
 /**
  * \brief Auxiliary class to ensure calibrations found are sent to the guider
  */
-class GuiderCalibrationRedirector : public Callback {
+class CalibrationRedirector : public Callback {
 	Guider	*_guider;
 public:
-	GuiderCalibrationRedirector(Guider *guider) : _guider(guider) { }
+	CalibrationRedirector(Guider *guider) : _guider(guider) { }
 	CallbackDataPtr	operator()(CallbackDataPtr data);
 };
 
 } // namespace guiding
 } // namespace astro
 
-#endif /* _GuiderCalibrationRedirector_h */
+#endif /* _CalibrationRedirector_h */

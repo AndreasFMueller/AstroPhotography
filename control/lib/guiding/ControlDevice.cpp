@@ -5,7 +5,7 @@
  */
 #include <AstroGuiding.h>
 #include <BasicProcess.h>
-#include <CalibrationProcess.h>
+#include <GPCalibrationProcess.h>
 #include <AOCalibrationProcess.h>
 #include <algorithm>
 #include "GuiderPortAction.h"
@@ -22,32 +22,11 @@ template<>
 int	ControlDevice<camera::GuiderPort,
 		GuiderCalibration, GP>::startCalibration(TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration start");
-	_calibration->calibrationtype(GP);
-#if 0
-	// reset the current calibration, just to make sure we don't confuse
-	// it with the previous
-	_calibration->reset();
-
-	// set the focal length
-	GuiderCalibration	*gcal
-		= dynamic_cast<GuiderCalibration *>(_calibration);
-	gcal->focallength = parameter(std::string("focallength"), 1.0);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f", gcal->focallength);
-#endif
 
 	// create the calibration process
 	CalibrationProcess	*calibrationprocess
-		= new CalibrationProcess(_guider, _device, tracker, _database);
+		= new GPCalibrationProcess(_guider, _device, tracker, _database);
 	process = BasicProcessPtr(calibrationprocess);
-
-#if 0
-	// set the device specific
-	calibrationprocess->focallength(gcal->focallength);
-
-	// compute angular size of pixels
-	gcal->masPerPixel = (_guider->pixelsize() / gcal->focallength)
-				* (180 * 3600 * 1000 / M_PI);
-#endif
 
 	// start the process and update the record in the database
 	return ControlDeviceBase::startCalibration(tracker);
@@ -99,7 +78,6 @@ template<>
 int	ControlDevice<camera::AdaptiveOptics,
 		AdaptiveOpticsCalibration, AO>::startCalibration(
 			TrackerPtr tracker) {
-	_calibration->calibrationtype(AO);
 
 	// create a new calibraiton process
 	AOCalibrationProcess	*aocalibrationprocess

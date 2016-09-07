@@ -108,8 +108,8 @@ CalibrationPtr	CalibrationStore::getCalibration(long id) {
 		calibration->a[i] = r.a[i];
 	}
 	calibration->complete((r.complete) ? true : false);
-	calibration->focallength = r.focallength;
-	calibration->masPerPixel = r.masPerPixel;
+	calibration->focallength(r.focallength);
+	calibration->masPerPixel(r.masPerPixel);
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"found calibration with masPerPixel=%.3f", r.masPerPixel);
 
@@ -149,21 +149,21 @@ long	CalibrationStore::addCalibration(const PersistentCalibration& calibration) 
  * \brief update a calibration record in the database
  */
 void	CalibrationStore::updateCalibration(
-		const BasicCalibration& calibration) {
+		const CalibrationPtr calibration) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update calibration %d",
-		calibration.calibrationid());
+		calibration->calibrationid());
 	CalibrationTable	t(_database);
-	CalibrationRecord	record = t.byid(calibration.calibrationid());
+	CalibrationRecord	record = t.byid(calibration->calibrationid());
 	for (int i = 0; i < 6; i++) {
-		record.a[i] = calibration.a[i];
+		record.a[i] = calibration->a[i];
 	}
-	record.det = calibration.det();
-	record.quality = calibration.quality();
-	record.complete = (calibration.complete()) ? 1 : 0;
-	record.focallength = calibration.focallength;
-	record.masPerPixel = calibration.masPerPixel;
+	record.det = calibration->det();
+	record.quality = calibration->quality();
+	record.complete = (calibration->complete()) ? 1 : 0;
+	record.focallength = calibration->focallength();
+	record.masPerPixel = calibration->masPerPixel();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "quality = %f", record.quality);
-	t.update(calibration.calibrationid(), record);
+	t.update(calibration->calibrationid(), record);
 }
 
 /**
@@ -238,19 +238,19 @@ bool	CalibrationStore::containscomplete(long id, ControlDeviceType type) {
  * This method adds the calibration data to an already existing calibration
  * record in the database
  */
-void	CalibrationStore::saveCalibration(const BasicCalibration& cal) {
-	int	id = cal.calibrationid();
+void	CalibrationStore::saveCalibration(const CalibrationPtr cal) {
+	int	id = cal->calibrationid();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving calibration %d", id);
 	CalibrationPtr	c = getCalibration(id);
 	c->complete(true);
-	*c = cal;
-	updateCalibration(*c);
+	*c = *cal;
+	updateCalibration(c);
 
 	// add the points
 	removePoints(id);
-	for (unsigned int i = 0; i < cal.size(); i++) {
-		CalibrationPoint	point = cal[i];
-		addPoint(cal.calibrationid(), point);
+	for (unsigned int i = 0; i < cal->size(); i++) {
+		CalibrationPoint	point = (*cal)[i];
+		addPoint(cal->calibrationid(), point);
 	}
 }
 

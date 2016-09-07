@@ -12,33 +12,34 @@ noinst_HEADERS = 							\
 	BasicProcess.h							\
 	CalibrationPersistence.h					\
 	CalibrationProcess.h						\
+	CalibrationRedirector.h						\
 	ControlDeviceCallback.h						\
-	GuiderCalibrationRedirector.h					\
+	GPCalibrationProcess.h						\
 	GuiderPortAction.h						\
 	TrackingPersistence.h						\
 	TrackingProcess.h
 
 libastroguiding_la_SOURCES = 						\
-	AdaptiveOpticsCalibration.cpp					\
 	AOCalibrationProcess.cpp					\
+	AdaptiveOpticsCalibration.cpp					\
 	BasicCalibration.cpp						\
-	BasicCalibrator.cpp						\
 	BasicProcess.cpp						\
 	BasicSummary.cpp						\
 	CalibrationPersistence.cpp					\
 	CalibrationPoint.cpp						\
 	CalibrationProcess.cpp						\
+	CalibrationRedirector.cpp					\
 	CalibrationStore.cpp						\
 	ControlDevice.cpp						\
+	ControlDeviceBase.cpp						\
+	ControlDeviceCallback.cpp					\
 	ControlDeviceName.cpp						\
 	ControlDeviceType.cpp						\
-	ControlDeviceCallback.cpp					\
-	ControlDeviceBase.cpp						\
+	GPCalibrationProcess.cpp					\
 	Guide.cpp							\
 	Guider.cpp							\
 	GuiderBase.cpp							\
 	GuiderCalibration.cpp						\
-	GuiderCalibrationRedirector.cpp					\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
 	GuiderName.cpp							\

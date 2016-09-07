@@ -1,23 +1,23 @@
 /*
- * GuiderCalibrationRedirector.cpp -- Callback to redirect calibration
+ * CalibrationRedirector.cpp -- Callback to redirect calibration
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
-#include "GuiderCalibrationRedirector.h"
+#include "CalibrationRedirector.h"
 
 using namespace astro::callback;
 
 namespace astro {
 namespace guiding {
 
-CallbackDataPtr	GuiderCalibrationRedirector::operator()(CallbackDataPtr data) {
+CallbackDataPtr	CalibrationRedirector::operator()(CallbackDataPtr data) {
 	// handle the calibration
 	{
-		GuiderCalibrationCallbackData	*cal
-			= dynamic_cast<GuiderCalibrationCallbackData *>(&*data);
+		CalibrationCallbackData	*cal
+			= dynamic_cast<CalibrationCallbackData *>(&*data);
 		if (NULL != cal) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration update");
-			_guider->saveCalibration(cal->data());
+			_guider->saveCalibration();
 		}
 	}
 

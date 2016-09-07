@@ -31,11 +31,11 @@ CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
 	}
 	// handle the calibration when it completes
 	{
-		GuiderCalibrationCallbackData   *cal
-			= dynamic_cast<GuiderCalibrationCallbackData *>(&*data);
+		CalibrationCallbackData   *cal
+			= dynamic_cast<CalibrationCallbackData *>(&*data);
 		if (NULL != cal) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration update");
-			_controldevice->saveCalibration(cal->data());
+			_controldevice->saveCalibration();
 			return data;
 		}
 	}

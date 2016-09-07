@@ -17,8 +17,13 @@ namespace guiding {
 AOCalibrationProcess::AOCalibrationProcess(GuiderBase *guider,
 	camera::AdaptiveOpticsPtr adaptiveoptics,
 	TrackerPtr tracker, persistence::Database database)
-	: BasicProcess(guider, tracker, database),
+	: CalibrationProcess(guider, tracker, database),
 	  _adaptiveoptics(adaptiveoptics) {
+	// prepare the calibration 
+	ControlDeviceNamePtr	cdname = guider->adaptiveOpticsDeviceName();
+	calibration(CalibrationPtr(new AdaptiveOpticsCalibration(*cdname)));
+
+	// start the thread
 	thread(thread::ThreadPtr(new thread::Thread<AOCalibrationProcess>(this)));
 }
 
@@ -38,9 +43,7 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start AO calibration for %s",
 		_adaptiveoptics->name().toString().c_str());
 
-	// prepare the calibrator and the timer
-	ControlDeviceNamePtr	cdname = guider()->adaptiveOpticsDeviceName();
-	BasicCalibrator	calibrator(*cdname);
+	// set up the timer
 	double	starttime = Timer::gettime();
 
 	// Progress indicator data
@@ -84,7 +87,7 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 			// add the calibration point
 			double	t = Timer::gettime() - starttime;
 			CalibrationPoint	calpoint(t, offset, star);
-			calibrator.add(calpoint);
+			calibration()->add(calpoint);
 			callback(calpoint);
 
 			// update the progress indicator
@@ -117,10 +120,10 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 	}
 
 	// we have found a calibration
-	BasicCalibration	cal = calibrator.calibrate();
+	calibration()->calibrate();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration: %s",
-		cal.toString().c_str());
-	callback(cal);
+		calibration()->toString().c_str());
+	callback(calibration());
 }
 
 /**
@@ -147,7 +150,7 @@ void	AOCalibrationProcess::callback(const ProgressInfo& progressinfo) {
 /**
  * \brief Send the completed calibration data to the callback
  */
-void	AOCalibrationProcess::callback(const GuiderCalibration& calibration) {
+void	AOCalibrationProcess::callback(const CalibrationPtr calibration) {
 	if (!hasGuider()) {
 		return;
 	}
