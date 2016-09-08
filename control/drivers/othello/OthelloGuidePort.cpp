@@ -61,7 +61,16 @@ void	OthelloGuidePort::activate(float raplus, float raminus,
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0, GUIDEPORT_SET_ALL_TIMES,
 		0, &payload);
-	deviceptr->controlRequest(&r);
+	try {
+		deviceptr->controlRequest(&r);
+	} catch (const std::exception& x) {
+		std::string 	cause = stringprintf(
+			"set all times %hu %hu %hu %hu failed: %s",
+			payload.raplus, payload.raminus,
+			payload.decplus, payload.decminus, x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw x;
+	}
 }
 
 typedef	uint8_t	active_t;
@@ -71,7 +80,14 @@ uint8_t	OthelloGuidePort::active() {
 		RequestBase::vendor_specific_type,
 		RequestBase::device_recipient, 0xf,
 		(uint8_t)GUIDEPORT_GET, 0);
-	deviceptr->controlRequest(&request);
+	try {
+		deviceptr->controlRequest(&request);
+	} catch (const std::exception& x) {
+		std::string	cause = stringprintf("can't get active: %s",
+			x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
+		throw x;
+	}
 	return *request.data();
 }
 

@@ -12,6 +12,7 @@
 #include <previewwindow.h>
 #include <focusingwindow.h>
 #include <guidingwindow.h>
+#include <instrumentswindow.h>
 #include <QMessageBox>
 
 using namespace astro::discover;
@@ -101,12 +102,12 @@ void	MainWindow::launchGuiding() {
 	delete is;
 }
 
+/**
+ * \brief Launch the instruments application
+ */
 void	MainWindow::launchInstruments() {
-	QMessageBox	*messagebox = new QMessageBox(this);
-	messagebox->setText(QString("Application not implemented"));
-	messagebox->setInformativeText(QString("The Instruments application is not yet implemented"));
-	messagebox->exec();
-	delete messagebox;
+	instrumentswindow	*iw = new instrumentswindow(NULL, _serviceobject);
+	iw->show();
 }
 
 void	MainWindow::launchRepository() {
