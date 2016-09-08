@@ -33,7 +33,7 @@ public:
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(DeviceName::device_type device = DeviceName::Camera);
 protected:
-	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
 	virtual FocuserPtr	getFocuser0(const DeviceName& name);
 };
 

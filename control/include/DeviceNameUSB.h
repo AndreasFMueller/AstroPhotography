@@ -61,11 +61,11 @@ public:
 	DeviceName	cameraname() const;
 	DeviceName	ccdname() const;
 	DeviceName	coolername() const;
-	DeviceName	guiderportname() const;
+	DeviceName	guideportname() const;
 	bool	isCamera(const DeviceName& other);
 	bool	isCcd(const DeviceName& other);
 	bool	isCooler(const DeviceName& other);
-	bool	isGuiderport(const DeviceName& other);
+	bool	isGuideport(const DeviceName& other);
 };
 
 } // namespace device

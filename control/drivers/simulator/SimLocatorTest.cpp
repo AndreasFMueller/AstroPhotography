@@ -8,7 +8,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <SimCamera.h>
-#include <SimGuiderPort.h>
+#include <SimGuidePort.h>
 #include <SimCooler.h>
 #include <SimFilterWheel.h>
 #include <config.h>
@@ -29,11 +29,11 @@ public:
 	void	testVersion();
 	void	testCameraName();
 	void	testFilterWheelName();
-	void	testGuiderPortName();
+	void	testGuidePortName();
 	void	testCoolerName();
 	void	testCamera();
 	void	testFilterWheel();
-	void	testGuiderPort();
+	void	testGuidePort();
 	void	testCooler();
 
 	CPPUNIT_TEST_SUITE(SimLocatorTest);
@@ -41,11 +41,11 @@ public:
 	CPPUNIT_TEST(testVersion);
 	CPPUNIT_TEST(testCameraName);
 	CPPUNIT_TEST(testFilterWheelName);
-	CPPUNIT_TEST(testGuiderPortName);
+	CPPUNIT_TEST(testGuidePortName);
 	CPPUNIT_TEST(testCoolerName);
 	CPPUNIT_TEST(testCamera);
 	CPPUNIT_TEST(testFilterWheel);
-	CPPUNIT_TEST(testGuiderPort);
+	CPPUNIT_TEST(testGuidePort);
 	CPPUNIT_TEST(testCooler);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -82,11 +82,11 @@ void	SimLocatorTest::testFilterWheelName() {
 	CPPUNIT_ASSERT(std::string("filterwheel:simulator/filterwheel") == *names.begin());
 }
 
-void	SimLocatorTest::testGuiderPortName() {
+void	SimLocatorTest::testGuidePortName() {
 	std::vector<std::string>	names
-		= locator->getDevicelist(DeviceName::Guiderport);
+		= locator->getDevicelist(DeviceName::Guideport);
 	CPPUNIT_ASSERT(names.size() == 1);
-	CPPUNIT_ASSERT(std::string("guiderport:simulator/guiderport") == *names.begin());
+	CPPUNIT_ASSERT(std::string("guideport:simulator/guideport") == *names.begin());
 }
 
 void	SimLocatorTest::testCoolerName() {
@@ -108,10 +108,10 @@ void	SimLocatorTest::testFilterWheel() {
 	CPPUNIT_ASSERT(NULL != filterwheel);
 }
 
-void	SimLocatorTest::testGuiderPort() {
-	SimGuiderPort	*guiderport
-		= dynamic_cast<SimGuiderPort*>(&*(locator->getGuiderPort("guiderport:simulator/guiderport")));
-	CPPUNIT_ASSERT(NULL != guiderport);
+void	SimLocatorTest::testGuidePort() {
+	SimGuidePort	*guideport
+		= dynamic_cast<SimGuidePort*>(&*(locator->getGuidePort("guideport:simulator/guideport")));
+	CPPUNIT_ASSERT(NULL != guideport);
 }
 
 void	SimLocatorTest::testCooler() {

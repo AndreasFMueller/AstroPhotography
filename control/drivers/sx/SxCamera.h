@@ -1,4 +1,4 @@
-/*
+	/*
  * SxCamera.h -- starlight express camera declarations
  *
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
@@ -33,7 +33,7 @@ class SxCamera : public Camera {
 	bool	useControlRequests;
 	sx_firmware_version_t	firmware_version;
 	bool	_hasCooler;
-	bool	_hasGuiderPort;
+	bool	_hasGuidePort;
 	bool	_has_interline_ccd;
 public:
 	bool	hasInterlineCcd() const { return _has_interline_ccd; }
@@ -79,9 +79,9 @@ public:
 
 	// guider port access
 public:
-	virtual bool	hasGuiderPort() const { return _hasGuiderPort; }
+	virtual bool	hasGuidePort() const { return _hasGuidePort; }
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 
 	// request handling
 public:

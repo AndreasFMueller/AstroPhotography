@@ -94,8 +94,8 @@ static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
 	case DeviceName::Cooler:
 		names.push_back(qhyname.coolername());
 		break;
-	case DeviceName::Guiderport:
-		names.push_back(qhyname.guiderportname());
+	case DeviceName::Guideport:
+		names.push_back(qhyname.guideportname());
 		break;
 	default:
 		// unknown components
@@ -229,10 +229,10 @@ CcdPtr	QhyCameraLocator::getCcd0(const DeviceName& name) {
 /**
  * \brief Get a guider port by name
  */
-GuiderPortPtr	QhyCameraLocator::getGuiderPort0(const DeviceName& name) {
+GuidePortPtr	QhyCameraLocator::getGuidePort0(const DeviceName& name) {
 	QhyName	qhyname(name);
-	if (!qhyname.isGuiderport(name)) {
-		std::string	msg = stringprintf("%s is not a Guiderport name",
+	if (!qhyname.isGuideport(name)) {
+		std::string	msg = stringprintf("%s is not a Guideport name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -241,11 +241,11 @@ GuiderPortPtr	QhyCameraLocator::getGuiderPort0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
-	if (!camera->hasGuiderPort()) {
+	if (!camera->hasGuidePort()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no guider port");
 		throw NotFound("camera does not have a guider port");
 	}
-	return GuiderPortPtr();
+	return GuidePortPtr();
 }
 
 } // namespace qhy

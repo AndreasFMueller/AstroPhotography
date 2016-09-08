@@ -36,7 +36,7 @@ DeviceName	asiCameraName(int index) {
  * \brief Generate a CCD name from the camera
  *
  * The name generated is designed to work with the implementation of the
- * getGuiderport0 function in the base DeviceLocator class, so that no
+ * getGuideport0 function in the base DeviceLocator class, so that no
  * ASI-specific implementation of this function is required.
  */
 DeviceName	asiCcdName(int index, const std::string& imgtype) {
@@ -56,14 +56,14 @@ DeviceName	asiCoolerName(int index, const std::string& imgtype) {
  * \brief Generate a guider port name from the camera
  *
  * The name generated is designed to work with the implementation of the
- * getGuiderport0 function in the base DeviceLocator class, so that no
+ * getGuideport0 function in the base DeviceLocator class, so that no
  * ASI-specific implementation of this function is required.
  */
-DeviceName	asiGuiderportName(int index) {
+DeviceName	asiGuideportName(int index) {
 	DeviceName	cameraname = asiCameraName(index);
-	DeviceName	guiderportname
-		= cameraname.child(DeviceName::Guiderport, "guiderport");
-	return guiderportname;
+	DeviceName	guideportname
+		= cameraname.child(DeviceName::Guideport, "guideport");
+	return guideportname;
 }
 
 

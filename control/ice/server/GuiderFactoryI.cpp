@@ -233,7 +233,7 @@ TrackingHistory	GuiderFactoryI::getTrackingHistoryType(int id,
 	try {
 		astro::guiding::TrackingStore	store(database);
 		switch (type) {
-		case ControlGuiderPort: {
+		case ControlGuidePort: {
 			TrackingHistory	history = convert(store.get(id,
 				astro::guiding::GP));
 			return history;

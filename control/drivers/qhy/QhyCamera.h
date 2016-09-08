@@ -33,7 +33,7 @@ protected:
 	virtual CcdPtr	getCcd0(size_t id);
 	// we currently don't know how to control the guider port of
 	// the camera from linux, so we do not offer a guider port
-//	virtual GuiderPortPtr	getGuiderPort0();
+//	virtual GuidePortPtr	getGuidePort0();
 };
 
 } // namespace qhy

@@ -182,7 +182,7 @@ int	main(int argc, char *argv[]) {
 		ImageSize(2 * r, 2 * r));
 
 	// get the Guider for the camera
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	GuidePortPtr	guideport = camera->getGuidePort();
 	
 	// now interpret the remaining arguments as control commands
 	if (optind < argc) {
@@ -194,16 +194,16 @@ int	main(int argc, char *argv[]) {
 				"found command %s for %.3fs",
 				direction, duration);
 			if (0 == strcmp(direction, "D-")) {
-				guiderport->activate(0, 0, 0, duration);
+				guideport->activate(0, 0, 0, duration);
 			}
 			if (0 == strcmp(direction, "D+")) {
-				guiderport->activate(0, 0, duration, 0);
+				guideport->activate(0, 0, duration, 0);
 			}
 			if (0 == strcmp(direction, "R-")) {
-				guiderport->activate(0, duration, 0, 0);
+				guideport->activate(0, duration, 0, 0);
 			}
 			if (0 == strcmp(direction, "R+")) {
-				guiderport->activate(duration, 0, 0, 0);
+				guideport->activate(duration, 0, 0, 0);
 			}
 			usleep(1000000 * duration);
 			printf(""); fflush(stdout);
@@ -213,7 +213,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// create a guider
-	Guider	guider(instrument, ccd, guiderport, NULL);
+	Guider	guider(instrument, ccd, guideport, NULL);
 
 	// if the path is set, we also install a callback
 	if (path) {

@@ -10,7 +10,7 @@
 #include <CoolerI.h>
 #include <FilterWheelI.h>
 #include <FocuserI.h>
-#include <GuiderPortI.h>
+#include <GuidePortI.h>
 #include <AdaptiveOpticsI.h>
 #include <MountI.h>
 #include <AstroDevice.h>
@@ -102,10 +102,10 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 				_repository).get(devicename));
 		break;
 
-	case astro::DeviceName::Guiderport:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Guiderport");
-		ptr = new GuiderPortI(
-			DeviceAccessor<astro::camera::GuiderPortPtr>(
+	case astro::DeviceName::Guideport:
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a Guideport");
+		ptr = new GuidePortI(
+			DeviceAccessor<astro::camera::GuidePortPtr>(
 				_repository).get(devicename));
 		break;
 

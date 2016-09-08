@@ -21,7 +21,7 @@ trackingmonitordialog::~trackingmonitordialog() {
 
 void	trackingmonitordialog::add(const snowstar::TrackingPoint& point) {
 	switch (point.type) {
-	case snowstar::ControlGuiderPort:
+	case snowstar::ControlGuidePort:
 		ui->gpTrack->add(point);
 		break;
 	case snowstar::ControlAdaptiveOptics:

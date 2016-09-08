@@ -30,8 +30,8 @@ DeviceName	othellodevname(astro::usb::DevicePtr& deviceptr) {
 		= deviceptr->descriptor();
 	unsigned short	product = descriptor->idProduct();
 	switch (product) {
-	case OTHELLO_GUIDERPORT_ID:
-		return DeviceName(DeviceName::Guiderport,
+	case OTHELLO_GUIDEPORT_ID:
+		return DeviceName(DeviceName::Guideport,
 			std::string("othello"), othelloname(deviceptr));
 	case OTHELLO_FOCUSER_ID:
 		return DeviceName(DeviceName::Focuser,

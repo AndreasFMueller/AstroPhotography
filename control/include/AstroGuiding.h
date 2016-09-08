@@ -284,13 +284,13 @@ class GuiderName {
 	std::string	_name;
 	std::string	_instrument;
 	int	_ccdIndex;
-	int	_guiderportIndex;
+	int	_guideportIndex;
 	int	_adaptiveopticsIndex;
 	void	parse(const std::string&);
 	std::string	buildname() const;
 public:
 	GuiderName(const std::string& n, int ccdIndex = -1,
-		int guiderportIndex = -1, int adaptiveopticsIndex = -1);
+		int guideportIndex = -1, int adaptiveopticsIndex = -1);
 	GuiderName(const GuiderName& other);
 
 	const std::string&	name() const { return _name; }
@@ -302,16 +302,16 @@ public:
 	int	ccdIndex() const { return _ccdIndex; }
 	void	ccdIndex(int c);
 
-	int	guiderportIndex() const { return _guiderportIndex; }
-	void	guiderportIndex(int g);
+	int	guideportIndex() const { return _guideportIndex; }
+	void	guideportIndex(int g);
 
 	int	adaptiveopticsIndex() const { return _adaptiveopticsIndex; }
 	void	adaptiveopticsIndex(int a);
 
-	bool	hasGuiderPort() const { return _guiderportIndex >= 0; }
+	bool	hasGuidePort() const { return _guideportIndex >= 0; }
 	bool	hasAdaptiveOptics() const { return _adaptiveopticsIndex >= 0; }
 
-	ControlDeviceNamePtr	guiderPortDeviceName();
+	ControlDeviceNamePtr	guidePortDeviceName();
 	ControlDeviceNamePtr	adaptiveOpticsDeviceName();
 };
 
@@ -550,21 +550,21 @@ class GuiderDescriptor {
 	std::string	_name;
 	std::string	_instrument;
 	std::string	_ccd;
-	std::string	_guiderport;
+	std::string	_guideport;
 	std::string	_adaptiveoptics;
 public:
 	GuiderDescriptor(const std::string& name, const std::string& instrument,
-		const std::string& ccd, const std::string& guiderport,
+		const std::string& ccd, const std::string& guideport,
 		const std::string& adaptiveoptics)
 		: _name(name), _instrument(instrument), _ccd(ccd),
-		  _guiderport(guiderport), _adaptiveoptics(adaptiveoptics) { }
+		  _guideport(guideport), _adaptiveoptics(adaptiveoptics) { }
 	bool	operator==(const GuiderDescriptor& other) const;
 	bool	operator<(const GuiderDescriptor& other) const;
 	std::string	name() const { return _name; }
 	std::string	instrument() const { return _instrument; }
 	std::string	ccd() const { return _ccd; }
-	std::string	guiderport() const { return _guiderport; }
-	void	guiderport(const std::string& g) { _guiderport = g; }
+	std::string	guideport() const { return _guideport; }
+	void	guideport(const std::string& g) { _guideport = g; }
 	std::string	adaptiveoptics() const { return _adaptiveoptics; }
 	void	adaptiveoptics(const std::string& a) {
 		_adaptiveoptics = a;
@@ -599,11 +599,11 @@ public:
 class TrackingSummary : public BasicSummary {
 public:
 	int	trackingid;
-	int	guiderportcalid;
+	int	guideportcalid;
 	int	adaptiveopticscalid;
 	GuiderDescriptor	descriptor;
 	TrackingSummary(const std::string& name, const std::string& instrument,
-		const std::string& ccd, const std::string& guiderport,
+		const std::string& ccd, const std::string& guideport,
 		const std::string& adaptiveoptics);
 	TrackingSummary(const std::string& name, const std::string& instrument,
 		const std::string& ccd);
@@ -811,13 +811,13 @@ public:
 				bool stepping = false);
 };
 
-// specializations for GuiderPort
+// specializations for GuidePort
 template<>
-int	ControlDevice<camera::GuiderPort,
+int	ControlDevice<camera::GuidePort,
 		GuiderCalibration, GP>::startCalibration(TrackerPtr tracker);
 
 template<>
-Point	ControlDevice<camera::GuiderPort,
+Point	ControlDevice<camera::GuidePort,
 		GuiderCalibration, GP>::correct(const Point& point, double Deltat,
 			bool stepping);
 
@@ -894,19 +894,19 @@ private:
 	GuiderStateMachine	_state;
 public:
 	Guide::state	state();
-	// The guider is essentially composed of a camera and a guiderport
+	// The guider is essentially composed of a camera and a guideport
 	// we will hardly need access to the camera, but we don't want to
 	// loose the reference to it either, so we keep it handy here
 private:
-	camera::GuiderPortPtr	_guiderport;
+	camera::GuidePortPtr	_guideport;
 	camera::AdaptiveOpticsPtr	_adaptiveoptics;
 public:
-	bool	hasGuiderport() { return (_guiderport) ? true : false; }
-	camera::GuiderPortPtr	guiderport() {
-		return _guiderport;
+	bool	hasGuideport() { return (_guideport) ? true : false; }
+	camera::GuidePortPtr	guideport() {
+		return _guideport;
 	}
-	std::string	guiderportname() const {
-		return _guiderport->name();
+	std::string	guideportname() const {
+		return _guideport->name();
 	}
 
 	bool	hasAdaptiveoptics() { return (_adaptiveoptics) ? true : false; }
@@ -932,7 +932,7 @@ private:
 	Guider&	operator=(const Guider& other);
 public:
 	/**
-	 * \brief Construct a guider from camera, ccd, and guiderport
+	 * \brief Construct a guider from camera, ccd, and guideport
 	 *
 	 * After construction, the Guider only knows about the hardware it can
 	 * use for guiding. There is no information about what parts of 
@@ -940,7 +940,7 @@ public:
 	 * or even how to expose an image.
 	 */
 	Guider(const GuiderName& guidername,
-		camera::CcdPtr ccd, camera::GuiderPortPtr guiderport,
+		camera::CcdPtr ccd, camera::GuidePortPtr guideport,
 		camera::AdaptiveOpticsPtr adaptiveoptics,
 		persistence::Database database = NULL);
 
@@ -991,7 +991,7 @@ private:
 	void	calibrationCleanup();
 
 public:
-	ControlDevicePtr	guiderPortDevice;
+	ControlDevicePtr	guidePortDevice;
 	ControlDevicePtr	adaptiveOpticsDevice;
 
 public:
@@ -1059,20 +1059,20 @@ public:
 	std::string	name;
 	std::string	instrument;
 	std::string	ccd;
-	std::string	guiderport;
+	std::string	guideport;
 	std::string	adaptiveoptics;
-	int	guiderportcalid;
+	int	guideportcalid;
 	int	adaptiveopticscalid;
 	Track() { }
 	Track(time_t _whenstarted, const std::string& _name,
 		const std::string& _instrument, const std::string& _ccd,
-		const std::string& _guiderport,
+		const std::string& _guideport,
 		const std::string& _adaptiveoptics)
 		: whenstarted(_whenstarted), name(_name),
-		  instrument(_instrument), ccd(_ccd), guiderport(_guiderport),
+		  instrument(_instrument), ccd(_ccd), guideport(_guideport),
 		  adaptiveoptics(_adaptiveoptics) {
 		trackid = -1;
-		guiderportcalid = -1;
+		guideportcalid = -1;
 		adaptiveopticscalid = -1;
 	}
 };

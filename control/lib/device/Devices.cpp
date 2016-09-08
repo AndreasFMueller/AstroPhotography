@@ -93,8 +93,8 @@ FocuserPtr	Devices::getFocuser(const DeviceName& name) {
 /**
  * \brief Get a guider port by name
  */
-GuiderPortPtr	Devices::getGuiderPort(const DeviceName& name) {
-	return DeviceAccessor<GuiderPortPtr>(_repository).get(name);
+GuidePortPtr	Devices::getGuidePort(const DeviceName& name) {
+	return DeviceAccessor<GuidePortPtr>(_repository).get(name);
 }
 
 /**

@@ -53,7 +53,7 @@ static void	usage(const std::string& progname) {
 	std::cout << "add <type> <service> <deviceurl>" << std::endl;
 	std::cout << "    Add a component to an instrument, this also creates the instrument." << std::endl;
 	std::cout << "    The following component types are available: Camera, CCD, GuiderCCD, Cooler," << std::endl;
-	std::cout << "    GuiderPort, Focuser, AdaptiveOptics, FilterWheel" << std::endl;
+	std::cout << "    GuidePort, Focuser, AdaptiveOptics, FilterWheel" << std::endl;
 	std::cout << std::endl;
 	std::cout << "remove <type> <index>" << std::endl;
 	std::cout << "    remove a component" << std::endl;

@@ -18,7 +18,7 @@ namespace camera {
 namespace sim {
 
 class SimCcd;
-class SimGuiderPort;
+class SimGuidePort;
 
 /**
  * \brief Simulator camera for guiding code tests
@@ -44,7 +44,7 @@ public:
 	double	vx;
 	double	vy;
 
-	// guiderport control
+	// guideport control
 	typedef struct movement {
 		double	starttime;	// time when movement started
 		double	duration;	// duration of movement
@@ -73,7 +73,7 @@ public:
 
 protected:
 	virtual CcdPtr	getCcd0(size_t id);
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 
 public:
 	// guider port functions
@@ -103,11 +103,11 @@ public:
 /**
  * \brief Simulator camera guider port
  */
-class SimGuiderPort : public GuiderPort {
+class SimGuidePort : public GuidePort {
 	SimCamera&	camera;
 public:
-	SimGuiderPort(SimCamera& camera);
-	virtual ~SimGuiderPort();
+	SimGuidePort(SimCamera& camera);
+	virtual ~SimGuidePort();
 	virtual uint8_t	active();
 	virtual void	activate(float raplus, float raminus,
 		float decplus, float decminus);

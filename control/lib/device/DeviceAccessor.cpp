@@ -79,12 +79,12 @@ astro::camera::CcdPtr
 }
 
 template<>
-astro::camera::GuiderPortPtr
-	DeviceAccessor<astro::camera::GuiderPortPtr>::get(
+astro::camera::GuidePortPtr
+	DeviceAccessor<astro::camera::GuidePortPtr>::get(
 		const DeviceName& name) {
-	check(name, DeviceName::Guiderport);
+	check(name, DeviceName::Guideport);
 	DeviceName	a = accessible(name);
-	return locator(a.modulename())->getGuiderPort((std::string)a);
+	return locator(a.modulename())->getGuidePort((std::string)a);
 }
 
 template<>

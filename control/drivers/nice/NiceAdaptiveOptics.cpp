@@ -15,7 +15,7 @@ NiceAdaptiveOptics::NiceAdaptiveOptics(
 	const DeviceName& devicename)
 	: AdaptiveOptics(devicename), NiceDevice(devicename),
 	  _adaptiveoptics(adaptiveoptics) {
-	_hasguiderport = adaptiveoptics->hasGuiderPort();
+	_hasguideport = adaptiveoptics->hasGuidePort();
 }
 
 NiceAdaptiveOptics::~NiceAdaptiveOptics() {
@@ -25,10 +25,10 @@ void	NiceAdaptiveOptics::set0(const Point& position) {
 	_adaptiveoptics->set(snowstar::convert(position));
 }
 
-GuiderPortPtr	NiceAdaptiveOptics::getGuiderPort0() {
-	snowstar::GuiderPortPrx	guiderport = _adaptiveoptics->getGuiderPort();
-	return GuiderPortPtr(new NiceGuiderPort(guiderport,
-		nice(guiderport->getName())));
+GuidePortPtr	NiceAdaptiveOptics::getGuidePort0() {
+	snowstar::GuidePortPrx	guideport = _adaptiveoptics->getGuidePort();
+	return GuidePortPtr(new NiceGuidePort(guideport,
+		nice(guideport->getName())));
 }
 
 } // namespace nice

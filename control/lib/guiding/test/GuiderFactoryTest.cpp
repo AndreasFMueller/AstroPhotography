@@ -39,7 +39,7 @@ void	GuiderFactoryTest::test() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "test() begin");
 	GuiderFactory	guiderfactory;
 	GuiderDescriptor	guiderdescriptor("test", "TEST",
-		"ccd:simulator/Imaging", "guiderport:simulator/guiderport", "");
+		"ccd:simulator/Imaging", "guideport:simulator/guideport", "");
 	GuiderPtr	guider = guiderfactory.get(guiderdescriptor);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider constructed");
 	std::vector<GuiderDescriptor>	guiders = guiderfactory.list();

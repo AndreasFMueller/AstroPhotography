@@ -12,7 +12,7 @@ noinst_LTLIBRARIES = libastrodevice.la
 
 libastrodevice_la_SOURCES =						\
 	AdaptiveOptics.cpp						\
-	BasicGuiderport.cpp						\
+	BasicGuideport.cpp						\
 	BinningSet.cpp							\
 	Camera.cpp							\
 	Ccd.cpp								\
@@ -29,7 +29,7 @@ libastrodevice_la_SOURCES =						\
 	Exposure.cpp							\
 	FilterWheel.cpp							\
 	Focuser.cpp							\
-	GuiderPort.cpp							\
+	GuidePort.cpp							\
 	Imager.cpp							\
 	ImageQueue.cpp							\
 	ImageQueueEntry.cpp						\

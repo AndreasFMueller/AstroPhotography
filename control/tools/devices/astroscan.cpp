@@ -93,8 +93,8 @@ static int	scan_command(const std::string& modulename, bool verbose) {
 	showlist(devloc->getDevicelist(DeviceName::Cooler));
 	std::cout << std::endl;
 
-	std::cout << "guiderport:       ";
-	showlist(devloc->getDevicelist(DeviceName::Guiderport));
+	std::cout << "guideport:        ";
+	showlist(devloc->getDevicelist(DeviceName::Guideport));
 	std::cout << std::endl;
 
 	std::cout << "filterwheel:      ";

@@ -29,9 +29,9 @@ protected:
 	virtual astro::camera::CcdPtr	getCcd0(size_t ccdid);
 
 public:
-	virtual bool	hasGuiderPort() const;
+	virtual bool	hasGuidePort() const;
 protected:
-	virtual astro::camera::GuiderPortPtr	getGuiderPort0();
+	virtual astro::camera::GuidePortPtr	getGuidePort0();
 
 public:
 	virtual bool	hasFilterWheel() const;

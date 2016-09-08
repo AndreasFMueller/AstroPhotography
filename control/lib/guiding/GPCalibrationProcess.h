@@ -10,7 +10,7 @@
 #define _GPCalibrationProcess_h
 
 #include <AstroGuiding.h>
-#include "GuiderPortProcess.h"
+#include "GuidePortProcess.h"
 
 using namespace astro::camera;
 using namespace astro::image;
@@ -23,7 +23,7 @@ namespace guiding {
  *
  * This class contains the work function for guider calibration.
  */
-class GPCalibrationProcess : public GuiderPortProcess {
+class GPCalibrationProcess : public GuidePortProcess {
 	// parameters for the calibration process
 	/**
 	 * \brief Pixel size in um
@@ -50,7 +50,7 @@ private:
 	GPCalibrationProcess(const GPCalibrationProcess& other);
 	GPCalibrationProcess&	operator=(const GPCalibrationProcess& other);
 public:
-	GPCalibrationProcess(GuiderBase *guider, camera::GuiderPortPtr guiderport,
+	GPCalibrationProcess(GuiderBase *guider, camera::GuidePortPtr guideport,
 		TrackerPtr tracker, persistence::Database database = NULL);
 	~GPCalibrationProcess();
 	void	focallength(double f) { _focallength = f; }

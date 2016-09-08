@@ -5,7 +5,7 @@
  */
 #include <NiceCamera.h>
 #include <NiceCcd.h>
-#include <NiceGuiderPort.h>
+#include <NiceGuidePort.h>
 #include <NiceFilterWheel.h>
 #include <IceConversions.h>
 
@@ -44,14 +44,14 @@ FilterWheelPtr	NiceCamera::getFilterWheel0() {
 		filterwheel->getName()));
 }
 
-bool	NiceCamera::hasGuiderPort() const {
-	return _camera->hasGuiderPort();
+bool	NiceCamera::hasGuidePort() const {
+	return _camera->hasGuidePort();
 }
 
-GuiderPortPtr	NiceCamera::getGuiderPort0() {
-	snowstar::GuiderPortPrx	guiderport = _camera->getGuiderPort();
-	return GuiderPortPtr(new NiceGuiderPort(guiderport,
-		nice(guiderport->getName())));
+GuidePortPtr	NiceCamera::getGuidePort0() {
+	snowstar::GuidePortPrx	guideport = _camera->getGuidePort();
+	return GuidePortPtr(new NiceGuidePort(guideport,
+		nice(guideport->getName())));
 }
 
 } // namespace nice

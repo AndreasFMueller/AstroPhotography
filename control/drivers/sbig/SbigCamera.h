@@ -17,7 +17,7 @@ namespace sbig {
 class SbigCcd;
 class SbigFilterWheel;
 class SbigCooler;
-class SbigGuiderPort;
+class SbigGuidePort;
 
 /**
  * \brief SBIG camera object
@@ -36,13 +36,13 @@ public:
 protected:
 	virtual FilterWheelPtr	getFilterWheel0();
 public:
-	virtual bool	hasGuiderPort() const;
+	virtual bool	hasGuidePort() const;
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 	friend class SbigCcd;
 	friend class SbigFilterWheel;
 	friend class SbigCooler;
-	friend class SbigGuiderPort;
+	friend class SbigGuidePort;
 };
 
 } // namespace sbig

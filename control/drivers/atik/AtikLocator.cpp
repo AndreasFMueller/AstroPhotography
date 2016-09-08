@@ -134,9 +134,9 @@ std::vector<std::string>	AtikCameraLocator::getDevicelist(DeviceName::device_typ
 		atik_camera[i]->getCapabilities(&name, &type, &capa);
 
 		switch (device) {
-		case DeviceName::Guiderport:
+		case DeviceName::Guideport:
 			if (capa.hasGuidePort) {
-				names.push_back(guiderportname(atik_camera[i]));
+				names.push_back(guideportname(atik_camera[i]));
 			}
 			break;
 		case DeviceName::Camera:

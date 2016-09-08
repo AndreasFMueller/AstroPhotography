@@ -155,7 +155,7 @@ std::list<long>	CalibrationTable::selectids(
 		"order by whenstarted",
 		guiderdescriptor.instrument().c_str(),
 		guiderdescriptor.ccd().c_str(),
-		guiderdescriptor.guiderport().c_str());
+		guiderdescriptor.guideport().c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition for calibrations: %s",
 		condition.c_str());	
 	return selectids(condition);

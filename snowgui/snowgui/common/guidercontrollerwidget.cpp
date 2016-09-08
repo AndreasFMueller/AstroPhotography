@@ -27,7 +27,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 	ui->setupUi(this);
 
 	_guiderdescriptor.ccdIndex = 0;
-	_guiderdescriptor.guiderportIndex = 0;
+	_guiderdescriptor.guideportIndex = 0;
 	_guiderdescriptor.adaptiveopticsIndex = 0;
 
 	// adding items to the tracking method combo box
@@ -103,7 +103,7 @@ void	guidercontrollerwidget::instrumentSetup(
 	// now build a GuiderDescriptor for the guider
 	_guiderdescriptor.instrumentname = _instrument.name();
 	_guiderdescriptor.ccdIndex = 0;
-	_guiderdescriptor.guiderportIndex = 0;
+	_guiderdescriptor.guideportIndex = 0;
 	_guiderdescriptor.adaptiveopticsIndex = 0;
 
 	// set up the guider
@@ -116,7 +116,7 @@ void	guidercontrollerwidget::instrumentSetup(
 void	guidercontrollerwidget::setupGuider() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting up the guider %s|%d|%d|%d",
 		_guiderdescriptor.instrumentname.c_str(),
-		_guiderdescriptor.ccdIndex, _guiderdescriptor.guiderportIndex,
+		_guiderdescriptor.ccdIndex, _guiderdescriptor.guideportIndex,
 		_guiderdescriptor.adaptiveopticsIndex);
 	statusTimer->stop();
 
@@ -138,7 +138,7 @@ void	guidercontrollerwidget::setupGuider() {
 	}
 
 	// also propagate the information to the calibration widgets
-	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuiderPort,
+	ui->gpcalibrationWidget->setGuider(snowstar::ControlGuidePort,
 		_guiderdescriptor, _guider, _guiderfactory, this);
 	ui->aocalibrationWidget->setGuider(snowstar::ControlAdaptiveOptics,
 		_guiderdescriptor, _guider, _guiderfactory, this);
@@ -252,10 +252,10 @@ void	guidercontrollerwidget::setCcd(int index) {
 }
 
 /**
- * \brief Select the Guiderport
+ * \brief Select the Guideport
  */
-void	guidercontrollerwidget::setGuiderport(int index) {
-	_guiderdescriptor.guiderportIndex = index;
+void	guidercontrollerwidget::setGuideport(int index) {
+	_guiderdescriptor.guideportIndex = index;
 	setupGuider();
 }
 
@@ -397,7 +397,7 @@ void	guidercontrollerwidget::methodChanged(int index) {
 }
 
 /**
- * \brief update the guiderport change interval
+ * \brief update the guideport change interval
  */
 void	guidercontrollerwidget::gpupdateintervalChanged(double r) {
 	_gpupdateinterval = r;
@@ -482,11 +482,11 @@ void	guidercontrollerwidget::launchMonitor() {
 	_trackingdialog->add(history);
 
 	// retrieve the calibrations
-	if (history.guiderportcalid > 0) {
+	if (history.guideportcalid > 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve cal %d",
-			history.guiderportcalid);
+			history.guideportcalid);
 		snowstar::Calibration cal = _guiderfactory
-			->getCalibration(history.guiderportcalid);
+			->getCalibration(history.guideportcalid);
 		_trackingdialog->gpMasperpixel(cal.masPerPixel);
 	}
 	if (history.adaptiveopticscalid > 0) {

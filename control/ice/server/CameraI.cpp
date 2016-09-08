@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <CameraI.h>
-#include <GuiderPortI.h>
+#include <GuidePortI.h>
 #include <FilterWheelI.h>
 #include <CcdI.h>
 #include <NameConverter.h>
@@ -47,15 +47,15 @@ FilterWheelPrx	CameraI::getFilterWheel(const Ice::Current& current) {
 	return FilterWheelI::createProxy(name, current);
 }
 
-bool	CameraI::hasGuiderPort(const Ice::Current& /* current */) {
-	return _camera->hasGuiderPort();
+bool	CameraI::hasGuidePort(const Ice::Current& /* current */) {
+	return _camera->hasGuidePort();
 }
 
-typedef IceUtil::Handle<GuiderPortI>        GuiderPortIPtr;
+typedef IceUtil::Handle<GuidePortI>        GuidePortIPtr;
 
-GuiderPortPrx	CameraI::getGuiderPort(const Ice::Current& current) {
-	std::string	name = _camera->getGuiderPort()->name();
-	return GuiderPortI::createProxy(name, current);
+GuidePortPrx	CameraI::getGuidePort(const Ice::Current& current) {
+	std::string	name = _camera->getGuidePort()->name();
+	return GuidePortI::createProxy(name, current);
 }
 
 CameraPrx	CameraI::createProxy(const std::string& cameraname,

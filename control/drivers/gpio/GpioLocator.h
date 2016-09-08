@@ -20,9 +20,9 @@ public:
 	virtual std::string	getName() const;
 	virtual std::string	getVersion() const;
 	virtual std::vector<std::string>	getDevicelist(
-		DeviceName::device_type device = DeviceName::Guiderport);
+		DeviceName::device_type device = DeviceName::Guideport);
 protected:
-	virtual astro::camera::GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual astro::camera::GuidePortPtr	getGuidePort0(const DeviceName& name);
 };
 
 } // namespace gpio

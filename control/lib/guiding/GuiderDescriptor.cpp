@@ -19,7 +19,7 @@ namespace guiding {
 bool	GuiderDescriptor::operator==(const GuiderDescriptor& other) const {
 	return (instrument() == other.instrument())
 		&& (ccd() == other.ccd())
-		&& (guiderport() == other.guiderport());
+		&& (guideport() == other.guideport());
 }
 
 /**
@@ -44,10 +44,10 @@ bool	GuiderDescriptor::operator<(const GuiderDescriptor& other) const {
 	if (ccd() > other.ccd()) {
 		return false;
 	}
-	if (guiderport() < other.guiderport()) {
+	if (guideport() < other.guideport()) {
 		return true;
 	}
-	if (guiderport() > other.guiderport()) {
+	if (guideport() > other.guideport()) {
 		return false;
 	}
 	return adaptiveoptics() < other.adaptiveoptics();
@@ -56,7 +56,7 @@ bool	GuiderDescriptor::operator<(const GuiderDescriptor& other) const {
 std::string	GuiderDescriptor::toString() const {
 	return stringprintf("%s:%s|%s|%s", name().c_str(),
 		instrument().c_str(), ccd().c_str(),
-		guiderport().c_str(), adaptiveoptics().c_str());
+		guideport().c_str(), adaptiveoptics().c_str());
 }
 
 } // namespace guiding

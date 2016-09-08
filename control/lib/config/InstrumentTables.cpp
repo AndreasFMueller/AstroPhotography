@@ -65,8 +65,8 @@ std::string	InstrumentComponentTableAdapter::type(DeviceName::device_type t) {
 		return std::string("filterwheel");
 	case DeviceName::Focuser:
 		return std::string("focuser");
-	case DeviceName::Guiderport:
-		return std::string("guiderport");
+	case DeviceName::Guideport:
+		return std::string("guideport");
 	case DeviceName::Module:
 		return std::string("module");
 	case DeviceName::Mount:
@@ -96,8 +96,8 @@ DeviceName::device_type	InstrumentComponentTableAdapter::type(const std::string&
 	if (t == "focuser") {
 		return DeviceName::Focuser;
 	}
-	if (t == "guiderport") {
-		return DeviceName::Guiderport;
+	if (t == "guideport") {
+		return DeviceName::Guideport;
 	}
 	if (t == "module") {
 		return DeviceName::Module;

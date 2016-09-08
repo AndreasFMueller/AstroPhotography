@@ -137,8 +137,8 @@ static void	addname(std::vector<std::string>& names, usb::DevicePtr devptr,
 			names.push_back(sxname.coolername());
 		}
 		break;
-	case DeviceName::Guiderport:
-		names.push_back(sxname.guiderportname());
+	case DeviceName::Guideport:
+		names.push_back(sxname.guideportname());
 		break;
 	default:
 		// unknown components
@@ -289,10 +289,10 @@ AdaptiveOpticsPtr	SxCameraLocator::getAdaptiveOptics0(const DeviceName& name) {
 /**
  * \brief Get a guider port by name
  */
-GuiderPortPtr	SxCameraLocator::getGuiderPort0(const DeviceName& name) {
+GuidePortPtr	SxCameraLocator::getGuidePort0(const DeviceName& name) {
 	SxName	sxname(name);
-	if (!sxname.isGuiderport(name)) {
-		std::string	msg = stringprintf("%s is not a Guiderport name",
+	if (!sxname.isGuideport(name)) {
+		std::string	msg = stringprintf("%s is not a Guideport name",
 			name.toString().c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
@@ -302,11 +302,11 @@ GuiderPortPtr	SxCameraLocator::getGuiderPort0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for guider port of camera %s",
 		cameraname.toString().c_str());
 	CameraPtr	camera = this->getCamera(cameraname);
-	if (!camera->hasGuiderPort()) {
+	if (!camera->hasGuidePort()) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "camera has no guider port");
 		throw NotFound("camera does not have guider port");
 	}
-	return camera->getGuiderPort();
+	return camera->getGuidePort();
 }
 
 } // namespace sx

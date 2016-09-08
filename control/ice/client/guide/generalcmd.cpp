@@ -22,9 +22,9 @@ namespace snowguide {
 void	Guide::usage(const char *progname) {
 	astro::Path	path(progname);
 	std::string	p = std::string("    ") + path.basename();
-	std::cout << "The snowguide program takes the CCD and guiderport defined for for an" << std::endl;
+	std::cout << "The snowguide program takes the CCD and guideport defined for for an" << std::endl;
 	std::cout << "and builds a guider from them. It understands a number of subcommands" << std::endl;
-	std::cout << "to control guding via this guider. A GuiderCCD and GuiderPort must be" << std::endl;
+	std::cout << "to control guding via this guider. A GuiderCCD and GuidePort must be" << std::endl;
 	std::cout << "defined in the instrument, as well as the guiderfocallength property." << std::endl;
 	std::cout << std::endl;
 	std::cout << "Usage:" << std::endl;
@@ -242,7 +242,7 @@ int	Guide::state_command(GuiderPrx guider) {
 		std::cout << ": ";
 		try {
 			Calibration	cal = guider->getCalibration(
-						ControlGuiderPort);
+						ControlGuidePort);
 			std::cout << "GP=" << cal.id << " ";
 		} catch (...) { }
 		try {

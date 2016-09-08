@@ -8,14 +8,14 @@ if ENABLE_SX
 pkglib_LTLIBRARIES = sx.la 
 
 noinst_HEADERS = sx.h SxUtils.h SxLocator.h SxCamera.h SxCcd.h SxDemux.h \
-	SxGuiderPort.h SxAO.h SxCooler.h
+	SxGuidePort.h SxAO.h SxCooler.h
 
 if ENABLE_UNITTESTS
 
 noinst_LTLIBRARIES = libsx.la
 
 libsx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuiderPort.cpp SxAO.cpp
+	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuidePort.cpp SxAO.cpp
 libsx_la_DEPENDENCIES = ../../lib/libastro.la
 libsx_la_LIBADD = ../../lib/libastro.la
 
@@ -32,7 +32,7 @@ aotest_DEPENDENCIES = ../../lib/libastro.la libsx.la
 endif
 
 sx_la_SOURCES = SxUtils.cpp SxLocator.cpp SxCamera.cpp SxCcd.cpp \
-	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuiderPort.cpp SxAO.cpp
+	SxCooler.cpp SxCcdM26C.cpp SxDemux.cpp SxGuidePort.cpp SxAO.cpp
 sx_la_LDFLAGS = -module
 sx_la_DEPENDENCIES = ../../lib/libastro.la
 sx_la_LIBADD = ../../lib/libastro.la

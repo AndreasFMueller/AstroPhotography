@@ -48,7 +48,7 @@ void	Calibration_display::operator()(const Calibration& cal) {
 	_out << ((cal.complete) ? "complete, " : "incomplete, ");
 	if (cal.flipped) { _out << "flipped, "; }
 	switch (cal.type) {
-	case ControlGuiderPort:
+	case ControlGuidePort:
 		_out << "GP, ";
 		_out << astro::stringprintf("%.3f mas/Pixel", cal.masPerPixel);
 		break;
@@ -105,7 +105,7 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 			_out << astro::stringprintf(",%8.0f", p);
 		}
 		switch (point.type) {
-		case ControlGuiderPort:
+		case ControlGuidePort:
 			_out << ",    GP";
 			break;
 		case ControlAdaptiveOptics:
@@ -119,7 +119,7 @@ void	TrackingPoint_display::operator()(const TrackingPoint& point) {
 		_out << astro::stringprintf(".%03.0f ",
 			1000 * (point.timeago - trunc(point.timeago)));
 		switch (point.type) {
-		case ControlGuiderPort:
+		case ControlGuidePort:
 			_out << "GP ";
 			break;
 		case ControlAdaptiveOptics:
@@ -148,7 +148,7 @@ void	TrackingHistory_display::operator()(const TrackingHistory history) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "display %d tracking points",
 			history.points.size());
 		Calibration     cal = _guiderfactory->getCalibration(
-					history.guiderportcalid);
+					history.guideportcalid);
 		double  starttime = history.points.begin()->timeago;
 		TrackingPoint_display   display(std::cout, starttime);
 		display.csv(_csv);

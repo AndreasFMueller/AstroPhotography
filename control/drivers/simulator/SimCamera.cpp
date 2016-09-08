@@ -6,7 +6,7 @@
 #include <SimCamera.h>
 #include <SimCcd.h>
 #include <SimFilterWheel.h>
-#include <SimGuiderPort.h>
+#include <SimGuidePort.h>
 #include <AstroExceptions.h>
 
 using namespace astro::image;
@@ -55,8 +55,8 @@ FilterWheelPtr	SimCamera::getFilterWheel0() {
 /**
  * \brief Get the guider port
  */
-GuiderPortPtr	SimCamera::getGuiderPort0() {
-	return _locator.guiderport();
+GuidePortPtr	SimCamera::getGuidePort0() {
+	return _locator.guideport();
 }
 
 } // namespace simulator

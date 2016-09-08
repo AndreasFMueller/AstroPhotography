@@ -45,7 +45,7 @@ private:
 	void	addCameraNames(std::vector<std::string>& names);
 	void	addCcdNames(std::vector<std::string>& names);
 	void	addCoolerNames(std::vector<std::string>& names);
-	void	addGuiderportNames(std::vector<std::string>& names);
+	void	addGuideportNames(std::vector<std::string>& names);
 };
 
 } // namespace asi

@@ -19,8 +19,8 @@ public:
 	virtual ~AdaptiveOpticsI();
 	virtual void	set(const Point& position, const Ice::Current& current);
 	virtual Point	get(const Ice::Current& current);
-	virtual bool	hasGuiderPort(const Ice::Current& current);
-	virtual GuiderPortPrx	getGuiderPort(const Ice::Current& current);	
+	virtual bool	hasGuidePort(const Ice::Current& current);
+	virtual GuidePortPrx	getGuidePort(const Ice::Current& current);	
 	virtual void	center(const Ice::Current& current);
 };
 

@@ -19,8 +19,8 @@ public:
 	virtual CcdPtr	getCcd0(size_t ccdid);
 	virtual bool	hasFilterWheel() const { return true; }
 	virtual FilterWheelPtr	getFilterWheel0();
-	virtual bool	hasGuiderPort() const { return true; }
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual bool	hasGuidePort() const { return true; }
+	virtual GuidePortPtr	getGuidePort0();
 };
 
 } // namespace simulator

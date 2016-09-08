@@ -61,7 +61,7 @@ void	calibrationdetaildialog::setCalibration(snowstar::Calibration calibration) 
 		_calibration.guider.instrumentname.c_str()));
 	ui->ccdField->setText(QString(astro::stringprintf("%d/%d/%d",
 		_calibration.guider.ccdIndex,
-		_calibration.guider.guiderportIndex,
+		_calibration.guider.guideportIndex,
 		_calibration.guider.adaptiveopticsIndex).c_str()));
 	ui->resolutionField->setText(QString(astro::stringprintf("%.1f\"/px",
 		_calibration.masPerPixel / 1000).c_str()));

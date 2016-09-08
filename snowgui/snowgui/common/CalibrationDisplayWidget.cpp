@@ -128,7 +128,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	// get the first point as a reference
 	snowstar::Point	ref;
 	switch (_calibration.type) {
-	case snowstar::ControlGuiderPort:
+	case snowstar::ControlGuidePort:
 		{
 		snowstar::CalibrationPoint	p = _calibration.points[0];
 		ref.x = p.star.x;

@@ -22,8 +22,8 @@ public:
 	CcdPrx	getCcd(int ccdid, const Ice::Current& current);
 	bool	hasFilterWheel(const Ice::Current& current);
 	FilterWheelPrx	getFilterWheel(const Ice::Current& current);
-	bool	hasGuiderPort(const Ice::Current& current);
-	GuiderPortPrx	getGuiderPort(const Ice::Current& current);
+	bool	hasGuidePort(const Ice::Current& current);
+	GuidePortPrx	getGuidePort(const Ice::Current& current);
 static	CameraPrx	createProxy(const std::string& cameraname,
 				const Ice::Current& current);
 };

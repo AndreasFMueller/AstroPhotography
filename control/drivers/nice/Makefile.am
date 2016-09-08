@@ -14,12 +14,12 @@ ICEDEPENDENCIES = $(top_builddir)/lib/libastro.la \
 
 pkglib_LTLIBRARIES = nice.la
 
-noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuiderPort.h \
+noinst_HEADERS = NiceDevice.h NiceLocator.h NiceCamera.h NiceGuidePort.h \
 	NiceFilterWheel.h NiceCcd.h NiceCooler.h NiceAdaptiveOptics.h \
 	NiceFocuser.h
 
 SRCFILES = NiceDevice.cpp \
-	NiceLocator.cpp NiceCamera.cpp NiceGuiderPort.cpp NiceCcd.cpp \
+	NiceLocator.cpp NiceCamera.cpp NiceGuidePort.cpp NiceCcd.cpp \
 	NiceFilterWheel.cpp NiceCooler.cpp NiceAdaptiveOptics.cpp \
 	NiceFocuser.cpp
 

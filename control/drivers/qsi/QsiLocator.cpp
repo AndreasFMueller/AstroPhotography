@@ -110,8 +110,8 @@ std::string	QsiCameraLocator::name(const std::string& serial,
 	case DeviceName::Filterwheel:
 		return std::string("filterwheel:qsi/" + serial + "/filterwheel");
 		break;
-	case DeviceName::Guiderport:
-		return std::string("guiderport:qsi/" + serial + "/guiderport");
+	case DeviceName::Guideport:
+		return std::string("guideport:qsi/" + serial + "/guideport");
 		break;
 	default:
 		break;
@@ -134,7 +134,7 @@ std::vector<std::string>	QsiCameraLocator::getDevicelist(DeviceName::device_type
 	case DeviceName::Ccd:
 	case DeviceName::Cooler:
 	case DeviceName::Filterwheel:
-	case DeviceName::Guiderport:
+	case DeviceName::Guideport:
 		break;
 	default:
 		return names;
@@ -243,21 +243,21 @@ FilterWheelPtr	QsiCameraLocator::getFilterWheel0(const DeviceName& filterwheelna
  * \brief Get the guider port by name
  *
  * \param name	Name of the guider port
- * \return	GuiderPortPtr object pointing to the guider port of the camera
+ * \return	GuidePortPtr object pointing to the guider port of the camera
  */
-GuiderPortPtr	QsiCameraLocator::getGuiderPort0(const DeviceName& guiderportname) {
-	if (guiderportname.size() < 2) {
+GuidePortPtr	QsiCameraLocator::getGuidePort0(const DeviceName& guideportname) {
+	if (guideportname.size() < 2) {
 		std::string	msg = stringprintf("bad name: %s",
-			guiderportname.toString().c_str());
+			guideportname.toString().c_str());
 		throw std::runtime_error(msg);
 	}
-	if (guiderportname.unitname() != "guiderport") {
+	if (guideportname.unitname() != "guideport") {
 		std::string	msg = stringprintf("not a valid unit name: %s",
-			guiderportname.toString().c_str());
+			guideportname.toString().c_str());
 		throw std::runtime_error(msg);
 	}
-	DeviceName	cameraname = guiderportname.parent(DeviceName::Camera);
-	return getCamera(cameraname)->getGuiderPort();
+	DeviceName	cameraname = guideportname.parent(DeviceName::Camera);
+	return getCamera(cameraname)->getGuidePort();
 }
 
 } // namespace qsi

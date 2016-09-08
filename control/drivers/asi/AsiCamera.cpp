@@ -6,7 +6,7 @@
 #include <AsiCamera.hh>
 #include <utils.h>
 #include <AsiCcd.h>
-#include <AsiGuiderPort.h>
+#include <AsiGuidePort.h>
 #include <AsiLocator.h>
 #include <ASICamera2.h>
 
@@ -54,7 +54,7 @@ AsiCamera::AsiCamera(int index) : Camera(asiCameraName(index)),
 	}
 
 	// set common variables depending on the camera info
-	_hasGuiderPort = (camerainfo.ST4Port) ? true : false;
+	_hasGuidePort = (camerainfo.ST4Port) ? true : false;
 	_isColor = (camerainfo.IsColorCam) ? true : false;
 	_hasCooler = (camerainfo.IsCoolerCam) ? true : false;
 	_id = camerainfo.CameraID;
@@ -130,15 +130,15 @@ CcdPtr	AsiCamera::getCcd0(size_t id) {
  *
  * Always returns true, because all ASI cameras have a guider port
  */
-bool    AsiCamera::hasGuiderPort() const {
-	return _hasGuiderPort;
+bool    AsiCamera::hasGuidePort() const {
+	return _hasGuidePort;
 }
 
 /**
  * \brief Get a guider port
  */
-GuiderPortPtr	AsiCamera::getGuiderPort0() {
-	return GuiderPortPtr(new AsiGuiderPort(*this));
+GuidePortPtr	AsiCamera::getGuidePort0() {
+	return GuidePortPtr(new AsiGuidePort(*this));
 }
 
 /**

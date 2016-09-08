@@ -40,24 +40,24 @@ CallbackDataPtr	TrackingProcessCallback::operator()(CallbackDataPtr data) {
  * \brief construct a new Tracking Process
  */
 TrackingProcess::TrackingProcess(GuiderBase *guider, TrackerPtr tracker,
-	ControlDevicePtr guiderPortDevice,
+	ControlDevicePtr guidePortDevice,
 	ControlDevicePtr adaptiveOpticsDevice,
 	persistence::Database database)
 	: BasicProcess(guider, tracker, database),
-	  _guiderPortDevice(guiderPortDevice),
+	  _guidePortDevice(guidePortDevice),
 	  _adaptiveOpticsDevice(adaptiveOpticsDevice),
 	  _summary(guider->name(), guider->instrument(), guider->ccdname()) {
 	_gain = 1;
-	_guiderportInterval = 10;
+	_guideportInterval = 10;
 	_adaptiveopticsInterval = 0;
 	_id = -1;
 
 	// additional fields in the summary
-	if (guiderPortDevice) {
-		_summary.descriptor.guiderport(guiderPortDevice->devicename());
+	if (guidePortDevice) {
+		_summary.descriptor.guideport(guidePortDevice->devicename());
 	}
 	if (adaptiveOpticsDevice) {
-		_summary.descriptor.guiderport(adaptiveOpticsDevice->devicename());
+		_summary.descriptor.guideport(adaptiveOpticsDevice->devicename());
 	}
 	
 	// install the callback
@@ -112,11 +112,11 @@ bool	TrackingProcess::adaptiveOpticsUsable() {
  * Like for the adaptive optics device, for this the device has to be
  * present and configured
  */
-bool	TrackingProcess::guiderPortUsable() {
-	if (!_guiderPortDevice) {
+bool	TrackingProcess::guidePortUsable() {
+	if (!_guidePortDevice) {
 		return false;
 	}
-	return _guiderPortDevice->iscalibrated();
+	return _guidePortDevice->iscalibrated();
 }
 
 /**
@@ -143,12 +143,12 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 		track.name = guider()->name();
 		track.instrument = guider()->instrument();
 		track.ccd = guider()->ccdname();
-		if (guiderPortUsable()) {
-                	track.guiderport = _guiderPortDevice->devicename();
-			track.guiderportcalid
-				= _guiderPortDevice->calibrationid();
+		if (guidePortUsable()) {
+                	track.guideport = _guidePortDevice->devicename();
+			track.guideportcalid
+				= _guidePortDevice->calibrationid();
 		} else {
-			track.guiderportcalid = -1;
+			track.guideportcalid = -1;
 		}
 		if (adaptiveOpticsUsable()) {
 			track.adaptiveoptics
@@ -169,7 +169,7 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 	}
 
 	// get the interval for images
-	double	imageInterval = _guiderportInterval;
+	double	imageInterval = _guideportInterval;
 	if (adaptiveOpticsUsable()) {
 		if (_adaptiveOpticsDevice->iscalibrated()) {
 			imageInterval = _adaptiveopticsInterval;
@@ -180,10 +180,10 @@ void	TrackingProcess::main(thread::Thread<TrackingProcess>& thread) {
 
 	// every time we go through the loop we ask whether we should terminate
 	// we also do this at appropriate points within the loop
-	double	guiderportTime = 0;
+	double	guideportTime = 0;
 	while (!thread.terminate()) {
 		try {
-			step(thread, imageInterval, guiderportTime);
+			step(thread, imageInterval, guideportTime);
 		} catch (const TrackingTerminationException& tte) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
 				"TRACK %d terminated: %s", _id, tte.what());
@@ -214,7 +214,7 @@ cleanup:
  */
 void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 		double imageInterval,
-		double& guiderportTime) {
+		double& guideportTime) {
 	// we measure the time it takes to get an exposure. This
 	// may be larger than the interval, so we need the time
 	// to protect from overcorrecting
@@ -276,20 +276,20 @@ void	TrackingProcess::step(thread::Thread<TrackingProcess>& thread,
 	}
 
 	// if we have a usable guider port, give it the remaining correction
-	if (guiderPortUsable()) {
+	if (guidePortUsable()) {
 		// check whether enough time has passed for a guider port
 		// action. Because there may be some variance in image 
 		// acquisition, we subtract half the elapsed time of the last
 		// image acquisition from the interval to ensure that there
 		// really will be a guider port update within each guide
 		// interval
-		if (Timer::gettime() > guiderportTime + _guiderportInterval
+		if (Timer::gettime() > guideportTime + _guideportInterval
 			- timer.elapsed() / 2) {
-			Point	d = _guiderPortDevice->correct(remainder,
-				_guiderportInterval, _stepping);
-			guiderportTime = Timer::gettime();
+			Point	d = _guidePortDevice->correct(remainder,
+				_guideportInterval, _stepping);
+			guideportTime = Timer::gettime();
 			debug(LOG_DEBUG, DEBUG_LOG, 0,
-				"TRACK %d: guiderport leaves offset %s",
+				"TRACK %d: guideport leaves offset %s",
 				_id, d.toString().c_str());
 		}
 	} else {

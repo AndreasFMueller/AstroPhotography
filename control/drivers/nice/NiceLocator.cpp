@@ -11,7 +11,7 @@
 #include <NiceDevice.h>
 #include <NiceCamera.h>
 #include <NiceCcd.h>
-#include <NiceGuiderPort.h>
+#include <NiceGuidePort.h>
 #include <NiceFocuser.h>
 #include <NiceAdaptiveOptics.h>
 #include <NiceFilterWheel.h>
@@ -290,8 +290,8 @@ CcdPtr	NiceLocator::getCcd0(const DeviceName& name) {
 	return CcdPtr(new NiceCcd(ccd, name));
 }
 
-GuiderPortPtr	NiceLocator::getGuiderPort0(const DeviceName& name) {
-	check(name, DeviceName::Guiderport);
+GuidePortPtr	NiceLocator::getGuidePort0(const DeviceName& name) {
+	check(name, DeviceName::Guideport);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving nice device %s",
 		name.toString().c_str());
 
@@ -299,9 +299,9 @@ GuiderPortPtr	NiceLocator::getGuiderPort0(const DeviceName& name) {
 	snowstar::DeviceLocatorPrx	locator = getLocator(name.servicename(),
 						remotename.modulename());
 
-	snowstar::GuiderPortPrx	guiderport
-		= locator->getGuiderPort(remotename.toString());
-	return GuiderPortPtr(new NiceGuiderPort(guiderport, name));
+	snowstar::GuidePortPrx	guideport
+		= locator->getGuidePort(remotename.toString());
+	return GuidePortPtr(new NiceGuidePort(guideport, name));
 }
 
 FilterWheelPtr	NiceLocator::getFilterWheel0(const DeviceName& name) {

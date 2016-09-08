@@ -9,7 +9,7 @@
 #include <AstroCamera.h>
 #include <camera.h>
 #include <NiceDevice.h>
-#include <NiceGuiderPort.h>
+#include <NiceGuidePort.h>
 
 namespace astro {
 namespace camera {
@@ -24,7 +24,7 @@ public:
 
 protected:
 	virtual void	set0(const Point& position);
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 };
 
 } // namespace nice

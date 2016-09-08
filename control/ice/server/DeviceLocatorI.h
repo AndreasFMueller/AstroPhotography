@@ -27,7 +27,7 @@ public:
 					const Ice::Current& current);
 	virtual CcdPrx		getCcd(const std::string& name,
 					const Ice::Current& current);
-	virtual GuiderPortPrx	getGuiderPort(const std::string& name,
+	virtual GuidePortPrx	getGuidePort(const std::string& name,
 					const Ice::Current& current);
 	virtual FilterWheelPrx	getFilterWheel(const std::string& name,
 					const Ice::Current& current);

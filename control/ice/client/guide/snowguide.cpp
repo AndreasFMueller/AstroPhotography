@@ -32,7 +32,7 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /*  4 */
 { "exposure",		required_argument,	NULL,	'e' }, /*  5 */
 { "flipped",		no_argument,		NULL,	'f' },
-{ "guiderport",		required_argument,	NULL,	'G' }, /*  7 */
+{ "guideport",		required_argument,	NULL,	'G' }, /*  7 */
 { "help",		no_argument,		NULL,	'h' }, /*  8 */
 { "interval",		required_argument,	NULL,	'i' }, /*  9 */
 { "method",		required_argument,	NULL,	'm' }, /* 10 */
@@ -60,7 +60,7 @@ int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	int	ccdIndex = 0;
-	int	guiderportIndex = 0;
+	int	guideportIndex = 0;
 	int	adaptiveopticsIndex = 0;
 	int	width = -1;
 
@@ -94,7 +94,7 @@ int	main(int argc, char *argv[]) {
 			guide.flipped = true;
 			break;
 		case 'G':
-			guiderportIndex = std::stoi(optarg);
+			guideportIndex = std::stoi(optarg);
 			break;
 		case 'h':
 			guide.usage(argv[0]);
@@ -190,13 +190,13 @@ int	main(int argc, char *argv[]) {
 	GuiderDescriptor	descriptor;
 	descriptor.instrumentname = instrumentname;
 	descriptor.ccdIndex = ccdIndex;
-	descriptor.guiderportIndex = guiderportIndex;
+	descriptor.guideportIndex = guideportIndex;
 	descriptor.adaptiveopticsIndex = adaptiveopticsIndex;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "instrument: %s",
 		descriptor.instrumentname.c_str());
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %d", descriptor.ccdIndex);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport: %d",
-		descriptor.guiderportIndex);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport: %d",
+		descriptor.guideportIndex);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "adaptiveoptics: %d",
 		descriptor.adaptiveopticsIndex);
 
@@ -228,7 +228,7 @@ int	main(int argc, char *argv[]) {
 		}
 		long	historyid = std::stoi(argv[optind++]);
 		if (argc > optind) {
-			ControlType	type = ControlGuiderPort;
+			ControlType	type = ControlGuidePort;
 			std::string	typestring(argv[optind++]);
 			try {
 				type = Guide::string2type(typestring);

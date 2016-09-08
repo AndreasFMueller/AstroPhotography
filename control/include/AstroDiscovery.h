@@ -109,7 +109,7 @@ public:
 		 */
 		DEVICES = 1 << 2,
 		/**
-		 * a guiding server can use a and a guiderport to guide a
+		 * a guiding server can use a and a guideport to guide a
 		 * telescope.
 		 */
 		GUIDING = 1 << 3,
@@ -318,7 +318,7 @@ public:
 		CCD = 2,
 		Cooler = 3,
 		GuiderCCD = 4,
-		GuiderPort = 5,
+		GuidePort = 5,
 		FilterWheel = 6,
 		Focuser = 7,
 		Mount = 8
@@ -428,7 +428,7 @@ public:
 	bool	hasCcd();
 	bool	hasCooler();
 	bool	hasGuiderCcd();
-	bool	hasGuiderPort();
+	bool	hasGuidePort();
 	bool	hasFilterWheel();
 	bool	hasFocuser();
 	bool	hasMount();
@@ -447,7 +447,7 @@ public:
 	InstrumentComponent	getCcd(int index = 0);
 	InstrumentComponent	getCooler(int index = 0);
 	InstrumentComponent	getGuiderCcd(int index = 0);
-	InstrumentComponent	getGuiderPort(int index = 0);
+	InstrumentComponent	getGuidePort(int index = 0);
 	InstrumentComponent	getFilterWheel(int index = 0);
 	InstrumentComponent	getFocuser(int index = 0);
 	InstrumentComponent	getMount(int index = 0);

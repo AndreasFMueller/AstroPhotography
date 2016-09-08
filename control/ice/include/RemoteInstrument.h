@@ -43,7 +43,7 @@ public:
 	CoolerPrx		cooler(unsigned int index = 0);
 	FilterWheelPrx		filterwheel(unsigned int index = 0);
 	FocuserPrx		focuser(unsigned int index = 0);
-	GuiderPortPrx		guiderport(unsigned int index = 0);
+	GuidePortPrx		guideport(unsigned int index = 0);
 	MountPrx		mount(unsigned int index = 0);
 };
 

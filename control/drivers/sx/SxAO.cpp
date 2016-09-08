@@ -13,7 +13,7 @@ namespace camera {
 namespace sx {
 
 SxAO::SxAO(const DeviceName& name) : AdaptiveOptics(name) {
-	_hasguiderport = false;
+	_hasguideport = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create AO on device %s",
 		name.toString().c_str());
 

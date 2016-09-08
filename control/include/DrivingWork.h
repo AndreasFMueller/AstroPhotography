@@ -17,10 +17,10 @@ namespace guiding {
  *
  * The driving process is responsible for applying the the correction to
  * the guider port. As a derived class of BasicProcess, it always has
- * a GuiderPort reference available. The correction is applied using the
+ * a GuidePort reference available. The correction is applied using the
  * setCorrection method.
  */
-class DrivingWork : public GuiderPortProcess {
+class DrivingWork : public GuidePortProcess {
 	std::mutex	mutex;
 	/**
  	 * \brief Control interval for the port driving process
@@ -67,7 +67,7 @@ private:
 	DrivingWork(const DrivingWork& other);
 	DrivingWork&	operator=(const DrivingWork& other);
 public:
-	DrivingWork(GuiderBase *_guider, camera::GuiderPortPtr guiderport,
+	DrivingWork(GuiderBase *_guider, camera::GuidePortPtr guideport,
 		TrackerPtr tracker, persistence::Database database = NULL);
 	virtual ~DrivingWork();
 

@@ -50,8 +50,8 @@ FocuserPtr	DeviceCacheAdapter<Focuser>::get0(const DeviceName& name) {
 }
 
 template<>
-GuiderPortPtr	DeviceCacheAdapter<GuiderPort>::get0(const DeviceName& name) {
-	return _locator->getGuiderPort0(name);
+GuidePortPtr	DeviceCacheAdapter<GuidePort>::get0(const DeviceName& name) {
+	return _locator->getGuidePort0(name);
 }
 
 template<>
@@ -64,7 +64,7 @@ MountPtr	DeviceCacheAdapter<Mount>::get0(const DeviceName& name) {
 //////////////////////////////////////////////////////////////////////
 DeviceLocator::DeviceLocator() :
 	aocache(this), cameracache(this), ccdcache(this), coolercache(this),
-	filterwheelcache(this), focusercache(this), guiderportcache(this),
+	filterwheelcache(this), focusercache(this), guideportcache(this),
 	mountcache(this) {
 }
 
@@ -124,15 +124,15 @@ astro::camera::CcdPtr	DeviceLocator::getCcd0(const DeviceName& name) {
 		name.toString().c_str()));
 }
 
-astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort0(const DeviceName& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "find guiderport %s",
+astro::camera::GuidePortPtr	DeviceLocator::getGuidePort0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "find guideport %s",
 		name.toString().c_str());
 	DeviceName	cameraname = name.parent(DeviceName::Camera);
 	CameraPtr	camera = this->getCamera(cameraname);
-	if (camera->hasGuiderPort()) {
-		return camera->getGuiderPort();
+	if (camera->hasGuidePort()) {
+		return camera->getGuidePort();
 	}
-	throw NotFound(stringprintf("guiderport %s not found",
+	throw NotFound(stringprintf("guideport %s not found",
 		name.toString().c_str()));
 }
 
@@ -192,8 +192,8 @@ astro::camera::FocuserPtr	DeviceLocator::getFocuser(const std::string& name) {
 	return focusercache.get(name);
 }
 
-astro::camera::GuiderPortPtr	DeviceLocator::getGuiderPort(const std::string& name) {
-	return guiderportcache.get(name);
+astro::camera::GuidePortPtr	DeviceLocator::getGuidePort(const std::string& name) {
+	return guideportcache.get(name);
 }
 
 astro::device::MountPtr	DeviceLocator::getMount(const std::string& name) {
@@ -241,17 +241,17 @@ astro::camera::CcdPtr	LocatorAdapter<astro::camera::Ccd>::get0(
 	return _locator->getCcd(ccdname);
 }
 
-// GuiderPort
+// GuidePort
 template<>
-astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get(
-					const DeviceName& guiderportname) {
-        return getCameraChild(guiderportname);
+astro::camera::GuidePortPtr	LocatorAdapter<astro::camera::GuidePort>::get(
+					const DeviceName& guideportname) {
+        return getCameraChild(guideportname);
 }
 
 template<>
-astro::camera::GuiderPortPtr	LocatorAdapter<astro::camera::GuiderPort>::get0(
-					const DeviceName& guiderportname) {
-        return _locator->getGuiderPort0(guiderportname);
+astro::camera::GuidePortPtr	LocatorAdapter<astro::camera::GuidePort>::get0(
+					const DeviceName& guideportname) {
+        return _locator->getGuidePort0(guideportname);
 }
 
 // FilterWheel

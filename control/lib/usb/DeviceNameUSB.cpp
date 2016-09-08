@@ -194,8 +194,8 @@ DeviceName	DeviceNameUSB::coolername() const {
 	return name(DeviceName::Cooler, "Imaging/cooler");
 }
 
-DeviceName	DeviceNameUSB::guiderportname() const {
-	return name(DeviceName::Guiderport, "guiderport");
+DeviceName	DeviceNameUSB::guideportname() const {
+	return name(DeviceName::Guideport, "guideport");
 }
 
 bool	DeviceNameUSB::matches(const DeviceName& other, DeviceName::device_type type) {
@@ -241,14 +241,14 @@ bool	DeviceNameUSB::isCooler(const DeviceName& other) {
 	return ((other[2] == "Imaging") && (other[3] == "cooler"));
 }
 
-bool	DeviceNameUSB::isGuiderport(const DeviceName& other) {
-	if (!matches(other, DeviceName::Guiderport)) {
+bool	DeviceNameUSB::isGuideport(const DeviceName& other) {
+	if (!matches(other, DeviceName::Guideport)) {
 		return false;
 	}
 	if (3 != other.size()) {
 		return false;
 	}
-	return (other[2] == "guiderport");
+	return (other[2] == "guideport");
 }
 
 } // namespace device

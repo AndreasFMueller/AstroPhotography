@@ -6,7 +6,7 @@
 #include <QsiCamera.h>
 #include <QsiCcd.h>
 #include <QsiFilterWheel.h>
-#include <QsiGuiderPort.h>
+#include <QsiGuidePort.h>
 
 namespace astro {
 namespace camera {
@@ -28,9 +28,9 @@ QsiCamera::QsiCamera(const std::string& _name) : Camera(_name) {
 	// connect to the camera
 	_camera.put_Connected(true);
 
-	// get the filterwheel and guiderport information
+	// get the filterwheel and guideport information
 	camera().get_HasFilterWheel(&_hasfilterwheel);
-	camera().get_CanPulseGuide(&_hasguiderport);
+	camera().get_CanPulseGuide(&_hasguideport);
 
 	// query the information of the CCD
 	long	xsize, ysize;
@@ -125,18 +125,18 @@ FilterWheelPtr	QsiCamera::getFilterWheel0() {
 /**
  * \brief Check whether the camera has a guider port
  */
-bool	QsiCamera::hasGuiderPort() const {
-	return _hasguiderport;
+bool	QsiCamera::hasGuidePort() const {
+	return _hasguideport;
 }
 
 /**
  * \brief Get the Guider port
  */
-GuiderPortPtr	QsiCamera::getGuiderPort0() {
-	if (!_hasguiderport) {
+GuidePortPtr	QsiCamera::getGuidePort0() {
+	if (!_hasguideport) {
 		throw std::runtime_error("camera has no guider port");
 	}
-	return GuiderPortPtr(new QsiGuiderPort(*this));
+	return GuidePortPtr(new QsiGuidePort(*this));
 }
 
 /**

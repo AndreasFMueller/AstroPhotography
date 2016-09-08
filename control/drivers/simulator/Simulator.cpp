@@ -107,7 +107,7 @@ void	SimCamera::complete_movement() {
 }
 
 /**
- * \brief Activate the Guiderport of the simulator camera
+ * \brief Activate the Guideport of the simulator camera
  *
  * This method completes the movement that was already in progress, as
  * far as time has already progressed.
@@ -262,31 +262,31 @@ ImagePtr	SimCcd::getImage() {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Simulator Guiderport implementation
+// Simulator Guideport implementation
 //////////////////////////////////////////////////////////////////////
 
-static DeviceName	guiderportname(const DeviceName& cameraname) {
-	return DeviceName(cameraname, DeviceName::Guiderport, "guiderport");
+static DeviceName	guideportname(const DeviceName& cameraname) {
+	return DeviceName(cameraname, DeviceName::Guideport, "guideport");
 }
 
-SimGuiderPort::SimGuiderPort(SimCamera& _camera)
-	: GuiderPort(guiderportname(_camera.name())), camera(_camera) {
+SimGuidePort::SimGuidePort(SimCamera& _camera)
+	: GuidePort(guideportname(_camera.name())), camera(_camera) {
 }
 
-SimGuiderPort::~SimGuiderPort() {
+SimGuidePort::~SimGuidePort() {
 }
 
-uint8_t	SimGuiderPort::active() {
+uint8_t	SimGuidePort::active() {
 	return camera.active();
 }
 
-void	SimGuiderPort::activate(float raplus, float raminus, float decplus,
+void	SimGuidePort::activate(float raplus, float raminus, float decplus,
 		float decminus) {
 	camera.activate(raplus, raminus, decplus, decminus);
 }
 
-GuiderPortPtr	SimCamera::getGuiderPort0() {
-	return GuiderPortPtr(new SimGuiderPort(*this));
+GuidePortPtr	SimCamera::getGuidePort0() {
+	return GuidePortPtr(new SimGuidePort(*this));
 }
 
 } // namespace sim

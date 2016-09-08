@@ -34,7 +34,7 @@ std::list<long>	TrackingStore::getTrackings(
 	std::ostringstream	out;
 	out << "instrument = '" << guider.instrument() << "' and ";
 	out << "ccd = '" << guider.ccd() << "' and ";
-	out << "guiderport = '" << guider.guiderport() << "' ";
+	out << "guideport = '" << guider.guideport() << "' ";
 	out << "order by whenstarted";
 	std::string	condition = out.str();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "condition: %s", condition.c_str());
@@ -142,10 +142,10 @@ TrackingSummary	TrackingStore::getSummary(long id) {
 	TrackTable	table(_database);
 	TrackRecord	track = table.byid(id);
 	TrackingSummary	summary(track.name, track.instrument, track.ccd,
-		track.guiderport, track.adaptiveoptics);
+		track.guideport, track.adaptiveoptics);
 	summary.trackingid = id;
 	summary.starttime = track.whenstarted;
-	summary.guiderportcalid = track.guiderportcalid;
+	summary.guideportcalid = track.guideportcalid;
 	summary.adaptiveopticscalid = track.adaptiveopticscalid;
 	// get the summary information about the point data
 	std::ostringstream	qstr;

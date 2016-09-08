@@ -4,9 +4,9 @@
 # (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 pkglib_LTLIBRARIES = gpio.la
-noinst_HEADERS = GpioLocator.h GpioGuiderport.h
+noinst_HEADERS = GpioLocator.h GpioGuideport.h
 
-SRCFILES = GpioLocator.cpp GpioGuiderport.cpp
+SRCFILES = GpioLocator.cpp GpioGuideport.cpp
 
 gpio_la_SOURCES = $(SRCFILES)
 gpio_la_LDFLAGS = -module

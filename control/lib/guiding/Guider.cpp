@@ -32,9 +32,9 @@ namespace guiding {
  * default frame is the entire CCD area.
  */
 Guider::Guider(const GuiderName& guidername,
-	CcdPtr ccd, GuiderPortPtr guiderport, AdaptiveOpticsPtr adaptiveoptics,
+	CcdPtr ccd, GuidePortPtr guideport, AdaptiveOpticsPtr adaptiveoptics,
 	Database database)
-	: GuiderBase(guidername, ccd, database), _guiderport(guiderport),
+	: GuiderBase(guidername, ccd, database), _guideport(guideport),
 	  _adaptiveoptics(adaptiveoptics) {
 	// default exposure settings
 	exposure().exposuretime(1.);
@@ -48,10 +48,10 @@ Guider::Guider(const GuiderName& guidername,
 	addProgressCallback(calcallback);
 
 	// create control devices
-	if (guiderport) {
-		guiderPortDevice = ControlDevicePtr(
-			new ControlDevice<GuiderPort, GuiderCalibration, GP>(this,
-				guiderport, database));
+	if (guideport) {
+		guidePortDevice = ControlDevicePtr(
+			new ControlDevice<GuidePort, GuiderCalibration, GP>(this,
+				guideport, database));
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "guider port control device");
 	}
 	if (adaptiveoptics) {
@@ -88,7 +88,7 @@ Guide::state	Guider::state() {
 	// that process is still doing it
 	switch (result) {
 	case Guide::calibrating:
-		if ((guiderPortDevice) && (guiderPortDevice->calibrating())) {
+		if ((guidePortDevice) && (guidePortDevice->calibrating())) {
 			return result;
 		}
 		if ((adaptiveOpticsDevice) && (adaptiveOpticsDevice->calibrating())) {
@@ -158,11 +158,11 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker) {
 	_progress = 0;
 
 	// start calibration
-	if ((type == GP) && guiderPortDevice) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuiderPort calibration");
+	if ((type == GP) && guidePortDevice) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuidePort calibration");
 		_state.startCalibrating();
-		guiderPortDevice->setParameter("focallength", focallength());
-		return guiderPortDevice->startCalibration(tracker);
+		guidePortDevice->setParameter("focallength", focallength());
+		return guidePortDevice->startCalibration(tracker);
 	}
 
 	if ((type == AO) && adaptiveOpticsDevice) {
@@ -213,7 +213,7 @@ void	Guider::useCalibration(int calid) {
 	CalibrationStore	store(database());
 	if (store.contains(calid, GP)) {
 		_state.addCalibration();
-		guiderPortDevice->calibrationid(calid);
+		guidePortDevice->calibrationid(calid);
 		return;
 	}
 	if (store.contains(calid, AO)) {
@@ -250,7 +250,7 @@ void	Guider::unCalibrate(ControlDeviceType type) {
 	// now uncalibrate the selected device
 	switch (type) {
 	case GP:
-		guiderPortDevice->calibrationid(-1);
+		guidePortDevice->calibrationid(-1);
 		break;
 	case AO:
 		adaptiveOpticsDevice->calibrationid(-1);
@@ -258,7 +258,7 @@ void	Guider::unCalibrate(ControlDeviceType type) {
 	}
 
 	// if neither device is no calibrated, go into the idle state
-	if ((!guiderPortDevice->iscalibrated())
+	if ((!guidePortDevice->iscalibrated())
 		&& (!adaptiveOpticsDevice->iscalibrated())) {
 		_state.configure();
 	}
@@ -271,9 +271,9 @@ void	Guider::cancelCalibration() {
 	if (_state != Guide::calibrating) {
 		throw BadState("not currently calibrating");
 	}
-	if (guiderPortDevice) {
-		if (guiderPortDevice->calibrating()) {
-			guiderPortDevice->cancelCalibration();
+	if (guidePortDevice) {
+		if (guidePortDevice->calibrating()) {
+			guidePortDevice->cancelCalibration();
 		}
 	}
 	if (adaptiveOpticsDevice) {
@@ -291,9 +291,9 @@ bool	Guider::waitCalibration(double timeout) {
 		throw BadState("not currently calibrating");
 	}
 	// only one device can be calibrating at a time, so we try them in turn
-	if (guiderPortDevice) {
-		if (guiderPortDevice->calibrating()) {
-			return guiderPortDevice->waitCalibration(timeout);
+	if (guidePortDevice) {
+		if (guidePortDevice->calibrating()) {
+			return guidePortDevice->waitCalibration(timeout);
 		}
 	}
 	if (adaptiveOpticsDevice) {
@@ -388,7 +388,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 	_state.startGuiding();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new tracking process");
 	TrackingProcess	*tp = new TrackingProcess(this, tracker,
-		guiderPortDevice, adaptiveOpticsDevice, database());
+		guidePortDevice, adaptiveOpticsDevice, database());
 	trackingprocess = BasicProcessPtr(tp);
 
 	// set the guiding intervals
@@ -400,7 +400,7 @@ void	Guider::startGuiding(TrackerPtr tracker, double gpinterval,
 			"GP interval is very short: %.3fs, are you sure?",
 			gpinterval);
 	}
-	tp->guiderportInterval(gpinterval);
+	tp->guideportInterval(gpinterval);
 	tp->adaptiveopticsInterval(aointerval);
 	tp->stepping(stepping);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using gp=%.3fs, ao=%.3fs interval",
@@ -434,7 +434,7 @@ double	Guider::getInterval() {
 	if (NULL == tp) {
 		return 10;
 	}
-	return tp->guiderportInterval();
+	return tp->guideportInterval();
 }
 
 /**
@@ -496,7 +496,7 @@ void Guider::lastAction(double& actiontime, Point& offset, Point& activation) {
  */
 GuiderDescriptor	Guider::getDescriptor() const {
 	return GuiderDescriptor(name(), instrument(), ccdname(),
-		guiderportname(), adaptiveopticsname());
+		guideportname(), adaptiveopticsname());
 }
 
 /**

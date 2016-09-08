@@ -305,18 +305,18 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 }
 
 /**
- * \brief Construct a guider from guider, guiderport, tracker and a database
+ * \brief Construct a guider from guider, guideport, tracker and a database
  */
 GPCalibrationProcess::GPCalibrationProcess(GuiderBase *_guider,
-	camera::GuiderPortPtr guiderport, TrackerPtr _tracker,
+	camera::GuidePortPtr guideport, TrackerPtr _tracker,
 	persistence::Database _database)
-	: GuiderPortProcess(_guider, guiderport, _tracker, _database) {
+	: GuidePortProcess(_guider, guideport, _tracker, _database) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "construct a new calibration process");
 	_focallength = 0.600;
 	calibrated = false;
 
 	// prepare a BasicCalibrator class that does the actual computation
-	ControlDeviceNamePtr	gpname = guider()->guiderPortDeviceName();
+	ControlDeviceNamePtr	gpname = guider()->guidePortDeviceName();
 	calibration(CalibrationPtr(new GuiderCalibration(*gpname)));
 
 	// create the thread
@@ -355,7 +355,7 @@ GPCalibrationProcess::~GPCalibrationProcess() {
  */
 void	GPCalibrationProcess::start() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the calibration thread");
-	GuiderPortProcess::start();
+	GuidePortProcess::start();
 }
 
 /**
@@ -386,7 +386,7 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "RA: raplus = %f, raminus = %f, t = %f",
 		raplus, raminus, t);
-	guiderport()->activate(raplus, raminus, 0, 0);
+	guideport()->activate(raplus, raminus, 0, 0);
 	Timer::sleep(t);
 
 	t = 0;
@@ -403,7 +403,7 @@ void	GPCalibrationProcess::moveto(double ra, double dec) {
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "DEC: decplus = %f, decminus = %f, t = %f",
 		decplus, decminus, t);
-	guiderport()->activate(0, 0, decplus, decminus);
+	guideport()->activate(0, 0, decplus, decminus);
 	Timer::sleep(t);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveto complete");
 }

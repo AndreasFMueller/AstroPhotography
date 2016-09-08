@@ -47,15 +47,15 @@ void	AdaptiveOptics::center() {
 	this->set0(Point(0, 0));
 }
 
-GuiderPortPtr	AdaptiveOptics::getGuiderPort() {
-	if (!hasGuiderPort()) {
-		throw std::runtime_error("AO unit has no guider port");
+GuidePortPtr	AdaptiveOptics::getGuidePort() {
+	if (!hasGuidePort()) {
+		throw std::runtime_error("AO unit has no guide port");
 	}
-	return this->getGuiderPort0();
+	return this->getGuidePort0();
 }
 
-GuiderPortPtr	AdaptiveOptics::getGuiderPort0() {
-	throw NotImplemented("guider port not implemented");
+GuidePortPtr	AdaptiveOptics::getGuidePort0() {
+	throw NotImplemented("guide port not implemented");
 }
 
 } // namespace camera

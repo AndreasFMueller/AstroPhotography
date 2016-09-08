@@ -41,8 +41,8 @@ public:
 	void	testFullimage();
 	void	testSubimage();
 	void	testImageSequence();
-	void	testGuiderport();
-	void	testGuiderport2();
+	void	testGuideport();
+	void	testGuideport2();
 
 	CPPUNIT_TEST_SUITE(sxtest);
 	//CPPUNIT_TEST(testList);
@@ -51,8 +51,8 @@ public:
 	//CPPUNIT_TEST(testFullimage);
 	CPPUNIT_TEST(testImageSequence);
 	//CPPUNIT_TEST(testSubimage);
-	//CPPUNIT_TEST(testGuiderport);
-	//CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuideport);
+	//CPPUNIT_TEST(testGuideport2);
 	CPPUNIT_TEST_SUITE_END();
 };
 
@@ -201,34 +201,34 @@ void	sxtest::testSubimage() {
 }
 
 
-void	sxtest::testGuiderport() {
+void	sxtest::testGuideport() {
 	CameraPtr	camera = locator->getCamera(0);
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
-	guiderport->activate(1,0,0,0);
+	GuidePortPtr	guideport = camera->getGuidePort();
+	guideport->activate(1,0,0,0);
 	sleep(2);
-	guiderport->activate(1,0,0,0);
+	guideport->activate(1,0,0,0);
 	sleep(2);
-	guiderport->activate(1,0,0,0);
+	guideport->activate(1,0,0,0);
 	sleep(2);
-	guiderport->activate(1,0,0,0);
+	guideport->activate(1,0,0,0);
 	sleep(2);
-	guiderport->activate(0,1,0,0);
+	guideport->activate(0,1,0,0);
 	sleep(2);
-	guiderport->activate(0,1,0,0);
+	guideport->activate(0,1,0,0);
 	sleep(2);
-	guiderport->activate(0,1,0,0);
+	guideport->activate(0,1,0,0);
 	sleep(2);
-	guiderport->activate(0,0,1,0);
+	guideport->activate(0,0,1,0);
 	sleep(2);
-	guiderport->activate(0,0,1,0);
+	guideport->activate(0,0,1,0);
 	sleep(2);
-	guiderport->activate(0,0,0,1);
+	guideport->activate(0,0,0,1);
 	sleep(3);
 }
 
-void	sxtest::testGuiderport2() {
+void	sxtest::testGuideport2() {
 	CameraPtr	camera = locator->getCamera(0);
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	GuidePortPtr	guideport = camera->getGuidePort();
 	int	counter = 100;
 	int	flags = 0;
 	float	delta = 0.2;
@@ -242,7 +242,7 @@ void	sxtest::testGuiderport2() {
 		float	decplus = delta * ((0x2 & flags) ? 1 : 0);
 		float	decminus = delta * ((0x4 & flags) ? 1 : 0);
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
-		guiderport->activate(raplus, raminus, decplus, decminus);
+		guideport->activate(raplus, raminus, decplus, decminus);
 		usleep(2 * delta * 1000000);
 	}
 }

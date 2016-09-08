@@ -61,7 +61,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		snowstar::GuiderFactoryPrx guiderfactory) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set the calibration selection %s, %s",
 		guiderdescriptor.instrumentname.c_str(),
-		(controltype == snowstar::ControlGuiderPort) ? "GP" : "AO");
+		(controltype == snowstar::ControlGuidePort) ? "GP" : "AO");
 	// remember the guider parameters
 	_controltype = controltype;
 	_guiderdescriptor = guiderdescriptor;
@@ -69,7 +69,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 
 	// update the title
 	std::string	title = astro::stringprintf("Select calibration for %s of instrument %s",
-		(_controltype == snowstar::ControlGuiderPort)
+		(_controltype == snowstar::ControlGuidePort)
 			? "Guide Port" : "AO",
 		_guiderdescriptor.instrumentname.c_str());
 	setWindowTitle(QString(title.c_str()));
@@ -114,7 +114,7 @@ void	calibrationselectiondialog::setGuider(snowstar::ControlType controltype,
 		messagebox->setText(QString("no calibrations found"));
 		messagebox->setInformativeText(QString(
 			astro::stringprintf("searching for calibrations for %s for guider %s returned no calibrations",
-				(_controltype == snowstar::ControlGuiderPort)
+				(_controltype == snowstar::ControlGuidePort)
 					? "Guide Port" : "Adaptive Optics",
 				_guiderdescriptor.instrumentname.c_str()).c_str()));
 		messagebox->exec();

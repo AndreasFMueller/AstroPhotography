@@ -131,8 +131,8 @@ int	command_scan(snowstar::ModulesPrx& modules,
 	devicelist(devicelocator, snowstar::DevFILTERWHEEL);
 	std::cout << "focuser:          ";
 	devicelist(devicelocator, snowstar::DevFOCUSER);
-	std::cout << "guiderport:       ";
-	devicelist(devicelocator, snowstar::DevGUIDERPORT);
+	std::cout << "guideport:        ";
+	devicelist(devicelocator, snowstar::DevGUIDEPORT);
 	std::cout << "adaptive optics:  ";
 	devicelist(devicelocator, snowstar::DevAO);
 	std::cout << "mount:            ";

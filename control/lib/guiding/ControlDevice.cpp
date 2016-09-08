@@ -8,7 +8,7 @@
 #include <GPCalibrationProcess.h>
 #include <AOCalibrationProcess.h>
 #include <algorithm>
-#include "GuiderPortAction.h"
+#include "GuidePortAction.h"
 
 using namespace astro::callback;
 
@@ -16,10 +16,10 @@ namespace astro {
 namespace guiding {
 
 //////////////////////////////////////////////////////////////////////
-// Specialization to GuiderPort
+// Specialization to GuidePort
 //////////////////////////////////////////////////////////////////////
 template<>
-int	ControlDevice<camera::GuiderPort,
+int	ControlDevice<camera::GuidePort,
 		GuiderCalibration, GP>::startCalibration(TrackerPtr tracker) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "GP calibration start");
 
@@ -33,13 +33,13 @@ int	ControlDevice<camera::GuiderPort,
 }
 
 /**
- * \brief apply a correction and send it to the GuiderPort
+ * \brief apply a correction and send it to the GuidePort
  */
 template<>
-Point	ControlDevice<camera::GuiderPort,
+Point	ControlDevice<camera::GuidePort,
 		GuiderCalibration, GP>::correct(const Point& point, double Deltat,
 			bool stepping) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport correction %s, %.2f",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport correction %s, %.2f",
 		point.toString().c_str(), Deltat);
 	// give up if not configured
 	if (!_calibration->complete()) {
@@ -53,7 +53,7 @@ Point	ControlDevice<camera::GuiderPort,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "apply GP correction: %s",
 		correction.toString().c_str());
 	double	dt = (Deltat > 0.5) ? (Deltat - 0.5) : 0;
-	GuiderPortAction	*action = new GuiderPortAction(_device,
+	GuidePortAction	*action = new GuidePortAction(_device,
 					correction, dt);
 	action->stepping(stepping);
 	ActionPtr	aptr(action);

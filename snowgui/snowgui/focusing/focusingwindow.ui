@@ -210,7 +210,7 @@
           <string>Filterwheel</string>
          </attribute>
         </widget>
-        <widget class="snowgui::guiderportcontrollerwidget" name="guiderportcontrollerWidget" native="true">
+        <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget" native="true">
          <attribute name="label">
           <string>Guide Port</string>
          </attribute>
@@ -272,9 +272,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::guiderportcontrollerwidget</class>
+   <class>snowgui::guideportcontrollerwidget</class>
    <extends>QWidget</extends>
-   <header location="global">guiderportcontrollerwidget.h</header>
+   <header location="global">guideportcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

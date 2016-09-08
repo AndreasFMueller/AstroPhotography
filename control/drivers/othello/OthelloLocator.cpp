@@ -5,7 +5,7 @@
  */
 #include <OthelloLocator.h>
 #include <OthelloUtil.h>
-#include <OthelloGuiderPort.h>
+#include <OthelloGuidePort.h>
 #include <OthelloFocuser.h>
 #include <AstroFormat.h>
 #include <AstroDebug.h>
@@ -108,9 +108,9 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 					!= OTHELLO_VENDOR_ID) continue;
 				// handle guider port devices
 				if ((descriptor->idProduct()
-					== OTHELLO_GUIDERPORT_ID)
-					&& (device == DeviceName::Guiderport)) {
-					names.push_back("guiderport:othello/"
+					== OTHELLO_GUIDEPORT_ID)
+					&& (device == DeviceName::Guideport)) {
+					names.push_back("guideport:othello/"
 						+ othelloname(devptr));
 				}
 				// handle focuser devices
@@ -137,7 +137,7 @@ std::vector<std::string>	OthelloLocator::getDevicelist(DeviceName::device_type d
 /**
  * \brief Get a guider port by name
  */
-GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
+GuidePortPtr	OthelloLocator::getGuidePort0(const DeviceName& name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for device %s",
 		name.toString().c_str());
 	// extract the serial number from the name
@@ -155,7 +155,7 @@ GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
 		if (vendor != OTHELLO_VENDOR_ID) {
 			continue;
 		}
-		if (descriptor->idProduct() != OTHELLO_GUIDERPORT_ID) {
+		if (descriptor->idProduct() != OTHELLO_GUIDEPORT_ID) {
 			continue;
 		}
 		bool	needsclosing = true;
@@ -169,7 +169,7 @@ GuiderPortPtr	OthelloLocator::getGuiderPort0(const DeviceName& name) {
 			devserial.c_str());
 		if (devserial == serial) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "matching guider port");
-			return GuiderPortPtr(new OthelloGuiderPort(dptr));
+			return GuidePortPtr(new OthelloGuidePort(dptr));
 		}
 		if (needsclosing) {
 			dptr->close();

@@ -77,8 +77,8 @@ astro::discover::InstrumentComponentKey::Type	convertInstrumentType(
 		return astro::discover::InstrumentComponentKey::Cooler;
 	case InstrumentGuiderCCD:
 		return astro::discover::InstrumentComponentKey::GuiderCCD;
-	case InstrumentGuiderPort:
-		return astro::discover::InstrumentComponentKey::GuiderPort;
+	case InstrumentGuidePort:
+		return astro::discover::InstrumentComponentKey::GuidePort;
 	case InstrumentFilterWheel:
 		return astro::discover::InstrumentComponentKey::FilterWheel;
 	case InstrumentFocuser:
@@ -102,8 +102,8 @@ InstrumentComponentType	convertInstrumentType(
 		return InstrumentCooler;
 	case astro::discover::InstrumentComponentKey::GuiderCCD:
 		return InstrumentGuiderCCD;
-	case astro::discover::InstrumentComponentKey::GuiderPort:
-		return InstrumentGuiderPort;
+	case astro::discover::InstrumentComponentKey::GuidePort:
+		return InstrumentGuidePort;
 	case astro::discover::InstrumentComponentKey::FilterWheel:
 		return InstrumentFilterWheel;
 	case astro::discover::InstrumentComponentKey::Focuser:
@@ -126,8 +126,8 @@ std::string	instrumentcomponent2name(const InstrumentComponentType type) {
                 return std::string("Cooler");
 	case InstrumentGuiderCCD:
                 return std::string("GuiderCCD");
-	case InstrumentGuiderPort:
-                return std::string("GuiderPort");
+	case InstrumentGuidePort:
+                return std::string("GuidePort");
 	case InstrumentFilterWheel:
                 return std::string("FilterWheel");
 	case InstrumentFocuser:
@@ -154,8 +154,8 @@ InstrumentComponentType	name2instrumentcomponent(const std::string& name) {
 	if (std::string("GuiderCCD") == name) {
 		return InstrumentGuiderCCD;
 	}
-	if (std::string("GuiderPort") == name) {
-		return InstrumentGuiderPort;
+	if (std::string("GuidePort") == name) {
+		return InstrumentGuidePort;
 	}
 	if (std::string("FilterWheel") == name) {
 		return InstrumentFilterWheel;

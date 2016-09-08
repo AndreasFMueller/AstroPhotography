@@ -10,7 +10,7 @@
 #include "SxCamera.h"
 #include "SxCcd.h"
 #include "sx.h"
-#include "SxGuiderPort.h"
+#include "SxGuidePort.h"
 #include "SxUtils.h"
 #include "SxCooler.h"
 
@@ -210,12 +210,12 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 
 	// find out whether this camera has a guider port
 	if (ccd0request.data()->extra_capabilities & STAR2000_PORT) {
-		_hasGuiderPort = true;
+		_hasGuidePort = true;
 	} else {
-		_hasGuiderPort = false;
+		_hasGuidePort = false;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "camera has guider port: %s",
-		(_hasGuiderPort) ? "yes" : "no");
+		(_hasGuidePort) ? "yes" : "no");
 
 	// try to get the same information from the second CCD, if there
 	// is one
@@ -431,13 +431,13 @@ CoolerPtr	SxCamera::getCooler(int ccdindex) {
 /**
  * \brief Get the guider port
  */
-GuiderPortPtr	SxCamera::getGuiderPort0() {
-	if (!_hasGuiderPort) {
+GuidePortPtr	SxCamera::getGuidePort0() {
+	if (!_hasGuidePort) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "this camera has no guide port");
 		throw NotImplemented("this camera has no guider port");
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating guider port object");
-	return GuiderPortPtr(new SxGuiderPort(*this));
+	return GuidePortPtr(new SxGuidePort(*this));
 }
 
 /**

@@ -72,7 +72,7 @@ protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
 	virtual CcdPtr		getCcd0(const DeviceName& name);
 	virtual FilterWheelPtr	getFilterWheel0(const DeviceName& name);
-	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
 	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual FocuserPtr	getFocuser0(const DeviceName& name);
 	virtual AdaptiveOpticsPtr	getAdaptiveOptics0(

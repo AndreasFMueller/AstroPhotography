@@ -259,7 +259,7 @@ static void	usage(const char *progname) {
 	std::cout << "                                    remove an instrument component"
 		<< std::endl;
         std::cout << "                                    Valid component types are: Camera, CCD," << std::endl;
-	std::cout << "                                    GuiderCCD, Cooler, GuiderPort, Focuser," << std::endl;
+	std::cout << "                                    GuiderCCD, Cooler, GuidePort, Focuser," << std::endl;
 	std::cout << "                                    AdaptiveOptics, FilterWheel" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  <server> <INSTR> property <name> [ <value> [ <description> ] ]" << std::endl;

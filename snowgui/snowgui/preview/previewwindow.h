@@ -30,7 +30,7 @@ class PreviewWindow : public QWidget {
 	snowstar::CoolerPrx		_cooler;
 	snowstar::FilterWheelPrx	_filterwheel;
 	snowstar::FocuserPrx		_focuser;
-	snowstar::GuiderPortPrx		_guiderport;
+	snowstar::GuidePortPrx		_guideport;
 
 	astro::image::ImagePtr		_image;
 	snowstar::CallbackAdapterPtr	_adapter;
@@ -50,7 +50,7 @@ private:
 	void	setupFilterwheel();
 	void	setupCooler();
 	void	setupFocuser();
-	void	setupGuiderport();
+	void	setupGuideport();
 
 	void	startStream();
 	void	stopStream();
@@ -83,8 +83,8 @@ public slots:
 	void	focuserChanged(int focuserindex);
 	void	focuserSetChanged(int focusposition);
 
-	void	guiderportChanged(int guiderportindex);
-	void	guiderportActivated();
+	void	guideportChanged(int guideportindex);
+	void	guideportActivated();
 
 	void	statusUpdate();
 private:

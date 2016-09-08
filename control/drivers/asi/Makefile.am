@@ -6,7 +6,7 @@
 
 if ENABLE_ASI
 
-noinst_HEADERS = AsiLocator.h utils.h AsiCamera.hh AsiCcd.h AsiGuiderPort.h \
+noinst_HEADERS = AsiLocator.h utils.h AsiCamera.hh AsiCcd.h AsiGuidePort.h \
 	AsiCooler.h AsiStream.h
 pkglib_LTLIBRARIES = asi.la 
 
@@ -15,7 +15,7 @@ if ENABLE_UNITTESTS
 noinst_LTLIBRARIES = libasi.la
 
 libasi_la_SOURCES = AsiLocator.cpp utils.cpp AsiCamera.cpp AsiCcd.cpp  \
-	AsiGuiderPort.cpp AsiCooler.cpp AsiStream.cpp
+	AsiGuidePort.cpp AsiCooler.cpp AsiStream.cpp
 libasi_la_DEPENDENCIES = ../../lib/libastro.la
 libasi_la_LIBADD = ../../lib/libastro.la
 
@@ -30,7 +30,7 @@ testcase_LDADD = @ASILIBRARY@
 endif
 
 asi_la_SOURCES = AsiLocator.cpp utils.cpp AsiCamera.cpp AsiCcd.cpp \
-	AsiGuiderPort.cpp AsiCooler.cpp AsiStream.cpp
+	AsiGuidePort.cpp AsiCooler.cpp AsiStream.cpp
 asi_la_LDFLAGS = -module
 asi_la_DEPENDENCIES = ../../lib/libastro.la
 asi_la_LIBADD = ../../lib/libastro.la @ASILIBPATH@ @ASILIBS@

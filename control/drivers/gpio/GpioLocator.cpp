@@ -1,5 +1,5 @@
 /*
- * GpioLocator.cpp -- Gpio Guiderport locator
+ * GpioLocator.cpp -- Gpio Guideport locator
  *
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
@@ -9,7 +9,7 @@
 #include <AstroExceptions.h>
 #include <AstroLoader.h>
 #include <config.h>
-#include <GpioGuiderport.h>
+#include <GpioGuideport.h>
 
 namespace astro {
 namespace module {
@@ -65,20 +65,20 @@ std::vector<std::string>	GpioLocator::getDevicelist(
 	DeviceName::device_type device) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve device list: %d", device);
 	std::vector<std::string>	names;
-	if (DeviceName::Guiderport != device) {
+	if (DeviceName::Guideport != device) {
 		return names;
 	}
-	names.push_back(std::string("guiderport:gpio/0"));
+	names.push_back(std::string("guideport:gpio/0"));
 	return names;
 }
 
-GuiderPortPtr	GpioLocator::getGuiderPort0(const DeviceName& name) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the gpio guiderport '%s'",
+GuidePortPtr	GpioLocator::getGuidePort0(const DeviceName& name) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the gpio guideport '%s'",
 		name.toString().c_str());
 
-	GpioGuiderport	*guiderport = new GpioGuiderport(name);
+	GpioGuideport	*guideport = new GpioGuideport(name);
 
-	return GuiderPortPtr(guiderport);
+	return GuidePortPtr(guideport);
 }
 
 } // namespace gpio

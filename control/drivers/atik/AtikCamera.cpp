@@ -77,12 +77,12 @@ FilterWheelPtr	AtikCamera::getFilterWheel0() {
 	return FilterWheelPtr(NULL);
 }
 
-bool	AtikCamera::hasGuiderPort() const {
+bool	AtikCamera::hasGuidePort() const {
 	return capa.hasGuidePort;
 }
 
-GuiderPortPtr	AtikCamera::getGuiderPort0() {
-	return GuiderPortPtr(NULL);
+GuidePortPtr	AtikCamera::getGuidePort0() {
+	return GuidePortPtr(NULL);
 }
 
 } // namespace atik

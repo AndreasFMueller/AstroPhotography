@@ -28,9 +28,9 @@ public:
 	bool	hasFilterWheel() const;
 
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 public:
-	bool	hasGuiderPort() const;
+	bool	hasGuidePort() const;
 
 friend class AtikCcd;
 };

@@ -50,7 +50,7 @@ void	adaptiveopticscontrollerwidget::instrumentSetup(
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
-	// read the informatio bout the guiderport
+	// read the informatio bout the guideport
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentAdaptiveOptics, index)) {
 		snowstar::AdaptiveOpticsPrx	adaptiveoptics

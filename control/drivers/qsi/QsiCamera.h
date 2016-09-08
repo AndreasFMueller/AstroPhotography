@@ -17,7 +17,7 @@ namespace qsi {
 class QsiCcd;
 class QsiCooler;
 class QsiFilterWheel;
-class QsiGuiderPort;
+class QsiGuidePort;
 
 class QsiCamera : public Camera {
 	std::recursive_mutex	mutex;
@@ -26,9 +26,9 @@ class QsiCamera : public Camera {
 friend class QsiCcd; // allow the CCD to get the QSICamera
 friend class QsiCooler; // allow the Cooler to get the QSICamera
 friend class QsiFilterWheel; // allow the Filterwheel to get the QSICamera
-friend class QsiGuiderPort; // allow the GuiderPort to get the QSICamera
+friend class QsiGuidePort; // allow the GuidePort to get the QSICamera
 	bool	_hasfilterwheel;
-	bool	_hasguiderport;
+	bool	_hasguideport;
 public:
 	QsiCamera(const std::string& name);
 	virtual ~QsiCamera();
@@ -44,9 +44,9 @@ protected:
 	virtual FilterWheelPtr	getFilterWheel0();
 
 public:
-	virtual bool	hasGuiderPort() const;
+	virtual bool	hasGuidePort() const;
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 
 public:
 	bool	isColor() const;

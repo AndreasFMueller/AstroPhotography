@@ -28,19 +28,19 @@ trackviewdialog::trackviewdialog(QWidget *parent) :
 	// make sure the calibration structures are in a consistent state
 	_gpcalibration.id = -1;
 	_gpcalibration.guider.ccdIndex = -1;
-	_gpcalibration.guider.guiderportIndex = -1;
+	_gpcalibration.guider.guideportIndex = -1;
 	_gpcalibration.guider.adaptiveopticsIndex = -1;
 	_aocalibration.id = -1;
 	_aocalibration.guider.ccdIndex = -1;
-	_aocalibration.guider.guiderportIndex = -1;
+	_aocalibration.guider.guideportIndex = -1;
 	_aocalibration.guider.adaptiveopticsIndex = -1;
 
 	// make sure the track is clean
 	_track.trackid = -1;
-	_track.guiderportcalid = -1;
+	_track.guideportcalid = -1;
 	_track.adaptiveopticscalid = -1;
 	_track.guider.ccdIndex = -1;
-	_track.guider.guiderportIndex = -1;
+	_track.guider.guideportIndex = -1;
 	_track.guider.adaptiveopticsIndex = -1;
 
 	// connect only at the end
@@ -88,13 +88,13 @@ void	trackviewdialog::setTrack(snowstar::TrackingHistory track) {
 	// get the calibrations
 	_gpcalibration.id = -1;
 	try {
-		if ((_guiderfactory) && (_track.guiderportcalid > 0)) {
+		if ((_guiderfactory) && (_track.guideportcalid > 0)) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve gp cal %d",
-				_track.guiderportcalid);
+				_track.guideportcalid);
 			_gpcalibration = _guiderfactory->getCalibration(
-						_track.guiderportcalid);
+						_track.guideportcalid);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "gp cal %d", 
-				_track.guiderportcalid);
+				_track.guideportcalid);
 		}
 	} catch (...) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "problem retrieving gp cal");

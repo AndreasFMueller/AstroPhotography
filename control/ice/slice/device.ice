@@ -30,7 +30,7 @@ module snowstar {
 
 	enum devicetype { DevAO, DevCAMERA, DevCCD,
 		DevCOOLER, DevFILTERWHEEL, DevFOCUSER,
-		DevGUIDERPORT, DevMODULE, DevMOUNT };
+		DevGUIDEPORT, DevMODULE, DevMOUNT };
 	/**
 	 * \brief Device Locator interface within a module
 	 */
@@ -52,7 +52,7 @@ module snowstar {
 		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
 		Camera*		getCamera(string name) throws NotFound;
 		Ccd*		getCcd(string name) throws NotFound;
-		GuiderPort*	getGuiderPort(string name) throws NotFound;
+		GuidePort*	getGuidePort(string name) throws NotFound;
 		FilterWheel*	getFilterWheel(string name) throws NotFound;
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;
@@ -69,7 +69,7 @@ module snowstar {
 		AdaptiveOptics*	getAdaptiveOptics(string name) throws NotFound;
 		Camera*		getCamera(string name) throws NotFound;
 		Ccd*		getCcd(string name) throws NotFound;
-		GuiderPort*	getGuiderPort(string name) throws NotFound;
+		GuidePort*	getGuidePort(string name) throws NotFound;
 		FilterWheel*	getFilterWheel(string name) throws NotFound;
 		Cooler*		getCooler(string name) throws NotFound;
 		Focuser*	getFocuser(string name) throws NotFound;

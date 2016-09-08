@@ -53,8 +53,8 @@ astro::camera::FocuserPtr
 DeviceCacheAdapter<astro::camera::Focuser>::get0(const DeviceName& name);
 
 template<>
-astro::camera::GuiderPortPtr
-DeviceCacheAdapter<astro::camera::GuiderPort>::get0(const DeviceName& name);
+astro::camera::GuidePortPtr
+DeviceCacheAdapter<astro::camera::GuidePort>::get0(const DeviceName& name);
 
 template<>
 astro::device::MountPtr
@@ -109,7 +109,7 @@ class   DeviceLocator {
 	DeviceCache<astro::camera::Cooler>	coolercache;
 	DeviceCache<astro::camera::FilterWheel>	filterwheelcache;
 	DeviceCache<astro::camera::Focuser>	focusercache;
-	DeviceCache<astro::camera::GuiderPort>	guiderportcache;
+	DeviceCache<astro::camera::GuidePort>	guideportcache;
 	DeviceCache<astro::device::Mount>	mountcache;
 public:
 	virtual astro::camera::AdaptiveOpticsPtr	getAdaptiveOptics0(const DeviceName& name);
@@ -118,7 +118,7 @@ public:
 	virtual	astro::camera::CoolerPtr	getCooler0(const DeviceName& name);
 	virtual	astro::camera::FilterWheelPtr	getFilterWheel0(const DeviceName& name);
 	virtual	astro::camera::FocuserPtr	getFocuser0(const DeviceName& name);
-	virtual	astro::camera::GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual	astro::camera::GuidePortPtr	getGuidePort0(const DeviceName& name);
 	virtual	astro::device::MountPtr		getMount0(const DeviceName& name);
 public:
 	DeviceLocator();
@@ -133,7 +133,7 @@ public:
 	astro::camera::CameraPtr	getCamera(const std::string& name);
 	astro::camera::CameraPtr	getCamera(size_t index);
 	astro::camera::CcdPtr		getCcd(const std::string& name);
-	astro::camera::GuiderPortPtr	getGuiderPort(const std::string& name);
+	astro::camera::GuidePortPtr	getGuidePort(const std::string& name);
 	astro::camera::FilterWheelPtr	getFilterWheel(const std::string& name);
 	astro::camera::CoolerPtr	getCooler(const std::string& name);
 	astro::camera::FocuserPtr	getFocuser(const std::string& name);
@@ -187,8 +187,8 @@ astro::camera::CcdPtr
 LocatorAdapter<astro::camera::Ccd>::get0(const DeviceName& name);
 
 template<>
-astro::camera::GuiderPortPtr
-LocatorAdapter<astro::camera::GuiderPort>::get0(const DeviceName& name);
+astro::camera::GuidePortPtr
+LocatorAdapter<astro::camera::GuidePort>::get0(const DeviceName& name);
 
 template<>
 astro::camera::FilterWheelPtr
@@ -220,8 +220,8 @@ astro::camera::CcdPtr
 LocatorAdapter<astro::camera::Ccd>::get(const DeviceName& name);
 
 template<>
-astro::camera::GuiderPortPtr
-LocatorAdapter<astro::camera::GuiderPort>::get(const DeviceName& name);
+astro::camera::GuidePortPtr
+LocatorAdapter<astro::camera::GuidePort>::get(const DeviceName& name);
 
 template<>
 astro::camera::FilterWheelPtr

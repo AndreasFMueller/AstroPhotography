@@ -150,18 +150,18 @@ static DeviceName	sbigCameraName(const QueryUSBResults& queryresults,
  * \brief Generate a guider port name from the camera
  *
  * The name generated is designed to work with the implementation of the
- * getGuiderport0 function in the base DeviceLocator class, so that no
+ * getGuideport0 function in the base DeviceLocator class, so that no
  * SBIG-specific implementation of this function is required.
  */
-static void	sbigAddGuiderportName(std::vector<std::string>& names,
+static void	sbigAddGuideportName(std::vector<std::string>& names,
 				const QueryUSBResults& queryresult,
 				int index) {
 	DeviceName	cameraname = sbigCameraName(queryresult, index);
-	std::string	guiderportname = cameraname.child(DeviceName::Ccd,
-				"guiderport");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guiderport %s",
-		guiderportname.c_str());
-	names.push_back(guiderportname);
+	std::string	guideportname = cameraname.child(DeviceName::Ccd,
+				"guideport");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "adding guideport %s",
+		guideportname.c_str());
+	names.push_back(guideportname);
 }
 
 /**
@@ -324,8 +324,8 @@ std::vector<std::string>	SbigCameraLocator::getDevicelist(DeviceName::device_typ
 					cameraname.c_str());
 				names.push_back(cameraname);
 				break;
-			case DeviceName::Guiderport:
-				sbigAddGuiderportName(names, results, i);
+			case DeviceName::Guideport:
+				sbigAddGuideportName(names, results, i);
 				break;
 			case DeviceName::Ccd:
 				sbigAddCcdName(names, results, i);

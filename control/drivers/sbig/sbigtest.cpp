@@ -33,8 +33,8 @@ public:
 	void	testExposure();
 	void	testFilterwheel();
 	void	testCooler();
-	void	testGuiderport();
-	void	testGuiderport2();
+	void	testGuideport();
+	void	testGuideport2();
 	void	testShutter();
 
 	CPPUNIT_TEST_SUITE(sbigtest);
@@ -44,8 +44,8 @@ public:
 	//CPPUNIT_TEST(testExposure);
 	//CPPUNIT_TEST(testFilterwheel);
 	//CPPUNIT_TEST(testCooler);
-	//CPPUNIT_TEST(testGuiderport);
-	//CPPUNIT_TEST(testGuiderport2);
+	//CPPUNIT_TEST(testGuideport);
+	//CPPUNIT_TEST(testGuideport2);
 	CPPUNIT_TEST(testShutter);
 	CPPUNIT_TEST_SUITE_END();
 };
@@ -151,38 +151,38 @@ void	sbigtest::testCooler() {
 	}
 }
 
-void	sbigtest::testGuiderport() {
+void	sbigtest::testGuideport() {
 	CameraPtr	camera = locator->getCamera(0);
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
-	guiderport->activate(3, 0, 0, 0);
+	GuidePortPtr	guideport = camera->getGuidePort();
+	guideport->activate(3, 0, 0, 0);
 	for (int t = 0; t < 5; t++) {
-		uint8_t	port = guiderport->active();
+		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guiderport->activate(0, 3, 0, 0);
+	guideport->activate(0, 3, 0, 0);
 	for (int t = 0; t < 5; t++) {
-		uint8_t	port = guiderport->active();
+		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guiderport->activate(0, 0, 3, 0);
+	guideport->activate(0, 0, 3, 0);
 	for (int t = 0; t < 5; t++) {
-		uint8_t	port = guiderport->active();
+		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
-	guiderport->activate(0, 0, 0, 3);
+	guideport->activate(0, 0, 0, 3);
 	for (int t = 0; t < 5; t++) {
-		uint8_t	port = guiderport->active();
+		uint8_t	port = guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "active: %02x", port);
 		sleep(1);
 	}
 }
 
-void	sbigtest::testGuiderport2() {
+void	sbigtest::testGuideport2() {
 	CameraPtr	camera = locator->getCamera(0);
-	GuiderPortPtr	guiderport = camera->getGuiderPort();
+	GuidePortPtr	guideport = camera->getGuidePort();
 	int	counter = 100;
 	int	flags = 0;
 	float	delta = 0.2;
@@ -196,7 +196,7 @@ void	sbigtest::testGuiderport2() {
 		float	decplus = delta * ((0x2 & flags) ? 1 : 0);
 		float	decminus = delta * ((0x4 & flags) ? 1 : 0);
 		float	raminus = delta * ((0x8 & flags) ? 1 : 0);
-		guiderport->activate(raplus, raminus, decplus, decminus);
+		guideport->activate(raplus, raminus, decplus, decminus);
 		usleep(2 * delta * 1000000);
 	}
 }

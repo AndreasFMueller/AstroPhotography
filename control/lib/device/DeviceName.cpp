@@ -101,7 +101,7 @@ static std::string	typenames[Ntypes] = {
 	"cooler",
 	"filterwheel",
 	"focuser",
-	"guiderport",
+	"guideport",
 	"module",
 	"mount"
 };
@@ -112,7 +112,7 @@ static DeviceName::device_type	typecode[Ntypes] = {
 	DeviceName::Cooler,
 	DeviceName::Filterwheel,
 	DeviceName::Focuser,
-	DeviceName::Guiderport,
+	DeviceName::Guideport,
 	DeviceName::Module,
 	DeviceName::Mount
 };

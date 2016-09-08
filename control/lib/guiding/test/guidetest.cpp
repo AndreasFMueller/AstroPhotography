@@ -165,11 +165,11 @@ int	guidetest_main(int argc, char *argv[]) {
 		rectangle.toString().c_str(), star.toString().c_str());
 
 	// get the guider port
-	GuiderPortPtr	guiderport = devicelocator->getGuiderPort(
-				"guiderport:simulator/guiderport");
+	GuidePortPtr	guideport = devicelocator->getGuidePort(
+				"guideport:simulator/guideport");
 
 	// create a Guider object
-	Guider	guider(instrument, ccd, guiderport, NULL);
+	Guider	guider(instrument, ccd, guideport, NULL);
 
 	// if we have an image directory configuration, we add the 
 	// callback

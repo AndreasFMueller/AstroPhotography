@@ -155,7 +155,7 @@ public:
 	camera::AdaptiveOpticsPtr	getAdaptiveOptics(const DeviceName& name);
 	camera::CameraPtr	getCamera(const DeviceName& name);
 	camera::CcdPtr		getCcd(const DeviceName& name);
-	camera::GuiderPortPtr	getGuiderPort(const DeviceName& name);
+	camera::GuidePortPtr	getGuidePort(const DeviceName& name);
 	camera::FilterWheelPtr	getFilterWheel(const DeviceName& name);
 	camera::CoolerPtr	getCooler(const DeviceName& name);
 	camera::FocuserPtr	getFocuser(const DeviceName& name);

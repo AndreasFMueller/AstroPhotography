@@ -33,9 +33,9 @@ void	GuiderName::parse(const std::string& n) {
 		_ccdIndex = -1;
 	}
 	if (components[2].size() > 0) {
-		_guiderportIndex = std::stoi(components[2]);
+		_guideportIndex = std::stoi(components[2]);
 	} else {
-		_guiderportIndex = -1;
+		_guideportIndex = -1;
 	}
 	if (components[3].size() > 0) {
 		_adaptiveopticsIndex = std::stoi(components[3]);
@@ -65,8 +65,8 @@ void	GuiderName::parse(const std::string& n) {
 std::string	GuiderName::buildname() const {
 	std::stringstream	str;
 	str << _instrument << "|" << _ccdIndex << "|";
-	if (_guiderportIndex >= 0) {
-		str << _guiderportIndex;
+	if (_guideportIndex >= 0) {
+		str << _guideportIndex;
 	}
 	str << "|";
 	if (_adaptiveopticsIndex >= 0) {
@@ -85,7 +85,7 @@ std::string	GuiderName::buildname() const {
  * as the instrument name, 
  */
 GuiderName::GuiderName(const std::string& n, int ccdIndex,
-	int guiderportIndex, int adaptiveopticsIndex) {
+	int guideportIndex, int adaptiveopticsIndex) {
 	if (ccdIndex < 0) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "GuiderName from name, %s",
 			n.c_str());
@@ -94,10 +94,10 @@ GuiderName::GuiderName(const std::string& n, int ccdIndex,
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "Guider: %s|%d|%d|%d",
-		n.c_str(), ccdIndex, guiderportIndex, adaptiveopticsIndex);
+		n.c_str(), ccdIndex, guideportIndex, adaptiveopticsIndex);
 	_instrument = n;
 	_ccdIndex = ccdIndex;
-	_guiderportIndex = guiderportIndex;
+	_guideportIndex = guideportIndex;
 	_adaptiveopticsIndex = adaptiveopticsIndex;
 	_name = buildname();
 }
@@ -109,7 +109,7 @@ GuiderName::GuiderName(const GuiderName& other) {
 	_name = other._name;
 	_instrument = other._instrument;
 	_ccdIndex = other._ccdIndex;
-	_guiderportIndex = other._guiderportIndex;
+	_guideportIndex = other._guideportIndex;
 	_adaptiveopticsIndex = other._adaptiveopticsIndex;
 }
 
@@ -143,15 +143,15 @@ void	GuiderName::ccdIndex(int c) {
 }
 
 /**
- * \brief update the guiderport index
+ * \brief update the guideport index
  */
-void	GuiderName::guiderportIndex(int g) {
+void	GuiderName::guideportIndex(int g) {
 	if (g < -1) {
-		std::string	msg = stringprintf("bad guiderportIndex %d", g);
+		std::string	msg = stringprintf("bad guideportIndex %d", g);
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
-	_guiderportIndex = g;
+	_guideportIndex = g;
 	_name = buildname();
 }
 
@@ -171,9 +171,9 @@ void	GuiderName::adaptiveopticsIndex(int a) {
 /**
  * \brief Get control Device name for guider port control device
  */
-ControlDeviceNamePtr	GuiderName::guiderPortDeviceName() {
-	if (!hasGuiderPort()) {
-		std::string	msg = stringprintf("%s has no guiderport",
+ControlDeviceNamePtr	GuiderName::guidePortDeviceName() {
+	if (!hasGuidePort()) {
+		std::string	msg = stringprintf("%s has no guideport",
 			_name.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);

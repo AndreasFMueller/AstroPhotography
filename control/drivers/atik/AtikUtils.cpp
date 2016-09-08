@@ -27,9 +27,9 @@ DeviceName	filterwheelname(::AtikCamera *camera) {
 		astro::stringprintf("%u", serial));
 }
 
-DeviceName	guiderportname(::AtikCamera *camera) {
+DeviceName	guideportname(::AtikCamera *camera) {
 	unsigned int serial = camera->getSerialNumber();
-	return DeviceName(DeviceName::Guiderport, "atik",
+	return DeviceName(DeviceName::Guideport, "atik",
 		astro::stringprintf("%u", serial));
 }
 

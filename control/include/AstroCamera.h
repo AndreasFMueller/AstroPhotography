@@ -158,8 +158,8 @@ std::ostream&	operator<<(std::ostream& out, const Exposure& exposure);
 class FilterWheel;
 typedef std::shared_ptr<FilterWheel>	FilterWheelPtr;
 
-class GuiderPort;
-typedef std::shared_ptr<GuiderPort>	GuiderPortPtr;
+class GuidePort;
+typedef std::shared_ptr<GuidePort>	GuidePortPtr;
 
 class Cooler;
 typedef std::shared_ptr<Cooler>	CoolerPtr;
@@ -502,12 +502,12 @@ public:
 
 	// handling the guider port
 private:
-	GuiderPortPtr	guiderport;
+	GuidePortPtr	guideport;
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 public:
-	virtual bool	hasGuiderPort() const { return false; }
-	GuiderPortPtr	getGuiderPort();
+	virtual bool	hasGuidePort() const { return false; }
+	GuidePortPtr	getGuidePort();
 };
 
 /**
@@ -571,15 +571,15 @@ static State	string2state(const std::string& s);
 /**
  * \brief Abstraction for the Guider port
  */
-class GuiderPort : public astro::device::Device {
+class GuidePort : public astro::device::Device {
 public:
-	typedef GuiderPortPtr	sharedptr;
+	typedef GuidePortPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
 	static DeviceName	defaultname(const DeviceName& parent,
 					const std::string& unitname);
-	GuiderPort(const std::string& name);
-	GuiderPort(const DeviceName& name);
-	virtual ~GuiderPort();
+	GuidePort(const std::string& name);
+	GuidePort(const DeviceName& name);
+	virtual ~GuidePort();
 
 	typedef enum {
 		DECMINUS = 1, DECPLUS = 2, RAMINUS = 4, RAPLUS = 8
@@ -634,7 +634,7 @@ typedef std::shared_ptr<AdaptiveOptics>	AdaptiveOpticsPtr;
 
 class AdaptiveOptics : public astro::device::Device {
 protected:
-	bool	_hasguiderport;
+	bool	_hasguideport;
 public:
 	typedef AdaptiveOpticsPtr	sharedptr;
 	static DeviceName::device_type	devicetype;
@@ -652,11 +652,11 @@ public:
 	Point	get() const { return currentposition; }
 	void	center();
 	// interface to the guider port contained in the unit
-	bool	hasGuiderPort() const { return _hasguiderport; }
+	bool	hasGuidePort() const { return _hasguideport; }
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 public:
-	GuiderPortPtr	getGuiderPort();
+	GuidePortPtr	getGuidePort();
 };
 
 /**
@@ -674,7 +674,7 @@ template<>
 CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name);
 
 template<>
-GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName& name);
+GuidePortPtr	CameraDeviceAdapter<GuidePort>::get(const DeviceName& name);
 
 template<>
 FilterWheelPtr	CameraDeviceAdapter<FilterWheel>::get(const DeviceName& name);

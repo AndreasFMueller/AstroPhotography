@@ -76,7 +76,7 @@ public:
  *
  * In the extended device naming scheme, each fully qualified device  name
  * starts with a type designator, one of the strings "camera", "ccd",
- * "cooler", "filterwheel", "guiderport", "focuser", followed by a colon
+ * "cooler", "filterwheel", "guideport", "focuser", followed by a colon
  * and a sequence of path components separated by other slashes.
  *
  * Device names should encode physical paths that the driver can interpret.
@@ -87,7 +87,7 @@ public:
 class DeviceName : public std::vector<std::string> {
 public:
 	typedef enum { AdaptiveOptics, Camera, Ccd, Cooler, Filterwheel,
-		Focuser, Guiderport, Module, Mount } device_type;
+		Focuser, Guideport, Module, Mount } device_type;
 	static std::string	type2string(const device_type& type);
 	static device_type	string2type(const std::string& name);
 private:

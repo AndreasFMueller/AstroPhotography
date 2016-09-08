@@ -15,7 +15,7 @@ noinst_HEADERS = 							\
 	CalibrationRedirector.h						\
 	ControlDeviceCallback.h						\
 	GPCalibrationProcess.h						\
-	GuiderPortAction.h						\
+	GuidePortAction.h						\
 	TrackingPersistence.h						\
 	TrackingProcess.h
 
@@ -43,8 +43,8 @@ libastroguiding_la_SOURCES = 						\
 	GuiderDescriptor.cpp						\
 	GuiderFactory.cpp						\
 	GuiderName.cpp							\
-	GuiderPortAction.cpp						\
-	GuiderPortProcess.cpp						\
+	GuidePortAction.cpp						\
+	GuidePortProcess.cpp						\
 	GuiderStateMachine.cpp						\
 	LargeTracker.cpp						\
 	NullTracker.cpp							\

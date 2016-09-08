@@ -7,7 +7,7 @@
 if ENABLE_SBIG
 
 noinst_HEADERS = utils.h SbigLocator.h SbigCamera.h SbigFilterWheel.h \
-	SbigCooler.h SbigGuiderPort.h
+	SbigCooler.h SbigGuidePort.h
 pkglib_LTLIBRARIES = sbig.la 
 
 if ENABLE_UNITTESTS
@@ -15,7 +15,7 @@ if ENABLE_UNITTESTS
 noinst_LTLIBRARIES = libsbig.la
 
 libsbig_la_SOURCES = SbigLocator.cpp utils.cpp SbigCamera.cpp SbigCcd.cpp \
-	SbigFilterWheel.cpp SbigCooler.cpp SbigGuiderPort.cpp
+	SbigFilterWheel.cpp SbigCooler.cpp SbigGuidePort.cpp
 libsbig_la_DEPENDENCIES = ../../lib/libastro.la
 libsbig_la_LIBADD = ../../lib/libastro.la
 libsbig_la_CPPFLAGS = -DTARGET=@SBIGTARGET@
@@ -33,7 +33,7 @@ testcase_LDADD = @SBIGLIBRARY@
 endif
 
 sbig_la_SOURCES = SbigLocator.cpp utils.cpp SbigCamera.cpp SbigCcd.cpp \
-	SbigFilterWheel.cpp SbigCooler.cpp SbigGuiderPort.cpp
+	SbigFilterWheel.cpp SbigCooler.cpp SbigGuidePort.cpp
 sbig_la_LDFLAGS = -module
 sbig_la_DEPENDENCIES = ../../lib/libastro.la
 sbig_la_LIBADD = ../../lib/libastro.la @SBIGLIBRARY@

@@ -651,7 +651,7 @@
         <property name="title">
          <string>Guider Port</string>
         </property>
-        <widget class="QComboBox" name="guiderportSelectionBox">
+        <widget class="QComboBox" name="guideportSelectionBox">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -851,10 +851,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>guiderportSelectionBox</sender>
+   <sender>guideportSelectionBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>PreviewWindow</receiver>
-   <slot>guiderportChanged(int)</slot>
+   <slot>guideportChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>930</x>
@@ -870,7 +870,7 @@
    <sender>decplusButton</sender>
    <signal>clicked()</signal>
    <receiver>PreviewWindow</receiver>
-   <slot>guiderportActivated()</slot>
+   <slot>guideportActivated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>919</x>
@@ -886,7 +886,7 @@
    <sender>raplusButton</sender>
    <signal>clicked()</signal>
    <receiver>PreviewWindow</receiver>
-   <slot>guiderportActivated()</slot>
+   <slot>guideportActivated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>967</x>
@@ -902,7 +902,7 @@
    <sender>decminusButton</sender>
    <signal>clicked()</signal>
    <receiver>PreviewWindow</receiver>
-   <slot>guiderportActivated()</slot>
+   <slot>guideportActivated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>932</x>
@@ -918,7 +918,7 @@
    <sender>raminusButton</sender>
    <signal>clicked()</signal>
    <receiver>PreviewWindow</receiver>
-   <slot>guiderportActivated()</slot>
+   <slot>guideportActivated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>843</x>
@@ -1052,8 +1052,8 @@
   <slot>filterwheelChanged(int)</slot>
   <slot>focuserChanged(int)</slot>
   <slot>focuserSetChanged(int)</slot>
-  <slot>guiderportChanged(int)</slot>
-  <slot>guiderportActivated()</slot>
+  <slot>guideportChanged(int)</slot>
+  <slot>guideportActivated()</slot>
   <slot>toggleStream()</slot>
   <slot>exposureChanged()</slot>
   <slot>imageSettingsChanged()</slot>

@@ -17,7 +17,7 @@ class SimAdaptiveOptics;
 class SimCamera;
 class SimCcd;
 class SimFilterWheel;
-class SimGuiderPort;
+class SimGuidePort;
 class SimCooler;
 class SimFocuser;
 class SimMount;
@@ -32,7 +32,7 @@ class SimLocator : public astro::device::DeviceLocator {
 	AdaptiveOpticsPtr	_adaptiveoptics;
 	CameraPtr	_camera;
 	CcdPtr		_ccd;
-	GuiderPortPtr	_guiderport;
+	GuidePortPtr	_guideport;
 	FilterWheelPtr	_filterwheel;
 	CoolerPtr	_cooler;
 	FocuserPtr	_focuser;
@@ -47,7 +47,7 @@ public:
 	AdaptiveOpticsPtr	adaptiveoptics() { return _adaptiveoptics; }
 	CameraPtr	camera() { return _camera; }
 	CcdPtr	ccd() { return _ccd; }
-	GuiderPortPtr	guiderport() { return _guiderport; }
+	GuidePortPtr	guideport() { return _guideport; }
 	FilterWheelPtr	filterwheel() { return _filterwheel; }
 	CoolerPtr	cooler() { return _cooler; }
 	FocuserPtr	focuser() { return _focuser; }
@@ -56,7 +56,7 @@ public:
 	SimAdaptiveOptics	*simadaptiveoptics();
 	SimCamera	*simcamera();
 	SimCcd		*simccd();
-	SimGuiderPort	*simguiderport();
+	SimGuidePort	*simguideport();
 	SimFilterWheel	*simfilterwheel();
 	SimCooler	*simcooler();
 	SimFocuser	*simfocuser();
@@ -71,7 +71,7 @@ protected:
 	virtual CameraPtr	getCamera0(const DeviceName& name);
 	virtual CcdPtr		getCcd0(const DeviceName& name);
 	virtual FilterWheelPtr	getFilterWheel0(const DeviceName& name);
-	virtual GuiderPortPtr	getGuiderPort0(const DeviceName& name);
+	virtual GuidePortPtr	getGuidePort0(const DeviceName& name);
 	virtual CoolerPtr	getCooler0(const DeviceName& name);
 	virtual FocuserPtr	getFocuser0(const DeviceName& name);
 	virtual astro::device::MountPtr	getMount0(const DeviceName& name);

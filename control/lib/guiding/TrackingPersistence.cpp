@@ -21,10 +21,10 @@ std::string	TrackTableAdapter::createstatement() {
 	"    name varchar(32) not null,\n"
 	"    instrument varchar(32) not null,\n"
 	"    ccd varchar(256) not null default 0,\n"
-	"    guiderport varchar(256) not null,\n"
+	"    guideport varchar(256) not null,\n"
 	"    adaptiveoptics varchar(256) not null,\n"
 	"    whenstarted datetime not null,\n"
-	"    guiderportcalid integer not null,\n"
+	"    guideportcalid integer not null,\n"
 	"    adaptiveopticscalid integer not null,\n"
 	"    primary key(id)\n"
 	")\n"
@@ -38,9 +38,9 @@ TrackRecord	TrackTableAdapter::row_to_object(int objectid,
 	result.name = row["name"]->stringValue();
 	result.instrument = row["instrument"]->stringValue();
 	result.ccd = row["ccd"]->stringValue();
-	result.guiderport = row["guiderport"]->stringValue();
+	result.guideport = row["guideport"]->stringValue();
 	result.adaptiveoptics = row["adaptiveoptics"]->stringValue();
-	result.guiderportcalid = row["guiderportcalid"]->intValue();
+	result.guideportcalid = row["guideportcalid"]->intValue();
 	result.adaptiveopticscalid = row["adaptiveopticscalid"]->intValue();
 	return result;
 }
@@ -51,10 +51,10 @@ UpdateSpec	TrackTableAdapter::object_to_updatespec(const TrackRecord& track) {
 	spec.insert(Field("name", factory.get(track.name)));
 	spec.insert(Field("instrument", factory.get(track.instrument)));
 	spec.insert(Field("ccd", factory.get(track.ccd)));
-	spec.insert(Field("guiderport", factory.get(track.guiderport)));
+	spec.insert(Field("guideport", factory.get(track.guideport)));
 	spec.insert(Field("adaptiveoptics", factory.get(track.adaptiveoptics)));
 	spec.insert(Field("whenstarted", factory.getTime(track.whenstarted)));
-	spec.insert(Field("guiderportcalid", factory.get(track.guiderportcalid)));
+	spec.insert(Field("guideportcalid", factory.get(track.guideportcalid)));
 	spec.insert(Field("adaptiveopticscalid", factory.get(track.adaptiveopticscalid)));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "update spec has %d entries", spec.size());
 	return spec;

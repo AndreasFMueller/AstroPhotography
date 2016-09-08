@@ -13,7 +13,7 @@ namespace guiding {
  * \brief Tracking class
  */
 class TrackingProcess : public BasicProcess {
-	ControlDevicePtr	_guiderPortDevice;
+	ControlDevicePtr	_guidePortDevice;
 	ControlDevicePtr	_adaptiveOpticsDevice;
 	TrackerPtr	_tracker;
 	int	_id;
@@ -22,13 +22,13 @@ public:
 	double	gain() const { return _gain; }
 	void	gain(double g) { _gain = g; }
 private:
-	double	_guiderportInterval;
+	double	_guideportInterval;
 public:
-	double	guiderportInterval() const {
-		return _guiderportInterval;
+	double	guideportInterval() const {
+		return _guideportInterval;
 	}
-	void	guiderportInterval(double g) {
-		_guiderportInterval = g;
+	void	guideportInterval(double g) {
+		_guideportInterval = g;
 	}
 private:
 	double	_adaptiveopticsInterval;
@@ -41,7 +41,7 @@ public:
 	}
 
 	bool	adaptiveOpticsUsable();
-	bool	guiderPortUsable();
+	bool	guidePortUsable();
 
 private:
 	bool	_stepping;
@@ -58,7 +58,7 @@ public:
 
 	// constructor
 	TrackingProcess(GuiderBase *base, TrackerPtr tracker,
-		ControlDevicePtr guiderPortDevice,
+		ControlDevicePtr guidePortDevice,
 		ControlDevicePtr adaptiveOpticsDevice,
 		persistence::Database database);
 	~TrackingProcess();
@@ -66,7 +66,7 @@ public:
 	void    main(astro::thread::Thread<TrackingProcess>& thread);
 private:
 	void	step(astro::thread::Thread<TrackingProcess>& thread,
-			double imageiInterval, double& guiderportTime);
+			double imageiInterval, double& guideportTime);
 
 private:
 	TrackingSummary	_summary;

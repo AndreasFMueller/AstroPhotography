@@ -58,14 +58,14 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s");
 		throw std::runtime_error(msg);
 	}
-	GuiderPortPtr	guiderport;
-	if (guiderdescriptor.guiderport().size()) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "get GuiderPort %s for guider %s",
-			guiderdescriptor.guiderport().c_str(),
+	GuidePortPtr	guideport;
+	if (guiderdescriptor.guideport().size()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get GuidePort %s for guider %s",
+			guiderdescriptor.guideport().c_str(),
 			guidername.name().c_str());
-		DeviceAccessor<GuiderPortPtr>	da(repository);
-		guiderport = da.get(DeviceName(guiderdescriptor.guiderport()));
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport constructed");
+		DeviceAccessor<GuidePortPtr>	da(repository);
+		guideport = da.get(DeviceName(guiderdescriptor.guideport()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport constructed");
 	} else {
 		std::string	msg = stringprintf("Guider %s has no Port",
 			guiderdescriptor.toString().c_str());
@@ -87,7 +87,7 @@ GuiderPtr	GuiderFactory::get(const GuiderDescriptor& guiderdescriptor) {
 
 	// with all these components we can now build a new guider
 	GuiderPtr	guider(new Guider(guidername,
-				ccd, guiderport, adaptiveoptics, database));
+				ccd, guideport, adaptiveoptics, database));
 	guiders.insert(std::make_pair(guiderdescriptor, guider));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "return guider '%s'",
 		guider->name().c_str());

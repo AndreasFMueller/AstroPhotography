@@ -6,7 +6,7 @@
 #include <SimCcd.h>
 #include <SimUtil.h>
 #include <AstroExceptions.h>
-#include <SimGuiderPort.h>
+#include <SimGuidePort.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
 #include <SimAdaptiveOptics.h>
@@ -42,7 +42,7 @@ void    SimCcd::startExposure(const Exposure& exposure) {
 	_locator.filterwheel()->currentPosition();
 
 	// ensure that the guideport ist updated before we start exposing
-	_locator.simguiderport()->update();
+	_locator.simguideport()->update();
 
 	// start the exposure
 	Ccd::startExposure(exposure);
@@ -143,10 +143,10 @@ ImagePtr  SimCcd::getRawImage() {
 		starcamera.dark(20000. * exposure.exposuretime());
 	}
 
-	// geometric distortion (guiderport)
-	starcamera.translation(_locator.simguiderport()->offset()
+	// geometric distortion (guideport)
+	starcamera.translation(_locator.simguideport()->offset()
 		+ _locator.simadaptiveoptics()->offset());
-	starcamera.alpha(_locator.simguiderport()->alpha());
+	starcamera.alpha(_locator.simguideport()->alpha());
 
 	// color (filterwheel)
 	starcamera.colorfactor(_locator.filterwheel()->currentPosition());

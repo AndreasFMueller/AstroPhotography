@@ -104,7 +104,7 @@ int	Guide::list_command(GuiderFactoryPrx guiderfactory,
 		GuiderDescriptor descriptor) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get calibrations from remote server");
 	idlist	l = guiderfactory->getCalibrations(descriptor,
-			ControlGuiderPort);
+			ControlGuidePort);
 	std::cout << "number of guider port calibrations: " << l.size()
 		<< std::endl;
 	idlist::iterator	i;
@@ -230,7 +230,7 @@ int	Guide::flip_command(GuiderPrx guider, ControlType type) {
 }
 
 int	Guide::flip_command(GuiderPrx guider) {
-	int rc = flip_command(guider, ControlGuiderPort);
+	int rc = flip_command(guider, ControlGuidePort);
 	if (rc != EXIT_SUCCESS) {
 		return rc;
 	}

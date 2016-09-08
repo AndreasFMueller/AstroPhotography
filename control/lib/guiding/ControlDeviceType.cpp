@@ -11,7 +11,7 @@ namespace guiding {
 std::string	type2string(ControlDeviceType caltype) {
 	switch (caltype) {
 	case GP:
-		return std::string("GuiderPort");
+		return std::string("GuidePort");
 	case AO:
 		return std::string("AdaptiveOptics");
 	}
@@ -20,7 +20,7 @@ std::string	type2string(ControlDeviceType caltype) {
 }
 
 ControlDeviceType	string2type(const std::string& calname) {
-	if (calname == std::string("GuiderPort")) {
+	if (calname == std::string("GuidePort")) {
 		return GP;
 	}
 	if (calname == std::string("GP")) {

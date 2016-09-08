@@ -48,7 +48,7 @@ private:
 	GuiderProcess(const GuiderProcess& other);
 	GuiderProcess&	operator=(const GuiderProcess& other);
 public:
-	GuiderProcess(GuiderBase *guider, GuiderPortPtr guiderport,
+	GuiderProcess(GuiderBase *guider, GuidePortPtr guideport,
 		TrackerPtr tracker, double interval = 10,
 		persistence::Database database = NULL);
 	~GuiderProcess();

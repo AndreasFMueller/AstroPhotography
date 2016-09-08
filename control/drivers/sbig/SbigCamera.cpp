@@ -22,7 +22,7 @@
 #include <utils.h>
 #include <AstroDebug.h>
 #include <SbigFilterWheel.h>
-#include <SbigGuiderPort.h>
+#include <SbigGuidePort.h>
 #include <AstroFormat.h>
 
 using namespace astro::camera;
@@ -347,7 +347,7 @@ FilterWheelPtr	SbigCamera::getFilterWheel0() {
 /**
  * \brief find out whether the camera has a guider port
  */
-bool	SbigCamera::hasGuiderPort() const {
+bool	SbigCamera::hasGuidePort() const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "does this camera have a guider port?");
 	// XXX that's not quite correct ;-)
 	return true;
@@ -357,11 +357,11 @@ bool	SbigCamera::hasGuiderPort() const {
  * \brief Get the Guider Port object
  *
  * If the camera has a guider port, thie object allows to retrieve a
- * GuiderPort object to control the guider port.
+ * GuidePort object to control the guider port.
  */
-GuiderPortPtr	SbigCamera::getGuiderPort0() {
+GuidePortPtr	SbigCamera::getGuidePort0() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get the guider port");
-	return GuiderPortPtr(new SbigGuiderPort(*this));
+	return GuidePortPtr(new SbigGuidePort(*this));
 }
 
 } // namespace sbig

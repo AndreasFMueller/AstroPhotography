@@ -65,7 +65,7 @@ public:
 
 	// devices making up the guider
 	virtual CcdPrx getCcd(const Ice::Current& current);
-	virtual GuiderPortPrx getGuiderPort(const Ice::Current& current);
+	virtual GuidePortPrx getGuidePort(const Ice::Current& current);
 	virtual GuiderDescriptor getDescriptor(const Ice::Current& current);
 
 	// parametrization of the guiding process

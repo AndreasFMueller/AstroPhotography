@@ -7,17 +7,17 @@ if ENABLE_OTHELLO
 
 pkglib_LTLIBRARIES = othello.la
 
-noinst_HEADERS = OthelloUtil.h OthelloLocator.h OthelloGuiderPort.h \
+noinst_HEADERS = OthelloUtil.h OthelloLocator.h OthelloGuidePort.h \
 	OthelloFocuser.h
 
 noinst_LTLIBRARIES = libothello.la
 
 libothello_la_SOURCES = OthelloUtil.cpp OthelloLocator.cpp 		\
-	OthelloGuiderPort.cpp OthelloFocuser.cpp
+	OthelloGuidePort.cpp OthelloFocuser.cpp
 libothello_la_DEPENDENCIES = ../../lib/libastro.la
 libothello_la_LIBADD = ../../lib/libastro.la
 
-othello_la_SOURCES = OthelloUtil.cpp OthelloLocator.cpp OthelloGuiderPort.cpp \
+othello_la_SOURCES = OthelloUtil.cpp OthelloLocator.cpp OthelloGuidePort.cpp \
 	OthelloFocuser.cpp
 othello_la_LDFLAGS = -module
 othello_la_DEPENDENCIES = ../../lib/libastro.la

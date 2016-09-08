@@ -13,7 +13,7 @@ namespace snowguide {
 
 ControlType	Guide::string2type(const std::string& type) {
 	if (type == "GP") {
-		return ControlGuiderPort;
+		return ControlGuidePort;
 	}
 	if (type == "AO") {
 		return ControlAdaptiveOptics;

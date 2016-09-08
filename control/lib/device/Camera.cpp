@@ -18,8 +18,8 @@ CcdPtr	CameraDeviceAdapter<Ccd>::get(const DeviceName& name) {
 }
 
 template<>
-GuiderPortPtr	CameraDeviceAdapter<GuiderPort>::get(const DeviceName&) {
-	return _camera->getGuiderPort();
+GuidePortPtr	CameraDeviceAdapter<GuidePort>::get(const DeviceName&) {
+	return _camera->getGuidePort();
 }
 
 template<>
@@ -133,23 +133,23 @@ FilterWheelPtr	Camera::getFilterWheel() {
 }
 
 /**
- * \brief Default GuiderPort implementation just throws an exception
+ * \brief Default GuidePort implementation just throws an exception
  */
-GuiderPortPtr	Camera::getGuiderPort0() {
+GuidePortPtr	Camera::getGuidePort0() {
 	throw NotImplemented("guider port not implemented");
 }
 
 /**
- * \brief Get GuiderPort, using the cached object if available
+ * \brief Get GuidePort, using the cached object if available
  */
-GuiderPortPtr	Camera::getGuiderPort() {
-	if (!this->hasGuiderPort()) {
+GuidePortPtr	Camera::getGuidePort() {
+	if (!this->hasGuidePort()) {
 		throw NotImplemented("cannot request guider port");
 	}
-	if (!guiderport) {
-		guiderport = this->getGuiderPort0();
+	if (!guideport) {
+		guideport = this->getGuidePort0();
 	}
-	return guiderport;
+	return guideport;
 }
 
 } // namespace camera

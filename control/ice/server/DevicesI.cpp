@@ -45,10 +45,10 @@ CcdPrx		DevicesI::getCcd(const std::string& name,
 	return createProxy<CcdPrx>(name, current);
 }
 
-GuiderPortPrx	DevicesI::getGuiderPort(const std::string& name,
+GuidePortPrx	DevicesI::getGuidePort(const std::string& name,
 					const Ice::Current& current) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve GuiderPort %s", name.c_str());
-	return createProxy<GuiderPortPrx>(name, current);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieve GuidePort %s", name.c_str());
+	return createProxy<GuidePortPrx>(name, current);
 }
 
 FilterWheelPrx	DevicesI::getFilterWheel(const std::string& name,

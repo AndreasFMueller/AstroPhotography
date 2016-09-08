@@ -7,7 +7,7 @@
 #include <SimCamera.h>
 #include <SimCcd.h>
 #include <SimUtil.h>
-#include <SimGuiderPort.h>
+#include <SimGuidePort.h>
 #include <SimFilterWheel.h>
 #include <SimCooler.h>
 #include <SimFocuser.h>
@@ -81,9 +81,9 @@ SimLocator::SimLocator() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "ccd: %s",
 		_ccd->name().toString().c_str());
 
-	_guiderport = GuiderPortPtr(new SimGuiderPort(*this));
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderport: %s",
-		_guiderport->name().toString().c_str());
+	_guideport = GuidePortPtr(new SimGuidePort(*this));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guideport: %s",
+		_guideport->name().toString().c_str());
 
 	_filterwheel = FilterWheelPtr(new SimFilterWheel(*this));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "filterwheel: %s",
@@ -145,8 +145,8 @@ std::vector<std::string>	SimLocator::getDevicelist(
 	case DeviceName::Ccd:
 		names.push_back(std::string("ccd:simulator/camera/ccd"));
 		break;
-	case DeviceName::Guiderport:
-		names.push_back(std::string("guiderport:simulator/guiderport"));
+	case DeviceName::Guideport:
+		names.push_back(std::string("guideport:simulator/guideport"));
 		break;
 	case DeviceName::Filterwheel:
 		names.push_back(std::string("filterwheel:simulator/filterwheel"));
@@ -203,15 +203,15 @@ CcdPtr	SimLocator::getCcd0(const DeviceName& name) {
 	return _ccd;
 }
 
-GuiderPortPtr	SimLocator::getGuiderPort0(const DeviceName& name) {
+GuidePortPtr	SimLocator::getGuidePort0(const DeviceName& name) {
 	std::string	sname = name;
-	if ((sname != "guiderport:simulator/guiderport") &&
-		(sname != "guiderport:simulator/camera")) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "guiderport %s does not exist",
+	if ((sname != "guideport:simulator/guideport") &&
+		(sname != "guideport:simulator/camera")) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "guideport %s does not exist",
 			sname.c_str());
-		throw NotFound("no such guiderport");
+		throw NotFound("no such guideport");
 	}
-	return _guiderport;
+	return _guideport;
 }
 
 FilterWheelPtr	SimLocator::getFilterWheel0(const DeviceName& name) {
@@ -271,8 +271,8 @@ SimFilterWheel	*SimLocator::simfilterwheel() {
 	return dynamic_cast<SimFilterWheel *>(&*_filterwheel);
 }
 
-SimGuiderPort	*SimLocator::simguiderport() {
-	return dynamic_cast<SimGuiderPort *>(&*_guiderport);
+SimGuidePort	*SimLocator::simguideport() {
+	return dynamic_cast<SimGuidePort *>(&*_guideport);
 }
 
 SimCooler	*SimLocator::simcooler() {

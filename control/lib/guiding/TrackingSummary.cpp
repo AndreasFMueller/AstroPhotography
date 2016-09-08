@@ -14,9 +14,9 @@ namespace guiding {
  */
 TrackingSummary::TrackingSummary(const std::string& name,
 		const std::string& instrument, const std::string& ccd,
-		const std::string& guiderport,
+		const std::string& guideport,
 		const std::string& adaptiveoptics)
-	: descriptor(name, instrument, ccd, guiderport, adaptiveoptics) {
+	: descriptor(name, instrument, ccd, guideport, adaptiveoptics) {
 	trackingid = -1;
 }
 

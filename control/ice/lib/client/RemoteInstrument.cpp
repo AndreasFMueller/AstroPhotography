@@ -201,13 +201,13 @@ CcdPrx           RemoteInstrument::guiderccd(unsigned int index) {
  *
  * guider ports can be derived from a camera
  */
-GuiderPortPrx           RemoteInstrument::guiderport(unsigned int index) {
+GuidePortPrx           RemoteInstrument::guideport(unsigned int index) {
 	InstrumentComponent	component
-			= getComponent(InstrumentGuiderPort, index);
+			= getComponent(InstrumentGuidePort, index);
 
 	// get the AO device for mapped or direct components
 	return devices(astro::ServerName(component.servicename))
-			->getGuiderPort(component.deviceurl);
+			->getGuidePort(component.deviceurl);
 }
 
 /**

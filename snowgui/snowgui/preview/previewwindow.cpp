@@ -103,16 +103,16 @@ void	PreviewWindow::instrumentSetup(ServiceObject serviceobject,
 		index++;
 	}
 
-	// guiderport
+	// guideport
 	index = 0;
-	while (_instrument.has(snowstar::InstrumentGuiderPort, index)) {
-		snowstar::GuiderPortPrx	guiderport
-			= _instrument.guiderport(index);
-		if (!_guiderport) {
-			_guiderport = guiderport;
+	while (_instrument.has(snowstar::InstrumentGuidePort, index)) {
+		snowstar::GuidePortPrx	guideport
+			= _instrument.guideport(index);
+		if (!_guideport) {
+			_guideport = guideport;
 		}
-		ui->guiderportSelectionBox->addItem(
-			QString(guiderport->getName().c_str()));
+		ui->guideportSelectionBox->addItem(
+			QString(guideport->getName().c_str()));
 		index++;
 	}
 
@@ -121,7 +121,7 @@ void	PreviewWindow::instrumentSetup(ServiceObject serviceobject,
 	setupCooler();
 	setupFilterwheel();
 	setupFocuser();
-	setupGuiderport();
+	setupGuideport();
 
 	// connect signals
 	connect(this, SIGNAL(imageUpdated()), this,
@@ -345,8 +345,8 @@ void	PreviewWindow::setupFocuser() {
 	}
 }
 
-void	PreviewWindow::setupGuiderport() {
-	if (_guiderport) {
+void	PreviewWindow::setupGuideport() {
+	if (_guideport) {
 		ui->raplusButton->setEnabled(true);
 		ui->raminusButton->setEnabled(true);
 		ui->decplusButton->setEnabled(true);
@@ -394,8 +394,8 @@ void	PreviewWindow::statusUpdate() {
 		= "QButton { background-color : white; }";
 	static const char	*transparent
 		= "QButton { background-color : transparent; }";
-	if (_guiderport) {
-		unsigned char	a = _guiderport->active();
+	if (_guideport) {
+		unsigned char	a = _guideport->active();
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "activation: %01x", (int)a);
 		if (a & snowstar::DECMINUS) {
 			ui->decminusButton->setStyleSheet(white);
@@ -607,37 +607,37 @@ void	PreviewWindow::focuserSetChanged(int focusposition) {
 	}
 }
 
-void	PreviewWindow::guiderportChanged(int guiderportindex) {
+void	PreviewWindow::guideportChanged(int guideportindex) {
 	int	index = 0;
-	while (_instrument.has(snowstar::InstrumentGuiderPort, index)) {
-		if (guiderportindex == index) {
-			_guiderport = _instrument.guiderport(index);
+	while (_instrument.has(snowstar::InstrumentGuidePort, index)) {
+		if (guideportindex == index) {
+			_guideport = _instrument.guideport(index);
 		}
 		index++;
 	}
-	setupGuiderport();
+	setupGuideport();
 }
 
-void	PreviewWindow::guiderportActivated() {
-	if (!_guiderport) {
+void	PreviewWindow::guideportActivated() {
+	if (!_guideport) {
 		return;
 	}
 	static const float	defaultactivation = 5;
 	try {
 		if (sender() == ui->raplusButton) {
-			_guiderport->activate(defaultactivation, 0);
+			_guideport->activate(defaultactivation, 0);
 		}
 		if (sender() == ui->raminusButton) {
-			_guiderport->activate(-defaultactivation, 0);
+			_guideport->activate(-defaultactivation, 0);
 		}
 		if (sender() == ui->decplusButton) {
-			_guiderport->activate(0, defaultactivation);
+			_guideport->activate(0, defaultactivation);
 		}
 		if (sender() == ui->decminusButton) {
-			_guiderport->activate(0, -defaultactivation);
+			_guideport->activate(0, -defaultactivation);
 		}
 	} catch (const std::exception& x) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate guiderport: %s",
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot activate guideport: %s",
 			x.what());
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "unkown exception");

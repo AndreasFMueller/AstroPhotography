@@ -287,7 +287,7 @@ public:
 	astro::camera::CoolerPtr		cooler();
 	astro::camera::FilterWheelPtr		filterwheel();
 	astro::camera::FocuserPtr		focuser();
-	astro::camera::GuiderPortPtr		guiderport();
+	astro::camera::GuidePortPtr		guideport();
 	astro::device::MountPtr			mount();
 };
 #endif

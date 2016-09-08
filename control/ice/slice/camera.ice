@@ -259,7 +259,7 @@ module snowstar {
 	const byte	DECPLUS = 2;
 	const byte	RAMINUS = 4;
 	const byte	RAPLUS = 8;
-	interface GuiderPort extends Device {
+	interface GuidePort extends Device {
 		/**
 		 * \brief Retrieve active ports
 		 *
@@ -375,11 +375,11 @@ module snowstar {
 		/**
 		 * \brief Find out whether the camera has a guider port.
 	 	 */
-		bool	hasGuiderPort();
+		bool	hasGuidePort();
 		/**
 		 * \brief Get the Guider Port
 		 */
-		GuiderPort*	getGuiderPort() throws NotImplemented, DeviceException;
+		GuidePort*	getGuidePort() throws NotImplemented, DeviceException;
 	};
 
 	/**
@@ -401,10 +401,10 @@ module snowstar {
 		/**
 		 * \brief find out whether the 
 		 */
-		bool	hasGuiderPort();
+		bool	hasGuidePort();
 		/**
 		 * \brief get the guider port of the adaptive optics unit
 		 */
-		GuiderPort*	getGuiderPort() throws NotImplemented;
+		GuidePort*	getGuidePort() throws NotImplemented;
 	};
 };

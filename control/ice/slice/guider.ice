@@ -16,7 +16,7 @@ module snowstar {
 	struct GuiderDescriptor {
 		string	instrumentname;
 		int	ccdIndex;
-		int	guiderportIndex;
+		int	guideportIndex;
 		int	adaptiveopticsIndex;
 	};
 
@@ -28,7 +28,7 @@ module snowstar {
 	 * to distinguish the two, by using the ControlType enumeration.
 	 */
 	enum ControlType {
-		ControlGuiderPort,
+		ControlGuidePort,
 		ControlAdaptiveOptics
 	};
 
@@ -57,7 +57,7 @@ module snowstar {
 	struct TrackingHistory {
 		int	trackid;
 		double	timeago;
-		int	guiderportcalid;
+		int	guideportcalid;
 		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
 		TrackingPoints	points;
@@ -74,7 +74,7 @@ module snowstar {
 	struct TrackingSummary {
 		int	trackid;
 		double	since;
-		int	guiderportcalid;
+		int	guideportcalid;
 		int	adaptiveopticscalid;
 		GuiderDescriptor	guider;
 		int	points;
@@ -144,7 +144,7 @@ module snowstar {
 	 * \brief States of the guider
 	 */
 	enum GuiderState {
-		// Without the camera, ccd and guiderport selected,
+		// Without the camera, ccd and guideport selected,
 		// the guider is not configured
 		GuiderUNCONFIGURED,
 		// When the camera, ccd and guider port have been
@@ -174,7 +174,7 @@ module snowstar {
 	 *
 	 * Guiders take information from images shot through a ccd of a
 	 * attached camera, and derive corrective actions that they then
-	 * output to the guiderport.
+	 * output to the guideport.
 	 */
 	interface Guider {
 		GuiderState	getState();
@@ -191,7 +191,7 @@ module snowstar {
 		 * it is assumed that the guider port of the chosen
 		 * camera should be used
 		 */
-		GuiderPort*	getGuiderPort() throws BadState;
+		GuidePort*	getGuidePort() throws BadState;
 
 		/**
 		 * \brief return the descriptor that created the guider

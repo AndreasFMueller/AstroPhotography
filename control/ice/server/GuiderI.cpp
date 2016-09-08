@@ -7,7 +7,7 @@
 #include <IceConversions.h>
 #include <CameraI.h>
 #include <CcdI.h>
-#include <GuiderPortI.h>
+#include <GuidePortI.h>
 #include <ImagesI.h>
 #include <AstroGuiding.h>
 #include <AstroConfig.h>
@@ -189,9 +189,9 @@ CcdPrx GuiderI::getCcd(const Ice::Current& current) {
 	return CcdI::createProxy(ccdname, current);
 }
 
-GuiderPortPrx GuiderI::getGuiderPort(const Ice::Current& current) {
-	std::string	name = guider->getDescriptor().guiderport();
-	return GuiderPortI::createProxy(name, current);
+GuidePortPrx GuiderI::getGuidePort(const Ice::Current& current) {
+	std::string	name = guider->getDescriptor().guideport();
+	return GuidePortI::createProxy(name, current);
 }
 
 GuiderDescriptor GuiderI::getDescriptor(const Ice::Current& /* current */) {
@@ -268,8 +268,8 @@ void GuiderI::useCalibration(Ice::Int calid, bool /* flipped */,
 void GuiderI::flipCalibration(ControlType type,
 	const Ice::Current& /* current */) {
 	switch (type) {
-	case ControlGuiderPort:
-		guider->guiderPortDevice->flip();
+	case ControlGuidePort:
+		guider->guidePortDevice->flip();
 		break;
 	case ControlAdaptiveOptics:
 		guider->adaptiveOpticsDevice->flip();
@@ -289,7 +289,7 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
 	// retrieve guider data from the database
 	try {
 		switch (calibrationtype) {
-		case ControlGuiderPort:
+		case ControlGuidePort:
 			astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 				astro::stringprintf("GP %s uncalibrated",
 				guider->name().c_str()));
@@ -317,18 +317,18 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 	CalibrationSource	source(database);
 	Calibration	calibration;
 	switch (calibrationtype) {
-	case ControlGuiderPort:
+	case ControlGuidePort:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for GP calibration");
-		if (!guider->hasGuiderport()) {
+		if (!guider->hasGuideport()) {
 			throw BadState("no guider port present");
 		}
-		if (!guider->guiderPortDevice->iscalibrated()) {
+		if (!guider->guidePortDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
-			guider->guiderPortDevice->calibrationid());
-		calibration = source.get(guider->guiderPortDevice->calibrationid());
-		calibration.flipped = guider->guiderPortDevice->flipped();
+			guider->guidePortDevice->calibrationid());
+		calibration = source.get(guider->guidePortDevice->calibrationid());
+		calibration.flipped = guider->guidePortDevice->flipped();
 		return calibration;
 	case ControlAdaptiveOptics:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for AO calibration");
@@ -364,7 +364,7 @@ Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* c
 
 	// start the calibration
 	switch (caltype) {
-	case ControlGuiderPort:
+	case ControlGuidePort:
 		astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 			astro::stringprintf("start GP %s calibration",
 			guider->name().c_str()));
@@ -391,7 +391,7 @@ Ice::Double GuiderI::calibrationProgress(const Ice::Current& /* current */) {
  * \brief cancel the current calibration process
  */
 void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
-	guider->guiderPortDevice->cancelCalibration();
+	guider->guidePortDevice->cancelCalibration();
 }
 
 /**
@@ -399,7 +399,7 @@ void GuiderI::cancelCalibration(const Ice::Current& /* current */) {
  */
 bool GuiderI::waitCalibration(Ice::Double timeout,
 	const Ice::Current& /* current */) {
-	return guider->guiderPortDevice->waitCalibration(timeout);
+	return guider->guidePortDevice->waitCalibration(timeout);
 }
 
 /**
@@ -539,7 +539,7 @@ TrackingHistory GuiderI::getTrackingHistoryType(Ice::Int id,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "get tracking history %d", id);
 	astro::guiding::TrackingStore	store(database);
 	switch (type) {
-	case ControlGuiderPort:
+	case ControlGuidePort:
 		return convert(store.get(id,
 			astro::guiding::GP));
 	case ControlAdaptiveOptics:

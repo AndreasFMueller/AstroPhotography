@@ -48,7 +48,7 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "set up the guider %s|%d|%d|%d",
 		_guiderdescriptor.instrumentname.c_str(),
 		_guiderdescriptor.ccdIndex,
-		_guiderdescriptor.guiderportIndex,
+		_guiderdescriptor.guideportIndex,
 		_guiderdescriptor.adaptiveopticsIndex);
 	_controltype = controltype;
 	_guiderdescriptor = guiderdescriptor;
@@ -119,7 +119,7 @@ void	calibrationwidget::displayCalibration() {
  * \brief handle when calibrate was clicked
  */
 void	calibrationwidget::calibrateClicked() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuiderPort");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuidePort");
 	if (_guidercontroller) {
 		_guidercontroller->setupTracker();
 	}

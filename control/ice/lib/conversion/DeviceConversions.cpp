@@ -41,8 +41,8 @@ devicetype	convert(const astro::DeviceName::device_type& type) {
 		return DevFILTERWHEEL;
 	case astro::DeviceName::Focuser:
 		return DevFOCUSER;
-	case astro::DeviceName::Guiderport:
-		return DevGUIDERPORT;
+	case astro::DeviceName::Guideport:
+		return DevGUIDEPORT;
 	case astro::DeviceName::Module:
 		return DevMODULE;
 	case astro::DeviceName::Mount:
@@ -65,8 +65,8 @@ astro::DeviceName::device_type	convert(const devicetype& type) {
 		return astro::DeviceName::Filterwheel;
 	case DevFOCUSER:
 		return astro::DeviceName::Focuser;
-	case DevGUIDERPORT:
-		return astro::DeviceName::Guiderport;
+	case DevGUIDEPORT:
+		return astro::DeviceName::Guideport;
 	case DevMODULE:
 		return astro::DeviceName::Module;
 	case DevMOUNT:

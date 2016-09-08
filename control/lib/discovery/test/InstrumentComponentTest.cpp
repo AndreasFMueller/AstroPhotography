@@ -89,28 +89,28 @@ void	InstrumentTest::testInstrumentBackend() {
 	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::CCD) == 5);
 	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::GuiderCCD) == 0);
 	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::Cooler) == 5);
-	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::GuiderPort) == 0);
+	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::GuidePort) == 0);
 	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::Focuser) == 0);
 	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::AdaptiveOptics) == 0);
 
-	discover::InstrumentComponentKey	key(instrument->name(), discover::InstrumentComponentKey::GuiderPort);
-	discover::InstrumentComponent	component(key, "mount", "guiderport:guiderport/0");
+	discover::InstrumentComponentKey	key(instrument->name(), discover::InstrumentComponentKey::GuidePort);
+	discover::InstrumentComponent	component(key, "mount", "guideport:guideport/0");
 	instrument->add(component);
-	component.deviceurl("guiderport:guiderport/1");
+	component.deviceurl("guideport:guideport/1");
 	instrument->add(component);
-	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::GuiderPort) == 2);
+	CPPUNIT_ASSERT(instrument->nComponentsOfType(discover::InstrumentComponentKey::GuidePort) == 2);
 
-	discover::InstrumentComponent	component2 = instrument->get(discover::InstrumentComponentKey::GuiderPort, 1);
+	discover::InstrumentComponent	component2 = instrument->get(discover::InstrumentComponentKey::GuidePort, 1);
 	CPPUNIT_ASSERT(component2.name() == "INSTRUMENT");
-	CPPUNIT_ASSERT(component2.type() == discover::InstrumentComponentKey::GuiderPort);
+	CPPUNIT_ASSERT(component2.type() == discover::InstrumentComponentKey::GuidePort);
 	CPPUNIT_ASSERT(component2.index() == 1);
 	CPPUNIT_ASSERT(component2.servicename() == "mount");
-	CPPUNIT_ASSERT(component2.deviceurl() == "guiderport:guiderport/1");
+	CPPUNIT_ASSERT(component2.deviceurl() == "guideport:guideport/1");
 
 	component2.servicename("cgepro");
 	instrument->update(component2);
 
-	discover::InstrumentComponent	component3 = instrument->get(discover::InstrumentComponentKey::GuiderPort, 1);
+	discover::InstrumentComponent	component3 = instrument->get(discover::InstrumentComponentKey::GuidePort, 1);
 
 	CPPUNIT_ASSERT(component3.servicename() == "cgepro");
 

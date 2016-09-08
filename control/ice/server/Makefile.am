@@ -6,47 +6,91 @@
 
 sbin_PROGRAMS = snowstar
 
-noinst_HEADERS = DevicesI.h \
-	CoolerI.h CcdI.h CameraI.h \
-	FilterWheelI.h GuiderPortI.h FocuserI.h \
-	AdaptiveOpticsI.h MountI.h \
-	DeviceServantLocator.h NameConverter.h \
-	ImagesI.h ImageI.h ImageLocator.h \
-	TaskQueueI.h TaskI.h TaskLocator.h \
-	GuiderFactoryI.h GuiderI.h \
-	GuiderLocator.h \
-	ModulesI.h DriverModuleI.h DriverModuleLocator.h \
-	DeviceLocatorI.h DeviceLocatorLocator.h \
-	FocusingFactoryI.h FocusingI.h FocusingLocator.h \
-	CallbackHandler.h \
-	RepositoriesI.h RepositoryI.h RepositoryLocator.h \
-	InstrumentI.h InstrumentLocator.h InstrumentsI.h \
-	DeviceI.h \
-	CalibrationSource.h \
-	EventHandlerI.h ConfigurationI.h \
-	RepositoryUser.h \
-	Server.h
+noinst_HEADERS =							\
+	AdaptiveOpticsI.h						\
+	CalibrationSource.h						\
+	CallbackHandler.h						\
+	CameraI.h							\
+	CcdI.h								\
+	ConfigurationI.h						\
+	CoolerI.h							\
+	DeviceI.h							\
+	DeviceLocatorI.h						\
+	DeviceLocatorLocator.h						\
+	DeviceServantLocator.h						\
+	DevicesI.h							\
+	DriverModuleI.h							\
+	DriverModuleLocator.h						\
+	EventHandlerI.h							\
+	FilterWheelI.h							\
+	FocuserI.h							\
+	FocusingFactoryI.h						\
+	FocusingI.h							\
+	FocusingLocator.h						\
+	GuidePortI.h							\
+	GuiderFactoryI.h						\
+	GuiderI.h							\
+	GuiderLocator.h							\
+	ImageI.h							\
+	ImageLocator.h							\
+	ImagesI.h							\
+	InstrumentI.h							\
+	InstrumentLocator.h						\
+	InstrumentsI.h							\
+	ModulesI.h							\
+	MountI.h							\
+	NameConverter.h							\
+	RepositoriesI.h							\
+	RepositoryI.h							\
+	RepositoryLocator.h						\
+	RepositoryUser.h						\
+	Server.h							\
+	TaskI.h								\
+	TaskLocator.h							\
+	TaskQueueI.h
 	
-snowstar_SOURCES = snowstar.cpp \
-	DevicesI.cpp \
-	CoolerI.cpp CcdI.cpp CcdSink.cpp CameraI.cpp \
-	FilterWheelI.cpp GuiderPortI.cpp FocuserI.cpp \
-	AdaptiveOpticsI.cpp MountI.cpp \
-	DeviceServantLocator.cpp NameConverter.cpp \
-	ImagesI.cpp ImageI.cpp ImageLocator.cpp \
-	TaskQueueI.cpp TaskI.cpp TaskLocator.cpp \
-	GuiderFactoryI.cpp GuiderI.cpp \
-	GuiderLocator.cpp \
-	ModulesI.cpp DriverModuleI.cpp DriverModuleLocator.cpp \
-	DeviceLocatorI.cpp DeviceLocatorLocator.cpp \
-	FocusingFactoryI.cpp FocusingI.cpp FocusingLocator.cpp \
-	RepositoriesI.cpp RepositoryI.cpp RepositoryLocator.cpp \
-	InstrumentI.cpp InstrumentLocator.cpp InstrumentsI.cpp \
-	DeviceI.cpp \
-	CalibrationSource.cpp \
-	EventHandlerI.cpp ConfigurationI.cpp \
-	RepositoryUser.cpp \
-	Server.cpp
+snowstar_SOURCES = snowstar.cpp 					\
+	AdaptiveOpticsI.cpp						\
+	CalibrationSource.cpp						\
+	CameraI.cpp							\
+	CcdI.cpp							\
+	CcdSink.cpp							\
+	ConfigurationI.cpp						\
+	CoolerI.cpp							\
+	DeviceI.cpp							\
+	DeviceLocatorI.cpp						\
+	DeviceLocatorLocator.cpp					\
+	DeviceServantLocator.cpp					\
+	DevicesI.cpp							\
+	DriverModuleI.cpp						\
+	DriverModuleLocator.cpp						\
+	EventHandlerI.cpp						\
+	FilterWheelI.cpp						\
+	FocuserI.cpp							\
+	FocusingFactoryI.cpp						\
+	FocusingI.cpp							\
+	FocusingLocator.cpp						\
+	GuidePortI.cpp							\
+	GuiderFactoryI.cpp						\
+	GuiderI.cpp							\
+	GuiderLocator.cpp						\
+	ImageI.cpp							\
+	ImageLocator.cpp						\
+	ImagesI.cpp							\
+	InstrumentI.cpp							\
+	InstrumentLocator.cpp						\
+	InstrumentsI.cpp						\
+	ModulesI.cpp							\
+	MountI.cpp							\
+	NameConverter.cpp						\
+	RepositoriesI.cpp						\
+	RepositoryI.cpp							\
+	RepositoryLocator.cpp						\
+	RepositoryUser.cpp						\
+	Server.cpp							\
+	TaskI.cpp							\
+	TaskLocator.cpp							\
+	TaskQueueI.cpp
 
 snowstar_DEPENDENCIES = $(top_builddir)/lib/libastro.la \
 	$(top_builddir)/ice/lib/libiceastro.la

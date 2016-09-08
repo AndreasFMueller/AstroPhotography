@@ -39,7 +39,7 @@ int	main(int argc, char *argv[]) {
 	// create a camera instance
 	SimCamera	camera;
 	CcdPtr	ccd = camera.getCcd(0);
-	GuiderPortPtr	guiderport = camera.getGuiderPort();
+	GuidePortPtr	guideport = camera.getGuidePort();
 
 	// we will always use 1 sec exposures
 	Exposure	exposure(ImageRectangle(ImagePoint(160,120),
@@ -54,22 +54,22 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// now move for 5 seconds
-	guiderport->activate(5, 0, 0, 0);
+	guideport->activate(5, 0, 0, 0);
 	sleep(5);
 	ccd->startExposure(exposure);
 	writeimage(ccd->getImage());
 
-	guiderport->activate(0, 5, 0, 0);
+	guideport->activate(0, 5, 0, 0);
 	sleep(5);
 	ccd->startExposure(exposure);
 	writeimage(ccd->getImage());
 	
-	guiderport->activate(0, 0, 5, 0);
+	guideport->activate(0, 0, 5, 0);
 	sleep(5);
 	ccd->startExposure(exposure);
 	writeimage(ccd->getImage());
 	
-	guiderport->activate(0, 0, 0, 5);
+	guideport->activate(0, 0, 0, 5);
 	sleep(5);
 	ccd->startExposure(exposure);
 	writeimage(ccd->getImage());

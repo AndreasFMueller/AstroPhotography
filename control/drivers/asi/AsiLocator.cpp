@@ -136,16 +136,16 @@ void	AsiCameraLocator::addCcdNames(std::vector<std::string>& names) {
 }
 
 /**
- * \brief add the names of all guiderport to a name vector
+ * \brief add the names of all guideport to a name vector
  *
  * \param names		list of names to which guider port names should be added
  */
-void	AsiCameraLocator::addGuiderportNames(std::vector<std::string>& names) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving Guiderport names");
+void	AsiCameraLocator::addGuideportNames(std::vector<std::string>& names) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "retrieving Guideport names");
 	int	n = ASIGetNumOfConnectedCameras();
 	for (int index = 0; index < n; index++) {
-		DeviceName	guiderportname = asiGuiderportName(index);
-		names.push_back(guiderportname);
+		DeviceName	guideportname = asiGuideportName(index);
+		names.push_back(guideportname);
 	}
 }
 
@@ -187,8 +187,8 @@ std::vector<std::string>	AsiCameraLocator::getDevicelist(DeviceName::device_type
 	case DeviceName::Mount:
 	case DeviceName::Filterwheel:
 		return names;
-	case DeviceName::Guiderport:
-		addGuiderportNames(names);
+	case DeviceName::Guideport:
+		addGuideportNames(names);
 		return names;
 	case DeviceName::Camera:
 		addCameraNames(names);

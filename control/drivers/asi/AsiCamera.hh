@@ -76,11 +76,11 @@ protected:
 	virtual CcdPtr	getCcd0(size_t id);
 
 private:
-	bool	_hasGuiderPort;
+	bool	_hasGuidePort;
 public:
-	virtual bool	hasGuiderPort() const;
+	virtual bool	hasGuidePort() const;
 protected:
-	virtual GuiderPortPtr	getGuiderPort0();
+	virtual GuidePortPtr	getGuidePort0();
 
 private:
 	bool	_isColor;

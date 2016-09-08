@@ -45,9 +45,9 @@ CcdPrx          DeviceLocatorI::getCcd(const std::string& name,
 	return createProxy<CcdPrx>(name, current);
 }
 
-GuiderPortPrx   DeviceLocatorI::getGuiderPort(const std::string& name,
+GuidePortPrx   DeviceLocatorI::getGuidePort(const std::string& name,
 					const Ice::Current& current) {
-	return createProxy<GuiderPortPrx>(name, current);
+	return createProxy<GuidePortPrx>(name, current);
 }
 
 FilterWheelPrx  DeviceLocatorI::getFilterWheel(const std::string& name,

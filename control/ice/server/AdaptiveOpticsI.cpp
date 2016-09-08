@@ -4,7 +4,7 @@
  * (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AdaptiveOpticsI.h>
-#include <GuiderPortI.h>
+#include <GuidePortI.h>
 #include <NameConverter.h>
 #include <IceConversions.h>
 
@@ -25,14 +25,14 @@ Point	AdaptiveOpticsI::get(const Ice::Current& /* current */) {
 	return convert(_ao->get());
 }
 
-bool	AdaptiveOpticsI::hasGuiderPort(const Ice::Current& /* current */) {
-	return _ao->hasGuiderPort();
+bool	AdaptiveOpticsI::hasGuidePort(const Ice::Current& /* current */) {
+	return _ao->hasGuidePort();
 }
 
-GuiderPortPrx	AdaptiveOpticsI::getGuiderPort(const Ice::Current& current) {
+GuidePortPrx	AdaptiveOpticsI::getGuidePort(const Ice::Current& current) {
 	std::string	name
-		= NameConverter::urlencode(_ao->getGuiderPort()->name());
-	return GuiderPortI::createProxy(name, current);
+		= NameConverter::urlencode(_ao->getGuidePort()->name());
+	return GuidePortI::createProxy(name, current);
 }
 
 void	AdaptiveOpticsI::center(const Ice::Current& /* current */) {
