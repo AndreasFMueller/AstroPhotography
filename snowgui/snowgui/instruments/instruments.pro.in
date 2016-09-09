@@ -25,15 +25,18 @@ INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
 	instrumentdisplay.ui						\
-	instrumentswindow.ui
+	instrumentswindow.ui						\
+	modulesdisplay.ui
 
 WIDGETSOURCES =								\
 	instrumentdisplay.cpp						\
-	instrumentswindow.cpp
+	instrumentswindow.cpp						\
+	modulesdisplay.cpp
 
 WIDGETHEADERS =								\
 	instrumentdisplay.h						\
-	instrumentswindow.h
+	instrumentswindow.h						\
+	modulesdisplay.h
 
 SOURCES += 								\
 	$${WIDGETSOURCES}

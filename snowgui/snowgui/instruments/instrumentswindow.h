@@ -10,6 +10,7 @@
 #include <AstroDiscovery.h>
 #include <instruments.h>
 #include <RemoteInstrument.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -25,14 +26,27 @@ public:
 		astro::discover::ServiceObject serviceobject);
 	~instrumentswindow();
 
+	void	redisplay();
+
 private:
 	Ui::instrumentswindow *ui;
 	astro::discover::ServiceObject	_serviceobject;
 	snowstar::InstrumentsPrx	_instruments;
 	snowstar::InstrumentPrx	_instrument;
+	snowstar::ModulesPrx	_modules;
+	astro::discover::ServiceDiscoveryPtr	_discovery;
+	QTimer	*_discoveryTimer;
 
 public slots:
 	void	instrumentSelected(QString);
+	void	serviceSelected(QString);
+	void	checkdiscovery();
+
+	void	addClicked();
+	void	addguiderccdClicked();
+	void	deleteClicked();
+
+	void	deleteInstrument();
 };
 
 

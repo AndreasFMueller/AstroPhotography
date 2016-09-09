@@ -24,6 +24,17 @@ public:
 
 	void	setInstrument(snowstar::InstrumentPrx instrument);
 
+	void	add(const std::string& devicename,
+			const std::string& servicename);
+	void	addGuiderCCD(const std::string& devicename,
+			const std::string& servicename);
+	void	deleteSelected();
+
+	void	redisplay();
+
+public slots:
+	void	propertyValueChanged(int row, int column);
+
 private:
 	Ui::instrumentdisplay *ui;
 	snowstar::InstrumentPrx	_instrument;
@@ -32,6 +43,9 @@ private:
 	void	alltoplevel();
 	void	children(snowstar::InstrumentComponentType type);
 	void	allchildren();
+	void	property(int row, const std::string& propertyname,
+			const std::string& description);
+	void	allproperties();
 };
 
 

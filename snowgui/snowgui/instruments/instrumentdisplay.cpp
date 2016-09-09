@@ -5,9 +5,45 @@
  */
 #include "instrumentdisplay.h"
 #include "ui_instrumentdisplay.h"
+#include <AstroDevice.h>
 
 namespace snowgui {
 
+/**
+ * \brief Construct an instrument display
+ */
+instrumentdisplay::instrumentdisplay(QWidget *parent)
+	: QWidget(parent), ui(new Ui::instrumentdisplay) {
+	ui->setupUi(this);
+
+	// headers for the component table
+	QStringList	componentheaders;
+	componentheaders << "Name" << "Index" << "Server";
+	ui->componentTree->setHeaderLabels(componentheaders);
+
+	// headers for the property table
+	QStringList	headerlist;
+	headerlist << "Property" << "Value" << "Description";
+	ui->propertyTable->setHorizontalHeaderLabels(headerlist);
+
+	// create the top level items
+	alltoplevel();
+
+	// value change in table
+	connect(ui->propertyTable, SIGNAL(cellChanged(int,int)),
+		this, SLOT(propertyValueChanged(int,int)));
+}
+
+/**
+ * \brief Destroy the instrument display
+ */
+instrumentdisplay::~instrumentdisplay() {
+	delete ui;
+}
+
+/**
+ * \brief add a top level tree entry of a given type
+ */
 void	instrumentdisplay::toplevel(snowstar::InstrumentComponentType type,
 		const std::string& name) {
 	// create the header
@@ -16,8 +52,14 @@ void	instrumentdisplay::toplevel(snowstar::InstrumentComponentType type,
 	QTreeWidgetItem	*item = new QTreeWidgetItem(list,
 		QTreeWidgetItem::Type);
 	ui->componentTree->addTopLevelItem(item);
+    	ui->componentTree->header()->resizeSection(1, 50);
+    	ui->componentTree->header()->resizeSection(2, 100);
+    	ui->componentTree->header()->resizeSection(0, 300);
 }
 
+/**
+ * \brief Add and display all the toplevel entries in the tree
+ */
 void	instrumentdisplay::alltoplevel() {
 	toplevel(snowstar::InstrumentAdaptiveOptics, "Adaptive Optics");
 	toplevel(snowstar::InstrumentCamera, "Camera");
@@ -30,6 +72,9 @@ void	instrumentdisplay::alltoplevel() {
 	toplevel(snowstar::InstrumentMount, "Mount");
 }
 
+/**
+ * \brief add device children of a given type
+ */
 void	instrumentdisplay::children(snowstar::InstrumentComponentType type) {
 	// give up if we have no instrument
 	if (!_instrument) {
@@ -59,20 +104,9 @@ void	instrumentdisplay::children(snowstar::InstrumentComponentType type) {
 	top->setExpanded(true);
 }
 
-static void resizeColumnsToContents( QTreeWidget *treeWidget_ ) {
-  int cCols = treeWidget_->columnCount();
-  int cItems = treeWidget_->topLevelItemCount();
-  int w;
-  int col;
-  int i;
-  for( col = 0; col < cCols; col++ ) {
-    w = treeWidget_->header()->sectionSizeHint( col );
-    for( i = 0; i < cItems; i++ )
-      w = qMax( w, treeWidget_->topLevelItem( i )->text( col ).size()*7 + (col == 0 ? treeWidget_->indentation() : 0) );
-    treeWidget_->header()->resizeSection( col, w );
-  }
-}
-
+/**
+ * \brief add alld evice children
+ */
 void	instrumentdisplay::allchildren() {
 	children(snowstar::InstrumentAdaptiveOptics);
 	children(snowstar::InstrumentCamera);
@@ -83,34 +117,200 @@ void	instrumentdisplay::allchildren() {
 	children(snowstar::InstrumentFilterWheel);
 	children(snowstar::InstrumentFocuser);
 	children(snowstar::InstrumentMount);
-	resizeColumnsToContents(ui->componentTree);
 }
 
-instrumentdisplay::instrumentdisplay(QWidget *parent)
-	: QWidget(parent), ui(new Ui::instrumentdisplay) {
-	ui->setupUi(this);
-
-	// headers for the component table
-	QStringList	componentheaders;
-	componentheaders << "Name" << "Index" << "Server";
-	ui->componentTree->setHeaderLabels(componentheaders);
-
-	// headers for the property table
-	QStringList	headerlist;
-	headerlist << "Property" << "Value" << "Description";
-	ui->propertyTable->setHorizontalHeaderLabels(headerlist);
-
-	// create the top level items
-	alltoplevel();
-}
-
-instrumentdisplay::~instrumentdisplay() {
-	delete ui;
-}
-
+/**
+ * \brief choose an instrument
+ */
 void	instrumentdisplay::setInstrument(snowstar::InstrumentPrx instrument) {
 	_instrument = instrument;
 	allchildren();
+	allproperties();
+}
+
+/**
+ * \brief Convert a device name into an instrument component type
+ */
+static snowstar::InstrumentComponentType	convert(const astro::DeviceName& d) {
+	switch (d.type()) {
+	case astro::DeviceName::AdaptiveOptics:
+		return  snowstar::InstrumentAdaptiveOptics;
+	case astro::DeviceName::Camera:
+		return  snowstar::InstrumentCamera;
+	case astro::DeviceName::Ccd:
+		return  snowstar::InstrumentCCD;
+	case astro::DeviceName::Cooler:
+		return  snowstar::InstrumentCooler;
+	case astro::DeviceName::Filterwheel:
+		return  snowstar::InstrumentFilterWheel;
+	case astro::DeviceName::Focuser:
+		return  snowstar::InstrumentFocuser;
+	case astro::DeviceName::Guideport:
+		return  snowstar::InstrumentGuidePort;
+	case astro::DeviceName::Mount:
+		return  snowstar::InstrumentMount;
+	default:
+		break;
+	}
+	throw std::runtime_error("no associated instrument type");
+}
+
+/**
+ * \brief Add a device to the instrument
+ */
+void	instrumentdisplay::add(const std::string& devicename,
+		const std::string& servicename) {
+	if (!_instrument) {
+		return;
+	}
+	snowstar::InstrumentComponent	component;
+	component.instrumentname = _instrument->name();
+	component.deviceurl = devicename;
+	component.servicename = servicename;
+	astro::DeviceName	d(devicename);
+	component.type = convert(d);
+	component.index = _instrument->nComponentsOfType(component.type);
+	_instrument->add(component);
+
+	// now make sure the list is redisplayed
+	redisplay();
+}
+
+/**
+ * \brief Add a CCD device as a Guider CCD
+ */
+void	instrumentdisplay::addGuiderCCD(const std::string& devicename,
+		const std::string& servicename) {
+	if (!_instrument) {
+		return;
+	}
+	snowstar::InstrumentComponent	component;
+	component.instrumentname = _instrument->name();
+	component.deviceurl = devicename;
+	component.servicename = servicename;
+	astro::DeviceName	d(devicename);
+	component.type = snowstar::InstrumentGuiderCCD;
+	if (convert(d) != snowstar::InstrumentCCD) {
+		return;
+	}
+	component.index = _instrument->nComponentsOfType(component.type);
+	_instrument->add(component);
+
+	redisplay();
+}
+
+/**
+ * \brief Delete the selected component from the instrument
+ */
+void	instrumentdisplay::deleteSelected() {
+	if (!_instrument) {
+		return;
+	}
+	QList<QTreeWidgetItem *>	selected = ui->componentTree->selectedItems();
+	if (selected.count() == 0) {
+		return;
+	}
+	QTreeWidgetItem	*item = selected.first();
+	// find the parent widget
+	if (ui->componentTree->invisibleRootItem() == item->parent()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot delete top level items");
+		return;
+	}
+
+	// find out whether this is a guiderport item
+	bool	isGuiderCCD = (item->parent()->text(0) == QString("GuiderCCD"));
+
+	// read name, type and index from the item
+	snowstar::InstrumentComponentType	type;
+	try {
+		type = convert(astro::DeviceName(std::string(item->text(0).toLatin1().data())));
+	} catch (std::exception& x) {
+		return;
+	}
+	int	index = item->text(1).toInt();
+	if (isGuiderCCD) {
+		type = snowstar::InstrumentGuiderCCD;
+	}
+	try {
+		_instrument->remove(type, index);
+	} catch (const snowstar::NotFound& x) {
+		// inform user that device was not found
+	}
+	redisplay();
+}
+
+/**
+ * \brief redisplay the component tree
+ */
+void	instrumentdisplay::redisplay() {
+	allchildren();
+}
+
+/**
+ * \brief build the contents of the property tree
+ */
+void	instrumentdisplay::allproperties() {
+	if (!_instrument) {
+		return;
+	}
+	ui->propertyTable->blockSignals(true);
+	property(0, "focallength", "Focal length of main camera");
+	property(1, "guiderfocallength", "Focal length of guide camera");
+	property(2, "guidespeed", "arc sec movement in one second");
+	ui->propertyTable->blockSignals(false);
+}
+
+/**
+ * \brief build the contents of a single property
+ */
+void    instrumentdisplay::property(int row, const std::string& propertyname, 
+                        const std::string& description) {
+	snowstar::InstrumentProperty	p;
+	try {
+		p = _instrument->getProperty(propertyname);
+	} catch (const std::exception& x) {
+		p.instrumentname = _instrument->name();
+		p.property = propertyname;
+		p.value = std::string();
+		p.description = description;
+	}
+	QTableWidgetItem	*i;
+	i = new QTableWidgetItem(p.property.c_str());
+	i->setFlags(Qt::NoItemFlags);
+        ui->propertyTable->setItem(row, 0, i);
+
+	i = new QTableWidgetItem(p.value.c_str());
+	i->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled);
+        ui->propertyTable->setItem(row, 1, i);
+
+	i = new QTableWidgetItem(p.description.c_str());
+	i->setFlags(Qt::NoItemFlags);
+        ui->propertyTable->setItem(row, 2, i);
+
+	ui->propertyTable->resizeColumnsToContents();
+}
+
+void	instrumentdisplay::propertyValueChanged(int row, int column) {
+	snowstar::InstrumentProperty	p;
+	p.instrumentname = _instrument->name();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "property in row %d value changed", row);
+	std::string	name;
+	switch (row) {
+	case 0:	name = "focallength"; break;
+	case 1:	name = "guiderfocallength"; break;
+	case 2:	name = "guidespeed"; break;
+	}
+	p.property = name;
+	QTableWidgetItem	*item = ui->propertyTable->item(row, 1);
+	p.value = std::string(item->text().toLatin1().data());
+	item = ui->propertyTable->item(row, 2);
+	p.description = std::string(item->text().toLatin1().data());
+	try {
+		_instrument->getProperty(name);
+		_instrument->updateProperty(p);
+	} catch (const std::exception& x) {
+		_instrument->addProperty(p);
+	}
 }
 
 } // namespace snowgui
