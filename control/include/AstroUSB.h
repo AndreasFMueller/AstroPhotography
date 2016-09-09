@@ -46,6 +46,7 @@ namespace usb {
 class	USBError : public std::runtime_error {
 public:
 	USBError(const char *error) : std::runtime_error(error) { }
+	USBError(enum libusb_error error);
 };
 
 /**
@@ -57,6 +58,7 @@ public:
 	ContextHolder();
 	~ContextHolder();
 	libusb_context	*context() { return _context; }
+	void	debug(int level);
 };
 typedef std::shared_ptr<ContextHolder>	ContextHolderPtr;
 

@@ -35,10 +35,10 @@ Context::~Context() {
  * \param level	The debug level is identical to the libusb debug level.
  */
 void	Context::setDebugLevel(int level) throw (std::range_error) {
-	if ((level < 0) || (level > 3)) {
+	if ((level < 0) || (level > 4)) {
 		throw std::range_error("invalid USB debug level");
 	}
-	libusb_set_debug(context->context(), level);
+	context->debug(level);
 }
 
 /**

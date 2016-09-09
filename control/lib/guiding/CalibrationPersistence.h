@@ -34,7 +34,7 @@ static astro::persistence::UpdateSpec
 class CalibrationTable : public astro::persistence::Table<CalibrationRecord,
 	CalibrationTableAdapter> {
 public:
-	CalibrationTable(astro::persistence::Database& database);
+	CalibrationTable(astro::persistence::Database database);
 	// select a list of calibrations based on a guider descriptor
 	std::list<long>	selectids(const GuiderDescriptor& guiderdescriptor);
 	// we must explicitly make the selectids method from the parent

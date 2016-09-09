@@ -314,11 +314,10 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
  * unconfigured, it throws the BadState exception.
  */
 Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Current& /* current */) {
-	CalibrationSource	source(database);
 	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuidePort:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for GP calibration");
+		{
 		if (!guider->hasGuideport()) {
 			throw BadState("no guider port present");
 		}
@@ -327,11 +326,12 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
 			guider->guidePortDevice->calibrationid());
-		calibration = source.get(guider->guidePortDevice->calibrationid());
+		astro::guiding::CalibrationPtr	cal = guider->guidePortDevice->calibration();
+		calibration = convert(cal);
 		calibration.flipped = guider->guidePortDevice->flipped();
 		return calibration;
+		}
 	case ControlAdaptiveOptics:
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "request for AO calibration");
 		if (!guider->hasAdaptiveoptics()) {
 			throw BadState("no adaptive optics present");
 		}
@@ -340,7 +340,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
 			guider->adaptiveOpticsDevice->calibrationid());
-		calibration = source.get(guider->adaptiveOpticsDevice->calibrationid());
+		astro::guiding::CalibrationPtr	cal = guider->adaptiveOpticsDevice->calibration();
+		calibration = convert(cal);
 		calibration.flipped = guider->adaptiveOpticsDevice->flipped();
 		return calibration;
 	}

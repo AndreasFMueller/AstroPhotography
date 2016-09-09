@@ -341,6 +341,9 @@ void	BasicCalibration::calibrate() {
 	// in the debug log.
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration origin: %.3f, %.3f",
 		b[6], b[7]);
+
+	// the calibration is now complete
+	_complete = true;
 }
 
 } // namespace guiding

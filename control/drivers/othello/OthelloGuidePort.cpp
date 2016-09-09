@@ -28,6 +28,7 @@ namespace othello {
 OthelloGuidePort::OthelloGuidePort(astro::usb::DevicePtr _deviceptr)
 	: GuidePort(othellodevname(_deviceptr)),
 	  deviceptr(_deviceptr) {
+	deviceptr->getContext()->debug(4);
 }
 
 OthelloGuidePort::~OthelloGuidePort() {

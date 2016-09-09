@@ -77,7 +77,6 @@ void	ControlDeviceBase::calibrationid(int calid) {
 }
 
 int	ControlDeviceBase::calibrationid() const {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "this = %p", this);
 	if (NULL == _calibration) {
 		return -1;
 	}
@@ -99,18 +98,6 @@ void	ControlDeviceBase::flip() {
 	if (_calibration) {
 		return _calibration->flip();
 	}
-}
-
-void	ControlDeviceBase::addCalibrationPoint(const CalibrationPoint& point) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "ADD CALIBRATION POINT %d %s",
-		_calibration->calibrationid(), point.toString().c_str());
-	if (!_calibrating) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "not calibrating!");
-		return;
-	}
-	_calibration->add(point);
-	CalibrationStore	store(_database);
-	store.addPoint(_calibration->calibrationid(), point);
 }
 
 const std::string&	ControlDeviceBase::name() const {

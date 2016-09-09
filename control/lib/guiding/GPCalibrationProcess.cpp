@@ -117,6 +117,7 @@ void	GPCalibrationProcess::measure(int ra, int dec) {
 
 	// add the calibration point to the calibrator
 	calibration()->add(calibrationpoint);
+	addCalibrationPoint(calibrationpoint);
 
 	// give the point to the callback
 	callback(calibrationpoint);
@@ -128,6 +129,7 @@ void	GPCalibrationProcess::measure(int ra, int dec) {
 
 	// also add the new zero point to the calibrator
 	calibration()->add(zeropoint);
+	addCalibrationPoint(zeropoint);
 
 	// give this point to the callback
 	callback(zeropoint);
@@ -218,6 +220,7 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// measure the initial point
 	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));
 	calibration()->add(initialpoint);
+	addCalibrationPoint(initialpoint);
 	callback(initialpoint);
 
 	// perform a grid search

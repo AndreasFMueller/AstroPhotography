@@ -40,6 +40,7 @@ Calibration	CalibrationSource::get(int id) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration %d time %f",
 			calibration.id, calibration.timeago);
 
+#if 0
 		// add the calibration points, this is independent of the
 		// control device type
 		std::list<astro::guiding::CalibrationPointRecord>	points
@@ -48,6 +49,7 @@ Calibration	CalibrationSource::get(int id) {
 		for (i = points.begin(); i != points.end(); i++) {
 			calibration.points.push_back(convert(*i));
 		}
+#endif
 
 		// we have the calibration now, just return it
 		return calibration;

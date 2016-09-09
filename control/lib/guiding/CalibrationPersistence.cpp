@@ -141,7 +141,7 @@ UpdateSpec	CalibrationTableAdapter::object_to_updatespec(const CalibrationRecord
 //////////////////////////////////////////////////////////////////////
 // CalibrationTable implementation
 //////////////////////////////////////////////////////////////////////
-CalibrationTable::CalibrationTable(Database& database)
+CalibrationTable::CalibrationTable(Database database)
 	: Table<CalibrationRecord, CalibrationTableAdapter>(database) {
 }
 

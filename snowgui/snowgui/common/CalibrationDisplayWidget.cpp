@@ -127,18 +127,18 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 
 	// get the first point as a reference
 	snowstar::Point	ref;
+	ref.x = 0;
+	ref.y = 0;
 	switch (_calibration.type) {
 	case snowstar::ControlGuidePort:
-		{
-		snowstar::CalibrationPoint	p = _calibration.points[0];
-		ref.x = p.star.x;
-		ref.y = p.star.y;
+		if (_calibration.points.size() > 0) {
+			snowstar::CalibrationPoint	p = _calibration.points[0];
+			ref.x = p.star.x;
+			ref.y = p.star.y;
 		}
 		break;
 	case snowstar::ControlAdaptiveOptics:
 		{
-		ref.x = 0;
-		ref.y = 0;
 		for (unsigned int i = 0; i < _calibration.points.size(); i++) {
 			ref.x += _calibration.points[i].star.x;
 			ref.y += _calibration.points[i].star.y;

@@ -23,6 +23,7 @@ public:
 	CalibrationProcess(const camera::Exposure& exposure,
 		camera::Imager& imager, TrackerPtr tracker,
 		persistence::Database database = NULL);
+	void	addCalibrationPoint(const CalibrationPoint& point);
 }; 
 
 } // namespace guiding

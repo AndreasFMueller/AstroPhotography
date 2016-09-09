@@ -19,5 +19,13 @@ CalibrationProcess::CalibrationProcess(const camera::Exposure& exposure,
 	: BasicProcess(exposure, imager, tracker, database) {
 }
 
+void	CalibrationProcess::addCalibrationPoint(const CalibrationPoint& point) {
+	if (database()) {
+		CalibrationStore	store(database());
+		int	calid = calibration()->calibrationid();
+		store.addPoint(calid, point);
+	}
+}
+
 } // namespace guiding
 } // namespace astro

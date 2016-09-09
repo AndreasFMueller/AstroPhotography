@@ -322,6 +322,12 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	result.det  = cal->det();
 	result.quality = cal->quality();
 
+	// copy the calibration points
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibraiton points: %d", cal->size());
+	for (int i = 0; i < cal->size(); i++) {
+		result.points.push_back(convert((*cal)[i]));
+	}
+
 	return result;
 }
 
@@ -351,6 +357,11 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	result->flipped(cal.flipped);
 	result->masPerPixel(cal.masPerPixel);
 	result->focallength(cal.focallength);
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibraiton points: %d", cal.points.size());
+	for (int i = 0; i < cal.points.size(); i++) {
+		result->push_back(convert(cal.points[i]));
+	}
 	return astro::guiding::CalibrationPtr(result);
 }
 

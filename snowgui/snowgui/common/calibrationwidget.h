@@ -31,6 +31,9 @@ class calibrationwidget : public QWidget {
 	snowstar::Calibration		_calibration;
 
 	guidercontrollerwidget		*_guidercontroller;
+
+	QTimer	*_statusTimer;
+	snowstar::GuiderState	_state;
 public:
 	void	setGuider(snowstar::ControlType controltype,
 			snowstar::GuiderDescriptor guiderdescriptor,
@@ -38,6 +41,7 @@ public:
 			snowstar::GuiderFactoryPrx guiderfactory,
 			guidercontrollerwidget *guidercontroller);
 	void	displayCalibration();
+	void	setupState();
 public:
 	explicit calibrationwidget(QWidget *parent = 0);
 	~calibrationwidget();
@@ -50,6 +54,7 @@ public slots:
 	void	calibrateClicked();
 	void	detailClicked();
 	void	setCalibration(snowstar::Calibration);
+	void	statusUpdate();
 };
 
 } // namespace snowgui

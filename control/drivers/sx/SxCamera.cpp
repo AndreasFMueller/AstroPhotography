@@ -97,8 +97,9 @@ sx_model_t	models[NUMBER_SX_MODELS] = {
  */
 SxCamera::SxCamera(DevicePtr& _deviceptr)
 	: Camera(SxName(_deviceptr).cameraname()), deviceptr(_deviceptr) {
-	// the default is to use the 
-	useControlRequests = false;
+	// the default is to send requests over the data end point
+	// XXX here we use the USB control requests
+	useControlRequests = true;
 
 	// make sure camera is not busy
 	_busy = false;
@@ -138,6 +139,14 @@ SxCamera::SxCamera(DevicePtr& _deviceptr)
 		std::cout << "OUT endpoint:" << std::endl;
 		std::cout << *outendpoint;
 	}
+
+	// reset the camera, just for good measure
+	EmptyRequest    resetrequest(
+                        RequestBase::vendor_specific_type,
+                        RequestBase::device_recipient, (uint16_t)0,
+                        (uint8_t)SX_CMD_RESET, (uint16_t)0);
+	controlRequest(&resetrequest);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reset the camera");
 
 	// learn the firmware version
 	Request<sx_firmware_version_t>	versionrequest(
@@ -465,13 +474,13 @@ bool	SxCamera::reserve(const std::string& purpose, int timeout) {
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (_busy && (purpose == _purpose)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"RESERVE already reserved for %s", purpose.c_str());
+			"RESERVE already reserved for '%s'", purpose.c_str());
 		return true;
 	}
 	if (!_busy) {
 		_busy = true;
 		_purpose = purpose;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: '%s'",
 			purpose.c_str());
 		return true;
 	}
@@ -483,7 +492,7 @@ bool	SxCamera::reserve(const std::string& purpose, int timeout) {
 	// we now own the lock and can change the busy flag
 	if (!_busy) {
 		_busy = true;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: %s",
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera reserved: '%s'",
 			purpose.c_str());
 		return true;
 	}
@@ -503,14 +512,15 @@ void	SxCamera::release(const std::string& purpose) {
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 	if (_busy == false) {
 		debug(LOG_ERR, DEBUG_LOG, 0,
-			"RESERVE cannot release %s, already released",
+			"RESERVE cannot release '%s', already released",
 			purpose.c_str());
 	}
 	if (purpose != _purpose) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "RESERVE wrong purpose: %s != %s",
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"RESERVE wrong purpose: '%s' != '%s'",
 			purpose.c_str(), _purpose.c_str());
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera released: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "RESERVE camera released: '%s'",
 		_purpose.c_str());
 	_busy = false;
 	_purpose = "";

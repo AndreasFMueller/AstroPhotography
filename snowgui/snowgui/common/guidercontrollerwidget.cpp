@@ -347,32 +347,22 @@ void	guidercontrollerwidget::statusUpdate() {
 	case snowstar::GuiderIDLE:
 		ui->guideButton->setText(QString("Guiding"));
 		ui->guideButton->setEnabled(false);
-		ui->gpcalibrationWidget->setEnabled(true);
-		ui->aocalibrationWidget->setEnabled(true);
 		break;
 	case snowstar::GuiderUNCONFIGURED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
-		ui->gpcalibrationWidget->setEnabled(true);
-		ui->aocalibrationWidget->setEnabled(true);
 		break;
 	case snowstar::GuiderCALIBRATING:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(false);
-		ui->gpcalibrationWidget->setEnabled(false);
-		ui->aocalibrationWidget->setEnabled(false);
 		break;
 	case snowstar::GuiderCALIBRATED:
 		ui->guideButton->setText(QString("Guide"));
 		ui->guideButton->setEnabled(true);
-		ui->gpcalibrationWidget->setEnabled(true);
-		ui->aocalibrationWidget->setEnabled(true);
 		break;
 	case snowstar::GuiderGUIDING:
 		ui->guideButton->setText(QString("Stop Guiding"));
 		ui->guideButton->setEnabled(true);
-		ui->gpcalibrationWidget->setEnabled(false);
-		ui->aocalibrationWidget->setEnabled(false);
 		break;
 	}
 	_previousstate = state;

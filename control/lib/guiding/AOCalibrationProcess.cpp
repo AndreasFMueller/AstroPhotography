@@ -89,6 +89,7 @@ void	AOCalibrationProcess::main(thread::Thread<AOCalibrationProcess>& thread) {
 			CalibrationPoint	calpoint(t, offset, star);
 			calibration()->add(calpoint);
 			callback(calpoint);
+			addCalibrationPoint(calpoint);
 
 			// update the progress indicator
 			pi.t = Timer::gettime() - starttime;

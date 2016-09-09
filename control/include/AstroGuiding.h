@@ -503,25 +503,6 @@ std::ostream&	operator<<(std::ostream& out, const CalibrationPoint& cal);
  */
 typedef callback::CallbackDataEnvelope<CalibrationPoint>	CalibrationPointCallbackData;
 
-#if 0
-/**
- * \brief BasicCalibrator
- *
- * The BasicCalibrator collects a set of points and computes the calibration
- * data from this. The BasicCalibrator is used by the CalibrationProcess,
- * it adds points during the calibration using the add method, the calibrate
- * method then computes the calibration data.
- */
-class BasicCalibrator {
-	CalibrationPtr	_calibration;
-public:
-	BasicCalibrator(const ControlDeviceName& controldevicename);
-	BasicCalibrator(CalibrationPtr calibration);
-	void	add(const CalibrationPoint& calibrationpoint);
-	CalibrationPtr	calibrate();
-};
-#endif
-
 /**
  * \brief Class to report data 
  */
@@ -664,7 +645,7 @@ public:
 private:
 	persistence::Database	_database;
 public:
-	persistence::Database&	database() { return _database; }
+	persistence::Database	database() { return _database; }
 
 	// callbacks
 private:
@@ -720,6 +701,7 @@ protected:
 	persistence::Database	_database;
 	CalibrationPtr	_calibration;
 public:
+	CalibrationPtr	calibration() { return _calibration; }
 	int	calibrationid() const;
 	void	calibrationid(int calid);
 	bool	iscalibrated() const;
@@ -756,7 +738,6 @@ public:
 	void	cancelCalibration();
 	bool	waitCalibration(double timeout);
 	virtual void	saveCalibration();
-	void	addCalibrationPoint(const CalibrationPoint& point);
 protected:
 	bool	_calibrating;
 public:
@@ -1042,7 +1023,7 @@ class GuiderFactory {
 public:
 	GuiderFactory() { }
 	GuiderFactory(module::Repository _repository,
-		persistence::Database& _database)
+		persistence::Database _database)
 		: repository(_repository), database(_database) { }
 	std::vector<GuiderDescriptor>	list() const;
 	GuiderPtr	get(const GuiderDescriptor& guiderdescriptor);
@@ -1120,11 +1101,11 @@ typedef persistence::PersistentRef<CalibrationPoint>	CalibrationPointRecord;
  * \brief a simplified interface to the calibration persistence  tables
  */
 class CalibrationStore {
-	astro::persistence::Database&	_database;
+	astro::persistence::Database	_database;
 	ControlDeviceName	nameFromRecord(
 					const CalibrationRecord& record) const;
 public:
-	CalibrationStore(astro::persistence::Database& database)
+	CalibrationStore(astro::persistence::Database database)
 		: _database(database) { }
 	std::list<long>	getAllCalibrations();
 	std::list<long>	getAllCalibrations(ControlDeviceType);
@@ -1160,9 +1141,9 @@ typedef persistence::PersistentRef<TrackingPoint>	TrackingPointRecord;
  * \brief Simplified interface to tracking history data
  */
 class TrackingStore {
-	astro::persistence::Database&	_database;
+	astro::persistence::Database	_database;
 public:
-	TrackingStore(astro::persistence::Database& database)
+	TrackingStore(astro::persistence::Database database)
 		: _database(database) { }
 	std::list<long>	getAllTrackings();
 	std::list<long>	getTrackings(const GuiderDescriptor& guider);

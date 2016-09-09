@@ -26,6 +26,7 @@ uvc_files =
 endif
 
 libastrousb_la_SOURCES = 						\
+	DeviceNameUSB.cpp						\
 	USBConfiguration.cpp						\
 	USBContext.cpp							\
 	USBContextHolder.cpp						\
@@ -33,13 +34,13 @@ libastrousb_la_SOURCES = 						\
 	USBDevice.cpp							\
 	USBDeviceDescriptor.cpp						\
 	USBEndpoint.cpp							\
+	USBError.cpp							\
 	USBFrame.cpp							\
 	USBInterface.cpp						\
 	USBIsoTransfer.cpp						\
 	USBRawDescriptors.cpp						\
 	USBRequests.cpp							\
 	USBTransfer.cpp							\
-	DeviceNameUSB.cpp						\
 	$(uvc_files)
 
 libastrousb_la_CPPFLAGS = -DPKGLIBDIR=\"$(pkglibdir)\" -DDEVICEPROPERTIES=\"@DEVICEPROPERTIES@\"

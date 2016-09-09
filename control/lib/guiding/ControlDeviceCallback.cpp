@@ -25,7 +25,6 @@ CallbackDataPtr	ControlDeviceCallback::operator()(CallbackDataPtr data) {
 		if (NULL != cal) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point: %s",
 				cal->data().toString().c_str());
-			_controldevice->addCalibrationPoint(cal->data());
 			return data;
 		}
 	}

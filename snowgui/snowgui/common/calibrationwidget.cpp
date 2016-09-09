@@ -10,6 +10,7 @@
 #include <AstroFormat.h>
 #include <guidercontrollerwidget.h>
 #include <calibrationdetaildialog.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -26,14 +27,25 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	connect(ui->detailButton, SIGNAL(clicked()),
 		this, SLOT(detailClicked()));
 
+	_state = snowstar::GuiderUNCONFIGURED;
+
 	_guidercontroller = NULL;
 	_calibration.id = -1;
+
+	_statusTimer = new QTimer();
+	_statusTimer->setInterval(100);
+	connect(_statusTimer, SIGNAL(timeout()),
+		this, SLOT(statusUpdate()));
 }
 
 /**
  * \brief Destroy the calibration widget
  */
 calibrationwidget::~calibrationwidget() {
+	if (_statusTimer) {
+		_statusTimer->stop();
+		delete _statusTimer;
+	}
 	delete ui;
 }
 
@@ -58,12 +70,15 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 
 	// find out whether the guider is currently calibrated
 	try {
-		_calibration = _guider->getCalibration(controltype);
+		_calibration = _guider->getCalibration(_controltype);
 		ui->calibrationdisplayWidget->setCalibration(_calibration);
 		displayCalibration();
 	} catch (...) {
 
 	}
+
+	// now that everything is configured, we start the timer
+	_statusTimer->start();
 }
 
 /**
@@ -111,8 +126,8 @@ void	calibrationwidget::displayCalibration() {
 	ui->numberField->setText(QString::number(_calibration.points.size()));
 	ui->qualityField->setText(QString(astro::stringprintf("%.1f%%",
 		_calibration.quality * 100).c_str()));
-	ui->resolutionField->setText(QString(astro::stringprintf("%.0fmas/px",
-		_calibration.masPerPixel).c_str()));
+	ui->resolutionField->setText(QString(astro::stringprintf("%.0f\"/px",
+		_calibration.masPerPixel / 1000.).c_str()));
 }
 
 /**
@@ -120,10 +135,23 @@ void	calibrationwidget::displayCalibration() {
  */
 void	calibrationwidget::calibrateClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration for GuidePort");
-	if (_guidercontroller) {
-		_guidercontroller->setupTracker();
+	// make sure we have the most recent information on the
+	// state
+	setupState();
+	if (_state == snowstar::GuiderCALIBRATING) {
+		try {
+			_guider->cancelCalibration();
+		} catch (const std::exception& x) {
+		}
+	} else {
+		if (_guidercontroller) {
+			_guidercontroller->setupTracker();
+		}
+		try {
+			_guider->startCalibration(_controltype);
+		} catch (const std::exception& x) {
+		}
 	}
-	_guider->startCalibration(_controltype);
 }
 
 /**
@@ -137,6 +165,66 @@ void	calibrationwidget::detailClicked() {
 	calibrationdetaildialog	*cdd = new calibrationdetaildialog(this);
 	cdd->setCalibration(_calibration);
 	cdd->show();
+}
+
+/**
+ * \brief Timer upate
+ */
+void	calibrationwidget::statusUpdate() {
+	try {
+		// find out whether something has changed in the state
+		setupState();
+
+		// check whether the calibration has changed
+		snowstar::Calibration	cal = _guider->getCalibration(_controltype);
+		if ((_calibration.id == cal.id)
+			&& (_calibration.points.size() == cal.points.size())) {
+			return;
+		}
+		_calibration = cal;
+		ui->calibrationdisplayWidget->setCalibration(_calibration);
+		displayCalibration();
+	} catch (...) {
+
+	}
+}
+
+/**
+ * \brief Check whether the state has changed
+ */
+void	calibrationwidget::setupState() {
+	snowstar::GuiderState	state = _guider->getState();
+	if (state == _state) {
+		return;
+	}
+	if (_state == snowstar::GuiderCALIBRATING) {
+		try {
+			_calibration = _guider->getCalibration(_controltype);
+			ui->calibrationdisplayWidget->setCalibration(_calibration);
+			displayCalibration();
+		} catch (const std::exception& x) {
+		}
+	}
+	_state = state;
+	switch (_state) {
+	case snowstar::GuiderUNCONFIGURED:
+	case snowstar::GuiderIDLE:
+	case snowstar::GuiderCALIBRATED:
+		ui->calibrateButton->setText(QString("Calibrate"));
+		ui->calibrateButton->setEnabled(true);
+		ui->databaseButton->setEnabled(true);
+		break;
+	case snowstar::GuiderCALIBRATING:
+		ui->calibrateButton->setText(QString("Stop"));
+		ui->calibrateButton->setEnabled(true);
+		ui->databaseButton->setEnabled(false);
+		break;
+	case snowstar::GuiderGUIDING:
+		ui->calibrateButton->setText(QString("Calibrate"));
+		ui->calibrateButton->setEnabled(false);
+		ui->databaseButton->setEnabled(false);
+		break;
+	}
 }
 
 } // namespace snowgui
