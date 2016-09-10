@@ -630,5 +630,19 @@ std::set<UUID>	ImageRepo::getUUIDs(const std::string& condition) {
 	return result;
 }
 
+std::vector<int>	ImageRepo::getIds() {
+	return getIds("0 = 0");
+}
+
+std::vector<int>	ImageRepo::getIds(const std::string& condition) {
+	ImageTable	imagetable(_database);
+	std::list<ImageRecord>	images = imagetable.select(condition);
+	std::vector<int>	result;
+	for (auto ptr = images.begin(); ptr != images.end(); ptr++) {
+		result.push_back(ptr->id());
+	}
+	return result;
+}
+
 } // namespace project
 } // namespace astro

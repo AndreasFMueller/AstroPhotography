@@ -17,6 +17,7 @@ class RepositoryI : virtual public Repository {
 public:
 	RepositoryI(astro::project::ImageRepo repo);
 	virtual ~RepositoryI();
+	virtual idlist	getIds(const Ice::Current& current);
 	virtual uuidlist	getUUIDs(const Ice::Current& current);
 	virtual uuidlist	getUUIDsCondition(const std::string& condition,
 					const Ice::Current& current);

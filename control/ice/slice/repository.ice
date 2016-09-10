@@ -37,6 +37,7 @@ module snowstar {
 	 * and a remote repository.
 	 */
 	interface Repository {
+		idlist		getIds();
 		uuidlist	getUUIDs();
 		uuidlist	getUUIDsCondition(string condition);
 		bool		has(int id);

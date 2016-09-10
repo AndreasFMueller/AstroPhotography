@@ -199,6 +199,8 @@ public:
 
 	std::set<ImageEnvelope>	get(const ImageSpec& spec);
 	std::set<UUID>	getUUIDs(const std::string& condition);
+	std::vector<int>	getIds();
+	std::vector<int>	getIds(const std::string& condition);
 };
 typedef std::shared_ptr<ImageRepo>	ImageRepoPtr;
 

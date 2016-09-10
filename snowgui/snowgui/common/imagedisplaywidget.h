@@ -119,6 +119,8 @@ public slots:
 	void	selectRectangle(QRect);
 	void	selectPoint(QPoint);
 	void	receiveImage(astro::image::ImagePtr);
+private:
+	void	closeEvent(QCloseEvent *);
 };
 
 } // namespace snowgui

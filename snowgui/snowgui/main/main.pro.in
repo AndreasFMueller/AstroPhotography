@@ -16,6 +16,7 @@ ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../images -limages
+LIBS += -L../repository -lrepository
 LIBS += -L../instruments -linstruments
 LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
@@ -26,7 +27,7 @@ LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common ../preview ../focusing ../guiding ../instruments ../images
+INCLUDEPATH += ../common ../preview ../focusing ../guiding ../instruments ../images ../repository
 
 ASTROGUISOURCES = 							\
         mainwindow.cpp 							\

@@ -15,6 +15,10 @@ RepositoryI::RepositoryI(astro::project::ImageRepo repo) : _repo(repo) {
 RepositoryI::~RepositoryI() {
 }
 
+idlist	RepositoryI::getIds(const Ice::Current& /* current */) {
+	return _repo.getIds();
+}
+
 uuidlist        RepositoryI::getUUIDs(const Ice::Current& /* current */) {
 	uuidlist	result;
 	std::set<astro::UUID>	uuids = _repo.getUUIDs("0 = 0");

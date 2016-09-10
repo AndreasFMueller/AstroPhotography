@@ -818,4 +818,8 @@ void	imagedisplaywidget::setRectangleSelectionEnabled(bool b) {
 	}
 }
 
+void	imagedisplaywidget::closeEvent(QCloseEvent * /* event */) {
+	deleteLater();
+}
+
 } // namespace snowgui

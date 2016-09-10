@@ -15,6 +15,7 @@
 #include <instrumentswindow.h>
 #include "configurationdialog.h"
 #include <imageswindow.h>
+#include <repositorywindow.h>
 #include <QMessageBox>
 #include <sstream>
 
@@ -40,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchInstruments()));
 	connect(ui->appRepositoryButton, SIGNAL(clicked()),
 		this, SLOT(launchRepository()));
-	connect(ui->appRepositoryButton, SIGNAL(clicked()),
+	connect(ui->appTasksButton, SIGNAL(clicked()),
 		this, SLOT(launchTasks()));
 	connect(ui->appConfigurationButton, SIGNAL(clicked()),
 		this, SLOT(launchConfiguration()));
@@ -174,11 +175,22 @@ void	MainWindow::launchImages() {
 }
 
 void	MainWindow::launchRepository() {
-	QMessageBox	*messagebox = new QMessageBox(this);
-	messagebox->setText(QString("Application not implemented"));
-	messagebox->setInformativeText(QString("The Repository application is not yet implemented"));
-	messagebox->exec();
-	delete messagebox;
+	try {
+		repositorywindow	*rw = new repositorywindow(NULL, _serviceobject);
+		rw->show();
+	} catch (const std::exception& x) {
+		QMessageBox	*message = new QMessageBox(this);
+		message->setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Repository' service on ";
+		out << _serviceobject.toString();
+		out << ". Images window cannot be constructed.";
+		out << "Cause: ";
+		out << x.what();
+		message->setInformativeText(QString(out.str().c_str()));
+		message->exec();
+		delete message;
+	}
 }
 
 void	MainWindow::launchTasks() {
