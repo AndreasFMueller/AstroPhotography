@@ -308,8 +308,6 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	Calibration	result;
 	result.id = cal->calibrationid();
 	result.timeago = converttime(cal->when());
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert calibration %d time %d to %f",
-		cal->calibrationid(), cal->when(), result.timeago);
 	result.guider = convertname(cal->name());
 	result.type = convertcontroltype(cal->calibrationtype());
 	result.focallength = cal->focallength();
@@ -323,7 +321,6 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 	result.quality = cal->quality();
 
 	// copy the calibration points
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibraiton points: %d", cal->size());
 	for (int i = 0; i < cal->size(); i++) {
 		result.points.push_back(convert((*cal)[i]));
 	}
@@ -332,8 +329,6 @@ Calibration     convert(const astro::guiding::CalibrationPtr cal) {
 }
 
 astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "convert calibration %d time %f",
-		cal.id, cal.timeago);
 	astro::guiding::GuiderName	guidername = convertname(cal.guider);
 	astro::guiding::ControlDeviceName	cdname(guidername,
 		convertcontroltype(cal.type));
@@ -358,7 +353,6 @@ astro::guiding::CalibrationPtr	convert(const Calibration& cal) {
 	result->masPerPixel(cal.masPerPixel);
 	result->focallength(cal.focallength);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibraiton points: %d", cal.points.size());
 	for (int i = 0; i < cal.points.size(); i++) {
 		result->push_back(convert(cal.points[i]));
 	}

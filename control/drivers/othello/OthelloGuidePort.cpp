@@ -70,7 +70,7 @@ void	OthelloGuidePort::activate(float raplus, float raminus,
 			payload.raplus, payload.raminus,
 			payload.decplus, payload.decminus, x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
-		throw x;
+		//throw x;
 	}
 }
 

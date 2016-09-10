@@ -229,7 +229,8 @@ TrackerMethod	GuiderI::getTrackerMethod(const Ice::Current& /* current */) {
 	return _method;
 }
 
-void	GuiderI::setTrackerMethod(TrackerMethod method, const Ice::Current& /* current */) {
+void	GuiderI::setTrackerMethod(TrackerMethod method,
+		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using method: %s",
 		(method == TrackerUNDEFINED) ? "undefined" : (
 			(method == TrackerSTAR) ? "star" : (
@@ -313,7 +314,8 @@ void	GuiderI::unCalibrate(ControlType calibrationtype,
  * This method retrieves the configuration of a device. If the device is
  * unconfigured, it throws the BadState exception.
  */
-Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Current& /* current */) {
+Calibration GuiderI::getCalibration(ControlType calibrationtype,
+		const Ice::Current& /* current */) {
 	Calibration	calibration;
 	switch (calibrationtype) {
 	case ControlGuidePort:
@@ -326,7 +328,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
 			guider->guidePortDevice->calibrationid());
-		astro::guiding::CalibrationPtr	cal = guider->guidePortDevice->calibration();
+		astro::guiding::CalibrationPtr	cal
+			= guider->guidePortDevice->calibration();
 		calibration = convert(cal);
 		calibration.flipped = guider->guidePortDevice->flipped();
 		return calibration;
@@ -340,7 +343,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
 		}
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
 			guider->adaptiveOpticsDevice->calibrationid());
-		astro::guiding::CalibrationPtr	cal = guider->adaptiveOpticsDevice->calibration();
+		astro::guiding::CalibrationPtr	cal
+			= guider->adaptiveOpticsDevice->calibration();
 		calibration = convert(cal);
 		calibration.flipped = guider->adaptiveOpticsDevice->flipped();
 		return calibration;
@@ -356,7 +360,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype, const Ice::Curr
  * The focal length is the only piece of information that we can not
  * get from anywhere else, so it has to be specified
  */
-Ice::Int GuiderI::startCalibration(ControlType caltype, const Ice::Current& /* current */) {
+Ice::Int GuiderI::startCalibration(ControlType caltype,
+		const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start calibration, type = %s",
 		calibrationtype2string(caltype).c_str());
 
