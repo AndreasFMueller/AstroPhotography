@@ -47,6 +47,9 @@ public slots:
 	void	deleteClicked();
 
 	void	deleteInstrument();
+
+protected:
+	virtual void	closeEvent(QCloseEvent *event);
 };
 
 

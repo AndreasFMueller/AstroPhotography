@@ -343,8 +343,32 @@ public:
 		if (value > limit) { return limit; }
 		return value;
 	}
-	virtual unsigned int	bitsPerPixel() const {
+#if 0
+	virtual unsigned int	bytesPerValue() const {
+		return sizeof(P);
+	}
+	virtual unsigned int	bitsPerValue() const {
 		return std::numeric_limits<P>::digits;
+	}
+	virtual unsigned int	bytesPerPixel() const {
+		return sizeof(P);
+	}
+	virtual unsigned int	bitsPerPixel() const {
+		return 8 * bytesPerPixel();
+	}
+#endif
+
+	static unsigned int	bytesPerValue() {
+		return sizeof(P);
+	}
+	static unsigned int	bitesPerValue() {
+		return std::numeric_limits<P>::digits;
+	}
+	static unsigned int	bytesPerPixel() {
+		return sizeof(P);
+	}
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
 	}
 };
 
@@ -401,14 +425,31 @@ public:
 	}
 	typedef yuyv_color_tag color_category;
 
-	virtual unsigned int	bitsPerPixel() const {
-		return 2 * std::numeric_limits<P>::digits;
-	}
 	P	luminance() const {
 		return y;
 	}
 	operator double() {
 		return (double)luminance();
+	}
+#if 0
+	virtual unsigned int	bytesPerPixel() const {
+		return sizeof(*this);
+	}
+	virtual unsigned int	bitsPerPixel() const {
+		return 8 * bytesPerPixel();
+	}
+#endif
+	static unsigned int	bytesPerPixel() {
+		return 2 * Color<P>::bytesPerValue();
+	}
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
+	}
+	static unsigned int	bytesPerValue() {
+		return 2 * Color<P>::bytesPerValue();
+	}
+	static unsigned int	bitsPerValue() {
+		return 8 * bytesPerPixel();
 	}
 };
 
@@ -436,14 +477,25 @@ public:
 		return (y != other.y) || (u != other.u) || (v != other.v);
 	}
 	typedef yuv_color_tag color_category;
-	virtual unsigned int	bitsPerPixel() const {
-		return 3 * std::numeric_limits<P>::digits;
-	}
 	P	luminance() const {
 		return y;
 	}
 	operator	double() {
 		return (double)luminance();
+	}
+#if 0
+	virtual unsigned int	bytesPerPixel() const {
+		return sizeof(*this);
+	}
+	virtual unsigned int	bitsPerPixel() const {
+		return 8 * bytesPerPixel();
+	}
+#endif
+	static unsigned int	bytesPerPixel() {
+		return 2 * Color<P>::bytesPerValue();
+	}
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
 	}
 };
 
@@ -585,8 +637,30 @@ public:
 		return (*this) * (double)value;
 	}
 
+#if 0
+	virtual unsigned int	bytesPerPixel() const {
+		return sizeof(*this);
+	}
+
 	virtual unsigned int	bitsPerPixel() const {
-		return 2 * std::numeric_limits<P>::digits;
+		return 8 * bytesPerPixel();
+	}
+#endif
+
+	static unsigned int	bytesPerPixel() {
+		return 3 * Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
+	}
+
+	static unsigned int	bytesPerValue() {
+		return Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerValue() {
+		return 8 * bytesPerValue();
 	}
 
 	P	luminance() const {
@@ -641,11 +715,10 @@ public:
  * with the LRGB technique.
  */
 template<typename P, int n>
-class Multiplane {
+class Multiplane : public Color<P> {
 public:
 	enum { planes = n};
 	P	p[n];
-	typedef	P	value_type;
 
 	Multiplane() { }
 
@@ -700,8 +773,30 @@ public:
 		return *this;
 	}
 
+#if 0
+	virtual unsigned int	bytesPerPixel() const {
+		return n * Color<P>::bytesPerValue();
+	}
+
 	virtual unsigned int	bitsPerPixel() const {
-		return n * std::numeric_limits<P>::digits;
+		return 8 * bytesPerPixel();
+	}
+#endif
+
+	static unsigned int	bytesPerPixel() {
+		return n * Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerPixel() {
+		return 8 * bytesPerPixel();
+	}
+
+	static unsigned int	bytesPerValue() {
+		return Color<P>::bytesPerValue();
+	}
+
+	static unsigned int	bitsPerValue() {
+		return 8 * bytesPerValue();
 	}
 
 	bool	operator==(const Multiplane<P, n>& other) const {
@@ -897,18 +992,108 @@ unsigned int	bitsPerPixel(P) {
 
 template<typename P>
 unsigned int	bitsPerPixel(YUYV<P>) {
-	return 2 * std::numeric_limits<P>::digits;
+	return YUYV<P>::bitsPerPixel();
+}
+
+template<typename P>
+unsigned int	bitsPerPixel(YUV<P>) {
+	return YUV<P>::bitsPerPixel();
 }
 
 template<typename P>
 unsigned int	bitsPerPixel(RGB<P>) {
-	return 3 * std::numeric_limits<P>::digits;
+	return RGB<P>::bitsPerPixel();
 }
 
 template<typename P, int n>
 unsigned int	bitsPerPixel(Multiplane<P, n>) {
-	return n * std::numeric_limits<P>::digits;
+	return Multiplane<P,n>::bitsPerPixel();
 }
+
+/**
+ * \brief bytesPerPixel template function
+ */
+template<typename P>
+unsigned int	bytesPerPixel(P) {
+	return sizeof(P);
+}
+
+template<typename P>
+unsigned int	bytesPerPixel(YUYV<P>) {
+	return YUYV<P>::bytesPerPixel();
+}
+
+template<typename P>
+unsigned int	bytesPerPixel(YUV<P>) {
+	return YUV<P>::bytesPerPixel();
+}
+
+template<typename P>
+unsigned int	bytesPerPixel(RGB<P>) {
+	return RGB<P>::bytesPerPixel();
+}
+
+template<typename P, int n>
+unsigned int	bytesPerPixel(Multiplane<P,n>) {
+	return Multiplane<P,n>::bytesPerPixel();
+}
+
+/**
+ * \brief template with specializations for the bitsPerValue function
+ */
+template<typename P>
+unsigned int	bitsPerValue(P) {
+	return std::numeric_limits<P>::digits;
+}
+
+template<typename P>
+unsigned int	bitsPerValue(YUYV<P>) {
+	return YUYV<P>::bitsPerValue();
+}
+
+template<typename P>
+unsigned int	bitsPerValue(YUV<P>) {
+	return YUV<P>::bitsPerValue();
+}
+
+template<typename P>
+unsigned int	bitsPerValue(RGB<P>) {
+	return RGB<P>::bitsPerValue();
+}
+
+template<typename P, int n>
+unsigned int	bitsPerValue(Multiplane<P, n>) {
+	return Multiplane<P,n>::bitsPerValue();
+}
+
+/**
+ * \brief bytesPerValue template function
+ */
+template<typename P>
+unsigned int	bytesPerValue(P) {
+	return sizeof(P);
+}
+
+template<typename P>
+unsigned int	bytesPerValue(YUYV<P>) {
+	return YUYV<P>::bytesPerValue();
+}
+
+template<typename P>
+unsigned int	bytesPerValue(YUV<P>) {
+	return YUV<P>::bytesPerValue();
+}
+
+template<typename P>
+unsigned int	bytesPerValue(RGB<P>) {
+	return RGB<P>::bytesPerValue();
+}
+
+template<typename P, int n>
+unsigned int	bytesPerValue(Multiplane<P,n>) {
+	return Multiplane<P,n>::bytesPerValue();
+}
+
 
 /**
  * \bits Weighted sum of Pixels

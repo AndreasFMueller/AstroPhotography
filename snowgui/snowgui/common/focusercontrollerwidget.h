@@ -54,6 +54,7 @@ public slots:
 	void	focuserChanged(int);
 	void	editingFinished();
 	void	guiChanged();
+
 };
 
 } // namespace snowgui

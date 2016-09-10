@@ -647,6 +647,8 @@ class FITSout {
 	bool	_precious;
 public:
 	FITSout(const std::string& filename);
+	bool	exists() const;
+	void	unlink();
 	bool	precious() const { return _precious; }
 	void	setPrecious(bool precious) { _precious = precious; }
 	void	write(const ImagePtr& image) throw (FITSexception);

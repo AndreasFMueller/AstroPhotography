@@ -239,4 +239,11 @@ void	instrumentswindow::deleteInstrument() {
 	delete messagebox;
 }
 
+/**
+ * \brief stop the timer when the window closes
+ */
+void    instrumentswindow::closeEvent(QCloseEvent *event) {
+	_discoveryTimer->stop();
+}
+
 } // namespace snowgui

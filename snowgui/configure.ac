@@ -151,6 +151,7 @@ AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/focusing/focusing.pro
 	snowgui/guiding/guiding.pro
 	snowgui/instruments/instruments.pro
+	snowgui/images/images.pro
 	snowgui/main/main.pro]
 	snowgui/build)
 AC_OUTPUT

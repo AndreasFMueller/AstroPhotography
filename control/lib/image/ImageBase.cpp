@@ -52,14 +52,6 @@ unsigned int     ImageBase::pixeloffset(const ImagePoint& p) const {
 	return frame.size().offset(p);
 }
 
-unsigned int	ImageBase::bytesPerPlane() const {
-	return bytesPerPixel() / planes();
-}
-
-unsigned int	ImageBase::bitsPerPlane() const {
-	return bitsPerPixel() / planes();
-}
-
 static std::string	mosaic_key("BAYER");
 
 /**

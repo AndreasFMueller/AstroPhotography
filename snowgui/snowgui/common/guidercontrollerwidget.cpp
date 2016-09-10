@@ -54,6 +54,7 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 		this, SLOT(selectTrack()));
 
 	// create the tracking monitor
+	_trackingmonitor = NULL;
 	_trackinglabel = new QLabel(NULL);
 	ui->trackingImageArea->setWidget(_trackinglabel);
 	_trackingmonitorimage = new TrackingMonitorImage(this, _trackinglabel);
@@ -68,9 +69,6 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 
 	connect(_trackingmonitorimage, SIGNAL(imageUpdated()),
 		this, SLOT(imageUpdated()));
-
-	// ensure the trackingmonitor pointer is properly initialized
-	_trackingmonitor = NULL;
 
 	// some other fields
 	_previousstate = snowstar::GuiderIDLE;
@@ -183,11 +181,11 @@ void	guidercontrollerwidget::setupGuider() {
  */
 guidercontrollerwidget::~guidercontrollerwidget() {
 	statusTimer->stop();
-	if (_trackingmonitorimage) {
+	delete statusTimer;
+	if (_trackingmonitor) {
 		Ice::Identity	identity = _trackingmonitor->identity();
 		snowstar::CommunicatorSingleton::remove(identity);
 	}
-	delete statusTimer;
 	delete ui;
 }
 

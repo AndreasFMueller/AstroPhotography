@@ -404,8 +404,8 @@ public:
 	virtual unsigned int bitsPerPixel() const { return 0; }
 	virtual unsigned int bytesPerPixel() const { return 0; }
 	virtual unsigned int	planes() const { return 0; }
-	unsigned int bytesPerPlane() const;
-	unsigned int bitsPerPlane() const;
+	virtual unsigned int bytesPerPlane() const { return 0; }
+	virtual unsigned int bitsPerPlane() const { return 0; }
 
 	// pixel range stuff
 	virtual double	minimum() const { return 0; }
@@ -1000,6 +1000,13 @@ public:
 	}
 
 	/**
+	 * \brief bits per Value
+	 */
+	virtual unsigned int	bitsPerPlane() const {
+		return astro::image::bitsPerValue(Pixel());
+	}
+
+	/**
  	 * \brief Determine the number of bytes per pixel
 	 *
 	 * This value gives information about the storage requirements of
@@ -1008,7 +1015,14 @@ public:
 	 * mantissa.
  	 */
 	virtual unsigned int	bytesPerPixel() const {
-		return sizeof(Pixel);
+		return astro::image::bytesPerPixel(Pixel());
+	}
+
+	/**
+ 	 * \brief bytes per Value
+	 */
+	virtual unsigned int	bytesPerPlane() const {
+		return astro::image::bytesPerValue(Pixel());
 	}
 
 	/**

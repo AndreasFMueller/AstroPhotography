@@ -44,6 +44,7 @@ guidingwindow::guidingwindow(QWidget *parent) : InstrumentWidget(parent),
 }
 
 guidingwindow::~guidingwindow() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy guidingwindow");
 	delete ui;
 }
 
@@ -68,6 +69,16 @@ void	guidingwindow::instrumentSetup(
 		instrument);
 	ui->guidercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	setAppname("Guiding");
+}
+
+/**
+ * \brief handle window close event
+ *
+ * This event handler makes sure the window is destroyed when it is closed
+ */
+void	guidingwindow::closeEvent(QCloseEvent * /* event */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "allow deletion");
+	deleteLater();
 }
 
 } // namespace snowgui

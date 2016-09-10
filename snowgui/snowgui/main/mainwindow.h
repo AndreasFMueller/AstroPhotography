@@ -30,6 +30,7 @@ public slots:
 	void	launchInstruments();
 	void	launchTasks();
 	void	launchConfiguration();
+	void	launchImages();
 
 private:
 	Ui::MainWindow *ui;

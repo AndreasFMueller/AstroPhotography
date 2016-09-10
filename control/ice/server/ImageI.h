@@ -28,6 +28,8 @@ public:
 	ImageI(astro::image::ImageDirectory& imagedirectrory,
 		astro::image::ImagePtr image, const std::string& filename);
 	virtual ~ImageI();
+	virtual std::string	name(const Ice::Current& current);
+	virtual int	age(const Ice::Current& current);
 	virtual ImageSize	size(const Ice::Current& current);
 	virtual ImagePoint	origin(const Ice::Current& current);
 	virtual int	bytesPerPixel(const Ice::Current& current);

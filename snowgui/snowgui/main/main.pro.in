@@ -15,6 +15,7 @@ ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
+LIBS += -L../images -limages
 LIBS += -L../instruments -linstruments
 LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
@@ -25,22 +26,25 @@ LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common ../preview ../focusing ../guiding ../instruments
+INCLUDEPATH += ../common ../preview ../focusing ../guiding ../instruments ../images
 
 ASTROGUISOURCES = 							\
         mainwindow.cpp 							\
+	configurationdialog.cpp						\
 	connectiondialog.cpp 						\
 	serverselectiondialog.cpp 					\
 	instrumentselectiondialog.cpp
 
 ASTROGUIHEADERS =							\
 	mainwindow.h							\
+	configurationdialog.h						\
 	connectiondialog.h						\
 	serverselectiondialog.h						\
 	instrumentselectiondialog.h
 
 FORMS    +=								\
 	mainwindow.ui							\
+	configurationdialog.ui						\
 	connectiondialog.ui						\
 	serverselectiondialog.ui					\
 	instrumentselectiondialog.ui

@@ -13,7 +13,10 @@
 #include <focusingwindow.h>
 #include <guidingwindow.h>
 #include <instrumentswindow.h>
+#include "configurationdialog.h"
+#include <imageswindow.h>
 #include <QMessageBox>
+#include <sstream>
 
 using namespace astro::discover;
 
@@ -41,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchTasks()));
 	connect(ui->appConfigurationButton, SIGNAL(clicked()),
 		this, SLOT(launchConfiguration()));
+	connect(ui->appImagesButton, SIGNAL(clicked()),
+		this, SLOT(launchImages()));
 
 	// initialize application specific stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main window with server %s",
@@ -72,6 +77,9 @@ MainWindow::MainWindow(QWidget *parent,
 	}
 	if (_serviceobject.has(ServiceSubset::TASKS)) {
 		ui->appTasksButton->setEnabled(true);
+	}
+	if (_serviceobject.has(ServiceSubset::IMAGES)) {
+		ui->appImagesButton->setEnabled(true);
 	}
 
 	// add menu
@@ -108,8 +116,61 @@ void	MainWindow::launchGuiding() {
  * \brief Launch the instruments application
  */
 void	MainWindow::launchInstruments() {
-	instrumentswindow	*iw = new instrumentswindow(NULL, _serviceobject);
-	iw->show();
+	try {
+		instrumentswindow	*iw = new instrumentswindow(NULL, _serviceobject);
+		iw->show();
+	} catch (const std::exception& x) {
+		QMessageBox	*message = new QMessageBox(this);
+		message->setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Instruments' service on '";
+		out << _serviceobject.toString();
+		out << "'. Instruments Window cannot be constructed. ";
+		out << "Cause: ";
+		out << x.what();
+		message->setInformativeText(QString(out.str().c_str()));
+		message->exec();
+		delete message;
+	}
+}
+
+void	MainWindow::launchConfiguration() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch configuration window");
+	try {
+		configurationdialog	*config = new configurationdialog(NULL, _serviceobject);
+		config->show();
+	} catch (const std::exception& x) {
+		QMessageBox	*message = new QMessageBox(this);
+		message->setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Configuration' service on ";
+		out << _serviceobject.toString();
+		out << ". Configuration dialog cannot be constructed.";
+		out << "Cause: ";
+		out << x.what();
+		message->setInformativeText(QString(out.str().c_str()));
+		message->exec();
+		delete message;
+	}
+}
+
+void	MainWindow::launchImages() {
+	try {
+		imageswindow	*images = new imageswindow(NULL, _serviceobject);
+		images->show();
+	} catch (const std::exception& x) {
+		QMessageBox	*message = new QMessageBox(this);
+		message->setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Images' service on ";
+		out << _serviceobject.toString();
+		out << ". Images window cannot be constructed.";
+		out << "Cause: ";
+		out << x.what();
+		message->setInformativeText(QString(out.str().c_str()));
+		message->exec();
+		delete message;
+	}
 }
 
 void	MainWindow::launchRepository() {
@@ -124,14 +185,6 @@ void	MainWindow::launchTasks() {
 	QMessageBox	*messagebox = new QMessageBox(this);
 	messagebox->setText(QString("Application not implemented"));
 	messagebox->setInformativeText(QString("The Tasks application is not yet implemented"));
-	messagebox->exec();
-	delete messagebox;
-}
-
-void	MainWindow::launchConfiguration() {
-	QMessageBox	*messagebox = new QMessageBox(this);
-	messagebox->setText(QString("Application not implemented"));
-	messagebox->setInformativeText(QString("The Configuration application is not yet implemented"));
 	messagebox->exec();
 	delete messagebox;
 }

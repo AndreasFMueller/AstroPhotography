@@ -109,4 +109,11 @@ void	focusingwindow::rectangleSelected(ImageRectangle rectangle) {
 	ui->ccdcontrollerWidget->setSubframe(rectangle);
 }
 
+/**
+ * \brief Make sure object is destroyed when the window closes
+ */
+void	focusingwindow::closeEvent(QCloseEvent * /* event */) {
+	deleteLater();
+}
+
 } // namespace snowgui

@@ -4,6 +4,7 @@
  * (c) 2013 Prof Dr Andreas Mueller, Hochschule Rapperswil
  */
 #include <AstroIO.h>
+#include <includes.h>
 
 using namespace astro::image;
 
@@ -12,6 +13,25 @@ namespace io {
 
 FITSout::FITSout(const std::string& _filename) : filename(_filename) {
 	_precious = true;
+}
+
+/**
+ * \brief Find out whether a file exists
+ */
+bool	FITSout::exists() const {
+	struct stat	sb;
+	int	rc = stat(filename.c_str(), &sb);
+	if (rc == 0) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * \brief Unlink the file if it exists
+ */
+void	FITSout::unlink() {
+	::unlink(filename.c_str());
 }
 
 /**

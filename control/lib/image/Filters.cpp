@@ -396,25 +396,28 @@ bool	saturated(const ImagePtr& /* image */, const ImageRectangle& /* rect */) {
 	return true;
 }
 
-#define	bytespervalue_typed(image, pixel)				\
+#define	bytespervalue_typed(image, Pixel)				\
 {									\
-	Image<pixel >	*imagep = dynamic_cast<Image<pixel > *>(&*image);\
+	Image<Pixel >	*imagep = NULL;					\
+	imagep = dynamic_cast<Image<Pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		return sizeof(pixel);				\
+		return sizeof(Pixel);					\
 	}								\
 }
 #define	bytespervalue_yuyv(image, Pixel)				\
 {									\
-	Image<YUYV<Pixel > >	*imagep = dynamic_cast<Image<YUYV<Pixel > > *>(&*image);\
+	Image<YUYV<Pixel > >	*imagep = NULL;				\
+	imagep = dynamic_cast<Image<YUYV<Pixel > > *>(&*image);		\
 	if (NULL != imagep) {						\
-		return sizeof(Pixel);				\
+		return sizeof(Pixel);					\
 	}								\
 }
-#define	bytespervalue_rgb(image, Pixel)				\
+#define	bytespervalue_rgb(image, Pixel)					\
 {									\
-	Image<RGB<Pixel > >	*imagep = dynamic_cast<Image<RGB<Pixel > > *>(&*image);\
+	Image<RGB<Pixel > >	*imagep = NULL;				\
+	imagep = dynamic_cast<Image<RGB<Pixel > > *>(&*image);		\
 	if (NULL != imagep) {						\
-		return sizeof(Pixel);				\
+		return sizeof(Pixel);					\
 	}								\
 }
 
@@ -458,7 +461,7 @@ int	bytespervalue(const ImagePtr& image) {
 {									\
 	Image<RGB<pixel > >	*imagep = dynamic_cast<Image<RGB<pixel > > *>(&*image);\
 	if (NULL != imagep) {						\
-		return 2;						\
+		return 3;						\
 	}								\
 }
 

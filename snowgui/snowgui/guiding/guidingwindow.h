@@ -26,6 +26,8 @@ public:
 
 private:
 	Ui::guidingwindow *ui;
+protected:
+	void	closeEvent(QCloseEvent *);
 };
 
 } // namespace snowgui

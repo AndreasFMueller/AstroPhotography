@@ -20,6 +20,16 @@ module snowstar {
 	 */
 	interface Image {
 		/**
+		 * \brief Get the filename of the image
+ 		 */
+		string	name();
+
+		/**
+		 * \brief Age of the file
+		 */
+		int	age();
+
+		/**
 		 * \brief Size of the image
 		 */
 		ImageSize	size();

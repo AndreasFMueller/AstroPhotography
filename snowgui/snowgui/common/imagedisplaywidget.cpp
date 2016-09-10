@@ -88,7 +88,7 @@ bool    imagedisplaywidget::subframeIsVisible() {
 }
 
 void    imagedisplaywidget::setSubframeVisible(bool h) {
-	ui->scaleGroup->setVisible(h);
+	ui->subframeGroup->setVisible(h);
 }
 
 bool	imagedisplaywidget::infoIsVisible() {
@@ -486,6 +486,7 @@ void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
 	int	row = 0;
 	for_each(image->begin(), image->end(),
 		[table,row](const ImageMetadata::value_type& metadata) mutable {
+			table->setRowHeight(row, 19);
 			Metavalue	v = metadata.second;
 			QTableWidgetItem	*i;
 			i = new QTableWidgetItem(v.getKeyword().c_str());

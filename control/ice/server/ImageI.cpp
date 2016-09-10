@@ -22,6 +22,8 @@ namespace snowstar {
 ImageI::ImageI(astro::image::ImageDirectory& imagedirectory,
 	astro::image::ImagePtr image, const std::string& filename)
 	: _imagedirectory(imagedirectory), _image(image), _filename(filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating image servant for %s",
+		_filename.c_str());
 	// origin
 	_origin = convert(_image->origin());
 	// size
@@ -29,9 +31,9 @@ ImageI::ImageI(astro::image::ImageDirectory& imagedirectory,
 	// bytes per pixel
 	_bytesperpixel = _image->bytesPerPixel();
 	// bytes per value
-	_bytespervalue = astro::image::filter::bytespervalue(_image);
+	_bytespervalue = _image->bytesPerPlane();
 	// planes
-	_planes = astro::image::filter::planes(_image);
+	_planes = _image->planes();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image servant created for %s",
 		_filename.c_str());
 }
@@ -39,6 +41,16 @@ ImageI::ImageI(astro::image::ImageDirectory& imagedirectory,
 ImageI::~ImageI() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroy servant for image %s", 
 		_filename.c_str());
+}
+
+std::string	ImageI::name(const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "request for image %s",
+		_filename.c_str());
+	return _filename;
+}
+
+int	ImageI::age(const Ice::Current& /* current */) {
+	return _imagedirectory.fileAge(_filename);
 }
 
 ImageSize       ImageI::size(const Ice::Current& /* current */) {
@@ -170,7 +182,7 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 ByteImageI::ByteImageI(astro::image::ImageDirectory& imagedirectory,
 		astro::image::ImagePtr image, const std::string& filename)
 	: ImageI(imagedirectory, image, filename) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image %d",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image, %d bytes per value",
 		_bytespervalue);
 	if (1 != _bytespervalue) {
 		std::string	msg = astro::stringprintf("cannot build byte image "
