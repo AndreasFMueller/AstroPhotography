@@ -257,6 +257,9 @@ void	repositorywindow::openClicked() {
 	}
 	ImagePtr	imageptr = currentImage();
 	imagedisplaywidget	*idw = new imagedisplaywidget(NULL);
+	connect(idw, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+        	idw, SLOT(selectRectangle(QRect)));
+	idw->setRectangleSelectionEnabled(true);
 	idw->setImage(imageptr);
 	idw->show();
 }
