@@ -29,6 +29,7 @@ public slots:
 	void	launchRepository();
 	void	launchInstruments();
 	void	launchTasks();
+	void	launchConfiguration();
 
 private:
 	Ui::MainWindow *ui;

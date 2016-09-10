@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchRepository()));
 	connect(ui->appRepositoryButton, SIGNAL(clicked()),
 		this, SLOT(launchTasks()));
+	connect(ui->appConfigurationButton, SIGNAL(clicked()),
+		this, SLOT(launchConfiguration()));
 
 	// initialize application specific stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main window with server %s",
@@ -122,6 +124,14 @@ void	MainWindow::launchTasks() {
 	QMessageBox	*messagebox = new QMessageBox(this);
 	messagebox->setText(QString("Application not implemented"));
 	messagebox->setInformativeText(QString("The Tasks application is not yet implemented"));
+	messagebox->exec();
+	delete messagebox;
+}
+
+void	MainWindow::launchConfiguration() {
+	QMessageBox	*messagebox = new QMessageBox(this);
+	messagebox->setText(QString("Application not implemented"));
+	messagebox->setInformativeText(QString("The Configuration application is not yet implemented"));
 	messagebox->exec();
 	delete messagebox;
 }
