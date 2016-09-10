@@ -174,7 +174,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QPushButton" name="appGuidingButton">
          <property name="enabled">
           <bool>false</bool>
@@ -184,7 +184,7 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="9" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -197,7 +197,7 @@
          </property>
         </spacer>
        </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <widget class="QPushButton" name="appRepositoryButton">
          <property name="enabled">
           <bool>false</bool>
@@ -207,7 +207,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QPushButton" name="appFocusingButton">
          <property name="enabled">
           <bool>false</bool>
@@ -217,7 +217,7 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="8" column="0">
         <widget class="QPushButton" name="appTasksButton">
          <property name="enabled">
           <bool>false</bool>
@@ -227,7 +227,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QPushButton" name="appInstrumentsButton">
          <property name="enabled">
           <bool>false</bool>
@@ -254,6 +254,16 @@
          </property>
          <property name="text">
           <string>Images</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="appExposeButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Expose</string>
          </property>
         </widget>
        </item>

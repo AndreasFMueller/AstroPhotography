@@ -7,7 +7,8 @@
 QT       += core gui widgets
 
 TEMPLATE = subdirs
-SUBDIRS = common preview test focusing guiding instruments images repository main
+SUBDIRS = common preview test focusing guiding instruments images
+SUBDIRS += repository expose main
 CONFIG += ordered
 
 snowgui.depends = common preview

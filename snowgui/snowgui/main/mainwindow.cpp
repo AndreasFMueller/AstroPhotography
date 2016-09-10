@@ -18,6 +18,7 @@
 #include <repositorywindow.h>
 #include <QMessageBox>
 #include <sstream>
+#include <exposewindow.h>
 
 using namespace astro::discover;
 
@@ -47,6 +48,8 @@ MainWindow::MainWindow(QWidget *parent,
 		this, SLOT(launchConfiguration()));
 	connect(ui->appImagesButton, SIGNAL(clicked()),
 		this, SLOT(launchImages()));
+	connect(ui->appExposeButton, SIGNAL(clicked()),
+		this, SLOT(launchExpose()));
 
 	// initialize application specific stuff
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "starting main window with server %s",
@@ -68,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent,
 		if (_serviceobject.has(ServiceSubset::DEVICES)) {
 			ui->appPreviewButton->setEnabled(true);
 			ui->appFocusingButton->setEnabled(true);
+			ui->appExposeButton->setEnabled(true);
 			if (_serviceobject.has(ServiceSubset::GUIDING)) {
 				ui->appGuidingButton->setEnabled(true);
 			}
@@ -199,6 +203,14 @@ void	MainWindow::launchTasks() {
 	messagebox->setInformativeText(QString("The Tasks application is not yet implemented"));
 	messagebox->exec();
 	delete messagebox;
+}
+
+void	MainWindow::launchExpose() {
+	InstrumentSelectionApplication<snowgui::exposewindow>	*is
+		= new InstrumentSelectionApplication<snowgui::exposewindow>(this, _serviceobject);
+	is->setWindowTitle(QString("Select instrument for Expose application"));
+	is->exec();
+	delete is;
 }
 
 void	MainWindow::connectFile() {
