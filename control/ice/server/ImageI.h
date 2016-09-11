@@ -35,6 +35,12 @@ public:
 	virtual int	bytesPerPixel(const Ice::Current& current);
 	virtual int	planes(const Ice::Current& current);
 	virtual int	bytesPerValue(const Ice::Current& current);
+	virtual bool	hasMeta(const std::string& keyword,
+				const Ice::Current& current);
+	virtual Metavalue	getMeta(const std::string& keyword,
+					const Ice::Current& current);
+	virtual void	setMeta(const Metavalue& metavalue,
+				const Ice::Current& current);
 	virtual ImageFile	file(const Ice::Current& current);
 	virtual int	filesize(const Ice::Current& current);
 	virtual void	toRepository(const std::string& reponame,

@@ -23,7 +23,6 @@ imageswindow::imageswindow(QWidget *parent,
 	ui->setupUi(this);
 
 	// don't show the subframe information
-	ui->imageWidget->setSubframeVisible(false);
 	QStringList	headers;
         headers << "Date" << "Time" << "Size" << "Filename";
         ui->imageTree->setHeaderLabels(headers);
@@ -56,6 +55,10 @@ imageswindow::imageswindow(QWidget *parent,
 		this, SLOT(setImage(astro::image::ImagePtr)));
 	connect(ui->imagedetailWidget, SIGNAL(deleteCurrentImage()),
 		this, SLOT(deleteCurrentImage()));
+
+	connect(ui->imageWidget, SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
+                ui->imageWidget, SLOT(selectRectangle(QRect)));
+	ui->imageWidget->setRectangleSelectionEnabled(true);
 }
 
 /**

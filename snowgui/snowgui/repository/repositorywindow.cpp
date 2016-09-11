@@ -39,8 +39,10 @@ repositorywindow::repositorywindow(QWidget *parent,
 	headers << "Temperature";	// 6
 	headers << "Binning";		// 7
 	headers << "Size";		// 8
-	headers << "Filename";		// 9
-	headers << "UUID";		// 10
+	headers << "Filter";		// 9
+	headers << "Bayer";		// 10
+	headers << "Filename";		// 11
+	headers << "UUID";		// 12
 	ui->repositoryTree->setHeaderLabels(headers);
 	ui->repositoryTree->header()->resizeSection(0, 80);
 	ui->repositoryTree->header()->resizeSection(1, 100);
@@ -51,7 +53,9 @@ repositorywindow::repositorywindow(QWidget *parent,
 	ui->repositoryTree->header()->resizeSection(6, 80);
 	ui->repositoryTree->header()->resizeSection(7, 50);
 	ui->repositoryTree->header()->resizeSection(8, 100);
-	ui->repositoryTree->header()->resizeSection(9, 180);
+	ui->repositoryTree->header()->resizeSection(9, 100);
+	ui->repositoryTree->header()->resizeSection(10, 80);
+	ui->repositoryTree->header()->resizeSection(11, 180);
 
 	// window title
 	std::string	title = astro::stringprintf("Repository overview on %s",
@@ -176,6 +180,12 @@ void	repositorywindow::addImages(QTreeWidgetItem *top,
 			info.size.height);
 		list << QString(s.c_str());
 
+		// filter
+		list << QString(info.filter.c_str());
+
+		// bayer pattern
+		list << QString(info.bayer.c_str());
+
 		// filename
 		list << QString(info.filename.c_str());
 
@@ -261,6 +271,9 @@ void	repositorywindow::openClicked() {
         	idw, SLOT(selectRectangle(QRect)));
 	idw->setRectangleSelectionEnabled(true);
 	idw->setImage(imageptr);
+	std::string	title = astro::stringprintf("image %d from repository %s",
+		_imageid, _reponame.c_str());
+	idw->setWindowTitle(QString(title.c_str()));
 	idw->show();
 }
 

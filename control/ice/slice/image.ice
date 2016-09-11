@@ -9,6 +9,12 @@
  * \brief snowstar module captures all interfaces
  */
 module snowstar {
+	struct Metavalue {
+		string	keyword;
+		string	value;
+		string	comment;
+	};
+
 	sequence<byte>	ImageFile;
 	/**
  	 * \brief Image base interface
@@ -83,6 +89,18 @@ module snowstar {
 		 * \brief get the file size
 		 */
 		int	filesize();
+
+		bool	hasMeta(string key);
+
+		/**
+		 * \brief Get a metadata value from the image
+		 */
+		Metavalue	getMeta(string key);
+
+		/**
+		 * \brief Update or add a metadata value in the image
+		 */
+		void	setMeta(Metavalue value);
 
 		/**
 		 * \brief Save an image in a repository for later use

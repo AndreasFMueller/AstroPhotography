@@ -185,6 +185,9 @@ SimpleImage	convertsimple(astro::image::ImagePtr image);
 astro::image::ImagePtr	convertfile(ImageFile imagefile);
 ImageFile	convertfile(astro::image::ImagePtr imageptr);
 
+astro::image::Metavalue	convert(const Metavalue& metavalue);
+Metavalue	convert(const astro::image::Metavalue& metavalue);
+
 // Focusing
 FocusState	convert(astro::focusing::Focusing::state_type s);
 astro::focusing::Focusing::state_type	convert(FocusState s);

@@ -328,4 +328,17 @@ ImageFile       convertfile(astro::image::ImagePtr imageptr) {
 	return result;
 }
 
+Metavalue	convert(const astro::image::Metavalue& metavalue) {
+	snowstar::Metavalue	result;
+	result.keyword = metavalue.getKeyword();
+	result.value = metavalue.getValue();
+	result.comment = metavalue.getComment();
+	return result;
+}
+
+astro::image::Metavalue	convert(const Metavalue& metavalue) {
+	return astro::image::Metavalue(metavalue.keyword, metavalue.value,
+		metavalue.comment);
+}
+
 } // namespace snowstar

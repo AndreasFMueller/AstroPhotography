@@ -31,6 +31,7 @@ public:
 
 signals:
 	void	filterInstalled();
+	void	filterwheelSelected(snowstar::FilterWheelPrx);
 
 private:
 	Ui::filterwheelcontrollerwidget *ui;

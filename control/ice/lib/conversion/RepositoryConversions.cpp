@@ -23,6 +23,8 @@ ImageInfo	convert(const astro::project::ImageEnvelope& envelope) {
 	result.exposuretime = envelope.exposuretime();
 	result.temperature = envelope.temperature();
 	result.purpose = astro::camera::Exposure::purpose2string(envelope.purpose());
+	result.bayer = envelope.bayer();
+	result.filter = envelope.filter();
 	result.observationago = converttime(envelope.observation());
 	return result;
 }
@@ -40,6 +42,8 @@ astro::project::ImageEnvelope	convert(const ImageInfo& info) {
 	envelope.temperature(info.temperature);
 	envelope.purpose(astro::camera::Exposure::string2purpose(info.purpose));
 	envelope.observation(converttime(info.observationago));
+	envelope.bayer(info.bayer);
+	envelope.filter(info.filter);
 	return envelope;
 }
 

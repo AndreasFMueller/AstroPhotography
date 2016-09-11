@@ -27,7 +27,11 @@ module snowstar {
 		double	temperature;
 		string	purpose;
 		double	observationago;
+		string	filter;
+		string	bayer;
 	};
+
+	sequence<string>	projectnamelist;
 
 	/**
 	 * \brief Image Repository interface
@@ -38,8 +42,10 @@ module snowstar {
 	 */
 	interface Repository {
 		idlist		getIds();
+		idlist		getIdsCondition(string condition);
 		uuidlist	getUUIDs();
 		uuidlist	getUUIDsCondition(string condition);
+		projectnamelist	getProjectnames();
 		bool		has(int id);
 		bool		hasUUID(string uuid);
 		int		getId(string uuid) throws NotFound;

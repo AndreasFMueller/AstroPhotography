@@ -144,6 +144,12 @@ public:
 	astro::camera::Exposure::purpose_t	purpose() const { return _purpose; }
 	void	purpose(astro::camera::Exposure::purpose_t c) { _purpose = c; }
 
+private:
+	std::string	_filter;
+public:
+	const std::string	filter() const { return _filter; }
+	void	filter(const std::string& f) { _filter = f; }
+
 	// bayer
 private:
 	std::string	_bayer;
@@ -201,6 +207,7 @@ public:
 	std::set<UUID>	getUUIDs(const std::string& condition);
 	std::vector<int>	getIds();
 	std::vector<int>	getIds(const std::string& condition);
+	std::vector<std::string>	getProjectnames();
 };
 typedef std::shared_ptr<ImageRepo>	ImageRepoPtr;
 

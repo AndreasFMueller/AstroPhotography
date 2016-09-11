@@ -10,6 +10,7 @@
 #include <cstring>
 #include <includes.h>
 #include <AstroImage.h>
+#include <AstroIO.h>
 #include <AstroConfig.h>
 #include <IceConversions.h>
 #include <Ice/ObjectAdapter.h>
@@ -71,6 +72,29 @@ int     ImageI::planes(const Ice::Current& /* current */) {
 
 int     ImageI::bytesPerValue(const Ice::Current& /* current */) {
 	return _bytespervalue;
+}
+
+bool	ImageI::hasMeta(const std::string& keyword,
+			const Ice::Current& /* current */) {
+	return _image->hasMetadata(keyword);
+}
+
+Metavalue	ImageI::getMeta(const std::string& keyword,
+			const Ice::Current& /* current */) {
+	if (!_image->hasMetadata(keyword)) {
+		throw NotFound("keyword not found");
+	}
+	return convert(_image->getMetadata(keyword));
+}
+
+void	ImageI::setMeta(const Metavalue& metavalue,
+			const Ice::Current& /* current */) {
+	_image->setMetadata(convert(metavalue));
+	astro::io::FITSout	out(_filename);
+	if (out.exists()) {
+		out.unlink();
+	}
+	out.write(_image);
 }
 
 ImageFile       ImageI::file(const Ice::Current& /* current */) {

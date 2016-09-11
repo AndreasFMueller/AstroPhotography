@@ -160,7 +160,6 @@ void	coolercontrollerwidget::setSetTemperature(double t) {
  * \brief Slot for timer updates
  */
 void	coolercontrollerwidget::statusUpdate() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "statusUpdate()");
 	if (!_cooler) {
 		return;
 	}

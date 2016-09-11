@@ -70,6 +70,8 @@ void	focusingwindow::instrumentSetup(
 	ui->focusercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->guideportcontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->adaptiveopticscontrollerWidget->instrumentSetup(serviceobject, instrument);
+	ui->mountcontrollerWidget->instrumentSetup(serviceobject, instrument);
 
 	setAppname("Focusing");
 }

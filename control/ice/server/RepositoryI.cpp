@@ -19,6 +19,11 @@ idlist	RepositoryI::getIds(const Ice::Current& /* current */) {
 	return _repo.getIds();
 }
 
+idlist	RepositoryI::getIdsCondition(const std::string& condition,
+		const Ice::Current& /* current */) {
+	return _repo.getIds(condition);
+}
+
 uuidlist        RepositoryI::getUUIDs(const Ice::Current& /* current */) {
 	uuidlist	result;
 	std::set<astro::UUID>	uuids = _repo.getUUIDs("0 = 0");
@@ -34,6 +39,10 @@ uuidlist	RepositoryI::getUUIDsCondition(const std::string& condition,
 	std::set<astro::UUID>	uuids = _repo.getUUIDs(condition);
 	std::copy(uuids.begin(), uuids.end(), std::back_inserter(result));
 	return result;
+}
+
+projectnamelist	RepositoryI::getProjectnames(const Ice::Current& /* current */) {
+	return _repo.getProjectnames();
 }
 
 bool	RepositoryI::has(int id, const Ice::Current& /* current */) {

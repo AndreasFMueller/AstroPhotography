@@ -25,18 +25,23 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
-	exposewindow.ui	
+	exposewindow.ui							\
+	exposewidget.ui
 
 WIDGETSOURCES =								\
-	exposewindow.cpp
+	exposewindow.cpp						\
+	exposewidget.cpp
 
 WIDGETHEADERS =								\
-	exposewindow.h
+	exposewindow.h							\
+	exposewidget.h
 
 SOURCES += 								\
+	RepositorySection.cpp						\
 	$${WIDGETSOURCES}
 
 HEADERS  += 								\
+	RepositorySection.h						\
 	$${WIDGETHEADERS}
 
 

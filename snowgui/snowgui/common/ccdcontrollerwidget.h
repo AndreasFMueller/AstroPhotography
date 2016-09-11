@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
+#include <image.h>
 
 namespace snowgui {
 
@@ -27,8 +28,12 @@ class ccdcontrollerwidget : public InstrumentWidget {
 
 	astro::image::ImagePtr	_image;
 	astro::camera::Exposure	_imageexposure;
+	snowstar::ImagePrx	_imageproxy;
+
 	bool	_guiderccdonly;
 	bool	_nosubframe;
+	bool	_nobuttons;
+	bool	_imageproxyonly;
 
 public:
 	explicit ccdcontrollerwidget(QWidget *parent = NULL);
@@ -41,9 +46,16 @@ public:
 	const astro::image::ImagePtr	image() const { return _image; }
 	const astro::camera::Exposure&	imageexposure() const { return _imageexposure; }
 
+	bool	guiderccdonly() const { return _guiderccdonly; }
+	void	guiderccdonly(bool g) { _guiderccdonly = g; }
+
+	bool	imageproxyonly() const { return _imageproxyonly; }
+	void	imageproxyonly(bool i) { _imageproxyonly = i; }
+
 signals:
 	void	exposureChanged(astro::camera::Exposure);
 	void	imageReceived(astro::image::ImagePtr image);
+	void	imageproxyReceived(snowstar::ImagePrx image);
 	void	ccdSelected(int);
 
 private:
@@ -87,6 +99,7 @@ public slots:
 	void	streamClicked();
 	void	ccdChanged(int);
 	void	hideSubframe(bool);
+	void	hideButtons(bool);
 
 	// needed internally for status udpates
 	void	statusUpdate();

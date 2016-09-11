@@ -88,30 +88,27 @@
        <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
       </item>
       <item>
-       <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget" native="true"/>
-      </item>
-      <item>
-       <widget class="snowgui::adaptiveopticscontrollerwidget" name="adaptiveopticscontrollerWidget" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>230</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
+        <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget">
+         <attribute name="label">
+          <string>Guideport</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::adaptiveopticscontrollerwidget" name="adaptiveopticscontrollerWidget">
+         <attribute name="label">
+          <string>Adaptive Optics</string>
+         </attribute>
+        </widget>
         <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>465</height>
+           <height>417</height>
           </rect>
          </property>
          <attribute name="label">
@@ -124,7 +121,7 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>245</height>
+           <height>417</height>
           </rect>
          </property>
          <attribute name="label">
@@ -137,11 +134,16 @@
            <x>0</x>
            <y>0</y>
            <width>350</width>
-           <height>465</height>
+           <height>417</height>
           </rect>
          </property>
          <attribute name="label">
           <string>Focuser</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget">
+         <attribute name="label">
+          <string>Mount</string>
          </attribute>
         </widget>
        </widget>
@@ -152,6 +154,12 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>snowgui::imagedisplaywidget</class>
+   <extends>QWidget</extends>
+   <header location="global">imagedisplaywidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>snowgui::ccdcontrollerwidget</class>
    <extends>QWidget</extends>
@@ -177,12 +185,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>snowgui::imagedisplaywidget</class>
-   <extends>QWidget</extends>
-   <header location="global">imagedisplaywidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>snowgui::filterwheelcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">filterwheelcontrollerwidget.h</header>
@@ -198,6 +200,12 @@
    <class>snowgui::adaptiveopticscontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">adaptiveopticscontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::mountcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">mountcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

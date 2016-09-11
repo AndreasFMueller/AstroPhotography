@@ -17,7 +17,7 @@
    <item>
     <widget class="QTreeWidget" name="repositoryTree">
      <property name="columnCount">
-      <number>11</number>
+      <number>13</number>
      </property>
      <column>
       <property name="text">
@@ -72,6 +72,16 @@
      <column>
       <property name="text">
        <string notr="true">11</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string notr="true">12</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string notr="true">13</string>
       </property>
      </column>
     </widget>

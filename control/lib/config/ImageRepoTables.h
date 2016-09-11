@@ -31,6 +31,7 @@ public:
 	double	exposuretime;
 	double	temperature;
 	std::string	purpose;
+	std::string	filter;
 	std::string	bayer;
 	std::string	observation;
 	std::string	uuid;

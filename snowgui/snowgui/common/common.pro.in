@@ -25,16 +25,17 @@ INCLUDEPATH += /usr/local/include
 
 FORMS    +=								\
 	adaptiveopticscontrollerwidget.ui				\
-	imagedisplaywidget.ui						\
-	ccdcontrollerwidget.ui						\
-	focusercontrollerwidget.ui					\
-	filterwheelcontrollerwidget.ui					\
-	guideportcontrollerwidget.ui					\
 	calibrationdetaildialog.ui					\
-	coolercontrollerwidget.ui					\
-	calibrationwidget.ui						\
 	calibrationselectiondialog.ui					\
+	calibrationwidget.ui						\
+	ccdcontrollerwidget.ui						\
+	coolercontrollerwidget.ui					\
+	filterwheelcontrollerwidget.ui					\
+	focusercontrollerwidget.ui					\
+	guideportcontrollerwidget.ui					\
 	guidercontrollerwidget.ui					\
+	imagedisplaywidget.ui						\
+	mountcontrollerwidget.ui					\
 	singletrackwidget.ui						\
 	trackingmonitordialog.ui					\
 	trackselectiondialog.ui						\
@@ -42,16 +43,17 @@ FORMS    +=								\
 
 WIDGETSOURCES =								\
 	adaptiveopticscontrollerwidget.cpp				\
-	imagedisplaywidget.cpp						\
-	ccdcontrollerwidget.cpp						\
-	focusercontrollerwidget.cpp					\
-	filterwheelcontrollerwidget.cpp					\
-	guideportcontrollerwidget.cpp					\
 	calibrationdetaildialog.cpp					\
-	coolercontrollerwidget.cpp					\
-	calibrationwidget.cpp						\
 	calibrationselectiondialog.cpp					\
+	calibrationwidget.cpp						\
+	ccdcontrollerwidget.cpp						\
+	coolercontrollerwidget.cpp					\
+	filterwheelcontrollerwidget.cpp					\
+	focusercontrollerwidget.cpp					\
+	guideportcontrollerwidget.cpp					\
 	guidercontrollerwidget.cpp					\
+	imagedisplaywidget.cpp						\
+	mountcontrollerwidget.cpp					\
 	singletrackwidget.cpp						\
 	trackingmonitordialog.cpp					\
 	trackselectiondialog.cpp					\
@@ -59,16 +61,17 @@ WIDGETSOURCES =								\
 
 WIDGETHEADERS =								\
 	adaptiveopticscontrollerwidget.h				\
-	ccdcontrollerwidget.h						\
-	imagedisplaywidget.h						\
-	focusercontrollerwidget.h					\
-	filterwheelcontrollerwidget.h					\
-	guideportcontrollerwidget.h					\
 	calibrationdetaildialog.h					\
-	coolercontrollerwidget.h					\
-	calibrationwidget.h						\
 	calibrationselectiondialog.h					\
+	calibrationwidget.h						\
+	ccdcontrollerwidget.h						\
+	coolercontrollerwidget.h					\
+	filterwheelcontrollerwidget.h					\
+	focusercontrollerwidget.h					\
+	guideportcontrollerwidget.h					\
 	guidercontrollerwidget.h					\
+	imagedisplaywidget.h						\
+	mountcontrollerwidget.h						\
 	singletrackwidget.h						\
 	trackingmonitordialog.h						\
 	trackselectiondialog.h						\

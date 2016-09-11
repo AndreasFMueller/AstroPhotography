@@ -284,6 +284,7 @@ static ImageEnvelope	convert(const ImageRecord& imageinfo,
 	result.exposuretime(imageinfo.exposuretime);
 	result.temperature(imageinfo.temperature);
 	result.purpose(Exposure::string2purpose(imageinfo.purpose));
+	result.filter(imageinfo.filter);
 	result.bayer(imageinfo.bayer);
 	result.observation((time_t)FITSdate(imageinfo.observation));
 	result.uuid(UUID(imageinfo.uuid));
@@ -373,6 +374,10 @@ long	ImageRepo::save(ImagePtr image) {
 	try {
 		imageinfo.purpose
 			= (std::string)image->getMetadata("PURPOSE");
+	} catch (...) { }
+	try {
+		imageinfo.filter
+			= (std::string)image->getMetadata("FILTER");
 	} catch (...) { }
 	try {
 		imageinfo.bayer
@@ -640,6 +645,17 @@ std::vector<int>	ImageRepo::getIds(const std::string& condition) {
 	std::vector<int>	result;
 	for (auto ptr = images.begin(); ptr != images.end(); ptr++) {
 		result.push_back(ptr->id());
+	}
+	return result;
+}
+
+std::vector<std::string>	ImageRepo::getProjectnames() {
+	std::vector<std::string>	result;
+	std::string	query("select distinct project from images order by 1");
+	Result	res = _database->query(query);
+	for (auto ptr = res.begin(); ptr != res.end(); ptr++) {
+		std::string	projectname = (*ptr)[0]->stringValue();
+		result.push_back(projectname);
 	}
 	return result;
 }

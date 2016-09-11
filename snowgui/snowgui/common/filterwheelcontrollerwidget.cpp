@@ -114,6 +114,9 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 		statusTimer->start();
 	}
 	ui->filterBox->blockSignals(false);
+
+	// emit the filterwheel selected signal
+	emit filterwheelSelected(_filterwheel);
 }
 
 /**

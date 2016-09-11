@@ -56,6 +56,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	previousstate = snowstar::IDLE;
 	_guiderccdonly = false;
 	_nosubframe = false;
+	_nobuttons = false;
+	_imageproxyonly = false;
 }
 
 /**
@@ -504,18 +506,23 @@ void	ccdcontrollerwidget::retrieveImage() {
 	}
 	ourexposure = false;
 	try {
-		snowstar::ImagePrx	imageprx;
-		imageprx = _ccd->getImage();
-		ImagePtr	image = snowstar::convert(imageprx);
-		if (!image->hasMetadata(std::string("INSTRUME"))) {
-			image->setMetadata(astro::io::FITSKeywords::meta(
-				std::string("INSTRUME"), instrumentname()));
+		_imageproxy = _ccd->getImage();
+		if (!_imageproxy->hasMeta("INSTRUME")) {
+			snowstar::Metavalue	v;
+			v.keyword = "INSTRUME";
+			v.value = instrumentname();
+			_imageproxy->setMeta(v);
 		}
+		if (_imageproxyonly) {
+			emit imageproxyReceived(_imageproxy);
+			return;
+		}
+		ImagePtr	image = snowstar::convert(_imageproxy);
 		_image = image;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "image frame: %s",
 			image->getFrame().toString().c_str());
 		_imageexposure = snowstar::convert(_ccd->getExposure());
-		imageprx->remove();
+		_imageproxy->remove();
 
 		// if the image size does not match the size requested, get the
 		// subimage
@@ -588,6 +595,11 @@ void	ccdcontrollerwidget::statusUpdate() {
 void	ccdcontrollerwidget::hideSubframe(bool sf) {
 	_nosubframe = sf;
 	ui->frameWidget->setHidden(_nosubframe);
+}
+
+void	ccdcontrollerwidget::hideButtons(bool b) {
+	_nobuttons = b;
+	ui->buttonArea->setHidden(_nobuttons);
 }
 
 } // namespace snowgui

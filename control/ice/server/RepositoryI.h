@@ -18,9 +18,12 @@ public:
 	RepositoryI(astro::project::ImageRepo repo);
 	virtual ~RepositoryI();
 	virtual idlist	getIds(const Ice::Current& current);
+	virtual idlist	getIdsCondition(const std::string& condition,
+				const Ice::Current& current);
 	virtual uuidlist	getUUIDs(const Ice::Current& current);
 	virtual uuidlist	getUUIDsCondition(const std::string& condition,
 					const Ice::Current& current);
+	virtual projectnamelist	getProjectnames(const Ice::Current& current);
 	virtual bool	has(int id, const Ice::Current& current);
 	virtual bool	hasUUID(const std::string& uuid,
 				const Ice::Current& current);
