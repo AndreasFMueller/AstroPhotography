@@ -307,12 +307,18 @@ public:
 	} mosaic_type;
 private:
 	mosaic_type	mosaic;
+	static mosaic_type	string2type(const std::string& mosaic_name);
+	static std::string	type2string(mosaic_type t);
 public:
 	MosaicType(mosaic_type _mosaic = NONE) : mosaic(_mosaic) { }
+	MosaicType(const std::string& mosaicstring);
 	mosaic_type	getMosaicType() const { return mosaic; }
 	void	setMosaicType(mosaic_type mosaic);
 	void	setMosaicType(const std::string& mosaic_name);
 	bool	isMosaic() const;
+	// typecast
+	operator	std::string() const { return type2string(mosaic); }
+	operator	bool() const { return mosaic != NONE; }
 	// methods used for demosaicing: x/y coordinates of colored
 	// pixels
 	ImagePoint	red() const;
@@ -325,6 +331,11 @@ public:
 	bool	isB(unsigned int x, unsigned int y) const;
 	bool	isGr(unsigned int x, unsigned int y) const;
 	bool	isGb(unsigned int x, unsigned int y) const;
+	// methods giving the mosaic type of a subrectangle
+	MosaicType	shifted(const ImagePoint& offset) const;
+	MosaicType	shifted(const ImageRectangle& rectangle) const;
+	MosaicType	operator()(const ImagePoint& offset) const;
+	MosaicType	operator()(const ImageRectangle& rectangle) const;
 };
 
 /**

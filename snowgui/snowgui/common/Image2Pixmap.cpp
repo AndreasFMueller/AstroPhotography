@@ -6,9 +6,12 @@
 #include "Image2Pixmap.h"
 #include <AstroDebug.h>
 #include <AstroAdapter.h>
+#include <AstroDemosaicAdapter.h>
+#include <AstroUtils.h>
 
 using namespace astro::image;
 using namespace astro::adapter;
+using namespace astro::adapter::demosaic;
 
 namespace snowgui {
 
@@ -167,7 +170,7 @@ public:
 /**
  * \brief Compute the rectangle to be used for the image
  */
-ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) {
+ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle for image %s",
 		image->size().toString().c_str());
 	if (_rectangle.isEmpty()) {
@@ -178,16 +181,37 @@ ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) {
 	return _rectangle;
 }
 
-#define	ga(gainadapter, wa, Pixel, image, scale, rect)			\
-	if (gainadapter == NULL) {					\
-		Image<Pixel>	*img = dynamic_cast<Image<Pixel> *>(&*image);\
-		if (NULL != img) {					\
-			WindowAdapter<Pixel>	*windowadapter		\
-				 = new WindowAdapter<Pixel>(*img, rect);\
-			wa = BasicAdapterPtr(windowadapter);		\
-			gainadapter = new GainAdapter<Pixel>(*windowadapter, scale);\
-		}							\
+template<typename Pixel>
+ImageRectangle	Image2Pixmap::rectangle(const ConstImageAdapter<Pixel>& image) const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle for image %s",
+		image.getSize().toString().c_str());
+	if (_rectangle.isEmpty()) {
+		return ImageRectangle(image.getSize());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle found: %s",
+		_rectangle.toString().c_str());
+	return _rectangle;
+}
+
+#define	ga(gainadapter, Pixel, image, scale, rect, mosaic)		\
+									\
+if (gainadapter == NULL) {						\
+	Image<Pixel>	*img = dynamic_cast<Image<Pixel> *>(&*image);	\
+	if (NULL != img) {						\
+		WindowAdapter<Pixel>	*windowadapter			\
+			 = new WindowAdapter<Pixel>(*img, rect);	\
+		windowadapterptr = BasicAdapterPtr(windowadapter);	\
+		gainadapter = new GainAdapter<Pixel>(*windowadapter, scale);\
+	}								\
+}
+
+#define convert_mono(imageptr, Pixel)					\
+{									\
+	Image<Pixel>	*image = dynamic_cast<Image<Pixel> *>(&*imageptr);\
+	if (NULL != image) {						\
+		return convertMono<Pixel>(*image);			\
+	}								\
+}
 
 /**
  * \brief Monochrome image conversion
@@ -197,7 +221,15 @@ ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) {
  * must be set to reasonable values or most pixel values may lie outside
  * the displayable range.
  */
-QImage	*Image2Pixmap::convertMono(ImagePtr image) {
+QImage	*Image2Pixmap::convertMono(ImagePtr imageptr) {
+	convert_mono(imageptr, unsigned char);
+	convert_mono(imageptr, unsigned short);
+	convert_mono(imageptr, unsigned int);
+	convert_mono(imageptr, unsigned long);
+	convert_mono(imageptr, float);
+	convert_mono(imageptr, double);
+	return NULL;
+#if 0
 	ImageSize	size = image->size();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Mono image of size %s",
 		size.toString().c_str());
@@ -213,17 +245,19 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
+	// Ptrs for automatic delllocation of the adapters we need
+	BasicAdapterPtr	windowadapterptr;
+
 	// get a gain adaapter
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"looking for gain adapter, scale = %d, rectangle = %s",
 		_scale, r.toString().c_str());
 	BasicGainAdapter	*gainadapter = NULL;
-	BasicAdapterPtr		ba;
-	ga(gainadapter, ba, unsigned char, image, _scale, r);
-	ga(gainadapter, ba, unsigned short, image, _scale, r);
-	ga(gainadapter, ba, unsigned long, image, _scale, r);
-	ga(gainadapter, ba, float, image, _scale, r);
-	ga(gainadapter, ba, double, image, _scale, r);
+	ga(gainadapter, unsigned char, image, _scale, r, _mosaic);
+	ga(gainadapter, unsigned short, image, _scale, r, _mosaic);
+	ga(gainadapter, unsigned long, image, _scale, r, _mosaic);
+	ga(gainadapter, float, image, _scale, r, _mosaic);
+	ga(gainadapter, double, image, _scale, r, _mosaic);
 	if (NULL == gainadapter) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no suitable adapter found");
 		return NULL;
@@ -253,6 +287,56 @@ QImage	*Image2Pixmap::convertMono(ImagePtr image) {
 	// cleanup
 	delete gainadapter;
 	
+	return qimage;
+#endif
+}
+
+template<typename Pixel>
+QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
+	ImageSize	size = image.getSize();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Image<%s> of size %s",
+		astro::demangle(typeid(Pixel).name()).c_str(),
+		size.toString().c_str());
+	Histogram<double>	*histo = new Histogram<double>(256);
+	histo->logarithmic(_logarithmic);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_histogram = %p", _histogram);
+	if (_histogram) {
+		delete _histogram;
+		_histogram = NULL;
+	}
+	_histogram = histo;
+
+	// compute the rectangle 
+	ImageRectangle	r = rectangle(image);
+
+	// create a windowadapter
+	WindowAdapter<Pixel>	windowadapter(image, r);
+
+	// create a gain adapter
+	GainAdapter<Pixel>	gainadapter(windowadapter, _scale);
+
+	gainadapter.gain(_gain);
+	gainadapter.brightness(_brightness);
+
+	// dimensions
+	int	w = gainadapter.getSize().width();
+	int	h = gainadapter.getSize().height();
+
+	// prepare the result
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing QImage(%d,%d)", w, h);
+	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
+
+	// fill the image into the result
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			unsigned char	v = gainadapter.pixel(x, y);
+			histo->add((double)v);
+			unsigned long	value = convert(v);
+			qimage->setPixel(x, h - 1 - y, value);
+		}
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image data set");
+
 	return qimage;
 }
 
@@ -359,9 +443,11 @@ public:
 /**
  * \brief Convert a RGB astro::image::ImagePtr to a QImage
  */
-QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
-	ImageSize	size = image->size();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting RGB image of size %s",
+template<typename Pixel>
+QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
+	ImageSize	size = image.getSize();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting RGB<%s> image of size %s",
+		astro::demangle(typeid(Pixel).name()).c_str(),
 		size.toString().c_str());
 	Histogram<RGB<double> >	*histo = new Histogram<RGB<double> >(256);
 	histo->logarithmic(_logarithmic);
@@ -374,6 +460,7 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
+#if 0
 	BasicGainRGBAdapter	*gainadapter = NULL;
 	BasicAdapterPtr		ba;
 	gargb(gainadapter, ba, unsigned char, image, _scale, r);
@@ -385,12 +472,15 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no gain adapter found");
 		return NULL;
 	}
-	gainadapter->gain(_gain);
-	gainadapter->brightness(_brightness);
+#endif
+	WindowAdapter<RGB<Pixel> >	windowadapter(image, r);
+	GainRGBAdapter<Pixel>	gainadapter(windowadapter, _scale);
+	gainadapter.gain(_gain);
+	gainadapter.brightness(_brightness);
 
 	// dimensions
-	int	w = gainadapter->getSize().width();
-	int	h = gainadapter->getSize().height();
+	int	w = gainadapter.getSize().width();
+	int	h = gainadapter.getSize().height();
 
 	// prepare result structuren
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QImage(%d, %d)", w, h);
@@ -398,7 +488,7 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
-			RGB<unsigned char>	p = gainadapter->pixel(x, y);
+			RGB<unsigned char>	p = gainadapter.pixel(x, y);
 			histo->add(RGB<double>(p));
 			unsigned long	value = convert(p);
 			qimage->setPixel(x, h - 1 - y, value);
@@ -407,6 +497,46 @@ QImage	*Image2Pixmap::convertRGB(ImagePtr image) {
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "QImage complete");
 	return qimage;
+}
+
+#define convert_mosaic(imageptr, Pixel)					\
+{									\
+	Image<Pixel>	*image = dynamic_cast<Image<Pixel>*>(&*imageptr);\
+	if (NULL != image) {						\
+		DemosaicAdapter<Pixel>	demosaicer(*image, _mosaic);	\
+		return convertRGB(demosaicer);				\
+	}								\
+}
+
+/**
+ * \brief Convert and debayer an image at the same time
+ */
+QImage	*Image2Pixmap::convertMosaic(ImagePtr imageptr) {
+	convert_mosaic(imageptr, unsigned char)
+	convert_mosaic(imageptr, unsigned short)
+	convert_mosaic(imageptr, unsigned int)
+	convert_mosaic(imageptr, unsigned long)
+	convert_mosaic(imageptr, float)
+	convert_mosaic(imageptr, double)
+	return NULL;
+}
+
+#define convert_rgb(imageptr, Pixel)					\
+{									\
+	Image<RGB<Pixel> >	*image = dynamic_cast<Image<RGB<Pixel> >*>(&*imageptr);\
+	if (NULL != image) {						\
+		return convertRGB(*image);				\
+	}								\
+}
+
+QImage	*Image2Pixmap::convertRGB(ImagePtr imageptr) {
+	convert_rgb(imageptr, unsigned char)
+	convert_rgb(imageptr, unsigned short)
+	convert_rgb(imageptr, unsigned int)
+	convert_rgb(imageptr, unsigned long)
+	convert_rgb(imageptr, float)
+	convert_rgb(imageptr, double)
+	return NULL;
 }
 
 /**
@@ -424,7 +554,11 @@ QPixmap	*Image2Pixmap::operator()(ImagePtr image) {
 		qimage = convertRGB(image);
 		break;
 	case 1:
-		qimage = convertMono(image);
+		if (_mosaic) {
+			qimage = convertMosaic(image);
+		} else {
+			qimage = convertMono(image);
+		}
 		break;
 	}
 	QPixmap	*result = new QPixmap(size.width(), size.height());

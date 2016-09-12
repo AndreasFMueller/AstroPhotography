@@ -25,8 +25,7 @@ namespace Ui {
  * This widget includes controls to change brightness and contrast, and
  * displays a statistics and metadata information about the image
  */
-class imagedisplaywidget : public QWidget
-{
+class imagedisplaywidget : public QWidget {
 	Q_OBJECT
 
 	// the current image, may be null if no image has been set yet
@@ -41,6 +40,8 @@ class imagedisplaywidget : public QWidget
 	// later be able to compute the coordinates based on the actual
 	// image displayed
 	snowgui::SelectableImage	*selectable;
+	// whether or not to debayer, and what bayer pattern to use
+	astro::image::MosaicType	_bayer_mosaic;
 
 public:
 	explicit imagedisplaywidget(QWidget *parent = 0);
@@ -81,6 +82,10 @@ public:
 	bool	pointSelectionEnabled();
 	void	setPointSelectionEnabled(bool);
 
+	// whether or not to debayer
+	void	bayer_mosaic(astro::image::MosaicType m);
+	astro::image::MosaicType	bayer_mosaic() const;
+
 private:
 	Ui::imagedisplaywidget *ui;
 
@@ -119,6 +124,7 @@ public slots:
 	void	selectRectangle(QRect);
 	void	selectPoint(QPoint);
 	void	receiveImage(astro::image::ImagePtr);
+	void	bayerChanged(int);
 private:
 	void	closeEvent(QCloseEvent *);
 };

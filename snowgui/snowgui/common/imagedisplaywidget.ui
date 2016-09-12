@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>snowgui::imagedisplaywidget</class>
- <widget class="QWidget" name="imagedisplaywidget">
+ <widget class="QWidget" name="snowgui::imagedisplaywidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -193,7 +193,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="bayerBox">
          <property name="geometry">
           <rect>
            <x>330</x>
@@ -202,31 +202,6 @@
            <height>26</height>
           </rect>
          </property>
-         <item>
-          <property name="text">
-           <string>none</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>RGGB</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>GRBG</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>GBRG</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>BGGR</string>
-          </property>
-         </item>
         </widget>
         <widget class="QPushButton" name="autogainButton">
          <property name="geometry">
@@ -795,198 +770,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>logarithmicBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>83</x>
-     <y>711</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>105</x>
-     <y>723</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>gainSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>207</x>
-     <y>42</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>143</x>
-     <y>5</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>brightnessSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>190</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>168</x>
-     <y>10</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>autogainButton</sender>
-   <signal>clicked()</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>377</x>
-     <y>50</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>6</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>comboBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>402</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>385</x>
-     <y>6</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>scaleDial</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>530</x>
-     <y>72</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>555</x>
-     <y>7</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframewidthBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>701</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>709</x>
-     <y>7</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframexBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>688</x>
-     <y>78</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>723</x>
-     <y>8</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframeheightBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>771</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>769</x>
-     <y>9</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframeyBox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>754</x>
-     <y>64</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>8</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframeBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>800</x>
-     <y>52</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>841</x>
-     <y>3</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>subframefullButton</sender>
-   <signal>clicked()</signal>
-   <receiver>imagedisplaywidget</receiver>
-   <slot>imageSettingsChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>821</x>
-     <y>80</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>903</x>
-     <y>66</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>imageSettingsChanged()</slot>

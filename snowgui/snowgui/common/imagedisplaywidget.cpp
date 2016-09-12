@@ -24,6 +24,15 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
     ui(new Ui::imagedisplaywidget) {
 	ui->setupUi(this);
 
+	// add the options to the debayer combobox
+	ui->bayerBox->addItem(QString("none"));
+	ui->bayerBox->addItem(QString("RGGB"));
+	ui->bayerBox->addItem(QString("GRBG"));
+	ui->bayerBox->addItem(QString("GBRG"));
+	ui->bayerBox->addItem(QString("BGGR"));
+	connect(ui->bayerBox, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(bayerChanged(int)));
+
 	// initialize the image
 	selectable = new SelectableImage();
 	connect(selectable, SIGNAL(rectangleSelected(QRect)),
@@ -50,6 +59,30 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 	displayGainSetting();
 	displayBrightnessSetting();
 	displayScaleSetting();
+
+	// make connections
+	connect(ui->logarithmicBox, SIGNAL(toggled(bool)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->gainSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->brightnessSlider, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->autogainButton, SIGNAL(clicked()),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->scaleDial, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframewidthBox, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframeheightBox, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframexBox, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframeyBox, SIGNAL(valueChanged(int)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframeBox, SIGNAL(toggled(bool)),
+		this, SLOT(imageSettingsChanged()));
+	connect(ui->subframefullButton, SIGNAL(clicked()),
+		this, SLOT(imageSettingsChanged()));
 }
 
 /**
@@ -818,8 +851,44 @@ void	imagedisplaywidget::setRectangleSelectionEnabled(bool b) {
 	}
 }
 
+/**
+ * \brief Handle window close events
+ *
+ * This is only used if the imagedisplay widget is itself the top leve
+ * widget, when it is used to display an image from the repository
+ * or expose applications. In those cases the window may be closed
+ * but we still have to ensure that the object is deleted later.
+ */
 void	imagedisplaywidget::closeEvent(QCloseEvent * /* event */) {
 	deleteLater();
+}
+
+/**
+ * \brief Setter for the mosaic type
+ */
+void	imagedisplaywidget::bayer_mosaic(astro::image::MosaicType m) {
+	_bayer_mosaic = m;
+}
+
+/**
+ * \brief Getter for the mosaic type
+ */
+astro::image::MosaicType	imagedisplaywidget::bayer_mosaic() const {
+	return _bayer_mosaic;
+}
+
+void	imagedisplaywidget::bayerChanged(int currentindex) {
+	switch (currentindex) {
+	case 0:	bayer_mosaic(MosaicType::NONE);		break;
+	case 1: bayer_mosaic(MosaicType::BAYER_RGGB);	break;
+	case 2: bayer_mosaic(MosaicType::BAYER_GRBG);	break;
+	case 3: bayer_mosaic(MosaicType::BAYER_GBRG);	break;
+	case 4: bayer_mosaic(MosaicType::BAYER_BGGR);	break;
+	}
+	image2pixmap.mosaic(_bayer_mosaic);
+	std::string	mosaicstring = _bayer_mosaic;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new mosaic: %s", mosaicstring.c_str());
+	processNewSettings();
 }
 
 } // namespace snowgui

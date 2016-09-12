@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	FWHMTest.cpp
+	DebayerTest.cpp
+#	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp
 #	ConvolutionAdapterTest.cpp
 #	DeconvolveTest.cpp
@@ -40,6 +41,7 @@ tests_SOURCES = tests.cpp 						\
 	ConvertingAdapterTest.cpp					\
 	ConvolveTest.cpp						\
 	ConvolutionAdapterTest.cpp					\
+	DebayerTest.cpp							\
 	DeconvolveTest.cpp						\
 	NoiseTest.cpp							\
 	EuclideanDisplacementTest.cpp					\

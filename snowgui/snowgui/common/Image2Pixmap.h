@@ -13,12 +13,39 @@
 
 namespace snowgui {
 
+template<typename Pixel>
+class MonoAdapter : public ConstImageAdapter<Pixel> {
+	Image<Pixel>	*_image;
+public:
+	MonoAdapter(Image<Pixel> *image)
+		: ConstImageAdapter<Pixel>(image->size()), _image(image) {
+	}
+	virtual Pixel	pixel(int x, int y) const {
+		return _image->pixel(x, y);
+	}
+};
+
+template<typename Pixel>
+class ColorAdapter : public ConstImageAdapter<RGB<Pixel> > {
+	Image<RGB<Pixel> >	*_image;
+public:
+	ColorAdapter(Image<RGB<Pixel> > *image)
+		: ConstImageAdapter<RGB<Pixel> >(_image->size()),
+		  _image(image) {
+	}
+	virtual RGB<Pixel>	pixel(int x, int y) const {
+		return _image->pixel(x, y);
+	}
+};
+
+
 class	Image2Pixmap {
 	double	_brightness;
 	double	_gain;
 	bool	_logarithmic;
 	int	_scale;
 	astro::image::ImageRectangle	_rectangle;
+	astro::image::MosaicType	_mosaic;
 public:
 	Image2Pixmap();
 	~Image2Pixmap();
@@ -37,11 +64,23 @@ public:
 	void	rectangle(const astro::image::ImageRectangle& r) {
 		_rectangle = r;
 	}
+	const astro::image::MosaicType&	mosaic() const { return _mosaic; }
+	void	mosaic(const astro::image::MosaicType m) { _mosaic = m; }
 private:
 	HistogramBase	*_histogram;
-	astro::image::ImageRectangle	rectangle(astro::image::ImagePtr image);
+	astro::image::ImageRectangle	rectangle(astro::image::ImagePtr image) const;
+	template<typename Pixel>
+	astro::image::ImageRectangle	rectangle(const ConstImageAdapter<Pixel>& image) const;
+
+	// adapters 
+	template<typename Pixel>
+	QImage	*convertRGB(const ConstImageAdapter<RGB<Pixel> >& image);
+	template<typename Pixel>
+	QImage	*convertMono(const ConstImageAdapter<Pixel>& image);
+
 	QImage	*convertRGB(astro::image::ImagePtr image);
 	QImage	*convertMono(astro::image::ImagePtr image);
+	QImage	*convertMosaic(astro::image::ImagePtr image);
 
 public:
 	QPixmap	*histogram(int width, int height);

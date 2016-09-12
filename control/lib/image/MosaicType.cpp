@@ -10,6 +10,53 @@ namespace astro {
 namespace image {
 
 /**
+ * \brief conversion of mosaic type from string
+ */
+MosaicType::mosaic_type	MosaicType::string2type(const std::string& mosaic_name) {
+	if (mosaic_name == "RGGB") {
+		return BAYER_RGGB;
+	}
+	if (mosaic_name == "GRBG") {
+		return BAYER_GRBG;
+	}
+	if (mosaic_name == "GBRG") {
+		return BAYER_GBRG;
+	}
+	if (mosaic_name == "BGGR") {
+		return BAYER_BGGR;
+	}
+	if (mosaic_name == "NONE") {
+		return NONE;
+	}
+	std::string	msg = stringprintf("unknown mosaic name: %s",
+		mosaic_name.c_str());
+	debug(LOG_WARNING, DEBUG_LOG, 0, "%s", msg.c_str());
+	return NONE;
+}
+
+/**
+ * \brief conversion of mosaic type from string
+ */
+std::string	MosaicType::type2string(mosaic_type t) {
+	switch (t) {
+	case BAYER_RGGB: return std::string("RGGB");
+	case BAYER_GRBG: return std::string("GRBG");
+	case BAYER_GBRG: return std::string("GBRG");
+	case BAYER_BGGR: return std::string("BGGR");
+	default:
+		break;
+	}
+	return std::string("NONE");
+}
+
+/**
+ * \brief Construct a MosaicType object from the mosaic name
+ */
+MosaicType::MosaicType(const std::string& mosaic_name)
+	: mosaic(string2type(mosaic_name)) {
+}
+
+/**
  * \brief Set mosaic type from name
  *
  * This method ensures that only valid mosaic type names are used and
@@ -17,30 +64,7 @@ namespace image {
  * \param mosaic_name	string representation of color mosaic
  */
 void	MosaicType::setMosaicType(const std::string& mosaic_name) {
-	if (mosaic_name == "NONE") {
-		setMosaicType(MosaicType::NONE);
-		return;
-	}
-	if (mosaic_name == "RGGB") {
-		setMosaicType(MosaicType::BAYER_RGGB);
-		return;
-	}
-	if (mosaic_name == "GRBG") {
-		setMosaicType(MosaicType::BAYER_GRBG);
-		return;
-	}
-	if (mosaic_name == "GBRG") {
-		setMosaicType(MosaicType::BAYER_GBRG);
-		return;
-	}
-	if (mosaic_name == "BGGR") {
-		setMosaicType(MosaicType::BAYER_BGGR);
-		return;
-	}
-	std::string	msg = stringprintf("unknown mosaic name: %s",
-		mosaic_name.c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
+	setMosaicType(string2type(mosaic_name));
 }
 
 void	MosaicType::setMosaicType(mosaic_type _mosaic) {
@@ -114,6 +138,27 @@ ImagePoint	MosaicType::greenb() const {
 	ImagePoint	r = red();
 	int	bluey = 0x1 ^ r.y();
 	return ImagePoint(r.x(), bluey);
+}
+
+MosaicType	MosaicType::shifted(const ImagePoint& offset) const {
+	if (mosaic == NONE) {
+		return MosaicType(NONE);
+	}
+	unsigned char	shift = ((offset.x() & 0x1) | ((offset.y() & 0x1) << 1));
+	mosaic_type	newmosaic = (mosaic_type)((int)mosaic ^ shift);
+	return MosaicType(newmosaic);
+}
+
+MosaicType	MosaicType::shifted(const ImageRectangle& rectangle) const {
+	return shifted(rectangle.origin());
+}
+
+MosaicType	MosaicType::operator()(const ImagePoint& offset) const {
+	return shifted(offset);
+}
+
+MosaicType	MosaicType::operator()(const ImageRectangle& rectangle) const {
+	return shifted(rectangle);
 }
 
 } // namespace image
