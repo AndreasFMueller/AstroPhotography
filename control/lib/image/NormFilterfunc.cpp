@@ -48,7 +48,7 @@ namespace filter {
 	}								\
 }
 
-double   l1norm(const ImagePtr& image) {
+double   l1norm(const ImagePtr image) {
 	filterl1(image, unsigned char)
 	filterl1(image, unsigned short)
 	filterl1(image, unsigned int)
@@ -62,7 +62,7 @@ double   l1norm(const ImagePtr& image) {
 	return 0;
 }
 
-double   l2norm(const ImagePtr& image) {
+double   l2norm(const ImagePtr image) {
 	filterl2(image, unsigned char)
 	filterl2(image, unsigned short)
 	filterl2(image, unsigned int)
@@ -76,7 +76,7 @@ double   l2norm(const ImagePtr& image) {
 	return 0;
 }
 
-double   lpnorm(const ImagePtr& image, double p) {
+double   lpnorm(const ImagePtr image, double p) {
 	filterlp(image, unsigned char, p)
 	filterlp(image, unsigned short, p)
 	filterlp(image, unsigned int, p)

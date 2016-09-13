@@ -42,6 +42,7 @@ exposewidget::exposewidget(QWidget *parent)
 	headers << "Temperature";
 	headers << "Binning";
 	headers << "Size";
+	headers << "Filter";
 	headers << "Bayer";
 	ui->repositoryTree->setHeaderLabels(headers);
 	ui->repositoryTree->header()->resizeSection(0, 80);
@@ -51,6 +52,7 @@ exposewidget::exposewidget(QWidget *parent)
 	ui->repositoryTree->header()->resizeSection(4, 80);
 	ui->repositoryTree->header()->resizeSection(5, 50);
 	ui->repositoryTree->header()->resizeSection(6, 100);
+	ui->repositoryTree->header()->resizeSection(7, 60);
 
 	// connections
 	connect(ui->repositoryBox, SIGNAL(currentIndexChanged(QString)),
@@ -330,7 +332,7 @@ void	exposewidget::updateHeaderlist() {
 		int	n = _filterwheel->nFilters();
 		for (int pos = 0; pos < n; pos++) {
 			std::string	filtername
-				= _filterwheel->filterName(pos);
+				= astro::trim(_filterwheel->filterName(pos));
 			RepositoryKey	key(snowstar::ExLIGHT, filtername);
 			_repository_index.insert(std::make_pair(key, index));
 			RepositorySection	section(key, pos, index++);
@@ -356,7 +358,7 @@ void	exposewidget::updateHeaderlist() {
 		int	n = _filterwheel->nFilters();
 		for (int pos = 0; pos < n; pos++) {
 			std::string	filtername
-				= _filterwheel->filterName(pos);
+				= astro::trim(_filterwheel->filterName(pos));
 			RepositoryKey	key(snowstar::ExFLAT, filtername);
 			_repository_index.insert(std::make_pair(key, index));
 			RepositorySection	section(key, pos, index++);
@@ -420,6 +422,7 @@ void	exposewidget::updateImagelist() {
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
 		int	id = *ptr;
 		snowstar::ImageInfo	info = _repository->getInfo(id);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filter = '%s'", info.filter.c_str());
 
 		QStringList	list;
 		list << QString::number(id);	// 0
@@ -447,7 +450,9 @@ void	exposewidget::updateImagelist() {
 		list << QString(astro::stringprintf("%d x %d", info.size.width,
 			info.size.height).c_str());	// 6
 
-		list << QString(info.bayer.c_str());
+		list << QString(info.filter.c_str());	// 7
+
+		list << QString(info.bayer.c_str());	// 8
 
 		QTreeWidgetItem	*item = new QTreeWidgetItem(list);
 		item->setTextAlignment(0, Qt::AlignRight);
@@ -462,6 +467,12 @@ void	exposewidget::updateImagelist() {
 			key = RepositoryKey(info.purpose);
 		}
 		auto s = _repository_index.find(key);
+		if (s == _repository_index.end()) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "key not found: '%s', try again without filter",
+				key.toString().c_str());
+			key = RepositoryKey(info.purpose);
+			s = _repository_index.find(key);
+		}
 		if (s != _repository_index.end()) {
 			QTreeWidgetItem	*top
 				= ui->repositoryTree->topLevelItem(s->second);
@@ -482,13 +493,19 @@ void	exposewidget::updateImagelist() {
  * button slots to perform actions on an image.
  */
 void    exposewidget::currentImageChanged(QTreeWidgetItem *current,
-	QTreeWidgetItem * /* previous */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "currentItemChanged()");
+	QTreeWidgetItem *previous) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "currentItemChanged(%p, %p)", current, previous);
 	if (NULL == current) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no current item");
 		return;
 	}
 	if (NULL == current->parent()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "has not parent");
+		_imageid = -1;
+		_imageitem = NULL;
+		ui->saveButton->setEnabled(false);
+		ui->openButton->setEnabled(false);
+		ui->deleteButton->setEnabled(false);
 		return;
 	}
 	// first find out whether this is a top level item
@@ -523,12 +540,14 @@ void    exposewidget::itemDoubleClicked(QTreeWidgetItem *, int) {
  * \brief Process an image reveived as an image proxy
  */
 void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new image proxy received");
 	// add additional fields
 	snowstar::Metadata	metadata;
 	if (_filterwheel) {
 		snowstar::Metavalue	v;
 		v.keyword = "FILTER";
-		v.value = _filterwheel->filterName(_filterwheel->currentPosition());
+		v.value = astro::trim(_filterwheel->filterName(_filterwheel->currentPosition()));
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "filter = '%s'", v.value.c_str());
 		metadata.push_back(v);
 	}
 
@@ -547,10 +566,13 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 	}
 	imageproxy->setMetadata(metadata);
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveing the image to repo %s",
+		_repositoryname.c_str());
 	imageproxy->toRepository(_repositoryname);
 	imageproxy->remove();
 
-	updateImagelist();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating the image list");
+	projectChanged(ui->projectBox->currentText());
 
 	// decrement the value in the 
 	int	count = ui->exposuresSpinBox->value();

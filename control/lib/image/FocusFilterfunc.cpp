@@ -32,7 +32,7 @@ static double	sum_adapter(const ConstImageAdapter<Pixel>& image) {
 	}								\
 }
 
-double	focus_horizontalgradient(const ImagePtr& image) {
+double	focus_horizontalgradient(const ImagePtr image) {
 	filter_typed(HorizontalGradientAdapter, image, unsigned char);
 	filter_typed(HorizontalGradientAdapter, image, unsigned short);
 	filter_typed(HorizontalGradientAdapter, image, unsigned int);
@@ -42,7 +42,7 @@ double	focus_horizontalgradient(const ImagePtr& image) {
 	return 0;
 }
 
-double	focus_verticalgradient(const ImagePtr& image) {
+double	focus_verticalgradient(const ImagePtr image) {
 	filter_typed(VerticalGradientAdapter, image, unsigned char);
 	filter_typed(VerticalGradientAdapter, image, unsigned short);
 	filter_typed(VerticalGradientAdapter, image, unsigned int);
@@ -52,7 +52,7 @@ double	focus_verticalgradient(const ImagePtr& image) {
 	return 0;
 }
 
-double	focus_squaredgradient(const ImagePtr& image) {
+double	focus_squaredgradient(const ImagePtr image) {
 	filter_typed(SquaredGradientAdapter, image, unsigned char);
 	filter_typed(SquaredGradientAdapter, image, unsigned short);
 	filter_typed(SquaredGradientAdapter, image, unsigned int);
@@ -62,7 +62,7 @@ double	focus_squaredgradient(const ImagePtr& image) {
 	return 0;
 }
 
-double	focus_horizontalbrenner(const ImagePtr& image) {
+double	focus_horizontalbrenner(const ImagePtr image) {
 	filter_typed(HorizontalBrennerAdapter, image, unsigned char);
 	filter_typed(HorizontalBrennerAdapter, image, unsigned short);
 	filter_typed(HorizontalBrennerAdapter, image, unsigned int);
@@ -72,7 +72,7 @@ double	focus_horizontalbrenner(const ImagePtr& image) {
 	return 0;
 }
 
-double	focus_verticalbrenner(const ImagePtr& image) {
+double	focus_verticalbrenner(const ImagePtr image) {
 	filter_typed(VerticalBrennerAdapter, image, unsigned char);
 	filter_typed(VerticalBrennerAdapter, image, unsigned short);
 	filter_typed(VerticalBrennerAdapter, image, unsigned int);
@@ -82,7 +82,7 @@ double	focus_verticalbrenner(const ImagePtr& image) {
 	return 0;
 }
 
-double	focus_squaredbrenner(const ImagePtr& image) {
+double	focus_squaredbrenner(const ImagePtr image) {
 	filter_typed(BrennerAdapter, image, unsigned char);
 	filter_typed(BrennerAdapter, image, unsigned short);
 	filter_typed(BrennerAdapter, image, unsigned int);
@@ -114,7 +114,7 @@ static FocusInfo sum_adapter_extended(const ConstImageAdapter<Pixel>& image) {
 	}								\
 }
 
-FocusInfo	focus_squaredbrenner_extended(const ImagePtr& image) {
+FocusInfo	focus_squaredbrenner_extended(const ImagePtr image) {
 	filter_extended_typed(BrennerAdapter, image, unsigned char);
 	filter_extended_typed(BrennerAdapter, image, unsigned short);
 	filter_extended_typed(BrennerAdapter, image, unsigned int);
@@ -124,7 +124,7 @@ FocusInfo	focus_squaredbrenner_extended(const ImagePtr& image) {
 	throw std::runtime_error("cannot analyize image with this pixel type");
 }
 
-FocusInfo	focus_squaredgradient_extended(const ImagePtr& image) {
+FocusInfo	focus_squaredgradient_extended(const ImagePtr image) {
 	filter_extended_typed(SquaredGradientAdapter, image, unsigned char);
 	filter_extended_typed(SquaredGradientAdapter, image, unsigned short);
 	filter_extended_typed(SquaredGradientAdapter, image, unsigned int);

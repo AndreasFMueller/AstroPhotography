@@ -28,7 +28,7 @@ namespace filter {
 		}							\
 	}
 
-double	countnans(const ImagePtr& image) {
+double	countnans(const ImagePtr image) {
 	countnans_typed(image, unsigned char);
 	countnans_typed(image, unsigned short);
 	countnans_typed(image, unsigned int);
@@ -49,7 +49,7 @@ double	countnans(const ImagePtr& image) {
 		}							\
 	}
 
-double	mean(const ImagePtr& image) {
+double	mean(const ImagePtr image) {
 	filter_typed(image, Mean, unsigned char);
 	filter_typed(image, Mean, unsigned short);
 	filter_typed(image, Mean, unsigned int);
@@ -59,7 +59,52 @@ double	mean(const ImagePtr& image) {
 	return 0;
 }
 
-#define	filter_typed1(image, f, pixel)				\
+template<typename Pixel>
+static RGB<double>	mean_color(const Image<Pixel>& image) {
+	MosaicType	mosaic = image.getMosaicType();
+	double	R = 0, G = 0, B = 0;
+	long	counterR = 0, counterG = 0, counterB = 0;
+	int	w = image.size().width();
+	int	h = image.size().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			if (mosaic.isR(x, y)) {
+				R += image.pixel(x, y); counterR++;
+			}
+			if (mosaic.isG(x, y)) {
+				G += image.pixel(x, y); counterG++;
+			}
+			if (mosaic.isB(x, y)) {
+				B += image.pixel(x, y); counterB++;
+			}
+		}
+	}
+	return RGB<double>(R / counterR, G / counterG, B / counterB);
+}
+
+#define filter_rgb(image, pixel)					\
+	{								\
+		Image<pixel>	*imagep					\
+			= dynamic_cast<Image<pixel> *>(&*image);	\
+		if (NULL != imagep) {					\
+			return mean_color(*imagep);			\
+		}							\
+	}
+
+RGB<double>	mean_color(const ImagePtr image) {
+	if (image->getMosaicType() == MosaicType()) {
+		return RGB<double>(mean(image));
+	}
+	filter_rgb(image, unsigned char);
+	filter_rgb(image, unsigned short);
+	filter_rgb(image, unsigned int);
+	filter_rgb(image, unsigned long);
+	filter_rgb(image, float);
+	filter_rgb(image, double);
+	return RGB<double>();
+}
+
+#define	filter_typed1(image, f, pixel)					\
 	{								\
 		Image<pixel>	*imagep					\
 			= dynamic_cast<Image<pixel> *>(&*image);	\
@@ -69,7 +114,7 @@ double	mean(const ImagePtr& image) {
 		}							\
 	}
 
-double	median(const ImagePtr& image) {
+double	median(const ImagePtr image) {
 	filter_typed1(image, Median, unsigned char);
 	filter_typed1(image, Median, unsigned short);
 	filter_typed1(image, Median, unsigned int);
@@ -92,7 +137,7 @@ double	median(const ImagePtr& image) {
 		}							\
 	}
 
-double	max(const ImagePtr& image) {
+double	max(const ImagePtr image) {
 	filter_typed2(image, Max, unsigned char);
 	filter_typed2(image, Max, unsigned short);
 	filter_typed2(image, Max, unsigned int);
@@ -102,7 +147,7 @@ double	max(const ImagePtr& image) {
 	return 0;
 }
 
-double	min(const ImagePtr& image) {
+double	min(const ImagePtr image) {
 	filter_typed2(image, Min, unsigned char);
 	filter_typed2(image, Min, unsigned short);
 	filter_typed2(image, Min, unsigned int);
@@ -124,7 +169,7 @@ double	min(const ImagePtr& image) {
 	}								\
 }
 
-double	max_luminance(const ImagePtr& image) {
+double	max_luminance(const ImagePtr image) {
 	filter_luminance_rgb(image, Max, unsigned char);
 	filter_luminance_rgb(image, Max, unsigned short);
 	filter_luminance_rgb(image, Max, unsigned int);
@@ -134,7 +179,7 @@ double	max_luminance(const ImagePtr& image) {
 	return max(image);
 }
 
-double	min_luminance(const ImagePtr& image) {
+double	min_luminance(const ImagePtr image) {
 	filter_luminance_rgb(image, Min, unsigned char);
 	filter_luminance_rgb(image, Min, unsigned short);
 	filter_luminance_rgb(image, Min, unsigned int);
@@ -144,7 +189,7 @@ double	min_luminance(const ImagePtr& image) {
 	return min(image);
 }
 
-double	mean_luminance(const ImagePtr& image) {
+double	mean_luminance(const ImagePtr image) {
 	filter_luminance_rgb(image, Mean, unsigned char);
 	filter_luminance_rgb(image, Mean, unsigned short);
 	filter_luminance_rgb(image, Mean, unsigned int);
@@ -165,7 +210,7 @@ double	mean_luminance(const ImagePtr& image) {
 	}								\
 }
 
-double	max_RGB(const ImagePtr& image) {
+double	max_RGB(const ImagePtr image) {
 	filter_MaxRGB_rgb(image, unsigned char);
 	filter_MaxRGB_rgb(image, unsigned short);
 	filter_MaxRGB_rgb(image, unsigned int);
@@ -186,7 +231,7 @@ double	max_RGB(const ImagePtr& image) {
 	}								\
 }
 
-double	min_RGB(const ImagePtr& image) {
+double	min_RGB(const ImagePtr image) {
 	filter_MinRGB_rgb(image, unsigned char);
 	filter_MinRGB_rgb(image, unsigned short);
 	filter_MinRGB_rgb(image, unsigned int);
@@ -207,7 +252,7 @@ double	min_RGB(const ImagePtr& image) {
 		}							\
 	}
 
-double	focusFOM(const ImagePtr& image, const bool diagonal) {
+double	focusFOM(const ImagePtr image, const bool diagonal) {
 	filter_focusfom(image, unsigned char, diagonal);
 	filter_focusfom(image, unsigned short, diagonal);
 	filter_focusfom(image, unsigned int, diagonal);
@@ -227,7 +272,7 @@ double	focusFOM(const ImagePtr& image, const bool diagonal) {
 	}								\
 }
 
-double	focusFWHM(const ImagePtr& image, const ImagePoint& center,
+double	focusFWHM(const ImagePtr image, const ImagePoint& center,
 	unsigned int r) {
 	filter_focusfwhm(image, unsigned char, center, r);
 	filter_focusfwhm(image, unsigned short, center, r);
@@ -248,7 +293,7 @@ double	focusFWHM(const ImagePtr& image, const ImagePoint& center,
 	}								\
 }
 
-double	focusFWHM2(const ImagePtr& image, const ImagePoint& center,
+double	focusFWHM2(const ImagePtr image, const ImagePoint& center,
 	unsigned int r) {
 	filter_focusfwhm2(image, unsigned char, center, r);
 	filter_focusfwhm2(image, unsigned short, center, r);
@@ -270,7 +315,7 @@ double	focusFWHM2(const ImagePtr& image, const ImagePoint& center,
 	}								\
 }
 
-FWHMInfo	focusFWHM2_extended(const ImagePtr& image,
+FWHMInfo	focusFWHM2_extended(const ImagePtr image,
 			const ImagePoint& center, unsigned int r) {
 	filter_focusFWHM2_extended(image, unsigned char, center, r);
 	filter_focusFWHM2_extended(image, unsigned short, center, r);
@@ -318,7 +363,7 @@ void	mask(MaskingFunction& maskingfunction, ImagePtr image) {
 	}								\
 }
 
-double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
+double	rawvalue(const ImagePtr image, const ImagePoint& point) {
 	rawvalue_typed(image, unsigned char, point);
 	rawvalue_typed(image, unsigned short, point);
 	rawvalue_typed(image, unsigned int, point);
@@ -392,7 +437,7 @@ double	rawvalue(const ImagePtr& image, const ImagePoint& point) {
 	return 0;
 }
 
-bool	saturated(const ImagePtr& /* image */, const ImageRectangle& /* rect */) {
+bool	saturated(const ImagePtr /* image */, const ImageRectangle& /* rect */) {
 	return true;
 }
 
@@ -421,7 +466,7 @@ bool	saturated(const ImagePtr& /* image */, const ImageRectangle& /* rect */) {
 	}								\
 }
 
-int	bytespervalue(const ImagePtr& image) {
+int	bytespervalue(const ImagePtr image) {
 	bytespervalue_typed(image, unsigned char);
 	bytespervalue_typed(image, unsigned short);
 	bytespervalue_typed(image, unsigned int);
@@ -465,7 +510,7 @@ int	bytespervalue(const ImagePtr& image) {
 	}								\
 }
 
-int	planes(const ImagePtr& image) {
+int	planes(const ImagePtr image) {
 	planes_typed(image, unsigned char);
 	planes_typed(image, unsigned short);
 	planes_typed(image, unsigned int);
@@ -487,11 +532,11 @@ int	planes(const ImagePtr& image) {
 	return 1;
 }
 
-int	bytesperpixel(const ImagePtr& image) {
+int	bytesperpixel(const ImagePtr image) {
 	return planes(image) * bytespervalue(image);
 }
 
-RGB<double>	whitebalance(const ImagePtr& /* image */) {
+RGB<double>	whitebalance(const ImagePtr /* image */) {
 	return RGB<double>(1., 1., 1.);
 }
 

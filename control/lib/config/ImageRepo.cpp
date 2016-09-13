@@ -345,11 +345,11 @@ long	ImageRepo::save(ImagePtr image) {
 	ImageRecord	imageinfo(imageid);
 	try {
 		imageinfo.project
-			= (std::string)image->getMetadata("PROJECT");
+			= trim((std::string)image->getMetadata("PROJECT"));
 	} catch (...) { }
 	try {
 		imageinfo.camera
-			= (std::string)image->getMetadata("INSTRUME");
+			= trim((std::string)image->getMetadata("INSTRUME"));
 	} catch (...) { }
 	imageinfo.width = image->size().width();
 	imageinfo.height = image->size().height();
@@ -377,11 +377,11 @@ long	ImageRepo::save(ImagePtr image) {
 	} catch (...) { }
 	try {
 		imageinfo.filter
-			= (std::string)image->getMetadata("FILTER");
+			= trim((std::string)image->getMetadata("FILTER"));
 	} catch (...) { }
 	try {
 		imageinfo.bayer
-			= (std::string)image->getMetadata("BAYER");
+			= trim((std::string)image->getMetadata("BAYER"));
 	} catch (...) { }
 	try {
 		imageinfo.observation
@@ -389,7 +389,7 @@ long	ImageRepo::save(ImagePtr image) {
 	} catch (...) { }
 	try {
 		imageinfo.uuid
-			= (std::string)image->getMetadata("UUID");
+			= trim((std::string)image->getMetadata("UUID"));
 	} catch (...) { }
 
 	// begin a transaction in the database

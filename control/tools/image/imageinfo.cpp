@@ -73,6 +73,13 @@ int	show_imageinfo(ImagePtr image) {
 	if (nans >= 0) {
 		std::cout << " nans=" << nans;
 	}
+	if (image->getMosaicType() != MosaicType()) {
+		RGB<double>	meancolor
+			= astro::image::filter::mean_color(image);
+		std::cout << " red=" << meancolor.R;
+		std::cout << " green=" << meancolor.G;
+		std::cout << " blue=" << meancolor.B;
+	}
 
 	return EXIT_SUCCESS;
 }
