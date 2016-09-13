@@ -133,7 +133,7 @@ int	ImageDirectory::bytesPerPlane(const std::string& filename) const {
 /**
  * \brief Get a list of file names
  */
-std::list<std::string>	ImageDirectory::fileList() const {
+std::list<std::string>	ImageDirectory::fileList() {
 	std::list<std::string>	names;
 	DIR	*dir = opendir(_basedir.c_str());
 	if (NULL == dir) {
@@ -142,6 +142,10 @@ std::list<std::string>	ImageDirectory::fileList() const {
 	struct dirent	*d;
 	while (NULL != (d = readdir(dir))) {
 		std::string	filename(d->d_name);
+		if (filename[0] == '.') {
+			// skip files that start with a .
+			continue;
+		}
 		if (isFile(filename)) {
 			names.push_back(filename);
 		}
