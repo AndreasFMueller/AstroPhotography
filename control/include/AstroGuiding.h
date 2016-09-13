@@ -420,6 +420,11 @@ public:
 	double	focallength() const { return _focallength; }
 	void	focallength(double f) { _focallength = f; }
 private:
+	double	_guiderate;
+public:
+	double	guiderate() const { return _guiderate; }
+	void	guiderate(double g) { _guiderate = g; }
+private:
 	double	_masPerPixel;
 public:
 	double	masPerPixel() const { return _masPerPixel; }
@@ -909,6 +914,12 @@ private:
 public:
 	double	focallength() const { return _focallength; }
 	void	focallength(double f) { _focallength = f; }
+
+private:
+	double	_guiderate;
+public:
+	double	guiderate() const { return _guiderate; }
+	void	guiderate(double g) { _guiderate = g; }
 
 private:
 

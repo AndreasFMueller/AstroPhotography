@@ -256,7 +256,7 @@ void	instrumentdisplay::allproperties() {
 	ui->propertyTable->blockSignals(true);
 	property(0, "focallength", "Focal length of main camera");
 	property(1, "guiderfocallength", "Focal length of guide camera");
-	property(2, "guidespeed", "arc sec movement in one second");
+	property(2, "guiderate", "mount rate wrt. siderial rate");
 	ui->propertyTable->blockSignals(false);
 }
 
@@ -298,7 +298,7 @@ void	instrumentdisplay::propertyValueChanged(int row, int column) {
 	switch (row) {
 	case 0:	name = "focallength"; break;
 	case 1:	name = "guiderfocallength"; break;
-	case 2:	name = "guidespeed"; break;
+	case 2:	name = "guiderate"; break;
 	}
 	p.property = name;
 	QTableWidgetItem	*item = ui->propertyTable->item(row, 1);

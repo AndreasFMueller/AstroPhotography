@@ -83,10 +83,10 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
 
 	// get the focallength from the instrument properties
+	astro::discover::InstrumentPtr	instrument
+		= astro::discover::InstrumentBackend::get(
+			descriptor.instrumentname);
 	try {
-		astro::discover::InstrumentPtr	instrument
-				= astro::discover::InstrumentBackend::get(
-					descriptor.instrumentname);
 		double	focallength
 			= instrument->getDouble("guiderfocallength");
 		guider->focallength(focallength);
@@ -95,6 +95,15 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	} catch (...) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderfocallength' property "
 			"found, using default %f", guider->focallength());
+	}
+	try {
+		double	guiderate = instrument->getDouble("guiderate");
+		guider->guiderate(guiderate);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate: %.3f",
+			guiderate);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "no 'guiderate' property "
+			"found, using default %f", guider->guiderate());
 	}
 
 	// create a GuiderI object

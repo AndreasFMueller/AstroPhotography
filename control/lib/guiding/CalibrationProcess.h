@@ -20,9 +20,12 @@ namespace guiding {
 class CalibrationProcess : public BasicProcess {
 protected:
 	CalibrationPtr	_calibration;
+	double	_guiderate;
 public:
 	CalibrationPtr	calibration() { return _calibration; }
 	void	calibration(CalibrationPtr cal) { _calibration = cal; }
+	double	guiderate() const { return _guiderate; }
+	void	guiderate(double g) { _guiderate = g; }
 public:
 	CalibrationProcess(GuiderBase *guider, TrackerPtr tracker,
                 persistence::Database database = NULL);

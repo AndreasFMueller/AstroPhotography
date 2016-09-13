@@ -42,6 +42,7 @@ Guider::Guider(const GuiderName& guidername,
 
 	// default focallength
 	_focallength = 1;
+	_guiderate = 0.5;
 
 	// We have to install a callback for calibrations
 	CallbackPtr	calcallback(new CalibrationRedirector(this));
@@ -162,6 +163,7 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start GuidePort calibration");
 		_state.startCalibrating();
 		guidePortDevice->setParameter("focallength", focallength());
+		guidePortDevice->setParameter("guiderate", guiderate());
 		return guidePortDevice->startCalibration(tracker);
 	}
 
