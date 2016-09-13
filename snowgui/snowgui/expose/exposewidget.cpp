@@ -182,11 +182,15 @@ void	exposewidget::startClicked() {
 	if (ui->startButton->text() == QString("Start")) {
 		emit startExposure();
 		ui->startButton->setText(QString("Cancel"));
+		ui->exposuresLabel->setText(QString("Remaining:"));
+		ui->exposuresSpinBox->setEnabled(false);
 		return;
 	}
 	if (ui->startButton->text() == QString("Cancel")) {
 		ui->exposuresSpinBox->setValue(1);
 		ui->startButton->setText(QString("Start"));
+		ui->exposuresLabel->setText(QString("Exposures:"));
+		ui->exposuresSpinBox->setEnabled(true);
 		return;
 	}
 }
@@ -548,6 +552,9 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 	// decrement the value in the 
 	int	count = ui->exposuresSpinBox->value();
 	if (count == 1) {
+		ui->startButton->setText(QString("Start"));
+		ui->exposuresLabel->setText(QString("Exposures:"));
+		ui->exposuresSpinBox->setEnabled(true);
 		return;
 	}
 	ui->exposuresSpinBox->setValue(count - 1);
