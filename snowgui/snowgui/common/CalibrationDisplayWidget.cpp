@@ -153,8 +153,8 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	// some parameters
 	double	timeinterval = 0;
 	int	counter = 0;
-	double	maxx = 1;
-	double	maxy = 1;
+	double	maxx = 10;	// 10 pixels
+	double	maxy = 10;	// 10 pixels
 	for (unsigned long i = 0; i < _calibration.points.size(); i++) {
 		snowstar::CalibrationPoint	p = _calibration.points[i];
 
@@ -209,7 +209,7 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	maxx *= 1.2;
 	maxy *= 1.2;
 
-	double	scalex = (width() / 2.) / maxx;
+	double	scalex = (width() / 2.) / maxx;	// px / calpixel
 	double	scaley = (height() / 2.) / maxy;
 	double	scale = (scalex < scaley) ? scalex : scaley;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "scale = %f", scale);
@@ -219,9 +219,27 @@ void	CalibrationDisplayWidget::drawCommon(QPainter& painter,
 	double	cy = height() / 2;
 	double	h = height() - 1;
 
+	// we are going to draw a few things, we need a pen for that
+	QPen	pen(Qt::SolidLine);
+
+	// draw the coordinate grid (10 pixel lines)
+	int	wm = floor(((width() / 2.) / scalex) / 10);
+	int	hm = floor(((height() / 2.) / scaley) / 10);
+	QColor	gridcolor(204, 204, 204);
+	pen.setColor(gridcolor);
+	pen.setWidth(1);
+	painter.setPen(pen);
+	for (int xi = -wm; xi <= wm; xi++) {
+		double	x = cx + 10 * xi * scalex;
+		painter.drawLine(x, 0, x, height());
+	}
+	for (int yi = -hm; yi <= hm; yi++) {
+		double	y = cy + 10 * yi * scaley;
+		painter.drawLine(0, y, width(), y);
+	}
+
 	// draw the points
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw points");
-	QPen	pen(Qt::SolidLine);
 	pen.setWidth(3);
 	QColor	pencolor = (dim) ? QColor(153., 102., 102.)
 				 : QColor(255., 0., 0.);
