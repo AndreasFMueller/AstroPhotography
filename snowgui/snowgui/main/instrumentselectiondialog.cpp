@@ -36,6 +36,10 @@ InstrumentSelectionDialog::InstrumentSelectionDialog(QWidget *parent,
 			listwidget->addItem(QString(instrumentname.c_str()));
 		}
 	);
+
+	// double click on instrument should select the instrument
+	connect(ui->instrumentListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+		this, SLOT(accept()));
 }
 
 /**
