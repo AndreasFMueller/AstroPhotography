@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <AstroIO.h>
 #include <AstroImageops.h>
+#include <QMessageBox>
 
 using namespace astro::image;
 using namespace astro::io;
@@ -57,6 +58,11 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 	_nosubframe = false;
 	_nobuttons = false;
 	_imageproxyonly = false;
+
+	// make sure the widget cannot be used unless a CCD is configured
+	ui->ccdInfo->setEnabled(false);
+	ui->frameWidget->setEnabled(false);
+	ui->buttonArea->setEnabled(false);
 }
 
 /**
@@ -78,22 +84,30 @@ void	ccdcontrollerwidget::instrumentSetup(
 	int	index = 0;
 	if (!_guiderccdonly) {
 		while (_instrument.has(snowstar::InstrumentCCD, index)) {
+			try {
+				snowstar::CcdPrx	ccd = _instrument.ccd(index);
+				if (!_ccd) {
+					_ccd = ccd;
+				}
+				ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
+				index++;
+			} catch (const std::exception& x) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
+			}
+		}
+		index = 0;
+	}
+	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
+		try {
 			snowstar::CcdPrx	ccd = _instrument.ccd(index);
 			if (!_ccd) {
 				_ccd = ccd;
 			}
 			ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
 			index++;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
 		}
-		index = 0;
-	}
-	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
-		snowstar::CcdPrx	ccd = _instrument.ccd(index);
-		if (!_ccd) {
-			_ccd = ccd;
-		}
-		ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-		index++;
 	}
 
 	// add additional information about this ccd
@@ -162,6 +176,11 @@ void	ccdcontrollerwidget::setupCcd() {
 	// now reenable signals
 	ui->binningSelectionBox->blockSignals(false);
 	ui->binningSelectionBox->setEnabled(true);
+
+	// enable everything
+	ui->ccdInfo->setEnabled(true);
+	ui->frameWidget->setEnabled(true);
+	ui->buttonArea->setEnabled(true);
 }
 
 /**
@@ -455,8 +474,8 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
 			}
 		}
 	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot change ccd: %s",
-			x.what());
+		ccdFailed(x);
+		return;
 	}
         setupCcd();
 	emit ccdSelected(index);
@@ -469,7 +488,12 @@ void	ccdcontrollerwidget::captureClicked() {
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure with time=%.3f",
 			_exposure.exposuretime());
-		_ccd->startExposure(snowstar::convert(_exposure));
+		try {
+			_ccd->startExposure(snowstar::convert(_exposure));
+		} catch (const std::exception& x) {
+			ccdFailed(x);
+			return;
+		}
 		ourexposure = true;
 		ui->captureButton->setEnabled(false);
 		ui->streamButton->setEnabled(false);
@@ -485,8 +509,11 @@ void	ccdcontrollerwidget::captureClicked() {
 void	ccdcontrollerwidget::cancelClicked() {
 	try {
 		_ccd->cancelExposure();
-	} catch (...) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot cancel");
+	} catch (const snowstar::BadState& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
+	} catch (const std::exception& x) {
+		ccdFailed(x);
+		return;
 	}
 }
 
@@ -496,8 +523,11 @@ void	ccdcontrollerwidget::cancelClicked() {
 void	ccdcontrollerwidget::streamClicked() {
 	try {
 		_ccd->startStream(snowstar::convert(_exposure));
-	} catch (...) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start stream");
+	} catch (const snowstar::BadState& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "bad state: %s", x.what());
+	} catch (const std::exception& x) {
+		ccdFailed(x);
+		return;
 	}
 }
 
@@ -552,6 +582,7 @@ void	ccdcontrollerwidget::retrieveImage() {
 			"image: exception %s, cause=%s",
 			astro::demangle(typeid(x).name()).c_str(), x.what());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		ccdFailed(x);
 	}
 }
 
@@ -568,7 +599,7 @@ void	ccdcontrollerwidget::statusUpdate() {
 	try {
 		newstate = _ccd->exposureStatus();
 	} catch (const std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get status");
+		ccdFailed(x);
 		return;
 	}
 	if (newstate == previousstate) {
@@ -617,6 +648,22 @@ void	ccdcontrollerwidget::hideSubframe(bool sf) {
 void	ccdcontrollerwidget::hideButtons(bool b) {
 	_nobuttons = b;
 	ui->buttonArea->setHidden(_nobuttons);
+}
+
+void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
+	_ccd = NULL;
+	ui->ccdInfo->setEnabled(false);
+	ui->frameWidget->setEnabled(false);
+	ui->buttonArea->setEnabled(false);
+	QMessageBox	message;
+	message.setText(QString("CCD failed"));
+	std::ostringstream	out;
+	out << "Communication with the CCD '";
+	out << ui->ccdSelectionBox->currentText().toLatin1().data();
+	out << "' failed. ";
+	out << "The CCD has been disabled and can no longer be used.";
+	message.setInformativeText(QString(out.str().c_str()));
+	message.exec();
 }
 
 } // namespace snowgui

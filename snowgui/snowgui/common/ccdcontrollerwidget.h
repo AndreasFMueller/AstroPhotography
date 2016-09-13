@@ -61,6 +61,7 @@ signals:
 
 private:
 	void	setupCcd();
+	void	ccdFailed(const std::exception&);
 
 	// methods to synchronize the GUI state with the internal state
 	void	displayExposure(astro::camera::Exposure);

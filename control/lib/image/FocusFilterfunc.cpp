@@ -6,6 +6,7 @@
 #include <AstroFilterfunc.h>
 #include <AstroFilter.h>
 #include <AstroAdapter.h>
+#include <AstroDebug.h>
 
 using namespace astro::adapter;
 
@@ -13,14 +14,21 @@ namespace astro {
 namespace image {
 namespace filter {
 
+template<typename Pixel, typename Adapter>
+static double	sum_adapter(const ConstImageAdapter<Pixel>& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering %s",
+		demangle(typeid(image).name()).c_str());
+	Sum<double>	sum;
+	Adapter	ba(image);
+	return sum.filter(ba);
+}
+
 #define	filter_typed(adapter, image, pixel)				\
 {									\
 	Image<pixel >	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		Sum<double>	sum;					\
-		adapter<pixel>	ba(*imagep);				\
-		return sum.filter(ba);					\
+		return sum_adapter<pixel,adapter<pixel>>(*imagep);	\
 	}								\
 }
 
@@ -84,18 +92,25 @@ double	focus_squaredbrenner(const ImagePtr& image) {
 	return 0;
 }
 
+template<typename Pixel, typename Adapter>
+static FocusInfo sum_adapter_extended(const ConstImageAdapter<Pixel>& image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "filtering %s",
+		demangle(typeid(image).name()).c_str());
+	Adapter	ba(image);
+	FocusInfo	result;	
+	Image<double>	*edges = new Image<double>(ba);
+	result.edges = ImagePtr(edges);	
+	Sum<double>	sum;	
+	result.value = sum.filter(*edges);
+	return result;
+}
+
 #define	filter_extended_typed(adapter, image, pixel)			\
 {									\
 	Image<pixel >	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		adapter<pixel >	ba(*imagep);				\
-		FocusInfo	result;					\
-		Image<double>	*edges = new Image<double>(ba);		\
-		result.edges = ImagePtr(edges);				\
-		Sum<double>	sum;					\
-		result.value = sum.filter(*edges);			\
-		return result;						\
+		return sum_adapter_extended<pixel,adapter<pixel> >(*imagep);\
 	}								\
 }
 

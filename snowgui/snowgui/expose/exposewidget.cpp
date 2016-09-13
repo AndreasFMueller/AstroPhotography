@@ -401,6 +401,7 @@ void	exposewidget::updateImagelist() {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no repository");
 		return;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating the image list");
 
 	// remove all children
 	int	n = ui->repositoryTree->topLevelItemCount();

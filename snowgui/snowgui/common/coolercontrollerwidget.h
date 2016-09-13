@@ -33,6 +33,7 @@ private:
 	void	displaySetTemperature(float settemperature);
 
 	void	setupCooler();
+	void	coolerFailed(const std::exception&);
 	Ui::coolercontrollerwidget *ui;
 	QTimer	statusTimer;
 

@@ -6,6 +6,8 @@
 #include "coolercontrollerwidget.h"
 #include "ui_coolercontrollerwidget.h"
 #include <QTimer>
+#include <sstream>
+#include <QMessageBox>
 
 namespace snowgui {
 
@@ -33,13 +35,17 @@ void	coolercontrollerwidget::instrumentSetup(
 	// remember the first cooler you can find
 	int	index = 0;
 	while (_instrument.has(snowstar::InstrumentCooler, index)) {
-		snowstar::CoolerPrx	cooler = _instrument.cooler(index);
-		if (!_cooler) {
-			_cooler = cooler;
+		try {
+			snowstar::CoolerPrx	cooler = _instrument.cooler(index);
+			if (!_cooler) {
+				_cooler = cooler;
+			}
+			ui->coolerSelectionBox->addItem(
+				QString(cooler->getName().c_str()));
+			index++;
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore cooler %d", index);
 		}
-		ui->coolerSelectionBox->addItem(
-			QString(cooler->getName().c_str()));
-		index++;
 	}
 
 	// connect signals
@@ -84,17 +90,25 @@ void	coolercontrollerwidget::setupCooler() {
 		ui->activeWidget->setEnabled(true);
 
 		// display the actual temperature
-		float	actual = _cooler->getActualTemperature() - 273.15;
+		float	actual = 0;
+		float	settemperature = 0;
+		bool	ison = false;
+		try {
+			actual = _cooler->getActualTemperature() - 273.15;
+			settemperature = _cooler->getSetTemperature() - 273.15;
+			ison = _cooler->isOn();
+		} catch (const std::exception& x) {
+			coolerFailed(x);
+		}
 		QString	actualstring(
 			astro::stringprintf("%.1f", actual).c_str());
 		ui->actualTemperatureField->setText(actualstring);
 
 		// display the set temperature
-		ui->setTemperatureSpinBox->setValue(
-			_cooler->getSetTemperature() - 273.15);
+		ui->setTemperatureSpinBox->setValue(settemperature);
 
 		// display whether the cooler is on
-		ui->activeWidget->setActive(_cooler->isOn());
+		ui->activeWidget->setActive(ison);
 
 		// enable the status update timer
 		statusTimer.start();
@@ -103,6 +117,24 @@ void	coolercontrollerwidget::setupCooler() {
 		ui->activeWidget->setValue(1);
 	}
 	ui->setTemperatureSpinBox->blockSignals(false);
+}
+
+void	coolercontrollerwidget::coolerFailed(const std::exception& x) {
+	_cooler = NULL;
+	ui->actualTemperatureField->setEnabled(false);
+	ui->setTemperatureSpinBox->setEnabled(false);
+	ui->activeWidget->setEnabled(false);
+	QMessageBox	message;
+	message.setText(QString(""));
+	std::ostringstream	out;
+	out << "Communcation with the cooler '";
+	out << ui->coolerSelectionBox->currentText().toLatin1().data();
+	out << "' failed: ";
+	out << x.what();
+	out << ". ";
+	out << "The connection has been dropped, the cooler can no longer be used.";
+	message.setInformativeText(QString(out.str().c_str()));
+	message.exec();
 }
 
 /**
@@ -182,7 +214,11 @@ void	coolercontrollerwidget::guiChanged() {
  */
 void	coolercontrollerwidget::coolerChanged(int index) {
 	statusTimer.stop();
-	_cooler = _instrument.cooler(index);
+	try {
+		_cooler = _instrument.cooler(index);
+	} catch (const std::exception& x) {
+		coolerFailed(x);
+	}
 	setupCooler();
 }
 
@@ -207,9 +243,10 @@ void	coolercontrollerwidget::sendSetTemperature(double temp) {
 	if (_cooler) {
 		try {
 			_cooler->setTemperature(t);
-		} catch (...) {
-			displaySetTemperature(_cooler->getSetTemperature()
-				- 273.15);
+		} catch (const std::exception& x) {
+			coolerFailed(x);
+			//displaySetTemperature(_cooler->getSetTemperature()
+			//	- 273.15);
 		}
 	}
 }
@@ -221,7 +258,11 @@ void	coolercontrollerwidget::activeToggled(bool active) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "turn the cooler %s",
 		(active) ? "on" : "off");
 	if (_cooler) {
-		_cooler->setOn(active);
+		try {
+			_cooler->setOn(active);
+		} catch (const std::exception& x) {
+			coolerFailed(x);
+		}
 	}
 }
 
