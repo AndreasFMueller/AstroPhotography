@@ -675,6 +675,10 @@ public:
 	// constructor
 	GuiderBase(const GuiderName& guidername, camera::CcdPtr ccd,
 		persistence::Database database = NULL);
+
+	// virtual interface
+	virtual void	saveCalibration() = 0;
+	virtual void	forgetCalibration() = 0;
 };
 
 /**
@@ -947,6 +951,9 @@ public:
 	 */
 	int	startCalibration(ControlDeviceType type,
 			TrackerPtr tracker);
+private:
+	void	checkCalibrationState();
+public:
 	void	saveCalibration();
 	void	forgetCalibration();
 	void	useCalibration(int calid);

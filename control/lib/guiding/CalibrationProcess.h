@@ -11,6 +11,12 @@
 namespace astro {
 namespace guiding {
 
+/**
+ * \brief Calibration Process
+ *
+ * The calibration process keeps a calibration object and updates it with 
+ * new points. How this is done has to be implemented in derived classes.
+ */
 class CalibrationProcess : public BasicProcess {
 protected:
 	CalibrationPtr	_calibration;

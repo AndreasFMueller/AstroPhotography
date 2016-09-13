@@ -19,9 +19,10 @@ namespace astro {
 namespace guiding {
 
 /**
- * \brief Encapsulation of the guiding process
+ * \brief Encapsulation of the guiding process for guide ports
  *
  * This class contains the work function for guider calibration.
+ * Note that adaptive optics devices have their own calibration process.
  */
 class GPCalibrationProcess : public GuidePortProcess {
 	// parameters for the calibration process

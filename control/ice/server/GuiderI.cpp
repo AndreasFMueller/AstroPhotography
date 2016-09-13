@@ -326,8 +326,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
 		if (!guider->guidePortDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
-			guider->guidePortDevice->calibrationid());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
+		//	guider->guidePortDevice->calibrationid());
 		astro::guiding::CalibrationPtr	cal
 			= guider->guidePortDevice->calibration();
 		calibration = convert(cal);
@@ -341,8 +341,8 @@ Calibration GuiderI::getCalibration(ControlType calibrationtype,
 		if (!guider->adaptiveOpticsDevice->iscalibrated()) {
 			throw BadState("GP not calibrated");
 		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
-			guider->adaptiveOpticsDevice->calibrationid());
+		//debug(LOG_DEBUG, DEBUG_LOG, 0, "device has cal id %d",
+		//	guider->adaptiveOpticsDevice->calibrationid());
 		astro::guiding::CalibrationPtr	cal
 			= guider->adaptiveOpticsDevice->calibration();
 		calibration = convert(cal);

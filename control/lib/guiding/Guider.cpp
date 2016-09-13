@@ -182,21 +182,53 @@ int	Guider::startCalibration(ControlDeviceType type, TrackerPtr tracker) {
  * this method only needs to update the guider state.
  */
 void	Guider::saveCalibration() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving completed calibration");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "accepting completed calibration");
 	if (!_state.canAcceptCalibration()) {
 		return;
 	}
-	_state.addCalibration();
+	checkCalibrationState();
 }
 
+/**
+ * \brief Forget a calibration
+ *
+ * This method is called by the control device or the calibration process
+ * when a calibration fails. Since the information is already in the database
+ * (the calibration remains incomplete), we only have to adjust the state.
+ *
+ */
 void	Guider::forgetCalibration() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "forgetting incomplete calibration");
-	if (_state.canFailCalibration()) {
-		_state.failCalibration();
+	if (!_state.canFailCalibration()) {
 		return;
 	}
-	debug(LOG_ERR, DEBUG_LOG, 0, "cannot fail calibration");
-	throw BadState("cannot forget failed calibration");
+	checkCalibrationState();
+}
+
+/**
+ * \brief Check the current calibrations tate
+ *
+ * The guider is calibrated if one of its control devices is calibrated.
+ * This makes it a little more difficult to determine the guider state
+ * after a calibration completes or fails. Since completion and failure
+ * use the same logic, this is collected in this method.
+ */
+void	Guider::checkCalibrationState() {
+	// we have received a calibration, lets see what this means
+        bool	something_calibrated = false;
+	if (adaptiveOpticsDevice) {
+		something_calibrated |= adaptiveOpticsDevice->iscalibrated();
+	}
+	if (guidePortDevice) {
+		something_calibrated |= guidePortDevice->iscalibrated();
+	}
+	if (something_calibrated) {
+		_state.addCalibration();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Guider now calibrated");
+	} else {
+		_state.failCalibration();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "Guider uncalibrated");
+	}
 }
 
 /**

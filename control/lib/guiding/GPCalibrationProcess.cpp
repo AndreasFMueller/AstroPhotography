@@ -46,6 +46,8 @@ Point	GPCalibrationProcess::starAt(double ra, double dec) {
 
 /**
  * \brief Send a calibration point to the callback
+ *
+ * This callback is called for each calibration point that was found
  */
 void	GPCalibrationProcess::callback(const CalibrationPoint& calpoint) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibration point callback");
@@ -57,6 +59,9 @@ void	GPCalibrationProcess::callback(const CalibrationPoint& calpoint) {
 
 /**
  * \brief Send progress info to the callback
+ *
+ * This callback is used to give the client information about how far
+ * the calibration process has progressed.
  */
 void	GPCalibrationProcess::callback(const ProgressInfo& progressinfo) {
 	if (!hasGuider()) {
@@ -67,6 +72,10 @@ void	GPCalibrationProcess::callback(const ProgressInfo& progressinfo) {
 
 /**
  * \brief Send the completed calibration data to the callback
+ *
+ * This callback is called when the calibration is complete. It forwards
+ * the calibration data received to the guider, who presumably will change
+ * it's state from idle to calibrated.
  */
 void	GPCalibrationProcess::callback(const CalibrationPtr calibration) {
 	if (!hasGuider()) {
@@ -77,6 +86,9 @@ void	GPCalibrationProcess::callback(const CalibrationPtr calibration) {
 
 /**
  * \brief Send the image to the callback
+ *
+ * This callback is used to keep track of images retrieved during the
+ * calibration process.
  */
 void	GPCalibrationProcess::callback(const ImagePtr& image) {
 	if (!hasGuider()) {
@@ -87,6 +99,9 @@ void	GPCalibrationProcess::callback(const ImagePtr& image) {
 
 /**
  * \brief Send an exception to the callback
+ *
+ * This callback informs the receiver of any exceptions that may have 
+ * shown up during the calibration process.
  */
 void	GPCalibrationProcess::callback(const std::exception& ex) {
 	if (!hasGuider()) {
@@ -187,7 +202,10 @@ void	GPCalibrationProcess::main(astro::thread::Thread<GPCalibrationProcess>& _th
 	}
 	// if we get here, then the calibration process has failed, and
 	// we should go back to the idle state
-	// XXX
+	// tell the guider that calibration is complete
+	if (hasGuider()) {
+		guider()->forgetCalibration();
+	}
 }
 
 /**
@@ -257,6 +275,11 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	pi.t = Timer::gettime() - starttime;
 	pi.progress = 1.0;
 	callback(pi);
+
+	// tell the guider that calibration is complete
+	if (hasGuider()) {
+		guider()->saveCalibration();
+	}
 
 	// inform the callback that calibration is complete, this also
 	// ensures that the guider saves the calibration

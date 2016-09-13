@@ -131,8 +131,19 @@ void	GuiderBase::callback(const ProgressInfo& info) {
 
 /**
  * \brief Callback for completed calibrations
+ *
+ * This callback informs the guider about the status of the calibration.
+ * If an incomplete calibration is received, then the guider should go
+ * into state idle. For complete calibrations it should go into state
+ * calibrationed.
  */
 void	GuiderBase::callback(const CalibrationPtr cal) {
+	// don't do anything if no calibration was sent.
+	if (!cal) {
+		return;
+	}
+
+	// now forward the calibration to the other callbacks
 	astro::callback::CallbackDataPtr	data(
                         new CalibrationCallbackData(cal));
 	_calibrationcallback(data);
