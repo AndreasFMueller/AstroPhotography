@@ -26,17 +26,15 @@ filterwheelcontrollerwidget::filterwheelcontrollerwidget(QWidget *parent)
 		this, SLOT(setFilter(int)));
 
 	// initialize the timer
-	statusTimer = new QTimer();
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer->setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
 }
 
 /**
  * \brief Destroy the filterwheelcontrollerwidget
  */
 filterwheelcontrollerwidget::~filterwheelcontrollerwidget() {
-	statusTimer->stop();
-	delete statusTimer;
+	statusTimer.stop();
 	delete ui;
 }
 
@@ -78,7 +76,7 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 	ui->filterBox->blockSignals(true);
 
 	// make sure the status timer does not fire
-	statusTimer->stop();
+	statusTimer.stop();
 
 	// remove previous content of the filterwheel
 	while (ui->filterBox->count() > 0) {
@@ -111,7 +109,7 @@ void	filterwheelcontrollerwidget::setupFilterwheel() {
 		_previousstate = snowstar::FwUNKNOWN;
 
 		// start the timer
-		statusTimer->start();
+		statusTimer.start();
 	}
 	ui->filterBox->blockSignals(false);
 
@@ -144,7 +142,7 @@ void    filterwheelcontrollerwidget::setFilter(int index) {
  * This slot is activate when the user chooses a different filter wheel.
  */
 void    filterwheelcontrollerwidget::filterwheelChanged(int index) {
-	statusTimer->stop();
+	statusTimer.stop();
 	_filterwheel = _instrument.filterwheel(index);
 	setupFilterwheel();
 }

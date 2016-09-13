@@ -1,0 +1,11 @@
+#! /bin/sh
+#
+# load the firmware to the QHY8PRO camera
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+# an21 fx fx2 fx2lp fx3
+
+type=fx2lp
+fxload -v -v -v -t ${type} -d 1618:6002 -i QHY8PRO.HEX
+

@@ -340,8 +340,9 @@ InterfacePtr	SxCamera::getInterface() {
  * rather reimplement control request handling via the bulk endpoints.
  */
 void	SxCamera::controlRequest(RequestBase *request) {
+	request->setTimeout(request->getTimeout() + 60000);
 	if (request->getTimeout() <= 1000) {
-		request->setTimeout(10000);
+		request->setTimeout(30000);
 	}
 	if (useControlRequests) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface");

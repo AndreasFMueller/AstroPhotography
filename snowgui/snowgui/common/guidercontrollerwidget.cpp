@@ -72,9 +72,8 @@ guidercontrollerwidget::guidercontrollerwidget(QWidget *parent)
 
 	// some other fields
 	_previousstate = snowstar::GuiderIDLE;
-	statusTimer = new QTimer;
-	statusTimer->setInterval(100);
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 	_gpupdateinterval = 10;
 	_aoupdateinterval = 1;
 	_stepping = false;
@@ -116,7 +115,7 @@ void	guidercontrollerwidget::setupGuider() {
 		_guiderdescriptor.instrumentname.c_str(),
 		_guiderdescriptor.ccdIndex, _guiderdescriptor.guideportIndex,
 		_guiderdescriptor.adaptiveopticsIndex);
-	statusTimer->stop();
+	statusTimer.stop();
 
 	// get the guider based on the descriptor
 	_guider = _guiderfactory->get(_guiderdescriptor);
@@ -171,7 +170,7 @@ void	guidercontrollerwidget::setupGuider() {
 	_trackingmonitorimage->setGuider(_guider, _trackingmonitorimageptr);
 
 	// start the timer
-	statusTimer->start();
+	statusTimer.start();
 }
 
 /**
@@ -180,8 +179,7 @@ void	guidercontrollerwidget::setupGuider() {
  * The destructor also stops and destroys the timer
  */
 guidercontrollerwidget::~guidercontrollerwidget() {
-	statusTimer->stop();
-	delete statusTimer;
+	statusTimer.stop();
 	if (_trackingmonitor) {
 		Ice::Identity	identity = _trackingmonitor->identity();
 		snowstar::CommunicatorSingleton::remove(identity);

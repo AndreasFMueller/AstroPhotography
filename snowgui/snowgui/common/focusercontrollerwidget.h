@@ -8,6 +8,7 @@
 
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -43,7 +44,7 @@ private:
 	void	startMoving(int target);
 
 	Ui::focusercontrollerwidget *ui;
-	QTimer	*statusTimer;
+	QTimer	statusTimer;
 	int	delta;
 
 public slots:

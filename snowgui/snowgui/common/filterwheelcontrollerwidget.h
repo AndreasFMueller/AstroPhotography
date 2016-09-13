@@ -7,6 +7,7 @@
 #define FILTERWHEELCONTROLLERWIDGET_H
 
 #include <InstrumentWidget.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -35,7 +36,7 @@ signals:
 
 private:
 	Ui::filterwheelcontrollerwidget *ui;
-	QTimer	*statusTimer;
+	QTimer	statusTimer;
 
 	void	setupFilterwheel();
 	void	displayFilter(int index);

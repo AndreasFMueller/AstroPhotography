@@ -80,6 +80,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 
 	// get an GuiderPtr from the original factory
 	astro::guiding::GuiderPtr	guider = guiderfactory.get(d);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guider");
 
 	// get the focallength from the instrument properties
 	try {
@@ -99,11 +100,13 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	// create a GuiderI object
 	Ice::ObjectPtr	guiderptr = new GuiderI(guider, imagedirectory,
 		database);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
 
 	// add the guider we have constructed to the D
 	locator->add(gn, guiderptr);
 	astro::event(EVENT_CLASS, astro::events::Event::GUIDE,
 		astro::stringprintf("new guider: %s", gn.c_str()));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guider servant activated");
 
 	// create a proxy
 	std::string	ename = NameConverter::urlencode(gn);

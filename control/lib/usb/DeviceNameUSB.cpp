@@ -222,6 +222,8 @@ bool	DeviceNameUSB::isCamera(const DeviceName& other) {
 }
 
 bool	DeviceNameUSB::isCcd(const DeviceName& other) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%s -> isCcd(%s)",
+		ccdname().toString().c_str(), other.toString().c_str());
 	if (!matches(other, DeviceName::Ccd)) {
 		return false;
 	}

@@ -71,6 +71,7 @@ void	mountcontrollerwidget::setupMount() {
 		ui->raField->setEnabled(true);
 		ui->decField->setEnabled(true);
 		ui->gotoButton->setEnabled(true);
+		_statusTimer.start();
 	} else {
 		ui->raField->setEnabled(true);
 		ui->decField->setEnabled(true);
@@ -78,7 +79,6 @@ void	mountcontrollerwidget::setupMount() {
 		ui->gotoButton->setText(QString("GOTO"));
 		ui->currentField->setText(QString("(idle)"));
 	}
-	_statusTimer.start();
 }
 
 static QString	rangemessage("The RA value must be between 0 and 24 hours, "
@@ -122,6 +122,9 @@ void	mountcontrollerwidget::gotoClicked() {
  * \brief Slot called when the timer expires
  */
 void	mountcontrollerwidget::statusUpdate() {
+	if (_mount) {
+		return;
+	}
 	snowstar::mountstate state = _mount->state();
 	if (state != _previousstate) {
 		_previousstate = state;

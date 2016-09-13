@@ -7,6 +7,7 @@
 #define COOLERCONTROLLERWIDGET_H
 
 #include <InstrumentWidget.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -33,7 +34,7 @@ private:
 
 	void	setupCooler();
 	Ui::coolercontrollerwidget *ui;
-	QTimer	*statusTimer;
+	QTimer	statusTimer;
 
 	void	sendSetTemperature(double temp);
 

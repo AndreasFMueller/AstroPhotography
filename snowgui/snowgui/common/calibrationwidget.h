@@ -8,6 +8,7 @@
 
 #include <QWidget>
 #include <guider.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -32,7 +33,7 @@ class calibrationwidget : public QWidget {
 
 	guidercontrollerwidget		*_guidercontroller;
 
-	QTimer	*_statusTimer;
+	QTimer	_statusTimer;
 	snowstar::GuiderState	_state;
 public:
 	void	setGuider(snowstar::ControlType controltype,

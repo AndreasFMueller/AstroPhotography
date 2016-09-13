@@ -17,7 +17,7 @@ namespace snowgui {
 class FilterWheelBusy : public QWidget {
 	Q_OBJECT
 
-	QTimer	*timer;
+	QTimer	timer;
 	int	_nfilters;
 	double	_starttime;
 	double	_angle;

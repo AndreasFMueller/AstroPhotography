@@ -13,6 +13,7 @@
 
 namespace snowgui {
 
+#if 0
 template<typename Pixel>
 class MonoAdapter : public ConstImageAdapter<Pixel> {
 	Image<Pixel>	*_image;
@@ -37,6 +38,7 @@ public:
 		return _image->pixel(x, y);
 	}
 };
+#endif
 
 
 class	Image2Pixmap {

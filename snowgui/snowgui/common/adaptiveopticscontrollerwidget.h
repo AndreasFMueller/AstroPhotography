@@ -7,6 +7,7 @@
 #define SNOWGUI_ADAPTIVEOPTICSCONTROLLERWIDGET_H
 
 #include <InstrumentWidget.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -34,7 +35,7 @@ private:
 
 	void	setupAdaptiveOptics();
 
-	QTimer  *statusTimer;
+	QTimer  statusTimer;
 
 public slots:
 	void    adaptiveopticsChanged(int);

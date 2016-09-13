@@ -95,6 +95,7 @@ int	snowstar_main(int argc, char *argv[]) {
 		props = Ice::createProperties(argc, argv);
 		props->setProperty("Ice.MessageSizeMax", "65536"); // 64 MB
 		props->setProperty("Ice.Plugin.IceSSL", "IceSSL:createIceSSL");
+		props->setProperty("Ice.NullHandleAbort", "1");
 		Ice::InitializationData	id;
 		id.properties = props;
 		ic = Ice::initialize(id);

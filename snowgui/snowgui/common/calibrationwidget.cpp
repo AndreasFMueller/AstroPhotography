@@ -32,9 +32,8 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
 	_guidercontroller = NULL;
 	_calibration.id = -1;
 
-	_statusTimer = new QTimer();
-	_statusTimer->setInterval(100);
-	connect(_statusTimer, SIGNAL(timeout()),
+	_statusTimer.setInterval(100);
+	connect(&_statusTimer, SIGNAL(timeout()),
 		this, SLOT(statusUpdate()));
 }
 
@@ -42,10 +41,7 @@ calibrationwidget::calibrationwidget(QWidget *parent) :
  * \brief Destroy the calibration widget
  */
 calibrationwidget::~calibrationwidget() {
-	if (_statusTimer) {
-		_statusTimer->stop();
-		delete _statusTimer;
-	}
+	_statusTimer.stop();
 	delete ui;
 }
 
@@ -78,7 +74,7 @@ void	calibrationwidget::setGuider(snowstar::ControlType controltype,
 	}
 
 	// now that everything is configured, we start the timer
-	_statusTimer->start();
+	_statusTimer.start();
 }
 
 /**

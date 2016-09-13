@@ -31,9 +31,8 @@ focusercontrollerwidget::focusercontrollerwidget(QWidget *parent)
 		this, SLOT(editingFinished()));
 
 	// initialize the timer
-	statusTimer = new QTimer();
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer->setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
 }
 
 /**
@@ -66,10 +65,7 @@ void	focusercontrollerwidget::instrumentSetup(
  * \brief Destroy the focuser controller widget
  */
 focusercontrollerwidget::~focusercontrollerwidget() {
-	if (statusTimer) {
-		statusTimer->stop();
-		delete statusTimer;
-	}
+	statusTimer.stop();
 	delete ui;
 }
 
@@ -78,7 +74,7 @@ focusercontrollerwidget::~focusercontrollerwidget() {
  */
 void	focusercontrollerwidget::setupFocuser() {
 	// make sure the timer does not fire
-	statusTimer->stop();
+	statusTimer.stop();
 
 	// make sure no signals are sent
 	ui->positionButton->blockSignals(true);
@@ -94,9 +90,7 @@ void	focusercontrollerwidget::setupFocuser() {
 		ui->positionSpinBox->setValue(current);
 		displayCurrent(current);
 		ui->positionButton->setEnabled(false);
-		if (statusTimer) {
-			statusTimer->start();
-		}
+		statusTimer.start();
 		ui->currentField->setEnabled(true);
 		ui->positionSpinBox->setEnabled(true);
 		ui->positionButton->setEnabled(true);
@@ -242,7 +236,7 @@ void	focusercontrollerwidget::statusUpdate() {
  * \brief Slot called when a different focuser is selected
  */
 void	focusercontrollerwidget::focuserChanged(int index) {
-	statusTimer->stop();
+	statusTimer.stop();
 	_focuser = _instrument.focuser(index);
 	setupFocuser();
 }

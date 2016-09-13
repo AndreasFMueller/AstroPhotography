@@ -15,9 +15,10 @@ namespace snowgui {
  * \brief Construct Filterwheel busy indicator
  */
 FilterWheelBusy::FilterWheelBusy(QWidget *parent) : QWidget(parent) {
-	timer = NULL;
 	_nfilters = 5;
 	_angle = 0;
+        timer.setInterval(50);
+        connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 /**
@@ -39,21 +40,14 @@ void	FilterWheelBusy::position(int n) {
  */
 void	FilterWheelBusy::start() {
 	_starttime = astro::Timer::gettime() - _angle;
-	timer = new QTimer();
-        connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-        timer->setInterval(50);
-	timer->start();
+	timer.start();
 }
 
 /**
  * \brief Stop the filter wheel rotation
  */
 void	FilterWheelBusy::stop() {
-	if (timer) {
-		timer->stop();
-		delete timer;
-		timer = NULL;
-	}
+	timer.stop();
 }
 	
 /**

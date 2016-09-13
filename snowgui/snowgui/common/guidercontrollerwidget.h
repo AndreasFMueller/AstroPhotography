@@ -12,6 +12,7 @@
 #include <AstroImage.h>
 #include <TrackingMonitorImage.h>
 #include <TrackingMonitorController.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -35,7 +36,7 @@ class guidercontrollerwidget : public InstrumentWidget {
 	double	_windowradius;
 
 	snowstar::GuiderState	_previousstate;
-	QTimer	*statusTimer;
+	QTimer	statusTimer;
 
 	TrackingMonitorImage	*_trackingmonitorimage;
 	Ice::ObjectPtr	_trackingmonitorimageptr;

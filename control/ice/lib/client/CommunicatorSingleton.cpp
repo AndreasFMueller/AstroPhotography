@@ -30,6 +30,9 @@ CommunicatorSingleton::CommunicatorSingleton(int& argc, char *argv[]) {
 	// where we transfer entire images as messages
 	props->setProperty("Ice.MessageSizeMax", "65536");
 
+	// abort on null handle errors
+	props->setProperty("Ice.NullHandleAbort", "1");
+
 	Ice::InitializationData	id;
 	id.properties = props;
 

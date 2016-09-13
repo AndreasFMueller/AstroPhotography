@@ -27,9 +27,8 @@ adaptiveopticscontrollerwidget::adaptiveopticscontrollerwidget(QWidget *parent)
 		this, SLOT(setPoint(QPointF)));
 
 	// timer for status updates
-	statusTimer = new QTimer();
-	statusTimer->setInterval(100);
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
 }
 
 /**
@@ -37,8 +36,7 @@ adaptiveopticscontrollerwidget::adaptiveopticscontrollerwidget(QWidget *parent)
  */
 adaptiveopticscontrollerwidget::~adaptiveopticscontrollerwidget() {
 	delete ui;
-	statusTimer->stop();
-	delete statusTimer;
+	statusTimer.stop();
 }
 
 /**
@@ -74,7 +72,7 @@ void	adaptiveopticscontrollerwidget::setupAdaptiveOptics() {
 	if (_adaptiveoptics) {
 		ui->adaptiveopticsWidget->setEnabled(true);
 		ui->adaptiveopticsSelectionBox->setEnabled(true);
-		statusTimer->start();
+		statusTimer.start();
 		statusUpdate();
 	} else {
 		ui->adaptiveopticsWidget->setEnabled(false);

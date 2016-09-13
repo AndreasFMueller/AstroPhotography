@@ -107,10 +107,10 @@ class GainAdapter : public BasicGainAdapter {
 	const ConstImageAdapter<Pixel>&	_image;
 	unsigned char	rescale(double value) const {
 		if (value > 255) {
-			value = 255;
+			return 255;
 		}
 		if (value < 0) {
-			value = 0;
+			return 0;
 		}
 		unsigned char	result = value;
 		return result;
@@ -181,6 +181,12 @@ ImageRectangle	Image2Pixmap::rectangle(ImagePtr image) const {
 	return _rectangle;
 }
 
+/**
+ * \brief Compute the rectangle to be used for the image
+ *
+ * This template function does the same thing as the rectangle(ImagePtr)
+ * method but with explicitly known type.
+ */
 template<typename Pixel>
 ImageRectangle	Image2Pixmap::rectangle(const ConstImageAdapter<Pixel>& image) const {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle for image %s",
@@ -191,18 +197,6 @@ ImageRectangle	Image2Pixmap::rectangle(const ConstImageAdapter<Pixel>& image) co
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "rectangle found: %s",
 		_rectangle.toString().c_str());
 	return _rectangle;
-}
-
-#define	ga(gainadapter, Pixel, image, scale, rect, mosaic)		\
-									\
-if (gainadapter == NULL) {						\
-	Image<Pixel>	*img = dynamic_cast<Image<Pixel> *>(&*image);	\
-	if (NULL != img) {						\
-		WindowAdapter<Pixel>	*windowadapter			\
-			 = new WindowAdapter<Pixel>(*img, rect);	\
-		windowadapterptr = BasicAdapterPtr(windowadapter);	\
-		gainadapter = new GainAdapter<Pixel>(*windowadapter, scale);\
-	}								\
 }
 
 #define convert_mono(imageptr, Pixel)					\
@@ -229,68 +223,14 @@ QImage	*Image2Pixmap::convertMono(ImagePtr imageptr) {
 	convert_mono(imageptr, float);
 	convert_mono(imageptr, double);
 	return NULL;
-#if 0
-	ImageSize	size = image->size();
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "converting Mono image of size %s",
-		size.toString().c_str());
-	Histogram<double>	*histo = new Histogram<double>(256);
-	histo->logarithmic(_logarithmic);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "_histogram = %p", _histogram);
-	if (_histogram) {
-		delete _histogram;
-		_histogram = NULL;
-	}
-	_histogram = histo;
-
-	// compute the rectangle 
-	ImageRectangle	r = rectangle(image);
-
-	// Ptrs for automatic delllocation of the adapters we need
-	BasicAdapterPtr	windowadapterptr;
-
-	// get a gain adaapter
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"looking for gain adapter, scale = %d, rectangle = %s",
-		_scale, r.toString().c_str());
-	BasicGainAdapter	*gainadapter = NULL;
-	ga(gainadapter, unsigned char, image, _scale, r, _mosaic);
-	ga(gainadapter, unsigned short, image, _scale, r, _mosaic);
-	ga(gainadapter, unsigned long, image, _scale, r, _mosaic);
-	ga(gainadapter, float, image, _scale, r, _mosaic);
-	ga(gainadapter, double, image, _scale, r, _mosaic);
-	if (NULL == gainadapter) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "no suitable adapter found");
-		return NULL;
-	}
-	gainadapter->gain(_gain);
-	gainadapter->brightness(_brightness);
-
-	// dimensions
-	int	w = gainadapter->getSize().width();
-	int	h = gainadapter->getSize().height();
-
-	// prepare the result
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "preparing QImage(%d,%d)", w, h);
-	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
-
-	// fill the image into the result
-	for (int x = 0; x < w; x++) {
-		for (int y = 0; y < h; y++) {
-			unsigned char	v = gainadapter->pixel(x, y);
-			histo->add((double)v);
-			unsigned long	value = convert(v);
-			qimage->setPixel(x, h - 1 - y, value);
-		}
-	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image data set");
-
-	// cleanup
-	delete gainadapter;
-	
-	return qimage;
-#endif
 }
 
+/**
+ * \brief Monochrome image Conversion, typed
+ *
+ * This template function converts an monochrome image presented in the
+ * form of a monochrome image adapter.
+ */
 template<typename Pixel>
 QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	ImageSize	size = image.getSize();
@@ -402,8 +342,8 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 				counter++;
 			}
 		}
-		return RGB<unsigned char>(trunc(r / counter),
-			trunc(g / counter), trunc(b / counter));
+		return RGB<unsigned char>(rescale(r / counter),
+			rescale(g / counter), rescale(b / counter));
 	}
 public:
 	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image, int scale)
@@ -428,20 +368,11 @@ public:
 	void	brightness(double b) { _brightness = b; }
 };
 
-#define	gargb(gainadapter, wa, Pixel, image, scale, rect)		\
-	if (gainadapter == NULL) {					\
-		Image<RGB<Pixel> >	*img				\
-			= dynamic_cast<Image<RGB<Pixel> > *>(&*image);	\
-		if (NULL != img) {					\
-			WindowAdapter<RGB<Pixel> >	*windowadapter	\
-				 = new WindowAdapter<RGB<Pixel> >(*img, rect);\
-			wa = BasicAdapterPtr(windowadapter);		\
-			gainadapter = new GainRGBAdapter<Pixel>(*windowadapter, scale);\
-		}							\
-	}
-
 /**
  * \brief Convert a RGB astro::image::ImagePtr to a QImage
+ *
+ * Because this adapter works with a RGB image adapter, it can be
+ * be used on RGB images or on DemosaicAdapter<Pixel> without change.
  */
 template<typename Pixel>
 QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
@@ -460,19 +391,6 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	// compute the rectangle 
 	ImageRectangle	r = rectangle(image);
 
-#if 0
-	BasicGainRGBAdapter	*gainadapter = NULL;
-	BasicAdapterPtr		ba;
-	gargb(gainadapter, ba, unsigned char, image, _scale, r);
-	gargb(gainadapter, ba, unsigned short, image, _scale, r);
-	gargb(gainadapter, ba, unsigned long, image, _scale, r);
-	gargb(gainadapter, ba, double, image, _scale, r);
-	gargb(gainadapter, ba, float, image, _scale, r);
-	if (NULL == gainadapter) {
-		debug(LOG_ERR, DEBUG_LOG, 0, "no gain adapter found");
-		return NULL;
-	}
-#endif
 	WindowAdapter<RGB<Pixel> >	windowadapter(image, r);
 	GainRGBAdapter<Pixel>	gainadapter(windowadapter, _scale);
 	gainadapter.gain(_gain);
@@ -510,6 +428,9 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 
 /**
  * \brief Convert and debayer an image at the same time
+ *
+ * This method selectes the convertMosaic template function with
+ * the correct pixel type template argument.
  */
 QImage	*Image2Pixmap::convertMosaic(ImagePtr imageptr) {
 	convert_mosaic(imageptr, unsigned char)
@@ -529,6 +450,12 @@ QImage	*Image2Pixmap::convertMosaic(ImagePtr imageptr) {
 	}								\
 }
 
+/**
+ * \brief Convert an RGB image into a Pixmap
+ *
+ * This method selectes the convertMosaic template function with
+ * the correct pixel type template argument.
+ */
 QImage	*Image2Pixmap::convertRGB(ImagePtr imageptr) {
 	convert_rgb(imageptr, unsigned char)
 	convert_rgb(imageptr, unsigned short)

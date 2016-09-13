@@ -18,7 +18,6 @@ coolercontrollerwidget::coolercontrollerwidget(QWidget *parent) :
 	ui->actualTemperatureField->setEnabled(false);
 	ui->setTemperatureSpinBox->setEnabled(false);
 	ui->activeWidget->setEnabled(false);
-	statusTimer = NULL;
 }
 
 /**
@@ -58,9 +57,8 @@ void	coolercontrollerwidget::instrumentSetup(
 	ui->activeWidget->setValue(1);
 
 	// initialize the timer
-	statusTimer = new QTimer();
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer->setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
 
 	// set the cooler
 	setupCooler();
@@ -70,10 +68,7 @@ void	coolercontrollerwidget::instrumentSetup(
  * \brief Destroy the cooler controller widget
  */
 coolercontrollerwidget::~coolercontrollerwidget() {
-	if (statusTimer) {
-		statusTimer->stop();
-		delete statusTimer;
-	}
+	statusTimer.stop();
 	delete ui;
 }
 
@@ -102,9 +97,7 @@ void	coolercontrollerwidget::setupCooler() {
 		ui->activeWidget->setActive(_cooler->isOn());
 
 		// enable the status update timer
-		if (statusTimer) {
-			statusTimer->start();
-		}
+		statusTimer.start();
 	} else {
 		// with no cooler, we just stay at temperature 1
 		ui->activeWidget->setValue(1);
@@ -188,9 +181,7 @@ void	coolercontrollerwidget::guiChanged() {
  * \brief Handle selection of a new cooler
  */
 void	coolercontrollerwidget::coolerChanged(int index) {
-	if (statusTimer) {
-		statusTimer->stop();
-	}
+	statusTimer.stop();
 	_cooler = _instrument.cooler(index);
 	setupCooler();
 }

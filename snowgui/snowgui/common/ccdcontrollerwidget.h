@@ -9,6 +9,7 @@
 #include <InstrumentWidget.h>
 #include <AstroCamera.h>
 #include <image.h>
+#include <QTimer>
 
 namespace snowgui {
 
@@ -76,7 +77,7 @@ private:
 	void	retrieveImage();
 
 	Ui::ccdcontrollerwidget *ui;
-	QTimer	*statusTimer;
+	QTimer	statusTimer;
 	snowstar::ExposureState	previousstate;
 	bool	ourexposure;
 

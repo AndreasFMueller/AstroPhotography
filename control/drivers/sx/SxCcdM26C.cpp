@@ -15,7 +15,7 @@
 #include "SxDemux.h"
 
 #define	EXPOSURE_FIELD_CUTOVER		10
-#define EXPOSURE_ADCONVERSION_TIME	30000
+#define EXPOSURE_ADCONVERSION_TIME	60000
 
 #define CCD_FLAGS_FIELD_ODD       1   /* Specify odd field for MX cameras */
 #define CCD_FLAGS_FIELD_EVEN      2   /* Specify even field for MX cameras */

@@ -49,9 +49,8 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		this, SLOT(guiChanged()));
 
 	// setup and connect the timer
-	statusTimer = new QTimer();
-	connect(statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
-	statusTimer->setInterval(100);
+	connect(&statusTimer, SIGNAL(timeout()), this, SLOT(statusUpdate()));
+	statusTimer.setInterval(100);
 	ourexposure = false;
 	previousstate = snowstar::IDLE;
 	_guiderccdonly = false;
@@ -70,6 +69,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 void	ccdcontrollerwidget::instrumentSetup(
 		astro::discover::ServiceObject serviceobject,
 		snowstar::RemoteInstrument instrument) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "begin ccdcontrollerwidget::instrumentSetup()");
 	// parent setup
 	InstrumentWidget::instrumentSetup(serviceobject, instrument);
 
@@ -98,14 +98,14 @@ void	ccdcontrollerwidget::instrumentSetup(
 
 	// add additional information about this ccd
 	setupCcd();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "end ccdcontrollerwidget::instrumentSetup()");
 }
 
 /**
  * \brief Destroy the CCD controller
  */
 ccdcontrollerwidget::~ccdcontrollerwidget() {
-	statusTimer->stop();
-	delete statusTimer;
+	statusTimer.stop();
 	delete ui;
 }
 
@@ -131,7 +131,9 @@ void	ccdcontrollerwidget::setupCcd() {
 
 	// propagate the information from the ccdinfo structure
 	if (_ccd) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "get info");
 		_ccdinfo = _ccd->getInfo();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "got info");
 		QComboBox	*binBox = ui->binningSelectionBox;
 		CcdInfo	ccdinfo(snowstar::convert(_ccdinfo));
 		std::for_each(ccdinfo.modes().begin(), ccdinfo.modes().end(),
@@ -154,7 +156,7 @@ void	ccdcontrollerwidget::setupCcd() {
 		displayFrame(ImageRectangle(ccdinfo.size()));
 
 		// start the timer
-		statusTimer->start();
+		statusTimer.start();
 	}
 
 	// now reenable signals
@@ -438,17 +440,23 @@ void	ccdcontrollerwidget::setImage(ImagePtr image) {
  * \brief Slot to handle a change of the selected CCD
  */
 void	ccdcontrollerwidget::ccdChanged(int index) {
-	statusTimer->stop();
-	if (_guiderccdonly) {
-		_ccd = _instrument.guiderccd(index);
-	} else {
-		int	nccds = _instrument.componentCount(
-					snowstar::InstrumentCCD);
-		if (index >= nccds) {
-			_ccd = _instrument.guiderccd(index - nccds);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "CCD changed");
+	statusTimer.stop();
+	try {
+		if (_guiderccdonly) {
+			_ccd = _instrument.guiderccd(index);
 		} else {
-			_ccd = _instrument.ccd(index);
+			int	nccds = _instrument.componentCount(
+						snowstar::InstrumentCCD);
+			if (index >= nccds) {
+				_ccd = _instrument.guiderccd(index - nccds);
+			} else {
+				_ccd = _instrument.ccd(index);
+			}
 		}
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot change ccd: %s",
+			x.what());
 	}
         setupCcd();
 	emit ccdSelected(index);
@@ -467,6 +475,7 @@ void	ccdcontrollerwidget::captureClicked() {
 		ui->streamButton->setEnabled(false);
 		ui->streamButton->setEnabled(true);
 	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start exposure");
 	}
 }
 
@@ -477,6 +486,7 @@ void	ccdcontrollerwidget::cancelClicked() {
 	try {
 		_ccd->cancelExposure();
 	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot cancel");
 	}
 }
 
@@ -487,6 +497,7 @@ void	ccdcontrollerwidget::streamClicked() {
 	try {
 		_ccd->startStream(snowstar::convert(_exposure));
 	} catch (...) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot start stream");
 	}
 }
 
@@ -553,7 +564,13 @@ void	ccdcontrollerwidget::statusUpdate() {
 	if (!_ccd) {
 		return;
 	}
-	snowstar::ExposureState	newstate = _ccd->exposureStatus();
+	snowstar::ExposureState	newstate;
+	try {
+		newstate = _ccd->exposureStatus();
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get status");
+		return;
+	}
 	if (newstate == previousstate) {
 		return;
 	}
