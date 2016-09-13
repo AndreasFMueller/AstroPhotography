@@ -10,6 +10,8 @@
 
 using namespace astro::usb;
 
+#define	DEFAULT_AS_USB_CONTROL_REQUEST	true
+
 namespace astro {
 namespace camera {
 namespace sx {

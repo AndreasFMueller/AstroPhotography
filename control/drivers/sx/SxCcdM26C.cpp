@@ -193,7 +193,7 @@ void	SxCcdM26C::requestField(int field) {
 			RequestBase::device_recipient, ccdindex,
 			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)(1 << field),
 			&rp);
-		camera.controlRequest(&request);
+		camera.controlRequest(&request, field == 0);
 	} catch (std::exception& x) {
 		camera.release("exposure M26C");
 		std::string	msg = stringprintf("cannot request field: %s",

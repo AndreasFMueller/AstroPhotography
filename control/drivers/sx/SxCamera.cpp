@@ -339,16 +339,20 @@ InterfacePtr	SxCamera::getInterface() {
  * We cannot use the controlRequest method of the USBDevice, but must
  * rather reimplement control request handling via the bulk endpoints.
  */
-void	SxCamera::controlRequest(RequestBase *request) {
+void	SxCamera::controlRequest(RequestBase *request,
+		bool asUSBControlRequest) {
 	//request->setTimeout(request->getTimeout() + 60000);
 	if (request->getTimeout() <= 1000) {
 		request->setTimeout(30000);
 	}
-	if (useControlRequests) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface");
+	if (asUSBControlRequest) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "using control interface, "
+			"request with timeout %d", request->getTimeout());
 		deviceptr->controlRequest(request);
 		return;
 	}
+
+	// Performing request over the data OUTPOINT
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"control request for command '%s' on data interface, "
 		"request = %02x, requesttype = %02x,  wValue = %04x, "

@@ -85,7 +85,8 @@ protected:
 
 	// request handling
 public:
-	void	controlRequest(RequestBase *request);
+	void	controlRequest(RequestBase *request,
+		bool asUSBControlRequest = DEFAULT_AS_USB_CONTROL_REQUEST);
 
 	// find out whether this is a color camera
 	bool	isColor() const;

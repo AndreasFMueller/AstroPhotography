@@ -210,7 +210,7 @@ int	main(int argc, char *argv[]) {
 	// where to store the images otherwise
 	ImageRepoPtr	repo;
 	if (0 == reponame.size()) {
-		std::cerr << "Warning: no repository set, images will be lost";
+		std::cerr << "Warning: no repository set, make sure output prefix is set";
 		std::cerr << std::endl;;
 	} else {
 		ImageRepoConfigurationPtr	imagerepos
@@ -331,10 +331,10 @@ int	main(int argc, char *argv[]) {
 	for (imageptr = images.begin(); imageptr != images.end(); imageptr++) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "adding image");
 		if ((*imageptr)->hasMetadata(std::string("INSTRUME"))) {
+			(*imageptr)->setMetadata(
+				FITSKeywords::meta(std::string("INSTRUME"),
+					instrument->name()));
 		}
-		(*imageptr)->setMetadata(
-			FITSKeywords::meta(std::string("INSTRUME"),
-				instrument->name()));
 		if (repo) {
 			repo->save(*imageptr);
 		} else {
@@ -344,7 +344,7 @@ int	main(int argc, char *argv[]) {
 				return EXIT_FAILURE;
 			}
 			std::string	filename = stringprintf("%s%03d.fits",
-				prefix.c_str(), counter);
+				prefix.c_str(), counter++);
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image %s",
 				filename.c_str());
 			FITSout	out(filename);
