@@ -8,7 +8,6 @@
 
 #include <camera.h>
 #include <AstroCamera.h>
-#include <ImageDirectory.h>
 #include <DeviceI.h>
 
 namespace snowstar {
@@ -30,12 +29,10 @@ typedef std::shared_ptr<CcdSink>	CcdSinkPtr;
  */
 class CcdI : virtual public Ccd, virtual public DeviceI {
 	astro::camera::CcdPtr	_ccd;
-	astro::image::ImageDirectory	_imagedirectory;
 	time_t	laststart;
 	astro::image::ImagePtr	image;
 public:
-	CcdI(astro::camera::CcdPtr ccd,
-		astro::image::ImageDirectory& imagedirectory);
+	CcdI(astro::camera::CcdPtr ccd);
 	virtual	~CcdI();
 
 static	CcdPrx	createProxy(const std::string& ccdname,

@@ -25,7 +25,7 @@ class ImageDirectory {
 	static std::string	_basedir;
 public:
 	static const std::string&	basedir() { return _basedir; }
-	static void	basedir(const std::string& b) { _basedir = b; }
+	static void	basedir(const std::string& b);
 public:
 	ImageDirectory() { }
 	std::string	fullname(const std::string& filename) const;
@@ -36,8 +36,15 @@ public:
 	int	bytesPerPlane(const std::string& filename) const;
 	virtual std::list<std::string>	fileList() const;
 	virtual std::string	save(astro::image::ImagePtr image);
+protected:
+	void	write(astro::image::ImagePtr image, const std::string& filename);
+public:
 	virtual void	remove(const std::string& filename);
 	ImagePtr	getImagePtr(const std::string& filename);
+	void	setMetadata(const std::string& filename,
+				const ImageMetadata& metadata);
+	Metavalue	getMetadata(const std::string& filename,
+				const std::string& keyword);
 };
 
 /**

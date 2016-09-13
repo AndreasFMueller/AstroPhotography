@@ -6,12 +6,12 @@
 #include <ImagesI.h>
 #include <ProxyCreator.h>
 #include <ImageI.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
 
-ImagesI::ImagesI(astro::image::ImageDirectory& _imagedirectory)
-	: imagedirectory(_imagedirectory) {
+ImagesI::ImagesI() {
 }
 
 ImagesI::~ImagesI() {
@@ -19,6 +19,7 @@ ImagesI::~ImagesI() {
 
 ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
 	ImageList	result;
+	astro::image::ImageDirectory	imagedirectory;
 	std::list<std::string>	names = imagedirectory.fileList();
 	std::copy(names.begin(), names.end(), back_inserter(result));
 	return result;
@@ -26,11 +27,13 @@ ImageList	ImagesI::listImages(const Ice::Current& /* current */) {
 
 int	ImagesI::imageSize(const std::string& name,
 			const Ice::Current& /* current */) {
+	astro::image::ImageDirectory	imagedirectory;
 	return imagedirectory.fileSize(name);
 }
 
 int	ImagesI::imageAge(const std::string& name,
 			const Ice::Current& /* current */) {
+	astro::image::ImageDirectory	imagedirectory;
 	return imagedirectory.fileAge(name);
 }
 
@@ -58,9 +61,9 @@ ImagePrx	getImage(const std::string& filename, int bytesPerPixel,
 }
 
 ImagePrx	getImage(const std::string& filename,
-			astro::image::ImageDirectory& imagedirectory,
 				const Ice::Current& current) {
 	// find the number bytes per pixel
+	astro::image::ImageDirectory	imagedirectory;
 	int	bytesperplane = imagedirectory.bytesPerPlane(filename);
 
 	// create the proxy

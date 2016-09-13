@@ -22,6 +22,15 @@ namespace image {
 std::string	ImageDirectory::_basedir("/tmp");
 
 /**
+ * \brief Set the base directory of the image directory
+ */
+void	ImageDirectory::basedir(const std::string& b) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting base directory to %s",
+		b.c_str());
+	_basedir = b;
+}
+
+/**
  * \brief Build the full name from a 
  */
 std::string	ImageDirectory::fullname(const std::string& filename) const {
@@ -166,26 +175,48 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw std::runtime_error(cause);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file name: %s", buffer);
 	unlink(buffer);
 	close(fd);
-
-	// write the file
 	std::string	fullname(buffer);
-	try {
-		astro::io::FITSout	outfile(fullname);
-		outfile.setPrecious(false);
-		outfile.write(image);
-	} catch (std::exception& x) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write file '%s': %s",
-			fullname.c_str(), x.what());
-	}
 
 	// construct the filename
 	std::string	filename = basename(fullname);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image full name: %s, filename: %s",
+		fullname.c_str(), filename.c_str());
+
+	// write the file
+	write(image, filename);
+
+	// return the filename
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image short name: %s",
 		filename.c_str());
 	return filename;
+}
+
+/**
+ * \brief Overwrite an existing file
+ *
+ * This method is protected because we don't want other parts of the
+ * system to randomly overwrite files
+ */
+void	ImageDirectory::write(astro::image::ImagePtr image,
+		const std::string& filename) {
+	std::string	f = fullname(filename);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write image to file %s, fullname = %s",
+		filename.c_str(), f.c_str());
+
+	// actually write the file
+	try {
+		astro::io::FITSout	outfile(f);
+		outfile.setPrecious(false);
+		if (outfile.exists()) {
+			outfile.unlink();
+		}
+		outfile.write(image);
+	} catch (std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write file '%s': %s",
+			f.c_str(), x.what());
+	}
 }
 
 /**
@@ -210,6 +241,26 @@ void	ImageDirectory::remove(const std::string& filename) {
 ImagePtr	ImageDirectory::getImagePtr(const std::string& filename) {
 	astro::io::FITSin	in(fullname(filename));
 	return in.read();
+}
+
+/**
+ * \brief Get a meta value from an image
+ */
+Metavalue	ImageDirectory::getMetadata(const std::string& filename,
+			const std::string& keyword) {
+	return getImagePtr(filename)->getMetadata(keyword);
+}
+
+/**
+ * \brief Set the meta data in an image
+ */
+void	ImageDirectory::setMetadata(const std::string& filename,
+		const ImageMetadata& metadata) {
+	ImagePtr	image = getImagePtr(filename);
+	for (auto ptr = metadata.begin(); ptr != metadata.end(); ptr++) {
+		image->setMetadata(ptr->second);
+	}
+	write(image, filename);
 }
 
 } // namespace image

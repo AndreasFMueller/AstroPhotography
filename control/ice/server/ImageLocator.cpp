@@ -7,11 +7,11 @@
 #include <ImageI.h>
 #include <AstroDebug.h>
 #include <AstroFilterfunc.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
-ImageLocator::ImageLocator(astro::image::ImageDirectory& imagedirectory)
-	: _imagedirectory(imagedirectory) {
+ImageLocator::ImageLocator() {
 }
 
 Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
@@ -26,6 +26,7 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	}
 
 	// have to create a new servant
+	astro::image::ImageDirectory	_imagedirectory;
 	Ice::ObjectPtr	ptr;
 	if (!_imagedirectory.isFile(name)) {
 		throw NotFound("image file not found");
@@ -35,10 +36,10 @@ Ice::ObjectPtr	ImageLocator::locate(const Ice::Current& current,
 	// find out how many bytes a pixel has
 	switch (astro::image::filter::bytespervalue(image)) {
 	case 1:	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating byte image servant");
-		ptr = new ByteImageI(_imagedirectory, image, name);
+		ptr = new ByteImageI(image, name);
 		break;
 	case 2:	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating short image servant");
-		ptr = new ShortImageI(_imagedirectory, image, name);
+		ptr = new ShortImageI(image, name);
 		break;
 	default:
 		throw BadParameter("image of unknown pixel size");

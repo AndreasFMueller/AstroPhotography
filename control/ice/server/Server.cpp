@@ -81,7 +81,7 @@ void	Server::add_devices_servant() {
 	Ice::ObjectPtr	object = new DevicesI(devices);
 	adapter->add(object, ic->stringToIdentity("Devices"));
 	DeviceServantLocator	*deviceservantlocator
-		= new DeviceServantLocator(repository, imagedirectory);
+		= new DeviceServantLocator(repository);
 	adapter->addServantLocator(deviceservantlocator, "");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "devices servant added");
 	astro::event(EVENT_GLOBAL, astro::events::Event::DEVICE,
@@ -120,9 +120,9 @@ void	Server::add_configuration_servant() {
 }
 
 void	Server::add_images_servant() {
-	Ice::ObjectPtr	object = new ImagesI(imagedirectory);
+	Ice::ObjectPtr	object = new ImagesI();
 	adapter->add(object, ic->stringToIdentity("Images"));
-	ImageLocator	*imagelocator = new ImageLocator(imagedirectory);
+	ImageLocator	*imagelocator = new ImageLocator();
 	adapter->addServantLocator(imagelocator, "image");
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "images servant locator added");
 	astro::event(EVENT_GLOBAL, astro::events::Event::IMAGE,
@@ -164,7 +164,7 @@ void	Server::add_repository_servant() {
 void	Server::add_guiding_servant() {
 	GuiderLocator	*guiderlocator = new GuiderLocator();
 	Ice::ObjectPtr	object = new GuiderFactoryI(database, guiderfactory,
-		guiderlocator, imagedirectory);
+		guiderlocator);
 	adapter->add(object, ic->stringToIdentity("Guiders"));
 	adapter->addServantLocator(guiderlocator, "guider");
 	astro::event(EVENT_GLOBAL, astro::events::Event::GUIDE,

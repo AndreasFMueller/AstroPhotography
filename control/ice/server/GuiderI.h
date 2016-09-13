@@ -8,7 +8,6 @@
 
 #include <guider.h>
 #include <AstroGuiding.h>
-#include <ImageDirectory.h>
 #include <AstroPersistence.h>
 #include <CallbackHandler.h>
 #include <AstroDebug.h>
@@ -40,7 +39,6 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
  */
 class GuiderI : virtual public Guider, virtual public RepositoryUser {
 	astro::guiding::GuiderPtr	guider;
-	astro::image::ImageDirectory	imagedirectory;
 	astro::persistence::Database	database;
 	// some infrastructure members we need 
 	Point	_point;
@@ -56,7 +54,6 @@ class GuiderI : virtual public Guider, virtual public RepositoryUser {
 public:
 	// construction and destruction
 	GuiderI(astro::guiding::GuiderPtr _guider,
-		astro::image::ImageDirectory& imagedirectoy,
 		astro::persistence::Database database);
 	virtual ~GuiderI();
 

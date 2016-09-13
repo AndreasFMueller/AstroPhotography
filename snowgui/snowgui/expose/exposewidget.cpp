@@ -523,26 +523,28 @@ void    exposewidget::itemDoubleClicked(QTreeWidgetItem *, int) {
  */
 void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 	// add additional fields
+	snowstar::Metadata	metadata;
 	if (_filterwheel) {
 		snowstar::Metavalue	v;
 		v.keyword = "FILTER";
 		v.value = _filterwheel->filterName(_filterwheel->currentPosition());
-		imageproxy->setMeta(v);
+		metadata.push_back(v);
 	}
 
 	{
 		snowstar::Metavalue	v;
 		v.keyword = "PROJECT";
 		v.value = std::string(ui->projectBox->currentText().toLatin1().data());
-		imageproxy->setMeta(v);
+		metadata.push_back(v);
 	}
 
 	{
 		snowstar::Metavalue	v;
 		v.keyword = "PURPOSE";
 		v.value = std::string(ui->purposeBox->currentText().toLatin1().data());
-		imageproxy->setMeta(v);
+		metadata.push_back(v);
 	}
+	imageproxy->setMetadata(metadata);
 
 	imageproxy->toRepository(_repositoryname);
 	imageproxy->remove();

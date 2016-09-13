@@ -13,6 +13,7 @@
 #include <IceConversions.h>
 #include <AstroUtils.h>
 #include <AstroConfig.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 

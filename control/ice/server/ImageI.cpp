@@ -17,14 +17,23 @@
 #include <Ice/Communicator.h>
 #include <ProxyCreator.h>
 #include <ImagesI.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
-ImageI::ImageI(astro::image::ImageDirectory& imagedirectory,
-	astro::image::ImagePtr image, const std::string& filename)
-	: _imagedirectory(imagedirectory), _image(image), _filename(filename) {
+ImageI::ImageI(astro::image::ImagePtr image, const std::string& filename)
+	: _image(image), _filename(filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating image servant for %s",
 		_filename.c_str());
+	// check whether the filename contains a /, because that we want all
+	// images to be in the top level
+	if (std::string::npos != _filename.find('/')) {
+		std::string	msg = astro::stringprintf("file '%s' has /, should "
+			"be basename", _filename.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+
 	// origin
 	_origin = convert(_image->origin());
 	// size
@@ -51,6 +60,7 @@ std::string	ImageI::name(const Ice::Current& /* current */) {
 }
 
 int	ImageI::age(const Ice::Current& /* current */) {
+	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileAge(_filename);
 }
 
@@ -87,18 +97,31 @@ Metavalue	ImageI::getMeta(const std::string& keyword,
 	return convert(_image->getMetadata(keyword));
 }
 
-void	ImageI::setMeta(const Metavalue& metavalue,
+void	ImageI::setMetavalue(const Metavalue& metavalue,
 			const Ice::Current& /* current */) {
-	_image->setMetadata(convert(metavalue));
-	astro::io::FITSout	out(_filename);
-	if (out.exists()) {
-		out.unlink();
+	ImageMetadata	metadata;
+	metadata.setMetadata(convert(metavalue));
+	astro::image::ImageDirectory	_imagedirectory;
+	_imagedirectory.setMetadata(_filename, metadata);
+	_image = _imagedirectory.getImagePtr(_filename);
+}
+
+void	ImageI::setMetadata(const Metadata& metadata,
+			const Ice::Current& /* current */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setting metadata on file %s, %d items",
+		_filename.c_str(), metadata.size());
+	ImageMetadata	m;
+	for (auto ptr = metadata.begin(); ptr != metadata.end(); ptr++) {
+		m.setMetadata(convert(*ptr));
 	}
-	out.write(_image);
+	astro::image::ImageDirectory	_imagedirectory;
+	_imagedirectory.setMetadata(_filename, m);
+	_image = _imagedirectory.getImagePtr(_filename);
 }
 
 ImageFile       ImageI::file(const Ice::Current& /* current */) {
 	std::vector<Ice::Byte>	result;
+	astro::image::ImageDirectory	_imagedirectory;
 	std::string	fullname = _imagedirectory.fullname(_filename);
 
 	// find the size of the file
@@ -143,6 +166,7 @@ ImageFile       ImageI::file(const Ice::Current& /* current */) {
 }
 
 int     ImageI::filesize(const Ice::Current& /* current */) {
+	astro::image::ImageDirectory	_imagedirectory;
 	return _imagedirectory.fileSize(_filename);
 }
 
@@ -164,6 +188,7 @@ void	ImageI::toRepository(const std::string& reponame,
 }
 
 void    ImageI::remove(const Ice::Current& /* current */) {
+	astro::image::ImageDirectory	_imagedirectory;
 	_imagedirectory.remove(_filename);
 }
 
@@ -203,9 +228,8 @@ void    ImageI::remove(const Ice::Current& /* current */) {
 	}								\
 }
 
-ByteImageI::ByteImageI(astro::image::ImageDirectory& imagedirectory,
-		astro::image::ImagePtr image, const std::string& filename)
-	: ImageI(imagedirectory, image, filename) {
+ByteImageI::ByteImageI(astro::image::ImagePtr image,
+	const std::string& filename) : ImageI(image, filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "building byte image, %d bytes per value",
 		_bytespervalue);
 	if (1 != _bytespervalue) {
@@ -228,9 +252,8 @@ ByteSequence	ByteImageI::getBytes(const Ice::Current& /* current */) {
 	return result;
 }
 
-ShortImageI::ShortImageI(astro::image::ImageDirectory& imagedirectory,
-		astro::image::ImagePtr image, const std::string& filename)
-	: ImageI(imagedirectory, image, filename) {
+ShortImageI::ShortImageI(astro::image::ImagePtr image,
+	const std::string& filename) : ImageI(image, filename) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image has %d bytes per plane",
 		_bytespervalue);
 	if (2 != _bytespervalue) {

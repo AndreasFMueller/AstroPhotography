@@ -522,7 +522,7 @@ void	ccdcontrollerwidget::retrieveImage() {
 			snowstar::Metavalue	v;
 			v.keyword = "INSTRUME";
 			v.value = instrumentname();
-			_imageproxy->setMeta(v);
+			_imageproxy->setMetavalue(v);
 		}
 		if (_imageproxyonly) {
 			emit imageproxyReceived(_imageproxy);

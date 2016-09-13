@@ -8,12 +8,10 @@
 
 #include <image.h>
 #include <AstroImage.h>
-#include <ImageDirectory.h>
 
 namespace snowstar {
 
 class ImageI : virtual public Image {
-	astro::image::ImageDirectory&	_imagedirectory;
 protected:
 	astro::image::ImagePtr	_image;
 private:
@@ -25,8 +23,7 @@ protected:
 	int	_bytespervalue;
 	int	_planes;
 public:
-	ImageI(astro::image::ImageDirectory& imagedirectrory,
-		astro::image::ImagePtr image, const std::string& filename);
+	ImageI(astro::image::ImagePtr image, const std::string& filename);
 	virtual ~ImageI();
 	virtual std::string	name(const Ice::Current& current);
 	virtual int	age(const Ice::Current& current);
@@ -39,7 +36,9 @@ public:
 				const Ice::Current& current);
 	virtual Metavalue	getMeta(const std::string& keyword,
 					const Ice::Current& current);
-	virtual void	setMeta(const Metavalue& metavalue,
+	virtual void	setMetavalue(const Metavalue& metavalue,
+				const Ice::Current& current);
+	virtual void	setMetadata(const Metadata& metadata,
 				const Ice::Current& current);
 	virtual ImageFile	file(const Ice::Current& current);
 	virtual int	filesize(const Ice::Current& current);
@@ -52,16 +51,14 @@ public:
 
 class ByteImageI : virtual public ByteImage, virtual public ImageI {
 public:
-	ByteImageI(astro::image::ImageDirectory& imagedirectrory,
-		astro::image::ImagePtr image, const std::string& filename);
+	ByteImageI(astro::image::ImagePtr image, const std::string& filename);
 	virtual ~ByteImageI();
 	virtual ByteSequence	getBytes(const Ice::Current& current);
 };
 
 class ShortImageI : virtual public ShortImage, virtual public ImageI {
 public:
-	ShortImageI(astro::image::ImageDirectory& imagedirectrory,
-		astro::image::ImagePtr image, const std::string& filename);
+	ShortImageI(astro::image::ImagePtr image, const std::string& filename);
 	virtual ~ShortImageI();
 	virtual ShortSequence	getShorts(const Ice::Current& current);
 };

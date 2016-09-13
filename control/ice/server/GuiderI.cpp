@@ -13,6 +13,7 @@
 #include <AstroConfig.h>
 #include "CalibrationSource.h"
 #include <AstroEvent.h>
+#include <ImageDirectory.h>
 
 namespace snowstar {
 
@@ -134,10 +135,8 @@ void	callback_adapter<CalibrationMonitorPrx>(CalibrationMonitorPrx& p,
  * \brief Constructor for the Guider servant
  */
 GuiderI::GuiderI(astro::guiding::GuiderPtr _guider,
-	astro::image::ImageDirectory& _imagedirectory,
 	astro::persistence::Database _database)
-	: guider(_guider), imagedirectory(_imagedirectory),
-	  database(_database) {
+	: guider(_guider), database(_database) {
 	// set point to an invalid value to allow us to detect that it 
 	// has not been set
 	_point.x = -1;
@@ -508,6 +507,7 @@ ImagePrx GuiderI::mostRecentImage(const Ice::Current& current) {
 	}
 
 	// store image in image directory
+	astro::image::ImageDirectory	imagedirectory;
 	std::string	filename = imagedirectory.save(image);
 
 	// return a proxy for the image

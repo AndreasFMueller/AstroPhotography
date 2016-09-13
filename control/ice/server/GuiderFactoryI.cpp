@@ -27,14 +27,12 @@ namespace snowstar {
  *				requested by a guider (the factory only
  *				returns a proxy, which will be converted to
  *				to an actual object by the locator)
- * \param _imagedirectory	the image directory to be used by all guiders
  */
 GuiderFactoryI::GuiderFactoryI(astro::persistence::Database _database,
 		astro::guiding::GuiderFactory& _guiderfactory,
-		GuiderLocator *_locator,
-		ImageDirectory& _imagedirectory)
+		GuiderLocator *_locator)
 	: database(_database), guiderfactory(_guiderfactory),
-	  locator(_locator), imagedirectory(_imagedirectory) {
+	  locator(_locator) {
 }
 
 /**
@@ -107,8 +105,7 @@ GuiderPrx	GuiderFactoryI::get(const GuiderDescriptor& descriptor,
 	}
 
 	// create a GuiderI object
-	Ice::ObjectPtr	guiderptr = new GuiderI(guider, imagedirectory,
-		database);
+	Ice::ObjectPtr	guiderptr = new GuiderI(guider, database);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got the guiderptr");
 
 	// add the guider we have constructed to the D

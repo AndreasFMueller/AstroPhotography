@@ -17,6 +17,7 @@
 #include <AstroDevaccess.h>
 #include <NameConverter.h>
 #include <AstroFormat.h>
+#include <ImageDirectory.h>
 
 using namespace astro::device;
 using namespace astro::camera;
@@ -27,9 +28,7 @@ namespace snowstar {
  * \brief Create the locator for device servants
  */
 DeviceServantLocator::DeviceServantLocator(
-	astro::module::Repository& repository,
-	astro::image::ImageDirectory& imagedirectory)
-	: _repository(repository), _imagedirectory(imagedirectory) {
+	astro::module::Repository& repository) : _repository(repository) {
 }
 
 /**
@@ -77,8 +76,7 @@ Ice::ObjectPtr	DeviceServantLocator::locate(const Ice::Current& current,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "getting a CCD");
 		ptr = new CcdI(
 			DeviceAccessor<astro::camera::CcdPtr>(
-				_repository).get(devicename),
-			_imagedirectory);
+				_repository).get(devicename));
 		break;
 
 	case astro::DeviceName::Cooler:

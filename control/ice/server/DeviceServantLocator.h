@@ -8,18 +8,15 @@
 
 #include <Ice/Ice.h>
 #include <AstroLoader.h>
-#include <ImageDirectory.h>
 
 namespace snowstar {
 
 class DeviceServantLocator : public Ice::ServantLocator {
 	astro::module::Repository	_repository;
-	astro::image::ImageDirectory&	_imagedirectory;
 	typedef std::map<std::string, Ice::ObjectPtr>	devicemap;
 	devicemap	devices;
 public:
-	DeviceServantLocator(astro::module::Repository& repository,
-		astro::image::ImageDirectory& imagedirectory);
+	DeviceServantLocator(astro::module::Repository& repository);
 
 	virtual Ice::ObjectPtr	locate(const Ice::Current& current,
 			Ice::LocalObjectPtr& cookie);

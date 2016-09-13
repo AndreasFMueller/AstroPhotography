@@ -14,6 +14,7 @@ module snowstar {
 		string	value;
 		string	comment;
 	};
+	sequence<Metavalue>	Metadata;
 
 	sequence<byte>	ImageFile;
 	/**
@@ -100,7 +101,8 @@ module snowstar {
 		/**
 		 * \brief Update or add a metadata value in the image
 		 */
-		void	setMeta(Metavalue value);
+		void	setMetavalue(Metavalue value);
+		void	setMetadata(Metadata values);
 
 		/**
 		 * \brief Save an image in a repository for later use

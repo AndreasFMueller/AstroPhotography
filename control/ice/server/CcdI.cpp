@@ -13,13 +13,13 @@
 #include <AstroExceptions.h>
 #include <IceConversions.h>
 #include <Ice/Connection.h>
+#include <ImageDirectory.h>
 
 
 namespace snowstar {
 
-CcdI::CcdI(astro::camera::CcdPtr ccd,
-                astro::image::ImageDirectory& imagedirectory)
-		: DeviceI(*ccd), _ccd(ccd), _imagedirectory(imagedirectory) {
+CcdI::CcdI(astro::camera::CcdPtr ccd)
+		: DeviceI(*ccd), _ccd(ccd) {
 }
 
 CcdI::~CcdI() {
@@ -112,9 +112,10 @@ ImagePrx	CcdI::getImage(const Ice::Current& current) {
 	}
 
 	// save image
+	ImageDirectory	_imagedirectory;
 	std::string	filename = _imagedirectory.save(image);
 	
-	return snowstar::getImage(filename, _imagedirectory, current);
+	return snowstar::getImage(filename, current);
 }
 
 bool	CcdI::hasGain(const Ice::Current& /* current */) {
