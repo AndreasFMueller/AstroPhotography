@@ -27,6 +27,7 @@ libastroimage_la_SOURCES = 						\
 	Circle.cpp							\
 	CircularImage.cpp						\
 	Clamper.cpp							\
+	ColorScaling.cpp						\
 	ConnectedComponent.cpp						\
 	ConvolutionOperator.cpp						\
 	ConvolutionResult.cpp						\
@@ -49,6 +50,7 @@ libastroimage_la_SOURCES = 						\
 	FITSout.cpp							\
 	Filters.cpp							\
 	FlatCorrector.cpp						\
+	Flip.cpp							\
 	FocusFilterfunc.cpp						\
 	FourierImage.cpp						\
 	Functions.cpp							\
@@ -95,6 +97,7 @@ libastroimage_la_SOURCES = 						\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\
 	SmallConvolve.cpp						\
+	ThresholdExtractor.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
 	VanCittertOperator.cpp						\

@@ -396,14 +396,26 @@ public:
  * \brief Analysis of a transformation and get a list of 
  */
 class Analyzer {
-	const ConstImageAdapter<double>& baseimage;
-	int	spacing;
-	int	patchsize;
+	const ConstImageAdapter<double>& _baseimage;
+	int	_spacing;
 public:
-	Analyzer(const ConstImageAdapter<double>& _baseimage,
-		int _spacing = 128, int _patchsize = 128);
+	int	spacing() const { return _spacing; }
+	void	spacing(int s) { _spacing = s; }
+private:
+	int	_patchsize;
+public:
+	int	patchsize() const { return _patchsize; }
+	void	patchsize(int p) { _patchsize = p; }
+private:
+	bool	_hanning;
+public:
+	bool	hanning() const { return _hanning; }
+	void	hanning(bool h) { _hanning = h; }
+public:
+	Analyzer(const ConstImageAdapter<double>& baseimage,
+		int spacing = 128, int patchsize = 128);
 	Residual	translation(const ConstImageAdapter<double>& image,
-		const ImagePoint& where, int _patchsize) const;
+		const ImagePoint& where, int patchsize) const;
         std::vector<Residual>	operator()(const ConstImageAdapter<double>& image) const;
 };
 

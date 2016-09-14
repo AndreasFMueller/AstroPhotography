@@ -28,20 +28,28 @@ Imager::Imager(CcdPtr ccd) : _ccd(ccd) {
  */
 void	Imager::operator()(ImagePtr image) {
 	ImageRectangle	frame = image->getFrame();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "working on image %s",
+			frame.toString().c_str());
 	if ((_dark) && (_darksubtract)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform dark correction");
 		DarkCorrector	corrector(_dark, frame);
 		corrector(image);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping dark correction");
 	}
 	if ((_flat) && (_flatdivide)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform flat correction");
 		FlatCorrector	corrector(_flat, frame);
 		corrector(image);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping flat correction");
 	}
 	if ((_interpolate) && (_dark)) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "interpolate bad pixels");
 		Interpolator	interpolator(_dark, frame);
 		interpolator(image);
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "skipping interpolation");
 	}
 }
 

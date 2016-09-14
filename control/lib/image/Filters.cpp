@@ -68,14 +68,19 @@ static RGB<double>	mean_color(const Image<Pixel>& image) {
 	int	h = image.size().height();
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
+			double	value = image.pixel(x, y);
+			if (value != value) {
+				// skip nans
+				continue;
+			}
 			if (mosaic.isR(x, y)) {
-				R += image.pixel(x, y); counterR++;
+				R += value; counterR++;
 			}
 			if (mosaic.isG(x, y)) {
-				G += image.pixel(x, y); counterG++;
+				G += value; counterG++;
 			}
 			if (mosaic.isB(x, y)) {
-				B += image.pixel(x, y); counterB++;
+				B += value; counterB++;
 			}
 		}
 	}

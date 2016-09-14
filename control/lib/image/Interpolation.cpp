@@ -51,10 +51,12 @@ void	TypedInterpolator<DarkPixelType, Pixel>::interpolate(
 	if (image.getSize() != dark.getSize()) {
 		throw std::range_error("image sizes don't match");
 	}
-	for (int x = 0; x < dark.getSize().width(); x++) {
-		for (int y = 0; y < dark.getSize().height(); y++) {
-			DarkPixelType	darkpixel = dark.pixel(x, y);
-			if (darkpixel != darkpixel) {
+	int	w = dark.getSize().width(); 
+	int	h = dark.getSize().height(); 
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			DarkPixelType	v = darkpixel(x, y);
+			if (v != v) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0,
 					"interpolating pixel (%u,%u)", x, y);
 				this->interpolatePixel(x, y, image);
@@ -152,7 +154,7 @@ protected:
 				ImageAdapter<Pixel>& image);
 	MosaicType	mosaic;
 public:
-	MosaicInterpolator(const Image<DarkPixelType>& _dark);
+	MosaicInterpolator(const ConstImageAdapter<DarkPixelType>& _dark);
 	void	setMosaic(const MosaicType& _mosaic) { mosaic = _mosaic; }
 };
 
@@ -164,7 +166,7 @@ DarkPixelType	MosaicInterpolator<DarkPixelType, Pixel>::darkpixel(
 
 template<typename DarkPixelType, typename Pixel>
 MosaicInterpolator<DarkPixelType, Pixel>::MosaicInterpolator(
-	const Image<DarkPixelType>& _dark)
+	const ConstImageAdapter<DarkPixelType>& _dark)
 	: TypedInterpolator<DarkPixelType, Pixel>(_dark) {
 }
 
@@ -272,7 +274,7 @@ void	MosaicInterpolator<DarkPixelType, Pixel>::interpolatePixel(
 //////////////////////////////////////////////////////////////////////
 // Interpolator implementation
 //////////////////////////////////////////////////////////////////////
-Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle _frame)
+Interpolator::Interpolator(const ImagePtr _dark, const ImageRectangle _frame)
 	: dark(_dark), frame(_frame) {
 	floatdark = dynamic_cast<Image<float> *>(&*dark);
 	doubledark = dynamic_cast<Image<double> *>(&*dark);
@@ -281,7 +283,7 @@ Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle _frame)
 			"suitable as darks");
 	}
 	if (_frame == ImageRectangle()) {
-		frame = _dark->getFrame();
+		frame = dark->getFrame();
 	}
 }
 
@@ -296,7 +298,7 @@ Interpolator::Interpolator(const ImagePtr& _dark, const ImageRectangle _frame)
 	}								\
 }
 
-void	Interpolator::interpolateMonochrome(ImagePtr& image) {
+void	Interpolator::interpolateMonochrome(ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "doing monochrome interpolation");
 	if (floatdark) {
 		WindowAdapter<float>	windowdark(*floatdark, frame);
@@ -319,24 +321,30 @@ void	Interpolator::interpolateMonochrome(ImagePtr& image) {
 	throw std::runtime_error("cannot interpolate this image type");
 }
 
+template<typename darkpixel, typename pixel>
+static void	do_interpolate_mosaic(const ConstImageAdapter<darkpixel>& dark,
+		Image<pixel>& image) {
+	MosaicInterpolator<darkpixel, pixel>	tint(dark);
+	tint.setMosaic(image.getMosaicType());
+	tint.interpolate(image);
+}
+
 #define interpolate_mosaic(darkpixeltype, pixel, dark, image)		\
 {									\
 	Image<pixel>	*imagep						\
 		= dynamic_cast<Image<pixel > *>(&*image);		\
 	if (NULL != imagep) {						\
-		MosaicInterpolator<darkpixeltype, pixel>	tint(dark);	\
-		tint.setMosaic(image->getMosaicType());			\
-		tint.interpolate(*imagep);				\
+		do_interpolate_mosaic(dark, *imagep);			\
 		return;							\
 	}								\
 }
 
-void	Interpolator::interpolateMosaic(ImagePtr& image) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "Mosaic interpolation");
+void	Interpolator::interpolateMosaic(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "doing Mosaic interpolation");
 	if (floatdark) {
 		WindowAdapter<float>	windowdark(*floatdark, frame);
 		interpolate_mosaic(float, unsigned char, windowdark, image);
-		interpolate_mosaic(float, unsigned short, windowdark, image);
+		interpolate_mosaic(float, unsigned short, *floatdark, image);
 		interpolate_mosaic(float, unsigned int, windowdark, image);
 		interpolate_mosaic(float, unsigned long, windowdark, image);
 		interpolate_mosaic(float, float, windowdark, image);
@@ -354,7 +362,7 @@ void	Interpolator::interpolateMosaic(ImagePtr& image) {
 	return;
 }
 
-void	Interpolator::operator()(ImagePtr& image) {
+void	Interpolator::operator()(ImagePtr image) {
 	if (image->getMosaicType().isMosaic()) {
 		interpolateMosaic(image);
 	} else {

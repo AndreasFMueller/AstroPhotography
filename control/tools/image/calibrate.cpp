@@ -14,6 +14,8 @@
 #include <AstroDemosaic.h>
 #include <AstroImager.h>
 #include <AstroUtils.h>
+#include <AstroOperators.h>
+#include <AstroAdapter.h>
 
 using namespace astro;
 using namespace astro::io;
@@ -46,6 +48,7 @@ static void	usage(const char *progname) {
 	std::cout << "  -M,--max=<max>          clamp the image values to at most <max>"
 		<< std::endl;
 	std::cout << "  -b,--bayer              demosaic bayer images" << std::endl;
+	std::cout << "  -f,--flip               flip image (useful for HyperStar)" << std::endl;
 	std::cout << "  -i,--interpolate        interpolate bad pixels" << std::endl;
 	std::cout << "  -d,--debug              increase debug level" << std::endl;
 	std::cout << "  -h,-?,--help            show this help message" << std::endl;
@@ -56,11 +59,12 @@ static struct option	longopts[] = {
 { "debug",		no_argument,		NULL,	'd' }, /* 1 */
 { "dark",		required_argument,	NULL,	'D' }, /* 2 */
 { "flat",		required_argument,	NULL,	'F' }, /* 3 */
-{ "help",		no_argument,		NULL,	'h' }, /* 4 */
-{ "min",		required_argument,	NULL,	'm' }, /* 5 */
-{ "max",		required_argument,	NULL,	'M' }, /* 6 */
-{ "interpolate",	no_argument,		NULL,	'i' }, /* 7 */
-{ NULL,			0,			NULL,	 0  }, /* 8 */
+{ "flip",		no_argument,		NULL,	'f' }, /* 4 */
+{ "help",		no_argument,		NULL,	'h' }, /* 5 */
+{ "min",		required_argument,	NULL,	'm' }, /* 6 */
+{ "max",		required_argument,	NULL,	'M' }, /* 7 */
+{ "interpolate",	no_argument,		NULL,	'i' }, /* 8 */
+{ NULL,			0,			NULL,	 0  }, /* 9 */
 };
 
 /**
@@ -75,9 +79,10 @@ int	main(int argc, char *argv[]) {
 	double	maxvalue = -1;
 	bool	demosaic = false;
 	bool	interpolate = false;
+	bool	flip = false;
 
 	// parse the command line
-	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hm:M:bi",
+	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hfm:M:bi",
 		longopts, &longindex)))
 		switch (c) {
 		case 'b':
@@ -91,6 +96,9 @@ int	main(int argc, char *argv[]) {
 			break;
 		case 'F':
 			flatfilename = optarg;
+			break;
+		case 'f':
+			flip = true;
 			break;
 		case '?':
 		case 'h':
@@ -167,17 +175,32 @@ int	main(int argc, char *argv[]) {
 		clamp(image);
 	}
 
+	// if demosaic is requested we do that now
+	ImagePtr	outimage;
+	if (demosaic) {
+		outimage = demosaic_bilinear(image);
+		if (image->hasMetadata("PROJECT")) {
+			outimage->setMetadata(image->getMetadata("PROJECT"));
+		}
+		if (image->hasMetadata("INSTRUME")) {
+			outimage->setMetadata(image->getMetadata("INSTRUME"));
+		}
+		//astro::image::operators::colorscaling_operator(RGB<double>(0.57,0.88,1), outimage);
+	} else {
+		outimage = image;
+	}
+
+	// flip the image
+	if (flip) {
+		astro::image::operators::flip(outimage);
+	}
+
 	// after all the calibrations have been performed, write the output
 	// file
 	FITSout	outfile(outfilename);
 
-	// if demosaic is requested we do that now
-	if (demosaic) {
-		ImagePtr	demosaiced = demosaic_bilinear(image);
-		outfile.write(demosaiced);
-	} else {
-		outfile.write(image);
-	}
+	// set attributes that we inherit from the original image
+	outfile.write(outimage);
 
 	// that's it
 	return EXIT_SUCCESS;

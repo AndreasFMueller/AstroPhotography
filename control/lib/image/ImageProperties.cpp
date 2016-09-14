@@ -14,7 +14,7 @@ namespace image {
 		return false;						\
 	}
 
-bool	isColorImage(const ImagePtr& image) {
+bool	isColorImage(const ImagePtr image) {
 	iscolor(image, unsigned char)
 	iscolor(image, unsigned short)
 	iscolor(image, unsigned int)
@@ -24,7 +24,7 @@ bool	isColorImage(const ImagePtr& image) {
 	return true;
 }
 
-bool	isMonochromeImage(const ImagePtr& image) {
+bool	isMonochromeImage(const ImagePtr image) {
 	return !isColorImage(image);
 }
 

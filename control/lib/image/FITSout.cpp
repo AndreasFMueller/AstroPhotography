@@ -41,7 +41,7 @@ void	FITSout::unlink() {
  * \param image		Image to write
  */
 template<typename P>
-static bool	do_write(const std::string& filename, const ImagePtr& image,
+static bool	do_write(const std::string& filename, const ImagePtr image,
 			const bool precious = true)
 		throw (FITSexception) {
 	Image<P>	*im = dynamic_cast<Image<P> *>(&*image);
@@ -59,7 +59,7 @@ static bool	do_write(const std::string& filename, const ImagePtr& image,
  *
  * \param image		The image to write to the file
  */
-void	FITSout::write(const ImagePtr& image) throw (FITSexception) {
+void	FITSout::write(const ImagePtr image) throw (FITSexception) {
 	// test the various types, and call the do_write template 
 #define	do_write_typed(type)						\
 	if (do_write<type >(filename, image, precious())) {		\

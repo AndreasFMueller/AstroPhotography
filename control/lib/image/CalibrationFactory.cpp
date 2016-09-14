@@ -18,6 +18,7 @@ using namespace astro::image;
 using namespace astro::image::filter;
 using namespace astro::camera;
 using namespace astro::adapter;
+using namespace astro::io;
 
 namespace astro {
 namespace calibration {
@@ -408,10 +409,13 @@ template<typename T>
 ImagePtr	dark_plain(const ImageSequence& images) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "plain dark processing");
 	ImageMean<T>	im(images, true);
-	subdark<T>(images, im, Subgrid());
+	size_t	badpixels = subdark<T>(images, im, Subgrid());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
 	
 	// that's it, we now have a dark image
-	return im.getImagePtr();
+	ImagePtr	darkimg = im.getImagePtr();
+	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
+	return darkimg;
 }
 
 template<typename T>
@@ -431,7 +435,9 @@ ImagePtr	dark(const ImageSequence& images, bool gridded = false) {
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(0, 1), step));
 	badpixels += subdark<T>(images, im, Subgrid(ImagePoint(1, 1), step));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "total bad pixels: %d", badpixels);
-	return im.getImagePtr();
+	ImagePtr	darkimg = im.getImagePtr();
+	darkimg->setMetadata(FITSKeywords::meta("BADPIXEL", (long)badpixels));
+	return darkimg;
 }
 
 /**
@@ -456,10 +462,21 @@ ImagePtr DarkFrameFactory::operator()(const ImageSequence& images) const {
 	// based on the bit size of the first image, decide whether to work
 	// with floats or with doubles
 	unsigned int	floatlimit = std::numeric_limits<float>::digits;
-	if (firstimage->bitsPerPixel() <= floatlimit) {
-		return dark<float>(images, gridded);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "float limit is %u", floatlimit);
+	ImagePtr	result;
+	if (firstimage->bitsPerPlane() <= floatlimit) {
+		result = dark<float>(images, gridded);
+	} else {
+		result = dark<double>(images, gridded);
 	}
-	return dark<double>(images, gridded);
+	if (firstimage->hasMetadata("INSTRUME")) {
+		result->setMetadata(firstimage->getMetadata("INSTRUME"));
+	}
+	if (firstimage->hasMetadata("PROJECT")) {
+		result->setMetadata(firstimage->getMetadata("PROJECT"));
+	}
+	result->setMosaicType(firstimage->getMosaicType());
+	return result;
 }
 
 /**
@@ -495,7 +512,7 @@ ImagePtr	flat(const ImageSequence& images, const Image<T>& dark) {
 }
 
 ImagePtr	FlatFrameFactory::operator()(const ImageSequence& images,
-			const ImagePtr& darkimage) const {
+			const ImagePtr darkimage) const {
 	Image<double>	*doubledark = dynamic_cast<Image<double>*>(&*darkimage);
 	Image<float>	*floatdark = dynamic_cast<Image<float>*>(&*darkimage);
 	if (doubledark) {
@@ -526,7 +543,7 @@ class TypedCalibrator {
 public:
 	TypedCalibrator(const ConstImageAdapter<T>& _dark,
 		const ConstImageAdapter<T>& _flat);
-	ImagePtr	operator()(const ImagePtr& image) const;
+	ImagePtr	operator()(const ImagePtr image) const;
 };
 
 template<typename T>
@@ -537,7 +554,7 @@ TypedCalibrator<T>::TypedCalibrator(const ConstImageAdapter<T>& _dark,
 }
 
 template<typename T>
-ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
+ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr image) const {
 	ConstPixelValueAdapter<T>	im(image);
 	Image<T>	*result = new Image<T>(image->size());
 	for (int x = 0; x < image->size().width(); x++) {
@@ -561,7 +578,7 @@ ImagePtr	TypedCalibrator<T>::operator()(const ImagePtr& image) const {
 //////////////////////////////////////////////////////////////////////
 // Calibrator implementation
 //////////////////////////////////////////////////////////////////////
-Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat,
+Calibrator::Calibrator(const ImagePtr _dark, const ImagePtr _flat,
 		const ImageRectangle _rectangle)
 	: dark(_dark), flat(_flat), rectangle(_rectangle) {
 	// We want dark and flat images to be of float or double type
@@ -574,7 +591,7 @@ Calibrator::Calibrator(const ImagePtr& _dark, const ImagePtr& _flat,
 	}
 }
 
-ImagePtr	Calibrator::operator()(const ImagePtr& image) const {
+ImagePtr	Calibrator::operator()(const ImagePtr image) const {
 	unsigned int	floatlimit = std::numeric_limits<float>::digits;
 	// find the appropriate frame to use for the correction images
 	ImageRectangle	frame;

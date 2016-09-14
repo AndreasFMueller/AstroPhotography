@@ -44,14 +44,25 @@ public:
 	void	add(ImagePtr image);
 };
 
+
+class Stacker;
+typedef std::shared_ptr<Stacker>	StackerPtr;
 /**
  * \brief Stacker class
  */
 class Stacker {
+protected:
+	ImagePtr	_baseimage;
 	int	_patchsize;
 public:
-	Stacker(int patchsize = 256) : _patchsize(patchsize) { }
-	ImagePtr	operator()(ImageSequence images);
+	int	patchsize() const { return _patchsize; }
+	void	patchsize(int p) { _patchsize = p; }
+	static StackerPtr	get(ImagePtr baseimage);
+protected:
+	Stacker(ImagePtr baseimage) : _baseimage(baseimage), _patchsize(256) { }
+public:
+	virtual void	add(ImagePtr) = 0;
+	virtual ImagePtr	image() = 0;
 };
 
 } // namespace stacking

@@ -30,12 +30,13 @@ class FlipOperator : public ImageOperator<T> {
 public:
 	FlipOperator() { }
 	virtual void	operator()(astro::image::Image<T>& image) {
-		for (int line = 0; (line << 1) < image.size().height();
-			line++) {
-			T	*p = &image.pixels[line * image.size().width()];
-			int	lastline = image.size().height() - line - 1;
-			T	*q = &image.pixels[lastline * image.size().width()];
-			for (int i = 0; i < image.size().width(); i++) {
+		int	h = image.size().height();
+		int	w = image.size().width();
+		for (int line = 0; (line << 1) < (h - 1); line++) {
+			T	*p = &image.pixels[line * w];
+			int	lastline = h - line - 1;
+			T	*q = &image.pixels[lastline * w];
+			for (int i = 0; i < w; i++) {
 				T	v = p[i];
 				p[i] = q[i];
 				q[i] = v;
@@ -43,6 +44,13 @@ public:
 		}
 	}
 };
+
+template<typename T>
+void	flip(Image<T>& image) {
+	FlipOperator<T>()(image);
+}
+
+void	flip(ImagePtr image);
 
 template<typename T>
 class LimitOperator : public ImageOperator<T> {
@@ -101,6 +109,27 @@ public:
 		}
 	}
 };
+
+template<typename T>
+class ColorScalingOperator : public ImageOperator<RGB<T> > {
+	RGB<double>	_scale;
+public:
+	ColorScalingOperator(const RGB<double>& scale) : _scale(scale) {
+	}
+	virtual void	operator()(Image<RGB<T> >& image) {
+		int	w = image.size().width();
+		int	h = image.size().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				RGB<T>	v = image.pixel(x, y);
+				image.pixel(x, y) = RGB<T>(v.R * _scale.R,
+					v.G * _scale.G, v.B * _scale.B);
+			}
+		}
+	}
+};
+
+void	colorscaling_operator(const RGB<double>& scale, ImagePtr image);
 
 } // namespace operators
 } // namespace image

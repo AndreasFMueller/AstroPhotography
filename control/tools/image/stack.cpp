@@ -76,19 +76,30 @@ int	main(int argc, char *argv[]) {
 		}
 	}
 
-	// read all the images
-	ImageSequence	images;
-	for (; optind < argc; optind++) {
-		FITSin	in(argv[optind]);
-		ImagePtr	image = in.read();
-		images.push_back(image);
+	// make sure we have at least 2 files
+	if (2 > (argc - optind)) {
+		std::cerr << "must specify at least two image files";
+		std::cerr << std::endl;
+		return EXIT_FAILURE;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d images for sequence",
-		images.size());
+
+	// open the first image, which will serve as the base image
+	FITSin	in(argv[optind++]);
+	ImagePtr	baseimage = in.read();
+
+	// create a stacker based in the base image
+	StackerPtr	stacker = Stacker::get(baseimage);
+	stacker->patchsize(patchsize);
+
+	// read all the images
+	while (optind < argc) {
+		FITSin	in(argv[optind++]);
+		ImagePtr	image = in.read();
+		stacker->add(image);
+	}
 
 	// now do the stacking
-	astro::image::stacking::Stacker	stacker(patchsize);
-	ImagePtr	stackedimage = stacker(images);
+	ImagePtr	stackedimage = stacker->image();
 
 	// write the result image
 	if(NULL != outfilename) {

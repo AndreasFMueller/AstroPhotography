@@ -422,7 +422,6 @@ void	exposewidget::updateImagelist() {
 	for (auto ptr = ids.begin(); ptr != ids.end(); ptr++) {
 		int	id = *ptr;
 		snowstar::ImageInfo	info = _repository->getInfo(id);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "filter = '%s'", info.filter.c_str());
 
 		QStringList	list;
 		list << QString::number(id);	// 0

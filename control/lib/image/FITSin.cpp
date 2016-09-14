@@ -140,7 +140,7 @@ ImagePtr	FITSin::read() throw (FITSexception) {
 	if (infile.hasHeader(std::string("BAYER"))) {
 		std::string	bayervalue
 			= infile.getHeader(std::string("BAYER"));
-		bayervalue = bayervalue.substr(1, 4);
+		bayervalue = bayervalue.substr(0, 4);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "bayervalue: '%s'",
 			bayervalue.c_str());
                 if (bayervalue == std::string("RGGB")) {

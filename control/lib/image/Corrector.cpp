@@ -16,7 +16,7 @@ namespace calibration {
 /**
  * \brief Construct a corrector
  */
-Corrector::Corrector(const ImagePtr& _calibrationimage,
+Corrector::Corrector(const ImagePtr _calibrationimage,
 	const ImageRectangle _rectangle)
 	: calibrationimage(_calibrationimage), rectangle(_rectangle) {
 	// first compute the rectangle from which to take the dark data

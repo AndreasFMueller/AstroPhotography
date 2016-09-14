@@ -74,7 +74,7 @@ void	dark_correct(Image<ImagePixelType>& image,
 }
 
 template<typename DarkPixelType>
-void	dark_correct_typed(ImagePtr& image,
+void	dark_correct_typed(ImagePtr image,
 		const ConstImageAdapter<DarkPixelType>& dark) {
 	dark_correct_for(unsigned char);
 	dark_correct_for(unsigned short);
@@ -90,7 +90,7 @@ void	dark_correct_typed(ImagePtr& image,
 //////////////////////////////////////////////////////////////////////
 // DarkCorrector implementation
 //////////////////////////////////////////////////////////////////////
-DarkCorrector::DarkCorrector(const ImagePtr& _dark,
+DarkCorrector::DarkCorrector(const ImagePtr _dark,
 	const ImageRectangle _rectangle)
 	: Corrector(_dark, _rectangle) {
 }
@@ -99,12 +99,12 @@ DarkCorrector::DarkCorrector(const ImagePtr& _dark,
  * \brief perform dark correction
  *
  * Subtract the dark image from the argument image. This is done in place,
- * as most quite, the uncorrected image is no longer needed. If a new image
- * is required, first create the new image, then apply the dark corrector in
- * place.
+ * as most of the time, the uncorrected image is no longer needed.
+ * If a new image is required, first create the new image, then apply
+ * the dark corrector in place.
  * \param image     image to dark correct
  */
-void	DarkCorrector::operator()(ImagePtr& image) const {
+void	DarkCorrector::operator()(ImagePtr image) const {
 	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
 	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
 	if (NULL != fp) {

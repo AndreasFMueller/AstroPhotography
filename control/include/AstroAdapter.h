@@ -854,6 +854,7 @@ Pixel	RescalingAdapter<Pixel>::pixel(int x, int y) const {
 //////////////////////////////////////////////////////////////////////
 template<typename Pixel>
 class ConstPixelValueAdapter : public ConstImageAdapter<Pixel> {
+	ImagePtr	_image;
 	const Image<unsigned char>	*byteimage;
 	const Image<unsigned short>	*shortimage;
 	const Image<unsigned int>	*intimage;
@@ -861,13 +862,13 @@ class ConstPixelValueAdapter : public ConstImageAdapter<Pixel> {
 	const Image<float>		*floatimage;
 	const Image<double>		*doubleimage;
 public:
-	ConstPixelValueAdapter(const ImagePtr& image);
+	ConstPixelValueAdapter(ImagePtr image);
 	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
-ConstPixelValueAdapter<Pixel>::ConstPixelValueAdapter(const ImagePtr& image)
-	: ConstImageAdapter<Pixel>(image->size()) {
+ConstPixelValueAdapter<Pixel>::ConstPixelValueAdapter(const ImagePtr image)
+	: ConstImageAdapter<Pixel>(image->size()), _image(image) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
 	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
@@ -900,6 +901,7 @@ Pixel	ConstPixelValueAdapter<Pixel>::pixel(int x, int y) const {
 
 template <typename Pixel>
 class PixelValueAdapter : public ConstImageAdapter<Pixel> {
+	ImagePtr	_image;
 	const Image<unsigned char>	*byteimage;
 	const Image<unsigned short>	*shortimage;
 	const Image<unsigned int>	*intimage;
@@ -907,13 +909,13 @@ class PixelValueAdapter : public ConstImageAdapter<Pixel> {
 	const Image<float>		*floatimage;
 	const Image<double>		*doubleimage;
 public:
-	PixelValueAdapter(ImagePtr& image);
+	PixelValueAdapter(ImagePtr image);
 	virtual Pixel	pixel(int x, int y) const;
 };
 
 template<typename Pixel>
-PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr& image) :
-	ConstImageAdapter<Pixel>(image->size()) {
+PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr image) :
+	ConstImageAdapter<Pixel>(image->size()), _image(image) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
 	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
@@ -947,22 +949,22 @@ Pixel	PixelValueAdapter<Pixel>::pixel(int x, int y) const {
 //////////////////////////////////////////////////////////////////////
 // RGB Adapter
 //////////////////////////////////////////////////////////////////////
-template<typename T>
-class RGBAdapter : public ConstImageAdapter<RGB<double> > {
+template<typename S, typename T>
+class RGBAdapter : public ConstImageAdapter<RGB<S> > {
 	const ConstImageAdapter<RGB<T> >&	image;
 public:
 	RGBAdapter(const ConstImageAdapter<RGB<T> >& image);
-	RGB<double>	pixel(int x, int y) const;
+	RGB<S>	pixel(int x, int y) const;
 };
 
-template<typename T>
-RGBAdapter<T>::RGBAdapter(const ConstImageAdapter<RGB<T> >& _image)
-	: ConstImageAdapter<RGB<double> >(_image.getSize()), image(_image) {
+template<typename S, typename T>
+RGBAdapter<S, T>::RGBAdapter(const ConstImageAdapter<RGB<T> >& _image)
+	: ConstImageAdapter<RGB<S> >(_image.getSize()), image(_image) {
 }
 
-template<typename T>
-RGB<double>	RGBAdapter<T>::pixel(int x, int y) const {
-	return RGB<double>(image.pixel(x, y));
+template<typename S, typename T>
+RGB<S>	RGBAdapter<S, T>::pixel(int x, int y) const {
+	return RGB<S>(image.pixel(x, y));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2154,6 +2156,62 @@ T	BayerGAdapter<S,T>::pixel(int x, int y) const {
 	value = accumulator / count;
 	return value;
 }
+
+//////////////////////////////////////////////////////////////////////
+// Color scaling adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class ColorScalingAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	RGB<double>	_scale;
+public:
+	ColorScalingAdapter(const ConstImageAdapter<RGB<T> >& image,
+		const RGB<double> scale)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
+		  _scale(scale) {
+	}
+	virtual RGB<T>	pixel(int x, int y) const {
+		RGB<T>	p = _image.pixel(x, y);
+		RGB<T>	result(p.R * _scale.R, p.G * _scale.G, p.B * _scale.B);
+		return result;
+	}
+};
+
+template<typename T>
+ImagePtr	colorscaling(const RGB<double>& scale,
+	const ConstImageAdapter<RGB<T> >& image) {
+	ColorScalingAdapter<T>	ca(image, scale);
+	return ImagePtr(new Image<RGB<T> >(ca));
+}
+
+ImagePtr	colorscaling(const RGB<double>& scale, ImagePtr image);
+
+//////////////////////////////////////////////////////////////////////
+// Thresholding adapter
+//////////////////////////////////////////////////////////////////////
+/**
+ * \brief Thresholding
+ */
+class ThresholdExtractor {
+	double	_p;
+public:
+	ThresholdExtractor(double p = 0.1) : _p(p) { }
+	double	threshold(const ConstImageAdapter<double>& image) const;
+};
+
+template<typename Pixel>
+class ThresholdingAdapter : public ThresholdExtractor,
+				public LevelMaskAdapter<Pixel> {
+	double	t(const ConstImageAdapter<Pixel>& image) const {
+		return threshold(TypeConversionAdapter<Pixel>(image));
+	}
+public:
+	ThresholdingAdapter(const ConstImageAdapter<Pixel>& image, double p)
+		: ThresholdExtractor(p),
+		  LevelMaskAdapter<Pixel>(image, t(image)) {
+	}
+};
+
 
 } // namespace adapter
 } // namespace astro

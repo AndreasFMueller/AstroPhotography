@@ -90,10 +90,10 @@ void	ccdcontrollerwidget::instrumentSetup(
 					_ccd = ccd;
 				}
 				ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-				index++;
 			} catch (const std::exception& x) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
 			}
+			index++;
 		}
 		index = 0;
 	}
@@ -104,10 +104,10 @@ void	ccdcontrollerwidget::instrumentSetup(
 				_ccd = ccd;
 			}
 			ui->ccdSelectionBox->addItem(QString(ccd->getName().c_str()));
-			index++;
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring ccd %d", index);
 		}
+		index++;
 	}
 
 	// add additional information about this ccd

@@ -75,5 +75,24 @@ DoubleAdapter::DoubleAdapter(const ImagePtr image) :
 	doubleimage = std::shared_ptr<ConstImageAdapter<double> >(adapter);
 }
 
+#define	do_colorscaling(scale, image, Pixel)				\
+	{								\
+		Image<RGB<Pixel> >	*imagep				\
+			= dynamic_cast<Image<RGB<Pixel> >*>(&*image);	\
+		if (NULL != imagep) {					\
+			return astro::adapter::colorscaling(scale, *imagep);\
+		}							\
+	}
+
+ImagePtr	colorscaling(const RGB<double>& scale, ImagePtr image) {
+	do_colorscaling(scale, image, unsigned char);
+	do_colorscaling(scale, image, unsigned short);
+	do_colorscaling(scale, image, unsigned int);
+	do_colorscaling(scale, image, unsigned long);
+	do_colorscaling(scale, image, float);
+	do_colorscaling(scale, image, double);
+	throw std::runtime_error("cannot do color scaling on this image");
+}
+
 } // namespace image
 } // namespace astro

@@ -1116,7 +1116,7 @@ ImagePtr	baseimage(std::shared_ptr<Image<P> >& image) {
  * \param image	Image to query the pixel type
  */
 template<typename P>
-bool	hasType(const ImagePtr& image) {
+bool	hasType(const ImagePtr image) {
 	return (NULL != dynamic_cast<Image<P> *>(&*image)) ? true : false;
 }
 
@@ -1208,12 +1208,12 @@ void	copy(Image<destPixel>& dest, const ConstImageAdapter<srcPixel>& src) {
 /**
  * \brief Find out whether an image is a color
  */
-bool	isColorImage(const ImagePtr& image);
+bool	isColorImage(const ImagePtr image);
 
 /**
  * \brief Find out whether an image is a monochrome
  */
-bool	isMonochromeImage(const ImagePtr& image);
+bool	isMonochromeImage(const ImagePtr image);
 
 /**
  * \brief Abstraction for subgrids of an image

@@ -75,7 +75,7 @@ void	do_clamp(Image<RGB<P> >& image, double minvalue, double maxvalue) {
 	}								\
 }
 
-void	Clamper::operator()(ImagePtr& image) const {
+void	Clamper::operator()(ImagePtr image) const {
 	do_clamp_monochrome(unsigned char);
 	do_clamp_monochrome(unsigned short);
 	do_clamp_monochrome(unsigned int);

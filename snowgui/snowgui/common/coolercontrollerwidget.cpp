@@ -42,10 +42,10 @@ void	coolercontrollerwidget::instrumentSetup(
 			}
 			ui->coolerSelectionBox->addItem(
 				QString(cooler->getName().c_str()));
-			index++;
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore cooler %d", index);
 		}
+		index++;
 	}
 
 	// connect signals

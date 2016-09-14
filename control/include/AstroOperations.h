@@ -9,10 +9,10 @@
 namespace astro {
 namespace image {
 
-ImagePtr	operator+(const ImagePtr& a, const ImagePtr& b);
-ImagePtr	operator-(const ImagePtr& a, const ImagePtr& b);
-ImagePtr	operator*(const ImagePtr& a, const ImagePtr& b);
-ImagePtr	operator/(const ImagePtr& a, const ImagePtr& b);
+ImagePtr	operator+(const ImagePtr a, const ImagePtr b);
+ImagePtr	operator-(const ImagePtr a, const ImagePtr b);
+ImagePtr	operator*(const ImagePtr a, const ImagePtr b);
+ImagePtr	operator/(const ImagePtr a, const ImagePtr b);
 
 ImagePtr	average(const std::vector<ImagePtr>& images);
 

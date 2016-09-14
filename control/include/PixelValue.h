@@ -25,6 +25,7 @@ namespace image {
  */
 template<typename T>
 class ConstPixelValue {
+	ImagePtr	_image;
 	const Image<unsigned char>	*byteimage;
 	const Image<unsigned short>	*shortimage;
 	const Image<unsigned int>	*intimage;
@@ -32,7 +33,7 @@ class ConstPixelValue {
 	const Image<float>	*floatimage;
 	const Image<double>	*doubleimage;
 public:
-	ConstPixelValue(const ImagePtr& image);
+	ConstPixelValue(const ImagePtr image);
 	T	pixelvalue(unsigned int x, unsigned int y) const;
 };
 
@@ -40,7 +41,7 @@ public:
  * \brief Constructor
  */
 template<typename T>
-ConstPixelValue<T>::ConstPixelValue(const ImagePtr& image) {
+ConstPixelValue<T>::ConstPixelValue(const ImagePtr image) : _image(image) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
 	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 	intimage = dynamic_cast<Image<unsigned int> *>(&*image);
@@ -89,6 +90,7 @@ T	ConstPixelValue<T>::pixelvalue(unsigned int x, unsigned int y) const {
  */
 template<typename T>
 class PixelValue {
+	ImagePtr	_image;
 	Image<unsigned char>	*byteimage;
 	Image<unsigned short>	*shortimage;
 	Image<unsigned int>	*intimage;
@@ -96,12 +98,12 @@ class PixelValue {
 	Image<float>	*floatimage;
 	Image<double>	*doubleimage;
 public:
-	PixelValue(ImagePtr& image);
+	PixelValue(ImagePtr image);
 	T	pixelvalue(unsigned int x, unsigned int y);
 };
 
 template<typename T>
-PixelValue<T>::PixelValue(ImagePtr& image) {
+PixelValue<T>::PixelValue(ImagePtr image) : _image(image) {
 	byteimage = dynamic_cast<Image<unsigned char> *>(&*image);
 	shortimage = dynamic_cast<Image<unsigned short> *>(&*image);
 	intimage = dynamic_cast<Image<unsigned int> *>(&*image);

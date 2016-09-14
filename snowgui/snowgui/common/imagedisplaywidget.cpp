@@ -507,7 +507,7 @@ void	imagedisplaywidget::processNewImageInfo(ImagePtr image) {
 
 	// query the bayer pattern
 	if (image->hasMetadata("BAYER")) {
-		Metavalue	v = image->getMetadata("EXPTIME");
+		Metavalue	v = image->getMetadata("BAYER");
 		ui->bayerField->setText(QString(v.getValue().c_str()));
 	} else {
 		ui->bayerField->setText(QString("none"));

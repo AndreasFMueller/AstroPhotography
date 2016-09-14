@@ -39,7 +39,7 @@ astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images) con
 class FlatFrameFactory : public CalibrationFrameFactory {
 public:
 astro::image::ImagePtr	operator()(const astro::image::ImageSequence& images,
-	const astro::image::ImagePtr& darkimage) const;
+	const astro::image::ImagePtr darkimage) const;
 };
 
 /**
@@ -50,7 +50,7 @@ class Clamper {
 	double maxvalue;
 public:
 	Clamper(double minvalue, double maxvalue);
-	void	operator()(astro::image::ImagePtr& image) const;
+	void	operator()(astro::image::ImagePtr image) const;
 };
 
 /**
@@ -59,7 +59,7 @@ public:
 class Stretcher {
 public:
 	Stretcher();
-	void	operator()(astro::image::ImagePtr& image) const;
+	void	operator()(astro::image::ImagePtr image) const;
 };
 
 /**
@@ -67,13 +67,13 @@ public:
  */
 class Corrector {
 protected:
-	const astro::image::ImagePtr&	calibrationimage;
+	astro::image::ImagePtr	calibrationimage;
 	astro::image::ImageRectangle	rectangle;
 public:
-	Corrector(const astro::image::ImagePtr& calibrationimage,
+	Corrector(astro::image::ImagePtr calibrationimage,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr& image) const = 0;
+	virtual void	operator()(astro::image::ImagePtr image) const = 0;
 };
 
 /**
@@ -81,10 +81,10 @@ public:
  */
 class DarkCorrector : public Corrector {
 public:
-	DarkCorrector(const astro::image::ImagePtr& dark,
+	DarkCorrector(astro::image::ImagePtr dark,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr& image) const;
+	virtual void	operator()(astro::image::ImagePtr image) const;
 };
 
 /**
@@ -92,25 +92,25 @@ public:
  */
 class FlatCorrector : public Corrector {
 public:
-	FlatCorrector(const astro::image::ImagePtr& flat,
+	FlatCorrector(astro::image::ImagePtr flat,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	virtual void	operator()(astro::image::ImagePtr& image) const;
+	virtual void	operator()(astro::image::ImagePtr image) const;
 };
 
 /**
  * \brief Calibrate using a dark frame and a flat frame
  */
 class Calibrator {
-	const astro::image::ImagePtr&	dark;
-	const astro::image::ImagePtr&	flat;
+	astro::image::ImagePtr	dark;
+	astro::image::ImagePtr	flat;
 	astro::image::ImageRectangle	rectangle;
 public:
-	Calibrator(const astro::image::ImagePtr& dark,
-		const astro::image::ImagePtr& flat,
+	Calibrator(astro::image::ImagePtr dark,
+		astro::image::ImagePtr flat,
 		const astro::image::ImageRectangle rectangle
 			= astro::image::ImageRectangle());
-	astro::image::ImagePtr	operator()(const astro::image::ImagePtr& image) const;
+	astro::image::ImagePtr	operator()(const astro::image::ImagePtr image) const;
 };
 
 /**
@@ -152,10 +152,10 @@ public:
 };
 
 class FlatFrameProcess : public CalibrationFrameProcess {
-	const astro::image::ImagePtr&	dark;
+	const astro::image::ImagePtr	dark;
 public:
 	FlatFrameProcess(astro::camera::CcdPtr _ccd,
-		const astro::image::ImagePtr& _dark)
+		const astro::image::ImagePtr _dark)
 		: CalibrationFrameProcess(_ccd), dark(_dark) { }
 	virtual astro::image::ImagePtr	get();
 };

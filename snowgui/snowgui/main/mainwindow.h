@@ -41,6 +41,9 @@ private:
 	QAction	*connectAction;
 	void	connectFile();
 
+	QAction	*openAction;
+	void	openFile();
+
 	void	createActions();
 	void	createMenus();
 };

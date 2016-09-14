@@ -72,7 +72,7 @@ void	flat_correct(Image<ImagePixelType>& image,
 }
 
 template<typename FlatPixelType>
-void	flat_correct_typed(ImagePtr& image,
+void	flat_correct_typed(ImagePtr image,
 		const Image<FlatPixelType>& flat) {
 	flat_correct_for(unsigned char);
 	flat_correct_for(unsigned short);
@@ -88,7 +88,7 @@ void	flat_correct_typed(ImagePtr& image,
 //////////////////////////////////////////////////////////////////////
 // FlatCorrector implementation
 //////////////////////////////////////////////////////////////////////
-FlatCorrector::FlatCorrector(const ImagePtr& _flat,
+FlatCorrector::FlatCorrector(const ImagePtr _flat,
 	const ImageRectangle _rectangle)
 	: Corrector(_flat, _rectangle) {
 }
@@ -102,7 +102,7 @@ FlatCorrector::FlatCorrector(const ImagePtr& _flat,
  * place.
  * \param image     image to flat correct
  */
-void	FlatCorrector::operator()(ImagePtr& image) const {
+void	FlatCorrector::operator()(ImagePtr image) const {
 	Image<float>	*fp = dynamic_cast<Image<float> *>(&*calibrationimage);
 	Image<double>	*dp = dynamic_cast<Image<double> *>(&*calibrationimage);
 	if (NULL != fp) {

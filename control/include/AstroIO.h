@@ -651,7 +651,7 @@ public:
 	void	unlink();
 	bool	precious() const { return _precious; }
 	void	setPrecious(bool precious) { _precious = precious; }
-	void	write(const ImagePtr& image) throw (FITSexception);
+	void	write(const ImagePtr image) throw (FITSexception);
 };
 
 /**
@@ -696,7 +696,7 @@ public:
 	}
 	const std::string&	path() const { return _path; }
 	// add an image
-	std::string	add(const ImagePtr& image);
+	std::string	add(const ImagePtr image);
 };
 
 } // namespace io

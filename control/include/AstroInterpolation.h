@@ -15,17 +15,17 @@ namespace interpolation {
  * \brief Using a dark image, interpolate bad pixelsin an image
  */
 class Interpolator {
-	const astro::image::ImagePtr& dark;
+	astro::image::ImagePtr dark;
 	astro::image::Image<float>	*floatdark;
 	astro::image::Image<double>	*doubledark;
-	void	interpolateMonochrome(astro::image::ImagePtr& image);
-	void	interpolateMosaic(astro::image::ImagePtr& image);
+	void	interpolateMonochrome(astro::image::ImagePtr image);
+	void	interpolateMosaic(astro::image::ImagePtr image);
 	astro::image::ImageRectangle	frame;
 public:
-	Interpolator(const astro::image::ImagePtr& dark,
+	Interpolator(const astro::image::ImagePtr dark,
 		const astro::image::ImageRectangle frame
 			= astro::image::ImageRectangle());
-	void	operator()(astro::image::ImagePtr& image);
+	void	operator()(astro::image::ImagePtr image);
 };
 
 } // namespace interpolation

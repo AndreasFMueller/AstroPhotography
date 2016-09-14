@@ -17,8 +17,11 @@
 #include <imageswindow.h>
 #include <repositorywindow.h>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <sstream>
 #include <exposewindow.h>
+#include <AstroIO.h>
+#include <imagedisplaywidget.h>
 
 using namespace astro::discover;
 
@@ -306,11 +309,45 @@ void	MainWindow::connectFile() {
 }
 
 /**
+ * \brief Open a FITS file and display it
+ */
+void	MainWindow::openFile() {
+	QFileDialog     filedialog(this);
+	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
+	filedialog.setFileMode(QFileDialog::AnyFile);
+	filedialog.setDefaultSuffix(QString("fits"));
+	if (!filedialog.exec()) {
+		return;
+	}
+	QStringList	list = filedialog.selectedFiles();
+	for (auto ptr = list.begin(); ptr != list.end(); ptr++) {
+		// open file
+		std::string	filename(ptr->toLatin1().data());
+		astro::Path	p(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "open file: %s",
+			filename.c_str());
+		astro::io::FITSin	in(filename);
+		try {
+			ImagePtr	image = in.read();
+			imagedisplaywidget	*idw = new imagedisplaywidget(NULL);
+			idw->setImage(image);
+			idw->setWindowTitle(QString(p.basename().c_str()));
+			idw->show();
+		} catch (const std::exception& x) {
+			// failure 
+			debug(LOG_ERR, DEBUG_LOG, 0, "%s: %s", filename.c_str(), x.what());
+		}
+	}
+}
+
+/**
  * \brief Create the actions in the menu
  */
 void	MainWindow::createActions() {
-	connectAction = new QAction(QString("connect"), this);
+	connectAction = new QAction(QString("Connect"), this);
 	connect(connectAction, &QAction::triggered, this, &MainWindow::connectFile);
+	openAction = new QAction(QString("Open"), this);
+	connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
 }
 
 /**
@@ -319,6 +356,7 @@ void	MainWindow::createActions() {
 void	MainWindow::createMenus() {
 	fileMenu = menuBar()->addMenu(QString("File"));
 	fileMenu->addAction(connectAction);
+	fileMenu->addAction(openAction);
 }
 
 /**

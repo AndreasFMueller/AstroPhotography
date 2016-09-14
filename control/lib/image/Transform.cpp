@@ -200,6 +200,8 @@ Transform::Transform(const std::vector<Residual>& residuals) {
 	for (int i = 0; i < 6; i++) {
 		a[i] = b[i];
 	}
+	a[0] += 1;
+	a[4] += 1;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transformation found: %s",
 		this->toString().c_str());
 }

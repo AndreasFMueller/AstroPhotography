@@ -28,6 +28,7 @@ LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common ../preview ../focusing ../guiding
 INCLUDEPATH += ../instruments ../images ../repository ../expose
 

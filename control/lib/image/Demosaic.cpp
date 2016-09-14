@@ -19,7 +19,7 @@ namespace image {
 	}								\
 }
 
-ImagePtr	demosaic_bilinear(const ImagePtr& image) {
+ImagePtr	demosaic_bilinear(const ImagePtr image) {
 	demosaic_bilinear_for(image, unsigned char);
 	demosaic_bilinear_for(image, unsigned short);
 	demosaic_bilinear_for(image, unsigned int);
