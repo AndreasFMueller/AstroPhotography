@@ -109,6 +109,7 @@ libastroimage_la_SOURCES = 						\
 	Triangle.cpp							\
 	TriangleSet.cpp							\
 	TriangleSetFactory.cpp						\
+	UnsharpMask.cpp							\
 	VanCittertOperator.cpp						\
 	Viewer.cpp							\
 	ViewerPipeline.cpp						\

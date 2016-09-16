@@ -2272,6 +2272,71 @@ void	colorbalance(ImageAdapter<RGB<T> >& image) {
 
 void	colorbalance(ImagePtr);
 
+//////////////////////////////////////////////////////////////////////
+// Unsharp mask
+//////////////////////////////////////////////////////////////////////
+class	UnsharpMaskBase {
+	double	_radius;
+protected:
+	double	_weight;
+	int	_top;
+public:
+	double	radius() const { return _radius; }
+	void	radius(double r);
+protected:
+	double	w(int x, int y) const;
+	double	weight() const { return _weight; }
+public:
+	UnsharpMaskBase();
+};
+
+template<typename T>
+class UnsharpMaskAdapter : public ConstImageAdapter<T>, public UnsharpMaskBase {
+	const ConstImageAdapter<T>&	_image;
+public:
+	UnsharpMaskAdapter(const ConstImageAdapter<T>& image) 
+		: ConstImageAdapter<T>(image.getSize()), _image(image) {
+	}
+	virtual T	pixel(int x, int y) const {
+		T	s = 0;
+		for (int xi = -_top; xi <= _top; xi++) {
+			for (int yi = -_top; yi <= _top; yi++) {
+				double	t = w(xi, yi);
+				if (t > 0) {
+					s += _image.pixel(x + xi, y + yi) * t;
+				}
+			}
+		}
+		return _weight * s;
+	}
+};
+
+template<typename T>
+class UnsharpMaskingAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&	_image;
+	UnsharpMaskAdapter<T>	_mask;
+	double	_amount;
+public:
+	double	radius() const { return _mask.radius(); }
+	void	radius(double r) { _mask.radius(r); }
+	double	amount() const { return _amount; }
+	void	amount(double a) { _amount = a; }
+	UnsharpMaskingAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image),
+		_mask(image) {
+		_amount = 0;
+	}
+	virtual T	pixel(int x, int y) const {
+		double	v = _image.pixel(x, y) - _amount * _mask.pixel(x, y);
+		if (v < 0) {
+			return 0;
+		}
+		return v;
+	}
+};
+
+ImagePtr	unsharp(ImagePtr image, double radius, double amount);
+
 } // namespace adapter
 } // namespace astro
 
