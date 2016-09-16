@@ -392,7 +392,7 @@ class YUYV : public Color<P> {
 public:
 	P	y;
 	P	uv;
-	YUYV() { }
+	YUYV() : y(0), uv(0) { }
 	YUYV(const P& _y, const P& _uv) : y(_y), uv(_uv) { }
 	YUYV(const P& _y) : y(_y), uv(0) { }
 
@@ -563,7 +563,7 @@ public:
 	P	R;
 	P	G;
 	P	B;
-	RGB() { }
+	RGB() : R(0), G(0), B(0) { }
 	RGB(P w) : R(w), G(w), B(w) { }
 	RGB(P r, P g, P b) : R(r), G(g), B(b) { }
 	RGB(const HSL<P>& h) : R(h.R()), G(h.G()), B(h.B()) { }
@@ -635,6 +635,14 @@ public:
 	}
 	RGB<P>	operator*(const float value) const {
 		return (*this) * (double)value;
+	}
+
+	RGB<P>	operator*(const RGB<P>& other) const {
+		return RGB<P>(R * other.R, G * other.G, B * other.B);
+	}
+
+	RGB<P>	operator/(const RGB<P>& other) const {
+		return RGB<P>(R / other.R, G / other.G, B / other.B);
 	}
 
 #if 0
