@@ -91,17 +91,8 @@ int	main(int argc, char *argv[]) {
 	toimage->size().toString().c_str());
 
 	// find the transform
-#if 0
-	TriangleSetFactory	factory;
-	factory.numberofstars(numberofstars);
-	factory.radius(searchradius);
-	TriangleSet	fromtriangles = factory.get(fromimage);
-	TriangleSet	totriangles = factory.get(toimage);
-	Transform	transform = fromtriangles.closest(totriangles);
-#else
 	TriangleAnalyzer	analyzer(fromimage, numberofstars, searchradius);
 	Transform	transform = analyzer.transform(toimage);
-#endif
 
 	std::cout << "Transform found: " << transform.toString() << std::endl;
 
