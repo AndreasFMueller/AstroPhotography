@@ -57,12 +57,32 @@ protected:
 public:
 	int	patchsize() const { return _patchsize; }
 	void	patchsize(int p) { _patchsize = p; }
+protected:
+	int	_numberofstars;
+public:
+	int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(int n) { _numberofstars = n; }
+protected:
+	int	_searchradius;
+public:
+	int	searchradius() const { return _searchradius; }
+	void	searchradius(int s) { _searchradius = s; }
+private:
+	bool	_notransform;
+public:
+	bool	notransform() const { return _notransform; }
+	void	notransform(bool n) { _notransform = n; }
+
 	static StackerPtr	get(ImagePtr baseimage);
 protected:
 	Stacker(ImagePtr baseimage) : _baseimage(baseimage), _patchsize(256) { }
 public:
 	virtual void	add(ImagePtr) = 0;
 	virtual ImagePtr	image() = 0;
+
+protected:
+	transform::Transform	findtransform(const ConstImageAdapter<double>& base,
+				const ConstImageAdapter<double>& image) const;
 };
 
 } // namespace stacking

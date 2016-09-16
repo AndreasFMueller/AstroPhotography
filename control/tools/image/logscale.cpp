@@ -90,7 +90,7 @@ int	main(int argc, char *argv[]) {
 	LuminanceAdapter<double, double>	la(doubleadapter);
 
 	// create image from log adapter
-	FunctionAdapter<double>	fa(la, log2);
+	FunctionAdapter<double, double>	fa(la, log2);
 	Image<double>	*logimage = new Image<double>(fa);
 	ImagePtr	outimage(logimage);
 

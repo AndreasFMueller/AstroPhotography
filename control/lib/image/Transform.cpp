@@ -113,53 +113,62 @@ void	Transform::translation(const std::vector<Residual>& residuals) {
 }
 
 /**
- * \brief Find the optimal transform from one set of points to the other
+ * \brief common method to solve least squares equations
  */
-Transform::Transform(const std::vector<Residual>& residuals) {
-
-	// make sure we have enough points
-	if (residuals.size() < 3) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "not enough data for full "
-			"transform, extracting translation only");
-		translation(residuals);
-		return;
+void	Transform::build(const std::vector<Point>& from,
+		const std::vector<Point>& to,
+		const std::vector<double>& weights) {
+	if (from.size() != to.size()) {
+		std::string	msg = stringprintf("point vector size mismatch:"
+			" %d != %d", from.size(), to.size());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
 	}
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "determine best transformation between two sets of %d points", residuals.size());
+	bool	ignore_weights = (from.size() != weights.size());
 
 	// allocate space for the linear system
-	int	m = 2 * residuals.size();
+	int	m = 2 * from.size();
 	double	A[6 * m];
 	double	b[m];
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "A size: %d, b size: %d", 6 * m, m);
 
 	// set up linear system of equations
-	std::vector<Residual>::const_iterator	residual;
 	int	i = 0;
-	for (residual = residuals.begin(); residual != residuals.end();
-		residual++) {
+	auto	fromptr = from.begin();
+	auto	toptr = to.begin();
+	auto	weightptr = weights.begin();
+	while (fromptr != from.end()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s ~ %s, delta = %s",
+			fromptr->toString().c_str(),
+			toptr->toString().c_str(),
+			(*toptr - *fromptr).toString().c_str());
+		double	weight = (ignore_weights) ? 1. : *weightptr;
 		// add coefficients to A array
-		A[i        ] = residual->from().x();
-		A[i +     m] = residual->from().y();
-		A[i + 2 * m] = 1;
+		A[i        ] = fromptr->x() * weight;
+		A[i +     m] = fromptr->y() * weight;
+		A[i + 2 * m] = 1 * weight;
 		A[i + 3 * m] = 0;
 		A[i + 4 * m] = 0;
 		A[i + 5 * m] = 0;
 
-                b[i] = residual->offset().x();
+                b[i] = toptr->x() * weight;
 
 		i++;
 
 		A[i        ] = 0;
 		A[i +     m] = 0;
 		A[i + 2 * m] = 0;
-		A[i + 3 * m] = residual->from().x();
-		A[i + 4 * m] = residual->from().y();
-		A[i + 5 * m] = 1;
+		A[i + 3 * m] = fromptr->x() * weight;
+		A[i + 4 * m] = fromptr->y() * weight;
+		A[i + 5 * m] = 1 * weight;
 
-                b[i] = residual->offset().y();
+                b[i] = toptr->y() * weight;
 
 		i++;
+
+		fromptr++;
+		toptr++;
+		if (!ignore_weights) { weightptr++; }
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "number of equations: %d", i);
 
@@ -200,10 +209,64 @@ Transform::Transform(const std::vector<Residual>& residuals) {
 	for (int i = 0; i < 6; i++) {
 		a[i] = b[i];
 	}
-	a[0] += 1;
-	a[4] += 1;
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transformation found: %s",
 		this->toString().c_str());
+
+	// compute the residual
+	double	residual = 0.;
+	fromptr = from.begin();
+	toptr = to.begin();
+	i = 0;
+	while (fromptr != from.end()) {
+		double	X, Y;
+		X = a[0] * fromptr->x() + a[1] * fromptr->y() + a[2];
+		Y = a[3] * fromptr->x() + a[4] * fromptr->y() + a[5];
+		double	delta = hypot(X - toptr->x(), Y - toptr->y());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "residual[%d] = %f",
+			i++, delta);
+		residual += delta;
+		fromptr++;
+		toptr++;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "residual = %f", residual);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "average residual %f",
+		residual / from.size());
+} 
+
+Transform::Transform(const std::vector<Residual>& residuals) {
+	// make sure we have enough points
+	if (residuals.size() < 3) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "not enough data for full "
+			"transform, extracting translation only");
+		translation(residuals);
+		return;
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "determine best transformation between "
+		"two sets of %d points", residuals.size());
+	std::vector<Point>	from;
+	std::vector<Point>	to;
+	std::vector<double>	weights;
+	for (auto ptr = residuals.begin(); ptr != residuals.end(); ptr++) {
+		Point	f = ptr->from();
+		from.push_back(f);
+		to.push_back(f + ptr->offset());
+		weights.push_back(ptr->weight());
+	}
+	build(from, to, weights);
+}
+
+Transform::Transform(const std::vector<Point>& from,
+	const std::vector<Point>& to) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "build transform from %d matching points", from.size());
+	std::vector<double>	weights(from.size(), 1.);
+	build(from, to, weights);
+}
+
+Transform::Transform(const std::vector<Point>& from,
+	const std::vector<Point>& to, const std::vector<double>& weights) {
+	build(from, to, weights);
 }
 
 /**
@@ -223,6 +286,21 @@ Transform	Transform::inverse() const {
 	return result;
 }
 
+double	Transform::discrepancy(const ImageSize& size) const {
+	double	m[4];
+
+	Point	p1(0, 0);
+	Point	p2(size.width(), 0);
+	Point	p3(0, size.height());
+	Point	p4(size.width(), size.height());
+
+	m[0] = ((*this)(p1) - p1).abs();
+	m[1] = ((*this)(p2) - p2).abs();
+	m[2] = ((*this)(p3) - p3).abs();
+	m[3] = ((*this)(p4) - p4).abs();
+
+	return *std::max_element(m, m + 4);
+}
 
 /**
  * \brief Test whether this is a translation
@@ -311,7 +389,7 @@ Transform	Transform::operator*(const Transform& other) const {
 	result.a[3] = a[3] * other.a[0] + a[4] * other.a[3];
 	result.a[4] = a[3] * other.a[1] + a[4] * other.a[4];
 	// operation 
-	Point	composed = this->operator()(getTranslation());
+	Point	composed = this->operator()(other.getTranslation());
 	result.a[2] = composed.x();
 	result.a[5] = composed.y();
 	return result;

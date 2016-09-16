@@ -6,7 +6,8 @@
 SUBDIRS = . test
 
 noinst_HEADERS =							\
-	Miniball.hpp
+	Miniball.hpp							\
+	LevelExtractor.h
 
 noinst_LTLIBRARIES = libastroimage.la
 
@@ -27,6 +28,7 @@ libastroimage_la_SOURCES = 						\
 	Circle.cpp							\
 	CircularImage.cpp						\
 	Clamper.cpp							\
+	ColorBalance.cpp						\
 	ColorScaling.cpp						\
 	ConnectedComponent.cpp						\
 	ConvolutionOperator.cpp						\
@@ -74,6 +76,7 @@ libastroimage_la_SOURCES = 						\
 	ImageSize.cpp							\
 	Interpolation.cpp						\
 	Layer.cpp							\
+	LevelExtractor.cpp						\
 	LevelMaskExtractor.cpp						\
 	Masks.cpp							\
 	Maxima.cpp							\
@@ -94,12 +97,18 @@ libastroimage_la_SOURCES = 						\
 	Stack.cpp							\
 	StackingAdapter.cpp						\
 	Stacker.cpp							\
+	Star.cpp							\
+	StarExtractor.cpp						\
 	StereographicProjection.cpp					\
 	Subgrid.cpp							\
 	SmallConvolve.cpp						\
 	ThresholdExtractor.cpp						\
 	Transform.cpp							\
 	TransformAnalyzer.cpp						\
+	TriangleAnalyzer.cpp						\
+	Triangle.cpp							\
+	TriangleSet.cpp							\
+	TriangleSetFactory.cpp						\
 	VanCittertOperator.cpp						\
 	Viewer.cpp							\
 	ViewerPipeline.cpp						\

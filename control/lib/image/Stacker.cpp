@@ -7,6 +7,9 @@
 #include <AstroAdapter.h>
 #include <AstroDebug.h>
 #include <AstroTransform.h>
+#include <AstroFilter.h>
+#include <cmath>
+#include "ReductionAdapter.h"
 
 using namespace astro::image;
 using namespace astro::image::transform;
@@ -16,6 +19,20 @@ namespace astro {
 namespace image {
 namespace stacking {
 
+double	LOG(double x) {
+	if (x <= 0) {
+		return 0;
+	}
+	return log(x);
+}
+
+float	LOG(float x) {
+	if (x <= 0) {
+		return 0;
+	}
+	return logf(x);
+}
+
 /**
  * \brief Accumulator class to add images
  */
@@ -23,13 +40,16 @@ template<typename AccumulatorPixel, typename Pixel>
 class Accumulator {
 	ImagePtr	_image;		// used for resource management
 	Image<AccumulatorPixel>	*_imageptr;
+	int	_counter;
 public:
+	int	counter() const { return _counter; }
 	Accumulator(const ConstImageAdapter<Pixel> *baseimage) {
 		if (NULL == baseimage) {
 			return;
 		}
 		_imageptr = new Image<AccumulatorPixel>(*baseimage);
 		_image = ImagePtr(_imageptr);
+		_counter = 0;
 	}
 	void	accumulate(const ConstImageAdapter<AccumulatorPixel>& add);
 	ImagePtr	image() {
@@ -45,6 +65,9 @@ void	Accumulator<AccumulatorPixel, Pixel>::accumulate(
 		throw std::runtime_error("image sizes in stack don't match");
 	}
 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulating new image: %d",
+		_counter++);
+
 	// add new pixels
 	int	w = _imageptr->size().width();
 	int	h = _imageptr->size().height();
@@ -54,6 +77,88 @@ void	Accumulator<AccumulatorPixel, Pixel>::accumulate(
 				= _imageptr->pixel(x, y) + add.pixel(x, y);
 		}
 	}
+}
+
+Transform	Stacker::findtransform(const ConstImageAdapter<double>& base,
+			const ConstImageAdapter<double>& image) const {
+	// create an transform analyzer with respect to the base image
+	TriangleAnalyzer	transformanalyzer(base, _numberofstars,
+					_searchradius);
+
+	// find the mean levels, this is used for the reduction later on
+	double	mb = filter::Mean<double, double>().filter(base);
+	double	mi = filter::Mean<double, double>().filter(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mb = %f, mi = %f", mb, mi);
+
+	// find the transform between the base image and the new image
+	Transform	transform = transformanalyzer.transform(image);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "initial transform: %s",
+		transform.toString().c_str());
+
+	// we now use this preliminary transform to improve using the Analyzer
+	int	repeats = 3;
+	while (repeats--) {
+		TransformAdapter<double> transformedbase(base, transform);
+		ReductionAdapter	reducedbase(transformedbase,
+						mb, 2 * mb);
+		Analyzer	analyzer(reducedbase);
+		analyzer.patchsize(_patchsize);
+		analyzer.spacing(_patchsize);
+		analyzer.hanning(false);
+
+		// now find the residuals to the target image
+		ReductionAdapter	target(image, mi, 2 * mi);
+		std::vector<Residual>	residuals = analyzer(target);
+
+		// we only want to use residuals that are close
+		int	counter = 0;
+		auto ptr = residuals.begin();
+		while (ptr != residuals.end()) {
+			if (ptr->offset().abs() > 30) {
+				ptr = residuals.erase(ptr);
+				counter++;
+			} else {
+				ptr++;
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"excluded %d residuals too large", counter);
+
+		// display the residuals that we still want to process
+		if (debuglevel >= LOG_DEBUG) {
+			int	i = 0;
+			for (ptr = residuals.begin(); ptr != residuals.end();
+				ptr++, i++) {
+				debug(LOG_DEBUG, DEBUG_LOG, 0,
+					"Residual[%d]: %s",
+					i, std::string(*ptr).c_str());
+			}
+		}
+
+		// create the improvement transform
+		Transform	deltatransform(residuals);
+		double	disc = deltatransform.discrepancy(image.getSize());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta transform: %s, disc = %f",
+			deltatransform.toString().c_str(), disc);
+
+		// the final transform is the composition of the previous 
+		// transform with the deltatransform;
+		transform = deltatransform.inverse() * transform;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "improved transform: %s",
+		transform.toString().c_str());
+
+		// check whether the difference is small enought so we can
+		// give up
+		if (disc < 2) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "accept transform, "
+				"last discrepancy %f", disc);
+			continue;
+		}
+	}
+
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "final transform: %s",
+		transform.toString().c_str());
+	return transform;
 }
 
 /**
@@ -82,20 +187,21 @@ public:
 template<typename AccumulatorPixel, typename Pixel>
 void	MonochromeStacker<AccumulatorPixel, Pixel>::add(
 		const ConstImageAdapter<Pixel>& image) {
+	// first handle the case where there is no transform
+	if (notransform()) {
+		ConvertingAdapter<AccumulatorPixel, Pixel>	accumulatorimage(image);
+		_accumulator.accumulate(accumulatorimage);
+		return;
+	}
+
 	// create a transform analyizer on the base image
 	TypeConversionAdapter<Pixel>	baseimageadapter(*baseimage());
 
 	// create an adapter to the target image to give it double values
 	TypeConversionAdapter<Pixel>	targetimageadapter(image);
 
-	// create an transform analyzer with respect to the base image
-	TransformAnalyzer	transformanalyzer(baseimageadapter);
-	transformanalyzer.patchsize(_patchsize);
-	transformanalyzer.spacing(_patchsize);
-	transformanalyzer.hanning(true);
-
-	// get the transform
-	Transform	transform = transformanalyzer(targetimageadapter);
+	Transform	transform = findtransform(baseimageadapter,
+					targetimageadapter);
 
 	// create an adapter that converts the pixels of the original image
 	// into pixels that are compatible with the accumulator
@@ -116,68 +222,6 @@ void	MonochromeStacker<AccumulatorPixel, Pixel>::add(ImagePtr imageptr) {
 	}
 	add(*imagep);
 }
-
-#if 0
-ImagePtr	MonochromeStacker::operator()(ImageSequence images) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start stacking of %d images",
-		images.size());
-	// get the base image
-	ImagePtr	baseimage = *images.begin();
-	ConstPixelValueAdapter<double>	base(baseimage);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "base image has size %s",
-		baseimage->size().toString().c_str());
-
-	// for each image in the sequence, find the transform relative to the
-	// base image
-	std::vector<Transform>	transforms;
-	ImageSequence::const_iterator	imgp = images.begin();
-	for (imgp++; imgp != images.end(); imgp++) {
-		ImagePtr	imageptr = *imgp;
-		ConstPixelValueAdapter<double>	img(imageptr);
-		TransformAnalyzer	ta(base);
-		ta.patchsize(_patchsize);
-		ta.spacing(_patchsize);
-		ta.hanning(true);
-		Transform	t = ta(img);
-		t = t.inverse();
-		transforms.push_back(t);
-	}
-
-	// at this point, we have all the transforms
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d transforms",
-		transforms.size());
-
-	// prepare the result image, containing a copy of the base image
-	Image<double>	*resultp = new Image<double>(base);
-	ImagePtr	result(resultp);
-	Accumulator<double>	accumulator(*resultp);
-
-	// now compute a transformed double image for each image 
-	// and add it to the base image
-	imgp = images.begin();
-	std::vector<Transform>::const_iterator	tp = transforms.begin();
-	for (imgp++; imgp != images.end(); imgp++, tp++) {
-		ImagePtr	imageptr = *imgp;
-		ConstPixelValueAdapter<double>	img(imageptr);
-		TransformAdapter<double>	ta(img, tp->inverse());
-		accumulator.accumulate(ta);
-	}
-
-	return result;
-}
-#endif
-
-#if 0
-#define	stacker_monochrome(image, pixel, images, patchsize)		\
-	{								\
-		Image<pixel>	*imagep					\
-			= dynamic_cast<Image<pixel > *>(&*image);	\
-		if (NULL != imagep) {					\
-			MonochromeStacker	stacker(patchsize);	\
-			return stacker(images);				\
-		}							\
-	}
-#endif
 
 /**
  * \brief Stacker class for color images
@@ -208,25 +252,102 @@ public:
 	}
 };
 
+/**
+ * \brief Add an image to the stack
+ *
+ * This method computes a translation between two images
+ */
 template<typename AccumulatorPixel, typename Pixel>
 void	RGBStacker<AccumulatorPixel, Pixel>::add(
 		const ConstImageAdapter<RGB<Pixel> >& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "stacking new image");
+
+	// first handle the case where there is no transform
+	if (notransform()) {
+		RGBAdapter<AccumulatorPixel, Pixel>	accumulatorimage(image);
+		_accumulator.accumulate(accumulatorimage);
+		return;
+	}
+
 	// create a luminance adapter on the base image, because we only want
 	// ot use the luminance when determining the transformation
 	LuminanceAdapter<RGB<Pixel>, double>	luminancebase(*baseimage());
+#if 0
+	double	mb = filter::Mean<double, double>().filter(luminancebase);
 
 	// create an transform analyzer with respect to the base image
-	TransformAnalyzer	transformanalyzer(luminancebase);
-	transformanalyzer.patchsize(_patchsize);
-	transformanalyzer.spacing(_patchsize);
-	transformanalyzer.hanning(true);
+	TriangleAnalyzer	transformanalyzer(luminancebase, _numberofstars,
+					_searchradius);
+#endif
 
 	// find the transform to the new image
 	LuminanceAdapter<RGB<Pixel>, double>	luminanceimage(image);
-	Transform	transform = transformanalyzer(luminanceimage);
+#if 0
+	double	mi = filter::Mean<double, double>().filter(luminanceimage);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "mb = %f, mi = %f", mb, mi);
+	Transform	transform = transformanalyzer.transform(luminanceimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "transform: %s",
 		transform.toString().c_str());
+
+	// we now use this preliminary transform to improve using the Analyzer
+	int	repeats = 3;
+	while (repeats--) {
+		TransformAdapter<double>	transformedbase(luminancebase,
+			transform);
+		ReductionAdapter	base(transformedbase, mb, 2 * mb);
+		Analyzer	analyzer(base);
+		analyzer.patchsize(_patchsize);
+		analyzer.spacing(_patchsize);
+		analyzer.hanning(false);
+
+		ReductionAdapter	target(luminanceimage, mi, 2 * mi);
+		std::vector<Residual>	residuals = analyzer(target);
+
+		// we only want to use residuals that are close
+		int	counter = 0;
+		auto ptr = residuals.begin();
+		while (ptr != residuals.end()) {
+			if (ptr->offset().abs() > 30) {
+				ptr = residuals.erase(ptr);
+				counter++;
+			} else {
+				ptr++;
+			}
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "excluded %d residuals too large",
+			counter);
+
+		// display the residuals that we still want to process
+		int	i = 0;
+		for (ptr = residuals.begin(); ptr != residuals.end();
+			ptr++, i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "Residual[%d]: %s",
+				i, std::string(*ptr).c_str());
+		}
+
+		// create the improvement transform
+		Transform	deltatransform(residuals);
+		double	disc = deltatransform.discrepancy(image.getSize());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delta transform: %s, disc = %f",
+			deltatransform.toString().c_str(), disc);
+
+		// the final transform is the composition of the previous 
+		// transform with the deltatransform;
+		transform = deltatransform.inverse() * transform;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "improved transform: %s",
+		transform.toString().c_str());
+
+		// check whether the difference is small enought so we can
+		// give up
+		if (disc < 2) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "accept transform, "
+				"last discrepancy %f", disc);
+			continue;
+		}
+	}
+#else
+	Transform	transform = findtransform(luminancebase, luminanceimage);
+#endif
 
 	// create an adapter that converts the pixels of the original image
 	// into pixels that are compatible with the accumulator
@@ -251,108 +372,6 @@ void	RGBStacker<AccumulatorPixel, Pixel>::add(ImagePtr newimage) {
 	// now add the image
 	add(*imagep);
 }
-
-#if 0
-template<typename Pixel>
-ImagePtr	RGBStacker<Pixel>::operator()(ImageSequence images) {
-	// get the base image
-	ImagePtr	baseimage = *images.begin();
-	Image<RGB<Pixel> >	*baseimagep
-		= dynamic_cast<Image<RGB<Pixel> > *>(&*baseimage);
-	if (NULL == baseimagep) {
-		throw std::runtime_error("type inconsistency");
-	}
-	LuminanceAdapter<RGB<Pixel>, double>	base(*baseimagep);
-	TransformAnalyzer	ta(base);
-	ta.patchsize(_patchsize);
-	ta.spacing(_patchsize);
-	ta.hanning(true);
-
-	// for each image in the sequence, find the transform relative to the
-	// base image
-	std::vector<Transform>	transforms;
-	ImageSequence::const_iterator	imgp = images.begin();
-	for (imgp++; imgp != images.end(); imgp++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "add image");
-		ImagePtr	imageptr = *imgp;
-		Image<RGB<Pixel > >	*imagep
-			= dynamic_cast<Image<RGB<Pixel> > *>(&*imageptr);
-		if (NULL == imagep) {
-			throw std::runtime_error("image type inconsistency");
-		}
-		LuminanceAdapter<RGB<Pixel>, double>	img(*imagep);
-		Transform	t = ta(img);
-		transforms.push_back(t);
-	}
-
-	// at this point, we have all the transforms
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d transforms",
-		transforms.size());
-
-	// prepare the result image, containing a copy of the base image
-	Image<RGB<double> >	*resultp = new Image<RGB<double> >(*baseimagep);
-	ImagePtr	result(resultp);
-	Accumulator<RGB<double> >	accumulator(*resultp);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "accumulator created");
-
-	// now compute a transformed double image for each image 
-	// and add it to the base image
-	imgp = images.begin();
-	std::vector<Transform>::const_iterator	tp = transforms.begin();
-	for (imgp++; imgp != images.end(); imgp++, tp++) {
-		ImagePtr	imageptr = *imgp;
-		Image<RGB<Pixel> >	*imagep
-			= dynamic_cast<Image<RGB<Pixel> > *>(&*imageptr);
-		if (NULL == imagep) {
-			throw std::runtime_error("image type inconsistenccy");
-		}
-		RGBAdapter<Pixel>	img(*imagep);
-		TransformAdapter<RGB<double> >	ta(img, tp->inverse());
-		accumulator.accumulate(ta);
-	}
-
-	return result;
-}
-#endif
-
-#if 0
-#define	stacker_rgb(image, pixel, images, patchsize)			\
-	{								\
-		Image<RGB<pixel > >	*imagep				\
-			= dynamic_cast<Image<RGB<pixel > > *>(&*image);	\
-		if (NULL != imagep) {					\
-			RGBStacker<pixel>	stacker(patchsize);	\
-			return stacker(images);				\
-		}							\
-	}
-
-
-ImagePtr	Stacker::operator()(ImageSequence images) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "get first image");
-	// extract the baseimage, and construct a transform analyzer from
-	// it the luminance channel associated with it
-	ImagePtr	baseimage = *images.begin();
-
-	// go through all possible types, and find an appropriately typed
-	// stacker
-	stacker_monochrome(baseimage, unsigned char, images, _patchsize);
-	stacker_monochrome(baseimage, unsigned short, images, _patchsize);
-	stacker_monochrome(baseimage, unsigned int, images, _patchsize);
-	stacker_monochrome(baseimage, unsigned long, images, _patchsize);
-	stacker_monochrome(baseimage, float, images, _patchsize);
-	stacker_monochrome(baseimage, double, images, _patchsize);
-
-	// color types
-	stacker_rgb(baseimage, unsigned char, images, _patchsize);
-	stacker_rgb(baseimage, unsigned short, images, _patchsize);
-	stacker_rgb(baseimage, unsigned int, images, _patchsize);
-	stacker_rgb(baseimage, unsigned long, images, _patchsize);
-	stacker_rgb(baseimage, float, images, _patchsize);
-	stacker_rgb(baseimage, double, images, _patchsize);
-
-	throw std::runtime_error("cannot stack images of this type");
-}
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // Implementation of the Stacker class

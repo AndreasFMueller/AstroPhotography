@@ -1081,19 +1081,19 @@ RGB<T>	YUYVAdapter<T>::pixel(int x, int y) const {
 //////////////////////////////////////////////////////////////////////
 // Function adapter
 //////////////////////////////////////////////////////////////////////
-template <typename Pixel>
-class FunctionAdapter : public ConstImageAdapter<double> {
+template <typename Pixel, typename T>
+class FunctionAdapter : public ConstImageAdapter<T> {
 	const ConstImageAdapter<Pixel>&	image;
-	double	(*f)(double);
+	T	(*f)(T);
 public:
 	FunctionAdapter(const ConstImageAdapter<Pixel>& _image,
-		double (*_f)(double))
-		: ConstImageAdapter<double>(_image.getSize()),
+		T (*_f)(T))
+		: ConstImageAdapter<T>(_image.getSize()),
 		  image(_image), f(_f) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "creating function adapter");
 	}
-	virtual double	pixel(int x, int y) const {
-		double	v = image.pixel(x, y);
+	virtual T	pixel(int x, int y) const {
+		T	v = image.pixel(x, y);
 		return f(v);
 	}
 };
@@ -2212,9 +2212,67 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+// Color balancing adapter
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class ColorBalanceAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	RGB<T>	_intercept;
+	RGB<T>	_slope;
+public:
+	ColorBalanceAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image) {
+		RGB<T>	sum;
+		RGB<T>	sum2;
+		int	w = image.getSize().width();
+		int	h = image.getSize().height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				RGB<T>	v = image.pixel(x, y);
+				sum = sum + v;
+				sum2 = sum2 + v * v;
+			}
+		}
+		double	n = 1. / (w * h);
+		RGB<T>	mean = sum * n;
+		RGB<T>	variance = (sum2 * n) - (mean * mean);
+		RGB<T>	stddev(sqrt(variance.R), sqrt(variance.G),
+				sqrt(variance.B));
+		RGB<T>	E = mean / stddev;
+		T	EX = mean.R, stddevX = stddev.R;
+		if (E.G > E.R) {
+			EX = mean.G, stddevX = stddev.G;
+		}
+		if (E.B > E.G) {
+			EX = mean.B, stddevX = stddev.B;
+		}
+		_slope = RGB<T>(stddevX / stddev.R, stddevX / stddev.G,
+				stddevX / stddev.B);
+		_intercept = RGB<T>(EX - _slope.R * mean.R,
+					EX - _slope.G * mean.G,
+					EX - _slope.B * mean.B);
+	}
+	virtual RGB<T>	pixel(int x, int y) const {
+		return _image.pixel(x, y) * _slope + _intercept;
+	}
+};
+
+template<typename T>
+void	colorbalance(ImageAdapter<RGB<T> >& image) {
+	ColorBalanceAdapter<T>	adapter(image);
+	int	w = image.getSize().width();
+	int	h = image.getSize().height();
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			image.writablepixel(x, y) = adapter.pixel(x, y);
+		}
+	}
+}
+
+void	colorbalance(ImagePtr);
 
 } // namespace adapter
 } // namespace astro
-
 
 #endif /* _AstroAdapter_h */

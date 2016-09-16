@@ -65,6 +65,8 @@ public:
 	static Point	centroid(const std::set<Point>& points);
 };
 Point	operator*(double l, const Point& other);
+double	distance(const Point& p1, const Point& p2);
+double	azimut(const Point& from, const Point& to);
 
 std::ostream&	operator<<(std::ostream& out, const Point& other);
 std::istream&	operator>>(std::istream& in, Point& other);

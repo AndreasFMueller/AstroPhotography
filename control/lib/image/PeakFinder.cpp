@@ -64,6 +64,7 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 	// in the area defined by the radius
 	// XXX these fixed numbers are a problem, because large stars may need
 	// XXX more pixels for a reasonable centroid
+	//const int maxpixelcount = _radius * _radius / 4;
 	const int maxpixelcount = 49;
 	const int minpixelcount = 25;
 	const int targetcount = (minpixelcount + maxpixelcount) / 2;
@@ -118,8 +119,9 @@ double	PeakFinder::threshold(const ConstImageAdapter<double>& image,
 /**
  * \brief Compute the centroid of the values above the threshold
  */
-Point	PeakFinder::centroid(const ConstImageAdapter<double>& image,
-		double threshold) {
+std::pair<Point, double>	PeakFinder::centroid(
+					const ConstImageAdapter<double>& image,
+					double threshold) {
 	int	counter = 0;
 	double	xsum = 0, ysum = 0, totalweight = 0;
 	for (int x = -_radius; x <= _radius; x++) {
@@ -138,13 +140,20 @@ Point	PeakFinder::centroid(const ConstImageAdapter<double>& image,
 	Point	result(xsum / totalweight, ysum / totalweight);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d points averaged to %s", counter,
 		result.toString().c_str());
-	return result;
+	return std::make_pair(result, totalweight);
 }
 
 /**
  * \brief find the maximum in an image
  */
 Point	PeakFinder::operator()(const ConstImageAdapter<double>& image) {
+	return peak(image).first;
+}
+
+/**
+ * \brief Find the peak and its weight
+ */
+std::pair<Point, double>	PeakFinder::peak(const ConstImageAdapter<double>& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "looking for peak in %s image",
 		image.getSize().toString().c_str());
 	// first get the pixel with the largest value
@@ -188,13 +197,13 @@ Point	PeakFinder::operator()(const ConstImageAdapter<double>& image) {
 	double	v = threshold(ta, minvalue, maxvalue);
 
 	// compute the centroid around this point
-	Point	c = centroid(ta, v);
+	std::pair<Point, double>	c = centroid(ta, v);
 
 	// done
-	Point	result = Point(_approximate) + c;
+	Point	result = Point(_approximate) + c.first;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "found peak: %s",
 		result.toString().c_str());
-	return result;
+	return std::make_pair(result, c.second);
 }
 
 } // namespace filter

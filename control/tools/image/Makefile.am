@@ -7,7 +7,24 @@
 
 bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
-	gammacorrect convolve background crop radon backprojection
+	gammacorrect convolve background crop radon backprojection \
+	colorbalance stars findtransform luminance
+
+findtransform_SOURCES = findtransform.cpp
+findtransform_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+findtransform_LDADD = -L$(top_builddir)/lib -lastro 
+
+stars_SOURCES = stars.cpp
+stars_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+stars_LDADD = -L$(top_builddir)/lib -lastro 
+
+luminance_SOURCES = luminance.cpp
+luminance_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+luminance_LDADD = -L$(top_builddir)/lib -lastro 
+
+colorbalance_SOURCES = colorbalance.cpp
+colorbalance_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+colorbalance_LDADD = -L$(top_builddir)/lib -lastro 
 
 imageinfo_SOURCES = imageinfo.cpp
 imageinfo_DEPENDENCIES = $(top_builddir)/lib/libastro.la

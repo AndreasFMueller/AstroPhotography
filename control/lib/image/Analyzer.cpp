@@ -60,9 +60,15 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 	// now compute the shift for each point
 	std::vector<Residual>	result;
 	for (auto pt = points.begin(); pt != points.end(); pt++) {
-		Residual	residual = translation(image, *pt, _patchsize);
-		if (residual.valid()) {
-			result.push_back(residual);
+		try {
+			Residual	residual = translation(image, *pt,
+							_patchsize);
+			if (residual.valid()) {
+				result.push_back(residual);
+			}
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring point %s: %s",
+				pt->toString().c_str(), x.what());
 		}
 	}
 
@@ -70,7 +76,7 @@ std::vector<Residual>	Analyzer::operator()(const ConstImageAdapter<double>& imag
 	if (debuglevel >= LOG_DEBUG) {
 		for (std::vector<Residual>::size_type i = 0; i < result.size();
 			i++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "residual[%d] %s", i,
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "Residual[%d] %s", i,
 				std::string(result[i]).c_str());
 		}
 	}

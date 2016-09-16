@@ -16,8 +16,9 @@ bool	Residual::invalid() const {
 }
 
 Residual::operator	std::string() const {
-	return stringprintf("@%s offset=%s (%f)",
-		_from.toString().c_str(), _offset.toString().c_str(), _weight);
+	return stringprintf("@%s offset=%s (%f, %f)",
+		_from.toString().c_str(), _offset.toString().c_str(), _weight,
+		log(_weight));
 }
 
 } // namespace transform

@@ -163,4 +163,12 @@ Point	Point::centroid(const std::set<Point>& points) {
 	return for_each(points.begin(), points.end(), PointAverager()).average();
 }
 
+double	distance(const Point& p1, const Point& p2) {
+	return hypot(p1.x() - p2.x(), p1.y() - p2.y());
+}
+
+double	azimut(const Point& from, const Point& to) {
+	return atan2(to.y() - from.y(), to.x() - from.x());
+}
+
 } // namespace astro

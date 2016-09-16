@@ -767,11 +767,13 @@ class PeakFinder : public GeneralFilter<double, Point> {
 	int	above(const ConstImageAdapter<double>& image, double v);
 	double	threshold(const ConstImageAdapter<double>& image,
 			double minvalue, double maxvalue);
-	Point	centroid(const ConstImageAdapter<double>& image,
+	std::pair<Point, double>	centroid(
+			const ConstImageAdapter<double>& image,
 			double threshold);
 public:
 	PeakFinder(const ImagePoint& approximate, int radius);
 	virtual Point	operator()(const ConstImageAdapter<double>& image);
+	std::pair<Point, double>	peak(const ConstImageAdapter<double>& image);
 };
 
 /**

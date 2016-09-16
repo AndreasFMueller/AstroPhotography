@@ -10,6 +10,7 @@
 #include <AstroImage.h>
 #include <AstroFormat.h>
 #include <AstroAdapter.h>
+#include <set>
 
 namespace astro {
 namespace image {
@@ -253,6 +254,9 @@ class Transform {
 	double	a[6];
 	void	identity();
 	void	translation(const std::vector<Residual>& residuals);
+	void	build(const std::vector<Point>& from,
+			const std::vector<Point>& to,
+			const std::vector<double>& weight);
 public:
 	// constructors
 	Transform();
@@ -260,6 +264,11 @@ public:
 	Transform(double angle, const Point& translation,
 		double scalefactor = 1);
 	Transform(const std::vector<Residual>& residuals);
+	Transform(const std::vector<Point>& from,
+		const std::vector<Point>& to);
+	Transform(const std::vector<Point>& from,
+		const std::vector<Point>& to,
+		const std::vector<double>& weights);
 
 	// check whether this is a certain type of transform
 	bool	isIdentity() const;
@@ -278,6 +287,9 @@ public:
 
 	// data access
 	Point	getTranslation() const;
+
+	// how far away from the identity is the transform
+	double	discrepancy(const ImageSize& size) const;
 
 	// operations
 	Transform	operator*(const Transform& other) const;
@@ -423,11 +435,178 @@ public:
  * \brief Find a general transformation between
  */
 class TransformAnalyzer : public Analyzer {
+	Transform	basetransform;
 public:
 	TransformAnalyzer(const ConstImageAdapter<double>& _baseimage,
 		int _spacing = 128, int _patchsize = 128)
 		: Analyzer(_baseimage, _spacing, _patchsize) { }
 	Transform	transform(const ConstImageAdapter<double>& image) const;
+};
+
+/**
+ * \brief Triangle data structure for the triangle matching algorithm
+ */
+class Triangle {
+	std::vector<Point>	points;
+	double	_longside;
+	double	_middleside;
+	double	_angle;
+	double	_azimut;
+	double	_area;
+public:
+	Triangle(Point p1, Point p2, Point p3);
+	Triangle(const std::vector<Point>);
+	const Point&	operator[](int i) const { return points[i]; }
+
+	// attributes of triangles
+	double	longside() const { return _longside; }
+	double	middleside() const { return _middleside; }
+	double	angle() const { return _angle; }
+	double	azimut() const { return _azimut; }
+	double	area() const { return _area; }
+
+	// find similar triangles
+	bool	operator<(const Triangle& other) const;
+	double	distance(const Triangle& other) const;
+
+	// find transformation between triangles
+	bool	mirror_to(const Triangle& other) const;
+	double	rotate_to(const Triangle& other) const;
+	double	scale_to(const Triangle& other) const;
+	Point	basepoint() const { return points[0]; }
+	Transform	to(const Triangle& other) const;
+
+	// display
+	std::string	toString() const;
+	operator std::string() const;
+};
+
+/**
+ * \brief A set of triangles
+ *
+ * Triangle sets are used for the triangle matching algorithm.
+ */
+class TriangleSet : public std::set<Triangle> {
+	double	_tolerance;
+public:
+	double	tolerance() const { return _tolerance; }
+	void	tolerance(double t) { _tolerance = t; }
+private:
+	bool	_allow_mirror;
+public:
+	bool	allow_mirror() const { return _allow_mirror; }
+	void	allow_mirror(bool b) { _allow_mirror = b; }
+
+	TriangleSet();
+	const Triangle&	closest(const Triangle& other) const;
+	Transform	closest(const TriangleSet& other) const;
+};
+
+/*
+ * \brief Star abstraction for transforms
+ *
+ * To determine transforms, we need an abstraction 
+ */
+class Star : public Point {
+	double	_brightness;
+public:	
+	double	brightness() const { return _brightness; }
+	void	brightness(double b) { _brightness = b; }
+	Star(const Point& p, double b = 1.) : Point(p), _brightness(b) { }
+	bool	operator<(const Star& other) const;
+	std::string	toString() const;
+	operator	std::string() const;
+};
+
+/**
+ * \brief Star extractor class
+ */
+class StarExtractor {
+	int	_numberofstars;
+public:
+	int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(int n) { _numberofstars = n; }
+private:
+	int	_searchradius;
+public:
+	int	searchradius() const { return _searchradius; }
+	void	searchradius(int s) { _searchradius = s; }
+public:
+	StarExtractor(int numberofstars = 10, int searchradius = 10)
+		: _numberofstars(numberofstars), _searchradius(searchradius) { }
+	StarExtractor(const StarExtractor& other)
+		: _numberofstars(other._numberofstars),
+		  _searchradius(other._searchradius) { }
+protected:
+static std::vector<Point>	stars2points(const std::vector<Star>& stars);
+public:
+	std::vector<Star> 	stars(const ConstImageAdapter<double>& image) const;
+	std::vector<Point>  	points(const ConstImageAdapter<double>& image) const;
+	std::vector<Star>	stars(ImagePtr image) const;
+	std::vector<Point>	points(ImagePtr image) const;
+};
+
+template<typename T>
+class TypedStarExtractor : public StarExtractor {
+public:
+	TypedStarExtractor(int numberofstars = 10, int searchradius = 10)
+		: StarExtractor(numberofstars, searchradius) { }
+	TypedStarExtractor(const StarExtractor& other)
+		: StarExtractor(other) { }
+	std::vector<Star>	stars(const ConstImageAdapter<T>& image) const;
+	std::vector<Point>	points(const ConstImageAdapter<T>& image) const;
+};
+
+template<typename T>
+std::vector<Star>	TypedStarExtractor<T>::stars(const ConstImageAdapter<T>& image) const {
+	adapter::LuminanceAdapter<T, double>	luminanceadapter(image);
+	return StarExtractor::stars(luminanceadapter);
+}
+
+template<typename T>
+std::vector<Point>	TypedStarExtractor<T>::points(const ConstImageAdapter<T>& image) const {
+	adapter::LuminanceAdapter<T, double>	luminanceadapter(image);
+	return StarExtractor::points(luminanceadapter);
+}
+
+/**
+ * \brief Extract a set of triangles from an image
+ */
+class TriangleSetFactory {
+	int	_numberofstars;
+public:
+	int	numberofstars() const { return _numberofstars; }
+	void	numberofstars(int n) { _numberofstars = n; }
+private:
+	double	_radius;
+public:
+	double	radius() const { return _radius; }
+	void	radius(double r) { _radius = r; }
+
+private:
+	bool	good(const Triangle& t, double l) const;
+public:
+	TriangleSetFactory();
+private:
+	TriangleSet	get(const std::vector<Star>& stars, double limit) const;
+public:
+	TriangleSet	get(ImagePtr) const;
+	TriangleSet	get(const ConstImageAdapter<double>& image) const;
+};
+
+/**
+ * \brief Extract a transform using the triangle method
+ */
+class TriangleAnalyzer {
+	TriangleSetFactory	factory;
+	TriangleSet	fromtriangles;
+public:
+	TriangleAnalyzer(const ConstImageAdapter<double>& image,
+		int numberofstars, int searchradius);
+	TriangleAnalyzer(ImagePtr image,
+		int numberofstars, int searchradius);
+	Transform	transform(const ConstImageAdapter<double>& image) const;
+	Transform	transform(ImagePtr image) const;
 };
 
 } // namespace transform

@@ -19,12 +19,15 @@ namespace app {
 namespace stack {
 
 static struct option	longopts[] = {
-/* name		argument?		int*		int */
-{ "debug",	no_argument,		NULL,		'd' }, /* 0 */
-{ "help",	no_argument,		NULL,		'h' }, /* 1 */
-{ "output",	required_argument,	NULL,		'o' }, /* 2 */
-{ "patchsize",	required_argument,	NULL,		'p' }, /* 3 */
-{ NULL,		0,			NULL,		 0  }
+/* name			argument?		int*	int */
+{ "debug",		no_argument,		NULL,	'd' }, /* 0 */
+{ "help",		no_argument,		NULL,	'h' }, /* 1 */
+{ "output",		required_argument,	NULL,	'o' }, /* 2 */
+{ "number",		required_argument,	NULL,	'n' }, /* 3 */
+{ "patchsize",		required_argument,	NULL,	'p' }, /* 4 */
+{ "searchradius",	required_argument,	NULL,	's' }, /* 5 */
+{ "transform",		required_argument,	NULL,	't' }, /* 6 */
+{ NULL,			0,			NULL,	 0  }
 };
 
 static void	usage(const char *progname) {
@@ -44,8 +47,11 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
 	std::cout << " -d,--debug             increase debug level" << std::endl;
+	std::cout << " -n,--number=<n>        number of stars to evaluate" << std::endl;
 	std::cout << " -o,--output=<outfile>  filename of output file" << std::endl;
 	std::cout << " -p,--patchsize=<s>     use patch size <s> for translation analysis" << std::endl;
+	std::cout << " -s,--searchradius=<s>  use radius <s> when searching for stars" << std::endl;
+	std::cout << " -t,--transform         don't transform the images when stacking" << std::endl;
 	std::cout << " -h,-?,--help           display this help" << std::endl;
 }
 
@@ -57,17 +63,29 @@ int	main(int argc, char *argv[]) {
 	int	longindex;
 	const char	*outfilename = NULL;
 	int	patchsize = 256;
-	while (EOF != (c = getopt_long(argc, argv, "dh?o:p:", longopts,
+	int	numberofstars = 20;
+	int	searchradius = 10;
+	bool	notransform = false;
+	while (EOF != (c = getopt_long(argc, argv, "dh?o:p:n:s:t", longopts,
 		&longindex))) {
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
 			break;
+		case 'n':
+			numberofstars = std::stoi(optarg);
+			break;
 		case 'o':
 			outfilename = optarg;
 			break;
 		case 'p':
-			patchsize = std::stoi(std::string(optarg));
+			patchsize = std::stoi(optarg);
+			break;
+		case 's':
+			searchradius = std::stoi(optarg);
+			break;
+		case 't':
+			notransform = true;
 			break;
 		case 'h':
 		case '?':
@@ -89,7 +107,12 @@ int	main(int argc, char *argv[]) {
 
 	// create a stacker based in the base image
 	StackerPtr	stacker = Stacker::get(baseimage);
+
+	// set the parameters from the command line
 	stacker->patchsize(patchsize);
+	stacker->numberofstars(numberofstars);
+	stacker->searchradius(searchradius);
+	stacker->notransform(notransform);
 
 	// read all the images
 	while (optind < argc) {
