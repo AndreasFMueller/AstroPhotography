@@ -69,6 +69,14 @@ public:
 	const astro::image::MosaicType&	mosaic() const { return _mosaic; }
 	void	mosaic(const astro::image::MosaicType m) { _mosaic = m; }
 private:
+	double	_colorscales[3];
+	double	_coloroffsets[3];
+public:
+	void	setColorScales(double, double, double);
+	void	setColorScale(int, double);
+	void	setColorOffsets(double, double, double);
+	void	setColorOffset(int, double);
+private:
 	HistogramBase	*_histogram;
 	astro::image::ImageRectangle	rectangle(astro::image::ImagePtr image) const;
 	template<typename Pixel>

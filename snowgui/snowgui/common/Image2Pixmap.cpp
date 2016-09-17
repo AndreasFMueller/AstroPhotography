@@ -20,6 +20,10 @@ Image2Pixmap::Image2Pixmap() {
 	_brightness = 0;
 	_scale = 0;
 	_histogram = NULL;
+	for (int i = 0; i < 3; i++) {
+		_colorscales[i] = 1.;
+		_coloroffsets[i] = 0.;
+	}
 }
 
 Image2Pixmap::~Image2Pixmap() {
@@ -67,13 +71,65 @@ protected:
 	double	_gain;
 	double	_brightness;
 	int	_scale;
+	double	_colorscales[3];
+	double	_coloroffsets[3];
+	void	initcolor() {
+		for (int i = 0; i < 3; i++) {
+			_colorscales[i] = 1.;
+			_coloroffsets[i] = 0.;
+		}
+	}
 public:
-	GainSettings() : _gain(1), _brightness(0), _scale(0) { }
-	GainSettings(int scale) : _gain(1), _brightness(0), _scale(scale) { }
+	GainSettings() : _gain(1), _brightness(0), _scale(0) {
+		initcolor();
+	}
+	GainSettings(int scale) : _gain(1), _brightness(0), _scale(scale) {
+		initcolor();
+	}
 	GainSettings(double gain, double brightness, int scale)
-		: _gain(gain), _brightness(brightness), _scale(scale) { }
-	void	gain(double g) { _gain = g; }
-	void	brightness(double b) { _brightness = b; }
+		: _gain(gain), _brightness(brightness), _scale(scale) {
+		initcolor();
+	}
+	GainSettings(const GainSettings& other) {
+		_gain = other._gain;
+		_brightness = other._brightness;
+		_scale = other._scale;
+		for (int i = 0; i < 3; i++) {
+			_colorscales[i] = other._colorscales[i];
+			_coloroffsets[i] = other._coloroffsets[i];
+		}
+	}
+	void	gain(double g) {
+		_gain = g;
+	}
+	void	brightness(double b) {
+		_brightness = b;
+	}
+	void	setColorScales(double r, double b, double g) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"setting scales to %.2f, %.2f, %.2f", r, g, b);
+		_colorscales[0] = r;
+		_colorscales[1] = g;
+		_colorscales[2] = b;
+	}
+	void	setColorOffsets(double r, double b, double g) {
+		_coloroffsets[0] = r;
+		_coloroffsets[1] = g;
+		_coloroffsets[2] = b;
+	}
+	void	setColorScales(double *colorscales) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"setting scales to %.2f, %.2f, %.2f",
+			colorscales[0], colorscales[1], colorscales[2]);
+		for (int i = 0; i < 3; i++) {
+			_colorscales[i] = colorscales[i];
+		}
+	}
+	void	setColorOffsets(double *coloroffsets) {
+		for (int i = 0; i < 3; i++) {
+			_coloroffsets[i] = coloroffsets[i];
+		}
+	}
 };
 
 /**
@@ -286,7 +342,8 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
  * By mixing in the GainSettings, this class adds gain information to the
  * basic image adapter
  */
-class BasicGainRGBAdapter : public ConstImageAdapter<RGB<unsigned char> >, public GainSettings {
+class BasicGainRGBAdapter : public ConstImageAdapter<RGB<unsigned char> >,
+			    public GainSettings {
 public:
 	BasicGainRGBAdapter(const ImageSize& imagesize, int scale)
 		: ConstImageAdapter<RGB<unsigned char> >(imagesize),
@@ -305,7 +362,7 @@ public:
 template<typename Pixel>
 class GainRGBAdapter : public BasicGainRGBAdapter {
 	const ConstImageAdapter<RGB<Pixel> >&	_image;
-	unsigned char	rescale(Pixel i) const {
+	unsigned char	rescale(double i) const {
 		double	v = trunc(i * _gain + _brightness);
 		if (v > 255) {
 			return 255;
@@ -315,11 +372,21 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 		}
 		return (unsigned char)v;
 	}
+	unsigned char	colorRescale(int i, double c) const {
+		return rescale(_colorscales[i] * c + _coloroffsets[i]);
+	}
 	RGB<unsigned char>	rescale(const RGB<Pixel> i) const {
-		return RGB<unsigned char>(rescale(i.R), rescale(i.G),
-			rescale(i.B));
+		return RGB<unsigned char>( colorRescale(0, i.R),
+					   colorRescale(1, i.G),
+					   colorRescale(2, i.B));
 	}
 	RGB<unsigned char>	normalPixel(int x, int y) const {
+if ((x == 0) && (y == 0)) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "scales: %.2f, %.2f, %.2f",
+		_colorscales[0], _colorscales[1], _colorscales[2]);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "offsets: %.2f, %.2f, %.2f",
+		_coloroffsets[0], _coloroffsets[1], _coloroffsets[2]);
+}
 		return rescale(_image.pixel(x, y));
 	}
 	RGB<unsigned char>	upscalePixel(int x, int y) const {
@@ -331,7 +398,6 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 		int	endx = startx + (1 << -_scale);
 		int	endy = starty + (1 << -_scale);
 		double	r = 0, g = 0, b = 0;
-		RGB<double>	s;
 		int	counter = 0;
 		for (int x = startx; x < endx; x++) {
 			for (int y = starty; y < endy; y++) {
@@ -342,8 +408,9 @@ class GainRGBAdapter : public BasicGainRGBAdapter {
 				counter++;
 			}
 		}
-		return RGB<unsigned char>(rescale(r / counter),
-			rescale(g / counter), rescale(b / counter));
+		return RGB<unsigned char>( colorRescale(0, r / counter),
+					   colorRescale(1, g / counter),
+					   colorRescale(2, b / counter));
 	}
 public:
 	GainRGBAdapter(const ConstImageAdapter<RGB<Pixel> >& image, int scale)
@@ -364,8 +431,6 @@ public:
 		}
 		return normalPixel(x, y);
 	}
-	void	gain(double g) { _gain = g; }
-	void	brightness(double b) { _brightness = b; }
 };
 
 /**
@@ -395,6 +460,8 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	GainRGBAdapter<Pixel>	gainadapter(windowadapter, _scale);
 	gainadapter.gain(_gain);
 	gainadapter.brightness(_brightness);
+	gainadapter.setColorScales(_colorscales);
+	gainadapter.setColorOffsets(_coloroffsets);
 
 	// dimensions
 	int	w = gainadapter.getSize().width();
@@ -502,6 +569,26 @@ QPixmap	*Image2Pixmap::histogram(int width, int height) {
 		return _histogram->pixmap(width, height);
 	}
 	return NULL;
+}
+
+void	Image2Pixmap::setColorScales(double r, double g, double b) {
+	_colorscales[0] = r;
+	_colorscales[1] = g;
+	_colorscales[2] = b;
+}
+
+void	Image2Pixmap::setColorOffsets(double r, double g, double b) {
+	_coloroffsets[0] = r;
+	_coloroffsets[1] = g;
+	_coloroffsets[2] = b;
+}
+
+void	Image2Pixmap::setColorScale(int i, double c) {
+	_colorscales[i] = c;
+}
+
+void	Image2Pixmap::setColorOffset(int i, double c) {
+	_coloroffsets[i] = c;
 }
 
 } // namespace snowgui

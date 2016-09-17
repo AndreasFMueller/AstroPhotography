@@ -28,6 +28,7 @@ namespace logscale {
 static struct option	longopts[] = {
 /* name		argument?		int*		int */
 { "debug",	no_argument,		NULL,		'd' }, /* 0 */
+{ "force",	no_argument,		NULL,		'f' },
 { "help",	no_argument,		NULL,		'h' }, /* 1 */
 { NULL,		0,			NULL,		 0  }
 };
@@ -42,21 +43,96 @@ static void	usage(const char *progname) {
 	std::cout << "options:" << std::endl;
 	std::cout << std::endl;
 	std::cout << "  -d        increase debug level" << std::endl;
+	std::cout << "  -f        force overwriting of images" << std::endl;
 	std::cout << "  -h, -?    show this help message" << std::endl;
+}
+
+template<typename T, typename S>
+class RGBLogAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	LuminanceAdapter<RGB<T>,S>	_luminance;
+public:
+	RGBLogAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
+		  _luminance(image) {
+	}
+	virtual RGB<T>	pixel(int x, int y) const {
+		S	l = _luminance.pixel(x, y);
+		S	s = log(l) / l;
+		if (s < 0) { s = 0; }
+		RGB<T>	p = _image.pixel(x, y);
+		RGB<T>	result(s * p.R, s * p.G, s * p.B);
+		return result;
+	}
+	static ImagePtr	rgblog(const ConstImageAdapter<RGB<T> >& image) {
+		RGBLogAdapter<T, S>	a(image);
+		return ImagePtr(new Image<RGB<T> >(a));
+	}
+};
+
+
+#define	do_rgblog(image, T, S)						\
+	{								\
+		Image<RGB<T> >	*imagep					\
+			= dynamic_cast<Image<RGB<T> >*>(&*image);	\
+		if (NULL != imagep) {					\
+			return RGBLogAdapter<T,S>::rgblog(*imagep);	\
+		}							\
+	}
+
+ImagePtr	rgblog(ImagePtr image) {
+	do_rgblog(image, float, float)
+	do_rgblog(image, double, double)
+	throw std::runtime_error("cannot log image with this pixel type");
+}
+
+template<typename T>
+class LogAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&	_image;
+public:
+	LogAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) {
+	}
+	virtual T	pixel(int x, int y) const {
+		return log(_image.pixel(x, y));
+	}
+	static ImagePtr	logimage(const ConstImageAdapter<T>& image) {
+		LogAdapter<T>	l(image);
+		return ImagePtr(new Image<T>(l));
+	}
+};
+
+#define	do_logimage(image, Pixel)					\
+	{								\
+		Image<Pixel>	*imagep					\
+			= dynamic_cast<Image<Pixel>*>(&*image);		\
+		if (NULL != imagep) {					\
+			return LogAdapter<Pixel>::logimage(*imagep);	\
+		}							\
+	}
+
+ImagePtr	logimage(ImagePtr image) {
+	do_logimage(image, float)
+	do_logimage(image, double)
+	throw std::runtime_error("cannot log image with this pixel type");
 }
 
 /**
  * \brief Main function in astro namespace
  */
 int	main(int argc, char *argv[]) {
-	int	c;
+	bool	force = false;
 
 	// parse the command line
+	int	c;
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "d?h", longopts, &longindex)))
+	while (EOF != (c = getopt_long(argc, argv, "df?h", longopts, &longindex)))
 		switch (c) {
 		case 'd':
 			debuglevel = LOG_DEBUG;
+			break;
+		case 'f':
+			force = true;
 			break;
 		case '?':
 		case 'h':
@@ -73,30 +149,29 @@ int	main(int argc, char *argv[]) {
 	}
 	std::string	infilename(argv[optind++]);
 	std::string	outfilename(argv[optind]);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "calibrate %s to %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "log %s to %s",
 		infilename.c_str(), outfilename.c_str());
 
 	// read the infile
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
 
-	// convert pixels according to luminance
-#if 0
-	Image<RGB<double> >	*imageptr
-		= dynamic_cast<Image<RGB<double> > *>(&*image);
-	LuminanceAdapter<RGB<double> >	la(*imageptr);
-#endif
-	DoubleAdapter	doubleadapter(image);
-	LuminanceAdapter<double, double>	la(doubleadapter);
+	// outfile
+	ImagePtr	outimage;
 
-	// create image from log adapter
-	FunctionAdapter<double, double>	fa(la, log2);
-	Image<double>	*logimage = new Image<double>(fa);
-	ImagePtr	outimage(logimage);
+	// convert pixels according to luminance
+	if (3 == image->planes()) {
+		outimage = rgblog(image);
+	} else {
+		outimage = logimage(image);
+	}
 
 	// after all the calibrations have been performed, write the output
 	// file
 	FITSout	outfile(outfilename);
+	if ((outfile.exists()) && (force)) {
+		outfile.unlink();
+	}
 	outfile.write(outimage);
 
 	// that's it

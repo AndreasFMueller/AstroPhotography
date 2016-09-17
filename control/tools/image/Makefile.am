@@ -8,7 +8,11 @@
 bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
-	colorbalance stars findtransform luminance unsharp
+	colorbalance stars findtransform luminance unsharp color
+
+color_SOURCES = color.cpp
+color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+color_LDADD = -L$(top_builddir)/lib -lastro 
 
 findtransform_SOURCES = findtransform.cpp
 findtransform_DEPENDENCIES = $(top_builddir)/lib/libastro.la

@@ -83,6 +83,24 @@ imagedisplaywidget::imagedisplaywidget(QWidget *parent) :
 		this, SLOT(imageSettingsChanged()));
 	connect(ui->subframefullButton, SIGNAL(clicked()),
 		this, SLOT(imageSettingsChanged()));
+
+	// colors
+	ui->redBox->setStyleSheet("QWidget { background-color: #ffcccc; }");
+	ui->greenBox->setStyleSheet("QWidget { background-color: #ccffcc; }");
+	ui->blueBox->setStyleSheet("QWidget { background-color: #ccccff; }");
+
+	connect(ui->redscaleBox, SIGNAL(valueChanged(double)),
+		this, SLOT(redScaleChanged(double)));
+	connect(ui->greenscaleBox, SIGNAL(valueChanged(double)),
+		this, SLOT(greenScaleChanged(double)));
+	connect(ui->bluescaleBox, SIGNAL(valueChanged(double)),
+		this, SLOT(blueScaleChanged(double)));
+	connect(ui->redoffsetBox, SIGNAL(valueChanged(double)),
+		this, SLOT(redOffsetChanged(double)));
+	connect(ui->greenoffsetBox, SIGNAL(valueChanged(double)),
+		this, SLOT(greenOffsetChanged(double)));
+	connect(ui->blueoffsetBox, SIGNAL(valueChanged(double)),
+		this, SLOT(blueOffsetChanged(double)));
 }
 
 /**
@@ -650,6 +668,16 @@ void	imagedisplaywidget::processNewImage() {
 	// even if in the mean time a new image has arrived.
 	ImagePtr	image = _image;
 
+	// if the image is a color image, then we should make the
+	// color box visible
+	if (image->planes() == 3) {
+		ui->colorBox->setHidden(false);
+		ui->bayerBox->setEnabled(false);
+	} else {
+		ui->colorBox->setHidden(true);
+		ui->bayerBox->setEnabled(true);
+	}
+
 	// process rectangle information for the new image
 	processNewImageRectangle(image);
 
@@ -890,5 +918,38 @@ void	imagedisplaywidget::bayerChanged(int currentindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new mosaic: %s", mosaicstring.c_str());
 	processNewSettings();
 }
+
+
+void	imagedisplaywidget::redScaleChanged(double s) {
+	image2pixmap.setColorScale(0, s);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::greenScaleChanged(double s) {
+	image2pixmap.setColorScale(1, s);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::blueScaleChanged(double s) {
+	image2pixmap.setColorScale(2, s);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::redOffsetChanged(double o) {
+	image2pixmap.setColorOffset(0, o);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::greenOffsetChanged(double o) {
+	image2pixmap.setColorOffset(1, o);
+	processNewSettings();
+}
+
+void	imagedisplaywidget::blueOffsetChanged(double o) {
+	image2pixmap.setColorOffset(2, o);
+	processNewSettings();
+}
+
+
 
 } // namespace snowgui

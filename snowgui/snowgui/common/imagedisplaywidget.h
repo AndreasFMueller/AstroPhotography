@@ -125,6 +125,13 @@ public slots:
 	void	selectPoint(QPoint);
 	void	receiveImage(astro::image::ImagePtr);
 	void	bayerChanged(int);
+
+	void	redScaleChanged(double);
+	void	greenScaleChanged(double);
+	void	blueScaleChanged(double);
+	void	redOffsetChanged(double);
+	void	greenOffsetChanged(double);
+	void	blueOffsetChanged(double);
 private:
 	void	closeEvent(QCloseEvent *);
 };
