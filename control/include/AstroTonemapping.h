@@ -66,27 +66,6 @@ Pixel	CauchyAdapter<Pixel>::pixel(int x, int y)
 }
 
 /**
- * \brief LogAdapter
- */
-template<typename Pixel>
-class LogAdapter : public ConstImageAdapter<Pixel> {
-	const ConstImageAdapter<Pixel>&	image;
-public:
-	LogAdapter(const ConstImageAdapter<Pixel>& image);
-	virtual Pixel	pixel(int x, int y) const;
-};
-
-template<typename Pixel>
-LogAdapter<Pixel>::LogAdapter(const ConstImageAdapter<Pixel>& _image)
-	: ConstImageAdapter<Pixel>(_image.getSize()), image(_image) {
-}
-
-template<typename Pixel>
-Pixel	LogAdapter<Pixel>::pixel(int x, int y) const {
-	return log10(image.pixel(x, y));
-}
-
-/**
  * \brief Rescaling Adapter
  */
 template<typename Pixel>

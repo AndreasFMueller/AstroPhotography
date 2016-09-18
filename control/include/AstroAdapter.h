@@ -2337,6 +2337,55 @@ public:
 
 ImagePtr	unsharp(ImagePtr image, double radius, double amount);
 
+//////////////////////////////////////////////////////////////////////
+// Log adapter
+//////////////////////////////////////////////////////////////////////
+
+template<typename T, typename S>
+class RGBLogAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	LuminanceAdapter<RGB<T>,S>	_luminance;
+public:
+	RGBLogAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
+		  _luminance(image) {
+	}
+	virtual RGB<T>	pixel(int x, int y) const {
+		S	l = _luminance.pixel(x, y);
+		S	s = log(l) / l;
+		if (s < 0) { s = 0; }
+		RGB<T>	p = _image.pixel(x, y);
+		RGB<T>	result(s * p.R, s * p.G, s * p.B);
+		return result;
+	}
+	static ImagePtr	logimage(const ConstImageAdapter<RGB<T> >& image) {
+		RGBLogAdapter<T, S>	a(image);
+		return ImagePtr(new Image<RGB<T> >(a));
+	}
+};
+
+ImagePtr	rgblogimage(ImagePtr image);
+
+template<typename T>
+class LogAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&	_image;
+public:
+	LogAdapter(const ConstImageAdapter<T>& image)
+		: ConstImageAdapter<T>(image.getSize()), _image(image) {
+	}
+	virtual T	pixel(int x, int y) const {
+		return log(_image.pixel(x, y));
+	}
+	static ImagePtr	logimage(const ConstImageAdapter<T>& image) {
+		LogAdapter<T>	l(image);
+		return ImagePtr(new Image<T>(l));
+	}
+};
+
+ImagePtr	monologimage(ImagePtr image);
+
+ImagePtr	logimage(ImagePtr image);
+
 } // namespace adapter
 } // namespace astro
 

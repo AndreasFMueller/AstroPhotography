@@ -78,6 +78,7 @@ libastroimage_la_SOURCES = 						\
 	Layer.cpp							\
 	LevelExtractor.cpp						\
 	LevelMaskExtractor.cpp						\
+	LogImage.cpp							\
 	Masks.cpp							\
 	Maxima.cpp							\
 	Metavalue.cpp							\

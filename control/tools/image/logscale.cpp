@@ -47,6 +47,7 @@ static void	usage(const char *progname) {
 	std::cout << "  -h, -?    show this help message" << std::endl;
 }
 
+#if 0
 template<typename T, typename S>
 class RGBLogAdapter : public ConstImageAdapter<RGB<T> > {
 	const ConstImageAdapter<RGB<T> >&	_image;
@@ -116,6 +117,7 @@ ImagePtr	logimage(ImagePtr image) {
 	do_logimage(image, double)
 	throw std::runtime_error("cannot log image with this pixel type");
 }
+#endif
 
 /**
  * \brief Main function in astro namespace
@@ -160,11 +162,14 @@ int	main(int argc, char *argv[]) {
 	ImagePtr	outimage;
 
 	// convert pixels according to luminance
+	outimage = logimage(image);
+#if 0
 	if (3 == image->planes()) {
 		outimage = rgblog(image);
 	} else {
 		outimage = logimage(image);
 	}
+#endif
 
 	// after all the calibrations have been performed, write the output
 	// file
