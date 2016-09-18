@@ -32,6 +32,8 @@ Image:
       - Bug in attribute read routines: if headers are in a second hdu, then
 	they are ignored
       - logic of precious is flawed
+      - If an image has an RGB mosaic, and we take a subframe, what 
+	mosaic do we actually give the subframe?
 
 URLs:
 
