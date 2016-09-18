@@ -1,7 +1,6 @@
 configuration system:
 
 Devices:
-      -	GuiderPort -> GuidePort
       -	reservation of devices to ensure that a CCD e.g. used for guiging
 	is not used for other exposures at the same time
       -	query method to ask for the most recent problem with a device
@@ -21,6 +20,11 @@ Guiding:
 	calibration and guiding. In general, failures in those threads should
 	be handled more gracefully
       - reservation of relevant devices during calibraiton and guiding
+      - during guiding, should we introduce a damping factor to prevent 
+	oscillations at the price of somewhat slower corrections?
+
+Focusing:
+      - FWHM does not work reliably
 
 Image:
       - FITS write operation has setPrecious/precious accessors that should
@@ -43,6 +47,9 @@ Drivers:
       - When there is a problem with the SX camera, we should try to reset
 	the camera and retry the operation. It should not be necessary to
 	disconnect and reconnect the camera to reset it.
+      - SX Camera names change too often (they are essentially bus numbers,
+	but when one has to restart the camera, the bus position may change).
+	Can we have persistent names for these devices?
       -	It should be possible to reread the devices of a module, just in
 	case a new device was added during runtime.
 

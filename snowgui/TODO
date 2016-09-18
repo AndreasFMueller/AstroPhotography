@@ -28,6 +28,15 @@ trackingmonitorwindow:
       - scrolling in long histories
       -	synchronize AO and GP histories (currently the scale is steps, not
 	time, but AO usually has a much shorter time scale)
+      - different colors for curves that display pixel offsets or arc second
+	offsets
+      - Legend: which color is RA, which one is DEC
+      - How do we now wether we see pixel offsets in the CCD coordinate
+	system, or arc second offsets in sky coordinates?
+      - Using the calibration, we should be able to see the arc seconds
+	offets in the sky coordinate system, not the CCD coordinate system
+      - make time axis scalable for long tracking histories
+      - show time when mouse moves over the tracking history
 
 guidingwindow:
       -	adaptiveoptics tool missing
@@ -50,4 +59,6 @@ focusercontrollerwidget:
 	visible enough)
       -	the allowed focuser range should be displayed
 
-
+exposewidget:
+      - progess indicator during image download
+      - naming of downloaded files
