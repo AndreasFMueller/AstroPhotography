@@ -1,4 +1,4 @@
-#
+
 # Makefile.am -- build the tools
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
@@ -18,11 +18,11 @@ imageloop_LDADD = -L$(top_builddir)/lib -lastro
 
 getimages_SOURCES = getimages.cpp
 getimages_DEPENDENCIES = $(top_builddir)/lib/libastro.la 
-getimages_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
+getimages_LDADD = -L$(top_builddir)/lib -lastro
 
 getstream_SOURCES = getstream.cpp
 getstream_DEPENDENCIES = $(top_builddir)/lib/libastro.la 
-getstream_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
+getstream_LDADD = -L$(top_builddir)/lib -lastro
 
 dark_SOURCES = dark.cpp
 dark_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -34,11 +34,11 @@ flat_LDADD = -L$(top_builddir)/lib -lastro
 
 focus_SOURCES = focus.cpp
 focus_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-focus_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
+focus_LDADD = -L$(top_builddir)/lib -lastro
 
 focustest_SOURCES = focustest.cpp
 focustest_DEPENDENCIES = $(top_builddir)/lib/libastro.la
-focustest_LDADD = -L$(top_builddir)/lib -lastro @SBIGLIBRARY@ 
+focustest_LDADD = -L$(top_builddir)/lib -lastro
 
 focusing_SOURCES = focusing.cpp
 focusing_DEPENDENCIES = $(top_builddir)/lib/libastro.la
