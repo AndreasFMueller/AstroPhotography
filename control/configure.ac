@@ -319,7 +319,11 @@ AC_ARG_ENABLE(sbig,
 [
 	case `uname` in
 	Darwin)	SBIGTARGET=ENV_MACOSX
-		SBIGINCLUDE="-framework SBIGUDrv"
+		# The driver installed by the SBIG installation driver
+		# no longer works out of the box, because apparently
+		# /Library/Frameworks is no longer on the system framework
+		# search path
+		SBIGINCLUDE="-F /Library/Frameworks"
 		;;
 	Linux)	SBIGTARGET=ENV_LINUX
 		SBIGINCLUDE=-I/usr/local/include
@@ -518,10 +522,4 @@ AC_CONFIG_FILES([Makefile include/Makefile
 	man/Makefile doc/Makefile doc/manual/Makefile
 	test/Makefile])
 AC_OUTPUT
-
-dnl The corba stuff is no longer supported
-dnl	corba/Makefile corba/idl/Makefile corba/include/Makefile
-dnl	corba/lib/Makefile corba/server/Makefile corba/cli/Makefile
-dnl	corba/client/Makefile corba/client/trackingmonitor/Makefile
-dnl	corba/client/calibrationmonitor/Makefile
 

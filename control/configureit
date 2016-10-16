@@ -73,6 +73,7 @@ fi
 systemtype=`uname`
 case ${systemtype} in
 Darwin)	echo "configuring for Mac OS X"
+	CFLAGS="${CFLAGS} -I/usr/local/include"
 	if [ -d /Library/Frameworks/SBIGUDrv.framework ]
 	then
 		echo "configureing with SBIG driver"
