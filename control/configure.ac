@@ -339,15 +339,18 @@ AC_ARG_ENABLE(sbig,
 		AC_CHECK_LIB([sbigudrv], [SBIGUnivDrvCommand], enable_sbig=yes,
 			[AC_MSG_ERROR([SBIG library not found])])
 		SBIGLIBRARY=-lsbigudrv
+		SBIGLDFLAGS=
 		LIBS="${OLDLIBS}"
 		;;
 	Darwin)	
 		AC_CHECK_HEADERS(SBIGUDrv/lpardrv.h, , [AC_MSG_ERROR([SBIG header not found])])
 		echo "Mac OS X: header was found, so library will work"
+		SBIGLDFLAGS="-F/Library/Frameworks"
 		SBIGLIBRARY="-framework SBIGUDrv"
 		CFLAGS="${CFLAGS} ${SBIGLIBRARY}"
 		;;
 	esac
+	AC_SUBST(SBIGLDFLAGS)
 	AC_SUBST(SBIGLIBRARY)
 	AC_SUBST(SBIGINCLUDE)
 	CFLAGS="${OLDCFLAGS}"
