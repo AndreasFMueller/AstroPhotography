@@ -54,6 +54,7 @@ std::string	TaskTableAdapter::createstatement() {
 	"    imagewidth integer not null default 0,\n"
 	"    imageheight integer not null default 0,\n"
 	"    project varchar(32) not null default '',\n"
+	"    repository varchar(32) not null default '',\n"
 	"    primary key(id)\n"
 	")");
 }
@@ -70,6 +71,7 @@ TaskQueueEntry	TaskTableAdapter::row_to_object(int objectid, const Row& row) {
 	parameters.filter(row["filter"]->stringValue());
 	parameters.mountindex(row["mountindex"]->intValue());
 	parameters.project(row["project"]->stringValue());
+	parameters.repository(row["repository"]->stringValue());
 	ImagePoint	origin(row["originx"]->intValue(),
 				row["originy"]->intValue());
 	ImageSize	size(row["width"]->intValue(),
@@ -159,6 +161,7 @@ UpdateSpec TaskTableAdapter::object_to_updatespec(const TaskQueueEntry& entry) {
 	spec.insert(Field("imageheight", factory.get((int)entry.size().height())));
 
 	spec.insert(Field("project", factory.get(entry.project())));
+	spec.insert(Field("repository", factory.get(entry.repository())));
 
 	return spec;
 }

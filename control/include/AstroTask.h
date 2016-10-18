@@ -83,6 +83,12 @@ public:
 	const std::string&	project() const { return _project; }
 	void	project(const std::string& p) { _project = p; }
 
+private:
+	std::string	_repository;
+public:
+	const std::string&	repository() const { return _repository; }
+	void	repository(const std::string& r) { _repository = r; }
+
 	TaskParameters();
 };
 

@@ -11,6 +11,9 @@
 #include <sys/time.h>
 #include <AstroLoader.h>
 #include <AstroDevaccess.h>
+#include <AstroProject.h>
+#include <AstroConfig.h>
+#include <AstroFormat.h>
 #include <ImageDirectory.h>
 #include <errno.h>
 #include <string.h>
@@ -256,12 +259,21 @@ void	ExposureWork::run() {
 			std::string("PROJECT"), _task.project()));
 	}
 
-	// add to the ImageDirectory
-	astro::image::ImageDatabaseDirectory	imagedir;
-	std::string	filename = imagedir.save(image);
+	if (_task.repository().size() > 0) {
+		// add the image to the repository
+		std::string	repository = _task.repository();
+		project::ImageRepoPtr	 imagerepo
+			= config::ImageRepoConfiguration::get()->repo(repository);
+		long	id = imagerepo->save(image);
+		_task.filename(stringprintf("%ld", id));
+	} else {
+		// add to the ImageDirectory
+		astro::image::ImageDatabaseDirectory	imagedir;
+		std::string	filename = imagedir.save(image);
 
-	// remember the filename
-	_task.filename(filename);
+		// remember the filename
+		_task.filename(filename);
+	}
 
 	// update the frame information
 	astro::camera::Exposure	exposure = _task.exposure();
