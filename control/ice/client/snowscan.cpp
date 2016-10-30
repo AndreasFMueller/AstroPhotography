@@ -207,6 +207,8 @@ int	main(int argc, char *argv[]) {
 		return command_scan(modules, modulename);
 	}
 
+	std::cerr << "unkonwn command '" << commandname << "'" << std::endl;
+
 	return EXIT_FAILURE;
 }
 	
