@@ -38,6 +38,8 @@ private:
 
 	ImagePtr	currentImage();
 
+	void	deleteMulti(QList<QTreeWidgetItem*>&);
+
 public slots:
 	void	openClicked();
 	void	saveClicked();
