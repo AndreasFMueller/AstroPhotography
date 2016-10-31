@@ -271,10 +271,49 @@ void	repositorywindow::openClicked() {
         	idw, SLOT(selectRectangle(QRect)));
 	idw->setRectangleSelectionEnabled(true);
 	idw->setImage(imageptr);
-	std::string	title = astro::stringprintf("image %d from repository %s",
-		_imageid, _reponame.c_str());
+	std::string	title
+		= astro::stringprintf("image %d from repository %s",
+			_imageid, _reponame.c_str());
 	idw->setWindowTitle(QString(title.c_str()));
 	idw->show();
+}
+
+
+/**
+ * \brief Delete multiple images
+ */
+void	repositorywindow::deleteMulti(QList<QTreeWidgetItem*>& items) {
+	QMessageBox	message;
+	message.setText(QString("Confirm delete"));
+	std::ostringstream	out;
+	out << "Do you really want to delete " << items.count();
+	out << " images from repository " << _reponame;
+	out << "?";
+	message.addButton(QString("Cancel"), QMessageBox::RejectRole);
+	message.addButton(QString("Delete"), QMessageBox::AcceptRole);
+	message.setInformativeText(QString(out.str().c_str()));
+	if (1 != message.exec()) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "delete cancelled");
+	}
+	snowstar::RepositoryPrx	repository
+		= _repositories->get(_reponame);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "deleting image %d", _imageid);
+	try {
+		// iterate through the list of items
+		QList<QTreeWidgetItem*>::iterator	li;
+		for (li = items.begin(); li != items.end(); li++) {
+			QTreeWidgetItem	*item = *li;
+
+			// find the image id
+			int	imageid = item->text(0).toInt();
+
+			repository->remove(imageid);
+			for (int i = 0; i < 13; i++) {
+				ui->repositoryTree->removeItemWidget(item, i);
+			}
+			delete item;
+		}
+	} catch (...) { }
 }
 
 /**
@@ -283,6 +322,11 @@ void	repositorywindow::openClicked() {
 void	repositorywindow::deleteClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deleteClicked()");
 	if (_reponame.size() == 0) {
+		return;
+	}
+	QList<QTreeWidgetItem*>	selected = ui->repositoryTree->selectedItems();
+	if (selected.count() > 1) {
+		deleteMulti(selected);
 		return;
 	}
 	QMessageBox	message;
@@ -298,7 +342,14 @@ void	repositorywindow::deleteClicked() {
 		snowstar::RepositoryPrx	repository
 			= _repositories->get(_reponame);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "deleting image %d", _imageid);
-		//repository->remove(_imageid);
+		try {
+			repository->remove(_imageid);
+			QTreeWidgetItem	*item = ui->repositoryTree->currentItem();
+			for (int i = 0; i < 13; i++) {
+				ui->repositoryTree->removeItemWidget(item, i);
+			}
+			delete item;
+		} catch (...) { }
 	} else {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "delete cancelled");
 	}

@@ -31,6 +31,7 @@ module snowstar {
 
 		// project
 		string	project;
+		string	repository;
 
 		// exposure stuff
 		Exposure	exp;

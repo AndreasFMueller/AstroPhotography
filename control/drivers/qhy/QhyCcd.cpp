@@ -71,6 +71,12 @@ void	QhyCcd::getImage0() {
 		}
 	}
 
+	// if the camera is a color camera, add the bayer type to the image
+	std::string	b = deviceptr->camera().bayer();
+	if (b.size() > 0) {
+		image->setMosaicType(MosaicType(b));
+	}
+
 	// that's it
 	state(CcdState::exposed);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "getImage0() complete");

@@ -92,6 +92,7 @@ TaskParameters	convert(const astro::task::TaskParameters& parameters) {
 	result.filter = parameters.filter();
 	result.mountIndex = parameters.mountindex();
 	result.project = parameters.project();
+	result.repository = parameters.repository();
 	result.exp = convert(parameters.exposure());
 	return result;
 }
@@ -108,6 +109,7 @@ astro::task::TaskParameters	convert(const TaskParameters& parameters) {
 	result.filter(parameters.filter);
 	result.mountindex(parameters.mountIndex);
 	result.project(parameters.project);
+	result.repository(parameters.repository);
 	return result;
 }
 

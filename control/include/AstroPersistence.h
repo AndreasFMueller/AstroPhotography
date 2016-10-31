@@ -13,6 +13,7 @@
 #include <memory>
 #include <algorithm>
 #include <stdexcept>
+#include <sys/time.h>
 
 namespace astro {
 

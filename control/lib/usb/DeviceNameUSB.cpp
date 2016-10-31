@@ -18,10 +18,12 @@ static std::string	remove_dashes(const std::string& s) {
 	std::string	result;
 	for (size_t i = 0; i < s.size(); i++) {
 		char	c = s[i];
-		if (('-' != c) || (' ' != c)) {
+		if (('-' != c) && (' ' != c)) {
 			result.append(1, c);
 		}
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "'%s' dashes removed: '%s'",
+		s.c_str(), result.c_str());
 	return result;
 }
 
@@ -79,8 +81,9 @@ DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 		deviceptr->getDeviceName().c_str());
 	usb::DeviceDescriptorPtr	descriptor = deviceptr->descriptor();
 	if (_modulevendor != descriptor->idVendor()) {
-		std::string	msg = stringprintf("device is not a %s device",
-			_modulename.c_str());
+		std::string	msg = stringprintf("device is not a %s device, "
+			"but 0x%hx",
+			_modulename.c_str(), descriptor->idVendor());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -113,8 +116,11 @@ DeviceNameUSB::DeviceNameUSB(const std::string& modulename,
 }
 
 std::string	DeviceNameUSB::unparse() const {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_iproduct = %s", _iproduct.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_idvendor = %04hx", _idvendor);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "_idproduct = %04hx", _idproduct);
 	std::string	name = stringprintf(
-		"%03d-%03d-%s-%04x-%04x",
+		"%03d-%03d-%s-%04hx-%04hx",
 		_busnumber, _deviceaddress, _iproduct.c_str(),
 		_idvendor, _idproduct);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "name = %s", name.c_str());
