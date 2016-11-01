@@ -33,6 +33,7 @@ public:
 	virtual ImageInfo	getInfo(int id, const Ice::Current& current);
 	virtual int	save(const ImageFile& image,
 				const Ice::Current& current);
+	virtual int	count(const Ice::Current& current);
 	virtual void	remove(int id, const Ice::Current& current);
 };
 

@@ -52,10 +52,20 @@ module snowstar {
 		ImageFile	getImage(int id) throws NotFound;
 		ImageInfo	getInfo(int id) throws NotFound;
 		int	save(ImageFile image) throws Exists;
+		int	count();
 		void	remove(int id) throws NotFound;
 	};
 
 	sequence<string>	reponamelist;
+
+	struct RepositorySummary {
+		string	name;
+		string	directory;
+		string	database;
+		int	count;
+	};
+
+	sequence<RepositorySummary>	reposummarylist;
 
 	/**
 	 * \brief Repository selection on server
@@ -65,6 +75,7 @@ module snowstar {
 	 */
 	interface Repositories {
 		reponamelist	list();
+		reposummarylist	summarylist();
 		bool	has(string reponame);
 		Repository*	get(string reponame) throws NotFound;
 		void	add(string reponame, string repodirectory)
