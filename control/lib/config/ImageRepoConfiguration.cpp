@@ -193,7 +193,7 @@ std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo(bool visible_on
 	ImageRepoTable	repos(_config->database());
 	std::string	condition("0 = 0");
 	if (visible_only) {
-		condition = "hidden != false";
+		condition = "hidden = 0";
 	}
 	std::list<ImageRepoInfo>	result;
 	std::list<ImageRepoRecord>	repolist = repos.select(condition);

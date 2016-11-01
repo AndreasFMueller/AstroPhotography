@@ -38,7 +38,7 @@ std::string	ImageRepoTableAdapter::createstatement() {
 		"    reponame varchar(32) not null,\n"
 		"    dbname varchar(1024) not null,\n"
 		"    directory varchar(1024) not null,\n"
-		"    hidden int not null default false,\n"
+		"    hidden int not null default 0,\n"
 		"    primary key(id)\n"
 		");\n"
 		"create unique index imagerepos_idx1\n"
@@ -52,6 +52,7 @@ ImageRepoRecord	ImageRepoTableAdapter::row_to_object(int objectid,
 	record.reponame = row["reponame"]->stringValue();
 	record.database = row["dbname"]->stringValue();
 	record.directory = row["directory"]->stringValue();
+	record.hidden = row["hidden"]->intValue();
 	return record;
 }
 
@@ -61,6 +62,8 @@ UpdateSpec	ImageRepoTableAdapter::object_to_updatespec(const ImageRepoRecord& im
 	spec.insert(Field("reponame", factory.get(imagerepo.reponame)));
 	spec.insert(Field("dbname", factory.get(imagerepo.database)));
 	spec.insert(Field("directory", factory.get(imagerepo.directory)));
+	int	h = (imagerepo.hidden) ? 1 : 0;
+	spec.insert(Field("hidden", factory.get(h)));
 	return spec;
 }
 
