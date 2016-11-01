@@ -45,7 +45,7 @@ reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(config);
 	std::list<astro::project::ImageRepoInfo>	repolist
-		= imagerepos->listrepo();
+		= imagerepos->listrepo(false);
 	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
 		RepositorySummary	summary;
 		summary.name = ptr->reponame;

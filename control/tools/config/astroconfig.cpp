@@ -182,15 +182,16 @@ int	list_repo() {
 	ConfigurationPtr	config = Configuration::get();
 	ImageRepoConfigurationPtr	imagerepos
 		= ImageRepoConfiguration::get(config);
-	std::list<ImageRepoInfo>	repoinfolist = imagerepos->listrepo();
+	std::list<ImageRepoInfo>	repoinfolist = imagerepos->listrepo(false);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d ImageRepoInfo objects",
 		repoinfolist.size());
 	std::for_each(repoinfolist.begin(), repoinfolist.end(),
 		[](const ImageRepoInfo& repoinfo) {
-			std::cout << stringprintf("%-8.8s %s %s\n",
+			std::cout << stringprintf("%-8.8s %s %s %s\n",
 				repoinfo.reponame.c_str(),
 				repoinfo.database.c_str(),
-				repoinfo.directory.c_str());
+				repoinfo.directory.c_str(),
+				repoinfo.hidden ? "hidden" : "visible");
 		}
 	);
 	return EXIT_SUCCESS;
