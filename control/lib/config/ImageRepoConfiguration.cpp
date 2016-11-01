@@ -36,7 +36,7 @@ public:
 				const std::string& directory);
 	virtual void	removerepo(const std::string& name,
 				bool removecontents);
-	virtual std::list<ImageRepoInfo>	listrepo();
+	virtual std::list<ImageRepoInfo>	listrepo(bool visible_only);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -189,10 +189,14 @@ void	ImageRepoConfigurationBackend::removerepo(const std::string& name,
 /**
  * \brief Get a list of repositories in the configuration database
  */
-std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo() {
+std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo(bool visible_only) {
 	ImageRepoTable	repos(_config->database());
+	std::string	condition("0 = 0");
+	if (visible_only) {
+		condition = "hidden != false";
+	}
 	std::list<ImageRepoInfo>	result;
-	std::list<ImageRepoRecord>	repolist = repos.select("0 = 0");
+	std::list<ImageRepoRecord>	repolist = repos.select(condition);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d image repo records",
 		repolist.size());
 	std::list<ImageRepoRecord>::const_iterator	i;

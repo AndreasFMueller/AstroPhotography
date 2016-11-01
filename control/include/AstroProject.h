@@ -231,6 +231,7 @@ public:
 	std::string	reponame;
 	std::string	database;
 	std::string	directory;
+	bool	hidden;
 	bool	operator==(const ImageRepoInfo& other) const;
 };
 

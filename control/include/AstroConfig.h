@@ -447,7 +447,7 @@ static ImageRepoConfigurationPtr	get(ConfigurationPtr config);
 				const std::string& directory) = 0;
 	virtual void	removerepo(const std::string& name,
 				bool removecontents = false) = 0;
-	virtual std::list<project::ImageRepoInfo>	listrepo() = 0;
+	virtual std::list<project::ImageRepoInfo>	listrepo(bool hidden_only) = 0;
 };
 
 class ProjectConfiguration;
