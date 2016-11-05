@@ -59,6 +59,7 @@ instrumentswindow::instrumentswindow(QWidget *parent,
 	Ice::ObjectPrx	base = ic->stringToProxy(
 				_serviceobject.connect("Instruments"));
 	_instruments = snowstar::InstrumentsPrx::checkedCast(base);
+	instrumentEnabled(false);
 
 	// read the list of instrument names from the proxy
 	snowstar::InstrumentList	il = _instruments->list();
@@ -87,6 +88,14 @@ instrumentswindow::~instrumentswindow() {
 	delete ui;
 }
 
+void	instrumentswindow::instrumentEnabled(bool enabled) {
+	ui->addButton->setEnabled(enabled);
+	ui->addguiderccdButton->setEnabled(enabled);
+	ui->deleteButton->setEnabled(enabled);
+	ui->deleteinstrumentButton->setEnabled(enabled);
+	ui->instrumentdisplayWidget->setEnabled(enabled);
+}
+
 /**
  * \brief Slot called when an instrument is selected
  *
@@ -98,6 +107,8 @@ void	instrumentswindow::instrumentSelected(QString name) {
 
 	// XXX make sure everything we know about this instrument is displayed
         ui->instrumentdisplayWidget->setInstrument(_instrument);
+
+	instrumentEnabled(true);
 }
 
 /**
@@ -232,6 +243,7 @@ void	instrumentswindow::deleteInstrument() {
 			_instruments->remove(_instrument->name());
 			int	index = ui->instrumentselectionBox->currentIndex();
 			ui->instrumentselectionBox->removeItem(index);
+			instrumentEnabled(false);
 		} catch (const std::exception& x) {
 		}
 	}
@@ -242,7 +254,7 @@ void	instrumentswindow::deleteInstrument() {
 /**
  * \brief stop the timer when the window closes
  */
-void    instrumentswindow::closeEvent(QCloseEvent *event) {
+void    instrumentswindow::closeEvent(QCloseEvent * /* event */) {
 	_discoveryTimer->stop();
 }
 

@@ -44,7 +44,7 @@ instrumentdisplay::~instrumentdisplay() {
 /**
  * \brief add a top level tree entry of a given type
  */
-void	instrumentdisplay::toplevel(snowstar::InstrumentComponentType type,
+void	instrumentdisplay::toplevel(snowstar::InstrumentComponentType /* type */,
 		const std::string& name) {
 	// create the header
 	QStringList	list;
@@ -160,11 +160,16 @@ static snowstar::InstrumentComponentType	convert(const astro::DeviceName& d) {
  */
 void	instrumentdisplay::add(const std::string& devicename,
 		const std::string& servicename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add device %s to service %s",
+		devicename.c_str(), servicename.c_str());
 	if (!_instrument) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no instrument");
 		return;
 	}
 	snowstar::InstrumentComponent	component;
 	component.instrumentname = _instrument->name();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "device name is %s",
+		component.instrumentname.c_str());
 	component.deviceurl = devicename;
 	component.servicename = servicename;
 	astro::DeviceName	d(devicename);
@@ -290,7 +295,7 @@ void    instrumentdisplay::property(int row, const std::string& propertyname,
 	ui->propertyTable->resizeColumnsToContents();
 }
 
-void	instrumentdisplay::propertyValueChanged(int row, int column) {
+void	instrumentdisplay::propertyValueChanged(int row, int /* column */) {
 	snowstar::InstrumentProperty	p;
 	p.instrumentname = _instrument->name();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "property in row %d value changed", row);

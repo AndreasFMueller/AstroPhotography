@@ -37,6 +37,8 @@ private:
 	astro::discover::ServiceDiscoveryPtr	_discovery;
 	QTimer	*_discoveryTimer;
 
+	void	instrumentEnabled(bool);
+
 public slots:
 	void	instrumentSelected(QString);
 	void	serviceSelected(QString);
