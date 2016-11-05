@@ -24,9 +24,6 @@ atiktests_SOURCES = atiktests.cpp atiktest.cpp
 atiktests_LDADD = -lcppunit ../../lib/libastro.la -L. -latik @ATIKLIBPATH@ @ATIKLIBS@
 atiktests_DEPENDENCIES = ../../lib/libastro.la libatik.la
 
-testcase_SOURCES = testcase.cpp
-testcase_LDADD = @ATIKLIBRARY@
-
 endif
 
 atik_la_SOURCES = AtikLocator.cpp AtikUtils.cpp AtikCamera.cpp		\

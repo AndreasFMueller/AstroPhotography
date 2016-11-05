@@ -149,6 +149,9 @@ Mandatory packages:
    class. In this case, the regex class from the boost library can be used,
    it should be configured using the --enable-boostregex option to configure.
 
+ - Avahi client library: locating a server is done using zeroconf, which is
+   implemented on Linux in the Avahi library.
+
 Optional packages:
 
  - ZeroC ICE is the prefered communications engine, version 3.5.1 is required
