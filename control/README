@@ -39,19 +39,6 @@ drivers
 	uvc
 		user space driver for USB video class cameras
 
-corba
-	Contains CORBA IDL and supporting classes, a server application
-	and some client programs to talk to the server
-
-	idl
-		Interface Definition Language files for all CORBA services
-	cli
-		a command line client named astro to access the CORBA server
-	client
-		some client programs for the CORBA server
-	server
-		Source code for the CORBA server functions
-
 ice
 	Contains ICE IDL and supporting classes for an ICE based server
 	named "snowstar". This server makes all telescope control operations
@@ -161,10 +148,6 @@ Mandatory packages:
 
 Optional packages:
 
- - omniORB: The client-server-communication uses Corba, and the build system
-   assumes that omniORB is preinstalled for the purpose.
-   (Ubuntu: omniorb omniorb-nameserver libomniorb4-dev libcos4-dev)
-
  - ZeroC ICE is the prefered communications engine, version 3.5.1 is required
    for C++11 support and for ARM. (Ubuntu: zeroc-ice35)
 
@@ -178,10 +161,7 @@ Optional packages:
 
 Some issues:
 
- - Linux defines a macro minor in /usr/include/sys/sysmacros.h. On the other
-   hand, CORBA defines a member function minor in CORBA::SystemException.
-   This only works if the minor macro is overridden. One way to do this is
-   to include sys/sysmacros in /usr/local/include/omniORB4/CORBA_Exception.h
+ none known currently
 
 Ubuntu:
 
