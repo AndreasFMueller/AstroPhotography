@@ -115,11 +115,20 @@ void	exposewidget::setRepositories(snowstar::RepositoriesPrx repositories) {
 	while (ui->repositoryBox->count() > 0) {
 		ui->repositoryBox->removeItem(0);
 	}
+	ui->repositoryBox->setEnabled(true);
+	_repository = NULL;
 	if (!_repositories) {
 		return;
 	}
-	_repository = NULL;
 	snowstar::reponamelist	list = _repositories->list();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got %d repository names", list.size());
+	if (0 == list.size()) {
+		QMessageBox     message(this);
+		message.setText(QString("No repositories"));
+		message.setInformativeText(QString("No repositories were found. Exposed images cannot be saved."));
+		message.exec();
+		return;
+	}
 	QComboBox	*box = ui->repositoryBox;
 	ui->repositoryBox->blockSignals(true);
 	for (auto ptr = list.begin(); ptr != list.end(); ptr++) {
@@ -131,6 +140,7 @@ void	exposewidget::setRepositories(snowstar::RepositoriesPrx repositories) {
 		}
 		ui->repositoryBox->setCurrentIndex(0);
 	}
+	ui->repositoryBox->setEnabled(true);
 	ui->repositoryBox->blockSignals(false);
 	repositoryChanged(QString(_repositoryname.c_str()));
 
@@ -565,10 +575,12 @@ void	exposewidget::imageproxyReceived(snowstar::ImagePrx imageproxy) {
 	}
 	imageproxy->setMetadata(metadata);
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "moveing the image to repo %s",
-		_repositoryname.c_str());
-	imageproxy->toRepository(_repositoryname);
-	imageproxy->remove();
+	if (_repository) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "moveing the image to repo %s",
+			_repositoryname.c_str());
+		imageproxy->toRepository(_repositoryname);
+		imageproxy->remove();
+	}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "updating the image list");
 	projectChanged(ui->projectBox->currentText());
@@ -606,9 +618,11 @@ void	exposewidget::downloadClicked() {
 		int	n = ui->repositoryTree->topLevelItemCount();
 		for (int index = 0; index < n; index++) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "section %d", index);
-			std::string	purpose = _repository_sections[index].purposeString();
+			std::string	purpose
+				= _repository_sections[index].purposeString();
 			std::string	dir = dirname + "/" + purpose;
-			std::string	filter = _repository_sections[index].filtername();
+			std::string	filter
+				= _repository_sections[index].filtername();
 			std::string	dir2 = dir + "/" + filter;
 			QTreeWidgetItem	*top
 				= ui->repositoryTree->topLevelItem(index);
@@ -616,11 +630,13 @@ void	exposewidget::downloadClicked() {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "no children");
 				continue;
 			}
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)", dir.c_str());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)",
+				dir.c_str());
 			mkdir(dir.c_str(), 0777);
 			if (filter.size() > 0) {
 				dir = dir2;
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)", dir.c_str());
+				debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)",
+					dir.c_str());
 				mkdir(dir.c_str(), 0777);
 			}
 			for (int i = 0; i < top->childCount(); i++) {
