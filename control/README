@@ -178,6 +178,7 @@ Ubuntu:
 	libsqlite3-dev
 	uuid-dev
         libfftw3-dev
+	libavahi-client-dev
    Optional:
 	zeroc-ice35
 	libunicap2-dev
