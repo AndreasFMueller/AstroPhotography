@@ -35,6 +35,16 @@ configurationdialog::configurationdialog(QWidget *parent,
 	}
 	setConfiguration(configuration);
 
+	// find out whether the remote supports 
+	try {
+		Ice::ObjectPrx	base = ic->stringToProxy(
+				_serviceobject.connect("Repositories"));
+		snowstar::RepositoriesPrx	repositories
+			= snowstar::RepositoriesPrx::checkedCast(base);
+		ui->repositoryconfiguration->setRepositories(repositories);
+	} catch (...) {
+	}
+
 	// connect buttons
 	connect(ui->devicesCheckBox, SIGNAL(toggled(bool)),
 		this, SLOT(devicesToggled(bool)));

@@ -37,7 +37,7 @@ ASTROGUISOURCES = 							\
 	configurationdialog.cpp						\
 	connectiondialog.cpp 						\
 	serverselectiondialog.cpp 					\
-	repositorycontrollerwdiget.cpp					\
+	repositoryconfigurationwidget.cpp				\
 	instrumentselectiondialog.cpp
 
 ASTROGUIHEADERS =							\
@@ -45,7 +45,7 @@ ASTROGUIHEADERS =							\
 	configurationdialog.h						\
 	connectiondialog.h						\
 	serverselectiondialog.h						\
-	repositorycontrollerwdiget.h					\
+	repositoryconfigurationwidget.h					\
 	instrumentselectiondialog.h
 
 FORMS    +=								\
@@ -53,7 +53,7 @@ FORMS    +=								\
 	configurationdialog.ui						\
 	connectiondialog.ui						\
 	serverselectiondialog.ui					\
-	repositorycontrollerwidget.ui					\
+	repositoryconfigurationwidget.ui				\
 	instrumentselectiondialog.ui
 
 SOURCES += main.cpp $${ASTROGUISOURCES} 				\

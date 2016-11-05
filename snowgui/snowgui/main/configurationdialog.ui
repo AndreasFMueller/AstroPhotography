@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>438</height>
+    <width>442</width>
+    <height>705</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,13 +92,13 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="repositoryGroup">
      <property name="title">
       <string>Image Repositories</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="snowgui::repositoryconfigurationwidget" name="widget_3" native="true"/>
+       <widget class="snowgui::repositoryconfigurationwidget" name="repositoryconfiguration" native="true"/>
       </item>
      </layout>
     </widget>

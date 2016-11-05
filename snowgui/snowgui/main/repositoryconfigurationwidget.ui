@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>repositoryconfigurationwidget</class>
- <widget class="QWidget" name="repositoryconfigurationwidget">
+ <class>snowgui::repositoryconfigurationwidget</class>
+ <widget class="QWidget" name="snowgui::repositoryconfigurationwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -45,7 +45,7 @@
        <widget class="QLineEdit" name="repositoryNameField"/>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="repositoryName">
+       <widget class="QLabel" name="repositoryNameLabel">
         <property name="text">
          <string>Repository:</string>
         </property>
@@ -66,13 +66,13 @@
        </widget>
       </item>
       <item row="1" column="1" colspan="2">
-       <widget class="QLineEdit" name="repositoryDirectoryLabel"/>
+       <widget class="QLineEdit" name="repositoryDirectoryField"/>
       </item>
      </layout>
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="repositoryTable">
      <property name="columnCount">
       <number>3</number>
      </property>

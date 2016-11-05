@@ -6,22 +6,36 @@
 #ifndef REPOSITORYCONTROLLERWIDGET_H
 #define REPOSITORYCONTROLLERWIDGET_H
 
+#include <QWidget>
+#include <repository.h>
+
 namespace snowgui {
 
 namespace Ui {
-	class repositorycontrollerwidget;
+	class repositoryconfigurationwidget;
 }
 
 /**
  * \brief A reusable GUI component to 
  */
-class repositorycontrollerwidget : public QWidget {
+class repositoryconfigurationwidget : public QWidget {
 	Q_OBJECT
 
 	snowstar::RepositoriesPrx	_repositories;
 public:
-	explicit repositorycontrollerwidget(QWidget *parent = NULL);
-	~repositorycontrollerwidget();
+	explicit repositoryconfigurationwidget(QWidget *parent = NULL);
+	~repositoryconfigurationwidget();
+
+	void	setRepositories(snowstar::RepositoriesPrx repositories);
+
+	void	readRepositories();
+
+public slots:
+	void	createClicked();
+
+private:
+	Ui::repositoryconfigurationwidget	*ui;
+
 };
 
 } // namespace snowgui
