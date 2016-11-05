@@ -24,9 +24,6 @@ asitests_SOURCES = asitests.cpp asitest.cpp
 asitests_LDADD = -lcppunit ../../lib/libastro.la -L. -lasi @ASILIBPATH@ @ASILIBS@
 asitests_DEPENDENCIES = ../../lib/libastro.la libasi.la
 
-testcase_SOURCES = testcase.cpp
-testcase_LDADD = @ASILIBRARY@
-
 endif
 
 asi_la_SOURCES = AsiLocator.cpp utils.cpp AsiCamera.cpp AsiCcd.cpp \

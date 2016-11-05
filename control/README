@@ -128,6 +128,9 @@ Mandatory packages:
    http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
    (Ubuntu: libcfitsio3-dev)
 
+ - FFTW3: image processing functions sometimes use fast fourier transforms
+   provided by the fftw3 library
+
  - LAPACK: in several places, linear systems of equations and least squares
    problems for relatively large numbers of equations or unknowns need to
    be solved. For these operations, LAPACK is used. (Ubuntu: liblapack-dev)
@@ -145,6 +148,9 @@ Mandatory packages:
    does come with the appropriate headers, does not implement the std::regex
    class. In this case, the regex class from the boost library can be used,
    it should be configured using the --enable-boostregex option to configure.
+
+ - Avahi client library: locating a server is done using zeroconf, which is
+   implemented on Linux in the Avahi library.
 
 Optional packages:
 
@@ -174,8 +180,9 @@ Ubuntu:
 	libglpk-dev
 	libsqlite3-dev
 	uuid-dev
+        libfftw3-dev
+	libavahi-client-dev
    Optional:
-	omniorb omniorb-nameserver libomniorb4-dev libcos4-dev
 	zeroc-ice35
 	libunicap2-dev
 
