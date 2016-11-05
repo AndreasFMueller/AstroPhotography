@@ -242,6 +242,20 @@ long	TableBase::id(const std::string& condition) {
  * \brief Find out whether there are any rows for the condition
  */
 bool	TableBase::has(const std::string& condition) {
+	return count(condition) > 0;
+}
+
+/**
+ * \brief Count all the rows of a table
+ */
+long	TableBase::count() {
+	return count("0 = 0");
+}
+
+/**
+ * \brief Count rows that satisfy a condition
+ */
+long	TableBase::count(const std::string& condition) {
 	std::ostringstream	out;
 	out << "select count(*) from " << _tablename << " where " << condition;
 	Result	result = _database->query(out.str());
@@ -252,7 +266,7 @@ bool	TableBase::has(const std::string& condition) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", cause.c_str());
 		throw NotFound(cause);
 	}
-	return 0 < (*result.begin())[0]->intValue();
+	return (*result.begin())[0]->intValue();
 }
 
 } // namespace persistence

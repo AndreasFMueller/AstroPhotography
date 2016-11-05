@@ -15,6 +15,7 @@ public:
 	RepositoriesI();
 	virtual ~RepositoriesI();
 	virtual reponamelist	list(const Ice::Current& current);
+	virtual reposummarylist	summarylist(const Ice::Current& current);
 	virtual bool	has(const std::string& reponame,
 				const Ice::Current& current);
 	virtual RepositoryPrx	get(const std::string& reponame,

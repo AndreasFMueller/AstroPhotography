@@ -100,6 +100,16 @@ int    RepositoryI::save(const ImageFile& image,
 	}
 }
 
+int	RepositoryI::count(const Ice::Current& /* current */) {
+	try {
+		return _repo.count();
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot retrieve number of images: %s", x.what());
+		return 0;
+	}
+}
+
 void    RepositoryI::remove(int id, const Ice::Current& /* current */) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "request to remvoe %d", id);
 	if (!_repo.has(id)) {

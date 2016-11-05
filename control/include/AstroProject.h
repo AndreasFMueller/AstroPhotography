@@ -200,6 +200,7 @@ public:
 	ImageEnvelope	getEnvelope(const UUID& uuid);
 
 	long	save(astro::image::ImagePtr image);
+	long	count();
 	void	remove(long id);
 	void	remove(const UUID& uuid);
 
@@ -231,6 +232,7 @@ public:
 	std::string	reponame;
 	std::string	database;
 	std::string	directory;
+	bool	hidden;
 	bool	operator==(const ImageRepoInfo& other) const;
 };
 

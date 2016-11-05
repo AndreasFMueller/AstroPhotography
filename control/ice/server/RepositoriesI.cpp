@@ -27,9 +27,36 @@ reponamelist	RepositoriesI::list(const Ice::Current& /* current */) {
 	astro::config::ImageRepoConfigurationPtr	imagerepos
 		= astro::config::ImageRepoConfiguration::get(config);
 	std::list<astro::project::ImageRepoInfo>	repolist
-		= imagerepos->listrepo();
+		= imagerepos->listrepo(true);
 	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
 		result.push_back(ptr->reponame);
+	}
+	return result;
+}
+
+/**
+ * \brief Retrieve a list of repository summaries of all repositories
+ */
+reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
+	reposummarylist	result;
+	// retrieve a list of repository names from the configuration
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+	std::list<astro::project::ImageRepoInfo>	repolist
+		= imagerepos->listrepo(false);
+	for (auto ptr = repolist.begin(); ptr != repolist.end(); ptr++) {
+		RepositorySummary	summary;
+		summary.name = ptr->reponame;
+		summary.directory = ptr->directory;
+		summary.database = ptr->database;
+		astro::config::ConfigurationPtr configuration
+			= astro::config::Configuration::get();
+		astro::project::ImageRepo	repo(ptr->reponame,
+			configuration->database(), ptr->directory, false);
+		summary.count = repo.count();
+		result.push_back(summary);
 	}
 	return result;
 }

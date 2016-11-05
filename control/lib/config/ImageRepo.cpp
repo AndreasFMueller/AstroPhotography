@@ -660,5 +660,10 @@ std::vector<std::string>	ImageRepo::getProjectnames() {
 	return result;
 }
 
+long	ImageRepo::count() {
+	ImageTable	imagetable(_database);
+	return imagetable.count();
+}
+
 } // namespace project
 } // namespace astro
