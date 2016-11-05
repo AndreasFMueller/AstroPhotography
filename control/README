@@ -128,6 +128,9 @@ Mandatory packages:
    http://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
    (Ubuntu: libcfitsio3-dev)
 
+ - FFTW3: image processing functions sometimes use fast fourier transforms
+   provided by the fftw3 library
+
  - LAPACK: in several places, linear systems of equations and least squares
    problems for relatively large numbers of equations or unknowns need to
    be solved. For these operations, LAPACK is used. (Ubuntu: liblapack-dev)
@@ -174,8 +177,8 @@ Ubuntu:
 	libglpk-dev
 	libsqlite3-dev
 	uuid-dev
+        libfftw3-dev
    Optional:
-	omniorb omniorb-nameserver libomniorb4-dev libcos4-dev
 	zeroc-ice35
 	libunicap2-dev
 

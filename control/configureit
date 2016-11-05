@@ -84,7 +84,10 @@ Linux)	if [ -r /etc/debian_version ]
 	then
 		echo "configuring for Debian"
 		systemtype=Debian
-		commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
+		if [ -d /opt/Ice-3.5.1/slice ]
+		then
+			commonflags="${commonflags} --with-slice=/opt/Ice-3.5.1/slice"
+		fi
 	else
 		if [ -r /etc/SuSE-release ]
 		then
