@@ -1,1 +1,26 @@
-no news yet
+
+Compilation times:
+
+Mac Pro 2010: 3.3 GHz, 6core, 32GB, make -j 12 (6.9x)
+
+	real    5m39.493s
+	user    36m19.325s
+	sys     2m42.384s
+
+MacBook Pro 2011: 2 GHz, 8GB, make -j 8 (5.5x)
+
+	real	9m16.766s
+	user	48m5.479s
+	sys	3m13.924s
+
+OpenSUSE Tumbleweed, 2core, 16GB, 2GHz, make -j 4
+
+Minnowboard Turbot: 1.46GHz, 2GB, make -j 2 (1.18x, 15%)
+
+	real    138m57.025s
+	user    153m3.452s
+	sys     10m43.476s
+
+
+
+
