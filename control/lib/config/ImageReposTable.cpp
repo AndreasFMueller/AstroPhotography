@@ -62,7 +62,7 @@ UpdateSpec	ImageRepoTableAdapter::object_to_updatespec(const ImageRepoRecord& im
 	spec.insert(Field("reponame", factory.get(imagerepo.reponame)));
 	spec.insert(Field("dbname", factory.get(imagerepo.database)));
 	spec.insert(Field("directory", factory.get(imagerepo.directory)));
-	int	h = (imagerepo.hidden) ? 1 : 0;
+	int	h = (imagerepo.hidden > 0) ? 1 : 0;
 	spec.insert(Field("hidden", factory.get(h)));
 	return spec;
 }
@@ -118,6 +118,8 @@ ImageRepoInfo	ImageRepoTable::getinfo(const std::string& name) {
 	info.directory = reporecord.directory;
 	info.database = reporecord.database;
 	info.hidden = (reporecord.hidden > 0) ? true : false;
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "info.hidden = %s",
+		(info.hidden) ? "true" : "false");
 	return info;
 }
 

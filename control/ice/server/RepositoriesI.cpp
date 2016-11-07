@@ -51,6 +51,11 @@ reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
 		summary.name = ptr->reponame;
 		summary.directory = ptr->directory;
 		summary.database = ptr->database;
+		summary.hidden = ptr->hidden;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "repo %s: %s -> %s",
+			summary.name.c_str(),
+			(ptr->hidden) ? "hidden" : "visible",
+			(summary.hidden) ? "hidden" : "visible");
 		astro::config::ConfigurationPtr configuration
 			= astro::config::Configuration::get();
 		astro::project::ImageRepo	repo(ptr->reponame,
@@ -58,6 +63,8 @@ reposummarylist	RepositoriesI::summarylist(const Ice::Current& /* current */) {
 		summary.count = repo.count();
 		result.push_back(summary);
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d repository records",
+		result.size());
 	return result;
 }
 
@@ -186,7 +193,7 @@ void	RepositoriesI::setHidden(const std::string& reponame,
 		= astro::config::ImageRepoConfiguration::get(config);
 
 	// check whether repository already exists
-	if (imagerepos->exists(reponame)) {
+	if (!imagerepos->exists(reponame)) {
 		std::string	msg = astro::stringprintf("image repository "
 			"'%s' does not exist", reponame.c_str());
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
@@ -194,6 +201,9 @@ void	RepositoriesI::setHidden(const std::string& reponame,
 	}
 
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "setting repo '%s' to %s",
+			reponame.c_str(),
+			(hidden) ? "hidden" : "visible");
 		imagerepos->setHidden(reponame, hidden);
 	} catch (const std::exception& x) {
 		std::string	msg = astro::stringprintf(

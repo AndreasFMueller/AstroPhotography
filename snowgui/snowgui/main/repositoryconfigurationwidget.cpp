@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QCheckBox>
 #include <QTableWidgetItem>
+#include "repoenablebox.h"
 
 namespace snowgui {
 
@@ -39,8 +40,10 @@ repositoryconfigurationwidget::~repositoryconfigurationwidget() {
  */
 void	repositoryconfigurationwidget::setRepositories(
 		snowstar::RepositoriesPrx repositories) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "got repository proxy");
 	_repositories = repositories;
 
+	// read repositories
 	readRepositories();
 }
 
@@ -48,24 +51,34 @@ void	repositoryconfigurationwidget::setRepositories(
  * \brief 
  */
 void	repositoryconfigurationwidget::readRepositories() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "reading repositories");
+	if (!_repositories) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no repositories proxy");
+		return;
+	}
 	snowstar::reposummarylist	l = _repositories->summarylist();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "repositories found: %d", l.size());
 	ui->repositoryTable->setRowCount(l.size());
 	int	row = 0;
 	for (auto ptr = l.begin(); ptr != l.end(); ptr++) {
 		snowstar::RepositorySummary	summary = *ptr;
+		std::string	reponame = summary.name;
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found repository: %s",
 			summary.name.c_str());
 		QTableWidgetItem	*i;
-		i = new QTableWidgetItem(summary.name.c_str());
+		i = new QTableWidgetItem(reponame.c_str());
 		ui->repositoryTable->setItem(row, 0, i);
 
 		i = new QTableWidgetItem();
-		QCheckBox	*box = new QCheckBox();
-		// XXX need to read the information from the server
-		box->setChecked(true);
+		repoenablebox	*box = new repoenablebox(NULL);
+		box->reponame(reponame);
+		box->setRepositories(_repositories);
+		bool	enabled = !summary.hidden;
+		box->setChecked(enabled);
 		ui->repositoryTable->setItem(row, 1, i);
 		ui->repositoryTable->setCellWidget(row, 1, box);
+		connect(box, SIGNAL(toggled(bool)),
+			box, SLOT(enableToggled(bool)));
 
 		i = new QTableWidgetItem(summary.directory.c_str());
 		ui->repositoryTable->setItem(row, 2, i);

@@ -137,6 +137,7 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 	imagerepoinfo.reponame = name;
 	imagerepoinfo.database = _directory + std::string("/.astro.db");
 	imagerepoinfo.directory = _directory;
+	imagerepoinfo.hidden = false;
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "using database name %s",
 		imagerepoinfo.database.c_str());
 
@@ -209,6 +210,9 @@ std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo(bool visible_on
 		info.reponame = i->reponame;
 		info.database = i->database;
 		info.directory = i->directory;
+		info.hidden = (i->hidden > 0);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s: %s", info.reponame.c_str(),
+			(info.hidden) ? "hidden" : "visible");
 		result.push_back(info);
 	}
 	return result;
@@ -234,9 +238,12 @@ bool	ImageRepoConfigurationBackend::hidden(const std::string& name) {
  */
 void	ImageRepoConfigurationBackend::setHidden(const std::string& name,
 		bool hidden) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "setHidden(%s, %s)", name.c_str(),
+		(hidden) ? "true" : "false");
 	ImageRepoTable	repos(_config->database());
 	ImageRepoInfo	info = repos.getinfo(name);
 	if (info.hidden == hidden) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no change necessary");
 		return;
 	}
 	UpdateSpec	updatespec;
