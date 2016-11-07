@@ -54,6 +54,8 @@ module snowstar {
 		int	save(ImageFile image) throws Exists;
 		int	count();
 		void	remove(int id) throws NotFound;
+		bool	hidden();
+		void	setHidden(bool hidden);
 	};
 
 	sequence<string>	reponamelist;
@@ -63,6 +65,7 @@ module snowstar {
 		string	directory;
 		string	database;
 		int	count;
+		bool	hidden;
 	};
 
 	sequence<RepositorySummary>	reposummarylist;
@@ -82,5 +85,7 @@ module snowstar {
 				throws Exists, BadParameter;
 		void	remove(string reponame, bool removecontents)
 				throws NotFound, IOException;
+		void	setHidden(string reponame, bool hidden)
+				throws NotFound;
 	};
 };

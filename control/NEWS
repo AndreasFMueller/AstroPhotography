@@ -15,6 +15,10 @@ MacBook Pro 2011: 2 GHz, 8GB, make -j 8 (5.5x)
 
 OpenSUSE Tumbleweed, 2core, 16GB, 2GHz, make -j 4
 
+	real    17m29.292s
+	user    44m56.260s
+	sys     3m23.016s
+
 Minnowboard Turbot: 1.46GHz, 2GB, make -j 2 (1.18x, 15%)
 
 	real    138m57.025s
