@@ -54,8 +54,6 @@ module snowstar {
 		int	save(ImageFile image) throws Exists;
 		int	count();
 		void	remove(int id) throws NotFound;
-		bool	hidden();
-		void	setHidden(bool hidden);
 	};
 
 	sequence<string>	reponamelist;

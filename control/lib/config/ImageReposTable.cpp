@@ -96,6 +96,31 @@ ImageRepo	ImageRepoTable::get(const std::string& name) {
 		server.directory);
 }
 
+ImageRepoInfo	ImageRepoTable::getinfo(const std::string& name) {
+	std::string	condition = stringprintf("reponame = '%s'",
+				name.c_str());
+	std::list<ImageRepoRecord>	records = select(condition);
+	if (0 == records.size()) {
+		std::string	msg = stringprintf("no image repo named '%s'",
+			name.c_str());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
+	// since the server name is unique, we can be sure that we have
+	// exactly one entry in the list at this point
+	assert(records.size() == 1);
+	ImageRepoRecord	reporecord = *records.begin();
+
+	// convert this record to an ImageRepo
+	ImageRepoInfo	info;
+	info.id = reporecord.id();
+	info.reponame = name;
+	info.directory = reporecord.directory;
+	info.database = reporecord.database;
+	info.hidden = (reporecord.hidden > 0) ? true : false;
+	return info;
+}
+
 /**
  * \brief Remove a repo entry identified by name
  */

@@ -26,6 +26,11 @@ public:
 	virtual void	remove(const std::string& reponame,
 				bool removecontents,
 				const Ice::Current& current);
+	virtual bool	hidden(const std::string& reponame,
+				const Ice::Current& current);
+	virtual void	setHidden(const std::string& rerponame,
+				bool hidden,
+				const Ice::Current& current);
 };
 
 } // namespace snowstar

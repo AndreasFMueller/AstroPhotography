@@ -229,6 +229,7 @@ public:
  */
 class ImageRepoInfo {
 public:
+	long	id;
 	std::string	reponame;
 	std::string	database;
 	std::string	directory;

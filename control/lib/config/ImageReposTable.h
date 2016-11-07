@@ -44,6 +44,7 @@ public:
 	}
 	bool	contains(const std::string& name);
 	ImageRepo	get(const std::string& name);
+	ImageRepoInfo	getinfo(const std::string& name);
 	void	remove(const std::string& name);
 };
 

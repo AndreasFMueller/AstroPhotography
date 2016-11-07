@@ -153,4 +153,54 @@ void	RepositoriesI::add(const std::string& reponame,
 	}
 }
 
+/**
+ * \brief return hidden status of a repository
+ */
+bool	RepositoriesI::hidden(const std::string& reponame,
+		const Ice::Current& /* current */) {
+	// get configuration
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+
+	// check whether repository already exists
+	if (imagerepos->exists(reponame)) {
+		std::string	msg = astro::stringprintf("image repository "
+			"'%s' does not exist", reponame.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
+	}
+	return imagerepos->hidden(reponame);
+}
+
+/**
+ * \brief Hide/unhide a repository
+ */
+void	RepositoriesI::setHidden(const std::string& reponame,
+		bool hidden, const Ice::Current& /* current */) {
+	// get configuration
+	astro::config::ConfigurationPtr	config
+		= astro::config::Configuration::get();
+	astro::config::ImageRepoConfigurationPtr	imagerepos
+		= astro::config::ImageRepoConfiguration::get(config);
+
+	// check whether repository already exists
+	if (imagerepos->exists(reponame)) {
+		std::string	msg = astro::stringprintf("image repository "
+			"'%s' does not exist", reponame.c_str());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw NotFound(msg);
+	}
+
+	try {
+		imagerepos->setHidden(reponame, hidden);
+	} catch (const std::exception& x) {
+		std::string	msg = astro::stringprintf(
+			"cannot set hidden: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw BadParameter(msg);
+	}
+}
+
 } // namespace snowstar

@@ -36,7 +36,10 @@ public:
 				const std::string& directory);
 	virtual void	removerepo(const std::string& name,
 				bool removecontents);
+	ImageRepoInfo	repoinfo(const std::string& name);
 	virtual std::list<ImageRepoInfo>	listrepo(bool visible_only);
+	virtual bool	hidden(const std::string& name);
+	virtual void	setHidden(const std::string& name, bool hidden);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -131,7 +134,6 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 
 	// prepare the entry for the database
 	ImageRepoRecord	imagerepoinfo;
-
 	imagerepoinfo.reponame = name;
 	imagerepoinfo.database = _directory + std::string("/.astro.db");
 	imagerepoinfo.directory = _directory;
@@ -140,7 +142,8 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 
 	// add the repository info to the database
 	ImageRepoTable	repos(_config->database());
-	repos.add(imagerepoinfo);
+	long	id = repos.add(imagerepoinfo);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new repo record has id %ld", id);
 
 	// find out whether the repository directory exists
 	if (0 != stat(imagerepoinfo.database.c_str(), &sb)) {
@@ -202,6 +205,7 @@ std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo(bool visible_on
 	std::list<ImageRepoRecord>::const_iterator	i;
 	for (i = repolist.begin(); i != repolist.end(); i++) {
 		ImageRepoInfo	info;
+		info.id = i->id();
 		info.reponame = i->reponame;
 		info.database = i->database;
 		info.directory = i->directory;
@@ -210,6 +214,38 @@ std::list<ImageRepoInfo>	ImageRepoConfigurationBackend::listrepo(bool visible_on
 	return result;
 }
 
+/**
+ * \brief retrieve repository information for a name
+ */
+ImageRepoInfo	ImageRepoConfigurationBackend::repoinfo(const std::string& name) {
+	ImageRepoTable	repos(_config->database());
+	return repos.getinfo(name);
+}
+
+/**
+ * \brief Find out whether a repository is hidden
+ */
+bool	ImageRepoConfigurationBackend::hidden(const std::string& name) {
+	return repoinfo(name).hidden;
+}
+
+/**
+ * \brief Set hidden flag for a repo
+ */
+void	ImageRepoConfigurationBackend::setHidden(const std::string& name,
+		bool hidden) {
+	ImageRepoTable	repos(_config->database());
+	ImageRepoInfo	info = repos.getinfo(name);
+	if (info.hidden == hidden) {
+		return;
+	}
+	UpdateSpec	updatespec;
+	FieldValueFactory	f;
+	std::pair<std::string, FieldValuePtr>	hp("hidden",
+		f.get((int)((hidden) ? 1 : 0)));
+	updatespec.insert(updatespec.begin(), hp);
+	repos.updaterow(info.id, updatespec);
+}
 
 } // namespace config
 } // namespace astro
