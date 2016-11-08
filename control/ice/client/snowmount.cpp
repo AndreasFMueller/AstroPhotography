@@ -179,6 +179,8 @@ int	main(int argc, char *argv[]) {
 		case 'w':
 			await_completion = true;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// next comes the command

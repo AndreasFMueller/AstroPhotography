@@ -162,6 +162,8 @@ int	main(int argc, char *argv[]) {
 		case 'v':
 			verbose = true;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// the next argument is the name of the service

@@ -219,6 +219,8 @@ int	main(int argc, char *argv[]) {
 		case 't':
 			temperature = std::stod(optarg);
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// the next argument is the command

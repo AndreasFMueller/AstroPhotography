@@ -143,6 +143,8 @@ int	main(int argc, char *argv[]) {
 		case 1:
 			exposure.frame(astro::image::ImageRectangle(optarg));
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 	}
 

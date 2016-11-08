@@ -148,6 +148,8 @@ int	main(int argc, char *argv[]) {
 		case 1:
 			guide.csv = true;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// next argument is the command
