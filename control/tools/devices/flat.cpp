@@ -119,6 +119,8 @@ int	main(int argc, char *argv[]) {
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// get module

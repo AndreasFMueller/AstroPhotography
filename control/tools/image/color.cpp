@@ -183,6 +183,8 @@ int	main(int argc, char *argv[]) {
 		case 'o':
 			colorbase.offsets(parse_color(optarg));
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 	}
 
 	// make sure we have two files

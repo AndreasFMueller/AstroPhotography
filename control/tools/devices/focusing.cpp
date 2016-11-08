@@ -152,6 +152,8 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "start focusing process");

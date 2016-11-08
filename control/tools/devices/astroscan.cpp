@@ -132,6 +132,8 @@ int	main(int argc, char *argv[]) {
 		case 'v':
 			verbose = true;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// make sure there is an additional argument

@@ -89,9 +89,13 @@ int	main(int argc, char *argv[]) {
 			exposuretime = atof(optarg);
 			break;
 		case 'D':
+			{
 			FITSin	in(optarg);
 			darkimage = in.read();
+			}
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// get the repository

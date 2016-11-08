@@ -113,6 +113,8 @@ int	main(int argc, char *argv[]) {
 		case 'M':
 			maxvalue = atof(optarg);
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// two more arguments are required: infile and outfile

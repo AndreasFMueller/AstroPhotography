@@ -105,6 +105,8 @@ int	main(int argc, char *argv[]) {
 		case 1:
 			exposure.frame(ImageRectangle(optarg));
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// next argument must be instrument name or help

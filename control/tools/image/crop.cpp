@@ -76,7 +76,7 @@ int	main(int argc, char *argv[]) {
 
 	// parse the command line
 	int	longindex;
-	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hm:M:bi", longopts,
+	while (EOF != (c = getopt_long(argc, argv, "dD:F:?hm:M:b", longopts,
 		&longindex)))
 		switch (c) {
 		case 'd':
@@ -102,6 +102,8 @@ int	main(int argc, char *argv[]) {
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// two more arguments are required: infile and outfile

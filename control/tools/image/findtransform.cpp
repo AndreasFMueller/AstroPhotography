@@ -40,7 +40,7 @@ static struct option    longopts[] = {
 { "debug",	no_argument,		NULL,		'd' }, /* 0 */
 { "help",	no_argument,		NULL,		'h' }, /* 1 */
 { "number",	required_argument,	NULL,		'n' }, /* 1 */
-{ "radius",	required_argument,	NULL,		'r' }, /* 1 */
+{ "radius",	required_argument,	NULL,		's' }, /* 1 */
 { NULL,		0,			NULL,		 0  }
 };
 
@@ -65,6 +65,8 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		default:
+			throw std::runtime_error("unknown option");
 		}	
 
 	// get the filename from the command line

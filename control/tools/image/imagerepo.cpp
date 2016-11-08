@@ -379,6 +379,8 @@ int	main(int argc, char *argv[]) {
 			switch (longindex) {
 			}
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 	}
 

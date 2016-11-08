@@ -128,6 +128,8 @@ int	main(int argc, char *argv[]) {
 		case '?':
 			usage(argv[0]);
 			return EXIT_SUCCESS;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// open the star catalog

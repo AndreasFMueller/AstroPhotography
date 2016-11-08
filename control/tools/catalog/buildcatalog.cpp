@@ -116,6 +116,8 @@ int	main(int argc, char *argv[]) {
 		case 'U':
 			ucac4dir = std::string(optarg);
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// the remaining argument ist the databasename

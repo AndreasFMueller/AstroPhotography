@@ -66,6 +66,8 @@ int	main(int argc, char *argv[]) {
 		case 'r':
 			radius = std::stod(optarg);
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 	}
 

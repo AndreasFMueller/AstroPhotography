@@ -68,6 +68,8 @@ int	main(int argc, char *argv[]) {
 		case 'o':
 			outfilename = std::string(optarg);
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// get the file name

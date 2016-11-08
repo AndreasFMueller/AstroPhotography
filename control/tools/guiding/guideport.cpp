@@ -170,6 +170,8 @@ int	main(int argc, char *argv[]) {
 				throw std::runtime_error("scale must be positive");
 			}
 			break;
+		default:
+			throw std::runtime_error("unknown option");
 		}
 
 	// next argument must be the device name
