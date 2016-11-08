@@ -225,6 +225,10 @@ int	snowstar_main(int argc, char *argv[]) {
 			}
 			}
 			break;
+		default:
+			std::string	msg = astro::stringprintf("unknown "
+				"option %c (0x%02x)", c, c);
+			throw std::runtime_error(msg);
 		}
 
 	// go inter the background
