@@ -13,6 +13,15 @@ ServiceKey::ServiceKey(const std::string& name, const std::string& type,
 	: _name(name), _type(type), _domain(domain) {
 }
 
+ServiceKey::ServiceKey(const std::string& nametypedomain) {
+	size_t	slashoffset = nametypedomain.find('/');
+	size_t	atoffset = nametypedomain.find('@');
+	_name = nametypedomain.substr(0, slashoffset);
+	_type = nametypedomain.substr(slashoffset + 1,
+		atoffset - slashoffset - 1);
+	_domain = nametypedomain.substr(atoffset + 1);
+}
+
 bool	ServiceKey::operator<(const ServiceKey& other) const {
 	if (_domain < other._domain) {
 		return true;

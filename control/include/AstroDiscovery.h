@@ -70,6 +70,7 @@ public:
 
 	ServiceKey(const std::string& name, const std::string& type,
 		const std::string& domain);
+	ServiceKey(const std::string& nametypedomain);
 	ServiceKey() { }
 #if 0
 	ServiceKey(const ServiceKey& other);

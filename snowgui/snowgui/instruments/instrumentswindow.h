@@ -30,10 +30,16 @@ public:
 
 private:
 	Ui::instrumentswindow *ui;
+
+	// the instrument service we talk to
 	astro::discover::ServiceObject	_serviceobject;
 	snowstar::InstrumentsPrx	_instruments;
 	snowstar::InstrumentPrx	_instrument;
+
+	// where we get the modules
 	snowstar::ModulesPrx	_modules;
+	astro::discover::ServiceKey	_modulekey;
+
 	astro::discover::ServiceDiscoveryPtr	_discovery;
 	QTimer	*_discoveryTimer;
 

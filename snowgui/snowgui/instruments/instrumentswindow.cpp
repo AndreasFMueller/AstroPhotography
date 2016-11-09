@@ -118,8 +118,10 @@ void	instrumentswindow::serviceSelected(QString name) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "connecting to service %s",
 		name.toLatin1().data());
 
-	// XXX turn name into a service object
-	astro::discover::ServiceObject	so = _serviceobject;
+	// turn name into a service object
+	std::string	sn(name.toLatin1().data());
+	_modulekey = astro::discover::ServiceKey(sn);
+	astro::discover::ServiceObject	so = _discovery->find(_modulekey);
 
 	// show modules on that server
 	Ice::CommunicatorPtr	ic = snowstar::CommunicatorSingleton::get();
@@ -202,7 +204,7 @@ void	instrumentswindow::checkdiscovery() {
 void	instrumentswindow::addClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add clicked");
 	std::string	devicename = ui->moduledisplayWidget->selectedDevicename();
-	std::string	servicename = _serviceobject.name();
+	std::string	servicename = _modulekey.name();
 	ui->instrumentdisplayWidget->add(devicename, servicename);
 }
 
