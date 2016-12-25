@@ -1,0 +1,3 @@
+ATTRS{idVendor}=="1618", ATTRS{idProduct}=="6002", RUN+="/sbin/fxload -t fx2 -I /etc/qhyccd/qhy8pro.hex -D $env{DEVNAME}"
+ATTRS{idVendor}=="1618", ATTRS{idProduct}=="6003*", OWNER="root", GROUP="video", MODE="0666", SYMLINK+="qhy8pro"
+

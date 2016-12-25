@@ -368,7 +368,7 @@ FITSKeyword	keywors[Nkeywors] = {
 },
 { // 57
 	std::string("PXLWIDTH"),
-	std::string("width of a pixeln in microns"),
+	std::string("width of a pixel in microns"),
 	std::type_index(typeid(double)),
 	true
 },
