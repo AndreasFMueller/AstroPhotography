@@ -99,7 +99,7 @@ void	ccdcontrollerwidget::instrumentSetup(
 	}
 	while (_instrument.has(snowstar::InstrumentGuiderCCD, index)) {
 		try {
-			snowstar::CcdPrx	ccd = _instrument.ccd(index);
+			snowstar::CcdPrx	ccd = _instrument.guiderccd(index);
 			if (!_ccd) {
 				_ccd = ccd;
 			}

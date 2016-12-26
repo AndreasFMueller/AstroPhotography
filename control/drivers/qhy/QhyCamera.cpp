@@ -39,7 +39,7 @@ QhyCamera::QhyCamera(usb::DevicePtr& devptr)
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "QHY device constructed");
 
 	// construct the device name
-	DeviceName	ccdname(DeviceName::Ccd, name(), "Imaging");
+	DeviceName	ccdname(name(), DeviceName::Ccd, "Imaging");
 
 	// construct the CcdInfo
 	switch (idProduct) {
