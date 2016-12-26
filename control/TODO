@@ -54,6 +54,8 @@ Drivers:
 	Can we have persistent names for these devices?
       -	It should be possible to reread the devices of a module, just in
 	case a new device was added during runtime.
+      -	ATIK driver should not crash if exposure time is too long for the
+	small camera, just reduce the exposure time ignore the large time
 
 ICE client/server:
       - USB Timeout in a driver should always be converted to a decent timeout

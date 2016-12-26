@@ -56,8 +56,20 @@ void	AtikCcd::run() {
 		}
 	}
 
+	// find out whether we are actually capable of performing the
+	// exposure
+	if ((!capa.supportsLongExposure)
+		&& (exposure.exposuretime() > capa.maxShortExposure)) {
+		std::string	msg = stringprintf("camera does not "
+			"support long exposure, and exposure time %.3f "
+			"exceeds limit %.3f for short exposures",
+			exposure.exposuretime(), capa.maxShortExposure);
+		exposure.exposuretime(capa.maxShortExposure);
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	}
+
 	// now we have to decide whether we can do a long exposure
-	if (exposure.exposuretime() < capa.maxShortExposure) {
+	if (exposure.exposuretime() <= capa.maxShortExposure) {
 		// do a short exposure
 		rc = _camera->readCCD(exposure.x(), exposure.y(),
 			exposure.width(), exposure.height(),
@@ -73,14 +85,6 @@ void	AtikCcd::run() {
 			throw std::runtime_error(msg);
 		}
 	} else {
-		if (!capa.supportsLongExposure) {
-			std::string	msg = stringprintf("camera does not "
-				"support long exposure, and exposure time %.3f "
-				"exceeds limit %.3f for short exposures",
-				exposure.exposuretime(), capa.maxShortExposure);
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw std::runtime_error(msg);
-		}
 		rc = _camera->startExposure(true);
 		if (!rc) {
 			// cannot start exposure
