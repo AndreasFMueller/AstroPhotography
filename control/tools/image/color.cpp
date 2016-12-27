@@ -25,8 +25,8 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "  -h,-?,--help      show this help message and exit";
 	std::cout << std::endl;
-	std::cout << "  -s,--scales=<s>   set color scale factors" << std::endl;
-	std::cout << "  -o,--offsets=<o>  set the color offsets" << std::endl;
+	std::cout << "  -s,--scales=<s>   set color scale factors (comma separated values)" << std::endl;
+	std::cout << "  -o,--offsets=<o>  set the color offsets (comma seprated values)" << std::endl;
 	std::cout << "  -g,--gain=<g>     set the gain" << std::endl;
 	std::cout << "  -b,--base=<b>     base value of the color scale";
 	std::cout << std::endl;
