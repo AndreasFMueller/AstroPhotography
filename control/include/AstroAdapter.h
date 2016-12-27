@@ -905,17 +905,17 @@ ConstPixelValueAdapter<Pixel>::ConstPixelValueAdapter(const ImagePtr image)
 
 template <typename Pixel>
 Pixel	ConstPixelValueAdapter<Pixel>::pixel(int x, int y) const {
-	if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
-	if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
-	if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
-	if (longimage) {   return longimage->pixelvalue<Pixel>(x, y);   }
-	if (floatimage) {  return floatimage->pixelvalue<Pixel>(x, y);  }
-	if (doubleimage) { return doubleimage->pixelvalue<Pixel>(x, y); }
-	if (bytergbimage) {   return bytergbimage->pixelvalue<Pixel>(x, y);   }
-	if (shortrgbimage) {  return shortrgbimage->pixelvalue<Pixel>(x, y);  }
-	if (intrgbimage) {    return intrgbimage->pixelvalue<Pixel>(x, y);    }
-	if (longrgbimage) {   return longrgbimage->pixelvalue<Pixel>(x, y);   }
-	if (floatrgbimage) {  return floatrgbimage->pixelvalue<Pixel>(x, y);  }
+	if (byteimage)      { return byteimage->pixelvalue<Pixel>(x, y);      }
+	if (shortimage)     { return shortimage->pixelvalue<Pixel>(x, y);     }
+	if (intimage)       { return intimage->pixelvalue<Pixel>(x, y);       }
+	if (longimage)      { return longimage->pixelvalue<Pixel>(x, y);      }
+	if (floatimage)     { return floatimage->pixelvalue<Pixel>(x, y);     }
+	if (doubleimage)    { return doubleimage->pixelvalue<Pixel>(x, y);    }
+	if (bytergbimage)   { return bytergbimage->pixelvalue<Pixel>(x, y);   }
+	if (shortrgbimage)  { return shortrgbimage->pixelvalue<Pixel>(x, y);  }
+	if (intrgbimage)    { return intrgbimage->pixelvalue<Pixel>(x, y);    }
+	if (longrgbimage)   { return longrgbimage->pixelvalue<Pixel>(x, y);   }
+	if (floatrgbimage)  { return floatrgbimage->pixelvalue<Pixel>(x, y);  }
 	if (doublergbimage) { return doublergbimage->pixelvalue<Pixel>(x, y); }
 	if (std::numeric_limits<Pixel>::has_quiet_NaN) {
 		return std::numeric_limits<Pixel>::quiet_NaN();
@@ -976,17 +976,17 @@ PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr image) :
 
 template<typename Pixel>
 Pixel	PixelValueAdapter<Pixel>::pixel(int x, int y) const {
-        if (byteimage) {   return byteimage->pixelvalue<Pixel>(x, y);   }
-        if (shortimage) {  return shortimage->pixelvalue<Pixel>(x, y);  }
-        if (intimage) {    return intimage->pixelvalue<Pixel>(x, y);    }
-        if (longimage) {   return longimage->pixelvalue<Pixel>(x, y);   }
-        if (floatimage) {  return floatimage->pixelvalue<Pixel>(x, y);  }
-        if (doubleimage) { return doubleimage->pixelvalue<Pixel>(x, y); }
-        if (bytergbimage) {   return bytergbimage->pixelvalue<Pixel>(x, y);   }
-        if (shortrgbimage) {  return shortrgbimage->pixelvalue<Pixel>(x, y);  }
-        if (intrgbimage) {    return intrgbimage->pixelvalue<Pixel>(x, y);    }
-        if (longrgbimage) {   return longrgbimage->pixelvalue<Pixel>(x, y);   }
-        if (floatrgbimage) {  return floatrgbimage->pixelvalue<Pixel>(x, y);  }
+        if (byteimage)      { return byteimage->pixelvalue<Pixel>(x, y);      }
+        if (shortimage)     { return shortimage->pixelvalue<Pixel>(x, y);     }
+        if (intimage)       { return intimage->pixelvalue<Pixel>(x, y);       }
+        if (longimage)      { return longimage->pixelvalue<Pixel>(x, y);      }
+        if (floatimage)     { return floatimage->pixelvalue<Pixel>(x, y);     }
+        if (doubleimage)    { return doubleimage->pixelvalue<Pixel>(x, y);    }
+        if (bytergbimage)   { return bytergbimage->pixelvalue<Pixel>(x, y);   }
+        if (shortrgbimage)  { return shortrgbimage->pixelvalue<Pixel>(x, y);  }
+        if (intrgbimage)    { return intrgbimage->pixelvalue<Pixel>(x, y);    }
+        if (longrgbimage)   { return longrgbimage->pixelvalue<Pixel>(x, y);   }
+        if (floatrgbimage)  { return floatrgbimage->pixelvalue<Pixel>(x, y);  }
         if (doublergbimage) { return doublergbimage->pixelvalue<Pixel>(x, y); }
         if (std::numeric_limits<Pixel>::has_quiet_NaN) {
                 return std::numeric_limits<Pixel>::quiet_NaN();
