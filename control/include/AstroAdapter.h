@@ -932,6 +932,12 @@ class PixelValueAdapter : public ConstImageAdapter<Pixel> {
 	const Image<unsigned long>	*longimage;
 	const Image<float>		*floatimage;
 	const Image<double>		*doubleimage;
+	const Image<RGB<unsigned char> >	*bytergbimage;
+	const Image<RGB<unsigned short> >	*shortrgbimage;
+	const Image<RGB<unsigned int> >		*intrgbimage;
+	const Image<RGB<unsigned long> >	*longrgbimage;
+	const Image<RGB<float> >		*floatrgbimage;
+	const Image<RGB<double> >		*doublergbimage;
 public:
 	PixelValueAdapter(ImagePtr image);
 	virtual Pixel	pixel(int x, int y) const;
@@ -946,12 +952,24 @@ PixelValueAdapter<Pixel>::PixelValueAdapter(ImagePtr image) :
 	longimage = dynamic_cast<Image<unsigned long> *>(&*image);
 	floatimage = dynamic_cast<Image<float> *>(&*image);
 	doubleimage = dynamic_cast<Image<double> *>(&*image);
+	bytergbimage = dynamic_cast<Image<RGB<unsigned char> >*>(&*image);
+	shortrgbimage = dynamic_cast<Image<RGB<unsigned short> >*>(&*image);
+	intrgbimage = dynamic_cast<Image<RGB<unsigned int> >*>(&*image);
+	longrgbimage = dynamic_cast<Image<RGB<unsigned long> >*>(&*image);
+	floatrgbimage = dynamic_cast<Image<RGB<float> >*>(&*image);
+	doublergbimage = dynamic_cast<Image<RGB<double> >*>(&*image);
 	if ((NULL == byteimage) &&
 	    (NULL == shortimage) &&
 	    (NULL == intimage) &&
 	    (NULL == longimage) &&
 	    (NULL == floatimage) &&
-	    (NULL == doubleimage)) {
+	    (NULL == doubleimage) &&
+	    (NULL == bytergbimage) &&
+	    (NULL == shortrgbimage) &&
+	    (NULL == intrgbimage) &&
+	    (NULL == longrgbimage) &&
+	    (NULL == floatrgbimage) &&
+	    (NULL == doublergbimage)) {
 		throw std::runtime_error("pixel type not primitive");
 	}
 }
@@ -964,6 +982,12 @@ Pixel	PixelValueAdapter<Pixel>::pixel(int x, int y) const {
         if (longimage) {   return longimage->pixelvalue<Pixel>(x, y);   }
         if (floatimage) {  return floatimage->pixelvalue<Pixel>(x, y);  }
         if (doubleimage) { return doubleimage->pixelvalue<Pixel>(x, y); }
+        if (bytergbimage) {   return bytergbimage->pixelvalue<Pixel>(x, y);   }
+        if (shortrgbimage) {  return shortrgbimage->pixelvalue<Pixel>(x, y);  }
+        if (intrgbimage) {    return intrgbimage->pixelvalue<Pixel>(x, y);    }
+        if (longrgbimage) {   return longrgbimage->pixelvalue<Pixel>(x, y);   }
+        if (floatrgbimage) {  return floatrgbimage->pixelvalue<Pixel>(x, y);  }
+        if (doublergbimage) { return doublergbimage->pixelvalue<Pixel>(x, y); }
         if (std::numeric_limits<Pixel>::has_quiet_NaN) {
                 return std::numeric_limits<Pixel>::quiet_NaN();
         }
