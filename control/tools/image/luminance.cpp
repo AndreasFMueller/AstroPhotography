@@ -62,6 +62,10 @@ ImagePtr	luminance(ImagePtr image) {
 	do_luminance(image, RGB<unsigned long>, unsigned long)
 	do_luminance(image, RGB<float>, float)
 	do_luminance(image, RGB<double>, double)
+	std::string	msg = stringprintf("cannot get luminance for %s pixels",
+		demangle(image->pixel_type().name()).c_str());
+	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+	throw std::runtime_error(msg);
 }
 
 
