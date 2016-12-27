@@ -83,23 +83,58 @@ int	main(int argc, char *argv[]) {
 	// read the input file
 	FITSin	infile(infilename);
 	ImagePtr	image = infile.read();
-	ConstPixelValueAdapter<float>	from(image);
+	ImagePtr	outimage;
 
-	// get the background
+	// prepare a background extractor
 	BackgroundExtractor	extractor(alpha);
-	Background<float>	bg = extractor(image->center(), true,
+
+	// if this is a mono image, we just use luminance for background
+	// extraction
+	switch (image->planes()) {
+	case 1:	{
+		// make image accessible as an image with float pixels
+		ConstPixelValueAdapter<float>	from(image);
+
+		// get the background
+		Background<float>	bg = extractor(image->center(), true,
 					BackgroundExtractor::QUADRATIC, from);
 
-	// subtract the background
-	BackgroundFunctionAdapter	bfa(from, bg.G());
+		// subtract the background
+		BackgroundFunctionAdapter	bfa(from, bg.G());
+
+		// write the result to the output
+		outimage = ImagePtr(new Image<float>(bfa));
+		}
+		break;
+	case 3:	{
+		// make image accessible as an RGB<float> image
+		ConstPixelValueAdapter<RGB<float> >	from(image);
+
+		// get the background
+		Background<float>	bg = extractor(image->center(), true,
+					BackgroundExtractor::QUADRATIC, from);
+
+		// subtract the background
+		BackgroundSubtractionAdapter	bsa(from, bg);
+
+		// write the result to the output
+		outimage = ImagePtr(new Image<RGB<float> >(bsa));
+		}
+		break;
+	default:
+		std::string	msg = stringprintf("don't know how to handle "
+			"background for images with %d planes",
+			image->planes());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// we give up here, because we don't want to write the changed file
 	if (0 == outfilename.size()) {
 		return EXIT_SUCCESS;
 	}
 
-	// write the result to the output
-	ImagePtr	outimage(new Image<float>(bfa));
+
 	FITSout	outfile(outfilename);
 	outfile.setPrecious(!force);
 	outfile.write(outimage);
