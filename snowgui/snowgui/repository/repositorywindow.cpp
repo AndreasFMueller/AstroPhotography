@@ -11,6 +11,7 @@
 #include <AstroIO.h>
 #include <IceConversions.h>
 #include <imagedisplaywidget.h>
+#include "repositorysavedialog.h"
 
 namespace snowgui {
 
@@ -222,13 +223,22 @@ astro::image::ImagePtr	repositorywindow::currentImage() {
 }
 
 /**
- * \brief Save the current image from the repository to a file
+ * \brief Save currently selected images from the repository to file/directory
  */
 void	repositorywindow::saveClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "saveClicked()");
 	if (_reponame.size() == 0) {
 		return;
 	}
+
+	// find out how many images are selected
+	QList<QTreeWidgetItem*>	selected = ui->repositoryTree->selectedItems();
+	if (selected.count() > 1) {
+		saveMulti(selected);
+		return;
+	}
+
+	// save an individual image to a file
 	ImagePtr	imageptr = currentImage();
 	QFileDialog	filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -255,6 +265,45 @@ void	repositorywindow::saveClicked() {
 			message.exec();
 		}
 	}
+}
+
+/**
+ * \brief Save a set of images into a directory
+ */
+void	repositorywindow::saveMulti(QList<QTreeWidgetItem*>& items) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "save %d images", items.count());
+	QString	dir = QFileDialog::getExistingDirectory(this,
+		"Save images to directory", NULL,
+		QFileDialog::ShowDirsOnly |
+		QFileDialog::DontResolveSymlinks);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "directory: %s",
+		dir.toLatin1().data());
+	if (dir.size() == 0) {
+		return;
+	}
+	// now we have all the information for the download. We extract
+	// the repository names and ids from the selection 
+	std::list<std::pair<std::string, int> >	imagelist;
+	QList<QTreeWidgetItem*>::const_iterator	i;
+	for (i = items.begin(); i != items.end(); i++) {
+		if ((*i)->parent() == NULL) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "top level");
+		} else {
+			std::string	reponame
+				= (*i)->parent()->text(1).toLatin1().data();
+			int	imageid = (*i)->text(0).toInt();
+			imagelist.push_back(std::make_pair(reponame, imageid));
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "repo: %s, id %d",
+				reponame.c_str(), imageid);
+		}
+	}
+
+	// we have no prepared a list of 
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving %d images", imagelist.size());
+	repositorysavedialog	d(this);
+	d.set(std::string(dir.toLatin1().data()), _repositories, imagelist);
+	d.exec();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "save dialog returned");
 }
 
 /**

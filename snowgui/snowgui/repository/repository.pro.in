@@ -25,13 +25,18 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
+	repositorysavedialog.ui						\
 	repositorywindow.ui	
 
 WIDGETSOURCES =								\
-	repositorywindow.cpp
+	repositorysavedialog.cpp					\
+	repositorywindow.cpp						\
+	savethread.cpp
 
 WIDGETHEADERS =								\
-	repositorywindow.h
+	repositorysavedialog.h						\
+	repositorywindow.h						\
+	savethread.h
 
 SOURCES += 								\
 	$${WIDGETSOURCES}
