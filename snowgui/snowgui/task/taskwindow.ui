@@ -25,12 +25,18 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QWidget" name="taskcontrollerWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>100</height>
+         </size>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QWidget" name="tasksubmissionWidget" native="true"/>
+          <widget class="snowgui::taskstatuswidget" name="taskstatusWidget" native="true"/>
          </item>
          <item>
-          <widget class="snowgui::taskstatuswidget" name="taskstatusWidget" native="true"/>
+          <widget class="snowgui::tasksubmissionwidget" name="tasksubmissionWidget" native="true"/>
          </item>
         </layout>
        </widget>
@@ -38,7 +44,7 @@
       <item>
        <widget class="QTabWidget" name="feedbackWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tasklistWidget">
          <attribute name="title">
@@ -161,6 +167,12 @@
    <class>snowgui::taskstatuswidget</class>
    <extends>QWidget</extends>
    <header>taskstatuswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::tasksubmissionwidget</class>
+   <extends>QWidget</extends>
+   <header>tasksubmissionwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
