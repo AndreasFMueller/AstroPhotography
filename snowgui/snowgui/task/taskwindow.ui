@@ -99,6 +99,16 @@
        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget" native="true"/>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -139,6 +149,12 @@
    <class>snowgui::filterwheelcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::mountcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">mountcontrollerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

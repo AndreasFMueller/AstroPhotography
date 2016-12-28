@@ -5,6 +5,7 @@
  */
 #include "TasksIndicator.h"
 #include <QPainter>
+#include <AstroDebug.h>
 
 namespace snowgui {
 
@@ -16,25 +17,7 @@ TasksIndicator::~TasksIndicator() {
 
 void	TasksIndicator::update(snowstar::QueueState state) {
 	_state = state;
-#if 0
-	switch (_state) {
-	case snowstar::QueueIDLE:
-		ui->startstopButton->setEnabled(true);
-		ui->startstopButton->setText(QString("Stop"));
-		break;
-	case snowstar::QueueLAUNCHING:
-		ui->startstopButton->setEnabled(true);
-		ui->startstopButton->setText(QString("Stop"));
-		break;
-	case snowstar::QueueSTOPPING:
-		ui->startstopButton->setEnabled(false);
-		break;
-	case snowstar::QueueSTOPPED:
-		ui->startstopButton->setEnabled(true);
-		ui->startstopButton->setText(QString("Start"));
-		break;
-	}
-#endif
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "state update");
 	repaint();
 }
 
@@ -43,6 +26,7 @@ void	TasksIndicator::paintEvent(QPaintEvent * /* event */) {
 }
 
 void	TasksIndicator::draw() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw()");
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 

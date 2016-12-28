@@ -37,8 +37,7 @@ void	taskstatuswidget::setServiceObject(
 	}
 
 	// get the status
-	_state = _tasks->state();
-	ui->taskstateWidget->update(_state);
+	ui->taskstateWidget->update(_tasks->state());
 	statusTimer.start();
 }
 
@@ -49,7 +48,7 @@ void	taskstatuswidget::startClicked() {
 	}
 	switch (_tasks->state()) {
 	case snowstar::QueueIDLE:
-		_tasks->stop();
+		_tasks->start();
 		break;
 	case snowstar::QueueLAUNCHING:
 		_tasks->stop();
@@ -70,7 +69,7 @@ void	taskstatuswidget::update(snowstar::QueueState state) {
 	switch (_state) {
 	case snowstar::QueueIDLE:
 		ui->startstopButton->setEnabled(true);
-		ui->startstopButton->setText(QString("Stop"));
+		ui->startstopButton->setText(QString("Start"));
 		break;
 	case snowstar::QueueLAUNCHING:
 		ui->startstopButton->setEnabled(true);

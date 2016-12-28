@@ -57,7 +57,7 @@ TaskQueueI::~TaskQueueI() {
 
 // interface methods
 QueueState TaskQueueI::state(const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "state request");
+	//debug(LOG_DEBUG, DEBUG_LOG, 0, "state request");
 	return convert(taskqueue.state());
 }
 
