@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>snowgui::taskwindow</class>
+ <widget class="QWidget" name="snowgui::taskwindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>747</width>
+    <height>708</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QWidget" name="taskcontrolWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QWidget" name="taskcontrollerWidget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QWidget" name="tasksubmissionWidget" native="true"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="taskstatusWidget" native="true"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="feedbackWidget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tasklistWidget">
+         <attribute name="title">
+          <string>Task List</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="imageWidget">
+         <attribute name="title">
+          <string>Image Preview</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="snowgui::imagedisplaywidget" name="imagedisplayWidget" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="instrumentControlWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::imagedisplaywidget</class>
+   <extends>QWidget</extends>
+   <header location="global">imagedisplaywidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::ccdcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ccdcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::coolercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">coolercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::filterwheelcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

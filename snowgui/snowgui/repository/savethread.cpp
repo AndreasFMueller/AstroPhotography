@@ -85,5 +85,9 @@ void	savethread::stopProcess() {
 	_stopProcess = true;
 }
 
+const std::string&	savethread::errormsg() const {
+	return _errormsg;
+}
+
 } // namespace snowgui
 

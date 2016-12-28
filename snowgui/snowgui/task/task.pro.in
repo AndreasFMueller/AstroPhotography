@@ -1,0 +1,43 @@
+#
+# task.pro.in -- qt configuration file for the task subapplication
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TEMPLATE = lib
+CONFIG += staticlib
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+
+LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS +=	@ICELIBS@
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += ../common
+
+FORMS    +=								\
+	taskwindow.ui
+
+WIDGETSOURCES =								\
+	taskwindow.cpp
+
+WIDGETHEADERS =								\
+	taskwindow.h
+
+SOURCES += 								\
+	$${WIDGETSOURCES}
+
+HEADERS  += 								\
+	$${WIDGETHEADERS}
+
+
+

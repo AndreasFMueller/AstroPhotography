@@ -16,6 +16,7 @@
 #include "configurationdialog.h"
 #include <imageswindow.h>
 #include <repositorywindow.h>
+#include <taskwindow.h>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <sstream>
@@ -254,7 +255,7 @@ void	MainWindow::launchRepository() {
 		std::ostringstream	out;
 		out << "Failed to connect to the 'Repository' service on ";
 		out << _serviceobject.toString();
-		out << ". Images window cannot be constructed.";
+		out << ". Repository window cannot be constructed.";
 		out << "Cause: ";
 		out << x.what();
 		message->setInformativeText(QString(out.str().c_str()));
@@ -267,12 +268,24 @@ void	MainWindow::launchRepository() {
  * \brief Launch the Tasks subapplication
  */
 void	MainWindow::launchTasks() {
-	QMessageBox	*messagebox = new QMessageBox(this);
-	messagebox->setText(QString("Application not implemented"));
-	messagebox->setInformativeText(QString("The Tasks application is not "
-		"yet implemented"));
-	messagebox->exec();
-	delete messagebox;
+	try {
+		InstrumentSelectionApplication<snowgui::taskwindow>	*is
+			= new InstrumentSelectionApplication<snowgui::taskwindow>(this, _serviceobject);
+		is->setWindowTitle(QString("Select instrument for Task application"));
+		is->exec();
+		delete is;
+	} catch (const std::exception& x) {
+		QMessageBox	message(this);
+		message.setText(QString("Connection failure"));
+		std::ostringstream	out;
+		out << "Failed to connect to the 'Repository' service on ";
+		out << _serviceobject.toString();
+		out << ". Task window cannot be constructed.";
+		out << "Cause: ";
+		out << x.what();
+		message.setInformativeText(QString(out.str().c_str()));
+		message.exec();
+	}
 }
 
 /**

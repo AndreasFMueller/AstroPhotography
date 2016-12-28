@@ -22,6 +22,7 @@ LIBS += -L../instruments -linstruments
 LIBS += -L../preview -lpreview
 LIBS += -L../focusing -lfocusing
 LIBS += -L../guiding -lguiding
+LIBS += -L../task -ltask
 LIBS += -L../common -lcommon
 LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
 LIBS +=	$${ICELIBS} -lIce -lIceUtil
@@ -31,6 +32,7 @@ INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common ../preview ../focusing ../guiding
 INCLUDEPATH += ../instruments ../images ../repository ../expose
+INCLUDEPATH += ../task
 
 ASTROGUISOURCES = 							\
         mainwindow.cpp 							\

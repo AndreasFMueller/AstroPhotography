@@ -43,7 +43,7 @@ public:
 	void	set(const std::string& directory,
 			snowstar::RepositoriesPrx repositories,
 			const std::list<std::pair<std::string, int> >& images);
-	std::string	errormsg() const;
+	const std::string&	errormsg() const;
 signals:
 	void	sendStatus(downloadstatus);
 	void	downloadComplete();
