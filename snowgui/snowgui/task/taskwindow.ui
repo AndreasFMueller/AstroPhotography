@@ -30,7 +30,7 @@
           <widget class="QWidget" name="tasksubmissionWidget" native="true"/>
          </item>
          <item>
-          <widget class="QWidget" name="taskstatusWidget" native="true"/>
+          <widget class="snowgui::taskstatuswidget" name="taskstatusWidget" native="true"/>
          </item>
         </layout>
        </widget>
@@ -79,7 +79,21 @@
        <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
       </item>
       <item>
+       <widget class="Line" name="ccdcoolerLine">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="Line" name="coolerfilterwheelLine">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget" native="true"/>
@@ -125,6 +139,12 @@
    <class>snowgui::filterwheelcontrollerwidget</class>
    <extends>QWidget</extends>
    <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::taskstatuswidget</class>
+   <extends>QWidget</extends>
+   <header>taskstatuswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -25,18 +25,23 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
+	taskstatuswidget.ui						\
 	taskwindow.ui
 
 WIDGETSOURCES =								\
+	taskstatuswidget.cpp						\
 	taskwindow.cpp
 
 WIDGETHEADERS =								\
+	taskstatuswidget.h						\
 	taskwindow.h
 
 SOURCES += 								\
+	TasksIndicator.cpp						\
 	$${WIDGETSOURCES}
 
 HEADERS  += 								\
+	TasksIndicator.h						\
 	$${WIDGETHEADERS}
 
 

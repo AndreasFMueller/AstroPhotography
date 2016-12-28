@@ -61,6 +61,7 @@ void	taskwindow::instrumentSetup(
 	ui->coolercontrollerWidget->instrumentSetup(serviceobject, instrument);
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject,
 		instrument);
+	ui->taskstatusWidget->setServiceObject(serviceobject);
 	setAppname("Tasks");
 }
 
