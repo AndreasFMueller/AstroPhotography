@@ -4,6 +4,7 @@
 #
 # (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
 #
+
 case `uname` in
 	Linux)
 		rm snowgui
@@ -16,11 +17,16 @@ esac
 # build the application
 make -j 8
 
-if [ -r servername ]
+if [ $# -gt 1 ]
 then
-	servername=`cat servername`
+	servername=${1}
 else
-	servername=server
+	if [ -r servername ]
+	then
+		servername=`cat servername`
+	else
+		servername=server
+	fi
 fi
 
 case `uname` in

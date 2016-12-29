@@ -7,6 +7,7 @@
 #define TASKWINDOW_H
 
 #include <InstrumentWidget.h>
+#include "TaskMonitorController.h"
 
 namespace snowgui {
 

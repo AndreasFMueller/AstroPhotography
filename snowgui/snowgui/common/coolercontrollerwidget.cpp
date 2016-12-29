@@ -37,11 +37,12 @@ void	coolercontrollerwidget::instrumentSetup(
 	while (_instrument.has(snowstar::InstrumentCooler, index)) {
 		try {
 			snowstar::CoolerPrx	cooler = _instrument.cooler(index);
-			if (!_cooler) {
-				_cooler = cooler;
-			}
 			ui->coolerSelectionBox->addItem(
 				QString(cooler->getName().c_str()));
+			if (!_cooler) {
+				_cooler = cooler;
+				emit coolerSelected(index);
+			}
 		} catch (const std::exception& x) {
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "ignore cooler %d", index);
 		}
@@ -216,6 +217,7 @@ void	coolercontrollerwidget::coolerChanged(int index) {
 	statusTimer.stop();
 	try {
 		_cooler = _instrument.cooler(index);
+		emit coolerSelected(index);
 	} catch (const std::exception& x) {
 		coolerFailed(x);
 	}

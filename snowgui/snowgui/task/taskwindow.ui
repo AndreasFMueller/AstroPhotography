@@ -28,12 +28,42 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>100</height>
+          <height>180</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>180</height>
          </size>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="snowgui::taskstatuswidget" name="taskstatusWidget" native="true"/>
+         </item>
+         <item>
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="snowgui::taskmonitorwidget" name="taskmonitorWidget" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>360</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="snowgui::tasksubmissionwidget" name="tasksubmissionWidget" native="true"/>
@@ -173,6 +203,12 @@
    <class>snowgui::tasksubmissionwidget</class>
    <extends>QWidget</extends>
    <header>tasksubmissionwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::taskmonitorwidget</class>
+   <extends>QWidget</extends>
+   <header>taskmonitorwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -26,7 +26,6 @@ void	TasksIndicator::paintEvent(QPaintEvent * /* event */) {
 }
 
 void	TasksIndicator::draw() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "draw()");
 	QPainter	painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 

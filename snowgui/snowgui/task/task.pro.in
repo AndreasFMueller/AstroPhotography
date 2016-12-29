@@ -17,7 +17,7 @@ ASTROLIBDIR = @ASTROLIBDIR@
 
 
 LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
-LIBS +=	@ICELIBS@
+LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
@@ -25,27 +25,30 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
+	taskmonitorwidget.ui						\
 	taskstatuswidget.ui						\
 	tasksubmissionwidget.ui						\
 	taskwindow.ui
 
 WIDGETSOURCES =								\
+	taskmonitorwidget.cpp						\
 	taskstatuswidget.cpp						\
 	tasksubmissionwidget.cpp					\
 	taskwindow.cpp
 
 WIDGETHEADERS =								\
+	taskmonitorwidget.h						\
 	taskstatuswidget.h						\
 	tasksubmissionwidget.h						\
 	taskwindow.h
 
 SOURCES += 								\
 	TasksIndicator.cpp						\
+	TaskMonitorController.cpp					\
 	$${WIDGETSOURCES}
 
 HEADERS  += 								\
 	TasksIndicator.h						\
+	TaskMonitorController.h						\
 	$${WIDGETHEADERS}
-
-
 

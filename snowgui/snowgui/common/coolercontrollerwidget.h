@@ -27,6 +27,7 @@ public:
 
 signals:
 	void	setTemperatureReached();
+	void	coolerSelected(int);
 
 private:
 	void	displayActualTemperature(float actual);

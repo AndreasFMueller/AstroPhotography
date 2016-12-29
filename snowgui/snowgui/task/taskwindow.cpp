@@ -31,6 +31,32 @@ taskwindow::taskwindow(QWidget *parent)
 		ui->ccdcontrollerWidget,
 		SLOT(setSubframe(astro::image::ImageRectangle)));
 
+	// setup connections between devices and the submission
+	connect(ui->filterwheelcontrollerWidget,
+		SIGNAL(filterwheelSelected(snowstar::FilterWheelPrx)),
+		ui->tasksubmissionWidget,
+		SLOT(filterwheelSelected(snowstar::FilterWheelPrx)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(exposureChanged(astro::camera::Exposure)),
+		ui->tasksubmissionWidget,
+		SLOT(exposureChanged(astro::camera::Exposure)));
+	connect(ui->ccdcontrollerWidget,
+		SIGNAL(ccdSelected(int)),
+		ui->tasksubmissionWidget,
+		SLOT(ccdSelected(int)));
+	connect(ui->coolercontrollerWidget,
+		SIGNAL(coolerSelected(int)),
+		ui->tasksubmissionWidget,
+		SLOT(coolerSelected(int)));
+	connect(ui->filterwheelcontrollerWidget,
+		SIGNAL(filterwheelSelected(int)),
+		ui->tasksubmissionWidget,
+		SLOT(filterwheelSelected(int)));
+	connect(ui->mountcontrollerWidget,
+		SIGNAL(mountSelected(int)),
+		ui->tasksubmissionWidget,
+		SLOT(mountSelected(int)));
+
 	// set up connections with this class
 	connect(ui->ccdcontrollerWidget,
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
@@ -62,6 +88,8 @@ void	taskwindow::instrumentSetup(
 	ui->filterwheelcontrollerWidget->instrumentSetup(serviceobject,
 		instrument);
 	ui->taskstatusWidget->setServiceObject(serviceobject);
+	ui->tasksubmissionWidget->instrumentSetup(serviceobject, instrument);
+	ui->taskmonitorWidget->setServiceObject(serviceobject);
 	setAppname("Tasks");
 }
 

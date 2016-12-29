@@ -93,64 +93,80 @@ void TaskQueueI::stop(const Ice::Current& /* current */) {
 
 int TaskQueueI::submit(const TaskParameters& parameters,
 		const Ice::Current& /* current */) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purp = %d",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit a new task on '%s', purpose = %d",
 		parameters.instrument.c_str(), parameters.exp.purpose);
 	// get information about the parameters
 	astro::discover::InstrumentPtr  instrument
                 = astro::discover::InstrumentBackend::get(
 			parameters.instrument);
 	astro::task::TaskInfo	info(-1);
-	if (instrument->nComponentsOfType(
-		astro::discover::InstrumentComponentKey::Camera) > 0) {
+	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Camera) > 0)
+		&& (parameters.cameraIndex >= 0)) {
 		astro::discover::InstrumentComponent	camera = instrument->get(
 			astro::discover::InstrumentComponentKey::Camera,
 				parameters.cameraIndex);
 		info.camera(camera.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found camera %s",
 			info.camera().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no camera components");
 	}
 
-	if (instrument->nComponentsOfType(
-		astro::discover::InstrumentComponentKey::CCD) > 0) {
+	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::CCD) > 0)
+		&& (parameters.ccdIndex >= 0)) {
 		astro::discover::InstrumentComponent	ccd = instrument->get(
 			astro::discover::InstrumentComponentKey::CCD,
 				parameters.ccdIndex);
 		info.ccd(ccd.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found ccd %s",
 			info.ccd().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no CCD components");
 	}
 
-	if (instrument->nComponentsOfType(
-		astro::discover::InstrumentComponentKey::Cooler) > 0) {
+	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Cooler) > 0)
+		&& (parameters.coolerIndex >= 0)) {
 		astro::discover::InstrumentComponent	cooler = instrument->get(
 			astro::discover::InstrumentComponentKey::Cooler,
 				parameters.coolerIndex);
 		info.cooler(cooler.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found cooler %s",
 			info.cooler().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no cooler components");
 	}
 
-	if (instrument->nComponentsOfType(
-		astro::discover::InstrumentComponentKey::FilterWheel) > 0) {
+	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::FilterWheel) > 0)
+		&& (parameters.filterwheelIndex >= 0)) {
 		astro::discover::InstrumentComponent	filterwheel = instrument->get(
 			astro::discover::InstrumentComponentKey::FilterWheel,
 				parameters.filterwheelIndex);
 		info.filterwheel(filterwheel.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found filterwheel %s",
 			info.filterwheel().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no filterwheel components");
 	}
 
-	if (instrument->nComponentsOfType(
-		astro::discover::InstrumentComponentKey::Mount) > 0) {
+	if ((instrument->nComponentsOfType(
+		astro::discover::InstrumentComponentKey::Mount) > 0)
+		&& (parameters.mountIndex >= 0)) {
 		astro::discover::InstrumentComponent	mount = instrument->get(
 			astro::discover::InstrumentComponentKey::Mount,
 				parameters.mountIndex);
 		info.mount(mount.deviceurl());
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "found mount %s",
 			info.mount().c_str());
+	} else {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "no mount components");
 	}
 
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "submitting new task");
 		int	id = taskqueue.submit(snowstar::convert(parameters), info);
 		astro::event(EVENT_CLASS, astro::events::Event::TASK,
 			astro::stringprintf("task %d submitted", id));
