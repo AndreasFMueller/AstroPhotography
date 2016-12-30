@@ -90,6 +90,7 @@ void	taskwindow::instrumentSetup(
 	ui->taskstatusWidget->setServiceObject(serviceobject);
 	ui->tasksubmissionWidget->instrumentSetup(serviceobject, instrument);
 	ui->taskmonitorWidget->setServiceObject(serviceobject);
+	ui->taskqueuemanagerWidget->setServiceObject(serviceobject);
 	setAppname("Tasks");
 }
 
