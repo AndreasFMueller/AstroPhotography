@@ -7,6 +7,8 @@
 #include "ui_taskqueuemanagerwidget.h"
 #include <CommunicatorSingleton.h>
 #include <AstroDebug.h>
+#include <AstroCamera.h>
+#include <IceConversions.h>
 
 namespace snowgui {
 
@@ -90,6 +92,76 @@ taskqueuemanagerwidget::~taskqueuemanagerwidget() {
 	delete ui;
 }
 
+void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
+		snowstar::TaskState state) {
+	snowstar::taskidsequence	s = _tasks->tasklist(state);
+	snowstar::taskidsequence::const_iterator	i;
+	for (i = s.begin(); i != s.end(); i++) {
+		snowstar::TaskInfo	info = _tasks->info(*i);
+		snowstar::TaskParameters	parameters
+			= _tasks->parameters(*i);
+		astro::camera::Exposure	exposure = snowstar::convert(parameters.exp);
+
+		QStringList	list;
+
+		// 0 taskid>
+		list << QString::number(info.taskid);
+
+		// 1 instrument
+		list << QString(parameters.instrument.c_str());
+
+		// 2 project
+		list << QString(parameters.project.c_str());
+
+		// 3 purpose
+		list << QString(astro::camera::Exposure::purpose2string(exposure.purpose()).c_str());
+
+		// 4 last state change
+		list << "";
+
+		// 5 exposure time
+		list << QString(astro::stringprintf("%.3f", exposure.exposuretime()).c_str());
+
+		// 6 filter
+		list << QString(parameters.filter.c_str());
+
+		// 7 binning
+		std::string	binning = exposure.mode().toString();
+		list << QString(binning.substr(1, binning.size() - 2).c_str());
+
+		// 8 temperature
+		list << QString(astro::stringprintf("%.1f",
+			parameters.ccdtemperature - 273.15).c_str());
+
+		QTreeWidgetItem	*item = new QTreeWidgetItem(list,
+			QTreeWidgetItem::Type);
+		item->setTextAlignment(0, Qt::AlignLeft);
+		item->setTextAlignment(1, Qt::AlignLeft);
+		item->setTextAlignment(2, Qt::AlignLeft);
+		item->setTextAlignment(3, Qt::AlignLeft);
+		item->setTextAlignment(4, Qt::AlignLeft);
+		item->setTextAlignment(5, Qt::AlignRight);
+		item->setTextAlignment(6, Qt::AlignLeft);
+		item->setTextAlignment(7, Qt::AlignLeft);
+		item->setTextAlignment(6, Qt::AlignRight);
+		parent->addChild(item);
+	}
+}
+
+void	taskqueuemanagerwidget::addTasks() {
+	if (!_tasks) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"no tasks proxy, cannot add tasks");
+		return;
+	}
+
+	addTasks(ui->taskTree->topLevelItem(0), snowstar::TskCOMPLETE);
+	addTasks(ui->taskTree->topLevelItem(1), snowstar::TskCANCELLED);
+	addTasks(ui->taskTree->topLevelItem(2), snowstar::TskFAILED);
+	addTasks(ui->taskTree->topLevelItem(3), snowstar::TskEXECUTING);
+	addTasks(ui->taskTree->topLevelItem(4), snowstar::TskPENDING);
+}
+
 void	taskqueuemanagerwidget::setServiceObject(
 		astro::discover::ServiceObject serviceobject) {
 	// get the Tasks proxy
@@ -109,6 +181,8 @@ void	taskqueuemanagerwidget::setServiceObject(
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "service setup complete");
 
+	// add the tasks
+	addTasks();
 }
 
 void	taskqueuemanagerwidget::infoClicked() {

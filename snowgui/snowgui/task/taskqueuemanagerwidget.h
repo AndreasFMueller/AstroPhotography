@@ -7,6 +7,7 @@
 #define SNOWGUI_TASKQUEUEMANAGERWIDGET_H
 
 #include <QWidget>
+#include <QTreeWidgetItem>
 #include <tasks.h>
 #include <repository.h>
 #include <AstroDiscovery.h>
@@ -37,6 +38,11 @@ public slots:
 
 private:
 	Ui::taskqueuemanagerwidget *ui;
+
+	
+	void    addTasks(QTreeWidgetItem *parent,
+			snowstar::TaskState state);
+	void    addTasks();
 };
 
 } // namespace snowgui

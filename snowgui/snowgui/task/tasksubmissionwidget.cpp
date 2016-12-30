@@ -133,6 +133,11 @@ void	tasksubmissionwidget::exposureChanged(
  */
 void	tasksubmissionwidget::filterwheelSelected(
 		snowstar::FilterWheelPrx filterwheel) {
+	// return if we have not filterwheel proxy
+	if (!filterwheel) {
+		return;
+	}
+
 	ui->filterBox->blockSignals(true);
 	// clear list of filters
 	while (ui->filterBox->count() > 0) {
