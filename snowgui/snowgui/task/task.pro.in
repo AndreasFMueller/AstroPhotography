@@ -26,18 +26,21 @@ INCLUDEPATH += ../common
 
 FORMS    +=								\
 	taskmonitorwidget.ui						\
+	taskqueuemanagerwidget.ui					\
 	taskstatuswidget.ui						\
 	tasksubmissionwidget.ui						\
 	taskwindow.ui
 
 WIDGETSOURCES =								\
 	taskmonitorwidget.cpp						\
+	taskqueuemanagerwidget.cpp					\
 	taskstatuswidget.cpp						\
 	tasksubmissionwidget.cpp					\
 	taskwindow.cpp
 
 WIDGETHEADERS =								\
 	taskmonitorwidget.h						\
+	taskqueuemanagerwidget.h					\
 	taskstatuswidget.h						\
 	tasksubmissionwidget.h						\
 	taskwindow.h

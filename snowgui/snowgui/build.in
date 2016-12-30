@@ -17,7 +17,7 @@ esac
 # build the application
 make -j 8
 
-if [ $# -gt 1 ]
+if [ $# -ge 1 ]
 then
 	servername=${1}
 else
