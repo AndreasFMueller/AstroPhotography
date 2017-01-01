@@ -487,6 +487,33 @@ public:
 };
 
 } // namespace thread
+
+/**
+ * \brief Generic class used to compute the median of a small data set
+ */
+template<class T>
+class Median : public std::set<T> {
+public:
+	T	median() const {
+		size_t	s = this->size();
+		if (s == 0) {
+			throw std::range_error("Median: empty data set");
+		}
+		size_t	i = (s - 1) / 2;
+		typename std::set<T>::const_iterator	j = this->begin();
+		while (i--) {
+			j++;
+		}
+		switch (s % 2) {
+		case 0:	return (*j + *(++j)) / 2;
+		case 1:	return *j;
+		}
+	}
+	void	add(T value) {
+		std::set<T>::insert(value);
+	}
+};
+
 } // namespace astro
 
 #endif /* _AstroUtils_h */

@@ -821,6 +821,40 @@ T	ClampingAdapter<Pixel, T>::pixel(int x, int y) const {
 	return v;
 }
 
+template<typename T>
+class ColorClampingAdapter : public ConstImageAdapter<RGB<T> > {
+	const ConstImageAdapter<RGB<T> >&	_image;
+	T	_minimum;
+	T	_maximum;
+public:
+	ColorClampingAdapter(const ConstImageAdapter<RGB<T> >& image,
+		T minimum, T maximum)
+		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
+		  _minimum(minimum), _maximum(maximum) {
+	}
+	RGB<T>	pixel(int x, int y) const {
+		RGB<T>	p = _image.pixel(x, y);
+		if (p.R > _maximum) { p.R = _maximum; }
+		if (p.G > _maximum) { p.G = _maximum; }
+		if (p.B > _maximum) { p.B = _maximum; }
+#if 0
+		T	l = 0;
+		if ((p.R > _maximum) || (p.G > _maximum) || (p.B > _maximum)) {
+			if (p.R > l) { l = p.R; }
+			if (p.G > l) { l = p.G; }
+			if (p.B > l) { l = p.B; }
+			if (l > 0) {
+				p = p * (_maximum / l);
+			}
+		}
+#endif
+		if (p.R < _minimum) { p.R = _minimum; }
+		if (p.G < _minimum) { p.G = _minimum; }
+		if (p.B < _minimum) { p.B = _minimum; }
+		return p;
+	}
+};
+
 //////////////////////////////////////////////////////////////////////
 // Rescaling adapter
 //////////////////////////////////////////////////////////////////////

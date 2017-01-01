@@ -28,7 +28,7 @@ GaussImage::GaussImage(const ImageSize& size, const ImagePoint& center,
 static inline double	sqr(double x) { return x * x; }
 
 /**
- * \brief Compute the value of a airy disk pixel
+ * \brief Compute the value of a Gauss distribution pixel
  */
 double	GaussImage::pixel(int x, int y) const {
 	double	rr = r(x, y) / _sigma;

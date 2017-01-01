@@ -169,8 +169,8 @@ public:
  * \brief Gauss disk image
  */
 class GaussImage : public CircularImage {
-	double	_sigma;
-	double	_n;
+	double	_sigma;	// standard deviation
+	double	_n;	// normalization constant
 public:
 	GaussImage(const ImageSize& size, const ImagePoint& center,
 		double sigma, double angularpixelsize,

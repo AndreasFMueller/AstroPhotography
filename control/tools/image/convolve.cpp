@@ -28,7 +28,7 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 	std::cout << "Compute the convolution of the two images in files "
 		"<in1.fits> and <in2.fits>" << std::endl;
-	std::cout << "and store the result in the faile <out.fits>."
+	std::cout << "and store the result in the file <out.fits>."
 		<< std::endl;
 	std::cout << std::endl;
 	std::cout << "options:" << std::endl;
