@@ -9,7 +9,7 @@ bin_PROGRAMS = imageinfo makedark makeflat calibrate \
 	transform clamp logscale stack fitsheader imagerepo rescale \
 	gammacorrect convolve background crop radon backprojection \
 	colorbalance stars findtransform luminance unsharp color \
-	colorclamp hdr
+	colorclamp hdr destar
 
 color_SOURCES = color.cpp
 color_DEPENDENCIES = $(top_builddir)/lib/libastro.la
@@ -110,6 +110,10 @@ radon_LDADD = -L$(top_builddir)/lib -lastro
 backprojection_SOURCES = backprojection.cpp
 backprojection_DEPENDENCIES = $(top_builddir)/lib/libastro.la
 backprojection_LDADD = -L$(top_builddir)/lib -lastro
+
+destar_SOURCES = destar.cpp
+destar_DEPENDENCIES = $(top_builddir)/lib/libastro.la
+destar_LDADD = -L$(top_builddir)/lib -lastro
 
 fitsheadertest:	fitsheader
 	cp andromeda-chart.fits headertest.fits

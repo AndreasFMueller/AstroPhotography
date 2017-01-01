@@ -177,6 +177,17 @@ public:
 		double weight = 1.0);
 	virtual double	pixel(int x, int y) const;
 };
+
+class TiledGaussImage : public GaussImage {
+	double	_sigma;	// standard deviation
+	double	_n;	// normalization constant
+	int	_w;
+	int	_h;
+public:
+	TiledGaussImage(const ImageSize& size, double sigma,
+		double angularpixelsize, double weight = 1.0);
+	virtual double	pixel(int x, int y) const;
+};
  
 /**
  * \brief circular disk image

@@ -82,7 +82,7 @@ void	FilterTest::testMean() {
 			image.pixel(x, y) = 7 + x + y;
 		}
 	}
-	Mean<unsigned char, double>	m;
+	filter::Mean<unsigned char, double>	m;
 	CPPUNIT_ASSERT(16 == m(image));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMean() end");
 }
@@ -95,7 +95,7 @@ void	FilterTest::testMedian() {
 			image.pixel(x, y) = 7 * x * y;
 		}
 	}
-	Median<unsigned short, unsigned short>	m;
+	filter::Median<unsigned short, unsigned short>	m;
 	CPPUNIT_ASSERT(12641 == m(image));
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedian() end");
 }
@@ -108,7 +108,7 @@ void	FilterTest::testMedian0() {
 			image.pixel(x, y) = 0;
 		}
 	}
-	Median<unsigned short, unsigned short>	m;
+	filter::Median<unsigned short, unsigned short>	m;
 	unsigned short	median = m(image);
 	CPPUNIT_ASSERT(0 == median);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedian0() end");
@@ -122,7 +122,7 @@ void	FilterTest::testMedianLarge() {
 			image.pixel(x, y) = x * y;
 		}
 	}
-	Median<unsigned int, unsigned int>	m;
+	filter::Median<unsigned int, unsigned int>	m;
 	unsigned int	median = m(image);
 	CPPUNIT_ASSERT(11943792 == median);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "testMedianLarge() end");

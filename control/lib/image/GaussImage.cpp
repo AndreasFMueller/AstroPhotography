@@ -35,5 +35,20 @@ double	GaussImage::pixel(int x, int y) const {
 	return weight() * exp(-sqr(rr)) * _n;
 }
 
+TiledGaussImage::TiledGaussImage(const ImageSize& size,
+	double sigma, double angularpixelsize, double totalweight)
+	: GaussImage(size, ImagePoint(), sigma, angularpixelsize, totalweight),
+	  _sigma(sigma) {
+	_n = 1 / (2 * M_PI * (_sigma / CircularImage::angularpixelsize()));
+	_w = size.width();
+	_h = size.height();
+}
+
+double	TiledGaussImage::pixel(int x, int y) const {
+	if (x >= _w / 2) { x = _w - x; }
+	if (y >= _h / 2) { y = _h - y; }
+	return GaussImage::pixel(x, y);
+}
+
 } // namespace image
 } // namespace astro

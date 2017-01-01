@@ -492,25 +492,25 @@ public:
  * \brief Generic class used to compute the median of a small data set
  */
 template<class T>
-class Median : public std::set<T> {
+class Median : public std::vector<T> {
 public:
-	T	median() const {
+	T	median() {
 		size_t	s = this->size();
 		if (s == 0) {
 			throw std::range_error("Median: empty data set");
 		}
+		if (s == 1) {
+			return *this->begin();
+		}
 		size_t	i = (s - 1) / 2;
-		typename std::set<T>::const_iterator	j = this->begin();
-		while (i--) {
-			j++;
+		nth_element(this->begin(), this->begin() + i + 1, this->end());
+		if (0 == s % 2) {
+			return ((*this)[i] + (*this)[i+1]) / 2;
 		}
-		switch (s % 2) {
-		case 0:	return (*j + *(++j)) / 2;
-		case 1:	return *j;
-		}
+		return (*this)[i];
 	}
 	void	add(T value) {
-		std::set<T>::insert(value);
+		std::vector<T>::push_back(value);
 	}
 };
 

@@ -135,7 +135,7 @@ void	sxtest::testCamera() {
 	Image<unsigned short>	*shortimage
 		= dynamic_cast<Image<unsigned short> *>(&*image);
 	CPPUNIT_ASSERT(NULL != shortimage);
-	Median<unsigned short, unsigned short>	median;
+	filter::Median<unsigned short, unsigned short>	median;
 	unsigned short	m = median(*shortimage);
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "median: %hu", m);
 

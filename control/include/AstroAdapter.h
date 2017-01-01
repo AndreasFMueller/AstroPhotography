@@ -2468,6 +2468,41 @@ ImagePtr	monologimage(ImagePtr image);
 
 ImagePtr	logimage(ImagePtr image);
 
+//////////////////////////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////////////////////////
+template<typename T>
+class MedianRadiusAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&	_image;
+	int	_r;
+	int	_w;
+	int	_h;
+	T	rawpixel(int x, int y) const {
+		if (x < 0) { return 0; }
+		if (y < 0) { return 0; }
+		if (x >= _w) { return 0; }
+		if (y >= _h) { return 0; }
+		return _image.pixel(x, y);
+	}
+public:
+	MedianRadiusAdapter(const ConstImageAdapter<T>& image, int r)
+		: ConstImageAdapter<T>(image.getSize()), _image(image), _r(r) {
+		_w = ConstImageAdapter<T>::getSize().width();
+		_h = ConstImageAdapter<T>::getSize().height();
+	}
+	virtual T	pixel(int x, int y) const {
+		astro::Median<T>	m;
+		for (int X = -_r; X <= _r; X++) {
+			for (int Y = -_r; Y <= _r; Y++) {
+				if (hypot(X, Y) <= _r) {
+					m.add(rawpixel(x + X, y + Y));
+				}
+			}
+		}
+		return m.median();
+	}
+};
+
 } // namespace adapter
 } // namespace astro
 

@@ -19,7 +19,8 @@ noinst_PROGRAMS = tests singletest
 
 # single test
 singletest_SOURCES = singletest.cpp \
-	DebayerTest.cpp
+	MedianRadiusAdapterTest.cpp					
+#	DebayerTest.cpp
 #	FWHMTest.cpp
 #	EuclideanDisplacementTest.cpp
 #	ConvolutionAdapterTest.cpp
@@ -60,6 +61,7 @@ tests_SOURCES = tests.cpp 						\
 	ImageSizeTest.cpp						\
 	ImageTest.cpp							\
 	LinearFunctionTest.cpp						\
+	MedianRadiusAdapterTest.cpp					\
 	MinRadiusTest.cpp						\
 	MosaicTest.cpp							\
 	MultiplaneTest.cpp						\
