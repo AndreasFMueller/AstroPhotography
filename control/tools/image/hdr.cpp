@@ -173,13 +173,6 @@ int	main(int argc, char *argv[]) {
 	TiledGaussImage	tg(maskptr->size(), radius, 1);
 	Image<double>	*tgimage = new Image<double>(tg);
 	ImagePtr	tgimageptr(tgimage);
-#if 0
-	{
-		io::FITSout	gaussout("gauss.fits");
-		gaussout.setPrecious(false);
-		gaussout.write(tgimageptr);
-	}
-#endif
 	FourierImage	blurr(*tgimage);
 
 	// convolve
