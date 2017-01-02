@@ -189,7 +189,7 @@ std::string	ImageDirectory::save(astro::image::ImagePtr image) {
 		fullname.c_str(), filename.c_str());
 
 	// write the file
-	write(image, filename);
+	ImageDirectory::write(image, filename);
 
 	// return the filename
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "image short name: %s",
@@ -221,6 +221,7 @@ void	ImageDirectory::write(astro::image::ImagePtr image,
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot write file '%s': %s",
 			f.c_str(), x.what());
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image file %s written", f.c_str());
 }
 
 /**

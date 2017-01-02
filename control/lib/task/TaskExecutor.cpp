@@ -25,6 +25,11 @@ namespace task {
 
 /**
  * \brief Springboard function to start the main method of the Executor class
+ *
+ * Threads can only start functions, but we want to execute a method
+ * of a class. So the function we call when constructing the thread
+ * has the class as an argument and call the method using this class
+ * pointer from this function.
  */
 static void	taskmain(TaskExecutor *te) {
 	try {
@@ -46,16 +51,14 @@ static void	taskmain(TaskExecutor *te) {
  * that must be cancelled.
  */
 void	TaskExecutor::main() {
-	// acquiring the lock ensures that the new thread is blocked until
-	// the starting thread is ready to release it.
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "main started LOCK");
-	std::unique_lock<std::mutex>	lock(_lock);
-	// by sending the notification, we signal to the starting thread
-	// that we are now up and running
-	_cond.notify_all();
-	lock.unlock();
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "lock release UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "TaskExecutor::main() started");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "LOCK(TaskExecutor::release_mutex,%d)",
+		_task.id());
+	// we try to lock the release_mutex, but because that mutex is
+	// locked by the constructor we will normally stop at this point.
+	// only when the lock is released by calling the release method
+	// will it be possible to acquire the lock and continue.
+	release_mutex.lock();
 
 	try {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "entering main task region");
@@ -64,14 +67,10 @@ void	TaskExecutor::main() {
 		_queue.post(_task.id()); // notify queue of state change
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "update posted");
 
-		// we signal to the constructor that the thread is now fully
-		// running, with the correct state set in the task queue
-		_cond.notify_one();
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "constructor signaled");
-
 		// the exposure task starts to run when we call the run method
 		// this is also the moment when the 
 		exposurework->run();
+		_task.state(TaskQueueEntry::complete);
 	} catch (CancelException& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "execution cancelled: %s",
 			x.what());
@@ -79,9 +78,13 @@ void	TaskExecutor::main() {
 	} catch (const std::exception& x) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "executor failure: %s", x.what());
 		_task.state(TaskQueueEntry::failed);
+	} catch (...) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"executor failure, unknown exception");
+		_task.state(TaskQueueEntry::failed);
 	}
 
-	// post the curretn state to the queue
+	// post the current state to the queue
 	_queue.post(_task.id());
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "main terminated");
@@ -90,38 +93,45 @@ void	TaskExecutor::main() {
 /**
  * \brief create a task executor
  *
- * launch a new thread to work an a given task
+ * Launch a new thread to work an a given task. When a task starts, we have
+ * to wait in the constructor until the new task is up and running and has
+ * changed the state from PENDING to anything else. If we didn't do this,
+ * then the task queue might launch the task again.
+ *
  * \param queue		the queue that ons this executor
  * \param task		the task queue entry describing the task
  */
 TaskExecutor::TaskExecutor(TaskQueue& queue, const TaskQueueEntry& task)
 	: _queue(queue), _task(task) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start a new executor LOCK");
-	// create the lock
-	std::unique_lock<std::mutex>	lock(_lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"constructor LOCK(TaskExecutor::release_mutex,%d)", _task.id());
+	release_mutex.lock();
 
 	// create a new ExposureTask object. The ExposureTask contains
 	// the logic to actually execute the task
 	exposurework = new ExposureWork(_task);
 
-	// initialize pthead resources
+	// initialize the thread. The constructor will return when the
+	// thread has started running. But it will then only proceed to
+	// the point where it tries to acquire the release_mutex. Only when
+	// we release the lock on the mutex in the release method the
+	// thread can go on and post state changes.
 	_thread = std::thread(taskmain, this);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread launched");
 }
 
+/**
+ * \brief Release the thread 
+ *
+ * Because the release_mutex is initially locked by the constructor, the
+ * newly launched thread cannot get very far. If the thread constructing
+ * the executor is read to receive updates from the thread, it should release
+ * the thread using this method.
+ */
 void	TaskExecutor::release() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "release executor LOCK");
-	std::unique_lock<std::mutex>	lock(_lock);
-
-	// now wait for the condition variable to be signaled. This will
-	// indicate that the thread has indeed started running. Doing this
-	// ensures that the TaskExecutor thread is running and everything in
-	// the new state before the constructor returns. The wait call 
-	// atomically unlocks the lock and waits for the condition variable
-	// to be signaled.
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting releases lock: UNLOCK");
-	_cond.wait(lock);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completion locks: LOCK");
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "task executor now released UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "UNLOCK(TaskExecutor::release_lock,%d)",
+		_task.id());
+	release_mutex.unlock();
 }
 
 /**

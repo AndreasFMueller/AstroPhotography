@@ -24,6 +24,7 @@ class taskqueuemanagerwidget : public QWidget {
 
 	snowstar::TaskQueuePrx		_tasks;
 	snowstar::RepositoriesPrx	_repositories;
+	snowstar::ImagesPrx		_images;
 	TaskMonitorController*	_taskmonitor;
 	Ice::ObjectPtr	_taskmonitorptr;
 
@@ -32,13 +33,16 @@ public:
 	~taskqueuemanagerwidget();
 	void	setServiceObject(astro::discover::ServiceObject serviceobject);
 
+signals:
+	void	imageReceived(astro::image::ImagePtr);
+
 public slots:
 	void	infoClicked();
 	void	cancelClicked();
 	void	imageClicked();
 	void	downloadClicked();
 	void	deleteClicked();
-
+	void	itemSelectionChanged();
 	void	taskUpdate(snowstar::TaskMonitorInfo);
 
 
@@ -49,8 +53,14 @@ private:
 	void    addTasks(QTreeWidgetItem *parent,
 			snowstar::TaskState state);
 	void    addTasks();
+	void	addTask(int taskid);
+	void	addTask(QTreeWidgetItem *parent, const snowstar::TaskInfo&,
+			const snowstar::TaskParameters&);
 	void	setHeader(snowstar::TaskState state);
 	void	setHeaders();
+	QTreeWidgetItem	*parent(snowstar::TaskState state);
+	void	deleteTask(int taskid);
+	void	updateInfo(QTreeWidgetItem *, const snowstar::TaskInfo&);
 };
 
 } // namespace snowgui

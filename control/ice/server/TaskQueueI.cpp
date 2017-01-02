@@ -208,6 +208,7 @@ TaskInfo TaskQueueI::info(int taskid, const Ice::Current& /* current */) {
 		throw NotFound(cause);
 	}
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "return task info(%d)", taskid);
 		return snowstar::convert(taskqueue.info(taskid));
 	} catch (const std::exception& x) {
 		std::string	 cause = astro::stringprintf(

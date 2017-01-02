@@ -46,13 +46,16 @@ static void	queuemain(TaskQueue *queue) {
  * This is the "real" main function for a task queue
  */
 void	TaskQueue::main() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "task queue begins executing, LOCK");
-	// we first try to acquire the lock, we need this to block the main
-	// method thread until it is released from the starting thread. As
-	// soon as we get the lock, we can assume that the lock was release
-	// from the main thread.
+	// we first signal to the parent thread that we are now ready in the	
+	// main function of the task queue
 	statechange_cond.notify_all();
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	// we now try to acquire the lock, we need this to block the main
+	// method thread until it is released from the starting thread. As
+	// soon as we get the lock, we can assume that the lock was released
+	// from the main thread.
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"--> main() LOCK(TaskQueue::queue_mutex)");
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	// keep executing until the queue state is idle
 	while (state() != idle) {
@@ -92,10 +95,10 @@ void	TaskQueue::main() {
 
 		// wait for the next signal, this also releases the lock
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for state change "
-			"signal, release lock, UNLOCK");
-		statechange_cond.wait(l);
+			"signal, release lock, UNLOCK(TaskQueue::queue_mutex)");
+		statechange_cond.wait(lock);
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
-			"statechange signal received, acquire LOCK");
+			"statechange signal received, acquire LOCK(TaskQueue::queue_mutex)");
 		// when we come out of the wait, the lock is again acquired.
 
 		// during this block, the lock was held by the work thread,
@@ -106,7 +109,7 @@ void	TaskQueue::main() {
 		// waiters will so the states that have changed while they
 		// were waiting for the lock
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "main method ends UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- main method ends UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -153,9 +156,9 @@ TaskQueue::state_type	TaskQueue::string2state(const std::string& s) {
  */
 void	TaskQueue::restart(state_type newstate) {
 	// lock the mutex for restart into a new state
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "restart from %s to state %s, LOCK",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> restart from %s to state %s, LOCK(TaskQueue::queue_mutex)",
 		state2string(state()).c_str(), state2string(newstate).c_str());
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	// make sure we don't try to start when there already is a thread
 	if (idle != _state ) {
@@ -184,13 +187,13 @@ void	TaskQueue::restart(state_type newstate) {
 
 	// we should wait until the main thread of the taskqueue signals
 	// that it has started up
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for thread to start UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for state change UNLOCK(TaskQueue::queue_mutex)");
 	statechange_cond.wait(lock);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completes LOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completes LOCK(TaskQueue::queue_mutex)");
 
 	// at this point, the lock object goes out of scope and releases
 	// the thread that was started previously
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "restart complete, UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- restart complete, UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -198,8 +201,8 @@ void	TaskQueue::restart(state_type newstate) {
  */
 void	TaskQueue::shutdown() {
 	{
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown requested LOCK");
-		std::unique_lock<std::recursive_mutex>	l(lock);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown requested LOCK(TaskQueue::queue_mutex)");
+		std::unique_lock<std::recursive_mutex>	l(queue_mutex);
 		if (state() != stopped) {
 			throw std::runtime_error("can shutdown only when "
 				"stopped");
@@ -212,7 +215,7 @@ void	TaskQueue::shutdown() {
 		// at this point, the lock goes out of scope and releases the
 		// work thread. So the only thing we have to do after this
 		// point is to wait for the thread to finish
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete, UNLOCK");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete, UNLOCK(TaskQueue::queue_mutex)");
 	}
 
 	// wait for the thread to terminate
@@ -242,9 +245,9 @@ TaskQueue::TaskQueue(Database database) : _database(database) {
  * variable
  */
 TaskQueue::~TaskQueue() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying task queue LOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying task queue LOCK(TaskQueue::queue_mutex)");
 	// ensure we are the only ones accessing the data structures
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	try {
 		// stop everything
@@ -261,7 +264,7 @@ TaskQueue::~TaskQueue() {
 	} catch (...) {
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -300,12 +303,11 @@ void	TaskQueue::launch(const TaskQueueEntry& entry) {
 	// add the task entry to the map
 	executormap::value_type	mapentry(entry.id(), _executor);
 	executors.insert(mapentry);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "new entry %d added to executors map",
+		entry.id());
 
 	// now we can release the executor
 	_executor->release();
-
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "new entry %d added to executors map",
-		entry.id());
 }
 
 /**
@@ -327,6 +329,7 @@ void	TaskQueue::launch() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launching all possible pending task");
 	TaskTable	tasktable(_database);
 	std::list<long>	idlist = tasktable.selectids("state = 0 order by id");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "found %d pending ids", idlist.size());
 
 	// go through the list of ids
 	std::list<long>::const_iterator	i;
@@ -362,9 +365,10 @@ void	TaskQueue::launch() {
  */
 taskid_t	TaskQueue::submit(const TaskParameters& parameters,
 			const TaskInfo& info) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submit new task LOCK: %s",
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"submit new task LOCK(TaskQueue::queue_mutex): %s",
 		parameters.project().c_str());
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	// add the entry to the task table
 	TaskTable	tasktable(_database);
@@ -390,8 +394,8 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters,
 	statechange_cond.notify_one();
 
 	// return the queue id
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new queueid %d UNLOCK",
-		taskqueueid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "submitted new queueid %d "
+		"UNLOCK(TaskQueue::queue_mutex)", taskqueueid);
 	return taskqueueid;
 }
 
@@ -404,11 +408,11 @@ taskid_t	TaskQueue::submit(const TaskParameters& parameters,
  * to the cleanup queue and signal the work thread that it can do the cleanup.
  */
 void	TaskQueue::post(taskid_t queueid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "post an update for id %d LOCK",
-		queueid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> post an update for id %d "
+		"LOCK(TaskQueue::queue_mutex)", queueid);
 
 	// to protect the data structures, we have to lock everything
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	// get the entry, and update the database
 	TaskExecutorPtr	e = executor(queueid);
@@ -428,7 +432,8 @@ void	TaskQueue::post(taskid_t queueid) {
 	}
 	// when the lock goes out of scope, the work thread will wake up and
 	// will start processing the state change
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "post complete, release lock UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- post an update for id %d "
+		"UNLOCK(TaskQueue::queue_mutex)", queueid);
 }
 
 using astro::callback::CallbackDataPtr;
@@ -437,8 +442,9 @@ using astro::callback::CallbackDataPtr;
  * \brief update the task queue with the state of the entry
  */
 void	TaskQueue::update(const TaskQueueEntry& entry) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "update the task table (LOCK)");
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> update the task table %d "
+		"LOCK(TaskQueue::queue_mutex)", entry.id());
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	// send update to database
 	TaskTable	tasktable(_database);
 	tasktable.update(entry.id(), entry);
@@ -447,7 +453,8 @@ void	TaskQueue::update(const TaskQueueEntry& entry) {
 
 	// inform the clients
 	call(entry);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- update the task table %d "
+		"UNLOCK(TaskQueue::queue_mutex)", entry.id());
 }
 
 /**
@@ -529,7 +536,7 @@ void	TaskQueue::remove(taskid_t queueid) {
 	}
 
 	// remove task from teh database
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	// since we want later to inform the client via the callback, we have
 	// to read the entry first
@@ -591,9 +598,10 @@ void	TaskQueue::remove(taskid_t queueid) {
  * thread
  */
 void	TaskQueue::start() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start the queue LOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> start the queue "
+		"LOCK(TaskQueue::queue_mutex)");
 	// start processing the queue
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	switch (_state) {
 	case idle:
 		// in this state the queue currently does not have an active
@@ -615,7 +623,8 @@ void	TaskQueue::start() {
 		statechange_cond.notify_one();
 		break;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- start the queue "
+		"UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -625,8 +634,9 @@ void	TaskQueue::start() {
  * still take quite some time until all active executors have terminated.
  */
 void	TaskQueue::stop() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "stop the queue LOCK");
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> stop the queue "
+		"LOCK(TaskQueue::queue_mutex)");
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	switch (_state) {
 	case idle:
 	case stopping:
@@ -647,8 +657,8 @@ void	TaskQueue::stop() {
 		statechange_cond.notify_one();
 		break;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0,
-		"no longer launching new executors UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- stop the queue "
+		"UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -661,27 +671,30 @@ void	TaskQueue::stop() {
  * to wait for the executors to terminate.
  */
 void	TaskQueue::cancel() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel all executors LOCK");
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> cancel all executors "
+		"LOCK(TaskQueue::queue_mutex)");
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	executormap::iterator	emapp;
 	for (emapp = executors.begin(); emapp != executors.end(); emapp++) {
 		cancel(emapp->first);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel complete UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- cancel all executors "
+		"UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
  * \brief Wait for a specific executor to terminate
  */
 void	TaskQueue::wait(taskid_t queueid) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for queueid %ld LOCK", queueid);
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> waiting for queueid %ld "
+		"LOCK(TaskQueue::queue_mutex)", queueid);
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	while (running(queueid)) {
-		wait_cond.wait(l);
+		wait_cond.wait(lock);
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "wait signal received");
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "queueid %d not (any longer) executing "
-		"UNLOCK", queueid);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- waiting queueid %d "
+		"UNLOCK(TaskQueue::queue_mutex)", queueid);
 }
 
 /**
@@ -693,10 +706,11 @@ void	TaskQueue::wait(taskid_t queueid) {
  * throws an exception.
  */
 void	TaskQueue::wait() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for all executors LOCK");
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"--> wait() LOCK(TaskQueue::queue_mutex)");
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 	if ((state() == idle) || (state() == launching)) {
-		std::string	msg = stringprintf("cannot wait in idle/launching state");
+		std::string	msg("cannot wait in idle/launching state");
 		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 		throw std::runtime_error(msg);
 	}
@@ -704,10 +718,10 @@ void	TaskQueue::wait() {
 		(state() == stopping) ? "" : "NOT ");
 	while (state() != stopped) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for stopped state");
-		wait_cond.wait(l);
+		wait_cond.wait(lock);
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "no executors executing (any longer) "
-		"UNLOCK");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"<-- wait() UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -775,8 +789,9 @@ TaskParameters  TaskQueue::parameters(taskid_t queueid) {
  * \brief Recover from a crash
  */
 void	TaskQueue::recover() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "database recovery LOCK");
-	std::unique_lock<std::recursive_mutex>	l(lock);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> database recovery "
+		"LOCK(TaskQueue::queue_mutex)");
+	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
 	time_t	now = time(NULL);
 	std::string	query = stringprintf(
@@ -791,10 +806,14 @@ void	TaskQueue::recover() {
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "error in recovery query: %s",
 			x.what());
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- failed database recovery "
+			"UNLOCK(TaskQueue::queue_mutex)", query.c_str());
 		return;
 	}
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "query '%s' fixed database consistency "
-		"UNLOCK", query.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "query '%s' fixed database consistency",
+		query.c_str());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- database recovery "
+		"UNLOCK(TaskQueue::queue_mutex)", query.c_str());
 }
 
 } // namespace task

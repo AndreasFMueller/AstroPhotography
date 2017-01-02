@@ -24,8 +24,17 @@ taskwindow::taskwindow(QWidget *parent)
 	// set up connections between ccdcontroller and image display
 	connect(ui->ccdcontrollerWidget,
 		SIGNAL(imageReceived(astro::image::ImagePtr)),
+		this,
+		SLOT(receiveImage(astro::image::ImagePtr)));
+	connect(ui->taskqueuemanagerWidget,
+		SIGNAL(imageReceived(astro::image::ImagePtr)),
+		this,
+		SLOT(receiveImage(astro::image::ImagePtr)));
+	connect(this,
+		SIGNAL(imageReceived(astro::image::ImagePtr)),
 		ui->imagedisplayWidget,
 		SLOT(receiveImage(astro::image::ImagePtr)));
+
 	connect(ui->imagedisplayWidget,
 		SIGNAL(rectangleSelected(astro::image::ImageRectangle)),
 		ui->ccdcontrollerWidget,
@@ -58,10 +67,6 @@ taskwindow::taskwindow(QWidget *parent)
 		SLOT(mountSelected(int)));
 
 	// set up connections with this class
-	connect(ui->ccdcontrollerWidget,
-		SIGNAL(imageReceived(astro::image::ImagePtr)),
-		this,
-		SLOT(imageReceived(astro::image::ImagePtr)));
 }
 
 /**
@@ -107,6 +112,8 @@ void	taskwindow::closeEvent(QCloseEvent * /* event */) {
 void	taskwindow::receiveImage(ImagePtr image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "received an image %s",
 		image->size().toString().c_str());
+	ui->feedbackWidget->setCurrentIndex(1);
+	emit imageReceived(image);
 }
 
 /**

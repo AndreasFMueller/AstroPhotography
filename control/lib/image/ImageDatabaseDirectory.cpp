@@ -141,6 +141,8 @@ void	ImageDatabaseDirectory::writeMetadata(long imageid, ImagePtr image) {
  * \brief add an image to the directory and the database
  */
 std::string	ImageDatabaseDirectory::save(ImagePtr image) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "saving an %s-image",
+		image->size().toString().c_str());
 	// first we add the image to the 
 	std::string	filename;
 	long	filesize;
@@ -152,6 +154,7 @@ std::string	ImageDatabaseDirectory::save(ImagePtr image) {
 			x.what());
 		throw x;
 	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image saved to %s", filename.c_str());
 
 	// if the database is not set, just ignore it, fall back to the 
 	// behaviour of the ImageDirectory
@@ -196,12 +199,14 @@ std::string	ImageDatabaseDirectory::save(ImagePtr image) {
  */
 void	ImageDatabaseDirectory::write(ImagePtr image,
 		const std::string& filename) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "write image to %s", filename.c_str());
 	// do the update to the file
 	ImageDirectory::write(image, filename);
 
 	// bracket the database changes in begin/commit block
 	_database->begin();
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "writing image info to db");
 		// get the image id
 		ImageTable	imagetable(_database);
 		std::string	condition = stringprintf("filename = '%s'",

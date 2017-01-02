@@ -262,17 +262,26 @@ void	ExposureWork::run() {
 	if (_task.repository().size() > 0) {
 		// add the image to the repository
 		std::string	repository = _task.repository();
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to imagerepo %s",
+			repository.c_str());
 		project::ImageRepoPtr	 imagerepo
 			= config::ImageRepoConfiguration::get()->repo(repository);
-		long	id = imagerepo->save(image);
-		_task.filename(stringprintf("%ld", id));
+		if (imagerepo) {
+			long	id = imagerepo->save(image);
+			_task.filename(stringprintf("%ld", id));
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no image repo found");
+		}
 	} else {
 		// add to the ImageDirectory
 		astro::image::ImageDatabaseDirectory	imagedir;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image");
 		std::string	filename = imagedir.save(image);
 
 		// remember the filename
 		_task.filename(filename);
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "saving image to file %s",
+			filename.c_str());
 	}
 
 	// update the frame information
@@ -284,7 +293,7 @@ void	ExposureWork::run() {
 	_task.origin(image->origin());
 
 	// log info
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "file %s written",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "image %s written",
 		_task.filename().c_str());
 	_task.state(TaskQueueEntry::complete);
 }

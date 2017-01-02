@@ -27,6 +27,8 @@ public:
 
 private:
 	Ui::taskwindow *ui;
+signals:
+	void	imageReceived(astro::image::ImagePtr);
 public slots:
 	void	receiveImage(astro::image::ImagePtr image);
 	void	rectangleSelected(astro::image::ImageRectangle);

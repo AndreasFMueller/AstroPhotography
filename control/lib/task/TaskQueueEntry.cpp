@@ -28,6 +28,7 @@ TaskParameters	TaskQueueEntry::parameters() const {
 	parameters.instrument(instrument());
 	parameters.mountindex(mountindex());
 	parameters.project(project());
+	parameters.repository(repository());
 	return parameters;
 }
 

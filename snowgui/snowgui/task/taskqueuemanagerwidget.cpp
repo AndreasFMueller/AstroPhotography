@@ -15,7 +15,7 @@ namespace snowgui {
 taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	: QWidget(parent), ui(new Ui::taskqueuemanagerwidget) {
 	ui->setupUi(this);
-
+	ui->taskTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	// configure the task list
 	QStringList	headers;
@@ -26,19 +26,23 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	headers << "Last change";	//  4
 	headers << "Exposure";		//  5
 	headers << "Filter";		//  6
-	headers << "Binning";		//  7
-	headers << "Temperature";	//  8
-	headers << "";
+	headers << "Frame";		//  7
+	headers << "Binning";		//  8
+	headers << "Temperature";	//  9
+	headers << "Repository";	// 10
+	headers << "Filename/Cause";	// 11
 	ui->taskTree->setHeaderLabels(headers);
-	ui->taskTree->header()->resizeSection(0, 80);
-	ui->taskTree->header()->resizeSection(1, 110);
-	ui->taskTree->header()->resizeSection(2, 100);
-	ui->taskTree->header()->resizeSection(3, 80);
-	ui->taskTree->header()->resizeSection(4, 160);
-	ui->taskTree->header()->resizeSection(5, 60);
-	ui->taskTree->header()->resizeSection(6, 100);
-	ui->taskTree->header()->resizeSection(7, 50);
-	ui->taskTree->header()->resizeSection(8, 80);
+	ui->taskTree->header()->resizeSection(0, 80);	// ID
+	ui->taskTree->header()->resizeSection(1, 110);	// Instrument
+	ui->taskTree->header()->resizeSection(2, 100);	// Project
+	ui->taskTree->header()->resizeSection(3, 60);	// Purpose
+	ui->taskTree->header()->resizeSection(4, 150);	// Last change
+	ui->taskTree->header()->resizeSection(5, 60);	// Exposure
+	ui->taskTree->header()->resizeSection(6, 100);	// Filter
+	ui->taskTree->header()->resizeSection(7, 90);	// Frame
+	ui->taskTree->header()->resizeSection(8, 50);	// Binning
+	ui->taskTree->header()->resizeSection(9, 80);	// Temperature
+	ui->taskTree->header()->resizeSection(10, 80);	// Repository
 
 	// create the top level entries in the tree
 	{
@@ -93,8 +97,14 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 		this, SLOT(downloadClicked()));
 	connect(ui->deleteButton, SIGNAL(clicked()),
 		this, SLOT(deleteClicked()));
+
+	connect(ui->taskTree, SIGNAL(itemSelectionChanged()),
+		this, SLOT(itemSelectionChanged()));
 }
 
+/**
+ * \brief Destroy the taskqueuemanagerwidget
+ */
 taskqueuemanagerwidget::~taskqueuemanagerwidget() {
 	if (_taskmonitor) {
 		Ice::Identity   identity = _taskmonitor->identity();
@@ -103,70 +113,120 @@ taskqueuemanagerwidget::~taskqueuemanagerwidget() {
 	delete ui;
 }
 
+/**
+ * \brief Add a task to a parent entry
+ */
+void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
+		const snowstar::TaskInfo& info,
+		const snowstar::TaskParameters& parameters) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add task to '%s'",
+		parent->text(1).toLatin1().data());
+	astro::camera::Exposure	exposure = snowstar::convert(parameters.exp);
+
+	QStringList	list;
+
+	// 0 taskid>
+	list << QString::number(info.taskid);
+
+	// 1 instrument
+	list << QString(parameters.instrument.c_str());
+
+	// 2 project
+	list << QString(parameters.project.c_str());
+
+	// 3 purpose
+	list << QString(astro::camera::Exposure::purpose2string(
+		exposure.purpose()).c_str());
+
+	// 4 last state change
+	time_t  when = snowstar::converttime(info.lastchange);
+	struct tm       *tmp = localtime(&when);
+	char    buffer[100];
+	strftime(buffer, sizeof(buffer), "%F %T", tmp);
+	list << buffer;
+
+	// 5 exposure time
+	list << QString(astro::stringprintf("%.3fs",
+		exposure.exposuretime()).c_str());
+
+	// 6 filter
+	list << QString(parameters.filter.c_str());
+
+	// 7 frame
+	list << QString(astro::stringprintf("%dx%d",
+			info.frame.size.width,
+			info.frame.size.height).c_str());
+
+	// 8 binning
+	std::string	binning = exposure.mode().toString();
+	list << QString(binning.substr(1, binning.size() - 2).c_str());
+
+	// 9 temperature
+	list << QString(astro::stringprintf("%.1f°C",
+		parameters.ccdtemperature - 273.15).c_str());
+
+	// 10 repository
+	list << QString(parameters.repository.c_str());
+
+	// 11 filename
+	list << QString(info.filename.c_str());
+
+	QTreeWidgetItem	*item = new QTreeWidgetItem(list,
+		QTreeWidgetItem::Type);
+	item->setTextAlignment(0, Qt::AlignRight);
+	item->setTextAlignment(1, Qt::AlignLeft);
+	item->setTextAlignment(2, Qt::AlignLeft);
+	item->setTextAlignment(3, Qt::AlignLeft);
+	item->setTextAlignment(4, Qt::AlignLeft);
+	item->setTextAlignment(5, Qt::AlignRight);
+	item->setTextAlignment(6, Qt::AlignLeft);
+	item->setTextAlignment(7, Qt::AlignLeft);
+	item->setTextAlignment(8, Qt::AlignLeft);
+	item->setTextAlignment(9, Qt::AlignRight);
+	item->setTextAlignment(10, Qt::AlignLeft);
+	item->setTextAlignment(11, Qt::AlignLeft);
+
+	// now add the new entry to the parent
+	parent->addChild(item);
+}
+
+/**
+ * \brief add a task based in the id
+ */
+void	taskqueuemanagerwidget::addTask(int taskid) {
+	if (!_tasks) {
+		return;
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "add task %d", taskid);
+	snowstar::TaskInfo	info = _tasks->info(taskid);
+	snowstar::TaskParameters	parameters = _tasks->parameters(taskid);
+	QTreeWidgetItem	*parent = this->parent(info.state);
+	
+	addTask(parent, info, parameters);
+}
+
+/**
+ * \brief add all tasks of a given state
+ */
 void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
 		snowstar::TaskState state) {
+	if (!_tasks) {
+		return;
+	}
 	snowstar::taskidsequence	s = _tasks->tasklist(state);
 	snowstar::taskidsequence::const_iterator	i;
 	for (i = s.begin(); i != s.end(); i++) {
 		snowstar::TaskInfo	info = _tasks->info(*i);
 		snowstar::TaskParameters	parameters
 			= _tasks->parameters(*i);
-		astro::camera::Exposure	exposure = snowstar::convert(parameters.exp);
-
-		QStringList	list;
-
-		// 0 taskid>
-		list << QString::number(info.taskid);
-
-		// 1 instrument
-		list << QString(parameters.instrument.c_str());
-
-		// 2 project
-		list << QString(parameters.project.c_str());
-
-		// 3 purpose
-		list << QString(astro::camera::Exposure::purpose2string(
-			exposure.purpose()).c_str());
-
-		// 4 last state change
-		time_t  when = snowstar::converttime(info.lastchange);
-		struct tm       *tmp = localtime(&when);
-		char    buffer[100];
-		strftime(buffer, sizeof(buffer), "%F %T", tmp);
-		list << buffer;
-
-		// 5 exposure time
-		list << QString(astro::stringprintf("%.3fs",
-			exposure.exposuretime()).c_str());
-
-		// 6 filter
-		list << QString(parameters.filter.c_str());
-
-		// 7 binning
-		std::string	binning = exposure.mode().toString();
-		list << QString(binning.substr(1, binning.size() - 2).c_str());
-
-		// 8 temperature
-		list << QString(astro::stringprintf("%.1f°C",
-			parameters.ccdtemperature - 273.15).c_str());
-
-		QTreeWidgetItem	*item = new QTreeWidgetItem(list,
-			QTreeWidgetItem::Type);
-		item->setTextAlignment(0, Qt::AlignRight);
-		item->setTextAlignment(1, Qt::AlignLeft);
-		item->setTextAlignment(2, Qt::AlignLeft);
-		item->setTextAlignment(3, Qt::AlignLeft);
-		item->setTextAlignment(4, Qt::AlignLeft);
-		item->setTextAlignment(5, Qt::AlignRight);
-		item->setTextAlignment(6, Qt::AlignLeft);
-		item->setTextAlignment(7, Qt::AlignLeft);
-		item->setTextAlignment(8, Qt::AlignRight);
-		parent->addChild(item);
+		addTask(parent, info, parameters);
 	}
-
 	setHeaders();
 }
 
+/**
+ * \brief Update a header for a given state based
+ */
 void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 	std::string	tag;
 	QTreeWidgetItem	*top;
@@ -198,6 +258,9 @@ void	taskqueuemanagerwidget::setHeader(snowstar::TaskState state) {
 			tag.c_str(), count).c_str()));
 }
 
+/**
+ * \brief Update all headers to reflect the correct number of entries
+ */
 void	taskqueuemanagerwidget::setHeaders() {
 	setHeader(snowstar::TskCOMPLETE);
 	setHeader(snowstar::TskCANCELLED);
@@ -206,6 +269,9 @@ void	taskqueuemanagerwidget::setHeaders() {
 	setHeader(snowstar::TskPENDING);
 }
 
+/**
+ * \brief add all tasks found in the repository
+ */
 void	taskqueuemanagerwidget::addTasks() {
 	if (!_tasks) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0,
@@ -220,6 +286,12 @@ void	taskqueuemanagerwidget::addTasks() {
 	addTasks(ui->taskTree->topLevelItem(4), snowstar::TskPENDING);
 }
 
+/**
+ * \brief set the service objecth
+ *
+ * This method also initializes the proxies and adds all tasks to to
+ * task tree.
+ */
 void	taskqueuemanagerwidget::setServiceObject(
 		astro::discover::ServiceObject serviceobject) {
 	// get the Tasks proxy
@@ -247,6 +319,14 @@ void	taskqueuemanagerwidget::setServiceObject(
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "service setup complete");
 
+	// connect to the images proxy
+	base = ic->stringToProxy(serviceobject.connect("Images"));
+	_images = snowstar::ImagesPrx::checkedCast(base);
+	if (!_images) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "could not get the images");
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "service setup complete");
+
 	// add the tasks
 	addTasks();
 }
@@ -259,8 +339,45 @@ void	taskqueuemanagerwidget::cancelClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelClicked()");
 }
 
+/**
+ * \brief slot to display the image
+ */
 void	taskqueuemanagerwidget::imageClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "imageClicked()");
+	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
+	if (selected.size() != 1) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "more than one object selected");
+		return;
+	}
+	int	taskid = std::stoi((*selected.begin())->text(0).toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "task id = %d", taskid);
+	try {
+		snowstar::TaskInfo	info = _tasks->info(taskid);
+		if (info.state != snowstar::TskCOMPLETE) {
+			return;
+		}
+		snowstar::TaskParameters	parameters
+			= _tasks->parameters(taskid);
+		ImagePtr	imageptr;
+		if (parameters.repository.size() > 0) {
+			int	imageid = std::stoi(info.filename);
+			snowstar::RepositoryPrx	repository
+				= _repositories->get(parameters.repository);
+			if (!repository->has(imageid)) {
+				return;
+			}
+			imageptr = snowstar::convertfile(
+				repository->getImage(imageid));
+		} else {
+			snowstar::ImagePrx	imageprx
+				= _images->getImage(info.filename);
+			imageptr = snowstar::convert(imageprx);
+		}
+		emit imageReceived(imageptr);
+	} catch (const std::exception& x) {
+		// XXX show error message
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "error: %s", x.what());
+	}
 }
 
 void	taskqueuemanagerwidget::downloadClicked() {
@@ -269,44 +386,152 @@ void	taskqueuemanagerwidget::downloadClicked() {
 
 void	taskqueuemanagerwidget::deleteClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deleteClicked()");
+	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
+	std::list<int>	taskids;
+	QList<QTreeWidgetItem*>::const_iterator	i;
+	for (i = todelete.begin(); i != todelete.end(); i++) {
+		taskids.push_back(std::stoi((*i)->text(0).toLatin1().data()));
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d items to delete", todelete.size());
+	std::list<int>::const_iterator	j;
+	for (j = taskids.begin(); j != taskids.end(); j++) {
+		try {
+			_tasks->remove(*j);
+			deleteTask(*j);
+		} catch (const std::exception& x) {
+			// XXX pop message
+			debug(LOG_ERR, DEBUG_LOG, 0, "cannot delete %d: %s",
+				*j, x.what());
+		}
+	}
+	setHeaders();
 }
 
+/**
+ * \brief Reflect the information in the 
+ */
+void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
+		const snowstar::TaskInfo& info) {
+	switch (info.state) {
+	case snowstar::TskPENDING:
+	case snowstar::TskEXECUTING:
+		item->setText(11, QString(""));
+		break;
+	case snowstar::TskFAILED:
+	case snowstar::TskCANCELLED:
+		item->setText(11, QString(info.cause.c_str()));
+		break;
+	case snowstar::TskCOMPLETE:
+		item->setText(11, QString(info.filename.c_str()));
+		break;
+	}
+	if ((info.frame.size.width != 0) && (info.frame.size.height != 0)) {
+		item->setText(7, QString(astro::stringprintf("%dx%d",
+			info.frame.size.width,
+			info.frame.size.height).c_str()));
+	}
+}
+
+/**
+ * \brief update a task
+ */
 void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "task udpate for %d", info.taskid);
+	// if the state is pending, then this is new entry and we have to
+	// add that entry to the pending section
+	if (info.newstate == snowstar::TskPENDING) {
+		addTask(info.taskid);
+		setHeaders();
+		return;
+	}
+
+	snowstar::TaskInfo	tinfo;
+	bool	hasinfo = false;
+	try {
+		tinfo = _tasks->info(info.taskid);
+		hasinfo = true;
+	} catch (const std::exception& x) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get task info %d",
+			info.taskid);
+	}
+
+	// for all other cases, we don't have to create new entries, but
+	// only move them around.
 	for (int section = 0; section < 5; section++) {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "checking section %d", section);
 		QString id = QString::number(info.taskid);
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "task id: '%s'",
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"checking section %d, task id %s", section,
 			id.toLatin1().data());
 		QTreeWidgetItem	*top = ui->taskTree->topLevelItem(section);
+		// go through all the children of the top level node in the
+		// hope of finding an item with the same id
 		for (int i = 0; i < top->childCount(); i++) {
 			QTreeWidgetItem	*child = top->child(i);
 			if (child->text(0) == id) {
 				debug(LOG_DEBUG, DEBUG_LOG, 0, "found item");
 				child = top->takeChild(i);
-				QTreeWidgetItem	*parent = NULL;
-				switch (info.newstate) {
-				case snowstar::TskCOMPLETE:
-					parent = ui->taskTree->topLevelItem(0);
-					break;
-				case snowstar::TskCANCELLED:
-					parent = ui->taskTree->topLevelItem(1);
-					break;
-				case snowstar::TskFAILED:
-					parent = ui->taskTree->topLevelItem(2);
-					break;
-				case snowstar::TskEXECUTING:
-					parent = ui->taskTree->topLevelItem(3);
-					break;
-				case snowstar::TskPENDING:
-					parent = ui->taskTree->topLevelItem(4);
-					break;
+				if (hasinfo) {
+					updateInfo(child, tinfo);
 				}
-				parent->addChild(child);
+				this->parent(info.newstate)->addChild(child);
 				setHeaders();
 				return;
 			}
 		}
+	}
+}
+
+/**
+ * \brief Find the top level item for this state
+ */
+QTreeWidgetItem	*taskqueuemanagerwidget::parent(snowstar::TaskState state) {
+	switch (state) {
+	case snowstar::TskCOMPLETE:
+		return ui->taskTree->topLevelItem(0);
+	case snowstar::TskCANCELLED:
+		return ui->taskTree->topLevelItem(1);
+	case snowstar::TskFAILED:
+		return ui->taskTree->topLevelItem(2);
+	case snowstar::TskEXECUTING:
+		return ui->taskTree->topLevelItem(3);
+	case snowstar::TskPENDING:
+		return ui->taskTree->topLevelItem(4);
+	}
+	throw std::range_error("bad state value");
+}
+
+/**
+ * \brief delete a task tree entry based on the task id
+ */
+void	taskqueuemanagerwidget::deleteTask(int taskid) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "delete with task id = %d", taskid);
+	for (int section = 0; section < 5; section++) {
+		QString	id = QString::number(taskid);
+		QTreeWidgetItem	*top = ui->taskTree->topLevelItem(section);
+		for (int i = 0; i < top->childCount(); i++) {
+			QTreeWidgetItem *child = top->child(i);
+			if (child->text(0) == id) {
+				child = top->takeChild(i);
+				delete child;
+				return;
+			}
+		}
+	}
+}
+
+/**
+ * \brief Find out which buttons to enable for the current selection
+ */
+void	taskqueuemanagerwidget::itemSelectionChanged() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "itemSelectionChanged()");
+	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
+	if (1 == selected.count()) {
+		ui->infoButton->setEnabled(true);
+		ui->imageButton->setEnabled((ui->taskTree->topLevelItem(0)
+					== (*selected.begin())->parent()));
+	} else {
+		ui->infoButton->setEnabled(false);
+		ui->imageButton->setEnabled(false);
 	}
 }
 

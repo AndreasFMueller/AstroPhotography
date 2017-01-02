@@ -211,7 +211,7 @@ class TaskQueue {
 	// thread performing the task queue management work
 	std::thread	_thread;
 	// lock to protect the data structures
-	std::recursive_mutex	lock;
+	std::recursive_mutex	queue_mutex;
 	// condition variable to signal to the task queue thread
 	std::condition_variable_any	statechange_cond;
 
@@ -376,11 +376,6 @@ public:
 	TaskQueueEntry&	task() { return _task; }
 private:
 	std::thread	_thread;
-	// the _lock and _cond variables are used to communicate with the 
-	// executor. The conditiona variable is signaled when the thread
-	// has stared running
-	std::mutex	_lock;
-	std::condition_variable	_cond;
 public:
 	void	main();
 private:
@@ -394,10 +389,11 @@ public:
 	~TaskExecutor();
 
 private:
-	// for cancel and wait methos, we use another couple of mutex and
-	// condition variables. Whenever there is an occasion to wait inside
-	std::mutex	wait_lock;
-	std::condition_variable	wait_cond;
+	// the release_mutex is used to block the thread from doing
+	// to much work, in particular from trying to post it's state 
+	// to the task queue before the task queue is ready to receive
+	// it. The constructor initially locks the mutex, and the 
+	std::mutex	release_mutex;
 public:
 	void	cancel();
 	void	wait();

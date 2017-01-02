@@ -14,12 +14,12 @@ namespace image {
 // ImageAdapter implemenation
 //////////////////////////////////////////////////////////////////////
 std::string	ImageTableAdapter::tablename() {
-	return std::string("images");
+	return std::string("image");
 }
 
 std::string	ImageTableAdapter::createstatement() {
 	return std::string(
-		"create table images (\n"
+		"create table image (\n"
 		"    id integer not null,\n"
 		"    filename varchar(1024) not null,\n"
 		"    created datetime not null,\n"
@@ -71,7 +71,7 @@ std::string	ImageAttributeAdapter::createstatement() {
 	return std::string(
 		"create table imageattributes (\n"
 		"    id integer not null,\n"
-		"    image integer not null references images(id),\n"
+		"    image integer not null references image(id),\n"
 		"    attribute char(8) not null,\n"
 		"    value char(8) not null,\n"
 		"    comment varchar(128) not null,\n"
