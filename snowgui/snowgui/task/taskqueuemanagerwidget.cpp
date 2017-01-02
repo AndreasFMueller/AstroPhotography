@@ -198,11 +198,16 @@ void	taskqueuemanagerwidget::addTask(int taskid) {
 		return;
 	}
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "add task %d", taskid);
-	snowstar::TaskInfo	info = _tasks->info(taskid);
-	snowstar::TaskParameters	parameters = _tasks->parameters(taskid);
-	QTreeWidgetItem	*parent = this->parent(info.state);
+	try {
+		snowstar::TaskInfo	info = _tasks->info(taskid);
+		snowstar::TaskParameters	parameters = _tasks->parameters(taskid);
+		QTreeWidgetItem	*parent = this->parent(info.state);
 	
-	addTask(parent, info, parameters);
+		addTask(parent, info, parameters);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get task %d: %s",
+			taskid, x.what());
+	}
 }
 
 /**
@@ -213,13 +218,24 @@ void	taskqueuemanagerwidget::addTasks(QTreeWidgetItem *parent,
 	if (!_tasks) {
 		return;
 	}
-	snowstar::taskidsequence	s = _tasks->tasklist(state);
+	snowstar::taskidsequence	s;
+	try {
+		s = _tasks->tasklist(state);
+	} catch (const std::exception& x) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot get task list: %s",
+			x.what());
+	}
 	snowstar::taskidsequence::const_iterator	i;
 	for (i = s.begin(); i != s.end(); i++) {
-		snowstar::TaskInfo	info = _tasks->info(*i);
-		snowstar::TaskParameters	parameters
-			= _tasks->parameters(*i);
-		addTask(parent, info, parameters);
+		try {
+			snowstar::TaskInfo	info = _tasks->info(*i);
+			snowstar::TaskParameters	parameters
+				= _tasks->parameters(*i);
+			addTask(parent, info, parameters);
+		} catch (const std::exception& x) {
+			debug(LOG_ERR, DEBUG_LOG, 0,
+				"cannot get tasks for state %d", state);
+		}
 	}
 	setHeaders();
 }
@@ -361,6 +377,9 @@ void	taskqueuemanagerwidget::imageClicked() {
 		ImagePtr	imageptr;
 		if (parameters.repository.size() > 0) {
 			int	imageid = std::stoi(info.filename);
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"getting image %d from repository %s", imageid,
+				parameters.repository.c_str());
 			snowstar::RepositoryPrx	repository
 				= _repositories->get(parameters.repository);
 			if (!repository->has(imageid)) {
@@ -369,10 +388,13 @@ void	taskqueuemanagerwidget::imageClicked() {
 			imageptr = snowstar::convertfile(
 				repository->getImage(imageid));
 		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "get image %s from dir",
+				info.filename.c_str());
 			snowstar::ImagePrx	imageprx
 				= _images->getImage(info.filename);
 			imageptr = snowstar::convert(imageprx);
 		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "emitting imageReceived()");
 		emit imageReceived(imageptr);
 	} catch (const std::exception& x) {
 		// XXX show error message
@@ -380,10 +402,16 @@ void	taskqueuemanagerwidget::imageClicked() {
 	}
 }
 
+/**
+ * \brief Slot to handle clicks on the download button
+ */
 void	taskqueuemanagerwidget::downloadClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "downloadClicked()");
 }
 
+/**
+ * \brief Slot to handle clicks on the delete button
+ */
 void	taskqueuemanagerwidget::deleteClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deleteClicked()");
 	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
@@ -408,7 +436,7 @@ void	taskqueuemanagerwidget::deleteClicked() {
 }
 
 /**
- * \brief Reflect the information in the 
+ * \brief Reflect changed information in the task list entries
  */
 void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 		const snowstar::TaskInfo& info) {
@@ -448,8 +476,10 @@ void	taskqueuemanagerwidget::taskUpdate(snowstar::TaskMonitorInfo info) {
 	snowstar::TaskInfo	tinfo;
 	bool	hasinfo = false;
 	try {
-		tinfo = _tasks->info(info.taskid);
-		hasinfo = true;
+		if (_tasks) {
+			tinfo = _tasks->info(info.taskid);
+			hasinfo = true;
+		}
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot get task info %d",
 			info.taskid);

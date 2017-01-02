@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <AstroDebug.h>
 #include <includes.h>
+#include <mutex>
 
 namespace astro {
 namespace persistence {
@@ -248,8 +249,31 @@ Result	Sqlite3Statement::result() {
 //////////////////////////////////////////////////////////////////////
 // Sqlite3 Backend implementation
 //////////////////////////////////////////////////////////////////////
+
+// The initialization of the sqlite3 library must ensure that it runs
+// in serialized mode. This is necessary because callbacks to the client
+// may perform calls to the server which in turn trigger database accesses
+// from different threads on the same database connection. This then
+// crashes the database.
+static std::once_flag	sqlite3_once_flag;
+static void	sqlite3_initialize_once() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "configureing sqlite3");
+	int	rc;
+	if (SQLITE_OK != (rc = sqlite3_config(SQLITE_CONFIG_SERIALIZED))) {
+		debug(LOG_ERR, DEBUG_LOG, 0,
+			"cannot put in serialized mode: %s",
+			sqlite3_errstr(rc));
+	}
+	if (SQLITE_OK != (rc = sqlite3_initialize())) {
+		debug(LOG_ERR, DEBUG_LOG, 0, "cannot initialize sqlite3: %s",
+			sqlite3_errstr(rc));
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "sqlite3 initialized");
+}
+
 Sqlite3Backend::Sqlite3Backend(const std::string& filename)
 	: _filename(filename) {
+	std::call_once(sqlite3_once_flag, sqlite3_initialize_once);
 	// check whether this version of sqlite is compiled with mutexes
 	if (sqlite3_threadsafe()) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "backend is thread safe");
