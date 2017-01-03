@@ -44,6 +44,9 @@ private:
 	QAction	*openAction;
 	void	openFile();
 
+	QAction	*browseAction;
+	void	browseDirectory();
+
 	void	createActions();
 	void	createMenus();
 };

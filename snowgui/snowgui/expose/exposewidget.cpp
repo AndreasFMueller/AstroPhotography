@@ -152,7 +152,8 @@ void	exposewidget::setRepositories(snowstar::RepositoriesPrx repositories) {
  * \brief Slot to handle a change of repository
  */
 void	exposewidget::repositoryChanged(const QString& repositoryname) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "repository changed: %s", repositoryname.toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "repository changed: %s",
+		repositoryname.toLatin1().data());
 	_repositoryname = std::string(repositoryname.toLatin1().data());
 	_repository = _repositories->get(_repositoryname);
 
@@ -166,9 +167,11 @@ void	exposewidget::repositoryChanged(const QString& repositoryname) {
 	int	currentindex = -1;
 	if (_repository) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "add project names");
-		snowstar::projectnamelist projects = _repository->getProjectnames();
+		snowstar::projectnamelist projects
+			= _repository->getProjectnames();
 		for (auto ptr = projects.begin(); ptr != projects.end(); ptr++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "project name: %s", ptr->c_str());
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "project name: %s",
+				ptr->c_str());
 			QString	project(ptr->c_str());
 			if (project == currentproject) {
 				currentindex = ui->projectBox->count();

@@ -23,6 +23,7 @@
 #include <exposewindow.h>
 #include <AstroIO.h>
 #include <imagedisplaywidget.h>
+#include <browserwindow.h>
 
 using namespace astro::discover;
 
@@ -354,13 +355,40 @@ void	MainWindow::openFile() {
 }
 
 /**
+ * \brief Open a directory in the browser
+ */
+void	MainWindow::browseDirectory() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "open browser");
+	QFileDialog     filedialog(this);
+	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
+	filedialog.setFileMode(QFileDialog::DirectoryOnly);
+	if (!filedialog.exec()) {
+		return;
+	}
+	QStringList     list = filedialog.selectedFiles();
+	std::string     dirname(list.begin()->toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "directory: %s",
+		dirname.c_str());
+	browserwindow	*browser = new browserwindow(NULL);
+	browser->setDirectory(dirname);
+	browser->show();
+}
+
+/**
  * \brief Create the actions in the menu
  */
 void	MainWindow::createActions() {
 	connectAction = new QAction(QString("Connect"), this);
-	connect(connectAction, &QAction::triggered, this, &MainWindow::connectFile);
+	connect(connectAction, &QAction::triggered, this,
+		&MainWindow::connectFile);
+
 	openAction = new QAction(QString("Open"), this);
-	connect(openAction, &QAction::triggered, this, &MainWindow::openFile);
+	connect(openAction, &QAction::triggered, this,
+		&MainWindow::openFile);
+
+	browseAction = new QAction(QString("Browse"), this);
+	connect(browseAction, &QAction::triggered, this,
+		&MainWindow::browseDirectory);
 }
 
 /**
@@ -370,6 +398,7 @@ void	MainWindow::createMenus() {
 	fileMenu = menuBar()->addMenu(QString("File"));
 	fileMenu->addAction(connectAction);
 	fileMenu->addAction(openAction);
+	fileMenu->addAction(browseAction);
 }
 
 /**

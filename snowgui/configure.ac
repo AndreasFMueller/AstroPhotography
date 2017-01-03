@@ -155,6 +155,7 @@ AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/repository/repository.pro
 	snowgui/expose/expose.pro
 	snowgui/task/task.pro
+	snowgui/browser/browser.pro
 	snowgui/main/main.pro]
 	snowgui/build)
 AC_OUTPUT
