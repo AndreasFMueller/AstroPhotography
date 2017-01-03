@@ -37,6 +37,7 @@ private:
 
 	void	markSubdirectory(const std::string& subdirectory);
 	void	markPrefix(const std::string& prefix);
+	void	makedirectory(const std::string& directory);
 };
 
 } // namespace snowgui

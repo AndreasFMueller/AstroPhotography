@@ -159,13 +159,19 @@ void	browserwindow::selectAllClicked() {
 	}
 }
 
-static void	makedirectory(const std::string& subdirectory) {
+/**
+ * \brief Auxiliary function to create a directory
+ */
+void	browserwindow::makedirectory(const std::string& subdirectory) {
 	if (mkdir(subdirectory.c_str(), 0777) < 0) {
 		debug(LOG_ERR, DEBUG_LOG, 0, "cannot create %s: %s",
 			subdirectory.c_str(), strerror(errno));
 	}
 }
 
+/**
+ * \brief Mark files by moving them to a subdirectory
+ */
 void	browserwindow::markSubdirectory(const std::string& subdirectory) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "moving to subdirectory: %s",
 		subdirectory.c_str());
@@ -209,6 +215,9 @@ void	browserwindow::markSubdirectory(const std::string& subdirectory) {
 	}
 }
 
+/**
+ * \brief mark bad files by prefixing them with a prefix
+ */
 void	browserwindow::markPrefix(const std::string& prefix) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "marking with prefix: %s",
 		prefix.c_str());
