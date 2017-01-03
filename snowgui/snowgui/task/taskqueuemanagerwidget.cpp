@@ -17,6 +17,9 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 	ui->setupUi(this);
 	ui->taskTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+	ui->cancelButton->setEnabled(false);
+	ui->downloadButton->setEnabled(false);
+
 	// configure the task list
 	QStringList	headers;
 	headers << "ID";		//  0
@@ -100,6 +103,13 @@ taskqueuemanagerwidget::taskqueuemanagerwidget(QWidget *parent)
 
 	connect(ui->taskTree, SIGNAL(itemSelectionChanged()),
 		this, SLOT(itemSelectionChanged()));
+
+	connect(ui->taskTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+                this, SLOT(itemDoubleClicked(QTreeWidgetItem*,int)));
+	connect(ui->taskTree,
+		SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+		this,
+		SLOT(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 }
 
 /**
@@ -146,8 +156,13 @@ void	taskqueuemanagerwidget::addTask(QTreeWidgetItem *parent,
 	list << buffer;
 
 	// 5 exposure time
-	list << QString(astro::stringprintf("%.3fs",
-		exposure.exposuretime()).c_str());
+	if (exposure.exposuretime() < 10) {
+		list << QString(astro::stringprintf("%.3fs",
+			exposure.exposuretime()).c_str());
+	} else {
+		list << QString(astro::stringprintf("%.0fs",
+			exposure.exposuretime()).c_str());
+	}
 
 	// 6 filter
 	list << QString(parameters.filter.c_str());
@@ -349,10 +364,38 @@ void	taskqueuemanagerwidget::setServiceObject(
 
 void	taskqueuemanagerwidget::infoClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "infoClicked()");
+	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
+	if (selected.size() != 1) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"ignoring infoClicked(): more than one item selected");
+		return;
+	}
+	showInfo(*selected.begin());
+	return;
 }
 
 void	taskqueuemanagerwidget::cancelClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancelClicked()");
+	std::list<int>	taskids = selectedids();
+	std::list<int>::const_iterator	idptr;
+	for (idptr = taskids.begin(); idptr != taskids.end(); idptr++) {
+		int	taskid = *idptr;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel task %d", taskid);
+		try {
+			_tasks->cancel(taskid);
+		} catch (const snowstar::BadState& badstate) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"taskid %d: cannot cancel, bad state",
+				badstate.what());
+		} catch (const snowstar::NotFound& notfound) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0,
+				"taskid %d: cannot cancel, not found, %s",
+				notfound.what());
+		} catch (const std::exception& x) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "cannot cancel: %s",
+				x.what());
+		}
+	}
 }
 
 /**
@@ -415,11 +458,7 @@ void	taskqueuemanagerwidget::downloadClicked() {
 void	taskqueuemanagerwidget::deleteClicked() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "deleteClicked()");
 	QList<QTreeWidgetItem*>	todelete = ui->taskTree->selectedItems();
-	std::list<int>	taskids;
-	QList<QTreeWidgetItem*>::const_iterator	i;
-	for (i = todelete.begin(); i != todelete.end(); i++) {
-		taskids.push_back(std::stoi((*i)->text(0).toLatin1().data()));
-	}
+	std::list<int>	taskids = selectedids();
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "%d items to delete", todelete.size());
 	std::list<int>::const_iterator	j;
 	for (j = taskids.begin(); j != taskids.end(); j++) {
@@ -458,6 +497,12 @@ void	taskqueuemanagerwidget::updateInfo(QTreeWidgetItem *item,
 			info.frame.size.width,
 			info.frame.size.height).c_str()));
 	}
+	// 4 last state change
+	time_t  when = snowstar::converttime(info.lastchange);
+	struct tm       *tmp = localtime(&when);
+	char    buffer[100];
+	strftime(buffer, sizeof(buffer), "%F %T", tmp);
+	item->setText(4, QString(buffer));
 }
 
 /**
@@ -563,6 +608,82 @@ void	taskqueuemanagerwidget::itemSelectionChanged() {
 		ui->infoButton->setEnabled(false);
 		ui->imageButton->setEnabled(false);
 	}
+	if (selected.count() > 0) {
+		ui->cancelButton->setEnabled(true);
+	} else {
+		ui->cancelButton->setEnabled(false);
+	}
+}
+
+/**
+ * \brief Display information about a given task id
+ */
+void	taskqueuemanagerwidget::showInfo(int taskid) {
+	// if the task info widget already exists, just update the information
+	if (_taskinfowidget) {
+		_taskinfowidget->updateTask(taskid);
+		return;
+	}
+	_taskinfowidget = new taskinfowidget(this);
+	connect(_taskinfowidget, SIGNAL(completed()),
+		this, SLOT(forgetInfoWidget()));
+	_taskinfowidget->setProxies(_tasks, _images, _repositories);
+	_taskinfowidget->updateTask(taskid);
+	_taskinfowidget->show();
+}
+
+/**
+ * \brief Display information about a given entry in the task list
+ */
+void	taskqueuemanagerwidget::showInfo(QTreeWidgetItem *item) {
+	std::string	idstring(item->text(0).toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "item id '%s' double clicked",
+		idstring.c_str());
+	if (idstring.size() == 0) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "ignoring infoClicked(): no id");
+		return;
+	}
+	int	taskid = std::stoi(idstring);
+	showInfo(taskid);
+}
+
+/**
+ * \brief Slot to handle double click action
+ */
+void	taskqueuemanagerwidget::itemDoubleClicked(QTreeWidgetItem *item, int) {
+	showInfo(item);
+}
+
+/**
+ * \brief Handle changed current item, if the info widget is already active
+ */
+void	taskqueuemanagerwidget::currentItemChanged(QTreeWidgetItem *item,
+		QTreeWidgetItem*) {
+	if (NULL == _taskinfowidget) {
+		return;
+	}
+	showInfo(item);
+}
+
+/**
+ * \brief Slot to handle closing of the info widget
+ */
+void	taskqueuemanagerwidget::forgetInfoWidget() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "forget the info widget");
+	_taskinfowidget = NULL;
+}
+
+/**
+ * \brief retrieve the currently selected ids
+ */
+std::list<int>	taskqueuemanagerwidget::selectedids() {
+	QList<QTreeWidgetItem*>	selected = ui->taskTree->selectedItems();
+	std::list<int>	taskids;
+	QList<QTreeWidgetItem*>::const_iterator	i;
+	for (i = selected.begin(); i != selected.end(); i++) {
+		taskids.push_back(std::stoi((*i)->text(0).toLatin1().data()));
+	}
+	return taskids;
 }
 
 } // namespace snowgui

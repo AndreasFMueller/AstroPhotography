@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>snowgui::taskinfowidget</class>
+ <widget class="QWidget" name="snowgui::taskinfowidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>455</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="parameterGroup">
+     <property name="title">
+      <string>Parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="1" colspan="5">
+       <widget class="QLabel" name="projectField">
+        <property name="text">
+         <string>test</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="filterwheelLabel">
+        <property name="text">
+         <string>Filterwheel:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="ccdField">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="cameraField">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="filterField">
+        <property name="text">
+         <string>-1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="projectLabel">
+        <property name="text">
+         <string>Project:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="temperatureLabel">
+        <property name="text">
+         <string>Temperature:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="instrumentField">
+        <property name="text">
+         <string>SIM</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="mountField">
+        <property name="text">
+         <string>-1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="mountLabel">
+        <property name="text">
+         <string>Mount:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="filterwheelField">
+        <property name="text">
+         <string>-1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="coolerLabel">
+        <property name="text">
+         <string>Cooler:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="filterLabel">
+        <property name="text">
+         <string>Filter:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="instrumentLabel">
+        <property name="text">
+         <string>Instrument:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="temperatureField">
+        <property name="text">
+         <string>-10.0°C</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="ccdLabel">
+        <property name="text">
+         <string>CCD:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="cameraLabel">
+        <property name="text">
+         <string>Camera:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="coolerField">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="repositoryLabel">
+        <property name="text">
+         <string>Repository:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="5">
+       <widget class="QLabel" name="repositoryField">
+        <property name="text">
+         <string>repo1</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="infoGroup">
+     <property name="title">
+      <string>Info</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="3">
+       <widget class="QLabel" name="stateField">
+        <property name="text">
+         <string>pending</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="cameraurlLabel">
+        <property name="text">
+         <string>Camera:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="ccdurlLabel">
+        <property name="text">
+         <string>CCD:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="filterwheelurlLabel">
+        <property name="text">
+         <string>Filterwheel:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="coolerurlLabel">
+        <property name="text">
+         <string>Cooler:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="lastchangeLabel">
+        <property name="text">
+         <string>since</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="5">
+       <widget class="QLabel" name="cameraurlField">
+        <property name="text">
+         <string>camera:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="lastchangeField">
+        <property name="text">
+         <string>11:45</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="stateLabel">
+        <property name="text">
+         <string>State:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="mounturlLabel">
+        <property name="text">
+         <string>Mount:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="5">
+       <widget class="QLabel" name="filenameField">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="filenameLabel">
+        <property name="text">
+         <string>File:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1" colspan="5">
+       <widget class="QLabel" name="mounturlField">
+        <property name="text">
+         <string>mount:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="5">
+       <widget class="QLabel" name="coolerurlField">
+        <property name="text">
+         <string>cooler:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="5">
+       <widget class="QLabel" name="ccdurlField">
+        <property name="text">
+         <string>ccd:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="taskidLabel">
+        <property name="text">
+         <string>Task ID:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="5">
+       <widget class="QLabel" name="filterwheelurlField">
+        <property name="text">
+         <string>filterwheel:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="taskidField">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="imagerectangleLabel">
+        <property name="text">
+         <string>Image Rectangle:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="5">
+       <widget class="QLabel" name="imagerectangleField">
+        <property name="text">
+         <string>0x0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="buttonArea" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>40</height>
+      </size>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="refreshButton">
+        <property name="text">
+         <string>Refresh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="imageButton">
+        <property name="text">
+         <string>Image</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="closeButton">
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

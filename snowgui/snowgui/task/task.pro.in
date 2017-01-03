@@ -25,6 +25,7 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
+	taskinfowidget.ui						\
 	taskmonitorwidget.ui						\
 	taskqueuemanagerwidget.ui					\
 	taskstatuswidget.ui						\
@@ -32,6 +33,7 @@ FORMS    +=								\
 	taskwindow.ui
 
 WIDGETSOURCES =								\
+	taskinfowidget.cpp						\
 	taskmonitorwidget.cpp						\
 	taskqueuemanagerwidget.cpp					\
 	taskstatuswidget.cpp						\
@@ -39,6 +41,7 @@ WIDGETSOURCES =								\
 	taskwindow.cpp
 
 WIDGETHEADERS =								\
+	taskinfowidget.h						\
 	taskmonitorwidget.h						\
 	taskqueuemanagerwidget.h					\
 	taskstatuswidget.h						\

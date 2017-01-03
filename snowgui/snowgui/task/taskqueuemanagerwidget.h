@@ -12,6 +12,7 @@
 #include <repository.h>
 #include <AstroDiscovery.h>
 #include "TaskMonitorController.h"
+#include "taskinfowidget.h"
 
 namespace snowgui {
 
@@ -27,6 +28,7 @@ class taskqueuemanagerwidget : public QWidget {
 	snowstar::ImagesPrx		_images;
 	TaskMonitorController*	_taskmonitor;
 	Ice::ObjectPtr	_taskmonitorptr;
+	taskinfowidget	*_taskinfowidget;
 
 public:
 	explicit taskqueuemanagerwidget(QWidget *parent = 0);
@@ -44,7 +46,10 @@ public slots:
 	void	deleteClicked();
 	void	itemSelectionChanged();
 	void	taskUpdate(snowstar::TaskMonitorInfo);
-
+	void	showInfo(QTreeWidgetItem*);
+	void	itemDoubleClicked(QTreeWidgetItem *, int);
+	void	currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *);
+	void	forgetInfoWidget();
 
 private:
 	Ui::taskqueuemanagerwidget *ui;
@@ -60,7 +65,9 @@ private:
 	void	setHeaders();
 	QTreeWidgetItem	*parent(snowstar::TaskState state);
 	void	deleteTask(int taskid);
+	void	showInfo(int taskid);
 	void	updateInfo(QTreeWidgetItem *, const snowstar::TaskInfo&);
+	std::list<int>	selectedids();
 };
 
 } // namespace snowgui

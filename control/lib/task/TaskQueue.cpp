@@ -493,6 +493,17 @@ void	TaskQueue::call(const TaskQueueEntry& entry) {
  */
 void	TaskQueue::cancel(taskid_t queueid) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "cancel request for id %d", queueid);
+
+	// if the entry is pending, then we can immediately move it to
+	// the cancelled state
+	TaskQueueEntry	entry = this->entry(queueid);
+	if (TaskInfo::pending == entry.state()) {
+		entry.state(TaskInfo::cancelled);
+		update(entry);
+		return;
+	}
+
+	// if it is presently executing, we have to make sure
 	executormap::iterator	emapp = executors.find(queueid);
 	if (executors.end() == emapp) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "no task with id %d", queueid);
@@ -763,6 +774,9 @@ std::list<long>	TaskQueue::tasklist(TaskQueueEntry::taskstate state) {
  */
 bool	TaskQueue::exists(taskid_t queueid) {
 	TaskTable	tasktable(_database);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "queueid %d %s",
+		queueid,
+		(tasktable.exists(queueid)) ? "exists" : "doesn't exist");
 	return tasktable.exists(queueid);
 }
 
