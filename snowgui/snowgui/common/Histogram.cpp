@@ -73,6 +73,7 @@ Histogram<double>::Histogram(int size) : HistogramBase(size) {
 
 template<>
 void	Histogram<double>::add(const double& p) {
+	//std::unique_lock<std::mutex>	lock(_mutex);
 	_buckets[index(p)]++;
 }
 
@@ -126,6 +127,7 @@ Histogram<RGB<double> >::Histogram(int size) : HistogramBase(size) {
 
 template<>
 void	Histogram<RGB<double> >::add(const RGB<double>& p) {
+	//std::unique_lock<std::mutex>	lock(_mutex);
 	_buckets[index(p.R)               ]++;
 	_buckets[index(p.G) +  _size      ]++;
 	_buckets[index(p.B) + (_size << 1)]++;

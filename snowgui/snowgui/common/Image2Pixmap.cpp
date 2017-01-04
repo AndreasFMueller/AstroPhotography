@@ -323,6 +323,7 @@ QImage	*Image2Pixmap::convertMono(const ConstImageAdapter<Pixel>& image) {
 	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
 
 	// fill the image into the result
+#pragma omp parallel for
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			unsigned char	v = gainadapter.pixel(x, y);
@@ -471,6 +472,7 @@ QImage	*Image2Pixmap::convertRGB(const ConstImageAdapter<RGB<Pixel> >& image) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create QImage(%d, %d)", w, h);
 	QImage	*qimage = new QImage(w, h, QImage::Format_RGB32);
 
+#pragma omp parallel for
 	for (int x = 0; x < w; x++) {
 		for (int y = 0; y < h; y++) {
 			RGB<unsigned char>	p = gainadapter.pixel(x, y);
