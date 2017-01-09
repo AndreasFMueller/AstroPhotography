@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <AstroDebug.h>
+#include <atomic>
 
 namespace snowgui {
 
@@ -65,7 +66,7 @@ template<>
 Histogram<double>::Histogram(int size) : HistogramBase(size) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new mono histogram");
 	int	l = size;
-	_buckets = new int[l];
+	_buckets = new std::atomic<int>[l];
 	for (int i = 0; i < l; i++) {
 		_buckets[i] = 0;
 	}
@@ -73,7 +74,6 @@ Histogram<double>::Histogram(int size) : HistogramBase(size) {
 
 template<>
 void	Histogram<double>::add(const double& p) {
-	//std::unique_lock<std::mutex>	lock(_mutex);
 	_buckets[index(p)]++;
 }
 
@@ -119,7 +119,7 @@ template<>
 Histogram<RGB<double> >::Histogram(int size) : HistogramBase(size) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating new color histogram");
 	int	l = 3 * size;
-	_buckets = new int[l];
+	_buckets = new std::atomic<int>[l];
 	for (int i = 0; i < l; i++) {
 		_buckets[i] = 0;
 	}
@@ -127,7 +127,6 @@ Histogram<RGB<double> >::Histogram(int size) : HistogramBase(size) {
 
 template<>
 void	Histogram<RGB<double> >::add(const RGB<double>& p) {
-	//std::unique_lock<std::mutex>	lock(_mutex);
 	_buckets[index(p.R)               ]++;
 	_buckets[index(p.G) +  _size      ]++;
 	_buckets[index(p.B) + (_size << 1)]++;

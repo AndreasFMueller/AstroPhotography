@@ -8,7 +8,7 @@
 
 #include <QPixmap>
 #include <AstroPixel.h>
-#include <mutex>
+#include <atomic>
 
 using namespace astro::image;
 
@@ -20,7 +20,7 @@ namespace snowgui {
 class HistogramBase {
 protected:
 	int	_size;
-	int	*_buckets;
+	std::atomic<int>	*_buckets;
 	bool	_logarithmic;
 	int	index(double v);
 	int	bucketindex(int width, int x) const;
@@ -43,7 +43,6 @@ class Histogram : public HistogramBase {
 private:
 	Histogram(const Histogram<Pixel>& other);
 	Histogram<Pixel>&	operator=(const Histogram<Pixel>& other);
-	std::mutex	_mutex;
 public:
 	Histogram(int size = 256) : HistogramBase(size) { }
 	virtual void	add(const Pixel& p);
@@ -52,7 +51,7 @@ public:
 	}
 };
 
-// specializations for monochrom images
+// specializations for monochrome images
 template<>
 Histogram<double>::Histogram(int size);
 
