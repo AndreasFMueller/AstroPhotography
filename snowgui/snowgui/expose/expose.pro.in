@@ -25,22 +25,27 @@ INCLUDEPATH += /usr/local/include
 INCLUDEPATH += ../common
 
 FORMS    +=								\
+	exposedownloaddialog.ui						\
 	exposewindow.ui							\
 	exposewidget.ui
 
 WIDGETSOURCES =								\
+	exposedownloaddialog.cpp					\
 	exposewindow.cpp						\
 	exposewidget.cpp
 
 WIDGETHEADERS =								\
+	exposedownloaddialog.h						\
 	exposewindow.h							\
 	exposewidget.h
 
 SOURCES += 								\
+	downloadthread.cpp						\
 	RepositorySection.cpp						\
 	$${WIDGETSOURCES}
 
 HEADERS  += 								\
+	downloadthread.h						\
 	RepositorySection.h						\
 	$${WIDGETHEADERS}
 

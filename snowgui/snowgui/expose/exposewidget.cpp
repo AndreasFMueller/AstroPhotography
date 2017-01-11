@@ -12,6 +12,8 @@
 #include <AstroIO.h>
 #include <QMessageBox>
 #include <sys/stat.h>
+#include "downloadthread.h"
+#include "exposedownloaddialog.h"
 
 namespace snowgui {
 
@@ -612,57 +614,60 @@ void	exposewidget::downloadClicked() {
 	QFileDialog	filedialog(this);
 	filedialog.setAcceptMode(QFileDialog::AcceptOpen);
 	filedialog.setFileMode(QFileDialog::DirectoryOnly);
-	if (filedialog.exec()) {
-		QStringList	list = filedialog.selectedFiles();
-		std::string	dirname(list.begin()->toLatin1().data());
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "directory: %s",
-			dirname.c_str());
+	if (!filedialog.exec()) {
+		return;
+	}
 
-		int	n = ui->repositoryTree->topLevelItemCount();
-		for (int index = 0; index < n; index++) {
-			debug(LOG_DEBUG, DEBUG_LOG, 0, "section %d", index);
-			std::string	purpose
-				= _repository_sections[index].purposeString();
-			std::string	dir = dirname + "/" + purpose;
-			std::string	filter
-				= _repository_sections[index].filtername();
-			std::string	dir2 = dir + "/" + filter;
-			QTreeWidgetItem	*top
-				= ui->repositoryTree->topLevelItem(index);
-			if (top->childCount() == 0) {
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "no children");
-				continue;
-			}
+	QStringList	list = filedialog.selectedFiles();
+	std::string	dirname(list.begin()->toLatin1().data());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "directory: %s",
+		dirname.c_str());
+
+	downloadlist	filelist;
+
+	int	n = ui->repositoryTree->topLevelItemCount();
+	for (int index = 0; index < n; index++) {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "section %d", index);
+		std::string	purpose
+			= _repository_sections[index].purposeString();
+		std::string	dir = dirname + "/" + purpose;
+		std::string	filter
+			= _repository_sections[index].filtername();
+		std::string	dir2 = dir + "/" + filter;
+		QTreeWidgetItem	*top
+			= ui->repositoryTree->topLevelItem(index);
+		if (top->childCount() == 0) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "no children");
+			continue;
+		} else {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "%d children",
+				top->childCount());
+		}
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)",
+			dir.c_str());
+		mkdir(dir.c_str(), 0777);
+		if (filter.size() > 0) {
+			dir = dir2;
 			debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)",
 				dir.c_str());
 			mkdir(dir.c_str(), 0777);
-			if (filter.size() > 0) {
-				dir = dir2;
-				debug(LOG_DEBUG, DEBUG_LOG, 0, "mkdir(%s)",
-					dir.c_str());
-				mkdir(dir.c_str(), 0777);
-			}
-			for (int i = 0; i < top->childCount(); i++) {
-				int	imageid = top->child(i)->text(0).toInt();
-				std::string	filename = astro::stringprintf("%s/%s-%d.fits",
-					dir.c_str(), _repositoryname.c_str(), imageid);
-				astro::io::FITSout	out(filename);
-				if (out.exists()) {
-					out.unlink();
-				}
-				snowstar::ImageFile	imagefile
-					= _repository->getImage(imageid);
-				astro::image::ImagePtr	image
-					= snowstar::convertfile(imagefile);
-				try {
-					out.write(image);
-				} catch (const std::exception& x) {
-					debug(LOG_ERR, DEBUG_LOG, 0, "cannot write %s: %s",
-						filename.c_str(), x.what());
-				}
-			}
+		}
+		for (int i = 0; i < top->childCount(); i++) {
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "adding child %d", i);
+			int	imageid = top->child(i)->text(0).toInt();
+			std::string	filename
+				= astro::stringprintf("%s-%05d.fits",
+					_repositoryname.c_str(), imageid);
+			downloaditem	item(_repositoryname, imageid,
+						dir, filename);
+			filelist.push_back(item);
 		}
 	}
+
+	// start the download dialog
+	exposedownloaddialog	*edd = new exposedownloaddialog(this);
+	edd->set(_repositories, filelist);
+	edd->exec();
 }
 
 } // namespace snowgui
