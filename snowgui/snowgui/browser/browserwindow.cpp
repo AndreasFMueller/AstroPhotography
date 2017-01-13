@@ -65,12 +65,13 @@ void	browserwindow::setDirectory(const std::string& d) {
 	}
 
 	// read the directory and fill the tree again
-	QStringList	namefilters;
-	namefilters << "*.fits";
-	QDirIterator	dirit(QString(_directory.c_str()), namefilters);
-	while (dirit.hasNext()) {
-		dirit.next();
-		QFileInfo	info = dirit.fileInfo();
+	QString	namefilter("*.fits");
+	QDir	directory(_directory.c_str(), namefilter,
+		QDir::Name | QDir::IgnoreCase, QDir::Files | QDir::Readable);
+	QFileInfoList	fileinfolist = directory.entryInfoList();
+	QFileInfoList::iterator	fi;
+	for (fi = fileinfolist.begin(); fi != fileinfolist.end(); fi++) {
+		QFileInfo	info = *fi;
 		QStringList	list;
 		list << "";
 		list << info.fileName();
