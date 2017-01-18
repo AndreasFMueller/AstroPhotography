@@ -158,6 +158,7 @@ AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/task/task.pro
 	snowgui/browser/browser.pro
 	snowgui/main/main.pro
+	snowgui/astroviewer/astroviewer.pro
 	snowgui/snowbrowser/snowbrowser.pro
 	snowgui/build])
 AC_OUTPUT

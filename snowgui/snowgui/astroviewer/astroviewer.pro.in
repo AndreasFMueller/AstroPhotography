@@ -1,0 +1,38 @@
+#
+# astroviewer.pro -- qt configuration file for the standalone file browser
+#
+# (c) 2017 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = astroviewer
+TEMPLATE = app
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L../astrogui -lastrogui 
+LIBS += -L../browser -lbrowser 
+LIBS += -L$${ASTROLIBDIR} -lastro
+#LIBS += -liceastro
+#LIBS += $${ICELIBS} -lIce -lIceUtil
+
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${ASTROPATH}/include
+#INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../astrogui ../common ../browser
+
+ASTROGUISOURCES =
+
+ASTROGUIHEADERS =
+
+FORMS    +=								\
+
+SOURCES += astroviewer.cpp $${ASTROGUISOURCES}
+
+HEADERS  += $${ASTROGUIHEADERS}
+

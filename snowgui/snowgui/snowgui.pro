@@ -8,7 +8,7 @@ QT       += core gui widgets
 
 TEMPLATE = subdirs
 SUBDIRS = astrogui common preview test focusing guiding instruments images
-SUBDIRS += repository expose task browser main snowbrowser
+SUBDIRS += repository expose task browser main snowbrowser astroviewer
 CONFIG += ordered
 
 snowgui.depends = astrogui common preview focusing guiding instruments images \
