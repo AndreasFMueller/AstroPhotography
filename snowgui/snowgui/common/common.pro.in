@@ -81,7 +81,6 @@ SOURCES += 								\
 	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusButton.cpp							\
-	FocusPointsWidget.cpp						\
 	GuiderButton.cpp						\
 	InstrumentWidget.cpp						\
 	MonitorImage.cpp						\
@@ -96,7 +95,6 @@ HEADERS  += 								\
 	CoolerActive.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\
-	FocusPointsWidget.h						\
 	GuiderButton.h							\
 	InstrumentWidget.h						\
 	MonitorImage.h							\

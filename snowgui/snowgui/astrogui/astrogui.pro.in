@@ -33,6 +33,7 @@ SOURCES += 								\
 	ColorArithmetic.cpp						\
 	ColorRectangles.cpp						\
 	FocusPoints.cpp							\
+	FocusPointsWidget.cpp						\
 	Histogram.cpp							\
 	Image2Pixmap.cpp						\
 	LogSpinBox.cpp							\
@@ -46,6 +47,7 @@ HEADERS  += 								\
 	ColorArithmetic.h						\
 	ColorRectangles.h						\
 	FocusPoints.h							\
+	FocusPointsWidget.h						\
 	Histogram.h							\
 	Image2Pixmap.h							\
 	LogSpinBox.h							\
