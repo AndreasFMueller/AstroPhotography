@@ -144,6 +144,9 @@ else
 fi
 AC_SUBST(ASTROLIBDIR)
 
+AC_SUBST(EXTRA_CXXFLAGS)
+AC_SUBST(EXTRA_LDFLAGS)
+
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/astrogui/astrogui.pro
 	snowgui/common/common.pro

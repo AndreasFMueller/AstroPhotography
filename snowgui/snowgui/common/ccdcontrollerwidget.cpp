@@ -660,7 +660,8 @@ void	ccdcontrollerwidget::ccdFailed(const std::exception& x) {
 	std::ostringstream	out;
 	out << "Communication with the CCD '";
 	out << ui->ccdSelectionBox->currentText().toLatin1().data();
-	out << "' failed. ";
+	out << "' failed." << std::endl;
+	out << "The reason for the failure was: " << x.what() << std::endl;
 	out << "The CCD has been disabled and can no longer be used.";
 	message.setInformativeText(QString(out.str().c_str()));
 	message.exec();

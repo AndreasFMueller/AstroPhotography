@@ -63,8 +63,10 @@ set -x
 # now that we have all the information, run the configure script
 case ${systemtype} in
 Linux)
-	CXXFLAGS="${CFLAGS} --std=c++11"
-	export CXXFLAGS
+	CXXFLAGS="${CFLAGS} --std=c++11 -fopenmp"
+	EXTRA_CXXFLAGS="-fopenmp"
+	EXTRA_LDFLAGS="-fopenmp"
+	export CXXFLAGS EXTRA_CXXFLAGS EXTRA_LDFLAGS
 	./configure ${commonflags}
 	;;
 Debian)
@@ -76,8 +78,8 @@ Debian)
 SuSE)
 	LDFLAGS="-L/usr/local/lib64 -lusb-1.0"
 	CXXFLAGS="${CFLAGS} --std=c++11"
-	export LDFLAGS CFLAGS CXXFLAGS
-
+	EXTRA_CXXFLAGS="-fopenmp"
+	export LDFLAGS CFLAGS CXXFLAGS EXTRA_CXXFLAGS
 	./configure ${commonflags}
 	;;
 Darwin)

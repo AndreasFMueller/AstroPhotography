@@ -677,6 +677,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+#		pragma omp parallel for
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
 				pixel(x, y) = adapter.pixel(x, y);
@@ -702,6 +703,7 @@ public:
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "copy %s alloc %d pixels at %p",
 			frame.size().toString().c_str(),
 			frame.size().getPixels(), pixels);
+#		pragma omp parallel for
 		for (int x = 0; x < frame.size().width(); x++) {
 			for (int y = 0; y < frame.size().height(); y++) {
 //debug(LOG_DEBUG, DEBUG_LOG, 0, "x = %4d, y = %4d, scalefactor = %f", x, y, scalefactor);
@@ -807,6 +809,7 @@ public:
 			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
 			throw std::length_error(msg);
 		}
+#		pragma omp parallel for
 		for (int x = 0; x < other.getSize().width(); x++) {
 			for (int y = 0; y < other.getSize().height(); y++) {
 				pixel(x, y) = other.pixel(x, y);
