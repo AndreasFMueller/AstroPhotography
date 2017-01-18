@@ -1,5 +1,5 @@
 /*
- * snowbrowser.cpp -- main function for the snowgui application
+ * astrobrowser.cpp -- main function for the snowgui application
  *
  * (c) 2016 Prof Dr Andreas Müller, Hochschule Rapperswil
  */

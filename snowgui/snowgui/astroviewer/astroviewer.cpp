@@ -101,7 +101,6 @@ int main(int argc, char *argv[]) {
 	idw->show();
 
 	return a.exec();
-	//return EXIT_SUCCESS;
 }
 
 } // namespace snowgui
