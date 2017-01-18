@@ -754,6 +754,14 @@ T	LuminanceAdapter<Pixel, T>::pixel(int x, int y) const {
 	return v;
 }
 
+template<typename Pixel, typename T>
+Image<T>	*luminance(const ConstImageAdapter<Pixel>& image) {
+	adapter::LuminanceAdapter<Pixel, T>	luminance(image);
+	return new Image<T>(luminance);
+}
+
+ImagePtr	luminanceptr(ImagePtr image);
+
 //////////////////////////////////////////////////////////////////////
 // Y-Adapter for YUV images
 //////////////////////////////////////////////////////////////////////
@@ -2469,7 +2477,7 @@ ImagePtr	monologimage(ImagePtr image);
 ImagePtr	logimage(ImagePtr image);
 
 //////////////////////////////////////////////////////////////////////
-//
+// spatial median filter
 //////////////////////////////////////////////////////////////////////
 template<typename T>
 class MedianRadiusAdapter : public ConstImageAdapter<T> {
@@ -2503,7 +2511,122 @@ public:
 	}
 };
 
+template<typename T>
+Image<T>	*destar(const ConstImageAdapter<T>& image, int radius) {
+	adapter::MedianRadiusAdapter<T>	mra(image, radius);
+	return new Image<T>(mra);
+}
+
+ImagePtr	destarptr(ImagePtr image, int radius);
+
+//////////////////////////////////////////////////////////////////////
+// Color correction adapter
+//////////////////////////////////////////////////////////////////////
+
+class ColorTransformBase {
+protected:
+	double	_gain;
+	double	_base;
+	double	_limit;
+	RGB<double>	_scales;
+	RGB<double>	_offsets;
+public:
+	double	gain() const { return _gain; }
+	double	base() const { return _base; }
+	double	limit() const { return _limit; }
+	const RGB<double>&	scales() const { return _scales; }
+	const RGB<double>&	offsets() const { return _offsets; }
+
+	void	gain(double g) { _gain = g; }
+	void	base(double b) { _base = b; }
+	void	limit(double l) { _limit = l; }
+	void	scales(const RGB<double>& s) { _scales = s; }
+	void	offsets(const RGB<double>& o) { _offsets = o; }
+	void	scales(const std::string& s);
+	void	offsets(const std::string& o);
+
+	ColorTransformBase() : _gain(1.0), _base(0.),
+		_scales(1.), _offsets(0.) {
+		_limit = -1;
+	}
+	ColorTransformBase(const ColorTransformBase& other)
+		: _gain(other._gain), _base(other._base), _limit(other._limit),
+		  _scales(other._scales), _offsets(other._offsets) {
+	}
+};
+
+template<typename T>
+class ColorTransformAdapter : public ConstImageAdapter<RGB<T> >,
+			public ColorTransformBase {
+	const ConstImageAdapter<RGB<T> >&	_image;
+public:
+	ColorTransformAdapter(const ConstImageAdapter<RGB<T> >& image)
+		: ConstImageAdapter<RGB<T> >(image.getString()), _image(image) {
+	}
+	ColorTransformAdapter(const ConstImageAdapter<RGB<T> >& image,
+			const ColorTransformBase& colorbase)
+		: ConstImageAdapter<RGB<T> >(image.getSize()),
+		  ColorTransformBase(colorbase), _image(image) {
+		if (_limit < 0) {
+			_limit = std::numeric_limits<T>::max();
+		}
+	}
+	virtual RGB<T>	pixel(int x, int y) const;
+	static ImagePtr	color(const ConstImageAdapter<RGB<T> >& image,
+				const ColorTransformBase& colorsettings) {
+		ColorTransformAdapter<T>	ca(image, colorsettings);
+		return ImagePtr(new Image<RGB<T> >(ca));
+	}
+};
+
+template<typename T>
+RGB<T>	ColorTransformAdapter<T>::pixel(int x, int y) const {
+	RGB<T>	v = _image.pixel(x, y);
+	double	r = _gain * (_scales.R * v.R + _offsets.R) + _base;
+	double	g = _gain * (_scales.G * v.G + _offsets.G) + _base;
+	double	b = _gain * (_scales.B * v.B + _offsets.B) + _base;
+	if (r < 0) { r = 0; }
+	if (g < 0) { g = 0; }
+	if (b < 0) { b = 0; }
+	double	m = std::max(std::max(r, g), b);
+	if (m > _limit) {
+		r = _limit * r / m;
+		g = _limit * g / m;
+		b = _limit * b / m;
+	}
+	return RGB<T>(r, g, b);
+}
+
+ImagePtr	colortransform(ImagePtr image,
+			const ColorTransformBase& colortransformbase);
+
+//////////////////////////////////////////////////////////////////////
+// Deemphasizing adapter
+//////////////////////////////////////////////////////////////////////
+
+template<typename T, typename S>
+class DeemphasizingAdapter : public ConstImageAdapter<T> {
+	const ConstImageAdapter<T>&     _image;
+	const ConstImageAdapter<S>&     _deemph;
+	double	_degree;
+public:
+	DeemphasizingAdapter(const ConstImageAdapter<T>& image,
+		const ConstImageAdapter<S>& deemph, double degree)
+		: ConstImageAdapter<T>(image.getSize()), _image(image),
+		  _deemph(deemph), _degree(degree) {
+	}
+	virtual T       pixel(int x, int y) const {
+		double	f = 1 / (_degree * _deemph.pixel(x, y) + 1.);
+		return _image.pixel(x, y) * f;
+	}
+};
+
+ImagePtr	deemphasize(ImagePtr imageptr,
+			const ConstImageAdapter<double>& blurredmask,
+			double degree);
+
 } // namespace adapter
 } // namespace astro
 
 #endif /* _AstroAdapter_h */
+

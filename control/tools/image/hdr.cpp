@@ -49,50 +49,6 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 }
 
-template<typename T, typename S>
-class DeemphasizingAdapter : public ConstImageAdapter<T> {
-	const ConstImageAdapter<T>&     _image;
-	const ConstImageAdapter<S>&     _deemph;
-	double	_degree;
-public:
-	DeemphasizingAdapter(const ConstImageAdapter<T>& image,
-		const ConstImageAdapter<S>& deemph, double degree)
-		: ConstImageAdapter<T>(image.getSize()), _image(image),
-		  _deemph(deemph), _degree(degree) {
-	}
-	virtual T       pixel(int x, int y) const {
-		double	f = 1 / (_degree * _deemph.pixel(x, y) + 1.);
-		return _image.pixel(x, y) * f;
-	}
-};
-
-#define deemphasize(Pixel, imageptr, blurredmask, degree)		\
-{									\
-	Image<Pixel>	*image = dynamic_cast<Image<Pixel>*>(&*imageptr);\
-	if (image != NULL) {						\
-		DeemphasizingAdapter<Pixel, double>	demph(*image,	\
-			blurredmask, degree);				\
-		return ImagePtr(new Image<Pixel>(demph));		\
-	}								\
-}
-
-ImagePtr	do_deemphasize(ImagePtr imageptr,
-	const ConstImageAdapter<double>& blurredmask, double degree) {
-	deemphasize(unsigned char, imageptr, blurredmask, degree);
-	deemphasize(unsigned short, imageptr, blurredmask, degree);
-	deemphasize(unsigned int, imageptr, blurredmask, degree);
-	deemphasize(unsigned long, imageptr, blurredmask, degree);
-	deemphasize(float, imageptr, blurredmask, degree);
-	deemphasize(double, imageptr, blurredmask, degree);
-	deemphasize(RGB<unsigned char>, imageptr, blurredmask, degree);
-	deemphasize(RGB<unsigned short>, imageptr, blurredmask, degree);
-	deemphasize(RGB<unsigned int>, imageptr, blurredmask, degree);
-	deemphasize(RGB<unsigned long>, imageptr, blurredmask, degree);
-	deemphasize(RGB<float>, imageptr, blurredmask, degree);
-	deemphasize(RGB<double>, imageptr, blurredmask, degree);
-	throw std::runtime_error("don't know how to deemphasize this image");
-}
-
 #define typeconvert(Pixel, maskptr)					\
 {									\
 	Image<Pixel>	*maskimage					\
@@ -193,7 +149,7 @@ int	main(int argc, char *argv[]) {
 		demangle(imageptr->pixel_type().name()).c_str());
 
 	// hdr masking of image
-	ImagePtr	outimage = do_deemphasize(imageptr, *blurredmask,
+	ImagePtr	outimage = adapter::deemphasize(imageptr, *blurredmask,
 		degree);
 
 	// find out whether the file exists

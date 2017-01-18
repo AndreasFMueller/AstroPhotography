@@ -40,49 +40,6 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 }
 
-template<typename T>
-ImagePtr	destar(const ConstImageAdapter<T>& image, int radius) {
-	adapter::MedianRadiusAdapter<T>	mra(image, radius);
-	return ImagePtr(new Image<T>(mra));
-}
-
-#define destar_mono(Pixel, imageptr)					\
-{									\
-	Image<Pixel>	*image						\
-		= dynamic_cast<Image<Pixel>*>(&*imageptr);		\
-	if (NULL != image) {						\
-		return destar(*image, radius);				\
-	}								\
-}
-
-#define destar_color(Pixel, imageptr)					\
-{									\
-	Image<RGB<Pixel> >	*image					\
-		= dynamic_cast<Image<RGB<Pixel> >*>(&*imageptr);	\
-	if (NULL != image) {						\
-		adapter::LuminanceAdapter<RGB<Pixel>, float>	la(*image);	\
-		Image<float>	*limage = new Image<float>(la);		\
-		ImagePtr	limageptr(limage);			\
-		return destar(*limage, radius);				\
-	}								\
-}
-
-ImagePtr	do_destar(ImagePtr imageptr, int radius) {
-	destar_mono(unsigned char, imageptr)
-	destar_mono(unsigned short, imageptr)
-	destar_mono(unsigned int, imageptr)
-	destar_mono(unsigned long, imageptr)
-	destar_mono(float, imageptr)
-	destar_mono(double, imageptr)
-	destar_color(unsigned char, imageptr)
-	destar_color(unsigned short, imageptr)
-	destar_color(unsigned int, imageptr)
-	destar_color(unsigned long, imageptr)
-	destar_color(float, imageptr)
-	destar_color(double, imageptr)
-	throw std::runtime_error("unknown pixel type");
-}
-
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
@@ -129,7 +86,7 @@ int	main(int argc, char *argv[]) {
 		demangle(image->pixel_type().name()).c_str());
 
 	// destar masking of image
-	ImagePtr	outimage = do_destar(image, radius);
+	ImagePtr	outimage = adapter::destarptr(image, radius);
 
 	// find out whether the file exists
 	io::FITSout	out(outfile);

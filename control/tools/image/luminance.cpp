@@ -35,40 +35,6 @@ static void	usage(const char *progname) {
 	std::cout << std::endl;
 }
 
-template<typename Pixel, typename T>
-ImagePtr	luminance(const ConstImageAdapter<Pixel>& image) {
-	adapter::LuminanceAdapter<Pixel, T>	luminance(image);
-	return ImagePtr(new Image<T>(luminance));
-}
-
-#define do_luminance(image, Pixel, T) {			\
-	Image<Pixel>	*imagep				\
-		= dynamic_cast<Image<Pixel >*>(&*image);\
-	if (NULL != imagep) {				\
-		return luminance<Pixel, T>(*imagep);	\
-	}						\
-}
-
-ImagePtr	luminance(ImagePtr image) {
-	do_luminance(image, unsigned char, unsigned char)
-	do_luminance(image, unsigned short, unsigned short)
-	do_luminance(image, unsigned int, unsigned int)
-	do_luminance(image, unsigned long, unsigned long)
-	do_luminance(image, float, float)
-	do_luminance(image, double, double)
-	do_luminance(image, RGB<unsigned char>, unsigned char)
-	do_luminance(image, RGB<unsigned short>, unsigned short)
-	do_luminance(image, RGB<unsigned int>, unsigned int)
-	do_luminance(image, RGB<unsigned long>, unsigned long)
-	do_luminance(image, RGB<float>, float)
-	do_luminance(image, RGB<double>, double)
-	std::string	msg = stringprintf("cannot get luminance for %s pixels",
-		demangle(image->pixel_type().name()).c_str());
-	debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-	throw std::runtime_error(msg);
-}
-
-
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
@@ -111,7 +77,7 @@ int	main(int argc, char *argv[]) {
 		demangle(image->pixel_type().name()).c_str());
 
 	// perform color balance
-	ImagePtr	outimage = luminance(image);
+	ImagePtr	outimage = adapter::luminanceptr(image);
 
 	// find out whether the file exists
 	io::FITSout	out(outfile);

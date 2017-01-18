@@ -44,117 +44,11 @@ static struct option	longopts[] = {
 { NULL,		0,			NULL,	 0  }
 };
 
-static RGB<double>	parse_color(const std::string& s) {
-	// split the string at commas
-	std::vector<std::string>	components;
-	split<std::vector<std::string> >(s, ",", components);
-	if (3 != components.size()) {
-		std::string	msg = stringprintf("not a color spec: '%s'",
-			s.c_str());
-		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-		throw std::runtime_error(msg);
-	}
-	return RGB<double>(std::stod(components[0]),
-			   std::stod(components[1]),
-			   std::stod(components[2]));
-}
-
-class ColorBase {
-protected:
-	double	_gain;
-	double	_base;
-	double	_limit;
-	RGB<double>	_scales;
-	RGB<double>	_offsets;
-public:
-	double	gain() const { return _gain; }
-	double	base() const { return _base; }
-	double	limit() const { return _limit; }
-	const RGB<double>&	scales() const { return _scales; }
-	const RGB<double>&	offsets() const { return _offsets; }
-
-	void	gain(double g) { _gain = g; }
-	void	base(double b) { _base = b; }
-	void	limit(double l) { _limit = l; }
-	void	scales(const RGB<double>& s) { _scales = s; }
-	void	offsets(const RGB<double>& o) { _offsets = o; }
-
-	ColorBase() : _gain(1.0), _base(0.),
-		_scales(1.), _offsets(0.) {
-		_limit = -1;
-	}
-	ColorBase(const ColorBase& other) : _gain(other._gain),
-		_base(other._base), _limit(other._limit),
-		_scales(other._scales),
-		_offsets(other._offsets) {
-	}
-};
-
-template<typename T>
-class ColorAdapter : public ConstImageAdapter<RGB<T> >, public ColorBase {
-	const ConstImageAdapter<RGB<T> >&	_image;
-public:
-	ColorAdapter(const ConstImageAdapter<RGB<T> >& image)
-		: ConstImageAdapter<RGB<T> >(image.getString()), _image(image) {
-	}
-	ColorAdapter(const ConstImageAdapter<RGB<T> >& image,
-		const ColorBase& colorbase)
-		: ConstImageAdapter<RGB<T> >(image.getSize()),
-		  ColorBase(colorbase), _image(image) {
-		if (_limit < 0) {
-			_limit = std::numeric_limits<T>::max();
-		}
-	}
-	virtual RGB<T>	pixel(int x, int y) const;
-	static ImagePtr	color(const ConstImageAdapter<RGB<T> >& image,
-				const ColorBase& colorsettings) {
-		ColorAdapter<T>	ca(image, colorsettings);
-		return ImagePtr(new Image<RGB<T> >(ca));
-	}
-};
-
-template<typename T>
-RGB<T>	ColorAdapter<T>::pixel(int x, int y) const {
-	RGB<T>	v = _image.pixel(x, y);
-	double	r = _gain * (_scales.R * v.R + _offsets.R) + _base;
-	double	g = _gain * (_scales.G * v.G + _offsets.G) + _base;
-	double	b = _gain * (_scales.B * v.B + _offsets.B) + _base;
-	if (r < 0) { r = 0; }
-	if (g < 0) { g = 0; }
-	if (b < 0) { b = 0; }
-	double	m = std::max(std::max(r, g), b);
-	if (m > _limit) {
-		r = _limit * r / m;
-		g = _limit * g / m;
-		b = _limit * b / m;
-	}
-	return RGB<T>(r, g, b);
-}
-
-#define	do_color(image, colorbase, Pixel)				\
-	{								\
-		Image<RGB<Pixel> >	*imagep				\
-			= dynamic_cast<Image<RGB<Pixel> >*>(&*image);	\
-		if (NULL != imagep) {					\
-			return ColorAdapter<Pixel>::color(*imagep, colorbase);\
-		}							\
-	}
-
-ImagePtr	color(ImagePtr image, const ColorBase& colorbase) {
-	do_color(image, colorbase, unsigned char)
-	do_color(image, colorbase, unsigned short)
-	do_color(image, colorbase, unsigned int)
-	do_color(image, colorbase, unsigned long)
-	do_color(image, colorbase, float)
-	do_color(image, colorbase, double)
-	throw std::runtime_error("cannot change color for this pixel type");
-}
-
 int	main(int argc, char *argv[]) {
 	int	c;
 	int	longindex;
 	bool	force = false;
-	ColorBase	colorbase;
+	adapter::ColorTransformBase	colorbase;
 	while (EOF != (c = getopt_long(argc, argv, "b:dfg:h?l:o:s:", longopts,
 		&longindex)))
 		switch (c) {
@@ -178,10 +72,10 @@ int	main(int argc, char *argv[]) {
 			colorbase.limit(std::stod(optarg));
 			break;
 		case 's':
-			colorbase.scales(parse_color(optarg));
+			colorbase.scales(std::string(optarg));
 			break;
 		case 'o':
-			colorbase.offsets(parse_color(optarg));
+			colorbase.offsets(std::string(optarg));
 			break;
 		default:
 			throw std::runtime_error("unknown option");
@@ -208,7 +102,7 @@ int	main(int argc, char *argv[]) {
 	}
 
 	// process the image
-	ImagePtr	outimage = color(image, colorbase);
+	ImagePtr	outimage = adapter::colortransform(image, colorbase);
 
 	// write the output file
 	io::FITSout	out(outfile);

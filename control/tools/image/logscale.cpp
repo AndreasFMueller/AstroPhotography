@@ -47,78 +47,6 @@ static void	usage(const char *progname) {
 	std::cout << "  -h, -?    show this help message" << std::endl;
 }
 
-#if 0
-template<typename T, typename S>
-class RGBLogAdapter : public ConstImageAdapter<RGB<T> > {
-	const ConstImageAdapter<RGB<T> >&	_image;
-	LuminanceAdapter<RGB<T>,S>	_luminance;
-public:
-	RGBLogAdapter(const ConstImageAdapter<RGB<T> >& image)
-		: ConstImageAdapter<RGB<T> >(image.getSize()), _image(image),
-		  _luminance(image) {
-	}
-	virtual RGB<T>	pixel(int x, int y) const {
-		S	l = _luminance.pixel(x, y);
-		S	s = log(l) / l;
-		if (s < 0) { s = 0; }
-		RGB<T>	p = _image.pixel(x, y);
-		RGB<T>	result(s * p.R, s * p.G, s * p.B);
-		return result;
-	}
-	static ImagePtr	rgblog(const ConstImageAdapter<RGB<T> >& image) {
-		RGBLogAdapter<T, S>	a(image);
-		return ImagePtr(new Image<RGB<T> >(a));
-	}
-};
-
-
-#define	do_rgblog(image, T, S)						\
-	{								\
-		Image<RGB<T> >	*imagep					\
-			= dynamic_cast<Image<RGB<T> >*>(&*image);	\
-		if (NULL != imagep) {					\
-			return RGBLogAdapter<T,S>::rgblog(*imagep);	\
-		}							\
-	}
-
-ImagePtr	rgblog(ImagePtr image) {
-	do_rgblog(image, float, float)
-	do_rgblog(image, double, double)
-	throw std::runtime_error("cannot log image with this pixel type");
-}
-
-template<typename T>
-class LogAdapter : public ConstImageAdapter<T> {
-	const ConstImageAdapter<T>&	_image;
-public:
-	LogAdapter(const ConstImageAdapter<T>& image)
-		: ConstImageAdapter<T>(image.getSize()), _image(image) {
-	}
-	virtual T	pixel(int x, int y) const {
-		return log(_image.pixel(x, y));
-	}
-	static ImagePtr	logimage(const ConstImageAdapter<T>& image) {
-		LogAdapter<T>	l(image);
-		return ImagePtr(new Image<T>(l));
-	}
-};
-
-#define	do_logimage(image, Pixel)					\
-	{								\
-		Image<Pixel>	*imagep					\
-			= dynamic_cast<Image<Pixel>*>(&*image);		\
-		if (NULL != imagep) {					\
-			return LogAdapter<Pixel>::logimage(*imagep);	\
-		}							\
-	}
-
-ImagePtr	logimage(ImagePtr image) {
-	do_logimage(image, float)
-	do_logimage(image, double)
-	throw std::runtime_error("cannot log image with this pixel type");
-}
-#endif
-
 /**
  * \brief Main function in astro namespace
  */
@@ -165,13 +93,6 @@ int	main(int argc, char *argv[]) {
 
 	// convert pixels according to luminance
 	outimage = logimage(image);
-#if 0
-	if (3 == image->planes()) {
-		outimage = rgblog(image);
-	} else {
-		outimage = logimage(image);
-	}
-#endif
 
 	// after all the calibrations have been performed, write the output
 	// file

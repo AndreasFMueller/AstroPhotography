@@ -29,6 +29,7 @@ libastroimage_la_SOURCES = 						\
 	CircularImage.cpp						\
 	Clamper.cpp							\
 	ColorBalance.cpp						\
+	ColorTransform.cpp						\
 	ColorScaling.cpp						\
 	ConnectedComponent.cpp						\
 	ConvolutionOperator.cpp						\
@@ -38,7 +39,9 @@ libastroimage_la_SOURCES = 						\
 	DarkCorrector.cpp						\
 	DarkNoiseAdapter.cpp						\
 	DeconvolutionOperator.cpp					\
+	Deemphasize.cpp							\
 	Demosaic.cpp							\
+	Destar.cpp							\
 	DiskImage.cpp							\
 	DisplayConverter.cpp						\
 	EuclideanDisplacement.cpp					\
@@ -79,6 +82,7 @@ libastroimage_la_SOURCES = 						\
 	LevelExtractor.cpp						\
 	LevelMaskExtractor.cpp						\
 	LogImage.cpp							\
+	Luminance.cpp							\
 	Masks.cpp							\
 	Maxima.cpp							\
 	Metavalue.cpp							\
