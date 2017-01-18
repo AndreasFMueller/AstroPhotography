@@ -145,6 +145,7 @@ fi
 AC_SUBST(ASTROLIBDIR)
 
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
+	snowgui/astrogui/astrogui.pro
 	snowgui/common/common.pro
 	snowgui/preview/preview.pro
 	snowgui/test/test.pro

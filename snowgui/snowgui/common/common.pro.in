@@ -22,6 +22,7 @@ LIBS +=	@ICELIBS@
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
+INCLUDEPATH += ../astrogui
 
 FORMS    +=								\
 	adaptiveopticscontrollerwidget.ui				\
@@ -34,7 +35,6 @@ FORMS    +=								\
 	focusercontrollerwidget.ui					\
 	guideportcontrollerwidget.ui					\
 	guidercontrollerwidget.ui					\
-	imagedisplaywidget.ui						\
 	mountcontrollerwidget.ui					\
 	singletrackwidget.ui						\
 	trackingmonitordialog.ui					\
@@ -52,7 +52,6 @@ WIDGETSOURCES =								\
 	focusercontrollerwidget.cpp					\
 	guideportcontrollerwidget.cpp					\
 	guidercontrollerwidget.cpp					\
-	imagedisplaywidget.cpp						\
 	mountcontrollerwidget.cpp					\
 	singletrackwidget.cpp						\
 	trackingmonitordialog.cpp					\
@@ -70,7 +69,6 @@ WIDGETHEADERS =								\
 	focusercontrollerwidget.h					\
 	guideportcontrollerwidget.h					\
 	guidercontrollerwidget.h					\
-	imagedisplaywidget.h						\
 	mountcontrollerwidget.h						\
 	singletrackwidget.h						\
 	trackingmonitordialog.h						\
@@ -79,24 +77,14 @@ WIDGETHEADERS =								\
 
 SOURCES += 								\
 	AdaptiveOpticsWidget.cpp					\
-	AutoGain.cpp							\
 	CalibrationDisplayWidget.cpp					\
-	ChannelDisplayWidget.cpp					\
-	ColorArithmetic.cpp						\
-	ColorRectangles.cpp						\
 	CoolerActive.cpp						\
 	FilterWheelBusy.cpp						\
 	FocusButton.cpp							\
-	FocusPoints.cpp							\
 	FocusPointsWidget.cpp						\
 	GuiderButton.cpp						\
-	Histogram.cpp							\
-	Image2Pixmap.cpp						\
 	InstrumentWidget.cpp						\
-	LogSpinBox.cpp							\
 	MonitorImage.cpp						\
-	Scaler.cpp							\
-	SelectableImage.cpp						\
 	TrackingMonitorImage.cpp					\
 	TrackingMonitorController.cpp					\
 	$${WIDGETSOURCES}
@@ -104,24 +92,14 @@ SOURCES += 								\
 
 HEADERS  += 								\
 	AdaptiveOpticsWidget.h						\
-	AutoGain.h							\
 	CalibrationDisplayWidget.h					\
-	ChannelDisplayWidget.h						\
-	ColorArithmetic.h						\
-	ColorRectangles.h						\
 	CoolerActive.h							\
 	FilterWheelBusy.h						\
 	FocusButton.h							\
-	FocusPoints.h							\
 	FocusPointsWidget.h						\
 	GuiderButton.h							\
-	Histogram.h							\
-	Image2Pixmap.h							\
 	InstrumentWidget.h						\
-	LogSpinBox.h							\
 	MonitorImage.h							\
-	Scaler.h							\
-	SelectableImage.h						\
 	TrackingMonitorImage.h						\
 	TrackingMonitorController.h					\
 	$${WIDGETHEADERS}

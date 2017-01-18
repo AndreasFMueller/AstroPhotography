@@ -1,0 +1,57 @@
+#
+# astrogui.pro.in -- qt configuration file for the gui project
+#
+# (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TEMPLATE = lib
+CONFIG += staticlib
+
+# Directories for ICE and the astrophotography library
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L$${ASTROLIBDIR} -lastro
+
+INCLUDEPATH += $${ASTROPATH}/include
+INCLUDEPATH += /usr/local/include
+
+FORMS    +=								\
+	imagedisplaywidget.ui
+
+WIDGETSOURCES =								\
+	imagedisplaywidget.cpp
+
+WIDGETHEADERS =								\
+	imagedisplaywidget.h
+
+SOURCES += 								\
+	AutoGain.cpp							\
+	ChannelDisplayWidget.cpp					\
+	ColorArithmetic.cpp						\
+	ColorRectangles.cpp						\
+	FocusPoints.cpp							\
+	Histogram.cpp							\
+	Image2Pixmap.cpp						\
+	LogSpinBox.cpp							\
+	Scaler.cpp							\
+	SelectableImage.cpp						\
+	$${WIDGETSOURCES}
+
+HEADERS  += 								\
+	AutoGain.h							\
+	ChannelDisplayWidget.h						\
+	ColorArithmetic.h						\
+	ColorRectangles.h						\
+	FocusPoints.h							\
+	Histogram.h							\
+	Image2Pixmap.h							\
+	LogSpinBox.h							\
+	Scaler.h							\
+	SelectableImage.h						\
+	$${WIDGETHEADERS}
+
+
+
