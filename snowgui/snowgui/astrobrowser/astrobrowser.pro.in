@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = astrobrowser
 TEMPLATE = app
 
-# Directories for ICE and the astrophotography library
+# Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
@@ -19,7 +19,7 @@ LIBS += -L$${ASTROLIBDIR} -lastro
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $${ASTROPATH}/include
-INCLUDEPATH += ../astrogui ../astrogui  ../browser
+INCLUDEPATH += ../common ../astrogui  ../browser
 
 ASTROGUISOURCES =
 

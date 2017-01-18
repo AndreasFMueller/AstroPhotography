@@ -18,13 +18,14 @@ ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L../common -lcommon 
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
 LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common 
+INCLUDEPATH += ../common ../astrogui
 
 ASTROGUISOURCES =
 

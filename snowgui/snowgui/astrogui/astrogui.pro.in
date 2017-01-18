@@ -9,7 +9,7 @@ QT       += core gui widgets
 TEMPLATE = lib
 CONFIG += staticlib
 
-# Directories for ICE and the astrophotography library
+# Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 

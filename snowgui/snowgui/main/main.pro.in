@@ -27,13 +27,14 @@ LIBS += -L../guiding -lguiding
 LIBS += -L../task -ltask
 LIBS += -L../browser -lbrowser
 LIBS += -L../common -lcommon
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
 LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../common ../preview ../focusing ../guiding
+INCLUDEPATH += ../common ../astrogui ../preview ../focusing ../guiding
 INCLUDEPATH += ../instruments ../images ../repository ../expose
 INCLUDEPATH += ../task ../browser
 

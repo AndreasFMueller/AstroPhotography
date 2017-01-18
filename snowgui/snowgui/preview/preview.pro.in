@@ -17,12 +17,13 @@ ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
 LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common
+INCLUDEPATH += ../common ../astrogui
 
 FORMS    +=								\
 	previewwindow.ui

@@ -17,13 +17,14 @@ ICELIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
 LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
+INCLUDEPATH += ../astrogui ../common
 
 FORMS    +=								\
 	instrumentdisplay.ui						\

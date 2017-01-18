@@ -17,12 +17,13 @@ ICDLIBS = @ICELIBS@
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
+LIBS += -L$${ASTROLIBDIR} -lastro
+LIBS += -liceastro
 LIBS +=	@ICELIBS@
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common
+INCLUDEPATH += ../common ../astrogui
 
 FORMS    +=								\
 	focusscancontroller.ui						\

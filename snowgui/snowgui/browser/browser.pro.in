@@ -11,19 +11,15 @@ CONFIG += staticlib
 QMAKE_CXXFLAGS += @EXTRA_CXXFLAGS@
 QMAKE_LFLAGS += @EXTRA_LDFLAGS@
 
-# Directories for ICE and the astrophotography library
-ICEDIR = @ICEDIR@
-ICELIBS = @ICELIBS@
+# Directories for the astrophotography library
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L$${ASTROLIBDIR} -lastro -liceastro
-LIBS +=	$${ICELIBS} -lIce -lIceUtil
+LIBS += -L$${ASTROLIBDIR} -lastro
 
 INCLUDEPATH += $${ASTROPATH}/include
-INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../common
+INCLUDEPATH += ../common ../astrogui
 
 FORMS    +=								\
 	browserwindow.ui						\
