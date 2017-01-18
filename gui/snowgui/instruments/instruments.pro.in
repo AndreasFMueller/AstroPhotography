@@ -24,7 +24,7 @@ LIBS +=	@ICELIBS@
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../astrogui ../common
+INCLUDEPATH += ../astrogui ../icegui
 
 FORMS    +=								\
 	instrumentdisplay.ui						\

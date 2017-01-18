@@ -19,7 +19,7 @@ LIBS += -L$${ASTROLIBDIR} -lastro
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../common ../astrogui
+INCLUDEPATH += ../astrogui
 
 FORMS    +=								\
 	browserwindow.ui						\

@@ -25,7 +25,7 @@ LIBS +=	@ICELIBS@
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../common ../astrogui
+INCLUDEPATH += ../icegui ../astrogui
 
 FORMS    +=								\
 	exposedownloaddialog.ui						\

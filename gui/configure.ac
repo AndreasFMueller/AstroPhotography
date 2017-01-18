@@ -149,7 +149,7 @@ AC_SUBST(EXTRA_LDFLAGS)
 
 AC_CONFIG_FILES([Makefile snowgui/snowgui.pro
 	snowgui/astrogui/astrogui.pro
-	snowgui/common/common.pro
+	snowgui/icegui/icegui.pro
 	snowgui/preview/preview.pro
 	snowgui/test/test.pro
 	snowgui/focusing/focusing.pro

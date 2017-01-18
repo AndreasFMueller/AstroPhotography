@@ -23,7 +23,7 @@ LIBS +=	$${ICELIBS} -lIce -lIceUtil
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
-INCLUDEPATH += ../common ../astrogui
+INCLUDEPATH += ../icegui ../astrogui
 
 FORMS    +=								\
 	guidingwindow.ui

@@ -1,5 +1,5 @@
 #
-# common.pro.in -- qt configuration file for the snowgui project
+# icegui.pro.in -- qt configuration file for the snowgui project
 #
 # (c) 2016 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
@@ -20,12 +20,12 @@ ASTROLIBDIR = @ASTROLIBDIR@
 
 LIBS += -L$${ASTROLIBDIR} -lastro
 LIBS += -liceastro
-LIBS +=	@ICELIBS@
+LIBS +=	$${ICELIBS}
 
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../astrogui ../common
+INCLUDEPATH += ../astrogui ../icegui
 
 FORMS    +=								\
 	adaptiveopticscontrollerwidget.ui				\

@@ -19,7 +19,7 @@ LIBS += -L$${ASTROLIBDIR} -lastro
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += $${ASTROPATH}/include
-INCLUDEPATH += ../astrogui ../common ../browser
+INCLUDEPATH += ../astrogui ../browser
 
 ASTROGUISOURCES =
 
