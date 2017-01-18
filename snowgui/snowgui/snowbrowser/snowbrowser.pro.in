@@ -1,0 +1,38 @@
+#
+# snowbrowser.pro -- qt configuration file for the standalone file browser
+#
+# (c) 2017 Prof Dr Andreas Mueller, Hochschule Rapperswil
+#
+
+QT       += core gui widgets
+
+TARGET = snowbrowser
+TEMPLATE = app
+
+# Directories for ICE and the astrophotography library
+ICEDIR = @ICEDIR@
+ICELIBS = @ICELIBS@
+ASTROPATH = @ASTROPATH@
+ASTROLIBDIR = @ASTROLIBDIR@
+
+LIBS += -L../common -lcommon 
+LIBS += -L../browser -lbrowser 
+LIBS += -L$${ASTROLIBDIR} -lastro
+#LIBS += -liceastro
+#LIBS += $${ICELIBS} -lIce -lIceUtil
+
+INCLUDEPATH += /usr/local/include
+INCLUDEPATH += $${ASTROPATH}/include
+#INCLUDEPATH += $${ICEDIR}/include
+INCLUDEPATH += ../common  ../browser
+
+ASTROGUISOURCES =
+
+ASTROGUIHEADERS =
+
+FORMS    +=								\
+
+SOURCES += snowbrowser.cpp $${ASTROGUISOURCES}
+
+HEADERS  += $${ASTROGUIHEADERS}
+
