@@ -13,6 +13,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <AstroUtils.h>
 
 namespace astro {
 namespace task {
@@ -282,6 +283,7 @@ public:
 
 	// main function
 	void	main();
+	thread::Barrier	_barrier;
 
 private:
 	// start new executors. Many methods here are private, they are

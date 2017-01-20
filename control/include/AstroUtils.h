@@ -399,6 +399,24 @@ public:
 
 namespace thread {
 
+/**
+ * \brief a Barrier implementation
+ */
+class Barrier {
+	std::mutex	_mutex;
+	std::condition_variable	_condition;
+	const int	n_threads;
+	int 	counts[2];
+	int	current;
+
+	Barrier(const Barrier&);
+	Barrier&	operator=(const Barrier&);
+public:
+	Barrier(int n);
+	~Barrier();
+	void	await();
+};
+
 // the RunAccess class is used to work around the access restrictions to
 // the run method. We want to be sure that only ThreadBase class can access
 // the run method, but the thread main function must have access, so we
@@ -513,6 +531,7 @@ public:
 		std::vector<T>::push_back(value);
 	}
 };
+
 
 } // namespace astro
 

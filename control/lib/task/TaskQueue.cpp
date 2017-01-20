@@ -46,9 +46,9 @@ static void	queuemain(TaskQueue *queue) {
  * This is the "real" main function for a task queue
  */
 void	TaskQueue::main() {
-	// we first signal to the parent thread that we are now ready in the	
-	// main function of the task queue
-	statechange_cond.notify_all();
+	// we have to run up to the barrier before continuing
+	_barrier.await();
+
 	// we now try to acquire the lock, we need this to block the main
 	// method thread until it is released from the starting thread. As
 	// soon as we get the lock, we can assume that the lock was released
@@ -156,7 +156,8 @@ TaskQueue::state_type	TaskQueue::string2state(const std::string& s) {
  */
 void	TaskQueue::restart(state_type newstate) {
 	// lock the mutex for restart into a new state
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> restart from %s to state %s, LOCK(TaskQueue::queue_mutex)",
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "--> restart from %s to state %s, "
+		"LOCK(TaskQueue::queue_mutex)",
 		state2string(state()).c_str(), state2string(newstate).c_str());
 	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
@@ -185,15 +186,13 @@ void	TaskQueue::restart(state_type newstate) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new state '%s'",
 		state2string(_state).c_str());
 
-	// we should wait until the main thread of the taskqueue signals
-	// that it has started up
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "waiting for state change UNLOCK(TaskQueue::queue_mutex)");
-	statechange_cond.wait(lock);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait completes LOCK(TaskQueue::queue_mutex)");
+	// wait until the thread is ready
+	_barrier.await();
 
 	// at this point, the lock object goes out of scope and releases
 	// the thread that was started previously
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- restart complete, UNLOCK(TaskQueue::queue_mutex)");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "<-- restart complete, "
+		"UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**
@@ -201,7 +200,8 @@ void	TaskQueue::restart(state_type newstate) {
  */
 void	TaskQueue::shutdown() {
 	{
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown requested LOCK(TaskQueue::queue_mutex)");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown requested "
+			"LOCK(TaskQueue::queue_mutex)");
 		std::unique_lock<std::recursive_mutex>	l(queue_mutex);
 		if (state() != stopped) {
 			throw std::runtime_error("can shutdown only when "
@@ -215,7 +215,8 @@ void	TaskQueue::shutdown() {
 		// at this point, the lock goes out of scope and releases the
 		// work thread. So the only thing we have to do after this
 		// point is to wait for the thread to finish
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete, UNLOCK(TaskQueue::queue_mutex)");
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete, "
+			"UNLOCK(TaskQueue::queue_mutex)");
 	}
 
 	// wait for the thread to terminate
@@ -229,7 +230,7 @@ void	TaskQueue::shutdown() {
  * The constructor does not also start the queue. For this purpose, the
  * method start() should be called, which then 
  */
-TaskQueue::TaskQueue(Database database) : _database(database) {
+TaskQueue::TaskQueue(Database database) : _database(database), _barrier(2) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating task queue in state idle");
 	// initialize state variables
 	_state = idle;
@@ -245,7 +246,8 @@ TaskQueue::TaskQueue(Database database) : _database(database) {
  * variable
  */
 TaskQueue::~TaskQueue() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying task queue LOCK(TaskQueue::queue_mutex)");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "destroying task queue "
+		"LOCK(TaskQueue::queue_mutex)");
 	// ensure we are the only ones accessing the data structures
 	std::unique_lock<std::recursive_mutex>	lock(queue_mutex);
 
@@ -264,7 +266,8 @@ TaskQueue::~TaskQueue() {
 	} catch (...) {
 	}
 
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed UNLOCK(TaskQueue::queue_mutex)");
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "taskqueue destroyed "
+		"UNLOCK(TaskQueue::queue_mutex)");
 }
 
 /**

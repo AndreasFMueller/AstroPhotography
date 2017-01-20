@@ -9,6 +9,7 @@ noinst_LTLIBRARIES = libastroutils.la
 libastroutils_la_SOURCES = 						\
 	AsynchronousAction.cpp						\
 	AttributeValuePairs.cpp						\
+	Barrier.cpp							\
 	BarycentricCoordinates.cpp					\
 	BlockStopWatch.cpp						\
 	CallbackSet.cpp							\

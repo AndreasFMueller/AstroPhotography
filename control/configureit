@@ -131,7 +131,7 @@ Linux)
 	./configure --prefix=${prefix} ${commonflags} ${sbigoption}
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++0x"
+	CXXFLAGS="${CXXFLAGS} --std=c++11x"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
 	./configure --prefix=${prefix} ${commonflags} \
