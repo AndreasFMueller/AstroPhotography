@@ -146,8 +146,8 @@ Mandatory packages:
 
  - The std::regex class of the C++11 standard is used, but g++, although it
    does come with the appropriate headers, does not implement the std::regex
-   class. In this case, the regex class from the boost library can be used,
-   it should be configured using the --enable-boostregex option to configure.
+   class. In this case, the regex class from the boost library must be used,
+   just install it, and it will be detected automatically
 
  - Avahi client library: locating a server is done using zeroconf, which is
    implemented on Linux in the Avahi library.

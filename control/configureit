@@ -128,7 +128,7 @@ case ${systemtype} in
 Linux)
 	CXXFLAGS="${CFLAGS} --std=c++11"
 	export CXXFLAGS
-	./configure --prefix=${prefix} ${commonflags}
+	./configure --prefix=${prefix} ${commonflags} ${sbigoption}
 	;;
 Debian)
 	CXXFLAGS="${CXXFLAGS} --std=c++0x"

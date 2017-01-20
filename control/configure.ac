@@ -171,23 +171,6 @@ Linux)	CFLAGS="${CFLAGS} -fopenmp"
 esac
 
 
-## BOOSTREGEX ########################################################
-# use boost regex
-AC_ARG_ENABLE(boostregex,
-[AS_HELP_STRING([--enable-boostregex], [use regex class from boost instead of C++11])],
-[
-	enable_boostregex=yes
-],[
-	enable_boostregex=no
-])
-if test ${enable_boostregex} = yes
-then
-	LIBS="${LIBS} -lboost_regex"
-	AC_DEFINE([ENABLE_BOOSTREGEX], [1], [Define to 1 if boost::regex should be used])
-else
-	AC_DEFINE([ENABLE_BOOSTREGEX], [0], [Define to 1 if boost::regex should be used])
-fi
-
 ## UNITTESTS #########################################################
 # decide whether or not to build the test programs
 AC_ARG_ENABLE(unittests,
