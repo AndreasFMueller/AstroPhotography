@@ -2,31 +2,75 @@
 # Makefile.am -- Makefile for the include files
 #
 # (c) 2012 Prof Dr Andreas Mueller, Hochschule Rapperswil
-# $Id$
 #
-include_HEADERS = AstroDebug.h AstroFormat.h AstroImage.h AstroCamera.h \
-	AstroDemosaicAdapter.h \
-	AstroLoader.h AstroDisplay.h AstroEvent.h AstroImager.h \
-	AstroIO.h AstroPixel.h AstroUSB.h AstroUVC.h AstroUnicap.h \
-	AstroUtils.h AstroMosaic.h AstroDemosaic.h AstroAdapter.h \
-	AstroFilter.h AstroFilterfunc.h AstroCalibration.h \
-	AstroOperations.h AstroTransform.h AstroFWHM.h \
-	AstroMask.h AstroGuiding.h AstroTypes.h AstroCallback.h \
-	AstroCoordinates.h AstroDevice.h AstroLocator.h AstroExceptions.h \
-	AstroFocus.h AstroViewer.h AstroTonemapping.h \
-	AstroPersistence.h AstroTask.h AstroInterpolation.h \
-	AstroCatalog.h AstroChart.h AstroProjection.h AstroProcess.h \
-	AstroConfig.h AstroDiscovery.h AstroConvolve.h AstroProject.h \
-	AstroImageops.h
+include_HEADERS =							\
+	AstroAdapter.h							\
+	AstroCalibration.h						\
+	AstroCallback.h							\
+	AstroCamera.h							\
+	AstroCatalog.h							\
+	AstroChart.h							\
+	AstroConfig.h							\
+	AstroConvolve.h							\
+	AstroCoordinates.h						\
+	AstroDebug.h							\
+	AstroDemosaic.h							\
+	AstroDemosaicAdapter.h						\
+	AstroDevice.h							\
+	AstroDiscovery.h						\
+	AstroDisplay.h							\
+	AstroEvent.h							\
+	AstroExceptions.h						\
+	AstroFWHM.h							\
+	AstroFilter.h							\
+	AstroFilterfunc.h						\
+	AstroFocus.h							\
+	AstroFormat.h							\
+	AstroGuiding.h							\
+	AstroIO.h							\
+	AstroImage.h							\
+	AstroImageops.h							\
+	AstroImager.h							\
+	AstroInterpolation.h						\
+	AstroLoader.h							\
+	AstroLocator.h							\
+	AstroMask.h							\
+	AstroMosaic.h							\
+	AstroOperations.h						\
+	AstroPersistence.h						\
+	AstroPixel.h							\
+	AstroProcess.h							\
+	AstroProject.h							\
+	AstroProjection.h						\
+	AstroTask.h							\
+	AstroTonemapping.h						\
+	AstroTransform.h						\
+	AstroTypes.h							\
+	AstroUSB.h							\
+	AstroUVC.h							\
+	AstroUnicap.h							\
+	AstroUtils.h							\
+	AstroViewer.h
 
-noinst_HEADERS = PixelValue.h Sun.h \
-	GuiderProcess.h \
-	ViewerPipeline.h Radon.h \
-	ImageDirectory.h TaskTable.h TrackingWork.h DrivingWork.h \
-	CancellableWork.h ExposureWork.h \
-	ImagePersistence.h \
-	FocusWork.h FocusCompute.h Serial.h \
-	BasicGuideport.h \
-	FieldPersistence.h astroregex.h \
-	Nice.h Blurr.h DeviceNameUSB.h
+noinst_HEADERS =							\
+	BasicGuideport.h						\
+	Blurr.h								\
+	CancellableWork.h						\
+	DeviceNameUSB.h							\
+	DrivingWork.h							\
+	ExposureWork.h							\
+	FieldPersistence.h						\
+	FocusCompute.h							\
+	FocusWork.h							\
+	GuiderProcess.h							\
+	ImageDirectory.h						\
+	ImagePersistence.h						\
+	Nice.h								\
+	PixelValue.h							\
+	Radon.h								\
+	Serial.h							\
+	Sun.h								\
+	TaskTable.h							\
+	TrackingWork.h							\
+	ViewerPipeline.h
 
