@@ -61,6 +61,9 @@ configurationdialog::configurationdialog(QWidget *parent,
 	connect(ui->tasksCheckBox, SIGNAL(toggled(bool)),
 		this, SLOT(tasksToggled(bool)));
 
+	connect(ui->restartButton, SIGNAL(clicked()),
+		this, SLOT(restartClicked()));
+
 	// title
 	setWindowTitle(QString("Configuration"));
 	std::string	title = astro::stringprintf("Remote configuration on %s", _serviceobject.toString().c_str());
@@ -148,6 +151,7 @@ void	configurationdialog::changevalue(const std::string& name, bool defaultvalue
 	if (_servicechangewarning) {
 		return;
 	}
+	ui->restartButton->setEnabled(true);
 	QMessageBox	*message = new QMessageBox(this);
 	message->setText(QString("Server restart required"));
 	std::ostringstream	str;
@@ -189,6 +193,10 @@ void	configurationdialog::tasksToggled(bool newvalue) {
 	changevalue("tasks", false, newvalue);
 }
 
+void	configurationdialog::restartClicked() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "restart initiated");
+	_configuration->restartServer(1.0f);
+}
 
 
 } // namespace snowgui

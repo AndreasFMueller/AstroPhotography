@@ -38,6 +38,7 @@ public slots:
 	void	focusingToggled(bool);
 	void	repositoriesToggled(bool);
 	void	tasksToggled(bool);
+	void	restartClicked();
 
 private:
 	Ui::configurationdialog *ui;
