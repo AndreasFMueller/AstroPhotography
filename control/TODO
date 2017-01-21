@@ -35,6 +35,9 @@ Image:
       - If an image has an RGB mosaic, and we take a subframe, what 
 	mosaic do we actually give the subframe?
 
+Tasks:
+      -	deadlock in the task manager thread startup
+
 URLs:
 
 Instruments:

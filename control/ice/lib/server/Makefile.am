@@ -4,7 +4,9 @@
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-SOURCES = ImageCallbackI.cpp ImageSinkI.cpp
+SOURCES = 								\
+	ImageCallbackI.cpp						\
+	ImageSinkI.cpp
 
 noinst_LTLIBRARIES = libserver.la 
 

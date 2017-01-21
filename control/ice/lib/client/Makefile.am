@@ -4,8 +4,12 @@
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-SOURCES = RemoteInstrument.cpp CommunicatorSingleton.cpp \
-	CommonClientTasks.cpp IceDiscovery.cpp CommonMonitor.cpp
+SOURCES =								\
+	CommonClientTasks.cpp						\
+	CommonMonitor.cpp						\
+	CommunicatorSingleton.cpp					\
+	IceDiscovery.cpp						\
+	RemoteInstrument.cpp
 
 noinst_LTLIBRARIES = libclient.la 
 

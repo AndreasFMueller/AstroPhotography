@@ -4,8 +4,17 @@
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-SOURCES = camera.cpp exceptions.cpp focusing.cpp guider.cpp image.cpp \
-	device.cpp tasks.cpp types.cpp  repository.cpp instruments.cpp
+SOURCES =								\
+	camera.cpp							\
+	device.cpp							\
+	exceptions.cpp							\
+	focusing.cpp							\
+	guider.cpp							\
+	image.cpp							\
+	instruments.cpp							\
+	repository.cpp							\
+	tasks.cpp							\
+	types.cpp
 
 BUILT_SOURCES = $(SOURCES)
 

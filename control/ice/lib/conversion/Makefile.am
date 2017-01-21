@@ -4,11 +4,21 @@
 # (c) 2014 Prof Dr Andreas Mueller, Hochschule Rapperswil
 #
 
-SOURCES = TypesConversions.cpp DeviceConversions.cpp CcdConversions.cpp \
-	FilterwheelConversions.cpp GuiderConversions.cpp TaskConversions.cpp \
-	MountConversions.cpp FocusingConversions.cpp RepositoryConversions.cpp \
-	InstrumentComponentConversions.cpp ImageConversions.cpp \
-	ParameterConversions.cpp EventConversions.cpp ConfigConversions.cpp
+SOURCES =								\
+	CcdConversions.cpp						\
+	ConfigConversions.cpp						\
+	DeviceConversions.cpp						\
+	EventConversions.cpp						\
+	FilterwheelConversions.cpp					\
+	FocusingConversions.cpp						\
+	GuiderConversions.cpp						\
+	ImageConversions.cpp						\
+	InstrumentComponentConversions.cpp				\
+	MountConversions.cpp						\
+	ParameterConversions.cpp					\
+	RepositoryConversions.cpp					\
+	TaskConversions.cpp						\
+	TypesConversions.cpp
 
 noinst_LTLIBRARIES = libconversion.la 
 
