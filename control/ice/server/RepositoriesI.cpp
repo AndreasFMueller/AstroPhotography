@@ -148,7 +148,7 @@ void	RepositoriesI::add(const std::string& reponame,
 		throw Exists(msg);
 	}
 
-	// create the repository
+	// add the repository to the configuration
 	try {
 		imagerepos->addrepo(reponame, directory);
 	} catch (const std::runtime_error& x) {

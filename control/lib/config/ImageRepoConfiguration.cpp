@@ -147,12 +147,15 @@ void	ImageRepoConfigurationBackend::addrepo(const std::string& name,
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "new repo record has id %ld", id);
 
 	// find out whether the repository directory exists
-	if (0 != stat(imagerepoinfo.database.c_str(), &sb)) {
+	if (0 == stat(imagerepoinfo.database.c_str(), &sb)) {
 		// file already exists, nothing needs to be done
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "database file %s exists",
+			imagerepoinfo.database.c_str());
 		return;
 	}
 
 	// create a new repository
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating repository");
 	Database	db = DatabaseFactory::get(imagerepoinfo.database);
 	ImageRepo(name, db, _directory, false);
 }
