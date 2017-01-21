@@ -278,7 +278,9 @@ Server::Server(Ice::CommunicatorPtr _ic, const std::string& dbfilename)
 }
 
 void	Server::waitForShutdown() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "wait for shutdown");
 	ic->waitForShutdown();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete");
 }
 
 } // namespace snowstar

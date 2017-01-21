@@ -28,6 +28,8 @@ public:
 	ConfigurationList	listSection(const std::string& domain,
 					const std::string& section,
 					const Ice::Current& current);
+	void	shutdownServer(Ice::Float delay, const Ice::Current& current);
+	void	restartServer(Ice::Float delay, const Ice::Current& current);
 };
 
 } // namespace snowstar

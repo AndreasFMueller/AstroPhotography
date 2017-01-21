@@ -18,6 +18,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include "Server.h"
+#include "Restart.h"
 
 namespace snowstar {
 
@@ -78,7 +79,12 @@ static void	usage(const char *progname) {
  * \brief Main function for the Snowstar server
  */
 int	snowstar_main(int argc, char *argv[]) {
+	// copy arguments so that we can restart
+	Restart	restart(argc, argv);
+
+	// set up communicator
 	CommunicatorSingleton	communicator(argc, argv);
+
 	// default debug settings
 	debugtimeprecision = 3;
 	debugthreads = true;
@@ -252,17 +258,24 @@ int	snowstar_main(int argc, char *argv[]) {
 		}
 		umask(027);
 	}
-	astro::PidFile	pidfile(pidfilename);
 
-	try {
-		Server	server(ic, databasefile);
-		server.waitForShutdown();
-	} catch (const Ice::Exception& ex) {
-		std::cerr << "ICE exception: " << ex.what() << std::endl;
-		status = EXIT_FAILURE;
-	} catch (const char *msg) {
-		std::cerr << msg << std::endl;
-		status = EXIT_FAILURE;
+	{
+		// by opening a new brace we ensure that the pdifile will
+		// be removed when we exit from the server
+		astro::PidFile	pidfile(pidfilename);
+
+		try {
+			Server	server(ic, databasefile);
+			server.waitForShutdown();
+			debug(LOG_DEBUG, DEBUG_LOG, 0, "server shutdown");
+		} catch (const Ice::Exception& ex) {
+			std::cerr << "ICE exception: " << ex.what() << std::endl;
+			status = EXIT_FAILURE;
+		} catch (const char *msg) {
+			std::cerr << msg << std::endl;
+			status = EXIT_FAILURE;
+		}
+		// at this point, the pid file disappears
 	}
 
 	// destroy the communicator
@@ -271,6 +284,9 @@ int	snowstar_main(int argc, char *argv[]) {
 	}
 	astro::event(EVENT_GLOBAL, astro::events::Event::SERVER,
 		"snowstar server shutdown");
+
+	restart.exec();
+
 	return status;
 }
 

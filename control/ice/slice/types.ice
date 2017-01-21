@@ -107,6 +107,8 @@ module snowstar {
 		ConfigurationList	listDomain(string domain);
 		ConfigurationList	listSection(string domain,
 						string section);
+		void	shutdownServer(float delay);
+		void	restartServer(float delay);
 	};
 
 	/**

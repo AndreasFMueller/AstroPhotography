@@ -8,6 +8,9 @@
 #include <AstroDebug.h>
 #include <AstroFormat.h>
 #include <IceConversions.h>
+#include <CommunicatorSingleton.h>
+#include <thread>
+#include "Restart.h"
 
 namespace snowstar {
 
@@ -91,6 +94,30 @@ ConfigurationList	ConfigurationI::listSection(const std::string& domain,
 		}
 	);
 	return result;
+}
+
+static void	do_shutdown(float delay, const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down communicator in %f",
+		delay);
+	useconds_t	udelay = 1000000 * delay;
+	usleep(udelay);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutting down communicator now");
+	current.adapter->getCommunicator()->shutdown();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutdown complete");
+}
+
+void	ConfigurationI::shutdownServer(Ice::Float delay,
+		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "server shutdown requested");
+	Restart::shutdown_instead(true);
+	std::thread	*t = new std::thread(do_shutdown, delay, current);
+}
+
+void	ConfigurationI::restartServer(Ice::Float delay,
+		const Ice::Current& current) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "server restart requested");
+	Restart::shutdown_instead(false);
+	std::thread	*t = new std::thread(do_shutdown, delay, current);
 }
 
 } // namespace snowstar

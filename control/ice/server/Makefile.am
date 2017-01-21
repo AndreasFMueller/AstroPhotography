@@ -44,6 +44,7 @@ noinst_HEADERS =							\
 	RepositoryI.h							\
 	RepositoryLocator.h						\
 	RepositoryUser.h						\
+	Restart.h							\
 	Server.h							\
 	TaskI.h								\
 	TaskLocator.h							\
@@ -87,6 +88,7 @@ snowstar_SOURCES = snowstar.cpp 					\
 	RepositoryI.cpp							\
 	RepositoryLocator.cpp						\
 	RepositoryUser.cpp						\
+	Restart.cpp							\
 	Server.cpp							\
 	TaskI.cpp							\
 	TaskLocator.cpp							\

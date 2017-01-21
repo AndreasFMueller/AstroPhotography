@@ -25,6 +25,8 @@ static void	short_usage(const char *progname) {
 	std::cout << p << " [ options ] <server> set <domain> <section> <name> <value>" << std::endl;
 	std::cout << p << " [ options ] <server> remove <domain> <section> <name>" << std::endl;
 	std::cout << p << " [ options ] <server> list [ <domain> [ <section> ] ]" << std::endl;
+	std::cout << p << " [ options ] <server> shutdown [ <delay> ]" << std::endl;
+	std::cout << p << " [ options ] <server> restart [ <delay> ]" << std::endl;
 }
 
 /**
@@ -148,6 +150,30 @@ static int	list_command(ConfigurationPrx configuration,
 	return EXIT_SUCCESS;
 }
 
+int	restart_command(ConfigurationPrx configuration,
+			const std::list<std::string>& arguments) {
+	float	delay = 0;
+	if (arguments.size() > 0) {
+		delay = std::stof(*arguments.begin());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting restart after delay %f",
+		delay);
+	configuration->restartServer(delay);
+	return EXIT_SUCCESS;
+}
+
+int	shutdown_command(ConfigurationPrx configuration,
+			const std::list<std::string>& arguments) {
+	float	delay = 0;
+	if (arguments.size() > 0) {
+		delay = std::stof(*arguments.begin());
+	}
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "requesting shutdown after delay %f",
+		delay);
+	configuration->shutdownServer(delay);
+	return EXIT_SUCCESS;
+}
+
 int	help_command(const char *progname) {
 	usage(progname);
 	return EXIT_SUCCESS;
@@ -232,6 +258,12 @@ int	main(int argc, char *argv[]) {
 	}
 	if ("list" == command) {
 		return list_command(configuration, arguments);
+	}
+	if ("shutdown" == command) {
+		return shutdown_command(configuration, arguments);
+	}
+	if ("restart" == command) {
+		return restart_command(configuration, arguments);
 	}
 	std::cerr << "command " << command << " unknown" << std::endl;
 
