@@ -24,7 +24,16 @@ namespace project {
 ImageRepo::ImageRepo(const std::string& name, Database database,
 	const std::string& directory, bool scan)
 	: _name(name), _database(database), _directory(directory) {
-	// 
+	// make sure the database contains required tables
+	try {
+		ImageTable	images(_database);
+		MetadataTable	metadatatable(_database);
+	} catch (std::exception& x) {
+		std::string	msg = stringprintf("cannot open image "
+			"repository tables: %s", x.what());
+		debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
+		throw std::runtime_error(msg);
+	}
 
 	// scan the directory for 
 	if (scan) {

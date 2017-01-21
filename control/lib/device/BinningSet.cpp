@@ -8,7 +8,6 @@
 #include <AstroFormat.h>
 #include <stdexcept>
 #include <limits>
-#include <astroregex.h>
 
 using namespace astro::image;
 

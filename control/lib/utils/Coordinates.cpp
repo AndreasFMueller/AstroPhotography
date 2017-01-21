@@ -11,7 +11,6 @@
 #include <regex>
 #include <mutex>
 #include <typeinfo>
-#include <astroregex.h>
 
 namespace astro {
 
@@ -132,16 +131,16 @@ public:
 	double	_value;
 	angle_parser(const std::string& xms);
 	double	value() const { return _value; }
-	int	integer(const astro::smatch& matches, int i);
-	double	fraction(const astro::smatch& matches, int i);
-	int	sign(const astro::smatch& matches, int i);
+	int	integer(const std::smatch& matches, int i);
+	double	fraction(const std::smatch& matches, int i);
+	int	sign(const std::smatch& matches, int i);
 };
 
 //                               1      2       34           5 6       78           9 1       1
 //                                                                                    0       1
 std::string	angle_parser::r("([-+])?([0-9]*)((\\.[0-9]*)|(:([0-9]*)((\\.[0-9]*)|(:([0-9]*)(\\.[0-9]*)?))?))?");
 
-int	angle_parser::integer(const astro::smatch& matches, int i) {
+int	angle_parser::integer(const std::smatch& matches, int i) {
 	if (matches.position(i) < 0) {
 		return 0;
 	}
@@ -151,7 +150,7 @@ int	angle_parser::integer(const astro::smatch& matches, int i) {
 	return std::stoi(matches[i]);
 }
 
-double	angle_parser::fraction(const astro::smatch& matches, int i) {
+double	angle_parser::fraction(const std::smatch& matches, int i) {
 	if (matches.position(i) < 0) {
 		return 0.;
 	}
@@ -161,7 +160,7 @@ double	angle_parser::fraction(const astro::smatch& matches, int i) {
 	return std::stod(matches[i]);
 }
 
-int	angle_parser::sign(const astro::smatch& matches, int i) {
+int	angle_parser::sign(const std::smatch& matches, int i) {
 	if (matches.position(i) < 0) {
 		return 1;
 	}
@@ -170,15 +169,15 @@ int	angle_parser::sign(const astro::smatch& matches, int i) {
 
 angle_parser::angle_parser(const std::string& xms) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "parse angle spec: %s", xms.c_str());
-	astro::regex	regex;
+	std::regex	regex;
 	try {
-		regex = astro::regex(r, astro::regex::extended);
+		regex = std::regex(r, std::regex::extended);
 	} catch (const std::exception& x) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "regex exception: %s %s",
 			typeid(x).name(), x.what());
 		throw;
 	}
-	astro::smatch	matches;
+	std::smatch	matches;
 	if (!regex_match(xms, matches, regex)) {
 		std::string	msg = stringprintf("bad angle spec '%s'",
 			xms.c_str());
