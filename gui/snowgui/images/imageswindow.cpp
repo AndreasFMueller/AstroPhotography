@@ -18,7 +18,7 @@ namespace snowgui {
 
 imageswindow::imageswindow(QWidget *parent,
 	astro::discover::ServiceObject serviceobject)
-	: QWidget(parent), ui(new Ui::imageswindow),
+	: QSplitter(parent), ui(new Ui::imageswindow),
 	  _serviceobject(serviceobject) {
 	ui->setupUi(this);
 

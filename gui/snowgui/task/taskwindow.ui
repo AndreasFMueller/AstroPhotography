@@ -126,6 +126,13 @@
     </widget>
    </item>
    <item>
+    <widget class="Line" name="controlSeparator">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="instrumentControlWidget" native="true">
      <property name="minimumSize">
       <size>

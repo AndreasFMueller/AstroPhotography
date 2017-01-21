@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>612</width>
-    <height>398</height>
+    <width>882</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0,1">
    <item>
     <widget class="QWidget" name="instrumentsWidget" native="true">
      <layout class="QGridLayout" name="gridLayout">

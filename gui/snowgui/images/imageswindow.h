@@ -6,7 +6,7 @@
 #ifndef SNOWGUI_IMAGESWINDOW_H
 #define SNOWGUI_IMAGESWINDOW_H
 
-#include <QWidget>
+#include <QSplitter>
 #include <image.h>
 #include <AstroDiscovery.h>
 #include <QTreeWidgetItem>
@@ -18,7 +18,7 @@ namespace Ui {
 	class imageswindow;
 }
 
-class imageswindow : public QWidget {
+class imageswindow : public QSplitter {
 	Q_OBJECT
 
 public:
