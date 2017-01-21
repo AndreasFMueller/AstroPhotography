@@ -6,7 +6,7 @@
 #ifndef SNOWGUI_BROWSERWINDOW_H
 #define SNOWGUI_BROWSERWINDOW_H
 
-#include <QWidget>
+#include <QSplitter>
 #include <QTreeWidgetItem>
 
 namespace snowgui {
@@ -15,7 +15,7 @@ namespace Ui {
 	class browserwindow;
 }
 
-class browserwindow : public QWidget {
+class browserwindow : public QSplitter {
 	Q_OBJECT
 
 	std::string	_directory;

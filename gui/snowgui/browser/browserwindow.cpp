@@ -20,7 +20,7 @@ namespace snowgui {
  * \brief Construct a new browser window
  */
 browserwindow::browserwindow(QWidget *parent)
-	: QWidget(parent), ui(new Ui::browserwindow) {
+	: QSplitter(parent), ui(new Ui::browserwindow) {
 	ui->setupUi(this);
 
 	QStringList	headers;
