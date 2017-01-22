@@ -35,6 +35,7 @@ private:
 	snowstar::RepositoriesPrx	_repositories;
 
 	void	addImages(QTreeWidgetItem *top, const std::string& reponame);
+	void	addAllImages();
 
 	ImagePtr	currentImage();
 
@@ -42,6 +43,7 @@ private:
 	void	saveMulti(QList<QTreeWidgetItem*>&);
 
 public slots:
+	void	refreshClicked();
 	void	openClicked();
 	void	saveClicked();
 	void	deleteClicked();
