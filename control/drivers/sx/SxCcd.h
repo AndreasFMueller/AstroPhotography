@@ -33,9 +33,6 @@ protected:
 	ImagePtr	image;
 	SxCamera&	camera;
 	int	ccdindex;
-	bool	_needs_read_pixels;
-public:
-	void	needs_read_pixels(bool n) { _needs_read_pixels = n; }
 private:
 	SxCcd(const SxCcd&);
 	SxCcd&	operator=(const SxCcd&);

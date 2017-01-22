@@ -297,9 +297,8 @@ CcdPtr	SxCamera::getCcd0(size_t ccdindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "create ordinary SX ccd: %s",
 		ccdinfo[ccdindex].toString().c_str());
 	SxCcd	*ccd = new SxCcd(ccdinfo[ccdindex], *this, ccdindex);
-	if ((product == 0x0126) || (model == 0x0010)) {
-		ccd->needs_read_pixels(true);
-	}
+
+	// return the CCD pointer
 	return CcdPtr(ccd);
 }
 
