@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>snowgui::takeimagewindow</class>
+ <widget class="QWidget" name="snowgui::takeimagewindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1002</width>
+    <height>904</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="snowgui::imagedisplaywidget" name="imageWidget" native="true"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QWidget" name="deviceWidget" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>350</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="snowgui::ccdcontrollerwidget" name="ccdcontrollerWidget" native="true"/>
+      </item>
+      <item>
+       <widget class="QToolBox" name="toolBox">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="snowgui::coolercontrollerwidget" name="coolercontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>326</width>
+           <height>632</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Cooler</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::filterwheelcontrollerwidget" name="filterwheelcontrollerWidget">
+         <attribute name="label">
+          <string>Filterwheel</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::focusercontrollerwidget" name="focusercontrollerWidget">
+         <attribute name="label">
+          <string>Focuser</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::guideportcontrollerwidget" name="guideportcontrollerWidget">
+         <attribute name="label">
+          <string>Guideport</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::adaptiveopticscontrollerwidget" name="adaptiveopticscontrollerWidget">
+         <attribute name="label">
+          <string>Adative Optics</string>
+         </attribute>
+        </widget>
+        <widget class="snowgui::mountcontrollerwidget" name="mountcontrollerWidget">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>326</width>
+           <height>632</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Mount</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>snowgui::imagedisplaywidget</class>
+   <extends>QWidget</extends>
+   <header location="global">imagedisplaywidget.h</header>
+   <container>1</container>
+   <slots>
+    <slot>rectangleSelected(astro::image::ImageRectangle)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::ccdcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">ccdcontrollerwidget.h</header>
+   <container>1</container>
+   <slots>
+    <signal>imageReceived()</signal>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::guideportcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">guideportcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::coolercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">coolercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::focusercontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">focusercontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::filterwheelcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">filterwheelcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::adaptiveopticscontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">adaptiveopticscontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>snowgui::mountcontrollerwidget</class>
+   <extends>QWidget</extends>
+   <header location="global">mountcontrollerwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
