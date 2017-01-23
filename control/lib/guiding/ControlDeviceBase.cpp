@@ -146,10 +146,12 @@ int	ControlDeviceBase::startCalibration(TrackerPtr /* tracker */) {
         _calibration->focallength(parameter(std::string("focallength"), 1.0));
         debug(LOG_DEBUG, DEBUG_LOG, 0, "focallength = %.3f",
 		_calibration->focallength());
-
-	// set the device specific
 	process->focallength(_calibration->focallength());
+
+	// get the guider rate
 	calibrationprocess->guiderate(parameter(std::string("guiderate"), 0.5));
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "guiderate = %.3f", 
+		calibrationprocess->guiderate());
 
 	// compute angular size of pixels
 	_calibration->masPerPixel(

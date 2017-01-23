@@ -430,6 +430,7 @@ class RunAccess;
 class ThreadBase {
 	// default construction of the thread does not start execution
 	std::thread	thread;
+	Barrier	start_barrier;
 private:
 	// the condition variable is used for waiting on the thread to
 	// complete. If one wants to wait for the thread to complete,
