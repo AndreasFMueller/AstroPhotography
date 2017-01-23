@@ -9,6 +9,7 @@
 #include <AstroFormat.h>
 #include <stdexcept>
 #include <chrono>
+#include <sstream>
 
 namespace astro {
 namespace thread {
@@ -68,7 +69,7 @@ static void	springboard_main(ThreadBase *threadbase) {
  *
  * This mostly means setting up the mutex and condition variables 
  */
-ThreadBase::ThreadBase() {
+ThreadBase::ThreadBase() : start_barrier(2) {
 	// mutex initialization
 	std::unique_lock<std::recursive_mutex>	lock(mutex);
 
@@ -141,11 +142,14 @@ void	ThreadBase::start() {
 
 	// start a new thread
 	thread = std::thread(springboard_main, this);
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread %p constructed",
-		thread.get_id());
+	std::ostringstream	out;
+	out << thread.get_id();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "thread '%s' constructed",
+		out.str().c_str());
 
 	// leaving the start method unlocks the releases the lock, so
 	// the thread can start running
+	start_barrier.await();
 }
 
 /**
@@ -204,6 +208,10 @@ bool	ThreadBase::wait(double timeout) {
  * springboard function to launch the thread main
  */
 void	ThreadBase::run() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "make sure the start function has "
+		"set up everything");
+	start_barrier.await();
+
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "run the thread main function");
 	// run the main methodrun the main method
 	try {

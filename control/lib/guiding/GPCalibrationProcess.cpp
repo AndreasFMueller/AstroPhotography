@@ -217,6 +217,7 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 		_thread.terminate() ? "YES" : "NO", hasGuider() ? "YES" : "NO");
 	// set the start time
 	starttime = Timer::gettime();
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start time = %f", starttime);
 
 	// send progress update for value 0
 	ProgressInfo	pi;
@@ -234,15 +235,18 @@ void	GPCalibrationProcess::main2(astro::thread::Thread<GPCalibrationProcess>& _t
 	// choice for a 100mm guide scope and 7u pixels as for the SBIG
 	// ST-i guider kit
 	grid = gridconstant(_focallength, guider()->pixelsize(), guiderate());
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "grid constant: %f", grid);
 
 	// measure the initial point
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "place initial point");
 	CalibrationPoint	initialpoint(0, Point(0, 0), starAt(0, 0));
-	calibration()->add(initialpoint);
-	addCalibrationPoint(initialpoint);
+	calibration()->add(initialpoint);	// to current calibration
+	addCalibrationPoint(initialpoint);	// to database
 	callback(initialpoint);
 
 	// perform a grid search
 	try {
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "perform grid scan");
 		for (int ra = -range; ra <= range; ra++) {
 			for (int dec = -range; dec <= range; dec++) {
 				measure(ra, dec);
@@ -320,7 +324,7 @@ double	GPCalibrationProcess::gridconstant(double focallength,
 
 	debug(LOG_DEBUG, DEBUG_LOG, 0,
 		"grid constant for focallength = %.0fmm, pixelsize = %.1fum, "
-		"guiderate %.1f, %.1s arc sec/sec",
+		"guiderate %.1f, %.1f arc sec/sec",
 		1000 * focallength, 1000000 * pixelsize,
 		guiderate / siderial_rate, guiderate * 3600 * 180 / M_PI);
 
