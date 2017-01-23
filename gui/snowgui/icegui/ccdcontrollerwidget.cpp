@@ -34,7 +34,7 @@ ccdcontrollerwidget::ccdcontrollerwidget(QWidget *parent) :
 		this, SLOT(guiChanged()));
 	connect(ui->binningSelectionBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiChanged()));
-	connect(ui->shutterOpenBox, SIGNAL(toggled()),
+	connect(ui->shutterOpenBox, SIGNAL(toggled(bool)),
 		this, SLOT(guiChanged()));
 	connect(ui->purposeBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(guiChanged()));
@@ -398,6 +398,8 @@ void	ccdcontrollerwidget::setPurpose(Exposure::purpose_t p) {
  * This method does not send any signals
  */
 void	ccdcontrollerwidget::displayShutter(Shutter::state s) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "shutter state: %s",
+		(_exposure.shutter() == Shutter::OPEN) ? "open" : "closed");
 	_exposure.shutter(s);
 	ui->shutterOpenBox->blockSignals(true);
 	if (_exposure.shutter() == Shutter::OPEN) {
@@ -486,8 +488,11 @@ void	ccdcontrollerwidget::ccdChanged(int index) {
  */
 void	ccdcontrollerwidget::captureClicked() {
 	try {
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "start exposure with time=%.3f",
-			_exposure.exposuretime());
+		debug(LOG_DEBUG, DEBUG_LOG, 0,
+			"start exposure with time=%.3f, shutter = %s",
+			_exposure.exposuretime(),
+			(_exposure.shutter() == Shutter::OPEN)
+				? "open" : "closed");
 		try {
 			_ccd->startExposure(snowstar::convert(_exposure));
 		} catch (const std::exception& x) {
