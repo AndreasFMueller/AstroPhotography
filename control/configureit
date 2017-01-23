@@ -14,7 +14,7 @@ CXXFLAGS="-fuse-cxa-atexit ${CFLAGS}"
 export CFLAGS CXXFLAGS
 
 # always enable unit tests 
-commonflags="--enable-unittests --enable-othello"
+commonflags="--enable-othello"
 
 # we always build the microtouch driver, as it is very small and we need
 # the USB library it depends on anyway
@@ -131,7 +131,7 @@ Linux)
 	./configure --prefix=${prefix} ${commonflags} ${sbigoption}
 	;;
 Debian)
-	CXXFLAGS="${CXXFLAGS} --std=c++11x"
+	CXXFLAGS="${CXXFLAGS} --std=c++11"
 	LDFLAGS="${LDFLAGS} -Wl,-rpath -Wl,/usr/local/lib"
 	export CXXFLAGS LDFLAGS
 	./configure --prefix=${prefix} ${commonflags} \

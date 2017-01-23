@@ -16,8 +16,9 @@
 #include <ctime>
 #include <cstdlib>
 #include <mutex>
-
+#include <thread>
 #include <iostream>
+#include <sstream>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -148,8 +149,10 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 
 	// find the current thread id if necessary
 	if (debugthreads) {
-		snprintf(threadid, sizeof(threadid), "/%04lx",
-			((unsigned long)pthread_self()) % 0x10000);
+		std::ostringstream	out;
+		out << std::this_thread::get_id;
+		snprintf(threadid, sizeof(threadid), "/%s",
+			out.str().c_str());
 	} else {
 		threadid[0] = '\0';
 	}
