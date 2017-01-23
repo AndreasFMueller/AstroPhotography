@@ -53,7 +53,6 @@ std::string	ServiceKey::toString() const {
 	return _name + "/" + _type + "@" + _domain;
 }
 
-#if 1
 ServiceKey::ServiceKey(const ServiceKey& other) {
 	_name = other._name;
 	_type = other._type;
@@ -70,7 +69,6 @@ ServiceKey&	ServiceKey::operator=(const ServiceKey& other) {
 	_protocol = other._protocol;
 	return *this;
 }
-#endif
 
 } // namespace discover
 } // namespace astro

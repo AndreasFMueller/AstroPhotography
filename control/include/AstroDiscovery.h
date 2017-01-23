@@ -72,10 +72,8 @@ public:
 		const std::string& domain);
 	ServiceKey(const std::string& nametypedomain);
 	ServiceKey() { }
-#if 1
 	ServiceKey(const ServiceKey& other);
 	ServiceKey&	operator=(const ServiceKey& other);
-#endif
 
 	int	interface() const { return _interface; }
 	void	interface(int i) { _interface = i; }
