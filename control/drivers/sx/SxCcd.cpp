@@ -28,7 +28,6 @@ namespace sx {
 SxCcd::SxCcd(const CcdInfo& info, SxCamera& _camera, int _ccdindex)
 	: Ccd(info), camera(_camera), ccdindex(_ccdindex) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "creating CCD %d", ccdindex);
-	_needs_read_pixels = false;
 }
 
 /**
@@ -134,62 +133,6 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
 		camera.release("exposure");
 	}
 
-	// some cameras may require that the we read out the pixels,
-	// the CLEAR_PIXELS command may not be enough
-	if (_needs_read_pixels) {
-		sx_read_pixels_t	rp;
-		rp.x_offset = 0;
-		rp.y_offset = 0;
-		//rp.width = info.size().width();
-		rp.width = 1;
-		rp.height = info.size().height();
-		rp.x_bin = 1;
-		rp.y_bin = 1;
-		Request<sx_read_pixels_t>	readoutrequest(
-			RequestBase::vendor_specific_type,
-			RequestBase::device_recipient, ccdindex,
-			(uint8_t)SX_CMD_READ_PIXELS, (uint16_t)0, &rp);
-		try {
-			if (!camera.reserve("exposure", 1000)) {
-				std::string	msg("cannot reserve camera");
-				debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-				throw std::logic_error(msg);
-			}
-			camera.controlRequest(&readoutrequest);
-		} catch (USBError& x) {
-			camera.release("exposure");
-			std::string	msg = stringprintf("%s usb error: %s",
-				name().toString().c_str(), x.what());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw DeviceTimeout(msg);
-		}
-
-		// compute the size of the buffer, and create a buffer
-		// for the data
-		int	size = rp.width * rp.height;
-		unsigned short	*data = new unsigned short[size];
-
-		// read the data from the data endpoint
-		BulkTransfer	transfer(camera.getEndpoint(),
-			sizeof(unsigned short) * size, (unsigned char *)data);
-		transfer.setTimeout(10000);
-
-		// submit the transfer
-		try {
-			camera.getDevicePtr()->submit(&transfer);
-		} catch (USBError& x) {
-			camera.release("exposure");
-			delete data;
-			std::string	msg = stringprintf("%s usb error: %s",
-				name().toString().c_str(), x.what());
-			debug(LOG_ERR, DEBUG_LOG, 0, "%s", msg.c_str());
-			throw DeviceTimeout(msg);
-		}
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "received %d cleanout pixels",
-			size);
-		delete data;
-	}
-
 	// create the exposure request
 	sx_read_pixels_delayed_t	rpd;
 	rpd.x_offset = exposure.x();
@@ -232,6 +175,7 @@ void	SxCcd::startExposure0(const Exposure& exposure) {
  * always produce 16 bit deep images.
  */
 void	SxCcd::getImage0() {
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "start getImage0");
 	// start the exposure
 	state(CcdState::exposing);
 	this->startExposure0(exposure);
@@ -242,6 +186,8 @@ void	SxCcd::getImage0() {
 	// compute the size of the buffer, and create a buffer for the data
 	int	size = targetsize.getPixels();
 	unsigned short	*data = new unsigned short[size];
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "data size to retrieve: %d",
+		sizeof(unsigned short) * size);
 
 	// read the data from the data endpoint
 	BulkTransfer	transfer(camera.getEndpoint(),
@@ -250,6 +196,7 @@ void	SxCcd::getImage0() {
 	// timeout depends on the actual data size we want to transfer
 	int	timeout = 1100 * exposure.exposuretime() + 30000;
 	transfer.setTimeout(timeout);
+	debug(LOG_DEBUG, DEBUG_LOG, 0, "data transfer timeout: %d", timeout);
 
 	// submit the transfer
 	try {

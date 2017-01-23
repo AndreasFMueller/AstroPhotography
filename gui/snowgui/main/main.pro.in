@@ -21,7 +21,7 @@ LIBS += -L../expose -lexpose
 LIBS += -L../images -limages
 LIBS += -L../repository -lrepository
 LIBS += -L../instruments -linstruments
-LIBS += -L../preview -lpreview
+LIBS += -L../image -limage
 LIBS += -L../focusing -lfocusing
 LIBS += -L../guiding -lguiding
 LIBS += -L../task -ltask
@@ -35,7 +35,7 @@ LIBS +=	$${ICELIBS} -lIce -lIceUtil
 INCLUDEPATH += $${ASTROPATH}/include
 INCLUDEPATH += $${ICEDIR}/include
 INCLUDEPATH += /usr/local/include
-INCLUDEPATH += ../icegui ../astrogui ../preview ../focusing ../guiding
+INCLUDEPATH += ../icegui ../astrogui ../image ../focusing ../guiding
 INCLUDEPATH += ../instruments ../images ../repository ../expose
 INCLUDEPATH += ../task ../browser
 

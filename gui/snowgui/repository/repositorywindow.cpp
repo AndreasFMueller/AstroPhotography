@@ -75,6 +75,8 @@ repositorywindow::repositorywindow(QWidget *parent,
         setRepositories(repositories);
 
 	// connections
+	connect(ui->refreshButton, SIGNAL(clicked()),
+		this, SLOT(refreshClicked()));
 	connect(ui->saveButton, SIGNAL(clicked()),
 		this, SLOT(saveClicked()));
 	connect(ui->openButton, SIGNAL(clicked()),
@@ -110,24 +112,7 @@ void	repositorywindow::setRepositories(
 		return;
 	}
 
-	ui->repositoryTree->blockSignals(true);
-
-	// read a list of repository names
-	snowstar::reponamelist	repos = _repositories->list();
-	snowstar::reponamelist::const_iterator	i;
-	for (i = repos.begin(); i != repos.end(); i++) {
-		std::string	reponame = *i;
-		debug(LOG_DEBUG, DEBUG_LOG, 0, "repository: %s",
-			reponame.c_str());
-		QStringList     list;
-		list << QString("");
-                list << QString(reponame.c_str());
-                QTreeWidgetItem *item = new QTreeWidgetItem(list,
-                        QTreeWidgetItem::Type);
-                ui->repositoryTree->addTopLevelItem(item);
-		addImages(item, reponame);
-	}
-	ui->repositoryTree->blockSignals(false);
+	addAllImages();
 }
 
 /**
@@ -203,6 +188,32 @@ void	repositorywindow::addImages(QTreeWidgetItem *top,
 		
                 top->addChild(item);
 	}
+}
+
+/**
+ * \brief
+ */
+void	repositorywindow::addAllImages() {
+	if (!_repositories) {
+		return;
+	}
+	ui->repositoryTree->blockSignals(true);
+	// read a list of repository names
+	snowstar::reponamelist	repos = _repositories->list();
+	snowstar::reponamelist::const_iterator	i;
+	for (i = repos.begin(); i != repos.end(); i++) {
+		std::string	reponame = *i;
+		debug(LOG_DEBUG, DEBUG_LOG, 0, "repository: %s",
+			reponame.c_str());
+		QStringList     list;
+		list << QString("");
+                list << QString(reponame.c_str());
+                QTreeWidgetItem *item = new QTreeWidgetItem(list,
+                        QTreeWidgetItem::Type);
+                ui->repositoryTree->addTopLevelItem(item);
+		addImages(item, reponame);
+	}
+	ui->repositoryTree->blockSignals(false);
 }
 
 /**
@@ -321,7 +332,7 @@ void	repositorywindow::openClicked() {
 	idw->setRectangleSelectionEnabled(true);
 	idw->setImage(imageptr);
 	std::string	title
-		= astro::stringprintf("image %d from repository %s",
+		= astro::stringprintf("Image %d from repository %s",
 			_imageid, _reponame.c_str());
 	idw->setWindowTitle(QString(title.c_str()));
 	idw->show();
@@ -449,6 +460,19 @@ void    repositorywindow::currentImageChanged(QTreeWidgetItem *current,
 void    repositorywindow::itemDoubleClicked(QTreeWidgetItem *, int) {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "itemDoubleClicked()");
 	openClicked();
+}
+
+/**
+ * \brief Slot called when we hit refresh
+ */
+void	repositorywindow::refreshClicked() {
+	// remove all items in the tree
+	while (ui->repositoryTree->topLevelItemCount()) {
+		delete ui->repositoryTree->takeTopLevelItem(0);
+	}
+
+	// add all images
+	addAllImages();
 }
 
 } // namespace snowgui

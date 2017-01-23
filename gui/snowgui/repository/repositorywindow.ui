@@ -93,6 +93,13 @@
     <widget class="QWidget" name="buttons" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
+       <widget class="QPushButton" name="refreshButton">
+        <property name="text">
+         <string>Refresh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="openButton">
         <property name="enabled">
          <bool>false</bool>

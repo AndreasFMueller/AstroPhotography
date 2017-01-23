@@ -9,7 +9,7 @@
 #include <AstroFormat.h>
 #include "serverselectiondialog.h"
 #include "instrumentselectiondialog.h"
-#include <previewwindow.h>
+#include <takeimagewindow.h>
 #include <focusingwindow.h>
 #include <guidingwindow.h>
 #include <instrumentswindow.h>
@@ -114,8 +114,8 @@ MainWindow::~MainWindow() {
 void	MainWindow::launchPreview() {
 	debug(LOG_DEBUG, DEBUG_LOG, 0, "launch a preview subapplication");
 	try {
-		InstrumentSelectionApplication<snowgui::PreviewWindow>	*is
-			= new InstrumentSelectionApplication<snowgui::PreviewWindow>(this, _serviceobject);
+		InstrumentSelectionApplication<snowgui::takeimagewindow>	*is
+			= new InstrumentSelectionApplication<snowgui::takeimagewindow>(this, _serviceobject);
 		is->setWindowTitle(QString("Select instrument for Preview "
 			"application"));
 		is->exec();
