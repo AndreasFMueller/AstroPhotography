@@ -43,7 +43,10 @@ static void	resolve_callback(
 			AvahiStringList *txt,
 			AvahiLookupResultFlags flags,
 			void* userdata) {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver callback");
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"resolver callback event=%s, name=%s, domain=%s, host_name=%s",
+		(event == AVAHI_RESOLVER_FOUND) ? "FOUND" : "FAILURE",
+		name, domain, host_name);
 	AvahiResolver	*ares = ((AvahiResolver *)userdata);
 	ares->resolve_callback(resolver, interface, protocol, event,
 		name, type, domain, host_name, address, port, txt, flags);
@@ -57,7 +60,9 @@ static void	resolve_callback(
  * synchronization mechanism to be used.
  */
 ServiceObject	AvahiResolver::do_resolve() {
-	debug(LOG_DEBUG, DEBUG_LOG, 0, "start do_resolve %p", _client);
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"start do_resolve %p, key = %s, interface=%d, protocol=%d",
+		_client, _key.toString().c_str(), _key.interface(), _key.protocol());
 	prom = std::shared_ptr<std::promise<bool> >(new std::promise<bool>());
 	fut = std::shared_ptr<std::future<bool> >(
 		new std::future<bool>(prom->get_future()));
@@ -76,6 +81,7 @@ ServiceObject	AvahiResolver::do_resolve() {
 		throw std::runtime_error("cannot construct a resolver");
 	}
 
+	// now wat for the resolver to produce a result
 	fut->get();
 	fut.reset();
 
@@ -92,17 +98,21 @@ ServiceObject	AvahiResolver::do_resolve() {
  */
 void	AvahiResolver::resolve_callback(
 			AvahiServiceResolver *resolver,
-			AvahiIfIndex /* interface */,
-			AvahiProtocol /* protocol */,
+			AvahiIfIndex interface,
+			AvahiProtocol protocol,
 			AvahiResolverEvent event,
 			const char *name,
 			const char *type,
-			const char * /* domain */,
+			const char *domain,
 			const char *host_name,
 			const AvahiAddress * /* address */,
 			uint16_t port,
 			AvahiStringList *txt,
 			AvahiLookupResultFlags /* flags */) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"resolve_callback interface=%d protocol=%d, name=%s, type=%s, "
+		"domain=%s, host_name=%s",
+		interface, protocol, name, type, domain);
 	if (event == AVAHI_RESOLVER_FAILURE) {
 		debug(LOG_DEBUG, DEBUG_LOG, 0, "resolver failure");
 		return;

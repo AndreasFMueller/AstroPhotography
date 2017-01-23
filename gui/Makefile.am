@@ -5,4 +5,4 @@
 #
 
 all:
-	cd snowgui; qmake; make
+	cd snowgui; qmake; $(MAKE)

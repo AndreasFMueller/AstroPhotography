@@ -13,8 +13,8 @@ TEMPLATE = app
 ASTROPATH = @ASTROPATH@
 ASTROLIBDIR = @ASTROLIBDIR@
 
-LIBS += -L../astrogui -lastrogui 
 LIBS += -L../browser -lbrowser 
+LIBS += -L../astrogui -lastrogui 
 LIBS += -L$${ASTROLIBDIR} -lastro
 
 INCLUDEPATH += /usr/local/include

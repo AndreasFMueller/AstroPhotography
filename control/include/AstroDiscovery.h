@@ -72,7 +72,7 @@ public:
 		const std::string& domain);
 	ServiceKey(const std::string& nametypedomain);
 	ServiceKey() { }
-#if 0
+#if 1
 	ServiceKey(const ServiceKey& other);
 	ServiceKey&	operator=(const ServiceKey& other);
 #endif

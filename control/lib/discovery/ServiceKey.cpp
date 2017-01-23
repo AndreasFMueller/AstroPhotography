@@ -11,6 +11,8 @@ namespace discover {
 ServiceKey::ServiceKey(const std::string& name, const std::string& type,
 	const std::string& domain)
 	: _name(name), _type(type), _domain(domain) {
+	_interface = -1;
+	_protocol = -1;
 }
 
 ServiceKey::ServiceKey(const std::string& nametypedomain) {
@@ -20,6 +22,8 @@ ServiceKey::ServiceKey(const std::string& nametypedomain) {
 	_type = nametypedomain.substr(slashoffset + 1,
 		atoffset - slashoffset - 1);
 	_domain = nametypedomain.substr(atoffset + 1);
+	_interface = -1;
+	_protocol = -1;
 }
 
 bool	ServiceKey::operator<(const ServiceKey& other) const {
@@ -49,7 +53,7 @@ std::string	ServiceKey::toString() const {
 	return _name + "/" + _type + "@" + _domain;
 }
 
-#if 0
+#if 1
 ServiceKey::ServiceKey(const ServiceKey& other) {
 	_name = other._name;
 	_type = other._type;

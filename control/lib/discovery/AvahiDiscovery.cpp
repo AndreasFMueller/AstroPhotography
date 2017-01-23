@@ -65,6 +65,9 @@ void	AvahiDiscovery::browse_callback(
 			const char *type,
 			const char *domain,
 			AvahiLookupResultFlags flags) {
+	debug(LOG_DEBUG, DEBUG_LOG, 0,
+		"browse_callback interface=%d, protocol=%d, name=%s, type=%s, "
+		"domain=%s", interface, protocol, name, type, domain);
 	AvahiClient	*client = avahi_service_browser_get_client(sb);
 	switch (event) {
 	case AVAHI_BROWSER_FAILURE:
