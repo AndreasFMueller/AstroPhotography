@@ -19,6 +19,7 @@
 #include <thread>
 #include <iostream>
 #include <sstream>
+#include <map>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -39,8 +40,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-
-#include <pthread.h>
 
 int	debuglevel = LOG_ERR;
 int	debugtimeprecision = 0;
@@ -108,6 +107,22 @@ extern "C" int debug_file(const char *filename) {
 
 static std::mutex	mtx;
 
+typedef std::map<std::thread::id, int>	thread_map_t;
+
+static	thread_map_t	thread_map;
+static	int	nextthreadid = 1;
+
+static int	lookupthreadid(const std::thread::id& id) {
+	std::unique_lock<std::mutex>	lock(mtx);
+	thread_map_t::const_iterator	i = thread_map.find(id);
+	if (i != thread_map.end()) {
+		return i->second;
+	}
+	int	newid = nextthreadid++;
+	thread_map.insert(std::make_pair(id, newid));
+	return newid;
+}
+
 extern "C" void vdebug(int loglevel, const char *file, int line,
 	int flags, const char *format, va_list ap) {
 	//time_t		t;
@@ -149,10 +164,8 @@ extern "C" void vdebug(int loglevel, const char *file, int line,
 
 	// find the current thread id if necessary
 	if (debugthreads) {
-		std::ostringstream	out;
-		out << std::this_thread::get_id;
-		snprintf(threadid, sizeof(threadid), "/%s",
-			out.str().c_str());
+		snprintf(threadid, sizeof(threadid), "/%d",
+			lookupthreadid(std::this_thread::get_id()));
 	} else {
 		threadid[0] = '\0';
 	}
